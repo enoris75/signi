@@ -17,6 +17,7 @@ export interface SlotConfig {
 export interface PhraseSelection {
     subject?: Concept;
     verb?: Concept;
+    verbNegative?: boolean;
     directObject?: Concept;
     indirectObject?: Concept;
     modifier?: Concept;

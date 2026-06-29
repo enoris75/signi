@@ -50,14 +50,20 @@ function subjectPhrase(forms, adj) {
 export const portugueseEngine = {
     language: 'pt',
     render(phrase) {
-        const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+        const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
         const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
-        const verbText = conjugate(verb.forms, subject.forms);
+        const conjugated = conjugate(verb.forms, subject.forms);
+        const verbText = verbNegative ? `não ${conjugated}` : conjugated;
         const directObjectText = directObject ? nounPhrase(directObject.forms) : '';
         // S V Adv DirectObj IndirectObj(a+article)
         const indirectObjectText = indirectObject ? indirectNounPhrase(indirectObject.forms) : '';
         const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-        return [subjectText, verbText, modifierText, directObjectText, indirectObjectText]
+        // "nunca" goes pre-verbal without "não": "eu nunca bebo"
+        // but post-verbal with "não": "eu não bebo nunca"
+        const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+        const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
+        const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
+        return [subjectText, preVerb, verbText, postVerb, directObjectText, indirectObjectText]
             .filter(Boolean)
             .join(' ')
             .trim();

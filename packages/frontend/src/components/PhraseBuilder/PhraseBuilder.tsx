@@ -6,7 +6,7 @@ import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
-import { SlotBox, NumberToggleBox, GenderToggleBox } from "./Boxes.tsx";
+import { SlotBox, NumberToggleBox, GenderToggleBox, NegativeToggleBox } from "./Boxes.tsx";
 import {
   GenderSlot,
   NumberSlot,
@@ -79,6 +79,7 @@ interface PhraseBuilderProps {
   onClear: (slot: SlotKey) => void;
   onToggleNumber: (which: NumberSlot) => void;
   onToggleGender: (which: GenderSlot) => void;
+  onToggleNegative: () => void;
   onConceptSelect: (slot: SlotKey, concept: Concept) => void;
   sidebar?: React.ReactNode;
 }
@@ -106,6 +107,7 @@ const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
   subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
   subjectGender: { x: 12, y: 57 },
+  verbNegative: { x: 52, y: 62 },
   directObjectNumber: NUMBER_TOGGLE_DEFAULTS.directObject,
   directObjectGender: { x: 93, y: 30 },
   indirectObjectNumber: NUMBER_TOGGLE_DEFAULTS.indirectObject,
@@ -139,9 +141,14 @@ export function PhraseBuilder({
   onClear,
   onToggleNumber,
   onToggleGender,
+  onToggleNegative,
   onConceptSelect,
   sidebar,
 }: PhraseBuilderProps) {
+  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
+    const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
+    return saved ? Number(saved) : 160;
+  });
   const hasVerb = Boolean(selection.verb);
   const verbSlot = ALL_SLOTS.find((s) => s.key === "verb")!;
   const visibleSlots = getActiveSlots(
@@ -175,7 +182,6 @@ export function PhraseBuilder({
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
-  const resizeRef = useRef<{ startY: number; startH: number } | null>(null);
 
   useLayoutEffect(() => {
     if (!containerRef.current) return;
@@ -294,6 +300,7 @@ export function PhraseBuilder({
         slot.key === "subjectAdjective" ? pos("subject") : pos("verb");
       edges.push({ from, to: pos(slot.key), color: MUI_COLOR_HEX[slot.color] });
     }
+    edges.push({ from: pos("verb"), to: pos("verbNegative"), color: MUI_COLOR_HEX.secondary });
     if (showSubjectNumber)
       edges.push({
         from: pos("subject"),
@@ -369,6 +376,7 @@ export function PhraseBuilder({
         color: MUI_COLOR_HEX.secondary,
         nodeKeys: [
           "verb",
+          "verbNegative",
           ...(visibleSlots.some((s) => s.key === "modifier")
             ? ["modifier"]
             : []),
@@ -657,36 +665,31 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
+                <Box {...makeDragProps("verbNegative", onToggleNegative)}>
+                  <NegativeToggleBox value={selection.verbNegative ?? false} />
+                </Box>
               </Box>
 
               {/* Resize strip */}
               <Box
                 onPointerDown={(e) => {
-                  (e.currentTarget as HTMLElement).setPointerCapture(
-                    e.pointerId,
-                  );
-                  resizeRef.current = {
-                    startY: e.clientY,
-                    startH: graphHeight,
+                  e.preventDefault();
+                  const startY = e.clientY;
+                  const startH = graphHeight;
+                  let currentH = startH;
+                  const onMove = (ev: PointerEvent) => {
+                    currentH = Math.max(MIN_GRAPH_HEIGHT, startH + (ev.clientY - startY));
+                    setGraphHeight(currentH);
                   };
-                }}
-                onPointerMove={(e) => {
-                  if (!resizeRef.current) return;
-                  const dy = e.clientY - resizeRef.current.startY;
-                  setGraphHeight(
-                    Math.max(MIN_GRAPH_HEIGHT, resizeRef.current.startH + dy),
-                  );
-                }}
-                onPointerUp={() => {
-                  if (resizeRef.current)
-                    localStorage.setItem(
-                      "signi:graphHeight",
-                      String(Math.round(graphHeight)),
-                    );
-                  resizeRef.current = null;
-                }}
-                onPointerCancel={() => {
-                  resizeRef.current = null;
+                  const onUp = () => {
+                    localStorage.setItem("signi:graphHeight", String(Math.round(currentH)));
+                    window.removeEventListener("pointermove", onMove);
+                    window.removeEventListener("pointerup", onUp);
+                    window.removeEventListener("pointercancel", onUp);
+                  };
+                  window.addEventListener("pointermove", onMove);
+                  window.addEventListener("pointerup", onUp);
+                  window.addEventListener("pointercancel", onUp);
                 }}
                 sx={{
                   height: 6,
@@ -703,19 +706,55 @@ export function PhraseBuilder({
           )}
         </Box>
         {sidebar && (
-          <Box
-            sx={{
-              width: 160,
-              flexShrink: 0,
-              borderLeft: "1px solid",
-              borderColor: "divider",
-              pl: 1.5,
-              maxHeight: graphHeight,
-              overflowY: "auto",
-            }}
-          >
-            {sidebar}
-          </Box>
+          <>
+            {/* Sidebar resize handle */}
+            <Box
+              onPointerDown={(e) => {
+                e.preventDefault();
+                const startX = e.clientX;
+                const startW = sidebarWidth;
+                let currentW = startW;
+                const onMove = (ev: PointerEvent) => {
+                  currentW = Math.max(80, Math.min(400, startW - (ev.clientX - startX)));
+                  setSidebarWidth(currentW);
+                };
+                const onUp = () => {
+                  localStorage.setItem("signi:phraseBuilderSidebarWidth", String(Math.round(currentW)));
+                  window.removeEventListener("pointermove", onMove);
+                  window.removeEventListener("pointerup", onUp);
+                  window.removeEventListener("pointercancel", onUp);
+                };
+                window.addEventListener("pointermove", onMove);
+                window.addEventListener("pointerup", onUp);
+                window.addEventListener("pointercancel", onUp);
+              }}
+              sx={{
+                width: 6,
+                flexShrink: 0,
+                cursor: "ew-resize",
+                touchAction: "none",
+                borderLeft: "2px solid",
+                borderColor: "divider",
+                bgcolor: "divider",
+                opacity: 0.6,
+                transition: "opacity 0.15s, background-color 0.15s",
+                "&:hover": { opacity: 1, bgcolor: "primary.main", borderColor: "primary.main" },
+              }}
+            />
+            <Box
+              sx={{
+                width: sidebarWidth,
+                flexShrink: 0,
+                borderLeft: "1px solid",
+                borderColor: "divider",
+                pl: 1.5,
+                maxHeight: graphHeight,
+                overflowY: "auto",
+              }}
+            >
+              {sidebar}
+            </Box>
+          </>
         )}
       </Box>
     </Paper>

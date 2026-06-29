@@ -44,14 +44,20 @@ function subjectPhrase(forms, adj) {
 export const spanishEngine = {
     language: 'es',
     render(phrase) {
-        const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+        const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
         const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
-        const verbText = conjugate(verb.forms, subject.forms);
+        const conjugated = conjugate(verb.forms, subject.forms);
+        const verbText = verbNegative ? `no ${conjugated}` : conjugated;
         const directObjectText = directObject ? nounPhrase(directObject.forms) : '';
         // S V Adv DirectObj IndirectObj(a+article)
         const indirectObjectText = indirectObject ? indirectNounPhrase(indirectObject.forms) : '';
         const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-        return [subjectText, verbText, modifierText, directObjectText, indirectObjectText]
+        // "nunca" goes pre-verbal without "no": "yo nunca bebo"
+        // but post-verbal with "no": "yo no bebo nunca"
+        const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+        const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
+        const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
+        return [subjectText, preVerb, verbText, postVerb, directObjectText, indirectObjectText]
             .filter(Boolean)
             .join(' ')
             .trim();

@@ -30,22 +30,34 @@ function subjectPhrase(forms, adj) {
 export const englishEngine = {
     language: 'en',
     render(phrase) {
-        const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+        const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
         const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
-        const verbText = conjugate(verb.forms, subject.forms);
         const directObjectText = directObject ? nounPhrase(directObject.forms, true) : '';
         // Prepositional dative: "to the cat"
         const indirectObjectText = indirectObject ? `to ${nounPhrase(indirectObject.forms, true)}` : '';
         const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
         const isFrequency = modifier?.forms['subtype'] === 'frequency';
-        // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
-        // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
-        const preVerb = isFrequency ? modifierText : '';
-        const postVerb = isFrequency ? '' : modifierText;
-        return [subjectText, preVerb, verbText, directObjectText, indirectObjectText, postVerb]
-            .filter(Boolean)
-            .join(' ')
-            .trim();
+        const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+        let parts;
+        if (verbNegative && !modifierIsNegative) {
+            const person = subject.forms['person'] ?? '3';
+            const number = subject.forms['number'] ?? 'singular';
+            const aux = (person === '3' && number === 'singular') ? 'does not' : 'do not';
+            const base = verb.forms['base'] ?? conjugate(verb.forms, subject.forms);
+            // Frequency adverbs slot between aux and base: "do not always drink"
+            const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
+            const trailingMod = isFrequency ? '' : modifierText;
+            parts = [subjectText, negVerb, directObjectText, indirectObjectText, trailingMod];
+        }
+        else {
+            const verbText = conjugate(verb.forms, subject.forms);
+            // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
+            // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
+            const preVerb = isFrequency ? modifierText : '';
+            const postVerb = isFrequency ? '' : modifierText;
+            parts = [subjectText, preVerb, verbText, directObjectText, indirectObjectText, postVerb];
+        }
+        return parts.filter(Boolean).join(' ').trim();
     },
 };
 //# sourceMappingURL=en.js.map

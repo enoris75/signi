@@ -174,3 +174,51 @@ export function NumberToggleBox({ value }: { value: "singular" | "plural" }) {
 export function GenderToggleBox({ value }: { value: "masc" | "fem" }) {
   return <ToggleBox label="Gender" value={value === "masc" ? "Masc" : "Fem"} />;
 }
+
+export function NegativeToggleBox({ value }: { value: boolean }) {
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        px: 1.5,
+        py: 0.75,
+        minWidth: 80,
+        cursor: "inherit",
+        borderRadius: 2,
+        borderWidth: 2,
+        borderColor: value ? "error.main" : "divider",
+        bgcolor: value ? "error.50" : "background.paper",
+        transition: "border-color 0.15s, background-color 0.15s",
+        userSelect: "none",
+        "&:hover": { borderColor: value ? "error.dark" : "text.secondary" },
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+          display: "block",
+          mb: 0.25,
+        }}
+      >
+        Polarity
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Lora", Georgia, serif',
+          fontSize: "0.9rem",
+          fontWeight: 600,
+          fontStyle: "italic",
+          color: value ? "error.dark" : "text.primary",
+          lineHeight: 1.3,
+        }}
+      >
+        {value ? "Negative" : "Positive"}
+      </Typography>
+    </Paper>
+  );
+}

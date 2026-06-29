@@ -3,6 +3,7 @@ import {
   Typography,
   Skeleton,
   Stack,
+  Tooltip,
 } from '@mui/material';
 import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
@@ -48,8 +49,15 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
               <Skeleton key={i} variant="text" width="90%" height={28} />
             ))
           : concepts?.map((concept) => (
-              <Box
+              <Tooltip
                 key={concept.id}
+                title={concept.description}
+                placement="right"
+                arrow
+                enterDelay={400}
+                slotProps={{ tooltip: { sx: { fontSize: '0.72rem', maxWidth: 200 } } }}
+              >
+              <Box
                 onClick={() => disabledIds.includes(concept.id) ? undefined : onSelect(concept)}
                 sx={{
                   px: 1,
@@ -76,6 +84,7 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
               >
                 {role === 'pronoun' ? concept.description : (concept.label ?? concept.description)}
               </Box>
+              </Tooltip>
             ))}
       </Stack>
     </Box>

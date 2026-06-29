@@ -35,18 +35,22 @@ function subjectPhrase(forms, adj) {
 export const germanEngine = {
     language: 'de',
     render(phrase) {
-        const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+        const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
         const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
         const verbText = conjugate(verb.forms, subject.forms);
         const directObjectText = directObject ? nounPhrase(directObject.forms, 'acc') : '';
         // German: dative (indirect) comes BEFORE accusative (direct) when both are noun phrases
         const indirectObjectText = indirectObject ? nounPhrase(indirectObject.forms, 'dat') : '';
         const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-        // S V Adv IndObj(dat) DirectObj(acc)
-        return [subjectText, verbText, modifierText, indirectObjectText, directObjectText]
-            .filter(Boolean)
-            .join(' ')
-            .trim();
+        // "nicht" precedes the modifier when one exists ("nicht immer"),
+        // otherwise trails after objects ("das Brot nicht").
+        // Skip "nicht" when the modifier is already negative ("nie" = never).
+        const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+        const applyNicht = verbNegative && !modifierIsNegative;
+        const negBefore = applyNicht && modifierText ? 'nicht' : '';
+        const negAfter = applyNicht && !modifierText ? 'nicht' : '';
+        return [subjectText, verbText, negBefore, modifierText, indirectObjectText, directObjectText, negAfter]
+            .filter(Boolean).join(' ').trim();
     },
 };
 //# sourceMappingURL=de.js.map

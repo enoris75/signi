@@ -1,9 +1,8 @@
-import { useState } from "react";
+import { useRef, useState } from "react";
 import {
   Box,
   Container,
   Typography,
-  Grid,
   Divider,
   Alert,
 } from "@mui/material";
@@ -23,6 +22,11 @@ import { useTranslation } from "./hooks/useTranslation.ts";
 export default function App() {
   const [selection, setSelection] = useState<PhraseSelection>({});
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
+  const [leftWidthPct, setLeftWidthPct] = useState<number>(() => {
+    const saved = localStorage.getItem("signi:leftWidth");
+    return saved ? Number(saved) : 58.33;
+  });
+  const splitContainerRef = useRef<HTMLDivElement>(null);
 
   const plan: Partial<PhrasePlan> = {
     subject: selection.subject?.id,
@@ -30,6 +34,7 @@ export default function App() {
     subjectGender: selection.subjectGender,
     subjectAdjective: selection.subjectAdjective?.id,
     verb: selection.verb?.id,
+    verbNegative: selection.verbNegative,
     directObject: selection.directObject?.id,
     directObjectNumber: selection.directObjectNumber,
     directObjectGender: selection.directObjectGender,
@@ -181,6 +186,10 @@ export default function App() {
     }));
   }
 
+  function handleToggleNegative() {
+    setSelection((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
+  }
+
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       {/* Header */}
@@ -225,9 +234,12 @@ export default function App() {
       </Box>
 
       <Container maxWidth="xl">
-        <Grid container spacing={3}>
+        <Box
+          ref={splitContainerRef}
+          sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start" }}
+        >
           {/* Left: phrase diagram with inline word palette sidebar */}
-          <Grid item xs={12} md={7}>
+          <Box sx={{ width: `${leftWidthPct}%`, flexShrink: 0, minWidth: 0, pr: 1.5 }}>
             <PhraseBuilder
               selection={selection}
               activeSlot={activeSlot}
@@ -235,6 +247,7 @@ export default function App() {
               onClear={handleClear}
               onToggleNumber={handleToggleNumber}
               onToggleGender={handleToggleGender}
+              onToggleNegative={handleToggleNegative}
               onConceptSelect={(slot, concept) =>
                 handleConceptSelect(concept, slot)
               }
@@ -293,10 +306,47 @@ export default function App() {
                 </Box>
               }
             />
-          </Grid>
+          </Box>
+
+          {/* Horizontal resize handle */}
+          <Box
+            onPointerDown={(e) => {
+              e.preventDefault();
+              const startX = e.clientX;
+              const startPct = leftWidthPct;
+              let currentPct = startPct;
+              const rect = splitContainerRef.current?.getBoundingClientRect();
+              if (!rect) return;
+              const onMove = (ev: PointerEvent) => {
+                currentPct = Math.max(20, Math.min(100, startPct + ((ev.clientX - startX) / rect.width) * 100));
+                setLeftWidthPct(currentPct);
+              };
+              const onUp = () => {
+                localStorage.setItem("signi:leftWidth", String(Math.round(currentPct * 10) / 10));
+                window.removeEventListener("pointermove", onMove);
+                window.removeEventListener("pointerup", onUp);
+                window.removeEventListener("pointercancel", onUp);
+              };
+              window.addEventListener("pointermove", onMove);
+              window.addEventListener("pointerup", onUp);
+              window.addEventListener("pointercancel", onUp);
+            }}
+            sx={{
+              width: 6,
+              alignSelf: "stretch",
+              flexShrink: 0,
+              cursor: "ew-resize",
+              touchAction: "none",
+              borderLeft: "1px solid",
+              borderColor: "divider",
+              opacity: 0.4,
+              transition: "opacity 0.15s",
+              "&:hover": { opacity: 1, borderColor: "primary.main" },
+            }}
+          />
 
           {/* Right: translations */}
-          <Grid item xs={12} md={5}>
+          <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }}>
             {isError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 Could not reach the translation server.
@@ -307,8 +357,8 @@ export default function App() {
               isLoading={isLoading}
               isReady={isReady}
             />
-          </Grid>
-        </Grid>
+          </Box>
+        </Box>
       </Container>
     </Box>
   );

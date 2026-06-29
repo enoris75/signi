@@ -70,6 +70,7 @@ export function translate(plan, lookup) {
             subject: subjectForms,
             subjectAdjective: plan.subjectAdjective ? resolve(plan.subjectAdjective, engine.language, lookup) : undefined,
             verb: resolve(plan.verb, engine.language, lookup),
+            verbNegative: plan.verbNegative,
             directObject: directObjectForms,
             indirectObject: indirectObjectForms,
             modifier: plan.modifier ? resolve(plan.modifier, engine.language, lookup) : undefined,

@@ -52,16 +52,30 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
   render(phrase: ResolvedPhrase): string {
-    const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+    const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
 
     const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
-    const verbText = conjugate(verb.forms, subject.forms);
-    const directObjectText = directObject ? nounPhrase(directObject.forms) : '';
-    // S V Adv DirectObj IndirectObj(à+article)
-    const indirectObjectText = indirectObject ? indirectNounPhrase(indirectObject.forms) : '';
+    const conjugated = conjugate(verb.forms, subject.forms);
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+    // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
+    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+    let effectiveVerb: string;
+    let effectiveMod: string;
+    if (modifierIsNegative) {
+      effectiveVerb = `ne ${conjugated} ${modifierText}`;
+      effectiveMod = '';
+    } else if (verbNegative) {
+      effectiveVerb = `ne ${conjugated} pas`;
+      effectiveMod = modifierText;
+    } else {
+      effectiveVerb = conjugated;
+      effectiveMod = modifierText;
+    }
+    const directObjectText = directObject ? nounPhrase(directObject.forms) : '';
+    // S V [Adv] DirectObj IndirectObj(à+article)
+    const indirectObjectText = indirectObject ? indirectNounPhrase(indirectObject.forms) : '';
 
-    return [subjectText, verbText, modifierText, directObjectText, indirectObjectText]
+    return [subjectText, effectiveVerb, effectiveMod, directObjectText, indirectObjectText]
       .filter(Boolean)
       .join(' ')
       .trim();

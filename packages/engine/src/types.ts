@@ -9,6 +9,7 @@ export interface ResolvedPhrase {
   subject: ConceptForms;
   subjectAdjective?: ConceptForms;
   verb: ConceptForms;
+  verbNegative?: boolean;
   directObject?: ConceptForms;
   indirectObject?: ConceptForms;
   modifier?: ConceptForms;

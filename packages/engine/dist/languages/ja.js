@@ -10,10 +10,14 @@ function subjectWord(forms) {
 export const japaneseEngine = {
     language: 'ja',
     render(phrase) {
-        const { subject, subjectAdjective, verb, directObject, indirectObject, modifier } = phrase;
+        const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
         const adjBase = subjectAdjective?.forms['base'] ?? '';
         const subjectText = adjBase + subjectWord(subject.forms) + 'は';
-        const verbText = verb.forms['masu_present'] ?? verb.forms['base'] ?? '';
+        const masuPresent = verb.forms['masu_present'] ?? verb.forms['base'] ?? '';
+        // Negative: ます → ません
+        const verbText = verbNegative && masuPresent.endsWith('ます')
+            ? masuPresent.slice(0, -2) + 'ません'
+            : masuPresent;
         const directObjectText = directObject ? (directObject.forms['base'] ?? '') + 'を' : '';
         const indirectObjectText = indirectObject ? (indirectObject.forms['base'] ?? '') + 'に' : '';
         const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
