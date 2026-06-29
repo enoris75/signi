@@ -148,6 +148,8 @@ export function PhraseBuilder({
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
   });
+  const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
+  const borderDragRef = useRef<{ startX: number; startY: number; startPos: { x: number; y: number } } | null>(null);
   const hasVerb = Boolean(selection.verb);
   const verbSlot = ALL_SLOTS.find((s) => s.key === "verb")!;
   const visibleSlots = getActiveSlots(
@@ -406,6 +408,29 @@ export function PhraseBuilder({
     setDraggingKey(null);
   }
 
+  function startBorderDrag(e: React.PointerEvent<HTMLDivElement>) {
+    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
+    borderDragRef.current = {
+      startX: e.clientX,
+      startY: e.clientY,
+      startPos: position ?? { x: 0, y: 0 },
+    };
+  }
+
+  function moveBorderDrag(e: React.PointerEvent<HTMLDivElement>) {
+    if (!borderDragRef.current) return;
+    const dx = e.clientX - borderDragRef.current.startX;
+    const dy = e.clientY - borderDragRef.current.startY;
+    setPosition({
+      x: borderDragRef.current.startPos.x + dx,
+      y: borderDragRef.current.startPos.y + dy,
+    });
+  }
+
+  function endBorderDrag() {
+    borderDragRef.current = null;
+  }
+
   function makeDragProps(key: string, onActivate: () => void) {
     const isDragging = draggingKey === key;
     const pos = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -577,10 +602,46 @@ export function PhraseBuilder({
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{ p: 2, border: "1px solid", borderColor: "divider" }}
+    <Box
+      sx={{
+        position: position ? "fixed" : "relative",
+        ...(position && { left: `${position.x}px`, top: `${position.y}px` }),
+        zIndex: position ? 50 : "auto",
+      }}
     >
+      <Paper
+        elevation={0}
+        onPointerDown={(e) => {
+          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          const borderWidth = 8;
+          const isNearBorder =
+            e.clientX - rect.left < borderWidth ||
+            e.clientX - rect.left > rect.width - borderWidth ||
+            e.clientY - rect.top < borderWidth ||
+            e.clientY - rect.top > rect.height - borderWidth;
+          if (isNearBorder) {
+            startBorderDrag(e as React.PointerEvent<HTMLDivElement>);
+          }
+        }}
+        onPointerMove={(e) => {
+          if (borderDragRef.current) {
+            moveBorderDrag(e as React.PointerEvent<HTMLDivElement>);
+          }
+        }}
+        onPointerUp={endBorderDrag}
+        onPointerCancel={endBorderDrag}
+        sx={{
+          p: 2,
+          border: "1px solid",
+          borderColor: "divider",
+          cursor:
+            borderDragRef.current && position
+              ? "grabbing"
+              : position
+                ? "default"
+                : undefined,
+        }}
+      >
       <Typography
         sx={{
           fontFamily: '"Inter", sans-serif',
@@ -955,5 +1016,6 @@ export function PhraseBuilder({
         </Box>
       </Box>
     </Paper>
+    </Box>
   );
 }
