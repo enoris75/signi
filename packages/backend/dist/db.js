@@ -1,0 +1,213 @@
+import Database from 'better-sqlite3';
+import path from 'path';
+import { fileURLToPath } from 'url';
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
+const DB_PATH = path.join(__dirname, '..', 'signi.db');
+let _db = null;
+export function getDb() {
+    if (!_db) {
+        _db = new Database(DB_PATH);
+        _db.pragma('journal_mode = WAL');
+        _db.pragma('foreign_keys = ON');
+        initSchema(_db);
+    }
+    return _db;
+}
+function initSchema(db) {
+    db.exec(`
+    -- ── Interlingual pivot ─────────────────────────────────────────────
+    CREATE TABLE IF NOT EXISTS semantic_concepts (
+      id           TEXT PRIMARY KEY,
+      role         TEXT NOT NULL CHECK (role IN ('pronoun','noun','verb','adjective','adverb')),
+      description  TEXT NOT NULL,
+      emoji        TEXT,
+      transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL)
+    );
+
+    -- ── Per-type lexeme tables ─────────────────────────────────────────
+    -- Each table carries only the attributes that are meaningful for that
+    -- grammatical category. Structured fields (gender, person, number) are
+    -- typed columns, not key-value rows.
+
+    CREATE TABLE IF NOT EXISTS verb_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      lemma    TEXT NOT NULL,   -- infinitive / dictionary form
+      notes    TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS noun_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      singular TEXT NOT NULL,   -- citation / nominative singular form
+      plural   TEXT,            -- NULL for uncountable or defective nouns
+      gender   TEXT CHECK (gender IN ('masc','fem','neut') OR gender IS NULL),
+      notes    TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS pronoun_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      lemma    TEXT NOT NULL,
+      person   TEXT NOT NULL CHECK (person IN ('1','2','3')),
+      number   TEXT NOT NULL CHECK (number IN ('singular','plural')),
+      gender   TEXT CHECK (gender IN ('masc','fem','neut') OR gender IS NULL),
+      notes    TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS adjective_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      lemma    TEXT NOT NULL,
+      notes    TEXT
+    );
+
+    CREATE TABLE IF NOT EXISTS adverb_lexemes (
+      id       INTEGER PRIMARY KEY AUTOINCREMENT,
+      language TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      lemma    TEXT NOT NULL,
+      notes    TEXT
+    );
+
+    -- ── Per-type inflected-form tables ────────────────────────────────
+    -- Only surface forms live here. Structured metadata (gender, person,
+    -- number) is on the lexeme table, not in these rows.
+
+    CREATE TABLE IF NOT EXISTS verb_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES verb_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- '1sg_present' … '3pl_present', 'masu_present'
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS noun_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES noun_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- future case forms (gen, dat…); singular/plural are columns
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS pronoun_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES pronoun_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- 'base', and optionally case forms
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS adjective_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES adjective_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- 'base', 'masc_sg', 'fem_sg', 'masc_pl', 'fem_pl'
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
+    CREATE TABLE IF NOT EXISTS adverb_forms (
+      id         INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_id  INTEGER NOT NULL REFERENCES adverb_lexemes(id) ON DELETE CASCADE,
+      form_key   TEXT NOT NULL,   -- 'base'
+      form_value TEXT NOT NULL,
+      UNIQUE (lexeme_id, form_key)
+    );
+
+    -- ── Per-type concept → lexeme links ──────────────────────────────
+    -- Typed FKs ensure a noun concept can only link to noun lexemes, etc.
+    -- is_primary = 0 marks synonym lexemes for the same concept.
+
+    CREATE TABLE IF NOT EXISTS concept_verb_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES verb_lexemes(id)      ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS concept_noun_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES noun_lexemes(id)      ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS concept_pronoun_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES pronoun_lexemes(id)   ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS concept_adjective_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES adjective_lexemes(id) ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS concept_adverb_links (
+      concept_id TEXT    NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      lexeme_id  INTEGER NOT NULL REFERENCES adverb_lexemes(id)    ON DELETE CASCADE,
+      is_primary INTEGER NOT NULL DEFAULT 1 CHECK (is_primary IN (0,1)),
+      PRIMARY KEY (concept_id, lexeme_id)
+    );
+
+    -- ── Per-type within-language lexical relations ────────────────────
+    -- Relations are always between words of the same grammatical category
+    -- (a verb synonym is a verb, a noun homonym is a noun, etc.).
+
+    CREATE TABLE IF NOT EXISTS verb_relations (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_a_id INTEGER NOT NULL REFERENCES verb_lexemes(id) ON DELETE CASCADE,
+      lexeme_b_id INTEGER NOT NULL REFERENCES verb_lexemes(id) ON DELETE CASCADE,
+      relation    TEXT NOT NULL CHECK (relation IN ('synonym','homonym','antonym','related')),
+      CHECK (lexeme_a_id <> lexeme_b_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS noun_relations (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_a_id INTEGER NOT NULL REFERENCES noun_lexemes(id) ON DELETE CASCADE,
+      lexeme_b_id INTEGER NOT NULL REFERENCES noun_lexemes(id) ON DELETE CASCADE,
+      relation    TEXT NOT NULL CHECK (relation IN ('synonym','homonym','antonym','related')),
+      CHECK (lexeme_a_id <> lexeme_b_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS pronoun_relations (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_a_id INTEGER NOT NULL REFERENCES pronoun_lexemes(id) ON DELETE CASCADE,
+      lexeme_b_id INTEGER NOT NULL REFERENCES pronoun_lexemes(id) ON DELETE CASCADE,
+      relation    TEXT NOT NULL CHECK (relation IN ('synonym','homonym','antonym','related')),
+      CHECK (lexeme_a_id <> lexeme_b_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS adjective_relations (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_a_id INTEGER NOT NULL REFERENCES adjective_lexemes(id) ON DELETE CASCADE,
+      lexeme_b_id INTEGER NOT NULL REFERENCES adjective_lexemes(id) ON DELETE CASCADE,
+      relation    TEXT NOT NULL CHECK (relation IN ('synonym','homonym','antonym','related')),
+      CHECK (lexeme_a_id <> lexeme_b_id)
+    );
+
+    CREATE TABLE IF NOT EXISTS adverb_relations (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      lexeme_a_id INTEGER NOT NULL REFERENCES adverb_lexemes(id) ON DELETE CASCADE,
+      lexeme_b_id INTEGER NOT NULL REFERENCES adverb_lexemes(id) ON DELETE CASCADE,
+      relation    TEXT NOT NULL CHECK (relation IN ('synonym','homonym','antonym','related')),
+      CHECK (lexeme_a_id <> lexeme_b_id)
+    );
+
+    -- ── Indexes ───────────────────────────────────────────────────────
+    CREATE INDEX IF NOT EXISTS idx_verb_lexemes_lang     ON verb_lexemes      (language);
+    CREATE INDEX IF NOT EXISTS idx_noun_lexemes_lang     ON noun_lexemes      (language);
+    CREATE INDEX IF NOT EXISTS idx_pronoun_lexemes_lang  ON pronoun_lexemes   (language);
+    CREATE INDEX IF NOT EXISTS idx_adjective_lexemes_lang ON adjective_lexemes (language);
+    CREATE INDEX IF NOT EXISTS idx_adverb_lexemes_lang   ON adverb_lexemes    (language);
+
+    CREATE INDEX IF NOT EXISTS idx_verb_forms_lexeme      ON verb_forms      (lexeme_id);
+    CREATE INDEX IF NOT EXISTS idx_noun_forms_lexeme      ON noun_forms      (lexeme_id);
+    CREATE INDEX IF NOT EXISTS idx_pronoun_forms_lexeme   ON pronoun_forms   (lexeme_id);
+    CREATE INDEX IF NOT EXISTS idx_adjective_forms_lexeme ON adjective_forms (lexeme_id);
+    CREATE INDEX IF NOT EXISTS idx_adverb_forms_lexeme    ON adverb_forms    (lexeme_id);
+  `);
+}
+//# sourceMappingURL=db.js.map
