@@ -7,7 +7,8 @@ export interface SlotConfig {
     "directObject" |
     "indirectObject" |
     "modifier" |
-    "subjectAdjective";
+    "subjectAdjective" |
+    "subjectAdjective2";
     label: string;
     required: boolean;
     roles: GrammaticalRole[];
@@ -22,6 +23,7 @@ export interface PhraseSelection {
     indirectObject?: Concept;
     modifier?: Concept;
     subjectAdjective?: Concept;
+    subjectAdjective2?: Concept;
     subjectNumber?: "singular" | "plural";
     subjectGender?: "masc" | "fem";
     directObjectNumber?: "singular" | "plural";

@@ -37,6 +37,7 @@ export interface PhrasePlan {
   subjectNumber?: 'singular' | 'plural';
   subjectGender?: 'masc' | 'fem';
   subjectAdjective?: string;
+  subjectAdjective2?: string;
   verb: string;
   verbNegative?: boolean;
   directObject?: string;

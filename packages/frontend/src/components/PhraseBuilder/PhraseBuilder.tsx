@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, Divider } from "@mui/material";
 import type { Concept, GrammaticalRole, Transitivity } from "@signi/shared";
+import ConceptPalette from "../ConceptPalette.tsx";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
@@ -19,6 +20,13 @@ const ALL_SLOTS: SlotConfig[] = [
   {
     key: "subjectAdjective",
     label: "Adjective",
+    required: false,
+    roles: ["adjective"],
+    color: "error",
+  },
+  {
+    key: "subjectAdjective2",
+    label: "Adjective 2",
     required: false,
     roles: ["adjective"],
     color: "error",
@@ -63,29 +71,25 @@ const ALL_SLOTS: SlotConfig[] = [
 export function getActiveSlots(
   transitivity?: Transitivity,
   subjectRole?: GrammaticalRole,
+  hasSubjectAdjective?: boolean,
 ): SlotConfig[] {
   return ALL_SLOTS.filter((slot) => {
     if (slot.key === "directObject") return transitivity !== "intransitive";
     if (slot.key === "indirectObject") return transitivity === "ditransitive";
     if (slot.key === "subjectAdjective") return subjectRole === "noun";
+    if (slot.key === "subjectAdjective2") return subjectRole === "noun" && hasSubjectAdjective;
     return true;
   });
 }
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
-  activeSlot: SlotKey | null;
-  onSlotClick: (slot: SlotKey) => void;
-  onClear: (slot: SlotKey) => void;
-  onToggleNumber: (which: NumberSlot) => void;
-  onToggleGender: (which: GenderSlot) => void;
-  onToggleNegative: () => void;
-  onConceptSelect: (slot: SlotKey, concept: Concept) => void;
-  sidebar?: React.ReactNode;
+  onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
 }
 
 const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   subjectAdjective: { x: 12, y: 14 },
+  subjectAdjective2: { x: 12, y: 26 },
   subject: { x: 26, y: 42 },
   verb: { x: 52, y: 42 },
   directObject: { x: 80, y: 42 },
@@ -107,6 +111,7 @@ const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
   subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
   subjectGender: { x: 12, y: 57 },
+  subjectAdjective2Gender: { x: 20, y: 26 },
   verbNegative: { x: 52, y: 62 },
   directObjectNumber: NUMBER_TOGGLE_DEFAULTS.directObject,
   directObjectGender: { x: 93, y: 30 },
@@ -136,15 +141,9 @@ type DragState = {
 
 export function PhraseBuilder({
   selection,
-  activeSlot,
-  onSlotClick,
-  onClear,
-  onToggleNumber,
-  onToggleGender,
-  onToggleNegative,
-  onConceptSelect,
-  sidebar,
+  onPhraseUpdate,
 }: PhraseBuilderProps) {
+  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
@@ -154,7 +153,152 @@ export function PhraseBuilder({
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
+    Boolean(selection.subjectAdjective),
   );
+  const activeSlotConfig =
+    visibleSlots.find((s) => s.key === activeSlot) ?? null;
+
+  function handleConceptSelect(concept: Concept, targetSlot?: SlotKey) {
+    const slot = targetSlot ?? activeSlot;
+    if (!slot) return;
+
+    onPhraseUpdate((prev) => {
+      const next = { ...prev, [slot]: concept };
+      if (slot === "verb") {
+        const nowVisible = getActiveSlots(
+          concept.transitivity,
+          prev.subject?.role,
+        ).map((s) => s.key);
+        if (!nowVisible.includes("directObject")) {
+          delete next.directObject;
+          delete next.directObjectNumber;
+        }
+        if (!nowVisible.includes("indirectObject")) {
+          delete next.indirectObject;
+          delete next.indirectObjectNumber;
+        }
+        if (!nowVisible.includes("subjectAdjective"))
+          delete next.subjectAdjective;
+      }
+      if (slot === "subject") {
+        delete next.subjectAdjective;
+        delete next.subjectAdjective2;
+        if (concept.role === "pronoun") {
+          next.subjectNumber = "singular";
+          if (concept.person === "3") {
+            next.subjectGender = prev.subjectGender ?? "masc";
+          } else {
+            delete next.subjectGender;
+          }
+        } else if (concept.role === "noun") {
+          if (concept.gendered) {
+            next.subjectGender = prev.subjectGender ?? "masc";
+          } else {
+            delete next.subjectGender;
+          }
+        } else {
+          delete next.subjectNumber;
+          delete next.subjectGender;
+        }
+      }
+      if (slot === "directObject") {
+        if (concept.gendered) {
+          next.directObjectGender = prev.directObjectGender ?? "masc";
+        } else {
+          delete next.directObjectGender;
+        }
+      }
+      if (slot === "indirectObject") {
+        if (concept.gendered) {
+          next.indirectObjectGender = prev.indirectObjectGender ?? "masc";
+        } else {
+          delete next.indirectObjectGender;
+        }
+      }
+      return next;
+    });
+
+    // Auto-advance to next empty slot
+    let slots = visibleSlots;
+    if (slot === "verb") {
+      slots = getActiveSlots(concept.transitivity, selection.subject?.role, Boolean(selection.subjectAdjective));
+      const subjectEmpty = !selection.subject;
+      setActiveSlot(
+        subjectEmpty
+          ? "subject"
+          : (slots.find((s) => s.key !== "verb" && !selection[s.key])?.key ??
+              null),
+      );
+    } else if (slot === "subjectAdjective") {
+      setActiveSlot("subjectAdjective2");
+    } else {
+      const currentIdx = slots.findIndex((s) => s.key === slot);
+      const nextSlot = slots
+        .slice(currentIdx + 1)
+        .find((s) => !selection[s.key]);
+      if (nextSlot) setActiveSlot(nextSlot.key);
+    }
+  }
+
+  function handleSlotClick(slot: SlotKey) {
+    setActiveSlot(slot);
+  }
+
+  function handleClear(slot: SlotKey) {
+    onPhraseUpdate((prev) => {
+      const next = { ...prev };
+      delete next[slot];
+      if (slot === "verb") {
+        delete next.directObject;
+        delete next.directObjectNumber;
+        delete next.directObjectGender;
+        delete next.indirectObject;
+        delete next.indirectObjectNumber;
+        delete next.indirectObjectGender;
+        delete next.subjectAdjective;
+        delete next.subjectAdjective2;
+      }
+      if (slot === "subject") {
+        delete next.subjectAdjective;
+        delete next.subjectAdjective2;
+        delete next.subjectNumber;
+        delete next.subjectGender;
+      }
+      if (slot === "subjectAdjective") {
+        delete next.subjectAdjective2;
+      }
+      if (slot === "directObject") {
+        delete next.directObjectNumber;
+        delete next.directObjectGender;
+      }
+      if (slot === "indirectObject") {
+        delete next.indirectObjectNumber;
+        delete next.indirectObjectGender;
+      }
+      return next;
+    });
+    if (slot === "verb") setActiveSlot("verb");
+  }
+
+  function handleToggleNumber(which: NumberSlot) {
+    const key = `${which}Number` as keyof PhraseSelection;
+    onPhraseUpdate((prev) => ({
+      ...prev,
+      [key]: prev[key] === "plural" ? "singular" : "plural",
+    }));
+  }
+
+  function handleToggleGender(which: GenderSlot) {
+    const key = `${which}Gender` as keyof PhraseSelection;
+    onPhraseUpdate((prev) => ({
+      ...prev,
+      [key]: prev[key] === "fem" ? "masc" : "fem",
+    }));
+  }
+
+  function handleToggleNegative() {
+    onPhraseUpdate((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
+  }
 
   const showSubjectNumber = Boolean(selection.subject);
   const showSubjectGender =
@@ -297,7 +441,7 @@ export function PhraseBuilder({
     for (const slot of visibleSlots) {
       if (slot.key === "verb") continue;
       const from =
-        slot.key === "subjectAdjective" ? pos("subject") : pos("verb");
+        slot.key === "subjectAdjective" || slot.key === "subjectAdjective2" ? pos("subject") : pos("verb");
       edges.push({ from, to: pos(slot.key), color: MUI_COLOR_HEX[slot.color] });
     }
     edges.push({ from: pos("verb"), to: pos("verbNegative"), color: MUI_COLOR_HEX.secondary });
@@ -365,6 +509,9 @@ export function PhraseBuilder({
         nodeKeys: [
           ...(visibleSlots.some((s) => s.key === "subjectAdjective")
             ? ["subjectAdjective"]
+            : []),
+          ...(visibleSlots.some((s) => s.key === "subjectAdjective2")
+            ? ["subjectAdjective2"]
             : []),
           "subject",
           ...(showSubjectNumber ? ["subjectNumber"] : []),
@@ -458,9 +605,9 @@ export function PhraseBuilder({
                 slot={verbSlot}
                 concept={undefined}
                 isActive={activeSlot === "verb"}
-                onClear={() => onClear("verb")}
+                onClear={() => handleClear("verb")}
                 emptyContent={
-                  <VerbTypeahead onSelect={(c) => onConceptSelect("verb", c)} />
+                  <VerbTypeahead onSelect={(c) => handleConceptSelect(c, "verb")} />
                 }
               />
             </Box>
@@ -527,13 +674,13 @@ export function PhraseBuilder({
                 {visibleSlots.map((slot, idx) => (
                   <Box
                     key={slot.key}
-                    {...makeDragProps(slot.key, () => onSlotClick(slot.key))}
+                    {...makeDragProps(slot.key, () => handleSlotClick(slot.key))}
                     ref={(el: HTMLElement | null) => {
                       if (el) slotEls.current.set(slot.key, el);
                       else slotEls.current.delete(slot.key);
                     }}
                     tabIndex={0}
-                    onFocus={() => onSlotClick(slot.key)}
+                    onFocus={() => handleSlotClick(slot.key)}
                     onKeyDown={(e: React.KeyboardEvent) => {
                       const isDirectFocus = e.target === e.currentTarget;
                       let dir: 1 | -1 | null = null;
@@ -549,7 +696,7 @@ export function PhraseBuilder({
                       const nextIdx =
                         (idx + dir + visibleSlots.length) % visibleSlots.length;
                       const nextKey = visibleSlots[nextIdx].key;
-                      onSlotClick(nextKey);
+                      handleSlotClick(nextKey);
                       slotEls.current.get(nextKey)?.focus();
                     }}
                   >
@@ -557,40 +704,48 @@ export function PhraseBuilder({
                       slot={slot}
                       concept={selection[slot.key]}
                       isActive={activeSlot === slot.key}
-                      onClear={() => onClear(slot.key)}
+                      onClear={() => handleClear(slot.key)}
                       emptyContent={
                         slot.key === "verb" &&
                         activeSlot === "verb" &&
                         !selection.verb ? (
                           <VerbTypeahead
-                            onSelect={(c) => onConceptSelect("verb", c)}
+                            onSelect={(c) => handleConceptSelect(c, "verb")}
                           />
                         ) : slot.key === "subject" &&
                           activeSlot === "subject" &&
                           !selection.subject ? (
                           <SubjectTypeahead
-                            onSelect={(c) => onConceptSelect("subject", c)}
+                            onSelect={(c) => handleConceptSelect(c, "subject")}
                           />
                         ) : slot.key === "subjectAdjective" &&
                           activeSlot === "subjectAdjective" &&
                           !selection.subjectAdjective ? (
                           <AdjectiveTypeahead
                             onSelect={(c) =>
-                              onConceptSelect("subjectAdjective", c)
+                              handleConceptSelect(c, "subjectAdjective")
+                            }
+                          />
+                        ) : slot.key === "subjectAdjective2" &&
+                          activeSlot === "subjectAdjective2" &&
+                          !selection.subjectAdjective2 ? (
+                          <AdjectiveTypeahead
+                            onSelect={(c) =>
+                              handleConceptSelect(c, "subjectAdjective2")
                             }
                           />
                         ) : slot.key === "directObject" &&
                           activeSlot === "directObject" &&
                           !selection.directObject ? (
                           <DirectObjectTypeahead
-                            onSelect={(c) => onConceptSelect("directObject", c)}
+                            onSelect={(c) => handleConceptSelect(c, "directObject")}
                           />
                         ) : slot.key === "indirectObject" &&
                           activeSlot === "indirectObject" &&
                           !selection.indirectObject ? (
                           <IndirectObjectTypeahead
                             onSelect={(c) =>
-                              onConceptSelect("indirectObject", c)
+                              handleConceptSelect(c, "indirectObject")
                             }
                           />
                         ) : undefined
@@ -602,7 +757,7 @@ export function PhraseBuilder({
                 {showSubjectNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("subject"), () =>
-                      onToggleNumber("subject"),
+                      handleToggleNumber("subject"),
                     )}
                   >
                     <NumberToggleBox
@@ -613,7 +768,7 @@ export function PhraseBuilder({
                 {showSubjectGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("subject"), () =>
-                      onToggleGender("subject"),
+                      handleToggleGender("subject"),
                     )}
                   >
                     <GenderToggleBox
@@ -624,7 +779,7 @@ export function PhraseBuilder({
                 {showDirectObjNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("directObject"), () =>
-                      onToggleNumber("directObject"),
+                      handleToggleNumber("directObject"),
                     )}
                   >
                     <NumberToggleBox
@@ -635,7 +790,7 @@ export function PhraseBuilder({
                 {showDirectObjGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("directObject"), () =>
-                      onToggleGender("directObject"),
+                      handleToggleGender("directObject"),
                     )}
                   >
                     <GenderToggleBox
@@ -646,7 +801,7 @@ export function PhraseBuilder({
                 {showIndirectObjNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("indirectObject"), () =>
-                      onToggleNumber("indirectObject"),
+                      handleToggleNumber("indirectObject"),
                     )}
                   >
                     <NumberToggleBox
@@ -657,7 +812,7 @@ export function PhraseBuilder({
                 {showIndirectObjGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("indirectObject"), () =>
-                      onToggleGender("indirectObject"),
+                      handleToggleGender("indirectObject"),
                     )}
                   >
                     <GenderToggleBox
@@ -665,7 +820,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                <Box {...makeDragProps("verbNegative", onToggleNegative)}>
+                <Box {...makeDragProps("verbNegative", handleToggleNegative)}>
                   <NegativeToggleBox value={selection.verbNegative ?? false} />
                 </Box>
               </Box>
@@ -705,57 +860,99 @@ export function PhraseBuilder({
             </>
           )}
         </Box>
-        {sidebar && (
-          <>
-            {/* Sidebar resize handle */}
-            <Box
-              onPointerDown={(e) => {
-                e.preventDefault();
-                const startX = e.clientX;
-                const startW = sidebarWidth;
-                let currentW = startW;
-                const onMove = (ev: PointerEvent) => {
-                  currentW = Math.max(80, Math.min(400, startW - (ev.clientX - startX)));
-                  setSidebarWidth(currentW);
-                };
-                const onUp = () => {
-                  localStorage.setItem("signi:phraseBuilderSidebarWidth", String(Math.round(currentW)));
-                  window.removeEventListener("pointermove", onMove);
-                  window.removeEventListener("pointerup", onUp);
-                  window.removeEventListener("pointercancel", onUp);
-                };
-                window.addEventListener("pointermove", onMove);
-                window.addEventListener("pointerup", onUp);
-                window.addEventListener("pointercancel", onUp);
-              }}
-              sx={{
-                width: 6,
-                flexShrink: 0,
-                cursor: "ew-resize",
-                touchAction: "none",
-                borderLeft: "2px solid",
-                borderColor: "divider",
-                bgcolor: "divider",
-                opacity: 0.6,
-                transition: "opacity 0.15s, background-color 0.15s",
-                "&:hover": { opacity: 1, bgcolor: "primary.main", borderColor: "primary.main" },
-              }}
-            />
-            <Box
-              sx={{
-                width: sidebarWidth,
-                flexShrink: 0,
-                borderLeft: "1px solid",
-                borderColor: "divider",
-                pl: 1.5,
-                maxHeight: graphHeight,
-                overflowY: "auto",
-              }}
-            >
-              {sidebar}
-            </Box>
-          </>
-        )}
+        {/* Sidebar resize handle */}
+        <Box
+          onPointerDown={(e) => {
+            e.preventDefault();
+            const startX = e.clientX;
+            const startW = sidebarWidth;
+            let currentW = startW;
+            const onMove = (ev: PointerEvent) => {
+              currentW = Math.max(80, Math.min(400, startW - (ev.clientX - startX)));
+              setSidebarWidth(currentW);
+            };
+            const onUp = () => {
+              localStorage.setItem("signi:phraseBuilderSidebarWidth", String(Math.round(currentW)));
+              window.removeEventListener("pointermove", onMove);
+              window.removeEventListener("pointerup", onUp);
+              window.removeEventListener("pointercancel", onUp);
+            };
+            window.addEventListener("pointermove", onMove);
+            window.addEventListener("pointerup", onUp);
+            window.addEventListener("pointercancel", onUp);
+          }}
+          sx={{
+            width: 6,
+            flexShrink: 0,
+            cursor: "ew-resize",
+            touchAction: "none",
+            borderLeft: "2px solid",
+            borderColor: "divider",
+            bgcolor: "divider",
+            opacity: 0.6,
+            transition: "opacity 0.15s, background-color 0.15s",
+            "&:hover": { opacity: 1, bgcolor: "primary.main", borderColor: "primary.main" },
+          }}
+        />
+        <Box
+          sx={{
+            width: sidebarWidth,
+            flexShrink: 0,
+            borderLeft: "1px solid",
+            borderColor: "divider",
+            pl: 1.5,
+            maxHeight: graphHeight,
+            overflowY: "auto",
+          }}
+        >
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.58rem",
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "text.secondary",
+              mb: 1,
+              display: "block",
+            }}
+          >
+            {activeSlotConfig ? activeSlotConfig.label : "Words"}
+          </Typography>
+          {activeSlotConfig ? (
+            activeSlotConfig.roles.map((role) => (
+              <ConceptPalette
+                key={role}
+                role={role}
+                onSelect={(c) => handleConceptSelect(c, activeSlot as SlotKey)}
+                selectedId={selection[activeSlot as SlotKey]?.id}
+              />
+            ))
+          ) : (
+            <>
+              <Typography
+                color="text.secondary"
+                sx={{ fontSize: "0.72rem", fontStyle: "italic", mb: 1 }}
+              >
+                Click a slot to filter.
+              </Typography>
+              <Divider sx={{ my: 1 }} />
+              {visibleSlots.map((slot) =>
+                slot.roles.map((role) => (
+                  <ConceptPalette
+                    key={`${slot.key}-${role}`}
+                    role={role}
+                    onSelect={(c) => {
+                      handleSlotClick(slot.key);
+                      handleConceptSelect(c, slot.key);
+                    }}
+                    selectedId={selection[slot.key]?.id}
+                  />
+                )),
+              )}
+            </>
+          )}
+        </Box>
       </Box>
     </Paper>
   );

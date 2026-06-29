@@ -3,25 +3,16 @@ import {
   Box,
   Container,
   Typography,
-  Divider,
   Alert,
 } from "@mui/material";
-import type { Concept, PhrasePlan } from "@signi/shared";
-import ConceptPalette from "./components/ConceptPalette.tsx";
-import {
-  PhraseBuilder,
-  getActiveSlots,
-} from "./components/PhraseBuilder/PhraseBuilder.tsx";
-import { type SlotKey } from "./components/PhraseBuilder/interfaces.ts";
-import { type GenderSlot } from "./components/PhraseBuilder/interfaces.ts";
-import { type NumberSlot } from "./components/PhraseBuilder/interfaces.ts";
+import type { PhrasePlan } from "@signi/shared";
+import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
 import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { useTranslation } from "./hooks/useTranslation.ts";
 
 export default function App() {
   const [selection, setSelection] = useState<PhraseSelection>({});
-  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
   const [leftWidthPct, setLeftWidthPct] = useState<number>(() => {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
@@ -33,6 +24,7 @@ export default function App() {
     subjectNumber: selection.subjectNumber,
     subjectGender: selection.subjectGender,
     subjectAdjective: selection.subjectAdjective?.id,
+    subjectAdjective2: selection.subjectAdjective2?.id,
     verb: selection.verb?.id,
     verbNegative: selection.verbNegative,
     directObject: selection.directObject?.id,
@@ -46,149 +38,6 @@ export default function App() {
 
   const { data: translations, isLoading, isError } = useTranslation(plan);
   const isReady = Boolean(plan.subject && plan.verb);
-
-  const visibleSlots = getActiveSlots(
-    selection.verb?.transitivity,
-    selection.subject?.role,
-  );
-  const activeSlotConfig =
-    visibleSlots.find((s) => s.key === activeSlot) ?? null;
-
-  function handleConceptSelect(concept: Concept, targetSlot?: SlotKey) {
-    const slot = targetSlot ?? activeSlot;
-    if (!slot) return;
-
-    setSelection((prev) => {
-      const next = { ...prev, [slot]: concept };
-      if (slot === "verb") {
-        const nowVisible = getActiveSlots(
-          concept.transitivity,
-          prev.subject?.role,
-        ).map((s) => s.key);
-        if (!nowVisible.includes("directObject")) {
-          delete next.directObject;
-          delete next.directObjectNumber;
-        }
-        if (!nowVisible.includes("indirectObject")) {
-          delete next.indirectObject;
-          delete next.indirectObjectNumber;
-        }
-        if (!nowVisible.includes("subjectAdjective"))
-          delete next.subjectAdjective;
-      }
-      if (slot === "subject") {
-        delete next.subjectAdjective;
-        if (concept.role === "pronoun") {
-          next.subjectNumber = "singular";
-          if (concept.person === "3") {
-            next.subjectGender = prev.subjectGender ?? "masc";
-          } else {
-            delete next.subjectGender;
-          }
-        } else if (concept.role === "noun") {
-          if (concept.gendered) {
-            next.subjectGender = prev.subjectGender ?? "masc";
-          } else {
-            delete next.subjectGender;
-          }
-        } else {
-          delete next.subjectNumber;
-          delete next.subjectGender;
-        }
-      }
-      if (slot === "directObject") {
-        if (concept.gendered) {
-          next.directObjectGender = prev.directObjectGender ?? "masc";
-        } else {
-          delete next.directObjectGender;
-        }
-      }
-      if (slot === "indirectObject") {
-        if (concept.gendered) {
-          next.indirectObjectGender = prev.indirectObjectGender ?? "masc";
-        } else {
-          delete next.indirectObjectGender;
-        }
-      }
-      return next;
-    });
-
-    // Auto-advance to next empty slot
-    const slots =
-      slot === "verb"
-        ? getActiveSlots(concept.transitivity, selection.subject?.role)
-        : visibleSlots;
-    if (slot === "verb") {
-      const subjectEmpty = !selection.subject;
-      setActiveSlot(
-        subjectEmpty
-          ? "subject"
-          : (slots.find((s) => s.key !== "verb" && !selection[s.key])?.key ??
-              null),
-      );
-    } else {
-      const currentIdx = slots.findIndex((s) => s.key === slot);
-      const nextSlot = slots
-        .slice(currentIdx + 1)
-        .find((s) => !selection[s.key]);
-      if (nextSlot) setActiveSlot(nextSlot.key);
-    }
-  }
-
-  function handleSlotClick(slot: SlotKey) {
-    setActiveSlot(slot);
-  }
-
-  function handleClear(slot: SlotKey) {
-    setSelection((prev) => {
-      const next = { ...prev };
-      delete next[slot];
-      if (slot === "verb") {
-        delete next.directObject;
-        delete next.directObjectNumber;
-        delete next.directObjectGender;
-        delete next.indirectObject;
-        delete next.indirectObjectNumber;
-        delete next.indirectObjectGender;
-        delete next.subjectAdjective;
-      }
-      if (slot === "subject") {
-        delete next.subjectAdjective;
-        delete next.subjectNumber;
-        delete next.subjectGender;
-      }
-      if (slot === "directObject") {
-        delete next.directObjectNumber;
-        delete next.directObjectGender;
-      }
-      if (slot === "indirectObject") {
-        delete next.indirectObjectNumber;
-        delete next.indirectObjectGender;
-      }
-      return next;
-    });
-    if (slot === "verb") setActiveSlot("verb");
-  }
-
-  function handleToggleNumber(which: NumberSlot) {
-    const key = `${which}Number` as keyof PhraseSelection;
-    setSelection((prev) => ({
-      ...prev,
-      [key]: prev[key] === "plural" ? "singular" : "plural",
-    }));
-  }
-
-  function handleToggleGender(which: GenderSlot) {
-    const key = `${which}Gender` as keyof PhraseSelection;
-    setSelection((prev) => ({
-      ...prev,
-      [key]: prev[key] === "fem" ? "masc" : "fem",
-    }));
-  }
-
-  function handleToggleNegative() {
-    setSelection((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
-  }
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -236,75 +85,13 @@ export default function App() {
       <Container maxWidth="xl">
         <Box
           ref={splitContainerRef}
-          sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start" }}
+          sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", mb: 3 }}
         >
           {/* Left: phrase diagram with inline word palette sidebar */}
           <Box sx={{ width: `${leftWidthPct}%`, flexShrink: 0, minWidth: 0, pr: 1.5 }}>
             <PhraseBuilder
               selection={selection}
-              activeSlot={activeSlot}
-              onSlotClick={handleSlotClick}
-              onClear={handleClear}
-              onToggleNumber={handleToggleNumber}
-              onToggleGender={handleToggleGender}
-              onToggleNegative={handleToggleNegative}
-              onConceptSelect={(slot, concept) =>
-                handleConceptSelect(concept, slot)
-              }
-              sidebar={
-                <Box>
-                  <Typography
-                    sx={{
-                      fontFamily: '"Inter", sans-serif',
-                      fontSize: "0.58rem",
-                      fontWeight: 700,
-                      letterSpacing: "0.18em",
-                      textTransform: "uppercase",
-                      color: "text.secondary",
-                      mb: 1,
-                      display: "block",
-                    }}
-                  >
-                    {activeSlotConfig ? activeSlotConfig.label : "Words"}
-                  </Typography>
-                  {activeSlotConfig ? (
-                    activeSlotConfig.roles.map((role) => (
-                      <ConceptPalette
-                        key={role}
-                        role={role}
-                        onSelect={handleConceptSelect}
-                        selectedId={selection[activeSlot as SlotKey]?.id}
-                      />
-                    ))
-                  ) : (
-                    <>
-                      <Typography
-                        color="text.secondary"
-                        sx={{ fontSize: "0.72rem", fontStyle: "italic", mb: 1 }}
-                      >
-                        Click a slot to filter.
-                      </Typography>
-                      <Divider sx={{ my: 1 }} />
-                      {visibleSlots.map((slot) =>
-                        slot.roles.map((role) => (
-                          <ConceptPalette
-                            key={`${slot.key}-${role}`}
-                            role={role}
-                            onSelect={(c) => {
-                              setActiveSlot(slot.key);
-                              setSelection((prev) => ({
-                                ...prev,
-                                [slot.key]: c,
-                              }));
-                            }}
-                            selectedId={selection[slot.key]?.id}
-                          />
-                        )),
-                      )}
-                    </>
-                  )}
-                </Box>
-              }
+              onPhraseUpdate={setSelection}
             />
           </Box>
 
@@ -345,20 +132,21 @@ export default function App() {
             }}
           />
 
-          {/* Right: translations */}
-          <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }}>
-            {isError && (
-              <Alert severity="error" sx={{ mb: 2 }}>
-                Could not reach the translation server.
-              </Alert>
-            )}
-            <TranslationPanel
-              translations={translations}
-              isLoading={isLoading}
-              isReady={isReady}
-            />
-          </Box>
+          {/* Right: empty space for balance */}
+          <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />
         </Box>
+
+        {/* Translations: full width below */}
+        {isError && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            Could not reach the translation server.
+          </Alert>
+        )}
+        <TranslationPanel
+          translations={translations}
+          isLoading={isLoading}
+          isReady={isReady}
+        />
       </Container>
     </Box>
   );
