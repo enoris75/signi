@@ -4,18 +4,30 @@ import { Concept } from "@signi/shared";
 import { ReactNode } from "react";
 import { SlotConfig } from "./interfaces";
 
+export interface SatelliteIcon {
+  key: string;
+  icon: ReactNode;
+  label: string;
+  active: boolean;
+  isSet: boolean;
+  valueLabel?: string;
+  onToggle: () => void;
+}
+
 export function SlotBox({
   slot,
   concept,
   isActive,
   onClear,
   emptyContent,
+  satellites,
 }: {
   slot: SlotConfig;
   concept?: Concept;
   isActive: boolean;
   onClear: () => void;
   emptyContent?: ReactNode;
+  satellites?: SatelliteIcon[];
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -109,6 +121,60 @@ export function SlotBox({
             <ClearIcon sx={{ fontSize: 11 }} />
           </IconButton>
         </Tooltip>
+      )}
+      {satellites && satellites.length > 0 && (
+        <Box
+          sx={{
+            position: "absolute",
+            bottom: -11,
+            left: "50%",
+            transform: "translateX(-50%)",
+            display: "flex",
+            gap: 0.5,
+            zIndex: 2,
+          }}
+        >
+          {satellites.map((sat) => {
+            // Three states: expanded (active), collapsed-but-set, collapsed-empty.
+            const collapsedSet = !sat.active && sat.isSet;
+            const tooltip = collapsedSet
+              ? `${sat.label}: ${sat.valueLabel ?? "set"}`
+              : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
+            return (
+              <Tooltip key={sat.key} title={tooltip}>
+                <IconButton
+                  size="small"
+                  onPointerDown={(e) => e.stopPropagation()}
+                  onClick={sat.onToggle}
+                  sx={{
+                    width: 20,
+                    height: 20,
+                    p: 0,
+                    // Set → solid color fill; expanded-empty → colored outline;
+                    // collapsed-empty → neutral. (No `.50` shade exists in the theme.)
+                    bgcolor: sat.isSet ? `${slot.color}.main` : "background.paper",
+                    color: sat.isSet
+                      ? "common.white"
+                      : sat.active
+                        ? `${slot.color}.main`
+                        : "text.secondary",
+                    border: "1px solid",
+                    borderColor:
+                      sat.isSet || sat.active ? `${slot.color}.main` : "divider",
+                    transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
+                    "&:hover": {
+                      bgcolor: sat.isSet ? `${slot.color}.dark` : "action.hover",
+                      borderColor: `${slot.color}.main`,
+                      color: sat.isSet ? "common.white" : `${slot.color}.main`,
+                    },
+                  }}
+                >
+                  {sat.icon}
+                </IconButton>
+              </Tooltip>
+            );
+          })}
+        </Box>
       )}
     </Box>
   );

@@ -1,5 +1,10 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { ReactNode, useLayoutEffect, useRef, useState } from "react";
 import { Box, Paper, Typography, Divider } from "@mui/material";
+import BrushIcon from "@mui/icons-material/Brush";
+import NumbersIcon from "@mui/icons-material/Numbers";
+import WcIcon from "@mui/icons-material/Wc";
+import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import TuneIcon from "@mui/icons-material/Tune";
 import type { Concept, GrammaticalRole, Transitivity } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
@@ -7,7 +12,13 @@ import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
-import { SlotBox, NumberToggleBox, GenderToggleBox, NegativeToggleBox } from "./Boxes.tsx";
+import {
+  SlotBox,
+  NumberToggleBox,
+  GenderToggleBox,
+  NegativeToggleBox,
+  type SatelliteIcon,
+} from "./Boxes.tsx";
 import {
   GenderSlot,
   NumberSlot,
@@ -67,6 +78,12 @@ const ALL_SLOTS: SlotConfig[] = [
     color: "info",
   },
 ];
+
+const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
+  "subjectAdjective",
+  "subjectAdjective2",
+  "modifier",
+]);
 
 export function getActiveSlots(
   transitivity?: Transitivity,
@@ -144,6 +161,7 @@ export function PhraseBuilder({
   onPhraseUpdate,
 }: PhraseBuilderProps) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
+  const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
@@ -220,7 +238,7 @@ export function PhraseBuilder({
       return next;
     });
 
-    // Auto-advance to next empty slot
+    // Auto-advance to next empty slot (only among the main, always-visible slots)
     let slots = visibleSlots;
     if (slot === "verb") {
       slots = getActiveSlots(concept.transitivity, selection.subject?.role, Boolean(selection.subjectAdjective));
@@ -228,16 +246,22 @@ export function PhraseBuilder({
       setActiveSlot(
         subjectEmpty
           ? "subject"
-          : (slots.find((s) => s.key !== "verb" && !selection[s.key])?.key ??
-              null),
+          : (slots.find(
+              (s) =>
+                s.key !== "verb" &&
+                !SATELLITE_SLOT_KEYS.has(s.key) &&
+                !selection[s.key],
+            )?.key ?? null),
       );
     } else if (slot === "subjectAdjective") {
+      // Reveal & focus the chained second adjective.
+      setRevealed((prev) => ({ ...prev, subjectAdjective2: true }));
       setActiveSlot("subjectAdjective2");
     } else {
       const currentIdx = slots.findIndex((s) => s.key === slot);
       const nextSlot = slots
         .slice(currentIdx + 1)
-        .find((s) => !selection[s.key]);
+        .find((s) => !SATELLITE_SLOT_KEYS.has(s.key) && !selection[s.key]);
       if (nextSlot) setActiveSlot(nextSlot.key);
     }
   }
@@ -312,6 +336,152 @@ export function PhraseBuilder({
   const showDirectObjGender = Boolean(selection.directObject?.gendered);
   const showIndirectObjNumber = Boolean(selection.indirectObject);
   const showIndirectObjGender = Boolean(selection.indirectObject?.gendered);
+
+  // Satellite elements (gender / number / polarity / adjective / adverb) are
+  // hidden by default and revealed via the small icons on each main box border.
+  type Satellite = {
+    key: string;
+    parent: SlotKey;
+    label: string;
+    icon: ReactNode;
+    available: boolean;
+    hasValue: boolean;
+    // Human-readable current term, shown in the icon tooltip when collapsed.
+    valueLabel?: string;
+    shown: boolean;
+  };
+  const iconSx = { fontSize: 13 };
+  const subjectRole = selection.subject?.role;
+  const conceptLabel = (c?: Concept) =>
+    c ? (c.role === "pronoun" ? c.description : (c.label ?? c.description)) : undefined;
+  const rawSatellites: Omit<Satellite, "shown">[] = [
+    {
+      key: "subjectAdjective",
+      parent: "subject",
+      label: "Adjective",
+      icon: <BrushIcon sx={iconSx} />,
+      available: subjectRole === "noun",
+      hasValue: Boolean(selection.subjectAdjective),
+      valueLabel: conceptLabel(selection.subjectAdjective),
+    },
+    {
+      key: "subjectAdjective2",
+      parent: "subject",
+      label: "Adjective 2",
+      icon: <BrushIcon sx={iconSx} />,
+      available: subjectRole === "noun" && Boolean(selection.subjectAdjective),
+      hasValue: Boolean(selection.subjectAdjective2),
+      valueLabel: conceptLabel(selection.subjectAdjective2),
+    },
+    {
+      key: "subjectNumber",
+      parent: "subject",
+      label: "Number",
+      icon: <NumbersIcon sx={iconSx} />,
+      available: showSubjectNumber,
+      hasValue: selection.subjectNumber === "plural",
+      valueLabel: "Plural",
+    },
+    {
+      key: "subjectGender",
+      parent: "subject",
+      label: "Gender",
+      icon: <WcIcon sx={iconSx} />,
+      available: showSubjectGender,
+      hasValue: selection.subjectGender === "fem",
+      valueLabel: "Feminine",
+    },
+    {
+      key: "verbNegative",
+      parent: "verb",
+      label: "Polarity",
+      icon: <RemoveCircleOutlineIcon sx={iconSx} />,
+      available: true,
+      hasValue: Boolean(selection.verbNegative),
+      valueLabel: "Negative",
+    },
+    {
+      key: "modifier",
+      parent: "verb",
+      label: "Adverb",
+      icon: <TuneIcon sx={iconSx} />,
+      available: true,
+      hasValue: Boolean(selection.modifier),
+      valueLabel: conceptLabel(selection.modifier),
+    },
+    {
+      key: "directObjectNumber",
+      parent: "directObject",
+      label: "Number",
+      icon: <NumbersIcon sx={iconSx} />,
+      available: showDirectObjNumber,
+      hasValue: selection.directObjectNumber === "plural",
+      valueLabel: "Plural",
+    },
+    {
+      key: "directObjectGender",
+      parent: "directObject",
+      label: "Gender",
+      icon: <WcIcon sx={iconSx} />,
+      available: showDirectObjGender,
+      hasValue: selection.directObjectGender === "fem",
+      valueLabel: "Feminine",
+    },
+    {
+      key: "indirectObjectNumber",
+      parent: "indirectObject",
+      label: "Number",
+      icon: <NumbersIcon sx={iconSx} />,
+      available: showIndirectObjNumber,
+      hasValue: selection.indirectObjectNumber === "plural",
+      valueLabel: "Plural",
+    },
+    {
+      key: "indirectObjectGender",
+      parent: "indirectObject",
+      label: "Gender",
+      icon: <WcIcon sx={iconSx} />,
+      available: showIndirectObjGender,
+      hasValue: selection.indirectObjectGender === "fem",
+      valueLabel: "Feminine",
+    },
+  ];
+  const satellites: Satellite[] = rawSatellites.map((s) => ({
+    ...s,
+    // An explicit toggle wins; otherwise a set satellite auto-expands.
+    shown: s.available && (revealed[s.key] ?? s.hasValue),
+  }));
+  const shownMap: Record<string, boolean> = Object.fromEntries(
+    satellites.map((s) => [s.key, s.shown]),
+  );
+
+  function handleToggleReveal(sat: Satellite) {
+    const willShow = !sat.shown;
+    setRevealed((prev) => ({ ...prev, [sat.key]: willShow }));
+    if (willShow && SATELLITE_SLOT_KEYS.has(sat.key as SlotKey)) {
+      setActiveSlot(sat.key as SlotKey);
+    }
+  }
+
+  // Map each main box to the satellite toggle icons rendered on its border.
+  const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
+  for (const sat of satellites) {
+    if (!sat.available) continue;
+    (satelliteIconsByParent[sat.parent] ??= []).push({
+      key: sat.key,
+      icon: sat.icon,
+      label: sat.label,
+      active: sat.shown,
+      isSet: sat.hasValue,
+      valueLabel: sat.valueLabel,
+      onToggle: () => handleToggleReveal(sat),
+    });
+  }
+
+  // Satellite slots (adjective / adverb) only render when revealed or filled.
+  const renderedSlots = visibleSlots.filter(
+    (s) => !SATELLITE_SLOT_KEYS.has(s.key) || shownMap[s.key],
+  );
 
   const containerRef = useRef<HTMLDivElement>(null);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
@@ -463,44 +633,45 @@ export function PhraseBuilder({
     color: string;
   }> = [];
   if (hasVerb) {
-    for (const slot of visibleSlots) {
+    for (const slot of renderedSlots) {
       if (slot.key === "verb") continue;
       const from =
         slot.key === "subjectAdjective" || slot.key === "subjectAdjective2" ? pos("subject") : pos("verb");
       edges.push({ from, to: pos(slot.key), color: MUI_COLOR_HEX[slot.color] });
     }
-    edges.push({ from: pos("verb"), to: pos("verbNegative"), color: MUI_COLOR_HEX.secondary });
-    if (showSubjectNumber)
+    if (shownMap.verbNegative)
+      edges.push({ from: pos("verb"), to: pos("verbNegative"), color: MUI_COLOR_HEX.secondary });
+    if (shownMap.subjectNumber)
       edges.push({
         from: pos("subject"),
         to: pos("subjectNumber"),
         color: "#888",
       });
-    if (showSubjectGender)
+    if (shownMap.subjectGender)
       edges.push({
         from: pos("subject"),
         to: pos("subjectGender"),
         color: "#888",
       });
-    if (showDirectObjNumber)
+    if (shownMap.directObjectNumber)
       edges.push({
         from: pos("directObject"),
         to: pos("directObjectNumber"),
         color: MUI_COLOR_HEX.success,
       });
-    if (showDirectObjGender)
+    if (shownMap.directObjectGender)
       edges.push({
         from: pos("directObject"),
         to: pos("directObjectGender"),
         color: MUI_COLOR_HEX.success,
       });
-    if (showIndirectObjNumber)
+    if (shownMap.indirectObjectNumber)
       edges.push({
         from: pos("indirectObject"),
         to: pos("indirectObjectNumber"),
         color: MUI_COLOR_HEX.warning,
       });
-    if (showIndirectObjGender)
+    if (shownMap.indirectObjectGender)
       edges.push({
         from: pos("indirectObject"),
         to: pos("indirectObjectGender"),
@@ -532,15 +703,11 @@ export function PhraseBuilder({
         label: "Subject",
         color: MUI_COLOR_HEX.primary,
         nodeKeys: [
-          ...(visibleSlots.some((s) => s.key === "subjectAdjective")
-            ? ["subjectAdjective"]
-            : []),
-          ...(visibleSlots.some((s) => s.key === "subjectAdjective2")
-            ? ["subjectAdjective2"]
-            : []),
+          ...(shownMap.subjectAdjective ? ["subjectAdjective"] : []),
+          ...(shownMap.subjectAdjective2 ? ["subjectAdjective2"] : []),
           "subject",
-          ...(showSubjectNumber ? ["subjectNumber"] : []),
-          ...(showSubjectGender ? ["subjectGender"] : []),
+          ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
+          ...(shownMap.subjectGender ? ["subjectGender"] : []),
         ],
       },
       {
@@ -548,10 +715,8 @@ export function PhraseBuilder({
         color: MUI_COLOR_HEX.secondary,
         nodeKeys: [
           "verb",
-          "verbNegative",
-          ...(visibleSlots.some((s) => s.key === "modifier")
-            ? ["modifier"]
-            : []),
+          ...(shownMap.verbNegative ? ["verbNegative"] : []),
+          ...(shownMap.modifier ? ["modifier"] : []),
         ],
       },
       ...(visibleSlots.some((s) => s.key === "directObject")
@@ -561,8 +726,8 @@ export function PhraseBuilder({
               color: MUI_COLOR_HEX.success,
               nodeKeys: [
                 "directObject",
-                ...(showDirectObjNumber ? ["directObjectNumber"] : []),
-                ...(showDirectObjGender ? ["directObjectGender"] : []),
+                ...(shownMap.directObjectNumber ? ["directObjectNumber"] : []),
+                ...(shownMap.directObjectGender ? ["directObjectGender"] : []),
               ],
             },
           ]
@@ -574,8 +739,8 @@ export function PhraseBuilder({
               color: MUI_COLOR_HEX.warning,
               nodeKeys: [
                 "indirectObject",
-                ...(showIndirectObjNumber ? ["indirectObjectNumber"] : []),
-                ...(showIndirectObjGender ? ["indirectObjectGender"] : []),
+                ...(shownMap.indirectObjectNumber ? ["indirectObjectNumber"] : []),
+                ...(shownMap.indirectObjectGender ? ["indirectObjectGender"] : []),
               ],
             },
           ]
@@ -732,7 +897,7 @@ export function PhraseBuilder({
                   ))}
                 </Box>
 
-                {visibleSlots.map((slot, idx) => (
+                {renderedSlots.map((slot, idx) => (
                   <Box
                     key={slot.key}
                     {...makeDragProps(slot.key, () => handleSlotClick(slot.key))}
@@ -755,8 +920,8 @@ export function PhraseBuilder({
                       if (dir === null) return;
                       e.preventDefault();
                       const nextIdx =
-                        (idx + dir + visibleSlots.length) % visibleSlots.length;
-                      const nextKey = visibleSlots[nextIdx].key;
+                        (idx + dir + renderedSlots.length) % renderedSlots.length;
+                      const nextKey = renderedSlots[nextIdx].key;
                       handleSlotClick(nextKey);
                       slotEls.current.get(nextKey)?.focus();
                     }}
@@ -766,6 +931,7 @@ export function PhraseBuilder({
                       concept={selection[slot.key]}
                       isActive={activeSlot === slot.key}
                       onClear={() => handleClear(slot.key)}
+                      satellites={satelliteIconsByParent[slot.key]}
                       emptyContent={
                         slot.key === "verb" &&
                         activeSlot === "verb" &&
@@ -815,7 +981,7 @@ export function PhraseBuilder({
                   </Box>
                 ))}
 
-                {showSubjectNumber && (
+                {shownMap.subjectNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("subject"), () =>
                       handleToggleNumber("subject"),
@@ -826,7 +992,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                {showSubjectGender && (
+                {shownMap.subjectGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("subject"), () =>
                       handleToggleGender("subject"),
@@ -837,7 +1003,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                {showDirectObjNumber && (
+                {shownMap.directObjectNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("directObject"), () =>
                       handleToggleNumber("directObject"),
@@ -848,7 +1014,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                {showDirectObjGender && (
+                {shownMap.directObjectGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("directObject"), () =>
                       handleToggleGender("directObject"),
@@ -859,7 +1025,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                {showIndirectObjNumber && (
+                {shownMap.indirectObjectNumber && (
                   <Box
                     {...makeDragProps(NUMBER_TOGGLE_KEY("indirectObject"), () =>
                       handleToggleNumber("indirectObject"),
@@ -870,7 +1036,7 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                {showIndirectObjGender && (
+                {shownMap.indirectObjectGender && (
                   <Box
                     {...makeDragProps(GENDER_TOGGLE_KEY("indirectObject"), () =>
                       handleToggleGender("indirectObject"),
@@ -881,9 +1047,11 @@ export function PhraseBuilder({
                     />
                   </Box>
                 )}
-                <Box {...makeDragProps("verbNegative", handleToggleNegative)}>
-                  <NegativeToggleBox value={selection.verbNegative ?? false} />
-                </Box>
+                {shownMap.verbNegative && (
+                  <Box {...makeDragProps("verbNegative", handleToggleNegative)}>
+                    <NegativeToggleBox value={selection.verbNegative ?? false} />
+                  </Box>
+                )}
               </Box>
 
               {/* Resize strip */}
