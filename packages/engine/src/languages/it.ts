@@ -1,4 +1,5 @@
-import type { LanguageEngine, ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
+import { adjString, pathSpecifier, type ConceptForms, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -25,6 +26,28 @@ function datPrep(forms: Record<string, string>, plural = false): string {
   return `a ${art}`;
 }
 
+/**
+ * Generic Italian simple-preposition + definite-article fusion for "a" (to),
+ * "da" (from) and "in" (in): al/dal/nel, allo/dallo/nello, alla/dalla/nella, …
+ */
+function prepArt(prep: 'a' | 'da' | 'in', forms: Record<string, string>, plural = false): string {
+  const art = defArticle(forms, plural);
+  const word = (plural ? forms['plural'] : forms['base']) ?? '';
+  const vowelStart = /^[aeiouàèéìòù]/i.test(word);
+  const prefix = prep === 'a' ? 'a' : prep === 'da' ? 'da' : 'ne';
+  let suffix: string;
+  switch (art) {
+    case 'il':  suffix = 'l'; break;
+    case 'lo':  suffix = 'llo'; break;
+    case 'la':  suffix = vowelStart ? "ll'" : 'lla'; break;
+    case 'i':   suffix = 'i'; break;
+    case 'gli': suffix = 'gli'; break;
+    case 'le':  suffix = 'lle'; break;
+    default:    return `${prep} ${art}`;
+  }
+  return prefix + suffix;
+}
+
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
@@ -40,11 +63,12 @@ function nounPhrase(forms: Record<string, string>, adj?: string): string {
   return `${defArticle(forms, plural)} ${word}${a}`;
 }
 
-function indirectNounPhrase(forms: Record<string, string>): string {
+function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  return `${datPrep(forms, plural)} ${word}`;
+  const a = adj ? ` ${adj}` : '';
+  return `${datPrep(forms, plural)} ${word}${a}`;
 }
 
 function subjectPhrase(forms: Record<string, string>, adj?: string): string {
@@ -55,22 +79,63 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
   return nounPhrase(forms, adj); // noun — definite article
 }
 
+/** route path relation → preposition (+ "a"-fusion for those that govern "a"). */
+function routeHead(c: ConceptForms, plural: boolean): string {
+  const art = defArticle(c.forms, plural);
+  switch (pathSpecifier(c)) {
+    case 'under':       return `sotto ${art}`;
+    case 'over':        return `sopra ${art}`;
+    case 'around':      return `intorno ${datPrep(c.forms, plural)}`;
+    case 'behind':      return `dietro ${art}`;
+    case 'in_front_of': return `davanti ${datPrep(c.forms, plural)}`;
+    case 'through':
+    default:            return `attraverso ${art}`;
+  }
+}
+
+function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptForms>>): string {
+  if (!complements) return '';
+  return COMPLEMENT_RENDER_ORDER
+    .map((type) => {
+      const c = complements[type];
+      if (!c) return '';
+      const plural = (c.forms['number'] ?? c.forms['count']) === 'plural';
+      const word = plural ? (c.forms['plural'] ?? c.forms['base'] ?? '') : (c.forms['base'] ?? '');
+      // locative→in, direction→a, source→da (fuse with article); route→path preposition
+      const head =
+        type === 'locative'  ? prepArt('in', c.forms, plural) :
+        type === 'direction' ? prepArt('a', c.forms, plural) :
+        type === 'source'    ? prepArt('da', c.forms, plural) :
+        routeHead(c, plural);
+      return `${head} ${word}`;
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
 export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
-    const { subject, subjectAdjective, verb, verbNegative, directObject, indirectObject, modifier } = phrase;
+    const { subject, subjectAdjective, subjectAdjective2, verb, verbNegative,
+      directObject, directObjectAdjective, directObjectAdjective2,
+      indirectObject, indirectObjectAdjective, indirectObjectAdjective2, modifier } = phrase;
 
-    const subjectText = subjectPhrase(subject.forms, subjectAdjective?.forms['base']);
+    const subjectText = subjectPhrase(subject.forms, adjString(subjectAdjective, subjectAdjective2));
     const verbText = conjugate(verb.forms, subject.forms);
     // "mai" always requires "non": "io non bevo mai" even without verbNegative
     const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
     const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
-    const directObjectText = directObject ? nounPhrase(directObject.forms) : '';
+    const directObjectText = directObject
+      ? nounPhrase(directObject.forms, adjString(directObjectAdjective, directObjectAdjective2))
+      : '';
     // S [non] V Adv DirectObj IndirectObj(a+article)
-    const indirectObjectText = indirectObject ? indirectNounPhrase(indirectObject.forms) : '';
+    const indirectObjectText = indirectObject
+      ? indirectNounPhrase(indirectObject.forms, adjString(indirectObjectAdjective, indirectObjectAdjective2))
+      : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+    const complementsText = complementsPhrase(phrase.complements);
 
-    return [subjectText, negText, verbText, modifierText, directObjectText, indirectObjectText]
+    return [subjectText, negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
       .filter(Boolean)
       .join(' ')
       .trim();

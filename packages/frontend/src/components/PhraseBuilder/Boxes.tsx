@@ -10,6 +10,9 @@ export interface SatelliteIcon {
   label: string;
   active: boolean;
   isSet: boolean;
+  // valued = always carries a value (number / gender / polarity); its icon reads
+  // as colored even at the default, and its tooltip always shows the current value.
+  valued: boolean;
   valueLabel?: string;
   onToggle: () => void;
 }
@@ -129,53 +132,70 @@ export function SlotBox({
             bottom: -11,
             left: "50%",
             transform: "translateX(-50%)",
-            display: "flex",
-            gap: 0.5,
             zIndex: 2,
           }}
         >
-          {satellites.map((sat) => {
-            // Three states: expanded (active), collapsed-but-set, collapsed-empty.
-            const collapsedSet = !sat.active && sat.isSet;
-            const tooltip = collapsedSet
-              ? `${sat.label}: ${sat.valueLabel ?? "set"}`
-              : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
-            return (
-              <Tooltip key={sat.key} title={tooltip}>
-                <IconButton
-                  size="small"
-                  onPointerDown={(e) => e.stopPropagation()}
-                  onClick={sat.onToggle}
-                  sx={{
-                    width: 20,
-                    height: 20,
-                    p: 0,
-                    // Set → solid color fill; expanded-empty → colored outline;
-                    // collapsed-empty → neutral. (No `.50` shade exists in the theme.)
-                    bgcolor: sat.isSet ? `${slot.color}.main` : "background.paper",
-                    color: sat.isSet
-                      ? "common.white"
-                      : sat.active
-                        ? `${slot.color}.main`
-                        : "text.secondary",
-                    border: "1px solid",
-                    borderColor:
-                      sat.isSet || sat.active ? `${slot.color}.main` : "divider",
-                    transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
-                    "&:hover": {
-                      bgcolor: sat.isSet ? `${slot.color}.dark` : "action.hover",
-                      borderColor: `${slot.color}.main`,
-                      color: sat.isSet ? "common.white" : `${slot.color}.main`,
-                    },
-                  }}
-                >
-                  {sat.icon}
-                </IconButton>
-              </Tooltip>
-            );
-          })}
+          <SatelliteRow satellites={satellites} color={slot.color} />
         </Box>
       )}
+    </Box>
+  );
+}
+
+// A horizontal row of satellite toggle icons. Rendered on the border of a slot
+// box (via SlotBox) or overlaid on a dotted role-group box (complement toggles).
+export function SatelliteRow({
+  satellites,
+  color,
+}: {
+  satellites: SatelliteIcon[];
+  color: SlotConfig["color"];
+}) {
+  return (
+    <Box sx={{ display: "flex", gap: 0.5 }}>
+      {satellites.map((sat) => {
+        // Color tiers:
+        //  • solid  → carries a non-default value (plural / fem / negative / a chosen word)
+        //  • outlined → expanded, or an always-valued satellite at its default (number/gender/polarity)
+        //  • neutral → a collapsed, genuinely-empty satellite (adjective / adverb)
+        const solid = sat.isSet;
+        const outlined = !solid && (sat.active || sat.valued);
+        // Always-valued (and set) satellites show their current value; empties prompt Show/Hide.
+        const tooltip =
+          !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
+            ? `${sat.label}: ${sat.valueLabel}`
+            : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
+        return (
+          <Tooltip key={sat.key} title={tooltip}>
+            <IconButton
+              size="small"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={sat.onToggle}
+              sx={{
+                width: 20,
+                height: 20,
+                p: 0,
+                bgcolor: solid ? `${color}.main` : "background.paper",
+                color: solid
+                  ? "common.white"
+                  : outlined
+                    ? `${color}.main`
+                    : "text.secondary",
+                border: "1px solid",
+                borderColor: solid || outlined ? `${color}.main` : "divider",
+                transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
+                "&:hover": {
+                  bgcolor: solid ? `${color}.dark` : "action.hover",
+                  borderColor: `${color}.main`,
+                  color: solid ? "common.white" : `${color}.main`,
+                },
+              }}
+            >
+              {sat.icon}
+            </IconButton>
+          </Tooltip>
+        );
+      })}
     </Box>
   );
 }
@@ -239,6 +259,10 @@ export function NumberToggleBox({ value }: { value: "singular" | "plural" }) {
 
 export function GenderToggleBox({ value }: { value: "masc" | "fem" }) {
   return <ToggleBox label="Gender" value={value === "masc" ? "Masc" : "Fem"} />;
+}
+
+export function SpecifierToggleBox({ label }: { label: string }) {
+  return <ToggleBox label="Path" value={label} />;
 }
 
 export function NegativeToggleBox({ value }: { value: boolean }) {

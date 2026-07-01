@@ -9,6 +9,7 @@ interface ConceptSeed {
   description: string;
   emoji?: string;
   transitivity?: string; // only for verbs
+  complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
 
@@ -154,6 +155,21 @@ const concepts: ConceptSeed[] = [
       es: { base: 'casa', plural: 'casas', gender: 'fem', count: 'singular' },
       ja: { base: '家', count: 'singular' },
       pt: { base: 'casa', plural: 'casas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'HOME',
+    role: 'noun',
+    description: 'the place where one lives',
+    emoji: '🏡',
+    forms: {
+      en: { base: 'home', plural: 'homes', count: 'singular' },
+      it: { base: 'casa', plural: 'case', gender: 'fem', count: 'singular' },
+      fr: { base: 'foyer', plural: 'foyers', gender: 'masc', count: 'singular' },
+      de: { base: 'Zuhause', plural: 'Zuhause', gender: 'neut', count: 'singular' },
+      es: { base: 'hogar', plural: 'hogares', gender: 'masc', count: 'singular' },
+      ja: { base: '家', count: 'singular' },
+      pt: { base: 'lar', plural: 'lares', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -493,6 +509,7 @@ const concepts: ConceptSeed[] = [
     id: 'JUMP',
     role: 'verb',
     transitivity: 'intransitive',
+    complements: ['locative', 'direction', 'source', 'route'],
     description: 'to propel oneself into the air',
     emoji: '🦘',
     forms: {
@@ -660,6 +677,52 @@ const concepts: ConceptSeed[] = [
         base: 'enviar',
         '1sg_present': 'envio', '2sg_present': 'envia', '3sg_present': 'envia',
         '1pl_present': 'enviamos', '2pl_present': 'enviam', '3pl_present': 'enviam',
+      },
+    },
+  },
+
+  // ── MOTION VERBS (license locative / direction / source / route) ──
+  {
+    id: 'GO',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['locative', 'direction', 'source', 'route'],
+    description: 'to move or travel from one place to another',
+    emoji: '🚶',
+    forms: {
+      en: {
+        base: 'go',
+        '1sg_present': 'go', '2sg_present': 'go', '3sg_present': 'goes',
+        '1pl_present': 'go', '2pl_present': 'go', '3pl_present': 'go',
+      },
+      it: {
+        base: 'andare',
+        '1sg_present': 'vado', '2sg_present': 'vai', '3sg_present': 'va',
+        '1pl_present': 'andiamo', '2pl_present': 'andate', '3pl_present': 'vanno',
+      },
+      fr: {
+        base: 'aller',
+        '1sg_present': 'vais', '2sg_present': 'vas', '3sg_present': 'va',
+        '1pl_present': 'allons', '2pl_present': 'allez', '3pl_present': 'vont',
+      },
+      de: {
+        base: 'gehen',
+        '1sg_present': 'gehe', '2sg_present': 'gehst', '3sg_present': 'geht',
+        '1pl_present': 'gehen', '2pl_present': 'geht', '3pl_present': 'gehen',
+      },
+      es: {
+        base: 'ir',
+        '1sg_present': 'voy', '2sg_present': 'vas', '3sg_present': 'va',
+        '1pl_present': 'vamos', '2pl_present': 'vais', '3pl_present': 'van',
+      },
+      ja: {
+        base: '行く',
+        masu_present: '行きます',
+      },
+      pt: {
+        base: 'ir',
+        '1sg_present': 'vou', '2sg_present': 'vai', '3sg_present': 'vai',
+        '1pl_present': 'vamos', '2pl_present': 'vão', '3pl_present': 'vão',
       },
     },
   },
@@ -1080,8 +1143,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity) VALUES (?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements) VALUES (?, ?, ?, ?, ?, ?)'
     ),
   };
 
@@ -1103,7 +1166,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

@@ -1,4 +1,4 @@
-import type { LexicalEntry, PhrasePlan, Translation } from '@signi/shared';
+import type { ComplementType, LexicalEntry, PhrasePlan, Translation } from '@signi/shared';
 import type { LanguageEngine, ResolvedPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -71,13 +71,38 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
       applyNounGender(indirectObjectForms.forms, plan.indirectObjectGender);
     }
 
+    const adj = (id?: string) => (id ? resolve(id, engine.language, lookup) : undefined);
+
+    // Complement noun phrases (locative / direction / source / route). Each is a
+    // noun resolved with its own number + gender, exactly like an object.
+    let complements: Partial<Record<ComplementType, ConceptForms>> | undefined;
+    if (plan.complements) {
+      complements = {};
+      for (const [type, value] of Object.entries(plan.complements)) {
+        if (!value?.concept) continue;
+        const forms = resolve(value.concept, engine.language, lookup);
+        const num = value.number ?? 'singular';
+        forms.forms['number'] = (num === 'plural' && !forms.forms['plural']) ? 'singular' : num;
+        applyNounGender(forms.forms, value.gender);
+        // Carry the path relation (through / under / over / …) for the route engine.
+        if (value.specifier) forms.forms['specifier'] = value.specifier;
+        complements[type as ComplementType] = forms;
+      }
+    }
+
     const resolved: ResolvedPhrase = {
       subject: subjectForms,
-      subjectAdjective: plan.subjectAdjective ? resolve(plan.subjectAdjective, engine.language, lookup) : undefined,
+      subjectAdjective: adj(plan.subjectAdjective),
+      subjectAdjective2: adj(plan.subjectAdjective2),
       verb: resolve(plan.verb, engine.language, lookup),
       verbNegative: plan.verbNegative,
       directObject: directObjectForms,
+      directObjectAdjective: adj(plan.directObjectAdjective),
+      directObjectAdjective2: adj(plan.directObjectAdjective2),
       indirectObject: indirectObjectForms,
+      indirectObjectAdjective: adj(plan.indirectObjectAdjective),
+      indirectObjectAdjective2: adj(plan.indirectObjectAdjective2),
+      complements,
       modifier: plan.modifier ? resolve(plan.modifier, engine.language, lookup) : undefined,
     };
     return {

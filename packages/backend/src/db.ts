@@ -25,7 +25,8 @@ function initSchema(db: Database.Database): void {
       role         TEXT NOT NULL CHECK (role IN ('pronoun','noun','verb','adjective','adverb')),
       description  TEXT NOT NULL,
       emoji        TEXT,
-      transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL)
+      transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL),
+      complements  TEXT   -- comma-separated ComplementType list (e.g. 'locative,direction'), NULL if none
     );
 
     -- ── Per-type lexeme tables ─────────────────────────────────────────
@@ -213,4 +214,13 @@ function initSchema(db: Database.Database): void {
     CREATE INDEX IF NOT EXISTS idx_adjective_forms_lexeme ON adjective_forms (lexeme_id);
     CREATE INDEX IF NOT EXISTS idx_adverb_forms_lexeme    ON adverb_forms    (lexeme_id);
   `);
+
+  // ── Migrations for databases created before a column existed ──────────
+  const conceptCols = db
+    .prepare<[], { name: string }>("PRAGMA table_info(semantic_concepts)")
+    .all()
+    .map((c) => c.name);
+  if (!conceptCols.includes('complements')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN complements TEXT');
+  }
 }

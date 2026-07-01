@@ -5,7 +5,8 @@ import {
   Typography,
   Alert,
 } from "@mui/material";
-import type { PhrasePlan } from "@signi/shared";
+import type { ComplementValue, PhrasePlan } from "@signi/shared";
+import { COMPLEMENT_TYPES } from "@signi/shared";
 import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
 import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
@@ -19,6 +20,18 @@ export default function App() {
   });
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
+  const complements: Partial<Record<(typeof COMPLEMENT_TYPES)[number], ComplementValue>> = {};
+  for (const type of COMPLEMENT_TYPES) {
+    const concept = selection[type];
+    if (!concept) continue;
+    complements[type] = {
+      concept: concept.id,
+      number: selection[`${type}Number`],
+      gender: selection[`${type}Gender`],
+      specifier: type === "route" ? selection.routeSpecifier : undefined,
+    };
+  }
+
   const plan: Partial<PhrasePlan> = {
     subject: selection.subject?.id,
     subjectNumber: selection.subjectNumber,
@@ -30,10 +43,15 @@ export default function App() {
     directObject: selection.directObject?.id,
     directObjectNumber: selection.directObjectNumber,
     directObjectGender: selection.directObjectGender,
+    directObjectAdjective: selection.directObjectAdjective?.id,
+    directObjectAdjective2: selection.directObjectAdjective2?.id,
     indirectObject: selection.indirectObject?.id,
     indirectObjectNumber: selection.indirectObjectNumber,
     indirectObjectGender: selection.indirectObjectGender,
+    indirectObjectAdjective: selection.indirectObjectAdjective?.id,
+    indirectObjectAdjective2: selection.indirectObjectAdjective2?.id,
     modifier: selection.modifier?.id,
+    complements: Object.keys(complements).length > 0 ? complements : undefined,
   };
 
   const { data: translations, isLoading, isError } = useTranslation(plan);

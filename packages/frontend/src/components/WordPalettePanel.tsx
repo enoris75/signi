@@ -1,7 +1,7 @@
 import { Paper, Typography, Divider } from "@mui/material";
 import type { Concept, GrammaticalRole, Transitivity } from "@signi/shared";
 import ConceptPalette from "./ConceptPalette.tsx";
-import { getActiveSlots } from "./PhraseBuilder/PhraseBuilder.tsx";
+import { getActiveSlots } from "./PhraseBuilder/slots.ts";
 import { type SlotConfig } from "./PhraseBuilder/interfaces.ts";
 
 interface Props {
