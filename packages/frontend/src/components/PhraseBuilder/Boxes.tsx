@@ -1,6 +1,17 @@
 import { Box, Paper, Typography, Tooltip, IconButton } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
-import { Concept } from "@signi/shared";
+import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
+import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
+import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
+import LoopIcon from "@mui/icons-material/Loop";
+import FlipToBackIcon from "@mui/icons-material/FlipToBack";
+import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
+import {
+  Concept,
+  PATH_SPECIFIERS,
+  PATH_SPECIFIER_LABELS,
+  type PathSpecifier,
+} from "@signi/shared";
 import { ReactNode } from "react";
 import { SlotConfig } from "./interfaces";
 
@@ -261,8 +272,66 @@ export function GenderToggleBox({ value }: { value: "masc" | "fem" }) {
   return <ToggleBox label="Gender" value={value === "masc" ? "Masc" : "Fem"} />;
 }
 
-export function SpecifierToggleBox({ label }: { label: string }) {
-  return <ToggleBox label="Path" value={label} />;
+const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
+  through: <DoubleArrowIcon sx={{ fontSize: 15 }} />,
+  under: <VerticalAlignBottomIcon sx={{ fontSize: 15 }} />,
+  over: <VerticalAlignTopIcon sx={{ fontSize: 15 }} />,
+  around: <LoopIcon sx={{ fontSize: 15 }} />,
+  behind: <FlipToBackIcon sx={{ fontSize: 15 }} />,
+  in_front_of: <FlipToFrontIcon sx={{ fontSize: 15 }} />,
+};
+
+// A toolbar of path relations for the route complement — one selectable icon per
+// specifier, the active one highlighted. Rendered on top of the route dotted box.
+export function SpecifierSelector({
+  value,
+  onSelect,
+}: {
+  value: PathSpecifier;
+  onSelect: (s: PathSpecifier) => void;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 0.25,
+        p: 0.25,
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1.5,
+        boxShadow: 1,
+      }}
+    >
+      {PATH_SPECIFIERS.map((s) => {
+        const selected = s === value;
+        return (
+          <Tooltip key={s} title={PATH_SPECIFIER_LABELS[s]}>
+            <IconButton
+              size="small"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onSelect(s)}
+              sx={{
+                width: 22,
+                height: 22,
+                p: 0,
+                borderRadius: 1,
+                bgcolor: selected ? "warning.main" : "transparent",
+                color: selected ? "common.white" : "text.secondary",
+                transition: "background-color 0.15s, color 0.15s",
+                "&:hover": {
+                  bgcolor: selected ? "warning.dark" : "action.hover",
+                  color: selected ? "common.white" : "warning.main",
+                },
+              }}
+            >
+              {SPECIFIER_ICONS[s]}
+            </IconButton>
+          </Tooltip>
+        );
+      })}
+    </Box>
+  );
 }
 
 export function NegativeToggleBox({ value }: { value: boolean }) {

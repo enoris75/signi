@@ -11,9 +11,9 @@ import ClearIcon from "@mui/icons-material/Clear";
 import {
   COMPLEMENT_TYPES,
   PATH_SPECIFIERS,
-  PATH_SPECIFIER_LABELS,
   type Concept,
   type ComplementType,
+  type PathSpecifier,
 } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
@@ -23,7 +23,7 @@ import {
   NumberToggleBox,
   GenderToggleBox,
   NegativeToggleBox,
-  SpecifierToggleBox,
+  SpecifierSelector,
   type SatelliteIcon,
 } from "./Boxes.tsx";
 import {
@@ -171,16 +171,9 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
   }
 
-  // Cycle the route complement's path relation (through → under → over → …).
-  function handleCycleSpecifier() {
-    onPhraseUpdate((prev) => {
-      const current = prev.routeSpecifier ?? PATH_SPECIFIERS[0];
-      const next =
-        PATH_SPECIFIERS[
-          (PATH_SPECIFIERS.indexOf(current) + 1) % PATH_SPECIFIERS.length
-        ];
-      return { ...prev, routeSpecifier: next };
-    });
+  // Set the route complement's path relation (through / under / over / …).
+  function handleSelectSpecifier(spec: PathSpecifier) {
+    onPhraseUpdate((prev) => ({ ...prev, routeSpecifier: spec }));
   }
 
   const { satellites, shownMap } = buildSatellites(selection, revealed);
@@ -198,8 +191,6 @@ export function PhraseBuilder({
   // rendered on the Verb Phrase dotted box instead of the verb box itself.
   const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
   const complementToggleIcons: SatelliteIcon[] = [];
-  // The route path specifier rides the route dotted box, not the route slot box.
-  let routeSpecifierIcon: SatelliteIcon | null = null;
   for (const sat of satellites) {
     if (!sat.available) continue;
     const iconEntry: SatelliteIcon = {
@@ -214,8 +205,6 @@ export function PhraseBuilder({
     };
     if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
       complementToggleIcons.push(iconEntry);
-    } else if (sat.key === "routeSpecifier") {
-      routeSpecifierIcon = iconEntry;
     } else {
       (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
     }
@@ -715,22 +704,6 @@ export function PhraseBuilder({
                           />
                         </Box>
                       )}
-                      {type === "route" && shownMap.routeSpecifier && (
-                        <Box
-                          {...makeDragProps(
-                            "routeSpecifier",
-                            handleCycleSpecifier,
-                          )}
-                        >
-                          <SpecifierToggleBox
-                            label={
-                              PATH_SPECIFIER_LABELS[
-                                selection.routeSpecifier ?? PATH_SPECIFIERS[0]
-                              ]
-                            }
-                          />
-                        </Box>
-                      )}
                     </React.Fragment>
                   ))}
 
@@ -760,9 +733,9 @@ export function PhraseBuilder({
                       );
                     })()}
 
-                  {/* Path specifier toggle rides the top edge of the Route
-                      dotted box. */}
-                  {routeSpecifierIcon &&
+                  {/* Path-relation toolbar rides the top edge of the Route
+                      dotted box — one selectable icon per specifier. */}
+                  {selection.route &&
                     (() => {
                       const rr = groupRects.find((g) => g.removeKey === "route");
                       if (!rr) return null;
@@ -776,9 +749,9 @@ export function PhraseBuilder({
                             zIndex: 3,
                           }}
                         >
-                          <SatelliteRow
-                            satellites={[routeSpecifierIcon]}
-                            color="warning"
+                          <SpecifierSelector
+                            value={selection.routeSpecifier ?? PATH_SPECIFIERS[0]}
+                            onSelect={handleSelectSpecifier}
                           />
                         </Box>
                       );

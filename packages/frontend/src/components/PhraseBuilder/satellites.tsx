@@ -8,12 +8,9 @@ import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RouteIcon from "@mui/icons-material/Route";
-import AltRouteIcon from "@mui/icons-material/AltRoute";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
-  PATH_SPECIFIERS,
-  PATH_SPECIFIER_LABELS,
   type Concept,
   type ComplementType,
 } from "@signi/shared";
@@ -256,28 +253,6 @@ export function buildSatellites(
           alwaysSet: true,
           valueLabel: gen === "fem" ? "Feminine" : "Masculine",
         },
-        // Only the route (path) complement carries a spatial specifier; its
-        // toggle rides the route dotted box (see PhraseBuilder).
-        ...(type === "route"
-          ? [
-              {
-                key: "routeSpecifier",
-                parent: "route" as SlotKey,
-                label: "Path",
-                icon: <AltRouteIcon sx={iconSx} />,
-                available: Boolean(concept),
-                hasValue: Boolean(
-                  selection.routeSpecifier &&
-                    selection.routeSpecifier !== PATH_SPECIFIERS[0],
-                ),
-                alwaysSet: true,
-                valueLabel:
-                  PATH_SPECIFIER_LABELS[
-                    selection.routeSpecifier ?? PATH_SPECIFIERS[0]
-                  ],
-              },
-            ]
-          : []),
       ];
     }),
   ];

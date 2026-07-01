@@ -192,7 +192,6 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   directionGender: { x: 28, y: 84 },
   routeNumber: NUMBER_TOGGLE_DEFAULTS.route,
   routeGender: { x: 74, y: 84 },
-  routeSpecifier: { x: 54, y: 99 },
   locativeNumber: NUMBER_TOGGLE_DEFAULTS.locative,
   locativeGender: { x: 96, y: 80 },
 };
