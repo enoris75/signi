@@ -1,31 +1,14 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import {
-  Box,
-  Paper,
-  Typography,
-  Divider,
-  Tooltip,
-  IconButton,
-} from "@mui/material";
-import ClearIcon from "@mui/icons-material/Clear";
+import { Box, Paper, Typography, Divider } from "@mui/material";
 import {
   COMPLEMENT_TYPES,
-  PATH_SPECIFIERS,
   type Concept,
   type ComplementType,
   type PathSpecifier,
 } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
-import {
-  SlotBox,
-  SatelliteRow,
-  NumberToggleBox,
-  GenderToggleBox,
-  NegativeToggleBox,
-  SpecifierSelector,
-  type SatelliteIcon,
-} from "./Boxes.tsx";
+import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
   GenderSlot,
   NumberSlot,
@@ -37,8 +20,6 @@ import {
   COMPLEMENT_KEY_SET,
   SATELLITE_SLOT_KEYS,
   getActiveSlots,
-  NUMBER_TOGGLE_KEY,
-  GENDER_TOGGLE_KEY,
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
@@ -46,7 +27,11 @@ import {
 import { applyConceptSelect, applyClear } from "./phraseReducers.ts";
 import { buildSatellites, type Satellite } from "./satellites.tsx";
 import { buildGraph } from "./graph.ts";
-import { slotTypeahead } from "./SlotTypeahead.tsx";
+import { type PhraseRenderContext } from "./phraseRender.tsx";
+import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
+import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
+import { PhraseGraphLayer } from "./PhraseGraphLayer.tsx";
+import { ComplementRemoveButtons } from "./ComplementRemoveButtons.tsx";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -365,6 +350,27 @@ export function PhraseBuilder({
     svgSize,
   });
 
+  // Shared bag passed to the verb/noun phrase builders — they all paint onto the
+  // same canvas below and lean on this component's drag machinery and handlers.
+  const ctx: PhraseRenderContext = {
+    selection,
+    activeSlot,
+    renderedSlots,
+    shownMap,
+    satelliteIconsByParent,
+    complementToggleIcons,
+    groupRects,
+    makeDragProps,
+    slotEls,
+    handleSlotClick,
+    handleConceptSelect,
+    handleClear,
+    handleToggleNumber,
+    handleToggleGender,
+    handleToggleNegative,
+    handleSelectSpecifier,
+  };
+
   return (
     <Box
       sx={{
@@ -448,314 +454,34 @@ export function PhraseBuilder({
                     touchAction: "none",
                   }}
                 >
-                  <Box
-                    component="svg"
-                    sx={{
-                      position: "absolute",
-                      inset: 0,
-                      width: "100%",
-                      height: "100%",
-                    }}
-                    viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
-                  >
-                    {groupRects.map((g) => (
-                      <rect
-                        key={g.label}
-                        x={g.x}
-                        y={g.y}
-                        width={g.width}
-                        height={g.height}
-                        rx="4"
-                        ry="4"
-                        fill="rgba(0,0,0,0.001)"
-                        stroke={g.color}
-                        strokeWidth="1"
-                        strokeOpacity="0.45"
-                        strokeDasharray="8 5"
-                        style={{
-                          cursor:
-                            draggingKey === "__group__" ? "grabbing" : "grab",
-                        }}
-                        onPointerDown={(e) => startGroupDrag(e, g.nodeKeys)}
-                        onPointerMove={moveDrag}
-                        onPointerUp={() => endDrag()}
-                        onPointerCancel={() => endDrag()}
-                      />
-                    ))}
-                    {groupEdges.map((edge, i) => (
-                      <line
-                        key={`group-${i}`}
-                        x1={edge.x1}
-                        y1={edge.y1}
-                        x2={edge.x2}
-                        y2={edge.y2}
-                        stroke={edge.color}
-                        strokeWidth="1.5"
-                        strokeOpacity="0.4"
-                        style={{ pointerEvents: "none" }}
-                      />
-                    ))}
-                    {edges.map((edge, i) => (
-                      <line
-                        key={i}
-                        x1={edge.x1}
-                        y1={edge.y1}
-                        x2={edge.x2}
-                        y2={edge.y2}
-                        stroke={edge.color}
-                        strokeWidth="1"
-                        strokeOpacity="0.25"
-                        strokeDasharray="4 3"
-                        style={{ pointerEvents: "none" }}
-                      />
-                    ))}
-                  </Box>
+                  <PhraseGraphLayer
+                    svgSize={svgSize}
+                    groupRects={groupRects}
+                    groupEdges={groupEdges}
+                    edges={edges}
+                    draggingKey={draggingKey}
+                    onGroupDragStart={startGroupDrag}
+                    onDragMove={moveDrag}
+                    onDragEnd={() => endDrag()}
+                  />
 
                   {/* Remove-complement "x" on each complement dotted box's corner */}
-                  {groupRects
-                    .filter((g) => g.removeKey)
-                    .map((g) => (
-                      <Tooltip
-                        key={`remove-${g.removeKey}`}
-                        title={`Remove ${g.label}`}
-                      >
-                        <IconButton
-                          size="small"
-                          onPointerDown={(e) => e.stopPropagation()}
-                          onClick={() => handleRemoveComplement(g.removeKey!)}
-                          sx={{
-                            position: "absolute",
-                            left: g.x + g.width - 9,
-                            top: g.y - 9,
-                            width: 18,
-                            height: 18,
-                            p: 0,
-                            zIndex: 3,
-                            bgcolor: "background.paper",
-                            border: "1px solid",
-                            borderColor: "divider",
-                            opacity: 0.7,
-                            "&:hover": {
-                              opacity: 1,
-                              bgcolor: "background.paper",
-                            },
-                          }}
-                        >
-                          <ClearIcon sx={{ fontSize: 11 }} />
-                        </IconButton>
-                      </Tooltip>
-                    ))}
+                  <ComplementRemoveButtons
+                    groupRects={groupRects}
+                    onRemove={handleRemoveComplement}
+                  />
 
-                  {renderedSlots.map((slot, idx) => (
-                    <Box
-                      key={slot.key}
-                      {...makeDragProps(slot.key, () =>
-                        handleSlotClick(slot.key),
-                      )}
-                      ref={(el: HTMLElement | null) => {
-                        if (el) slotEls.current.set(slot.key, el);
-                        else slotEls.current.delete(slot.key);
-                      }}
-                      tabIndex={0}
-                      onFocus={() => handleSlotClick(slot.key)}
-                      onKeyDown={(e: React.KeyboardEvent) => {
-                        const isDirectFocus = e.target === e.currentTarget;
-                        let dir: 1 | -1 | null = null;
-                        if (e.key === "Tab") {
-                          dir = e.shiftKey ? -1 : 1;
-                        } else if (isDirectFocus && e.key === "ArrowRight") {
-                          dir = 1;
-                        } else if (isDirectFocus && e.key === "ArrowLeft") {
-                          dir = -1;
-                        }
-                        if (dir === null) return;
-                        e.preventDefault();
-                        const nextIdx =
-                          (idx + dir + renderedSlots.length) %
-                          renderedSlots.length;
-                        const nextKey = renderedSlots[nextIdx].key;
-                        handleSlotClick(nextKey);
-                        slotEls.current.get(nextKey)?.focus();
-                      }}
-                    >
-                      <SlotBox
-                        slot={slot}
-                        concept={selection[slot.key]}
-                        isActive={activeSlot === slot.key}
-                        onClear={() => handleClear(slot.key)}
-                        satellites={satelliteIconsByParent[slot.key]}
-                        emptyContent={slotTypeahead({
-                          slotKey: slot.key,
-                          activeSlot,
-                          selection,
-                          onSelect: handleConceptSelect,
-                        })}
-                      />
-                    </Box>
-                  ))}
-
-                  {shownMap.subjectNumber && (
-                    <Box
-                      {...makeDragProps(NUMBER_TOGGLE_KEY("subject"), () =>
-                        handleToggleNumber("subject"),
-                      )}
-                    >
-                      <NumberToggleBox
-                        value={selection.subjectNumber ?? "singular"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.subjectGender && (
-                    <Box
-                      {...makeDragProps(GENDER_TOGGLE_KEY("subject"), () =>
-                        handleToggleGender("subject"),
-                      )}
-                    >
-                      <GenderToggleBox
-                        value={selection.subjectGender ?? "masc"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.directObjectNumber && (
-                    <Box
-                      {...makeDragProps(NUMBER_TOGGLE_KEY("directObject"), () =>
-                        handleToggleNumber("directObject"),
-                      )}
-                    >
-                      <NumberToggleBox
-                        value={selection.directObjectNumber ?? "singular"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.directObjectGender && (
-                    <Box
-                      {...makeDragProps(GENDER_TOGGLE_KEY("directObject"), () =>
-                        handleToggleGender("directObject"),
-                      )}
-                    >
-                      <GenderToggleBox
-                        value={selection.directObjectGender ?? "masc"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.indirectObjectNumber && (
-                    <Box
-                      {...makeDragProps(
-                        NUMBER_TOGGLE_KEY("indirectObject"),
-                        () => handleToggleNumber("indirectObject"),
-                      )}
-                    >
-                      <NumberToggleBox
-                        value={selection.indirectObjectNumber ?? "singular"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.indirectObjectGender && (
-                    <Box
-                      {...makeDragProps(
-                        GENDER_TOGGLE_KEY("indirectObject"),
-                        () => handleToggleGender("indirectObject"),
-                      )}
-                    >
-                      <GenderToggleBox
-                        value={selection.indirectObjectGender ?? "masc"}
-                      />
-                    </Box>
-                  )}
-                  {shownMap.verbNegative && (
-                    <Box
-                      {...makeDragProps("verbNegative", handleToggleNegative)}
-                    >
-                      <NegativeToggleBox
-                        value={selection.verbNegative ?? false}
-                      />
-                    </Box>
-                  )}
+                  {/* Every constituent paints onto this shared canvas. The
+                      builders self-filter, so mounting one per possible noun /
+                      the verb phrase unconditionally is safe — inactive slots
+                      and toggles render nothing. */}
+                  <NounPhraseBuilder which="subject" ctx={ctx} />
+                  <VerbPhraseBuilder ctx={ctx} />
+                  <NounPhraseBuilder which="directObject" ctx={ctx} />
+                  <NounPhraseBuilder which="indirectObject" ctx={ctx} />
                   {COMPLEMENT_TYPES.map((type) => (
-                    <React.Fragment key={type}>
-                      {shownMap[`${type}Number`] && (
-                        <Box
-                          {...makeDragProps(NUMBER_TOGGLE_KEY(type), () =>
-                            handleToggleNumber(type),
-                          )}
-                        >
-                          <NumberToggleBox
-                            value={
-                              (selection[
-                                `${type}Number` as keyof PhraseSelection
-                              ] as "singular" | "plural" | undefined) ??
-                              "singular"
-                            }
-                          />
-                        </Box>
-                      )}
-                      {shownMap[`${type}Gender`] && (
-                        <Box
-                          {...makeDragProps(GENDER_TOGGLE_KEY(type), () =>
-                            handleToggleGender(type),
-                          )}
-                        >
-                          <GenderToggleBox
-                            value={
-                              (selection[
-                                `${type}Gender` as keyof PhraseSelection
-                              ] as "masc" | "fem" | undefined) ?? "masc"
-                            }
-                          />
-                        </Box>
-                      )}
-                    </React.Fragment>
+                    <NounPhraseBuilder key={type} which={type} ctx={ctx} />
                   ))}
-
-                  {/* Complement toggles ride the bottom edge of the Verb Phrase
-                      dotted box, not the verb box itself. */}
-                  {complementToggleIcons.length > 0 &&
-                    (() => {
-                      const vp = groupRects.find(
-                        (g) => g.label === "Verb Phrase",
-                      );
-                      if (!vp) return null;
-                      return (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            left: vp.x + vp.width / 2,
-                            top: vp.y + vp.height,
-                            transform: "translate(-50%, -50%)",
-                            zIndex: 3,
-                          }}
-                        >
-                          <SatelliteRow
-                            satellites={complementToggleIcons}
-                            color="secondary"
-                          />
-                        </Box>
-                      );
-                    })()}
-
-                  {/* Path-relation toolbar rides the top edge of the Route
-                      dotted box — one selectable icon per specifier. */}
-                  {selection.route &&
-                    (() => {
-                      const rr = groupRects.find((g) => g.removeKey === "route");
-                      if (!rr) return null;
-                      return (
-                        <Box
-                          sx={{
-                            position: "absolute",
-                            left: rr.x + rr.width / 2,
-                            top: rr.y,
-                            transform: "translate(-50%, -50%)",
-                            zIndex: 3,
-                          }}
-                        >
-                          <SpecifierSelector
-                            value={selection.routeSpecifier ?? PATH_SPECIFIERS[0]}
-                            onSelect={handleSelectSpecifier}
-                          />
-                        </Box>
-                      );
-                    })()}
                 </Box>
 
                 {/* Resize strip */}

@@ -1,10 +1,48 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
-import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
   if (plural) return gender === 'fem' ? 'as' : 'os';
   return gender === 'fem' ? 'a' : 'o';
+}
+
+/** Irregular Portuguese adjectives: base → [masc sg, fem sg, masc pl, fem pl]. */
+const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
+  bom: ['bom', 'boa', 'bons', 'boas'],
+  mau: ['mau', 'má', 'maus', 'más'],
+};
+
+/** Portuguese noun/adjective pluralisation: -m → -ns, -r/-z → -es, -l → -is, else +s. */
+function pluralize(word: string): string {
+  if (/m$/i.test(word)) return `${word.slice(0, -1)}ns`;
+  if (/[rz]$/i.test(word)) return `${word}es`;
+  if (/l$/i.test(word)) return `${word.slice(0, -1)}is`;
+  return `${word}s`;
+}
+
+/**
+ * Inflect a Portuguese adjective (given as masculine singular) to agree with the head
+ * noun's gender and number. "-o" adjectives take -a/-os/-as; adjectives ending in
+ * -e or a consonant are gender-invariant and only pluralise.
+ */
+function agreeAdj(base: string, gender: string, plural: boolean): string {
+  if (!base) return '';
+  const fem = gender === 'fem';
+  const irr = IRREGULAR_ADJ[base];
+  if (irr) return irr[(fem ? 1 : 0) + (plural ? 2 : 0)];
+  const sg = base.endsWith('o') && fem ? `${base.slice(0, -1)}a` : base;
+  return plural ? pluralize(sg) : sg;
+}
+
+/** Join a noun phrase's adjectives, each agreed with the head's gender/number. */
+function ptAdj(np: ResolvedNounPhrase): string {
+  const gender = np.head.forms['gender'] ?? 'masc';
+  const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
+  return np.adjectives
+    .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
+    .filter(Boolean)
+    .join(' ');
 }
 
 /** Portuguese "em" (in) + article: em+o=no, em+a=na, em+os=nos, em+as=nas. */
@@ -92,7 +130,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const f = c.phrase.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const a = npAdj(c.phrase);
+      const a = ptAdj(c.phrase);
       const adj = a ? ` ${a}` : '';
       // locative→em (no/na), direction→a (ao/à), source→de (do/da), route→path preposition
       const head =
@@ -112,15 +150,15 @@ export const portugueseEngine: LanguageEngine = {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
     const { verb, negative: verbNegative, modifier } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
+    const subjectText = subjectPhrase(subject.head.forms, ptAdj(subject));
     const conjugated = conjugate(verb.forms, subject.head.forms);
     const verbText = verbNegative ? `não ${conjugated}` : conjugated;
     const directObjectText = directObject
-      ? nounPhrase(directObject.head.forms, npAdj(directObject))
+      ? nounPhrase(directObject.head.forms, ptAdj(directObject))
       : '';
     // S V Adv DirectObj IndirectObj(a+article)
     const indirectObjectText = indirectObject
-      ? indirectNounPhrase(indirectObject.head.forms, npAdj(indirectObject))
+      ? indirectNounPhrase(indirectObject.head.forms, ptAdj(indirectObject))
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // "nunca" goes pre-verbal without "não": "eu nunca bebo"
