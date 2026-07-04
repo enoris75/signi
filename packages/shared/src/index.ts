@@ -134,9 +134,22 @@ export interface PhrasePlan {
   complements?: Partial<Record<ComplementType, Complement>>;
 }
 
+/**
+ * A run of text with an optional reading. When `r` is present it is the furigana
+ * (kana reading) to display above the surface text `t`; when absent, `t` is rendered
+ * plainly (kana, particles, punctuation). Only languages that supply readings (ja)
+ * populate this; the plain `text` is always the segments' `t` joined in order.
+ */
+export interface RubySegment {
+  t: string;
+  r?: string;
+}
+
 export interface Translation {
   language: LanguageCode;
   text: string;
+  /** Present only for languages with furigana (Japanese); `text` is the plain fallback. */
+  ruby?: RubySegment[];
 }
 
 export interface TranslateRequest {

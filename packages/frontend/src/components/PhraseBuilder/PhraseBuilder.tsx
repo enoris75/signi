@@ -8,7 +8,7 @@ import {
   type PathSpecifier,
 } from "@signi/shared";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
-import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { SlotBox, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import {
   GenderSlot,
   NumberSlot,
@@ -46,6 +46,89 @@ type DragState = {
   origPositions: Record<string, { x: number; y: number }>;
   moved: boolean;
 };
+
+// Equal within half a pixel on every key — used to stop the box-measuring layout
+// effect from looping on sub-pixel jitter.
+function sameBoxSizes(
+  a: Record<string, { w: number; h: number }>,
+  b: Record<string, { w: number; h: number }>,
+): boolean {
+  const keysA = Object.keys(a);
+  if (keysA.length !== Object.keys(b).length) return false;
+  for (const k of keysA) {
+    const pb = b[k];
+    if (!pb) return false;
+    if (Math.abs(a[k].w - pb.w) > 0.5 || Math.abs(a[k].h - pb.h) > 0.5)
+      return false;
+  }
+  return true;
+}
+
+// Where the ray from a box's center toward a target crosses the box border,
+// padded outward a touch so a control placed there straddles the edge. Both
+// points and the returned point are in canvas pixels.
+function borderPoint(
+  center: { x: number; y: number },
+  size: { w: number; h: number },
+  target: { x: number; y: number },
+  pad: number,
+): { x: number; y: number } {
+  const hw = size.w / 2 + pad;
+  const hh = size.h / 2 + pad;
+  const dx = target.x - center.x;
+  const dy = target.y - center.y;
+  if (dx === 0 && dy === 0) return { x: center.x, y: center.y - hh };
+  const scale = 1 / Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh);
+  return { x: center.x + dx * scale, y: center.y + dy * scale };
+}
+
+// Place a box's satellite controls on its border, each on the ray toward its
+// target node. Controls that land on the same spot (targets collinear with the
+// box center) are fanned out along that border edge so they don't overlap.
+function layoutControls(
+  center: { x: number; y: number },
+  size: { w: number; h: number },
+  targets: { key: string; target: { x: number; y: number } }[],
+): Record<string, { x: number; y: number }> {
+  const GAP = 22; // control button + a hair of breathing room, in px
+  const raw = targets.map((t) => ({
+    key: t.key,
+    p: borderPoint(center, size, t.target, 2),
+    dx: t.target.x - center.x,
+    dy: t.target.y - center.y,
+  }));
+  // Cluster near-coincident border points.
+  const clusters: (typeof raw)[] = [];
+  for (const it of raw) {
+    const cl = clusters.find(
+      (c) => Math.hypot(c[0].p.x - it.p.x, c[0].p.y - it.p.y) < GAP,
+    );
+    if (cl) cl.push(it);
+    else clusters.push([it]);
+  }
+  const out: Record<string, { x: number; y: number }> = {};
+  for (const items of clusters) {
+    if (items.length === 1) {
+      out[items[0].key] = items[0].p;
+      continue;
+    }
+    // Spread the cluster along the tangent of its shared outward direction —
+    // which, on a box edge, runs along that edge.
+    const bx = items.reduce((s, i) => s + i.p.x, 0) / items.length;
+    const by = items.reduce((s, i) => s + i.p.y, 0) / items.length;
+    const adx = items.reduce((s, i) => s + i.dx, 0) / items.length;
+    const ady = items.reduce((s, i) => s + i.dy, 0) / items.length;
+    const len = Math.hypot(adx, ady) || 1;
+    const tx = -ady / len;
+    const ty = adx / len;
+    const sorted = [...items].sort((a, b) => (a.key < b.key ? -1 : 1));
+    sorted.forEach((it, i) => {
+      const off = (i - (sorted.length - 1) / 2) * GAP;
+      out[it.key] = { x: bx + tx * off, y: by + ty * off };
+    });
+  }
+  return out;
+}
 
 export function PhraseBuilder({
   selection,
@@ -198,6 +281,46 @@ export function PhraseBuilder({
     setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   }
 
+  // Re-arrange a dotted box's child nodes into a compact, tidy cluster centered on
+  // the group's current position: adjectives (and the tense chip) on a top row, the
+  // main word in the middle, and the number/gender/adverb/polarity toggles on a
+  // bottom row. Each row is horizontally centered, so the derived bounding box
+  // shrinks to a neat, minimal footprint.
+  function handleRearrangeGroup(nodeKeys: string[]) {
+    if (nodeKeys.length === 0) return;
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.max(lo, Math.min(hi, v));
+    // Convert a comfortable per-node pixel spacing into the % coordinate space.
+    const stepX = (150 / Math.max(svgSize.w, 1)) * 100;
+    const stepY = (68 / Math.max(svgSize.h, 1)) * 100;
+    // -1 = top row (adjectives / tense), 0 = main word, 1 = bottom row (toggles).
+    const tierOf = (k: string): -1 | 0 | 1 => {
+      if (/Adjective2?$/.test(k) || k === "verbTense") return -1;
+      if (/(Number|Gender)$/.test(k) || k === "verbNegative" || k === "modifier")
+        return 1;
+      return 0;
+    };
+    setPositions((prev) => {
+      const cur = nodeKeys.map(
+        (k) => prev[k] ?? DEFAULT_POSITIONS[k] ?? { x: 50, y: 50 },
+      );
+      const cx = cur.reduce((s, p) => s + p.x, 0) / cur.length;
+      const cy = cur.reduce((s, p) => s + p.y, 0) / cur.length;
+      const rows: Record<number, string[]> = { [-1]: [], 0: [], 1: [] };
+      for (const k of nodeKeys) rows[tierOf(k)].push(k);
+      const next = { ...prev };
+      for (const tier of [-1, 0, 1] as const) {
+        const row = rows[tier];
+        const rowY = clamp(cy + tier * stepY, 4, 96);
+        const startX = cx - ((row.length - 1) * stepX) / 2;
+        row.forEach((k, i) => {
+          next[k] = { x: clamp(startX + i * stepX, 2, 98), y: rowY };
+        });
+      }
+      return next;
+    });
+  }
+
   function handleToggleReveal(sat: Satellite) {
     const willShow = !sat.shown;
     setRevealed((prev) => ({ ...prev, [sat.key]: willShow }));
@@ -240,6 +363,12 @@ export function PhraseBuilder({
 
   const containerRef = useRef<HTMLDivElement>(null);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
+  // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
+  // each satellite reveal control on the box border facing its satellite (and to
+  // start that satellite's connector from there).
+  const [boxSizes, setBoxSizes] = useState<
+    Record<string, { w: number; h: number }>
+  >({});
   const [positions, setPositions] = useState<
     Record<string, { x: number; y: number }>
   >(() => ({ ...DEFAULT_POSITIONS }));
@@ -265,6 +394,18 @@ export function PhraseBuilder({
     obs.observe(containerRef.current);
     return () => obs.disconnect();
   }, [hasVerb]);
+
+  // After every render, measure each core word box's pixel size. Control icons and
+  // their connectors are placed on the box border, so we need the box's half-extents.
+  // Runs on every commit; settles because it only sets state on an actual size change.
+  useLayoutEffect(() => {
+    const next: Record<string, { w: number; h: number }> = {};
+    for (const [key, el] of slotEls.current) {
+      const r = el.getBoundingClientRect();
+      next[key] = { w: r.width, h: r.height };
+    }
+    setBoxSizes((prev) => (sameBoxSizes(prev, next) ? prev : next));
+  });
 
   function startDrag(e: React.PointerEvent, key: string) {
     const p = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -388,12 +529,35 @@ export function PhraseBuilder({
     return positions[key] ?? DEFAULT_POSITIONS[key];
   }
 
+  // Place each satellite reveal control on its core box's border, on the ray toward
+  // the satellite it governs — so the control migrates around the box to face its
+  // node and the connector leaves the box cleanly from the control. Canvas pixels,
+  // keyed by satellite key; also fed to buildGraph as each link's origin.
+  const pxPt = (key: string) => ({
+    x: (pos(key).x / 100) * svgSize.w,
+    y: (pos(key).y / 100) * svgSize.h,
+  });
+  const controlPos: Record<string, { x: number; y: number }> = {};
+  for (const [parentKey, icons] of Object.entries(satelliteIconsByParent)) {
+    const size = boxSizes[parentKey];
+    if (!size) continue;
+    Object.assign(
+      controlPos,
+      layoutControls(
+        pxPt(parentKey),
+        size,
+        icons.map((icon) => ({ key: icon.key, target: pxPt(icon.key) })),
+      ),
+    );
+  }
+
   const { edges, groupRects, groupEdges } = buildGraph({
     hasVerb,
     renderedSlots,
     visibleSlots,
     shownMap,
     pos,
+    controlPos,
     svgSize,
   });
 
@@ -421,6 +585,7 @@ export function PhraseBuilder({
     handleCycleTense,
     handleSelectSpecifier,
     handleToggleCollapse,
+    handleRearrangeGroup,
     handleRemoveComplement,
   };
 
@@ -526,6 +691,36 @@ export function PhraseBuilder({
                   {COMPLEMENT_TYPES.map((type) => (
                     <NounPhraseBuilder key={type} which={type} ctx={ctx} />
                   ))}
+
+                  {/* Satellite reveal controls — each pinned to its core box's
+                      border facing the satellite it governs (see controlPos), so
+                      the connector starts from the control. Complement toggles are
+                      excluded here; they ride the Verb Phrase dotted box. */}
+                  {Object.entries(satelliteIconsByParent).flatMap(
+                    ([parentKey, icons]) => {
+                      const color =
+                        ALL_SLOTS.find((s) => s.key === parentKey)?.color ??
+                        "primary";
+                      return icons.map((icon) => {
+                        const p = controlPos[icon.key];
+                        if (!p) return null;
+                        return (
+                          <Box
+                            key={icon.key}
+                            sx={{
+                              position: "absolute",
+                              left: p.x,
+                              top: p.y,
+                              transform: "translate(-50%, -50%)",
+                              zIndex: 2,
+                            }}
+                          >
+                            <SatelliteButton sat={icon} color={color} />
+                          </Box>
+                        );
+                      });
+                    },
+                  )}
                 </Box>
 
                 {/* Resize strip */}

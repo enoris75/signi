@@ -1,9 +1,9 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
-function subjectWord(forms: Record<string, string>): string {
-  if (forms['person'] && forms['number'] === 'plural' && forms['plural']) return forms['plural'];
-  return forms['base'] ?? '';
+/** A segment for one word: attach the furigana reading only when it differs from the surface. */
+function wordSeg(surface: string, reading?: string): RubySegment {
+  return reading && reading !== surface ? { t: surface, r: reading } : { t: surface };
 }
 
 /** Postposition particle per complement type. (Route を is safe: motion verbs are intransitive.) */
@@ -24,54 +24,107 @@ const REL_NOUN: Record<PathSpecifier, string> = {
   in_front_of: 'の前',
 };
 
-function complementsText(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
-  if (!complements) return '';
-  return COMPLEMENT_RENDER_ORDER
-    .map((type) => {
-      const c = complements[type];
-      if (!c) return '';
-      const word = npAdj(c.phrase) + (c.phrase.head.forms['base'] ?? '');
-      const rel = type === 'route' ? REL_NOUN[pathSpecifier(c)] : '';
-      return word + rel + PARTICLE[type];
-    })
-    .join('');
+/** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
+const REL_NOUN_READING: Record<PathSpecifier, string> = {
+  through: '',
+  under: 'のした',
+  over: 'のうえ',
+  around: 'のまわり',
+  behind: 'のうしろ',
+  in_front_of: 'のまえ',
+};
+
+/**
+ * Segments for a noun phrase: [adjectives] noun, adjectives separated by a space and the
+ * noun appended directly (matching the string form "大きい 小さい猫").
+ */
+function npSegs(np: ResolvedNounPhrase): RubySegment[] {
+  const segs: RubySegment[] = [];
+  for (const a of np.adjectives) {
+    const base = a.forms['base'] ?? '';
+    if (!base) continue;
+    if (segs.length) segs.push({ t: ' ' });
+    segs.push(wordSeg(base, a.forms['reading']));
+  }
+  const head = np.head.forms;
+  segs.push(wordSeg(head['base'] ?? '', head['reading']));
+  return segs;
+}
+
+/**
+ * The verb segment. Japanese has no dedicated future, so future reuses the present (masu)
+ * form; the polite past is the masu-stem + ました (negative ませんでした). The reading is
+ * derived the same way from the masu-stem's reading so the furigana tracks the surface.
+ */
+function verbSeg(verb: ResolvedVerbPhrase['verb'], negative: boolean | undefined, tense: Tense): RubySegment {
+  const masuPresent = verb.forms['masu_present'] ?? verb.forms['base'] ?? '';
+  const masuReading = verb.forms['masu_present_reading'];
+  const stem = masuPresent.endsWith('ます') ? masuPresent.slice(0, -2) : null;
+  const readingStem = masuReading?.endsWith('ます') ? masuReading.slice(0, -2) : undefined;
+
+  let surface: string;
+  let suffix: string | null = null;
+  if (tense === 'past' && stem !== null) {
+    suffix = negative ? 'ませんでした' : 'ました';
+    surface = stem + suffix;
+  } else if (negative && stem !== null) {
+    suffix = 'ません';
+    surface = stem + suffix;
+  } else {
+    surface = masuPresent; // present / future — plain masu form
+  }
+  const reading = suffix === null
+    ? masuReading
+    : readingStem !== undefined ? readingStem + suffix : undefined;
+  return wordSeg(surface, reading);
+}
+
+function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>): RubySegment[] {
+  if (!complements) return [];
+  const segs: RubySegment[] = [];
+  for (const type of COMPLEMENT_RENDER_ORDER) {
+    const c = complements[type];
+    if (!c) continue;
+    segs.push(...npSegs(c.phrase));
+    if (type === 'route') {
+      const spec = pathSpecifier(c);
+      if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
+    }
+    segs.push({ t: PARTICLE[type] });
+  }
+  return segs;
 }
 
 /**
  * Japanese word order: S IndObj+に DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
+function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
+  const { subject, verbPhrase, directObject, indirectObject } = phrase;
+  const { verb, negative, modifier, tense = 'present' } = verbPhrase;
+
+  const segs: RubySegment[] = [];
+  segs.push(...npSegs(subject), { t: 'は' });
+  segs.push(...complementSegs(phrase.complements));
+  if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
+  if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
+  if (modifier) {
+    const base = modifier.forms['base'] ?? '';
+    if (base) segs.push(wordSeg(base, modifier.forms['reading']));
+  }
+  segs.push(verbSeg(verb, negative, tense));
+  return segs;
+}
+
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
   render(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
-
-    const subjectText = npAdj(subject) + subjectWord(subject.head.forms) + 'は';
-    const masuPresent = verb.forms['masu_present'] ?? verb.forms['base'] ?? '';
-    // The polite past is the masu-stem + ました (negative ませんでした). Japanese
-    // has no dedicated future, so future reuses the present (masu) form.
-    const stem: string | null = masuPresent.endsWith('ます') ? masuPresent.slice(0, -2) : null;
-    let verbText: string;
-    if (tense === 'past' && stem !== null) {
-      verbText = verbNegative ? stem + 'ませんでした' : stem + 'ました';
-    } else {
-      // present / future — ます, negated to ません
-      verbText = verbNegative && stem !== null ? stem + 'ません' : masuPresent;
-    }
-    const directObjectText = directObject
-      ? npAdj(directObject) + (directObject.head.forms['base'] ?? '') + 'を'
-      : '';
-    const indirectObjectText = indirectObject
-      ? npAdj(indirectObject) + (indirectObject.head.forms['base'] ?? '') + 'に'
-      : '';
-    const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-    const complementText = complementsText(phrase.complements);
-
-    // SOV: subject [complements] indirectObj directObj adv verb
-    return [subjectText, complementText, indirectObjectText, directObjectText, modifierText, verbText]
-      .filter(Boolean)
+    return buildSegments(phrase)
+      .map((s) => s.t)
       .join('')
       .trim();
+  },
+  renderRuby(phrase: ResolvedPhrase): RubySegment[] {
+    return buildSegments(phrase);
   },
 };

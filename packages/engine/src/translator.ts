@@ -47,11 +47,15 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     const number = np.number ?? 'singular';
     const gender = np.gender ?? 'masc';
     head.forms['number'] = number;
+    // Keep the furigana reading (if any) in step with whichever surface we select.
     if (number === 'plural') {
       if (head.forms['plural']) head.forms['base'] = head.forms['plural'];
+      if (head.forms['plural_reading']) head.forms['reading'] = head.forms['plural_reading'];
     } else if (head.forms['person'] === '3') {
       const gf = head.forms[`singular_${gender}`];
       if (gf) head.forms['base'] = gf;
+      const gr = head.forms[`singular_${gender}_reading`];
+      if (gr) head.forms['reading'] = gr;
       head.forms['gender'] = gender;
     }
     // 1st / 2nd person singular: base is already the correct form
@@ -97,9 +101,11 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
       indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
       complements,
     };
+    const ruby = engine.renderRuby?.(resolved);
     return {
       language: engine.language,
       text: engine.render(resolved),
+      ...(ruby ? { ruby } : {}),
     };
   });
 }

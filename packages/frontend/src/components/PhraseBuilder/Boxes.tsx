@@ -36,14 +36,12 @@ export function SlotBox({
   isActive,
   onClear,
   emptyContent,
-  satellites,
 }: {
   slot: SlotConfig;
   concept?: Concept;
   isActive: boolean;
   onClear: () => void;
   emptyContent?: ReactNode;
-  satellites?: SatelliteIcon[];
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -138,19 +136,6 @@ export function SlotBox({
           </IconButton>
         </Tooltip>
       )}
-      {satellites && satellites.length > 0 && (
-        <Box
-          sx={{
-            position: "absolute",
-            bottom: -11,
-            left: "50%",
-            transform: "translateX(-50%)",
-            zIndex: 2,
-          }}
-        >
-          <SatelliteRow satellites={satellites} color={slot.color} />
-        </Box>
-      )}
     </Box>
   );
 }
@@ -166,50 +151,63 @@ export function SatelliteRow({
 }) {
   return (
     <Box sx={{ display: "flex", gap: 0.5 }}>
-      {satellites.map((sat) => {
-        // Color tiers:
-        //  • solid  → carries a non-default value (plural / fem / negative / a chosen word)
-        //  • outlined → expanded, or an always-valued satellite at its default (number/gender/polarity)
-        //  • neutral → a collapsed, genuinely-empty satellite (adjective / adverb)
-        const solid = sat.isSet;
-        const outlined = !solid && (sat.active || sat.valued);
-        // Always-valued (and set) satellites show their current value; empties prompt Show/Hide.
-        const tooltip =
-          !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
-            ? `${sat.label}: ${sat.valueLabel}`
-            : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
-        return (
-          <Tooltip key={sat.key} title={tooltip}>
-            <IconButton
-              size="small"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={sat.onToggle}
-              sx={{
-                width: 20,
-                height: 20,
-                p: 0,
-                bgcolor: solid ? `${color}.main` : "background.paper",
-                color: solid
-                  ? "common.white"
-                  : outlined
-                    ? `${color}.main`
-                    : "text.secondary",
-                border: "1px solid",
-                borderColor: solid || outlined ? `${color}.main` : "divider",
-                transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
-                "&:hover": {
-                  bgcolor: solid ? `${color}.dark` : "action.hover",
-                  borderColor: `${color}.main`,
-                  color: solid ? "common.white" : `${color}.main`,
-                },
-              }}
-            >
-              {sat.icon}
-            </IconButton>
-          </Tooltip>
-        );
-      })}
+      {satellites.map((sat) => (
+        <SatelliteButton key={sat.key} sat={sat} color={color} />
+      ))}
     </Box>
+  );
+}
+
+// One satellite reveal/toggle button. Rendered inline in a SatelliteRow (the
+// complement toggles) or, on the phrase canvas, positioned individually on its
+// core box's border pointing toward the satellite it governs.
+export function SatelliteButton({
+  sat,
+  color,
+}: {
+  sat: SatelliteIcon;
+  color: SlotConfig["color"];
+}) {
+  // Color tiers:
+  //  • solid  → carries a non-default value (plural / fem / negative / a chosen word)
+  //  • outlined → expanded, or an always-valued satellite at its default (number/gender/polarity)
+  //  • neutral → a collapsed, genuinely-empty satellite (adjective / adverb)
+  const solid = sat.isSet;
+  const outlined = !solid && (sat.active || sat.valued);
+  // Always-valued (and set) satellites show their current value; empties prompt Show/Hide.
+  const tooltip =
+    !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
+      ? `${sat.label}: ${sat.valueLabel}`
+      : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
+  return (
+    <Tooltip title={tooltip}>
+      <IconButton
+        size="small"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={sat.onToggle}
+        sx={{
+          width: 20,
+          height: 20,
+          p: 0,
+          bgcolor: solid ? `${color}.main` : "background.paper",
+          color: solid
+            ? "common.white"
+            : outlined
+              ? `${color}.main`
+              : "text.secondary",
+          border: "1px solid",
+          borderColor: solid || outlined ? `${color}.main` : "divider",
+          transition: "background-color 0.15s, border-color 0.15s, color 0.15s",
+          "&:hover": {
+            bgcolor: solid ? `${color}.dark` : "action.hover",
+            borderColor: `${color}.main`,
+            color: solid ? "common.white" : `${color}.main`,
+          },
+        }}
+      >
+        {sat.icon}
+      </IconButton>
+    </Tooltip>
   );
 }
 

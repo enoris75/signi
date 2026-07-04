@@ -61,6 +61,8 @@ export interface PhraseRenderContext {
   handleCycleTense: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
   handleToggleCollapse: (label: string) => void;
+  // Compact a dotted box's child nodes into a tidy centered cluster.
+  handleRearrangeGroup: (nodeKeys: string[]) => void;
   handleRemoveComplement: (type: ComplementType) => void;
 }
 
@@ -82,7 +84,6 @@ export function SlotNode({
     selection,
     activeSlot,
     handleClear,
-    satelliteIconsByParent,
     handleConceptSelect,
   } = ctx;
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
@@ -119,7 +120,6 @@ export function SlotNode({
         concept={selection[slot.key]}
         isActive={activeSlot === slot.key}
         onClear={() => handleClear(slot.key)}
-        satellites={satelliteIconsByParent[slot.key]}
         emptyContent={slotTypeahead({
           slotKey: slot.key,
           activeSlot,

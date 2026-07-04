@@ -1,4 +1,6 @@
-import type { ComplementType, LanguageCode, PathSpecifier, Specifier, Tense } from '@signi/shared';
+import type { ComplementType, LanguageCode, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+
+export type { RubySegment };
 
 export interface ConceptForms {
   conceptId: string;
@@ -54,4 +56,9 @@ export function npAdj(np: ResolvedNounPhrase): string {
 export interface LanguageEngine {
   language: LanguageCode;
   render(phrase: ResolvedPhrase): string;
+  /**
+   * Optional ruby (furigana) rendering: the same surface as `render`, split into
+   * segments carrying kana readings. Implemented only by languages with furigana (ja).
+   */
+  renderRuby?(phrase: ResolvedPhrase): RubySegment[];
 }

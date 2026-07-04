@@ -2,6 +2,7 @@ import { Box, Tooltip, IconButton } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import type { GroupRect } from "./graph.ts";
 import type { PhraseRenderContext } from "./phraseRender.tsx";
 
@@ -23,9 +24,13 @@ export function GroupBox({
     draggingKey,
     makeGroupDragProps,
     handleToggleCollapse,
+    handleRearrangeGroup,
     handleRemoveComplement,
   } = ctx;
   const isCollapsed = collapsedGroups[rect.label] ?? false;
+  // Only worth tidying when there's more than the main word to arrange, and not
+  // while collapsed (the satellites are hidden).
+  const canRearrange = !isCollapsed && rect.nodeKeys.length > 1;
 
   return (
     <>
@@ -77,6 +82,33 @@ export function GroupBox({
           )}
         </IconButton>
       </Tooltip>
+
+      {/* Re-arrange / compact control, just right of the collapse toggle. */}
+      {canRearrange && (
+        <Tooltip title={`Tidy up ${rect.label}`}>
+          <IconButton
+            size="small"
+            onPointerDown={(e) => e.stopPropagation()}
+            onClick={() => handleRearrangeGroup(rect.nodeKeys)}
+            sx={{
+              position: "absolute",
+              left: rect.x + 11,
+              top: rect.y - 9,
+              width: 18,
+              height: 18,
+              p: 0,
+              zIndex: 3,
+              bgcolor: "background.paper",
+              border: "1px solid",
+              borderColor: "divider",
+              opacity: 0.7,
+              "&:hover": { opacity: 1, bgcolor: "background.paper" },
+            }}
+          >
+            <AutoFixHighIcon sx={{ fontSize: 11 }} />
+          </IconButton>
+        </Tooltip>
+      )}
 
       {/* Remove "x" on the top-right corner — complements only. */}
       {rect.removeKey && (

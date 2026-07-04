@@ -70,6 +70,7 @@ export function buildGraph({
   visibleSlots,
   shownMap,
   pos,
+  controlPos,
   svgSize,
 }: {
   hasVerb: boolean;
@@ -77,17 +78,25 @@ export function buildGraph({
   visibleSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
   pos: PosFn;
+  // Measured pixel centers (canvas-relative) of the satellite reveal controls
+  // riding each core box's border, keyed by satellite key. When present, a
+  // satellite's dashed link starts here — from its own control — instead of the
+  // core box center. Missing (not yet measured) → fall back to the box center.
+  controlPos: Record<string, Pt>;
   svgSize: { w: number; h: number };
 }): { edges: Edge[]; groupRects: GroupRect[]; groupEdges: Edge[] } {
   const px = (pct: number, dim: number) => (pct / 100) * dim;
-  const pctEdge = (from: Pt, to: Pt, color: string): Edge => ({
-    x1: px(from.x, svgSize.w),
-    y1: px(from.y, svgSize.h),
-    x2: px(to.x, svgSize.w),
-    y2: px(to.y, svgSize.h),
-    color,
-    dashed: true,
+  const pxPt = (pt: Pt): Pt => ({
+    x: px(pt.x, svgSize.w),
+    y: px(pt.y, svgSize.h),
   });
+  // A satellite link: from its control icon on the core box (measured) to the
+  // satellite node, both in canvas pixels.
+  const satEdge = (coreKey: string, satKey: string, color: string): Edge => {
+    const from = controlPos[satKey] ?? pxPt(pos(coreKey));
+    const to = pxPt(pos(satKey));
+    return { x1: from.x, y1: from.y, x2: to.x, y2: to.y, color, dashed: true };
+  };
 
   const edges: Edge[] = [];
   if (hasVerb) {
@@ -104,73 +113,55 @@ export function buildGraph({
       )
         continue;
       const complementParent = COMPLEMENT_ADJECTIVE_TYPE[slot.key];
-      const from =
+      const parentKey =
         slot.key === "subjectAdjective" || slot.key === "subjectAdjective2"
-          ? pos("subject")
+          ? "subject"
           : slot.key === "directObjectAdjective" ||
               slot.key === "directObjectAdjective2"
-            ? pos("directObject")
+            ? "directObject"
             : slot.key === "indirectObjectAdjective" ||
                 slot.key === "indirectObjectAdjective2"
-              ? pos("indirectObject")
-              : complementParent
-                ? pos(complementParent)
-                : pos("verb");
-      edges.push(pctEdge(from, pos(slot.key), MUI_COLOR_HEX[slot.color]));
+              ? "indirectObject"
+              : (complementParent ?? "verb");
+      edges.push(satEdge(parentKey, slot.key, MUI_COLOR_HEX[slot.color]));
     }
     if (shownMap.verbNegative)
-      edges.push(
-        pctEdge(pos("verb"), pos("verbNegative"), MUI_COLOR_HEX.secondary),
-      );
+      edges.push(satEdge("verb", "verbNegative", MUI_COLOR_HEX.secondary));
     if (shownMap.verbTense)
-      edges.push(
-        pctEdge(pos("verb"), pos("verbTense"), MUI_COLOR_HEX.secondary),
-      );
+      edges.push(satEdge("verb", "verbTense", MUI_COLOR_HEX.secondary));
     if (shownMap.subjectNumber)
-      edges.push(pctEdge(pos("subject"), pos("subjectNumber"), "#888"));
+      edges.push(satEdge("subject", "subjectNumber", "#888"));
     if (shownMap.subjectGender)
-      edges.push(pctEdge(pos("subject"), pos("subjectGender"), "#888"));
+      edges.push(satEdge("subject", "subjectGender", "#888"));
     if (shownMap.directObjectNumber)
       edges.push(
-        pctEdge(
-          pos("directObject"),
-          pos("directObjectNumber"),
-          MUI_COLOR_HEX.success,
-        ),
+        satEdge("directObject", "directObjectNumber", MUI_COLOR_HEX.success),
       );
     if (shownMap.directObjectGender)
       edges.push(
-        pctEdge(
-          pos("directObject"),
-          pos("directObjectGender"),
-          MUI_COLOR_HEX.success,
-        ),
+        satEdge("directObject", "directObjectGender", MUI_COLOR_HEX.success),
       );
     if (shownMap.indirectObjectNumber)
       edges.push(
-        pctEdge(
-          pos("indirectObject"),
-          pos("indirectObjectNumber"),
+        satEdge(
+          "indirectObject",
+          "indirectObjectNumber",
           MUI_COLOR_HEX.warning,
         ),
       );
     if (shownMap.indirectObjectGender)
       edges.push(
-        pctEdge(
-          pos("indirectObject"),
-          pos("indirectObjectGender"),
+        satEdge(
+          "indirectObject",
+          "indirectObjectGender",
           MUI_COLOR_HEX.warning,
         ),
       );
     for (const type of COMPLEMENT_TYPES) {
       if (shownMap[`${type}Number`])
-        edges.push(
-          pctEdge(pos(type), pos(`${type}Number`), MUI_COLOR_HEX.warning),
-        );
+        edges.push(satEdge(type, `${type}Number`, MUI_COLOR_HEX.warning));
       if (shownMap[`${type}Gender`])
-        edges.push(
-          pctEdge(pos(type), pos(`${type}Gender`), MUI_COLOR_HEX.warning),
-        );
+        edges.push(satEdge(type, `${type}Gender`, MUI_COLOR_HEX.warning));
     }
   }
 

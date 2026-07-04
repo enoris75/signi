@@ -10,8 +10,26 @@ import {
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import type { Translation } from '@signi/shared';
+import type { RubySegment, Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
+
+/** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
+function RubyText({ segments }: { segments: RubySegment[] }) {
+  return (
+    <>
+      {segments.map((s, i) =>
+        s.r ? (
+          <ruby key={i}>
+            {s.t}
+            <rt>{s.r}</rt>
+          </ruby>
+        ) : (
+          <span key={i}>{s.t}</span>
+        ),
+      )}
+    </>
+  );
+}
 
 const FLAG: Record<string, string> = {
   en: '🇬🇧',
@@ -146,18 +164,21 @@ function TranslationRow({ translation: t, isLast }: { translation: Translation; 
         </Tooltip>
       </Box>
       <Typography
+        component="div"
         sx={{
           fontFamily: t.language === 'ja'
             ? '"Noto Serif JP", serif'
             : '"Lora", Georgia, serif',
           fontSize: t.language === 'ja' ? '1rem' : '1.1rem',
-          lineHeight: 1.65,
+          // Ruby readings sit above the line; give furigana rows a little headroom.
+          lineHeight: t.ruby ? 2 : 1.65,
           fontStyle: t.language !== 'ja' ? 'italic' : 'normal',
           color: 'text.primary',
           pl: 2.5,
+          '& rt': { fontSize: '0.6em', fontWeight: 400, userSelect: 'none' },
         }}
       >
-        {t.text}
+        {t.ruby ? <RubyText segments={t.ruby} /> : t.text}
       </Typography>
     </Box>
   );
