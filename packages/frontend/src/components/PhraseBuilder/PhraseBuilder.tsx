@@ -1,12 +1,11 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Box, Paper, Typography, Divider } from "@mui/material";
+import { Box, Paper, Typography } from "@mui/material";
 import {
   COMPLEMENT_TYPES,
   type Concept,
   type ComplementType,
   type PathSpecifier,
 } from "@signi/shared";
-import ConceptPalette from "../ConceptPalette.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
@@ -32,8 +31,7 @@ import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { PhraseGraphLayer } from "./PhraseGraphLayer.tsx";
-import { ComplementRemoveButtons } from "./ComplementRemoveButtons.tsx";
-import { GroupCollapseButtons } from "./GroupCollapseButtons.tsx";
+import { PhraseSidebar } from "./PhraseSidebar.tsx";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -297,12 +295,9 @@ export function PhraseBuilder({
     });
   }
 
-  function startGroupDrag(
-    e: React.PointerEvent<SVGRectElement>,
-    nodeKeys: string[],
-  ) {
+  function startGroupDrag(e: React.PointerEvent, nodeKeys: string[]) {
     e.stopPropagation();
-    (e.currentTarget as SVGElement).setPointerCapture(e.pointerId);
+    (e.currentTarget as Element).setPointerCapture(e.pointerId);
     const origPositions: Record<string, { x: number; y: number }> = {};
     for (const key of nodeKeys) {
       const p = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -368,6 +363,18 @@ export function PhraseBuilder({
     };
   }
 
+  // Pointer handlers for a dashed group box — dragging it moves every child node
+  // together. The GroupBox owns its own positioning, so unlike makeDragProps this
+  // returns handlers only.
+  function makeGroupDragProps(nodeKeys: string[]) {
+    return {
+      onPointerDown: (e: React.PointerEvent) => startGroupDrag(e, nodeKeys),
+      onPointerMove: moveDrag,
+      onPointerUp: () => endDrag(),
+      onPointerCancel: () => endDrag(),
+    };
+  }
+
   function pos(key: string) {
     return positions[key] ?? DEFAULT_POSITIONS[key];
   }
@@ -391,7 +398,10 @@ export function PhraseBuilder({
     satelliteIconsByParent,
     complementToggleIcons,
     groupRects,
+    collapsedGroups,
+    draggingKey,
     makeDragProps,
+    makeGroupDragProps,
     slotEls,
     handleSlotClick,
     handleConceptSelect,
@@ -400,6 +410,8 @@ export function PhraseBuilder({
     handleToggleGender,
     handleToggleNegative,
     handleSelectSpecifier,
+    handleToggleCollapse,
+    handleRemoveComplement,
   };
 
   return (
@@ -487,31 +499,15 @@ export function PhraseBuilder({
                 >
                   <PhraseGraphLayer
                     svgSize={svgSize}
-                    groupRects={groupRects}
                     groupEdges={groupEdges}
                     edges={edges}
-                    draggingKey={draggingKey}
-                    onGroupDragStart={startGroupDrag}
-                    onDragMove={moveDrag}
-                    onDragEnd={() => endDrag()}
                   />
 
-                  {/* Remove-complement "x" on each complement dotted box's corner */}
-                  <ComplementRemoveButtons
-                    groupRects={groupRects}
-                    onRemove={handleRemoveComplement}
-                  />
-
-                  {/* Collapse/expand control on each dotted box's top-left corner */}
-                  <GroupCollapseButtons
-                    groupRects={groupRects}
-                    collapsed={collapsedGroups}
-                    onToggle={handleToggleCollapse}
-                  />
-
-                  {/* Every constituent paints onto this shared canvas. The
-                      builders self-filter, so mounting one per possible noun /
-                      the verb phrase unconditionally is safe — inactive slots
+                  {/* Every constituent paints onto this shared canvas. Each
+                      builder draws its own dashed group box (with the collapse
+                      and, for complements, remove controls) plus its word boxes.
+                      The builders self-filter, so mounting one per possible noun
+                      / the verb phrase unconditionally is safe — inactive slots
                       and toggles render nothing. */}
                   <NounPhraseBuilder which="subject" ctx={ctx} />
                   <VerbPhraseBuilder ctx={ctx} />
@@ -563,111 +559,17 @@ export function PhraseBuilder({
               </>
             )}
           </Box>
-          {/* Sidebar resize handle */}
-          <Box
-            onPointerDown={(e) => {
-              e.preventDefault();
-              const startX = e.clientX;
-              const startW = sidebarWidth;
-              let currentW = startW;
-              const onMove = (ev: PointerEvent) => {
-                currentW = Math.max(
-                  80,
-                  Math.min(400, startW - (ev.clientX - startX)),
-                );
-                setSidebarWidth(currentW);
-              };
-              const onUp = () => {
-                localStorage.setItem(
-                  "signi:phraseBuilderSidebarWidth",
-                  String(Math.round(currentW)),
-                );
-                window.removeEventListener("pointermove", onMove);
-                window.removeEventListener("pointerup", onUp);
-                window.removeEventListener("pointercancel", onUp);
-              };
-              window.addEventListener("pointermove", onMove);
-              window.addEventListener("pointerup", onUp);
-              window.addEventListener("pointercancel", onUp);
-            }}
-            sx={{
-              width: 6,
-              flexShrink: 0,
-              cursor: "ew-resize",
-              touchAction: "none",
-              borderLeft: "2px solid",
-              borderColor: "divider",
-              bgcolor: "divider",
-              opacity: 0.6,
-              transition: "opacity 0.15s, background-color 0.15s",
-              "&:hover": {
-                opacity: 1,
-                bgcolor: "primary.main",
-                borderColor: "primary.main",
-              },
-            }}
+          <PhraseSidebar
+            width={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            maxHeight={graphHeight}
+            selection={selection}
+            activeSlot={activeSlot}
+            activeSlotConfig={activeSlotConfig}
+            visibleSlots={visibleSlots}
+            onSlotClick={handleSlotClick}
+            onConceptSelect={handleConceptSelect}
           />
-          <Box
-            sx={{
-              width: sidebarWidth,
-              flexShrink: 0,
-              borderLeft: "1px solid",
-              borderColor: "divider",
-              pl: 1.5,
-              maxHeight: graphHeight,
-              overflowY: "auto",
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.58rem",
-                fontWeight: 700,
-                letterSpacing: "0.18em",
-                textTransform: "uppercase",
-                color: "text.secondary",
-                mb: 1,
-                display: "block",
-              }}
-            >
-              {activeSlotConfig ? activeSlotConfig.label : "Words"}
-            </Typography>
-            {activeSlotConfig ? (
-              activeSlotConfig.roles.map((role) => (
-                <ConceptPalette
-                  key={role}
-                  role={role}
-                  onSelect={(c) =>
-                    handleConceptSelect(c, activeSlot as SlotKey)
-                  }
-                  selectedId={selection[activeSlot as SlotKey]?.id}
-                />
-              ))
-            ) : (
-              <>
-                <Typography
-                  color="text.secondary"
-                  sx={{ fontSize: "0.72rem", fontStyle: "italic", mb: 1 }}
-                >
-                  Click a slot to filter.
-                </Typography>
-                <Divider sx={{ my: 1 }} />
-                {visibleSlots.map((slot) =>
-                  slot.roles.map((role) => (
-                    <ConceptPalette
-                      key={`${slot.key}-${role}`}
-                      role={role}
-                      onSelect={(c) => {
-                        handleSlotClick(slot.key);
-                        handleConceptSelect(c, slot.key);
-                      }}
-                      selectedId={selection[slot.key]?.id}
-                    />
-                  )),
-                )}
-              </>
-            )}
-          </Box>
         </Box>
       </Paper>
     </Box>

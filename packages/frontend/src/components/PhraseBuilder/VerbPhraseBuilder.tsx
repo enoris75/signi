@@ -6,6 +6,7 @@ import {
   SpecifierSelector,
 } from "./Boxes.tsx";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
+import { GroupBox } from "./GroupBox.tsx";
 
 // Renders the verb phrase onto the shared canvas: the verb box, the adverb box,
 // the polarity toggle, the complement-toggle row that rides the Verb Phrase
@@ -32,6 +33,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
   return (
     <>
+      {verbPhraseRect && <GroupBox rect={verbPhraseRect} ctx={ctx} />}
       {verbSlots.map((slot) => (
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}

@@ -3,6 +3,7 @@ import { NumberToggleBox, GenderToggleBox } from "./Boxes.tsx";
 import { NumberSlot, PhraseSelection } from "./interfaces.ts";
 import { NUMBER_TOGGLE_KEY, GENDER_TOGGLE_KEY } from "./slots.ts";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
+import { GroupBox } from "./GroupBox.tsx";
 
 // Renders one noun constituent — its noun box, chained adjective boxes, and the
 // number/gender toggle boxes — all onto the shared canvas. `which` picks the
@@ -16,12 +17,16 @@ export function NounPhraseBuilder({
   which: NumberSlot;
   ctx: PhraseRenderContext;
 }) {
-  const { renderedSlots, shownMap, makeDragProps, selection } = ctx;
+  const { renderedSlots, shownMap, makeDragProps, selection, groupRects } = ctx;
 
   // Every noun constituent — core roles and motion complements alike — chains up
   // to two adjectives; unrevealed/unlicensed keys simply aren't in renderedSlots.
   const slotKeys = [`${which}Adjective`, `${which}Adjective2`, which];
   const mySlots = renderedSlots.filter((s) => slotKeys.includes(s.key));
+
+  // The dashed box for this constituent — its main word key is one of its nodes.
+  // Absent (e.g. an unrevealed complement) means there's nothing to draw.
+  const myRect = groupRects.find((g) => g.nodeKeys.includes(which));
 
   const number = selection[`${which}Number` as keyof PhraseSelection] as
     | "singular"
@@ -34,6 +39,7 @@ export function NounPhraseBuilder({
 
   return (
     <>
+      {myRect && <GroupBox rect={myRect} ctx={ctx} />}
       {mySlots.map((slot) => (
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}

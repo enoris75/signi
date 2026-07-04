@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, type SxProps, type Theme } from "@mui/material";
-import type { Concept, PathSpecifier } from "@signi/shared";
+import type { Concept, ComplementType, PathSpecifier } from "@signi/shared";
 import {
   GenderSlot,
   NumberSlot,
@@ -22,6 +22,16 @@ export type DragBoxProps = {
   sx: SxProps<Theme>;
 };
 
+// Pointer handlers for dragging a whole role group (its dashed box moves every
+// child node at once). Unlike DragBoxProps this omits `sx` — the dashed GroupBox
+// owns its own positioning.
+export type GroupDragProps = {
+  onPointerDown: (e: React.PointerEvent) => void;
+  onPointerMove: (e: React.PointerEvent) => void;
+  onPointerUp: () => void;
+  onPointerCancel: () => void;
+};
+
 // Everything the VerbPhrase / NounPhrase builders need from the parent. They all
 // paint onto the same absolutely-positioned canvas and share its drag machinery,
 // keyboard-nav list, and selection handlers, so we thread one bag through.
@@ -33,7 +43,14 @@ export interface PhraseRenderContext {
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   complementToggleIcons: SatelliteIcon[];
   groupRects: GroupRect[];
+  // Which group boxes are collapsed (keyed by GroupRect.label). Read by the
+  // GroupBox to pick its collapse/expand icon.
+  collapsedGroups: Record<string, boolean>;
+  // "__group__" while a dashed box is being dragged — the GroupBox uses it to
+  // switch its cursor.
+  draggingKey: string | null;
   makeDragProps: (key: string, onActivate: () => void) => DragBoxProps;
+  makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
   slotEls: React.MutableRefObject<Map<SlotKey, HTMLElement>>;
   handleSlotClick: (slot: SlotKey) => void;
   handleConceptSelect: (concept: Concept, targetSlot?: SlotKey) => void;
@@ -42,6 +59,8 @@ export interface PhraseRenderContext {
   handleToggleGender: (which: GenderSlot) => void;
   handleToggleNegative: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
+  handleToggleCollapse: (label: string) => void;
+  handleRemoveComplement: (type: ComplementType) => void;
 }
 
 // A single draggable slot box: pointer-drag wrapper + Tab/arrow keyboard nav
