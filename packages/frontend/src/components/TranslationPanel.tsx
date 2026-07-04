@@ -1,10 +1,15 @@
+import { useState } from 'react';
 import {
   Box,
   Paper,
   Typography,
   Skeleton,
   Stack,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import type { Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
 
@@ -69,48 +74,91 @@ export default function TranslationPanel({ translations, isLoading, isReady }: P
       {isReady && !isLoading && translations && (
         <Box>
           {translations.map((t, idx) => (
-            <Box
+            <TranslationRow
               key={t.language}
-              sx={{
-                py: 1.75,
-                borderBottom: idx < translations.length - 1 ? '1px solid' : 'none',
-                borderColor: 'divider',
-              }}
-            >
-              <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-                <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>{FLAG[t.language]}</Box>
-                <Typography
-                  component="span"
-                  sx={{
-                    fontFamily: '"Inter", sans-serif',
-                    fontSize: '0.6rem',
-                    fontWeight: 700,
-                    letterSpacing: '0.16em',
-                    textTransform: 'uppercase',
-                    color: 'text.secondary',
-                  }}
-                >
-                  {LANGUAGES[t.language]}
-                </Typography>
-              </Box>
-              <Typography
-                sx={{
-                  fontFamily: t.language === 'ja'
-                    ? '"Noto Serif JP", serif'
-                    : '"Lora", Georgia, serif',
-                  fontSize: t.language === 'ja' ? '1rem' : '1.1rem',
-                  lineHeight: 1.65,
-                  fontStyle: t.language !== 'ja' ? 'italic' : 'normal',
-                  color: 'text.primary',
-                  pl: 2.5,
-                }}
-              >
-                {t.text}
-              </Typography>
-            </Box>
+              translation={t}
+              isLast={idx === translations.length - 1}
+            />
           ))}
         </Box>
       )}
     </Paper>
+  );
+}
+
+function TranslationRow({ translation: t, isLast }: { translation: Translation; isLast: boolean }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(t.text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // clipboard unavailable (e.g. insecure context) — ignore
+    }
+  };
+
+  return (
+    <Box
+      sx={{
+        py: 1.75,
+        borderBottom: isLast ? 'none' : '1px solid',
+        borderColor: 'divider',
+        '&:hover .copy-btn': { opacity: 1 },
+      }}
+    >
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
+        <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>{FLAG[t.language]}</Box>
+        <Typography
+          component="span"
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: '0.6rem',
+            fontWeight: 700,
+            letterSpacing: '0.16em',
+            textTransform: 'uppercase',
+            color: 'text.secondary',
+          }}
+        >
+          {LANGUAGES[t.language]}
+        </Typography>
+        <Tooltip title={copied ? 'Copied' : 'Copy to clipboard'} placement="top">
+          <IconButton
+            className="copy-btn"
+            onClick={handleCopy}
+            size="small"
+            aria-label={`Copy ${LANGUAGES[t.language]} translation`}
+            sx={{
+              ml: 'auto',
+              p: 0.5,
+              color: copied ? 'success.main' : 'text.secondary',
+              opacity: copied ? 1 : 0,
+              transition: 'opacity 0.15s',
+            }}
+          >
+            {copied ? (
+              <CheckIcon sx={{ fontSize: '0.95rem' }} />
+            ) : (
+              <ContentCopyIcon sx={{ fontSize: '0.95rem' }} />
+            )}
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Typography
+        sx={{
+          fontFamily: t.language === 'ja'
+            ? '"Noto Serif JP", serif'
+            : '"Lora", Georgia, serif',
+          fontSize: t.language === 'ja' ? '1rem' : '1.1rem',
+          lineHeight: 1.65,
+          fontStyle: t.language !== 'ja' ? 'italic' : 'normal',
+          color: 'text.primary',
+          pl: 2.5,
+        }}
+      >
+        {t.text}
+      </Typography>
+    </Box>
   );
 }
