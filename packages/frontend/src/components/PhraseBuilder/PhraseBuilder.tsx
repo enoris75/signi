@@ -18,6 +18,7 @@ import {
 import {
   ALL_SLOTS,
   COMPLEMENT_KEY_SET,
+  COLLAPSIBLE_GROUPS,
   SATELLITE_SLOT_KEYS,
   getActiveSlots,
   DEFAULT_POSITIONS,
@@ -32,6 +33,7 @@ import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { PhraseGraphLayer } from "./PhraseGraphLayer.tsx";
 import { ComplementRemoveButtons } from "./ComplementRemoveButtons.tsx";
+import { GroupCollapseButtons } from "./GroupCollapseButtons.tsx";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -52,6 +54,11 @@ export function PhraseBuilder({
 }: PhraseBuilderProps) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  // Which dotted role-group boxes are collapsed (keyed by group label). A
+  // collapsed box shows only its main word; its satellites stay set but hidden.
+  const [collapsedGroups, setCollapsedGroups] = useState<
+    Record<string, boolean>
+  >({});
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
@@ -101,12 +108,9 @@ export function PhraseBuilder({
                 !selection[s.key],
             )?.key ?? null),
       );
-    } else if (
-      slot === "subjectAdjective" ||
-      slot === "directObjectAdjective" ||
-      slot === "indirectObjectAdjective"
-    ) {
-      // Reveal & focus the chained second adjective.
+    } else if (slot.endsWith("Adjective")) {
+      // Any first adjective (subject / object / complement) chains to a second —
+      // reveal & focus it. (Second adjectives end in "Adjective2", so are skipped.)
       const second = `${slot}2` as SlotKey;
       setRevealed((prev) => ({ ...prev, [second]: true }));
       setActiveSlot(second);
@@ -161,7 +165,31 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => ({ ...prev, routeSpecifier: spec }));
   }
 
-  const { satellites, shownMap } = buildSatellites(selection, revealed);
+  const { satellites, shownMap: rawShownMap } = buildSatellites(
+    selection,
+    revealed,
+  );
+
+  // Collapse: force every child node of a collapsed group hidden. Because group
+  // rects, rendered slots, and edges all derive from shownMap, forcing these
+  // false shrinks each collapsed box down to just its main word.
+  const collapsedHiddenKeys = new Set<string>();
+  const collapsedMainKeys = new Set<string>();
+  for (const g of COLLAPSIBLE_GROUPS) {
+    if (!collapsedGroups[g.label]) continue;
+    collapsedMainKeys.add(g.mainKey);
+    for (const k of g.childKeys) collapsedHiddenKeys.add(k);
+  }
+  const shownMap = collapsedHiddenKeys.size
+    ? {
+        ...rawShownMap,
+        ...Object.fromEntries([...collapsedHiddenKeys].map((k) => [k, false])),
+      }
+    : rawShownMap;
+
+  function handleToggleCollapse(label: string) {
+    setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
+  }
 
   function handleToggleReveal(sat: Satellite) {
     const willShow = !sat.shown;
@@ -191,6 +219,9 @@ export function PhraseBuilder({
     if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
       complementToggleIcons.push(iconEntry);
     } else {
+      // A collapsed group hides its own reveal icons; complement toggles ride
+      // the verb box but belong to sibling groups, so they stay above.
+      if (collapsedMainKeys.has(sat.parent)) continue;
       (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
     }
   }
@@ -469,6 +500,13 @@ export function PhraseBuilder({
                   <ComplementRemoveButtons
                     groupRects={groupRects}
                     onRemove={handleRemoveComplement}
+                  />
+
+                  {/* Collapse/expand control on each dotted box's top-left corner */}
+                  <GroupCollapseButtons
+                    groupRects={groupRects}
+                    collapsed={collapsedGroups}
+                    onToggle={handleToggleCollapse}
                   />
 
                   {/* Every constituent paints onto this shared canvas. The

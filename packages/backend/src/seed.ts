@@ -998,6 +998,21 @@ const concepts: ConceptSeed[] = [
       pt: { base: 'castanho' },
     },
   },
+  {
+    id: 'LAZY',
+    role: 'adjective',
+    description: 'unwilling to work or use energy',
+    emoji: '🦥',
+    forms: {
+      en: { base: 'lazy' },
+      it: { base: 'pigro' },
+      fr: { base: 'paresseux' },
+      de: { base: 'faul' },
+      es: { base: 'perezoso' },
+      ja: { base: '怠惰な' },
+      pt: { base: 'preguiçoso' },
+    },
+  },
 
   // ── ADVERBS ──────────────────────────────────────────────────────
   {

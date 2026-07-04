@@ -4,7 +4,11 @@ import {
   type ComplementType,
 } from "@signi/shared";
 import { SlotConfig } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET, MUI_COLOR_HEX } from "./slots.ts";
+import {
+  COMPLEMENT_ADJECTIVE_TYPE,
+  COMPLEMENT_KEY_SET,
+  MUI_COLOR_HEX,
+} from "./slots.ts";
 
 export type Edge = {
   x1: number;
@@ -99,6 +103,7 @@ export function buildGraph({
         COMPLEMENT_KEY_SET.has(slot.key)
       )
         continue;
+      const complementParent = COMPLEMENT_ADJECTIVE_TYPE[slot.key];
       const from =
         slot.key === "subjectAdjective" || slot.key === "subjectAdjective2"
           ? pos("subject")
@@ -108,7 +113,9 @@ export function buildGraph({
             : slot.key === "indirectObjectAdjective" ||
                 slot.key === "indirectObjectAdjective2"
               ? pos("indirectObject")
-              : pos("verb");
+              : complementParent
+                ? pos(complementParent)
+                : pos("verb");
       edges.push(pctEdge(from, pos(slot.key), MUI_COLOR_HEX[slot.color]));
     }
     if (shownMap.verbNegative)
@@ -241,6 +248,8 @@ export function buildGraph({
         color: MUI_COLOR_HEX.warning,
         removeKey: type,
         nodeKeys: [
+          ...(shownMap[`${type}Adjective`] ? [`${type}Adjective`] : []),
+          ...(shownMap[`${type}Adjective2`] ? [`${type}Adjective2`] : []),
           type,
           ...(shownMap[`${type}Number`] ? [`${type}Number`] : []),
           ...(shownMap[`${type}Gender`] ? [`${type}Gender`] : []),

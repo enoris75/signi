@@ -18,8 +18,8 @@ export function NounPhraseBuilder({
 }) {
   const { renderedSlots, shownMap, makeDragProps, selection } = ctx;
 
-  // Complements have no adjective slots; those keys simply won't be in
-  // renderedSlots, so the filter drops them.
+  // Every noun constituent — core roles and motion complements alike — chains up
+  // to two adjectives; unrevealed/unlicensed keys simply aren't in renderedSlots.
   const slotKeys = [`${which}Adjective`, `${which}Adjective2`, which];
   const mySlots = renderedSlots.filter((s) => slotKeys.includes(s.key));
 

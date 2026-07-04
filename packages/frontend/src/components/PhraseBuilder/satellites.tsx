@@ -223,6 +223,12 @@ export function buildSatellites(
         | "masc"
         | "fem"
         | undefined;
+      const adj = selection[`${type}Adjective` as keyof PhraseSelection] as
+        | Concept
+        | undefined;
+      const adj2 = selection[`${type}Adjective2` as keyof PhraseSelection] as
+        | Concept
+        | undefined;
       return [
         {
           key: type,
@@ -232,6 +238,24 @@ export function buildSatellites(
           available: supportedComplements.includes(type),
           hasValue: Boolean(concept),
           valueLabel: conceptLabel(concept),
+        },
+        {
+          key: `${type}Adjective`,
+          parent: type,
+          label: "Adjective",
+          icon: <BrushIcon sx={iconSx} />,
+          available: Boolean(concept),
+          hasValue: Boolean(adj),
+          valueLabel: conceptLabel(adj),
+        },
+        {
+          key: `${type}Adjective2`,
+          parent: type,
+          label: "Adjective 2",
+          icon: <BrushIcon sx={iconSx} />,
+          available: Boolean(concept) && Boolean(adj),
+          hasValue: Boolean(adj2),
+          valueLabel: conceptLabel(adj2),
         },
         {
           key: `${type}Number`,

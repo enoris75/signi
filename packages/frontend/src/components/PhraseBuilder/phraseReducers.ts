@@ -37,6 +37,8 @@ export function applyConceptSelect(
         delete next[type];
         delete next[`${type}Number`];
         delete next[`${type}Gender`];
+        delete next[`${type}Adjective`];
+        delete next[`${type}Adjective2`];
         if (type === "route") delete next.routeSpecifier;
       }
     }
@@ -81,6 +83,9 @@ export function applyConceptSelect(
     }
   }
   if (COMPLEMENT_KEY_SET.has(slot)) {
+    // Swapping the complement noun invalidates its adjectives.
+    delete next[`${slot}Adjective` as keyof PhraseSelection];
+    delete next[`${slot}Adjective2` as keyof PhraseSelection];
     const gKey = `${slot}Gender` as keyof PhraseSelection;
     if (concept.gendered) {
       (next[gKey] as "masc" | "fem") =
@@ -117,6 +122,8 @@ export function applyClear(
       delete next[type];
       delete next[`${type}Number`];
       delete next[`${type}Gender`];
+      delete next[`${type}Adjective`];
+      delete next[`${type}Adjective2`];
     }
     delete next.routeSpecifier;
   }
@@ -150,7 +157,15 @@ export function applyClear(
   if (COMPLEMENT_KEY_SET.has(slot)) {
     delete next[`${slot}Number` as keyof PhraseSelection];
     delete next[`${slot}Gender` as keyof PhraseSelection];
+    delete next[`${slot}Adjective` as keyof PhraseSelection];
+    delete next[`${slot}Adjective2` as keyof PhraseSelection];
     if (slot === "route") delete next.routeSpecifier;
+  }
+  // Clearing a complement's first adjective drops the chained second one.
+  for (const type of COMPLEMENT_TYPES) {
+    if (slot === `${type}Adjective`) {
+      delete next[`${type}Adjective2` as keyof PhraseSelection];
+    }
   }
   return next;
 }

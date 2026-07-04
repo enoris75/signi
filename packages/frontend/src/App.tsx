@@ -29,7 +29,10 @@ export default function App() {
         concept: concept.id,
         number: selection[`${type}Number`],
         gender: selection[`${type}Gender`],
-        adjectives: [],
+        adjectives: [
+          selection[`${type}Adjective`]?.id,
+          selection[`${type}Adjective2`]?.id,
+        ].filter((id): id is string => Boolean(id)),
       },
       specifiers:
         type === "route" && selection.routeSpecifier
