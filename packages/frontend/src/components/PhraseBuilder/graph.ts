@@ -122,6 +122,10 @@ export function buildGraph({
       edges.push(
         pctEdge(pos("verb"), pos("verbNegative"), MUI_COLOR_HEX.secondary),
       );
+    if (shownMap.verbTense)
+      edges.push(
+        pctEdge(pos("verb"), pos("verbTense"), MUI_COLOR_HEX.secondary),
+      );
     if (shownMap.subjectNumber)
       edges.push(pctEdge(pos("subject"), pos("subjectNumber"), "#888"));
     if (shownMap.subjectGender)
@@ -197,6 +201,7 @@ export function buildGraph({
         nodeKeys: [
           "verb",
           ...(shownMap.verbNegative ? ["verbNegative"] : []),
+          ...(shownMap.verbTense ? ["verbTense"] : []),
           ...(shownMap.modifier ? ["modifier"] : []),
         ],
       },

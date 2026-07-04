@@ -4,6 +4,7 @@ import {
   NegativeToggleBox,
   SatelliteRow,
   SpecifierSelector,
+  TenseToggleBox,
 } from "./Boxes.tsx";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
@@ -21,6 +22,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     complementToggleIcons,
     groupRects,
     handleToggleNegative,
+    handleCycleTense,
     handleSelectSpecifier,
   } = ctx;
 
@@ -40,6 +42,11 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {shownMap.verbNegative && (
         <Box {...makeDragProps("verbNegative", handleToggleNegative)}>
           <NegativeToggleBox value={selection.verbNegative ?? false} />
+        </Box>
+      )}
+      {shownMap.verbTense && (
+        <Box {...makeDragProps("verbTense", handleCycleTense)}>
+          <TenseToggleBox value={selection.verbTense ?? "present"} />
         </Box>
       )}
 

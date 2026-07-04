@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
 import { pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 type Case = 'nom' | 'acc' | 'dat';
@@ -46,12 +46,19 @@ function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
   return gender === 'masc' ? 'dem' : gender === 'fem' ? 'der' : 'dem';
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
+function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
-  const key = `${person}${number === 'plural' ? 'pl' : 'sg'}_present`;
-  return forms[key] ?? forms['base'] ?? '';
+  const n = number === 'plural' ? 'pl' : 'sg';
+  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
+
+// Present-tense forms of the auxiliary "werden", used to build the periphrastic
+// future ("ich werde essen"). The infinitive is placed at the clause end.
+const WERDEN: Record<string, string> = {
+  '1sg': 'werde', '2sg': 'wirst', '3sg': 'wird',
+  '1pl': 'werden', '2pl': 'werdet', '3pl': 'werden',
+};
 
 function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
   const forms = np.head.forms;
@@ -129,10 +136,20 @@ export const germanEngine: LanguageEngine = {
   language: 'de',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
     const subjectText = subjectPhrase(subject);
-    const verbText = conjugate(verb.forms, subject.head.forms);
+    // Future is periphrastic: finite "werden" sits in the V2 slot and the
+    // infinitive closes the clause ("ich werde das Brot essen"). Present/past
+    // put the single finite verb in V2 with no tail.
+    const person = subject.head.forms['person'] ?? '3';
+    const number = subject.head.forms['number'] ?? 'singular';
+    const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
+    const isFuture = tense === 'future';
+    const verbText = isFuture
+      ? (WERDEN[pn] ?? 'wird')
+      : conjugate(verb.forms, subject.head.forms, tense);
+    const infinitiveTail = isFuture ? (verb.forms['base'] ?? '') : '';
     const directObjectText = directObject
       ? nounPhrase(directObject, 'acc')
       : '';
@@ -150,7 +167,7 @@ export const germanEngine: LanguageEngine = {
     const negBefore = applyNicht && modifierText ? 'nicht' : '';
     const negAfter  = applyNicht && !modifierText ? 'nicht' : '';
     const complementsText = complementsPhrase(phrase.complements);
-    return [subjectText, verbText, negBefore, modifierText, indirectObjectText, directObjectText, complementsText, negAfter]
+    return [subjectText, verbText, negBefore, modifierText, indirectObjectText, directObjectText, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
   },
 };

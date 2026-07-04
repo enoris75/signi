@@ -5,6 +5,20 @@ export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
 /**
+ * Verb tense the phrase is rendered in. Only the simple tenses today; the
+ * imperfect/continuous aspect is reserved for a later split of `past`.
+ */
+export type Tense = 'present' | 'past' | 'future';
+
+export const TENSES: Tense[] = ['present', 'past', 'future'];
+
+export const TENSE_LABELS: Record<Tense, string> = {
+  present: 'Present',
+  past: 'Past',
+  future: 'Future',
+};
+
+/**
  * Semantic complement types — the "varieties" of indirect object a verb can
  * license. English collapses these into a single category, but each takes a
  * distinct adposition (and case, in German) across languages. Verbs declare
@@ -87,6 +101,7 @@ export interface VerbPhrase {
   verb: string;                    // core verb id
   negative?: boolean;
   modifier?: string;               // adverb id
+  tense?: Tense;                   // defaults to 'present'
 }
 
 /**

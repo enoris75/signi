@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
 import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function subjectWord(forms: Record<string, string>): string {
@@ -45,14 +45,20 @@ export const japaneseEngine: LanguageEngine = {
   language: 'ja',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
     const subjectText = npAdj(subject) + subjectWord(subject.head.forms) + 'は';
     const masuPresent = verb.forms['masu_present'] ?? verb.forms['base'] ?? '';
-    // Negative: ます → ません
-    const verbText = verbNegative && masuPresent.endsWith('ます')
-      ? masuPresent.slice(0, -2) + 'ません'
-      : masuPresent;
+    // The polite past is the masu-stem + ました (negative ませんでした). Japanese
+    // has no dedicated future, so future reuses the present (masu) form.
+    const stem: string | null = masuPresent.endsWith('ます') ? masuPresent.slice(0, -2) : null;
+    let verbText: string;
+    if (tense === 'past' && stem !== null) {
+      verbText = verbNegative ? stem + 'ませんでした' : stem + 'ました';
+    } else {
+      // present / future — ます, negated to ません
+      verbText = verbNegative && stem !== null ? stem + 'ません' : masuPresent;
+    }
     const directObjectText = directObject
       ? npAdj(directObject) + (directObject.head.forms['base'] ?? '') + 'を'
       : '';

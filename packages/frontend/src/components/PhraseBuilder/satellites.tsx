@@ -3,6 +3,7 @@ import BrushIcon from "@mui/icons-material/Brush";
 import NumbersIcon from "@mui/icons-material/Numbers";
 import WcIcon from "@mui/icons-material/Wc";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
+import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TuneIcon from "@mui/icons-material/Tune";
 import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -11,6 +12,7 @@ import RouteIcon from "@mui/icons-material/Route";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
+  TENSE_LABELS,
   type Concept,
   type ComplementType,
 } from "@signi/shared";
@@ -118,6 +120,17 @@ export function buildSatellites(
       hasValue: Boolean(selection.verbNegative),
       alwaysSet: true,
       valueLabel: selection.verbNegative ? "Negative" : "Positive",
+    },
+    {
+      key: "verbTense",
+      parent: "verb",
+      label: "Tense",
+      icon: <AccessTimeIcon sx={iconSx} />,
+      available: true,
+      // Non-default (solid) once the tense is anything but the implicit present.
+      hasValue: Boolean(selection.verbTense) && selection.verbTense !== "present",
+      alwaysSet: true,
+      valueLabel: TENSE_LABELS[selection.verbTense ?? "present"],
     },
     {
       key: "modifier",

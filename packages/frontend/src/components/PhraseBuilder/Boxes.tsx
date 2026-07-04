@@ -10,7 +10,9 @@ import {
   Concept,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
+  TENSE_LABELS,
   type PathSpecifier,
+  type Tense,
 } from "@signi/shared";
 import { ReactNode } from "react";
 import { SlotConfig } from "./interfaces";
@@ -331,6 +333,56 @@ export function SpecifierSelector({
         );
       })}
     </Box>
+  );
+}
+
+export function TenseToggleBox({ value }: { value: Tense }) {
+  // Present is the implicit default → styled neutral; past/future read as "set".
+  const active = value !== "present";
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        px: 1.5,
+        py: 0.75,
+        minWidth: 80,
+        cursor: "inherit",
+        borderRadius: 2,
+        borderWidth: 2,
+        borderColor: active ? "secondary.main" : "divider",
+        bgcolor: active ? "secondary.50" : "background.paper",
+        transition: "border-color 0.15s, background-color 0.15s",
+        userSelect: "none",
+        "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+          display: "block",
+          mb: 0.25,
+        }}
+      >
+        Tense
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Lora", Georgia, serif',
+          fontSize: "0.9rem",
+          fontWeight: 600,
+          fontStyle: "italic",
+          color: active ? "secondary.dark" : "text.primary",
+          lineHeight: 1.3,
+        }}
+      >
+        {TENSE_LABELS[value]}
+      </Typography>
+    </Paper>
   );
 }
 

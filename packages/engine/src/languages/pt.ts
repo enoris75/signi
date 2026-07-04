@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
 import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
@@ -42,7 +42,7 @@ function ptAdj(np: ResolvedNounPhrase): string {
   return np.adjectives
     .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
     .filter(Boolean)
-    .join(' ');
+    .join(' e ');
 }
 
 /** Portuguese "em" (in) + article: em+o=no, em+a=na, em+os=nos, em+as=nas. */
@@ -76,11 +76,11 @@ function datPrep(forms: Record<string, string>, plural = false): string {
   return `a ${art}`;
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
+function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
-  const key = `${person}${number === 'plural' ? 'pl' : 'sg'}_present`;
-  return forms[key] ?? forms['base'] ?? '';
+  const n = number === 'plural' ? 'pl' : 'sg';
+  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: string): string {
@@ -148,10 +148,10 @@ export const portugueseEngine: LanguageEngine = {
   language: 'pt',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
 
     const subjectText = subjectPhrase(subject.head.forms, ptAdj(subject));
-    const conjugated = conjugate(verb.forms, subject.head.forms);
+    const conjugated = conjugate(verb.forms, subject.head.forms, tense);
     const verbText = verbNegative ? `não ${conjugated}` : conjugated;
     const directObjectText = directObject
       ? nounPhrase(directObject.head.forms, ptAdj(directObject))

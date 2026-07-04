@@ -56,6 +56,7 @@ export default function App() {
     verbPhrase: {
       verb: selection.verb?.id as string,
       negative: selection.verbNegative,
+      tense: selection.verbTense,
       modifier: selection.modifier?.id,
     },
     directObject: selection.directObject

@@ -69,7 +69,7 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
 
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
-    const { verb, negative, modifier } = plan.verbPhrase;
+    const { verb, negative, modifier, tense } = plan.verbPhrase;
 
     // Complement noun phrases (locative / direction / source / route). Each is a
     // noun phrase with any specifiers carried straight through as plain data.
@@ -90,6 +90,7 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
       verbPhrase: {
         verb: resolve(verb, engine.language, lookup),
         negative,
+        tense,
         modifier: modifier ? resolve(modifier, engine.language, lookup) : undefined,
       },
       directObject: plan.directObject ? resolveNounPhrase(plan.directObject, engine.language, lookup) : undefined,

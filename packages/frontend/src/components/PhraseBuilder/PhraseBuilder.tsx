@@ -2,6 +2,7 @@ import React, { useLayoutEffect, useRef, useState } from "react";
 import { Box, Paper, Typography } from "@mui/material";
 import {
   COMPLEMENT_TYPES,
+  TENSES,
   type Concept,
   type ComplementType,
   type PathSpecifier,
@@ -156,6 +157,14 @@ export function PhraseBuilder({
 
   function handleToggleNegative() {
     onPhraseUpdate((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
+  }
+
+  // Cycle the verb tense present → past → future → present.
+  function handleCycleTense() {
+    onPhraseUpdate((prev) => {
+      const idx = TENSES.indexOf(prev.verbTense ?? "present");
+      return { ...prev, verbTense: TENSES[(idx + 1) % TENSES.length] };
+    });
   }
 
   // Set the route complement's path relation (through / under / over / …).
@@ -409,6 +418,7 @@ export function PhraseBuilder({
     handleToggleNumber,
     handleToggleGender,
     handleToggleNegative,
+    handleCycleTense,
     handleSelectSpecifier,
     handleToggleCollapse,
     handleRemoveComplement,

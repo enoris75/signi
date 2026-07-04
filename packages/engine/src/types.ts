@@ -1,4 +1,4 @@
-import type { ComplementType, LanguageCode, PathSpecifier, Specifier } from '@signi/shared';
+import type { ComplementType, LanguageCode, PathSpecifier, Specifier, Tense } from '@signi/shared';
 
 export interface ConceptForms {
   conceptId: string;
@@ -11,10 +11,11 @@ export interface ResolvedNounPhrase {
   adjectives: ConceptForms[];
 }
 
-/** A resolved verb phrase: the verb, negation flag, and resolved adverb. */
+/** A resolved verb phrase: the verb, negation flag, tense, and resolved adverb. */
 export interface ResolvedVerbPhrase {
   verb: ConceptForms;
   negative?: boolean;
+  tense?: Tense;
   modifier?: ConceptForms;
 }
 

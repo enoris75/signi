@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
 import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
@@ -25,14 +25,24 @@ function agreeAdj(base: string, gender: string, plural: boolean): string {
   return plural ? pluralize(sg) : sg;
 }
 
+/** Coordinate adjectives with "y", switching to "e" before an i-/hi- sound (but not "hie-"). */
+function coordinate(parts: string[]): string {
+  return parts.reduce((acc, w, i) => {
+    if (i === 0) return w;
+    const conj = /^(i|hi(?!e))/i.test(w) ? 'e' : 'y';
+    return `${acc} ${conj} ${w}`;
+  }, '');
+}
+
 /** Join a noun phrase's adjectives, each agreed with the head's gender/number. */
 function esAdj(np: ResolvedNounPhrase): string {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
-  return np.adjectives
-    .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
-    .filter(Boolean)
-    .join(' ');
+  return coordinate(
+    np.adjectives
+      .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
+      .filter(Boolean),
+  );
 }
 
 /** Spanish "de" (from) + article: de+el=del; otherwise "de la/los/las". */
@@ -52,11 +62,11 @@ function datPrep(forms: Record<string, string>, plural = false): string {
   return `a ${art}`;
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
+function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
-  const key = `${person}${number === 'plural' ? 'pl' : 'sg'}_present`;
-  return forms[key] ?? forms['base'] ?? '';
+  const n = number === 'plural' ? 'pl' : 'sg';
+  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: string): string {
@@ -124,10 +134,10 @@ export const spanishEngine: LanguageEngine = {
   language: 'es',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
 
     const subjectText = subjectPhrase(subject.head.forms, esAdj(subject));
-    const conjugated = conjugate(verb.forms, subject.head.forms);
+    const conjugated = conjugate(verb.forms, subject.head.forms, tense);
     const verbText = verbNegative ? `no ${conjugated}` : conjugated;
     const directObjectText = directObject
       ? nounPhrase(directObject.head.forms, esAdj(directObject))

@@ -1,9 +1,18 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
+import { pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouàèéìòù]/i;
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */
 const SPECIAL_START = /^(s[^aeiou]|z|ps|gn|x|y)/i;
+
+/**
+ * Concept IDs of the common short adjectives that idiomatically precede the noun
+ * in Italian (the "BAGS"-style set: beauty, age, goodness, size). Everything else
+ * (e.g. felice, triste, forte, colours) stays after the noun. Both size adjectives
+ * (grande/piccolo) precede, so they behave consistently — the trade-off is that a
+ * size + beauty pair stacks before the noun ("il grande bel cane").
+ */
+const PRENOMINAL = new Set(['BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL']);
 
 function isPlural(forms: Record<string, string>): boolean {
   return (forms['number'] ?? forms['count']) === 'plural';
@@ -13,9 +22,14 @@ function surface(forms: Record<string, string>, plural: boolean): string {
   return (plural ? forms['plural'] : forms['base']) ?? forms['base'] ?? '';
 }
 
-function defArticle(forms: Record<string, string>, plural = false): string {
+/**
+ * The definite article, selected by gender/number and by the sound of the word that
+ * actually follows it (`lead`) — which is the first prenominal adjective when present,
+ * otherwise the noun itself ("il gatto" but "lo studente", "il bravo studente").
+ */
+function defArticle(forms: Record<string, string>, plural = false, lead?: string): string {
   const gender = forms['gender'] ?? 'masc';
-  const base = surface(forms, plural);
+  const base = lead ?? surface(forms, plural);
   const vowel = VOWEL_START.test(base);
   if (gender === 'fem') {
     if (plural) return 'le';
@@ -32,12 +46,19 @@ function joinArt(head: string, word: string): string {
   return head.endsWith("'") ? `${head}${word}` : `${head} ${word}`;
 }
 
+/** Join a sequence of words, dropping the space after an elided word ("bell'amico"). */
+function joinWords(words: string[]): string {
+  return words
+    .filter(Boolean)
+    .reduce((acc, w) => (!acc ? w : acc.endsWith("'") ? `${acc}${w}` : `${acc} ${w}`), '');
+}
+
 /**
  * Italian "a" (to) + definite article contractions:
  * a+il=al, a+lo=allo, a+la=alla, a+l'=all', a+i=ai, a+gli=agli, a+le=alle
  */
-function datPrep(forms: Record<string, string>, plural = false): string {
-  const art = defArticle(forms, plural);
+function datPrep(forms: Record<string, string>, plural = false, lead?: string): string {
+  const art = defArticle(forms, plural, lead);
   switch (art) {
     case 'il':  return 'al';
     case 'lo':  return 'allo';
@@ -54,8 +75,8 @@ function datPrep(forms: Record<string, string>, plural = false): string {
  * Generic Italian simple-preposition + definite-article fusion for "a" (to),
  * "da" (from) and "in" (in): al/dal/nel, allo/dallo/nello, alla/dalla/nella, all'/dall'/nell', …
  */
-function prepArt(prep: 'a' | 'da' | 'in', forms: Record<string, string>, plural = false): string {
-  const art = defArticle(forms, plural);
+function prepArt(prep: 'a' | 'da' | 'in', forms: Record<string, string>, plural = false, lead?: string): string {
+  const art = defArticle(forms, plural, lead);
   const prefix = prep === 'a' ? 'a' : prep === 'da' ? 'da' : 'ne';
   let suffix: string;
   switch (art) {
@@ -96,35 +117,97 @@ function agreeAdj(base: string, gender: string, plural: boolean): string {
   return base;
 }
 
-/** Join a noun phrase's adjectives, each agreed with the head's gender/number. */
-function itAdj(np: ResolvedNounPhrase): string {
-  const gender = np.head.forms['gender'] ?? 'masc';
-  const plural = isPlural(np.head.forms);
-  return np.adjectives
+/**
+ * Prenominal "bello", which inflects like the definite article according to the sound
+ * of the word that follows it: bel/bello/bell'/bei/begli · bella/belle/bell'.
+ */
+function belloForm(gender: string, plural: boolean, next: string): string {
+  const vowel = VOWEL_START.test(next);
+  const special = SPECIAL_START.test(next);
+  if (gender === 'fem') {
+    if (plural) return 'belle';
+    return vowel ? "bell'" : 'bella';
+  }
+  if (plural) return (vowel || special) ? 'begli' : 'bei';
+  if (vowel) return "bell'";
+  return special ? 'bello' : 'bel';
+}
+
+/**
+ * Prenominal "buono", which apocopates in the masculine singular ("il buon cane",
+ * "il buon amico") except before s-impura/z ("il buono studente"); fem "buon'" elides
+ * before a vowel ("la buon'amica").
+ */
+function buonoForm(gender: string, plural: boolean, next: string): string {
+  const vowel = VOWEL_START.test(next);
+  const special = SPECIAL_START.test(next);
+  if (gender === 'fem') {
+    if (plural) return 'buone';
+    return vowel ? "buon'" : 'buona';
+  }
+  if (plural) return 'buoni';
+  return special ? 'buono' : 'buon';
+}
+
+function prenominalSurface(a: ConceptForms, gender: string, plural: boolean, next: string): string {
+  if (a.conceptId === 'BEAUTIFUL') return belloForm(gender, plural, next);
+  if (a.conceptId === 'GOOD') return buonoForm(gender, plural, next);
+  return agreeAdj(a.forms['base'] ?? '', gender, plural);
+}
+
+/** Split a phrase's adjectives into those that precede the noun and those that follow. */
+function splitAdjectives(np: ResolvedNounPhrase): { pre: ConceptForms[]; post: ConceptForms[] } {
+  const pre: ConceptForms[] = [];
+  const post: ConceptForms[] = [];
+  for (const a of np.adjectives) {
+    (PRENOMINAL.has(a.conceptId) ? pre : post).push(a);
+  }
+  return { pre, post };
+}
+
+/**
+ * Surface forms of the prenominal adjectives, resolved right-to-left so each (bello in
+ * particular) can agree with the sound of the word immediately following it.
+ */
+function prenominalChain(pre: ConceptForms[], gender: string, plural: boolean, noun: string): string[] {
+  const out: string[] = [];
+  let next = noun;
+  for (let i = pre.length - 1; i >= 0; i--) {
+    const surf = prenominalSurface(pre[i], gender, plural, next);
+    if (surf) {
+      out.unshift(surf);
+      next = surf;
+    }
+  }
+  return out;
+}
+
+/**
+ * Render a noun phrase: [head] [prenominal adjectives] noun [postnominal adjectives].
+ * `headFor` builds the article/preposition, receiving the plurality and the surface of
+ * the word that will follow it (`lead`) so it can pick the right form/elision.
+ */
+function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: string) => string): string {
+  const forms = np.head.forms;
+  const gender = forms['gender'] ?? 'masc';
+  const plural = isPlural(forms);
+  const noun = surface(forms, plural);
+  const { pre, post } = splitAdjectives(np);
+  const preSurfaces = prenominalChain(pre, gender, plural, noun);
+  const lead = preSurfaces[0] ?? noun;
+  const core = joinArt(headFor(plural, lead), joinWords([...preSurfaces, noun]));
+  const postStr = post
     .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
     .filter(Boolean)
-    .join(' ');
+    .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
+  return postStr ? `${core} ${postStr}` : core;
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
+function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
-  const key = `${person}${number === 'plural' ? 'pl' : 'sg'}_present`;
-  return forms[key] ?? forms['base'] ?? '';
-}
-
-function nounPhrase(forms: Record<string, string>, adj?: string): string {
-  const plural = isPlural(forms);
-  const word = surface(forms, plural);
-  const a = adj ? ` ${adj}` : '';
-  return `${joinArt(defArticle(forms, plural), word)}${a}`;
-}
-
-function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
-  const plural = isPlural(forms);
-  const word = surface(forms, plural);
-  const a = adj ? ` ${adj}` : '';
-  return `${joinArt(datPrep(forms, plural), word)}${a}`;
+  const n = number === 'plural' ? 'pl' : 'sg';
+  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -133,19 +216,19 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, itAdj(np)); // noun — definite article
+  return renderNP(np, (plural, lead) => defArticle(forms, plural, lead)); // noun — definite article
 }
 
 /** route path relation → preposition (+ "a"-fusion for those that govern "a"). */
-function routeHead(c: ResolvedComplement, plural: boolean): string {
+function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string {
   const f = c.phrase.head.forms;
-  const art = defArticle(f, plural);
+  const art = defArticle(f, plural, lead);
   switch (pathSpecifier(c)) {
     case 'under':       return `sotto ${art}`;
     case 'over':        return `sopra ${art}`;
-    case 'around':      return `intorno ${datPrep(f, plural)}`;
+    case 'around':      return `intorno ${datPrep(f, plural, lead)}`;
     case 'behind':      return `dietro ${art}`;
-    case 'in_front_of': return `davanti ${datPrep(f, plural)}`;
+    case 'in_front_of': return `davanti ${datPrep(f, plural, lead)}`;
     case 'through':
     default:            return `attraverso ${art}`;
   }
@@ -158,17 +241,13 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      const plural = isPlural(f);
-      const word = surface(f, plural);
-      const a = itAdj(c.phrase);
-      const adj = a ? ` ${a}` : '';
       // locative→in, direction→a, source→da (fuse with article); route→path preposition
-      const head =
-        type === 'locative'  ? prepArt('in', f, plural) :
-        type === 'direction' ? prepArt('a', f, plural) :
-        type === 'source'    ? prepArt('da', f, plural) :
-        routeHead(c, plural);
-      return `${joinArt(head, word)}${adj}`;
+      const headFor = (plural: boolean, lead: string): string =>
+        type === 'locative'  ? prepArt('in', f, plural, lead) :
+        type === 'direction' ? prepArt('a', f, plural, lead) :
+        type === 'source'    ? prepArt('da', f, plural, lead) :
+        routeHead(c, plural, lead);
+      return renderNP(c.phrase, headFor);
     })
     .filter(Boolean)
     .join(' ');
@@ -178,19 +257,19 @@ export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
 
     const subjectText = subjectPhrase(subject);
-    const verbText = conjugate(verb.forms, subject.head.forms);
+    const verbText = conjugate(verb.forms, subject.head.forms, tense);
     // "mai" always requires "non": "io non bevo mai" even without verbNegative
     const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
     const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
     const directObjectText = directObject
-      ? nounPhrase(directObject.head.forms, itAdj(directObject))
+      ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
       : '';
     // S [non] V Adv DirectObj IndirectObj(a+article)
     const indirectObjectText = indirectObject
-      ? indirectNounPhrase(indirectObject.head.forms, itAdj(indirectObject))
+      ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     const complementsText = complementsPhrase(phrase.complements);

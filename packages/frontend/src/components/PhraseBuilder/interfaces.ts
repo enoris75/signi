@@ -1,4 +1,4 @@
-import type { Concept, ComplementType, GrammaticalRole, PathSpecifier } from "@signi/shared";
+import type { Concept, ComplementType, GrammaticalRole, PathSpecifier, Tense } from "@signi/shared";
 
 
 export interface SlotConfig {
@@ -26,6 +26,7 @@ export interface PhraseSelection {
     subject?: Concept;
     verb?: Concept;
     verbNegative?: boolean;
+    verbTense?: Tense;
     directObject?: Concept;
     indirectObject?: Concept;
     modifier?: Concept;

@@ -58,6 +58,7 @@ export interface PhraseRenderContext {
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
   handleToggleNegative: () => void;
+  handleCycleTense: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: ComplementType) => void;

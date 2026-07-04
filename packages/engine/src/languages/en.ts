@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
 import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const PREP: Record<ComplementType, string> = {
@@ -24,11 +24,13 @@ function getArticle(forms: Record<string, string>): string {
   return /^[aeiou]/i.test(base) ? 'an' : 'a';
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>): string {
+function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
-  const key = `${person}${number === 'plural' ? 'pl' : 'sg'}_present`;
-  return forms[key] ?? forms['base'] ?? '';
+  const n = number === 'plural' ? 'pl' : 'sg';
+  // English past ("ate") is invariant across persons, so a single `past` form
+  // covers all; present keeps its per-person keys.
+  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
 function nounPhrase(forms: Record<string, string>, definite = false, adj?: string): string {
@@ -64,7 +66,7 @@ export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
     const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
     const directObjectText = directObject
@@ -84,14 +86,22 @@ export const englishEngine: LanguageEngine = {
     if (verbNegative && !modifierIsNegative) {
       const person = subject.head.forms['person'] ?? '3';
       const number = subject.head.forms['number'] ?? 'singular';
-      const aux = (person === '3' && number === 'singular') ? 'does not' : 'do not';
+      // Negation auxiliary is tense-driven: "do/does not" (present),
+      // "did not" (past), "will not" (future) — all followed by the bare base.
+      const aux =
+        tense === 'past'   ? 'did not' :
+        tense === 'future' ? 'will not' :
+        (person === '3' && number === 'singular') ? 'does not' : 'do not';
       const base = verb.forms['base'] ?? conjugate(verb.forms, subject.head.forms);
       // Frequency adverbs slot between aux and base: "do not always drink"
       const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
       const trailingMod = isFrequency ? '' : modifierText;
       parts = [subjectText, negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
     } else {
-      const verbText = conjugate(verb.forms, subject.head.forms);
+      // Future is periphrastic ("will eat"); present/past come from the forms map.
+      const verbText = tense === 'future'
+        ? `will ${verb.forms['base'] ?? ''}`
+        : conjugate(verb.forms, subject.head.forms, tense);
       // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
       // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
       const preVerb  = isFrequency ? modifierText : '';
