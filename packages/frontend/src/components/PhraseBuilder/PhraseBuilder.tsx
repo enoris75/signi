@@ -30,7 +30,7 @@ import { buildGraph } from "./graph.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
-import { PhraseGraphLayer } from "./PhraseGraphLayer.tsx";
+import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 
 interface PhraseBuilderProps {
@@ -497,7 +497,7 @@ export function PhraseBuilder({
                     touchAction: "none",
                   }}
                 >
-                  <PhraseGraphLayer
+                  <ConnectorsLayer
                     svgSize={svgSize}
                     groupEdges={groupEdges}
                     edges={edges}

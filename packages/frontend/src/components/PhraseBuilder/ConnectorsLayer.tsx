@@ -5,7 +5,7 @@ import type { Edge } from "./graph.ts";
 // dashed box ↔ verb phrase) and the faint dashed satellite/adjective links. The
 // dashed group boxes themselves are drawn by each Noun/VerbPhraseBuilder now, so
 // this layer only paints the connecting lines.
-export function PhraseGraphLayer({
+export function ConnectorsLayer({
   svgSize,
   groupEdges,
   edges,
