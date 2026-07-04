@@ -1,5 +1,37 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
-import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+
+type Case = 'nom' | 'acc' | 'dat';
+type Slot = 'masc' | 'fem' | 'neut' | 'plural';
+
+// Weak adjective declension (after a definite article) — the only pattern the
+// engine needs, since every noun phrase here is introduced by der/die/das.
+const WEAK_ENDINGS: Record<Case, Record<Slot, string>> = {
+  nom: { masc: 'e',  fem: 'e',  neut: 'e',  plural: 'en' },
+  acc: { masc: 'en', fem: 'e',  neut: 'e',  plural: 'en' },
+  dat: { masc: 'en', fem: 'en', neut: 'en', plural: 'en' },
+};
+
+function declineAdj(base: string, _case: Case, gender: string, plural: boolean): string {
+  const slot: Slot = plural ? 'plural' : gender === 'masc' || gender === 'fem' ? gender : 'neut';
+  let ending = WEAK_ENDINGS[_case][slot];
+  // Stems already ending in -e (e.g. "müde") absorb the ending's leading e.
+  if (base.endsWith('e')) ending = ending.slice(1);
+  return base + ending;
+}
+
+// Decline every attributive adjective of a noun phrase for the given case,
+// agreeing with the head's gender/number. Returns "" when there are none.
+function adjPhrase(np: ResolvedNounPhrase, _case: Case): string {
+  const f = np.head.forms;
+  const gender = f['gender'] ?? 'neut';
+  const plural = (f['number'] ?? f['count']) === 'plural';
+  return np.adjectives
+    .map((a) => a.forms['base'])
+    .filter((b): b is string => Boolean(b))
+    .map((b) => declineAdj(b, _case, gender, plural))
+    .join(' ');
+}
 
 function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural = false): string {
   if (plural) return _case === 'dat' ? 'den' : 'die';
@@ -21,34 +53,44 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   return forms[key] ?? forms['base'] ?? '';
 }
 
-function nounPhrase(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', adj?: string): string {
+function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
+  const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? `${adj} ` : '';
+  const declined = adjPhrase(np, _case);
+  const a = declined ? `${declined} ` : '';
   return `${defArticle(forms, _case, plural)} ${a}${word}`;
 }
 
-function subjectPhrase(forms: Record<string, string>, adj?: string): string {
+function subjectPhrase(np: ResolvedNounPhrase): string {
+  const forms = np.head.forms;
   if (forms['person']) {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, 'nom', adj); // noun — nominative article
+  return nounPhrase(np, 'nom'); // noun — nominative article
 }
 
-// route path relation → preposition + article. durch/um govern accusative;
-// the static-relation two-way preps (unter/über/hinter/vor) take dative here.
+// durch/um govern accusative; the static-relation two-way preps
+// (unter/über/hinter/vor) take dative here.
+function routeCase(c: ResolvedComplement): 'acc' | 'dat' {
+  const spec = pathSpecifier(c);
+  return spec === 'through' || spec === 'around' ? 'acc' : 'dat';
+}
+
+// route path relation → preposition + article.
 function routeHead(c: ResolvedComplement, plural: boolean): string {
   const f = c.phrase.head.forms;
+  const art = defArticle(f, routeCase(c), plural);
   switch (pathSpecifier(c)) {
-    case 'under':       return `unter ${defArticle(f, 'dat', plural)}`;
-    case 'over':        return `über ${defArticle(f, 'dat', plural)}`;
-    case 'around':      return `um ${defArticle(f, 'acc', plural)}`;
-    case 'behind':      return `hinter ${defArticle(f, 'dat', plural)}`;
-    case 'in_front_of': return `vor ${defArticle(f, 'dat', plural)}`;
+    case 'under':       return `unter ${art}`;
+    case 'over':        return `über ${art}`;
+    case 'around':      return `um ${art}`;
+    case 'behind':      return `hinter ${art}`;
+    case 'in_front_of': return `vor ${art}`;
     case 'through':
-    default:            return `durch ${defArticle(f, 'acc', plural)}`;
+    default:            return `durch ${art}`;
   }
 }
 
@@ -61,19 +103,22 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const f = c.phrase.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const a = npAdj(c.phrase);
-      const adj = a ? `${a} ` : '';
       // route → path preposition (+ its case); locative/direction/source → two-way
       // preps + dative with the usual in+dem=im, zu+dem=zum, zu+der=zur fusions.
       let head: string;
+      let _case: 'nom' | 'acc' | 'dat';
       if (type === 'route') {
+        _case = routeCase(c);
         head = routeHead(c, plural);
       } else {
+        _case = 'dat';
         const art = defArticle(f, 'dat', plural); // dem / der / den
         if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
         else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
         else /* source */         head = `aus ${art}`;
       }
+      const declined = adjPhrase(c.phrase, _case);
+      const adj = declined ? `${declined} ` : '';
       return `${head} ${adj}${word}`;
     })
     .filter(Boolean)
@@ -86,14 +131,14 @@ export const germanEngine: LanguageEngine = {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
     const { verb, negative: verbNegative, modifier } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
+    const subjectText = subjectPhrase(subject);
     const verbText = conjugate(verb.forms, subject.head.forms);
     const directObjectText = directObject
-      ? nounPhrase(directObject.head.forms, 'acc', npAdj(directObject))
+      ? nounPhrase(directObject, 'acc')
       : '';
     // German: dative (indirect) comes BEFORE accusative (direct) when both are noun phrases
     const indirectObjectText = indirectObject
-      ? nounPhrase(indirectObject.head.forms, 'dat', npAdj(indirectObject))
+      ? nounPhrase(indirectObject, 'dat')
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
 
