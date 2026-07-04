@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
 import { PhraseSelection, SlotKey } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET } from "./slots.ts";
+import { COMPLEMENT_KEY_SET, COMPLEMENT_ADJECTIVE_TYPE } from "./slots.ts";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
@@ -44,6 +44,10 @@ export function slotTypeahead({
     case "indirectObjectAdjective2":
       return <AdjectiveTypeahead onSelect={pick} />;
     default:
+      // Complement adjectives (sourceAdjective, directionAdjective2, …) use the
+      // same adjective picker as the core roles.
+      if (COMPLEMENT_ADJECTIVE_TYPE[slotKey])
+        return <AdjectiveTypeahead onSelect={pick} />;
       // Motion/locative complements share the indirect-object picker.
       if (COMPLEMENT_KEY_SET.has(slotKey))
         return <IndirectObjectTypeahead onSelect={pick} />;
