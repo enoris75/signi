@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier } from '@signi/shared';
-import { adjString, pathSpecifier, type ConceptForms, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const PREP: Record<ComplementType, string> = {
   locative: 'in',
@@ -47,14 +47,14 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
   return nounPhrase(forms, true, adj); // noun — definite article
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptForms>>): string {
+function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
-      return `${prep} ${nounPhrase(c.forms, true)}`;
+      return `${prep} ${nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase))}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -63,17 +63,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptF
 export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
-    const { subject, subjectAdjective, subjectAdjective2, verb, verbNegative,
-      directObject, directObjectAdjective, directObjectAdjective2,
-      indirectObject, indirectObjectAdjective, indirectObjectAdjective2, modifier } = phrase;
+    const { subject, verbPhrase, directObject, indirectObject } = phrase;
+    const { verb, negative: verbNegative, modifier } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject.forms, adjString(subjectAdjective, subjectAdjective2));
+    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
     const directObjectText = directObject
-      ? nounPhrase(directObject.forms, true, adjString(directObjectAdjective, directObjectAdjective2))
+      ? nounPhrase(directObject.head.forms, true, npAdj(directObject))
       : '';
     // Prepositional dative: "to the cat"
     const indirectObjectText = indirectObject
-      ? `to ${nounPhrase(indirectObject.forms, true, adjString(indirectObjectAdjective, indirectObjectAdjective2))}`
+      ? `to ${nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject))}`
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     const isFrequency = modifier?.forms['subtype'] === 'frequency';
@@ -83,16 +82,16 @@ export const englishEngine: LanguageEngine = {
 
     let parts: string[];
     if (verbNegative && !modifierIsNegative) {
-      const person = subject.forms['person'] ?? '3';
-      const number = subject.forms['number'] ?? 'singular';
+      const person = subject.head.forms['person'] ?? '3';
+      const number = subject.head.forms['number'] ?? 'singular';
       const aux = (person === '3' && number === 'singular') ? 'does not' : 'do not';
-      const base = verb.forms['base'] ?? conjugate(verb.forms, subject.forms);
+      const base = verb.forms['base'] ?? conjugate(verb.forms, subject.head.forms);
       // Frequency adverbs slot between aux and base: "do not always drink"
       const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
       const trailingMod = isFrequency ? '' : modifierText;
       parts = [subjectText, negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
     } else {
-      const verbText = conjugate(verb.forms, subject.forms);
+      const verbText = conjugate(verb.forms, subject.head.forms);
       // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
       // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
       const preVerb  = isFrequency ? modifierText : '';

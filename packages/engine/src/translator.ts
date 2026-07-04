@@ -1,5 +1,5 @@
-import type { ComplementType, LexicalEntry, PhrasePlan, Translation } from '@signi/shared';
-import type { LanguageEngine, ResolvedPhrase, ConceptForms } from './types.js';
+import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, Translation } from '@signi/shared';
+import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
 import { frenchEngine } from './languages/fr.js';
@@ -33,77 +33,68 @@ function applyNounGender(forms: Record<string, string>, gender?: 'masc' | 'fem')
   forms['gender'] = 'fem';
 }
 
+/**
+ * Resolve a noun phrase for one language: resolve the head noun/pronoun and apply
+ * number/gender (synthesising the pronoun surface form, or applying noun gender),
+ * then resolve each adjective. This folds together what used to be four duplicated
+ * subject/object/complement blocks.
+ */
+function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup): ResolvedNounPhrase {
+  const head = resolve(np.concept, language, lookup);
+  if (head.forms['person']) {
+    // Pronoun: synthesise the correct surface form as 'base' so all engines can use
+    // their existing `forms['base']` / `forms['plural']` logic unchanged.
+    const number = np.number ?? 'singular';
+    const gender = np.gender ?? 'masc';
+    head.forms['number'] = number;
+    if (number === 'plural') {
+      if (head.forms['plural']) head.forms['base'] = head.forms['plural'];
+    } else if (head.forms['person'] === '3') {
+      const gf = head.forms[`singular_${gender}`];
+      if (gf) head.forms['base'] = gf;
+      head.forms['gender'] = gender;
+    }
+    // 1st / 2nd person singular: base is already the correct form
+  } else {
+    // Noun: apply number then gender
+    const num = np.number ?? 'singular';
+    head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
+    applyNounGender(head.forms, np.gender);
+  }
+  return {
+    head,
+    adjectives: (np.adjectives ?? []).map((id) => resolve(id, language, lookup)),
+  };
+}
+
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
-    const subjectForms = resolve(plan.subject, engine.language, lookup);
-    if (subjectForms.forms['person']) {
-      // Pronoun: synthesise the correct surface form as 'base' so all engines
-      // can use their existing `forms['base']` / `forms['plural']` logic unchanged.
-      const number = plan.subjectNumber ?? 'singular';
-      const gender = plan.subjectGender ?? 'masc';
-      subjectForms.forms['number'] = number;
-      if (number === 'plural') {
-        if (subjectForms.forms['plural']) subjectForms.forms['base'] = subjectForms.forms['plural'];
-      } else if (subjectForms.forms['person'] === '3') {
-        const gf = subjectForms.forms[`singular_${gender}`];
-        if (gf) subjectForms.forms['base'] = gf;
-        subjectForms.forms['gender'] = gender;
-      }
-      // 1st / 2nd person singular: base is already the correct form
-    } else {
-      // Noun subject: apply number then gender
-      const sNum = plan.subjectNumber ?? 'singular';
-      subjectForms.forms['number'] = (sNum === 'plural' && !subjectForms.forms['plural']) ? 'singular' : sNum;
-      applyNounGender(subjectForms.forms, plan.subjectGender);
-    }
-
-    const directObjectForms = plan.directObject ? resolve(plan.directObject, engine.language, lookup) : undefined;
-    if (directObjectForms) {
-      const doNum = plan.directObjectNumber ?? 'singular';
-      directObjectForms.forms['number'] = (doNum === 'plural' && !directObjectForms.forms['plural']) ? 'singular' : doNum;
-      applyNounGender(directObjectForms.forms, plan.directObjectGender);
-    }
-
-    const indirectObjectForms = plan.indirectObject ? resolve(plan.indirectObject, engine.language, lookup) : undefined;
-    if (indirectObjectForms) {
-      const ioNum = plan.indirectObjectNumber ?? 'singular';
-      indirectObjectForms.forms['number'] = (ioNum === 'plural' && !indirectObjectForms.forms['plural']) ? 'singular' : ioNum;
-      applyNounGender(indirectObjectForms.forms, plan.indirectObjectGender);
-    }
-
-    const adj = (id?: string) => (id ? resolve(id, engine.language, lookup) : undefined);
+    const { verb, negative, modifier } = plan.verbPhrase;
 
     // Complement noun phrases (locative / direction / source / route). Each is a
-    // noun resolved with its own number + gender, exactly like an object.
-    let complements: Partial<Record<ComplementType, ConceptForms>> | undefined;
+    // noun phrase with any specifiers carried straight through as plain data.
+    let complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined;
     if (plan.complements) {
       complements = {};
       for (const [type, value] of Object.entries(plan.complements)) {
-        if (!value?.concept) continue;
-        const forms = resolve(value.concept, engine.language, lookup);
-        const num = value.number ?? 'singular';
-        forms.forms['number'] = (num === 'plural' && !forms.forms['plural']) ? 'singular' : num;
-        applyNounGender(forms.forms, value.gender);
-        // Carry the path relation (through / under / over / …) for the route engine.
-        if (value.specifier) forms.forms['specifier'] = value.specifier;
-        complements[type as ComplementType] = forms;
+        if (!value?.phrase?.concept) continue;
+        complements[type as ComplementType] = {
+          phrase: resolveNounPhrase(value.phrase, engine.language, lookup),
+          specifiers: value.specifiers,
+        };
       }
     }
 
     const resolved: ResolvedPhrase = {
-      subject: subjectForms,
-      subjectAdjective: adj(plan.subjectAdjective),
-      subjectAdjective2: adj(plan.subjectAdjective2),
-      verb: resolve(plan.verb, engine.language, lookup),
-      verbNegative: plan.verbNegative,
-      directObject: directObjectForms,
-      directObjectAdjective: adj(plan.directObjectAdjective),
-      directObjectAdjective2: adj(plan.directObjectAdjective2),
-      indirectObject: indirectObjectForms,
-      indirectObjectAdjective: adj(plan.indirectObjectAdjective),
-      indirectObjectAdjective2: adj(plan.indirectObjectAdjective2),
+      subject: resolveNounPhrase(plan.subject, engine.language, lookup),
+      verbPhrase: {
+        verb: resolve(verb, engine.language, lookup),
+        negative,
+        modifier: modifier ? resolve(modifier, engine.language, lookup) : undefined,
+      },
+      directObject: plan.directObject ? resolveNounPhrase(plan.directObject, engine.language, lookup) : undefined,
+      indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
       complements,
-      modifier: plan.modifier ? resolve(plan.modifier, engine.language, lookup) : undefined,
     };
     return {
       language: engine.language,

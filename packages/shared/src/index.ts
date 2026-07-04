@@ -70,13 +70,39 @@ export interface Concept {
   complements?: ComplementType[]; // motion/locative complements a verb licenses
 }
 
-/** A single complement noun phrase (e.g. the "the park" in "through the park"). */
-export interface ComplementValue {
-  concept: string;
+/**
+ * A noun phrase: a core noun or pronoun, optionally modified by adjectives, and
+ * carrying its own number/gender. Subjects and objects are all noun phrases.
+ */
+export interface NounPhrase {
+  concept: string;                 // core noun or pronoun id
   number?: 'singular' | 'plural';
   gender?: 'masc' | 'fem';
-  /** Only meaningful for the `route` (path) complement; defaults to `through`. */
-  specifier?: PathSpecifier;
+  /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
+  adjectives?: string[];
+}
+
+/** The predicate head: a core verb, optional negation, and an optional adverb. */
+export interface VerbPhrase {
+  verb: string;                    // core verb id
+  negative?: boolean;
+  modifier?: string;               // adverb id
+}
+
+/**
+ * A specifier attached to a complement. Discriminated by `kind`; today the only
+ * kind is `path` (the route complement's spatial relation), but new specifier
+ * families can be added as further members of the union.
+ */
+export type Specifier = { kind: 'path'; value: PathSpecifier };
+
+/**
+ * A complement: a noun phrase plus zero or more specifiers. Not every complement
+ * takes a specifier, and not every specifier is a `PathSpecifier`.
+ */
+export interface Complement {
+  phrase: NounPhrase;
+  specifiers?: Specifier[];
 }
 
 export interface LexicalEntry {
@@ -86,25 +112,11 @@ export interface LexicalEntry {
 }
 
 export interface PhrasePlan {
-  subject: string;
-  subjectNumber?: 'singular' | 'plural';
-  subjectGender?: 'masc' | 'fem';
-  subjectAdjective?: string;
-  subjectAdjective2?: string;
-  verb: string;
-  verbNegative?: boolean;
-  directObject?: string;
-  directObjectNumber?: 'singular' | 'plural';
-  directObjectGender?: 'masc' | 'fem';
-  directObjectAdjective?: string;
-  directObjectAdjective2?: string;
-  indirectObject?: string;
-  indirectObjectNumber?: 'singular' | 'plural';
-  indirectObjectGender?: 'masc' | 'fem';
-  indirectObjectAdjective?: string;
-  indirectObjectAdjective2?: string;
-  complements?: Partial<Record<ComplementType, ComplementValue>>;
-  modifier?: string;
+  subject: NounPhrase;
+  verbPhrase: VerbPhrase;
+  directObject?: NounPhrase;
+  indirectObject?: NounPhrase;
+  complements?: Partial<Record<ComplementType, Complement>>;
 }
 
 export interface Translation {

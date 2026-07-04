@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
-import { adjString, pathSpecifier, type ConceptForms, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural = false): string {
   if (plural) return _case === 'dat' ? 'den' : 'die';
@@ -39,38 +39,42 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
 
 // route path relation → preposition + article. durch/um govern accusative;
 // the static-relation two-way preps (unter/über/hinter/vor) take dative here.
-function routeHead(c: ConceptForms, plural: boolean): string {
+function routeHead(c: ResolvedComplement, plural: boolean): string {
+  const f = c.phrase.head.forms;
   switch (pathSpecifier(c)) {
-    case 'under':       return `unter ${defArticle(c.forms, 'dat', plural)}`;
-    case 'over':        return `über ${defArticle(c.forms, 'dat', plural)}`;
-    case 'around':      return `um ${defArticle(c.forms, 'acc', plural)}`;
-    case 'behind':      return `hinter ${defArticle(c.forms, 'dat', plural)}`;
-    case 'in_front_of': return `vor ${defArticle(c.forms, 'dat', plural)}`;
+    case 'under':       return `unter ${defArticle(f, 'dat', plural)}`;
+    case 'over':        return `über ${defArticle(f, 'dat', plural)}`;
+    case 'around':      return `um ${defArticle(f, 'acc', plural)}`;
+    case 'behind':      return `hinter ${defArticle(f, 'dat', plural)}`;
+    case 'in_front_of': return `vor ${defArticle(f, 'dat', plural)}`;
     case 'through':
-    default:            return `durch ${defArticle(c.forms, 'acc', plural)}`;
+    default:            return `durch ${defArticle(f, 'acc', plural)}`;
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptForms>>): string {
+function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const plural = (c.forms['number'] ?? c.forms['count']) === 'plural';
-      const word = plural ? (c.forms['plural'] ?? c.forms['base'] ?? '') : (c.forms['base'] ?? '');
+      const f = c.phrase.head.forms;
+      const plural = (f['number'] ?? f['count']) === 'plural';
+      const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      const a = npAdj(c.phrase);
+      const adj = a ? `${a} ` : '';
       // route → path preposition (+ its case); locative/direction/source → two-way
       // preps + dative with the usual in+dem=im, zu+dem=zum, zu+der=zur fusions.
       let head: string;
       if (type === 'route') {
         head = routeHead(c, plural);
       } else {
-        const art = defArticle(c.forms, 'dat', plural); // dem / der / den
+        const art = defArticle(f, 'dat', plural); // dem / der / den
         if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
         else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
         else /* source */         head = `aus ${art}`;
       }
-      return `${head} ${word}`;
+      return `${head} ${adj}${word}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -79,18 +83,17 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptF
 export const germanEngine: LanguageEngine = {
   language: 'de',
   render(phrase: ResolvedPhrase): string {
-    const { subject, subjectAdjective, subjectAdjective2, verb, verbNegative,
-      directObject, directObjectAdjective, directObjectAdjective2,
-      indirectObject, indirectObjectAdjective, indirectObjectAdjective2, modifier } = phrase;
+    const { subject, verbPhrase, directObject, indirectObject } = phrase;
+    const { verb, negative: verbNegative, modifier } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject.forms, adjString(subjectAdjective, subjectAdjective2));
-    const verbText = conjugate(verb.forms, subject.forms);
+    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
+    const verbText = conjugate(verb.forms, subject.head.forms);
     const directObjectText = directObject
-      ? nounPhrase(directObject.forms, 'acc', adjString(directObjectAdjective, directObjectAdjective2))
+      ? nounPhrase(directObject.head.forms, 'acc', npAdj(directObject))
       : '';
     // German: dative (indirect) comes BEFORE accusative (direct) when both are noun phrases
     const indirectObjectText = indirectObject
-      ? nounPhrase(indirectObject.forms, 'dat', adjString(indirectObjectAdjective, indirectObjectAdjective2))
+      ? nounPhrase(indirectObject.head.forms, 'dat', npAdj(indirectObject))
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
 

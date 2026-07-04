@@ -5,7 +5,7 @@ import {
   Typography,
   Alert,
 } from "@mui/material";
-import type { ComplementValue, PhrasePlan } from "@signi/shared";
+import type { Complement, PhrasePlan } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
 import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
 import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
@@ -20,42 +20,68 @@ export default function App() {
   });
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  const complements: Partial<Record<(typeof COMPLEMENT_TYPES)[number], ComplementValue>> = {};
+  const complements: Partial<Record<(typeof COMPLEMENT_TYPES)[number], Complement>> = {};
   for (const type of COMPLEMENT_TYPES) {
     const concept = selection[type];
     if (!concept) continue;
     complements[type] = {
-      concept: concept.id,
-      number: selection[`${type}Number`],
-      gender: selection[`${type}Gender`],
-      specifier: type === "route" ? selection.routeSpecifier : undefined,
+      phrase: {
+        concept: concept.id,
+        number: selection[`${type}Number`],
+        gender: selection[`${type}Gender`],
+        adjectives: [],
+      },
+      specifiers:
+        type === "route" && selection.routeSpecifier
+          ? [{ kind: "path", value: selection.routeSpecifier }]
+          : undefined,
     };
   }
 
   const plan: Partial<PhrasePlan> = {
-    subject: selection.subject?.id,
-    subjectNumber: selection.subjectNumber,
-    subjectGender: selection.subjectGender,
-    subjectAdjective: selection.subjectAdjective?.id,
-    subjectAdjective2: selection.subjectAdjective2?.id,
-    verb: selection.verb?.id,
-    verbNegative: selection.verbNegative,
-    directObject: selection.directObject?.id,
-    directObjectNumber: selection.directObjectNumber,
-    directObjectGender: selection.directObjectGender,
-    directObjectAdjective: selection.directObjectAdjective?.id,
-    directObjectAdjective2: selection.directObjectAdjective2?.id,
-    indirectObject: selection.indirectObject?.id,
-    indirectObjectNumber: selection.indirectObjectNumber,
-    indirectObjectGender: selection.indirectObjectGender,
-    indirectObjectAdjective: selection.indirectObjectAdjective?.id,
-    indirectObjectAdjective2: selection.indirectObjectAdjective2?.id,
-    modifier: selection.modifier?.id,
+    subject: selection.subject
+      ? {
+          concept: selection.subject.id,
+          number: selection.subjectNumber,
+          gender: selection.subjectGender,
+          adjectives: [
+            selection.subjectAdjective?.id,
+            selection.subjectAdjective2?.id,
+          ].filter((id): id is string => Boolean(id)),
+        }
+      : undefined,
+    verbPhrase: {
+      verb: selection.verb?.id as string,
+      negative: selection.verbNegative,
+      modifier: selection.modifier?.id,
+    },
+    directObject: selection.directObject
+      ? {
+          concept: selection.directObject.id,
+          number: selection.directObjectNumber,
+          gender: selection.directObjectGender,
+          adjectives: [
+            selection.directObjectAdjective?.id,
+            selection.directObjectAdjective2?.id,
+          ].filter((id): id is string => Boolean(id)),
+        }
+      : undefined,
+    indirectObject: selection.indirectObject
+      ? {
+          concept: selection.indirectObject.id,
+          number: selection.indirectObjectNumber,
+          gender: selection.indirectObjectGender,
+          adjectives: [
+            selection.indirectObjectAdjective?.id,
+            selection.indirectObjectAdjective2?.id,
+          ].filter((id): id is string => Boolean(id)),
+        }
+      : undefined,
     complements: Object.keys(complements).length > 0 ? complements : undefined,
   };
 
   const { data: translations, isLoading, isError } = useTranslation(plan);
-  const isReady = Boolean(plan.subject && plan.verb);
+  const isReady = Boolean(plan.subject?.concept && plan.verbPhrase?.verb);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>

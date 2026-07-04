@@ -1,37 +1,53 @@
-import type { ComplementType, LanguageCode, PathSpecifier, PhrasePlan } from '@signi/shared';
+import type { ComplementType, LanguageCode, PathSpecifier, Specifier } from '@signi/shared';
 
 export interface ConceptForms {
   conceptId: string;
   forms: Record<string, string>;
 }
 
-export interface ResolvedPhrase {
-  subject: ConceptForms;
-  subjectAdjective?: ConceptForms;
-  subjectAdjective2?: ConceptForms;
+/** A resolved noun phrase: its head noun/pronoun plus its resolved adjectives. */
+export interface ResolvedNounPhrase {
+  head: ConceptForms;
+  adjectives: ConceptForms[];
+}
+
+/** A resolved verb phrase: the verb, negation flag, and resolved adverb. */
+export interface ResolvedVerbPhrase {
   verb: ConceptForms;
-  verbNegative?: boolean;
-  directObject?: ConceptForms;
-  directObjectAdjective?: ConceptForms;
-  directObjectAdjective2?: ConceptForms;
-  indirectObject?: ConceptForms;
-  indirectObjectAdjective?: ConceptForms;
-  indirectObjectAdjective2?: ConceptForms;
-  complements?: Partial<Record<ComplementType, ConceptForms>>;
+  negative?: boolean;
   modifier?: ConceptForms;
 }
 
-/** The path relation chosen for a `route` complement; defaults to `through`. */
-export function pathSpecifier(c: ConceptForms): PathSpecifier {
-  return (c.forms['specifier'] as PathSpecifier) ?? 'through';
+/** A resolved complement: its noun phrase plus any specifiers (plain data). */
+export interface ResolvedComplement {
+  phrase: ResolvedNounPhrase;
+  specifiers?: Specifier[];
 }
 
-/** Join the base forms of up to two adjectives into one string ("big red"). */
+export interface ResolvedPhrase {
+  subject: ResolvedNounPhrase;
+  verbPhrase: ResolvedVerbPhrase;
+  directObject?: ResolvedNounPhrase;
+  indirectObject?: ResolvedNounPhrase;
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>;
+}
+
+/** The path relation chosen for a `route` complement; defaults to `through`. */
+export function pathSpecifier(c: ResolvedComplement): PathSpecifier {
+  return c.specifiers?.find((s) => s.kind === 'path')?.value ?? 'through';
+}
+
+/** Join the base forms of any number of adjectives into one string ("big red"). */
 export function adjString(...adjs: Array<ConceptForms | undefined>): string {
   return adjs
     .map((a) => a?.forms['base'])
     .filter((s): s is string => Boolean(s))
     .join(' ');
+}
+
+/** Join a resolved noun phrase's adjectives into one string ("big red"). */
+export function npAdj(np: ResolvedNounPhrase): string {
+  return adjString(...np.adjectives);
 }
 
 export interface LanguageEngine {

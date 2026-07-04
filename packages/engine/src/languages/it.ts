@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType } from '@signi/shared';
-import { adjString, pathSpecifier, type ConceptForms, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -80,34 +80,38 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
 }
 
 /** route path relation → preposition (+ "a"-fusion for those that govern "a"). */
-function routeHead(c: ConceptForms, plural: boolean): string {
-  const art = defArticle(c.forms, plural);
+function routeHead(c: ResolvedComplement, plural: boolean): string {
+  const f = c.phrase.head.forms;
+  const art = defArticle(f, plural);
   switch (pathSpecifier(c)) {
     case 'under':       return `sotto ${art}`;
     case 'over':        return `sopra ${art}`;
-    case 'around':      return `intorno ${datPrep(c.forms, plural)}`;
+    case 'around':      return `intorno ${datPrep(f, plural)}`;
     case 'behind':      return `dietro ${art}`;
-    case 'in_front_of': return `davanti ${datPrep(c.forms, plural)}`;
+    case 'in_front_of': return `davanti ${datPrep(f, plural)}`;
     case 'through':
     default:            return `attraverso ${art}`;
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptForms>>): string {
+function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const plural = (c.forms['number'] ?? c.forms['count']) === 'plural';
-      const word = plural ? (c.forms['plural'] ?? c.forms['base'] ?? '') : (c.forms['base'] ?? '');
+      const f = c.phrase.head.forms;
+      const plural = (f['number'] ?? f['count']) === 'plural';
+      const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      const a = npAdj(c.phrase);
+      const adj = a ? ` ${a}` : '';
       // locative→in, direction→a, source→da (fuse with article); route→path preposition
       const head =
-        type === 'locative'  ? prepArt('in', c.forms, plural) :
-        type === 'direction' ? prepArt('a', c.forms, plural) :
-        type === 'source'    ? prepArt('da', c.forms, plural) :
+        type === 'locative'  ? prepArt('in', f, plural) :
+        type === 'direction' ? prepArt('a', f, plural) :
+        type === 'source'    ? prepArt('da', f, plural) :
         routeHead(c, plural);
-      return `${head} ${word}`;
+      return `${head} ${word}${adj}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -116,21 +120,20 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, ConceptF
 export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
-    const { subject, subjectAdjective, subjectAdjective2, verb, verbNegative,
-      directObject, directObjectAdjective, directObjectAdjective2,
-      indirectObject, indirectObjectAdjective, indirectObjectAdjective2, modifier } = phrase;
+    const { subject, verbPhrase, directObject, indirectObject } = phrase;
+    const { verb, negative: verbNegative, modifier } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject.forms, adjString(subjectAdjective, subjectAdjective2));
-    const verbText = conjugate(verb.forms, subject.forms);
+    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
+    const verbText = conjugate(verb.forms, subject.head.forms);
     // "mai" always requires "non": "io non bevo mai" even without verbNegative
     const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
     const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
     const directObjectText = directObject
-      ? nounPhrase(directObject.forms, adjString(directObjectAdjective, directObjectAdjective2))
+      ? nounPhrase(directObject.head.forms, npAdj(directObject))
       : '';
     // S [non] V Adv DirectObj IndirectObj(a+article)
     const indirectObjectText = indirectObject
-      ? indirectNounPhrase(indirectObject.forms, adjString(indirectObjectAdjective, indirectObjectAdjective2))
+      ? indirectNounPhrase(indirectObject.head.forms, npAdj(indirectObject))
       : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     const complementsText = complementsPhrase(phrase.complements);

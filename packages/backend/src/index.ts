@@ -117,8 +117,8 @@ app.get('/api/concepts', (req, res) => {
 
 app.post('/api/translate', (req, res) => {
   const body = req.body as TranslateRequest;
-  if (!body?.plan?.subject || !body?.plan?.verb) {
-    res.status(400).json({ error: 'plan.subject and plan.verb are required' });
+  if (!body?.plan?.subject?.concept || !body?.plan?.verbPhrase?.verb) {
+    res.status(400).json({ error: 'plan.subject.concept and plan.verbPhrase.verb are required' });
     return;
   }
 
