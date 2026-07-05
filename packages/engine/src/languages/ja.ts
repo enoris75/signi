@@ -35,20 +35,27 @@ const REL_NOUN_READING: Record<PathSpecifier, string> = {
 };
 
 /**
- * Segments for a noun phrase: [adjectives] noun, adjectives separated by a space and the
- * noun appended directly (matching the string form "大きい 小さい猫").
+ * Segments for a noun phrase: [relative clause] [adjectives] noun. Adjectives are
+ * separated by a space and the noun appended directly (matching the string form
+ * "大きい 小さい猫"); any relative clause is prepended (see below).
  */
 function npSegs(np: ResolvedNounPhrase): RubySegment[] {
-  const segs: RubySegment[] = [];
+  const core: RubySegment[] = [];
   for (const a of np.adjectives) {
     const base = a.forms['base'] ?? '';
     if (!base) continue;
-    if (segs.length) segs.push({ t: ' ' });
-    segs.push(wordSeg(base, a.forms['reading']));
+    if (core.length) core.push({ t: ' ' });
+    core.push(wordSeg(base, a.forms['reading']));
   }
   const head = np.head.forms;
-  segs.push(wordSeg(head['base'] ?? '', head['reading']));
-  return segs;
+  core.push(wordSeg(head['base'] ?? '', head['reading']));
+  // A relative clause is prenominal in Japanese: the whole predicate precedes the head
+  // noun with no relative pronoun (泣いた少年 = "the boy who cried"). The clause verb uses
+  // the polite (masu / ました) form — plain-form derivation isn't seeded yet, so this is a
+  // known first-cut simplification, consistent with ja treating future as present.
+  const rel = np.relative;
+  if (!rel) return core;
+  return [...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements), ...core];
 }
 
 /**
@@ -96,16 +103,18 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
 }
 
 /**
- * Japanese word order: S IndObj+に DirectObj+を Adv V
- * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
+ * The predicate half of a phrase, in Japanese order: complements IndObj+に DirectObj+を
+ * Adv V. Shared by the main sentence (after 〜は) and by prenominal relative clauses.
  */
-function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
-  const { subject, verbPhrase, directObject, indirectObject } = phrase;
+function predicateSegs(
+  verbPhrase: ResolvedVerbPhrase,
+  directObject: ResolvedNounPhrase | undefined,
+  indirectObject: ResolvedNounPhrase | undefined,
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+): RubySegment[] {
   const { verb, negative, modifier, tense = 'present' } = verbPhrase;
-
   const segs: RubySegment[] = [];
-  segs.push(...npSegs(subject), { t: 'は' });
-  segs.push(...complementSegs(phrase.complements));
+  segs.push(...complementSegs(complements));
   if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
   if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
   if (modifier) {
@@ -113,6 +122,17 @@ function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
   }
   segs.push(verbSeg(verb, negative, tense));
+  return segs;
+}
+
+/**
+ * Japanese word order: S IndObj+に DirectObj+を Adv V
+ * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
+ */
+function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
+  const segs: RubySegment[] = [];
+  segs.push(...npSegs(phrase.subject), { t: 'は' });
+  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements));
   return segs;
 }
 

@@ -260,30 +260,52 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
     .join(' ');
 }
 
+/**
+ * The predicate half of a phrase — everything after the subject noun. Shared by the
+ * top-level sentence and by relative clauses, which pass the head noun's forms as
+ * `subjectForms` so the verb agrees with the head.
+ */
+function predicateText(
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounPhrase,
+  indirectObject?: ResolvedNounPhrase,
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): string {
+  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
+  const verbText = conjugate(verb.forms, subjectForms, tense);
+  // "mai" always requires "non": "io non bevo mai" even without verbNegative
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
+  const directObjectText = directObject
+    ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
+    : '';
+  // [non] V Adv DirectObj IndirectObj(a+article)
+  const indirectObjectText = indirectObject
+    ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
+    : '';
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const complementsText = complementsPhrase(complements);
+  return [negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** A relative clause on `np`: invariant "che" + the clause predicate (head = subject). */
+function relativeText(np: ResolvedNounPhrase): string {
+  const rel = np.relative;
+  if (!rel) return '';
+  return `che ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+}
+
 export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
-
+    const { subject } = phrase;
     const subjectText = subjectPhrase(subject);
-    const verbText = conjugate(verb.forms, subject.head.forms, tense);
-    // "mai" always requires "non": "io non bevo mai" even without verbNegative
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-    const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
-    const directObjectText = directObject
-      ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
-      : '';
-    // S [non] V Adv DirectObj IndirectObj(a+article)
-    const indirectObjectText = indirectObject
-      ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
-      : '';
-    const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-    const complementsText = complementsPhrase(phrase.complements);
-
-    return [subjectText, negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
+    const predicate = predicateText(
+      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    );
+    return [subjectText, predicate].filter(Boolean).join(' ').trim();
   },
 };

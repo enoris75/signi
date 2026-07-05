@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -143,8 +143,50 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         type === 'direction' ? (f['animate'] === '1' ? `para ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `longe ${dePrep(f, plural)}` :
         routeHead(c, plural);
-      return `${head} ${word}${adj}`;
+      return withRelative(`${head} ${word}${adj}`, c.phrase);
     })
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** Append a noun phrase's relative clause ("que" + predicate) to its rendered surface. */
+function withRelative(text: string, np: ResolvedNounPhrase): string {
+  const rel = np.relative;
+  if (!rel) return text;
+  const clause = predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  return `${text} que ${clause}`.trimEnd();
+}
+
+/**
+ * The predicate half of a phrase — everything after the subject noun. Shared by the
+ * top-level sentence and by relative clauses, which pass the head noun's forms as
+ * `subjectForms` so the verb agrees with the head.
+ */
+function predicateText(
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounPhrase,
+  indirectObject?: ResolvedNounPhrase,
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): string {
+  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
+  const conjugated = conjugate(verb.forms, subjectForms, tense);
+  const verbText = verbNegative ? `não ${conjugated}` : conjugated;
+  const directObjectText = directObject
+    ? withRelative(nounPhrase(directObject.head.forms, ptAdj(directObject)), directObject)
+    : '';
+  // V Adv DirectObj IndirectObj(a+article)
+  const indirectObjectText = indirectObject
+    ? withRelative(indirectNounPhrase(indirectObject.head.forms, ptAdj(indirectObject)), indirectObject)
+    : '';
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // "nunca" goes pre-verbal without "não": "eu nunca bebo"
+  // but post-verbal with "não": "eu não bebo nunca"
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
+  const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
+  const complementsText = complementsPhrase(complements);
+  return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -152,31 +194,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
 export const portugueseEngine: LanguageEngine = {
   language: 'pt',
   render(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
-
-    const subjectText = subjectPhrase(subject.head.forms, ptAdj(subject));
-    const conjugated = conjugate(verb.forms, subject.head.forms, tense);
-    const verbText = verbNegative ? `não ${conjugated}` : conjugated;
-    const directObjectText = directObject
-      ? nounPhrase(directObject.head.forms, ptAdj(directObject))
-      : '';
-    // S V Adv DirectObj IndirectObj(a+article)
-    const indirectObjectText = indirectObject
-      ? indirectNounPhrase(indirectObject.head.forms, ptAdj(indirectObject))
-      : '';
-    const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-    // "nunca" goes pre-verbal without "não": "eu nunca bebo"
-    // but post-verbal with "não": "eu não bebo nunca"
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-    const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
-    const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
-
-    const complementsText = complementsPhrase(phrase.complements);
-
-    return [subjectText, preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
+    const { subject } = phrase;
+    const subjectText = withRelative(subjectPhrase(subject.head.forms, ptAdj(subject)), subject);
+    const predicate = predicateText(
+      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    );
+    return [subjectText, predicate].filter(Boolean).join(' ').trim();
   },
 };

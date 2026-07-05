@@ -67,7 +67,7 @@ function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): strin
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const declined = adjPhrase(np, _case);
   const a = declined ? `${declined} ` : '';
-  return `${defArticle(forms, _case, plural)} ${a}${word}`;
+  return `${defArticle(forms, _case, plural)} ${a}${word}${subordinateClause(np)}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -126,10 +126,45 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       }
       const declined = adjPhrase(c.phrase, _case);
       const adj = declined ? `${declined} ` : '';
-      return `${head} ${adj}${word}`;
+      return `${head} ${adj}${word}${subordinateClause(c.phrase)}`;
     })
     .filter(Boolean)
     .join(' ');
+}
+
+/**
+ * A restrictive relative clause on `np`, German-style: comma, relative pronoun agreeing
+ * with the head (nominative — subject-relative — so identical to the definite article
+ * der/die/das/die), then the clause with its finite verb pushed to the end. Returns "" if
+ * `np` has no relative. (The closing comma is omitted; a known first-cut simplification.)
+ */
+function subordinateClause(np: ResolvedNounPhrase): string {
+  const rel = np.relative;
+  if (!rel) return '';
+  const f = np.head.forms;
+  const plural = (f['number'] ?? f['count']) === 'plural';
+  const pronoun = defArticle(f, 'nom', plural); // der / die / das / die
+
+  const { verb, negative: verbNegative, modifier, tense = 'present' } = rel.verbPhrase;
+  const person = f['person'] ?? '3';
+  const pn = `${person}${plural ? 'pl' : 'sg'}`;
+  const isFuture = tense === 'future';
+  // Verb-final: the finite verb closes the clause. Future puts the infinitive
+  // just before the clause-final finite "werden" ("der Wein trinken wird").
+  const finite = isFuture ? (WERDEN[pn] ?? 'wird') : conjugate(verb.forms, f, tense);
+  const infinitive = isFuture ? (verb.forms['base'] ?? '') : '';
+
+  const indirectObjectText = rel.indirectObject ? nounPhrase(rel.indirectObject, 'dat') : '';
+  const directObjectText = rel.directObject ? nounPhrase(rel.directObject, 'acc') : '';
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
+  const complementsText = complementsPhrase(rel.complements);
+
+  const body = [pronoun, indirectObjectText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
+    .filter(Boolean)
+    .join(' ');
+  return `, ${body}`;
 }
 
 export const germanEngine: LanguageEngine = {

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
 
@@ -82,7 +82,9 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const lead = pre[0] ?? noun;
   const core = joinArt(headFor(plural, lead), [...pre, noun].join(' '));
   const postStr = post.join(' et ');
-  return postStr ? `${core} ${postStr}` : core;
+  const base = postStr ? `${core} ${postStr}` : core;
+  const rel = relativeText(np);
+  return rel ? `${base} ${rel}` : base;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -133,42 +135,63 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
     .join(' ');
 }
 
+/**
+ * The predicate half of a phrase — everything after the subject noun. Shared by the
+ * top-level sentence and by relative clauses, which pass the head noun's forms as
+ * `subjectForms` so the verb agrees with the head.
+ */
+function predicateText(
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounPhrase,
+  indirectObject?: ResolvedNounPhrase,
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): string {
+  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
+  const conjugated = conjugate(verb.forms, subjectForms, tense);
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  let effectiveVerb: string;
+  let effectiveMod: string;
+  if (modifierIsNegative) {
+    effectiveVerb = `ne ${conjugated} ${modifierText}`;
+    effectiveMod = '';
+  } else if (verbNegative) {
+    effectiveVerb = `ne ${conjugated} pas`;
+    effectiveMod = modifierText;
+  } else {
+    effectiveVerb = conjugated;
+    effectiveMod = modifierText;
+  }
+  const directObjectText = directObject
+    ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
+    : '';
+  // V [Adv] DirectObj IndirectObj(à+article)
+  const indirectObjectText = indirectObject
+    ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
+    : '';
+  const complementsText = complementsPhrase(complements);
+  return [effectiveVerb, effectiveMod, directObjectText, indirectObjectText, complementsText]
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** A relative clause on `np`: subject relativizer "qui" + the clause predicate. */
+function relativeText(np: ResolvedNounPhrase): string {
+  const rel = np.relative;
+  if (!rel) return '';
+  return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+}
+
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
   render(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
-
+    const { subject } = phrase;
     const subjectText = subjectPhrase(subject);
-    const conjugated = conjugate(verb.forms, subject.head.forms, tense);
-    const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-    // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-    let effectiveVerb: string;
-    let effectiveMod: string;
-    if (modifierIsNegative) {
-      effectiveVerb = `ne ${conjugated} ${modifierText}`;
-      effectiveMod = '';
-    } else if (verbNegative) {
-      effectiveVerb = `ne ${conjugated} pas`;
-      effectiveMod = modifierText;
-    } else {
-      effectiveVerb = conjugated;
-      effectiveMod = modifierText;
-    }
-    const directObjectText = directObject
-      ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
-      : '';
-    // S V [Adv] DirectObj IndirectObj(à+article)
-    const indirectObjectText = indirectObject
-      ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
-      : '';
-
-    const complementsText = complementsPhrase(phrase.complements);
-
-    return [subjectText, effectiveVerb, effectiveMod, directObjectText, indirectObjectText, complementsText]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
+    const predicate = predicateText(
+      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    );
+    return [subjectText, predicate].filter(Boolean).join(' ').trim();
   },
 };
