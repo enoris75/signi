@@ -37,6 +37,7 @@ import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
+import { Resizer } from "./Resizer.tsx";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -924,43 +925,16 @@ export function PhraseBuilder({
                   )}
                 </Box>
 
-                {/* Resize strip */}
-                <Box
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    const startY = e.clientY;
-                    const startH = graphHeight;
-                    let currentH = startH;
-                    const onMove = (ev: PointerEvent) => {
-                      currentH = Math.max(
-                        MIN_GRAPH_HEIGHT,
-                        startH + (ev.clientY - startY),
+                <Resizer
+                  height={graphHeight}
+                  minHeight={MIN_GRAPH_HEIGHT}
+                  onResize={setGraphHeight}
+                  onResizeEnd={(h) => {
+                    if (!nested)
+                      localStorage.setItem(
+                        "signi:graphHeight",
+                        String(Math.round(h)),
                       );
-                      setGraphHeight(currentH);
-                    };
-                    const onUp = () => {
-                      if (!nested)
-                        localStorage.setItem(
-                          "signi:graphHeight",
-                          String(Math.round(currentH)),
-                        );
-                      window.removeEventListener("pointermove", onMove);
-                      window.removeEventListener("pointerup", onUp);
-                      window.removeEventListener("pointercancel", onUp);
-                    };
-                    window.addEventListener("pointermove", onMove);
-                    window.addEventListener("pointerup", onUp);
-                    window.addEventListener("pointercancel", onUp);
-                  }}
-                  sx={{
-                    height: 6,
-                    cursor: "ns-resize",
-                    touchAction: "none",
-                    borderTop: "1px solid",
-                    borderColor: "divider",
-                    opacity: 0.4,
-                    transition: "opacity 0.15s",
-                    "&:hover": { opacity: 1, borderColor: "primary.main" },
                   }}
                 />
               </>

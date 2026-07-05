@@ -1,4 +1,7 @@
-import { Box, Typography, Divider } from "@mui/material";
+import { useState } from "react";
+import { Box, Typography, Divider, IconButton, Tooltip } from "@mui/material";
+import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
+import ChevronRightIcon from "@mui/icons-material/ChevronRight";
 import { type Concept } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import {
@@ -30,6 +33,50 @@ export function PhraseSidebar({
   onSlotClick,
   onConceptSelect,
 }: PhraseSidebarProps) {
+  // Collapsed by default; the word palette is opt-in so the canvas gets the room.
+  const [collapsed, setCollapsed] = useState<boolean>(() => {
+    const saved = localStorage.getItem("signi:phraseBuilderSidebarCollapsed");
+    return saved === null ? true : saved === "true";
+  });
+
+  function toggleCollapsed() {
+    setCollapsed((prev) => {
+      const next = !prev;
+      localStorage.setItem(
+        "signi:phraseBuilderSidebarCollapsed",
+        String(next),
+      );
+      return next;
+    });
+  }
+
+  if (collapsed) {
+    return (
+      <Tooltip title="Show words" placement="left">
+        <Box
+          onClick={toggleCollapsed}
+          sx={{
+            flexShrink: 0,
+            alignSelf: "stretch",
+            maxHeight,
+            display: "flex",
+            alignItems: "flex-start",
+            justifyContent: "center",
+            pt: 0.5,
+            cursor: "pointer",
+            borderLeft: "1px solid",
+            borderColor: "divider",
+            color: "text.secondary",
+            transition: "background-color 0.15s, color 0.15s",
+            "&:hover": { bgcolor: "action.hover", color: "primary.main" },
+          }}
+        >
+          <ChevronLeftIcon fontSize="small" />
+        </Box>
+      </Tooltip>
+    );
+  }
+
   return (
     <>
       {/* Sidebar resize handle */}
@@ -87,20 +134,37 @@ export function PhraseSidebar({
           overflowY: "auto",
         }}
       >
-        <Typography
+        <Box
           sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "0.58rem",
-            fontWeight: 700,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "text.secondary",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
             mb: 1,
-            display: "block",
           }}
         >
-          {activeSlotConfig ? activeSlotConfig.label : "Words"}
-        </Typography>
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.58rem",
+              fontWeight: 700,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "text.secondary",
+            }}
+          >
+            {activeSlotConfig ? activeSlotConfig.label : "Words"}
+          </Typography>
+          <Tooltip title="Hide words" placement="left">
+            <IconButton
+              size="small"
+              onClick={toggleCollapsed}
+              aria-label="Hide words"
+              sx={{ p: 0.25 }}
+            >
+              <ChevronRightIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         {activeSlotConfig ? (
           activeSlotConfig.roles.map((role) => (
             <ConceptPalette
