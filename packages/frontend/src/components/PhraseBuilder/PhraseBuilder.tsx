@@ -9,7 +9,7 @@ import {
   type PathSpecifier,
 } from "@signi/shared";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
-import { SlotBox, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
+import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
   GenderSlot,
   NounKey,
@@ -38,6 +38,7 @@ import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
+import { SatelliteControls } from "./SatelliteControls.tsx";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -894,35 +895,10 @@ export function PhraseBuilder({
                     <NounPhraseBuilder key={type} which={type} ctx={ctx} />
                   ))}
 
-                  {/* Satellite reveal controls — each pinned to its core box's
-                      border facing the satellite it governs (see controlPos), so
-                      the connector starts from the control. Complement toggles are
-                      excluded here; they ride the Verb Phrase dotted box. */}
-                  {Object.entries(satelliteIconsByParent).flatMap(
-                    ([parentKey, icons]) => {
-                      const color =
-                        ALL_SLOTS.find((s) => s.key === parentKey)?.color ??
-                        "primary";
-                      return icons.map((icon) => {
-                        const p = controlPos[icon.key];
-                        if (!p) return null;
-                        return (
-                          <Box
-                            key={icon.key}
-                            sx={{
-                              position: "absolute",
-                              left: p.x,
-                              top: p.y,
-                              transform: "translate(-50%, -50%)",
-                              zIndex: 2,
-                            }}
-                          >
-                            <SatelliteButton sat={icon} color={color} />
-                          </Box>
-                        );
-                      });
-                    },
-                  )}
+                  <SatelliteControls
+                    satelliteIconsByParent={satelliteIconsByParent}
+                    controlPos={controlPos}
+                  />
                 </Box>
 
                 <Resizer
