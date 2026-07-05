@@ -27,6 +27,7 @@ import {
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
+  MUI_COLOR_HEX,
 } from "./slots.ts";
 import { applyConceptSelect, applyClear } from "./phraseReducers.ts";
 import { buildSatellites, conceptLabel, type Satellite } from "./satellites.tsx";
@@ -77,6 +78,36 @@ function sameBoxSizes(
     const pb = b[k];
     if (!pb) return false;
     if (Math.abs(a[k].w - pb.w) > 0.5 || Math.abs(a[k].h - pb.h) > 0.5)
+      return false;
+  }
+  return true;
+}
+
+// A connector from a noun box down to its (open, uncollapsed) relative-clause
+// panel. Coordinates are pixels relative to the builder's root Box.
+type RelConnector = {
+  which: string;
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+  color: string;
+};
+
+// Equal within half a pixel on every endpoint — stops the measuring layout
+// effect from looping on sub-pixel jitter.
+function sameRelConnectors(a: RelConnector[], b: RelConnector[]): boolean {
+  if (a.length !== b.length) return false;
+  for (let i = 0; i < a.length; i++) {
+    const p = a[i];
+    const q = b[i];
+    if (p.which !== q.which || p.color !== q.color) return false;
+    if (
+      Math.abs(p.x1 - q.x1) > 0.5 ||
+      Math.abs(p.y1 - q.y1) > 0.5 ||
+      Math.abs(p.x2 - q.x2) > 0.5 ||
+      Math.abs(p.y2 - q.y2) > 0.5
+    )
       return false;
   }
   return true;
@@ -408,6 +439,12 @@ export function PhraseBuilder({
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
+  // The outermost positioned Box — connectors from a noun to its relative-clause
+  // panel are measured relative to this, since the panels live below the canvas.
+  const rootRef = useRef<HTMLDivElement>(null);
+  // Each open relative-clause panel's wrapper element, keyed by its noun block.
+  const relativePanelEls = useRef<Map<string, HTMLElement>>(new Map());
+  const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
   // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
   // each satellite reveal control on the box border facing its satellite (and to
@@ -454,6 +491,39 @@ export function PhraseBuilder({
       next[key] = { w: r.width, h: r.height };
     }
     setBoxSizes((prev) => (sameBoxSizes(prev, next) ? prev : next));
+  });
+
+  // After every render, measure a connector from each open, uncollapsed noun to
+  // its relative-clause panel below the canvas. Both the noun box and the panel
+  // are measured relative to the root Box, so the SVG overlay can span the gap
+  // between the canvas and the docked clause panels. Guarded so it settles.
+  useLayoutEffect(() => {
+    const root = rootRef.current;
+    if (!root) return;
+    const rootRect = root.getBoundingClientRect();
+    const clamp = (v: number, lo: number, hi: number) =>
+      Math.max(lo, Math.min(hi, v));
+    const next: RelConnector[] = [];
+    for (const which of openRelatives) {
+      // Skip the connector while the noun's group box is collapsed.
+      const label = COLLAPSIBLE_GROUPS.find((g) => g.mainKey === which)?.label;
+      if (label && collapsedGroups[label]) continue;
+      const boxEl = slotEls.current.get(which as SlotKey);
+      const panelEl = relativePanelEls.current.get(which);
+      if (!boxEl || !panelEl) continue;
+      const b = boxEl.getBoundingClientRect();
+      const p = panelEl.getBoundingClientRect();
+      const x1 = b.left + b.width / 2 - rootRect.left;
+      const y1 = b.bottom - rootRect.top;
+      const y2 = p.top - rootRect.top;
+      // Land on the panel's top edge directly below the noun where possible,
+      // clamped a little inside the panel so the line meets it cleanly.
+      const x2 = clamp(x1, p.left - rootRect.left + 14, p.right - rootRect.left - 14);
+      const color =
+        MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
+      next.push({ which, x1, y1, x2, y2, color });
+    }
+    setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
 
   function startDrag(e: React.PointerEvent, key: string) {
@@ -647,12 +717,44 @@ export function PhraseBuilder({
 
   return (
     <Box
+      ref={rootRef}
       sx={{
         position: position ? "fixed" : "relative",
         ...(position && { left: `${position.x}px`, top: `${position.y}px` }),
         zIndex: position ? 50 : "auto",
       }}
     >
+      {/* Connectors linking each noun to its relative-clause panel below the
+          canvas. Painted over the whole builder so the line can bridge the gap
+          between the canvas and the docked clause panels. */}
+      {relConnectors.length > 0 && (
+        <Box
+          component="svg"
+          sx={{
+            position: "absolute",
+            inset: 0,
+            width: "100%",
+            height: "100%",
+            zIndex: 1,
+            pointerEvents: "none",
+            overflow: "visible",
+          }}
+        >
+          {relConnectors.map((c) => (
+            <line
+              key={c.which}
+              x1={c.x1}
+              y1={c.y1}
+              x2={c.x2}
+              y2={c.y2}
+              stroke={c.color}
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
+              strokeDasharray="5 3"
+            />
+          ))}
+        </Box>
+      )}
       <Paper
         elevation={0}
         onPointerDown={(e) => {
@@ -890,7 +992,14 @@ export function PhraseBuilder({
             const nounHead = selection[which] as Concept;
             const label = nounHead?.animate ? "who" : "that";
             return (
-              <Box key={which} sx={{ mt: 1.5, pl: nested ? 1 : 2 }}>
+              <Box
+                key={which}
+                ref={(el: HTMLDivElement | null) => {
+                  if (el) relativePanelEls.current.set(which, el);
+                  else relativePanelEls.current.delete(which);
+                }}
+                sx={{ mt: 1.5, pl: nested ? 1 : 2 }}
+              >
                 <PhraseBuilder
                   nested
                   head={nounHead}
