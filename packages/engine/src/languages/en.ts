@@ -33,20 +33,44 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
-function nounPhrase(forms: Record<string, string>, definite = false, adj?: string): string {
+/**
+ * The Saxon genitive marker for a possessor: "'s", but a bare "'" after a plural that
+ * already ends in -s ("the cats' book").
+ */
+function genitiveMarker(np: ResolvedNounPhrase): string {
+  const forms = np.head.forms;
+  const plural = (forms['number'] ?? forms['count']) === 'plural';
+  const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
+  return plural && word.endsWith('s') ? "'" : "'s";
+}
+
+/**
+ * A possessor rendered as a Saxon-genitive prefix ("the cat's "). The possessor is a
+ * definite noun phrase (recursing for its own possessor / relative clause) followed by
+ * the genitive marker; the possessed head drops its own article.
+ */
+function possessivePrefix(poss: ResolvedNounPhrase): string {
+  const inner = withRelative(nounPhrase(poss.head.forms, true, npAdj(poss), poss.possessor), poss);
+  return `${inner}${genitiveMarker(poss)} `;
+}
+
+function nounPhrase(forms: Record<string, string>, definite = false, adj?: string, possessor?: ResolvedNounPhrase): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? `${adj} ` : '';
+  // A possessor replaces the article: "the cat's book", not "the cat's the book".
+  if (possessor) return `${possessivePrefix(possessor)}${a}${word}`;
   if (definite) return `the ${a}${word}`;
   return `${getArticle(forms)} ${a}${word}`;
 }
 
-function subjectPhrase(forms: Record<string, string>, adj?: string): string {
+function subjectPhrase(np: ResolvedNounPhrase): string {
+  const forms = np.head.forms;
   if (forms['person']) {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, true, adj); // noun — definite article
+  return nounPhrase(forms, true, npAdj(np), np.possessor); // noun — definite article
 }
 
 function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
@@ -56,7 +80,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
-      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase)), c.phrase)}`;
+      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase), c.phrase.possessor), c.phrase)}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -77,11 +101,11 @@ function predicateParts(
   const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
   const directObjectText = directObject
-    ? withRelative(nounPhrase(directObject.head.forms, true, npAdj(directObject)), directObject)
+    ? withRelative(nounPhrase(directObject.head.forms, true, npAdj(directObject), directObject.possessor), directObject)
     : '';
   // Prepositional dative: "to the cat"
   const indirectObjectText = indirectObject
-    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject)), indirectObject)}`
+    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject), indirectObject.possessor), indirectObject)}`
     : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
@@ -137,7 +161,7 @@ export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
-    const subjectText = withRelative(subjectPhrase(subject.head.forms, npAdj(subject)), subject);
+    const subjectText = withRelative(subjectPhrase(subject), subject);
     return [
       subjectText,
       ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),

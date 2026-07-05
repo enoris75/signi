@@ -8,7 +8,7 @@ import type {
 } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
 import type { Concept } from "@signi/shared";
-import { NounKey, PhraseSelection, RELATIVE_KEY } from "./interfaces.ts";
+import { NounKey, PhraseSelection, POSSESSOR_KEY, RELATIVE_KEY } from "./interfaces.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
 // `${which}Adjective`, …) all exist on PhraseSelection; the union index widens the
@@ -33,12 +33,17 @@ function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | und
   if (!concept) return undefined;
   const relSel = field<PhraseSelection>(sel, RELATIVE_KEY(which));
   const relative = relSel ? buildRelativeClause(relSel) : undefined;
+  // A possessor is a nested noun phrase whose head lives in its `subject` slot; recursing
+  // through buildNounPhrase gives it its own number/gender/adjectives/nested possessor.
+  const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
+  const possessor = possSel ? buildNounPhrase(possSel, "subject") : undefined;
   return {
     concept: concept.id,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem">(sel, `${which}Gender`),
     adjectives: adjectiveIds(sel, which),
     relative,
+    possessor,
   };
 }
 

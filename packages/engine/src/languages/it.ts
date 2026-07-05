@@ -73,11 +73,12 @@ function datPrep(forms: Record<string, string>, plural = false, lead?: string): 
 
 /**
  * Generic Italian simple-preposition + definite-article fusion for "a" (to),
- * "da" (from) and "in" (in): al/dal/nel, allo/dallo/nello, alla/dalla/nella, all'/dall'/nell', …
+ * "da" (from), "in" (in) and "di" (of): al/dal/nel/del, allo/dallo/nello/dello,
+ * alla/dalla/nella/della, all'/dall'/nell'/dell', …
  */
-function prepArt(prep: 'a' | 'da' | 'in', forms: Record<string, string>, plural = false, lead?: string): string {
+function prepArt(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, plural = false, lead?: string): string {
   const art = defArticle(forms, plural, lead);
-  const prefix = prep === 'a' ? 'a' : prep === 'da' ? 'da' : 'ne';
+  const prefix = prep === 'a' ? 'a' : prep === 'da' ? 'da' : prep === 'di' ? 'de' : 'ne';
   let suffix: string;
   switch (art) {
     case 'il':  suffix = 'l'; break;
@@ -200,7 +201,13 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
     .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
     .filter(Boolean)
     .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
-  const base = postStr ? `${core} ${postStr}` : core;
+  const withPost = postStr ? `${core} ${postStr}` : core;
+  // A possessor is postnominal, headed by "di"+article fused ("il libro del gatto").
+  // Rendering it through renderNP recurses for its own adjectives / nested possessor.
+  const poss = np.possessor;
+  const base = poss
+    ? `${withPost} ${renderNP(poss, (plural, lead) => prepArt('di', poss.head.forms, plural, lead))}`
+    : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;
 }

@@ -13,6 +13,8 @@ export interface ResolvedNounPhrase {
   adjectives: ConceptForms[];
   /** A resolved relative clause; the head above is implicitly its subject. */
   relative?: ResolvedRelativeClause;
+  /** A resolved possessing noun phrase (Saxon genitive): "the cat's book" → "the cat". */
+  possessor?: ResolvedNounPhrase;
 }
 
 /** A resolved verb phrase: the verb, negation flag, tense, and resolved adverb. */

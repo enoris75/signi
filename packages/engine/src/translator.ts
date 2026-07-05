@@ -72,6 +72,9 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     // head. Recursing through resolveNounPhrase (its objects/complements are noun
     // phrases that may themselves carry `relative`) handles arbitrary nesting.
     relative: np.relative ? resolveRelativeClause(np.relative, language, lookup) : undefined,
+    // A possessor is itself a noun phrase; recursing handles its own adjectives,
+    // number/gender, and any nested possessor ("the cat's owner's book").
+    possessor: np.possessor ? resolveNounPhrase(np.possessor, language, lookup) : undefined,
   };
 }
 

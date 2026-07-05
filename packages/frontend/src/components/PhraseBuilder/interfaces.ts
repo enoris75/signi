@@ -76,6 +76,16 @@ export interface PhraseSelection {
     directionRelative?: PhraseSelection;
     sourceRelative?: PhraseSelection;
     routeRelative?: PhraseSelection;
+    // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
+    // whose `subject` slot holds the possessing noun (so its number/gender/adjectives and
+    // its own nested possessor all reuse the `subject*` fields); built via buildNounPhrase.
+    subjectPossessor?: PhraseSelection;
+    directObjectPossessor?: PhraseSelection;
+    indirectObjectPossessor?: PhraseSelection;
+    locativePossessor?: PhraseSelection;
+    directionPossessor?: PhraseSelection;
+    sourcePossessor?: PhraseSelection;
+    routePossessor?: PhraseSelection;
 }
 
 export type NumberSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
@@ -87,5 +97,8 @@ export type NounKey = "subject" | "directObject" | "indirectObject" | Complement
 
 export const RELATIVE_KEY = (which: NounKey) =>
   `${which}Relative` as keyof PhraseSelection;
+
+export const POSSESSOR_KEY = (which: NounKey) =>
+  `${which}Possessor` as keyof PhraseSelection;
 
 export type SlotKey = SlotConfig["key"];

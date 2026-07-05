@@ -15,6 +15,7 @@ import {
   NounKey,
   NumberSlot,
   PhraseSelection,
+  POSSESSOR_KEY,
   RELATIVE_KEY,
   SlotKey,
 } from "./interfaces.ts";
@@ -37,8 +38,10 @@ import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
+import { PossessorBuilder } from "./PossessorBuilder.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { SatelliteControls } from "./SatelliteControls.tsx";
+import { computeControlPositions } from "./controlLayout.ts";
 
 interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -113,72 +116,6 @@ function sameRelConnectors(a: RelConnector[], b: RelConnector[]): boolean {
       return false;
   }
   return true;
-}
-
-// Where the ray from a box's center toward a target crosses the box border,
-// padded outward a touch so a control placed there straddles the edge. Both
-// points and the returned point are in canvas pixels.
-function borderPoint(
-  center: { x: number; y: number },
-  size: { w: number; h: number },
-  target: { x: number; y: number },
-  pad: number,
-): { x: number; y: number } {
-  const hw = size.w / 2 + pad;
-  const hh = size.h / 2 + pad;
-  const dx = target.x - center.x;
-  const dy = target.y - center.y;
-  if (dx === 0 && dy === 0) return { x: center.x, y: center.y - hh };
-  const scale = 1 / Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh);
-  return { x: center.x + dx * scale, y: center.y + dy * scale };
-}
-
-// Place a box's satellite controls on its border, each on the ray toward its
-// target node. Controls that land on the same spot (targets collinear with the
-// box center) are fanned out along that border edge so they don't overlap.
-function layoutControls(
-  center: { x: number; y: number },
-  size: { w: number; h: number },
-  targets: { key: string; target: { x: number; y: number } }[],
-): Record<string, { x: number; y: number }> {
-  const GAP = 22; // control button + a hair of breathing room, in px
-  const raw = targets.map((t) => ({
-    key: t.key,
-    p: borderPoint(center, size, t.target, 2),
-    dx: t.target.x - center.x,
-    dy: t.target.y - center.y,
-  }));
-  // Cluster near-coincident border points.
-  const clusters: (typeof raw)[] = [];
-  for (const it of raw) {
-    const cl = clusters.find(
-      (c) => Math.hypot(c[0].p.x - it.p.x, c[0].p.y - it.p.y) < GAP,
-    );
-    if (cl) cl.push(it);
-    else clusters.push([it]);
-  }
-  const out: Record<string, { x: number; y: number }> = {};
-  for (const items of clusters) {
-    if (items.length === 1) {
-      out[items[0].key] = items[0].p;
-      continue;
-    }
-    // Spread the cluster along the tangent of its shared outward direction —
-    // which, on a box edge, runs along that edge.
-    const bx = items.reduce((s, i) => s + i.p.x, 0) / items.length;
-    const by = items.reduce((s, i) => s + i.p.y, 0) / items.length;
-    const adx = items.reduce((s, i) => s + i.dx, 0) / items.length;
-    const ady = items.reduce((s, i) => s + i.dy, 0) / items.length;
-    const len = Math.hypot(adx, ady) || 1;
-    const tx = -ady / len;
-    const ty = adx / len;
-    const sorted = [...items].sort((a, b) => (a.key < b.key ? -1 : 1));
-    sorted.forEach((it, i) => {
-      const off = (i - (sorted.length - 1) / 2) * GAP;
-      out[it.key] = { x: bx + tx * off, y: by + ty * off };
-    });
-  }
-  return out;
 }
 
 export function PhraseBuilder({
@@ -299,6 +236,29 @@ export function PhraseBuilder({
       return next;
     });
     setRevealed((prev) => ({ ...prev, [`${which}Relative`]: false }));
+  }
+
+  // A lens onto the possessor slice hanging off `which`, seeding an empty possessor the
+  // first time. Handed to the nested PossessorBuilder as its onUpdate, so its edits land
+  // inside this block's `${which}Possessor`.
+  function makePossessorUpdate(which: NounKey) {
+    return (updater: (prev: PhraseSelection) => PhraseSelection) =>
+      onPhraseUpdate((prev) => ({
+        ...prev,
+        [POSSESSOR_KEY(which)]: updater(
+          (prev[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ?? {},
+        ),
+      }));
+  }
+
+  // Remove a noun block's possessor entirely and collapse its reveal.
+  function handleRemovePossessor(which: NounKey) {
+    onPhraseUpdate((prev) => {
+      const next = { ...prev };
+      delete next[POSSESSOR_KEY(which)];
+      return next;
+    });
+    setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
   }
 
   function handleToggleNumber(which: NumberSlot) {
@@ -444,8 +404,9 @@ export function PhraseBuilder({
   // The outermost positioned Box — connectors from a noun to its relative-clause
   // panel are measured relative to this, since the panels live below the canvas.
   const rootRef = useRef<HTMLDivElement>(null);
-  // Each open relative-clause panel's wrapper element, keyed by its noun block.
+  // Each open relative-clause / possessor panel's wrapper element, keyed by its noun block.
   const relativePanelEls = useRef<Map<string, HTMLElement>>(new Map());
+  const possessorPanelEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
   // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
@@ -506,13 +467,18 @@ export function PhraseBuilder({
     const clamp = (v: number, lo: number, hi: number) =>
       Math.max(lo, Math.min(hi, v));
     const next: RelConnector[] = [];
-    for (const which of openRelatives) {
+    // Measure one noun→panel connector. `prefix` keeps relative and possessor keys
+    // distinct so a noun can carry both panels without their connectors colliding.
+    const measure = (
+      which: string,
+      panelEl: HTMLElement | undefined,
+      prefix: string,
+    ) => {
       // Skip the connector while the noun's group box is collapsed.
       const label = COLLAPSIBLE_GROUPS.find((g) => g.mainKey === which)?.label;
-      if (label && collapsedGroups[label]) continue;
+      if (label && collapsedGroups[label]) return;
       const boxEl = slotEls.current.get(which as SlotKey);
-      const panelEl = relativePanelEls.current.get(which);
-      if (!boxEl || !panelEl) continue;
+      if (!boxEl || !panelEl) return;
       const b = boxEl.getBoundingClientRect();
       const p = panelEl.getBoundingClientRect();
       const x1 = b.left + b.width / 2 - rootRect.left;
@@ -523,8 +489,10 @@ export function PhraseBuilder({
       const x2 = clamp(x1, p.left - rootRect.left + 14, p.right - rootRect.left - 14);
       const color =
         MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
-      next.push({ which, x1, y1, x2, y2, color });
-    }
+      next.push({ which: `${prefix}:${which}`, x1, y1, x2, y2, color });
+    };
+    for (const which of openRelatives) measure(which, relativePanelEls.current.get(which), "rel");
+    for (const which of openPossessors) measure(which, possessorPanelEls.current.get(which), "poss");
     setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
 
@@ -650,27 +618,14 @@ export function PhraseBuilder({
     return positions[key] ?? DEFAULT_POSITIONS[key];
   }
 
-  // Place each satellite reveal control on its core box's border, on the ray toward
-  // the satellite it governs — so the control migrates around the box to face its
-  // node and the connector leaves the box cleanly from the control. Canvas pixels,
-  // keyed by satellite key; also fed to buildGraph as each link's origin.
-  const pxPt = (key: string) => ({
-    x: (pos(key).x / 100) * svgSize.w,
-    y: (pos(key).y / 100) * svgSize.h,
+  // Canvas-pixel position of each satellite reveal control, keyed by satellite
+  // key; also fed to buildGraph as each link's origin (see controlLayout).
+  const controlPos = computeControlPositions({
+    satelliteIconsByParent,
+    boxSizes,
+    pos,
+    svgSize,
   });
-  const controlPos: Record<string, { x: number; y: number }> = {};
-  for (const [parentKey, icons] of Object.entries(satelliteIconsByParent)) {
-    const size = boxSizes[parentKey];
-    if (!size) continue;
-    Object.assign(
-      controlPos,
-      layoutControls(
-        pxPt(parentKey),
-        size,
-        icons.map((icon) => ({ key: icon.key, target: pxPt(icon.key) })),
-      ),
-    );
-  }
 
   const { edges, groupRects, groupEdges } = buildGraph({
     hasVerb,
@@ -687,6 +642,11 @@ export function PhraseBuilder({
   // has content). Each renders a nested clause-mode PhraseBuilder below the canvas.
   const openRelatives = NOUN_KEYS.filter(
     (which) => selection[which] && shownMap[`${which}Relative`],
+  );
+
+  // Noun blocks whose possessor panel is currently open (revealed or already filled).
+  const openPossessors = NOUN_KEYS.filter(
+    (which) => selection[which] && shownMap[`${which}Possessor`],
   );
 
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
@@ -960,6 +920,34 @@ export function PhraseBuilder({
                   }
                   onPhraseUpdate={makeRelativeUpdate(which)}
                   onRemove={() => handleRemoveRelative(which)}
+                />
+              </Box>
+            );
+          })}
+
+        {/* Possessor editors — one per noun block with an open possessor. Each edits that
+            block's `${which}Possessor` slice (a noun phrase whose head is its `subject`)
+            and recurses for its own nested possessor. */}
+        {hasVerb &&
+          openPossessors.map((which) => {
+            const nounHead = selection[which] as Concept;
+            return (
+              <Box
+                key={which}
+                ref={(el: HTMLDivElement | null) => {
+                  if (el) possessorPanelEls.current.set(which, el);
+                  else possessorPanelEls.current.delete(which);
+                }}
+                sx={{ mt: 1.5, pl: nested ? 1 : 2 }}
+              >
+                <PossessorBuilder
+                  parentLabel={conceptLabel(nounHead)}
+                  selection={
+                    (selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ??
+                    {}
+                  }
+                  onUpdate={makePossessorUpdate(which)}
+                  onRemove={() => handleRemovePossessor(which)}
                 />
               </Box>
             );

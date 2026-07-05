@@ -102,6 +102,13 @@ export interface NounPhrase {
    * own `relative`, so relative clauses nest.
    */
   relative?: RelativeClause;
+  /**
+   * An optional possessing noun phrase — a Saxon genitive ("the cat's book" → the head
+   * is "book", the possessor is "the cat"). Only nouns possess (pronoun possessives like
+   * "my" are out of scope). Being a noun phrase itself, a possessor carries its own
+   * number/gender/adjectives and may in turn have a possessor ("the cat's owner's book").
+   */
+  possessor?: NounPhrase;
 }
 
 /**

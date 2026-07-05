@@ -1,4 +1,3 @@
-import React from "react";
 import { Box } from "@mui/material";
 import { SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import { ALL_SLOTS } from "./slots.ts";

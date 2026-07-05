@@ -82,7 +82,13 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const lead = pre[0] ?? noun;
   const core = joinArt(headFor(plural, lead), [...pre, noun].join(' '));
   const postStr = post.join(' et ');
-  const base = postStr ? `${core} ${postStr}` : core;
+  const withPost = postStr ? `${core} ${postStr}` : core;
+  // A possessor is postnominal, headed by "de"+article contracted ("le livre du chat").
+  // Rendering it through renderNP recurses for its own adjectives / nested possessor.
+  const poss = np.possessor;
+  const base = poss
+    ? `${withPost} ${renderNP(poss, (plural, lead) => dePrep(poss.head.forms, plural, lead))}`
+    : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;
 }

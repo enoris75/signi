@@ -41,12 +41,17 @@ const REL_NOUN_READING: Record<PathSpecifier, string> = {
  */
 function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const core: RubySegment[] = [];
+  // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
+  // adjectives / nested possessor / relative clause ("子供の猫の本").
+  if (np.possessor) core.push(...npSegs(np.possessor), { t: 'の' });
+  const adjSegs: RubySegment[] = [];
   for (const a of np.adjectives) {
     const base = a.forms['base'] ?? '';
     if (!base) continue;
-    if (core.length) core.push({ t: ' ' });
-    core.push(wordSeg(base, a.forms['reading']));
+    if (adjSegs.length) adjSegs.push({ t: ' ' });
+    adjSegs.push(wordSeg(base, a.forms['reading']));
   }
+  core.push(...adjSegs);
   const head = np.head.forms;
   core.push(wordSeg(head['base'] ?? '', head['reading']));
   // A relative clause is prenominal in Japanese: the whole predicate precedes the head

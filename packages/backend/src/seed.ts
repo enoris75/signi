@@ -207,6 +207,38 @@ const concepts: ConceptSeed[] = [
       pt: { base: 'raposa',  plural: 'raposas', gender: 'fem',  count: 'singular' },
     },
   },
+  {
+    id: 'BOY',
+    role: 'noun',
+    description: 'a young male human',
+    emoji: '👦',
+    animate: true,
+    forms: {
+      en: { base: 'boy',      plural: 'boys',     count: 'singular' },
+      it: { base: 'ragazzo',  plural: 'ragazzi',  gender: 'masc', count: 'singular' },
+      fr: { base: 'garçon',   plural: 'garçons',  gender: 'masc', count: 'singular' },
+      de: { base: 'Junge',    plural: 'Jungen',   gender: 'masc', count: 'singular' },
+      es: { base: 'niño',     plural: 'niños',    gender: 'masc', count: 'singular' },
+      ja: { base: '男の子',   count: 'singular', reading: 'おとこのこ' },
+      pt: { base: 'menino',   plural: 'meninos',  gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'WOLF',
+    role: 'noun',
+    description: 'a wild canine animal',
+    emoji: '🐺',
+    animate: true,
+    forms: {
+      en: { base: 'wolf',   plural: 'wolves', count: 'singular' },
+      it: { base: 'lupo',   plural: 'lupi',   gender: 'masc', count: 'singular', fem: 'lupa',    fem_plural: 'lupe' },
+      fr: { base: 'loup',   plural: 'loups',  gender: 'masc', count: 'singular', fem: 'louve',   fem_plural: 'louves' },
+      de: { base: 'Wolf',   plural: 'Wölfe',  gender: 'masc', count: 'singular', fem: 'Wölfin',  fem_plural: 'Wölfinnen' },
+      es: { base: 'lobo',   plural: 'lobos',  gender: 'masc', count: 'singular', fem: 'loba',    fem_plural: 'lobas' },
+      ja: { base: '狼',    count: 'singular', reading: 'おおかみ' },
+      pt: { base: 'lobo',   plural: 'lobos',  gender: 'masc', count: 'singular', fem: 'loba',    fem_plural: 'lobas' },
+    },
+  },
 
   // ── VERBS ────────────────────────────────────────────────────────
   {

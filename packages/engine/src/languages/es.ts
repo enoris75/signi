@@ -135,12 +135,29 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
     .join(' ');
 }
 
-/** Append a noun phrase's relative clause ("que" + predicate) to its rendered surface. */
+/**
+ * A postnominal possessor, headed by "de"+article ("el libro del gato"). Recurses
+ * through withRelative so the possessor carries its own adjectives / nested possessor /
+ * relative clause. Empty when the phrase has no possessor.
+ */
+function possessorText(np: ResolvedNounPhrase): string {
+  const poss = np.possessor;
+  if (!poss) return '';
+  const f = poss.head.forms;
+  const plural = (f['number'] ?? f['count']) === 'plural';
+  const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+  const a = esAdj(poss);
+  const adj = a ? ` ${a}` : '';
+  return ` ${withRelative(`${dePrep(f, plural)} ${word}${adj}`, poss)}`;
+}
+
+/** Append a noun phrase's possessor and its relative clause ("que" + predicate). */
 function withRelative(text: string, np: ResolvedNounPhrase): string {
+  const withPoss = `${text}${possessorText(np)}`;
   const rel = np.relative;
-  if (!rel) return text;
+  if (!rel) return withPoss;
   const clause = predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
-  return `${text} que ${clause}`.trimEnd();
+  return `${withPoss} que ${clause}`.trimEnd();
 }
 
 /**

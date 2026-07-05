@@ -301,6 +301,16 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   directionRelative: { x: 40, y: 99 },
   routeRelative: { x: 62, y: 99 },
   locativeRelative: { x: 84, y: 99 },
+  // Possessor reveal icons — same role as the relative ones (aim the icon at the noun
+  // box edge; the possessor editor docks in a panel below). Offset left of the relative
+  // anchor so both icons ride the box without overlapping.
+  subjectPossessor: { x: 20, y: 64 },
+  directObjectPossessor: { x: 74, y: 64 },
+  indirectObjectPossessor: { x: 70, y: 92 },
+  sourcePossessor: { x: 14, y: 99 },
+  directionPossessor: { x: 34, y: 99 },
+  routePossessor: { x: 56, y: 99 },
+  locativePossessor: { x: 78, y: 99 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

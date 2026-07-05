@@ -60,6 +60,24 @@ const WERDEN: Record<string, string> = {
   '1pl': 'werden', '2pl': 'werdet', '3pl': 'werden',
 };
 
+/**
+ * A possessor rendered colloquially as "von" + dative ("das Buch vom Kind"): von+dem
+ * fuses to "vom", otherwise "von der/den". The possessor's adjectives decline dative;
+ * recursion carries its own nested possessor and relative clause. Empty when absent.
+ */
+function possessorText(np: ResolvedNounPhrase): string {
+  const poss = np.possessor;
+  if (!poss) return '';
+  const f = poss.head.forms;
+  const plural = (f['number'] ?? f['count']) === 'plural';
+  const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+  const art = defArticle(f, 'dat', plural); // dem / der / den
+  const von = art === 'dem' ? 'vom' : `von ${art}`;
+  const declined = adjPhrase(poss, 'dat');
+  const adj = declined ? `${declined} ` : '';
+  return ` ${von} ${adj}${word}${possessorText(poss)}${subordinateClause(poss)}`;
+}
+
 function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
@@ -67,7 +85,7 @@ function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): strin
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const declined = adjPhrase(np, _case);
   const a = declined ? `${declined} ` : '';
-  return `${defArticle(forms, _case, plural)} ${a}${word}${subordinateClause(np)}`;
+  return `${defArticle(forms, _case, plural)} ${a}${word}${possessorText(np)}${subordinateClause(np)}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -126,7 +144,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       }
       const declined = adjPhrase(c.phrase, _case);
       const adj = declined ? `${declined} ` : '';
-      return `${head} ${adj}${word}${subordinateClause(c.phrase)}`;
+      return `${head} ${adj}${word}${possessorText(c.phrase)}${subordinateClause(c.phrase)}`;
     })
     .filter(Boolean)
     .join(' ');

@@ -10,6 +10,7 @@ import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RouteIcon from "@mui/icons-material/Route";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
+import KeyIcon from "@mui/icons-material/Key";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
@@ -123,6 +124,16 @@ export function buildSatellites(
       hasValue: Boolean(selection.subjectRelative?.verb),
     },
     {
+      key: "subjectPossessor",
+      parent: "subject",
+      label: "Possessor",
+      icon: <KeyIcon sx={iconSx} />,
+      // A possessor (Saxon genitive) attaches only to a noun head; its own head noun
+      // lives in the nested selection's `subject` slot.
+      available: subjectRole === "noun",
+      hasValue: Boolean(selection.subjectPossessor?.subject),
+    },
+    {
       key: "verbNegative",
       parent: "verb",
       label: "Polarity",
@@ -203,6 +214,14 @@ export function buildSatellites(
       hasValue: Boolean(selection.directObjectRelative?.verb),
     },
     {
+      key: "directObjectPossessor",
+      parent: "directObject",
+      label: "Possessor",
+      icon: <KeyIcon sx={iconSx} />,
+      available: Boolean(selection.directObject),
+      hasValue: Boolean(selection.directObjectPossessor?.subject),
+    },
+    {
       key: "indirectObjectAdjective",
       parent: "indirectObject",
       label: "Adjective",
@@ -251,6 +270,14 @@ export function buildSatellites(
       icon: <AccountTreeIcon sx={iconSx} />,
       available: Boolean(selection.indirectObject),
       hasValue: Boolean(selection.indirectObjectRelative?.verb),
+    },
+    {
+      key: "indirectObjectPossessor",
+      parent: "indirectObject",
+      label: "Possessor",
+      icon: <KeyIcon sx={iconSx} />,
+      available: Boolean(selection.indirectObject),
+      hasValue: Boolean(selection.indirectObjectPossessor?.subject),
     },
     // Complement toggles live on the VERB box; number/gender hang off each complement.
     ...COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
@@ -329,6 +356,20 @@ export function buildSatellites(
                 | PhraseSelection
                 | undefined
             )?.verb,
+          ),
+        },
+        {
+          key: `${type}Possessor`,
+          parent: type,
+          label: "Possessor",
+          icon: <KeyIcon sx={iconSx} />,
+          available: Boolean(concept),
+          hasValue: Boolean(
+            (
+              selection[`${type}Possessor` as keyof PhraseSelection] as
+                | PhraseSelection
+                | undefined
+            )?.subject,
           ),
         },
       ];
