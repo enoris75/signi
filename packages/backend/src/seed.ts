@@ -258,6 +258,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '食べる',
+        reading: 'たべる',
         masu_present: '食べます',
         masu_present_reading: 'たべます',
       },
@@ -321,6 +322,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '飲む',
+        reading: 'のむ',
         masu_present: '飲みます',
         masu_present_reading: 'のみます',
       },
@@ -385,6 +387,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '走る',
+        reading: 'はしる',
         masu_present: '走ります',
         masu_present_reading: 'はしります',
       },
@@ -448,6 +451,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '見る',
+        reading: 'みる',
         masu_present: '見ます',
         masu_present_reading: 'みます',
       },
@@ -511,6 +515,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '愛する',
+        reading: 'あいする',
         masu_present: '愛します',
         masu_present_reading: 'あいします',
       },
@@ -574,6 +579,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '知る',
+        reading: 'しる',
         masu_present: '知っています',
         masu_present_reading: 'しっています',
       },
@@ -637,6 +643,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '読む',
+        reading: 'よむ',
         masu_present: '読みます',
         masu_present_reading: 'よみます',
       },
@@ -701,6 +708,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '跳ぶ',
+        reading: 'とぶ',
         masu_present: '跳びます',
         masu_present_reading: 'とびます',
       },
@@ -828,6 +836,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '見せる',
+        reading: 'みせる',
         masu_present: '見せます',
         masu_present_reading: 'みせます',
       },
@@ -891,6 +900,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '送る',
+        reading: 'おくる',
         masu_present: '送ります',
         masu_present_reading: 'おくります',
       },
@@ -957,6 +967,7 @@ const concepts: ConceptSeed[] = [
       },
       ja: {
         base: '行く',
+        reading: 'いく',
         masu_present: '行きます',
         masu_present_reading: 'いきます',
       },
