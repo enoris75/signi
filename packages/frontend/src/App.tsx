@@ -5,10 +5,9 @@ import {
   Typography,
   Alert,
 } from "@mui/material";
-import type { Complement, PhrasePlan } from "@signi/shared";
-import { COMPLEMENT_TYPES } from "@signi/shared";
 import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
 import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
+import { selectionToPlan } from "./components/PhraseBuilder/selectionToPlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { useTranslation } from "./hooks/useTranslation.ts";
 
@@ -20,69 +19,7 @@ export default function App() {
   });
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  const complements: Partial<Record<(typeof COMPLEMENT_TYPES)[number], Complement>> = {};
-  for (const type of COMPLEMENT_TYPES) {
-    const concept = selection[type];
-    if (!concept) continue;
-    complements[type] = {
-      phrase: {
-        concept: concept.id,
-        number: selection[`${type}Number`],
-        gender: selection[`${type}Gender`],
-        adjectives: [
-          selection[`${type}Adjective`]?.id,
-          selection[`${type}Adjective2`]?.id,
-        ].filter((id): id is string => Boolean(id)),
-      },
-      specifiers:
-        type === "route" && selection.routeSpecifier
-          ? [{ kind: "path", value: selection.routeSpecifier }]
-          : undefined,
-    };
-  }
-
-  const plan: Partial<PhrasePlan> = {
-    subject: selection.subject
-      ? {
-          concept: selection.subject.id,
-          number: selection.subjectNumber,
-          gender: selection.subjectGender,
-          adjectives: [
-            selection.subjectAdjective?.id,
-            selection.subjectAdjective2?.id,
-          ].filter((id): id is string => Boolean(id)),
-        }
-      : undefined,
-    verbPhrase: {
-      verb: selection.verb?.id as string,
-      negative: selection.verbNegative,
-      tense: selection.verbTense,
-      modifier: selection.modifier?.id,
-    },
-    directObject: selection.directObject
-      ? {
-          concept: selection.directObject.id,
-          number: selection.directObjectNumber,
-          gender: selection.directObjectGender,
-          adjectives: [
-            selection.directObjectAdjective?.id,
-            selection.directObjectAdjective2?.id,
-          ].filter((id): id is string => Boolean(id)),
-        }
-      : undefined,
-    indirectObject: selection.indirectObject
-      ? {
-          concept: selection.indirectObject.id,
-          number: selection.indirectObjectNumber,
-          gender: selection.indirectObjectGender,
-          adjectives: [
-            selection.indirectObjectAdjective?.id,
-            selection.indirectObjectAdjective2?.id,
-          ].filter((id): id is string => Boolean(id)),
-        }
-      : undefined,
-    complements: Object.keys(complements).length > 0 ? complements : undefined,
-  };
+  const plan = selectionToPlan(selection);
 
   const { data: translations, isLoading, isError } = useTranslation(plan);
   const isReady = Boolean(plan.subject?.concept && plan.verbPhrase?.verb);

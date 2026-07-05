@@ -66,10 +66,26 @@ export interface PhraseSelection {
     routeAdjective2?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
+    // Optional relative clause per noun block ("the boy *who cried*"). Each is itself
+    // a PhraseSelection minus its subject (the head noun is the clause's subject), so
+    // clauses nest recursively. Edited by a nested clause-mode PhraseBuilder instance.
+    subjectRelative?: PhraseSelection;
+    directObjectRelative?: PhraseSelection;
+    indirectObjectRelative?: PhraseSelection;
+    locativeRelative?: PhraseSelection;
+    directionRelative?: PhraseSelection;
+    sourceRelative?: PhraseSelection;
+    routeRelative?: PhraseSelection;
 }
 
 export type NumberSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
 
 export type GenderSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
+
+// The noun blocks that can carry a relative clause (same set as NumberSlot).
+export type NounKey = "subject" | "directObject" | "indirectObject" | ComplementType;
+
+export const RELATIVE_KEY = (which: NounKey) =>
+  `${which}Relative` as keyof PhraseSelection;
 
 export type SlotKey = SlotConfig["key"];

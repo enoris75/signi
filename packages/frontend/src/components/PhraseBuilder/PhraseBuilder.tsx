@@ -1,5 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Box, Paper, Typography } from "@mui/material";
+import { Box, Paper, Typography, IconButton } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import {
   COMPLEMENT_TYPES,
   TENSES,
@@ -11,8 +12,10 @@ import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SlotBox, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import {
   GenderSlot,
+  NounKey,
   NumberSlot,
   PhraseSelection,
+  RELATIVE_KEY,
   SlotKey,
 } from "./interfaces.ts";
 import {
@@ -26,7 +29,7 @@ import {
   MIN_GRAPH_HEIGHT,
 } from "./slots.ts";
 import { applyConceptSelect, applyClear } from "./phraseReducers.ts";
-import { buildSatellites, type Satellite } from "./satellites.tsx";
+import { buildSatellites, conceptLabel, type Satellite } from "./satellites.tsx";
 import { buildGraph } from "./graph.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
@@ -37,7 +40,22 @@ import { PhraseSidebar } from "./PhraseSidebar.tsx";
 interface PhraseBuilderProps {
   selection: PhraseSelection;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
+  // Clause mode: this builder edits a relative clause whose subject is the external
+  // `head` noun rather than a box on its own canvas. Set for every nested instance.
+  nested?: boolean;
+  head?: Concept;
+  // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
+  relativeLabel?: string;
+  onRemove?: () => void;
 }
+
+// The noun blocks that can carry a relative clause.
+const NOUN_KEYS: NounKey[] = [
+  "subject",
+  "directObject",
+  "indirectObject",
+  ...COMPLEMENT_TYPES,
+];
 
 type DragState = {
   keys: string[];
@@ -133,6 +151,10 @@ function layoutControls(
 export function PhraseBuilder({
   selection,
   onPhraseUpdate,
+  nested = false,
+  head,
+  relativeLabel,
+  onRemove,
 }: PhraseBuilderProps) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
@@ -160,7 +182,8 @@ export function PhraseBuilder({
     selection.subject?.role,
     Boolean(selection.subjectAdjective),
     selection.verb?.complements,
-  );
+    // In clause mode the subject is the external head, so drop the subject slot.
+  ).filter((s) => !nested || s.key !== "subject");
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -220,6 +243,29 @@ export function PhraseBuilder({
     handleClear(type);
     setRevealed((prev) => ({ ...prev, [type]: false }));
     if (activeSlot === type) setActiveSlot("verb");
+  }
+
+  // A lens: update the relative-clause slice hanging off `which`, seeding an empty
+  // clause the first time. Handed to the nested clause-mode PhraseBuilder as its
+  // onPhraseUpdate, so all its edits land inside this block's `${which}Relative`.
+  function makeRelativeUpdate(which: NounKey) {
+    return (updater: (prev: PhraseSelection) => PhraseSelection) =>
+      onPhraseUpdate((prev) => ({
+        ...prev,
+        [RELATIVE_KEY(which)]: updater(
+          (prev[RELATIVE_KEY(which)] as PhraseSelection | undefined) ?? {},
+        ),
+      }));
+  }
+
+  // Remove a noun block's relative clause entirely and collapse its reveal.
+  function handleRemoveRelative(which: NounKey) {
+    onPhraseUpdate((prev) => {
+      const next = { ...prev };
+      delete next[RELATIVE_KEY(which)];
+      return next;
+    });
+    setRevealed((prev) => ({ ...prev, [`${which}Relative`]: false }));
   }
 
   function handleToggleNumber(which: NumberSlot) {
@@ -379,6 +425,9 @@ export function PhraseBuilder({
     h: GRAPH_HEIGHT,
   });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
+    // Nested clause canvases start shorter and don't persist (the global key is
+    // shared, so many instances would clobber each other).
+    if (nested) return MIN_GRAPH_HEIGHT + 60;
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
@@ -553,6 +602,7 @@ export function PhraseBuilder({
 
   const { edges, groupRects, groupEdges } = buildGraph({
     hasVerb,
+    showSubject: !nested,
     renderedSlots,
     visibleSlots,
     shownMap,
@@ -560,6 +610,12 @@ export function PhraseBuilder({
     controlPos,
     svgSize,
   });
+
+  // Noun blocks whose relative-clause panel is currently open (revealed or already
+  // has content). Each renders a nested clause-mode PhraseBuilder below the canvas.
+  const openRelatives = NOUN_KEYS.filter(
+    (which) => selection[which] && shownMap[`${which}Relative`],
+  );
 
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
   // same canvas below and lean on this component's drag machinery and handlers.
@@ -600,6 +656,7 @@ export function PhraseBuilder({
       <Paper
         elevation={0}
         onPointerDown={(e) => {
+          if (nested) return; // nested clause panels stay docked, never float
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const borderWidth = 8;
           const isNearBorder =
@@ -622,6 +679,11 @@ export function PhraseBuilder({
           p: 2,
           border: "1px solid",
           borderColor: "divider",
+          ...(nested && {
+            borderLeft: "3px solid",
+            borderLeftColor: "primary.light",
+            bgcolor: "action.hover",
+          }),
           cursor:
             borderDragRef.current && position
               ? "grabbing"
@@ -630,21 +692,58 @@ export function PhraseBuilder({
                 : undefined,
         }}
       >
-        <Typography
-          sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "0.6rem",
-            fontWeight: 600,
-            letterSpacing: "0.18em",
-            textTransform: "uppercase",
-            color: "text.secondary",
-            mb: 1.5,
-          }}
-        >
-          {hasVerb
-            ? "Compose your phrase — click a slot then choose a word"
-            : "Start by choosing a verb"}
-        </Typography>
+        {nested ? (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
+              mb: 1.5,
+            }}
+          >
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.62rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "text.secondary",
+              }}
+            >
+              {conceptLabel(head) ?? "…"}{" "}
+              <Box component="span" sx={{ color: "text.disabled", fontWeight: 500 }}>
+                · {relativeLabel ?? "that"} …
+              </Box>
+            </Typography>
+            {onRemove && (
+              <IconButton
+                size="small"
+                onClick={onRemove}
+                aria-label="Remove relative clause"
+                sx={{ p: 0.25 }}
+              >
+                <CloseIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            )}
+          </Box>
+        ) : (
+          <Typography
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.6rem",
+              fontWeight: 600,
+              letterSpacing: "0.18em",
+              textTransform: "uppercase",
+              color: "text.secondary",
+              mb: 1.5,
+            }}
+          >
+            {hasVerb
+              ? "Compose your phrase — click a slot then choose a word"
+              : "Start by choosing a verb"}
+          </Typography>
+        )}
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
@@ -684,7 +783,7 @@ export function PhraseBuilder({
                       The builders self-filter, so mounting one per possible noun
                       / the verb phrase unconditionally is safe — inactive slots
                       and toggles render nothing. */}
-                  <NounPhraseBuilder which="subject" ctx={ctx} />
+                  {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
                   <VerbPhraseBuilder ctx={ctx} />
                   <NounPhraseBuilder which="directObject" ctx={ctx} />
                   <NounPhraseBuilder which="indirectObject" ctx={ctx} />
@@ -738,10 +837,11 @@ export function PhraseBuilder({
                       setGraphHeight(currentH);
                     };
                     const onUp = () => {
-                      localStorage.setItem(
-                        "signi:graphHeight",
-                        String(Math.round(currentH)),
-                      );
+                      if (!nested)
+                        localStorage.setItem(
+                          "signi:graphHeight",
+                          String(Math.round(currentH)),
+                        );
                       window.removeEventListener("pointermove", onMove);
                       window.removeEventListener("pointerup", onUp);
                       window.removeEventListener("pointercancel", onUp);
@@ -764,18 +864,47 @@ export function PhraseBuilder({
               </>
             )}
           </Box>
-          <PhraseSidebar
-            width={sidebarWidth}
-            onWidthChange={setSidebarWidth}
-            maxHeight={graphHeight}
-            selection={selection}
-            activeSlot={activeSlot}
-            activeSlotConfig={activeSlotConfig}
-            visibleSlots={visibleSlots}
-            onSlotClick={handleSlotClick}
-            onConceptSelect={handleConceptSelect}
-          />
+          {/* The word palette rides only the top-level builder; nested clauses fill
+              their slots via each box's inline typeahead. */}
+          {!nested && (
+            <PhraseSidebar
+              width={sidebarWidth}
+              onWidthChange={setSidebarWidth}
+              maxHeight={graphHeight}
+              selection={selection}
+              activeSlot={activeSlot}
+              activeSlotConfig={activeSlotConfig}
+              visibleSlots={visibleSlots}
+              onSlotClick={handleSlotClick}
+              onConceptSelect={handleConceptSelect}
+            />
+          )}
         </Box>
+
+        {/* Nested relative-clause builders — one per noun block with an open clause.
+            Each is a clause-mode PhraseBuilder editing that block's `${which}Relative`
+            slice; because they recurse, a clause's own objects can sprout deeper
+            clauses. */}
+        {hasVerb &&
+          openRelatives.map((which) => {
+            const nounHead = selection[which] as Concept;
+            const label = nounHead?.animate ? "who" : "that";
+            return (
+              <Box key={which} sx={{ mt: 1.5, pl: nested ? 1 : 2 }}>
+                <PhraseBuilder
+                  nested
+                  head={nounHead}
+                  relativeLabel={label}
+                  selection={
+                    (selection[RELATIVE_KEY(which)] as PhraseSelection | undefined) ??
+                    {}
+                  }
+                  onPhraseUpdate={makeRelativeUpdate(which)}
+                  onRemove={() => handleRemoveRelative(which)}
+                />
+              </Box>
+            );
+          })}
       </Paper>
     </Box>
   );

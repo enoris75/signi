@@ -292,6 +292,15 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   routeGender: { x: 74, y: 84 },
   locativeNumber: NUMBER_TOGGLE_DEFAULTS.locative,
   locativeGender: { x: 96, y: 80 },
+  // Relative-clause reveal icons — no canvas node of their own; these only aim each
+  // icon at the bottom edge of its noun box (clauses expand into panels below).
+  subjectRelative: { x: 26, y: 64 },
+  directObjectRelative: { x: 80, y: 64 },
+  indirectObjectRelative: { x: 76, y: 92 },
+  sourceRelative: { x: 20, y: 99 },
+  directionRelative: { x: 40, y: 99 },
+  routeRelative: { x: 62, y: 99 },
+  locativeRelative: { x: 84, y: 99 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

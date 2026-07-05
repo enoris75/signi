@@ -9,6 +9,7 @@ import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RouteIcon from "@mui/icons-material/Route";
+import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
@@ -112,6 +113,16 @@ export function buildSatellites(
       valueLabel: selection.subjectGender === "fem" ? "Feminine" : "Masculine",
     },
     {
+      key: "subjectRelative",
+      parent: "subject",
+      label: "Relative clause",
+      icon: <AccountTreeIcon sx={iconSx} />,
+      // A relative clause attaches only to a noun head (pronoun subjects render
+      // without one), and the engine appends it after the noun.
+      available: subjectRole === "noun",
+      hasValue: Boolean(selection.subjectRelative?.verb),
+    },
+    {
       key: "verbNegative",
       parent: "verb",
       label: "Polarity",
@@ -184,6 +195,14 @@ export function buildSatellites(
         selection.directObjectGender === "fem" ? "Feminine" : "Masculine",
     },
     {
+      key: "directObjectRelative",
+      parent: "directObject",
+      label: "Relative clause",
+      icon: <AccountTreeIcon sx={iconSx} />,
+      available: Boolean(selection.directObject),
+      hasValue: Boolean(selection.directObjectRelative?.verb),
+    },
+    {
       key: "indirectObjectAdjective",
       parent: "indirectObject",
       label: "Adjective",
@@ -224,6 +243,14 @@ export function buildSatellites(
       alwaysSet: true,
       valueLabel:
         selection.indirectObjectGender === "fem" ? "Feminine" : "Masculine",
+    },
+    {
+      key: "indirectObjectRelative",
+      parent: "indirectObject",
+      label: "Relative clause",
+      icon: <AccountTreeIcon sx={iconSx} />,
+      available: Boolean(selection.indirectObject),
+      hasValue: Boolean(selection.indirectObjectRelative?.verb),
     },
     // Complement toggles live on the VERB box; number/gender hang off each complement.
     ...COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
@@ -289,6 +316,20 @@ export function buildSatellites(
           hasValue: gen === "fem",
           alwaysSet: true,
           valueLabel: gen === "fem" ? "Feminine" : "Masculine",
+        },
+        {
+          key: `${type}Relative`,
+          parent: type,
+          label: "Relative clause",
+          icon: <AccountTreeIcon sx={iconSx} />,
+          available: Boolean(concept),
+          hasValue: Boolean(
+            (
+              selection[`${type}Relative` as keyof PhraseSelection] as
+                | PhraseSelection
+                | undefined
+            )?.verb,
+          ),
         },
       ];
     }),

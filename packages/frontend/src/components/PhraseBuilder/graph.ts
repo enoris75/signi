@@ -66,6 +66,7 @@ const rectBorderPoint = (r: GroupRect, tx: number, ty: number): Pt => {
 // the dashed role-group bounding boxes, and the solid links between those boxes.
 export function buildGraph({
   hasVerb,
+  showSubject = true,
   renderedSlots,
   visibleSlots,
   shownMap,
@@ -74,6 +75,9 @@ export function buildGraph({
   svgSize,
 }: {
   hasVerb: boolean;
+  // Whether the Subject role group is drawn. False inside a relative clause, whose
+  // subject is the (external) head noun rather than a box on this canvas.
+  showSubject?: boolean;
   renderedSlots: SlotConfig[];
   visibleSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
@@ -175,17 +179,21 @@ export function buildGraph({
       nodeKeys: string[];
       removeKey?: ComplementType;
     }> = [
-      {
-        label: "Subject",
-        color: MUI_COLOR_HEX.primary,
-        nodeKeys: [
-          ...(shownMap.subjectAdjective ? ["subjectAdjective"] : []),
-          ...(shownMap.subjectAdjective2 ? ["subjectAdjective2"] : []),
-          "subject",
-          ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
-          ...(shownMap.subjectGender ? ["subjectGender"] : []),
-        ],
-      },
+      ...(showSubject
+        ? [
+            {
+              label: "Subject",
+              color: MUI_COLOR_HEX.primary,
+              nodeKeys: [
+                ...(shownMap.subjectAdjective ? ["subjectAdjective"] : []),
+                ...(shownMap.subjectAdjective2 ? ["subjectAdjective2"] : []),
+                "subject",
+                ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
+                ...(shownMap.subjectGender ? ["subjectGender"] : []),
+              ],
+            },
+          ]
+        : []),
       {
         label: "Verb Phrase",
         color: MUI_COLOR_HEX.secondary,
