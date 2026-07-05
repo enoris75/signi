@@ -81,6 +81,7 @@ export interface Concept {
   person?: '1' | '2' | '3';   // only set for pronouns
   number?: 'singular' | 'plural'; // inherent grammatical number, only set for pronouns
   gendered?: boolean;           // noun has distinct masc/fem surface forms
+  animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
   complements?: ComplementType[]; // motion/locative complements a verb licenses
 }
 
@@ -94,6 +95,26 @@ export interface NounPhrase {
   gender?: 'masc' | 'fem';
   /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
   adjectives?: string[];
+  /**
+   * An optional restrictive relative clause ("the boy *who cried wolf*"). The head
+   * noun is implicitly the clause's subject, so only the predicate is stored. The
+   * clause's own objects/complements are themselves noun phrases and may carry their
+   * own `relative`, so relative clauses nest.
+   */
+  relative?: RelativeClause;
+}
+
+/**
+ * A subordinate (restrictive relative) clause. It is a full predicate — verb phrase
+ * plus optional objects and complements — whose subject is the noun phrase it hangs
+ * off of. There is no `subject` field: the head noun fills that role (subject-relative
+ * only; "the book that I read" is out of scope).
+ */
+export interface RelativeClause {
+  verbPhrase: VerbPhrase;
+  directObject?: NounPhrase;
+  indirectObject?: NounPhrase;
+  complements?: Partial<Record<ComplementType, Complement>>;
 }
 
 /** The predicate head: a core verb, optional negation, and an optional adverb. */

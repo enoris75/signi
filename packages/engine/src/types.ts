@@ -11,6 +11,8 @@ export interface ConceptForms {
 export interface ResolvedNounPhrase {
   head: ConceptForms;
   adjectives: ConceptForms[];
+  /** A resolved relative clause; the head above is implicitly its subject. */
+  relative?: ResolvedRelativeClause;
 }
 
 /** A resolved verb phrase: the verb, negation flag, tense, and resolved adverb. */
@@ -19,6 +21,17 @@ export interface ResolvedVerbPhrase {
   negative?: boolean;
   tense?: Tense;
   modifier?: ConceptForms;
+}
+
+/**
+ * A resolved relative clause: the predicate half of a phrase (verb + objects +
+ * complements), whose subject is the noun phrase carrying it.
+ */
+export interface ResolvedRelativeClause {
+  verbPhrase: ResolvedVerbPhrase;
+  directObject?: ResolvedNounPhrase;
+  indirectObject?: ResolvedNounPhrase;
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>;
 }
 
 /** A resolved complement: its noun phrase plus any specifiers (plain data). */

@@ -1,5 +1,5 @@
-import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, Translation } from '@signi/shared';
-import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ConceptForms } from './types.js';
+import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation } from '@signi/shared';
+import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
 import { frenchEngine } from './languages/fr.js';
@@ -68,38 +68,71 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
   return {
     head,
     adjectives: (np.adjectives ?? []).map((id) => resolve(id, language, lookup)),
+    // A relative clause is the predicate half of a phrase whose subject is this
+    // head. Recursing through resolveNounPhrase (its objects/complements are noun
+    // phrases that may themselves carry `relative`) handles arbitrary nesting.
+    relative: np.relative ? resolveRelativeClause(np.relative, language, lookup) : undefined,
+  };
+}
+
+/** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). */
+function resolveVerbPhrase(
+  vp: PhrasePlan['verbPhrase'],
+  language: string,
+  lookup: LexiconLookup,
+): ResolvedVerbPhrase {
+  return {
+    verb: resolve(vp.verb, language, lookup),
+    negative: vp.negative,
+    tense: vp.tense,
+    modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
+  };
+}
+
+/**
+ * Resolve the complement map (locative / direction / source / route). Each value is a
+ * noun phrase with any specifiers carried straight through as plain data. Shared by the
+ * top-level plan and by every relative clause.
+ */
+function resolveComplements(
+  complements: PhrasePlan['complements'],
+  language: string,
+  lookup: LexiconLookup,
+): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
+  if (!complements) return undefined;
+  const out: Partial<Record<ComplementType, ResolvedComplement>> = {};
+  for (const [type, value] of Object.entries(complements)) {
+    if (!value?.phrase?.concept) continue;
+    out[type as ComplementType] = {
+      phrase: resolveNounPhrase(value.phrase, language, lookup),
+      specifiers: value.specifiers,
+    };
+  }
+  return out;
+}
+
+/** Resolve a relative clause: its verb phrase, optional objects, and complements. */
+function resolveRelativeClause(
+  clause: RelativeClause,
+  language: string,
+  lookup: LexiconLookup,
+): ResolvedRelativeClause {
+  return {
+    verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
+    directObject: clause.directObject ? resolveNounPhrase(clause.directObject, language, lookup) : undefined,
+    indirectObject: clause.indirectObject ? resolveNounPhrase(clause.indirectObject, language, lookup) : undefined,
+    complements: resolveComplements(clause.complements, language, lookup),
   };
 }
 
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
-    const { verb, negative, modifier, tense } = plan.verbPhrase;
-
-    // Complement noun phrases (locative / direction / source / route). Each is a
-    // noun phrase with any specifiers carried straight through as plain data.
-    let complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined;
-    if (plan.complements) {
-      complements = {};
-      for (const [type, value] of Object.entries(plan.complements)) {
-        if (!value?.phrase?.concept) continue;
-        complements[type as ComplementType] = {
-          phrase: resolveNounPhrase(value.phrase, engine.language, lookup),
-          specifiers: value.specifiers,
-        };
-      }
-    }
-
     const resolved: ResolvedPhrase = {
       subject: resolveNounPhrase(plan.subject, engine.language, lookup),
-      verbPhrase: {
-        verb: resolve(verb, engine.language, lookup),
-        negative,
-        tense,
-        modifier: modifier ? resolve(modifier, engine.language, lookup) : undefined,
-      },
+      verbPhrase: resolveVerbPhrase(plan.verbPhrase, engine.language, lookup),
       directObject: plan.directObject ? resolveNounPhrase(plan.directObject, engine.language, lookup) : undefined,
       indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
-      complements,
+      complements: resolveComplements(plan.complements, engine.language, lookup),
     };
     const ruby = engine.renderRuby?.(resolved);
     return {

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { npAdj, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { npAdj, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const PREP: Record<ComplementType, string> = {
   locative: 'in',
@@ -56,59 +56,94 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
-      return `${prep} ${nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase))}`;
+      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase)), c.phrase)}`;
     })
     .filter(Boolean)
     .join(' ');
 }
 
+/**
+ * The predicate half of a phrase — everything after the subject — as ordered parts.
+ * Shared by the top-level sentence and by relative clauses, which pass the head noun's
+ * forms as `subjectForms` so the verb agrees with the head.
+ */
+function predicateParts(
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounPhrase,
+  indirectObject?: ResolvedNounPhrase,
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): string[] {
+  const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
+
+  const directObjectText = directObject
+    ? withRelative(nounPhrase(directObject.head.forms, true, npAdj(directObject)), directObject)
+    : '';
+  // Prepositional dative: "to the cat"
+  const indirectObjectText = indirectObject
+    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject)), indirectObject)}`
+    : '';
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const isFrequency = modifier?.forms['subtype'] === 'frequency';
+  const complementsText = complementsPhrase(complements);
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+
+  if (verbNegative && !modifierIsNegative) {
+    const person = subjectForms['person'] ?? '3';
+    const number = subjectForms['number'] ?? 'singular';
+    // Negation auxiliary is tense-driven: "do/does not" (present),
+    // "did not" (past), "will not" (future) — all followed by the bare base.
+    const aux =
+      tense === 'past'   ? 'did not' :
+      tense === 'future' ? 'will not' :
+      (person === '3' && number === 'singular') ? 'does not' : 'do not';
+    const base = verb.forms['base'] ?? conjugate(verb.forms, subjectForms);
+    // Frequency adverbs slot between aux and base: "do not always drink"
+    const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
+    const trailingMod = isFrequency ? '' : modifierText;
+    return [negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
+  }
+  // Future is periphrastic ("will eat"); present/past come from the forms map.
+  const verbText = tense === 'future'
+    ? `will ${verb.forms['base'] ?? ''}`
+    : conjugate(verb.forms, subjectForms, tense);
+  // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
+  // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
+  const preVerb  = isFrequency ? modifierText : '';
+  const postVerb = isFrequency ? '' : modifierText;
+  return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+}
+
+/**
+ * A restrictive relative clause on `np`: relativizer + the clause's predicate, the head
+ * noun serving as the clause's subject. "who" for an animate head, "that" otherwise.
+ */
+function relativeText(np: ResolvedNounPhrase): string {
+  const rel = np.relative;
+  if (!rel) return '';
+  const pronoun = np.head.forms['animate'] === '1' ? 'who' : 'that';
+  return [pronoun, ...predicateParts(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)]
+    .filter(Boolean)
+    .join(' ');
+}
+
+/** Append a noun phrase's relative clause (if any) to its already-rendered surface. */
+function withRelative(text: string, np: ResolvedNounPhrase): string {
+  const rel = relativeText(np);
+  return rel ? `${text} ${rel}` : text;
+}
+
 export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
-    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
-
-    const subjectText = subjectPhrase(subject.head.forms, npAdj(subject));
-    const directObjectText = directObject
-      ? nounPhrase(directObject.head.forms, true, npAdj(directObject))
-      : '';
-    // Prepositional dative: "to the cat"
-    const indirectObjectText = indirectObject
-      ? `to ${nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject))}`
-      : '';
-    const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-    const isFrequency = modifier?.forms['subtype'] === 'frequency';
-    const complementsText = complementsPhrase(phrase.complements);
-
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-
-    let parts: string[];
-    if (verbNegative && !modifierIsNegative) {
-      const person = subject.head.forms['person'] ?? '3';
-      const number = subject.head.forms['number'] ?? 'singular';
-      // Negation auxiliary is tense-driven: "do/does not" (present),
-      // "did not" (past), "will not" (future) — all followed by the bare base.
-      const aux =
-        tense === 'past'   ? 'did not' :
-        tense === 'future' ? 'will not' :
-        (person === '3' && number === 'singular') ? 'does not' : 'do not';
-      const base = verb.forms['base'] ?? conjugate(verb.forms, subject.head.forms);
-      // Frequency adverbs slot between aux and base: "do not always drink"
-      const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
-      const trailingMod = isFrequency ? '' : modifierText;
-      parts = [subjectText, negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
-    } else {
-      // Future is periphrastic ("will eat"); present/past come from the forms map.
-      const verbText = tense === 'future'
-        ? `will ${verb.forms['base'] ?? ''}`
-        : conjugate(verb.forms, subject.head.forms, tense);
-      // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
-      // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
-      const preVerb  = isFrequency ? modifierText : '';
-      const postVerb = isFrequency ? '' : modifierText;
-      parts = [subjectText, preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
-    }
-
-    return parts.filter(Boolean).join(' ').trim();
+    const { subject } = phrase;
+    const subjectText = withRelative(subjectPhrase(subject.head.forms, npAdj(subject)), subject);
+    return [
+      subjectText,
+      ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),
+    ]
+      .filter(Boolean)
+      .join(' ')
+      .trim();
   },
 };

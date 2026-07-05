@@ -10,6 +10,7 @@ interface ConceptSeed {
   emoji?: string;
   transitivity?: string; // only for verbs
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
+  animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
 
@@ -72,6 +73,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'domestic feline animal',
     emoji: '🐱',
+    animate: true,
     forms: {
       en: { base: 'cat',   plural: 'cats',   count: 'singular' },
       it: { base: 'gatto', plural: 'gatti',  gender: 'masc', count: 'singular', fem: 'gatta',   fem_plural: 'gatte' },
@@ -87,6 +89,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'domestic canine animal',
     emoji: '🐶',
+    animate: true,
     forms: {
       en: { base: 'dog',    plural: 'dogs',   count: 'singular' },
       it: { base: 'cane',   plural: 'cani',   gender: 'masc', count: 'singular', fem: 'cagna',   fem_plural: 'cagne' },
@@ -177,6 +180,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'a young human being',
     emoji: '👦',
+    animate: true,
     forms: {
       en: { base: 'child',    plural: 'children', count: 'singular' },
       it: { base: 'bambino',  plural: 'bambini',  gender: 'masc', count: 'singular', fem: 'bambina',  fem_plural: 'bambine' },
@@ -192,6 +196,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'a carnivorous mammal with reddish fur',
     emoji: '🦊',
+    animate: true,
     forms: {
       en: { base: 'fox',     plural: 'foxes',   count: 'singular' },
       it: { base: 'volpe',   plural: 'volpi',   gender: 'fem', count: 'singular' },
@@ -334,6 +339,7 @@ const concepts: ConceptSeed[] = [
     id: 'RUN',
     role: 'verb',
     transitivity: 'intransitive',
+    complements: ['locative', 'direction', 'source', 'route'],
     description: 'to move quickly on foot',
     emoji: '🏃',
     forms: {
@@ -1397,8 +1403,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements) VALUES (?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate) VALUES (?, ?, ?, ?, ?, ?, ?)'
     ),
   };
 
@@ -1420,7 +1426,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

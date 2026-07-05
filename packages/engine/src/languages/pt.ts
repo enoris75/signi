@@ -132,11 +132,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const a = ptAdj(c.phrase);
       const adj = a ? ` ${a}` : '';
-      // locative→em (no/na), direction→a (ao/à), source→de (do/da), route→path preposition
+      // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
+      // route→path preposition. A direction toward an *animate* goal takes "para"
+      // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para
+      // a criança", not "*à criança"); "para" doesn't contract. Source is prefixed with
+      // the ablative adverb "longe" so it reads as motion away ("corro longe da criança");
+      // bare "de" reads as origin/possession, not departure.
       const head =
         type === 'locative'  ? emPrep(f, plural) :
-        type === 'direction' ? datPrep(f, plural) :
-        type === 'source'    ? dePrep(f, plural) :
+        type === 'direction' ? (f['animate'] === '1' ? `para ${defArticle(f, plural)}` : datPrep(f, plural)) :
+        type === 'source'    ? `longe ${dePrep(f, plural)}` :
         routeHead(c, plural);
       return `${head} ${word}${adj}`;
     })

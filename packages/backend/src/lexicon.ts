@@ -46,9 +46,10 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
+    JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
   `).get(conceptId, language);
   if (!lexeme) return undefined;
@@ -62,6 +63,7 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   forms['base']   = lexeme.singular;
   if (lexeme.plural) forms['plural'] = lexeme.plural;
   if (lexeme.gender) forms['gender'] = lexeme.gender;
+  if (lexeme.animate) forms['animate'] = '1'; // concept-level animacy (affects motion-goal adposition)
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }

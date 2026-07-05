@@ -118,11 +118,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const a = esAdj(c.phrase);
       const adj = a ? ` ${a}` : '';
-      // locative→en, direction→a (al/a la), source→de (del/de la), route→path preposition
+      // locative→en, direction→a (al/a la), source→"lejos de" (lejos del/de la),
+      // route→path preposition. A direction toward an *animate* goal takes "hacia"
+      // (toward) — bare "a" + person doesn't read as a motion destination ("corro hacia
+      // el niño", not "*al niño"); "hacia" doesn't contract. Source is prefixed with the
+      // ablative adverb "lejos" so it reads as motion away ("corro lejos del niño"); bare
+      // "de" reads as origin/possession, not departure.
       const head =
         type === 'locative'  ? `en ${defArticle(f, plural)}` :
-        type === 'direction' ? datPrep(f, plural) :
-        type === 'source'    ? dePrep(f, plural) :
+        type === 'direction' ? (f['animate'] === '1' ? `hacia ${defArticle(f, plural)}` : datPrep(f, plural)) :
+        type === 'source'    ? `lejos ${dePrep(f, plural)}` :
         routeHead(c, plural);
       return `${head} ${word}${adj}`;
     })

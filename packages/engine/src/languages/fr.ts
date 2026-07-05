@@ -116,11 +116,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // locative→dans, direction→à (au/aux/à la), source→de (du/des/de la), route→path preposition
+      // locative→dans, direction→à (au/aux/à la), source→"loin de" (loin du/des/de la),
+      // route→path preposition. A direction toward an *animate* goal takes "vers"
+      // (toward) — French doesn't use bare "à" for a person destination ("je cours vers
+      // l'enfant", not "*à l'enfant"); "vers" doesn't contract with the article. Source is
+      // prefixed with the ablative adverb "loin" so it clearly reads as motion away ("je
+      // cours loin de l'enfant"); bare "de" reads as a partitive/complement, not departure.
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? `dans ${defArticle(f, plural, lead)}` :
-        type === 'direction' ? datPrep(f, plural, lead) :
-        type === 'source'    ? dePrep(f, plural, lead) :
+        type === 'direction' ? (f['animate'] === '1' ? `vers ${defArticle(f, plural, lead)}` : datPrep(f, plural, lead)) :
+        type === 'source'    ? `loin ${dePrep(f, plural, lead)}` :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })

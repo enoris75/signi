@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
-import { pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouàèéìòù]/i;
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */
@@ -200,7 +200,9 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
     .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
     .filter(Boolean)
     .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
-  return postStr ? `${core} ${postStr}` : core;
+  const base = postStr ? `${core} ${postStr}` : core;
+  const rel = relativeText(np);
+  return rel ? `${base} ${rel}` : base;
 }
 
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
@@ -241,11 +243,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // locative→in, direction→a, source→da (fuse with article); route→path preposition
+      // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.
+      // A direction toward an *animate* goal takes "da" ("corro dal bambino" = to/towards
+      // the child — the "andare da qualcuno" construction), not bare "a", which is for
+      // places ("corro alla casa"). Because source also governs "da", it is prefixed with
+      // the ablative adverb "via" so the two senses never collide: "corro dal bambino"
+      // (motion to) vs "corro via dal bambino" (motion away from).
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepArt('in', f, plural, lead) :
-        type === 'direction' ? prepArt('a', f, plural, lead) :
-        type === 'source'    ? prepArt('da', f, plural, lead) :
+        type === 'direction' ? prepArt(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
+        type === 'source'    ? `via ${prepArt('da', f, plural, lead)}` :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })
