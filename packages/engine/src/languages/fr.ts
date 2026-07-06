@@ -42,6 +42,20 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   const de = VOWEL_START.test(lead) ? "d'" : 'de';
+  // Mass nouns ("eau") stay singular and take the partitive "de l'/du/de la" for
+  // some/indefinite; "beaucoup/peu de" already work; "all" → "tout/toute" + article.
+  if (forms['uncountable'] === '1') {
+    switch (definiteness) {
+      case 'bare':       return '';
+      case 'indefinite': return dePrep(forms, false, lead);   // partitive: "de l'eau"
+      case 'some':       return dePrep(forms, false, lead);   // partitive: "de l'eau"
+      case 'many':       return `beaucoup ${de}`;
+      case 'few':        return `peu ${de}`;
+      case 'all':        return `${fem ? 'toute' : 'tout'} ${defArticle(forms, false, lead)}`;
+      case 'no':         return fem ? 'aucune' : 'aucun';
+      default:           return defArticle(forms, false, lead);
+    }
+  }
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural);

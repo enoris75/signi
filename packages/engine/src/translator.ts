@@ -68,7 +68,8 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     // boys", "all boys"), so they force the plural surface — but only when the noun has
     // one (mass nouns like "water" stay singular: "some water").
     const definiteness = np.definiteness ?? 'definite';
-    const forcesPlural = PLURAL_DETERMINERS.has(definiteness);
+    // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
+    const forcesPlural = PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1';
     const num = forcesPlural ? 'plural' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);

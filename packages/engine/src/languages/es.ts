@@ -23,6 +23,19 @@ function indefArticle(forms: Record<string, string>, plural = false): string {
 function artFor(forms: Record<string, string>, plural = false): string {
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
+  // Mass nouns ("agua") stay singular: "algo de agua", "mucha/poca agua", "toda el agua".
+  if (forms['uncountable'] === '1') {
+    switch (definiteness) {
+      case 'bare':       return '';
+      case 'indefinite': return '';                 // no "un agua" — bare
+      case 'some':       return 'algo de';
+      case 'many':       return fem ? 'mucha' : 'mucho';
+      case 'few':        return fem ? 'poca' : 'poco';
+      case 'all':        return `${fem ? 'toda' : 'todo'} ${defArticle(forms, false)}`;
+      case 'no':         return fem ? 'ninguna' : 'ningún';
+      default:           return defArticle(forms, false);
+    }
+  }
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural);

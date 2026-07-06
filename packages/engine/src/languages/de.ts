@@ -101,6 +101,20 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
   const definiteness = forms['definiteness'] ?? 'definite';
   if (_case === 'dat' || definiteness === 'definite') return defArticle(forms, _case, plural);
   const gender = forms['gender'] ?? 'neut';
+  // Mass nouns ("Wasser") stay singular and take the invariant mass quantifiers
+  // "etwas / viel / wenig"; "all das Wasser"; no indefinite article.
+  if (forms['uncountable'] === '1') {
+    switch (definiteness) {
+      case 'bare':        return '';
+      case 'indefinite':  return '';                       // no "ein Wasser"
+      case 'no':          return keinForm(_case, gender, false);
+      case 'some':        return 'etwas';
+      case 'many':        return 'viel';
+      case 'few':         return 'wenig';
+      case 'all':         return `all ${defArticle(forms, _case, false)}`;
+      default:            return defArticle(forms, _case, false);
+    }
+  }
   switch (definiteness) {
     case 'bare': return '';
     case 'no':   return keinForm(_case, gender, plural);

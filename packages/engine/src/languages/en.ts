@@ -26,14 +26,16 @@ const PATH_PREP: Record<PathSpecifier, string> = {
  */
 function determiner(forms: Record<string, string>, lead: string): string {
   const definiteness = forms['definiteness'] ?? 'definite';
+  const mass = forms['uncountable'] === '1';
   switch (definiteness) {
     case 'bare':  return '';
     case 'some':  return 'some ';
     case 'no':    return 'no ';
-    case 'many':  return 'many ';
-    case 'few':   return 'few ';
+    case 'many':  return mass ? 'much ' : 'many ';   // mass: much water
+    case 'few':   return mass ? 'little ' : 'few ';  // mass: little water
     case 'all':   return 'all ';
     case 'indefinite': {
+      if (mass) return '';                            // no "a water" — bare
       const count = forms['number'] ?? forms['count'] ?? 'singular';
       if (count === 'plural') return '';
       return /^[aeiou]/i.test(lead) ? 'an ' : 'a ';

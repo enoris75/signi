@@ -146,6 +146,7 @@ export interface Concept {
   number?: 'singular' | 'plural'; // inherent grammatical number, only set for pronouns
   gendered?: boolean;           // noun has distinct masc/fem surface forms
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
+  countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   complements?: ComplementType[]; // motion/locative complements a verb licenses
 }
 

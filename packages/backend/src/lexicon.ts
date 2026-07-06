@@ -46,8 +46,8 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; countable: number }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.countable FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
@@ -64,6 +64,7 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   if (lexeme.plural) forms['plural'] = lexeme.plural;
   if (lexeme.gender) forms['gender'] = lexeme.gender;
   if (lexeme.animate) forms['animate'] = '1'; // concept-level animacy (affects motion-goal adposition)
+  if (!lexeme.countable) forms['uncountable'] = '1'; // mass noun — changes quantifier words / blocks pluralisation
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }

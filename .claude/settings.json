@@ -1,0 +1,9 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(awk '{print \"  watcher PID\", $2}')",
+      "Bash(curl -s -o /dev/null -w \"backend health: %{http_code}\\\\n\" http://localhost:3001/api/concepts?role=noun)",
+      "Bash(curl -s -o /dev/null -w \"backend health: %{http_code}\\\\n\" \"http://localhost:3001/api/concepts?role=noun\")"
+    ]
+  }
+}

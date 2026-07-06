@@ -11,6 +11,7 @@ interface ConceptSeed {
   transitivity?: string; // only for verbs
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
+  countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
@@ -121,6 +122,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'the liquid H₂O',
     emoji: '💧',
+    countable: false,
     forms: {
       en: { base: 'water', count: 'singular' },
       it: { base: 'acqua', gender: 'fem', count: 'singular' },
@@ -136,6 +138,7 @@ const concepts: ConceptSeed[] = [
     role: 'noun',
     description: 'nourishment, something to eat',
     emoji: '🍽️',
+    countable: false,
     forms: {
       en: { base: 'food', count: 'singular' },
       it: { base: 'cibo', gender: 'masc', count: 'singular' },
@@ -1577,8 +1580,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null, number]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym, countable) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
   };
 
@@ -1600,7 +1603,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

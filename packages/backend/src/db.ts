@@ -28,7 +28,8 @@ function initSchema(db: Database.Database): void {
       transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL),
       complements  TEXT,  -- comma-separated ComplementType list (e.g. 'locative,direction'), NULL if none
       animate      INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1)), -- 1 if the referent is animate
-      synonym      TEXT    -- short disambiguating gloss shown in parentheses in the picker, NULL if none
+      synonym      TEXT,   -- short disambiguating gloss shown in parentheses in the picker, NULL if none
+      countable    INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1)) -- 0 for mass/uncountable nouns (water, food)
     );
 
     -- ── Per-type lexeme tables ─────────────────────────────────────────
@@ -230,5 +231,8 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('synonym')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN synonym TEXT');
+  }
+  if (!conceptCols.includes('countable')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN countable INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1))');
   }
 }
