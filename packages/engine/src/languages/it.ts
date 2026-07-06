@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
 import { pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouàèéìòù]/i;
@@ -41,8 +41,51 @@ function defArticle(forms: Record<string, string>, plural = false, lead?: string
   return SPECIAL_START.test(base) ? 'lo' : 'il';
 }
 
+/**
+ * The indefinite article, by gender and the sound of the following word (`lead`):
+ * masc "un" ("un cane") / "uno" (s-impura, z: "uno studente") · fem "una" / "un'"
+ * before a vowel ("un'amica"). Plural indefinite has no article here (bare "cani").
+ */
+function indefArticle(forms: Record<string, string>, plural: boolean, lead?: string): string {
+  if (plural) return '';
+  const gender = forms['gender'] ?? 'masc';
+  const base = lead ?? '';
+  if (gender === 'fem') return VOWEL_START.test(base) ? "un'" : 'una';
+  return SPECIAL_START.test(base) ? 'uno' : 'un';
+}
+
+/**
+ * "nessun" (no), inflected like the indefinite article: masc "nessun" / "nessuno"
+ * (s-impura, z) · fem "nessuna" / "nessun'" before a vowel. Always singular.
+ */
+function nessunForm(gender: string, lead: string): string {
+  if (gender === 'fem') return VOWEL_START.test(lead) ? "nessun'" : 'nessuna';
+  return SPECIAL_START.test(lead) ? 'nessuno' : 'nessun';
+}
+
+/**
+ * The determiner for a subject/direct-object noun phrase, from its `definiteness`
+ * (default 'definite'): the definite/indefinite article, nothing (bare), or a
+ * quantifier agreeing in gender (and, for "tutti/e", carrying the definite article).
+ */
+function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  switch (definiteness) {
+    case 'bare':       return '';
+    case 'indefinite': return indefArticle(forms, plural, lead);
+    case 'some':       return fem ? 'alcune' : 'alcuni';
+    case 'many':       return fem ? 'molte' : 'molti';
+    case 'few':        return fem ? 'poche' : 'pochi';
+    case 'all':        return `${fem ? 'tutte' : 'tutti'} ${defArticle(forms, true, lead)}`;
+    case 'no':         return nessunForm(forms['gender'] ?? 'masc', lead);
+    default:           return defArticle(forms, plural, lead);
+  }
+}
+
 /** Join an article/preposition head to the following word: no space after elision. */
 function joinArt(head: string, word: string): string {
+  if (!head) return word; // bare noun phrase — no article
   return head.endsWith("'") ? `${head}${word}` : `${head} ${word}`;
 }
 
@@ -183,6 +226,20 @@ function prenominalChain(pre: ConceptForms[], gender: string, plural: boolean, n
   return out;
 }
 
+/** Italian linking preposition for an attributive noun, chosen by its relation (bare, no article). */
+const REL_PREP_IT: Record<ModifierRelation, string> = { feature: 'a', purpose: 'da', material: 'di' };
+
+/** Postnominal attributive nouns as a bare "prep + noun" string ("a vela", "da sole"). */
+function itMods(np: ResolvedNounPhrase): string {
+  return np.nounModifiers
+    .map((m) => {
+      const base = m.concept.forms['base'];
+      return base ? `${REL_PREP_IT[m.relation]} ${base}` : '';
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
 /**
  * Render a noun phrase: [head] [prenominal adjectives] noun [postnominal adjectives].
  * `headFor` builds the article/preposition, receiving the plurality and the surface of
@@ -201,7 +258,12 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
     .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
     .filter(Boolean)
     .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
-  const withPost = postStr ? `${core} ${postStr}` : core;
+  const postAdj = postStr ? `${core} ${postStr}` : core;
+  // Attributive nouns are postnominal and bare (no article), the relation choosing the
+  // preposition: feature "a" (barca a vela), purpose "da" (occhiali da sole), material
+  // "di" (bicchiere di vino). This is deliberately distinct from the possessor's "del".
+  const mods = itMods(np);
+  const withPost = mods ? `${postAdj} ${mods}` : postAdj;
   // A possessor is postnominal, headed by "di"+article fused ("il libro del gatto").
   // Rendering it through renderNP recurses for its own adjectives / nested possessor.
   const poss = np.possessor;
@@ -225,7 +287,7 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return renderNP(np, (plural, lead) => defArticle(forms, plural, lead)); // noun — definite article
+  return renderNP(np, (plural, lead) => artFor(forms, plural, lead)); // noun — determiner from forms
 }
 
 /** route path relation → preposition (+ "a"-fusion for those that govern "a"). */
@@ -281,11 +343,14 @@ function predicateText(
 ): string {
   const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
   const verbText = conjugate(verb.forms, subjectForms, tense);
-  // "mai" always requires "non": "io non bevo mai" even without verbNegative
+  // "mai" always requires "non": "io non bevo mai" even without verbNegative.
+  // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
+  // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  const negText = (verbNegative || modifierIsNegative) ? 'non' : '';
+  const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';
+  const negText = (verbNegative || modifierIsNegative || objectIsNegative) ? 'non' : '';
   const directObjectText = directObject
-    ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
+    ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
     : '';
   // [non] V Adv DirectObj IndirectObj(a+article)
   const indirectObjectText = indirectObject

@@ -8,9 +8,11 @@ import FlipToBackIcon from "@mui/icons-material/FlipToBack";
 import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
 import {
   Concept,
+  DEFINITENESS_LABELS,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
   TENSE_LABELS,
+  type Definiteness,
   type PathSpecifier,
   type Tense,
 } from "@signi/shared";
@@ -36,12 +38,15 @@ export function SlotBox({
   isActive,
   onClear,
   emptyContent,
+  footer,
 }: {
   slot: SlotConfig;
   concept?: Concept;
   isActive: boolean;
   onClear: () => void;
   emptyContent?: ReactNode;
+  // Extra content rendered below a filled slot's word (e.g. the noun-modifier relation chip).
+  footer?: ReactNode;
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -111,6 +116,7 @@ export function SlotBox({
             </Typography>
           ))
         )}
+        {concept && footer}
       </Paper>
       {concept && (
         <Tooltip title={`Clear ${slot.label}`}>
@@ -270,6 +276,19 @@ export function NumberToggleBox({ value }: { value: "singular" | "plural" }) {
 
 export function GenderToggleBox({ value }: { value: "masc" | "fem" }) {
   return <ToggleBox label="Gender" value={value === "masc" ? "Masc" : "Fem"} />;
+}
+
+export function DeterminerToggleBox({ value }: { value: Definiteness }) {
+  // Short surface for the toggle box: "the" / "a" / "—" / the quantifier word.
+  const label =
+    value === "definite"
+      ? "The"
+      : value === "indefinite"
+        ? "A / An"
+        : value === "bare"
+          ? "—"
+          : DEFINITENESS_LABELS[value];
+  return <ToggleBox label="Determiner" value={label} />;
 }
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {

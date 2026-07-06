@@ -66,6 +66,7 @@ const rectBorderPoint = (r: GroupRect, tx: number, ty: number): Pt => {
 // the dashed role-group bounding boxes, and the solid links between those boxes.
 export function buildGraph({
   hasVerb,
+  nounPhrase = false,
   showSubject = true,
   renderedSlots,
   visibleSlots,
@@ -75,6 +76,10 @@ export function buildGraph({
   svgSize,
 }: {
   hasVerb: boolean;
+  // Verbless noun-phrase mode: the canvas holds a single noun phrase (the `subject`
+  // box + its satellites) with no verb phrase, objects, or inter-group links. Used by
+  // the possessor editor, which is a full noun phrase but has no predicate.
+  nounPhrase?: boolean;
   // Whether the Subject role group is drawn. False inside a relative clause, whose
   // subject is the (external) head noun rather than a box on this canvas.
   showSubject?: boolean;
@@ -102,8 +107,12 @@ export function buildGraph({
     return { x1: from.x, y1: from.y, x2: to.x, y2: to.y, color, dashed: true };
   };
 
+  // Both the satellite edges and the role-group rects draw whenever a canvas is shown —
+  // either a full phrase (hasVerb) or a lone noun phrase (nounPhrase mode).
+  const drawCanvas = hasVerb || nounPhrase;
+
   const edges: Edge[] = [];
-  if (hasVerb) {
+  if (drawCanvas) {
     for (const slot of renderedSlots) {
       if (slot.key === "verb") continue;
       // Main constituents (subject, objects, complements) link group-to-group
@@ -137,6 +146,8 @@ export function buildGraph({
       edges.push(satEdge("subject", "subjectNumber", "#888"));
     if (shownMap.subjectGender)
       edges.push(satEdge("subject", "subjectGender", "#888"));
+    if (shownMap.subjectDefiniteness)
+      edges.push(satEdge("subject", "subjectDefiniteness", "#888"));
     if (shownMap.directObjectNumber)
       edges.push(
         satEdge("directObject", "directObjectNumber", MUI_COLOR_HEX.success),
@@ -144,6 +155,14 @@ export function buildGraph({
     if (shownMap.directObjectGender)
       edges.push(
         satEdge("directObject", "directObjectGender", MUI_COLOR_HEX.success),
+      );
+    if (shownMap.directObjectDefiniteness)
+      edges.push(
+        satEdge(
+          "directObject",
+          "directObjectDefiniteness",
+          MUI_COLOR_HEX.success,
+        ),
       );
     if (shownMap.indirectObjectNumber)
       edges.push(
@@ -172,7 +191,7 @@ export function buildGraph({
   // Role-group bounding rects (coordinates in SVG pixels = CSS pixels since the
   // viewBox matches the container).
   const groupRects: GroupRect[] = [];
-  if (hasVerb) {
+  if (drawCanvas) {
     const roleGroups: Array<{
       label: string;
       color: string;
@@ -190,11 +209,16 @@ export function buildGraph({
                 "subject",
                 ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
                 ...(shownMap.subjectGender ? ["subjectGender"] : []),
+                ...(shownMap.subjectDefiniteness
+                  ? ["subjectDefiniteness"]
+                  : []),
               ],
             },
           ]
         : []),
-      {
+      // The verb phrase and its satellite objects/complements exist only in a full
+      // phrase — a lone noun phrase (possessor editor) has just the subject group.
+      ...(nounPhrase ? [] : [{
         label: "Verb Phrase",
         color: MUI_COLOR_HEX.secondary,
         nodeKeys: [
@@ -203,7 +227,7 @@ export function buildGraph({
           ...(shownMap.verbTense ? ["verbTense"] : []),
           ...(shownMap.modifier ? ["modifier"] : []),
         ],
-      },
+      }]),
       ...(visibleSlots.some((s) => s.key === "directObject")
         ? [
             {
@@ -219,6 +243,9 @@ export function buildGraph({
                   : []),
                 ...(shownMap.directObjectNumber ? ["directObjectNumber"] : []),
                 ...(shownMap.directObjectGender ? ["directObjectGender"] : []),
+                ...(shownMap.directObjectDefiniteness
+                  ? ["directObjectDefiniteness"]
+                  : []),
               ],
             },
           ]

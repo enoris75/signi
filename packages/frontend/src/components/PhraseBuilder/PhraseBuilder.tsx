@@ -3,9 +3,12 @@ import { Box, Paper, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import {
   COMPLEMENT_TYPES,
+  DEFINITENESS,
+  MODIFIER_RELATIONS,
   TENSES,
   type Concept,
   type ComplementType,
+  type Definiteness,
   type PathSpecifier,
 } from "@signi/shared";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
@@ -38,7 +41,6 @@ import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
-import { PossessorBuilder } from "./PossessorBuilder.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { SatelliteControls } from "./SatelliteControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
@@ -49,6 +51,9 @@ interface PhraseBuilderProps {
   // Clause mode: this builder edits a relative clause whose subject is the external
   // `head` noun rather than a box on its own canvas. Set for every nested instance.
   nested?: boolean;
+  // Noun-phrase mode: this builder edits a bare noun phrase (the possessor) — its head
+  // lives in the `subject` slot and there is no verb/predicate. Docked like a clause.
+  nounPhrase?: boolean;
   head?: Concept;
   // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
   relativeLabel?: string;
@@ -122,11 +127,14 @@ export function PhraseBuilder({
   selection,
   onPhraseUpdate,
   nested = false,
+  nounPhrase = false,
   head,
   relativeLabel,
   onRemove,
 }: PhraseBuilderProps) {
-  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("verb");
+  const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
+    nounPhrase ? "subject" : "verb",
+  );
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
@@ -146,14 +154,21 @@ export function PhraseBuilder({
     startPos: { x: number; y: number };
   } | null>(null);
   const hasVerb = Boolean(selection.verb);
+  // A canvas is shown for a full phrase (once a verb is chosen) or, verbless, for a
+  // lone noun phrase (the possessor editor).
+  const showCanvas = hasVerb || nounPhrase;
   const verbSlot = ALL_SLOTS.find((s) => s.key === "verb")!;
-  const visibleSlots = getActiveSlots(
-    selection.verb?.transitivity,
-    selection.subject?.role,
-    Boolean(selection.subjectAdjective),
-    selection.verb?.complements,
-    // In clause mode the subject is the external head, so drop the subject slot.
-  ).filter((s) => !nested || s.key !== "subject");
+  const visibleSlots = nounPhrase
+    ? // Noun-phrase mode: only the subject family (the possessor head + its adjectives).
+      getActiveSlots("intransitive", selection.subject?.role, Boolean(selection.subjectAdjective))
+        .filter((s) => s.key === "subject" || s.key.startsWith("subjectAdjective"))
+    : getActiveSlots(
+        selection.verb?.transitivity,
+        selection.subject?.role,
+        Boolean(selection.subjectAdjective),
+        selection.verb?.complements,
+        // In clause mode the subject is the external head, so drop the subject slot.
+      ).filter((s) => !nested || s.key !== "subject");
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -239,8 +254,8 @@ export function PhraseBuilder({
   }
 
   // A lens onto the possessor slice hanging off `which`, seeding an empty possessor the
-  // first time. Handed to the nested PossessorBuilder as its onUpdate, so its edits land
-  // inside this block's `${which}Possessor`.
+  // first time. Handed to the nested noun-phrase-mode PhraseBuilder as its onPhraseUpdate,
+  // so its edits land inside this block's `${which}Possessor`.
   function makePossessorUpdate(which: NounKey) {
     return (updater: (prev: PhraseSelection) => PhraseSelection) =>
       onPhraseUpdate((prev) => ({
@@ -279,6 +294,27 @@ export function PhraseBuilder({
 
   function handleToggleNegative() {
     onPhraseUpdate((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
+  }
+
+  // Cycle a noun's determiner definite → indefinite → bare → definite.
+  function handleCycleDefiniteness(which: NounKey) {
+    const key = `${which}Definiteness` as keyof PhraseSelection;
+    onPhraseUpdate((prev) => {
+      const cur = (prev[key] as Definiteness) ?? "definite";
+      const idx = DEFINITENESS.indexOf(cur);
+      return { ...prev, [key]: DEFINITENESS[(idx + 1) % DEFINITENESS.length] };
+    });
+  }
+
+  // Cycle a noun-modifier's semantic relation (feature → purpose → material → feature),
+  // stored per adjective slot key in `modifierRelations`. Only meaningful when that slot
+  // holds a noun; ignored otherwise.
+  function handleCycleModifierRelation(slotKey: SlotKey) {
+    onPhraseUpdate((prev) => {
+      const cur = prev.modifierRelations?.[slotKey] ?? "feature";
+      const next = MODIFIER_RELATIONS[(MODIFIER_RELATIONS.indexOf(cur) + 1) % MODIFIER_RELATIONS.length];
+      return { ...prev, modifierRelations: { ...prev.modifierRelations, [slotKey]: next } };
+    });
   }
 
   // Cycle the verb tense present → past → future → present.
@@ -335,7 +371,11 @@ export function PhraseBuilder({
     // -1 = top row (adjectives / tense), 0 = main word, 1 = bottom row (toggles).
     const tierOf = (k: string): -1 | 0 | 1 => {
       if (/Adjective2?$/.test(k) || k === "verbTense") return -1;
-      if (/(Number|Gender)$/.test(k) || k === "verbNegative" || k === "modifier")
+      if (
+        /(Number|Gender|Definiteness)$/.test(k) ||
+        k === "verbNegative" ||
+        k === "modifier"
+      )
         return 1;
       return 0;
     };
@@ -425,9 +465,9 @@ export function PhraseBuilder({
     h: GRAPH_HEIGHT,
   });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
-    // Nested clause canvases start shorter and don't persist (the global key is
-    // shared, so many instances would clobber each other).
-    if (nested) return MIN_GRAPH_HEIGHT + 60;
+    // Nested clause / possessor canvases start shorter and don't persist (the global
+    // key is shared, so many instances would clobber each other).
+    if (nested || nounPhrase) return MIN_GRAPH_HEIGHT + 60;
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
@@ -629,7 +669,10 @@ export function PhraseBuilder({
 
   const { edges, groupRects, groupEdges } = buildGraph({
     hasVerb,
-    showSubject: !nested,
+    nounPhrase,
+    // The possessor's own head is a box on this canvas; in a relative clause the
+    // subject is the external head, so it isn't drawn.
+    showSubject: nounPhrase ? true : !nested,
     renderedSlots,
     visibleSlots,
     shownMap,
@@ -653,6 +696,7 @@ export function PhraseBuilder({
   // same canvas below and lean on this component's drag machinery and handlers.
   const ctx: PhraseRenderContext = {
     selection,
+    nounPhrase,
     activeSlot,
     renderedSlots,
     shownMap,
@@ -669,6 +713,8 @@ export function PhraseBuilder({
     handleClear,
     handleToggleNumber,
     handleToggleGender,
+    handleCycleDefiniteness,
+    handleCycleModifierRelation,
     handleToggleNegative,
     handleCycleTense,
     handleSelectSpecifier,
@@ -743,9 +789,9 @@ export function PhraseBuilder({
           p: 2,
           border: "1px solid",
           borderColor: "divider",
-          ...(nested && {
+          ...((nested || nounPhrase) && {
             borderLeft: "3px solid",
-            borderLeftColor: "primary.light",
+            borderLeftColor: nounPhrase ? "info.light" : "primary.light",
             bgcolor: "action.hover",
           }),
           cursor:
@@ -756,7 +802,7 @@ export function PhraseBuilder({
                 : undefined,
         }}
       >
-        {nested ? (
+        {nested || nounPhrase ? (
           <Box
             sx={{
               display: "flex",
@@ -784,7 +830,7 @@ export function PhraseBuilder({
               <IconButton
                 size="small"
                 onClick={onRemove}
-                aria-label="Remove relative clause"
+                aria-label={nounPhrase ? "Remove possessor" : "Remove relative clause"}
                 sx={{ p: 0.25 }}
               >
                 <CloseIcon sx={{ fontSize: 15 }} />
@@ -811,7 +857,7 @@ export function PhraseBuilder({
 
         <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
           <Box sx={{ flex: 1, minWidth: 0 }}>
-            {!hasVerb ? (
+            {!showCanvas ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
                 <SlotBox
                   slot={verbSlot}
@@ -846,14 +892,21 @@ export function PhraseBuilder({
                       and, for complements, remove controls) plus its word boxes.
                       The builders self-filter, so mounting one per possible noun
                       / the verb phrase unconditionally is safe — inactive slots
-                      and toggles render nothing. */}
-                  {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
-                  <VerbPhraseBuilder ctx={ctx} />
-                  <NounPhraseBuilder which="directObject" ctx={ctx} />
-                  <NounPhraseBuilder which="indirectObject" ctx={ctx} />
-                  {COMPLEMENT_TYPES.map((type) => (
-                    <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-                  ))}
+                      and toggles render nothing. Noun-phrase mode (possessor) paints
+                      only its single head noun phrase — no verb, objects, or complements. */}
+                  {nounPhrase ? (
+                    <NounPhraseBuilder which="subject" ctx={ctx} />
+                  ) : (
+                    <>
+                      {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
+                      <VerbPhraseBuilder ctx={ctx} />
+                      <NounPhraseBuilder which="directObject" ctx={ctx} />
+                      <NounPhraseBuilder which="indirectObject" ctx={ctx} />
+                      {COMPLEMENT_TYPES.map((type) => (
+                        <NounPhraseBuilder key={type} which={type} ctx={ctx} />
+                      ))}
+                    </>
+                  )}
 
                   <SatelliteControls
                     satelliteIconsByParent={satelliteIconsByParent}
@@ -866,7 +919,7 @@ export function PhraseBuilder({
                   minHeight={MIN_GRAPH_HEIGHT}
                   onResize={setGraphHeight}
                   onResizeEnd={(h) => {
-                    if (!nested)
+                    if (!nested && !nounPhrase)
                       localStorage.setItem(
                         "signi:graphHeight",
                         String(Math.round(h)),
@@ -876,9 +929,9 @@ export function PhraseBuilder({
               </>
             )}
           </Box>
-          {/* The word palette rides only the top-level builder; nested clauses fill
-              their slots via each box's inline typeahead. */}
-          {!nested && (
+          {/* The word palette rides only the top-level builder; nested clauses and
+              possessor editors fill their slots via each box's inline typeahead. */}
+          {!nested && !nounPhrase && (
             <PhraseSidebar
               width={sidebarWidth}
               onWidthChange={setSidebarWidth}
@@ -897,7 +950,7 @@ export function PhraseBuilder({
             Each is a clause-mode PhraseBuilder editing that block's `${which}Relative`
             slice; because they recurse, a clause's own objects can sprout deeper
             clauses. */}
-        {hasVerb &&
+        {showCanvas &&
           openRelatives.map((which) => {
             const nounHead = selection[which] as Concept;
             const label = nounHead?.animate ? "who" : "that";
@@ -925,10 +978,12 @@ export function PhraseBuilder({
             );
           })}
 
-        {/* Possessor editors — one per noun block with an open possessor. Each edits that
-            block's `${which}Possessor` slice (a noun phrase whose head is its `subject`)
-            and recurses for its own nested possessor. */}
-        {hasVerb &&
+        {/* Possessor editors — one per noun block with an open possessor. Each is a
+            verbless noun-phrase-mode PhraseBuilder editing that block's `${which}Possessor`
+            slice (a noun phrase whose head is its `subject`); because it is the same
+            builder, the possessor gets the full noun-phrase surface — adjectives,
+            number/gender, a relative clause, and its own nested possessor. */}
+        {showCanvas &&
           openPossessors.map((which) => {
             const nounHead = selection[which] as Concept;
             return (
@@ -940,13 +995,15 @@ export function PhraseBuilder({
                 }}
                 sx={{ mt: 1.5, pl: nested ? 1 : 2 }}
               >
-                <PossessorBuilder
-                  parentLabel={conceptLabel(nounHead)}
+                <PhraseBuilder
+                  nounPhrase
+                  head={nounHead}
+                  relativeLabel="'s"
                   selection={
                     (selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ??
                     {}
                   }
-                  onUpdate={makePossessorUpdate(which)}
+                  onPhraseUpdate={makePossessorUpdate(which)}
                   onRemove={() => handleRemovePossessor(which)}
                 />
               </Box>

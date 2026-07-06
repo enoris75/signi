@@ -1,8 +1,9 @@
 import React from "react";
-import { Box, type SxProps, type Theme } from "@mui/material";
-import type { Concept, ComplementType, PathSpecifier } from "@signi/shared";
+import { Box, Tooltip, type SxProps, type Theme } from "@mui/material";
+import { MODIFIER_RELATION_LABELS, type Concept, type ComplementType, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   GenderSlot,
+  NounKey,
   NumberSlot,
   PhraseSelection,
   SlotConfig,
@@ -37,6 +38,9 @@ export type GroupDragProps = {
 // keyboard-nav list, and selection handlers, so we thread one bag through.
 export interface PhraseRenderContext {
   selection: PhraseSelection;
+  // Verbless noun-phrase mode (the possessor editor): the `subject` slot is the
+  // possessor head and must use the noun-only picker rather than the subject picker.
+  nounPhrase?: boolean;
   activeSlot: SlotKey | null;
   renderedSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
@@ -57,6 +61,9 @@ export interface PhraseRenderContext {
   handleClear: (slot: SlotKey) => void;
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
+  handleCycleDefiniteness: (which: NounKey) => void;
+  // Cycle the semantic relation of an attributive-noun modifier sitting in an adjective slot.
+  handleCycleModifierRelation: (slotKey: SlotKey) => void;
   handleToggleNegative: () => void;
   handleCycleTense: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
@@ -85,8 +92,50 @@ export function SlotNode({
     activeSlot,
     handleClear,
     handleConceptSelect,
+    handleCycleModifierRelation,
+    nounPhrase,
   } = ctx;
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
+
+  // An adjective slot filled with a *noun* is an attributive modifier ("sail boat"); it
+  // carries a semantic relation (feature / purpose / material) that the Romance engines
+  // turn into a preposition. Show a small cycling chip to pick it.
+  const held = selection[slot.key];
+  const isNounModifier = slot.key.includes("Adjective") && held?.role === "noun";
+  const relation: ModifierRelation =
+    (selection.modifierRelations?.[slot.key] as ModifierRelation | undefined) ?? "feature";
+  const relationChip = isNounModifier ? (
+    <Tooltip title={`Relation: ${MODIFIER_RELATION_LABELS[relation]} — click to change`}>
+      <Box
+        component="span"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCycleModifierRelation(slot.key);
+        }}
+        sx={{
+          display: "inline-block",
+          mt: 0.5,
+          px: 0.75,
+          py: 0.1,
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          cursor: "pointer",
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+          "&:hover": { borderColor: "text.secondary" },
+        }}
+      >
+        {relation}
+      </Box>
+    </Tooltip>
+  ) : undefined;
   return (
     <Box
       {...makeDragProps(slot.key, () => handleSlotClick(slot.key))}
@@ -125,7 +174,9 @@ export function SlotNode({
           activeSlot,
           selection,
           onSelect: handleConceptSelect,
+          nounSubject: nounPhrase,
         })}
+        footer={relationChip}
       />
     </Box>
   );

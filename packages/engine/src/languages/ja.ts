@@ -44,6 +44,12 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
   // adjectives / nested possessor / relative clause ("子供の猫の本").
   if (np.possessor) core.push(...npSegs(np.possessor), { t: 'の' });
+  // Attributive nouns ("sail boat") are also の-linked in Japanese (ガラスのコップ); the
+  // relation is neutralised, so every relation renders the same の.
+  for (const m of np.nounModifiers) {
+    const base = m.concept.forms['base'];
+    if (base) core.push(wordSeg(base, m.concept.forms['reading']), { t: 'の' });
+  }
   const adjSegs: RubySegment[] = [];
   for (const a of np.adjectives) {
     const base = a.forms['base'] ?? '';

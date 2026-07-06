@@ -1,6 +1,9 @@
 import type {
   Complement,
   ComplementType,
+  Definiteness,
+  ModifierRelation,
+  NounModifier,
   NounPhrase,
   PhrasePlan,
   RelativeClause,
@@ -17,13 +20,23 @@ function field<T>(sel: PhraseSelection, key: string): T | undefined {
   return sel[key as keyof PhraseSelection] as T | undefined;
 }
 
-function adjectiveIds(sel: PhraseSelection, which: NounKey): string[] {
-  return [
-    field<Concept>(sel, `${which}Adjective`),
-    field<Concept>(sel, `${which}Adjective2`),
-  ]
-    .map((c) => c?.id)
-    .filter((id): id is string => Boolean(id));
+// Split the two adjective slots of a noun block by the picked concept's role: real
+// adjectives become `adjectives`, nouns become attributive `nounModifiers` carrying the
+// slot's chosen relation (defaulting to 'feature'). This is the "Adjective ⇄ Noun" switch.
+function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]; nounModifiers: NounModifier[] } {
+  const adjectives: string[] = [];
+  const nounModifiers: NounModifier[] = [];
+  for (const key of [`${which}Adjective`, `${which}Adjective2`]) {
+    const c = field<Concept>(sel, key);
+    if (!c) continue;
+    if (c.role === "noun") {
+      const relation = sel.modifierRelations?.[key] ?? "feature";
+      nounModifiers.push({ concept: c.id, relation: relation as ModifierRelation });
+    } else {
+      adjectives.push(c.id);
+    }
+  }
+  return { adjectives, nounModifiers };
 }
 
 // Build one noun phrase from the flat `${which}*` fields, recursing into its relative
@@ -37,11 +50,16 @@ function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | und
   // through buildNounPhrase gives it its own number/gender/adjectives/nested possessor.
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
   const possessor = possSel ? buildNounPhrase(possSel, "subject") : undefined;
+  const { adjectives, nounModifiers } = modifiers(sel, which);
   return {
     concept: concept.id,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem">(sel, `${which}Gender`),
-    adjectives: adjectiveIds(sel, which),
+    // Only subject/directObject carry a definiteness field today; elsewhere this is
+    // undefined and the engines default to 'definite'.
+    definiteness: field<Definiteness>(sel, `${which}Definiteness`),
+    adjectives,
+    nounModifiers,
     relative,
     possessor,
   };

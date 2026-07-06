@@ -1,4 +1,4 @@
-import type { ComplementType, LanguageCode, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { ComplementType, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -7,10 +7,18 @@ export interface ConceptForms {
   forms: Record<string, string>;
 }
 
+/** A resolved noun-modifier: the attributive noun's forms plus its semantic relation. */
+export interface ResolvedNounModifier {
+  concept: ConceptForms;
+  relation: ModifierRelation;
+}
+
 /** A resolved noun phrase: its head noun/pronoun plus its resolved adjectives. */
 export interface ResolvedNounPhrase {
   head: ConceptForms;
   adjectives: ConceptForms[];
+  /** Resolved attributive nouns ("sail boat"); relation drives the Romance preposition. */
+  nounModifiers: ResolvedNounModifier[];
   /** A resolved relative clause; the head above is implicitly its subject. */
   relative?: ResolvedRelativeClause;
   /** A resolved possessing noun phrase (Saxon genitive): "the cat's book" → "the cat". */

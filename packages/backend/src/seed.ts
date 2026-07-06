@@ -11,6 +11,7 @@ interface ConceptSeed {
   transitivity?: string; // only for verbs
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
+  synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
 
@@ -755,6 +756,136 @@ const concepts: ConceptSeed[] = [
       },
     },
   },
+  {
+    id: 'CRY',
+    role: 'verb',
+    transitivity: 'intransitive',
+    description: 'to weep; to shed tears',
+    emoji: '😭',
+    synonym: 'weep',
+    forms: {
+      en: {
+        base: 'cry',
+        '1sg_present': 'cry', '2sg_present': 'cry', '3sg_present': 'cries',
+        '1pl_present': 'cry', '2pl_present': 'cry', '3pl_present': 'cry',
+        past: 'cried',
+      },
+      it: {
+        base: 'piangere',
+        '1sg_present': 'piango', '2sg_present': 'piangi', '3sg_present': 'piange',
+        '1pl_present': 'piangiamo', '2pl_present': 'piangete', '3pl_present': 'piangono',
+        '1sg_past': 'piansi', '2sg_past': 'piangesti', '3sg_past': 'pianse',
+        '1pl_past': 'piangemmo', '2pl_past': 'piangeste', '3pl_past': 'piansero',
+        '1sg_future': 'piangerò', '2sg_future': 'piangerai', '3sg_future': 'piangerà',
+        '1pl_future': 'piangeremo', '2pl_future': 'piangerete', '3pl_future': 'piangeranno',
+      },
+      fr: {
+        base: 'pleurer',
+        '1sg_present': 'pleure', '2sg_present': 'pleures', '3sg_present': 'pleure',
+        '1pl_present': 'pleurons', '2pl_present': 'pleurez', '3pl_present': 'pleurent',
+        '1sg_past': 'pleurai', '2sg_past': 'pleuras', '3sg_past': 'pleura',
+        '1pl_past': 'pleurâmes', '2pl_past': 'pleurâtes', '3pl_past': 'pleurèrent',
+        '1sg_future': 'pleurerai', '2sg_future': 'pleureras', '3sg_future': 'pleurera',
+        '1pl_future': 'pleurerons', '2pl_future': 'pleurerez', '3pl_future': 'pleureront',
+      },
+      de: {
+        base: 'weinen',
+        '1sg_present': 'weine', '2sg_present': 'weinst', '3sg_present': 'weint',
+        '1pl_present': 'weinen', '2pl_present': 'weint', '3pl_present': 'weinen',
+        '1sg_past': 'weinte', '2sg_past': 'weintest', '3sg_past': 'weinte',
+        '1pl_past': 'weinten', '2pl_past': 'weintet', '3pl_past': 'weinten',
+      },
+      es: {
+        base: 'llorar',
+        '1sg_present': 'lloro', '2sg_present': 'lloras', '3sg_present': 'llora',
+        '1pl_present': 'lloramos', '2pl_present': 'lloráis', '3pl_present': 'lloran',
+        '1sg_past': 'lloré', '2sg_past': 'lloraste', '3sg_past': 'lloró',
+        '1pl_past': 'lloramos', '2pl_past': 'llorasteis', '3pl_past': 'lloraron',
+        '1sg_future': 'lloraré', '2sg_future': 'llorarás', '3sg_future': 'llorará',
+        '1pl_future': 'lloraremos', '2pl_future': 'lloraréis', '3pl_future': 'llorarán',
+      },
+      ja: {
+        base: '泣く',
+        reading: 'なく',
+        masu_present: '泣きます',
+        masu_present_reading: 'なきます',
+      },
+      pt: {
+        base: 'chorar',
+        '1sg_present': 'choro', '2sg_present': 'chora', '3sg_present': 'chora',
+        '1pl_present': 'choramos', '2pl_present': 'choram', '3pl_present': 'choram',
+        '1sg_past': 'chorei', '2sg_past': 'chorou', '3sg_past': 'chorou',
+        '1pl_past': 'choramos', '2pl_past': 'choraram', '3pl_past': 'choraram',
+        '1sg_future': 'chorarei', '2sg_future': 'chorará', '3sg_future': 'chorará',
+        '1pl_future': 'choraremos', '2pl_future': 'chorarão', '3pl_future': 'chorarão',
+      },
+    },
+  },
+  {
+    id: 'CRY_OUT',
+    role: 'verb',
+    transitivity: 'transitive',
+    description: 'to cry out; to shout or exclaim loudly',
+    emoji: '📢',
+    synonym: 'shout',
+    forms: {
+      en: {
+        base: 'cry',
+        '1sg_present': 'cry', '2sg_present': 'cry', '3sg_present': 'cries',
+        '1pl_present': 'cry', '2pl_present': 'cry', '3pl_present': 'cry',
+        past: 'cried',
+      },
+      it: {
+        base: 'gridare',
+        '1sg_present': 'grido', '2sg_present': 'gridi', '3sg_present': 'grida',
+        '1pl_present': 'gridiamo', '2pl_present': 'gridate', '3pl_present': 'gridano',
+        '1sg_past': 'gridai', '2sg_past': 'gridasti', '3sg_past': 'gridò',
+        '1pl_past': 'gridammo', '2pl_past': 'gridaste', '3pl_past': 'gridarono',
+        '1sg_future': 'griderò', '2sg_future': 'griderai', '3sg_future': 'griderà',
+        '1pl_future': 'grideremo', '2pl_future': 'griderete', '3pl_future': 'grideranno',
+      },
+      fr: {
+        base: 'crier',
+        '1sg_present': 'crie', '2sg_present': 'cries', '3sg_present': 'crie',
+        '1pl_present': 'crions', '2pl_present': 'criez', '3pl_present': 'crient',
+        '1sg_past': 'criai', '2sg_past': 'crias', '3sg_past': 'cria',
+        '1pl_past': 'criâmes', '2pl_past': 'criâtes', '3pl_past': 'crièrent',
+        '1sg_future': 'crierai', '2sg_future': 'crieras', '3sg_future': 'criera',
+        '1pl_future': 'crierons', '2pl_future': 'crierez', '3pl_future': 'crieront',
+      },
+      de: {
+        base: 'rufen',
+        '1sg_present': 'rufe', '2sg_present': 'rufst', '3sg_present': 'ruft',
+        '1pl_present': 'rufen', '2pl_present': 'ruft', '3pl_present': 'rufen',
+        '1sg_past': 'rief', '2sg_past': 'riefst', '3sg_past': 'rief',
+        '1pl_past': 'riefen', '2pl_past': 'rieft', '3pl_past': 'riefen',
+      },
+      es: {
+        base: 'gritar',
+        '1sg_present': 'grito', '2sg_present': 'gritas', '3sg_present': 'grita',
+        '1pl_present': 'gritamos', '2pl_present': 'gritáis', '3pl_present': 'gritan',
+        '1sg_past': 'grité', '2sg_past': 'gritaste', '3sg_past': 'gritó',
+        '1pl_past': 'gritamos', '2pl_past': 'gritasteis', '3pl_past': 'gritaron',
+        '1sg_future': 'gritaré', '2sg_future': 'gritarás', '3sg_future': 'gritará',
+        '1pl_future': 'gritaremos', '2pl_future': 'gritaréis', '3pl_future': 'gritarán',
+      },
+      ja: {
+        base: '叫ぶ',
+        reading: 'さけぶ',
+        masu_present: '叫びます',
+        masu_present_reading: 'さけびます',
+      },
+      pt: {
+        base: 'gritar',
+        '1sg_present': 'grito', '2sg_present': 'grita', '3sg_present': 'grita',
+        '1pl_present': 'gritamos', '2pl_present': 'gritam', '3pl_present': 'gritam',
+        '1sg_past': 'gritei', '2sg_past': 'gritou', '3sg_past': 'gritou',
+        '1pl_past': 'gritamos', '2pl_past': 'gritaram', '3pl_past': 'gritaram',
+        '1sg_future': 'gritarei', '2sg_future': 'gritará', '3sg_future': 'gritará',
+        '1pl_future': 'gritaremos', '2pl_future': 'gritarão', '3pl_future': 'gritarão',
+      },
+    },
+  },
 
   // ── DITRANSITIVE VERBS ───────────────────────────────────────────
   {
@@ -1446,8 +1577,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate) VALUES (?, ?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym) VALUES (?, ?, ?, ?, ?, ?, ?, ?)'
     ),
   };
 
@@ -1469,7 +1600,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

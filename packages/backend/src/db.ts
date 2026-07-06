@@ -27,7 +27,8 @@ function initSchema(db: Database.Database): void {
       emoji        TEXT,
       transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL),
       complements  TEXT,  -- comma-separated ComplementType list (e.g. 'locative,direction'), NULL if none
-      animate      INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1)) -- 1 if the referent is animate
+      animate      INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1)), -- 1 if the referent is animate
+      synonym      TEXT    -- short disambiguating gloss shown in parentheses in the picker, NULL if none
     );
 
     -- ── Per-type lexeme tables ─────────────────────────────────────────
@@ -226,5 +227,8 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('animate')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN animate INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1))');
+  }
+  if (!conceptCols.includes('synonym')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN synonym TEXT');
   }
 }

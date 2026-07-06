@@ -1,10 +1,38 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
 import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
   if (plural) return gender === 'fem' ? 'las' : 'los';
   return gender === 'fem' ? 'la' : 'el';
+}
+
+/** The indefinite article: un/una (singular), unos/unas (plural). */
+function indefArticle(forms: Record<string, string>, plural = false): string {
+  const gender = forms['gender'] ?? 'masc';
+  if (plural) return gender === 'fem' ? 'unas' : 'unos';
+  return gender === 'fem' ? 'una' : 'un';
+}
+
+/**
+ * The determiner for a subject/direct-object noun phrase, from its `definiteness`
+ * (default 'definite'): the definite/indefinite article, nothing (bare), or a quantifier
+ * agreeing in gender. "todos/todas" carry the definite article; "ningún/ninguna" is
+ * singular and drives verb negation ("no") upstream when it is an object.
+ */
+function artFor(forms: Record<string, string>, plural = false): string {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  switch (definiteness) {
+    case 'bare':       return '';
+    case 'indefinite': return indefArticle(forms, plural);
+    case 'some':       return fem ? 'algunas' : 'algunos';
+    case 'many':       return fem ? 'muchas' : 'muchos';
+    case 'few':        return fem ? 'pocas' : 'pocos';
+    case 'all':        return `${fem ? 'todas' : 'todos'} ${defArticle(forms, true)}`;
+    case 'no':         return fem ? 'ninguna' : 'ningún';
+    default:           return defArticle(forms, plural);
+  }
 }
 
 /** Spanish noun/adjective pluralisation: vowel → +s, -z → -ces, consonant → +es. */
@@ -74,7 +102,8 @@ function nounPhrase(forms: Record<string, string>, adj?: string): string {
   const plural = count === 'plural';
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? ` ${adj}` : '';
-  return `${defArticle(forms, plural)} ${word}${a}`;
+  const art = artFor(forms, plural); // definite / indefinite / bare
+  return art ? `${art} ${word}${a}` : `${word}${a}`;
 }
 
 function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
@@ -151,9 +180,22 @@ function possessorText(np: ResolvedNounPhrase): string {
   return ` ${withRelative(`${dePrep(f, plural)} ${word}${adj}`, poss)}`;
 }
 
-/** Append a noun phrase's possessor and its relative clause ("que" + predicate). */
+/** Spanish links every attributive-noun relation with bare "de" ("barco de vela", "gafas de sol"). */
+const REL_PREP_ES: Record<ModifierRelation, string> = { feature: 'de', purpose: 'de', material: 'de' };
+
+/** Postnominal attributive nouns as bare " de noun" strings (no del contraction). */
+function modifierText(np: ResolvedNounPhrase): string {
+  return np.nounModifiers
+    .map((m) => {
+      const base = m.concept.forms['base'];
+      return base ? ` ${REL_PREP_ES[m.relation]} ${base}` : '';
+    })
+    .join('');
+}
+
+/** Append a noun phrase's attributive nouns, possessor, and relative clause ("que" + predicate). */
 function withRelative(text: string, np: ResolvedNounPhrase): string {
-  const withPoss = `${text}${possessorText(np)}`;
+  const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
   const rel = np.relative;
   if (!rel) return withPoss;
   const clause = predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
@@ -174,7 +216,10 @@ function predicateText(
 ): string {
   const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
   const conjugated = conjugate(verb.forms, subjectForms, tense);
-  const verbText = verbNegative ? `no ${conjugated}` : conjugated;
+  // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
+  // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
+  const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';
+  const verbText = verbNegative || objectIsNegative ? `no ${conjugated}` : conjugated;
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, esAdj(directObject)), directObject)
     : '';

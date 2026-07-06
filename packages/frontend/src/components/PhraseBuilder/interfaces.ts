@@ -1,4 +1,4 @@
-import type { Concept, ComplementType, GrammaticalRole, PathSpecifier, Tense } from "@signi/shared";
+import type { Concept, ComplementType, Definiteness, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
 
 
 export interface SlotConfig {
@@ -34,6 +34,9 @@ export interface PhraseSelection {
     subjectAdjective2?: Concept;
     subjectNumber?: "singular" | "plural";
     subjectGender?: "masc" | "fem";
+    // Determiner (the / a / bare) for the subject and direct-object noun phrases.
+    subjectDefiniteness?: Definiteness;
+    directObjectDefiniteness?: Definiteness;
     directObjectNumber?: "singular" | "plural";
     directObjectGender?: "masc" | "fem";
     directObjectAdjective?: Concept;
@@ -66,6 +69,11 @@ export interface PhraseSelection {
     routeAdjective2?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
+    // Semantic relation for any adjective slot whose picked concept is a *noun* used
+    // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
+    // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
+    // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
+    modifierRelations?: Partial<Record<string, ModifierRelation>>;
     // Optional relative clause per noun block ("the boy *who cried*"). Each is itself
     // a PhraseSelection minus its subject (the head noun is the clause's subject), so
     // clauses nest recursively. Edited by a nested clause-mode PhraseBuilder instance.

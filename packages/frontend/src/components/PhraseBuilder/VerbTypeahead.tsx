@@ -17,7 +17,9 @@ export function VerbTypeahead({
 
   const filtered = query.trim()
     ? verbs.filter((v) =>
-        (v.label ?? v.description).toLowerCase().includes(query.toLowerCase()),
+        `${v.label ?? v.description} ${v.synonym ?? ""}`
+          .toLowerCase()
+          .includes(query.toLowerCase()),
       )
     : verbs;
 
@@ -109,6 +111,14 @@ export function VerbTypeahead({
               }}
             >
               {v.label ?? v.description}
+              {v.synonym ? (
+                <Box
+                  component="span"
+                  sx={{ ml: 0.5, color: "text.secondary", fontStyle: "normal" }}
+                >
+                  ({v.synonym})
+                </Box>
+              ) : null}
             </Box>
           ))}
         </Paper>

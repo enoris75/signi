@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
 import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
@@ -23,8 +23,40 @@ function defArticle(forms: Record<string, string>, plural = false, lead?: string
   return gender === 'fem' ? 'la' : 'le';
 }
 
+/**
+ * The indefinite article: masc "un", fem "une", plural "des" (French keeps a plural
+ * indefinite, unlike the Romance siblings). "un"/"une" don't elide before a vowel.
+ */
+function indefArticle(forms: Record<string, string>, plural: boolean): string {
+  if (plural) return 'des';
+  return (forms['gender'] ?? 'masc') === 'fem' ? 'une' : 'un';
+}
+
+/**
+ * The determiner for a subject/direct-object noun phrase, from its `definiteness`
+ * (default 'definite'): the definite/indefinite article, nothing (bare), or a quantifier.
+ * "beaucoup/peu de" take a bare noun (the "de" elides before a vowel); "tous/toutes les"
+ * carry the definite article; "aucun/e" is singular and drives verb negation ("ne") upstream.
+ */
+function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  const de = VOWEL_START.test(lead) ? "d'" : 'de';
+  switch (definiteness) {
+    case 'bare':       return '';
+    case 'indefinite': return indefArticle(forms, plural);
+    case 'some':       return 'quelques';
+    case 'many':       return `beaucoup ${de}`;
+    case 'few':        return `peu ${de}`;
+    case 'all':        return `${fem ? 'toutes' : 'tous'} ${defArticle(forms, true, lead)}`;
+    case 'no':         return fem ? 'aucune' : 'aucun';
+    default:           return defArticle(forms, plural, lead);
+  }
+}
+
 /** Join an article/preposition head to the following word: no space after elision. */
 function joinArt(head: string, word: string): string {
+  if (!head) return word; // bare noun phrase — no article
   return head.endsWith("'") ? `${head}${word}` : `${head} ${word}`;
 }
 
@@ -57,6 +89,22 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
+/** French linking preposition for an attributive noun, by relation (bare, no article). */
+const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de' };
+
+/** Postnominal attributive nouns as a bare "prep + noun" string; "de" elides before a vowel. */
+function frMods(np: ResolvedNounPhrase): string {
+  return np.nounModifiers
+    .map((m) => {
+      const base = m.concept.forms['base'];
+      if (!base) return '';
+      const prep = REL_PREP_FR[m.relation];
+      return prep === 'de' && VOWEL_START.test(base) ? `d'${base}` : `${prep} ${base}`;
+    })
+    .filter(Boolean)
+    .join(' ');
+}
+
 /** Split a phrase's adjectives (surface = base form) into pre- and post-nominal groups. */
 function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[] } {
   const pre: string[] = [];
@@ -82,7 +130,12 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const lead = pre[0] ?? noun;
   const core = joinArt(headFor(plural, lead), [...pre, noun].join(' '));
   const postStr = post.join(' et ');
-  const withPost = postStr ? `${core} ${postStr}` : core;
+  const postAdj = postStr ? `${core} ${postStr}` : core;
+  // Attributive nouns are postnominal and bare, the relation choosing the preposition:
+  // feature "à" (bateau à voile), purpose/material "de" (lunettes de soleil). Distinct
+  // from the possessor's contracted "du/de la".
+  const mods = frMods(np);
+  const withPost = mods ? `${postAdj} ${mods}` : postAdj;
   // A possessor is postnominal, headed by "de"+article contracted ("le livre du chat").
   // Rendering it through renderNP recurses for its own adjectives / nested possessor.
   const poss = np.possessor;
@@ -99,7 +152,7 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return renderNP(np, (plural, lead) => defArticle(forms, plural, lead)); // noun — definite article
+  return renderNP(np, (plural, lead) => artFor(forms, plural, lead)); // noun — determiner from forms
 }
 
 /** route path relation → preposition (+ "de"-contraction for those governing "de"). */
@@ -158,6 +211,11 @@ function predicateText(
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
+  // ("aucun garçon ne pleure") or an object ("il ne voit aucun garçon").
+  const aucun =
+    subjectForms['definiteness'] === 'no' ||
+    directObject?.head.forms['definiteness'] === 'no';
   let effectiveVerb: string;
   let effectiveMod: string;
   if (modifierIsNegative) {
@@ -166,12 +224,15 @@ function predicateText(
   } else if (verbNegative) {
     effectiveVerb = `ne ${conjugated} pas`;
     effectiveMod = modifierText;
+  } else if (aucun) {
+    effectiveVerb = `ne ${conjugated}`;
+    effectiveMod = modifierText;
   } else {
     effectiveVerb = conjugated;
     effectiveMod = modifierText;
   }
   const directObjectText = directObject
-    ? renderNP(directObject, (plural, lead) => defArticle(directObject.head.forms, plural, lead))
+    ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
     : '';
   // V [Adv] DirectObj IndirectObj(à+article)
   const indirectObjectText = indirectObject

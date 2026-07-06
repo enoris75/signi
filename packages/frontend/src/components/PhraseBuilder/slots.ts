@@ -160,6 +160,7 @@ export const COLLAPSIBLE_GROUPS: {
       "subjectAdjective2",
       "subjectNumber",
       "subjectGender",
+      "subjectDefiniteness",
     ],
   },
   {
@@ -175,6 +176,7 @@ export const COLLAPSIBLE_GROUPS: {
       "directObjectAdjective2",
       "directObjectNumber",
       "directObjectGender",
+      "directObjectDefiniteness",
     ],
   },
   {
@@ -277,6 +279,10 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
   subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
   subjectGender: { x: 12, y: 57 },
+  // Determiner (the / a / bare) reveal icons — icon-only (cycle on click), no canvas
+  // node; these just aim the icon at the noun box edge.
+  subjectDefiniteness: { x: 34, y: 30 },
+  directObjectDefiniteness: { x: 66, y: 30 },
   subjectAdjective2Gender: { x: 20, y: 26 },
   verbNegative: { x: 52, y: 62 },
   verbTense: { x: 40, y: 22 },

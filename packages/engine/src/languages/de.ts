@@ -4,32 +4,61 @@ import { pathSpecifier, type ResolvedComplement, type LanguageEngine, type Resol
 type Case = 'nom' | 'acc' | 'dat';
 type Slot = 'masc' | 'fem' | 'neut' | 'plural';
 
-// Weak adjective declension (after a definite article) — the only pattern the
-// engine needs, since every noun phrase here is introduced by der/die/das.
+// Weak adjective declension (after a definite article: der/die/das).
 const WEAK_ENDINGS: Record<Case, Record<Slot, string>> = {
   nom: { masc: 'e',  fem: 'e',  neut: 'e',  plural: 'en' },
   acc: { masc: 'en', fem: 'e',  neut: 'e',  plural: 'en' },
   dat: { masc: 'en', fem: 'en', neut: 'en', plural: 'en' },
 };
 
-function declineAdj(base: string, _case: Case, gender: string, plural: boolean): string {
+// Mixed declension (after an indefinite article: ein/eine) — nom/acc only, since a
+// subject/direct object is the only place non-definite determiners appear.
+const MIXED_ENDINGS: Record<'nom' | 'acc', Record<Slot, string>> = {
+  nom: { masc: 'er', fem: 'e', neut: 'es', plural: 'en' },
+  acc: { masc: 'en', fem: 'e', neut: 'es', plural: 'en' },
+};
+
+// Strong declension (no article: bare noun phrase, and article-less indefinite plurals),
+// where the adjective itself carries the case/gender the article would otherwise show.
+const STRONG_ENDINGS: Record<'nom' | 'acc', Record<Slot, string>> = {
+  nom: { masc: 'er', fem: 'e', neut: 'es', plural: 'e' },
+  acc: { masc: 'en', fem: 'e', neut: 'es', plural: 'e' },
+};
+
+// Pick the ending table for a case + determiner. Dative only ever appears on definite
+// (indirect object / complement) phrases here, so it stays weak. An indefinite *plural*
+// has no article, so it declines strong like a bare phrase.
+//   • kein- ("no")      → like ein-: mixed in the singular, weak in the plural.
+//   • einige/viele/wenige (some/many/few) → strong (no article carries the case).
+//   • alle ("all") and the definite article → weak.
+function endingsFor(_case: Case, definiteness: string, plural: boolean): Record<Slot, string> {
+  if (_case === 'dat') return WEAK_ENDINGS.dat;
+  if (definiteness === 'bare') return STRONG_ENDINGS[_case];
+  if (definiteness === 'indefinite') return plural ? STRONG_ENDINGS[_case] : MIXED_ENDINGS[_case];
+  if (definiteness === 'no') return plural ? WEAK_ENDINGS[_case] : MIXED_ENDINGS[_case];
+  if (definiteness === 'some' || definiteness === 'many' || definiteness === 'few')
+    return STRONG_ENDINGS[_case];
+  return WEAK_ENDINGS[_case]; // 'all' and 'definite'
+}
+
+function declineAdj(base: string, _case: Case, gender: string, plural: boolean, definiteness: string): string {
   const slot: Slot = plural ? 'plural' : gender === 'masc' || gender === 'fem' ? gender : 'neut';
-  let ending = WEAK_ENDINGS[_case][slot];
+  let ending = endingsFor(_case, definiteness, plural)[slot];
   // Stems already ending in -e (e.g. "müde") absorb the ending's leading e.
-  if (base.endsWith('e')) ending = ending.slice(1);
+  if (ending.startsWith('e') && base.endsWith('e')) ending = ending.slice(1);
   return base + ending;
 }
 
-// Decline every attributive adjective of a noun phrase for the given case,
-// agreeing with the head's gender/number. Returns "" when there are none.
-function adjPhrase(np: ResolvedNounPhrase, _case: Case): string {
+// Decline every attributive adjective of a noun phrase for the given case, agreeing with
+// the head's gender/number and determiner. Returns "" when there are none.
+function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite'): string {
   const f = np.head.forms;
   const gender = f['gender'] ?? 'neut';
   const plural = (f['number'] ?? f['count']) === 'plural';
   return np.adjectives
     .map((a) => a.forms['base'])
     .filter((b): b is string => Boolean(b))
-    .map((b) => declineAdj(b, _case, gender, plural))
+    .map((b) => declineAdj(b, _case, gender, plural, definiteness))
     .join(' ');
 }
 
@@ -44,6 +73,43 @@ function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
   }
   // dative
   return gender === 'masc' ? 'dem' : gender === 'fem' ? 'der' : 'dem';
+}
+
+// The indefinite article ein-, declined for case/gender. Plural has no indefinite
+// article (bare). Only nom/acc are reachable (subject/direct object).
+function indefArticle(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean): string {
+  if (plural) return '';
+  if (_case === 'acc') return gender === 'masc' ? 'einen' : gender === 'fem' ? 'eine' : 'ein';
+  if (_case === 'dat') return gender === 'fem' ? 'einer' : 'einem';
+  return gender === 'fem' ? 'eine' : 'ein'; // nominative: masc/neut ein, fem eine
+}
+
+// "kein" (no), declined like ein- but with a plural (keine / keinen in the dative).
+function keinForm(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean): string {
+  if (plural) return _case === 'dat' ? 'keinen' : 'keine';
+  if (_case === 'acc') return gender === 'masc' ? 'keinen' : gender === 'fem' ? 'keine' : 'kein';
+  if (_case === 'dat') return gender === 'fem' ? 'keiner' : 'keinem';
+  return gender === 'fem' ? 'keine' : 'kein'; // nominative: masc/neut kein, fem keine
+}
+
+/**
+ * The determiner for a noun phrase, from its `definiteness` (default 'definite'). Dative
+ * phrases (indirect object / complement) are always definite here, so they keep der/die/den.
+ * "kein" is self-negating (no verb concord); einige/viele/wenige/alle are plural quantifiers.
+ */
+function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  if (_case === 'dat' || definiteness === 'definite') return defArticle(forms, _case, plural);
+  const gender = forms['gender'] ?? 'neut';
+  switch (definiteness) {
+    case 'bare': return '';
+    case 'no':   return keinForm(_case, gender, plural);
+    case 'some': return 'einige';
+    case 'many': return 'viele';
+    case 'few':  return 'wenige';
+    case 'all':  return 'alle';
+    default:     return indefArticle(_case, gender, plural);
+  }
 }
 
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
@@ -70,7 +136,7 @@ function possessorText(np: ResolvedNounPhrase): string {
   if (!poss) return '';
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
-  const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+  const word = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
   const art = defArticle(f, 'dat', plural); // dem / der / den
   const von = art === 'dem' ? 'vom' : `von ${art}`;
   const declined = adjPhrase(poss, 'dat');
@@ -78,14 +144,33 @@ function possessorText(np: ResolvedNounPhrase): string {
   return ` ${von} ${adj}${word}${possessorText(poss)}${subordinateClause(poss)}`;
 }
 
+/**
+ * German realises an attributive noun as a closed compound ("Segel" + "Boot" →
+ * "Segelboot"): the modifiers are prefixed onto the head and every element but the first
+ * has its initial lowercased. The relation is neutralised. Gender/declension stay the
+ * head's (the compound's last element), so only the surface `word` changes. (Linking
+ * morphemes like the -s- in "Arbeitsplatz" are a known simplification.)
+ */
+function germanCompound(np: ResolvedNounPhrase, headWord: string): string {
+  const mods = np.nounModifiers.map((m) => m.concept.forms['base']).filter(Boolean);
+  if (!mods.length || !headWord) return headWord;
+  return [...mods, headWord]
+    .map((p, i) => (i === 0 ? p : p.charAt(0).toLowerCase() + p.slice(1)))
+    .join('');
+}
+
 function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
-  const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const declined = adjPhrase(np, _case);
+  const headWord = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
+  const word = germanCompound(np, headWord);
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const declined = adjPhrase(np, _case, definiteness);
   const a = declined ? `${declined} ` : '';
-  return `${defArticle(forms, _case, plural)} ${a}${word}${possessorText(np)}${subordinateClause(np)}`;
+  const art = determiner(forms, _case, plural); // der/die/das · ein/eine/einen · (bare)
+  const lead = art ? `${art} ` : '';
+  return `${lead}${a}${word}${possessorText(np)}${subordinateClause(np)}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -127,7 +212,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       if (!c) return '';
       const f = c.phrase.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
-      const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      const word = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route → path preposition (+ its case); locative/direction/source → two-way
       // preps + dative with the usual in+dem=im, zu+dem=zum, zu+der=zur fusions.
       let head: string;

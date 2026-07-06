@@ -24,6 +24,7 @@ interface ConceptRow {
   emoji: string | null;
   transitivity: string | null;
   complements: string | null;
+  synonym: string | null;
 }
 
 const PRONOUN_META_SQL = `
@@ -76,11 +77,11 @@ app.get('/api/concepts', (req, res) => {
   let rows: ConceptRow[];
   if (role) {
     rows = db
-      .prepare<[string], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements FROM semantic_concepts WHERE role = ? ORDER BY id')
+      .prepare<[string], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements, synonym FROM semantic_concepts WHERE role = ? ORDER BY id')
       .all(role);
   } else {
     rows = db
-      .prepare<[], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements FROM semantic_concepts ORDER BY role, id')
+      .prepare<[], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements, synonym FROM semantic_concepts ORDER BY role, id')
       .all();
   }
 
@@ -102,6 +103,7 @@ app.get('/api/concepts', (req, res) => {
       role: r.role,
       description: r.description,
       label: labels.get(r.id),
+      synonym: r.synonym ?? undefined,
       emoji: r.emoji ?? undefined,
       transitivity: (r.transitivity as import('@signi/shared').Transitivity) ?? undefined,
       complements: r.complements

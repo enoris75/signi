@@ -4,7 +4,7 @@ import { PhraseSelection, SlotKey } from "./interfaces.ts";
 import { COMPLEMENT_KEY_SET, COMPLEMENT_ADJECTIVE_TYPE } from "./slots.ts";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
-import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
+import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 
@@ -16,11 +16,15 @@ export function slotTypeahead({
   activeSlot,
   selection,
   onSelect,
+  nounSubject = false,
 }: {
   slotKey: SlotKey;
   activeSlot: SlotKey | null;
   selection: PhraseSelection;
   onSelect: (concept: Concept, slot: SlotKey) => void;
+  // In noun-phrase mode (possessor editor) the `subject` slot is a possessor head, which
+  // is noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
+  nounSubject?: boolean;
 }): ReactNode {
   // Only the active, still-empty slot renders a picker.
   if (slotKey !== activeSlot || selection[slotKey]) return undefined;
@@ -31,7 +35,11 @@ export function slotTypeahead({
     case "verb":
       return <VerbTypeahead onSelect={pick} />;
     case "subject":
-      return <SubjectTypeahead onSelect={pick} />;
+      return nounSubject ? (
+        <DirectObjectTypeahead onSelect={pick} />
+      ) : (
+        <SubjectTypeahead onSelect={pick} />
+      );
     case "directObject":
       return <DirectObjectTypeahead onSelect={pick} />;
     case "indirectObject":
@@ -42,12 +50,13 @@ export function slotTypeahead({
     case "directObjectAdjective2":
     case "indirectObjectAdjective":
     case "indirectObjectAdjective2":
-      return <AdjectiveTypeahead onSelect={pick} />;
+      // Adjective slots carry the Adjective ⇄ Noun switch (a noun here is attributive).
+      return <ModifierTypeahead onSelect={pick} />;
     default:
       // Complement adjectives (sourceAdjective, directionAdjective2, …) use the
-      // same adjective picker as the core roles.
+      // same adjective/noun switch as the core roles.
       if (COMPLEMENT_ADJECTIVE_TYPE[slotKey])
-        return <AdjectiveTypeahead onSelect={pick} />;
+        return <ModifierTypeahead onSelect={pick} />;
       // Motion/locative complements share the indirect-object picker.
       if (COMPLEMENT_KEY_SET.has(slotKey))
         return <IndirectObjectTypeahead onSelect={pick} />;

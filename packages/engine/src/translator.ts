@@ -20,6 +20,9 @@ export const engines: LanguageEngine[] = [
 
 export type LexiconLookup = (conceptId: string, language: string) => LexicalEntry | undefined;
 
+/** Determiners that are inherently plural, so they render the plural noun surface. */
+const PLURAL_DETERMINERS = new Set(['some', 'many', 'few', 'all']);
+
 function resolve(conceptId: string, language: string, lookup: LexiconLookup): ConceptForms {
   const entry = lookup(conceptId, language);
   return { conceptId, forms: entry ? { ...entry.forms } : {} };
@@ -60,14 +63,26 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     }
     // 1st / 2nd person singular: base is already the correct form
   } else {
-    // Noun: apply number then gender
-    const num = np.number ?? 'singular';
+    // Noun: apply number then gender. Determiner choice is threaded like number/gender
+    // so each engine reads it off forms. Some quantifiers are inherently plural ("many
+    // boys", "all boys"), so they force the plural surface — but only when the noun has
+    // one (mass nouns like "water" stay singular: "some water").
+    const definiteness = np.definiteness ?? 'definite';
+    const forcesPlural = PLURAL_DETERMINERS.has(definiteness);
+    const num = forcesPlural ? 'plural' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);
+    head.forms['definiteness'] = definiteness;
   }
   return {
     head,
     adjectives: (np.adjectives ?? []).map((id) => resolve(id, language, lookup)),
+    // Attributive nouns ("sail boat"). Carry the relation through so each engine can
+    // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise).
+    nounModifiers: (np.nounModifiers ?? []).map((m) => ({
+      concept: resolve(m.concept, language, lookup),
+      relation: m.relation,
+    })),
     // A relative clause is the predicate half of a phrase whose subject is this
     // head. Recursing through resolveNounPhrase (its objects/complements are noun
     // phrases that may themselves carry `relative`) handles arbitrary nesting.

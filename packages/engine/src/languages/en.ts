@@ -17,11 +17,29 @@ const PATH_PREP: Record<PathSpecifier, string> = {
   in_front_of: 'in front of',
 };
 
-function getArticle(forms: Record<string, string>): string {
-  const count = forms['number'] ?? forms['count'] ?? 'singular';
-  if (count === 'plural') return '';
-  const base = forms['base'] ?? '';
-  return /^[aeiou]/i.test(base) ? 'an' : 'a';
+/**
+ * The determiner for a noun phrase, from its `definiteness` (default 'definite'):
+ * "the", "a/an", nothing (bare), or a quantifier (some/no/many/few/all). "a" vs "an" is
+ * chosen on the sound of `lead` — the first word that will actually follow the article
+ * (an adjective if present, else the noun) — and an indefinite plural is bare ("a wolf"
+ * → plural "wolves"). Returns the determiner with a trailing space, or "" for bare.
+ */
+function determiner(forms: Record<string, string>, lead: string): string {
+  const definiteness = forms['definiteness'] ?? 'definite';
+  switch (definiteness) {
+    case 'bare':  return '';
+    case 'some':  return 'some ';
+    case 'no':    return 'no ';
+    case 'many':  return 'many ';
+    case 'few':   return 'few ';
+    case 'all':   return 'all ';
+    case 'indefinite': {
+      const count = forms['number'] ?? forms['count'] ?? 'singular';
+      if (count === 'plural') return '';
+      return /^[aeiou]/i.test(lead) ? 'an ' : 'a ';
+    }
+    default:      return 'the ';
+  }
 }
 
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
@@ -50,18 +68,29 @@ function genitiveMarker(np: ResolvedNounPhrase): string {
  * the genitive marker; the possessed head drops its own article.
  */
 function possessivePrefix(poss: ResolvedNounPhrase): string {
-  const inner = withRelative(nounPhrase(poss.head.forms, true, npAdj(poss), poss.possessor), poss);
+  const inner = withRelative(nounPhrase(poss.head.forms, npAdj(poss), nounMods(poss), poss.possessor), poss);
   return `${inner}${genitiveMarker(poss)} `;
 }
 
-function nounPhrase(forms: Record<string, string>, definite = false, adj?: string, possessor?: ResolvedNounPhrase): string {
+/**
+ * Attributive nouns as a bare prenominal string ("sail" in "sail boat"). English
+ * neutralises the relation entirely — the noun is just juxtaposed before the head.
+ */
+function nounMods(np: ResolvedNounPhrase): string {
+  return np.nounModifiers.map((m) => m.concept.forms['base']).filter(Boolean).join(' ');
+}
+
+function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? `${adj} ` : '';
+  // Noun-modifiers sit between the adjectives and the head: "the big sail boat".
+  const m = mods ? `${mods} ` : '';
   // A possessor replaces the article: "the cat's book", not "the cat's the book".
-  if (possessor) return `${possessivePrefix(possessor)}${a}${word}`;
-  if (definite) return `the ${a}${word}`;
-  return `${getArticle(forms)} ${a}${word}`;
+  if (possessor) return `${possessivePrefix(possessor)}${a}${m}${word}`;
+  // "a/an" agrees with the first word after the article (adjective, else modifier, else noun).
+  const lead = adj || mods || word;
+  return `${determiner(forms, lead)}${a}${m}${word}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -70,7 +99,7 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, true, npAdj(np), np.possessor); // noun — definite article
+  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor); // noun — determiner from forms
 }
 
 function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
@@ -80,7 +109,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
-      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, true, npAdj(c.phrase), c.phrase.possessor), c.phrase)}`;
+      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase)}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -101,11 +130,11 @@ function predicateParts(
   const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
   const directObjectText = directObject
-    ? withRelative(nounPhrase(directObject.head.forms, true, npAdj(directObject), directObject.possessor), directObject)
+    ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
     : '';
   // Prepositional dative: "to the cat"
   const indirectObjectText = indirectObject
-    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, true, npAdj(indirectObject), indirectObject.possessor), indirectObject)}`
+    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, npAdj(indirectObject), nounMods(indirectObject), indirectObject.possessor), indirectObject)}`
     : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';

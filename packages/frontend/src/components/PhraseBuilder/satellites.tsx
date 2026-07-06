@@ -11,9 +11,11 @@ import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RouteIcon from "@mui/icons-material/Route";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import KeyIcon from "@mui/icons-material/Key";
+import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
+  DEFINITENESS_LABELS,
   TENSE_LABELS,
   type Concept,
   type ComplementType,
@@ -114,6 +116,20 @@ export function buildSatellites(
       valueLabel: selection.subjectGender === "fem" ? "Feminine" : "Masculine",
     },
     {
+      key: "subjectDefiniteness",
+      parent: "subject",
+      label: "Determiner",
+      icon: <ArticleOutlinedIcon sx={iconSx} />,
+      // Only a noun head takes an article; pronoun subjects render without one.
+      available: subjectRole === "noun",
+      hasValue: Boolean(
+        selection.subjectDefiniteness &&
+          selection.subjectDefiniteness !== "definite",
+      ),
+      alwaysSet: true,
+      valueLabel: DEFINITENESS_LABELS[selection.subjectDefiniteness ?? "definite"],
+    },
+    {
       key: "subjectRelative",
       parent: "subject",
       label: "Relative clause",
@@ -204,6 +220,20 @@ export function buildSatellites(
       alwaysSet: true,
       valueLabel:
         selection.directObjectGender === "fem" ? "Feminine" : "Masculine",
+    },
+    {
+      key: "directObjectDefiniteness",
+      parent: "directObject",
+      label: "Determiner",
+      icon: <ArticleOutlinedIcon sx={iconSx} />,
+      available: Boolean(selection.directObject),
+      hasValue: Boolean(
+        selection.directObjectDefiniteness &&
+          selection.directObjectDefiniteness !== "definite",
+      ),
+      alwaysSet: true,
+      valueLabel:
+        DEFINITENESS_LABELS[selection.directObjectDefiniteness ?? "definite"],
     },
     {
       key: "directObjectRelative",

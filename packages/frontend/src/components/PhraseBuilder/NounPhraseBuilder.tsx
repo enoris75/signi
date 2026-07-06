@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
-import { NumberToggleBox, GenderToggleBox } from "./Boxes.tsx";
+import type { Definiteness } from "@signi/shared";
+import { NumberToggleBox, GenderToggleBox, DeterminerToggleBox } from "./Boxes.tsx";
 import { NumberSlot, PhraseSelection } from "./interfaces.ts";
 import { NUMBER_TOGGLE_KEY, GENDER_TOGGLE_KEY } from "./slots.ts";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
@@ -36,6 +37,9 @@ export function NounPhraseBuilder({
     | "masc"
     | "fem"
     | undefined;
+  const definiteness = selection[
+    `${which}Definiteness` as keyof PhraseSelection
+  ] as Definiteness | undefined;
 
   return (
     <>
@@ -59,6 +63,15 @@ export function NounPhraseBuilder({
           )}
         >
           <GenderToggleBox value={gender ?? "masc"} />
+        </Box>
+      )}
+      {shownMap[`${which}Definiteness`] && (
+        <Box
+          {...makeDragProps(`${which}Definiteness`, () =>
+            ctx.handleCycleDefiniteness(which),
+          )}
+        >
+          <DeterminerToggleBox value={definiteness ?? "definite"} />
         </Box>
       )}
     </>

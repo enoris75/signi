@@ -5,6 +5,69 @@ export type LanguageCode = 'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt';
 export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 
 /**
+ * The determiner a noun phrase renders with. `definite` → "the/il/le/der…",
+ * `indefinite` → "a/un/une/ein…", `bare` → no article at all (the article-less
+ * quotative/idiomatic object of "the boy cried wolf", generics like "wolves eat meat").
+ * Defaults to `definite`. Only nouns carry it — pronouns render without an article.
+ */
+/**
+ * A noun phrase's leading determiner. Beyond the three definiteness values (definite /
+ * indefinite / bare) it also carries the quantifiers, which some languages inflect for
+ * gender/number and, for `no`, weave into verb negation (negative concord).
+ */
+export type Definiteness =
+  | 'definite'
+  | 'indefinite'
+  | 'bare'
+  | 'some'
+  | 'no'
+  | 'many'
+  | 'few'
+  | 'all';
+
+/** Cycle order used by the UI toggle. */
+export const DEFINITENESS: Definiteness[] = [
+  'definite',
+  'indefinite',
+  'bare',
+  'some',
+  'no',
+  'many',
+  'few',
+  'all',
+];
+
+export const DEFINITENESS_LABELS: Record<Definiteness, string> = {
+  definite: 'Definite (the)',
+  indefinite: 'Indefinite (a)',
+  bare: '—',
+  some: 'Some',
+  no: 'No',
+  many: 'Many',
+  few: 'Few',
+  all: 'All',
+};
+
+/**
+ * The semantic relation a noun-modifier bears to its head — a noun used
+ * attributively ("sail boat", "sunglasses", "gold ring"). English/German/Japanese
+ * neutralise it (juxtaposition / compound / の); the Romance engines use it to select
+ * the linking preposition, which is exactly where the relations diverge:
+ *   feature (barca **a** vela) · purpose (occhiali **da** sole) · material (anello **di** oro)
+ * This is distinct from a possessor (the genitive "barca **della** vela").
+ */
+export type ModifierRelation = 'feature' | 'purpose' | 'material';
+
+/** Cycle order used by the UI relation chip. */
+export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'material'];
+
+export const MODIFIER_RELATION_LABELS: Record<ModifierRelation, string> = {
+  feature: 'Feature / means',
+  purpose: 'Purpose / use',
+  material: 'Material / content',
+};
+
+/**
  * Verb tense the phrase is rendered in. Only the simple tenses today; the
  * imperfect/continuous aspect is reserved for a later split of `past`.
  */
@@ -76,6 +139,7 @@ export interface Concept {
   role: GrammaticalRole;
   description: string;
   label?: string;              // English base form, e.g. "cat", "eat", "I"
+  synonym?: string;            // short disambiguating gloss shown in parentheses, e.g. "weep" for cry
   emoji?: string;
   transitivity?: Transitivity; // only set for verbs
   person?: '1' | '2' | '3';   // only set for pronouns
@@ -83,6 +147,12 @@ export interface Concept {
   gendered?: boolean;           // noun has distinct masc/fem surface forms
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
   complements?: ComplementType[]; // motion/locative complements a verb licenses
+}
+
+/** A noun used attributively to modify a head noun, plus its semantic relation. */
+export interface NounModifier {
+  concept: string;              // a noun id ("SAIL" in "sail boat")
+  relation: ModifierRelation;   // selects the linking preposition in Romance
 }
 
 /**
@@ -93,8 +163,17 @@ export interface NounPhrase {
   concept: string;                 // core noun or pronoun id
   number?: 'singular' | 'plural';
   gender?: 'masc' | 'fem';
+  /** Determiner to render with; defaults to 'definite'. Ignored for pronoun heads. */
+  definiteness?: Definiteness;
   /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
   adjectives?: string[];
+  /**
+   * Nouns used attributively ("**sail** boat"), each with the semantic relation it bears
+   * to the head. Distinct from `adjectives` (a noun-modifier doesn't inflect/agree — it is
+   * bare, and in Romance is linked by a relation-selected preposition) and from `possessor`
+   * (which is a full owning noun phrase, the genitive).
+   */
+  nounModifiers?: NounModifier[];
   /**
    * An optional restrictive relative clause ("the boy *who cried wolf*"). The head
    * noun is implicitly the clause's subject, so only the predicate is stored. The
