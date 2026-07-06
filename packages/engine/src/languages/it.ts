@@ -377,11 +377,19 @@ function predicateText(
     .join(' ');
 }
 
-/** A relative clause on `np`: invariant "che" + the clause predicate (head = subject). */
+/**
+ * A relative clause on `np`: invariant "che" for both subject- and object-relatives. A
+ * subject-relative agrees with the head ("il ragazzo che piange"); an object-relative
+ * carries the clause's own subject, which drives agreement ("il libro che io leggo").
+ */
 function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
-  return `che ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+  const subjectRelative = rel.headRole === 'subject' || !rel.subject;
+  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
+  const subjText = subjectRelative ? '' : subjectPhrase(rel.subject!);
+  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  return `che ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }
 
 export const italianEngine: LanguageEngine = {

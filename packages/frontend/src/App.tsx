@@ -1,4 +1,5 @@
 import { useRef, useState } from "react";
+import type { PhrasePlan } from "@signi/shared";
 import {
   Box,
   Container,
@@ -7,14 +8,69 @@ import {
   Button,
 } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
-import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
-import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
-import { selectionToPlan } from "./components/PhraseBuilder/selectionToPlan.ts";
+import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
+import {
+  type PhraseContainer,
+  type PhraseLink,
+} from "./components/PhraseBuilder/interfaces.ts";
+import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { useTranslation } from "./hooks/useTranslation.ts";
 
+const newId = () =>
+  typeof crypto !== "undefined" && crypto.randomUUID
+    ? crypto.randomUUID()
+    : `c${Math.random().toString(36).slice(2)}`;
+
+// One root sentence's translations. A component (not a loop) so useTranslation runs once
+// per sentence, honouring the rules of hooks as sentences are added/removed.
+function SentenceTranslation({
+  plan,
+  index,
+  total,
+}: {
+  plan: Partial<PhrasePlan>;
+  index: number;
+  total: number;
+}) {
+  const { data: translations, isLoading, isError } = useTranslation(plan);
+  const isReady = Boolean(plan.subject?.concept && plan.verbPhrase?.verb);
+  return (
+    <Box sx={{ mb: 3 }}>
+      {total > 1 && (
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.6rem",
+            fontWeight: 700,
+            letterSpacing: "0.16em",
+            textTransform: "uppercase",
+            color: "text.secondary",
+            mb: 1,
+          }}
+        >
+          Sentence {index + 1}
+        </Typography>
+      )}
+      {isError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          Could not reach the translation server.
+        </Alert>
+      )}
+      <TranslationPanel
+        translations={translations}
+        isLoading={isLoading}
+        isReady={isReady}
+      />
+    </Box>
+  );
+}
+
 export default function App() {
-  const [selection, setSelection] = useState<PhraseSelection>({});
+  const [containers, setContainers] = useState<PhraseContainer[]>(() => [
+    { id: newId(), selection: {} },
+  ]);
+  const [links, setLinks] = useState<PhraseLink[]>([]);
   const [leftWidthPct, setLeftWidthPct] = useState<number>(() => {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
@@ -31,10 +87,9 @@ export default function App() {
   }
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
-  const plan = selectionToPlan(selection);
-
-  const { data: translations, isLoading, isError } = useTranslation(plan);
-  const isReady = Boolean(plan.subject?.concept && plan.verbPhrase?.verb);
+  // One plan per root container (a container no link targets); linked containers fold in
+  // as relative clauses. Each root renders its own translations block.
+  const sentences = workspaceToPlans(containers, links);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -110,11 +165,13 @@ export default function App() {
           ref={splitContainerRef}
           sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", mb: 3 }}
         >
-          {/* Left: phrase diagram with inline word palette sidebar */}
+          {/* Left: stack of phrase containers + their relative-clause links */}
           <Box sx={{ width: `${leftWidthPct}%`, flexShrink: 0, minWidth: 0, pr: 1.5 }}>
-            <PhraseBuilder
-              selection={selection}
-              onPhraseUpdate={setSelection}
+            <PhraseWorkspace
+              containers={containers}
+              links={links}
+              setContainers={setContainers}
+              setLinks={setLinks}
               wordsPanelOpen={wordsPanelOpen}
               onWordsPanelClose={() => setWordsPanel(false)}
             />
@@ -161,17 +218,15 @@ export default function App() {
           <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />
         </Box>
 
-        {/* Translations: full width below */}
-        {isError && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            Could not reach the translation server.
-          </Alert>
-        )}
-        <TranslationPanel
-          translations={translations}
-          isLoading={isLoading}
-          isReady={isReady}
-        />
+        {/* Translations: one block per root sentence, full width below */}
+        {sentences.map((s, i) => (
+          <SentenceTranslation
+            key={s.containerId}
+            plan={s.plan}
+            index={i}
+            total={sentences.length}
+          />
+        ))}
       </Container>
     </Box>
   );

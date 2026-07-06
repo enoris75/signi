@@ -39,6 +39,8 @@ export function SlotBox({
   onClear,
   emptyContent,
   footer,
+  dimmed = false,
+  highlight = false,
 }: {
   slot: SlotConfig;
   concept?: Concept;
@@ -47,6 +49,10 @@ export function SlotBox({
   emptyContent?: ReactNode;
   // Extra content rendered below a filled slot's word (e.g. the noun-modifier relation chip).
   footer?: ReactNode;
+  // dimmed = this noun is a relative-clause link target: greyed out, the mere endpoint of
+  // the connector (no clear button). highlight = an eligible pick target in link mode.
+  dimmed?: boolean;
+  highlight?: boolean;
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -59,13 +65,21 @@ export function SlotBox({
           cursor: "inherit",
           borderRadius: 2,
           borderWidth: 2,
-          borderColor: isActive ? `${slot.color}.main` : "divider",
+          borderColor: highlight
+            ? `${slot.color}.main`
+            : isActive
+              ? `${slot.color}.main`
+              : "divider",
+          borderStyle: highlight ? "dashed" : "solid",
+          boxShadow: highlight ? (t) => `0 0 0 3px ${t.palette[slot.color].main}33` : "none",
           bgcolor: isActive
             ? `${slot.color}.50`
             : concept
               ? `${slot.color}.50`
               : "background.paper",
-          transition: "border-color 0.15s, background-color 0.15s",
+          opacity: dimmed ? 0.45 : 1,
+          filter: dimmed ? "grayscale(1)" : "none",
+          transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
           "&:hover": { borderColor: `${slot.color}.main` },
           userSelect: "none",
         }}
@@ -118,7 +132,7 @@ export function SlotBox({
         )}
         {concept && footer}
       </Paper>
-      {concept && (
+      {concept && !dimmed && (
         <Tooltip title={`Clear ${slot.label}`}>
           <IconButton
             size="small"

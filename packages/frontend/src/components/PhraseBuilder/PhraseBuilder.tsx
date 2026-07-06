@@ -19,8 +19,8 @@ import {
   NumberSlot,
   PhraseSelection,
   POSSESSOR_KEY,
-  RELATIVE_KEY,
   SlotKey,
+  WorkspaceBinding,
 } from "./interfaces.ts";
 import {
   ALL_SLOTS,
@@ -62,6 +62,10 @@ interface PhraseBuilderProps {
   // header so a control there can toggle it. The panel reports its own close.
   wordsPanelOpen?: boolean;
   onWordsPanelClose?: () => void;
+  // Workspace container id + the cross-container linking hooks. Present for every
+  // top-level container in the workspace; absent for embedded possessor sub-builders.
+  containerId?: string;
+  binding?: WorkspaceBinding;
 }
 
 // The noun blocks that can carry a relative clause.
@@ -137,6 +141,7 @@ export function PhraseBuilder({
   onRemove,
   wordsPanelOpen = false,
   onWordsPanelClose,
+  binding,
 }: PhraseBuilderProps) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
     nounPhrase ? "subject" : "verb",
@@ -160,6 +165,11 @@ export function PhraseBuilder({
     startPos: { x: number; y: number };
   } | null>(null);
   const hasVerb = Boolean(selection.verb);
+  // Has the user put anything in this clause? An untouched container is `{}`; any picked
+  // word, toggle, or nested possessor adds a key. Drives the remove-confirmation prompt.
+  const hasContent = Object.values(selection).some(
+    (v) => v != null && (typeof v !== "object" || Object.keys(v).length > 0),
+  );
   // A canvas is shown for a full phrase (once a verb is chosen) or, verbless, for a
   // lone noun phrase (the possessor editor).
   const showCanvas = hasVerb || nounPhrase;
@@ -236,28 +246,9 @@ export function PhraseBuilder({
     if (activeSlot === type) setActiveSlot("verb");
   }
 
-  // A lens: update the relative-clause slice hanging off `which`, seeding an empty
-  // clause the first time. Handed to the nested clause-mode PhraseBuilder as its
-  // onPhraseUpdate, so all its edits land inside this block's `${which}Relative`.
-  function makeRelativeUpdate(which: NounKey) {
-    return (updater: (prev: PhraseSelection) => PhraseSelection) =>
-      onPhraseUpdate((prev) => ({
-        ...prev,
-        [RELATIVE_KEY(which)]: updater(
-          (prev[RELATIVE_KEY(which)] as PhraseSelection | undefined) ?? {},
-        ),
-      }));
-  }
-
-  // Remove a noun block's relative clause entirely and collapse its reveal.
-  function handleRemoveRelative(which: NounKey) {
-    onPhraseUpdate((prev) => {
-      const next = { ...prev };
-      delete next[RELATIVE_KEY(which)];
-      return next;
-    });
-    setRevealed((prev) => ({ ...prev, [`${which}Relative`]: false }));
-  }
+  // Relative clauses are now cross-container links (see PhraseWorkspace): a noun's
+  // "relative clause" satellite starts/removes a link via `binding`, and the target
+  // container is folded in at serialization time — no in-selection relative slice.
 
   // A lens onto the possessor slice hanging off `which`, seeding an empty possessor the
   // first time. Handed to the nested noun-phrase-mode PhraseBuilder as its onPhraseUpdate,
@@ -421,6 +412,30 @@ export function PhraseBuilder({
   const complementToggleIcons: SatelliteIcon[] = [];
   for (const sat of satellites) {
     if (!sat.available) continue;
+    // The "Relative clause" satellite is a cross-container link control, not a reveal.
+    // It only exists in a workspace container (needs the binding); clicking it starts a
+    // link (pick a noun in another container) or, when already a source, removes it.
+    const relativeNoun: NounKey | null = sat.key.endsWith("Relative")
+      ? (sat.key.slice(0, -"Relative".length) as NounKey)
+      : null;
+    if (relativeNoun) {
+      if (!binding) continue;
+      const isSource = binding.linkSourceKeys.has(relativeNoun);
+      (satelliteIconsByParent[sat.parent] ??= []).push({
+        key: sat.key,
+        icon: sat.icon,
+        label: sat.label,
+        active: isSource,
+        isSet: isSource,
+        valued: false,
+        valueLabel: isSource ? "Linked — click to remove" : undefined,
+        onToggle: () =>
+          isSource
+            ? binding.onRemoveLink(relativeNoun)
+            : binding.onStartRelativeLink(relativeNoun),
+      });
+      continue;
+    }
     const iconEntry: SatelliteIcon = {
       key: sat.key,
       icon: sat.icon,
@@ -450,8 +465,8 @@ export function PhraseBuilder({
   // The outermost positioned Box — connectors from a noun to its relative-clause
   // panel are measured relative to this, since the panels live below the canvas.
   const rootRef = useRef<HTMLDivElement>(null);
-  // Each open relative-clause / possessor panel's wrapper element, keyed by its noun block.
-  const relativePanelEls = useRef<Map<string, HTMLElement>>(new Map());
+  // Each open possessor panel's wrapper element, keyed by its noun block. (Relative
+  // clauses are separate workspace containers now, not docked panels.)
   const possessorPanelEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
@@ -537,7 +552,6 @@ export function PhraseBuilder({
         MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
       next.push({ which: `${prefix}:${which}`, x1, y1, x2, y2, color });
     };
-    for (const which of openRelatives) measure(which, relativePanelEls.current.get(which), "rel");
     for (const which of openPossessors) measure(which, possessorPanelEls.current.get(which), "poss");
     setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
@@ -687,12 +701,6 @@ export function PhraseBuilder({
     svgSize,
   });
 
-  // Noun blocks whose relative-clause panel is currently open (revealed or already
-  // has content). Each renders a nested clause-mode PhraseBuilder below the canvas.
-  const openRelatives = NOUN_KEYS.filter(
-    (which) => selection[which] && shownMap[`${which}Relative`],
-  );
-
   // Noun blocks whose possessor panel is currently open (revealed or already filled).
   const openPossessors = NOUN_KEYS.filter(
     (which) => selection[which] && shownMap[`${which}Possessor`],
@@ -727,6 +735,20 @@ export function PhraseBuilder({
     handleToggleCollapse,
     handleRearrangeGroup,
     handleRemoveComplement,
+    // Cross-container linking: forward noun boxes to the workspace registry and expose
+    // greying (link targets) + pick-mode (eligible targets). Only NOUN_KEYS participate.
+    onBoxRef: binding
+      ? (key, el) => {
+          if (NOUN_KEYS.includes(key as NounKey))
+            binding.registerBox(key as NounKey, el);
+        }
+      : undefined,
+    dimmedKeys: binding ? (binding.linkTargetKeys as Set<string>) : undefined,
+    isPickTarget: binding
+      ? (key) =>
+          NOUN_KEYS.includes(key as NounKey) && binding.isPickTarget(key as NounKey)
+      : undefined,
+    onPickTarget: binding ? (key) => binding.onNounPick(key as NounKey) : undefined,
   };
 
   return (
@@ -772,7 +794,9 @@ export function PhraseBuilder({
       <Paper
         elevation={0}
         onPointerDown={(e) => {
-          if (nested) return; // nested clause panels stay docked, never float
+          // Nested panels stay docked; workspace containers (binding present) stay in
+          // the managed stack so cross-container connectors measure correctly.
+          if (nested || binding) return;
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const borderWidth = 8;
           const isNearBorder =
@@ -878,6 +902,24 @@ export function PhraseBuilder({
                   : "start by choosing a verb"}
               </Box>
             </Typography>
+            {onRemove && (
+              <IconButton
+                size="small"
+                onClick={() => {
+                  // Confirm only when there's work to lose; an empty clause deletes silently.
+                  if (
+                    hasContent &&
+                    !window.confirm("Remove this main clause and everything in it?")
+                  )
+                    return;
+                  onRemove();
+                }}
+                aria-label="Remove main clause"
+                sx={{ p: 0.25 }}
+              >
+                <CloseIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            )}
           </Box>
         )}
 
@@ -955,38 +997,6 @@ export function PhraseBuilder({
             )}
         </Box>
       </Paper>
-
-      {/* Subordinate containers — siblings of the main-clause container above, not
-          nested inside it. One per noun block with an open relative clause; each is a
-          clause-mode PhraseBuilder editing that block's `${which}Relative` slice, and
-          because they recurse a clause's own objects can sprout deeper clauses. */}
-      {showCanvas &&
-          openRelatives.map((which) => {
-            const nounHead = selection[which] as Concept;
-            const label = nounHead?.animate ? "who" : "that";
-            return (
-              <Box
-                key={which}
-                ref={(el: HTMLDivElement | null) => {
-                  if (el) relativePanelEls.current.set(which, el);
-                  else relativePanelEls.current.delete(which);
-                }}
-                sx={{ mt: 1.5, pl: nested ? 1 : 2 }}
-              >
-                <PhraseBuilder
-                  nested
-                  head={nounHead}
-                  relativeLabel={label}
-                  selection={
-                    (selection[RELATIVE_KEY(which)] as PhraseSelection | undefined) ??
-                    {}
-                  }
-                  onPhraseUpdate={makeRelativeUpdate(which)}
-                  onRemove={() => handleRemoveRelative(which)}
-                />
-              </Box>
-            );
-          })}
 
         {/* Possessor editors — one per noun block with an open possessor. Each is a
             verbless noun-phrase-mode PhraseBuilder editing that block's `${which}Possessor`

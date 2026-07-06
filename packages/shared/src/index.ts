@@ -176,10 +176,11 @@ export interface NounPhrase {
    */
   nounModifiers?: NounModifier[];
   /**
-   * An optional restrictive relative clause ("the boy *who cried wolf*"). The head
-   * noun is implicitly the clause's subject, so only the predicate is stored. The
-   * clause's own objects/complements are themselves noun phrases and may carry their
-   * own `relative`, so relative clauses nest.
+   * An optional restrictive relative clause ("the boy *who cried wolf*", "the book
+   * *that I read*"). The head noun fills one slot of the clause — its subject by
+   * default, but any slot (see `RelativeClause.headRole`). The clause's own
+   * objects/complements are themselves noun phrases and may carry their own
+   * `relative`, so relative clauses nest.
    */
   relative?: RelativeClause;
   /**
@@ -193,11 +194,19 @@ export interface NounPhrase {
 
 /**
  * A subordinate (restrictive relative) clause. It is a full predicate — verb phrase
- * plus optional objects and complements — whose subject is the noun phrase it hangs
- * off of. There is no `subject` field: the head noun fills that role (subject-relative
- * only; "the book that I read" is out of scope).
+ * plus optional objects and complements. The head noun phrase it hangs off of fills
+ * one of the clause's slots (the "gap"), named by `headRole`:
+ *  - `'subject'` (the default): a subject-relative, "the boy *who cried*". The gap is
+ *    the subject, so `subject` is left undefined and the head drives verb agreement.
+ *  - anything else: a non-subject relative, "the book *that I read*". The gap slot
+ *    (e.g. `directObject`) is left undefined, the clause carries its own `subject`,
+ *    and that subject drives agreement.
  */
 export interface RelativeClause {
+  /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
+  headRole?: 'subject' | 'directObject' | 'indirectObject' | ComplementType;
+  /** The clause's own subject — present when headRole !== 'subject' (drives agreement). */
+  subject?: NounPhrase;
   verbPhrase: VerbPhrase;
   directObject?: NounPhrase;
   indirectObject?: NounPhrase;

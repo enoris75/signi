@@ -61,12 +61,16 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const head = np.head.forms;
   core.push(wordSeg(head['base'] ?? '', head['reading']));
   // A relative clause is prenominal in Japanese: the whole predicate precedes the head
-  // noun with no relative pronoun (泣いた少年 = "the boy who cried"). The clause verb uses
+  // noun with no relative pronoun (泣いた少年 = "the boy who cried"). For a non-subject
+  // (e.g. object) relative the clause's own subject leads, marked by が (私が読む本 = "the
+  // book I read"); the gap slot is already absent from the clause. The clause verb uses
   // the polite (masu / ました) form — plain-form derivation isn't seeded yet, so this is a
   // known first-cut simplification, consistent with ja treating future as present.
   const rel = np.relative;
   if (!rel) return core;
-  return [...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements), ...core];
+  const clauseSubjectSegs: RubySegment[] =
+    rel.headRole !== 'subject' && rel.subject ? [...npSegs(rel.subject), { t: 'が' }] : [];
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements), ...core];
 }
 
 /**

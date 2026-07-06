@@ -130,13 +130,20 @@ function resolveComplements(
   return out;
 }
 
-/** Resolve a relative clause: its verb phrase, optional objects, and complements. */
+/**
+ * Resolve a relative clause: its verb phrase, optional objects, and complements. The
+ * gap slot named by `headRole` (default 'subject') is filled by the head noun above,
+ * so it is absent from the clause's own fields; a non-subject relative carries its own
+ * `subject`, which the engines use for agreement.
+ */
 function resolveRelativeClause(
   clause: RelativeClause,
   language: string,
   lookup: LexiconLookup,
 ): ResolvedRelativeClause {
   return {
+    headRole: clause.headRole ?? 'subject',
+    subject: clause.subject ? resolveNounPhrase(clause.subject, language, lookup) : undefined,
     verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
     directObject: clause.directObject ? resolveNounPhrase(clause.directObject, language, lookup) : undefined,
     indirectObject: clause.indirectObject ? resolveNounPhrase(clause.indirectObject, language, lookup) : undefined,

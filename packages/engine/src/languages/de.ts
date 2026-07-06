@@ -251,24 +251,36 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
 
 /**
  * A restrictive relative clause on `np`, German-style: comma, relative pronoun agreeing
- * with the head (nominative — subject-relative — so identical to the definite article
- * der/die/das/die), then the clause with its finite verb pushed to the end. Returns "" if
- * `np` has no relative. (The closing comma is omitted; a known first-cut simplification.)
+ * with the head in gender/number and case, then the clause with its finite verb pushed to
+ * the end. A subject-relative uses a nominative pronoun and the head drives agreement
+ * ("der Junge, der weint"). A direct-object relative uses an accusative pronoun, renders
+ * the clause's own subject, and that subject drives agreement ("das Buch, das ich lese").
+ * For nominative/accusative the relative pronoun coincides with the definite article
+ * (der/die/das · den/die/das); genitive ("dessen") and dative ("denen") relatives —
+ * indirect/complement — are not modelled and fall back to accusative. Returns "" if `np`
+ * has no relative. (The closing comma is omitted; a known first-cut simplification.)
  */
 function subordinateClause(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
   const f = np.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
-  const pronoun = defArticle(f, 'nom', plural); // der / die / das / die
+  const subjectRelative = rel.headRole === 'subject' || !rel.subject;
+  // nom for a subject-relative, acc for a (direct-)object relative. TODO: gen/dat pronouns.
+  const pronoun = defArticle(f, subjectRelative ? 'nom' : 'acc', plural);
+  // Agreement + the rendered clause subject: the head fills it for a subject-relative;
+  // otherwise the clause carries its own nominative subject.
+  const agreeForms = subjectRelative ? f : rel.subject!.head.forms;
+  const clauseSubjectText = subjectRelative ? '' : subjectPhrase(rel.subject!);
 
   const { verb, negative: verbNegative, modifier, tense = 'present' } = rel.verbPhrase;
-  const person = f['person'] ?? '3';
-  const pn = `${person}${plural ? 'pl' : 'sg'}`;
+  const person = agreeForms['person'] ?? '3';
+  const aPlural = (agreeForms['number'] ?? agreeForms['count']) === 'plural';
+  const pn = `${person}${aPlural ? 'pl' : 'sg'}`;
   const isFuture = tense === 'future';
   // Verb-final: the finite verb closes the clause. Future puts the infinitive
   // just before the clause-final finite "werden" ("der Wein trinken wird").
-  const finite = isFuture ? (WERDEN[pn] ?? 'wird') : conjugate(verb.forms, f, tense);
+  const finite = isFuture ? (WERDEN[pn] ?? 'wird') : conjugate(verb.forms, agreeForms, tense);
   const infinitive = isFuture ? (verb.forms['base'] ?? '') : '';
 
   const indirectObjectText = rel.indirectObject ? nounPhrase(rel.indirectObject, 'dat') : '';
@@ -278,7 +290,7 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
   const complementsText = complementsPhrase(rel.complements);
 
-  const body = [pronoun, indirectObjectText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
+  const body = [pronoun, clauseSubjectText, indirectObjectText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
     .filter(Boolean)
     .join(' ');
   return `, ${body}`;

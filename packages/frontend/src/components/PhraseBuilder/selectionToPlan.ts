@@ -6,12 +6,11 @@ import type {
   NounModifier,
   NounPhrase,
   PhrasePlan,
-  RelativeClause,
   VerbPhrase,
 } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
 import type { Concept } from "@signi/shared";
-import { NounKey, PhraseSelection, POSSESSOR_KEY, RELATIVE_KEY } from "./interfaces.ts";
+import { NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
 // `${which}Adjective`, …) all exist on PhraseSelection; the union index widens the
@@ -39,13 +38,12 @@ function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]
   return { adjectives, nounModifiers };
 }
 
-// Build one noun phrase from the flat `${which}*` fields, recursing into its relative
-// clause (whose objects are themselves noun phrases, so nesting is unbounded).
-function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | undefined {
+// Build one noun phrase from the flat `${which}*` fields. Relative clauses are no longer
+// stored in the selection — they are cross-container links assembled in workspacePlan.ts,
+// which attaches `.relative` to the noun phrases this returns.
+export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | undefined {
   const concept = field<Concept>(sel, which);
   if (!concept) return undefined;
-  const relSel = field<PhraseSelection>(sel, RELATIVE_KEY(which));
-  const relative = relSel ? buildRelativeClause(relSel) : undefined;
   // A possessor is a nested noun phrase whose head lives in its `subject` slot; recursing
   // through buildNounPhrase gives it its own number/gender/adjectives/nested possessor.
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
@@ -60,12 +58,11 @@ function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | und
     definiteness: field<Definiteness>(sel, `${which}Definiteness`),
     adjectives,
     nounModifiers,
-    relative,
     possessor,
   };
 }
 
-function buildVerbPhrase(sel: PhraseSelection): VerbPhrase {
+export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase {
   return {
     verb: sel.verb?.id as string,
     negative: sel.verbNegative,
@@ -92,20 +89,10 @@ function buildComplements(
   return Object.keys(out).length > 0 ? out : undefined;
 }
 
-// A relative clause is a phrase minus its subject (the head noun fills that role). It
-// only materialises once its verb is chosen, mirroring the top-level phrase.
-function buildRelativeClause(sel: PhraseSelection): RelativeClause | undefined {
-  if (!sel.verb) return undefined;
-  return {
-    verbPhrase: buildVerbPhrase(sel),
-    directObject: buildNounPhrase(sel, "directObject"),
-    indirectObject: buildNounPhrase(sel, "indirectObject"),
-    complements: buildComplements(sel),
-  };
-}
+export { buildComplements };
 
-// Serialise the flat builder selection into the wire PhrasePlan, recursing through
-// every noun block's optional relative clause.
+// Serialise one container's flat selection into a wire PhrasePlan (its noun phrases carry
+// no relative clauses; those are attached from cross-container links in workspacePlan.ts).
 export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
   return {
     subject: buildNounPhrase(sel, "subject"),

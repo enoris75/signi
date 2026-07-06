@@ -134,10 +134,11 @@ export function buildSatellites(
       parent: "subject",
       label: "Relative clause",
       icon: <AccountTreeIcon sx={iconSx} />,
-      // A relative clause attaches only to a noun head (pronoun subjects render
-      // without one), and the engine appends it after the noun.
+      // A relative clause attaches only to a noun head (pronoun subjects render without
+      // one). It is now a cross-container link; `hasValue` (is-a-link-source) is supplied
+      // by PhraseBuilder from the workspace binding.
       available: subjectRole === "noun",
-      hasValue: Boolean(selection.subjectRelative?.verb),
+      hasValue: false,
     },
     {
       key: "subjectPossessor",
@@ -241,7 +242,7 @@ export function buildSatellites(
       label: "Relative clause",
       icon: <AccountTreeIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
-      hasValue: Boolean(selection.directObjectRelative?.verb),
+      hasValue: false,
     },
     {
       key: "directObjectPossessor",
@@ -299,7 +300,7 @@ export function buildSatellites(
       label: "Relative clause",
       icon: <AccountTreeIcon sx={iconSx} />,
       available: Boolean(selection.indirectObject),
-      hasValue: Boolean(selection.indirectObjectRelative?.verb),
+      hasValue: false,
     },
     {
       key: "indirectObjectPossessor",
@@ -380,13 +381,7 @@ export function buildSatellites(
           label: "Relative clause",
           icon: <AccountTreeIcon sx={iconSx} />,
           available: Boolean(concept),
-          hasValue: Boolean(
-            (
-              selection[`${type}Relative` as keyof PhraseSelection] as
-                | PhraseSelection
-                | undefined
-            )?.verb,
-          ),
+          hasValue: false,
         },
         {
           key: `${type}Possessor`,

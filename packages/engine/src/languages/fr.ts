@@ -258,11 +258,23 @@ function predicateText(
     .join(' ');
 }
 
-/** A relative clause on `np`: subject relativizer "qui" + the clause predicate. */
+/**
+ * A relative clause on `np`. A subject-relative uses "qui" and the head drives agreement
+ * ("le garçon qui pleure"). A non-subject (direct-object) relative uses "que" — elided to
+ * "qu'" before a vowel — followed by the clause's own subject, which drives agreement
+ * ("le livre que je lis"). Indirect/complement relativization ("dont", "à qui") is not
+ * yet modelled, so those fall back to "que" — best-effort. TODO: prepositional relativizers.
+ */
 function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
-  return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+  if (rel.headRole === 'subject' || !rel.subject) {
+    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+  }
+  const subjText = subjectPhrase(rel.subject);
+  const relzr = joinArt(VOWEL_START.test(subjText) ? "qu'" : 'que', subjText);
+  const pred = predicateText(rel.subject.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  return `${relzr} ${pred}`.trim();
 }
 
 export const frenchEngine: LanguageEngine = {

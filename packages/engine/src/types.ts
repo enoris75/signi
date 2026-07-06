@@ -34,10 +34,15 @@ export interface ResolvedVerbPhrase {
 }
 
 /**
- * A resolved relative clause: the predicate half of a phrase (verb + objects +
- * complements), whose subject is the noun phrase carrying it.
+ * A resolved relative clause: a full predicate (verb + objects + complements) in
+ * which the head noun phrase fills the slot named by `headRole` (the "gap"). For a
+ * subject-relative (`headRole === 'subject'`) the head drives verb agreement and
+ * `subject` is undefined; otherwise the clause carries its own resolved `subject`
+ * (which drives agreement) and the `headRole` slot is left undefined.
  */
 export interface ResolvedRelativeClause {
+  headRole: 'subject' | 'directObject' | 'indirectObject' | ComplementType;
+  subject?: ResolvedNounPhrase;
   verbPhrase: ResolvedVerbPhrase;
   directObject?: ResolvedNounPhrase;
   indirectObject?: ResolvedNounPhrase;

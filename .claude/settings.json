@@ -9,7 +9,11 @@
       "Bash(curl -s \"http://localhost:3001/concepts?role=verb\")",
       "Bash(curl -s http://localhost:9222/json/version)",
       "Bash(curl -s http://localhost:9222/json)",
-      "Bash(python3 -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts'\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts'\\)\\)\")",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/260c7ee4-99f6-46d9-a3b7-c82a9727b5c7/scratchpad/rel-test.mjs)",
+      "Bash(PORT=3011 node packages/backend/dist/index.js)",
+      "Bash(curl -s -X POST http://localhost:3011/api/translate -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(python3 -c \"import sys,json; [print\\(f\\\\\"{t['language']:>4}: {t['text']}\\\\\"\\) for t in json.load\\(sys.stdin\\)['translations']]\")"
     ]
   }
 }

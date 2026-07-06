@@ -206,13 +206,23 @@ function modifierText(np: ResolvedNounPhrase): string {
     .join('');
 }
 
-/** Append a noun phrase's attributive nouns, possessor, and relative clause ("que" + predicate). */
+/**
+ * Append a noun phrase's attributive nouns, possessor, and relative clause (invariant
+ * "que" + predicate). A subject-relative agrees with the head ("el niño que llora"); an
+ * object-relative carries the clause's own subject, which drives agreement ("el libro
+ * que yo leo").
+ */
 function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
   const rel = np.relative;
   if (!rel) return withPoss;
-  const clause = predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
-  return `${withPoss} que ${clause}`.trimEnd();
+  const subjectRelative = rel.headRole === 'subject' || !rel.subject;
+  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
+  const subjText = subjectRelative
+    ? ''
+    : withRelative(subjectPhrase(rel.subject!.head.forms, esAdj(rel.subject!)), rel.subject!);
+  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }
 
 /**

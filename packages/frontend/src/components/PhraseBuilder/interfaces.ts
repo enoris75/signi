@@ -74,16 +74,8 @@ export interface PhraseSelection {
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
     // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
     modifierRelations?: Partial<Record<string, ModifierRelation>>;
-    // Optional relative clause per noun block ("the boy *who cried*"). Each is itself
-    // a PhraseSelection minus its subject (the head noun is the clause's subject), so
-    // clauses nest recursively. Edited by a nested clause-mode PhraseBuilder instance.
-    subjectRelative?: PhraseSelection;
-    directObjectRelative?: PhraseSelection;
-    indirectObjectRelative?: PhraseSelection;
-    locativeRelative?: PhraseSelection;
-    directionRelative?: PhraseSelection;
-    sourceRelative?: PhraseSelection;
-    routeRelative?: PhraseSelection;
+    // Relative clauses are no longer stored inside a selection: a noun's relative clause
+    // is a *separate* phrase container linked to it (see PhraseLink / PhraseWorkspace).
     // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
     // whose `subject` slot holds the possessing noun (so its number/gender/adjectives and
     // its own nested possessor all reuse the `subject*` fields); built via buildNounPhrase.
@@ -100,13 +92,52 @@ export type NumberSlot = "subject" | "directObject" | "indirectObject" | Complem
 
 export type GenderSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
 
-// The noun blocks that can carry a relative clause (same set as NumberSlot).
+// The noun blocks that can carry a relative clause / possessor (same set as NumberSlot).
 export type NounKey = "subject" | "directObject" | "indirectObject" | ComplementType;
-
-export const RELATIVE_KEY = (which: NounKey) =>
-  `${which}Relative` as keyof PhraseSelection;
 
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
 
 export type SlotKey = SlotConfig["key"];
+
+// ── Multi-container workspace ────────────────────────────────────────────────
+// The builder now edits a *stack* of independent phrase containers. A relative clause
+// is expressed as a cross-container link: a noun in one container (the source/head) is
+// linked to a noun in another container (the target/relativized "gap"), which is greyed
+// out and consumed as that head's relative clause when the sentence is serialized.
+
+// One phrase container: a stable id plus a full clause selection.
+export interface PhraseContainer {
+  id: string;
+  selection: PhraseSelection;
+}
+
+// A cross-container relative-clause link: source noun (the head) → target noun (the gap).
+export interface PhraseLink {
+  id: string;
+  source: { containerId: string; nounKey: NounKey };
+  target: { containerId: string; nounKey: NounKey };
+}
+
+// Pick-mode: a source noun's relative satellite was clicked and is awaiting a target click.
+export type PickMode =
+  | { active: false }
+  | { active: true; source: { containerId: string; nounKey: NounKey } };
+
+// The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
+// linking. Undefined for embedded (possessor) sub-builders, which never link.
+export interface WorkspaceBinding {
+  containerId: string;
+  // Register/unregister a noun box's DOM element for cross-container measuring & greying.
+  registerBox: (nounKey: NounKey, el: HTMLElement | null) => void;
+  // Pick-mode: is this noun a legal link target right now? (drives highlight + click)
+  isPickTarget: (nounKey: NounKey) => boolean;
+  onNounPick: (nounKey: NounKey) => void;
+  // Start / remove a relative-clause link sourced from this noun.
+  onStartRelativeLink: (nounKey: NounKey) => void;
+  onRemoveLink: (nounKey: NounKey) => void;
+  // Nouns of this container that are a link source / a link target.
+  linkSourceKeys: Set<NounKey>;
+  linkTargetKeys: Set<NounKey>;
+  pickActive: boolean;
+}

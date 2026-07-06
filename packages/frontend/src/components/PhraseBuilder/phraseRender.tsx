@@ -71,6 +71,14 @@ export interface PhraseRenderContext {
   // Compact a dotted box's child nodes into a tidy centered cluster.
   handleRearrangeGroup: (nodeKeys: string[]) => void;
   handleRemoveComplement: (type: ComplementType) => void;
+  // ── Cross-container linking (top-level containers only; undefined for possessors) ──
+  // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
+  onBoxRef?: (key: SlotKey, el: HTMLElement | null) => void;
+  // Noun keys that are a relative-clause link target — rendered greyed and inert.
+  dimmedKeys?: Set<string>;
+  // In pick-mode: is this noun an eligible link target? Clicking it completes the link.
+  isPickTarget?: (key: SlotKey) => boolean;
+  onPickTarget?: (key: SlotKey) => void;
 }
 
 // A single draggable slot box: pointer-drag wrapper + Tab/arrow keyboard nav
@@ -94,8 +102,22 @@ export function SlotNode({
     handleConceptSelect,
     handleCycleModifierRelation,
     nounPhrase,
+    onBoxRef,
+    dimmedKeys,
+    isPickTarget,
+    onPickTarget,
   } = ctx;
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
+
+  // Link-mode state for this box: a greyed link target (endpoint only) or an eligible
+  // pick target (click completes the link). Its click "activates" via the drag machinery.
+  const dimmed = dimmedKeys?.has(slot.key) ?? false;
+  const pickTarget = isPickTarget?.(slot.key) ?? false;
+  const onActivate = pickTarget
+    ? () => onPickTarget?.(slot.key)
+    : dimmed
+      ? () => {}
+      : () => handleSlotClick(slot.key);
 
   // An adjective slot filled with a *noun* is an attributive modifier ("sail boat"); it
   // carries a semantic relation (feature / purpose / material) that the Romance engines
@@ -138,10 +160,11 @@ export function SlotNode({
   ) : undefined;
   return (
     <Box
-      {...makeDragProps(slot.key, () => handleSlotClick(slot.key))}
+      {...makeDragProps(slot.key, onActivate)}
       ref={(el: HTMLElement | null) => {
         if (el) slotEls.current.set(slot.key, el);
         else slotEls.current.delete(slot.key);
+        onBoxRef?.(slot.key, el);
       }}
       tabIndex={0}
       onFocus={() => handleSlotClick(slot.key)}
@@ -168,6 +191,8 @@ export function SlotNode({
         slot={slot}
         concept={selection[slot.key]}
         isActive={activeSlot === slot.key}
+        dimmed={dimmed}
+        highlight={pickTarget}
         onClear={() => handleClear(slot.key)}
         emptyContent={slotTypeahead({
           slotKey: slot.key,
