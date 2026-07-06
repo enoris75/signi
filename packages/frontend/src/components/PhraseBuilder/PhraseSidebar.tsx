@@ -1,7 +1,5 @@
-import { useState } from "react";
-import { Box, Typography, Divider, IconButton, Tooltip } from "@mui/material";
-import ChevronLeftIcon from "@mui/icons-material/ChevronLeft";
-import ChevronRightIcon from "@mui/icons-material/ChevronRight";
+import { Box, Typography, Divider, IconButton, Tooltip, Paper } from "@mui/material";
+import CloseIcon from "@mui/icons-material/Close";
 import { type Concept } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import {
@@ -11,9 +9,12 @@ import {
 } from "./interfaces.ts";
 
 interface PhraseSidebarProps {
+  // Whether the overlay is shown. Owned by the page (App) so a control in the
+  // header can toggle it; this panel only reports when it wants to close.
+  open: boolean;
+  onClose: () => void;
   width: number;
   onWidthChange: (width: number) => void;
-  maxHeight: number;
   selection: PhraseSelection;
   activeSlot: SlotKey | null;
   activeSlotConfig: SlotConfig | null;
@@ -23,9 +24,10 @@ interface PhraseSidebarProps {
 }
 
 export function PhraseSidebar({
+  open,
+  onClose,
   width,
   onWidthChange,
-  maxHeight,
   selection,
   activeSlot,
   activeSlotConfig,
@@ -33,53 +35,29 @@ export function PhraseSidebar({
   onSlotClick,
   onConceptSelect,
 }: PhraseSidebarProps) {
-  // Collapsed by default; the word palette is opt-in so the canvas gets the room.
-  const [collapsed, setCollapsed] = useState<boolean>(() => {
-    const saved = localStorage.getItem("signi:phraseBuilderSidebarCollapsed");
-    return saved === null ? true : saved === "true";
-  });
-
-  function toggleCollapsed() {
-    setCollapsed((prev) => {
-      const next = !prev;
-      localStorage.setItem(
-        "signi:phraseBuilderSidebarCollapsed",
-        String(next),
-      );
-      return next;
-    });
-  }
-
-  if (collapsed) {
-    return (
-      <Tooltip title="Show words" placement="left">
-        <Box
-          onClick={toggleCollapsed}
-          sx={{
-            flexShrink: 0,
-            alignSelf: "stretch",
-            maxHeight,
-            display: "flex",
-            alignItems: "flex-start",
-            justifyContent: "center",
-            pt: 0.5,
-            cursor: "pointer",
-            borderLeft: "1px solid",
-            borderColor: "divider",
-            color: "text.secondary",
-            transition: "background-color 0.15s, color 0.15s",
-            "&:hover": { bgcolor: "action.hover", color: "primary.main" },
-          }}
-        >
-          <ChevronLeftIcon fontSize="small" />
-        </Box>
-      </Tooltip>
-    );
-  }
-
   return (
-    <>
-      {/* Sidebar resize handle */}
+    <Paper
+      elevation={8}
+      square
+      sx={{
+        position: "fixed",
+        top: 0,
+        right: 0,
+        bottom: 0,
+        width,
+        zIndex: (t) => t.zIndex.drawer,
+        display: "flex",
+        flexDirection: "column",
+        borderLeft: "1px solid",
+        borderColor: "divider",
+        transform: open ? "translateX(0)" : "translateX(100%)",
+        transition: "transform 0.2s ease",
+        // Off-screen while hidden — keep it out of the pointer path so it never
+        // intercepts clicks meant for the canvas beneath it.
+        pointerEvents: open ? "auto" : "none",
+      }}
+    >
+      {/* Resize handle on the panel's left edge. Dragging left widens it. */}
       <Box
         onPointerDown={(e) => {
           e.preventDefault();
@@ -107,64 +85,54 @@ export function PhraseSidebar({
           window.addEventListener("pointercancel", onUp);
         }}
         sx={{
+          position: "absolute",
+          left: 0,
+          top: 0,
+          bottom: 0,
           width: 6,
-          flexShrink: 0,
           cursor: "ew-resize",
           touchAction: "none",
-          borderLeft: "2px solid",
-          borderColor: "divider",
           bgcolor: "divider",
           opacity: 0.6,
           transition: "opacity 0.15s, background-color 0.15s",
-          "&:hover": {
-            opacity: 1,
-            bgcolor: "primary.main",
-            borderColor: "primary.main",
-          },
+          "&:hover": { opacity: 1, bgcolor: "primary.main" },
         }}
       />
       <Box
         sx={{
-          width,
-          flexShrink: 0,
-          borderLeft: "1px solid",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          px: 1.5,
+          py: 1,
+          borderBottom: "1px solid",
           borderColor: "divider",
-          pl: 1.5,
-          maxHeight,
-          overflowY: "auto",
         }}
       >
-        <Box
+        <Typography
           sx={{
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            mb: 1,
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.58rem",
+            fontWeight: 700,
+            letterSpacing: "0.18em",
+            textTransform: "uppercase",
+            color: "text.secondary",
           }}
         >
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "0.58rem",
-              fontWeight: 700,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "text.secondary",
-            }}
+          {activeSlotConfig ? activeSlotConfig.label : "Words"}
+        </Typography>
+        <Tooltip title="Hide words" placement="left">
+          <IconButton
+            size="small"
+            onClick={onClose}
+            aria-label="Hide words"
+            sx={{ p: 0.25 }}
           >
-            {activeSlotConfig ? activeSlotConfig.label : "Words"}
-          </Typography>
-          <Tooltip title="Hide words" placement="left">
-            <IconButton
-              size="small"
-              onClick={toggleCollapsed}
-              aria-label="Hide words"
-              sx={{ p: 0.25 }}
-            >
-              <ChevronRightIcon fontSize="small" />
-            </IconButton>
-          </Tooltip>
-        </Box>
+            <CloseIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
+      </Box>
+      <Box sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
         {activeSlotConfig ? (
           activeSlotConfig.roles.map((role) => (
             <ConceptPalette
@@ -199,6 +167,6 @@ export function PhraseSidebar({
           </>
         )}
       </Box>
-    </>
+    </Paper>
   );
 }

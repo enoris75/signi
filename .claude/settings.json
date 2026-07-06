@@ -3,7 +3,13 @@
     "allow": [
       "Bash(awk '{print \"  watcher PID\", $2}')",
       "Bash(curl -s -o /dev/null -w \"backend health: %{http_code}\\\\n\" http://localhost:3001/api/concepts?role=noun)",
-      "Bash(curl -s -o /dev/null -w \"backend health: %{http_code}\\\\n\" \"http://localhost:3001/api/concepts?role=noun\")"
+      "Bash(curl -s -o /dev/null -w \"backend health: %{http_code}\\\\n\" \"http://localhost:3001/api/concepts?role=noun\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" http://localhost:5173/)",
+      "Bash(curl -s \"http://localhost:3001/api/concepts?role=verb\")",
+      "Bash(curl -s \"http://localhost:3001/concepts?role=verb\")",
+      "Bash(curl -s http://localhost:9222/json/version)",
+      "Bash(curl -s http://localhost:9222/json)",
+      "Bash(python3 -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts'\\)\\)\")"
     ]
   }
 }

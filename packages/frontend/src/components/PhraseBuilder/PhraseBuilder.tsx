@@ -58,6 +58,10 @@ interface PhraseBuilderProps {
   // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
   relativeLabel?: string;
   onRemove?: () => void;
+  // Top-level only: the word-palette overlay's open state, lifted to the page
+  // header so a control there can toggle it. The panel reports its own close.
+  wordsPanelOpen?: boolean;
+  onWordsPanelClose?: () => void;
 }
 
 // The noun blocks that can carry a relative clause.
@@ -131,6 +135,8 @@ export function PhraseBuilder({
   head,
   relativeLabel,
   onRemove,
+  wordsPanelOpen = false,
+  onWordsPanelClose,
 }: PhraseBuilderProps) {
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
     nounPhrase ? "subject" : "verb",
@@ -789,11 +795,16 @@ export function PhraseBuilder({
           p: 2,
           border: "1px solid",
           borderColor: "divider",
-          ...((nested || nounPhrase) && {
-            borderLeft: "3px solid",
-            borderLeftColor: nounPhrase ? "info.light" : "primary.light",
-            bgcolor: "action.hover",
-          }),
+          // Every phrase — the main clause and each nested relative/possessor — sits
+          // in the same accent container (left rule + tinted bg). The rule's colour
+          // marks the kind: possessor info, relative primary, main clause neutral.
+          borderLeft: "3px solid",
+          borderLeftColor: nounPhrase
+            ? "info.light"
+            : nested
+              ? "primary.light"
+              : "text.secondary",
+          bgcolor: "action.hover",
           cursor:
             borderDragRef.current && position
               ? "grabbing"
@@ -838,26 +849,40 @@ export function PhraseBuilder({
             )}
           </Box>
         ) : (
-          <Typography
+          <Box
             sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "0.6rem",
-              fontWeight: 600,
-              letterSpacing: "0.18em",
-              textTransform: "uppercase",
-              color: "text.secondary",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "space-between",
               mb: 1.5,
             }}
           >
-            {hasVerb
-              ? "Compose your phrase — click a slot then choose a word"
-              : "Start by choosing a verb"}
-          </Typography>
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.62rem",
+                fontWeight: 700,
+                letterSpacing: "0.12em",
+                textTransform: "uppercase",
+                color: "text.secondary",
+              }}
+            >
+              Main clause{" "}
+              <Box
+                component="span"
+                sx={{ color: "text.disabled", fontWeight: 500 }}
+              >
+                ·{" "}
+                {hasVerb
+                  ? "click a slot then choose a word"
+                  : "start by choosing a verb"}
+              </Box>
+            </Typography>
+          </Box>
         )}
 
-        <Box sx={{ display: "flex", gap: 2, alignItems: "flex-start" }}>
-          <Box sx={{ flex: 1, minWidth: 0 }}>
-            {!showCanvas ? (
+        <Box sx={{ minWidth: 0 }}>
+          {!showCanvas ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
                 <SlotBox
                   slot={verbSlot}
@@ -928,29 +953,14 @@ export function PhraseBuilder({
                 />
               </>
             )}
-          </Box>
-          {/* The word palette rides only the top-level builder; nested clauses and
-              possessor editors fill their slots via each box's inline typeahead. */}
-          {!nested && !nounPhrase && (
-            <PhraseSidebar
-              width={sidebarWidth}
-              onWidthChange={setSidebarWidth}
-              maxHeight={graphHeight}
-              selection={selection}
-              activeSlot={activeSlot}
-              activeSlotConfig={activeSlotConfig}
-              visibleSlots={visibleSlots}
-              onSlotClick={handleSlotClick}
-              onConceptSelect={handleConceptSelect}
-            />
-          )}
         </Box>
+      </Paper>
 
-        {/* Nested relative-clause builders — one per noun block with an open clause.
-            Each is a clause-mode PhraseBuilder editing that block's `${which}Relative`
-            slice; because they recurse, a clause's own objects can sprout deeper
-            clauses. */}
-        {showCanvas &&
+      {/* Subordinate containers — siblings of the main-clause container above, not
+          nested inside it. One per noun block with an open relative clause; each is a
+          clause-mode PhraseBuilder editing that block's `${which}Relative` slice, and
+          because they recurse a clause's own objects can sprout deeper clauses. */}
+      {showCanvas &&
           openRelatives.map((which) => {
             const nounHead = selection[which] as Concept;
             const label = nounHead?.animate ? "who" : "that";
@@ -1009,7 +1019,24 @@ export function PhraseBuilder({
               </Box>
             );
           })}
-      </Paper>
+
+      {/* The word palette rides only the top-level builder as a slide-over
+          overlay; nested clauses and possessor editors fill their slots via each
+          box's inline typeahead. Its open state is owned by the page header. */}
+      {!nested && !nounPhrase && (
+        <PhraseSidebar
+          open={wordsPanelOpen}
+          onClose={() => onWordsPanelClose?.()}
+          width={sidebarWidth}
+          onWidthChange={setSidebarWidth}
+          selection={selection}
+          activeSlot={activeSlot}
+          activeSlotConfig={activeSlotConfig}
+          visibleSlots={visibleSlots}
+          onSlotClick={handleSlotClick}
+          onConceptSelect={handleConceptSelect}
+        />
+      )}
     </Box>
   );
 }

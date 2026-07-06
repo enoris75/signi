@@ -4,7 +4,9 @@ import {
   Container,
   Typography,
   Alert,
+  Button,
 } from "@mui/material";
+import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { PhraseBuilder } from "./components/PhraseBuilder/PhraseBuilder.tsx";
 import { type PhraseSelection } from "./components/PhraseBuilder/interfaces.ts";
 import { selectionToPlan } from "./components/PhraseBuilder/selectionToPlan.ts";
@@ -17,6 +19,16 @@ export default function App() {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
   });
+  // The word-palette overlay's open state, owned here so the header control can
+  // toggle it while the panel itself lives inside PhraseBuilder. Off by default.
+  const [wordsPanelOpen, setWordsPanelOpen] = useState<boolean>(() => {
+    return localStorage.getItem("signi:wordsPanelOpen") === "true";
+  });
+
+  function setWordsPanel(next: boolean) {
+    localStorage.setItem("signi:wordsPanelOpen", String(next));
+    setWordsPanelOpen(next);
+  }
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
   const plan = selectionToPlan(selection);
@@ -26,9 +38,14 @@ export default function App() {
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
-      {/* Header */}
+      {/* Header. Sticky and stacked above the word-palette overlay (which is a
+          fixed drawer) so its toggle control stays clickable while the panel is
+          open and the panel appears to slide out from beneath it. */}
       <Box
         sx={{
+          position: "sticky",
+          top: 0,
+          zIndex: (t) => t.zIndex.drawer + 1,
           bgcolor: "background.paper",
           borderTop: "3px solid",
           borderBottom: "1px solid",
@@ -39,31 +56,52 @@ export default function App() {
           mb: 4,
         }}
       >
-        <Container maxWidth="xl">
-          <Typography
-            variant="h4"
-            sx={{
-              fontFamily: '"Playfair Display", serif',
-              fontWeight: 800,
-              lineHeight: 1,
-              color: "text.primary",
-            }}
+        <Container
+          maxWidth="xl"
+          sx={{
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            gap: 2,
+          }}
+        >
+          <Box>
+            <Typography
+              variant="h4"
+              sx={{
+                fontFamily: '"Playfair Display", serif',
+                fontWeight: 800,
+                lineHeight: 1,
+                color: "text.primary",
+              }}
+            >
+              Signi
+            </Typography>
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.6rem",
+                fontWeight: 600,
+                letterSpacing: "0.2em",
+                textTransform: "uppercase",
+                color: "text.secondary",
+                mt: 0.5,
+              }}
+            >
+              Semantic phrase translator · 7 languages
+            </Typography>
+          </Box>
+          <Button
+            variant={wordsPanelOpen ? "contained" : "outlined"}
+            size="small"
+            disableElevation
+            startIcon={<MenuBookIcon />}
+            onClick={() => setWordsPanel(!wordsPanelOpen)}
+            aria-pressed={wordsPanelOpen}
+            sx={{ flexShrink: 0, textTransform: "none" }}
           >
-            Signi
-          </Typography>
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "0.6rem",
-              fontWeight: 600,
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "text.secondary",
-              mt: 0.5,
-            }}
-          >
-            Semantic phrase translator · 7 languages
-          </Typography>
+            Words
+          </Button>
         </Container>
       </Box>
 
@@ -77,6 +115,8 @@ export default function App() {
             <PhraseBuilder
               selection={selection}
               onPhraseUpdate={setSelection}
+              wordsPanelOpen={wordsPanelOpen}
+              onWordsPanelClose={() => setWordsPanel(false)}
             />
           </Box>
 
