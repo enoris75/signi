@@ -1,5 +1,24 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { causeSentiment, npAdj, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Periphrastic degree words placed before the adjective ("more beautiful", "the most
+// beautiful"). English marks the superlative with "the", which the noun's own determiner
+// already supplies, so only the degree adverb is added here.
+const EN_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'more', most: 'most', less: 'less', least: 'least', equally: 'equally',
+};
+
+/** One adjective's surface with its degree adverb prepended ("more beautiful"). */
+function enAdj(a: ConceptForms): string {
+  const base = a.forms['base'] ?? '';
+  const d = EN_DEGREE[adjDegree(a)];
+  return d && base ? `${d} ${base}` : base;
+}
+
+/** Join a resolved noun phrase's adjectives, each carrying its comparative degree. */
+function npAdj(np: ResolvedNounPhrase): string {
+  return np.adjectives.map(enAdj).filter(Boolean).join(' ');
+}
 
 const PREP: Record<ComplementType, string> = {
   locative: 'in',
@@ -7,6 +26,7 @@ const PREP: Record<ComplementType, string> = {
   source: 'from',
   route: 'through',
   cause: 'because of',
+  predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
 };
 
 const PATH_PREP: Record<PathSpecifier, string> = {
@@ -120,6 +140,13 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
+      // Subject complement: a predicate adjective is bare ("seems happy" — English
+      // adjectives don't inflect); a predicate noun keeps its own article, no preposition
+      // ("becomes a legend").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') return f['base'] ?? '';
+        return withRelative(nounPhrase(f, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase);
+      }
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
         : type === 'cause' ? (causeSentiment(c) === 'positive' ? 'thanks to' : 'because of')
         : PREP[type];
@@ -212,6 +239,8 @@ export const englishEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
     const subjectText = withRelative(subjectPhrase(subject), subject);
+    // Verbless period: a bare noun phrase ("breaking news").
+    if (!phrase.verbPhrase) return subjectText.trim();
     return [
       subjectText,
       ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),

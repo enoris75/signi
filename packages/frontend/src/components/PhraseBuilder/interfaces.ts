@@ -1,4 +1,4 @@
-import type { CauseSentiment, Concept, ComplementType, Definiteness, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+import type { CauseSentiment, Concept, ComplementType, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
 
 
 export interface SlotConfig {
@@ -45,6 +45,15 @@ export interface PhraseSelection {
     indirectObjectGender?: "masc" | "fem" | "neut";
     indirectObjectAdjective?: Concept;
     indirectObjectAdjective2?: Concept;
+    // Subject complement (predicative) of a copular verb (become/seem/appear). Its head
+    // may be a predicate noun ("becomes a legend") or a predicate adjective ("seems
+    // happy"); number/gender apply only to a noun head (an adjective head agrees with the
+    // subject in the engine).
+    predicative?: Concept;
+    predicativeNumber?: "singular" | "plural";
+    predicativeGender?: "masc" | "fem" | "neut";
+    predicativeAdjective?: Concept;
+    predicativeAdjective2?: Concept;
     // Motion/locative complements — each an independent noun phrase, with its
     // own chained adjectives (up to two, matching subjects/objects).
     locative?: Concept;
@@ -83,6 +92,11 @@ export interface PhraseSelection {
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
     // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
     modifierRelations?: Partial<Record<string, ModifierRelation>>;
+    // Comparative degree for any adjective slot whose picked concept is a real *adjective*
+    // ("more beautiful"). Keyed by the adjective slot key, mirroring `modifierRelations`
+    // (the two are mutually exclusive — a slot holds either an adjective or a noun-modifier).
+    // Only consulted when that slot holds an adjective; defaults to 'positive'. See Degree.
+    adjectiveDegrees?: Partial<Record<string, Degree>>;
     // Relative clauses are no longer stored inside a selection: a noun's relative clause
     // is a *separate* phrase container linked to it (see PhraseLink / PhraseWorkspace).
     // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
@@ -91,6 +105,7 @@ export interface PhraseSelection {
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     indirectObjectPossessor?: PhraseSelection;
+    predicativePossessor?: PhraseSelection;
     locativePossessor?: PhraseSelection;
     directionPossessor?: PhraseSelection;
     sourcePossessor?: PhraseSelection;

@@ -1,4 +1,4 @@
-import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation } from '@signi/shared';
+import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -91,7 +91,14 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
   }
   return {
     head,
-    adjectives: (np.adjectives ?? []).map((id) => resolve(id, language, lookup)),
+    adjectives: (np.adjectives ?? []).map((id, i) => {
+      const cf = resolve(id, language, lookup);
+      // Thread the per-adjective comparative degree onto its forms (like number/gender/
+      // definiteness) so each engine reads it off `forms['degree']`. Omit the plain form.
+      const deg = np.adjectiveDegrees?.[i];
+      if (deg && deg !== 'positive') cf.forms['degree'] = deg;
+      return cf;
+    }),
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can
     // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise).
     nounModifiers: (np.nounModifiers ?? []).map((m) => ({
@@ -108,9 +115,10 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
   };
 }
 
-/** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). */
+/** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
+ *  called when a verb phrase is present — a verbless period skips it (see translate). */
 function resolveVerbPhrase(
-  vp: PhrasePlan['verbPhrase'],
+  vp: VerbPhrase,
   language: string,
   lookup: LexiconLookup,
 ): ResolvedVerbPhrase {
@@ -169,7 +177,9 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
   return engines.map((engine) => {
     const resolved: ResolvedPhrase = {
       subject: resolveNounPhrase(plan.subject, engine.language, lookup),
-      verbPhrase: resolveVerbPhrase(plan.verbPhrase, engine.language, lookup),
+      // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
+      // render just the subject when it is absent.
+      verbPhrase: plan.verbPhrase ? resolveVerbPhrase(plan.verbPhrase, engine.language, lookup) : undefined,
       directObject: plan.directObject ? resolveNounPhrase(plan.directObject, engine.language, lookup) : undefined,
       indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
       complements: resolveComplements(plan.complements, engine.language, lookup),

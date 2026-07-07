@@ -98,7 +98,10 @@ export const ALL_SLOTS: SlotConfig[] = [
         key: type,
         label: COMPLEMENT_LABELS[type],
         required: false,
-        roles: ["noun"],
+        // The subject complement (predicative) can be a predicate noun ("becomes a
+        // legend") OR a predicate adjective ("seems happy"); every other complement is a
+        // noun head with optional adjective modifiers.
+        roles: type === "predicative" ? ["noun", "adjective"] : ["noun"],
         color: "warning",
       },
       {
@@ -234,6 +237,11 @@ export function getActiveSlots(
 }
 
 export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
+  // Subject complement (predicative) — copular verbs (become/seem/appear) are
+  // intransitive, so it reuses the otherwise-empty direct-object region after the verb.
+  predicative: { x: 80, y: 42 },
+  predicativeAdjective: { x: 68, y: 16 },
+  predicativeAdjective2: { x: 84, y: 14 },
   subjectAdjective: { x: 12, y: 14 },
   subjectAdjective2: { x: 12, y: 26 },
   subject: { x: 26, y: 42 },
@@ -266,6 +274,7 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
 };
 
 const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
+  predicative: { x: 80, y: 62 },
   subject: { x: 12, y: 72 },
   directObject: { x: 80, y: 62 },
   indirectObject: { x: 90, y: 88 },
@@ -282,6 +291,10 @@ export const GENDER_TOGGLE_KEY = (which: GenderSlot) => `${which}Gender`;
 
 export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
+  predicativeNumber: NUMBER_TOGGLE_DEFAULTS.predicative,
+  predicativeGender: { x: 93, y: 30 },
+  predicativeRelative: { x: 80, y: 64 },
+  predicativePossessor: { x: 74, y: 64 },
   subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
   subjectGender: { x: 12, y: 57 },
   // Determiner (the / a / bare) reveal icons — icon-only (cycle on click), no canvas

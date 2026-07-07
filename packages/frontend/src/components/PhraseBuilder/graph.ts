@@ -69,7 +69,7 @@ const rectBorderPoint = (r: GroupRect, tx: number, ty: number): Pt => {
 // Assemble everything the SVG layer draws: the faint intra-group satellite edges,
 // the dashed role-group bounding boxes, and the solid links between those boxes.
 export function buildGraph({
-  hasVerb,
+  drawCanvas,
   nounPhrase = false,
   showSubject = true,
   renderedSlots,
@@ -79,7 +79,9 @@ export function buildGraph({
   controlPos,
   svgSize,
 }: {
-  hasVerb: boolean;
+  // Whether to paint the canvas at all: true once the period has a subject or verb (or in
+  // noun-phrase mode). Before that the builder shows its empty-state opening picker instead.
+  drawCanvas: boolean;
   // Verbless noun-phrase mode: the canvas holds a single noun phrase (the `subject`
   // box + its satellites) with no verb phrase, objects, or inter-group links. Used by
   // the possessor editor, which is a full noun phrase but has no predicate.
@@ -111,10 +113,8 @@ export function buildGraph({
     return { x1: from.x, y1: from.y, x2: to.x, y2: to.y, color, dashed: true };
   };
 
-  // Both the satellite edges and the role-group rects draw whenever a canvas is shown —
-  // either a full phrase (hasVerb) or a lone noun phrase (nounPhrase mode).
-  const drawCanvas = hasVerb || nounPhrase;
-
+  // Both the satellite edges and the role-group rects draw whenever the canvas is shown —
+  // a period with a subject/verb, or a lone noun phrase (nounPhrase mode).
   const edges: Edge[] = [];
   if (drawCanvas) {
     for (const slot of renderedSlots) {

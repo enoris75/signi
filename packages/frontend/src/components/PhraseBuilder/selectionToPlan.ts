@@ -2,6 +2,7 @@ import type {
   Complement,
   ComplementType,
   Definiteness,
+  Degree,
   ModifierRelation,
   NounModifier,
   NounPhrase,
@@ -22,8 +23,10 @@ function field<T>(sel: PhraseSelection, key: string): T | undefined {
 // Split the two adjective slots of a noun block by the picked concept's role: real
 // adjectives become `adjectives`, nouns become attributive `nounModifiers` carrying the
 // slot's chosen relation (defaulting to 'feature'). This is the "Adjective ⇄ Noun" switch.
-function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]; nounModifiers: NounModifier[] } {
+function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]; adjectiveDegrees: Degree[]; nounModifiers: NounModifier[] } {
   const adjectives: string[] = [];
+  // Index-aligned with `adjectives`: each real adjective's chosen degree (default 'positive').
+  const adjectiveDegrees: Degree[] = [];
   const nounModifiers: NounModifier[] = [];
   for (const key of [`${which}Adjective`, `${which}Adjective2`]) {
     const c = field<Concept>(sel, key);
@@ -33,9 +36,10 @@ function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]
       nounModifiers.push({ concept: c.id, relation: relation as ModifierRelation });
     } else {
       adjectives.push(c.id);
+      adjectiveDegrees.push(sel.adjectiveDegrees?.[key] ?? "positive");
     }
   }
-  return { adjectives, nounModifiers };
+  return { adjectives, adjectiveDegrees, nounModifiers };
 }
 
 // Build one noun phrase from the flat `${which}*` fields. Relative clauses are no longer
@@ -48,7 +52,7 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
   // through buildNounPhrase gives it its own number/gender/adjectives/nested possessor.
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
   const possessor = possSel ? buildNounPhrase(possSel, "subject") : undefined;
-  const { adjectives, nounModifiers } = modifiers(sel, which);
+  const { adjectives, adjectiveDegrees, nounModifiers } = modifiers(sel, which);
   return {
     concept: concept.id,
     number: field<"singular" | "plural">(sel, `${which}Number`),
@@ -57,14 +61,18 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
     // undefined and the engines default to 'definite'.
     definiteness: field<Definiteness>(sel, `${which}Definiteness`),
     adjectives,
+    adjectiveDegrees,
     nounModifiers,
     possessor,
   };
 }
 
-export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase {
+// A verbless period (a bare noun phrase like "breaking news") has no verb phrase — return
+// undefined so the plan omits it and the engines render just the subject.
+export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
+  if (!sel.verb) return undefined;
   return {
-    verb: sel.verb?.id as string,
+    verb: sel.verb.id,
     negative: sel.verbNegative,
     tense: sel.verbTense,
     modifier: sel.modifier?.id,

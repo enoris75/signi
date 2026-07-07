@@ -139,6 +139,11 @@ export function lookupLexicalEntry(conceptId: string, language: string): Lexical
   const role = getConceptRole(conceptId);
   const entry = role ? (LOOKUP_BY_ROLE[role]?.(conceptId, language) ?? null) : null;
 
+  // Expose the concept's grammatical role in the forms map so the engines can tell an
+  // adjective-headed subject complement (predicate adjective: "seems happy") from a
+  // noun-headed one (predicate nominative: "becomes a legend") at render time.
+  if (entry && role) entry.forms['role'] = role;
+
   entryCache.set(key, entry);
   return entry ?? undefined;
 }

@@ -1,5 +1,18 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
+// share "mais"/"menos"; the noun phrase's definite article distinguishes them ("um gato mais
+// grande" vs "o gato mais grande"). Equality uses the invariant "igualmente".
+const PT_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'mais', most: 'mais', less: 'menos', least: 'menos', equally: 'igualmente',
+};
+
+/** Prefix an adjective's degree adverb onto its already-agreed surface ("mais grande"). */
+function ptDeg(a: ConceptForms, surface: string): string {
+  const d = PT_DEGREE[adjDegree(a)];
+  return d && surface ? `${d} ${surface}` : surface;
+}
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -81,7 +94,7 @@ function ptAdj(np: ResolvedNounPhrase): string {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   return np.adjectives
-    .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
+    .map((a) => ptDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
     .filter(Boolean)
     .join(' e ');
 }
@@ -163,13 +176,25 @@ function routeHead(c: ResolvedComplement, plural: boolean): string {
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+function complementsPhrase(
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  subjectForms: Record<string, string>,
+): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // Subject complement: a predicate adjective agrees with the *subject* ("torna-se uma
+      // lenda" but "parece cansada"); a predicate noun keeps its own article, no
+      // preposition ("torna-se uma lenda").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') {
+          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+        }
+        return withRelative(nounPhrase(f, ptAdj(c.phrase)), c.phrase);
+      }
       // A pronoun cause: neutral "por causa de mim / dele" takes the tonic form after "de"
       // (which contracts with the 3rd-person pronouns, de+ele→dele); positive "graças a mim"
       // takes the tonic after "a"; negative uses the possessive with "culpa" ("por minha culpa").
@@ -296,7 +321,7 @@ function predicateText(
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
   const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
-  const complementsText = complementsPhrase(complements);
+  const complementsText = complementsPhrase(complements, subjectForms);
   return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -307,6 +332,8 @@ export const portugueseEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
     const subjectText = withRelative(subjectPhrase(subject.head.forms, ptAdj(subject)), subject);
+    // Verbless period: a bare noun phrase ("últimas notícias").
+    if (!phrase.verbPhrase) return subjectText.trim();
     const predicate = predicateText(
       subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
     );

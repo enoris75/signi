@@ -8,6 +8,7 @@ import {
   COMPLEMENT_LABELS,
   COMPLEMENT_TYPES,
   DEFINITENESS,
+  DEGREES,
   MODIFIER_RELATIONS,
   TENSES,
   type Concept,
@@ -17,6 +18,7 @@ import {
   type PathSpecifier,
 } from "@signi/shared";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
+import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
   ConceptSelectOpts,
@@ -212,8 +214,11 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
+  // A period starts on its subject noun phrase — translation begins as soon as a subject
+  // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
+  // Only a nested relative clause starts on the verb, since its subject is the external head.
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
-    nounPhrase ? "subject" : "verb",
+    nested ? "verb" : "subject",
   );
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which dotted role-group boxes are collapsed (keyed by group label). A
@@ -234,15 +239,18 @@ export function PhraseBuilder({
     startPos: { x: number; y: number };
   } | null>(null);
   const hasVerb = Boolean(selection.verb);
+  const hasSubject = Boolean(selection.subject);
   // Has the user put anything in this clause? An untouched container is `{}`; any picked
   // word, toggle, or nested possessor adds a key. Drives the remove-confirmation prompt.
   const hasContent = Object.values(selection).some(
     (v) => v != null && (typeof v !== "object" || Object.keys(v).length > 0),
   );
-  // A canvas is shown for a full phrase (once a verb is chosen) or, verbless, for a
-  // lone noun phrase (the possessor editor).
-  const showCanvas = hasVerb || nounPhrase;
+  // A canvas is shown once a subject or verb is chosen (a period starts on its subject),
+  // or, verbless, for a lone noun phrase (the possessor editor). Before that, the empty
+  // state offers the single opening word picker.
+  const showCanvas = hasSubject || hasVerb || nounPhrase;
   const verbSlot = ALL_SLOTS.find((s) => s.key === "verb")!;
+  const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
   const visibleSlots = nounPhrase
     ? // Noun-phrase mode: only the subject family (the possessor head + its adjectives).
       getActiveSlots("intransitive", selection.subject?.role, Boolean(selection.subjectAdjective))
@@ -253,7 +261,15 @@ export function PhraseBuilder({
         Boolean(selection.subjectAdjective),
         selection.verb?.complements,
         // In clause mode the subject is the external head, so drop the subject slot.
-      ).filter((s) => !nested || s.key !== "subject");
+      )
+        .filter((s) => !nested || s.key !== "subject")
+        // Objects hang off the verb, so a subject-only (verbless) period shows none —
+        // otherwise an empty Direct Object box would appear before any verb is chosen.
+        .filter(
+          (s) =>
+            hasVerb ||
+            !(s.key.startsWith("directObject") || s.key.startsWith("indirectObject")),
+        );
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -404,6 +420,17 @@ export function PhraseBuilder({
       const cur = prev.modifierRelations?.[slotKey] ?? "feature";
       const next = MODIFIER_RELATIONS[(MODIFIER_RELATIONS.indexOf(cur) + 1) % MODIFIER_RELATIONS.length];
       return { ...prev, modifierRelations: { ...prev.modifierRelations, [slotKey]: next } };
+    });
+  }
+
+  // Cycle a real adjective's comparative degree (positive → more → most → less → least →
+  // equally → positive), stored per adjective slot key in `adjectiveDegrees`. Only
+  // meaningful when that slot holds an adjective; ignored otherwise.
+  function handleCycleDegree(slotKey: SlotKey) {
+    onPhraseUpdate((prev) => {
+      const cur = prev.adjectiveDegrees?.[slotKey] ?? "positive";
+      const next = DEGREES[(DEGREES.indexOf(cur) + 1) % DEGREES.length];
+      return { ...prev, adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: next } };
     });
   }
 
@@ -631,7 +658,7 @@ export function PhraseBuilder({
     });
     obs.observe(containerRef.current);
     return () => obs.disconnect();
-  }, [hasVerb]);
+  }, [showCanvas]);
 
   // After every render, measure each core word box's pixel size. Control icons and
   // their connectors are placed on the box border, so we need the box's half-extents.
@@ -829,7 +856,7 @@ export function PhraseBuilder({
   });
 
   const { edges, groupRects, groupEdges } = buildGraph({
-    hasVerb,
+    drawCanvas: showCanvas,
     nounPhrase,
     // The possessor's own head is a box on this canvas; in a relative clause the
     // subject is the external head, so it isn't drawn.
@@ -944,6 +971,7 @@ export function PhraseBuilder({
     handleToggleGender,
     handleCycleDefiniteness,
     handleCycleModifierRelation,
+    handleCycleDegree,
     handleToggleNegative,
     handleCycleTense,
     handleSelectSpecifier,
@@ -1114,9 +1142,9 @@ export function PhraseBuilder({
                 sx={{ color: "text.disabled", fontWeight: 500 }}
               >
                 ·{" "}
-                {hasVerb
+                {showCanvas
                   ? "click a slot then choose a word"
-                  : "start by choosing a verb"}
+                  : "start by choosing a subject"}
               </Box>
             </Typography>
             <Box sx={{ display: "flex", alignItems: "center" }}>
@@ -1185,17 +1213,35 @@ export function PhraseBuilder({
         <Box sx={{ minWidth: 0 }}>
           {!showCanvas ? (
               <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
-                <SlotBox
-                  slot={verbSlot}
-                  concept={undefined}
-                  isActive={activeSlot === "verb"}
-                  onClear={() => handleClear("verb")}
-                  emptyContent={
-                    <VerbTypeahead
-                      onSelect={(c) => handleConceptSelect(c, "verb")}
-                    />
-                  }
-                />
+                {/* A period opens on its subject noun phrase; only a nested relative
+                    clause opens on the verb (its subject is the external head). */}
+                {nested ? (
+                  <SlotBox
+                    slot={verbSlot}
+                    concept={undefined}
+                    isActive={activeSlot === "verb"}
+                    onClear={() => handleClear("verb")}
+                    emptyContent={
+                      <VerbTypeahead
+                        onSelect={(c) => handleConceptSelect(c, "verb")}
+                      />
+                    }
+                  />
+                ) : (
+                  <SlotBox
+                    slot={subjectSlot}
+                    concept={undefined}
+                    isActive={activeSlot === "subject"}
+                    onClear={() => handleClear("subject")}
+                    emptyContent={
+                      <SubjectTypeahead
+                        onSelect={(c, opts) =>
+                          handleConceptSelect(c, "subject", opts)
+                        }
+                      />
+                    }
+                  />
+                )}
               </Box>
             ) : (
               <>

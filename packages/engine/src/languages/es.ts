@@ -1,5 +1,18 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
+// share "más"/"menos"; the noun phrase's definite article distinguishes them ("un gato más
+// grande" vs "el gato más grande"). Equality uses the invariant "igual de".
+const ES_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'más', most: 'más', less: 'menos', least: 'menos', equally: 'igual de',
+};
+
+/** Prefix an adjective's degree adverb onto its already-agreed surface ("más grande"). */
+function esDeg(a: ConceptForms, surface: string): string {
+  const d = ES_DEGREE[adjDegree(a)];
+  return d && surface ? `${d} ${surface}` : surface;
+}
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -81,7 +94,7 @@ function esAdj(np: ResolvedNounPhrase): string {
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   return coordinate(
     np.adjectives
-      .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
+      .map((a) => esDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
       .filter(Boolean),
   );
 }
@@ -149,13 +162,25 @@ function routeHead(c: ResolvedComplement, plural: boolean): string {
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+function complementsPhrase(
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  subjectForms: Record<string, string>,
+): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // Subject complement: a predicate adjective agrees with the *subject* ("se vuelve
+      // una leyenda" but "parece cansada"); a predicate noun keeps its own article, no
+      // preposition ("se vuelve una leyenda").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') {
+          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+        }
+        return withRelative(nounPhrase(f, esAdj(c.phrase)), c.phrase);
+      }
       // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
       // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
       if (type === 'cause' && f['person']) {
@@ -280,7 +305,7 @@ function predicateText(
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
   const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
-  const complementsText = complementsPhrase(complements);
+  const complementsText = complementsPhrase(complements, subjectForms);
   return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -291,6 +316,8 @@ export const spanishEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
     const subjectText = withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
+    // Verbless period: a bare noun phrase ("últimas noticias").
+    if (!phrase.verbPhrase) return subjectText.trim();
     const predicate = predicateText(
       subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
     );

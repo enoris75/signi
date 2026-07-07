@@ -1,5 +1,19 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Degree adverb placed before the adjective. Comparative and relative superlative share
+// "plus"/"moins"; the noun phrase's definite article distinguishes them ("un chat plus
+// grand" vs "le chat le plus grand" — the second article is an MVP approximation we skip).
+// Equality uses "aussi" ("aussi grand").
+const FR_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'plus', most: 'plus', less: 'moins', least: 'moins', equally: 'aussi',
+};
+
+/** Prefix an adjective's degree adverb onto its surface ("plus grand"). */
+function frDeg(a: ConceptForms, surface: string): string {
+  const d = FR_DEGREE[adjDegree(a)];
+  return d && surface ? `${d} ${surface}` : surface;
+}
 
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
 
@@ -124,9 +138,13 @@ function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[
   const pre: string[] = [];
   const post: string[] = [];
   for (const a of np.adjectives) {
-    const word = a.forms['base'] ?? '';
+    const word = frDeg(a, a.forms['base'] ?? '');
     if (!word) continue;
-    (PRENOMINAL.has(a.conceptId) ? pre : post).push(word);
+    // A comparative/superlative adjective is postnominal in French ("le chat plus grand"),
+    // even when its plain form would precede the noun — this also avoids elision artefacts
+    // ("l'aussi grand chat").
+    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive';
+    (prenominal ? pre : post).push(word);
   }
   return { pre, post };
 }
@@ -191,6 +209,14 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // Subject complement: a predicate adjective is bare ("semble heureux" — this engine
+      // doesn't inflect adjectives for agreement, so the masculine base is used, matching
+      // its attributive behavior); a predicate noun keeps its own article, no preposition
+      // ("devient une légende").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') return f['base'] ?? '';
+        return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+      }
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
       // (eliding before a vowel); positive "grâce à moi" takes it after "à" (which never
       // elides); negative uses the possessive with "faute" ("par ma faute").
@@ -308,6 +334,8 @@ export const frenchEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
     const subjectText = subjectPhrase(subject);
+    // Verbless period: a bare noun phrase ("dernières nouvelles").
+    if (!phrase.verbPhrase) return subjectText.trim();
     const predicate = predicateText(
       subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
     );

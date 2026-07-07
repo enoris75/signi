@@ -1,5 +1,19 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
+// share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes
+// them ("un gatto più grande" = a bigger cat vs "il gatto più grande" = the biggest), so
+// only the adverb is added here. Equality uses the invariant "ugualmente".
+const IT_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'più', most: 'più', less: 'meno', least: 'meno', equally: 'ugualmente',
+};
+
+/** Prefix an adjective's degree adverb onto its already-agreed surface ("più grande"). */
+function itDeg(a: ConceptForms, surface: string): string {
+  const d = IT_DEGREE[adjDegree(a)];
+  return d && surface ? `${d} ${surface}` : surface;
+}
 
 const VOWEL_START = /^[aeiouàèéìòù]/i;
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */
@@ -218,7 +232,11 @@ function splitAdjectives(np: ResolvedNounPhrase): { pre: ConceptForms[]; post: C
   const pre: ConceptForms[] = [];
   const post: ConceptForms[] = [];
   for (const a of np.adjectives) {
-    (PRENOMINAL.has(a.conceptId) ? pre : post).push(a);
+    // A comparative/superlative adjective is postnominal in Italian ("il gatto più grande"),
+    // even when its plain form would precede the noun — this also avoids article-elision
+    // artefacts ("l'ugualmente grande gatto").
+    const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive';
+    (prenominal ? pre : post).push(a);
   }
   return { pre, post };
 }
@@ -233,7 +251,8 @@ function prenominalChain(pre: ConceptForms[], gender: string, plural: boolean, n
   for (let i = pre.length - 1; i >= 0; i--) {
     const surf = prenominalSurface(pre[i], gender, plural, next);
     if (surf) {
-      out.unshift(surf);
+      // Chain agreement off the bare surface, but emit it with any degree adverb prepended.
+      out.unshift(itDeg(pre[i], surf));
       next = surf;
     }
   }
@@ -269,7 +288,7 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const lead = preSurfaces[0] ?? noun;
   const core = joinArt(headFor(plural, lead), joinWords([...preSurfaces, noun]));
   const postStr = post
-    .map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural))
+    .map((a) => itDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
     .filter(Boolean)
     .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
   const postAdj = postStr ? `${core} ${postStr}` : core;
@@ -319,13 +338,25 @@ function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+function complementsPhrase(
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  subjectForms: Record<string, string>,
+): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // Subject complement: a predicate adjective agrees with the *subject* ("sembra
+      // stanca"); a predicate noun keeps its own article, no preposition ("diventa una
+      // leggenda").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') {
+          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+        }
+        return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+      }
       // A pronoun cause: positive "grazie a me/te/lui…" uses the tonic pronoun; neutral and
       // negative take the possessive, agreeing with feminine "causa"/"colpa" — "a causa mia",
       // "per colpa mia" — NOT "a causa di me" (which sounds off, like "*per colpa di me").
@@ -393,7 +424,7 @@ function predicateText(
     ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
     : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  const complementsText = complementsPhrase(complements);
+  const complementsText = complementsPhrase(complements, subjectForms);
   return [negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -419,6 +450,8 @@ export const italianEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const { subject } = phrase;
     const subjectText = subjectPhrase(subject);
+    // Verbless period: a bare noun phrase ("ultime notizie").
+    if (!phrase.verbPhrase) return subjectText.trim();
     const predicate = predicateText(
       subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
     );

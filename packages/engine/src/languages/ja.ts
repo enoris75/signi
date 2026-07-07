@@ -1,5 +1,13 @@
-import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { adjDegree, causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
+// is largely contextual (より marks the standard); these adverbs are the closest MVP. 'less'
+// (あまり) and 'least' properly pair with a negative predicate, which is out of scope here —
+// 'least' reuses 最も as an approximation.
+const JA_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'もっと', most: '最も', less: 'あまり', least: '最も', equally: '同じくらい',
+};
 
 /** A segment for one word: attach the furigana reading only when it differs from the surface. */
 function wordSeg(surface: string, reading?: string): RubySegment {
@@ -15,6 +23,10 @@ const PARTICLE: Record<ComplementType, string> = {
   // Cause/reason: the neutral compound postposition "のために"; the sentiment swaps it (see
   // CAUSE_PARTICLE). Kept here for the type — cause is overridden per-sentiment below.
   cause: 'のために',
+  // Subject complement: a noun/na-adjective predicate takes に (伝説になる); an i-adjective
+  // takes its adverbial く-form with no particle (楽しくなる). Handled specially in
+  // complementSegs — this に is the noun/na-adjective default.
+  predicative: 'に',
 };
 
 /**
@@ -69,6 +81,9 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     const base = a.forms['base'] ?? '';
     if (!base) continue;
     if (adjSegs.length) adjSegs.push({ t: ' ' });
+    // Prenominal degree adverb bound directly to its adjective (もっと大きい), no space.
+    const deg = JA_DEGREE[adjDegree(a)];
+    if (deg) adjSegs.push({ t: deg });
     adjSegs.push(wordSeg(base, a.forms['reading']));
   }
   core.push(...adjSegs);
@@ -84,7 +99,7 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   if (!rel) return core;
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject ? [...npSegs(rel.subject), { t: 'が' }] : [];
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements, true), ...core];
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements), ...core];
 }
 
 /**
@@ -121,6 +136,31 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
   for (const type of COMPLEMENT_RENDER_ORDER) {
     const c = complements[type];
     if (!c) continue;
+    // Subject complement (of なる/見える etc.), by head type:
+    //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
+    //  · na-adjective (…な) → drop the attributive な, then に (幸せな → "幸せになる")
+    //  · noun → 〜に (伝説 → "伝説になる")
+    // The furigana reading tracks the same trailing-mora substitution.
+    if (type === 'predicative') {
+      const f = c.phrase.head.forms;
+      const base = f['base'] ?? '';
+      const reading = f['reading'];
+      const isAdj = f['role'] === 'adjective';
+      if (isAdj && base.endsWith('い')) {
+        segs.push(wordSeg(
+          `${base.slice(0, -1)}く`,
+          reading?.endsWith('い') ? `${reading.slice(0, -1)}く` : reading,
+        ));
+      } else if (isAdj && base.endsWith('な')) {
+        segs.push(
+          wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading),
+          { t: 'に' },
+        );
+      } else {
+        segs.push(...npSegs(c.phrase), { t: 'に' });
+      }
+      continue;
+    }
     segs.push(...npSegs(c.phrase));
     if (type === 'route') {
       const spec = pathSpecifier(c);
@@ -159,6 +199,8 @@ function predicateSegs(
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
 function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
+  // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
+  if (!phrase.verbPhrase) return npSegs(phrase.subject);
   const segs: RubySegment[] = [];
   segs.push(...npSegs(phrase.subject), { t: 'は' });
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements));

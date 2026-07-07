@@ -29,7 +29,8 @@ function SentenceTranslation({
   total: number;
 }) {
   const { data: translations, isLoading, isError } = useTranslation(plan);
-  const isReady = Boolean(plan.subject?.concept && plan.verbPhrase?.verb);
+  // A subject alone is enough to translate — a verbless period is a bare noun phrase.
+  const isReady = Boolean(plan.subject?.concept);
   return (
     <Box sx={{ mb: 3 }}>
       {total > 1 && (

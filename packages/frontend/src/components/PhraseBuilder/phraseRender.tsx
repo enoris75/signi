@@ -1,6 +1,6 @@
 import React from "react";
 import { Box, Tooltip, type SxProps, type Theme } from "@mui/material";
-import { MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   ConceptSelectOpts,
   GenderSlot,
@@ -69,6 +69,8 @@ export interface PhraseRenderContext {
   handleCycleDefiniteness: (which: NounKey) => void;
   // Cycle the semantic relation of an attributive-noun modifier sitting in an adjective slot.
   handleCycleModifierRelation: (slotKey: SlotKey) => void;
+  // Cycle the comparative degree of a real adjective sitting in an adjective slot.
+  handleCycleDegree: (slotKey: SlotKey) => void;
   handleToggleNegative: () => void;
   handleCycleTense: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
@@ -107,6 +109,7 @@ export function SlotNode({
     handleClear,
     handleConceptSelect,
     handleCycleModifierRelation,
+    handleCycleDegree,
     nounPhrase,
     onBoxRef,
     dimmedKeys,
@@ -129,9 +132,15 @@ export function SlotNode({
   // carries a semantic relation (feature / purpose / material) that the Romance engines
   // turn into a preposition. Show a small cycling chip to pick it.
   const held = selection[slot.key];
-  const isNounModifier = slot.key.includes("Adjective") && held?.role === "noun";
+  const isAdjectiveSlot = slot.key.includes("Adjective");
+  const isNounModifier = isAdjectiveSlot && held?.role === "noun";
+  // A real adjective ("beautiful") in an adjective slot carries a comparative degree
+  // (more / most / less / least / equally); a noun modifier ("sail") carries a relation
+  // instead. The two are mutually exclusive, so at most one chip shows in the footer.
+  const isRealAdjective = isAdjectiveSlot && held?.role === "adjective";
   const relation: ModifierRelation =
     (selection.modifierRelations?.[slot.key] as ModifierRelation | undefined) ?? "feature";
+  const degree: Degree = selection.adjectiveDegrees?.[slot.key] ?? "positive";
   const relationChip = isNounModifier ? (
     <Tooltip title={`Relation: ${MODIFIER_RELATION_LABELS[relation]} — click to change`}>
       <Box
@@ -161,6 +170,40 @@ export function SlotNode({
         }}
       >
         {relation}
+      </Box>
+    </Tooltip>
+  ) : undefined;
+  // Same chip styling as the relation chip; shown for a real adjective. A positive
+  // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
+  const degreeChip = isRealAdjective ? (
+    <Tooltip title={`Degree: ${DEGREE_LABELS[degree]} — click to change`}>
+      <Box
+        component="span"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={(e) => {
+          e.stopPropagation();
+          handleCycleDegree(slot.key);
+        }}
+        sx={{
+          display: "inline-block",
+          mt: 0.5,
+          px: 0.75,
+          py: 0.1,
+          borderRadius: 1,
+          border: "1px solid",
+          borderColor: "divider",
+          bgcolor: "background.paper",
+          cursor: "pointer",
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.06em",
+          textTransform: "uppercase",
+          color: degree === "positive" ? "text.disabled" : "text.secondary",
+          "&:hover": { borderColor: "text.secondary" },
+        }}
+      >
+        {degree === "positive" ? "±" : degree}
       </Box>
     </Tooltip>
   ) : undefined;
@@ -207,7 +250,7 @@ export function SlotNode({
           onSelect: handleConceptSelect,
           nounSubject: nounPhrase,
         })}
-        footer={relationChip}
+        footer={relationChip ?? degreeChip}
       />
     </Box>
   );

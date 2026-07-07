@@ -13,6 +13,7 @@ import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
+import LinkIcon from "@mui/icons-material/Link";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
@@ -51,6 +52,7 @@ export const conceptLabel = (c?: Concept) =>
     : undefined;
 
 const complementIcons: Record<ComplementType, ReactNode> = {
+  predicative: <LinkIcon sx={iconSx} />,
   locative: <PlaceIcon sx={iconSx} />,
   direction: <ArrowForwardIcon sx={iconSx} />,
   source: <ArrowBackIcon sx={iconSx} />,

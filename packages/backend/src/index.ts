@@ -129,8 +129,10 @@ app.get('/api/concepts', (req, res) => {
 
 app.post('/api/translate', (req, res) => {
   const body = req.body as TranslateRequest;
-  if (!body?.plan?.subject?.concept || !body?.plan?.verbPhrase?.verb) {
-    res.status(400).json({ error: 'plan.subject.concept and plan.verbPhrase.verb are required' });
+  // A subject is always required; the verb phrase is optional (a verbless period is a
+  // bare noun phrase, e.g. a newspaper title like "breaking news").
+  if (!body?.plan?.subject?.concept) {
+    res.status(400).json({ error: 'plan.subject.concept is required' });
     return;
   }
 

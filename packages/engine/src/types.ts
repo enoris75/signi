@@ -1,4 +1,4 @@
-import type { CauseSentiment, ComplementType, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { CauseSentiment, ComplementType, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -57,7 +57,8 @@ export interface ResolvedComplement {
 
 export interface ResolvedPhrase {
   subject: ResolvedNounPhrase;
-  verbPhrase: ResolvedVerbPhrase;
+  // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
+  verbPhrase?: ResolvedVerbPhrase;
   directObject?: ResolvedNounPhrase;
   indirectObject?: ResolvedNounPhrase;
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
@@ -71,6 +72,15 @@ export function pathSpecifier(c: ResolvedComplement): PathSpecifier {
 /** The affective stance chosen for a `cause` complement; defaults to `neutral`. */
 export function causeSentiment(c: ResolvedComplement): CauseSentiment {
   return c.specifiers?.find((s) => s.kind === 'sentiment')?.value ?? 'neutral';
+}
+
+/**
+ * The comparative degree threaded onto a resolved adjective's forms (see the translator).
+ * Absent ⇒ the plain, unmarked `positive` form. Each engine maps this to its own degree
+ * words / morphology.
+ */
+export function adjDegree(a: ConceptForms): Degree {
+  return (a.forms['degree'] as Degree | undefined) ?? 'positive';
 }
 
 /** Join the base forms of any number of adjectives into one string ("big red"). */

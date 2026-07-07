@@ -25,7 +25,7 @@ export function SubjectTypeahead({
 }) {
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
-  const [tab, setTab] = useState<"pronoun" | "noun">("pronoun");
+  const [tab, setTab] = useState<"pronoun" | "noun">("noun");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);

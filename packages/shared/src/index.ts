@@ -68,6 +68,28 @@ export const MODIFIER_RELATION_LABELS: Record<ModifierRelation, string> = {
 };
 
 /**
+ * Comparative degree of an adjective — an orthogonal grammatical feature layered on
+ * the adjective word (distinct from *which* adjective is chosen). `positive` is the
+ * plain, unmarked form (the default); the rest are the periphrastic degrees. Applies
+ * only to real adjectives, never to attributive noun-modifiers.
+ *   more/less   — comparative superiority / inferiority ("more beautiful")
+ *   most/least  — (relative) superlative superiority / inferiority ("the most beautiful")
+ *   equally     — equality ("equally beautiful")
+ */
+export type Degree = 'positive' | 'more' | 'most' | 'less' | 'least' | 'equally';
+
+export const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', 'equally'];
+
+export const DEGREE_LABELS: Record<Degree, string> = {
+  positive: '—',
+  more: 'More',
+  most: 'Most',
+  less: 'Less',
+  least: 'Least',
+  equally: 'Equally',
+};
+
+/**
  * Verb tense the phrase is rendered in. Only the simple tenses today; the
  * imperfect/continuous aspect is reserved for a later split of `past`.
  */
@@ -89,21 +111,29 @@ export const TENSE_LABELS: Record<Tense, string> = {
  *
  * `locative`/`direction`/`source`/`route` are the motion/place family; `cause`
  * is the reason/motive adjunct — "the boy cried **because of the dog**"
- * (a causa di / à cause de / wegen / por causa de …).
+ * (a causa di / à cause de / wegen / por causa de …). `predicative` is the subject
+ * complement of a copular/linking verb — the predicate nominative or predicate
+ * adjective that describes the *subject*: "she becomes **a legend**", "he seems
+ * **happy**". Unlike the others it takes no adposition; a noun head keeps its own
+ * article (predicate nominative, German nominative case) and an adjective head agrees
+ * with the subject (Romance) — English/German predicate adjectives are uninflected.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'predicative';
 
 /** Canonical UI order (matches how complements are presented to the user). */
-export const COMPLEMENT_TYPES: ComplementType[] = ['locative', 'direction', 'source', 'route', 'cause'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'locative', 'direction', 'source', 'route', 'cause'];
 
 /**
- * Order in which active complements are rendered within a sentence. Follows the
- * natural path reading "from X to Y through Z", with the static locative next and
- * the causal adjunct ("because of …") last.
+ * Order in which active complements are rendered within a sentence. The subject
+ * complement leads (it sits right after the verb: "becomes **a legend** in the house"),
+ * then the motion path "from X to Y through Z", the static locative, and the causal
+ * adjunct ("because of …") last. In Japanese (SOV) everything precedes the verb, so the
+ * subject complement's になる/く-form ends up adjacent to the verb regardless.
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
+  predicative: 'Subject Complement',
   locative: 'Locative',
   direction: 'Direction',
   source: 'Source',
@@ -172,7 +202,7 @@ export interface Concept {
   gendered?: boolean;           // noun has distinct masc/fem surface forms
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
-  complements?: ComplementType[]; // motion/locative complements a verb licenses
+  complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
 }
 
 /** A noun used attributively to modify a head noun, plus its semantic relation. */
@@ -194,6 +224,12 @@ export interface NounPhrase {
   definiteness?: Definiteness;
   /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
   adjectives?: string[];
+  /**
+   * Comparative degree per adjective, index-aligned with `adjectives` (a missing or
+   * 'positive' entry is the plain form). Only real adjectives carry a degree; attributive
+   * noun-modifiers never do. Threaded into each resolved adjective's `forms['degree']`.
+   */
+  adjectiveDegrees?: Degree[];
   /**
    * Nouns used attributively ("**sail** boat"), each with the semantic relation it bears
    * to the head. Distinct from `adjectives` (a noun-modifier doesn't inflect/agree — it is
@@ -273,7 +309,10 @@ export interface LexicalEntry {
 
 export interface PhrasePlan {
   subject: NounPhrase;
-  verbPhrase: VerbPhrase;
+  // Optional: a verbless period is a bare noun phrase (a newspaper-title-style fragment
+  // like "breaking news"). When absent the engines render just the subject; objects and
+  // complements, which hang off the verb, are meaningless without it.
+  verbPhrase?: VerbPhrase;
   directObject?: NounPhrase;
   indirectObject?: NounPhrase;
   complements?: Partial<Record<ComplementType, Complement>>;

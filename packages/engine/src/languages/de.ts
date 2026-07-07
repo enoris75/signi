@@ -1,5 +1,24 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
-import { causeSentiment, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+
+// German comparison is synthetic: the comparative adds "-er" and the superlative "-st" to
+// the stem *before* the case/gender declension ending ("schön" → "schöner-e" / "schönst-e",
+// the superlative leaning on the noun's definite article). Inferiority/equality stay
+// periphrastic ("weniger schön", "gleich schön"). MVP: ignores umlaut and irregular stems.
+function deDegStem(a: ConceptForms, base: string): string {
+  const d = adjDegree(a);
+  if (d === 'more') return `${base}er`;
+  if (d === 'most') return `${base}st`;
+  return base;
+}
+/** Invariant adverb placed before the declined adjective for the periphrastic degrees. */
+function deDegPrefix(a: ConceptForms): string {
+  const d = adjDegree(a);
+  if (d === 'less') return 'weniger ';
+  if (d === 'least') return 'am wenigsten ';
+  if (d === 'equally') return 'gleich ';
+  return '';
+}
 
 type Case = 'nom' | 'acc' | 'dat';
 type Slot = 'masc' | 'fem' | 'neut' | 'plural';
@@ -56,9 +75,14 @@ function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite
   const gender = f['gender'] ?? 'neut';
   const plural = (f['number'] ?? f['count']) === 'plural';
   return np.adjectives
-    .map((a) => a.forms['base'])
-    .filter((b): b is string => Boolean(b))
-    .map((b) => declineAdj(b, _case, gender, plural, definiteness))
+    .map((a) => {
+      const base = a.forms['base'];
+      if (!base) return '';
+      // Synthesise the comparative/superlative stem, decline it, then prefix any
+      // periphrastic degree adverb ("weniger schöne", "am wenigsten schöne").
+      return `${deDegPrefix(a)}${declineAdj(deDegStem(a, base), _case, gender, plural, definiteness)}`;
+    })
+    .filter(Boolean)
     .join(' ');
 }
 
@@ -233,6 +257,13 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const prep = causeSentiment(c) === 'positive' ? 'dank' : 'wegen';
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
+      // Subject complement: a German predicate adjective is uninflected ("wird müde",
+      // "scheint groß" — no declension endings); a predicate noun takes the *nominative*
+      // case, not the dative the other complements use ("wird eine Legende").
+      if (type === 'predicative') {
+        if (f['role'] === 'adjective') return f['base'] ?? '';
+        return nounPhrase(c.phrase, 'nom');
+      }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route → path preposition (+ its case); locative/direction/source → two-way
@@ -312,9 +343,11 @@ export const germanEngine: LanguageEngine = {
   language: 'de',
   render(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
+    const subjectText = subjectPhrase(subject);
+    // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
+    if (!verbPhrase) return subjectText.trim();
     const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
 
-    const subjectText = subjectPhrase(subject);
     // Future is periphrastic: finite "werden" sits in the V2 slot and the
     // infinitive closes the clause ("ich werde das Brot essen"). Present/past
     // put the single finite verb in V2 with no tail.
