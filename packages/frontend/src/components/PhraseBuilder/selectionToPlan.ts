@@ -52,7 +52,7 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
   return {
     concept: concept.id,
     number: field<"singular" | "plural">(sel, `${which}Number`),
-    gender: field<"masc" | "fem">(sel, `${which}Gender`),
+    gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject carry a definiteness field today; elsewhere this is
     // undefined and the engines default to 'definite'.
     definiteness: field<Definiteness>(sel, `${which}Definiteness`),
@@ -80,10 +80,14 @@ function buildComplements(
     if (!phrase) continue;
     out[type] = {
       phrase,
+      // Route carries a path specifier; cause carries a sentiment specifier (omit the
+      // default 'neutral' — the engine assumes it when absent).
       specifiers:
         type === "route" && sel.routeSpecifier
           ? [{ kind: "path", value: sel.routeSpecifier }]
-          : undefined,
+          : type === "cause" && sel.causeSentiment && sel.causeSentiment !== "neutral"
+            ? [{ kind: "sentiment", value: sel.causeSentiment }]
+            : undefined,
     };
   }
   return Object.keys(out).length > 0 ? out : undefined;

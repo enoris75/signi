@@ -130,6 +130,25 @@ export const PATH_SPECIFIER_LABELS: Record<PathSpecifier, string> = {
   in_front_of: 'in front of',
 };
 
+/**
+ * The affective stance a `cause` adjunct takes toward its reason — the difference
+ * between blaming, crediting, and merely stating a cause. English barely marks it,
+ * but most languages pick a different connector per stance:
+ *   neutral  ("because of")   · a causa di · à cause de · por causa de · wegen · のために
+ *   negative ("through … fault") · per colpa di · par la faute de · por culpa de · のせいで
+ *   positive ("thanks to")    · grazie a · grâce à · gracias a · dank · のおかげで
+ * Only the `cause` complement carries it; it defaults to `neutral`.
+ */
+export type CauseSentiment = 'neutral' | 'negative' | 'positive';
+
+export const CAUSE_SENTIMENTS: CauseSentiment[] = ['neutral', 'negative', 'positive'];
+
+export const CAUSE_SENTIMENT_LABELS: Record<CauseSentiment, string> = {
+  neutral: 'Neutral — because of',
+  negative: 'Negative — fault of',
+  positive: 'Positive — thanks to',
+};
+
 export const LANGUAGES: Record<LanguageCode, string> = {
   en: 'English',
   it: 'Italian',
@@ -169,7 +188,8 @@ export interface NounModifier {
 export interface NounPhrase {
   concept: string;                 // core noun or pronoun id
   number?: 'singular' | 'plural';
-  gender?: 'masc' | 'fem';
+  // 'neut' is only meaningful for a 3rd-person pronoun head ("it"); noun heads use masc/fem.
+  gender?: 'masc' | 'fem' | 'neut';
   /** Determiner to render with; defaults to 'definite'. Ignored for pronoun heads. */
   definiteness?: Definiteness;
   /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
@@ -228,11 +248,13 @@ export interface VerbPhrase {
 }
 
 /**
- * A specifier attached to a complement. Discriminated by `kind`; today the only
- * kind is `path` (the route complement's spatial relation), but new specifier
- * families can be added as further members of the union.
+ * A specifier attached to a complement. Discriminated by `kind`: `path` is the route
+ * complement's spatial relation, `sentiment` is the cause complement's affective stance
+ * (blame / credit / neutral). New specifier families can be added as further members.
  */
-export type Specifier = { kind: 'path'; value: PathSpecifier };
+export type Specifier =
+  | { kind: 'path'; value: PathSpecifier }
+  | { kind: 'sentiment'; value: CauseSentiment };
 
 /**
  * A complement: a noun phrase plus zero or more specifiers. Not every complement
@@ -304,6 +326,18 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  */
 export const SAVED_PHRASE_VERSION = 1;
 
+/**
+ * The grain of a saved workspace:
+ *  - `period` — a single clause (verb phrase + subject + objects + complements, plus any
+ *    nested possessors). One container, no cross-container links. Loaded *additively* into
+ *    a new container.
+ *  - `phrase` — a whole workspace: several periods joined by subordinate (relative) clauses,
+ *    with their links. Loaded by *replacing* the current workspace.
+ */
+export type SavedPhraseKind = 'period' | 'phrase';
+
+export const SAVED_PHRASE_KINDS: SavedPhraseKind[] = ['period', 'phrase'];
+
 /** A phrase selection with every Concept replaced by its id string. Structurally open — the
  *  frontend owns the exact key set (it evolves), so shared keeps it a loose record. */
 export type SerializedSelection = { [key: string]: unknown };
@@ -329,6 +363,7 @@ export interface SerializedWorkspace {
 export interface SavedPhrase {
   format: typeof SAVED_PHRASE_FORMAT;
   version: number;
+  kind: SavedPhraseKind;         // 'period' (one clause) or 'phrase' (whole workspace)
   savedAt: string;               // ISO-8601 timestamp
   name?: string;
   workspace: SerializedWorkspace;
@@ -341,6 +376,7 @@ export interface SavedPhrase {
 /** Request body for creating a saved phrase. */
 export interface SavePhraseRequest {
   name: string;
+  kind: SavedPhraseKind;
   workspace: SerializedWorkspace;
 }
 
@@ -348,6 +384,7 @@ export interface SavePhraseRequest {
 export interface SavedPhraseSummary {
   id: string;
   name: string;
+  kind: SavedPhraseKind;
   author: string;
   version: number;
   createdAt: string;

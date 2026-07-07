@@ -1,12 +1,16 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Box, Paper, Typography, IconButton } from "@mui/material";
+import { Box, Paper, Typography, IconButton, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
+import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import {
+  COMPLEMENT_LABELS,
   COMPLEMENT_TYPES,
   DEFINITENESS,
   MODIFIER_RELATIONS,
   TENSES,
   type Concept,
+  type CauseSentiment,
   type ComplementType,
   type Definiteness,
   type PathSpecifier,
@@ -14,6 +18,7 @@ import {
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
+  ConceptSelectOpts,
   GenderSlot,
   NounAddress,
   NounKey,
@@ -37,7 +42,13 @@ import {
 } from "./slots.ts";
 import { applyConceptSelect, applyClear } from "./phraseReducers.ts";
 import { buildSatellites, conceptLabel, type Satellite } from "./satellites.tsx";
-import { buildGraph } from "./graph.ts";
+import {
+  buildGraph,
+  PIX_PAD_H,
+  PIX_PAD_TOP,
+  PIX_PAD_BOT,
+  ROUTE_PAD_TOP,
+} from "./graph.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
@@ -61,6 +72,9 @@ interface PhraseBuilderProps {
   // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
   relativeLabel?: string;
   onRemove?: () => void;
+  // Top-level only: save just this clause (a "period") to the saved-phrase store. Shown as
+  // a small icon in the main-clause header. Undefined for nested (possessor/relative) builders.
+  onSave?: () => void;
   // Top-level only: the word-palette overlay's open state, lifted to the page
   // header so a control there can toggle it. The panel reports its own close.
   wordsPanelOpen?: boolean;
@@ -178,6 +192,7 @@ export function PhraseBuilder({
   head,
   relativeLabel,
   onRemove,
+  onSave,
   wordsPanelOpen = false,
   onWordsPanelClose,
   binding,
@@ -237,11 +252,26 @@ export function PhraseBuilder({
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
-  function handleConceptSelect(concept: Concept, targetSlot?: SlotKey) {
+  function handleConceptSelect(
+    concept: Concept,
+    targetSlot?: SlotKey,
+    opts?: ConceptSelectOpts,
+  ) {
     const slot = targetSlot ?? activeSlot;
     if (!slot) return;
 
-    onPhraseUpdate((prev) => applyConceptSelect(prev, slot, concept));
+    onPhraseUpdate((prev) => {
+      const next = applyConceptSelect(prev, slot, concept);
+      // The pronoun chooser commits its plurality/gender decision alongside the
+      // concept; override the defaults applyConceptSelect seeded.
+      if (opts?.number !== undefined)
+        (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] =
+          opts.number as never;
+      if (opts?.gender !== undefined)
+        (next as PhraseSelection)[`${slot}Gender` as keyof PhraseSelection] =
+          opts.gender as never;
+      return next;
+    });
 
     // Auto-advance to next empty slot (only among the main, always-visible slots)
     let slots = visibleSlots;
@@ -334,10 +364,15 @@ export function PhraseBuilder({
 
   function handleToggleGender(which: GenderSlot) {
     const key = `${which}Gender` as keyof PhraseSelection;
-    onPhraseUpdate((prev) => ({
-      ...prev,
-      [key]: prev[key] === "fem" ? "masc" : "fem",
-    }));
+    onPhraseUpdate((prev) => {
+      // Pronouns distinguish three genders in the 3rd person (he/she/it); nouns only two.
+      const concept = prev[which] as Concept | undefined;
+      const cycle: ("masc" | "fem" | "neut")[] =
+        concept?.role === "pronoun" ? ["masc", "fem", "neut"] : ["masc", "fem"];
+      const cur = (prev[key] as "masc" | "fem" | "neut") ?? "masc";
+      const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
+      return { ...prev, [key]: next };
+    });
   }
 
   function handleToggleNegative() {
@@ -378,6 +413,11 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => ({ ...prev, routeSpecifier: spec }));
   }
 
+  // Set the cause complement's affective sentiment (neutral / negative / positive).
+  function handleSelectSentiment(sentiment: CauseSentiment) {
+    onPhraseUpdate((prev) => ({ ...prev, causeSentiment: sentiment }));
+  }
+
   const { satellites, shownMap: rawShownMap } = buildSatellites(
     selection,
     revealed,
@@ -404,13 +444,15 @@ export function PhraseBuilder({
     setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   }
 
-  // Re-arrange a dotted box's child nodes into a compact, tidy cluster centered on
-  // the group's current position: adjectives (and the tense chip) on a top row, the
-  // main word in the middle, and the number/gender/adverb/polarity toggles on a
-  // bottom row. Each row is horizontally centered, so the derived bounding box
-  // shrinks to a neat, minimal footprint.
-  function handleRearrangeGroup(nodeKeys: string[]) {
-    if (nodeKeys.length === 0) return;
+  // Row-compact one dotted box's child nodes into a tidy cluster centered on
+  // `center` (% coords): adjectives (and the tense chip) on a top row, the main word
+  // in the middle, and the number/gender/adverb/polarity toggles on a bottom row.
+  // Each row is horizontally centered, so the group's derived bounding box shrinks to
+  // a neat, minimal footprint. Returns the new positions for just this group's keys.
+  function tidyGroupPositions(
+    nodeKeys: string[],
+    center: { x: number; y: number },
+  ): Record<string, { x: number; y: number }> {
     const clamp = (v: number, lo: number, hi: number) =>
       Math.max(lo, Math.min(hi, v));
     // Convert a comfortable per-node pixel spacing into the % coordinate space.
@@ -427,24 +469,33 @@ export function PhraseBuilder({
         return 1;
       return 0;
     };
+    const rows: Record<number, string[]> = { [-1]: [], 0: [], 1: [] };
+    for (const k of nodeKeys) rows[tierOf(k)].push(k);
+    const out: Record<string, { x: number; y: number }> = {};
+    for (const tier of [-1, 0, 1] as const) {
+      const row = rows[tier];
+      const rowY = clamp(center.y + tier * stepY, 4, 96);
+      const startX = center.x - ((row.length - 1) * stepX) / 2;
+      row.forEach((k, i) => {
+        out[k] = { x: clamp(startX + i * stepX, 2, 98), y: rowY };
+      });
+    }
+    return out;
+  }
+
+  // Re-arrange a single dotted box in place — compacting its child nodes around the
+  // group's own current center.
+  function handleRearrangeGroup(nodeKeys: string[]) {
+    if (nodeKeys.length === 0) return;
     setPositions((prev) => {
       const cur = nodeKeys.map(
         (k) => prev[k] ?? DEFAULT_POSITIONS[k] ?? { x: 50, y: 50 },
       );
-      const cx = cur.reduce((s, p) => s + p.x, 0) / cur.length;
-      const cy = cur.reduce((s, p) => s + p.y, 0) / cur.length;
-      const rows: Record<number, string[]> = { [-1]: [], 0: [], 1: [] };
-      for (const k of nodeKeys) rows[tierOf(k)].push(k);
-      const next = { ...prev };
-      for (const tier of [-1, 0, 1] as const) {
-        const row = rows[tier];
-        const rowY = clamp(cy + tier * stepY, 4, 96);
-        const startX = cx - ((row.length - 1) * stepX) / 2;
-        row.forEach((k, i) => {
-          next[k] = { x: clamp(startX + i * stepX, 2, 98), y: rowY };
-        });
-      }
-      return next;
+      const center = {
+        x: cur.reduce((s, p) => s + p.x, 0) / cur.length,
+        y: cur.reduce((s, p) => s + p.y, 0) / cur.length,
+      };
+      return { ...prev, ...tidyGroupPositions(nodeKeys, center) };
     });
   }
 
@@ -784,6 +835,80 @@ export function PhraseBuilder({
     svgSize,
   });
 
+  // Tidy the whole period: collapse every dotted box down to its main word, then pack
+  // the collapsed boxes into non-overlapping rows in reading order — subject · verb
+  // phrase · direct object · indirect object · complements. One click re-flows the
+  // whole container into a clean grid.
+  function handleTidyPeriod() {
+    if (groupRects.length === 0) return;
+    // Reading order; boxes with a label not listed sort to the end.
+    const order = [
+      "Subject",
+      "Verb Phrase",
+      "Direct Object",
+      "Indirect Object",
+      ...COMPLEMENT_TYPES.map((t) => COMPLEMENT_LABELS[t]),
+    ];
+    const rank = (label: string) => {
+      const i = order.indexOf(label);
+      return i === -1 ? order.length : i;
+    };
+    const boxes = [...groupRects].sort((a, b) => rank(a.label) - rank(b.label));
+
+    // Collapse everything: every group label maps to a COLLAPSIBLE_GROUPS entry, so the
+    // packed footprints below (a single main word) are what actually renders.
+    setCollapsedGroups(
+      Object.fromEntries(boxes.map((g) => [g.label, true])),
+    );
+
+    // A collapsed box wraps just its main word: a fixed width plus the standard
+    // padding — the route box needs extra headroom for its path toolbar. These match
+    // graph.ts exactly, so the packed spacing reproduces the rendered box footprint.
+    const boxW = 2 * PIX_PAD_H;
+    const padTopOf = (g: (typeof boxes)[number]) =>
+      g.removeKey === "route" || g.removeKey === "cause"
+        ? PIX_PAD_TOP + ROUTE_PAD_TOP
+        : PIX_PAD_TOP;
+    const boxHOf = (g: (typeof boxes)[number]) => padTopOf(g) + PIX_PAD_BOT;
+
+    const gap = 20; // gutter between boxes, px
+    const margin = 6;
+    const { w: svgW, h: svgH } = svgSize;
+    // How many equal-width boxes fit across the canvas (at least one per row).
+    const perRow = Math.max(
+      1,
+      Math.floor((svgW - 2 * margin + gap) / (boxW + gap)),
+    );
+    const rows: (typeof boxes)[] = [];
+    for (let i = 0; i < boxes.length; i += perRow)
+      rows.push(boxes.slice(i, i + perRow));
+    const rowHeights = rows.map((row) => Math.max(...row.map(boxHOf)));
+    const totalH =
+      rowHeights.reduce((a, b) => a + b, 0) + gap * (rows.length - 1);
+
+    setPositions((prev) => {
+      const next = { ...prev };
+      // Center the whole stack vertically; center each row horizontally.
+      let boxTop = Math.max(margin, (svgH - totalH) / 2);
+      rows.forEach((row, r) => {
+        const rowW = row.length * boxW + gap * (row.length - 1);
+        let boxLeft = Math.max(margin, (svgW - rowW) / 2);
+        for (const g of row) {
+          // Convert the box's top-left corner back to its main word's center (px → %),
+          // then compact the group around it (only the main word survives collapse).
+          const center = {
+            x: ((boxLeft + PIX_PAD_H) / Math.max(svgW, 1)) * 100,
+            y: ((boxTop + padTopOf(g)) / Math.max(svgH, 1)) * 100,
+          };
+          Object.assign(next, tidyGroupPositions(g.nodeKeys, center));
+          boxLeft += boxW + gap;
+        }
+        boxTop += rowHeights[r] + gap;
+      });
+      return next;
+    });
+  }
+
   // Noun blocks whose possessor panel is currently open (revealed or already filled).
   const openPossessors = NOUN_KEYS.filter(
     (which) => selection[which] && shownMap[`${which}Possessor`],
@@ -815,6 +940,7 @@ export function PhraseBuilder({
     handleToggleNegative,
     handleCycleTense,
     handleSelectSpecifier,
+    handleSelectSentiment,
     handleToggleCollapse,
     handleRearrangeGroup,
     handleRemoveComplement,
@@ -986,24 +1112,54 @@ export function PhraseBuilder({
                   : "start by choosing a verb"}
               </Box>
             </Typography>
-            {onRemove && (
-              <IconButton
-                size="small"
-                onClick={() => {
-                  // Confirm only when there's work to lose; an empty clause deletes silently.
-                  if (
-                    hasContent &&
-                    !window.confirm("Remove this main clause and everything in it?")
-                  )
-                    return;
-                  onRemove();
-                }}
-                aria-label="Remove main clause"
-                sx={{ p: 0.25 }}
-              >
-                <CloseIcon sx={{ fontSize: 15 }} />
-              </IconButton>
-            )}
+            <Box sx={{ display: "flex", alignItems: "center" }}>
+              {groupRects.length > 0 && (
+                <Tooltip title="Tidy up this period">
+                  <IconButton
+                    size="small"
+                    onClick={handleTidyPeriod}
+                    aria-label="Tidy up this period"
+                    sx={{ p: 0.25 }}
+                  >
+                    <AutoFixHighIcon sx={{ fontSize: 15 }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {onSave && (
+                <Tooltip title="Save this period">
+                  <span>
+                    <IconButton
+                      size="small"
+                      onClick={onSave}
+                      // Nothing to save until the clause has content.
+                      disabled={!hasContent}
+                      aria-label="Save this period"
+                      sx={{ p: 0.25 }}
+                    >
+                      <SaveOutlinedIcon sx={{ fontSize: 15 }} />
+                    </IconButton>
+                  </span>
+                </Tooltip>
+              )}
+              {onRemove && (
+                <IconButton
+                  size="small"
+                  onClick={() => {
+                    // Confirm only when there's work to lose; an empty clause deletes silently.
+                    if (
+                      hasContent &&
+                      !window.confirm("Remove this main clause and everything in it?")
+                    )
+                      return;
+                    onRemove();
+                  }}
+                  aria-label="Remove main clause"
+                  sx={{ p: 0.25 }}
+                >
+                  <CloseIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              )}
+            </Box>
           </Box>
         )}
 

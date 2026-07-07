@@ -1,6 +1,7 @@
 import type {
   Concept,
   SavedPhrase,
+  SavedPhraseKind,
   SerializedContainer,
   SerializedSelection,
   SerializedWorkspace,
@@ -121,7 +122,7 @@ export function hydrateWorkspace(
   return { containers, links, missing: [...missing] };
 }
 
-/** Wrap a workspace as a versioned SavedPhrase document (the export-file / DB body). */
+/** Wrap a whole workspace as a versioned `phrase` document (the export-file / DB body). */
 export function toSavedPhrase(
   name: string,
   containers: PhraseContainer[],
@@ -130,10 +131,20 @@ export function toSavedPhrase(
   return {
     format: SAVED_PHRASE_FORMAT,
     version: SAVED_PHRASE_VERSION,
+    kind: "phrase",
     savedAt: new Date().toISOString(),
     name,
     workspace: serializeWorkspace(containers, links),
   };
+}
+
+/**
+ * Serialize a single clause (one container) as a `period` workspace — one container, no
+ * cross-container links. Nested possessors travel inside the selection; subordinate clauses
+ * (which live in *other* containers) are deliberately not included.
+ */
+export function serializePeriod(container: PhraseContainer): SerializedWorkspace {
+  return serializeWorkspace([container], []);
 }
 
 /**
@@ -156,7 +167,9 @@ export function parseSavedPhrase(raw: unknown): SavedPhrase {
   if (!doc.workspace || !Array.isArray(doc.workspace.containers)) {
     throw new Error("Phrase file has no workspace data.");
   }
-  return doc as SavedPhrase;
+  // `kind` was added after v1 files first shipped; treat a missing value as a full phrase.
+  const kind: SavedPhraseKind = doc.kind === "period" ? "period" : "phrase";
+  return { ...(doc as SavedPhrase), kind };
 }
 
 // ── File export / import ─────────────────────────────────────────────────────

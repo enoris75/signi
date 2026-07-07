@@ -11,6 +11,7 @@ import type {
   GrammaticalRole,
   SavePhraseRequest,
   SavedPhrase,
+  SavedPhraseKind,
   SavedPhraseRecord,
   SavedPhraseSummary,
   SavedPhrasesResponse,
@@ -146,6 +147,7 @@ const DEFAULT_AUTHOR = 'system';
 interface SavedPhraseRow {
   id: string;
   name: string;
+  kind: SavedPhraseKind;
   author: string;
   version: number;
   payload: string;
@@ -153,9 +155,13 @@ interface SavedPhraseRow {
   updated_at: string;
 }
 
+const SAVED_PHRASE_COLS =
+  'id, name, kind, author, version, payload, created_at, updated_at';
+
 const toSummary = (r: SavedPhraseRow): SavedPhraseSummary => ({
   id: r.id,
   name: r.name,
+  kind: r.kind,
   author: r.author,
   version: r.version,
   createdAt: r.created_at,
@@ -167,13 +173,23 @@ const toRecord = (r: SavedPhraseRow): SavedPhraseRecord => ({
   workspace: (JSON.parse(r.payload) as SavedPhrase).workspace,
 });
 
-app.get('/api/phrases', (_req, res) => {
+app.get('/api/phrases', (req, res) => {
   const db = getDb();
-  const rows = db
-    .prepare<[], SavedPhraseRow>(
-      'SELECT id, name, author, version, payload, created_at, updated_at FROM saved_phrases ORDER BY updated_at DESC',
-    )
-    .all();
+  // Optional ?kind=period|phrase filter, so the period picker and the phrase picker
+  // each list only their own grain.
+  const kind = req.query['kind'] as string | undefined;
+  const rows =
+    kind === 'period' || kind === 'phrase'
+      ? db
+          .prepare<[string], SavedPhraseRow>(
+            `SELECT ${SAVED_PHRASE_COLS} FROM saved_phrases WHERE kind = ? ORDER BY updated_at DESC`,
+          )
+          .all(kind)
+      : db
+          .prepare<[], SavedPhraseRow>(
+            `SELECT ${SAVED_PHRASE_COLS} FROM saved_phrases ORDER BY updated_at DESC`,
+          )
+          .all();
   const response: SavedPhrasesResponse = { phrases: rows.map(toSummary) };
   res.json(response);
 });
@@ -182,7 +198,7 @@ app.get('/api/phrases/:id', (req, res) => {
   const db = getDb();
   const row = db
     .prepare<[string], SavedPhraseRow>(
-      'SELECT id, name, author, version, payload, created_at, updated_at FROM saved_phrases WHERE id = ?',
+      `SELECT ${SAVED_PHRASE_COLS} FROM saved_phrases WHERE id = ?`,
     )
     .get(req.params.id);
   if (!row) {
@@ -195,6 +211,7 @@ app.get('/api/phrases/:id', (req, res) => {
 app.post('/api/phrases', (req, res) => {
   const body = req.body as SavePhraseRequest;
   const name = body?.name?.trim();
+  const kind: SavedPhraseKind = body?.kind === 'period' ? 'period' : 'phrase';
   if (!name || !body?.workspace || !Array.isArray(body.workspace.containers)) {
     res.status(400).json({ error: 'name and workspace.containers are required' });
     return;
@@ -206,6 +223,7 @@ app.post('/api/phrases', (req, res) => {
   const doc: SavedPhrase = {
     format: SAVED_PHRASE_FORMAT,
     version: SAVED_PHRASE_VERSION,
+    kind,
     savedAt: now,
     name,
     workspace: body.workspace,
@@ -213,13 +231,14 @@ app.post('/api/phrases', (req, res) => {
 
   const db = getDb();
   db.prepare(
-    `INSERT INTO saved_phrases (id, name, author, version, payload, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
-  ).run(id, name, DEFAULT_AUTHOR, SAVED_PHRASE_VERSION, JSON.stringify(doc), now, now);
+    `INSERT INTO saved_phrases (id, name, kind, author, version, payload, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+  ).run(id, name, kind, DEFAULT_AUTHOR, SAVED_PHRASE_VERSION, JSON.stringify(doc), now, now);
 
   const record: SavedPhraseRecord = {
     id,
     name,
+    kind,
     author: DEFAULT_AUTHOR,
     version: SAVED_PHRASE_VERSION,
     createdAt: now,

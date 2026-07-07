@@ -40,6 +40,7 @@ export function applyConceptSelect(
         delete next[`${type}Adjective`];
         delete next[`${type}Adjective2`];
         if (type === "route") delete next.routeSpecifier;
+        if (type === "cause") delete next.causeSentiment;
       }
     }
   }
@@ -126,6 +127,7 @@ export function applyClear(
       delete next[`${type}Adjective2`];
     }
     delete next.routeSpecifier;
+    delete next.causeSentiment;
   }
   if (slot === "subject") {
     delete next.subjectAdjective;
@@ -160,6 +162,7 @@ export function applyClear(
     delete next[`${slot}Adjective` as keyof PhraseSelection];
     delete next[`${slot}Adjective2` as keyof PhraseSelection];
     if (slot === "route") delete next.routeSpecifier;
+    if (slot === "cause") delete next.causeSentiment;
   }
   // Clearing a complement's first adjective drops the chained second one.
   for (const type of COMPLEMENT_TYPES) {

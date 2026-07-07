@@ -3,7 +3,9 @@ import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import CloseIcon from "@mui/icons-material/Close";
+import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import { PhraseBuilder } from "./PhraseBuilder.tsx";
+import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
   NounAddress,
   NounKey,
@@ -88,6 +90,10 @@ export function PhraseWorkspace({
   onWordsPanelClose,
 }: Props) {
   const [pick, setPick] = useState<PickMode>({ active: false });
+  // Period (single-clause) save/load: which container's save dialog is open, and whether
+  // the "add a saved period" picker is open. See PeriodSaveLoad.
+  const [savePeriodId, setSavePeriodId] = useState<string | null>(null);
+  const [loadPeriodOpen, setLoadPeriodOpen] = useState(false);
   const workspaceRef = useRef<HTMLDivElement>(null);
   const boxEls = useRef<Map<string, HTMLElement>>(new Map());
   // The anchor dots the link line snaps to: the source noun's relative-clause control
@@ -307,6 +313,7 @@ export function PhraseWorkspace({
               selection={c.selection}
               onPhraseUpdate={makeContainerUpdate(c.id)}
               onRemove={containers.length > 1 ? () => removeContainer(c.id) : undefined}
+              onSave={() => setSavePeriodId(c.id)}
               // The word palette rides only the first container to avoid ambiguity.
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}
               onWordsPanelClose={onWordsPanelClose}
@@ -315,15 +322,37 @@ export function PhraseWorkspace({
         })}
       </Stack>
 
-      <Button
-        onClick={addContainer}
-        startIcon={<AddIcon />}
-        size="small"
-        variant="outlined"
-        sx={{ mt: 2, textTransform: "none" }}
-      >
-        Add phrase container
-      </Button>
+      <Box sx={{ display: "flex", gap: 1, mt: 2 }}>
+        <Button
+          onClick={addContainer}
+          startIcon={<AddIcon />}
+          size="small"
+          variant="outlined"
+          sx={{ textTransform: "none" }}
+        >
+          Add phrase container
+        </Button>
+        <Button
+          onClick={() => setLoadPeriodOpen(true)}
+          startIcon={<FolderOpenOutlinedIcon />}
+          size="small"
+          variant="text"
+          sx={{ textTransform: "none" }}
+        >
+          Load period
+        </Button>
+      </Box>
+
+      {/* Per-period (single-clause) save + load dialogs. */}
+      <PeriodSaveLoad
+        saveTarget={containers.find((c) => c.id === savePeriodId) ?? null}
+        onCloseSave={() => setSavePeriodId(null)}
+        loadOpen={loadPeriodOpen}
+        onCloseLoad={() => setLoadPeriodOpen(false)}
+        onAppendPeriod={(selection) =>
+          setContainers((cs) => [...cs, { id: uid(), selection }])
+        }
+      />
 
       {/* Pick-mode banner: prompt to click a noun in another container. */}
       {pick.active && (

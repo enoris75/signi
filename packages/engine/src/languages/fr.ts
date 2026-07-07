@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
 
@@ -191,10 +191,21 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // A pronoun cause ("à cause de moi / d'eux / d'elle") takes the disjunctive form after
-      // "de", eliding before a vowel. Only cause accepts a pronoun in the UI today.
+      // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
+      // (eliding before a vowel); positive "grâce à moi" takes it after "à" (which never
+      // elides); negative uses the possessive with "faute" ("par ma faute").
       if (type === 'cause' && f['person']) {
         const disj = f['disjunctive'] ?? f['base'] ?? '';
+        const sent = causeSentiment(c);
+        if (sent === 'positive') return `grâce à ${disj}`;
+        if (sent === 'negative') {
+          const plural = f['number'] === 'plural';
+          const poss =
+            f['person'] === '1' ? (plural ? 'notre' : 'ma') :
+            f['person'] === '2' ? (plural ? 'votre' : 'ta') :
+            plural ? 'leur' : 'sa';
+          return `par ${poss} faute`;
+        }
         return `à cause ${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
       }
       // locative→dans, direction→à (au/aux/à la), source→"loin de" (loin du/des/de la),
@@ -203,12 +214,19 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // l'enfant", not "*à l'enfant"); "vers" doesn't contract with the article. Source is
       // prefixed with the ablative adverb "loin" so it clearly reads as motion away ("je
       // cours loin de l'enfant"); bare "de" reads as a partitive/complement, not departure.
-      // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien").
+      // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien"); the
+      // sentiment swaps the connector — negative "par la faute du chien", positive "grâce au
+      // chien" ("à"-contracted via datPrep).
+      const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? `dans ${defArticle(f, plural, lead)}` :
         type === 'direction' ? (f['animate'] === '1' ? `vers ${defArticle(f, plural, lead)}` : datPrep(f, plural, lead)) :
         type === 'source'    ? `loin ${dePrep(f, plural, lead)}` :
-        type === 'cause'     ? `à cause ${dePrep(f, plural, lead)}` :
+        type === 'cause'     ? (
+          causeSent === 'positive' ? `grâce ${datPrep(f, plural, lead)}` :
+          causeSent === 'negative' ? `par la faute ${dePrep(f, plural, lead)}` :
+          `à cause ${dePrep(f, plural, lead)}`
+        ) :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })

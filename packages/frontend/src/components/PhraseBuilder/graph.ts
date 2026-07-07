@@ -35,13 +35,14 @@ export type GroupRect = {
 type Pt = { x: number; y: number };
 type PosFn = (key: string) => Pt;
 
-// Role-group bounding-rect padding, in SVG pixels.
-const PIX_PAD_H = 80; // left & right — covers widest slot box half-width
-const PIX_PAD_TOP = 35;
-const PIX_PAD_BOT = 40;
-// The route box carries the path-specifier toolbar on its top edge; give it
-// extra headroom so the toolbar clears the ROUTE label.
-const ROUTE_PAD_TOP = 40;
+// Role-group bounding-rect padding, in SVG pixels. Exported so the period "tidy"
+// packer can reproduce a collapsed box's exact footprint when spacing boxes apart.
+export const PIX_PAD_H = 80; // left & right — covers widest slot box half-width
+export const PIX_PAD_TOP = 35;
+export const PIX_PAD_BOT = 40;
+// The route and cause boxes each carry a specifier toolbar on their top edge (path
+// relation / sentiment); give them extra headroom so it clears the box label.
+export const ROUTE_PAD_TOP = 40;
 
 const rectCenter = (r: GroupRect): Pt => ({
   x: r.x + r.width / 2,
@@ -295,7 +296,9 @@ export function buildGraph({
       const minYpct = Math.min(...pts.map((p) => p.y));
       const maxYpct = Math.max(...pts.map((p) => p.y));
       const padTop =
-        g.removeKey === "route" ? PIX_PAD_TOP + ROUTE_PAD_TOP : PIX_PAD_TOP;
+        g.removeKey === "route" || g.removeKey === "cause"
+          ? PIX_PAD_TOP + ROUTE_PAD_TOP
+          : PIX_PAD_TOP;
       const rx = Math.max(0, px(minXpct, svgSize.w) - PIX_PAD_H);
       const ry = Math.max(0, px(minYpct, svgSize.h) - padTop);
       groupRects.push({

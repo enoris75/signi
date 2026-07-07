@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
+import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 /** A segment for one word: attach the furigana reading only when it differs from the surface. */
 function wordSeg(surface: string, reading?: string): RubySegment {
@@ -12,8 +12,20 @@ const PARTICLE: Record<ComplementType, string> = {
   direction: 'へ',
   source: 'から',
   route: 'を',
-  // Cause/reason: the compound postposition "のために" ("because of / for the sake of").
+  // Cause/reason: the neutral compound postposition "のために"; the sentiment swaps it (see
+  // CAUSE_PARTICLE). Kept here for the type — cause is overridden per-sentiment below.
   cause: 'のために',
+};
+
+/**
+ * Cause postposition per sentiment — Japanese marks the stance cleanly: neutral のために
+ * ("for the sake of / because of"), negative のせいで ("owing to … fault"), positive のおかげで
+ * ("thanks to"). All written in kana, so no furigana reading is attached.
+ */
+const CAUSE_PARTICLE: Record<CauseSentiment, string> = {
+  neutral: 'のために',
+  negative: 'のせいで',
+  positive: 'のおかげで',
 };
 
 /** Path relations expressed via a relational noun before を ("橋の下を" = under the bridge). */
@@ -114,7 +126,7 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       const spec = pathSpecifier(c);
       if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
     }
-    segs.push({ t: PARTICLE[type] });
+    segs.push({ t: type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)] : PARTICLE[type] });
   }
   return segs;
 }

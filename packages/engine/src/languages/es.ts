@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { causeSentiment, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
@@ -156,9 +156,21 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // A pronoun cause ("a causa de mí / de él / de ellos") takes the tonic form after bare
-      // "de", with no article (no del contraction). Only cause accepts a pronoun today.
-      if (type === 'cause' && f['person']) return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
+      // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
+      if (type === 'cause' && f['person']) {
+        const sent = causeSentiment(c);
+        if (sent === 'positive') return `gracias a ${f['disjunctive'] ?? f['base'] ?? ''}`;
+        if (sent === 'negative') {
+          const plural = f['number'] === 'plural';
+          const poss =
+            f['person'] === '1' ? (plural ? 'nuestra' : 'mi') :
+            f['person'] === '2' ? (plural ? 'vuestra' : 'tu') :
+            'su';
+          return `por ${poss} culpa`;
+        }
+        return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const a = esAdj(c.phrase);
@@ -169,12 +181,19 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // el niño", not "*al niño"); "hacia" doesn't contract. Source is prefixed with the
       // ablative adverb "lejos" so it reads as motion away ("corro lejos del niño"); bare
       // "de" reads as origin/possession, not departure.
-      // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro").
+      // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro"); the
+      // sentiment swaps the connector — negative "por culpa del perro", positive "gracias al
+      // perro" ("a"-contracted via datPrep).
+      const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
         type === 'locative'  ? `en ${defArticle(f, plural)}` :
         type === 'direction' ? (f['animate'] === '1' ? `hacia ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `lejos ${dePrep(f, plural)}` :
-        type === 'cause'     ? `a causa ${dePrep(f, plural)}` :
+        type === 'cause'     ? (
+          causeSent === 'positive' ? `gracias ${datPrep(f, plural)}` :
+          causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :
+          `a causa ${dePrep(f, plural)}`
+        ) :
         routeHead(c, plural);
       return withRelative(`${head} ${word}${adj}`, c.phrase);
     })

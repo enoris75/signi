@@ -28,7 +28,8 @@ function resolve(conceptId: string, language: string, lookup: LexiconLookup): Co
   return { conceptId, forms: entry ? { ...entry.forms } : {} };
 }
 
-function applyNounGender(forms: Record<string, string>, gender?: 'masc' | 'fem') {
+function applyNounGender(forms: Record<string, string>, gender?: 'masc' | 'fem' | 'neut') {
+  // Only nouns reach here, and nouns are masc/fem — 'neut' is a pronoun-only head gender.
   if (gender !== 'fem' || !forms['fem']) return;
   const plural = forms['number'] === 'plural';
   forms['base']   = plural ? (forms['fem_plural'] ?? forms['fem']) : forms['fem'];
@@ -68,8 +69,8 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     const disj =
       number === 'plural'
         ? head.forms['disjunctive_plural'] ?? head.forms['disjunctive']
-        : head.forms['person'] === '3' && gender === 'fem'
-          ? head.forms['disjunctive_fem'] ?? head.forms['disjunctive']
+        : head.forms['person'] === '3'
+          ? head.forms[`disjunctive_${gender}`] ?? head.forms['disjunctive']
           : head.forms['disjunctive'];
     if (disj) head.forms['disjunctive'] = disj;
   } else {

@@ -1,4 +1,4 @@
-import type { Concept, ComplementType, Definiteness, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+import type { CauseSentiment, Concept, ComplementType, Definiteness, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
 
 
 export interface SlotConfig {
@@ -33,48 +33,51 @@ export interface PhraseSelection {
     subjectAdjective?: Concept;
     subjectAdjective2?: Concept;
     subjectNumber?: "singular" | "plural";
-    subjectGender?: "masc" | "fem";
+    subjectGender?: "masc" | "fem" | "neut";
     // Determiner (the / a / bare) for the subject and direct-object noun phrases.
     subjectDefiniteness?: Definiteness;
     directObjectDefiniteness?: Definiteness;
     directObjectNumber?: "singular" | "plural";
-    directObjectGender?: "masc" | "fem";
+    directObjectGender?: "masc" | "fem" | "neut";
     directObjectAdjective?: Concept;
     directObjectAdjective2?: Concept;
     indirectObjectNumber?: "singular" | "plural";
-    indirectObjectGender?: "masc" | "fem";
+    indirectObjectGender?: "masc" | "fem" | "neut";
     indirectObjectAdjective?: Concept;
     indirectObjectAdjective2?: Concept;
     // Motion/locative complements — each an independent noun phrase, with its
     // own chained adjectives (up to two, matching subjects/objects).
     locative?: Concept;
     locativeNumber?: "singular" | "plural";
-    locativeGender?: "masc" | "fem";
+    locativeGender?: "masc" | "fem" | "neut";
     locativeAdjective?: Concept;
     locativeAdjective2?: Concept;
     direction?: Concept;
     directionNumber?: "singular" | "plural";
-    directionGender?: "masc" | "fem";
+    directionGender?: "masc" | "fem" | "neut";
     directionAdjective?: Concept;
     directionAdjective2?: Concept;
     source?: Concept;
     sourceNumber?: "singular" | "plural";
-    sourceGender?: "masc" | "fem";
+    sourceGender?: "masc" | "fem" | "neut";
     sourceAdjective?: Concept;
     sourceAdjective2?: Concept;
     route?: Concept;
     routeNumber?: "singular" | "plural";
-    routeGender?: "masc" | "fem";
+    routeGender?: "masc" | "fem" | "neut";
     routeAdjective?: Concept;
     routeAdjective2?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
-    // Cause / reason adjunct ("cried because of the dog") — a plain noun phrase, no specifier.
+    // Cause / reason adjunct ("cried because of the dog"). Its one specifier is the
+    // affective sentiment — neutral (because of) / negative (fault of) / positive (thanks to),
+    // selected on the cause dotted box. Defaults to 'neutral' when absent.
     cause?: Concept;
     causeNumber?: "singular" | "plural";
-    causeGender?: "masc" | "fem";
+    causeGender?: "masc" | "fem" | "neut";
     causeAdjective?: Concept;
     causeAdjective2?: Concept;
+    causeSentiment?: CauseSentiment;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
@@ -93,6 +96,14 @@ export interface PhraseSelection {
     sourcePossessor?: PhraseSelection;
     routePossessor?: PhraseSelection;
     causePossessor?: PhraseSelection;
+}
+
+// Extra grammatical settings a picker can commit alongside a concept. The pronoun
+// chooser uses this to place its number/gender decision in one shot (a plain noun
+// pick omits it and lets applyConceptSelect seed the defaults).
+export interface ConceptSelectOpts {
+  number?: "singular" | "plural";
+  gender?: "masc" | "fem" | "neut";
 }
 
 export type NumberSlot = "subject" | "directObject" | "indirectObject" | ComplementType;

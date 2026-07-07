@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type PathSpecifier, type Tense } from '@signi/shared';
-import { npAdj, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { causeSentiment, npAdj, pathSpecifier, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const PREP: Record<ComplementType, string> = {
   locative: 'in',
@@ -113,9 +113,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       if (!c) return '';
       const f = c.phrase.head.forms;
       // A pronoun complement ("because of him/her/them") takes the oblique form with no
-      // article — only the causal adjunct accepts a pronoun in the UI today.
-      if (type === 'cause' && f['person']) return `because of ${f['disjunctive'] ?? f['base'] ?? ''}`;
-      const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
+      // article — only the causal adjunct accepts a pronoun in the UI today. Positive credits
+      // with "thanks to"; English has no distinct neutral/negative connector, so both read
+      // "because of" (the blame sense rides on "because of" itself).
+      if (type === 'cause' && f['person']) {
+        const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
+        return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      }
+      const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
+        : type === 'cause' ? (causeSentiment(c) === 'positive' ? 'thanks to' : 'because of')
+        : PREP[type];
       return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase)}`;
     })
     .filter(Boolean)

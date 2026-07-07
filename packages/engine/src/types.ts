@@ -1,4 +1,4 @@
-import type { ComplementType, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { CauseSentiment, ComplementType, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -66,6 +66,11 @@ export interface ResolvedPhrase {
 /** The path relation chosen for a `route` complement; defaults to `through`. */
 export function pathSpecifier(c: ResolvedComplement): PathSpecifier {
   return c.specifiers?.find((s) => s.kind === 'path')?.value ?? 'through';
+}
+
+/** The affective stance chosen for a `cause` complement; defaults to `neutral`. */
+export function causeSentiment(c: ResolvedComplement): CauseSentiment {
+  return c.specifiers?.find((s) => s.kind === 'sentiment')?.value ?? 'neutral';
 }
 
 /** Join the base forms of any number of adjectives into one string ("big red"). */

@@ -6,12 +6,18 @@ import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import LoopIcon from "@mui/icons-material/Loop";
 import FlipToBackIcon from "@mui/icons-material/FlipToBack";
 import FlipToFrontIcon from "@mui/icons-material/FlipToFront";
+import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt";
+import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
+import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import {
+  CAUSE_SENTIMENTS,
+  CAUSE_SENTIMENT_LABELS,
   Concept,
   DEFINITENESS_LABELS,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
   TENSE_LABELS,
+  type CauseSentiment,
   type Definiteness,
   type PathSpecifier,
   type Tense,
@@ -288,8 +294,10 @@ export function NumberToggleBox({ value }: { value: "singular" | "plural" }) {
   );
 }
 
-export function GenderToggleBox({ value }: { value: "masc" | "fem" }) {
-  return <ToggleBox label="Gender" value={value === "masc" ? "Masc" : "Fem"} />;
+const GENDER_LABELS = { masc: "Masc", fem: "Fem", neut: "Neut" } as const;
+
+export function GenderToggleBox({ value }: { value: "masc" | "fem" | "neut" }) {
+  return <ToggleBox label="Gender" value={GENDER_LABELS[value]} />;
 }
 
 export function DeterminerToggleBox({ value }: { value: Definiteness }) {
@@ -359,6 +367,66 @@ export function SpecifierSelector({
               }}
             >
               {SPECIFIER_ICONS[s]}
+            </IconButton>
+          </Tooltip>
+        );
+      })}
+    </Box>
+  );
+}
+
+const SENTIMENT_ICONS: Record<CauseSentiment, ReactNode> = {
+  neutral: <SentimentNeutralIcon sx={{ fontSize: 15 }} />,
+  negative: <SentimentVeryDissatisfiedIcon sx={{ fontSize: 15 }} />,
+  positive: <SentimentSatisfiedAltIcon sx={{ fontSize: 15 }} />,
+};
+
+// A toolbar of affective stances for the cause complement — neutral (because of),
+// negative (fault of), positive (thanks to), the active one highlighted. Rendered on
+// top of the cause dotted box, mirroring the route's SpecifierSelector.
+export function SentimentSelector({
+  value,
+  onSelect,
+}: {
+  value: CauseSentiment;
+  onSelect: (s: CauseSentiment) => void;
+}) {
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        gap: 0.25,
+        p: 0.25,
+        bgcolor: "background.paper",
+        border: "1px solid",
+        borderColor: "divider",
+        borderRadius: 1.5,
+        boxShadow: 1,
+      }}
+    >
+      {CAUSE_SENTIMENTS.map((s) => {
+        const selected = s === value;
+        return (
+          <Tooltip key={s} title={CAUSE_SENTIMENT_LABELS[s]}>
+            <IconButton
+              size="small"
+              onPointerDown={(e) => e.stopPropagation()}
+              onClick={() => onSelect(s)}
+              sx={{
+                width: 22,
+                height: 22,
+                p: 0,
+                borderRadius: 1,
+                bgcolor: selected ? "warning.main" : "transparent",
+                color: selected ? "common.white" : "text.secondary",
+                transition: "background-color 0.15s, color 0.15s",
+                "&:hover": {
+                  bgcolor: selected ? "warning.dark" : "action.hover",
+                  color: selected ? "common.white" : "warning.main",
+                },
+              }}
+            >
+              {SENTIMENT_ICONS[s]}
             </IconButton>
           </Tooltip>
         );

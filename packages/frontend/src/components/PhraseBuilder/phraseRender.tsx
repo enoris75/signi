@@ -1,7 +1,8 @@
 import React from "react";
 import { Box, Tooltip, type SxProps, type Theme } from "@mui/material";
-import { MODIFIER_RELATION_LABELS, type Concept, type ComplementType, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
+  ConceptSelectOpts,
   GenderSlot,
   NounKey,
   NumberSlot,
@@ -57,7 +58,11 @@ export interface PhraseRenderContext {
   makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
   slotEls: React.MutableRefObject<Map<SlotKey, HTMLElement>>;
   handleSlotClick: (slot: SlotKey) => void;
-  handleConceptSelect: (concept: Concept, targetSlot?: SlotKey) => void;
+  handleConceptSelect: (
+    concept: Concept,
+    targetSlot?: SlotKey,
+    opts?: ConceptSelectOpts,
+  ) => void;
   handleClear: (slot: SlotKey) => void;
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
@@ -67,6 +72,7 @@ export interface PhraseRenderContext {
   handleToggleNegative: () => void;
   handleCycleTense: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
+  handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   // Compact a dotted box's child nodes into a tidy centered cluster.
   handleRearrangeGroup: (nodeKeys: string[]) => void;

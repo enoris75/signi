@@ -1,12 +1,6 @@
 import { useRef, useState } from "react";
 import type { PhrasePlan } from "@signi/shared";
-import {
-  Box,
-  Container,
-  Typography,
-  Alert,
-  Button,
-} from "@mui/material";
+import { Box, Container, Typography, Alert, Button } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
 import {
@@ -144,10 +138,17 @@ export default function App() {
                 mt: 0.5,
               }}
             >
-              Semantic phrase translator · 7 languages
+              Semantic phrase builder
             </Typography>
           </Box>
-          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 1,
+              flexShrink: 0,
+            }}
+          >
             <SavedPhrasesToolbar
               containers={containers}
               links={links}
@@ -174,10 +175,22 @@ export default function App() {
       <Container maxWidth="xl">
         <Box
           ref={splitContainerRef}
-          sx={{ display: "flex", flexWrap: "wrap", alignItems: "flex-start", mb: 3 }}
+          sx={{
+            display: "flex",
+            flexWrap: "wrap",
+            alignItems: "flex-start",
+            mb: 3,
+          }}
         >
           {/* Left: stack of phrase containers + their relative-clause links */}
-          <Box sx={{ width: `${leftWidthPct}%`, flexShrink: 0, minWidth: 0, pr: 1.5 }}>
+          <Box
+            sx={{
+              width: `${leftWidthPct}%`,
+              flexShrink: 0,
+              minWidth: 0,
+              pr: 1.5,
+            }}
+          >
             <PhraseWorkspace
               containers={containers}
               links={links}
@@ -198,11 +211,20 @@ export default function App() {
               const rect = splitContainerRef.current?.getBoundingClientRect();
               if (!rect) return;
               const onMove = (ev: PointerEvent) => {
-                currentPct = Math.max(20, Math.min(100, startPct + ((ev.clientX - startX) / rect.width) * 100));
+                currentPct = Math.max(
+                  20,
+                  Math.min(
+                    100,
+                    startPct + ((ev.clientX - startX) / rect.width) * 100,
+                  ),
+                );
                 setLeftWidthPct(currentPct);
               };
               const onUp = () => {
-                localStorage.setItem("signi:leftWidth", String(Math.round(currentPct * 10) / 10));
+                localStorage.setItem(
+                  "signi:leftWidth",
+                  String(Math.round(currentPct * 10) / 10),
+                );
                 window.removeEventListener("pointermove", onMove);
                 window.removeEventListener("pointerup", onUp);
                 window.removeEventListener("pointercancel", onUp);

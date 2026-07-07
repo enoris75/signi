@@ -212,6 +212,7 @@ function initSchema(db: Database.Database): void {
     CREATE TABLE IF NOT EXISTS saved_phrases (
       id         TEXT PRIMARY KEY,
       name       TEXT NOT NULL,
+      kind       TEXT NOT NULL DEFAULT 'phrase' CHECK (kind IN ('period','phrase')), -- one clause vs a whole workspace
       author     TEXT NOT NULL DEFAULT 'system',
       version    INTEGER NOT NULL,
       payload    TEXT NOT NULL,   -- the full SavedPhrase JSON document
@@ -250,5 +251,14 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('countable')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN countable INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1))');
+  }
+
+  // saved_phrases gained a `kind` column after the table first shipped; backfill it.
+  const savedPhraseCols = db
+    .prepare<[], { name: string }>("PRAGMA table_info(saved_phrases)")
+    .all()
+    .map((c) => c.name);
+  if (savedPhraseCols.length > 0 && !savedPhraseCols.includes('kind')) {
+    db.exec("ALTER TABLE saved_phrases ADD COLUMN kind TEXT NOT NULL DEFAULT 'phrase'");
   }
 }

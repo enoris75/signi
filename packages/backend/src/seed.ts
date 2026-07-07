@@ -59,14 +59,14 @@ const concepts: ConceptSeed[] = [
     description: '3rd Person',
     emoji: '👤',
     forms: {
-      // base = default masc singular; singular_fem and plural stored as extra forms
-      en: { base: 'he',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'she',    plural: 'they',  disjunctive: 'him', disjunctive_fem: 'her',  disjunctive_plural: 'them' },
-      it: { base: 'lui',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei',    plural: 'loro',  disjunctive: 'lui', disjunctive_fem: 'lei',  disjunctive_plural: 'loro' },
-      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   plural: 'ils',   disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_plural: 'eux' },
-      de: { base: 'er',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'sie',    plural: 'sie',   disjunctive: 'ihm', disjunctive_fem: 'ihr',  disjunctive_plural: 'ihnen' },
-      es: { base: 'él',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella',   plural: 'ellos', disjunctive: 'él',  disjunctive_fem: 'ella', disjunctive_plural: 'ellos' },
-      ja: { base: '彼',   person: '3', number: 'singular', gender: 'masc', singular_fem: '彼女',   plural: '彼ら', reading: 'かれ', singular_fem_reading: 'かのじょ', plural_reading: 'かれら' },
-      pt: { base: 'ele',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela',    plural: 'eles',  disjunctive: 'ele', disjunctive_fem: 'ela',  disjunctive_plural: 'eles' },
+      // base = default masc singular; singular_fem/singular_neut and plural stored as extra forms
+      en: { base: 'he',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'she',    singular_neut: 'it',   plural: 'they',  disjunctive: 'him', disjunctive_fem: 'her',  disjunctive_neut: 'it',   disjunctive_plural: 'them' },
+      it: { base: 'lui',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei',    singular_neut: 'esso', plural: 'loro',  disjunctive: 'lui', disjunctive_fem: 'lei',  disjunctive_neut: 'esso', disjunctive_plural: 'loro' },
+      fr: { base: 'il',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'elle',   singular_neut: 'cela', plural: 'ils',   disjunctive: 'lui', disjunctive_fem: 'elle', disjunctive_neut: 'cela', disjunctive_plural: 'eux' },
+      de: { base: 'er',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'sie',    singular_neut: 'es',   plural: 'sie',   disjunctive: 'ihm', disjunctive_fem: 'ihr',  disjunctive_neut: 'ihm',  disjunctive_plural: 'ihnen' },
+      es: { base: 'él',   person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella',   singular_neut: 'ello', plural: 'ellos', disjunctive: 'él',  disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos' },
+      ja: { base: '彼',   person: '3', number: 'singular', gender: 'masc', singular_fem: '彼女',   singular_neut: 'それ', plural: '彼ら', reading: 'かれ', singular_fem_reading: 'かのじょ', singular_neut_reading: 'それ', plural_reading: 'かれら' },
+      pt: { base: 'ele',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela',    singular_neut: 'isso', plural: 'eles',  disjunctive: 'ele', disjunctive_fem: 'ela',  disjunctive_neut: 'isso', disjunctive_plural: 'eles' },
     },
   },
 

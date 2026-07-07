@@ -36,6 +36,7 @@ export function NounPhraseBuilder({
   const gender = selection[`${which}Gender` as keyof PhraseSelection] as
     | "masc"
     | "fem"
+    | "neut"
     | undefined;
   const definiteness = selection[
     `${which}Definiteness` as keyof PhraseSelection

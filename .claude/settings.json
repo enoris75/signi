@@ -37,7 +37,14 @@
       "Bash(echo \"started pid $!\")",
       "Bash(node --input-type=module -e ' *)",
       "Bash(awk 'NR==209' packages/backend/src/db.ts)",
-      "Bash(kill 89508)"
+      "Bash(kill 89508)",
+      "Bash(node -e \"const D=require\\('better-sqlite3'\\); const db=new D\\('packages/backend/signi.db',{readonly:true}\\); console.log\\('rows now:', db.prepare\\('SELECT count\\(*\\) n FROM saved_phrases'\\).get\\(\\).n\\)\")",
+      "Bash(pkill -f \"tsx packages/backend/src/index.ts\")",
+      "Bash(perl -0pi -e 's/Gender\\\\?: \"masc\" \\\\| \"fem\";/Gender?: \"masc\" | \"fem\" | \"neut\";/g' components/PhraseBuilder/interfaces.ts)",
+      "Bash(grep -rn \"paths\\\\|@signi/shared\" engine/tsconfig.json backend/tsconfig.json)",
+      "Bash(ls shared/dist/)",
+      "Bash(grep -iA0 \"SLEEP\\\\|CRY\\\\|RUN\\\\|EAT\")",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/2a0b75eb-f8df-42e3-81c9-c849e165ff33/scratchpad/verify.mjs)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

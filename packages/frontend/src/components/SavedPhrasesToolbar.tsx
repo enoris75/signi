@@ -86,14 +86,18 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   }
 
   const listQuery = useQuery({
-    queryKey: ["savedPhrases"],
-    queryFn: listSavedPhrases,
+    queryKey: ["savedPhrases", "phrase"],
+    queryFn: () => listSavedPhrases("phrase"),
     enabled: loadOpen,
   });
 
   const saveMutation = useMutation({
     mutationFn: () =>
-      savePhrase({ name: name.trim(), workspace: serializeWorkspace(containers, links) }),
+      savePhrase({
+        name: name.trim(),
+        kind: "phrase",
+        workspace: serializeWorkspace(containers, links),
+      }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["savedPhrases"] });
       setSaveOpen(false);
@@ -133,7 +137,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-      <Tooltip title="Save phrase">
+      <Tooltip title="Save the whole phrase (all periods)">
         <span>
           <Button
             variant="outlined"
@@ -148,7 +152,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           </Button>
         </span>
       </Tooltip>
-      <Tooltip title="Load a saved phrase">
+      <Tooltip title="Load a saved phrase (replaces the workspace)">
         <Button
           variant="outlined"
           size="small"

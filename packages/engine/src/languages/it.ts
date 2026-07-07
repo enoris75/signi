@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type ModifierRelation, type Tense } from '@signi/shared';
-import { pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 const VOWEL_START = /^[aeiouàèéìòù]/i;
 /** Words that take "lo"/"gli" (s+consonant, z, ps, gn, x, y, …). */
@@ -326,21 +326,38 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // A pronoun cause ("a causa di me/di lei/di loro") takes the tonic form after bare
-      // "di", with no article. Only cause accepts a pronoun in the UI today.
-      if (type === 'cause' && f['person']) return `a causa di ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      // A pronoun cause: positive "grazie a me/te/lui…" uses the tonic pronoun; neutral and
+      // negative take the possessive, agreeing with feminine "causa"/"colpa" — "a causa mia",
+      // "per colpa mia" — NOT "a causa di me" (which sounds off, like "*per colpa di me").
+      // "loro" is invariable. Only cause accepts a pronoun in the UI today.
+      if (type === 'cause' && f['person']) {
+        const sent = causeSentiment(c);
+        if (sent === 'positive') return `grazie a ${f['disjunctive'] ?? f['base'] ?? ''}`;
+        const plural = f['number'] === 'plural';
+        const poss =
+          f['person'] === '1' ? (plural ? 'nostra' : 'mia') :
+          f['person'] === '2' ? (plural ? 'vostra' : 'tua') :
+          plural ? 'loro' : 'sua';
+        return sent === 'negative' ? `per colpa ${poss}` : `a causa ${poss}`;
+      }
       // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.
       // A direction toward an *animate* goal takes "da" ("corro dal bambino" = to/towards
       // the child — the "andare da qualcuno" construction), not bare "a", which is for
       // places ("corro alla casa"). Because source also governs "da", it is prefixed with
       // the ablative adverb "via" so the two senses never collide: "corro dal bambino"
       // (motion to) vs "corro via dal bambino" (motion away from).
-      // Cause reads "a causa di" + the "di"-fused article ("a causa del cane").
+      // Cause reads "a causa di" + the "di"-fused article ("a causa del cane"); the sentiment
+      // swaps the connector — negative "per colpa del cane", positive "grazie al cane" ("a"-fused).
+      const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepArt('in', f, plural, lead) :
         type === 'direction' ? prepArt(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
         type === 'source'    ? `via ${prepArt('da', f, plural, lead)}` :
-        type === 'cause'     ? `a causa ${prepArt('di', f, plural, lead)}` :
+        type === 'cause'     ? (
+          causeSent === 'positive' ? `grazie ${prepArt('a', f, plural, lead)}` :
+          causeSent === 'negative' ? `per colpa ${prepArt('di', f, plural, lead)}` :
+          `a causa ${prepArt('di', f, plural, lead)}`
+        ) :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })

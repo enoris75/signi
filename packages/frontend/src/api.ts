@@ -3,6 +3,7 @@ import type {
   GrammaticalRole,
   PhrasePlan,
   SavePhraseRequest,
+  SavedPhraseKind,
   SavedPhraseRecord,
   SavedPhraseSummary,
   SavedPhrasesResponse,
@@ -32,8 +33,11 @@ export async function fetchTranslation(plan: PhrasePlan): Promise<Translation[]>
 
 // ── Saved phrases ────────────────────────────────────────────────────────────
 
-export async function listSavedPhrases(): Promise<SavedPhraseSummary[]> {
-  const res = await fetch(`${BASE}/phrases`);
+export async function listSavedPhrases(
+  kind?: SavedPhraseKind,
+): Promise<SavedPhraseSummary[]> {
+  const url = kind ? `${BASE}/phrases?kind=${kind}` : `${BASE}/phrases`;
+  const res = await fetch(url);
   if (!res.ok) throw new Error('Failed to load saved phrases');
   const data = await res.json() as SavedPhrasesResponse;
   return data.phrases;

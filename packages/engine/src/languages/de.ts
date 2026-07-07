@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
-import { pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { causeSentiment, pathSpecifier, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 type Case = 'nom' | 'acc' | 'dat';
 type Slot = 'masc' | 'fem' | 'neut' | 'plural';
@@ -226,8 +226,13 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       if (!c) return '';
       const f = c.phrase.head.forms;
       // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
-      // colloquial dative that "wegen" already takes here. Only cause accepts a pronoun today.
-      if (type === 'cause' && f['person']) return `wegen ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      // colloquial dative that "wegen" already takes. Positive credits with "dank" ("dank
+      // dir"); German has no clean prepositional blame connector short of the genitive
+      // "durch … Schuld", so negative renders like neutral ("wegen"). Only cause takes a pronoun.
+      if (type === 'cause' && f['person']) {
+        const prep = causeSentiment(c) === 'positive' ? 'dank' : 'wegen';
+        return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route → path preposition (+ its case); locative/direction/source → two-way
@@ -242,9 +247,10 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const art = defArticle(f, 'dat', plural); // dem / der / den
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund")
         // is standard in speech and reuses the dative articles the other complements share.
+        // Positive credits with "dank" ("dank dem Hund"), also dative here.
         if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
         else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
-        else if (type === 'cause') head = `wegen ${art}`;
+        else if (type === 'cause') head = `${causeSentiment(c) === 'positive' ? 'dank' : 'wegen'} ${art}`;
         else /* source */         head = `aus ${art}`;
       }
       const declined = adjPhrase(c.phrase, _case);

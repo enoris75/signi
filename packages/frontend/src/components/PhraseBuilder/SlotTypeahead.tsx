@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
-import { PhraseSelection, SlotKey } from "./interfaces.ts";
+import { ConceptSelectOpts, PhraseSelection, SlotKey } from "./interfaces.ts";
 import { COMPLEMENT_KEY_SET, COMPLEMENT_ADJECTIVE_TYPE } from "./slots.ts";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
@@ -21,7 +21,7 @@ export function slotTypeahead({
   slotKey: SlotKey;
   activeSlot: SlotKey | null;
   selection: PhraseSelection;
-  onSelect: (concept: Concept, slot: SlotKey) => void;
+  onSelect: (concept: Concept, slot: SlotKey, opts?: ConceptSelectOpts) => void;
   // In noun-phrase mode (possessor editor) the `subject` slot is a possessor head, which
   // is noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
   nounSubject?: boolean;
@@ -29,7 +29,7 @@ export function slotTypeahead({
   // Only the active, still-empty slot renders a picker.
   if (slotKey !== activeSlot || selection[slotKey]) return undefined;
 
-  const pick = (c: Concept) => onSelect(c, slotKey);
+  const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
   switch (slotKey) {
     case "verb":

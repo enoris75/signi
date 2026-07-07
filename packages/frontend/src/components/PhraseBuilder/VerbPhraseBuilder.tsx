@@ -1,8 +1,9 @@
 import { Box } from "@mui/material";
-import { PATH_SPECIFIERS } from "@signi/shared";
+import { CAUSE_SENTIMENTS, PATH_SPECIFIERS } from "@signi/shared";
 import {
   NegativeToggleBox,
   SatelliteRow,
+  SentimentSelector,
   SpecifierSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
@@ -24,6 +25,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleToggleNegative,
     handleCycleTense,
     handleSelectSpecifier,
+    handleSelectSentiment,
   } = ctx;
 
   const verbSlots = renderedSlots.filter(
@@ -32,6 +34,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
   const verbPhraseRect = groupRects.find((g) => g.label === "Verb Phrase");
   const routeRect = groupRects.find((g) => g.removeKey === "route");
+  const causeRect = groupRects.find((g) => g.removeKey === "cause");
 
   return (
     <>
@@ -81,6 +84,25 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           <SpecifierSelector
             value={selection.routeSpecifier ?? PATH_SPECIFIERS[0]}
             onSelect={handleSelectSpecifier}
+          />
+        </Box>
+      )}
+
+      {/* Sentiment toolbar rides the top edge of the Cause dotted box — neutral /
+          negative / positive, mirroring the route's path-relation toolbar. */}
+      {selection.cause && causeRect && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: causeRect.x + causeRect.width / 2,
+            top: causeRect.y,
+            transform: "translate(-50%, -50%)",
+            zIndex: 3,
+          }}
+        >
+          <SentimentSelector
+            value={selection.causeSentiment ?? CAUSE_SENTIMENTS[0]}
+            onSelect={handleSelectSentiment}
           />
         </Box>
       )}
