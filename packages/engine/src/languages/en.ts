@@ -6,6 +6,7 @@ const PREP: Record<ComplementType, string> = {
   direction: 'to',
   source: 'from',
   route: 'through',
+  cause: 'because of',
 };
 
 const PATH_PREP: Record<PathSpecifier, string> = {

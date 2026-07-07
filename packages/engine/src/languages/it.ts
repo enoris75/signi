@@ -332,10 +332,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // places ("corro alla casa"). Because source also governs "da", it is prefixed with
       // the ablative adverb "via" so the two senses never collide: "corro dal bambino"
       // (motion to) vs "corro via dal bambino" (motion away from).
+      // Cause reads "a causa di" + the "di"-fused article ("a causa del cane").
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepArt('in', f, plural, lead) :
         type === 'direction' ? prepArt(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
         type === 'source'    ? `via ${prepArt('da', f, plural, lead)}` :
+        type === 'cause'     ? `a causa ${prepArt('di', f, plural, lead)}` :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })

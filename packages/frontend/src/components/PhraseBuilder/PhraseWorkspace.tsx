@@ -5,6 +5,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import CloseIcon from "@mui/icons-material/Close";
 import { PhraseBuilder } from "./PhraseBuilder.tsx";
 import {
+  NounAddress,
   NounKey,
   PhraseContainer,
   PhraseLink,
@@ -19,7 +20,7 @@ const uid = () =>
     ? crypto.randomUUID()
     : `c${Math.random().toString(36).slice(2)}`;
 
-const boxKey = (containerId: string, nounKey: NounKey) => `${containerId}:${nounKey}`;
+const boxKey = (containerId: string, nounKey: NounAddress) => `${containerId}:${nounKey}`;
 
 // A drawn link line, in workspace pixels. Guarded by a half-pixel comparator so the
 // measuring layout effect settles instead of looping on sub-pixel jitter.
@@ -131,11 +132,11 @@ export function PhraseWorkspace({
     if (pick.active && pick.source.containerId === id) setPick({ active: false });
   }
 
-  function startLink(containerId: string, nounKey: NounKey) {
+  function startLink(containerId: string, nounKey: NounAddress) {
     setPick({ active: true, source: { containerId, nounKey } });
   }
 
-  function removeLink(containerId: string, nounKey: NounKey) {
+  function removeLink(containerId: string, nounKey: NounAddress) {
     setLinks((ls) =>
       ls.filter(
         (l) =>
@@ -210,9 +211,12 @@ export function PhraseWorkspace({
         x2 = t.left + t.width / 2 - rootRect.left;
         y2 = t.top - rootRect.top;
       } else continue;
+      // A possessor-sourced link's noun key is an address (`route/possessor`); colour it by
+      // its base noun so the line keeps that noun's colour.
+      const baseKey = link.source.nounKey.split("/")[0];
       const color =
         MUI_COLOR_HEX[
-          ALL_SLOTS.find((sl) => sl.key === link.source.nounKey)?.color ?? "primary"
+          ALL_SLOTS.find((sl) => sl.key === baseKey)?.color ?? "primary"
         ];
       next.push({ id: link.id, x1, y1, x2, y2, color });
     }
@@ -253,12 +257,12 @@ export function PhraseWorkspace({
 
       <Stack spacing={2}>
         {containers.map((c, i) => {
-          const linkSourceKeys = new Set<NounKey>(
+          const linkSourceKeys = new Set<NounAddress>(
             links
               .filter((l) => l.source.containerId === c.id)
               .map((l) => l.source.nounKey),
           );
-          const linkTargetKeys = new Set<NounKey>(
+          const linkTargetKeys = new Set<NounAddress>(
             links
               .filter((l) => l.target.containerId === c.id)
               .map((l) => l.target.nounKey),
@@ -284,10 +288,11 @@ export function PhraseWorkspace({
             isPickTarget: (nounKey) =>
               pick.active &&
               pick.source.containerId !== c.id &&
-              Boolean(c.selection[nounKey]) &&
+              Boolean(c.selection[nounKey as keyof PhraseSelection]) &&
               !linkTargetKeys.has(nounKey) &&
               !isSelfOrAncestor(c.id, pick.source.containerId, links),
-            onNounPick: (nounKey) => completeLink(c.id, nounKey),
+            // Only real top-level nouns are ever offered as pick targets, so the address is a NounKey.
+            onNounPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
             onStartRelativeLink: (nounKey) => startLink(c.id, nounKey),
             onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
             linkSourceKeys,

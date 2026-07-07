@@ -69,6 +69,12 @@ export interface PhraseSelection {
     routeAdjective2?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
+    // Cause / reason adjunct ("cried because of the dog") — a plain noun phrase, no specifier.
+    cause?: Concept;
+    causeNumber?: "singular" | "plural";
+    causeGender?: "masc" | "fem";
+    causeAdjective?: Concept;
+    causeAdjective2?: Concept;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
@@ -86,6 +92,7 @@ export interface PhraseSelection {
     directionPossessor?: PhraseSelection;
     sourcePossessor?: PhraseSelection;
     routePossessor?: PhraseSelection;
+    causePossessor?: PhraseSelection;
 }
 
 export type NumberSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
@@ -94,6 +101,16 @@ export type GenderSlot = "subject" | "directObject" | "indirectObject" | Complem
 
 // The noun blocks that can carry a relative clause / possessor (same set as NumberSlot).
 export type NounKey = "subject" | "directObject" | "indirectObject" | ComplementType;
+
+// The address of a noun anywhere in a container's phrase tree, used as a cross-container
+// link endpoint. A top-level noun is just its `NounKey`; a possessor head is that address
+// followed by a `/possessor` step (e.g. `directObject/possessor`, or, for a
+// possessor-of-a-possessor, `directObject/possessor/possessor`). Only *sources* use the
+// suffix today (relativising a possessor head); targets are always plain `NounKey`.
+export type NounAddress = string;
+
+// Append a `/possessor` step to a noun address — the address of that noun's possessor head.
+export const possessorAddress = (base: NounAddress): NounAddress => `${base}/possessor`;
 
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
@@ -113,41 +130,42 @@ export interface PhraseContainer {
 }
 
 // A cross-container relative-clause link: source noun (the head) → target noun (the gap).
+// The source may be a possessor head (a `/possessor` address); the target is a plain noun.
 export interface PhraseLink {
   id: string;
-  source: { containerId: string; nounKey: NounKey };
+  source: { containerId: string; nounKey: NounAddress };
   target: { containerId: string; nounKey: NounKey };
 }
 
 // Pick-mode: a source noun's relative satellite was clicked and is awaiting a target click.
 export type PickMode =
   | { active: false }
-  | { active: true; source: { containerId: string; nounKey: NounKey } };
+  | { active: true; source: { containerId: string; nounKey: NounAddress } };
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
 // linking. Undefined for embedded (possessor) sub-builders, which never link.
 export interface WorkspaceBinding {
   containerId: string;
   // Register/unregister a noun box's DOM element for cross-container measuring & greying.
-  registerBox: (nounKey: NounKey, el: HTMLElement | null) => void;
+  registerBox: (nounKey: NounAddress, el: HTMLElement | null) => void;
   // Register the little anchor dots the cross-container link line runs between: the
   // relative-clause control on the source noun's dotted box (line start) and the
   // receiving dot on the target noun's dotted box (line end). The workspace measures
   // the connector between these when present, falling back to the noun boxes.
-  registerLinkSourceAnchor: (nounKey: NounKey, el: HTMLElement | null) => void;
-  registerLinkTargetAnchor: (nounKey: NounKey, el: HTMLElement | null) => void;
+  registerLinkSourceAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
+  registerLinkTargetAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
   // Signal that this container's canvas geometry changed (a box was dragged, the
   // canvas resized, a group collapsed) so the workspace re-measures its link lines —
   // the workspace can't otherwise observe a child's internal drag state.
   onGeometryChange: () => void;
   // Pick-mode: is this noun a legal link target right now? (drives highlight + click)
-  isPickTarget: (nounKey: NounKey) => boolean;
-  onNounPick: (nounKey: NounKey) => void;
+  isPickTarget: (nounKey: NounAddress) => boolean;
+  onNounPick: (nounKey: NounAddress) => void;
   // Start / remove a relative-clause link sourced from this noun.
-  onStartRelativeLink: (nounKey: NounKey) => void;
-  onRemoveLink: (nounKey: NounKey) => void;
+  onStartRelativeLink: (nounKey: NounAddress) => void;
+  onRemoveLink: (nounKey: NounAddress) => void;
   // Nouns of this container that are a link source / a link target.
-  linkSourceKeys: Set<NounKey>;
-  linkTargetKeys: Set<NounKey>;
+  linkSourceKeys: Set<NounAddress>;
+  linkTargetKeys: Set<NounAddress>;
   pickActive: boolean;
 }

@@ -15,10 +15,12 @@ import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import {
   GenderSlot,
+  NounAddress,
   NounKey,
   NumberSlot,
   PhraseSelection,
   POSSESSOR_KEY,
+  possessorAddress,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
@@ -64,9 +66,16 @@ interface PhraseBuilderProps {
   wordsPanelOpen?: boolean;
   onWordsPanelClose?: () => void;
   // Workspace container id + the cross-container linking hooks. Present for every
-  // top-level container in the workspace; absent for embedded possessor sub-builders.
+  // top-level container in the workspace; forwarded (unchanged) into embedded possessor
+  // sub-builders so their head can source a cross-container relative-clause link too.
   containerId?: string;
   binding?: WorkspaceBinding;
+  // The workspace address of *this* builder's head noun, set only when this builder is an
+  // embedded possessor sub-builder (its head lives in the `subject` slot). It names the
+  // possessor head within the owning container — e.g. `directObject/possessor` — so the
+  // head can anchor a link. Undefined for a top-level container (its nouns are their own
+  // plain addresses). See `linkBinding` / `possessorAddress`.
+  possessorPath?: NounAddress;
 }
 
 // The noun blocks that can carry a relative clause.
@@ -132,6 +141,35 @@ function sameRelConnectors(a: RelConnector[], b: RelConnector[]): boolean {
   return true;
 }
 
+// Wrap a container's `binding` for an embedded possessor sub-builder whose head is
+// addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
+// `"subject"`); this maps that head onto `headPath` before forwarding to the container, so
+// the possessor head registers/links under its workspace address. A possessor head is only
+// ever a link *source* (relativising it), never a target, so target/dimming is suppressed.
+function adaptPossessorBinding(
+  root: WorkspaceBinding,
+  headPath: NounAddress,
+): WorkspaceBinding {
+  const map = (nounKey: NounAddress): NounAddress =>
+    nounKey === "subject" ? headPath : nounKey;
+  return {
+    containerId: root.containerId,
+    registerBox: (nounKey, el) => root.registerBox(map(nounKey), el),
+    registerLinkSourceAnchor: (nounKey, el) =>
+      root.registerLinkSourceAnchor(map(nounKey), el),
+    registerLinkTargetAnchor: (nounKey, el) =>
+      root.registerLinkTargetAnchor(map(nounKey), el),
+    onGeometryChange: root.onGeometryChange,
+    isPickTarget: () => false,
+    onNounPick: (nounKey) => root.onNounPick(map(nounKey)),
+    onStartRelativeLink: (nounKey) => root.onStartRelativeLink(map(nounKey)),
+    onRemoveLink: (nounKey) => root.onRemoveLink(map(nounKey)),
+    linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
+    linkTargetKeys: new Set(),
+    pickActive: root.pickActive,
+  };
+}
+
 export function PhraseBuilder({
   selection,
   onPhraseUpdate,
@@ -143,7 +181,17 @@ export function PhraseBuilder({
   wordsPanelOpen = false,
   onWordsPanelClose,
   binding,
+  possessorPath,
 }: PhraseBuilderProps) {
+  // When this builder edits a possessor (a `possessorPath` naming its head), wrap the
+  // container's `binding` so the sub-builder can link like any container: its internal head
+  // key `"subject"` is mapped onto the possessor address, and it is never itself a link
+  // *target* (a possessor head can only *source* a relative clause today). Top-level
+  // containers use their `binding` unchanged.
+  const linkBinding: WorkspaceBinding | undefined =
+    binding && possessorPath
+      ? adaptPossessorBinding(binding, possessorPath)
+      : binding;
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
     nounPhrase ? "subject" : "verb",
   );
@@ -272,6 +320,8 @@ export function PhraseBuilder({
       return next;
     });
     setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
+    // Drop any relative-clause link sourced from the possessor head that just vanished.
+    binding?.onRemoveLink(possessorAddress(possessorPath ?? which));
   }
 
   function handleToggleNumber(which: NumberSlot) {
@@ -426,8 +476,8 @@ export function PhraseBuilder({
       ? (sat.key.slice(0, -"Relative".length) as NounKey)
       : null;
     if (relativeNoun) {
-      if (!binding) continue;
-      const isSource = binding.linkSourceKeys.has(relativeNoun);
+      if (!linkBinding) continue;
+      const isSource = linkBinding.linkSourceKeys.has(relativeNoun);
       (perimeterByNoun[relativeNoun] ??= {}).relative = {
         key: sat.key,
         icon: sat.icon,
@@ -438,8 +488,8 @@ export function PhraseBuilder({
         valueLabel: isSource ? "Linked — click to remove" : undefined,
         onToggle: () =>
           isSource
-            ? binding.onRemoveLink(relativeNoun)
-            : binding.onStartRelativeLink(relativeNoun),
+            ? linkBinding.onRemoveLink(relativeNoun)
+            : linkBinding.onStartRelativeLink(relativeNoun),
       };
       continue;
     }
@@ -770,18 +820,18 @@ export function PhraseBuilder({
     handleRemoveComplement,
     // Cross-container linking: forward noun boxes to the workspace registry and expose
     // greying (link targets) + pick-mode (eligible targets). Only NOUN_KEYS participate.
-    onBoxRef: binding
+    onBoxRef: linkBinding
       ? (key, el) => {
           if (NOUN_KEYS.includes(key as NounKey))
-            binding.registerBox(key as NounKey, el);
+            linkBinding.registerBox(key as NounKey, el);
         }
       : undefined,
-    dimmedKeys: binding ? (binding.linkTargetKeys as Set<string>) : undefined,
-    isPickTarget: binding
+    dimmedKeys: linkBinding ? (linkBinding.linkTargetKeys as Set<string>) : undefined,
+    isPickTarget: linkBinding
       ? (key) =>
-          NOUN_KEYS.includes(key as NounKey) && binding.isPickTarget(key as NounKey)
+          NOUN_KEYS.includes(key as NounKey) && linkBinding.isPickTarget(key as NounKey)
       : undefined,
-    onPickTarget: binding ? (key) => binding.onNounPick(key as NounKey) : undefined,
+    onPickTarget: linkBinding ? (key) => linkBinding.onNounPick(key as NounKey) : undefined,
   };
 
   return (
@@ -827,9 +877,10 @@ export function PhraseBuilder({
       <Paper
         elevation={0}
         onPointerDown={(e) => {
-          // Nested panels stay docked; workspace containers (binding present) stay in
-          // the managed stack so cross-container connectors measure correctly.
-          if (nested || binding) return;
+          // Nested panels stay docked; workspace containers (a binding, but not the
+          // docked possessor sub-builders that now also carry one) stay in the managed
+          // stack so cross-container connectors measure correctly.
+          if (nested || (binding && !nounPhrase)) return;
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const borderWidth = 8;
           const isNearBorder =
@@ -1017,10 +1068,10 @@ export function PhraseBuilder({
                     groupRects={groupRects}
                     perimeterByNoun={perimeterByNoun}
                     linkTargetKeys={
-                      binding ? (binding.linkTargetKeys as Set<NounKey>) : undefined
+                      linkBinding ? (linkBinding.linkTargetKeys as Set<NounKey>) : undefined
                     }
-                    registerSourceAnchor={binding?.registerLinkSourceAnchor}
-                    registerTargetAnchor={binding?.registerLinkTargetAnchor}
+                    registerSourceAnchor={linkBinding?.registerLinkSourceAnchor}
+                    registerTargetAnchor={linkBinding?.registerLinkTargetAnchor}
                     registerPossessorControl={(nounKey, el) => {
                       if (el) possessorControlEls.current.set(nounKey, el);
                       else possessorControlEls.current.delete(nounKey);
@@ -1095,6 +1146,11 @@ export function PhraseBuilder({
                   }
                   onPhraseUpdate={makePossessorUpdate(which)}
                   onRemove={() => handleRemovePossessor(which)}
+                  // Forward the container's binding so the possessor's head can source a
+                  // relative-clause link, addressed under this possessor step (composes for
+                  // nested possessors via `possessorPath ?? which`).
+                  binding={binding}
+                  possessorPath={possessorAddress(possessorPath ?? which)}
                 />
               </Box>
             );

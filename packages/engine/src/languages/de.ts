@@ -237,8 +237,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       } else {
         _case = 'dat';
         const art = defArticle(f, 'dat', plural); // dem / der / den
+        // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund")
+        // is standard in speech and reuses the dative articles the other complements share.
         if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
         else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
+        else if (type === 'cause') head = `wegen ${art}`;
         else /* source */         head = `aus ${art}`;
       }
       const declined = adjPhrase(c.phrase, _case);

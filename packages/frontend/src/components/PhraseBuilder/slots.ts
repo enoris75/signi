@@ -259,6 +259,10 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   locative: { x: 84, y: 88 },
   locativeAdjective: { x: 80, y: 78 },
   locativeAdjective2: { x: 76, y: 70 },
+  // Cause ("because of …") — a non-motion adjunct; parked center-bottom under the verb.
+  cause: { x: 52, y: 90 },
+  causeAdjective: { x: 50, y: 80 },
+  causeAdjective2: { x: 54, y: 72 },
 };
 
 const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
@@ -269,6 +273,7 @@ const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   direction: { x: 32, y: 99 },
   route: { x: 70, y: 99 },
   locative: { x: 94, y: 96 },
+  cause: { x: 46, y: 96 },
 };
 
 export const NUMBER_TOGGLE_KEY = (which: NumberSlot) => `${which}Number`;
@@ -298,6 +303,8 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   routeGender: { x: 74, y: 84 },
   locativeNumber: NUMBER_TOGGLE_DEFAULTS.locative,
   locativeGender: { x: 96, y: 80 },
+  causeNumber: NUMBER_TOGGLE_DEFAULTS.cause,
+  causeGender: { x: 58, y: 96 },
   // Relative-clause reveal icons — no canvas node of their own; these only aim each
   // icon at the bottom edge of its noun box (clauses expand into panels below).
   subjectRelative: { x: 26, y: 64 },
@@ -307,6 +314,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   directionRelative: { x: 40, y: 99 },
   routeRelative: { x: 62, y: 99 },
   locativeRelative: { x: 84, y: 99 },
+  causeRelative: { x: 52, y: 99 },
   // Possessor reveal icons — same role as the relative ones (aim the icon at the noun
   // box edge; the possessor editor docks in a panel below). Offset left of the relative
   // anchor so both icons ride the box without overlapping.
@@ -317,6 +325,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   directionPossessor: { x: 34, y: 99 },
   routePossessor: { x: 56, y: 99 },
   locativePossessor: { x: 78, y: 99 },
+  causePossessor: { x: 48, y: 99 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

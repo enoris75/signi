@@ -1,16 +1,29 @@
 import type { ComplementType, NounPhrase, PhrasePlan, RelativeClause } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
-import { NounKey, PhraseContainer, PhraseLink } from "./interfaces.ts";
+import { NounAddress, NounKey, PhraseContainer, PhraseLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
 const CORE_KEYS = new Set<NounKey>(["subject", "directObject", "indirectObject"]);
 const COMPLEMENT_KEYS = new Set<string>(COMPLEMENT_TYPES);
 
-// Read the noun phrase filling a container plan's slot. Core roles (subject/objects) sit
-// at the top level; complement nouns live under `complements[type].phrase`.
-function getNoun(plan: Partial<PhrasePlan>, key: NounKey): NounPhrase | undefined {
+// Resolve the top-level noun phrase filling a container plan's slot. Core roles
+// (subject/objects) sit at the top level; complement nouns live under `complements[type].phrase`.
+function getTopNoun(plan: Partial<PhrasePlan>, key: NounKey): NounPhrase | undefined {
   if (CORE_KEYS.has(key)) return plan[key as "subject" | "directObject" | "indirectObject"];
   return plan.complements?.[key as ComplementType]?.phrase;
+}
+
+// Resolve a noun address to its noun phrase in `plan`. The first segment names a top-level
+// noun; each trailing `possessor` segment descends into that noun's possessor (already built
+// by buildNounPhrase). Returns undefined if any step is absent.
+function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPhrase | undefined {
+  const [base, ...steps] = address.split("/");
+  let np = getTopNoun(plan, base as NounKey);
+  for (const step of steps) {
+    if (!np || step !== "possessor") return undefined;
+    np = np.possessor;
+  }
+  return np;
 }
 
 // A container is a root iff no link targets it — those translate as their own sentence.

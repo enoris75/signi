@@ -14,7 +14,27 @@
       "Bash(PORT=3011 node packages/backend/dist/index.js)",
       "Bash(curl -s -X POST http://localhost:3011/api/translate -H 'Content-Type: application/json' -d '{ *)",
       "Bash(python3 -c \"import sys,json; [print\\(f\\\\\"{t['language']:>4}: {t['text']}\\\\\"\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
-      "Bash(pkill -f \"vite --port 5199\")"
+      "Bash(pkill -f \"vite --port 5199\")",
+      "Bash(node -e ' *)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\);console.log\\('COME present?',j.some\\(c=>c.id==='COME'\\)\\);}catch\\(e\\){console.log\\('resp:',d.slice\\(0,200\\)\\)}}\\)\")",
+      "Bash(curl -s -X POST \"http://localhost:3001/api/translate\" -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"conceptId\":\"FIRST_PERSON\"},\"verb\":{\"conceptId\":\"COME\",\"tense\":\"present\"},\"direction\":{\"conceptId\":\"HOUSE\"}}}')",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{console.log\\(d.slice\\(0,600\\)\\)}\\)\")",
+      "Bash(curl -s -X POST http://localhost:3001/api/translate -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(node -e \"let d='';process.stdin.on\\('data',c=>d+=c\\).on\\('end',\\(\\)=>{try{const j=JSON.parse\\(d\\);for\\(const t of j.translations\\)console.log\\(t.language.padEnd\\(3\\), t.text\\);}catch\\(e\\){console.log\\(d.slice\\(0,400\\)\\)}}\\)\")",
+      "Bash(node -e \"console.log\\(require\\('esbuild'\\)?require\\('esbuild'\\).version:''\\)\")",
+      "Bash(node_modules/.bin/tsx /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/wp.ts)",
+      "Bash(node_modules/.bin/esbuild /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/wp.ts --bundle --platform=node --format=esm --alias:@signi/shared=/Users/enoris/Code/signi/packages/shared/dist/index.js --outfile=/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/wp.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/wp.mjs)",
+      "Bash(node_modules/.bin/esbuild /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render.ts --bundle --platform=node --format=esm --alias:@signi/shared=/Users/enoris/Code/signi/packages/shared/dist/index.js --outfile=/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render.mjs)",
+      "Bash(sed 's/^const links.*$/const links: PhraseLink[] = [];/; s|the child who cried wolf.s lazy dog|the child'\"'\"'s lazy dog|' /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render.ts)",
+      "Bash(node_modules/.bin/esbuild /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.ts --bundle --platform=node --format=esm --alias:@signi/shared=/Users/enoris/Code/signi/packages/shared/dist/index.js --outfile=/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.mjs)",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.mjs)",
+      "Bash(sed 's/const want = .*/const want = \"the quick brown fox jumped over the child'\"'\"'s lazy dog\";/')",
+      "Bash(rm -f /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.ts /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.mjs 2>/dev/null; echo done)"
+    ],
+    "additionalDirectories": [
+      "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad"
     ]
   }
 }

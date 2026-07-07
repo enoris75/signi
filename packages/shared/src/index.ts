@@ -86,23 +86,29 @@ export const TENSE_LABELS: Record<Tense, string> = {
  * license. English collapses these into a single category, but each takes a
  * distinct adposition (and case, in German) across languages. Verbs declare
  * which they support via `Concept.complements`.
+ *
+ * `locative`/`direction`/`source`/`route` are the motion/place family; `cause`
+ * is the reason/motive adjunct — "the boy cried **because of the dog**"
+ * (a causa di / à cause de / wegen / por causa de …).
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause';
 
 /** Canonical UI order (matches how complements are presented to the user). */
-export const COMPLEMENT_TYPES: ComplementType[] = ['locative', 'direction', 'source', 'route'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['locative', 'direction', 'source', 'route', 'cause'];
 
 /**
  * Order in which active complements are rendered within a sentence. Follows the
- * natural path reading "from X to Y through Z", with the static locative last.
+ * natural path reading "from X to Y through Z", with the static locative next and
+ * the causal adjunct ("because of …") last.
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['source', 'direction', 'route', 'locative'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   locative: 'Locative',
   direction: 'Direction',
   source: 'Source',
   route: 'Route',
+  cause: 'Cause',
 };
 
 /**

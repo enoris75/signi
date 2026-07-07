@@ -166,10 +166,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // el niño", not "*al niño"); "hacia" doesn't contract. Source is prefixed with the
       // ablative adverb "lejos" so it reads as motion away ("corro lejos del niño"); bare
       // "de" reads as origin/possession, not departure.
+      // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro").
       const head =
         type === 'locative'  ? `en ${defArticle(f, plural)}` :
         type === 'direction' ? (f['animate'] === '1' ? `hacia ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `lejos ${dePrep(f, plural)}` :
+        type === 'cause'     ? `a causa ${dePrep(f, plural)}` :
         routeHead(c, plural);
       return withRelative(`${head} ${word}${adj}`, c.phrase);
     })

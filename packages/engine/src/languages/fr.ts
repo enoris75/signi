@@ -197,10 +197,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // l'enfant", not "*à l'enfant"); "vers" doesn't contract with the article. Source is
       // prefixed with the ablative adverb "loin" so it clearly reads as motion away ("je
       // cours loin de l'enfant"); bare "de" reads as a partitive/complement, not departure.
+      // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien").
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? `dans ${defArticle(f, plural, lead)}` :
         type === 'direction' ? (f['animate'] === '1' ? `vers ${defArticle(f, plural, lead)}` : datPrep(f, plural, lead)) :
         type === 'source'    ? `loin ${dePrep(f, plural, lead)}` :
+        type === 'cause'     ? `à cause ${dePrep(f, plural, lead)}` :
         routeHead(c, plural, lead);
       return renderNP(c.phrase, headFor);
     })

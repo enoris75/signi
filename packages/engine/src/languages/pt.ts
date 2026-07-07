@@ -180,10 +180,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // a criança", not "*à criança"); "para" doesn't contract. Source is prefixed with
       // the ablative adverb "longe" so it reads as motion away ("corro longe da criança");
       // bare "de" reads as origin/possession, not departure.
+      // Cause reads "por causa de" + the "de"-contracted article ("por causa do cão").
       const head =
         type === 'locative'  ? emPrep(f, plural) :
         type === 'direction' ? (f['animate'] === '1' ? `para ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `longe ${dePrep(f, plural)}` :
+        type === 'cause'     ? `por causa ${dePrep(f, plural)}` :
         routeHead(c, plural);
       return withRelative(`${head} ${word}${adj}`, c.phrase);
     })

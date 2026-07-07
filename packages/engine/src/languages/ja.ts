@@ -12,6 +12,8 @@ const PARTICLE: Record<ComplementType, string> = {
   direction: 'へ',
   source: 'から',
   route: 'を',
+  // Cause/reason: the compound postposition "のために" ("because of / for the sake of").
+  cause: 'のために',
 };
 
 /** Path relations expressed via a relational noun before を ("橋の下を" = under the bridge). */
