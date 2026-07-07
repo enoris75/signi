@@ -15,6 +15,7 @@ import {
 } from "./components/PhraseBuilder/interfaces.ts";
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
+import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
 import { useTranslation } from "./hooks/useTranslation.ts";
 
 const newId = () =>
@@ -146,17 +147,27 @@ export default function App() {
               Semantic phrase translator · 7 languages
             </Typography>
           </Box>
-          <Button
-            variant={wordsPanelOpen ? "contained" : "outlined"}
-            size="small"
-            disableElevation
-            startIcon={<MenuBookIcon />}
-            onClick={() => setWordsPanel(!wordsPanelOpen)}
-            aria-pressed={wordsPanelOpen}
-            sx={{ flexShrink: 0, textTransform: "none" }}
-          >
-            Words
-          </Button>
+          <Box sx={{ display: "flex", alignItems: "center", gap: 1, flexShrink: 0 }}>
+            <SavedPhrasesToolbar
+              containers={containers}
+              links={links}
+              onLoad={(nextContainers, nextLinks) => {
+                setContainers(nextContainers);
+                setLinks(nextLinks);
+              }}
+            />
+            <Button
+              variant={wordsPanelOpen ? "contained" : "outlined"}
+              size="small"
+              disableElevation
+              startIcon={<MenuBookIcon />}
+              onClick={() => setWordsPanel(!wordsPanelOpen)}
+              aria-pressed={wordsPanelOpen}
+              sx={{ textTransform: "none" }}
+            >
+              Words
+            </Button>
+          </Box>
         </Container>
       </Box>
 

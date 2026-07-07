@@ -111,6 +111,10 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
+      const f = c.phrase.head.forms;
+      // A pronoun complement ("because of him/her/them") takes the oblique form with no
+      // article — only the causal adjunct accepts a pronoun in the UI today.
+      if (type === 'cause' && f['person']) return `because of ${f['disjunctive'] ?? f['base'] ?? ''}`;
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)] : PREP[type];
       return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase)}`;
     })

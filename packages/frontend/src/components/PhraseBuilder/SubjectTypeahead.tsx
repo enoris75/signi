@@ -5,8 +5,12 @@ import { useConcepts } from "../../hooks/useConcepts";
 
 export function SubjectTypeahead({
   onSelect,
+  placeholder = "type a subject…",
 }: {
   onSelect: (concept: Concept) => void;
+  // The picker is pronoun-inclusive (pronouns + nouns); the label varies by slot
+  // (a subject vs. a causal complement, which also accepts a pronoun).
+  placeholder?: string;
 }) {
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
@@ -75,7 +79,7 @@ export function SubjectTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type a subject…"
+        placeholder={placeholder}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",

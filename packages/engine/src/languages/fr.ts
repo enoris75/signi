@@ -191,6 +191,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // A pronoun cause ("à cause de moi / d'eux / d'elle") takes the disjunctive form after
+      // "de", eliding before a vowel. Only cause accepts a pronoun in the UI today.
+      if (type === 'cause' && f['person']) {
+        const disj = f['disjunctive'] ?? f['base'] ?? '';
+        return `à cause ${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
+      }
       // locative→dans, direction→à (au/aux/à la), source→"loin de" (loin du/des/de la),
       // route→path preposition. A direction toward an *animate* goal takes "vers"
       // (toward) — French doesn't use bare "à" for a person destination ("je cours vers

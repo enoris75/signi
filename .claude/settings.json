@@ -31,10 +31,17 @@
       "Bash(node_modules/.bin/esbuild /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.ts --bundle --platform=node --format=esm --alias:@signi/shared=/Users/enoris/Code/signi/packages/shared/dist/index.js --outfile=/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.mjs)",
       "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/render1.mjs)",
       "Bash(sed 's/const want = .*/const want = \"the quick brown fox jumped over the child'\"'\"'s lazy dog\";/')",
-      "Bash(rm -f /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.ts /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.mjs 2>/dev/null; echo done)"
+      "Bash(rm -f /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.ts /private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad/*.mjs 2>/dev/null; echo done)",
+      "Bash(rm -f packages/*/tsconfig.tsbuildinfo; npx tsc -b packages/shared packages/engine 2>&1 | head -30; echo \"=== engine/shared exit: done ===\")",
+      "Bash(PORT=3999 npx tsx packages/backend/src/index.ts)",
+      "Bash(echo \"started pid $!\")",
+      "Bash(node --input-type=module -e ' *)",
+      "Bash(awk 'NR==209' packages/backend/src/db.ts)",
+      "Bash(kill 89508)"
     ],
     "additionalDirectories": [
-      "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad"
+      "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
+      "/Users/enoris/Code/signi/packages/*"
     ]
   }
 }

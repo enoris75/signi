@@ -57,6 +57,12 @@ export function slotTypeahead({
       // same adjective/noun switch as the core roles.
       if (COMPLEMENT_ADJECTIVE_TYPE[slotKey])
         return <ModifierTypeahead onSelect={pick} />;
+      // The causal complement ("because of him") also accepts a pronoun, so it uses the
+      // pronoun-inclusive picker; the motion/locative complements stay noun-only.
+      if (slotKey === "cause")
+        return (
+          <SubjectTypeahead onSelect={pick} placeholder="type a noun or pronoun…" />
+        );
       // Motion/locative complements share the indirect-object picker.
       if (COMPLEMENT_KEY_SET.has(slotKey))
         return <IndirectObjectTypeahead onSelect={pick} />;

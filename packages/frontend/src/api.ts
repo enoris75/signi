@@ -2,6 +2,10 @@ import type {
   Concept,
   GrammaticalRole,
   PhrasePlan,
+  SavePhraseRequest,
+  SavedPhraseRecord,
+  SavedPhraseSummary,
+  SavedPhrasesResponse,
   Translation,
 } from '@signi/shared';
 
@@ -24,4 +28,34 @@ export async function fetchTranslation(plan: PhrasePlan): Promise<Translation[]>
   if (!res.ok) throw new Error('Translation failed');
   const data = await res.json() as { translations: Translation[] };
   return data.translations;
+}
+
+// ── Saved phrases ────────────────────────────────────────────────────────────
+
+export async function listSavedPhrases(): Promise<SavedPhraseSummary[]> {
+  const res = await fetch(`${BASE}/phrases`);
+  if (!res.ok) throw new Error('Failed to load saved phrases');
+  const data = await res.json() as SavedPhrasesResponse;
+  return data.phrases;
+}
+
+export async function fetchSavedPhrase(id: string): Promise<SavedPhraseRecord> {
+  const res = await fetch(`${BASE}/phrases/${id}`);
+  if (!res.ok) throw new Error('Failed to load phrase');
+  return await res.json() as SavedPhraseRecord;
+}
+
+export async function savePhrase(body: SavePhraseRequest): Promise<SavedPhraseRecord> {
+  const res = await fetch(`${BASE}/phrases`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  });
+  if (!res.ok) throw new Error('Failed to save phrase');
+  return await res.json() as SavedPhraseRecord;
+}
+
+export async function deleteSavedPhrase(id: string): Promise<void> {
+  const res = await fetch(`${BASE}/phrases/${id}`, { method: 'DELETE' });
+  if (!res.ok) throw new Error('Failed to delete phrase');
 }

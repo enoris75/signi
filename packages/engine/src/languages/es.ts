@@ -156,6 +156,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // A pronoun cause ("a causa de mí / de él / de ellos") takes the tonic form after bare
+      // "de", with no article (no del contraction). Only cause accepts a pronoun today.
+      if (type === 'cause' && f['person']) return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const a = esAdj(c.phrase);

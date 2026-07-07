@@ -286,3 +286,79 @@ export interface TranslateResponse {
 export interface ConceptsResponse {
   concepts: Concept[];
 }
+
+// ── Saved phrases (persistence format) ──────────────────────────────────────
+// A saved phrase is the whole builder workspace — a stack of phrase containers plus
+// the cross-container relative-clause links — serialized to plain JSON. Concepts are
+// stored by id (not embedded), so a save stays valid as the lexicon evolves; the app
+// rehydrates each id against the live concept catalog on load. This same JSON is what
+// both the DB rows and the export/import files carry.
+
+/** Discriminator written into every saved-phrase file, so an arbitrary JSON can be identified. */
+export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
+
+/**
+ * Schema version of the saved-phrase payload. Bump whenever the serialized selection
+ * shape changes in a way an older loader couldn't read; the loader checks this to
+ * migrate or reject. Starts at 1.
+ */
+export const SAVED_PHRASE_VERSION = 1;
+
+/** A phrase selection with every Concept replaced by its id string. Structurally open — the
+ *  frontend owns the exact key set (it evolves), so shared keeps it a loose record. */
+export type SerializedSelection = { [key: string]: unknown };
+
+export interface SerializedContainer {
+  id: string;
+  selection: SerializedSelection;
+}
+
+export interface SerializedLink {
+  id: string;
+  source: { containerId: string; nounKey: string };
+  target: { containerId: string; nounKey: string };
+}
+
+/** The serialized builder workspace: the container stack plus their relative-clause links. */
+export interface SerializedWorkspace {
+  containers: SerializedContainer[];
+  links: SerializedLink[];
+}
+
+/** The full on-disk / on-wire saved-phrase document (export file body and DB payload). */
+export interface SavedPhrase {
+  format: typeof SAVED_PHRASE_FORMAT;
+  version: number;
+  savedAt: string;               // ISO-8601 timestamp
+  name?: string;
+  workspace: SerializedWorkspace;
+}
+
+// ── Saved-phrase API ────────────────────────────────────────────────────────
+// Author is captured on every record. There is no auth yet, so the backend always
+// stamps it 'system'; the column exists so real owners can be attached later.
+
+/** Request body for creating a saved phrase. */
+export interface SavePhraseRequest {
+  name: string;
+  workspace: SerializedWorkspace;
+}
+
+/** A saved-phrase list entry (no payload — for pickers). */
+export interface SavedPhraseSummary {
+  id: string;
+  name: string;
+  author: string;
+  version: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+/** A full saved-phrase record, including its workspace payload. */
+export interface SavedPhraseRecord extends SavedPhraseSummary {
+  workspace: SerializedWorkspace;
+}
+
+export interface SavedPhrasesResponse {
+  phrases: SavedPhraseSummary[];
+}

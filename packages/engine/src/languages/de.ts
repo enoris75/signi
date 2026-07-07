@@ -225,6 +225,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
+      // colloquial dative that "wegen" already takes here. Only cause accepts a pronoun today.
+      if (type === 'cause' && f['person']) return `wegen ${f['disjunctive'] ?? f['base'] ?? ''}`;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route → path preposition (+ its case); locative/direction/source → two-way

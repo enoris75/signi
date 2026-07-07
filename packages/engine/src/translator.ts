@@ -62,6 +62,16 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
       head.forms['gender'] = gender;
     }
     // 1st / 2nd person singular: base is already the correct form
+    // Disjunctive (tonic/oblique) surface for prepositional use ("because of me/her/them"),
+    // synthesised for the same number/gender as `base`. Engines that place a pronoun after
+    // a preposition read forms['disjunctive'] (falling back to base when absent, e.g. ja).
+    const disj =
+      number === 'plural'
+        ? head.forms['disjunctive_plural'] ?? head.forms['disjunctive']
+        : head.forms['person'] === '3' && gender === 'fem'
+          ? head.forms['disjunctive_fem'] ?? head.forms['disjunctive']
+          : head.forms['disjunctive'];
+    if (disj) head.forms['disjunctive'] = disj;
   } else {
     // Noun: apply number then gender. Determiner choice is threaded like number/gender
     // so each engine reads it off forms. Some quantifiers are inherently plural ("many

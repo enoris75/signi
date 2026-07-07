@@ -3,12 +3,19 @@ import cors from 'cors';
 import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
+import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
   TranslateRequest,
   TranslateResponse,
   GrammaticalRole,
+  SavePhraseRequest,
+  SavedPhrase,
+  SavedPhraseRecord,
+  SavedPhraseSummary,
+  SavedPhrasesResponse,
 } from '@signi/shared';
+import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
 
 const app = express();
 app.use(cors());
@@ -129,6 +136,107 @@ app.post('/api/translate', (req, res) => {
   const translations = translate(body.plan, lookupLexicalEntry);
   const response: TranslateResponse = { translations };
   res.json(response);
+});
+
+// ── Saved phrases ────────────────────────────────────────────────────────────
+// No auth yet, so every save is stamped with this author. When real users arrive
+// this becomes the authenticated identity and the rest of the code is unchanged.
+const DEFAULT_AUTHOR = 'system';
+
+interface SavedPhraseRow {
+  id: string;
+  name: string;
+  author: string;
+  version: number;
+  payload: string;
+  created_at: string;
+  updated_at: string;
+}
+
+const toSummary = (r: SavedPhraseRow): SavedPhraseSummary => ({
+  id: r.id,
+  name: r.name,
+  author: r.author,
+  version: r.version,
+  createdAt: r.created_at,
+  updatedAt: r.updated_at,
+});
+
+const toRecord = (r: SavedPhraseRow): SavedPhraseRecord => ({
+  ...toSummary(r),
+  workspace: (JSON.parse(r.payload) as SavedPhrase).workspace,
+});
+
+app.get('/api/phrases', (_req, res) => {
+  const db = getDb();
+  const rows = db
+    .prepare<[], SavedPhraseRow>(
+      'SELECT id, name, author, version, payload, created_at, updated_at FROM saved_phrases ORDER BY updated_at DESC',
+    )
+    .all();
+  const response: SavedPhrasesResponse = { phrases: rows.map(toSummary) };
+  res.json(response);
+});
+
+app.get('/api/phrases/:id', (req, res) => {
+  const db = getDb();
+  const row = db
+    .prepare<[string], SavedPhraseRow>(
+      'SELECT id, name, author, version, payload, created_at, updated_at FROM saved_phrases WHERE id = ?',
+    )
+    .get(req.params.id);
+  if (!row) {
+    res.status(404).json({ error: 'Phrase not found' });
+    return;
+  }
+  res.json(toRecord(row));
+});
+
+app.post('/api/phrases', (req, res) => {
+  const body = req.body as SavePhraseRequest;
+  const name = body?.name?.trim();
+  if (!name || !body?.workspace || !Array.isArray(body.workspace.containers)) {
+    res.status(400).json({ error: 'name and workspace.containers are required' });
+    return;
+  }
+
+  const now = new Date().toISOString();
+  const id = randomUUID();
+  // Persist the full versioned document so an exported file and a DB row are identical.
+  const doc: SavedPhrase = {
+    format: SAVED_PHRASE_FORMAT,
+    version: SAVED_PHRASE_VERSION,
+    savedAt: now,
+    name,
+    workspace: body.workspace,
+  };
+
+  const db = getDb();
+  db.prepare(
+    `INSERT INTO saved_phrases (id, name, author, version, payload, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+  ).run(id, name, DEFAULT_AUTHOR, SAVED_PHRASE_VERSION, JSON.stringify(doc), now, now);
+
+  const record: SavedPhraseRecord = {
+    id,
+    name,
+    author: DEFAULT_AUTHOR,
+    version: SAVED_PHRASE_VERSION,
+    createdAt: now,
+    updatedAt: now,
+    workspace: body.workspace,
+  };
+  res.status(201).json(record);
+});
+
+app.delete('/api/phrases/:id', (req, res) => {
+  const db = getDb();
+  const info = db.prepare('DELETE FROM saved_phrases WHERE id = ?').run(req.params.id);
+  if (info.changes === 0) {
+    res.status(404).json({ error: 'Phrase not found' });
+    return;
+  }
+  res.status(204).end();
 });
 
 const PORT = process.env['PORT'] ?? 3001;

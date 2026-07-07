@@ -326,6 +326,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // A pronoun cause ("a causa di me/di lei/di loro") takes the tonic form after bare
+      // "di", with no article. Only cause accepts a pronoun in the UI today.
+      if (type === 'cause' && f['person']) return `a causa di ${f['disjunctive'] ?? f['base'] ?? ''}`;
       // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.
       // A direction toward an *animate* goal takes "da" ("corro dal bambino" = to/towards
       // the child — the "andare da qualcuno" construction), not bare "a", which is for

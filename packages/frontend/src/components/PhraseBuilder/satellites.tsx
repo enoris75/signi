@@ -9,6 +9,7 @@ import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
 import ArrowBackIcon from "@mui/icons-material/ArrowBack";
 import RouteIcon from "@mui/icons-material/Route";
+import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
@@ -54,6 +55,7 @@ const complementIcons: Record<ComplementType, ReactNode> = {
   direction: <ArrowForwardIcon sx={iconSx} />,
   source: <ArrowBackIcon sx={iconSx} />,
   route: <RouteIcon sx={iconSx} />,
+  cause: <HelpOutlineIcon sx={iconSx} />,
 };
 
 // Derive every satellite for the current selection, resolving each one's `shown`
@@ -342,7 +344,9 @@ export function buildSatellites(
           parent: type,
           label: "Adjective",
           icon: <BrushIcon sx={iconSx} />,
-          available: Boolean(concept),
+          // Adjectives/possessor/relative attach to a noun head; a pronoun complement
+          // (only `cause` allows one) takes none of them.
+          available: concept?.role === "noun",
           hasValue: Boolean(adj),
           valueLabel: conceptLabel(adj),
         },
@@ -351,7 +355,7 @@ export function buildSatellites(
           parent: type,
           label: "Adjective 2",
           icon: <BrushIcon sx={iconSx} />,
-          available: Boolean(concept) && Boolean(adj),
+          available: concept?.role === "noun" && Boolean(adj),
           hasValue: Boolean(adj2),
           valueLabel: conceptLabel(adj2),
         },
@@ -370,7 +374,11 @@ export function buildSatellites(
           parent: type,
           label: "Gender",
           icon: <WcIcon sx={iconSx} />,
-          available: Boolean(concept?.gendered),
+          // Gendered nouns, plus a 3rd-person pronoun (he/she) so a pronoun cause can
+          // render feminine ("a causa di lei", "because of her").
+          available:
+            Boolean(concept?.gendered) ||
+            (concept?.role === "pronoun" && concept?.person === "3"),
           hasValue: gen === "fem",
           alwaysSet: true,
           valueLabel: gen === "fem" ? "Feminine" : "Masculine",
@@ -380,7 +388,7 @@ export function buildSatellites(
           parent: type,
           label: "Relative clause",
           icon: <AccountTreeIcon sx={iconSx} />,
-          available: Boolean(concept),
+          available: concept?.role === "noun",
           hasValue: false,
         },
         {
@@ -388,7 +396,7 @@ export function buildSatellites(
           parent: type,
           label: "Possessor",
           icon: <KeyIcon sx={iconSx} />,
-          available: Boolean(concept),
+          available: concept?.role === "noun",
           hasValue: Boolean(
             (
               selection[`${type}Possessor` as keyof PhraseSelection] as

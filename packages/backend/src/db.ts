@@ -204,7 +204,23 @@ function initSchema(db: Database.Database): void {
       CHECK (lexeme_a_id <> lexeme_b_id)
     );
 
+    -- ── Saved phrases ─────────────────────────────────────────────────
+    -- A user-saved builder workspace, stored as the versioned SavedPhrase JSON
+    -- document (see @signi/shared). The author column records who saved it; there is no
+    -- auth yet, so it is always 'system' for now — the column exists so real
+    -- owners can be attached later without a migration.
+    CREATE TABLE IF NOT EXISTS saved_phrases (
+      id         TEXT PRIMARY KEY,
+      name       TEXT NOT NULL,
+      author     TEXT NOT NULL DEFAULT 'system',
+      version    INTEGER NOT NULL,
+      payload    TEXT NOT NULL,   -- the full SavedPhrase JSON document
+      created_at TEXT NOT NULL,
+      updated_at TEXT NOT NULL
+    );
+
     -- ── Indexes ───────────────────────────────────────────────────────
+    CREATE INDEX IF NOT EXISTS idx_saved_phrases_author  ON saved_phrases     (author);
     CREATE INDEX IF NOT EXISTS idx_verb_lexemes_lang     ON verb_lexemes      (language);
     CREATE INDEX IF NOT EXISTS idx_noun_lexemes_lang     ON noun_lexemes      (language);
     CREATE INDEX IF NOT EXISTS idx_pronoun_lexemes_lang  ON pronoun_lexemes   (language);

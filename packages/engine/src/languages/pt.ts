@@ -170,6 +170,12 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
+      // A pronoun cause ("por causa de mim / dele / dela / deles") takes the tonic form after
+      // "de", which contracts with the 3rd-person pronouns (de+ele→dele). Only cause today.
+      if (type === 'cause' && f['person']) {
+        const disj = f['disjunctive'] ?? f['base'] ?? '';
+        return `por causa ${/^e/i.test(disj) ? `d${disj}` : `de ${disj}`}`;
+      }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const a = ptAdj(c.phrase);
