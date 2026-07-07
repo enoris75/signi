@@ -51,6 +51,10 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     const number = np.number ?? 'singular';
     const gender = np.gender ?? 'masc';
     head.forms['number'] = number;
+    // Expose the referent's gender for every person: the 1st/2nd-person surface is
+    // gender-invariant ("io", "tu"), but Romance participle/adjective agreement still
+    // depends on it ("tu sei stato/stata"), so downstream engines need to read it.
+    head.forms['gender'] = gender;
     // Keep the furigana reading (if any) in step with whichever surface we select.
     if (number === 'plural') {
       if (head.forms['plural']) head.forms['base'] = head.forms['plural'];
@@ -60,7 +64,6 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
       if (gf) head.forms['base'] = gf;
       const gr = head.forms[`singular_${gender}_reading`];
       if (gr) head.forms['reading'] = gr;
-      head.forms['gender'] = gender;
     }
     // 1st / 2nd person singular: base is already the correct form
     // Disjunctive (tonic/oblique) surface for prepositional use ("because of me/her/them"),

@@ -198,20 +198,18 @@ export function SubjectTypeahead({
 
               {/* Gender matters for every person (participle/adjective agreement in
                   Romance); neuter ("it") is offered only in the 3rd person. */}
-              {(
-                <ChooserRow label="gender">
-                  <ToggleButtonGroup
-                    exclusive
-                    size="small"
-                    value={gender}
-                    onChange={(_, v) => v && setGender(v)}
-                  >
-                    <ToggleButton value="masc">masc.</ToggleButton>
-                    <ToggleButton value="fem">fem.</ToggleButton>
-                    {person === "3" && <ToggleButton value="neut">neut.</ToggleButton>}
-                  </ToggleButtonGroup>
-                </ChooserRow>
-              )}
+              <ChooserRow label="gender">
+                <ToggleButtonGroup
+                  exclusive
+                  size="small"
+                  value={gender}
+                  onChange={(_, v) => v && setGender(v)}
+                >
+                  <ToggleButton value="masc">masc.</ToggleButton>
+                  <ToggleButton value="fem">fem.</ToggleButton>
+                  {person === "3" && <ToggleButton value="neut">neut.</ToggleButton>}
+                </ToggleButtonGroup>
+              </ChooserRow>
 
               <Button
                 size="small"

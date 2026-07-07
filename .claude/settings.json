@@ -44,7 +44,10 @@
       "Bash(grep -rn \"paths\\\\|@signi/shared\" engine/tsconfig.json backend/tsconfig.json)",
       "Bash(ls shared/dist/)",
       "Bash(grep -iA0 \"SLEEP\\\\|CRY\\\\|RUN\\\\|EAT\")",
-      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/2a0b75eb-f8df-42e3-81c9-c849e165ff33/scratchpad/verify.mjs)"
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/2a0b75eb-f8df-42e3-81c9-c849e165ff33/scratchpad/verify.mjs)",
+      "Bash(sqlite3 signi.db \"SELECT id, role, transitivity, animate FROM semantic_concepts WHERE id IN \\('MOUSE','STICK','FIRE','BITE','BEAT','BURN'\\);\")",
+      "Bash(sqlite3 signi.db ' *)",
+      "Bash(sqlite3 signi.db \"SELECT id, transitivity, synonym FROM semantic_concepts WHERE id LIKE 'BURN%' OR id='SET_ON_FIRE';\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

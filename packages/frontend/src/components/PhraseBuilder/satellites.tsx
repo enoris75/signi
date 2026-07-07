@@ -69,8 +69,7 @@ export function buildSatellites(
 
   const showSubjectNumber = Boolean(selection.subject);
   const showSubjectGender =
-    (selection.subject?.role === "pronoun" &&
-      selection.subject?.person === "3") ||
+    selection.subject?.role === "pronoun" ||
     (selection.subject?.role === "noun" &&
       Boolean(selection.subject?.gendered));
   const showDirectObjNumber = Boolean(selection.directObject);

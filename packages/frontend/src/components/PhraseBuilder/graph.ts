@@ -38,8 +38,11 @@ type PosFn = (key: string) => Pt;
 // Role-group bounding-rect padding, in SVG pixels. Exported so the period "tidy"
 // packer can reproduce a collapsed box's exact footprint when spacing boxes apart.
 export const PIX_PAD_H = 80; // left & right — covers widest slot box half-width
-export const PIX_PAD_TOP = 35;
-export const PIX_PAD_BOT = 40;
+// Top & bottom must clear not just the box half-height but the satellite reveal
+// controls that ride the box border (each ~20px tall, straddling the edge) plus the
+// clear/adjective toggles on the corners — otherwise they superimpose on the dashed edge.
+export const PIX_PAD_TOP = 48;
+export const PIX_PAD_BOT = 52;
 // The route and cause boxes each carry a specifier toolbar on their top edge (path
 // relation / sentiment); give them extra headroom so it clears the box label.
 export const ROUTE_PAD_TOP = 40;

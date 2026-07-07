@@ -1,4 +1,10 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
+} from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -22,7 +28,8 @@ const uid = () =>
     ? crypto.randomUUID()
     : `c${Math.random().toString(36).slice(2)}`;
 
-const boxKey = (containerId: string, nounKey: NounAddress) => `${containerId}:${nounKey}`;
+const boxKey = (containerId: string, nounKey: NounAddress) =>
+  `${containerId}:${nounKey}`;
 
 // A drawn link line, in workspace pixels. Guarded by a half-pixel comparator so the
 // measuring layout effect settles instead of looping on sub-pixel jitter.
@@ -120,7 +127,9 @@ export function PhraseWorkspace({
   const makeContainerUpdate =
     (id: string) => (updater: (prev: PhraseSelection) => PhraseSelection) =>
       setContainers((cs) =>
-        cs.map((c) => (c.id === id ? { ...c, selection: updater(c.selection) } : c)),
+        cs.map((c) =>
+          c.id === id ? { ...c, selection: updater(c.selection) } : c,
+        ),
       );
 
   function addContainer() {
@@ -128,14 +137,21 @@ export function PhraseWorkspace({
   }
 
   function removeContainer(id: string) {
-    setContainers((cs) => cs.filter((c) => c.id !== id));
-    // Drop any link touching the removed container (its targets re-become roots).
+    // The workspace always keeps at least one period: removing the last remaining
+    // container clears its content in place rather than leaving an empty workspace.
+    setContainers((cs) =>
+      cs.length > 1
+        ? cs.filter((c) => c.id !== id)
+        : cs.map((c) => (c.id === id ? { ...c, selection: {} } : c)),
+    );
+    // Drop any link touching the removed/cleared container (its targets re-become roots).
     setLinks((ls) =>
       ls.filter(
         (l) => l.source.containerId !== id && l.target.containerId !== id,
       ),
     );
-    if (pick.active && pick.source.containerId === id) setPick({ active: false });
+    if (pick.active && pick.source.containerId === id)
+      setPick({ active: false });
   }
 
   function startLink(containerId: string, nounKey: NounAddress) {
@@ -146,7 +162,9 @@ export function PhraseWorkspace({
     setLinks((ls) =>
       ls.filter(
         (l) =>
-          !(l.source.containerId === containerId && l.source.nounKey === nounKey),
+          !(
+            l.source.containerId === containerId && l.source.nounKey === nounKey
+          ),
       ),
     );
   }
@@ -171,7 +189,11 @@ export function PhraseWorkspace({
       );
       return [
         ...kept,
-        { id: uid(), source, target: { containerId: targetContainerId, nounKey: targetNoun } },
+        {
+          id: uid(),
+          source,
+          target: { containerId: targetContainerId, nounKey: targetNoun },
+        },
       ];
     });
   }
@@ -193,8 +215,12 @@ export function PhraseWorkspace({
       const tgtAnchor = targetAnchorEls.current.get(
         boxKey(link.target.containerId, link.target.nounKey),
       );
-      const srcBox = boxEls.current.get(boxKey(link.source.containerId, link.source.nounKey));
-      const tgtBox = boxEls.current.get(boxKey(link.target.containerId, link.target.nounKey));
+      const srcBox = boxEls.current.get(
+        boxKey(link.source.containerId, link.source.nounKey),
+      );
+      const tgtBox = boxEls.current.get(
+        boxKey(link.target.containerId, link.target.nounKey),
+      );
       // Start point: the source anchor's center, else the source box's bottom-center.
       let x1: number, y1: number;
       if (srcAnchor) {
@@ -312,7 +338,10 @@ export function PhraseWorkspace({
               binding={binding}
               selection={c.selection}
               onPhraseUpdate={makeContainerUpdate(c.id)}
-              onRemove={containers.length > 1 ? () => removeContainer(c.id) : undefined}
+              onRemove={() => removeContainer(c.id)}
+              // The sole container can't be deleted (the workspace always keeps one), so
+              // its header control clears the content in place instead of removing it.
+              soleContainer={containers.length === 1}
               onSave={() => setSavePeriodId(c.id)}
               // The word palette rides only the first container to avoid ambiguity.
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}
@@ -330,7 +359,7 @@ export function PhraseWorkspace({
           variant="outlined"
           sx={{ textTransform: "none" }}
         >
-          Add phrase container
+          Add period container
         </Button>
         <Button
           onClick={() => setLoadPeriodOpen(true)}

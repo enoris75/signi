@@ -49,11 +49,10 @@ export function applyConceptSelect(
     delete next.subjectAdjective2;
     if (concept.role === "pronoun") {
       next.subjectNumber = "singular";
-      if (concept.person === "3") {
-        next.subjectGender = prev.subjectGender ?? "masc";
-      } else {
-        delete next.subjectGender;
-      }
+      // Gender applies to every pronoun person (participle/adjective agreement in Romance);
+      // neuter is 3rd-person only, so clamp a stale 'neut' when switching to 1st/2nd.
+      const g = prev.subjectGender ?? "masc";
+      next.subjectGender = concept.person !== "3" && g === "neut" ? "masc" : g;
     } else if (concept.role === "noun") {
       if (concept.gendered) {
         next.subjectGender = prev.subjectGender ?? "masc";

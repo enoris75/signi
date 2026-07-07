@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Box, Paper, Typography, IconButton, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import BackspaceOutlinedIcon from "@mui/icons-material/BackspaceOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import {
@@ -72,6 +73,9 @@ interface PhraseBuilderProps {
   // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
   relativeLabel?: string;
   onRemove?: () => void;
+  // Top-level only: this is the sole period in the workspace, so it can't be deleted — the
+  // header's `onRemove` control clears its content in place instead of removing the container.
+  soleContainer?: boolean;
   // Top-level only: save just this clause (a "period") to the saved-phrase store. Shown as
   // a small icon in the main-clause header. Undefined for nested (possessor/relative) builders.
   onSave?: () => void;
@@ -192,6 +196,7 @@ export function PhraseBuilder({
   head,
   relativeLabel,
   onRemove,
+  soleContainer = false,
   onSave,
   wordsPanelOpen = false,
   onWordsPanelClose,
@@ -365,10 +370,12 @@ export function PhraseBuilder({
   function handleToggleGender(which: GenderSlot) {
     const key = `${which}Gender` as keyof PhraseSelection;
     onPhraseUpdate((prev) => {
-      // Pronouns distinguish three genders in the 3rd person (he/she/it); nouns only two.
+      // Every pronoun carries gender (masc/fem); only the 3rd person adds neuter (he/she/it).
       const concept = prev[which] as Concept | undefined;
       const cycle: ("masc" | "fem" | "neut")[] =
-        concept?.role === "pronoun" ? ["masc", "fem", "neut"] : ["masc", "fem"];
+        concept?.role === "pronoun" && concept.person === "3"
+          ? ["masc", "fem", "neut"]
+          : ["masc", "fem"];
       const cur = (prev[key] as "masc" | "fem" | "neut") ?? "masc";
       const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
       return { ...prev, [key]: next };
@@ -1141,23 +1148,35 @@ export function PhraseBuilder({
                   </span>
                 </Tooltip>
               )}
-              {onRemove && (
-                <IconButton
-                  size="small"
-                  onClick={() => {
-                    // Confirm only when there's work to lose; an empty clause deletes silently.
-                    if (
-                      hasContent &&
-                      !window.confirm("Remove this main clause and everything in it?")
-                    )
-                      return;
-                    onRemove();
-                  }}
-                  aria-label="Remove main clause"
-                  sx={{ p: 0.25 }}
+              {/* The sole period can't be removed (the workspace always keeps one), so its
+                  control clears the content in place. Hide it when there's nothing to clear;
+                  a removable (non-sole) container keeps its remove control even when empty. */}
+              {onRemove && (!soleContainer || hasContent) && (
+                <Tooltip
+                  title={soleContainer ? "Clear this period" : "Remove this period"}
                 >
-                  <CloseIcon sx={{ fontSize: 15 }} />
-                </IconButton>
+                  <IconButton
+                    size="small"
+                    onClick={() => {
+                      // Confirm only when there's work to lose; an empty clause acts silently.
+                      const message = soleContainer
+                        ? "Clear this main clause and everything in it?"
+                        : "Remove this main clause and everything in it?";
+                      if (hasContent && !window.confirm(message)) return;
+                      onRemove();
+                    }}
+                    aria-label={
+                      soleContainer ? "Clear main clause" : "Remove main clause"
+                    }
+                    sx={{ p: 0.25 }}
+                  >
+                    {soleContainer ? (
+                      <BackspaceOutlinedIcon sx={{ fontSize: 15 }} />
+                    ) : (
+                      <CloseIcon sx={{ fontSize: 15 }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
               )}
             </Box>
           </Box>
