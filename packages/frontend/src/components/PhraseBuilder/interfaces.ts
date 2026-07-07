@@ -130,6 +130,16 @@ export interface WorkspaceBinding {
   containerId: string;
   // Register/unregister a noun box's DOM element for cross-container measuring & greying.
   registerBox: (nounKey: NounKey, el: HTMLElement | null) => void;
+  // Register the little anchor dots the cross-container link line runs between: the
+  // relative-clause control on the source noun's dotted box (line start) and the
+  // receiving dot on the target noun's dotted box (line end). The workspace measures
+  // the connector between these when present, falling back to the noun boxes.
+  registerLinkSourceAnchor: (nounKey: NounKey, el: HTMLElement | null) => void;
+  registerLinkTargetAnchor: (nounKey: NounKey, el: HTMLElement | null) => void;
+  // Signal that this container's canvas geometry changed (a box was dragged, the
+  // canvas resized, a group collapsed) so the workspace re-measures its link lines —
+  // the workspace can't otherwise observe a child's internal drag state.
+  onGeometryChange: () => void;
   // Pick-mode: is this noun a legal link target right now? (drives highlight + click)
   isPickTarget: (nounKey: NounKey) => boolean;
   onNounPick: (nounKey: NounKey) => void;

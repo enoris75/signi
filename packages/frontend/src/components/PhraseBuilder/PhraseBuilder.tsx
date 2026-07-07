@@ -43,6 +43,7 @@ import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { SatelliteControls } from "./SatelliteControls.tsx";
+import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 
 interface PhraseBuilderProps {
@@ -410,6 +411,12 @@ export function PhraseBuilder({
   // rendered on the Verb Phrase dotted box instead of the verb box itself.
   const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
   const complementToggleIcons: SatelliteIcon[] = [];
+  // Relative-clause + possessor controls don't ride the word box border — they sit on
+  // their noun's *dotted-box* perimeter and start the dotted connector line from there
+  // (see GroupPerimeterControls below). Collected per noun so both can share an edge.
+  const perimeterByNoun: Partial<
+    Record<NounKey, { relative?: SatelliteIcon; possessor?: SatelliteIcon }>
+  > = {};
   for (const sat of satellites) {
     if (!sat.available) continue;
     // The "Relative clause" satellite is a cross-container link control, not a reveal.
@@ -421,7 +428,7 @@ export function PhraseBuilder({
     if (relativeNoun) {
       if (!binding) continue;
       const isSource = binding.linkSourceKeys.has(relativeNoun);
-      (satelliteIconsByParent[sat.parent] ??= []).push({
+      (perimeterByNoun[relativeNoun] ??= {}).relative = {
         key: sat.key,
         icon: sat.icon,
         label: sat.label,
@@ -433,7 +440,7 @@ export function PhraseBuilder({
           isSource
             ? binding.onRemoveLink(relativeNoun)
             : binding.onStartRelativeLink(relativeNoun),
-      });
+      };
       continue;
     }
     const iconEntry: SatelliteIcon = {
@@ -446,6 +453,15 @@ export function PhraseBuilder({
       valueLabel: sat.valueLabel,
       onToggle: () => handleToggleReveal(sat),
     };
+    // The possessor reveal toggle likewise rides the dotted-box perimeter and anchors
+    // its own connector down to the possessor panel.
+    const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
+      ? (sat.key.slice(0, -"Possessor".length) as NounKey)
+      : null;
+    if (possessorNoun) {
+      (perimeterByNoun[possessorNoun] ??= {}).possessor = iconEntry;
+      continue;
+    }
     if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
       complementToggleIcons.push(iconEntry);
     } else {
@@ -468,6 +484,10 @@ export function PhraseBuilder({
   // Each open possessor panel's wrapper element, keyed by its noun block. (Relative
   // clauses are separate workspace containers now, not docked panels.)
   const possessorPanelEls = useRef<Map<string, HTMLElement>>(new Map());
+  // The possessor connector runs dot-to-dot: from the possessor control on the noun's
+  // dotted-box perimeter (start) to the receiving dot on the panel's top edge (end).
+  const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
+  const possessorDotEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
   const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
   // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
@@ -517,44 +537,57 @@ export function PhraseBuilder({
     setBoxSizes((prev) => (sameBoxSizes(prev, next) ? prev : next));
   });
 
-  // After every render, measure a connector from each open, uncollapsed noun to
-  // its relative-clause panel below the canvas. Both the noun box and the panel
-  // are measured relative to the root Box, so the SVG overlay can span the gap
-  // between the canvas and the docked clause panels. Guarded so it settles.
+  // After every render, measure each open possessor's connector dot-to-dot: from the
+  // possessor control on the noun's dotted-box perimeter (start) to the receiving dot
+  // on the panel's top edge (end). Both are measured relative to the root Box so the
+  // SVG overlay can span the gap down to the docked panel. Guarded so it settles; runs
+  // every commit, so it tracks a noun box dragged around the canvas.
   useLayoutEffect(() => {
     const root = rootRef.current;
     if (!root) return;
     const rootRect = root.getBoundingClientRect();
-    const clamp = (v: number, lo: number, hi: number) =>
-      Math.max(lo, Math.min(hi, v));
     const next: RelConnector[] = [];
-    // Measure one noun→panel connector. `prefix` keeps relative and possessor keys
-    // distinct so a noun can carry both panels without their connectors colliding.
+    // Measure one control→panel-dot connector. `prefix` keeps keys distinct so a noun
+    // could carry several such connectors without their ids colliding.
     const measure = (
       which: string,
-      panelEl: HTMLElement | undefined,
+      controlEl: HTMLElement | undefined,
+      dotEl: HTMLElement | undefined,
       prefix: string,
     ) => {
       // Skip the connector while the noun's group box is collapsed.
       const label = COLLAPSIBLE_GROUPS.find((g) => g.mainKey === which)?.label;
       if (label && collapsedGroups[label]) return;
-      const boxEl = slotEls.current.get(which as SlotKey);
-      if (!boxEl || !panelEl) return;
-      const b = boxEl.getBoundingClientRect();
-      const p = panelEl.getBoundingClientRect();
-      const x1 = b.left + b.width / 2 - rootRect.left;
-      const y1 = b.bottom - rootRect.top;
-      const y2 = p.top - rootRect.top;
-      // Land on the panel's top edge directly below the noun where possible,
-      // clamped a little inside the panel so the line meets it cleanly.
-      const x2 = clamp(x1, p.left - rootRect.left + 14, p.right - rootRect.left - 14);
+      if (!controlEl || !dotEl) return;
+      const c = controlEl.getBoundingClientRect();
+      const d = dotEl.getBoundingClientRect();
+      const x1 = c.left + c.width / 2 - rootRect.left;
+      const y1 = c.top + c.height / 2 - rootRect.top;
+      const x2 = d.left + d.width / 2 - rootRect.left;
+      const y2 = d.top + d.height / 2 - rootRect.top;
       const color =
         MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
       next.push({ which: `${prefix}:${which}`, x1, y1, x2, y2, color });
     };
-    for (const which of openPossessors) measure(which, possessorPanelEls.current.get(which), "poss");
+    for (const which of openPossessors)
+      measure(
+        which,
+        possessorControlEls.current.get(which),
+        possessorDotEls.current.get(which),
+        "poss",
+      );
     setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
+
+  // Tell the workspace to re-measure its cross-container link lines whenever this
+  // container's canvas geometry changes — a box dragged, the canvas resized, a group
+  // collapsed. The workspace can't observe our internal drag state, so it would
+  // otherwise draw stale subordinate connectors. Keyed on the geometry-bearing state
+  // only, so a workspace re-render (new binding object) doesn't refire it into a loop.
+  const notifyGeometry = binding?.onGeometryChange;
+  useLayoutEffect(() => {
+    notifyGeometry?.();
+  }, [notifyGeometry, positions, boxSizes, svgSize, graphHeight, collapsedGroups]);
 
   function startDrag(e: React.PointerEvent, key: string) {
     const p = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -979,6 +1012,20 @@ export function PhraseBuilder({
                     satelliteIconsByParent={satelliteIconsByParent}
                     controlPos={controlPos}
                   />
+
+                  <GroupPerimeterControls
+                    groupRects={groupRects}
+                    perimeterByNoun={perimeterByNoun}
+                    linkTargetKeys={
+                      binding ? (binding.linkTargetKeys as Set<NounKey>) : undefined
+                    }
+                    registerSourceAnchor={binding?.registerLinkSourceAnchor}
+                    registerTargetAnchor={binding?.registerLinkTargetAnchor}
+                    registerPossessorControl={(nounKey, el) => {
+                      if (el) possessorControlEls.current.set(nounKey, el);
+                      else possessorControlEls.current.delete(nounKey);
+                    }}
+                  />
                 </Box>
 
                 <Resizer
@@ -1006,6 +1053,8 @@ export function PhraseBuilder({
         {showCanvas &&
           openPossessors.map((which) => {
             const nounHead = selection[which] as Concept;
+            const possColor =
+              MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
             return (
               <Box
                 key={which}
@@ -1013,8 +1062,29 @@ export function PhraseBuilder({
                   if (el) possessorPanelEls.current.set(which, el);
                   else possessorPanelEls.current.delete(which);
                 }}
-                sx={{ mt: 1.5, pl: nested ? 1 : 2 }}
+                sx={{ position: "relative", mt: 1.5, pl: nested ? 1 : 2 }}
               >
+                {/* Receiving dot on the panel's top edge — where this noun's possessor
+                    connector lands. */}
+                <Box
+                  ref={(el: HTMLDivElement | null) => {
+                    if (el) possessorDotEls.current.set(which, el);
+                    else possessorDotEls.current.delete(which);
+                  }}
+                  sx={{
+                    position: "absolute",
+                    left: nested ? 8 + 20 : 16 + 20,
+                    top: 0,
+                    transform: "translate(-50%, -50%)",
+                    width: 10,
+                    height: 10,
+                    borderRadius: "50%",
+                    bgcolor: possColor,
+                    border: "2px solid",
+                    borderColor: "background.paper",
+                    zIndex: 2,
+                  }}
+                />
                 <PhraseBuilder
                   nounPhrase
                   head={nounHead}

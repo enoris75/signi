@@ -1,4 +1,4 @@
-import React, { useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -89,7 +89,16 @@ export function PhraseWorkspace({
   const [pick, setPick] = useState<PickMode>({ active: false });
   const workspaceRef = useRef<HTMLDivElement>(null);
   const boxEls = useRef<Map<string, HTMLElement>>(new Map());
+  // The anchor dots the link line snaps to: the source noun's relative-clause control
+  // and the target noun's receiving dot, both pinned on their dotted-box perimeter.
+  const sourceAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
+  const targetAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const [connectors, setConnectors] = useState<Connector[]>([]);
+  // Bumped by a child container whenever it drags a box / resizes its canvas, so the
+  // measuring effect below re-runs against the moved anchors. Stable identity so the
+  // child effect that calls it doesn't refire on every workspace render.
+  const [, setGeomTick] = useState(0);
+  const bumpGeom = useCallback(() => setGeomTick((t) => t + 1), []);
 
   // Cancel pick-mode on Escape.
   useEffect(() => {
@@ -160,31 +169,52 @@ export function PhraseWorkspace({
     });
   }
 
-  // Measure each link's connector from the source noun box (bottom-center) to the target
-  // noun box (top-center), in workspace-relative pixels. Guarded so it settles.
+  // Measure each link's connector between the two anchor dots — the source noun's
+  // relative-clause control and the target noun's receiving dot — in workspace-relative
+  // pixels. Falls back to the noun boxes (bottom-center → top-center) until the anchors
+  // mount. Runs on every render, including the geometry bumps a child fires on drag, so
+  // the line tracks a box moved inside a container. Guarded so it settles.
   useLayoutEffect(() => {
     const root = workspaceRef.current;
     if (!root) return;
     const rootRect = root.getBoundingClientRect();
     const next: Connector[] = [];
     for (const link of links) {
-      const src = boxEls.current.get(boxKey(link.source.containerId, link.source.nounKey));
-      const tgt = boxEls.current.get(boxKey(link.target.containerId, link.target.nounKey));
-      if (!src || !tgt) continue;
-      const s = src.getBoundingClientRect();
-      const t = tgt.getBoundingClientRect();
+      const srcAnchor = sourceAnchorEls.current.get(
+        boxKey(link.source.containerId, link.source.nounKey),
+      );
+      const tgtAnchor = targetAnchorEls.current.get(
+        boxKey(link.target.containerId, link.target.nounKey),
+      );
+      const srcBox = boxEls.current.get(boxKey(link.source.containerId, link.source.nounKey));
+      const tgtBox = boxEls.current.get(boxKey(link.target.containerId, link.target.nounKey));
+      // Start point: the source anchor's center, else the source box's bottom-center.
+      let x1: number, y1: number;
+      if (srcAnchor) {
+        const s = srcAnchor.getBoundingClientRect();
+        x1 = s.left + s.width / 2 - rootRect.left;
+        y1 = s.top + s.height / 2 - rootRect.top;
+      } else if (srcBox) {
+        const s = srcBox.getBoundingClientRect();
+        x1 = s.left + s.width / 2 - rootRect.left;
+        y1 = s.bottom - rootRect.top;
+      } else continue;
+      // End point: the target anchor's center, else the target box's top-center.
+      let x2: number, y2: number;
+      if (tgtAnchor) {
+        const t = tgtAnchor.getBoundingClientRect();
+        x2 = t.left + t.width / 2 - rootRect.left;
+        y2 = t.top + t.height / 2 - rootRect.top;
+      } else if (tgtBox) {
+        const t = tgtBox.getBoundingClientRect();
+        x2 = t.left + t.width / 2 - rootRect.left;
+        y2 = t.top - rootRect.top;
+      } else continue;
       const color =
         MUI_COLOR_HEX[
           ALL_SLOTS.find((sl) => sl.key === link.source.nounKey)?.color ?? "primary"
         ];
-      next.push({
-        id: link.id,
-        x1: s.left + s.width / 2 - rootRect.left,
-        y1: s.bottom - rootRect.top,
-        x2: t.left + t.width / 2 - rootRect.left,
-        y2: t.top - rootRect.top,
-        color,
-      });
+      next.push({ id: link.id, x1, y1, x2, y2, color });
     }
     setConnectors((prev) => (sameConnectors(prev, next) ? prev : next));
   });
@@ -240,6 +270,17 @@ export function PhraseWorkspace({
               if (el) boxEls.current.set(k, el);
               else boxEls.current.delete(k);
             },
+            registerLinkSourceAnchor: (nounKey, el) => {
+              const k = boxKey(c.id, nounKey);
+              if (el) sourceAnchorEls.current.set(k, el);
+              else sourceAnchorEls.current.delete(k);
+            },
+            registerLinkTargetAnchor: (nounKey, el) => {
+              const k = boxKey(c.id, nounKey);
+              if (el) targetAnchorEls.current.set(k, el);
+              else targetAnchorEls.current.delete(k);
+            },
+            onGeometryChange: bumpGeom,
             isPickTarget: (nounKey) =>
               pick.active &&
               pick.source.containerId !== c.id &&
