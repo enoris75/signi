@@ -110,6 +110,40 @@ function dePrep(forms: Record<string, string>, plural = false, lead?: string): s
   return `de ${art}`; // "de la", "de l'"
 }
 
+/**
+ * Non-contracting preposition (dans / vers / sous / à travers …) + determiner. French only
+ * fuses "à"/"de" with a definite article, so these carry whatever `artFor` yields: "dans une
+ * maison", "dans la maison", bare "dans maison".
+ */
+function prepDet(prep: string, forms: Record<string, string>, plural: boolean, lead: string): string {
+  const det = artFor(forms, plural, lead);
+  return det ? `${prep} ${det}` : prep;
+}
+
+/**
+ * "à" + determiner. Only the definite fuses (au/aux/à la/à l'); otherwise a plain "à" leads
+ * the chosen determiner ("à une maison", "à quelques maisons") — "à" never elides.
+ */
+function aDet(forms: Record<string, string>, plural: boolean, lead: string): string {
+  if ((forms['definiteness'] ?? 'definite') === 'definite') return datPrep(forms, plural, lead);
+  return prepDet('à', forms, plural, lead);
+}
+
+/**
+ * "de" + determiner. Only the definite fuses (du/des/de la/de l'). Otherwise French drops the
+ * indefinite/partitive article after "de" (de+des → "de maisons", de+du/de la → "d'eau") and
+ * elides before a vowel; a surviving quantifier or "un/une" is kept ("de quelques maisons",
+ * "d'une maison").
+ */
+function deDet(forms: Record<string, string>, plural: boolean, lead: string): string {
+  const def = forms['definiteness'] ?? 'definite';
+  if (def === 'definite') return dePrep(forms, plural, lead);
+  const det = artFor(forms, plural, lead);
+  const drops = det === 'des' || (forms['uncountable'] === '1' && (def === 'indefinite' || def === 'some'));
+  if (!det || drops) return VOWEL_START.test(lead) ? "d'" : 'de';
+  return VOWEL_START.test(det) ? `d'${det}` : `de ${det}`;
+}
+
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
@@ -187,18 +221,22 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
   return renderNP(np, (plural, lead) => artFor(forms, plural, lead)); // noun — determiner from forms
 }
 
-/** route path relation → preposition (+ "de"-contraction for those governing "de"). */
+/**
+ * route path relation → preposition, honoring the head's determiner. The plain adverbs
+ * (sous / derrière / devant / à travers) take a non-fusing article straight off `artFor`
+ * ("sous une maison" / "sous la maison"); "au-dessus" and "autour" govern "de", which fuses
+ * only with the definite ("autour de la maison" but "autour d'une maison"), via `deDet`.
+ */
 function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string {
   const f = c.phrase.head.forms;
-  const art = defArticle(f, plural, lead);
   switch (pathSpecifier(c)) {
-    case 'under':       return `sous ${art}`;
-    case 'over':        return `au-dessus ${dePrep(f, plural, lead)}`;
-    case 'around':      return `autour ${dePrep(f, plural, lead)}`;
-    case 'behind':      return `derrière ${art}`;
-    case 'in_front_of': return `devant ${art}`;
+    case 'under':       return prepDet('sous', f, plural, lead);
+    case 'over':        return `au-dessus ${deDet(f, plural, lead)}`;
+    case 'around':      return `autour ${deDet(f, plural, lead)}`;
+    case 'behind':      return prepDet('derrière', f, plural, lead);
+    case 'in_front_of': return prepDet('devant', f, plural, lead);
     case 'through':
-    default:            return `à travers ${art}`;
+    default:            return prepDet('à travers', f, plural, lead);
   }
 }
 
@@ -245,10 +283,10 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // chien" ("à"-contracted via datPrep).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
-        type === 'locative'  ? `dans ${defArticle(f, plural, lead)}` :
-        type === 'terminus'  ? datPrep(f, plural, lead) :
-        type === 'direction' ? (f['animate'] === '1' ? `vers ${defArticle(f, plural, lead)}` : datPrep(f, plural, lead)) :
-        type === 'source'    ? `loin ${dePrep(f, plural, lead)}` :
+        type === 'locative'  ? prepDet('dans', f, plural, lead) :
+        type === 'terminus'  ? aDet(f, plural, lead) :
+        type === 'direction' ? (f['animate'] === '1' ? prepDet('vers', f, plural, lead) : aDet(f, plural, lead)) :
+        type === 'source'    ? `loin ${deDet(f, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grâce ${datPrep(f, plural, lead)}` :
           causeSent === 'negative' ? `par la faute ${dePrep(f, plural, lead)}` :

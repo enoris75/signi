@@ -150,6 +150,16 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
 };
 
 /**
+ * Complements whose noun head carries a user-selectable determiner. The adposition-free
+ * `predicative` keeps its own article; the spatial/dative complements (locative / direction
+ * / source / route / terminus) are adposition-bearing — their engines fuse the preposition
+ * with a *definite* article (Italian "alla casa") but otherwise render the chosen determiner
+ * uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is excluded: it
+ * accepts a pronoun and weaves the quantifier into its connector, a separate concern.
+ */
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'locative', 'direction', 'source', 'route'];
+
+/**
  * Spatial relations a `route` (path) complement can express. English needs a
  * distinct preposition for each ("through" vs "over" vs "around"); every
  * language maps these to its own adposition (and case, in German). Only the

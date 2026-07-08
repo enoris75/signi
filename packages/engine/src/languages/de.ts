@@ -44,14 +44,19 @@ const STRONG_ENDINGS: Record<'nom' | 'acc', Record<Slot, string>> = {
   acc: { masc: 'en', fem: 'e', neut: 'es', plural: 'e' },
 };
 
-// Pick the ending table for a case + determiner. Dative only ever appears on definite
-// (indirect object / complement) phrases here, so it stays weak. An indefinite *plural*
-// has no article, so it declines strong like a bare phrase.
+// Strong dative (article-less dative complement — "mit gutem Wein", "guter Milch",
+// "guten Häusern"): the adjective carries the dative gender/number ending.
+const STRONG_DAT: Record<Slot, string> = { masc: 'em', fem: 'er', neut: 'em', plural: 'en' };
+
+// Pick the ending table for a case + determiner. In the dative a *bare* phrase declines
+// strong (the adjective carries the case); every other dative determiner — definite,
+// ein-/kein- (mixed → -en), and einige/viele/wenige/alle — takes the invariant weak -en.
+// In nom/acc an indefinite *plural* has no article, so it declines strong like a bare phrase.
 //   • kein- ("no")      → like ein-: mixed in the singular, weak in the plural.
 //   • einige/viele/wenige (some/many/few) → strong (no article carries the case).
 //   • alle ("all") and the definite article → weak.
 function endingsFor(_case: Case, definiteness: string, plural: boolean): Record<Slot, string> {
-  if (_case === 'dat') return WEAK_ENDINGS.dat;
+  if (_case === 'dat') return definiteness === 'bare' ? STRONG_DAT : WEAK_ENDINGS.dat;
   if (definiteness === 'bare') return STRONG_ENDINGS[_case];
   if (definiteness === 'indefinite') return plural ? STRONG_ENDINGS[_case] : MIXED_ENDINGS[_case];
   if (definiteness === 'no') return plural ? WEAK_ENDINGS[_case] : MIXED_ENDINGS[_case];
@@ -117,13 +122,14 @@ function keinForm(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean)
 }
 
 /**
- * The determiner for a noun phrase, from its `definiteness` (default 'definite'). Dative
- * phrases (indirect object / complement) are always definite here, so they keep der/die/den.
- * "kein" is self-negating (no verb concord); einige/viele/wenige/alle are plural quantifiers.
+ * The determiner for a noun phrase, from its `definiteness` (default 'definite'), declined
+ * for case — including the dative, which the motion/dative complements use (einem/einer,
+ * keinem/keiner, einigen/vielen/wenigen/allen). "kein" is self-negating (no verb concord);
+ * einige/viele/wenige/alle are plural quantifiers.
  */
 function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
   const definiteness = forms['definiteness'] ?? 'definite';
-  if (_case === 'dat' || definiteness === 'definite') return defArticle(forms, _case, plural);
+  if (definiteness === 'definite') return defArticle(forms, _case, plural);
   const gender = forms['gender'] ?? 'neut';
   // Mass nouns ("Wasser") stay singular and take the invariant mass quantifiers
   // "etwas / viel / wenig"; "all das Wasser"; no indefinite article.
@@ -139,15 +145,34 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
       default:            return defArticle(forms, _case, false);
     }
   }
+  // Dative plural quantifiers add -n (mit einigen/vielen/wenigen/allen Häusern).
+  const dat = _case === 'dat';
   switch (definiteness) {
     case 'bare': return '';
     case 'no':   return keinForm(_case, gender, plural);
-    case 'some': return 'einige';
-    case 'many': return 'viele';
-    case 'few':  return 'wenige';
-    case 'all':  return 'alle';
+    case 'some': return dat ? 'einigen' : 'einige';
+    case 'many': return dat ? 'vielen' : 'viele';
+    case 'few':  return dat ? 'wenigen' : 'wenige';
+    case 'all':  return dat ? 'allen' : 'alle';
     default:     return indefArticle(_case, gender, plural);
   }
+}
+
+/**
+ * A complement's preposition + case-declined determiner, honoring `definiteness`. Only a
+ * *definite* article triggers the German preposition-article fusions (in+dem=im, zu+dem=zum,
+ * zu+der=zur); any other determiner (einem, keiner, vielen, bare) rides after the plain
+ * preposition. An empty `prep` is the bare-dative terminus — the determiner alone.
+ */
+function prepDet(prep: string, forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
+  const det = determiner(forms, _case, plural);
+  if ((forms['definiteness'] ?? 'definite') === 'definite') {
+    if (prep === 'in' && det === 'dem') return 'im';
+    if (prep === 'zu' && det === 'dem') return 'zum';
+    if (prep === 'zu' && det === 'der') return 'zur';
+  }
+  if (!prep) return det;
+  return det ? `${prep} ${det}` : prep;
 }
 
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
@@ -174,7 +199,7 @@ function possessorText(np: ResolvedNounPhrase): string {
   if (!poss) return '';
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
-  const word = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
+  const word = datPluralN(germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '')), 'dat', plural);
   const art = defArticle(f, 'dat', plural); // dem / der / den
   const von = art === 'dem' ? 'vom' : `von ${art}`;
   const declined = adjPhrase(poss, 'dat');
@@ -197,12 +222,20 @@ function germanCompound(np: ResolvedNounPhrase, headWord: string): string {
     .join('');
 }
 
+/**
+ * Dative plural nouns take an -n ("den/vielen Häusern"), unless the plural already ends in
+ * -n or -s ("den Katzen", "den Autos"). Applied wherever a noun surfaces in the dative.
+ */
+function datPluralN(word: string, _case: Case, plural: boolean): string {
+  return _case === 'dat' && plural && word && !/[ns]$/.test(word) ? `${word}n` : word;
+}
+
 function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const headWord = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const word = germanCompound(np, headWord);
+  const word = datPluralN(germanCompound(np, headWord), _case, plural);
   const definiteness = forms['definiteness'] ?? 'definite';
   const declined = adjPhrase(np, _case, definiteness);
   const a = declined ? `${declined} ` : '';
@@ -227,18 +260,18 @@ function routeCase(c: ResolvedComplement): 'acc' | 'dat' {
   return spec === 'through' || spec === 'around' ? 'acc' : 'dat';
 }
 
-// route path relation → preposition + article.
+// route path relation → preposition + case-declined determiner (none of these preps fuse).
 function routeHead(c: ResolvedComplement, plural: boolean): string {
   const f = c.phrase.head.forms;
-  const art = defArticle(f, routeCase(c), plural);
+  const _case = routeCase(c);
   switch (pathSpecifier(c)) {
-    case 'under':       return `unter ${art}`;
-    case 'over':        return `über ${art}`;
-    case 'around':      return `um ${art}`;
-    case 'behind':      return `hinter ${art}`;
-    case 'in_front_of': return `vor ${art}`;
+    case 'under':       return prepDet('unter', f, _case, plural);
+    case 'over':        return prepDet('über', f, _case, plural);
+    case 'around':      return prepDet('um', f, _case, plural);
+    case 'behind':      return prepDet('hinter', f, _case, plural);
+    case 'in_front_of': return prepDet('vor', f, _case, plural);
     case 'through':
-    default:            return `durch ${art}`;
+    default:            return prepDet('durch', f, _case, plural);
   }
 }
 
@@ -265,9 +298,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         return nounPhrase(c.phrase, 'nom');
       }
       const plural = (f['number'] ?? f['count']) === 'plural';
-      const word = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
-      // route → path preposition (+ its case); locative/direction/source → two-way
-      // preps + dative with the usual in+dem=im, zu+dem=zum, zu+der=zur fusions.
+      const definiteness = f['definiteness'] ?? 'definite';
+      const compound = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
+      // route → path preposition (+ its case); locative/direction/source → two-way preps +
+      // dative. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire only for a definite
+      // article; any other determiner (einem, keiner, vielen, bare) stays uncontracted.
       let head: string;
       let _case: 'nom' | 'acc' | 'dat';
       if (type === 'route') {
@@ -275,21 +310,21 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         head = routeHead(c, plural);
       } else {
         _case = 'dat';
-        const art = defArticle(f, 'dat', plural); // dem / der / den
-        // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund")
-        // is standard in speech and reuses the dative articles the other complements share.
-        // Positive credits with "dank" ("dank dem Hund"), also dative here.
-        if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
-        else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
-        else if (type === 'cause') head = `${causeSentiment(c) === 'positive' ? 'dank' : 'wegen'} ${art}`;
+        // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
+        // standard in speech and reuses the dative determiners; positive credits with "dank".
+        if (type === 'locative')  head = prepDet('in', f, 'dat', plural);
+        else if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
+        else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
         // Terminus (dative recipient) is a bare dative — no preposition, just the dative
-        // article ("der Katze"), the same case German gives the plain indirect object.
-        else if (type === 'terminus') head = art;
-        else /* source */         head = `aus ${art}`;
+        // determiner ("der Katze"), the same case German gives the plain indirect object.
+        else if (type === 'terminus') head = prepDet('', f, 'dat', plural);
+        else /* source */         head = prepDet('aus', f, 'dat', plural);
       }
-      const declined = adjPhrase(c.phrase, _case);
+      const word = datPluralN(compound, _case, plural);
+      const declined = adjPhrase(c.phrase, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
-      return `${head} ${adj}${word}${possessorText(c.phrase)}${subordinateClause(c.phrase)}`;
+      const rest = `${adj}${word}${possessorText(c.phrase)}${subordinateClause(c.phrase)}`;
+      return head ? `${head} ${rest}` : rest;
     })
     .filter(Boolean)
     .join(' ');

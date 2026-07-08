@@ -1,6 +1,7 @@
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
+  DETERMINER_COMPLEMENT_TYPES,
   type ComplementType,
   type GrammaticalRole,
   type Transitivity,
@@ -195,8 +196,9 @@ export const COLLAPSIBLE_GROUPS: {
       `${type}Adjective2`,
       `${type}Number`,
       `${type}Gender`,
-      // Only the predicative carries a determiner (the one adposition-free complement).
-      ...(type === "predicative" ? [`${type}Definiteness`] : []),
+      // The predicative plus the adposition-bearing spatial/dative complements carry a
+      // determiner (cause is excluded — it weaves the quantifier into its connector).
+      ...(DETERMINER_COMPLEMENT_TYPES.includes(type) ? [`${type}Definiteness`] : []),
     ],
   })),
 ];
@@ -323,6 +325,13 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   causeGender: { x: 58, y: 96 },
   terminusNumber: NUMBER_TOGGLE_DEFAULTS.terminus,
   terminusGender: { x: 82, y: 60 },
+  // Determiner (the / a / bare / quantifier) reveal icons for the adposition-bearing
+  // complements — icon-only (cycle on click), aimed just outboard of each noun box.
+  sourceDefiniteness: { x: 12, y: 78 },
+  directionDefiniteness: { x: 32, y: 82 },
+  routeDefiniteness: { x: 68, y: 82 },
+  locativeDefiniteness: { x: 92, y: 78 },
+  terminusDefiniteness: { x: 84, y: 50 },
   // Relative-clause reveal icons — no canvas node of their own; these only aim each
   // icon at the bottom edge of its noun box (clauses expand into panels below).
   subjectRelative: { x: 26, y: 64 },

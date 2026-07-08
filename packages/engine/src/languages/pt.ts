@@ -130,6 +130,30 @@ function datPrep(forms: Record<string, string>, plural = false): string {
   return `a ${art}`;
 }
 
+/**
+ * Non-contracting preposition (para …) + determiner, honoring the head's `definiteness`.
+ * Carries whatever `artFor` yields: "para uma casa", "para a casa", bare "para" (→ "para casa").
+ */
+function prepDet(prep: string, forms: Record<string, string>, plural = false): string {
+  const det = artFor(forms, plural);
+  return det ? `${prep} ${det}` : prep;
+}
+
+/**
+ * Contracting preposition (a/de/em/por) + determiner. The definite article fuses via
+ * `contract` (ao/à, do/da, no/na, pelo/pela); any other determiner rides after the plain
+ * preposition uncontracted ("a uma casa", "de muitas casas", "em nenhuma casa").
+ */
+function contractDet(
+  contract: (f: Record<string, string>, p: boolean) => string,
+  prep: string,
+  forms: Record<string, string>,
+  plural = false,
+): string {
+  if ((forms['definiteness'] ?? 'definite') === 'definite') return contract(forms, plural);
+  return prepDet(prep, forms, plural);
+}
+
 function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
   const person = subjectForms['person'] ?? '3';
   const number = subjectForms['number'] ?? 'singular';
@@ -162,17 +186,22 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
   return nounPhrase(forms, adj); // noun — definite article
 }
 
-/** route path relation → preposition (most are "de"-locutions: debaixo do, …). */
+/**
+ * route path relation → preposition, honoring the head's determiner. Most are "de"-locutions
+ * (debaixo de, ao redor de, …) whose "de" fuses only with the definite ("debaixo do carro"
+ * but "debaixo de uma casa"); "through" is "por", which fuses to pelo/pela with the definite
+ * ("pela casa") and stays "por" + determiner otherwise ("por uma casa").
+ */
 function routeHead(c: ResolvedComplement, plural: boolean): string {
   const f = c.phrase.head.forms;
   switch (pathSpecifier(c)) {
-    case 'under':       return `debaixo ${dePrep(f, plural)}`;
-    case 'over':        return `por cima ${dePrep(f, plural)}`;
-    case 'around':      return `ao redor ${dePrep(f, plural)}`;
-    case 'behind':      return `atrás ${dePrep(f, plural)}`;
-    case 'in_front_of': return `em frente ${dePrep(f, plural)}`;
+    case 'under':       return `debaixo ${contractDet(dePrep, 'de', f, plural)}`;
+    case 'over':        return `por cima ${contractDet(dePrep, 'de', f, plural)}`;
+    case 'around':      return `ao redor ${contractDet(dePrep, 'de', f, plural)}`;
+    case 'behind':      return `atrás ${contractDet(dePrep, 'de', f, plural)}`;
+    case 'in_front_of': return `em frente ${contractDet(dePrep, 'de', f, plural)}`;
     case 'through':
-    default:            return porPrep(f, plural);
+    default:            return contractDet(porPrep, 'por', f, plural);
   }
 }
 
@@ -227,10 +256,10 @@ function complementsPhrase(
       // ("a"-contracted via datPrep).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
-        type === 'locative'  ? emPrep(f, plural) :
-        type === 'terminus'  ? datPrep(f, plural) :
-        type === 'direction' ? (f['animate'] === '1' ? `para ${defArticle(f, plural)}` : datPrep(f, plural)) :
-        type === 'source'    ? `longe ${dePrep(f, plural)}` :
+        type === 'locative'  ? contractDet(emPrep, 'em', f, plural) :
+        type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
+        type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
+        type === 'source'    ? `longe ${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `graças ${datPrep(f, plural)}` :
           causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :

@@ -81,7 +81,19 @@
       "Bash(awk ' *)",
       "Bash(perl -ne ' *)",
       "Bash(sqlite3 signi.db \"SELECT DISTINCT cnl.concept_id FROM noun_forms nf JOIN concept_noun_links cnl ON cnl.lexeme_id = nf.lexeme_id AND cnl.is_primary = 1 WHERE nf.form_key = 'fem';\")",
-      "Bash(sqlite3 signi.db \"SELECT COUNT\\(*\\) FROM noun_forms WHERE form_key='fem';\")"
+      "Bash(sqlite3 signi.db \"SELECT COUNT\\(*\\) FROM noun_forms WHERE form_key='fem';\")",
+      "Bash(lsof -i :5173 -i :3000 -i :3001 -sTCP:LISTEN)",
+      "Bash(curl -s \"http://localhost:3001/api/concepts?role=noun\")",
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); g=[c['id'] for c in d['concepts'] if c.get\\('gendered'\\)]; print\\('gendered served by LIVE API:', g\\)\")",
+      "Bash(echo \"shared: $?\")",
+      "Bash(echo \"engine: $?\")",
+      "Bash(curl -s -m 3 http://localhost:3001/api/concepts?role=verb)",
+      "Bash(curl -s -m 3 \"http://localhost:3001/api/concepts?role=verb\")",
+      "Bash(curl -s -m 5 -X POST http://localhost:3001/api/translate -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(echo \"shared:$?\")",
+      "Bash(echo \"engine:$?\")",
+      "Bash(echo \"backend:$?\")",
+      "Bash(echo \"frontend:$?\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

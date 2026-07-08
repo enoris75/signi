@@ -165,6 +165,19 @@ function prepArt(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, 
 }
 
 /**
+ * Preposition + determiner for an adposition-bearing complement, honoring the head's
+ * `definiteness`. Only the *definite* article fuses with the preposition (al/alla/nel/dal…);
+ * an indefinite article, quantifier, or bare noun stays uncontracted after the plain prep —
+ * "a una casa", "a nessuna casa", "a molte case", "a casa". `all` keeps its own definite
+ * article, which likewise doesn't fuse ("a tutte le case").
+ */
+function prepDet(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, plural: boolean, lead: string): string {
+  if ((forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
+  const det = artFor(forms, plural, lead);
+  return det ? `${prep} ${det}` : prep;
+}
+
+/**
  * Inflect an Italian adjective (given in masculine-singular "base" form) to agree
  * with the head noun's gender and number.
  * - "-o" class: freddo → fredda / freddi / fredde (hard c/g kept: stanco → stanchi/stanche)
@@ -323,18 +336,24 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
   return renderNP(np, (plural, lead) => artFor(forms, plural, lead)); // noun — determiner from forms
 }
 
-/** route path relation → preposition (+ "a"-fusion for those that govern "a"). */
+/**
+ * route path relation → preposition, honoring the head's determiner. The place adverbs
+ * (sotto/sopra/dietro/attraverso) take a plain, non-fusing article, so the determiner rides
+ * straight off `artFor` ("sotto la casa" / "sotto una casa" / "sotto casa"). "intorno" and
+ * "davanti" govern "a", which fuses only with the definite ("intorno alla casa" but
+ * "intorno a una casa"), so they route through `prepDet`.
+ */
 function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string {
   const f = c.phrase.head.forms;
-  const art = defArticle(f, plural, lead);
+  const adv = (a: string): string => { const det = artFor(f, plural, lead); return det ? `${a} ${det}` : a; };
   switch (pathSpecifier(c)) {
-    case 'under':       return `sotto ${art}`;
-    case 'over':        return `sopra ${art}`;
-    case 'around':      return `intorno ${datPrep(f, plural, lead)}`;
-    case 'behind':      return `dietro ${art}`;
-    case 'in_front_of': return `davanti ${datPrep(f, plural, lead)}`;
+    case 'under':       return adv('sotto');
+    case 'over':        return adv('sopra');
+    case 'around':      return `intorno ${prepDet('a', f, plural, lead)}`;
+    case 'behind':      return adv('dietro');
+    case 'in_front_of': return `davanti ${prepDet('a', f, plural, lead)}`;
     case 'through':
-    default:            return `attraverso ${art}`;
+    default:            return adv('attraverso');
   }
 }
 
@@ -381,10 +400,10 @@ function complementsPhrase(
       // swaps the connector — negative "per colpa del cane", positive "grazie al cane" ("a"-fused).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
-        type === 'locative'  ? prepArt('in', f, plural, lead) :
-        type === 'terminus'  ? datPrep(f, plural, lead) :
-        type === 'direction' ? prepArt(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
-        type === 'source'    ? `via ${prepArt('da', f, plural, lead)}` :
+        type === 'locative'  ? prepDet('in', f, plural, lead) :
+        type === 'terminus'  ? prepDet('a', f, plural, lead) :
+        type === 'direction' ? prepDet(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
+        type === 'source'    ? `via ${prepDet('da', f, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grazie ${prepArt('a', f, plural, lead)}` :
           causeSent === 'negative' ? `per colpa ${prepArt('di', f, plural, lead)}` :

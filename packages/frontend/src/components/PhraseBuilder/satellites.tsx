@@ -21,6 +21,7 @@ import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
   DEFINITENESS_LABELS,
+  DETERMINER_COMPLEMENT_TYPES,
   TENSE_LABELS,
   type Concept,
   type ComplementType,
@@ -427,9 +428,11 @@ export function buildSatellites(
           parent: type,
           label: "Determiner",
           icon: <ArticleOutlinedIcon sx={iconSx} />,
-          // Only the adposition-free subject complement carries a determiner, and only
-          // for a predicate-noun head ("becomes a legend"); adjective heads take none.
-          available: type === "predicative" && concept?.role === "noun",
+          // The predicative plus the adposition-bearing spatial/dative complements carry a
+          // determiner, and only for a noun head (a pronoun cause takes none). Cause is not
+          // in the set — it folds the quantifier into its connector.
+          available:
+            DETERMINER_COMPLEMENT_TYPES.includes(type) && concept?.role === "noun",
           hasValue: Boolean(
             def && def !== "definite",
           ),
