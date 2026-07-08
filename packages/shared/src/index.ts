@@ -111,29 +111,37 @@ export const TENSE_LABELS: Record<Tense, string> = {
  *
  * `locative`/`direction`/`source`/`route` are the motion/place family; `cause`
  * is the reason/motive adjunct — "the boy cried **because of the dog**"
- * (a causa di / à cause de / wegen / por causa de …). `predicative` is the subject
- * complement of a copular/linking verb — the predicate nominative or predicate
+ * (a causa di / à cause de / wegen / por causa de …). `terminus` is the dative
+ * "to whom / to what" adjunct — the recipient/goal of the action ("I give the book
+ * **to him**", "I cut the hair **to the cat**"). It renders with the same dative
+ * adposition each language already uses for the indirect object (to / a / à / dative
+ * case / に); unlike the ditransitive `indirectObject` it is a per-verb-licensed
+ * adjunct, so a plain transitive verb (cut, read) can take one. `predicative` is the
+ * subject complement of a copular/linking verb — the predicate nominative or predicate
  * adjective that describes the *subject*: "she becomes **a legend**", "he seems
  * **happy**". Unlike the others it takes no adposition; a noun head keeps its own
  * article (predicate nominative, German nominative case) and an adjective head agrees
  * with the subject (Romance) — English/German predicate adjectives are uninflected.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'predicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'terminus' | 'predicative';
 
 /** Canonical UI order (matches how complements are presented to the user). */
-export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'locative', 'direction', 'source', 'route', 'cause'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'cause'];
 
 /**
  * Order in which active complements are rendered within a sentence. The subject
  * complement leads (it sits right after the verb: "becomes **a legend** in the house"),
  * then the motion path "from X to Y through Z", the static locative, and the causal
  * adjunct ("because of …") last. In Japanese (SOV) everything precedes the verb, so the
- * subject complement's になる/く-form ends up adjacent to the verb regardless.
+ * subject complement's になる/く-form ends up adjacent to the verb regardless. The dative
+ * `terminus` ("to him") sits with the recipient right after the subject complement, mirroring
+ * where the indirect object falls ("gives **a legend** the book to the cat").
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
+  terminus: 'Terminus',
   locative: 'Locative',
   direction: 'Direction',
   source: 'Source',

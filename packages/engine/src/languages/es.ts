@@ -212,6 +212,7 @@ function complementsPhrase(
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
         type === 'locative'  ? `en ${defArticle(f, plural)}` :
+        type === 'terminus'  ? datPrep(f, plural) :
         type === 'direction' ? (f['animate'] === '1' ? `hacia ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `lejos ${dePrep(f, plural)}` :
         type === 'cause'     ? (

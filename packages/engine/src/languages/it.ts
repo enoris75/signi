@@ -382,6 +382,7 @@ function complementsPhrase(
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepArt('in', f, plural, lead) :
+        type === 'terminus'  ? datPrep(f, plural, lead) :
         type === 'direction' ? prepArt(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
         type === 'source'    ? `via ${prepArt('da', f, plural, lead)}` :
         type === 'cause'     ? (

@@ -52,6 +52,11 @@ export interface PhraseSelection {
     predicative?: Concept;
     predicativeNumber?: "singular" | "plural";
     predicativeGender?: "masc" | "fem" | "neut";
+    // Determiner for a predicate-noun subject complement ("becomes a legend"). The
+    // predicative is the one complement that takes no adposition, so — like subject and
+    // direct object — it can honor the determiner; the adposition-bearing complements
+    // stay definite. Only meaningful for a noun head (an adjective head takes none).
+    predicativeDefiniteness?: Definiteness;
     predicativeAdjective?: Concept;
     predicativeAdjective2?: Concept;
     // Motion/locative complements — each an independent noun phrase, with its
@@ -87,6 +92,14 @@ export interface PhraseSelection {
     causeAdjective?: Concept;
     causeAdjective2?: Concept;
     causeSentiment?: CauseSentiment;
+    // Terminus / dative adjunct ("cut the hair *to the cat*") — the recipient or goal, "to
+    // whom / to what". Renders with each language's indirect-object dative; carries no
+    // specifier.
+    terminus?: Concept;
+    terminusNumber?: "singular" | "plural";
+    terminusGender?: "masc" | "fem" | "neut";
+    terminusAdjective?: Concept;
+    terminusAdjective2?: Concept;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
@@ -111,6 +124,7 @@ export interface PhraseSelection {
     sourcePossessor?: PhraseSelection;
     routePossessor?: PhraseSelection;
     causePossessor?: PhraseSelection;
+    terminusPossessor?: PhraseSelection;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun

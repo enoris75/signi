@@ -72,11 +72,14 @@ export function VerbTypeahead({
         }}
         onKeyDown={handleKeyDown}
         placeholder="type a verb…"
+        // Size the field to its placeholder rather than the browser default
+        // (~20ch); otherwise the empty verb box overflows the 160px-wide dashed
+        // group box that's padded to PIX_PAD_H (widest-slot half-width) each side.
+        inputProps={{ size: 13 }}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",
           color: "text.primary",
-          width: "100%",
           "& input": { p: 0 },
         }}
       />

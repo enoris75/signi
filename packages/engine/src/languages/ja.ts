@@ -23,6 +23,8 @@ const PARTICLE: Record<ComplementType, string> = {
   // Cause/reason: the neutral compound postposition "のために"; the sentiment swaps it (see
   // CAUSE_PARTICLE). Kept here for the type — cause is overridden per-sentiment below.
   cause: 'のために',
+  // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
+  terminus: 'に',
   // Subject complement: a noun/na-adjective predicate takes に (伝説になる); an i-adjective
   // takes its adverbial く-form with no particle (楽しくなる). Handled specially in
   // complementSegs — this に is the noun/na-adjective default.

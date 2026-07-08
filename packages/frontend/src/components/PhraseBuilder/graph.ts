@@ -47,6 +47,13 @@ export const PIX_PAD_BOT = 52;
 // relation / sentiment); give them extra headroom so it clears the box label.
 export const ROUTE_PAD_TOP = 40;
 
+// Compact-view padding: the dashed boxes and their border controls are hidden, so a
+// group rect only has to hug its lone core word (plus a hair of gap for the spine).
+// Much tighter than the full-view pads above — this is what shrinks the canvas.
+export const COMPACT_PAD_H = 66;
+export const COMPACT_PAD_TOP = 30;
+export const COMPACT_PAD_BOT = 30;
+
 const rectCenter = (r: GroupRect): Pt => ({
   x: r.x + r.width / 2,
   y: r.y + r.height / 2,
@@ -72,6 +79,7 @@ export function buildGraph({
   drawCanvas,
   nounPhrase = false,
   showSubject = true,
+  compact = false,
   renderedSlots,
   visibleSlots,
   shownMap,
@@ -89,6 +97,9 @@ export function buildGraph({
   // Whether the Subject role group is drawn. False inside a relative clause, whose
   // subject is the (external) head noun rather than a box on this canvas.
   showSubject?: boolean;
+  // Compact view: shrink the group rects to hug their core word (the dashed boxes and
+  // their border controls are hidden), so the spine connects tightly-packed chips.
+  compact?: boolean;
   renderedSlots: SlotConfig[];
   visibleSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
@@ -189,6 +200,8 @@ export function buildGraph({
         edges.push(satEdge(type, `${type}Number`, MUI_COLOR_HEX.warning));
       if (shownMap[`${type}Gender`])
         edges.push(satEdge(type, `${type}Gender`, MUI_COLOR_HEX.warning));
+      if (shownMap[`${type}Definiteness`])
+        edges.push(satEdge(type, `${type}Definiteness`, MUI_COLOR_HEX.warning));
     }
   }
 
@@ -288,21 +301,27 @@ export function buildGraph({
           type,
           ...(shownMap[`${type}Number`] ? [`${type}Number`] : []),
           ...(shownMap[`${type}Gender`] ? [`${type}Gender`] : []),
+          ...(shownMap[`${type}Definiteness`] ? [`${type}Definiteness`] : []),
         ],
       })),
     ];
 
+    // Compact hugs the lone core word with tight, uniform pads (no toolbar headroom,
+    // since the specifier toolbars are hidden too); full view uses the generous pads.
+    const padH = compact ? COMPACT_PAD_H : PIX_PAD_H;
+    const padBot = compact ? COMPACT_PAD_BOT : PIX_PAD_BOT;
     for (const g of roleGroups) {
       const pts = g.nodeKeys.map((k) => pos(k));
       const minXpct = Math.min(...pts.map((p) => p.x));
       const maxXpct = Math.max(...pts.map((p) => p.x));
       const minYpct = Math.min(...pts.map((p) => p.y));
       const maxYpct = Math.max(...pts.map((p) => p.y));
-      const padTop =
-        g.removeKey === "route" || g.removeKey === "cause"
+      const padTop = compact
+        ? COMPACT_PAD_TOP
+        : g.removeKey === "route" || g.removeKey === "cause"
           ? PIX_PAD_TOP + ROUTE_PAD_TOP
           : PIX_PAD_TOP;
-      const rx = Math.max(0, px(minXpct, svgSize.w) - PIX_PAD_H);
+      const rx = Math.max(0, px(minXpct, svgSize.w) - padH);
       const ry = Math.max(0, px(minYpct, svgSize.h) - padTop);
       groupRects.push({
         label: g.label,
@@ -311,8 +330,8 @@ export function buildGraph({
         removeKey: g.removeKey,
         x: rx,
         y: ry,
-        width: Math.min(svgSize.w, px(maxXpct, svgSize.w) + PIX_PAD_H) - rx,
-        height: Math.min(svgSize.h, px(maxYpct, svgSize.h) + PIX_PAD_BOT) - ry,
+        width: Math.min(svgSize.w, px(maxXpct, svgSize.w) + padH) - rx,
+        height: Math.min(svgSize.h, px(maxYpct, svgSize.h) + padBot) - ry,
       });
     }
   }

@@ -282,6 +282,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         if (type === 'locative')  head = art === 'dem' ? 'im' : `in ${art}`;
         else if (type === 'direction') head = art === 'dem' ? 'zum' : art === 'der' ? 'zur' : `zu ${art}`;
         else if (type === 'cause') head = `${causeSentiment(c) === 'positive' ? 'dank' : 'wegen'} ${art}`;
+        // Terminus (dative recipient) is a bare dative — no preposition, just the dative
+        // article ("der Katze"), the same case German gives the plain indirect object.
+        else if (type === 'terminus') head = art;
         else /* source */         head = `aus ${art}`;
       }
       const declined = adjPhrase(c.phrase, _case);

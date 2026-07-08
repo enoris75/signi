@@ -228,6 +228,7 @@ function complementsPhrase(
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
         type === 'locative'  ? emPrep(f, plural) :
+        type === 'terminus'  ? datPrep(f, plural) :
         type === 'direction' ? (f['animate'] === '1' ? `para ${defArticle(f, plural)}` : datPrep(f, plural)) :
         type === 'source'    ? `longe ${dePrep(f, plural)}` :
         type === 'cause'     ? (

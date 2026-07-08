@@ -4,6 +4,8 @@ import CloseIcon from "@mui/icons-material/Close";
 import BackspaceOutlinedIcon from "@mui/icons-material/BackspaceOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
+import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
+import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import {
   COMPLEMENT_LABELS,
   COMPLEMENT_TYPES,
@@ -51,6 +53,9 @@ import {
   PIX_PAD_TOP,
   PIX_PAD_BOT,
   ROUTE_PAD_TOP,
+  COMPACT_PAD_H,
+  COMPACT_PAD_TOP,
+  COMPACT_PAD_BOT,
 } from "./graph.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
@@ -220,12 +225,19 @@ export function PhraseBuilder({
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
     nested ? "verb" : "subject",
   );
+  // A filled word box the user clicked to change its word: its inline picker is shown
+  // over the current word. Null when no box is being re-picked. Cleared on select or blur.
+  const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
   const [collapsedGroups, setCollapsedGroups] = useState<
     Record<string, boolean>
   >({});
+  // Compact view: collapse every dotted box down to just its core word at once — a
+  // period-level toggle over the per-group collapse below. It doesn't touch
+  // `collapsedGroups`, so any manual per-box collapses are preserved when it turns off.
+  const [compact, setCompact] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
@@ -281,6 +293,10 @@ export function PhraseBuilder({
     const slot = targetSlot ?? activeSlot;
     if (!slot) return;
 
+    // Re-picking an already-filled box: replace the word in place and don't auto-advance.
+    const wasFilled = Boolean(selection[slot]);
+    setEditingSlot(null);
+
     onPhraseUpdate((prev) => {
       const next = applyConceptSelect(prev, slot, concept);
       // The pronoun chooser commits its plurality/gender decision alongside the
@@ -293,6 +309,9 @@ export function PhraseBuilder({
           opts.gender as never;
       return next;
     });
+
+    // Re-picking a filled word keeps focus on it; only a fresh pick auto-advances.
+    if (wasFilled) return;
 
     // Auto-advance to next empty slot (only among the main, always-visible slots)
     let slots = visibleSlots;
@@ -315,11 +334,9 @@ export function PhraseBuilder({
             )?.key ?? null),
       );
     } else if (slot.endsWith("Adjective")) {
-      // Any first adjective (subject / object / complement) chains to a second —
-      // reveal & focus it. (Second adjectives end in "Adjective2", so are skipped.)
-      const second = `${slot}2` as SlotKey;
-      setRevealed((prev) => ({ ...prev, [second]: true }));
-      setActiveSlot(second);
+      // Setting a first adjective just closes the picker; the user can open the
+      // second adjective satellite explicitly if they want one.
+      setActiveSlot(null);
     } else {
       const currentIdx = slots.findIndex((s) => s.key === slot);
       const nextSlot = slots
@@ -331,6 +348,18 @@ export function PhraseBuilder({
 
   function handleSlotClick(slot: SlotKey) {
     setActiveSlot(slot);
+  }
+
+  // Click a filled word box to change its word: select the slot and open its inline
+  // picker over the current word (see SlotNode / slotTypeahead `editing`).
+  function handleEditSlot(slot: SlotKey) {
+    setActiveSlot(slot);
+    setEditingSlot(slot);
+  }
+
+  // Focus left a box being re-picked without a new word chosen — restore the word.
+  function handleCancelEdit(slot: SlotKey) {
+    setEditingSlot((cur) => (cur === slot ? null : cur));
   }
 
   function handleClear(slot: SlotKey) {
@@ -457,13 +486,20 @@ export function PhraseBuilder({
     revealed,
   );
 
+  // Effective collapse state: compact view collapses every group at once; otherwise
+  // just the individually-collapsed ones. Everything downstream (shown map, group
+  // rects, the collapse icon, the drag guard) reads this rather than `collapsedGroups`.
+  const effectiveCollapsed: Record<string, boolean> = compact
+    ? Object.fromEntries(COLLAPSIBLE_GROUPS.map((g) => [g.label, true]))
+    : collapsedGroups;
+
   // Collapse: force every child node of a collapsed group hidden. Because group
   // rects, rendered slots, and edges all derive from shownMap, forcing these
   // false shrinks each collapsed box down to just its main word.
   const collapsedHiddenKeys = new Set<string>();
   const collapsedMainKeys = new Set<string>();
   for (const g of COLLAPSIBLE_GROUPS) {
-    if (!collapsedGroups[g.label]) continue;
+    if (!effectiveCollapsed[g.label]) continue;
     collapsedMainKeys.add(g.mainKey);
     for (const k of g.childKeys) collapsedHiddenKeys.add(k);
   }
@@ -578,6 +614,17 @@ export function PhraseBuilder({
       };
       continue;
     }
+    // A direct-toggle satellite (number / gender) has no reveal box — its border icon
+    // flips the value in place (singular ⇄ plural, or cycling masc → fem → …). `which`
+    // is the slot key minus the "Number" / "Gender" suffix.
+    const numberSlot: NumberSlot | null =
+      sat.directToggle && sat.key.endsWith("Number")
+        ? (sat.key.slice(0, -"Number".length) as NumberSlot)
+        : null;
+    const genderSlot: GenderSlot | null =
+      sat.directToggle && sat.key.endsWith("Gender")
+        ? (sat.key.slice(0, -"Gender".length) as GenderSlot)
+        : null;
     const iconEntry: SatelliteIcon = {
       key: sat.key,
       icon: sat.icon,
@@ -586,7 +633,11 @@ export function PhraseBuilder({
       isSet: sat.hasValue,
       valued: Boolean(sat.alwaysSet),
       valueLabel: sat.valueLabel,
-      onToggle: () => handleToggleReveal(sat),
+      onToggle: numberSlot
+        ? () => handleToggleNumber(numberSlot)
+        : genderSlot
+          ? () => handleToggleGender(genderSlot)
+          : () => handleToggleReveal(sat),
     };
     // The possessor reveal toggle likewise rides the dotted-box perimeter and anchors
     // its own connector down to the possessor panel.
@@ -647,7 +698,6 @@ export function PhraseBuilder({
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
-
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const { width, height } = containerRef.current.getBoundingClientRect();
@@ -692,7 +742,7 @@ export function PhraseBuilder({
     ) => {
       // Skip the connector while the noun's group box is collapsed.
       const label = COLLAPSIBLE_GROUPS.find((g) => g.mainKey === which)?.label;
-      if (label && collapsedGroups[label]) return;
+      if (label && effectiveCollapsed[label]) return;
       if (!controlEl || !dotEl) return;
       const c = controlEl.getBoundingClientRect();
       const d = dotEl.getBoundingClientRect();
@@ -722,7 +772,15 @@ export function PhraseBuilder({
   const notifyGeometry = binding?.onGeometryChange;
   useLayoutEffect(() => {
     notifyGeometry?.();
-  }, [notifyGeometry, positions, boxSizes, svgSize, graphHeight, collapsedGroups]);
+  }, [
+    notifyGeometry,
+    positions,
+    boxSizes,
+    svgSize,
+    graphHeight,
+    collapsedGroups,
+    compact,
+  ]);
 
   function startDrag(e: React.PointerEvent, key: string) {
     const p = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -842,7 +900,55 @@ export function PhraseBuilder({
     };
   }
 
+  // Compact-view layout, derived (not stored) each render: pack the visible core words
+  // into centered rows and size the canvas to just wrap them. Because it's recomputed
+  // from the current width every render, it never goes stale on a resize, and the stored
+  // full-view positions/height stay pristine for when compact turns back off. The core
+  // words are exactly `renderedSlots` in compact (satellites are already filtered out).
+  const compactLayout = React.useMemo(() => {
+    if (!compact) return null;
+    const boxW = 2 * COMPACT_PAD_H;
+    const rowH = COMPACT_PAD_TOP + COMPACT_PAD_BOT;
+    const gap = 16;
+    const margin = 4;
+    const svgW = svgSize.w;
+    const keys = renderedSlots.map((s) => s.key);
+    const perRow = Math.max(
+      1,
+      Math.floor((svgW - 2 * margin + gap) / (boxW + gap)),
+    );
+    const rows: string[][] = [];
+    for (let i = 0; i < keys.length; i += perRow)
+      rows.push(keys.slice(i, i + perRow));
+    const height = Math.max(
+      rowH,
+      Math.round(rows.length * rowH + gap * Math.max(rows.length - 1, 0) + 2 * margin),
+    );
+    const positionsOut: Record<string, { x: number; y: number }> = {};
+    let top = margin;
+    for (const row of rows) {
+      const rowW = row.length * boxW + gap * (row.length - 1);
+      let left = Math.max(margin, (svgW - rowW) / 2);
+      for (const key of row) {
+        positionsOut[key] = {
+          x: ((left + COMPACT_PAD_H) / Math.max(svgW, 1)) * 100,
+          y: ((top + COMPACT_PAD_TOP) / Math.max(height, 1)) * 100,
+        };
+        left += boxW + gap;
+      }
+      top += rowH + gap;
+    }
+    return { positions: positionsOut, height };
+  }, [compact, renderedSlots, svgSize.w]);
+
+  // Canvas height + the size buildGraph measures against: the tight compact height when
+  // compact, else the (resizable) full-view height. Both the group rects and the box %
+  // positions are computed against this same height, so they stay consistent.
+  const canvasHeight = compactLayout ? compactLayout.height : graphHeight;
+  const graphSize = compactLayout ? { w: svgSize.w, h: canvasHeight } : svgSize;
+
   function pos(key: string) {
+    if (compactLayout?.positions[key]) return compactLayout.positions[key];
     return positions[key] ?? DEFAULT_POSITIONS[key];
   }
 
@@ -852,7 +958,7 @@ export function PhraseBuilder({
     satelliteIconsByParent,
     boxSizes,
     pos,
-    svgSize,
+    svgSize: graphSize,
   });
 
   const { edges, groupRects, groupEdges } = buildGraph({
@@ -861,12 +967,13 @@ export function PhraseBuilder({
     // The possessor's own head is a box on this canvas; in a relative clause the
     // subject is the external head, so it isn't drawn.
     showSubject: nounPhrase ? true : !nested,
+    compact,
     renderedSlots,
     visibleSlots,
     shownMap,
     pos,
     controlPos,
-    svgSize,
+    svgSize: graphSize,
   });
 
   // Tidy the whole period: collapse every dotted box down to its main word, then pack
@@ -943,6 +1050,14 @@ export function PhraseBuilder({
     });
   }
 
+  // Compact / expand the whole period. This is a pure view toggle: the compact packing
+  // and shrunk canvas height are *derived* each render (see compactLayout below), so the
+  // stored full-view positions and graphHeight are left untouched — expanding just falls
+  // straight back to them, and the compact layout can never go stale on a resize.
+  function handleToggleCompact() {
+    setCompact((c) => !c);
+  }
+
   // Noun blocks whose possessor panel is currently open (revealed or already filled).
   const openPossessors = NOUN_KEYS.filter(
     (which) => selection[which] && shownMap[`${which}Possessor`],
@@ -959,12 +1074,16 @@ export function PhraseBuilder({
     satelliteIconsByParent,
     complementToggleIcons,
     groupRects,
-    collapsedGroups,
+    collapsedGroups: effectiveCollapsed,
+    compact,
     draggingKey,
     makeDragProps,
     makeGroupDragProps,
     slotEls,
     handleSlotClick,
+    editingSlot,
+    handleEditSlot,
+    handleCancelEdit,
     handleConceptSelect,
     handleClear,
     handleToggleNumber,
@@ -1061,7 +1180,10 @@ export function PhraseBuilder({
         onPointerUp={endBorderDrag}
         onPointerCancel={endBorderDrag}
         sx={{
-          p: 2,
+          p: compact ? 1 : 2,
+          // Compact floats its controls into the top-right corner, so the Paper is the
+          // positioning context for that overlay.
+          position: "relative",
           border: "1px solid",
           borderColor: "divider",
           // Every phrase — the main clause and each nested relative/possessor — sits
@@ -1123,9 +1245,22 @@ export function PhraseBuilder({
               display: "flex",
               alignItems: "center",
               justifyContent: "space-between",
-              mb: 1.5,
+              // Compact drops the label and floats the controls into the top-right corner
+              // (absolute), so they reserve no vertical space and the chips rise to the top
+              // of the reclaimed area; full view keeps the labelled header in flow.
+              ...(compact
+                ? {
+                    position: "absolute",
+                    top: 6,
+                    right: 6,
+                    zIndex: 4,
+                    m: 0,
+                  }
+                : { mb: 1.5 }),
             }}
           >
+            {/* The "Main clause · …" caption is chrome the compact overview doesn't need. */}
+            {!compact && (
             <Typography
               sx={{
                 fontFamily: '"Inter", sans-serif',
@@ -1147,7 +1282,29 @@ export function PhraseBuilder({
                   : "start by choosing a subject"}
               </Box>
             </Typography>
+            )}
             <Box sx={{ display: "flex", alignItems: "center" }}>
+              {groupRects.length > 0 && (
+                <Tooltip
+                  title={compact ? "Expand this period" : "Compact this period"}
+                >
+                  <IconButton
+                    size="small"
+                    onClick={handleToggleCompact}
+                    aria-label={
+                      compact ? "Expand this period" : "Compact this period"
+                    }
+                    color={compact ? "primary" : "default"}
+                    sx={{ p: 0.25 }}
+                  >
+                    {compact ? (
+                      <UnfoldMoreIcon sx={{ fontSize: 15 }} />
+                    ) : (
+                      <UnfoldLessIcon sx={{ fontSize: 15 }} />
+                    )}
+                  </IconButton>
+                </Tooltip>
+              )}
               {groupRects.length > 0 && (
                 <Tooltip title="Tidy up this period">
                   <IconButton
@@ -1249,12 +1406,12 @@ export function PhraseBuilder({
                   ref={containerRef}
                   sx={{
                     position: "relative",
-                    height: graphHeight,
+                    height: canvasHeight,
                     touchAction: "none",
                   }}
                 >
                   <ConnectorsLayer
-                    svgSize={svgSize}
+                    svgSize={graphSize}
                     groupEdges={groupEdges}
                     edges={edges}
                   />
@@ -1280,11 +1437,16 @@ export function PhraseBuilder({
                     </>
                   )}
 
-                  <SatelliteControls
-                    satelliteIconsByParent={satelliteIconsByParent}
-                    controlPos={controlPos}
-                  />
+                  {/* Compact view is just the bare core-word chips — no reveal icons
+                      on the box borders and no dotted-box perimeter controls. */}
+                  {!compact && (
+                    <SatelliteControls
+                      satelliteIconsByParent={satelliteIconsByParent}
+                      controlPos={controlPos}
+                    />
+                  )}
 
+                  {!compact && (
                   <GroupPerimeterControls
                     groupRects={groupRects}
                     perimeterByNoun={perimeterByNoun}
@@ -1298,20 +1460,25 @@ export function PhraseBuilder({
                       else possessorControlEls.current.delete(nounKey);
                     }}
                   />
+                  )}
                 </Box>
 
-                <Resizer
-                  height={graphHeight}
-                  minHeight={MIN_GRAPH_HEIGHT}
-                  onResize={setGraphHeight}
-                  onResizeEnd={(h) => {
-                    if (!nested && !nounPhrase)
-                      localStorage.setItem(
-                        "signi:graphHeight",
-                        String(Math.round(h)),
-                      );
-                  }}
-                />
+                {/* No manual resize while compact — the canvas is auto-sized to hug
+                    the chips, and the resizer's tall minimum would fight that. */}
+                {!compact && (
+                  <Resizer
+                    height={graphHeight}
+                    minHeight={MIN_GRAPH_HEIGHT}
+                    onResize={setGraphHeight}
+                    onResizeEnd={(h) => {
+                      if (!nested && !nounPhrase)
+                        localStorage.setItem(
+                          "signi:graphHeight",
+                          String(Math.round(h)),
+                        );
+                    }}
+                  />
+                )}
               </>
             )}
         </Box>

@@ -246,6 +246,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? `dans ${defArticle(f, plural, lead)}` :
+        type === 'terminus'  ? datPrep(f, plural, lead) :
         type === 'direction' ? (f['animate'] === '1' ? `vers ${defArticle(f, plural, lead)}` : datPrep(f, plural, lead)) :
         type === 'source'    ? `loin ${dePrep(f, plural, lead)}` :
         type === 'cause'     ? (

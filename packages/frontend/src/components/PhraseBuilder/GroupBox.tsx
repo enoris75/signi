@@ -21,12 +21,15 @@ export function GroupBox({
 }) {
   const {
     collapsedGroups,
+    compact,
     draggingKey,
     makeGroupDragProps,
     handleToggleCollapse,
     handleRearrangeGroup,
     handleRemoveComplement,
   } = ctx;
+  // Compact view hides the dashed boxes entirely — only the core-word chips remain.
+  if (compact) return null;
   const isCollapsed = collapsedGroups[rect.label] ?? false;
   // Only worth tidying when there's more than the main word to arrange, and not
   // while collapsed (the satellites are hidden).

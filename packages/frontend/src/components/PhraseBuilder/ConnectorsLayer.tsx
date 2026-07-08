@@ -40,17 +40,26 @@ export function ConnectorsLayer({
         />
       ))}
       {edges.map((edge, i) => (
-        <line
-          key={i}
-          x1={edge.x1}
-          y1={edge.y1}
-          x2={edge.x2}
-          y2={edge.y2}
-          stroke={edge.color}
-          strokeWidth="1"
-          strokeOpacity="0.25"
-          strokeDasharray="4 3"
-        />
+        <g key={i}>
+          <line
+            x1={edge.x1}
+            y1={edge.y1}
+            x2={edge.x2}
+            y2={edge.y2}
+            stroke={edge.color}
+            strokeWidth="1"
+            strokeOpacity="0.25"
+            strokeDasharray="4 3"
+          />
+          {/* Dot on the satellite end of the connector. */}
+          <circle
+            cx={edge.x2}
+            cy={edge.y2}
+            r="2"
+            fill={edge.color}
+            fillOpacity="0.4"
+          />
+        </g>
       ))}
     </Box>
   );

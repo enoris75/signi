@@ -26,6 +26,7 @@ const PREP: Record<ComplementType, string> = {
   source: 'from',
   route: 'through',
   cause: 'because of',
+  terminus: 'to', // dative recipient — "cut the hair to the cat"
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
 };
 

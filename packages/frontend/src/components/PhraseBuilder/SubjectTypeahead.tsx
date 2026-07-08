@@ -160,8 +160,8 @@ export function SubjectTypeahead({
               },
             }}
           >
-            <Tab value="pronoun" label="pronoun" />
             <Tab value="noun" label="noun" />
+            <Tab value="pronoun" label="pronoun" />
           </Tabs>
 
           {tab === "pronoun" ? (

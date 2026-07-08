@@ -5,12 +5,7 @@ import {
   type GrammaticalRole,
   type Transitivity,
 } from "@signi/shared";
-import {
-  GenderSlot,
-  NumberSlot,
-  SlotConfig,
-  SlotKey,
-} from "./interfaces.ts";
+import { NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
 
 export const ALL_SLOTS: SlotConfig[] = [
   {
@@ -200,6 +195,8 @@ export const COLLAPSIBLE_GROUPS: {
       `${type}Adjective2`,
       `${type}Number`,
       `${type}Gender`,
+      // Only the predicative carries a determiner (the one adposition-free complement).
+      ...(type === "predicative" ? [`${type}Definiteness`] : []),
     ],
   })),
 ];
@@ -271,8 +268,15 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   cause: { x: 52, y: 90 },
   causeAdjective: { x: 50, y: 80 },
   causeAdjective2: { x: 54, y: 72 },
+  // Terminus ("to the cat") — the dative recipient; parked right-of-verb near the object row.
+  terminus: { x: 90, y: 60 },
+  terminusAdjective: { x: 88, y: 50 },
+  terminusAdjective2: { x: 94, y: 46 },
 };
 
+// Number is a direct-toggle satellite — the "#" border icon flips singular ⇄ plural
+// in place, with no canvas box. These points are only the icon's aim target: the icon
+// migrates around its noun box onto the ray toward this spot (see controlLayout).
 const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   predicative: { x: 80, y: 62 },
   subject: { x: 12, y: 72 },
@@ -283,16 +287,15 @@ const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   route: { x: 70, y: 99 },
   locative: { x: 94, y: 96 },
   cause: { x: 46, y: 96 },
+  terminus: { x: 96, y: 70 },
 };
-
-export const NUMBER_TOGGLE_KEY = (which: NumberSlot) => `${which}Number`;
-
-export const GENDER_TOGGLE_KEY = (which: GenderSlot) => `${which}Gender`;
 
 export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
   predicativeNumber: NUMBER_TOGGLE_DEFAULTS.predicative,
   predicativeGender: { x: 93, y: 30 },
+  // Determiner reveal icon for the predicate-noun subject complement (reuses the DO region).
+  predicativeDefiniteness: { x: 66, y: 26 },
   predicativeRelative: { x: 80, y: 64 },
   predicativePossessor: { x: 74, y: 64 },
   subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
@@ -318,6 +321,8 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   locativeGender: { x: 96, y: 80 },
   causeNumber: NUMBER_TOGGLE_DEFAULTS.cause,
   causeGender: { x: 58, y: 96 },
+  terminusNumber: NUMBER_TOGGLE_DEFAULTS.terminus,
+  terminusGender: { x: 82, y: 60 },
   // Relative-clause reveal icons — no canvas node of their own; these only aim each
   // icon at the bottom edge of its noun box (clauses expand into panels below).
   subjectRelative: { x: 26, y: 64 },
@@ -328,6 +333,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   routeRelative: { x: 62, y: 99 },
   locativeRelative: { x: 84, y: 99 },
   causeRelative: { x: 52, y: 99 },
+  terminusRelative: { x: 92, y: 70 },
   // Possessor reveal icons — same role as the relative ones (aim the icon at the noun
   // box edge; the possessor editor docks in a panel below). Offset left of the relative
   // anchor so both icons ride the box without overlapping.
@@ -339,6 +345,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   routePossessor: { x: 56, y: 99 },
   locativePossessor: { x: 78, y: 99 },
   causePossessor: { x: 48, y: 99 },
+  terminusPossessor: { x: 86, y: 70 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

@@ -1,8 +1,7 @@
 import { Box } from "@mui/material";
 import type { Definiteness } from "@signi/shared";
-import { NumberToggleBox, GenderToggleBox, DeterminerToggleBox } from "./Boxes.tsx";
+import { DeterminerToggleBox } from "./Boxes.tsx";
 import { NumberSlot, PhraseSelection } from "./interfaces.ts";
-import { NUMBER_TOGGLE_KEY, GENDER_TOGGLE_KEY } from "./slots.ts";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 
@@ -29,15 +28,6 @@ export function NounPhraseBuilder({
   // Absent (e.g. an unrevealed complement) means there's nothing to draw.
   const myRect = groupRects.find((g) => g.nodeKeys.includes(which));
 
-  const number = selection[`${which}Number` as keyof PhraseSelection] as
-    | "singular"
-    | "plural"
-    | undefined;
-  const gender = selection[`${which}Gender` as keyof PhraseSelection] as
-    | "masc"
-    | "fem"
-    | "neut"
-    | undefined;
   const definiteness = selection[
     `${which}Definiteness` as keyof PhraseSelection
   ] as Definiteness | undefined;
@@ -48,24 +38,6 @@ export function NounPhraseBuilder({
       {mySlots.map((slot) => (
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}
-      {shownMap[`${which}Number`] && (
-        <Box
-          {...makeDragProps(NUMBER_TOGGLE_KEY(which), () =>
-            ctx.handleToggleNumber(which),
-          )}
-        >
-          <NumberToggleBox value={number ?? "singular"} />
-        </Box>
-      )}
-      {shownMap[`${which}Gender`] && (
-        <Box
-          {...makeDragProps(GENDER_TOGGLE_KEY(which), () =>
-            ctx.handleToggleGender(which),
-          )}
-        >
-          <GenderToggleBox value={gender ?? "masc"} />
-        </Box>
-      )}
       {shownMap[`${which}Definiteness`] && (
         <Box
           {...makeDragProps(`${which}Definiteness`, () =>

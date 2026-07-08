@@ -47,6 +47,7 @@ export function SlotBox({
   footer,
   dimmed = false,
   highlight = false,
+  editing = false,
 }: {
   slot: SlotConfig;
   concept?: Concept;
@@ -59,6 +60,9 @@ export function SlotBox({
   // the connector (no clear button). highlight = an eligible pick target in link mode.
   dimmed?: boolean;
   highlight?: boolean;
+  // The user clicked this filled box to change its word: show `emptyContent` (the picker)
+  // over the current word instead of the word itself.
+  editing?: boolean;
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -107,7 +111,7 @@ export function SlotBox({
             {slot.required ? " *" : ""}
           </Typography>
         )}
-        {concept ? (
+        {concept && !editing ? (
           <Typography
             sx={{
               fontFamily: '"Lora", Georgia, serif',
@@ -136,9 +140,9 @@ export function SlotBox({
             </Typography>
           ))
         )}
-        {concept && footer}
+        {concept && !editing && footer}
       </Paper>
-      {concept && !dimmed && (
+      {concept && !dimmed && !editing && (
         <Tooltip title={`Clear ${slot.label}`}>
           <IconButton
             size="small"
@@ -283,21 +287,6 @@ export function ToggleBox({ label, value }: { label: string; value: string }) {
       </Typography>
     </Paper>
   );
-}
-
-export function NumberToggleBox({ value }: { value: "singular" | "plural" }) {
-  return (
-    <ToggleBox
-      label="Number"
-      value={value === "singular" ? "Singular" : "Plural"}
-    />
-  );
-}
-
-const GENDER_LABELS = { masc: "Masc", fem: "Fem", neut: "Neut" } as const;
-
-export function GenderToggleBox({ value }: { value: "masc" | "fem" | "neut" }) {
-  return <ToggleBox label="Gender" value={GENDER_LABELS[value]} />;
 }
 
 export function DeterminerToggleBox({ value }: { value: Definiteness }) {

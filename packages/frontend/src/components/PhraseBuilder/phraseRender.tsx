@@ -12,7 +12,7 @@ import {
 } from "./interfaces.ts";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import type { GroupRect } from "./graph.ts";
-import { slotTypeahead } from "./SlotTypeahead.tsx";
+import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
 
 // Props spread onto each draggable node — the absolute positioning + pointer
 // handlers wired up by PhraseBuilder.makeDragProps.
@@ -51,6 +51,9 @@ export interface PhraseRenderContext {
   // Which group boxes are collapsed (keyed by GroupRect.label). Read by the
   // GroupBox to pick its collapse/expand icon.
   collapsedGroups: Record<string, boolean>;
+  // Compact view: the dashed group boxes and their border controls are suppressed,
+  // leaving just the tightly-packed core-word chips. Read by GroupBox (renders nothing).
+  compact: boolean;
   // "__group__" while a dashed box is being dragged — the GroupBox uses it to
   // switch its cursor.
   draggingKey: string | null;
@@ -58,6 +61,12 @@ export interface PhraseRenderContext {
   makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
   slotEls: React.MutableRefObject<Map<SlotKey, HTMLElement>>;
   handleSlotClick: (slot: SlotKey) => void;
+  // Which filled word box is currently open for re-picking its word (null = none).
+  editingSlot: SlotKey | null;
+  // Click a filled word box to change its word: open its inline picker over the word.
+  handleEditSlot: (slot: SlotKey) => void;
+  // Leave edit mode for `slot` without changing the word (focus left the box).
+  handleCancelEdit: (slot: SlotKey) => void;
   handleConceptSelect: (
     concept: Concept,
     targetSlot?: SlotKey,
@@ -115,18 +124,30 @@ export function SlotNode({
     dimmedKeys,
     isPickTarget,
     onPickTarget,
+    editingSlot,
+    handleEditSlot,
+    handleCancelEdit,
   } = ctx;
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
+
+  // Is this filled box currently open for re-picking its word?
+  const editing = editingSlot === slot.key;
 
   // Link-mode state for this box: a greyed link target (endpoint only) or an eligible
   // pick target (click completes the link). Its click "activates" via the drag machinery.
   const dimmed = dimmedKeys?.has(slot.key) ?? false;
   const pickTarget = isPickTarget?.(slot.key) ?? false;
+  // A clean click on a filled word box (one that offers an inline picker) opens it for
+  // re-picking; otherwise it just selects the slot.
+  const canRepick =
+    Boolean(selection[slot.key]) && slotHasInlinePicker(slot.key, nounPhrase);
   const onActivate = pickTarget
     ? () => onPickTarget?.(slot.key)
     : dimmed
       ? () => {}
-      : () => handleSlotClick(slot.key);
+      : canRepick
+        ? () => handleEditSlot(slot.key)
+        : () => handleSlotClick(slot.key);
 
   // An adjective slot filled with a *noun* is an attributive modifier ("sail boat"); it
   // carries a semantic relation (feature / purpose / material) that the Romance engines
@@ -217,6 +238,12 @@ export function SlotNode({
       }}
       tabIndex={0}
       onFocus={() => handleSlotClick(slot.key)}
+      onBlur={(e: React.FocusEvent) => {
+        // Focus left the box (clicked elsewhere) while re-picking — restore the word.
+        // Popper items keep focus (mousedown preventDefault), so choosing one won't blur.
+        if (editing && !e.currentTarget.contains(e.relatedTarget as Node | null))
+          handleCancelEdit(slot.key);
+      }}
       onKeyDown={(e: React.KeyboardEvent) => {
         const isDirectFocus = e.target === e.currentTarget;
         let dir: 1 | -1 | null = null;
@@ -242,6 +269,7 @@ export function SlotNode({
         isActive={activeSlot === slot.key}
         dimmed={dimmed}
         highlight={pickTarget}
+        editing={editing}
         onClear={() => handleClear(slot.key)}
         emptyContent={slotTypeahead({
           slotKey: slot.key,
@@ -249,6 +277,7 @@ export function SlotNode({
           selection,
           onSelect: handleConceptSelect,
           nounSubject: nounPhrase,
+          editing,
         })}
         footer={relationChip ?? degreeChip}
       />

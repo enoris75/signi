@@ -57,8 +57,9 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
     concept: concept.id,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
-    // Only subject/directObject carry a definiteness field today; elsewhere this is
-    // undefined and the engines default to 'definite'.
+    // Only subject/directObject and the predicative subject complement carry a
+    // definiteness field (the adposition-free slots); elsewhere this is undefined and
+    // the engines default to 'definite'.
     definiteness: field<Definiteness>(sel, `${which}Definiteness`),
     adjectives,
     adjectiveDegrees,

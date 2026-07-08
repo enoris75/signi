@@ -8,15 +8,17 @@ import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 
-// The inline word-picker shown inside an empty, active slot box. Returns
-// `undefined` for slots that aren't the active/empty target so the caller's
-// placeholder ("choose…" / "empty") shows through.
+// The inline word-picker shown inside an empty, active slot box — or, when `editing`,
+// inside an already-filled box the user clicked to change its word. Returns
+// `undefined` for slots that aren't the active/empty target (or that have no inline
+// picker) so the caller's placeholder ("choose…" / "empty") / word shows through.
 export function slotTypeahead({
   slotKey,
   activeSlot,
   selection,
   onSelect,
   nounSubject = false,
+  editing = false,
 }: {
   slotKey: SlotKey;
   activeSlot: SlotKey | null;
@@ -25,12 +27,32 @@ export function slotTypeahead({
   // In noun-phrase mode (possessor editor) the `subject` slot is a possessor head, which
   // is noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
   nounSubject?: boolean;
+  // Re-picking the word of an already-filled box: bypass the empty/active guard so the
+  // picker renders over the current word.
+  editing?: boolean;
 }): ReactNode {
-  // Only the active, still-empty slot renders a picker.
-  if (slotKey !== activeSlot || selection[slotKey]) return undefined;
+  // Only the active, still-empty slot renders a picker — unless we're editing a filled one.
+  if (!editing && (slotKey !== activeSlot || selection[slotKey])) return undefined;
 
   const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
+  return pickerFor(slotKey, pick, nounSubject);
+}
+
+// Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can
+// be clicked to change its word. (Every word slot but the adverb `modifier` does.)
+export function slotHasInlinePicker(
+  slotKey: SlotKey,
+  nounSubject = false,
+): boolean {
+  return pickerFor(slotKey, () => {}, nounSubject) != null;
+}
+
+function pickerFor(
+  slotKey: SlotKey,
+  pick: (c: Concept, opts?: ConceptSelectOpts) => void,
+  nounSubject: boolean,
+): ReactNode {
   switch (slotKey) {
     case "verb":
       return <VerbTypeahead onSelect={pick} />;

@@ -1,7 +1,9 @@
 import { ReactNode } from "react";
 import BrushIcon from "@mui/icons-material/Brush";
 import NumbersIcon from "@mui/icons-material/Numbers";
-import WcIcon from "@mui/icons-material/Wc";
+import MaleIcon from "@mui/icons-material/Male";
+import FemaleIcon from "@mui/icons-material/Female";
+import TransgenderIcon from "@mui/icons-material/Transgender";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -14,6 +16,7 @@ import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LinkIcon from "@mui/icons-material/Link";
+import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import {
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
@@ -21,6 +24,7 @@ import {
   TENSE_LABELS,
   type Concept,
   type ComplementType,
+  type Definiteness,
 } from "@signi/shared";
 import { PhraseSelection, SlotKey } from "./interfaces.ts";
 
@@ -37,12 +41,33 @@ export type Satellite = {
   // alwaysSet = number / gender / polarity — these always hold a value (even the
   // default), so their icon reads as "valued" and the tooltip shows the current one.
   alwaysSet?: boolean;
+  // directToggle = the border icon *is* the control: clicking it flips the value
+  // (singular ⇄ plural) in place, with no expandable canvas box. Such satellites
+  // never `shown` (there is nothing to reveal); the icon's solid/outlined state
+  // indicates the current value and its tooltip spells it out.
+  directToggle?: boolean;
   // Human-readable current term, shown in the icon tooltip.
   valueLabel?: string;
   shown: boolean;
 };
 
 const iconSx = { fontSize: 13 };
+
+type Gender = "masc" | "fem" | "neut";
+
+// Gender is a direct-toggle satellite: its border icon *is* the glyph for the current
+// value (♂ / ♀ / ⚧), so cycling it swaps the icon rather than revealing a box.
+const genderIcon = (gen?: Gender): ReactNode =>
+  gen === "fem" ? (
+    <FemaleIcon sx={iconSx} />
+  ) : gen === "neut" ? (
+    <TransgenderIcon sx={iconSx} />
+  ) : (
+    <MaleIcon sx={iconSx} />
+  );
+
+const genderLabel = (gen?: Gender): string =>
+  gen === "fem" ? "Feminine" : gen === "neut" ? "Neuter" : "Masculine";
 
 export const conceptLabel = (c?: Concept) =>
   c
@@ -58,6 +83,7 @@ const complementIcons: Record<ComplementType, ReactNode> = {
   source: <ArrowBackIcon sx={iconSx} />,
   route: <RouteIcon sx={iconSx} />,
   cause: <HelpOutlineIcon sx={iconSx} />,
+  terminus: <CallReceivedIcon sx={iconSx} />,
 };
 
 // Derive every satellite for the current selection, resolving each one's `shown`
@@ -106,17 +132,19 @@ export function buildSatellites(
       available: showSubjectNumber,
       hasValue: selection.subjectNumber === "plural",
       alwaysSet: true,
+      directToggle: true,
       valueLabel: selection.subjectNumber === "plural" ? "Plural" : "Singular",
     },
     {
       key: "subjectGender",
       parent: "subject",
       label: "Gender",
-      icon: <WcIcon sx={iconSx} />,
+      icon: genderIcon(selection.subjectGender),
       available: showSubjectGender,
-      hasValue: selection.subjectGender === "fem",
+      hasValue: Boolean(selection.subjectGender) && selection.subjectGender !== "masc",
       alwaysSet: true,
-      valueLabel: selection.subjectGender === "fem" ? "Feminine" : "Masculine",
+      directToggle: true,
+      valueLabel: genderLabel(selection.subjectGender),
     },
     {
       key: "subjectDefiniteness",
@@ -211,6 +239,7 @@ export function buildSatellites(
       available: showDirectObjNumber,
       hasValue: selection.directObjectNumber === "plural",
       alwaysSet: true,
+      directToggle: true,
       valueLabel:
         selection.directObjectNumber === "plural" ? "Plural" : "Singular",
     },
@@ -218,12 +247,14 @@ export function buildSatellites(
       key: "directObjectGender",
       parent: "directObject",
       label: "Gender",
-      icon: <WcIcon sx={iconSx} />,
+      icon: genderIcon(selection.directObjectGender),
       available: showDirectObjGender,
-      hasValue: selection.directObjectGender === "fem",
+      hasValue:
+        Boolean(selection.directObjectGender) &&
+        selection.directObjectGender !== "masc",
       alwaysSet: true,
-      valueLabel:
-        selection.directObjectGender === "fem" ? "Feminine" : "Masculine",
+      directToggle: true,
+      valueLabel: genderLabel(selection.directObjectGender),
     },
     {
       key: "directObjectDefiniteness",
@@ -283,6 +314,7 @@ export function buildSatellites(
       available: showIndirectObjNumber,
       hasValue: selection.indirectObjectNumber === "plural",
       alwaysSet: true,
+      directToggle: true,
       valueLabel:
         selection.indirectObjectNumber === "plural" ? "Plural" : "Singular",
     },
@@ -290,12 +322,14 @@ export function buildSatellites(
       key: "indirectObjectGender",
       parent: "indirectObject",
       label: "Gender",
-      icon: <WcIcon sx={iconSx} />,
+      icon: genderIcon(selection.indirectObjectGender),
       available: showIndirectObjGender,
-      hasValue: selection.indirectObjectGender === "fem",
+      hasValue:
+        Boolean(selection.indirectObjectGender) &&
+        selection.indirectObjectGender !== "masc",
       alwaysSet: true,
-      valueLabel:
-        selection.indirectObjectGender === "fem" ? "Feminine" : "Masculine",
+      directToggle: true,
+      valueLabel: genderLabel(selection.indirectObjectGender),
     },
     {
       key: "indirectObjectRelative",
@@ -321,8 +355,10 @@ export function buildSatellites(
         | "plural"
         | undefined;
       const gen = selection[`${type}Gender` as keyof PhraseSelection] as
-        | "masc"
-        | "fem"
+        | Gender
+        | undefined;
+      const def = selection[`${type}Definiteness` as keyof PhraseSelection] as
+        | Definiteness
         | undefined;
       const adj = selection[`${type}Adjective` as keyof PhraseSelection] as
         | Concept
@@ -368,21 +404,37 @@ export function buildSatellites(
           available: Boolean(concept),
           hasValue: num === "plural",
           alwaysSet: true,
+          directToggle: true,
           valueLabel: num === "plural" ? "Plural" : "Singular",
         },
         {
           key: `${type}Gender`,
           parent: type,
           label: "Gender",
-          icon: <WcIcon sx={iconSx} />,
+          icon: genderIcon(gen),
           // Gendered nouns, plus a 3rd-person pronoun (he/she) so a pronoun cause can
           // render feminine ("a causa di lei", "because of her").
           available:
             Boolean(concept?.gendered) ||
             (concept?.role === "pronoun" && concept?.person === "3"),
-          hasValue: gen === "fem",
+          hasValue: Boolean(gen) && gen !== "masc",
           alwaysSet: true,
-          valueLabel: gen === "fem" ? "Feminine" : "Masculine",
+          directToggle: true,
+          valueLabel: genderLabel(gen),
+        },
+        {
+          key: `${type}Definiteness`,
+          parent: type,
+          label: "Determiner",
+          icon: <ArticleOutlinedIcon sx={iconSx} />,
+          // Only the adposition-free subject complement carries a determiner, and only
+          // for a predicate-noun head ("becomes a legend"); adjective heads take none.
+          available: type === "predicative" && concept?.role === "noun",
+          hasValue: Boolean(
+            def && def !== "definite",
+          ),
+          alwaysSet: true,
+          valueLabel: DEFINITENESS_LABELS[def ?? "definite"],
         },
         {
           key: `${type}Relative`,
@@ -412,8 +464,9 @@ export function buildSatellites(
 
   const satellites: Satellite[] = rawSatellites.map((s) => ({
     ...s,
-    // An explicit toggle wins; otherwise a set satellite auto-expands.
-    shown: s.available && (revealed[s.key] ?? s.hasValue),
+    // A direct-toggle satellite (number) has no box to reveal — its border icon
+    // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
+    shown: s.available && !s.directToggle && (revealed[s.key] ?? s.hasValue),
   }));
   const shownMap: Record<string, boolean> = Object.fromEntries(
     satellites.map((s) => [s.key, s.shown]),
