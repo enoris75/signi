@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
 import { CAUSE_SENTIMENTS, PATH_SPECIFIERS } from "@signi/shared";
 import {
+  AspectToggleBox,
   NegativeToggleBox,
   SatelliteRow,
   SentimentSelector,
@@ -24,6 +25,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     groupRects,
     handleToggleNegative,
     handleCycleTense,
+    handleCycleAspect,
     handleSelectSpecifier,
     handleSelectSentiment,
   } = ctx;
@@ -50,6 +52,11 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {shownMap.verbTense && (
         <Box {...makeDragProps("verbTense", handleCycleTense)}>
           <TenseToggleBox value={selection.verbTense ?? "present"} />
+        </Box>
+      )}
+      {shownMap.verbAspect && (
+        <Box {...makeDragProps("verbAspect", handleCycleAspect)}>
+          <AspectToggleBox value={selection.verbAspect ?? "neutral"} />
         </Box>
       )}
 

@@ -1,4 +1,4 @@
-import type { CauseSentiment, ComplementType, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { Aspect, CauseSentiment, ComplementType, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -25,11 +25,12 @@ export interface ResolvedNounPhrase {
   possessor?: ResolvedNounPhrase;
 }
 
-/** A resolved verb phrase: the verb, negation flag, tense, and resolved adverb. */
+/** A resolved verb phrase: the verb, negation flag, tense, aspect, and resolved adverb. */
 export interface ResolvedVerbPhrase {
   verb: ConceptForms;
   negative?: boolean;
   tense?: Tense;
+  aspect?: Aspect;
   modifier?: ConceptForms;
 }
 

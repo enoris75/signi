@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
@@ -73,6 +73,43 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   // English past ("ate") is invariant across persons, so a single `past` form
   // covers all; present keeps its per-person keys.
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
+}
+
+/**
+ * The auxiliary "be", conjugated for tense + subject, as its word(s): "am"/"is"/"are",
+ * "was"/"were", "will be". Drives every non-neutral aspect (progressive / prospective /
+ * resultative), which are all periphrastic on "be".
+ */
+function auxBe(subjectForms: Record<string, string>, tense: Tense): string[] {
+  const person = subjectForms['person'] ?? '3';
+  const singular = (subjectForms['number'] ?? 'singular') !== 'plural';
+  if (tense === 'future') return ['will', 'be'];
+  if (tense === 'past') return [singular && (person === '1' || person === '3') ? 'was' : 'were'];
+  if (!singular) return ['are'];
+  return person === '1' ? ['am'] : person === '3' ? ['is'] : ['are']; // "you are"
+}
+
+/**
+ * The finite verb group for a non-neutral aspect: auxiliary "be" (tense/subject-inflected)
+ * plus the main verb's non-finite form — gerund for progressive ("is going"), "about to" +
+ * base for prospective ("is about to go"), past participle for resultative ("is gone").
+ * Negation attaches to the auxiliary ("is not going", "will not be going").
+ */
+function aspectVerb(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  aspect: Aspect,
+  negative: boolean,
+): string {
+  const aux = auxBe(subjectForms, tense);
+  const base = verbForms['base'] ?? '';
+  const nonfinite =
+    aspect === 'progressive' ? (verbForms['gerund'] ?? base) :
+    aspect === 'resultative' ? (verbForms['participle'] ?? base) :
+    `about to ${base}`; // prospective
+  const auxStr = negative ? [aux[0], 'not', ...aux.slice(1)].join(' ') : aux.join(' ');
+  return `${auxStr} ${nonfinite}`.trim();
 }
 
 /**
@@ -169,7 +206,7 @@ function predicateParts(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
 
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
@@ -182,6 +219,15 @@ function predicateParts(
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements);
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+
+  // A non-neutral aspect (progressive/prospective/resultative) is periphrastic on "be",
+  // which carries the tense and any negation ("is not going"), so it bypasses do-support.
+  if (aspect !== 'neutral') {
+    const verbText = aspectVerb(verb.forms, subjectForms, tense, aspect, verbNegative === true && !modifierIsNegative);
+    const preVerb = isFrequency ? modifierText : '';
+    const postVerb = isFrequency ? '' : modifierText;
+    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+  }
 
   if (verbNegative && !modifierIsNegative) {
     const person = subjectForms['person'] ?? '3';

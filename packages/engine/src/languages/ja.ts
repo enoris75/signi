@@ -132,6 +132,30 @@ function verbSeg(verb: ResolvedVerbPhrase['verb'], negative: boolean | undefined
   return wordSeg(surface, reading);
 }
 
+/**
+ * The verb segment(s) for a non-neutral aspect, built on the te-form (`forms['te']`):
+ *   progressive → ～ています ("行っています", past ～ていました)
+ *   resultative → ～てしまいます (completion; "行ってしまいました")
+ *   prospective → dictionary form + ところです ("行くところです", past ～ところでした)
+ * Future reuses the present, as elsewhere in the Japanese engine.
+ */
+function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase): RubySegment[] {
+  const { verb, negative, tense = 'present', aspect = 'neutral' } = verbPhrase;
+  const past = tense === 'past';
+  if (aspect === 'prospective') {
+    const cop = past ? 'でした' : 'です';
+    return [wordSeg(verb.forms['base'] ?? '', verb.forms['reading']), { t: 'ところ' }, { t: cop }];
+  }
+  // Progressive (～ている) and resultative (～てしまう) both build on the te-form.
+  const te = verb.forms['te'];
+  const teSeg = te ? wordSeg(te, verb.forms['te_reading']) : wordSeg(verb.forms['base'] ?? '', verb.forms['reading']);
+  const stem = aspect === 'resultative' ? 'しまい' : 'い'; // てしまう vs ている (polite い-stem)
+  const suffix = negative
+    ? (past ? `${stem}ませんでした` : `${stem}ません`)
+    : (past ? `${stem}ました` : `${stem}ます`);
+  return [teSeg, { t: suffix }];
+}
+
 function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>): RubySegment[] {
   if (!complements) return [];
   const segs: RubySegment[] = [];
@@ -183,7 +207,7 @@ function predicateSegs(
   indirectObject: ResolvedNounPhrase | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
 ): RubySegment[] {
-  const { verb, negative, modifier, tense = 'present' } = verbPhrase;
+  const { verb, negative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
   const segs: RubySegment[] = [];
   segs.push(...complementSegs(complements));
   if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
@@ -192,7 +216,8 @@ function predicateSegs(
     const base = modifier.forms['base'] ?? '';
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
   }
-  segs.push(verbSeg(verb, negative, tense));
+  if (aspect === 'neutral') segs.push(verbSeg(verb, negative, tense));
+  else segs.push(...aspectVerbSegs(verbPhrase));
   return segs;
 }
 

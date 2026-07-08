@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 // German comparison is synthetic: the comparative adds "-er" and the superlative "-st" to
@@ -188,6 +188,53 @@ const WERDEN: Record<string, string> = {
   '1sg': 'werde', '2sg': 'wirst', '3sg': 'wird',
   '1pl': 'werden', '2pl': 'werdet', '3pl': 'werden',
 };
+
+// "sein", the auxiliary for the prospective ("ist im Begriff zu gehen") and resultative
+// ("ist gegangen") aspects. Only present and past are synthetic; the future is periphrastic
+// on "werden" (see VERB_GROUP below), so no future column is needed here.
+const SEIN: Record<'present' | 'past', Record<string, string>> = {
+  present: { '1sg': 'bin', '2sg': 'bist', '3sg': 'ist', '1pl': 'sind', '2pl': 'seid', '3pl': 'sind' },
+  past:    { '1sg': 'war', '2sg': 'warst', '3sg': 'war', '1pl': 'waren', '2pl': 'wart', '3pl': 'waren' },
+};
+
+/**
+ * The German verb complex for a tense + aspect, split across the clause: `v2` is the finite
+ * verb in the V2 slot, `mid` is any material that follows it in the Mittelfeld ("gerade",
+ * "im Begriff"), and `tail` is the clause-final non-finite material. German has no synthetic
+ * progressive, so it is rendered with the adverb "gerade" over the plain finite verb; the
+ * prospective is "im Begriff … zu + Infinitiv"; the resultative is "sein" + Partizip II.
+ */
+function verbGroup(
+  verbForms: Record<string, string>,
+  pn: string,
+  tense: Tense,
+  aspect: Aspect,
+): { v2: string; mid: string; tail: string } {
+  const base = verbForms['base'] ?? '';
+  const participle = verbForms['participle'] ?? base;
+  const isFuture = tense === 'future';
+  const sein = isFuture ? '' : SEIN[tense][pn];
+  const conjug = isFuture ? (WERDEN[pn] ?? 'wird') : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
+  switch (aspect) {
+    case 'progressive':
+      // Plain finite verb + "gerade"; future keeps werden … Infinitiv, with "gerade" mid.
+      return { v2: conjug, mid: 'gerade', tail: isFuture ? base : '' };
+    case 'prospective':
+      return {
+        v2: isFuture ? (WERDEN[pn] ?? 'wird') : sein,
+        mid: 'im Begriff',
+        tail: isFuture ? `sein zu ${base}` : `zu ${base}`,
+      };
+    case 'resultative':
+      return {
+        v2: isFuture ? (WERDEN[pn] ?? 'wird') : sein,
+        mid: '',
+        tail: isFuture ? `${participle} sein` : participle,
+      };
+    default: // neutral
+      return { v2: conjug, mid: '', tail: isFuture ? base : '' };
+  }
+}
 
 /**
  * A possessor rendered colloquially as "von" + dative ("das Buch vom Kind"): von+dem
@@ -384,19 +431,16 @@ export const germanEngine: LanguageEngine = {
     const subjectText = subjectPhrase(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
-    const { verb, negative: verbNegative, modifier, tense = 'present' } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
 
-    // Future is periphrastic: finite "werden" sits in the V2 slot and the
-    // infinitive closes the clause ("ich werde das Brot essen"). Present/past
-    // put the single finite verb in V2 with no tail.
+    // The verb complex is split across the clause: the finite verb (werden/sein or the
+    // conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff" follows it, and
+    // the non-finite tail (infinitive / Partizip / "zu …") closes the clause. Aspect is
+    // rendered here in the main clause only (relative clauses stay neutral — a known gap).
     const person = subject.head.forms['person'] ?? '3';
     const number = subject.head.forms['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
-    const isFuture = tense === 'future';
-    const verbText = isFuture
-      ? (WERDEN[pn] ?? 'wird')
-      : conjugate(verb.forms, subject.head.forms, tense);
-    const infinitiveTail = isFuture ? (verb.forms['base'] ?? '') : '';
+    const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbGroup(verb.forms, pn, tense, aspect);
     const directObjectText = directObject
       ? nounPhrase(directObject, 'acc')
       : '';
@@ -414,7 +458,7 @@ export const germanEngine: LanguageEngine = {
     const negBefore = applyNicht && modifierText ? 'nicht' : '';
     const negAfter  = applyNicht && !modifierText ? 'nicht' : '';
     const complementsText = complementsPhrase(phrase.complements);
-    return [subjectText, verbText, negBefore, modifierText, indirectObjectText, directObjectText, complementsText, negAfter, infinitiveTail]
+    return [subjectText, verbText, aspectMid, negBefore, modifierText, indirectObjectText, directObjectText, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
   },
 };

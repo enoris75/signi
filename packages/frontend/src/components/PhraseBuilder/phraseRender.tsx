@@ -82,6 +82,7 @@ export interface PhraseRenderContext {
   handleCycleDegree: (slotKey: SlotKey) => void;
   handleToggleNegative: () => void;
   handleCycleTense: () => void;
+  handleCycleAspect: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;

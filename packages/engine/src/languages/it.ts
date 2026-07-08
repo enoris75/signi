@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -327,6 +327,53 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
+/** Person/number key ("1sg" … "3pl") into the auxiliary conjugation tables below. */
+function auxKey(subjectForms: Record<string, string>): string {
+  const person = subjectForms['person'] ?? '3';
+  const n = (subjectForms['number'] ?? 'singular') === 'plural' ? 'pl' : 'sg';
+  return `${person}${n}`;
+}
+
+// "stare" — the progressive/prospective auxiliary ("sto andando", "sto per andare"). Past
+// uses the *imperfect* ("stavo andando"): the progressive past is imperfective, so the
+// passato remoto ("stetti") the engine uses elsewhere would be ungrammatical here.
+const STARE_IT: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'sto', '2sg': 'stai', '3sg': 'sta', '1pl': 'stiamo', '2pl': 'state', '3pl': 'stanno' },
+  past:    { '1sg': 'stavo', '2sg': 'stavi', '3sg': 'stava', '1pl': 'stavamo', '2pl': 'stavate', '3pl': 'stavano' },
+  future:  { '1sg': 'starò', '2sg': 'starai', '3sg': 'starà', '1pl': 'staremo', '2pl': 'starete', '3pl': 'staranno' },
+};
+
+// "essere" — the resultative auxiliary ("sono andato"), past again imperfect ("ero andato").
+const ESSERE_IT: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'sono', '2sg': 'sei', '3sg': 'è', '1pl': 'siamo', '2pl': 'siete', '3pl': 'sono' },
+  past:    { '1sg': 'ero', '2sg': 'eri', '3sg': 'era', '1pl': 'eravamo', '2pl': 'eravate', '3pl': 'erano' },
+  future:  { '1sg': 'sarò', '2sg': 'sarai', '3sg': 'sarà', '1pl': 'saremo', '2pl': 'sarete', '3pl': 'saranno' },
+};
+
+/**
+ * The verb group for a non-neutral aspect: progressive = stare + gerundio ("sto andando"),
+ * prospective = stare + "per" + infinito ("sto per andare"), resultative = essere + participio
+ * passato agreeing with the subject ("sono andato/a"). Negation ("non") is prepended by the
+ * caller, as for the neutral verb.
+ */
+function aspectVerb(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  aspect: Aspect,
+): string {
+  const key = auxKey(subjectForms);
+  const inf = verbForms['base'] ?? '';
+  if (aspect === 'resultative') {
+    const aux = ESSERE_IT[tense][key];
+    const part = agreeAdj(verbForms['participle'] ?? inf, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
+    return `${aux} ${part}`.trim();
+  }
+  const aux = STARE_IT[tense][key];
+  if (aspect === 'prospective') return `${aux} per ${inf}`.trim();
+  return `${aux} ${verbForms['gerund'] ?? inf}`.trim(); // progressive
+}
+
 function subjectPhrase(np: ResolvedNounPhrase): string {
   const forms = np.head.forms;
   if (forms['person']) {
@@ -428,8 +475,10 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
-  const verbText = conjugate(verb.forms, subjectForms, tense);
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
+  const verbText = aspect === 'neutral'
+    ? conjugate(verb.forms, subjectForms, tense)
+    : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.

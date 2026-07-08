@@ -7,6 +7,7 @@ import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import {
+  ASPECTS,
   COMPLEMENT_LABELS,
   COMPLEMENT_TYPES,
   DEFINITENESS,
@@ -471,6 +472,14 @@ export function PhraseBuilder({
     });
   }
 
+  // Cycle the verb aspect neutral → progressive → prospective → resultative → neutral.
+  function handleCycleAspect() {
+    onPhraseUpdate((prev) => {
+      const idx = ASPECTS.indexOf(prev.verbAspect ?? "neutral");
+      return { ...prev, verbAspect: ASPECTS[(idx + 1) % ASPECTS.length] };
+    });
+  }
+
   // Set the route complement's path relation (through / under / over / …).
   function handleSelectSpecifier(spec: PathSpecifier) {
     onPhraseUpdate((prev) => ({ ...prev, routeSpecifier: spec }));
@@ -530,7 +539,7 @@ export function PhraseBuilder({
     const stepY = (68 / Math.max(svgSize.h, 1)) * 100;
     // -1 = top row (adjectives / tense), 0 = main word, 1 = bottom row (toggles).
     const tierOf = (k: string): -1 | 0 | 1 => {
-      if (/Adjective2?$/.test(k) || k === "verbTense") return -1;
+      if (/Adjective2?$/.test(k) || k === "verbTense" || k === "verbAspect") return -1;
       if (
         /(Number|Gender|Definiteness)$/.test(k) ||
         k === "verbNegative" ||
@@ -1093,6 +1102,7 @@ export function PhraseBuilder({
     handleCycleDegree,
     handleToggleNegative,
     handleCycleTense,
+    handleCycleAspect,
     handleSelectSpecifier,
     handleSelectSentiment,
     handleToggleCollapse,

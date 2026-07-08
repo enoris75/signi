@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -143,6 +143,42 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   const number = subjectForms['number'] ?? 'singular';
   const n = number === 'plural' ? 'pl' : 'sg';
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
+}
+
+/** Person/number key ("1sg" … "3pl") into the "estar" auxiliary table below. */
+function auxKey(subjectForms: Record<string, string>): string {
+  const person = subjectForms['person'] ?? '3';
+  const n = (subjectForms['number'] ?? 'singular') === 'plural' ? 'pl' : 'sg';
+  return `${person}${n}`;
+}
+
+// "estar" — the auxiliary for every non-neutral aspect: progressive/prospective = estar +
+// gerundio / "a punto de" + infinitivo, resultative = estar + agreeing participio. Past uses
+// the imperfect ("estaba"), the aspectually-imperfective past.
+const ESTAR_ES: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'estoy', '2sg': 'estás', '3sg': 'está', '1pl': 'estamos', '2pl': 'estáis', '3pl': 'están' },
+  past:    { '1sg': 'estaba', '2sg': 'estabas', '3sg': 'estaba', '1pl': 'estábamos', '2pl': 'estabais', '3pl': 'estaban' },
+  future:  { '1sg': 'estaré', '2sg': 'estarás', '3sg': 'estará', '1pl': 'estaremos', '2pl': 'estaréis', '3pl': 'estarán' },
+};
+
+/**
+ * The verb group for a non-neutral aspect: progressive = estar + gerundio ("está yendo"),
+ * prospective = estar + "a punto de" + infinitivo ("está a punto de ir"), resultative = estar
+ * + participio agreeing with the subject ("está ido/a"). Negation ("no") is prepended by the
+ * caller, as for the neutral verb.
+ */
+function aspectVerb(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  aspect: Aspect,
+): string {
+  const aux = ESTAR_ES[tense][auxKey(subjectForms)];
+  const inf = verbForms['base'] ?? '';
+  if (aspect === 'progressive') return `${aux} ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `${aux} a punto de ${inf}`;
+  const part = agreeAdj(verbForms['participle'] ?? inf, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
+  return `${aux} ${part}`; // resultative
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: string): string {
@@ -314,8 +350,10 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
-  const conjugated = conjugate(verb.forms, subjectForms, tense);
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
+  const conjugated = aspect === 'neutral'
+    ? conjugate(verb.forms, subjectForms, tense)
+    : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';

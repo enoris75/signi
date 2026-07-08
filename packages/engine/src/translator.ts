@@ -126,6 +126,7 @@ function resolveVerbPhrase(
     verb: resolve(vp.verb, language, lookup),
     negative: vp.negative,
     tense: vp.tense,
+    aspect: vp.aspect,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
   };
 }

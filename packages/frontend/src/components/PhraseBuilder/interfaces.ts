@@ -1,4 +1,4 @@
-import type { CauseSentiment, Concept, ComplementType, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+import type { Aspect, CauseSentiment, Concept, ComplementType, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
 
 
 export interface SlotConfig {
@@ -27,6 +27,9 @@ export interface PhraseSelection {
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;
+    // Grammatical aspect (neutral / progressive / prospective / resultative), orthogonal to
+    // tense. Defaults to 'neutral' when absent.
+    verbAspect?: Aspect;
     directObject?: Concept;
     indirectObject?: Concept;
     modifier?: Concept;

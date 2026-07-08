@@ -165,7 +165,7 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Verb Phrase",
     mainKey: "verb",
-    childKeys: ["modifier", "verbNegative", "verbTense"],
+    childKeys: ["modifier", "verbNegative", "verbTense", "verbAspect"],
   },
   {
     label: "Direct Object",
@@ -309,6 +309,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   subjectAdjective2Gender: { x: 20, y: 26 },
   verbNegative: { x: 52, y: 62 },
   verbTense: { x: 40, y: 22 },
+  verbAspect: { x: 64, y: 22 },
   directObjectNumber: NUMBER_TOGGLE_DEFAULTS.directObject,
   directObjectGender: { x: 93, y: 30 },
   indirectObjectNumber: NUMBER_TOGGLE_DEFAULTS.indirectObject,

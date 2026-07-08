@@ -10,6 +10,7 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import {
+  ASPECT_LABELS,
   CAUSE_SENTIMENTS,
   CAUSE_SENTIMENT_LABELS,
   Concept,
@@ -17,6 +18,7 @@ import {
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
   TENSE_LABELS,
+  type Aspect,
   type CauseSentiment,
   type Definiteness,
   type PathSpecifier,
@@ -469,6 +471,56 @@ export function TenseToggleBox({ value }: { value: Tense }) {
         }}
       >
         {TENSE_LABELS[value]}
+      </Typography>
+    </Paper>
+  );
+}
+
+export function AspectToggleBox({ value }: { value: Aspect }) {
+  // Neutral is the implicit default → styled neutral; the marked aspects read as "set".
+  const active = value !== "neutral";
+  return (
+    <Paper
+      variant="outlined"
+      sx={{
+        px: 1.5,
+        py: 0.75,
+        minWidth: 80,
+        cursor: "inherit",
+        borderRadius: 2,
+        borderWidth: 2,
+        borderColor: active ? "secondary.main" : "divider",
+        bgcolor: active ? "secondary.50" : "background.paper",
+        transition: "border-color 0.15s, background-color 0.15s",
+        userSelect: "none",
+        "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },
+      }}
+    >
+      <Typography
+        sx={{
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.14em",
+          textTransform: "uppercase",
+          color: "text.secondary",
+          display: "block",
+          mb: 0.25,
+        }}
+      >
+        Aspect
+      </Typography>
+      <Typography
+        sx={{
+          fontFamily: '"Lora", Georgia, serif',
+          fontSize: "0.9rem",
+          fontWeight: 600,
+          fontStyle: "italic",
+          color: active ? "secondary.dark" : "text.primary",
+          lineHeight: 1.3,
+        }}
+      >
+        {ASPECT_LABELS[value]}
       </Typography>
     </Paper>
   );

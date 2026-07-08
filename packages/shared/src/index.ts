@@ -104,6 +104,34 @@ export const TENSE_LABELS: Record<Tense, string> = {
 };
 
 /**
+ * Grammatical aspect — the internal temporal shape of the event, layered orthogonally on
+ * top of `tense` (each aspect is available in present / past / future). Realised
+ * periphrastically as an auxiliary (conjugated for the tense + subject) plus a non-finite
+ * form of the main verb:
+ *   neutral      — the plain, unmarked event ("I go", "you went", "they will go").
+ *   progressive  — the event in progress ("he is going", "she was going", "we will be
+ *                  going"): be + gerund; Romance stare/estar + gerund; fr "en train de";
+ *                  de "gerade"; ja ～ている.
+ *   prospective  — on the verge of the event ("you are about to go", "the man was about to
+ *                  go"): be about to / stare per / a punto de / prestes a / sur le point de /
+ *                  im Begriff zu / ～ところ + infinitive.
+ *   resultative  — the state resulting from the completed event ("I am gone", "I was gone",
+ *                  "I will be gone"): be / essere / estar / être / sein + past participle
+ *                  (agreeing with the subject in the Romance languages); ja ～てしまう.
+ * The non-finite forms (gerund, past participle, ja te-form) are lexical data per verb.
+ */
+export type Aspect = 'neutral' | 'progressive' | 'prospective' | 'resultative';
+
+export const ASPECTS: Aspect[] = ['neutral', 'progressive', 'prospective', 'resultative'];
+
+export const ASPECT_LABELS: Record<Aspect, string> = {
+  neutral: 'Neutral',
+  progressive: 'Progressive',
+  prospective: 'Prospective',
+  resultative: 'Resultative',
+};
+
+/**
  * Semantic complement types — the "varieties" of indirect object a verb can
  * license. English collapses these into a single category, but each takes a
  * distinct adposition (and case, in German) across languages. Verbs declare
@@ -299,6 +327,7 @@ export interface VerbPhrase {
   negative?: boolean;
   modifier?: string;               // adverb id
   tense?: Tense;                   // defaults to 'present'
+  aspect?: Aspect;                 // defaults to 'neutral'
 }
 
 /**

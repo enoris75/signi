@@ -93,7 +93,9 @@
       "Bash(echo \"shared:$?\")",
       "Bash(echo \"engine:$?\")",
       "Bash(echo \"backend:$?\")",
-      "Bash(echo \"frontend:$?\")"
+      "Bash(echo \"frontend:$?\")",
+      "Bash(awk 'NR>0')",
+      "Bash(awk 'NR>=454 && NR<=2075 { if \\($0 ~ /id: '\\\\''/\\) {print \"===\"$0}; if \\($0 ~ /base:|reading:/ && $0 !~ /_reading|masu/\\) print NR\": \"$0 }' packages/backend/src/seed.ts)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

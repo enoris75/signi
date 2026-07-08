@@ -2493,6 +2493,221 @@ function roleInsertSql(role: string): string {
   }
 }
 
+/**
+ * Non-finite verb forms that feed the grammatical *aspect* (progressive / prospective /
+ * resultative). Kept as one table rather than scattered across every verb block: the seed
+ * loop merges the per-language entry into that verb's forms before persisting them.
+ *   • gerund     — present participle / gerundio / gerúndio (en/it/es/pt progressive).
+ *   • participle — past participle (all Romance + de/en resultative; fr also for resultative).
+ *   • te / te_reading — Japanese te-form, the base for ～ている / ～てしまう.
+ * French/German need no gerund (their progressive is periphrastic on the infinitive/adverb);
+ * Japanese needs only the te-form. Irregular forms (gone, corso, gegangen, visto…) can't be
+ * derived by rule, so they are listed explicitly. Copular verbs (become/seem/appear) get
+ * best-effort forms — aspect on them is linguistically marginal.
+ */
+const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
+  CUT: {
+    en: { gerund: 'cutting', participle: 'cut' },
+    it: { gerund: 'tagliando', participle: 'tagliato' },
+    fr: { participle: 'coupé' }, de: { participle: 'geschnitten' },
+    es: { gerund: 'cortando', participle: 'cortado' },
+    pt: { gerund: 'cortando', participle: 'cortado' },
+    ja: { te: '切って', te_reading: 'きって' },
+  },
+  EAT: {
+    en: { gerund: 'eating', participle: 'eaten' },
+    it: { gerund: 'mangiando', participle: 'mangiato' },
+    fr: { participle: 'mangé' }, de: { participle: 'gegessen' },
+    es: { gerund: 'comiendo', participle: 'comido' },
+    pt: { gerund: 'comendo', participle: 'comido' },
+    ja: { te: '食べて', te_reading: 'たべて' },
+  },
+  DRINK: {
+    en: { gerund: 'drinking', participle: 'drunk' },
+    it: { gerund: 'bevendo', participle: 'bevuto' },
+    fr: { participle: 'bu' }, de: { participle: 'getrunken' },
+    es: { gerund: 'bebiendo', participle: 'bebido' },
+    pt: { gerund: 'bebendo', participle: 'bebido' },
+    ja: { te: '飲んで', te_reading: 'のんで' },
+  },
+  RUN: {
+    en: { gerund: 'running', participle: 'run' },
+    it: { gerund: 'correndo', participle: 'corso' },
+    fr: { participle: 'couru' }, de: { participle: 'gelaufen' },
+    es: { gerund: 'corriendo', participle: 'corrido' },
+    pt: { gerund: 'correndo', participle: 'corrido' },
+    ja: { te: '走って', te_reading: 'はしって' },
+  },
+  SEE: {
+    en: { gerund: 'seeing', participle: 'seen' },
+    it: { gerund: 'vedendo', participle: 'visto' },
+    fr: { participle: 'vu' }, de: { participle: 'gesehen' },
+    es: { gerund: 'viendo', participle: 'visto' },
+    pt: { gerund: 'vendo', participle: 'visto' },
+    ja: { te: '見て', te_reading: 'みて' },
+  },
+  LOVE: {
+    en: { gerund: 'loving', participle: 'loved' },
+    it: { gerund: 'amando', participle: 'amato' },
+    fr: { participle: 'aimé' }, de: { participle: 'geliebt' },
+    es: { gerund: 'amando', participle: 'amado' },
+    pt: { gerund: 'amando', participle: 'amado' },
+    ja: { te: '愛して', te_reading: 'あいして' },
+  },
+  KILL: {
+    en: { gerund: 'killing', participle: 'killed' },
+    it: { gerund: 'uccidendo', participle: 'ucciso' },
+    fr: { participle: 'tué' }, de: { participle: 'getötet' },
+    es: { gerund: 'matando', participle: 'matado' },
+    pt: { gerund: 'matando', participle: 'matado' },
+    ja: { te: '殺して', te_reading: 'ころして' },
+  },
+  KNOW: {
+    en: { gerund: 'knowing', participle: 'known' },
+    it: { gerund: 'sapendo', participle: 'saputo' },
+    fr: { participle: 'su' }, de: { participle: 'gewusst' },
+    es: { gerund: 'sabiendo', participle: 'sabido' },
+    pt: { gerund: 'sabendo', participle: 'sabido' },
+    ja: { te: '知って', te_reading: 'しって' },
+  },
+  READ: {
+    en: { gerund: 'reading', participle: 'read' },
+    it: { gerund: 'leggendo', participle: 'letto' },
+    fr: { participle: 'lu' }, de: { participle: 'gelesen' },
+    es: { gerund: 'leyendo', participle: 'leído' },
+    pt: { gerund: 'lendo', participle: 'lido' },
+    ja: { te: '読んで', te_reading: 'よんで' },
+  },
+  JUMP: {
+    en: { gerund: 'jumping', participle: 'jumped' },
+    it: { gerund: 'saltando', participle: 'saltato' },
+    fr: { participle: 'sauté' }, de: { participle: 'gesprungen' },
+    es: { gerund: 'saltando', participle: 'saltado' },
+    pt: { gerund: 'pulando', participle: 'pulado' },
+    ja: { te: '跳んで', te_reading: 'とんで' },
+  },
+  COME: {
+    en: { gerund: 'coming', participle: 'come' },
+    it: { gerund: 'venendo', participle: 'venuto' },
+    fr: { participle: 'venu' }, de: { participle: 'gekommen' },
+    es: { gerund: 'viniendo', participle: 'venido' },
+    pt: { gerund: 'vindo', participle: 'vindo' },
+    ja: { te: '来て', te_reading: 'きて' },
+  },
+  CRY: {
+    en: { gerund: 'crying', participle: 'cried' },
+    it: { gerund: 'piangendo', participle: 'pianto' },
+    fr: { participle: 'pleuré' }, de: { participle: 'geweint' },
+    es: { gerund: 'llorando', participle: 'llorado' },
+    pt: { gerund: 'chorando', participle: 'chorado' },
+    ja: { te: '泣いて', te_reading: 'ないて' },
+  },
+  CRY_OUT: {
+    en: { gerund: 'crying', participle: 'cried' },
+    it: { gerund: 'gridando', participle: 'gridato' },
+    fr: { participle: 'crié' }, de: { participle: 'gerufen' },
+    es: { gerund: 'gritando', participle: 'gritado' },
+    pt: { gerund: 'gritando', participle: 'gritado' },
+    ja: { te: '叫んで', te_reading: 'さけんで' },
+  },
+  BITE: {
+    en: { gerund: 'biting', participle: 'bitten' },
+    it: { gerund: 'mordendo', participle: 'morso' },
+    fr: { participle: 'mordu' }, de: { participle: 'gebissen' },
+    es: { gerund: 'mordiendo', participle: 'mordido' },
+    pt: { gerund: 'mordendo', participle: 'mordido' },
+    ja: { te: '噛んで', te_reading: 'かんで' },
+  },
+  BEAT: {
+    en: { gerund: 'beating', participle: 'beaten' },
+    it: { gerund: 'battendo', participle: 'battuto' },
+    fr: { participle: 'battu' }, de: { participle: 'geschlagen' },
+    es: { gerund: 'batiendo', participle: 'batido' },
+    pt: { gerund: 'batendo', participle: 'batido' },
+    ja: { te: '打って', te_reading: 'うって' },
+  },
+  BURN: {
+    en: { gerund: 'burning', participle: 'burned' },
+    it: { gerund: 'bruciando', participle: 'bruciato' },
+    fr: { participle: 'brûlé' }, de: { participle: 'gebrannt' },
+    es: { gerund: 'ardiendo', participle: 'ardido' },
+    pt: { gerund: 'ardendo', participle: 'ardido' },
+    ja: { te: '燃えて', te_reading: 'もえて' },
+  },
+  SET_ON_FIRE: {
+    en: { gerund: 'burning', participle: 'burned' },
+    it: { gerund: 'bruciando', participle: 'bruciato' },
+    fr: { participle: 'brûlé' }, de: { participle: 'verbrannt' },
+    es: { gerund: 'quemando', participle: 'quemado' },
+    pt: { gerund: 'queimando', participle: 'queimado' },
+    ja: { te: '燃やして', te_reading: 'もやして' },
+  },
+  BUY: {
+    en: { gerund: 'buying', participle: 'bought' },
+    it: { gerund: 'comprando', participle: 'comprato' },
+    fr: { participle: 'acheté' }, de: { participle: 'gekauft' },
+    es: { gerund: 'comprando', participle: 'comprado' },
+    pt: { gerund: 'comprando', participle: 'comprado' },
+    ja: { te: '買って', te_reading: 'かって' },
+  },
+  GIVE: {
+    en: { gerund: 'giving', participle: 'given' },
+    it: { gerund: 'dando', participle: 'dato' },
+    fr: { participle: 'donné' }, de: { participle: 'gegeben' },
+    es: { gerund: 'dando', participle: 'dado' },
+    pt: { gerund: 'dando', participle: 'dado' },
+    ja: { te: 'あげて', te_reading: 'あげて' },
+  },
+  SHOW: {
+    en: { gerund: 'showing', participle: 'shown' },
+    it: { gerund: 'mostrando', participle: 'mostrato' },
+    fr: { participle: 'montré' }, de: { participle: 'gezeigt' },
+    es: { gerund: 'mostrando', participle: 'mostrado' },
+    pt: { gerund: 'mostrando', participle: 'mostrado' },
+    ja: { te: '見せて', te_reading: 'みせて' },
+  },
+  SEND: {
+    en: { gerund: 'sending', participle: 'sent' },
+    it: { gerund: 'mandando', participle: 'mandato' },
+    fr: { participle: 'envoyé' }, de: { participle: 'geschickt' },
+    es: { gerund: 'enviando', participle: 'enviado' },
+    pt: { gerund: 'enviando', participle: 'enviado' },
+    ja: { te: '送って', te_reading: 'おくって' },
+  },
+  GO: {
+    en: { gerund: 'going', participle: 'gone' },
+    it: { gerund: 'andando', participle: 'andato' },
+    fr: { participle: 'allé' }, de: { participle: 'gegangen' },
+    es: { gerund: 'yendo', participle: 'ido' },
+    pt: { gerund: 'indo', participle: 'ido' },
+    ja: { te: '行って', te_reading: 'いって' },
+  },
+  BECOME: {
+    en: { gerund: 'becoming', participle: 'become' },
+    it: { gerund: 'diventando', participle: 'diventato' },
+    fr: { participle: 'devenu' }, de: { participle: 'geworden' },
+    es: { gerund: 'volviéndose', participle: 'vuelto' },
+    pt: { gerund: 'tornando-se', participle: 'tornado' },
+    ja: { te: 'なって', te_reading: 'なって' },
+  },
+  SEEM: {
+    en: { gerund: 'seeming', participle: 'seemed' },
+    it: { gerund: 'sembrando', participle: 'sembrato' },
+    fr: { participle: 'semblé' }, de: { participle: 'geschienen' },
+    es: { gerund: 'pareciendo', participle: 'parecido' },
+    pt: { gerund: 'parecendo', participle: 'parecido' },
+    ja: { te: '思えて', te_reading: 'おもえて' },
+  },
+  APPEAR: {
+    en: { gerund: 'appearing', participle: 'appeared' },
+    it: { gerund: 'apparendo', participle: 'apparso' },
+    fr: { participle: 'apparu' }, de: { participle: 'erschienen' },
+    es: { gerund: 'apareciendo', participle: 'aparecido' },
+    pt: { gerund: 'aparecendo', participle: 'aparecido' },
+    ja: { te: '見えて', te_reading: 'みえて' },
+  },
+};
+
 /** Form keys that are stored as typed columns on the lexeme table (not in *_forms) */
 const LEXEME_COLUMNS: Record<string, string[]> = {
   noun:    ['base', 'plural', 'gender'],
@@ -2549,7 +2764,10 @@ function seed() {
 
       const excludedKeys = new Set(['base', ...(LEXEME_COLUMNS[c.role] ?? [])]);
 
-      for (const [lang, forms] of Object.entries(c.forms)) {
+      for (const [lang, baseForms] of Object.entries(c.forms)) {
+        // Fold in the non-finite aspect forms (gerund / participle / te-form) for verbs.
+        const extra = c.role === 'verb' ? NONFINITE[c.id]?.[lang] : undefined;
+        const forms = extra ? { ...baseForms, ...extra } : baseForms;
         const lemma = forms['base'] ?? '';
         // Pass language via a temporary augmented object so lexemeArgs can access it
         const { lastInsertRowid } = rs.insertLexeme.run(...lexemeArgs(c.role, lang, lemma, forms));

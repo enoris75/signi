@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -149,6 +149,50 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   const number = subjectForms['number'] ?? 'singular';
   const n = number === 'plural' ? 'pl' : 'sg';
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
+}
+
+/** Person/number key ("1sg" … "3pl") into the "être" auxiliary table below. */
+function auxKey(subjectForms: Record<string, string>): string {
+  const person = subjectForms['person'] ?? '3';
+  const n = (subjectForms['number'] ?? 'singular') === 'plural' ? 'pl' : 'sg';
+  return `${person}${n}`;
+}
+
+// "être" — the auxiliary for every non-neutral aspect. French has no synthetic progressive,
+// so the progressive/prospective are "être en train de" / "être sur le point de" + infinitive;
+// the resultative is "être" + agreeing past participle. Past uses the imparfait ("était").
+const ETRE_FR: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'suis', '2sg': 'es', '3sg': 'est', '1pl': 'sommes', '2pl': 'êtes', '3pl': 'sont' },
+  past:    { '1sg': 'étais', '2sg': 'étais', '3sg': 'était', '1pl': 'étions', '2pl': 'étiez', '3pl': 'étaient' },
+  future:  { '1sg': 'serai', '2sg': 'seras', '3sg': 'sera', '1pl': 'serons', '2pl': 'serez', '3pl': 'seront' },
+};
+
+/** Agree an être-selecting past participle with the subject: allé → allée / allés / allées. */
+function agreeParticipleFr(base: string, subjectForms: Record<string, string>): string {
+  if (!base) return '';
+  const fem = (subjectForms['gender'] ?? 'masc') === 'fem';
+  const plural = (subjectForms['number'] ?? 'singular') === 'plural';
+  return `${base}${fem ? 'e' : ''}${plural ? 's' : ''}`;
+}
+
+/**
+ * The verb group for a non-neutral aspect, split into the finite "être" (which negation
+ * wraps) and the non-finite tail: progressive "en train de + inf", prospective "sur le
+ * point de + inf" (both eliding "de" → "d'" before a vowel), resultative = the agreeing
+ * past participle ("est allé").
+ */
+function aspectVerbFr(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  aspect: Aspect,
+): { finite: string; tail: string } {
+  const finite = ETRE_FR[tense][auxKey(subjectForms)];
+  const inf = verbForms['base'] ?? '';
+  const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
+  if (aspect === 'progressive') return { finite, tail: `en train ${deInf}` };
+  if (aspect === 'prospective') return { finite, tail: `sur le point ${deInf}` };
+  return { finite, tail: agreeParticipleFr(verbForms['participle'] ?? inf, subjectForms) }; // resultative
 }
 
 /** French linking preposition for an attributive noun, by relation (bare, no article). */
@@ -311,7 +355,7 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
   const conjugated = conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
@@ -323,7 +367,18 @@ function predicateText(
     directObject?.head.forms['definiteness'] === 'no';
   let effectiveVerb: string;
   let effectiveMod: string;
-  if (modifierIsNegative) {
+  if (aspect !== 'neutral') {
+    // Every non-neutral aspect is periphrastic on "être"; negation (ne … pas, or "ne" alone
+    // for the self-negating "aucun"/"jamais") wraps the finite être, then the non-finite tail
+    // follows ("n'est pas en train d'aller", "est allé").
+    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
+    const neg = verbNegative || aucun || modifierIsNegative;
+    const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';
+    const pas = verbNegative && !modifierIsNegative && !aucun ? ' pas' : '';
+    const finiteText = neg ? `${ne}${finite}${pas}` : finite;
+    effectiveVerb = `${finiteText} ${tail}`.trim();
+    effectiveMod = modifierText;
+  } else if (modifierIsNegative) {
     effectiveVerb = `ne ${conjugated} ${modifierText}`;
     effectiveMod = '';
   } else if (verbNegative) {

@@ -76,6 +76,7 @@ export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
     verb: sel.verb.id,
     negative: sel.verbNegative,
     tense: sel.verbTense,
+    aspect: sel.verbAspect,
     modifier: sel.modifier?.id,
   };
 }

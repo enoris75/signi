@@ -6,6 +6,7 @@ import FemaleIcon from "@mui/icons-material/Female";
 import TransgenderIcon from "@mui/icons-material/Transgender";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
+import TimelapseIcon from "@mui/icons-material/Timelapse";
 import TuneIcon from "@mui/icons-material/Tune";
 import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -18,6 +19,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import {
+  ASPECT_LABELS,
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
   DEFINITENESS_LABELS,
@@ -202,6 +204,17 @@ export function buildSatellites(
       hasValue: Boolean(selection.verbTense) && selection.verbTense !== "present",
       alwaysSet: true,
       valueLabel: TENSE_LABELS[selection.verbTense ?? "present"],
+    },
+    {
+      key: "verbAspect",
+      parent: "verb",
+      label: "Aspect",
+      icon: <TimelapseIcon sx={iconSx} />,
+      available: true,
+      // Non-default (solid) once the aspect is anything but the implicit neutral.
+      hasValue: Boolean(selection.verbAspect) && selection.verbAspect !== "neutral",
+      alwaysSet: true,
+      valueLabel: ASPECT_LABELS[selection.verbAspect ?? "neutral"],
     },
     {
       key: "modifier",
