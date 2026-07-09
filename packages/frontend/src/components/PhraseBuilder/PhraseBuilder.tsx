@@ -433,6 +433,16 @@ export function PhraseBuilder({
     if (prevH === graphHeight) return;
     prevGraphHeightRef.current = graphHeight;
     setPositions((prev) => rescaleYForHeight(prev, prevH, graphHeight));
+    // A drag in flight holds the grabbed nodes' start y's in the old height's % too — and
+    // the canvas can grow mid-drag, when a box shoved aside has to go down instead. Rebase
+    // them with everything else, or the box under the pointer jumps on the next move.
+    const drag = dragRef.current;
+    if (drag)
+      drag.origPositions = rescaleYForHeight(
+        drag.origPositions,
+        prevH,
+        graphHeight,
+      );
   }, [graphHeight]);
 
   useLayoutEffect(() => {
@@ -635,8 +645,13 @@ export function PhraseBuilder({
   // Canvas height + the size buildGraph measures against: the tight compact height when
   // compact, else the (resizable) full-view height. Both the group rects and the box %
   // positions are computed against this same height, so they stay consistent.
+  //
+  // The height is taken from state rather than from the measured `svgSize`, which is a
+  // ResizeObserver behind by a frame: when the overlap resolver grows the container to
+  // hold a box it pushed down, it has to see the height it just asked for, or it re-reads
+  // the old one and pushes the box down again.
   const canvasHeight = compactLayout ? compactLayout.height : graphHeight;
-  const graphSize = compactLayout ? { w: svgSize.w, h: canvasHeight } : svgSize;
+  const graphSize = { w: svgSize.w, h: canvasHeight };
 
   // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
   // with the container's bottom border, so the two must stay in step.
@@ -716,7 +731,14 @@ export function PhraseBuilder({
     });
     // Null once the boxes are clear of each other — which is the common case, and what
     // lets this run on every commit without chasing its own writes.
-    if (separated) setPositions((prev) => ({ ...prev, ...separated }));
+    if (!separated) return;
+    setPositions((prev) => ({ ...prev, ...separated.positions }));
+    // A box with nowhere left to go sideways is pushed down instead, and can land past
+    // the bottom edge. Grow the container to meet it rather than let it be clipped — the
+    // height rebase (above) holds every node's pixel offset, so the new room appears at
+    // the bottom and nothing else shifts. Not persisted: this is the content asking for
+    // space, not the user sizing the container with the grip.
+    if (separated.minHeight > graphHeight) setGraphHeight(separated.minHeight);
   });
 
   // Tidy the whole period: collapse every dotted box down to its main word, then pack

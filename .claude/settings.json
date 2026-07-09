@@ -144,7 +144,8 @@
       "Bash(node -e \"const c=require\\('json5'\\);\")",
       "Bash(grep -n \"noUnusedLocals\\\\|noUnusedParameters\" tsconfig*.json ../../tsconfig*.json)",
       "Bash(curl -s \"http://localhost:3001/api/concepts?role=pronoun\")",
-      "Bash(python3 -c \"import json,sys; print\\([c['id'] for c in json.load\\(sys.stdin\\)['concepts']]\\)\")"
+      "Bash(python3 -c \"import json,sys; print\\([c['id'] for c in json.load\\(sys.stdin\\)['concepts']]\\)\")",
+      "Bash(echo \"tsc exit: $?\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
