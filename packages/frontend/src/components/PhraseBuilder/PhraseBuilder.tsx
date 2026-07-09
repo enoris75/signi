@@ -212,9 +212,7 @@ export function PhraseBuilder({
         selection.subject?.role,
         Boolean(selection.subjectAdjective),
         selection.verb?.complements,
-        // In clause mode the subject is the external head, so drop the subject slot.
       )
-        .filter((s) => s.key !== "subject")
         // Objects hang off the verb, so a subject-only (verbless) period shows none —
         // otherwise an empty Direct Object box would appear before any verb is chosen.
         .filter(
