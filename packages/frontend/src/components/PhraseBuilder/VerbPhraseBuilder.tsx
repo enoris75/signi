@@ -2,7 +2,6 @@ import { Box } from "@mui/material";
 import { CAUSE_SENTIMENTS, PATH_SPECIFIERS } from "@signi/shared";
 import {
   AspectToggleBox,
-  NegativeToggleBox,
   SatelliteRow,
   SentimentSelector,
   SpecifierSelector,
@@ -13,9 +12,9 @@ import { GroupBox } from "./GroupBox.tsx";
 import { isModalSlot } from "./slots.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb box, the adverb box,
-// the polarity toggle, the complement-toggle row that rides the Verb Phrase
+// the tense and aspect boxes, the complement-toggle row that rides the Verb Phrase
 // dotted box, and — when a route is set — the path-specifier toolbar on the
-// route box.
+// route box. (Polarity is a direct toggle on the verb box border, not a box here.)
 export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
   const {
     renderedSlots,
@@ -24,7 +23,6 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     selection,
     complementToggleIcons,
     groupRects,
-    handleToggleNegative,
     handleCycleTense,
     handleCycleAspect,
     handleSelectSpecifier,
@@ -46,11 +44,6 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {verbSlots.map((slot) => (
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}
-      {shownMap.verbNegative && (
-        <Box {...makeDragProps("verbNegative", handleToggleNegative)}>
-          <NegativeToggleBox value={selection.verbNegative ?? false} />
-        </Box>
-      )}
       {shownMap.verbTense && (
         <Box {...makeDragProps("verbTense", handleCycleTense)}>
           <TenseToggleBox value={selection.verbTense ?? "present"} />

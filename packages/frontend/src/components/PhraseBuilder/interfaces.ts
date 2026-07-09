@@ -236,3 +236,32 @@ export interface WorkspaceBinding {
   linkTargetKeys: Set<NounAddress>;
   pickActive: boolean;
 }
+
+// Wrap a container's `binding` for an embedded possessor sub-builder whose head is
+// addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
+// `"subject"`); this maps that head onto `headPath` before forwarding to the container, so
+// the possessor head registers/links under its workspace address. A possessor head is only
+// ever a link *source* (relativising it), never a target, so target/dimming is suppressed.
+export function adaptPossessorBinding(
+  root: WorkspaceBinding,
+  headPath: NounAddress,
+): WorkspaceBinding {
+  const map = (nounKey: NounAddress): NounAddress =>
+    nounKey === "subject" ? headPath : nounKey;
+  return {
+    containerId: root.containerId,
+    registerBox: (nounKey, el) => root.registerBox(map(nounKey), el),
+    registerLinkSourceAnchor: (nounKey, el) =>
+      root.registerLinkSourceAnchor(map(nounKey), el),
+    registerLinkTargetAnchor: (nounKey, el) =>
+      root.registerLinkTargetAnchor(map(nounKey), el),
+    onGeometryChange: root.onGeometryChange,
+    isPickTarget: () => false,
+    onNounPick: (nounKey) => root.onNounPick(map(nounKey)),
+    onStartRelativeLink: (nounKey) => root.onStartRelativeLink(map(nounKey)),
+    onRemoveLink: (nounKey) => root.onRemoveLink(map(nounKey)),
+    linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
+    linkTargetKeys: new Set(),
+    pickActive: root.pickActive,
+  };
+}

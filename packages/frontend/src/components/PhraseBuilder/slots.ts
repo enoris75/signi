@@ -230,8 +230,9 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
 ]);
 
 // Collapsible role groups: each dashed box can be collapsed to show only its main
-// word (the verb, the subject noun, …). `childKeys` are the satellite/toggle nodes
-// hidden while collapsed; keyed by the group's `label` (matches GroupRect.label).
+// word (the verb, the subject noun, …). `childKeys` are the satellite nodes hidden
+// while collapsed; keyed by the group's `label` (matches GroupRect.label). Direct
+// toggles (number / gender / polarity) have no node, so they never appear here.
 export const COLLAPSIBLE_GROUPS: {
   label: string;
   mainKey: string;
@@ -240,50 +241,28 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Subject",
     mainKey: "subject",
-    childKeys: [
-      ...adjectiveSlots("subject"),
-      "subjectNumber",
-      "subjectGender",
-      "subjectDefiniteness",
-    ],
+    childKeys: [...adjectiveSlots("subject"), "subjectDefiniteness"],
   },
   {
     label: "Verb Phrase",
     mainKey: "verb",
-    childKeys: [
-      "modifier",
-      ...MODAL_SLOTS,
-      "verbNegative",
-      "verbTense",
-      "verbAspect",
-    ],
+    childKeys: ["modifier", ...MODAL_SLOTS, "verbTense", "verbAspect"],
   },
   {
     label: "Direct Object",
     mainKey: "directObject",
-    childKeys: [
-      ...adjectiveSlots("directObject"),
-      "directObjectNumber",
-      "directObjectGender",
-      "directObjectDefiniteness",
-    ],
+    childKeys: [...adjectiveSlots("directObject"), "directObjectDefiniteness"],
   },
   {
     label: "Indirect Object",
     mainKey: "indirectObject",
-    childKeys: [
-      ...adjectiveSlots("indirectObject"),
-      "indirectObjectNumber",
-      "indirectObjectGender",
-    ],
+    childKeys: [...adjectiveSlots("indirectObject")],
   },
   ...COMPLEMENT_TYPES.map((type) => ({
     label: COMPLEMENT_LABELS[type],
     mainKey: type as string,
     childKeys: [
       ...adjectiveSlots(type),
-      `${type}Number`,
-      `${type}Gender`,
       // The predicative plus the adposition-bearing spatial/dative complements carry a
       // determiner (cause is excluded — it weaves the quantifier into its connector).
       ...(DETERMINER_COMPLEMENT_TYPES.includes(type) ? [`${type}Definiteness`] : []),
@@ -394,6 +373,9 @@ const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   terminus: { x: 96, y: 70 },
 };
 
+// Every satellite needs an entry, including the direct toggles (number / gender /
+// polarity) that never render a canvas node: computeControlPositions reads each
+// satellite's position to aim its icon around the parent box's perimeter.
 export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   ...NODE_POS,
   predicativeNumber: NUMBER_TOGGLE_DEFAULTS.predicative,

@@ -24,17 +24,18 @@ export type Edge = {
   dashed: boolean;
 };
 
-export type GroupRect = {
+export type Rect = { x: number; y: number; width: number; height: number };
+
+export type GroupRect = Rect & {
   label: string;
   color: string;
   nodeKeys: string[];
   // Set on complement groups — these carry an "x" to remove the whole box.
   removeKey?: ComplementType;
-  x: number;
-  y: number;
-  width: number;
-  height: number;
 };
+
+// The identity of a role group, before its rect is measured.
+export type GroupShape = { nodeKeys: string[]; removeKey?: ComplementType };
 
 type Pt = { x: number; y: number };
 type PosFn = (key: string) => Pt;
@@ -57,6 +58,51 @@ export const ROUTE_PAD_TOP = 40;
 export const COMPACT_PAD_H = 66;
 export const COMPACT_PAD_TOP = 30;
 export const COMPACT_PAD_BOT = 30;
+
+// The padding a group's dotted box wraps around its node cluster, in SVG pixels.
+// Compact hugs the lone core word with tight, uniform pads (no toolbar headroom, since
+// the specifier toolbars are hidden too); full view uses the generous pads above.
+export function groupPads(
+  removeKey: ComplementType | undefined,
+  compact: boolean,
+): { padH: number; padTop: number; padBot: number } {
+  if (compact)
+    return {
+      padH: COMPACT_PAD_H,
+      padTop: COMPACT_PAD_TOP,
+      padBot: COMPACT_PAD_BOT,
+    };
+  return {
+    padH: PIX_PAD_H,
+    padTop:
+      removeKey === "route" || removeKey === "cause"
+        ? PIX_PAD_TOP + ROUTE_PAD_TOP
+        : PIX_PAD_TOP,
+    padBot: PIX_PAD_BOT,
+  };
+}
+
+// The dotted box a group's nodes trace out, in canvas pixels, before the canvas-edge
+// clamp that `buildGraph` applies for painting. The overlap resolver works on these raw
+// rects: a box shoved against the canvas edge must still report its true footprint, or it
+// would read as narrower than it is and never get pushed clear of its neighbour.
+export function rawGroupRect(
+  group: GroupShape,
+  pos: PosFn,
+  svgSize: { w: number; h: number },
+  compact: boolean,
+): Rect {
+  const { padH, padTop, padBot } = groupPads(group.removeKey, compact);
+  const pts = group.nodeKeys.map((k) => pos(k));
+  const x = (Math.min(...pts.map((p) => p.x)) / 100) * svgSize.w - padH;
+  const y = (Math.min(...pts.map((p) => p.y)) / 100) * svgSize.h - padTop;
+  return {
+    x,
+    y,
+    width: (Math.max(...pts.map((p) => p.x)) / 100) * svgSize.w + padH - x,
+    height: (Math.max(...pts.map((p) => p.y)) / 100) * svgSize.h + padBot - y,
+  };
+}
 
 const rectCenter = (r: GroupRect): Pt => ({
   x: r.x + r.width / 2,
@@ -160,26 +206,12 @@ export function buildGraph({
               : (complementParent ?? "verb"));
       edges.push(satEdge(parentKey, slot.key, MUI_COLOR_HEX[slot.color]));
     }
-    if (shownMap.verbNegative)
-      edges.push(satEdge("verb", "verbNegative", MUI_COLOR_HEX.secondary));
     if (shownMap.verbTense)
       edges.push(satEdge("verb", "verbTense", MUI_COLOR_HEX.secondary));
     if (shownMap.verbAspect)
       edges.push(satEdge("verb", "verbAspect", MUI_COLOR_HEX.secondary));
-    if (shownMap.subjectNumber)
-      edges.push(satEdge("subject", "subjectNumber", "#888"));
-    if (shownMap.subjectGender)
-      edges.push(satEdge("subject", "subjectGender", "#888"));
     if (shownMap.subjectDefiniteness)
       edges.push(satEdge("subject", "subjectDefiniteness", "#888"));
-    if (shownMap.directObjectNumber)
-      edges.push(
-        satEdge("directObject", "directObjectNumber", MUI_COLOR_HEX.success),
-      );
-    if (shownMap.directObjectGender)
-      edges.push(
-        satEdge("directObject", "directObjectGender", MUI_COLOR_HEX.success),
-      );
     if (shownMap.directObjectDefiniteness)
       edges.push(
         satEdge(
@@ -188,27 +220,7 @@ export function buildGraph({
           MUI_COLOR_HEX.success,
         ),
       );
-    if (shownMap.indirectObjectNumber)
-      edges.push(
-        satEdge(
-          "indirectObject",
-          "indirectObjectNumber",
-          MUI_COLOR_HEX.warning,
-        ),
-      );
-    if (shownMap.indirectObjectGender)
-      edges.push(
-        satEdge(
-          "indirectObject",
-          "indirectObjectGender",
-          MUI_COLOR_HEX.warning,
-        ),
-      );
     for (const type of COMPLEMENT_TYPES) {
-      if (shownMap[`${type}Number`])
-        edges.push(satEdge(type, `${type}Number`, MUI_COLOR_HEX.warning));
-      if (shownMap[`${type}Gender`])
-        edges.push(satEdge(type, `${type}Gender`, MUI_COLOR_HEX.warning));
       if (shownMap[`${type}Definiteness`])
         edges.push(satEdge(type, `${type}Definiteness`, MUI_COLOR_HEX.warning));
     }
@@ -232,8 +244,6 @@ export function buildGraph({
               nodeKeys: [
                 ...adjectiveSlots("subject").filter((k) => shownMap[k]),
                 "subject",
-                ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
-                ...(shownMap.subjectGender ? ["subjectGender"] : []),
                 ...(shownMap.subjectDefiniteness
                   ? ["subjectDefiniteness"]
                   : []),
@@ -249,7 +259,6 @@ export function buildGraph({
         nodeKeys: [
           ...MODAL_SLOTS.filter((k) => shownMap[k]),
           "verb",
-          ...(shownMap.verbNegative ? ["verbNegative"] : []),
           ...(shownMap.verbTense ? ["verbTense"] : []),
           ...(shownMap.verbAspect ? ["verbAspect"] : []),
           ...(shownMap.modifier ? ["modifier"] : []),
@@ -263,8 +272,6 @@ export function buildGraph({
               nodeKeys: [
                 "directObject",
                 ...adjectiveSlots("directObject").filter((k) => shownMap[k]),
-                ...(shownMap.directObjectNumber ? ["directObjectNumber"] : []),
-                ...(shownMap.directObjectGender ? ["directObjectGender"] : []),
                 ...(shownMap.directObjectDefiniteness
                   ? ["directObjectDefiniteness"]
                   : []),
@@ -280,12 +287,6 @@ export function buildGraph({
               nodeKeys: [
                 "indirectObject",
                 ...adjectiveSlots("indirectObject").filter((k) => shownMap[k]),
-                ...(shownMap.indirectObjectNumber
-                  ? ["indirectObjectNumber"]
-                  : []),
-                ...(shownMap.indirectObjectGender
-                  ? ["indirectObjectGender"]
-                  : []),
               ],
             },
           ]
@@ -298,30 +299,17 @@ export function buildGraph({
         nodeKeys: [
           ...adjectiveSlots(type).filter((k) => shownMap[k]),
           type,
-          ...(shownMap[`${type}Number`] ? [`${type}Number`] : []),
-          ...(shownMap[`${type}Gender`] ? [`${type}Gender`] : []),
           ...(shownMap[`${type}Definiteness`] ? [`${type}Definiteness`] : []),
         ],
       })),
     ];
 
-    // Compact hugs the lone core word with tight, uniform pads (no toolbar headroom,
-    // since the specifier toolbars are hidden too); full view uses the generous pads.
-    const padH = compact ? COMPACT_PAD_H : PIX_PAD_H;
-    const padBot = compact ? COMPACT_PAD_BOT : PIX_PAD_BOT;
+    // Painted rects are the raw footprints clipped to the canvas, so a box that spills
+    // over an edge is drawn flush against it rather than off-screen.
     for (const g of roleGroups) {
-      const pts = g.nodeKeys.map((k) => pos(k));
-      const minXpct = Math.min(...pts.map((p) => p.x));
-      const maxXpct = Math.max(...pts.map((p) => p.x));
-      const minYpct = Math.min(...pts.map((p) => p.y));
-      const maxYpct = Math.max(...pts.map((p) => p.y));
-      const padTop = compact
-        ? COMPACT_PAD_TOP
-        : g.removeKey === "route" || g.removeKey === "cause"
-          ? PIX_PAD_TOP + ROUTE_PAD_TOP
-          : PIX_PAD_TOP;
-      const rx = Math.max(0, px(minXpct, svgSize.w) - padH);
-      const ry = Math.max(0, px(minYpct, svgSize.h) - padTop);
+      const raw = rawGroupRect(g, pos, svgSize, compact);
+      const rx = Math.max(0, raw.x);
+      const ry = Math.max(0, raw.y);
       groupRects.push({
         label: g.label,
         color: g.color,
@@ -329,8 +317,8 @@ export function buildGraph({
         removeKey: g.removeKey,
         x: rx,
         y: ry,
-        width: Math.min(svgSize.w, px(maxXpct, svgSize.w) + padH) - rx,
-        height: Math.min(svgSize.h, px(maxYpct, svgSize.h) + padBot) - ry,
+        width: Math.min(svgSize.w, raw.x + raw.width) - rx,
+        height: Math.min(svgSize.h, raw.y + raw.height) - ry,
       });
     }
   }

@@ -136,6 +136,19 @@ export function PhraseWorkspace({
     setContainers((cs) => [...cs, { id: uid(), selection: {} }]);
   }
 
+  // Swap a container with its neighbour. Links are keyed by container id, so they follow
+  // their containers; the connector overlay re-measures on the resulting render.
+  function moveContainer(id: string, delta: -1 | 1) {
+    setContainers((cs) => {
+      const i = cs.findIndex((c) => c.id === id);
+      const j = i + delta;
+      if (i < 0 || j < 0 || j >= cs.length) return cs;
+      const next = [...cs];
+      [next[i], next[j]] = [next[j], next[i]];
+      return next;
+    });
+  }
+
   function removeContainer(id: string) {
     // The workspace always keeps at least one period: removing the last remaining
     // container clears its content in place rather than leaving an empty workspace.
@@ -342,6 +355,14 @@ export function PhraseWorkspace({
               // The sole container can't be deleted (the workspace always keeps one), so
               // its header control clears the content in place instead of removing it.
               soleContainer={containers.length === 1}
+              // Reorder controls, omitted at each end of the stack so the header can
+              // disable the button that has nowhere to go.
+              onMoveUp={i > 0 ? () => moveContainer(c.id, -1) : undefined}
+              onMoveDown={
+                i < containers.length - 1
+                  ? () => moveContainer(c.id, 1)
+                  : undefined
+              }
               onSave={() => setSavePeriodId(c.id)}
               // The word palette rides only the first container to avoid ambiguity.
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}

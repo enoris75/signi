@@ -37,7 +37,7 @@ export function slotTypeahead({
 
   const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
-  return pickerFor(slotKey, pick, nounSubject);
+  return pickerFor(slotKey, pick, nounSubject, selection[slotKey]);
 }
 
 // Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can
@@ -53,6 +53,9 @@ function pickerFor(
   slotKey: SlotKey,
   pick: (c: Concept, opts?: ConceptSelectOpts) => void,
   nounSubject: boolean,
+  // The concept the slot already holds, when re-picking — lets a two-vocabulary picker
+  // open on the kind that is currently there.
+  held?: Concept,
 ): ReactNode {
   switch (slotKey) {
     case "verb":
@@ -77,6 +80,16 @@ function pickerFor(
       // switch (a noun here is attributive).
       if (/Adjective\d?$/.test(slotKey))
         return <ModifierTypeahead onSelect={pick} />;
+      // The subject complement takes a predicate noun ("becomes a legend") or a predicate
+      // adjective ("seems happy"), so it carries the same Noun ⇄ Adjective switch — opened
+      // on Noun, the more common head.
+      if (slotKey === "predicative")
+        return (
+          <ModifierTypeahead
+            onSelect={pick}
+            defaultKind={held?.role === "adjective" ? "adjective" : "noun"}
+          />
+        );
       // The causal complement ("because of him") also accepts a pronoun, so it uses the
       // pronoun-inclusive picker; the motion/locative complements stay noun-only.
       if (slotKey === "cause")

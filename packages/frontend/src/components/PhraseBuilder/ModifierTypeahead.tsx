@@ -5,13 +5,21 @@ import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 
 /**
- * The empty-slot picker for an adjective slot, with a switch between a real adjective
- * ("big") and a noun used attributively ("sail" → "sail boat"). The picked concept's
- * `role` is what downstream code (selectionToPlan) reads to route it into `adjectives`
- * vs `nounModifiers`; this toggle only chooses which vocabulary is searched.
+ * A picker that switches between the adjective and the noun vocabulary. Used by every
+ * adjective slot — a real adjective ("big") or a noun used attributively ("sail" → "sail
+ * boat") — and by the subject complement, whose head is a predicate noun ("becomes a
+ * legend") or a predicate adjective ("seems happy"). The picked concept's `role` is what
+ * downstream code reads to tell the two apart; this toggle only chooses which vocabulary
+ * is searched.
  */
-export function ModifierTypeahead({ onSelect }: { onSelect: (concept: Concept) => void }) {
-  const [kind, setKind] = useState<"adjective" | "noun">("adjective");
+export function ModifierTypeahead({
+  onSelect,
+  defaultKind = "adjective",
+}: {
+  onSelect: (concept: Concept) => void;
+  defaultKind?: "adjective" | "noun";
+}) {
+  const [kind, setKind] = useState<"adjective" | "noun">(defaultKind);
   return (
     <Box onPointerDown={(e) => e.stopPropagation()}>
       <ToggleButtonGroup

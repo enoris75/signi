@@ -6,24 +6,20 @@ import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
 import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
 import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
+import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
+import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import {
-  ASPECTS,
-  COMPLEMENT_LABELS,
   COMPLEMENT_TYPES,
-  DEFINITENESS,
-  DEGREES,
-  MODIFIER_RELATIONS,
-  TENSES,
   type Concept,
   type CauseSentiment,
   type ComplementType,
-  type Definiteness,
   type PathSpecifier,
 } from "@signi/shared";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
-import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { SlotBox } from "./Boxes.tsx";
 import {
+  adaptPossessorBinding,
   ConceptSelectOpts,
   GenderSlot,
   NounAddress,
@@ -37,7 +33,6 @@ import {
 } from "./interfaces.ts";
 import {
   ALL_SLOTS,
-  COMPLEMENT_KEY_SET,
   COLLAPSIBLE_GROUPS,
   NOUN_KEYS,
   SATELLITE_SLOT_KEYS,
@@ -48,18 +43,42 @@ import {
   MIN_GRAPH_HEIGHT,
   MUI_COLOR_HEX,
 } from "./slots.ts";
-import { applyConceptSelect, applyClear } from "./phraseReducers.ts";
-import { buildSatellites, conceptLabel, type Satellite } from "./satellites.tsx";
 import {
-  buildGraph,
-  PIX_PAD_H,
-  PIX_PAD_TOP,
-  PIX_PAD_BOT,
-  ROUTE_PAD_TOP,
-  COMPACT_PAD_H,
-  COMPACT_PAD_TOP,
-  COMPACT_PAD_BOT,
-} from "./graph.ts";
+  applyConceptSelect,
+  applyClear,
+  cycleAspect,
+  cycleDefiniteness,
+  cycleDegree,
+  cycleModifierRelation,
+  cycleTense,
+  removePossessor,
+  setSentiment,
+  setSpecifier,
+  toggleGender,
+  toggleNegative,
+  toggleNumber,
+  updatePossessor,
+} from "./phraseReducers.ts";
+import {
+  buildSatelliteIcons,
+  buildSatellites,
+  conceptLabel,
+  type Satellite,
+} from "./satellites.tsx";
+import {
+  computeCompactLayout,
+  packPeriod,
+  rearrangeGroupPositions,
+  rescaleYForHeight,
+} from "./layout.ts";
+import { sameBoxSizes, sameRelConnectors, type RelConnector } from "./measure.ts";
+import { buildGraph, rawGroupRect, type GroupRect } from "./graph.ts";
+import {
+  resolveGroupOverlaps,
+  RANK_DRAGGED,
+  RANK_FREE,
+  RANK_GROWN,
+} from "./overlap.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
@@ -90,6 +109,10 @@ interface PhraseBuilderProps {
   // Top-level only: this is the sole period in the workspace, so it can't be deleted — the
   // header's `onRemove` control clears its content in place instead of removing the container.
   soleContainer?: boolean;
+  // Top-level only: move this period one place up/down the workspace stack. Left undefined
+  // at the ends of the stack, where the header shows the control disabled.
+  onMoveUp?: () => void;
+  onMoveDown?: () => void;
   // Top-level only: save just this clause (a "period") to the saved-phrase store. Shown as
   // a small icon in the main-clause header. Undefined for nested (possessor/relative) builders.
   onSave?: () => void;
@@ -118,82 +141,6 @@ type DragState = {
   moved: boolean;
 };
 
-// Equal within half a pixel on every key — used to stop the box-measuring layout
-// effect from looping on sub-pixel jitter.
-function sameBoxSizes(
-  a: Record<string, { w: number; h: number }>,
-  b: Record<string, { w: number; h: number }>,
-): boolean {
-  const keysA = Object.keys(a);
-  if (keysA.length !== Object.keys(b).length) return false;
-  for (const k of keysA) {
-    const pb = b[k];
-    if (!pb) return false;
-    if (Math.abs(a[k].w - pb.w) > 0.5 || Math.abs(a[k].h - pb.h) > 0.5)
-      return false;
-  }
-  return true;
-}
-
-// A connector from a noun box down to its (open, uncollapsed) relative-clause
-// panel. Coordinates are pixels relative to the builder's root Box.
-type RelConnector = {
-  which: string;
-  x1: number;
-  y1: number;
-  x2: number;
-  y2: number;
-  color: string;
-};
-
-// Equal within half a pixel on every endpoint — stops the measuring layout
-// effect from looping on sub-pixel jitter.
-function sameRelConnectors(a: RelConnector[], b: RelConnector[]): boolean {
-  if (a.length !== b.length) return false;
-  for (let i = 0; i < a.length; i++) {
-    const p = a[i];
-    const q = b[i];
-    if (p.which !== q.which || p.color !== q.color) return false;
-    if (
-      Math.abs(p.x1 - q.x1) > 0.5 ||
-      Math.abs(p.y1 - q.y1) > 0.5 ||
-      Math.abs(p.x2 - q.x2) > 0.5 ||
-      Math.abs(p.y2 - q.y2) > 0.5
-    )
-      return false;
-  }
-  return true;
-}
-
-// Wrap a container's `binding` for an embedded possessor sub-builder whose head is
-// addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
-// `"subject"`); this maps that head onto `headPath` before forwarding to the container, so
-// the possessor head registers/links under its workspace address. A possessor head is only
-// ever a link *source* (relativising it), never a target, so target/dimming is suppressed.
-function adaptPossessorBinding(
-  root: WorkspaceBinding,
-  headPath: NounAddress,
-): WorkspaceBinding {
-  const map = (nounKey: NounAddress): NounAddress =>
-    nounKey === "subject" ? headPath : nounKey;
-  return {
-    containerId: root.containerId,
-    registerBox: (nounKey, el) => root.registerBox(map(nounKey), el),
-    registerLinkSourceAnchor: (nounKey, el) =>
-      root.registerLinkSourceAnchor(map(nounKey), el),
-    registerLinkTargetAnchor: (nounKey, el) =>
-      root.registerLinkTargetAnchor(map(nounKey), el),
-    onGeometryChange: root.onGeometryChange,
-    isPickTarget: () => false,
-    onNounPick: (nounKey) => root.onNounPick(map(nounKey)),
-    onStartRelativeLink: (nounKey) => root.onStartRelativeLink(map(nounKey)),
-    onRemoveLink: (nounKey) => root.onRemoveLink(map(nounKey)),
-    linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
-    linkTargetKeys: new Set(),
-    pickActive: root.pickActive,
-  };
-}
-
 export function PhraseBuilder({
   selection,
   onPhraseUpdate,
@@ -204,6 +151,8 @@ export function PhraseBuilder({
   relativeLabel,
   onRemove,
   soleContainer = false,
+  onMoveUp,
+  onMoveDown,
   onSave,
   wordsPanelOpen = false,
   onWordsPanelClose,
@@ -379,115 +328,41 @@ export function PhraseBuilder({
   // "relative clause" satellite starts/removes a link via `binding`, and the target
   // container is folded in at serialization time — no in-selection relative slice.
 
-  // A lens onto the possessor slice hanging off `which`, seeding an empty possessor the
-  // first time. Handed to the nested noun-phrase-mode PhraseBuilder as its onPhraseUpdate,
-  // so its edits land inside this block's `${which}Possessor`.
+  // A lens onto the possessor slice hanging off `which`. Handed to the nested
+  // noun-phrase-mode PhraseBuilder as its onPhraseUpdate, so its edits land inside
+  // this block's `${which}Possessor`.
   function makePossessorUpdate(which: NounKey) {
     return (updater: (prev: PhraseSelection) => PhraseSelection) =>
-      onPhraseUpdate((prev) => ({
-        ...prev,
-        [POSSESSOR_KEY(which)]: updater(
-          (prev[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ?? {},
-        ),
-      }));
+      onPhraseUpdate((prev) => updatePossessor(prev, which, updater));
   }
 
   // Remove a noun block's possessor entirely and collapse its reveal.
   function handleRemovePossessor(which: NounKey) {
-    onPhraseUpdate((prev) => {
-      const next = { ...prev };
-      delete next[POSSESSOR_KEY(which)];
-      return next;
-    });
+    onPhraseUpdate((prev) => removePossessor(prev, which));
     setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
     // Drop any relative-clause link sourced from the possessor head that just vanished.
     binding?.onRemoveLink(possessorAddress(possessorPath ?? which));
   }
 
-  function handleToggleNumber(which: NumberSlot) {
-    const key = `${which}Number` as keyof PhraseSelection;
-    onPhraseUpdate((prev) => ({
-      ...prev,
-      [key]: prev[key] === "plural" ? "singular" : "plural",
-    }));
-  }
-
-  function handleToggleGender(which: GenderSlot) {
-    const key = `${which}Gender` as keyof PhraseSelection;
-    onPhraseUpdate((prev) => {
-      // Every pronoun carries gender (masc/fem); only the 3rd person adds neuter (he/she/it).
-      const concept = prev[which] as Concept | undefined;
-      const cycle: ("masc" | "fem" | "neut")[] =
-        concept?.role === "pronoun" && concept.person === "3"
-          ? ["masc", "fem", "neut"]
-          : ["masc", "fem"];
-      const cur = (prev[key] as "masc" | "fem" | "neut") ?? "masc";
-      const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
-      return { ...prev, [key]: next };
-    });
-  }
-
-  function handleToggleNegative() {
-    onPhraseUpdate((prev) => ({ ...prev, verbNegative: !prev.verbNegative }));
-  }
-
-  // Cycle a noun's determiner definite → indefinite → bare → definite.
-  function handleCycleDefiniteness(which: NounKey) {
-    const key = `${which}Definiteness` as keyof PhraseSelection;
-    onPhraseUpdate((prev) => {
-      const cur = (prev[key] as Definiteness) ?? "definite";
-      const idx = DEFINITENESS.indexOf(cur);
-      return { ...prev, [key]: DEFINITENESS[(idx + 1) % DEFINITENESS.length] };
-    });
-  }
-
-  // Cycle a noun-modifier's semantic relation (feature → purpose → material → feature),
-  // stored per adjective slot key in `modifierRelations`. Only meaningful when that slot
-  // holds a noun; ignored otherwise.
-  function handleCycleModifierRelation(slotKey: SlotKey) {
-    onPhraseUpdate((prev) => {
-      const cur = prev.modifierRelations?.[slotKey] ?? "feature";
-      const next = MODIFIER_RELATIONS[(MODIFIER_RELATIONS.indexOf(cur) + 1) % MODIFIER_RELATIONS.length];
-      return { ...prev, modifierRelations: { ...prev.modifierRelations, [slotKey]: next } };
-    });
-  }
-
-  // Cycle a real adjective's comparative degree (positive → more → most → less → least →
-  // equally → positive), stored per adjective slot key in `adjectiveDegrees`. Only
-  // meaningful when that slot holds an adjective; ignored otherwise.
-  function handleCycleDegree(slotKey: SlotKey) {
-    onPhraseUpdate((prev) => {
-      const cur = prev.adjectiveDegrees?.[slotKey] ?? "positive";
-      const next = DEGREES[(DEGREES.indexOf(cur) + 1) % DEGREES.length];
-      return { ...prev, adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: next } };
-    });
-  }
-
-  // Cycle the verb tense present → past → future → present.
-  function handleCycleTense() {
-    onPhraseUpdate((prev) => {
-      const idx = TENSES.indexOf(prev.verbTense ?? "present");
-      return { ...prev, verbTense: TENSES[(idx + 1) % TENSES.length] };
-    });
-  }
-
-  // Cycle the verb aspect neutral → progressive → prospective → resultative → neutral.
-  function handleCycleAspect() {
-    onPhraseUpdate((prev) => {
-      const idx = ASPECTS.indexOf(prev.verbAspect ?? "neutral");
-      return { ...prev, verbAspect: ASPECTS[(idx + 1) % ASPECTS.length] };
-    });
-  }
-
-  // Set the route complement's path relation (through / under / over / …).
-  function handleSelectSpecifier(spec: PathSpecifier) {
-    onPhraseUpdate((prev) => ({ ...prev, routeSpecifier: spec }));
-  }
-
-  // Set the cause complement's affective sentiment (neutral / negative / positive).
-  function handleSelectSentiment(sentiment: CauseSentiment) {
-    onPhraseUpdate((prev) => ({ ...prev, causeSentiment: sentiment }));
-  }
+  // Each grammatical control on the canvas is a pure selection transform (phraseReducers);
+  // these bind them to this builder's slice.
+  const handleToggleNumber = (which: NumberSlot) =>
+    onPhraseUpdate((prev) => toggleNumber(prev, which));
+  const handleToggleGender = (which: GenderSlot) =>
+    onPhraseUpdate((prev) => toggleGender(prev, which));
+  const handleToggleNegative = () => onPhraseUpdate(toggleNegative);
+  const handleCycleDefiniteness = (which: NounKey) =>
+    onPhraseUpdate((prev) => cycleDefiniteness(prev, which));
+  const handleCycleModifierRelation = (slotKey: SlotKey) =>
+    onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey));
+  const handleCycleDegree = (slotKey: SlotKey) =>
+    onPhraseUpdate((prev) => cycleDegree(prev, slotKey));
+  const handleCycleTense = () => onPhraseUpdate(cycleTense);
+  const handleCycleAspect = () => onPhraseUpdate(cycleAspect);
+  const handleSelectSpecifier = (spec: PathSpecifier) =>
+    onPhraseUpdate((prev) => setSpecifier(prev, spec));
+  const handleSelectSentiment = (sentiment: CauseSentiment) =>
+    onPhraseUpdate((prev) => setSentiment(prev, sentiment));
 
   const { satellites, shownMap: rawShownMap } = buildSatellites(
     selection,
@@ -522,59 +397,14 @@ export function PhraseBuilder({
     setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   }
 
-  // Row-compact one dotted box's child nodes into a tidy cluster centered on
-  // `center` (% coords): adjectives (and the tense chip) on a top row, the main word
-  // in the middle, and the number/gender/adverb/polarity toggles on a bottom row.
-  // Each row is horizontally centered, so the group's derived bounding box shrinks to
-  // a neat, minimal footprint. Returns the new positions for just this group's keys.
-  function tidyGroupPositions(
-    nodeKeys: string[],
-    center: { x: number; y: number },
-  ): Record<string, { x: number; y: number }> {
-    const clamp = (v: number, lo: number, hi: number) =>
-      Math.max(lo, Math.min(hi, v));
-    // Convert a comfortable per-node pixel spacing into the % coordinate space.
-    const stepX = (150 / Math.max(svgSize.w, 1)) * 100;
-    const stepY = (68 / Math.max(svgSize.h, 1)) * 100;
-    // -1 = top row (adjectives / tense), 0 = main word, 1 = bottom row (toggles).
-    const tierOf = (k: string): -1 | 0 | 1 => {
-      if (/Adjective\d?$/.test(k) || k === "verbTense" || k === "verbAspect") return -1;
-      if (
-        /(Number|Gender|Definiteness)$/.test(k) ||
-        k === "verbNegative" ||
-        k === "modifier"
-      )
-        return 1;
-      return 0;
-    };
-    const rows: Record<number, string[]> = { [-1]: [], 0: [], 1: [] };
-    for (const k of nodeKeys) rows[tierOf(k)].push(k);
-    const out: Record<string, { x: number; y: number }> = {};
-    for (const tier of [-1, 0, 1] as const) {
-      const row = rows[tier];
-      const rowY = clamp(center.y + tier * stepY, 4, 96);
-      const startX = center.x - ((row.length - 1) * stepX) / 2;
-      row.forEach((k, i) => {
-        out[k] = { x: clamp(startX + i * stepX, 2, 98), y: rowY };
-      });
-    }
-    return out;
-  }
-
   // Re-arrange a single dotted box in place — compacting its child nodes around the
   // group's own current center.
   function handleRearrangeGroup(nodeKeys: string[]) {
     if (nodeKeys.length === 0) return;
-    setPositions((prev) => {
-      const cur = nodeKeys.map(
-        (k) => prev[k] ?? DEFAULT_POSITIONS[k] ?? { x: 50, y: 50 },
-      );
-      const center = {
-        x: cur.reduce((s, p) => s + p.x, 0) / cur.length,
-        y: cur.reduce((s, p) => s + p.y, 0) / cur.length,
-      };
-      return { ...prev, ...tidyGroupPositions(nodeKeys, center) };
-    });
+    setPositions((prev) => ({
+      ...prev,
+      ...rearrangeGroupPositions(nodeKeys, prev, svgSize),
+    }));
   }
 
   function handleToggleReveal(sat: Satellite) {
@@ -585,89 +415,20 @@ export function PhraseBuilder({
     }
   }
 
-  // Map each main box to the satellite toggle icons rendered on its border.
-  // Complement toggles (locative/direction/source/route) are pulled out here and
-  // rendered on the Verb Phrase dotted box instead of the verb box itself.
-  const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
-  const complementToggleIcons: SatelliteIcon[] = [];
-  // Relative-clause + possessor controls don't ride the word box border — they sit on
-  // their noun's *dotted-box* perimeter and start the dotted connector line from there
-  // (see GroupPerimeterControls below). Collected per noun so both can share an edge.
-  const perimeterByNoun: Partial<
-    Record<NounKey, { relative?: SatelliteIcon; possessor?: SatelliteIcon }>
-  > = {};
-  for (const sat of satellites) {
-    if (!sat.available) continue;
-    // The "Relative clause" satellite is a cross-container link control, not a reveal.
-    // It only exists in a workspace container (needs the binding); clicking it starts a
-    // link (pick a noun in another container) or, when already a source, removes it.
-    const relativeNoun: NounKey | null = sat.key.endsWith("Relative")
-      ? (sat.key.slice(0, -"Relative".length) as NounKey)
-      : null;
-    if (relativeNoun) {
-      if (!linkBinding) continue;
-      const isSource = linkBinding.linkSourceKeys.has(relativeNoun);
-      (perimeterByNoun[relativeNoun] ??= {}).relative = {
-        key: sat.key,
-        icon: sat.icon,
-        label: sat.label,
-        active: isSource,
-        isSet: isSource,
-        valued: false,
-        valueLabel: isSource ? "Linked — click to remove" : undefined,
-        onToggle: () =>
-          isSource
-            ? linkBinding.onRemoveLink(relativeNoun)
-            : linkBinding.onStartRelativeLink(relativeNoun),
-      };
-      continue;
-    }
-    // A direct-toggle satellite (number / gender) has no reveal box — its border icon
-    // flips the value in place (singular ⇄ plural, or cycling masc → fem → …). `which`
-    // is the slot key minus the "Number" / "Gender" suffix.
-    const numberSlot: NumberSlot | null =
-      sat.directToggle && sat.key.endsWith("Number")
-        ? (sat.key.slice(0, -"Number".length) as NumberSlot)
-        : null;
-    const genderSlot: GenderSlot | null =
-      sat.directToggle && sat.key.endsWith("Gender")
-        ? (sat.key.slice(0, -"Gender".length) as GenderSlot)
-        : null;
-    const iconEntry: SatelliteIcon = {
-      key: sat.key,
-      icon: sat.icon,
-      label: sat.label,
-      active: sat.shown,
-      isSet: sat.hasValue,
-      valued: Boolean(sat.alwaysSet),
-      valueLabel: sat.valueLabel,
-      onToggle: numberSlot
-        ? () => handleToggleNumber(numberSlot)
-        : genderSlot
-          ? () => handleToggleGender(genderSlot)
-          : () => handleToggleReveal(sat),
-    };
-    // The possessor reveal toggle likewise rides the dotted-box perimeter and anchors
-    // its own connector down to the possessor panel.
-    const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
-      ? (sat.key.slice(0, -"Possessor".length) as NounKey)
-      : null;
-    if (possessorNoun) {
-      (perimeterByNoun[possessorNoun] ??= {}).possessor = iconEntry;
-      continue;
-    }
-    if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
-      complementToggleIcons.push(iconEntry);
-    } else {
-      // A collapsed group hides its own reveal icons; complement toggles ride
-      // the verb box but belong to sibling groups, so they stay above.
-      if (collapsedMainKeys.has(sat.parent)) continue;
-      // A control riding another satellite's box (Adjective 2 on Adjective 1) can only
-      // appear while that box is itself on the canvas.
-      if (SATELLITE_SLOT_KEYS.has(sat.parent) && !shownMap[sat.parent]) continue;
-      (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
-    }
-  }
+  // Sort every satellite's control into: its parent word box's border, the verb-phrase
+  // dotted box (complement toggles), or a noun's dotted-box perimeter (relative-clause +
+  // possessor controls, which also anchor their connector lines).
+  const { satelliteIconsByParent, complementToggleIcons, perimeterByNoun } =
+    buildSatelliteIcons({
+      satellites,
+      shownMap,
+      collapsedMainKeys,
+      linkBinding,
+      onToggleNumber: handleToggleNumber,
+      onToggleGender: handleToggleGender,
+      onToggleNegative: handleToggleNegative,
+      onToggleReveal: handleToggleReveal,
+    });
 
   // Satellite slots (adjective / adverb) only render when revealed or filled.
   const renderedSlots = visibleSlots.filter(
@@ -709,6 +470,19 @@ export function PhraseBuilder({
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
+
+  // Resizing the container must not move the content vertically. Node y's are % of the
+  // canvas, so a height change alone would slide them all; rebase them onto the new height
+  // to hold each node's pixel offset from the canvas top. Runs before paint, so the nodes
+  // never render at the un-rebased position — the resized edge just yields empty space.
+  const prevGraphHeightRef = useRef(graphHeight);
+  useLayoutEffect(() => {
+    const prevH = prevGraphHeightRef.current;
+    if (prevH === graphHeight) return;
+    prevGraphHeightRef.current = graphHeight;
+    setPositions((prev) => rescaleYForHeight(prev, prevH, graphHeight));
+  }, [graphHeight]);
+
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const { width, height } = containerRef.current.getBoundingClientRect();
@@ -916,41 +690,13 @@ export function PhraseBuilder({
   // from the current width every render, it never goes stale on a resize, and the stored
   // full-view positions/height stay pristine for when compact turns back off. The core
   // words are exactly `renderedSlots` in compact (satellites are already filtered out).
-  const compactLayout = React.useMemo(() => {
-    if (!compact) return null;
-    const boxW = 2 * COMPACT_PAD_H;
-    const rowH = COMPACT_PAD_TOP + COMPACT_PAD_BOT;
-    const gap = 16;
-    const margin = 4;
-    const svgW = svgSize.w;
-    const keys = renderedSlots.map((s) => s.key);
-    const perRow = Math.max(
-      1,
-      Math.floor((svgW - 2 * margin + gap) / (boxW + gap)),
-    );
-    const rows: string[][] = [];
-    for (let i = 0; i < keys.length; i += perRow)
-      rows.push(keys.slice(i, i + perRow));
-    const height = Math.max(
-      rowH,
-      Math.round(rows.length * rowH + gap * Math.max(rows.length - 1, 0) + 2 * margin),
-    );
-    const positionsOut: Record<string, { x: number; y: number }> = {};
-    let top = margin;
-    for (const row of rows) {
-      const rowW = row.length * boxW + gap * (row.length - 1);
-      let left = Math.max(margin, (svgW - rowW) / 2);
-      for (const key of row) {
-        positionsOut[key] = {
-          x: ((left + COMPACT_PAD_H) / Math.max(svgW, 1)) * 100,
-          y: ((top + COMPACT_PAD_TOP) / Math.max(height, 1)) * 100,
-        };
-        left += boxW + gap;
-      }
-      top += rowH + gap;
-    }
-    return { positions: positionsOut, height };
-  }, [compact, renderedSlots, svgSize.w]);
+  const compactLayout = React.useMemo(
+    () =>
+      compact
+        ? computeCompactLayout(renderedSlots.map((s) => s.key), svgSize.w)
+        : null,
+    [compact, renderedSlots, svgSize.w],
+  );
 
   // Canvas height + the size buildGraph measures against: the tight compact height when
   // compact, else the (resizable) full-view height. Both the group rects and the box %
@@ -991,78 +737,65 @@ export function PhraseBuilder({
     svgSize: graphSize,
   });
 
+  // Dotted boxes never overlap. A box's footprint is derived from the nodes inside it, so
+  // revealing a satellite, adding an adjective, expanding a group or dragging a node out
+  // all grow it — potentially straight over a neighbour. After every commit, measure the
+  // boxes and slide the ones that would be covered aside or down until each is clear.
+  //
+  // The box that caused the growth holds its ground and everything else yields to it: the
+  // box under the pointer outranks all, then any box that just grew or just appeared. The
+  // last footprint of each box is remembered so "just grew" can be read off the difference.
+  // Nothing to compare against on the first pass (`null`), so nothing is pinned and any
+  // boxes that start out overlapping share the shove evenly.
+  //
+  // Compact view packs its own non-overlapping rows and derives positions rather than
+  // storing them, so there is nothing here to resolve or to write back.
+  const prevGroupSizesRef = useRef<Map<string, { w: number; h: number }> | null>(
+    null,
+  );
+  useLayoutEffect(() => {
+    if (compact || groupRects.length < 2) return;
+    const sizes = new Map(
+      groupRects.map((g) => {
+        const r = rawGroupRect(g, pos, graphSize, false);
+        return [g.label, { w: r.width, h: r.height }] as const;
+      }),
+    );
+    const before = prevGroupSizesRef.current;
+    prevGroupSizesRef.current = sizes;
+
+    const dragKeys = dragRef.current?.keys;
+    const rankOf = (g: GroupRect) => {
+      if (dragKeys?.some((k) => g.nodeKeys.includes(k))) return RANK_DRAGGED;
+      if (!before) return RANK_FREE;
+      const was = before.get(g.label);
+      const now = sizes.get(g.label)!;
+      const grew = !was || now.w > was.w + 0.5 || now.h > was.h + 0.5;
+      return grew ? RANK_GROWN : RANK_FREE;
+    };
+
+    const separated = resolveGroupOverlaps({
+      groupRects,
+      pos,
+      svgSize: graphSize,
+      rankOf,
+    });
+    // Null once the boxes are clear of each other — which is the common case, and what
+    // lets this run on every commit without chasing its own writes.
+    if (separated) setPositions((prev) => ({ ...prev, ...separated }));
+  });
+
   // Tidy the whole period: collapse every dotted box down to its main word, then pack
   // the collapsed boxes into non-overlapping rows in reading order — subject · verb
   // phrase · direct object · indirect object · complements. One click re-flows the
   // whole container into a clean grid.
   function handleTidyPeriod() {
     if (groupRects.length === 0) return;
-    // Reading order; boxes with a label not listed sort to the end.
-    const order = [
-      "Subject",
-      "Verb Phrase",
-      "Direct Object",
-      "Indirect Object",
-      ...COMPLEMENT_TYPES.map((t) => COMPLEMENT_LABELS[t]),
-    ];
-    const rank = (label: string) => {
-      const i = order.indexOf(label);
-      return i === -1 ? order.length : i;
-    };
-    const boxes = [...groupRects].sort((a, b) => rank(a.label) - rank(b.label));
-
+    const { labels, positions: packed } = packPeriod(groupRects, svgSize);
     // Collapse everything: every group label maps to a COLLAPSIBLE_GROUPS entry, so the
-    // packed footprints below (a single main word) are what actually renders.
-    setCollapsedGroups(
-      Object.fromEntries(boxes.map((g) => [g.label, true])),
-    );
-
-    // A collapsed box wraps just its main word: a fixed width plus the standard
-    // padding — the route box needs extra headroom for its path toolbar. These match
-    // graph.ts exactly, so the packed spacing reproduces the rendered box footprint.
-    const boxW = 2 * PIX_PAD_H;
-    const padTopOf = (g: (typeof boxes)[number]) =>
-      g.removeKey === "route" || g.removeKey === "cause"
-        ? PIX_PAD_TOP + ROUTE_PAD_TOP
-        : PIX_PAD_TOP;
-    const boxHOf = (g: (typeof boxes)[number]) => padTopOf(g) + PIX_PAD_BOT;
-
-    const gap = 20; // gutter between boxes, px
-    const margin = 6;
-    const { w: svgW, h: svgH } = svgSize;
-    // How many equal-width boxes fit across the canvas (at least one per row).
-    const perRow = Math.max(
-      1,
-      Math.floor((svgW - 2 * margin + gap) / (boxW + gap)),
-    );
-    const rows: (typeof boxes)[] = [];
-    for (let i = 0; i < boxes.length; i += perRow)
-      rows.push(boxes.slice(i, i + perRow));
-    const rowHeights = rows.map((row) => Math.max(...row.map(boxHOf)));
-    const totalH =
-      rowHeights.reduce((a, b) => a + b, 0) + gap * (rows.length - 1);
-
-    setPositions((prev) => {
-      const next = { ...prev };
-      // Center the whole stack vertically; center each row horizontally.
-      let boxTop = Math.max(margin, (svgH - totalH) / 2);
-      rows.forEach((row, r) => {
-        const rowW = row.length * boxW + gap * (row.length - 1);
-        let boxLeft = Math.max(margin, (svgW - rowW) / 2);
-        for (const g of row) {
-          // Convert the box's top-left corner back to its main word's center (px → %),
-          // then compact the group around it (only the main word survives collapse).
-          const center = {
-            x: ((boxLeft + PIX_PAD_H) / Math.max(svgW, 1)) * 100,
-            y: ((boxTop + padTopOf(g)) / Math.max(svgH, 1)) * 100,
-          };
-          Object.assign(next, tidyGroupPositions(g.nodeKeys, center));
-          boxLeft += boxW + gap;
-        }
-        boxTop += rowHeights[r] + gap;
-      });
-      return next;
-    });
+    // packed footprints are what actually renders.
+    setCollapsedGroups(Object.fromEntries(labels.map((l) => [l, true])));
+    setPositions((prev) => ({ ...prev, ...packed }));
   }
 
   // Compact / expand the whole period. This is a pure view toggle: the compact packing
@@ -1308,6 +1041,39 @@ export function PhraseBuilder({
             </Typography>
             )}
             <Box sx={{ display: "flex", alignItems: "center" }}>
+              {/* Reorder within the workspace stack. Both controls stay mounted while the
+                  workspace holds more than one period, so the cluster doesn't shift width
+                  as a period reaches an end; the one with nowhere to go is disabled. */}
+              {!soleContainer && (
+                <>
+                  <Tooltip title="Move this period up">
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={onMoveUp}
+                        disabled={!onMoveUp}
+                        aria-label="Move this period up"
+                        sx={{ p: 0.25 }}
+                      >
+                        <ArrowUpwardIcon sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                  <Tooltip title="Move this period down">
+                    <span>
+                      <IconButton
+                        size="small"
+                        onClick={onMoveDown}
+                        disabled={!onMoveDown}
+                        aria-label="Move this period down"
+                        sx={{ p: 0.25 }}
+                      >
+                        <ArrowDownwardIcon sx={{ fontSize: 15 }} />
+                      </IconButton>
+                    </span>
+                  </Tooltip>
+                </>
+              )}
               {groupRects.length > 0 && (
                 <Tooltip
                   title={compact ? "Expand this period" : "Compact this period"}
