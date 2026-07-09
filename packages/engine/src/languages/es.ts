@@ -209,6 +209,19 @@ function nounPhrase(forms: Record<string, string>, adj?: string): string {
   return art ? `${art} ${word}${a}` : `${word}${a}`;
 }
 
+/**
+ * A predicate nominal's forms, with an indefinite *plural* flattened to bare: Spanish says
+ * "se vuelven gatos", never "se vuelven unos gatos". "unos" before a predicate noun is
+ * evaluative ("son unos idiotas"), not the plural of "un". The singular keeps "un/una", and
+ * an explicitly chosen determiner (definite, quantifier) passes through untouched. French is
+ * the odd Romance sibling here — it keeps "des chats" — so this lives per-engine.
+ */
+function predicativeForms(forms: Record<string, string>): Record<string, string> {
+  const plural = (forms['number'] ?? forms['count'] ?? 'singular') === 'plural';
+  if (!plural || forms['definiteness'] !== 'indefinite') return forms;
+  return { ...forms, definiteness: 'bare' };
+}
+
 function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
@@ -261,7 +274,7 @@ function complementsPhrase(
         if (f['role'] === 'adjective') {
           return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
         }
-        return withRelative(nounPhrase(f, esAdj(c.phrase)), c.phrase);
+        return withRelative(nounPhrase(predicativeForms(f), esAdj(c.phrase)), c.phrase);
       }
       // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
       // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").

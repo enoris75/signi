@@ -26,6 +26,7 @@ import {
   DEFINITENESS_LABELS,
   DETERMINER_COMPLEMENT_TYPES,
   TENSE_LABELS,
+  defaultDefiniteness,
   type Concept,
   type ComplementType,
   type Definiteness,
@@ -528,10 +529,10 @@ export function buildSatellites(
           available:
             DETERMINER_COMPLEMENT_TYPES.includes(type) && concept?.role === "noun",
           hasValue: Boolean(
-            def && def !== "definite",
+            def && def !== defaultDefiniteness(type),
           ),
           alwaysSet: true,
-          valueLabel: DEFINITENESS_LABELS[def ?? "definite"],
+          valueLabel: DEFINITENESS_LABELS[def ?? defaultDefiniteness(type)],
         },
         {
           key: `${type}Relative`,

@@ -26,7 +26,6 @@ import {
   NounKey,
   NumberSlot,
   PhraseSelection,
-  POSSESSOR_KEY,
   possessorAddress,
   SlotKey,
   WorkspaceBinding,
@@ -57,7 +56,6 @@ import {
   toggleGender,
   toggleNegative,
   toggleNumber,
-  updatePossessor,
 } from "./phraseReducers.ts";
 import {
   buildSatelliteIcons,
@@ -88,8 +86,9 @@ import { Resizer } from "./Resizer.tsx";
 import { SatelliteControls } from "./SatelliteControls.tsx";
 import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
+import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
 
-interface PhraseBuilderProps {
+export interface PhraseBuilderProps {
   selection: PhraseSelection;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
   // Clause mode: this builder edits a relative clause whose subject is the external
@@ -328,14 +327,6 @@ export function PhraseBuilder({
   // "relative clause" satellite starts/removes a link via `binding`, and the target
   // container is folded in at serialization time — no in-selection relative slice.
 
-  // A lens onto the possessor slice hanging off `which`. Handed to the nested
-  // noun-phrase-mode PhraseBuilder as its onPhraseUpdate, so its edits land inside
-  // this block's `${which}Possessor`.
-  function makePossessorUpdate(which: NounKey) {
-    return (updater: (prev: PhraseSelection) => PhraseSelection) =>
-      onPhraseUpdate((prev) => updatePossessor(prev, which, updater));
-  }
-
   // Remove a noun block's possessor entirely and collapse its reveal.
   function handleRemovePossessor(which: NounKey) {
     onPhraseUpdate((prev) => removePossessor(prev, which));
@@ -439,9 +430,6 @@ export function PhraseBuilder({
   // The outermost positioned Box — connectors from a noun to its relative-clause
   // panel are measured relative to this, since the panels live below the canvas.
   const rootRef = useRef<HTMLDivElement>(null);
-  // Each open possessor panel's wrapper element, keyed by its noun block. (Relative
-  // clauses are separate workspace containers now, not docked panels.)
-  const possessorPanelEls = useRef<Map<string, HTMLElement>>(new Map());
   // The possessor connector runs dot-to-dot: from the possessor control on the noun's
   // dotted-box perimeter (start) to the receiving dot on the panel's top edge (end).
   const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
@@ -806,10 +794,7 @@ export function PhraseBuilder({
     setCompact((c) => !c);
   }
 
-  // Noun blocks whose possessor panel is currently open (revealed or already filled).
-  const openPossessors = NOUN_KEYS.filter(
-    (which) => selection[which] && shownMap[`${which}Possessor`],
-  );
+  const openPossessors = openPossessorsFor(selection, shownMap);
 
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
   // same canvas below and lean on this component's drag machinery and handlers.
@@ -1283,68 +1268,22 @@ export function PhraseBuilder({
           </Box>
         )}
 
-        {/* Possessor editors — one per noun block with an open possessor. Each is a
-            verbless noun-phrase-mode PhraseBuilder editing that block's `${which}Possessor`
-            slice (a noun phrase whose head is its `subject`); because it is the same
-            builder, the possessor gets the full noun-phrase surface — adjectives,
-            number/gender, a relative clause, and its own nested possessor. Being a noun
-            phrase and not a period, each sits in a dashed box inside this period rather
-            than in a period container of its own. */}
-        {showCanvas &&
-          openPossessors.map((which) => {
-            const nounHead = selection[which] as Concept;
-            const possColor =
-              MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
-            return (
-              <Box
-                key={which}
-                ref={(el: HTMLDivElement | null) => {
-                  if (el) possessorPanelEls.current.set(which, el);
-                  else possessorPanelEls.current.delete(which);
-                }}
-                sx={{ position: "relative", mt: 1.5, pl: nested ? 1 : 2 }}
-              >
-                {/* Receiving dot on the panel's top edge — where this noun's possessor
-                    connector lands. */}
-                <Box
-                  ref={(el: HTMLDivElement | null) => {
-                    if (el) possessorDotEls.current.set(which, el);
-                    else possessorDotEls.current.delete(which);
-                  }}
-                  sx={{
-                    position: "absolute",
-                    left: nested ? 8 + 20 : 16 + 20,
-                    top: 0,
-                    transform: "translate(-50%, -50%)",
-                    width: 10,
-                    height: 10,
-                    borderRadius: "50%",
-                    bgcolor: possColor,
-                    border: "2px solid",
-                    borderColor: "background.paper",
-                    zIndex: 2,
-                  }}
-                />
-                <PhraseBuilder
-                  nounPhrase
-                  dottedColor={possColor}
-                  head={nounHead}
-                  relativeLabel="'s"
-                  selection={
-                    (selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ??
-                    {}
-                  }
-                  onPhraseUpdate={makePossessorUpdate(which)}
-                  onRemove={() => handleRemovePossessor(which)}
-                  // Forward the container's binding so the possessor's head can source a
-                  // relative-clause link, addressed under this possessor step (composes for
-                  // nested possessors via `possessorPath ?? which`).
-                  binding={binding}
-                  possessorPath={possessorAddress(possessorPath ?? which)}
-                />
-              </Box>
-            );
-          })}
+        {showCanvas && (
+          <PossessorPanels
+            openPossessors={openPossessors}
+            selection={selection}
+            nested={nested}
+            onPhraseUpdate={onPhraseUpdate}
+            onRemovePossessor={handleRemovePossessor}
+            registerDot={(which, el) => {
+              if (el) possessorDotEls.current.set(which, el);
+              else possessorDotEls.current.delete(which);
+            }}
+            binding={binding}
+            possessorPath={possessorPath}
+            Builder={PhraseBuilder}
+          />
+        )}
       </Paper>
 
       {/* The word palette rides only the top-level builder as a slide-over

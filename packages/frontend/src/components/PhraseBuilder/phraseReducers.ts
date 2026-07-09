@@ -5,6 +5,7 @@ import {
   DEGREES,
   MODIFIER_RELATIONS,
   TENSES,
+  defaultDefiniteness,
   type CauseSentiment,
   type Concept,
   type Definiteness,
@@ -244,13 +245,14 @@ export function toggleNegative(prev: PhraseSelection): PhraseSelection {
   return { ...prev, verbNegative: !prev.verbNegative };
 }
 
-// Cycle a noun's determiner definite → indefinite → bare → definite.
+// Cycle a noun's determiner definite → indefinite → bare → definite. The starting point is
+// the slot's default, so the first click always moves off what the phrase already reads as.
 export function cycleDefiniteness(
   prev: PhraseSelection,
   which: NounKey,
 ): PhraseSelection {
   const key = `${which}Definiteness` as keyof PhraseSelection;
-  const cur = (prev[key] as Definiteness) ?? "definite";
+  const cur = (prev[key] as Definiteness) ?? defaultDefiniteness(which);
   const idx = DEFINITENESS.indexOf(cur);
   return { ...prev, [key]: DEFINITENESS[(idx + 1) % DEFINITENESS.length] };
 }

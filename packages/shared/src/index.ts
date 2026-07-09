@@ -49,6 +49,21 @@ export const DEFINITENESS_LABELS: Record<Definiteness, string> = {
 };
 
 /**
+ * The determiner a noun phrase takes when the user has not chosen one, which depends on
+ * the slot it fills. Referential slots (subject, objects, the spatial complements) pick out
+ * a referent and default to `definite`. The `predicative` subject complement does not: a
+ * predicate noun ascribes class membership ("the angel becomes *a* cat"), so it defaults to
+ * `indefinite`. `definite` there is the equative reading — an assertion of identity with a
+ * known referent ("Clark Kent is *the* reporter") — which stays reachable by selecting it.
+ *
+ * Read by the engine when resolving a plan, and by the UI to label the determiner toggle
+ * and decide where its cycle starts. Both must agree, so both call this.
+ */
+export function defaultDefiniteness(slot: string): Definiteness {
+  return slot === 'predicative' ? 'indefinite' : 'definite';
+}
+
+/**
  * The semantic relation a noun-modifier bears to its head — a noun used
  * attributively ("sail boat", "sunglasses", "gold ring"). English/German/Japanese
  * neutralise it (juxtaposition / compound / の); the Romance engines use it to select

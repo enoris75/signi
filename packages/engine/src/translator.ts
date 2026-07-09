@@ -1,4 +1,5 @@
 import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
+import { defaultDefiniteness } from '@signi/shared';
 import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -148,8 +149,14 @@ function resolveComplements(
   const out: Partial<Record<ComplementType, ResolvedComplement>> = {};
   for (const [type, value] of Object.entries(complements)) {
     if (!value?.phrase?.concept) continue;
+    // The unchosen determiner depends on the slot: `predicative` defaults to indefinite,
+    // every other complement to definite. See `defaultDefiniteness`.
+    const phrase =
+      value.phrase.definiteness === undefined
+        ? { ...value.phrase, definiteness: defaultDefiniteness(type) }
+        : value.phrase;
     out[type as ComplementType] = {
-      phrase: resolveNounPhrase(value.phrase, language, lookup),
+      phrase: resolveNounPhrase(phrase, language, lookup),
       specifiers: value.specifiers,
     };
   }

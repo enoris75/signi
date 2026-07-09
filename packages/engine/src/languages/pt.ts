@@ -226,6 +226,19 @@ function nounPhrase(forms: Record<string, string>, adj?: string): string {
   return art ? `${art} ${word}${a}` : `${word}${a}`;
 }
 
+/**
+ * A predicate nominal's forms, with an indefinite *plural* flattened to bare: Portuguese says
+ * "tornam-se gatos", never "tornam-se uns gatos" — "uns" before a predicate noun is
+ * evaluative, not the plural of "um". The singular keeps "um/uma", and an explicitly chosen
+ * determiner (definite, quantifier) passes through untouched. French is the odd Romance
+ * sibling here — it keeps "des chats" — so this lives per-engine.
+ */
+function predicativeForms(forms: Record<string, string>): Record<string, string> {
+  const plural = (forms['number'] ?? forms['count'] ?? 'singular') === 'plural';
+  if (!plural || forms['definiteness'] !== 'indefinite') return forms;
+  return { ...forms, definiteness: 'bare' };
+}
+
 function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
@@ -278,7 +291,7 @@ function complementsPhrase(
         if (f['role'] === 'adjective') {
           return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
         }
-        return withRelative(nounPhrase(f, ptAdj(c.phrase)), c.phrase);
+        return withRelative(nounPhrase(predicativeForms(f), ptAdj(c.phrase)), c.phrase);
       }
       // A pronoun cause: neutral "por causa de mim / dele" takes the tonic form after "de"
       // (which contracts with the 3rd-person pronouns, de+ele→dele); positive "graças a mim"

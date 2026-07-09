@@ -135,7 +135,14 @@
       "Bash(python3 -c \"import sys,json;[print\\(f\\\\\"  {t['language']}: {t['text']}\\\\\"\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
       "Bash(curl -s -X POST localhost:3001/api/translate -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"BOY\",\"number\":\"singular\",\"adjectives\":[],\"adjectiveDegrees\":[],\"nounModifiers\":[]},\"verbPhrase\":{\"verb\":\"BECOME\",\"tense\":\"present\"},\"complements\":{\"predicative\":{\"phrase\":{\"concept\":\"LEGEND\",\"number\":\"singular\",\"definiteness\":\"indefinite\",\"adjectives\":[],\"adjectiveDegrees\":[],\"nounModifiers\":[]}}}}}')",
       "Bash(echo \"--- tsc exit: $? ---\")",
-      "Bash(grep -rn \"shownMap\\\\[\\\\`\\\\${type}\\\\|shownMap\\\\.\\\\w*Number\\\\|shownMap\\\\.\\\\w*Gender\\\\|shownMap\\\\.verbNegative\" .)"
+      "Bash(grep -rn \"shownMap\\\\[\\\\`\\\\${type}\\\\|shownMap\\\\.\\\\w*Number\\\\|shownMap\\\\.\\\\w*Gender\\\\|shownMap\\\\.verbNegative\" .)",
+      "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/4f132332-b292-4daa-8ef3-4b67d79d8806/scratchpad/check.mjs)",
+      "Bash(timeout 240 npm test)",
+      "Bash(npm test *)",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('./package.json'\\).scripts||{}\\)\\)\")",
+      "Bash(node -e \"console.log\\(Object.keys\\(require\\('./packages/frontend/package.json'\\).scripts||{}\\)\\)\")",
+      "Bash(node -e \"const c=require\\('json5'\\);\")",
+      "Bash(grep -n \"noUnusedLocals\\\\|noUnusedParameters\" tsconfig*.json ../../tsconfig*.json)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
