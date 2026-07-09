@@ -1,13 +1,6 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { alpha, Box, Paper, Typography, IconButton, Tooltip } from "@mui/material";
+import { alpha, Box, Paper, Typography, IconButton } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import BackspaceOutlinedIcon from "@mui/icons-material/BackspaceOutlined";
-import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
-import AutoFixHighIcon from "@mui/icons-material/AutoFixHigh";
-import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
-import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
-import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
-import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import {
   COMPLEMENT_TYPES,
   type Concept,
@@ -87,6 +80,7 @@ import { SatelliteControls } from "./SatelliteControls.tsx";
 import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
+import { PeriodContainer } from "./PeriodContainer.tsx";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -190,14 +184,12 @@ export function PhraseBuilder({
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
   });
+  // Where a standalone period card has been dragged to by its border, in viewport pixels;
+  // null while it sits in the page flow. The drag itself lives in PeriodContainer, but the
+  // state is held here because this component's outer Box is what goes `fixed`.
   const [position, setPosition] = useState<{ x: number; y: number } | null>(
     null,
   );
-  const borderDragRef = useRef<{
-    startX: number;
-    startY: number;
-    startPos: { x: number; y: number };
-  } | null>(null);
   const hasVerb = Boolean(selection.verb);
   const hasSubject = Boolean(selection.subject);
   // Has the user put anything in this clause? An untouched container is `{}`; any picked
@@ -617,29 +609,6 @@ export function PhraseBuilder({
     setDraggingKey(null);
   }
 
-  function startBorderDrag(e: React.PointerEvent<HTMLDivElement>) {
-    (e.currentTarget as HTMLElement).setPointerCapture(e.pointerId);
-    borderDragRef.current = {
-      startX: e.clientX,
-      startY: e.clientY,
-      startPos: position ?? { x: 0, y: 0 },
-    };
-  }
-
-  function moveBorderDrag(e: React.PointerEvent<HTMLDivElement>) {
-    if (!borderDragRef.current) return;
-    const dx = e.clientX - borderDragRef.current.startX;
-    const dy = e.clientY - borderDragRef.current.startY;
-    setPosition({
-      x: borderDragRef.current.startPos.x + dx,
-      y: borderDragRef.current.startPos.y + dy,
-    });
-  }
-
-  function endBorderDrag() {
-    borderDragRef.current = null;
-  }
-
   function makeDragProps(key: string, onActivate: () => void) {
     const isDragging = draggingKey === key;
     const p = positions[key] ?? DEFAULT_POSITIONS[key];
@@ -848,6 +817,155 @@ export function PhraseBuilder({
     onPickTarget: linkBinding ? (key) => linkBinding.onNounPick(key as NounKey) : undefined,
   };
 
+  // The card's contents — the canvas, its resize grip, and any docked possessor panels.
+  // Shared by both chromes below: a top-level period wears the PeriodContainer card, a
+  // nested clause or possessor the plainer Paper drawn inline.
+  const content = (
+    <>
+      <Box sx={{ minWidth: 0 }}>
+        {!showCanvas ? (
+          // An empty period is still the full, resizable canvas height — the bottom
+          // edge resizes it just as it does once words land on the canvas.
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              height: canvasHeight,
+            }}
+          >
+            {/* A period opens on its subject noun phrase; only a nested relative
+                clause opens on the verb (its subject is the external head). */}
+            {nested ? (
+              <SlotBox
+                slot={verbSlot}
+                concept={undefined}
+                isActive={activeSlot === "verb"}
+                onClear={() => handleClear("verb")}
+                emptyContent={
+                  <VerbTypeahead
+                    onSelect={(c) => handleConceptSelect(c, "verb")}
+                  />
+                }
+              />
+            ) : (
+              <SlotBox
+                slot={subjectSlot}
+                concept={undefined}
+                isActive={activeSlot === "subject"}
+                onClear={() => handleClear("subject")}
+                emptyContent={
+                  <SubjectTypeahead
+                    onSelect={(c, opts) =>
+                      handleConceptSelect(c, "subject", opts)
+                    }
+                  />
+                }
+              />
+            )}
+          </Box>
+        ) : (
+          <Box
+            ref={containerRef}
+            sx={{
+              position: "relative",
+              height: canvasHeight,
+              touchAction: "none",
+            }}
+          >
+            <ConnectorsLayer
+              svgSize={graphSize}
+              groupEdges={groupEdges}
+              edges={edges}
+            />
+
+            {/* Every constituent paints onto this shared canvas. Each
+                builder draws its own dashed group box (with the collapse
+                and, for complements, remove controls) plus its word boxes.
+                The builders self-filter, so mounting one per possible noun
+                / the verb phrase unconditionally is safe — inactive slots
+                and toggles render nothing. Noun-phrase mode (possessor) paints
+                only its single head noun phrase — no verb, objects, or complements. */}
+            {nounPhrase ? (
+              <NounPhraseBuilder which="subject" ctx={ctx} />
+            ) : (
+              <>
+                {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
+                <VerbPhraseBuilder ctx={ctx} />
+                <NounPhraseBuilder which="directObject" ctx={ctx} />
+                <NounPhraseBuilder which="indirectObject" ctx={ctx} />
+                {COMPLEMENT_TYPES.map((type) => (
+                  <NounPhraseBuilder key={type} which={type} ctx={ctx} />
+                ))}
+              </>
+            )}
+
+            {/* Compact view is just the bare core-word chips — no reveal icons
+                on the box borders and no dotted-box perimeter controls. */}
+            {!compact && (
+              <SatelliteControls
+                satelliteIconsByParent={satelliteIconsByParent}
+                controlPos={controlPos}
+              />
+            )}
+
+            {!compact && (
+              <GroupPerimeterControls
+                groupRects={groupRects}
+                perimeterByNoun={perimeterByNoun}
+                linkTargetKeys={
+                  linkBinding
+                    ? (linkBinding.linkTargetKeys as Set<NounKey>)
+                    : undefined
+                }
+                registerSourceAnchor={linkBinding?.registerLinkSourceAnchor}
+                registerTargetAnchor={linkBinding?.registerLinkTargetAnchor}
+                registerPossessorControl={(nounKey, el) => {
+                  if (el) possessorControlEls.current.set(nounKey, el);
+                  else possessorControlEls.current.delete(nounKey);
+                }}
+              />
+            )}
+          </Box>
+        )}
+      </Box>
+
+      {/* The container's own bottom edge is the resize grip, so it bleeds back through
+          the Paper's padding. No manual resize while compact — the canvas is auto-sized
+          to hug the chips, and the resizer's tall minimum would fight that. */}
+      {!compact && (
+        <Box sx={{ mt: 2, mx: -paperPad, mb: -paperPad }}>
+          <Resizer
+            height={graphHeight}
+            minHeight={MIN_GRAPH_HEIGHT}
+            onResize={setGraphHeight}
+            onResizeEnd={(h) => {
+              if (!nested && !nounPhrase)
+                localStorage.setItem("signi:graphHeight", String(Math.round(h)));
+            }}
+          />
+        </Box>
+      )}
+
+      {showCanvas && (
+        <PossessorPanels
+          openPossessors={openPossessors}
+          selection={selection}
+          nested={nested}
+          onPhraseUpdate={onPhraseUpdate}
+          onRemovePossessor={handleRemovePossessor}
+          registerDot={(which, el) => {
+            if (el) possessorDotEls.current.set(which, el);
+            else possessorDotEls.current.delete(which);
+          }}
+          binding={binding}
+          possessorPath={possessorPath}
+          Builder={PhraseBuilder}
+        />
+      )}
+    </>
+  );
+
   return (
     <Box
       ref={rootRef}
@@ -888,65 +1006,34 @@ export function PhraseBuilder({
           ))}
         </Box>
       )}
-      <Paper
-        elevation={0}
-        onPointerDown={(e) => {
-          // Nested panels stay docked, a possessor stays inside its owner's dashed box,
-          // and workspace containers stay in the managed stack so cross-container
-          // connectors measure correctly.
-          if (nested || nounPhrase || binding) return;
-          const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
-          const borderWidth = 8;
-          const isNearBorder =
-            e.clientX - rect.left < borderWidth ||
-            e.clientX - rect.left > rect.width - borderWidth ||
-            e.clientY - rect.top < borderWidth ||
-            e.clientY - rect.top > rect.height - borderWidth;
-          if (isNearBorder) {
-            startBorderDrag(e as React.PointerEvent<HTMLDivElement>);
-          }
-        }}
-        onPointerMove={(e) => {
-          if (borderDragRef.current) {
-            moveBorderDrag(e as React.PointerEvent<HTMLDivElement>);
-          }
-        }}
-        onPointerUp={endBorderDrag}
-        onPointerCancel={endBorderDrag}
-        sx={{
-          p: paperPad,
-          // Compact floats its controls into the top-right corner, so the Paper is the
-          // positioning context for that overlay.
-          position: "relative",
-          // A possessor is only a noun phrase, not a period of its own, so it wears the
-          // same dashed outline as the role groups on the canvas above it rather than the
-          // period container's accent card. A clause or the main period keeps the card
-          // (left rule + tinted bg), its rule's colour marking the kind.
-          ...(nounPhrase
-            ? {
-                border: "1px dashed",
-                borderColor: dottedColor
-                  ? alpha(dottedColor, 0.5)
-                  : "info.light",
-                borderRadius: "4px",
-                bgcolor: "transparent",
-              }
-            : {
-                border: "1px solid",
-                borderColor: "divider",
-                borderLeft: "3px solid",
-                borderLeftColor: nested ? "primary.light" : "text.secondary",
-                bgcolor: "action.hover",
-              }),
-          cursor:
-            borderDragRef.current && position
-              ? "grabbing"
-              : position
-                ? "default"
-                : undefined,
-        }}
-      >
-        {nested || nounPhrase ? (
+      {nested || nounPhrase ? (
+        // A possessor is only a noun phrase, not a period of its own, so it wears the same
+        // dashed outline as the role groups on the canvas above it rather than the period
+        // container's accent card. A relative clause keeps the card, its left rule tinted
+        // to mark it subordinate.
+        <Paper
+          elevation={0}
+          sx={{
+            p: paperPad,
+            position: "relative",
+            ...(nounPhrase
+              ? {
+                  border: "1px dashed",
+                  borderColor: dottedColor
+                    ? alpha(dottedColor, 0.5)
+                    : "info.light",
+                  borderRadius: "4px",
+                  bgcolor: "transparent",
+                }
+              : {
+                  border: "1px solid",
+                  borderColor: "divider",
+                  borderLeft: "3px solid",
+                  borderLeftColor: "primary.light",
+                  bgcolor: "action.hover",
+                }),
+          }}
+        >
           <Box
             sx={{
               display: "flex",
@@ -981,310 +1068,32 @@ export function PhraseBuilder({
               </IconButton>
             )}
           </Box>
-        ) : (
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              // Compact drops the label and floats the controls into the top-right corner
-              // (absolute), so they reserve no vertical space and the chips rise to the top
-              // of the reclaimed area; full view keeps the labelled header in flow.
-              ...(compact
-                ? {
-                    position: "absolute",
-                    top: 6,
-                    right: 6,
-                    zIndex: 4,
-                    m: 0,
-                  }
-                : { mb: 1.5 }),
-            }}
-          >
-            {/* The "Main clause · …" caption is chrome the compact overview doesn't need. */}
-            {!compact && (
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "text.secondary",
-              }}
-            >
-              Main clause{" "}
-              <Box
-                component="span"
-                sx={{ color: "text.disabled", fontWeight: 500 }}
-              >
-                ·{" "}
-                {showCanvas
-                  ? "click a slot then choose a word"
-                  : "start by choosing a subject"}
-              </Box>
-            </Typography>
-            )}
-            <Box sx={{ display: "flex", alignItems: "center" }}>
-              {/* Reorder within the workspace stack. Both controls stay mounted while the
-                  workspace holds more than one period, so the cluster doesn't shift width
-                  as a period reaches an end; the one with nowhere to go is disabled. */}
-              {!soleContainer && (
-                <>
-                  <Tooltip title="Move this period up">
-                    <span>
-                      <IconButton
-                        size="small"
-                        onClick={onMoveUp}
-                        disabled={!onMoveUp}
-                        aria-label="Move this period up"
-                        sx={{ p: 0.25 }}
-                      >
-                        <ArrowUpwardIcon sx={{ fontSize: 15 }} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                  <Tooltip title="Move this period down">
-                    <span>
-                      <IconButton
-                        size="small"
-                        onClick={onMoveDown}
-                        disabled={!onMoveDown}
-                        aria-label="Move this period down"
-                        sx={{ p: 0.25 }}
-                      >
-                        <ArrowDownwardIcon sx={{ fontSize: 15 }} />
-                      </IconButton>
-                    </span>
-                  </Tooltip>
-                </>
-              )}
-              {groupRects.length > 0 && (
-                <Tooltip
-                  title={compact ? "Expand this period" : "Compact this period"}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={handleToggleCompact}
-                    aria-label={
-                      compact ? "Expand this period" : "Compact this period"
-                    }
-                    color={compact ? "primary" : "default"}
-                    sx={{ p: 0.25 }}
-                  >
-                    {compact ? (
-                      <UnfoldMoreIcon sx={{ fontSize: 15 }} />
-                    ) : (
-                      <UnfoldLessIcon sx={{ fontSize: 15 }} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              )}
-              {groupRects.length > 0 && (
-                <Tooltip title="Tidy up this period">
-                  <IconButton
-                    size="small"
-                    onClick={handleTidyPeriod}
-                    aria-label="Tidy up this period"
-                    sx={{ p: 0.25 }}
-                  >
-                    <AutoFixHighIcon sx={{ fontSize: 15 }} />
-                  </IconButton>
-                </Tooltip>
-              )}
-              {onSave && (
-                <Tooltip title="Save this period">
-                  <span>
-                    <IconButton
-                      size="small"
-                      onClick={onSave}
-                      // Nothing to save until the clause has content.
-                      disabled={!hasContent}
-                      aria-label="Save this period"
-                      sx={{ p: 0.25 }}
-                    >
-                      <SaveOutlinedIcon sx={{ fontSize: 15 }} />
-                    </IconButton>
-                  </span>
-                </Tooltip>
-              )}
-              {/* The sole period can't be removed (the workspace always keeps one), so its
-                  control clears the content in place. Hide it when there's nothing to clear;
-                  a removable (non-sole) container keeps its remove control even when empty. */}
-              {onRemove && (!soleContainer || hasContent) && (
-                <Tooltip
-                  title={soleContainer ? "Clear this period" : "Remove this period"}
-                >
-                  <IconButton
-                    size="small"
-                    onClick={() => {
-                      // Confirm only when there's work to lose; an empty clause acts silently.
-                      const message = soleContainer
-                        ? "Clear this main clause and everything in it?"
-                        : "Remove this main clause and everything in it?";
-                      if (hasContent && !window.confirm(message)) return;
-                      onRemove();
-                    }}
-                    aria-label={
-                      soleContainer ? "Clear main clause" : "Remove main clause"
-                    }
-                    sx={{ p: 0.25 }}
-                  >
-                    {soleContainer ? (
-                      <BackspaceOutlinedIcon sx={{ fontSize: 15 }} />
-                    ) : (
-                      <CloseIcon sx={{ fontSize: 15 }} />
-                    )}
-                  </IconButton>
-                </Tooltip>
-              )}
-            </Box>
-          </Box>
-        )}
 
-        <Box sx={{ minWidth: 0 }}>
-          {!showCanvas ? (
-              // An empty period is still the full, resizable canvas height — the bottom
-              // edge resizes it just as it does once words land on the canvas.
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  height: canvasHeight,
-                }}
-              >
-                {/* A period opens on its subject noun phrase; only a nested relative
-                    clause opens on the verb (its subject is the external head). */}
-                {nested ? (
-                  <SlotBox
-                    slot={verbSlot}
-                    concept={undefined}
-                    isActive={activeSlot === "verb"}
-                    onClear={() => handleClear("verb")}
-                    emptyContent={
-                      <VerbTypeahead
-                        onSelect={(c) => handleConceptSelect(c, "verb")}
-                      />
-                    }
-                  />
-                ) : (
-                  <SlotBox
-                    slot={subjectSlot}
-                    concept={undefined}
-                    isActive={activeSlot === "subject"}
-                    onClear={() => handleClear("subject")}
-                    emptyContent={
-                      <SubjectTypeahead
-                        onSelect={(c, opts) =>
-                          handleConceptSelect(c, "subject", opts)
-                        }
-                      />
-                    }
-                  />
-                )}
-              </Box>
-            ) : (
-                <Box
-                  ref={containerRef}
-                  sx={{
-                    position: "relative",
-                    height: canvasHeight,
-                    touchAction: "none",
-                  }}
-                >
-                  <ConnectorsLayer
-                    svgSize={graphSize}
-                    groupEdges={groupEdges}
-                    edges={edges}
-                  />
-
-                  {/* Every constituent paints onto this shared canvas. Each
-                      builder draws its own dashed group box (with the collapse
-                      and, for complements, remove controls) plus its word boxes.
-                      The builders self-filter, so mounting one per possible noun
-                      / the verb phrase unconditionally is safe — inactive slots
-                      and toggles render nothing. Noun-phrase mode (possessor) paints
-                      only its single head noun phrase — no verb, objects, or complements. */}
-                  {nounPhrase ? (
-                    <NounPhraseBuilder which="subject" ctx={ctx} />
-                  ) : (
-                    <>
-                      {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
-                      <VerbPhraseBuilder ctx={ctx} />
-                      <NounPhraseBuilder which="directObject" ctx={ctx} />
-                      <NounPhraseBuilder which="indirectObject" ctx={ctx} />
-                      {COMPLEMENT_TYPES.map((type) => (
-                        <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-                      ))}
-                    </>
-                  )}
-
-                  {/* Compact view is just the bare core-word chips — no reveal icons
-                      on the box borders and no dotted-box perimeter controls. */}
-                  {!compact && (
-                    <SatelliteControls
-                      satelliteIconsByParent={satelliteIconsByParent}
-                      controlPos={controlPos}
-                    />
-                  )}
-
-                  {!compact && (
-                  <GroupPerimeterControls
-                    groupRects={groupRects}
-                    perimeterByNoun={perimeterByNoun}
-                    linkTargetKeys={
-                      linkBinding ? (linkBinding.linkTargetKeys as Set<NounKey>) : undefined
-                    }
-                    registerSourceAnchor={linkBinding?.registerLinkSourceAnchor}
-                    registerTargetAnchor={linkBinding?.registerLinkTargetAnchor}
-                    registerPossessorControl={(nounKey, el) => {
-                      if (el) possessorControlEls.current.set(nounKey, el);
-                      else possessorControlEls.current.delete(nounKey);
-                    }}
-                  />
-                  )}
-                </Box>
-            )}
-        </Box>
-
-        {/* The container's own bottom edge is the resize grip, so it bleeds back through
-            the Paper's padding. No manual resize while compact — the canvas is auto-sized
-            to hug the chips, and the resizer's tall minimum would fight that. */}
-        {!compact && (
-          <Box sx={{ mt: 2, mx: -paperPad, mb: -paperPad }}>
-            <Resizer
-              height={graphHeight}
-              minHeight={MIN_GRAPH_HEIGHT}
-              onResize={setGraphHeight}
-              onResizeEnd={(h) => {
-                if (!nested && !nounPhrase)
-                  localStorage.setItem(
-                    "signi:graphHeight",
-                    String(Math.round(h)),
-                  );
-              }}
-            />
-          </Box>
-        )}
-
-        {showCanvas && (
-          <PossessorPanels
-            openPossessors={openPossessors}
-            selection={selection}
-            nested={nested}
-            onPhraseUpdate={onPhraseUpdate}
-            onRemovePossessor={handleRemovePossessor}
-            registerDot={(which, el) => {
-              if (el) possessorDotEls.current.set(which, el);
-              else possessorDotEls.current.delete(which);
-            }}
-            binding={binding}
-            possessorPath={possessorPath}
-            Builder={PhraseBuilder}
-          />
-        )}
-      </Paper>
+          {content}
+        </Paper>
+      ) : (
+        <PeriodContainer
+          paperPad={paperPad}
+          compact={compact}
+          showCanvas={showCanvas}
+          hasGroups={groupRects.length > 0}
+          hasContent={hasContent}
+          soleContainer={soleContainer}
+          // A workspace container stays in the managed stack so the cross-container
+          // connectors measure correctly; only a standalone period may be floated.
+          floatable={!binding}
+          position={position}
+          onPositionChange={setPosition}
+          onMoveUp={onMoveUp}
+          onMoveDown={onMoveDown}
+          onSave={onSave}
+          onRemove={onRemove}
+          onToggleCompact={handleToggleCompact}
+          onTidy={handleTidyPeriod}
+        >
+          {content}
+        </PeriodContainer>
+      )}
 
       {/* The word palette rides only the top-level builder as a slide-over
           overlay; nested clauses and possessor editors fill their slots via each
