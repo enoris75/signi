@@ -8,7 +8,6 @@ import {
   type ComplementType,
   type PathSpecifier,
 } from "@signi/shared";
-import { VerbTypeahead } from "./VerbTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { SlotBox } from "./Boxes.tsx";
 import {
@@ -62,7 +61,11 @@ import {
   rearrangeGroupPositions,
   rescaleYForHeight,
 } from "./layout.ts";
-import { sameBoxSizes, sameRelConnectors, type RelConnector } from "./measure.ts";
+import {
+  sameBoxSizes,
+  sameRelConnectors,
+  type RelConnector,
+} from "./measure.ts";
 import { buildGraph, rawGroupRect, type GroupRect } from "./graph.ts";
 import {
   resolveGroupOverlaps,
@@ -85,9 +88,6 @@ import { PeriodContainer } from "./PeriodContainer.tsx";
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
-  // Clause mode: this builder edits a relative clause whose subject is the external
-  // `head` noun rather than a box on its own canvas. Set for every nested instance.
-  nested?: boolean;
   // Noun-phrase mode: this builder edits a bare noun phrase (the possessor) — its head
   // lives in the `subject` slot and there is no verb/predicate. A noun phrase is not a
   // period, so it renders as a dashed box inside its owner rather than as its own card.
@@ -107,7 +107,7 @@ export interface PhraseBuilderProps {
   onMoveUp?: () => void;
   onMoveDown?: () => void;
   // Top-level only: save just this clause (a "period") to the saved-phrase store. Shown as
-  // a small icon in the main-clause header. Undefined for nested (possessor/relative) builders.
+  // a small icon in the main-clause header.
   onSave?: () => void;
   // Top-level only: the word-palette overlay's open state, lifted to the page
   // header so a control there can toggle it. The panel reports its own close.
@@ -137,7 +137,6 @@ type DragState = {
 export function PhraseBuilder({
   selection,
   onPhraseUpdate,
-  nested = false,
   nounPhrase = false,
   dottedColor,
   head,
@@ -163,10 +162,7 @@ export function PhraseBuilder({
       : binding;
   // A period starts on its subject noun phrase — translation begins as soon as a subject
   // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
-  // Only a nested relative clause starts on the verb, since its subject is the external head.
-  const [activeSlot, setActiveSlot] = useState<SlotKey | null>(
-    nested ? "verb" : "subject",
-  );
+  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("subject");
   // A filled word box the user clicked to change its word: its inline picker is shown
   // over the current word. Null when no box is being re-picked. Cleared on select or blur.
   const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
@@ -201,12 +197,16 @@ export function PhraseBuilder({
   // or, verbless, for a lone noun phrase (the possessor editor). Before that, the empty
   // state offers the single opening word picker.
   const showCanvas = hasSubject || hasVerb || nounPhrase;
-  const verbSlot = ALL_SLOTS.find((s) => s.key === "verb")!;
   const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
   const visibleSlots = nounPhrase
     ? // Noun-phrase mode: only the subject family (the possessor head + its adjectives).
-      getActiveSlots("intransitive", selection.subject?.role, Boolean(selection.subjectAdjective))
-        .filter((s) => s.key === "subject" || s.key.startsWith("subjectAdjective"))
+      getActiveSlots(
+        "intransitive",
+        selection.subject?.role,
+        Boolean(selection.subjectAdjective),
+      ).filter(
+        (s) => s.key === "subject" || s.key.startsWith("subjectAdjective"),
+      )
     : getActiveSlots(
         selection.verb?.transitivity,
         selection.subject?.role,
@@ -214,13 +214,16 @@ export function PhraseBuilder({
         selection.verb?.complements,
         // In clause mode the subject is the external head, so drop the subject slot.
       )
-        .filter((s) => !nested || s.key !== "subject")
+        .filter((s) => s.key !== "subject")
         // Objects hang off the verb, so a subject-only (verbless) period shows none —
         // otherwise an empty Direct Object box would appear before any verb is chosen.
         .filter(
           (s) =>
             hasVerb ||
-            !(s.key.startsWith("directObject") || s.key.startsWith("indirectObject")),
+            !(
+              s.key.startsWith("directObject") ||
+              s.key.startsWith("indirectObject")
+            ),
         );
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
@@ -444,9 +447,7 @@ export function PhraseBuilder({
     h: GRAPH_HEIGHT,
   });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
-    // Nested clause / possessor canvases start shorter and don't persist (the global
-    // key is shared, so many instances would clobber each other).
-    if (nested || nounPhrase) return MIN_GRAPH_HEIGHT + 60;
+    if (nounPhrase) return MIN_GRAPH_HEIGHT + 60;
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
@@ -516,7 +517,9 @@ export function PhraseBuilder({
       const x2 = d.left + d.width / 2 - rootRect.left;
       const y2 = d.top + d.height / 2 - rootRect.top;
       const color =
-        MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
+        MUI_COLOR_HEX[
+          ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"
+        ];
       next.push({ which: `${prefix}:${which}`, x1, y1, x2, y2, color });
     };
     for (const which of openPossessors)
@@ -650,7 +653,10 @@ export function PhraseBuilder({
   const compactLayout = React.useMemo(
     () =>
       compact
-        ? computeCompactLayout(renderedSlots.map((s) => s.key), svgSize.w)
+        ? computeCompactLayout(
+            renderedSlots.map((s) => s.key),
+            svgSize.w,
+          )
         : null,
     [compact, renderedSlots, svgSize.w],
   );
@@ -684,7 +690,7 @@ export function PhraseBuilder({
     nounPhrase,
     // The possessor's own head is a box on this canvas; in a relative clause the
     // subject is the external head, so it isn't drawn.
-    showSubject: nounPhrase ? true : !nested,
+    showSubject: true,
     compact,
     renderedSlots,
     visibleSlots,
@@ -707,9 +713,10 @@ export function PhraseBuilder({
   //
   // Compact view packs its own non-overlapping rows and derives positions rather than
   // storing them, so there is nothing here to resolve or to write back.
-  const prevGroupSizesRef = useRef<Map<string, { w: number; h: number }> | null>(
-    null,
-  );
+  const prevGroupSizesRef = useRef<Map<
+    string,
+    { w: number; h: number }
+  > | null>(null);
   useLayoutEffect(() => {
     if (compact || groupRects.length < 2) return;
     const sizes = new Map(
@@ -809,17 +816,22 @@ export function PhraseBuilder({
             linkBinding.registerBox(key as NounKey, el);
         }
       : undefined,
-    dimmedKeys: linkBinding ? (linkBinding.linkTargetKeys as Set<string>) : undefined,
+    dimmedKeys: linkBinding
+      ? (linkBinding.linkTargetKeys as Set<string>)
+      : undefined,
     isPickTarget: linkBinding
       ? (key) =>
-          NOUN_KEYS.includes(key as NounKey) && linkBinding.isPickTarget(key as NounKey)
+          NOUN_KEYS.includes(key as NounKey) &&
+          linkBinding.isPickTarget(key as NounKey)
       : undefined,
-    onPickTarget: linkBinding ? (key) => linkBinding.onNounPick(key as NounKey) : undefined,
+    onPickTarget: linkBinding
+      ? (key) => linkBinding.onNounPick(key as NounKey)
+      : undefined,
   };
 
   // The card's contents — the canvas, its resize grip, and any docked possessor panels.
-  // Shared by both chromes below: a top-level period wears the PeriodContainer card, a
-  // nested clause or possessor the plainer Paper drawn inline.
+  // Shared by both chromes below: a top-level period wears the PeriodContainer card
+  // or possessor the plainer Paper drawn inline.
   const content = (
     <>
       <Box sx={{ minWidth: 0 }}>
@@ -834,35 +846,19 @@ export function PhraseBuilder({
               height: canvasHeight,
             }}
           >
-            {/* A period opens on its subject noun phrase; only a nested relative
-                clause opens on the verb (its subject is the external head). */}
-            {nested ? (
-              <SlotBox
-                slot={verbSlot}
-                concept={undefined}
-                isActive={activeSlot === "verb"}
-                onClear={() => handleClear("verb")}
-                emptyContent={
-                  <VerbTypeahead
-                    onSelect={(c) => handleConceptSelect(c, "verb")}
-                  />
-                }
-              />
-            ) : (
-              <SlotBox
-                slot={subjectSlot}
-                concept={undefined}
-                isActive={activeSlot === "subject"}
-                onClear={() => handleClear("subject")}
-                emptyContent={
-                  <SubjectTypeahead
-                    onSelect={(c, opts) =>
-                      handleConceptSelect(c, "subject", opts)
-                    }
-                  />
-                }
-              />
-            )}
+            <SlotBox
+              slot={subjectSlot}
+              concept={undefined}
+              isActive={activeSlot === "subject"}
+              onClear={() => handleClear("subject")}
+              emptyContent={
+                <SubjectTypeahead
+                  onSelect={(c, opts) =>
+                    handleConceptSelect(c, "subject", opts)
+                  }
+                />
+              }
+            />
           </Box>
         ) : (
           <Box
@@ -890,7 +886,7 @@ export function PhraseBuilder({
               <NounPhraseBuilder which="subject" ctx={ctx} />
             ) : (
               <>
-                {!nested && <NounPhraseBuilder which="subject" ctx={ctx} />}
+                <NounPhraseBuilder which="subject" ctx={ctx} />
                 <VerbPhraseBuilder ctx={ctx} />
                 <NounPhraseBuilder which="directObject" ctx={ctx} />
                 <NounPhraseBuilder which="indirectObject" ctx={ctx} />
@@ -940,8 +936,11 @@ export function PhraseBuilder({
             minHeight={MIN_GRAPH_HEIGHT}
             onResize={setGraphHeight}
             onResizeEnd={(h) => {
-              if (!nested && !nounPhrase)
-                localStorage.setItem("signi:graphHeight", String(Math.round(h)));
+              if (!nounPhrase)
+                localStorage.setItem(
+                  "signi:graphHeight",
+                  String(Math.round(h)),
+                );
             }}
           />
         </Box>
@@ -951,7 +950,6 @@ export function PhraseBuilder({
         <PossessorPanels
           openPossessors={openPossessors}
           selection={selection}
-          nested={nested}
           onPhraseUpdate={onPhraseUpdate}
           onRemovePossessor={handleRemovePossessor}
           registerDot={(which, el) => {
@@ -1006,7 +1004,7 @@ export function PhraseBuilder({
           ))}
         </Box>
       )}
-      {nested || nounPhrase ? (
+      {nounPhrase ? (
         // A possessor is only a noun phrase, not a period of its own, so it wears the same
         // dashed outline as the role groups on the canvas above it rather than the period
         // container's accent card. A relative clause keeps the card, its left rule tinted
@@ -1053,7 +1051,10 @@ export function PhraseBuilder({
               }}
             >
               {conceptLabel(head) ?? "…"}{" "}
-              <Box component="span" sx={{ color: "text.disabled", fontWeight: 500 }}>
+              <Box
+                component="span"
+                sx={{ color: "text.disabled", fontWeight: 500 }}
+              >
                 · {relativeLabel ?? "that"} …
               </Box>
             </Typography>
@@ -1061,7 +1062,9 @@ export function PhraseBuilder({
               <IconButton
                 size="small"
                 onClick={onRemove}
-                aria-label={nounPhrase ? "Remove possessor" : "Remove relative clause"}
+                aria-label={
+                  nounPhrase ? "Remove possessor" : "Remove relative clause"
+                }
                 sx={{ p: 0.25 }}
               >
                 <CloseIcon sx={{ fontSize: 15 }} />
@@ -1098,7 +1101,7 @@ export function PhraseBuilder({
       {/* The word palette rides only the top-level builder as a slide-over
           overlay; nested clauses and possessor editors fill their slots via each
           box's inline typeahead. Its open state is owned by the page header. */}
-      {!nested && !nounPhrase && (
+      {!nounPhrase && (
         <PhraseSidebar
           open={wordsPanelOpen}
           onClose={() => onWordsPanelClose?.()}

@@ -30,7 +30,6 @@ const nounColor = (which: NounKey) =>
 interface PossessorPanelsProps {
   openPossessors: NounKey[];
   selection: PhraseSelection;
-  nested: boolean;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
   onRemovePossessor: (which: NounKey) => void;
   // The receiving dot on each panel's top edge, handed back to the owner so it can
@@ -52,7 +51,6 @@ interface PossessorPanelsProps {
 export function PossessorPanels({
   openPossessors,
   selection,
-  nested,
   onPhraseUpdate,
   onRemovePossessor,
   registerDot,
@@ -72,17 +70,14 @@ export function PossessorPanels({
       {openPossessors.map((which) => {
         const possColor = nounColor(which);
         return (
-          <Box
-            key={which}
-            sx={{ position: "relative", mt: 1.5, pl: nested ? 1 : 2 }}
-          >
+          <Box key={which} sx={{ position: "relative", mt: 1.5, pl: 2 }}>
             {/* Receiving dot on the panel's top edge — where this noun's possessor
                 connector lands. */}
             <Box
               ref={(el: HTMLDivElement | null) => registerDot(which, el)}
               sx={{
                 position: "absolute",
-                left: nested ? 8 + 20 : 16 + 20,
+                left: 16 + 20,
                 top: 0,
                 transform: "translate(-50%, -50%)",
                 width: 10,
@@ -100,13 +95,14 @@ export function PossessorPanels({
               head={selection[which] as Concept}
               relativeLabel="'s"
               selection={
-                (selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ?? {}
+                (selection[POSSESSOR_KEY(which)] as
+                  | PhraseSelection
+                  | undefined) ?? {}
               }
               onPhraseUpdate={makePossessorUpdate(which)}
               onRemove={() => onRemovePossessor(which)}
               // Forward the container's binding so the possessor's head can source a
-              // relative-clause link, addressed under this possessor step (composes for
-              // nested possessors via `possessorPath ?? which`).
+              // relative-clause link.
               binding={binding}
               possessorPath={possessorAddress(possessorPath ?? which)}
             />
