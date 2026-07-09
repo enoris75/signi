@@ -23,8 +23,8 @@ const EPS_PCT = 0.05;
 // A shove smaller than this (px) counts as no movement at all — it stops a pair wedged
 // against a wall from reporting progress forever.
 const EPS_PX = 0.01;
-// Clear space left below the lowest box when the canvas has to grow to hold it.
-const BOTTOM_MARGIN = 8;
+// Clear space left below the lowest box when the canvas is sized to hold it.
+export const BOTTOM_MARGIN = 8;
 
 // How hard a box resists being pushed. The box under the pointer never yields; a box that
 // just grew or just appeared yields only to that one; everything else is free to be shoved.

@@ -67,6 +67,7 @@ import {
 import { buildGraph, rawGroupRect, type GroupRect } from "./graph.ts";
 import {
   resolveGroupOverlaps,
+  BOTTOM_MARGIN,
   RANK_DRAGGED,
   RANK_FREE,
   RANK_GROWN,
@@ -428,10 +429,15 @@ export function PhraseBuilder({
   // to hold each node's pixel offset from the canvas top. Runs before paint, so the nodes
   // never render at the un-rebased position — the resized edge just yields empty space.
   const prevGraphHeightRef = useRef(graphHeight);
+  // Set for the one commit that sees a new height but the positions the old one was laid
+  // out against — the rebase below only lands on the render after. Any footprint measured
+  // in between reads too tall, so whoever measures them sits that commit out.
+  const positionsStaleRef = useRef(false);
   useLayoutEffect(() => {
     const prevH = prevGraphHeightRef.current;
     if (prevH === graphHeight) return;
     prevGraphHeightRef.current = graphHeight;
+    positionsStaleRef.current = true;
     setPositions((prev) => rescaleYForHeight(prev, prevH, graphHeight));
     // A drag in flight holds the grabbed nodes' start y's in the old height's % too — and
     // the canvas can grow mid-drag, when a box shoved aside has to go down instead. Rebase
@@ -703,7 +709,14 @@ export function PhraseBuilder({
     { w: number; h: number }
   > | null>(null);
   useLayoutEffect(() => {
-    if (compact || groupRects.length < 2) return;
+    if (compact || groupRects.length === 0) return;
+    // The rebase that follows a height change re-renders, so nothing is lost by waiting
+    // for it — and measuring before it would size the canvas from stretched footprints,
+    // which feeds its own next measurement and ratchets the canvas taller without end.
+    if (positionsStaleRef.current) {
+      positionsStaleRef.current = false;
+      return;
+    }
     const sizes = new Map(
       groupRects.map((g) => {
         const r = rawGroupRect(g, pos, graphSize, false);
@@ -723,22 +736,49 @@ export function PhraseBuilder({
       return grew ? RANK_GROWN : RANK_FREE;
     };
 
-    const separated = resolveGroupOverlaps({
-      groupRects,
-      pos,
-      svgSize: graphSize,
-      rankOf,
-    });
+    const separated =
+      groupRects.length < 2
+        ? null
+        : resolveGroupOverlaps({
+            groupRects,
+            pos,
+            svgSize: graphSize,
+            rankOf,
+          });
     // Null once the boxes are clear of each other — which is the common case, and what
     // lets this run on every commit without chasing its own writes.
-    if (!separated) return;
-    setPositions((prev) => ({ ...prev, ...separated.positions }));
-    // A box with nowhere left to go sideways is pushed down instead, and can land past
-    // the bottom edge. Grow the container to meet it rather than let it be clipped — the
-    // height rebase (above) holds every node's pixel offset, so the new room appears at
-    // the bottom and nothing else shifts. Not persisted: this is the content asking for
-    // space, not the user sizing the container with the grip.
-    if (separated.minHeight > graphHeight) setGraphHeight(separated.minHeight);
+    if (separated) setPositions((prev) => ({ ...prev, ...separated.positions }));
+
+    // Only once the pointer has travelled: a press that turns out to be a click on a slot
+    // must not resize anything under the user's finger.
+    if (dragRef.current?.moved) {
+      // A drag in flight sizes the canvas to its content: it grows so a box dragged
+      // toward the bottom edge stays whole rather than being clipped by it, and shrinks
+      // back so pulling that box up again doesn't strand a band of dead space beneath the
+      // boxes. Measured against the positions the separation just wrote, or this would
+      // fit the canvas to where the boxes were before they were shoved clear.
+      const settled = (key: string) => separated?.positions[key] ?? pos(key);
+      const bottom = Math.max(
+        ...groupRects.map((g) => {
+          const r = rawGroupRect(g, settled, graphSize, false);
+          return r.y + r.height;
+        }),
+      );
+      const fitted = Math.max(
+        MIN_GRAPH_HEIGHT,
+        Math.ceil(bottom + BOTTOM_MARGIN),
+      );
+      // The height rebase (above) holds every node's pixel offset, so the room only ever
+      // appears or disappears at the bottom and nothing else shifts. Not persisted: this
+      // is the content claiming space, not the user sizing the container with the grip.
+      if (fitted !== graphHeight) setGraphHeight(fitted);
+      return;
+    }
+    // Outside a drag the canvas only ever grows, and only to meet a box the separation
+    // pushed down past the bottom edge. Shrinking here would fight the resize grip, whose
+    // whole purpose is to hold a height the content didn't ask for.
+    if (separated && separated.minHeight > graphHeight)
+      setGraphHeight(separated.minHeight);
   });
 
   // Tidy the whole period: collapse every dotted box down to its main word, then pack
