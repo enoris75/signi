@@ -171,7 +171,6 @@ export function PeriodContainer({
               color: "text.secondary",
             }}
           >
-            Main clause{" "}
             <Box
               component="span"
               sx={{ color: "text.disabled", fontWeight: 500 }}
@@ -218,11 +217,15 @@ export function PeriodContainer({
             </>
           )}
           {hasGroups && (
-            <Tooltip title={compact ? "Expand this period" : "Compact this period"}>
+            <Tooltip
+              title={compact ? "Expand this period" : "Compact this period"}
+            >
               <IconButton
                 size="small"
                 onClick={onToggleCompact}
-                aria-label={compact ? "Expand this period" : "Compact this period"}
+                aria-label={
+                  compact ? "Expand this period" : "Compact this period"
+                }
                 color={compact ? "primary" : "default"}
                 sx={{ p: 0.25 }}
               >
