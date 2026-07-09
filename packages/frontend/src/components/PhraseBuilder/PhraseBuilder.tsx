@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { Box, Paper, Typography, IconButton, Tooltip } from "@mui/material";
+import { alpha, Box, Paper, Typography, IconButton, Tooltip } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import BackspaceOutlinedIcon from "@mui/icons-material/BackspaceOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
@@ -77,8 +77,12 @@ interface PhraseBuilderProps {
   // `head` noun rather than a box on its own canvas. Set for every nested instance.
   nested?: boolean;
   // Noun-phrase mode: this builder edits a bare noun phrase (the possessor) — its head
-  // lives in the `subject` slot and there is no verb/predicate. Docked like a clause.
+  // lives in the `subject` slot and there is no verb/predicate. A noun phrase is not a
+  // period, so it renders as a dashed box inside its owner rather than as its own card.
   nounPhrase?: boolean;
+  // Noun-phrase mode: the hex colour of the owning noun, used for the dashed outline so
+  // the box matches the role group and the connector that runs down into it.
+  dottedColor?: string;
   head?: Concept;
   // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
   relativeLabel?: string;
@@ -195,6 +199,7 @@ export function PhraseBuilder({
   onPhraseUpdate,
   nested = false,
   nounPhrase = false,
+  dottedColor,
   head,
   relativeLabel,
   onRemove,
@@ -953,6 +958,10 @@ export function PhraseBuilder({
   const canvasHeight = compactLayout ? compactLayout.height : graphHeight;
   const graphSize = compactLayout ? { w: svgSize.w, h: canvasHeight } : svgSize;
 
+  // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
+  // with the container's bottom border, so the two must stay in step.
+  const paperPad = nounPhrase ? 1.5 : compact ? 1 : 2;
+
   function pos(key: string) {
     if (compactLayout?.positions[key]) return compactLayout.positions[key];
     return positions[key] ?? DEFAULT_POSITIONS[key];
@@ -1164,10 +1173,10 @@ export function PhraseBuilder({
       <Paper
         elevation={0}
         onPointerDown={(e) => {
-          // Nested panels stay docked; workspace containers (a binding, but not the
-          // docked possessor sub-builders that now also carry one) stay in the managed
-          // stack so cross-container connectors measure correctly.
-          if (nested || (binding && !nounPhrase)) return;
+          // Nested panels stay docked, a possessor stays inside its owner's dashed box,
+          // and workspace containers stay in the managed stack so cross-container
+          // connectors measure correctly.
+          if (nested || nounPhrase || binding) return;
           const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
           const borderWidth = 8;
           const isNearBorder =
@@ -1187,22 +1196,30 @@ export function PhraseBuilder({
         onPointerUp={endBorderDrag}
         onPointerCancel={endBorderDrag}
         sx={{
-          p: compact ? 1 : 2,
+          p: paperPad,
           // Compact floats its controls into the top-right corner, so the Paper is the
           // positioning context for that overlay.
           position: "relative",
-          border: "1px solid",
-          borderColor: "divider",
-          // Every phrase — the main clause and each nested relative/possessor — sits
-          // in the same accent container (left rule + tinted bg). The rule's colour
-          // marks the kind: possessor info, relative primary, main clause neutral.
-          borderLeft: "3px solid",
-          borderLeftColor: nounPhrase
-            ? "info.light"
-            : nested
-              ? "primary.light"
-              : "text.secondary",
-          bgcolor: "action.hover",
+          // A possessor is only a noun phrase, not a period of its own, so it wears the
+          // same dashed outline as the role groups on the canvas above it rather than the
+          // period container's accent card. A clause or the main period keeps the card
+          // (left rule + tinted bg), its rule's colour marking the kind.
+          ...(nounPhrase
+            ? {
+                border: "1px dashed",
+                borderColor: dottedColor
+                  ? alpha(dottedColor, 0.5)
+                  : "info.light",
+                borderRadius: "4px",
+                bgcolor: "transparent",
+              }
+            : {
+                border: "1px solid",
+                borderColor: "divider",
+                borderLeft: "3px solid",
+                borderLeftColor: nested ? "primary.light" : "text.secondary",
+                bgcolor: "action.hover",
+              }),
           cursor:
             borderDragRef.current && position
               ? "grabbing"
@@ -1376,7 +1393,16 @@ export function PhraseBuilder({
 
         <Box sx={{ minWidth: 0 }}>
           {!showCanvas ? (
-              <Box sx={{ display: "flex", justifyContent: "center", py: 2 }}>
+              // An empty period is still the full, resizable canvas height — the bottom
+              // edge resizes it just as it does once words land on the canvas.
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  height: canvasHeight,
+                }}
+              >
                 {/* A period opens on its subject noun phrase; only a nested relative
                     clause opens on the verb (its subject is the external head). */}
                 {nested ? (
@@ -1408,7 +1434,6 @@ export function PhraseBuilder({
                 )}
               </Box>
             ) : (
-              <>
                 <Box
                   ref={containerRef}
                   sx={{
@@ -1469,33 +1494,36 @@ export function PhraseBuilder({
                   />
                   )}
                 </Box>
-
-                {/* No manual resize while compact — the canvas is auto-sized to hug
-                    the chips, and the resizer's tall minimum would fight that. */}
-                {!compact && (
-                  <Resizer
-                    height={graphHeight}
-                    minHeight={MIN_GRAPH_HEIGHT}
-                    onResize={setGraphHeight}
-                    onResizeEnd={(h) => {
-                      if (!nested && !nounPhrase)
-                        localStorage.setItem(
-                          "signi:graphHeight",
-                          String(Math.round(h)),
-                        );
-                    }}
-                  />
-                )}
-              </>
             )}
         </Box>
-      </Paper>
+
+        {/* The container's own bottom edge is the resize grip, so it bleeds back through
+            the Paper's padding. No manual resize while compact — the canvas is auto-sized
+            to hug the chips, and the resizer's tall minimum would fight that. */}
+        {!compact && (
+          <Box sx={{ mt: 2, mx: -paperPad, mb: -paperPad }}>
+            <Resizer
+              height={graphHeight}
+              minHeight={MIN_GRAPH_HEIGHT}
+              onResize={setGraphHeight}
+              onResizeEnd={(h) => {
+                if (!nested && !nounPhrase)
+                  localStorage.setItem(
+                    "signi:graphHeight",
+                    String(Math.round(h)),
+                  );
+              }}
+            />
+          </Box>
+        )}
 
         {/* Possessor editors — one per noun block with an open possessor. Each is a
             verbless noun-phrase-mode PhraseBuilder editing that block's `${which}Possessor`
             slice (a noun phrase whose head is its `subject`); because it is the same
             builder, the possessor gets the full noun-phrase surface — adjectives,
-            number/gender, a relative clause, and its own nested possessor. */}
+            number/gender, a relative clause, and its own nested possessor. Being a noun
+            phrase and not a period, each sits in a dashed box inside this period rather
+            than in a period container of its own. */}
         {showCanvas &&
           openPossessors.map((which) => {
             const nounHead = selection[which] as Concept;
@@ -1533,6 +1561,7 @@ export function PhraseBuilder({
                 />
                 <PhraseBuilder
                   nounPhrase
+                  dottedColor={possColor}
                   head={nounHead}
                   relativeLabel="'s"
                   selection={
@@ -1550,6 +1579,7 @@ export function PhraseBuilder({
               </Box>
             );
           })}
+      </Paper>
 
       {/* The word palette rides only the top-level builder as a slide-over
           overlay; nested clauses and possessor editors fill their slots via each
