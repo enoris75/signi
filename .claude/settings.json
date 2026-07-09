@@ -95,7 +95,17 @@
       "Bash(echo \"backend:$?\")",
       "Bash(echo \"frontend:$?\")",
       "Bash(awk 'NR>0')",
-      "Bash(awk 'NR>=454 && NR<=2075 { if \\($0 ~ /id: '\\\\''/\\) {print \"===\"$0}; if \\($0 ~ /base:|reading:/ && $0 !~ /_reading|masu/\\) print NR\": \"$0 }' packages/backend/src/seed.ts)"
+      "Bash(awk 'NR>=454 && NR<=2075 { if \\($0 ~ /id: '\\\\''/\\) {print \"===\"$0}; if \\($0 ~ /base:|reading:/ && $0 !~ /_reading|masu/\\) print NR\": \"$0 }' packages/backend/src/seed.ts)",
+      "Bash(awk '/^const NONFINITE/,/^};/' packages/backend/src/seed.ts)",
+      "Bash(awk 'NR>=2508 && NR<=2720' packages/backend/src/seed.ts)",
+      "Bash(echo \"engine tsc exit=$?\")",
+      "Bash(mkdir -p /private/tmp/claude-501/-Users-enoris-Code-signi/b9d0e145-efa7-4346-b0b3-501b5f42aa5a/scratchpad)",
+      "Bash(PORT=3999 npx tsx src/index.ts)",
+      "Bash(curl -s -X POST localhost:3999/api/translate -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"BOY\"},\"verbPhrase\":{\"verb\":\"SEE\",\"aspect\":\"resultative\"},\"directObject\":{\"concept\":\"ANGEL\",\"definiteness\":\"indefinite\"}}}')",
+      "Bash(pkill -f \"tsx src/index.ts\")",
+      "Bash(python3 /private/tmp/claude-501/-Users-enoris-Code-signi/b9d0e145-efa7-4346-b0b3-501b5f42aa5a/scratchpad/probe.py)",
+      "Bash(curl -s localhost:3999/api/concepts)",
+      "Bash(python3 -c ' *)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

@@ -115,9 +115,15 @@ export const TENSE_LABELS: Record<Tense, string> = {
  *   prospective  — on the verge of the event ("you are about to go", "the man was about to
  *                  go"): be about to / stare per / a punto de / prestes a / sur le point de /
  *                  im Begriff zu / ～ところ + infinitive.
- *   resultative  — the state resulting from the completed event ("I am gone", "I was gone",
- *                  "I will be gone"): be / essere / estar / être / sein + past participle
- *                  (agreeing with the subject in the Romance languages); ja ～てしまう.
+ *   resultative  — the state resulting from the completed event ("he has seen", "I am gone",
+ *                  "I will have gone"): the periphrastic perfect, auxiliary + past participle.
+ *                  Which auxiliary is a lexical property of the verb, not of the aspect:
+ *                  es/pt take haber/ter throughout, while en/it/fr/de select BE (is gone,
+ *                  è andato, est allé, ist gegangen) for a small unaccusative class and HAVE
+ *                  (has seen, ha visto, a vu, hat gesehen) for everything else. The seed marks
+ *                  the BE-selecting verbs per language with a form `aux: "be"`. Only a BE
+ *                  participle agrees with the subject, and only in it/fr ("è andata"). ja
+ *                  renders the aspect as ～てしまう and needs no auxiliary.
  * The non-finite forms (gerund, past participle, ja te-form) are lexical data per verb.
  */
 export type Aspect = 'neutral' | 'progressive' | 'prospective' | 'resultative';

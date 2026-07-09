@@ -189,12 +189,18 @@ const WERDEN: Record<string, string> = {
   '1pl': 'werden', '2pl': 'werdet', '3pl': 'werden',
 };
 
-// "sein", the auxiliary for the prospective ("ist im Begriff zu gehen") and resultative
-// ("ist gegangen") aspects. Only present and past are synthetic; the future is periphrastic
-// on "werden" (see VERB_GROUP below), so no future column is needed here.
+// "sein", the copula of the prospective ("ist im Begriff zu gehen") and the resultative
+// auxiliary of the verbs that select it ("ist gegangen"). Only present and past are synthetic;
+// the future is periphrastic on "werden" (see VERB_GROUP below), so no future column is needed.
 const SEIN: Record<'present' | 'past', Record<string, string>> = {
   present: { '1sg': 'bin', '2sg': 'bist', '3sg': 'ist', '1pl': 'sind', '2pl': 'seid', '3pl': 'sind' },
   past:    { '1sg': 'war', '2sg': 'warst', '3sg': 'war', '1pl': 'waren', '2pl': 'wart', '3pl': 'waren' },
+};
+
+// "haben", the resultative auxiliary everywhere else ("hat gesehen"), the majority case.
+const HABEN: Record<'present' | 'past', Record<string, string>> = {
+  present: { '1sg': 'habe', '2sg': 'hast', '3sg': 'hat', '1pl': 'haben', '2pl': 'habt', '3pl': 'haben' },
+  past:    { '1sg': 'hatte', '2sg': 'hattest', '3sg': 'hatte', '1pl': 'hatten', '2pl': 'hattet', '3pl': 'hatten' },
 };
 
 /**
@@ -202,7 +208,9 @@ const SEIN: Record<'present' | 'past', Record<string, string>> = {
  * verb in the V2 slot, `mid` is any material that follows it in the Mittelfeld ("gerade",
  * "im Begriff"), and `tail` is the clause-final non-finite material. German has no synthetic
  * progressive, so it is rendered with the adverb "gerade" over the plain finite verb; the
- * prospective is "im Begriff … zu + Infinitiv"; the resultative is "sein" + Partizip II.
+ * prospective is "im Begriff … zu + Infinitiv"; the resultative is sein/haben + Partizip II,
+ * the auxiliary being a lexical property of the verb (the seed marks the sein-selecting ones
+ * with forms.aux = "be") — "ist gegangen" but "hat gesehen".
  */
 function verbGroup(
   verbForms: Record<string, string>,
@@ -214,6 +222,8 @@ function verbGroup(
   const participle = verbForms['participle'] ?? base;
   const isFuture = tense === 'future';
   const sein = isFuture ? '' : SEIN[tense][pn];
+  const perfAux = verbForms['aux'] === 'be' ? 'sein' : 'haben';
+  const perfFinite = isFuture ? '' : (perfAux === 'sein' ? SEIN : HABEN)[tense][pn];
   const conjug = isFuture ? (WERDEN[pn] ?? 'wird') : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
   switch (aspect) {
     case 'progressive':
@@ -226,10 +236,11 @@ function verbGroup(
         tail: isFuture ? `sein zu ${base}` : `zu ${base}`,
       };
     case 'resultative':
+      // Future perfect stacks the auxiliary's infinitive at the clause end: "wird gesehen haben".
       return {
-        v2: isFuture ? (WERDEN[pn] ?? 'wird') : sein,
+        v2: isFuture ? (WERDEN[pn] ?? 'wird') : perfFinite,
         mid: '',
-        tail: isFuture ? `${participle} sein` : participle,
+        tail: isFuture ? `${participle} ${perfAux}` : participle,
       };
     default: // neutral
       return { v2: conjug, mid: '', tail: isFuture ? base : '' };

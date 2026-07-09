@@ -168,20 +168,28 @@ function auxKey(subjectForms: Record<string, string>): string {
   return `${person}${n}`;
 }
 
-// "estar" — the auxiliary for every non-neutral aspect: progressive/prospective = estar +
-// gerúndio / "prestes a" + infinitivo, resultative = estar + agreeing particípio. Past uses
-// the imperfect ("estava"). The gerund progressive is the Brazilian norm ("está indo").
+// "estar" — the auxiliary of the progressive and prospective: estar + gerúndio / "prestes a" +
+// infinitivo. Past uses the imperfect ("estava"). The gerund progressive is the Brazilian norm
+// ("está indo").
 const ESTAR_PT: Record<Tense, Record<string, string>> = {
   present: { '1sg': 'estou', '2sg': 'estás', '3sg': 'está', '1pl': 'estamos', '2pl': 'estais', '3pl': 'estão' },
   past:    { '1sg': 'estava', '2sg': 'estavas', '3sg': 'estava', '1pl': 'estávamos', '2pl': 'estáveis', '3pl': 'estavam' },
   future:  { '1sg': 'estarei', '2sg': 'estarás', '3sg': 'estará', '1pl': 'estaremos', '2pl': 'estareis', '3pl': 'estarão' },
 };
 
+// "ter" — the resultative auxiliary. Like Spanish, Portuguese has no essere/avere split (and
+// unlike Spanish it uses "ter", not "haver"); the participle does not agree with the subject.
+const TER_PT: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'tenho', '2sg': 'tens', '3sg': 'tem', '1pl': 'temos', '2pl': 'tendes', '3pl': 'têm' },
+  past:    { '1sg': 'tinha', '2sg': 'tinhas', '3sg': 'tinha', '1pl': 'tínhamos', '2pl': 'tínheis', '3pl': 'tinham' },
+  future:  { '1sg': 'terei', '2sg': 'terás', '3sg': 'terá', '1pl': 'teremos', '2pl': 'tereis', '3pl': 'terão' },
+};
+
 /**
  * The verb group for a non-neutral aspect: progressive = estar + gerúndio ("está indo"),
- * prospective = estar + "prestes a" + infinitivo ("está prestes a ir"), resultative = estar +
- * particípio agreeing with the subject ("está ido/a"). Negation ("não") is prepended by the
- * caller, as for the neutral verb.
+ * prospective = estar + "prestes a" + infinitivo ("está prestes a ir"), resultative = ter +
+ * particípio ("tem visto", "tinha ido"). Negation ("não") is prepended by the caller, as for
+ * the neutral verb.
  */
 function aspectVerb(
   verbForms: Record<string, string>,
@@ -189,12 +197,11 @@ function aspectVerb(
   tense: Tense,
   aspect: Aspect,
 ): string {
-  const aux = ESTAR_PT[tense][auxKey(subjectForms)];
+  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
-  if (aspect === 'progressive') return `${aux} ${verbForms['gerund'] ?? inf}`;
-  if (aspect === 'prospective') return `${aux} prestes a ${inf}`;
-  const part = agreeAdj(verbForms['participle'] ?? inf, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
-  return `${aux} ${part}`; // resultative
+  if (aspect === 'progressive') return `${ESTAR_PT[tense][key]} ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `${ESTAR_PT[tense][key]} prestes a ${inf}`;
+  return `${TER_PT[tense][key]} ${verbForms['participle'] ?? inf}`; // resultative
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: string): string {

@@ -158,13 +158,21 @@ function auxKey(subjectForms: Record<string, string>): string {
   return `${person}${n}`;
 }
 
-// "être" — the auxiliary for every non-neutral aspect. French has no synthetic progressive,
-// so the progressive/prospective are "être en train de" / "être sur le point de" + infinitive;
-// the resultative is "être" + agreeing past participle. Past uses the imparfait ("était").
+// "être" — the finite verb of the progressive and prospective, and the resultative auxiliary
+// of the verbs that select it. French has no synthetic progressive, so the progressive/
+// prospective are "être en train de" / "être sur le point de" + infinitive; the resultative is
+// être/avoir + past participle. Past uses the imparfait ("était").
 const ETRE_FR: Record<Tense, Record<string, string>> = {
   present: { '1sg': 'suis', '2sg': 'es', '3sg': 'est', '1pl': 'sommes', '2pl': 'êtes', '3pl': 'sont' },
   past:    { '1sg': 'étais', '2sg': 'étais', '3sg': 'était', '1pl': 'étions', '2pl': 'étiez', '3pl': 'étaient' },
   future:  { '1sg': 'serai', '2sg': 'seras', '3sg': 'sera', '1pl': 'serons', '2pl': 'serez', '3pl': 'seront' },
+};
+
+// "avoir" — the resultative auxiliary everywhere else ("a vu"), the majority case.
+const AVOIR_FR: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'ai', '2sg': 'as', '3sg': 'a', '1pl': 'avons', '2pl': 'avez', '3pl': 'ont' },
+  past:    { '1sg': 'avais', '2sg': 'avais', '3sg': 'avait', '1pl': 'avions', '2pl': 'aviez', '3pl': 'avaient' },
+  future:  { '1sg': 'aurai', '2sg': 'auras', '3sg': 'aura', '1pl': 'aurons', '2pl': 'aurez', '3pl': 'auront' },
 };
 
 /** Agree an être-selecting past participle with the subject: allé → allée / allés / allées. */
@@ -176,10 +184,12 @@ function agreeParticipleFr(base: string, subjectForms: Record<string, string>): 
 }
 
 /**
- * The verb group for a non-neutral aspect, split into the finite "être" (which negation
+ * The verb group for a non-neutral aspect, split into the finite auxiliary (which negation
  * wraps) and the non-finite tail: progressive "en train de + inf", prospective "sur le
- * point de + inf" (both eliding "de" → "d'" before a vowel), resultative = the agreeing
- * past participle ("est allé").
+ * point de + inf" (both eliding "de" → "d'" before a vowel), resultative = the past
+ * participle ("est allé", "a vu"). The resultative auxiliary is a lexical property of the
+ * verb (the seed marks the être-selecting ones with forms.aux = "be"), and only an être
+ * participle agrees with the subject — "elle est allée" but "elle a vu".
  */
 function aspectVerbFr(
   verbForms: Record<string, string>,
@@ -187,12 +197,17 @@ function aspectVerbFr(
   tense: Tense,
   aspect: Aspect,
 ): { finite: string; tail: string } {
-  const finite = ETRE_FR[tense][auxKey(subjectForms)];
+  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
   const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
-  if (aspect === 'progressive') return { finite, tail: `en train ${deInf}` };
-  if (aspect === 'prospective') return { finite, tail: `sur le point ${deInf}` };
-  return { finite, tail: agreeParticipleFr(verbForms['participle'] ?? inf, subjectForms) }; // resultative
+  if (aspect === 'progressive') return { finite: ETRE_FR[tense][key], tail: `en train ${deInf}` };
+  if (aspect === 'prospective') return { finite: ETRE_FR[tense][key], tail: `sur le point ${deInf}` };
+  const etre = verbForms['aux'] === 'be'; // resultative
+  const part = verbForms['participle'] ?? inf;
+  return {
+    finite: (etre ? ETRE_FR : AVOIR_FR)[tense][key],
+    tail: etre ? agreeParticipleFr(part, subjectForms) : part,
+  };
 }
 
 /** French linking preposition for an attributive noun, by relation (bare, no article). */
@@ -368,9 +383,9 @@ function predicateText(
   let effectiveVerb: string;
   let effectiveMod: string;
   if (aspect !== 'neutral') {
-    // Every non-neutral aspect is periphrastic on "être"; negation (ne … pas, or "ne" alone
-    // for the self-negating "aucun"/"jamais") wraps the finite être, then the non-finite tail
-    // follows ("n'est pas en train d'aller", "est allé").
+    // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
+    // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then the
+    // non-finite tail follows ("n'est pas en train d'aller", "est allé", "n'a pas vu").
     const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
     const neg = verbNegative || aucun || modifierIsNegative;
     const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';

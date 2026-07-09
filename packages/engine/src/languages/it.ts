@@ -343,18 +343,28 @@ const STARE_IT: Record<Tense, Record<string, string>> = {
   future:  { '1sg': 'starò', '2sg': 'starai', '3sg': 'starà', '1pl': 'staremo', '2pl': 'starete', '3pl': 'staranno' },
 };
 
-// "essere" — the resultative auxiliary ("sono andato"), past again imperfect ("ero andato").
+// "essere" — the resultative auxiliary of the unaccusatives ("sono andato"), past again
+// imperfect ("ero andato").
 const ESSERE_IT: Record<Tense, Record<string, string>> = {
   present: { '1sg': 'sono', '2sg': 'sei', '3sg': 'è', '1pl': 'siamo', '2pl': 'siete', '3pl': 'sono' },
   past:    { '1sg': 'ero', '2sg': 'eri', '3sg': 'era', '1pl': 'eravamo', '2pl': 'eravate', '3pl': 'erano' },
   future:  { '1sg': 'sarò', '2sg': 'sarai', '3sg': 'sarà', '1pl': 'saremo', '2pl': 'sarete', '3pl': 'saranno' },
 };
 
+// "avere" — the resultative auxiliary everywhere else ("ho visto"), the majority case.
+const AVERE_IT: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'ho', '2sg': 'hai', '3sg': 'ha', '1pl': 'abbiamo', '2pl': 'avete', '3pl': 'hanno' },
+  past:    { '1sg': 'avevo', '2sg': 'avevi', '3sg': 'aveva', '1pl': 'avevamo', '2pl': 'avevate', '3pl': 'avevano' },
+  future:  { '1sg': 'avrò', '2sg': 'avrai', '3sg': 'avrà', '1pl': 'avremo', '2pl': 'avrete', '3pl': 'avranno' },
+};
+
 /**
  * The verb group for a non-neutral aspect: progressive = stare + gerundio ("sto andando"),
- * prospective = stare + "per" + infinito ("sto per andare"), resultative = essere + participio
- * passato agreeing with the subject ("sono andato/a"). Negation ("non") is prepended by the
- * caller, as for the neutral verb.
+ * prospective = stare + "per" + infinito ("sto per andare"), resultative = essere/avere +
+ * participio passato. Which auxiliary is a lexical property of the verb (the seed marks the
+ * essere-selecting ones with forms.aux = "be"); only an essere participle agrees with the
+ * subject — "la ragazza è andata" but "la ragazza ha visto". Negation ("non") is prepended
+ * by the caller, as for the neutral verb.
  */
 function aspectVerb(
   verbForms: Record<string, string>,
@@ -365,8 +375,12 @@ function aspectVerb(
   const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
   if (aspect === 'resultative') {
-    const aux = ESSERE_IT[tense][key];
-    const part = agreeAdj(verbForms['participle'] ?? inf, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
+    const essere = verbForms['aux'] === 'be';
+    const aux = (essere ? ESSERE_IT : AVERE_IT)[tense][key];
+    const base = verbForms['participle'] ?? inf;
+    const part = essere
+      ? agreeAdj(base, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural')
+      : base;
     return `${aux} ${part}`.trim();
   }
   const aux = STARE_IT[tense][key];

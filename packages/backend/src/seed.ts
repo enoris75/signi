@@ -2500,6 +2500,10 @@ function roleInsertSql(role: string): string {
  *   • gerund     — present participle / gerundio / gerúndio (en/it/es/pt progressive).
  *   • participle — past participle (all Romance + de/en resultative; fr also for resultative).
  *   • te / te_reading — Japanese te-form, the base for ～ている / ～てしまう.
+ *   • aux        — "be" on the verbs whose resultative selects the BE auxiliary instead of
+ *     the HAVE default (it essere / fr être / de sein). Selection is lexical, not syntactic,
+ *     and it does not match across languages: "correre" takes avere but "laufen" takes sein.
+ *     Absent = HAVE. es/pt/en/ja have a single auxiliary and ignore the key.
  * French/German need no gerund (their progressive is periphrastic on the infinitive/adverb);
  * Japanese needs only the te-form. Irregular forms (gone, corso, gegangen, visto…) can't be
  * derived by rule, so they are listed explicitly. Copular verbs (become/seem/appear) get
@@ -2533,7 +2537,7 @@ const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
   RUN: {
     en: { gerund: 'running', participle: 'run' },
     it: { gerund: 'correndo', participle: 'corso' },
-    fr: { participle: 'couru' }, de: { participle: 'gelaufen' },
+    fr: { participle: 'couru' }, de: { participle: 'gelaufen', aux: 'be' },
     es: { gerund: 'corriendo', participle: 'corrido' },
     pt: { gerund: 'correndo', participle: 'corrido' },
     ja: { te: '走って', te_reading: 'はしって' },
@@ -2581,15 +2585,15 @@ const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
   JUMP: {
     en: { gerund: 'jumping', participle: 'jumped' },
     it: { gerund: 'saltando', participle: 'saltato' },
-    fr: { participle: 'sauté' }, de: { participle: 'gesprungen' },
+    fr: { participle: 'sauté' }, de: { participle: 'gesprungen', aux: 'be' },
     es: { gerund: 'saltando', participle: 'saltado' },
     pt: { gerund: 'pulando', participle: 'pulado' },
     ja: { te: '跳んで', te_reading: 'とんで' },
   },
   COME: {
     en: { gerund: 'coming', participle: 'come' },
-    it: { gerund: 'venendo', participle: 'venuto' },
-    fr: { participle: 'venu' }, de: { participle: 'gekommen' },
+    it: { gerund: 'venendo', participle: 'venuto', aux: 'be' },
+    fr: { participle: 'venu', aux: 'be' }, de: { participle: 'gekommen', aux: 'be' },
     es: { gerund: 'viniendo', participle: 'venido' },
     pt: { gerund: 'vindo', participle: 'vindo' },
     ja: { te: '来て', te_reading: 'きて' },
@@ -2675,24 +2679,24 @@ const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
     ja: { te: '送って', te_reading: 'おくって' },
   },
   GO: {
-    en: { gerund: 'going', participle: 'gone' },
-    it: { gerund: 'andando', participle: 'andato' },
-    fr: { participle: 'allé' }, de: { participle: 'gegangen' },
+    en: { gerund: 'going', participle: 'gone', aux: 'be' }, // "is gone", not "has gone"
+    it: { gerund: 'andando', participle: 'andato', aux: 'be' },
+    fr: { participle: 'allé', aux: 'be' }, de: { participle: 'gegangen', aux: 'be' },
     es: { gerund: 'yendo', participle: 'ido' },
     pt: { gerund: 'indo', participle: 'ido' },
     ja: { te: '行って', te_reading: 'いって' },
   },
   BECOME: {
     en: { gerund: 'becoming', participle: 'become' },
-    it: { gerund: 'diventando', participle: 'diventato' },
-    fr: { participle: 'devenu' }, de: { participle: 'geworden' },
+    it: { gerund: 'diventando', participle: 'diventato', aux: 'be' },
+    fr: { participle: 'devenu', aux: 'be' }, de: { participle: 'geworden', aux: 'be' },
     es: { gerund: 'volviéndose', participle: 'vuelto' },
     pt: { gerund: 'tornando-se', participle: 'tornado' },
     ja: { te: 'なって', te_reading: 'なって' },
   },
   SEEM: {
     en: { gerund: 'seeming', participle: 'seemed' },
-    it: { gerund: 'sembrando', participle: 'sembrato' },
+    it: { gerund: 'sembrando', participle: 'sembrato', aux: 'be' },
     fr: { participle: 'semblé' }, de: { participle: 'geschienen' },
     es: { gerund: 'pareciendo', participle: 'parecido' },
     pt: { gerund: 'parecendo', participle: 'parecido' },
@@ -2700,8 +2704,8 @@ const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
   },
   APPEAR: {
     en: { gerund: 'appearing', participle: 'appeared' },
-    it: { gerund: 'apparendo', participle: 'apparso' },
-    fr: { participle: 'apparu' }, de: { participle: 'erschienen' },
+    it: { gerund: 'apparendo', participle: 'apparso', aux: 'be' },
+    fr: { participle: 'apparu', aux: 'be' }, de: { participle: 'erschienen', aux: 'be' },
     es: { gerund: 'apareciendo', participle: 'aparecido' },
     pt: { gerund: 'aparecendo', participle: 'aparecido' },
     ja: { te: '見えて', te_reading: 'みえて' },

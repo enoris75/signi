@@ -77,8 +77,8 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
 
 /**
  * The auxiliary "be", conjugated for tense + subject, as its word(s): "am"/"is"/"are",
- * "was"/"were", "will be". Drives every non-neutral aspect (progressive / prospective /
- * resultative), which are all periphrastic on "be".
+ * "was"/"were", "will be". Drives the progressive and prospective, and the resultative of
+ * the few verbs that select it ("is gone").
  */
 function auxBe(subjectForms: Record<string, string>, tense: Tense): string[] {
   const person = subjectForms['person'] ?? '3';
@@ -89,11 +89,22 @@ function auxBe(subjectForms: Record<string, string>, tense: Tense): string[] {
   return person === '1' ? ['am'] : person === '3' ? ['is'] : ['are']; // "you are"
 }
 
+/** The auxiliary "have": "have"/"has", "had", "will have". */
+function auxHave(subjectForms: Record<string, string>, tense: Tense): string[] {
+  const person = subjectForms['person'] ?? '3';
+  const singular = (subjectForms['number'] ?? 'singular') !== 'plural';
+  if (tense === 'future') return ['will', 'have'];
+  if (tense === 'past') return ['had'];
+  return [singular && person === '3' ? 'has' : 'have'];
+}
+
 /**
- * The finite verb group for a non-neutral aspect: auxiliary "be" (tense/subject-inflected)
- * plus the main verb's non-finite form — gerund for progressive ("is going"), "about to" +
- * base for prospective ("is about to go"), past participle for resultative ("is gone").
- * Negation attaches to the auxiliary ("is not going", "will not be going").
+ * The finite verb group for a non-neutral aspect: an auxiliary (tense/subject-inflected) plus
+ * the main verb's non-finite form — "be" + gerund for progressive ("is going"), "be" + "about
+ * to" + base for prospective ("is about to go"), and for the resultative "have" + past
+ * participle ("has seen"), or "be" + past participle on the verbs the seed marks with
+ * forms.aux = "be" ("is gone"). Negation attaches to the auxiliary ("is not going", "has not
+ * seen", "will not be going").
  */
 function aspectVerb(
   verbForms: Record<string, string>,
@@ -102,8 +113,11 @@ function aspectVerb(
   aspect: Aspect,
   negative: boolean,
 ): string {
-  const aux = auxBe(subjectForms, tense);
   const base = verbForms['base'] ?? '';
+  const perfectBe = verbForms['aux'] === 'be';
+  const aux = aspect === 'resultative' && !perfectBe
+    ? auxHave(subjectForms, tense)
+    : auxBe(subjectForms, tense);
   const nonfinite =
     aspect === 'progressive' ? (verbForms['gerund'] ?? base) :
     aspect === 'resultative' ? (verbForms['participle'] ?? base) :
