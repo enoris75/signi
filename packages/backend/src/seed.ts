@@ -444,7 +444,10 @@ const concepts: ConceptSeed[] = [
       en: { base: 'young woman', plural: 'young women',  count: 'singular' },
       it: { base: 'giovane',   plural: 'giovani',      gender: 'fem', count: 'singular' },
       fr: { base: 'jeune femme', plural: 'jeunes femmes', gender: 'fem', count: 'singular' },
-      de: { base: 'junge Frau', plural: 'junge Frauen', gender: 'fem', count: 'singular' },
+      // "jung" is stored as the head's inherent attributive adjective, not baked into the
+      // lemma: German declines it for case + determiner ("die junge Frau", "die jungen
+      // Frauen", "von einer jungen Frau"), so no single surface string is right everywhere.
+      de: { base: 'Frau', plural: 'Frauen', adjective: 'jung', gender: 'fem', count: 'singular' },
       es: { base: 'joven',     plural: 'jóvenes',      gender: 'fem', count: 'singular' },
       ja: { base: '若い女性',  count: 'singular', reading: 'わかいじょせい' },
       pt: { base: 'jovem',     plural: 'jovens',       gender: 'fem', count: 'singular' },

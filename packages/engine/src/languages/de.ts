@@ -75,20 +75,28 @@ function declineAdj(base: string, _case: Case, gender: string, plural: boolean, 
 
 // Decline every attributive adjective of a noun phrase for the given case, agreeing with
 // the head's gender/number and determiner. Returns "" when there are none.
+//
+// Some heads carry an inherent adjective of their own — the concept YOUNG_WOMAN is one word
+// in most languages but "junge Frau" in German. It can't be baked into the lemma, because
+// its ending tracks case and determiner just like any other adjective, so the lexicon stores
+// the bare stem in forms.adjective and it declines here. It sits closest to the noun, after
+// the phrase's own adjectives ("die schönen jungen Frauen").
 function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite'): string {
   const f = np.head.forms;
   const gender = f['gender'] ?? 'neut';
   const plural = (f['number'] ?? f['count']) === 'plural';
-  return np.adjectives
+  const decline = (stem: string): string => declineAdj(stem, _case, gender, plural, definiteness);
+  const own = np.adjectives
     .map((a) => {
       const base = a.forms['base'];
       if (!base) return '';
       // Synthesise the comparative/superlative stem, decline it, then prefix any
       // periphrastic degree adverb ("weniger schöne", "am wenigsten schöne").
-      return `${deDegPrefix(a)}${declineAdj(deDegStem(a, base), _case, gender, plural, definiteness)}`;
+      return `${deDegPrefix(a)}${decline(deDegStem(a, base))}`;
     })
-    .filter(Boolean)
-    .join(' ');
+    .filter(Boolean);
+  const inherent = f['adjective'];
+  return [...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
 }
 
 function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural = false): string {
