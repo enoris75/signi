@@ -34,7 +34,11 @@ interface ConceptRow {
   complements: string | null;
   synonym: string | null;
   countable: number;
+  modal: number;
 }
+
+const CONCEPT_COLS =
+  'id, role, description, emoji, transitivity, complements, synonym, countable, modal';
 
 const PRONOUN_META_SQL = `
   SELECT cpl.concept_id, pl.person, pl.number
@@ -86,11 +90,11 @@ app.get('/api/concepts', (req, res) => {
   let rows: ConceptRow[];
   if (role) {
     rows = db
-      .prepare<[string], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements, synonym, countable FROM semantic_concepts WHERE role = ? ORDER BY id')
+      .prepare<[string], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts WHERE role = ? ORDER BY id`)
       .all(role);
   } else {
     rows = db
-      .prepare<[], ConceptRow>('SELECT id, role, description, emoji, transitivity, complements, synonym, countable FROM semantic_concepts ORDER BY role, id')
+      .prepare<[], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts ORDER BY role, id`)
       .all();
   }
 
@@ -115,6 +119,7 @@ app.get('/api/concepts', (req, res) => {
       synonym: r.synonym ?? undefined,
       countable: r.countable === 0 ? false : undefined,
       emoji: r.emoji ?? undefined,
+      modal: r.modal === 1 || undefined,
       transitivity: (r.transitivity as import('@signi/shared').Transitivity) ?? undefined,
       complements: r.complements
         ? (r.complements.split(',') as import('@signi/shared').ComplementType[])

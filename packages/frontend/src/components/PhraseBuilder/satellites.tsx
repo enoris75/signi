@@ -7,6 +7,7 @@ import TransgenderIcon from "@mui/icons-material/Transgender";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
+import GavelIcon from "@mui/icons-material/Gavel";
 import TuneIcon from "@mui/icons-material/Tune";
 import PlaceIcon from "@mui/icons-material/Place";
 import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
@@ -35,6 +36,8 @@ import { PhraseSelection, SlotKey } from "./interfaces.ts";
 // by default and revealed via the small icons on each main box border.
 export type Satellite = {
   key: string;
+  // The box whose border carries this satellite's control. Usually a core word box,
+  // but a chained satellite rides another satellite's box (Adjective 2 on Adjective 1).
   parent: SlotKey;
   label: string;
   icon: ReactNode;
@@ -119,13 +122,25 @@ export function buildSatellites(
       valueLabel: conceptLabel(selection.subjectAdjective),
     },
     {
+      // Adjectives chain: each one's control rides the *previous* adjective's box, not the
+      // noun's, and only appears once that previous adjective holds a word. The chain
+      // stops at three.
       key: "subjectAdjective2",
-      parent: "subject",
+      parent: "subjectAdjective",
       label: "Adjective 2",
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun" && Boolean(selection.subjectAdjective),
       hasValue: Boolean(selection.subjectAdjective2),
       valueLabel: conceptLabel(selection.subjectAdjective2),
+    },
+    {
+      key: "subjectAdjective3",
+      parent: "subjectAdjective2",
+      label: "Adjective 3",
+      icon: <BrushIcon sx={iconSx} />,
+      available: subjectRole === "noun" && Boolean(selection.subjectAdjective2),
+      hasValue: Boolean(selection.subjectAdjective3),
+      valueLabel: conceptLabel(selection.subjectAdjective3),
     },
     {
       key: "subjectNumber",
@@ -217,6 +232,27 @@ export function buildSatellites(
       valueLabel: ASPECT_LABELS[selection.verbAspect ?? "neutral"],
     },
     {
+      // Modals chain like the adjectives: the verb box carries the control for the
+      // outermost modal, and that modal's box carries the control for the one it governs
+      // ("voglio" opens the control that reveals "poter", which governs "andare").
+      key: "verbModal",
+      parent: "verb",
+      label: "Modal",
+      icon: <GavelIcon sx={iconSx} />,
+      available: true,
+      hasValue: Boolean(selection.verbModal),
+      valueLabel: conceptLabel(selection.verbModal),
+    },
+    {
+      key: "verbModal2",
+      parent: "verbModal",
+      label: "Modal 2",
+      icon: <GavelIcon sx={iconSx} />,
+      available: Boolean(selection.verbModal),
+      hasValue: Boolean(selection.verbModal2),
+      valueLabel: conceptLabel(selection.verbModal2),
+    },
+    {
       key: "modifier",
       parent: "verb",
       label: "Adverb",
@@ -236,7 +272,7 @@ export function buildSatellites(
     },
     {
       key: "directObjectAdjective2",
-      parent: "directObject",
+      parent: "directObjectAdjective",
       label: "Adjective 2",
       icon: <BrushIcon sx={iconSx} />,
       available:
@@ -244,6 +280,17 @@ export function buildSatellites(
         Boolean(selection.directObjectAdjective),
       hasValue: Boolean(selection.directObjectAdjective2),
       valueLabel: conceptLabel(selection.directObjectAdjective2),
+    },
+    {
+      key: "directObjectAdjective3",
+      parent: "directObjectAdjective2",
+      label: "Adjective 3",
+      icon: <BrushIcon sx={iconSx} />,
+      available:
+        Boolean(selection.directObject) &&
+        Boolean(selection.directObjectAdjective2),
+      hasValue: Boolean(selection.directObjectAdjective3),
+      valueLabel: conceptLabel(selection.directObjectAdjective3),
     },
     {
       key: "directObjectNumber",
@@ -311,7 +358,7 @@ export function buildSatellites(
     },
     {
       key: "indirectObjectAdjective2",
-      parent: "indirectObject",
+      parent: "indirectObjectAdjective",
       label: "Adjective 2",
       icon: <BrushIcon sx={iconSx} />,
       available:
@@ -319,6 +366,17 @@ export function buildSatellites(
         Boolean(selection.indirectObjectAdjective),
       hasValue: Boolean(selection.indirectObjectAdjective2),
       valueLabel: conceptLabel(selection.indirectObjectAdjective2),
+    },
+    {
+      key: "indirectObjectAdjective3",
+      parent: "indirectObjectAdjective2",
+      label: "Adjective 3",
+      icon: <BrushIcon sx={iconSx} />,
+      available:
+        Boolean(selection.indirectObject) &&
+        Boolean(selection.indirectObjectAdjective2),
+      hasValue: Boolean(selection.indirectObjectAdjective3),
+      valueLabel: conceptLabel(selection.indirectObjectAdjective3),
     },
     {
       key: "indirectObjectNumber",
@@ -380,6 +438,9 @@ export function buildSatellites(
       const adj2 = selection[`${type}Adjective2` as keyof PhraseSelection] as
         | Concept
         | undefined;
+      const adj3 = selection[`${type}Adjective3` as keyof PhraseSelection] as
+        | Concept
+        | undefined;
       return [
         {
           key: type,
@@ -403,12 +464,21 @@ export function buildSatellites(
         },
         {
           key: `${type}Adjective2`,
-          parent: type,
+          parent: `${type}Adjective`,
           label: "Adjective 2",
           icon: <BrushIcon sx={iconSx} />,
           available: concept?.role === "noun" && Boolean(adj),
           hasValue: Boolean(adj2),
           valueLabel: conceptLabel(adj2),
+        },
+        {
+          key: `${type}Adjective3`,
+          parent: `${type}Adjective2`,
+          label: "Adjective 3",
+          icon: <BrushIcon sx={iconSx} />,
+          available: concept?.role === "noun" && Boolean(adj2),
+          hasValue: Boolean(adj3),
+          valueLabel: conceptLabel(adj3),
         },
         {
           key: `${type}Number`,

@@ -3,28 +3,29 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 
-export function VerbTypeahead({
+// Picker for a modal slot. Modals are verb concepts, so they arrive on the same
+// `role=verb` fetch as the main verbs; `Concept.modal` is what separates the two lists
+// (VerbTypeahead filters them out, this one filters them in).
+export function ModalTypeahead({
   onSelect,
 }: {
   onSelect: (concept: Concept) => void;
 }) {
-  const { data: allVerbs = [] } = useConcepts("verb");
+  const { data: verbs = [] } = useConcepts("verb");
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const anchorRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  // Modals are verb concepts too, but they govern a verb rather than heading a clause,
-  // so they belong in the modal slots (see ModalTypeahead), never here.
-  const verbs = allVerbs.filter((v) => !v.modal);
+  const modals = verbs.filter((v) => v.modal);
   const filtered = query.trim()
-    ? verbs.filter((v) =>
+    ? modals.filter((v) =>
         `${v.label ?? v.description} ${v.synonym ?? ""}`
           .toLowerCase()
           .includes(query.toLowerCase()),
       )
-    : verbs;
+    : modals;
 
   function commit(idx: number) {
     const v = filtered[idx];
@@ -74,10 +75,7 @@ export function VerbTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type a verb…"
-        // Size the field to its placeholder rather than the browser default
-        // (~20ch); otherwise the empty verb box overflows the 160px-wide dashed
-        // group box that's padded to PIX_PAD_H (widest-slot half-width) each side.
+        placeholder="type a modal…"
         inputProps={{ size: 13 }}
         sx={{
           fontFamily: '"Inter", sans-serif',

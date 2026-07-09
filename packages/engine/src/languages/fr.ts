@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
 // "plus"/"moins"; the noun phrase's definite article distinguishes them ("un chat plus
@@ -210,6 +210,48 @@ function aspectVerbFr(
   };
 }
 
+/**
+ * The main verb's whole group as an infinitive — what a modal governs. Neutral is the bare
+ * infinitif ("doit aller"); the marked aspects put their auxiliary in the infinitive ("doit
+ * être en train d'aller", "doit avoir vu", "doit être allée" — the être participle agreeing
+ * with the subject, as ever).
+ */
+function verbGroupInfinitiveFr(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  aspect: Aspect,
+): string {
+  const inf = verbForms['base'] ?? '';
+  const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
+  if (aspect === 'progressive') return `être en train ${deInf}`;
+  if (aspect === 'prospective') return `être sur le point ${deInf}`;
+  if (aspect === 'resultative') {
+    const etre = verbForms['aux'] === 'be';
+    const part = verbForms['participle'] ?? inf;
+    return etre ? `être ${agreeParticipleFr(part, subjectForms)}` : `avoir ${part}`;
+  }
+  return inf;
+}
+
+/**
+ * The modal chain split for negation: the outermost modal is the finite verb that "ne … pas"
+ * wraps ("je ne veux pas pouvoir aller"), and everything it governs — the inner modals'
+ * infinitives, then the main verb group's — trails after.
+ */
+function modalGroupFr(
+  modals: ConceptForms[],
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  aspect: Aspect,
+): { finite: string; tail: string } {
+  const [finite, ...governed] = modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense));
+  return {
+    finite,
+    tail: [...governed, verbGroupInfinitiveFr(verbForms, subjectForms, aspect)].join(' '),
+  };
+}
+
 /** French linking preposition for an attributive noun, by relation (bare, no article). */
 const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de' };
 
@@ -370,7 +412,7 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
   const conjugated = conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
@@ -380,18 +422,30 @@ function predicateText(
   const aucun =
     subjectForms['definiteness'] === 'no' ||
     directObject?.head.forms['definiteness'] === 'no';
+  // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
+  // already carries the negation). Shared by the periphrastic aspect and the modal chain,
+  // which both negate their finite auxiliary and leave the non-finite tail untouched.
+  const negateFinite = (finite: string): string => {
+    if (!verbNegative && !aucun && !modifierIsNegative) return finite;
+    const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';
+    const pas = verbNegative && !modifierIsNegative && !aucun ? ' pas' : '';
+    return `${ne}${finite}${pas}`;
+  };
   let effectiveVerb: string;
   let effectiveMod: string;
-  if (aspect !== 'neutral') {
+  if (modals.length > 0) {
+    // The outermost modal is the finite verb — it takes the tense, the agreement, and the
+    // negation — and governs the inner modals' infinitives down to the main verb group's
+    // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
+    const { finite, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect);
+    effectiveVerb = `${negateFinite(finite)} ${tail}`.trim();
+    effectiveMod = modifierText;
+  } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then the
     // non-finite tail follows ("n'est pas en train d'aller", "est allé", "n'a pas vu").
     const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
-    const neg = verbNegative || aucun || modifierIsNegative;
-    const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';
-    const pas = verbNegative && !modifierIsNegative && !aucun ? ' pas' : '';
-    const finiteText = neg ? `${ne}${finite}${pas}` : finite;
-    effectiveVerb = `${finiteText} ${tail}`.trim();
+    effectiveVerb = `${negateFinite(finite)} ${tail}`.trim();
     effectiveMod = modifierText;
   } else if (modifierIsNegative) {
     effectiveVerb = `ne ${conjugated} ${modifierText}`;

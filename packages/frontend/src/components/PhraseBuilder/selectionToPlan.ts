@@ -12,6 +12,7 @@ import type {
 import { COMPLEMENT_TYPES } from "@signi/shared";
 import type { Concept } from "@signi/shared";
 import { NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
+import { adjectiveSlots, MODAL_SLOTS } from "./slots.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
 // `${which}Adjective`, …) all exist on PhraseSelection; the union index widens the
@@ -20,7 +21,7 @@ function field<T>(sel: PhraseSelection, key: string): T | undefined {
   return sel[key as keyof PhraseSelection] as T | undefined;
 }
 
-// Split the two adjective slots of a noun block by the picked concept's role: real
+// Split the adjective slots of a noun block by the picked concept's role: real
 // adjectives become `adjectives`, nouns become attributive `nounModifiers` carrying the
 // slot's chosen relation (defaulting to 'feature'). This is the "Adjective ⇄ Noun" switch.
 function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]; adjectiveDegrees: Degree[]; nounModifiers: NounModifier[] } {
@@ -28,7 +29,7 @@ function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]
   // Index-aligned with `adjectives`: each real adjective's chosen degree (default 'positive').
   const adjectiveDegrees: Degree[] = [];
   const nounModifiers: NounModifier[] = [];
-  for (const key of [`${which}Adjective`, `${which}Adjective2`]) {
+  for (const key of adjectiveSlots(which)) {
     const c = field<Concept>(sel, key);
     if (!c) continue;
     if (c.role === "noun") {
@@ -72,12 +73,18 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
 // undefined so the plan omits it and the engines render just the subject.
 export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
   if (!sel.verb) return undefined;
+  // The modal chain, outermost first. Filtering (rather than stopping at the first empty
+  // slot) keeps a chain with a hole in it meaningful: whatever modals are set still apply.
+  const modals = MODAL_SLOTS.map((key) => field<Concept>(sel, key)?.id).filter(
+    (id): id is string => Boolean(id),
+  );
   return {
     verb: sel.verb.id,
     negative: sel.verbNegative,
     tense: sel.verbTense,
     aspect: sel.verbAspect,
     modifier: sel.modifier?.id,
+    ...(modals.length > 0 && { modals }),
   };
 }
 

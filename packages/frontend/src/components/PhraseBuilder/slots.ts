@@ -6,7 +6,54 @@ import {
   type GrammaticalRole,
   type Transitivity,
 } from "@signi/shared";
-import { NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
+import { NounKey, NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
+
+// Every noun block on the canvas: the core roles plus each complement. These are the
+// blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
+export const NOUN_KEYS: NounKey[] = [
+  "subject",
+  "directObject",
+  "indirectObject",
+  ...COMPLEMENT_TYPES,
+];
+
+// Every noun block chains up to three adjectives. They are revealed one at a time —
+// the noun box carries the control for the first, and each adjective box carries the
+// control for the next — so slot `n` only exists once slot `n-1` holds a word. Ordered
+// head-first: `adjectiveSlots("subject")[0]` is the first adjective.
+export const ADJECTIVE_SUFFIXES = ["Adjective", "Adjective2", "Adjective3"] as const;
+
+/** The adjective slot keys of one noun block, in chain order. */
+export const adjectiveSlots = (which: NounKey): SlotKey[] =>
+  ADJECTIVE_SUFFIXES.map((suffix) => `${which}${suffix}` as SlotKey);
+
+/**
+ * The slot an adjective's reveal control rides: the previous link in its chain. The first
+ * adjective hangs off its noun, so it isn't chained and this returns undefined for it (and
+ * for any non-adjective key).
+ */
+export const adjectiveChainParent = (key: string): SlotKey | undefined => {
+  if (key.endsWith("Adjective3")) return key.replace(/3$/, "2") as SlotKey;
+  if (key.endsWith("Adjective2")) return key.replace(/2$/, "") as SlotKey;
+  return undefined;
+};
+
+// The verb phrase chains up to two modal verbs, outermost first: in "voglio poter andare"
+// MODAL_SLOTS[0] holds WILL, which governs MODAL_SLOTS[1] = CAN, which governs the verb.
+// They reveal one at a time like the adjectives — the verb box carries the control for the
+// first modal, and the first modal's box carries the control for the second.
+export const MODAL_SLOTS: SlotKey[] = ["verbModal", "verbModal2"];
+
+const MODAL_SLOT_SET = new Set<SlotKey>(MODAL_SLOTS);
+
+export const isModalSlot = (key: string): boolean => MODAL_SLOT_SET.has(key as SlotKey);
+
+/** The box a modal's reveal control rides: the previous link in its chain, else the verb. */
+export const modalChainParent = (key: string): SlotKey | undefined => {
+  const idx = MODAL_SLOTS.indexOf(key as SlotKey);
+  if (idx === -1) return undefined;
+  return idx === 0 ? "verb" : MODAL_SLOTS[idx - 1];
+};
 
 export const ALL_SLOTS: SlotConfig[] = [
   {
@@ -24,6 +71,13 @@ export const ALL_SLOTS: SlotConfig[] = [
     color: "error",
   },
   {
+    key: "subjectAdjective3",
+    label: "Adjective 3",
+    required: false,
+    roles: ["adjective"],
+    color: "error",
+  },
+  {
     key: "subject",
     label: "Subject",
     required: true,
@@ -34,6 +88,22 @@ export const ALL_SLOTS: SlotConfig[] = [
     key: "verb",
     label: "Verb",
     required: true,
+    roles: ["verb"],
+    color: "secondary",
+  },
+  // Modal verbs governing the verb. Both hold verb concepts, but only the modal ones —
+  // the picker filters on `Concept.modal`, which also keeps them out of the verb slot.
+  {
+    key: "verbModal",
+    label: "Modal",
+    required: false,
+    roles: ["verb"],
+    color: "secondary",
+  },
+  {
+    key: "verbModal2",
+    label: "Modal 2",
+    required: false,
     roles: ["verb"],
     color: "secondary",
   },
@@ -59,6 +129,13 @@ export const ALL_SLOTS: SlotConfig[] = [
     color: "success",
   },
   {
+    key: "directObjectAdjective3",
+    label: "Adjective 3",
+    required: false,
+    roles: ["adjective"],
+    color: "success",
+  },
+  {
     key: "indirectObject",
     label: "Indirect Object",
     required: false,
@@ -75,6 +152,13 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "indirectObjectAdjective2",
     label: "Adjective 2",
+    required: false,
+    roles: ["adjective"],
+    color: "warning",
+  },
+  {
+    key: "indirectObjectAdjective3",
+    label: "Adjective 3",
     required: false,
     roles: ["adjective"],
     color: "warning",
@@ -114,6 +198,13 @@ export const ALL_SLOTS: SlotConfig[] = [
         roles: ["adjective"],
         color: "warning",
       },
+      {
+        key: `${type}Adjective3`,
+        label: "Adjective 3",
+        required: false,
+        roles: ["adjective"],
+        color: "warning",
+      },
     ],
   ),
 ];
@@ -123,24 +214,19 @@ export const COMPLEMENT_KEY_SET = new Set<SlotKey>(COMPLEMENT_TYPES);
 // Complement adjective slot keys, mapped back to the complement they modify.
 export const COMPLEMENT_ADJECTIVE_TYPE: Partial<Record<SlotKey, ComplementType>> =
   Object.fromEntries(
-    COMPLEMENT_TYPES.flatMap((type) => [
-      [`${type}Adjective`, type],
-      [`${type}Adjective2`, type],
-    ]),
+    COMPLEMENT_TYPES.flatMap((type) =>
+      adjectiveSlots(type).map((key) => [key, type]),
+    ),
   );
 
 export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
-  "subjectAdjective",
-  "subjectAdjective2",
+  ...adjectiveSlots("subject"),
   "modifier",
-  "directObjectAdjective",
-  "directObjectAdjective2",
-  "indirectObjectAdjective",
-  "indirectObjectAdjective2",
+  ...MODAL_SLOTS,
+  ...adjectiveSlots("directObject"),
+  ...adjectiveSlots("indirectObject"),
   ...COMPLEMENT_TYPES,
-  ...COMPLEMENT_TYPES.flatMap(
-    (type): SlotKey[] => [`${type}Adjective`, `${type}Adjective2`],
-  ),
+  ...COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
 ]);
 
 // Collapsible role groups: each dashed box can be collapsed to show only its main
@@ -155,8 +241,7 @@ export const COLLAPSIBLE_GROUPS: {
     label: "Subject",
     mainKey: "subject",
     childKeys: [
-      "subjectAdjective",
-      "subjectAdjective2",
+      ...adjectiveSlots("subject"),
       "subjectNumber",
       "subjectGender",
       "subjectDefiniteness",
@@ -165,14 +250,19 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Verb Phrase",
     mainKey: "verb",
-    childKeys: ["modifier", "verbNegative", "verbTense", "verbAspect"],
+    childKeys: [
+      "modifier",
+      ...MODAL_SLOTS,
+      "verbNegative",
+      "verbTense",
+      "verbAspect",
+    ],
   },
   {
     label: "Direct Object",
     mainKey: "directObject",
     childKeys: [
-      "directObjectAdjective",
-      "directObjectAdjective2",
+      ...adjectiveSlots("directObject"),
       "directObjectNumber",
       "directObjectGender",
       "directObjectDefiniteness",
@@ -182,8 +272,7 @@ export const COLLAPSIBLE_GROUPS: {
     label: "Indirect Object",
     mainKey: "indirectObject",
     childKeys: [
-      "indirectObjectAdjective",
-      "indirectObjectAdjective2",
+      ...adjectiveSlots("indirectObject"),
       "indirectObjectNumber",
       "indirectObjectGender",
     ],
@@ -192,8 +281,7 @@ export const COLLAPSIBLE_GROUPS: {
     label: COMPLEMENT_LABELS[type],
     mainKey: type as string,
     childKeys: [
-      `${type}Adjective`,
-      `${type}Adjective2`,
+      ...adjectiveSlots(type),
       `${type}Number`,
       `${type}Gender`,
       // The predicative plus the adposition-bearing spatial/dative complements carry a
@@ -203,6 +291,10 @@ export const COLLAPSIBLE_GROUPS: {
   })),
 ];
 
+const SUBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("subject"));
+const DIRECT_OBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("directObject"));
+const INDIRECT_OBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("indirectObject"));
+
 export function getActiveSlots(
   transitivity?: Transitivity,
   subjectRole?: GrammaticalRole,
@@ -211,20 +303,16 @@ export function getActiveSlots(
 ): SlotConfig[] {
   return ALL_SLOTS.filter((slot) => {
     if (slot.key === "directObject") return transitivity !== "intransitive";
-    if (
-      slot.key === "directObjectAdjective" ||
-      slot.key === "directObjectAdjective2"
-    )
+    if (DIRECT_OBJECT_ADJECTIVES.has(slot.key))
       return transitivity !== "intransitive";
     if (slot.key === "indirectObject") return transitivity === "ditransitive";
-    if (
-      slot.key === "indirectObjectAdjective" ||
-      slot.key === "indirectObjectAdjective2"
-    )
+    if (INDIRECT_OBJECT_ADJECTIVES.has(slot.key))
       return transitivity === "ditransitive";
     if (slot.key === "subjectAdjective") return subjectRole === "noun";
-    if (slot.key === "subjectAdjective2")
-      return subjectRole === "noun" && hasSubjectAdjective;
+    // The chained subject adjectives ride along once the first one exists; which of them
+    // is actually revealed is governed by the satellite chain, not by this list.
+    if (SUBJECT_ADJECTIVES.has(slot.key))
+      return subjectRole === "noun" && Boolean(hasSubjectAdjective);
     if (COMPLEMENT_KEY_SET.has(slot.key))
       return verbComplements?.includes(slot.key as ComplementType) ?? false;
     // Complement adjectives ride along whenever their complement is licensed;
@@ -241,39 +329,53 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   predicative: { x: 80, y: 42 },
   predicativeAdjective: { x: 68, y: 16 },
   predicativeAdjective2: { x: 84, y: 14 },
+  predicativeAdjective3: { x: 76, y: 26 },
   subjectAdjective: { x: 12, y: 14 },
   subjectAdjective2: { x: 12, y: 26 },
+  subjectAdjective3: { x: 24, y: 20 },
   subject: { x: 26, y: 42 },
   verb: { x: 52, y: 42 },
+  // Modal chain — its own row above the verb's tense/aspect toggles, reading
+  // outermost-first left to right ("voglio" then "poter", governing "andare" below).
+  verbModal: { x: 42, y: 10 },
+  verbModal2: { x: 62, y: 10 },
   directObject: { x: 80, y: 42 },
   directObjectAdjective: { x: 68, y: 16 },
   directObjectAdjective2: { x: 84, y: 14 },
+  directObjectAdjective3: { x: 76, y: 26 },
   indirectObject: { x: 76, y: 74 },
   indirectObjectAdjective: { x: 58, y: 86 },
   indirectObjectAdjective2: { x: 62, y: 96 },
+  indirectObjectAdjective3: { x: 54, y: 78 },
   modifier: { x: 52, y: 74 },
   // Motion complements — arranged below the verb, each its own little cluster,
   // with its adjectives stacked just above the complement noun.
   source: { x: 20, y: 88 },
   sourceAdjective: { x: 24, y: 78 },
   sourceAdjective2: { x: 28, y: 70 },
+  sourceAdjective3: { x: 32, y: 62 },
   direction: { x: 40, y: 92 },
   directionAdjective: { x: 44, y: 82 },
   directionAdjective2: { x: 48, y: 74 },
+  directionAdjective3: { x: 52, y: 66 },
   route: { x: 62, y: 92 },
   routeAdjective: { x: 58, y: 82 },
   routeAdjective2: { x: 54, y: 74 },
+  routeAdjective3: { x: 50, y: 66 },
   locative: { x: 84, y: 88 },
   locativeAdjective: { x: 80, y: 78 },
   locativeAdjective2: { x: 76, y: 70 },
+  locativeAdjective3: { x: 72, y: 62 },
   // Cause ("because of …") — a non-motion adjunct; parked center-bottom under the verb.
   cause: { x: 52, y: 90 },
   causeAdjective: { x: 50, y: 80 },
   causeAdjective2: { x: 54, y: 72 },
+  causeAdjective3: { x: 58, y: 64 },
   // Terminus ("to the cat") — the dative recipient; parked right-of-verb near the object row.
   terminus: { x: 90, y: 60 },
   terminusAdjective: { x: 88, y: 50 },
   terminusAdjective2: { x: 94, y: 46 },
+  terminusAdjective3: { x: 90, y: 38 },
 };
 
 // Number is a direct-toggle satellite — the "#" border icon flips singular ⇄ plural

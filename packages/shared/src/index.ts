@@ -249,6 +249,7 @@ export interface Concept {
   synonym?: string;            // short disambiguating gloss shown in parentheses, e.g. "weep" for cry
   emoji?: string;
   transitivity?: Transitivity; // only set for verbs
+  modal?: boolean;             // verb that governs another verb rather than heading a clause
   person?: '1' | '2' | '3';   // only set for pronouns
   number?: 'singular' | 'plural'; // inherent grammatical number, only set for pronouns
   gendered?: boolean;           // noun has distinct masc/fem surface forms
@@ -274,7 +275,7 @@ export interface NounPhrase {
   gender?: 'masc' | 'fem' | 'neut';
   /** Determiner to render with; defaults to 'definite'. Ignored for pronoun heads. */
   definiteness?: Definiteness;
-  /** Adjective ids, in order. The UI supplies up to two today; the model is uncapped. */
+  /** Adjective ids, in order. The UI supplies up to three today; the model is uncapped. */
   adjectives?: string[];
   /**
    * Comparative degree per adjective, index-aligned with `adjectives` (a missing or
@@ -334,6 +335,28 @@ export interface VerbPhrase {
   modifier?: string;               // adverb id
   tense?: Tense;                   // defaults to 'present'
   aspect?: Aspect;                 // defaults to 'neutral'
+  /**
+   * Modal verbs governing this predicate, outermost first — obligation (must / dovere),
+   * ability (can / potere), volition (will / volere). `["WILL", "CAN"]` over GO is "voglio
+   * poter andare", "I want to be able to go". Each is an ordinary verb concept flagged
+   * `Concept.modal`, so it conjugates out of the lexicon; what marks a modal out is that
+   * it *governs* a non-finite verb group instead of heading one.
+   *
+   * Only the outermost modal is finite: it carries the tense, the subject agreement, and
+   * the negation. Every inner modal takes its `nonfinite` form (Italian apocopates,
+   * *potere* → *poter*; English is suppletive, *can* → *be able to*), and the innermost
+   * element is the infinitive of the main verb's *whole* group — so a modal composes with
+   * `aspect`: "must **have seen**", "deve **aver visto**". Two lexical form keys carry the
+   * language-specific joinery: `nonfinite` (default: `base`) and `link`, a particle emitted
+   * before the governed element (English "want **to** go"; empty elsewhere).
+   *
+   * Japanese has no modal verbs — modality is suffixal (〜必要がある / 〜ことができる /
+   * 〜たい) — so its lexemes carry `governs` / `suffix_dict` / `suffix_stem` / `kind`
+   * instead, and its engine drops `aspect` under a modal (a documented gap).
+   *
+   * The UI chains two today; the model is uncapped.
+   */
+  modals?: string[];
 }
 
 /**

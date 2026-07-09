@@ -190,6 +190,11 @@ function conjugate(forms: Record<string, string>, subjectForms: Record<string, s
   return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
 }
 
+/** Conjugate from a person-number key ("3sg") — the shape this engine's callers carry. */
+function conjPn(forms: Record<string, string>, pn: string, tense: Tense): string {
+  return forms[`${pn}_${tense}`] ?? forms[tense] ?? forms[`${pn}_present`] ?? forms['base'] ?? '';
+}
+
 // Present-tense forms of the auxiliary "werden", used to build the periphrastic
 // future ("ich werde essen"). The infinitive is placed at the clause end.
 const WERDEN: Record<string, string> = {
@@ -253,6 +258,49 @@ function verbGroup(
     default: // neutral
       return { v2: conjug, mid: '', tail: isFuture ? base : '' };
   }
+}
+
+/**
+ * A modal chain's clause-final infinitive stack, in German's mirror order: the innermost
+ * modal sits nearest the verb group it governs and the outermost furthest right — "er will
+ * gehen können müssen" (wants to have to be able to go). When the outermost modal is itself
+ * finite in the V2 slot it is left out of the stack ("er will gehen können"); in the future
+ * "werden" holds V2 instead, so every modal stacks ("er wird gehen müssen").
+ */
+function modalStack(modals: ConceptForms[], includeOutermost: boolean): string[] {
+  const infinitives = modals.map((m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '');
+  return (includeOutermost ? infinitives : infinitives.slice(1)).reverse().filter(Boolean);
+}
+
+/**
+ * The verb complex when a modal chain governs the predicate. The outermost modal is the
+ * finite verb in the V2 slot, and the clause closes with the main verb group's infinitive
+ * followed by the modal stack. The aspect contributes exactly the material it does without a
+ * modal, only non-finite: "gerade" in the Mittelfeld for the progressive, "im Begriff … zu …
+ * sein" for the prospective, and Partizip + sein/haben for the resultative — so "er muss die
+ * Katze gesehen haben" and "er wird gehen müssen" both fall out of the same shape.
+ */
+function modalVerbGroup(
+  modals: ConceptForms[],
+  verbForms: Record<string, string>,
+  pn: string,
+  tense: Tense,
+  aspect: Aspect,
+): { v2: string; mid: string; tail: string } {
+  const base = verbForms['base'] ?? '';
+  const participle = verbForms['participle'] ?? base;
+  const perfAux = verbForms['aux'] === 'be' ? 'sein' : 'haben';
+  const group =
+    aspect === 'progressive' ? { mid: 'gerade', tail: [base] } :
+    aspect === 'prospective' ? { mid: 'im Begriff', tail: [`zu ${base}`, 'sein'] } :
+    aspect === 'resultative' ? { mid: '', tail: [participle, perfAux] } :
+    { mid: '', tail: [base] };
+  const isFuture = tense === 'future';
+  return {
+    v2: isFuture ? (WERDEN[pn] ?? 'wird') : conjPn(modals[0].forms, pn, tense),
+    mid: group.mid,
+    tail: [...group.tail, ...modalStack(modals, isFuture)].join(' '),
+  };
 }
 
 /**
@@ -420,15 +468,23 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const agreeForms = subjectRelative ? f : rel.subject!.head.forms;
   const clauseSubjectText = subjectRelative ? '' : subjectPhrase(rel.subject!);
 
-  const { verb, negative: verbNegative, modifier, tense = 'present' } = rel.verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', modals } = rel.verbPhrase;
   const person = agreeForms['person'] ?? '3';
   const aPlural = (agreeForms['number'] ?? agreeForms['count']) === 'plural';
   const pn = `${person}${aPlural ? 'pl' : 'sg'}`;
   const isFuture = tense === 'future';
   // Verb-final: the finite verb closes the clause. Future puts the infinitive
-  // just before the clause-final finite "werden" ("der Wein trinken wird").
-  const finite = isFuture ? (WERDEN[pn] ?? 'wird') : conjugate(verb.forms, agreeForms, tense);
-  const infinitive = isFuture ? (verb.forms['base'] ?? '') : '';
+  // just before the clause-final finite "werden" ("der Wein trinken wird"). A modal chain
+  // makes its outermost member the finite verb and pushes the main verb's infinitive plus
+  // the modal stack in front of it ("der Junge, der gehen können muss").
+  const finite = isFuture
+    ? (WERDEN[pn] ?? 'wird')
+    : modals.length > 0
+      ? conjPn(modals[0].forms, pn, tense)
+      : conjugate(verb.forms, agreeForms, tense);
+  const infinitive = modals.length > 0
+    ? [verb.forms['base'] ?? '', ...modalStack(modals, isFuture)].join(' ')
+    : isFuture ? (verb.forms['base'] ?? '') : '';
 
   const indirectObjectText = rel.indirectObject ? nounPhrase(rel.indirectObject, 'dat') : '';
   const directObjectText = rel.directObject ? nounPhrase(rel.directObject, 'acc') : '';
@@ -452,14 +508,17 @@ export const germanEngine: LanguageEngine = {
     if (!verbPhrase) return subjectText.trim();
     const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
 
-    // The verb complex is split across the clause: the finite verb (werden/sein or the
-    // conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff" follows it, and
-    // the non-finite tail (infinitive / Partizip / "zu …") closes the clause. Aspect is
-    // rendered here in the main clause only (relative clauses stay neutral — a known gap).
+    // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
+    // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"
+    // follows it, and the non-finite tail (infinitive / Partizip / "zu …" / the modal stack)
+    // closes the clause. Aspect is rendered here in the main clause only (relative clauses
+    // stay neutral — a known gap).
     const person = subject.head.forms['person'] ?? '3';
     const number = subject.head.forms['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
-    const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbGroup(verb.forms, pn, tense, aspect);
+    const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
+      ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect)
+      : verbGroup(verb.forms, pn, tense, aspect);
     const directObjectText = directObject
       ? nounPhrase(directObject, 'acc')
       : '';

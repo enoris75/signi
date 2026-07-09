@@ -10,6 +10,7 @@ import {
 } from "./Boxes.tsx";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
+import { isModalSlot } from "./slots.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb box, the adverb box,
 // the polarity toggle, the complement-toggle row that rides the Verb Phrase
@@ -30,8 +31,9 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleSelectSentiment,
   } = ctx;
 
+  // The verb, its adverb, and its modal chain are all word boxes on the verb phrase.
   const verbSlots = renderedSlots.filter(
-    (s) => s.key === "verb" || s.key === "modifier",
+    (s) => s.key === "verb" || s.key === "modifier" || isModalSlot(s.key),
   );
 
   const verbPhraseRect = groupRects.find((g) => g.label === "Verb Phrase");

@@ -105,7 +105,16 @@
       "Bash(pkill -f \"tsx src/index.ts\")",
       "Bash(python3 /private/tmp/claude-501/-Users-enoris-Code-signi/b9d0e145-efa7-4346-b0b3-501b5f42aa5a/scratchpad/probe.py)",
       "Bash(curl -s localhost:3999/api/concepts)",
-      "Bash(python3 -c ' *)"
+      "Bash(python3 -c ' *)",
+      "Bash(grep -n \"key: \\\\\"verbAspect\\\\\"\" -B 2 -A 14 ../frontend/src/components/PhraseBuilder/satellites.tsx)",
+      "Read(//Users/enoris/Code/frontend/src/components/PhraseBuilder/**)",
+      "Bash(echo \"exit=$?\")",
+      "Bash(curl -s -X POST http://localhost:3001/api/translate -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"FIRST_PERSON\"},\"verbPhrase\":{\"verb\":\"GO\",\"modals\":[\"WILL\",\"CAN\"]}}}')",
+      "Bash(python3 -c \"import json,sys; [print\\(f\\\\\"  {t['language']}  {t['text']}\\\\\"\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
+      "Bash(cd /Users/enoris/Code/signi/packages/backend && npm run seed 2>&1 | tail -1; ls /Users/enoris/Code/signi/node_modules/.bin/ 2>/dev/null | grep -iE 'playwright|puppeteer' ; echo \"--- vite build ---\"; cd ../frontend && npx vite build 2>&1 | tail -6)",
+      "Read(//Users/enoris/Code/**)",
+      "Bash(node -e \"const p=require\\('./package.json'\\); console.log\\(JSON.stringify\\(p.scripts\\)\\); console.log\\(Object.keys\\({...p.devDependencies,...p.dependencies}\\).filter\\(d=>/test|vitest|jest/.test\\(d\\)\\)\\)\")",
+      "Bash(pkill -f \"tsx watch src/index.ts\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

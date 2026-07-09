@@ -32,6 +32,8 @@ export interface ResolvedVerbPhrase {
   tense?: Tense;
   aspect?: Aspect;
   modifier?: ConceptForms;
+  /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
+  modals: ConceptForms[];
 }
 
 /**
@@ -95,6 +97,27 @@ export function adjString(...adjs: Array<ConceptForms | undefined>): string {
 /** Join a resolved noun phrase's adjectives into one string ("big red"). */
 export function npAdj(np: ResolvedNounPhrase): string {
   return adjString(...np.adjectives);
+}
+
+/**
+ * The words of a modal chain, outermost first, up to (but not including) the verb group it
+ * governs: the outermost modal in the finite form `finite` builds (it alone carries tense,
+ * agreement, and negation), then each inner modal's `nonfinite` form. Every modal is followed
+ * by its `link` particle when it has one — English "want **to** go"; the Romance and German
+ * modals govern a bare infinitive and set none. Shared by the five engines whose modals are
+ * ordinary pre-infinitival verbs (en/it/fr/es/pt); German stacks its infinitives clause-finally
+ * and Japanese suffixes them, so both build their own chain.
+ */
+export function modalChain(
+  modals: ConceptForms[],
+  finite: (m: ConceptForms) => string,
+): string[] {
+  const words: string[] = [];
+  modals.forEach((m, i) => {
+    words.push(i === 0 ? finite(m) : (m.forms['nonfinite'] ?? m.forms['base'] ?? ''));
+    if (m.forms['link']) words.push(m.forms['link']);
+  });
+  return words.filter(Boolean);
 }
 
 export interface LanguageEngine {

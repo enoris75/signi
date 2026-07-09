@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "mais"/"menos"; the noun phrase's definite article distinguishes them ("um gato mais
@@ -204,6 +204,19 @@ function aspectVerb(
   return `${TER_PT[tense][key]} ${verbForms['participle'] ?? inf}`; // resultative
 }
 
+/**
+ * The main verb's whole group as an infinitive — what a modal governs. Neutral is the bare
+ * infinitivo ("deve ir"); the marked aspects put their auxiliary in the infinitive ("deve
+ * estar indo", "deve ter visto").
+ */
+function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect): string {
+  const inf = verbForms['base'] ?? '';
+  if (aspect === 'progressive') return `estar ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `estar prestes a ${inf}`;
+  if (aspect === 'resultative') return `ter ${verbForms['participle'] ?? inf}`;
+  return inf;
+}
+
 function nounPhrase(forms: Record<string, string>, adj?: string): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
@@ -375,10 +388,17 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
-  const conjugated = aspect === 'neutral'
-    ? conjugate(verb.forms, subjectForms, tense)
-    : aspectVerb(verb.forms, subjectForms, tense, aspect);
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
+  // prepended below and lands in front of it, exactly as for a plain verb.
+  const conjugated = modals.length > 0
+    ? [
+        ...modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense)),
+        verbGroupInfinitive(verb.forms, aspect),
+      ].join(' ')
+    : aspect === 'neutral'
+      ? conjugate(verb.forms, subjectForms, tense)
+      : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';

@@ -1,6 +1,45 @@
 import { COMPLEMENT_TYPES, type Concept } from "@signi/shared";
-import { PhraseSelection, SlotKey } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET, getActiveSlots } from "./slots.ts";
+import { NounKey, PhraseSelection, SlotKey } from "./interfaces.ts";
+import {
+  adjectiveSlots,
+  COMPLEMENT_KEY_SET,
+  getActiveSlots,
+  MODAL_SLOTS,
+  NOUN_KEYS,
+} from "./slots.ts";
+
+// Drop every adjective of a noun block — the whole chain, since a later link is
+// meaningless without the earlier ones.
+function clearAdjectives(sel: PhraseSelection, which: NounKey): void {
+  for (const key of adjectiveSlots(which))
+    delete sel[key as keyof PhraseSelection];
+}
+
+// Drop the adjectives chained *after* `slot`, which is itself an adjective slot. Used when
+// that slot is cleared or its word replaced: the controls that revealed the later links
+// live on this box, so they must go with it.
+function clearChainedAdjectives(
+  sel: PhraseSelection,
+  which: NounKey,
+  slot: SlotKey,
+): void {
+  const chain = adjectiveSlots(which);
+  const idx = chain.indexOf(slot);
+  if (idx === -1) return;
+  for (const key of chain.slice(idx + 1))
+    delete sel[key as keyof PhraseSelection];
+}
+
+// Drop the modals chained *after* `slot` — same reasoning as the adjectives: the control
+// that reveals a governed modal rides its governor's box, so it goes when that box does.
+// `slot` may be the verb, which clears the whole chain (a modal with no verb to govern is
+// meaningless), a modal, or anything else (a no-op).
+function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
+  const idx = MODAL_SLOTS.indexOf(slot);
+  if (idx === -1 && slot !== "verb") return;
+  for (const key of MODAL_SLOTS.slice(idx + 1))
+    delete sel[key as keyof PhraseSelection];
+}
 
 // Pure state transform: place `concept` into `slot`, cascading the side effects
 // that keep the selection internally consistent (dropping now-invalid dependents,
@@ -21,32 +60,28 @@ export function applyConceptSelect(
     if (!nowVisible.includes("directObject")) {
       delete next.directObject;
       delete next.directObjectNumber;
-      delete next.directObjectAdjective;
-      delete next.directObjectAdjective2;
+      clearAdjectives(next, "directObject");
     }
     if (!nowVisible.includes("indirectObject")) {
       delete next.indirectObject;
       delete next.indirectObjectNumber;
-      delete next.indirectObjectAdjective;
-      delete next.indirectObjectAdjective2;
+      clearAdjectives(next, "indirectObject");
     }
-    if (!nowVisible.includes("subjectAdjective")) delete next.subjectAdjective;
+    if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
     // Drop complements the new verb no longer licenses.
     for (const type of COMPLEMENT_TYPES) {
       if (!nowVisible.includes(type)) {
         delete next[type];
         delete next[`${type}Number`];
         delete next[`${type}Gender`];
-        delete next[`${type}Adjective`];
-        delete next[`${type}Adjective2`];
+        clearAdjectives(next, type);
         if (type === "route") delete next.routeSpecifier;
         if (type === "cause") delete next.causeSentiment;
       }
     }
   }
   if (slot === "subject") {
-    delete next.subjectAdjective;
-    delete next.subjectAdjective2;
+    clearAdjectives(next, "subject");
     if (concept.role === "pronoun") {
       next.subjectNumber = "singular";
       // Gender applies to every pronoun person (participle/adjective agreement in Romance);
@@ -65,8 +100,7 @@ export function applyConceptSelect(
     }
   }
   if (slot === "directObject") {
-    delete next.directObjectAdjective;
-    delete next.directObjectAdjective2;
+    clearAdjectives(next, "directObject");
     if (concept.gendered) {
       next.directObjectGender = prev.directObjectGender ?? "masc";
     } else {
@@ -74,8 +108,7 @@ export function applyConceptSelect(
     }
   }
   if (slot === "indirectObject") {
-    delete next.indirectObjectAdjective;
-    delete next.indirectObjectAdjective2;
+    clearAdjectives(next, "indirectObject");
     if (concept.gendered) {
       next.indirectObjectGender = prev.indirectObjectGender ?? "masc";
     } else {
@@ -84,8 +117,7 @@ export function applyConceptSelect(
   }
   if (COMPLEMENT_KEY_SET.has(slot)) {
     // Swapping the complement noun invalidates its adjectives.
-    delete next[`${slot}Adjective` as keyof PhraseSelection];
-    delete next[`${slot}Adjective2` as keyof PhraseSelection];
+    clearAdjectives(next, slot as NounKey);
     const gKey = `${slot}Gender` as keyof PhraseSelection;
     if (concept.gendered) {
       (next[gKey] as "masc" | "fem") =
@@ -109,65 +141,46 @@ export function applyClear(
     delete next.directObject;
     delete next.directObjectNumber;
     delete next.directObjectGender;
-    delete next.directObjectAdjective;
-    delete next.directObjectAdjective2;
+    clearAdjectives(next, "directObject");
     delete next.indirectObject;
     delete next.indirectObjectNumber;
     delete next.indirectObjectGender;
-    delete next.indirectObjectAdjective;
-    delete next.indirectObjectAdjective2;
-    delete next.subjectAdjective;
-    delete next.subjectAdjective2;
+    clearAdjectives(next, "indirectObject");
+    clearAdjectives(next, "subject");
     for (const type of COMPLEMENT_TYPES) {
       delete next[type];
       delete next[`${type}Number`];
       delete next[`${type}Gender`];
-      delete next[`${type}Adjective`];
-      delete next[`${type}Adjective2`];
+      clearAdjectives(next, type);
     }
     delete next.routeSpecifier;
     delete next.causeSentiment;
   }
   if (slot === "subject") {
-    delete next.subjectAdjective;
-    delete next.subjectAdjective2;
+    clearAdjectives(next, "subject");
     delete next.subjectNumber;
     delete next.subjectGender;
-  }
-  if (slot === "subjectAdjective") {
-    delete next.subjectAdjective2;
   }
   if (slot === "directObject") {
     delete next.directObjectNumber;
     delete next.directObjectGender;
-    delete next.directObjectAdjective;
-    delete next.directObjectAdjective2;
-  }
-  if (slot === "directObjectAdjective") {
-    delete next.directObjectAdjective2;
+    clearAdjectives(next, "directObject");
   }
   if (slot === "indirectObject") {
     delete next.indirectObjectNumber;
     delete next.indirectObjectGender;
-    delete next.indirectObjectAdjective;
-    delete next.indirectObjectAdjective2;
-  }
-  if (slot === "indirectObjectAdjective") {
-    delete next.indirectObjectAdjective2;
+    clearAdjectives(next, "indirectObject");
   }
   if (COMPLEMENT_KEY_SET.has(slot)) {
     delete next[`${slot}Number` as keyof PhraseSelection];
     delete next[`${slot}Gender` as keyof PhraseSelection];
-    delete next[`${slot}Adjective` as keyof PhraseSelection];
-    delete next[`${slot}Adjective2` as keyof PhraseSelection];
+    clearAdjectives(next, slot as NounKey);
     if (slot === "route") delete next.routeSpecifier;
     if (slot === "cause") delete next.causeSentiment;
   }
-  // Clearing a complement's first adjective drops the chained second one.
-  for (const type of COMPLEMENT_TYPES) {
-    if (slot === `${type}Adjective`) {
-      delete next[`${type}Adjective2` as keyof PhraseSelection];
-    }
-  }
+  // Clearing an adjective drops the ones chained after it — their reveal controls
+  // ride the box that just went away. Modals chain off the verb the same way.
+  for (const which of NOUN_KEYS) clearChainedAdjectives(next, which, slot);
+  clearChainedModals(next, slot);
   return next;
 }

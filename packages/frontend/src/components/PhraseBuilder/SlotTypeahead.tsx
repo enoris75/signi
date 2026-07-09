@@ -1,9 +1,10 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
 import { ConceptSelectOpts, PhraseSelection, SlotKey } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET, COMPLEMENT_ADJECTIVE_TYPE } from "./slots.ts";
+import { COMPLEMENT_KEY_SET } from "./slots.ts";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
+import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
@@ -66,18 +67,15 @@ function pickerFor(
       return <DirectObjectTypeahead onSelect={pick} />;
     case "indirectObject":
       return <IndirectObjectTypeahead onSelect={pick} />;
-    case "subjectAdjective":
-    case "subjectAdjective2":
-    case "directObjectAdjective":
-    case "directObjectAdjective2":
-    case "indirectObjectAdjective":
-    case "indirectObjectAdjective2":
-      // Adjective slots carry the Adjective ⇄ Noun switch (a noun here is attributive).
-      return <ModifierTypeahead onSelect={pick} />;
+    case "verbModal":
+    case "verbModal2":
+      // Modals are verb concepts, so the modal picker filters the verb list on `modal`.
+      return <ModalTypeahead onSelect={pick} />;
     default:
-      // Complement adjectives (sourceAdjective, directionAdjective2, …) use the
-      // same adjective/noun switch as the core roles.
-      if (COMPLEMENT_ADJECTIVE_TYPE[slotKey])
+      // Every adjective slot — the core roles' chains and the complements'
+      // (sourceAdjective, directionAdjective2, …) alike — carries the Adjective ⇄ Noun
+      // switch (a noun here is attributive).
+      if (/Adjective\d?$/.test(slotKey))
         return <ModifierTypeahead onSelect={pick} />;
       // The causal complement ("because of him") also accepts a pronoun, so it uses the
       // pronoun-inclusive picker; the motion/locative complements stay noun-only.

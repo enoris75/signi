@@ -128,6 +128,9 @@ function resolveVerbPhrase(
     tense: vp.tense,
     aspect: vp.aspect,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
+    // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
+    // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys.
+    modals: (vp.modals ?? []).map((id) => resolve(id, language, lookup)),
   };
 }
 

@@ -5,6 +5,10 @@ import {
 } from "@signi/shared";
 import { SlotConfig } from "./interfaces.ts";
 import {
+  adjectiveChainParent,
+  adjectiveSlots,
+  modalChainParent,
+  MODAL_SLOTS,
   COMPLEMENT_ADJECTIVE_TYPE,
   COMPLEMENT_KEY_SET,
   MUI_COLOR_HEX,
@@ -140,17 +144,20 @@ export function buildGraph({
         COMPLEMENT_KEY_SET.has(slot.key)
       )
         continue;
+      // A chained adjective hangs off the previous one, so its link starts on that box
+      // rather than on the noun; the first adjective links back to its noun. Modals chain
+      // the same way, the first one hanging off the verb.
       const complementParent = COMPLEMENT_ADJECTIVE_TYPE[slot.key];
       const parentKey =
-        slot.key === "subjectAdjective" || slot.key === "subjectAdjective2"
+        adjectiveChainParent(slot.key) ??
+        modalChainParent(slot.key) ??
+        (slot.key === "subjectAdjective"
           ? "subject"
-          : slot.key === "directObjectAdjective" ||
-              slot.key === "directObjectAdjective2"
+          : slot.key === "directObjectAdjective"
             ? "directObject"
-            : slot.key === "indirectObjectAdjective" ||
-                slot.key === "indirectObjectAdjective2"
+            : slot.key === "indirectObjectAdjective"
               ? "indirectObject"
-              : (complementParent ?? "verb");
+              : (complementParent ?? "verb"));
       edges.push(satEdge(parentKey, slot.key, MUI_COLOR_HEX[slot.color]));
     }
     if (shownMap.verbNegative)
@@ -223,8 +230,7 @@ export function buildGraph({
               label: "Subject",
               color: MUI_COLOR_HEX.primary,
               nodeKeys: [
-                ...(shownMap.subjectAdjective ? ["subjectAdjective"] : []),
-                ...(shownMap.subjectAdjective2 ? ["subjectAdjective2"] : []),
+                ...adjectiveSlots("subject").filter((k) => shownMap[k]),
                 "subject",
                 ...(shownMap.subjectNumber ? ["subjectNumber"] : []),
                 ...(shownMap.subjectGender ? ["subjectGender"] : []),
@@ -241,6 +247,7 @@ export function buildGraph({
         label: "Verb Phrase",
         color: MUI_COLOR_HEX.secondary,
         nodeKeys: [
+          ...MODAL_SLOTS.filter((k) => shownMap[k]),
           "verb",
           ...(shownMap.verbNegative ? ["verbNegative"] : []),
           ...(shownMap.verbTense ? ["verbTense"] : []),
@@ -255,12 +262,7 @@ export function buildGraph({
               color: MUI_COLOR_HEX.success,
               nodeKeys: [
                 "directObject",
-                ...(shownMap.directObjectAdjective
-                  ? ["directObjectAdjective"]
-                  : []),
-                ...(shownMap.directObjectAdjective2
-                  ? ["directObjectAdjective2"]
-                  : []),
+                ...adjectiveSlots("directObject").filter((k) => shownMap[k]),
                 ...(shownMap.directObjectNumber ? ["directObjectNumber"] : []),
                 ...(shownMap.directObjectGender ? ["directObjectGender"] : []),
                 ...(shownMap.directObjectDefiniteness
@@ -277,12 +279,7 @@ export function buildGraph({
               color: MUI_COLOR_HEX.warning,
               nodeKeys: [
                 "indirectObject",
-                ...(shownMap.indirectObjectAdjective
-                  ? ["indirectObjectAdjective"]
-                  : []),
-                ...(shownMap.indirectObjectAdjective2
-                  ? ["indirectObjectAdjective2"]
-                  : []),
+                ...adjectiveSlots("indirectObject").filter((k) => shownMap[k]),
                 ...(shownMap.indirectObjectNumber
                   ? ["indirectObjectNumber"]
                   : []),
@@ -299,8 +296,7 @@ export function buildGraph({
         color: MUI_COLOR_HEX.warning,
         removeKey: type,
         nodeKeys: [
-          ...(shownMap[`${type}Adjective`] ? [`${type}Adjective`] : []),
-          ...(shownMap[`${type}Adjective2`] ? [`${type}Adjective2`] : []),
+          ...adjectiveSlots(type).filter((k) => shownMap[k]),
           type,
           ...(shownMap[`${type}Number`] ? [`${type}Number`] : []),
           ...(shownMap[`${type}Gender`] ? [`${type}Gender`] : []),

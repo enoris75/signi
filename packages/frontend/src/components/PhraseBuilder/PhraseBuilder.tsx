@@ -39,8 +39,10 @@ import {
   ALL_SLOTS,
   COMPLEMENT_KEY_SET,
   COLLAPSIBLE_GROUPS,
+  NOUN_KEYS,
   SATELLITE_SLOT_KEYS,
   getActiveSlots,
+  isModalSlot,
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
@@ -103,14 +105,6 @@ interface PhraseBuilderProps {
   // plain addresses). See `linkBinding` / `possessorAddress`.
   possessorPath?: NounAddress;
 }
-
-// The noun blocks that can carry a relative clause.
-const NOUN_KEYS: NounKey[] = [
-  "subject",
-  "directObject",
-  "indirectObject",
-  ...COMPLEMENT_TYPES,
-];
 
 type DragState = {
   keys: string[];
@@ -334,9 +328,9 @@ export function PhraseBuilder({
                 !selection[s.key],
             )?.key ?? null),
       );
-    } else if (slot.endsWith("Adjective")) {
-      // Setting a first adjective just closes the picker; the user can open the
-      // second adjective satellite explicitly if they want one.
+    } else if (/Adjective\d?$/.test(slot) || isModalSlot(slot)) {
+      // Setting an adjective or a modal just closes the picker; the next link in the
+      // chain is opened explicitly, from the control this box now carries.
       setActiveSlot(null);
     } else {
       const currentIdx = slots.findIndex((s) => s.key === slot);
@@ -539,7 +533,7 @@ export function PhraseBuilder({
     const stepY = (68 / Math.max(svgSize.h, 1)) * 100;
     // -1 = top row (adjectives / tense), 0 = main word, 1 = bottom row (toggles).
     const tierOf = (k: string): -1 | 0 | 1 => {
-      if (/Adjective2?$/.test(k) || k === "verbTense" || k === "verbAspect") return -1;
+      if (/Adjective\d?$/.test(k) || k === "verbTense" || k === "verbAspect") return -1;
       if (
         /(Number|Gender|Definiteness)$/.test(k) ||
         k === "verbNegative" ||
@@ -663,6 +657,9 @@ export function PhraseBuilder({
       // A collapsed group hides its own reveal icons; complement toggles ride
       // the verb box but belong to sibling groups, so they stay above.
       if (collapsedMainKeys.has(sat.parent)) continue;
+      // A control riding another satellite's box (Adjective 2 on Adjective 1) can only
+      // appear while that box is itself on the canvas.
+      if (SATELLITE_SLOT_KEYS.has(sat.parent) && !shownMap[sat.parent]) continue;
       (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
     }
   }

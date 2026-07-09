@@ -4,6 +4,7 @@ import { DeterminerToggleBox } from "./Boxes.tsx";
 import { NumberSlot, PhraseSelection } from "./interfaces.ts";
 import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
+import { adjectiveSlots } from "./slots.ts";
 
 // Renders one noun constituent — its noun box, chained adjective boxes, and the
 // number/gender toggle boxes — all onto the shared canvas. `which` picks the
@@ -20,8 +21,8 @@ export function NounPhraseBuilder({
   const { renderedSlots, shownMap, makeDragProps, selection, groupRects } = ctx;
 
   // Every noun constituent — core roles and motion complements alike — chains up
-  // to two adjectives; unrevealed/unlicensed keys simply aren't in renderedSlots.
-  const slotKeys = [`${which}Adjective`, `${which}Adjective2`, which];
+  // to three adjectives; unrevealed/unlicensed keys simply aren't in renderedSlots.
+  const slotKeys: string[] = [...adjectiveSlots(which), which];
   const mySlots = renderedSlots.filter((s) => slotKeys.includes(s.key));
 
   // The dashed box for this constituent — its main word key is one of its nodes.

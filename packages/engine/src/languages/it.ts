@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes
@@ -388,6 +388,31 @@ function aspectVerb(
   return `${aux} ${verbForms['gerund'] ?? inf}`.trim(); // progressive
 }
 
+/**
+ * The main verb's whole group as an infinitive — what a modal governs. Neutral is the bare
+ * infinito ("deve andare"); the marked aspects put their auxiliary in the infinitive ("deve
+ * stare andando", "deve stare per andare"). The resultative infinitive apocopates "avere"
+ * to "aver" before the participle, as Italian does ("deve aver visto"), while the
+ * essere-selecting verbs keep the full auxiliary and agree their participle with the
+ * subject ("deve essere andata").
+ */
+function verbGroupInfinitive(
+  verbForms: Record<string, string>,
+  subjectForms: Record<string, string>,
+  aspect: Aspect,
+): string {
+  const inf = verbForms['base'] ?? '';
+  if (aspect === 'progressive') return `stare ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `stare per ${inf}`;
+  if (aspect === 'resultative') {
+    const base = verbForms['participle'] ?? inf;
+    if (verbForms['aux'] !== 'be') return `aver ${base}`;
+    const part = agreeAdj(base, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
+    return `essere ${part}`;
+  }
+  return inf;
+}
+
 function subjectPhrase(np: ResolvedNounPhrase): string {
   const forms = np.head.forms;
   if (forms['person']) {
@@ -489,10 +514,18 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
-  const verbText = aspect === 'neutral'
-    ? conjugate(verb.forms, subjectForms, tense)
-    : aspectVerb(verb.forms, subjectForms, tense, aspect);
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  // A modal chain makes the outermost modal the finite verb; every inner modal takes its
+  // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
+  // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
+  const verbText = modals.length > 0
+    ? [
+        ...modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense)),
+        verbGroupInfinitive(verb.forms, subjectForms, aspect),
+      ].join(' ')
+    : aspect === 'neutral'
+      ? conjugate(verb.forms, subjectForms, tense)
+      : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.

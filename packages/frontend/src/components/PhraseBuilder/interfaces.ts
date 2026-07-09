@@ -4,18 +4,24 @@ import type { Aspect, CauseSentiment, Concept, ComplementType, Definiteness, Deg
 export interface SlotConfig {
     key: "subject" |
     "verb" |
+    "verbModal" |
+    "verbModal2" |
     "directObject" |
     "indirectObject" |
     "modifier" |
     "subjectAdjective" |
     "subjectAdjective2" |
+    "subjectAdjective3" |
     "directObjectAdjective" |
     "directObjectAdjective2" |
+    "directObjectAdjective3" |
     "indirectObjectAdjective" |
     "indirectObjectAdjective2" |
+    "indirectObjectAdjective3" |
     ComplementType |
     `${ComplementType}Adjective` |
-    `${ComplementType}Adjective2`;
+    `${ComplementType}Adjective2` |
+    `${ComplementType}Adjective3`;
     label: string;
     required: boolean;
     roles: GrammaticalRole[];
@@ -30,11 +36,20 @@ export interface PhraseSelection {
     // Grammatical aspect (neutral / progressive / prospective / resultative), orthogonal to
     // tense. Defaults to 'neutral' when absent.
     verbAspect?: Aspect;
+    // Modal verbs governing the predicate, outermost first: `verbModal` governs `verbModal2`,
+    // which governs the verb — "voglio poter andare". Like the adjectives they chain, each
+    // revealed from a control on the previous one's box, so `verbModal2` only exists once
+    // `verbModal` holds a word. Both hold modal verb concepts (`Concept.modal`).
+    verbModal?: Concept;
+    verbModal2?: Concept;
     directObject?: Concept;
     indirectObject?: Concept;
     modifier?: Concept;
+    // Each noun block chains up to three adjectives; each one is revealed from a control
+    // on the previous adjective's box, so `Adjective2` only exists once `Adjective` is set.
     subjectAdjective?: Concept;
     subjectAdjective2?: Concept;
+    subjectAdjective3?: Concept;
     subjectNumber?: "singular" | "plural";
     subjectGender?: "masc" | "fem" | "neut";
     // Determiner (the / a / bare) for the subject and direct-object noun phrases.
@@ -44,10 +59,12 @@ export interface PhraseSelection {
     directObjectGender?: "masc" | "fem" | "neut";
     directObjectAdjective?: Concept;
     directObjectAdjective2?: Concept;
+    directObjectAdjective3?: Concept;
     indirectObjectNumber?: "singular" | "plural";
     indirectObjectGender?: "masc" | "fem" | "neut";
     indirectObjectAdjective?: Concept;
     indirectObjectAdjective2?: Concept;
+    indirectObjectAdjective3?: Concept;
     // Subject complement (predicative) of a copular verb (become/seem/appear). Its head
     // may be a predicate noun ("becomes a legend") or a predicate adjective ("seems
     // happy"); number/gender apply only to a noun head (an adjective head agrees with the
@@ -62,28 +79,33 @@ export interface PhraseSelection {
     predicativeDefiniteness?: Definiteness;
     predicativeAdjective?: Concept;
     predicativeAdjective2?: Concept;
+    predicativeAdjective3?: Concept;
     // Motion/locative complements — each an independent noun phrase, with its
-    // own chained adjectives (up to two, matching subjects/objects).
+    // own chained adjectives (up to three, matching subjects/objects).
     locative?: Concept;
     locativeNumber?: "singular" | "plural";
     locativeGender?: "masc" | "fem" | "neut";
     locativeAdjective?: Concept;
     locativeAdjective2?: Concept;
+    locativeAdjective3?: Concept;
     direction?: Concept;
     directionNumber?: "singular" | "plural";
     directionGender?: "masc" | "fem" | "neut";
     directionAdjective?: Concept;
     directionAdjective2?: Concept;
+    directionAdjective3?: Concept;
     source?: Concept;
     sourceNumber?: "singular" | "plural";
     sourceGender?: "masc" | "fem" | "neut";
     sourceAdjective?: Concept;
     sourceAdjective2?: Concept;
+    sourceAdjective3?: Concept;
     route?: Concept;
     routeNumber?: "singular" | "plural";
     routeGender?: "masc" | "fem" | "neut";
     routeAdjective?: Concept;
     routeAdjective2?: Concept;
+    routeAdjective3?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
     // Cause / reason adjunct ("cried because of the dog"). Its one specifier is the
@@ -94,6 +116,7 @@ export interface PhraseSelection {
     causeGender?: "masc" | "fem" | "neut";
     causeAdjective?: Concept;
     causeAdjective2?: Concept;
+    causeAdjective3?: Concept;
     causeSentiment?: CauseSentiment;
     // Terminus / dative adjunct ("cut the hair *to the cat*") — the recipient or goal, "to
     // whom / to what". Renders with each language's indirect-object dative; carries no
@@ -103,6 +126,7 @@ export interface PhraseSelection {
     terminusGender?: "masc" | "fem" | "neut";
     terminusAdjective?: Concept;
     terminusAdjective2?: Concept;
+    terminusAdjective3?: Concept;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults

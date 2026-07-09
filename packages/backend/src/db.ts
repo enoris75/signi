@@ -29,7 +29,11 @@ function initSchema(db: Database.Database): void {
       complements  TEXT,  -- comma-separated ComplementType list (e.g. 'locative,direction'), NULL if none
       animate      INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1)), -- 1 if the referent is animate
       synonym      TEXT,   -- short disambiguating gloss shown in parentheses in the picker, NULL if none
-      countable    INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1)) -- 0 for mass/uncountable nouns (water, food)
+      countable    INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1)), -- 0 for mass/uncountable nouns (water, food)
+      -- 1 for a modal verb (must/can/will): a verb that governs another verb's infinitive
+      -- rather than heading a clause. Modals conjugate like any verb, so they reuse the
+      -- verb lexeme/form tables; this flag is what keeps them out of the main-verb picker.
+      modal        INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1))
     );
 
     -- ── Per-type lexeme tables ─────────────────────────────────────────
@@ -251,6 +255,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('countable')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN countable INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1))');
+  }
+  if (!conceptCols.includes('modal')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN modal INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1))');
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

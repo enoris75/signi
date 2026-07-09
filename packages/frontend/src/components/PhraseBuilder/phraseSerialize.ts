@@ -6,7 +6,7 @@ import type {
   SerializedSelection,
   SerializedWorkspace,
 } from "@signi/shared";
-import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from "@signi/shared";
+import { COMPLEMENT_TYPES, SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from "@signi/shared";
 import type {
   NounAddress,
   NounKey,
@@ -14,6 +14,7 @@ import type {
   PhraseLink,
   PhraseSelection,
 } from "./interfaces.ts";
+import { MODAL_SLOTS } from "./slots.ts";
 
 // ── Selection ⇄ serialized selection ────────────────────────────────────────
 // A PhraseSelection embeds whole Concept objects (DB-derived) and nests further
@@ -22,24 +23,23 @@ import type {
 // save is a compact reference tree that survives lexicon edits. Both directions share
 // the same key predicates below, which guarantees a lossless round-trip.
 
-// Concept-valued slots whose exact key isn't suffix-derived.
-const CONCEPT_BASE_KEYS = new Set([
+// Concept-valued slots whose exact key isn't suffix-derived. Every complement head is one,
+// so they come off COMPLEMENT_TYPES rather than a hand-kept list that drifts as new
+// complements land.
+const CONCEPT_BASE_KEYS = new Set<string>([
   "subject",
   "verb",
   "directObject",
   "indirectObject",
   "modifier",
-  "locative",
-  "direction",
-  "source",
-  "route",
-  "cause",
+  ...MODAL_SLOTS,
+  ...COMPLEMENT_TYPES,
 ]);
 
 // A slot that holds a single Concept (encoded to its id). Covers the base slots plus
 // every chained adjective slot (`subjectAdjective`, `routeAdjective2`, …).
 const isConceptKey = (k: string): boolean =>
-  CONCEPT_BASE_KEYS.has(k) || k.endsWith("Adjective") || k.endsWith("Adjective2");
+  CONCEPT_BASE_KEYS.has(k) || /Adjective\d?$/.test(k);
 
 // A slot that holds a nested PhraseSelection (the genitive possessor blocks).
 const isPossessorKey = (k: string): boolean => k.endsWith("Possessor");

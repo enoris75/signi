@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -127,6 +127,57 @@ function aspectVerb(
 }
 
 /**
+ * The main verb's whole group as an infinitive — what a modal governs. For the neutral
+ * aspect that is the bare base ("must **go**"); the marked aspects put their auxiliary in
+ * the infinitive and keep their own non-finite form ("must **be going**", "must **have
+ * seen**", "must **be gone**" for the verbs whose perfect selects BE).
+ */
+function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect): string {
+  const base = verbForms['base'] ?? '';
+  switch (aspect) {
+    case 'progressive': return `be ${verbForms['gerund'] ?? base}`;
+    case 'prospective': return `be about to ${base}`;
+    case 'resultative': return `${verbForms['aux'] === 'be' ? 'be' : 'have'} ${verbForms['participle'] ?? base}`;
+    default:            return base;
+  }
+}
+
+/**
+ * The true English modal auxiliaries. They are defective — no infinitive, no participle,
+ * no do-support — and take "not" straight after themselves ("must not go", "could not go").
+ * The lexicon fills their gaps with suppletive periphrases ("had to", "will be able to"),
+ * which are ordinary verbs and therefore negate with do-support ("did not have to go"). A
+ * finite modal form is one or the other depending on its *first* word, which this decides.
+ */
+const MODAL_AUX = new Set(['must', 'can', 'could', 'will', 'would', 'shall', 'may', 'might']);
+
+/**
+ * The outermost modal's finite form, negated where asked. "not" follows a true modal
+ * auxiliary — with the orthographic contraction "can not" → "cannot" — and everything else
+ * (the suppletive "had to", the lexical "want") takes do-support over its bare form.
+ */
+function modalFinite(
+  m: ConceptForms,
+  subjectForms: Record<string, string>,
+  tense: Tense,
+  negative: boolean,
+): string {
+  const finite = conjugate(m.forms, subjectForms, tense);
+  if (!negative) return finite;
+  const [first, ...rest] = finite.split(' ');
+  if (MODAL_AUX.has(first)) {
+    if (first === 'can' && rest.length === 0) return 'cannot';
+    return [first, 'not', ...rest].join(' ');
+  }
+  const person = subjectForms['person'] ?? '3';
+  const singular = (subjectForms['number'] ?? 'singular') !== 'plural';
+  const doAux =
+    tense === 'past' ? 'did not' :
+    person === '3' && singular ? 'does not' : 'do not';
+  return `${doAux} ${m.forms['nonfinite'] ?? m.forms['base'] ?? ''}`;
+}
+
+/**
  * The Saxon genitive marker for a possessor: "'s", but a bare "'" after a plural that
  * already ends in -s ("the cats' book").
  */
@@ -220,7 +271,7 @@ function predicateParts(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
 
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
@@ -234,10 +285,25 @@ function predicateParts(
   const complementsText = complementsPhrase(complements);
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
 
+  const negateVerb = verbNegative === true && !modifierIsNegative;
+
+  // A modal chain makes the outermost modal the finite verb — it takes the tense, the
+  // agreement, and the negation — and every other element non-finite, down to the main
+  // verb's whole group in the infinitive ("must not have seen the cat").
+  if (modals.length > 0) {
+    const verbText = [
+      ...modalChain(modals, (m) => modalFinite(m, subjectForms, tense, negateVerb)),
+      verbGroupInfinitive(verb.forms, aspect),
+    ].join(' ');
+    const preVerb = isFrequency ? modifierText : '';
+    const postVerb = isFrequency ? '' : modifierText;
+    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+  }
+
   // A non-neutral aspect (progressive/prospective/resultative) is periphrastic on "be",
   // which carries the tense and any negation ("is not going"), so it bypasses do-support.
   if (aspect !== 'neutral') {
-    const verbText = aspectVerb(verb.forms, subjectForms, tense, aspect, verbNegative === true && !modifierIsNegative);
+    const verbText = aspectVerb(verb.forms, subjectForms, tense, aspect, negateVerb);
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
     return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
