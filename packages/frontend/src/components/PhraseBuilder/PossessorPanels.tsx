@@ -1,6 +1,5 @@
 import React from "react";
 import { Box } from "@mui/material";
-import { type Concept } from "@signi/shared";
 import {
   NounAddress,
   NounKey,
@@ -90,10 +89,6 @@ export function PossessorPanels({
               }}
             />
             <Builder
-              nounPhrase
-              dottedColor={possColor}
-              head={selection[which] as Concept}
-              relativeLabel="'s"
               selection={
                 (selection[POSSESSOR_KEY(which)] as
                   | PhraseSelection

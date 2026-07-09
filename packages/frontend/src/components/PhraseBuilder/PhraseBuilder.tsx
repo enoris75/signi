@@ -1,6 +1,5 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
-import { alpha, Box, Paper, Typography, IconButton } from "@mui/material";
-import CloseIcon from "@mui/icons-material/Close";
+import { Box } from "@mui/material";
 import {
   COMPLEMENT_TYPES,
   type Concept,
@@ -52,7 +51,6 @@ import {
 import {
   buildSatelliteIcons,
   buildSatellites,
-  conceptLabel,
   type Satellite,
 } from "./satellites.tsx";
 import {
@@ -88,16 +86,6 @@ import { PeriodContainer } from "./PeriodContainer.tsx";
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
   onPhraseUpdate: (updater: (prev: PhraseSelection) => PhraseSelection) => void;
-  // Noun-phrase mode: this builder edits a bare noun phrase (the possessor) — its head
-  // lives in the `subject` slot and there is no verb/predicate. A noun phrase is not a
-  // period, so it renders as a dashed box inside its owner rather than as its own card.
-  nounPhrase?: boolean;
-  // Noun-phrase mode: the hex colour of the owning noun, used for the dashed outline so
-  // the box matches the role group and the connector that runs down into it.
-  dottedColor?: string;
-  head?: Concept;
-  // Whether the head reads as animate ("who") vs inanimate ("that"), for the label.
-  relativeLabel?: string;
   onRemove?: () => void;
   // Top-level only: this is the sole period in the workspace, so it can't be deleted — the
   // header's `onRemove` control clears its content in place instead of removing the container.
@@ -137,10 +125,6 @@ type DragState = {
 export function PhraseBuilder({
   selection,
   onPhraseUpdate,
-  nounPhrase = false,
-  dottedColor,
-  head,
-  relativeLabel,
   onRemove,
   soleContainer = false,
   onMoveUp,
@@ -196,33 +180,23 @@ export function PhraseBuilder({
   // A canvas is shown once a subject or verb is chosen (a period starts on its subject),
   // or, verbless, for a lone noun phrase (the possessor editor). Before that, the empty
   // state offers the single opening word picker.
-  const showCanvas = hasSubject || hasVerb || nounPhrase;
+  const showCanvas = hasSubject || hasVerb;
   const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
-  const visibleSlots = nounPhrase
-    ? // Noun-phrase mode: only the subject family (the possessor head + its adjectives).
-      getActiveSlots(
-        "intransitive",
-        selection.subject?.role,
-        Boolean(selection.subjectAdjective),
-      ).filter(
-        (s) => s.key === "subject" || s.key.startsWith("subjectAdjective"),
-      )
-    : getActiveSlots(
-        selection.verb?.transitivity,
-        selection.subject?.role,
-        Boolean(selection.subjectAdjective),
-        selection.verb?.complements,
-      )
-        // Objects hang off the verb, so a subject-only (verbless) period shows none —
-        // otherwise an empty Direct Object box would appear before any verb is chosen.
-        .filter(
-          (s) =>
-            hasVerb ||
-            !(
-              s.key.startsWith("directObject") ||
-              s.key.startsWith("indirectObject")
-            ),
-        );
+  const visibleSlots = getActiveSlots(
+    selection.verb?.transitivity,
+    selection.subject?.role,
+    Boolean(selection.subjectAdjective),
+    selection.verb?.complements,
+  )
+    // Objects hang off the verb, so a subject-only (verbless) period shows none —
+    // otherwise an empty Direct Object box would appear before any verb is chosen.
+    .filter(
+      (s) =>
+        hasVerb ||
+        !(
+          s.key.startsWith("directObject") || s.key.startsWith("indirectObject")
+        ),
+    );
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -445,7 +419,6 @@ export function PhraseBuilder({
     h: GRAPH_HEIGHT,
   });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
-    if (nounPhrase) return MIN_GRAPH_HEIGHT + 60;
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
@@ -667,7 +640,7 @@ export function PhraseBuilder({
 
   // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
   // with the container's bottom border, so the two must stay in step.
-  const paperPad = nounPhrase ? 1.5 : compact ? 1 : 2;
+  const paperPad = compact ? 1 : 2;
 
   function pos(key: string) {
     if (compactLayout?.positions[key]) return compactLayout.positions[key];
@@ -685,7 +658,6 @@ export function PhraseBuilder({
 
   const { edges, groupRects, groupEdges } = buildGraph({
     drawCanvas: showCanvas,
-    nounPhrase,
     // The possessor's own head is a box on this canvas; in a relative clause the
     // subject is the external head, so it isn't drawn.
     showSubject: true,
@@ -774,7 +746,6 @@ export function PhraseBuilder({
   // same canvas below and lean on this component's drag machinery and handlers.
   const ctx: PhraseRenderContext = {
     selection,
-    nounPhrase,
     activeSlot,
     renderedSlots,
     shownMap,
@@ -873,26 +844,15 @@ export function PhraseBuilder({
               edges={edges}
             />
 
-            {/* Every constituent paints onto this shared canvas. Each
-                builder draws its own dashed group box (with the collapse
-                and, for complements, remove controls) plus its word boxes.
-                The builders self-filter, so mounting one per possible noun
-                / the verb phrase unconditionally is safe — inactive slots
-                and toggles render nothing. Noun-phrase mode (possessor) paints
-                only its single head noun phrase — no verb, objects, or complements. */}
-            {nounPhrase ? (
+            <>
               <NounPhraseBuilder which="subject" ctx={ctx} />
-            ) : (
-              <>
-                <NounPhraseBuilder which="subject" ctx={ctx} />
-                <VerbPhraseBuilder ctx={ctx} />
-                <NounPhraseBuilder which="directObject" ctx={ctx} />
-                <NounPhraseBuilder which="indirectObject" ctx={ctx} />
-                {COMPLEMENT_TYPES.map((type) => (
-                  <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-                ))}
-              </>
-            )}
+              <VerbPhraseBuilder ctx={ctx} />
+              <NounPhraseBuilder which="directObject" ctx={ctx} />
+              <NounPhraseBuilder which="indirectObject" ctx={ctx} />
+              {COMPLEMENT_TYPES.map((type) => (
+                <NounPhraseBuilder key={type} which={type} ctx={ctx} />
+              ))}
+            </>
 
             {/* Compact view is just the bare core-word chips — no reveal icons
                 on the box borders and no dotted-box perimeter controls. */}
@@ -934,11 +894,7 @@ export function PhraseBuilder({
             minHeight={MIN_GRAPH_HEIGHT}
             onResize={setGraphHeight}
             onResizeEnd={(h) => {
-              if (!nounPhrase)
-                localStorage.setItem(
-                  "signi:graphHeight",
-                  String(Math.round(h)),
-                );
+              localStorage.setItem("signi:graphHeight", String(Math.round(h)));
             }}
           />
         </Box>
@@ -1002,117 +958,40 @@ export function PhraseBuilder({
           ))}
         </Box>
       )}
-      {nounPhrase ? (
-        // A possessor is only a noun phrase, not a period of its own, so it wears the same
-        // dashed outline as the role groups on the canvas above it rather than the period
-        // container's accent card. A relative clause keeps the card, its left rule tinted
-        // to mark it subordinate.
-        <Paper
-          elevation={0}
-          sx={{
-            p: paperPad,
-            position: "relative",
-            ...(nounPhrase
-              ? {
-                  border: "1px dashed",
-                  borderColor: dottedColor
-                    ? alpha(dottedColor, 0.5)
-                    : "info.light",
-                  borderRadius: "4px",
-                  bgcolor: "transparent",
-                }
-              : {
-                  border: "1px solid",
-                  borderColor: "divider",
-                  borderLeft: "3px solid",
-                  borderLeftColor: "primary.light",
-                  bgcolor: "action.hover",
-                }),
-          }}
-        >
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              mb: 1.5,
-            }}
-          >
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.62rem",
-                fontWeight: 700,
-                letterSpacing: "0.12em",
-                textTransform: "uppercase",
-                color: "text.secondary",
-              }}
-            >
-              {conceptLabel(head) ?? "…"}{" "}
-              <Box
-                component="span"
-                sx={{ color: "text.disabled", fontWeight: 500 }}
-              >
-                · {relativeLabel ?? "that"} …
-              </Box>
-            </Typography>
-            {onRemove && (
-              <IconButton
-                size="small"
-                onClick={onRemove}
-                aria-label={
-                  nounPhrase ? "Remove possessor" : "Remove relative clause"
-                }
-                sx={{ p: 0.25 }}
-              >
-                <CloseIcon sx={{ fontSize: 15 }} />
-              </IconButton>
-            )}
-          </Box>
+      <PeriodContainer
+        paperPad={paperPad}
+        compact={compact}
+        showCanvas={showCanvas}
+        hasGroups={groupRects.length > 0}
+        hasContent={hasContent}
+        soleContainer={soleContainer}
+        // A workspace container stays in the managed stack so the cross-container
+        // connectors measure correctly; only a standalone period may be floated.
+        floatable={!binding}
+        position={position}
+        onPositionChange={setPosition}
+        onMoveUp={onMoveUp}
+        onMoveDown={onMoveDown}
+        onSave={onSave}
+        onRemove={onRemove}
+        onToggleCompact={handleToggleCompact}
+        onTidy={handleTidyPeriod}
+      >
+        {content}
+      </PeriodContainer>
 
-          {content}
-        </Paper>
-      ) : (
-        <PeriodContainer
-          paperPad={paperPad}
-          compact={compact}
-          showCanvas={showCanvas}
-          hasGroups={groupRects.length > 0}
-          hasContent={hasContent}
-          soleContainer={soleContainer}
-          // A workspace container stays in the managed stack so the cross-container
-          // connectors measure correctly; only a standalone period may be floated.
-          floatable={!binding}
-          position={position}
-          onPositionChange={setPosition}
-          onMoveUp={onMoveUp}
-          onMoveDown={onMoveDown}
-          onSave={onSave}
-          onRemove={onRemove}
-          onToggleCompact={handleToggleCompact}
-          onTidy={handleTidyPeriod}
-        >
-          {content}
-        </PeriodContainer>
-      )}
-
-      {/* The word palette rides only the top-level builder as a slide-over
-          overlay; nested clauses and possessor editors fill their slots via each
-          box's inline typeahead. Its open state is owned by the page header. */}
-      {!nounPhrase && (
-        <PhraseSidebar
-          open={wordsPanelOpen}
-          onClose={() => onWordsPanelClose?.()}
-          width={sidebarWidth}
-          onWidthChange={setSidebarWidth}
-          selection={selection}
-          activeSlot={activeSlot}
-          activeSlotConfig={activeSlotConfig}
-          visibleSlots={visibleSlots}
-          onSlotClick={handleSlotClick}
-          onConceptSelect={handleConceptSelect}
-        />
-      )}
+      <PhraseSidebar
+        open={wordsPanelOpen}
+        onClose={() => onWordsPanelClose?.()}
+        width={sidebarWidth}
+        onWidthChange={setSidebarWidth}
+        selection={selection}
+        activeSlot={activeSlot}
+        activeSlotConfig={activeSlotConfig}
+        visibleSlots={visibleSlots}
+        onSlotClick={handleSlotClick}
+        onConceptSelect={handleConceptSelect}
+      />
     </Box>
   );
 }
