@@ -1,6 +1,6 @@
 import type { ComplementType, NounPhrase, PhrasePlan, RelativeClause } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
-import { NounAddress, NounKey, PhraseContainer, PhraseLink } from "./interfaces.ts";
+import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isRelativeLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
 const CORE_KEYS = new Set<NounKey>(["subject", "directObject", "indirectObject"]);
@@ -42,6 +42,7 @@ function attachLinks(
   seen: Set<string>,
 ): void {
   for (const link of links) {
+    if (!isRelativeLink(link)) continue;
     if (link.source.containerId !== container.id) continue;
     const target = byId.get(link.target.containerId);
     if (!target || seen.has(target.id)) continue;
@@ -49,6 +50,28 @@ function attachLinks(
     if (!head) continue;
     head.relative = buildRelativeClause(target, link.target.nounKey, links, byId, seen);
   }
+}
+
+// Attach the hypothetical condition (the "if" clause) sourced from `container` onto `plan`.
+// The IF container is serialised as its own plan (with its own relative links folded in) and
+// hung on `plan.condition`; the translator renders it as the protasis. Conditions don't nest,
+// so the IF clause is not itself given a condition.
+function attachCondition(
+  plan: Partial<PhrasePlan>,
+  container: PhraseContainer,
+  links: PhraseLink[],
+  byId: Map<string, PhraseContainer>,
+  seen: Set<string>,
+): void {
+  const link = links.find(
+    (l) => isConditionalLink(l) && l.source.containerId === container.id,
+  );
+  if (!link || !isConditionalLink(link)) return;
+  const ifContainer = byId.get(link.target.containerId);
+  if (!ifContainer || seen.has(ifContainer.id)) return;
+  const condPlan = selectionToPlan(ifContainer.selection);
+  attachLinks(condPlan, ifContainer, links, byId, new Set([...seen, ifContainer.id]));
+  plan.condition = condPlan as PhrasePlan;
 }
 
 // Serialise a target container as a relative clause whose head fills the `gap` slot. The
@@ -95,6 +118,7 @@ export function workspaceToPlans(
     .map((c) => {
       const plan = selectionToPlan(c.selection);
       attachLinks(plan, c, links, byId, new Set([c.id]));
+      attachCondition(plan, c, links, byId, new Set([c.id]));
       return { containerId: c.id, plan };
     });
 }

@@ -1,6 +1,6 @@
 import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import { defaultDefiniteness } from '@signi/shared';
-import type { LanguageEngine, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
+import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
 import { frenchEngine } from './languages/fr.js';
@@ -122,12 +122,14 @@ function resolveVerbPhrase(
   vp: VerbPhrase,
   language: string,
   lookup: LexiconLookup,
+  mood?: Mood,
 ): ResolvedVerbPhrase {
   return {
     verb: resolve(vp.verb, language, lookup),
     negative: vp.negative,
     tense: vp.tense,
     aspect: vp.aspect,
+    mood,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
     // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
     // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys.
@@ -184,17 +186,37 @@ function resolveRelativeClause(
   };
 }
 
+/**
+ * Resolve one plan for one language. `mood` is threaded onto the verb phrase — set only for
+ * the two halves of a conditional (main = 'conditional', condition = 'subjunctive'); a plain
+ * sentence leaves it undefined (indicative). The condition clause is resolved recursively.
+ */
+function resolvePhrase(
+  plan: PhrasePlan,
+  language: string,
+  lookup: LexiconLookup,
+  mood?: Mood,
+): ResolvedPhrase {
+  return {
+    subject: resolveNounPhrase(plan.subject, language, lookup),
+    // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
+    // render just the subject when it is absent.
+    verbPhrase: plan.verbPhrase ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood) : undefined,
+    directObject: plan.directObject ? resolveNounPhrase(plan.directObject, language, lookup) : undefined,
+    indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, language, lookup) : undefined,
+    complements: resolveComplements(plan.complements, language, lookup),
+    // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
+    // `condition` the protasis (subjunctive mood). Conditions don't nest.
+    condition: plan.condition
+      ? resolvePhrase(plan.condition, language, lookup, 'subjunctive')
+      : undefined,
+  };
+}
+
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
-    const resolved: ResolvedPhrase = {
-      subject: resolveNounPhrase(plan.subject, engine.language, lookup),
-      // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
-      // render just the subject when it is absent.
-      verbPhrase: plan.verbPhrase ? resolveVerbPhrase(plan.verbPhrase, engine.language, lookup) : undefined,
-      directObject: plan.directObject ? resolveNounPhrase(plan.directObject, engine.language, lookup) : undefined,
-      indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
-      complements: resolveComplements(plan.complements, engine.language, lookup),
-    };
+    // The main clause takes the conditional mood only when a condition is attached.
+    const resolved = resolvePhrase(plan, engine.language, lookup, plan.condition ? 'conditional' : undefined);
     // Every rendered period closes with its language's full stop, appended here rather
     // than by each engine — the ruby segments must carry the same one, unread.
     const stop = engine.terminator ?? '.';

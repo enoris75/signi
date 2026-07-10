@@ -407,6 +407,14 @@ export interface PhrasePlan {
   directObject?: NounPhrase;
   indirectObject?: NounPhrase;
   complements?: Partial<Record<ComplementType, Complement>>;
+  /**
+   * An optional hypothetical condition (the protasis / "if" clause) — itself a full plan.
+   * When present the sentence is a counterfactual conditional: this plan is the main clause
+   * (apodosis, rendered in the conditional mood — "the dog would run") and `condition` is the
+   * "if" clause (rendered in the past / imperfect-subjunctive mood — "if the cat ate"). One
+   * condition per plan; conditions do not nest (the condition clause stays indicative).
+   */
+  condition?: PhrasePlan;
 }
 
 /**
@@ -454,7 +462,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 1;
+export const SAVED_PHRASE_VERSION = 2;
 
 /**
  * The grain of a saved workspace:
@@ -479,8 +487,12 @@ export interface SerializedContainer {
 
 export interface SerializedLink {
   id: string;
-  source: { containerId: string; nounKey: string };
-  target: { containerId: string; nounKey: string };
+  // 'relative' (default, omitted on legacy v1 files) is a noun-to-noun relative-clause link;
+  // 'conditional' is a container-to-container hypothetical link (source = main clause, target =
+  // the "if" clause). Conditional links carry no noun key.
+  kind?: 'relative' | 'conditional';
+  source: { containerId: string; nounKey?: string };
+  target: { containerId: string; nounKey?: string };
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

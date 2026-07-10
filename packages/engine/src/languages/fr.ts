@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
 // "plus"/"moins"; the noun phrase's definite article distinguishes them ("un chat plus
@@ -13,6 +14,43 @@ const FR_DEGREE: Record<Degree, string> = {
 function frDeg(a: ConceptForms, surface: string): string {
   const d = FR_DEGREE[adjDegree(a)];
   return d && surface ? `${d} ${surface}` : surface;
+}
+
+/**
+ * Agree an adjective's masculine-singular base with the noun it modifies, deriving the
+ * feminine and plural by rule (French adjective forms aren't stored — only the base is).
+ * Covers the seeded vocabulary: the -eau/-eux/-x/-f/-er/-on families plus the irregular
+ * beau/nouveau/vieux, defaulting to a plain +e (fem) / +s (plural). Adjectives already
+ * ending in -e are invariable in the feminine (triste, rapide); those in -s/-x are
+ * invariable in the masculine plural (mauvais, heureux).
+ */
+const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string]> = {
+  // [masc.sg, fem.sg, masc.pl, fem.pl]
+  beau: ['beau', 'belle', 'beaux', 'belles'],
+  nouveau: ['nouveau', 'nouvelle', 'nouveaux', 'nouvelles'],
+  vieux: ['vieux', 'vieille', 'vieux', 'vieilles'],
+};
+function agreeAdjFr(base: string, gender: string, plural: boolean): string {
+  if (!base) return '';
+  const fem = gender === 'fem';
+  const irr = FR_ADJ_IRREGULAR[base];
+  if (irr) return irr[(fem ? 1 : 0) + (plural ? 2 : 0)];
+  // Feminine stem.
+  let f = base;
+  if (fem) {
+    if (base.endsWith('e')) f = base;                              // triste, faible, rapide
+    else if (base.endsWith('eux')) f = `${base.slice(0, -3)}euse`; // heureux → heureuse
+    else if (base.endsWith('x')) f = `${base.slice(0, -1)}se`;     // generic -x → -se
+    else if (base.endsWith('f')) f = `${base.slice(0, -1)}ve`;     // actif → active
+    else if (base.endsWith('er')) f = `${base.slice(0, -2)}ère`;   // premier → première
+    else if (base.endsWith('on')) f = `${base}ne`;                 // bon → bonne
+    else f = `${base}e`;                                           // grand, fort, fatigué → +e
+  }
+  if (!plural) return f;
+  if (fem) return `${f}s`;                                         // fem plural is always +s
+  if (f.endsWith('s') || f.endsWith('x')) return f;                // mauvais, heureux invariable
+  if (f.endsWith('al')) return `${f.slice(0, -2)}aux`;             // -al → -aux
+  return `${f}s`;
 }
 
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
@@ -247,8 +285,10 @@ function modalGroupFr(
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
+  mood?: Mood,
 ): { finite: string; tail: string } {
-  const [finite, ...governed] = modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense));
+  const pn = moodPN(subjectForms);
+  const [finite, ...governed] = modalChain(modals, (m) => moodForm('fr', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense));
   return {
     finite,
     tail: [...governed, verbGroupInfinitiveFr(verbForms, subjectForms, aspect)].join(' '),
@@ -275,8 +315,10 @@ function frMods(np: ResolvedNounPhrase): string {
 function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[] } {
   const pre: string[] = [];
   const post: string[] = [];
+  const gender = np.head.forms['gender'] ?? 'masc';
+  const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   for (const a of np.adjectives) {
-    const word = frDeg(a, a.forms['base'] ?? '');
+    const word = frDeg(a, agreeAdjFr(a.forms['base'] ?? '', gender, plural));
     if (!word) continue;
     // A comparative/superlative adjective is postnominal in French ("le chat plus grand"),
     // even when its plain form would precede the noun — this also avoids elision artefacts
@@ -344,19 +386,22 @@ function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string
   }
 }
 
-function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+function complementsPhrase(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  subjectForms: Record<string, string> = {},
+): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // Subject complement: a predicate adjective is bare ("semble heureux" — this engine
-      // doesn't inflect adjectives for agreement, so the masculine base is used, matching
-      // its attributive behavior); a predicate noun keeps its own article, no preposition
-      // ("devient une légende").
+      // Subject complement: a predicate adjective agrees with the subject ("la chatte est
+      // belle", "elles semblent heureuses"); a predicate noun keeps its own article, no
+      // preposition ("devient une légende").
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') return f['base'] ?? '';
+        if (f['role'] === 'adjective')
+          return agreeAdjFr(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
         return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
       }
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
@@ -415,11 +460,17 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
-  const conjugated = conjugate(verb.forms, subjectForms, tense);
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
+  // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
+  const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A frequency adverb (jamais, toujours, souvent) sits right after the finite verb — which
+  // in a compound tense means between the auxiliary and the participle ("n'a jamais été",
+  // "doit toujours aller"), not trailing the whole group. Manner adverbs still trail.
+  const isFrequency = modifier?.forms['subtype'] === 'frequency';
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
   // ("aucun garçon ne pleure") or an object ("il ne voit aucun garçon").
   const aucun =
@@ -440,16 +491,17 @@ function predicateText(
     // The outermost modal is the finite verb — it takes the tense, the agreement, and the
     // negation — and governs the inner modals' infinitives down to the main verb group's
     // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
-    const { finite, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect);
-    effectiveVerb = `${negateFinite(finite)} ${tail}`.trim();
-    effectiveMod = modifierText;
+    const { finite, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect, mood);
+    effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
+    effectiveMod = isFrequency ? '' : modifierText;
   } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
-    // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then the
-    // non-finite tail follows ("n'est pas en train d'aller", "est allé", "n'a pas vu").
+    // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a
+    // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
+    // d'aller", "est allé", "n'a pas vu").
     const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
-    effectiveVerb = `${negateFinite(finite)} ${tail}`.trim();
-    effectiveMod = modifierText;
+    effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
+    effectiveMod = isFrequency ? '' : modifierText;
   } else if (verbNegative || aucun || modifierIsNegative) {
     // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
     // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais).
@@ -466,7 +518,7 @@ function predicateText(
   const indirectObjectText = indirectObject
     ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
     : '';
-  const complementsText = complementsPhrase(complements);
+  const complementsText = complementsPhrase(complements, subjectForms);
   return [effectiveVerb, effectiveMod, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -491,16 +543,27 @@ function relativeText(np: ResolvedNounPhrase): string {
   return `${relzr} ${pred}`.trim();
 }
 
+/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+function renderClause(phrase: ResolvedPhrase): string {
+  const { subject } = phrase;
+  const subjectText = subjectPhrase(subject);
+  // Verbless period: a bare noun phrase ("dernières nouvelles").
+  if (!phrase.verbPhrase) return subjectText.trim();
+  const predicate = predicateText(
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+  );
+  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+}
+
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
   render(phrase: ResolvedPhrase): string {
-    const { subject } = phrase;
-    const subjectText = subjectPhrase(subject);
-    // Verbless period: a bare noun phrase ("dernières nouvelles").
-    if (!phrase.verbPhrase) return subjectText.trim();
-    const predicate = predicateText(
-      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
-    );
-    return [subjectText, predicate].filter(Boolean).join(' ').trim();
+    const main = renderClause(phrase);
+    if (!phrase.condition) return main;
+    // "si" + protasis (imparfait), elided to "s'" only before "il"/"ils"; apodosis in the
+    // conditionnel.
+    const cond = renderClause(phrase.condition);
+    const ifw = /^ils?\b/.test(cond) ? "s'" : 'si ';
+    return `${ifw}${cond}, ${main}`;
   },
 };

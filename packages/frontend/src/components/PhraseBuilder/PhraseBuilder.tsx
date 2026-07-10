@@ -1066,6 +1066,22 @@ export function PhraseBuilder({
         onRemove={onRemove}
         onToggleCompact={handleToggleCompact}
         onTidy={handleTidyPeriod}
+        conditional={
+          binding
+            ? {
+                hasCondition: binding.hasConditionalSource,
+                isIfClause: binding.hasConditionalTarget,
+                isPickTarget: binding.isConditionalPickTarget,
+                pickActive: binding.pickActive,
+                // An IF clause can't also be a main clause — conditionals don't chain.
+                canStart: !binding.hasConditionalTarget,
+                onStart: binding.onStartConditional,
+                onClear: binding.onClearConditional,
+                onPick: binding.onConditionalPick,
+                registerBorderAnchor: binding.registerBorderAnchor,
+              }
+            : undefined
+        }
       >
         {content}
       </PeriodContainer>

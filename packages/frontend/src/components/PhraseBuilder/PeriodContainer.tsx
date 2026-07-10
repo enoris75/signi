@@ -8,6 +8,26 @@ import UnfoldLessIcon from "@mui/icons-material/UnfoldLess";
 import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
+import AltRouteIcon from "@mui/icons-material/AltRoute";
+
+// The container-to-container conditional control state, threaded from the workspace binding.
+// Undefined for a standalone (non-workspace) period, which can't take part in conditionals.
+export interface ConditionalControl {
+  // This period is a main clause — it already has an attached IF condition.
+  hasCondition: boolean;
+  // This period is itself the IF clause of some other (main) period.
+  isIfClause: boolean;
+  // A conditional pick is in progress and this period is a legal IF-clause target.
+  isPickTarget: boolean;
+  // Any pick (relative or conditional) is currently in progress.
+  pickActive: boolean;
+  // May this period start a conditional (false for an IF clause — conditionals don't chain).
+  canStart: boolean;
+  onStart: () => void;
+  onClear: () => void;
+  onPick: () => void;
+  registerBorderAnchor: (el: HTMLElement | null) => void;
+}
 
 export interface PeriodContainerProps {
   // The card's padding, in theme spacing units. The caller's resize grip negates it to
@@ -41,6 +61,8 @@ export interface PeriodContainerProps {
   onRemove?: () => void;
   onToggleCompact: () => void;
   onTidy: () => void;
+  // Conditional (IF/MAIN) connector control on the card border. Absent for a standalone period.
+  conditional?: ConditionalControl;
   children: React.ReactNode;
 }
 
@@ -67,6 +89,7 @@ export function PeriodContainer({
   onRemove,
   onToggleCompact,
   onTidy,
+  conditional,
   children,
 }: PeriodContainerProps) {
   const borderDragRef = useRef<{
@@ -98,6 +121,36 @@ export function PeriodContainer({
     borderDragRef.current = null;
   }
 
+  // The border IF-control's behaviour: choose this period as the pending pick's IF clause; else
+  // clear an attached condition; else start a new conditional (this period becomes the main clause).
+  const condActive = Boolean(
+    conditional?.hasCondition || conditional?.isIfClause,
+  );
+  const condDroppable = Boolean(conditional?.isPickTarget);
+  const condDisabled = conditional
+    ? conditional.pickActive
+      ? !conditional.isPickTarget
+      : !conditional.hasCondition && !conditional.canStart
+    : true;
+  function onCondClick() {
+    if (!conditional) return;
+    if (conditional.pickActive) {
+      if (conditional.isPickTarget) conditional.onPick();
+      return;
+    }
+    if (conditional.hasCondition) conditional.onClear();
+    else if (conditional.canStart) conditional.onStart();
+  }
+  const condTitle = !conditional
+    ? ""
+    : condDroppable
+      ? "Use this period as the IF condition"
+      : conditional.hasCondition
+        ? "Remove the IF condition"
+        : conditional.isIfClause
+          ? "This period is an IF clause"
+          : "Add an IF condition (this becomes the main clause)";
+
   return (
     <Paper
       elevation={0}
@@ -126,11 +179,17 @@ export function PeriodContainer({
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.
         position: "relative",
-        // The period's accent card: left rule + tinted bg.
+        // The period's accent card: left rule + tinted bg. A pending conditional pick lights the
+        // border to mark this period as a droppable IF-clause target.
         border: "1px solid",
-        borderColor: "divider",
+        borderColor: condDroppable ? "warning.main" : "divider",
         borderLeft: "3px solid",
-        borderLeftColor: "text.secondary",
+        borderLeftColor: condDroppable
+          ? "warning.main"
+          : condActive
+            ? "warning.main"
+            : "text.secondary",
+        boxShadow: condDroppable ? "0 0 0 2px rgba(237,108,2,0.35)" : undefined,
         bgcolor: "action.hover",
         cursor:
           borderDragRef.current && position
@@ -140,6 +199,45 @@ export function PeriodContainer({
               : undefined,
       }}
     >
+      {/* The conditional (IF/MAIN) control, pinned to the card's left border. */}
+      {conditional && (
+        <Box
+          ref={conditional.registerBorderAnchor}
+          onPointerDown={(e) => e.stopPropagation()}
+          sx={{
+            position: "absolute",
+            left: -14,
+            top: "50%",
+            transform: "translateY(-50%)",
+            zIndex: 5,
+          }}
+        >
+          <Tooltip title={condTitle}>
+            <span>
+              <IconButton
+                size="small"
+                onClick={onCondClick}
+                disabled={condDisabled}
+                aria-label={condTitle}
+                sx={{
+                  p: 0.25,
+                  bgcolor: "background.paper",
+                  border: "1px solid",
+                  borderColor: condDroppable
+                    ? "warning.main"
+                    : condActive
+                      ? "warning.main"
+                      : "divider",
+                  color: condActive || condDroppable ? "warning.main" : "text.secondary",
+                  "&:hover": { bgcolor: "background.paper" },
+                }}
+              >
+                <AltRouteIcon sx={{ fontSize: 15 }} />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
+      )}
       <Box
         sx={{
           display: "flex",
@@ -171,6 +269,11 @@ export function PeriodContainer({
               color: "text.secondary",
             }}
           >
+            {conditional?.hasCondition
+              ? "Main clause"
+              : conditional?.isIfClause
+                ? "If clause"
+                : ""}
             <Box
               component="span"
               sx={{ color: "text.disabled", fontWeight: 500 }}

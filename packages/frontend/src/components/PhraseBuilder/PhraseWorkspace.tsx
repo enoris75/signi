@@ -20,6 +20,8 @@ import {
   PhraseSelection,
   PickMode,
   WorkspaceBinding,
+  isConditionalLink,
+  isRelativeLink,
 } from "./interfaces.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
 
@@ -32,9 +34,11 @@ const boxKey = (containerId: string, nounKey: NounAddress) =>
   `${containerId}:${nounKey}`;
 
 // A drawn link line, in workspace pixels. Guarded by a half-pixel comparator so the
-// measuring layout effect settles instead of looping on sub-pixel jitter.
+// measuring layout effect settles instead of looping on sub-pixel jitter. `kind` selects the
+// stroke style: dashed faint line for a relative clause, solid arrowed line for a conditional.
 type Connector = {
   id: string;
+  kind: "relative" | "conditional";
   x1: number;
   y1: number;
   x2: number;
@@ -47,7 +51,7 @@ function sameConnectors(a: Connector[], b: Connector[]): boolean {
   for (let i = 0; i < a.length; i++) {
     const p = a[i];
     const q = b[i];
-    if (p.id !== q.id || p.color !== q.color) return false;
+    if (p.id !== q.id || p.color !== q.color || p.kind !== q.kind) return false;
     if (
       Math.abs(p.x1 - q.x1) > 0.5 ||
       Math.abs(p.y1 - q.y1) > 0.5 ||
@@ -107,6 +111,9 @@ export function PhraseWorkspace({
   // and the target noun's receiving dot, both pinned on their dotted-box perimeter.
   const sourceAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const targetAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
+  // The border-control element per container — the endpoint the conditional connector runs
+  // between (main clause's control → "if" clause's control).
+  const borderAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const [connectors, setConnectors] = useState<Connector[]>([]);
   // Bumped by a child container whenever it drags a box / resizes its canvas, so the
   // measuring effect below re-runs against the moved anchors. Stable identity so the
@@ -168,7 +175,7 @@ export function PhraseWorkspace({
   }
 
   function startLink(containerId: string, nounKey: NounAddress) {
-    setPick({ active: true, source: { containerId, nounKey } });
+    setPick({ active: true, kind: "relative", source: { containerId, nounKey } });
   }
 
   function removeLink(containerId: string, nounKey: NounAddress) {
@@ -176,14 +183,16 @@ export function PhraseWorkspace({
       ls.filter(
         (l) =>
           !(
-            l.source.containerId === containerId && l.source.nounKey === nounKey
+            isRelativeLink(l) &&
+            l.source.containerId === containerId &&
+            l.source.nounKey === nounKey
           ),
       ),
     );
   }
 
   function completeLink(targetContainerId: string, targetNoun: NounKey) {
-    if (!pick.active) return;
+    if (!pick.active || pick.kind !== "relative") return;
     const source = pick.source;
     setPick({ active: false });
     if (
@@ -192,13 +201,15 @@ export function PhraseWorkspace({
     )
       return; // same container or would create a cycle
     setLinks((ls) => {
-      const kept = ls.filter(
-        (l) =>
-          // one link per source noun, and one incoming link per target container
-          !(
-            l.source.containerId === source.containerId &&
-            l.source.nounKey === source.nounKey
-          ) && l.target.containerId !== targetContainerId,
+      const kept = ls.filter((l) =>
+        isConditionalLink(l)
+          ? // a container can't be both an "if" clause and a relativised gap
+            l.target.containerId !== targetContainerId
+          : // one relative link per source noun, and one incoming link per target container
+            !(
+              l.source.containerId === source.containerId &&
+              l.source.nounKey === source.nounKey
+            ) && l.target.containerId !== targetContainerId,
       );
       return [
         ...kept,
@@ -211,6 +222,51 @@ export function PhraseWorkspace({
     });
   }
 
+  // ── Conditional (container-to-container) linking ───────────────────────────
+  function startConditional(containerId: string) {
+    setPick({ active: true, kind: "conditional", source: { containerId } });
+  }
+
+  function clearConditional(mainContainerId: string) {
+    setLinks((ls) =>
+      ls.filter(
+        (l) =>
+          !(isConditionalLink(l) && l.source.containerId === mainContainerId),
+      ),
+    );
+  }
+
+  // Whether `ifId` may become the "if" clause of the container that started the pick: not
+  // itself, no cycle, not already an "if" clause of something, and not itself a main clause
+  // (no conditional chaining).
+  function canBeCondition(mainId: string, ifId: string): boolean {
+    if (mainId === ifId) return false;
+    if (isSelfOrAncestor(ifId, mainId, links)) return false;
+    const conditionals = links.filter(isConditionalLink);
+    if (conditionals.some((l) => l.target.containerId === ifId)) return false; // already an if-clause
+    if (conditionals.some((l) => l.source.containerId === ifId)) return false; // is itself a main clause
+    return true;
+  }
+
+  function completeConditional(ifContainerId: string) {
+    if (!pick.active || pick.kind !== "conditional") return;
+    const mainId = pick.source.containerId;
+    setPick({ active: false });
+    if (!canBeCondition(mainId, ifContainerId)) return;
+    setLinks((ls) => [
+      // One "if" clause per main clause: drop any conditional this main already sources.
+      ...ls.filter(
+        (l) => !(isConditionalLink(l) && l.source.containerId === mainId),
+      ),
+      {
+        id: uid(),
+        kind: "conditional",
+        source: { containerId: mainId },
+        target: { containerId: ifContainerId },
+      },
+    ]);
+  }
+
   // Measure each link's connector between the two anchor dots — the source noun's
   // relative-clause control and the target noun's receiving dot — in workspace-relative
   // pixels. Falls back to the noun boxes (bottom-center → top-center) until the anchors
@@ -221,7 +277,30 @@ export function PhraseWorkspace({
     if (!root) return;
     const rootRect = root.getBoundingClientRect();
     const next: Connector[] = [];
+    // Conditional connectors: main clause's border control → "if" clause's border control.
     for (const link of links) {
+      if (!isConditionalLink(link)) continue;
+      const srcAnchor = borderAnchorEls.current.get(link.source.containerId);
+      const tgtAnchor = borderAnchorEls.current.get(link.target.containerId);
+      const srcBox = boxEls.current.get(`${link.source.containerId}:subject`);
+      const tgtBox = boxEls.current.get(`${link.target.containerId}:subject`);
+      const rect = srcAnchor ?? srcBox;
+      const trect = tgtAnchor ?? tgtBox;
+      if (!rect || !trect) continue;
+      const s = rect.getBoundingClientRect();
+      const t = trect.getBoundingClientRect();
+      next.push({
+        id: link.id,
+        kind: "conditional",
+        x1: s.left + s.width / 2 - rootRect.left,
+        y1: s.top + s.height / 2 - rootRect.top,
+        x2: t.left + t.width / 2 - rootRect.left,
+        y2: t.top + t.height / 2 - rootRect.top,
+        color: MUI_COLOR_HEX.warning,
+      });
+    }
+    for (const link of links) {
+      if (!isRelativeLink(link)) continue;
       const srcAnchor = sourceAnchorEls.current.get(
         boxKey(link.source.containerId, link.source.nounKey),
       );
@@ -263,7 +342,7 @@ export function PhraseWorkspace({
         MUI_COLOR_HEX[
           ALL_SLOTS.find((sl) => sl.key === baseKey)?.color ?? "primary"
         ];
-      next.push({ id: link.id, x1, y1, x2, y2, color });
+      next.push({ id: link.id, kind: "relative", x1, y1, x2, y2, color });
     }
     setConnectors((prev) => (sameConnectors(prev, next) ? prev : next));
   });
@@ -284,19 +363,59 @@ export function PhraseWorkspace({
             overflow: "visible",
           }}
         >
-          {connectors.map((c) => (
-            <line
-              key={c.id}
-              x1={c.x1}
-              y1={c.y1}
-              x2={c.x2}
-              y2={c.y2}
-              stroke={c.color}
-              strokeWidth="1.75"
-              strokeOpacity="0.5"
-              strokeDasharray="5 3"
-            />
-          ))}
+          <defs>
+            {/* Arrowhead for the conditional connector, pointing at the "if" clause. */}
+            <marker
+              id="conditional-arrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="6"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.warning} />
+            </marker>
+          </defs>
+          {connectors.map((c) =>
+            c.kind === "conditional" ? (
+              <g key={c.id}>
+                <line
+                  x1={c.x1}
+                  y1={c.y1}
+                  x2={c.x2}
+                  y2={c.y2}
+                  stroke={c.color}
+                  strokeWidth="2"
+                  strokeOpacity="0.85"
+                  markerEnd="url(#conditional-arrow)"
+                />
+                {/* "if" label at the line midpoint. */}
+                <text
+                  x={(c.x1 + c.x2) / 2}
+                  y={(c.y1 + c.y2) / 2 - 4}
+                  fill={c.color}
+                  fontSize="11"
+                  fontWeight="700"
+                  textAnchor="middle"
+                >
+                  if
+                </text>
+              </g>
+            ) : (
+              <line
+                key={c.id}
+                x1={c.x1}
+                y1={c.y1}
+                x2={c.x2}
+                y2={c.y2}
+                stroke={c.color}
+                strokeWidth="1.75"
+                strokeOpacity="0.5"
+                strokeDasharray="5 3"
+              />
+            ),
+          )}
         </Box>
       )}
 
@@ -304,14 +423,27 @@ export function PhraseWorkspace({
         {containers.map((c, i) => {
           const linkSourceKeys = new Set<NounAddress>(
             links
+              .filter(isRelativeLink)
               .filter((l) => l.source.containerId === c.id)
               .map((l) => l.source.nounKey),
           );
           const linkTargetKeys = new Set<NounAddress>(
             links
+              .filter(isRelativeLink)
               .filter((l) => l.target.containerId === c.id)
               .map((l) => l.target.nounKey),
           );
+          const conditionals = links.filter(isConditionalLink);
+          const hasConditionalSource = conditionals.some(
+            (l) => l.source.containerId === c.id,
+          );
+          const hasConditionalTarget = conditionals.some(
+            (l) => l.target.containerId === c.id,
+          );
+          const isConditionalPickTarget =
+            pick.active &&
+            pick.kind === "conditional" &&
+            canBeCondition(pick.source.containerId, c.id);
           const binding: WorkspaceBinding = {
             containerId: c.id,
             registerBox: (nounKey, el) => {
@@ -332,6 +464,7 @@ export function PhraseWorkspace({
             onGeometryChange: bumpGeom,
             isPickTarget: (nounKey) =>
               pick.active &&
+              pick.kind === "relative" &&
               pick.source.containerId !== c.id &&
               Boolean(c.selection[nounKey as keyof PhraseSelection]) &&
               !linkTargetKeys.has(nounKey) &&
@@ -343,6 +476,16 @@ export function PhraseWorkspace({
             linkSourceKeys,
             linkTargetKeys,
             pickActive: pick.active,
+            onStartConditional: () => startConditional(c.id),
+            onClearConditional: () => clearConditional(c.id),
+            isConditionalPickTarget,
+            onConditionalPick: () => completeConditional(c.id),
+            hasConditionalSource,
+            hasConditionalTarget,
+            registerBorderAnchor: (el) => {
+              if (el) borderAnchorEls.current.set(c.id, el);
+              else borderAnchorEls.current.delete(c.id);
+            },
           };
           return (
             <PhraseBuilder
@@ -425,7 +568,9 @@ export function PhraseWorkspace({
         >
           <AccountTreeIcon sx={{ fontSize: 18 }} />
           <Typography sx={{ fontSize: "0.8rem", flex: 1 }}>
-            Click the noun this clause describes — in another phrase container.
+            {pick.active && pick.kind === "conditional"
+              ? "Click the period that is the IF condition — in another phrase container."
+              : "Click the noun this clause describes — in another phrase container."}
           </Typography>
           <Button
             size="small"

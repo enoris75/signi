@@ -25,12 +25,21 @@ export interface ResolvedNounPhrase {
   possessor?: ResolvedNounPhrase;
 }
 
-/** A resolved verb phrase: the verb, negation flag, tense, aspect, and resolved adverb. */
+/**
+ * Verb mood, set by the translator only when the plan is a hypothetical conditional:
+ * the main clause's verb is `'conditional'` ("would run"), the "if" clause's verb is
+ * `'subjunctive'` (past / imperfect-subjunctive, "if the cat ate"). Absent ⇒ plain
+ * `'indicative'`. Each engine maps this onto its own conditional/subjunctive forms.
+ */
+export type Mood = 'indicative' | 'conditional' | 'subjunctive';
+
+/** A resolved verb phrase: the verb, negation flag, tense, aspect, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {
   verb: ConceptForms;
   negative?: boolean;
   tense?: Tense;
   aspect?: Aspect;
+  mood?: Mood;
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ConceptForms[];
@@ -65,6 +74,13 @@ export interface ResolvedPhrase {
   directObject?: ResolvedNounPhrase;
   indirectObject?: ResolvedNounPhrase;
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
+  /**
+   * A resolved hypothetical condition (the "if" clause). When present this phrase is the
+   * main clause of a conditional (its verb resolved in the `'conditional'` mood) and
+   * `condition` is the protasis (its verb resolved in the `'subjunctive'` mood). Engines
+   * render it as "<if-word> <condition>, <main>".
+   */
+  condition?: ResolvedPhrase;
 }
 
 /** The path relation chosen for a `route` complement; defaults to `through`. */

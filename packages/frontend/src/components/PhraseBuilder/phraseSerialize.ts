@@ -92,8 +92,9 @@ export function serializeWorkspace(
     containers: containers.map(
       (c): SerializedContainer => ({ id: c.id, selection: serializeSelection(c.selection) }),
     ),
-    // Links are already plain reference data (ids + noun addresses); copy as-is.
-    links: links.map((l) => ({ id: l.id, source: { ...l.source }, target: { ...l.target } })),
+    // Links are already plain reference data (ids + kind + noun addresses); copy as-is. A
+    // conditional link carries its `kind` and no noun keys; a relative link omits `kind`.
+    links: links.map((l) => ({ id: l.id, kind: l.kind, source: { ...l.source }, target: { ...l.target } })),
   };
 }
 
@@ -113,12 +114,22 @@ export function hydrateWorkspace(
   const containers = workspace.containers.map(
     (c): PhraseContainer => ({ id: c.id, selection: hydrateSelection(c.selection, byId, missing) }),
   );
-  const links: PhraseLink[] = workspace.links.map((l) => ({
-    id: l.id,
-    // Serialized noun keys are plain strings; restore their branded types.
-    source: { containerId: l.source.containerId, nounKey: l.source.nounKey as NounAddress },
-    target: { containerId: l.target.containerId, nounKey: l.target.nounKey as NounKey },
-  }));
+  const links: PhraseLink[] = workspace.links.map((l) =>
+    l.kind === "conditional"
+      ? {
+          id: l.id,
+          kind: "conditional" as const,
+          source: { containerId: l.source.containerId },
+          target: { containerId: l.target.containerId },
+        }
+      : {
+          id: l.id,
+          // Serialized noun keys are plain strings; restore their branded types. (A missing
+          // kind is a legacy relative link, which always carries noun keys.)
+          source: { containerId: l.source.containerId, nounKey: (l.source.nounKey ?? "subject") as NounAddress },
+          target: { containerId: l.target.containerId, nounKey: (l.target.nounKey ?? "subject") as NounKey },
+        },
+  );
   return { containers, links, missing: [...missing] };
 }
 

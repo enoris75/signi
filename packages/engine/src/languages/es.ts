@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "más"/"menos"; the noun phrase's definite article distinguishes them ("un gato más
@@ -385,16 +386,21 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  // In a hypothetical conditional the finite element takes the conditional (apodosis, "correría")
+  // or imperfect-subjunctive (protasis, "comiera") form; marked aspects keep their indicative
+  // auxiliary (aspect under a conditional is a documented gap).
+  const pn = moodPN(subjectForms);
+  const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
   // prepended below and lands in front of it, exactly as for a plain verb.
   const conjugated = modals.length > 0
     ? [
-        ...modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense)),
+        ...modalChain(modals, finite),
         verbGroupInfinitive(verb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
-      ? conjugate(verb.forms, subjectForms, tense)
+      ? finite(verb)
       : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
@@ -419,16 +425,24 @@ function predicateText(
     .join(' ');
 }
 
+/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+function renderClause(phrase: ResolvedPhrase): string {
+  const { subject } = phrase;
+  const subjectText = withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
+  // Verbless period: a bare noun phrase ("últimas noticias").
+  if (!phrase.verbPhrase) return subjectText.trim();
+  const predicate = predicateText(
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+  );
+  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+}
+
 export const spanishEngine: LanguageEngine = {
   language: 'es',
   render(phrase: ResolvedPhrase): string {
-    const { subject } = phrase;
-    const subjectText = withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
-    // Verbless period: a bare noun phrase ("últimas noticias").
-    if (!phrase.verbPhrase) return subjectText.trim();
-    const predicate = predicateText(
-      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
-    );
-    return [subjectText, predicate].filter(Boolean).join(' ').trim();
+    const main = renderClause(phrase);
+    // Hypothetical conditional: "si <protasis (subjunctive)>, <apodosis (conditional)>".
+    if (!phrase.condition) return main;
+    return `si ${renderClause(phrase.condition)}, ${main}`;
   },
 };

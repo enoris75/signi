@@ -205,6 +205,22 @@ const WERDEN: Record<string, string> = {
   '1pl': 'werden', '2pl': 'werdet', '3pl': 'werden',
 };
 
+// Konjunktiv II of "werden" — the würde-periphrasis that realises the hypothetical
+// conditional in both clauses ("wenn … essen würde, würde … laufen"). Structurally it
+// behaves exactly like the future WERDEN (finite in V2, main verb infinitive at the clause
+// end), so the verb-group builders treat the conditional mood like the future, only swapping
+// the auxiliary. Verb-final ordering in the "wenn" clause is a documented approximation.
+const WUERDE: Record<string, string> = {
+  '1sg': 'würde', '2sg': 'würdest', '3sg': 'würde',
+  '1pl': 'würden', '2pl': 'würdet', '3pl': 'würden',
+};
+
+/** True when a resolved verb phrase's mood calls for the würde-periphrasis (either half of a
+ *  conditional). */
+function isConditionalMood(mood: string | undefined): boolean {
+  return mood === 'conditional' || mood === 'subjunctive';
+}
+
 // "sein", the copula of the prospective ("ist im Begriff zu gehen") and the resultative
 // auxiliary of the verbs that select it ("ist gegangen"). Only present and past are synthetic;
 // the future is periphrastic on "werden" (see VERB_GROUP below), so no future column is needed.
@@ -233,33 +249,39 @@ function verbGroup(
   pn: string,
   tense: Tense,
   aspect: Aspect,
+  mood?: string,
 ): { v2: string; mid: string; tail: string } {
   const base = verbForms['base'] ?? '';
   const participle = verbForms['participle'] ?? base;
-  const isFuture = tense === 'future';
-  const sein = isFuture ? '' : SEIN[tense][pn];
+  // The conditional mood is periphrastic like the future — würde/werden in V2, infinitive at
+  // the clause end — so the two share every branch, differing only in the auxiliary word.
+  const conditional = isConditionalMood(mood);
+  const periphrastic = tense === 'future' || conditional;
+  const auxV2 = conditional ? (WUERDE[pn] ?? 'würde') : (WERDEN[pn] ?? 'wird');
+  const sein = periphrastic ? '' : SEIN[tense][pn];
   const perfAux = verbForms['aux'] === 'be' ? 'sein' : 'haben';
-  const perfFinite = isFuture ? '' : (perfAux === 'sein' ? SEIN : HABEN)[tense][pn];
-  const conjug = isFuture ? (WERDEN[pn] ?? 'wird') : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
+  const perfFinite = periphrastic ? '' : (perfAux === 'sein' ? SEIN : HABEN)[tense][pn];
+  const conjug = periphrastic ? auxV2 : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
   switch (aspect) {
     case 'progressive':
-      // Plain finite verb + "gerade"; future keeps werden … Infinitiv, with "gerade" mid.
-      return { v2: conjug, mid: 'gerade', tail: isFuture ? base : '' };
+      // Plain finite verb + "gerade"; periphrastic keeps aux … Infinitiv, with "gerade" mid.
+      return { v2: conjug, mid: 'gerade', tail: periphrastic ? base : '' };
     case 'prospective':
       return {
-        v2: isFuture ? (WERDEN[pn] ?? 'wird') : sein,
+        v2: periphrastic ? auxV2 : sein,
         mid: 'im Begriff',
-        tail: isFuture ? `sein zu ${base}` : `zu ${base}`,
+        tail: periphrastic ? `sein zu ${base}` : `zu ${base}`,
       };
     case 'resultative':
-      // Future perfect stacks the auxiliary's infinitive at the clause end: "wird gesehen haben".
+      // Future/conditional perfect stacks the auxiliary's infinitive at the clause end
+      // ("wird gesehen haben" / "würde gesehen haben").
       return {
-        v2: isFuture ? (WERDEN[pn] ?? 'wird') : perfFinite,
+        v2: periphrastic ? auxV2 : perfFinite,
         mid: '',
-        tail: isFuture ? `${participle} ${perfAux}` : participle,
+        tail: periphrastic ? `${participle} ${perfAux}` : participle,
       };
     default: // neutral
-      return { v2: conjug, mid: '', tail: isFuture ? base : '' };
+      return { v2: conjug, mid: '', tail: periphrastic ? base : '' };
   }
 }
 
@@ -289,6 +311,7 @@ function modalVerbGroup(
   pn: string,
   tense: Tense,
   aspect: Aspect,
+  mood?: string,
 ): { v2: string; mid: string; tail: string } {
   const base = verbForms['base'] ?? '';
   const participle = verbForms['participle'] ?? base;
@@ -298,11 +321,13 @@ function modalVerbGroup(
     aspect === 'prospective' ? { mid: 'im Begriff', tail: [`zu ${base}`, 'sein'] } :
     aspect === 'resultative' ? { mid: '', tail: [participle, perfAux] } :
     { mid: '', tail: [base] };
-  const isFuture = tense === 'future';
+  // Conditional stacks every modal after würde, exactly as the future does after werden.
+  const conditional = isConditionalMood(mood);
+  const periphrastic = tense === 'future' || conditional;
   return {
-    v2: isFuture ? (WERDEN[pn] ?? 'wird') : conjPn(modals[0].forms, pn, tense),
+    v2: periphrastic ? (conditional ? (WUERDE[pn] ?? 'würde') : (WERDEN[pn] ?? 'wird')) : conjPn(modals[0].forms, pn, tense),
     mid: group.mid,
-    tail: [...group.tail, ...modalStack(modals, isFuture)].join(' '),
+    tail: [...group.tail, ...modalStack(modals, periphrastic)].join(' '),
   };
 }
 
@@ -502,14 +527,13 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   return `, ${body}`;
 }
 
-export const germanEngine: LanguageEngine = {
-  language: 'de',
-  render(phrase: ResolvedPhrase): string {
+/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+function renderClause(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
     const subjectText = subjectPhrase(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
-    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral' } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood } = verbPhrase;
 
     // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
     // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"
@@ -520,8 +544,8 @@ export const germanEngine: LanguageEngine = {
     const number = subject.head.forms['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
-      ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect)
-      : verbGroup(verb.forms, pn, tense, aspect);
+      ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
+      : verbGroup(verb.forms, pn, tense, aspect, mood);
     const directObjectText = directObject
       ? nounPhrase(directObject, 'acc')
       : '';
@@ -546,5 +570,16 @@ export const germanEngine: LanguageEngine = {
     const complementsText = complementsPhrase(phrase.complements);
     return [subjectText, verbText, aspectMid, negBefore, modifierText, indirectObjectText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
+}
+
+export const germanEngine: LanguageEngine = {
+  language: 'de',
+  render(phrase: ResolvedPhrase): string {
+    const main = renderClause(phrase);
+    // Hypothetical conditional: "wenn <protasis>, <apodosis>", both realised with the
+    // würde-periphrasis. The "wenn" clause's verb-final ordering is approximated (a documented
+    // gap it shares with the future/relative word order).
+    if (!phrase.condition) return main;
+    return `wenn ${renderClause(phrase.condition)}, ${main}`;
   },
 };

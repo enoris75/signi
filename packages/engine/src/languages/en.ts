@@ -273,7 +273,10 @@ function predicateParts(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, modals } = verbPhrase;
+  // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
+  // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
+  const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
 
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
@@ -288,6 +291,19 @@ function predicateParts(
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
 
   const negateVerb = verbNegative === true && !modifierIsNegative;
+
+  // Conditional apodosis: "would" + the verb group ("would run", "would not run", "would be
+  // running", "would have seen", "would want to go"). "would" is a defective modal auxiliary,
+  // so it takes "not" directly and carries no tense/agreement itself.
+  if (mood === 'conditional') {
+    const groups = modals.length > 0
+      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? ''), verbGroupInfinitive(verb.forms, aspect)]
+      : [verbGroupInfinitive(verb.forms, aspect)];
+    const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
+    const preVerb = isFrequency ? modifierText : '';
+    const postVerb = isFrequency ? '' : modifierText;
+    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+  }
 
   // A modal chain makes the outermost modal the finite verb — it takes the tense, the
   // agreement, and the negation — and every other element non-finite, down to the main
@@ -306,9 +322,14 @@ function predicateParts(
   // which carries the tense and any negation ("is not going"), so it bypasses do-support.
   if (aspect !== 'neutral') {
     const verbText = aspectVerb(verb.forms, subjectForms, tense, aspect, negateVerb);
-    const preVerb = isFrequency ? modifierText : '';
-    const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+    // A frequency adverb follows the finite auxiliary of the group, not the whole group:
+    // "you have never been", "is never going" — never "you never have been".
+    if (isFrequency && modifierText) {
+      const [aux, ...rest] = verbText.split(' ');
+      const withAdv = [aux, modifierText, ...rest].join(' ');
+      return ['', withAdv, directObjectText, indirectObjectText, complementsText, ''];
+    }
+    return ['', verbText, directObjectText, indirectObjectText, complementsText, modifierText];
   }
 
   if (verbNegative && !modifierIsNegative) {
@@ -372,19 +393,27 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   return rel ? `${text} ${rel}` : text;
 }
 
+/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+function renderClause(phrase: ResolvedPhrase): string {
+  const { subject } = phrase;
+  const subjectText = withRelative(subjectPhrase(subject), subject);
+  // Verbless period: a bare noun phrase ("breaking news").
+  if (!phrase.verbPhrase) return subjectText.trim();
+  return [
+    subjectText,
+    ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),
+  ]
+    .filter(Boolean)
+    .join(' ')
+    .trim();
+}
+
 export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
-    const { subject } = phrase;
-    const subjectText = withRelative(subjectPhrase(subject), subject);
-    // Verbless period: a bare noun phrase ("breaking news").
-    if (!phrase.verbPhrase) return subjectText.trim();
-    return [
-      subjectText,
-      ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
+    const main = renderClause(phrase);
+    // Hypothetical conditional: "if <protasis (past)>, <apodosis (would …)>".
+    if (!phrase.condition) return main;
+    return `if ${renderClause(phrase.condition)}, ${main}`;
   },
 };

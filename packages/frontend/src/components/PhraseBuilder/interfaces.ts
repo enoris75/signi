@@ -196,18 +196,43 @@ export interface PhraseContainer {
   selection: PhraseSelection;
 }
 
-// A cross-container relative-clause link: source noun (the head) → target noun (the gap).
-// The source may be a possessor head (a `/possessor` address); the target is a plain noun.
-export interface PhraseLink {
-  id: string;
-  source: { containerId: string; nounKey: NounAddress };
-  target: { containerId: string; nounKey: NounKey };
-}
+// A cross-container link between two containers. Two kinds share one array (so they share the
+// forest/cycle machinery and both mark their target container non-root):
+//  - `relative` (default): a source noun (the head) → target noun (the gap) — a relative clause.
+//    The source may be a possessor head (a `/possessor` address); the target is a plain noun.
+//  - `conditional`: a container → container hypothetical link. The *source* is the main clause
+//    (its border control was clicked), the *target* is the "if" clause. No noun endpoints.
+export type PhraseLink =
+  | {
+      id: string;
+      kind?: 'relative';
+      source: { containerId: string; nounKey: NounAddress };
+      target: { containerId: string; nounKey: NounKey };
+    }
+  | {
+      id: string;
+      kind: 'conditional';
+      source: { containerId: string };
+      target: { containerId: string };
+    };
 
-// Pick-mode: a source noun's relative satellite was clicked and is awaiting a target click.
+/** Narrow a link to the relative kind (the default). */
+export const isRelativeLink = (
+  l: PhraseLink,
+): l is Extract<PhraseLink, { kind?: 'relative' }> => l.kind !== 'conditional';
+
+/** Narrow a link to the conditional kind. */
+export const isConditionalLink = (
+  l: PhraseLink,
+): l is Extract<PhraseLink, { kind: 'conditional' }> => l.kind === 'conditional';
+
+// Pick-mode: awaiting a target click. A `relative` pick started from a source noun's satellite
+// and lands on a target noun; a `conditional` pick started from a container's border control
+// and lands on another container (which becomes the "if" clause).
 export type PickMode =
   | { active: false }
-  | { active: true; source: { containerId: string; nounKey: NounAddress } };
+  | { active: true; kind: 'relative'; source: { containerId: string; nounKey: NounAddress } }
+  | { active: true; kind: 'conditional'; source: { containerId: string } };
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
 // linking. Undefined for embedded (possessor) sub-builders, which never link.
@@ -235,6 +260,23 @@ export interface WorkspaceBinding {
   linkSourceKeys: Set<NounAddress>;
   linkTargetKeys: Set<NounAddress>;
   pickActive: boolean;
+
+  // ── Conditional (container-to-container) connector ───────────────────────────
+  // Start a conditional link from this container (it becomes the main clause and awaits an
+  // "if" clause pick); clear the one already sourced here.
+  onStartConditional: () => void;
+  onClearConditional: () => void;
+  // During another container's conditional pick, is this container a legal "if" clause target?
+  isConditionalPickTarget: boolean;
+  // Choose this container as the pending pick's "if" clause (valid only when isConditionalPickTarget).
+  onConditionalPick: () => void;
+  // This container already sources a conditional link (it is a main clause with an "if" clause).
+  hasConditionalSource: boolean;
+  // This container is the target of a conditional link (it is an "if" clause of some main clause).
+  hasConditionalTarget: boolean;
+  // Register this container's border-control element, the endpoint the conditional connector
+  // line runs between.
+  registerBorderAnchor: (el: HTMLElement | null) => void;
 }
 
 // Wrap a container's `binding` for an embedded possessor sub-builder whose head is
@@ -263,5 +305,13 @@ export function adaptPossessorBinding(
     linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
     linkTargetKeys: new Set(),
     pickActive: root.pickActive,
+    // A possessor sub-builder is never a conditional endpoint — inert pass-through.
+    onStartConditional: () => {},
+    onClearConditional: () => {},
+    isConditionalPickTarget: false,
+    onConditionalPick: () => {},
+    hasConditionalSource: false,
+    hasConditionalTarget: false,
+    registerBorderAnchor: () => {},
   };
 }

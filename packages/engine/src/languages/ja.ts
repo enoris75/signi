@@ -216,8 +216,8 @@ function modalSegs(
  *   prospective → dictionary form + ところです ("行くところです", past ～ところでした)
  * Future reuses the present, as elsewhere in the Japanese engine.
  */
-function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase): RubySegment[] {
-  const { verb, negative, tense = 'present', aspect = 'neutral' } = verbPhrase;
+function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase, negative: boolean): RubySegment[] {
+  const { verb, tense = 'present', aspect = 'neutral' } = verbPhrase;
   const past = tense === 'past';
   if (aspect === 'prospective') {
     const cop = past ? 'でした' : 'です';
@@ -231,6 +231,19 @@ function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase): RubySegment[] {
     ? (past ? `${stem}ませんでした` : `${stem}ません`)
     : (past ? `${stem}ました` : `${stem}ます`);
   return [teSeg, { t: suffix }];
+}
+
+/**
+ * The ～たら conditional form of a verb (the protasis of a hypothetical: 食べたら "if … eats").
+ * Built on the te-form: the plain past is te with て→た / で→だ, then ～ら. Falls back to the
+ * dictionary form + たら when no te-form is stored.
+ */
+function taraSeg(verb: ConceptForms): RubySegment {
+  const te = verb.forms['te'];
+  if (!te) return wordSeg(`${verb.forms['base'] ?? ''}たら`, undefined);
+  const toTa = (s: string) => s.slice(0, -1) + (s.endsWith('で') ? 'だ' : 'た');
+  const teReading = verb.forms['te_reading'];
+  return wordSeg(`${toTa(te)}ら`, teReading ? `${toTa(teReading)}ら` : undefined);
 }
 
 function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>): RubySegment[] {
@@ -319,8 +332,13 @@ function predicateSegs(
   indirectObject: ResolvedNounPhrase | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
 ): RubySegment[] {
-  const { verb, negative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
   const segs: RubySegment[] = [];
+  // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
+  // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
+  // phrase itself isn't marked negative. The adverb is still emitted; only the ending flips.
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  const negated = negative === true || modifierIsNegative;
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive and licenses only the predicative, so no objects or other complements occur;
   // an adverb (いつも) simply precedes the predicate.
@@ -330,7 +348,11 @@ function predicateSegs(
       const base = modifier.forms['base'] ?? '';
       if (base) segs.push(wordSeg(base, modifier.forms['reading']));
     }
-    segs.push(...copulaSegs(predicative, tense, negative === true));
+    // A copula has no verb to carry aspect; the only meaningful one is the resultative
+    // ("has been X"), a past state — rendered as the past copula (美しくなかった). Progressive /
+    // prospective on a copula stay best-effort present. (Aspect on a copula is marginal.)
+    const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
+    segs.push(...copulaSegs(predicative, copTense, negated));
     return segs;
   }
   segs.push(...complementSegs(complements));
@@ -340,11 +362,16 @@ function predicateSegs(
     const base = modifier.forms['base'] ?? '';
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
   }
+  // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form. The main
+  // clause (conditional) falls through to the ordinary polite main-clause path — Japanese has
+  // no dedicated conditional inflection, and keeping the normal path preserves tense and,
+  // crucially, negation (走りません). The たら protasis carries the hypothetical meaning.
+  if (mood === 'subjunctive') segs.push(taraSeg(verb));
   // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
   // periphrasis to compose with here, so it is dropped (see the Modality note above).
-  if (modals.length > 0) segs.push(...modalSegs(modals, verb, tense, negative === true));
-  else if (aspect === 'neutral') segs.push(verbSeg(verb, negative, tense));
-  else segs.push(...aspectVerbSegs(verbPhrase));
+  else if (modals.length > 0) segs.push(...modalSegs(modals, verb, tense, negated));
+  else if (aspect === 'neutral') segs.push(verbSeg(verb, negated, tense));
+  else segs.push(...aspectVerbSegs(verbPhrase, negated));
   return segs;
 }
 
@@ -352,13 +379,21 @@ function predicateSegs(
  * Japanese word order: S IndObj+に DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
-function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
+function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
   if (!phrase.verbPhrase) return npSegs(phrase.subject);
   const segs: RubySegment[] = [];
-  segs.push(...npSegs(phrase.subject), { t: 'は' });
+  segs.push(...npSegs(phrase.subject), { t: subjectParticle });
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements));
   return segs;
+}
+
+function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
+  const main = buildClauseSegments(phrase, 'は');
+  if (!phrase.condition) return main;
+  // Hypothetical conditional: もし <protasis (…たら)>、 <apodosis (…でしょう)>. The condition
+  // clause's subject takes が (the neutral subject marker inside a subordinate clause).
+  return [{ t: 'もし' }, ...buildClauseSegments(phrase.condition, 'が'), { t: '、' }, ...main];
 }
 
 export const japaneseEngine: LanguageEngine = {

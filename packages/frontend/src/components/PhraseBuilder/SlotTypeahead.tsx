@@ -6,6 +6,7 @@ import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
+import { AdverbTypeahead } from "./AdverbTypeahead.tsx";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { VerbTypeahead } from "./VerbTypeahead.tsx";
 
@@ -41,7 +42,7 @@ export function slotTypeahead({
 }
 
 // Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can
-// be clicked to change its word. (Every word slot but the adverb `modifier` does.)
+// be clicked to change its word. (Every word slot, including the adverb `modifier`, does.)
 export function slotHasInlinePicker(
   slotKey: SlotKey,
   nounSubject = false,
@@ -80,6 +81,8 @@ function pickerFor(
       // switch (a noun here is attributive).
       if (/Adjective\d?$/.test(slotKey))
         return <ModifierTypeahead onSelect={pick} />;
+      // The verb's adverb slot — a single-vocabulary adverb picker.
+      if (slotKey === "modifier") return <AdverbTypeahead onSelect={pick} />;
       // The subject complement takes a predicate noun ("becomes a legend") or a predicate
       // adjective ("seems happy"), so it carries the same Noun ⇄ Adjective switch — opened
       // on Noun, the more common head.

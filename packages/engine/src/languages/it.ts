@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes
@@ -517,17 +518,22 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  // In a hypothetical conditional the finite element (the outermost modal, or the main verb)
+  // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
+  // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
+  const pn = moodPN(subjectForms);
+  const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
   const verbText = modals.length > 0
     ? [
-        ...modalChain(modals, (m) => conjugate(m.forms, subjectForms, tense)),
+        ...modalChain(modals, finite),
         verbGroupInfinitive(verb.forms, subjectForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
-      ? conjugate(verb.forms, subjectForms, tense)
+      ? finite(verb)
       : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
@@ -564,16 +570,24 @@ function relativeText(np: ResolvedNounPhrase): string {
   return `che ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }
 
+/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+function renderClause(phrase: ResolvedPhrase): string {
+  const { subject } = phrase;
+  const subjectText = subjectPhrase(subject);
+  // Verbless period: a bare noun phrase ("ultime notizie").
+  if (!phrase.verbPhrase) return subjectText.trim();
+  const predicate = predicateText(
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+  );
+  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+}
+
 export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
-    const { subject } = phrase;
-    const subjectText = subjectPhrase(subject);
-    // Verbless period: a bare noun phrase ("ultime notizie").
-    if (!phrase.verbPhrase) return subjectText.trim();
-    const predicate = predicateText(
-      subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
-    );
-    return [subjectText, predicate].filter(Boolean).join(' ').trim();
+    const main = renderClause(phrase);
+    // Hypothetical conditional: "se <protasis (subjunctive)>, <apodosis (conditional)>".
+    if (!phrase.condition) return main;
+    return `se ${renderClause(phrase.condition)}, ${main}`;
   },
 };
