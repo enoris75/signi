@@ -195,11 +195,14 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
       indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, engine.language, lookup) : undefined,
       complements: resolveComplements(plan.complements, engine.language, lookup),
     };
+    // Every rendered period closes with its language's full stop, appended here rather
+    // than by each engine — the ruby segments must carry the same one, unread.
+    const stop = engine.terminator ?? '.';
     const ruby = engine.renderRuby?.(resolved);
     return {
       language: engine.language,
-      text: engine.render(resolved),
-      ...(ruby ? { ruby } : {}),
+      text: engine.render(resolved) + stop,
+      ...(ruby ? { ruby: [...ruby, { t: stop }] } : {}),
     };
   });
 }

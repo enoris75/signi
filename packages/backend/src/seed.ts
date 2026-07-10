@@ -13,6 +13,7 @@ interface ConceptSeed {
   complements?: string[]; // ComplementType list a verb licenses (motion/locative)
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
+  proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }
@@ -500,6 +501,40 @@ const concepts: ConceptSeed[] = [
       es: { base: 'joven',     plural: 'jóvenes',      gender: 'fem', count: 'singular' },
       ja: { base: '若い女性',  count: 'singular', reading: 'わかいじょせい' },
       pt: { base: 'jovem',     plural: 'jovens',       gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'PRISON',
+    role: 'noun',
+    description: 'a building where people are confined as punishment',
+    emoji: '🔒',
+    forms: {
+      en: { base: 'prison',     plural: 'prisons',      count: 'singular' },
+      it: { base: 'prigione',   plural: 'prigioni',     gender: 'fem',  count: 'singular' },
+      fr: { base: 'prison',     plural: 'prisons',      gender: 'fem',  count: 'singular' },
+      de: { base: 'Gefängnis',  plural: 'Gefängnisse',  gender: 'neut', count: 'singular' },
+      es: { base: 'prisión',    plural: 'prisiones',    gender: 'fem',  count: 'singular' },
+      ja: { base: '刑務所',     count: 'singular', reading: 'けいむしょ' },
+      pt: { base: 'prisão',     plural: 'prisões',      gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'AFRICA',
+    role: 'noun',
+    description: 'the continent south of the Mediterranean',
+    emoji: '🌍',
+    // A proper noun: no plural, and the article is the language's to fix — English, German,
+    // Spanish and Japanese take none; Italian, French and Portuguese take the definite one.
+    proper: true,
+    countable: false,
+    forms: {
+      en: { base: 'Africa',   count: 'singular' },
+      it: { base: 'Africa',   gender: 'fem', count: 'singular' },
+      fr: { base: 'Afrique',  gender: 'fem', count: 'singular' },
+      de: { base: 'Afrika',   gender: 'neut', count: 'singular' },
+      es: { base: 'África',   gender: 'fem', count: 'singular' },
+      ja: { base: 'アフリカ', count: 'singular' },
+      pt: { base: 'África',   gender: 'fem', count: 'singular' },
     },
   },
 
@@ -3086,8 +3121,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null, number, number]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym, countable, modal) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null, number, number, number]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym, countable, modal, proper) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
   };
 
@@ -3109,7 +3144,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.proper ? 1 : 0);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

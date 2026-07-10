@@ -4,14 +4,14 @@ import {
   Paper,
   Typography,
   Skeleton,
-  Stack,
   IconButton,
   Tooltip,
 } from '@mui/material';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import CheckIcon from '@mui/icons-material/Check';
-import type { RubySegment, Translation } from '@signi/shared';
+import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
+import type { SentenceResult } from '../hooks/useTranslation.ts';
 
 /** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
 function RubyText({ segments }: { segments: RubySegment[] }) {
@@ -41,13 +41,19 @@ const FLAG: Record<string, string> = {
   pt: '🇵🇹',
 };
 
+const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
+
 interface Props {
-  translations?: Translation[];
-  isLoading: boolean;
-  isReady: boolean;
+  // One entry per root sentence, in period order. Sentences that aren't translatable yet
+  // (no subject) are skipped; the panel shows its empty state when none are.
+  sentences: SentenceResult[];
 }
 
-export default function TranslationPanel({ translations, isLoading, isReady }: Props) {
+// One card holding every root sentence's translations, grouped by language: each language
+// row lists its sentences one under the other, in period order.
+export default function TranslationPanel({ sentences }: Props) {
+  const ready = sentences.filter((s) => s.isReady);
+
   return (
     <Paper elevation={0} sx={{ p: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
       <Typography
@@ -57,7 +63,7 @@ export default function TranslationPanel({ translations, isLoading, isReady }: P
         Translations
       </Typography>
 
-      {!isReady && (
+      {ready.length === 0 ? (
         <Typography
           sx={{
             fontFamily: '"Lora", serif',
@@ -69,33 +75,14 @@ export default function TranslationPanel({ translations, isLoading, isReady }: P
         >
           Select at least a subject and a verb to see translations.
         </Typography>
-      )}
-
-      {isReady && isLoading && (
-        <Stack spacing={0}>
-          {Object.keys(LANGUAGES).map((lang, idx, arr) => (
-            <Box
-              key={lang}
-              sx={{
-                py: 1.75,
-                borderBottom: idx < arr.length - 1 ? '1px solid' : 'none',
-                borderColor: 'divider',
-              }}
-            >
-              <Skeleton width={90} height={14} sx={{ mb: 0.75 }} />
-              <Skeleton width="75%" height={22} sx={{ ml: 2.5 }} />
-            </Box>
-          ))}
-        </Stack>
-      )}
-
-      {isReady && !isLoading && translations && (
+      ) : (
         <Box>
-          {translations.map((t, idx) => (
-            <TranslationRow
-              key={t.language}
-              translation={t}
-              isLast={idx === translations.length - 1}
+          {LANGUAGE_CODES.map((language, idx) => (
+            <LanguageRow
+              key={language}
+              language={language}
+              sentences={ready}
+              isLast={idx === LANGUAGE_CODES.length - 1}
             />
           ))}
         </Box>
@@ -104,12 +91,27 @@ export default function TranslationPanel({ translations, isLoading, isReady }: P
   );
 }
 
-function TranslationRow({ translation: t, isLast }: { translation: Translation; isLast: boolean }) {
+// The translations of every sentence into one language, stacked in period order. A sentence
+// still in flight shows a skeleton line, so a newly edited period doesn't drop the others.
+function LanguageRow({
+  language,
+  sentences,
+  isLast,
+}: {
+  language: LanguageCode;
+  sentences: SentenceResult[];
+  isLast: boolean;
+}) {
   const [copied, setCopied] = useState(false);
+  const lines = sentences.map((s) => s.translations?.find((t) => t.language === language));
+  const text = lines
+    .filter((t): t is Translation => Boolean(t))
+    .map((t) => t.text)
+    .join('\n');
 
   const handleCopy = async () => {
     try {
-      await navigator.clipboard.writeText(t.text);
+      await navigator.clipboard.writeText(text);
       setCopied(true);
       setTimeout(() => setCopied(false), 1500);
     } catch {
@@ -127,7 +129,7 @@ function TranslationRow({ translation: t, isLast }: { translation: Translation; 
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>
-        <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>{FLAG[t.language]}</Box>
+        <Box sx={{ fontSize: '0.9rem', lineHeight: 1 }}>{FLAG[language]}</Box>
         <Typography
           component="span"
           sx={{
@@ -139,47 +141,61 @@ function TranslationRow({ translation: t, isLast }: { translation: Translation; 
             color: 'text.secondary',
           }}
         >
-          {LANGUAGES[t.language]}
+          {LANGUAGES[language]}
         </Typography>
-        <Tooltip title={copied ? 'Copied' : 'Copy to clipboard'} placement="top">
-          <IconButton
-            className="copy-btn"
-            onClick={handleCopy}
-            size="small"
-            aria-label={`Copy ${LANGUAGES[t.language]} translation`}
-            sx={{
-              ml: 'auto',
-              p: 0.5,
-              color: copied ? 'success.main' : 'text.secondary',
-              opacity: copied ? 1 : 0,
-              transition: 'opacity 0.15s',
-            }}
-          >
-            {copied ? (
-              <CheckIcon sx={{ fontSize: '0.95rem' }} />
-            ) : (
-              <ContentCopyIcon sx={{ fontSize: '0.95rem' }} />
-            )}
-          </IconButton>
-        </Tooltip>
+        {text && (
+          <Tooltip title={copied ? 'Copied' : 'Copy to clipboard'} placement="top">
+            <IconButton
+              className="copy-btn"
+              onClick={handleCopy}
+              size="small"
+              aria-label={`Copy ${LANGUAGES[language]} translation`}
+              sx={{
+                ml: 'auto',
+                p: 0.5,
+                color: copied ? 'success.main' : 'text.secondary',
+                opacity: copied ? 1 : 0,
+                transition: 'opacity 0.15s',
+              }}
+            >
+              {copied ? (
+                <CheckIcon sx={{ fontSize: '0.95rem' }} />
+              ) : (
+                <ContentCopyIcon sx={{ fontSize: '0.95rem' }} />
+              )}
+            </IconButton>
+          </Tooltip>
+        )}
       </Box>
-      <Typography
-        component="div"
-        sx={{
-          fontFamily: t.language === 'ja'
-            ? '"Noto Serif JP", serif'
-            : '"Lora", Georgia, serif',
-          fontSize: t.language === 'ja' ? '1rem' : '1.1rem',
-          // Ruby readings sit above the line; give furigana rows a little headroom.
-          lineHeight: t.ruby ? 2 : 1.65,
-          fontStyle: t.language !== 'ja' ? 'italic' : 'normal',
-          color: 'text.primary',
-          pl: 2.5,
-          '& rt': { fontSize: '0.6em', fontWeight: 400, userSelect: 'none' },
-        }}
-      >
-        {t.ruby ? <RubyText segments={t.ruby} /> : t.text}
-      </Typography>
+      {lines.map((translation, i) =>
+        translation ? (
+          <SentenceLine key={i} translation={translation} />
+        ) : (
+          <Skeleton key={i} width="75%" height={22} sx={{ ml: 2.5 }} />
+        ),
+      )}
     </Box>
+  );
+}
+
+function SentenceLine({ translation: t }: { translation: Translation }) {
+  return (
+    <Typography
+      component="div"
+      sx={{
+        fontFamily: t.language === 'ja'
+          ? '"Noto Serif JP", serif'
+          : '"Lora", Georgia, serif',
+        fontSize: t.language === 'ja' ? '1rem' : '1.1rem',
+        // Ruby readings sit above the line; give furigana rows a little headroom.
+        lineHeight: t.ruby ? 2 : 1.65,
+        fontStyle: t.language !== 'ja' ? 'italic' : 'normal',
+        color: 'text.primary',
+        pl: 2.5,
+        '& rt': { fontSize: '0.6em', fontWeight: 400, userSelect: 'none' },
+      }}
+    >
+      {t.ruby ? <RubyText segments={t.ruby} /> : t.text}
+    </Typography>
   );
 }

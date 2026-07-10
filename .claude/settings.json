@@ -187,7 +187,17 @@
       "Bash(node tidy2.mjs)",
       "Bash(node tidy3.mjs)",
       "Bash(sed -e 's|await page.evaluate\\(\\(\\) => localStorage.clear\\(\\)\\);|await page.evaluate\\(\\(\\) => { localStorage.clear\\(\\); localStorage.setItem\\(\"signi:graphHeight\", \"220\"\\); }\\);|' -e 's|width: 900|width: 700|' tidy3.mjs)",
-      "Bash(node tidy4.mjs)"
+      "Bash(node tidy4.mjs)",
+      "Bash(lsof -nP -iTCP:5173 -sTCP:LISTEN)",
+      "Bash(node two.mjs)",
+      "Bash(sed -i '' 's/subjInputs.nth\\(idx\\)/subjInputs.last\\(\\)/g; s/verbInputs.nth\\(idx\\)/verbInputs.last\\(\\)/g' two.mjs)",
+      "Bash(sed -i '' 's/fillPeriod\\(1, \"dog\", \"sleep\"\\)/fillPeriod\\(1, \"dog\", \"run\"\\)/' two.mjs)",
+      "Bash(sed -i '' 's|/move up/i|/Move this period up/i|' order.mjs)",
+      "Bash(node order.mjs)",
+      "Bash(curl -s localhost:3001/api/translate -X POST -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"cat\",\"number\":\"singular\",\"adjectives\":[]},\"verbPhrase\":{\"verb\":\"run\"}}}')",
+      "Bash(curl -s localhost:3001/api/translate -X POST -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"CAT\",\"number\":\"singular\",\"adjectives\":[]},\"verbPhrase\":{\"verb\":\"RUN\"}}}')",
+      "Bash(curl -s -m 3 \"http://localhost:3001/api/concepts?role=adjective\")",
+      "Bash(curl -s -X POST localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"THIRD_PERSON\"},\"verbPhrase\":{\"verb\":\"BECOME\",\"negative\":true},\"complements\":{\"predicative\":{\"phrase\":{\"concept\":\"TIRED\"}}}}}')"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

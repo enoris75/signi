@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-import type { PhrasePlan } from "@signi/shared";
 import { Box, Container, Typography, Alert, Button } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
@@ -10,57 +9,12 @@ import {
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
-import { useTranslation } from "./hooks/useTranslation.ts";
+import { useTranslations } from "./hooks/useTranslation.ts";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
     ? crypto.randomUUID()
     : `c${Math.random().toString(36).slice(2)}`;
-
-// One root sentence's translations. A component (not a loop) so useTranslation runs once
-// per sentence, honouring the rules of hooks as sentences are added/removed.
-function SentenceTranslation({
-  plan,
-  index,
-  total,
-}: {
-  plan: Partial<PhrasePlan>;
-  index: number;
-  total: number;
-}) {
-  const { data: translations, isLoading, isError } = useTranslation(plan);
-  // A subject alone is enough to translate — a verbless period is a bare noun phrase.
-  const isReady = Boolean(plan.subject?.concept);
-  return (
-    <Box sx={{ mb: 3 }}>
-      {total > 1 && (
-        <Typography
-          sx={{
-            fontFamily: '"Inter", sans-serif',
-            fontSize: "0.6rem",
-            fontWeight: 700,
-            letterSpacing: "0.16em",
-            textTransform: "uppercase",
-            color: "text.secondary",
-            mb: 1,
-          }}
-        >
-          Sentence {index + 1}
-        </Typography>
-      )}
-      {isError && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          Could not reach the translation server.
-        </Alert>
-      )}
-      <TranslationPanel
-        translations={translations}
-        isLoading={isLoading}
-        isReady={isReady}
-      />
-    </Box>
-  );
-}
 
 export default function App() {
   const [containers, setContainers] = useState<PhraseContainer[]>(() => [
@@ -84,8 +38,10 @@ export default function App() {
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
   // One plan per root container (a container no link targets); linked containers fold in
-  // as relative clauses. Each root renders its own translations block.
+  // as relative clauses. Every root is translated and shown in period order.
   const sentences = workspaceToPlans(containers, links);
+  const results = useTranslations(sentences.map((s) => s.plan));
+  const isError = results.some((r) => r.isError);
 
   return (
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
@@ -252,15 +208,15 @@ export default function App() {
           <Box sx={{ flex: "1 0 280px", minWidth: 0, pl: 1.5 }} />
         </Box>
 
-        {/* Translations: one block per root sentence, full width below */}
-        {sentences.map((s, i) => (
-          <SentenceTranslation
-            key={s.containerId}
-            plan={s.plan}
-            index={i}
-            total={sentences.length}
-          />
-        ))}
+        {/* Translations: one card, each language listing every root sentence in order */}
+        <Box sx={{ mb: 3 }}>
+          {isError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              Could not reach the translation server.
+            </Alert>
+          )}
+          <TranslationPanel sentences={results} />
+        </Box>
       </Container>
     </Box>
   );

@@ -316,6 +316,7 @@ function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
 
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
+  terminator: '。',
   render(phrase: ResolvedPhrase): string {
     return buildSegments(phrase)
       .map((s) => s.t)

@@ -128,4 +128,6 @@ export interface LanguageEngine {
    * segments carrying kana readings. Implemented only by languages with furigana (ja).
    */
   renderRuby?(phrase: ResolvedPhrase): RubySegment[];
+  /** The full stop closing a rendered sentence. Defaults to '.'; ja overrides it with '。'. */
+  terminator?: string;
 }

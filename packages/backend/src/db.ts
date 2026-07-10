@@ -33,7 +33,11 @@ function initSchema(db: Database.Database): void {
       -- 1 for a modal verb (must/can/will): a verb that governs another verb's infinitive
       -- rather than heading a clause. Modals conjugate like any verb, so they reuse the
       -- verb lexeme/form tables; this flag is what keeps them out of the main-verb picker.
-      modal        INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1))
+      modal        INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1)),
+      -- 1 for a proper noun (Africa): its article is fixed by the language, not chosen —
+      -- en/de/es/ja take none, it/fr/pt take the definite one — so the determiner the user
+      -- picks is ignored for this head.
+      proper       INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1))
     );
 
     -- ── Per-type lexeme tables ─────────────────────────────────────────
@@ -258,6 +262,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('modal')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN modal INTEGER NOT NULL DEFAULT 0 CHECK (modal IN (0,1))');
+  }
+  if (!conceptCols.includes('proper')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN proper INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1))');
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.
