@@ -2226,6 +2226,77 @@ const concepts: ConceptSeed[] = [
       },
     },
   },
+  {
+    // The copula "to be" + a predicate adjective — the plain "is careful" that BECOME/SEEM/
+    // APPEAR can't express. `copula: '1'` is the marker the en engine reads to negate directly
+    // ("is not careful", not "*does not be") and the ja engine reads to render です (慎重です),
+    // not the になる-flavoured に. it/fr/de/es/pt treat it as an ordinary intransitive verb whose
+    // predicative adjective agrees with the subject — the path BECOME already exercises.
+    id: 'BE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['predicative'],
+    description: 'to have a quality or state; the copula',
+    emoji: '🟰',
+    forms: {
+      en: {
+        base: 'be', copula: '1',
+        '1sg_present': 'am',  '2sg_present': 'are', '3sg_present': 'is',
+        '1pl_present': 'are', '2pl_present': 'are', '3pl_present': 'are',
+        '1sg_past': 'was',  '2sg_past': 'were', '3sg_past': 'was',
+        '1pl_past': 'were', '2pl_past': 'were', '3pl_past': 'were',
+      },
+      it: {
+        base: 'essere', copula: '1',
+        '1sg_present': 'sono', '2sg_present': 'sei', '3sg_present': 'è',
+        '1pl_present': 'siamo', '2pl_present': 'siete', '3pl_present': 'sono',
+        '1sg_past': 'fui', '2sg_past': 'fosti', '3sg_past': 'fu',
+        '1pl_past': 'fummo', '2pl_past': 'foste', '3pl_past': 'furono',
+        '1sg_future': 'sarò', '2sg_future': 'sarai', '3sg_future': 'sarà',
+        '1pl_future': 'saremo', '2pl_future': 'sarete', '3pl_future': 'saranno',
+      },
+      fr: {
+        base: 'être', copula: '1',
+        '1sg_present': 'suis', '2sg_present': 'es', '3sg_present': 'est',
+        '1pl_present': 'sommes', '2pl_present': 'êtes', '3pl_present': 'sont',
+        '1sg_past': 'fus', '2sg_past': 'fus', '3sg_past': 'fut',
+        '1pl_past': 'fûmes', '2pl_past': 'fûtes', '3pl_past': 'furent',
+        '1sg_future': 'serai', '2sg_future': 'seras', '3sg_future': 'sera',
+        '1pl_future': 'serons', '2pl_future': 'serez', '3pl_future': 'seront',
+      },
+      de: {
+        base: 'sein', copula: '1',
+        '1sg_present': 'bin', '2sg_present': 'bist', '3sg_present': 'ist',
+        '1pl_present': 'sind', '2pl_present': 'seid', '3pl_present': 'sind',
+        '1sg_past': 'war', '2sg_past': 'warst', '3sg_past': 'war',
+        '1pl_past': 'waren', '2pl_past': 'wart', '3pl_past': 'waren',
+      },
+      es: {
+        base: 'ser', copula: '1',
+        '1sg_present': 'soy', '2sg_present': 'eres', '3sg_present': 'es',
+        '1pl_present': 'somos', '2pl_present': 'sois', '3pl_present': 'son',
+        '1sg_past': 'fui', '2sg_past': 'fuiste', '3sg_past': 'fue',
+        '1pl_past': 'fuimos', '2pl_past': 'fuisteis', '3pl_past': 'fueron',
+        '1sg_future': 'seré', '2sg_future': 'serás', '3sg_future': 'será',
+        '1pl_future': 'seremos', '2pl_future': 'seréis', '3pl_future': 'serán',
+      },
+      ja: {
+        // Rendered specially by the engine (copula です on the predicate), so these are a
+        // safety fallback only — BE is never picked without a predicative.
+        base: 'です', copula: '1',
+        masu_present: 'です',
+      },
+      pt: {
+        base: 'ser', copula: '1',
+        '1sg_present': 'sou', '2sg_present': 'és', '3sg_present': 'é',
+        '1pl_present': 'somos', '2pl_present': 'sois', '3pl_present': 'são',
+        '1sg_past': 'fui', '2sg_past': 'foste', '3sg_past': 'foi',
+        '1pl_past': 'fomos', '2pl_past': 'fostes', '3pl_past': 'foram',
+        '1sg_future': 'serei', '2sg_future': 'serás', '3sg_future': 'será',
+        '1pl_future': 'seremos', '2pl_future': 'sereis', '3pl_future': 'serão',
+      },
+    },
+  },
 
   // ── MODAL VERBS ──────────────────────────────────────────────────
   // A modal governs another verb's infinitive rather than heading a clause, and modals
@@ -2749,6 +2820,21 @@ const concepts: ConceptSeed[] = [
       pt: { base: 'preguiçoso' },
     },
   },
+  {
+    id: 'CAREFUL',
+    role: 'adjective',
+    description: 'taking care to avoid harm or mistakes',
+    emoji: '⚠️',
+    forms: {
+      en: { base: 'careful' },
+      it: { base: 'attento' },
+      fr: { base: 'prudent' },
+      de: { base: 'vorsichtig' },
+      es: { base: 'cuidadoso' },
+      ja: { base: '慎重な', reading: 'しんちょうな' },
+      pt: { base: 'cuidadoso' },
+    },
+  },
 
   // ── ADVERBS ──────────────────────────────────────────────────────
   {
@@ -2885,6 +2971,16 @@ function roleInsertSql(role: string): string {
  * best-effort forms — aspect on them is linguistically marginal.
  */
 const NONFINITE: Record<string, Record<string, Record<string, string>>> = {
+  // The copula's resultative selects BE in it/de (è stato / ist gewesen); fr/es/pt/en use
+  // HAVE (a été / ha sido / tem sido / has been). Aspect on a copula is marginal, so these
+  // are best-effort. ja renders the copula specially and never reads a te-form.
+  BE: {
+    en: { gerund: 'being', participle: 'been' },
+    it: { gerund: 'essendo', participle: 'stato', aux: 'be' },
+    fr: { participle: 'été' }, de: { participle: 'gewesen', aux: 'be' },
+    es: { gerund: 'siendo', participle: 'sido' },
+    pt: { gerund: 'sendo', participle: 'sido' },
+  },
   CUT: {
     en: { gerund: 'cutting', participle: 'cut' },
     it: { gerund: 'tagliando', participle: 'tagliato' },

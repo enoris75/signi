@@ -136,6 +136,9 @@ function keinForm(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean)
  * einige/viele/wenige/alle are plural quantifiers.
  */
 function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
+  // A continent name like "Afrika" goes bare in German (no article), whatever determiner
+  // the user picked.
+  if (forms['proper'] === '1') return '';
   const definiteness = forms['definiteness'] ?? 'definite';
   if (definiteness === 'definite') return defArticle(forms, _case, plural);
   const gender = forms['gender'] ?? 'neut';
@@ -533,10 +536,15 @@ export const germanEngine: LanguageEngine = {
     // Skip "nicht" when the modifier is already negative ("nie" = never).
     const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
     const applyNicht = verbNegative && !modifierIsNegative;
+    // A predicate complement (copula/BECOME: "ist vorsichtig") is negated by "nicht"
+    // *before* it — "ist nicht vorsichtig", not "*ist vorsichtig nicht". With an adverb
+    // present the "nicht immer" placement already covers it, so guard on !modifierText.
+    const hasPredicative = !!phrase.complements?.['predicative'];
     const negBefore = applyNicht && modifierText ? 'nicht' : '';
-    const negAfter  = applyNicht && !modifierText ? 'nicht' : '';
+    const negComplement = applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
+    const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(phrase.complements);
-    return [subjectText, verbText, aspectMid, negBefore, modifierText, indirectObjectText, directObjectText, complementsText, negAfter, infinitiveTail]
+    return [subjectText, verbText, aspectMid, negBefore, modifierText, indirectObjectText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
   },
 };

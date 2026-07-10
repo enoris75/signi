@@ -34,6 +34,9 @@ function indefArticle(forms: Record<string, string>, plural = false): string {
  * singular and drives verb negation ("não") upstream when it is an object.
  */
 function artFor(forms: Record<string, string>, plural = false): string {
+  // A proper noun (a África) always takes the definite article in Portuguese, whatever
+  // determiner the user picked; it is a property of the name, not a choice.
+  if (forms['proper'] === '1') return defArticle(forms, plural);
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   // Mass nouns ("água") stay singular: "um pouco de água", "muita/pouca água", "toda a água".

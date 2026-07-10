@@ -53,6 +53,9 @@ function indefArticle(forms: Record<string, string>, plural: boolean): string {
  * carry the definite article; "aucun/e" is singular and drives verb negation ("ne") upstream.
  */
 function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  // A proper noun (l'Afrique) always takes the definite article in French, whatever
+  // determiner the user picked; it is a property of the name, not a choice.
+  if (forms['proper'] === '1') return defArticle(forms, plural, lead);
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   const de = VOWEL_START.test(lead) ? "d'" : 'de';
@@ -447,14 +450,10 @@ function predicateText(
     const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
     effectiveVerb = `${negateFinite(finite)} ${tail}`.trim();
     effectiveMod = modifierText;
-  } else if (modifierIsNegative) {
-    effectiveVerb = `ne ${conjugated} ${modifierText}`;
-    effectiveMod = '';
-  } else if (verbNegative) {
-    effectiveVerb = `ne ${conjugated} pas`;
-    effectiveMod = modifierText;
-  } else if (aucun) {
-    effectiveVerb = `ne ${conjugated}`;
+  } else if (verbNegative || aucun || modifierIsNegative) {
+    // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
+    // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais).
+    effectiveVerb = negateFinite(conjugated);
     effectiveMod = modifierText;
   } else {
     effectiveVerb = conjugated;

@@ -275,6 +275,41 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
 }
 
 /**
+ * The copula (BE) predicate: the predicate adjective or noun with an inflected です — the
+ * plain "is careful" (慎重です) that the になる-based predicative can't express. An i-adjective
+ * inflects itself (楽しいです / 楽しくなかったです); a na-adjective (strip the attributive な) or a
+ * noun takes the copula proper (慎重です / 慎重ではありませんでした). Future reuses the present.
+ */
+function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): RubySegment[] {
+  const f = pred.phrase.head.forms;
+  const base = f['base'] ?? '';
+  const reading = f['reading'];
+  const past = tense === 'past';
+  const isAdj = f['role'] === 'adjective';
+  if (isAdj && base.endsWith('い')) {
+    const ending = negative
+      ? (past ? 'くなかったです' : 'くないです')
+      : (past ? 'かったです' : 'いです');
+    return [
+      wordSeg(base.slice(0, -1), reading?.endsWith('い') ? reading.slice(0, -1) : reading),
+      { t: ending },
+    ];
+  }
+  const cop = negative
+    ? (past ? 'ではありませんでした' : 'ではありません')
+    : (past ? 'でした' : 'です');
+  // na-adjective: strip the attributive な, then the copula. A noun predicate is a full NP
+  // (its own adjectives/possessor) rendered by npSegs, then the copula.
+  if (isAdj && base.endsWith('な')) {
+    return [
+      wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading),
+      { t: cop },
+    ];
+  }
+  return [...npSegs(pred.phrase), { t: cop }];
+}
+
+/**
  * The predicate half of a phrase, in Japanese order: complements IndObj+に DirectObj+を
  * Adv V. Shared by the main sentence (after 〜は) and by prenominal relative clauses.
  */
@@ -286,6 +321,18 @@ function predicateSegs(
 ): RubySegment[] {
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', modals } = verbPhrase;
   const segs: RubySegment[] = [];
+  // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
+  // intransitive and licenses only the predicative, so no objects or other complements occur;
+  // an adverb (いつも) simply precedes the predicate.
+  const predicative = complements?.['predicative'];
+  if (verb.forms['copula'] === '1' && predicative) {
+    if (modifier) {
+      const base = modifier.forms['base'] ?? '';
+      if (base) segs.push(wordSeg(base, modifier.forms['reading']));
+    }
+    segs.push(...copulaSegs(predicative, tense, negative === true));
+    return segs;
+  }
   segs.push(...complementSegs(complements));
   if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
   if (directObject) segs.push(...npSegs(directObject), { t: 'を' });

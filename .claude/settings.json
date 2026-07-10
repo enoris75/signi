@@ -197,7 +197,8 @@
       "Bash(curl -s localhost:3001/api/translate -X POST -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"cat\",\"number\":\"singular\",\"adjectives\":[]},\"verbPhrase\":{\"verb\":\"run\"}}}')",
       "Bash(curl -s localhost:3001/api/translate -X POST -H 'content-type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"CAT\",\"number\":\"singular\",\"adjectives\":[]},\"verbPhrase\":{\"verb\":\"RUN\"}}}')",
       "Bash(curl -s -m 3 \"http://localhost:3001/api/concepts?role=adjective\")",
-      "Bash(curl -s -X POST localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"THIRD_PERSON\"},\"verbPhrase\":{\"verb\":\"BECOME\",\"negative\":true},\"complements\":{\"predicative\":{\"phrase\":{\"concept\":\"TIRED\"}}}}}')"
+      "Bash(curl -s -X POST localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"THIRD_PERSON\"},\"verbPhrase\":{\"verb\":\"BECOME\",\"negative\":true},\"complements\":{\"predicative\":{\"phrase\":{\"concept\":\"TIRED\"}}}}}')",
+      "Bash(node -e \"const p=require\\('./packages/engine/package.json'\\); console.log\\(JSON.stringify\\({main:p.main,module:p.module,exports:p.exports,types:p.types},null,1\\)\\)\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

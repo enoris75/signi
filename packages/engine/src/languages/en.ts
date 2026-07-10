@@ -47,6 +47,8 @@ const PATH_PREP: Record<PathSpecifier, string> = {
  * → plural "wolves"). Returns the determiner with a trailing space, or "" for bare.
  */
 function determiner(forms: Record<string, string>, lead: string): string {
+  // A proper noun ("Africa") takes no article in English, whatever determiner was picked.
+  if (forms['proper'] === '1') return '';
   const definiteness = forms['definiteness'] ?? 'definite';
   const mass = forms['uncountable'] === '1';
   switch (definiteness) {
@@ -310,6 +312,15 @@ function predicateParts(
   }
 
   if (verbNegative && !modifierIsNegative) {
+    // The copula negates on itself — "is not careful", "was not careful", "will not be
+    // careful" — never with do-support.
+    if (verb.forms['copula'] === '1') {
+      const negVerb = tense === 'future'
+        ? `will not ${verb.forms['base'] ?? 'be'}`
+        : `${conjugate(verb.forms, subjectForms, tense)} not`;
+      const trailingMod = isFrequency ? '' : modifierText;
+      return [negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
+    }
     const person = subjectForms['person'] ?? '3';
     const number = subjectForms['number'] ?? 'singular';
     // Negation auxiliary is tense-driven: "do/does not" (present),

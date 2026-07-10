@@ -83,6 +83,9 @@ function nessunForm(gender: string, lead: string): string {
  * quantifier agreeing in gender (and, for "tutti/e", carrying the definite article).
  */
 function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
+  // A proper noun (l'Africa) always takes the definite article in Italian, whatever
+  // determiner the user picked; it is a property of the name, not a choice.
+  if (forms['proper'] === '1') return defArticle(forms, plural, lead);
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   // Mass nouns ("acqua") stay singular and take the partitive / singular quantifiers:
