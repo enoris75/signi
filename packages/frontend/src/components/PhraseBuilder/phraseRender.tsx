@@ -11,7 +11,7 @@ import {
   SlotKey,
 } from "./interfaces.ts";
 import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
-import type { GroupRect } from "./graph.ts";
+import type { GroupRect, GroupShape } from "./graph.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
 
 // Props spread onto each draggable node — the absolute positioning + pointer
@@ -59,7 +59,10 @@ export interface PhraseRenderContext {
   draggingKey: string | null;
   makeDragProps: (key: string, onActivate: () => void) => DragBoxProps;
   makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
-  slotEls: React.MutableRefObject<Map<SlotKey, HTMLElement>>;
+  // Every draggable node's DOM element, keyed by node key — the word boxes and the
+  // tense / aspect / determiner toggle boxes alike. Measured each commit so the dotted
+  // boxes and the tidy layout can work from real footprints rather than assumed ones.
+  slotEls: React.MutableRefObject<Map<string, HTMLElement>>;
   handleSlotClick: (slot: SlotKey) => void;
   // Which filled word box is currently open for re-picking its word (null = none).
   editingSlot: SlotKey | null;
@@ -87,7 +90,7 @@ export interface PhraseRenderContext {
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   // Compact a dotted box's child nodes into a tidy centered cluster.
-  handleRearrangeGroup: (nodeKeys: string[]) => void;
+  handleRearrangeGroup: (group: GroupShape) => void;
   handleRemoveComplement: (type: ComplementType) => void;
   // ── Cross-container linking (top-level containers only; undefined for possessors) ──
   // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
@@ -97,6 +100,16 @@ export interface PhraseRenderContext {
   // In pick-mode: is this noun an eligible link target? Clicking it completes the link.
   isPickTarget?: (key: SlotKey) => boolean;
   onPickTarget?: (key: SlotKey) => void;
+}
+
+// Register one draggable node's element in the measurement map under `key`. Every node on
+// the canvas goes in — a box left out reads as nominally sized, and its dotted box would
+// then be cut too tight around it.
+export function nodeElRef(ctx: PhraseRenderContext, key: string) {
+  return (el: HTMLElement | null) => {
+    if (el) ctx.slotEls.current.set(key, el);
+    else ctx.slotEls.current.delete(key);
+  };
 }
 
 // A single draggable slot box: pointer-drag wrapper + Tab/arrow keyboard nav

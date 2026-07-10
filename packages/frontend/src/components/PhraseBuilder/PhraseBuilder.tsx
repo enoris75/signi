@@ -64,7 +64,13 @@ import {
   sameRelConnectors,
   type RelConnector,
 } from "./measure.ts";
-import { buildGraph, rawGroupRect, type GroupRect } from "./graph.ts";
+import {
+  buildGraph,
+  rawGroupRect,
+  DEFAULT_NODE_SIZE,
+  type GroupRect,
+  type GroupShape,
+} from "./graph.ts";
 import {
   resolveGroupOverlaps,
   BOTTOM_MARGIN,
@@ -357,13 +363,22 @@ export function PhraseBuilder({
   }
 
   // Re-arrange a single dotted box in place — compacting its child nodes around the
-  // group's own current center.
-  function handleRearrangeGroup(nodeKeys: string[]) {
-    if (nodeKeys.length === 0) return;
-    setPositions((prev) => ({
-      ...prev,
-      ...rearrangeGroupPositions(nodeKeys, prev, svgSize),
-    }));
+  // group's own current center. The tidied cluster is laid out from the nodes' real
+  // footprints, so it can come back taller than the canvas (a box of long words, or one
+  // wearing all three rows); when it does, the container grows to hold it rather than the
+  // cluster being squashed back into a canvas that was never sized for it.
+  function handleRearrangeGroup(group: GroupShape) {
+    if (group.nodeKeys.length === 0) return;
+    const { positions: tidied, minHeight } = rearrangeGroupPositions(
+      group,
+      (k) => positions[k] ?? DEFAULT_POSITIONS[k] ?? { x: 50, y: 50 },
+      { w: svgSize.w, h: graphHeight },
+      sizeOf,
+    );
+    setPositions((prev) => ({ ...prev, ...tidied }));
+    // Growing rebases every y onto the new height (see rescaleYForHeight), so the cluster
+    // we just placed keeps the pixel position it was laid out at.
+    if (minHeight > graphHeight) setGraphHeight(minHeight);
   }
 
   function handleToggleReveal(sat: Satellite) {
@@ -403,13 +418,18 @@ export function PhraseBuilder({
   const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
   const possessorDotEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
-  const slotEls = useRef<Map<SlotKey, HTMLElement>>(new Map());
+  const slotEls = useRef<Map<string, HTMLElement>>(new Map());
   // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
   // each satellite reveal control on the box border facing its satellite (and to
   // start that satellite's connector from there).
   const [boxSizes, setBoxSizes] = useState<
     Record<string, { w: number; h: number }>
   >({});
+  // A node's box as of the last paint. Everything that reasons about a node's footprint —
+  // the dotted box that wraps it, the overlap resolver, the tidy layout — reads it through
+  // here, so the three agree on where a box's edges are. A node not yet measured reads as
+  // the nominal box the paddings already leave room for.
+  const sizeOf = (key: string) => boxSizes[key] ?? DEFAULT_NODE_SIZE;
   const [positions, setPositions] = useState<
     Record<string, { x: number; y: number }>
   >(() => ({ ...DEFAULT_POSITIONS }));
@@ -688,6 +708,7 @@ export function PhraseBuilder({
     shownMap,
     pos,
     controlPos,
+    sizeOf,
     svgSize: graphSize,
   });
 
@@ -719,7 +740,7 @@ export function PhraseBuilder({
     }
     const sizes = new Map(
       groupRects.map((g) => {
-        const r = rawGroupRect(g, pos, graphSize, false);
+        const r = rawGroupRect(g, pos, graphSize, false, sizeOf);
         return [g.label, { w: r.width, h: r.height }] as const;
       }),
     );
@@ -742,6 +763,7 @@ export function PhraseBuilder({
         : resolveGroupOverlaps({
             groupRects,
             pos,
+            sizeOf,
             svgSize: graphSize,
             rankOf,
           });
@@ -760,7 +782,7 @@ export function PhraseBuilder({
       const settled = (key: string) => separated?.positions[key] ?? pos(key);
       const bottom = Math.max(
         ...groupRects.map((g) => {
-          const r = rawGroupRect(g, settled, graphSize, false);
+          const r = rawGroupRect(g, settled, graphSize, false, sizeOf);
           return r.y + r.height;
         }),
       );
@@ -781,17 +803,23 @@ export function PhraseBuilder({
       setGraphHeight(separated.minHeight);
   });
 
-  // Tidy the whole period: collapse every dotted box down to its main word, then pack
-  // the collapsed boxes into non-overlapping rows in reading order — subject · verb
-  // phrase · direct object · indirect object · complements. One click re-flows the
-  // whole container into a clean grid.
+  // Tidy the whole period: tidy each dotted box on its own — the same re-arrange its own
+  // button runs — then pack the tidied boxes into non-overlapping rows in reading order:
+  // subject · verb phrase · direct object · indirect object · complements. Collapse state
+  // is left alone; one click re-flows the container into a clean grid without hiding
+  // anything the user had revealed.
   function handleTidyPeriod() {
     if (groupRects.length === 0) return;
-    const { labels, positions: packed } = packPeriod(groupRects, svgSize);
-    // Collapse everything: every group label maps to a COLLAPSIBLE_GROUPS entry, so the
-    // packed footprints are what actually renders.
-    setCollapsedGroups(Object.fromEntries(labels.map((l) => [l, true])));
+    const { positions: packed, minHeight } = packPeriod(
+      groupRects,
+      graphSize,
+      sizeOf,
+    );
     setPositions((prev) => ({ ...prev, ...packed }));
+    // Expanded boxes can need more room than the canvas has; grow it rather than pack them
+    // off the bottom edge. The rebase onto the new height (rescaleYForHeight) holds every
+    // pixel offset, so the grid we just laid out stays put.
+    if (minHeight > graphHeight) setGraphHeight(minHeight);
   }
 
   // Compact / expand the whole period. This is a pure view toggle: the compact packing

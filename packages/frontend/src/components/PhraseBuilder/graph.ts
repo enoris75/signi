@@ -40,8 +40,12 @@ export type GroupShape = { nodeKeys: string[]; removeKey?: ComplementType };
 type Pt = { x: number; y: number };
 type PosFn = (key: string) => Pt;
 
-// Role-group bounding-rect padding, in SVG pixels. Exported so the period "tidy"
-// packer can reproduce a collapsed box's exact footprint when spacing boxes apart.
+// A word box's measured pixel footprint. Nodes are centered on their position, so a box
+// spans half its size either side of that point.
+export type NodeSize = { w: number; h: number };
+export type SizeFn = (key: string) => NodeSize;
+
+// Role-group bounding-rect padding, in SVG pixels.
 export const PIX_PAD_H = 80; // left & right — covers widest slot box half-width
 // Top & bottom must clear not just the box half-height but the satellite reveal
 // controls that ride the box border (each ~20px tall, straddling the edge) plus the
@@ -51,6 +55,19 @@ export const PIX_PAD_BOT = 52;
 // The route and cause boxes each carry a specifier toolbar on their top edge (path
 // relation / sentiment); give them extra headroom so it clears the box label.
 export const ROUTE_PAD_TOP = 40;
+
+// The word box the pads above are cut to fit: a minimum-width slot box, half its size.
+// A node is only allowed to push its dotted box out by however much it exceeds this, so a
+// box of ordinary words keeps exactly the geometry the pads were tuned for, and one
+// holding a long word — or a tall one, wearing a degree/relation chip — grows to wrap it.
+const NOMINAL_HALF_W = 54;
+const NOMINAL_HALF_H = 26;
+// What a node's box measures before anyone has measured it (the first frame, and the
+// toggle boxes on a canvas that hasn't painted yet).
+export const DEFAULT_NODE_SIZE: NodeSize = {
+  w: NOMINAL_HALF_W * 2,
+  h: NOMINAL_HALF_H * 2,
+};
 
 // Compact-view padding: the dashed boxes and their border controls are hidden, so a
 // group rect only has to hug its lone core word (plus a hair of gap for the spine).
@@ -86,21 +103,40 @@ export function groupPads(
 // clamp that `buildGraph` applies for painting. The overlap resolver works on these raw
 // rects: a box shoved against the canvas edge must still report its true footprint, or it
 // would read as narrower than it is and never get pushed clear of its neighbour.
+//
+// Each node claims its own pad, widened by however far its box overhangs the nominal one
+// the pads assume — so a group holding a long word wraps that word rather than letting it
+// spill through the dashed border. `sizeOf` may be omitted where the nodes are known to be
+// ordinary, in which case every pad is the plain one.
 export function rawGroupRect(
   group: GroupShape,
   pos: PosFn,
   svgSize: { w: number; h: number },
   compact: boolean,
+  sizeOf: SizeFn = () => DEFAULT_NODE_SIZE,
 ): Rect {
   const { padH, padTop, padBot } = groupPads(group.removeKey, compact);
-  const pts = group.nodeKeys.map((k) => pos(k));
-  const x = (Math.min(...pts.map((p) => p.x)) / 100) * svgSize.w - padH;
-  const y = (Math.min(...pts.map((p) => p.y)) / 100) * svgSize.h - padTop;
+  const extents = group.nodeKeys.map((k) => {
+    const p = pos(k);
+    const size = sizeOf(k);
+    const overH = Math.max(0, size.w / 2 - NOMINAL_HALF_W);
+    const overV = Math.max(0, size.h / 2 - NOMINAL_HALF_H);
+    const cx = (p.x / 100) * svgSize.w;
+    const cy = (p.y / 100) * svgSize.h;
+    return {
+      left: cx - padH - overH,
+      right: cx + padH + overH,
+      top: cy - padTop - overV,
+      bottom: cy + padBot + overV,
+    };
+  });
+  const x = Math.min(...extents.map((e) => e.left));
+  const y = Math.min(...extents.map((e) => e.top));
   return {
     x,
     y,
-    width: (Math.max(...pts.map((p) => p.x)) / 100) * svgSize.w + padH - x,
-    height: (Math.max(...pts.map((p) => p.y)) / 100) * svgSize.h + padBot - y,
+    width: Math.max(...extents.map((e) => e.right)) - x,
+    height: Math.max(...extents.map((e) => e.bottom)) - y,
   };
 }
 
@@ -135,6 +171,7 @@ export function buildGraph({
   shownMap,
   pos,
   controlPos,
+  sizeOf,
   svgSize,
 }: {
   // Whether to paint the canvas at all: true once the period has a subject or verb (or in
@@ -159,6 +196,9 @@ export function buildGraph({
   // satellite's dashed link starts here — from its own control — instead of the
   // core box center. Missing (not yet measured) → fall back to the box center.
   controlPos: Record<string, Pt>;
+  // Measured pixel size of every node box, so a group rect can wrap a word wider or
+  // taller than the padding assumes.
+  sizeOf: SizeFn;
   svgSize: { w: number; h: number };
 }): { edges: Edge[]; groupRects: GroupRect[]; groupEdges: Edge[] } {
   const px = (pct: number, dim: number) => (pct / 100) * dim;
@@ -307,7 +347,7 @@ export function buildGraph({
     // Painted rects are the raw footprints clipped to the canvas, so a box that spills
     // over an edge is drawn flush against it rather than off-screen.
     for (const g of roleGroups) {
-      const raw = rawGroupRect(g, pos, svgSize, compact);
+      const raw = rawGroupRect(g, pos, svgSize, compact, sizeOf);
       const rx = Math.max(0, raw.x);
       const ry = Math.max(0, raw.y);
       groupRects.push({

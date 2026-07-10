@@ -7,7 +7,7 @@ import {
   SpecifierSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
-import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
+import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { isModalSlot } from "./slots.ts";
 
@@ -45,12 +45,18 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}
       {shownMap.verbTense && (
-        <Box {...makeDragProps("verbTense", handleCycleTense)}>
+        <Box
+          {...makeDragProps("verbTense", handleCycleTense)}
+          ref={nodeElRef(ctx, "verbTense")}
+        >
           <TenseToggleBox value={selection.verbTense ?? "present"} />
         </Box>
       )}
       {shownMap.verbAspect && (
-        <Box {...makeDragProps("verbAspect", handleCycleAspect)}>
+        <Box
+          {...makeDragProps("verbAspect", handleCycleAspect)}
+          ref={nodeElRef(ctx, "verbAspect")}
+        >
           <AspectToggleBox value={selection.verbAspect ?? "neutral"} />
         </Box>
       )}

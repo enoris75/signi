@@ -659,6 +659,7 @@ export function buildSatelliteIcons({
       isSet: sat.hasValue,
       valued: Boolean(sat.alwaysSet),
       valueLabel: sat.valueLabel,
+      directToggle: sat.directToggle,
       onToggle: numberSlot
         ? () => onToggleNumber(numberSlot)
         : genderSlot

@@ -37,6 +37,9 @@ export interface SatelliteIcon {
   // as colored even at the default, and its tooltip always shows the current value.
   valued: boolean;
   valueLabel?: string;
+  // directToggle = clicking flips a value in place rather than revealing a box.
+  // Squared off so shape alone separates the two kinds of control.
+  directToggle?: boolean;
   onToggle: () => void;
 }
 
@@ -221,6 +224,7 @@ export function SatelliteButton({
           width: 20,
           height: 20,
           p: 0,
+          borderRadius: sat.directToggle ? 0.5 : "50%",
           bgcolor: solid ? `${color}.main` : "background.paper",
           color: solid
             ? "common.white"

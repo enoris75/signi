@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import type { Definiteness } from "@signi/shared";
 import { DeterminerToggleBox } from "./Boxes.tsx";
 import { NumberSlot, PhraseSelection } from "./interfaces.ts";
-import { PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
+import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { adjectiveSlots } from "./slots.ts";
 
@@ -44,6 +44,7 @@ export function NounPhraseBuilder({
           {...makeDragProps(`${which}Definiteness`, () =>
             ctx.handleCycleDefiniteness(which),
           )}
+          ref={nodeElRef(ctx, `${which}Definiteness`)}
         >
           <DeterminerToggleBox value={definiteness ?? "definite"} />
         </Box>

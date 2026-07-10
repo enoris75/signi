@@ -1,4 +1,4 @@
-import { rawGroupRect, type GroupRect } from "./graph.ts";
+import { rawGroupRect, type GroupRect, type SizeFn } from "./graph.ts";
 import type { CanvasSize, PositionMap } from "./layout.ts";
 
 // Keeps the dotted role boxes from ever covering one another. A box's footprint is derived
@@ -84,11 +84,13 @@ function allocate(
 export function resolveGroupOverlaps({
   groupRects,
   pos,
+  sizeOf,
   svgSize,
   rankOf,
 }: {
   groupRects: GroupRect[];
   pos: (key: string) => { x: number; y: number };
+  sizeOf: SizeFn;
   svgSize: CanvasSize;
   rankOf: (group: GroupRect) => Rank;
 }): Separation | null {
@@ -97,7 +99,7 @@ export function resolveGroupOverlaps({
   const boxes = groupRects.map((g) => ({
     group: g,
     // Raw, unclipped footprints — see rawGroupRect.
-    rect: rawGroupRect(g, pos, svgSize, false),
+    rect: rawGroupRect(g, pos, svgSize, false, sizeOf),
     rank: rankOf(g),
     dx: 0,
     dy: 0,

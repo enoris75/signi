@@ -92,7 +92,7 @@ export function GroupBox({
           <IconButton
             size="small"
             onPointerDown={(e) => e.stopPropagation()}
-            onClick={() => handleRearrangeGroup(rect.nodeKeys)}
+            onClick={() => handleRearrangeGroup(rect)}
             sx={{
               position: "absolute",
               left: rect.x + 11,
