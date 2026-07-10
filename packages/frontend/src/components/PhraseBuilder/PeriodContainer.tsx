@@ -190,6 +190,10 @@ export function PeriodContainer({
             ? "warning.main"
             : "text.secondary",
         boxShadow: condDroppable ? "0 0 0 2px rgba(237,108,2,0.35)" : undefined,
+        // Once this period takes part in a conditional, give up a strip on the right so the
+        // elbow connector routes in the freed gutter instead of over the border.
+        mr: condActive ? "64px" : 0,
+        transition: "margin 0.15s ease",
         bgcolor: "action.hover",
         cursor:
           borderDragRef.current && position
@@ -199,14 +203,14 @@ export function PeriodContainer({
               : undefined,
       }}
     >
-      {/* The conditional (IF/MAIN) control, pinned to the card's left border. */}
+      {/* The conditional (IF/MAIN) control, pinned to the card's right border. */}
       {conditional && (
         <Box
           ref={conditional.registerBorderAnchor}
           onPointerDown={(e) => e.stopPropagation()}
           sx={{
             position: "absolute",
-            left: -14,
+            right: -14,
             top: "50%",
             transform: "translateY(-50%)",
             zIndex: 5,

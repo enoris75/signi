@@ -216,7 +216,8 @@
       "Bash(lsof -iTCP:3001 -sTCP:LISTEN -n)",
       "Bash(lsof -iTCP:5173 -sTCP:LISTEN -n)",
       "Bash(npm run *)",
-      "Bash(ls \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\")"
+      "Bash(ls \"/Applications/Google Chrome.app/Contents/MacOS/Google Chrome\")",
+      "Bash(curl -s -o /dev/null -w \"backend:%{http_code}\\\\n\" http://localhost:3001/api/concepts)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

@@ -377,32 +377,40 @@ export function PhraseWorkspace({
               <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.warning} />
             </marker>
           </defs>
-          {connectors.map((c) =>
-            c.kind === "conditional" ? (
-              <g key={c.id}>
-                <line
-                  x1={c.x1}
-                  y1={c.y1}
-                  x2={c.x2}
-                  y2={c.y2}
-                  stroke={c.color}
-                  strokeWidth="2"
-                  strokeOpacity="0.85"
-                  markerEnd="url(#conditional-arrow)"
-                />
-                {/* "if" label at the line midpoint. */}
-                <text
-                  x={(c.x1 + c.x2) / 2}
-                  y={(c.y1 + c.y2) / 2 - 4}
-                  fill={c.color}
-                  fontSize="11"
-                  fontWeight="700"
-                  textAnchor="middle"
-                >
-                  if
-                </text>
-              </g>
-            ) : (
+          {connectors.map((c) => {
+            if (c.kind === "conditional") {
+              // Elbow route through the right-hand gutter: out from the main clause's control,
+              // down the gutter, back in to the "if" clause's control.
+              const midX = Math.max(c.x1, c.x2) + 24;
+              const midY = (c.y1 + c.y2) / 2;
+              const d = `M ${c.x1} ${c.y1} H ${midX} V ${c.y2} H ${c.x2}`;
+              return (
+                <g key={c.id}>
+                  <path
+                    d={d}
+                    fill="none"
+                    stroke={c.color}
+                    strokeWidth="2"
+                    strokeOpacity="0.85"
+                    strokeLinejoin="round"
+                    markerEnd="url(#conditional-arrow)"
+                  />
+                  {/* "if" label on the vertical run of the elbow. */}
+                  <text
+                    x={midX + 5}
+                    y={midY}
+                    fill={c.color}
+                    fontSize="11"
+                    fontWeight="700"
+                    textAnchor="start"
+                    dominantBaseline="middle"
+                  >
+                    if
+                  </text>
+                </g>
+              );
+            }
+            return (
               <line
                 key={c.id}
                 x1={c.x1}
@@ -414,8 +422,8 @@ export function PhraseWorkspace({
                 strokeOpacity="0.5"
                 strokeDasharray="5 3"
               />
-            ),
-          )}
+            );
+          })}
         </Box>
       )}
 
