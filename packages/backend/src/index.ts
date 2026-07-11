@@ -4,9 +4,11 @@ import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
 import { PAYOFF_PLAN } from './payoff.js';
+import { LANGUAGE_NAME_CONCEPTS } from './languages.js';
 import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
+  LanguageCode,
   TranslateRequest,
   TranslateResponse,
   GrammaticalRole,
@@ -154,6 +156,20 @@ app.get('/api/payoff', (_req, res) => {
   const translations = translate(PAYOFF_PLAN, lookupLexicalEntry);
   const response: TranslateResponse = { translations };
   res.json(response);
+});
+
+// Each UI language's name rendered by the engine in every language, so the header selector
+// can label the options in the current UI language (see languages.ts). Returns, per
+// selectable language code, that language's name-noun translated into all seven.
+app.get('/api/languages', (_req, res) => {
+  const languages = (Object.keys(LANGUAGE_NAME_CONCEPTS) as LanguageCode[]).map((code) => ({
+    code,
+    translations: translate(
+      { subject: { concept: LANGUAGE_NAME_CONCEPTS[code], definiteness: 'bare' } },
+      lookupLexicalEntry,
+    ),
+  }));
+  res.json({ languages });
 });
 
 // ── Saved phrases ────────────────────────────────────────────────────────────

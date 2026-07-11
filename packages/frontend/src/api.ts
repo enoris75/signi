@@ -1,6 +1,7 @@
 import type {
   Concept,
   GrammaticalRole,
+  LanguageCode,
   PhrasePlan,
   SavePhraseRequest,
   SavedPhraseKind,
@@ -38,6 +39,20 @@ export async function fetchPayoff(): Promise<Translation[]> {
   if (!res.ok) throw new Error('Failed to fetch payoff');
   const data = await res.json() as { translations: Translation[] };
   return data.translations;
+}
+
+// Each selectable UI language paired with its name rendered by the engine in every
+// language, so the header selector can label the options in the current UI language.
+export interface LanguageOption {
+  code: LanguageCode;
+  translations: Translation[];
+}
+
+export async function fetchLanguages(): Promise<LanguageOption[]> {
+  const res = await fetch(`${BASE}/languages`);
+  if (!res.ok) throw new Error('Failed to fetch languages');
+  const data = await res.json() as { languages: LanguageOption[] };
+  return data.languages;
 }
 
 // ── Saved phrases ────────────────────────────────────────────────────────────
