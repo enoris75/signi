@@ -9,8 +9,9 @@ import {
   PhraseSelection,
   SlotConfig,
   SlotKey,
+  slotCategories,
 } from "./interfaces.ts";
-import { SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { CategoryToggle, SlotBox, type SatelliteIcon } from "./Boxes.tsx";
 import type { GroupRect, GroupShape } from "./graph.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
 
@@ -75,6 +76,11 @@ export interface PhraseRenderContext {
     targetSlot?: SlotKey,
     opts?: ConceptSelectOpts,
   ) => void;
+  // The effective word-category of a switchable slot (subject/cause = noun|pronoun;
+  // predicative + adjectives = noun|adjective) and its setter — shared between the on-box
+  // toggle and the in-dropdown selector so the two move together.
+  slotKind: (slotKey: SlotKey) => string;
+  onSlotKindChange: (slotKey: SlotKey, kind: string) => void;
   handleClear: (slot: SlotKey) => void;
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
@@ -131,6 +137,8 @@ export function SlotNode({
     activeSlot,
     handleClear,
     handleConceptSelect,
+    slotKind,
+    onSlotKindChange,
     handleCycleModifierRelation,
     handleCycleDegree,
     nounPhrase,
@@ -242,6 +250,19 @@ export function SlotNode({
       </Box>
     </Tooltip>
   ) : undefined;
+  // A switchable slot (subject/cause = noun|pronoun; predicative + adjectives = noun|adj)
+  // wears its category toggle on the empty box; the same value threads into the picker so
+  // the in-dropdown selector matches. Single-vocabulary slots return null → no toggle.
+  const categories = slotCategories(slot.key, nounPhrase);
+  const categoryToggle =
+    categories && !held ? (
+      <CategoryToggle
+        options={categories.options}
+        value={slotKind(slot.key)}
+        onChange={(v) => onSlotKindChange(slot.key, v)}
+      />
+    ) : undefined;
+
   return (
     <Box
       {...makeDragProps(slot.key, onActivate)}
@@ -285,6 +306,7 @@ export function SlotNode({
         highlight={pickTarget}
         editing={editing}
         onClear={() => handleClear(slot.key)}
+        categoryToggle={categoryToggle}
         emptyContent={slotTypeahead({
           slotKey: slot.key,
           activeSlot,
@@ -292,6 +314,10 @@ export function SlotNode({
           onSelect: handleConceptSelect,
           nounSubject: nounPhrase,
           editing,
+          kind: categories ? slotKind(slot.key) : undefined,
+          onKindChange: categories
+            ? (v) => onSlotKindChange(slot.key, v)
+            : undefined,
         })}
         footer={relationChip ?? degreeChip}
       />

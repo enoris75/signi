@@ -8,7 +8,7 @@ import {
   type PathSpecifier,
 } from "@signi/shared";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
-import { SlotBox } from "./Boxes.tsx";
+import { CategoryToggle, SlotBox } from "./Boxes.tsx";
 import {
   adaptPossessorBinding,
   ConceptSelectOpts,
@@ -18,6 +18,7 @@ import {
   NumberSlot,
   PhraseSelection,
   possessorAddress,
+  slotCategories,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
@@ -157,6 +158,11 @@ export function PhraseBuilder({
   // A filled word box the user clicked to change its word: its inline picker is shown
   // over the current word. Null when no box is being re-picked. Cleared on select or blur.
   const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
+  // The chosen word-category (noun|pronoun / noun|adjective) for each switchable empty box,
+  // keyed by slot. Set by the on-box toggle or the in-dropdown selector — the two read the
+  // same value here, so they stay in sync. A slot with no stored entry falls back to the
+  // held word's class (a re-pick) or the slot's default (see kindFor).
+  const [slotKindState, setSlotKindState] = useState<Record<string, string>>({});
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
@@ -271,6 +277,23 @@ export function PhraseBuilder({
   function handleSlotClick(slot: SlotKey) {
     setActiveSlot(slot);
   }
+
+  // The effective word-category of a switchable slot: an explicit choice if the user made
+  // one, else the held word's own class (so re-picking opens on the right vocabulary), else
+  // the slot's default. Returns "" for a single-vocabulary slot (no toggle).
+  function kindFor(slot: SlotKey): string {
+    const cats = slotCategories(slot);
+    if (!cats) return "";
+    const stored = slotKindState[slot];
+    if (stored != null) return stored;
+    const held = selection[slot] as Concept | undefined;
+    if (held?.role && cats.options.some((o) => o.value === held.role))
+      return held.role;
+    return cats.fallback;
+  }
+
+  const handleSlotKindChange = (slot: SlotKey, kind: string) =>
+    setSlotKindState((prev) => ({ ...prev, [slot]: kind }));
 
   // Click a filled word box to change its word: select the slot and open its inline
   // picker over the current word (see SlotNode / slotTypeahead `editing`).
@@ -853,6 +876,8 @@ export function PhraseBuilder({
     handleEditSlot,
     handleCancelEdit,
     handleConceptSelect,
+    slotKind: kindFor,
+    onSlotKindChange: handleSlotKindChange,
     handleClear,
     handleToggleNumber,
     handleToggleGender,
@@ -910,11 +935,20 @@ export function PhraseBuilder({
               concept={undefined}
               isActive={activeSlot === "subject"}
               onClear={() => handleClear("subject")}
+              categoryToggle={
+                <CategoryToggle
+                  options={slotCategories("subject")!.options}
+                  value={kindFor("subject")}
+                  onChange={(v) => handleSlotKindChange("subject", v)}
+                />
+              }
               emptyContent={
                 <SubjectTypeahead
                   onSelect={(c, opts) =>
                     handleConceptSelect(c, "subject", opts)
                   }
+                  kind={kindFor("subject")}
+                  onKindChange={(v) => handleSlotKindChange("subject", v)}
                 />
               }
             />

@@ -17,15 +17,26 @@ import { ConceptSelectOpts } from "./interfaces.ts";
 export function SubjectTypeahead({
   onSelect,
   placeholder = "type a subject…",
+  kind = "noun",
+  onKindChange,
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
   // The picker is pronoun-inclusive (pronouns + nouns); the label varies by slot
   // (a subject vs. a causal complement, which also accepts a pronoun).
   placeholder?: string;
+  // The word-category switch (noun / pronoun), controlled from the box so the in-dropdown
+  // tabs and the on-box toggle stay in sync. Standalone callers may omit it (defaults noun,
+  // switchable locally within the popper via `onKindChange`).
+  kind?: string;
+  onKindChange?: (kind: string) => void;
 }) {
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
-  const [tab, setTab] = useState<"pronoun" | "noun">("noun");
+  // The category is controlled when the box supplies `onKindChange`; otherwise the popper
+  // owns it locally so a bare <SubjectTypeahead/> still works.
+  const [localTab, setLocalTab] = useState<string>(kind);
+  const tab = onKindChange ? kind : localTab;
+  const setTab = onKindChange ?? setLocalTab;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);

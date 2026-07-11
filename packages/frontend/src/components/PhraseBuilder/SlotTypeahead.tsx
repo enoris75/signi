@@ -1,6 +1,6 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
-import { ConceptSelectOpts, PhraseSelection, SlotKey } from "./interfaces.ts";
+import { ConceptSelectOpts, PhraseSelection, slotCategories, SlotKey } from "./interfaces.ts";
 import { COMPLEMENT_KEY_SET } from "./slots.ts";
 import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
@@ -21,6 +21,8 @@ export function slotTypeahead({
   onSelect,
   nounSubject = false,
   editing = false,
+  kind,
+  onKindChange,
 }: {
   slotKey: SlotKey;
   activeSlot: SlotKey | null;
@@ -32,13 +34,18 @@ export function slotTypeahead({
   // Re-picking the word of an already-filled box: bypass the empty/active guard so the
   // picker renders over the current word.
   editing?: boolean;
+  // The controlled word-category for a switchable slot, shared with the on-box toggle so
+  // the in-dropdown selector and the box selector move together. Undefined for a
+  // single-vocabulary slot (the picker ignores it).
+  kind?: string;
+  onKindChange?: (kind: string) => void;
 }): ReactNode {
   // Only the active, still-empty slot renders a picker — unless we're editing a filled one.
   if (!editing && (slotKey !== activeSlot || selection[slotKey])) return undefined;
 
   const pick = (c: Concept, opts?: ConceptSelectOpts) => onSelect(c, slotKey, opts);
 
-  return pickerFor(slotKey, pick, nounSubject, selection[slotKey]);
+  return pickerFor(slotKey, pick, nounSubject, kind, onKindChange);
 }
 
 // Whether a slot type offers an inline word-picker — i.e. a filled box of this kind can
@@ -54,9 +61,10 @@ function pickerFor(
   slotKey: SlotKey,
   pick: (c: Concept, opts?: ConceptSelectOpts) => void,
   nounSubject: boolean,
-  // The concept the slot already holds, when re-picking — lets a two-vocabulary picker
-  // open on the kind that is currently there.
-  held?: Concept,
+  // The controlled category + setter for a switchable slot (see slotTypeahead). The
+  // starting class for a re-pick is decided by the caller (from the held concept's role).
+  kind?: string,
+  onKindChange?: (kind: string) => void,
 ): ReactNode {
   switch (slotKey) {
     case "verb":
@@ -65,7 +73,7 @@ function pickerFor(
       return nounSubject ? (
         <DirectObjectTypeahead onSelect={pick} />
       ) : (
-        <SubjectTypeahead onSelect={pick} />
+        <SubjectTypeahead onSelect={pick} kind={kind} onKindChange={onKindChange} />
       );
     case "directObject":
       return <DirectObjectTypeahead onSelect={pick} />;
@@ -78,26 +86,29 @@ function pickerFor(
     default:
       // Every adjective slot — the core roles' chains and the complements'
       // (sourceAdjective, directionAdjective2, …) alike — carries the Adjective ⇄ Noun
-      // switch (a noun here is attributive).
-      if (/Adjective\d?$/.test(slotKey))
-        return <ModifierTypeahead onSelect={pick} />;
-      // The verb's adverb slot — a single-vocabulary adverb picker.
-      if (slotKey === "modifier") return <AdverbTypeahead onSelect={pick} />;
-      // The subject complement takes a predicate noun ("becomes a legend") or a predicate
-      // adjective ("seems happy"), so it carries the same Noun ⇄ Adjective switch — opened
-      // on Noun, the more common head.
-      if (slotKey === "predicative")
+      // switch (a noun here is attributive). The subject complement takes a predicate noun
+      // ("becomes a legend") or a predicate adjective ("seems happy") — the same switch.
+      if (/Adjective\d?$/.test(slotKey) || slotKey === "predicative")
         return (
           <ModifierTypeahead
             onSelect={pick}
-            defaultKind={held?.role === "adjective" ? "adjective" : "noun"}
+            kind={kind}
+            onKindChange={onKindChange}
+            options={slotCategories(slotKey)?.options}
           />
         );
+      // The verb's adverb slot — a single-vocabulary adverb picker.
+      if (slotKey === "modifier") return <AdverbTypeahead onSelect={pick} />;
       // The causal complement ("because of him") also accepts a pronoun, so it uses the
       // pronoun-inclusive picker; the motion/locative complements stay noun-only.
       if (slotKey === "cause")
         return (
-          <SubjectTypeahead onSelect={pick} placeholder="type a noun or pronoun…" />
+          <SubjectTypeahead
+            onSelect={pick}
+            placeholder="type a noun or pronoun…"
+            kind={kind}
+            onKindChange={onKindChange}
+          />
         );
       // Motion/locative complements share the indirect-object picker.
       if (COMPLEMENT_KEY_SET.has(slotKey))

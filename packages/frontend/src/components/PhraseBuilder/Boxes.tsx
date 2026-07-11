@@ -1,4 +1,12 @@
-import { Box, Paper, Typography, Tooltip, IconButton } from "@mui/material";
+import {
+  Box,
+  Paper,
+  Typography,
+  Tooltip,
+  IconButton,
+  ToggleButton,
+  ToggleButtonGroup,
+} from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
@@ -25,7 +33,53 @@ import {
   type Tense,
 } from "@signi/shared";
 import { ReactNode } from "react";
-import { SlotConfig } from "./interfaces";
+import { SlotCategory, SlotConfig } from "./interfaces";
+
+// The word-category switch (Noun | Pronoun, or Noun | Adj) shown both on an empty box and
+// inside the open word picker. Purely a vocabulary chooser — the two places share one
+// `value`/`onChange` so they stay in lock-step. `stopPropagation` on pointer-down keeps a
+// click from starting a box drag (on the canvas) or blurring the picker input (in a popper).
+export function CategoryToggle({
+  options,
+  value,
+  onChange,
+}: {
+  options: SlotCategory[];
+  value: string;
+  onChange: (value: string) => void;
+}) {
+  return (
+    <ToggleButtonGroup
+      size="small"
+      exclusive
+      value={value}
+      onChange={(_, v) => v && onChange(v)}
+      onPointerDown={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.preventDefault()}
+      sx={{
+        mb: 0.5,
+        "& .MuiToggleButton-root": {
+          px: 0.75,
+          py: 0.1,
+          fontFamily: '"Inter", sans-serif',
+          fontSize: "0.55rem",
+          fontWeight: 700,
+          letterSpacing: "0.08em",
+          textTransform: "uppercase",
+          lineHeight: 1.4,
+          border: "1px solid",
+          borderColor: "divider",
+        },
+      }}
+    >
+      {options.map((o) => (
+        <ToggleButton key={o.value} value={o.value}>
+          {o.label}
+        </ToggleButton>
+      ))}
+    </ToggleButtonGroup>
+  );
+}
 
 export interface SatelliteIcon {
   key: string;
@@ -49,6 +103,7 @@ export function SlotBox({
   isActive,
   onClear,
   emptyContent,
+  categoryToggle,
   footer,
   dimmed = false,
   highlight = false,
@@ -59,6 +114,10 @@ export function SlotBox({
   isActive: boolean;
   onClear: () => void;
   emptyContent?: ReactNode;
+  // The word-category switch (Noun | Pronoun / Noun | Adj) for a switchable slot, shown at
+  // the top of the box only while it is empty (no word chosen). Undefined for a
+  // single-vocabulary slot or a filled box.
+  categoryToggle?: ReactNode;
   // Extra content rendered below a filled slot's word (e.g. the noun-modifier relation chip).
   footer?: ReactNode;
   // dimmed = this noun is a relative-clause link target: greyed out, the mere endpoint of
@@ -132,18 +191,23 @@ export function SlotBox({
               : (concept.label ?? concept.description)}
           </Typography>
         ) : (
-          (emptyContent ?? (
-            <Typography
-              sx={{
-                fontFamily: '"Inter", sans-serif',
-                fontSize: "0.8rem",
-                color: "text.disabled",
-                fontStyle: "italic",
-              }}
-            >
-              {isActive ? "choose…" : "empty"}
-            </Typography>
-          ))
+          <>
+            {/* Only a genuinely-empty box wears the on-box category switch; a filled box
+                being re-picked (editing) keeps its word's class. */}
+            {!concept && categoryToggle}
+            {emptyContent ?? (
+              <Typography
+                sx={{
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: "0.8rem",
+                  color: "text.disabled",
+                  fontStyle: "italic",
+                }}
+              >
+                {isActive ? "choose…" : "empty"}
+              </Typography>
+            )}
+          </>
         )}
         {concept && !editing && footer}
       </Paper>

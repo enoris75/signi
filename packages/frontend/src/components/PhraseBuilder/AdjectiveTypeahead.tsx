@@ -1,12 +1,16 @@
 import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
-import { useState, useRef } from "react";
+import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 
 export function AdjectiveTypeahead({
   onSelect,
+  // Optional sticky content pinned to the top of the dropdown — used to surface the
+  // word-category switch inside the picker (mirroring the on-box toggle).
+  header,
 }: {
   onSelect: (concept: Concept) => void;
+  header?: ReactNode;
 }) {
   const { data: adjectives = [] } = useConcepts("adjective");
   const [query, setQuery] = useState("");
@@ -83,38 +87,49 @@ export function AdjectiveTypeahead({
         }}
       />
       <Popper
-        open={open && filtered.length > 0}
+        open={(open && filtered.length > 0) || Boolean(header && open)}
         anchorEl={anchorRef.current}
         placement="bottom-start"
         style={{ zIndex: 1300 }}
         modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
       >
-        <Paper
-          ref={listRef}
-          elevation={4}
-          sx={{ minWidth: 160, maxHeight: 200, overflow: "auto", py: 0.5 }}
-        >
-          {filtered.map((a, i) => (
+        <Paper elevation={4} sx={{ minWidth: 160, overflow: "hidden" }}>
+          {header && (
             <Box
-              key={a.id}
-              onMouseDown={(e) => e.preventDefault()}
-              onMouseEnter={() => setHighlightedIdx(i)}
-              onClick={() => commit(i)}
               sx={{
-                px: 1.5,
+                px: 1,
                 py: 0.5,
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: "0.85rem",
-                fontStyle: "italic",
-                cursor: "pointer",
-                bgcolor:
-                  i === highlightedIdx ? "action.selected" : "transparent",
-                "&:hover": { bgcolor: "action.hover" },
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
               }}
             >
-              {a.label ?? a.description}
+              {header}
             </Box>
-          ))}
+          )}
+          <Box ref={listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
+            {filtered.map((a, i) => (
+              <Box
+                key={a.id}
+                onMouseDown={(e) => e.preventDefault()}
+                onMouseEnter={() => setHighlightedIdx(i)}
+                onClick={() => commit(i)}
+                sx={{
+                  px: 1.5,
+                  py: 0.5,
+                  fontFamily: '"Lora", Georgia, serif',
+                  fontSize: "0.85rem",
+                  fontStyle: "italic",
+                  cursor: "pointer",
+                  bgcolor:
+                    i === highlightedIdx ? "action.selected" : "transparent",
+                  "&:hover": { bgcolor: "action.hover" },
+                }}
+              >
+                {a.label ?? a.description}
+              </Box>
+            ))}
+          </Box>
         </Paper>
       </Popper>
     </Box>

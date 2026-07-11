@@ -205,6 +205,60 @@ export const POSSESSOR_KEY = (which: NounKey) =>
 
 export type SlotKey = SlotConfig["key"];
 
+// ── Word-category switch ─────────────────────────────────────────────────────
+// Some slots accept a word from one of two lexical classes: the subject (and the causal
+// complement) take a noun or a pronoun; the subject complement and every adjective slot
+// take a noun or an adjective. The chosen class is shown in two synced places — a toggle
+// *on the empty box*, and the category selector *inside the open word picker*. It only
+// chooses which vocabulary is searched; the picked concept's own `role` is what downstream
+// code reads. A single-vocabulary slot (verb, direct object, adverb, …) returns null.
+export interface SlotCategory {
+  value: string;
+  label: string;
+}
+
+export function slotCategories(
+  slotKey: SlotKey,
+  // In noun-phrase (possessor) mode the `subject` slot is a plain noun head — no pronoun.
+  nounSubject = false,
+): { options: SlotCategory[]; fallback: string } | null {
+  if (slotKey === "subject")
+    return nounSubject
+      ? null
+      : {
+          options: [
+            { value: "noun", label: "Noun" },
+            { value: "pronoun", label: "Pron" },
+          ],
+          fallback: "noun",
+        };
+  if (slotKey === "cause")
+    return {
+      options: [
+        { value: "noun", label: "Noun" },
+        { value: "pronoun", label: "Pron" },
+      ],
+      fallback: "noun",
+    };
+  if (slotKey === "predicative")
+    return {
+      options: [
+        { value: "noun", label: "Noun" },
+        { value: "adjective", label: "Adj" },
+      ],
+      fallback: "noun",
+    };
+  if (/Adjective\d?$/.test(slotKey))
+    return {
+      options: [
+        { value: "adjective", label: "Adj" },
+        { value: "noun", label: "Noun" },
+      ],
+      fallback: "adjective",
+    };
+  return null;
+}
+
 // ── Multi-container workspace ────────────────────────────────────────────────
 // The builder now edits a *stack* of independent phrase containers. A relative clause
 // is expressed as a cross-container link: a noun in one container (the source/head) is

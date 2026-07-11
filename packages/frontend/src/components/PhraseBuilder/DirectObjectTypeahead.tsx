@@ -1,12 +1,16 @@
 import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
-import { useState, useRef } from "react";
+import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 
 export function DirectObjectTypeahead({
   onSelect,
+  // Optional sticky content pinned to the top of the dropdown — used to surface the
+  // word-category switch inside the picker (mirroring the on-box toggle).
+  header,
 }: {
   onSelect: (concept: Concept) => void;
+  header?: ReactNode;
 }) {
   const { data: nouns = [] } = useConcepts("noun");
   const [query, setQuery] = useState("");
@@ -83,18 +87,31 @@ export function DirectObjectTypeahead({
         }}
       />
       <Popper
-        open={open && filtered.length > 0}
+        open={(open && filtered.length > 0) || Boolean(header && open)}
         anchorEl={anchorRef.current}
         placement="bottom-start"
         style={{ zIndex: 1300 }}
         modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
       >
-        <Paper
-          ref={listRef}
-          elevation={4}
-          sx={{ minWidth: 160, maxHeight: 200, overflow: "auto", py: 0.5 }}
-        >
-          {filtered.map((n, i) => (
+        <Paper elevation={4} sx={{ minWidth: 160, overflow: "hidden" }}>
+          {header && (
+            <Box
+              sx={{
+                px: 1,
+                py: 0.5,
+                borderBottom: "1px solid",
+                borderColor: "divider",
+                bgcolor: "background.paper",
+              }}
+            >
+              {header}
+            </Box>
+          )}
+          <Box
+            ref={listRef}
+            sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}
+          >
+            {filtered.map((n, i) => (
             <Box
               key={n.id}
               onMouseDown={(e) => e.preventDefault()}
@@ -114,7 +131,8 @@ export function DirectObjectTypeahead({
             >
               {n.label ?? n.description}
             </Box>
-          ))}
+            ))}
+          </Box>
         </Paper>
       </Popper>
     </Box>
