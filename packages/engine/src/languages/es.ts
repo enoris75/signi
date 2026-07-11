@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
-import { moodForm, moodPN } from '../mood.js';
+import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "más"/"menos"; the noun phrase's definite article distinguishes them ("un gato más
@@ -420,6 +420,17 @@ function predicateText(
   const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
   const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
   const complementsText = complementsPhrase(complements, subjectForms);
+  // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
+  // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
+  // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here.
+  if (mood === 'imperative') {
+    const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const impForm = imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated;
+    const impVerb = impNeg ? `no ${impForm}` : impForm;
+    return [impVerb, modifierText, directObjectText, indirectObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -428,7 +439,10 @@ function predicateText(
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
-  const subjectText = withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
+  // An imperative drops its subject (the person still drives the form — see predicateText).
+  const subjectText = phrase.verbPhrase?.mood === 'imperative'
+    ? ''
+    : withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
   // Verbless period: a bare noun phrase ("últimas noticias").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(

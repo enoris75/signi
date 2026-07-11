@@ -225,7 +225,8 @@ export function buildSatellites(
       parent: "verb",
       label: "Tense",
       icon: <AccessTimeIcon sx={iconSx} />,
-      available: true,
+      // An imperative is tenseless (present command), so the control is withdrawn under it.
+      available: !selection.imperative,
       // Non-default (solid) once the tense is anything but the implicit present.
       hasValue: Boolean(selection.verbTense) && selection.verbTense !== "present",
       alwaysSet: true,
@@ -236,7 +237,8 @@ export function buildSatellites(
       parent: "verb",
       label: "Aspect",
       icon: <TimelapseIcon sx={iconSx} />,
-      available: true,
+      // An imperative forces neutral aspect, so the control is withdrawn under it.
+      available: !selection.imperative,
       // Non-default (solid) once the aspect is anything but the implicit neutral.
       hasValue: Boolean(selection.verbAspect) && selection.verbAspect !== "neutral",
       alwaysSet: true,
@@ -250,7 +252,8 @@ export function buildSatellites(
       parent: "verb",
       label: "Modal",
       icon: <GavelIcon sx={iconSx} />,
-      available: true,
+      // A modal fills the same finite/mood slot as the command, so it's withdrawn under it.
+      available: !selection.imperative,
       hasValue: Boolean(selection.verbModal),
       valueLabel: conceptLabel(selection.verbModal),
     },
@@ -259,7 +262,7 @@ export function buildSatellites(
       parent: "verbModal",
       label: "Modal 2",
       icon: <GavelIcon sx={iconSx} />,
-      available: Boolean(selection.verbModal),
+      available: !selection.imperative && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModal2),
       valueLabel: conceptLabel(selection.verbModal2),
     },

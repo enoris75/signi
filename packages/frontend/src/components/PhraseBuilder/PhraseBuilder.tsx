@@ -13,6 +13,7 @@ import {
   adaptPossessorBinding,
   ConceptSelectOpts,
   GenderSlot,
+  ImperativePerson,
   NounAddress,
   NounKey,
   NumberSlot,
@@ -43,9 +44,11 @@ import {
   cycleModifierRelation,
   cycleTense,
   removePossessor,
+  setImperativePerson,
   setSentiment,
   setSpecifier,
   toggleGender,
+  toggleImperative,
   toggleNegative,
   toggleNumber,
 } from "./phraseReducers.ts";
@@ -90,6 +93,7 @@ import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
 import { PeriodContainer } from "./PeriodContainer.tsx";
+import { ImperativeSubjectSelector } from "./ImperativeSubjectSelector.tsx";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -347,6 +351,9 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => cycleDegree(prev, slotKey));
   const handleCycleTense = () => onPhraseUpdate(cycleTense);
   const handleCycleAspect = () => onPhraseUpdate(cycleAspect);
+  const handleToggleImperative = () => onPhraseUpdate(toggleImperative);
+  const handleSetImperativePerson = (person: ImperativePerson) =>
+    onPhraseUpdate((prev) => setImperativePerson(prev, person));
   const handleSelectSpecifier = (spec: PathSpecifier) =>
     onPhraseUpdate((prev) => setSpecifier(prev, spec));
   const handleSelectSentiment = (sentiment: CauseSentiment) =>
@@ -930,28 +937,36 @@ export function PhraseBuilder({
               height: canvasHeight,
             }}
           >
-            <SlotBox
-              slot={subjectSlot}
-              concept={undefined}
-              isActive={activeSlot === "subject"}
-              onClear={() => handleClear("subject")}
-              categoryToggle={
-                <CategoryToggle
-                  options={slotCategories("subject")!.options}
-                  value={kindFor("subject")}
-                  onChange={(v) => handleSlotKindChange("subject", v)}
-                />
-              }
-              emptyContent={
-                <SubjectTypeahead
-                  onSelect={(c, opts) =>
-                    handleConceptSelect(c, "subject", opts)
-                  }
-                  kind={kindFor("subject")}
-                  onKindChange={(v) => handleSlotKindChange("subject", v)}
-                />
-              }
-            />
+            {selection.imperative ? (
+              // A command drops its subject — the box becomes the addressee selector instead.
+              <ImperativeSubjectSelector
+                value={selection.imperativePerson ?? "2sg"}
+                onChange={handleSetImperativePerson}
+              />
+            ) : (
+              <SlotBox
+                slot={subjectSlot}
+                concept={undefined}
+                isActive={activeSlot === "subject"}
+                onClear={() => handleClear("subject")}
+                categoryToggle={
+                  <CategoryToggle
+                    options={slotCategories("subject")!.options}
+                    value={kindFor("subject")}
+                    onChange={(v) => handleSlotKindChange("subject", v)}
+                  />
+                }
+                emptyContent={
+                  <SubjectTypeahead
+                    onSelect={(c, opts) =>
+                      handleConceptSelect(c, "subject", opts)
+                    }
+                    kind={kindFor("subject")}
+                    onKindChange={(v) => handleSlotKindChange("subject", v)}
+                  />
+                }
+              />
+            )}
           </Box>
         ) : (
           <Box
@@ -969,7 +984,22 @@ export function PhraseBuilder({
             />
 
             <>
-              <NounPhraseBuilder which="subject" ctx={ctx} />
+              {selection.imperative ? (
+                // A command drops its subject: grey the subject box (kept for layout) and overlay
+                // the addressee selector on its footprint.
+                <>
+                  <Box sx={{ opacity: 0.35, pointerEvents: "none" }}>
+                    <NounPhraseBuilder which="subject" ctx={ctx} />
+                  </Box>
+                  <ImperativeSubjectSelector
+                    value={selection.imperativePerson ?? "2sg"}
+                    onChange={handleSetImperativePerson}
+                    rect={groupRects.find((g) => g.nodeKeys.includes("subject"))}
+                  />
+                </>
+              ) : (
+                <NounPhraseBuilder which="subject" ctx={ctx} />
+              )}
               <VerbPhraseBuilder ctx={ctx} />
               <NounPhraseBuilder which="directObject" ctx={ctx} />
               <NounPhraseBuilder which="indirectObject" ctx={ctx} />
@@ -1110,6 +1140,7 @@ export function PhraseBuilder({
                 // An IF clause can't also be a main clause (conditionals don't chain), and a
                 // period already in a coordination can't also start a conditional.
                 canStart:
+                  !selection.imperative &&
                   !binding.hasConditionalTarget &&
                   !binding.hasCoordinativeSource &&
                   !binding.hasCoordinativeTarget,
@@ -1131,6 +1162,7 @@ export function PhraseBuilder({
                 // A period can take part in only one clause-level relation at a time: not a
                 // second clause already, and not tied into a conditional.
                 canStart:
+                  !selection.imperative &&
                   !binding.hasCoordinativeTarget &&
                   !binding.hasConditionalSource &&
                   !binding.hasConditionalTarget,
@@ -1140,6 +1172,18 @@ export function PhraseBuilder({
               }
             : undefined
         }
+        imperative={{
+          active: Boolean(selection.imperative),
+          // An imperative is a mood, mutually exclusive with a conditional / coordination, so the
+          // toggle is disabled while this period takes part in one.
+          disabled: binding
+            ? binding.hasConditionalSource ||
+              binding.hasConditionalTarget ||
+              binding.hasCoordinativeSource ||
+              binding.hasCoordinativeTarget
+            : false,
+          onToggle: handleToggleImperative,
+        }}
       >
         {content}
       </PeriodContainer>

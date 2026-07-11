@@ -26,12 +26,14 @@ export interface ResolvedNounPhrase {
 }
 
 /**
- * Verb mood, set by the translator only when the plan is a hypothetical conditional:
- * the main clause's verb is `'conditional'` ("would run"), the "if" clause's verb is
- * `'subjunctive'` (past / imperfect-subjunctive, "if the cat ate"). Absent ⇒ plain
- * `'indicative'`. Each engine maps this onto its own conditional/subjunctive forms.
+ * Verb mood, set by the translator. For a hypothetical conditional the main clause's verb is
+ * `'conditional'` ("would run") and the "if" clause's verb is `'subjunctive'` (past /
+ * imperfect-subjunctive, "if the cat ate"). For a command the verb is `'imperative'` ("eat!",
+ * "don't run!"), the subject is dropped from the surface, and the subject's person/number
+ * selects the imperative form (2sg default, 1pl "let's…", 2pl). Absent ⇒ plain `'indicative'`.
+ * Each engine maps this onto its own conditional / subjunctive / imperative forms.
  */
-export type Mood = 'indicative' | 'conditional' | 'subjunctive';
+export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'imperative';
 
 /** A resolved verb phrase: the verb, negation flag, tense, aspect, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {

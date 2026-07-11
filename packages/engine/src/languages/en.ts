@@ -292,6 +292,22 @@ function predicateParts(
 
   const negateVerb = verbNegative === true && !modifierIsNegative;
 
+  // Imperative: a subjectless command on the bare base ("eat the food!", "run!"). The subject
+  // pronoun's person selects the form — 1st-plural is the "let's …" cohortative ("let's eat"),
+  // 2nd person (singular or plural share a form in English) is the plain base. Negation is
+  // "do not …" for 2nd person and "let's not …" for the cohortative; a frequency adverb keeps
+  // its pre-verb slot ("always eat"), manner adverbs trail ("eat slowly").
+  if (mood === 'imperative') {
+    const base = verb.forms['base'] ?? conjugate(verb.forms, subjectForms);
+    const cohortative = (subjectForms['person'] ?? '2') === '1'; // 1pl "let's"
+    const verbText = cohortative
+      ? (negateVerb ? `let's not ${base}` : `let's ${base}`)
+      : (negateVerb ? `do not ${base}` : base);
+    const preVerb = isFrequency ? modifierText : '';
+    const postVerb = isFrequency ? '' : modifierText;
+    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+  }
+
   // Conditional apodosis: "would" + the verb group ("would run", "would not run", "would be
   // running", "would have seen", "would want to go"). "would" is a defective modal auxiliary,
   // so it takes "not" directly and carries no tense/agreement itself.
@@ -396,7 +412,10 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
-  const subjectText = withRelative(subjectPhrase(subject), subject);
+  // An imperative drops its subject from the surface, but the subject's person/number still
+  // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
+  const imperative = phrase.verbPhrase?.mood === 'imperative';
+  const subjectText = imperative ? '' : withRelative(subjectPhrase(subject), subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subjectText.trim();
   return [

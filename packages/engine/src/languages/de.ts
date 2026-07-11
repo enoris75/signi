@@ -527,6 +527,37 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   return `, ${body}`;
 }
 
+// Imperative person key from a subject: 1st-plural cohortative, else 2nd sg/pl.
+type DeIPN = '2sg' | '1pl' | '2pl';
+function deImperativePN(forms: Record<string, string>): DeIPN {
+  const person = forms['person'] ?? '2';
+  const plural = (forms['number'] ?? 'singular') === 'plural';
+  return person === '1' ? '1pl' : plural ? '2pl' : '2sg';
+}
+
+// Irregular imperative surfaces by concept. The du (2sg) form is the one that misbehaves: strong
+// e→i/ie verbs keep the vowel change (essen→iss, lesen→lies, sehen→sieh) that the plain infinitive
+// stem loses, and sein/wissen are suppletive. ihr (2pl) is the ordinary 2pl-present, and the wir
+// cohortative is the infinitive with inverted "wir" ("laufen wir", but "seien wir").
+const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
+  BE:   { '2sg': 'sei', '1pl': 'seien', '2pl': 'seid' }, // sein
+  EAT:  { '2sg': 'iss' },
+  READ: { '2sg': 'lies' },
+  SEE:  { '2sg': 'sieh' },
+  KNOW: { '2sg': 'wisse' }, // wissen
+};
+
+/** The German imperative verb surface for a person: a single word for du/ihr, "<inf> wir" for the
+ *  cohortative. Regular du is the infinitive stem (laufen→lauf); ihr the stored 2pl-present. */
+function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: DeIPN): string {
+  const base = forms['base'] ?? '';
+  const stem = base.replace(/e?n$/, '');
+  const ov = DE_IMPERATIVE[conceptId];
+  if (pn === '2sg') return ov?.['2sg'] ?? stem ?? base;
+  if (pn === '2pl') return ov?.['2pl'] ?? forms['2pl_present'] ?? `${stem}t`;
+  return `${ov?.['1pl'] ?? base} wir`; // 1pl cohortative
+}
+
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
     const { subject, verbPhrase, directObject, indirectObject } = phrase;
@@ -534,6 +565,28 @@ function renderClause(phrase: ResolvedPhrase): string {
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
     const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood } = verbPhrase;
+
+    // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" negates,
+    // sitting before a predicate complement ("sei nicht vorsichtig") but after the objects
+    // otherwise ("iss das Brot nicht").
+    if (mood === 'imperative') {
+      const word = deImperativeWord(verb.forms, verb.conceptId, deImperativePN(subject.head.forms));
+      const impDirect = directObject ? nounPhrase(directObject, 'acc') : '';
+      const impIndirect = indirectObject ? nounPhrase(indirectObject, 'dat') : '';
+      const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
+      const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
+      const hasPredicative = !!phrase.complements?.['predicative'];
+      const impComplements = complementsPhrase(phrase.complements);
+      const parts = [word, impModifier, impIndirect, impDirect];
+      if (hasPredicative) {
+        if (applyNicht) parts.push('nicht');
+        parts.push(impComplements);
+      } else {
+        parts.push(impComplements);
+        if (applyNicht) parts.push('nicht');
+      }
+      return parts.filter(Boolean).join(' ').trim();
+    }
 
     // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
     // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"

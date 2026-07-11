@@ -112,14 +112,29 @@ function buildComplements(
 
 export { buildComplements };
 
+// The pronoun (concept + number) an imperative addressee maps to. The engines drop the subject
+// but read its person/number to pick the imperative form: tu (2sg) / "let's" (1pl) / plural (2pl).
+function imperativeSubject(person: PhraseSelection["imperativePerson"]): NounPhrase {
+  switch (person) {
+    case "1pl": return { concept: "FIRST_PERSON", number: "plural" };   // "let's …"
+    case "2pl": return { concept: "SECOND_PERSON", number: "plural" };
+    default:    return { concept: "SECOND_PERSON", number: "singular" }; // 2sg (default)
+  }
+}
+
 // Serialise one container's flat selection into a wire PhrasePlan (its noun phrases carry
 // no relative clauses; those are attached from cross-container links in workspacePlan.ts).
 export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
   return {
-    subject: buildNounPhrase(sel, "subject"),
+    // An imperative synthesises its subject from the chosen addressee (the user's own subject
+    // pick is left untouched in the selection, so toggling the command off restores it).
+    subject: sel.imperative
+      ? imperativeSubject(sel.imperativePerson)
+      : buildNounPhrase(sel, "subject"),
     verbPhrase: buildVerbPhrase(sel),
     directObject: buildNounPhrase(sel, "directObject"),
     indirectObject: buildNounPhrase(sel, "indirectObject"),
     complements: buildComplements(sel),
+    ...(sel.imperative && { imperative: true }),
   };
 }

@@ -187,7 +187,10 @@
       "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/a0a4c3f0-18a1-47e9-a865-95dc0d246ab6/scratchpad/drive4.mjs)",
       "Bash(python3 -c \"import json;json.load\\(open\\('.claude/settings.json'\\)\\);print\\('valid JSON'\\)\")",
       "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\([c['id'] for c in d if c['id'] in \\('BUILDER','PHRASE'\\)]\\)\")",
-      "Bash(grep -iE \"\\\\.\\(tsx|ts\\)$\")"
+      "Bash(grep -iE \"\\\\.\\(tsx|ts\\)$\")",
+      "Bash(xargs ps -o pid=,command= -p)",
+      "Bash(curl -s -X POST http://localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"SECOND_PERSON\",\"number\":\"singular\"},\"verbPhrase\":{\"verb\":\"EAT\"},\"directObject\":{\"concept\":\"FOOD\",\"definiteness\":\"definite\"},\"imperative\":true}}')",
+      "Bash(python3 -c \"import sys,json; [print\\(t['language'],':',t['text']\\) for t in json.load\\(sys.stdin\\)['translations']]\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

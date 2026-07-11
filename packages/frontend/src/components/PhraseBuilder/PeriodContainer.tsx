@@ -18,6 +18,7 @@ import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import CallMergeIcon from "@mui/icons-material/CallMerge";
+import CampaignIcon from "@mui/icons-material/Campaign";
 import {
   COORD_CONJUNCTION_LABEL,
   COORD_CONJUNCTION_OPTIONS,
@@ -65,6 +66,15 @@ export interface CoordinativeControl {
   onPick: () => void;
 }
 
+// The imperative (command) toggle on the card border. Independent of the workspace bindings —
+// every period, standalone or not, can be a command. Disabled while the period takes part in a
+// conditional or coordination, since an imperative is a mood mutually exclusive with those.
+export interface ImperativeControl {
+  active: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}
+
 export interface PeriodContainerProps {
   // The card's padding, in theme spacing units. The caller's resize grip negates it to
   // sit flush with the bottom border, so the two must stay in step.
@@ -101,6 +111,8 @@ export interface PeriodContainerProps {
   conditional?: ConditionalControl;
   // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
   coordinative?: CoordinativeControl;
+  // Imperative (command) toggle on the card border. Present for every period.
+  imperative?: ImperativeControl;
   children: React.ReactNode;
 }
 
@@ -129,6 +141,7 @@ export function PeriodContainer({
   onTidy,
   conditional,
   coordinative,
+  imperative,
   children,
 }: PeriodContainerProps) {
   const [coordMenuAnchor, setCoordMenuAnchor] = useState<HTMLElement | null>(
@@ -273,7 +286,9 @@ export function PeriodContainer({
               ? "warning.main"
               : coordActive
                 ? "info.main"
-                : "text.secondary",
+                : imperative?.active
+                  ? "success.main"
+                  : "text.secondary",
         boxShadow: condDroppable
           ? "0 0 0 2px rgba(237,108,2,0.35)"
           : coordDroppable
@@ -292,9 +307,10 @@ export function PeriodContainer({
               : undefined,
       }}
     >
-      {/* The clause-relation controls (conditional above, coordinative below), stacked on the
-          card's right border. Both connectors run from this cluster's registered anchor. */}
-      {(conditional || coordinative) && (
+      {/* The clause-level controls (imperative on top, then conditional, then coordinative),
+          stacked on the card's right border. The conditional/coordinative connectors run from
+          this cluster's registered anchor. */}
+      {(conditional || coordinative || imperative) && (
         <Box
           ref={conditional?.registerBorderAnchor}
           onPointerDown={(e) => e.stopPropagation()}
@@ -309,6 +325,36 @@ export function PeriodContainer({
             gap: 0.5,
           }}
         >
+          {imperative && (
+            <Tooltip
+              title={
+                imperative.disabled
+                  ? "Remove the IF / coordination link to make this a command"
+                  : imperative.active
+                    ? "This period is a command — turn it off"
+                    : "Make this period a command (imperative)"
+              }
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={imperative.onToggle}
+                  disabled={imperative.disabled}
+                  aria-label="Toggle imperative (command)"
+                  sx={{
+                    p: 0.25,
+                    bgcolor: "background.paper",
+                    border: "1px solid",
+                    borderColor: imperative.active ? "success.main" : "divider",
+                    color: imperative.active ? "success.main" : "text.secondary",
+                    "&:hover": { bgcolor: "background.paper" },
+                  }}
+                >
+                  <CampaignIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
           {conditional && (
             <Tooltip title={condTitle}>
               <span>
@@ -429,15 +475,17 @@ export function PeriodContainer({
               color: "text.secondary",
             }}
           >
-            {conditional?.hasCondition
-              ? "Main clause"
-              : conditional?.isIfClause
-                ? "If clause"
-                : coordinative?.hasCoordination
-                  ? "First clause"
-                  : coordinative?.isCoordinated
-                    ? `${coordLabel} clause`
-                    : ""}
+            {imperative?.active
+              ? "Command"
+              : conditional?.hasCondition
+                ? "Main clause"
+                : conditional?.isIfClause
+                  ? "If clause"
+                  : coordinative?.hasCoordination
+                    ? "First clause"
+                    : coordinative?.isCoordinated
+                      ? `${coordLabel} clause`
+                      : ""}
             <Box
               component="span"
               sx={{ color: "text.disabled", fontWeight: 500 }}

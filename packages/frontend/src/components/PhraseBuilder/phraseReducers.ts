@@ -13,6 +13,7 @@ import {
 } from "@signi/shared";
 import {
   GenderSlot,
+  ImperativePerson,
   NounKey,
   NumberSlot,
   PhraseSelection,
@@ -288,6 +289,35 @@ export function cycleDegree(
     ...prev,
     adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: next },
   };
+}
+
+// Toggle imperative (command) mood on this period. Turning it on forces the verb into the
+// present tense, neutral aspect and clears any modals — an imperative is a mood, so it can't
+// carry a tense/aspect/modal, and it's mutually exclusive with a conditional / coordination (the
+// UI gates those). The addressee defaults to 2sg. Turning it off leaves everything else intact,
+// including the user's own subject pick (which selectionToPlan restores).
+export function toggleImperative(prev: PhraseSelection): PhraseSelection {
+  if (prev.imperative) {
+    return { ...prev, imperative: false };
+  }
+  return {
+    ...prev,
+    imperative: true,
+    imperativePerson: prev.imperativePerson ?? "2sg",
+    verbTense: "present",
+    verbAspect: "neutral",
+    verbModal: undefined,
+    verbModal2: undefined,
+  };
+}
+
+// Set the imperative addressee (2sg / 1pl "let's" / 2pl). No-op semantics off imperative, but
+// harmless to store so the choice persists across a toggle.
+export function setImperativePerson(
+  prev: PhraseSelection,
+  person: ImperativePerson,
+): PhraseSelection {
+  return { ...prev, imperativePerson: person };
 }
 
 // Cycle the verb tense present → past → future → present.

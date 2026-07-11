@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
-import { moodForm, moodPN } from '../mood.js';
+import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes
@@ -550,6 +550,15 @@ function predicateText(
     : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms);
+  // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
+  // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
+  // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.
+  if (mood === 'imperative') {
+    const impForm = imperativeForm('it', verb, moodPN(subjectForms), negText === 'non') ?? verbText;
+    return [negText, impForm, modifierText, directObjectText, indirectObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   return [negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -573,7 +582,8 @@ function relativeText(np: ResolvedNounPhrase): string {
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
-  const subjectText = subjectPhrase(subject);
+  // An imperative drops its subject (the person still drives the form — see predicateText).
+  const subjectText = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectPhrase(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(

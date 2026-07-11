@@ -49,8 +49,19 @@ export interface SlotConfig {
     color: "primary" | "secondary" | "success" | "warning" | "info" | "error";
 }
 
+// Which addressee an imperative command targets. The subject is dropped from the surface, but
+// the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
+export type ImperativePerson = "2sg" | "1pl" | "2pl";
+
 export interface PhraseSelection {
     subject?: Concept;
+    // When set, this period is an imperative (command). The subject box becomes the addressee
+    // selector (see `imperativePerson`) and the subject is dropped by the engines; tense/aspect
+    // are forced present/neutral and modals cleared (an imperative is a mood, mutually exclusive
+    // with those and with a conditional / coordination — the UI enforces this).
+    imperative?: boolean;
+    // The addressee of an imperative command (default 2sg). Only meaningful when `imperative`.
+    imperativePerson?: ImperativePerson;
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;

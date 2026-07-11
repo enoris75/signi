@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
-import { moodForm, moodPN } from '../mood.js';
+import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
 // "plus"/"moins"; the noun phrase's definite article distinguishes them ("un chat plus
@@ -519,6 +519,15 @@ function predicateText(
     ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
     : '';
   const complementsText = complementsPhrase(complements, subjectForms);
+  // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
+  // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
+  // by `negateFinite` ("ne cours pas", "ne sois pas prudent", "aucun"/"jamais" taking bare "ne").
+  if (mood === 'imperative') {
+    const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
+    return [negateFinite(impForm), modifierText, directObjectText, indirectObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   return [effectiveVerb, effectiveMod, directObjectText, indirectObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -546,7 +555,8 @@ function relativeText(np: ResolvedNounPhrase): string {
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
-  const subjectText = subjectPhrase(subject);
+  // An imperative drops its subject (the person still drives the form — see predicateText).
+  const subjectText = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectPhrase(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(

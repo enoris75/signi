@@ -423,6 +423,16 @@ export interface PhrasePlan {
    * coordinated clause stays indicative and is not itself given a coordination.
    */
   coordination?: Coordination;
+  /**
+   * When true this clause is an **imperative** (a command — "eat the food!", "don't run!").
+   * The verb is rendered in the imperative mood and the subject is dropped, but `subject`
+   * still carries the addressee pronoun (2nd-singular by default, or 1st-plural "let's…" /
+   * 2nd-plural) so the engines pick the right person/number of the imperative form. An
+   * imperative is a mood, so it is mutually exclusive with a hypothetical `condition` and a
+   * `coordination`, and it forces present tense / neutral aspect / no modals (the UI enforces
+   * this; the translator also normalises it defensively).
+   */
+  imperative?: boolean;
 }
 
 /**
@@ -488,7 +498,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 2;
+export const SAVED_PHRASE_VERSION = 3;
 
 /**
  * The grain of a saved workspace:

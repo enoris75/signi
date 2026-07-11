@@ -322,15 +322,48 @@ function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): 
   return [...npSegs(pred.phrase), { t: cop }];
 }
 
+type JaIPN = '2sg' | '1pl' | '2pl';
+
+/** Imperative person key from a subject: 1st-plural cohortative, else 2nd person. */
+function jaImperativePN(forms: Record<string, string>): JaIPN {
+  const person = forms['person'] ?? '2';
+  const plural = (forms['number'] ?? 'singular') === 'plural';
+  return person === '1' ? '1pl' : plural ? '2pl' : '2sg';
+}
+
+/**
+ * The imperative verb segment(s). The 1st-plural is the cohortative ～ましょう ("let's eat",
+ * 食べましょう) off the masu-stem. The 2nd person is the polite request ～てください (食べてください)
+ * built on the te-form; its negative uses the plain prohibitive ～な (走るな) — a deliberate
+ * register gap (the affirmative stays polite), taken because the polite ～ないでください would need a
+ * nai-form the lexicon doesn't store.
+ */
+function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean): RubySegment[] {
+  if (pn === '1pl') {
+    const st = masuStem(verb);
+    if (st) return [wordSeg(st.stem + 'ましょう', st.reading !== undefined ? st.reading + 'ましょう' : undefined)];
+    return [wordSeg((verb.forms['masu_present'] ?? verb.forms['base'] ?? '').replace(/ます$/, '') + 'ましょう')];
+  }
+  if (negative) {
+    const base = verb.forms['base'] ?? '';
+    return [wordSeg(base + 'な', verb.forms['reading'] ? verb.forms['reading'] + 'な' : undefined)];
+  }
+  const te = verb.forms['te'];
+  const teSeg = te ? wordSeg(te, verb.forms['te_reading']) : wordSeg(verb.forms['base'] ?? '', verb.forms['reading']);
+  return [teSeg, { t: 'ください' }];
+}
+
 /**
  * The predicate half of a phrase, in Japanese order: complements IndObj+に DirectObj+を
  * Adv V. Shared by the main sentence (after 〜は) and by prenominal relative clauses.
+ * `imperativePN` is set only for a top-level command (relative clauses are never imperative).
  */
 function predicateSegs(
   verbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounPhrase | undefined,
   indirectObject: ResolvedNounPhrase | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  imperativePN?: JaIPN,
 ): RubySegment[] {
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
   const segs: RubySegment[] = [];
@@ -343,6 +376,25 @@ function predicateSegs(
   // intransitive and licenses only the predicative, so no objects or other complements occur;
   // an adverb (いつも) simply precedes the predicate.
   const predicative = complements?.['predicative'];
+  // Imperative: a subjectless command (SOV — objects/complements first, verb last). The copula
+  // command routes through する: "…にしてください" / "…にしないでください" (する's nai-form is fixed, so
+  // the copula negative *can* stay polite, unlike ordinary verbs).
+  if (mood === 'imperative') {
+    const pn = imperativePN ?? '2sg';
+    if (verb.forms['copula'] === '1' && predicative) {
+      segs.push(...complementSegs({ predicative }), { t: negated ? 'しないでください' : 'してください' });
+      return segs;
+    }
+    segs.push(...complementSegs(complements));
+    if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
+    if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
+    if (modifier) {
+      const b = modifier.forms['base'] ?? '';
+      if (b) segs.push(wordSeg(b, modifier.forms['reading']));
+    }
+    segs.push(...jaImperativeSegs(verb, pn, negated));
+    return segs;
+  }
   if (verb.forms['copula'] === '1' && predicative) {
     if (modifier) {
       const base = modifier.forms['base'] ?? '';
@@ -383,8 +435,11 @@ function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): R
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
   if (!phrase.verbPhrase) return npSegs(phrase.subject);
   const segs: RubySegment[] = [];
-  segs.push(...npSegs(phrase.subject), { t: subjectParticle });
-  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements));
+  // An imperative drops its subject/topic; the subject's person still selects the form.
+  const imperative = phrase.verbPhrase.mood === 'imperative';
+  if (!imperative) segs.push(...npSegs(phrase.subject), { t: subjectParticle });
+  const impPN = imperative ? jaImperativePN(phrase.subject.head.forms) : undefined;
+  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements, impPN));
   return segs;
 }
 
