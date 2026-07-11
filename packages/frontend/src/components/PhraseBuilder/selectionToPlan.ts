@@ -34,7 +34,16 @@ function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]
     if (!c) continue;
     if (c.role === "noun") {
       const relation = sel.modifierRelations?.[key] ?? "feature";
-      nounModifiers.push({ concept: c.id, relation: relation as ModifierRelation });
+      // The modifier's own number ("di frasi") and any adjective modifying it ("di frasi
+      // semantiche") — both scoped to the modifier, not the head. Omit when at defaults.
+      const number = sel.modifierNumbers?.[key];
+      const modAdj = sel.modifierAdjectives?.[key];
+      nounModifiers.push({
+        concept: c.id,
+        relation: relation as ModifierRelation,
+        ...(number === "plural" && { number }),
+        ...(modAdj && { adjectives: [modAdj.id] }),
+      });
     } else {
       adjectives.push(c.id);
       adjectiveDegrees.push(sel.adjectiveDegrees?.[key] ?? "positive");

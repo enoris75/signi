@@ -277,6 +277,20 @@ export interface Concept {
 export interface NounModifier {
   concept: string;              // a noun id ("SAIL" in "sail boat")
   relation: ModifierRelation;   // selects the linking preposition in Romance
+  /**
+   * Grammatical number of the attributive noun itself ("creatore di **frasi**"). Defaults
+   * to singular. In Romance the modifier is a real noun and can be plural; English keeps
+   * the attributive noun singular ("phrase creator") and German/Japanese ignore it (the
+   * compound / の-link doesn't inflect the non-head element).
+   */
+  number?: 'singular' | 'plural';
+  /**
+   * Adjectives modifying *this attributive noun*, not the head ("semantic" in "semantic
+   * phrase creator" → creatore di frasi **semantiche**). In Romance they agree with the
+   * modifier's own gender/number; English renders them bare and prenominal; German scopes
+   * them over the whole compound (approximation); Japanese renders them bare before the の.
+   */
+  adjectives?: string[];
 }
 
 /**
@@ -498,7 +512,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 3;
+export const SAVED_PHRASE_VERSION = 4;
 
 /**
  * The grain of a saved workspace:

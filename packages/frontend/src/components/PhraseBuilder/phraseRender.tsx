@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Tooltip, type SxProps, type Theme } from "@mui/material";
+import { Box, Popover, Tooltip, type SxProps, type Theme } from "@mui/material";
+import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   ConceptSelectOpts,
@@ -12,6 +13,7 @@ import {
   slotCategories,
 } from "./interfaces.ts";
 import { CategoryToggle, SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { conceptLabel } from "./satellites.tsx";
 import { CONTROL_GAP } from "./controlLayout.ts";
 import type { GroupRect, GroupShape } from "./graph.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
@@ -88,6 +90,10 @@ export interface PhraseRenderContext {
   handleCycleDefiniteness: (which: NounKey) => void;
   // Cycle the semantic relation of an attributive-noun modifier sitting in an adjective slot.
   handleCycleModifierRelation: (slotKey: SlotKey) => void;
+  // Toggle a noun-modifier's own number (singular ⇄ plural), keyed by its adjective slot.
+  handleCycleModifierNumber: (slotKey: SlotKey) => void;
+  // Set (or clear, with `undefined`) the adjective modifying a noun-modifier itself.
+  handleSetModifierAdjective: (slotKey: SlotKey, concept: Concept | undefined) => void;
   // Cycle the comparative degree of a real adjective sitting in an adjective slot.
   handleCycleDegree: (slotKey: SlotKey) => void;
   handleToggleNegative: () => void;
@@ -119,6 +125,98 @@ export function nodeElRef(ctx: PhraseRenderContext, key: string) {
   };
 }
 
+// Shared styling for the little footer chips that hang under a filled slot box (the
+// modifier relation / number / adjective controls, and the real-adjective degree chip).
+const FOOTER_CHIP_SX = {
+  display: "inline-block",
+  px: 0.75,
+  py: 0.1,
+  borderRadius: 1,
+  border: "1px solid",
+  borderColor: "divider",
+  bgcolor: "background.paper",
+  cursor: "pointer",
+  fontFamily: '"Inter", sans-serif',
+  fontSize: "0.55rem",
+  fontWeight: 700,
+  letterSpacing: "0.06em",
+  textTransform: "uppercase",
+  color: "text.secondary",
+  "&:hover": { borderColor: "text.secondary" },
+} as const;
+
+// The footer chip that picks the adjective modifying a noun-modifier itself ("semantic
+// *phrase* creator"). Empty → a muted "+ adj" affordance; filled → the adjective's label
+// (click to reopen the picker, "clear" to remove). The picker is the shared adjective
+// typeahead docked in a popover anchored to the chip.
+function ModifierAdjectiveChip({
+  slotKey,
+  adjective,
+  onSet,
+}: {
+  slotKey: SlotKey;
+  adjective?: Concept;
+  onSet: (slotKey: SlotKey, concept: Concept | undefined) => void;
+}) {
+  const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
+  return (
+    <>
+      <Tooltip
+        title={
+          adjective
+            ? `Adjective on modifier: ${conceptLabel(adjective)} — click to change`
+            : "Add an adjective describing this modifier"
+        }
+      >
+        <Box
+          component="span"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            setAnchor(e.currentTarget);
+          }}
+          sx={{
+            ...FOOTER_CHIP_SX,
+            color: adjective ? "text.secondary" : "text.disabled",
+            textTransform: adjective ? "none" : "uppercase",
+            fontStyle: adjective ? "italic" : "normal",
+          }}
+        >
+          {adjective ? conceptLabel(adjective) : "+ adj"}
+        </Box>
+      </Tooltip>
+      <Popover
+        open={Boolean(anchor)}
+        anchorEl={anchor}
+        onClose={() => setAnchor(null)}
+        anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+        onPointerDown={(e) => e.stopPropagation()}
+      >
+        <Box sx={{ p: 1, minWidth: 180 }}>
+          <AdjectiveTypeahead
+            onSelect={(c) => {
+              onSet(slotKey, c);
+              setAnchor(null);
+            }}
+          />
+          {adjective && (
+            <Box
+              component="span"
+              onClick={() => {
+                onSet(slotKey, undefined);
+                setAnchor(null);
+              }}
+              sx={{ ...FOOTER_CHIP_SX, mt: 1 }}
+            >
+              clear
+            </Box>
+          )}
+        </Box>
+      </Popover>
+    </>
+  );
+}
+
 // A single draggable slot box: pointer-drag wrapper + Tab/arrow keyboard nav
 // (cycling the global renderedSlots list) + the SlotBox itself. Shared by both
 // the verb-phrase and noun-phrase builders.
@@ -141,6 +239,8 @@ export function SlotNode({
     slotKind,
     onSlotKindChange,
     handleCycleModifierRelation,
+    handleCycleModifierNumber,
+    handleSetModifierAdjective,
     handleCycleDegree,
     nounPhrase,
     onBoxRef,
@@ -185,37 +285,55 @@ export function SlotNode({
   const relation: ModifierRelation =
     (selection.modifierRelations?.[slot.key] as ModifierRelation | undefined) ?? "feature";
   const degree: Degree = selection.adjectiveDegrees?.[slot.key] ?? "positive";
-  const relationChip = isNounModifier ? (
-    <Tooltip title={`Relation: ${MODIFIER_RELATION_LABELS[relation]} — click to change`}>
-      <Box
-        component="span"
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
-          e.stopPropagation();
-          handleCycleModifierRelation(slot.key);
-        }}
-        sx={{
-          display: "inline-block",
-          mt: 0.5,
-          px: 0.75,
-          py: 0.1,
-          borderRadius: 1,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.paper",
-          cursor: "pointer",
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.55rem",
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
-          color: "text.secondary",
-          "&:hover": { borderColor: "text.secondary" },
-        }}
+  // A noun modifier carries three footer controls: its semantic relation (→ preposition),
+  // its own grammatical number, and an optional adjective describing *it* ("di frasi
+  // semantiche"). They sit together in one wrapping row under the box.
+  const modifierNumber = selection.modifierNumbers?.[slot.key] ?? "singular";
+  const modifierAdjective = selection.modifierAdjectives?.[slot.key];
+  const modifierFooter = isNounModifier ? (
+    <Box
+      sx={{
+        mt: 0.5,
+        display: "flex",
+        flexWrap: "wrap",
+        gap: 0.5,
+        justifyContent: "center",
+      }}
+    >
+      <Tooltip title={`Relation: ${MODIFIER_RELATION_LABELS[relation]} — click to change`}>
+        <Box
+          component="span"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCycleModifierRelation(slot.key);
+          }}
+          sx={FOOTER_CHIP_SX}
+        >
+          {relation}
+        </Box>
+      </Tooltip>
+      <Tooltip
+        title={`Modifier number: ${modifierNumber === "plural" ? "Plural" : "Singular"} — click to change`}
       >
-        {relation}
-      </Box>
-    </Tooltip>
+        <Box
+          component="span"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={(e) => {
+            e.stopPropagation();
+            handleCycleModifierNumber(slot.key);
+          }}
+          sx={FOOTER_CHIP_SX}
+        >
+          {modifierNumber === "plural" ? "PL" : "SG"}
+        </Box>
+      </Tooltip>
+      <ModifierAdjectiveChip
+        slotKey={slot.key}
+        adjective={modifierAdjective}
+        onSet={handleSetModifierAdjective}
+      />
+    </Box>
   ) : undefined;
   // Same chip styling as the relation chip; shown for a real adjective. A positive
   // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
@@ -329,7 +447,7 @@ export function SlotNode({
             ? (v) => onSlotKindChange(slot.key, v)
             : undefined,
         })}
-        footer={relationChip ?? degreeChip}
+        footer={modifierFooter ?? degreeChip}
       />
     </Box>
   );

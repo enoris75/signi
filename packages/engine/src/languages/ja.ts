@@ -73,10 +73,17 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // adjectives / nested possessor / relative clause ("子供の猫の本").
   if (np.possessor) core.push(...npSegs(np.possessor), { t: 'の' });
   // Attributive nouns ("sail boat") are also の-linked in Japanese (ガラスのコップ); the
-  // relation is neutralised, so every relation renders the same の.
+  // relation is neutralised, so every relation renders the same の. The modifier's own
+  // adjectives are bare (Japanese adjectives don't agree) and precede it (意味的なフレーズ
+  // の創造者 = "semantic phrase creator").
   for (const m of np.nounModifiers) {
     const base = m.concept.forms['base'];
-    if (base) core.push(wordSeg(base, m.concept.forms['reading']), { t: 'の' });
+    if (!base) continue;
+    for (const a of m.adjectives) {
+      const ab = a.forms['base'] ?? '';
+      if (ab) core.push(wordSeg(ab, a.forms['reading']));
+    }
+    core.push(wordSeg(base, m.concept.forms['reading']), { t: 'の' });
   }
   const adjSegs: RubySegment[] = [];
   for (const a of np.adjectives) {

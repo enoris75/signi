@@ -164,6 +164,15 @@ export interface PhraseSelection {
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
     // to 'feature'. See NounModifier / ModifierRelation in @signi/shared.
     modifierRelations?: Partial<Record<string, ModifierRelation>>;
+    // Grammatical number of an attributive-noun modifier ("creatore di *frasi*"), keyed by
+    // the adjective slot key like `modifierRelations`. Only consulted when that slot holds a
+    // noun; defaults to 'singular'. See NounModifier.number in @signi/shared.
+    modifierNumbers?: Partial<Record<string, "singular" | "plural">>;
+    // An adjective modifying an attributive-noun modifier itself ("*semantic* phrase creator"
+    // → creatore di frasi *semantiche*), keyed by the adjective slot key. In Romance it agrees
+    // with the modifier's own gender/number, not the head's. Only consulted when the slot holds
+    // a noun. See NounModifier.adjectives in @signi/shared.
+    modifierAdjectives?: Partial<Record<string, Concept>>;
     // Comparative degree for any adjective slot whose picked concept is a real *adjective*
     // ("more beautiful"). Keyed by the adjective slot key, mirroring `modifierRelations`
     // (the two are mutually exclusive — a slot holds either an adjective or a noun-modifier).

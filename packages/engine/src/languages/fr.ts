@@ -298,14 +298,27 @@ function modalGroupFr(
 /** French linking preposition for an attributive noun, by relation (bare, no article). */
 const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de' };
 
-/** Postnominal attributive nouns as a bare "prep + noun" string; "de" elides before a vowel. */
+/**
+ * Postnominal attributive nouns as a bare "prep + noun" string ("de phrases sémantiques");
+ * "de" elides before a vowel. The modifier takes its own number and its adjectives agree
+ * with *its* gender/number ("créateur de phrases sémantiques"), postnominal as in French.
+ */
 function frMods(np: ResolvedNounPhrase): string {
   return np.nounModifiers
     .map((m) => {
-      const base = m.concept.forms['base'];
-      if (!base) return '';
+      const forms = m.concept.forms;
+      const plural = (forms['number'] ?? forms['count']) === 'plural';
+      const noun = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
+      if (!noun) return '';
+      const gender = forms['gender'] ?? 'masc';
+      const adjs = m.adjectives
+        .map((a) => agreeAdjFr(a.forms['base'] ?? '', gender, plural))
+        .filter(Boolean)
+        .join(' ');
+      const nounPart = adjs ? `${noun} ${adjs}` : noun;
       const prep = REL_PREP_FR[m.relation];
-      return prep === 'de' && VOWEL_START.test(base) ? `d'${base}` : `${prep} ${base}`;
+      // Elision keys on the noun that immediately follows "de" (the adjective is postnominal).
+      return prep === 'de' && VOWEL_START.test(noun) ? `d'${nounPart}` : `${prep} ${nounPart}`;
     })
     .filter(Boolean)
     .join(' ');

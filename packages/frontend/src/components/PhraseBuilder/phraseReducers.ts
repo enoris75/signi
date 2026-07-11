@@ -276,6 +276,34 @@ export function cycleModifierRelation(
   };
 }
 
+// Toggle a noun-modifier's own grammatical number (singular ⇄ plural), stored per adjective
+// slot key in `modifierNumbers`. Only meaningful when that slot holds a noun.
+export function cycleModifierNumber(
+  prev: PhraseSelection,
+  slotKey: SlotKey,
+): PhraseSelection {
+  const cur = prev.modifierNumbers?.[slotKey] ?? "singular";
+  const next = cur === "singular" ? "plural" : "singular";
+  return {
+    ...prev,
+    modifierNumbers: { ...prev.modifierNumbers, [slotKey]: next },
+  };
+}
+
+// Set (or, with `concept: undefined`, clear) the adjective modifying a noun-modifier itself,
+// stored per adjective slot key in `modifierAdjectives`. Only meaningful when that slot holds
+// a noun ("semantic *phrase* creator").
+export function setModifierAdjective(
+  prev: PhraseSelection,
+  slotKey: SlotKey,
+  concept: Concept | undefined,
+): PhraseSelection {
+  const modifierAdjectives = { ...prev.modifierAdjectives };
+  if (concept) modifierAdjectives[slotKey] = concept;
+  else delete modifierAdjectives[slotKey];
+  return { ...prev, modifierAdjectives };
+}
+
 // Cycle a real adjective's comparative degree (positive → more → most → less → least →
 // equally → positive), stored per adjective slot key in `adjectiveDegrees`. Only
 // meaningful when that slot holds an adjective; ignored otherwise.

@@ -11,6 +11,12 @@ export interface ConceptForms {
 export interface ResolvedNounModifier {
   concept: ConceptForms;
   relation: ModifierRelation;
+  /**
+   * Adjectives modifying the attributive noun itself. Resolved for the modifier's own
+   * gender/number (which the translator sets on `concept.forms`) so each engine agrees
+   * them against the modifier, not the head ("creatore di frasi **semantiche**").
+   */
+  adjectives: ConceptForms[];
 }
 
 /** A resolved noun phrase: its head noun/pronoun plus its resolved adjectives. */

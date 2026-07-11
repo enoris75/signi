@@ -39,6 +39,8 @@ import {
   cycleDefiniteness,
   cycleDegree,
   cycleModifierRelation,
+  cycleModifierNumber,
+  setModifierAdjective,
   cycleTense,
   removePossessor,
   setImperativePerson,
@@ -332,6 +334,10 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => cycleDefiniteness(prev, which));
   const handleCycleModifierRelation = (slotKey: SlotKey) =>
     onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey));
+  const handleCycleModifierNumber = (slotKey: SlotKey) =>
+    onPhraseUpdate((prev) => cycleModifierNumber(prev, slotKey));
+  const handleSetModifierAdjective = (slotKey: SlotKey, concept: Concept | undefined) =>
+    onPhraseUpdate((prev) => setModifierAdjective(prev, slotKey, concept));
   const handleCycleDegree = (slotKey: SlotKey) =>
     onPhraseUpdate((prev) => cycleDegree(prev, slotKey));
   const handleCycleTense = () => onPhraseUpdate(cycleTense);
@@ -783,6 +789,8 @@ export function PhraseBuilder({
     handleToggleGender,
     handleCycleDefiniteness,
     handleCycleModifierRelation,
+    handleCycleModifierNumber,
+    handleSetModifierAdjective,
     handleCycleDegree,
     handleToggleNegative,
     handleCycleTense,

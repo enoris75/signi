@@ -53,9 +53,14 @@ function serializeSelection(selection: PhraseSelection): SerializedSelection {
       out[key] = serializeSelection(value as PhraseSelection);
     } else if (isConceptKey(key)) {
       out[key] = (value as Concept).id;
+    } else if (key === "modifierAdjectives") {
+      // A map of slot key → Concept (an adjective on a noun-modifier); encode each to its id.
+      out[key] = Object.fromEntries(
+        Object.entries(value as Record<string, Concept>).map(([k, c]) => [k, c.id]),
+      );
     } else {
-      // Scalars (number/gender/definiteness/tense/negative/specifier) and the
-      // `modifierRelations` map carry through untouched.
+      // Scalars (number/gender/definiteness/tense/negative/specifier) and the string-valued
+      // `modifierRelations` / `modifierNumbers` maps carry through untouched.
       out[key] = value;
     }
   }
@@ -76,6 +81,16 @@ function hydrateSelection(
       const concept = byId.get(value);
       if (concept) out[key] = concept;
       else missing.add(value); // referenced concept no longer in the catalog
+    } else if (key === "modifierAdjectives" && typeof value === "object") {
+      // Rehydrate the slot key → id map back to Concepts, dropping (and reporting) any id
+      // no longer in the catalog.
+      const resolved: Record<string, Concept> = {};
+      for (const [k, id] of Object.entries(value as Record<string, string>)) {
+        const concept = byId.get(id);
+        if (concept) resolved[k] = concept;
+        else missing.add(id);
+      }
+      out[key] = resolved;
     } else {
       out[key] = value;
     }

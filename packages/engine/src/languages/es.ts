@@ -345,12 +345,24 @@ function possessorText(np: ResolvedNounPhrase): string {
 /** Spanish links every attributive-noun relation with bare "de" ("barco de vela", "gafas de sol"). */
 const REL_PREP_ES: Record<ModifierRelation, string> = { feature: 'de', purpose: 'de', material: 'de' };
 
-/** Postnominal attributive nouns as bare " de noun" strings (no del contraction). */
+/**
+ * Postnominal attributive nouns as bare " de noun" strings (no del contraction). The
+ * modifier takes its own number and its adjectives agree with *its* gender/number
+ * ("creador de frases semánticas"), postnominal as in Spanish.
+ */
 function modifierText(np: ResolvedNounPhrase): string {
   return np.nounModifiers
     .map((m) => {
-      const base = m.concept.forms['base'];
-      return base ? ` ${REL_PREP_ES[m.relation]} ${base}` : '';
+      const forms = m.concept.forms;
+      const plural = (forms['number'] ?? forms['count']) === 'plural';
+      const noun = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
+      if (!noun) return '';
+      const gender = forms['gender'] ?? 'masc';
+      const adjs = coordinate(
+        m.adjectives.map((a) => agreeAdj(a.forms['base'] ?? '', gender, plural)).filter(Boolean),
+      );
+      const nounPart = adjs ? `${noun} ${adjs}` : noun;
+      return ` ${REL_PREP_ES[m.relation]} ${nounPart}`;
     })
     .join('');
 }

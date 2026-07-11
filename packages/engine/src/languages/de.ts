@@ -95,8 +95,16 @@ function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite
       return `${deDegPrefix(a)}${decline(deDegStem(a, base))}`;
     })
     .filter(Boolean);
+  // German can't attach an adjective *inside* a compound ("Phrasenschöpfer"), so an
+  // attributive noun's adjective is scoped over the whole compound as a prenominal
+  // declined adjective ("semantischer Phrasenschöpfer") — an approximation of the
+  // narrower English/Romance scope, but grammatical.
+  const modAdjs = np.nounModifiers
+    .flatMap((m) => m.adjectives.map((a) => a.forms['base']))
+    .filter((b): b is string => Boolean(b))
+    .map((base) => decline(base));
   const inherent = f['adjective'];
-  return [...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
+  return [...modAdjs, ...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
 }
 
 function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural = false): string {

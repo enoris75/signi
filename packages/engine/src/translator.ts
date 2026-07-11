@@ -101,11 +101,21 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
       return cf;
     }),
     // Attributive nouns ("sail boat"). Carry the relation through so each engine can
-    // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise).
-    nounModifiers: (np.nounModifiers ?? []).map((m) => ({
-      concept: resolve(m.concept, language, lookup),
-      relation: m.relation,
-    })),
+    // pick its linking preposition (Romance) or ignore it (en/de/ja neutralise). Apply
+    // the modifier's own number (so Romance engines can select its plural surface and
+    // agree its adjectives) and resolve those adjectives against that gender/number.
+    nounModifiers: (np.nounModifiers ?? []).map((m) => {
+      const concept = resolve(m.concept, language, lookup);
+      const number = m.number ?? 'singular';
+      // Fall back to singular when the lexicon has no plural surface (so isPlural/surface
+      // don't select a missing form) — same guard the head noun uses above.
+      concept.forms['number'] = (number === 'plural' && !concept.forms['plural']) ? 'singular' : number;
+      return {
+        concept,
+        relation: m.relation,
+        adjectives: (m.adjectives ?? []).map((id) => resolve(id, language, lookup)),
+      };
+    }),
     // A relative clause is the predicate half of a phrase whose subject is this
     // head. Recursing through resolveNounPhrase (its objects/complements are noun
     // phrases that may themselves carry `relative`) handles arbitrary nesting.

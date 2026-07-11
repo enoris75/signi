@@ -3,6 +3,7 @@
     "allow": [
       "Bash(awk '{print \"  watcher PID\", $2}')",
       "Bash(curl:*)",
+      "Bash(curl *)",
       "Bash(grep:*)",
       "Bash(python3 -c \"import json,sys; print\\(json.load\\(sys.stdin\\).get\\('scripts'\\)\\)\")",
       "Bash(node /private/tmp/claude-501/-Users-enoris-Code-signi/260c7ee4-99f6-46d9-a3b7-c82a9727b5c7/scratchpad/rel-test.mjs)",
@@ -191,7 +192,13 @@
       "Bash(xargs ps -o pid=,command= -p)",
       "Bash(curl -s -X POST http://localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"SECOND_PERSON\",\"number\":\"singular\"},\"verbPhrase\":{\"verb\":\"EAT\"},\"directObject\":{\"concept\":\"FOOD\",\"definiteness\":\"definite\"},\"imperative\":true}}')",
       "Bash(python3 -c \"import sys,json; [print\\(t['language'],':',t['text']\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
-      "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")"
+      "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")",
+      "Bash(curl -s localhost:3001/api/concepts?role=noun)",
+      "Bash(curl -s \"localhost:3001/api/concepts?role=noun\")",
+      "Bash(curl -s -X POST localhost:3001/api/translate -H 'Content-Type: application/json' -d '{ *)",
+      "Bash(python3 -c \"import sys,json;[print\\(t['language'],':',t['text']\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
+      "Bash(node drive4.mjs)",
+      "Bash(node drive5.mjs)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
