@@ -594,3 +594,7 @@ export interface SavedPhraseRecord extends SavedPhraseSummary {
 export interface SavedPhrasesResponse {
   phrases: SavedPhraseSummary[];
 }
+
+// The catalog of engine-rendered UI strings (keys, plans, fallbacks), shared so the keys
+// are typed on both sides of the wire.
+export * from './uiStrings.js';

@@ -134,16 +134,21 @@ function imperativeSubject(person: PhraseSelection["imperativePerson"]): NounPhr
 // Serialise one container's flat selection into a wire PhrasePlan (its noun phrases carry
 // no relative clauses; those are attached from cross-container links in workspacePlan.ts).
 export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
+  // An imperative is a command, so it only takes effect once there is a verb to command.
+  // Until then the period behaves like any other: an empty container stays empty instead of
+  // leaking the synthesised addressee pronoun ("you.") that the subject-dropping mood would
+  // otherwise render with no verb to attach to.
+  const imperative = Boolean(sel.imperative && sel.verb);
   return {
     // An imperative synthesises its subject from the chosen addressee (the user's own subject
     // pick is left untouched in the selection, so toggling the command off restores it).
-    subject: sel.imperative
+    subject: imperative
       ? imperativeSubject(sel.imperativePerson)
       : buildNounPhrase(sel, "subject"),
     verbPhrase: buildVerbPhrase(sel),
     directObject: buildNounPhrase(sel, "directObject"),
     indirectObject: buildNounPhrase(sel, "indirectObject"),
     complements: buildComplements(sel),
-    ...(sel.imperative && { imperative: true }),
+    ...(imperative && { imperative: true }),
   };
 }

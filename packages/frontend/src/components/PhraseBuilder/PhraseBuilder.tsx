@@ -183,9 +183,12 @@ export function PhraseBuilder({
     (v) => v != null && (typeof v !== "object" || Object.keys(v).length > 0),
   );
   // A canvas is shown once a subject or verb is chosen (a period starts on its subject),
-  // or, verbless, for a lone noun phrase (the possessor editor). Before that, the empty
-  // state offers the single opening word picker.
-  const showCanvas = hasSubject || hasVerb;
+  // or, verbless, for a lone noun phrase (the possessor editor). An imperative also shows it:
+  // its subject is the synthesised addressee (never picked into `selection`), so the canvas
+  // gives the greyed subject + addressee selector *and the verb box* — without this the empty
+  // state would show only the addressee selector, with no way to add the verb to command.
+  // Before that, the empty state offers the single opening word picker.
+  const showCanvas = hasSubject || hasVerb || Boolean(selection.imperative);
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
@@ -342,7 +345,13 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => cycleDegree(prev, slotKey));
   const handleCycleTense = () => onPhraseUpdate(cycleTense);
   const handleCycleAspect = () => onPhraseUpdate(cycleAspect);
-  const handleToggleImperative = () => onPhraseUpdate(toggleImperative);
+  const handleToggleImperative = () => {
+    onPhraseUpdate(toggleImperative);
+    // Switching a command on greys out the subject box (the addressee is chosen on the
+    // overlay instead), so focus would otherwise sit on an inert box. Move it to the verb —
+    // the one thing still to pick, and the whole point of a command.
+    if (!selection.imperative && !selection.verb) setActiveSlot("verb");
+  };
   const handleSetImperativePerson = (person: ImperativePerson) =>
     onPhraseUpdate((prev) => setImperativePerson(prev, person));
   const handleSelectSpecifier = (spec: PathSpecifier) =>

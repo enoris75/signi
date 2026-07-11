@@ -11,8 +11,7 @@ import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
 import { useTranslations } from "./hooks/useTranslation.ts";
-import { useUiLanguage } from "./i18n/LanguageContext.tsx";
-import { usePayoff } from "./i18n/payoff.ts";
+import { useUiString } from "./i18n/useUiString.ts";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -41,8 +40,8 @@ export default function App() {
   const splitContainerRef = useRef<HTMLDivElement>(null);
 
   // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
-  const { uiLanguage } = useUiLanguage();
-  const payoff = usePayoff(uiLanguage);
+  const t = useUiString();
+  const payoff = t('app.payoff');
 
   // One plan per root container (a container no link targets); linked containers fold in
   // as relative clauses. Every root is translated and shown in period order.

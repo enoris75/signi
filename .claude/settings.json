@@ -1,9 +1,6 @@
 {
   "permissions": {
     "allow": [
-      "Bash(curl *)",
-      "Bash(grep *)",
-      "Bash(node *)",
       "Bash(npx *)",
       "Bash(sqlite3 *)",
       "Bash(npm *)",
@@ -11,7 +8,14 @@
       "Bash(pkill *)",
       "Bash(ls *)",
       "Bash(node verify2.mjs)",
-      "Bash(node verify3.mjs)"
+      "Bash(node verify3.mjs)",
+      "Bash(*curl*)",
+      "Bash(*grep*)",
+      "Bash(*node*)",
+      "Bash(npm init *)",
+      "Bash(npm i *)",
+      "Bash(cd packages/backend && npx tsc --noEmit 2>&1 | tail -20; echo \"=== FRONTEND ===\"; cd ../frontend && npx tsc --noEmit 2>&1 | tail -20)",
+      "Read(//Users/enoris/Code/**)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

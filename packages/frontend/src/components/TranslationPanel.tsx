@@ -13,7 +13,7 @@ import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
 import { FLAG } from '../i18n/flags.ts';
-import { useLanguageName } from '../i18n/useLanguageName.ts';
+import { useUiString } from '../i18n/useUiString.ts';
 
 /** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
 function RubyText({ segments }: { segments: RubySegment[] }) {
@@ -45,6 +45,8 @@ interface Props {
 // row lists its sentences one under the other, in period order.
 export default function TranslationPanel({ sentences }: Props) {
   const ready = sentences.filter((s) => s.isReady);
+  const t = useUiString();
+  const heading = t('translations.heading');
 
   return (
     <Paper elevation={0} sx={{ p: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
@@ -52,7 +54,7 @@ export default function TranslationPanel({ sentences }: Props) {
         variant="h6"
         sx={{ mb: 2.5, fontFamily: '"Playfair Display", serif', fontWeight: 700, letterSpacing: '-0.01em' }}
       >
-        Translations
+        {heading}
       </Typography>
 
       {ready.length === 0 ? (
@@ -95,8 +97,9 @@ function LanguageRow({
   isLast: boolean;
 }) {
   const [copied, setCopied] = useState(false);
-  const languageName = useLanguageName();
-  const name = languageName(language);
+  // Named `uiString` rather than `t` — the translation lambdas below already bind `t`.
+  const uiString = useUiString();
+  const name = uiString(`language.${language}`);
   const lines = sentences.map((s) => s.translations?.find((t) => t.language === language));
   const text = lines
     .filter((t): t is Translation => Boolean(t))

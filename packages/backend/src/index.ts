@@ -3,12 +3,11 @@ import cors from 'cors';
 import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
-import { PAYOFF_PLAN } from './payoff.js';
-import { LANGUAGE_NAME_CONCEPTS } from './languages.js';
+import { buildUiStrings } from './uiStrings.js';
 import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
-  LanguageCode,
+  UiStringsResponse,
   TranslateRequest,
   TranslateResponse,
   GrammaticalRole,
@@ -149,27 +148,15 @@ app.post('/api/translate', (req, res) => {
   res.json(response);
 });
 
-// The engine-rendered payoff/tagline in all seven languages (see payoff.ts for the period
-// that defines it). Lets the header show the tagline in the chosen UI language without the
-// frontend hardcoding either the strings or the plan.
-app.get('/api/payoff', (_req, res) => {
-  const translations = translate(PAYOFF_PLAN, lookupLexicalEntry);
-  const response: TranslateResponse = { translations };
-  res.json(response);
-});
+// Every engine-rendered UI string (tagline, headings, language names…) in all seven
+// languages, keyed — the frontend picks the key and the current UI language. The catalog of
+// plans lives in @signi/shared (uiStrings.ts); adding a string means adding an entry there,
+// not a route here. The bundle depends only on the lexicon, so it's rendered once at startup
+// and served from memory; express's ETag turns repeat fetches into 304s.
+const UI_STRINGS_BUNDLE: UiStringsResponse = { strings: buildUiStrings() };
 
-// Each UI language's name rendered by the engine in every language, so the header selector
-// can label the options in the current UI language (see languages.ts). Returns, per
-// selectable language code, that language's name-noun translated into all seven.
-app.get('/api/languages', (_req, res) => {
-  const languages = (Object.keys(LANGUAGE_NAME_CONCEPTS) as LanguageCode[]).map((code) => ({
-    code,
-    translations: translate(
-      { subject: { concept: LANGUAGE_NAME_CONCEPTS[code], definiteness: 'bare' } },
-      lookupLexicalEntry,
-    ),
-  }));
-  res.json({ languages });
+app.get('/api/ui-strings', (_req, res) => {
+  res.json(UI_STRINGS_BUNDLE);
 });
 
 // ── Saved phrases ────────────────────────────────────────────────────────────
