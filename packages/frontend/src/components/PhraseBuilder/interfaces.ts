@@ -337,70 +337,95 @@ export type PickMode =
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
 // linking. Undefined for embedded (possessor) sub-builders, which never link.
-export interface WorkspaceBinding {
-  containerId: string;
-  // Register/unregister a noun box's DOM element for cross-container measuring & greying.
+//
+// The surface is wide, so it's split into four compartments: `geometry` (wiring DOM
+// elements into the workspace's measurement registry — mirrors what useConnectors returns),
+// `relative` (noun-level relative-clause links), and the two clause-level relations
+// `conditional` and `coordinative`. `containerId` and `pickActive` are shared by all.
+
+// How the workspace observes a container's geometry. Each register fn wires (or, with a null
+// element, unregisters) a DOM node into the workspace's measurement registry; onGeometryChange
+// asks the workspace to re-measure when internal state it can't see — an in-canvas drag — moves
+// things. Mirrors the ref maps useConnectors hands back.
+export interface WorkspaceGeometry {
+  // A noun box, for cross-container measuring & greying.
   registerBox: (nounKey: NounAddress, el: HTMLElement | null) => void;
-  // Register the little anchor dots the cross-container link line runs between: the
-  // relative-clause control on the source noun's dotted box (line start) and the
-  // receiving dot on the target noun's dotted box (line end). The workspace measures
-  // the connector between these when present, falling back to the noun boxes.
-  registerLinkSourceAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
-  registerLinkTargetAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
-  // Signal that this container's canvas geometry changed (a box was dragged, the
-  // canvas resized, a group collapsed) so the workspace re-measures its link lines —
-  // the workspace can't otherwise observe a child's internal drag state.
+  // The little anchor dots a relative link line runs between: the relative-clause control on
+  // the source noun's dotted box (line start) and the receiving dot on the target noun's
+  // dotted box (line end). The workspace measures between these when present, else the boxes.
+  registerSourceAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
+  registerTargetAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
+  // The border-control cluster: the endpoint the conditional/coordinative connector lines run
+  // between (one anchor shared by both clause-level relations).
+  registerBorderAnchor: (el: HTMLElement | null) => void;
+  // Signal that this container's canvas geometry changed (a box was dragged, the canvas
+  // resized, a group collapsed) so the workspace re-measures its link lines.
   onGeometryChange: () => void;
+}
+
+// Noun-level relative-clause linking for one container.
+export interface RelativeBinding {
+  // Nouns of this container that are a link source / a link target.
+  sourceKeys: Set<NounAddress>;
+  targetKeys: Set<NounAddress>;
   // Pick-mode: is this noun a legal link target right now? (drives highlight + click)
   isPickTarget: (nounKey: NounAddress) => boolean;
-  onNounPick: (nounKey: NounAddress) => void;
+  onPick: (nounKey: NounAddress) => void;
   // Start / remove a relative-clause link sourced from this noun.
-  onStartRelativeLink: (nounKey: NounAddress) => void;
+  onStartLink: (nounKey: NounAddress) => void;
   onRemoveLink: (nounKey: NounAddress) => void;
-  // Nouns of this container that are a link source / a link target.
-  linkSourceKeys: Set<NounAddress>;
-  linkTargetKeys: Set<NounAddress>;
-  pickActive: boolean;
+}
 
-  // ── Conditional (container-to-container) connector ───────────────────────────
-  // Start a conditional link from this container (it becomes the main clause and awaits an
-  // "if" clause pick); clear the one already sourced here.
-  onStartConditional: () => void;
-  onClearConditional: () => void;
-  // During another container's conditional pick, is this container a legal "if" clause target?
-  isConditionalPickTarget: boolean;
-  // Choose this container as the pending pick's "if" clause (valid only when isConditionalPickTarget).
-  onConditionalPick: () => void;
-  // This container already sources a conditional link (it is a main clause with an "if" clause).
-  hasConditionalSource: boolean;
+// Clause-level conditional (IF / MAIN) linking for one container.
+export interface ConditionalBinding {
+  // This container sources a conditional link (it is a main clause with an "if" clause).
+  hasSource: boolean;
   // This container is the target of a conditional link (it is an "if" clause of some main clause).
-  hasConditionalTarget: boolean;
-  // Register this container's border-control element, the endpoint the conditional/coordinative
-  // connector line runs between.
-  registerBorderAnchor: (el: HTMLElement | null) => void;
+  hasTarget: boolean;
+  // During another container's conditional pick, is this container a legal "if" clause target?
+  isPickTarget: boolean;
+  // Start a conditional from this container (it becomes the main clause and awaits an "if"
+  // pick); clear the one already sourced here; choose this container as a pending pick's "if".
+  onStart: () => void;
+  onClear: () => void;
+  onPick: () => void;
+}
 
-  // ── Coordinative (container-to-container) connector ──────────────────────────
-  // Start a coordination from this container with the chosen conjunction (it becomes the first
-  // clause and awaits a second-clause pick); clear the one already sourced here.
-  onStartCoordinative: (conjunction: CoordConjunction) => void;
-  onClearCoordinative: () => void;
-  // During another container's coordinative pick, is this container a legal second-clause target?
-  isCoordinativePickTarget: boolean;
-  // Choose this container as the pending pick's second clause (valid only when isCoordinativePickTarget).
-  onCoordinativePick: () => void;
-  // This container already sources a coordinative link (it is the first clause of a coordination).
-  hasCoordinativeSource: boolean;
+// Clause-level coordinative (AND / OR / BUT / …) linking for one container. Mirrors
+// ConditionalBinding, but a coordination carries the conjunction and onStart takes it.
+export interface CoordinativeBinding {
+  // This container sources a coordinative link (it is the first clause of a coordination).
+  hasSource: boolean;
   // This container is the target of a coordinative link (it is the second clause).
-  hasCoordinativeTarget: boolean;
+  hasTarget: boolean;
   // The conjunction of the coordination this container takes part in, if any (for labelling).
-  coordinativeConjunction?: CoordConjunction;
+  conjunction?: CoordConjunction;
+  // During another container's coordinative pick, is this container a legal second-clause target?
+  isPickTarget: boolean;
+  // Start a coordination from this container with the chosen conjunction (it becomes the first
+  // clause and awaits a second-clause pick); clear the one already sourced here; choose this
+  // container as a pending pick's second clause.
+  onStart: (conjunction: CoordConjunction) => void;
+  onClear: () => void;
+  onPick: () => void;
+}
+
+export interface WorkspaceBinding {
+  containerId: string;
+  // Any cross-container pick (relative / conditional / coordinative) is currently in progress.
+  pickActive: boolean;
+  geometry: WorkspaceGeometry;
+  relative: RelativeBinding;
+  conditional: ConditionalBinding;
+  coordinative: CoordinativeBinding;
 }
 
 // Wrap a container's `binding` for an embedded possessor sub-builder whose head is
 // addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
 // `"subject"`); this maps that head onto `headPath` before forwarding to the container, so
 // the possessor head registers/links under its workspace address. A possessor head is only
-// ever a link *source* (relativising it), never a target, so target/dimming is suppressed.
+// ever a link *source* (relativising it), never a target, so target/dimming is suppressed,
+// and it is never a clause endpoint, so both clause compartments are inert.
 export function adaptPossessorBinding(
   root: WorkspaceBinding,
   headPath: NounAddress,
@@ -409,33 +434,44 @@ export function adaptPossessorBinding(
     nounKey === "subject" ? headPath : nounKey;
   return {
     containerId: root.containerId,
-    registerBox: (nounKey, el) => root.registerBox(map(nounKey), el),
-    registerLinkSourceAnchor: (nounKey, el) =>
-      root.registerLinkSourceAnchor(map(nounKey), el),
-    registerLinkTargetAnchor: (nounKey, el) =>
-      root.registerLinkTargetAnchor(map(nounKey), el),
-    onGeometryChange: root.onGeometryChange,
-    isPickTarget: () => false,
-    onNounPick: (nounKey) => root.onNounPick(map(nounKey)),
-    onStartRelativeLink: (nounKey) => root.onStartRelativeLink(map(nounKey)),
-    onRemoveLink: (nounKey) => root.onRemoveLink(map(nounKey)),
-    linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
-    linkTargetKeys: new Set(),
     pickActive: root.pickActive,
-    // A possessor sub-builder is never a conditional/coordinative endpoint — inert pass-through.
-    onStartConditional: () => {},
-    onClearConditional: () => {},
-    isConditionalPickTarget: false,
-    onConditionalPick: () => {},
-    hasConditionalSource: false,
-    hasConditionalTarget: false,
-    registerBorderAnchor: () => {},
-    onStartCoordinative: () => {},
-    onClearCoordinative: () => {},
-    isCoordinativePickTarget: false,
-    onCoordinativePick: () => {},
-    hasCoordinativeSource: false,
-    hasCoordinativeTarget: false,
-    coordinativeConjunction: undefined,
+    geometry: {
+      registerBox: (nounKey, el) => root.geometry.registerBox(map(nounKey), el),
+      registerSourceAnchor: (nounKey, el) =>
+        root.geometry.registerSourceAnchor(map(nounKey), el),
+      registerTargetAnchor: (nounKey, el) =>
+        root.geometry.registerTargetAnchor(map(nounKey), el),
+      // A possessor sub-builder is never a clause endpoint, so it anchors no clause connector.
+      registerBorderAnchor: () => {},
+      onGeometryChange: root.geometry.onGeometryChange,
+    },
+    relative: {
+      sourceKeys: new Set(
+        root.relative.sourceKeys.has(headPath) ? ["subject"] : [],
+      ),
+      targetKeys: new Set(),
+      isPickTarget: () => false,
+      onPick: (nounKey) => root.relative.onPick(map(nounKey)),
+      onStartLink: (nounKey) => root.relative.onStartLink(map(nounKey)),
+      onRemoveLink: (nounKey) => root.relative.onRemoveLink(map(nounKey)),
+    },
+    // Inert: a possessor sub-builder is never a conditional/coordinative endpoint.
+    conditional: {
+      hasSource: false,
+      hasTarget: false,
+      isPickTarget: false,
+      onStart: () => {},
+      onClear: () => {},
+      onPick: () => {},
+    },
+    coordinative: {
+      hasSource: false,
+      hasTarget: false,
+      conjunction: undefined,
+      isPickTarget: false,
+      onStart: () => {},
+      onClear: () => {},
+      onPick: () => {},
+    },
   };
 }

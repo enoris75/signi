@@ -627,7 +627,7 @@ export function buildSatelliteIcons({
       : null;
     if (relativeNoun) {
       if (!linkBinding) continue;
-      const isSource = linkBinding.linkSourceKeys.has(relativeNoun);
+      const isSource = linkBinding.relative.sourceKeys.has(relativeNoun);
       (perimeterByNoun[relativeNoun] ??= {}).relative = {
         key: sat.key,
         icon: sat.icon,
@@ -638,8 +638,8 @@ export function buildSatelliteIcons({
         valueLabel: isSource ? "Linked — click to remove" : undefined,
         onToggle: () =>
           isSource
-            ? linkBinding.onRemoveLink(relativeNoun)
-            : linkBinding.onStartRelativeLink(relativeNoun),
+            ? linkBinding.relative.onRemoveLink(relativeNoun)
+            : linkBinding.relative.onStartLink(relativeNoun),
       };
       continue;
     }

@@ -183,11 +183,11 @@ export function PhraseCanvas({
               perimeterByNoun={perimeterByNoun}
               linkTargetKeys={
                 linkBinding
-                  ? (linkBinding.linkTargetKeys as Set<NounKey>)
+                  ? (linkBinding.relative.targetKeys as Set<NounKey>)
                   : undefined
               }
-              registerSourceAnchor={linkBinding?.registerLinkSourceAnchor}
-              registerTargetAnchor={linkBinding?.registerLinkTargetAnchor}
+              registerSourceAnchor={linkBinding?.geometry.registerSourceAnchor}
+              registerTargetAnchor={linkBinding?.geometry.registerTargetAnchor}
               registerPossessorControl={(nounKey, el) => {
                 if (el) possessorControlEls.current.set(nounKey, el);
                 else possessorControlEls.current.delete(nounKey);

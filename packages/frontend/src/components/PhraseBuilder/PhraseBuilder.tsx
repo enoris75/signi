@@ -318,7 +318,7 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => removePossessor(prev, which));
     setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
     // Drop any relative-clause link sourced from the possessor head that just vanished.
-    binding?.onRemoveLink(possessorAddress(possessorPath ?? which));
+    binding?.relative.onRemoveLink(possessorAddress(possessorPath ?? which));
   }
 
   // Each grammatical control on the canvas is a pure selection transform (phraseReducers);
@@ -562,7 +562,7 @@ export function PhraseBuilder({
   // collapsed. The workspace can't observe our internal drag state, so it would
   // otherwise draw stale subordinate connectors. Keyed on the geometry-bearing state
   // only, so a workspace re-render (new binding object) doesn't refire it into a loop.
-  const notifyGeometry = binding?.onGeometryChange;
+  const notifyGeometry = binding?.geometry.onGeometryChange;
   useLayoutEffect(() => {
     notifyGeometry?.();
   }, [
@@ -797,19 +797,19 @@ export function PhraseBuilder({
     onBoxRef: linkBinding
       ? (key, el) => {
           if (NOUN_KEYS.includes(key as NounKey))
-            linkBinding.registerBox(key as NounKey, el);
+            linkBinding.geometry.registerBox(key as NounKey, el);
         }
       : undefined,
     dimmedKeys: linkBinding
-      ? (linkBinding.linkTargetKeys as Set<string>)
+      ? (linkBinding.relative.targetKeys as Set<string>)
       : undefined,
     isPickTarget: linkBinding
       ? (key) =>
           NOUN_KEYS.includes(key as NounKey) &&
-          linkBinding.isPickTarget(key as NounKey)
+          linkBinding.relative.isPickTarget(key as NounKey)
       : undefined,
     onPickTarget: linkBinding
-      ? (key) => linkBinding.onNounPick(key as NounKey)
+      ? (key) => linkBinding.relative.onPick(key as NounKey)
       : undefined,
   };
 
@@ -906,10 +906,10 @@ export function PhraseBuilder({
           // An imperative is a mood, mutually exclusive with a conditional / coordination, so the
           // toggle is disabled while this period takes part in one.
           disabled: binding
-            ? binding.hasConditionalSource ||
-              binding.hasConditionalTarget ||
-              binding.hasCoordinativeSource ||
-              binding.hasCoordinativeTarget
+            ? binding.conditional.hasSource ||
+              binding.conditional.hasTarget ||
+              binding.coordinative.hasSource ||
+              binding.coordinative.hasTarget
             : false,
           onToggle: handleToggleImperative,
         }}

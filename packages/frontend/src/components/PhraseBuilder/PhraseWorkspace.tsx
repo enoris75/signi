@@ -410,54 +410,61 @@ export function PhraseWorkspace({
             canBeCoordinate(pick.source.containerId, c.id);
           const binding: WorkspaceBinding = {
             containerId: c.id,
-            registerBox: (nounKey, el) => {
-              const k = boxKey(c.id, nounKey);
-              if (el) boxEls.current.set(k, el);
-              else boxEls.current.delete(k);
-            },
-            registerLinkSourceAnchor: (nounKey, el) => {
-              const k = boxKey(c.id, nounKey);
-              if (el) sourceAnchorEls.current.set(k, el);
-              else sourceAnchorEls.current.delete(k);
-            },
-            registerLinkTargetAnchor: (nounKey, el) => {
-              const k = boxKey(c.id, nounKey);
-              if (el) targetAnchorEls.current.set(k, el);
-              else targetAnchorEls.current.delete(k);
-            },
-            onGeometryChange: bumpGeom,
-            isPickTarget: (nounKey) =>
-              pick.active &&
-              pick.kind === "relative" &&
-              pick.source.containerId !== c.id &&
-              Boolean(c.selection[nounKey as keyof PhraseSelection]) &&
-              !linkTargetKeys.has(nounKey) &&
-              !isSelfOrAncestor(c.id, pick.source.containerId, links),
-            // Only real top-level nouns are ever offered as pick targets, so the address is a NounKey.
-            onNounPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
-            onStartRelativeLink: (nounKey) => startLink(c.id, nounKey),
-            onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
-            linkSourceKeys,
-            linkTargetKeys,
             pickActive: pick.active,
-            onStartConditional: () => startConditional(c.id),
-            onClearConditional: () => clearConditional(c.id),
-            isConditionalPickTarget,
-            onConditionalPick: () => completeConditional(c.id),
-            hasConditionalSource,
-            hasConditionalTarget,
-            registerBorderAnchor: (el) => {
-              if (el) borderAnchorEls.current.set(c.id, el);
-              else borderAnchorEls.current.delete(c.id);
+            geometry: {
+              registerBox: (nounKey, el) => {
+                const k = boxKey(c.id, nounKey);
+                if (el) boxEls.current.set(k, el);
+                else boxEls.current.delete(k);
+              },
+              registerSourceAnchor: (nounKey, el) => {
+                const k = boxKey(c.id, nounKey);
+                if (el) sourceAnchorEls.current.set(k, el);
+                else sourceAnchorEls.current.delete(k);
+              },
+              registerTargetAnchor: (nounKey, el) => {
+                const k = boxKey(c.id, nounKey);
+                if (el) targetAnchorEls.current.set(k, el);
+                else targetAnchorEls.current.delete(k);
+              },
+              registerBorderAnchor: (el) => {
+                if (el) borderAnchorEls.current.set(c.id, el);
+                else borderAnchorEls.current.delete(c.id);
+              },
+              onGeometryChange: bumpGeom,
             },
-            onStartCoordinative: (conjunction) =>
-              startCoordinative(c.id, conjunction),
-            onClearCoordinative: () => clearCoordinative(c.id),
-            isCoordinativePickTarget,
-            onCoordinativePick: () => completeCoordinative(c.id),
-            hasCoordinativeSource: Boolean(coordAsSource),
-            hasCoordinativeTarget: Boolean(coordAsTarget),
-            coordinativeConjunction: (coordAsSource ?? coordAsTarget)?.conjunction,
+            relative: {
+              sourceKeys: linkSourceKeys,
+              targetKeys: linkTargetKeys,
+              isPickTarget: (nounKey) =>
+                pick.active &&
+                pick.kind === "relative" &&
+                pick.source.containerId !== c.id &&
+                Boolean(c.selection[nounKey as keyof PhraseSelection]) &&
+                !linkTargetKeys.has(nounKey) &&
+                !isSelfOrAncestor(c.id, pick.source.containerId, links),
+              // Only real top-level nouns are ever offered as pick targets, so the address is a NounKey.
+              onPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
+              onStartLink: (nounKey) => startLink(c.id, nounKey),
+              onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
+            },
+            conditional: {
+              hasSource: hasConditionalSource,
+              hasTarget: hasConditionalTarget,
+              isPickTarget: isConditionalPickTarget,
+              onStart: () => startConditional(c.id),
+              onClear: () => clearConditional(c.id),
+              onPick: () => completeConditional(c.id),
+            },
+            coordinative: {
+              hasSource: Boolean(coordAsSource),
+              hasTarget: Boolean(coordAsTarget),
+              conjunction: (coordAsSource ?? coordAsTarget)?.conjunction,
+              isPickTarget: isCoordinativePickTarget,
+              onStart: (conjunction) => startCoordinative(c.id, conjunction),
+              onClear: () => clearCoordinative(c.id),
+              onPick: () => completeCoordinative(c.id),
+            },
           };
           return (
             <PhraseBuilder

@@ -87,40 +87,41 @@ export function periodControls(
   selection: PhraseSelection,
 ): { conditional?: ConditionalControl; coordinative?: CoordinativeControl } {
   if (!binding) return {};
+  const { conditional, coordinative } = binding;
   return {
     conditional: {
-      hasCondition: binding.hasConditionalSource,
-      isIfClause: binding.hasConditionalTarget,
-      isPickTarget: binding.isConditionalPickTarget,
+      hasCondition: conditional.hasSource,
+      isIfClause: conditional.hasTarget,
+      isPickTarget: conditional.isPickTarget,
       pickActive: binding.pickActive,
       // An IF clause can't also be a main clause (conditionals don't chain), and a period already
       // in a coordination — or acting as a command — can't also start a conditional.
       canStart:
         !selection.imperative &&
-        !binding.hasConditionalTarget &&
-        !binding.hasCoordinativeSource &&
-        !binding.hasCoordinativeTarget,
-      onStart: binding.onStartConditional,
-      onClear: binding.onClearConditional,
-      onPick: binding.onConditionalPick,
-      registerBorderAnchor: binding.registerBorderAnchor,
+        !conditional.hasTarget &&
+        !coordinative.hasSource &&
+        !coordinative.hasTarget,
+      onStart: conditional.onStart,
+      onClear: conditional.onClear,
+      onPick: conditional.onPick,
+      registerBorderAnchor: binding.geometry.registerBorderAnchor,
     },
     coordinative: {
-      hasCoordination: binding.hasCoordinativeSource,
-      isCoordinated: binding.hasCoordinativeTarget,
-      conjunction: binding.coordinativeConjunction,
-      isPickTarget: binding.isCoordinativePickTarget,
+      hasCoordination: coordinative.hasSource,
+      isCoordinated: coordinative.hasTarget,
+      conjunction: coordinative.conjunction,
+      isPickTarget: coordinative.isPickTarget,
       pickActive: binding.pickActive,
       // A period can take part in only one clause-level relation at a time: not a second clause
       // already, not tied into a conditional, and not a command.
       canStart:
         !selection.imperative &&
-        !binding.hasCoordinativeTarget &&
-        !binding.hasConditionalSource &&
-        !binding.hasConditionalTarget,
-      onStart: binding.onStartCoordinative,
-      onClear: binding.onClearCoordinative,
-      onPick: binding.onCoordinativePick,
+        !coordinative.hasTarget &&
+        !conditional.hasSource &&
+        !conditional.hasTarget,
+      onStart: coordinative.onStart,
+      onClear: coordinative.onClear,
+      onPick: coordinative.onPick,
     },
   };
 }
