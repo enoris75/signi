@@ -23,6 +23,8 @@ import {
   COORD_CONJUNCTION_LABEL,
   COORD_CONJUNCTION_OPTIONS,
   type CoordConjunction,
+  type PhraseSelection,
+  type WorkspaceBinding,
 } from "./interfaces.ts";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
@@ -73,6 +75,54 @@ export interface ImperativeControl {
   active: boolean;
   disabled: boolean;
   onToggle: () => void;
+}
+
+// Derive the conditional/coordinative control bags from a workspace binding, keeping
+// PeriodContainer ignorant of WorkspaceBinding itself. A standalone period has no binding and
+// can't take part in a clause-level relation, so both come back undefined. `selection` is read
+// only for the imperative-exclusion rule below — a command is a mood mutually exclusive with a
+// conditional or a coordination, so neither may be started while this period is imperative.
+export function periodControls(
+  binding: WorkspaceBinding | undefined,
+  selection: PhraseSelection,
+): { conditional?: ConditionalControl; coordinative?: CoordinativeControl } {
+  if (!binding) return {};
+  return {
+    conditional: {
+      hasCondition: binding.hasConditionalSource,
+      isIfClause: binding.hasConditionalTarget,
+      isPickTarget: binding.isConditionalPickTarget,
+      pickActive: binding.pickActive,
+      // An IF clause can't also be a main clause (conditionals don't chain), and a period already
+      // in a coordination — or acting as a command — can't also start a conditional.
+      canStart:
+        !selection.imperative &&
+        !binding.hasConditionalTarget &&
+        !binding.hasCoordinativeSource &&
+        !binding.hasCoordinativeTarget,
+      onStart: binding.onStartConditional,
+      onClear: binding.onClearConditional,
+      onPick: binding.onConditionalPick,
+      registerBorderAnchor: binding.registerBorderAnchor,
+    },
+    coordinative: {
+      hasCoordination: binding.hasCoordinativeSource,
+      isCoordinated: binding.hasCoordinativeTarget,
+      conjunction: binding.coordinativeConjunction,
+      isPickTarget: binding.isCoordinativePickTarget,
+      pickActive: binding.pickActive,
+      // A period can take part in only one clause-level relation at a time: not a second clause
+      // already, not tied into a conditional, and not a command.
+      canStart:
+        !selection.imperative &&
+        !binding.hasCoordinativeTarget &&
+        !binding.hasConditionalSource &&
+        !binding.hasConditionalTarget,
+      onStart: binding.onStartCoordinative,
+      onClear: binding.onClearCoordinative,
+      onPick: binding.onCoordinativePick,
+    },
+  };
 }
 
 export interface PeriodContainerProps {

@@ -1,14 +1,11 @@
 import React, { useLayoutEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import {
-  COMPLEMENT_TYPES,
   type Concept,
   type CauseSentiment,
   type ComplementType,
   type PathSpecifier,
 } from "@signi/shared";
-import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
-import { CategoryToggle, SlotBox } from "./Boxes.tsx";
 import {
   adaptPossessorBinding,
   ConceptSelectOpts,
@@ -83,17 +80,12 @@ import {
   RANK_GROWN,
 } from "./overlap.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
-import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
-import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
-import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
+import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
-import { SatelliteControls } from "./SatelliteControls.tsx";
-import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
-import { PeriodContainer } from "./PeriodContainer.tsx";
-import { ImperativeSubjectSelector } from "./ImperativeSubjectSelector.tsx";
+import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
 import { useDrag } from "./useDrag.ts";
 
@@ -192,7 +184,6 @@ export function PhraseBuilder({
   // or, verbless, for a lone noun phrase (the possessor editor). Before that, the empty
   // state offers the single opening word picker.
   const showCanvas = hasSubject || hasVerb;
-  const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
@@ -822,123 +813,29 @@ export function PhraseBuilder({
       : undefined,
   };
 
+  // The clause-level connector controls on the card border, derived from the workspace binding
+  // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
+  const clauseControls = periodControls(binding, selection);
+
   // The card's contents — the canvas, its resize grip, and any docked possessor panels.
   // Shared by both chromes below: a top-level period wears the PeriodContainer card
   // or possessor the plainer Paper drawn inline.
   const content = (
     <>
-      <Box sx={{ minWidth: 0 }}>
-        {!showCanvas ? (
-          // An empty period is still the full, resizable canvas height — the bottom
-          // edge resizes it just as it does once words land on the canvas.
-          <Box
-            sx={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              height: canvasHeight,
-            }}
-          >
-            {selection.imperative ? (
-              // A command drops its subject — the box becomes the addressee selector instead.
-              <ImperativeSubjectSelector
-                value={selection.imperativePerson ?? "2sg"}
-                onChange={handleSetImperativePerson}
-              />
-            ) : (
-              <SlotBox
-                slot={subjectSlot}
-                concept={undefined}
-                isActive={activeSlot === "subject"}
-                onClear={() => handleClear("subject")}
-                categoryToggle={
-                  <CategoryToggle
-                    options={slotCategories("subject")!.options}
-                    value={kindFor("subject")}
-                    onChange={(v) => handleSlotKindChange("subject", v)}
-                  />
-                }
-                emptyContent={
-                  <SubjectTypeahead
-                    onSelect={(c, opts) =>
-                      handleConceptSelect(c, "subject", opts)
-                    }
-                    kind={kindFor("subject")}
-                    onKindChange={(v) => handleSlotKindChange("subject", v)}
-                  />
-                }
-              />
-            )}
-          </Box>
-        ) : (
-          <Box
-            ref={containerRef}
-            sx={{
-              position: "relative",
-              height: canvasHeight,
-              touchAction: "none",
-            }}
-          >
-            <ConnectorsLayer
-              svgSize={graphSize}
-              groupEdges={groupEdges}
-              edges={edges}
-            />
-
-            <>
-              {selection.imperative ? (
-                // A command drops its subject: grey the subject box (kept for layout) and overlay
-                // the addressee selector on its footprint.
-                <>
-                  <Box sx={{ opacity: 0.35, pointerEvents: "none" }}>
-                    <NounPhraseBuilder which="subject" ctx={ctx} />
-                  </Box>
-                  <ImperativeSubjectSelector
-                    value={selection.imperativePerson ?? "2sg"}
-                    onChange={handleSetImperativePerson}
-                    rect={groupRects.find((g) => g.nodeKeys.includes("subject"))}
-                  />
-                </>
-              ) : (
-                <NounPhraseBuilder which="subject" ctx={ctx} />
-              )}
-              <VerbPhraseBuilder ctx={ctx} />
-              <NounPhraseBuilder which="directObject" ctx={ctx} />
-              <NounPhraseBuilder which="indirectObject" ctx={ctx} />
-              {COMPLEMENT_TYPES.map((type) => (
-                <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-              ))}
-            </>
-
-            {/* Compact view is just the bare core-word chips — no reveal icons
-                on the box borders and no dotted-box perimeter controls. */}
-            {!compact && (
-              <SatelliteControls
-                satelliteIconsByParent={satelliteIconsByParent}
-                controlPos={controlPos}
-              />
-            )}
-
-            {!compact && (
-              <GroupPerimeterControls
-                groupRects={groupRects}
-                perimeterByNoun={perimeterByNoun}
-                linkTargetKeys={
-                  linkBinding
-                    ? (linkBinding.linkTargetKeys as Set<NounKey>)
-                    : undefined
-                }
-                registerSourceAnchor={linkBinding?.registerLinkSourceAnchor}
-                registerTargetAnchor={linkBinding?.registerLinkTargetAnchor}
-                registerPossessorControl={(nounKey, el) => {
-                  if (el) possessorControlEls.current.set(nounKey, el);
-                  else possessorControlEls.current.delete(nounKey);
-                }}
-              />
-            )}
-          </Box>
-        )}
-      </Box>
+      <PhraseCanvas
+        ctx={ctx}
+        showCanvas={showCanvas}
+        canvasHeight={canvasHeight}
+        graphSize={graphSize}
+        edges={edges}
+        groupEdges={groupEdges}
+        controlPos={controlPos}
+        perimeterByNoun={perimeterByNoun}
+        linkBinding={linkBinding}
+        onSetImperativePerson={handleSetImperativePerson}
+        containerRef={containerRef}
+        possessorControlEls={possessorControlEls}
+      />
 
       {/* The container's own bottom edge is the resize grip, so it bleeds back through
           the Paper's padding. No manual resize while compact — the canvas is auto-sized
@@ -1002,48 +899,8 @@ export function PhraseBuilder({
         onRemove={onRemove}
         onToggleCompact={handleToggleCompact}
         onTidy={handleTidyPeriod}
-        conditional={
-          binding
-            ? {
-                hasCondition: binding.hasConditionalSource,
-                isIfClause: binding.hasConditionalTarget,
-                isPickTarget: binding.isConditionalPickTarget,
-                pickActive: binding.pickActive,
-                // An IF clause can't also be a main clause (conditionals don't chain), and a
-                // period already in a coordination can't also start a conditional.
-                canStart:
-                  !selection.imperative &&
-                  !binding.hasConditionalTarget &&
-                  !binding.hasCoordinativeSource &&
-                  !binding.hasCoordinativeTarget,
-                onStart: binding.onStartConditional,
-                onClear: binding.onClearConditional,
-                onPick: binding.onConditionalPick,
-                registerBorderAnchor: binding.registerBorderAnchor,
-              }
-            : undefined
-        }
-        coordinative={
-          binding
-            ? {
-                hasCoordination: binding.hasCoordinativeSource,
-                isCoordinated: binding.hasCoordinativeTarget,
-                conjunction: binding.coordinativeConjunction,
-                isPickTarget: binding.isCoordinativePickTarget,
-                pickActive: binding.pickActive,
-                // A period can take part in only one clause-level relation at a time: not a
-                // second clause already, and not tied into a conditional.
-                canStart:
-                  !selection.imperative &&
-                  !binding.hasCoordinativeTarget &&
-                  !binding.hasConditionalSource &&
-                  !binding.hasConditionalTarget,
-                onStart: binding.onStartCoordinative,
-                onClear: binding.onClearCoordinative,
-                onPick: binding.onCoordinativePick,
-              }
-            : undefined
-        }
+        conditional={clauseControls.conditional}
+        coordinative={clauseControls.coordinative}
         imperative={{
           active: Boolean(selection.imperative),
           // An imperative is a mood, mutually exclusive with a conditional / coordination, so the
