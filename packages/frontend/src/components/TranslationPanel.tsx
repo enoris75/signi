@@ -13,6 +13,7 @@ import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
 import { FLAG } from '../i18n/flags.ts';
+import { useLanguageName } from '../i18n/useLanguageName.ts';
 
 /** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
 function RubyText({ segments }: { segments: RubySegment[] }) {
@@ -94,6 +95,8 @@ function LanguageRow({
   isLast: boolean;
 }) {
   const [copied, setCopied] = useState(false);
+  const languageName = useLanguageName();
+  const name = languageName(language);
   const lines = sentences.map((s) => s.translations?.find((t) => t.language === language));
   const text = lines
     .filter((t): t is Translation => Boolean(t))
@@ -132,7 +135,7 @@ function LanguageRow({
             color: 'text.secondary',
           }}
         >
-          {LANGUAGES[language]}
+          {name}
         </Typography>
         {text && (
           <Tooltip title={copied ? 'Copied' : 'Copy to clipboard'} placement="top">
@@ -140,7 +143,7 @@ function LanguageRow({
               className="copy-btn"
               onClick={handleCopy}
               size="small"
-              aria-label={`Copy ${LANGUAGES[language]} translation`}
+              aria-label={`Copy ${name} translation`}
               sx={{
                 ml: 'auto',
                 p: 0.5,

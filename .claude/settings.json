@@ -10,7 +10,8 @@
       "Bash(git *)",
       "Bash(pkill *)",
       "Bash(ls *)",
-      "Bash(node verify2.mjs)"
+      "Bash(node verify2.mjs)",
+      "Bash(node verify3.mjs)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

@@ -495,6 +495,37 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    id: 'SLOT',
+    role: 'noun',
+    description: 'a narrow opening or an allotted position',
+    emoji: '🎰',
+    forms: {
+      en: { base: 'slot',    plural: 'slots',    count: 'singular' },
+      it: { base: 'fessura', plural: 'fessure',  gender: 'fem',  count: 'singular' },
+      fr: { base: 'fente',   plural: 'fentes',   gender: 'fem',  count: 'singular' },
+      de: { base: 'Schlitz', plural: 'Schlitze', gender: 'masc', count: 'singular' },
+      es: { base: 'ranura',  plural: 'ranuras',  gender: 'fem',  count: 'singular' },
+      ja: { base: 'スロット', count: 'singular', reading: 'すろっと' },
+      pt: { base: 'ranhura', plural: 'ranhuras', gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'WORD',
+    role: 'noun',
+    description: 'a single unit of language',
+    emoji: '🔤',
+    forms: {
+      en: { base: 'word',    plural: 'words',    count: 'singular' },
+      it: { base: 'parola',  plural: 'parole',   gender: 'fem',  count: 'singular' },
+      fr: { base: 'mot',     plural: 'mots',     gender: 'masc', count: 'singular' },
+      de: { base: 'Wort',    plural: 'Wörter',   gender: 'neut', count: 'singular' },
+      es: { base: 'palabra', plural: 'palabras', gender: 'fem',  count: 'singular' },
+      ja: { base: '単語',    count: 'singular', reading: 'たんご' },
+      pt: { base: 'palavra', plural: 'palavras', gender: 'fem',  count: 'singular' },
+    },
+  },
+
+  {
     id: 'AFRICA',
     role: 'noun',
     description: 'the continent south of the Mediterranean',

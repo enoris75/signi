@@ -177,6 +177,22 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'comprando', participle: 'comprado' },
     ja: { te: '買って', te_reading: 'かって' },
   },
+  CLICK: {
+    en: { gerund: 'clicking', participle: 'clicked' },
+    it: { gerund: 'cliccando', participle: 'cliccato' },
+    fr: { participle: 'cliqué' }, de: { participle: 'geklickt' },
+    es: { gerund: 'clicando', participle: 'clicado' },
+    pt: { gerund: 'clicando', participle: 'clicado' },
+    ja: { te: 'クリックして', te_reading: 'くりっくして' },
+  },
+  CHOOSE: {
+    en: { gerund: 'choosing', participle: 'chosen' },
+    it: { gerund: 'scegliendo', participle: 'scelto' },
+    fr: { participle: 'choisi' }, de: { participle: 'gewählt' },
+    es: { gerund: 'eligiendo', participle: 'elegido' },
+    pt: { gerund: 'escolhendo', participle: 'escolhido' },
+    ja: { te: '選んで', te_reading: 'えらんで' },
+  },
   GIVE: {
     en: { gerund: 'giving', participle: 'given' },
     it: { gerund: 'dando', participle: 'dato' },
