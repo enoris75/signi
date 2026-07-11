@@ -9,7 +9,10 @@ import {
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
+import { LanguageSelector } from "./components/LanguageSelector.tsx";
 import { useTranslations } from "./hooks/useTranslation.ts";
+import { useUiLanguage } from "./i18n/LanguageContext.tsx";
+import { usePayoff } from "./i18n/payoff.ts";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -36,6 +39,10 @@ export default function App() {
     setWordsPanelOpen(next);
   }
   const splitContainerRef = useRef<HTMLDivElement>(null);
+
+  // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
+  const { uiLanguage } = useUiLanguage();
+  const payoff = usePayoff(uiLanguage);
 
   // One plan per root container (a container no link targets); linked containers fold in
   // as relative clauses. Every root is translated and shown in period order.
@@ -95,7 +102,7 @@ export default function App() {
                 mt: 0.5,
               }}
             >
-              Semantic phrase builder
+              {payoff}
             </Typography>
           </Box>
           <Box
@@ -106,6 +113,7 @@ export default function App() {
               flexShrink: 0,
             }}
           >
+            <LanguageSelector />
             <SavedPhrasesToolbar
               containers={containers}
               links={links}

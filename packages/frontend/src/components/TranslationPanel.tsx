@@ -12,6 +12,7 @@ import CheckIcon from '@mui/icons-material/Check';
 import type { LanguageCode, RubySegment, Translation } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
+import { FLAG } from '../i18n/flags.ts';
 
 /** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
 function RubyText({ segments }: { segments: RubySegment[] }) {
@@ -30,16 +31,6 @@ function RubyText({ segments }: { segments: RubySegment[] }) {
     </>
   );
 }
-
-const FLAG: Record<string, string> = {
-  en: '🇬🇧',
-  it: '🇮🇹',
-  fr: '🇫🇷',
-  de: '🇩🇪',
-  es: '🇪🇸',
-  ja: '🇯🇵',
-  pt: '🇵🇹',
-};
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 

@@ -31,6 +31,15 @@ export async function fetchTranslation(plan: PhrasePlan): Promise<Translation[]>
   return data.translations;
 }
 
+// The app's payoff/tagline rendered by the engine in every language. The defining period
+// lives server-side (see backend payoff.ts), so the frontend only fetches the strings.
+export async function fetchPayoff(): Promise<Translation[]> {
+  const res = await fetch(`${BASE}/payoff`);
+  if (!res.ok) throw new Error('Failed to fetch payoff');
+  const data = await res.json() as { translations: Translation[] };
+  return data.translations;
+}
+
 // ── Saved phrases ────────────────────────────────────────────────────────────
 
 export async function listSavedPhrases(

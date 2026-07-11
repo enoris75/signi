@@ -3,6 +3,7 @@ import cors from 'cors';
 import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
+import { PAYOFF_PLAN } from './payoff.js';
 import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
@@ -142,6 +143,15 @@ app.post('/api/translate', (req, res) => {
   }
 
   const translations = translate(body.plan, lookupLexicalEntry);
+  const response: TranslateResponse = { translations };
+  res.json(response);
+});
+
+// The engine-rendered payoff/tagline in all seven languages (see payoff.ts for the period
+// that defines it). Lets the header show the tagline in the chosen UI language without the
+// frontend hardcoding either the strings or the plan.
+app.get('/api/payoff', (_req, res) => {
+  const translations = translate(PAYOFF_PLAN, lookupLexicalEntry);
   const response: TranslateResponse = { translations };
   res.json(response);
 });
