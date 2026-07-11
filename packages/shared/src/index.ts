@@ -415,6 +415,32 @@ export interface PhrasePlan {
    * condition per plan; conditions do not nest (the condition clause stays indicative).
    */
   condition?: PhrasePlan;
+  /**
+   * An optional coordinated clause joined to this one by a coordinating conjunction ("the cat
+   * sleeps AND the dog runs"). Unlike a condition, coordination is a symmetric join of two
+   * independent (indicative) clauses: this plan is the first, `coordination.clause` the second,
+   * and `coordination.conjunction` selects the linking word. One coordination per plan; the
+   * coordinated clause stays indicative and is not itself given a coordination.
+   */
+  coordination?: Coordination;
+}
+
+/**
+ * A coordinating conjunction joining two independent clauses:
+ *  - `and`     copulative ("and")
+ *  - `or`      disjunctive ("or")
+ *  - `but`     adversative ("but")
+ *  - `that_is` explicative ("that is")
+ *  - `then`    conclusive ("so" / "then")
+ */
+export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'then';
+
+export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'then'];
+
+/** A coordinated second clause plus the conjunction linking it to the first. */
+export interface Coordination {
+  conjunction: CoordConjunction;
+  clause: PhrasePlan;
 }
 
 /**
@@ -489,10 +515,13 @@ export interface SerializedLink {
   id: string;
   // 'relative' (default, omitted on legacy v1 files) is a noun-to-noun relative-clause link;
   // 'conditional' is a container-to-container hypothetical link (source = main clause, target =
-  // the "if" clause). Conditional links carry no noun key.
-  kind?: 'relative' | 'conditional';
+  // the "if" clause); 'coordinative' is a container-to-container coordination (source = first
+  // clause, target = second clause, joined by `conjunction`). Clause-level links carry no noun key.
+  kind?: 'relative' | 'conditional' | 'coordinative';
   source: { containerId: string; nounKey?: string };
   target: { containerId: string; nounKey?: string };
+  // The coordinating conjunction, present only on a 'coordinative' link.
+  conjunction?: CoordConjunction;
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

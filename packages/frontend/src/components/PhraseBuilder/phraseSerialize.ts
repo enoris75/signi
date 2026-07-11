@@ -8,6 +8,7 @@ import type {
 } from "@signi/shared";
 import { COMPLEMENT_TYPES, SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from "@signi/shared";
 import type {
+  CoordConjunction,
   NounAddress,
   NounKey,
   PhraseContainer,
@@ -93,8 +94,15 @@ export function serializeWorkspace(
       (c): SerializedContainer => ({ id: c.id, selection: serializeSelection(c.selection) }),
     ),
     // Links are already plain reference data (ids + kind + noun addresses); copy as-is. A
-    // conditional link carries its `kind` and no noun keys; a relative link omits `kind`.
-    links: links.map((l) => ({ id: l.id, kind: l.kind, source: { ...l.source }, target: { ...l.target } })),
+    // conditional link carries its `kind` and no noun keys; a coordinative link additionally
+    // carries its `conjunction`; a relative link omits `kind`.
+    links: links.map((l) => ({
+      id: l.id,
+      kind: l.kind,
+      source: { ...l.source },
+      target: { ...l.target },
+      ...(l.kind === "coordinative" ? { conjunction: l.conjunction } : {}),
+    })),
   };
 }
 
@@ -119,6 +127,15 @@ export function hydrateWorkspace(
       ? {
           id: l.id,
           kind: "conditional" as const,
+          source: { containerId: l.source.containerId },
+          target: { containerId: l.target.containerId },
+        }
+      : l.kind === "coordinative"
+      ? {
+          id: l.id,
+          kind: "coordinative" as const,
+          // Default a missing conjunction to copulative "and" (defensive; always written on save).
+          conjunction: (l.conjunction ?? "and") as CoordConjunction,
           source: { containerId: l.source.containerId },
           target: { containerId: l.target.containerId },
         }

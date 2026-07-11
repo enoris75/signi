@@ -1,4 +1,25 @@
-import type { Aspect, CauseSentiment, Concept, ComplementType, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+
+export type { CoordConjunction };
+
+// UI metadata for the coordinating conjunctions offered on the coordinative control: the
+// short menu label and the traditional grammatical name of each relation.
+export const COORD_CONJUNCTION_OPTIONS: {
+  value: CoordConjunction;
+  label: string;
+  hint: string;
+}[] = [
+  { value: "and", label: "And", hint: "copulative" },
+  { value: "or", label: "Or", hint: "disjunctive" },
+  { value: "but", label: "But", hint: "adversative" },
+  { value: "that_is", label: "That is", hint: "explicative" },
+  { value: "then", label: "Then", hint: "conclusive" },
+];
+
+export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =
+  Object.fromEntries(
+    COORD_CONJUNCTION_OPTIONS.map((o) => [o.value, o.label]),
+  ) as Record<CoordConjunction, string>;
 
 
 export interface SlotConfig {
@@ -214,17 +235,31 @@ export type PhraseLink =
       kind: 'conditional';
       source: { containerId: string };
       target: { containerId: string };
+    }
+  | {
+      id: string;
+      kind: 'coordinative';
+      // The coordinating conjunction joining the two clauses (source = first, target = second).
+      conjunction: CoordConjunction;
+      source: { containerId: string };
+      target: { containerId: string };
     };
 
 /** Narrow a link to the relative kind (the default). */
 export const isRelativeLink = (
   l: PhraseLink,
-): l is Extract<PhraseLink, { kind?: 'relative' }> => l.kind !== 'conditional';
+): l is Extract<PhraseLink, { kind?: 'relative' }> =>
+  l.kind !== 'conditional' && l.kind !== 'coordinative';
 
 /** Narrow a link to the conditional kind. */
 export const isConditionalLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind: 'conditional' }> => l.kind === 'conditional';
+
+/** Narrow a link to the coordinative kind. */
+export const isCoordinativeLink = (
+  l: PhraseLink,
+): l is Extract<PhraseLink, { kind: 'coordinative' }> => l.kind === 'coordinative';
 
 // Pick-mode: awaiting a target click. A `relative` pick started from a source noun's satellite
 // and lands on a target noun; a `conditional` pick started from a container's border control
@@ -232,7 +267,8 @@ export const isConditionalLink = (
 export type PickMode =
   | { active: false }
   | { active: true; kind: 'relative'; source: { containerId: string; nounKey: NounAddress } }
-  | { active: true; kind: 'conditional'; source: { containerId: string } };
+  | { active: true; kind: 'conditional'; source: { containerId: string } }
+  | { active: true; kind: 'coordinative'; conjunction: CoordConjunction; source: { containerId: string } };
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
 // linking. Undefined for embedded (possessor) sub-builders, which never link.
@@ -274,9 +310,25 @@ export interface WorkspaceBinding {
   hasConditionalSource: boolean;
   // This container is the target of a conditional link (it is an "if" clause of some main clause).
   hasConditionalTarget: boolean;
-  // Register this container's border-control element, the endpoint the conditional connector
-  // line runs between.
+  // Register this container's border-control element, the endpoint the conditional/coordinative
+  // connector line runs between.
   registerBorderAnchor: (el: HTMLElement | null) => void;
+
+  // ── Coordinative (container-to-container) connector ──────────────────────────
+  // Start a coordination from this container with the chosen conjunction (it becomes the first
+  // clause and awaits a second-clause pick); clear the one already sourced here.
+  onStartCoordinative: (conjunction: CoordConjunction) => void;
+  onClearCoordinative: () => void;
+  // During another container's coordinative pick, is this container a legal second-clause target?
+  isCoordinativePickTarget: boolean;
+  // Choose this container as the pending pick's second clause (valid only when isCoordinativePickTarget).
+  onCoordinativePick: () => void;
+  // This container already sources a coordinative link (it is the first clause of a coordination).
+  hasCoordinativeSource: boolean;
+  // This container is the target of a coordinative link (it is the second clause).
+  hasCoordinativeTarget: boolean;
+  // The conjunction of the coordination this container takes part in, if any (for labelling).
+  coordinativeConjunction?: CoordConjunction;
 }
 
 // Wrap a container's `binding` for an embedded possessor sub-builder whose head is
@@ -305,7 +357,7 @@ export function adaptPossessorBinding(
     linkSourceKeys: new Set(root.linkSourceKeys.has(headPath) ? ["subject"] : []),
     linkTargetKeys: new Set(),
     pickActive: root.pickActive,
-    // A possessor sub-builder is never a conditional endpoint — inert pass-through.
+    // A possessor sub-builder is never a conditional/coordinative endpoint — inert pass-through.
     onStartConditional: () => {},
     onClearConditional: () => {},
     isConditionalPickTarget: false,
@@ -313,5 +365,12 @@ export function adaptPossessorBinding(
     hasConditionalSource: false,
     hasConditionalTarget: false,
     registerBorderAnchor: () => {},
+    onStartCoordinative: () => {},
+    onClearCoordinative: () => {},
+    isCoordinativePickTarget: false,
+    onCoordinativePick: () => {},
+    hasCoordinativeSource: false,
+    hasCoordinativeTarget: false,
+    coordinativeConjunction: undefined,
   };
 }

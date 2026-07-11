@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 // German comparison is synthetic: the comparative adds "-er" and the superlative "-st" to
@@ -572,6 +572,14 @@ function renderClause(phrase: ResolvedPhrase): string {
       .filter(Boolean).join(' ').trim();
 }
 
+const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'und',
+  or: 'oder',
+  but: 'aber',
+  that_is: 'das heißt',
+  then: 'also',
+};
+
 export const germanEngine: LanguageEngine = {
   language: 'de',
   render(phrase: ResolvedPhrase): string {
@@ -579,7 +587,9 @@ export const germanEngine: LanguageEngine = {
     // Hypothetical conditional: "wenn <protasis>, <apodosis>", both realised with the
     // würde-periphrasis. The "wenn" clause's verb-final ordering is approximated (a documented
     // gap it shares with the future/relative word order).
-    if (!phrase.condition) return main;
-    return `wenn ${renderClause(phrase.condition)}, ${main}`;
+    const sentence = phrase.condition ? `wenn ${renderClause(phrase.condition)}, ${main}` : main;
+    // Coordination: "<first clause>, <conjunction> <second clause>".
+    if (!phrase.coordination) return sentence;
+    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
   },
 };

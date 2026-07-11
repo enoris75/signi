@@ -1073,12 +1073,36 @@ export function PhraseBuilder({
                 isIfClause: binding.hasConditionalTarget,
                 isPickTarget: binding.isConditionalPickTarget,
                 pickActive: binding.pickActive,
-                // An IF clause can't also be a main clause — conditionals don't chain.
-                canStart: !binding.hasConditionalTarget,
+                // An IF clause can't also be a main clause (conditionals don't chain), and a
+                // period already in a coordination can't also start a conditional.
+                canStart:
+                  !binding.hasConditionalTarget &&
+                  !binding.hasCoordinativeSource &&
+                  !binding.hasCoordinativeTarget,
                 onStart: binding.onStartConditional,
                 onClear: binding.onClearConditional,
                 onPick: binding.onConditionalPick,
                 registerBorderAnchor: binding.registerBorderAnchor,
+              }
+            : undefined
+        }
+        coordinative={
+          binding
+            ? {
+                hasCoordination: binding.hasCoordinativeSource,
+                isCoordinated: binding.hasCoordinativeTarget,
+                conjunction: binding.coordinativeConjunction,
+                isPickTarget: binding.isCoordinativePickTarget,
+                pickActive: binding.pickActive,
+                // A period can take part in only one clause-level relation at a time: not a
+                // second clause already, and not tied into a conditional.
+                canStart:
+                  !binding.hasCoordinativeTarget &&
+                  !binding.hasConditionalSource &&
+                  !binding.hasConditionalTarget,
+                onStart: binding.onStartCoordinative,
+                onClear: binding.onClearCoordinative,
+                onPick: binding.onCoordinativePick,
               }
             : undefined
         }

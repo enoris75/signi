@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { moodForm, moodPN } from '../mood.js';
 
@@ -582,12 +582,22 @@ function renderClause(phrase: ResolvedPhrase): string {
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
 
+const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'e',
+  or: 'o',
+  but: 'ma',
+  that_is: 'cioè',
+  then: 'quindi',
+};
+
 export const italianEngine: LanguageEngine = {
   language: 'it',
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
     // Hypothetical conditional: "se <protasis (subjunctive)>, <apodosis (conditional)>".
-    if (!phrase.condition) return main;
-    return `se ${renderClause(phrase.condition)}, ${main}`;
+    const sentence = phrase.condition ? `se ${renderClause(phrase.condition)}, ${main}` : main;
+    // Coordination: "<first clause>, <conjunction> <second clause>".
+    if (!phrase.coordination) return sentence;
+    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
   },
 };

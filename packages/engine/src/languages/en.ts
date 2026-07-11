@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
@@ -408,12 +408,23 @@ function renderClause(phrase: ResolvedPhrase): string {
     .trim();
 }
 
+// The coordinating conjunctions, as English surface words.
+const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'and',
+  or: 'or',
+  but: 'but',
+  that_is: 'that is',
+  then: 'so',
+};
+
 export const englishEngine: LanguageEngine = {
   language: 'en',
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
     // Hypothetical conditional: "if <protasis (past)>, <apodosis (would …)>".
-    if (!phrase.condition) return main;
-    return `if ${renderClause(phrase.condition)}, ${main}`;
+    const sentence = phrase.condition ? `if ${renderClause(phrase.condition)}, ${main}` : main;
+    // Coordination: "<first clause>, <conjunction> <second clause>".
+    if (!phrase.coordination) return sentence;
+    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
   },
 };

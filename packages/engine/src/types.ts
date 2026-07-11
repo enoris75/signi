@@ -1,4 +1,4 @@
-import type { Aspect, CauseSentiment, ComplementType, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -81,6 +81,12 @@ export interface ResolvedPhrase {
    * render it as "<if-word> <condition>, <main>".
    */
   condition?: ResolvedPhrase;
+  /**
+   * A resolved coordinated second clause plus the conjunction linking it to this one. When
+   * present the engines render "<this clause> <conjunction-word> <coordination.clause>". Both
+   * clauses are plain indicative; the coordinated clause is not itself coordinated.
+   */
+  coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
 }
 
 /** The path relation chosen for a `route` complement; defaults to `through`. */

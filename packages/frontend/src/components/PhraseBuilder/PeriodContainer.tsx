@@ -1,5 +1,13 @@
-import React, { useRef } from "react";
-import { Box, IconButton, Paper, Tooltip, Typography } from "@mui/material";
+import React, { useRef, useState } from "react";
+import {
+  Box,
+  IconButton,
+  Menu,
+  MenuItem,
+  Paper,
+  Tooltip,
+  Typography,
+} from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import BackspaceOutlinedIcon from "@mui/icons-material/BackspaceOutlined";
 import SaveOutlinedIcon from "@mui/icons-material/SaveOutlined";
@@ -9,6 +17,12 @@ import UnfoldMoreIcon from "@mui/icons-material/UnfoldMore";
 import ArrowUpwardIcon from "@mui/icons-material/ArrowUpward";
 import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
+import CallMergeIcon from "@mui/icons-material/CallMerge";
+import {
+  COORD_CONJUNCTION_LABEL,
+  COORD_CONJUNCTION_OPTIONS,
+  type CoordConjunction,
+} from "./interfaces.ts";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
 // Undefined for a standalone (non-workspace) period, which can't take part in conditionals.
@@ -27,6 +41,28 @@ export interface ConditionalControl {
   onClear: () => void;
   onPick: () => void;
   registerBorderAnchor: (el: HTMLElement | null) => void;
+}
+
+// The container-to-container coordinative control state, threaded from the workspace binding.
+// Mirrors ConditionalControl, but starting a coordination first picks a conjunction (AND / OR /
+// BUT / THAT IS / THEN) from a menu, then a second-clause target. Undefined for a standalone
+// (non-workspace) period, which can't take part in coordinations.
+export interface CoordinativeControl {
+  // This period is the first clause — it already coordinates a second clause.
+  hasCoordination: boolean;
+  // This period is itself the coordinated (second) clause of some other period.
+  isCoordinated: boolean;
+  // The conjunction of the coordination this period takes part in, if any (for labelling).
+  conjunction?: CoordConjunction;
+  // A coordinative pick is in progress and this period is a legal second-clause target.
+  isPickTarget: boolean;
+  // Any pick (relative / conditional / coordinative) is currently in progress.
+  pickActive: boolean;
+  // May this period start a coordination (false for a period already tied into another relation).
+  canStart: boolean;
+  onStart: (conjunction: CoordConjunction) => void;
+  onClear: () => void;
+  onPick: () => void;
 }
 
 export interface PeriodContainerProps {
@@ -63,6 +99,8 @@ export interface PeriodContainerProps {
   onTidy: () => void;
   // Conditional (IF/MAIN) connector control on the card border. Absent for a standalone period.
   conditional?: ConditionalControl;
+  // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
+  coordinative?: CoordinativeControl;
   children: React.ReactNode;
 }
 
@@ -90,8 +128,12 @@ export function PeriodContainer({
   onToggleCompact,
   onTidy,
   conditional,
+  coordinative,
   children,
 }: PeriodContainerProps) {
+  const [coordMenuAnchor, setCoordMenuAnchor] = useState<HTMLElement | null>(
+    null,
+  );
   const borderDragRef = useRef<{
     startX: number;
     startY: number;
@@ -151,6 +193,40 @@ export function PeriodContainer({
           ? "This period is an IF clause"
           : "Add an IF condition (this becomes the main clause)";
 
+  // The coordinative control mirrors the conditional one, but starting a coordination opens a
+  // conjunction menu (AND / OR / BUT / …) before entering pick-mode; picking a target then
+  // creates the link with the chosen conjunction.
+  const coordActive = Boolean(
+    coordinative?.hasCoordination || coordinative?.isCoordinated,
+  );
+  const coordDroppable = Boolean(coordinative?.isPickTarget);
+  const coordDisabled = coordinative
+    ? coordinative.pickActive
+      ? !coordinative.isPickTarget
+      : !coordinative.hasCoordination && !coordinative.canStart
+    : true;
+  function onCoordClick(e: React.MouseEvent<HTMLElement>) {
+    if (!coordinative) return;
+    if (coordinative.pickActive) {
+      if (coordinative.isPickTarget) coordinative.onPick();
+      return;
+    }
+    if (coordinative.hasCoordination) coordinative.onClear();
+    else if (coordinative.canStart) setCoordMenuAnchor(e.currentTarget);
+  }
+  const coordLabel = coordinative?.conjunction
+    ? COORD_CONJUNCTION_LABEL[coordinative.conjunction]
+    : "";
+  const coordTitle = !coordinative
+    ? ""
+    : coordDroppable
+      ? "Use this period as the coordinated clause"
+      : coordinative.hasCoordination
+        ? `Remove the coordination (${coordLabel})`
+        : coordinative.isCoordinated
+          ? `This period is a coordinated clause (${coordLabel})`
+          : "Coordinate this period with another";
+
   return (
     <Paper
       elevation={0}
@@ -179,20 +255,33 @@ export function PeriodContainer({
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.
         position: "relative",
-        // The period's accent card: left rule + tinted bg. A pending conditional pick lights the
-        // border to mark this period as a droppable IF-clause target.
+        // The period's accent card: left rule + tinted bg. A pending pick lights the border to
+        // mark this period as a droppable target — warning (orange) for a conditional IF-clause,
+        // info (blue) for a coordinated clause.
         border: "1px solid",
-        borderColor: condDroppable ? "warning.main" : "divider",
+        borderColor: condDroppable
+          ? "warning.main"
+          : coordDroppable
+            ? "info.main"
+            : "divider",
         borderLeft: "3px solid",
         borderLeftColor: condDroppable
           ? "warning.main"
-          : condActive
-            ? "warning.main"
-            : "text.secondary",
-        boxShadow: condDroppable ? "0 0 0 2px rgba(237,108,2,0.35)" : undefined,
-        // Once this period takes part in a conditional, give up a strip on the right so the
-        // elbow connector routes in the freed gutter instead of over the border.
-        mr: condActive ? "64px" : 0,
+          : coordDroppable
+            ? "info.main"
+            : condActive
+              ? "warning.main"
+              : coordActive
+                ? "info.main"
+                : "text.secondary",
+        boxShadow: condDroppable
+          ? "0 0 0 2px rgba(237,108,2,0.35)"
+          : coordDroppable
+            ? "0 0 0 2px rgba(2,136,209,0.35)"
+            : undefined,
+        // Once this period takes part in a conditional/coordination, give up a strip on the right
+        // so the elbow connector routes in the freed gutter instead of over the border.
+        mr: condActive || coordActive ? "64px" : 0,
         transition: "margin 0.15s ease",
         bgcolor: "action.hover",
         cursor:
@@ -203,10 +292,11 @@ export function PeriodContainer({
               : undefined,
       }}
     >
-      {/* The conditional (IF/MAIN) control, pinned to the card's right border. */}
-      {conditional && (
+      {/* The clause-relation controls (conditional above, coordinative below), stacked on the
+          card's right border. Both connectors run from this cluster's registered anchor. */}
+      {(conditional || coordinative) && (
         <Box
-          ref={conditional.registerBorderAnchor}
+          ref={conditional?.registerBorderAnchor}
           onPointerDown={(e) => e.stopPropagation()}
           sx={{
             position: "absolute",
@@ -214,34 +304,100 @@ export function PeriodContainer({
             top: "50%",
             transform: "translateY(-50%)",
             zIndex: 5,
+            display: "flex",
+            flexDirection: "column",
+            gap: 0.5,
           }}
         >
-          <Tooltip title={condTitle}>
-            <span>
-              <IconButton
-                size="small"
-                onClick={onCondClick}
-                disabled={condDisabled}
-                aria-label={condTitle}
-                sx={{
-                  p: 0.25,
-                  bgcolor: "background.paper",
-                  border: "1px solid",
-                  borderColor: condDroppable
-                    ? "warning.main"
-                    : condActive
+          {conditional && (
+            <Tooltip title={condTitle}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={onCondClick}
+                  disabled={condDisabled}
+                  aria-label={condTitle}
+                  sx={{
+                    p: 0.25,
+                    bgcolor: "background.paper",
+                    border: "1px solid",
+                    borderColor: condDroppable
                       ? "warning.main"
-                      : "divider",
-                  color: condActive || condDroppable ? "warning.main" : "text.secondary",
-                  "&:hover": { bgcolor: "background.paper" },
-                }}
-              >
-                <AltRouteIcon sx={{ fontSize: 15 }} />
-              </IconButton>
-            </span>
-          </Tooltip>
+                      : condActive
+                        ? "warning.main"
+                        : "divider",
+                    color:
+                      condActive || condDroppable
+                        ? "warning.main"
+                        : "text.secondary",
+                    "&:hover": { bgcolor: "background.paper" },
+                  }}
+                >
+                  <AltRouteIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {coordinative && (
+            <Tooltip title={coordTitle}>
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={onCoordClick}
+                  disabled={coordDisabled}
+                  aria-label={coordTitle}
+                  sx={{
+                    p: 0.25,
+                    bgcolor: "background.paper",
+                    border: "1px solid",
+                    borderColor: coordDroppable
+                      ? "info.main"
+                      : coordActive
+                        ? "info.main"
+                        : "divider",
+                    color:
+                      coordActive || coordDroppable
+                        ? "info.main"
+                        : "text.secondary",
+                    "&:hover": { bgcolor: "background.paper" },
+                  }}
+                >
+                  <CallMergeIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
         </Box>
       )}
+      {/* Conjunction picker for a new coordination (AND / OR / BUT / THAT IS / THEN). */}
+      <Menu
+        anchorEl={coordMenuAnchor}
+        open={Boolean(coordMenuAnchor)}
+        onClose={() => setCoordMenuAnchor(null)}
+        anchorOrigin={{ vertical: "center", horizontal: "right" }}
+        transformOrigin={{ vertical: "center", horizontal: "left" }}
+      >
+        {COORD_CONJUNCTION_OPTIONS.map((o) => (
+          <MenuItem
+            key={o.value}
+            dense
+            onClick={() => {
+              setCoordMenuAnchor(null);
+              coordinative?.onStart(o.value);
+            }}
+          >
+            <Typography component="span" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
+              {o.label}
+            </Typography>
+            <Typography
+              component="span"
+              sx={{ ml: 1, color: "text.disabled", fontSize: "0.72rem" }}
+            >
+              {o.hint}
+            </Typography>
+          </MenuItem>
+        ))}
+      </Menu>
       <Box
         sx={{
           display: "flex",
@@ -277,7 +433,11 @@ export function PeriodContainer({
               ? "Main clause"
               : conditional?.isIfClause
                 ? "If clause"
-                : ""}
+                : coordinative?.hasCoordination
+                  ? "First clause"
+                  : coordinative?.isCoordinated
+                    ? `${coordLabel} clause`
+                    : ""}
             <Box
               component="span"
               sx={{ color: "text.disabled", fontWeight: 500 }}

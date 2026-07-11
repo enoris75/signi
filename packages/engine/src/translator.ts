@@ -210,6 +210,14 @@ function resolvePhrase(
     condition: plan.condition
       ? resolvePhrase(plan.condition, language, lookup, 'subjunctive')
       : undefined,
+    // A coordinated second clause: resolved as a plain indicative clause; the conjunction word
+    // is chosen per-engine at render time. Coordination doesn't nest.
+    coordination: plan.coordination
+      ? {
+          conjunction: plan.coordination.conjunction,
+          clause: resolvePhrase(plan.coordination.clause, language, lookup),
+        }
+      : undefined,
   };
 }
 

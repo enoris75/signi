@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
@@ -388,12 +388,30 @@ function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): R
   return segs;
 }
 
+// Coordinating conjunctions as Japanese connective adverbs, placed after the first clause's 、.
+const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'そして',
+  or: 'または',
+  but: 'しかし',
+  that_is: 'つまり',
+  then: 'だから',
+};
+
 function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
   const main = buildClauseSegments(phrase, 'は');
-  if (!phrase.condition) return main;
   // Hypothetical conditional: もし <protasis (…たら)>、 <apodosis (…でしょう)>. The condition
   // clause's subject takes が (the neutral subject marker inside a subordinate clause).
-  return [{ t: 'もし' }, ...buildClauseSegments(phrase.condition, 'が'), { t: '、' }, ...main];
+  const sentence = phrase.condition
+    ? [{ t: 'もし' }, ...buildClauseSegments(phrase.condition, 'が'), { t: '、' }, ...main]
+    : main;
+  // Coordination: <first clause>、<conjunction> <second clause>.
+  if (!phrase.coordination) return sentence;
+  return [
+    ...sentence,
+    { t: '、' },
+    { t: COORD_WORDS[phrase.coordination.conjunction] },
+    ...buildClauseSegments(phrase.coordination.clause, 'は'),
+  ];
 }
 
 export const japaneseEngine: LanguageEngine = {

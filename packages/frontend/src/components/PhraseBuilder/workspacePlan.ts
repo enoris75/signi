@@ -1,6 +1,6 @@
 import type { ComplementType, NounPhrase, PhrasePlan, RelativeClause } from "@signi/shared";
 import { COMPLEMENT_TYPES } from "@signi/shared";
-import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isRelativeLink } from "./interfaces.ts";
+import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isCoordinativeLink, isRelativeLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
 const CORE_KEYS = new Set<NounKey>(["subject", "directObject", "indirectObject"]);
@@ -74,6 +74,28 @@ function attachCondition(
   plan.condition = condPlan as PhrasePlan;
 }
 
+// Attach the coordinated second clause sourced from `container` onto `plan`. The coordinated
+// container is serialised as its own indicative plan (with its own relative links folded in)
+// and hung on `plan.coordination`; the translator renders it after the conjunction word.
+// Coordination doesn't nest, so the second clause is not itself given a coordination.
+function attachCoordination(
+  plan: Partial<PhrasePlan>,
+  container: PhraseContainer,
+  links: PhraseLink[],
+  byId: Map<string, PhraseContainer>,
+  seen: Set<string>,
+): void {
+  const link = links.find(
+    (l) => isCoordinativeLink(l) && l.source.containerId === container.id,
+  );
+  if (!link || !isCoordinativeLink(link)) return;
+  const second = byId.get(link.target.containerId);
+  if (!second || seen.has(second.id)) return;
+  const clausePlan = selectionToPlan(second.selection);
+  attachLinks(clausePlan, second, links, byId, new Set([...seen, second.id]));
+  plan.coordination = { conjunction: link.conjunction, clause: clausePlan as PhrasePlan };
+}
+
 // Serialise a target container as a relative clause whose head fills the `gap` slot. The
 // gap slot is dropped (its surface comes from the head above); any other slot is kept. A
 // non-subject relative keeps the clause's own subject, which drives agreement.
@@ -119,6 +141,7 @@ export function workspaceToPlans(
       const plan = selectionToPlan(c.selection);
       attachLinks(plan, c, links, byId, new Set([c.id]));
       attachCondition(plan, c, links, byId, new Set([c.id]));
+      attachCoordination(plan, c, links, byId, new Set([c.id]));
       return { containerId: c.id, plan };
     });
 }

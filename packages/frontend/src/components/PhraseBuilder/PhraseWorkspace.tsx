@@ -13,6 +13,8 @@ import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import { PhraseBuilder } from "./PhraseBuilder.tsx";
 import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
+  COORD_CONJUNCTION_LABEL,
+  CoordConjunction,
   NounAddress,
   NounKey,
   PhraseContainer,
@@ -21,6 +23,7 @@ import {
   PickMode,
   WorkspaceBinding,
   isConditionalLink,
+  isCoordinativeLink,
   isRelativeLink,
 } from "./interfaces.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
@@ -38,12 +41,14 @@ const boxKey = (containerId: string, nounKey: NounAddress) =>
 // stroke style: dashed faint line for a relative clause, solid arrowed line for a conditional.
 type Connector = {
   id: string;
-  kind: "relative" | "conditional";
+  kind: "relative" | "conditional" | "coordinative";
   x1: number;
   y1: number;
   x2: number;
   y2: number;
   color: string;
+  // The elbow label drawn on a clause-level connector's vertical run ("if" / "and" / "but" / …).
+  label?: string;
 };
 
 function sameConnectors(a: Connector[], b: Connector[]): boolean {
@@ -51,7 +56,8 @@ function sameConnectors(a: Connector[], b: Connector[]): boolean {
   for (let i = 0; i < a.length; i++) {
     const p = a[i];
     const q = b[i];
-    if (p.id !== q.id || p.color !== q.color || p.kind !== q.kind) return false;
+    if (p.id !== q.id || p.color !== q.color || p.kind !== q.kind || p.label !== q.label)
+      return false;
     if (
       Math.abs(p.x1 - q.x1) > 0.5 ||
       Math.abs(p.y1 - q.y1) > 0.5 ||
@@ -202,14 +208,14 @@ export function PhraseWorkspace({
       return; // same container or would create a cycle
     setLinks((ls) => {
       const kept = ls.filter((l) =>
-        isConditionalLink(l)
-          ? // a container can't be both an "if" clause and a relativised gap
-            l.target.containerId !== targetContainerId
-          : // one relative link per source noun, and one incoming link per target container
+        isRelativeLink(l)
+          ? // one relative link per source noun, and one incoming link per target container
             !(
               l.source.containerId === source.containerId &&
               l.source.nounKey === source.nounKey
-            ) && l.target.containerId !== targetContainerId,
+            ) && l.target.containerId !== targetContainerId
+          : // a container can't be both a clause-level linked clause and a relativised gap
+            l.target.containerId !== targetContainerId,
       );
       return [
         ...kept,
@@ -236,16 +242,65 @@ export function PhraseWorkspace({
     );
   }
 
+  // Whether `id` already takes part in any clause-level (conditional or coordinative) link —
+  // as either endpoint. Such a container can't be pulled into a second clause-level relation.
+  function inClauseRelation(id: string): boolean {
+    return links.some(
+      (l) =>
+        (isConditionalLink(l) || isCoordinativeLink(l)) &&
+        (l.source.containerId === id || l.target.containerId === id),
+    );
+  }
+
   // Whether `ifId` may become the "if" clause of the container that started the pick: not
-  // itself, no cycle, not already an "if" clause of something, and not itself a main clause
-  // (no conditional chaining).
+  // itself, no cycle, and free of any other clause-level relation.
   function canBeCondition(mainId: string, ifId: string): boolean {
     if (mainId === ifId) return false;
     if (isSelfOrAncestor(ifId, mainId, links)) return false;
-    const conditionals = links.filter(isConditionalLink);
-    if (conditionals.some((l) => l.target.containerId === ifId)) return false; // already an if-clause
-    if (conditionals.some((l) => l.source.containerId === ifId)) return false; // is itself a main clause
-    return true;
+    return !inClauseRelation(ifId);
+  }
+
+  // ── Coordinative (container-to-container) linking ──────────────────────────
+  function startCoordinative(containerId: string, conjunction: CoordConjunction) {
+    setPick({ active: true, kind: "coordinative", conjunction, source: { containerId } });
+  }
+
+  function clearCoordinative(firstContainerId: string) {
+    setLinks((ls) =>
+      ls.filter(
+        (l) =>
+          !(isCoordinativeLink(l) && l.source.containerId === firstContainerId),
+      ),
+    );
+  }
+
+  // Whether `secondId` may become the coordinated second clause of the pick's first clause:
+  // not itself, no cycle, and free of any other clause-level relation.
+  function canBeCoordinate(firstId: string, secondId: string): boolean {
+    if (firstId === secondId) return false;
+    if (isSelfOrAncestor(secondId, firstId, links)) return false;
+    return !inClauseRelation(secondId);
+  }
+
+  function completeCoordinative(secondContainerId: string) {
+    if (!pick.active || pick.kind !== "coordinative") return;
+    const firstId = pick.source.containerId;
+    const conjunction = pick.conjunction;
+    setPick({ active: false });
+    if (!canBeCoordinate(firstId, secondContainerId)) return;
+    setLinks((ls) => [
+      // One coordination per first clause: drop any this container already sources.
+      ...ls.filter(
+        (l) => !(isCoordinativeLink(l) && l.source.containerId === firstId),
+      ),
+      {
+        id: uid(),
+        kind: "coordinative" as const,
+        conjunction,
+        source: { containerId: firstId },
+        target: { containerId: secondContainerId },
+      },
+    ]);
   }
 
   function completeConditional(ifContainerId: string) {
@@ -297,6 +352,30 @@ export function PhraseWorkspace({
         x2: t.left + t.width / 2 - rootRect.left,
         y2: t.top + t.height / 2 - rootRect.top,
         color: MUI_COLOR_HEX.warning,
+        label: "if",
+      });
+    }
+    // Coordinative connectors: first clause's border control → second clause's border control.
+    for (const link of links) {
+      if (!isCoordinativeLink(link)) continue;
+      const srcAnchor = borderAnchorEls.current.get(link.source.containerId);
+      const tgtAnchor = borderAnchorEls.current.get(link.target.containerId);
+      const srcBox = boxEls.current.get(`${link.source.containerId}:subject`);
+      const tgtBox = boxEls.current.get(`${link.target.containerId}:subject`);
+      const rect = srcAnchor ?? srcBox;
+      const trect = tgtAnchor ?? tgtBox;
+      if (!rect || !trect) continue;
+      const s = rect.getBoundingClientRect();
+      const t = trect.getBoundingClientRect();
+      next.push({
+        id: link.id,
+        kind: "coordinative",
+        x1: s.left + s.width / 2 - rootRect.left,
+        y1: s.top + s.height / 2 - rootRect.top,
+        x2: t.left + t.width / 2 - rootRect.left,
+        y2: t.top + t.height / 2 - rootRect.top,
+        color: MUI_COLOR_HEX.info,
+        label: COORD_CONJUNCTION_LABEL[link.conjunction].toLowerCase(),
       });
     }
     for (const link of links) {
@@ -364,7 +443,7 @@ export function PhraseWorkspace({
           }}
         >
           <defs>
-            {/* Arrowhead for the conditional connector, pointing at the "if" clause. */}
+            {/* Arrowheads for the clause-level connectors, pointing at the linked clause. */}
             <marker
               id="conditional-arrow"
               markerWidth="8"
@@ -376,14 +455,29 @@ export function PhraseWorkspace({
             >
               <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.warning} />
             </marker>
+            <marker
+              id="coordinative-arrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="6"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.info} />
+            </marker>
           </defs>
           {connectors.map((c) => {
-            if (c.kind === "conditional") {
-              // Elbow route through the right-hand gutter: out from the main clause's control,
-              // down the gutter, back in to the "if" clause's control.
+            if (c.kind === "conditional" || c.kind === "coordinative") {
+              // Elbow route through the right-hand gutter: out from the first clause's control,
+              // down the gutter, back in to the linked clause's control.
               const midX = Math.max(c.x1, c.x2) + 24;
               const midY = (c.y1 + c.y2) / 2;
               const d = `M ${c.x1} ${c.y1} H ${midX} V ${c.y2} H ${c.x2}`;
+              const marker =
+                c.kind === "conditional"
+                  ? "url(#conditional-arrow)"
+                  : "url(#coordinative-arrow)";
               return (
                 <g key={c.id}>
                   <path
@@ -393,9 +487,9 @@ export function PhraseWorkspace({
                     strokeWidth="2"
                     strokeOpacity="0.85"
                     strokeLinejoin="round"
-                    markerEnd="url(#conditional-arrow)"
+                    markerEnd={marker}
                   />
-                  {/* "if" label on the vertical run of the elbow. */}
+                  {/* Conjunction label ("if" / "and" / "but" / …) on the vertical run. */}
                   <text
                     x={midX + 5}
                     y={midY}
@@ -405,7 +499,7 @@ export function PhraseWorkspace({
                     textAnchor="start"
                     dominantBaseline="middle"
                   >
-                    if
+                    {c.label}
                   </text>
                 </g>
               );
@@ -452,6 +546,17 @@ export function PhraseWorkspace({
             pick.active &&
             pick.kind === "conditional" &&
             canBeCondition(pick.source.containerId, c.id);
+          const coordinatives = links.filter(isCoordinativeLink);
+          const coordAsSource = coordinatives.find(
+            (l) => l.source.containerId === c.id,
+          );
+          const coordAsTarget = coordinatives.find(
+            (l) => l.target.containerId === c.id,
+          );
+          const isCoordinativePickTarget =
+            pick.active &&
+            pick.kind === "coordinative" &&
+            canBeCoordinate(pick.source.containerId, c.id);
           const binding: WorkspaceBinding = {
             containerId: c.id,
             registerBox: (nounKey, el) => {
@@ -494,6 +599,14 @@ export function PhraseWorkspace({
               if (el) borderAnchorEls.current.set(c.id, el);
               else borderAnchorEls.current.delete(c.id);
             },
+            onStartCoordinative: (conjunction) =>
+              startCoordinative(c.id, conjunction),
+            onClearCoordinative: () => clearCoordinative(c.id),
+            isCoordinativePickTarget,
+            onCoordinativePick: () => completeCoordinative(c.id),
+            hasCoordinativeSource: Boolean(coordAsSource),
+            hasCoordinativeTarget: Boolean(coordAsTarget),
+            coordinativeConjunction: (coordAsSource ?? coordAsTarget)?.conjunction,
           };
           return (
             <PhraseBuilder
@@ -578,7 +691,9 @@ export function PhraseWorkspace({
           <Typography sx={{ fontSize: "0.8rem", flex: 1 }}>
             {pick.active && pick.kind === "conditional"
               ? "Click the period that is the IF condition — in another phrase container."
-              : "Click the noun this clause describes — in another phrase container."}
+              : pick.active && pick.kind === "coordinative"
+                ? `Click the period to coordinate with “${COORD_CONJUNCTION_LABEL[pick.conjunction]}” — in another phrase container.`
+                : "Click the noun this clause describes — in another phrase container."}
           </Typography>
           <Button
             size="small"

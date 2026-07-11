@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { moodForm, moodPN } from '../mood.js';
 
@@ -555,15 +555,28 @@ function renderClause(phrase: ResolvedPhrase): string {
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
 
+const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'et',
+  or: 'ou',
+  but: 'mais',
+  that_is: "c'est-à-dire",
+  then: 'donc',
+};
+
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
-    if (!phrase.condition) return main;
-    // "si" + protasis (imparfait), elided to "s'" only before "il"/"ils"; apodosis in the
-    // conditionnel.
-    const cond = renderClause(phrase.condition);
-    const ifw = /^ils?\b/.test(cond) ? "s'" : 'si ';
-    return `${ifw}${cond}, ${main}`;
+    let sentence = main;
+    if (phrase.condition) {
+      // "si" + protasis (imparfait), elided to "s'" only before "il"/"ils"; apodosis in the
+      // conditionnel.
+      const cond = renderClause(phrase.condition);
+      const ifw = /^ils?\b/.test(cond) ? "s'" : 'si ';
+      sentence = `${ifw}${cond}, ${main}`;
+    }
+    // Coordination: "<first clause>, <conjunction> <second clause>".
+    if (!phrase.coordination) return sentence;
+    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
   },
 };
