@@ -190,7 +190,8 @@
       "Bash(grep -iE \"\\\\.\\(tsx|ts\\)$\")",
       "Bash(xargs ps -o pid=,command= -p)",
       "Bash(curl -s -X POST http://localhost:3001/api/translate -H 'Content-Type: application/json' -d '{\"plan\":{\"subject\":{\"concept\":\"SECOND_PERSON\",\"number\":\"singular\"},\"verbPhrase\":{\"verb\":\"EAT\"},\"directObject\":{\"concept\":\"FOOD\",\"definiteness\":\"definite\"},\"imperative\":true}}')",
-      "Bash(python3 -c \"import sys,json; [print\\(t['language'],':',t['text']\\) for t in json.load\\(sys.stdin\\)['translations']]\")"
+      "Bash(python3 -c \"import sys,json; [print\\(t['language'],':',t['text']\\) for t in json.load\\(sys.stdin\\)['translations']]\")",
+      "Bash(python3 -c \"import sys,json; print\\(json.load\\(sys.stdin\\).get\\('scripts',{}\\)\\)\")"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
