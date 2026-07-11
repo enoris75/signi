@@ -8,6 +8,11 @@
 type Pt = { x: number; y: number };
 type Size = { w: number; h: number };
 
+// Spacing between adjacent satellite controls fanned along a box edge, in px:
+// one control button (20px) plus a hair of breathing room. Exported so a box can
+// be sized wide enough to seat the controls that ride its border without overlap.
+export const CONTROL_GAP = 22;
+
 // Where the ray from a box's center toward a target crosses the box border,
 // padded outward a touch so a control placed there straddles the edge. Both
 // points and the returned point are in canvas pixels.
@@ -29,7 +34,7 @@ function layoutControls(
   size: Size,
   targets: { key: string; target: Pt }[],
 ): Record<string, Pt> {
-  const GAP = 22; // control button + a hair of breathing room, in px
+  const GAP = CONTROL_GAP; // control button + a hair of breathing room, in px
   const raw = targets.map((t) => ({
     key: t.key,
     p: borderPoint(center, size, t.target, 2),

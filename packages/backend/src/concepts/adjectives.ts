@@ -317,4 +317,19 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'cuidadoso' },
     },
   },
+  {
+    id: 'SEMANTIC',
+    role: 'adjective',
+    description: 'relating to meaning in language',
+    emoji: '🔤',
+    forms: {
+      en: { base: 'semantic' },
+      it: { base: 'semantico' },
+      fr: { base: 'sémantique' },
+      de: { base: 'semantisch' },
+      es: { base: 'semántico' },
+      ja: { base: '意味的な', reading: 'いみてきな' },
+      pt: { base: 'semântico' },
+    },
+  },
 ];

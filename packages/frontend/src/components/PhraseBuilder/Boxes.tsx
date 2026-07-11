@@ -108,6 +108,7 @@ export function SlotBox({
   dimmed = false,
   highlight = false,
   editing = false,
+  minWidth = 80,
 }: {
   slot: SlotConfig;
   concept?: Concept;
@@ -127,6 +128,10 @@ export function SlotBox({
   // The user clicked this filled box to change its word: show `emptyContent` (the picker)
   // over the current word instead of the word itself.
   editing?: boolean;
+  // Minimum box width in px. Widened above the 80px default for boxes that host many
+  // satellite controls on their border (e.g. a short verb like "become"), so the controls
+  // have room to fan out along the edge instead of piling up over each other.
+  minWidth?: number;
 }) {
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
@@ -135,7 +140,7 @@ export function SlotBox({
         sx={{
           px: 1.5,
           py: 0.75,
-          minWidth: 80,
+          minWidth,
           cursor: "inherit",
           borderRadius: 2,
           borderWidth: 2,

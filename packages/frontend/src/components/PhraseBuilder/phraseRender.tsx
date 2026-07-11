@@ -12,6 +12,7 @@ import {
   slotCategories,
 } from "./interfaces.ts";
 import { CategoryToggle, SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { CONTROL_GAP } from "./controlLayout.ts";
 import type { GroupRect, GroupShape } from "./graph.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
 
@@ -263,6 +264,14 @@ export function SlotNode({
       />
     ) : undefined;
 
+  // Widen the box to seat the satellite controls that ride its border. A short word
+  // (e.g. the verb "become") otherwise leaves too little edge for its controls, and
+  // their border points collide. Reserve one CONTROL_GAP slot per control so they can
+  // fan along an edge without piling up, keeping the 80px SlotBox default as the floor.
+  const controlCount = ctx.satelliteIconsByParent[slot.key]?.length ?? 0;
+  const minWidth =
+    controlCount > 0 ? Math.max(80, controlCount * CONTROL_GAP) : undefined;
+
   return (
     <Box
       {...makeDragProps(slot.key, onActivate)}
@@ -305,6 +314,7 @@ export function SlotNode({
         dimmed={dimmed}
         highlight={pickTarget}
         editing={editing}
+        minWidth={minWidth}
         onClear={() => handleClear(slot.key)}
         categoryToggle={categoryToggle}
         emptyContent={slotTypeahead({
