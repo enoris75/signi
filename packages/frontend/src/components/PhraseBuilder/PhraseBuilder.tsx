@@ -10,7 +10,7 @@ import {
   adaptPossessorBinding,
   ConceptSelectOpts,
   GenderSlot,
-  ImperativePerson,
+  ImperativeAddress,
   NounAddress,
   NounKey,
   NumberSlot,
@@ -43,7 +43,7 @@ import {
   setModifierAdjective,
   cycleTense,
   removePossessor,
-  setImperativePerson,
+  setImperativeAddress,
   setSentiment,
   setSpecifier,
   toggleGender,
@@ -352,8 +352,8 @@ export function PhraseBuilder({
     // the one thing still to pick, and the whole point of a command.
     if (!selection.imperative && !selection.verb) setActiveSlot("verb");
   };
-  const handleSetImperativePerson = (person: ImperativePerson) =>
-    onPhraseUpdate((prev) => setImperativePerson(prev, person));
+  const handleSetImperativeAddress = (address: ImperativeAddress) =>
+    onPhraseUpdate((prev) => setImperativeAddress(prev, address));
   const handleSelectSpecifier = (spec: PathSpecifier) =>
     onPhraseUpdate((prev) => setSpecifier(prev, spec));
   const handleSelectSentiment = (sentiment: CauseSentiment) =>
@@ -849,7 +849,7 @@ export function PhraseBuilder({
         controlPos={controlPos}
         perimeterByNoun={perimeterByNoun}
         linkBinding={linkBinding}
-        onSetImperativePerson={handleSetImperativePerson}
+        onSetImperativeAddress={handleSetImperativeAddress}
         containerRef={containerRef}
         possessorControlEls={possessorControlEls}
       />

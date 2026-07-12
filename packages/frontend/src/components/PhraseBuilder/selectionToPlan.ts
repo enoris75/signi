@@ -153,6 +153,11 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
     directObject: buildNounPhrase(sel, "directObject"),
     indirectObject: buildNounPhrase(sel, "indirectObject"),
     complements: buildComplements(sel),
-    ...(imperative && { imperative: true }),
+    // The register rides along with the mood: absent ⇒ 'request', a command spoken to the
+    // addressee above. 'instruction' addresses nobody, and the engines then ignore the person.
+    ...(imperative && {
+      imperative: true,
+      ...(sel.imperativeRegister && { imperativeRegister: sel.imperativeRegister }),
+    }),
   };
 }

@@ -352,8 +352,21 @@ function jaImperativePN(forms: Record<string, string>): JaIPN {
  * built on the te-form; its negative uses the plain prohibitive ～な (走るな) — a deliberate
  * register gap (the affirmative stays polite), taken because the polite ～ないでください would need a
  * nai-form the lexicon doesn't store.
+ *
+ * An `instruction` (a button, a menu entry, a recipe step) is addressed to nobody, and Japanese
+ * does not command there: it labels with the verb's verbal noun — 保存, 読み込み, 追加 — so
+ * "文を読み込んでください" ("please load a period") becomes "文を読み込み". The noun is the `label`
+ * form seeded on the ja verb; failing that it derives from the masu-stem, minus the し a
+ * する-verb ends on (保存し → 保存). Its negative is the prohibitive ～ないこと ("走らないこと"),
+ * which the lexicon's nai-form gap likewise rules out, so a negative instruction keeps ～な.
  */
-function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean): RubySegment[] {
+function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, instruction = false): RubySegment[] {
+  if (instruction && !negative) {
+    const label = verb.forms['label'];
+    if (label) return [wordSeg(label)];
+    const st = masuStem(verb);
+    if (st) return [wordSeg(st.stem.replace(/し$/, ''), st.reading?.replace(/し$/, ''))];
+  }
   if (pn === '1pl') {
     const st = masuStem(verb);
     if (st) return [wordSeg(st.stem + 'ましょう', st.reading !== undefined ? st.reading + 'ましょう' : undefined)];
@@ -380,7 +393,7 @@ function predicateSegs(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
 ): RubySegment[] {
-  const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -407,7 +420,7 @@ function predicateSegs(
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
     }
-    segs.push(...jaImperativeSegs(verb, pn, negated));
+    segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
     return segs;
   }
   if (verb.forms['copula'] === '1' && predicative) {

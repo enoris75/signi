@@ -454,7 +454,24 @@ export interface PhrasePlan {
    * this; the translator also normalises it defensively).
    */
   imperative?: boolean;
+  /**
+   * The register of an imperative — who the command is addressed to, which the languages
+   * realise with different forms. Ignored unless `imperative` is set.
+   *  - `request` (the default): a command spoken to a person — "load a period!", "carica un
+   *    periodo", ja "読み込んでください".
+   *  - `instruction`: an impersonal directive addressed to nobody — the label on a control, a
+   *    menu entry, a step in a recipe. Most languages do *not* use the imperative for this:
+   *    French/Spanish/Portuguese/German take the infinitive ("charger une période", "ein
+   *    Satzgefüge laden") and Japanese the verbal noun ("文を読み込み"). Only English (bare
+   *    base) and Italian (2sg) happen to reuse their imperative surface.
+   */
+  imperativeRegister?: ImperativeRegister;
 }
+
+/** See `PhrasePlan.imperativeRegister`. */
+export type ImperativeRegister = 'request' | 'instruction';
+
+export const IMPERATIVE_REGISTERS: ImperativeRegister[] = ['request', 'instruction'];
 
 /**
  * A coordinating conjunction joining two independent clauses:

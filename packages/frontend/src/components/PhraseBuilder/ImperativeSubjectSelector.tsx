@@ -1,14 +1,17 @@
 import { Box, ToggleButton, ToggleButtonGroup, Tooltip, Typography } from "@mui/material";
 import CampaignIcon from "@mui/icons-material/Campaign";
-import type { ImperativePerson } from "./interfaces.ts";
+import type { ImperativeAddress } from "./interfaces.ts";
 
-// The three addressees an imperative can target. The subject is dropped from every rendered
-// sentence, so this only picks the person/number the command's verb form agrees with — familiar
+// Who an imperative is addressed to. The subject is dropped from every rendered sentence, so the
+// three persons only pick the person/number the command's verb form agrees with — familiar
 // 2nd-singular ("run!"), the 1st-plural cohortative ("let's run!"), and 2nd-plural ("run!", plural).
-const OPTIONS: { value: ImperativePerson; label: string; hint: string }[] = [
+// "Nobody" is not a person but the instruction register: a command with no addressee, which most
+// languages render outside the imperative altogether (fr "courir", de "laufen", ja "実行").
+const OPTIONS: { value: ImperativeAddress; label: string; hint: string }[] = [
   { value: "2sg", label: "You", hint: "2nd person singular — “run!”" },
   { value: "1pl", label: "Let’s", hint: "1st person plural — “let’s run!”" },
   { value: "2pl", label: "You all", hint: "2nd person plural — “run!” (plural)" },
+  { value: "none", label: "Nobody", hint: "Instruction — a button, a menu entry, a recipe step: “run” / fr “courir”" },
 ];
 
 // The subject box, under an imperative, is replaced by this addressee selector: the command has
@@ -20,8 +23,8 @@ export function ImperativeSubjectSelector({
   onChange,
   rect,
 }: {
-  value: ImperativePerson;
-  onChange: (person: ImperativePerson) => void;
+  value: ImperativeAddress;
+  onChange: (address: ImperativeAddress) => void;
   rect?: { x: number; y: number; width: number; height: number };
 }) {
   const body = (
@@ -61,7 +64,7 @@ export function ImperativeSubjectSelector({
         size="small"
         value={value}
         onChange={(_, v) => {
-          if (v) onChange(v as ImperativePerson);
+          if (v) onChange(v as ImperativeAddress);
         }}
       >
         {OPTIONS.map((o) => (

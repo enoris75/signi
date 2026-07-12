@@ -531,7 +531,7 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element (the outermost modal, or the main verb)
   // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
@@ -567,7 +567,10 @@ function predicateText(
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
   // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.
   if (mood === 'imperative') {
-    const impForm = imperativeForm('it', verb, moodPN(subjectForms), negText === 'non') ?? verbText;
+    // Italian is the one Romance language whose UI labels keep the imperative ("Salva", "Carica"),
+    // so an instruction only pins the person to tu — it has no addressee to take noi/voi from.
+    const impPN = register === 'instruction' ? '2sg' : moodPN(subjectForms);
+    const impForm = imperativeForm('it', verb, impPN, negText === 'non') ?? verbText;
     return [negText, impForm, modifierText, directObjectText, indirectObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

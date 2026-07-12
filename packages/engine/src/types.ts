@@ -1,4 +1,4 @@
-import type { Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -48,6 +48,14 @@ export interface ResolvedVerbPhrase {
   tense?: Tense;
   aspect?: Aspect;
   mood?: Mood;
+  /**
+   * The register of an imperative (see PhrasePlan.imperativeRegister). Absent ⇒ `'request'`,
+   * a command spoken to someone. `'instruction'` is the impersonal directive a UI control or a
+   * recipe step carries; each engine renders it in the form its language conventionally uses
+   * there — the infinitive in fr/es/pt/de, the verbal noun in ja, the plain base in en/it.
+   * Meaningless outside `mood === 'imperative'`; the engines only read it there.
+   */
+  register?: ImperativeRegister;
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ConceptForms[];

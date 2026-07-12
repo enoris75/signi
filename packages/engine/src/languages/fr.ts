@@ -474,7 +474,7 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
   // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
   const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? conjugate(verb.forms, subjectForms, tense);
@@ -537,6 +537,15 @@ function predicateText(
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
   // by `negateFinite` ("ne cours pas", "ne sois pas prudent", "aucun"/"jamais" taking bare "ne").
   if (mood === 'imperative') {
+    // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
+    // infinitive in French ("Charger une période", "Ne pas courir"), not the imperative.
+    if (register === 'instruction') {
+      const inf = verb.forms['base'] ?? conjugated;
+      const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
+      return [infVerb, modifierText, directObjectText, indirectObjectText, complementsText]
+        .filter(Boolean)
+        .join(' ');
+    }
     const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
     return [negateFinite(impForm), modifierText, directObjectText, indirectObjectText, complementsText]
       .filter(Boolean)

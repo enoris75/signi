@@ -597,7 +597,7 @@ function renderClause(phrase: ResolvedPhrase): string {
     const subjectText = subjectPhrase(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
-    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood } = verbPhrase;
+    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
     // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" negates,
     // sitting before a predicate complement ("sei nicht vorsichtig") but after the objects
@@ -610,6 +610,15 @@ function renderClause(phrase: ResolvedPhrase): string {
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
       const hasPredicative = !!phrase.complements?.['predicative'];
       const impComplements = complementsPhrase(phrase.complements);
+      // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
+      // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
+      // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
+      if (register === 'instruction') {
+        return [impModifier, impIndirect, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word]
+          .filter(Boolean)
+          .join(' ')
+          .trim();
+      }
       const parts = [word, impModifier, impIndirect, impDirect];
       if (hasPredicative) {
         if (applyNicht) parts.push('nicht');

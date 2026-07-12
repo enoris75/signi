@@ -13,7 +13,7 @@ import {
 } from "@signi/shared";
 import {
   GenderSlot,
-  ImperativePerson,
+  ImperativeAddress,
   NounKey,
   NumberSlot,
   PhraseSelection,
@@ -340,13 +340,16 @@ export function toggleImperative(prev: PhraseSelection): PhraseSelection {
   };
 }
 
-// Set the imperative addressee (2sg / 1pl "let's" / 2pl). No-op semantics off imperative, but
-// harmless to store so the choice persists across a toggle.
-export function setImperativePerson(
+// Set who the command is addressed to: one of the three persons (2sg / 1pl "let's" / 2pl), or
+// nobody — an instruction, the register a button or a recipe step carries. Switching to "none"
+// keeps the person pick, so returning to a spoken command restores it. No-op semantics off
+// imperative, but harmless to store so the choice persists across a toggle.
+export function setImperativeAddress(
   prev: PhraseSelection,
-  person: ImperativePerson,
+  address: ImperativeAddress,
 ): PhraseSelection {
-  return { ...prev, imperativePerson: person };
+  if (address === "none") return { ...prev, imperativeRegister: "instruction" };
+  return { ...prev, imperativePerson: address, imperativeRegister: undefined };
 }
 
 // Cycle the verb tense present → past → future → present.

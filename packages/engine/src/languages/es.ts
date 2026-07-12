@@ -398,7 +398,7 @@ function predicateText(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correría")
   // or imperfect-subjunctive (protasis, "comiera") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
@@ -437,7 +437,11 @@ function predicateText(
   // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here.
   if (mood === 'imperative') {
     const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
-    const impForm = imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated;
+    // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
+    // infinitive in Spanish ("Cargar un período", "No correr"), not the imperative.
+    const impForm = register === 'instruction'
+      ? (verb.forms['base'] ?? conjugated)
+      : (imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `no ${impForm}` : impForm;
     return [impVerb, modifierText, directObjectText, indirectObjectText, complementsText]
       .filter(Boolean)

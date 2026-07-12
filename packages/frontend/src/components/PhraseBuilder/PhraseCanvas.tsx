@@ -8,7 +8,7 @@ import { COMPLEMENT_TYPES } from "@signi/shared";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { CategoryToggle, SlotBox } from "./Boxes.tsx";
 import {
-  ImperativePerson,
+  ImperativeAddress,
   NounKey,
   slotCategories,
   WorkspaceBinding,
@@ -44,7 +44,7 @@ export interface PhraseCanvasProps {
   >["perimeterByNoun"];
   // The cross-container link hooks (undefined for possessor sub-builders that don't link).
   linkBinding: WorkspaceBinding | undefined;
-  onSetImperativePerson: (person: ImperativePerson) => void;
+  onSetImperativeAddress: (address: ImperativeAddress) => void;
   // Attached to the positioned canvas Box; the parent measures it with a ResizeObserver.
   containerRef: RefObject<HTMLDivElement>;
   // Receives each noun's possessor control element (its connector's start), measured up in
@@ -68,7 +68,7 @@ export function PhraseCanvas({
   controlPos,
   perimeterByNoun,
   linkBinding,
-  onSetImperativePerson,
+  onSetImperativeAddress,
   containerRef,
   possessorControlEls,
 }: PhraseCanvasProps) {
@@ -83,6 +83,11 @@ export function PhraseCanvas({
     slotKind,
     onSlotKindChange,
   } = ctx;
+
+  // The selector holds the addressee and the register as one choice: an instruction is the
+  // command addressed to nobody, so it wins over whichever person the selection still carries.
+  const imperativeAddress: ImperativeAddress =
+    selection.imperativeRegister === "instruction" ? "none" : (selection.imperativePerson ?? "2sg");
 
   return (
     <Box sx={{ minWidth: 0 }}>
@@ -100,8 +105,8 @@ export function PhraseCanvas({
           {selection.imperative ? (
             // A command drops its subject — the box becomes the addressee selector instead.
             <ImperativeSubjectSelector
-              value={selection.imperativePerson ?? "2sg"}
-              onChange={onSetImperativePerson}
+              value={imperativeAddress}
+              onChange={onSetImperativeAddress}
             />
           ) : (
             <SlotBox
@@ -152,8 +157,8 @@ export function PhraseCanvas({
                   <NounPhraseBuilder which="subject" ctx={ctx} />
                 </Box>
                 <ImperativeSubjectSelector
-                  value={selection.imperativePerson ?? "2sg"}
-                  onChange={onSetImperativePerson}
+                  value={imperativeAddress}
+                  onChange={onSetImperativeAddress}
                   rect={groupRects.find((g) => g.nodeKeys.includes("subject"))}
                 />
               </>

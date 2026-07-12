@@ -333,7 +333,7 @@ function predicateParts(
   indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
@@ -359,7 +359,9 @@ function predicateParts(
   // its pre-verb slot ("always eat"), manner adverbs trail ("eat slowly").
   if (mood === 'imperative') {
     const base = verb.forms['base'] ?? conjugate(verb.forms, subjectForms);
-    const cohortative = (subjectForms['person'] ?? '2') === '1'; // 1pl "let's"
+    // An instruction ("Load a period" on a button) is addressed to nobody, so it takes the bare
+    // base whatever person the plan carries — the cohortative would put an addressee back in.
+    const cohortative = register !== 'instruction' && (subjectForms['person'] ?? '2') === '1'; // 1pl "let's"
     const verbText = cohortative
       ? (negateVerb ? `let's not ${base}` : `let's ${base}`)
       : (negateVerb ? `do not ${base}` : base);

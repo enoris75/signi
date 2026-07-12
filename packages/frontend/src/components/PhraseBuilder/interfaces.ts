@@ -1,4 +1,4 @@
-import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
+import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
 
 export type { CoordConjunction };
 
@@ -57,6 +57,15 @@ export interface SlotConfig {
 // the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
 export type ImperativePerson = "2sg" | "1pl" | "2pl";
 
+/**
+ * What the addressee selector offers: one of the three persons a command can be spoken to, or
+ * "none" — an instruction addressed to nobody (a button, a menu entry, a recipe step). "none"
+ * is the `instruction` imperative register, which the engines render in each language's own
+ * label form (fr/es/pt/de infinitive, ja verbal noun); the person becomes moot there, so the
+ * selector holds the two as one choice even though the plan carries them as two fields.
+ */
+export type ImperativeAddress = ImperativePerson | "none";
+
 export interface PhraseSelection {
     subject?: Concept;
     // When set, this period is an imperative (command). The subject box becomes the addressee
@@ -64,8 +73,13 @@ export interface PhraseSelection {
     // are forced present/neutral and modals cleared (an imperative is a mood, mutually exclusive
     // with those and with a conditional / coordination — the UI enforces this).
     imperative?: boolean;
-    // The addressee of an imperative command (default 2sg). Only meaningful when `imperative`.
+    // The addressee of an imperative command (default 2sg). Only meaningful when `imperative`,
+    // and moot under the `instruction` register, which addresses nobody.
     imperativePerson?: ImperativePerson;
+    // The register of an imperative: a command spoken to the addressee above (`request`, the
+    // default) or an impersonal instruction (see ImperativeAddress). Only meaningful when
+    // `imperative`; passed straight through to the plan.
+    imperativeRegister?: ImperativeRegister;
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;

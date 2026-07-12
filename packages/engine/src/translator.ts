@@ -1,4 +1,4 @@
-import type { ComplementType, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
+import type { ComplementType, ImperativeRegister, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import { defaultDefiniteness } from '@signi/shared';
 import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
@@ -139,6 +139,7 @@ function resolveVerbPhrase(
   language: string,
   lookup: LexiconLookup,
   mood?: Mood,
+  register?: ImperativeRegister,
 ): ResolvedVerbPhrase {
   // An imperative is a mood that occupies the finite/mood slot: it is always present-tense,
   // neutral-aspect and modal-free. The UI already enforces this, but normalise defensively so
@@ -150,6 +151,7 @@ function resolveVerbPhrase(
     tense: imperative ? 'present' : vp.tense,
     aspect: imperative ? 'neutral' : vp.aspect,
     mood,
+    register: imperative ? (register ?? 'request') : undefined,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
     // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
     // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys.
@@ -221,7 +223,9 @@ function resolvePhrase(
     subject: resolveNounPhrase(plan.subject, language, lookup),
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
-    verbPhrase: plan.verbPhrase ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood) : undefined,
+    verbPhrase: plan.verbPhrase
+      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, plan.imperativeRegister)
+      : undefined,
     directObject: plan.directObject ? resolveNounPhrase(plan.directObject, language, lookup) : undefined,
     indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),

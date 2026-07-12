@@ -31,14 +31,16 @@ const nameOf = (concept: string): PhrasePlan =>
 
 const NAME_FORMAT: UiStringFormat = { capitalize: true, stripPeriod: true };
 
-// A button label is a command addressed to the app: the verb in the imperative, 2nd singular.
-// The engines drop the subject from the surface, so only the verb survives — en "save",
-// it "salva", de "speichere", ja "保存してください".
+// A control's label is a command, but one addressed to nobody: the `instruction` register of the
+// imperative, which each engine renders in the form its language puts on a button — en "Save",
+// it "Salva", fr "Enregistrer", de "Speichern", ja "保存" (see PhrasePlan.imperativeRegister).
+// The engines drop the subject from the surface; it is carried only to fix the person.
 const commandOf = (concept: string): PhrasePlan =>
   ({
     subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
     verbPhrase: { verb: concept },
     imperative: true,
+    imperativeRegister: 'instruction',
   }) as PhrasePlan;
 
 /**
