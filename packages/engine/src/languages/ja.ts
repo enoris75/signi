@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. 'less'
@@ -23,6 +23,9 @@ const PARTICLE: Record<ComplementType, string> = {
   // Cause/reason: the neutral compound postposition "のために"; the sentiment swaps it (see
   // CAUSE_PARTICLE). Kept here for the type — cause is overridden per-sentiment below.
   cause: 'のために',
+  // Instrumental (means / tool) — で, the same particle the locative takes: Japanese marks
+  // "with a word" (言葉で) and "at the house" (家で) alike, and only the verb tells them apart.
+  instrumental: 'で',
   // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
   terminus: 'に',
   // Subject complement: a noun/na-adjective predicate takes に (伝説になる); an i-adjective
@@ -287,6 +290,25 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       }
       continue;
     }
+    // An instrument presented as an action, with the noun phrase as its direct object (を). The
+    // process level takes the te-form, which is exactly how Japanese marks the means of an act
+    // ("単語を選んで始める"); the concept level nominalises the verb with こと and marks that with
+    // で — "単語を選ぶことで", by means of the act of choosing.
+    if (type === 'instrumental' && c.action) {
+      const level = abstractionLevel(c);
+      if (level !== 'object') {
+        const v = c.action.verb.forms;
+        segs.push(...npSegs(c.phrase), { t: 'を' });
+        const adverb = c.action.modifier;
+        if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
+        if (level === 'process') {
+          segs.push(wordSeg(v['te'] ?? v['base'] ?? '', v['te_reading']));
+        } else {
+          segs.push(wordSeg(v['base'] ?? '', v['reading']), { t: 'ことで' });
+        }
+        continue;
+      }
+    }
     segs.push(...npSegs(c.phrase));
     if (type === 'route') {
       const spec = pathSpecifier(c);
@@ -475,7 +497,8 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'または',
   but: 'しかし',
   that_is: 'つまり',
-  then: 'だから',
+  therefore: 'だから',
+  then: 'それから',
 };
 
 function buildSegments(phrase: ResolvedPhrase): RubySegment[] {

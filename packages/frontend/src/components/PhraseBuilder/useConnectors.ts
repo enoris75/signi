@@ -5,6 +5,7 @@ import {
   PhraseLink,
   isConditionalLink,
   isCoordinativeLink,
+  isInstrumentalLink,
   isRelativeLink,
 } from "./interfaces.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
@@ -17,7 +18,7 @@ export const boxKey = (containerId: string, nounKey: NounAddress) =>
 // stroke style: dashed faint line for a relative clause, solid arrowed line for a conditional.
 export type Connector = {
   id: string;
-  kind: "relative" | "conditional" | "coordinative";
+  kind: "relative" | "conditional" | "coordinative" | "instrumental";
   x1: number;
   y1: number;
   x2: number;
@@ -49,7 +50,7 @@ function sameConnectors(a: Connector[], b: Connector[]): boolean {
 // into, plus the layout effect that measures each link into workspace-relative pixels.
 // Returns the refs for the workspace to wire into its container bindings and the computed
 // connectors for the SVG overlay to draw.
-export function useConnectors(links: PhraseLink[]) {
+export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const boxEls = useRef<Map<string, HTMLElement>>(new Map());
   // The anchor dots the link line snaps to: the source noun's relative-clause control
@@ -59,6 +60,9 @@ export function useConnectors(links: PhraseLink[]) {
   // The border-control element per container — the endpoint the conditional connector runs
   // between (main clause's control → "if" clause's control).
   const borderAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
+  // The complement-toggle row on each container's verb-phrase dotted box — where an
+  // instrumental connector starts (the instrument is the verb's, not the clause's).
+  const verbAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const [connectors, setConnectors] = useState<Connector[]>([]);
   // Bumped by a child container whenever it drags a box / resizes its canvas, so the
   // measuring effect below re-runs against the moved anchors. Stable identity so the
@@ -122,6 +126,31 @@ export function useConnectors(links: PhraseLink[]) {
         label: COORD_CONJUNCTION_LABEL[link.conjunction].toLowerCase(),
       });
     }
+    // Instrumental connectors: the clause's verb-phrase toggle row → the instrument period's
+    // border control. The start anchor is inside the canvas (it falls back to the subject box
+    // until the verb phrase has one), the end is the card border, like the clause-level links.
+    for (const link of links) {
+      if (!isInstrumentalLink(link)) continue;
+      const srcAnchor =
+        verbAnchorEls.current.get(link.source.containerId) ??
+        boxEls.current.get(`${link.source.containerId}:subject`);
+      const tgtAnchor =
+        borderAnchorEls.current.get(link.target.containerId) ??
+        boxEls.current.get(`${link.target.containerId}:subject`);
+      if (!srcAnchor || !tgtAnchor) continue;
+      const s = srcAnchor.getBoundingClientRect();
+      const t = tgtAnchor.getBoundingClientRect();
+      next.push({
+        id: link.id,
+        kind: "instrumental",
+        x1: s.left + s.width / 2 - rootRect.left,
+        y1: s.top + s.height / 2 - rootRect.top,
+        x2: t.left + t.width / 2 - rootRect.left,
+        y2: t.top + t.height / 2 - rootRect.top,
+        color: MUI_COLOR_HEX.secondary,
+        label: instrumentalLabel,
+      });
+    }
     for (const link of links) {
       if (!isRelativeLink(link)) continue;
       const srcAnchor = sourceAnchorEls.current.get(
@@ -176,6 +205,7 @@ export function useConnectors(links: PhraseLink[]) {
     sourceAnchorEls,
     targetAnchorEls,
     borderAnchorEls,
+    verbAnchorEls,
     bumpGeom,
     connectors,
   };

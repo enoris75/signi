@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -349,6 +349,21 @@ function complementsPhrase(
         }
         return withRelative(nounPhrase(predicativeForms(f), esAdj(c.phrase)), c.phrase);
       }
+      // An instrument presented as an action: the bare gerundio for the process level
+      // ("eligiendo una palabra"), the nominalised infinitive for the concept level ("con el
+      // acto de elegir una palabra"). The noun phrase is the action's direct object.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const object = withRelative(nounPhrase(f, esAdj(c.phrase)), c.phrase);
+          const verb =
+            level === 'process'
+              ? actionGerund(c.action)
+              : `con el acto de ${actionInfinitive(c.action)}`;
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return [verb, object, adverb].filter(Boolean).join(' ');
+        }
+      }
       // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
       // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
       if (type === 'cause' && f['person']) {
@@ -384,6 +399,8 @@ function complementsPhrase(
       const head =
         type === 'locative'  ? prepDet('en', af, plural) :
         type === 'terminus'  ? aDet(af, plural) :
+        // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
+        type === 'instrumental' ? prepDet('con', af, plural) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
         type === 'source'    ? `lejos ${deDet(af, plural)}` :
         type === 'cause'     ? (
@@ -538,7 +555,10 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'o',
   but: 'pero',
   that_is: 'es decir',
-  then: 'entonces',
+  // "entonces" is both conclusive and temporal in Spanish; the unambiguous "por lo tanto" /
+  // "y luego" pair keeps the two selectors distinguishable.
+  therefore: 'por lo tanto',
+  then: 'y luego',
 };
 
 export const spanishEngine: LanguageEngine = {

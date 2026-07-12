@@ -1,5 +1,5 @@
-import type { ComplementType, Definiteness, ImperativeRegister, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
-import { defaultDefiniteness } from '@signi/shared';
+import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
+import { canCoordinateImperative, defaultDefiniteness } from '@signi/shared';
 import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -181,6 +181,10 @@ function resolveComplements(
         : value.phrase;
     out[type as ComplementType] = {
       phrase: resolveNounPhrase(phrase, language, lookup),
+      // The action an instrument *is* at the process/concept levels ("by **choosing** a word").
+      // It is non-finite — it takes no tense, mood or agreement of its own — so it resolves with
+      // none, and each engine reads the lexical forms (gerund / infinitive / te-form) it needs.
+      action: value.action ? resolveVerbPhrase(value.action, language, lookup) : undefined,
       specifiers: value.specifiers,
     };
   }
@@ -208,22 +212,38 @@ function resolveRelativeClause(
 }
 
 /**
- * Resolve one plan for one language. `mood` is threaded onto the verb phrase — set only for
- * the two halves of a conditional (main = 'conditional', condition = 'subjunctive'); a plain
- * sentence leaves it undefined (indicative). The condition clause is resolved recursively.
+ * The conjunction joining a coordination, normalised for the mood of the pair. Only four of the
+ * six can join two commands (see IMPERATIVE_COORD_CONJUNCTIONS); the UI never offers the other
+ * two under an imperative, but a stale or hand-built plan that asks for one falls back to the
+ * plain copulative rather than losing the second command.
+ */
+function coordConjunction(conjunction: CoordConjunction, imperative: boolean): CoordConjunction {
+  return imperative && !canCoordinateImperative(conjunction) ? 'and' : conjunction;
+}
+
+/**
+ * Resolve one plan for one language. `mood` is threaded onto the verb phrase — set for the two
+ * halves of a conditional (main = 'conditional', condition = 'subjunctive'), for a command
+ * ('imperative'), and left undefined for a plain (indicative) sentence. `register` is the
+ * addressee register a coordinated command inherits from its first clause; at the top level it
+ * is absent and the plan's own `imperativeRegister` applies. The condition and the coordinated
+ * clause are resolved recursively.
  */
 function resolvePhrase(
   plan: PhrasePlan,
   language: string,
   lookup: LexiconLookup,
   mood?: Mood,
+  register?: ImperativeRegister,
 ): ResolvedPhrase {
+  const imperative = mood === 'imperative';
+  const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   return {
     subject: resolveNounPhrase(plan.subject, language, lookup),
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
     verbPhrase: plan.verbPhrase
-      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, plan.imperativeRegister)
+      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister)
       : undefined,
     directObject: plan.directObject ? resolveNounPhrase(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
@@ -232,12 +252,22 @@ function resolvePhrase(
     condition: plan.condition
       ? resolvePhrase(plan.condition, language, lookup, 'subjunctive')
       : undefined,
-    // A coordinated second clause: resolved as a plain indicative clause; the conjunction word
-    // is chosen per-engine at render time. Coordination doesn't nest.
+    // A coordinated second clause; the conjunction word is chosen per-engine at render time.
+    // Coordination is a symmetric join, so the second clause carries the same illocutionary
+    // force as the first: under a command it is resolved in the imperative mood too, with the
+    // first clause's register and addressee (its own subject is dropped from the surface, so
+    // taking the first's keeps the pair addressed to one and the same person). A conditional
+    // main clause coordinates a plain indicative clause. Coordination doesn't nest.
     coordination: plan.coordination
       ? {
-          conjunction: plan.coordination.conjunction,
-          clause: resolvePhrase(plan.coordination.clause, language, lookup),
+          conjunction: coordConjunction(plan.coordination.conjunction, imperative),
+          clause: resolvePhrase(
+            imperative ? { ...plan.coordination.clause, subject: plan.subject } : plan.coordination.clause,
+            language,
+            lookup,
+            imperative ? 'imperative' : undefined,
+            impRegister,
+          ),
         }
       : undefined,
   };
@@ -306,7 +336,8 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
   return engines.map((engine) => {
     // The top clause's mood: 'conditional' when a hypothetical condition is attached,
     // 'imperative' for a command, else plain indicative (undefined). These are mutually
-    // exclusive (the UI never sets both), and only the top clause carries a command mood.
+    // exclusive (the UI never sets both). A command hands its mood on to a coordinated
+    // second clause (see resolvePhrase) but never to a relative clause.
     const topMood: Mood | undefined = plan.condition ? 'conditional' : plan.imperative ? 'imperative' : undefined;
     const resolved = resolvePhrase(plan, engine.language, lookup, topMood);
     // Every rendered period closes with its language's full stop, appended here rather

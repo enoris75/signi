@@ -1,17 +1,17 @@
 import {
   ASPECTS,
-  COMPLEMENT_TYPES,
   DEGREES,
   MODIFIER_RELATIONS,
   TENSES,
   type CauseSentiment,
   type Concept,
   type Definiteness,
+  type ImperativeRegister,
   type PathSpecifier,
 } from "@signi/shared";
 import {
   GenderSlot,
-  ImperativeAddress,
+  ImperativePerson,
   NounKey,
   NumberSlot,
   PhraseSelection,
@@ -20,6 +20,7 @@ import {
 } from "./interfaces.ts";
 import {
   adjectiveSlots,
+  BOX_COMPLEMENT_TYPES,
   COMPLEMENT_KEY_SET,
   getActiveSlots,
   MODAL_SLOTS,
@@ -82,7 +83,7 @@ export function applyConceptSelect(
     }
     if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
     // Drop complements the new verb no longer licenses.
-    for (const type of COMPLEMENT_TYPES) {
+    for (const type of BOX_COMPLEMENT_TYPES) {
       if (!nowVisible.includes(type)) {
         delete next[type];
         delete next[`${type}Number`];
@@ -157,7 +158,7 @@ export function applyClear(
     delete next.directObjectGender;
     clearAdjectives(next, "directObject");
     clearAdjectives(next, "subject");
-    for (const type of COMPLEMENT_TYPES) {
+    for (const type of BOX_COMPLEMENT_TYPES) {
       delete next[type];
       delete next[`${type}Number`];
       delete next[`${type}Gender`];
@@ -314,16 +315,28 @@ export function toggleImperative(prev: PhraseSelection): PhraseSelection {
   };
 }
 
-// Set who the command is addressed to: one of the three persons (2sg / 1pl "let's" / 2pl), or
-// nobody — an instruction, the register a button or a recipe step carries. Switching to "none"
-// keeps the person pick, so returning to a spoken command restores it. No-op semantics off
-// imperative, but harmless to store so the choice persists across a toggle.
-export function setImperativeAddress(
+// Set the person the command's verb agrees with (2sg / 1pl "let's" / 2pl). Kept even under the
+// `instruction` register, where it is moot: the selector greys the row rather than forgetting the
+// pick, so switching back to an order restores it. No-op semantics off imperative, but harmless
+// to store so the choice persists across a toggle.
+export function setImperativePerson(
   prev: PhraseSelection,
-  address: ImperativeAddress,
+  person: ImperativePerson,
 ): PhraseSelection {
-  if (address === "none") return { ...prev, imperativeRegister: "instruction" };
-  return { ...prev, imperativePerson: address, imperativeRegister: undefined };
+  return { ...prev, imperativePerson: person };
+}
+
+// Set the register the command is spoken in: an order addressed to the person above (`request`,
+// the default, stored as absent), or an impersonal instruction — what a button or a recipe step
+// carries, which the engines render in each language's own label form.
+export function setImperativeRegister(
+  prev: PhraseSelection,
+  register: ImperativeRegister,
+): PhraseSelection {
+  return {
+    ...prev,
+    imperativeRegister: register === "instruction" ? "instruction" : undefined,
+  };
 }
 
 // Cycle the verb tense present → past → future → present.

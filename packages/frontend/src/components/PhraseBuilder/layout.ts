@@ -157,12 +157,13 @@ const READING_ORDER = [
 // an expanded box gets the room its satellites need.
 //
 // Returns the new positions for every packed group's node, plus the canvas height the
-// stack needs when it comes out taller than the canvas (0 when it fits).
+// stack wants: the caller sizes the container to it, growing *or* shrinking, so tidying
+// never strands a band of empty space under the grid.
 export function packPeriod(
   groupRects: GroupRect[],
   svgSize: CanvasSize,
   sizeOf: SizeFn,
-): { positions: PositionMap; minHeight: number } {
+): { positions: PositionMap; height: number } {
   const rank = (label: string) => {
     const i = READING_ORDER.indexOf(label);
     return i === -1 ? READING_ORDER.length : i;
@@ -179,7 +180,7 @@ export function packPeriod(
 
   const gap = 20; // gutter between boxes, px
   const margin = 6;
-  const { w: svgW, h: svgH } = svgSize;
+  const { w: svgW } = svgSize;
 
   // Fill each row until the next box would overhang the canvas; a box wider than the
   // canvas on its own still gets a row to itself rather than an empty one above it.
@@ -202,9 +203,11 @@ export function packPeriod(
   const totalH = rowHeights.reduce((a, b) => a + b, 0) + gap * (rows.length - 1);
 
   const positions: PositionMap = {};
-  // Center the whole stack vertically; center each row horizontally, and each box on its
-  // row's baseline-agnostic middle so short boxes don't hang off a tall neighbour's top.
-  const stackTop = Math.max(margin, (svgH - totalH) / 2);
+  // Hang the stack from the top of the canvas rather than centering it in the height the
+  // canvas happens to have: the caller then trims the container down to the stack, and the
+  // slack that would have sat above it never exists. Each row is centered horizontally, and
+  // each box on its row's middle so short boxes don't hang off a tall neighbour's top.
+  const stackTop = margin;
   let boxTop = stackTop;
   rows.forEach((r, i) => {
     const width = r.reduce((s, it) => s + it.rect.width, 0) + gap * (r.length - 1);
@@ -222,10 +225,9 @@ export function packPeriod(
     boxTop += rowHeights[i] + gap;
   });
 
-  // Downward is the one direction with give, as when tidying a single box: the caller
-  // grows the container rather than the stack being squashed into a canvas too short for it.
-  const bottom = stackTop + totalH + BOTTOM_MARGIN;
-  return { positions, minHeight: bottom > svgH ? Math.ceil(bottom) : 0 };
+  // The height the grid actually occupies, bottom margin included. The canvas is never too
+  // short for the stack — it is resized to exactly this.
+  return { positions, height: Math.ceil(stackTop + totalH + BOTTOM_MARGIN) };
 }
 
 // Compact-view layout: pack the visible core words into centered rows and size the canvas

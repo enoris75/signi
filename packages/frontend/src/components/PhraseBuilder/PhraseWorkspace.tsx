@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Box, Button, Stack, Typography } from "@mui/material";
 import AddIcon from "@mui/icons-material/Add";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -8,44 +8,15 @@ import { PhraseBuilder } from "./PhraseBuilder.tsx";
 import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
   COORD_CONJUNCTION_LABEL,
-  CoordConjunction,
-  NounAddress,
-  NounKey,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
-  PickMode,
   WorkspaceBinding,
-  isConditionalLink,
-  isCoordinativeLink,
-  isRelativeLink,
 } from "./interfaces.ts";
 import { MUI_COLOR_HEX } from "./slots.ts";
 import { boxKey, useConnectors } from "./useConnectors.ts";
+import { uid, useWorkspaceLinks } from "./useWorkspaceLinks.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
-
-const uid = () =>
-  typeof crypto !== "undefined" && crypto.randomUUID
-    ? crypto.randomUUID()
-    : `c${Math.random().toString(36).slice(2)}`;
-
-// Is `candidate` the container `of`, or an ancestor of it (walking up incoming links)?
-// Used to reject links that would form a cycle — links are meant to form a forest.
-function isSelfOrAncestor(
-  candidate: string,
-  of: string,
-  links: PhraseLink[],
-): boolean {
-  let cur: string | undefined = of;
-  const seen = new Set<string>();
-  while (cur) {
-    if (cur === candidate) return true;
-    if (seen.has(cur)) break;
-    seen.add(cur);
-    cur = links.find((l) => l.target.containerId === cur)?.source.containerId;
-  }
-  return false;
-}
 
 interface Props {
   containers: PhraseContainer[];
@@ -67,7 +38,14 @@ export function PhraseWorkspace({
   onWordsPanelClose,
 }: Props) {
   const t = useUiString();
-  const [pick, setPick] = useState<PickMode>({ active: false });
+  // The cross-container link graph — the four relations a period can take part in, plus the
+  // pick-mode that builds them. It owns the rules (no cycles, one subordinate role per period)
+  // and hands back each container's link compartments; this component only lays the stack out.
+  const { pick, cancelPick, compartmentsFor, dropContainer } = useWorkspaceLinks(
+    containers,
+    links,
+    setLinks,
+  );
   // Period (single-clause) save/load: which container's save dialog is open, and whether
   // the "add a saved period" picker is open. See PeriodSaveLoad.
   const [savePeriodId, setSavePeriodId] = useState<string | null>(null);
@@ -80,19 +58,10 @@ export function PhraseWorkspace({
     sourceAnchorEls,
     targetAnchorEls,
     borderAnchorEls,
+    verbAnchorEls,
     bumpGeom,
     connectors,
-  } = useConnectors(links);
-
-  // Cancel pick-mode on Escape.
-  useEffect(() => {
-    if (!pick.active) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setPick({ active: false });
-    };
-    window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
-  }, [pick.active]);
+  } = useConnectors(links, t("slot.instrumental").toLowerCase());
 
   const makeContainerUpdate =
     (id: string) => (updater: (prev: PhraseSelection) => PhraseSelection) =>
@@ -127,156 +96,7 @@ export function PhraseWorkspace({
         ? cs.filter((c) => c.id !== id)
         : cs.map((c) => (c.id === id ? { ...c, selection: {} } : c)),
     );
-    // Drop any link touching the removed/cleared container (its targets re-become roots).
-    setLinks((ls) =>
-      ls.filter(
-        (l) => l.source.containerId !== id && l.target.containerId !== id,
-      ),
-    );
-    if (pick.active && pick.source.containerId === id)
-      setPick({ active: false });
-  }
-
-  function startLink(containerId: string, nounKey: NounAddress) {
-    setPick({ active: true, kind: "relative", source: { containerId, nounKey } });
-  }
-
-  function removeLink(containerId: string, nounKey: NounAddress) {
-    setLinks((ls) =>
-      ls.filter(
-        (l) =>
-          !(
-            isRelativeLink(l) &&
-            l.source.containerId === containerId &&
-            l.source.nounKey === nounKey
-          ),
-      ),
-    );
-  }
-
-  function completeLink(targetContainerId: string, targetNoun: NounKey) {
-    if (!pick.active || pick.kind !== "relative") return;
-    const source = pick.source;
-    setPick({ active: false });
-    if (
-      source.containerId === targetContainerId ||
-      isSelfOrAncestor(targetContainerId, source.containerId, links)
-    )
-      return; // same container or would create a cycle
-    setLinks((ls) => {
-      const kept = ls.filter((l) =>
-        isRelativeLink(l)
-          ? // one relative link per source noun, and one incoming link per target container
-            !(
-              l.source.containerId === source.containerId &&
-              l.source.nounKey === source.nounKey
-            ) && l.target.containerId !== targetContainerId
-          : // a container can't be both a clause-level linked clause and a relativised gap
-            l.target.containerId !== targetContainerId,
-      );
-      return [
-        ...kept,
-        {
-          id: uid(),
-          source,
-          target: { containerId: targetContainerId, nounKey: targetNoun },
-        },
-      ];
-    });
-  }
-
-  // ── Conditional (container-to-container) linking ───────────────────────────
-  function startConditional(containerId: string) {
-    setPick({ active: true, kind: "conditional", source: { containerId } });
-  }
-
-  function clearConditional(mainContainerId: string) {
-    setLinks((ls) =>
-      ls.filter(
-        (l) =>
-          !(isConditionalLink(l) && l.source.containerId === mainContainerId),
-      ),
-    );
-  }
-
-  // Whether `id` already takes part in any clause-level (conditional or coordinative) link —
-  // as either endpoint. Such a container can't be pulled into a second clause-level relation.
-  function inClauseRelation(id: string): boolean {
-    return links.some(
-      (l) =>
-        (isConditionalLink(l) || isCoordinativeLink(l)) &&
-        (l.source.containerId === id || l.target.containerId === id),
-    );
-  }
-
-  // Whether `ifId` may become the "if" clause of the container that started the pick: not
-  // itself, no cycle, and free of any other clause-level relation.
-  function canBeCondition(mainId: string, ifId: string): boolean {
-    if (mainId === ifId) return false;
-    if (isSelfOrAncestor(ifId, mainId, links)) return false;
-    return !inClauseRelation(ifId);
-  }
-
-  // ── Coordinative (container-to-container) linking ──────────────────────────
-  function startCoordinative(containerId: string, conjunction: CoordConjunction) {
-    setPick({ active: true, kind: "coordinative", conjunction, source: { containerId } });
-  }
-
-  function clearCoordinative(firstContainerId: string) {
-    setLinks((ls) =>
-      ls.filter(
-        (l) =>
-          !(isCoordinativeLink(l) && l.source.containerId === firstContainerId),
-      ),
-    );
-  }
-
-  // Whether `secondId` may become the coordinated second clause of the pick's first clause:
-  // not itself, no cycle, and free of any other clause-level relation.
-  function canBeCoordinate(firstId: string, secondId: string): boolean {
-    if (firstId === secondId) return false;
-    if (isSelfOrAncestor(secondId, firstId, links)) return false;
-    return !inClauseRelation(secondId);
-  }
-
-  function completeCoordinative(secondContainerId: string) {
-    if (!pick.active || pick.kind !== "coordinative") return;
-    const firstId = pick.source.containerId;
-    const conjunction = pick.conjunction;
-    setPick({ active: false });
-    if (!canBeCoordinate(firstId, secondContainerId)) return;
-    setLinks((ls) => [
-      // One coordination per first clause: drop any this container already sources.
-      ...ls.filter(
-        (l) => !(isCoordinativeLink(l) && l.source.containerId === firstId),
-      ),
-      {
-        id: uid(),
-        kind: "coordinative" as const,
-        conjunction,
-        source: { containerId: firstId },
-        target: { containerId: secondContainerId },
-      },
-    ]);
-  }
-
-  function completeConditional(ifContainerId: string) {
-    if (!pick.active || pick.kind !== "conditional") return;
-    const mainId = pick.source.containerId;
-    setPick({ active: false });
-    if (!canBeCondition(mainId, ifContainerId)) return;
-    setLinks((ls) => [
-      // One "if" clause per main clause: drop any conditional this main already sources.
-      ...ls.filter(
-        (l) => !(isConditionalLink(l) && l.source.containerId === mainId),
-      ),
-      {
-        id: uid(),
-        kind: "conditional",
-        source: { containerId: mainId },
-        target: { containerId: ifContainerId },
-      },
-    ]);
+    dropContainer(id);
   }
 
   return (
@@ -319,9 +139,24 @@ export function PhraseWorkspace({
             >
               <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.info} />
             </marker>
+            <marker
+              id="instrumental-arrow"
+              markerWidth="8"
+              markerHeight="8"
+              refX="6"
+              refY="3"
+              orient="auto"
+              markerUnits="strokeWidth"
+            >
+              <path d="M0,0 L6,3 L0,6 Z" fill={MUI_COLOR_HEX.secondary} />
+            </marker>
           </defs>
           {connectors.map((c) => {
-            if (c.kind === "conditional" || c.kind === "coordinative") {
+            if (
+              c.kind === "conditional" ||
+              c.kind === "coordinative" ||
+              c.kind === "instrumental"
+            ) {
               // Elbow route through the right-hand gutter: out from the first clause's control,
               // down the gutter, back in to the linked clause's control.
               const midX = Math.max(c.x1, c.x2) + 24;
@@ -330,7 +165,9 @@ export function PhraseWorkspace({
               const marker =
                 c.kind === "conditional"
                   ? "url(#conditional-arrow)"
-                  : "url(#coordinative-arrow)";
+                  : c.kind === "coordinative"
+                    ? "url(#coordinative-arrow)"
+                    : "url(#instrumental-arrow)";
               return (
                 <g key={c.id}>
                   <path
@@ -376,43 +213,12 @@ export function PhraseWorkspace({
 
       <Stack spacing={2}>
         {containers.map((c, i) => {
-          const linkSourceKeys = new Set<NounAddress>(
-            links
-              .filter(isRelativeLink)
-              .filter((l) => l.source.containerId === c.id)
-              .map((l) => l.source.nounKey),
-          );
-          const linkTargetKeys = new Set<NounAddress>(
-            links
-              .filter(isRelativeLink)
-              .filter((l) => l.target.containerId === c.id)
-              .map((l) => l.target.nounKey),
-          );
-          const conditionals = links.filter(isConditionalLink);
-          const hasConditionalSource = conditionals.some(
-            (l) => l.source.containerId === c.id,
-          );
-          const hasConditionalTarget = conditionals.some(
-            (l) => l.target.containerId === c.id,
-          );
-          const isConditionalPickTarget =
-            pick.active &&
-            pick.kind === "conditional" &&
-            canBeCondition(pick.source.containerId, c.id);
-          const coordinatives = links.filter(isCoordinativeLink);
-          const coordAsSource = coordinatives.find(
-            (l) => l.source.containerId === c.id,
-          );
-          const coordAsTarget = coordinatives.find(
-            (l) => l.target.containerId === c.id,
-          );
-          const isCoordinativePickTarget =
-            pick.active &&
-            pick.kind === "coordinative" &&
-            canBeCoordinate(pick.source.containerId, c.id);
           const binding: WorkspaceBinding = {
             containerId: c.id,
             pickActive: pick.active,
+            // The link compartments come off the graph; only the geometry is this component's,
+            // since it wires each container's boxes and anchors into the connector registry.
+            ...compartmentsFor(c),
             geometry: {
               registerBox: (nounKey, el) => {
                 const k = boxKey(c.id, nounKey);
@@ -433,39 +239,11 @@ export function PhraseWorkspace({
                 if (el) borderAnchorEls.current.set(c.id, el);
                 else borderAnchorEls.current.delete(c.id);
               },
+              registerVerbAnchor: (el) => {
+                if (el) verbAnchorEls.current.set(c.id, el);
+                else verbAnchorEls.current.delete(c.id);
+              },
               onGeometryChange: bumpGeom,
-            },
-            relative: {
-              sourceKeys: linkSourceKeys,
-              targetKeys: linkTargetKeys,
-              isPickTarget: (nounKey) =>
-                pick.active &&
-                pick.kind === "relative" &&
-                pick.source.containerId !== c.id &&
-                Boolean(c.selection[nounKey as keyof PhraseSelection]) &&
-                !linkTargetKeys.has(nounKey) &&
-                !isSelfOrAncestor(c.id, pick.source.containerId, links),
-              // Only real top-level nouns are ever offered as pick targets, so the address is a NounKey.
-              onPick: (nounKey) => completeLink(c.id, nounKey as NounKey),
-              onStartLink: (nounKey) => startLink(c.id, nounKey),
-              onRemoveLink: (nounKey) => removeLink(c.id, nounKey),
-            },
-            conditional: {
-              hasSource: hasConditionalSource,
-              hasTarget: hasConditionalTarget,
-              isPickTarget: isConditionalPickTarget,
-              onStart: () => startConditional(c.id),
-              onClear: () => clearConditional(c.id),
-              onPick: () => completeConditional(c.id),
-            },
-            coordinative: {
-              hasSource: Boolean(coordAsSource),
-              hasTarget: Boolean(coordAsTarget),
-              conjunction: (coordAsSource ?? coordAsTarget)?.conjunction,
-              isPickTarget: isCoordinativePickTarget,
-              onStart: (conjunction) => startCoordinative(c.id, conjunction),
-              onClear: () => clearCoordinative(c.id),
-              onPick: () => completeCoordinative(c.id),
             },
           };
           return (
@@ -553,11 +331,13 @@ export function PhraseWorkspace({
               ? "Click the period that is the IF condition — in another phrase container."
               : pick.active && pick.kind === "coordinative"
                 ? `Click the period to coordinate with “${COORD_CONJUNCTION_LABEL[pick.conjunction]}” — in another phrase container.`
-                : "Click the noun this clause describes — in another phrase container."}
+                : pick.active && pick.kind === "instrumental"
+                  ? `Click the period holding the ${t("slot.instrumental").toLowerCase()} — a period with no verb, whose noun is what the action is done with.`
+                  : "Click the noun this clause describes — in another phrase container."}
           </Typography>
           <Button
             size="small"
-            onClick={() => setPick({ active: false })}
+            onClick={cancelPick}
             startIcon={<CloseIcon sx={{ fontSize: 15 }} />}
             sx={{ color: "primary.contrastText", textTransform: "none" }}
           >

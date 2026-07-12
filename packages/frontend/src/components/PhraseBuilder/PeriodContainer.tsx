@@ -23,10 +23,16 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import {
   COORD_CONJUNCTION_LABEL,
   COORD_CONJUNCTION_OPTIONS,
+  coordConjunctionOptions,
   type CoordConjunction,
   type PhraseSelection,
   type WorkspaceBinding,
 } from "./interfaces.ts";
+import {
+  ABSTRACTION_LEVELS,
+  ABSTRACTION_LEVEL_LABELS,
+  type AbstractionLevel,
+} from "@signi/shared";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
 // Undefined for a standalone (non-workspace) period, which can't take part in conditionals.
@@ -58,6 +64,9 @@ export interface CoordinativeControl {
   isCoordinated: boolean;
   // The conjunction of the coordination this period takes part in, if any (for labelling).
   conjunction?: CoordConjunction;
+  // The conjunctions the menu offers here — the full six, or the four that can join two
+  // commands when this period is one (see coordConjunctionOptions).
+  conjunctions: typeof COORD_CONJUNCTION_OPTIONS;
   // A coordinative pick is in progress and this period is a legal second-clause target.
   isPickTarget: boolean;
   // Any pick (relative / conditional / coordinative) is currently in progress.
@@ -69,9 +78,30 @@ export interface CoordinativeControl {
   onPick: () => void;
 }
 
+// The instrumental control state, threaded from the workspace binding. Unlike the two clause-level
+// relations this period has no *border* control for it: the link is started from the verb-phrase
+// dotted box of the clause that acts (inside the canvas), so all a period needs here is the target
+// side — light up as droppable during a pick, take the click, and caption itself once linked.
+export interface InstrumentalControl {
+  // This period *is* the instrument phrase of some other period.
+  isInstrument: boolean;
+  // This period's clause acts with an instrument (it sources the link) — for the border gutter.
+  hasInstrument: boolean;
+  // How far the instrument is reified (process / concept / object) and its setter. Shown as a
+  // three-way switch on the instrument period's header: it decides both what that period holds
+  // (a noun, or a verb and its object) and how the engines render it.
+  level: AbstractionLevel;
+  onLevelChange: (level: AbstractionLevel) => void;
+  // An instrumental pick is in progress and this period is a legal instrument target.
+  isPickTarget: boolean;
+  onPick: () => void;
+}
+
 // The imperative (command) toggle on the card border. Independent of the workspace bindings —
 // every period, standalone or not, can be a command. Disabled while the period takes part in a
-// conditional or coordination, since an imperative is a mood mutually exclusive with those.
+// conditional (an imperative is a mood mutually exclusive with one) or in a coordination, whose
+// two clauses share one mood: flipping it on one clause alone would break the pair, so the
+// coordination has to be cleared first.
 export interface ImperativeControl {
   active: boolean;
   disabled: boolean;
@@ -81,15 +111,27 @@ export interface ImperativeControl {
 // Derive the conditional/coordinative control bags from a workspace binding, keeping
 // PeriodContainer ignorant of WorkspaceBinding itself. A standalone period has no binding and
 // can't take part in a clause-level relation, so both come back undefined. `selection` is read
-// only for the imperative-exclusion rule below — a command is a mood mutually exclusive with a
-// conditional or a coordination, so neither may be started while this period is imperative.
+// for the mood rules below: a command can't also be a conditional's main clause, and the
+// coordination it *can* start offers only the conjunctions that join two commands.
 export function periodControls(
   binding: WorkspaceBinding | undefined,
   selection: PhraseSelection,
-): { conditional?: ConditionalControl; coordinative?: CoordinativeControl } {
+): {
+  conditional?: ConditionalControl;
+  coordinative?: CoordinativeControl;
+  instrumental?: InstrumentalControl;
+} {
   if (!binding) return {};
-  const { conditional, coordinative } = binding;
+  const { conditional, coordinative, instrumental } = binding;
   return {
+    instrumental: {
+      isInstrument: instrumental.hasTarget,
+      hasInstrument: instrumental.hasSource,
+      level: instrumental.level,
+      onLevelChange: instrumental.onLevelChange,
+      isPickTarget: instrumental.isPickTarget,
+      onPick: instrumental.onPick,
+    },
     conditional: {
       hasCondition: conditional.hasSource,
       isIfClause: conditional.hasTarget,
@@ -111,12 +153,13 @@ export function periodControls(
       hasCoordination: coordinative.hasSource,
       isCoordinated: coordinative.hasTarget,
       conjunction: coordinative.conjunction,
+      conjunctions: coordConjunctionOptions(Boolean(selection.imperative)),
       isPickTarget: coordinative.isPickTarget,
       pickActive: binding.pickActive,
       // A period can take part in only one clause-level relation at a time: not a second clause
-      // already, not tied into a conditional, and not a command.
+      // already, and not tied into a conditional. A command may coordinate — with a second
+      // command, which the workspace enforces when it picks the target.
       canStart:
-        !selection.imperative &&
         !coordinative.hasTarget &&
         !conditional.hasSource &&
         !conditional.hasTarget,
@@ -163,6 +206,9 @@ export interface PeriodContainerProps {
   conditional?: ConditionalControl;
   // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
   coordinative?: CoordinativeControl;
+  // Instrumental link state — target side only (the control that starts it lives on the verb
+  // phrase's dotted box). Absent for a standalone period.
+  instrumental?: InstrumentalControl;
   // Imperative (command) toggle on the card border. Present for every period.
   imperative?: ImperativeControl;
   children: React.ReactNode;
@@ -193,6 +239,7 @@ export function PeriodContainer({
   onTidy,
   conditional,
   coordinative,
+  instrumental,
   imperative,
   children,
 }: PeriodContainerProps) {
@@ -293,6 +340,13 @@ export function PeriodContainer({
           ? `This period is a coordinated clause (${coordLabel})`
           : "Coordinate this period with another";
 
+  // The instrumental has no border control here — only the target side. The card lights up while
+  // an instrumental pick is pending and takes the click, exactly as it does for the other two.
+  const instActive = Boolean(
+    instrumental?.hasInstrument || instrumental?.isInstrument,
+  );
+  const instDroppable = Boolean(instrumental?.isPickTarget);
+
   return (
     <Paper
       elevation={0}
@@ -316,6 +370,19 @@ export function PeriodContainer({
       }}
       onPointerUp={endBorderDrag}
       onPointerCancel={endBorderDrag}
+      // While a pick is pending, the whole card is lit as the drop target, so the whole card
+      // takes the click — not just the border control. The control's own click bubbles here
+      // too, but the second call is a no-op: the pick is already resolved.
+      onClick={
+        condDroppable || coordDroppable || instDroppable
+          ? () =>
+              condDroppable
+                ? conditional?.onPick()
+                : coordDroppable
+                  ? coordinative?.onPick()
+                  : instrumental?.onPick()
+          : undefined
+      }
       sx={{
         p: paperPad,
         // Compact floats its controls into the top-right corner, so the Paper is the
@@ -329,35 +396,45 @@ export function PeriodContainer({
           ? "warning.main"
           : coordDroppable
             ? "info.main"
-            : "divider",
+            : instDroppable
+              ? "secondary.main"
+              : "divider",
         borderLeft: "3px solid",
         borderLeftColor: condDroppable
           ? "warning.main"
           : coordDroppable
             ? "info.main"
-            : condActive
-              ? "warning.main"
-              : coordActive
-                ? "info.main"
-                : imperative?.active
-                  ? "success.main"
-                  : "text.secondary",
+            : instDroppable
+              ? "secondary.main"
+              : condActive
+                ? "warning.main"
+                : coordActive
+                  ? "info.main"
+                  : instrumental?.isInstrument
+                    ? "secondary.main"
+                    : imperative?.active
+                      ? "success.main"
+                      : "text.secondary",
         boxShadow: condDroppable
           ? "0 0 0 2px rgba(237,108,2,0.35)"
           : coordDroppable
             ? "0 0 0 2px rgba(2,136,209,0.35)"
-            : undefined,
-        // Once this period takes part in a conditional/coordination, give up a strip on the right
-        // so the elbow connector routes in the freed gutter instead of over the border.
-        mr: condActive || coordActive ? "64px" : 0,
+            : instDroppable
+              ? "0 0 0 2px rgba(139,62,42,0.35)"
+              : undefined,
+        // Once this period takes part in a conditional/coordination/instrumental, give up a strip
+        // on the right so the elbow connector routes in the freed gutter instead of over the border.
+        mr: condActive || coordActive || instActive ? "64px" : 0,
         transition: "margin 0.15s ease",
         bgcolor: "action.hover",
         cursor:
-          borderDragRef.current && position
-            ? "grabbing"
-            : position
-              ? "default"
-              : undefined,
+          condDroppable || coordDroppable || instDroppable
+            ? "pointer"
+            : borderDragRef.current && position
+              ? "grabbing"
+              : position
+                ? "default"
+                : undefined,
       }}
     >
       {/* The clause-level controls (imperative on top, then conditional, then coordinative),
@@ -468,7 +545,8 @@ export function PeriodContainer({
           )}
         </Box>
       )}
-      {/* Conjunction picker for a new coordination (AND / OR / BUT / THAT IS / THEN). */}
+      {/* Conjunction picker for a new coordination (AND / OR / BUT / THAT IS / THEN — a command
+          offers only the four that can join two commands). */}
       <Menu
         anchorEl={coordMenuAnchor}
         open={Boolean(coordMenuAnchor)}
@@ -476,7 +554,7 @@ export function PeriodContainer({
         anchorOrigin={{ vertical: "center", horizontal: "right" }}
         transformOrigin={{ vertical: "center", horizontal: "left" }}
       >
-        {COORD_CONJUNCTION_OPTIONS.map((o) => (
+        {(coordinative?.conjunctions ?? COORD_CONJUNCTION_OPTIONS).map((o) => (
           <MenuItem
             key={o.value}
             dense
@@ -528,17 +606,19 @@ export function PeriodContainer({
               color: "text.secondary",
             }}
           >
-            {imperative?.active
-              ? "Command"
-              : conditional?.hasCondition
-                ? "Main clause"
-                : conditional?.isIfClause
-                  ? "If clause"
-                  : coordinative?.hasCoordination
-                    ? "First clause"
-                    : coordinative?.isCoordinated
-                      ? `${coordLabel} clause`
-                      : ""}
+            {instrumental?.isInstrument
+              ? t("slot.instrumental")
+              : imperative?.active
+                ? "Command"
+                : conditional?.hasCondition
+                  ? "Main clause"
+                  : conditional?.isIfClause
+                    ? "If clause"
+                    : coordinative?.hasCoordination
+                      ? "First clause"
+                      : coordinative?.isCoordinated
+                        ? `${coordLabel} clause`
+                        : ""}
             <Box
               component="span"
               sx={{ color: "text.disabled", fontWeight: 500 }}
@@ -549,6 +629,41 @@ export function PeriodContainer({
                 : "start by choosing a subject"}
             </Box>
           </Typography>
+        )}
+        {/* The reification switch, on the instrument period itself: it decides what this period
+            holds — an act in flow, an act named, or the thing it leaves behind — and so what the
+            sentence above does with it. Changing it changes the boxes on this canvas. */}
+        {!compact && instrumental?.isInstrument && (
+          <Box sx={{ display: "flex", gap: 0.5, ml: 1.5 }}>
+            {ABSTRACTION_LEVELS.map((level) => {
+              const active = instrumental.level === level;
+              return (
+                <Tooltip key={level} title={ABSTRACTION_LEVEL_LABELS[level]}>
+                  <Box
+                    component="span"
+                    onClick={() => instrumental.onLevelChange(level)}
+                    sx={{
+                      px: 0.75,
+                      py: 0.1,
+                      borderRadius: 1,
+                      border: "1px solid",
+                      borderColor: active ? "secondary.main" : "divider",
+                      bgcolor: active ? "secondary.main" : "background.paper",
+                      color: active ? "common.white" : "text.secondary",
+                      cursor: "pointer",
+                      fontFamily: '"Inter", sans-serif',
+                      fontSize: "0.55rem",
+                      fontWeight: 700,
+                      letterSpacing: "0.06em",
+                      textTransform: "uppercase",
+                    }}
+                  >
+                    {level}
+                  </Box>
+                </Tooltip>
+              );
+            })}
+          </Box>
         )}
         <Box sx={{ display: "flex", alignItems: "center" }}>
           {/* Reorder within the workspace stack. Both controls stay mounted while the

@@ -9,10 +9,9 @@ import type {
   PhrasePlan,
   VerbPhrase,
 } from "@signi/shared";
-import { COMPLEMENT_TYPES } from "@signi/shared";
 import type { Concept } from "@signi/shared";
 import { NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
-import { adjectiveSlots, MODAL_SLOTS } from "./slots.ts";
+import { adjectiveSlots, BOX_COMPLEMENT_TYPES, MODAL_SLOTS } from "./slots.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
 // `${which}Adjective`, …) all exist on PhraseSelection; the union index widens the
@@ -105,7 +104,7 @@ function buildComplements(
   sel: PhraseSelection,
 ): Partial<Record<ComplementType, Complement>> | undefined {
   const out: Partial<Record<ComplementType, Complement>> = {};
-  for (const type of COMPLEMENT_TYPES) {
+  for (const type of BOX_COMPLEMENT_TYPES) {
     const phrase = buildNounPhrase(sel, type);
     if (!phrase) continue;
     out[type] = {

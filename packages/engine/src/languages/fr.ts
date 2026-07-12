@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -180,6 +180,23 @@ function dePrep(forms: Record<string, string>, plural = false, lead?: string): s
  * fuses "à"/"de" with a definite article, so these carry whatever `artFor` yields: "dans une
  * maison", "dans la maison", bare "dans maison".
  */
+/**
+ * The present participle, for the gérondif ("en choisissant"). French seeds no gerund — its
+ * progressive is periphrastic ("en train de") — so it is derived the way the moods are: from the
+ * "nous" present minus its -ons ending, which carries any stem irregularity with it (nous
+ * choisissons → choisissant, nous mangeons → mangeant). The three verbs whose participle that
+ * rule misses are listed.
+ */
+const FR_PARTICIPLE_STEM: Record<string, string> = { BE: 'ét', HAVE: 'ay', KNOW: 'sach' };
+
+function presentParticiple(verb: ConceptForms): string {
+  const irregular = FR_PARTICIPLE_STEM[verb.conceptId];
+  if (irregular) return `${irregular}ant`;
+  const nous = verb.forms['1pl_present'];
+  if (nous?.endsWith('ons')) return `${nous.slice(0, -3)}ant`;
+  return verb.forms['base'] ?? '';
+}
+
 function prepDet(prep: string, forms: Record<string, string>, plural: boolean, lead: string): string {
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
@@ -442,6 +459,21 @@ function complementsPhrase(
           return frDeg(c.phrase.head, agreeAdjFr(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
         return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
       }
+      // An instrument presented as an action: the gérondif for the process level ("en
+      // choisissant un mot"), the nominalised infinitive for the concept level ("avec l'acte de
+      // choisir un mot"). The noun phrase is the action's direct object.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const object = renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+          const verb =
+            level === 'process'
+              ? `en ${presentParticiple(c.action.verb)}`
+              : `avec l'acte de ${actionInfinitive(c.action)}`;
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return [verb, object, adverb].filter(Boolean).join(' ');
+        }
+      }
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
       // (eliding before a vowel); positive "grâce à moi" takes it after "à" (which never
       // elides); negative uses the possessive with "faute" ("par ma faute").
@@ -472,6 +504,8 @@ function complementsPhrase(
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepDet('dans', f, plural, lead) :
         type === 'terminus'  ? aDet(f, plural, lead) :
+        // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
+        type === 'instrumental' ? prepDet('avec', f, plural, lead) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('vers', f, plural, lead) : aDet(f, plural, lead)) :
         type === 'source'    ? `loin ${deDet(f, plural, lead)}` :
         type === 'cause'     ? (
@@ -612,7 +646,8 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'ou',
   but: 'mais',
   that_is: "c'est-à-dire",
-  then: 'donc',
+  therefore: 'donc',
+  then: 'et puis',
 };
 
 export const frenchEngine: LanguageEngine = {

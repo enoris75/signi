@@ -785,6 +785,26 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The name of the instrumental complement — the means or tool an action is carried out
+    // with ("start with a word"). Each tradition names it its own way: a bare adjective-turned-
+    // noun in en/de (the Indo-European case name), a full phrase in the Romance ones. Only the
+    // singular is used (it titles a slot), but the plural is seeded like every other noun.
+    id: 'INSTRUMENTAL',
+    role: 'noun',
+    description: 'the complement naming the means an action is carried out with (grammar)',
+    emoji: '🔧',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'instrumental', plural: 'instrumentals', count: 'singular' },
+      it: { base: 'complemento di mezzo', plural: 'complementi di mezzo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément de moyen',  plural: 'compléments de moyen', gender: 'masc', count: 'singular' },
+      de: { base: 'Instrumental', plural: 'Instrumentale', gender: 'masc', count: 'singular' },
+      es: { base: 'complemento circunstancial de instrumento', plural: 'complementos circunstanciales de instrumento', gender: 'masc', count: 'singular' },
+      ja: { base: '手段語', count: 'singular', reading: 'しゅだんご' },
+      pt: { base: 'adjunto adverbial de instrumento', plural: 'adjuntos adverbiais de instrumento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
@@ -1032,6 +1052,40 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'comando',  plural: 'comandos',  gender: 'masc', count: 'singular' },
       ja: { base: '命令',     count: 'singular', reading: 'めいれい' },
       pt: { base: 'comando',  plural: 'comandos',  gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The two registers a command is spoken in, named for the addressee selector. An order is
+    // addressed to someone ("run!"); an instruction to nobody — a button, a menu entry, a recipe
+    // step ("run"), which the engines render in each language's own label form. Only the command
+    // sense is seeded: es "la orden" (fem) is the command, "el orden" the sequence.
+    id: 'ORDER',
+    role: 'noun',
+    description: 'a command telling someone to act',
+    emoji: '📢',
+    forms: {
+      en: { base: 'order',  plural: 'orders',   count: 'singular' },
+      it: { base: 'ordine', plural: 'ordini',   gender: 'masc', count: 'singular' },
+      fr: { base: 'ordre',  plural: 'ordres',   gender: 'masc', count: 'singular' },
+      de: { base: 'Befehl', plural: 'Befehle',  gender: 'masc', count: 'singular' },
+      es: { base: 'orden',  plural: 'órdenes',  gender: 'fem',  count: 'singular' },
+      ja: { base: '命令',   count: 'singular', reading: 'めいれい' },
+      pt: { base: 'ordem',  plural: 'ordens',   gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'INSTRUCTION',
+    role: 'noun',
+    description: 'a step telling what to do, addressed to nobody',
+    emoji: '📋',
+    forms: {
+      en: { base: 'instruction', plural: 'instructions', count: 'singular' },
+      it: { base: 'istruzione',  plural: 'istruzioni',   gender: 'fem', count: 'singular' },
+      fr: { base: 'instruction', plural: 'instructions', gender: 'fem', count: 'singular' },
+      de: { base: 'Anweisung',   plural: 'Anweisungen',  gender: 'fem', count: 'singular' },
+      es: { base: 'instrucción', plural: 'instrucciones', gender: 'fem', count: 'singular' },
+      ja: { base: '指示',        count: 'singular', reading: 'しじ' },
+      pt: { base: 'instrução',   plural: 'instruções',   gender: 'fem', count: 'singular' },
     },
   },
   {

@@ -1,8 +1,9 @@
 import React from "react";
 import { Box, Popover, Tooltip, type SxProps, type Theme } from "@mui/material";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
-import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
+  BoxComplementType,
   ConceptSelectOpts,
   GenderSlot,
   NounKey,
@@ -46,6 +47,9 @@ export interface PhraseRenderContext {
   // Verbless noun-phrase mode (the possessor editor): the `subject` slot is the
   // possessor head and must use the noun-only picker rather than the subject picker.
   nounPhrase?: boolean;
+  // Whether the subject box is drawn at all. False for an instrument period at an action level:
+  // the act ("by choosing a word") has no subject of its own — the clause it serves supplies it.
+  showSubject?: boolean;
   activeSlot: SlotKey | null;
   renderedSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
@@ -104,7 +108,7 @@ export interface PhraseRenderContext {
   handleToggleCollapse: (label: string) => void;
   // Compact a dotted box's child nodes into a tidy centered cluster.
   handleRearrangeGroup: (group: GroupShape) => void;
-  handleRemoveComplement: (type: ComplementType) => void;
+  handleRemoveComplement: (type: BoxComplementType) => void;
   // ── Cross-container linking (top-level containers only; undefined for possessors) ──
   // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
   onBoxRef?: (key: SlotKey, el: HTMLElement | null) => void;
@@ -113,6 +117,9 @@ export interface PhraseRenderContext {
   // In pick-mode: is this noun an eligible link target? Clicking it completes the link.
   isPickTarget?: (key: SlotKey) => boolean;
   onPickTarget?: (key: SlotKey) => void;
+  // Register the complement-toggle row on the verb-phrase dotted box with the workspace — the
+  // start of an instrumental link's connector. Undefined for a standalone period.
+  registerVerbAnchor?: (el: HTMLElement | null) => void;
 }
 
 // Register one draggable node's element in the measurement map under `key`. Every node on

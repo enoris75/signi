@@ -5,15 +5,28 @@ import {
   type ComplementType,
   type GrammaticalRole,
   type Transitivity,
+  type UiStringKey,
 } from "@signi/shared";
-import { NounKey, NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
+import { BoxComplementType, NounKey, NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
 
-// Every noun block on the canvas: the core roles plus each complement. These are the
+/**
+ * The complements realized as a cross-container link rather than a box on this canvas — their
+ * noun phrase lives in a period container of its own (see BoxComplementType). The instrumental
+ * is the only one today.
+ */
+export const LINKED_COMPLEMENT_TYPES: ComplementType[] = ["instrumental"];
+
+/** The complements that do get a canvas box — everything else. */
+export const BOX_COMPLEMENT_TYPES: BoxComplementType[] = COMPLEMENT_TYPES.filter(
+  (type) => !LINKED_COMPLEMENT_TYPES.includes(type),
+) as BoxComplementType[];
+
+// Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
 export const NOUN_KEYS: NounKey[] = [
   "subject",
   "directObject",
-  ...COMPLEMENT_TYPES,
+  ...BOX_COMPLEMENT_TYPES,
 ];
 
 // Every noun block chains up to three adjectives. They are revealed one at a time —
@@ -52,6 +65,16 @@ export const modalChainParent = (key: string): SlotKey | undefined => {
   const idx = MODAL_SLOTS.indexOf(key as SlotKey);
   if (idx === -1) return undefined;
   return idx === 0 ? "verb" : MODAL_SLOTS[idx - 1];
+};
+
+/**
+ * The engine-rendered name of a complement, for the complements whose word is seeded. The box
+ * titles itself with this in the current UI language and the satellite icon's tooltip reads it;
+ * the static English `COMPLEMENT_LABELS` stays the fallback. The rest of the complements migrate
+ * here as their grammar noun is seeded.
+ */
+export const COMPLEMENT_LABEL_KEYS: Partial<Record<ComplementType, UiStringKey>> = {
+  instrumental: "slot.instrumental",
 };
 
 export const ALL_SLOTS: SlotConfig[] = [
@@ -144,11 +167,12 @@ export const ALL_SLOTS: SlotConfig[] = [
   },
   // Motion/locative complements — noun slots gated by the verb's `complements`,
   // each with its own pair of chained adjective slots.
-  ...COMPLEMENT_TYPES.flatMap(
+  ...BOX_COMPLEMENT_TYPES.flatMap(
     (type): SlotConfig[] => [
       {
         key: type,
         label: COMPLEMENT_LABELS[type],
+        labelKey: COMPLEMENT_LABEL_KEYS[type],
         required: false,
         // The subject complement (predicative) can be a predicate noun ("becomes a
         // legend") OR a predicate adjective ("seems happy"); every other complement is a
@@ -181,12 +205,12 @@ export const ALL_SLOTS: SlotConfig[] = [
   ),
 ];
 
-export const COMPLEMENT_KEY_SET = new Set<SlotKey>(COMPLEMENT_TYPES);
+export const COMPLEMENT_KEY_SET = new Set<SlotKey>(BOX_COMPLEMENT_TYPES);
 
 // Complement adjective slot keys, mapped back to the complement they modify.
 export const COMPLEMENT_ADJECTIVE_TYPE: Partial<Record<SlotKey, ComplementType>> =
   Object.fromEntries(
-    COMPLEMENT_TYPES.flatMap((type) =>
+    BOX_COMPLEMENT_TYPES.flatMap((type) =>
       adjectiveSlots(type).map((key) => [key, type]),
     ),
   );
@@ -196,8 +220,8 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   "modifier",
   ...MODAL_SLOTS,
   ...adjectiveSlots("directObject"),
-  ...COMPLEMENT_TYPES,
-  ...COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
+  ...BOX_COMPLEMENT_TYPES,
+  ...BOX_COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
 ]);
 
 // Collapsible role groups: each dashed box can be collapsed to show only its main
@@ -224,7 +248,7 @@ export const COLLAPSIBLE_GROUPS: {
     mainKey: "directObject",
     childKeys: [...adjectiveSlots("directObject"), "directObjectDefiniteness"],
   },
-  ...COMPLEMENT_TYPES.map((type) => ({
+  ...BOX_COMPLEMENT_TYPES.map((type) => ({
     label: COMPLEMENT_LABELS[type],
     mainKey: type as string,
     childKeys: [

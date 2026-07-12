@@ -19,9 +19,9 @@ import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
+import BuildIcon from "@mui/icons-material/Build";
 import {
   ASPECT_LABELS,
-  COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
   DETERMINER_COMPLEMENT_TYPES,
   TENSE_LABELS,
@@ -41,7 +41,12 @@ import {
   WorkspaceBinding,
 } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
-import { COMPLEMENT_KEY_SET, SATELLITE_SLOT_KEYS } from "./slots.ts";
+import {
+  BOX_COMPLEMENT_TYPES,
+  COMPLEMENT_KEY_SET,
+  COMPLEMENT_LABEL_KEYS,
+  SATELLITE_SLOT_KEYS,
+} from "./slots.ts";
 
 // Satellite elements (gender / number / polarity / adjective / adverb) are hidden
 // by default and revealed via the small icons on each main box border.
@@ -93,6 +98,7 @@ const complementIcons: Record<ComplementType, ReactNode> = {
   source: <ArrowBackIcon sx={iconSx} />,
   route: <RouteIcon sx={iconSx} />,
   cause: <HelpOutlineIcon sx={iconSx} />,
+  instrumental: <BuildIcon sx={iconSx} />,
   terminus: <CallReceivedIcon sx={iconSx} />,
 };
 
@@ -359,8 +365,20 @@ export function buildSatellites(
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectPossessor?.subject),
     },
+    // The instrumental has no box on this canvas: its noun phrase lives in a period container
+    // of its own, and this control on the verb-phrase dotted box is the link to it (started,
+    // and later cleared, in buildSatelliteIcons off the workspace binding — like the
+    // relative-clause control, `hasValue` is a fact about the links, not the selection).
+    {
+      key: "instrumental",
+      parent: "verb",
+      label: t("slot.instrumental"),
+      icon: complementIcons.instrumental,
+      available: supportedComplements.includes("instrumental"),
+      hasValue: false,
+    },
     // Complement toggles live on the VERB box; number/gender hang off each complement.
-    ...COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
+    ...BOX_COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
       const concept = selection[type];
       const num = selection[`${type}Number` as keyof PhraseSelection] as
         | "singular"
@@ -381,11 +399,14 @@ export function buildSatellites(
       const adj3 = selection[`${type}Adjective3` as keyof PhraseSelection] as
         | Concept
         | undefined;
+      const labelKey = COMPLEMENT_LABEL_KEYS[type];
       return [
         {
           key: type,
           parent: "verb",
-          label: COMPLEMENT_LABELS[type],
+          // A complement whose name is seeded shows it in the UI language ("complemento di
+          // mezzo"); the rest still read their static English label.
+          label: labelKey ? t(labelKey) : COMPLEMENT_LABELS[type],
           icon: complementIcons[type],
           available: supportedComplements.includes(type),
           hasValue: Boolean(concept),
@@ -489,12 +510,24 @@ export function buildSatellites(
     }),
   ];
 
-  const satellites: Satellite[] = rawSatellites.map((s) => ({
-    ...s,
-    // A direct-toggle satellite (number) has no box to reveal — its border icon
-    // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
-    shown: s.available && !s.directToggle && (revealed[s.key] ?? s.hasValue),
-  }));
+  // A command drops its subject: the subject box is replaced by the command box (PhraseCanvas),
+  // so the whole subject family — its adjectives, number/gender, determiner, relative clause and
+  // possessor — has no head to hang off and is withdrawn. Every one of those satellites is keyed
+  // off the subject, and dropping them here is what keeps their controls, their boxes and their
+  // connectors from floating over the box that took its place.
+  const subjectDropped = (key: string) =>
+    Boolean(selection.imperative) && key.startsWith("subject");
+
+  const satellites: Satellite[] = rawSatellites.map((s) => {
+    const available = s.available && !subjectDropped(s.key);
+    return {
+      ...s,
+      available,
+      // A direct-toggle satellite (number) has no box to reveal — its border icon
+      // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
+      shown: available && !s.directToggle && (revealed[s.key] ?? s.hasValue),
+    };
+  });
   const shownMap: Record<string, boolean> = Object.fromEntries(
     satellites.map((s) => [s.key, s.shown]),
   );
@@ -545,6 +578,30 @@ export function buildSatelliteIcons({
 
   for (const sat of satellites) {
     if (!sat.available) continue;
+    // The instrumental control is a cross-container link, not a reveal: it rides the verb-phrase
+    // dotted box (with the other complement toggles) and points at the period holding the
+    // instrument. Clicking it starts a pick, or removes the link once one is made. It exists
+    // only in a workspace container — a standalone period has nowhere to link to.
+    if (sat.key === "instrumental") {
+      if (!linkBinding) continue;
+      const linked = linkBinding.instrumental.hasSource;
+      complementToggleIcons.push({
+        key: sat.key,
+        icon: sat.icon,
+        // Never "active": there is no box to reveal, so the icon reads as *set* (a link exists)
+        // or not, and its tooltip says what clicking will do.
+        active: false,
+        label: sat.label,
+        isSet: linked,
+        valued: false,
+        valueLabel: linked ? "Linked — click to remove" : undefined,
+        onToggle: () =>
+          linked
+            ? linkBinding.instrumental.onClear()
+            : linkBinding.instrumental.onStart(),
+      });
+      continue;
+    }
     // The "Relative clause" satellite is a cross-container link control, not a reveal.
     // It only exists in a workspace container (needs the binding); clicking it starts a
     // link (pick a noun in another container) or, when already a source, removes it.

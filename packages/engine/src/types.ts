@@ -1,4 +1,5 @@
-import type { Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
+import { isActionLevel } from '@signi/shared';
 
 export type { RubySegment };
 
@@ -79,6 +80,12 @@ export interface ResolvedRelativeClause {
 /** A resolved complement: its noun phrase plus any specifiers (plain data). */
 export interface ResolvedComplement {
   phrase: ResolvedNounPhrase;
+  /**
+   * The resolved action an instrument *is* at the `process` / `concept` abstraction levels —
+   * "by **choosing** a word" (see Complement.action). `phrase` is the noun it acts on. Absent at
+   * the `object` level and on every other complement.
+   */
+  action?: ResolvedVerbPhrase;
   specifiers?: Specifier[];
 }
 
@@ -98,8 +105,11 @@ export interface ResolvedPhrase {
   condition?: ResolvedPhrase;
   /**
    * A resolved coordinated second clause plus the conjunction linking it to this one. When
-   * present the engines render "<this clause> <conjunction-word> <coordination.clause>". Both
-   * clauses are plain indicative; the coordinated clause is not itself coordinated.
+   * present the engines render "<this clause> <conjunction-word> <coordination.clause>". The
+   * two clauses always share a mood — either both plain indicative, or (when this clause is a
+   * command) both imperative, the second carrying the first's register and addressee, so the
+   * engines drop its subject exactly as they do the first's. The coordinated clause is not
+   * itself coordinated.
    */
   coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
 }
@@ -112,6 +122,31 @@ export function pathSpecifier(c: ResolvedComplement): PathSpecifier {
 /** The affective stance chosen for a `cause` complement; defaults to `neutral`. */
 export function causeSentiment(c: ResolvedComplement): CauseSentiment {
   return c.specifiers?.find((s) => s.kind === 'sentiment')?.value ?? 'neutral';
+}
+
+/**
+ * The reification degree chosen for an `instrumental` complement; defaults to `object`. An
+ * action level with no resolved `action` to render falls back to `object` — the noun phrase alone
+ * — so a half-built plan renders "with a word" rather than nothing.
+ */
+export function abstractionLevel(c: ResolvedComplement): AbstractionLevel {
+  const level = c.specifiers?.find((s) => s.kind === 'abstraction')?.value ?? 'object';
+  return isActionLevel(level) && !c.action ? 'object' : level;
+}
+
+/**
+ * The verb of an instrument's action, in the non-finite form the `process` level takes, plus its
+ * adverb: the gerund in en/it/es/pt ("choosing", "scegliendo"), the te-form in ja. French has no
+ * seeded gerund — its gérondif is built in-engine from the "nous" present stem — and German has
+ * no gerund at all, so both build their own form; this is the shared lookup for the four that do.
+ */
+export function actionGerund(action: ResolvedVerbPhrase): string {
+  return action.verb.forms['gerund'] ?? action.verb.forms['base'] ?? '';
+}
+
+/** The plain infinitive (citation form) of an instrument's action — the `concept` level's stem. */
+export function actionInfinitive(action: ResolvedVerbPhrase): string {
+  return action.verb.forms['base'] ?? '';
 }
 
 /**

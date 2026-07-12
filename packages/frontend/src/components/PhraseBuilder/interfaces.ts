@@ -1,6 +1,7 @@
-import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
+import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
+import { canCoordinateImperative } from "@signi/shared";
 
-export type { CoordConjunction };
+export type { AbstractionLevel, CoordConjunction };
 
 // UI metadata for the coordinating conjunctions offered on the coordinative control: the
 // short menu label and the traditional grammatical name of each relation.
@@ -13,7 +14,8 @@ export const COORD_CONJUNCTION_OPTIONS: {
   { value: "or", label: "Or", hint: "disjunctive" },
   { value: "but", label: "But", hint: "adversative" },
   { value: "that_is", label: "That is", hint: "explicative" },
-  { value: "then", label: "Then", hint: "conclusive" },
+  { value: "therefore", label: "Therefore", hint: "conclusive" },
+  { value: "then", label: "Then", hint: "temporal" },
 ];
 
 export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =
@@ -21,6 +23,29 @@ export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =
     COORD_CONJUNCTION_OPTIONS.map((o) => [o.value, o.label]),
   ) as Record<CoordConjunction, string>;
 
+// The conjunctions offered when starting a coordination from `imperative` period. A command
+// coordinates with a second command, which only four of the six can join: the conclusive
+// "therefore" and the explicative "that is" need a statement on at least one side (see
+// IMPERATIVE_COORD_CONJUNCTIONS), so they drop out of the menu under a command.
+export function coordConjunctionOptions(
+  imperative: boolean,
+): typeof COORD_CONJUNCTION_OPTIONS {
+  if (!imperative) return COORD_CONJUNCTION_OPTIONS;
+  return COORD_CONJUNCTION_OPTIONS.filter((o) =>
+    canCoordinateImperative(o.value),
+  );
+}
+
+
+/**
+ * The complements that get a word box on the canvas — every one except those realized as a
+ * cross-container link. The `instrumental` is the one such link today: its noun phrase lives in
+ * a period container of its own, reached from the control on the verb-phrase dotted box (see
+ * PhraseLink's 'instrumental' kind), so it has no box, no adjective slots and no fields in the
+ * selection. Everything keyed by "a noun block on this canvas" — slots, positions, number/gender
+ * toggles, possessors — is keyed by this rather than by ComplementType.
+ */
+export type BoxComplementType = Exclude<ComplementType, "instrumental">;
 
 export interface SlotConfig {
     key: "subject" |
@@ -35,10 +60,10 @@ export interface SlotConfig {
     "directObjectAdjective" |
     "directObjectAdjective2" |
     "directObjectAdjective3" |
-    ComplementType |
-    `${ComplementType}Adjective` |
-    `${ComplementType}Adjective2` |
-    `${ComplementType}Adjective3`;
+    BoxComplementType |
+    `${BoxComplementType}Adjective` |
+    `${BoxComplementType}Adjective2` |
+    `${BoxComplementType}Adjective3`;
     label: string;
     // When set, the box titles itself with this engine-rendered string in the current UI
     // language instead of the static English `label` (which stays as the fallback and as the
@@ -53,21 +78,27 @@ export interface SlotConfig {
 // the person/number still selects the imperative form (tu vs "let's" vs plural). Default 2sg.
 export type ImperativePerson = "2sg" | "1pl" | "2pl";
 
-/**
- * What the addressee selector offers: one of the three persons a command can be spoken to, or
- * "none" — an instruction addressed to nobody (a button, a menu entry, a recipe step). "none"
- * is the `instruction` imperative register, which the engines render in each language's own
- * label form (fr/es/pt/de infinitive, ja verbal noun); the person becomes moot there, so the
- * selector holds the two as one choice even though the plan carries them as two fields.
- */
-export type ImperativeAddress = ImperativePerson | "none";
+// The person a selection's command agrees with (default 2sg). Still meaningful under the
+// `instruction` register — the selector only greys it there, it does not forget it, so
+// returning to an order restores the person the user last picked.
+export function imperativePerson(selection: PhraseSelection): ImperativePerson {
+  return selection.imperativePerson ?? "2sg";
+}
+
+// The register a selection's command is spoken in (default `request` — an order, addressed to
+// the person above). `instruction` is addressed to nobody, and the engines render it in each
+// language's own label form (fr/es/pt/de infinitive, ja verbal noun).
+export function imperativeRegisterOf(selection: PhraseSelection): ImperativeRegister {
+  return selection.imperativeRegister ?? "request";
+}
 
 export interface PhraseSelection {
     subject?: Concept;
     // When set, this period is an imperative (command). The subject box becomes the addressee
     // selector (see `imperativePerson`) and the subject is dropped by the engines; tense/aspect
     // are forced present/neutral and modals cleared (an imperative is a mood, mutually exclusive
-    // with those and with a conditional / coordination — the UI enforces this).
+    // with those and with a conditional — the UI enforces this). A command may still coordinate
+    // with a second command, which shares its mood, addressee and register.
     imperative?: boolean;
     // The addressee of an imperative command (default 2sg). Only meaningful when `imperative`,
     // and moot under the `instruction` register, which addresses nobody.
@@ -158,6 +189,9 @@ export interface PhraseSelection {
     causeAdjective2?: Concept;
     causeAdjective3?: Concept;
     causeSentiment?: CauseSentiment;
+    // The instrumental complement has no fields here: its noun phrase lives in a period
+    // container of its own, linked from the verb-phrase dotted box (see BoxComplementType and
+    // the 'instrumental' PhraseLink), and is folded into the plan by workspacePlan.
     // Terminus — the recipient or goal, "to whom / to what": the traditional indirect object
     // ("gives the book *to the cat*") and the dative adjunct a plain transitive verb can take
     // ("cut the hair *to the cat*") alike. Renders with each language's dative; no specifier.
@@ -212,12 +246,12 @@ export interface ConceptSelectOpts {
   gender?: "masc" | "fem" | "neut";
 }
 
-export type NumberSlot = "subject" | "directObject" | ComplementType;
+export type NumberSlot = "subject" | "directObject" | BoxComplementType;
 
-export type GenderSlot = "subject" | "directObject" | ComplementType;
+export type GenderSlot = "subject" | "directObject" | BoxComplementType;
 
 // The noun blocks that can carry a relative clause / possessor (same set as NumberSlot).
-export type NounKey = "subject" | "directObject" | ComplementType;
+export type NounKey = "subject" | "directObject" | BoxComplementType;
 
 // The address of a noun anywhere in a container's phrase tree, used as a cross-container
 // link endpoint. A top-level noun is just its `NounKey`; a possessor head is that address
@@ -311,13 +345,30 @@ export type PhraseLink =
       conjunction: CoordConjunction;
       source: { containerId: string };
       target: { containerId: string };
+    }
+  | {
+      // The instrumental complement: the *source* container is the clause that acts, and the
+      // *target* container holds the noun phrase it acts with — its subject noun and nothing
+      // else, since a period with no verb is a bare noun phrase ("a word"). Sourced from the
+      // control on the verb-phrase dotted box, so it carries no noun key: the target's own
+      // subject is the instrument. Unlike the conditional and the coordination, which join two
+      // *clauses*, this one pulls a noun phrase out into a period of its own.
+      id: string;
+      kind: 'instrumental';
+      // How far the instrument is reified: an act in flow ("by choosing a word"), the act named
+      // as a protocol ("with the act of choosing a word"), or the thing it leaves behind ("with
+      // a word"). It belongs to the *link*, not to either period: it is the relation between the
+      // clause and its instrument. Absent ⇒ 'object'. See AbstractionLevel.
+      level?: AbstractionLevel;
+      source: { containerId: string };
+      target: { containerId: string };
     };
 
 /** Narrow a link to the relative kind (the default). */
 export const isRelativeLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind?: 'relative' }> =>
-  l.kind !== 'conditional' && l.kind !== 'coordinative';
+  l.kind !== 'conditional' && l.kind !== 'coordinative' && l.kind !== 'instrumental';
 
 /** Narrow a link to the conditional kind. */
 export const isConditionalLink = (
@@ -329,14 +380,21 @@ export const isCoordinativeLink = (
   l: PhraseLink,
 ): l is Extract<PhraseLink, { kind: 'coordinative' }> => l.kind === 'coordinative';
 
+/** Narrow a link to the instrumental kind. */
+export const isInstrumentalLink = (
+  l: PhraseLink,
+): l is Extract<PhraseLink, { kind: 'instrumental' }> => l.kind === 'instrumental';
+
 // Pick-mode: awaiting a target click. A `relative` pick started from a source noun's satellite
 // and lands on a target noun; a `conditional` pick started from a container's border control
-// and lands on another container (which becomes the "if" clause).
+// and lands on another container (which becomes the "if" clause); an `instrumental` pick started
+// from the verb-phrase dotted box's control and lands on the container holding the instrument.
 export type PickMode =
   | { active: false }
   | { active: true; kind: 'relative'; source: { containerId: string; nounKey: NounAddress } }
   | { active: true; kind: 'conditional'; source: { containerId: string } }
-  | { active: true; kind: 'coordinative'; conjunction: CoordConjunction; source: { containerId: string } };
+  | { active: true; kind: 'coordinative'; conjunction: CoordConjunction; source: { containerId: string } }
+  | { active: true; kind: 'instrumental'; source: { containerId: string } };
 
 // The workspace-provided hooks a PhraseBuilder needs to take part in cross-container
 // linking. Undefined for embedded (possessor) sub-builders, which never link.
@@ -361,6 +419,9 @@ export interface WorkspaceGeometry {
   // The border-control cluster: the endpoint the conditional/coordinative connector lines run
   // between (one anchor shared by both clause-level relations).
   registerBorderAnchor: (el: HTMLElement | null) => void;
+  // The complement-toggle row on the verb-phrase dotted box — where an instrumental link
+  // starts, since the instrument is something the *verb* takes.
+  registerVerbAnchor: (el: HTMLElement | null) => void;
   // Signal that this container's canvas geometry changed (a box was dragged, the canvas
   // resized, a group collapsed) so the workspace re-measures its link lines.
   onGeometryChange: () => void;
@@ -403,6 +464,11 @@ export interface CoordinativeBinding {
   hasTarget: boolean;
   // The conjunction of the coordination this container takes part in, if any (for labelling).
   conjunction?: CoordConjunction;
+  // Set only when this container is the second clause of a *command* coordination: the person and
+  // register of the first clause, which the pair shares (a command and its coordinate are one
+  // speech act, spoken to one person). This container's command box shows them, locked — see
+  // PhraseCanvas.
+  inheritedCommand?: { person: ImperativePerson; register: ImperativeRegister };
   // During another container's coordinative pick, is this container a legal second-clause target?
   isPickTarget: boolean;
   // Start a coordination from this container with the chosen conjunction (it becomes the first
@@ -413,14 +479,38 @@ export interface CoordinativeBinding {
   onPick: () => void;
 }
 
+// The instrumental link for one container. Mirrors ConditionalBinding, but the two ends are of
+// different kinds: the *source* is a clause (its verb-phrase box carries the control) and the
+// *target* is a period holding the instrument noun phrase, so the two roles are not symmetric
+// and a container may hold both (an instrument phrase can itself act with an instrument only if
+// it had a verb — it doesn't, so in practice a target sources nothing).
+export interface InstrumentalBinding {
+  // This container sources an instrumental link (its clause acts with an instrument).
+  hasSource: boolean;
+  // The reification degree of the link this container takes part in (either end), and its setter.
+  // 'object' when there is no link — the level a new one starts at.
+  level: AbstractionLevel;
+  onLevelChange: (level: AbstractionLevel) => void;
+  // This container is the target of one — it *is* an instrument phrase.
+  hasTarget: boolean;
+  // During another container's instrumental pick, is this container a legal instrument target?
+  isPickTarget: boolean;
+  // Start an instrumental from this container (awaits an instrument-period pick); clear the one
+  // already sourced here; choose this container as a pending pick's instrument.
+  onStart: () => void;
+  onClear: () => void;
+  onPick: () => void;
+}
+
 export interface WorkspaceBinding {
   containerId: string;
-  // Any cross-container pick (relative / conditional / coordinative) is currently in progress.
+  // Any cross-container pick (relative / conditional / coordinative / instrumental) is in progress.
   pickActive: boolean;
   geometry: WorkspaceGeometry;
   relative: RelativeBinding;
   conditional: ConditionalBinding;
   coordinative: CoordinativeBinding;
+  instrumental: InstrumentalBinding;
 }
 
 // Wrap a container's `binding` for an embedded possessor sub-builder whose head is
@@ -444,8 +534,10 @@ export function adaptPossessorBinding(
         root.geometry.registerSourceAnchor(map(nounKey), el),
       registerTargetAnchor: (nounKey, el) =>
         root.geometry.registerTargetAnchor(map(nounKey), el),
-      // A possessor sub-builder is never a clause endpoint, so it anchors no clause connector.
+      // A possessor sub-builder is never a clause endpoint, so it anchors no clause connector,
+      // and it has no verb phrase to hang an instrument off.
       registerBorderAnchor: () => {},
+      registerVerbAnchor: () => {},
       onGeometryChange: root.geometry.onGeometryChange,
     },
     relative: {
@@ -471,6 +563,16 @@ export function adaptPossessorBinding(
       hasSource: false,
       hasTarget: false,
       conjunction: undefined,
+      isPickTarget: false,
+      onStart: () => {},
+      onClear: () => {},
+      onPick: () => {},
+    },
+    instrumental: {
+      hasSource: false,
+      hasTarget: false,
+      level: 'object',
+      onLevelChange: () => {},
       isPickTarget: false,
       onStart: () => {},
       onClear: () => {},

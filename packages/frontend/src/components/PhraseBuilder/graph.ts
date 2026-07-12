@@ -1,13 +1,10 @@
-import {
-  COMPLEMENT_TYPES,
-  COMPLEMENT_LABELS,
-  type ComplementType,
-} from "@signi/shared";
-import { SlotConfig } from "./interfaces.ts";
+import { COMPLEMENT_LABELS } from "@signi/shared";
+import { BoxComplementType, SlotConfig } from "./interfaces.ts";
 import {
   adjectiveChainParent,
   adjectiveSlots,
   modalChainParent,
+  BOX_COMPLEMENT_TYPES,
   MODAL_SLOTS,
   COMPLEMENT_ADJECTIVE_TYPE,
   COMPLEMENT_KEY_SET,
@@ -31,11 +28,11 @@ export type GroupRect = Rect & {
   color: string;
   nodeKeys: string[];
   // Set on complement groups — these carry an "x" to remove the whole box.
-  removeKey?: ComplementType;
+  removeKey?: BoxComplementType;
 };
 
 // The identity of a role group, before its rect is measured.
-export type GroupShape = { nodeKeys: string[]; removeKey?: ComplementType };
+export type GroupShape = { nodeKeys: string[]; removeKey?: BoxComplementType };
 
 type Pt = { x: number; y: number };
 type PosFn = (key: string) => Pt;
@@ -80,7 +77,7 @@ export const COMPACT_PAD_BOT = 30;
 // Compact hugs the lone core word with tight, uniform pads (no toolbar headroom, since
 // the specifier toolbars are hidden too); full view uses the generous pads above.
 export function groupPads(
-  removeKey: ComplementType | undefined,
+  removeKey: BoxComplementType | undefined,
   compact: boolean,
 ): { padH: number; padTop: number; padBot: number } {
   if (compact)
@@ -257,7 +254,7 @@ export function buildGraph({
           MUI_COLOR_HEX.success,
         ),
       );
-    for (const type of COMPLEMENT_TYPES) {
+    for (const type of BOX_COMPLEMENT_TYPES) {
       if (shownMap[`${type}Definiteness`])
         edges.push(satEdge(type, `${type}Definiteness`, MUI_COLOR_HEX.warning));
     }
@@ -271,7 +268,7 @@ export function buildGraph({
       label: string;
       color: string;
       nodeKeys: string[];
-      removeKey?: ComplementType;
+      removeKey?: BoxComplementType;
     }> = [
       ...(showSubject
         ? [
@@ -317,7 +314,7 @@ export function buildGraph({
           ]
         : []),
       // One dashed box per revealed complement (Locative / Direction / Source / Route).
-      ...COMPLEMENT_TYPES.filter((type) => shownMap[type]).map((type) => ({
+      ...BOX_COMPLEMENT_TYPES.filter((type) => shownMap[type]).map((type) => ({
         label: COMPLEMENT_LABELS[type],
         color: MUI_COLOR_HEX.warning,
         removeKey: type,

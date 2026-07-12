@@ -339,4 +339,12 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'arrumando', participle: 'arrumado' },
     ja: { te: '片付けて', te_reading: 'かたづけて' },
   },
+  START: {
+    en: { gerund: 'starting', participle: 'started' },
+    it: { gerund: 'iniziando', participle: 'iniziato' },
+    fr: { participle: 'commencé' }, de: { participle: 'begonnen' },
+    es: { gerund: 'empezando', participle: 'empezado' },
+    pt: { gerund: 'começando', participle: 'começado' },
+    ja: { te: '始めて', te_reading: 'はじめて' },
+  },
 };

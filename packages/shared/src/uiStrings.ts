@@ -156,6 +156,16 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'type a subject',
   },
 
+  // The instrumental complement's box title and satellite label. Each language names the
+  // relation as its own grammar tradition does — a one-word name in en/de ("instrumental"), a
+  // whole phrase in the Romance ones ("complemento di mezzo", "complément de moyen") — so it is
+  // seeded as a single noun concept per language rather than composed from parts.
+  'slot.instrumental': {
+    plan: nameOf('INSTRUMENTAL'),
+    format: NAME_FORMAT,
+    fallback: 'Instrumental',
+  },
+
   // The verb box's placeholder, the same command shape as the subject's: "type a verb" — the
   // TYPE imperative taking an indefinite VERB (the grammar noun) as its direct object.
   'slot.verb.placeholder': {
@@ -417,6 +427,78 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Save period',
+  },
+
+  // The command box, which replaces the subject box under an imperative (the subject is dropped
+  // from every surface, so there is no noun to pick there). Its caption is the bare COMMAND noun.
+  'imperative.command': {
+    plan: nameOf('COMMAND'),
+    format: NAME_FORMAT,
+    fallback: 'Command',
+  },
+
+  // Where the second command of a coordination gets its (locked) choices from — the tooltip on
+  // the link icon in its box. The pair is one speech act, so the first clause makes them.
+  'imperative.firstCommand': {
+    plan: {
+      subject: { concept: 'COMMAND', definiteness: 'definite', adjectives: ['FIRST'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'The first command',
+  },
+
+  // The two registers a command is spoken in — the box's first row. They are two speech acts,
+  // not two persons: an ORDER is addressed to somebody, an INSTRUCTION to nobody (a button, a
+  // recipe step), which is why the person row below goes moot under it. Named by the bare nouns,
+  // keyed by register value so the selector can write t(`imperative.register.${value}`).
+  'imperative.register.request': {
+    plan: nameOf('ORDER'),
+    format: NAME_FORMAT,
+    fallback: 'Order',
+  },
+  'imperative.register.instruction': {
+    plan: nameOf('INSTRUCTION'),
+    format: NAME_FORMAT,
+    fallback: 'Instruction',
+  },
+
+  // The three persons an order can be spoken to — the box's second row, keyed by person so the
+  // selector can write t(`imperative.person.${value}`). The buttons themselves carry the compact
+  // grammatical codes (2sg / 1pl / 2pl, the same notation the engines use and language-neutral);
+  // these name them in full for the tooltip — PERSON_GRAMMAR under its ordinal and number
+  // adjectives, which agree with it per language (it "seconda persona singolare").
+  'imperative.person.2sg': {
+    plan: {
+      subject: {
+        concept: 'PERSON_GRAMMAR',
+        definiteness: 'bare',
+        adjectives: ['SECOND', 'SINGULAR'],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Second person singular',
+  },
+  'imperative.person.1pl': {
+    plan: {
+      subject: {
+        concept: 'PERSON_GRAMMAR',
+        definiteness: 'bare',
+        adjectives: ['FIRST', 'PLURAL'],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'First person plural',
+  },
+  'imperative.person.2pl': {
+    plan: {
+      subject: {
+        concept: 'PERSON_GRAMMAR',
+        definiteness: 'bare',
+        adjectives: ['SECOND', 'PLURAL'],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Second person plural',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

@@ -1,6 +1,6 @@
 import type { ComplementType, NounPhrase, PhrasePlan, RelativeClause } from "@signi/shared";
-import { COMPLEMENT_TYPES } from "@signi/shared";
-import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isCoordinativeLink, isRelativeLink } from "./interfaces.ts";
+import { COMPLEMENT_TYPES, isActionLevel } from "@signi/shared";
+import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isCoordinativeLink, isInstrumentalLink, isRelativeLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
 const CORE_KEYS = new Set<NounKey>(["subject", "directObject"]);
@@ -75,9 +75,15 @@ function attachCondition(
 }
 
 // Attach the coordinated second clause sourced from `container` onto `plan`. The coordinated
-// container is serialised as its own indicative plan (with its own relative links folded in)
-// and hung on `plan.coordination`; the translator renders it after the conjunction word.
-// Coordination doesn't nest, so the second clause is not itself given a coordination.
+// container is serialised as its own plan (with its own relative links folded in) and hung on
+// `plan.coordination`; the translator renders it after the conjunction word. Coordination
+// doesn't nest, so the second clause is not itself given a coordination.
+//
+// Coordination is a symmetric join, so the mood belongs to the pair: the workspace only links
+// two clauses of the same mood, and when they are commands the addressee and register are the
+// first clause's — one command can't be spoken to "you" and its partner to "us". The second
+// clause's own address selector is locked to the first's while the pair holds (see
+// PhraseCanvas), so this override never contradicts what the user sees.
 function attachCoordination(
   plan: Partial<PhrasePlan>,
   container: PhraseContainer,
@@ -91,9 +97,66 @@ function attachCoordination(
   if (!link || !isCoordinativeLink(link)) return;
   const second = byId.get(link.target.containerId);
   if (!second || seen.has(second.id)) return;
-  const clausePlan = selectionToPlan(second.selection);
+  const clausePlan = selectionToPlan(
+    plan.imperative
+      ? {
+          ...second.selection,
+          imperative: true,
+          imperativePerson: container.selection.imperativePerson,
+          imperativeRegister: container.selection.imperativeRegister,
+        }
+      : second.selection,
+  );
   attachLinks(clausePlan, second, links, byId, new Set([...seen, second.id]));
   plan.coordination = { conjunction: link.conjunction, clause: clausePlan as PhrasePlan };
+}
+
+// Attach the instrument sourced from `container` onto `plan` as its `instrumental` complement.
+// The linked container is serialised like any other, and what is taken from it depends on the
+// link's reification degree (see AbstractionLevel):
+//
+//  · object  — the period is a bare noun phrase, and its subject *is* the instrument:
+//              "start **with a word**".
+//  · process
+//    concept — the period is a verb and the noun it acts on, with no subject of its own (the
+//              clause above supplies it): its verb becomes the complement's `action` and its
+//              direct object the noun the act is done to — "start **by choosing a word**" /
+//              "**with the act of choosing a word**". The level rides along as a specifier so
+//              each engine can pick its own non-finite form.
+//
+// Either way the instrument keeps its own relative links ("with the word that I chose"). A period
+// that hasn't got what its level needs yet contributes nothing rather than half a complement — so
+// an action level with no verb, or with no object for it, simply doesn't render.
+function attachInstrumental(
+  plan: Partial<PhrasePlan>,
+  container: PhraseContainer,
+  links: PhraseLink[],
+  byId: Map<string, PhraseContainer>,
+  seen: Set<string>,
+): void {
+  const link = links.find(
+    (l) => isInstrumentalLink(l) && l.source.containerId === container.id,
+  );
+  if (!link || !isInstrumentalLink(link)) return;
+  const instrument = byId.get(link.target.containerId);
+  if (!instrument || seen.has(instrument.id)) return;
+  const instrumentPlan = selectionToPlan(instrument.selection);
+  attachLinks(instrumentPlan, instrument, links, byId, new Set([...seen, instrument.id]));
+
+  const level = link.level ?? "object";
+  const complement = isActionLevel(level)
+    ? instrumentPlan.verbPhrase && instrumentPlan.directObject
+      ? {
+          phrase: instrumentPlan.directObject,
+          action: instrumentPlan.verbPhrase,
+          specifiers: [{ kind: "abstraction" as const, value: level }],
+        }
+      : undefined
+    : instrumentPlan.subject
+      ? { phrase: instrumentPlan.subject }
+      : undefined;
+  if (!complement) return;
+  plan.complements = { ...plan.complements, instrumental: complement };
 }
 
 // Serialise a target container as a relative clause whose head fills the `gap` slot. The
@@ -139,6 +202,7 @@ export function workspaceToPlans(
     .map((c) => {
       const plan = selectionToPlan(c.selection);
       attachLinks(plan, c, links, byId, new Set([c.id]));
+      attachInstrumental(plan, c, links, byId, new Set([c.id]));
       attachCondition(plan, c, links, byId, new Set([c.id]));
       attachCoordination(plan, c, links, byId, new Set([c.id]));
       return { containerId: c.id, plan };

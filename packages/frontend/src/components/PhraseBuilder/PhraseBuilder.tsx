@@ -3,15 +3,16 @@ import { Box } from "@mui/material";
 import {
   type Concept,
   type CauseSentiment,
-  type ComplementType,
   type Definiteness,
+  type ImperativeRegister,
   type PathSpecifier,
 } from "@signi/shared";
 import {
+  BoxComplementType,
   adaptPossessorBinding,
   ConceptSelectOpts,
   GenderSlot,
-  ImperativeAddress,
+  ImperativePerson,
   NounAddress,
   NounKey,
   NumberSlot,
@@ -44,7 +45,8 @@ import {
   cycleTense,
   removePossessor,
   setDefiniteness,
-  setImperativeAddress,
+  setImperativePerson,
+  setImperativeRegister,
   setSentiment,
   setSpecifier,
   toggleGender,
@@ -149,6 +151,15 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
+  // This period is the instrument of another clause, and its reification degree decides what it
+  // holds — so the canvas shows exactly the boxes the sentence will read (see AbstractionLevel):
+  //  · object            → a bare noun phrase ("with a word"): the subject box alone, no predicate.
+  //  · process / concept → an act ("by choosing a word"): a verb and its direct object, and *no*
+  //                        subject — the clause above is the one doing it.
+  const isInstrument = Boolean(binding?.instrumental.hasTarget);
+  const instrumentLevel = binding?.instrumental.level ?? "object";
+  const nounPhraseMode = isInstrument && instrumentLevel === "object";
+  const actionMode = isInstrument && instrumentLevel !== "object";
   // A period starts on its subject noun phrase — translation begins as soon as a subject
   // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
   const [activeSlot, setActiveSlot] = useState<SlotKey | null>("subject");
@@ -193,7 +204,9 @@ export function PhraseBuilder({
   // gives the greyed subject + addressee selector *and the verb box* — without this the empty
   // state would show only the addressee selector, with no way to add the verb to command.
   // Before that, the empty state offers the single opening word picker.
-  const showCanvas = hasSubject || hasVerb || Boolean(selection.imperative);
+  // An instrument-as-action period draws its canvas from the start: its first box is the verb,
+  // not the subject, so the subject-picking empty state would have nothing to offer.
+  const showCanvas = hasSubject || hasVerb || Boolean(selection.imperative) || actionMode;
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
@@ -307,7 +320,7 @@ export function PhraseBuilder({
 
   // Remove a complement entirely: clear its concept/number/gender and collapse
   // its dotted box (un-reveal so it doesn't linger as an empty group).
-  function handleRemoveComplement(type: ComplementType) {
+  function handleRemoveComplement(type: BoxComplementType) {
     handleClear(type);
     setRevealed((prev) => ({ ...prev, [type]: false }));
     if (activeSlot === type) setActiveSlot("verb");
@@ -346,13 +359,15 @@ export function PhraseBuilder({
   const handleCycleAspect = () => onPhraseUpdate(cycleAspect);
   const handleToggleImperative = () => {
     onPhraseUpdate(toggleImperative);
-    // Switching a command on greys out the subject box (the addressee is chosen on the
-    // overlay instead), so focus would otherwise sit on an inert box. Move it to the verb —
-    // the one thing still to pick, and the whole point of a command.
+    // Switching a command on replaces the subject box with the command box, so focus would
+    // otherwise sit on a box that no longer exists. Move it to the verb — the one thing still to
+    // pick, and the whole point of a command.
     if (!selection.imperative && !selection.verb) setActiveSlot("verb");
   };
-  const handleSetImperativeAddress = (address: ImperativeAddress) =>
-    onPhraseUpdate((prev) => setImperativeAddress(prev, address));
+  const handleSetImperativePerson = (person: ImperativePerson) =>
+    onPhraseUpdate((prev) => setImperativePerson(prev, person));
+  const handleSetImperativeRegister = (register: ImperativeRegister) =>
+    onPhraseUpdate((prev) => setImperativeRegister(prev, register));
   const handleSelectSpecifier = (spec: PathSpecifier) =>
     onPhraseUpdate((prev) => setSpecifier(prev, spec));
   const handleSelectSentiment = (sentiment: CauseSentiment) =>
@@ -638,9 +653,13 @@ export function PhraseBuilder({
 
   const { edges, groupRects, groupEdges } = buildGraph({
     drawCanvas: showCanvas,
-    // The possessor's own head is a box on this canvas; in a relative clause the
-    // subject is the external head, so it isn't drawn.
-    showSubject: true,
+    // An `object`-level instrument holds a bare noun phrase, not a clause: no verb phrase, no
+    // objects.
+    nounPhrase: nounPhraseMode,
+    // The possessor's own head is a box on this canvas; in a relative clause the subject is the
+    // external head, so it isn't drawn — and neither is an instrument act's, which is the acting
+    // clause's subject, not one of its own.
+    showSubject: !actionMode,
     compact,
     renderedSlots,
     visibleSlots,
@@ -749,16 +768,14 @@ export function PhraseBuilder({
   // anything the user had revealed.
   function handleTidyPeriod() {
     if (groupRects.length === 0) return;
-    const { positions: packed, minHeight } = packPeriod(
-      groupRects,
-      graphSize,
-      sizeOf,
-    );
+    const { positions: packed, height } = packPeriod(groupRects, graphSize, sizeOf);
     setPositions((prev) => ({ ...prev, ...packed }));
-    // Expanded boxes can need more room than the canvas has; grow it rather than pack them
-    // off the bottom edge. The rebase onto the new height (rescaleYForHeight) holds every
-    // pixel offset, so the grid we just laid out stays put.
-    if (minHeight > graphHeight) setGraphHeight(minHeight);
+    // Fit the container to the grid we just laid out — growing when expanded boxes need
+    // more room than the canvas has, and shrinking when they need less, so tidying clears
+    // the dead space under the content instead of leaving it behind. The rebase onto the
+    // new height (rescaleYForHeight) holds every pixel offset, so the grid stays put.
+    const fitted = Math.max(MIN_GRAPH_HEIGHT, height);
+    if (fitted !== graphHeight) setGraphHeight(fitted);
   }
 
   // Compact / expand the whole period. This is a pure view toggle: the compact packing
@@ -775,6 +792,8 @@ export function PhraseBuilder({
   // same canvas below and lean on this component's drag machinery and handlers.
   const ctx: PhraseRenderContext = {
     selection,
+    nounPhrase: nounPhraseMode,
+    showSubject: !actionMode,
     activeSlot,
     renderedSlots,
     shownMap,
@@ -829,6 +848,9 @@ export function PhraseBuilder({
     onPickTarget: linkBinding
       ? (key) => linkBinding.relative.onPick(key as NounKey)
       : undefined,
+    // The verb-phrase dotted box's complement-toggle row is where an instrumental link starts,
+    // so the workspace measures its connector from there.
+    registerVerbAnchor: linkBinding?.geometry.registerVerbAnchor,
   };
 
   // The clause-level connector controls on the card border, derived from the workspace binding
@@ -850,7 +872,8 @@ export function PhraseBuilder({
         controlPos={controlPos}
         perimeterByNoun={perimeterByNoun}
         linkBinding={linkBinding}
-        onSetImperativeAddress={handleSetImperativeAddress}
+        onSetImperativePerson={handleSetImperativePerson}
+        onSetImperativeRegister={handleSetImperativeRegister}
         containerRef={containerRef}
         possessorControlEls={possessorControlEls}
       />
@@ -919,10 +942,12 @@ export function PhraseBuilder({
         onTidy={handleTidyPeriod}
         conditional={clauseControls.conditional}
         coordinative={clauseControls.coordinative}
+        instrumental={clauseControls.instrumental}
         imperative={{
           active: Boolean(selection.imperative),
-          // An imperative is a mood, mutually exclusive with a conditional / coordination, so the
-          // toggle is disabled while this period takes part in one.
+          // An imperative is a mood: mutually exclusive with a conditional, and shared by the two
+          // clauses of a coordination. Either way the mood can't be flipped on this period alone
+          // while it takes part in one — the relation has to be cleared first.
           disabled: binding
             ? binding.conditional.hasSource ||
               binding.conditional.hasTarget ||

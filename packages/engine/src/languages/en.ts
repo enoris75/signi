@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -76,6 +76,7 @@ const PREP: Record<ComplementType, string> = {
   source: 'from',
   route: 'through',
   cause: 'because of',
+  instrumental: 'with', // means / tool — "starts with a word"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
 };
@@ -311,6 +312,18 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
+      // An instrument presented as an action rather than a thing: "by choosing a word"
+      // (process) / "with the act of choosing a word" (concept). Both take the gerund — English
+      // nominalises with the same -ing form — and the noun phrase is the verb's object.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const head = level === 'process' ? 'by' : 'with the act of';
+          const object = withRelative(nounPhrase(f, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase);
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return [head, actionGerund(c.action), object, adverb].filter(Boolean).join(' ');
+        }
+      }
       // Subject complement: a predicate adjective takes no article and doesn't agree, but
       // carries its own degree ("seems happier"); a predicate noun keeps its own article,
       // with no preposition ("becomes a legend").
@@ -496,7 +509,8 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'or',
   but: 'but',
   that_is: 'that is',
-  then: 'so',
+  therefore: 'so',
+  then: 'and then',
 };
 
 export const englishEngine: LanguageEngine = {

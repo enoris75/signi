@@ -4,18 +4,20 @@ import type {
   RefObject,
 } from "react";
 import { Box } from "@mui/material";
-import { COMPLEMENT_TYPES } from "@signi/shared";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { CategoryToggle, SlotBox } from "./Boxes.tsx";
+import type { ImperativeRegister } from "@signi/shared";
 import {
-  ImperativeAddress,
+  ImperativePerson,
+  imperativePerson,
+  imperativeRegisterOf,
   NounKey,
   slotCategories,
   WorkspaceBinding,
 } from "./interfaces.ts";
-import { ALL_SLOTS } from "./slots.ts";
+import { ALL_SLOTS, BOX_COMPLEMENT_TYPES } from "./slots.ts";
 import type { Edge } from "./graph.ts";
-import { type PhraseRenderContext } from "./phraseRender.tsx";
+import { nodeElRef, type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
@@ -44,7 +46,8 @@ export interface PhraseCanvasProps {
   >["perimeterByNoun"];
   // The cross-container link hooks (undefined for possessor sub-builders that don't link).
   linkBinding: WorkspaceBinding | undefined;
-  onSetImperativeAddress: (address: ImperativeAddress) => void;
+  onSetImperativePerson: (person: ImperativePerson) => void;
+  onSetImperativeRegister: (register: ImperativeRegister) => void;
   // Attached to the positioned canvas Box; the parent measures it with a ResizeObserver.
   containerRef: RefObject<HTMLDivElement>;
   // Receives each noun's possessor control element (its connector's start), measured up in
@@ -68,7 +71,8 @@ export function PhraseCanvas({
   controlPos,
   perimeterByNoun,
   linkBinding,
-  onSetImperativeAddress,
+  onSetImperativePerson,
+  onSetImperativeRegister,
   containerRef,
   possessorControlEls,
 }: PhraseCanvasProps) {
@@ -84,10 +88,21 @@ export function PhraseCanvas({
     onSlotKindChange,
   } = ctx;
 
-  // The selector holds the addressee and the register as one choice: an instruction is the
-  // command addressed to nobody, so it wins over whichever person the selection still carries.
-  const imperativeAddress: ImperativeAddress =
-    selection.imperativeRegister === "instruction" ? "none" : (selection.imperativePerson ?? "2sg");
+  // What the command box shows. A command that is the *second* clause of a coordination shares the
+  // first's person and register — one pair of commands is one speech act — so it shows the
+  // inherited ones and is locked; the user changes them on the first clause.
+  const inheritedCommand = linkBinding?.coordinative.inheritedCommand;
+  const person = inheritedCommand?.person ?? imperativePerson(selection);
+  const register = inheritedCommand?.register ?? imperativeRegisterOf(selection);
+  const commandBox = (
+    <ImperativeSubjectSelector
+      person={person}
+      register={register}
+      onPersonChange={onSetImperativePerson}
+      onRegisterChange={onSetImperativeRegister}
+      inherited={Boolean(inheritedCommand)}
+    />
+  );
 
   return (
     <Box sx={{ minWidth: 0 }}>
@@ -103,11 +118,8 @@ export function PhraseCanvas({
           }}
         >
           {selection.imperative ? (
-            // A command drops its subject — the box becomes the addressee selector instead.
-            <ImperativeSubjectSelector
-              value={imperativeAddress}
-              onChange={onSetImperativeAddress}
-            />
+            // A command drops its subject — the box is the command box instead.
+            commandBox
           ) : (
             <SlotBox
               slot={subjectSlot}
@@ -149,27 +161,31 @@ export function PhraseCanvas({
           />
 
           <>
-            {selection.imperative ? (
-              // A command drops its subject: grey the subject box (kept for layout) and overlay
-              // the addressee selector on its footprint.
-              <>
-                <Box sx={{ opacity: 0.35, pointerEvents: "none" }}>
-                  <NounPhraseBuilder which="subject" ctx={ctx} />
-                </Box>
-                <ImperativeSubjectSelector
-                  value={imperativeAddress}
-                  onChange={onSetImperativeAddress}
-                  rect={groupRects.find((g) => g.nodeKeys.includes("subject"))}
-                />
-              </>
+            {ctx.showSubject === false ? null : selection.imperative ? (
+              // A command drops its subject, so the subject box has no noun to hold: the command
+              // box *is* the subject node — dragged, positioned and measured as one, so the layout
+              // wraps it exactly as it wrapped the box it replaces. The subject's own satellites
+              // are withdrawn with it (see buildSatellites), leaving nothing to overlay.
+              <Box
+                {...ctx.makeDragProps("subject", () => {})}
+                ref={nodeElRef(ctx, "subject")}
+              >
+                {commandBox}
+              </Box>
             ) : (
               <NounPhraseBuilder which="subject" ctx={ctx} />
             )}
-            <VerbPhraseBuilder ctx={ctx} />
-            <NounPhraseBuilder which="directObject" ctx={ctx} />
-            {COMPLEMENT_TYPES.map((type) => (
-              <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-            ))}
+            {/* A noun-phrase period has no predicate — an instrument ("a word") is a noun
+                phrase, not a clause, so its canvas is the subject box alone. */}
+            {!ctx.nounPhrase && (
+              <>
+                <VerbPhraseBuilder ctx={ctx} />
+                <NounPhraseBuilder which="directObject" ctx={ctx} />
+                {BOX_COMPLEMENT_TYPES.map((type) => (
+                  <NounPhraseBuilder key={type} which={type} ctx={ctx} />
+                ))}
+              </>
+            )}
           </>
 
           {/* Compact view is just the bare core-word chips — no reveal icons

@@ -182,7 +182,11 @@ export const ASPECT_LABELS: Record<Aspect, string> = {
  *
  * `locative`/`direction`/`source`/`route` are the motion/place family; `cause`
  * is the reason/motive adjunct — "the boy cried **because of the dog**"
- * (a causa di / à cause de / wegen / por causa de …). `terminus` is the dative
+ * (a causa di / à cause de / wegen / por causa de …). `instrumental` is the means
+ * or tool the action is carried out by — "start **with a word**", "cut the bread
+ * **with the knife**" (con / avec / mit + dative / で). It answers "by what means?",
+ * where `cause` answers "why?": both are adjuncts, but the instrument is used by the
+ * subject, not a reason acting on it. `terminus` is the dative
  * "to whom / to what" — the recipient/goal of the action, i.e. what traditional
  * grammar calls the indirect object ("I give the book **to him**", "I cut the hair
  * **to the cat**"). It renders with each language's dative (to / a / à / dative case /
@@ -195,10 +199,10 @@ export const ASPECT_LABELS: Record<Aspect, string> = {
  * article (predicate nominative, German nominative case) and an adjective head agrees
  * with the subject (Romance) — English/German predicate adjectives are uninflected.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'terminus' | 'predicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'terminus' | 'predicative';
 
 /** Canonical UI order (matches how complements are presented to the user). */
-export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'locative', 'direction', 'source', 'route', 'cause'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'locative', 'direction', 'source', 'route', 'cause'];
 
 /**
  * Order in which active complements are rendered within a sentence. The subject
@@ -207,13 +211,16 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'l
  * adjunct ("because of …") last. In Japanese (SOV) everything precedes the verb, so the
  * subject complement's になる/く-form ends up adjacent to the verb regardless. The dative
  * `terminus` ("to him") — the recipient — sits right after the subject complement, before the
- * path ("gives **a legend** to the cat from the house").
+ * path ("gives **a legend** to the cat from the house"). The `instrumental` follows it — the
+ * means belongs with the act ("cuts the bread **with the knife** in the house"), before the
+ * path and the place it happens in.
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
   terminus: 'Terminus',
+  instrumental: 'Instrumental',
   locative: 'Locative',
   direction: 'Direction',
   source: 'Source',
@@ -223,13 +230,13 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
 
 /**
  * Complements whose noun head carries a user-selectable determiner. The adposition-free
- * `predicative` keeps its own article; the spatial/dative complements (locative / direction
- * / source / route / terminus) are adposition-bearing — their engines fuse the preposition
- * with a *definite* article (Italian "alla casa") but otherwise render the chosen determiner
- * uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is excluded: it
- * accepts a pronoun and weaves the quantifier into its connector, a separate concern.
+ * `predicative` keeps its own article; the spatial/dative/instrumental complements (locative /
+ * direction / source / route / terminus / instrumental) are adposition-bearing — their engines
+ * fuse the preposition with a *definite* article (Italian "alla casa") but otherwise render the
+ * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
+ * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'locative', 'direction', 'source', 'route'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'locative', 'direction', 'source', 'route'];
 
 /**
  * Spatial relations a `route` (path) complement can express. English needs a
@@ -268,6 +275,42 @@ export const CAUSE_SENTIMENT_LABELS: Record<CauseSentiment, string> = {
   negative: 'Negative — fault of',
   positive: 'Positive — thanks to',
 };
+
+/**
+ * How far an instrument is *reified* — the abstraction gradient between doing something and
+ * holding a thing. One and the same instrument can be presented at three degrees, and each
+ * language has its own grammar for them. Only the `instrumental` complement carries it, and it
+ * defaults to `object`.
+ *
+ *   process — the instrument is an action in flow, presented as it is carried out: "start **by
+ *             choosing a word**". Realised non-finitely — the gerund (en by ~ing, it/es/pt the
+ *             plain gerundio, fr the gérondif "en choisissant"), the German "indem" clause, the
+ *             Japanese te-form. Emphasises engagement and method.
+ *   concept — the same action, abstracted into a protocol one *invokes*: "start **with the act of
+ *             choosing a word**". Realised by nominalising the verb — "l'atto di scegliere",
+ *             "el acto de elegir", "mit dem Akt, … zu wählen", ja ～ことで. Emphasises rule and
+ *             system.
+ *   object  — the action is gone; only its outcome, a thing, remains: "start **with a word**".
+ *             The plain adposition + noun phrase. Emphasises the result.
+ *
+ * The three share one noun phrase (`Complement.phrase`): at `object` it *is* the instrument, and
+ * at the other two it is the direct object of `Complement.action` — the noun the act is done to.
+ */
+export type AbstractionLevel = 'process' | 'concept' | 'object';
+
+/** Display order: most dynamic first, most reified last. */
+export const ABSTRACTION_LEVELS: AbstractionLevel[] = ['process', 'concept', 'object'];
+
+export const ABSTRACTION_LEVEL_LABELS: Record<AbstractionLevel, string> = {
+  process: 'Process — by doing it',
+  concept: 'Concept — the act of doing it',
+  object: 'Object — the thing itself',
+};
+
+/** The levels that present the instrument as an action, and so need `Complement.action`. */
+export function isActionLevel(level: AbstractionLevel): boolean {
+  return level !== 'object';
+}
 
 export const LANGUAGES: Record<LanguageCode, string> = {
   en: 'English',
@@ -438,7 +481,8 @@ export interface VerbPhrase {
  */
 export type Specifier =
   | { kind: 'path'; value: PathSpecifier }
-  | { kind: 'sentiment'; value: CauseSentiment };
+  | { kind: 'sentiment'; value: CauseSentiment }
+  | { kind: 'abstraction'; value: AbstractionLevel };
 
 /**
  * A complement: a noun phrase plus zero or more specifiers. Not every complement
@@ -447,6 +491,17 @@ export type Specifier =
 export interface Complement {
   phrase: NounPhrase;
   specifiers?: Specifier[];
+  /**
+   * The instrument as an *action* rather than a thing — set only on the `instrumental`
+   * complement, and only at the `process` and `concept` abstraction levels (see
+   * AbstractionLevel). The verb is rendered non-finitely (gerund / nominalised infinitive) and
+   * `phrase` is the noun it acts on: action CHOOSE + phrase "a word" is "by choosing a word".
+   * Ignored at the `object` level, where the noun phrase stands alone ("with a word").
+   *
+   * It is a full VerbPhrase, but only the verb and its adverb are read: an instrument has no
+   * tense, mood or agreement of its own — it takes them from the clause it serves.
+   */
+  action?: VerbPhrase;
 }
 
 export interface LexicalEntry {
@@ -476,9 +531,17 @@ export interface PhrasePlan {
   /**
    * An optional coordinated clause joined to this one by a coordinating conjunction ("the cat
    * sleeps AND the dog runs"). Unlike a condition, coordination is a symmetric join of two
-   * independent (indicative) clauses: this plan is the first, `coordination.clause` the second,
-   * and `coordination.conjunction` selects the linking word. One coordination per plan; the
-   * coordinated clause stays indicative and is not itself given a coordination.
+   * independent clauses: this plan is the first, `coordination.clause` the second, and
+   * `coordination.conjunction` selects the linking word. One coordination per plan; the
+   * coordinated clause is not itself given a coordination.
+   *
+   * A symmetric join means both clauses carry the same illocutionary force, so the mood belongs
+   * to the *pair*: two statements coordinate ("the cat sleeps and the dog runs"), and so do two
+   * commands ("eat the bread, then run!"), but a statement and a command do not. An `imperative`
+   * plan therefore hands its mood, its `imperativeRegister` and its addressee `subject` down to
+   * the coordinated clause, and may only use the conjunctions in
+   * `IMPERATIVE_COORD_CONJUNCTIONS` (the UI enforces this; the translator also normalises it
+   * defensively).
    */
   coordination?: Coordination;
   /**
@@ -486,9 +549,10 @@ export interface PhrasePlan {
    * The verb is rendered in the imperative mood and the subject is dropped, but `subject`
    * still carries the addressee pronoun (2nd-singular by default, or 1st-plural "let's…" /
    * 2nd-plural) so the engines pick the right person/number of the imperative form. An
-   * imperative is a mood, so it is mutually exclusive with a hypothetical `condition` and a
-   * `coordination`, and it forces present tense / neutral aspect / no modals (the UI enforces
-   * this; the translator also normalises it defensively).
+   * imperative is a mood, so it is mutually exclusive with a hypothetical `condition` and it
+   * forces present tense / neutral aspect / no modals (the UI enforces this; the translator
+   * also normalises it defensively). It may still take a `coordination` — a command coordinates
+   * with a second command, which inherits its mood (see `coordination`).
    */
   imperative?: boolean;
   /**
@@ -515,12 +579,35 @@ export const IMPERATIVE_REGISTERS: ImperativeRegister[] = ['request', 'instructi
  *  - `and`     copulative ("and")
  *  - `or`      disjunctive ("or")
  *  - `but`     adversative ("but")
- *  - `that_is` explicative ("that is")
- *  - `then`    conclusive ("so" / "then")
+ *  - `that_is`   explicative ("that is")
+ *  - `therefore` conclusive — the second clause follows *from* the first ("so", "quindi", "donc")
+ *  - `then`      temporal — the second clause follows *after* the first ("and then", "e poi",
+ *                "und dann"). Most languages mark sequence with an adverb rather than a
+ *                conjunction, so the engines render this one with its coordinator attached.
  */
-export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'then';
+export type CoordConjunction = 'and' | 'or' | 'but' | 'that_is' | 'therefore' | 'then';
 
-export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'then'];
+export const COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or', 'but', 'that_is', 'therefore', 'then'];
+
+/**
+ * The conjunctions that may join two **commands** (see `PhrasePlan.coordination`). Four of the
+ * six carry over to the imperative: the cumulative "and" ("sit down and be quiet!"), the
+ * sequential "then" — the natural join of the steps of a recipe or a wizard — the adversative
+ * "but" ("come in, but don't touch anything!"), and the disjunctive "or" offering the addressee
+ * a choice ("call me or write to me!").
+ *
+ * The other two need a *statement* on at least one side and so are not offered under a command:
+ * `therefore` draws a conclusion from a premise, and an order is not a premise ("eat the bread,
+ * therefore run" is broken — what works, "it's late, so go to bed", is a statement joined to a
+ * command, i.e. two different moods, which a symmetric join cannot express); `that_is`
+ * paraphrases the first clause instead of adding a second act.
+ */
+export const IMPERATIVE_COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'then', 'but', 'or'];
+
+/** Whether `conjunction` may join two commands — see `IMPERATIVE_COORD_CONJUNCTIONS`. */
+export function canCoordinateImperative(conjunction: CoordConjunction): boolean {
+  return IMPERATIVE_COORD_CONJUNCTIONS.includes(conjunction);
+}
 
 /** A coordinated second clause plus the conjunction linking it to the first. */
 export interface Coordination {
@@ -601,12 +688,16 @@ export interface SerializedLink {
   // 'relative' (default, omitted on legacy v1 files) is a noun-to-noun relative-clause link;
   // 'conditional' is a container-to-container hypothetical link (source = main clause, target =
   // the "if" clause); 'coordinative' is a container-to-container coordination (source = first
-  // clause, target = second clause, joined by `conjunction`). Clause-level links carry no noun key.
-  kind?: 'relative' | 'conditional' | 'coordinative';
+  // clause, target = second clause, joined by `conjunction`); 'instrumental' is a
+  // container-to-container link whose target period holds the instrument noun phrase the source
+  // clause acts with ("start **with a word**"). None of the three carries a noun key.
+  kind?: 'relative' | 'conditional' | 'coordinative' | 'instrumental';
   source: { containerId: string; nounKey?: string };
   target: { containerId: string; nounKey?: string };
   // The coordinating conjunction, present only on a 'coordinative' link.
   conjunction?: CoordConjunction;
+  // The reification degree, present only on an 'instrumental' link (absent ⇒ 'object').
+  level?: AbstractionLevel;
 }
 
 /** The serialized builder workspace: the container stack plus their relative-clause links. */

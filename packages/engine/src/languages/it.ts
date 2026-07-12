@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -192,9 +192,12 @@ function prepArt(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, 
  * an indefinite article, quantifier, or bare noun stays uncontracted after the plain prep —
  * "a una casa", "a nessuna casa", "a molte case", "a casa". `all` keeps its own definite
  * article, which likewise doesn't fuse ("a tutte le case").
+ *
+ * "con" (the instrumental) is the exception that fuses with nothing: modern standard Italian
+ * writes "con il coltello", leaving the fused "col" to speech.
  */
-function prepDet(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, plural: boolean, lead: string): string {
-  if ((forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
+function prepDet(prep: 'a' | 'da' | 'in' | 'di' | 'con', forms: Record<string, string>, plural: boolean, lead: string): string {
+  if (prep !== 'con' && (forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
 }
@@ -497,6 +500,22 @@ function complementsPhrase(
         }
         return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
       }
+      // An instrument presented as an action: the bare gerundio for the process level
+      // ("scegliendo una parola" — Italian needs no preposition before it), and the nominalised
+      // infinitive for the concept level ("con l'atto di scegliere una parola"). The noun phrase
+      // is the action's direct object either way.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const object = renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+          const verb =
+            level === 'process'
+              ? actionGerund(c.action)
+              : `con l'atto di ${actionInfinitive(c.action)}`;
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return joinWords([verb, object, adverb]);
+        }
+      }
       // A pronoun cause: positive "grazie a me/te/lui…" uses the tonic pronoun; neutral and
       // negative take the possessive, agreeing with feminine "causa"/"colpa" — "a causa mia",
       // "per colpa mia" — NOT "a causa di me" (which sounds off, like "*per colpa di me").
@@ -523,6 +542,7 @@ function complementsPhrase(
       const headFor = (plural: boolean, lead: string): string =>
         type === 'locative'  ? prepDet('in', f, plural, lead) :
         type === 'terminus'  ? prepDet('a', f, plural, lead) :
+        type === 'instrumental' ? prepDet('con', f, plural, lead) :
         type === 'direction' ? prepDet(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
         type === 'source'    ? `via ${prepDet('da', f, plural, lead)}` :
         type === 'cause'     ? (
@@ -626,7 +646,8 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'o',
   but: 'ma',
   that_is: 'cioè',
-  then: 'quindi',
+  therefore: 'quindi',
+  then: 'e poi',
 };
 
 export const italianEngine: LanguageEngine = {

@@ -27,6 +27,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleCycleAspect,
     handleSelectSpecifier,
     handleSelectSentiment,
+    registerVerbAnchor,
   } = ctx;
 
   // The verb, its adverb, and its modal chain are all word boxes on the verb phrase.
@@ -65,6 +66,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           not the verb box itself. */}
       {complementToggleIcons.length > 0 && verbPhraseRect && (
         <Box
+          ref={registerVerbAnchor}
           sx={{
             position: "absolute",
             left: verbPhraseRect.x + verbPhraseRect.width / 2,

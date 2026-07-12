@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -343,6 +343,21 @@ function complementsPhrase(
         }
         return withRelative(nounPhrase(predicativeForms(f), ptAdj(c.phrase)), c.phrase);
       }
+      // An instrument presented as an action: the bare gerúndio for the process level
+      // ("escolhendo uma palavra"), the nominalised infinitive for the concept level ("com o ato
+      // de escolher uma palavra"). The noun phrase is the action's direct object.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const object = withRelative(nounPhrase(f, ptAdj(c.phrase)), c.phrase);
+          const verb =
+            level === 'process'
+              ? actionGerund(c.action)
+              : `com o ato de ${actionInfinitive(c.action)}`;
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return [verb, object, adverb].filter(Boolean).join(' ');
+        }
+      }
       // A pronoun cause: neutral "por causa de mim / dele" takes the tonic form after "de"
       // (which contracts with the 3rd-person pronouns, de+ele→dele); positive "graças a mim"
       // takes the tonic after "a"; negative uses the possessive with "culpa" ("por minha culpa").
@@ -376,6 +391,9 @@ function complementsPhrase(
       const head =
         type === 'locative'  ? contractDet(emPrep, 'em', f, plural) :
         type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
+        // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
+        // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
+        type === 'instrumental' ? prepDet('com', f, plural) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
         type === 'source'    ? `longe ${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (
@@ -530,7 +548,9 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'ou',
   but: 'mas',
   that_is: 'isto é',
-  then: 'então',
+  // As in Spanish, "então" spans both senses; "portanto" / "e depois" separate them.
+  therefore: 'portanto',
+  then: 'e depois',
 };
 
 export const portugueseEngine: LanguageEngine = {

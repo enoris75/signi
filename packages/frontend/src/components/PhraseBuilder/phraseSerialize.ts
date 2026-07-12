@@ -8,6 +8,7 @@ import type {
 } from "@signi/shared";
 import { COMPLEMENT_TYPES, SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from "@signi/shared";
 import type {
+  AbstractionLevel,
   CoordConjunction,
   NounAddress,
   NounKey,
@@ -138,6 +139,7 @@ export function serializeWorkspace(
       source: { ...l.source },
       target: { ...l.target },
       ...(l.kind === "coordinative" ? { conjunction: l.conjunction } : {}),
+      ...(l.kind === "instrumental" ? { level: l.level } : {}),
     })),
   };
 }
@@ -159,7 +161,16 @@ export function hydrateWorkspace(
     (c): PhraseContainer => ({ id: c.id, selection: hydrateSelection(c.selection, byId, missing) }),
   );
   const links: PhraseLink[] = workspace.links.map((l) =>
-    l.kind === "conditional"
+    l.kind === "instrumental"
+      ? {
+          id: l.id,
+          kind: "instrumental" as const,
+          // A missing level is the plain "with a thing" the link starts at.
+          level: (l.level ?? "object") as AbstractionLevel,
+          source: { containerId: l.source.containerId },
+          target: { containerId: l.target.containerId },
+        }
+      : l.kind === "conditional"
       ? {
           id: l.id,
           kind: "conditional" as const,

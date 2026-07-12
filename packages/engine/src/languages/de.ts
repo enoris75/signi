@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -491,6 +491,34 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const prep = causeSentiment(c) === 'positive' ? 'dank' : 'wegen';
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
+      // An instrument presented as an action. German has no gerund, so neither level is a mere
+      // phrase: the process level is a subordinate means clause — "indem man ein Wort wählt",
+      // with the impersonal "man" and the verb pushed to the end — and the concept level names
+      // the act with a zu-infinitive, "mit dem Akt, ein Wort zu wählen". The noun phrase is the
+      // action's direct object, so it takes the *accusative*, not the dative "mit" would give it.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const objPlural = (f['number'] ?? f['count']) === 'plural';
+          const objWord = objPlural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+          const objDet = prepDet('', f, 'acc', objPlural);
+          const objAdj = adjPhrase(c.phrase, 'acc', f['definiteness'] ?? 'definite');
+          const object = [objDet, objAdj, germanCompound(c.phrase, objWord)]
+            .filter(Boolean)
+            .join(' ') + possessorText(c.phrase) + subordinateClause(c.phrase);
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          if (level === 'process') {
+            const finite3sg = c.action.verb.forms['3sg_present'] ?? c.action.verb.forms['base'] ?? '';
+            // A subordinate clause is set off by a comma ("beginnt, indem man ein Wort wählt").
+            // It is emitted as a leading comma and pulled back onto the previous word when the
+            // clause is joined (see `punctuate`), since the joiner knows nothing of punctuation.
+            return [', indem man', object, adverb, finite3sg].filter(Boolean).join(' ');
+          }
+          return ['mit dem Akt,', object, adverb, 'zu', actionInfinitive(c.action)]
+            .filter(Boolean)
+            .join(' ');
+        }
+      }
       // Subject complement: a German predicate adjective is uninflected ("wird müde",
       // "scheint groß" — no declension endings) but is still compared ("wird müder"); a
       // predicate noun takes the *nominative* case, not the dative the other complements
@@ -516,6 +544,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         // standard in speech and reuses the dative determiners; positive credits with "dank".
         if (type === 'locative')  head = prepDet('in', f, 'dat', plural);
         else if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
+        // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
+        // doesn't exist for "mit", so prepDet leaves it uncontracted.
+        else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);
         else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
         // Terminus (dative recipient) is a bare dative — no preposition, just the dative
         // determiner ("der Katze"), the same case German gives the plain indirect object.
@@ -629,7 +660,10 @@ function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: 
 }
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
-function renderClause(phrase: ResolvedPhrase): string {
+// `inverted` renders the clause with the finite verb ahead of the subject, for when something
+// else already fills the front field (see COORD_INVERTS). A verbless or imperative clause has
+// no V2 slot to invert, so the flag is inert there.
+function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const { subject, verbPhrase, directObject } = phrase;
     // The dative recipient leads the accusative object; the other complements trail it.
     const { dative, rest } = splitDative(phrase.complements);
@@ -698,7 +732,8 @@ function renderClause(phrase: ResolvedPhrase): string {
     const negComplement = applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
     const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
-    return [subjectText, verbText, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
+    const head = inverted ? [verbText, subjectText] : [subjectText, verbText];
+    return [...head, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
 }
 
@@ -707,8 +742,30 @@ const COORD_WORDS: Record<CoordConjunction, string> = {
   or: 'oder',
   but: 'aber',
   that_is: 'das heißt',
-  then: 'also',
+  therefore: 'also',
+  then: 'und dann',
 };
+
+// "also" and "dann" are conjunctional *adverbs*, not coordinators: they occupy the clause's
+// front field, which pushes the finite verb into second position ahead of the subject —
+// "…, also läuft der Hund", "…, und dann läuft der Hund". The true coordinators (und, oder,
+// aber) and the parenthetical "das heißt" sit outside the clause and leave its order alone.
+const COORD_INVERTS: Record<CoordConjunction, boolean> = {
+  and: false,
+  or: false,
+  but: false,
+  that_is: false,
+  therefore: true,
+  then: true,
+};
+
+/**
+ * Tidy the punctuation a clause part carried in with it: the parts are joined with spaces, which
+ * puts one in front of a leading comma ("beginnt , indem"). Applied once to the finished sentence.
+ */
+function punctuate(sentence: string): string {
+  return sentence.replace(/\s+,/g, ',');
+}
 
 export const germanEngine: LanguageEngine = {
   language: 'de',
@@ -718,9 +775,13 @@ export const germanEngine: LanguageEngine = {
     // würde-periphrasis. The "wenn" clause's verb-final ordering is approximated (a documented
     // gap it shares with the future/relative word order).
     const sentence = phrase.condition ? `wenn ${renderClause(phrase.condition)}, ${main}` : main;
-    // Coordination: "<first clause>, <conjunction> <second clause>".
-    if (!phrase.coordination) return sentence;
-    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    // Coordination: "<first clause>, <conjunction> <second clause>" — with the second clause
+    // inverted when the conjunction is an adverb that claims the front field.
+    if (!phrase.coordination) return punctuate(sentence);
+    const { conjunction, clause } = phrase.coordination;
+    return punctuate(
+      `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause, COORD_INVERTS[conjunction])}`,
+    );
   },
   // The determiner alone, for the menu that picks one. A German determiner is declined for case;
   // a menu names it in the nominative, the case the citation form is given in.
