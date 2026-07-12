@@ -1,11 +1,9 @@
 import {
   ASPECTS,
   COMPLEMENT_TYPES,
-  DEFINITENESS,
   DEGREES,
   MODIFIER_RELATIONS,
   TENSES,
-  defaultDefiniteness,
   type CauseSentiment,
   type Concept,
   type Definiteness,
@@ -82,11 +80,6 @@ export function applyConceptSelect(
       delete next.directObjectNumber;
       clearAdjectives(next, "directObject");
     }
-    if (!nowVisible.includes("indirectObject")) {
-      delete next.indirectObject;
-      delete next.indirectObjectNumber;
-      clearAdjectives(next, "indirectObject");
-    }
     if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
     // Drop complements the new verb no longer licenses.
     for (const type of COMPLEMENT_TYPES) {
@@ -127,14 +120,6 @@ export function applyConceptSelect(
       delete next.directObjectGender;
     }
   }
-  if (slot === "indirectObject") {
-    clearAdjectives(next, "indirectObject");
-    if (concept.gendered) {
-      next.indirectObjectGender = prev.indirectObjectGender ?? "masc";
-    } else {
-      delete next.indirectObjectGender;
-    }
-  }
   if (COMPLEMENT_KEY_SET.has(slot)) {
     // Swapping the complement noun invalidates its adjectives.
     clearAdjectives(next, slot as NounKey);
@@ -171,10 +156,6 @@ export function applyClear(
     delete next.directObjectNumber;
     delete next.directObjectGender;
     clearAdjectives(next, "directObject");
-    delete next.indirectObject;
-    delete next.indirectObjectNumber;
-    delete next.indirectObjectGender;
-    clearAdjectives(next, "indirectObject");
     clearAdjectives(next, "subject");
     for (const type of COMPLEMENT_TYPES) {
       delete next[type];
@@ -194,11 +175,6 @@ export function applyClear(
     delete next.directObjectNumber;
     delete next.directObjectGender;
     clearAdjectives(next, "directObject");
-  }
-  if (slot === "indirectObject") {
-    delete next.indirectObjectNumber;
-    delete next.indirectObjectGender;
-    clearAdjectives(next, "indirectObject");
   }
   if (COMPLEMENT_KEY_SET.has(slot)) {
     delete next[`${slot}Number` as keyof PhraseSelection];
@@ -246,16 +222,14 @@ export function toggleNegative(prev: PhraseSelection): PhraseSelection {
   return { ...prev, verbNegative: !prev.verbNegative };
 }
 
-// Cycle a noun's determiner definite → indefinite → bare → definite. The starting point is
-// the slot's default, so the first click always moves off what the phrase already reads as.
-export function cycleDefiniteness(
+// Set a noun's determiner to a value picked from the menu. Ten values across three semantic
+// dimensions is too many to cycle blindly, so the box opens a grouped menu instead.
+export function setDefiniteness(
   prev: PhraseSelection,
   which: NounKey,
+  value: Definiteness,
 ): PhraseSelection {
-  const key = `${which}Definiteness` as keyof PhraseSelection;
-  const cur = (prev[key] as Definiteness) ?? defaultDefiniteness(which);
-  const idx = DEFINITENESS.indexOf(cur);
-  return { ...prev, [key]: DEFINITENESS[(idx + 1) % DEFINITENESS.length] };
+  return { ...prev, [`${which}Definiteness`]: value };
 }
 
 // Cycle a noun-modifier's semantic relation (feature → purpose → material → feature),

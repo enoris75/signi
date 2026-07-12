@@ -60,7 +60,12 @@ const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
  * noun in French — beau, bon, grand, petit, vieux, jeune, nouveau, mauvais. Every other
  * adjective (heureux, triste, fort, …) follows the noun.
  */
-const PRENOMINAL = new Set(['BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL']);
+// The ordinals join them: an ordinal precedes its noun in French ("le premier père", "la
+// deuxième fois"), whatever its "BAGS" membership.
+const PRENOMINAL = new Set([
+  'BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
+  'FIRST', 'SECOND', 'THIRD',
+]);
 
 /**
  * The definite article, selected by the sound of the word that actually follows it
@@ -85,10 +90,25 @@ function indefArticle(forms: Record<string, string>, plural: boolean): string {
 }
 
 /**
+ * The demonstrative: "ce" (masc), "cet" before a vowel sound ("cet ami", "cet autre homme" —
+ * chosen on `lead`, the word that actually follows), "cette" (fem), "ces" (plural).
+ *
+ * French neutralises the proximal/distal contrast here — a single series covers both "this"
+ * and "that" ("ce livre" is either — the contrast is only ever forced with the postposed
+ * clitics "-ci"/"-là", which are marked and rarely used) — so `this` and `that` both render it.
+ */
+function demArticle(forms: Record<string, string>, plural: boolean, lead: string): string {
+  if (plural) return 'ces';
+  if ((forms['gender'] ?? 'masc') === 'fem') return 'cette';
+  return VOWEL_START.test(lead) ? 'cet' : 'ce';
+}
+
+/**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
- * (default 'definite'): the definite/indefinite article, nothing (bare), or a quantifier.
- * "beaucoup/peu de" take a bare noun (the "de" elides before a vowel); "tous/toutes les"
- * carry the definite article; "aucun/e" is singular and drives verb negation ("ne") upstream.
+ * (default 'definite'): the definite/indefinite article, nothing (bare), the demonstrative,
+ * or a quantifier. "beaucoup/peu de" take a bare noun (the "de" elides before a vowel);
+ * "tous/toutes les" carry the definite article; "aucun/e" is singular and drives verb
+ * negation ("ne") upstream.
  */
 function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
   // A proper noun (l'Afrique) always takes the definite article in French, whatever
@@ -103,6 +123,8 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
     switch (definiteness) {
       case 'bare':       return '';
       case 'indefinite': return dePrep(forms, false, lead);   // partitive: "de l'eau"
+      case 'this':
+      case 'that':       return demArticle(forms, false, lead);
       case 'some':       return dePrep(forms, false, lead);   // partitive: "de l'eau"
       case 'many':       return `beaucoup ${de}`;
       case 'few':        return `peu ${de}`;
@@ -114,6 +136,8 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural);
+    case 'this':
+    case 'that':       return demArticle(forms, plural, lead);
     case 'some':       return 'quelques';
     case 'many':       return `beaucoup ${de}`;
     case 'few':        return `peu ${de}`;
@@ -471,7 +495,6 @@ function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounPhrase,
-  indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -528,10 +551,6 @@ function predicateText(
   const directObjectText = directObject
     ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
     : '';
-  // V [Adv] DirectObj IndirectObj(à+article)
-  const indirectObjectText = indirectObject
-    ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
-    : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
@@ -542,16 +561,16 @@ function predicateText(
     if (register === 'instruction') {
       const inf = verb.forms['base'] ?? conjugated;
       const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-      return [infVerb, modifierText, directObjectText, indirectObjectText, complementsText]
+      return [infVerb, modifierText, directObjectText, complementsText]
         .filter(Boolean)
         .join(' ');
     }
     const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
-    return [negateFinite(impForm), modifierText, directObjectText, indirectObjectText, complementsText]
+    return [negateFinite(impForm), modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [effectiveVerb, effectiveMod, directObjectText, indirectObjectText, complementsText]
+  return [effectiveVerb, effectiveMod, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -567,11 +586,11 @@ function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
   if (rel.headRole === 'subject' || !rel.subject) {
-    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)}`.trim();
+    return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements)}`.trim();
   }
   const subjText = subjectPhrase(rel.subject);
   const relzr = joinArt(VOWEL_START.test(subjText) ? "qu'" : 'que', subjText);
-  const pred = predicateText(rel.subject.head.forms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  const pred = predicateText(rel.subject.head.forms, rel.verbPhrase, rel.directObject, rel.complements);
   return `${relzr} ${pred}`.trim();
 }
 
@@ -583,7 +602,7 @@ function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
@@ -611,5 +630,11 @@ export const frenchEngine: LanguageEngine = {
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
     return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+  },
+  renderWord(word: ConceptForms): string {
+    const f = word.forms;
+    const base = f['base'] ?? '';
+    if (f['role'] !== 'adjective') return base;
+    return agreeAdjFr(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
 };

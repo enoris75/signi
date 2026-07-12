@@ -1068,6 +1068,78 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    id: 'SELECT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['cause'],
+    // Distinct from CHOOSE: not "pick one option over the others" but "mark this item as
+    // the one acted on" — the interface sense (select a word, select a slot).
+    description: 'to mark out an item as the one to act on',
+    emoji: '🖱️',
+    synonym: 'mark',
+    forms: {
+      en: {
+        base: 'select',
+        '1sg_present': 'select', '2sg_present': 'select', '3sg_present': 'selects',
+        '1pl_present': 'select', '2pl_present': 'select', '3pl_present': 'select',
+        past: 'selected',
+      },
+      it: {
+        base: 'selezionare',
+        '1sg_present': 'seleziono', '2sg_present': 'selezioni', '3sg_present': 'seleziona',
+        '1pl_present': 'selezioniamo', '2pl_present': 'selezionate', '3pl_present': 'selezionano',
+        '1sg_past': 'selezionai', '2sg_past': 'selezionasti', '3sg_past': 'selezionò',
+        '1pl_past': 'selezionammo', '2pl_past': 'selezionaste', '3pl_past': 'selezionarono',
+        '1sg_future': 'selezionerò', '2sg_future': 'selezionerai', '3sg_future': 'selezionerà',
+        '1pl_future': 'selezioneremo', '2pl_future': 'selezionerete', '3pl_future': 'selezioneranno',
+      },
+      fr: {
+        base: 'sélectionner',
+        '1sg_present': 'sélectionne', '2sg_present': 'sélectionnes', '3sg_present': 'sélectionne',
+        '1pl_present': 'sélectionnons', '2pl_present': 'sélectionnez', '3pl_present': 'sélectionnent',
+        '1sg_past': 'sélectionnai', '2sg_past': 'sélectionnas', '3sg_past': 'sélectionna',
+        '1pl_past': 'sélectionnâmes', '2pl_past': 'sélectionnâtes', '3pl_past': 'sélectionnèrent',
+        '1sg_future': 'sélectionnerai', '2sg_future': 'sélectionneras', '3sg_future': 'sélectionnera',
+        '1pl_future': 'sélectionnerons', '2pl_future': 'sélectionnerez', '3pl_future': 'sélectionneront',
+      },
+      de: {
+        // "auswählen" is the idiomatic word, but its prefix is separable ("ich wähle das Wort
+        // aus") and the engine has no separable-verb machinery, so the inseparable technical
+        // synonym is used instead — it stays well-formed in every clause type.
+        base: 'selektieren',
+        '1sg_present': 'selektiere', '2sg_present': 'selektierst', '3sg_present': 'selektiert',
+        '1pl_present': 'selektieren', '2pl_present': 'selektiert', '3pl_present': 'selektieren',
+        '1sg_past': 'selektierte', '2sg_past': 'selektiertest', '3sg_past': 'selektierte',
+        '1pl_past': 'selektierten', '2pl_past': 'selektiertet', '3pl_past': 'selektierten',
+      },
+      es: {
+        base: 'seleccionar',
+        '1sg_present': 'selecciono', '2sg_present': 'seleccionas', '3sg_present': 'selecciona',
+        '1pl_present': 'seleccionamos', '2pl_present': 'seleccionáis', '3pl_present': 'seleccionan',
+        '1sg_past': 'seleccioné', '2sg_past': 'seleccionaste', '3sg_past': 'seleccionó',
+        '1pl_past': 'seleccionamos', '2pl_past': 'seleccionasteis', '3pl_past': 'seleccionaron',
+        '1sg_future': 'seleccionaré', '2sg_future': 'seleccionarás', '3sg_future': 'seleccionará',
+        '1pl_future': 'seleccionaremos', '2pl_future': 'seleccionaréis', '3pl_future': 'seleccionarán',
+      },
+      ja: {
+        base: '選択する',
+        reading: 'せんたくする',
+        masu_present: '選択します',
+        masu_present_reading: 'せんたくします',
+      },
+      pt: {
+        base: 'selecionar',
+        '1sg_present': 'seleciono', '2sg_present': 'seleciona', '3sg_present': 'seleciona',
+        '1pl_present': 'selecionamos', '2pl_present': 'selecionam', '3pl_present': 'selecionam',
+        '1sg_past': 'selecionei', '2sg_past': 'selecionou', '3sg_past': 'selecionou',
+        '1pl_past': 'selecionamos', '2pl_past': 'selecionaram', '3pl_past': 'selecionaram',
+        '1sg_future': 'selecionarei', '2sg_future': 'selecionará', '3sg_future': 'selecionará',
+        '1pl_future': 'selecionaremos', '2pl_future': 'selecionarão', '3pl_future': 'selecionarão',
+      },
+    },
+  },
+
+  {
     id: 'TYPE',
     role: 'verb',
     transitivity: 'transitive',
@@ -1599,6 +1671,76 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'coordenamos', '2pl_past': 'coordenaram', '3pl_past': 'coordenaram',
         '1sg_future': 'coordenarei', '2sg_future': 'coordenará', '3sg_future': 'coordenará',
         '1pl_future': 'coordenaremos', '2pl_future': 'coordenarão', '3pl_future': 'coordenarão',
+      },
+    },
+  },
+
+  {
+    id: 'TIDY_UP',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['cause'],
+    description: 'to put back in order what was left in a mess',
+    emoji: '🧹',
+    forms: {
+      en: {
+        // phrasal, like EXTINGUISH: the particle stays adjacent to the verb, since the direct
+        // object here is always a full noun phrase ("tidies up the room"), never a pronoun.
+        base: 'tidy up',
+        '1sg_present': 'tidy up', '2sg_present': 'tidy up', '3sg_present': 'tidies up',
+        '1pl_present': 'tidy up', '2pl_present': 'tidy up', '3pl_present': 'tidy up',
+        past: 'tidied up',
+      },
+      it: {
+        base: 'riordinare',
+        '1sg_present': 'riordino', '2sg_present': 'riordini', '3sg_present': 'riordina',
+        '1pl_present': 'riordiniamo', '2pl_present': 'riordinate', '3pl_present': 'riordinano',
+        '1sg_past': 'riordinai', '2sg_past': 'riordinasti', '3sg_past': 'riordinò',
+        '1pl_past': 'riordinammo', '2pl_past': 'riordinaste', '3pl_past': 'riordinarono',
+        '1sg_future': 'riordinerò', '2sg_future': 'riordinerai', '3sg_future': 'riordinerà',
+        '1pl_future': 'riordineremo', '2pl_future': 'riordinerete', '3pl_future': 'riordineranno',
+      },
+      fr: {
+        base: 'ranger',
+        '1sg_present': 'range', '2sg_present': 'ranges', '3sg_present': 'range',
+        '1pl_present': 'rangeons', '2pl_present': 'rangez', '3pl_present': 'rangent',
+        '1sg_past': 'rangeai', '2sg_past': 'rangeas', '3sg_past': 'rangea',
+        '1pl_past': 'rangeâmes', '2pl_past': 'rangeâtes', '3pl_past': 'rangèrent',
+        '1sg_future': 'rangerai', '2sg_future': 'rangeras', '3sg_future': 'rangera',
+        '1pl_future': 'rangerons', '2pl_future': 'rangerez', '3pl_future': 'rangeront',
+      },
+      de: {
+        // "aufräumen" is the idiomatic verb, but its prefix separates ("räumt auf"), which the
+        // clause builder cannot place; "ordnen" is regular and stays whole.
+        base: 'ordnen',
+        '1sg_present': 'ordne', '2sg_present': 'ordnest', '3sg_present': 'ordnet',
+        '1pl_present': 'ordnen', '2pl_present': 'ordnet', '3pl_present': 'ordnen',
+        '1sg_past': 'ordnete', '2sg_past': 'ordnetest', '3sg_past': 'ordnete',
+        '1pl_past': 'ordneten', '2pl_past': 'ordnetet', '3pl_past': 'ordneten',
+      },
+      es: {
+        base: 'ordenar',
+        '1sg_present': 'ordeno', '2sg_present': 'ordenas', '3sg_present': 'ordena',
+        '1pl_present': 'ordenamos', '2pl_present': 'ordenáis', '3pl_present': 'ordenan',
+        '1sg_past': 'ordené', '2sg_past': 'ordenaste', '3sg_past': 'ordenó',
+        '1pl_past': 'ordenamos', '2pl_past': 'ordenasteis', '3pl_past': 'ordenaron',
+        '1sg_future': 'ordenaré', '2sg_future': 'ordenarás', '3sg_future': 'ordenará',
+        '1pl_future': 'ordenaremos', '2pl_future': 'ordenaréis', '3pl_future': 'ordenarán',
+      },
+      ja: {
+        base: '片付ける',
+        reading: 'かたづける',
+        masu_present: '片付けます',
+        masu_present_reading: 'かたづけます',
+      },
+      pt: {
+        base: 'arrumar',
+        '1sg_present': 'arrumo', '2sg_present': 'arruma', '3sg_present': 'arruma',
+        '1pl_present': 'arrumamos', '2pl_present': 'arrumam', '3pl_present': 'arrumam',
+        '1sg_past': 'arrumei', '2sg_past': 'arrumou', '3sg_past': 'arrumou',
+        '1pl_past': 'arrumamos', '2pl_past': 'arrumaram', '3pl_past': 'arrumaram',
+        '1sg_future': 'arrumarei', '2sg_future': 'arrumará', '3sg_future': 'arrumará',
+        '1pl_future': 'arrumaremos', '2pl_future': 'arrumarão', '3pl_future': 'arrumarão',
       },
     },
   },

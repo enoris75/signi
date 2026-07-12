@@ -31,11 +31,22 @@ const CONCEPT_BASE_KEYS = new Set<string>([
   "subject",
   "verb",
   "directObject",
-  "indirectObject",
   "modifier",
   ...MODAL_SLOTS,
   ...COMPLEMENT_TYPES,
 ]);
+
+// Phrases saved before the recipient became the `terminus` complement carry `indirectObject`
+// keys (`indirectObjectAdjective2`, `indirectObjectPossessor`, the noun address of a relative
+// link, …). They mean exactly what the `terminus` ones mean now, so a load renames them and
+// nothing downstream ever sees the old name.
+const LEGACY_INDIRECT = "indirectObject";
+const migrateKey = (key: string): string =>
+  key.startsWith(LEGACY_INDIRECT) ? `terminus${key.slice(LEGACY_INDIRECT.length)}` : key;
+
+// The same rename inside a slot-keyed map (`modifierRelations`, `adjectiveDegrees`, …).
+const migrateKeys = <T,>(map: Record<string, T>): Record<string, T> =>
+  Object.fromEntries(Object.entries(map).map(([k, v]) => [migrateKey(k), v]));
 
 // A slot that holds a single Concept (encoded to its id). Covers the base slots plus
 // every chained adjective slot (`subjectAdjective`, `routeAdjective2`, …).
@@ -44,6 +55,13 @@ const isConceptKey = (k: string): boolean =>
 
 // A slot that holds a nested PhraseSelection (the genitive possessor blocks).
 const isPossessorKey = (k: string): boolean => k.endsWith("Possessor");
+
+// Selection fields that are maps *keyed by slot key* — their keys need the legacy rename too.
+const SLOT_KEYED_MAPS = new Set<string>([
+  "modifierRelations",
+  "modifierNumbers",
+  "adjectiveDegrees",
+]);
 
 function serializeSelection(selection: PhraseSelection): SerializedSelection {
   const out: SerializedSelection = {};
@@ -73,8 +91,9 @@ function hydrateSelection(
   missing: Set<string>,
 ): PhraseSelection {
   const out: Record<string, unknown> = {};
-  for (const [key, value] of Object.entries(selection)) {
+  for (const [savedKey, value] of Object.entries(selection)) {
     if (value == null) continue;
+    const key = migrateKey(savedKey);
     if (isPossessorKey(key) && typeof value === "object") {
       out[key] = hydrateSelection(value as SerializedSelection, byId, missing);
     } else if (isConceptKey(key) && typeof value === "string") {
@@ -87,10 +106,12 @@ function hydrateSelection(
       const resolved: Record<string, Concept> = {};
       for (const [k, id] of Object.entries(value as Record<string, string>)) {
         const concept = byId.get(id);
-        if (concept) resolved[k] = concept;
+        if (concept) resolved[migrateKey(k)] = concept;
         else missing.add(id);
       }
       out[key] = resolved;
+    } else if (SLOT_KEYED_MAPS.has(key) && typeof value === "object") {
+      out[key] = migrateKeys(value as Record<string, unknown>);
     } else {
       out[key] = value;
     }
@@ -156,10 +177,11 @@ export function hydrateWorkspace(
         }
       : {
           id: l.id,
-          // Serialized noun keys are plain strings; restore their branded types. (A missing
-          // kind is a legacy relative link, which always carries noun keys.)
-          source: { containerId: l.source.containerId, nounKey: (l.source.nounKey ?? "subject") as NounAddress },
-          target: { containerId: l.target.containerId, nounKey: (l.target.nounKey ?? "subject") as NounKey },
+          // Serialized noun keys are plain strings; restore their branded types (renaming a
+          // legacy `indirectObject` endpoint like any other saved key). A missing kind is a
+          // legacy relative link, which always carries noun keys.
+          source: { containerId: l.source.containerId, nounKey: migrateKey(l.source.nounKey ?? "subject") as NounAddress },
+          target: { containerId: l.target.containerId, nounKey: migrateKey(l.target.nounKey ?? "subject") as NounKey },
         },
   );
   return { containers, links, missing: [...missing] };

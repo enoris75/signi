@@ -333,4 +333,75 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+
+  {
+    id: 'COLLAPSE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['locative', 'cause'],
+    description: 'to fall down suddenly, losing all support',
+    emoji: '🏚️',
+    forms: {
+      en: {
+        base: 'collapse',
+        '1sg_present': 'collapse', '2sg_present': 'collapse', '3sg_present': 'collapses',
+        '1pl_present': 'collapse', '2pl_present': 'collapse', '3pl_present': 'collapse',
+        past: 'collapsed',
+      },
+      it: {
+        base: 'crollare',
+        '1sg_present': 'crollo', '2sg_present': 'crolli', '3sg_present': 'crolla',
+        '1pl_present': 'crolliamo', '2pl_present': 'crollate', '3pl_present': 'crollano',
+        '1sg_past': 'crollai', '2sg_past': 'crollasti', '3sg_past': 'crollò',
+        '1pl_past': 'crollammo', '2pl_past': 'crollaste', '3pl_past': 'crollarono',
+        '1sg_future': 'crollerò', '2sg_future': 'crollerai', '3sg_future': 'crollerà',
+        '1pl_future': 'crolleremo', '2pl_future': 'crollerete', '3pl_future': 'crolleranno',
+      },
+      fr: {
+        // Inherently reflexive: the clitic rides along inside each form, as in the es motion
+        // verbs, so it stays adjacent to the verb under negation ("ne s'effondre pas"). The
+        // 1pl/2pl forms carry only the second pronoun — the subject supplies the first.
+        base: 's\'effondrer',
+        '1sg_present': 'm\'effondre', '2sg_present': 't\'effondres', '3sg_present': 's\'effondre',
+        '1pl_present': 'nous effondrons', '2pl_present': 'vous effondrez', '3pl_present': 's\'effondrent',
+        '1sg_past': 'm\'effondrai', '2sg_past': 't\'effondras', '3sg_past': 's\'effondra',
+        '1pl_past': 'nous effondrâmes', '2pl_past': 'vous effondrâtes', '3pl_past': 's\'effondrèrent',
+        '1sg_future': 'm\'effondrerai', '2sg_future': 't\'effondreras', '3sg_future': 's\'effondrera',
+        '1pl_future': 'nous effondrerons', '2pl_future': 'vous effondrerez', '3pl_future': 's\'effondreront',
+      },
+      de: {
+        // "einstürzen" would be the idiomatic verb, but its prefix separates ("stürzt ein"),
+        // which the clause builder cannot place; "kollabieren" is regular and stays whole.
+        base: 'kollabieren',
+        '1sg_present': 'kollabiere', '2sg_present': 'kollabierst', '3sg_present': 'kollabiert',
+        '1pl_present': 'kollabieren', '2pl_present': 'kollabiert', '3pl_present': 'kollabieren',
+        '1sg_past': 'kollabierte', '2sg_past': 'kollabiertest', '3sg_past': 'kollabierte',
+        '1pl_past': 'kollabierten', '2pl_past': 'kollabiertet', '3pl_past': 'kollabierten',
+      },
+      es: {
+        base: 'colapsar',
+        '1sg_present': 'colapso', '2sg_present': 'colapsas', '3sg_present': 'colapsa',
+        '1pl_present': 'colapsamos', '2pl_present': 'colapsáis', '3pl_present': 'colapsan',
+        '1sg_past': 'colapsé', '2sg_past': 'colapsaste', '3sg_past': 'colapsó',
+        '1pl_past': 'colapsamos', '2pl_past': 'colapsasteis', '3pl_past': 'colapsaron',
+        '1sg_future': 'colapsaré', '2sg_future': 'colapsarás', '3sg_future': 'colapsará',
+        '1pl_future': 'colapsaremos', '2pl_future': 'colapsaréis', '3pl_future': 'colapsarán',
+      },
+      ja: {
+        base: '崩れる',
+        reading: 'くずれる',
+        masu_present: '崩れます',
+        masu_present_reading: 'くずれます',
+      },
+      pt: {
+        base: 'desabar',
+        '1sg_present': 'desabo', '2sg_present': 'desaba', '3sg_present': 'desaba',
+        '1pl_present': 'desabamos', '2pl_present': 'desabam', '3pl_present': 'desabam',
+        '1sg_past': 'desabei', '2sg_past': 'desabou', '3sg_past': 'desabou',
+        '1pl_past': 'desabamos', '2pl_past': 'desabaram', '3pl_past': 'desabaram',
+        '1sg_future': 'desabarei', '2sg_future': 'desabará', '3sg_future': 'desabará',
+        '1pl_future': 'desabaremos', '2pl_future': 'desabarão', '3pl_future': 'desabarão',
+      },
+    },
+  },
 ];

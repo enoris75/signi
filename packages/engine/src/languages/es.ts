@@ -15,9 +15,20 @@ function esDeg(a: ConceptForms, surface: string): string {
   return d && surface ? `${d} ${surface}` : surface;
 }
 
+/**
+ * A feminine noun beginning with a stressed a- ("agua", "águila") takes the *masculine*
+ * singular article — "el agua", "un agua" — purely to break the a-a hiatus. The exception is
+ * confined to those two articles: the noun stays feminine everywhere else ("esta agua fría",
+ * "toda el agua", plural "las aguas"). The lexicon marks it with forms.stressed_a.
+ */
+function stressedA(forms: Record<string, string>, plural: boolean): boolean {
+  return !plural && forms['stressed_a'] === '1';
+}
+
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
   if (plural) return gender === 'fem' ? 'las' : 'los';
+  if (stressedA(forms, plural)) return 'el';
   return gender === 'fem' ? 'la' : 'el';
 }
 
@@ -25,14 +36,26 @@ function defArticle(forms: Record<string, string>, plural = false): string {
 function indefArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
   if (plural) return gender === 'fem' ? 'unas' : 'unos';
+  if (stressedA(forms, plural)) return 'un';
   return gender === 'fem' ? 'una' : 'un';
 }
 
 /**
+ * The demonstratives, agreeing in gender and number: proximal "este/esta/estos/estas"
+ * (this/these) and distal "ese/esa/esos/esas" (that/those).
+ */
+function demonstrative(distal: boolean, forms: Record<string, string>, plural = false): string {
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  const stem = distal ? 'es' : 'est';
+  if (plural) return `${stem}${fem ? 'as' : 'os'}`;
+  return `${stem}${fem ? 'a' : 'e'}`;
+}
+
+/**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
- * (default 'definite'): the definite/indefinite article, nothing (bare), or a quantifier
- * agreeing in gender. "todos/todas" carry the definite article; "ningún/ninguna" is
- * singular and drives verb negation ("no") upstream when it is an object.
+ * (default 'definite'): the definite/indefinite article, nothing (bare), a demonstrative,
+ * or a quantifier agreeing in gender. "todos/todas" carry the definite article;
+ * "ningún/ninguna" is singular and drives verb negation ("no") upstream when it is an object.
  */
 function artFor(forms: Record<string, string>, plural = false): string {
   // A continent name like "África" goes bare in Spanish (no article on the subject/object),
@@ -45,6 +68,8 @@ function artFor(forms: Record<string, string>, plural = false): string {
     switch (definiteness) {
       case 'bare':       return '';
       case 'indefinite': return '';                 // no "un agua" — bare
+      case 'this':       return demonstrative(false, forms, false);
+      case 'that':       return demonstrative(true, forms, false);
       case 'some':       return 'algo de';
       case 'many':       return fem ? 'mucha' : 'mucho';
       case 'few':        return fem ? 'poca' : 'poco';
@@ -56,6 +81,8 @@ function artFor(forms: Record<string, string>, plural = false): string {
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural);
+    case 'this':       return demonstrative(false, forms, plural);
+    case 'that':       return demonstrative(true, forms, plural);
     case 'some':       return fem ? 'algunas' : 'algunos';
     case 'many':       return fem ? 'muchas' : 'muchos';
     case 'few':        return fem ? 'pocas' : 'pocos';
@@ -92,15 +119,66 @@ function coordinate(parts: string[]): string {
   }, '');
 }
 
-/** Join a noun phrase's adjectives, each agreed with the head's gender/number. */
-function esAdj(np: ResolvedNounPhrase): string {
+/**
+ * Concept IDs of the adjectives that precede their noun in Spanish. Only the ordinals do:
+ * "el primer día", "la segunda vez". Every qualifying adjective (grande, feliz, rojo …)
+ * follows the noun, which is why Spanish needs no "BAGS" set the way French and Italian do.
+ */
+const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD']);
+
+/**
+ * Apocope: "primero" and "tercero" lose their final -o immediately before a masculine
+ * singular noun ("el primer día", but "la primera vez", "los primeros días"). It happens
+ * only in that prenominal position — the postnominal and predicate forms keep the -o.
+ */
+function apocopate(concept: string, surface: string, gender: string, plural: boolean): string {
+  if (plural || gender === 'fem') return surface;
+  if (concept !== 'FIRST' && concept !== 'THIRD') return surface;
+  return surface.endsWith('o') ? surface.slice(0, -1) : surface;
+}
+
+/** A noun phrase's adjectives, agreed with the head and split around it. */
+interface EsAdjectives {
+  /** The prenominal ones, in order, ready to sit between the article and the noun. */
+  pre: string;
+  /** The postnominal ones, coordinated with y/e. */
+  post: string;
+}
+
+/** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
+function esAdj(np: ResolvedNounPhrase): EsAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
-  return coordinate(
-    np.adjectives
-      .map((a) => esDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
-      .filter(Boolean),
-  );
+  const pre: string[] = [];
+  const post: string[] = [];
+  for (const a of np.adjectives) {
+    const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
+    if (!surface) continue;
+    // A comparative/superlative follows the noun even when its plain form precedes it ("el
+    // primer gato" but "el gato más primero"), as its degree adverb belongs with the phrase.
+    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
+      pre.push(apocopate(a.conceptId, surface, gender, plural));
+    } else {
+      post.push(esDeg(a, surface));
+    }
+  }
+  return { pre: pre.join(' '), post: coordinate(post) };
+}
+
+/** A noun with its adjectives set around it: the prenominal ones, the noun, then the rest. */
+function withAdj(word: string, adj?: EsAdjectives): string {
+  const pre = adj?.pre ? `${adj.pre} ` : '';
+  const post = adj?.post ? ` ${adj.post}` : '';
+  return `${pre}${word}${post}`;
+}
+
+/**
+ * The forms an article is chosen from. The stressed-a exception ("el agua") exists only to
+ * break the a-a hiatus between article and noun, so it lapses as soon as a prenominal
+ * adjective comes between them: "la primera agua", not "*el primera agua".
+ */
+function artForms(forms: Record<string, string>, adj?: EsAdjectives): Record<string, string> {
+  return adj?.pre ? { ...forms, stressed_a: '' } : forms;
 }
 
 /** Spanish "de" (from) + article: de+el=del; otherwise "de la/los/las". */
@@ -204,13 +282,13 @@ function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect):
   return inf;
 }
 
-function nounPhrase(forms: Record<string, string>, adj?: string): string {
+function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? ` ${adj}` : '';
-  const art = artFor(forms, plural); // definite / indefinite / bare
-  return art ? `${art} ${word}${a}` : `${word}${a}`;
+  const noun = withAdj(word, adj);
+  const art = artFor(artForms(forms, adj), plural); // definite / indefinite / bare
+  return art ? `${art} ${noun}` : noun;
 }
 
 /**
@@ -226,15 +304,7 @@ function predicativeForms(forms: Record<string, string>): Record<string, string>
   return { ...forms, definiteness: 'bare' };
 }
 
-function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
-  const count = forms['number'] ?? forms['count'] ?? 'singular';
-  const plural = count === 'plural';
-  const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? ` ${adj}` : '';
-  return `${datPrep(forms, plural)} ${word}${a}`;
-}
-
-function subjectPhrase(forms: Record<string, string>, adj?: string): string {
+function subjectPhrase(forms: Record<string, string>, adj?: EsAdjectives): string {
   if (forms['person']) {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
@@ -248,8 +318,7 @@ function subjectPhrase(forms: Record<string, string>, adj?: string): string {
  * "debajo de una casa"), via `deDet`; "through" is the bare preposition "por", which takes a
  * non-fusing article ("por la casa" / "por una casa").
  */
-function routeHead(c: ResolvedComplement, plural: boolean): string {
-  const f = c.phrase.head.forms;
+function routeHead(c: ResolvedComplement, plural: boolean, f: Record<string, string>): string {
   switch (pathSpecifier(c)) {
     case 'under':       return `debajo ${deDet(f, plural)}`;
     case 'over':        return `por encima ${deDet(f, plural)}`;
@@ -297,8 +366,11 @@ function complementsPhrase(
       }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const a = esAdj(c.phrase);
-      const adj = a ? ` ${a}` : '';
+      const adj = esAdj(c.phrase);
+      const noun = withAdj(word, adj);
+      // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
+      // stressed-a nouns take ("en la primera agua").
+      const af = artForms(f, adj);
       // locative→en, direction→a (al/a la), source→"lejos de" (lejos del/de la),
       // route→path preposition. A direction toward an *animate* goal takes "hacia"
       // (toward) — bare "a" + person doesn't read as a motion destination ("corro hacia
@@ -310,17 +382,17 @@ function complementsPhrase(
       // perro" ("a"-contracted via datPrep).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
-        type === 'locative'  ? prepDet('en', f, plural) :
-        type === 'terminus'  ? aDet(f, plural) :
-        type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', f, plural) : aDet(f, plural)) :
-        type === 'source'    ? `lejos ${deDet(f, plural)}` :
+        type === 'locative'  ? prepDet('en', af, plural) :
+        type === 'terminus'  ? aDet(af, plural) :
+        type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
+        type === 'source'    ? `lejos ${deDet(af, plural)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `gracias ${datPrep(f, plural)}` :
-          causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :
-          `a causa ${dePrep(f, plural)}`
+          causeSent === 'positive' ? `gracias ${datPrep(af, plural)}` :
+          causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
+          `a causa ${dePrep(af, plural)}`
         ) :
-        routeHead(c, plural);
-      return withRelative(`${head} ${word}${adj}`, c.phrase);
+        routeHead(c, plural, af);
+      return withRelative(`${head} ${noun}`, c.phrase);
     })
     .filter(Boolean)
     .join(' ');
@@ -337,9 +409,8 @@ function possessorText(np: ResolvedNounPhrase): string {
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const a = esAdj(poss);
-  const adj = a ? ` ${a}` : '';
-  return ` ${withRelative(`${dePrep(f, plural)} ${word}${adj}`, poss)}`;
+  const adj = esAdj(poss);
+  return ` ${withRelative(`${dePrep(artForms(f, adj), plural)} ${withAdj(word, adj)}`, poss)}`;
 }
 
 /** Spanish links every attributive-noun relation with bare "de" ("barco de vela", "gafas de sol"). */
@@ -382,7 +453,7 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   const subjText = subjectRelative
     ? ''
     : withRelative(subjectPhrase(rel.subject!.head.forms, esAdj(rel.subject!)), rel.subject!);
-  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }
 
@@ -395,7 +466,6 @@ function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounPhrase,
-  indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -421,10 +491,6 @@ function predicateText(
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, esAdj(directObject)), directObject)
     : '';
-  // V Adv DirectObj IndirectObj(a+article)
-  const indirectObjectText = indirectObject
-    ? withRelative(indirectNounPhrase(indirectObject.head.forms, esAdj(indirectObject)), indirectObject)
-    : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "no": "yo nunca bebo"
   // but post-verbal with "no": "yo no bebo nunca"
@@ -443,11 +509,11 @@ function predicateText(
       ? (verb.forms['base'] ?? conjugated)
       : (imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `no ${impForm}` : impForm;
-    return [impVerb, modifierText, directObjectText, indirectObjectText, complementsText]
+    return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
+  return [preVerb, verbText, postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -462,7 +528,7 @@ function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("últimas noticias").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
@@ -484,5 +550,12 @@ export const spanishEngine: LanguageEngine = {
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
     return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+  },
+  // No apocope here: the word stands alone, with no masculine noun behind it to shorten before.
+  renderWord(word: ConceptForms): string {
+    const f = word.forms;
+    const base = f['base'] ?? '';
+    if (f['role'] !== 'adjective') return base;
+    return agreeAdj(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
 };

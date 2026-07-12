@@ -32,7 +32,7 @@ import {
   type Definiteness,
   type LanguageCode,
 } from "@signi/shared";
-import { conceptWord } from "../../i18n/conceptWord.ts";
+import { conceptWord, type UiStringLookup } from "../../i18n/conceptWord.ts";
 import {
   GenderSlot,
   NounKey,
@@ -105,8 +105,11 @@ export function buildSatellites(
   // The UI language: a satellite that carries a word (an adjective, a modal, a complement)
   // shows it as the picker offered it, not in English.
   language: LanguageCode,
+  // The UI-string lookup, for the one label the lexicon cannot give on its own: a pronoun,
+  // which shows the person it stands for rather than a word.
+  t: UiStringLookup,
 ): { satellites: Satellite[]; shownMap: Record<string, boolean> } {
-  const label = (c?: Concept) => conceptWord(c, language);
+  const label = (c?: Concept) => conceptWord(c, language, t);
   const subjectRole = selection.subject?.role;
   const supportedComplements = selection.verb?.complements ?? [];
 
@@ -117,8 +120,6 @@ export function buildSatellites(
       Boolean(selection.subject?.gendered));
   const showDirectObjNumber = Boolean(selection.directObject);
   const showDirectObjGender = Boolean(selection.directObject?.gendered);
-  const showIndirectObjNumber = Boolean(selection.indirectObject);
-  const showIndirectObjGender = Boolean(selection.indirectObject?.gendered);
 
   const rawSatellites: Omit<Satellite, "shown">[] = [
     {
@@ -176,7 +177,7 @@ export function buildSatellites(
     {
       key: "subjectDefiniteness",
       parent: "subject",
-      label: "Determiner",
+      label: t("satellite.determiner"),
       icon: <ArticleOutlinedIcon sx={iconSx} />,
       // Only a noun head takes an article; pronoun subjects render without one.
       available: subjectRole === "noun",
@@ -333,7 +334,7 @@ export function buildSatellites(
     {
       key: "directObjectDefiniteness",
       parent: "directObject",
-      label: "Determiner",
+      label: t("satellite.determiner"),
       icon: <ArticleOutlinedIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(
@@ -359,78 +360,6 @@ export function buildSatellites(
       icon: <KeyIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectPossessor?.subject),
-    },
-    {
-      key: "indirectObjectAdjective",
-      parent: "indirectObject",
-      label: "Adjective",
-      icon: <BrushIcon sx={iconSx} />,
-      available: Boolean(selection.indirectObject),
-      hasValue: Boolean(selection.indirectObjectAdjective),
-      valueLabel: label(selection.indirectObjectAdjective),
-    },
-    {
-      key: "indirectObjectAdjective2",
-      parent: "indirectObjectAdjective",
-      label: "Adjective 2",
-      icon: <BrushIcon sx={iconSx} />,
-      available:
-        Boolean(selection.indirectObject) &&
-        Boolean(selection.indirectObjectAdjective),
-      hasValue: Boolean(selection.indirectObjectAdjective2),
-      valueLabel: label(selection.indirectObjectAdjective2),
-    },
-    {
-      key: "indirectObjectAdjective3",
-      parent: "indirectObjectAdjective2",
-      label: "Adjective 3",
-      icon: <BrushIcon sx={iconSx} />,
-      available:
-        Boolean(selection.indirectObject) &&
-        Boolean(selection.indirectObjectAdjective2),
-      hasValue: Boolean(selection.indirectObjectAdjective3),
-      valueLabel: label(selection.indirectObjectAdjective3),
-    },
-    {
-      key: "indirectObjectNumber",
-      parent: "indirectObject",
-      label: "Number",
-      icon: <NumbersIcon sx={iconSx} />,
-      available: showIndirectObjNumber,
-      hasValue: selection.indirectObjectNumber === "plural",
-      alwaysSet: true,
-      directToggle: true,
-      valueLabel:
-        selection.indirectObjectNumber === "plural" ? "Plural" : "Singular",
-    },
-    {
-      key: "indirectObjectGender",
-      parent: "indirectObject",
-      label: "Gender",
-      icon: genderIcon(selection.indirectObjectGender),
-      available: showIndirectObjGender,
-      hasValue:
-        Boolean(selection.indirectObjectGender) &&
-        selection.indirectObjectGender !== "masc",
-      alwaysSet: true,
-      directToggle: true,
-      valueLabel: genderLabel(selection.indirectObjectGender),
-    },
-    {
-      key: "indirectObjectRelative",
-      parent: "indirectObject",
-      label: "Relative clause",
-      icon: <AccountTreeIcon sx={iconSx} />,
-      available: Boolean(selection.indirectObject),
-      hasValue: false,
-    },
-    {
-      key: "indirectObjectPossessor",
-      parent: "indirectObject",
-      label: "Possessor",
-      icon: <KeyIcon sx={iconSx} />,
-      available: Boolean(selection.indirectObject),
-      hasValue: Boolean(selection.indirectObjectPossessor?.subject),
     },
     // Complement toggles live on the VERB box; number/gender hang off each complement.
     ...COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
@@ -523,7 +452,7 @@ export function buildSatellites(
         {
           key: `${type}Definiteness`,
           parent: type,
-          label: "Determiner",
+          label: t("satellite.determiner"),
           icon: <ArticleOutlinedIcon sx={iconSx} />,
           // The predicative plus the adposition-bearing spatial/dative complements carry a
           // determiner, and only for a noun head (a pronoun cause takes none). Cause is not

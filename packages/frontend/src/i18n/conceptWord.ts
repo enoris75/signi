@@ -1,25 +1,38 @@
-import type { Concept, LanguageCode } from '@signi/shared';
+import type { Concept, LanguageCode, UiStringKey } from '@signi/shared';
+
+/** Resolves a UI string in the current UI language — the `t` of useUiString(). */
+export type UiStringLookup = (key: UiStringKey) => string;
 
 /**
  * The concept as the user should read it: its citation form in `language` ("cat" / "gatto" /
  * "Katze"), from the label catalog the concept list carries. A concept not yet seeded in that
  * language falls back to English, then to its description, so a word never renders blank.
  *
- * Pronouns are the exception: the concept is a person, not a word ("1st Person"), and its
- * surface form is only settled once the chooser has fixed number and gender — so they keep
- * showing their description.
+ * Pronouns are the exception: the concept is a person, not a word, and its surface form is only
+ * settled once the chooser has fixed number and gender — so it shows the person it stands for
+ * ("first person" / "prima persona" / 第一の人称), which the engine renders like any other UI
+ * string. Without a `t` it falls back to the concept's English description.
  *
  * Components should reach for `useConceptLabel()` instead; this bare form exists for the
  * plain builders (satellites) that run outside a hook.
  */
-export function conceptWord(concept: Concept, language: LanguageCode): string;
-export function conceptWord(concept: Concept | undefined, language: LanguageCode): string | undefined;
+export function conceptWord(concept: Concept, language: LanguageCode, t?: UiStringLookup): string;
 export function conceptWord(
   concept: Concept | undefined,
   language: LanguageCode,
+  t?: UiStringLookup,
+): string | undefined;
+export function conceptWord(
+  concept: Concept | undefined,
+  language: LanguageCode,
+  t?: UiStringLookup,
 ): string | undefined {
   if (!concept) return undefined;
-  if (concept.role === 'pronoun') return concept.description;
+  if (concept.role === 'pronoun') {
+    const person = concept.person;
+    if (!t || !person) return concept.description;
+    return t(`pronoun.person.${person}` as UiStringKey);
+  }
   return concept.labels?.[language] ?? concept.label ?? concept.description;
 }
 

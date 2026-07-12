@@ -147,13 +147,12 @@ const READING_ORDER = [
   "Subject",
   "Verb Phrase",
   "Direct Object",
-  "Indirect Object",
   ...COMPLEMENT_TYPES.map((t) => COMPLEMENT_LABELS[t]),
 ];
 
 // Tidy the whole period: tidy each dotted box on its own — exactly as its own tidy button
 // does — then pack the tidied boxes into non-overlapping rows in reading order: subject ·
-// verb phrase · direct object · indirect object · complements. Boxes keep whatever
+// verb phrase · direct object · complements. Boxes keep whatever
 // collapse state they were in; a box is packed at the footprint it really renders at, so
 // an expanded box gets the room its satellites need.
 //

@@ -13,13 +13,41 @@ export interface UiStringFormat {
   stripPeriod?: boolean;
 }
 
-export interface UiStringDef {
-  /** The period the engine renders into every language. This is the string's definition. */
-  plan: PhrasePlan;
+interface UiStringCommon {
   format?: UiStringFormat;
   /** Shown while the bundle is in flight or the backend is unreachable, so nothing renders blank. */
   fallback: string;
 }
+
+/** A string the engine renders from a period. This is the usual entry. */
+export interface UiStringPlanDef extends UiStringCommon {
+  /** The period the engine renders into every language. This is the string's definition. */
+  plan: PhrasePlan;
+  word?: never;
+}
+
+/**
+ * A string that is one word, taken straight from the lexicon. For the labels a period cannot
+ * express — a bare adjective ("singular", "male"), which a sentence only ever shows attached
+ * to a noun it agrees with.
+ */
+export interface UiStringWordDef extends UiStringCommon {
+  /** The concept the string names. */
+  word: string;
+  /**
+   * The noun the word describes, when the word is an adjective. An adjective has no settled
+   * form until something fixes its gender and number, and the label for a value of a row is
+   * describing that row's noun even though the noun itself is only in the caption beside it:
+   * the ordinals of the person row agree with "person" (it "la **prima** persona", feminine),
+   * the values of the gender row with "gender" (it "il genere **neutro**", masculine). Which
+   * gender that noun has is a fact about each language's own lexicon, so it is resolved per
+   * language rather than stated here.
+   */
+  agreesWith?: string;
+  plan?: never;
+}
+
+export type UiStringDef = UiStringPlanDef | UiStringWordDef;
 
 // Preserves the literal keys (a plain `Record<string, UiStringDef>` annotation would widen
 // them to `string` and lose the typo-checking on `t('…')`).
@@ -136,6 +164,130 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Adjective',
   },
 
+  // The determiner control — the icon satellite on a noun box and the toggle box it reveals.
+  // The bare grammar noun, like `category.*`: it names the feature the control sets, not one of
+  // its values (the values are the surface words "the" / "a" / "—", which the box shows).
+  'satellite.determiner': {
+    plan: { subject: { concept: 'DETERMINER', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Determiner',
+  },
+
+  // The sections of the determiner menu, keyed `determiner.category.<DeterminerCategory>` so the
+  // menu can write t(`determiner.category.${category}`) for any of the three. Each is the bare
+  // grammar noun for the *realization* the user knows — article / demonstrative / quantifier —
+  // where the model's key names the meaning realized (identifiability / deixis / quantity):
+  // an article is how English and the Romance languages happen to spell identifiability, and
+  // Japanese, which spells it not at all, still renders 冠詞 as the name of the section.
+  'determiner.category.identifiability': {
+    plan: nameOf('ARTICLE'),
+    format: NAME_FORMAT,
+    fallback: 'Article',
+  },
+  'determiner.category.deixis': {
+    plan: nameOf('DEMONSTRATIVE'),
+    format: NAME_FORMAT,
+    fallback: 'Demonstrative',
+  },
+  'determiner.category.quantity': {
+    plan: nameOf('QUANTIFIER'),
+    format: NAME_FORMAT,
+    fallback: 'Quantifier',
+  },
+
+  // The headings of the word palette's sections, one per grammatical role — the same grammar
+  // nouns as `category.*` but in the plural, because a section lists many words. Keyed
+  // `palette.<role>` so ConceptPalette can write t(`palette.${role}`) for any GrammaticalRole.
+  // The CSS uppercases them.
+  'palette.pronoun': {
+    plan: { subject: { concept: 'PRONOUN', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Pronouns',
+  },
+  'palette.noun': {
+    plan: { subject: { concept: 'NOUN', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Nouns',
+  },
+  'palette.verb': {
+    plan: { subject: { concept: 'VERB', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Verbs',
+  },
+  'palette.adjective': {
+    plan: { subject: { concept: 'ADJECTIVE', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Adjectives',
+  },
+  'palette.adverb': {
+    plan: { subject: { concept: 'ADVERB', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Adverbs',
+  },
+
+  // The pronoun chooser's three rows — the grammatical features a pronoun is picked by, each
+  // the bare grammar noun ("person", "number", "gender"). Lower-case: they caption a row, and
+  // outside English the engine renders a noun lower-case anyway.
+  'pronoun.person': {
+    plan: nameOf('PERSON_GRAMMAR'),
+    format: { stripPeriod: true },
+    fallback: 'person',
+  },
+  'pronoun.number': {
+    plan: nameOf('NUMBER'),
+    format: { stripPeriod: true },
+    fallback: 'number',
+  },
+  'pronoun.gender': {
+    plan: nameOf('GENDER'),
+    format: { stripPeriod: true },
+    fallback: 'gender',
+  },
+
+  // The three pronoun concepts as the pickers name them. A pronoun is the only concept whose
+  // list entry is not a word: its surface form is settled only once number and gender are
+  // fixed, so it shows the person it stands for instead — the bare PERSON_GRAMMAR noun carrying
+  // the ordinal adjective ("first person", "prima persona", 一人称). Keyed by concept id, so
+  // conceptWord() can write t(`pronoun.person.${concept.person}`) for any of the three.
+  'pronoun.person.1': {
+    plan: {
+      subject: { concept: 'PERSON_GRAMMAR', definiteness: 'bare', adjectives: ['FIRST'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'First person',
+  },
+  'pronoun.person.2': {
+    plan: {
+      subject: { concept: 'PERSON_GRAMMAR', definiteness: 'bare', adjectives: ['SECOND'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Second person',
+  },
+  'pronoun.person.3': {
+    plan: {
+      subject: { concept: 'PERSON_GRAMMAR', definiteness: 'bare', adjectives: ['THIRD'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Third person',
+  },
+
+  // The values those rows offer. Each is a bare adjective — a word, not a period: a sentence
+  // shows an adjective only in agreement with a noun, and here the noun is not in the label but
+  // in the caption of the row the value belongs to. `agreesWith` names it, which is what makes
+  // the Italian person row read "prima / seconda / terza" (persona is feminine) while the
+  // gender row reads "maschile / femminile / neutro" (genere is masculine).
+  'pronoun.first': { word: 'FIRST', agreesWith: 'PERSON_GRAMMAR', fallback: 'first' },
+  'pronoun.second': { word: 'SECOND', agreesWith: 'PERSON_GRAMMAR', fallback: 'second' },
+  'pronoun.third': { word: 'THIRD', agreesWith: 'PERSON_GRAMMAR', fallback: 'third' },
+  'pronoun.singular': { word: 'SINGULAR', agreesWith: 'NUMBER', fallback: 'singular' },
+  'pronoun.plural': { word: 'PLURAL', agreesWith: 'NUMBER', fallback: 'plural' },
+  'pronoun.male': { word: 'MALE', agreesWith: 'GENDER', fallback: 'male' },
+  'pronoun.female': { word: 'FEMALE', agreesWith: 'GENDER', fallback: 'female' },
+  'pronoun.neuter': { word: 'NEUTER', agreesWith: 'GENDER', fallback: 'neuter' },
+
+  // The chooser's commit button: "select (it)".
+  'action.select': { plan: commandOf('SELECT'), format: NAME_FORMAT, fallback: 'Select' },
+
   // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
   'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
   'action.load': { plan: commandOf('LOAD'), format: NAME_FORMAT, fallback: 'Load' },
@@ -151,6 +303,41 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Save the whole phrase',
+  },
+
+  // The header Load button's tooltip: the LOAD imperative on an indefinite PHRASE carrying the
+  // SAVED adjective — "load a saved phrase", one of the many already stored. Indefinite where
+  // `action.save.tooltip` is definite: that one acts on the phrase in the workspace, this one
+  // brings in a phrase the user has yet to pick.
+  'action.load.tooltip': {
+    plan: {
+      ...commandOf('LOAD'),
+      directObject: { concept: 'PHRASE', definiteness: 'indefinite', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Load a saved phrase',
+  },
+
+  // The two file-transfer icon buttons, which have no label of their own — the tooltip is the
+  // whole affordance. Export is definite (it acts on the phrase already in the workspace, like
+  // `action.save.tooltip`); import is indefinite (it brings in a phrase from a file the user
+  // has yet to pick, like `action.load.tooltip`). Neither names the JSON file: the format is an
+  // implementation detail the lexicon has no concept for, and the icons already say "to disk".
+  'action.export.tooltip': {
+    plan: {
+      ...commandOf('EXPORT'),
+      directObject: { concept: 'PHRASE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Export phrase',
+  },
+  'action.import.tooltip': {
+    plan: {
+      ...commandOf('IMPORT'),
+      directObject: { concept: 'PHRASE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Import phrase',
   },
 
   // The workspace's two period-level buttons, as commands. "Add a period container" is the

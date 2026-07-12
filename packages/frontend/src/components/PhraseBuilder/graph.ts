@@ -226,7 +226,6 @@ export function buildGraph({
       if (
         slot.key === "subject" ||
         slot.key === "directObject" ||
-        slot.key === "indirectObject" ||
         COMPLEMENT_KEY_SET.has(slot.key)
       )
         continue;
@@ -241,9 +240,7 @@ export function buildGraph({
           ? "subject"
           : slot.key === "directObjectAdjective"
             ? "directObject"
-            : slot.key === "indirectObjectAdjective"
-              ? "indirectObject"
-              : (complementParent ?? "verb"));
+            : (complementParent ?? "verb"));
       edges.push(satEdge(parentKey, slot.key, MUI_COLOR_HEX[slot.color]));
     }
     if (shownMap.verbTense)
@@ -315,18 +312,6 @@ export function buildGraph({
                 ...(shownMap.directObjectDefiniteness
                   ? ["directObjectDefiniteness"]
                   : []),
-              ],
-            },
-          ]
-        : []),
-      ...(visibleSlots.some((s) => s.key === "indirectObject")
-        ? [
-            {
-              label: "Indirect Object",
-              color: MUI_COLOR_HEX.warning,
-              nodeKeys: [
-                "indirectObject",
-                ...adjectiveSlots("indirectObject").filter((k) => shownMap[k]),
               ],
             },
           ]

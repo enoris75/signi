@@ -167,7 +167,6 @@ export function PhraseCanvas({
             )}
             <VerbPhraseBuilder ctx={ctx} />
             <NounPhraseBuilder which="directObject" ctx={ctx} />
-            <NounPhraseBuilder which="indirectObject" ctx={ctx} />
             {COMPLEMENT_TYPES.map((type) => (
               <NounPhraseBuilder key={type} which={type} ctx={ctx} />
             ))}

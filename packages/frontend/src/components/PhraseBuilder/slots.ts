@@ -13,7 +13,6 @@ import { NounKey, NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
 export const NOUN_KEYS: NounKey[] = [
   "subject",
   "directObject",
-  "indirectObject",
   ...COMPLEMENT_TYPES,
 ];
 
@@ -137,34 +136,6 @@ export const ALL_SLOTS: SlotConfig[] = [
     color: "success",
   },
   {
-    key: "indirectObject",
-    label: "Indirect Object",
-    required: false,
-    roles: ["noun"],
-    color: "warning",
-  },
-  {
-    key: "indirectObjectAdjective",
-    label: "Adjective",
-    required: false,
-    roles: ["adjective"],
-    color: "warning",
-  },
-  {
-    key: "indirectObjectAdjective2",
-    label: "Adjective 2",
-    required: false,
-    roles: ["adjective"],
-    color: "warning",
-  },
-  {
-    key: "indirectObjectAdjective3",
-    label: "Adjective 3",
-    required: false,
-    roles: ["adjective"],
-    color: "warning",
-  },
-  {
     key: "modifier",
     label: "Adverb",
     required: false,
@@ -225,7 +196,6 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   "modifier",
   ...MODAL_SLOTS,
   ...adjectiveSlots("directObject"),
-  ...adjectiveSlots("indirectObject"),
   ...COMPLEMENT_TYPES,
   ...COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
 ]);
@@ -254,11 +224,6 @@ export const COLLAPSIBLE_GROUPS: {
     mainKey: "directObject",
     childKeys: [...adjectiveSlots("directObject"), "directObjectDefiniteness"],
   },
-  {
-    label: "Indirect Object",
-    mainKey: "indirectObject",
-    childKeys: [...adjectiveSlots("indirectObject")],
-  },
   ...COMPLEMENT_TYPES.map((type) => ({
     label: COMPLEMENT_LABELS[type],
     mainKey: type as string,
@@ -273,7 +238,6 @@ export const COLLAPSIBLE_GROUPS: {
 
 const SUBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("subject"));
 const DIRECT_OBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("directObject"));
-const INDIRECT_OBJECT_ADJECTIVES = new Set<SlotKey>(adjectiveSlots("indirectObject"));
 
 export function getActiveSlots(
   transitivity?: Transitivity,
@@ -285,9 +249,6 @@ export function getActiveSlots(
     if (slot.key === "directObject") return transitivity !== "intransitive";
     if (DIRECT_OBJECT_ADJECTIVES.has(slot.key))
       return transitivity !== "intransitive";
-    if (slot.key === "indirectObject") return transitivity === "ditransitive";
-    if (INDIRECT_OBJECT_ADJECTIVES.has(slot.key))
-      return transitivity === "ditransitive";
     if (slot.key === "subjectAdjective") return subjectRole === "noun";
     // The chained subject adjectives ride along once the first one exists; which of them
     // is actually revealed is governed by the satellite chain, not by this list.
@@ -323,10 +284,6 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   directObjectAdjective: { x: 68, y: 16 },
   directObjectAdjective2: { x: 84, y: 14 },
   directObjectAdjective3: { x: 76, y: 26 },
-  indirectObject: { x: 76, y: 74 },
-  indirectObjectAdjective: { x: 58, y: 86 },
-  indirectObjectAdjective2: { x: 62, y: 96 },
-  indirectObjectAdjective3: { x: 54, y: 78 },
   modifier: { x: 52, y: 74 },
   // Motion complements — arranged below the verb, each its own little cluster,
   // with its adjectives stacked just above the complement noun.
@@ -365,7 +322,6 @@ const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   predicative: { x: 80, y: 62 },
   subject: { x: 12, y: 72 },
   directObject: { x: 80, y: 62 },
-  indirectObject: { x: 90, y: 88 },
   source: { x: 12, y: 96 },
   direction: { x: 32, y: 99 },
   route: { x: 70, y: 99 },
@@ -397,8 +353,6 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   verbAspect: { x: 64, y: 22 },
   directObjectNumber: NUMBER_TOGGLE_DEFAULTS.directObject,
   directObjectGender: { x: 93, y: 30 },
-  indirectObjectNumber: NUMBER_TOGGLE_DEFAULTS.indirectObject,
-  indirectObjectGender: { x: 88, y: 62 },
   sourceNumber: NUMBER_TOGGLE_DEFAULTS.source,
   sourceGender: { x: 8, y: 80 },
   directionNumber: NUMBER_TOGGLE_DEFAULTS.direction,
@@ -422,7 +376,6 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // icon at the bottom edge of its noun box (clauses expand into panels below).
   subjectRelative: { x: 26, y: 64 },
   directObjectRelative: { x: 80, y: 64 },
-  indirectObjectRelative: { x: 76, y: 92 },
   sourceRelative: { x: 20, y: 99 },
   directionRelative: { x: 40, y: 99 },
   routeRelative: { x: 62, y: 99 },
@@ -434,7 +387,6 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // anchor so both icons ride the box without overlapping.
   subjectPossessor: { x: 20, y: 64 },
   directObjectPossessor: { x: 74, y: 64 },
-  indirectObjectPossessor: { x: 70, y: 92 },
   sourcePossessor: { x: 14, y: 99 },
   directionPossessor: { x: 34, y: 99 },
   routePossessor: { x: 56, y: 99 },

@@ -2,6 +2,7 @@ import { Box } from '@mui/material';
 import type { Concept } from '@signi/shared';
 import { conceptReading, conceptWord } from './conceptWord.ts';
 import { useUiLanguage } from './LanguageContext.tsx';
+import { useUiString } from './useUiString.ts';
 
 /**
  * A concept's word as the pickers show it, carrying furigana when the UI language supplies a
@@ -11,7 +12,8 @@ import { useUiLanguage } from './LanguageContext.tsx';
  */
 export function ConceptWord({ concept }: { concept: Concept }) {
   const { uiLanguage } = useUiLanguage();
-  const word = conceptWord(concept, uiLanguage);
+  const t = useUiString();
+  const word = conceptWord(concept, uiLanguage, t);
   const reading = conceptReading(concept, uiLanguage);
 
   if (!reading) return <>{word}</>;

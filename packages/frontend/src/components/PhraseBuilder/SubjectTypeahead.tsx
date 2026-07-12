@@ -51,7 +51,7 @@ export function SubjectTypeahead({
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
-  // The pronoun chooser's in-progress decision: person, plurality, gender.
+  // The pronoun chooser's in-progress decision: person, number, gender.
   const [person, setPerson] = useState<"1" | "2" | "3">("1");
   const [number, setNumber] = useState<"singular" | "plural">("singular");
   const [gender, setGender] = useState<"masc" | "fem" | "neut">("masc");
@@ -183,7 +183,7 @@ export function SubjectTypeahead({
 
           {tab === "pronoun" ? (
             <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-              <ChooserRow label="person">
+              <ChooserRow label={t("pronoun.person")}>
                 <ToggleButtonGroup
                   exclusive
                   size="small"
@@ -195,36 +195,38 @@ export function SubjectTypeahead({
                     if (v !== "3" && gender === "neut") setGender("masc");
                   }}
                 >
-                  <ToggleButton value="1">1st</ToggleButton>
-                  <ToggleButton value="2">2nd</ToggleButton>
-                  <ToggleButton value="3">3rd</ToggleButton>
+                  <ToggleButton value="1">{t("pronoun.first")}</ToggleButton>
+                  <ToggleButton value="2">{t("pronoun.second")}</ToggleButton>
+                  <ToggleButton value="3">{t("pronoun.third")}</ToggleButton>
                 </ToggleButtonGroup>
               </ChooserRow>
 
-              <ChooserRow label="plurality">
+              <ChooserRow label={t("pronoun.number")}>
                 <ToggleButtonGroup
                   exclusive
                   size="small"
                   value={number}
                   onChange={(_, v) => v && setNumber(v)}
                 >
-                  <ToggleButton value="singular">singular</ToggleButton>
-                  <ToggleButton value="plural">plural</ToggleButton>
+                  <ToggleButton value="singular">{t("pronoun.singular")}</ToggleButton>
+                  <ToggleButton value="plural">{t("pronoun.plural")}</ToggleButton>
                 </ToggleButtonGroup>
               </ChooserRow>
 
               {/* Gender matters for every person (participle/adjective agreement in
                   Romance); neuter ("it") is offered only in the 3rd person. */}
-              <ChooserRow label="gender">
+              <ChooserRow label={t("pronoun.gender")}>
                 <ToggleButtonGroup
                   exclusive
                   size="small"
                   value={gender}
                   onChange={(_, v) => v && setGender(v)}
                 >
-                  <ToggleButton value="masc">masc.</ToggleButton>
-                  <ToggleButton value="fem">fem.</ToggleButton>
-                  {person === "3" && <ToggleButton value="neut">neut.</ToggleButton>}
+                  <ToggleButton value="masc">{t("pronoun.male")}</ToggleButton>
+                  <ToggleButton value="fem">{t("pronoun.female")}</ToggleButton>
+                  {person === "3" && (
+                    <ToggleButton value="neut">{t("pronoun.neuter")}</ToggleButton>
+                  )}
                 </ToggleButtonGroup>
               </ChooserRow>
 
@@ -239,7 +241,7 @@ export function SubjectTypeahead({
                   fontFamily: '"Inter", sans-serif',
                 }}
               >
-                select
+                {t("action.select")}
               </Button>
             </Box>
           ) : (

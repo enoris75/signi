@@ -108,7 +108,7 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   if (!rel) return core;
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject ? [...npSegs(rel.subject), { t: 'が' }] : [];
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements), ...core];
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements), ...core];
 }
 
 /**
@@ -382,14 +382,14 @@ function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, inst
 }
 
 /**
- * The predicate half of a phrase, in Japanese order: complements IndObj+に DirectObj+を
- * Adv V. Shared by the main sentence (after 〜は) and by prenominal relative clauses.
+ * The predicate half of a phrase, in Japanese order: complements (the recipient's に among
+ * them) DirectObj+を Adv V. Shared by the main sentence (after 〜は) and by prenominal
+ * relative clauses.
  * `imperativePN` is set only for a top-level command (relative clauses are never imperative).
  */
 function predicateSegs(
   verbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounPhrase | undefined,
-  indirectObject: ResolvedNounPhrase | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
 ): RubySegment[] {
@@ -414,7 +414,6 @@ function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(complements));
-    if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
     if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
@@ -436,7 +435,6 @@ function predicateSegs(
     return segs;
   }
   segs.push(...complementSegs(complements));
-  if (indirectObject) segs.push(...npSegs(indirectObject), { t: 'に' });
   if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
   if (modifier) {
     const base = modifier.forms['base'] ?? '';
@@ -456,7 +454,7 @@ function predicateSegs(
 }
 
 /**
- * Japanese word order: S IndObj+に DirectObj+を Adv V
+ * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
 function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
@@ -467,7 +465,7 @@ function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): R
   const imperative = phrase.verbPhrase.mood === 'imperative';
   if (!imperative) segs.push(...npSegs(phrase.subject), { t: subjectParticle });
   const impPN = imperative ? jaImperativePN(phrase.subject.head.forms) : undefined;
-  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements, impPN));
+  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN));
   return segs;
 }
 
@@ -508,5 +506,15 @@ export const japaneseEngine: LanguageEngine = {
   },
   renderRuby(phrase: ResolvedPhrase): RubySegment[] {
     return buildSegments(phrase);
+  },
+  // A na-/no-adjective is seeded in its attributive form (慎重な, 単数の), where the marker links
+  // it to the noun that follows. A word standing alone has no noun to link to, so the marker
+  // goes — the same trim copulaSegs makes for a predicate adjective. An i-adjective keeps its
+  // い, which is part of the word (若い).
+  renderWord(word: ConceptForms): string {
+    const f = word.forms;
+    const base = f['base'] ?? '';
+    if (f['role'] !== 'adjective') return base;
+    return /[なの]$/.test(base) ? base.slice(0, -1) : base;
   },
 };

@@ -154,7 +154,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           </Button>
         </span>
       </Tooltip>
-      <Tooltip title="Load a saved phrase (replaces the workspace)">
+      <Tooltip title={t("action.load.tooltip")}>
         <Button
           variant="outlined"
           size="small"
@@ -166,14 +166,14 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           {t("action.load")}
         </Button>
       </Tooltip>
-      <Tooltip title="Export to a JSON file">
+      <Tooltip title={t("action.export.tooltip")}>
         <span>
           <IconButton size="small" onClick={handleExport} disabled={empty}>
             <FileDownloadOutlinedIcon fontSize="small" />
           </IconButton>
         </span>
       </Tooltip>
-      <Tooltip title="Import from a JSON file">
+      <Tooltip title={t("action.import.tooltip")}>
         <IconButton size="small" onClick={() => fileInputRef.current?.click()}>
           <FileUploadOutlinedIcon fontSize="small" />
         </IconButton>

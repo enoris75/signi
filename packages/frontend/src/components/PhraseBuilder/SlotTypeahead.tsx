@@ -2,7 +2,6 @@ import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
 import { ConceptSelectOpts, PhraseSelection, slotCategories, SlotKey } from "./interfaces.ts";
 import { COMPLEMENT_KEY_SET } from "./slots.ts";
-import { IndirectObjectTypeahead } from "./IndirectObjectTypeahead.tsx";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
@@ -77,8 +76,6 @@ function pickerFor(
       );
     case "directObject":
       return <DirectObjectTypeahead onSelect={pick} />;
-    case "indirectObject":
-      return <IndirectObjectTypeahead onSelect={pick} />;
     case "verbModal":
     case "verbModal2":
       // Modals are verb concepts, so the modal picker filters the verb list on `modal`.
@@ -110,9 +107,10 @@ function pickerFor(
             onKindChange={onKindChange}
           />
         );
-      // Motion/locative complements share the indirect-object picker.
+      // Every other complement — the motion/locative family and the dative terminus — is a
+      // plain noun head, so they share the noun picker.
       if (COMPLEMENT_KEY_SET.has(slotKey))
-        return <IndirectObjectTypeahead onSelect={pick} />;
+        return <DirectObjectTypeahead onSelect={pick} />;
       return undefined;
   }
 }

@@ -2,6 +2,7 @@ import type { Concept } from '@signi/shared';
 import { useCallback } from 'react';
 import { conceptWord } from './conceptWord.ts';
 import { useUiLanguage } from './LanguageContext.tsx';
+import { useUiString } from './useUiString.ts';
 
 /**
  * Returns `word`, giving a concept's citation form in the current UI language — the word the
@@ -10,7 +11,8 @@ import { useUiLanguage } from './LanguageContext.tsx';
  */
 export function useConceptLabel(): (concept: Concept) => string {
   const { uiLanguage } = useUiLanguage();
-  return useCallback((concept: Concept) => conceptWord(concept, uiLanguage), [uiLanguage]);
+  const t = useUiString();
+  return useCallback((concept: Concept) => conceptWord(concept, uiLanguage, t), [uiLanguage, t]);
 }
 
 /**

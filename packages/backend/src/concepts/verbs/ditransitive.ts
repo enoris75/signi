@@ -1,11 +1,13 @@
 import type { ConceptSeed } from '../types.js';
 
-// Ditransitive verbs (license a recipient/theme).
+// Ditransitive verbs (license a recipient/theme). The recipient is the `terminus` complement
+// — the dative "to whom" — which these verbs declare like any other complement-taking verb.
 export const ditransitiveVerbs: ConceptSeed[] = [
   {
     id: 'GIVE',
     role: 'verb',
     transitivity: 'ditransitive',
+    complements: ['terminus', 'cause'],
     description: 'to hand something to someone',
     emoji: '🎁',
     forms: {
@@ -69,6 +71,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'SHOW',
     role: 'verb',
     transitivity: 'ditransitive',
+    complements: ['terminus', 'cause'],
     description: 'to make something visible to someone',
     emoji: '👁️',
     forms: {
@@ -134,6 +137,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'SEND',
     role: 'verb',
     transitivity: 'ditransitive',
+    complements: ['terminus', 'cause'],
     description: 'to dispatch something to someone',
     emoji: '📨',
     forms: {

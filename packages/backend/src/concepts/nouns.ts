@@ -60,7 +60,10 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'acqua', gender: 'fem', count: 'singular' },
       fr: { base: 'eau', gender: 'fem', count: 'singular' },
       de: { base: 'Wasser', gender: 'neut', count: 'singular' },
-      es: { base: 'agua', gender: 'masc', count: 'singular' }, // special: uses "el" even though feminine
+      // "agua" is feminine but takes the masculine singular article ("el agua") because it
+      // begins with a stressed a-; stressed_a marks that, and only the article obeys it —
+      // every other agreement stays feminine ("esta agua fría", "toda el agua").
+      es: { base: 'agua', gender: 'fem', stressed_a: '1', count: 'singular' },
       ja: { base: '水', count: 'singular', reading: 'みず' },
       pt: { base: 'água', gender: 'fem', count: 'singular' },
     },
@@ -125,6 +128,22 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'niño',     plural: 'niños',    gender: 'masc', count: 'singular', fem: 'niña',     fem_plural: 'niñas' },
       ja: { base: '子供',    count: 'singular', reading: 'こども' },
       pt: { base: 'criança',  plural: 'crianças', gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'PERSON',
+    role: 'noun',
+    description: 'a human being',
+    emoji: '🧑',
+    animate: true,
+    forms: {
+      en: { base: 'person',  plural: 'people',   count: 'singular' },
+      it: { base: 'persona', plural: 'persone',  gender: 'fem', count: 'singular' },
+      fr: { base: 'personne', plural: 'personnes', gender: 'fem', count: 'singular' },
+      de: { base: 'Person',  plural: 'Personen', gender: 'fem', count: 'singular' },
+      es: { base: 'persona', plural: 'personas', gender: 'fem', count: 'singular' },
+      ja: { base: '人',      count: 'singular', reading: 'ひと' },
+      pt: { base: 'pessoa',  plural: 'pessoas',  gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -747,6 +766,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The complement a transitive verb's action falls on, not a physical thing — suffixed like
+    // SUBJECT_GRAMMAR because the plain word means both, and only this sense is seeded
+    // (ja 目的語, not 物体).
+    id: 'OBJECT_GRAMMAR',
+    role: 'noun',
+    description: 'the noun phrase a verb\'s action falls on (grammar)',
+    emoji: '🥅',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'object',      plural: 'objects',      count: 'singular' },
+      it: { base: 'complemento oggetto', plural: 'complementi oggetto', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément d\'objet', plural: 'compléments d\'objet', gender: 'masc', count: 'singular' },
+      de: { base: 'Objekt',      plural: 'Objekte',      gender: 'neut', count: 'singular' },
+      es: { base: 'complemento', plural: 'complementos', gender: 'masc', count: 'singular' },
+      ja: { base: '目的語',      count: 'singular', reading: 'もくてきご' },
+      pt: { base: 'objeto',      plural: 'objetos',      gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
@@ -822,6 +860,70 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    id: 'DETERMINER',
+    role: 'noun',
+    description: 'a word fixing the reference of a noun — the, a, this, some (grammar)',
+    emoji: '🔖',
+    forms: {
+      en: { base: 'determiner',   plural: 'determiners',   count: 'singular' },
+      it: { base: 'determinante', plural: 'determinanti',  gender: 'masc', count: 'singular' },
+      fr: { base: 'déterminant',  plural: 'déterminants',  gender: 'masc', count: 'singular' },
+      de: { base: 'Determinativ', plural: 'Determinative', gender: 'neut', count: 'singular' },
+      es: { base: 'determinante', plural: 'determinantes', gender: 'masc', count: 'singular' },
+      ja: { base: '限定詞',       count: 'singular', reading: 'げんていし' },
+      pt: { base: 'determinante', plural: 'determinantes', gender: 'masc', count: 'singular' },
+    },
+  },
+  // The three kinds of determiner, as each language's own grammar tradition names them. They
+  // label the sections of the determiner menu — the words a user knows for the dimensions the
+  // model calls identifiability / deixis / quantity (shared DeterminerCategory).
+  {
+    id: 'ARTICLE',
+    role: 'noun',
+    description: 'the determiner marking a noun as identifiable or not — the, a (grammar)',
+    emoji: '📄',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'article',   plural: 'articles',  count: 'singular' },
+      it: { base: 'articolo',  plural: 'articoli',  gender: 'masc', count: 'singular' },
+      fr: { base: 'article',   plural: 'articles',  gender: 'masc', count: 'singular' },
+      de: { base: 'Artikel',   plural: 'Artikel',   gender: 'masc', count: 'singular' },
+      es: { base: 'artículo',  plural: 'artículos', gender: 'masc', count: 'singular' },
+      ja: { base: '冠詞',      count: 'singular', reading: 'かんし' },
+      pt: { base: 'artigo',    plural: 'artigos',   gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'DEMONSTRATIVE',
+    role: 'noun',
+    description: 'the determiner that points — this, that (grammar)',
+    emoji: '👆',
+    forms: {
+      en: { base: 'demonstrative',  plural: 'demonstratives',  count: 'singular' },
+      it: { base: 'dimostrativo',   plural: 'dimostrativi',    gender: 'masc', count: 'singular' },
+      fr: { base: 'démonstratif',   plural: 'démonstratifs',   gender: 'masc', count: 'singular' },
+      de: { base: 'Demonstrativum', plural: 'Demonstrativa',   gender: 'neut', count: 'singular' },
+      es: { base: 'demostrativo',   plural: 'demostrativos',   gender: 'masc', count: 'singular' },
+      ja: { base: '指示詞',         count: 'singular', reading: 'しじし' },
+      pt: { base: 'demonstrativo',  plural: 'demonstrativos',  gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'QUANTIFIER',
+    role: 'noun',
+    description: 'the determiner of amount — some, many, few, all, no (grammar)',
+    emoji: '🔢',
+    forms: {
+      en: { base: 'quantifier',    plural: 'quantifiers',    count: 'singular' },
+      it: { base: 'quantificatore', plural: 'quantificatori', gender: 'masc', count: 'singular' },
+      fr: { base: 'quantifieur',   plural: 'quantifieurs',   gender: 'masc', count: 'singular' },
+      de: { base: 'Quantor',       plural: 'Quantoren',      gender: 'masc', count: 'singular' },
+      es: { base: 'cuantificador', plural: 'cuantificadores', gender: 'masc', count: 'singular' },
+      ja: { base: '数量詞',        count: 'singular', reading: 'すうりょうし' },
+      pt: { base: 'quantificador', plural: 'quantificadores', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'PERIOD_SENTENCE',
     role: 'noun',
     description: 'a complete sentence built of one or more clauses (grammar)',
@@ -869,6 +971,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The grammatical person (who speaks / is spoken to / is spoken about), not a human being —
+    // suffixed like SUBJECT_GRAMMAR because the plain word means both, and only this sense is
+    // seeded (ja 人称, not 人).
+    id: 'PERSON_GRAMMAR',
+    role: 'noun',
+    description: 'the speaker, the addressee or the one spoken about (grammar)',
+    emoji: '🗣️',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'person',      plural: 'persons',   count: 'singular' },
+      it: { base: 'persona',     plural: 'persone',   gender: 'fem',  count: 'singular' },
+      fr: { base: 'personne',    plural: 'personnes', gender: 'fem',  count: 'singular' },
+      de: { base: 'Person',      plural: 'Personen',  gender: 'fem',  count: 'singular' },
+      es: { base: 'persona',     plural: 'personas',  gender: 'fem',  count: 'singular' },
+      ja: { base: '人称',        count: 'singular', reading: 'にんしょう' },
+      pt: { base: 'pessoa',      plural: 'pessoas',   gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
     id: 'NUMBER',
     role: 'noun',
     description: 'a value used to count or measure',
@@ -911,6 +1032,37 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'comando',  plural: 'comandos',  gender: 'masc', count: 'singular' },
       ja: { base: '命令',     count: 'singular', reading: 'めいれい' },
       pt: { base: 'comando',  plural: 'comandos',  gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'CAUSE',
+    role: 'noun',
+    description: 'that which makes something else happen',
+    emoji: '💥',
+    forms: {
+      en: { base: 'cause',   plural: 'causes',   count: 'singular' },
+      it: { base: 'causa',   plural: 'cause',    gender: 'fem',  count: 'singular' },
+      fr: { base: 'cause',   plural: 'causes',   gender: 'fem',  count: 'singular' },
+      de: { base: 'Ursache', plural: 'Ursachen', gender: 'fem',  count: 'singular' },
+      es: { base: 'causa',   plural: 'causas',   gender: 'fem',  count: 'singular' },
+      ja: { base: '原因',    count: 'singular', reading: 'げんいん' },
+      pt: { base: 'causa',   plural: 'causas',   gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'POSSESSOR',
+    role: 'noun',
+    description: 'the one who owns or holds something',
+    emoji: '🔑',
+    animate: true,
+    forms: {
+      en: { base: 'possessor',  plural: 'possessors',  count: 'singular' },
+      it: { base: 'possessore', plural: 'possessori',  gender: 'masc', count: 'singular', fem: 'posseditrice', fem_plural: 'posseditrici' },
+      fr: { base: 'possesseur', plural: 'possesseurs', gender: 'masc', count: 'singular', fem: 'possesseuse',  fem_plural: 'possesseuses' },
+      de: { base: 'Besitzer',   plural: 'Besitzer',    gender: 'masc', count: 'singular', fem: 'Besitzerin',   fem_plural: 'Besitzerinnen' },
+      es: { base: 'poseedor',   plural: 'poseedores',  gender: 'masc', count: 'singular', fem: 'poseedora',    fem_plural: 'poseedoras' },
+      ja: { base: '所有者',     count: 'singular', reading: 'しょゆうしゃ' },
+      pt: { base: 'possuidor',  plural: 'possuidores', gender: 'masc', count: 'singular', fem: 'possuidora',   fem_plural: 'possuidoras' },
     },
   },
 ];

@@ -8,13 +8,14 @@ import {
 import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
 import { ConceptWord } from '../i18n/ConceptWord.tsx';
+import { useUiString } from '../i18n/useUiString.ts';
 
-const ROLE_CONFIG: Record<GrammaticalRole, { label: string; color: 'primary' | 'secondary' | 'success' | 'warning' | 'info' }> = {
-  pronoun: { label: 'Pronouns', color: 'primary' },
-  noun: { label: 'Nouns', color: 'success' },
-  verb: { label: 'Verbs', color: 'secondary' },
-  adjective: { label: 'Adjectives', color: 'warning' },
-  adverb: { label: 'Adverbs', color: 'info' },
+const ROLE_CONFIG: Record<GrammaticalRole, { color: 'primary' | 'secondary' | 'success' | 'warning' | 'info' }> = {
+  pronoun: { color: 'primary' },
+  noun: { color: 'success' },
+  verb: { color: 'secondary' },
+  adjective: { color: 'warning' },
+  adverb: { color: 'info' },
 };
 
 interface Props {
@@ -26,6 +27,7 @@ interface Props {
 
 export default function ConceptPalette({ role, onSelect, selectedId, disabledIds = [] }: Props) {
   const { data: concepts, isLoading } = useConcepts(role);
+  const t = useUiString();
   const config = ROLE_CONFIG[role];
 
   return (
@@ -42,7 +44,7 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
           mb: 0.75,
         }}
       >
-        {config.label}
+        {t(`palette.${role}`)}
       </Typography>
       <Stack direction="column" gap={0}>
         {isLoading

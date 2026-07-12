@@ -74,7 +74,8 @@ const STRONG_DAT: Record<Slot, string> = { masc: 'em', fem: 'er', neut: 'em', pl
 // In nom/acc an indefinite *plural* has no article, so it declines strong like a bare phrase.
 //   • kein- ("no")      → like ein-: mixed in the singular, weak in the plural.
 //   • einige/viele/wenige (some/many/few) → strong (no article carries the case).
-//   • alle ("all") and the definite article → weak.
+//   • alle ("all"), dies-/jen- (this/that) and the definite article → weak: they are
+//     der-words, carrying the case/gender ending themselves.
 function endingsFor(_case: Case, definiteness: string, plural: boolean): Record<Slot, string> {
   if (_case === 'dat') return definiteness === 'bare' ? STRONG_DAT : WEAK_ENDINGS.dat;
   if (definiteness === 'bare') return STRONG_ENDINGS[_case];
@@ -82,7 +83,7 @@ function endingsFor(_case: Case, definiteness: string, plural: boolean): Record<
   if (definiteness === 'no') return plural ? WEAK_ENDINGS[_case] : MIXED_ENDINGS[_case];
   if (definiteness === 'some' || definiteness === 'many' || definiteness === 'few')
     return STRONG_ENDINGS[_case];
-  return WEAK_ENDINGS[_case]; // 'all' and 'definite'
+  return WEAK_ENDINGS[_case]; // 'all', 'this', 'that' and 'definite'
 }
 
 function declineAdj(base: string, _case: Case, gender: string, plural: boolean, definiteness: string): string {
@@ -157,11 +158,23 @@ function keinForm(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean)
   return gender === 'fem' ? 'keine' : 'kein'; // nominative: masc/neut kein, fem keine
 }
 
+// The demonstratives dies- (this) and jen- (that), der-words that take the same case/gender
+// endings as the definite article: dieser/diesen/diesem, diese/dieser, dieses, diese/diesen.
+const DEM_ENDINGS: Record<Case, Record<Slot, string>> = {
+  nom: { masc: 'er', fem: 'e',  neut: 'es', plural: 'e'  },
+  acc: { masc: 'en', fem: 'e',  neut: 'es', plural: 'e'  },
+  dat: { masc: 'em', fem: 'er', neut: 'em', plural: 'en' },
+};
+function demForm(distal: boolean, _case: Case, gender: string, plural: boolean): string {
+  const slot: Slot = plural ? 'plural' : gender === 'masc' || gender === 'fem' ? gender : 'neut';
+  return `${distal ? 'jen' : 'dies'}${DEM_ENDINGS[_case][slot]}`;
+}
+
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'), declined
  * for case — including the dative, which the motion/dative complements use (einem/einer,
- * keinem/keiner, einigen/vielen/wenigen/allen). "kein" is self-negating (no verb concord);
- * einige/viele/wenige/alle are plural quantifiers.
+ * keinem/keiner, diesem/jener, einigen/vielen/wenigen/allen). "kein" is self-negating (no
+ * verb concord); einige/viele/wenige/alle are plural quantifiers.
  */
 function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
   // A continent name like "Afrika" goes bare in German (no article), whatever determiner
@@ -176,6 +189,8 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
     switch (definiteness) {
       case 'bare':        return '';
       case 'indefinite':  return '';                       // no "ein Wasser"
+      case 'this':        return demForm(false, _case, gender, false);
+      case 'that':        return demForm(true, _case, gender, false);
       case 'no':          return keinForm(_case, gender, false);
       case 'some':        return 'etwas';
       case 'many':        return 'viel';
@@ -188,6 +203,8 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
   const dat = _case === 'dat';
   switch (definiteness) {
     case 'bare': return '';
+    case 'this': return demForm(false, _case, gender, plural);
+    case 'that': return demForm(true, _case, gender, plural);
     case 'no':   return keinForm(_case, gender, plural);
     case 'some': return dat ? 'einigen' : 'einige';
     case 'many': return dat ? 'vielen' : 'viele';
@@ -445,6 +462,20 @@ function routeHead(c: ResolvedComplement, plural: boolean): string {
   }
 }
 
+/**
+ * Split the complements into the bare-dative recipient (`terminus`) and the rest. German puts a
+ * dative object before the accusative one ("gibt dem Mann das Buch" — the neutral order for two
+ * full noun phrases), so its clause builders render the terminus in that slot and let the other
+ * complements trail the direct object, where the shared render order puts them.
+ */
+function splitDative(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): { dative?: Partial<Record<ComplementType, ResolvedComplement>>; rest?: Partial<Record<ComplementType, ResolvedComplement>> } {
+  if (!complements?.['terminus']) return { rest: complements };
+  const { terminus, ...rest } = complements;
+  return { dative: { terminus }, rest };
+}
+
 function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
@@ -543,14 +574,15 @@ function subordinateClause(np: ResolvedNounPhrase): string {
     ? [verb.forms['base'] ?? '', ...modalStack(modals, isFuture)].join(' ')
     : isFuture ? (verb.forms['base'] ?? '') : '';
 
-  const indirectObjectText = rel.indirectObject ? nounPhrase(rel.indirectObject, 'dat') : '';
+  const { dative, rest } = splitDative(rel.complements);
+  const dativeText = complementsPhrase(dative);
   const directObjectText = rel.directObject ? nounPhrase(rel.directObject, 'acc') : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
-  const complementsText = complementsPhrase(rel.complements);
+  const complementsText = complementsPhrase(rest);
 
-  const body = [pronoun, clauseSubjectText, indirectObjectText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
+  const body = [pronoun, clauseSubjectText, dativeText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
     .filter(Boolean)
     .join(' ');
   return `, ${body}`;
@@ -581,6 +613,7 @@ const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
   EXPORT: { '2sg': 'exportiere' },
   IMPORT: { '2sg': 'importiere' },
   COORDINATE: { '2sg': 'koordiniere' },
+  SELECT: { '2sg': 'selektiere' },
   CLEAR: { '2sg': 'lösche' }, // löschen: the -sch stem keeps the du -e
 };
 
@@ -597,7 +630,10 @@ function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: 
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
-    const { subject, verbPhrase, directObject, indirectObject } = phrase;
+    const { subject, verbPhrase, directObject } = phrase;
+    // The dative recipient leads the accusative object; the other complements trail it.
+    const { dative, rest } = splitDative(phrase.complements);
+    const dativeText = complementsPhrase(dative);
     const subjectText = subjectPhrase(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
@@ -609,21 +645,20 @@ function renderClause(phrase: ResolvedPhrase): string {
     if (mood === 'imperative') {
       const word = deImperativeWord(verb.forms, verb.conceptId, deImperativePN(subject.head.forms));
       const impDirect = directObject ? nounPhrase(directObject, 'acc') : '';
-      const impIndirect = indirectObject ? nounPhrase(indirectObject, 'dat') : '';
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
       const hasPredicative = !!phrase.complements?.['predicative'];
-      const impComplements = complementsPhrase(phrase.complements);
+      const impComplements = complementsPhrase(rest);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
       if (register === 'instruction') {
-        return [impModifier, impIndirect, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word]
+        return [impModifier, dativeText, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word]
           .filter(Boolean)
           .join(' ')
           .trim();
       }
-      const parts = [word, impModifier, impIndirect, impDirect];
+      const parts = [word, impModifier, dativeText, impDirect];
       if (hasPredicative) {
         if (applyNicht) parts.push('nicht');
         parts.push(impComplements);
@@ -648,10 +683,6 @@ function renderClause(phrase: ResolvedPhrase): string {
     const directObjectText = directObject
       ? nounPhrase(directObject, 'acc')
       : '';
-    // German: dative (indirect) comes BEFORE accusative (direct) when both are noun phrases
-    const indirectObjectText = indirectObject
-      ? nounPhrase(indirectObject, 'dat')
-      : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
 
     // "nicht" precedes the modifier when one exists ("nicht immer"),
@@ -666,8 +697,8 @@ function renderClause(phrase: ResolvedPhrase): string {
     const negBefore = applyNicht && modifierText ? 'nicht' : '';
     const negComplement = applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
     const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
-    const complementsText = complementsPhrase(phrase.complements);
-    return [subjectText, verbText, aspectMid, negBefore, modifierText, indirectObjectText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
+    const complementsText = complementsPhrase(rest);
+    return [subjectText, verbText, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
       .filter(Boolean).join(' ').trim();
 }
 

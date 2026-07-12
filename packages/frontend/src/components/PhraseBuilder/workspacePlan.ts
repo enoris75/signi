@@ -3,13 +3,13 @@ import { COMPLEMENT_TYPES } from "@signi/shared";
 import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isCoordinativeLink, isRelativeLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
-const CORE_KEYS = new Set<NounKey>(["subject", "directObject", "indirectObject"]);
+const CORE_KEYS = new Set<NounKey>(["subject", "directObject"]);
 const COMPLEMENT_KEYS = new Set<string>(COMPLEMENT_TYPES);
 
 // Resolve the top-level noun phrase filling a container plan's slot. Core roles
 // (subject/objects) sit at the top level; complement nouns live under `complements[type].phrase`.
 function getTopNoun(plan: Partial<PhrasePlan>, key: NounKey): NounPhrase | undefined {
-  if (CORE_KEYS.has(key)) return plan[key as "subject" | "directObject" | "indirectObject"];
+  if (CORE_KEYS.has(key)) return plan[key as "subject" | "directObject"];
   return plan.complements?.[key as ComplementType]?.phrase;
 }
 
@@ -116,7 +116,6 @@ function buildRelativeClause(
     subject: gap === "subject" ? undefined : plan.subject,
     verbPhrase: plan.verbPhrase!,
     directObject: gap === "directObject" ? undefined : plan.directObject,
-    indirectObject: gap === "indirectObject" ? undefined : plan.indirectObject,
     complements: complements && Object.keys(complements).length > 0 ? complements : undefined,
   };
 }

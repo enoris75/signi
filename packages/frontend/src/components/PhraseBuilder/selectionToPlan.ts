@@ -151,7 +151,6 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
       : buildNounPhrase(sel, "subject"),
     verbPhrase: buildVerbPhrase(sel),
     directObject: buildNounPhrase(sel, "directObject"),
-    indirectObject: buildNounPhrase(sel, "indirectObject"),
     complements: buildComplements(sel),
     // The register rides along with the mood: absent ⇒ 'request', a command spoken to the
     // addressee above. 'instruction' addresses nobody, and the engines then ignore the person.

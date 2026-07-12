@@ -91,18 +91,24 @@ const PATH_PREP: Record<PathSpecifier, string> = {
 
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'):
- * "the", "a/an", nothing (bare), or a quantifier (some/no/many/few/all). "a" vs "an" is
- * chosen on the sound of `lead` — the first word that will actually follow the article
- * (an adjective if present, else the noun) — and an indefinite plural is bare ("a wolf"
- * → plural "wolves"). Returns the determiner with a trailing space, or "" for bare.
+ * "the", "a/an", nothing (bare), a demonstrative (this/these, that/those), or a quantifier
+ * (some/no/many/few/all). "a" vs "an" is chosen on the sound of `lead` — the first word that
+ * will actually follow the article (an adjective if present, else the noun) — and an
+ * indefinite plural is bare ("a wolf" → plural "wolves"). Returns the determiner with a
+ * trailing space, or "" for bare.
  */
 function determiner(forms: Record<string, string>, lead: string): string {
   // A proper noun ("Africa") takes no article in English, whatever determiner was picked.
   if (forms['proper'] === '1') return '';
   const definiteness = forms['definiteness'] ?? 'definite';
   const mass = forms['uncountable'] === '1';
+  // A demonstrative agrees with the phrase's number ("this boy" / "these boys"); a mass
+  // noun never pluralises, so it always takes the singular ("this water").
+  const plural = (forms['number'] ?? forms['count']) === 'plural';
   switch (definiteness) {
     case 'bare':  return '';
+    case 'this':  return plural ? 'these ' : 'this ';
+    case 'that':  return plural ? 'those ' : 'that ';
     case 'some':  return 'some ';
     case 'no':    return 'no ';
     case 'many':  return mass ? 'much ' : 'many ';   // mass: much water
@@ -330,7 +336,6 @@ function predicateParts(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounPhrase,
-  indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
   const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -340,10 +345,6 @@ function predicateParts(
 
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
-    : '';
-  // Prepositional dative: "to the cat"
-  const indirectObjectText = indirectObject
-    ? `to ${withRelative(nounPhrase(indirectObject.head.forms, npAdj(indirectObject), nounMods(indirectObject), indirectObject.possessor), indirectObject)}`
     : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
@@ -367,7 +368,7 @@ function predicateParts(
       : (negateVerb ? `do not ${base}` : base);
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+    return [preVerb, verbText, directObjectText, complementsText, postVerb];
   }
 
   // Conditional apodosis: "would" + the verb group ("would run", "would not run", "would be
@@ -380,7 +381,7 @@ function predicateParts(
     const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+    return [preVerb, verbText, directObjectText, complementsText, postVerb];
   }
 
   // A modal chain makes the outermost modal the finite verb — it takes the tense, the
@@ -393,7 +394,7 @@ function predicateParts(
     ].join(' ');
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+    return [preVerb, verbText, directObjectText, complementsText, postVerb];
   }
 
   // A non-neutral aspect (progressive/prospective/resultative) is periphrastic on "be",
@@ -405,9 +406,9 @@ function predicateParts(
     if (isFrequency && modifierText) {
       const [aux, ...rest] = verbText.split(' ');
       const withAdv = [aux, modifierText, ...rest].join(' ');
-      return ['', withAdv, directObjectText, indirectObjectText, complementsText, ''];
+      return ['', withAdv, directObjectText, complementsText, ''];
     }
-    return ['', verbText, directObjectText, indirectObjectText, complementsText, modifierText];
+    return ['', verbText, directObjectText, complementsText, modifierText];
   }
 
   if (verbNegative && !modifierIsNegative) {
@@ -418,7 +419,7 @@ function predicateParts(
         ? `will not ${verb.forms['base'] ?? 'be'}`
         : `${conjugate(verb.forms, subjectForms, tense)} not`;
       const trailingMod = isFrequency ? '' : modifierText;
-      return [negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
+      return [negVerb, directObjectText, complementsText, trailingMod];
     }
     const person = subjectForms['person'] ?? '3';
     const number = subjectForms['number'] ?? 'singular';
@@ -432,7 +433,7 @@ function predicateParts(
     // Frequency adverbs slot between aux and base: "do not always drink"
     const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
     const trailingMod = isFrequency ? '' : modifierText;
-    return [negVerb, directObjectText, indirectObjectText, complementsText, trailingMod];
+    return [negVerb, directObjectText, complementsText, trailingMod];
   }
   // Future is periphrastic ("will eat"); present/past come from the forms map.
   const verbText = tense === 'future'
@@ -442,7 +443,7 @@ function predicateParts(
   // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
   const preVerb  = isFrequency ? modifierText : '';
   const postVerb = isFrequency ? '' : modifierText;
-  return [preVerb, verbText, directObjectText, indirectObjectText, complementsText, postVerb];
+  return [preVerb, verbText, directObjectText, complementsText, postVerb];
 }
 
 /**
@@ -460,7 +461,7 @@ function relativeText(np: ResolvedNounPhrase): string {
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
   const subjText = subjectRelative ? '' : withRelative(subjectPhrase(rel.subject!), rel.subject!);
-  return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements)]
+  return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements)]
     .filter(Boolean)
     .join(' ');
 }
@@ -482,7 +483,7 @@ function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase) return subjectText.trim();
   return [
     subjectText,
-    ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements),
+    ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements),
   ]
     .filter(Boolean)
     .join(' ')

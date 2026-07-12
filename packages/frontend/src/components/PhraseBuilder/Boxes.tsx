@@ -368,7 +368,8 @@ export function ToggleBox({ label, value }: { label: string; value: string }) {
 }
 
 export function DeterminerToggleBox({ value }: { value: Definiteness }) {
-  // Short surface for the toggle box: "the" / "a" / "—" / the quantifier word.
+  const t = useUiString();
+  // Short surface for the toggle box: "the" / "a" / "—" / the demonstrative or quantifier word.
   const label =
     value === "definite"
       ? "The"
@@ -376,8 +377,12 @@ export function DeterminerToggleBox({ value }: { value: Definiteness }) {
         ? "A / An"
         : value === "bare"
           ? "—"
-          : DEFINITENESS_LABELS[value];
-  return <ToggleBox label="Determiner" value={label} />;
+          : value === "this"
+            ? "This"
+            : value === "that"
+              ? "That"
+              : DEFINITENESS_LABELS[value];
+  return <ToggleBox label={t("satellite.determiner")} value={label} />;
 }
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {

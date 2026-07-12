@@ -28,7 +28,6 @@ export interface SlotConfig {
     "verbModal" |
     "verbModal2" |
     "directObject" |
-    "indirectObject" |
     "modifier" |
     "subjectAdjective" |
     "subjectAdjective2" |
@@ -36,9 +35,6 @@ export interface SlotConfig {
     "directObjectAdjective" |
     "directObjectAdjective2" |
     "directObjectAdjective3" |
-    "indirectObjectAdjective" |
-    "indirectObjectAdjective2" |
-    "indirectObjectAdjective3" |
     ComplementType |
     `${ComplementType}Adjective` |
     `${ComplementType}Adjective2` |
@@ -93,7 +89,6 @@ export interface PhraseSelection {
     verbModal?: Concept;
     verbModal2?: Concept;
     directObject?: Concept;
-    indirectObject?: Concept;
     modifier?: Concept;
     // Each noun block chains up to three adjectives; each one is revealed from a control
     // on the previous adjective's box, so `Adjective2` only exists once `Adjective` is set.
@@ -110,11 +105,6 @@ export interface PhraseSelection {
     directObjectAdjective?: Concept;
     directObjectAdjective2?: Concept;
     directObjectAdjective3?: Concept;
-    indirectObjectNumber?: "singular" | "plural";
-    indirectObjectGender?: "masc" | "fem" | "neut";
-    indirectObjectAdjective?: Concept;
-    indirectObjectAdjective2?: Concept;
-    indirectObjectAdjective3?: Concept;
     // Subject complement (predicative) of a copular verb (become/seem/appear). Its head
     // may be a predicate noun ("becomes a legend") or a predicate adjective ("seems
     // happy"); number/gender apply only to a noun head (an adjective head agrees with the
@@ -168,9 +158,9 @@ export interface PhraseSelection {
     causeAdjective2?: Concept;
     causeAdjective3?: Concept;
     causeSentiment?: CauseSentiment;
-    // Terminus / dative adjunct ("cut the hair *to the cat*") — the recipient or goal, "to
-    // whom / to what". Renders with each language's indirect-object dative; carries no
-    // specifier.
+    // Terminus — the recipient or goal, "to whom / to what": the traditional indirect object
+    // ("gives the book *to the cat*") and the dative adjunct a plain transitive verb can take
+    // ("cut the hair *to the cat*") alike. Renders with each language's dative; no specifier.
     terminus?: Concept;
     terminusNumber?: "singular" | "plural";
     terminusGender?: "masc" | "fem" | "neut";
@@ -205,7 +195,6 @@ export interface PhraseSelection {
     // its own nested possessor all reuse the `subject*` fields); built via buildNounPhrase.
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
-    indirectObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
     locativePossessor?: PhraseSelection;
     directionPossessor?: PhraseSelection;
@@ -223,12 +212,12 @@ export interface ConceptSelectOpts {
   gender?: "masc" | "fem" | "neut";
 }
 
-export type NumberSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
+export type NumberSlot = "subject" | "directObject" | ComplementType;
 
-export type GenderSlot = "subject" | "directObject" | "indirectObject" | ComplementType;
+export type GenderSlot = "subject" | "directObject" | ComplementType;
 
 // The noun blocks that can carry a relative clause / possessor (same set as NumberSlot).
-export type NounKey = "subject" | "directObject" | "indirectObject" | ComplementType;
+export type NounKey = "subject" | "directObject" | ComplementType;
 
 // The address of a noun anywhere in a container's phrase tree, used as a cross-container
 // link endpoint. A top-level noun is just its `NounKey`; a possessor head is that address

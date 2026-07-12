@@ -13,7 +13,9 @@ export type Transitivity = 'intransitive' | 'transitive' | 'ditransitive';
 /**
  * A noun phrase's leading determiner. Beyond the three definiteness values (definite /
  * indefinite / bare) it also carries the quantifiers, which some languages inflect for
- * gender/number and, for `no`, weave into verb negation (negative concord).
+ * gender/number and, for `no`, weave into verb negation (negative concord), and the
+ * demonstratives `this` / `that` (proximal / distal), which inflect for gender/number/case
+ * and, unlike the quantifiers, keep the phrase's own number ("this boy" / "these boys").
  */
 export type Definiteness =
   | 'definite'
@@ -23,19 +25,50 @@ export type Definiteness =
   | 'no'
   | 'many'
   | 'few'
-  | 'all';
+  | 'all'
+  | 'this'
+  | 'that';
 
-/** Cycle order used by the UI toggle. */
-export const DEFINITENESS: Definiteness[] = [
-  'definite',
-  'indefinite',
-  'bare',
-  'some',
-  'no',
-  'many',
-  'few',
-  'all',
-];
+/**
+ * The semantic dimension a determiner value belongs to. Not the part of speech that spells it:
+ * an *article* is one language's way of realizing identifiability (English writes a word, German
+ * fuses it with case and gender, Japanese leaves it to context), so "article" is a fact about an
+ * engine, while these three are facts about the meaning being built.
+ *
+ *   identifiability — can the addressee already pick the referent out? ("the cat" yes, "a cat"
+ *                     no, bare = the language spells neither: the zero article)
+ *   deixis          — identifiability by pointing, near the speaker or away from them
+ *   quantity        — how much of the class the phrase takes in
+ *
+ * The UI names each dimension with the word users know for its realization (Article /
+ * Demonstrative / Quantifier — see the `determiner.category.*` UI strings); the model keeps
+ * the semantic name.
+ */
+export type DeterminerCategory = 'identifiability' | 'deixis' | 'quantity';
+
+/** Display order of the dimensions. */
+export const DETERMINER_CATEGORIES: DeterminerCategory[] = ['identifiability', 'deixis', 'quantity'];
+
+/** The values each dimension offers, in display order. */
+export const DETERMINER_CATEGORY_VALUES: Record<DeterminerCategory, Definiteness[]> = {
+  identifiability: ['definite', 'indefinite', 'bare'],
+  // Historically the definite article descends from the distal demonstrative in most of these
+  // languages, which is why the two compete for the one slot rather than stacking.
+  deixis: ['this', 'that'],
+  quantity: ['some', 'no', 'many', 'few', 'all'],
+};
+
+/** The dimension each determiner value belongs to — the inverse of DETERMINER_CATEGORY_VALUES. */
+export const DETERMINER_CATEGORY: Record<Definiteness, DeterminerCategory> = Object.fromEntries(
+  DETERMINER_CATEGORIES.flatMap((category) =>
+    DETERMINER_CATEGORY_VALUES[category].map((value) => [value, category]),
+  ),
+) as Record<Definiteness, DeterminerCategory>;
+
+/** Every determiner value, grouped by dimension. The order the UI menu lists them in. */
+export const DEFINITENESS: Definiteness[] = DETERMINER_CATEGORIES.flatMap(
+  (category) => DETERMINER_CATEGORY_VALUES[category],
+);
 
 export const DEFINITENESS_LABELS: Record<Definiteness, string> = {
   definite: 'Definite (the)',
@@ -46,6 +79,8 @@ export const DEFINITENESS_LABELS: Record<Definiteness, string> = {
   many: 'Many',
   few: 'Few',
   all: 'All',
+  this: 'This / These',
+  that: 'That / Those',
 };
 
 /**
@@ -161,11 +196,12 @@ export const ASPECT_LABELS: Record<Aspect, string> = {
  * `locative`/`direction`/`source`/`route` are the motion/place family; `cause`
  * is the reason/motive adjunct — "the boy cried **because of the dog**"
  * (a causa di / à cause de / wegen / por causa de …). `terminus` is the dative
- * "to whom / to what" adjunct — the recipient/goal of the action ("I give the book
- * **to him**", "I cut the hair **to the cat**"). It renders with the same dative
- * adposition each language already uses for the indirect object (to / a / à / dative
- * case / に); unlike the ditransitive `indirectObject` it is a per-verb-licensed
- * adjunct, so a plain transitive verb (cut, read) can take one. `predicative` is the
+ * "to whom / to what" — the recipient/goal of the action, i.e. what traditional
+ * grammar calls the indirect object ("I give the book **to him**", "I cut the hair
+ * **to the cat**"). It renders with each language's dative (to / a / à / dative case /
+ * に). Being licensed per verb rather than by transitivity, it covers both the
+ * ditransitive's recipient (give / show / send) and the dative adjunct a plain
+ * transitive verb (cut, read) can take. `predicative` is the
  * subject complement of a copular/linking verb — the predicate nominative or predicate
  * adjective that describes the *subject*: "she becomes **a legend**", "he seems
  * **happy**". Unlike the others it takes no adposition; a noun head keeps its own
@@ -183,8 +219,8 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'l
  * then the motion path "from X to Y through Z", the static locative, and the causal
  * adjunct ("because of …") last. In Japanese (SOV) everything precedes the verb, so the
  * subject complement's になる/く-form ends up adjacent to the verb regardless. The dative
- * `terminus` ("to him") sits with the recipient right after the subject complement, mirroring
- * where the indirect object falls ("gives **a legend** the book to the cat").
+ * `terminus` ("to him") — the recipient — sits right after the subject complement, before the
+ * path ("gives **a legend** to the cat from the house").
  */
 export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'source', 'direction', 'route', 'locative', 'cause'];
 
@@ -369,12 +405,11 @@ export interface NounPhrase {
  */
 export interface RelativeClause {
   /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
-  headRole?: 'subject' | 'directObject' | 'indirectObject' | ComplementType;
+  headRole?: 'subject' | 'directObject' | ComplementType;
   /** The clause's own subject — present when headRole !== 'subject' (drives agreement). */
   subject?: NounPhrase;
   verbPhrase: VerbPhrase;
   directObject?: NounPhrase;
-  indirectObject?: NounPhrase;
   complements?: Partial<Record<ComplementType, Complement>>;
 }
 
@@ -440,7 +475,8 @@ export interface PhrasePlan {
   // complements, which hang off the verb, are meaningless without it.
   verbPhrase?: VerbPhrase;
   directObject?: NounPhrase;
-  indirectObject?: NounPhrase;
+  // The recipient of a ditransitive ("gives the book *to the cat*") is not a slot of its own:
+  // it is the `terminus` complement, which every verb that licenses one declares.
   complements?: Partial<Record<ComplementType, Complement>>;
   /**
    * An optional hypothetical condition (the protasis / "if" clause) — itself a full plan.

@@ -27,7 +27,12 @@ const SPECIAL_START = /^(s[^aeiou]|z|ps|gn|x|y)/i;
  * (grande/piccolo) precede, so they behave consistently — the trade-off is that a
  * size + beauty pair stacks before the noun ("il grande bel cane").
  */
-const PRENOMINAL = new Set(['BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL']);
+// The ordinals join them: an ordinal precedes its noun in Italian ("il primo padre", "la
+// seconda volta"), unlike the qualifying adjectives that follow it.
+const PRENOMINAL = new Set([
+  'BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
+  'FIRST', 'SECOND', 'THIRD',
+]);
 
 function isPlural(forms: Record<string, string>): boolean {
   return (forms['number'] ?? forms['count']) === 'plural';
@@ -79,9 +84,36 @@ function nessunForm(gender: string, lead: string): string {
 }
 
 /**
+ * The proximal demonstrative "questo", agreeing in gender/number and eliding before a vowel:
+ * masc "questo"/"questi" · fem "questa"/"queste" · "quest'amico", "quest'amica" (the singulars
+ * elide; the plurals never do).
+ */
+function questoForm(forms: Record<string, string>, plural: boolean, lead: string): string {
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  if (plural) return fem ? 'queste' : 'questi';
+  if (VOWEL_START.test(lead)) return "quest'";
+  return fem ? 'questa' : 'questo';
+}
+
+/**
+ * The distal demonstrative "quello", which inflects exactly like the definite article —
+ * quel/quello/quell' · quei/quegli · quella/quell' · quelle — so it is built by mapping the
+ * article `defArticle` picks for the same gender/number/`lead` onto its quel- counterpart.
+ */
+const QUELLO_FOR_ARTICLE: Record<string, string> = {
+  il: 'quel', lo: 'quello', "l'": "quell'", i: 'quei', gli: 'quegli', la: 'quella', le: 'quelle',
+};
+function quelloForm(forms: Record<string, string>, plural: boolean, lead: string): string {
+  const art = defArticle(forms, plural, lead);
+  // The feminine singular "l'" maps to "quell'" like the masculine, which the table already
+  // gives; every article the function can return is covered, so the fallback never fires.
+  return QUELLO_FOR_ARTICLE[art] ?? 'quel';
+}
+
+/**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
- * (default 'definite'): the definite/indefinite article, nothing (bare), or a
- * quantifier agreeing in gender (and, for "tutti/e", carrying the definite article).
+ * (default 'definite'): the definite/indefinite article, nothing (bare), a demonstrative,
+ * or a quantifier agreeing in gender (and, for "tutti/e", carrying the definite article).
  */
 function artFor(forms: Record<string, string>, plural: boolean, lead: string): string {
   // A proper noun (l'Africa) always takes the definite article in Italian, whatever
@@ -95,6 +127,8 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
     switch (definiteness) {
       case 'bare':       return '';
       case 'indefinite': return '';                                   // bare: "bevo acqua"
+      case 'this':       return questoForm(forms, false, lead);
+      case 'that':       return quelloForm(forms, false, lead);
       case 'some':       return prepArt('di', forms, false, lead);    // partitive: "dell'acqua"
       case 'many':       return fem ? 'molta' : 'molto';
       case 'few':        return fem ? 'poca' : 'poco';
@@ -106,6 +140,8 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural, lead);
+    case 'this':       return questoForm(forms, plural, lead);
+    case 'that':       return quelloForm(forms, plural, lead);
     case 'some':       return fem ? 'alcune' : 'alcuni';
     case 'many':       return fem ? 'molte' : 'molti';
     case 'few':        return fem ? 'poche' : 'pochi';
@@ -126,24 +162,6 @@ function joinWords(words: string[]): string {
   return words
     .filter(Boolean)
     .reduce((acc, w) => (!acc ? w : acc.endsWith("'") ? `${acc}${w}` : `${acc} ${w}`), '');
-}
-
-/**
- * Italian "a" (to) + definite article contractions:
- * a+il=al, a+lo=allo, a+la=alla, a+l'=all', a+i=ai, a+gli=agli, a+le=alle
- */
-function datPrep(forms: Record<string, string>, plural = false, lead?: string): string {
-  const art = defArticle(forms, plural, lead);
-  switch (art) {
-    case 'il':  return 'al';
-    case 'lo':  return 'allo';
-    case 'la':  return 'alla';
-    case "l'":  return "all'";
-    case 'i':   return 'ai';
-    case 'gli': return 'agli';
-    case 'le':  return 'alle';
-    default:    return `a ${art}`;
-  }
 }
 
 /**
@@ -528,7 +546,6 @@ function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounPhrase,
-  indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -557,10 +574,6 @@ function predicateText(
   const directObjectText = directObject
     ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
     : '';
-  // [non] V Adv DirectObj IndirectObj(a+article)
-  const indirectObjectText = indirectObject
-    ? renderNP(indirectObject, (plural, lead) => datPrep(indirectObject.head.forms, plural, lead))
-    : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
@@ -571,11 +584,11 @@ function predicateText(
     // so an instruction only pins the person to tu — it has no addressee to take noi/voi from.
     const impPN = register === 'instruction' ? '2sg' : moodPN(subjectForms);
     const impForm = imperativeForm('it', verb, impPN, negText === 'non') ?? verbText;
-    return [negText, impForm, modifierText, directObjectText, indirectObjectText, complementsText]
+    return [negText, impForm, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [negText, verbText, modifierText, directObjectText, indirectObjectText, complementsText]
+  return [negText, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -591,7 +604,7 @@ function relativeText(np: ResolvedNounPhrase): string {
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
   const subjText = subjectRelative ? '' : subjectPhrase(rel.subject!);
-  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `che ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }
 
@@ -603,7 +616,7 @@ function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("ultime notizie").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
@@ -625,5 +638,11 @@ export const italianEngine: LanguageEngine = {
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
     return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+  },
+  renderWord(word: ConceptForms): string {
+    const f = word.forms;
+    const base = f['base'] ?? '';
+    if (f['role'] !== 'adjective') return base;
+    return agreeAdj(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
 };

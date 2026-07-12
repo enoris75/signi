@@ -1,7 +1,7 @@
 import React from "react";
 import { Box, Popover, Tooltip, type SxProps, type Theme } from "@mui/material";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
-import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type ComplementType, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   ConceptSelectOpts,
   GenderSlot,
@@ -87,7 +87,7 @@ export interface PhraseRenderContext {
   handleClear: (slot: SlotKey) => void;
   handleToggleNumber: (which: NumberSlot) => void;
   handleToggleGender: (which: GenderSlot) => void;
-  handleCycleDefiniteness: (which: NounKey) => void;
+  handleSetDefiniteness: (which: NounKey, value: Definiteness) => void;
   // Cycle the semantic relation of an attributive-noun modifier sitting in an adjective slot.
   handleCycleModifierRelation: (slotKey: SlotKey) => void;
   // Toggle a noun-modifier's own number (singular ⇄ plural), keyed by its adjective slot.

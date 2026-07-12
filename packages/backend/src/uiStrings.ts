@@ -1,6 +1,6 @@
-import { translate } from '@signi/engine';
+import { translate, translateWord } from '@signi/engine';
 import { UI_STRINGS, LANGUAGES } from '@signi/shared';
-import type { LanguageCode, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
+import type { LanguageCode, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
@@ -23,18 +23,25 @@ export function buildUiStrings(): UiStrings {
   const out = {} as UiStrings;
 
   for (const key of Object.keys(UI_STRINGS) as UiStringKey[]) {
-    const def = UI_STRINGS[key];
+    // Annotated, not inferred: the catalog preserves each entry's literal type, and only the
+    // declared union tells a `word` entry from a `plan` one.
+    const def: UiStringDef = UI_STRINGS[key];
     const byLanguage = {} as Record<LanguageCode, string>;
 
-    for (const t of translate(def.plan, lookupLexicalEntry)) {
-      byLanguage[t.language] = applyFormat(t.text, def.format);
+    const rendered =
+      def.word !== undefined
+        ? translateWord(def.word, lookupLexicalEntry, def.agreesWith)
+        : translate(def.plan, lookupLexicalEntry);
+
+    for (const t of rendered) {
+      if (t.text) byLanguage[t.language] = applyFormat(t.text, def.format);
     }
 
     const missing = LANGUAGE_CODES.filter((code) => !byLanguage[code]);
     if (missing.length > 0) {
       throw new Error(
         `UI string "${key}" did not render in: ${missing.join(', ')}. ` +
-          'Check the concepts its plan references are seeded in every language.',
+          'Check the concepts it references are seeded in every language.',
       );
     }
 

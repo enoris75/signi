@@ -29,10 +29,23 @@ function indefArticle(forms: Record<string, string>, plural = false): string {
 }
 
 /**
+ * The demonstratives, agreeing in gender and number: proximal "este/esta/estes/estas"
+ * (this/these) and medial "esse/essa/esses/essas" (that/those). Portuguese also has a distal
+ * "aquele" (yonder, away from both speakers), but the two-way this/that contrast maps onto
+ * este/esse, the pair that mirrors the speaker/hearer split "that" carries.
+ */
+function demonstrative(distal: boolean, forms: Record<string, string>, plural = false): string {
+  const fem = (forms['gender'] ?? 'masc') === 'fem';
+  const stem = distal ? 'ess' : 'est';
+  if (plural) return `${stem}${fem ? 'as' : 'es'}`;
+  return `${stem}${fem ? 'a' : 'e'}`;
+}
+
+/**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
- * (default 'definite'): the definite/indefinite article, nothing (bare), or a quantifier
- * agreeing in gender. "todos/todas" carry the definite article; "nenhum/nenhuma" is
- * singular and drives verb negation ("não") upstream when it is an object.
+ * (default 'definite'): the definite/indefinite article, nothing (bare), a demonstrative,
+ * or a quantifier agreeing in gender. "todos/todas" carry the definite article;
+ * "nenhum/nenhuma" is singular and drives verb negation ("não") upstream when it is an object.
  */
 function artFor(forms: Record<string, string>, plural = false): string {
   // A proper noun (a África) always takes the definite article in Portuguese, whatever
@@ -45,6 +58,8 @@ function artFor(forms: Record<string, string>, plural = false): string {
     switch (definiteness) {
       case 'bare':       return '';
       case 'indefinite': return '';                 // no "uma água" — bare
+      case 'this':       return demonstrative(false, forms, false);
+      case 'that':       return demonstrative(true, forms, false);
       case 'some':       return 'um pouco de';
       case 'many':       return fem ? 'muita' : 'muito';
       case 'few':        return fem ? 'pouca' : 'pouco';
@@ -56,6 +71,8 @@ function artFor(forms: Record<string, string>, plural = false): string {
   switch (definiteness) {
     case 'bare':       return '';
     case 'indefinite': return indefArticle(forms, plural);
+    case 'this':       return demonstrative(false, forms, plural);
+    case 'that':       return demonstrative(true, forms, plural);
     case 'some':       return fem ? 'algumas' : 'alguns';
     case 'many':       return fem ? 'muitas' : 'muitos';
     case 'few':        return fem ? 'poucas' : 'poucos';
@@ -93,14 +110,43 @@ function agreeAdj(base: string, gender: string, plural: boolean): string {
   return plural ? pluralize(sg) : sg;
 }
 
-/** Join a noun phrase's adjectives, each agreed with the head's gender/number. */
-function ptAdj(np: ResolvedNounPhrase): string {
+/**
+ * Concept IDs of the adjectives that precede their noun in Portuguese. Only the ordinals do:
+ * "o primeiro dia", "a segunda vez". Every qualifying adjective follows the noun (and unlike
+ * Spanish, no ordinal apocopates — "o primeiro dia", never "*o primer dia").
+ */
+const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD']);
+
+/** A noun phrase's adjectives, agreed with the head and split around it. */
+interface PtAdjectives {
+  /** The prenominal ones, in order, ready to sit between the article and the noun. */
+  pre: string;
+  /** The postnominal ones, coordinated with "e". */
+  post: string;
+}
+
+/** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
+function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
-  return np.adjectives
-    .map((a) => ptDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
-    .filter(Boolean)
-    .join(' e ');
+  const pre: string[] = [];
+  const post: string[] = [];
+  for (const a of np.adjectives) {
+    const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
+    if (!surface) continue;
+    // A comparative/superlative follows the noun even when its plain form precedes it: its
+    // degree adverb belongs with the phrase, not between the article and the noun.
+    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') pre.push(surface);
+    else post.push(ptDeg(a, surface));
+  }
+  return { pre: pre.join(' '), post: post.join(' e ') };
+}
+
+/** A noun with its adjectives set around it: the prenominal ones, the noun, then the rest. */
+function withAdj(word: string, adj?: PtAdjectives): string {
+  const pre = adj?.pre ? `${adj.pre} ` : '';
+  const post = adj?.post ? ` ${adj.post}` : '';
+  return `${pre}${word}${post}`;
 }
 
 /** Portuguese "em" (in) + article: em+o=no, em+a=na, em+os=nos, em+as=nas. */
@@ -145,8 +191,10 @@ function prepDet(prep: string, forms: Record<string, string>, plural = false): s
 
 /**
  * Contracting preposition (a/de/em/por) + determiner. The definite article fuses via
- * `contract` (ao/à, do/da, no/na, pelo/pela); any other determiner rides after the plain
- * preposition uncontracted ("a uma casa", "de muitas casas", "em nenhuma casa").
+ * `contract` (ao/à, do/da, no/na, pelo/pela); "em" and "de" fuse with a demonstrative just as
+ * obligatorily (em+esta = nesta, de+esse = desse), which is the one determiner besides the
+ * article that contracts. Everything else rides after the plain preposition uncontracted
+ * ("a uma casa", "de muitas casas", "em nenhuma casa").
  */
 function contractDet(
   contract: (f: Record<string, string>, p: boolean) => string,
@@ -154,7 +202,13 @@ function contractDet(
   forms: Record<string, string>,
   plural = false,
 ): string {
-  if ((forms['definiteness'] ?? 'definite') === 'definite') return contract(forms, plural);
+  const definiteness = forms['definiteness'] ?? 'definite';
+  // A proper noun keeps its definite article whatever was picked (see `artFor`), so it
+  // contracts with it: "na África".
+  if (definiteness === 'definite' || forms['proper'] === '1') return contract(forms, plural);
+  if ((definiteness === 'this' || definiteness === 'that') && (prep === 'em' || prep === 'de')) {
+    return `${prep === 'em' ? 'n' : 'd'}${demonstrative(definiteness === 'that', forms, plural)}`;
+  }
   return prepDet(prep, forms, plural);
 }
 
@@ -221,13 +275,13 @@ function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect):
   return inf;
 }
 
-function nounPhrase(forms: Record<string, string>, adj?: string): string {
+function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? ` ${adj}` : '';
+  const noun = withAdj(word, adj);
   const art = artFor(forms, plural); // definite / indefinite / bare
-  return art ? `${art} ${word}${a}` : `${word}${a}`;
+  return art ? `${art} ${noun}` : noun;
 }
 
 /**
@@ -243,15 +297,7 @@ function predicativeForms(forms: Record<string, string>): Record<string, string>
   return { ...forms, definiteness: 'bare' };
 }
 
-function indirectNounPhrase(forms: Record<string, string>, adj?: string): string {
-  const count = forms['number'] ?? forms['count'] ?? 'singular';
-  const plural = count === 'plural';
-  const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const a = adj ? ` ${adj}` : '';
-  return `${datPrep(forms, plural)} ${word}${a}`;
-}
-
-function subjectPhrase(forms: Record<string, string>, adj?: string): string {
+function subjectPhrase(forms: Record<string, string>, adj?: PtAdjectives): string {
   if (forms['person']) {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
@@ -316,8 +362,7 @@ function complementsPhrase(
       }
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const a = ptAdj(c.phrase);
-      const adj = a ? ` ${a}` : '';
+      const noun = withAdj(word, ptAdj(c.phrase));
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para
@@ -339,7 +384,7 @@ function complementsPhrase(
           `por causa ${dePrep(f, plural)}`
         ) :
         routeHead(c, plural);
-      return withRelative(`${head} ${word}${adj}`, c.phrase);
+      return withRelative(`${head} ${noun}`, c.phrase);
     })
     .filter(Boolean)
     .join(' ');
@@ -356,9 +401,7 @@ function possessorText(np: ResolvedNounPhrase): string {
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  const a = ptAdj(poss);
-  const adj = a ? ` ${a}` : '';
-  return ` ${withRelative(`${dePrep(f, plural)} ${word}${adj}`, poss)}`;
+  return ` ${withRelative(`${dePrep(f, plural)} ${withAdj(word, ptAdj(poss))}`, poss)}`;
 }
 
 /** Portuguese linking preposition for an attributive noun, by relation (bare, no article). */
@@ -402,7 +445,7 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   const subjText = subjectRelative
     ? ''
     : withRelative(subjectPhrase(rel.subject!.head.forms, ptAdj(rel.subject!)), rel.subject!);
-  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.indirectObject, rel.complements);
+  const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }
 
@@ -415,7 +458,6 @@ function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounPhrase,
-  indirectObject?: ResolvedNounPhrase,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -441,10 +483,6 @@ function predicateText(
   const directObjectText = directObject
     ? withRelative(nounPhrase(directObject.head.forms, ptAdj(directObject)), directObject)
     : '';
-  // V Adv DirectObj IndirectObj(a+article)
-  const indirectObjectText = indirectObject
-    ? withRelative(indirectNounPhrase(indirectObject.head.forms, ptAdj(indirectObject)), indirectObject)
-    : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "não": "eu nunca bebo"
   // but post-verbal with "não": "eu não bebo nunca"
@@ -463,11 +501,11 @@ function predicateText(
       ? (verb.forms['base'] ?? conjugated)
       : (imperativeForm('pt', verb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `não ${impForm}` : impForm;
-    return [impVerb, modifierText, directObjectText, indirectObjectText, complementsText]
+    return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, verbText, postVerb, directObjectText, indirectObjectText, complementsText]
+  return [preVerb, verbText, postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -482,7 +520,7 @@ function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("últimas notícias").
   if (!phrase.verbPhrase) return subjectText.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.indirectObject, phrase.complements,
+    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
   return [subjectText, predicate].filter(Boolean).join(' ').trim();
 }
@@ -504,5 +542,11 @@ export const portugueseEngine: LanguageEngine = {
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
     return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+  },
+  renderWord(word: ConceptForms): string {
+    const f = word.forms;
+    const base = f['base'] ?? '';
+    if (f['role'] !== 'adjective') return base;
+    return agreeAdj(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
 };

@@ -69,11 +69,10 @@ export interface ResolvedVerbPhrase {
  * (which drives agreement) and the `headRole` slot is left undefined.
  */
 export interface ResolvedRelativeClause {
-  headRole: 'subject' | 'directObject' | 'indirectObject' | ComplementType;
+  headRole: 'subject' | 'directObject' | ComplementType;
   subject?: ResolvedNounPhrase;
   verbPhrase: ResolvedVerbPhrase;
   directObject?: ResolvedNounPhrase;
-  indirectObject?: ResolvedNounPhrase;
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
 }
 
@@ -88,7 +87,7 @@ export interface ResolvedPhrase {
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
   verbPhrase?: ResolvedVerbPhrase;
   directObject?: ResolvedNounPhrase;
-  indirectObject?: ResolvedNounPhrase;
+  // The recipient ("gives the book *to the cat*") arrives as the `terminus` complement.
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
   /**
    * A resolved hypothetical condition (the "if" clause). When present this phrase is the
@@ -161,6 +160,17 @@ export function modalChain(
 export interface LanguageEngine {
   language: LanguageCode;
   render(phrase: ResolvedPhrase): string;
+  /**
+   * One word standing on its own, with no sentence around it — a UI label naming a concept
+   * ("singular", "first"). An adjective still has to *agree* with something: the word's forms
+   * carry the gender/number of the noun it describes (the translator resolves them from the
+   * noun named by the label's `agreesWith`), which is what lets the Romance engines render the
+   * feminine "prima persona" as "prima" and not "primo".
+   *
+   * Optional: a language whose adjective is invariant (en, de) needs no implementation, and
+   * the translator falls back to the citation form.
+   */
+  renderWord?(word: ConceptForms): string;
   /**
    * Optional ruby (furigana) rendering: the same surface as `render`, split into
    * segments carrying kana readings. Implemented only by languages with furigana (ja).

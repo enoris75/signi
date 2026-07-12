@@ -4,6 +4,7 @@ import {
   type Concept,
   type CauseSentiment,
   type ComplementType,
+  type Definiteness,
   type PathSpecifier,
 } from "@signi/shared";
 import {
@@ -36,13 +37,13 @@ import {
   applyConceptSelect,
   applyClear,
   cycleAspect,
-  cycleDefiniteness,
   cycleDegree,
   cycleModifierRelation,
   cycleModifierNumber,
   setModifierAdjective,
   cycleTense,
   removePossessor,
+  setDefiniteness,
   setImperativeAddress,
   setSentiment,
   setSpecifier,
@@ -91,6 +92,7 @@ import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
 import { useDrag } from "./useDrag.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -137,6 +139,7 @@ export function PhraseBuilder({
   possessorPath,
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
+  const t = useUiString();
   // When this builder edits a possessor (a `possessorPath` naming its head), wrap the
   // container's `binding` so the sub-builder can link like any container: its internal head
   // key `"subject"` is mapped onto the possessor address, and it is never itself a link
@@ -199,13 +202,7 @@ export function PhraseBuilder({
   )
     // Objects hang off the verb, so a subject-only (verbless) period shows none —
     // otherwise an empty Direct Object box would appear before any verb is chosen.
-    .filter(
-      (s) =>
-        hasVerb ||
-        !(
-          s.key.startsWith("directObject") || s.key.startsWith("indirectObject")
-        ),
-    );
+    .filter((s) => hasVerb || !s.key.startsWith("directObject"));
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -335,8 +332,8 @@ export function PhraseBuilder({
   const handleToggleGender = (which: GenderSlot) =>
     onPhraseUpdate((prev) => toggleGender(prev, which));
   const handleToggleNegative = () => onPhraseUpdate(toggleNegative);
-  const handleCycleDefiniteness = (which: NounKey) =>
-    onPhraseUpdate((prev) => cycleDefiniteness(prev, which));
+  const handleSetDefiniteness = (which: NounKey, value: Definiteness) =>
+    onPhraseUpdate((prev) => setDefiniteness(prev, which, value));
   const handleCycleModifierRelation = (slotKey: SlotKey) =>
     onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey));
   const handleCycleModifierNumber = (slotKey: SlotKey) =>
@@ -365,6 +362,7 @@ export function PhraseBuilder({
     selection,
     revealed,
     uiLanguage,
+    t,
   );
 
   // Effective collapse state: compact view collapses every group at once; otherwise
@@ -746,7 +744,7 @@ export function PhraseBuilder({
 
   // Tidy the whole period: tidy each dotted box on its own — the same re-arrange its own
   // button runs — then pack the tidied boxes into non-overlapping rows in reading order:
-  // subject · verb phrase · direct object · indirect object · complements. Collapse state
+  // subject · verb phrase · direct object · complements. Collapse state
   // is left alone; one click re-flows the container into a clean grid without hiding
   // anything the user had revealed.
   function handleTidyPeriod() {
@@ -799,7 +797,7 @@ export function PhraseBuilder({
     handleClear,
     handleToggleNumber,
     handleToggleGender,
-    handleCycleDefiniteness,
+    handleSetDefiniteness,
     handleCycleModifierRelation,
     handleCycleModifierNumber,
     handleSetModifierAdjective,

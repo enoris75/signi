@@ -193,6 +193,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'escolhendo', participle: 'escolhido' },
     ja: { te: '選んで', te_reading: 'えらんで' },
   },
+  SELECT: {
+    en: { gerund: 'selecting', participle: 'selected' },
+    it: { gerund: 'selezionando', participle: 'selezionato' },
+    fr: { participle: 'sélectionné' }, de: { participle: 'selektiert' },
+    es: { gerund: 'seleccionando', participle: 'seleccionado' },
+    pt: { gerund: 'selecionando', participle: 'selecionado' },
+    ja: { te: '選択して', te_reading: 'せんたくして' },
+  },
   TYPE: {
     en: { gerund: 'typing', participle: 'typed' },
     it: { gerund: 'digitando', participle: 'digitato' },
@@ -312,5 +320,23 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'coordinando', participle: 'coordinado' },
     pt: { gerund: 'coordenando', participle: 'coordenado' },
     ja: { te: '調整して', te_reading: 'ちょうせいして' },
+  },
+  // it crollare and de kollabieren both select BE; the fr participle drops the reflexive clitic
+  // its finite forms carry, so the resultative reads as the resulting state ("est effondré").
+  COLLAPSE: {
+    en: { gerund: 'collapsing', participle: 'collapsed' },
+    it: { gerund: 'crollando', participle: 'crollato', aux: 'be' },
+    fr: { participle: 'effondré', aux: 'be' }, de: { participle: 'kollabiert', aux: 'be' },
+    es: { gerund: 'colapsando', participle: 'colapsado' },
+    pt: { gerund: 'desabando', participle: 'desabado' },
+    ja: { te: '崩れて', te_reading: 'くずれて' },
+  },
+  TIDY_UP: {
+    en: { gerund: 'tidying up', participle: 'tidied up' },
+    it: { gerund: 'riordinando', participle: 'riordinato' },
+    fr: { participle: 'rangé' }, de: { participle: 'geordnet' },
+    es: { gerund: 'ordenando', participle: 'ordenado' },
+    pt: { gerund: 'arrumando', participle: 'arrumado' },
+    ja: { te: '片付けて', te_reading: 'かたづけて' },
   },
 };

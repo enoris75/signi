@@ -203,7 +203,6 @@ function resolveRelativeClause(
     subject: clause.subject ? resolveNounPhrase(clause.subject, language, lookup) : undefined,
     verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
     directObject: clause.directObject ? resolveNounPhrase(clause.directObject, language, lookup) : undefined,
-    indirectObject: clause.indirectObject ? resolveNounPhrase(clause.indirectObject, language, lookup) : undefined,
     complements: resolveComplements(clause.complements, language, lookup),
   };
 }
@@ -227,7 +226,6 @@ function resolvePhrase(
       ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, plan.imperativeRegister)
       : undefined,
     directObject: plan.directObject ? resolveNounPhrase(plan.directObject, language, lookup) : undefined,
-    indirectObject: plan.indirectObject ? resolveNounPhrase(plan.indirectObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.
@@ -243,6 +241,33 @@ function resolvePhrase(
         }
       : undefined,
   };
+}
+
+/**
+ * Render a single word into every language — a UI label, which is a word and not a period (see
+ * UiStringWordDef). `agreesWith` names the noun the word describes: an adjective has no
+ * meaningful form until something fixes its gender/number, and a label like the "first" of the
+ * person row is agreeing with the row's own noun even though that noun is nowhere on screen. Its
+ * gender is a fact about each language's lexicon (it "persona" is feminine, "genere" masculine),
+ * so it is resolved per language and threaded onto the word's own forms for the engine to read.
+ */
+export function translateWord(
+  conceptId: string,
+  lookup: LexiconLookup,
+  agreesWith?: string,
+): Translation[] {
+  return engines.map((engine) => {
+    const word = resolve(conceptId, engine.language, lookup);
+    if (agreesWith) {
+      const noun = resolve(agreesWith, engine.language, lookup).forms;
+      word.forms['gender'] = noun['gender'] ?? 'masc';
+      word.forms['number'] = noun['number'] ?? noun['count'] ?? 'singular';
+    }
+    return {
+      language: engine.language,
+      text: engine.renderWord?.(word) ?? word.forms['base'] ?? '',
+    };
+  });
 }
 
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
