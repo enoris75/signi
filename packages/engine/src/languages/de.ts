@@ -722,4 +722,10 @@ export const germanEngine: LanguageEngine = {
     if (!phrase.coordination) return sentence;
     return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
   },
+  // The determiner alone, for the menu that picks one. A German determiner is declined for case;
+  // a menu names it in the nominative, the case the citation form is given in.
+  renderDeterminer(noun: ConceptForms): string {
+    const f = noun.forms;
+    return determiner(f, 'nom', (f['number'] ?? f['count']) === 'plural');
+  },
 };

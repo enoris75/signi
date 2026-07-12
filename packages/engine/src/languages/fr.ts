@@ -637,4 +637,12 @@ export const frenchEngine: LanguageEngine = {
     if (f['role'] !== 'adjective') return base;
     return agreeAdjFr(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
+  // The determiner alone, for the menu that picks one. French elides against the word that
+  // follows ("l'", "cet", "beaucoup d'"), so the citation noun is passed as that word.
+  renderDeterminer(noun: ConceptForms): string {
+    const f = noun.forms;
+    const plural = (f['number'] ?? f['count']) === 'plural';
+    const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+    return artFor(f, plural, word);
+  },
 };

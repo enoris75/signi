@@ -22,7 +22,6 @@ import {
   CAUSE_SENTIMENTS,
   CAUSE_SENTIMENT_LABELS,
   Concept,
-  DEFINITENESS_LABELS,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
   TENSE_LABELS,
@@ -369,20 +368,14 @@ export function ToggleBox({ label, value }: { label: string; value: string }) {
 
 export function DeterminerToggleBox({ value }: { value: Definiteness }) {
   const t = useUiString();
-  // Short surface for the toggle box: "the" / "a" / "—" / the demonstrative or quantifier word.
-  const label =
-    value === "definite"
-      ? "The"
-      : value === "indefinite"
-        ? "A / An"
-        : value === "bare"
-          ? "—"
-          : value === "this"
-            ? "This"
-            : value === "that"
-              ? "That"
-              : DEFINITENESS_LABELS[value];
-  return <ToggleBox label={t("satellite.determiner")} value={label} />;
+  // The box shows the determiner word itself, in the UI language — "the" / "il" / "der" / "この",
+  // and the em-dash for `bare`, the determiner that is no word at all.
+  return (
+    <ToggleBox
+      label={t("satellite.determiner")}
+      value={t(`determiner.value.${value}`)}
+    />
+  );
 }
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {

@@ -1,4 +1,4 @@
-import type { LanguageCode, PhrasePlan } from './index.js';
+import type { Definiteness, LanguageCode, PhrasePlan } from './index.js';
 
 /**
  * Post-processing applied to an engine-rendered UI string, once, for every language.
@@ -24,6 +24,7 @@ export interface UiStringPlanDef extends UiStringCommon {
   /** The period the engine renders into every language. This is the string's definition. */
   plan: PhrasePlan;
   word?: never;
+  determiner?: never;
 }
 
 /**
@@ -45,9 +46,30 @@ export interface UiStringWordDef extends UiStringCommon {
    */
   agreesWith?: string;
   plan?: never;
+  determiner?: never;
 }
 
-export type UiStringDef = UiStringPlanDef | UiStringWordDef;
+/**
+ * One determiner value, named by the word that realizes it — the entries of the determiner menu.
+ * Neither a period nor a lexicon word: a determiner is a function word each engine *builds* from
+ * the noun it determines (gender, number, and the sound it starts with), so it is rendered by
+ * citing it with a noun rather than by looking it up.
+ */
+export interface UiStringDeterminerDef extends UiStringCommon {
+  /** The determiner value this string names ("definite" → the / il / der / この…). */
+  determiner: Definiteness;
+  /**
+   * The noun the determiner is cited with. Its gender and initial sound settle the form the
+   * label shows (it "il nome" → "il"; a feminine noun would give "la"), exactly as `agreesWith`
+   * settles an adjective label's. Defaults to the grammar noun NOUN — a determiner determines a
+   * noun, so the menu names it as it would appear on the word "noun" itself.
+   */
+  agreesWith?: string;
+  plan?: never;
+  word?: never;
+}
+
+export type UiStringDef = UiStringPlanDef | UiStringWordDef | UiStringDeterminerDef;
 
 // Preserves the literal keys (a plain `Record<string, UiStringDef>` annotation would widen
 // them to `string` and lose the typo-checking on `t('…')`).
@@ -194,6 +216,27 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Quantifier',
   },
+
+  // The values themselves — the determiner menu's entries and the word the determiner box shows.
+  // Each names itself with the word that realizes it in the language ("the" / "il" / "der" /
+  // "この"), cited on the grammar noun NOUN, whose gender and initial sound settle the form (see
+  // UiStringDeterminerDef). Keyed `determiner.value.<Definiteness>` so a call site can write
+  // t(`determiner.value.${value}`) for any of the ten.
+  //
+  // Lower-case and unformatted: these are words shown as words, not headings — the same choice
+  // the `pronoun.*` value labels make. `bare` is the determiner that is *no word at all*, so
+  // every language renders it as the em-dash the engines return nothing for; Japanese, which
+  // spells no article either, shows the em-dash for the two articles as well.
+  'determiner.value.definite': { determiner: 'definite', fallback: 'the' },
+  'determiner.value.indefinite': { determiner: 'indefinite', fallback: 'a / an' },
+  'determiner.value.bare': { determiner: 'bare', fallback: '—' },
+  'determiner.value.this': { determiner: 'this', fallback: 'this' },
+  'determiner.value.that': { determiner: 'that', fallback: 'that' },
+  'determiner.value.some': { determiner: 'some', fallback: 'some' },
+  'determiner.value.no': { determiner: 'no', fallback: 'no' },
+  'determiner.value.many': { determiner: 'many', fallback: 'many' },
+  'determiner.value.few': { determiner: 'few', fallback: 'few' },
+  'determiner.value.all': { determiner: 'all', fallback: 'all' },
 
   // The headings of the word palette's sections, one per grammatical role — the same grammar
   // nouns as `category.*` but in the plural, because a section lists many words. Keyed

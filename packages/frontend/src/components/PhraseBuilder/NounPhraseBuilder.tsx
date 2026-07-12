@@ -1,7 +1,6 @@
 import { useRef, useState } from "react";
 import { Box, ListSubheader, Menu, MenuItem } from "@mui/material";
 import {
-  DEFINITENESS_LABELS,
   DETERMINER_CATEGORIES,
   DETERMINER_CATEGORY_VALUES,
   defaultDefiniteness,
@@ -17,6 +16,8 @@ import { useUiString } from "../../i18n/useUiString.ts";
 // The determiner picker: the ten values are too many to cycle blindly, so the box opens a
 // menu grouped by the dimension each value belongs to — article / demonstrative / quantifier,
 // section headings the engine renders in the current UI language like any other UI string.
+// Each value names itself with the word that realizes it in that language ("il", "questo",
+// "tutti i", "この"), so the menu is read in the language being written, not in English.
 function DeterminerMenu({
   anchorEl,
   value,
@@ -60,7 +61,7 @@ function DeterminerMenu({
             }}
             sx={{ fontSize: "0.78rem", minHeight: 28, py: 0.25, pl: 2.5 }}
           >
-            {DEFINITENESS_LABELS[v]}
+            {t(`determiner.value.${v}`)}
           </MenuItem>
         )),
       ])}

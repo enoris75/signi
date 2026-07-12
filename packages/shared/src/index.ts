@@ -70,19 +70,6 @@ export const DEFINITENESS: Definiteness[] = DETERMINER_CATEGORIES.flatMap(
   (category) => DETERMINER_CATEGORY_VALUES[category],
 );
 
-export const DEFINITENESS_LABELS: Record<Definiteness, string> = {
-  definite: 'Definite (the)',
-  indefinite: 'Indefinite (a)',
-  bare: '—',
-  some: 'Some',
-  no: 'No',
-  many: 'Many',
-  few: 'Few',
-  all: 'All',
-  this: 'This / These',
-  that: 'That / Those',
-};
-
 /**
  * The determiner a noun phrase takes when the user has not chosen one, which depends on
  * the slot it fills. Referential slots (subject, objects, the spatial complements) pick out

@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
@@ -495,6 +495,21 @@ function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
   ];
 }
 
+/**
+ * The Japanese determiner words, for the UI's determiner menu only (see renderDeterminer). The
+ * article values are absent: Japanese has no article to name, which is exactly what the menu's
+ * em-dash says.
+ */
+const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
+  this: 'この',
+  that: 'その',
+  some: 'いくつかの',
+  no: 'どの…もない',
+  many: '多くの',
+  few: '少しの',
+  all: 'すべての',
+};
+
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
   terminator: '。',
@@ -516,5 +531,15 @@ export const japaneseEngine: LanguageEngine = {
     const base = f['base'] ?? '';
     if (f['role'] !== 'adjective') return base;
     return /[なの]$/.test(base) ? base.slice(0, -1) : base;
+  },
+  /**
+   * The determiner alone, for the menu that picks one. Japanese spells no article at all —
+   * identifiability is left to context — so the three article values render nothing and the menu
+   * shows an em-dash for them; the demonstratives and the quantifiers are real words (the の
+   * linking them to their noun is part of the attributive form, so it is kept). Nothing here
+   * reaches sentence rendering: the ja engine still drops every determiner from a noun phrase.
+   */
+  renderDeterminer(noun: ConceptForms): string {
+    return JA_DETERMINERS[(noun.forms['definiteness'] ?? 'definite') as Definiteness] ?? '';
   },
 };

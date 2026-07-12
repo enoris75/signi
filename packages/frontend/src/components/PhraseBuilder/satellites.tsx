@@ -23,7 +23,6 @@ import {
   ASPECT_LABELS,
   COMPLEMENT_TYPES,
   COMPLEMENT_LABELS,
-  DEFINITENESS_LABELS,
   DETERMINER_COMPLEMENT_TYPES,
   TENSE_LABELS,
   defaultDefiniteness,
@@ -186,7 +185,7 @@ export function buildSatellites(
           selection.subjectDefiniteness !== "definite",
       ),
       alwaysSet: true,
-      valueLabel: DEFINITENESS_LABELS[selection.subjectDefiniteness ?? "definite"],
+      valueLabel: t(`determiner.value.${selection.subjectDefiniteness ?? "definite"}`),
     },
     {
       key: "subjectRelative",
@@ -342,8 +341,7 @@ export function buildSatellites(
           selection.directObjectDefiniteness !== "definite",
       ),
       alwaysSet: true,
-      valueLabel:
-        DEFINITENESS_LABELS[selection.directObjectDefiniteness ?? "definite"],
+      valueLabel: t(`determiner.value.${selection.directObjectDefiniteness ?? "definite"}`),
     },
     {
       key: "directObjectRelative",
@@ -463,7 +461,7 @@ export function buildSatellites(
             def && def !== defaultDefiniteness(type),
           ),
           alwaysSet: true,
-          valueLabel: DEFINITENESS_LABELS[def ?? defaultDefiniteness(type)],
+          valueLabel: t(`determiner.value.${def ?? defaultDefiniteness(type)}`),
         },
         {
           key: `${type}Relative`,

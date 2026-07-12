@@ -172,6 +172,15 @@ export interface LanguageEngine {
    */
   renderWord?(word: ConceptForms): string;
   /**
+   * The determiner alone, for the UI's determiner menu — the surface this language puts before
+   * `noun` for the `definiteness` its forms carry ("the" / "il" / "questo" / "tutti i" / "この").
+   * A determiner has no citation form of its own: it agrees with the noun it determines, so the
+   * caller supplies one (see `translateDeterminer`) and this returns the determiner it would
+   * take. Return '' where the language spells no determiner at all — the bare article
+   * everywhere, and every article in Japanese; the caller shows an em-dash for it.
+   */
+  renderDeterminer?(noun: ConceptForms): string;
+  /**
    * Optional ruby (furigana) rendering: the same surface as `render`, split into
    * segments carrying kana readings. Implemented only by languages with furigana (ja).
    */

@@ -645,4 +645,12 @@ export const italianEngine: LanguageEngine = {
     if (f['role'] !== 'adjective') return base;
     return agreeAdj(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
+  // The determiner alone, for the menu that picks one. Italian elides and fuses against the word
+  // that follows ("l'", "quell'", "un'"), so the citation noun is passed as that word.
+  renderDeterminer(noun: ConceptForms): string {
+    const f = noun.forms;
+    const plural = (f['number'] ?? f['count']) === 'plural';
+    const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+    return artFor(f, plural, word);
+  },
 };

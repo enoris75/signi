@@ -558,4 +558,9 @@ export const spanishEngine: LanguageEngine = {
     if (f['role'] !== 'adjective') return base;
     return agreeAdj(base, f['gender'] ?? 'masc', f['number'] === 'plural');
   },
+  // The determiner alone, for the menu that picks one.
+  renderDeterminer(noun: ConceptForms): string {
+    const f = noun.forms;
+    return artFor(f, (f['number'] ?? f['count']) === 'plural');
+  },
 };
