@@ -2,6 +2,7 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 export function VerbTypeahead({
   onSelect,
@@ -9,6 +10,8 @@ export function VerbTypeahead({
   onSelect: (concept: Concept) => void;
 }) {
   const { data: allVerbs = [] } = useConcepts("verb");
+  const t = useUiString();
+  const prompt = `${t("slot.verb.placeholder")}…`;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
@@ -74,11 +77,11 @@ export function VerbTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type a verb…"
+        placeholder={prompt}
         // Size the field to its placeholder rather than the browser default
         // (~20ch); otherwise the empty verb box overflows the 160px-wide dashed
         // group box that's padded to PIX_PAD_H (widest-slot half-width) each side.
-        inputProps={{ size: 13 }}
+        inputProps={{ size: prompt.length }}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",

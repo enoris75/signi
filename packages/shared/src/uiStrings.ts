@@ -106,6 +106,17 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'type a subject',
   },
 
+  // The verb box's placeholder, the same command shape as the subject's: "type a verb" — the
+  // TYPE imperative taking an indefinite VERB (the grammar noun) as its direct object.
+  'slot.verb.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'VERB', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a verb',
+  },
+
   // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
   'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
   'action.load': { plan: commandOf('LOAD'), format: NAME_FORMAT, fallback: 'Load' },
