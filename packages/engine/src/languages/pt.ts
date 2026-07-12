@@ -288,12 +288,12 @@ function complementsPhrase(
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // Subject complement: a predicate adjective agrees with the *subject* ("torna-se uma
-      // lenda" but "parece cansada"); a predicate noun keeps its own article, no
-      // preposition ("torna-se uma lenda").
+      // Subject complement: a predicate adjective agrees with the *subject* ("parece
+      // cansada") and carries its own degree ("parece mais cansada"); a predicate noun keeps
+      // its own article, no preposition ("torna-se uma lenda").
       if (type === 'predicative') {
         if (f['role'] === 'adjective') {
-          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+          return ptDeg(c.phrase.head, agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
         }
         return withRelative(nounPhrase(predicativeForms(f), ptAdj(c.phrase)), c.phrase);
       }

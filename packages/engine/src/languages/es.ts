@@ -271,12 +271,12 @@ function complementsPhrase(
       const c = complements[type];
       if (!c) return '';
       const f = c.phrase.head.forms;
-      // Subject complement: a predicate adjective agrees with the *subject* ("se vuelve
-      // una leyenda" but "parece cansada"); a predicate noun keeps its own article, no
-      // preposition ("se vuelve una leyenda").
+      // Subject complement: a predicate adjective agrees with the *subject* ("parece
+      // cansada") and carries its own degree ("parece más cansada"); a predicate noun keeps
+      // its own article, no preposition ("se vuelve una leyenda").
       if (type === 'predicative') {
         if (f['role'] === 'adjective') {
-          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+          return esDeg(c.phrase.head, agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
         }
         return withRelative(nounPhrase(predicativeForms(f), esAdj(c.phrase)), c.phrase);
       }

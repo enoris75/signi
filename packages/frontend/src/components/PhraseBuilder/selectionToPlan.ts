@@ -65,6 +65,10 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
   const { adjectives, adjectiveDegrees, nounModifiers } = modifiers(sel, which);
   return {
     concept: concept.id,
+    // An adjective head is the predicate adjective of the subject complement ("seems
+    // happy") — the one head that is compared, so it carries a degree of its own, stored
+    // under the head's own slot key. A noun/pronoun head has none.
+    headDegree: concept.role === "adjective" ? sel.adjectiveDegrees?.[which] : undefined,
     number: field<"singular" | "plural">(sel, `${which}Number`),
     gender: field<"masc" | "fem" | "neut">(sel, `${which}Gender`),
     // Only subject/directObject and the predicative subject complement carry a

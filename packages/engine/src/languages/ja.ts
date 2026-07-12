@@ -263,12 +263,15 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
     //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
     //  · na-adjective (…な) → drop the attributive な, then に (幸せな → "幸せになる")
     //  · noun → 〜に (伝説 → "伝説になる")
-    // The furigana reading tracks the same trailing-mora substitution.
+    // The furigana reading tracks the same trailing-mora substitution. A predicate adjective
+    // takes its degree adverb before it, as an attributive one does (もっと楽しくなる).
     if (type === 'predicative') {
       const f = c.phrase.head.forms;
       const base = f['base'] ?? '';
       const reading = f['reading'];
       const isAdj = f['role'] === 'adjective';
+      const deg = isAdj ? JA_DEGREE[adjDegree(c.phrase.head)] : '';
+      if (deg) segs.push({ t: deg });
       if (isAdj && base.endsWith('い')) {
         segs.push(wordSeg(
           `${base.slice(0, -1)}く`,
@@ -306,11 +309,15 @@ function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): 
   const reading = f['reading'];
   const past = tense === 'past';
   const isAdj = f['role'] === 'adjective';
+  // The predicate adjective's degree adverb leads, as it does attributively (もっと楽しいです).
+  const deg = isAdj ? JA_DEGREE[adjDegree(pred.phrase.head)] : '';
+  const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];
   if (isAdj && base.endsWith('い')) {
     const ending = negative
       ? (past ? 'くなかったです' : 'くないです')
       : (past ? 'かったです' : 'いです');
     return [
+      ...degSegs,
       wordSeg(base.slice(0, -1), reading?.endsWith('い') ? reading.slice(0, -1) : reading),
       { t: ending },
     ];
@@ -322,6 +329,7 @@ function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): 
   // (its own adjectives/possessor) rendered by npSegs, then the copula.
   if (isAdj && base.endsWith('な')) {
     return [
+      ...degSegs,
       wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading),
       { t: cop },
     ];

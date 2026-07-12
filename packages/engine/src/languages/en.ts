@@ -3,16 +3,66 @@ import { adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
-// already supplies, so only the degree adverb is added here.
+// already supplies, so only the degree adverb is added here. Short adjectives take the
+// inflected comparative instead ("bigger"), so 'more'/'most' are resolved in enAdj.
 const EN_DEGREE: Record<Degree, string> = {
   positive: '', more: 'more', most: 'most', less: 'less', least: 'least', equally: 'equally',
 };
 
-/** One adjective's surface with its degree adverb prepended ("more beautiful"). */
+/** Suppletive comparatives — no spelling rule derives these. */
+const EN_IRREGULAR: Record<string, [comparative: string, superlative: string]> = {
+  good: ['better', 'best'],
+  bad: ['worse', 'worst'],
+  far: ['farther', 'farthest'],
+  little: ['less', 'least'],
+  much: ['more', 'most'],
+  many: ['more', 'most'],
+};
+
+/** Vowel groups, minus a silent final "e" — enough to tell short adjectives from long ones. */
+function syllables(word: string): number {
+  const groups = word.replace(/e$/, '').match(/[aeiouy]+/g);
+  return groups ? groups.length : 1;
+}
+
+/**
+ * Whether an adjective inflects (-er/-est) rather than taking "more"/"most". One-syllable
+ * adjectives do ("big" → "bigger"), as do two-syllable ones ending in -y, -le, -ow or -er
+ * ("happy" → "happier", "simple" → "simpler"). Participial adjectives are periphrastic
+ * whatever their length — "more tired", never "tireder".
+ */
+function inflects(base: string): boolean {
+  if (/ed$/.test(base)) return false;
+  const n = syllables(base);
+  if (n === 1) return true;
+  return n === 2 && /(y|le|ow|er)$/.test(base);
+}
+
+/** Attach -er/-est with English's spelling rules (doubling, y → i, silent e). */
+function inflect(base: string, suffix: 'er' | 'est'): string {
+  if (/e$/.test(base)) return base + suffix.slice(1);            // large → larger
+  if (/[^aeiou]y$/.test(base)) return `${base.slice(0, -1)}i${suffix}`; // happy → happier
+  // A stressed consonant-vowel-consonant ending doubles its final consonant: big → bigger.
+  if (/[^aeiou][aeiou][^aeiouwxy]$/.test(base)) return base + base.slice(-1) + suffix;
+  return base + suffix;
+}
+
+/**
+ * One adjective's surface at its degree: inflected where English inflects ("bigger",
+ * "the best"), periphrastic otherwise ("more beautiful"). "less"/"least"/"equally" are
+ * always periphrastic — English has no inflected downward comparison.
+ */
 function enAdj(a: ConceptForms): string {
   const base = a.forms['base'] ?? '';
-  const d = EN_DEGREE[adjDegree(a)];
-  return d && base ? `${d} ${base}` : base;
+  const degree = adjDegree(a);
+  if (!base) return '';
+  if (degree === 'more' || degree === 'most') {
+    const irregular = EN_IRREGULAR[base];
+    if (irregular) return degree === 'more' ? irregular[0] : irregular[1];
+    if (inflects(base)) return inflect(base, degree === 'more' ? 'er' : 'est');
+  }
+  const d = EN_DEGREE[degree];
+  return d ? `${d} ${base}` : base;
 }
 
 /** Join a resolved noun phrase's adjectives, each carrying its comparative degree. */
@@ -255,11 +305,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
-      // Subject complement: a predicate adjective is bare ("seems happy" — English
-      // adjectives don't inflect); a predicate noun keeps its own article, no preposition
-      // ("becomes a legend").
+      // Subject complement: a predicate adjective takes no article and doesn't agree, but
+      // carries its own degree ("seems happier"); a predicate noun keeps its own article,
+      // with no preposition ("becomes a legend").
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') return f['base'] ?? '';
+        if (f['role'] === 'adjective') return enAdj(c.phrase.head);
         return withRelative(nounPhrase(f, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase);
       }
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]

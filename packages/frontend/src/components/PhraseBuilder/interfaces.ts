@@ -173,10 +173,12 @@ export interface PhraseSelection {
     // with the modifier's own gender/number, not the head's. Only consulted when the slot holds
     // a noun. See NounModifier.adjectives in @signi/shared.
     modifierAdjectives?: Partial<Record<string, Concept>>;
-    // Comparative degree for any adjective slot whose picked concept is a real *adjective*
-    // ("more beautiful"). Keyed by the adjective slot key, mirroring `modifierRelations`
-    // (the two are mutually exclusive — a slot holds either an adjective or a noun-modifier).
-    // Only consulted when that slot holds an adjective; defaults to 'positive'. See Degree.
+    // Comparative degree for any slot whose picked concept is a real *adjective* ("more
+    // beautiful"). Keyed by the slot key, mirroring `modifierRelations` (the two are mutually
+    // exclusive — a slot holds either an adjective or a noun-modifier). That is every adjective
+    // slot, plus the `predicative` slot itself when the subject complement is a predicate
+    // adjective ("seems happier") — which threads into NounPhrase.headDegree rather than
+    // `adjectiveDegrees`. Defaults to 'positive'. See Degree.
     adjectiveDegrees?: Partial<Record<string, Degree>>;
     // Relative clauses are no longer stored inside a selection: a noun's relative clause
     // is a *separate* phrase container linked to it (see PhraseLink / PhraseWorkspace).

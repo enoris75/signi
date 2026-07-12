@@ -410,11 +410,12 @@ function complementsPhrase(
       if (!c) return '';
       const f = c.phrase.head.forms;
       // Subject complement: a predicate adjective agrees with the subject ("la chatte est
-      // belle", "elles semblent heureuses"); a predicate noun keeps its own article, no
-      // preposition ("devient une légende").
+      // belle", "elles semblent heureuses") and carries its own degree ("semblent plus
+      // heureuses"); a predicate noun keeps its own article, no preposition ("devient une
+      // légende").
       if (type === 'predicative') {
         if (f['role'] === 'adjective')
-          return agreeAdjFr(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+          return frDeg(c.phrase.head, agreeAdjFr(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
         return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
       }
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"

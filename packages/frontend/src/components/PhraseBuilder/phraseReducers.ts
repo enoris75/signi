@@ -305,8 +305,9 @@ export function setModifierAdjective(
 }
 
 // Cycle a real adjective's comparative degree (positive → more → most → less → least →
-// equally → positive), stored per adjective slot key in `adjectiveDegrees`. Only
-// meaningful when that slot holds an adjective; ignored otherwise.
+// equally → positive), stored per slot key in `adjectiveDegrees` — for an adjective slot
+// or for the `predicative` slot holding a predicate adjective. Only meaningful when that
+// slot holds an adjective; ignored otherwise.
 export function cycleDegree(
   prev: PhraseSelection,
   slotKey: SlotKey,

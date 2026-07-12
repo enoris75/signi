@@ -1,13 +1,18 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
 import { adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
+/** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
+function deComparative(base: string): string {
+  return base.endsWith('e') ? `${base}r` : `${base}er`;
+}
+
 // German comparison is synthetic: the comparative adds "-er" and the superlative "-st" to
 // the stem *before* the case/gender declension ending ("schön" → "schöner-e" / "schönst-e",
 // the superlative leaning on the noun's definite article). Inferiority/equality stay
 // periphrastic ("weniger schön", "gleich schön"). MVP: ignores umlaut and irregular stems.
 function deDegStem(a: ConceptForms, base: string): string {
   const d = adjDegree(a);
-  if (d === 'more') return `${base}er`;
+  if (d === 'more') return deComparative(base);
   if (d === 'most') return `${base}st`;
   return base;
 }
@@ -18,6 +23,21 @@ function deDegPrefix(a: ConceptForms): string {
   if (d === 'least') return 'am wenigsten ';
   if (d === 'equally') return 'gleich ';
   return '';
+}
+
+/**
+ * A predicate adjective ("wird müde") — undeclined, but still compared. The comparative
+ * stays synthetic ("müder"); the *predicative* superlative takes the fixed "am …sten" frame
+ * ("am müdesten"), which the attributive "-st" + declension ending can't express. The
+ * periphrastic degrees reuse the prefix above ("weniger müde", "gleich müde").
+ */
+function dePredAdj(a: ConceptForms): string {
+  const base = a.forms['base'] ?? '';
+  if (!base) return '';
+  const d = adjDegree(a);
+  if (d === 'more') return deComparative(base);
+  if (d === 'most') return `am ${base}sten`;
+  return `${deDegPrefix(a)}${base}`;
 }
 
 type Case = 'nom' | 'acc' | 'dat';
@@ -441,10 +461,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
       // Subject complement: a German predicate adjective is uninflected ("wird müde",
-      // "scheint groß" — no declension endings); a predicate noun takes the *nominative*
-      // case, not the dative the other complements use ("wird eine Legende").
+      // "scheint groß" — no declension endings) but is still compared ("wird müder"); a
+      // predicate noun takes the *nominative* case, not the dative the other complements
+      // use ("wird eine Legende").
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') return f['base'] ?? '';
+        if (f['role'] === 'adjective') return dePredAdj(c.phrase.head);
         return nounPhrase(c.phrase, 'nom');
       }
       const plural = (f['number'] ?? f['count']) === 'plural';

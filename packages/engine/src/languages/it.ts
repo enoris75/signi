@@ -471,11 +471,11 @@ function complementsPhrase(
       if (!c) return '';
       const f = c.phrase.head.forms;
       // Subject complement: a predicate adjective agrees with the *subject* ("sembra
-      // stanca"); a predicate noun keeps its own article, no preposition ("diventa una
-      // leggenda").
+      // stanca") and carries its own degree ("sembra più stanca"); a predicate noun keeps
+      // its own article, no preposition ("diventa una leggenda").
       if (type === 'predicative') {
         if (f['role'] === 'adjective') {
-          return agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural');
+          return itDeg(c.phrase.head, agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
         }
         return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
       }

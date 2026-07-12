@@ -278,10 +278,12 @@ export function SlotNode({
   const held = selection[slot.key];
   const isAdjectiveSlot = slot.key.includes("Adjective");
   const isNounModifier = isAdjectiveSlot && held?.role === "noun";
-  // A real adjective ("beautiful") in an adjective slot carries a comparative degree
-  // (more / most / less / least / equally); a noun modifier ("sail") carries a relation
-  // instead. The two are mutually exclusive, so at most one chip shows in the footer.
-  const isRealAdjective = isAdjectiveSlot && held?.role === "adjective";
+  // A real adjective ("beautiful") carries a comparative degree (more / most / less /
+  // least / equally); a noun modifier ("sail") carries a relation instead. The two are
+  // mutually exclusive, so at most one chip shows in the footer. Any slot holding an
+  // adjective gets the degree — the adjective slots, and the subject complement when its
+  // head is a predicate adjective ("seems happier") rather than a predicate noun.
+  const isRealAdjective = held?.role === "adjective";
   const relation: ModifierRelation =
     (selection.modifierRelations?.[slot.key] as ModifierRelation | undefined) ?? "feature";
   const degree: Degree = selection.adjectiveDegrees?.[slot.key] ?? "positive";

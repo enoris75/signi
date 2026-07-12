@@ -313,6 +313,13 @@ export interface NounPhrase {
    */
   adjectiveDegrees?: Degree[];
   /**
+   * Comparative degree of the *head* itself. Only meaningful when the head is an adjective —
+   * i.e. the predicate adjective of a `predicative` subject complement ("seems **happier**"),
+   * the one place an adjective heads a noun phrase. Ignored for a noun or pronoun head.
+   * Threaded into the resolved head's `forms['degree']`, like `adjectiveDegrees`.
+   */
+  headDegree?: Degree;
+  /**
    * Nouns used attributively ("**sail** boat"), each with the semantic relation it bears
    * to the head. Distinct from `adjectives` (a noun-modifier doesn't inflect/agree — it is
    * bare, and in Romance is linked by a relation-selected preposition) and from `possessor`

@@ -90,6 +90,12 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     applyNounGender(head.forms, np.gender);
     head.forms['definiteness'] = definiteness;
   }
+  // An adjective head is the predicate adjective of a subject complement ("seems happy") —
+  // the one head that carries a comparative degree of its own. Thread it onto the head's
+  // forms exactly as an attributive adjective's is below, so `adjDegree` reads either.
+  if (head.forms['role'] === 'adjective' && np.headDegree && np.headDegree !== 'positive') {
+    head.forms['degree'] = np.headDegree;
+  }
   return {
     head,
     adjectives: (np.adjectives ?? []).map((id, i) => {
