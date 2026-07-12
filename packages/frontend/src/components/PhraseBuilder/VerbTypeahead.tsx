@@ -3,6 +3,11 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import {
+  useConceptGloss,
+  useConceptSearch,
+} from "../../i18n/useConceptLabel.ts";
 
 export function VerbTypeahead({
   onSelect,
@@ -11,6 +16,8 @@ export function VerbTypeahead({
 }) {
   const { data: allVerbs = [] } = useConcepts("verb");
   const t = useUiString();
+  const gloss = useConceptGloss();
+  const matches = useConceptSearch();
   const prompt = `${t("slot.verb.placeholder")}…`;
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -21,13 +28,7 @@ export function VerbTypeahead({
   // Modals are verb concepts too, but they govern a verb rather than heading a clause,
   // so they belong in the modal slots (see ModalTypeahead), never here.
   const verbs = allVerbs.filter((v) => !v.modal);
-  const filtered = query.trim()
-    ? verbs.filter((v) =>
-        `${v.label ?? v.description} ${v.synonym ?? ""}`
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-      )
-    : verbs;
+  const filtered = verbs.filter((v) => matches(v, query));
 
   function commit(idx: number) {
     const v = filtered[idx];
@@ -119,13 +120,13 @@ export function VerbTypeahead({
                 "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              {v.label ?? v.description}
-              {v.synonym ? (
+              <ConceptWord concept={v} />
+              {gloss(v) ? (
                 <Box
                   component="span"
                   sx={{ ml: 0.5, color: "text.secondary", fontStyle: "normal" }}
                 >
-                  ({v.synonym})
+                  ({gloss(v)})
                 </Box>
               ) : null}
             </Box>

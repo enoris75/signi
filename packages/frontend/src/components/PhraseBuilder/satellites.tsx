@@ -30,7 +30,9 @@ import {
   type Concept,
   type ComplementType,
   type Definiteness,
+  type LanguageCode,
 } from "@signi/shared";
+import { conceptWord } from "../../i18n/conceptWord.ts";
 import {
   GenderSlot,
   NounKey,
@@ -85,13 +87,6 @@ const genderIcon = (gen?: Gender): ReactNode =>
 const genderLabel = (gen?: Gender): string =>
   gen === "fem" ? "Feminine" : gen === "neut" ? "Neuter" : "Masculine";
 
-export const conceptLabel = (c?: Concept) =>
-  c
-    ? c.role === "pronoun"
-      ? c.description
-      : (c.label ?? c.description)
-    : undefined;
-
 const complementIcons: Record<ComplementType, ReactNode> = {
   predicative: <LinkIcon sx={iconSx} />,
   locative: <PlaceIcon sx={iconSx} />,
@@ -107,7 +102,11 @@ const complementIcons: Record<ComplementType, ReactNode> = {
 export function buildSatellites(
   selection: PhraseSelection,
   revealed: Record<string, boolean>,
+  // The UI language: a satellite that carries a word (an adjective, a modal, a complement)
+  // shows it as the picker offered it, not in English.
+  language: LanguageCode,
 ): { satellites: Satellite[]; shownMap: Record<string, boolean> } {
+  const label = (c?: Concept) => conceptWord(c, language);
   const subjectRole = selection.subject?.role;
   const supportedComplements = selection.verb?.complements ?? [];
 
@@ -129,7 +128,7 @@ export function buildSatellites(
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun",
       hasValue: Boolean(selection.subjectAdjective),
-      valueLabel: conceptLabel(selection.subjectAdjective),
+      valueLabel: label(selection.subjectAdjective),
     },
     {
       // Adjectives chain: each one's control rides the *previous* adjective's box, not the
@@ -141,7 +140,7 @@ export function buildSatellites(
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun" && Boolean(selection.subjectAdjective),
       hasValue: Boolean(selection.subjectAdjective2),
-      valueLabel: conceptLabel(selection.subjectAdjective2),
+      valueLabel: label(selection.subjectAdjective2),
     },
     {
       key: "subjectAdjective3",
@@ -150,7 +149,7 @@ export function buildSatellites(
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun" && Boolean(selection.subjectAdjective2),
       hasValue: Boolean(selection.subjectAdjective3),
-      valueLabel: conceptLabel(selection.subjectAdjective3),
+      valueLabel: label(selection.subjectAdjective3),
     },
     {
       key: "subjectNumber",
@@ -255,7 +254,7 @@ export function buildSatellites(
       // A modal fills the same finite/mood slot as the command, so it's withdrawn under it.
       available: !selection.imperative,
       hasValue: Boolean(selection.verbModal),
-      valueLabel: conceptLabel(selection.verbModal),
+      valueLabel: label(selection.verbModal),
     },
     {
       key: "verbModal2",
@@ -264,7 +263,7 @@ export function buildSatellites(
       icon: <GavelIcon sx={iconSx} />,
       available: !selection.imperative && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModal2),
-      valueLabel: conceptLabel(selection.verbModal2),
+      valueLabel: label(selection.verbModal2),
     },
     {
       key: "modifier",
@@ -273,7 +272,7 @@ export function buildSatellites(
       icon: <TuneIcon sx={iconSx} />,
       available: true,
       hasValue: Boolean(selection.modifier),
-      valueLabel: conceptLabel(selection.modifier),
+      valueLabel: label(selection.modifier),
     },
     {
       key: "directObjectAdjective",
@@ -282,7 +281,7 @@ export function buildSatellites(
       icon: <BrushIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectAdjective),
-      valueLabel: conceptLabel(selection.directObjectAdjective),
+      valueLabel: label(selection.directObjectAdjective),
     },
     {
       key: "directObjectAdjective2",
@@ -293,7 +292,7 @@ export function buildSatellites(
         Boolean(selection.directObject) &&
         Boolean(selection.directObjectAdjective),
       hasValue: Boolean(selection.directObjectAdjective2),
-      valueLabel: conceptLabel(selection.directObjectAdjective2),
+      valueLabel: label(selection.directObjectAdjective2),
     },
     {
       key: "directObjectAdjective3",
@@ -304,7 +303,7 @@ export function buildSatellites(
         Boolean(selection.directObject) &&
         Boolean(selection.directObjectAdjective2),
       hasValue: Boolean(selection.directObjectAdjective3),
-      valueLabel: conceptLabel(selection.directObjectAdjective3),
+      valueLabel: label(selection.directObjectAdjective3),
     },
     {
       key: "directObjectNumber",
@@ -368,7 +367,7 @@ export function buildSatellites(
       icon: <BrushIcon sx={iconSx} />,
       available: Boolean(selection.indirectObject),
       hasValue: Boolean(selection.indirectObjectAdjective),
-      valueLabel: conceptLabel(selection.indirectObjectAdjective),
+      valueLabel: label(selection.indirectObjectAdjective),
     },
     {
       key: "indirectObjectAdjective2",
@@ -379,7 +378,7 @@ export function buildSatellites(
         Boolean(selection.indirectObject) &&
         Boolean(selection.indirectObjectAdjective),
       hasValue: Boolean(selection.indirectObjectAdjective2),
-      valueLabel: conceptLabel(selection.indirectObjectAdjective2),
+      valueLabel: label(selection.indirectObjectAdjective2),
     },
     {
       key: "indirectObjectAdjective3",
@@ -390,7 +389,7 @@ export function buildSatellites(
         Boolean(selection.indirectObject) &&
         Boolean(selection.indirectObjectAdjective2),
       hasValue: Boolean(selection.indirectObjectAdjective3),
-      valueLabel: conceptLabel(selection.indirectObjectAdjective3),
+      valueLabel: label(selection.indirectObjectAdjective3),
     },
     {
       key: "indirectObjectNumber",
@@ -463,7 +462,7 @@ export function buildSatellites(
           icon: complementIcons[type],
           available: supportedComplements.includes(type),
           hasValue: Boolean(concept),
-          valueLabel: conceptLabel(concept),
+          valueLabel: label(concept),
         },
         {
           key: `${type}Adjective`,
@@ -474,7 +473,7 @@ export function buildSatellites(
           // (only `cause` allows one) takes none of them.
           available: concept?.role === "noun",
           hasValue: Boolean(adj),
-          valueLabel: conceptLabel(adj),
+          valueLabel: label(adj),
         },
         {
           key: `${type}Adjective2`,
@@ -483,7 +482,7 @@ export function buildSatellites(
           icon: <BrushIcon sx={iconSx} />,
           available: concept?.role === "noun" && Boolean(adj),
           hasValue: Boolean(adj2),
-          valueLabel: conceptLabel(adj2),
+          valueLabel: label(adj2),
         },
         {
           key: `${type}Adjective3`,
@@ -492,7 +491,7 @@ export function buildSatellites(
           icon: <BrushIcon sx={iconSx} />,
           available: concept?.role === "noun" && Boolean(adj2),
           hasValue: Boolean(adj3),
-          valueLabel: conceptLabel(adj3),
+          valueLabel: label(adj3),
         },
         {
           key: `${type}Number`,

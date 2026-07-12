@@ -13,7 +13,7 @@ import {
   slotCategories,
 } from "./interfaces.ts";
 import { CategoryToggle, SlotBox, type SatelliteIcon } from "./Boxes.tsx";
-import { conceptLabel } from "./satellites.tsx";
+import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { CONTROL_GAP } from "./controlLayout.ts";
 import type { GroupRect, GroupShape } from "./graph.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
@@ -159,12 +159,13 @@ function ModifierAdjectiveChip({
   onSet: (slotKey: SlotKey, concept: Concept | undefined) => void;
 }) {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
+  const word = useConceptLabel();
   return (
     <>
       <Tooltip
         title={
           adjective
-            ? `Adjective on modifier: ${conceptLabel(adjective)} — click to change`
+            ? `Adjective on modifier: ${word(adjective)} — click to change`
             : "Add an adjective describing this modifier"
         }
       >
@@ -182,7 +183,7 @@ function ModifierAdjectiveChip({
             fontStyle: adjective ? "italic" : "normal",
           }}
         >
-          {adjective ? conceptLabel(adjective) : "+ adj"}
+          {adjective ? word(adjective) : "+ adj"}
         </Box>
       </Tooltip>
       <Popover

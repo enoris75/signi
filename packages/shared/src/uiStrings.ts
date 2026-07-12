@@ -117,9 +117,41 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'type a verb',
   },
 
+  // The word-category switch on a switchable box (subject/cause = noun | pronoun;
+  // predicative + adjectives = noun | adjective) and the matching selector inside the open
+  // picker. Each is the bare grammar noun; the toggle's CSS uppercases it.
+  'category.noun': {
+    plan: { subject: { concept: 'NOUN', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Noun',
+  },
+  'category.pronoun': {
+    plan: { subject: { concept: 'PRONOUN', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Pronoun',
+  },
+  'category.adjective': {
+    plan: { subject: { concept: 'ADJECTIVE', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Adjective',
+  },
+
   // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
   'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
   'action.load': { plan: commandOf('LOAD'), format: NAME_FORMAT, fallback: 'Load' },
+
+  // The header Save button's tooltip, spelling out what its bare "Save" label acts on — the
+  // whole phrase, as against the per-container `action.savePeriod`. The WHOLE adjective (not
+  // an "all the periods" quantifier) carries that contrast, because Japanese renders no
+  // determiner at all and would drop an `all` on the floor.
+  'action.save.tooltip': {
+    plan: {
+      ...commandOf('SAVE'),
+      directObject: { concept: 'PHRASE', definiteness: 'definite', adjectives: ['WHOLE'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Save the whole phrase',
+  },
 
   // The workspace's two period-level buttons, as commands. "Add a period container" is the
   // ADD imperative on an indefinite CONTAINER carrying an attributive PERIOD_SENTENCE

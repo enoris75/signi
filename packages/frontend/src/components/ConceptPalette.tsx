@@ -7,6 +7,7 @@ import {
 } from '@mui/material';
 import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
+import { ConceptWord } from '../i18n/ConceptWord.tsx';
 
 const ROLE_CONFIG: Record<GrammaticalRole, { label: string; color: 'primary' | 'secondary' | 'success' | 'warning' | 'info' }> = {
   pronoun: { label: 'Pronouns', color: 'primary' },
@@ -82,7 +83,7 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
                   },
                 }}
               >
-                {role === 'pronoun' ? concept.description : (concept.label ?? concept.description)}
+                <ConceptWord concept={concept} />
               </Box>
               </Tooltip>
             ))}

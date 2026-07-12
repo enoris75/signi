@@ -34,6 +34,7 @@ import {
 } from "@signi/shared";
 import { ReactNode } from "react";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
 
 // The word-category switch (Noun | Pronoun, or Noun | Adj) shown both on an empty box and
@@ -49,6 +50,7 @@ export function CategoryToggle({
   value: string;
   onChange: (value: string) => void;
 }) {
+  const t = useUiString();
   return (
     <ToggleButtonGroup
       size="small"
@@ -75,7 +77,7 @@ export function CategoryToggle({
     >
       {options.map((o) => (
         <ToggleButton key={o.value} value={o.value}>
-          {o.label}
+          {t(o.labelKey)}
         </ToggleButton>
       ))}
     </ToggleButtonGroup>
@@ -135,6 +137,7 @@ export function SlotBox({
   minWidth?: number;
 }) {
   const t = useUiString();
+  const word = useConceptLabel();
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
       <Paper
@@ -193,9 +196,7 @@ export function SlotBox({
               lineHeight: 1.3,
             }}
           >
-            {concept.role === "pronoun"
-              ? concept.description
-              : (concept.label ?? concept.description)}
+            {word(concept)}
           </Typography>
         ) : (
           <>

@@ -2,6 +2,8 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
 
 export function DirectObjectTypeahead({
   onSelect,
@@ -13,17 +15,14 @@ export function DirectObjectTypeahead({
   header?: ReactNode;
 }) {
   const { data: nouns = [] } = useConcepts("noun");
+  const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const anchorRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filtered = query.trim()
-    ? nouns.filter((n) =>
-        (n.label ?? n.description).toLowerCase().includes(query.toLowerCase()),
-      )
-    : nouns;
+  const filtered = nouns.filter((n) => matches(n, query));
 
   function commit(idx: number) {
     const n = filtered[idx];
@@ -129,7 +128,7 @@ export function DirectObjectTypeahead({
                 "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              {n.label ?? n.description}
+              <ConceptWord concept={n} />
             </Box>
             ))}
           </Box>

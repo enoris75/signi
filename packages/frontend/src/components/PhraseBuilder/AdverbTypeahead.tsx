@@ -2,6 +2,8 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
 
 // The inline picker for the verb's adverb (`modifier`) slot. A single-vocabulary
 // typeahead over the adverb concepts — the mirror of AdjectiveTypeahead. Without it the
@@ -12,17 +14,14 @@ export function AdverbTypeahead({
   onSelect: (concept: Concept) => void;
 }) {
   const { data: adverbs = [] } = useConcepts("adverb");
+  const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const anchorRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filtered = query.trim()
-    ? adverbs.filter((a) =>
-        (a.label ?? a.description).toLowerCase().includes(query.toLowerCase()),
-      )
-    : adverbs;
+  const filtered = adverbs.filter((a) => matches(a, query));
 
   function commit(idx: number) {
     const a = filtered[idx];
@@ -115,7 +114,7 @@ export function AdverbTypeahead({
                 "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              {a.label ?? a.description}
+              <ConceptWord concept={a} />
             </Box>
           ))}
         </Paper>

@@ -254,8 +254,17 @@ export type SlotKey = SlotConfig["key"];
 // code reads. A single-vocabulary slot (verb, direct object, adverb, …) returns null.
 export interface SlotCategory {
   value: string;
-  label: string;
+  // The label is a catalog key, not a literal: the engine renders the grammar noun
+  // ("noun" / "pronoun" / "adjective") into the UI language like every other UI string.
+  labelKey: UiStringKey;
 }
+
+const NOUN_CATEGORY: SlotCategory = { value: "noun", labelKey: "category.noun" };
+const PRONOUN_CATEGORY: SlotCategory = { value: "pronoun", labelKey: "category.pronoun" };
+const ADJECTIVE_CATEGORY: SlotCategory = {
+  value: "adjective",
+  labelKey: "category.adjective",
+};
 
 export function slotCategories(
   slotKey: SlotKey,
@@ -265,37 +274,13 @@ export function slotCategories(
   if (slotKey === "subject")
     return nounSubject
       ? null
-      : {
-          options: [
-            { value: "noun", label: "Noun" },
-            { value: "pronoun", label: "Pron" },
-          ],
-          fallback: "noun",
-        };
+      : { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "cause")
-    return {
-      options: [
-        { value: "noun", label: "Noun" },
-        { value: "pronoun", label: "Pron" },
-      ],
-      fallback: "noun",
-    };
+    return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
-    return {
-      options: [
-        { value: "noun", label: "Noun" },
-        { value: "adjective", label: "Adj" },
-      ],
-      fallback: "noun",
-    };
+    return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };
   if (/Adjective\d?$/.test(slotKey))
-    return {
-      options: [
-        { value: "adjective", label: "Adj" },
-        { value: "noun", label: "Noun" },
-      ],
-      fallback: "adjective",
-    };
+    return { options: [ADJECTIVE_CATEGORY, NOUN_CATEGORY], fallback: "adjective" };
   return null;
 }
 

@@ -261,6 +261,20 @@ export interface Concept {
   role: GrammaticalRole;
   description: string;
   label?: string;              // English base form, e.g. "cat", "eat", "I"
+  /**
+   * The concept's citation form in every seeded language ("cat" / "gatto" / "Katze"), taken
+   * from the primary lexeme's lemma. The whole catalog ships with the concept list so the
+   * pickers can show the word in the chosen language without a per-language re-fetch; a
+   * language missing an entry falls back to `label`.
+   */
+  labels?: Partial<Record<LanguageCode, string>>;
+  /**
+   * The kana reading of the citation form, for the languages whose script needs one (ja: 猫 →
+   * ねこ). Keyed like `labels` so a picker can look the reading up by the language it is
+   * already showing; a language that supplies no readings simply has no entry, and the word
+   * renders without furigana.
+   */
+  readings?: Partial<Record<LanguageCode, string>>;
   synonym?: string;            // short disambiguating gloss shown in parentheses, e.g. "weep" for cry
   emoji?: string;
   transitivity?: Transitivity; // only set for verbs

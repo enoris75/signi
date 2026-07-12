@@ -578,6 +578,10 @@ const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
   SAVE: { '2sg': 'speichere' },
   LOAD: { '2sg': 'lade' },
   ADD:  { '2sg': 'addiere' },
+  EXPORT: { '2sg': 'exportiere' },
+  IMPORT: { '2sg': 'importiere' },
+  COORDINATE: { '2sg': 'koordiniere' },
+  CLEAR: { '2sg': 'lösche' }, // löschen: the -sch stem keeps the du -e
 };
 
 /** The German imperative verb surface for a person: a single word for du/ihr, "<inf> wir" for the

@@ -2,6 +2,8 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
 
 export function AdjectiveTypeahead({
   onSelect,
@@ -13,17 +15,14 @@ export function AdjectiveTypeahead({
   header?: ReactNode;
 }) {
   const { data: adjectives = [] } = useConcepts("adjective");
+  const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
   const anchorRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const filtered = query.trim()
-    ? adjectives.filter((a) =>
-        (a.label ?? a.description).toLowerCase().includes(query.toLowerCase()),
-      )
-    : adjectives;
+  const filtered = adjectives.filter((a) => matches(a, query));
 
   function commit(idx: number) {
     const a = filtered[idx];
@@ -126,7 +125,7 @@ export function AdjectiveTypeahead({
                   "&:hover": { bgcolor: "action.hover" },
                 }}
               >
-                {a.label ?? a.description}
+                <ConceptWord concept={a} />
               </Box>
             ))}
           </Box>

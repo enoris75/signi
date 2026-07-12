@@ -11,6 +11,7 @@ import type {
   TranslateRequest,
   TranslateResponse,
   GrammaticalRole,
+  LanguageCode,
   SavePhraseRequest,
   SavedPhrase,
   SavedPhraseKind,
@@ -56,32 +57,42 @@ const GENDERED_NOUNS_SQL = `
   WHERE nf.form_key = 'fem'
 `;
 
-const EN_LABEL_SQL = `
-  SELECT concept_id, en_word FROM (
-    SELECT cpl.concept_id, pl.lemma AS en_word
+// The citation form of every concept in every seeded language — the primary lexeme's lemma
+// (a noun's singular), with the kana reading of that lemma where the lexeme carries one (ja),
+// so the pickers can put furigana over the word they show. The pickers show the word in the
+// chosen language, so the whole catalog rides along with the concept list rather than being
+// re-fetched per language.
+const LABEL_SQL = `
+  SELECT concept_id, language, word, reading FROM (
+    SELECT cpl.concept_id, pl.language, pl.lemma AS word,
+           (SELECT form_value FROM pronoun_forms f
+            WHERE f.lexeme_id = pl.id AND f.form_key = 'reading') AS reading
     FROM pronoun_lexemes pl
     JOIN concept_pronoun_links cpl ON cpl.lexeme_id = pl.id AND cpl.is_primary = 1
-    WHERE pl.language = 'en'
     UNION ALL
-    SELECT cvl.concept_id, vl.lemma AS en_word
+    SELECT cvl.concept_id, vl.language, vl.lemma AS word,
+           (SELECT form_value FROM verb_forms f
+            WHERE f.lexeme_id = vl.id AND f.form_key = 'reading') AS reading
     FROM verb_lexemes vl
     JOIN concept_verb_links cvl ON cvl.lexeme_id = vl.id AND cvl.is_primary = 1
-    WHERE vl.language = 'en'
     UNION ALL
-    SELECT cnl.concept_id, nl.singular AS en_word
+    SELECT cnl.concept_id, nl.language, nl.singular AS word,
+           (SELECT form_value FROM noun_forms f
+            WHERE f.lexeme_id = nl.id AND f.form_key = 'reading') AS reading
     FROM noun_lexemes nl
     JOIN concept_noun_links cnl ON cnl.lexeme_id = nl.id AND cnl.is_primary = 1
-    WHERE nl.language = 'en'
     UNION ALL
-    SELECT cal.concept_id, al.lemma AS en_word
+    SELECT cal.concept_id, al.language, al.lemma AS word,
+           (SELECT form_value FROM adjective_forms f
+            WHERE f.lexeme_id = al.id AND f.form_key = 'reading') AS reading
     FROM adjective_lexemes al
     JOIN concept_adjective_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 1
-    WHERE al.language = 'en'
     UNION ALL
-    SELECT cal.concept_id, al.lemma AS en_word
+    SELECT cal.concept_id, al.language, al.lemma AS word,
+           (SELECT form_value FROM adverb_forms f
+            WHERE f.lexeme_id = al.id AND f.form_key = 'reading') AS reading
     FROM adverb_lexemes al
     JOIN concept_adverb_links cal ON cal.lexeme_id = al.id AND cal.is_primary = 1
-    WHERE al.language = 'en'
   )
 `;
 
@@ -100,8 +111,25 @@ app.get('/api/concepts', (req, res) => {
       .all();
   }
 
-  const labelRows = db.prepare<[], { concept_id: string; en_word: string }>(EN_LABEL_SQL).all();
-  const labels = new Map(labelRows.map((r) => [r.concept_id, r.en_word]));
+  const labelRows = db
+    .prepare<[], { concept_id: string; language: LanguageCode; word: string; reading: string | null }>(
+      LABEL_SQL,
+    )
+    .all();
+  const labels = new Map<string, Partial<Record<LanguageCode, string>>>();
+  const readings = new Map<string, Partial<Record<LanguageCode, string>>>();
+  for (const r of labelRows) {
+    const byLanguage = labels.get(r.concept_id) ?? {};
+    byLanguage[r.language] = r.word;
+    labels.set(r.concept_id, byLanguage);
+    // A word already written in kana reads as itself (ねこ), so it gets no furigana — same
+    // rule the engine applies when it builds ruby segments for a translation.
+    if (r.reading && r.reading !== r.word) {
+      const readingByLanguage = readings.get(r.concept_id) ?? {};
+      readingByLanguage[r.language] = r.reading;
+      readings.set(r.concept_id, readingByLanguage);
+    }
+  }
 
   const genderedNounRows = db.prepare<[], { concept_id: string }>(GENDERED_NOUNS_SQL).all();
   const genderedNouns = new Set(genderedNounRows.map((r) => r.concept_id));
@@ -117,7 +145,9 @@ app.get('/api/concepts', (req, res) => {
       id: r.id,
       role: r.role,
       description: r.description,
-      label: labels.get(r.id),
+      label: labels.get(r.id)?.en,
+      labels: labels.get(r.id),
+      readings: readings.get(r.id),
       synonym: r.synonym ?? undefined,
       countable: r.countable === 0 ? false : undefined,
       emoji: r.emoji ?? undefined,

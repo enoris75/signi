@@ -13,6 +13,11 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import {
+  useConceptGloss,
+  useConceptSearch,
+} from "../../i18n/useConceptLabel.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
 
 export function SubjectTypeahead({
@@ -33,6 +38,8 @@ export function SubjectTypeahead({
   onKindChange?: (kind: string) => void;
 }) {
   const t = useUiString();
+  const gloss = useConceptGloss();
+  const matches = useConceptSearch();
   const prompt = placeholder ?? `${t("slot.subject.placeholder")}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
@@ -51,14 +58,7 @@ export function SubjectTypeahead({
   const anchorRef = useRef<HTMLDivElement>(null);
   const listRef = useRef<HTMLDivElement>(null);
 
-  const q = query.trim();
-  const filteredNouns = q
-    ? nouns.filter((n) =>
-        `${n.label ?? n.description} ${n.synonym ?? ""}`
-          .toLowerCase()
-          .includes(q.toLowerCase()),
-      )
-    : nouns;
+  const filteredNouns = nouns.filter((n) => matches(n, query));
 
   function commitNoun(idx: number) {
     const n = filteredNouns[idx];
@@ -177,8 +177,8 @@ export function SubjectTypeahead({
               },
             }}
           >
-            <Tab value="noun" label="noun" />
-            <Tab value="pronoun" label="pronoun" />
+            <Tab value="noun" label={t("category.noun")} />
+            <Tab value="pronoun" label={t("category.pronoun")} />
           </Tabs>
 
           {tab === "pronoun" ? (
@@ -262,8 +262,8 @@ export function SubjectTypeahead({
                       "&:hover": { bgcolor: "action.hover" },
                     }}
                   >
-                    {n.label ?? n.description}
-                    {n.synonym ? (
+                    <ConceptWord concept={n} />
+                    {gloss(n) ? (
                       <Box
                         component="span"
                         sx={{
@@ -272,7 +272,7 @@ export function SubjectTypeahead({
                           fontStyle: "normal",
                         }}
                       >
-                        ({n.synonym})
+                        ({gloss(n)})
                       </Box>
                     ) : null}
                   </Box>

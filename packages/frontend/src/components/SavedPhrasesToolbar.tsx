@@ -139,7 +139,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
   return (
     <Box sx={{ display: "flex", gap: 1, alignItems: "center" }}>
-      <Tooltip title="Save the whole phrase (all periods)">
+      <Tooltip title={t("action.save.tooltip")}>
         <span>
           <Button
             variant="outlined"

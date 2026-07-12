@@ -2,6 +2,11 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { ConceptWord } from "../../i18n/ConceptWord.tsx";
+import {
+  useConceptGloss,
+  useConceptSearch,
+} from "../../i18n/useConceptLabel.ts";
 
 // Picker for a modal slot. Modals are verb concepts, so they arrive on the same
 // `role=verb` fetch as the main verbs; `Concept.modal` is what separates the two lists
@@ -12,6 +17,8 @@ export function ModalTypeahead({
   onSelect: (concept: Concept) => void;
 }) {
   const { data: verbs = [] } = useConcepts("verb");
+  const gloss = useConceptGloss();
+  const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
@@ -19,13 +26,7 @@ export function ModalTypeahead({
   const listRef = useRef<HTMLDivElement>(null);
 
   const modals = verbs.filter((v) => v.modal);
-  const filtered = query.trim()
-    ? modals.filter((v) =>
-        `${v.label ?? v.description} ${v.synonym ?? ""}`
-          .toLowerCase()
-          .includes(query.toLowerCase()),
-      )
-    : modals;
+  const filtered = modals.filter((v) => matches(v, query));
 
   function commit(idx: number) {
     const v = filtered[idx];
@@ -114,13 +115,13 @@ export function ModalTypeahead({
                 "&:hover": { bgcolor: "action.hover" },
               }}
             >
-              {v.label ?? v.description}
-              {v.synonym ? (
+              <ConceptWord concept={v} />
+              {gloss(v) ? (
                 <Box
                   component="span"
                   sx={{ ml: 0.5, color: "text.secondary", fontStyle: "normal" }}
                 >
-                  ({v.synonym})
+                  ({gloss(v)})
                 </Box>
               ) : null}
             </Box>

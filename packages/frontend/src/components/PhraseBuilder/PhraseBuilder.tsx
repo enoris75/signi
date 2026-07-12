@@ -90,6 +90,7 @@ import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
 import { useDrag } from "./useDrag.ts";
+import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -135,6 +136,7 @@ export function PhraseBuilder({
   binding,
   possessorPath,
 }: PhraseBuilderProps) {
+  const { uiLanguage } = useUiLanguage();
   // When this builder edits a possessor (a `possessorPath` naming its head), wrap the
   // container's `binding` so the sub-builder can link like any container: its internal head
   // key `"subject"` is mapped onto the possessor address, and it is never itself a link
@@ -362,6 +364,7 @@ export function PhraseBuilder({
   const { satellites, shownMap: rawShownMap } = buildSatellites(
     selection,
     revealed,
+    uiLanguage,
   );
 
   // Effective collapse state: compact view collapses every group at once; otherwise

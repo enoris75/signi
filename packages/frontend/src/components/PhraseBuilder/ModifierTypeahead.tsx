@@ -18,8 +18,8 @@ import type { SlotCategory } from "./interfaces.ts";
  * `onKindChange`, so they stay in sync.
  */
 const DEFAULT_MODIFIER_OPTIONS: SlotCategory[] = [
-  { value: "adjective", label: "Adj" },
-  { value: "noun", label: "Noun" },
+  { value: "adjective", labelKey: "category.adjective" },
+  { value: "noun", labelKey: "category.noun" },
 ];
 
 export function ModifierTypeahead({
