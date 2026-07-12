@@ -22,6 +22,7 @@ import {
 } from "./interfaces.ts";
 import { MUI_COLOR_HEX } from "./slots.ts";
 import { boxKey, useConnectors } from "./useConnectors.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 const uid = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -65,6 +66,7 @@ export function PhraseWorkspace({
   wordsPanelOpen,
   onWordsPanelClose,
 }: Props) {
+  const t = useUiString();
   const [pick, setPick] = useState<PickMode>({ active: false });
   // Period (single-clause) save/load: which container's save dialog is open, and whether
   // the "add a saved period" picker is open. See PeriodSaveLoad.
@@ -502,7 +504,7 @@ export function PhraseWorkspace({
           variant="outlined"
           sx={{ textTransform: "none" }}
         >
-          Add period container
+          {t("action.addPeriodContainer")}
         </Button>
         <Button
           onClick={() => setLoadPeriodOpen(true)}
@@ -511,7 +513,7 @@ export function PhraseWorkspace({
           variant="text"
           sx={{ textTransform: "none" }}
         >
-          Load period
+          {t("action.loadPeriod")}
         </Button>
       </Box>
 

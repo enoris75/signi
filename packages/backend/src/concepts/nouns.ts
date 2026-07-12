@@ -853,4 +853,19 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'ponto',  plural: 'pontos',  gender: 'masc', count: 'singular' },
     },
   },
+  {
+    id: 'CONTAINER',
+    role: 'noun',
+    description: 'an object that holds or stores things',
+    emoji: '📦',
+    forms: {
+      en: { base: 'container',   plural: 'containers',  count: 'singular' },
+      it: { base: 'contenitore', plural: 'contenitori', gender: 'masc', count: 'singular' },
+      fr: { base: 'récipient',   plural: 'récipients',  gender: 'masc', count: 'singular' },
+      de: { base: 'Behälter',    plural: 'Behälter',    gender: 'masc', count: 'singular' },
+      es: { base: 'recipiente',  plural: 'recipientes', gender: 'masc', count: 'singular' },
+      ja: { base: '容器',        count: 'singular', reading: 'ようき' },
+      pt: { base: 'recipiente',  plural: 'recipientes', gender: 'masc', count: 'singular' },
+    },
+  },
 ];

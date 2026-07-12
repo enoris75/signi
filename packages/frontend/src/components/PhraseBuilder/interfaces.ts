@@ -1,4 +1,4 @@
-import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense } from "@signi/shared";
+import type { Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
 
 export type { CoordConjunction };
 
@@ -44,6 +44,10 @@ export interface SlotConfig {
     `${ComplementType}Adjective2` |
     `${ComplementType}Adjective3`;
     label: string;
+    // When set, the box titles itself with this engine-rendered string in the current UI
+    // language instead of the static English `label` (which stays as the fallback and as the
+    // name used in tooltips / group headings). Slots migrate to a key as their word is seeded.
+    labelKey?: UiStringKey;
     required: boolean;
     roles: GrammaticalRole[];
     color: "primary" | "secondary" | "success" | "warning" | "info" | "error";

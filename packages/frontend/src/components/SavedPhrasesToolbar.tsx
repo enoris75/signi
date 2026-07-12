@@ -29,6 +29,7 @@ import {
   savePhrase,
 } from "../api.ts";
 import { useConcepts } from "../hooks/useConcepts.ts";
+import { useUiString } from "../i18n/useUiString.ts";
 import type {
   PhraseContainer,
   PhraseLink,
@@ -55,6 +56,7 @@ const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
   containers.every((c) => Object.keys(c.selection).length === 0);
 
 export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
+  const t = useUiString();
   const queryClient = useQueryClient();
   const { data: concepts } = useConcepts();
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -148,7 +150,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
             disabled={empty}
             sx={{ textTransform: "none" }}
           >
-            Save
+            {t("action.save")}
           </Button>
         </span>
       </Tooltip>
@@ -161,7 +163,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           onClick={() => setLoadOpen(true)}
           sx={{ textTransform: "none" }}
         >
-          Load
+          {t("action.load")}
         </Button>
       </Tooltip>
       <Tooltip title="Export to a JSON file">

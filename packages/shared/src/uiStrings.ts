@@ -31,6 +31,16 @@ const nameOf = (concept: string): PhrasePlan =>
 
 const NAME_FORMAT: UiStringFormat = { capitalize: true, stripPeriod: true };
 
+// A button label is a command addressed to the app: the verb in the imperative, 2nd singular.
+// The engines drop the subject from the surface, so only the verb survives — en "save",
+// it "salva", de "speichere", ja "保存してください".
+const commandOf = (concept: string): PhrasePlan =>
+  ({
+    subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
+    verbPhrase: { verb: concept },
+    imperative: true,
+  }) as PhrasePlan;
+
 /**
  * Every engine-rendered string the UI shows, keyed. Adding one means adding one entry here:
  * the backend renders the whole catalog at startup and serves it from GET /api/ui-strings,
@@ -66,6 +76,72 @@ export const UI_STRINGS = defineUiStrings({
     plan: { subject: { concept: 'TRANSLATION', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
     format: { capitalize: true, stripPeriod: true },
     fallback: 'Translations',
+  },
+
+  // The header control that opens the word palette: the WORD noun in the plural, bare.
+  'words.heading': {
+    plan: { subject: { concept: 'WORD', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { capitalize: true, stripPeriod: true },
+    fallback: 'Words',
+  },
+
+  // The subject box's own title: the grammatical SUBJECT noun, bare. The CSS uppercases it.
+  'slot.subject': {
+    plan: { subject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Subject',
+  },
+
+  // The subject box's placeholder, as a command to the user: "type a subject" — the TYPE
+  // imperative taking an indefinite SUBJECT as its direct object. Lower-case (a placeholder,
+  // not a label), and the call site adds the trailing ellipsis.
+  'slot.subject.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a subject',
+  },
+
+  // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
+  'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
+  'action.load': { plan: commandOf('LOAD'), format: NAME_FORMAT, fallback: 'Load' },
+
+  // The workspace's two period-level buttons, as commands. "Add a period container" is the
+  // ADD imperative on an indefinite CONTAINER carrying an attributive PERIOD_SENTENCE
+  // (material relation, so Romance links it with di/de: "un contenitore di periodo").
+  'action.addPeriodContainer': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: {
+        concept: 'CONTAINER',
+        definiteness: 'indefinite',
+        nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add period container',
+  },
+  'action.loadPeriod': {
+    plan: {
+      ...commandOf('LOAD'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Load period',
+  },
+
+  // The save control on a period container's header. Definite, not indefinite: the command
+  // acts on the period the button sits in — "save the period" ("salva il periodo"). The
+  // engine has no demonstrative determiner, so `definite` is as close as it renders to "this".
+  'action.savePeriod': {
+    plan: {
+      ...commandOf('SAVE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Save period',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

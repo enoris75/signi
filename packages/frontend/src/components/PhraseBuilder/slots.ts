@@ -80,6 +80,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "subject",
     label: "Subject",
+    labelKey: "slot.subject",
     required: true,
     roles: ["pronoun", "noun"],
     color: "primary",

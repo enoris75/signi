@@ -13,7 +13,11 @@
       "Bash(*node*)",
       "Bash(*tsc*)",
       "Read(//Users/enoris/Code/**)",
-      "Bash(*sqlite3*)"
+      "Bash(sqlite3*)",
+      "Bash(*sqlite3*)",
+      "Bash(npm *)",
+      "Bash(python3 -c ' *)",
+      "Bash(sqlite3 signi.db *)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

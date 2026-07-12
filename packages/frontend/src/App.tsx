@@ -130,7 +130,7 @@ export default function App() {
               aria-pressed={wordsPanelOpen}
               sx={{ textTransform: "none" }}
             >
-              Words
+              {t('words.heading')}
             </Button>
           </Box>
         </Container>

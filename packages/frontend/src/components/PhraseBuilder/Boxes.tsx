@@ -33,6 +33,7 @@ import {
   type Tense,
 } from "@signi/shared";
 import { ReactNode } from "react";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
 
 // The word-category switch (Noun | Pronoun, or Noun | Adj) shown both on an empty box and
@@ -133,6 +134,7 @@ export function SlotBox({
   // have room to fan out along the edge instead of piling up over each other.
   minWidth?: number;
 }) {
+  const t = useUiString();
   return (
     <Box sx={{ position: "relative", display: "inline-block" }}>
       <Paper
@@ -176,7 +178,7 @@ export function SlotBox({
               mb: 0.25,
             }}
           >
-            {slot.label}
+            {slot.labelKey ? t(slot.labelKey) : slot.label}
             {slot.required ? " *" : ""}
           </Typography>
         )}

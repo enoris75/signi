@@ -170,6 +170,20 @@ const FR_IMP_OVERRIDE: Record<string, Record<IPN, string>> = {
   GO:   { '2sg': 'va', '1pl': 'allons', '2pl': 'allez' },      // aller
 };
 
+/**
+ * The subjunctive endings of an -ar verb start in -e, where the stem's final consonant would
+ * change sound: the spelling absorbs it (cargar → carguemos, tocar → toque, cruzar → cruce).
+ * A stem already ending in -gu/-qu is left alone. Only -ar verbs need this — an -er/-ir stem
+ * comes off the 1sg present, which already carries the shift (coger → cojo → coja).
+ */
+function arSubjStem(stem: string): string {
+  if (/(?:gu|qu)$/.test(stem)) return stem;
+  return stem
+    .replace(/g$/, 'gu')
+    .replace(/c$/, 'qu')
+    .replace(/z$/, 'c');
+}
+
 function subjPresent(
   lang: 'es' | 'pt',
   verb: ConceptForms,
@@ -177,9 +191,10 @@ function subjPresent(
 ): string {
   const override = (lang === 'es' ? ES_SUBJ_OVERRIDE : PT_SUBJ_OVERRIDE)[verb.conceptId];
   if (override) return override[pn];
-  const stem = (verb.forms['1sg_present'] ?? '').replace(/o$/, '');
+  const raw = (verb.forms['1sg_present'] ?? '').replace(/o$/, '');
   const base = verb.forms['base'] ?? '';
   const cls = base.endsWith('ar') ? 'ar' : 'er';
+  const stem = cls === 'ar' ? arSubjStem(raw) : raw;
   return stem + (lang === 'es' ? ES_SUBJ_PRES_END : PT_SUBJ_PRES_END)[cls][pn];
 }
 

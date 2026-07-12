@@ -19,6 +19,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import CallMergeIcon from "@mui/icons-material/CallMerge";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import { useUiString } from "../../i18n/useUiString.ts";
 import {
   COORD_CONJUNCTION_LABEL,
   COORD_CONJUNCTION_OPTIONS,
@@ -195,6 +196,7 @@ export function PeriodContainer({
   imperative,
   children,
 }: PeriodContainerProps) {
+  const t = useUiString();
   const [coordMenuAnchor, setCoordMenuAnchor] = useState<HTMLElement | null>(
     null,
   );
@@ -616,14 +618,14 @@ export function PeriodContainer({
             </Tooltip>
           )}
           {onSave && (
-            <Tooltip title="Save this period">
+            <Tooltip title={t("action.savePeriod")}>
               <span>
                 <IconButton
                   size="small"
                   onClick={onSave}
                   // Nothing to save until the clause has content.
                   disabled={!hasContent}
-                  aria-label="Save this period"
+                  aria-label={t("action.savePeriod")}
                   sx={{ p: 0.25 }}
                 >
                   <SaveOutlinedIcon sx={{ fontSize: 15 }} />

@@ -574,6 +574,10 @@ const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
   READ: { '2sg': 'lies' },
   SEE:  { '2sg': 'sieh' },
   KNOW: { '2sg': 'wisse' }, // wissen
+  // Stems in -er / -d keep the du -e (speichere, lade); the bare stem rule drops it.
+  SAVE: { '2sg': 'speichere' },
+  LOAD: { '2sg': 'lade' },
+  ADD:  { '2sg': 'addiere' },
 };
 
 /** The German imperative verb surface for a person: a single word for du/ihr, "<inf> wir" for the

@@ -12,17 +12,19 @@ import {
 import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
 
 export function SubjectTypeahead({
   onSelect,
-  placeholder = "type a subject…",
+  placeholder,
   kind = "noun",
   onKindChange,
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
   // The picker is pronoun-inclusive (pronouns + nouns); the label varies by slot
-  // (a subject vs. a causal complement, which also accepts a pronoun).
+  // (a subject vs. a causal complement, which also accepts a pronoun). Left out in the
+  // subject slot, whose prompt ("type a subject…") the engine renders in the UI language.
   placeholder?: string;
   // The word-category switch (noun / pronoun), controlled from the box so the in-dropdown
   // tabs and the on-box toggle stay in sync. Standalone callers may omit it (defaults noun,
@@ -30,6 +32,8 @@ export function SubjectTypeahead({
   kind?: string;
   onKindChange?: (kind: string) => void;
 }) {
+  const t = useUiString();
+  const prompt = placeholder ?? `${t("slot.subject.placeholder")}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
   // The category is controlled when the box supplies `onKindChange`; otherwise the popper
@@ -50,7 +54,9 @@ export function SubjectTypeahead({
   const q = query.trim();
   const filteredNouns = q
     ? nouns.filter((n) =>
-        (n.label ?? n.description).toLowerCase().includes(q.toLowerCase()),
+        `${n.label ?? n.description} ${n.synonym ?? ""}`
+          .toLowerCase()
+          .includes(q.toLowerCase()),
       )
     : nouns;
 
@@ -133,7 +139,7 @@ export function SubjectTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder={placeholder}
+        placeholder={prompt}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",
@@ -257,6 +263,18 @@ export function SubjectTypeahead({
                     }}
                   >
                     {n.label ?? n.description}
+                    {n.synonym ? (
+                      <Box
+                        component="span"
+                        sx={{
+                          ml: 0.5,
+                          color: "text.secondary",
+                          fontStyle: "normal",
+                        }}
+                      >
+                        ({n.synonym})
+                      </Box>
+                    ) : null}
                   </Box>
                 ))
               ) : (
