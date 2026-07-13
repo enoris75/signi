@@ -33,8 +33,12 @@ export interface UiStringPlanDef extends UiStringCommon {
  * to a noun it agrees with.
  */
 export interface UiStringWordDef extends UiStringCommon {
-  /** The concept the string names. */
-  word: string;
+  /**
+   * The concept the string names — or the few concepts that name it together, when one word will
+   * not do it ("second singular", the person of a command). The engine joins them the way its
+   * language joins words.
+   */
+  word: string | string[];
   /**
    * The noun the word describes, when the word is an adjective. An adjective has no settled
    * form until something fixes its gender and number, and the label for a value of a row is
@@ -499,6 +503,26 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Second person plural',
+  },
+
+  // What the person *buttons* read: the same three persons, said without the noun that would not
+  // fit on a button — the ordinal and the number alone, as they agree with the PERSON_GRAMMAR the
+  // tooltip above spells out (it "seconda singolare", the feminine of "persona"). Two words, not
+  // one: a person is an ordinal *and* a number, and neither names it by itself.
+  'imperative.personShort.2sg': {
+    word: ['SECOND', 'SINGULAR'],
+    agreesWith: 'PERSON_GRAMMAR',
+    fallback: 'second singular',
+  },
+  'imperative.personShort.1pl': {
+    word: ['FIRST', 'PLURAL'],
+    agreesWith: 'PERSON_GRAMMAR',
+    fallback: 'first plural',
+  },
+  'imperative.personShort.2pl': {
+    word: ['SECOND', 'PLURAL'],
+    agreesWith: 'PERSON_GRAMMAR',
+    fallback: 'second plural',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

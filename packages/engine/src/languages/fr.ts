@@ -44,6 +44,7 @@ function agreeAdjFr(base: string, gender: string, plural: boolean): string {
     else if (base.endsWith('f')) f = `${base.slice(0, -1)}ve`;     // actif → active
     else if (base.endsWith('er')) f = `${base.slice(0, -2)}ère`;   // premier → première
     else if (base.endsWith('on')) f = `${base}ne`;                 // bon → bonne
+    else if (base.endsWith('el')) f = `${base}le`;                 // pluriel → plurielle
     else f = `${base}e`;                                           // grand, fort, fatigué → +e
   }
   if (!plural) return f;

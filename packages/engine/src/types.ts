@@ -207,6 +207,12 @@ export interface LanguageEngine {
    */
   renderWord?(word: ConceptForms): string;
   /**
+   * What goes between two words of a label that names one thing with several words ("second
+   * singular"). A space in the languages that write with them; Japanese writes none (二番目単数).
+   * Optional: defaults to a space.
+   */
+  wordJoiner?: string;
+  /**
    * The determiner alone, for the UI's determiner menu — the surface this language puts before
    * `noun` for the `definiteness` its forms carry ("the" / "il" / "questo" / "tutti i" / "この").
    * A determiner has no citation form of its own: it agrees with the noun it determines, so the

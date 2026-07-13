@@ -555,6 +555,8 @@ export const japaneseEngine: LanguageEngine = {
     if (f['role'] !== 'adjective') return base;
     return /[なの]$/.test(base) ? base.slice(0, -1) : base;
   },
+  // Japanese writes no spaces: the words of a label run together (第二単数).
+  wordJoiner: '',
   /**
    * The determiner alone, for the menu that picks one. Japanese spells no article at all —
    * identifiability is left to context — so the three article values render nothing and the menu
