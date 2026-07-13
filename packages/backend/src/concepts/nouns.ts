@@ -785,6 +785,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The name of the predicative complement — what a copular verb predicates of its subject
+    // ("becomes a legend", "seems happy"). Seeded as one noun per language rather than composed,
+    // because no two traditions cut it the same way: fr/pt name it after the subject, es names it
+    // alone (the attribute is the subject's by definition — "atributo del sujeto" is an anglicism),
+    // and de must be the wider Prädikativ, not Prädikatsnomen, since the slot also takes an
+    // adjective. ja distinguishes it from the object complement (目的格補語) by the case name.
+    id: 'SUBJECT_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement a copular verb predicates of its subject (grammar)',
+    emoji: '🪞',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'subject complement', plural: 'subject complements', count: 'singular' },
+      it: { base: 'complemento predicativo del soggetto', plural: 'complementi predicativi del soggetto', gender: 'masc', count: 'singular' },
+      fr: { base: 'attribut du sujet',  plural: 'attributs du sujet',  gender: 'masc', count: 'singular' },
+      de: { base: 'Prädikativ',         plural: 'Prädikative',         gender: 'neut', count: 'singular' },
+      es: { base: 'atributo',           plural: 'atributos',           gender: 'masc', count: 'singular' },
+      ja: { base: '主格補語', count: 'singular', reading: 'しゅかくほご' },
+      pt: { base: 'predicativo do sujeito', plural: 'predicativos do sujeito', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The name of the instrumental complement — the means or tool an action is carried out
     // with ("start with a word"). Each tradition names it its own way: a bare adjective-turned-
     // noun in en/de (the Indo-European case name), a full phrase in the Romance ones. Only the

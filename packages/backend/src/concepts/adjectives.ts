@@ -437,6 +437,172 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'neutro' },
     },
   },
+  // ── Determiner values ────────────────────────────────────────────
+  // What each determiner *means*, as the grammar traditions name it — the entries of the
+  // determiner menu, which says "Definite" where it used to say "the". Adjectives, not nouns:
+  // each qualifies the noun of the section it sits under (an article that is definite, a
+  // demonstrative that is proximal, a quantifier that is universal), so the menu cites them
+  // with ARTICLE / DEMONSTRATIVE / QUANTIFIER and the Romance forms come out agreeing —
+  // it "articolo determinativo", "quantificatore universale".
+  //
+  // Japanese has no adjective for these: it names each with the noun the tradition coined
+  // (定冠詞, 近称, 全称). Seeded with the の that makes a noun attributive, which ja's renderWord
+  // strips when the word stands alone — so the menu shows 定冠詞, not 定冠詞の.
+  {
+    id: 'DEFINITE',
+    role: 'adjective',
+    description: 'pointing at a referent the hearer can already identify (grammar)',
+    emoji: '🎯',
+    forms: {
+      en: { base: 'definite' },
+      it: { base: 'determinativo' },
+      fr: { base: 'défini' },
+      de: { base: 'bestimmt' },
+      es: { base: 'definido' },
+      ja: { base: '定冠詞の', reading: 'ていかんしの' },
+      pt: { base: 'definido' },
+    },
+  },
+  {
+    id: 'INDEFINITE',
+    role: 'adjective',
+    description: 'pointing at a referent the hearer cannot yet identify (grammar)',
+    emoji: '❓',
+    forms: {
+      en: { base: 'indefinite' },
+      it: { base: 'indeterminativo' },
+      fr: { base: 'indéfini' },
+      de: { base: 'unbestimmt' },
+      es: { base: 'indefinido' },
+      ja: { base: '不定冠詞の', reading: 'ふていかんしの' },
+      pt: { base: 'indefinido' },
+    },
+  },
+  {
+    // The article that is no word at all — a positive choice, not the absence of one. German
+    // says "artikellos" rather than "null", which alone would read as the number.
+    id: 'ZERO',
+    role: 'adjective',
+    description: 'spelled with no article at all, meaningfully (grammar)',
+    emoji: '⃠',
+    forms: {
+      en: { base: 'zero' },
+      it: { base: 'zero' },
+      fr: { base: 'zéro' },
+      de: { base: 'artikellos' },
+      es: { base: 'cero' },
+      ja: { base: '無冠詞の', reading: 'むかんしの' },
+      pt: { base: 'zero' },
+    },
+  },
+  {
+    id: 'PROXIMAL',
+    role: 'adjective',
+    description: 'pointing at what is near the speaker (grammar)',
+    emoji: '👉',
+    forms: {
+      en: { base: 'proximal' },
+      it: { base: 'vicinale' },
+      fr: { base: 'proximal' },
+      de: { base: 'proximal' },
+      es: { base: 'proximal' },
+      ja: { base: '近称の', reading: 'きんしょうの' },
+      pt: { base: 'proximal' },
+    },
+  },
+  {
+    id: 'DISTAL',
+    role: 'adjective',
+    description: 'pointing at what is far from the speaker (grammar)',
+    emoji: '🔭',
+    forms: {
+      en: { base: 'distal' },
+      it: { base: 'distale' },
+      fr: { base: 'distal' },
+      de: { base: 'distal' },
+      es: { base: 'distal' },
+      ja: { base: '遠称の', reading: 'えんしょうの' },
+      pt: { base: 'distal' },
+    },
+  },
+  {
+    id: 'PARTITIVE',
+    role: 'adjective',
+    description: 'naming a part of a whole, an unspecified some of it (grammar)',
+    emoji: '🍰',
+    forms: {
+      en: { base: 'partitive' },
+      it: { base: 'partitivo' },
+      fr: { base: 'partitif' },
+      de: { base: 'partitiv' },
+      es: { base: 'partitivo' },
+      ja: { base: '部分詞の', reading: 'ぶぶんしの' },
+      pt: { base: 'partitivo' },
+    },
+  },
+  {
+    id: 'NEGATIVE',
+    role: 'adjective',
+    description: 'asserting that there is none of it (grammar)',
+    emoji: '🚫',
+    forms: {
+      en: { base: 'negative' },
+      it: { base: 'negativo' },
+      fr: { base: 'négatif' },
+      de: { base: 'negativ' },
+      es: { base: 'negativo' },
+      ja: { base: '否定の', reading: 'ひていの' },
+      pt: { base: 'negativo' },
+    },
+  },
+  {
+    // Multal and paucal are the quantities "many" and "few" — a large and a small amount, with
+    // no claim about halves. "Majority"/"minority" would make that claim, and it is not one
+    // "many books" makes.
+    id: 'MULTAL',
+    role: 'adjective',
+    description: 'naming a large quantity, without claiming most (grammar)',
+    emoji: '🔺',
+    forms: {
+      en: { base: 'multal' },
+      it: { base: 'multale' },
+      fr: { base: 'multal' },
+      de: { base: 'multal' },
+      es: { base: 'multal' },
+      ja: { base: '多数の', reading: 'たすうの' },
+      pt: { base: 'multal' },
+    },
+  },
+  {
+    id: 'PAUCAL',
+    role: 'adjective',
+    description: 'naming a small quantity, without claiming a minority (grammar)',
+    emoji: '🔻',
+    forms: {
+      en: { base: 'paucal' },
+      it: { base: 'paucale' },
+      fr: { base: 'paucal' },
+      de: { base: 'paukal' },
+      es: { base: 'paucal' },
+      ja: { base: '少数の', reading: 'しょうすうの' },
+      pt: { base: 'paucal' },
+    },
+  },
+  {
+    id: 'UNIVERSAL',
+    role: 'adjective',
+    description: 'taking in every one of them, with no exception (grammar)',
+    emoji: '🌐',
+    forms: {
+      en: { base: 'universal' },
+      it: { base: 'universale' },
+      fr: { base: 'universel' },
+      de: { base: 'universal' },
+      es: { base: 'universal' },
+      ja: { base: '全称の', reading: 'ぜんしょうの' },
+      pt: { base: 'universal' },
+    },
+  },
   // ── Ordinals ─────────────────────────────────────────────────────
   // Position in a sequence. Seeded so the pronoun chooser can name the three grammatical
   // persons in the UI language. German declines from an uninflected stem, but its endings

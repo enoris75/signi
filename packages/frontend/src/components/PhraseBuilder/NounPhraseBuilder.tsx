@@ -16,8 +16,13 @@ import { useUiString } from "../../i18n/useUiString.ts";
 // The determiner picker: the ten values are too many to cycle blindly, so the box opens a
 // menu grouped by the dimension each value belongs to — article / demonstrative / quantifier,
 // section headings the engine renders in the current UI language like any other UI string.
-// Each value names itself with the word that realizes it in that language ("il", "questo",
-// "tutti i", "この"), so the menu is read in the language being written, not in English.
+//
+// Each row says the value twice over: what it means, as its grammar tradition names it
+// ("Multal", "Determinativo", 近称), and beside it, dimmed, the word that will actually appear
+// in the phrase ("many", "il", "この"). The name alone would leave a user who has not met
+// "paucal" guessing; the word alone — which is all the menu used to show — teaches nothing
+// about what the slot is for. Both are UI strings, so both are read in the language being
+// written rather than in English.
 function DeterminerMenu({
   anchorEl,
   value,
@@ -59,9 +64,19 @@ function DeterminerMenu({
               onPick(v);
               onClose();
             }}
-            sx={{ fontSize: "0.78rem", minHeight: 28, py: 0.25, pl: 2.5 }}
+            sx={{
+              fontSize: "0.78rem",
+              minHeight: 28,
+              py: 0.25,
+              pl: 2.5,
+              gap: 1.5,
+              justifyContent: "space-between",
+            }}
           >
-            {t(`determiner.value.${v}`)}
+            {t(`determiner.name.${v}`)}
+            <Box component="span" sx={{ color: "text.secondary", fontSize: "0.72rem" }}>
+              {t(`determiner.value.${v}`)}
+            </Box>
           </MenuItem>
         )),
       ])}

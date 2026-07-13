@@ -75,6 +75,7 @@ export const modalChainParent = (key: string): SlotKey | undefined => {
  */
 export const COMPLEMENT_LABEL_KEYS: Partial<Record<ComplementType, UiStringKey>> = {
   instrumental: "slot.instrumental",
+  predicative: "slot.predicative",
 };
 
 export const ALL_SLOTS: SlotConfig[] = [

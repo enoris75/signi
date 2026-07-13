@@ -188,6 +188,16 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Instrumental',
   },
 
+  // The subject complement's box title and satellite label — a bare name-noun like the
+  // instrumental, for the same reason: the grammar traditions name the relation in words that do
+  // not decompose ("attribut du sujet", "complemento predicativo del soggetto", es just
+  // "atributo"), so the concept carries the whole term.
+  'slot.predicative': {
+    plan: nameOf('SUBJECT_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Subject Complement',
+  },
+
   // The verb box's placeholder, the same command shape as the subject's: "type a verb" — the
   // TYPE imperative taking an indefinite VERB (the grammar noun) as its direct object.
   'slot.verb.placeholder': {
@@ -275,11 +285,83 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Quantifier',
   },
 
-  // The values themselves — the determiner menu's entries and the word the determiner box shows.
-  // Each names itself with the word that realizes it in the language ("the" / "il" / "der" /
-  // "この"), cited on the grammar noun NOUN, whose gender and initial sound settle the form (see
-  // UiStringDeterminerDef). Keyed `determiner.value.<Definiteness>` so a call site can write
-  // t(`determiner.value.${value}`) for any of the ten.
+  // What the ten values *mean*, as each grammar tradition names them — the determiner menu's
+  // labels. A bare adjective, like the `pronoun.*` values: an article that is definite, a
+  // demonstrative that is proximal, a quantifier that is universal. `agreesWith` names the noun
+  // of the section the value sits under, which is what makes the Italian read "determinativo"
+  // under the articles and "universale" under the quantifiers (both masculine, but the
+  // agreement is a fact about each language's lexicon, not about this file).
+  //
+  // These say what the slot does; `determiner.value.*` below says what it spells. The menu
+  // shows both, because a user who has not met "paucal" learns it from the "few" beside it.
+  // Keyed `determiner.name.<Definiteness>`, parallel to the values, so the menu can write
+  // t(`determiner.name.${value}`) for any of the ten.
+  'determiner.name.definite': {
+    word: 'DEFINITE',
+    agreesWith: 'ARTICLE',
+    format: { capitalize: true },
+    fallback: 'Definite',
+  },
+  'determiner.name.indefinite': {
+    word: 'INDEFINITE',
+    agreesWith: 'ARTICLE',
+    format: { capitalize: true },
+    fallback: 'Indefinite',
+  },
+  'determiner.name.bare': {
+    word: 'ZERO',
+    agreesWith: 'ARTICLE',
+    format: { capitalize: true },
+    fallback: 'Zero',
+  },
+  'determiner.name.this': {
+    word: 'PROXIMAL',
+    agreesWith: 'DEMONSTRATIVE',
+    format: { capitalize: true },
+    fallback: 'Proximal',
+  },
+  'determiner.name.that': {
+    word: 'DISTAL',
+    agreesWith: 'DEMONSTRATIVE',
+    format: { capitalize: true },
+    fallback: 'Distal',
+  },
+  'determiner.name.some': {
+    word: 'PARTITIVE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Partitive',
+  },
+  'determiner.name.no': {
+    word: 'NEGATIVE',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Negative',
+  },
+  'determiner.name.many': {
+    word: 'MULTAL',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Multal',
+  },
+  'determiner.name.few': {
+    word: 'PAUCAL',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Paucal',
+  },
+  'determiner.name.all': {
+    word: 'UNIVERSAL',
+    agreesWith: 'QUANTIFIER',
+    format: { capitalize: true },
+    fallback: 'Universal',
+  },
+
+  // The words those values spell — the hint beside each menu label, and the word the determiner
+  // box on the canvas shows. Each names itself with the word that realizes it in the language
+  // ("the" / "il" / "der" / "この"), cited on the grammar noun NOUN, whose gender and initial
+  // sound settle the form (see UiStringDeterminerDef). Keyed `determiner.value.<Definiteness>`
+  // so a call site can write t(`determiner.value.${value}`) for any of the ten.
   //
   // Lower-case and unformatted: these are words shown as words, not headings — the same choice
   // the `pronoun.*` value labels make. `bare` is the determiner that is *no word at all*, so
