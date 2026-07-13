@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -461,14 +461,34 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
 }
 
 /**
+ * Render every conjunct of a noun slot and coordinate them the Italian way: commas between all
+ * but the last pair, the conjunction on the last ("il gatto, il cane e la volpe"). "e" becomes
+ * the euphonic "ed" before a word already starting with e- ("il cane ed il gatto" — "ed elefanti").
+ */
+function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
+  const link = (next: string) =>
+    el.conjunction === 'or' ? ' o ' : /^e/i.test(next) ? ' ed ' : ' e ';
+  return joinConjuncts(el.conjuncts.map(render), ', ', link);
+}
+
+/** A subject slot: each conjunct with its own article/adjectives/relative, coordinated. */
+function subjectText(el: ResolvedNounElement): string {
+  return coordinate(el, subjectPhrase);
+}
+
+/** One conjunct as a plain noun phrase carrying its own determiner ("una parola"). */
+function npText(np: ResolvedNounPhrase): string {
+  return renderNP(np, (plural, lead) => artFor(np.head.forms, plural, lead));
+}
+
+/**
  * route path relation → preposition, honoring the head's determiner. The place adverbs
  * (sotto/sopra/dietro/attraverso) take a plain, non-fusing article, so the determiner rides
  * straight off `artFor` ("sotto la casa" / "sotto una casa" / "sotto casa"). "intorno" and
  * "davanti" govern "a", which fuses only with the definite ("intorno alla casa" but
  * "intorno a una casa"), so they route through `prepDet`.
  */
-function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string {
-  const f = c.phrase.head.forms;
+function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean, lead: string): string {
   const adv = (a: string): string => { const det = artFor(f, plural, lead); return det ? `${a} ${det}` : a; };
   switch (pathSpecifier(c)) {
     case 'under':       return adv('sotto');
@@ -490,15 +510,20 @@ function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const f = c.phrase.head.forms;
+      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
+      // its surface is rendered from every conjunct, each with its own article and agreement.
+      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the *subject* ("sembra
       // stanca") and carries its own degree ("sembra più stanca"); a predicate noun keeps
-      // its own article, no preposition ("diventa una leggenda").
+      // its own article, no preposition ("diventa una leggenda"). Every conjunct agrees with
+      // the subject independently, so a coordinated one reads "sembra stanca e felice" — and a
+      // coordinated *subject* resolves to masculine plural first, giving "sembrano stanchi".
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') {
-          return itDeg(c.phrase.head, agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
-        }
-        return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+        return coordinate(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective'
+            ? itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
+            : npText(np),
+        );
       }
       // An instrument presented as an action: the bare gerundio for the process level
       // ("scegliendo una parola" — Italian needs no preposition before it), and the nominalised
@@ -507,7 +532,7 @@ function complementsPhrase(
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const object = renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+          const object = coordinate(c.phrase, npText);
           const verb =
             level === 'process'
               ? actionGerund(c.action)
@@ -538,20 +563,25 @@ function complementsPhrase(
       // (motion to) vs "corro via dal bambino" (motion away from).
       // Cause reads "a causa di" + the "di"-fused article ("a causa del cane"); the sentiment
       // swaps the connector — negative "per colpa del cane", positive "grazie al cane" ("a"-fused).
+      // The preposition fuses with the article ("in"+"la" → "nella"), so it cannot be factored
+      // out in front of a coordinated complement — each conjunct carries its own fused head:
+      // "nella casa e nel bosco", never "*nella casa e il bosco". Repeating it also lets each
+      // conjunct choose its own preposition, which `direction` needs — the animate goal takes
+      // "da" and the place goal "a" ("corro dal bambino e alla casa").
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
-      const headFor = (plural: boolean, lead: string): string =>
-        type === 'locative'  ? prepDet('in', f, plural, lead) :
-        type === 'terminus'  ? prepDet('a', f, plural, lead) :
-        type === 'instrumental' ? prepDet('con', f, plural, lead) :
-        type === 'direction' ? prepDet(f['animate'] === '1' ? 'da' : 'a', f, plural, lead) :
-        type === 'source'    ? `via ${prepDet('da', f, plural, lead)}` :
+      const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
+        type === 'locative'  ? prepDet('in', nf, plural, lead) :
+        type === 'terminus'  ? prepDet('a', nf, plural, lead) :
+        type === 'instrumental' ? prepDet('con', nf, plural, lead) :
+        type === 'direction' ? prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead) :
+        type === 'source'    ? `via ${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `grazie ${prepArt('a', f, plural, lead)}` :
-          causeSent === 'negative' ? `per colpa ${prepArt('di', f, plural, lead)}` :
-          `a causa ${prepArt('di', f, plural, lead)}`
+          causeSent === 'positive' ? `grazie ${prepArt('a', nf, plural, lead)}` :
+          causeSent === 'negative' ? `per colpa ${prepArt('di', nf, plural, lead)}` :
+          `a causa ${prepArt('di', nf, plural, lead)}`
         ) :
-        routeHead(c, plural, lead);
-      return renderNP(c.phrase, headFor);
+        routeHead(c, nf, plural, lead);
+      return coordinate(c.phrase, (np) => renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)
     .join(' ');
@@ -565,7 +595,7 @@ function complementsPhrase(
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
-  directObject?: ResolvedNounPhrase,
+  directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -589,11 +619,10 @@ function predicateText(
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';
+  // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza".
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const negText = (verbNegative || modifierIsNegative || objectIsNegative) ? 'non' : '';
-  const directObjectText = directObject
-    ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
-    : '';
+  const directObjectText = directObject ? coordinate(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
@@ -622,8 +651,8 @@ function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
-  const subjText = subjectRelative ? '' : subjectPhrase(rel.subject!);
+  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  const subjText = subjectRelative ? '' : subjectText(rel.subject!);
   const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `che ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }
@@ -632,13 +661,13 @@ function relativeText(np: ResolvedNounPhrase): string {
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // An imperative drops its subject (the person still drives the form — see predicateText).
-  const subjectText = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectPhrase(subject);
+  const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
-  if (!phrase.verbPhrase) return subjectText.trim();
+  if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+  return [subj, predicate].filter(Boolean).join(' ').trim();
 }
 
 const COORD_WORDS: Record<CoordConjunction, string> = {

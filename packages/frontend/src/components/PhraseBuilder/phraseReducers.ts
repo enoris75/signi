@@ -2,14 +2,18 @@ import {
   ASPECTS,
   DEGREES,
   MODIFIER_RELATIONS,
+  NOUN_COORD_CONJUNCTIONS,
   TENSES,
   type CauseSentiment,
   type Concept,
+  type CoordConjunction,
   type Definiteness,
   type ImperativeRegister,
   type PathSpecifier,
 } from "@signi/shared";
 import {
+  CONJUNCTION_KEY,
+  CONJUNCTS_KEY,
   GenderSlot,
   ImperativePerson,
   NounKey,
@@ -391,4 +395,63 @@ export function removePossessor(
   const next = { ...prev };
   delete next[POSSESSOR_KEY(which)];
   return next;
+}
+
+/** The extra conjuncts coordinated with a noun block's own head (empty when it has none). */
+export function conjunctsOf(prev: PhraseSelection, which: NounKey): PhraseSelection[] {
+  return (prev[CONJUNCTS_KEY(which)] as PhraseSelection[] | undefined) ?? [];
+}
+
+/** The conjunction joining a noun block's group. Defaults to the copulative. */
+export function conjunctionOf(prev: PhraseSelection, which: NounKey): CoordConjunction {
+  return (prev[CONJUNCTION_KEY(which)] as CoordConjunction | undefined) ?? "and";
+}
+
+// Append an empty conjunct to a noun block, coordinating it with the block's own head.
+export function addConjunct(prev: PhraseSelection, which: NounKey): PhraseSelection {
+  return { ...prev, [CONJUNCTS_KEY(which)]: [...conjunctsOf(prev, which), {}] };
+}
+
+// Apply `updater` to the i-th conjunct of `which`. Lets the nested noun-phrase-mode builder
+// editing that conjunct write into `${which}Conjuncts[i]` without knowing it is embedded —
+// the same lens `updatePossessor` gives a possessor sub-builder.
+export function updateConjunct(
+  prev: PhraseSelection,
+  which: NounKey,
+  i: number,
+  updater: (prev: PhraseSelection) => PhraseSelection,
+): PhraseSelection {
+  const conjuncts = conjunctsOf(prev, which);
+  return {
+    ...prev,
+    [CONJUNCTS_KEY(which)]: conjuncts.map((c, j) => (j === i ? updater(c ?? {}) : c)),
+  };
+}
+
+// Drop the i-th conjunct. The last one out takes the conjunction with it — a block with no
+// conjuncts is not a coordination, and leaving a stale conjunction behind would resurrect
+// itself the next time one is added.
+export function removeConjunct(
+  prev: PhraseSelection,
+  which: NounKey,
+  i: number,
+): PhraseSelection {
+  const conjuncts = conjunctsOf(prev, which).filter((_, j) => j !== i);
+  const next = { ...prev, [CONJUNCTS_KEY(which)]: conjuncts };
+  if (conjuncts.length === 0) {
+    delete next[CONJUNCTS_KEY(which)];
+    delete next[CONJUNCTION_KEY(which)];
+  }
+  return next;
+}
+
+// Cycle a block's conjunction through the ones that may join noun phrases (and / or).
+export function cycleNounConjunction(
+  prev: PhraseSelection,
+  which: NounKey,
+): PhraseSelection {
+  const current = conjunctionOf(prev, which);
+  const i = NOUN_COORD_CONJUNCTIONS.indexOf(current);
+  const next = NOUN_COORD_CONJUNCTIONS[(i + 1) % NOUN_COORD_CONJUNCTIONS.length];
+  return { ...prev, [CONJUNCTION_KEY(which)]: next };
 }

@@ -418,6 +418,51 @@ export interface NounPhrase {
 }
 
 /**
+ * Two or more noun phrases coordinated into one noun element ("Peter **and** Paul", "aramaic
+ * **or** latin"). The conjunction belongs to the group as a whole, not to each junction: three
+ * conjuncts are "Peter, Paul and Mary", not "Peter and Paul and Mary" — where the comma falls,
+ * and whether the word repeats, is a fact about each language, so the engines do the joining.
+ *
+ * Each conjunct is a full `NounPhrase` and keeps its own determiner, number, gender, adjectives,
+ * possessor and relative clause — which is what Romance needs (it repeats the article: "il gatto
+ * **e il** cane") and what lets conjuncts differ ("Peter and the old dog that barks").
+ *
+ * The group is flat: one conjunction over all its conjuncts. Nested scope ("Peter and either Paul
+ * or Mary") is deliberately not expressible.
+ */
+export interface NounGroup {
+  /** At least two — a lone phrase is not a group, it is a `NounPhrase` (see `NounElement`). */
+  conjuncts: NounPhrase[];
+  conjunction: CoordConjunction;
+}
+
+/**
+ * What can stand in a noun slot: a single noun phrase, or several coordinated. Every slot that
+ * holds a noun takes an element — subject, direct object, complement, and the slots of a relative
+ * clause. A `possessor` is the exception and stays a plain `NounPhrase`: "Peter and Paul's book"
+ * cannot say whether they own it jointly or one apiece, so there is nothing for the user to mean.
+ */
+export type NounElement = NounPhrase | NounGroup;
+
+/** Whether a noun element is a coordinated group rather than a single phrase. */
+export function isNounGroup(element: NounElement): element is NounGroup {
+  return 'conjuncts' in element;
+}
+
+/** The conjuncts of any noun element, in order — a single phrase is a group of one. */
+export function nounConjuncts(element: NounElement): NounPhrase[] {
+  return isNounGroup(element) ? element.conjuncts : [element];
+}
+
+/**
+ * The conjunctions that may join **noun phrases** — the copulative and the disjunctive only.
+ * The other four in `CoordConjunction` relate propositions and need a predicate on each side:
+ * `therefore` draws a conclusion, `that_is` paraphrases a clause, `but` contrasts two assertions,
+ * `then` sequences two events. None of them join two things.
+ */
+export const NOUN_COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
+
+/**
  * A subordinate (restrictive relative) clause. It is a full predicate — verb phrase
  * plus optional objects and complements. The head noun phrase it hangs off of fills
  * one of the clause's slots (the "gap"), named by `headRole`:
@@ -431,9 +476,9 @@ export interface RelativeClause {
   /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
   headRole?: 'subject' | 'directObject' | ComplementType;
   /** The clause's own subject — present when headRole !== 'subject' (drives agreement). */
-  subject?: NounPhrase;
+  subject?: NounElement;
   verbPhrase: VerbPhrase;
-  directObject?: NounPhrase;
+  directObject?: NounElement;
   complements?: Partial<Record<ComplementType, Complement>>;
 }
 
@@ -483,7 +528,7 @@ export type Specifier =
  * takes a specifier, and not every specifier is a `PathSpecifier`.
  */
 export interface Complement {
-  phrase: NounPhrase;
+  phrase: NounElement;
   specifiers?: Specifier[];
   /**
    * The instrument as an *action* rather than a thing — set only on the `instrumental`
@@ -505,12 +550,12 @@ export interface LexicalEntry {
 }
 
 export interface PhrasePlan {
-  subject: NounPhrase;
+  subject: NounElement;
   // Optional: a verbless period is a bare noun phrase (a newspaper-title-style fragment
   // like "breaking news"). When absent the engines render just the subject; objects and
   // complements, which hang off the verb, are meaningless without it.
   verbPhrase?: VerbPhrase;
-  directObject?: NounPhrase;
+  directObject?: NounElement;
   // The recipient of a ditransitive ("gives the book *to the cat*") is not a slot of its own:
   // it is the `terminus` complement, which every verb that licenses one declares.
   complements?: Partial<Record<ComplementType, Complement>>;

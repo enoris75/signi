@@ -33,6 +33,53 @@ export interface ResolvedNounPhrase {
 }
 
 /**
+ * A resolved noun element: the conjuncts filling one noun slot, and the agreement they resolve
+ * to as a group. A slot holding a single phrase resolves to one conjunct and no conjunction —
+ * which is the overwhelmingly common case, and is bit-for-bit what the engines saw before
+ * coordination existed.
+ */
+export interface ResolvedNounElement {
+  /** At least one. Each is a full noun phrase and renders with its own determiner/adjectives. */
+  conjuncts: ResolvedNounPhrase[];
+  /** The conjunction joining them; absent iff there is a single conjunct. */
+  conjunction?: CoordConjunction;
+  /**
+   * The person/number/gender the *group* agrees as — what a verb agreeing with this slot, or an
+   * adjective agreeing with it, must read. "Peter and Paul" is 3rd plural though both conjuncts
+   * are singular; "il gatto e la volpe" is masculine plural though one conjunct is feminine.
+   *
+   * Agreement **only**: it deliberately carries no surface forms (no `base`, no `plural`), so an
+   * engine that tries to render a noun from it prints nothing rather than silently printing just
+   * one of the conjuncts. Render from `conjuncts`; agree from here. For a single conjunct it is
+   * that conjunct's own head forms, so the two coincide and nothing changes.
+   */
+  agreement: Record<string, string>;
+}
+
+/** The first conjunct of an element — the head of a slot the engines treat as a single phrase. */
+export function firstConjunct(element: ResolvedNounElement): ResolvedNounPhrase {
+  return element.conjuncts[0];
+}
+
+/**
+ * Join the rendered conjuncts of a coordinated slot the way a language coordinates: every
+ * junction but the last takes `separator` (a comma in the European languages, と in Japanese),
+ * and the last takes whatever `link` returns for the conjunct that follows it — a function, not a
+ * word, because the conjunction is not always the same word: Spanish says "y" but "e" before an
+ * i- sound, Italian "e" but "ed" before an e-.
+ */
+export function joinConjuncts(
+  parts: string[],
+  separator: string,
+  link: (next: string) => string,
+): string {
+  const words = parts.filter(Boolean);
+  if (words.length <= 1) return words[0] ?? '';
+  const last = words[words.length - 1];
+  return words.slice(0, -1).join(separator) + link(last) + last;
+}
+
+/**
  * Verb mood, set by the translator. For a hypothetical conditional the main clause's verb is
  * `'conditional'` ("would run") and the "if" clause's verb is `'subjunctive'` (past /
  * imperfect-subjunctive, "if the cat ate"). For a command the verb is `'imperative'` ("eat!",
@@ -71,15 +118,15 @@ export interface ResolvedVerbPhrase {
  */
 export interface ResolvedRelativeClause {
   headRole: 'subject' | 'directObject' | ComplementType;
-  subject?: ResolvedNounPhrase;
+  subject?: ResolvedNounElement;
   verbPhrase: ResolvedVerbPhrase;
-  directObject?: ResolvedNounPhrase;
+  directObject?: ResolvedNounElement;
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
 }
 
 /** A resolved complement: its noun phrase plus any specifiers (plain data). */
 export interface ResolvedComplement {
-  phrase: ResolvedNounPhrase;
+  phrase: ResolvedNounElement;
   /**
    * The resolved action an instrument *is* at the `process` / `concept` abstraction levels —
    * "by **choosing** a word" (see Complement.action). `phrase` is the noun it acts on. Absent at
@@ -90,10 +137,10 @@ export interface ResolvedComplement {
 }
 
 export interface ResolvedPhrase {
-  subject: ResolvedNounPhrase;
+  subject: ResolvedNounElement;
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
   verbPhrase?: ResolvedVerbPhrase;
-  directObject?: ResolvedNounPhrase;
+  directObject?: ResolvedNounElement;
   // The recipient ("gives the book *to the cat*") arrives as the `terminus` complement.
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
   /**

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -297,20 +297,43 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
   return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor); // noun — determiner from forms
 }
 
+/**
+ * Render every conjunct of a noun slot and join them the way English coordinates: commas between
+ * all but the last pair, the conjunction word on the last ("Peter, Paul and Mary"). A slot holding
+ * one phrase is just that phrase.
+ */
+function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
+  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${COORD_WORDS[el.conjunction ?? 'and']} `);
+}
+
+/** One conjunct as a full non-subject noun phrase: determiner, adjectives, modifiers, relative. */
+function npText(np: ResolvedNounPhrase): string {
+  return withRelative(nounPhrase(np.head.forms, npAdj(np), nounMods(np), np.possessor), np);
+}
+
+/** A subject slot: each conjunct with its own relative clause, coordinated. */
+function subjectText(el: ResolvedNounElement): string {
+  return coordinate(el, (np) => withRelative(subjectPhrase(np), np));
+}
+
 function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const f = c.phrase.head.forms;
+      // What *kind* of complement this is (a pronoun? an adjective?) is settled by its first
+      // conjunct — a coordination never mixes a pronoun with a noun in practice — but the
+      // surface is rendered from every conjunct.
+      const f = firstConjunct(c.phrase).head.forms;
       // A pronoun complement ("because of him/her/them") takes the oblique form with no
       // article — only the causal adjunct accepts a pronoun in the UI today. Positive credits
       // with "thanks to"; English has no distinct neutral/negative connector, so both read
       // "because of" (the blame sense rides on "because of" itself).
       if (type === 'cause' && f['person']) {
         const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
-        return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
+        const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
+        return `${prep} ${pronouns}`;
       }
       // An instrument presented as an action rather than a thing: "by choosing a word"
       // (process) / "with the act of choosing a word" (concept). Both take the gerund — English
@@ -319,22 +342,26 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const head = level === 'process' ? 'by' : 'with the act of';
-          const object = withRelative(nounPhrase(f, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase);
+          const object = coordinate(c.phrase, npText);
           const adverb = c.action.modifier?.forms['base'] ?? '';
           return [head, actionGerund(c.action), object, adverb].filter(Boolean).join(' ');
         }
       }
       // Subject complement: a predicate adjective takes no article and doesn't agree, but
       // carries its own degree ("seems happier"); a predicate noun keeps its own article,
-      // with no preposition ("becomes a legend").
+      // with no preposition ("becomes a legend"). Coordinated conjuncts are rendered one by
+      // one, so a group may mix the two ("seems a legend and happy" is odd, but "seems happy
+      // or tired" and "becomes a legend and an icon" both fall out of the same map).
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') return enAdj(c.phrase.head);
-        return withRelative(nounPhrase(f, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase);
+        return coordinate(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),
+        );
       }
+      // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
         : type === 'cause' ? (causeSentiment(c) === 'positive' ? 'thanks to' : 'because of')
         : PREP[type];
-      return `${prep} ${withRelative(nounPhrase(c.phrase.head.forms, npAdj(c.phrase), nounMods(c.phrase), c.phrase.possessor), c.phrase)}`;
+      return `${prep} ${coordinate(c.phrase, npText)}`;
     })
     .filter(Boolean)
     .join(' ');
@@ -348,7 +375,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
 function predicateParts(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
-  directObject?: ResolvedNounPhrase,
+  directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
   const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -356,9 +383,7 @@ function predicateParts(
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
 
-  const directObjectText = directObject
-    ? withRelative(nounPhrase(directObject.head.forms, npAdj(directObject), nounMods(directObject), directObject.possessor), directObject)
-    : '';
+  const directObjectText = directObject ? coordinate(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements);
@@ -472,8 +497,8 @@ function relativeText(np: ResolvedNounPhrase): string {
   if (!rel) return '';
   const pronoun = np.head.forms['animate'] === '1' ? 'who' : 'that';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
-  const subjText = subjectRelative ? '' : withRelative(subjectPhrase(rel.subject!), rel.subject!);
+  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  const subjText = subjectRelative ? '' : subjectText(rel.subject!);
   return [pronoun, subjText, ...predicateParts(agreeForms, rel.verbPhrase, rel.directObject, rel.complements)]
     .filter(Boolean)
     .join(' ');
@@ -491,12 +516,12 @@ function renderClause(phrase: ResolvedPhrase): string {
   // An imperative drops its subject from the surface, but the subject's person/number still
   // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
   const imperative = phrase.verbPhrase?.mood === 'imperative';
-  const subjectText = imperative ? '' : withRelative(subjectPhrase(subject), subject);
+  const subj = imperative ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
-  if (!phrase.verbPhrase) return subjectText.trim();
+  if (!phrase.verbPhrase) return subj.trim();
   return [
-    subjectText,
-    ...predicateParts(subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements),
+    subj,
+    ...predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements),
   ]
     .filter(Boolean)
     .join(' ')

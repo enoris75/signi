@@ -17,6 +17,7 @@ import {
   NounKey,
   NumberSlot,
   PhraseSelection,
+  conjunctAddress,
   possessorAddress,
   slotCategories,
   SlotKey,
@@ -37,12 +38,16 @@ import {
 import {
   applyConceptSelect,
   applyClear,
+  addConjunct,
+  conjunctsOf,
   cycleAspect,
   cycleDegree,
   cycleModifierRelation,
   cycleModifierNumber,
+  cycleNounConjunction,
   setModifierAdjective,
   cycleTense,
+  removeConjunct,
   removePossessor,
   setDefiniteness,
   setImperativePerson,
@@ -90,6 +95,7 @@ import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
+import { ConjunctPanels, openConjunctsFor } from "./ConjunctPanels.tsx";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
 import { useDrag } from "./useDrag.ts";
@@ -338,6 +344,28 @@ export function PhraseBuilder({
     binding?.relative.onRemoveLink(possessorAddress(possessorPath ?? which));
   }
 
+  // Coordinate one more phrase with a noun block's head ("Peter *and Paul*"). Unlike the
+  // possessor, this is not a reveal but an append: each click opens one more conjunct panel.
+  function handleAddConjunct(which: NounKey) {
+    onPhraseUpdate((prev) => addConjunct(prev, which));
+  }
+
+  // Drop one conjunct out of a block's group. The panels below it shift up by one, so every
+  // relative-clause link sourced from a conjunct at or after `i` is now aimed at the wrong
+  // phrase — an address is positional. Rather than renumber them (and silently move a user's
+  // clause onto a different noun), drop those links: the conjunct they described is gone or
+  // has moved, and re-linking is one click.
+  function handleRemoveConjunct(which: NounKey, i: number) {
+    const base = possessorPath ?? which;
+    const count = conjunctsOf(selection, which).length;
+    for (let j = i; j < count; j++)
+      binding?.relative.onRemoveLink(conjunctAddress(base, j));
+    onPhraseUpdate((prev) => removeConjunct(prev, which, i));
+  }
+
+  const handleCycleConjunction = (which: NounKey) =>
+    onPhraseUpdate((prev) => cycleNounConjunction(prev, which));
+
   // Each grammatical control on the canvas is a pure selection transform (phraseReducers);
   // these bind them to this builder's slice.
   const handleToggleNumber = (which: NumberSlot) =>
@@ -448,6 +476,7 @@ export function PhraseBuilder({
       onToggleGender: handleToggleGender,
       onToggleNegative: handleToggleNegative,
       onToggleReveal: handleToggleReveal,
+      onAddConjunct: handleAddConjunct,
     });
 
   // Satellite slots (adjective / adverb) only render when revealed or filled.
@@ -463,6 +492,10 @@ export function PhraseBuilder({
   // dotted-box perimeter (start) to the receiving dot on the panel's top edge (end).
   const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
   const possessorDotEls = useRef<Map<string, HTMLElement>>(new Map());
+  // The coordination connector runs the same way: from the "Coordinate" control on the noun's
+  // dotted-box perimeter down to the receiving dot atop its stack of conjunct panels.
+  const conjunctControlEls = useRef<Map<string, HTMLElement>>(new Map());
+  const conjunctDotEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
   const slotEls = useRef<Map<string, HTMLElement>>(new Map());
   // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
@@ -584,6 +617,13 @@ export function PhraseBuilder({
         possessorControlEls.current.get(which),
         possessorDotEls.current.get(which),
         "poss",
+      );
+    for (const which of openConjuncts)
+      measure(
+        which,
+        conjunctControlEls.current.get(which),
+        conjunctDotEls.current.get(which),
+        "conj",
       );
     setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
@@ -787,6 +827,7 @@ export function PhraseBuilder({
   }
 
   const openPossessors = openPossessorsFor(selection, shownMap);
+  const openConjuncts = openConjunctsFor(selection);
 
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
   // same canvas below and lean on this component's drag machinery and handlers.
@@ -876,6 +917,7 @@ export function PhraseBuilder({
         onSetImperativeRegister={handleSetImperativeRegister}
         containerRef={containerRef}
         possessorControlEls={possessorControlEls}
+        conjunctControlEls={conjunctControlEls}
       />
 
       {/* The container's own bottom edge is the resize grip, so it bleeds back through
@@ -903,6 +945,23 @@ export function PhraseBuilder({
           registerDot={(which, el) => {
             if (el) possessorDotEls.current.set(which, el);
             else possessorDotEls.current.delete(which);
+          }}
+          binding={binding}
+          possessorPath={possessorPath}
+          Builder={PhraseBuilder}
+        />
+      )}
+
+      {showCanvas && (
+        <ConjunctPanels
+          openConjuncts={openConjuncts}
+          selection={selection}
+          onPhraseUpdate={onPhraseUpdate}
+          onRemoveConjunct={handleRemoveConjunct}
+          onCycleConjunction={handleCycleConjunction}
+          registerDot={(which, el) => {
+            if (el) conjunctDotEls.current.set(which, el);
+            else conjunctDotEls.current.delete(which);
           }}
           binding={binding}
           possessorPath={possessorPath}

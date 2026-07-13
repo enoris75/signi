@@ -227,6 +227,23 @@ export interface PhraseSelection {
     // Optional possessor per noun block ("the *cat's* book"). Each is a PhraseSelection
     // whose `subject` slot holds the possessing noun (so its number/gender/adjectives and
     // its own nested possessor all reuse the `subject*` fields); built via buildNounPhrase.
+    // Coordinated conjuncts of a noun block ("Peter *and Paul*"). Like `*Possessor`, each is a
+    // PhraseSelection whose `subject` slot holds that conjunct's head — so a conjunct gets the
+    // whole noun-phrase surface (determiner, number/gender, adjectives, its own possessor and
+    // relative clause) from the same recursive builder, and conjuncts may differ freely ("Peter
+    // and the old dog"). The block's own fields are the *first* conjunct; these are the rest.
+    //
+    // Only the three adposition-free noun slots coordinate today (see COORDINABLE_NOUN_KEYS):
+    // the prepositional complements raise a question these don't — whether the preposition
+    // repeats across the conjuncts — that each language answers differently.
+    subjectConjuncts?: PhraseSelection[];
+    directObjectConjuncts?: PhraseSelection[];
+    predicativeConjuncts?: PhraseSelection[];
+    // The one conjunction joining a block's whole group (default 'and'). Only `and` / `or` join
+    // noun phrases — see NOUN_COORD_CONJUNCTIONS.
+    subjectConjunction?: CoordConjunction;
+    directObjectConjunction?: CoordConjunction;
+    predicativeConjunction?: CoordConjunction;
     subjectPossessor?: PhraseSelection;
     directObjectPossessor?: PhraseSelection;
     predicativePossessor?: PhraseSelection;
@@ -256,15 +273,28 @@ export type NounKey = "subject" | "directObject" | BoxComplementType;
 // The address of a noun anywhere in a container's phrase tree, used as a cross-container
 // link endpoint. A top-level noun is just its `NounKey`; a possessor head is that address
 // followed by a `/possessor` step (e.g. `directObject/possessor`, or, for a
-// possessor-of-a-possessor, `directObject/possessor/possessor`). Only *sources* use the
-// suffix today (relativising a possessor head); targets are always plain `NounKey`.
+// possessor-of-a-possessor, `directObject/possessor/possessor`); a coordinated conjunct is
+// that address followed by `/conjunct/<i>` (`subject/conjunct/0` is the *second* noun of the
+// subject — the block's own fields are the first). Steps compose, so a conjunct's possessor is
+// `subject/conjunct/0/possessor`. Only *sources* use the suffixes today (relativising a
+// possessor or a conjunct head); targets are always plain `NounKey`.
 export type NounAddress = string;
 
 // Append a `/possessor` step to a noun address — the address of that noun's possessor head.
 export const possessorAddress = (base: NounAddress): NounAddress => `${base}/possessor`;
 
+// Append a `/conjunct/<i>` step — the address of the i-th *extra* conjunct of that noun.
+export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
+  `${base}/conjunct/${i}`;
+
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
+
+export const CONJUNCTS_KEY = (which: NounKey) =>
+  `${which}Conjuncts` as keyof PhraseSelection;
+
+export const CONJUNCTION_KEY = (which: NounKey) =>
+  `${which}Conjunction` as keyof PhraseSelection;
 
 export type SlotKey = SlotConfig["key"];
 

@@ -19,7 +19,7 @@ import type {
   SavedPhraseSummary,
   SavedPhrasesResponse,
 } from '@signi/shared';
-import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
+import { nounConjuncts, SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
 
 const app = express();
 app.use(cors());
@@ -167,8 +167,11 @@ app.get('/api/concepts', (req, res) => {
 app.post('/api/translate', (req, res) => {
   const body = req.body as TranslateRequest;
   // A subject is always required; the verb phrase is optional (a verbless period is a
-  // bare noun phrase, e.g. a newspaper title like "breaking news").
-  if (!body?.plan?.subject?.concept) {
+  // bare noun phrase, e.g. a newspaper title like "breaking news"). A coordinated subject
+  // ("the cat and the dog") is a group of phrases rather than one, so the head to check for
+  // is its first conjunct.
+  const subject = body?.plan?.subject;
+  if (!subject || !nounConjuncts(subject)[0]?.concept) {
     res.status(400).json({ error: 'plan.subject.concept is required' });
     return;
   }

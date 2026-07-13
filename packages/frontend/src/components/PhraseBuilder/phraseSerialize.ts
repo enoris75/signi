@@ -57,6 +57,12 @@ const isConceptKey = (k: string): boolean =>
 // A slot that holds a nested PhraseSelection (the genitive possessor blocks).
 const isPossessorKey = (k: string): boolean => k.endsWith("Possessor");
 
+// A slot that holds an *array* of nested PhraseSelections — the coordinated conjuncts of a noun
+// block. Each element is a selection like any other (its head is its `subject`), so it round-trips
+// through the same two functions. A phrase saved before coordination existed simply has no such
+// key, and loads unchanged.
+const isConjunctsKey = (k: string): boolean => k.endsWith("Conjuncts");
+
 // Selection fields that are maps *keyed by slot key* — their keys need the legacy rename too.
 const SLOT_KEYED_MAPS = new Set<string>([
   "modifierRelations",
@@ -70,6 +76,8 @@ function serializeSelection(selection: PhraseSelection): SerializedSelection {
     if (value == null) continue;
     if (isPossessorKey(key)) {
       out[key] = serializeSelection(value as PhraseSelection);
+    } else if (isConjunctsKey(key)) {
+      out[key] = (value as PhraseSelection[]).map(serializeSelection);
     } else if (isConceptKey(key)) {
       out[key] = (value as Concept).id;
     } else if (key === "modifierAdjectives") {
@@ -97,6 +105,8 @@ function hydrateSelection(
     const key = migrateKey(savedKey);
     if (isPossessorKey(key) && typeof value === "object") {
       out[key] = hydrateSelection(value as SerializedSelection, byId, missing);
+    } else if (isConjunctsKey(key) && Array.isArray(value)) {
+      out[key] = (value as SerializedSelection[]).map((c) => hydrateSelection(c, byId, missing));
     } else if (isConceptKey(key) && typeof value === "string") {
       const concept = byId.get(value);
       if (concept) out[key] = concept;

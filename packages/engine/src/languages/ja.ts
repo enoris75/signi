@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. 'less'
@@ -110,7 +110,7 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const rel = np.relative;
   if (!rel) return core;
   const clauseSubjectSegs: RubySegment[] =
-    rel.headRole !== 'subject' && rel.subject ? [...npSegs(rel.subject), { t: 'が' }] : [];
+    rel.headRole !== 'subject' && rel.subject ? [...elSegs(rel.subject), { t: 'が' }] : [];
   return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements), ...core];
 }
 
@@ -119,6 +119,26 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
  * carries no ます form. Everything polite — the tense endings, the modal suffixes — is
  * built by appending to this.
  */
+/**
+ * A whole noun slot: its conjuncts strung together the Japanese way. Japanese repeats the
+ * conjunction between *every* pair and writes no comma — 猫と犬と狐 — where the European
+ * languages comma all but the last ("the cat, the dog and the fox"). と is the exhaustive "and";
+ * か the disjunctive "or".
+ *
+ * The case particle (は / を / に) is NOT emitted here: it attaches once, to the group as a
+ * whole (「猫と犬は」, not 「猫はと犬は」), so every caller appends it after these segments —
+ * which is exactly what they already did for a single phrase.
+ */
+function elSegs(el: ResolvedNounElement): RubySegment[] {
+  const word = el.conjunction === 'or' ? 'か' : 'と';
+  const segs: RubySegment[] = [];
+  el.conjuncts.forEach((np, i) => {
+    if (i > 0) segs.push({ t: word });
+    segs.push(...npSegs(np));
+  });
+  return segs;
+}
+
 function masuStem(verb: ConceptForms): { stem: string; reading?: string } | null {
   const masuPresent = verb.forms['masu_present'] ?? '';
   if (!masuPresent.endsWith('ます')) return null;
@@ -269,25 +289,37 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
     // The furigana reading tracks the same trailing-mora substitution. A predicate adjective
     // takes its degree adverb before it, as an attributive one does (もっと楽しくなる).
     if (type === 'predicative') {
-      const f = c.phrase.head.forms;
-      const base = f['base'] ?? '';
-      const reading = f['reading'];
-      const isAdj = f['role'] === 'adjective';
-      const deg = isAdj ? JA_DEGREE[adjDegree(c.phrase.head)] : '';
-      if (deg) segs.push({ t: deg });
-      if (isAdj && base.endsWith('い')) {
-        segs.push(wordSeg(
-          `${base.slice(0, -1)}く`,
-          reading?.endsWith('い') ? `${reading.slice(0, -1)}く` : reading,
-        ));
-      } else if (isAdj && base.endsWith('な')) {
-        segs.push(
-          wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading),
-          { t: 'に' },
-        );
-      } else {
-        segs.push(...npSegs(c.phrase), { t: 'に' });
-      }
+      // Coordinated conjuncts are strung with と / か, and the に — like every other particle in
+      // Japanese — attaches once, to the group: 「幸せか疲れに見える」, never 「幸せにか疲れに」.
+      // An i-adjective takes no に at all (it is already adverbial in the く-form), so the
+      // particle is decided by the *last* conjunct, the one the predicate actually follows.
+      // (Japanese would more idiomatically chain predicate adjectives with the て-form —
+      // 楽しくて疲れて — so a coordinated *adjective* predicate here is an approximation.)
+      const conj = c.phrase.conjunction === 'or' ? 'か' : 'と';
+      let takesNi = false;
+      c.phrase.conjuncts.forEach((np, i) => {
+        if (i > 0) segs.push({ t: conj });
+        const f = np.head.forms;
+        const base = f['base'] ?? '';
+        const reading = f['reading'];
+        const isAdj = f['role'] === 'adjective';
+        const deg = isAdj ? JA_DEGREE[adjDegree(np.head)] : '';
+        if (deg) segs.push({ t: deg });
+        if (isAdj && base.endsWith('い')) {
+          segs.push(wordSeg(
+            `${base.slice(0, -1)}く`,
+            reading?.endsWith('い') ? `${reading.slice(0, -1)}く` : reading,
+          ));
+          takesNi = false;
+        } else if (isAdj && base.endsWith('な')) {
+          segs.push(wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading));
+          takesNi = true;
+        } else {
+          segs.push(...npSegs(np));
+          takesNi = true;
+        }
+      });
+      if (takesNi) segs.push({ t: 'に' });
       continue;
     }
     // An instrument presented as an action, with the noun phrase as its direct object (を). The
@@ -298,7 +330,7 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       const level = abstractionLevel(c);
       if (level !== 'object') {
         const v = c.action.verb.forms;
-        segs.push(...npSegs(c.phrase), { t: 'を' });
+        segs.push(...elSegs(c.phrase), { t: 'を' });
         const adverb = c.action.modifier;
         if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
         if (level === 'process') {
@@ -309,7 +341,8 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
         continue;
       }
     }
-    segs.push(...npSegs(c.phrase));
+    // The particle below attaches to the whole group, not to each conjunct: 「猫と犬に」.
+    segs.push(...elSegs(c.phrase));
     if (type === 'route') {
       const spec = pathSpecifier(c);
       if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
@@ -326,13 +359,16 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
  * noun takes the copula proper (慎重です / 慎重ではありませんでした). Future reuses the present.
  */
 function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): RubySegment[] {
-  const f = pred.phrase.head.forms;
+  // The inflected copula agrees with one head; a coordinated copular predicate takes the first
+  // conjunct's form (a documented approximation — the UI's copula predicate is a single phrase).
+  const head = firstConjunct(pred.phrase);
+  const f = head.head.forms;
   const base = f['base'] ?? '';
   const reading = f['reading'];
   const past = tense === 'past';
   const isAdj = f['role'] === 'adjective';
   // The predicate adjective's degree adverb leads, as it does attributively (もっと楽しいです).
-  const deg = isAdj ? JA_DEGREE[adjDegree(pred.phrase.head)] : '';
+  const deg = isAdj ? JA_DEGREE[adjDegree(head.head)] : '';
   const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];
   if (isAdj && base.endsWith('い')) {
     const ending = negative
@@ -356,7 +392,7 @@ function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): 
       { t: cop },
     ];
   }
-  return [...npSegs(pred.phrase), { t: cop }];
+  return [...elSegs(pred.phrase), { t: cop }];
 }
 
 type JaIPN = '2sg' | '1pl' | '2pl';
@@ -411,7 +447,7 @@ function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, inst
  */
 function predicateSegs(
   verbPhrase: ResolvedVerbPhrase,
-  directObject: ResolvedNounPhrase | undefined,
+  directObject: ResolvedNounElement | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
 ): RubySegment[] {
@@ -436,7 +472,7 @@ function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(complements));
-    if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
+    if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -457,7 +493,7 @@ function predicateSegs(
     return segs;
   }
   segs.push(...complementSegs(complements));
-  if (directObject) segs.push(...npSegs(directObject), { t: 'を' });
+  if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
   if (modifier) {
     const base = modifier.forms['base'] ?? '';
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
@@ -481,12 +517,13 @@ function predicateSegs(
  */
 function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
-  if (!phrase.verbPhrase) return npSegs(phrase.subject);
+  if (!phrase.verbPhrase) return elSegs(phrase.subject);
   const segs: RubySegment[] = [];
   // An imperative drops its subject/topic; the subject's person still selects the form.
   const imperative = phrase.verbPhrase.mood === 'imperative';
-  if (!imperative) segs.push(...npSegs(phrase.subject), { t: subjectParticle });
-  const impPN = imperative ? jaImperativePN(phrase.subject.head.forms) : undefined;
+  // One topic particle for the whole subject, coordinated or not: 「ピーターとパウロは」.
+  if (!imperative) segs.push(...elSegs(phrase.subject), { t: subjectParticle });
+  const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN));
   return segs;
 }

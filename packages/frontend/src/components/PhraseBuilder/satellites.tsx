@@ -20,6 +20,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import BuildIcon from "@mui/icons-material/Build";
+import CallSplitIcon from "@mui/icons-material/CallSplit";
 import {
   ASPECT_LABELS,
   COMPLEMENT_LABELS,
@@ -38,6 +39,7 @@ import {
   NumberSlot,
   PhraseSelection,
   SlotKey,
+  CONJUNCTS_KEY,
   WorkspaceBinding,
 } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
@@ -45,6 +47,7 @@ import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_KEY_SET,
   COMPLEMENT_LABEL_KEYS,
+  COORDINABLE_NOUN_KEYS,
   SATELLITE_SLOT_KEYS,
 } from "./slots.ts";
 
@@ -116,6 +119,9 @@ export function buildSatellites(
 ): { satellites: Satellite[]; shownMap: Record<string, boolean> } {
   const label = (c?: Concept) => conceptWord(c, language, t);
   const subjectRole = selection.subject?.role;
+  // How many phrases are coordinated with a noun block's own head ("Peter *and Paul*").
+  const conjunctCount = (which: NounKey): number =>
+    ((selection[CONJUNCTS_KEY(which)] as PhraseSelection[] | undefined) ?? []).length;
   const supportedComplements = selection.verb?.complements ?? [];
 
   const showSubjectNumber = Boolean(selection.subject);
@@ -213,6 +219,17 @@ export function buildSatellites(
       // lives in the nested selection's `subject` slot.
       available: subjectRole === "noun",
       hasValue: Boolean(selection.subjectPossessor?.subject),
+    },
+    {
+      key: "subjectConjunct",
+      parent: "subject",
+      label: "Coordination",
+      icon: <CallSplitIcon sx={iconSx} />,
+      // Anything that can head a subject can be coordinated with another — nouns ("the cat and
+      // the dog") and pronouns alike ("you and I"). Clicking adds a conjunct rather than
+      // revealing a box, so this control is a direct action, not a reveal (see buildSatelliteIcons).
+      available: Boolean(selection.subject),
+      hasValue: conjunctCount("subject") > 0,
     },
     {
       key: "verbNegative",
@@ -364,6 +381,14 @@ export function buildSatellites(
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectPossessor?.subject),
     },
+    {
+      key: "directObjectConjunct",
+      parent: "directObject",
+      label: "Coordination",
+      icon: <CallSplitIcon sx={iconSx} />,
+      available: Boolean(selection.directObject),
+      hasValue: conjunctCount("directObject") > 0,
+    },
     // The instrumental has no box on this canvas: its noun phrase lives in a period container
     // of its own, and this control on the verb-phrase dotted box is the link to it (started,
     // and later cleared, in buildSatelliteIcons off the workspace binding — like the
@@ -505,6 +530,17 @@ export function buildSatellites(
             )?.subject,
           ),
         },
+        {
+          key: `${type}Conjunct`,
+          parent: type,
+          label: "Coordination",
+          icon: <CallSplitIcon sx={iconSx} />,
+          // Only the adposition-free complement coordinates today — the predicative subject
+          // complement ("seems happy or tired", "becomes a legend and an icon"). See
+          // COORDINABLE_NOUN_KEYS for why the prepositional ones are held back.
+          available: COORDINABLE_NOUN_KEYS.includes(type) && Boolean(concept),
+          hasValue: conjunctCount(type) > 0,
+        },
       ];
     }),
   ];
@@ -534,11 +570,12 @@ export function buildSatellites(
   return { satellites, shownMap };
 }
 
-// The relative-clause and possessor controls a noun carries on its *dotted-box*
+// The relative-clause, possessor and coordination controls a noun carries on its *dotted-box*
 // perimeter, rather than on its word box border.
 export type PerimeterEntry = {
   relative?: SatelliteIcon;
   possessor?: SatelliteIcon;
+  conjunct?: SatelliteIcon;
 };
 
 // Sort every available satellite into the three places its control can render: on its
@@ -555,6 +592,7 @@ export function buildSatelliteIcons({
   onToggleGender,
   onToggleNegative,
   onToggleReveal,
+  onAddConjunct,
 }: {
   satellites: Satellite[];
   shownMap: Record<string, boolean>;
@@ -566,6 +604,9 @@ export function buildSatelliteIcons({
   onToggleGender: (which: GenderSlot) => void;
   onToggleNegative: () => void;
   onToggleReveal: (sat: Satellite) => void;
+  // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
+  // coordinate any number of phrases, so each click opens one more panel.
+  onAddConjunct: (which: NounKey) => void;
 }): {
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   complementToggleIcons: SatelliteIcon[];
@@ -622,6 +663,27 @@ export function buildSatelliteIcons({
           isSource
             ? linkBinding.relative.onRemoveLink(relativeNoun)
             : linkBinding.relative.onStartLink(relativeNoun),
+      };
+      continue;
+    }
+    // The "Coordinate" satellite rides the perimeter beside the possessor control and, like it,
+    // anchors a connector down into the panels below. Clicking it appends one more conjunct.
+    const conjunctNoun: NounKey | null = sat.key.endsWith("Conjunct")
+      ? (sat.key.slice(0, -"Conjunct".length) as NounKey)
+      : null;
+    if (conjunctNoun) {
+      (perimeterByNoun[conjunctNoun] ??= {}).conjunct = {
+        key: sat.key,
+        icon: sat.icon,
+        label: sat.label,
+        // Never `active`: this control does not reveal a box that a second click would hide —
+        // it *appends* a phrase, and clicking it again appends another. Saying so keeps the
+        // button's tooltip on its value ("Add a conjunct") instead of offering to "Hide" it.
+        active: false,
+        isSet: sat.hasValue,
+        valued: true,
+        valueLabel: sat.hasValue ? "Add another conjunct" : "Add a conjunct",
+        onToggle: () => onAddConjunct(conjunctNoun),
       };
       continue;
     }

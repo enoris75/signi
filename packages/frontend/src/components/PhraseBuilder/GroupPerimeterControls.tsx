@@ -1,12 +1,11 @@
 import { Box } from "@mui/material";
-import { SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
+import { SatelliteButton } from "./Boxes.tsx";
 import type { GroupRect } from "./graph.ts";
 import type { NounKey, SlotConfig } from "./interfaces.ts";
+import type { PerimeterEntry } from "./satellites.tsx";
 import { ALL_SLOTS } from "./slots.ts";
 
-type PerimeterEntry = { relative?: SatelliteIcon; possessor?: SatelliteIcon };
-
-// The relative-clause + possessor controls (and the receiving dots for incoming
+// The relative-clause + possessor + coordination controls (and the receiving dots for incoming
 // links) ride each noun's *dotted-box* perimeter rather than the word box: the
 // controls sit on the box's bottom edge and are where the dotted connector lines
 // start, while a small dot on the top edge marks where an incoming subordinate
@@ -19,6 +18,7 @@ export function GroupPerimeterControls({
   registerSourceAnchor,
   registerTargetAnchor,
   registerPossessorControl,
+  registerConjunctControl,
 }: {
   groupRects: GroupRect[];
   perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>>;
@@ -31,6 +31,8 @@ export function GroupPerimeterControls({
   registerTargetAnchor?: (nounKey: NounKey, el: HTMLElement | null) => void;
   // Register the possessor control (its connector's start) with the local builder.
   registerPossessorControl: (nounKey: NounKey, el: HTMLElement | null) => void;
+  // Register the coordination control — the start of the connector down to the conjunct panels.
+  registerConjunctControl: (nounKey: NounKey, el: HTMLElement | null) => void;
 }) {
   const rectFor = (nounKey: NounKey) =>
     groupRects.find((g) => g.nodeKeys.includes(nounKey));
@@ -74,9 +76,9 @@ export function GroupPerimeterControls({
                 }}
               />
             )}
-            {/* Relative + possessor controls on the bottom edge — each the start of its
-                connector line. */}
-            {(entry?.relative || entry?.possessor) && (
+            {/* Relative + possessor + coordination controls on the bottom edge — each the
+                start of its connector line. */}
+            {(entry?.relative || entry?.possessor || entry?.conjunct) && (
               <Box
                 sx={{
                   position: "absolute",
@@ -104,6 +106,15 @@ export function GroupPerimeterControls({
                     }
                   >
                     <SatelliteButton sat={entry.possessor} color={color} />
+                  </Box>
+                )}
+                {entry?.conjunct && (
+                  <Box
+                    ref={(el: HTMLElement | null) =>
+                      registerConjunctControl(nounKey, el)
+                    }
+                  >
+                    <SatelliteButton sat={entry.conjunct} color={color} />
                   </Box>
                 )}
               </Box>

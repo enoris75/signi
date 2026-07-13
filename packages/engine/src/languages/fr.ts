@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -423,13 +423,46 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
 }
 
 /**
+ * Render every conjunct of a noun slot and coordinate them the French way: commas between all
+ * but the last pair, "et" / "ou" on the last ("le chat, le chien et le renard"). Neither word
+ * has a euphonic variant, so the link is invariable.
+ */
+function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
+  const word = el.conjunction === 'or' ? 'ou' : 'et';
+  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${word} `);
+}
+
+/**
+ * A subject slot: each conjunct with its own article/adjectives/relative, coordinated.
+ *
+ * A coordinated *pronoun* does not keep its clitic subject form in French — "*tu et je mangeons"
+ * is not French. It takes the tonic (disjunctive) form, and when the group resolves to the 1st or
+ * 2nd person the sentence resumes it with the matching subject clitic: "toi et moi, nous
+ * mangeons". A group of 3rd-person nouns needs no resumption ("le chat et le renard mangent").
+ */
+function subjectText(el: ResolvedNounElement): string {
+  if (el.conjuncts.length < 2) return coordinate(el, subjectPhrase);
+  const conjuncts = coordinate(el, (np) => {
+    const f = np.head.forms;
+    return f['person'] ? (f['disjunctive'] ?? f['base'] ?? '') : subjectPhrase(np);
+  });
+  const person = el.agreement['person'] ?? '3';
+  if (person === '3') return conjuncts;
+  return `${conjuncts}, ${person === '1' ? 'nous' : 'vous'}`;
+}
+
+/** One conjunct as a plain noun phrase carrying its own determiner ("un mot"). */
+function npText(np: ResolvedNounPhrase): string {
+  return renderNP(np, (plural, lead) => artFor(np.head.forms, plural, lead));
+}
+
+/**
  * route path relation → preposition, honoring the head's determiner. The plain adverbs
  * (sous / derrière / devant / à travers) take a non-fusing article straight off `artFor`
  * ("sous une maison" / "sous la maison"); "au-dessus" and "autour" govern "de", which fuses
  * only with the definite ("autour de la maison" but "autour d'une maison"), via `deDet`.
  */
-function routeHead(c: ResolvedComplement, plural: boolean, lead: string): string {
-  const f = c.phrase.head.forms;
+function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean, lead: string): string {
   switch (pathSpecifier(c)) {
     case 'under':       return prepDet('sous', f, plural, lead);
     case 'over':        return `au-dessus ${deDet(f, plural, lead)}`;
@@ -450,15 +483,20 @@ function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const f = c.phrase.head.forms;
+      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
+      // its surface is rendered from every conjunct, each with its own article and agreement.
+      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the subject ("la chatte est
       // belle", "elles semblent heureuses") and carries its own degree ("semblent plus
       // heureuses"); a predicate noun keeps its own article, no preposition ("devient une
-      // légende").
+      // légende"). Coordinated conjuncts each agree with the subject: "semblent heureuses et
+      // fatiguées".
       if (type === 'predicative') {
-        if (f['role'] === 'adjective')
-          return frDeg(c.phrase.head, agreeAdjFr(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
-        return renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+        return coordinate(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective'
+            ? frDeg(np.head, agreeAdjFr(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
+            : npText(np),
+        );
       }
       // An instrument presented as an action: the gérondif for the process level ("en
       // choisissant un mot"), the nominalised infinitive for the concept level ("avec l'acte de
@@ -466,7 +504,7 @@ function complementsPhrase(
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const object = renderNP(c.phrase, (plural, lead) => artFor(f, plural, lead));
+          const object = coordinate(c.phrase, npText);
           const verb =
             level === 'process'
               ? `en ${presentParticiple(c.action.verb)}`
@@ -501,21 +539,25 @@ function complementsPhrase(
       // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien"); the
       // sentiment swaps the connector — negative "par la faute du chien", positive "grâce au
       // chien" ("à"-contracted via datPrep).
+      // The preposition contracts with the article ("à"+"le" → "au"), so it cannot be factored
+      // out in front of a coordinated complement — each conjunct carries its own contracted head
+      // ("au chat et au chien"). Repeating it also lets each conjunct pick its own preposition,
+      // which `direction` needs: an animate goal takes "vers", a place "à".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
-      const headFor = (plural: boolean, lead: string): string =>
-        type === 'locative'  ? prepDet('dans', f, plural, lead) :
-        type === 'terminus'  ? aDet(f, plural, lead) :
+      const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
+        type === 'locative'  ? prepDet('dans', nf, plural, lead) :
+        type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
-        type === 'instrumental' ? prepDet('avec', f, plural, lead) :
-        type === 'direction' ? (f['animate'] === '1' ? prepDet('vers', f, plural, lead) : aDet(f, plural, lead)) :
-        type === 'source'    ? `loin ${deDet(f, plural, lead)}` :
+        type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
+        type === 'direction' ? (nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)) :
+        type === 'source'    ? `loin ${deDet(nf, plural, lead)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `grâce ${datPrep(f, plural, lead)}` :
-          causeSent === 'negative' ? `par la faute ${dePrep(f, plural, lead)}` :
-          `à cause ${dePrep(f, plural, lead)}`
+          causeSent === 'positive' ? `grâce ${datPrep(nf, plural, lead)}` :
+          causeSent === 'negative' ? `par la faute ${dePrep(nf, plural, lead)}` :
+          `à cause ${dePrep(nf, plural, lead)}`
         ) :
-        routeHead(c, plural, lead);
-      return renderNP(c.phrase, headFor);
+        routeHead(c, nf, plural, lead);
+      return coordinate(c.phrase, (np) => renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)
     .join(' ');
@@ -529,7 +571,7 @@ function complementsPhrase(
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
-  directObject?: ResolvedNounPhrase,
+  directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -547,7 +589,7 @@ function predicateText(
   // ("aucun garçon ne pleure") or an object ("il ne voit aucun garçon").
   const aucun =
     subjectForms['definiteness'] === 'no' ||
-    directObject?.head.forms['definiteness'] === 'no';
+    (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false);
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched.
@@ -583,9 +625,7 @@ function predicateText(
     effectiveVerb = conjugated;
     effectiveMod = modifierText;
   }
-  const directObjectText = directObject
-    ? renderNP(directObject, (plural, lead) => artFor(directObject.head.forms, plural, lead))
-    : '';
+  const directObjectText = directObject ? coordinate(directObject, npText) : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
@@ -623,9 +663,9 @@ function relativeText(np: ResolvedNounPhrase): string {
   if (rel.headRole === 'subject' || !rel.subject) {
     return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements)}`.trim();
   }
-  const subjText = subjectPhrase(rel.subject);
+  const subjText = subjectText(rel.subject);
   const relzr = joinArt(VOWEL_START.test(subjText) ? "qu'" : 'que', subjText);
-  const pred = predicateText(rel.subject.head.forms, rel.verbPhrase, rel.directObject, rel.complements);
+  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements);
   return `${relzr} ${pred}`.trim();
 }
 
@@ -633,13 +673,13 @@ function relativeText(np: ResolvedNounPhrase): string {
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // An imperative drops its subject (the person still drives the form — see predicateText).
-  const subjectText = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectPhrase(subject);
+  const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
-  if (!phrase.verbPhrase) return subjectText.trim();
+  if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+  return [subj, predicate].filter(Boolean).join(' ').trim();
 }
 
 const COORD_WORDS: Record<CoordConjunction, string> = {

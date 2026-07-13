@@ -1,16 +1,18 @@
 import type {
   Complement,
   ComplementType,
+  CoordConjunction,
   Definiteness,
   Degree,
   ModifierRelation,
+  NounElement,
   NounModifier,
   NounPhrase,
   PhrasePlan,
   VerbPhrase,
 } from "@signi/shared";
 import type { Concept } from "@signi/shared";
-import { NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
+import { CONJUNCTION_KEY, CONJUNCTS_KEY, NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, MODAL_SLOTS } from "./slots.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
@@ -81,6 +83,29 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
   };
 }
 
+/**
+ * Build the noun *element* filling a slot: the block's own noun phrase, plus any conjuncts
+ * coordinated with it. Each conjunct is a nested selection whose head lives in its `subject`
+ * slot, so it goes through `buildNounPhrase` exactly as a possessor does — which is what gives
+ * a conjunct its own determiner, number/gender, adjectives, possessor and relative clause.
+ *
+ * A group needs at least two phrases, so a conjunct panel that is open but still empty
+ * contributes nothing and the slot stays a plain noun phrase — the same rule the instrumental
+ * link follows (a half-built period renders no complement rather than half of one).
+ */
+export function buildNounElement(sel: PhraseSelection, which: NounKey): NounElement | undefined {
+  const head = buildNounPhrase(sel, which);
+  if (!head) return undefined;
+  const conjuncts = (field<PhraseSelection[]>(sel, CONJUNCTS_KEY(which)) ?? [])
+    .map((c) => buildNounPhrase(c, "subject"))
+    .filter((np): np is NounPhrase => Boolean(np));
+  if (conjuncts.length === 0) return head;
+  return {
+    conjuncts: [head, ...conjuncts],
+    conjunction: field<CoordConjunction>(sel, CONJUNCTION_KEY(which)) ?? "and",
+  };
+}
+
 // A verbless period (a bare noun phrase like "breaking news") has no verb phrase — return
 // undefined so the plan omits it and the engines render just the subject.
 export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
@@ -105,7 +130,7 @@ function buildComplements(
 ): Partial<Record<ComplementType, Complement>> | undefined {
   const out: Partial<Record<ComplementType, Complement>> = {};
   for (const type of BOX_COMPLEMENT_TYPES) {
-    const phrase = buildNounPhrase(sel, type);
+    const phrase = buildNounElement(sel, type);
     if (!phrase) continue;
     out[type] = {
       phrase,
@@ -147,9 +172,9 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
     // pick is left untouched in the selection, so toggling the command off restores it).
     subject: imperative
       ? imperativeSubject(sel.imperativePerson)
-      : buildNounPhrase(sel, "subject"),
+      : buildNounElement(sel, "subject"),
     verbPhrase: buildVerbPhrase(sel),
-    directObject: buildNounPhrase(sel, "directObject"),
+    directObject: buildNounElement(sel, "directObject"),
     complements: buildComplements(sel),
     // The register rides along with the mood: absent ⇒ 'request', a command spoken to the
     // addressee above. 'instruction' addresses nobody, and the engines then ignore the person.

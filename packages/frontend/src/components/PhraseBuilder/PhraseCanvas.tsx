@@ -53,6 +53,7 @@ export interface PhraseCanvasProps {
   // Receives each noun's possessor control element (its connector's start), measured up in
   // the parent against the root Box.
   possessorControlEls: MutableRefObject<Map<string, HTMLElement>>;
+  conjunctControlEls: MutableRefObject<Map<string, HTMLElement>>;
 }
 
 const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
@@ -75,6 +76,7 @@ export function PhraseCanvas({
   onSetImperativeRegister,
   containerRef,
   possessorControlEls,
+  conjunctControlEls,
 }: PhraseCanvasProps) {
   const {
     selection,
@@ -211,6 +213,10 @@ export function PhraseCanvas({
               registerPossessorControl={(nounKey, el) => {
                 if (el) possessorControlEls.current.set(nounKey, el);
                 else possessorControlEls.current.delete(nounKey);
+              }}
+              registerConjunctControl={(nounKey, el) => {
+                if (el) conjunctControlEls.current.set(nounKey, el);
+                else conjunctControlEls.current.delete(nounKey);
               }}
             />
           )}

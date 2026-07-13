@@ -1,6 +1,6 @@
-import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
-import { canCoordinateImperative, defaultDefiniteness } from '@signi/shared';
-import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
+import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounElement, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
+import { canCoordinateImperative, defaultDefiniteness, isNounGroup, nounConjuncts } from '@signi/shared';
+import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
 import { frenchEngine } from './languages/fr.js';
@@ -132,6 +132,66 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
   };
 }
 
+/** The agreement keys a group carries — see ResolvedNounElement.agreement. Nothing renderable. */
+const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
+
+/**
+ * The person / number / gender a coordinated group agrees as. The rules are the same in the six
+ * languages that agree at all (ja agrees with nothing), so they live here rather than per engine:
+ *
+ *  · **and** — the group is plural whatever its conjuncts are ("Peter and Paul **speak**"), takes
+ *    the lowest person of them (1 ≺ 2 ≺ 3: "you and I **are**" is 1st plural), and, in the
+ *    languages that resolve gender, is feminine only if *every* conjunct is — one masculine
+ *    conjunct masculinises the whole ("il gatto e la volpe sono stanch**i**").
+ *  · **or** — the group agrees with the conjunct *nearest* the verb, i.e. the last ("Peter or the
+ *    boys **speak**", "o Pietro o i ragazzi parl**ano**"): the disjunction asserts one of them,
+ *    not both, so there is no group to resolve.
+ *
+ * A single conjunct resolves to its own head's forms untouched, which is exactly what the engines
+ * read before coordination existed.
+ */
+function groupAgreement(
+  conjuncts: ResolvedNounPhrase[],
+  conjunction: CoordConjunction,
+): Record<string, string> {
+  const last = conjuncts[conjuncts.length - 1].head.forms;
+  const features: Record<string, string> =
+    // Disjunction: the nearest conjunct is the one the verb agrees with — take its features whole.
+    conjunction !== 'and'
+      ? Object.fromEntries(AGREEMENT_KEYS.filter((k) => last[k] !== undefined).map((k) => [k, last[k]]))
+      : (() => {
+          const persons = conjuncts.map((c) => c.head.forms['person'] ?? '3');
+          const person = ['1', '2', '3'].find((p) => persons.includes(p)) ?? '3';
+          const feminine = conjuncts.every((c) => c.head.forms['gender'] === 'fem');
+          return { person, number: 'plural', gender: feminine ? 'fem' : 'masc' };
+        })();
+  // The negative determiner is not agreement, but it *is* a fact about the whole group that the
+  // engines read off the subject: French negates on "aucun" alone ("aucun garçon ne pleure"), so
+  // a group with any negative conjunct still triggers the concord.
+  if (conjuncts.some((c) => c.head.forms['definiteness'] === 'no')) features['definiteness'] = 'no';
+  return features;
+}
+
+/**
+ * Resolve a noun slot: each conjunct as a full noun phrase, plus the agreement they resolve to
+ * together. A slot holding a single phrase yields a one-conjunct element with that phrase's own
+ * head forms as its agreement — no coordination, no behaviour change.
+ *
+ * The group's plural number is a fact about the *group*, not about its members, so it is not
+ * pushed back down into the conjuncts: "Peter and the boys" keeps a singular Peter.
+ */
+function resolveNounElement(el: NounElement, language: string, lookup: LexiconLookup): ResolvedNounElement {
+  const conjuncts = nounConjuncts(el).map((np) => resolveNounPhrase(np, language, lookup));
+  if (!isNounGroup(el) || conjuncts.length < 2) {
+    return { conjuncts, agreement: conjuncts[0].head.forms };
+  }
+  return {
+    conjuncts,
+    conjunction: el.conjunction,
+    agreement: groupAgreement(conjuncts, el.conjunction),
+  };
+}
+
 /** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
  *  called when a verb phrase is present — a verbless period skips it (see translate). */
 function resolveVerbPhrase(
@@ -172,15 +232,17 @@ function resolveComplements(
   if (!complements) return undefined;
   const out: Partial<Record<ComplementType, ResolvedComplement>> = {};
   for (const [type, value] of Object.entries(complements)) {
-    if (!value?.phrase?.concept) continue;
+    if (!value?.phrase || !nounConjuncts(value.phrase).every((np) => np.concept)) continue;
     // The unchosen determiner depends on the slot: `predicative` defaults to indefinite,
-    // every other complement to definite. See `defaultDefiniteness`.
-    const phrase =
-      value.phrase.definiteness === undefined
-        ? { ...value.phrase, definiteness: defaultDefiniteness(type) }
-        : value.phrase;
+    // every other complement to definite. See `defaultDefiniteness`. Each conjunct of a
+    // coordinated complement chooses its own, so the default is applied per conjunct.
+    const withDeterminer = (np: NounPhrase): NounPhrase =>
+      np.definiteness === undefined ? { ...np, definiteness: defaultDefiniteness(type) } : np;
+    const phrase: NounElement = isNounGroup(value.phrase)
+      ? { ...value.phrase, conjuncts: value.phrase.conjuncts.map(withDeterminer) }
+      : withDeterminer(value.phrase);
     out[type as ComplementType] = {
-      phrase: resolveNounPhrase(phrase, language, lookup),
+      phrase: resolveNounElement(phrase, language, lookup),
       // The action an instrument *is* at the process/concept levels ("by **choosing** a word").
       // It is non-finite — it takes no tense, mood or agreement of its own — so it resolves with
       // none, and each engine reads the lexical forms (gerund / infinitive / te-form) it needs.
@@ -204,9 +266,9 @@ function resolveRelativeClause(
 ): ResolvedRelativeClause {
   return {
     headRole: clause.headRole ?? 'subject',
-    subject: clause.subject ? resolveNounPhrase(clause.subject, language, lookup) : undefined,
+    subject: clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined,
     verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
-    directObject: clause.directObject ? resolveNounPhrase(clause.directObject, language, lookup) : undefined,
+    directObject: clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined,
     complements: resolveComplements(clause.complements, language, lookup),
   };
 }
@@ -239,13 +301,13 @@ function resolvePhrase(
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   return {
-    subject: resolveNounPhrase(plan.subject, language, lookup),
+    subject: resolveNounElement(plan.subject, language, lookup),
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
     verbPhrase: plan.verbPhrase
       ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister)
       : undefined,
-    directObject: plan.directObject ? resolveNounPhrase(plan.directObject, language, lookup) : undefined,
+    directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.

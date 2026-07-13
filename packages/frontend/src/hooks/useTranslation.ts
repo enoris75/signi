@@ -1,6 +1,6 @@
 import { useQueries } from '@tanstack/react-query';
 import { fetchTranslation } from '../api.ts';
-import type { PhrasePlan, Translation } from '@signi/shared';
+import { nounConjuncts, type PhrasePlan, type Translation } from '@signi/shared';
 
 // One root sentence's translation request state.
 export interface SentenceResult {
@@ -11,6 +11,12 @@ export interface SentenceResult {
   isReady: boolean;
 }
 
+// A period is translatable once its subject slot has a head — which, for a coordinated subject,
+// is its first conjunct ("Peter and Paul": Peter is enough to translate).
+function hasSubject(plan: Partial<PhrasePlan>): boolean {
+  return Boolean(plan.subject && nounConjuncts(plan.subject)[0]?.concept);
+}
+
 // Translate every root sentence of the workspace in one hook. `useQueries` takes a
 // dynamic list, so periods can be added and removed without breaking the rules of hooks.
 export function useTranslations(plans: Partial<PhrasePlan>[]): SentenceResult[] {
@@ -18,7 +24,7 @@ export function useTranslations(plans: Partial<PhrasePlan>[]): SentenceResult[] 
     queries: plans.map((plan) => ({
       queryKey: ['translation', plan],
       queryFn: () => fetchTranslation(plan as PhrasePlan),
-      enabled: Boolean(plan.subject?.concept),
+      enabled: hasSubject(plan),
       staleTime: 1000 * 60,
     })),
     combine: (results) =>
@@ -26,7 +32,7 @@ export function useTranslations(plans: Partial<PhrasePlan>[]): SentenceResult[] 
         translations: r.data,
         isLoading: r.isLoading,
         isError: r.isError,
-        isReady: Boolean(plans[i].subject?.concept),
+        isReady: hasSubject(plans[i]),
       })),
   });
 }

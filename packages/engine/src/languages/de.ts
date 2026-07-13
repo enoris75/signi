@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -440,6 +440,29 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
   return nounPhrase(np, 'nom'); // noun — nominative article
 }
 
+/**
+ * Render every conjunct of a noun slot and coordinate them the German way: commas between all
+ * but the last pair, "und" / "oder" on the last ("der Kater, der Hund und der Fuchs").
+ */
+function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
+  const word = el.conjunction === 'or' ? 'oder' : 'und';
+  return joinConjuncts(el.conjuncts.map(render), ', ', () => ` ${word} `);
+}
+
+/**
+ * A whole noun slot in one case. Every conjunct declines for that case *individually* — German
+ * marks case on the article, so it repeats across the coordination ("mit dem Messer und dem
+ * Stock"), it cannot be factored out in front of the group.
+ */
+function elementPhrase(el: ResolvedNounElement, _case: 'nom' | 'acc' | 'dat'): string {
+  return coordinate(el, (np) => nounPhrase(np, _case));
+}
+
+/** A subject slot: each conjunct in the nominative, coordinated. */
+function subjectText(el: ResolvedNounElement): string {
+  return coordinate(el, subjectPhrase);
+}
+
 // durch/um govern accusative; the static-relation two-way preps
 // (unter/über/hinter/vor) take dative here.
 function routeCase(c: ResolvedComplement): 'acc' | 'dat' {
@@ -448,8 +471,7 @@ function routeCase(c: ResolvedComplement): 'acc' | 'dat' {
 }
 
 // route path relation → preposition + case-declined determiner (none of these preps fuse).
-function routeHead(c: ResolvedComplement, plural: boolean): string {
-  const f = c.phrase.head.forms;
+function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean): string {
   const _case = routeCase(c);
   switch (pathSpecifier(c)) {
     case 'under':       return prepDet('unter', f, _case, plural);
@@ -498,14 +520,17 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const f = c.phrase.head.forms;
+      // The complement's *kind* (pronoun? adjective?) comes off its first conjunct; its surface
+      // is rendered from every conjunct, each declining for the case on its own article.
+      const f = firstConjunct(c.phrase).head.forms;
       // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
       // colloquial dative that "wegen" already takes. Positive credits with "dank" ("dank
       // dir"); German has no clean prepositional blame connector short of the genitive
       // "durch … Schuld", so negative renders like neutral ("wegen"). Only cause takes a pronoun.
       if (type === 'cause' && f['person']) {
         const prep = causeSentiment(c) === 'positive' ? 'dank' : 'wegen';
-        return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
+        const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
+        return `${prep} ${pronouns}`;
       }
       // An instrument presented as an action. German has no gerund, so neither level is a mere
       // phrase: the process level is a subordinate means clause — "indem man ein Wort wählt",
@@ -515,13 +540,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const objPlural = (f['number'] ?? f['count']) === 'plural';
-          const objWord = objPlural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-          const objDet = prepDet('', f, 'acc', objPlural);
-          const objAdj = adjPhrase(c.phrase, 'acc', f['definiteness'] ?? 'definite');
-          const object = [objDet, objAdj, germanCompound(c.phrase, objWord)]
-            .filter(Boolean)
-            .join(' ') + possessorText(c.phrase) + subordinateClause(c.phrase);
+          const object = coordinate(c.phrase, (np) => {
+            const nf = np.head.forms;
+            const objPlural = (nf['number'] ?? nf['count']) === 'plural';
+            const objWord = objPlural ? (nf['plural'] ?? nf['base'] ?? '') : (nf['base'] ?? '');
+            const objDet = prepDet('', nf, 'acc', objPlural);
+            const objAdj = adjPhrase(np, 'acc', nf['definiteness'] ?? 'definite');
+            return [objDet, objAdj, germanCompound(np, objWord)]
+              .filter(Boolean)
+              .join(' ') + possessorText(np) + subordinateClause(np);
+          });
           const adverb = c.action.modifier?.forms['base'] ?? '';
           if (level === 'process') {
             const finite3sg = c.action.verb.forms['3sg_present'] ?? c.action.verb.forms['base'] ?? '';
@@ -539,13 +567,20 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // "scheint groß" — no declension endings) but is still compared ("wird müder"); a
       // predicate noun takes the *nominative* case, not the dative the other complements
       // use ("wird eine Legende").
+      // Coordinated conjuncts render one by one, so a group may mix the two ("wird müde und
+      // eine Legende" is odd, but "scheint müde oder groß" falls out of the same map).
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') return dePredAdj(c.phrase.head);
-        return nounPhrase(c.phrase, 'nom');
+        return coordinate(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective' ? dePredAdj(np.head) : nounPhrase(np, 'nom'),
+        );
       }
+      // The preposition governs a case, and the case is spelled on each conjunct's own article
+      // ("mit dem Messer und dem Stock"), so preposition and determiner are emitted per conjunct.
+      return coordinate(c.phrase, (np) => {
+      const f = np.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = f['definiteness'] ?? 'definite';
-      const compound = germanCompound(c.phrase, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
+      const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route → path preposition (+ its case); locative/direction/source → two-way preps +
       // dative. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire only for a definite
       // article; any other determiner (einem, keiner, vielen, bare) stays uncontracted.
@@ -553,7 +588,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       let _case: 'nom' | 'acc' | 'dat';
       if (type === 'route') {
         _case = routeCase(c);
-        head = routeHead(c, plural);
+        head = routeHead(c, f, plural);
       } else {
         _case = 'dat';
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
@@ -570,10 +605,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         else /* source */         head = prepDet('aus', f, 'dat', plural);
       }
       const word = datPluralN(compound, _case, plural);
-      const declined = adjPhrase(c.phrase, _case, definiteness);
+      const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
-      const rest = `${adj}${word}${possessorText(c.phrase)}${subordinateClause(c.phrase)}`;
+      const rest = `${adj}${word}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
+      });
     })
     .filter(Boolean)
     .join(' ');
@@ -600,8 +636,8 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const pronoun = defArticle(f, subjectRelative ? 'nom' : 'acc', plural);
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
-  const agreeForms = subjectRelative ? f : rel.subject!.head.forms;
-  const clauseSubjectText = subjectRelative ? '' : subjectPhrase(rel.subject!);
+  const agreeForms = subjectRelative ? f : rel.subject!.agreement;
+  const clauseSubjectText = subjectRelative ? '' : subjectText(rel.subject!);
 
   const { verb, negative: verbNegative, modifier, tense = 'present', modals } = rel.verbPhrase;
   const person = agreeForms['person'] ?? '3';
@@ -623,7 +659,7 @@ function subordinateClause(np: ResolvedNounPhrase): string {
 
   const { dative, rest } = splitDative(rel.complements);
   const dativeText = complementsPhrase(dative);
-  const directObjectText = rel.directObject ? nounPhrase(rel.directObject, 'acc') : '';
+  const directObjectText = rel.directObject ? elementPhrase(rel.directObject, 'acc') : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
@@ -687,17 +723,17 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const { means, rest } = splitMeansClause(undative);
     const dativeText = complementsPhrase(dative);
     const meansText = complementsPhrase(means);
-    const subjectText = subjectPhrase(subject);
+    const subj = subjectText(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
-    if (!verbPhrase) return subjectText.trim();
+    if (!verbPhrase) return subj.trim();
     const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
     // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" negates,
     // sitting before a predicate complement ("sei nicht vorsichtig") but after the objects
     // otherwise ("iss das Brot nicht").
     if (mood === 'imperative') {
-      const word = deImperativeWord(verb.forms, verb.conceptId, deImperativePN(subject.head.forms));
-      const impDirect = directObject ? nounPhrase(directObject, 'acc') : '';
+      const word = deImperativeWord(verb.forms, verb.conceptId, deImperativePN(subject.agreement));
+      const impDirect = directObject ? elementPhrase(directObject, 'acc') : '';
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
       const hasPredicative = !!phrase.complements?.['predicative'];
@@ -728,15 +764,13 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     // follows it, and the non-finite tail (infinitive / Partizip / "zu …" / the modal stack)
     // closes the clause. Aspect is rendered here in the main clause only (relative clauses
     // stay neutral — a known gap).
-    const person = subject.head.forms['person'] ?? '3';
-    const number = subject.head.forms['number'] ?? 'singular';
+    const person = subject.agreement['person'] ?? '3';
+    const number = subject.agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
       : verbGroup(verb.forms, pn, tense, aspect, mood);
-    const directObjectText = directObject
-      ? nounPhrase(directObject, 'acc')
-      : '';
+    const directObjectText = directObject ? elementPhrase(directObject, 'acc') : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
 
     // "nicht" precedes the modifier when one exists ("nicht immer"),
@@ -752,7 +786,7 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const negComplement = applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
     const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
-    const head = inverted ? [verbText, subjectText] : [subjectText, verbText];
+    const head = inverted ? [verbText, subj] : [subj, verbText];
     return [...head, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
 }

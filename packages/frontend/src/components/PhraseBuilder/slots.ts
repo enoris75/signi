@@ -29,6 +29,21 @@ export const NOUN_KEYS: NounKey[] = [
   ...BOX_COMPLEMENT_TYPES,
 ];
 
+/**
+ * The noun blocks that can be *coordinated* ("Peter and Paul could speak aramaic or latin").
+ * The three adposition-free slots: subject, direct object, and the predicative subject
+ * complement.
+ *
+ * The other complements are left out on purpose, not for lack of a data model — `NounGroup` sits
+ * in every noun slot. Coordinating a complement forces a question they alone raise: does the
+ * preposition repeat across the conjuncts? Each language answers differently (Italian's fused
+ * "nella casa e nel bosco" must repeat it; English's "with the cat and the dog" must not), and
+ * a `direction` group could even need two different prepositions at once ("corro dal bambino e
+ * alla casa"). The engines already implement each language's answer, so opening these up is a
+ * UI change — but it deserves its own look, not a silent ride-along.
+ */
+export const COORDINABLE_NOUN_KEYS: NounKey[] = ["subject", "directObject", "predicative"];
+
 // Every noun block chains up to three adjectives. They are revealed one at a time —
 // the noun box carries the control for the first, and each adjective box carries the
 // control for the next — so slot `n` only exists once slot `n-1` holds a word. Ordered
@@ -412,6 +427,10 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   // anchor so both icons ride the box without overlapping.
   subjectPossessor: { x: 20, y: 64 },
   directObjectPossessor: { x: 74, y: 64 },
+  // Conjunct reveal icons — same role again (the conjuncts dock in panels below the noun).
+  subjectConjunct: { x: 14, y: 64 },
+  directObjectConjunct: { x: 68, y: 64 },
+  predicativeConjunct: { x: 68, y: 64 },
   sourcePossessor: { x: 14, y: 99 },
   directionPossessor: { x: 34, y: 99 },
   routePossessor: { x: 56, y: 99 },

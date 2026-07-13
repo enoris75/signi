@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -313,6 +313,30 @@ function subjectPhrase(forms: Record<string, string>, adj?: EsAdjectives): strin
 }
 
 /**
+ * Render every conjunct of a noun slot and coordinate them the Spanish way: commas between all
+ * but the last pair, the conjunction on the last ("el gato, el perro y el zorro"). Both words
+ * have a euphonic variant before their own sound — "y" becomes "e" before an i-/hi- word, "o"
+ * becomes "u" before an o-/ho- one — which is why the link is a function of what follows it.
+ */
+function coordinateElement(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) => string): string {
+  const link = (next: string) =>
+    el.conjunction === 'or'
+      ? (/^(o|ho)/i.test(next) ? ' u ' : ' o ')
+      : (/^(i|hi(?!e))/i.test(next) ? ' e ' : ' y ');
+  return joinConjuncts(el.conjuncts.map(render), ', ', link);
+}
+
+/** A subject slot: each conjunct with its own article/adjectives/relative, coordinated. */
+function subjectText(el: ResolvedNounElement): string {
+  return coordinateElement(el, (np) => withRelative(subjectPhrase(np.head.forms, esAdj(np)), np));
+}
+
+/** One conjunct as a plain noun phrase carrying its own determiner ("una palabra"). */
+function npText(np: ResolvedNounPhrase): string {
+  return withRelative(nounPhrase(np.head.forms, esAdj(np)), np);
+}
+
+/**
  * route path relation → preposition, honoring the head's determiner. Most are "de"-locutions
  * (debajo de, alrededor de, …) whose "de" fuses only with "el" ("debajo del árbol" but
  * "debajo de una casa"), via `deDet`; "through" is the bare preposition "por", which takes a
@@ -339,15 +363,19 @@ function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      const f = c.phrase.head.forms;
+      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
+      // its surface is rendered from every conjunct, each with its own article and agreement.
+      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the *subject* ("parece
       // cansada") and carries its own degree ("parece más cansada"); a predicate noun keeps
-      // its own article, no preposition ("se vuelve una leyenda").
+      // its own article, no preposition ("se vuelve una leyenda"). Coordinated conjuncts each
+      // agree with the subject: "parece cansada y feliz".
       if (type === 'predicative') {
-        if (f['role'] === 'adjective') {
-          return esDeg(c.phrase.head, agreeAdj(f['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'));
-        }
-        return withRelative(nounPhrase(predicativeForms(f), esAdj(c.phrase)), c.phrase);
+        return coordinateElement(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective'
+            ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
+            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np),
+        );
       }
       // An instrument presented as an action: the bare gerundio for the process level
       // ("eligiendo una palabra"), the nominalised infinitive for the concept level ("con el
@@ -355,7 +383,7 @@ function complementsPhrase(
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const object = withRelative(nounPhrase(f, esAdj(c.phrase)), c.phrase);
+          const object = coordinateElement(c.phrase, npText);
           const verb =
             level === 'process'
               ? actionGerund(c.action)
@@ -379,9 +407,15 @@ function complementsPhrase(
         }
         return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
       }
+      // The preposition contracts with the article ("a"+"el" → "al"), so it cannot be factored
+      // out in front of a coordinated complement — each conjunct carries its own contracted head
+      // ("al gato y al perro"). Repeating it also lets each conjunct pick its own preposition,
+      // which `direction` needs: an animate goal takes "hacia", a place "a".
+      return coordinateElement(c.phrase, (np) => {
+      const f = np.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const adj = esAdj(c.phrase);
+      const adj = esAdj(np);
       const noun = withAdj(word, adj);
       // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
       // stressed-a nouns take ("en la primera agua").
@@ -409,7 +443,8 @@ function complementsPhrase(
           `a causa ${dePrep(af, plural)}`
         ) :
         routeHead(c, plural, af);
-      return withRelative(`${head} ${noun}`, c.phrase);
+      return withRelative(`${head} ${noun}`, np);
+      });
     })
     .filter(Boolean)
     .join(' ');
@@ -466,10 +501,8 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return withPoss;
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.head.forms;
-  const subjText = subjectRelative
-    ? ''
-    : withRelative(subjectPhrase(rel.subject!.head.forms, esAdj(rel.subject!)), rel.subject!);
+  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  const subjText = subjectRelative ? '' : subjectText(rel.subject!);
   const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }
@@ -482,7 +515,7 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
-  directObject?: ResolvedNounPhrase,
+  directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
@@ -503,11 +536,10 @@ function predicateText(
       : aspectVerb(verb.forms, subjectForms, tense, aspect);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
-  const objectIsNegative = directObject?.head.forms['definiteness'] === 'no';
+  // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const verbText = verbNegative || objectIsNegative ? `no ${conjugated}` : conjugated;
-  const directObjectText = directObject
-    ? withRelative(nounPhrase(directObject.head.forms, esAdj(directObject)), directObject)
-    : '';
+  const directObjectText = directObject ? coordinateElement(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "no": "yo nunca bebo"
   // but post-verbal with "no": "yo no bebo nunca"
@@ -539,15 +571,13 @@ function predicateText(
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // An imperative drops its subject (the person still drives the form — see predicateText).
-  const subjectText = phrase.verbPhrase?.mood === 'imperative'
-    ? ''
-    : withRelative(subjectPhrase(subject.head.forms, esAdj(subject)), subject);
+  const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("últimas noticias").
-  if (!phrase.verbPhrase) return subjectText.trim();
+  if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.head.forms, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subjectText, predicate].filter(Boolean).join(' ').trim();
+  return [subj, predicate].filter(Boolean).join(' ').trim();
 }
 
 const COORD_WORDS: Record<CoordConjunction, string> = {
