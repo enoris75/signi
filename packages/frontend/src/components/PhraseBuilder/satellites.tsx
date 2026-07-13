@@ -160,13 +160,13 @@ export function buildSatellites(
     {
       key: "subjectNumber",
       parent: "subject",
-      label: "Number",
+      label: t("satellite.number"),
       icon: <NumbersIcon sx={iconSx} />,
       available: showSubjectNumber,
       hasValue: selection.subjectNumber === "plural",
       alwaysSet: true,
       directToggle: true,
-      valueLabel: selection.subjectNumber === "plural" ? "Plural" : "Singular",
+      valueLabel: t(`number.value.${selection.subjectNumber ?? "singular"}`),
     },
     {
       key: "subjectGender",
@@ -314,14 +314,13 @@ export function buildSatellites(
     {
       key: "directObjectNumber",
       parent: "directObject",
-      label: "Number",
+      label: t("satellite.number"),
       icon: <NumbersIcon sx={iconSx} />,
       available: showDirectObjNumber,
       hasValue: selection.directObjectNumber === "plural",
       alwaysSet: true,
       directToggle: true,
-      valueLabel:
-        selection.directObjectNumber === "plural" ? "Plural" : "Singular",
+      valueLabel: t(`number.value.${selection.directObjectNumber ?? "singular"}`),
     },
     {
       key: "directObjectGender",
@@ -444,14 +443,14 @@ export function buildSatellites(
         {
           key: `${type}Number`,
           parent: type,
-          label: "Number",
+          label: t("satellite.number"),
           icon: <NumbersIcon sx={iconSx} />,
           // A predicate adjective has no number of its own — it agrees with the subject.
           available: Boolean(concept) && concept?.role !== "adjective",
           hasValue: num === "plural",
           alwaysSet: true,
           directToggle: true,
-          valueLabel: num === "plural" ? "Plural" : "Singular",
+          valueLabel: t(`number.value.${num ?? "singular"}`),
         },
         {
           key: `${type}Gender`,

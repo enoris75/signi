@@ -301,12 +301,6 @@ export type AbstractionLevel = 'process' | 'concept' | 'object';
 /** Display order: most dynamic first, most reified last. */
 export const ABSTRACTION_LEVELS: AbstractionLevel[] = ['process', 'concept', 'object'];
 
-export const ABSTRACTION_LEVEL_LABELS: Record<AbstractionLevel, string> = {
-  process: 'Process — by doing it',
-  concept: 'Concept — the act of doing it',
-  object: 'Object — the thing itself',
-};
-
 /** The levels that present the instrument as an action, and so need `Complement.action`. */
 export function isActionLevel(level: AbstractionLevel): boolean {
   return level !== 'object';

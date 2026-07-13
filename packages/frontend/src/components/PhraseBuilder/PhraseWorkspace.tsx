@@ -158,10 +158,13 @@ export function PhraseWorkspace({
               c.kind === "instrumental"
             ) {
               // Elbow route through the right-hand gutter: out from the first clause's control,
-              // down the gutter, back in to the linked clause's control.
+              // down the gutter, back in to the linked clause's control. The instrumental link
+              // starts on the verb box's bottom edge rather than on a card border, so it drops
+              // clear of that edge before turning, otherwise its first run traces the border.
               const midX = Math.max(c.x1, c.x2) + 24;
               const midY = (c.y1 + c.y2) / 2;
-              const d = `M ${c.x1} ${c.y1} H ${midX} V ${c.y2} H ${c.x2}`;
+              const startY = c.kind === "instrumental" ? c.y1 + 24 : c.y1;
+              const d = `M ${c.x1} ${c.y1} V ${startY} H ${midX} V ${c.y2} H ${c.x2}`;
               const marker =
                 c.kind === "conditional"
                   ? "url(#conditional-arrow)"

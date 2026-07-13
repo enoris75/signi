@@ -1025,6 +1025,63 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // Grammatical number, as against the NUMBER above, which is the one you count with. Most
+    // languages happen to use the same word for both (it "numero", fr "nombre"), but German does
+    // not — a noun is in the "Numerus" singular, never in the "Zahl" singular — and Japanese
+    // reads the same 数 differently in the two senses (すう here, かず for the arithmetic one).
+    id: 'NUMBER_GRAMMAR',
+    role: 'noun',
+    description: 'whether a word refers to one or to more than one (grammar)',
+    emoji: '🔢',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'number',   plural: 'numbers', count: 'singular' },
+      it: { base: 'numero',   plural: 'numeri',  gender: 'masc', count: 'singular' },
+      fr: { base: 'nombre',   plural: 'nombres', gender: 'masc', count: 'singular' },
+      de: { base: 'Numerus',  plural: 'Numeri',  gender: 'masc', count: 'singular' },
+      es: { base: 'número',   plural: 'números', gender: 'masc', count: 'singular' },
+      ja: { base: '数',       count: 'singular', reading: 'すう' },
+      pt: { base: 'número',   plural: 'números', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The two values of NUMBER_GRAMMAR, as nouns — what the number control shows when it names a
+    // value on its own ("Singular" / "Plural"), with no noun beside it to agree with. The
+    // adjectives of the same meaning are seeded separately (SINGULAR / PLURAL in adjectives.ts):
+    // a label that sits next to the noun it describes wants those, one that stands alone wants
+    // these. Both are borrowed Latin in every language, which is why they look alike throughout.
+    id: 'SINGULAR_GRAMMAR',
+    role: 'noun',
+    description: 'the form of a word referring to one (grammar)',
+    emoji: '1️⃣',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'singular',   plural: 'singulars',   count: 'singular' },
+      it: { base: 'singolare',  plural: 'singolari',   gender: 'masc', count: 'singular' },
+      fr: { base: 'singulier',  plural: 'singuliers',  gender: 'masc', count: 'singular' },
+      de: { base: 'Singular',   plural: 'Singulare',   gender: 'masc', count: 'singular' },
+      es: { base: 'singular',   plural: 'singulares',  gender: 'masc', count: 'singular' },
+      ja: { base: '単数',       count: 'singular', reading: 'たんすう' },
+      pt: { base: 'singular',   plural: 'singulares',  gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'PLURAL_GRAMMAR',
+    role: 'noun',
+    description: 'the form of a word referring to more than one (grammar)',
+    emoji: '🔟',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'plural',   plural: 'plurals',    count: 'singular' },
+      it: { base: 'plurale',  plural: 'plurali',    gender: 'masc', count: 'singular' },
+      fr: { base: 'pluriel',  plural: 'pluriels',   gender: 'masc', count: 'singular' },
+      de: { base: 'Plural',   plural: 'Plurale',    gender: 'masc', count: 'singular' },
+      es: { base: 'plural',   plural: 'plurales',   gender: 'masc', count: 'singular' },
+      ja: { base: '複数',     count: 'singular', reading: 'ふくすう' },
+      pt: { base: 'plural',   plural: 'plurais',    gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'GENDER',
     role: 'noun',
     description: 'the class a noun belongs to — masculine, feminine, neuter (grammar)',
@@ -1117,6 +1174,61 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'poseedor',   plural: 'poseedores',  gender: 'masc', count: 'singular', fem: 'poseedora',    fem_plural: 'poseedoras' },
       ja: { base: '所有者',     count: 'singular', reading: 'しょゆうしゃ' },
       pt: { base: 'possuidor',  plural: 'possuidores', gender: 'masc', count: 'singular', fem: 'possuidora',   fem_plural: 'possuidoras' },
+    },
+  },
+
+  // ── Abstraction levels ────────────────────────────────────────────
+  // The three degrees an instrument can be reified to (see AbstractionLevel): an act in flow, the
+  // act named, or the thing it leaves behind. Everyday nouns, seeded like any other — the levels
+  // just happen to be the first thing that names them.
+  {
+    id: 'PROCESS',
+    role: 'noun',
+    description: 'a course of action unfolding step by step',
+    emoji: '🔄',
+    forms: {
+      en: { base: 'process',   plural: 'processes', count: 'singular' },
+      it: { base: 'processo',  plural: 'processi',  gender: 'masc', count: 'singular' },
+      fr: { base: 'processus', plural: 'processus', gender: 'masc', count: 'singular' },
+      de: { base: 'Prozess',   plural: 'Prozesse',  gender: 'masc', count: 'singular' },
+      es: { base: 'proceso',   plural: 'procesos',  gender: 'masc', count: 'singular' },
+      ja: { base: '過程',      count: 'singular', reading: 'かてい' },
+      pt: { base: 'processo',  plural: 'processos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The abstract notion, not a draft or a plan — de Begriff (the philosophical sense), not
+    // Konzept, which is the sketch one writes before doing the thing.
+    id: 'CONCEPT',
+    role: 'noun',
+    description: 'an abstract notion, a thing thought rather than held',
+    emoji: '💡',
+    forms: {
+      en: { base: 'concept',  plural: 'concepts', count: 'singular' },
+      it: { base: 'concetto', plural: 'concetti', gender: 'masc', count: 'singular' },
+      fr: { base: 'concept',  plural: 'concepts', gender: 'masc', count: 'singular' },
+      de: { base: 'Begriff',  plural: 'Begriffe', gender: 'masc', count: 'singular' },
+      es: { base: 'concepto', plural: 'conceptos', gender: 'masc', count: 'singular' },
+      ja: { base: '概念',     count: 'singular', reading: 'がいねん' },
+      pt: { base: 'conceito', plural: 'conceitos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The physical thing, as against the grammatical OBJECT_GRAMMAR the same English word also
+    // means: this is the one a hand closes on (ja 物体, not 目的語), which is why the ids split.
+    id: 'OBJECT_THING',
+    role: 'noun',
+    description: 'a material thing one can hold or use',
+    emoji: '📦',
+    synonym: 'thing',
+    forms: {
+      en: { base: 'object',      plural: 'objects',      count: 'singular' },
+      it: { base: 'oggetto',     plural: 'oggetti',      gender: 'masc', count: 'singular' },
+      fr: { base: 'objet',       plural: 'objets',       gender: 'masc', count: 'singular' },
+      de: { base: 'Gegenstand',  plural: 'Gegenstände',  gender: 'masc', count: 'singular' },
+      es: { base: 'objeto',      plural: 'objetos',      gender: 'masc', count: 'singular' },
+      ja: { base: '物体',        count: 'singular', reading: 'ぶったい' },
+      pt: { base: 'objeto',      plural: 'objetos',      gender: 'masc', count: 'singular' },
     },
   },
 ];

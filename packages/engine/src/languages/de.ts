@@ -476,6 +476,22 @@ function splitDative(
   return { dative: { terminus }, rest };
 }
 
+/**
+ * A `process` instrumental is not a phrase but a subordinate means clause ("indem man ein Wort
+ * wählt"), and a subordinate clause is clause-final in German: it sits in the Nachfeld, *after*
+ * the verb material the other complements come before ("hat begonnen, indem man ein Wort wählt",
+ * "Ein Wort wählen" → "Beginnen, indem man ein Wort wählt"). Split it out so the joiner can put
+ * it last instead of burying it among the objects.
+ */
+function splitMeansClause(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): { means?: Partial<Record<ComplementType, ResolvedComplement>>; rest?: Partial<Record<ComplementType, ResolvedComplement>> } {
+  const instrument = complements?.['instrumental'];
+  if (!instrument?.action || abstractionLevel(instrument) !== 'process') return { rest: complements };
+  const { instrumental, ...rest } = complements!;
+  return { means: { instrumental }, rest };
+}
+
 function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
@@ -665,9 +681,12 @@ function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: 
 // no V2 slot to invert, so the flag is inert there.
 function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const { subject, verbPhrase, directObject } = phrase;
-    // The dative recipient leads the accusative object; the other complements trail it.
-    const { dative, rest } = splitDative(phrase.complements);
+    // The dative recipient leads the accusative object; the other complements trail it, and a
+    // subordinate means clause trails even the verb (see `splitMeansClause`).
+    const { dative, rest: undative } = splitDative(phrase.complements);
+    const { means, rest } = splitMeansClause(undative);
     const dativeText = complementsPhrase(dative);
+    const meansText = complementsPhrase(means);
     const subjectText = subjectPhrase(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subjectText.trim();
@@ -687,7 +706,7 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
       if (register === 'instruction') {
-        return [impModifier, dativeText, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word]
+        return [impModifier, dativeText, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word, meansText]
           .filter(Boolean)
           .join(' ')
           .trim();
@@ -700,6 +719,7 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
         parts.push(impComplements);
         if (applyNicht) parts.push('nicht');
       }
+      parts.push(meansText);
       return parts.filter(Boolean).join(' ').trim();
     }
 
@@ -733,7 +753,7 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
     const head = inverted ? [verbText, subjectText] : [subjectText, verbText];
-    return [...head, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail]
+    return [...head, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
 }
 

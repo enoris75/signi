@@ -28,11 +28,7 @@ import {
   type PhraseSelection,
   type WorkspaceBinding,
 } from "./interfaces.ts";
-import {
-  ABSTRACTION_LEVELS,
-  ABSTRACTION_LEVEL_LABELS,
-  type AbstractionLevel,
-} from "@signi/shared";
+import { ABSTRACTION_LEVELS, type AbstractionLevel } from "@signi/shared";
 
 // The container-to-container conditional control state, threaded from the workspace binding.
 // Undefined for a standalone (non-workspace) period, which can't take part in conditionals.
@@ -625,8 +621,8 @@ export function PeriodContainer({
             >
               ·{" "}
               {showCanvas
-                ? "click a slot then choose a word"
-                : "start by choosing a subject"}
+                ? t("hint.chooseWord")
+                : t("hint.chooseSubject")}
             </Box>
           </Typography>
         )}
@@ -638,7 +634,10 @@ export function PeriodContainer({
             {ABSTRACTION_LEVELS.map((level) => {
               const active = instrumental.level === level;
               return (
-                <Tooltip key={level} title={ABSTRACTION_LEVEL_LABELS[level]}>
+                <Tooltip
+                  key={level}
+                  title={t(`instrumental.level.${level}.example`)}
+                >
                   <Box
                     component="span"
                     onClick={() => instrumental.onLevelChange(level)}
@@ -658,7 +657,7 @@ export function PeriodContainer({
                       textTransform: "uppercase",
                     }}
                   >
-                    {level}
+                    {t(`instrumental.level.${level}`)}
                   </Box>
                 </Tooltip>
               );

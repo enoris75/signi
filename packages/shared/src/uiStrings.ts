@@ -1,4 +1,4 @@
-import type { Definiteness, LanguageCode, PhrasePlan } from './index.js';
+import type { AbstractionLevel, Definiteness, LanguageCode, PhrasePlan } from './index.js';
 
 /**
  * Post-processing applied to an engine-rendered UI string, once, for every language.
@@ -95,6 +95,24 @@ const commandOf = (concept: string): PhrasePlan =>
     verbPhrase: { verb: concept },
     imperative: true,
     imperativeRegister: 'instruction',
+  }) as PhrasePlan;
+
+// One instrument, said three ways: the START command taking "choosing a word" as its instrumental,
+// at whichever abstraction level is asked for. At `object` the action drops away and the noun
+// phrase *is* the instrument (see AbstractionLevel), which is what makes the three read as one
+// gradient rather than three unrelated sentences. The action levels are spelled out rather than
+// asked of `isActionLevel`: index.ts re-exports this module, so importing a *value* back from it
+// would close a runtime cycle and leave the export undefined at load.
+const exampleAt = (level: AbstractionLevel): PhrasePlan =>
+  ({
+    ...commandOf('START'),
+    complements: {
+      instrumental: {
+        phrase: { concept: 'WORD', definiteness: 'indefinite' },
+        ...(level === 'object' ? {} : { action: { verb: 'CHOOSE' } }),
+        specifiers: [{ kind: 'abstraction', value: level }],
+      },
+    },
   }) as PhrasePlan;
 
 /**
@@ -209,6 +227,32 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Determiner',
   },
 
+  // The number control on a noun box — the icon satellite and the toggle it reveals. The bare
+  // grammar noun, like `satellite.determiner`: it names the feature, not either of its values.
+  // NUMBER_GRAMMAR, not the NUMBER you count with: German keeps them apart (a noun is in the
+  // Numerus singular, never in the Zahl singular) and Japanese reads the same 数 differently.
+  'satellite.number': {
+    plan: nameOf('NUMBER_GRAMMAR'),
+    format: NAME_FORMAT,
+    fallback: 'Number',
+  },
+
+  // The two values that control shows, keyed `number.value.<Number>` so a call site can write
+  // t(`number.value.${value}`) for either. Nouns, where the pronoun chooser's `pronoun.singular`
+  // is an adjective: there the value sits in a row captioned by the noun it agrees with, here the
+  // toggle shows it standing alone, and a language that has a word for the singular *as a thing*
+  // (de "der Singular", ja 単数) uses that word rather than the adjective it would attach to a noun.
+  'number.value.singular': {
+    plan: nameOf('SINGULAR_GRAMMAR'),
+    format: NAME_FORMAT,
+    fallback: 'Singular',
+  },
+  'number.value.plural': {
+    plan: nameOf('PLURAL_GRAMMAR'),
+    format: NAME_FORMAT,
+    fallback: 'Plural',
+  },
+
   // The sections of the determiner menu, keyed `determiner.category.<DeterminerCategory>` so the
   // menu can write t(`determiner.category.${category}`) for any of the three. Each is the bare
   // grammar noun for the *realization* the user knows — article / demonstrative / quantifier —
@@ -291,7 +335,7 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'person',
   },
   'pronoun.number': {
-    plan: nameOf('NUMBER'),
+    plan: nameOf('NUMBER_GRAMMAR'),
     format: { stripPeriod: true },
     fallback: 'number',
   },
@@ -336,8 +380,8 @@ export const UI_STRINGS = defineUiStrings({
   'pronoun.first': { word: 'FIRST', agreesWith: 'PERSON_GRAMMAR', fallback: 'first' },
   'pronoun.second': { word: 'SECOND', agreesWith: 'PERSON_GRAMMAR', fallback: 'second' },
   'pronoun.third': { word: 'THIRD', agreesWith: 'PERSON_GRAMMAR', fallback: 'third' },
-  'pronoun.singular': { word: 'SINGULAR', agreesWith: 'NUMBER', fallback: 'singular' },
-  'pronoun.plural': { word: 'PLURAL', agreesWith: 'NUMBER', fallback: 'plural' },
+  'pronoun.singular': { word: 'SINGULAR', agreesWith: 'NUMBER_GRAMMAR', fallback: 'singular' },
+  'pronoun.plural': { word: 'PLURAL', agreesWith: 'NUMBER_GRAMMAR', fallback: 'plural' },
   'pronoun.male': { word: 'MALE', agreesWith: 'GENDER', fallback: 'male' },
   'pronoun.female': { word: 'FEMALE', agreesWith: 'GENDER', fallback: 'female' },
   'pronoun.neuter': { word: 'NEUTER', agreesWith: 'GENDER', fallback: 'neuter' },
@@ -431,6 +475,101 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Save period',
+  },
+
+  // The hint in the caption of a period container that has nothing in it yet. A command, and one
+  // that says its *method*: the START imperative with a `process`-level instrumental — the
+  // instrument is not a thing but an act in flow, rendered non-finitely by each language's own
+  // means (en "start by choosing a subject", it "inizia scegliendo un soggetto", fr "commence en
+  // choisissant un sujet", de "beginne, indem du ein Subjekt wählst", ja "主語を選んで始め").
+  // The subject is indefinite: the user has yet to pick one — that is the whole point of the hint.
+  'hint.chooseSubject': {
+    plan: {
+      ...commandOf('START'),
+      complements: {
+        instrumental: {
+          phrase: { concept: 'SUBJECT_GRAMMAR', definiteness: 'indefinite' },
+          action: { verb: 'CHOOSE' },
+          specifiers: [{ kind: 'abstraction', value: 'process' }],
+        },
+      },
+    } as PhrasePlan,
+    // Lower-case like the placeholders: it trails a "·" inside a caption the CSS uppercases.
+    format: { stripPeriod: true },
+    fallback: 'start by choosing a subject',
+  },
+
+  // The same caption once the period has a subject and the canvas is up: what to do with it. Two
+  // commands in *sequence*, which is what the `then` conjunction is for — the join of the steps of
+  // a recipe or a wizard (see IMPERATIVE_COORD_CONJUNCTIONS): click a slot, and only then choose a
+  // word for it. Not one command with two objects: the second act waits on the first. Both objects
+  // are indefinite — any slot, any word. The coordinated clause inherits the mood, the register and
+  // the addressee from this one, so it is built with the same `commandOf` shorthand.
+  // en "click a slot, and then choose a word", it "clicca uno slot, e poi scegli una parola",
+  // de "einen Slot klicken, und dann ein Wort wählen", ja "スロットをクリック、それから単語を選び".
+  'hint.chooseWord': {
+    plan: {
+      ...commandOf('CLICK'),
+      // SLOT_COMPUTING, not SLOT: the plain noun is the narrow opening you post a coin through
+      // ("fessura", "Schlitz"). A role box on the canvas is a slot in the computing sense — a
+      // reserved position waiting to be filled — which every language borrows as "slot".
+      directObject: { concept: 'SLOT_COMPUTING', definiteness: 'indefinite' },
+      coordination: {
+        conjunction: 'then',
+        clause: {
+          ...commandOf('CHOOSE'),
+          directObject: { concept: 'WORD', definiteness: 'indefinite' },
+        },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'click a slot and then choose a word',
+  },
+
+  // The reification switch on an instrument period — the three degrees an instrument can be
+  // presented at (see AbstractionLevel), keyed by level so the selector can write
+  // t(`instrumental.level.${level}`). Each is the bare noun the level is named after: the act in
+  // flow (process), the act named (concept), the thing it leaves behind (object — OBJECT_THING,
+  // the thing one holds, not the grammatical OBJECT_GRAMMAR the English word also means).
+  // The buttons' CSS uppercases them.
+  'instrumental.level.process': {
+    plan: nameOf('PROCESS'),
+    format: NAME_FORMAT,
+    fallback: 'Process',
+  },
+  'instrumental.level.concept': {
+    plan: nameOf('CONCEPT'),
+    format: NAME_FORMAT,
+    fallback: 'Concept',
+  },
+  'instrumental.level.object': {
+    plan: nameOf('OBJECT_THING'),
+    format: NAME_FORMAT,
+    fallback: 'Object',
+  },
+
+  // The tooltip on each of those buttons. A level is a *construction*, and no gloss of one
+  // survives translation ("by doing it" is English grammar talking about itself), so each tooltip
+  // is the construction itself: one and the same period — "start … a word", the CHOOSE act on an
+  // indefinite WORD — rendered at the level the button sets, in the current UI language. Pressing
+  // the button does to the workspace exactly what the tooltip shows.
+  //   process → en "start by choosing a word", de "beginne, indem du ein Wort wählst", ja 「単語を選んで始め」
+  //   concept → it "inizia con l'atto di scegliere una parola"
+  //   object  → fr "commence avec un mot" — the act is gone, only the thing is left.
+  'instrumental.level.process.example': {
+    plan: exampleAt('process'),
+    format: { capitalize: true, stripPeriod: true },
+    fallback: 'Start by choosing a word',
+  },
+  'instrumental.level.concept.example': {
+    plan: exampleAt('concept'),
+    format: { capitalize: true, stripPeriod: true },
+    fallback: 'Start with the act of choosing a word',
+  },
+  'instrumental.level.object.example': {
+    plan: exampleAt('object'),
+    format: { capitalize: true, stripPeriod: true },
+    fallback: 'Start with a word',
   },
 
   // The command box, which replaces the subject box under an imperative (the subject is dropped
