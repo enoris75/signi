@@ -40,14 +40,17 @@ function dePredAdj(a: ConceptForms): string {
   return `${deDegPrefix(a)}${base}`;
 }
 
-type Case = 'nom' | 'acc' | 'dat';
+type Case = 'nom' | 'acc' | 'dat' | 'gen';
 type Slot = 'masc' | 'fem' | 'neut' | 'plural';
 
-// Weak adjective declension (after a definite article: der/die/das).
+// Weak adjective declension (after a definite article: der/die/das). The genitive row is also
+// the *mixed* genitive: after any determiner at all, a genitive adjective is invariably -en
+// ("des großen Wortes", "eines großen Wortes").
 const WEAK_ENDINGS: Record<Case, Record<Slot, string>> = {
   nom: { masc: 'e',  fem: 'e',  neut: 'e',  plural: 'en' },
   acc: { masc: 'en', fem: 'e',  neut: 'e',  plural: 'en' },
   dat: { masc: 'en', fem: 'en', neut: 'en', plural: 'en' },
+  gen: { masc: 'en', fem: 'en', neut: 'en', plural: 'en' },
 };
 
 // Mixed declension (after an indefinite article: ein/eine) — nom/acc only, since a
@@ -68,6 +71,10 @@ const STRONG_ENDINGS: Record<'nom' | 'acc', Record<Slot, string>> = {
 // "guten Häusern"): the adjective carries the dative gender/number ending.
 const STRONG_DAT: Record<Slot, string> = { masc: 'em', fem: 'er', neut: 'em', plural: 'en' };
 
+// Strong genitive (article-less genitive — "guten Weines", "guter Milch", "guter Wörter"): the
+// masculine/neuter -en leans on the noun's own -(e)s, which already marks the case there.
+const STRONG_GEN: Record<Slot, string> = { masc: 'en', fem: 'er', neut: 'en', plural: 'er' };
+
 // Pick the ending table for a case + determiner. In the dative a *bare* phrase declines
 // strong (the adjective carries the case); every other dative determiner — definite,
 // ein-/kein- (mixed → -en), and einige/viele/wenige/alle — takes the invariant weak -en.
@@ -78,6 +85,15 @@ const STRONG_DAT: Record<Slot, string> = { masc: 'em', fem: 'er', neut: 'em', pl
 //     der-words, carrying the case/gender ending themselves.
 function endingsFor(_case: Case, definiteness: string, plural: boolean): Record<Slot, string> {
   if (_case === 'dat') return definiteness === 'bare' ? STRONG_DAT : WEAK_ENDINGS.dat;
+  // The genitive collapses weak and mixed alike to -en, so only a phrase with no article at all
+  // declines strong: a bare one, the article-less quantifiers, and the indefinite plural.
+  if (_case === 'gen') {
+    const articleless =
+      definiteness === 'bare' ||
+      definiteness === 'some' || definiteness === 'many' || definiteness === 'few' ||
+      (definiteness === 'indefinite' && plural);
+    return articleless ? STRONG_GEN : WEAK_ENDINGS.gen;
+  }
   if (definiteness === 'bare') return STRONG_ENDINGS[_case];
   if (definiteness === 'indefinite') return plural ? STRONG_ENDINGS[_case] : MIXED_ENDINGS[_case];
   if (definiteness === 'no') return plural ? WEAK_ENDINGS[_case] : MIXED_ENDINGS[_case];
@@ -128,8 +144,8 @@ function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite
   return [...modAdjs, ...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
 }
 
-function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural = false): string {
-  if (plural) return _case === 'dat' ? 'den' : 'die';
+function defArticle(forms: Record<string, string>, _case: Case, plural = false): string {
+  if (plural) return _case === 'dat' ? 'den' : _case === 'gen' ? 'der' : 'die';
   const gender = forms['gender'] ?? 'neut';
   if (_case === 'nom') {
     return gender === 'masc' ? 'der' : gender === 'fem' ? 'die' : 'das';
@@ -137,24 +153,30 @@ function defArticle(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
   if (_case === 'acc') {
     return gender === 'masc' ? 'den' : gender === 'fem' ? 'die' : 'das';
   }
+  if (_case === 'gen') {
+    return gender === 'fem' ? 'der' : 'des';
+  }
   // dative
   return gender === 'masc' ? 'dem' : gender === 'fem' ? 'der' : 'dem';
 }
 
 // The indefinite article ein-, declined for case/gender. Plural has no indefinite
-// article (bare). Only nom/acc are reachable (subject/direct object).
-function indefArticle(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean): string {
+// article (bare).
+function indefArticle(_case: Case, gender: string, plural: boolean): string {
   if (plural) return '';
   if (_case === 'acc') return gender === 'masc' ? 'einen' : gender === 'fem' ? 'eine' : 'ein';
   if (_case === 'dat') return gender === 'fem' ? 'einer' : 'einem';
+  if (_case === 'gen') return gender === 'fem' ? 'einer' : 'eines';
   return gender === 'fem' ? 'eine' : 'ein'; // nominative: masc/neut ein, fem eine
 }
 
-// "kein" (no), declined like ein- but with a plural (keine / keinen in the dative).
-function keinForm(_case: 'nom' | 'acc' | 'dat', gender: string, plural: boolean): string {
-  if (plural) return _case === 'dat' ? 'keinen' : 'keine';
+// "kein" (no), declined like ein- but with a plural (keine / keinen in the dative,
+// keiner in the genitive).
+function keinForm(_case: Case, gender: string, plural: boolean): string {
+  if (plural) return _case === 'dat' ? 'keinen' : _case === 'gen' ? 'keiner' : 'keine';
   if (_case === 'acc') return gender === 'masc' ? 'keinen' : gender === 'fem' ? 'keine' : 'kein';
   if (_case === 'dat') return gender === 'fem' ? 'keiner' : 'keinem';
+  if (_case === 'gen') return gender === 'fem' ? 'keiner' : 'keines';
   return gender === 'fem' ? 'keine' : 'kein'; // nominative: masc/neut kein, fem keine
 }
 
@@ -164,6 +186,7 @@ const DEM_ENDINGS: Record<Case, Record<Slot, string>> = {
   nom: { masc: 'er', fem: 'e',  neut: 'es', plural: 'e'  },
   acc: { masc: 'en', fem: 'e',  neut: 'es', plural: 'e'  },
   dat: { masc: 'em', fem: 'er', neut: 'em', plural: 'en' },
+  gen: { masc: 'es', fem: 'er', neut: 'es', plural: 'er' },
 };
 function demForm(distal: boolean, _case: Case, gender: string, plural: boolean): string {
   const slot: Slot = plural ? 'plural' : gender === 'masc' || gender === 'fem' ? gender : 'neut';
@@ -173,10 +196,11 @@ function demForm(distal: boolean, _case: Case, gender: string, plural: boolean):
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'), declined
  * for case — including the dative, which the motion/dative complements use (einem/einer,
- * keinem/keiner, diesem/jener, einigen/vielen/wenigen/allen). "kein" is self-negating (no
- * verb concord); einige/viele/wenige/alle are plural quantifiers.
+ * keinem/keiner, diesem/jener, einigen/vielen/wenigen/allen), and the genitive, which the
+ * object of a nominalised infinitive takes ("mit dem Wählen eines Wortes"). "kein" is
+ * self-negating (no verb concord); einige/viele/wenige/alle are plural quantifiers.
  */
-function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
+function determiner(forms: Record<string, string>, _case: Case, plural: boolean): string {
   // Most proper names go bare in German ("Afrika"), whatever determiner the user picked. But a
   // class of them is inherently articled — "die Antarktis", "die Schweiz", "die Türkei" — and that
   // is a property of the name, not a choice, so the lexicon marks it and the definite article wins.
@@ -202,17 +226,19 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
       default:            return defArticle(forms, _case, false);
     }
   }
-  // Dative plural quantifiers add -n (mit einigen/vielen/wenigen/allen Häusern).
+  // Dative plural quantifiers add -n (mit einigen/vielen/wenigen/allen Häusern); the genitive
+  // takes -r (die Wahl einiger/vieler/weniger/aller Wörter).
   const dat = _case === 'dat';
+  const gen = _case === 'gen';
   switch (definiteness) {
     case 'bare': return '';
     case 'this': return demForm(false, _case, gender, plural);
     case 'that': return demForm(true, _case, gender, plural);
     case 'no':   return keinForm(_case, gender, plural);
-    case 'some': return dat ? 'einigen' : 'einige';
-    case 'many': return dat ? 'vielen' : 'viele';
-    case 'few':  return dat ? 'wenigen' : 'wenige';
-    case 'all':  return dat ? 'allen' : 'alle';
+    case 'some': return dat ? 'einigen' : gen ? 'einiger' : 'einige';
+    case 'many': return dat ? 'vielen'  : gen ? 'vieler'  : 'viele';
+    case 'few':  return dat ? 'wenigen' : gen ? 'weniger' : 'wenige';
+    case 'all':  return dat ? 'allen'   : gen ? 'aller'   : 'alle';
     default:     return indefArticle(_case, gender, plural);
   }
 }
@@ -223,7 +249,7 @@ function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat',
  * zu+der=zur); any other determiner (einem, keiner, vielen, bare) rides after the plain
  * preposition. An empty `prep` is the bare-dative terminus — the determiner alone.
  */
-function prepDet(prep: string, forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
+function prepDet(prep: string, forms: Record<string, string>, _case: Case, plural: boolean): string {
   const det = determiner(forms, _case, plural);
   if ((forms['definiteness'] ?? 'definite') === 'definite') {
     if (prep === 'in' && det === 'dem') return 'im';
@@ -420,12 +446,26 @@ function datPluralN(word: string, _case: Case, plural: boolean): string {
   return _case === 'dat' && plural && word && !/[ns]$/.test(word) ? `${word}n` : word;
 }
 
-function nounPhrase(np: ResolvedNounPhrase, _case: 'nom' | 'acc' | 'dat'): string {
+/**
+ * The genitive -(e)s a masculine/neuter *singular* noun carries ("des Wortes", "des Mädchens"):
+ * the long -es after a sibilant, where a bare -s would be unpronounceable, and after a
+ * monosyllable, where it is the standard form; the short -s otherwise. A feminine or a plural
+ * takes no ending at all — there the article alone marks the case ("einer Katze", "der Wörter").
+ */
+function genitiveS(word: string, _case: Case, forms: Record<string, string>, plural: boolean): string {
+  if (_case !== 'gen' || plural || !word) return word;
+  if ((forms['gender'] ?? 'neut') === 'fem') return word;
+  if (/(?:s|ß|z|x|tsch)$/i.test(word)) return `${word}es`;
+  const syllables = (word.match(/[aeiouäöüy]+/gi) ?? []).length;
+  return syllables <= 1 ? `${word}es` : `${word}s`;
+}
+
+function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const headWord = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const word = datPluralN(germanCompound(np, headWord), _case, plural);
+  const word = genitiveS(datPluralN(germanCompound(np, headWord), _case, plural), _case, forms, plural);
   const definiteness = forms['definiteness'] ?? 'definite';
   const declined = adjPhrase(np, _case, definiteness);
   const a = declined ? `${declined} ` : '';
@@ -535,35 +575,34 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
         return `${prep} ${pronouns}`;
       }
-      // An instrument presented as an action. German has no gerund, so neither level is a mere
-      // phrase: the process level is a subordinate means clause — "indem man ein Wort wählt",
-      // with the impersonal "man" and the verb pushed to the end — and the concept level names
-      // the act with a zu-infinitive, "mit dem Akt, ein Wort zu wählen". The noun phrase is the
-      // action's direct object, so it takes the *accusative*, not the dative "mit" would give it.
+      // An instrument presented as an action. German has no gerund, so the two levels part ways
+      // completely. The process level is a subordinate means clause — "indem man ein Wort wählt",
+      // with the impersonal "man" and the verb pushed to the end — whose noun phrase is a plain
+      // direct object, hence *accusative*, not the dative "mit" would otherwise give it.
+      //
+      // The concept level nominalises the infinitive instead: German turns any infinitive into a
+      // neuter noun just by capitalising it ("wählen" → "das Wählen"), which "mit" then puts in
+      // the dative, and — the noun being a noun — its object arrives as an attached *genitive*:
+      // "mit dem Wählen eines Wortes". The action's adverb comes along as an attributive
+      // adjective on that noun ("mit dem schnellen Wählen"), which is what German adverbs are.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const object = coordinate(c.phrase, (np) => {
-            const nf = np.head.forms;
-            const objPlural = (nf['number'] ?? nf['count']) === 'plural';
-            const objWord = objPlural ? (nf['plural'] ?? nf['base'] ?? '') : (nf['base'] ?? '');
-            const objDet = prepDet('', nf, 'acc', objPlural);
-            const objAdj = adjPhrase(np, 'acc', nf['definiteness'] ?? 'definite');
-            return [objDet, objAdj, germanCompound(np, objWord)]
-              .filter(Boolean)
-              .join(' ') + possessorText(np) + subordinateClause(np);
-          });
           const adverb = c.action.modifier?.forms['base'] ?? '';
           if (level === 'process') {
+            const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
             const finite3sg = c.action.verb.forms['3sg_present'] ?? c.action.verb.forms['base'] ?? '';
             // A subordinate clause is set off by a comma ("beginnt, indem man ein Wort wählt").
             // It is emitted as a leading comma and pulled back onto the previous word when the
             // clause is joined (see `punctuate`), since the joiner knows nothing of punctuation.
             return [', indem man', object, adverb, finite3sg].filter(Boolean).join(' ');
           }
-          return ['mit dem Akt,', object, adverb, 'zu', actionInfinitive(c.action)]
-            .filter(Boolean)
-            .join(' ');
+          const object = coordinate(c.phrase, (np) => nounPhrase(np, 'gen'));
+          const infinitive = actionInfinitive(c.action);
+          const act = infinitive.charAt(0).toUpperCase() + infinitive.slice(1);
+          // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en).
+          const attr = adverb ? declineAdj(adverb, 'dat', 'neut', false, 'definite') : '';
+          return ['mit dem', attr, act, object].filter(Boolean).join(' ');
         }
       }
       // Subject complement: a German predicate adjective is uninflected ("wird müde",

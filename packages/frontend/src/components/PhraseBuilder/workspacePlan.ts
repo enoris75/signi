@@ -135,7 +135,7 @@ function attachCoordination(
 //    concept — the period is a verb and the noun it acts on, with no subject of its own (the
 //              clause above supplies it): its verb becomes the complement's `action` and its
 //              direct object the noun the act is done to — "start **by choosing a word**" /
-//              "**with the act of choosing a word**". The level rides along as a specifier so
+//              "**with the choosing of a word**". The level rides along as a specifier so
 //              each engine can pick its own non-finite form.
 //
 // Either way the instrument keeps its own relative links ("with the word that I chose"). A period

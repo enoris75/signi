@@ -367,8 +367,9 @@ function complementsPhrase(
         );
       }
       // An instrument presented as an action: the bare gerúndio for the process level
-      // ("escolhendo uma palavra"), the nominalised infinitive for the concept level ("com o ato
-      // de escolher uma palavra"). The noun phrase is the action's direct object.
+      // ("escolhendo uma palavra"), the substantivized infinitive for the concept level ("com o
+      // escolher uma palavra") — a masculine singular noun, hence the invariant "o", whatever the
+      // infinitive. The noun phrase is the action's direct object either way.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
@@ -376,7 +377,7 @@ function complementsPhrase(
           const verb =
             level === 'process'
               ? actionGerund(c.action)
-              : `com o ato de ${actionInfinitive(c.action)}`;
+              : `com o ${actionInfinitive(c.action)}`;
           const adverb = c.action.modifier?.forms['base'] ?? '';
           return [verb, object, adverb].filter(Boolean).join(' ');
         }

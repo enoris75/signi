@@ -336,15 +336,20 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         return `${prep} ${pronouns}`;
       }
       // An instrument presented as an action rather than a thing: "by choosing a word"
-      // (process) / "with the act of choosing a word" (concept). Both take the gerund — English
-      // nominalises with the same -ing form — and the noun phrase is the verb's object.
+      // (process) / "with the choosing of a word" (concept). Both take the gerund — English
+      // nominalises with the same -ing form — but the concept level makes that gerund a *noun*:
+      // it takes the definite article and reaches its object through "of", where the process
+      // level keeps the verb's own direct object.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
-          const head = level === 'process' ? 'by' : 'with the act of';
           const object = coordinate(c.phrase, npText);
           const adverb = c.action.modifier?.forms['base'] ?? '';
-          return [head, actionGerund(c.action), object, adverb].filter(Boolean).join(' ');
+          const words =
+            level === 'process'
+              ? ['by', actionGerund(c.action), object]
+              : ['with the', actionGerund(c.action), 'of', object];
+          return [...words, adverb].filter(Boolean).join(' ');
         }
       }
       // Subject complement: a predicate adjective takes no article and doesn't agree, but

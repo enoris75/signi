@@ -712,7 +712,7 @@ export const UI_STRINGS = defineUiStrings({
   // indefinite WORD — rendered at the level the button sets, in the current UI language. Pressing
   // the button does to the workspace exactly what the tooltip shows.
   //   process → en "start by choosing a word", de "beginne, indem du ein Wort wählst", ja 「単語を選んで始め」
-  //   concept → it "inizia con l'atto di scegliere una parola"
+  //   concept → it "inizia con lo scegliere una parola", de "mit dem Wählen eines Wortes beginnen"
   //   object  → fr "commence avec un mot" — the act is gone, only the thing is left.
   'instrumental.level.process.example': {
     plan: exampleAt('process'),
@@ -722,7 +722,7 @@ export const UI_STRINGS = defineUiStrings({
   'instrumental.level.concept.example': {
     plan: exampleAt('concept'),
     format: { capitalize: true, stripPeriod: true },
-    fallback: 'Start with the act of choosing a word',
+    fallback: 'Start with the choosing of a word',
   },
   'instrumental.level.object.example': {
     plan: exampleAt('object'),

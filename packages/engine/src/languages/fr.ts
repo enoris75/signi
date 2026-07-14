@@ -499,8 +499,11 @@ function complementsPhrase(
         );
       }
       // An instrument presented as an action: the gérondif for the process level ("en
-      // choisissant un mot"), the nominalised infinitive for the concept level ("avec l'acte de
-      // choisir un mot"). The noun phrase is the action's direct object.
+      // choisissant un mot"), and for the concept level the periphrasis "avec le fait de choisir
+      // un mot". French is the one language here that stays periphrastic, and not by choice: its
+      // substantivized infinitive is fossilised (le boire, le manger) rather than productive, so
+      // it has no counterpart of "lo scegliere" / "el elegir" / "the choosing" to reify the act
+      // with. The noun phrase is the action's direct object.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
@@ -508,7 +511,7 @@ function complementsPhrase(
           const verb =
             level === 'process'
               ? `en ${presentParticiple(c.action.verb)}`
-              : `avec l'acte de ${actionInfinitive(c.action)}`;
+              : `avec le fait de ${actionInfinitive(c.action)}`;
           const adverb = c.action.modifier?.forms['base'] ?? '';
           return [verb, object, adverb].filter(Boolean).join(' ');
         }

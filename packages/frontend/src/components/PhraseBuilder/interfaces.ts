@@ -386,7 +386,7 @@ export type PhraseLink =
       id: string;
       kind: 'instrumental';
       // How far the instrument is reified: an act in flow ("by choosing a word"), the act named
-      // as a protocol ("with the act of choosing a word"), or the thing it leaves behind ("with
+      // as a protocol ("with the choosing of a word"), or the thing it leaves behind ("with
       // a word"). It belongs to the *link*, not to either period: it is the relation between the
       // clause and its instrument. Absent ⇒ 'object'. See AbstractionLevel.
       level?: AbstractionLevel;

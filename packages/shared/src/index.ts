@@ -286,10 +286,13 @@ export const CAUSE_SENTIMENT_LABELS: Record<CauseSentiment, string> = {
  *             choosing a word**". Realised non-finitely — the gerund (en by ~ing, it/es/pt the
  *             plain gerundio, fr the gérondif "en choisissant"), the German "indem" clause, the
  *             Japanese te-form. Emphasises engagement and method.
- *   concept — the same action, abstracted into a protocol one *invokes*: "start **with the act of
- *             choosing a word**". Realised by nominalising the verb — "l'atto di scegliere",
- *             "el acto de elegir", "mit dem Akt, … zu wählen", ja ～ことで. Emphasises rule and
- *             system.
+ *   concept — the same action, abstracted into a protocol one *invokes*: "start **with the
+ *             choosing of a word**". Realised by nominalising the verb, each language with the
+ *             noun it makes of one — the substantivized infinitive in it/es/pt ("con lo
+ *             scegliere", "con el elegir"), the capitalised infinitive plus a genitive object in
+ *             de ("mit dem Wählen eines Wortes"), the -ing noun in en, ja ～ことで. French alone
+ *             stays periphrastic ("avec le fait de choisir"), having no productive one.
+ *             Emphasises rule and system.
  *   object  — the action is gone; only its outcome, a thing, remains: "start **with a word**".
  *             The plain adposition + noun phrase. Emphasises the result.
  *

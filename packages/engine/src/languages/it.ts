@@ -526,17 +526,20 @@ function complementsPhrase(
         );
       }
       // An instrument presented as an action: the bare gerundio for the process level
-      // ("scegliendo una parola" — Italian needs no preposition before it), and the nominalised
-      // infinitive for the concept level ("con l'atto di scegliere una parola"). The noun phrase
-      // is the action's direct object either way.
+      // ("scegliendo una parola" — Italian needs no preposition before it), and the substantivized
+      // infinitive for the concept level ("con lo scegliere una parola"). That infinitive is an
+      // ordinary masculine singular noun, so it takes the definite article its *own* sound selects
+      // — "lo scegliere" (s-impura), "il mangiare", "l'aprire" — and "con" fuses with none of them.
+      // The noun phrase is the action's direct object either way.
       if (type === 'instrumental' && c.action) {
         const level = abstractionLevel(c);
         if (level !== 'object') {
           const object = coordinate(c.phrase, npText);
+          const infinitive = actionInfinitive(c.action);
           const verb =
             level === 'process'
               ? actionGerund(c.action)
-              : `con l'atto di ${actionInfinitive(c.action)}`;
+              : joinWords(['con', defArticle({ gender: 'masc' }, false, infinitive), infinitive]);
           const adverb = c.action.modifier?.forms['base'] ?? '';
           return joinWords([verb, object, adverb]);
         }
