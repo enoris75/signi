@@ -131,6 +131,16 @@ export interface PhraseBuilderProps {
   // head can anchor a link. Undefined for a top-level container (its nouns are their own
   // plain addresses). See `linkBinding` / `possessorAddress`.
   possessorPath?: NounAddress;
+  /**
+   * This builder edits a bare noun phrase, so it shows no predicate — the subject box and its
+   * satellites, nothing else. Set for a *conjunct* panel: a conjunct is one phrase of a
+   * coordinated noun element ("Peter and **Paul**"), and a phrase has no verb of its own.
+   *
+   * A possessor sub-builder deliberately does *not* set it. A possessor is a whole noun phrase
+   * in its own right and may well head a clause — "the boy who cried wolf's fox" — so it keeps
+   * the full canvas.
+   */
+  nounPhraseOnly?: boolean;
 }
 
 export function PhraseBuilder({
@@ -145,6 +155,7 @@ export function PhraseBuilder({
   onWordsPanelClose,
   binding,
   possessorPath,
+  nounPhraseOnly = false,
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
   const t = useUiString();
@@ -164,7 +175,8 @@ export function PhraseBuilder({
   //                        subject — the clause above is the one doing it.
   const isInstrument = Boolean(binding?.instrumental.hasTarget);
   const instrumentLevel = binding?.instrumental.level ?? "object";
-  const nounPhraseMode = isInstrument && instrumentLevel === "object";
+  // A conjunct panel is the other bare-noun-phrase canvas (see `nounPhraseOnly`).
+  const nounPhraseMode = nounPhraseOnly || (isInstrument && instrumentLevel === "object");
   const actionMode = isInstrument && instrumentLevel !== "object";
   // A period starts on its subject noun phrase — translation begins as soon as a subject
   // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.

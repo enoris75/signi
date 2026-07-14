@@ -1,6 +1,7 @@
 import { getDb } from './db.js';
 import { clearLexiconCache } from './lexicon.js';
 import { concepts, NONFINITE } from './concepts/index.js';
+import { assertValidHierarchy } from './concepts/hierarchy.js';
 
 const db = getDb();
 
@@ -58,6 +59,10 @@ function seed() {
     insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null, number, number, number]>(
       'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym, countable, modal, proper) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
+
+    insertHypernym: db.prepare<[string, string]>(
+      "INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, 'hypernym')"
+    ),
   };
 
   const roleStmts: Record<string, RoleStmts> = {
@@ -110,7 +115,19 @@ function seed() {
         rs.insertLink.run(c.id, lexemeId);
       }
     }
+
+    // Hypernyms go in a second pass: the FK points back at semantic_concepts, and a concept is
+    // free to name a parent that appears later in the seed files (CARAVEL will not politely sort
+    // after SHIP). Every concept exists by now, so no ordering discipline is needed above.
+    for (const c of concepts) {
+      if (c.isA) stmts.insertHypernym.run(c.id, c.isA);
+    }
   });
+
+  // Fail before touching the database: an isA naming a concept that isn't seeded, or a cycle.
+  // Neither is caught by the schema — a cycle satisfies every foreign key — and an undetected
+  // one would hang the ancestor walk at request time instead of failing here.
+  assertValidHierarchy(concepts);
 
   run();
   clearLexiconCache();

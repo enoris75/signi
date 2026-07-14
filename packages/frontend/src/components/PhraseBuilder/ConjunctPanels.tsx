@@ -157,6 +157,11 @@ export function ConjunctPanels({
                     // relative-clause link of its own ("Peter and the dog *that barks*").
                     binding={binding}
                     possessorPath={conjunctAddress(possessorPath ?? which, i)}
+                    // A conjunct is a noun *phrase*, not a clause: it has no predicate of its
+                    // own, so its canvas is the noun box alone. (A possessor panel, by contrast,
+                    // keeps the full canvas — a possessor can head a clause: "the boy who cried
+                    // wolf's fox".)
+                    nounPhraseOnly
                   />
                 </Box>
               </Box>

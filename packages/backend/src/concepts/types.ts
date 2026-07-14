@@ -10,5 +10,6 @@ export interface ConceptSeed {
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
+  isA?: string;     // immediate hypernym — CARAVEL isA SAILING_SHIP. One parent only; see concepts/hierarchy.ts
   forms: Record<string, Record<string, string>>; // language -> form_key -> value
 }

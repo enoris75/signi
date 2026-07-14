@@ -168,6 +168,35 @@ function initSchema(db: Database.Database): void {
       PRIMARY KEY (concept_id, lexeme_id)
     );
 
+    -- ── Cross-language relations between concepts ─────────────────────
+    -- These hold between *meanings*, not words: a caravel is a ship in every language, so
+    -- the edge is stored once against the concept rather than once per lexeme. Contrast the
+    -- *_relations tables below, which relate two words *inside one language* (English "bank"
+    -- the riverbank vs "bank" the institution is a fact about English, not about a meaning).
+    --
+    -- The hypernym relation reads a is_a b — CARAVEL is_a SAILING_SHIP is_a SHIP. UNIQUE caps
+    -- a concept at one parent per relation, which keeps the hierarchy a tree rather than a
+    -- DAG: rules attach to a node and fire for everything beneath it, resolving by walking up
+    -- and taking the first (most specific) match, and that only has a well-defined answer if a
+    -- concept's ancestors are totally ordered. A second parent would make two rules at the
+    -- same depth incomparable, and the engine would have no principled way to choose.
+    --
+    -- Cycles satisfy both foreign keys and every constraint here, so they are rejected in the
+    -- seed instead (see concepts/hierarchy.ts) — an undetected one would hang the ancestor
+    -- walk at request time.
+    --
+    -- Widening the relation set later (meronymy: WHEEL part_of CAR) means editing the CHECK,
+    -- which in SQLite is a table rebuild — cheap, since "npm run seed" regenerates this table
+    -- wholesale and it holds no user data.
+    CREATE TABLE IF NOT EXISTS concept_relations (
+      concept_a_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      concept_b_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      relation     TEXT NOT NULL CHECK (relation IN ('hypernym')),
+      PRIMARY KEY (concept_a_id, concept_b_id, relation),
+      UNIQUE (concept_a_id, relation),
+      CHECK (concept_a_id <> concept_b_id)
+    );
+
     -- ── Per-type within-language lexical relations ────────────────────
     -- Relations are always between words of the same grammatical category
     -- (a verb synonym is a verb, a noun homonym is a noun, etc.).
