@@ -66,9 +66,10 @@ const REL_NOUN_READING: Record<PathSpecifier, string> = {
 };
 
 /**
- * Segments for a noun phrase: [relative clause] [adjectives] noun. Adjectives are
- * separated by a space and the noun appended directly (matching the string form
- * "大きい 小さい猫"); any relative clause is prepended (see below).
+ * Segments for a noun phrase: [relative clause] [adjectives] noun. Japanese does not put
+ * spaces between words, so stacked adjectives run straight into each other and into the head
+ * ("大きい小さい猫"); each one's own attributive marker (な / の) is what keeps them apart.
+ * Any relative clause is prepended (see below).
  */
 function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const core: RubySegment[] = [];
@@ -92,7 +93,6 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   for (const a of np.adjectives) {
     const base = a.forms['base'] ?? '';
     if (!base) continue;
-    if (adjSegs.length) adjSegs.push({ t: ' ' });
     // Prenominal degree adverb bound directly to its adjective (もっと大きい), no space.
     const deg = JA_DEGREE[adjDegree(a)];
     if (deg) adjSegs.push({ t: deg });

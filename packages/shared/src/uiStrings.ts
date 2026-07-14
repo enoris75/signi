@@ -159,6 +159,82 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Words',
   },
 
+  // The title of the corpus map dialog: the MAP noun, bare, carrying an attributive WORD
+  // (material relation, plural — it maps the words, all of them). The same shape as `app.payoff`:
+  // English and German compound it ("word map", "Wörterkarte"), the Romance ones link it with
+  // di/de ("mappa di parole", "carte de mots"), Japanese with の (「単語の地図」).
+  'wordMap.heading': {
+    plan: {
+      subject: {
+        concept: 'MAP',
+        definiteness: 'bare',
+        nounModifiers: [{ concept: 'WORD', relation: 'material', number: 'plural' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Word Map',
+  },
+
+  // The map's caption — what it is showing, as three counted facts ("185 nodes · 420
+  // relationships · 3 unconnected words hidden"). The *number* stays in the component: it is
+  // digits, which every language writes the same way, and a plan is rendered once at boot and so
+  // cannot inflect to a count known only at render time. What the catalog supplies is the noun the
+  // number counts — which is why each comes in both numbers, keyed `<key>.<singular|plural>` so the
+  // caption can write t(`wordMap.nodes.${n === 1 ? 'singular' : 'plural'}`). The singular is not
+  // hypothetical: filtering the map down to one relation kind can leave a single edge, and a corpus
+  // routinely has exactly one unconnected word.
+  //
+  // Lower-case: they trail a numeral inside a caption, not a heading. (German capitalizes its
+  // nouns regardless — "Knoten" — which is the engine's business, not this file's.)
+  'wordMap.nodes.singular': {
+    plan: nameOf('NODE'),
+    format: { stripPeriod: true },
+    fallback: 'node',
+  },
+  'wordMap.nodes.plural': {
+    plan: { subject: { concept: 'NODE', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'nodes',
+  },
+  'wordMap.relationships.singular': {
+    plan: nameOf('RELATIONSHIP'),
+    format: { stripPeriod: true },
+    fallback: 'relationship',
+  },
+  'wordMap.relationships.plural': {
+    plan: {
+      subject: { concept: 'RELATIONSHIP', number: 'plural', definiteness: 'bare' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'relationships',
+  },
+
+  // The third fact says the map is *not* showing something: the words no relation reaches are left
+  // out of the drawing. Two adjectives on one noun — words that are unconnected, and that are
+  // hidden — because the engine has no passive voice to say "…are hidden" with, and a participle
+  // is what every one of these languages reaches for anyway (it "parole non collegate nascoste").
+  // English therefore reads "unconnected hidden words" rather than the elliptical "unconnected
+  // words hidden" it replaces: same fact, said as a phrase English will actually own.
+  'wordMap.hidden.singular': {
+    plan: {
+      subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['UNCONNECTED', 'HIDDEN'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'unconnected hidden word',
+  },
+  'wordMap.hidden.plural': {
+    plan: {
+      subject: {
+        concept: 'WORD',
+        number: 'plural',
+        definiteness: 'bare',
+        adjectives: ['UNCONNECTED', 'HIDDEN'],
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'unconnected hidden words',
+  },
+
   // The subject box's own title: the grammatical SUBJECT noun, bare. The CSS uppercases it.
   'slot.subject': {
     plan: { subject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'bare' } } as PhrasePlan,

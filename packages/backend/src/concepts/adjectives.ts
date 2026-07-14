@@ -698,4 +698,40 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'indireto' },
     },
   },
+  {
+    // Joined to nothing else — said of a word no relation of the map reaches. The negative is
+    // built into the word in en/de ("unconnected", "unverbunden") and spelled as a separate
+    // negator in the Romance ones (it "non collegato", fr "non connecté").
+    id: 'UNCONNECTED',
+    role: 'adjective',
+    description: 'joined to nothing else',
+    emoji: '⚪',
+    forms: {
+      en: { base: 'unconnected' },
+      it: { base: 'non collegato' },
+      fr: { base: 'non connecté' },
+      de: { base: 'unverbunden' },
+      es: { base: 'no conectado' },
+      ja: { base: '孤立した', reading: 'こりつした' },
+      pt: { base: 'não conectado' },
+    },
+  },
+  {
+    // Kept out of sight — said of what the map does not draw. Japanese takes the attributive
+    // 非表示の (literally "not-displayed"), the word an interface uses of what it is not showing,
+    // rather than 隠れた, which is something concealing itself.
+    id: 'HIDDEN',
+    role: 'adjective',
+    description: 'kept out of sight',
+    emoji: '🙈',
+    forms: {
+      en: { base: 'hidden' },
+      it: { base: 'nascosto' },
+      fr: { base: 'caché' },
+      de: { base: 'ausgeblendet' },
+      es: { base: 'oculto' },
+      ja: { base: '非表示の', reading: 'ひひょうじの' },
+      pt: { base: 'oculto' },
+    },
+  },
 ];

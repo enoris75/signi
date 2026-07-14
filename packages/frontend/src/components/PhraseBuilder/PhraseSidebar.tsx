@@ -1,12 +1,39 @@
+import { useEffect, useState } from "react";
 import { Box, Typography, Divider, IconButton, Tooltip, Paper } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
+import HubIcon from "@mui/icons-material/Hub";
 import { type Concept } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
+import { WordMap } from "../WordMap/WordMap.tsx";
 import {
   PhraseSelection,
   SlotConfig,
   SlotKey,
 } from "./interfaces.ts";
+
+/**
+ * The height of the page's sticky header, which is painted above this panel: the panel starts
+ * below it, or its own title row (and the controls in it) would be covered by the header and
+ * unclickable. Measured rather than assumed — the header's height depends on the font the UI
+ * language renders its tagline in. Falls back to 0 if the header isn't there.
+ */
+function useHeaderOffset(): number {
+  const [offset, setOffset] = useState(0);
+
+  useEffect(() => {
+    const header = document.querySelector("[data-signi-header]");
+    if (!header) return;
+    // The border box, not the entry's contentRect: the header's padding and bottom border are
+    // part of what covers the panel.
+    const observer = new ResizeObserver(() => {
+      setOffset(header.getBoundingClientRect().height);
+    });
+    observer.observe(header);
+    return () => observer.disconnect();
+  }, []);
+
+  return offset;
+}
 
 interface PhraseSidebarProps {
   // Whether the overlay is shown. Owned by the page (App) so a control in the
@@ -35,13 +62,18 @@ export function PhraseSidebar({
   onSlotClick,
   onConceptSelect,
 }: PhraseSidebarProps) {
+  // The map opens over the whole page, not inside this panel — the panel is a few hundred pixels
+  // wide and a graph needs the room. Its open state is local: nothing outside cares.
+  const [mapOpen, setMapOpen] = useState(false);
+  const headerOffset = useHeaderOffset();
+
   return (
     <Paper
       elevation={8}
       square
       sx={{
         position: "fixed",
-        top: 0,
+        top: headerOffset,
         right: 0,
         bottom: 0,
         width,
@@ -121,16 +153,28 @@ export function PhraseSidebar({
         >
           {activeSlotConfig ? activeSlotConfig.label : "Words"}
         </Typography>
-        <Tooltip title="Hide words" placement="left">
-          <IconButton
-            size="small"
-            onClick={onClose}
-            aria-label="Hide words"
-            sx={{ p: 0.25 }}
-          >
-            <CloseIcon fontSize="small" />
-          </IconButton>
-        </Tooltip>
+        <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
+          <Tooltip title="Show word map" placement="left">
+            <IconButton
+              size="small"
+              onClick={() => setMapOpen(true)}
+              aria-label="Show word map"
+              sx={{ p: 0.25 }}
+            >
+              <HubIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Tooltip title="Hide words" placement="left">
+            <IconButton
+              size="small"
+              onClick={onClose}
+              aria-label="Hide words"
+              sx={{ p: 0.25 }}
+            >
+              <CloseIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
       </Box>
       <Box sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
         {activeSlotConfig ? (
@@ -167,6 +211,8 @@ export function PhraseSidebar({
           </>
         )}
       </Box>
+
+      <WordMap open={mapOpen} onClose={() => setMapOpen(false)} />
     </Paper>
   );
 }

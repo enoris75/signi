@@ -53,8 +53,11 @@ export default function App() {
     <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
       {/* Header. Sticky and stacked above the word-palette overlay (which is a
           fixed drawer) so its toggle control stays clickable while the panel is
-          open and the panel appears to slide out from beneath it. */}
+          open and the panel appears to slide out from beneath it. The panel reads
+          this element's height (by the data attribute) to know where to start, so
+          that its own header row lands below this one rather than beneath it. */}
       <Box
+        data-signi-header=""
         sx={{
           position: "sticky",
           top: 0,

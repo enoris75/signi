@@ -1222,6 +1222,61 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // A drawing of how things lie in relation to each other. The Romance languages split the word
+    // the geographical map fell out of: it "mappa" and es/pt "mapa" keep the drawing sense, while
+    // fr "carte" and de "Karte" are the same word as a playing card or a menu — the sense is
+    // settled by what it is a map *of*, which is exactly what the noun-modifier supplies.
+    id: 'MAP',
+    role: 'noun',
+    description: 'a diagram showing how things are arranged or connected',
+    emoji: '🗺️',
+    forms: {
+      en: { base: 'map', plural: 'maps', count: 'singular' },
+      it: { base: 'mappa', plural: 'mappe', gender: 'fem', count: 'singular' },
+      fr: { base: 'carte', plural: 'cartes', gender: 'fem', count: 'singular' },
+      de: { base: 'Karte', plural: 'Karten', gender: 'fem', count: 'singular' },
+      es: { base: 'mapa', plural: 'mapas', gender: 'masc', count: 'singular' },
+      ja: { base: '地図', count: 'singular', reading: 'ちず' },
+      pt: { base: 'mapa', plural: 'mapas', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A point where the lines of a network meet — the graph-theory sense, which every language
+    // takes from the word for a knot (it "nodo", de "Knoten", pt "nó"). Japanese does not: it
+    // borrows ノード outright, and 結び目 (a knot in a rope) would not be understood of a graph.
+    id: 'NODE',
+    role: 'noun',
+    description: 'a point where the lines of a network meet',
+    emoji: '⚫',
+    forms: {
+      en: { base: 'node', plural: 'nodes', count: 'singular' },
+      it: { base: 'nodo', plural: 'nodi', gender: 'masc', count: 'singular' },
+      fr: { base: 'nœud', plural: 'nœuds', gender: 'masc', count: 'singular' },
+      de: { base: 'Knoten', plural: 'Knoten', gender: 'masc', count: 'singular' },
+      es: { base: 'nodo', plural: 'nodos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ノード', count: 'singular', reading: 'のーど' },
+      pt: { base: 'nó', plural: 'nós', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The way two things stand to one another — what an edge of the map draws. Feminine across
+    // the Romance languages (it "relazione", es "relación"), which is what makes an adjective
+    // agreeing with it come out feminine.
+    id: 'RELATIONSHIP',
+    role: 'noun',
+    description: 'the way two things stand to one another',
+    emoji: '🔗',
+    forms: {
+      en: { base: 'relationship', plural: 'relationships', count: 'singular' },
+      it: { base: 'relazione', plural: 'relazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'relation', plural: 'relations', gender: 'fem', count: 'singular' },
+      de: { base: 'Beziehung', plural: 'Beziehungen', gender: 'fem', count: 'singular' },
+      es: { base: 'relación', plural: 'relaciones', gender: 'fem', count: 'singular' },
+      ja: { base: '関係', count: 'singular', reading: 'かんけい' },
+      pt: { base: 'relação', plural: 'relações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // The grammatical person (who speaks / is spoken to / is spoken about), not a human being —
     // suffixed like SUBJECT_GRAMMAR because the plain word means both, and only this sense is
     // seeded (ja 人称, not 人).

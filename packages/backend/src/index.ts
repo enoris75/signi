@@ -57,6 +57,13 @@ const GENDERED_NOUNS_SQL = `
   WHERE nf.form_key = 'fem'
 `;
 
+// Every is_a edge, read as "a is_a b". A concept has at most one (the table's UNIQUE says so),
+// so this maps cleanly onto Concept.isA. Fetched unfiltered even when the request narrows to one
+// role: hypernyms relate concepts of the same role, so the parent is in the response either way.
+const HYPERNYM_SQL = `
+  SELECT concept_a_id, concept_b_id FROM concept_relations WHERE relation = 'hypernym'
+`;
+
 // The citation form of every concept in every seeded language — the primary lexeme's lemma
 // (a noun's singular), with the kana reading of that lemma where the lexeme carries one (ja),
 // so the pickers can put furigana over the word they show. The pickers show the word in the
@@ -134,6 +141,11 @@ app.get('/api/concepts', (req, res) => {
   const genderedNounRows = db.prepare<[], { concept_id: string }>(GENDERED_NOUNS_SQL).all();
   const genderedNouns = new Set(genderedNounRows.map((r) => r.concept_id));
 
+  const hypernymRows = db
+    .prepare<[], { concept_a_id: string; concept_b_id: string }>(HYPERNYM_SQL)
+    .all();
+  const hypernyms = new Map(hypernymRows.map((r) => [r.concept_a_id, r.concept_b_id]));
+
   const pronounMeta = db
     .prepare<[], { concept_id: string; person: string; number: string }>(PRONOUN_META_SQL)
     .all();
@@ -159,6 +171,7 @@ app.get('/api/concepts', (req, res) => {
       person: pronounPersons.get(r.id),
       number: pronounNumbers.get(r.id),
       gendered: genderedNouns.has(r.id) || undefined,
+      isA: hypernyms.get(r.id),
     })),
   };
   res.json(response);

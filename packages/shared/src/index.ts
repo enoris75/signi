@@ -345,6 +345,12 @@ export interface Concept {
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
+  /**
+   * The concept's hypernym — the id of the concept it *is a* kind of (CARAVEL → SAILING_SHIP).
+   * At most one, so the edges form a forest. Only the direct parent travels; a client that wants
+   * the full chain walks it, since every ancestor is itself in the concept list.
+   */
+  isA?: string;
 }
 
 /** A noun used attributively to modify a head noun, plus its semantic relation. */
