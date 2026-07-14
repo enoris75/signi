@@ -2,3 +2,8 @@ node_modules/
 
 # Build output
 dist/
+
+# Playwright: reports, traces, and the throwaway database the e2e stack seeds itself
+test-results/
+playwright-report/
+e2e/.tmp/

@@ -99,6 +99,8 @@ export function AdverbTypeahead({
           {filtered.map((a, i) => (
             <Box
               key={a.id}
+              data-testid="typeahead-option"
+              data-concept={a.id}
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}

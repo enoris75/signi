@@ -82,7 +82,7 @@ export function VerbTypeahead({
         // Size the field to its placeholder rather than the browser default
         // (~20ch); otherwise the empty verb box overflows the 160px-wide dashed
         // group box that's padded to PIX_PAD_H (widest-slot half-width) each side.
-        inputProps={{ size: prompt.length }}
+        inputProps={{ size: prompt.length, "data-testid": "typeahead-verb" }}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",
@@ -105,6 +105,8 @@ export function VerbTypeahead({
           {filtered.map((v, i) => (
             <Box
               key={v.id}
+              data-testid="typeahead-option"
+              data-concept={v.id}
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}

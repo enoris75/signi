@@ -368,12 +368,13 @@ export function ToggleBox({ label, value }: { label: string; value: string }) {
 
 export function DeterminerToggleBox({ value }: { value: Definiteness }) {
   const t = useUiString();
-  // The box shows the determiner word itself, in the UI language — "the" / "il" / "der" / "この",
-  // and the em-dash for `bare`, the determiner that is no word at all.
+  // The box names the value the way the menu row that set it did — "Definite", "Multal" — not the
+  // word it spells. The surface word is already in the rendered phrase; repeating it here would
+  // say nothing the sentence doesn't, and would leave `bare` with an em-dash for a value.
   return (
     <ToggleBox
       label={t("satellite.determiner")}
-      value={t(`determiner.value.${value}`)}
+      value={t(`determiner.name.${value}`)}
     />
   );
 }

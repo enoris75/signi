@@ -77,6 +77,7 @@ export function DirectObjectTypeahead({
         }}
         onKeyDown={handleKeyDown}
         placeholder="type a noun…"
+        inputProps={{ "data-testid": "typeahead-noun" }}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",
@@ -113,6 +114,8 @@ export function DirectObjectTypeahead({
             {filtered.map((n, i) => (
             <Box
               key={n.id}
+              data-testid="typeahead-option"
+              data-concept={n.id}
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}

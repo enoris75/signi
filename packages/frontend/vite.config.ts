@@ -12,7 +12,9 @@ export default defineConfig({
   server: {
     port: 5173,
     proxy: {
-      '/api': 'http://localhost:3001',
+      // The e2e suite runs its own backend on a spare port so it never talks to the
+      // dev server's database; everything else gets the usual :3001.
+      '/api': process.env['SIGNI_API_URL'] ?? 'http://localhost:3001',
     },
   },
 });

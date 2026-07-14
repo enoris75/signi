@@ -254,6 +254,32 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'type a subject',
   },
 
+  // The verb box's title, and the sidebar's heading while the verb slot is the one being filled:
+  // the bare grammar noun. The same word as `palette.verb` in the singular — a box holds one verb,
+  // a palette section lists many.
+  'slot.verb': {
+    plan: nameOf('VERB'),
+    format: NAME_FORMAT,
+    fallback: 'Verb',
+  },
+
+  // The direct object's box title and sidebar heading. OBJECT_GRAMMAR, not the OBJECT_THING you can
+  // hold: the traditions that distinguish them do so in the word itself (ja 目的語, it "complemento
+  // oggetto"), which is why this is the grammar noun and reads "Object" in English rather than the
+  // "Direct Object" it replaces — the slot is the only object slot there is.
+  'slot.directObject': {
+    plan: nameOf('OBJECT_GRAMMAR'),
+    format: NAME_FORMAT,
+    fallback: 'Object',
+  },
+
+  // The adverb (modifier) box's title and sidebar heading — the bare grammar noun, like `slot.verb`.
+  'slot.adverb': {
+    plan: nameOf('ADVERB'),
+    format: NAME_FORMAT,
+    fallback: 'Adverb',
+  },
+
   // The instrumental complement's box title and satellite label. Each language names the
   // relation as its own grammar tradition does — a one-word name in en/de ("instrumental"), a
   // whole phrase in the Romance ones ("complemento di mezzo", "complément de moyen") — so it is
@@ -633,6 +659,73 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Save period',
+  },
+
+  // The three view controls on a period container's header, which have no label of their own —
+  // the tooltip is the whole affordance. Each is a command on the period the button sits in, and
+  // that period is the one right there under the cursor, so the object takes the `this`
+  // demonstrative rather than the definite article: en "compact this period", it "compatta questo
+  // periodo", de "verdichte diese Periode", ja 「この期間を圧縮」. The compact/expand pair is one
+  // button in two states, so it is two entries, each naming what pressing it will do.
+  'action.compactPeriod': {
+    plan: {
+      ...commandOf('COMPACT'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Compact this period',
+  },
+  'action.expandPeriod': {
+    plan: {
+      ...commandOf('EXPAND'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Expand this period',
+  },
+  // TIDY_UP, not a bare ORDER/ARRANGE: the button does not sort the period, it puts back in order
+  // what dragging left in a mess — which is the verb every one of these languages already has for
+  // a room ("tidy up", "riordina", "aufräumen").
+  'action.tidyPeriod': {
+    plan: {
+      ...commandOf('TIDY_UP'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Tidy up this period',
+  },
+
+  // The two icon controls in the words sidebar's header, which have no label of their own — the
+  // tooltip (and the aria-label it doubles as) is the whole affordance. Both are commands.
+  //
+  // "Show the word map" reuses the noun phrase of `wordMap.heading` — MAP carrying an attributive
+  // plural WORD — as the object of the SHOW imperative, so the button and the dialog it opens name
+  // the same thing in the same words. Definite: there is one corpus and one map of it, and the
+  // button opens *that* one ("mostra la mappa di parole", "zeige die Wörterkarte").
+  'action.showWordMap': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: {
+        concept: 'MAP',
+        definiteness: 'definite',
+        nounModifiers: [{ concept: 'WORD', relation: 'material', number: 'plural' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show the word map',
+  },
+
+  // "Hide the words" — the HIDE imperative on the same plural WORD that `words.heading` titles the
+  // panel with, so the control says it is putting away the thing named above it. Definite, not the
+  // heading's bare: the command acts on the words already on screen, and the Romance languages want
+  // the article to say so ("nascondi le parole", "esconde las palabras").
+  'action.hideWords': {
+    plan: {
+      ...commandOf('HIDE'),
+      directObject: { concept: 'WORD', number: 'plural', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Hide the words',
   },
 
   // The hint in the caption of a period container that has nothing in it yet. A command, and one

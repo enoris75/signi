@@ -27,6 +27,7 @@ import {
   ALL_SLOTS,
   COLLAPSIBLE_GROUPS,
   NOUN_KEYS,
+  REVEALABLE_SLOT_KEYS,
   SATELLITE_SLOT_KEYS,
   getActiveSlots,
   isModalSlot,
@@ -470,7 +471,7 @@ export function PhraseBuilder({
   function handleToggleReveal(sat: Satellite) {
     const willShow = !sat.shown;
     setRevealed((prev) => ({ ...prev, [sat.key]: willShow }));
-    if (willShow && SATELLITE_SLOT_KEYS.has(sat.key as SlotKey)) {
+    if (willShow && REVEALABLE_SLOT_KEYS.has(sat.key as SlotKey)) {
       setActiveSlot(sat.key as SlotKey);
     }
   }
@@ -478,8 +479,12 @@ export function PhraseBuilder({
   // Sort every satellite's control into: its parent word box's border, the verb-phrase
   // dotted box (complement toggles), or a noun's dotted-box perimeter (relative-clause +
   // possessor controls, which also anchor their connector lines).
-  const { satelliteIconsByParent, complementToggleIcons, perimeterByNoun } =
-    buildSatelliteIcons({
+  const {
+    satelliteIconsByParent,
+    complementToggleIcons,
+    perimeterByNoun,
+    directObjectToggle,
+  } = buildSatelliteIcons({
       satellites,
       shownMap,
       collapsedMainKeys,
@@ -491,9 +496,10 @@ export function PhraseBuilder({
       onAddConjunct: handleAddConjunct,
     });
 
-  // Satellite slots (adjective / adverb) only render when revealed or filled.
+  // Satellite slots (adjective / adverb) only render when revealed or filled; the direct
+  // object, only while its own control on the verb-phrase box has it unfolded.
   const renderedSlots = visibleSlots.filter(
-    (s) => !SATELLITE_SLOT_KEYS.has(s.key) || shownMap[s.key],
+    (s) => !REVEALABLE_SLOT_KEYS.has(s.key) || shownMap[s.key],
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -852,6 +858,7 @@ export function PhraseBuilder({
     shownMap,
     satelliteIconsByParent,
     complementToggleIcons,
+    directObjectToggle,
     groupRects,
     collapsedGroups: effectiveCollapsed,
     compact,

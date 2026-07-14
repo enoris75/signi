@@ -34,7 +34,7 @@ export type GroupRect = Rect & {
 // The identity of a role group, before its rect is measured.
 export type GroupShape = { nodeKeys: string[]; removeKey?: BoxComplementType };
 
-type Pt = { x: number; y: number };
+export type Pt = { x: number; y: number };
 type PosFn = (key: string) => Pt;
 
 // A word box's measured pixel footprint. Nodes are centered on their position, so a box
@@ -137,14 +137,14 @@ export function rawGroupRect(
   };
 }
 
-const rectCenter = (r: GroupRect): Pt => ({
+export const rectCenter = (r: Rect): Pt => ({
   x: r.x + r.width / 2,
   y: r.y + r.height / 2,
 });
 
 // Point where the segment from r's center toward (tx, ty) crosses r's border,
 // so the link starts/ends on the dashed box edge rather than inside it.
-const rectBorderPoint = (r: GroupRect, tx: number, ty: number): Pt => {
+export const rectBorderPoint = (r: Rect, tx: number, ty: number): Pt => {
   const cx = r.x + r.width / 2;
   const cy = r.y + r.height / 2;
   const dx = tx - cx;
@@ -298,7 +298,10 @@ export function buildGraph({
           ...(shownMap.modifier ? ["modifier"] : []),
         ],
       }]),
-      ...(visibleSlots.some((s) => s.key === "directObject")
+      // The object's box, like a complement's, is on the canvas only while its control on the
+      // verb-phrase box says so — the difference being that its control starts out saying yes.
+      ...(visibleSlots.some((s) => s.key === "directObject") &&
+      shownMap.directObject
         ? [
             {
               label: "Direct Object",

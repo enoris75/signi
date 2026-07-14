@@ -5,6 +5,7 @@ import HubIcon from "@mui/icons-material/Hub";
 import { type Concept } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import { WordMap } from "../WordMap/WordMap.tsx";
+import { useUiString } from "../../i18n/useUiString.ts";
 import {
   PhraseSelection,
   SlotConfig,
@@ -66,6 +67,7 @@ export function PhraseSidebar({
   // wide and a graph needs the room. Its open state is local: nothing outside cares.
   const [mapOpen, setMapOpen] = useState(false);
   const headerOffset = useHeaderOffset();
+  const t = useUiString();
 
   return (
     <Paper
@@ -151,24 +153,28 @@ export function PhraseSidebar({
             color: "text.secondary",
           }}
         >
-          {activeSlotConfig ? activeSlotConfig.label : "Words"}
+          {activeSlotConfig
+            ? activeSlotConfig.labelKey
+              ? t(activeSlotConfig.labelKey)
+              : activeSlotConfig.label
+            : t("words.heading")}
         </Typography>
         <Box sx={{ display: "flex", alignItems: "center", gap: 0.25 }}>
-          <Tooltip title="Show word map" placement="left">
+          <Tooltip title={t("action.showWordMap")} placement="left">
             <IconButton
               size="small"
               onClick={() => setMapOpen(true)}
-              aria-label="Show word map"
+              aria-label={t("action.showWordMap")}
               sx={{ p: 0.25 }}
             >
               <HubIcon fontSize="small" />
             </IconButton>
           </Tooltip>
-          <Tooltip title="Hide words" placement="left">
+          <Tooltip title={t("action.hideWords")} placement="left">
             <IconButton
               size="small"
               onClick={onClose}
-              aria-label="Hide words"
+              aria-label={t("action.hideWords")}
               sx={{ p: 0.25 }}
             >
               <CloseIcon fontSize="small" />

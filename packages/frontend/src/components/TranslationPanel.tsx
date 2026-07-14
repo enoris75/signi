@@ -59,6 +59,7 @@ export default function TranslationPanel({ sentences }: Props) {
 
       {ready.length === 0 ? (
         <Typography
+          data-testid="translations-empty"
           sx={{
             fontFamily: '"Lora", serif',
             fontStyle: 'italic',
@@ -118,6 +119,7 @@ function LanguageRow({
 
   return (
     <Box
+      data-testid={`translation-${language}`}
       sx={{
         py: 1.75,
         borderBottom: isLast ? 'none' : '1px solid',
@@ -179,6 +181,7 @@ function SentenceLine({ translation: t }: { translation: Translation }) {
   return (
     <Typography
       component="div"
+      data-testid="sentence"
       sx={{
         fontFamily: t.language === 'ja'
           ? '"Noto Serif JP", serif'

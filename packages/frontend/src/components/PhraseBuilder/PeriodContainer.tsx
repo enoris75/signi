@@ -700,14 +700,18 @@ export function PeriodContainer({
           )}
           {hasGroups && (
             <Tooltip
-              title={compact ? "Expand this period" : "Compact this period"}
+              title={t(
+                compact ? "action.expandPeriod" : "action.compactPeriod",
+              )}
             >
               <IconButton
                 size="small"
                 onClick={onToggleCompact}
-                aria-label={
-                  compact ? "Expand this period" : "Compact this period"
-                }
+                aria-label={t(
+                  compact ? "action.expandPeriod" : "action.compactPeriod",
+                )}
+                data-testid="period-compact-toggle"
+                data-compact={compact ? "true" : "false"}
                 color={compact ? "primary" : "default"}
                 sx={{ p: 0.25 }}
               >
@@ -720,11 +724,12 @@ export function PeriodContainer({
             </Tooltip>
           )}
           {hasGroups && (
-            <Tooltip title="Tidy up this period">
+            <Tooltip title={t("action.tidyPeriod")}>
               <IconButton
                 size="small"
                 onClick={onTidy}
-                aria-label="Tidy up this period"
+                aria-label={t("action.tidyPeriod")}
+                data-testid="period-tidy"
                 sx={{ p: 0.25 }}
               >
                 <AutoFixHighIcon sx={{ fontSize: 15 }} />

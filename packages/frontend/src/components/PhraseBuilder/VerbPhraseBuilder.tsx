@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { CAUSE_SENTIMENTS, PATH_SPECIFIERS } from "@signi/shared";
 import {
   AspectToggleBox,
+  SatelliteButton,
   SatelliteRow,
   SentimentSelector,
   SpecifierSelector,
@@ -9,6 +10,7 @@ import {
 } from "./Boxes.tsx";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
+import { rectBorderPoint, rectCenter } from "./graph.ts";
 import { isModalSlot } from "./slots.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb box, the adverb box,
@@ -22,6 +24,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     makeDragProps,
     selection,
     complementToggleIcons,
+    directObjectToggle,
     groupRects,
     handleCycleTense,
     handleCycleAspect,
@@ -38,6 +41,21 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
   const verbPhraseRect = groupRects.find((g) => g.label === "Verb Phrase");
   const routeRect = groupRects.find((g) => g.removeKey === "route");
   const causeRect = groupRects.find((g) => g.removeKey === "cause");
+
+  // Where the direct object's control sits on the verb-phrase box: exactly where the connector
+  // to the object leaves that box (buildGraph draws the line from the same point), so the icon
+  // reads as the line's start. Folded away, there is no object box to aim at and no line — the
+  // icon parks on the right edge, the side the object is dealt on the canvas.
+  const doRect = groupRects.find((g) => g.label === "Direct Object");
+  const doAnchor =
+    !verbPhraseRect || !directObjectToggle
+      ? null
+      : doRect
+        ? rectBorderPoint(verbPhraseRect, rectCenter(doRect).x, rectCenter(doRect).y)
+        : {
+            x: verbPhraseRect.x + verbPhraseRect.width,
+            y: verbPhraseRect.y + verbPhraseRect.height / 2,
+          };
 
   return (
     <>
@@ -76,6 +94,21 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           }}
         >
           <SatelliteRow satellites={complementToggleIcons} color="secondary" />
+        </Box>
+      )}
+
+      {/* The direct object's fold-away control, on the verb-phrase box where its connector starts. */}
+      {directObjectToggle && doAnchor && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: doAnchor.x,
+            top: doAnchor.y,
+            transform: "translate(-50%, -50%)",
+            zIndex: 3,
+          }}
+        >
+          <SatelliteButton sat={directObjectToggle} color="success" />
         </Box>
       )}
 

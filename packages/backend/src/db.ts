@@ -3,7 +3,9 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const DB_PATH = path.join(__dirname, '..', 'signi.db');
+// The e2e suite points this at a throwaway copy so its saves don't land in the dev database.
+const DB_PATH =
+  process.env['SIGNI_DB_PATH'] ?? path.join(__dirname, '..', 'signi.db');
 
 let _db: Database.Database | null = null;
 

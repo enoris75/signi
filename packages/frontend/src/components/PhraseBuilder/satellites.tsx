@@ -21,6 +21,7 @@ import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import BuildIcon from "@mui/icons-material/Build";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
+import AdjustIcon from "@mui/icons-material/Adjust";
 import {
   ASPECT_LABELS,
   COMPLEMENT_LABELS,
@@ -48,7 +49,7 @@ import {
   COMPLEMENT_KEY_SET,
   COMPLEMENT_LABEL_KEYS,
   COORDINABLE_NOUN_KEYS,
-  SATELLITE_SLOT_KEYS,
+  REVEALABLE_SLOT_KEYS,
 } from "./slots.ts";
 
 // Satellite elements (gender / number / polarity / adjective / adverb) are hidden
@@ -66,6 +67,11 @@ export type Satellite = {
   // alwaysSet = number / gender / polarity — these always hold a value (even the
   // default), so their icon reads as "valued" and the tooltip shows the current one.
   alwaysSet?: boolean;
+  // Whether the satellite's box is on the canvas before anyone touches its control.
+  // Defaults to `hasValue` — an empty satellite stays folded away until revealed. The
+  // direct object overrides it: it is a core role, offered open the moment a transitive
+  // verb licenses it, and its control is there to *hide* it.
+  defaultShown?: boolean;
   // directToggle = the border icon *is* the control: clicking it flips the value
   // (singular ⇄ plural, positive ⇄ negative) in place, with no expandable canvas box.
   // Such satellites never `shown` (there is nothing to reveal); the icon's
@@ -197,7 +203,7 @@ export function buildSatellites(
           selection.subjectDefiniteness !== "definite",
       ),
       alwaysSet: true,
-      valueLabel: t(`determiner.value.${selection.subjectDefiniteness ?? "definite"}`),
+      valueLabel: t(`determiner.name.${selection.subjectDefiniteness ?? "definite"}`),
     },
     {
       key: "subjectRelative",
@@ -297,6 +303,22 @@ export function buildSatellites(
       hasValue: Boolean(selection.modifier),
       valueLabel: label(selection.modifier),
     },
+    // The direct object's own control. It rides the verb-phrase dotted box, like the complement
+    // toggles, and anchors the connector that runs from there to the object's dotted box — which
+    // otherwise starts nowhere. Unlike a complement it is shown by default: a transitive verb
+    // wants its object, so the box is offered open and this control folds it away.
+    {
+      key: "directObject",
+      parent: "verb",
+      label: "Direct Object",
+      icon: <AdjustIcon sx={iconSx} />,
+      available:
+        Boolean(selection.verb) &&
+        selection.verb?.transitivity !== "intransitive",
+      hasValue: Boolean(selection.directObject),
+      valueLabel: label(selection.directObject),
+      defaultShown: true,
+    },
     {
       key: "directObjectAdjective",
       parent: "directObject",
@@ -363,7 +385,7 @@ export function buildSatellites(
           selection.directObjectDefiniteness !== "definite",
       ),
       alwaysSet: true,
-      valueLabel: t(`determiner.value.${selection.directObjectDefiniteness ?? "definite"}`),
+      valueLabel: t(`determiner.name.${selection.directObjectDefiniteness ?? "definite"}`),
     },
     {
       key: "directObjectRelative",
@@ -506,7 +528,7 @@ export function buildSatellites(
             def && def !== defaultDefiniteness(type),
           ),
           alwaysSet: true,
-          valueLabel: t(`determiner.value.${def ?? defaultDefiniteness(type)}`),
+          valueLabel: t(`determiner.name.${def ?? defaultDefiniteness(type)}`),
         },
         {
           key: `${type}Relative`,
@@ -553,14 +575,28 @@ export function buildSatellites(
   const subjectDropped = (key: string) =>
     Boolean(selection.imperative) && key.startsWith("subject");
 
+  // Folding the direct object's box away takes its whole family with it — its adjectives,
+  // number/gender, determiner, relative clause, possessor and conjuncts all hang off a head
+  // that is no longer on the canvas. Same move as `subjectDropped` above, and what keeps
+  // their controls and connectors from floating over the space the box used to hold.
+  const directObject = rawSatellites.find((s) => s.key === "directObject")!;
+  const directObjectShown =
+    directObject.available && (revealed.directObject ?? true);
+  const directObjectDropped = (key: string) =>
+    !directObjectShown && key.startsWith("directObject") && key !== "directObject";
+
   const satellites: Satellite[] = rawSatellites.map((s) => {
-    const available = s.available && !subjectDropped(s.key);
+    const available =
+      s.available && !subjectDropped(s.key) && !directObjectDropped(s.key);
     return {
       ...s,
       available,
       // A direct-toggle satellite (number) has no box to reveal — its border icon
       // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
-      shown: available && !s.directToggle && (revealed[s.key] ?? s.hasValue),
+      shown:
+        available &&
+        !s.directToggle &&
+        (revealed[s.key] ?? s.defaultShown ?? s.hasValue),
     };
   });
   const shownMap: Record<string, boolean> = Object.fromEntries(
@@ -611,10 +647,14 @@ export function buildSatelliteIcons({
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   complementToggleIcons: SatelliteIcon[];
   perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>>;
+  directObjectToggle?: SatelliteIcon;
 } {
   const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
   const complementToggleIcons: SatelliteIcon[] = [];
   const perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>> = {};
+  // Sits apart from the complement-toggle row: it is pinned to the point where the object's
+  // connector leaves the verb-phrase dotted box, so it reads as that line's start (VerbPhraseBuilder).
+  let directObjectToggle: SatelliteIcon | undefined;
 
   for (const sat of satellites) {
     if (!sat.available) continue;
@@ -715,6 +755,10 @@ export function buildSatelliteIcons({
             ? onToggleNegative
             : () => onToggleReveal(sat),
     };
+    if (sat.key === "directObject") {
+      directObjectToggle = iconEntry;
+      continue;
+    }
     // The possessor reveal toggle likewise rides the dotted-box perimeter and anchors
     // its own connector down to the possessor panel.
     const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
@@ -732,10 +776,15 @@ export function buildSatelliteIcons({
       if (collapsedMainKeys.has(sat.parent)) continue;
       // A control riding another satellite's box (Adjective 2 on Adjective 1) can only
       // appear while that box is itself on the canvas.
-      if (SATELLITE_SLOT_KEYS.has(sat.parent) && !shownMap[sat.parent]) continue;
+      if (REVEALABLE_SLOT_KEYS.has(sat.parent) && !shownMap[sat.parent]) continue;
       (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
     }
   }
 
-  return { satelliteIconsByParent, complementToggleIcons, perimeterByNoun };
+  return {
+    satelliteIconsByParent,
+    complementToggleIcons,
+    perimeterByNoun,
+    directObjectToggle,
+  };
 }

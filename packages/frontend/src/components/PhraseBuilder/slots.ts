@@ -93,10 +93,19 @@ export const COMPLEMENT_LABEL_KEYS: Partial<Record<ComplementType, UiStringKey>>
   predicative: "slot.predicative",
 };
 
+/**
+ * Every adjective slot names itself with the same word — the grammar noun "adjective", which is
+ * what `category.adjective` already renders. The chain position ("Adjective 2") was never part of
+ * the name: it disambiguated three identical English labels, and the boxes are told apart by where
+ * they sit and the word they hold. The static `label` keeps the numeral as the pre-bundle fallback.
+ */
+const ADJECTIVE_LABEL_KEY: UiStringKey = "category.adjective";
+
 export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "subjectAdjective",
     label: "Adjective",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "error",
@@ -104,6 +113,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "subjectAdjective2",
     label: "Adjective 2",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "error",
@@ -111,6 +121,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "subjectAdjective3",
     label: "Adjective 3",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "error",
@@ -126,6 +137,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "verb",
     label: "Verb",
+    labelKey: "slot.verb",
     required: true,
     roles: ["verb"],
     color: "secondary",
@@ -149,6 +161,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "directObject",
     label: "Direct Object",
+    labelKey: "slot.directObject",
     required: false,
     roles: ["noun"],
     color: "success",
@@ -156,6 +169,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "directObjectAdjective",
     label: "Adjective",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "success",
@@ -163,6 +177,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "directObjectAdjective2",
     label: "Adjective 2",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "success",
@@ -170,6 +185,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "directObjectAdjective3",
     label: "Adjective 3",
+    labelKey: ADJECTIVE_LABEL_KEY,
     required: false,
     roles: ["adjective"],
     color: "success",
@@ -177,6 +193,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "modifier",
     label: "Adverb",
+    labelKey: "slot.adverb",
     required: false,
     roles: ["adverb"],
     color: "info",
@@ -199,6 +216,7 @@ export const ALL_SLOTS: SlotConfig[] = [
       {
         key: `${type}Adjective`,
         label: "Adjective",
+        labelKey: ADJECTIVE_LABEL_KEY,
         required: false,
         roles: ["adjective"],
         color: "warning",
@@ -206,6 +224,7 @@ export const ALL_SLOTS: SlotConfig[] = [
       {
         key: `${type}Adjective2`,
         label: "Adjective 2",
+        labelKey: ADJECTIVE_LABEL_KEY,
         required: false,
         roles: ["adjective"],
         color: "warning",
@@ -213,6 +232,7 @@ export const ALL_SLOTS: SlotConfig[] = [
       {
         key: `${type}Adjective3`,
         label: "Adjective 3",
+        labelKey: ADJECTIVE_LABEL_KEY,
         required: false,
         roles: ["adjective"],
         color: "warning",
@@ -238,6 +258,20 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   ...adjectiveSlots("directObject"),
   ...BOX_COMPLEMENT_TYPES,
   ...BOX_COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
+]);
+
+/**
+ * Every slot whose box is on the canvas only while its control says so — the satellites above
+ * plus the direct object, which carries a control of its own on the verb-phrase dotted box.
+ *
+ * The object is deliberately *not* a satellite: it is a core role, so it is offered open by
+ * default and stays in the keyboard auto-advance after the verb (both of which key off
+ * SATELLITE_SLOT_KEYS). It only shares the satellites' "can be folded away" nature — which is
+ * all this set means.
+ */
+export const REVEALABLE_SLOT_KEYS = new Set<SlotKey>([
+  ...SATELLITE_SLOT_KEYS,
+  "directObject",
 ]);
 
 // Collapsible role groups: each dashed box can be collapsed to show only its main

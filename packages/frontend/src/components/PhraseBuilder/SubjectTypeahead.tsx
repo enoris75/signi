@@ -140,6 +140,7 @@ export function SubjectTypeahead({
         }}
         onKeyDown={handleKeyDown}
         placeholder={prompt}
+        inputProps={{ "data-testid": "typeahead-subject" }}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",
@@ -250,6 +251,8 @@ export function SubjectTypeahead({
                 filteredNouns.map((n, i) => (
                   <Box
                     key={n.id}
+                    data-testid="typeahead-option"
+                    data-concept={n.id}
                     onMouseEnter={() => setHighlightedIdx(i)}
                     onClick={() => commitNoun(i)}
                     sx={{

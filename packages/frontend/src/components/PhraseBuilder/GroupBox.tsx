@@ -41,6 +41,8 @@ export function GroupBox({
           drags over its empty area. */}
       <Box
         {...makeGroupDragProps(rect.nodeKeys)}
+        data-testid="group-box"
+        data-group={rect.label}
         sx={{
           position: "absolute",
           left: rect.x,

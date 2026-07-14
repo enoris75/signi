@@ -55,6 +55,9 @@ export interface PhraseRenderContext {
   shownMap: Record<string, boolean>;
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   complementToggleIcons: SatelliteIcon[];
+  // The direct object's fold-away control. Not part of the toggle row: it is pinned to the point
+  // where the object's connector leaves the verb-phrase dotted box, so it reads as its start.
+  directObjectToggle?: SatelliteIcon;
   groupRects: GroupRect[];
   // Which group boxes are collapsed (keyed by GroupRect.label). Read by the
   // GroupBox to pick its collapse/expand icon.

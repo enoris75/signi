@@ -8,9 +8,13 @@
   "scripts": {
     "dev": "concurrently \"npm run dev --workspace=packages/backend\" \"npm run dev --workspace=packages/frontend\"",
     "build": "npm run build --workspace=packages/shared && npm run build --workspace=packages/engine && npm run build --workspace=packages/backend && npm run build --workspace=packages/frontend",
-    "seed": "npm run seed --workspace=packages/backend"
+    "seed": "npm run seed --workspace=packages/backend",
+    "test": "playwright test",
+    "test:ui": "playwright test --ui",
+    "test:report": "playwright show-report"
   },
   "devDependencies": {
+    "@playwright/test": "^1.61.1",
     "concurrently": "^8.2.2",
     "typescript": "^5.4.5"
   }

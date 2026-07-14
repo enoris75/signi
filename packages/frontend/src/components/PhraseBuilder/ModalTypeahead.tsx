@@ -100,6 +100,8 @@ export function ModalTypeahead({
           {filtered.map((v, i) => (
             <Box
               key={v.id}
+              data-testid="typeahead-option"
+              data-concept={v.id}
               onMouseDown={(e) => e.preventDefault()}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}
