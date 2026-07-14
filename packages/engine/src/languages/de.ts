@@ -177,9 +177,12 @@ function demForm(distal: boolean, _case: Case, gender: string, plural: boolean):
  * verb concord); einige/viele/wenige/alle are plural quantifiers.
  */
 function determiner(forms: Record<string, string>, _case: 'nom' | 'acc' | 'dat', plural: boolean): string {
-  // A continent name like "Afrika" goes bare in German (no article), whatever determiner
-  // the user picked.
-  if (forms['proper'] === '1') return '';
+  // Most proper names go bare in German ("Afrika"), whatever determiner the user picked. But a
+  // class of them is inherently articled — "die Antarktis", "die Schweiz", "die Türkei" — and that
+  // is a property of the name, not a choice, so the lexicon marks it and the definite article wins.
+  if (forms['proper'] === '1') {
+    return forms['takes_article'] === '1' ? defArticle(forms, _case, plural) : '';
+  }
   const definiteness = forms['definiteness'] ?? 'definite';
   if (definiteness === 'definite') return defArticle(forms, _case, plural);
   const gender = forms['gender'] ?? 'neut';

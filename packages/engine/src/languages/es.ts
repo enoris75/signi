@@ -58,9 +58,12 @@ function demonstrative(distal: boolean, forms: Record<string, string>, plural = 
  * "ningún/ninguna" is singular and drives verb negation ("no") upstream when it is an object.
  */
 function artFor(forms: Record<string, string>, plural = false): string {
-  // A continent name like "África" goes bare in Spanish (no article on the subject/object),
-  // whatever determiner the user picked.
-  if (forms['proper'] === '1') return '';
+  // Most proper names go bare in Spanish ("África"), whatever determiner the user picked. But a
+  // class of them is inherently articled — "la Antártida", "los Estados Unidos" — and that is a
+  // property of the name, not a choice, so the lexicon marks it and the definite article wins.
+  if (forms['proper'] === '1') {
+    return forms['takes_article'] === '1' ? defArticle(forms, plural) : '';
+  }
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   // Mass nouns ("agua") stay singular: "algo de agua", "mucha/poca agua", "toda el agua".

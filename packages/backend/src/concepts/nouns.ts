@@ -766,6 +766,27 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'América do Sul',   gender: 'fem',  count: 'singular' },
     },
   },
+  {
+    id: 'ANTARCTICA',
+    role: 'noun',
+    description: 'the continent at the south pole',
+    emoji: '🧊',
+    proper: true,
+    countable: false,
+    isA: 'CONTINENT',
+    forms: {
+      en: { base: 'Antarctica',   count: 'singular' },
+      it: { base: 'Antartide',    gender: 'fem',  count: 'singular' },
+      fr: { base: 'Antarctique',  gender: 'masc', count: 'singular' },
+      // The odd one out among the continents: German and Spanish leave every other continent
+      // bare but article this one ("die Antarktis", "la Antártida"). takes_article marks that;
+      // only de.ts and es.ts read it, and only for proper nouns.
+      de: { base: 'Antarktis',    gender: 'fem',  takes_article: '1', count: 'singular' },
+      es: { base: 'Antártida',    gender: 'fem',  takes_article: '1', count: 'singular' },
+      ja: { base: '南極大陸',     count: 'singular', reading: 'なんきょくたいりく' },
+      pt: { base: 'Antártida',    gender: 'fem',  count: 'singular' },
+    },
+  },
 
   {
     id: 'LANGUAGE',
