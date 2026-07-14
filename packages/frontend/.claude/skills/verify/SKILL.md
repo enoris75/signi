@@ -9,23 +9,36 @@ The surface is pixels: Signi is a React/MUI canvas app. Drive it in a browser an
 DOM. Typecheck (`npx tsc --noEmit -p tsconfig.json` in `packages/frontend`) is not
 verification — it only rules out the cheapest class of mistake.
 
-## The suite
+## The suites
 
-There is a Playwright suite at the repo root (`e2e/`). **Run it first** — it covers the
-translation round trip, the interface-language switch, the canvas controls, and the save/load
-round trip:
+Two layers, and they answer different questions:
+
+- **`npm run test:unit`** (Vitest, `packages/engine/test/`) — the grammar itself: tense, aspect,
+  agreement, determiners, degree, modals. Pure, runs in ~300ms against the real corpus. If the
+  change is to a conjugation or an article rule, **this** is where it belongs; a browser adds
+  nothing but latency.
+- **`npm run test:e2e`** (Playwright, `e2e/`) — the wiring: canvas → plan → API → engine →
+  panel. Keep it about wiring, not grammar.
+
+`npm test` runs both (unit first).
 
 ```bash
-npm test                       # whole suite, headless
-npm test -- e2e/canvas.spec.ts # one spec
-npm test -- --ui               # pick and watch tests run
-npm test -- --headed --debug   # step through with a visible browser
+npm run test:e2e -- e2e/canvas.spec.ts  # one spec
+npm run test:e2e -- --ui                # pick and watch tests run
+npm run test:e2e -- --headed --debug    # step through with a visible browser
+npm run test:watch                      # unit tests, watching
+npm run typecheck                       # typechecks the engine AND its tests
 ```
+
+Vitest does **not** typecheck, so a plan built with an invalid literal (a `Degree` of
+`'comparative'`, which does not exist) will run and silently take a fallback path. Run
+`npm run typecheck` on any test that builds a `PhrasePlan`.
 
 `playwright.config.ts` starts everything itself: the backend on **:3101** against a
 **throwaway database it seeds from source** (`e2e/serveBackend.ts`), and vite on **:5273**. It
 never touches the dev servers on :5173/:3001 or `packages/backend/signi.db`, so it is safe to
 run while the user has their own `npm run dev` going. Nothing to set up, nothing to clean up.
+The unit suite likewise seeds its own in-memory database (`packages/engine/test/harness.ts`).
 
 If the change is covered by a spec, extending that spec **is** the verification — and it stays
 behind to catch the regression next time. Prefer that over a throwaway script.
