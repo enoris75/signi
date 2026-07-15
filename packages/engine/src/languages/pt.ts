@@ -15,6 +15,31 @@ function ptDeg(a: ConceptForms, surface: string): string {
   return d && surface ? `${d} ${surface}` : surface;
 }
 
+/**
+ * The raised degrees (more/most) of these adjectives are suppletive in Portuguese — a single
+ * synthetic word, never "mais" + base: grande → maior, bom → melhor, pequeno → menor, mau →
+ * pior. Only "more"/"most" suppletise; the lowered and equal degrees stay periphrastic ("menos
+ * grande", "igualmente bom"). All four suppletives are gender-invariant and pluralise in -es
+ * (maiores, melhores), which `agreeAdj` derives from the base.
+ */
+const PT_SUPPLETIVE: Record<string, string> = {
+  BIG: 'maior', GOOD: 'melhor', SMALL: 'menor', BAD: 'pior',
+};
+
+/**
+ * An adjective's comparison surface, agreed with the noun. A suppletive raised degree replaces
+ * the base outright and is itself agreed (maior → maiores); every other case is the periphrastic
+ * degree adverb prefixed onto the agreed base ("mais grande", "menos bom").
+ */
+function ptComparison(a: ConceptForms, gender: string, plural: boolean): string {
+  const degree = adjDegree(a);
+  const suppletive = PT_SUPPLETIVE[a.conceptId];
+  if (suppletive && (degree === 'more' || degree === 'most')) {
+    return agreeAdj(suppletive, gender, plural);
+  }
+  return ptDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural));
+}
+
 function defArticle(forms: Record<string, string>, plural = false): string {
   const gender = forms['gender'] ?? 'masc';
   if (plural) return gender === 'fem' ? 'as' : 'os';
@@ -132,12 +157,16 @@ function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const pre: string[] = [];
   const post: string[] = [];
   for (const a of np.adjectives) {
-    const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
-    if (!surface) continue;
     // A comparative/superlative follows the noun even when its plain form precedes it: its
-    // degree adverb belongs with the phrase, not between the article and the noun.
-    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') pre.push(surface);
-    else post.push(ptDeg(a, surface));
+    // degree marking (periphrastic "mais …" or a suppletive like "maior") belongs with the
+    // phrase, not between the article and the noun.
+    if (PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive') {
+      const surface = agreeAdj(a.forms['base'] ?? '', gender, plural);
+      if (surface) pre.push(surface);
+    } else {
+      const surface = ptComparison(a, gender, plural);
+      if (surface) post.push(surface);
+    }
   }
   return { pre: pre.join(' '), post: post.join(' e ') };
 }
@@ -362,7 +391,7 @@ function complementsPhrase(
       if (type === 'predicative') {
         return coordinateElement(c.phrase, (np) =>
           np.head.forms['role'] === 'adjective'
-            ? ptDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
+            ? ptComparison(np.head, subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural')
             : withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np)), np),
         );
       }

@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (91 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (90 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A6 | [A06-portuguese-suppletive-comparative.md](A-must-fix/A06-portuguese-suppletive-comparative.md) | Portuguese |
 | A7 | [A07-english-relativises-on-personhood.md](A-must-fix/A07-english-relativises-on-personhood.md) | English |
 | A8 | [A08-german-weak-masculine-nouns.md](A-must-fix/A08-german-weak-masculine-nouns.md) | German |
 | A9 | [A09-portuguese-resultative-perfective.md](A-must-fix/A09-portuguese-resultative-perfective.md) | Portuguese |
@@ -117,6 +116,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A2-A4 | [A02-A04-german-comparison-umlaut-suppletive-epenthesis.md](fixed/A02-A04-german-comparison-umlaut-suppletive-epenthesis.md) | German | 2026-07-15 |
 | A25 | [A25-english-superlative-indefinite-article.md](fixed/A25-english-superlative-indefinite-article.md) | English | 2026-07-15 |
 | A5 | [A05-french-suppletive-comparative.md](fixed/A05-french-suppletive-comparative.md) | French | 2026-07-15 |
+| A6 | [A06-portuguese-suppletive-comparative.md](fixed/A06-portuguese-suppletive-comparative.md) | Portuguese | 2026-07-15 |
 
 ---
 
