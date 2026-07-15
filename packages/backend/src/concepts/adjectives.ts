@@ -11,7 +11,9 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'big' },
       it: { base: 'grande' },
       fr: { base: 'grand' },
-      de: { base: 'groß' },
+      // groß umlauts in the comparative (größer, via the flag) but its superlative is
+      // irregular — größt, with no epenthetic -e- a -ß stem would otherwise take.
+      de: { base: 'groß', umlaut: 'true', superlative: 'größt' },
       es: { base: 'grande' },
       ja: { base: '大きい', reading: 'おおきい' },
       pt: { base: 'grande' },
@@ -41,7 +43,8 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'good' },
       it: { base: 'buono' },
       fr: { base: 'bon' },
-      de: { base: 'gut' },
+      // Suppletive: gut → besser / best, no rule derives it (cf. English good → better).
+      de: { base: 'gut', comparative: 'besser', superlative: 'best' },
       es: { base: 'bueno' },
       ja: { base: '良い', reading: 'よい' },
       pt: { base: 'bom' },
@@ -101,7 +104,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'old' },
       it: { base: 'vecchio' },
       fr: { base: 'vieux' },
-      de: { base: 'alt' },
+      de: { base: 'alt', umlaut: 'true' }, // alt → älter / ältest
       es: { base: 'viejo' },
       ja: { base: '古い', reading: 'ふるい' },
       pt: { base: 'velho' },
@@ -116,7 +119,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'young' },
       it: { base: 'giovane' },
       fr: { base: 'jeune' },
-      de: { base: 'jung' },
+      de: { base: 'jung', umlaut: 'true' }, // jung → jünger / jüngst
       es: { base: 'joven' },
       ja: { base: '若い', reading: 'わかい' },
       pt: { base: 'jovem' },
@@ -191,7 +194,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'strong' },
       it: { base: 'forte' },
       fr: { base: 'fort' },
-      de: { base: 'stark' },
+      de: { base: 'stark', umlaut: 'true' }, // stark → stärker / stärkst
       es: { base: 'fuerte' },
       ja: { base: '強い', reading: 'つよい' },
       pt: { base: 'forte' },
@@ -206,7 +209,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'weak' },
       it: { base: 'debole' },
       fr: { base: 'faible' },
-      de: { base: 'schwach' },
+      de: { base: 'schwach', umlaut: 'true' }, // schwach → schwächer / schwächst
       es: { base: 'débil' },
       ja: { base: '弱い', reading: 'よわい' },
       pt: { base: 'fraco' },
@@ -251,7 +254,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'cold' },
       it: { base: 'freddo' },
       fr: { base: 'froid' },
-      de: { base: 'kalt' },
+      de: { base: 'kalt', umlaut: 'true' }, // kalt → kälter / kältest
       es: { base: 'frío' },
       ja: { base: '冷たい', reading: 'つめたい' },
       pt: { base: 'frio' },

@@ -280,16 +280,57 @@ describe('known bugs: degree', () => {
   const withDegree = (adjective: string, degree: 'more' | 'most') =>
     sayAll(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: [degree] }), 'EAT'));
 
-  test.fails('German umlauts the comparative: groß → größer', () => {
+  test('German umlauts the comparative: groß → größer', () => {
     expect(withDegree('BIG', 'more')).toMatchObject({ de: 'der größere Kater isst.' });
   });
 
-  test.fails('German umlauts the superlative: groß → größt', () => {
+  test('German umlauts the superlative: groß → größt', () => {
     expect(withDegree('BIG', 'most')).toMatchObject({ de: 'der größte Kater isst.' });
   });
 
-  test.fails('German has suppletive comparatives: gut → besser', () => {
+  test('German has suppletive comparatives: gut → besser', () => {
     expect(withDegree('GOOD', 'more')).toMatchObject({ de: 'der bessere Kater isst.' });
+  });
+
+  // The fix generalises beyond groß/gut: the umlaut set, the epenthesis rule and the
+  // suppletive superlative, each verified below — and the non-umlauting stems left untouched.
+  test('German umlauts the whole monosyllabic set, comparative and superlative', () => {
+    expect(withDegree('OLD', 'more').de).toBe('der ältere Kater isst.');
+    expect(withDegree('OLD', 'most').de).toBe('der älteste Kater isst.');
+    expect(withDegree('YOUNG', 'more').de).toBe('der jüngere Kater isst.');
+    expect(withDegree('YOUNG', 'most').de).toBe('der jüngste Kater isst.');
+    expect(withDegree('STRONG', 'more').de).toBe('der stärkere Kater isst.');
+    expect(withDegree('WEAK', 'most').de).toBe('der schwächste Kater isst.');
+    expect(withDegree('COLD', 'most').de).toBe('der kälteste Kater isst.'); // umlaut + epenthesis
+  });
+
+  test('German inserts the epenthetic -e- after a dental/sibilant stem', () => {
+    expect(withDegree('BAD', 'most').de).toBe('der schlechteste Kater isst.'); // -t → -est
+    expect(withDegree('HOT', 'most').de).toBe('der heißeste Kater isst.'); // -ß → -est, no umlaut
+    expect(withDegree('QUICK', 'most').de).toBe('der schnellste Kater isst.'); // plain -st
+  });
+
+  test('German has a suppletive superlative too: gut → best', () => {
+    expect(withDegree('GOOD', 'most').de).toBe('der beste Kater isst.');
+  });
+
+  // Regression guard: umlaut is lexical, not a blanket vowel rule — an unflagged stem stays put
+  // (braun → brauner, never *bräuner; heiß → heißer, never *häißer).
+  test('German does not umlaut an adjective not flagged for it', () => {
+    expect(withDegree('BROWN', 'more').de).toBe('der braunere Kater isst.');
+    expect(withDegree('HOT', 'more').de).toBe('der heißere Kater isst.');
+  });
+
+  // The same machinery feeds the predicative "am …sten" frame.
+  test('German predicative superlative umlauts and takes the irregular/suppletive stems', () => {
+    const pred = (adj: string, degree: 'more' | 'most') =>
+      sayAll(clause(np('CAT'), 'SEEM', {
+        complements: { predicative: { phrase: np(adj, { headDegree: degree }) } },
+      })).de;
+    expect(pred('BIG', 'most')).toBe('der Kater scheint am größten.');
+    expect(pred('GOOD', 'most')).toBe('der Kater scheint am besten.');
+    expect(pred('OLD', 'most')).toBe('der Kater scheint am ältesten.');
+    expect(pred('BIG', 'more')).toBe('der Kater scheint größer.');
   });
 
   test.fails('French has suppletive comparatives: bon → meilleur, not "plus bon"', () => {
@@ -439,7 +480,7 @@ describe('superlative with each determiner', () => {
       it: 'il gatto più grande mangia.', // definite article carries the superlative
       fr: 'le chat plus grand mange.',
       es: 'el gato más grande come.',
-      de: 'der großste Kater isst.', // umlaut aside (known bug), the ending is right
+      de: 'der größte Kater isst.', // umlaut + irregular superlative (größt), the ending is right
     });
   });
 
@@ -534,7 +575,7 @@ describe('known bugs: degree (extended)', () => {
   // German superlatives miss the linking -e- after a stem in -t (the epenthesis rule): INTERESTING
   // gives "interessantste" for "interessanteste", and BAD "schlechtste" for "schlechteste". This
   // is separate from the umlaut/suppletive misses on BIG/OLD/GOOD already pinned above.
-  test.fails('German superlative needs epenthetic -e- after -t: "interessanteste"', () => {
+  test('German superlative needs epenthetic -e- after -t: "interessanteste"', () => {
     expect(cat({ adjectives: ['INTERESTING'], adjectiveDegrees: ['most'] }))
       .toMatchObject({ de: 'der interessanteste Kater isst.' });
   });

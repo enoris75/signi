@@ -6,14 +6,46 @@ function deComparative(base: string): string {
   return base.endsWith('e') ? `${base}r` : `${base}er`;
 }
 
+/**
+ * Umlaut the stem vowel (a→ä, o→ö, u→ü, au→äu). Most monosyllabic adjectives mutate under
+ * comparison (alt → älter, groß → größer), but many do not (klar → klarer, not *klärer) — the
+ * distinction is lexical, so this is applied only when the lexeme carries the seeded `umlaut`
+ * flag, never as a blanket rule. Mutates the last stem vowel (the one before the final consonant
+ * run), which is the comparison-relevant one in the monosyllables that umlaut.
+ */
+const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
+function deUmlaut(base: string): string {
+  return base.replace(/(au|[aou])(?=[^aeiouäöü]*$)/, (v) => DE_UMLAUT[v] ?? v);
+}
+
+/** The comparison stem: the umlauted base when the lexeme is flagged for it, else the base. */
+function deStem(a: ConceptForms, base: string): string {
+  return a.forms['umlaut'] ? deUmlaut(base) : base;
+}
+
+/**
+ * The superlative suffix, with the epenthetic -e- German inserts to keep the "-st" pronounceable
+ * after a stem ending in a dental/sibilant — -d, -t, -s, -ß, -z, -sch (interessant → interessantest,
+ * kalt → kältest, heiß → heißest). Elsewhere the bare "-st" (jung → jüngst, schnell → schnellst).
+ */
+function deSuperlativeSuffix(stem: string): string {
+  return /(sch|[dtsßz])$/.test(stem) ? 'est' : 'st';
+}
+
 // German comparison is synthetic: the comparative adds "-er" and the superlative "-st" to
 // the stem *before* the case/gender declension ending ("schön" → "schöner-e" / "schönst-e",
 // the superlative leaning on the noun's definite article). Inferiority/equality stay
-// periphrastic ("weniger schön", "gleich schön"). MVP: ignores umlaut and irregular stems.
+// periphrastic ("weniger schön", "gleich schön"). Suppletives (gut → besser / best) and the
+// irregular groß → größt are seeded whole on the lexeme (`comparative` / `superlative`); umlaut
+// and superlative epenthesis are otherwise derived by rule from the seeded `umlaut` flag.
 function deDegStem(a: ConceptForms, base: string): string {
   const d = adjDegree(a);
-  if (d === 'more') return deComparative(base);
-  if (d === 'most') return `${base}st`;
+  if (d === 'more') return a.forms['comparative'] ?? deComparative(deStem(a, base));
+  if (d === 'most') {
+    if (a.forms['superlative']) return a.forms['superlative'];
+    const stem = deStem(a, base);
+    return `${stem}${deSuperlativeSuffix(stem)}`;
+  }
   return base;
 }
 /** Invariant adverb placed before the declined adjective for the periphrastic degrees. */
@@ -35,8 +67,14 @@ function dePredAdj(a: ConceptForms): string {
   const base = a.forms['base'] ?? '';
   if (!base) return '';
   const d = adjDegree(a);
-  if (d === 'more') return deComparative(base);
-  if (d === 'most') return `am ${base}sten`;
+  if (d === 'more') return a.forms['comparative'] ?? deComparative(deStem(a, base));
+  if (d === 'most') {
+    // The predicative superlative is the fixed "am …sten" frame; a seeded irregular stem
+    // (größt, best) slots straight into it, else the umlaut/epenthesis rules build the stem.
+    if (a.forms['superlative']) return `am ${a.forms['superlative']}en`;
+    const stem = deStem(a, base);
+    return `am ${stem}${deSuperlativeSuffix(stem)}en`;
+  }
   return `${deDegPrefix(a)}${base}`;
 }
 
