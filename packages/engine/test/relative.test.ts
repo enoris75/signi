@@ -96,15 +96,59 @@ describe('known bugs: relative clauses', () => {
   // form (食べた猫), not the polite ます/ました of a main clause — Japanese requires plain form on a
   // prenominal predicate (see plainVerbSeg)" — but `plainVerbSeg` was never written, and the
   // relative path calls the polite `predicateSegs`. Intent documented, never implemented.
-  test.fails('Japanese should use the plain form inside a relative clause', () => {
+  test('Japanese should use the plain form inside a relative clause', () => {
     expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')))
       .toMatchObject({ ja: '食べる猫は走ります。' });
   });
 
-  test.fails('Japanese should use the plain past inside a relative clause', () => {
+  test('Japanese should use the plain past inside a relative clause', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', {
       directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT', tense: 'past' } } }),
     }))).toMatchObject({ ja: '犬は食べた猫を見ます。' });
+  });
+
+  // The plain form generalises to every affirmative-neutral relative clause, not just a
+  // subject-relative present. Below are the siblings the fix must also cover.
+
+  // Future has no dedicated Japanese form; it reuses the present, so it too is the plain
+  // dictionary form (食べる), never the polite 食べます.
+  test('Japanese future in a relative clause reuses the plain present', () => {
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', tense: 'future' } } }), 'RUN')))
+      .toMatchObject({ ja: '食べる猫は走ります。' });
+  });
+
+  // An object-relative ("the mouse that the cat eats") — the clause's own subject leads,
+  // marked by が, and its verb is still plain: 食べる non-past, 食べた past.
+  test('Japanese object-relative clauses are plain too', () => {
+    const objRel = (tense?: 'past') => sayAll(clause(
+      np('MOUSE', {
+        relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', tense } },
+      }),
+      'RUN',
+    )).ja;
+    expect(objRel()).toBe('猫が食べるネズミは走ります。');
+    expect(objRel('past')).toBe('猫が食べたネズミは走ります。');
+  });
+
+  // Nested relative clauses are all subordinate, so the plain form applies at every depth:
+  // both 走る (inner) and 食べる (outer) are plain, only the matrix 走ります stays polite.
+  test('Japanese plain form reaches every depth of a nested relative clause', () => {
+    expect(sayAll(clause(
+      np('CAT', {
+        relative: {
+          verbPhrase: { verb: 'EAT' },
+          directObject: np('MOUSE', { relative: { verbPhrase: { verb: 'RUN' } } }),
+        },
+      }),
+      'RUN',
+    ))).toMatchObject({ ja: '走るネズミを食べる猫は走ります。' });
+  });
+
+  // Regression guard on the documented boundary of this fix: the matrix (main-clause) verb
+  // keeps its polite ます. Only the subordinate relative clause is plain-formed.
+  test('Japanese keeps the polite form on the matrix verb', () => {
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')).ja)
+      .toContain('走ります');
   });
 });
 

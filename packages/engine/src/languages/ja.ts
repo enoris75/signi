@@ -106,12 +106,13 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // (e.g. object) relative the clause's own subject leads, marked by が (私が読む本 = "the
   // book I read"); the gap slot is already absent from the clause. The clause verb takes
   // the *plain* form (食べた猫 "the cat that ate…"), not the polite ます/ました of a main
-  // clause — Japanese requires plain form on a prenominal predicate (see plainVerbSeg).
+  // clause — Japanese requires plain form on a prenominal predicate (see plainVerbSeg), so the
+  // predicate is built with `plain` set.
   const rel = np.relative;
   if (!rel) return core;
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject ? [...elSegs(rel.subject), { t: 'が' }] : [];
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements), ...core];
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true), ...core];
 }
 
 /**
@@ -261,6 +262,26 @@ function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase, negative: boolean): Ruby
     ? (past ? `${stem}ませんでした` : `${stem}ません`)
     : (past ? `${stem}ました` : `${stem}ます`);
   return [teSeg, { t: suffix }];
+}
+
+/**
+ * The plain (dictionary / plain-past) form of a verb, for a subordinate predicate. A prenominal
+ * relative clause takes the plain form, not the polite ます/ました of a main clause (食べる猫 /
+ * 食べた猫, never 食べます猫). Non-past is the dictionary form; the past is the plain past (た-form),
+ * derived from the te-form exactly as taraSeg builds its stem (て→た, で→だ). Falls back to the
+ * dictionary form when no te-form is stored. Negation and aspect are NOT plain-formed here — they
+ * still route through the polite verbSeg / aspectVerbSegs, a documented remaining gap (see the
+ * negative and aspectual relative-clause tests, which lock the current polite output).
+ */
+function plainVerbSeg(verb: ConceptForms, tense: Tense): RubySegment {
+  const base = verb.forms['base'] ?? '';
+  const reading = verb.forms['reading'];
+  if (tense !== 'past') return wordSeg(base, reading); // dictionary form (present / future)
+  const te = verb.forms['te'];
+  if (!te) return wordSeg(base, reading);
+  const toTa = (s: string) => s.slice(0, -1) + (s.endsWith('で') ? 'だ' : 'た');
+  const teReading = verb.forms['te_reading'];
+  return wordSeg(toTa(te), teReading ? toTa(teReading) : undefined);
 }
 
 /**
@@ -444,12 +465,15 @@ function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, inst
  * them) DirectObj+を Adv V. Shared by the main sentence (after 〜は) and by prenominal
  * relative clauses.
  * `imperativePN` is set only for a top-level command (relative clauses are never imperative).
+ * `plain` is set only for a subordinate (prenominal relative) predicate: its finite verb takes
+ * the plain form instead of the polite ます (see plainVerbSeg).
  */
 function predicateSegs(
   verbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounElement | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
+  plain = false,
 ): RubySegment[] {
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   const segs: RubySegment[] = [];
@@ -506,7 +530,12 @@ function predicateSegs(
   // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
   // periphrasis to compose with here, so it is dropped (see the Modality note above).
   else if (modals.length > 0) segs.push(...modalSegs(modals, verb, tense, negated));
-  else if (aspect === 'neutral') segs.push(verbSeg(verb, negated, tense));
+  // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫).
+  // Negation still routes through the polite verbSeg — the plain negative (ない/なかった) needs a
+  // nai-form the lexicon doesn't store — a documented remaining gap.
+  else if (aspect === 'neutral') {
+    segs.push(plain && !negated ? plainVerbSeg(verb, tense) : verbSeg(verb, negated, tense));
+  }
   else segs.push(...aspectVerbSegs(verbPhrase, negated));
   return segs;
 }

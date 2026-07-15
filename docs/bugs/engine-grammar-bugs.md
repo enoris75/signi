@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (75 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (73 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A1 | [A01-japanese-relative-clause-plain-form.md](A-must-fix/A01-japanese-relative-clause-plain-form.md) | Japanese |
 | A2-A4 | [A02-A04-german-comparison-umlaut-suppletive-epenthesis.md](A-must-fix/A02-A04-german-comparison-umlaut-suppletive-epenthesis.md) | German |
 | A5 | [A05-french-suppletive-comparative.md](A-must-fix/A05-french-suppletive-comparative.md) | French |
 | A6 | [A06-portuguese-suppletive-comparative.md](A-must-fix/A06-portuguese-suppletive-comparative.md) | Portuguese |
@@ -110,6 +109,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language | Fixed |
 |---|---|---|---|
+| A1 | [A01-japanese-relative-clause-plain-form.md](fixed/A01-japanese-relative-clause-plain-form.md) | Japanese | 2026-07-15 |
 | A25 | [A25-english-superlative-indefinite-article.md](fixed/A25-english-superlative-indefinite-article.md) | English | 2026-07-15 |
 
 ---

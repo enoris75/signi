@@ -48,7 +48,7 @@ describe('predicative: a predicate noun with a subordinate clause', () => {
       // German closes the clause correctly HERE, because it ends the sentence — the missing
       // closing comma only shows when the matrix clause continues afterwards.
       de: 'der Kater wird eine Legende, die brennt.',
-      ja: '猫は燃えます伝説になります。',
+      ja: '猫は燃える伝説になります。', // plain form inside the relative clause (燃える, not 燃えます)
     });
   });
 
@@ -72,7 +72,7 @@ describe('predicative: a predicate noun with a subordinate clause', () => {
       es: 'el gato se vuelve una leyenda que el perro lee.',
       pt: 'o gato se torna uma lenda que o cão lê.',
       de: 'der Kater wird eine Legende, die der Hund liest.',
-      ja: '猫は犬が読みます伝説になります。', // the clause's own subject leads, marked by が
+      ja: '猫は犬が読む伝説になります。', // the clause's own subject leads (が); plain form 読む, not 読みます
     });
   });
 
