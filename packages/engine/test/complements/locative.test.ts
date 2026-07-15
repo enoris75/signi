@@ -144,7 +144,7 @@ describe('known bugs: locative', () => {
   // The same weak-masculine (n-declension) miss pinned in direction.test.ts, showing up here too:
   // it is a property of the NOUN, not of the complement, so every complement that puts "Junge"
   // in an oblique case hits it. "im Junge" should be "im Jungen".
-  test.fails('German should decline the weak masculine in a locative too: "im Jungen"', () => {
+  test('German should decline the weak masculine in a locative too: "im Jungen"', () => {
     expect(inPlace('RUN', np('BOY'))).toMatchObject({ de: 'der Kater läuft im Jungen.' });
   });
 });

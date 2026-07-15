@@ -453,7 +453,9 @@ function possessorText(np: ResolvedNounPhrase): string {
   if (!poss) return '';
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
-  const word = datPluralN(germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '')), 'dat', plural);
+  const compound = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
+  // "von" governs the dative, so a weak masculine possessor declines to -(e)n ("vom Jungen").
+  const word = f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
   const art = defArticle(f, 'dat', plural); // dem / der / den
   const von = art === 'dem' ? 'vom' : `von ${art}`;
   const declined = adjPhrase(poss, 'dat');
@@ -498,12 +500,29 @@ function genitiveS(word: string, _case: Case, forms: Record<string, string>, plu
   return syllables <= 1 ? `${word}es` : `${word}s`;
 }
 
+/**
+ * A weak masculine (n-declension) noun takes -(e)n in every case but the nominative singular
+ * ("der Junge" but "den/dem/des Jungen"). Weakness is a lexical property of the noun (forms.weak),
+ * so it fires wherever the singular surfaces in an oblique case, and it also supplies the genitive
+ * (a weak noun takes no -(e)s). The ending is -n after a final -e (Junge → Jungen), -en otherwise
+ * (Mensch → Menschen). The plural already carries its own -n, so it is left alone.
+ */
+function weakN(word: string, _case: Case, plural: boolean): string {
+  if (plural || _case === 'nom' || !word) return word;
+  return word.endsWith('e') ? `${word}n` : `${word}en`;
+}
+
 function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   const forms = np.head.forms;
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const plural = count === 'plural';
   const headWord = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const word = genitiveS(datPluralN(germanCompound(np, headWord), _case, plural), _case, forms, plural);
+  const compound = germanCompound(np, headWord);
+  // A weak masculine noun declines to -(e)n in the oblique singular (and takes no genitive -(e)s);
+  // every other noun takes the regular dative-plural -n and masculine/neuter genitive -(e)s.
+  const word = forms['weak'] === '1'
+    ? weakN(compound, _case, plural)
+    : genitiveS(datPluralN(compound, _case, plural), _case, forms, plural);
   const definiteness = forms['definiteness'] ?? 'definite';
   const declined = adjPhrase(np, _case, definiteness);
   const a = declined ? `${declined} ` : '';
@@ -684,7 +703,9 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         else if (type === 'terminus') head = prepDet('', f, 'dat', plural);
         else /* source */         head = prepDet('aus', f, 'dat', plural);
       }
-      const word = datPluralN(compound, _case, plural);
+      // A weak masculine goal/place declines to -(e)n in the oblique ("zum/im/aus dem Jungen");
+      // every other noun takes the regular dative-plural -n.
+      const word = f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
       const rest = `${adj}${word}${possessorText(np)}${subordinateClause(np)}`;

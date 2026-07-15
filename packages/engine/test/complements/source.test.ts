@@ -182,7 +182,7 @@ describe('known bugs: source', () => {
   // The same weak-masculine (n-declension) miss pinned in direction.test.ts and locative.test.ts:
   // it is a property of the NOUN, so every complement that puts "Junge" in an oblique case hits
   // it. "aus dem Junge" should be "aus dem Jungen".
-  test.fails('German should decline the weak masculine: "aus dem Jungen"', () => {
+  test('German should decline the weak masculine: "aus dem Jungen"', () => {
     expect(from('COME', np('BOY'))).toMatchObject({ de: 'der Kater kommt aus dem Jungen.' });
   });
 });

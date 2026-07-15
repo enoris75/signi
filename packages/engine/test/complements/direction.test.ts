@@ -114,8 +114,32 @@ describe('known bugs: direction', () => {
   //
   // Fixing it needs a weak-noun class in the corpus (Junge, Herr, Mensch, Student…), since which
   // nouns decline this way is lexical and cannot be derived.
-  test.fails('German should decline the weak masculine: "zum Jungen", not "zum Junge"', () => {
+  test('German should decline the weak masculine: "zum Jungen", not "zum Junge"', () => {
     expect(goTo(person())).toMatchObject({ de: 'der Kater geht zum Jungen.' });
+  });
+
+  // The weak-noun class generalises. It is a lexical property of the noun (forms.weak), so it
+  // fires for every weak masculine, not just Junge, and in every oblique case — the accusative
+  // direct object and the "von"-dative possessor as much as the dative goal — while leaving the
+  // nominative singular and the (already -n) plural alone.
+  test('German declines the other weak masculines too (Ochse, Bursche)', () => {
+    expect(goTo(np('OX')).de).toBe('der Kater geht zum Ochsen.');
+    expect(goTo(np('YOUNG_MAN')).de).toBe('der Kater geht zum Burschen.');
+  });
+
+  test('German declines a weak masculine in the accusative and as a possessor', () => {
+    // Accusative direct object: "den Jungen", not "den Junge".
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY') })).de)
+      .toBe('der Kater sieht den Jungen.');
+    // Possessor via the colloquial "von" + dative: "vom Jungen".
+    expect(sayAll(clause(np('BOOK', { possessor: np('BOY') }), 'BURN')).de)
+      .toBe('das Buch vom Jungen brennt.');
+  });
+
+  test('German leaves the nominative singular and the plural of a weak noun alone', () => {
+    // Nominative subject keeps the bare stem; the plural already ends in -n, so it is unchanged.
+    expect(sayAll(clause(np('BOY'), 'RUN')).de).toBe('der Junge läuft.');
+    expect(goTo(np('BOY', { number: 'plural' })).de).toBe('der Kater geht zu den Jungen.');
   });
 
   // A continent goal is a proper noun that fixes its own article (correct as a subject:
