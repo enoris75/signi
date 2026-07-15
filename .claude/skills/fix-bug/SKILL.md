@@ -78,7 +78,14 @@ warnings and no collateral failures in other tests.
 Add coverage the original `test.fails` did not — the point is that the fix stays fixed. Put new
 `test(...)` cases (not `test.fails`) in the **same `describe` block / test file**, asserting the
 *actual* rendered output (run first, read what the engine produces, then assert it — never guess
-foreign-language strings). Good extensions: the sibling forms the fix should also cover (other
+foreign-language strings).
+
+> **Reading engine output:** Vitest swallows `console.log`. To see what the engine actually renders
+> for a plan, drop a throwaway test in `packages/engine/test/` that asserts the value against a
+> sentinel — `expect(sayAll(...)).toBe('SHOW')` (or `expect({...bag of cases}).toBe('SHOW')`) — and
+> read the real strings out of the assertion diff. Delete the throwaway file before moving on.
+
+Good extensions: the sibling forms the fix should also cover (other
 degrees, persons, genders, the other Romance languages if the defect was Romance-wide), and a
 regression guard that the previously-correct neighbouring behaviour is unchanged. Match the depth of
 the neighbouring cases. If the defect is genuinely a single output with nothing to generalise, say so
@@ -89,6 +96,9 @@ rather than padding.
   filename): `git mv docs/bugs/A-must-fix/<file> docs/bugs/fixed/<file>`.
 - Append a resolution note to the moved file: an `## Resolved` section with the date
   (today is available in context), the engine file(s) changed, and the tests now guarding it.
+  **Fix the relative-link depth for the new location:** a file in `fixed/` is one directory below
+  `docs/bugs/`, so links back to the repo root need `../../../` (e.g.
+  `../../../packages/engine/src/languages/en.ts`), not the `../../` an `A-must-fix/` file would use.
 - Update [docs/bugs/engine-grammar-bugs.md](../../docs/bugs/engine-grammar-bugs.md): remove the
   defect's row from the **Part A** table and add it to a **"Fixed"** section (create the section if
   absent) with a link to its new `fixed/` path. Keep the running count in the prose accurate (the

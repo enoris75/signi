@@ -70,6 +70,18 @@ function npAdj(np: ResolvedNounPhrase): string {
   return np.adjectives.map(enAdj).filter(Boolean).join(' ');
 }
 
+/**
+ * Whether the phrase carries a superlative adjective ('most'/'least'). English marks the
+ * superlative with a forced definite article; comparatives ('more'/'less') do not, so
+ * "a bigger cat" is fine but "a biggest cat" is not.
+ */
+function npHasSuperlative(np: ResolvedNounPhrase): boolean {
+  return np.adjectives.some((a) => {
+    const d = adjDegree(a);
+    return d === 'most' || d === 'least';
+  });
+}
+
 const PREP: Record<ComplementType, string> = {
   locative: 'in',
   direction: 'to',
@@ -98,10 +110,15 @@ const PATH_PREP: Record<PathSpecifier, string> = {
  * indefinite plural is bare ("a wolf" → plural "wolves"). Returns the determiner with a
  * trailing space, or "" for bare.
  */
-function determiner(forms: Record<string, string>, lead: string): string {
+function determiner(forms: Record<string, string>, lead: string, superlative = false): string {
   // A proper noun ("Africa") takes no article in English, whatever determiner was picked.
   if (forms['proper'] === '1') return '';
   const definiteness = forms['definiteness'] ?? 'definite';
+  // English superlatives are inherently definite ("THE biggest cat"), so an indefinite or bare
+  // determiner is ungrammatical with one ("a biggest cat", "biggest cats"). Force "the". The
+  // other determiners (demonstratives, quantifiers, and a possessor which replaces the article
+  // upstream) are already definite and read correctly with a superlative, so leave them.
+  if (superlative && (definiteness === 'indefinite' || definiteness === 'bare')) return 'the ';
   const mass = forms['uncountable'] === '1';
   // A demonstrative agrees with the phrase's number ("this boy" / "these boys"); a mass
   // noun never pluralises, so it always takes the singular ("this water").
@@ -253,7 +270,7 @@ function genitiveMarker(np: ResolvedNounPhrase): string {
  * the genitive marker; the possessed head drops its own article.
  */
 function possessivePrefix(poss: ResolvedNounPhrase): string {
-  const inner = withRelative(nounPhrase(poss.head.forms, npAdj(poss), nounMods(poss), poss.possessor), poss);
+  const inner = withRelative(nounPhrase(poss.head.forms, npAdj(poss), nounMods(poss), poss.possessor, npHasSuperlative(poss)), poss);
   return `${inner}${genitiveMarker(poss)} `;
 }
 
@@ -275,7 +292,7 @@ function nounMods(np: ResolvedNounPhrase): string {
     .join(' ');
 }
 
-function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase): string {
+function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase, superlative = false): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? `${adj} ` : '';
@@ -285,7 +302,7 @@ function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, 
   if (possessor) return `${possessivePrefix(possessor)}${a}${m}${word}`;
   // "a/an" agrees with the first word after the article (adjective, else modifier, else noun).
   const lead = adj || mods || word;
-  return `${determiner(forms, lead)}${a}${m}${word}`;
+  return `${determiner(forms, lead, superlative)}${a}${m}${word}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -294,7 +311,7 @@ function subjectPhrase(np: ResolvedNounPhrase): string {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor); // noun — determiner from forms
+  return nounPhrase(forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np)); // noun — determiner from forms
 }
 
 /**
@@ -308,7 +325,7 @@ function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) =>
 
 /** One conjunct as a full non-subject noun phrase: determiner, adjectives, modifiers, relative. */
 function npText(np: ResolvedNounPhrase): string {
-  return withRelative(nounPhrase(np.head.forms, npAdj(np), nounMods(np), np.possessor), np);
+  return withRelative(nounPhrase(np.head.forms, npAdj(np), nounMods(np), np.possessor, npHasSuperlative(np)), np);
 }
 
 /** A subject slot: each conjunct with its own relative clause, coordinated. */

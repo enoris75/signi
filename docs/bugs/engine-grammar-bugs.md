@@ -38,9 +38,11 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (76 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (75 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
+
+Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** section below.
 
 ## Index
 
@@ -70,7 +72,6 @@ name, not the code comment.
 | A22 | [A22-english-frequency-adverb-modal.md](A-must-fix/A22-english-frequency-adverb-modal.md) | English |
 | A23 | [A23-english-must-negative-scope.md](A-must-fix/A23-english-must-negative-scope.md) | English |
 | A24 | [A24-french-silent-h-elision.md](A-must-fix/A24-french-silent-h-elision.md) | French |
-| A25 | [A25-english-superlative-indefinite-article.md](A-must-fix/A25-english-superlative-indefinite-article.md) | English |
 | A26 | [A26-romance-predicative-superlative-article.md](A-must-fix/A26-romance-predicative-superlative-article.md) | Romance |
 | A27 | [A27-romance-adjective-list-coordination.md](A-must-fix/A27-romance-adjective-list-coordination.md) | Romance |
 | A28 | [A28-italian-frequency-adverb-participle.md](A-must-fix/A28-italian-frequency-adverb-participle.md) | Italian |
@@ -104,6 +105,12 @@ name, not the code comment.
 | C5 | [C05-german-no-progressive.md](C-do-not-fix/C05-german-no-progressive.md) |
 | C6 | [C06-romance-simple-past-perfective.md](C-do-not-fix/C06-romance-simple-past-perfective.md) |
 | C7 | [C07-german-neuter-noun-head-noop.md](C-do-not-fix/C07-german-neuter-noun-head-noop.md) |
+
+### Fixed (`fixed/`)
+
+| # | File | Language | Fixed |
+|---|---|---|---|
+| A25 | [A25-english-superlative-indefinite-article.md](fixed/A25-english-superlative-indefinite-article.md) | English | 2026-07-15 |
 
 ---
 

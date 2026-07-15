@@ -485,9 +485,50 @@ describe('known bugs: degree (extended)', () => {
   // ungrammatical with one: "a biggest cat eats." The engine renders the inflected superlative
   // regardless of the determiner. Either the superlative should force the definite article, or a
   // superlative-under-indefinite plan should be refused upstream — but "a biggest" is not English.
-  test.fails('English must not render a superlative under an indefinite article', () => {
+  test('English must not render a superlative under an indefinite article', () => {
     expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'], definiteness: 'indefinite' }).en)
       .not.toBe('a biggest cat eats.');
+  });
+
+  // The superlative forces the definite article across the determiners that would otherwise be
+  // ungrammatical with one — the indefinite (singular and plural) and the bare determiner — and
+  // for both superlative degrees (inflected 'most' and periphrastic 'least').
+  test('English forces "the" for a superlative under an indefinite article', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'], definiteness: 'indefinite' }).en)
+      .toBe('the biggest cat eats.');
+  });
+
+  test('English forces "the" for a superlative under a bare determiner', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'], definiteness: 'bare' }).en)
+      .toBe('the biggest cat eats.');
+  });
+
+  test('English forces "the" for an indefinite plural superlative', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'], definiteness: 'indefinite', number: 'plural' }).en)
+      .toBe('the biggest cats eat.');
+  });
+
+  test('English forces "the" for the periphrastic superlative "least"', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['least'], definiteness: 'indefinite' }).en)
+      .toBe('the least big cat eats.');
+  });
+
+  // The forcing is scoped to the superlative: a comparative and a positive adjective keep the
+  // indefinite article ("a bigger cat", "a big cat"), and an already-definite superlative is left
+  // untouched.
+  test('English keeps the indefinite article for a comparative (not a superlative)', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['more'], definiteness: 'indefinite' }).en)
+      .toBe('a bigger cat eats.');
+  });
+
+  test('English keeps the indefinite article for a plain (positive) adjective', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['positive'], definiteness: 'indefinite' }).en)
+      .toBe('a big cat eats.');
+  });
+
+  test('English leaves an already-definite superlative unchanged', () => {
+    expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'], definiteness: 'definite' }).en)
+      .toBe('the biggest cat eats.');
   });
 
   // German superlatives miss the linking -e- after a stem in -t (the epenthesis rule): INTERESTING
