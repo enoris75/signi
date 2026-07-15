@@ -453,12 +453,38 @@ describe('known bugs: modals', () => {
   //
   // Asserted negatively — the idiomatic renderings (食べられるようになりたい and the like) are a
   // design call. What is not in doubt is that the current stacking is ungrammatical.
-  test.fails('Japanese modal chains should not stack suffixes into できたい', () => {
+  test('Japanese modal chains should not stack suffixes into できたい', () => {
     expect(catModal({ modals: ['WILL', 'CAN'] }).ja).not.toContain('できたい');
   });
 
-  test.fails('Japanese modal chains should not stack suffixes into たいこと', () => {
+  test('Japanese modal chains should not stack suffixes into たいこと', () => {
     expect(catModal({ modals: ['CAN', 'WILL'] }).ja).not.toContain('たいこと');
+  });
+
+  // The bridged forms in full. 〜たい *over* a modal rides ようになる ("come to be able"); a modal
+  // *over* 〜たい makes it a clause with と思う ("think that …"). The fix keys off the 〜たい
+  // i-adjective, so it covers CAN and MUST alike, in either order.
+  test('Japanese bridges a volitional (〜たい) modal chain instead of stacking suffixes', () => {
+    expect(catModal({ modals: ['WILL', 'CAN'] }).ja).toBe('猫は食べることができるようになりたいです。');
+    expect(catModal({ modals: ['CAN', 'WILL'] }).ja).toBe('猫は食べたいと思うことができます。');
+    expect(catModal({ modals: ['WILL', 'MUST'] }).ja).toBe('猫は食べる必要があるようになりたいです。');
+    expect(catModal({ modals: ['MUST', 'WILL'] }).ja).toBe('猫は食べたいと思う必要があります。');
+  });
+
+  test('the volitional bridge carries tense and polarity on the outer element', () => {
+    // Negation and past land on the bridging なる (なりたくない) / と思う-modal, as they would on
+    // any outermost modal.
+    expect(catModal({ modals: ['WILL', 'CAN'], negative: true }).ja)
+      .toBe('猫は食べることができるようになりたくないです。');
+    expect(catModal({ modals: ['CAN', 'WILL'], tense: 'past' }).ja)
+      .toBe('猫は食べたいと思うことができました。');
+  });
+
+  // Regression: a chain with no 〜たい never triggers the bridge — two verb-kind modals still
+  // stack directly (they compose grammatically), and a lone 〜たい is untouched.
+  test('Japanese still stacks two verb-kind modals directly', () => {
+    expect(catModal({ modals: ['MUST', 'CAN'] }).ja).toBe('猫は食べることができる必要があります。');
+    expect(catModal({ modals: ['WILL'] }).ja).toBe('猫は食べたいです。');
   });
 
   // An English frequency adverb goes AFTER the first auxiliary, not before it:

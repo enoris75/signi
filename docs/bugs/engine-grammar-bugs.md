@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (81 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (79 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A11 | [A11-japanese-modal-chains.md](A-must-fix/A11-japanese-modal-chains.md) | Japanese |
 | A12 | [A12-japanese-prospective-aspect-negation.md](A-must-fix/A12-japanese-prospective-aspect-negation.md) | Japanese |
 | A13 | [A13-japanese-hortative-negation.md](A-must-fix/A13-japanese-hortative-negation.md) | Japanese |
 | A14 | [A14-japanese-brown-linker.md](A-must-fix/A14-japanese-brown-linker.md) | Japanese |
@@ -117,6 +116,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A8 | [A08-german-weak-masculine-nouns.md](fixed/A08-german-weak-masculine-nouns.md) | German | 2026-07-15 |
 | A9 | [A09-portuguese-resultative-perfective.md](fixed/A09-portuguese-resultative-perfective.md) | Portuguese | 2026-07-15 |
 | A10 | [A10-japanese-degree-least-less.md](fixed/A10-japanese-degree-least-less.md) | Japanese | 2026-07-15 |
+| A11 | [A11-japanese-modal-chains.md](fixed/A11-japanese-modal-chains.md) | Japanese | 2026-07-15 |
 
 ---
 
