@@ -139,7 +139,7 @@ describe('known bugs: possessor', () => {
   // clause in the way it lands on the last word of the clause:
   //
   //   plan:  book of [the cat that eats the mouse]
-  //   got:   "the cat who eats THE MOUSE'S book"     ← the mouse now owns the book
+  //   got:   "the cat that eats THE MOUSE'S book"    ← the mouse now owns the book
   //   want:  "the book of the cat that eats the mouse"
   //
   // English resolves this by abandoning the Saxon genitive for the of-genitive whenever the
@@ -151,7 +151,7 @@ describe('known bugs: possessor', () => {
   });
 
   // The same bug, but the clause ends in a VERB rather than a noun — so the clitic lands on the
-  // verb and the output is not English at all: "the mouse who the cat EATS'S book burns."
+  // verb and the output is not English at all: "the mouse that the cat EATS'S book burns."
   test.fails('English must never attach the genitive clitic to a verb ("eats\'s")', () => {
     expect(bookOf(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },

@@ -56,8 +56,8 @@ function seed() {
     wipeAdjectives: db.prepare('DELETE FROM adjective_lexemes'),
     wipeAdverbs:  db.prepare('DELETE FROM adverb_lexemes'),
 
-    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, string | null, number, number, number]>(
-      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, synonym, countable, modal, proper) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
+    insertConcept: db.prepare<[string, string, string, string | null, string | null, string | null, number, number, string | null, number, number, number]>(
+      'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, human, synonym, countable, modal, proper) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
 
     insertHypernym: db.prepare<[string, string]>(
@@ -83,7 +83,7 @@ function seed() {
     stmts.wipeConcepts.run();
 
     for (const c of concepts) {
-      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.proper ? 1 : 0);
+      stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.human ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.proper ? 1 : 0);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

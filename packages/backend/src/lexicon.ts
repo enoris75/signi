@@ -46,8 +46,8 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; countable: number; proper: number }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.countable, sc.proper FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
@@ -64,6 +64,7 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   if (lexeme.plural) forms['plural'] = lexeme.plural;
   if (lexeme.gender) forms['gender'] = lexeme.gender;
   if (lexeme.animate) forms['animate'] = '1'; // concept-level animacy (affects motion-goal adposition)
+  if (lexeme.human) forms['human'] = '1'; // concept-level personhood (English relativises "who" on this)
   if (!lexeme.countable) forms['uncountable'] = '1'; // mass noun — changes quantifier words / blocks pluralisation
   if (lexeme.proper) forms['proper'] = '1'; // proper noun — the language fixes the article, not the user
 

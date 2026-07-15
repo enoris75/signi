@@ -508,7 +508,7 @@ function predicateParts(
 
 /**
  * A restrictive relative clause on `np`: relativizer + the clause's predicate. "who"
- * for an animate head, "that" otherwise (English uses the same relativizer whether the
+ * for a personal head, "that" otherwise (English uses the same relativizer whether the
  * head is the clause's subject or object). For a subject-relative the head fills the
  * subject slot and drives agreement ("the boy who cried"). For a non-subject relative
  * the gap slot is already absent from the clause and it carries its own subject, which
@@ -517,7 +517,9 @@ function predicateParts(
 function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
-  const pronoun = np.head.forms['animate'] === '1' ? 'who' : 'that';
+  // English relativises on PERSONHOOD, not animacy: "who" for a person, "that" for anything else
+  // (an animal is animate but still takes "that"/"which").
+  const pronoun = np.head.forms['human'] === '1' ? 'who' : 'that';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   const subjText = subjectRelative ? '' : subjectText(rel.subject!);

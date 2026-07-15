@@ -346,6 +346,7 @@ export interface Concept {
   number?: 'singular' | 'plural'; // inherent grammatical number, only set for pronouns
   gendered?: boolean;           // noun has distinct masc/fem surface forms
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
+  human?: boolean;              // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
   /**

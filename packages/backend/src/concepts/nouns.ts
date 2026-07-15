@@ -156,6 +156,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a young human being',
     emoji: '👦',
     animate: true,
+    human: true,
     forms: {
       en: { base: 'child', plural: 'children', count: 'singular' },
       it: { base: 'bambino', plural: 'bambini', gender: 'masc', count: 'singular', fem: 'bambina', fem_plural: 'bambine' },
@@ -172,6 +173,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a human being',
     emoji: '🧑',
     animate: true,
+    human: true,
     forms: {
       en: { base: 'person', plural: 'people', count: 'singular' },
       it: { base: 'persona', plural: 'persone', gender: 'fem', count: 'singular' },
@@ -205,6 +207,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a young male human',
     emoji: '👦',
     animate: true,
+    human: true,
     isA: 'PERSON',
     forms: {
       en: { base: 'boy', plural: 'boys', count: 'singular' },
@@ -222,6 +225,7 @@ export const nouns: ConceptSeed[] = [
     description: 'an adult male human',
     emoji: '👨',
     animate: true,
+    human: true,
     isA: 'PERSON',
     forms: {
       en: { base: 'man', plural: 'men', count: 'singular' },
@@ -288,6 +292,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a person who slaughters animals or sells meat',
     emoji: '🔪',
     animate: true,
+    human: true,
     forms: {
       en: { base: 'butcher', plural: 'butchers', count: 'singular' },
       it: { base: 'macellaio', plural: 'macellai', gender: 'masc', count: 'singular', fem: 'macellaia', fem_plural: 'macellaie' },
@@ -384,6 +389,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a male parent',
     emoji: '👨',
     animate: true,
+    human: true,
     forms: {
       en: { base: 'father', plural: 'fathers', count: 'singular' },
       it: { base: 'padre', plural: 'padri', gender: 'masc', count: 'singular' },
@@ -461,6 +467,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a young male person',
     emoji: '👱‍♂️',
     animate: true,
+    human: true,
     synonym: 'youth',
     isA: 'PERSON',
     forms: {
@@ -479,6 +486,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a young female person',
     emoji: '👱‍♀️',
     animate: true,
+    human: true,
     synonym: 'youth',
     isA: 'PERSON',
     forms: {
@@ -515,6 +523,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a person who constructs things',
     emoji: '👷',
     animate: true,
+    human: true,
     isA: 'PERSON',
     forms: {
       en: { base: 'builder', plural: 'builders', count: 'singular' },

@@ -30,6 +30,7 @@ function initSchema(db: Database.Database): void {
       transitivity TEXT CHECK (transitivity IN ('intransitive','transitive','ditransitive') OR transitivity IS NULL),
       complements  TEXT,  -- comma-separated ComplementType list (e.g. 'locative,direction'), NULL if none
       animate      INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1)), -- 1 if the referent is animate
+      human        INTEGER NOT NULL DEFAULT 0 CHECK (human IN (0,1)), -- 1 if the referent is a person (English relativises "who" on this, not animacy)
       synonym      TEXT,   -- short disambiguating gloss shown in parentheses in the picker, NULL if none
       countable    INTEGER NOT NULL DEFAULT 1 CHECK (countable IN (0,1)), -- 0 for mass/uncountable nouns (water, food)
       -- 1 for a modal verb (must/can/will): a verb that governs another verb's infinitive
@@ -284,6 +285,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('animate')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN animate INTEGER NOT NULL DEFAULT 0 CHECK (animate IN (0,1))');
+  }
+  if (!conceptCols.includes('human')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN human INTEGER NOT NULL DEFAULT 0 CHECK (human IN (0,1))');
   }
   if (!conceptCols.includes('synonym')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN synonym TEXT');

@@ -21,7 +21,7 @@ describe('relative clauses', () => {
       np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE') } }),
       'RUN',
     ))).toMatchObject({
-      en: 'the cat who eats the mouse runs.',
+      en: 'the cat that eats the mouse runs.',
       it: 'il gatto che mangia il topo corre.',
       fr: 'le chat qui mange la souris court.',
       // German sends the relative clause's verb to the end.
@@ -48,7 +48,7 @@ describe('relative clauses', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', {
       directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT', tense: 'past' } } }),
     }))).toMatchObject({
-      en: 'the dog sees the cat who ate.',
+      en: 'the dog sees the cat that ate.',
       it: 'il cane vede il gatto che mangiò.',
       fr: 'le chien voit le chat qui mangea.',
       de: 'der Hund sieht den Kater, der aß.',
@@ -73,16 +73,34 @@ describe('relative clauses', () => {
 });
 
 describe('known bugs: relative clauses', () => {
-  // en.ts keys the relativiser off ANIMACY ("who" for an animate head, "that" otherwise), but
-  // English keys it off PERSONHOOD: an animal is animate and still takes "that"/"which".
-  // Fixing this needs a `person`/`human` feature on the concept — animacy cannot stand in.
-  test.fails('English should not relativise a non-person with "who"', () => {
+  // en.ts now keys the relativiser off PERSONHOOD, not animacy: an animal is animate and still
+  // takes "that"/"which" — only a person (the `human` concept feature) takes "who". A subject
+  // (CAT) and head (MOUSE) that are both non-persons therefore both relativise with "that".
+  test('English should not relativise a non-person with "who"', () => {
     expect(sayAll(clause(
       np('MOUSE', {
         relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
       }),
       'RUN',
     ))).toMatchObject({ en: 'the mouse that the cat eats runs.' });
+  });
+
+  // The generalisation: a person head DOES take "who" (this is what animacy could not express —
+  // a cat is animate but not a person), and a person still takes "who" in object position too.
+  test('English relativises a person with "who"', () => {
+    expect(sayAll(clause(
+      np('BOY', { relative: { verbPhrase: { verb: 'EAT' } } }),
+      'RUN',
+    )).en).toBe('the boy who eats runs.');
+    expect(sayAll(clause(
+      np('CHILD', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'SEE' } } }),
+      'RUN',
+    )).en).toBe('the child who the cat sees runs.');
+    // A non-person head with a person subject still takes "that" on the head.
+    expect(sayAll(clause(
+      np('MOUSE', { relative: { headRole: 'directObject', subject: np('PERSON'), verbPhrase: { verb: 'EAT' } } }),
+      'RUN',
+    )).en).toBe('the mouse that the person eats runs.');
   });
 
   // A German relative clause is set off by commas at BOTH ends; the engine only opens one.
@@ -168,14 +186,14 @@ const matrix = (main: Partial<VerbPhrase>, rel: Partial<VerbPhrase>) =>
 describe('relative clauses: a tense of their own', () => {
   test('a past clause under a present matrix, and the reverse', () => {
     expect(matrix({}, { tense: 'past' })).toMatchObject({
-      en: 'the cat who ate sees the mouse.',
+      en: 'the cat that ate sees the mouse.',
       it: 'il gatto che mangiò vede il topo.',
       fr: 'le chat qui mangea voit la souris.',
       de: 'der Kater, der aß sieht die Maus.',
     });
 
     expect(matrix({ tense: 'past' }, {})).toMatchObject({
-      en: 'the cat who eats saw the mouse.',
+      en: 'the cat that eats saw the mouse.',
       it: 'il gatto che mangia vide il topo.', // mangia present, vide past
       es: 'el gato que come vio el ratón.',
       de: 'der Kater, der isst sah die Maus.',
@@ -184,14 +202,14 @@ describe('relative clauses: a tense of their own', () => {
 
   test('a future clause under a past matrix — the two tenses need not be ordered', () => {
     expect(matrix({ tense: 'past' }, { tense: 'future' })).toMatchObject({
-      en: 'the cat who will eat saw the mouse.',
+      en: 'the cat that will eat saw the mouse.',
       it: 'il gatto che mangerà vide il topo.',
       fr: 'le chat qui mangera vit la souris.',
       de: 'der Kater, der essen wird sah die Maus.', // verb-final: the auxiliary goes last
     });
 
     expect(matrix({ tense: 'future' }, { tense: 'past' })).toMatchObject({
-      en: 'the cat who ate will see the mouse.',
+      en: 'the cat that ate will see the mouse.',
       it: 'il gatto che mangiò vedrà il topo.',
       pt: 'o gato que comeu verá o rato.',
     });
@@ -201,7 +219,7 @@ describe('relative clauses: a tense of their own', () => {
 describe('relative clauses: an aspect of their own', () => {
   test('a resultative clause under a present matrix', () => {
     expect(matrix({}, { aspect: 'resultative' })).toMatchObject({
-      en: 'the cat who has eaten sees the mouse.',
+      en: 'the cat that has eaten sees the mouse.',
       it: 'il gatto che ha mangiato vede il topo.',
       fr: 'le chat qui a mangé voit la souris.',
       es: 'el gato que ha comido ve el ratón.',
@@ -210,7 +228,7 @@ describe('relative clauses: an aspect of their own', () => {
 
   test('a resultative matrix over a present clause', () => {
     expect(matrix({ aspect: 'resultative' }, {})).toMatchObject({
-      en: 'the cat who eats has seen the mouse.',
+      en: 'the cat that eats has seen the mouse.',
       it: 'il gatto che mangia ha visto il topo.',
       fr: 'le chat qui mange a vu la souris.',
       de: 'der Kater, der isst hat die Maus gesehen.', // the matrix aspect DOES render
@@ -219,13 +237,13 @@ describe('relative clauses: an aspect of their own', () => {
 
   test('a different aspect on each side', () => {
     expect(matrix({ aspect: 'progressive' }, { aspect: 'resultative' })).toMatchObject({
-      en: 'the cat who has eaten is seeing the mouse.',
+      en: 'the cat that has eaten is seeing the mouse.',
       it: 'il gatto che ha mangiato sta vedendo il topo.',
       fr: 'le chat qui a mangé est en train de voir la souris.',
     });
 
     expect(matrix({ aspect: 'resultative' }, { aspect: 'progressive' })).toMatchObject({
-      en: 'the cat who is eating has seen the mouse.',
+      en: 'the cat that is eating has seen the mouse.',
       it: 'il gatto che sta mangiando ha visto il topo.',
       es: 'el gato que está comiendo ha visto el ratón.',
     });
@@ -287,7 +305,7 @@ describe('relative clauses: tense and aspect together, differing on both sides',
       { tense: 'past', aspect: 'resultative' },
       { tense: 'future', aspect: 'progressive' },
     )).toMatchObject({
-      en: 'the cat who will be eating had seen the mouse.',
+      en: 'the cat that will be eating had seen the mouse.',
       it: 'il gatto che starà mangiando aveva visto il topo.',
       fr: 'le chat qui sera en train de manger avait vu la souris.',
       es: 'el gato que estará comiendo había visto el ratón.',
@@ -299,7 +317,7 @@ describe('relative clauses: tense and aspect together, differing on both sides',
       { tense: 'future', aspect: 'progressive' },
       { tense: 'past', aspect: 'resultative' },
     )).toMatchObject({
-      en: 'the cat who had eaten will be seeing the mouse.',
+      en: 'the cat that had eaten will be seeing the mouse.',
       it: 'il gatto che aveva mangiato starà vedendo il topo.',
       pt: 'o gato que tinha comido estará vendo o rato.',
     });
@@ -309,13 +327,13 @@ describe('relative clauses: tense and aspect together, differing on both sides',
 describe('relative clauses: polarity and modals of their own', () => {
   test('the negation belongs to one clause, not the other', () => {
     expect(matrix({ negative: true }, {})).toMatchObject({
-      en: 'the cat who eats does not see the mouse.',
+      en: 'the cat that eats does not see the mouse.',
       it: 'il gatto che mangia non vede il topo.',
       de: 'der Kater, der isst sieht die Maus nicht.',
     });
 
     expect(matrix({}, { negative: true })).toMatchObject({
-      en: 'the cat who does not eat sees the mouse.',
+      en: 'the cat that does not eat sees the mouse.',
       fr: 'le chat qui ne mange pas voit la souris.',
       de: 'der Kater, der nicht isst sieht die Maus.', // negation survives into the clause
       ja: '食べません猫はネズミを見ます。',
@@ -324,12 +342,12 @@ describe('relative clauses: polarity and modals of their own', () => {
 
   test('a modal in one clause and not the other', () => {
     expect(matrix({ modals: ['MUST'] }, {})).toMatchObject({
-      en: 'the cat who eats must see the mouse.',
+      en: 'the cat that eats must see the mouse.',
       it: 'il gatto che mangia deve vedere il topo.',
     });
 
     expect(matrix({}, { modals: ['CAN'] })).toMatchObject({
-      en: 'the cat who can eat sees the mouse.',
+      en: 'the cat that can eat sees the mouse.',
       it: 'il gatto che può mangiare vede il topo.',
       de: 'der Kater, der essen kann sieht die Maus.', // modal goes final, like the tense auxiliary
     });
@@ -393,7 +411,7 @@ const nested = (
 describe('nested relative clauses: three tenses at once', () => {
   test('past matrix, present outer, future inner', () => {
     expect(nested({ tense: 'past' }, {}, { tense: 'future' })).toMatchObject({
-      en: 'the cat who eats the mouse who will run saw the dog.',
+      en: 'the cat that eats the mouse that will run saw the dog.',
       it: 'il gatto che mangia il topo che correrà vide il cane.',
       fr: 'le chat qui mange la souris qui courra vit le chien.',
       es: 'el gato que come el ratón que correrá vio el perro.',
@@ -403,7 +421,7 @@ describe('nested relative clauses: three tenses at once', () => {
 
   test('future matrix, past outer, present inner', () => {
     expect(nested({ tense: 'future' }, { tense: 'past' }, {})).toMatchObject({
-      en: 'the cat who ate the mouse who runs will see the dog.',
+      en: 'the cat that ate the mouse that runs will see the dog.',
       it: 'il gatto che mangiò il topo che corre vedrà il cane.',
       fr: 'le chat qui mangea la souris qui court verra le chien.',
       // Each German clause is verb-final on its own: "die läuft" inside "der … aß".
@@ -413,7 +431,7 @@ describe('nested relative clauses: three tenses at once', () => {
 
   test('present matrix, future outer, past inner', () => {
     expect(nested({}, { tense: 'future' }, { tense: 'past' })).toMatchObject({
-      en: 'the cat who will eat the mouse who ran sees the dog.',
+      en: 'the cat that will eat the mouse that ran sees the dog.',
       it: 'il gatto che mangerà il topo che corse vede il cane.',
       es: 'el gato que comerá el ratón que corrió ve el perro.',
       de: 'der Kater, der die Maus, die lief essen wird sieht den Hund.',
@@ -426,7 +444,7 @@ describe('nested relative clauses: three aspects at once', () => {
     expect(nested(
       { aspect: 'progressive' }, { aspect: 'resultative' }, { aspect: 'prospective' },
     )).toMatchObject({
-      en: 'the cat who has eaten the mouse who is about to run is seeing the dog.',
+      en: 'the cat that has eaten the mouse that is about to run is seeing the dog.',
       it: 'il gatto che ha mangiato il topo che sta per correre sta vedendo il cane.',
       fr: 'le chat qui a mangé la souris qui est sur le point de courir est en train de voir le chien.',
       es: 'el gato que ha comido el ratón que está a punto de correr está viendo el perro.',
@@ -437,7 +455,7 @@ describe('nested relative clauses: three aspects at once', () => {
     expect(nested(
       { aspect: 'resultative' }, { aspect: 'prospective' }, { aspect: 'progressive' },
     )).toMatchObject({
-      en: 'the cat who is about to eat the mouse who is running has seen the dog.',
+      en: 'the cat that is about to eat the mouse that is running has seen the dog.',
       it: 'il gatto che sta per mangiare il topo che sta correndo ha visto il cane.',
       pt: 'o gato que está prestes a comer o rato que está correndo tem visto o cão.',
     });
@@ -447,7 +465,7 @@ describe('nested relative clauses: three aspects at once', () => {
     expect(nested(
       { aspect: 'prospective' }, { aspect: 'progressive' }, { aspect: 'resultative' },
     )).toMatchObject({
-      en: 'the cat who is eating the mouse who has run is about to see the dog.',
+      en: 'the cat that is eating the mouse that has run is about to see the dog.',
       it: 'il gatto che sta mangiando il topo che ha corso sta per vedere il cane.',
       fr: 'le chat qui est en train de manger la souris qui a couru est sur le point de voir le chien.',
     });
@@ -461,7 +479,7 @@ describe('nested relative clauses: three tenses AND three aspects', () => {
       { aspect: 'progressive' },
       { tense: 'future', aspect: 'prospective' },
     )).toMatchObject({
-      en: 'the cat who is eating the mouse who will be about to run had seen the dog.',
+      en: 'the cat that is eating the mouse that will be about to run had seen the dog.',
       it: 'il gatto che sta mangiando il topo che starà per correre aveva visto il cane.',
       fr: 'le chat qui est en train de manger la souris qui sera sur le point de courir avait vu le chien.',
       es: 'el gato que está comiendo el ratón que estará a punto de correr había visto el perro.',
@@ -475,7 +493,7 @@ describe('nested relative clauses: three tenses AND three aspects', () => {
       { tense: 'past', aspect: 'prospective' },
       { aspect: 'resultative' },
     )).toMatchObject({
-      en: 'the cat who was about to eat the mouse who has run will be seeing the dog.',
+      en: 'the cat that was about to eat the mouse that has run will be seeing the dog.',
       it: 'il gatto che stava per mangiare il topo che ha corso starà vedendo il cane.',
       fr: 'le chat qui était sur le point de manger la souris qui a couru sera en train de voir le chien.',
       es: 'el gato que estaba a punto de comer el ratón que ha corrido estará viendo el perro.',
