@@ -313,3 +313,80 @@ describe('subject: a possessor and a relative clause together', () => {
     });
   });
 });
+
+// Three genders, each with an indefinite article and two adjectives. German is the reason this is
+// interesting: it has three genders (der/die/das) AND its INDEFINITE ("mixed") declension puts
+// the gender ending on the adjective — -er / -e / -es — because "ein" itself is uninflected in the
+// nominative and so carries no gender of its own. Both adjectives take the ending.
+describe('subject: three genders, indefinite + two adjectives', () => {
+  const twoAdj = (extra: Partial<NounPhrase>): NounPhrase =>
+    ({ concept: 'CAT', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'], ...extra });
+
+  test('masculine', () => {
+    // CAT defaults to its masculine lexeme (der Kater / il gatto).
+    expect(subject(twoAdj({}))).toMatchObject({
+      en: 'a big old cat runs.',
+      it: 'un grande vecchio gatto corre.',
+      fr: 'un grand vieux chat court.',
+      es: 'un gato grande y viejo corre.',
+      de: 'ein großer alter Kater läuft.', // mixed masc: -er on both adjectives
+    });
+  });
+
+  test('feminine', () => {
+    // gender:'fem' selects the feminine lexeme, and article, both adjectives and noun all agree.
+    expect(subject(twoAdj({ gender: 'fem' }))).toMatchObject({
+      it: 'una grande vecchia gatta corre.', // una … vecchia … gatta
+      fr: 'une grande vieille chatte court.',
+      es: 'una gata grande y vieja corre.',
+      pt: 'uma gata grande e velha corre.',
+      de: 'eine große alte Katze läuft.', // mixed fem: -e
+    });
+  });
+
+  test('neuter', () => {
+    // Only German has a third gender; BOOK is das Buch there, but masculine (il libro) in Romance,
+    // which has no neuter — so Romance shows its masculine, German its neuter.
+    expect(subject({
+      concept: 'BOOK', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'],
+    })).toMatchObject({
+      en: 'a big old book runs.',
+      it: 'un grande vecchio libro corre.', // masc in Italian
+      de: 'ein großes altes Buch läuft.', // mixed neut: -es
+    });
+  });
+
+  test('the ending follows the noun\'s gender, not the noun itself', () => {
+    const de = (concept: string, gender?: 'fem') =>
+      subject({ concept, definiteness: 'indefinite', adjectives: ['BIG', 'OLD'], ...(gender ? { gender } : {}) }).de;
+    // A different neuter noun takes -es too; a feminine one takes -e — so it is the gender doing
+    // the work, not the lexeme.
+    expect(de('HOUSE')).toBe('ein großes altes Haus läuft.'); // das Haus → -es
+    expect(de('MOUSE')).toBe('eine große alte Maus läuft.'); // die Maus → -e
+    expect(de('CAT')).toBe('ein großer alter Kater läuft.'); // der Kater → -er
+  });
+
+  test('German grammatical gender is language-specific: HOUSE is neuter there, feminine in Romance', () => {
+    expect(subject({
+      concept: 'HOUSE', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'],
+    })).toMatchObject({
+      de: 'ein großes altes Haus läuft.', // neuter
+      it: 'una grande vecchia casa corre.', // feminine (la casa)
+      fr: 'une grande vieille maison court.',
+      es: 'una casa grande y vieja corre.',
+    });
+  });
+});
+
+// `gender` carries three values, but 'neut' is meaningful only for a pronoun head ("it"). On a
+// noun it is a no-op: the head keeps its own (default/masculine) lexeme and gender.
+describe('subject: the neuter gender value on a noun head', () => {
+  test("gender:'neut' on a noun is ignored — identical to the default", () => {
+    const base: NounPhrase = {
+      concept: 'CAT', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'],
+    };
+    const neuter = subject({ ...base, gender: 'neut' });
+    expect(neuter).toEqual(subject({ ...base, gender: 'masc' }));
+    expect(neuter).toMatchObject({ de: 'ein großer alter Kater läuft.', it: 'un grande vecchio gatto corre.' });
+  });
+});

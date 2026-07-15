@@ -345,3 +345,129 @@ describe('documented simplifications: aspect', () => {
     expect(catEats({ aspect: 'resultative' })).toMatchObject({ ja: '猫は食べました。' });
   });
 });
+
+// A feminine subject in the resultative present, across EVERY verb. This is the case that
+// exercises the compound past: Romance selects the perfect auxiliary per verb (essere/avere,
+// être/avoir), and with the "be" auxiliary the participle AGREES with the subject — so a
+// feminine subject is what makes that agreement visible.
+//
+// Italian is swept in full because it has both halves: the essere/avere split AND participle
+// agreement. Every one of these is correct.
+const femResult = (verb: string) =>
+  sayAll(clause(np('CAT', { gender: 'fem' }), verb, { verbPhrase: { aspect: 'resultative' } }));
+
+describe('feminine subject, resultative present: Italian, every verb', () => {
+  const IT: [id: string, it: string][] = [
+    ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
+    ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
+    ['BECOME', 'la gatta è diventata.'], ['BITE', 'la gatta ha morso.'],
+    ['BURN', 'la gatta ha bruciato.'], ['BUY', 'la gatta ha comprato.'],
+    ['CHOOSE', 'la gatta ha scelto.'], ['CLEAR', 'la gatta ha cancellato.'],
+    ['CLICK', 'la gatta ha cliccato.'], ['COLLAPSE', 'la gatta è crollata.'],
+    ['COME', 'la gatta è venuta.'], ['COMPACT', 'la gatta ha compattato.'],
+    ['COORDINATE', 'la gatta ha coordinato.'], ['CRY', 'la gatta ha pianto.'],
+    ['CRY_OUT', 'la gatta ha gridato.'], ['CUT', 'la gatta ha tagliato.'],
+    ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],
+    ['EXPAND', 'la gatta ha espanso.'], ['EXPORT', 'la gatta ha esportato.'],
+    ['EXTINGUISH', 'la gatta ha spento.'], ['GIVE', 'la gatta ha dato.'],
+    ['GO', 'la gatta è andata.'], ['HIDE', 'la gatta ha nascosto.'],
+    ['IMPORT', 'la gatta ha importato.'], ['JUMP', 'la gatta ha saltato.'],
+    ['KILL', 'la gatta ha ucciso.'], ['KNOW', 'la gatta ha saputo.'],
+    ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
+    ['MAKE', 'la gatta ha fatto.'], ['READ', 'la gatta ha letto.'],
+    ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
+    ['SEE', 'la gatta ha visto.'], ['SEEM', 'la gatta è sembrata.'],
+    ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
+    ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHOW', 'la gatta ha mostrato.'],
+    ['START', 'la gatta ha iniziato.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['TYPE', 'la gatta ha digitato.'],
+  ];
+
+  test.each(IT)('%s → %s', (id, expected) => {
+    expect(femResult(id).it).toBe(expected);
+  });
+});
+
+describe('participle agreement: Italian (essere vs avere)', () => {
+  test('an essere verb agrees its participle with the feminine subject (-a)', () => {
+    // è …a — the participle inflects for the subject's gender.
+    expect(femResult('GO').it).toBe('la gatta è andata.'); // andato → andata
+    expect(femResult('COME').it).toBe('la gatta è venuta.');
+    expect(femResult('BECOME').it).toBe('la gatta è diventata.');
+    expect(femResult('APPEAR').it).toBe('la gatta è apparsa.');
+  });
+
+  test('an avere verb leaves the participle invariable — a masculine subject is identical', () => {
+    const masc = (verb: string) =>
+      sayAll(clause(np('CAT'), verb, { verbPhrase: { aspect: 'resultative' } })).it;
+    // ha mangiato, not "ha mangiata": avere does not agree with the subject.
+    expect(femResult('EAT').it).toBe('la gatta ha mangiato.');
+    expect(femResult('EAT').it.replace('la gatta', 'il gatto')).toBe(masc('EAT'));
+    expect(femResult('SEE').it).toBe('la gatta ha visto.');
+    expect(femResult('SEE').it.replace('la gatta', 'il gatto')).toBe(masc('SEE'));
+  });
+});
+
+describe('participle agreement: French (être vs avoir)', () => {
+  test('an être verb agrees its participle with the feminine subject (-e)', () => {
+    expect(femResult('GO').fr).toBe('la chatte est allée.'); // allé → allée
+    expect(femResult('COME').fr).toBe('la chatte est venue.');
+    expect(femResult('BECOME').fr).toBe('la chatte est devenue.');
+    expect(femResult('APPEAR').fr).toBe('la chatte est apparue.');
+  });
+
+  test('an avoir verb does not agree with the subject', () => {
+    expect(femResult('EAT').fr).toBe('la chatte a mangé.'); // mangé, not mangée
+    expect(femResult('SEE').fr).toBe('la chatte a vu.');
+  });
+
+  test('the auxiliary is language-specific: BE and SEEM take essere in it but avoir in fr', () => {
+    // Italian essere → agreement; French avoir → none. Same verb, opposite auxiliary.
+    expect(femResult('BE')).toMatchObject({
+      it: 'la gatta è stata.', // essere: agrees
+      fr: 'la chatte a été.', // avoir: "être" is conjugated with avoir, no agreement
+    });
+    expect(femResult('SEEM')).toMatchObject({
+      it: 'la gatta è sembrata.',
+      fr: 'la chatte a semblé.',
+    });
+  });
+});
+
+describe('the perfect auxiliary: Spanish and German', () => {
+  test('Spanish uses haber for every verb, and it never agrees', () => {
+    // No ser/estar perfect, no participle agreement — "ha …ido/ado" throughout, motion or not.
+    expect(femResult('GO').es).toBe('la gata ha ido.');
+    expect(femResult('COME').es).toBe('la gata ha venido.');
+    expect(femResult('EAT').es).toBe('la gata ha comido.');
+    expect(femResult('APPEAR').es).toBe('la gata ha aparecido.');
+  });
+
+  test('German selects sein for motion/change and haben otherwise (no agreement)', () => {
+    expect(femResult('GO').de).toBe('die Katze ist gegangen.'); // sein
+    expect(femResult('COME').de).toBe('die Katze ist gekommen.');
+    expect(femResult('JUMP').de).toBe('die Katze ist gesprungen.'); // motion → sein
+    expect(femResult('RUN').de).toBe('die Katze ist gelaufen.');
+    expect(femResult('EAT').de).toBe('die Katze hat gegessen.'); // haben
+    expect(femResult('SEEM').de).toBe('die Katze hat geschienen.');
+  });
+});
+
+describe('known bugs: reflexive verbs in the compound tense', () => {
+  // A pronominal verb keeps its clitic in the simple present but LOSES it in the compound past:
+  //
+  //   COLLAPSE fr   present "la chatte s'effondre"   resultative "la chatte est effondrée"
+  //   BECOME   es   present "la gata se vuelve"       resultative "la gata ha vuelto"
+  //
+  // The clitic has to move to before the auxiliary, not vanish: "s'est effondrée", "se ha vuelto".
+  // The Spanish case even changes the meaning — "ha vuelto" without the reflexive is "has
+  // RETURNED" (volver), not "has become" (volverse). The auxiliary and the agreement are right;
+  // only the reflexive pronoun is dropped.
+  test.fails('French pronominal verb keeps its clitic: "s\'est effondrée"', () => {
+    expect(femResult('COLLAPSE').fr).toBe("la chatte s'est effondrée.");
+  });
+
+  test.fails('Spanish pronominal verb keeps its clitic: "se ha vuelto", not "ha vuelto"', () => {
+    expect(femResult('BECOME').es).toBe('la gata se ha vuelto.');
+  });
+});

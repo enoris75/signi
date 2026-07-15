@@ -117,4 +117,20 @@ describe('known bugs: direction', () => {
   test.fails('German should decline the weak masculine: "zum Jungen", not "zum Junge"', () => {
     expect(goTo(person())).toMatchObject({ de: 'der Kater geht zum Jungen.' });
   });
+
+  // A continent goal is a proper noun that fixes its own article (correct as a subject:
+  // "l'Antartide è fredda"), but a continent takes a DIFFERENT goal preposition in Italian and
+  // French — *in* / *en*, and with no article: "va in Antartide", "va en Antarctique". The engine
+  // applies the default inanimate-goal adposition (*a* / *à*) and keeps the proper-noun article,
+  // so it emits "va all'Antartide" / "va à l'Antarctique" — wrong on both counts. This is A29's
+  // article defect (there for the *locative*) plus a preposition-selection error unique to the
+  // goal. Spanish/Portuguese genuinely keep the article ("a la Antártida", "à Antártida") and are
+  // right; German "zur Antarktis" is acceptable. Fixing it needs continent-awareness in the two
+  // engines (ANTARCTICA isA CONTINENT), which the goal preposition can key off.
+  test.fails('Italian/French select "in"/"en" (no article) for a continent goal', () => {
+    expect(goTo(np('ANTARCTICA'))).toMatchObject({
+      it: 'il gatto va in Antartide.',
+      fr: 'le chat va en Antarctique.',
+    });
+  });
 });

@@ -24,6 +24,8 @@ languages; a concept missing a language is a bug, not a partial success (see "De
 | The `ConceptSeed` shape | [packages/backend/src/concepts/types.ts](packages/backend/src/concepts/types.ts) |
 | Verb aspect forms (gerund/participle/te-form/aux) | [packages/backend/src/concepts/verbs/nonfinite.ts](packages/backend/src/concepts/verbs/nonfinite.ts) |
 | The loader (wipes + reinserts everything) | [packages/backend/src/seed.ts](packages/backend/src/seed.ts) |
+| Engine tests (one file per role/feature) | [packages/engine/test/](packages/engine/test/) — `adjectives.test.ts`, `verb.test.ts`, `subject.test.ts`, `nounPhrase.test.ts`, `coordination.test.ts`, … |
+| Test harness (seeds the real corpus, renders every language) | [packages/engine/test/harness.ts](packages/engine/test/harness.ts) |
 
 Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
 
@@ -52,6 +54,29 @@ Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
 4. **Reload the corpus:** `npm run seed`. It wipes and re-inserts every concept, so it is safe to
    re-run at any time. The dev backend caches the lexicon; restart it (or rely on `tsx watch`) after
    seeding.
+5. **Add unit tests for the new words.** A seeded word that no test pins is a paradigm nobody is
+   watching — the next refactor can silently break its plural, its gender agreement, or its past
+   participle and the suite stays green. Every new concept gets a test. The engine tests in
+   [packages/engine/test/](packages/engine/test/) run the *real* seeded corpus through
+   [harness.ts](packages/engine/test/harness.ts) (`sayAll` renders all seven languages at once), so a
+   word is testable the moment it is seeded — no fixtures to write.
+   - **Find the file by role and extend its exhaustive table.** Where a role already keeps a "every
+     word renders" table, add the new concept to it rather than starting a new `describe`:
+     - **adjective** → `adjectives.test.ts`, the `EVERY_ADJECTIVE` table (add `[id, en]`, keep it
+       sorted); add an Italian pre-/post-nominal position case if the word's placement is notable.
+     - **verb** → `verb.test.ts`, the Italian resultative `IT` table (add `[id, it]`). Get the
+       essere-vs-avere auxiliary and, for essere verbs, the feminine participle agreement (`-a`)
+       right — that table is the check that the verb's compound past is correct.
+     - **noun / adverb / pronoun** → `subject.test.ts` / `nounPhrase.test.ts` (nouns),
+       `coordination.test.ts` or the nearest feature file otherwise. No exhaustive table exists yet,
+       so pin the new word in a small `test.each` or a single `expect(sayAll(...))` that asserts its
+       surface form — article, gender, plural, reading — in every language.
+   - **Assert the paradigm, not just that it renders.** A noun test should exercise its plural and
+     (Romance/German) gender agreement; a verb test, the persons and tenses its languages inflect; an
+     adjective, its agreement. Match the depth of the neighbouring cases in the file.
+   - **Run them:** `npm run test:unit` from the repo root (or `npx vitest run <file>` for one file).
+     Pin the *actual* rendered output — run first, read what the engine produces, assert that — never
+     guess the foreign-language strings.
 
 ## Definition of done
 
@@ -63,4 +88,6 @@ Languages: `en`, `it`, `fr`, `de`, `es`, `ja`, `pt`. Every one is mandatory.
 - It shows up in the word palette under its role, and can be picked and built into a phrase that
   translates in every language. That is the check that matters: the corpus exists to be composed
   with.
-- Seeding produces data; it never edits `.tsx`.
+- Every new concept is pinned by a unit test in [packages/engine/test/](packages/engine/test/), and
+  `npm run test:unit` passes. A word with no test is not seeded, it is seeded and unguarded.
+- Seeding produces data and its tests; it never edits `.tsx`.

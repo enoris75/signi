@@ -498,3 +498,292 @@ describe('known bugs: degree (extended)', () => {
       .toMatchObject({ de: 'der interessanteste Kater isst.' });
   });
 });
+
+// At least one case for every adjective in the corpus. Many are grammatical-category concepts
+// (DEFINITE, PARTITIVE, the ordinals…) that carry role='adjective' for use elsewhere in the
+// grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
+// is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
+const EVERY_ADJECTIVE: [id: string, en: string][] = [
+  ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'], ['BROWN', 'brown'],
+  ['CAREFUL', 'careful'], ['COLD', 'cold'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'],
+  ['DISTAL', 'distal'], ['FEMALE', 'female'], ['FIRST', 'first'], ['GOOD', 'good'],
+  ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
+  ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
+  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['MALE', 'male'], ['MULTAL', 'multal'],
+  ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEW', 'new'], ['OLD', 'old'],
+  ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'], ['PROXIMAL', 'proximal'],
+  ['QUICK', 'quick'], ['SAD', 'sad'], ['SAVED', 'saved'], ['SECOND', 'second'],
+  ['SEMANTIC', 'semantic'], ['SINGULAR', 'singular'], ['SMALL', 'small'], ['STRONG', 'strong'],
+  ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'], ['UNIVERSAL', 'universal'],
+  ['WEAK', 'weak'], ['WHOLE', 'whole'], ['YOUNG', 'young'], ['ZERO', 'zero'],
+];
+
+describe('every adjective renders attributively', () => {
+  test.each(EVERY_ADJECTIVE)('%s → "the %s cat"', (id, en) => {
+    const said = cat({ adjectives: [id] });
+    expect(said.en).toBe(`the ${en} cat eats.`);
+    // And every language produces a non-empty, terminated sentence for it — no dropped lexeme.
+    for (const lang of ['it', 'fr', 'es', 'pt', 'de', 'ja'] as const) {
+      expect(said[lang]).toMatch(/[.。]$/);
+      expect(said[lang]).not.toContain('undefined');
+    }
+  });
+});
+
+// Italian sorts adjectives into a prenominal class (a short, common core) and a postnominal one
+// (everything else). The class is lexical, so it is worth a spot-check across several adjectives.
+describe('adjective position: Italian', () => {
+  const it = (id: string) => cat({ adjectives: [id] }).it;
+
+  test('the prenominal class sits before the noun', () => {
+    expect(it('BIG')).toBe('il grande gatto mangia.');
+    expect(it('OLD')).toBe('il vecchio gatto mangia.');
+    expect(it('NEW')).toBe('il nuovo gatto mangia.');
+    expect(it('SMALL')).toBe('il piccolo gatto mangia.');
+    expect(it('YOUNG')).toBe('il giovane gatto mangia.');
+    expect(it('BAD')).toBe('il cattivo gatto mangia.');
+    expect(it('GOOD')).toBe('il buon gatto mangia.'); // buono → buon before a consonant
+    expect(it('BEAUTIFUL')).toBe('il bel gatto mangia.'); // bello → bel
+    expect(it('FIRST')).toBe('il primo gatto mangia.'); // ordinals are prenominal
+  });
+
+  test('everything else follows the noun', () => {
+    expect(it('HAPPY')).toBe('il gatto felice mangia.');
+    expect(it('STRONG')).toBe('il gatto forte mangia.');
+    expect(it('COLD')).toBe('il gatto freddo mangia.');
+    expect(it('INTERESTING')).toBe('il gatto interessante mangia.');
+    expect(it('SEMANTIC')).toBe('il gatto semantico mangia.');
+    expect(it('QUICK')).toBe('il gatto veloce mangia.');
+  });
+});
+
+// Japanese links an attributive adjective to its noun by one of several routes, decided by the
+// adjective's class: an i-adjective attaches directly, a na-adjective takes な, a noun-adjective
+// takes の, and a verb-derived one takes its plain past (た).
+describe('adjective linker: Japanese', () => {
+  const ja = (id: string) => cat({ adjectives: [id] }).ja;
+
+  test('an i-adjective attaches directly', () => {
+    expect(ja('BIG')).toBe('大きい猫は食べます。'); // 大きい, ends in い, no linker
+    expect(ja('OLD')).toBe('古い猫は食べます。');
+    expect(ja('STRONG')).toBe('強い猫は食べます。');
+  });
+
+  test('a na-adjective takes な', () => {
+    expect(ja('HAPPY')).toBe('幸せな猫は食べます。');
+    expect(ja('CAREFUL')).toBe('慎重な猫は食べます。');
+    expect(ja('SEMANTIC')).toBe('意味的な猫は食べます。');
+  });
+
+  test('a noun-adjective takes の', () => {
+    expect(ja('MALE')).toBe('男性の猫は食べます。');
+    expect(ja('SEMANTIC')).not.toContain('意味的の'); // …but a na-adjective must not take の
+  });
+
+  test('a verb-derived adjective takes its plain past', () => {
+    expect(ja('TIRED')).toBe('疲れた猫は食べます。'); // 疲れる → 疲れた
+    expect(ja('UNCONNECTED')).toBe('孤立した猫は食べます。');
+  });
+});
+
+describe('known bugs: adjective linker (Japanese)', () => {
+  // BROWN is the one adjective in the corpus that attaches with NO linker: 茶色猫. 茶色 is a noun
+  // ("brown[ness]"), so attributively it needs の — 茶色の猫 — exactly like the other noun-
+  // adjectives (男性の, 定冠詞の). It is the only one of the 47 that comes out bare; every other
+  // adjective takes い / な / の / た. (茶色い猫, the i-adjective form, would do as well — the
+  // surface is a design call, but the bare compound is not it.)
+  test.fails('Japanese BROWN needs a linker: 茶色の猫, not 茶色猫', () => {
+    expect(cat({ adjectives: ['BROWN'] }).ja).toBe('茶色の猫は食べます。');
+  });
+});
+
+// All 36 combinations of two adjectives, each at every degree. `adjectiveDegrees` is index-
+// aligned, so BIG takes d1 and OLD takes d2 independently. The grid exercises two interacting
+// systems at once: each adjective's own degree form, and where that degree puts it relative to
+// the noun (and to the other adjective) in Romance.
+describe('two adjectives across all degree combinations', () => {
+  const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', 'equally'];
+  const pairs = DEGREES.flatMap((d1) => DEGREES.map((d2): [Degree, Degree] => [d1, d2]));
+
+  const say = (d1: Degree, d2: Degree) =>
+    cat({ adjectives: ['BIG', 'OLD'], adjectiveDegrees: [d1, d2] });
+
+  // English keeps both adjectives prenominal in order at every degree, so its 36 outputs are
+  // fully generable — the strongest way to assert "all combinations".
+  const EN_BIG: Record<Degree, string> = {
+    positive: 'big', more: 'bigger', most: 'biggest',
+    less: 'less big', least: 'least big', equally: 'equally big',
+  };
+  const EN_OLD: Record<Degree, string> = {
+    positive: 'old', more: 'older', most: 'oldest',
+    less: 'less old', least: 'least old', equally: 'equally old',
+  };
+
+  test.each(pairs)('English BIG@%s + OLD@%s', (d1, d2) => {
+    expect(say(d1, d2).en).toBe(`the ${EN_BIG[d1]} ${EN_OLD[d2]} cat eats.`);
+  });
+
+  // Romance: a positive adjective of the prenominal class stays before the noun; a compared one
+  // (any non-positive degree) moves after it. So which side each adjective lands on is a function
+  // of its own degree — the four quadrants below.
+  test('both positive → both prenominal, juxtaposed (no conjunction)', () => {
+    expect(say('positive', 'positive')).toMatchObject({
+      it: 'il grande vecchio gatto mangia.',
+      fr: 'le grand vieux chat mange.',
+      de: 'der große alte Kater isst.',
+    });
+  });
+
+  test('one compared → it crosses the noun, the positive one stays prenominal', () => {
+    // OLD compared, BIG positive: BIG before, OLD after.
+    expect(say('positive', 'more')).toMatchObject({
+      en: 'the big older cat eats.',
+      it: 'il grande gatto più vecchio mangia.',
+      fr: 'le grand chat plus vieux mange.',
+    });
+    // BIG compared, OLD positive: the mirror image.
+    expect(say('more', 'positive')).toMatchObject({
+      en: 'the bigger old cat eats.',
+      it: 'il vecchio gatto più grande mangia.',
+      fr: 'le vieux chat plus grand mange.',
+    });
+  });
+
+  test('both compared → both postnominal, and now they COORDINATE', () => {
+    // Two adjectives on the same (post-nominal) side are joined with e/et, unlike the juxtaposed
+    // prenominal pair above. This holds for any mix of non-positive degrees.
+    expect(say('more', 'more')).toMatchObject({
+      it: 'il gatto più grande e più vecchio mangia.',
+      fr: 'le chat plus grand et plus vieux mange.',
+      es: 'el gato más grande y más viejo come.',
+    });
+    expect(say('less', 'equally')).toMatchObject({
+      it: 'il gatto meno grande e ugualmente vecchio mangia.',
+      fr: 'le chat moins grand et aussi vieux mange.',
+    });
+    expect(say('most', 'least')).toMatchObject({
+      // most==more and least==less under the definite article (the legitimate homophony).
+      it: 'il gatto più grande e meno vecchio mangia.',
+    });
+  });
+
+  test('Spanish, both postnominal, joins with "y" — but "e" before an i-sound', () => {
+    // The euphonic rule: y → e before a word beginning /i/. "igual" (equally) triggers it; "más"
+    // and "menos" and "viejo" do not.
+    expect(say('more', 'positive').es).toBe('el gato más grande y viejo come.'); // y viejo
+    expect(say('equally', 'positive').es).toBe('el gato igual de grande y viejo come.');
+    expect(say('positive', 'equally').es).toBe('el gato grande e igual de viejo come.'); // e igual
+    expect(say('more', 'equally').es).toBe('el gato más grande e igual de viejo come.');
+  });
+
+  // Every combination renders a well-formed sentence in every language — a guard over the whole
+  // grid, catching a dropped conjunction or a stranded degree word that a spot-check would miss.
+  test.each(pairs)('BIG@%s + OLD@%s is well-formed everywhere', (d1, d2) => {
+    const said = say(d1, d2);
+    for (const lang of ['en', 'it', 'fr', 'es', 'pt', 'de', 'ja'] as const) {
+      expect(said[lang]).toMatch(/[.。]$/);
+      expect(said[lang]).not.toMatch(/\s{2,}|undefined|,\s*[.。]/);
+    }
+  });
+});
+
+// Romance decides an adjective's side of the noun by its lexical class: a small prenominal set
+// (grande, vecchio, buono…) sits before, everything else after. Combining adjectives of different
+// classes is where that shows — these cover the two-postnominal and the mixed cases.
+describe('Romance: two postnominal adjectives', () => {
+  test('both follow the noun and are coordinated, in the given order', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY'] })).toMatchObject({
+      it: 'il gatto forte e felice mangia.',
+      fr: 'le chat fort et heureux mange.',
+      es: 'el gato fuerte y feliz come.',
+      pt: 'o gato forte e feliz come.',
+    });
+    // Reversing the pair reverses the surface — postnominal order is the input order.
+    expect(cat({ adjectives: ['HAPPY', 'STRONG'] })).toMatchObject({
+      it: 'il gatto felice e forte mangia.',
+      fr: 'le chat heureux et fort mange.',
+      es: 'el gato feliz y fuerte come.',
+    });
+  });
+
+  test('the coordinator takes its euphonic form before a vowel / i-sound', () => {
+    // Italian "e" (no change here), Spanish "y" → "e" before /i/: "frío e interesante".
+    expect(cat({ adjectives: ['COLD', 'INTERESTING'] })).toMatchObject({
+      it: 'il gatto freddo e interessante mangia.',
+      es: 'el gato frío e interesante come.', // e, not y, before "interesante"
+      pt: 'o gato frio e interessante come.',
+    });
+  });
+
+  test('both agree with the head in gender and number', () => {
+    expect(cat({ gender: 'fem', number: 'plural', adjectives: ['STRONG', 'HAPPY'] }))
+      .toMatchObject({
+        it: 'le gatte forti e felici mangiano.',
+        fr: 'les chattes fortes et heureuses mangent.',
+        es: 'las gatas fuertes y felices comen.',
+      });
+  });
+});
+
+describe('Romance: a prenominal and a postnominal adjective', () => {
+  test('the prenominal one leads, the postnominal one trails — no coordinator between them', () => {
+    // They sit on opposite sides of the noun, so nothing joins them: "il grande gatto felice",
+    // not "il grande e felice gatto" nor "il gatto grande e felice".
+    expect(cat({ adjectives: ['BIG', 'HAPPY'] })).toMatchObject({
+      it: 'il grande gatto felice mangia.',
+      fr: 'le grand chat heureux mange.',
+    });
+    expect(cat({ adjectives: ['OLD', 'STRONG'] })).toMatchObject({
+      it: 'il vecchio gatto forte mangia.',
+      fr: 'le vieux chat fort mange.',
+    });
+    expect(cat({ adjectives: ['BEAUTIFUL', 'STRONG'] })).toMatchObject({
+      it: 'il bel gatto forte mangia.', // bello → bel, prenominally
+      fr: 'le beau chat fort mange.',
+    });
+  });
+
+  test('Italian and French place by class, so the input order does not move them', () => {
+    // [BIG, HAPPY] and [HAPPY, BIG] both yield "il grande gatto felice": grande is prenominal and
+    // felice postnominal whatever order they arrive in — the position is lexical, not positional.
+    const forward = cat({ adjectives: ['BIG', 'HAPPY'] });
+    const reversed = cat({ adjectives: ['HAPPY', 'BIG'] });
+    expect(reversed.it).toBe(forward.it);
+    expect(reversed.fr).toBe(forward.fr);
+
+    // Iberian Romance, where both are postnominal, DOES follow the input order instead.
+    expect(forward.es).toBe('el gato grande y feliz come.');
+    expect(reversed.es).toBe('el gato feliz y grande come.');
+  });
+
+  test('two prenominal and one postnominal: the pair juxtaposes, the last trails', () => {
+    // "il grande vecchio gatto felice" — grande vecchio juxtaposed (no e), felice after the noun.
+    // Only one adjective is postnominal, so no coordinator appears at all.
+    expect(cat({ adjectives: ['BIG', 'OLD', 'HAPPY'] })).toMatchObject({
+      it: 'il grande vecchio gatto felice mangia.',
+      fr: 'le grand vieux chat heureux mange.',
+    });
+  });
+});
+
+describe('known bugs: Romance postnominal coordination', () => {
+  // Three postnominal adjectives repeat the conjunction — "forte e felice e freddo" — where the
+  // list should be comma-separated with the coordinator only before the last: "forte, felice e
+  // freddo". This is the SAME defect already pinned for Spanish/Portuguese (with BIG/OLD/BEAUTIFUL),
+  // but those adjectives are prenominal in Italian and French, so they juxtapose and hide it.
+  // A postnominal triple shows that Italian and French have the bug too — it is Romance-wide.
+  test.fails('Italian should comma-separate three postnominal adjectives', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
+      .toMatchObject({ it: 'il gatto forte, felice e freddo mangia.' });
+  });
+
+  test.fails('French should comma-separate three postnominal adjectives', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
+      .toMatchObject({ fr: 'le chat fort, heureux et froid mange.' });
+  });
+
+  test.fails('Spanish, likewise, for a postnominal triple', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
+      .toMatchObject({ es: 'el gato fuerte, feliz y frío come.' });
+  });
+});
