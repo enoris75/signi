@@ -552,7 +552,7 @@ describe('known bugs: degree (extended)', () => {
   // Japanese, in the attributive case now (the same two were pinned for the predicative case in
   // complements/predicative.test.ts). LEAST renders as 最も — which is MOST — so "the least big
   // cat" and "the most big cat" come out identical, inverting the meaning.
-  test.fails('Japanese attributive "least" must not render as 最も ("most")', () => {
+  test('Japanese attributive "least" must not render as 最も ("most")', () => {
     const least = cat({ adjectives: ['BIG'], adjectiveDegrees: ['least'] }).ja;
     const most = cat({ adjectives: ['BIG'], adjectiveDegrees: ['most'] }).ja;
     expect(least).not.toBe(most);
@@ -560,8 +560,27 @@ describe('known bugs: degree (extended)', () => {
 
   // LESS reuses あまり, a negative-polarity adverb: あまり大きい is ungrammatical without a negated
   // predicate (あまり大きくない). Same defect as the predicative case.
-  test.fails('Japanese attributive "less" should not use あまり with an affirmative adjective', () => {
+  test('Japanese attributive "less" should not use あまり with an affirmative adjective', () => {
     expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['less'] }).ja).not.toContain('あまり');
+  });
+
+  // The concrete forms: a lowered degree negates the adjective — 最も…ない ("least") and
+  // それほど…ない ("less") — while the raised degrees keep the affirmative. An i-adjective
+  // (大きい) negates to 大きくない; a na-adjective (幸せな) to 幸せではない, both prenominal.
+  test('Japanese renders the lowered degrees as the negated attributive adjective', () => {
+    const big = (d: 'more' | 'most' | 'less' | 'least') =>
+      cat({ adjectives: ['BIG'], adjectiveDegrees: [d] }).ja;
+    expect(big('least')).toBe('最も大きくない猫は食べます。');
+    expect(big('less')).toBe('それほど大きくない猫は食べます。');
+    // Regression: the raised degrees are untouched.
+    expect(big('most')).toBe('最も大きい猫は食べます。');
+    expect(big('more')).toBe('もっと大きい猫は食べます。');
+    // A na-adjective negates with ではない, still an い-adjective and still prenominal.
+    const happy = (d: 'most' | 'less' | 'least') =>
+      cat({ adjectives: ['HAPPY'], adjectiveDegrees: [d] }).ja;
+    expect(happy('least')).toBe('最も幸せではない猫は食べます。');
+    expect(happy('less')).toBe('それほど幸せではない猫は食べます。');
+    expect(happy('most')).toBe('最も幸せな猫は食べます。');
   });
 
   // English superlatives are inherently definite ("THE biggest"), so an indefinite article is

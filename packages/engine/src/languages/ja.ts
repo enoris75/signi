@@ -2,12 +2,39 @@ import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type
 import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
-// is largely contextual (より marks the standard); these adverbs are the closest MVP. 'less'
-// (あまり) and 'least' properly pair with a negative predicate, which is out of scope here —
-// 'least' reuses 最も as an approximation.
+// is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
+// LOWERED degrees are negative-polarity: Japanese lowers a degree by negating the adjective, so
+// 'less' pairs それほど with the negative (それほど大きくない "not so big") and 'least' pairs 最も with
+// it (最も大きくない "least big") — see `jaComparisonAdj`. Reusing 最も for 'least' bare would make it
+// identical to 'most', and あまり on an affirmative adjective is ungrammatical.
 const JA_DEGREE: Record<Degree, string> = {
-  positive: '', more: 'もっと', most: '最も', less: 'あまり', least: '最も', equally: '同じくらい',
+  positive: '', more: 'もっと', most: '最も', less: 'それほど', least: '最も', equally: '同じくらい',
 };
+
+/** True for the lowered degrees, which Japanese realises by negating the adjective. */
+function isLoweredDegree(concept: ConceptForms): boolean {
+  const d = adjDegree(concept);
+  return d === 'less' || d === 'least';
+}
+
+/**
+ * An adjective's surface for its degree. The lowered degrees (less/least) put the adjective into
+ * its plain negative — i-adjective 大きい → 大きくない, na-adjective 幸せな → 幸せではない — because a
+ * lowered degree is negative-polarity in Japanese. The result itself ends in …ない (an
+ * i-adjective), so every downstream position (attributive 大きくない, adverbial 大きくなく, copula
+ * 大きくないです) is handled by the ordinary い-adjective machinery. Every other degree keeps the
+ * stored base. Furigana tracks the same substitution (whole-word ruby, as elsewhere).
+ */
+function jaComparisonAdj(concept: ConceptForms): { base: string; reading?: string } {
+  const base = concept.forms['base'] ?? '';
+  const reading = concept.forms['reading'];
+  if (concept.forms['role'] !== 'adjective' || !isLoweredDegree(concept)) return { base, reading };
+  const negate = (s: string): string =>
+    s.endsWith('な') ? `${s.slice(0, -1)}ではない`
+    : s.endsWith('い') ? `${s.slice(0, -1)}くない`
+    : `${s}ではない`;
+  return { base: negate(base), reading: reading ? negate(reading) : reading };
+}
 
 /** A segment for one word: attach the furigana reading only when it differs from the surface. */
 function wordSeg(surface: string, reading?: string): RubySegment {
@@ -91,12 +118,13 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   }
   const adjSegs: RubySegment[] = [];
   for (const a of np.adjectives) {
-    const base = a.forms['base'] ?? '';
+    // The lowered degrees negate the adjective (大きい → 大きくない); every other keeps the base.
+    const { base, reading } = jaComparisonAdj(a);
     if (!base) continue;
     // Prenominal degree adverb bound directly to its adjective (もっと大きい), no space.
     const deg = JA_DEGREE[adjDegree(a)];
     if (deg) adjSegs.push({ t: deg });
-    adjSegs.push(wordSeg(base, a.forms['reading']));
+    adjSegs.push(wordSeg(base, reading));
   }
   core.push(...adjSegs);
   const head = np.head.forms;
@@ -321,9 +349,9 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       c.phrase.conjuncts.forEach((np, i) => {
         if (i > 0) segs.push({ t: conj });
         const f = np.head.forms;
-        const base = f['base'] ?? '';
-        const reading = f['reading'];
         const isAdj = f['role'] === 'adjective';
+        // The lowered degrees negate the adjective (幸せな → 幸せではない, itself an い-adjective).
+        const { base, reading } = isAdj ? jaComparisonAdj(np.head) : { base: f['base'] ?? '', reading: f['reading'] };
         const deg = isAdj ? JA_DEGREE[adjDegree(np.head)] : '';
         if (deg) segs.push({ t: deg });
         if (isAdj && base.endsWith('い')) {
@@ -384,10 +412,11 @@ function copulaSegs(pred: ResolvedComplement, tense: Tense, negative: boolean): 
   // conjunct's form (a documented approximation — the UI's copula predicate is a single phrase).
   const head = firstConjunct(pred.phrase);
   const f = head.head.forms;
-  const base = f['base'] ?? '';
-  const reading = f['reading'];
   const past = tense === 'past';
   const isAdj = f['role'] === 'adjective';
+  // The lowered degrees negate the adjective (大きい → 大きくない, itself an い-adjective, so the
+  // い-branch below inflects its copula: 大きくないです).
+  const { base, reading } = isAdj ? jaComparisonAdj(head.head) : { base: f['base'] ?? '', reading: f['reading'] };
   // The predicate adjective's degree adverb leads, as it does attributively (もっと楽しいです).
   const deg = isAdj ? JA_DEGREE[adjDegree(head.head)] : '';
   const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];

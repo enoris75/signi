@@ -207,13 +207,32 @@ describe('known bugs: predicative degree', () => {
   // Japanese renders LEAST as 最も — which means MOST. The two degrees come out byte-identical,
   // so "the cat seems LEAST happy" is rendered "the cat seems MOST happy": the meaning inverts.
   // (A lowered superlative wants 最も〜ない / 一番〜ない — a negated form.)
-  test.fails('Japanese "least" must not render as 最も ("most")', () => {
+  test('Japanese "least" must not render as 最も ("most")', () => {
     expect(atDegree('least').ja).not.toBe(atDegree('most').ja);
   });
 
   // And "less" reuses あまり, which is a negative-polarity adverb: あまり幸せ is ungrammatical
   // without a negated predicate (あまり幸せではない). Same defect as the attributive case.
-  test.fails('Japanese "less" should not use あまり with an affirmative predicate', () => {
+  test('Japanese "less" should not use あまり with an affirmative predicate', () => {
     expect(atDegree('less').ja).not.toContain('あまり');
+  });
+
+  // The concrete predicative forms. Through 見える/思える the negated adjective takes the adverbial
+  // (幸せではなく); the raised degrees stay affirmative (幸せに). The lowering adverbs are 最も…
+  // ("least") and それほど… ("less").
+  test('Japanese renders the lowered predicative degrees as the negated adjective', () => {
+    expect(atDegree('least').ja).toBe('猫は最も幸せではなく思えます。');
+    expect(atDegree('less').ja).toBe('猫はそれほど幸せではなく思えます。');
+    expect(atDegree('most').ja).toBe('猫は最も幸せに思えます。'); // regression: raised is affirmative
+  });
+
+  // The copula (BE) predicate reaches the same negation the other way: an i-adjective's negative
+  // inflects its own copula (大きくないです), so "is least/less big" is 最も/それほど大きくないです.
+  test('Japanese lowers a copula predicate adjective by negating it (大きくないです)', () => {
+    const isBig = (d: Degree) =>
+      sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG', { headDegree: d }) } } })).ja;
+    expect(isBig('least')).toBe('猫は最も大きくないです。');
+    expect(isBig('less')).toBe('猫はそれほど大きくないです。');
+    expect(isBig('most')).toBe('猫は最も大きいです。'); // regression: raised is affirmative
   });
 });
