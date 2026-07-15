@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { PhrasePlan } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // The shape of a clause: subject, verb, object — agreement, case, and word order.
@@ -25,6 +26,17 @@ describe('clause', () => {
       de: 'der Kater.',
       ja: '猫。',
     });
+  });
+
+  test('a verbless period drops objects and complements — they hang off the verb', () => {
+    // A half-built plan with no verb renders just the subject: the directObject and the locative
+    // are meaningless without a verb, so they are dropped, not rendered loose.
+    const bareSubject = sayAll({ subject: np('CAT') });
+    expect(sayAll({
+      subject: np('CAT'),
+      directObject: np('MOUSE'),
+      complements: { locative: { phrase: np('HOUSE') } },
+    } as PhrasePlan)).toEqual(bareSubject);
   });
 
   test('the verb agrees with a plural subject', () => {

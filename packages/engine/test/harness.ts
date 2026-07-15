@@ -1,4 +1,5 @@
 import type {
+  Definiteness,
   LanguageCode,
   NounElement,
   NounPhrase,
@@ -6,7 +7,7 @@ import type {
   Translation,
   VerbPhrase,
 } from '@signi/shared';
-import { translate } from '../src/index.js';
+import { translate, translateWord, translateDeterminer } from '../src/index.js';
 
 // The engine is a pure function of (plan, lexicon), so these tests give it the *real* lexicon:
 // an in-memory SQLite seeded from the same corpus the app ships, read through the same
@@ -38,6 +39,31 @@ export function say(plan: PhrasePlan, language: LanguageCode): string {
 export function sayAll(plan: PhrasePlan): Record<LanguageCode, string> {
   return Object.fromEntries(
     translateAll(plan).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+/**
+ * Render a UI-label word (or several words naming one thing) into every language, keyed — the
+ * `translateWord` path the sentence helpers never touch. `agreesWith` fixes the gender/number of an
+ * adjective label against a (nowhere-rendered) noun, so "first" agreeing with PERSON_GRAMMAR reads
+ * "prima" in Italian.
+ */
+export function wordAll(
+  conceptIds: string | string[],
+  agreesWith?: string,
+): Record<LanguageCode, string> {
+  return Object.fromEntries(
+    translateWord(conceptIds, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+/** Render one determiner value (agreeing with `agreesWith`, default NOUN) into every language. */
+export function determinerAll(
+  value: Definiteness,
+  agreesWith?: string,
+): Record<LanguageCode, string> {
+  return Object.fromEntries(
+    translateDeterminer(value, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
   ) as Record<LanguageCode, string>;
 }
 

@@ -167,6 +167,29 @@ describe('modals: chains', () => {
       de: 'der Kater musste nicht essen können.',
     });
   });
+
+  test('a three-modal chain — the UI stops at two, but the model is uncapped', () => {
+    // WILL > MUST > CAN: English supplets both inner modals ("have to", "be able to"), Romance
+    // apocopates them (dover, poter), and German stacks all three infinitives clause-finally,
+    // innermost first — "essen können müssen".
+    expect(catModal({ modals: ['WILL', 'MUST', 'CAN'] })).toMatchObject({
+      en: 'the cat wants to have to be able to eat.',
+      it: 'il gatto vuole dover poter mangiare.',
+      fr: 'le chat veut devoir pouvoir manger.',
+      es: 'el gato quiere deber poder comer.',
+      pt: 'o gato quer dever poder comer.',
+      de: 'der Kater will essen können müssen.',
+    });
+  });
+
+  test('a three-modal chain carries tense and negation on the outermost only', () => {
+    expect(catModal({ modals: ['WILL', 'MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
+      en: 'the cat did not want to have to be able to eat.', // do-support: WILL is the lexical "want"
+      it: 'il gatto non volle dover poter mangiare.',
+      fr: 'le chat ne voulut pas devoir pouvoir manger.',
+      de: 'der Kater wollte nicht essen können müssen.',
+    });
+  });
 });
 
 describe('modals: negation', () => {

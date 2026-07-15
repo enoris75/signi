@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { CoordConjunction, NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // Coordinated nouns. Where the comma falls and whether the conjunction repeats is a fact about
@@ -53,6 +53,34 @@ describe('coordinated noun groups', () => {
       ja: '男の子は猫と犬を見ます。',
     });
   });
+
+  test('a disjoined object and disjoined complements repeat their marking per conjunct', () => {
+    // OR (か in Japanese) works on a direct object, and on the adposition-bearing complements —
+    // where the preposition (with its case and article-fusion) repeats per conjunct, exactly as AND.
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      directObject: { conjuncts: [np('MOUSE'), np('FOOD')], conjunction: 'or' },
+    }))).toMatchObject({
+      en: 'the cat eats the mouse or the food.',
+      it: 'il gatto mangia il topo o il cibo.',
+      de: 'der Kater isst die Maus oder das Essen.', // accusative on both
+      ja: '猫はネズミか食べ物を食べます。', // か, を on the group
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: { conjuncts: [np('HOUSE'), np('MARKET')], conjunction: 'or' } } },
+    }))).toMatchObject({
+      it: 'il gatto corre nella casa o nel mercato.', // the fused preposition repeats: nella / nel
+      fr: 'le chat court dans la maison ou dans le marché.',
+      de: 'der Kater läuft im Haus oder im Markt.',
+      ja: '猫は家か市場で走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'GIVE', {
+      directObject: np('BOOK'),
+      complements: { terminus: { phrase: { conjuncts: [np('DOG'), np('MOUSE')], conjunction: 'or' } } },
+    }))).toMatchObject({
+      it: 'il gatto dà il libro al cane o al topo.',
+      de: 'der Kater gibt dem Hund oder der Maus das Buch.', // dative on both conjuncts
+    });
+  });
 });
 
 // Two independent clauses joined by a conjunction. Symmetric, unlike a condition.
@@ -88,6 +116,61 @@ describe('coordinated clauses', () => {
       // "also" is a V2 adverb: the finite verb comes before the subject.
       de: 'der Kater läuft, also springt der Hund.',
     });
+  });
+
+  const join = (conjunction: CoordConjunction) =>
+    sayAll({
+      ...clause(np('CAT'), 'RUN'),
+      coordination: { conjunction, clause: clause(np('DOG'), 'JUMP') },
+    });
+
+  test('disjunctive — "or"', () => {
+    expect(join('or')).toMatchObject({
+      en: 'the cat runs, or the dog jumps.',
+      it: 'il gatto corre, o il cane salta.',
+      fr: 'le chat court, ou le chien saute.',
+      es: 'el gato corre, o el perro salta.',
+      de: 'der Kater läuft, oder der Hund springt.',
+      ja: '猫は走ります、または犬は跳びます。',
+    });
+  });
+
+  test('explicative — "that is"', () => {
+    expect(join('that_is')).toMatchObject({
+      en: 'the cat runs, that is the dog jumps.',
+      it: 'il gatto corre, cioè il cane salta.',
+      fr: "le chat court, c'est-à-dire le chien saute.",
+      es: 'el gato corre, es decir el perro salta.',
+      pt: 'o gato corre, isto é o cão pula.',
+      // "das heißt" is parenthetical, so — unlike "also" / "dann" — it does NOT invert.
+      de: 'der Kater läuft, das heißt der Hund springt.',
+      ja: '猫は走ります、つまり犬は跳びます。',
+    });
+  });
+
+  test('temporal — "then" carries its coordinator, and inverts German like "therefore"', () => {
+    // Most languages mark sequence with an adverb, so the engines render "then" with a coordinator
+    // in front of it ("and then", "e poi", "und dann"). German "dann" is a V2 adverb, so — like
+    // "also" — the finite verb precedes the subject.
+    expect(join('then')).toMatchObject({
+      en: 'the cat runs, and then the dog jumps.',
+      it: 'il gatto corre, e poi il cane salta.',
+      fr: 'le chat court, et puis le chien saute.',
+      es: 'el gato corre, y luego el perro salta.',
+      pt: 'o gato corre, e depois o cão pula.',
+      de: 'der Kater läuft, und dann springt der Hund.',
+      ja: '猫は走ります、それから犬は跳びます。',
+    });
+  });
+
+  test('German V2: "therefore" and "then" invert, the other four do not', () => {
+    // The finite verb "springt" leads for the inverting pair, and trails the subject "der Hund"
+    // for the rest — the one German axis the six conjunctions split on.
+    expect(join('therefore').de).toContain('springt der Hund');
+    expect(join('then').de).toContain('springt der Hund');
+    for (const conjunction of ['and', 'or', 'but', 'that_is'] as const) {
+      expect(join(conjunction).de).toContain('der Hund springt');
+    }
   });
 });
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { VerbPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // A restrictive relative clause. The head noun fills one slot of the clause — its subject by
@@ -229,6 +229,55 @@ describe('relative clauses: an aspect of their own', () => {
       it: 'il gatto che sta mangiando ha visto il topo.',
       es: 'el gato que está comiendo ha visto el ratón.',
     });
+  });
+});
+
+// French agrees a past participle with a PRECEDING direct object (the accord du participe passé du
+// COD antéposé): in an object-relative clause under the compound past, the participle agrees with
+// the antecedent — "la souris QUE le chat a mangéE". Only French makes this obligatory: Italian's
+// relative-clause agreement is optional (ha mangiato is fine), and Spanish/Portuguese never agree an
+// haber/ter participle. The head is the object of the clause and it is resolved in the resultative.
+const eatenByCat = (head: string, extra: Partial<NounPhrase> = {}) =>
+  sayAll(clause(
+    np(head, {
+      ...extra,
+      relative: {
+        headRole: 'directObject',
+        subject: np('CAT'),
+        verbPhrase: { verb: 'EAT', aspect: 'resultative' },
+      },
+    }),
+    'RUN',
+  ));
+
+describe('relative clauses: preceding-object participle agreement', () => {
+  test('Spanish and Portuguese correctly do NOT agree the participle with the antecedent', () => {
+    expect(eatenByCat('MOUSE')).toMatchObject({
+      es: 'el ratón que el gato ha comido corre.',
+      pt: 'o rato que o gato tem comido corre.',
+    });
+  });
+
+  test('a masculine antecedent shows no visible agreement in French either', () => {
+    // The control: "mangé" is already the form a masculine antecedent takes, so the agreement is
+    // invisible here — which is why the feminine antecedent below is what exposes the gap.
+    expect(eatenByCat('BOOK')).toMatchObject({ fr: 'le livre que le chat a mangé court.' });
+  });
+});
+
+describe('known bugs: French preceding-object participle agreement', () => {
+  // French obligatorily agrees the participle with a preceding direct object, so a feminine
+  // antecedent gives "mangée" (singular) / "mangées" (plural). The engine leaves the participle in
+  // its base ("a mangé"), which is a spelling error in French. fr.ts documents only that avoir does
+  // not agree with the SUBJECT ("elle a vu") — it says nothing about the preceding-OBJECT exception,
+  // so this is an undocumented gap, not a stated simplification.
+  test.fails('French agrees with a feminine singular antecedent: "a mangée"', () => {
+    expect(eatenByCat('MOUSE')).toMatchObject({ fr: 'la souris que le chat a mangée court.' });
+  });
+
+  test.fails('…and with a feminine plural antecedent: "a mangées"', () => {
+    expect(eatenByCat('MOUSE', { number: 'plural' }))
+      .toMatchObject({ fr: 'les souris que le chat a mangées courent.' });
   });
 });
 

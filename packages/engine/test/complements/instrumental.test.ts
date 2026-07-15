@@ -133,6 +133,69 @@ describe('instrumental: the verbs that are not one word', () => {
   });
 });
 
+// Complement.action is a full verb phrase, but only its verb and its ADVERB are read (an instrument
+// has no tense/mood of its own — it takes them from the clause). The adverb attaches to the
+// non-finite action — the gerund / te-form / indem-clause — not to the matrix verb.
+describe('instrumental: an adverb on the action', () => {
+  const cutChoosing = (level: 'process' | 'concept', adverb: string) =>
+    sayAll(clause(np('CAT'), 'CUT', {
+      complements: {
+        instrumental: {
+          phrase: np('STICK'),
+          specifiers: [{ kind: 'abstraction', value: level }],
+          action: { verb: 'CHOOSE', modifier: adverb },
+        },
+      },
+    }));
+
+  test('a manner adverb attaches to the process-level gerund', () => {
+    expect(cutChoosing('process', 'WELL')).toEqual({
+      en: 'the cat cuts by choosing the stick well.',
+      it: 'il gatto taglia scegliendo il bastone bene.',
+      fr: 'le chat coupe en choisissant le bâton bien.',
+      es: 'el gato corta eligiendo el palo bien.',
+      pt: 'o gato corta escolhendo o pau bem.',
+      // German drops it into the indem-clause, preverbally (the clause is verb-final): "gut wählt".
+      de: 'der Kater schneidet, indem man den Stock gut wählt.',
+      ja: '猫は棒をよく選んで切ります。', // よく attaches to the te-form action
+    });
+  });
+
+  test('a different adverb changes only the action', () => {
+    expect(cutChoosing('process', 'FAST')).toMatchObject({
+      en: 'the cat cuts by choosing the stick fast.',
+      it: 'il gatto taglia scegliendo il bastone velocemente.',
+      de: 'der Kater schneidet, indem man den Stock schnell wählt.',
+      ja: '猫は棒を速く選んで切ります。',
+    });
+  });
+
+  test('at the concept level German turns the adverb into an adjective on the nominalisation', () => {
+    // A nominalised verb ("das Wählen") takes an ADJECTIVE, not an adverb: German declines "gut" →
+    // "guten" inside the noun phrase ("mit dem guten Wählen"). The others keep it as an adverb.
+    expect(cutChoosing('concept', 'WELL')).toMatchObject({
+      en: 'the cat cuts with the choosing of the stick well.',
+      it: 'il gatto taglia con lo scegliere il bastone bene.',
+      de: 'der Kater schneidet mit dem guten Wählen des Stockes.',
+      ja: '猫は棒をよく選ぶことで切ります。',
+    });
+  });
+
+  test('the adverb is what adds the word — without it the action is bare', () => {
+    const bare = sayAll(clause(np('CAT'), 'CUT', {
+      complements: {
+        instrumental: {
+          phrase: np('STICK'),
+          specifiers: [{ kind: 'abstraction', value: 'process' }],
+          action: { verb: 'CHOOSE' },
+        },
+      },
+    }));
+    expect(bare.en).toBe('the cat cuts by choosing the stick.');
+    expect(cutChoosing('process', 'WELL').en).not.toBe(bare.en);
+  });
+});
+
 // DELIBERATE — do not "fix" without a product decision.
 describe('documented simplifications: instrumental', () => {
   // German's means clause needs an overt subject (it cannot drop one the way a gerund does), and

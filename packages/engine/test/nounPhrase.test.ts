@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { Definiteness } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
@@ -85,5 +86,81 @@ describe('known bugs: determiners', () => {
   test.fails('the miss propagates into the contracted forms: "de l\'homme", not "du homme"', () => {
     expect(sayAll(clause(np('BOOK', { possessor: np('MAN') }), 'BURN')))
       .toMatchObject({ fr: "le livre de l'homme brûle." });
+  });
+});
+
+// A mass (uncountable) noun does not just block the plural — it takes DIFFERENT quantifier words.
+// English splits many/much and few/little on countability; the Romance and German quantifiers
+// change form or become a partitive. WATER is the mass noun; MOUSE the count noun for contrast.
+describe('mass nouns and quantifiers', () => {
+  const water = (definiteness: Definiteness) =>
+    sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness }) }));
+  const mouse = (definiteness: Definiteness) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: np('MOUSE', { definiteness }) }));
+
+  test('English says "much / little" for mass where a count noun takes "many / few"', () => {
+    expect(water('many')).toMatchObject({
+      en: 'the cat drinks much water.', // much, not "many"
+      it: 'il gatto beve molta acqua.', // molta (fem sg), not molti
+      fr: "le chat boit beaucoup d'eau.",
+      es: 'el gato bebe mucha agua.',
+      pt: 'o gato bebe muita água.',
+      de: 'der Kater trinkt viel Wasser.', // viel (uninflected), not viele
+    });
+    expect(water('few')).toMatchObject({
+      en: 'the cat drinks little water.', // little, not "few"
+      it: 'il gatto beve poca acqua.',
+      fr: "le chat boit peu d'eau.",
+      de: 'der Kater trinkt wenig Wasser.', // wenig, not wenige
+    });
+    // The count noun takes the count words, and pluralises.
+    expect(mouse('many')).toMatchObject({ en: 'the cat sees many mice.', it: 'il gatto vede molti topi.', de: 'der Kater sieht viele Mäuse.' });
+    expect(mouse('few')).toMatchObject({ en: 'the cat sees few mice.', de: 'der Kater sieht wenige Mäuse.' });
+  });
+
+  test('the mass "some" is a partitive, not the count "some"', () => {
+    // Mass: a partitive quantity — English "some", Italian the partitive article "dell'", French
+    // "de l'", Spanish/Portuguese a "…de" phrase, German "etwas".
+    expect(water('some')).toMatchObject({
+      en: 'the cat drinks some water.',
+      it: "il gatto beve dell'acqua.", // di + l' = dell' — the partitive
+      fr: "le chat boit de l'eau.",
+      es: 'el gato bebe algo de agua.',
+      pt: 'o gato bebe um pouco de água.',
+      de: 'der Kater trinkt etwas Wasser.',
+    });
+    // Count: the enumerating "some" — a few individuals, pluralised.
+    expect(mouse('some')).toMatchObject({
+      en: 'the cat sees some mice.',
+      it: 'il gatto vede alcuni topi.', // alcuni, not dell'
+      fr: 'le chat voit quelques souris.',
+      de: 'der Kater sieht einige Mäuse.',
+    });
+  });
+
+  test('a mass noun takes no indefinite article — "water", not "a water"', () => {
+    expect(water('indefinite')).toMatchObject({
+      en: 'the cat drinks water.', // not "a water"
+      it: 'il gatto beve acqua.',
+      fr: "le chat boit de l'eau.", // French fills the slot with the partitive
+      es: 'el gato bebe agua.',
+      de: 'der Kater trinkt Wasser.',
+    });
+    // The count noun does take one.
+    expect(mouse('indefinite')).toMatchObject({ en: 'the cat sees a mouse.', it: 'il gatto vede un topo.' });
+  });
+
+  test('every quantifier keeps the mass noun singular', () => {
+    // The count noun pluralises under some/many/few ("mice", "topi"); the mass noun never does.
+    for (const q of ['some', 'many', 'few', 'all'] as const) {
+      expect(water(q).en).toContain('water'); // never "waters"
+      expect(water(q).it).toContain('acqua'); // never "acque"
+      expect(water(q).de).toContain('Wasser');
+    }
+  });
+
+  test('the article-bearing determiners work on a mass noun', () => {
+    expect(water('definite')).toMatchObject({ en: 'the cat drinks the water.', it: "il gatto beve l'acqua." });
+    expect(water('this')).toMatchObject({ en: 'the cat drinks this water.', it: "il gatto beve quest'acqua.", de: 'der Kater trinkt dieses Wasser.' });
   });
 });

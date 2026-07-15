@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (87 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (92 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -80,6 +80,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A33 | [A33-romance-complement-negative-concord.md](A-must-fix/A33-romance-complement-negative-concord.md) | it, fr, es, pt |
 | A34 | [A34-romance-negative-determiner-plural-noun.md](A-must-fix/A34-romance-negative-determiner-plural-noun.md) | it, es, pt |
 | A35 | [A35-stacked-negation-not-collapsed.md](A-must-fix/A35-stacked-negation-not-collapsed.md) | en, de, es, pt, it |
+| A36 | [A36-feminine-plural-pronoun.md](A-must-fix/A36-feminine-plural-pronoun.md) | fr, es, pt |
+| A37 | [A37-french-preceding-object-participle-agreement.md](A-must-fix/A37-french-preceding-object-participle-agreement.md) | French |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
