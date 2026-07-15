@@ -508,6 +508,13 @@ function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, inst
     if (st) return [wordSeg(st.stem.replace(/し$/, ''), st.reading?.replace(/し$/, ''))];
   }
   if (pn === '1pl') {
+    if (negative) {
+      // "let's not eat" → 食べるのはやめましょう ("let's refrain from eating"). The hortative ～ましょう
+      // rides やめる ("stop"), so the negation is not dropped; built on the dictionary form, it
+      // sidesteps the nai-form the lexicon doesn't store.
+      const base = verb.forms['base'] ?? '';
+      return [wordSeg(base, verb.forms['reading']), { t: 'のはやめましょう' }];
+    }
     const st = masuStem(verb);
     if (st) return [wordSeg(st.stem + 'ましょう', st.reading !== undefined ? st.reading + 'ましょう' : undefined)];
     return [wordSeg((verb.forms['masu_present'] ?? verb.forms['base'] ?? '').replace(/ます$/, '') + 'ましょう')];

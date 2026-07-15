@@ -235,8 +235,26 @@ describe('known bugs: imperative', () => {
   // The target below (～のはやめましょう, "let's stop/refrain from") is one of several possible
   // renderings — 食べないでおきましょう would do as well — so treat the surface as a design call.
   // What is not in doubt is that it must not be the affirmative.
-  test.fails('Japanese should not render "let\'s not eat" as the affirmative 食べましょう', () => {
+  test('Japanese should not render "let\'s not eat" as the affirmative 食べましょう', () => {
     expect(sayAll(command({}, np('FIRST_PERSON', { number: 'plural' }), { negative: true })).ja)
       .not.toBe('食べましょう。');
+  });
+
+  // The concrete form: the negative hortative rides やめる ("stop") — 〜のはやめましょう ("let's
+  // refrain from …") — so ～ましょう carries the hortative and the negation survives. It builds on
+  // the dictionary form, so it generalises to any verb and keeps the object before it.
+  const usNot = (verb: string, directObject?: NounPhrase): PhrasePlan => ({
+    ...clause(np('FIRST_PERSON', { number: 'plural' }), verb, {
+      verbPhrase: { negative: true },
+      ...(directObject ? { directObject } : {}),
+    }),
+    imperative: true,
+  });
+  test('Japanese renders the negative hortative as 〜のはやめましょう', () => {
+    expect(sayAll(usNot('EAT')).ja).toBe('食べるのはやめましょう。');
+    expect(sayAll(usNot('RUN')).ja).toBe('走るのはやめましょう。');
+    expect(sayAll(usNot('EAT', np('MOUSE'))).ja).toBe('ネズミを食べるのはやめましょう。');
+    // Regression: the affirmative hortative is unchanged.
+    expect(sayAll(command({}, np('FIRST_PERSON', { number: 'plural' }), {})).ja).toBe('食べましょう。');
   });
 });
