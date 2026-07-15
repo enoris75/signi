@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { PhrasePlan } from '@signi/shared';
+import type { NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // Coordinated nouns. Where the comma falls and whether the conjunction repeats is a fact about
@@ -243,6 +243,117 @@ describe('coordinated clauses: an imperative and an indicative', () => {
     })).toMatchObject({
       en: 'eat the food, and run.', // "therefore" → "and"
       de: 'iss das Essen, und lauf.',
+    });
+  });
+});
+
+// The agreement a coordinated group resolves to AS A GROUP — the person/number/gender a verb, a
+// predicate adjective or a participle must read off it. This is carried on the element's
+// `agreement`, separate from any one conjunct: "il gatto e la volpe" is masculine plural though one
+// conjunct is feminine, and "the cat and I" is first-person plural though neither conjunct is. The
+// verb-number case is pinned above ("run"); this section is the gender and the person.
+const and = (...conjuncts: NounPhrase[]): NounElement => ({ conjuncts, conjunction: 'and' });
+
+// Group gender only surfaces through something that agrees with the whole subject — a predicate
+// adjective (Romance agrees it with the subject) or a BE-auxiliary participle. A feminine cat
+// (la gatta) and a masculine dog (il cane) make the resolution visible.
+describe('coordinated noun groups: group gender agreement', () => {
+  const FEM = np('CAT', { gender: 'fem' }); // la gatta / la chatte / la gata
+  const MASC = np('DOG'); // il cane / le chien (masculine)
+  const FEM2 = np('HOUSE'); // la casa / la maison (feminine)
+
+  const seemOld = (group: NounElement) =>
+    sayAll(clause(group, 'SEEM', { complements: { predicative: { phrase: np('OLD') } } }));
+
+  test('mixed gender resolves to MASCULINE plural, whatever the order', () => {
+    // The predicate adjective agrees with the group: masc plural (vecchi / vieux / viejos / velhos),
+    // not feminine, even though one conjunct is feminine.
+    expect(seemOld(and(FEM, MASC))).toMatchObject({
+      en: 'the cat and the dog seem old.', // English invariant
+      it: 'la gatta e il cane sembrano vecchi.',
+      fr: 'la chatte et le chien semblent vieux.',
+      es: 'la gata y el perro parecen viejos.',
+      pt: 'a gata e o cão parecem velhos.',
+      de: 'die Katze und der Hund scheinen alt.', // German predicate adjective is uninflected
+    });
+    // Reversing the conjuncts does not make the group feminine — mixed is masculine either way.
+    expect(seemOld(and(MASC, FEM))).toMatchObject({
+      it: 'il cane e la gatta sembrano vecchi.',
+      fr: 'le chien et la chatte semblent vieux.',
+      es: 'el perro y la gata parecen viejos.',
+    });
+  });
+
+  test('an all-feminine group resolves to FEMININE plural', () => {
+    expect(seemOld(and(FEM, FEM2))).toMatchObject({
+      it: 'la gatta e la casa sembrano vecchie.', // vecchie, not vecchi
+      fr: 'la chatte et la maison semblent vieilles.',
+      es: 'la gata y la casa parecen viejas.',
+      pt: 'a gata e a casa parecem velhas.',
+    });
+  });
+
+  test('the same resolution drives BE-auxiliary participle agreement', () => {
+    // it/fr select essere/être for GO, and the participle agrees with the group: masc plural for a
+    // mixed group (andati / allés), feminine plural for an all-feminine one (andate / allées).
+    expect(sayAll(clause(and(FEM, MASC), 'GO', { verbPhrase: { aspect: 'resultative' } })))
+      .toMatchObject({
+        it: 'la gatta e il cane sono andati.',
+        fr: 'la chatte et le chien sont allés.',
+      });
+    expect(sayAll(clause(and(FEM, FEM2), 'GO', { verbPhrase: { aspect: 'resultative' } })))
+      .toMatchObject({
+        it: 'la gatta e la casa sono andate.',
+        fr: 'la chatte et la maison sont allées.',
+      });
+  });
+});
+
+// Group PERSON follows the 1 > 2 > 3 hierarchy: a group containing a first person is first-person
+// plural, else a group containing a second person is second-person plural, else third. The verb
+// agrees with the resolved person, not with any one conjunct.
+describe('coordinated noun groups: group person agreement', () => {
+  const eat = (group: NounElement) => sayAll(clause(group, 'EAT'));
+  const I = np('FIRST_PERSON');
+  const YOU = np('SECOND_PERSON');
+  const CAT = np('CAT');
+
+  test('first + third resolves to FIRST plural', () => {
+    // "io e il gatto MANGIAMO" (1pl), not "mangia" (3sg) or "mangiano" (3pl). French dislocates the
+    // disjunctive pronouns and resumes them with the subject clitic ("moi et le chat, NOUS mangeons").
+    expect(eat(and(I, CAT))).toMatchObject({
+      en: 'I and the cat eat.',
+      it: 'io e il gatto mangiamo.',
+      es: 'yo y el gato comemos.',
+      pt: 'eu e o gato comemos.',
+      fr: 'moi et le chat, nous mangeons.',
+      de: 'ich und der Kater essen.',
+    });
+    expect(eat(and(CAT, I))).toMatchObject({
+      it: 'il gatto e io mangiamo.', // order does not change the person
+      es: 'el gato y yo comemos.',
+      fr: 'le chat et moi, nous mangeons.',
+    });
+  });
+
+  test('second + third resolves to SECOND plural', () => {
+    expect(eat(and(YOU, CAT))).toMatchObject({
+      it: 'tu e il gatto mangiate.', // 2pl
+      fr: 'toi et le chat, vous mangez.',
+      es: 'tú y el gato coméis.', // vosotros
+      de: 'du und der Kater esst.',
+      // Brazilian "você" is morphologically third person, so você + cat agrees as third plural.
+      pt: 'você e o gato comem.',
+    });
+  });
+
+  test('first + second resolves to FIRST plural (first wins over second)', () => {
+    expect(eat(and(I, YOU))).toMatchObject({
+      it: 'io e tu mangiamo.',
+      es: 'yo y tú comemos.',
+      fr: 'moi et toi, nous mangeons.',
+      de: 'ich und du essen.',
+      pt: 'eu e você comemos.',
     });
   });
 });
