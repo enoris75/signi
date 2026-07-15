@@ -333,8 +333,27 @@ describe('known bugs: degree', () => {
     expect(pred('BIG', 'more')).toBe('der Kater scheint größer.');
   });
 
-  test.fails('French has suppletive comparatives: bon → meilleur, not "plus bon"', () => {
+  test('French has suppletive comparatives: bon → meilleur, not "plus bon"', () => {
     expect(withDegree('GOOD', 'more')).toMatchObject({ fr: 'le chat meilleur mange.' });
+  });
+
+  // The fix generalises to the other French suppletive (mauvais → pire) and agrees it with the
+  // noun; it fires only on the raised degrees, leaving the lowered/equal degrees periphrastic,
+  // and does not disturb a non-suppletive adjective's periphrasis.
+  test('French suppletives cover mauvais → pire and agree with the noun', () => {
+    expect(withDegree('BAD', 'more').fr).toBe('le chat pire mange.');
+    // Feminine + plural agreement of the suppletive stem.
+    expect(sayAll(clause(np('CAT', {
+      gender: 'fem', number: 'plural', adjectives: ['GOOD'], adjectiveDegrees: ['more'],
+    }), 'EAT')).fr).toBe('les chattes meilleures mangent.');
+  });
+
+  test('French lowered/equal degrees and non-suppletive adjectives stay periphrastic', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['GOOD'], adjectiveDegrees: ['less'] }), 'EAT')).fr)
+      .toBe('le chat moins bon mange.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['GOOD'], adjectiveDegrees: ['equally'] }), 'EAT')).fr)
+      .toBe('le chat aussi bon mange.');
+    expect(withDegree('BIG', 'more').fr).toBe('le chat plus grand mange.');
   });
 
   test.fails('Portuguese has suppletive comparatives: grande → maior, bom → melhor', () => {
@@ -420,9 +439,10 @@ describe('every adjective at every degree', () => {
   test('Romance marks the raised and lowered degrees periphrastically', () => {
     // più/plus/más/mais for "more"; meno/moins/menos for "less". The compared adjective moves
     // behind the noun. GOOD is prenominal in the positive (buon gatto) but not when compared.
+    // French is the exception: its raised GOOD is the suppletive "meilleur", not "plus bon".
     expect(cat({ adjectives: ['GOOD'], adjectiveDegrees: ['more'] })).toMatchObject({
       it: 'il gatto più buono mangia.',
-      fr: 'le chat plus bon mange.',
+      fr: 'le chat meilleur mange.',
       es: 'el gato más bueno come.',
       pt: 'o gato mais bom come.',
     });

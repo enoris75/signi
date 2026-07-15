@@ -17,6 +17,30 @@ function frDeg(a: ConceptForms, surface: string): string {
 }
 
 /**
+ * The raised degrees (more/most) of these adjectives are suppletive in French — a single
+ * word, never "plus" + base: bon → meilleur, mauvais → pire. "plus bon" is ungrammatical;
+ * "plus mauvais" is merely dispreferred. Only "more"/"most" suppletise — the lowered and
+ * equal degrees stay periphrastic ("moins bon", "aussi bon"). petit → moindre is deliberately
+ * omitted: moindre is figurative-only, and the literal size comparative "plus petit" is
+ * correct and by far the common case.
+ */
+const FR_SUPPLETIVE: Record<string, string> = { GOOD: 'meilleur', BAD: 'pire' };
+
+/**
+ * An adjective's comparison surface, agreed with the noun. A suppletive raised degree replaces
+ * the base outright and is itself agreed (meilleur → meilleure/meilleurs); every other case is
+ * the periphrastic degree adverb prefixed onto the agreed base ("plus grand", "moins bon").
+ */
+function frComparison(a: ConceptForms, gender: string, plural: boolean): string {
+  const degree = adjDegree(a);
+  const suppletive = FR_SUPPLETIVE[a.conceptId];
+  if (suppletive && (degree === 'more' || degree === 'most')) {
+    return agreeAdjFr(suppletive, gender, plural);
+  }
+  return frDeg(a, agreeAdjFr(a.forms['base'] ?? '', gender, plural));
+}
+
+/**
  * Agree an adjective's masculine-singular base with the noun it modifies, deriving the
  * feminine and plural by rule (French adjective forms aren't stored — only the base is).
  * Covers the seeded vocabulary: the -eau/-eux/-x/-f/-er/-on families plus the irregular
@@ -373,11 +397,11 @@ function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   for (const a of np.adjectives) {
-    const word = frDeg(a, agreeAdjFr(a.forms['base'] ?? '', gender, plural));
+    const word = frComparison(a, gender, plural);
     if (!word) continue;
-    // A comparative/superlative adjective is postnominal in French ("le chat plus grand"),
-    // even when its plain form would precede the noun — this also avoids elision artefacts
-    // ("l'aussi grand chat").
+    // A comparative/superlative adjective is postnominal in French ("le chat plus grand",
+    // "le chat meilleur"), even when its plain form would precede the noun — this also avoids
+    // elision artefacts ("l'aussi grand chat").
     const prenominal = PRENOMINAL.has(a.conceptId) && adjDegree(a) === 'positive';
     (prenominal ? pre : post).push(word);
   }
@@ -494,7 +518,7 @@ function complementsPhrase(
       if (type === 'predicative') {
         return coordinate(c.phrase, (np) =>
           np.head.forms['role'] === 'adjective'
-            ? frDeg(np.head, agreeAdjFr(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
+            ? frComparison(np.head, subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural')
             : npText(np),
         );
       }
