@@ -284,8 +284,26 @@ describe('known bugs: aspect', () => {
   // Portuguese "tem comido" is ITERATIVE ("has been eating, repeatedly"), not resultative. The
   // perfect of a bounded event is the pretérito perfeito: "o gato comeu". pt.ts documents its
   // choice of `ter` as the auxiliary but not this consequence, so it reads as an oversight.
-  test.fails('resultative Portuguese should use the pretérito, not ter + particípio', () => {
+  test('resultative Portuguese should use the pretérito, not ter + particípio', () => {
     expect(catEats({ aspect: 'resultative' })).toMatchObject({ pt: 'o gato comeu.' });
+  });
+
+  // The pretérito mapping generalises across person/number, verb and polarity — the present
+  // resultative is the simple past everywhere it surfaces.
+  test('the Portuguese present resultative is the pretérito for every subject and verb', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'EAT', { verbPhrase: { aspect: 'resultative' } })).pt)
+      .toBe('os gatos comeram.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { aspect: 'resultative' }, directObject: np('MOUSE') })).pt)
+      .toBe('o gato viu o rato.');
+    expect(catEats({ aspect: 'resultative', negative: true }).pt).toBe('o gato não comeu.');
+  });
+
+  // The bug's "careful": ONLY the present is remapped. The past resultative stays the pluperfect
+  // ("tinha comido") and the future resultative the future perfect ("terá comido") — both are
+  // genuine Portuguese perfects and must not collapse into a simple tense.
+  test('the Portuguese past and future resultatives keep ter + particípio', () => {
+    expect(catEats({ aspect: 'resultative', tense: 'past' }).pt).toBe('o gato tinha comido.');
+    expect(catEats({ aspect: 'resultative', tense: 'future' }).pt).toBe('o gato terá comido.');
   });
 
   // Japanese DROPS the negation on the prospective: 食べるところです comes out for both polarities,

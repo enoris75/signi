@@ -275,8 +275,9 @@ const TER_PT: Record<Tense, Record<string, string>> = {
 /**
  * The verb group for a non-neutral aspect: progressive = estar + gerúndio ("está indo"),
  * prospective = estar + "prestes a" + infinitivo ("está prestes a ir"), resultative = ter +
- * particípio ("tem visto", "tinha ido"). Negation ("não") is prepended by the caller, as for
- * the neutral verb.
+ * particípio in the past/future ("tinha ido", "terá visto") but the pretérito perfeito in the
+ * present ("viu", not the iterative "tem visto" — see below). Negation ("não") is prepended by
+ * the caller, as for the neutral verb.
  */
 function aspectVerb(
   verbForms: Record<string, string>,
@@ -288,7 +289,13 @@ function aspectVerb(
   const inf = verbForms['base'] ?? '';
   if (aspect === 'progressive') return `${ESTAR_PT[tense][key]} ${verbForms['gerund'] ?? inf}`;
   if (aspect === 'prospective') return `${ESTAR_PT[tense][key]} prestes a ${inf}`;
-  return `${TER_PT[tense][key]} ${verbForms['participle'] ?? inf}`; // resultative
+  // Resultative. Portuguese has no present-perfect equivalent of Spanish "ha comido": "tem
+  // comido" is iterative ("has been eating, repeatedly"), not the perfect of a bounded event.
+  // The present resultative therefore maps onto the pretérito perfeito (the simple past
+  // "comeu"). The past (pluperfect "tinha comido") and future (future perfect "terá comido")
+  // resultatives are correct as ter + particípio and keep it.
+  if (tense === 'present') return conjugate(verbForms, subjectForms, 'past');
+  return `${TER_PT[tense][key]} ${verbForms['participle'] ?? inf}`;
 }
 
 /**

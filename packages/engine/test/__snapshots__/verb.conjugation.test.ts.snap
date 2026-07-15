@@ -108,7 +108,7 @@ exports[`conjugation: ADD > 1st plural 1`] = `
     "fr": "nous avons ajouté.",
     "it": "noi abbiamo aggiunto.",
     "ja": "私たちは加えてしまいます。",
-    "pt": "nós temos adicionado.",
+    "pt": "nós adicionamos.",
   },
 }
 `;
@@ -221,7 +221,7 @@ exports[`conjugation: ADD > 1st singular 1`] = `
     "fr": "je ai ajouté.",
     "it": "io ho aggiunto.",
     "ja": "私は加えてしまいます。",
-    "pt": "eu tenho adicionado.",
+    "pt": "eu adicionei.",
   },
 }
 `;
@@ -334,7 +334,7 @@ exports[`conjugation: ADD > 2nd plural 1`] = `
     "fr": "vous avez ajouté.",
     "it": "voi avete aggiunto.",
     "ja": "あなたたちは加えてしまいます。",
-    "pt": "vocês tendes adicionado.",
+    "pt": "vocês adicionaram.",
   },
 }
 `;
@@ -447,7 +447,7 @@ exports[`conjugation: ADD > 2nd singular 1`] = `
     "fr": "tu as ajouté.",
     "it": "tu hai aggiunto.",
     "ja": "あなたは加えてしまいます。",
-    "pt": "você tens adicionado.",
+    "pt": "você adicionou.",
   },
 }
 `;
@@ -560,7 +560,7 @@ exports[`conjugation: ADD > 3rd plural 1`] = `
     "fr": "ils ont ajouté.",
     "it": "loro hanno aggiunto.",
     "ja": "彼らは加えてしまいます。",
-    "pt": "eles têm adicionado.",
+    "pt": "eles adicionaram.",
   },
 }
 `;
@@ -673,7 +673,7 @@ exports[`conjugation: ADD > 3rd singular 1`] = `
     "fr": "il a ajouté.",
     "it": "lui ha aggiunto.",
     "ja": "彼は加えてしまいます。",
-    "pt": "ele tem adicionado.",
+    "pt": "ele adicionou.",
   },
 }
 `;
@@ -786,7 +786,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "fr": "nous sommes apparus.",
     "it": "noi siamo apparsi.",
     "ja": "私たちは見えてしまいます。",
-    "pt": "nós temos aparecido.",
+    "pt": "nós aparecemos.",
   },
 }
 `;
@@ -899,7 +899,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "fr": "je suis apparu.",
     "it": "io sono apparso.",
     "ja": "私は見えてしまいます。",
-    "pt": "eu tenho aparecido.",
+    "pt": "eu apareci.",
   },
 }
 `;
@@ -1012,7 +1012,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "fr": "vous êtes apparus.",
     "it": "voi siete apparsi.",
     "ja": "あなたたちは見えてしまいます。",
-    "pt": "vocês tendes aparecido.",
+    "pt": "vocês apareceram.",
   },
 }
 `;
@@ -1125,7 +1125,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "fr": "tu es apparu.",
     "it": "tu sei apparso.",
     "ja": "あなたは見えてしまいます。",
-    "pt": "você tens aparecido.",
+    "pt": "você apareceu.",
   },
 }
 `;
@@ -1238,7 +1238,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "fr": "ils sont apparus.",
     "it": "loro sono apparsi.",
     "ja": "彼らは見えてしまいます。",
-    "pt": "eles têm aparecido.",
+    "pt": "eles apareceram.",
   },
 }
 `;
@@ -1351,7 +1351,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "fr": "il est apparu.",
     "it": "lui è apparso.",
     "ja": "彼は見えてしまいます。",
-    "pt": "ele tem aparecido.",
+    "pt": "ele apareceu.",
   },
 }
 `;
@@ -1464,7 +1464,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "fr": "nous avons été.",
     "it": "noi siamo stati.",
     "ja": "私たちはですしまいます。",
-    "pt": "nós temos sido.",
+    "pt": "nós fomos.",
   },
 }
 `;
@@ -1577,7 +1577,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "fr": "je ai été.",
     "it": "io sono stato.",
     "ja": "私はですしまいます。",
-    "pt": "eu tenho sido.",
+    "pt": "eu fui.",
   },
 }
 `;
@@ -1690,7 +1690,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "fr": "vous avez été.",
     "it": "voi siete stati.",
     "ja": "あなたたちはですしまいます。",
-    "pt": "vocês tendes sido.",
+    "pt": "vocês fostes.",
   },
 }
 `;
@@ -1803,7 +1803,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "fr": "tu as été.",
     "it": "tu sei stato.",
     "ja": "あなたはですしまいます。",
-    "pt": "você tens sido.",
+    "pt": "você foste.",
   },
 }
 `;
@@ -1916,7 +1916,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "fr": "ils ont été.",
     "it": "loro sono stati.",
     "ja": "彼らはですしまいます。",
-    "pt": "eles têm sido.",
+    "pt": "eles foram.",
   },
 }
 `;
@@ -2029,7 +2029,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "fr": "il a été.",
     "it": "lui è stato.",
     "ja": "彼はですしまいます。",
-    "pt": "ele tem sido.",
+    "pt": "ele foi.",
   },
 }
 `;
@@ -2142,7 +2142,7 @@ exports[`conjugation: BEAT > 1st plural 1`] = `
     "fr": "nous avons battu.",
     "it": "noi abbiamo battuto.",
     "ja": "私たちは打ってしまいます。",
-    "pt": "nós temos batido.",
+    "pt": "nós batemos.",
   },
 }
 `;
@@ -2255,7 +2255,7 @@ exports[`conjugation: BEAT > 1st singular 1`] = `
     "fr": "je ai battu.",
     "it": "io ho battuto.",
     "ja": "私は打ってしまいます。",
-    "pt": "eu tenho batido.",
+    "pt": "eu bati.",
   },
 }
 `;
@@ -2368,7 +2368,7 @@ exports[`conjugation: BEAT > 2nd plural 1`] = `
     "fr": "vous avez battu.",
     "it": "voi avete battuto.",
     "ja": "あなたたちは打ってしまいます。",
-    "pt": "vocês tendes batido.",
+    "pt": "vocês bateram.",
   },
 }
 `;
@@ -2481,7 +2481,7 @@ exports[`conjugation: BEAT > 2nd singular 1`] = `
     "fr": "tu as battu.",
     "it": "tu hai battuto.",
     "ja": "あなたは打ってしまいます。",
-    "pt": "você tens batido.",
+    "pt": "você bateu.",
   },
 }
 `;
@@ -2594,7 +2594,7 @@ exports[`conjugation: BEAT > 3rd plural 1`] = `
     "fr": "ils ont battu.",
     "it": "loro hanno battuto.",
     "ja": "彼らは打ってしまいます。",
-    "pt": "eles têm batido.",
+    "pt": "eles bateram.",
   },
 }
 `;
@@ -2707,7 +2707,7 @@ exports[`conjugation: BEAT > 3rd singular 1`] = `
     "fr": "il a battu.",
     "it": "lui ha battuto.",
     "ja": "彼は打ってしまいます。",
-    "pt": "ele tem batido.",
+    "pt": "ele bateu.",
   },
 }
 `;
@@ -2820,7 +2820,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous sommes devenus.",
     "it": "noi siamo diventati.",
     "ja": "私たちはなってしまいます。",
-    "pt": "nós temos tornado.",
+    "pt": "nós nos tornamos.",
   },
 }
 `;
@@ -2933,7 +2933,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je suis devenu.",
     "it": "io sono diventato.",
     "ja": "私はなってしまいます。",
-    "pt": "eu tenho tornado.",
+    "pt": "eu me tornei.",
   },
 }
 `;
@@ -3046,7 +3046,7 @@ exports[`conjugation: BECOME > 2nd plural 1`] = `
     "fr": "vous êtes devenus.",
     "it": "voi siete diventati.",
     "ja": "あなたたちはなってしまいます。",
-    "pt": "vocês tendes tornado.",
+    "pt": "vocês se tornaram.",
   },
 }
 `;
@@ -3159,7 +3159,7 @@ exports[`conjugation: BECOME > 2nd singular 1`] = `
     "fr": "tu es devenu.",
     "it": "tu sei diventato.",
     "ja": "あなたはなってしまいます。",
-    "pt": "você tens tornado.",
+    "pt": "você te tornaste.",
   },
 }
 `;
@@ -3272,7 +3272,7 @@ exports[`conjugation: BECOME > 3rd plural 1`] = `
     "fr": "ils sont devenus.",
     "it": "loro sono diventati.",
     "ja": "彼らはなってしまいます。",
-    "pt": "eles têm tornado.",
+    "pt": "eles se tornaram.",
   },
 }
 `;
@@ -3385,7 +3385,7 @@ exports[`conjugation: BECOME > 3rd singular 1`] = `
     "fr": "il est devenu.",
     "it": "lui è diventato.",
     "ja": "彼はなってしまいます。",
-    "pt": "ele tem tornado.",
+    "pt": "ele se tornou.",
   },
 }
 `;
@@ -3498,7 +3498,7 @@ exports[`conjugation: BITE > 1st plural 1`] = `
     "fr": "nous avons mordu.",
     "it": "noi abbiamo morso.",
     "ja": "私たちは噛んでしまいます。",
-    "pt": "nós temos mordido.",
+    "pt": "nós mordemos.",
   },
 }
 `;
@@ -3611,7 +3611,7 @@ exports[`conjugation: BITE > 1st singular 1`] = `
     "fr": "je ai mordu.",
     "it": "io ho morso.",
     "ja": "私は噛んでしまいます。",
-    "pt": "eu tenho mordido.",
+    "pt": "eu mordi.",
   },
 }
 `;
@@ -3724,7 +3724,7 @@ exports[`conjugation: BITE > 2nd plural 1`] = `
     "fr": "vous avez mordu.",
     "it": "voi avete morso.",
     "ja": "あなたたちは噛んでしまいます。",
-    "pt": "vocês tendes mordido.",
+    "pt": "vocês morderam.",
   },
 }
 `;
@@ -3837,7 +3837,7 @@ exports[`conjugation: BITE > 2nd singular 1`] = `
     "fr": "tu as mordu.",
     "it": "tu hai morso.",
     "ja": "あなたは噛んでしまいます。",
-    "pt": "você tens mordido.",
+    "pt": "você mordeu.",
   },
 }
 `;
@@ -3950,7 +3950,7 @@ exports[`conjugation: BITE > 3rd plural 1`] = `
     "fr": "ils ont mordu.",
     "it": "loro hanno morso.",
     "ja": "彼らは噛んでしまいます。",
-    "pt": "eles têm mordido.",
+    "pt": "eles morderam.",
   },
 }
 `;
@@ -4063,7 +4063,7 @@ exports[`conjugation: BITE > 3rd singular 1`] = `
     "fr": "il a mordu.",
     "it": "lui ha morso.",
     "ja": "彼は噛んでしまいます。",
-    "pt": "ele tem mordido.",
+    "pt": "ele mordeu.",
   },
 }
 `;
@@ -4176,7 +4176,7 @@ exports[`conjugation: BURN > 1st plural 1`] = `
     "fr": "nous avons brûlé.",
     "it": "noi abbiamo bruciato.",
     "ja": "私たちは燃えてしまいます。",
-    "pt": "nós temos ardido.",
+    "pt": "nós ardemos.",
   },
 }
 `;
@@ -4289,7 +4289,7 @@ exports[`conjugation: BURN > 1st singular 1`] = `
     "fr": "je ai brûlé.",
     "it": "io ho bruciato.",
     "ja": "私は燃えてしまいます。",
-    "pt": "eu tenho ardido.",
+    "pt": "eu ardi.",
   },
 }
 `;
@@ -4402,7 +4402,7 @@ exports[`conjugation: BURN > 2nd plural 1`] = `
     "fr": "vous avez brûlé.",
     "it": "voi avete bruciato.",
     "ja": "あなたたちは燃えてしまいます。",
-    "pt": "vocês tendes ardido.",
+    "pt": "vocês arderam.",
   },
 }
 `;
@@ -4515,7 +4515,7 @@ exports[`conjugation: BURN > 2nd singular 1`] = `
     "fr": "tu as brûlé.",
     "it": "tu hai bruciato.",
     "ja": "あなたは燃えてしまいます。",
-    "pt": "você tens ardido.",
+    "pt": "você ardeu.",
   },
 }
 `;
@@ -4628,7 +4628,7 @@ exports[`conjugation: BURN > 3rd plural 1`] = `
     "fr": "ils ont brûlé.",
     "it": "loro hanno bruciato.",
     "ja": "彼らは燃えてしまいます。",
-    "pt": "eles têm ardido.",
+    "pt": "eles arderam.",
   },
 }
 `;
@@ -4741,7 +4741,7 @@ exports[`conjugation: BURN > 3rd singular 1`] = `
     "fr": "il a brûlé.",
     "it": "lui ha bruciato.",
     "ja": "彼は燃えてしまいます。",
-    "pt": "ele tem ardido.",
+    "pt": "ele ardeu.",
   },
 }
 `;
@@ -4854,7 +4854,7 @@ exports[`conjugation: BUY > 1st plural 1`] = `
     "fr": "nous avons acheté.",
     "it": "noi abbiamo comprato.",
     "ja": "私たちは買ってしまいます。",
-    "pt": "nós temos comprado.",
+    "pt": "nós compramos.",
   },
 }
 `;
@@ -4967,7 +4967,7 @@ exports[`conjugation: BUY > 1st singular 1`] = `
     "fr": "je ai acheté.",
     "it": "io ho comprato.",
     "ja": "私は買ってしまいます。",
-    "pt": "eu tenho comprado.",
+    "pt": "eu comprei.",
   },
 }
 `;
@@ -5080,7 +5080,7 @@ exports[`conjugation: BUY > 2nd plural 1`] = `
     "fr": "vous avez acheté.",
     "it": "voi avete comprato.",
     "ja": "あなたたちは買ってしまいます。",
-    "pt": "vocês tendes comprado.",
+    "pt": "vocês compraram.",
   },
 }
 `;
@@ -5193,7 +5193,7 @@ exports[`conjugation: BUY > 2nd singular 1`] = `
     "fr": "tu as acheté.",
     "it": "tu hai comprato.",
     "ja": "あなたは買ってしまいます。",
-    "pt": "você tens comprado.",
+    "pt": "você comprou.",
   },
 }
 `;
@@ -5306,7 +5306,7 @@ exports[`conjugation: BUY > 3rd plural 1`] = `
     "fr": "ils ont acheté.",
     "it": "loro hanno comprato.",
     "ja": "彼らは買ってしまいます。",
-    "pt": "eles têm comprado.",
+    "pt": "eles compraram.",
   },
 }
 `;
@@ -5419,7 +5419,7 @@ exports[`conjugation: BUY > 3rd singular 1`] = `
     "fr": "il a acheté.",
     "it": "lui ha comprato.",
     "ja": "彼は買ってしまいます。",
-    "pt": "ele tem comprado.",
+    "pt": "ele comprou.",
   },
 }
 `;
@@ -5532,7 +5532,7 @@ exports[`conjugation: CHOOSE > 1st plural 1`] = `
     "fr": "nous avons choisi.",
     "it": "noi abbiamo scelto.",
     "ja": "私たちは選んでしまいます。",
-    "pt": "nós temos escolhido.",
+    "pt": "nós escolhemos.",
   },
 }
 `;
@@ -5645,7 +5645,7 @@ exports[`conjugation: CHOOSE > 1st singular 1`] = `
     "fr": "je ai choisi.",
     "it": "io ho scelto.",
     "ja": "私は選んでしまいます。",
-    "pt": "eu tenho escolhido.",
+    "pt": "eu escolhi.",
   },
 }
 `;
@@ -5758,7 +5758,7 @@ exports[`conjugation: CHOOSE > 2nd plural 1`] = `
     "fr": "vous avez choisi.",
     "it": "voi avete scelto.",
     "ja": "あなたたちは選んでしまいます。",
-    "pt": "vocês tendes escolhido.",
+    "pt": "vocês escolheram.",
   },
 }
 `;
@@ -5871,7 +5871,7 @@ exports[`conjugation: CHOOSE > 2nd singular 1`] = `
     "fr": "tu as choisi.",
     "it": "tu hai scelto.",
     "ja": "あなたは選んでしまいます。",
-    "pt": "você tens escolhido.",
+    "pt": "você escolheu.",
   },
 }
 `;
@@ -5984,7 +5984,7 @@ exports[`conjugation: CHOOSE > 3rd plural 1`] = `
     "fr": "ils ont choisi.",
     "it": "loro hanno scelto.",
     "ja": "彼らは選んでしまいます。",
-    "pt": "eles têm escolhido.",
+    "pt": "eles escolheram.",
   },
 }
 `;
@@ -6097,7 +6097,7 @@ exports[`conjugation: CHOOSE > 3rd singular 1`] = `
     "fr": "il a choisi.",
     "it": "lui ha scelto.",
     "ja": "彼は選んでしまいます。",
-    "pt": "ele tem escolhido.",
+    "pt": "ele escolheu.",
   },
 }
 `;
@@ -6210,7 +6210,7 @@ exports[`conjugation: CLEAR > 1st plural 1`] = `
     "fr": "nous avons effacé.",
     "it": "noi abbiamo cancellato.",
     "ja": "私たちは消去してしまいます。",
-    "pt": "nós temos limpado.",
+    "pt": "nós limpamos.",
   },
 }
 `;
@@ -6323,7 +6323,7 @@ exports[`conjugation: CLEAR > 1st singular 1`] = `
     "fr": "je ai effacé.",
     "it": "io ho cancellato.",
     "ja": "私は消去してしまいます。",
-    "pt": "eu tenho limpado.",
+    "pt": "eu limpei.",
   },
 }
 `;
@@ -6436,7 +6436,7 @@ exports[`conjugation: CLEAR > 2nd plural 1`] = `
     "fr": "vous avez effacé.",
     "it": "voi avete cancellato.",
     "ja": "あなたたちは消去してしまいます。",
-    "pt": "vocês tendes limpado.",
+    "pt": "vocês limparam.",
   },
 }
 `;
@@ -6549,7 +6549,7 @@ exports[`conjugation: CLEAR > 2nd singular 1`] = `
     "fr": "tu as effacé.",
     "it": "tu hai cancellato.",
     "ja": "あなたは消去してしまいます。",
-    "pt": "você tens limpado.",
+    "pt": "você limpou.",
   },
 }
 `;
@@ -6662,7 +6662,7 @@ exports[`conjugation: CLEAR > 3rd plural 1`] = `
     "fr": "ils ont effacé.",
     "it": "loro hanno cancellato.",
     "ja": "彼らは消去してしまいます。",
-    "pt": "eles têm limpado.",
+    "pt": "eles limparam.",
   },
 }
 `;
@@ -6775,7 +6775,7 @@ exports[`conjugation: CLEAR > 3rd singular 1`] = `
     "fr": "il a effacé.",
     "it": "lui ha cancellato.",
     "ja": "彼は消去してしまいます。",
-    "pt": "ele tem limpado.",
+    "pt": "ele limpou.",
   },
 }
 `;
@@ -6888,7 +6888,7 @@ exports[`conjugation: CLICK > 1st plural 1`] = `
     "fr": "nous avons cliqué.",
     "it": "noi abbiamo cliccato.",
     "ja": "私たちはクリックしてしまいます。",
-    "pt": "nós temos clicado.",
+    "pt": "nós clicamos.",
   },
 }
 `;
@@ -7001,7 +7001,7 @@ exports[`conjugation: CLICK > 1st singular 1`] = `
     "fr": "je ai cliqué.",
     "it": "io ho cliccato.",
     "ja": "私はクリックしてしまいます。",
-    "pt": "eu tenho clicado.",
+    "pt": "eu cliquei.",
   },
 }
 `;
@@ -7114,7 +7114,7 @@ exports[`conjugation: CLICK > 2nd plural 1`] = `
     "fr": "vous avez cliqué.",
     "it": "voi avete cliccato.",
     "ja": "あなたたちはクリックしてしまいます。",
-    "pt": "vocês tendes clicado.",
+    "pt": "vocês clicaram.",
   },
 }
 `;
@@ -7227,7 +7227,7 @@ exports[`conjugation: CLICK > 2nd singular 1`] = `
     "fr": "tu as cliqué.",
     "it": "tu hai cliccato.",
     "ja": "あなたはクリックしてしまいます。",
-    "pt": "você tens clicado.",
+    "pt": "você clicou.",
   },
 }
 `;
@@ -7340,7 +7340,7 @@ exports[`conjugation: CLICK > 3rd plural 1`] = `
     "fr": "ils ont cliqué.",
     "it": "loro hanno cliccato.",
     "ja": "彼らはクリックしてしまいます。",
-    "pt": "eles têm clicado.",
+    "pt": "eles clicaram.",
   },
 }
 `;
@@ -7453,7 +7453,7 @@ exports[`conjugation: CLICK > 3rd singular 1`] = `
     "fr": "il a cliqué.",
     "it": "lui ha cliccato.",
     "ja": "彼はクリックしてしまいます。",
-    "pt": "ele tem clicado.",
+    "pt": "ele clicou.",
   },
 }
 `;
@@ -7566,7 +7566,7 @@ exports[`conjugation: COLLAPSE > 1st plural 1`] = `
     "fr": "nous sommes effondrés.",
     "it": "noi siamo crollati.",
     "ja": "私たちは崩れてしまいます。",
-    "pt": "nós temos desabado.",
+    "pt": "nós desabamos.",
   },
 }
 `;
@@ -7679,7 +7679,7 @@ exports[`conjugation: COLLAPSE > 1st singular 1`] = `
     "fr": "je suis effondré.",
     "it": "io sono crollato.",
     "ja": "私は崩れてしまいます。",
-    "pt": "eu tenho desabado.",
+    "pt": "eu desabei.",
   },
 }
 `;
@@ -7792,7 +7792,7 @@ exports[`conjugation: COLLAPSE > 2nd plural 1`] = `
     "fr": "vous êtes effondrés.",
     "it": "voi siete crollati.",
     "ja": "あなたたちは崩れてしまいます。",
-    "pt": "vocês tendes desabado.",
+    "pt": "vocês desabaram.",
   },
 }
 `;
@@ -7905,7 +7905,7 @@ exports[`conjugation: COLLAPSE > 2nd singular 1`] = `
     "fr": "tu es effondré.",
     "it": "tu sei crollato.",
     "ja": "あなたは崩れてしまいます。",
-    "pt": "você tens desabado.",
+    "pt": "você desabou.",
   },
 }
 `;
@@ -8018,7 +8018,7 @@ exports[`conjugation: COLLAPSE > 3rd plural 1`] = `
     "fr": "ils sont effondrés.",
     "it": "loro sono crollati.",
     "ja": "彼らは崩れてしまいます。",
-    "pt": "eles têm desabado.",
+    "pt": "eles desabaram.",
   },
 }
 `;
@@ -8131,7 +8131,7 @@ exports[`conjugation: COLLAPSE > 3rd singular 1`] = `
     "fr": "il est effondré.",
     "it": "lui è crollato.",
     "ja": "彼は崩れてしまいます。",
-    "pt": "ele tem desabado.",
+    "pt": "ele desabou.",
   },
 }
 `;
@@ -8244,7 +8244,7 @@ exports[`conjugation: COME > 1st plural 1`] = `
     "fr": "nous sommes venus.",
     "it": "noi siamo venuti.",
     "ja": "私たちは来てしまいます。",
-    "pt": "nós temos vindo.",
+    "pt": "nós viemos.",
   },
 }
 `;
@@ -8357,7 +8357,7 @@ exports[`conjugation: COME > 1st singular 1`] = `
     "fr": "je suis venu.",
     "it": "io sono venuto.",
     "ja": "私は来てしまいます。",
-    "pt": "eu tenho vindo.",
+    "pt": "eu vim.",
   },
 }
 `;
@@ -8470,7 +8470,7 @@ exports[`conjugation: COME > 2nd plural 1`] = `
     "fr": "vous êtes venus.",
     "it": "voi siete venuti.",
     "ja": "あなたたちは来てしまいます。",
-    "pt": "vocês tendes vindo.",
+    "pt": "vocês vieram.",
   },
 }
 `;
@@ -8583,7 +8583,7 @@ exports[`conjugation: COME > 2nd singular 1`] = `
     "fr": "tu es venu.",
     "it": "tu sei venuto.",
     "ja": "あなたは来てしまいます。",
-    "pt": "você tens vindo.",
+    "pt": "você veio.",
   },
 }
 `;
@@ -8696,7 +8696,7 @@ exports[`conjugation: COME > 3rd plural 1`] = `
     "fr": "ils sont venus.",
     "it": "loro sono venuti.",
     "ja": "彼らは来てしまいます。",
-    "pt": "eles têm vindo.",
+    "pt": "eles vieram.",
   },
 }
 `;
@@ -8809,7 +8809,7 @@ exports[`conjugation: COME > 3rd singular 1`] = `
     "fr": "il est venu.",
     "it": "lui è venuto.",
     "ja": "彼は来てしまいます。",
-    "pt": "ele tem vindo.",
+    "pt": "ele veio.",
   },
 }
 `;
@@ -8922,7 +8922,7 @@ exports[`conjugation: COMPACT > 1st plural 1`] = `
     "fr": "nous avons compacté.",
     "it": "noi abbiamo compattato.",
     "ja": "私たちは圧縮してしまいます。",
-    "pt": "nós temos compactado.",
+    "pt": "nós compactamos.",
   },
 }
 `;
@@ -9035,7 +9035,7 @@ exports[`conjugation: COMPACT > 1st singular 1`] = `
     "fr": "je ai compacté.",
     "it": "io ho compattato.",
     "ja": "私は圧縮してしまいます。",
-    "pt": "eu tenho compactado.",
+    "pt": "eu compactei.",
   },
 }
 `;
@@ -9148,7 +9148,7 @@ exports[`conjugation: COMPACT > 2nd plural 1`] = `
     "fr": "vous avez compacté.",
     "it": "voi avete compattato.",
     "ja": "あなたたちは圧縮してしまいます。",
-    "pt": "vocês tendes compactado.",
+    "pt": "vocês compactaram.",
   },
 }
 `;
@@ -9261,7 +9261,7 @@ exports[`conjugation: COMPACT > 2nd singular 1`] = `
     "fr": "tu as compacté.",
     "it": "tu hai compattato.",
     "ja": "あなたは圧縮してしまいます。",
-    "pt": "você tens compactado.",
+    "pt": "você compactou.",
   },
 }
 `;
@@ -9374,7 +9374,7 @@ exports[`conjugation: COMPACT > 3rd plural 1`] = `
     "fr": "ils ont compacté.",
     "it": "loro hanno compattato.",
     "ja": "彼らは圧縮してしまいます。",
-    "pt": "eles têm compactado.",
+    "pt": "eles compactaram.",
   },
 }
 `;
@@ -9487,7 +9487,7 @@ exports[`conjugation: COMPACT > 3rd singular 1`] = `
     "fr": "il a compacté.",
     "it": "lui ha compattato.",
     "ja": "彼は圧縮してしまいます。",
-    "pt": "ele tem compactado.",
+    "pt": "ele compactou.",
   },
 }
 `;
@@ -9600,7 +9600,7 @@ exports[`conjugation: COORDINATE > 1st plural 1`] = `
     "fr": "nous avons coordonné.",
     "it": "noi abbiamo coordinato.",
     "ja": "私たちは調整してしまいます。",
-    "pt": "nós temos coordenado.",
+    "pt": "nós coordenamos.",
   },
 }
 `;
@@ -9713,7 +9713,7 @@ exports[`conjugation: COORDINATE > 1st singular 1`] = `
     "fr": "je ai coordonné.",
     "it": "io ho coordinato.",
     "ja": "私は調整してしまいます。",
-    "pt": "eu tenho coordenado.",
+    "pt": "eu coordenei.",
   },
 }
 `;
@@ -9826,7 +9826,7 @@ exports[`conjugation: COORDINATE > 2nd plural 1`] = `
     "fr": "vous avez coordonné.",
     "it": "voi avete coordinato.",
     "ja": "あなたたちは調整してしまいます。",
-    "pt": "vocês tendes coordenado.",
+    "pt": "vocês coordenaram.",
   },
 }
 `;
@@ -9939,7 +9939,7 @@ exports[`conjugation: COORDINATE > 2nd singular 1`] = `
     "fr": "tu as coordonné.",
     "it": "tu hai coordinato.",
     "ja": "あなたは調整してしまいます。",
-    "pt": "você tens coordenado.",
+    "pt": "você coordenou.",
   },
 }
 `;
@@ -10052,7 +10052,7 @@ exports[`conjugation: COORDINATE > 3rd plural 1`] = `
     "fr": "ils ont coordonné.",
     "it": "loro hanno coordinato.",
     "ja": "彼らは調整してしまいます。",
-    "pt": "eles têm coordenado.",
+    "pt": "eles coordenaram.",
   },
 }
 `;
@@ -10165,7 +10165,7 @@ exports[`conjugation: COORDINATE > 3rd singular 1`] = `
     "fr": "il a coordonné.",
     "it": "lui ha coordinato.",
     "ja": "彼は調整してしまいます。",
-    "pt": "ele tem coordenado.",
+    "pt": "ele coordenou.",
   },
 }
 `;
@@ -10278,7 +10278,7 @@ exports[`conjugation: CRY > 1st plural 1`] = `
     "fr": "nous avons pleuré.",
     "it": "noi abbiamo pianto.",
     "ja": "私たちは泣いてしまいます。",
-    "pt": "nós temos chorado.",
+    "pt": "nós choramos.",
   },
 }
 `;
@@ -10391,7 +10391,7 @@ exports[`conjugation: CRY > 1st singular 1`] = `
     "fr": "je ai pleuré.",
     "it": "io ho pianto.",
     "ja": "私は泣いてしまいます。",
-    "pt": "eu tenho chorado.",
+    "pt": "eu chorei.",
   },
 }
 `;
@@ -10504,7 +10504,7 @@ exports[`conjugation: CRY > 2nd plural 1`] = `
     "fr": "vous avez pleuré.",
     "it": "voi avete pianto.",
     "ja": "あなたたちは泣いてしまいます。",
-    "pt": "vocês tendes chorado.",
+    "pt": "vocês choraram.",
   },
 }
 `;
@@ -10617,7 +10617,7 @@ exports[`conjugation: CRY > 2nd singular 1`] = `
     "fr": "tu as pleuré.",
     "it": "tu hai pianto.",
     "ja": "あなたは泣いてしまいます。",
-    "pt": "você tens chorado.",
+    "pt": "você chorou.",
   },
 }
 `;
@@ -10730,7 +10730,7 @@ exports[`conjugation: CRY > 3rd plural 1`] = `
     "fr": "ils ont pleuré.",
     "it": "loro hanno pianto.",
     "ja": "彼らは泣いてしまいます。",
-    "pt": "eles têm chorado.",
+    "pt": "eles choraram.",
   },
 }
 `;
@@ -10843,7 +10843,7 @@ exports[`conjugation: CRY > 3rd singular 1`] = `
     "fr": "il a pleuré.",
     "it": "lui ha pianto.",
     "ja": "彼は泣いてしまいます。",
-    "pt": "ele tem chorado.",
+    "pt": "ele chorou.",
   },
 }
 `;
@@ -10956,7 +10956,7 @@ exports[`conjugation: CRY_OUT > 1st plural 1`] = `
     "fr": "nous avons crié.",
     "it": "noi abbiamo gridato.",
     "ja": "私たちは叫んでしまいます。",
-    "pt": "nós temos gritado.",
+    "pt": "nós gritamos.",
   },
 }
 `;
@@ -11069,7 +11069,7 @@ exports[`conjugation: CRY_OUT > 1st singular 1`] = `
     "fr": "je ai crié.",
     "it": "io ho gridato.",
     "ja": "私は叫んでしまいます。",
-    "pt": "eu tenho gritado.",
+    "pt": "eu gritei.",
   },
 }
 `;
@@ -11182,7 +11182,7 @@ exports[`conjugation: CRY_OUT > 2nd plural 1`] = `
     "fr": "vous avez crié.",
     "it": "voi avete gridato.",
     "ja": "あなたたちは叫んでしまいます。",
-    "pt": "vocês tendes gritado.",
+    "pt": "vocês gritaram.",
   },
 }
 `;
@@ -11295,7 +11295,7 @@ exports[`conjugation: CRY_OUT > 2nd singular 1`] = `
     "fr": "tu as crié.",
     "it": "tu hai gridato.",
     "ja": "あなたは叫んでしまいます。",
-    "pt": "você tens gritado.",
+    "pt": "você gritou.",
   },
 }
 `;
@@ -11408,7 +11408,7 @@ exports[`conjugation: CRY_OUT > 3rd plural 1`] = `
     "fr": "ils ont crié.",
     "it": "loro hanno gridato.",
     "ja": "彼らは叫んでしまいます。",
-    "pt": "eles têm gritado.",
+    "pt": "eles gritaram.",
   },
 }
 `;
@@ -11521,7 +11521,7 @@ exports[`conjugation: CRY_OUT > 3rd singular 1`] = `
     "fr": "il a crié.",
     "it": "lui ha gridato.",
     "ja": "彼は叫んでしまいます。",
-    "pt": "ele tem gritado.",
+    "pt": "ele gritou.",
   },
 }
 `;
@@ -11634,7 +11634,7 @@ exports[`conjugation: CUT > 1st plural 1`] = `
     "fr": "nous avons coupé.",
     "it": "noi abbiamo tagliato.",
     "ja": "私たちは切ってしまいます。",
-    "pt": "nós temos cortado.",
+    "pt": "nós cortamos.",
   },
 }
 `;
@@ -11747,7 +11747,7 @@ exports[`conjugation: CUT > 1st singular 1`] = `
     "fr": "je ai coupé.",
     "it": "io ho tagliato.",
     "ja": "私は切ってしまいます。",
-    "pt": "eu tenho cortado.",
+    "pt": "eu cortei.",
   },
 }
 `;
@@ -11860,7 +11860,7 @@ exports[`conjugation: CUT > 2nd plural 1`] = `
     "fr": "vous avez coupé.",
     "it": "voi avete tagliato.",
     "ja": "あなたたちは切ってしまいます。",
-    "pt": "vocês tendes cortado.",
+    "pt": "vocês cortaram.",
   },
 }
 `;
@@ -11973,7 +11973,7 @@ exports[`conjugation: CUT > 2nd singular 1`] = `
     "fr": "tu as coupé.",
     "it": "tu hai tagliato.",
     "ja": "あなたは切ってしまいます。",
-    "pt": "você tens cortado.",
+    "pt": "você cortou.",
   },
 }
 `;
@@ -12086,7 +12086,7 @@ exports[`conjugation: CUT > 3rd plural 1`] = `
     "fr": "ils ont coupé.",
     "it": "loro hanno tagliato.",
     "ja": "彼らは切ってしまいます。",
-    "pt": "eles têm cortado.",
+    "pt": "eles cortaram.",
   },
 }
 `;
@@ -12199,7 +12199,7 @@ exports[`conjugation: CUT > 3rd singular 1`] = `
     "fr": "il a coupé.",
     "it": "lui ha tagliato.",
     "ja": "彼は切ってしまいます。",
-    "pt": "ele tem cortado.",
+    "pt": "ele cortou.",
   },
 }
 `;
@@ -12312,7 +12312,7 @@ exports[`conjugation: DRINK > 1st plural 1`] = `
     "fr": "nous avons bu.",
     "it": "noi abbiamo bevuto.",
     "ja": "私たちは飲んでしまいます。",
-    "pt": "nós temos bebido.",
+    "pt": "nós bebemos.",
   },
 }
 `;
@@ -12425,7 +12425,7 @@ exports[`conjugation: DRINK > 1st singular 1`] = `
     "fr": "je ai bu.",
     "it": "io ho bevuto.",
     "ja": "私は飲んでしまいます。",
-    "pt": "eu tenho bebido.",
+    "pt": "eu bebi.",
   },
 }
 `;
@@ -12538,7 +12538,7 @@ exports[`conjugation: DRINK > 2nd plural 1`] = `
     "fr": "vous avez bu.",
     "it": "voi avete bevuto.",
     "ja": "あなたたちは飲んでしまいます。",
-    "pt": "vocês tendes bebido.",
+    "pt": "vocês beberam.",
   },
 }
 `;
@@ -12651,7 +12651,7 @@ exports[`conjugation: DRINK > 2nd singular 1`] = `
     "fr": "tu as bu.",
     "it": "tu hai bevuto.",
     "ja": "あなたは飲んでしまいます。",
-    "pt": "você tens bebido.",
+    "pt": "você bebeu.",
   },
 }
 `;
@@ -12764,7 +12764,7 @@ exports[`conjugation: DRINK > 3rd plural 1`] = `
     "fr": "ils ont bu.",
     "it": "loro hanno bevuto.",
     "ja": "彼らは飲んでしまいます。",
-    "pt": "eles têm bebido.",
+    "pt": "eles beberam.",
   },
 }
 `;
@@ -12877,7 +12877,7 @@ exports[`conjugation: DRINK > 3rd singular 1`] = `
     "fr": "il a bu.",
     "it": "lui ha bevuto.",
     "ja": "彼は飲んでしまいます。",
-    "pt": "ele tem bebido.",
+    "pt": "ele bebeu.",
   },
 }
 `;
@@ -12990,7 +12990,7 @@ exports[`conjugation: EAT > 1st plural 1`] = `
     "fr": "nous avons mangé.",
     "it": "noi abbiamo mangiato.",
     "ja": "私たちは食べてしまいます。",
-    "pt": "nós temos comido.",
+    "pt": "nós comemos.",
   },
 }
 `;
@@ -13103,7 +13103,7 @@ exports[`conjugation: EAT > 1st singular 1`] = `
     "fr": "je ai mangé.",
     "it": "io ho mangiato.",
     "ja": "私は食べてしまいます。",
-    "pt": "eu tenho comido.",
+    "pt": "eu comi.",
   },
 }
 `;
@@ -13216,7 +13216,7 @@ exports[`conjugation: EAT > 2nd plural 1`] = `
     "fr": "vous avez mangé.",
     "it": "voi avete mangiato.",
     "ja": "あなたたちは食べてしまいます。",
-    "pt": "vocês tendes comido.",
+    "pt": "vocês comeram.",
   },
 }
 `;
@@ -13329,7 +13329,7 @@ exports[`conjugation: EAT > 2nd singular 1`] = `
     "fr": "tu as mangé.",
     "it": "tu hai mangiato.",
     "ja": "あなたは食べてしまいます。",
-    "pt": "você tens comido.",
+    "pt": "você comeu.",
   },
 }
 `;
@@ -13442,7 +13442,7 @@ exports[`conjugation: EAT > 3rd plural 1`] = `
     "fr": "ils ont mangé.",
     "it": "loro hanno mangiato.",
     "ja": "彼らは食べてしまいます。",
-    "pt": "eles têm comido.",
+    "pt": "eles comeram.",
   },
 }
 `;
@@ -13555,7 +13555,7 @@ exports[`conjugation: EAT > 3rd singular 1`] = `
     "fr": "il a mangé.",
     "it": "lui ha mangiato.",
     "ja": "彼は食べてしまいます。",
-    "pt": "ele tem comido.",
+    "pt": "ele comeu.",
   },
 }
 `;
@@ -13668,7 +13668,7 @@ exports[`conjugation: EXPAND > 1st plural 1`] = `
     "fr": "nous avons étendu.",
     "it": "noi abbiamo espanso.",
     "ja": "私たちは展開してしまいます。",
-    "pt": "nós temos expandido.",
+    "pt": "nós expandimos.",
   },
 }
 `;
@@ -13781,7 +13781,7 @@ exports[`conjugation: EXPAND > 1st singular 1`] = `
     "fr": "je ai étendu.",
     "it": "io ho espanso.",
     "ja": "私は展開してしまいます。",
-    "pt": "eu tenho expandido.",
+    "pt": "eu expandi.",
   },
 }
 `;
@@ -13894,7 +13894,7 @@ exports[`conjugation: EXPAND > 2nd plural 1`] = `
     "fr": "vous avez étendu.",
     "it": "voi avete espanso.",
     "ja": "あなたたちは展開してしまいます。",
-    "pt": "vocês tendes expandido.",
+    "pt": "vocês expandiram.",
   },
 }
 `;
@@ -14007,7 +14007,7 @@ exports[`conjugation: EXPAND > 2nd singular 1`] = `
     "fr": "tu as étendu.",
     "it": "tu hai espanso.",
     "ja": "あなたは展開してしまいます。",
-    "pt": "você tens expandido.",
+    "pt": "você expandiu.",
   },
 }
 `;
@@ -14120,7 +14120,7 @@ exports[`conjugation: EXPAND > 3rd plural 1`] = `
     "fr": "ils ont étendu.",
     "it": "loro hanno espanso.",
     "ja": "彼らは展開してしまいます。",
-    "pt": "eles têm expandido.",
+    "pt": "eles expandiram.",
   },
 }
 `;
@@ -14233,7 +14233,7 @@ exports[`conjugation: EXPAND > 3rd singular 1`] = `
     "fr": "il a étendu.",
     "it": "lui ha espanso.",
     "ja": "彼は展開してしまいます。",
-    "pt": "ele tem expandido.",
+    "pt": "ele expandiu.",
   },
 }
 `;
@@ -14346,7 +14346,7 @@ exports[`conjugation: EXPORT > 1st plural 1`] = `
     "fr": "nous avons exporté.",
     "it": "noi abbiamo esportato.",
     "ja": "私たちは書き出してしまいます。",
-    "pt": "nós temos exportado.",
+    "pt": "nós exportamos.",
   },
 }
 `;
@@ -14459,7 +14459,7 @@ exports[`conjugation: EXPORT > 1st singular 1`] = `
     "fr": "je ai exporté.",
     "it": "io ho esportato.",
     "ja": "私は書き出してしまいます。",
-    "pt": "eu tenho exportado.",
+    "pt": "eu exportei.",
   },
 }
 `;
@@ -14572,7 +14572,7 @@ exports[`conjugation: EXPORT > 2nd plural 1`] = `
     "fr": "vous avez exporté.",
     "it": "voi avete esportato.",
     "ja": "あなたたちは書き出してしまいます。",
-    "pt": "vocês tendes exportado.",
+    "pt": "vocês exportaram.",
   },
 }
 `;
@@ -14685,7 +14685,7 @@ exports[`conjugation: EXPORT > 2nd singular 1`] = `
     "fr": "tu as exporté.",
     "it": "tu hai esportato.",
     "ja": "あなたは書き出してしまいます。",
-    "pt": "você tens exportado.",
+    "pt": "você exportou.",
   },
 }
 `;
@@ -14798,7 +14798,7 @@ exports[`conjugation: EXPORT > 3rd plural 1`] = `
     "fr": "ils ont exporté.",
     "it": "loro hanno esportato.",
     "ja": "彼らは書き出してしまいます。",
-    "pt": "eles têm exportado.",
+    "pt": "eles exportaram.",
   },
 }
 `;
@@ -14911,7 +14911,7 @@ exports[`conjugation: EXPORT > 3rd singular 1`] = `
     "fr": "il a exporté.",
     "it": "lui ha esportato.",
     "ja": "彼は書き出してしまいます。",
-    "pt": "ele tem exportado.",
+    "pt": "ele exportou.",
   },
 }
 `;
@@ -15024,7 +15024,7 @@ exports[`conjugation: EXTINGUISH > 1st plural 1`] = `
     "fr": "nous avons éteint.",
     "it": "noi abbiamo spento.",
     "ja": "私たちは消してしまいます。",
-    "pt": "nós temos apagado.",
+    "pt": "nós apagamos.",
   },
 }
 `;
@@ -15137,7 +15137,7 @@ exports[`conjugation: EXTINGUISH > 1st singular 1`] = `
     "fr": "je ai éteint.",
     "it": "io ho spento.",
     "ja": "私は消してしまいます。",
-    "pt": "eu tenho apagado.",
+    "pt": "eu apaguei.",
   },
 }
 `;
@@ -15250,7 +15250,7 @@ exports[`conjugation: EXTINGUISH > 2nd plural 1`] = `
     "fr": "vous avez éteint.",
     "it": "voi avete spento.",
     "ja": "あなたたちは消してしまいます。",
-    "pt": "vocês tendes apagado.",
+    "pt": "vocês apagaram.",
   },
 }
 `;
@@ -15363,7 +15363,7 @@ exports[`conjugation: EXTINGUISH > 2nd singular 1`] = `
     "fr": "tu as éteint.",
     "it": "tu hai spento.",
     "ja": "あなたは消してしまいます。",
-    "pt": "você tens apagado.",
+    "pt": "você apagou.",
   },
 }
 `;
@@ -15476,7 +15476,7 @@ exports[`conjugation: EXTINGUISH > 3rd plural 1`] = `
     "fr": "ils ont éteint.",
     "it": "loro hanno spento.",
     "ja": "彼らは消してしまいます。",
-    "pt": "eles têm apagado.",
+    "pt": "eles apagaram.",
   },
 }
 `;
@@ -15589,7 +15589,7 @@ exports[`conjugation: EXTINGUISH > 3rd singular 1`] = `
     "fr": "il a éteint.",
     "it": "lui ha spento.",
     "ja": "彼は消してしまいます。",
-    "pt": "ele tem apagado.",
+    "pt": "ele apagou.",
   },
 }
 `;
@@ -15702,7 +15702,7 @@ exports[`conjugation: GIVE > 1st plural 1`] = `
     "fr": "nous avons donné.",
     "it": "noi abbiamo dato.",
     "ja": "私たちはあげてしまいます。",
-    "pt": "nós temos dado.",
+    "pt": "nós demos.",
   },
 }
 `;
@@ -15815,7 +15815,7 @@ exports[`conjugation: GIVE > 1st singular 1`] = `
     "fr": "je ai donné.",
     "it": "io ho dato.",
     "ja": "私はあげてしまいます。",
-    "pt": "eu tenho dado.",
+    "pt": "eu dei.",
   },
 }
 `;
@@ -15928,7 +15928,7 @@ exports[`conjugation: GIVE > 2nd plural 1`] = `
     "fr": "vous avez donné.",
     "it": "voi avete dato.",
     "ja": "あなたたちはあげてしまいます。",
-    "pt": "vocês tendes dado.",
+    "pt": "vocês deram.",
   },
 }
 `;
@@ -16041,7 +16041,7 @@ exports[`conjugation: GIVE > 2nd singular 1`] = `
     "fr": "tu as donné.",
     "it": "tu hai dato.",
     "ja": "あなたはあげてしまいます。",
-    "pt": "você tens dado.",
+    "pt": "você deu.",
   },
 }
 `;
@@ -16154,7 +16154,7 @@ exports[`conjugation: GIVE > 3rd plural 1`] = `
     "fr": "ils ont donné.",
     "it": "loro hanno dato.",
     "ja": "彼らはあげてしまいます。",
-    "pt": "eles têm dado.",
+    "pt": "eles deram.",
   },
 }
 `;
@@ -16267,7 +16267,7 @@ exports[`conjugation: GIVE > 3rd singular 1`] = `
     "fr": "il a donné.",
     "it": "lui ha dato.",
     "ja": "彼はあげてしまいます。",
-    "pt": "ele tem dado.",
+    "pt": "ele deu.",
   },
 }
 `;
@@ -16380,7 +16380,7 @@ exports[`conjugation: GO > 1st plural 1`] = `
     "fr": "nous sommes allés.",
     "it": "noi siamo andati.",
     "ja": "私たちは行ってしまいます。",
-    "pt": "nós temos ido.",
+    "pt": "nós fomos.",
   },
 }
 `;
@@ -16493,7 +16493,7 @@ exports[`conjugation: GO > 1st singular 1`] = `
     "fr": "je suis allé.",
     "it": "io sono andato.",
     "ja": "私は行ってしまいます。",
-    "pt": "eu tenho ido.",
+    "pt": "eu fui.",
   },
 }
 `;
@@ -16606,7 +16606,7 @@ exports[`conjugation: GO > 2nd plural 1`] = `
     "fr": "vous êtes allés.",
     "it": "voi siete andati.",
     "ja": "あなたたちは行ってしまいます。",
-    "pt": "vocês tendes ido.",
+    "pt": "vocês foram.",
   },
 }
 `;
@@ -16719,7 +16719,7 @@ exports[`conjugation: GO > 2nd singular 1`] = `
     "fr": "tu es allé.",
     "it": "tu sei andato.",
     "ja": "あなたは行ってしまいます。",
-    "pt": "você tens ido.",
+    "pt": "você foi.",
   },
 }
 `;
@@ -16832,7 +16832,7 @@ exports[`conjugation: GO > 3rd plural 1`] = `
     "fr": "ils sont allés.",
     "it": "loro sono andati.",
     "ja": "彼らは行ってしまいます。",
-    "pt": "eles têm ido.",
+    "pt": "eles foram.",
   },
 }
 `;
@@ -16945,7 +16945,7 @@ exports[`conjugation: GO > 3rd singular 1`] = `
     "fr": "il est allé.",
     "it": "lui è andato.",
     "ja": "彼は行ってしまいます。",
-    "pt": "ele tem ido.",
+    "pt": "ele foi.",
   },
 }
 `;
@@ -17058,7 +17058,7 @@ exports[`conjugation: HIDE > 1st plural 1`] = `
     "fr": "nous avons caché.",
     "it": "noi abbiamo nascosto.",
     "ja": "私たちは隠してしまいます。",
-    "pt": "nós temos escondido.",
+    "pt": "nós escondemos.",
   },
 }
 `;
@@ -17171,7 +17171,7 @@ exports[`conjugation: HIDE > 1st singular 1`] = `
     "fr": "je ai caché.",
     "it": "io ho nascosto.",
     "ja": "私は隠してしまいます。",
-    "pt": "eu tenho escondido.",
+    "pt": "eu escondi.",
   },
 }
 `;
@@ -17284,7 +17284,7 @@ exports[`conjugation: HIDE > 2nd plural 1`] = `
     "fr": "vous avez caché.",
     "it": "voi avete nascosto.",
     "ja": "あなたたちは隠してしまいます。",
-    "pt": "vocês tendes escondido.",
+    "pt": "vocês esconderam.",
   },
 }
 `;
@@ -17397,7 +17397,7 @@ exports[`conjugation: HIDE > 2nd singular 1`] = `
     "fr": "tu as caché.",
     "it": "tu hai nascosto.",
     "ja": "あなたは隠してしまいます。",
-    "pt": "você tens escondido.",
+    "pt": "você escondeu.",
   },
 }
 `;
@@ -17510,7 +17510,7 @@ exports[`conjugation: HIDE > 3rd plural 1`] = `
     "fr": "ils ont caché.",
     "it": "loro hanno nascosto.",
     "ja": "彼らは隠してしまいます。",
-    "pt": "eles têm escondido.",
+    "pt": "eles esconderam.",
   },
 }
 `;
@@ -17623,7 +17623,7 @@ exports[`conjugation: HIDE > 3rd singular 1`] = `
     "fr": "il a caché.",
     "it": "lui ha nascosto.",
     "ja": "彼は隠してしまいます。",
-    "pt": "ele tem escondido.",
+    "pt": "ele escondeu.",
   },
 }
 `;
@@ -17736,7 +17736,7 @@ exports[`conjugation: IMPORT > 1st plural 1`] = `
     "fr": "nous avons importé.",
     "it": "noi abbiamo importato.",
     "ja": "私たちは取り込んでしまいます。",
-    "pt": "nós temos importado.",
+    "pt": "nós importamos.",
   },
 }
 `;
@@ -17849,7 +17849,7 @@ exports[`conjugation: IMPORT > 1st singular 1`] = `
     "fr": "je ai importé.",
     "it": "io ho importato.",
     "ja": "私は取り込んでしまいます。",
-    "pt": "eu tenho importado.",
+    "pt": "eu importei.",
   },
 }
 `;
@@ -17962,7 +17962,7 @@ exports[`conjugation: IMPORT > 2nd plural 1`] = `
     "fr": "vous avez importé.",
     "it": "voi avete importato.",
     "ja": "あなたたちは取り込んでしまいます。",
-    "pt": "vocês tendes importado.",
+    "pt": "vocês importaram.",
   },
 }
 `;
@@ -18075,7 +18075,7 @@ exports[`conjugation: IMPORT > 2nd singular 1`] = `
     "fr": "tu as importé.",
     "it": "tu hai importato.",
     "ja": "あなたは取り込んでしまいます。",
-    "pt": "você tens importado.",
+    "pt": "você importou.",
   },
 }
 `;
@@ -18188,7 +18188,7 @@ exports[`conjugation: IMPORT > 3rd plural 1`] = `
     "fr": "ils ont importé.",
     "it": "loro hanno importato.",
     "ja": "彼らは取り込んでしまいます。",
-    "pt": "eles têm importado.",
+    "pt": "eles importaram.",
   },
 }
 `;
@@ -18301,7 +18301,7 @@ exports[`conjugation: IMPORT > 3rd singular 1`] = `
     "fr": "il a importé.",
     "it": "lui ha importato.",
     "ja": "彼は取り込んでしまいます。",
-    "pt": "ele tem importado.",
+    "pt": "ele importou.",
   },
 }
 `;
@@ -18414,7 +18414,7 @@ exports[`conjugation: JUMP > 1st plural 1`] = `
     "fr": "nous avons sauté.",
     "it": "noi abbiamo saltato.",
     "ja": "私たちは跳んでしまいます。",
-    "pt": "nós temos pulado.",
+    "pt": "nós pulamos.",
   },
 }
 `;
@@ -18527,7 +18527,7 @@ exports[`conjugation: JUMP > 1st singular 1`] = `
     "fr": "je ai sauté.",
     "it": "io ho saltato.",
     "ja": "私は跳んでしまいます。",
-    "pt": "eu tenho pulado.",
+    "pt": "eu pulei.",
   },
 }
 `;
@@ -18640,7 +18640,7 @@ exports[`conjugation: JUMP > 2nd plural 1`] = `
     "fr": "vous avez sauté.",
     "it": "voi avete saltato.",
     "ja": "あなたたちは跳んでしまいます。",
-    "pt": "vocês tendes pulado.",
+    "pt": "vocês pularam.",
   },
 }
 `;
@@ -18753,7 +18753,7 @@ exports[`conjugation: JUMP > 2nd singular 1`] = `
     "fr": "tu as sauté.",
     "it": "tu hai saltato.",
     "ja": "あなたは跳んでしまいます。",
-    "pt": "você tens pulado.",
+    "pt": "você pulou.",
   },
 }
 `;
@@ -18866,7 +18866,7 @@ exports[`conjugation: JUMP > 3rd plural 1`] = `
     "fr": "ils ont sauté.",
     "it": "loro hanno saltato.",
     "ja": "彼らは跳んでしまいます。",
-    "pt": "eles têm pulado.",
+    "pt": "eles pularam.",
   },
 }
 `;
@@ -18979,7 +18979,7 @@ exports[`conjugation: JUMP > 3rd singular 1`] = `
     "fr": "il a sauté.",
     "it": "lui ha saltato.",
     "ja": "彼は跳んでしまいます。",
-    "pt": "ele tem pulado.",
+    "pt": "ele pulou.",
   },
 }
 `;
@@ -19092,7 +19092,7 @@ exports[`conjugation: KILL > 1st plural 1`] = `
     "fr": "nous avons tué.",
     "it": "noi abbiamo ucciso.",
     "ja": "私たちは殺してしまいます。",
-    "pt": "nós temos matado.",
+    "pt": "nós matamos.",
   },
 }
 `;
@@ -19205,7 +19205,7 @@ exports[`conjugation: KILL > 1st singular 1`] = `
     "fr": "je ai tué.",
     "it": "io ho ucciso.",
     "ja": "私は殺してしまいます。",
-    "pt": "eu tenho matado.",
+    "pt": "eu matei.",
   },
 }
 `;
@@ -19318,7 +19318,7 @@ exports[`conjugation: KILL > 2nd plural 1`] = `
     "fr": "vous avez tué.",
     "it": "voi avete ucciso.",
     "ja": "あなたたちは殺してしまいます。",
-    "pt": "vocês tendes matado.",
+    "pt": "vocês mataram.",
   },
 }
 `;
@@ -19431,7 +19431,7 @@ exports[`conjugation: KILL > 2nd singular 1`] = `
     "fr": "tu as tué.",
     "it": "tu hai ucciso.",
     "ja": "あなたは殺してしまいます。",
-    "pt": "você tens matado.",
+    "pt": "você matou.",
   },
 }
 `;
@@ -19544,7 +19544,7 @@ exports[`conjugation: KILL > 3rd plural 1`] = `
     "fr": "ils ont tué.",
     "it": "loro hanno ucciso.",
     "ja": "彼らは殺してしまいます。",
-    "pt": "eles têm matado.",
+    "pt": "eles mataram.",
   },
 }
 `;
@@ -19657,7 +19657,7 @@ exports[`conjugation: KILL > 3rd singular 1`] = `
     "fr": "il a tué.",
     "it": "lui ha ucciso.",
     "ja": "彼は殺してしまいます。",
-    "pt": "ele tem matado.",
+    "pt": "ele matou.",
   },
 }
 `;
@@ -19770,7 +19770,7 @@ exports[`conjugation: KNOW > 1st plural 1`] = `
     "fr": "nous avons su.",
     "it": "noi abbiamo saputo.",
     "ja": "私たちは知ってしまいます。",
-    "pt": "nós temos sabido.",
+    "pt": "nós soubemos.",
   },
 }
 `;
@@ -19883,7 +19883,7 @@ exports[`conjugation: KNOW > 1st singular 1`] = `
     "fr": "je ai su.",
     "it": "io ho saputo.",
     "ja": "私は知ってしまいます。",
-    "pt": "eu tenho sabido.",
+    "pt": "eu soube.",
   },
 }
 `;
@@ -19996,7 +19996,7 @@ exports[`conjugation: KNOW > 2nd plural 1`] = `
     "fr": "vous avez su.",
     "it": "voi avete saputo.",
     "ja": "あなたたちは知ってしまいます。",
-    "pt": "vocês tendes sabido.",
+    "pt": "vocês souberam.",
   },
 }
 `;
@@ -20109,7 +20109,7 @@ exports[`conjugation: KNOW > 2nd singular 1`] = `
     "fr": "tu as su.",
     "it": "tu hai saputo.",
     "ja": "あなたは知ってしまいます。",
-    "pt": "você tens sabido.",
+    "pt": "você soube.",
   },
 }
 `;
@@ -20222,7 +20222,7 @@ exports[`conjugation: KNOW > 3rd plural 1`] = `
     "fr": "ils ont su.",
     "it": "loro hanno saputo.",
     "ja": "彼らは知ってしまいます。",
-    "pt": "eles têm sabido.",
+    "pt": "eles souberam.",
   },
 }
 `;
@@ -20335,7 +20335,7 @@ exports[`conjugation: KNOW > 3rd singular 1`] = `
     "fr": "il a su.",
     "it": "lui ha saputo.",
     "ja": "彼は知ってしまいます。",
-    "pt": "ele tem sabido.",
+    "pt": "ele soube.",
   },
 }
 `;
@@ -20448,7 +20448,7 @@ exports[`conjugation: LOAD > 1st plural 1`] = `
     "fr": "nous avons chargé.",
     "it": "noi abbiamo caricato.",
     "ja": "私たちは読み込んでしまいます。",
-    "pt": "nós temos carregado.",
+    "pt": "nós carregamos.",
   },
 }
 `;
@@ -20561,7 +20561,7 @@ exports[`conjugation: LOAD > 1st singular 1`] = `
     "fr": "je ai chargé.",
     "it": "io ho caricato.",
     "ja": "私は読み込んでしまいます。",
-    "pt": "eu tenho carregado.",
+    "pt": "eu carreguei.",
   },
 }
 `;
@@ -20674,7 +20674,7 @@ exports[`conjugation: LOAD > 2nd plural 1`] = `
     "fr": "vous avez chargé.",
     "it": "voi avete caricato.",
     "ja": "あなたたちは読み込んでしまいます。",
-    "pt": "vocês tendes carregado.",
+    "pt": "vocês carregaram.",
   },
 }
 `;
@@ -20787,7 +20787,7 @@ exports[`conjugation: LOAD > 2nd singular 1`] = `
     "fr": "tu as chargé.",
     "it": "tu hai caricato.",
     "ja": "あなたは読み込んでしまいます。",
-    "pt": "você tens carregado.",
+    "pt": "você carregou.",
   },
 }
 `;
@@ -20900,7 +20900,7 @@ exports[`conjugation: LOAD > 3rd plural 1`] = `
     "fr": "ils ont chargé.",
     "it": "loro hanno caricato.",
     "ja": "彼らは読み込んでしまいます。",
-    "pt": "eles têm carregado.",
+    "pt": "eles carregaram.",
   },
 }
 `;
@@ -21013,7 +21013,7 @@ exports[`conjugation: LOAD > 3rd singular 1`] = `
     "fr": "il a chargé.",
     "it": "lui ha caricato.",
     "ja": "彼は読み込んでしまいます。",
-    "pt": "ele tem carregado.",
+    "pt": "ele carregou.",
   },
 }
 `;
@@ -21126,7 +21126,7 @@ exports[`conjugation: LOVE > 1st plural 1`] = `
     "fr": "nous avons aimé.",
     "it": "noi abbiamo amato.",
     "ja": "私たちは愛してしまいます。",
-    "pt": "nós temos amado.",
+    "pt": "nós amamos.",
   },
 }
 `;
@@ -21239,7 +21239,7 @@ exports[`conjugation: LOVE > 1st singular 1`] = `
     "fr": "je ai aimé.",
     "it": "io ho amato.",
     "ja": "私は愛してしまいます。",
-    "pt": "eu tenho amado.",
+    "pt": "eu amei.",
   },
 }
 `;
@@ -21352,7 +21352,7 @@ exports[`conjugation: LOVE > 2nd plural 1`] = `
     "fr": "vous avez aimé.",
     "it": "voi avete amato.",
     "ja": "あなたたちは愛してしまいます。",
-    "pt": "vocês tendes amado.",
+    "pt": "vocês amaram.",
   },
 }
 `;
@@ -21465,7 +21465,7 @@ exports[`conjugation: LOVE > 2nd singular 1`] = `
     "fr": "tu as aimé.",
     "it": "tu hai amato.",
     "ja": "あなたは愛してしまいます。",
-    "pt": "você tens amado.",
+    "pt": "você amou.",
   },
 }
 `;
@@ -21578,7 +21578,7 @@ exports[`conjugation: LOVE > 3rd plural 1`] = `
     "fr": "ils ont aimé.",
     "it": "loro hanno amato.",
     "ja": "彼らは愛してしまいます。",
-    "pt": "eles têm amado.",
+    "pt": "eles amaram.",
   },
 }
 `;
@@ -21691,7 +21691,7 @@ exports[`conjugation: LOVE > 3rd singular 1`] = `
     "fr": "il a aimé.",
     "it": "lui ha amato.",
     "ja": "彼は愛してしまいます。",
-    "pt": "ele tem amado.",
+    "pt": "ele amou.",
   },
 }
 `;
@@ -21804,7 +21804,7 @@ exports[`conjugation: MAKE > 1st plural 1`] = `
     "fr": "nous avons fait.",
     "it": "noi abbiamo fatto.",
     "ja": "私たちは作ってしまいます。",
-    "pt": "nós temos feito.",
+    "pt": "nós fizemos.",
   },
 }
 `;
@@ -21917,7 +21917,7 @@ exports[`conjugation: MAKE > 1st singular 1`] = `
     "fr": "je ai fait.",
     "it": "io ho fatto.",
     "ja": "私は作ってしまいます。",
-    "pt": "eu tenho feito.",
+    "pt": "eu fiz.",
   },
 }
 `;
@@ -22030,7 +22030,7 @@ exports[`conjugation: MAKE > 2nd plural 1`] = `
     "fr": "vous avez fait.",
     "it": "voi avete fatto.",
     "ja": "あなたたちは作ってしまいます。",
-    "pt": "vocês tendes feito.",
+    "pt": "vocês fizeram.",
   },
 }
 `;
@@ -22143,7 +22143,7 @@ exports[`conjugation: MAKE > 2nd singular 1`] = `
     "fr": "tu as fait.",
     "it": "tu hai fatto.",
     "ja": "あなたは作ってしまいます。",
-    "pt": "você tens feito.",
+    "pt": "você fez.",
   },
 }
 `;
@@ -22256,7 +22256,7 @@ exports[`conjugation: MAKE > 3rd plural 1`] = `
     "fr": "ils ont fait.",
     "it": "loro hanno fatto.",
     "ja": "彼らは作ってしまいます。",
-    "pt": "eles têm feito.",
+    "pt": "eles fizeram.",
   },
 }
 `;
@@ -22369,7 +22369,7 @@ exports[`conjugation: MAKE > 3rd singular 1`] = `
     "fr": "il a fait.",
     "it": "lui ha fatto.",
     "ja": "彼は作ってしまいます。",
-    "pt": "ele tem feito.",
+    "pt": "ele fez.",
   },
 }
 `;
@@ -22482,7 +22482,7 @@ exports[`conjugation: READ > 1st plural 1`] = `
     "fr": "nous avons lu.",
     "it": "noi abbiamo letto.",
     "ja": "私たちは読んでしまいます。",
-    "pt": "nós temos lido.",
+    "pt": "nós lemos.",
   },
 }
 `;
@@ -22595,7 +22595,7 @@ exports[`conjugation: READ > 1st singular 1`] = `
     "fr": "je ai lu.",
     "it": "io ho letto.",
     "ja": "私は読んでしまいます。",
-    "pt": "eu tenho lido.",
+    "pt": "eu li.",
   },
 }
 `;
@@ -22708,7 +22708,7 @@ exports[`conjugation: READ > 2nd plural 1`] = `
     "fr": "vous avez lu.",
     "it": "voi avete letto.",
     "ja": "あなたたちは読んでしまいます。",
-    "pt": "vocês tendes lido.",
+    "pt": "vocês leram.",
   },
 }
 `;
@@ -22821,7 +22821,7 @@ exports[`conjugation: READ > 2nd singular 1`] = `
     "fr": "tu as lu.",
     "it": "tu hai letto.",
     "ja": "あなたは読んでしまいます。",
-    "pt": "você tens lido.",
+    "pt": "você leu.",
   },
 }
 `;
@@ -22934,7 +22934,7 @@ exports[`conjugation: READ > 3rd plural 1`] = `
     "fr": "ils ont lu.",
     "it": "loro hanno letto.",
     "ja": "彼らは読んでしまいます。",
-    "pt": "eles têm lido.",
+    "pt": "eles leram.",
   },
 }
 `;
@@ -23047,7 +23047,7 @@ exports[`conjugation: READ > 3rd singular 1`] = `
     "fr": "il a lu.",
     "it": "lui ha letto.",
     "ja": "彼は読んでしまいます。",
-    "pt": "ele tem lido.",
+    "pt": "ele leu.",
   },
 }
 `;
@@ -23160,7 +23160,7 @@ exports[`conjugation: RUN > 1st plural 1`] = `
     "fr": "nous avons couru.",
     "it": "noi abbiamo corso.",
     "ja": "私たちは走ってしまいます。",
-    "pt": "nós temos corrido.",
+    "pt": "nós corremos.",
   },
 }
 `;
@@ -23273,7 +23273,7 @@ exports[`conjugation: RUN > 1st singular 1`] = `
     "fr": "je ai couru.",
     "it": "io ho corso.",
     "ja": "私は走ってしまいます。",
-    "pt": "eu tenho corrido.",
+    "pt": "eu corri.",
   },
 }
 `;
@@ -23386,7 +23386,7 @@ exports[`conjugation: RUN > 2nd plural 1`] = `
     "fr": "vous avez couru.",
     "it": "voi avete corso.",
     "ja": "あなたたちは走ってしまいます。",
-    "pt": "vocês tendes corrido.",
+    "pt": "vocês correram.",
   },
 }
 `;
@@ -23499,7 +23499,7 @@ exports[`conjugation: RUN > 2nd singular 1`] = `
     "fr": "tu as couru.",
     "it": "tu hai corso.",
     "ja": "あなたは走ってしまいます。",
-    "pt": "você tens corrido.",
+    "pt": "você correu.",
   },
 }
 `;
@@ -23612,7 +23612,7 @@ exports[`conjugation: RUN > 3rd plural 1`] = `
     "fr": "ils ont couru.",
     "it": "loro hanno corso.",
     "ja": "彼らは走ってしまいます。",
-    "pt": "eles têm corrido.",
+    "pt": "eles correram.",
   },
 }
 `;
@@ -23725,7 +23725,7 @@ exports[`conjugation: RUN > 3rd singular 1`] = `
     "fr": "il a couru.",
     "it": "lui ha corso.",
     "ja": "彼は走ってしまいます。",
-    "pt": "ele tem corrido.",
+    "pt": "ele correu.",
   },
 }
 `;
@@ -23838,7 +23838,7 @@ exports[`conjugation: SAVE > 1st plural 1`] = `
     "fr": "nous avons enregistré.",
     "it": "noi abbiamo salvato.",
     "ja": "私たちは保存してしまいます。",
-    "pt": "nós temos salvado.",
+    "pt": "nós salvamos.",
   },
 }
 `;
@@ -23951,7 +23951,7 @@ exports[`conjugation: SAVE > 1st singular 1`] = `
     "fr": "je ai enregistré.",
     "it": "io ho salvato.",
     "ja": "私は保存してしまいます。",
-    "pt": "eu tenho salvado.",
+    "pt": "eu salvei.",
   },
 }
 `;
@@ -24064,7 +24064,7 @@ exports[`conjugation: SAVE > 2nd plural 1`] = `
     "fr": "vous avez enregistré.",
     "it": "voi avete salvato.",
     "ja": "あなたたちは保存してしまいます。",
-    "pt": "vocês tendes salvado.",
+    "pt": "vocês salvaram.",
   },
 }
 `;
@@ -24177,7 +24177,7 @@ exports[`conjugation: SAVE > 2nd singular 1`] = `
     "fr": "tu as enregistré.",
     "it": "tu hai salvato.",
     "ja": "あなたは保存してしまいます。",
-    "pt": "você tens salvado.",
+    "pt": "você salvou.",
   },
 }
 `;
@@ -24290,7 +24290,7 @@ exports[`conjugation: SAVE > 3rd plural 1`] = `
     "fr": "ils ont enregistré.",
     "it": "loro hanno salvato.",
     "ja": "彼らは保存してしまいます。",
-    "pt": "eles têm salvado.",
+    "pt": "eles salvaram.",
   },
 }
 `;
@@ -24403,7 +24403,7 @@ exports[`conjugation: SAVE > 3rd singular 1`] = `
     "fr": "il a enregistré.",
     "it": "lui ha salvato.",
     "ja": "彼は保存してしまいます。",
-    "pt": "ele tem salvado.",
+    "pt": "ele salvou.",
   },
 }
 `;
@@ -24516,7 +24516,7 @@ exports[`conjugation: SEE > 1st plural 1`] = `
     "fr": "nous avons vu.",
     "it": "noi abbiamo visto.",
     "ja": "私たちは見てしまいます。",
-    "pt": "nós temos visto.",
+    "pt": "nós vimos.",
   },
 }
 `;
@@ -24629,7 +24629,7 @@ exports[`conjugation: SEE > 1st singular 1`] = `
     "fr": "je ai vu.",
     "it": "io ho visto.",
     "ja": "私は見てしまいます。",
-    "pt": "eu tenho visto.",
+    "pt": "eu vi.",
   },
 }
 `;
@@ -24742,7 +24742,7 @@ exports[`conjugation: SEE > 2nd plural 1`] = `
     "fr": "vous avez vu.",
     "it": "voi avete visto.",
     "ja": "あなたたちは見てしまいます。",
-    "pt": "vocês tendes visto.",
+    "pt": "vocês viram.",
   },
 }
 `;
@@ -24855,7 +24855,7 @@ exports[`conjugation: SEE > 2nd singular 1`] = `
     "fr": "tu as vu.",
     "it": "tu hai visto.",
     "ja": "あなたは見てしまいます。",
-    "pt": "você tens visto.",
+    "pt": "você viu.",
   },
 }
 `;
@@ -24968,7 +24968,7 @@ exports[`conjugation: SEE > 3rd plural 1`] = `
     "fr": "ils ont vu.",
     "it": "loro hanno visto.",
     "ja": "彼らは見てしまいます。",
-    "pt": "eles têm visto.",
+    "pt": "eles viram.",
   },
 }
 `;
@@ -25081,7 +25081,7 @@ exports[`conjugation: SEE > 3rd singular 1`] = `
     "fr": "il a vu.",
     "it": "lui ha visto.",
     "ja": "彼は見てしまいます。",
-    "pt": "ele tem visto.",
+    "pt": "ele viu.",
   },
 }
 `;
@@ -25194,7 +25194,7 @@ exports[`conjugation: SEEM > 1st plural 1`] = `
     "fr": "nous avons semblé.",
     "it": "noi siamo sembrati.",
     "ja": "私たちは思えてしまいます。",
-    "pt": "nós temos parecido.",
+    "pt": "nós parecemos.",
   },
 }
 `;
@@ -25307,7 +25307,7 @@ exports[`conjugation: SEEM > 1st singular 1`] = `
     "fr": "je ai semblé.",
     "it": "io sono sembrato.",
     "ja": "私は思えてしまいます。",
-    "pt": "eu tenho parecido.",
+    "pt": "eu pareci.",
   },
 }
 `;
@@ -25420,7 +25420,7 @@ exports[`conjugation: SEEM > 2nd plural 1`] = `
     "fr": "vous avez semblé.",
     "it": "voi siete sembrati.",
     "ja": "あなたたちは思えてしまいます。",
-    "pt": "vocês tendes parecido.",
+    "pt": "vocês pareceram.",
   },
 }
 `;
@@ -25533,7 +25533,7 @@ exports[`conjugation: SEEM > 2nd singular 1`] = `
     "fr": "tu as semblé.",
     "it": "tu sei sembrato.",
     "ja": "あなたは思えてしまいます。",
-    "pt": "você tens parecido.",
+    "pt": "você pareceu.",
   },
 }
 `;
@@ -25646,7 +25646,7 @@ exports[`conjugation: SEEM > 3rd plural 1`] = `
     "fr": "ils ont semblé.",
     "it": "loro sono sembrati.",
     "ja": "彼らは思えてしまいます。",
-    "pt": "eles têm parecido.",
+    "pt": "eles pareceram.",
   },
 }
 `;
@@ -25759,7 +25759,7 @@ exports[`conjugation: SEEM > 3rd singular 1`] = `
     "fr": "il a semblé.",
     "it": "lui è sembrato.",
     "ja": "彼は思えてしまいます。",
-    "pt": "ele tem parecido.",
+    "pt": "ele pareceu.",
   },
 }
 `;
@@ -25872,7 +25872,7 @@ exports[`conjugation: SELECT > 1st plural 1`] = `
     "fr": "nous avons sélectionné.",
     "it": "noi abbiamo selezionato.",
     "ja": "私たちは選択してしまいます。",
-    "pt": "nós temos selecionado.",
+    "pt": "nós selecionamos.",
   },
 }
 `;
@@ -25985,7 +25985,7 @@ exports[`conjugation: SELECT > 1st singular 1`] = `
     "fr": "je ai sélectionné.",
     "it": "io ho selezionato.",
     "ja": "私は選択してしまいます。",
-    "pt": "eu tenho selecionado.",
+    "pt": "eu selecionei.",
   },
 }
 `;
@@ -26098,7 +26098,7 @@ exports[`conjugation: SELECT > 2nd plural 1`] = `
     "fr": "vous avez sélectionné.",
     "it": "voi avete selezionato.",
     "ja": "あなたたちは選択してしまいます。",
-    "pt": "vocês tendes selecionado.",
+    "pt": "vocês selecionaram.",
   },
 }
 `;
@@ -26211,7 +26211,7 @@ exports[`conjugation: SELECT > 2nd singular 1`] = `
     "fr": "tu as sélectionné.",
     "it": "tu hai selezionato.",
     "ja": "あなたは選択してしまいます。",
-    "pt": "você tens selecionado.",
+    "pt": "você selecionou.",
   },
 }
 `;
@@ -26324,7 +26324,7 @@ exports[`conjugation: SELECT > 3rd plural 1`] = `
     "fr": "ils ont sélectionné.",
     "it": "loro hanno selezionato.",
     "ja": "彼らは選択してしまいます。",
-    "pt": "eles têm selecionado.",
+    "pt": "eles selecionaram.",
   },
 }
 `;
@@ -26437,7 +26437,7 @@ exports[`conjugation: SELECT > 3rd singular 1`] = `
     "fr": "il a sélectionné.",
     "it": "lui ha selezionato.",
     "ja": "彼は選択してしまいます。",
-    "pt": "ele tem selecionado.",
+    "pt": "ele selecionou.",
   },
 }
 `;
@@ -26550,7 +26550,7 @@ exports[`conjugation: SEND > 1st plural 1`] = `
     "fr": "nous avons envoyé.",
     "it": "noi abbiamo mandato.",
     "ja": "私たちは送ってしまいます。",
-    "pt": "nós temos enviado.",
+    "pt": "nós enviamos.",
   },
 }
 `;
@@ -26663,7 +26663,7 @@ exports[`conjugation: SEND > 1st singular 1`] = `
     "fr": "je ai envoyé.",
     "it": "io ho mandato.",
     "ja": "私は送ってしまいます。",
-    "pt": "eu tenho enviado.",
+    "pt": "eu enviei.",
   },
 }
 `;
@@ -26776,7 +26776,7 @@ exports[`conjugation: SEND > 2nd plural 1`] = `
     "fr": "vous avez envoyé.",
     "it": "voi avete mandato.",
     "ja": "あなたたちは送ってしまいます。",
-    "pt": "vocês tendes enviado.",
+    "pt": "vocês enviaram.",
   },
 }
 `;
@@ -26889,7 +26889,7 @@ exports[`conjugation: SEND > 2nd singular 1`] = `
     "fr": "tu as envoyé.",
     "it": "tu hai mandato.",
     "ja": "あなたは送ってしまいます。",
-    "pt": "você tens enviado.",
+    "pt": "você enviou.",
   },
 }
 `;
@@ -27002,7 +27002,7 @@ exports[`conjugation: SEND > 3rd plural 1`] = `
     "fr": "ils ont envoyé.",
     "it": "loro hanno mandato.",
     "ja": "彼らは送ってしまいます。",
-    "pt": "eles têm enviado.",
+    "pt": "eles enviaram.",
   },
 }
 `;
@@ -27115,7 +27115,7 @@ exports[`conjugation: SEND > 3rd singular 1`] = `
     "fr": "il a envoyé.",
     "it": "lui ha mandato.",
     "ja": "彼は送ってしまいます。",
-    "pt": "ele tem enviado.",
+    "pt": "ele enviou.",
   },
 }
 `;
@@ -27228,7 +27228,7 @@ exports[`conjugation: SET_ON_FIRE > 1st plural 1`] = `
     "fr": "nous avons brûlé.",
     "it": "noi abbiamo bruciato.",
     "ja": "私たちは燃やしてしまいます。",
-    "pt": "nós temos queimado.",
+    "pt": "nós queimamos.",
   },
 }
 `;
@@ -27341,7 +27341,7 @@ exports[`conjugation: SET_ON_FIRE > 1st singular 1`] = `
     "fr": "je ai brûlé.",
     "it": "io ho bruciato.",
     "ja": "私は燃やしてしまいます。",
-    "pt": "eu tenho queimado.",
+    "pt": "eu queimei.",
   },
 }
 `;
@@ -27454,7 +27454,7 @@ exports[`conjugation: SET_ON_FIRE > 2nd plural 1`] = `
     "fr": "vous avez brûlé.",
     "it": "voi avete bruciato.",
     "ja": "あなたたちは燃やしてしまいます。",
-    "pt": "vocês tendes queimado.",
+    "pt": "vocês queimaram.",
   },
 }
 `;
@@ -27567,7 +27567,7 @@ exports[`conjugation: SET_ON_FIRE > 2nd singular 1`] = `
     "fr": "tu as brûlé.",
     "it": "tu hai bruciato.",
     "ja": "あなたは燃やしてしまいます。",
-    "pt": "você tens queimado.",
+    "pt": "você queimou.",
   },
 }
 `;
@@ -27680,7 +27680,7 @@ exports[`conjugation: SET_ON_FIRE > 3rd plural 1`] = `
     "fr": "ils ont brûlé.",
     "it": "loro hanno bruciato.",
     "ja": "彼らは燃やしてしまいます。",
-    "pt": "eles têm queimado.",
+    "pt": "eles queimaram.",
   },
 }
 `;
@@ -27793,7 +27793,7 @@ exports[`conjugation: SET_ON_FIRE > 3rd singular 1`] = `
     "fr": "il a brûlé.",
     "it": "lui ha bruciato.",
     "ja": "彼は燃やしてしまいます。",
-    "pt": "ele tem queimado.",
+    "pt": "ele queimou.",
   },
 }
 `;
@@ -27906,7 +27906,7 @@ exports[`conjugation: SHOW > 1st plural 1`] = `
     "fr": "nous avons montré.",
     "it": "noi abbiamo mostrato.",
     "ja": "私たちは見せてしまいます。",
-    "pt": "nós temos mostrado.",
+    "pt": "nós mostramos.",
   },
 }
 `;
@@ -28019,7 +28019,7 @@ exports[`conjugation: SHOW > 1st singular 1`] = `
     "fr": "je ai montré.",
     "it": "io ho mostrato.",
     "ja": "私は見せてしまいます。",
-    "pt": "eu tenho mostrado.",
+    "pt": "eu mostrei.",
   },
 }
 `;
@@ -28132,7 +28132,7 @@ exports[`conjugation: SHOW > 2nd plural 1`] = `
     "fr": "vous avez montré.",
     "it": "voi avete mostrato.",
     "ja": "あなたたちは見せてしまいます。",
-    "pt": "vocês tendes mostrado.",
+    "pt": "vocês mostraram.",
   },
 }
 `;
@@ -28245,7 +28245,7 @@ exports[`conjugation: SHOW > 2nd singular 1`] = `
     "fr": "tu as montré.",
     "it": "tu hai mostrato.",
     "ja": "あなたは見せてしまいます。",
-    "pt": "você tens mostrado.",
+    "pt": "você mostrou.",
   },
 }
 `;
@@ -28358,7 +28358,7 @@ exports[`conjugation: SHOW > 3rd plural 1`] = `
     "fr": "ils ont montré.",
     "it": "loro hanno mostrato.",
     "ja": "彼らは見せてしまいます。",
-    "pt": "eles têm mostrado.",
+    "pt": "eles mostraram.",
   },
 }
 `;
@@ -28471,7 +28471,7 @@ exports[`conjugation: SHOW > 3rd singular 1`] = `
     "fr": "il a montré.",
     "it": "lui ha mostrato.",
     "ja": "彼は見せてしまいます。",
-    "pt": "ele tem mostrado.",
+    "pt": "ele mostrou.",
   },
 }
 `;
@@ -28584,7 +28584,7 @@ exports[`conjugation: START > 1st plural 1`] = `
     "fr": "nous avons commencé.",
     "it": "noi abbiamo iniziato.",
     "ja": "私たちは始めてしまいます。",
-    "pt": "nós temos começado.",
+    "pt": "nós começamos.",
   },
 }
 `;
@@ -28697,7 +28697,7 @@ exports[`conjugation: START > 1st singular 1`] = `
     "fr": "je ai commencé.",
     "it": "io ho iniziato.",
     "ja": "私は始めてしまいます。",
-    "pt": "eu tenho começado.",
+    "pt": "eu comecei.",
   },
 }
 `;
@@ -28810,7 +28810,7 @@ exports[`conjugation: START > 2nd plural 1`] = `
     "fr": "vous avez commencé.",
     "it": "voi avete iniziato.",
     "ja": "あなたたちは始めてしまいます。",
-    "pt": "vocês tendes começado.",
+    "pt": "vocês começaram.",
   },
 }
 `;
@@ -28923,7 +28923,7 @@ exports[`conjugation: START > 2nd singular 1`] = `
     "fr": "tu as commencé.",
     "it": "tu hai iniziato.",
     "ja": "あなたは始めてしまいます。",
-    "pt": "você tens começado.",
+    "pt": "você começou.",
   },
 }
 `;
@@ -29036,7 +29036,7 @@ exports[`conjugation: START > 3rd plural 1`] = `
     "fr": "ils ont commencé.",
     "it": "loro hanno iniziato.",
     "ja": "彼らは始めてしまいます。",
-    "pt": "eles têm começado.",
+    "pt": "eles começaram.",
   },
 }
 `;
@@ -29149,7 +29149,7 @@ exports[`conjugation: START > 3rd singular 1`] = `
     "fr": "il a commencé.",
     "it": "lui ha iniziato.",
     "ja": "彼は始めてしまいます。",
-    "pt": "ele tem começado.",
+    "pt": "ele começou.",
   },
 }
 `;
@@ -29262,7 +29262,7 @@ exports[`conjugation: TIDY_UP > 1st plural 1`] = `
     "fr": "nous avons rangé.",
     "it": "noi abbiamo riordinato.",
     "ja": "私たちは片付けてしまいます。",
-    "pt": "nós temos arrumado.",
+    "pt": "nós arrumamos.",
   },
 }
 `;
@@ -29375,7 +29375,7 @@ exports[`conjugation: TIDY_UP > 1st singular 1`] = `
     "fr": "je ai rangé.",
     "it": "io ho riordinato.",
     "ja": "私は片付けてしまいます。",
-    "pt": "eu tenho arrumado.",
+    "pt": "eu arrumei.",
   },
 }
 `;
@@ -29488,7 +29488,7 @@ exports[`conjugation: TIDY_UP > 2nd plural 1`] = `
     "fr": "vous avez rangé.",
     "it": "voi avete riordinato.",
     "ja": "あなたたちは片付けてしまいます。",
-    "pt": "vocês tendes arrumado.",
+    "pt": "vocês arrumaram.",
   },
 }
 `;
@@ -29601,7 +29601,7 @@ exports[`conjugation: TIDY_UP > 2nd singular 1`] = `
     "fr": "tu as rangé.",
     "it": "tu hai riordinato.",
     "ja": "あなたは片付けてしまいます。",
-    "pt": "você tens arrumado.",
+    "pt": "você arrumou.",
   },
 }
 `;
@@ -29714,7 +29714,7 @@ exports[`conjugation: TIDY_UP > 3rd plural 1`] = `
     "fr": "ils ont rangé.",
     "it": "loro hanno riordinato.",
     "ja": "彼らは片付けてしまいます。",
-    "pt": "eles têm arrumado.",
+    "pt": "eles arrumaram.",
   },
 }
 `;
@@ -29827,7 +29827,7 @@ exports[`conjugation: TIDY_UP > 3rd singular 1`] = `
     "fr": "il a rangé.",
     "it": "lui ha riordinato.",
     "ja": "彼は片付けてしまいます。",
-    "pt": "ele tem arrumado.",
+    "pt": "ele arrumou.",
   },
 }
 `;
@@ -29940,7 +29940,7 @@ exports[`conjugation: TYPE > 1st plural 1`] = `
     "fr": "nous avons tapé.",
     "it": "noi abbiamo digitato.",
     "ja": "私たちは入力してしまいます。",
-    "pt": "nós temos digitado.",
+    "pt": "nós digitamos.",
   },
 }
 `;
@@ -30053,7 +30053,7 @@ exports[`conjugation: TYPE > 1st singular 1`] = `
     "fr": "je ai tapé.",
     "it": "io ho digitato.",
     "ja": "私は入力してしまいます。",
-    "pt": "eu tenho digitado.",
+    "pt": "eu digitei.",
   },
 }
 `;
@@ -30166,7 +30166,7 @@ exports[`conjugation: TYPE > 2nd plural 1`] = `
     "fr": "vous avez tapé.",
     "it": "voi avete digitato.",
     "ja": "あなたたちは入力してしまいます。",
-    "pt": "vocês tendes digitado.",
+    "pt": "vocês digitaram.",
   },
 }
 `;
@@ -30279,7 +30279,7 @@ exports[`conjugation: TYPE > 2nd singular 1`] = `
     "fr": "tu as tapé.",
     "it": "tu hai digitato.",
     "ja": "あなたは入力してしまいます。",
-    "pt": "você tens digitado.",
+    "pt": "você digitou.",
   },
 }
 `;
@@ -30392,7 +30392,7 @@ exports[`conjugation: TYPE > 3rd plural 1`] = `
     "fr": "ils ont tapé.",
     "it": "loro hanno digitato.",
     "ja": "彼らは入力してしまいます。",
-    "pt": "eles têm digitado.",
+    "pt": "eles digitaram.",
   },
 }
 `;
@@ -30505,7 +30505,7 @@ exports[`conjugation: TYPE > 3rd singular 1`] = `
     "fr": "il a tapé.",
     "it": "lui ha digitato.",
     "ja": "彼は入力してしまいます。",
-    "pt": "ele tem digitado.",
+    "pt": "ele digitou.",
   },
 }
 `;

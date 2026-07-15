@@ -272,7 +272,7 @@ describe('relative clauses: preceding-object participle agreement', () => {
   test('Spanish and Portuguese correctly do NOT agree the participle with the antecedent', () => {
     expect(eatenByCat('MOUSE')).toMatchObject({
       es: 'el ratón que el gato ha comido corre.',
-      pt: 'o rato que o gato tem comido corre.',
+      pt: 'o rato que o gato comeu corre.',
     });
   });
 
@@ -457,7 +457,7 @@ describe('nested relative clauses: three aspects at once', () => {
     )).toMatchObject({
       en: 'the cat that is about to eat the mouse that is running has seen the dog.',
       it: 'il gatto che sta per mangiare il topo che sta correndo ha visto il cane.',
-      pt: 'o gato que está prestes a comer o rato que está correndo tem visto o cão.',
+      pt: 'o gato que está prestes a comer o rato que está correndo viu o cão.',
     });
   });
 
