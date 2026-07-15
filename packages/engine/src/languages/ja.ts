@@ -306,7 +306,12 @@ function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase, negative: boolean): Ruby
   const { verb, tense = 'present', aspect = 'neutral' } = verbPhrase;
   const past = tense === 'past';
   if (aspect === 'prospective') {
-    const cop = past ? 'でした' : 'です';
+    // The copula carries the polarity: affirmative です/でした, negative ではありません(でした) —
+    // the same copula negation the na-adjective/noun predicate uses. Without this the prospective
+    // renders identically for both polarities.
+    const cop = negative
+      ? (past ? 'ではありませんでした' : 'ではありません')
+      : (past ? 'でした' : 'です');
     return [wordSeg(verb.forms['base'] ?? '', verb.forms['reading']), { t: 'ところ' }, { t: cop }];
   }
   // Progressive (～ている) and resultative (～てしまう) both build on the te-form.

@@ -310,9 +310,23 @@ describe('known bugs: aspect', () => {
   // so "the cat is NOT about to eat" renders as "the cat IS about to eat" — the meaning inverts.
   // The other two aspects negate correctly (食べていません, 食べてしまいません), which is what makes
   // this an oversight rather than a gap in the suffix inventory.
-  test.fails('Japanese must not drop the negation on the prospective aspect', () => {
+  test('Japanese must not drop the negation on the prospective aspect', () => {
     expect(catEats({ aspect: 'prospective', negative: true }).ja)
       .not.toBe(catEats({ aspect: 'prospective' }).ja);
+  });
+
+  // The concrete forms: the negation lands on the copula (です → ではありません), present and past,
+  // and the affirmative is left exactly as it was.
+  test('Japanese prospective negates on the copula in both tenses', () => {
+    expect(catEats({ aspect: 'prospective', negative: true }).ja).toBe('猫は食べるところではありません。');
+    expect(catEats({ aspect: 'prospective', tense: 'past', negative: true }).ja)
+      .toBe('猫は食べるところではありませんでした。');
+    // Regression: the affirmative prospective is unchanged.
+    expect(catEats({ aspect: 'prospective' }).ja).toBe('猫は食べるところです。');
+    expect(catEats({ aspect: 'prospective', tense: 'past' }).ja).toBe('猫は食べるところでした。');
+    // Regression: the neighbouring aspects, which already negated correctly, are unchanged.
+    expect(catEats({ aspect: 'progressive', negative: true }).ja).toBe('猫は食べていません。');
+    expect(catEats({ aspect: 'resultative', negative: true }).ja).toBe('猫は食べてしまいません。');
   });
 
   // German negates INSIDE the prospective periphrasis rather than outside it:
