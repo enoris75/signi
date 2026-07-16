@@ -126,8 +126,8 @@ describe('hypothetical: anchored cells', () => {
   });
 });
 
-describe('documented simplifications: aspect drops the conditional mood', () => {
-  // Gap B8 (docs/engine-grammar-bugs.md). A marked aspect (progressive / prospective / resultative)
+describe('known bugs: aspect drops the conditional mood', () => {
+  // Gap A38 (docs/bugs/A-must-fix). A marked aspect (progressive / prospective / resultative)
   // on the apodosis loses the conditional mood in the four Romance engines: the periphrastic
   // auxiliary (stare / estar /
   // être) is conjugated in the plain PRESENT INDICATIVE, not the conditional. See it.ts ~line 605:
@@ -148,6 +148,30 @@ describe('documented simplifications: aspect drops the conditional mood', () => 
       fr: 'si le chat mangeait, le chien serait en train de courir.',
       es: 'si el gato comiera, el perro estaría corriendo.',
       pt: 'se o gato comesse, o cão estaria correndo.',
+    });
+  });
+  // Prospective: the same auxiliary (stare / être / estar) fronts the "about to" periphrasis and
+  // must carry the conditional — currently plain present indicative (sta per / est sur le point de
+  // / está a punto de / está prestes a).
+  test.fails('the prospective apodosis should be conditional, not present indicative', () => {
+    expect(hypothetical('present', 'prospective', 'present', 'neutral')).toMatchObject({
+      it: 'se il gatto mangiasse, il cane starebbe per correre.',
+      fr: 'si le chat mangeait, le chien serait sur le point de courir.',
+      es: 'si el gato comiera, el perro estaría a punto de correr.',
+      pt: 'se o gato comesse, o cão estaria prestes a correr.',
+    });
+  });
+  // Resultative (the conditional perfect, "would have run"): it/fr/es carry the perfect auxiliary
+  // (avere / avoir / haber) into the conditional over the participle. Portuguese is the odd one —
+  // its present resultative collapses to the pretérito perfeito (fixed A9), so under a conditional
+  // apodosis that collapse must be bypassed for the true conditional perfect "teria corrido", not
+  // the present-indicative "correu" it emits today.
+  test.fails('the resultative apodosis should be the conditional perfect', () => {
+    expect(hypothetical('present', 'resultative', 'present', 'neutral')).toMatchObject({
+      it: 'se il gatto mangiasse, il cane avrebbe corso.',
+      fr: 'si le chat mangeait, le chien aurait couru.',
+      es: 'si el gato comiera, el perro habría corrido.',
+      pt: 'se o gato comesse, o cão teria corrido.',
     });
   });
 });

@@ -117,7 +117,21 @@ describe('known bugs: terminus', () => {
   //
   // Asserted negatively: which preposition German should choose (in / an / zu) depends on the
   // verb, so the surface is a design call — what is not in doubt is that the bare dative is wrong.
-  test.fails('German should not mark an inanimate terminus with a bare dative', () => {
+  test('German should not mark an inanimate terminus with a bare dative', () => {
     expect(sendTo('SAVE', 'CONTAINER').de).not.toBe('der Kater speichert dem Behälter das Buch.');
+  });
+
+  // The fix in full: an inanimate goal takes the directional "in" + accusative and trails the
+  // object ("das Buch in den Behälter"), across the verbs that license it — while an animate
+  // recipient is unchanged, still the bare dative that leads the object ("dem Hund das Buch").
+  // So the German terminus DOES vary with animacy, unlike the other six languages.
+  test('German marks an inanimate terminus with a preposition, an animate one with the dative', () => {
+    expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
+    expect(sendTo('ADD', 'CONTAINER').de).toBe('der Kater addiert das Buch in den Behälter.');
+    expect(sendTo('EXPORT', 'CONTAINER').de).toBe('der Kater exportiert das Buch in den Behälter.');
+    expect(sendTo('SEND', 'MARKET').de).toBe('der Kater schickt das Buch in den Markt.');
+    // Regression: a person recipient keeps the bare dative, leading the object.
+    expect(sendTo('SEND', 'DOG').de).toBe('der Kater schickt dem Hund das Buch.');
+    expect(sendTo('GIVE', 'DOG').de).toBe('der Kater gibt dem Hund das Buch.');
   });
 });

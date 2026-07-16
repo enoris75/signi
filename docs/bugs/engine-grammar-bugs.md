@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (71 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (72 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A16 | [A16-german-inanimate-terminus-dative.md](A-must-fix/A16-german-inanimate-terminus-dative.md) | German |
 | A17 | [A17-german-relative-clause-closing-comma.md](A-must-fix/A17-german-relative-clause-closing-comma.md) | German |
 | A18 | [A18-german-relative-clause-aspect.md](A-must-fix/A18-german-relative-clause-aspect.md) | German |
 | A19 | [A19-german-prospective-aspect-negation.md](A-must-fix/A19-german-prospective-aspect-negation.md) | German |
@@ -71,6 +70,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A35 | [A35-stacked-negation-not-collapsed.md](A-must-fix/A35-stacked-negation-not-collapsed.md) | en, de, es, pt, it |
 | A36 | [A36-feminine-plural-pronoun.md](A-must-fix/A36-feminine-plural-pronoun.md) | fr, es, pt |
 | A37 | [A37-french-preceding-object-participle-agreement.md](A-must-fix/A37-french-preceding-object-participle-agreement.md) | French |
+| A38 | [A38-romance-aspect-drops-conditional-mood.md](A-must-fix/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -84,7 +84,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | B5 | [B05-japanese-resultative-completive.md](B-can-fix/B05-japanese-resultative-completive.md) |
 | B6 | [B06-german-means-clause-impersonal-man.md](B-can-fix/B06-german-means-clause-impersonal-man.md) |
 | B7 | [B07-japanese-aspect-under-modal.md](B-can-fix/B07-japanese-aspect-under-modal.md) |
-| B8 | [B08-romance-aspect-drops-conditional-mood.md](B-can-fix/B08-romance-aspect-drops-conditional-mood.md) |
 | B9 | [B09-german-genitive-vs-colloquial-dative.md](B-can-fix/B09-german-genitive-vs-colloquial-dative.md) (not pinned by a test) |
 
 ### Part C — Looks wrong, is right (`C-do-not-fix/`)
@@ -117,6 +116,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A13 | [A13-japanese-hortative-negation.md](fixed/A13-japanese-hortative-negation.md) | Japanese | 2026-07-16 |
 | A14 | [A14-japanese-brown-linker.md](fixed/A14-japanese-brown-linker.md) | Japanese | 2026-07-16 |
 | A15 | [A15-japanese-katakana-furigana.md](fixed/A15-japanese-katakana-furigana.md) | Japanese | 2026-07-16 |
+| A16 | [A16-german-inanimate-terminus-dative.md](fixed/A16-german-inanimate-terminus-dative.md) | German | 2026-07-16 |
 
 ---
 

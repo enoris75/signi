@@ -589,12 +589,18 @@ function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boo
  * dative object before the accusative one ("gibt dem Mann das Buch" — the neutral order for two
  * full noun phrases), so its clause builders render the terminus in that slot and let the other
  * complements trail the direct object, where the shared render order puts them.
+ *
+ * Only an *animate* recipient is a bare dative that leads the object. An inanimate goal ("save the
+ * book into the container") is not a recipient but a prepositional destination ("in den Behälter"),
+ * so it stays in `rest` and trails the object like any other adjunct — see the terminus branch of
+ * `complementsPhrase`.
  */
 function splitDative(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): { dative?: Partial<Record<ComplementType, ResolvedComplement>>; rest?: Partial<Record<ComplementType, ResolvedComplement>> } {
-  if (!complements?.['terminus']) return { rest: complements };
-  const { terminus, ...rest } = complements;
+  const terminus = complements?.['terminus'];
+  if (!terminus || firstConjunct(terminus.phrase).head.forms['animate'] !== '1') return { rest: complements };
+  const { terminus: _t, ...rest } = complements;
   return { dative: { terminus }, rest };
 }
 
@@ -698,9 +704,16 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         // doesn't exist for "mit", so prepDet leaves it uncontracted.
         else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);
         else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
-        // Terminus (dative recipient) is a bare dative — no preposition, just the dative
-        // determiner ("der Katze"), the same case German gives the plain indirect object.
-        else if (type === 'terminus') head = prepDet('', f, 'dat', plural);
+        // Terminus. An animate recipient is a bare dative — no preposition, just the dative
+        // determiner ("der Katze"), the same case German gives the plain indirect object. An
+        // inanimate goal is a destination, not a recipient, so it takes a directional preposition:
+        // "in" + the accusative of motion-into ("speichert das Buch in den Behälter"), never the
+        // bare dative that would read as *giving the book to the container*. (Which preposition —
+        // in / an / zu — is verb-dependent; "in" is the app's into-a-container default.)
+        else if (type === 'terminus') {
+          if (f['animate'] === '1') head = prepDet('', f, 'dat', plural);
+          else { _case = 'acc'; head = prepDet('in', f, 'acc', plural); }
+        }
         else /* source */         head = prepDet('aus', f, 'dat', plural);
       }
       // A weak masculine goal/place declines to -(e)n in the oblique ("zum/im/aus dem Jungen");
