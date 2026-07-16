@@ -362,21 +362,22 @@ describe('known bugs: aspect', () => {
 
 describe('known bugs: adverb placement', () => {
   // Italian puts a FREQUENCY adverb between the auxiliary and the past participle, never after
-  // it: "ha SEMPRE mangiato", "non ha MAI mangiato". The engine appends it to the whole group.
+  // it: "ha SEMPRE mangiato", "non ha MAI mangiato". The engine used to append it to the whole
+  // group; it now slots it inside the compound perfect.
   //
-  //     got   "il gatto ha mangiato sempre."       want  "il gatto ha sempre mangiato."
-  //     got   "il gatto non ha mangiato mai."      want  "il gatto non ha mai mangiato."
+  //     was   "il gatto ha mangiato sempre."       now  "il gatto ha sempre mangiato."
+  //     was   "il gatto non ha mangiato mai."      now  "il gatto non ha mai mangiato."
   //
   // A MANNER adverb genuinely does follow the participle in Italian ("ha mangiato bene"), and the
-  // engine gets that right — so the two classes need telling apart, exactly as they do in English
+  // engine gets that right — so the two classes are told apart, exactly as they are in English
   // (see the frequency-adverb bug in modals.test.ts). French and German both place them properly
   // ("a toujours mangé", "hat immer gegessen").
-  test.fails('Italian should put a frequency adverb between auxiliary and participle', () => {
+  test('Italian puts a frequency adverb between auxiliary and participle', () => {
     expect(catEats({ modifier: 'ALWAYS', aspect: 'resultative' }))
       .toMatchObject({ it: 'il gatto ha sempre mangiato.' });
   });
 
-  test.fails('…and likewise the negative concord adverb "mai"', () => {
+  test('…and likewise the negative concord adverb "mai"', () => {
     expect(catEats({ modifier: 'NEVER', aspect: 'resultative' }))
       .toMatchObject({ it: 'il gatto non ha mai mangiato.' });
   });
@@ -384,6 +385,42 @@ describe('known bugs: adverb placement', () => {
   test('a manner adverb DOES follow the participle — which is why the above is a bug', () => {
     expect(catEats({ modifier: 'WELL', aspect: 'resultative' }))
       .toMatchObject({ it: 'il gatto ha mangiato bene.' });
+  });
+
+  // The adverb stays between auxiliary and participle when the clause carries a direct object —
+  // the object follows the whole verb group ("ha sempre mangiato il topo").
+  test('Italian keeps the frequency adverb inside the perfect with a direct object', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modifier: 'ALWAYS', aspect: 'resultative' }, directObject: np('MOUSE'),
+    })).it).toBe('il gatto ha sempre mangiato il topo.');
+  });
+
+  // …and across the compound tenses: the pluperfect ("aveva sempre mangiato") and future perfect
+  // ("avrà sempre mangiato") split the auxiliary and participle the same way.
+  test('Italian slots the adverb inside the pluperfect and future perfect too', () => {
+    expect(catEats({ modifier: 'ALWAYS', aspect: 'resultative', tense: 'past' }).it)
+      .toBe('il gatto aveva sempre mangiato.');
+    expect(catEats({ modifier: 'ALWAYS', aspect: 'resultative', tense: 'future' }).it)
+      .toBe('il gatto avrà sempre mangiato.');
+  });
+
+  // An essere-selecting verb agrees its participle with the subject AND takes the adverb inside:
+  // "la gatta è sempre andata" (feminine "andata", "sempre" between "è" and it).
+  test('Italian places the adverb inside an essere perfect, participle still agreeing', () => {
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'GO', {
+      verbPhrase: { modifier: 'ALWAYS', aspect: 'resultative' },
+    })).it).toBe('la gatta è sempre andata.');
+  });
+
+  // Regression: a MANNER adverb with an object still trails the participle ("ha mangiato bene il
+  // topo"), and the frequency adverb keeps its OTHER positions — after the finite verb in a simple
+  // tense ("mangia sempre"), after the infinitive in a modal chain ("deve mangiare sempre").
+  test('Italian leaves the other adverb positions untouched', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modifier: 'WELL', aspect: 'resultative' }, directObject: np('MOUSE'),
+    })).it).toBe('il gatto ha mangiato bene il topo.');
+    expect(catEats({ modifier: 'ALWAYS' }).it).toBe('il gatto mangia sempre.');
+    expect(catEats({ modifier: 'ALWAYS', modals: ['MUST'] }).it).toBe('il gatto deve mangiare sempre.');
   });
 });
 

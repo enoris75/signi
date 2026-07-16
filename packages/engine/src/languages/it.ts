@@ -665,6 +665,17 @@ function predicateText(
       .filter(Boolean)
       .join(' ');
   }
+  // Italian slots a FREQUENCY adverb between the auxiliary and the past participle of a compound
+  // perfect ("ha SEMPRE mangiato", "non ha MAI mangiato"), not after the whole group — where a
+  // MANNER adverb does belong ("ha mangiato bene"). Only the resultative splits the verb into
+  // auxiliary + participle; a simple tense ("mangia sempre") and a modal chain ("deve mangiare
+  // sempre") keep the adverb after the verb, so both stay on the append path below.
+  const isFrequency = modifier?.forms['subtype'] === 'frequency';
+  if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
+    const [aux, ...rest] = verbText.split(' ');
+    const withAdverb = [aux, modifierText, ...rest].join(' ');
+    return [negText, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
+  }
   return [negText, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
