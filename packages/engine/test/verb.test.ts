@@ -329,16 +329,34 @@ describe('known bugs: aspect', () => {
     expect(catEats({ aspect: 'resultative', negative: true }).ja).toBe('猫は食べてしまいません。');
   });
 
-  // German negates INSIDE the prospective periphrasis rather than outside it:
+  // German used to negate INSIDE the prospective periphrasis rather than outside it:
   //
   //     got   "der Kater ist im Begriff NICHT zu essen."   = is about to NOT eat
   //     want  "der Kater ist NICHT im Begriff zu essen."   = is NOT about to eat
   //
   // The negation belongs on the finite "ist", as it does for the other aspects ("hat nicht
-  // gegessen", "isst gerade nicht"). Another meaning-inverting placement.
-  test.fails('German should negate the prospective auxiliary, not the governed infinitive', () => {
+  // gegessen", "isst gerade nicht"). It now precedes the "im Begriff" predicate as a whole.
+  test('German negates the prospective auxiliary, not the governed infinitive', () => {
     expect(catEats({ aspect: 'prospective', negative: true }))
       .toMatchObject({ de: 'der Kater ist nicht im Begriff zu essen.' });
+  });
+
+  // The same placement holds across tenses: the negation sits on the finite auxiliary (present
+  // "ist", past "war", future "wird") in front of "im Begriff", never inside the periphrasis.
+  test('German negates the prospective on the finite auxiliary in every tense', () => {
+    expect(catEats({ aspect: 'prospective', tense: 'past', negative: true }).de)
+      .toBe('der Kater war nicht im Begriff zu essen.');
+    expect(catEats({ aspect: 'prospective', tense: 'future', negative: true }).de)
+      .toBe('der Kater wird nicht im Begriff sein zu essen.');
+  });
+
+  // Regression guard: the OTHER aspects negate exactly where they did — the resultative's "nicht"
+  // before the participle, the progressive's after its adverb "gerade" — and the affirmative
+  // prospective is unchanged.
+  test('German leaves the other aspects\' negation placement untouched', () => {
+    expect(catEats({ aspect: 'resultative', negative: true }).de).toBe('der Kater hat nicht gegessen.');
+    expect(catEats({ aspect: 'progressive', negative: true }).de).toBe('der Kater isst gerade nicht.');
+    expect(catEats({ aspect: 'prospective' }).de).toBe('der Kater ist im Begriff zu essen.');
   });
 });
 

@@ -882,16 +882,23 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     // Skip "nicht" when the modifier is already negative ("nie" = never).
     const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
     const applyNicht = verbNegative && !modifierIsNegative;
+    // The prospective's "im Begriff …" is a predicate the negation scopes over as a whole, so
+    // "nicht" precedes it on the finite auxiliary — "ist NICHT im Begriff zu essen" (is NOT about
+    // to eat), never "ist im Begriff NICHT zu essen" (is about to NOT eat). It is the only aspect
+    // whose "mid" behaves this way; the progressive's adverb "gerade" takes "nicht" after it
+    // ("isst gerade nicht"). When it fires it is the sole "nicht", so the other slots stand down.
+    const negProspective = applyNicht && aspect === 'prospective';
     // A predicate complement (copula/BECOME: "ist vorsichtig") is negated by "nicht"
     // *before* it — "ist nicht vorsichtig", not "*ist vorsichtig nicht". With an adverb
     // present the "nicht immer" placement already covers it, so guard on !modifierText.
     const hasPredicative = !!phrase.complements?.['predicative'];
-    const negBefore = applyNicht && modifierText ? 'nicht' : '';
-    const negComplement = applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
-    const negAfter  = applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
+    const negAspectMid = negProspective ? 'nicht' : '';
+    const negBefore = !negProspective && applyNicht && modifierText ? 'nicht' : '';
+    const negComplement = !negProspective && applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
+    const negAfter  = !negProspective && applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
     const head = inverted ? [verbText, subj] : [subj, verbText];
-    return [...head, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
+    return [...head, negAspectMid, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
 }
 
