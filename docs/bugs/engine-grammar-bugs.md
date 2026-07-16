@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (69 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (68 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A17 | [A17-german-relative-clause-closing-comma.md](A-must-fix/A17-german-relative-clause-closing-comma.md) | German |
 | A18 | [A18-german-relative-clause-aspect.md](A-must-fix/A18-german-relative-clause-aspect.md) | German |
 | A19 | [A19-german-prospective-aspect-negation.md](A-must-fix/A19-german-prospective-aspect-negation.md) | German |
 | A20 | [A20-german-modifier-adjective-hoist.md](A-must-fix/A20-german-modifier-adjective-hoist.md) | German |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A14 | [A14-japanese-brown-linker.md](fixed/A14-japanese-brown-linker.md) | Japanese | 2026-07-16 |
 | A15 | [A15-japanese-katakana-furigana.md](fixed/A15-japanese-katakana-furigana.md) | Japanese | 2026-07-16 |
 | A16 | [A16-german-inanimate-terminus-dative.md](fixed/A16-german-inanimate-terminus-dative.md) | German | 2026-07-16 |
+| A17 | [A17-german-relative-clause-closing-comma.md](fixed/A17-german-relative-clause-closing-comma.md) | German | 2026-07-16 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---

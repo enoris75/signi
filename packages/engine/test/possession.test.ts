@@ -90,8 +90,9 @@ describe('possessor as a full SVO phrase', () => {
     }))).toMatchObject({
       it: 'il libro del gatto che dà la moneta al cane brucia.',
       fr: 'le livre du chat qui donne la pièce au chien brûle.',
-      // German, whose relative clause is verb-final, orders dative before accusative inside it.
-      de: 'das Buch vom Kater, der dem Hund die Münze gibt brennt.',
+      // German, whose relative clause is verb-final, orders dative before accusative inside it,
+      // and brackets the whole clause in commas.
+      de: 'das Buch vom Kater, der dem Hund die Münze gibt, brennt.',
     });
   });
 

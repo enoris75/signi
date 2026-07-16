@@ -738,7 +738,8 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
  * For nominative/accusative the relative pronoun coincides with the definite article
  * (der/die/das · den/die/das); genitive ("dessen") and dative ("denen") relatives —
  * indirect/complement — are not modelled and fall back to accusative. Returns "" if `np`
- * has no relative. (The closing comma is omitted; a known first-cut simplification.)
+ * has no relative. The clause is bracketed by commas at both ends; a closing comma that lands
+ * against the sentence-final stop (or another comma) is tidied up in `punctuate`.
  */
 function subordinateClause(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -782,7 +783,7 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const body = [pronoun, clauseSubjectText, dativeText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
     .filter(Boolean)
     .join(' ');
-  return `, ${body}`;
+  return `, ${body},`;
 }
 
 // Imperative person key from a subject: 1st-plural cohortative, else 2nd sg/pl.
@@ -929,10 +930,16 @@ const COORD_INVERTS: Record<CoordConjunction, boolean> = {
 
 /**
  * Tidy the punctuation a clause part carried in with it: the parts are joined with spaces, which
- * puts one in front of a leading comma ("beginnt , indem"). Applied once to the finished sentence.
+ * puts one in front of a leading comma ("beginnt , indem"). A relative clause also carries a
+ * closing comma; when it lands next to another comma (adjacent clauses) it collapses to one, and
+ * a comma at the very end merges with the sentence-final stop the translator appends. Applied once
+ * to the finished sentence.
  */
 function punctuate(sentence: string): string {
-  return sentence.replace(/\s+,/g, ',');
+  return sentence
+    .replace(/\s+,/g, ',') // pull a comma back onto the preceding word
+    .replace(/,(\s*,)+/g, ',') // collapse a run of commas (two abutting clauses) into one
+    .replace(/,\s*$/, ''); // drop a trailing comma; the full stop closes the clause here
 }
 
 export const germanEngine: LanguageEngine = {

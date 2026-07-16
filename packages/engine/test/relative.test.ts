@@ -24,8 +24,8 @@ describe('relative clauses', () => {
       en: 'the cat that eats the mouse runs.',
       it: 'il gatto che mangia il topo corre.',
       fr: 'le chat qui mange la souris court.',
-      // German sends the relative clause's verb to the end.
-      de: 'der Kater, der die Maus isst läuft.',
+      // German sends the relative clause's verb to the end, and brackets the clause in commas.
+      de: 'der Kater, der die Maus isst, läuft.',
     });
   });
 
@@ -40,7 +40,7 @@ describe('relative clauses', () => {
       // French distinguishes the subject relativiser (qui) from the object one (que).
       fr: 'la souris que le chat mange court.',
       es: 'el ratón que el gato come corre.',
-      de: 'die Maus, die der Kater isst läuft.',
+      de: 'die Maus, die der Kater isst, läuft.',
     });
   });
 
@@ -103,11 +103,20 @@ describe('known bugs: relative clauses', () => {
     )).en).toBe('the mouse that the person eats runs.');
   });
 
-  // A German relative clause is set off by commas at BOTH ends; the engine only opens one.
-  // de.ts calls this out: "(The closing comma is omitted; a known first-cut simplification.)"
-  test.fails('German should close the relative clause with a comma', () => {
+  // A German relative clause is set off by commas at BOTH ends; the engine now closes it too.
+  // A closing comma that lands against the sentence-final stop is absorbed by it (see the
+  // sibling cases below where the clause ends the sentence).
+  test('German closes the relative clause with a comma', () => {
     expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')))
       .toMatchObject({ de: 'der Kater, der isst, läuft.' });
+  });
+
+  // The closing comma merges with the sentence-final full stop when the clause ends the sentence:
+  // no ", ." — just ".". (The head noun is the matrix direct object, so the clause is last.)
+  test('German drops the closing comma into the sentence-final stop', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', {
+      directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }),
+    })).de).toBe('der Hund sieht den Kater, der isst.');
   });
 
   // The clearest bug in the engine: ja.ts's own comment says the clause verb "takes the *plain*
@@ -174,8 +183,8 @@ describe('known bugs: relative clauses', () => {
 // independent of the matrix clause's. "the cat that WILL EAT SAW the mouse" is a perfectly good
 // plan, and each half has to conjugate on its own terms.
 //
-// The German strings below still lack the relative clause's closing comma — that is the known bug
-// pinned above, not a claim that the comma should be absent.
+// The German strings below bracket the relative clause in commas at both ends (the clause sits on
+// the subject, so the closing comma is clause-medial and visible before the matrix verb).
 const matrix = (main: Partial<VerbPhrase>, rel: Partial<VerbPhrase>) =>
   sayAll(clause(
     np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...rel } } }),
@@ -189,14 +198,14 @@ describe('relative clauses: a tense of their own', () => {
       en: 'the cat that ate sees the mouse.',
       it: 'il gatto che mangiò vede il topo.',
       fr: 'le chat qui mangea voit la souris.',
-      de: 'der Kater, der aß sieht die Maus.',
+      de: 'der Kater, der aß, sieht die Maus.',
     });
 
     expect(matrix({ tense: 'past' }, {})).toMatchObject({
       en: 'the cat that eats saw the mouse.',
       it: 'il gatto che mangia vide il topo.', // mangia present, vide past
       es: 'el gato que come vio el ratón.',
-      de: 'der Kater, der isst sah die Maus.',
+      de: 'der Kater, der isst, sah die Maus.',
     });
   });
 
@@ -205,7 +214,7 @@ describe('relative clauses: a tense of their own', () => {
       en: 'the cat that will eat saw the mouse.',
       it: 'il gatto che mangerà vide il topo.',
       fr: 'le chat qui mangera vit la souris.',
-      de: 'der Kater, der essen wird sah die Maus.', // verb-final: the auxiliary goes last
+      de: 'der Kater, der essen wird, sah die Maus.', // verb-final: the auxiliary goes last
     });
 
     expect(matrix({ tense: 'future' }, { tense: 'past' })).toMatchObject({
@@ -231,7 +240,7 @@ describe('relative clauses: an aspect of their own', () => {
       en: 'the cat that eats has seen the mouse.',
       it: 'il gatto che mangia ha visto il topo.',
       fr: 'le chat qui mange a vu la souris.',
-      de: 'der Kater, der isst hat die Maus gesehen.', // the matrix aspect DOES render
+      de: 'der Kater, der isst, hat die Maus gesehen.', // the matrix aspect DOES render
     });
   });
 
@@ -329,13 +338,13 @@ describe('relative clauses: polarity and modals of their own', () => {
     expect(matrix({ negative: true }, {})).toMatchObject({
       en: 'the cat that eats does not see the mouse.',
       it: 'il gatto che mangia non vede il topo.',
-      de: 'der Kater, der isst sieht die Maus nicht.',
+      de: 'der Kater, der isst, sieht die Maus nicht.',
     });
 
     expect(matrix({}, { negative: true })).toMatchObject({
       en: 'the cat that does not eat sees the mouse.',
       fr: 'le chat qui ne mange pas voit la souris.',
-      de: 'der Kater, der nicht isst sieht die Maus.', // negation survives into the clause
+      de: 'der Kater, der nicht isst, sieht die Maus.', // negation survives into the clause
       ja: '食べません猫はネズミを見ます。',
     });
   });
@@ -349,7 +358,7 @@ describe('relative clauses: polarity and modals of their own', () => {
     expect(matrix({}, { modals: ['CAN'] })).toMatchObject({
       en: 'the cat that can eat sees the mouse.',
       it: 'il gatto che può mangiare vede il topo.',
-      de: 'der Kater, der essen kann sieht die Maus.', // modal goes final, like the tense auxiliary
+      de: 'der Kater, der essen kann, sieht die Maus.', // modal goes final, like the tense auxiliary
     });
   });
 });
@@ -371,9 +380,11 @@ describe('known bugs: relative clauses (aspect)', () => {
   });
 
   test.fails('German should render a progressive inside a relative clause', () => {
-    // "der gerade isst" — the adverbial progressive German uses everywhere else.
+    // "der gerade isst" — the adverbial progressive German uses everywhere else. The clause is now
+    // comma-bracketed (A17, fixed), so the baseline the aspect must diverge from carries the commas;
+    // the aspect itself is still dropped, so this stays failing until A18 lands.
     expect(matrix({ aspect: 'resultative' }, { aspect: 'progressive' }).de)
-      .not.toBe('der Kater, der isst hat die Maus gesehen.');
+      .not.toBe('der Kater, der isst, hat die Maus gesehen.');
   });
 
   test.fails('German should keep BOTH the tense and the aspect of a relative clause', () => {
@@ -424,8 +435,8 @@ describe('nested relative clauses: three tenses at once', () => {
       en: 'the cat that ate the mouse that runs will see the dog.',
       it: 'il gatto che mangiò il topo che corre vedrà il cane.',
       fr: 'le chat qui mangea la souris qui court verra le chien.',
-      // Each German clause is verb-final on its own: "die läuft" inside "der … aß".
-      de: 'der Kater, der die Maus, die läuft aß wird den Hund sehen.',
+      // Each German clause is verb-final on its own: "die läuft," inside "der … aß,".
+      de: 'der Kater, der die Maus, die läuft, aß, wird den Hund sehen.',
     });
   });
 
@@ -434,7 +445,7 @@ describe('nested relative clauses: three tenses at once', () => {
       en: 'the cat that will eat the mouse that ran sees the dog.',
       it: 'il gatto che mangerà il topo che corse vede il cane.',
       es: 'el gato que comerá el ratón que corrió ve el perro.',
-      de: 'der Kater, der die Maus, die lief essen wird sieht den Hund.',
+      de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.',
     });
   });
 });
@@ -520,13 +531,14 @@ describe('known bugs: nested relative clauses', () => {
     const de = nested(
       { aspect: 'progressive' }, { aspect: 'resultative' }, { aspect: 'prospective' },
     ).de;
-    // Both clauses collapse to "isst" / "läuft" — the two aspects vanish.
-    expect(de).not.toBe('der Kater, der die Maus, die läuft isst sieht gerade den Hund.');
+    // Both clauses collapse to "isst" / "läuft" — the two aspects vanish. The clauses are
+    // comma-bracketed (A17, fixed); the aspects are still what is missing here.
+    expect(de).not.toBe('der Kater, der die Maus, die läuft, isst, sieht gerade den Hund.');
   });
 
   test('…while the TENSE survives at every depth, which is what makes it a bug', () => {
     // Same nest, tenses instead of aspects: all three levels render. The path exists.
     expect(nested({}, { tense: 'future' }, { tense: 'past' }))
-      .toMatchObject({ de: 'der Kater, der die Maus, die lief essen wird sieht den Hund.' });
+      .toMatchObject({ de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.' });
   });
 });
