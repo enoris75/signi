@@ -364,36 +364,52 @@ describe('relative clauses: polarity and modals of their own', () => {
 });
 
 describe('known bugs: relative clauses (aspect)', () => {
-  // German DROPS the aspect inside a relative clause. Everything else survives — the tense
-  // ("der aß", "der essen wird"), the negation ("der nicht isst") and a modal ("der essen kann")
-  // are all rendered — but an aspect is silently discarded and the clause falls back to a plain
-  // present:
-  //
-  //     got   "der Kater, der ISST sieht die Maus."
-  //     want  "der Kater, der GEGESSEN HAT, sieht die Maus."
-  //
-  // The matrix clause renders the same aspect perfectly ("hat die Maus gesehen"), so the
-  // machinery exists; it simply is not reached from the relative-clause path.
-  test.fails('German should render a resultative inside a relative clause', () => {
+  // German used to DROP the aspect inside a relative clause — the tense ("der aß", "der essen
+  // wird"), the negation ("der nicht isst") and a modal ("der essen kann") all survived, but an
+  // aspect was silently discarded and the clause fell back to a plain present. The relative path
+  // now runs the same verbGroup/modalVerbGroup the matrix clause does, so the aspect renders here
+  // too — verb-final: the finite auxiliary closes the clause behind the participle/infinitive.
+  test('German renders a resultative inside a relative clause', () => {
     expect(matrix({}, { aspect: 'resultative' }))
       .toMatchObject({ de: 'der Kater, der gegessen hat, sieht die Maus.' });
   });
 
-  test.fails('German should render a progressive inside a relative clause', () => {
-    // "der gerade isst" — the adverbial progressive German uses everywhere else. The clause is now
-    // comma-bracketed (A17, fixed), so the baseline the aspect must diverge from carries the commas;
-    // the aspect itself is still dropped, so this stays failing until A18 lands.
+  test('German renders a progressive inside a relative clause', () => {
+    // "der gerade isst" — the adverbial progressive German uses everywhere else, unaffected by the
+    // matrix clause carrying an aspect of its own ("hat … gesehen").
     expect(matrix({ aspect: 'resultative' }, { aspect: 'progressive' }).de)
-      .not.toBe('der Kater, der isst, hat die Maus gesehen.');
+      .toBe('der Kater, der gerade isst, hat die Maus gesehen.');
   });
 
-  test.fails('German should keep BOTH the tense and the aspect of a relative clause', () => {
-    // Past + resultative in the clause: the tense survives ("aß") and the aspect is thrown away,
-    // so a pluperfect collapses into a simple past.
+  test('German renders a prospective inside a relative clause', () => {
+    // "im Begriff zu essen", with the finite "ist" pushed to the clause end (verb-final).
+    expect(matrix({}, { aspect: 'prospective' }).de)
+      .toBe('der Kater, der im Begriff zu essen ist, sieht die Maus.');
+  });
+
+  test('German keeps BOTH the tense and the aspect of a relative clause', () => {
+    // Past + resultative in the clause is a pluperfect ("gegessen hatte"), not the simple past the
+    // aspect-drop used to collapse it into.
     expect(matrix(
       { tense: 'future', aspect: 'progressive' },
       { tense: 'past', aspect: 'resultative' },
     )).toMatchObject({ de: 'der Kater, der gegessen hatte, wird gerade die Maus sehen.' });
+  });
+
+  test('German renders a future perfect inside a relative clause', () => {
+    // Future + resultative stacks the auxiliary's infinitive behind the participle, with "werden"
+    // finite and clause-final: "gegessen haben wird".
+    expect(matrix({}, { tense: 'future', aspect: 'resultative' }).de)
+      .toBe('der Kater, der gegessen haben wird, sieht die Maus.');
+  });
+
+  test('German orders the clause object before the resultative participle', () => {
+    // The aspect does not disturb the verb-final order: the object still precedes the
+    // participle + auxiliary ("die Maus gegessen hat").
+    expect(sayAll(clause(
+      np('CAT', { relative: { verbPhrase: { verb: 'EAT', aspect: 'resultative' }, directObject: np('MOUSE') } }),
+      'RUN',
+    )).de).toBe('der Kater, der die Maus gegessen hat, läuft.');
   });
 });
 
@@ -523,20 +539,18 @@ describe('nested relative clauses: three tenses AND three aspects', () => {
 });
 
 describe('known bugs: nested relative clauses', () => {
-  // The German aspect-drop compounds with depth: EVERY relative clause falls back to a plain
-  // tense, so a three-level plan loses two aspects at once. Below, the outer clause should be a
-  // perfect ("der gegessen hat") and the inner a prospective ("die im Begriff ist zu laufen");
-  // both come out as bare presents, and only the matrix keeps its aspect.
-  test.fails('German should render an aspect at every relative depth, not just the matrix', () => {
+  // The German aspect-drop used to compound with depth: every relative clause fell back to a plain
+  // tense, so a three-level plan lost an aspect at every level. Now each level renders its own:
+  // the outer clause is a perfect ("gegessen hat"), the inner a prospective ("im Begriff zu laufen
+  // ist"), and only the matrix stays a progressive ("sieht gerade").
+  test('German renders an aspect at every relative depth, not just the matrix', () => {
     const de = nested(
       { aspect: 'progressive' }, { aspect: 'resultative' }, { aspect: 'prospective' },
     ).de;
-    // Both clauses collapse to "isst" / "läuft" — the two aspects vanish. The clauses are
-    // comma-bracketed (A17, fixed); the aspects are still what is missing here.
-    expect(de).not.toBe('der Kater, der die Maus, die läuft, isst, sieht gerade den Hund.');
+    expect(de).toBe('der Kater, der die Maus, die im Begriff zu laufen ist, gegessen hat, sieht gerade den Hund.');
   });
 
-  test('…while the TENSE survives at every depth, which is what makes it a bug', () => {
+  test('…and the TENSE still survives at every depth alongside it', () => {
     // Same nest, tenses instead of aspects: all three levels render. The path exists.
     expect(nested({}, { tense: 'future' }, { tense: 'past' }))
       .toMatchObject({ de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.' });

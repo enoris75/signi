@@ -298,13 +298,6 @@ function prepDet(prep: string, forms: Record<string, string>, _case: Case, plura
   return det ? `${prep} ${det}` : prep;
 }
 
-function conjugate(forms: Record<string, string>, subjectForms: Record<string, string>, tense: Tense = 'present'): string {
-  const person = subjectForms['person'] ?? '3';
-  const number = subjectForms['number'] ?? 'singular';
-  const n = number === 'plural' ? 'pl' : 'sg';
-  return forms[`${person}${n}_${tense}`] ?? forms[tense] ?? forms[`${person}${n}_present`] ?? forms['base'] ?? '';
-}
-
 /** Conjugate from a person-number key ("3sg") — the shape this engine's callers carry. */
 function conjPn(forms: Record<string, string>, pn: string, tense: Tense): string {
   return forms[`${pn}_${tense}`] ?? forms[tense] ?? forms[`${pn}_present`] ?? forms['base'] ?? '';
@@ -754,23 +747,19 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;
   const clauseSubjectText = subjectRelative ? '' : subjectText(rel.subject!);
 
-  const { verb, negative: verbNegative, modifier, tense = 'present', modals } = rel.verbPhrase;
+  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = rel.verbPhrase;
   const person = agreeForms['person'] ?? '3';
   const aPlural = (agreeForms['number'] ?? agreeForms['count']) === 'plural';
   const pn = `${person}${aPlural ? 'pl' : 'sg'}`;
-  const isFuture = tense === 'future';
-  // Verb-final: the finite verb closes the clause. Future puts the infinitive
-  // just before the clause-final finite "werden" ("der Wein trinken wird"). A modal chain
-  // makes its outermost member the finite verb and pushes the main verb's infinitive plus
-  // the modal stack in front of it ("der Junge, der gehen können muss").
-  const finite = isFuture
-    ? (WERDEN[pn] ?? 'wird')
-    : modals.length > 0
-      ? conjPn(modals[0].forms, pn, tense)
-      : conjugate(verb.forms, agreeForms, tense);
-  const infinitive = modals.length > 0
-    ? [verb.forms['base'] ?? '', ...modalStack(modals, isFuture)].join(' ')
-    : isFuture ? (verb.forms['base'] ?? '') : '';
+  // The verb complex is built by the same `verbGroup`/`modalVerbGroup` the main clause uses, so a
+  // relative clause renders its aspect too (resultative "gegessen hat", progressive "gerade isst",
+  // prospective "im Begriff … zu essen"). The clause is verb-final: the finite verb (`v2`) closes
+  // it, sitting after the non-finite `tail` (Partizip / infinitive / "zu …" / the modal stack),
+  // while the aspect adverbial (`mid`: "gerade" / "im Begriff") sits in the Mittelfeld before the
+  // objects — the mirror of the main clause, whose finite verb leads from the V2 slot instead.
+  const { v2: finite, mid, tail } = modals.length > 0
+    ? modalVerbGroup(modals, verb.forms, pn, tense, aspect, mood)
+    : verbGroup(verb.forms, pn, tense, aspect, mood);
 
   const { dative, rest } = splitDative(rel.complements);
   const dativeText = complementsPhrase(dative);
@@ -780,7 +769,7 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
   const complementsText = complementsPhrase(rest);
 
-  const body = [pronoun, clauseSubjectText, dativeText, directObjectText, complementsText, modifierText, nicht, infinitive, finite]
+  const body = [pronoun, clauseSubjectText, mid, dativeText, directObjectText, complementsText, modifierText, nicht, tail, finite]
     .filter(Boolean)
     .join(' ');
   return `, ${body},`;
@@ -877,8 +866,8 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
     // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"
     // follows it, and the non-finite tail (infinitive / Partizip / "zu …" / the modal stack)
-    // closes the clause. Aspect is rendered here in the main clause only (relative clauses
-    // stay neutral — a known gap).
+    // closes the clause. Aspect is rendered by verbGroup/modalVerbGroup, which a relative clause
+    // reaches through the same helpers (see subordinateClause).
     const person = subject.agreement['person'] ?? '3';
     const number = subject.agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
