@@ -416,6 +416,13 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
  * Shared by the top-level sentence and by relative clauses, which pass the head noun's
  * forms as `subjectForms` so the verb agrees with the head.
  */
+/** Place a frequency adverb after the finite auxiliary of a verb group — the slot English gives
+ *  it after the *first* auxiliary: "must always eat", "will always eat", "has always eaten". */
+function afterFirstAux(verbText: string, adverb: string): string {
+  const [aux, ...rest] = verbText.split(' ');
+  return [aux, adverb, ...rest].join(' ');
+}
+
 function predicateParts(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
@@ -474,9 +481,12 @@ function predicateParts(
       ...modalChain(modals, (m) => modalFinite(m, subjectForms, tense, negateVerb)),
       verbGroupInfinitive(verb.forms, aspect),
     ].join(' ');
-    const preVerb = isFrequency ? modifierText : '';
-    const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, complementsText, postVerb];
+    // A frequency adverb follows the finite (outermost) modal — "must always eat", "must never
+    // eat" — not before it; a manner adverb trails the whole group ("eat fast").
+    if (isFrequency && modifierText) {
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+    }
+    return ['', verbText, directObjectText, complementsText, modifierText];
   }
 
   // A non-neutral aspect (progressive/prospective/resultative) is periphrastic on "be",
@@ -486,9 +496,7 @@ function predicateParts(
     // A frequency adverb follows the finite auxiliary of the group, not the whole group:
     // "you have never been", "is never going" — never "you never have been".
     if (isFrequency && modifierText) {
-      const [aux, ...rest] = verbText.split(' ');
-      const withAdv = [aux, modifierText, ...rest].join(' ');
-      return ['', withAdv, directObjectText, complementsText, ''];
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
     }
     return ['', verbText, directObjectText, complementsText, modifierText];
   }
@@ -521,6 +529,11 @@ function predicateParts(
   const verbText = tense === 'future'
     ? `will ${verb.forms['base'] ?? ''}`
     : conjugate(verb.forms, subjectForms, tense);
+  // In the future, the frequency adverb follows the auxiliary "will" ("will always eat"), the same
+  // slot the perfect and a modal give it. With no auxiliary (present/past) it stays pre-verbal.
+  if (isFrequency && modifierText && tense === 'future') {
+    return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+  }
   // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
   // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv
   const preVerb  = isFrequency ? modifierText : '';

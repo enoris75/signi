@@ -494,21 +494,21 @@ describe('known bugs: modals', () => {
   //     modal          "the cat ALWAYS MUST eat."      ✗ want "must always eat"
   //     future         "the cat ALWAYS WILL eat."      ✗ want "will always eat"
   //
-  // So the engine has the rule and applies it for the perfect — it simply does not treat a modal
-  // or the future auxiliary as an auxiliary for this purpose. That the perfect is right is what
-  // makes this a bug rather than a choice. A manner adverb ("eat fast") is unaffected, being
-  // post-verbal; only the pre-verbal (frequency) class moves.
-  test.fails('English should place a frequency adverb after the modal, not before it', () => {
+  // The engine had the rule and applied it for the perfect — it simply did not treat a modal or
+  // the future auxiliary as an auxiliary for this purpose. Now it does: the frequency adverb
+  // follows the finite auxiliary (modal, "will" or the perfect "has") alike. A manner adverb
+  // ("eat fast") is unaffected, being post-verbal; only the pre-verbal (frequency) class moves.
+  test('English places a frequency adverb after the modal, not before it', () => {
     expect(catModal({ modals: ['MUST'], modifier: 'ALWAYS' }))
       .toMatchObject({ en: 'the cat must always eat.' });
   });
 
-  test.fails('English should place NEVER after the modal', () => {
+  test('English places NEVER after the modal', () => {
     expect(catModal({ modals: ['MUST'], modifier: 'NEVER' }))
       .toMatchObject({ en: 'the cat must never eat.' });
   });
 
-  test.fails('English should place a frequency adverb after the future auxiliary', () => {
+  test('English places a frequency adverb after the future auxiliary', () => {
     expect(catModal({ tense: 'future', modifier: 'ALWAYS' }))
       .toMatchObject({ en: 'the cat will always eat.' });
   });
@@ -516,5 +516,30 @@ describe('known bugs: modals', () => {
   test('…but it gets the perfect right, which is why the above is a bug', () => {
     expect(catModal({ aspect: 'resultative', modifier: 'ALWAYS' }))
       .toMatchObject({ en: 'the cat has always eaten.' });
+  });
+
+  // The adverb follows the OUTERMOST (finite) modal of a chain, not each one: "must always be
+  // able to eat", never "always must be able to eat".
+  test('English places the frequency adverb after the outermost modal of a chain', () => {
+    expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'ALWAYS' }).en)
+      .toBe('the cat must always be able to eat.');
+  });
+
+  // NEVER after the future auxiliary too, matching ALWAYS.
+  test('English places NEVER after the future auxiliary', () => {
+    expect(catModal({ tense: 'future', modifier: 'NEVER' }).en).toBe('the cat will never eat.');
+  });
+
+  // Regression: a MANNER adverb is post-verbal and does NOT move to the auxiliary slot, with a
+  // modal or in the future ("must eat fast", "will eat fast").
+  test('English keeps a manner adverb post-verbal under a modal and in the future', () => {
+    expect(catModal({ modals: ['MUST'], modifier: 'FAST' }).en).toBe('the cat must eat fast.');
+    expect(catModal({ tense: 'future', modifier: 'FAST' }).en).toBe('the cat will eat fast.');
+  });
+
+  // Regression: with NO auxiliary (present/past) the frequency adverb stays pre-verbal.
+  test('English keeps a frequency adverb pre-verbal when there is no auxiliary', () => {
+    expect(catModal({ modifier: 'ALWAYS' }).en).toBe('the cat always eats.');
+    expect(catModal({ tense: 'past', modifier: 'ALWAYS' }).en).toBe('the cat always ate.');
   });
 });

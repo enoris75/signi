@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (59 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (56 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A22 | [A22-english-frequency-adverb-modal.md](A-must-fix/A22-english-frequency-adverb-modal.md) | English |
 | A23 | [A23-english-must-negative-scope.md](A-must-fix/A23-english-must-negative-scope.md) | English |
 | A24 | [A24-french-silent-h-elision.md](A-must-fix/A24-french-silent-h-elision.md) | French |
 | A26 | [A26-romance-predicative-superlative-article.md](A-must-fix/A26-romance-predicative-superlative-article.md) | Romance |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A19 | [A19-german-prospective-aspect-negation.md](fixed/A19-german-prospective-aspect-negation.md) | German | 2026-07-16 |
 | A20 | [A20-german-modifier-adjective-hoist.md](fixed/A20-german-modifier-adjective-hoist.md) | German | 2026-07-16 |
 | A21 | [A21-english-group-genitive.md](fixed/A21-english-group-genitive.md) | English | 2026-07-16 |
+| A22 | [A22-english-frequency-adverb-modal.md](fixed/A22-english-frequency-adverb-modal.md) | English | 2026-07-16 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---
