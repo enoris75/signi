@@ -172,36 +172,78 @@ describe('predicative: a predicate adjective at every degree', () => {
 describe('known bugs: predicative degree', () => {
   const atDegree = (headDegree: Degree) => seems(np('HAPPY', { headDegree }));
 
-  // Romance renders a PREDICATIVE superlative identically to the comparative:
+  // Romance used to render a PREDICATIVE superlative identically to the comparative:
   //
   //     more   "il gatto sembra più felice."     most   "il gatto sembra più felice."
   //
-  // This is NOT the legitimate homophony of the attributive case. There, the noun's own definite
-  // article does the superlative's work ("il gatto più grande" — see nounPhrase.test.ts), so the
-  // two genuinely coincide. A predicate adjective has no article to borrow, so the superlative
-  // must supply its own: "sembra IL più felice", "semble LE plus heureux". Without it, "most"
-  // simply says "more".
+  // That collapsed the two, unlike the legitimate homophony of the attributive case, where the
+  // noun's own definite article does the superlative's work ("il gatto più grande" — see
+  // nounPhrase.test.ts). A predicate adjective has no article to borrow, so the superlative now
+  // supplies its own: "sembra IL più felice", "semble LE plus heureux".
   //
   // German proves the distinction is real by getting it right ("am glücklichsten" vs
   // "glücklicher"), as does English ("happiest" vs "happier").
-  test.fails('Italian predicative superlative needs its own article: "il più felice"', () => {
+  test('Italian predicative superlative supplies its own article: "il più felice"', () => {
     expect(atDegree('most')).toMatchObject({ it: 'il gatto sembra il più felice.' });
   });
 
-  test.fails('French predicative superlative needs its own article: "le plus heureux"', () => {
+  test('French predicative superlative supplies its own article: "le plus heureux"', () => {
     expect(atDegree('most')).toMatchObject({ fr: 'le chat semble le plus heureux.' });
   });
 
-  test.fails('Spanish predicative superlative needs its own article: "el más feliz"', () => {
+  test('Spanish predicative superlative supplies its own article: "el más feliz"', () => {
     expect(atDegree('most')).toMatchObject({ es: 'el gato parece el más feliz.' });
   });
 
-  test.fails('…and the same for the lowered superlative, "least"', () => {
+  test('…and the same for the lowered superlative, "least"', () => {
     expect(atDegree('least')).toMatchObject({ it: 'il gatto sembra il meno felice.' });
   });
 
-  test.fails('Romance "most" must not be word-for-word identical to "more"', () => {
+  test('Romance "most" must not be word-for-word identical to "more"', () => {
     expect(atDegree('most').it).not.toBe(atDegree('more').it);
+  });
+
+  // Portuguese completes the Romance set (not asserted above): "o mais feliz" / "o menos feliz".
+  test('Portuguese predicative superlative supplies its own article too', () => {
+    expect(atDegree('most').pt).toBe('o gato parece o mais feliz.');
+    expect(atDegree('least').pt).toBe('o gato parece o menos feliz.');
+  });
+
+  // The lowered superlative "least" carries the article in French and Spanish as well as Italian.
+  test('the lowered superlative takes the article across Romance', () => {
+    expect(atDegree('least').fr).toBe('le chat semble le moins heureux.');
+    expect(atDegree('least').es).toBe('el gato parece el menos feliz.');
+  });
+
+  // The supplied article agrees with the subject in gender, alongside the adjective: a feminine
+  // subject gives "la … più/plus/más felice/heureuse/feliz", "a … mais feliz".
+  test('the predicative superlative article agrees with a feminine subject', () => {
+    const fem = seems(np('HAPPY', { headDegree: 'most' }), np('CAT', { gender: 'fem' }));
+    expect(fem).toMatchObject({
+      it: 'la gatta sembra la più felice.',
+      fr: 'la chatte semble la plus heureuse.',
+      es: 'la gata parece la más feliz.',
+      pt: 'a gata parece a mais feliz.',
+    });
+  });
+
+  // …and in number: a plural subject gives the plural article and the plural adjective.
+  test('the predicative superlative article agrees with a plural subject', () => {
+    const pl = seems(np('HAPPY', { headDegree: 'most' }), np('CAT', { number: 'plural' }));
+    expect(pl).toMatchObject({
+      it: 'i gatti sembrano i più felici.',
+      es: 'los gatos parecen los más felices.',
+    });
+  });
+
+  // Regression: the COMPARATIVE (more/less) still takes no article — only the superlative does.
+  test('the comparative predicative takes no article', () => {
+    expect(atDegree('more')).toMatchObject({
+      it: 'il gatto sembra più felice.',
+      fr: 'le chat semble plus heureux.',
+      es: 'el gato parece más feliz.',
+      pt: 'o gato parece mais feliz.',
+    });
   });
 
   // Japanese renders LEAST as 最も — which means MOST. The two degrees come out byte-identical,

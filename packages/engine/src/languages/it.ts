@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -533,11 +533,18 @@ function complementsPhrase(
       // the subject independently, so a coordinated one reads "sembra stanca e felice" — and a
       // coordinated *subject* resolves to masculine plural first, giving "sembrano stanchi".
       if (type === 'predicative') {
-        return coordinate(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective'
-            ? itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
-            : npText(np),
-        );
+        const gender = subjectForms['gender'] ?? 'masc';
+        const plural = subjectForms['number'] === 'plural';
+        return coordinate(c.phrase, (np) => {
+          if (np.head.forms['role'] !== 'adjective') return npText(np);
+          const surface = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+          // A predicative superlative has no noun's article to borrow (unlike "il gatto più
+          // grande"), so it supplies its own, agreeing with the subject: "sembra IL più felice",
+          // distinguishing it from the comparative "sembra più felice".
+          return isRelativeSuperlative(np.head)
+            ? joinArt(defArticle({ gender }, plural, surface), surface)
+            : surface;
+        });
       }
       // An instrument presented as an action: the bare gerundio for the process level
       // ("scegliendo una parola" — Italian needs no preposition before it), and the substantivized

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -543,11 +543,17 @@ function complementsPhrase(
       // légende"). Coordinated conjuncts each agree with the subject: "semblent heureuses et
       // fatiguées".
       if (type === 'predicative') {
-        return coordinate(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective'
-            ? frComparison(np.head, subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural')
-            : npText(np),
-        );
+        const gender = subjectForms['gender'] ?? 'masc';
+        const plural = subjectForms['number'] === 'plural';
+        return coordinate(c.phrase, (np) => {
+          if (np.head.forms['role'] !== 'adjective') return npText(np);
+          const surface = frComparison(np.head, gender, plural);
+          // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
+          // with the subject: "semble LE plus heureux" — distinct from the comparative "plus heureux".
+          return isRelativeSuperlative(np.head)
+            ? joinArt(defArticle({ gender }, plural, surface), surface)
+            : surface;
+        });
       }
       // An instrument presented as an action: the gérondif for the process level ("en
       // choisissant un mot"), and for the concept level the periphrasis "avec le fait de choisir

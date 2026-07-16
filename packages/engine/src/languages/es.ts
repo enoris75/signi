@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -388,11 +388,17 @@ function complementsPhrase(
       // its own article, no preposition ("se vuelve una leyenda"). Coordinated conjuncts each
       // agree with the subject: "parece cansada y feliz".
       if (type === 'predicative') {
-        return coordinateElement(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective'
-            ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural'))
-            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np),
-        );
+        const gender = subjectForms['gender'] ?? 'masc';
+        const plural = subjectForms['number'] === 'plural';
+        return coordinateElement(c.phrase, (np) => {
+          if (np.head.forms['role'] !== 'adjective') {
+            return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np);
+          }
+          const surface = esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+          // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
+          // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
+          return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+        });
       }
       // An instrument presented as an action: the bare gerundio for the process level
       // ("eligiendo una palabra"), the substantivized infinitive for the concept level ("con el

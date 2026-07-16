@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (52 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (47 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A26 | [A26-romance-predicative-superlative-article.md](A-must-fix/A26-romance-predicative-superlative-article.md) | Romance |
 | A27 | [A27-romance-adjective-list-coordination.md](A-must-fix/A27-romance-adjective-list-coordination.md) | Romance |
 | A28 | [A28-italian-frequency-adverb-participle.md](A-must-fix/A28-italian-frequency-adverb-participle.md) | Italian |
 | A29 | [A29-romance-locative-proper-noun-article.md](A-must-fix/A29-romance-locative-proper-noun-article.md) | Italian, French |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A22 | [A22-english-frequency-adverb-modal.md](fixed/A22-english-frequency-adverb-modal.md) | English | 2026-07-16 |
 | A23 | [A23-english-must-negative-scope.md](fixed/A23-english-must-negative-scope.md) | English | 2026-07-16 |
 | A24 | [A24-french-silent-h-elision.md](fixed/A24-french-silent-h-elision.md) | French | 2026-07-16 |
+| A26 | [A26-romance-predicative-superlative-article.md](fixed/A26-romance-predicative-superlative-article.md) | Romance | 2026-07-16 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---

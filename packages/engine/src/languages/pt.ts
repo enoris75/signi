@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -410,11 +410,17 @@ function complementsPhrase(
       // its own article, no preposition ("torna-se uma lenda"). Coordinated conjuncts each
       // agree with the subject: "parece cansada e feliz".
       if (type === 'predicative') {
-        return coordinateElement(c.phrase, (np) =>
-          np.head.forms['role'] === 'adjective'
-            ? ptComparison(np.head, subjectForms['gender'] ?? 'masc', subjectForms['number'] === 'plural')
-            : withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np)), np),
-        );
+        const gender = subjectForms['gender'] ?? 'masc';
+        const plural = subjectForms['number'] === 'plural';
+        return coordinateElement(c.phrase, (np) => {
+          if (np.head.forms['role'] !== 'adjective') {
+            return withRelative(nounPhrase(predicativeForms(np.head.forms), ptAdj(np)), np);
+          }
+          const surface = ptComparison(np.head, gender, plural);
+          // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
+          // with the subject: "parece O mais feliz" — distinct from the comparative "mais feliz".
+          return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+        });
       }
       // An instrument presented as an action: the bare gerúndio for the process level
       // ("escolhendo uma palavra"), the substantivized infinitive for the concept level ("com o
