@@ -316,7 +316,7 @@ export const adjectives: ConceptSeed[] = [
       fr: { base: 'brun' },
       de: { base: 'braun' },
       es: { base: 'marrón' },
-      ja: { base: '茶色', reading: 'ちゃいろ' },
+      ja: { base: '茶色の', reading: 'ちゃいろの' },
       pt: { base: 'castanho' },
     },
   },

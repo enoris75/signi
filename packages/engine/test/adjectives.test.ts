@@ -735,8 +735,16 @@ describe('known bugs: adjective linker (Japanese)', () => {
   // adjectives (男性の, 定冠詞の). It is the only one of the 47 that comes out bare; every other
   // adjective takes い / な / の / た. (茶色い猫, the i-adjective form, would do as well — the
   // surface is a design call, but the bare compound is not it.)
-  test.fails('Japanese BROWN needs a linker: 茶色の猫, not 茶色猫', () => {
+  test('Japanese BROWN needs a linker: 茶色の猫, not 茶色猫', () => {
     expect(cat({ adjectives: ['BROWN'] }).ja).toBe('茶色の猫は食べます。');
+  });
+
+  // The linker holds wherever 茶色 attaches: never the bare compound 茶色猫, and の survives when
+  // BROWN is one of several adjectives — the same の the other noun-adjectives (男性の) take.
+  test('Japanese BROWN keeps its の linker alongside other adjectives', () => {
+    expect(cat({ adjectives: ['BROWN'] }).ja).not.toContain('茶色猫');
+    expect(cat({ adjectives: ['BIG', 'BROWN'] }).ja).toBe('大きい茶色の猫は食べます。');
+    expect(cat({ adjectives: ['BROWN', 'HAPPY'] }).ja).toBe('茶色の幸せな猫は食べます。');
   });
 });
 
