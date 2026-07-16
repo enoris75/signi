@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -279,23 +279,37 @@ const TER_PT: Record<Tense, Record<string, string>> = {
  * present ("viu", not the iterative "tem visto" — see below). Negation ("não") is prepended by
  * the caller, as for the neutral verb.
  */
+// The aspect auxiliaries as minimal concepts, so `moodForm` derives their conditional (estaria /
+// teria, from the future stem) and imperfect subjunctive (estivesse / tivesse, from the 3pl
+// preterite) — the same way it handles a plain verb. The preterite stems are irregular and are
+// not in the tables above (which carry the imperfect), so they are supplied here.
+const ESTAR_AUX: ConceptForms = { conceptId: 'ESTAR', forms: { '1sg_future': 'estarei', '3pl_past': 'estiveram' } };
+const TER_AUX: ConceptForms = { conceptId: 'TER', forms: { '1sg_future': 'terei', '3pl_past': 'tiveram' } };
+
+/** The aspect auxiliary's finite form: its mood form under a hypothetical, else the tense form. */
+function auxFinite(aux: ConceptForms, table: Record<Tense, Record<string, string>>, subjectForms: Record<string, string>, tense: Tense, mood?: Mood): string {
+  return moodForm('pt', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
+}
+
 function aspectVerb(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
+  mood?: Mood,
 ): string {
-  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
-  if (aspect === 'progressive') return `${ESTAR_PT[tense][key]} ${verbForms['gerund'] ?? inf}`;
-  if (aspect === 'prospective') return `${ESTAR_PT[tense][key]} prestes a ${inf}`;
+  if (aspect === 'progressive') return `${auxFinite(ESTAR_AUX, ESTAR_PT, subjectForms, tense, mood)} ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `${auxFinite(ESTAR_AUX, ESTAR_PT, subjectForms, tense, mood)} prestes a ${inf}`;
   // Resultative. Portuguese has no present-perfect equivalent of Spanish "ha comido": "tem
-  // comido" is iterative ("has been eating, repeatedly"), not the perfect of a bounded event.
-  // The present resultative therefore maps onto the pretérito perfeito (the simple past
-  // "comeu"). The past (pluperfect "tinha comido") and future (future perfect "terá comido")
-  // resultatives are correct as ter + particípio and keep it.
-  if (tense === 'present') return conjugate(verbForms, subjectForms, 'past');
-  return `${TER_PT[tense][key]} ${verbForms['participle'] ?? inf}`;
+  // comido" is iterative ("has been eating, repeatedly"), not the perfect of a bounded event, so
+  // the *indicative* present resultative maps onto the pretérito perfeito (the simple past
+  // "comeu"). But under a hypothetical a mood is set, and the conditional perfect "teria corrido"
+  // / pluperfect subjunctive "tivesse corrido" is a genuine perfect, not iterative — so the A9
+  // collapse is bypassed and ter + particípio takes the mood. The past (pluperfect "tinha ido")
+  // and future (future perfect "terá visto") indicatives keep ter + particípio as before.
+  if (mood === undefined && tense === 'present') return conjugate(verbForms, subjectForms, 'past');
+  return `${auxFinite(TER_AUX, TER_PT, subjectForms, tense, mood)} ${verbForms['participle'] ?? inf}`;
 }
 
 /**
@@ -558,7 +572,7 @@ function predicateText(
       ].join(' ')
     : aspect === 'neutral'
       ? finite(verb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect);
+      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".

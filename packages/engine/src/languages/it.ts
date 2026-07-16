@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -404,24 +404,38 @@ const AVERE_IT: Record<Tense, Record<string, string>> = {
  * subject — "la ragazza è andata" but "la ragazza ha visto". Negation ("non") is prepended
  * by the caller, as for the neutral verb.
  */
+// The aspect auxiliaries as minimal concepts, so `moodForm` can derive their conditional
+// (apodosis) and imperfect-subjunctive (protasis) exactly as it does a plain verb — from the
+// future stem (starò → starebbe) and the infinitive/irregular stem (stare → stesse via
+// IT_SUBJ_STEM, essere → fosse via BE, avere → avesse). Without this a marked aspect under a
+// hypothetical dropped the mood and kept the plain present indicative.
+const STARE_AUX: ConceptForms = { conceptId: 'STARE', forms: { '1sg_future': 'starò', base: 'stare' } };
+const ESSERE_AUX: ConceptForms = { conceptId: 'BE', forms: { '1sg_future': 'sarò', base: 'essere' } };
+const AVERE_AUX: ConceptForms = { conceptId: 'AVERE', forms: { '1sg_future': 'avrò', base: 'avere' } };
+
+/** The aspect auxiliary's finite form: its mood form under a hypothetical, else the tense form. */
+function auxFinite(aux: ConceptForms, table: Record<Tense, Record<string, string>>, subjectForms: Record<string, string>, tense: Tense, mood?: Mood): string {
+  return moodForm('it', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
+}
+
 function aspectVerb(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
+  mood?: Mood,
 ): string {
-  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
   if (aspect === 'resultative') {
     const essere = verbForms['aux'] === 'be';
-    const aux = (essere ? ESSERE_IT : AVERE_IT)[tense][key];
+    const aux = auxFinite(essere ? ESSERE_AUX : AVERE_AUX, essere ? ESSERE_IT : AVERE_IT, subjectForms, tense, mood);
     const base = verbForms['participle'] ?? inf;
     const part = essere
       ? agreeAdj(base, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural')
       : base;
     return `${aux} ${part}`.trim();
   }
-  const aux = STARE_IT[tense][key];
+  const aux = auxFinite(STARE_AUX, STARE_IT, subjectForms, tense, mood);
   if (aspect === 'prospective') return `${aux} per ${inf}`.trim();
   return `${aux} ${verbForms['gerund'] ?? inf}`.trim(); // progressive
 }
@@ -617,7 +631,7 @@ function predicateText(
       ].join(' ')
     : aspect === 'neutral'
       ? finite(verb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect);
+      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.

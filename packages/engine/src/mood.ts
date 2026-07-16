@@ -39,7 +39,8 @@ const PT_SUBJ: Record<PN, string> = { '1sg': 'sse', '2sg': 'sses', '3sg': 'sse',
 const FR_IMPARF: Record<PN, string> = { '1sg': 'ais', '2sg': 'ais', '3sg': 'ait', '1pl': 'ions', '2pl': 'iez', '3pl': 'aient' };
 
 // Italian imperfect-subjunctive stems that the "infinitive minus -re" rule gets wrong.
-const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', DRINK: 'beve' };
+// STARE is the aspect auxiliary (progressive/prospective) — irregular: stessi/stesse, not *stassi.
+const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', DRINK: 'beve', STARE: 'ste' };
 // French imparfait stems the "nous-present minus -ons" rule gets wrong (être → ét-).
 const FR_IMPARF_STEM: Record<string, string> = { BE: 'ét' };
 

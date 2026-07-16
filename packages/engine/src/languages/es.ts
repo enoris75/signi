@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -259,17 +259,31 @@ const HABER_ES: Record<Tense, Record<string, string>> = {
  * + participio ("ha visto", "había ido"). Negation ("no") is prepended by the caller, as for
  * the neutral verb.
  */
+// The aspect auxiliaries as minimal concepts, so `moodForm` derives their conditional (estaría /
+// habría, from the future stem) and imperfect subjunctive (estuviera / hubiera, from the 3pl
+// preterite) — the same way it handles a plain verb. The preterite stems are irregular and are
+// not in the tables above (which carry the imperfect), so they are supplied here. Without this a
+// marked aspect under a hypothetical dropped the mood and kept the plain present indicative.
+const ESTAR_AUX: ConceptForms = { conceptId: 'ESTAR', forms: { '1sg_future': 'estaré', '3pl_past': 'estuvieron' } };
+const HABER_AUX: ConceptForms = { conceptId: 'HABER', forms: { '1sg_future': 'habré', '3pl_past': 'hubieron' } };
+
+/** The aspect auxiliary's finite form: its mood form under a hypothetical, else the tense form. */
+function auxFinite(aux: ConceptForms, table: Record<Tense, Record<string, string>>, subjectForms: Record<string, string>, tense: Tense, mood?: Mood): string {
+  return moodForm('es', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
+}
+
 function aspectVerb(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
+  mood?: Mood,
 ): string {
-  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
-  if (aspect === 'progressive') return `${ESTAR_ES[tense][key]} ${verbForms['gerund'] ?? inf}`;
-  if (aspect === 'prospective') return `${ESTAR_ES[tense][key]} a punto de ${inf}`;
-  return `${HABER_ES[tense][key]} ${verbForms['participle'] ?? inf}`; // resultative
+  const estar = auxFinite(ESTAR_AUX, ESTAR_ES, subjectForms, tense, mood);
+  if (aspect === 'progressive') return `${estar} ${verbForms['gerund'] ?? inf}`;
+  if (aspect === 'prospective') return `${estar} a punto de ${inf}`;
+  return `${auxFinite(HABER_AUX, HABER_ES, subjectForms, tense, mood)} ${verbForms['participle'] ?? inf}`; // resultative
 }
 
 /**
@@ -537,7 +551,7 @@ function predicateText(
       ].join(' ')
     : aspect === 'neutral'
       ? finite(verb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect);
+      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".

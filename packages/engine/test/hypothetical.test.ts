@@ -103,14 +103,14 @@ describe('hypothetical: anchored cells', () => {
       }),
     });
 
-    // The `dovesse` (imperfect subjunctive of *dovere*) protasis pairs with a present-indicative
-    // apodosis — the valid Italian "were-to / should…" pattern, so the missing conditional on the
-    // prospective main clause reads correctly *here* (contrast the plain counterfactual pinned in
-    // the documented-simplifications block below — gap B8). KNOWN BUG A31: the `direction` goal
-    // renders "all'Antartide" (a + article), but Italian selects *in* (no article) for a
-    // continent — "in Antartide". Pinned as current output; flip it when A31 lands.
+    // The `dovesse` (imperfect subjunctive of *dovere*) protasis governs the progressive verb
+    // group as an infinitive ("dovesse stare andando"), so aspect there is untouched by mood. The
+    // prospective main clause is the apodosis and now carries the conditional on its auxiliary
+    // ("starebbe per bere" — gap A38 fixed). KNOWN BUG A31: the `direction` goal renders
+    // "all'Antartide" (a + article), but Italian selects *in* (no article) for a continent —
+    // "in Antartide". Pinned as current output; flip it when A31 lands.
     expect(said).toMatchObject({
-      it: "se l'animale dovesse stare andando all'Antartide, l'angelo sta per bere l'acqua.",
+      it: "se l'animale dovesse stare andando all'Antartide, l'angelo starebbe per bere l'acqua.",
     });
     expect(said).toMatchSnapshot();
   });
@@ -142,7 +142,7 @@ describe('known bugs: aspect drops the conditional mood', () => {
   //
   // Recorded as the correct target, not asserted as current behaviour: 3sg conditional of the
   // aspect auxiliary + the same non-finite form the indicative already gets right.
-  test.fails('the progressive apodosis should be conditional, not present indicative', () => {
+  test('the progressive apodosis should be conditional, not present indicative', () => {
     expect(hypothetical('present', 'progressive', 'present', 'neutral')).toMatchObject({
       it: 'se il gatto mangiasse, il cane starebbe correndo.',
       fr: 'si le chat mangeait, le chien serait en train de courir.',
@@ -153,7 +153,7 @@ describe('known bugs: aspect drops the conditional mood', () => {
   // Prospective: the same auxiliary (stare / être / estar) fronts the "about to" periphrasis and
   // must carry the conditional — currently plain present indicative (sta per / est sur le point de
   // / está a punto de / está prestes a).
-  test.fails('the prospective apodosis should be conditional, not present indicative', () => {
+  test('the prospective apodosis should be conditional, not present indicative', () => {
     expect(hypothetical('present', 'prospective', 'present', 'neutral')).toMatchObject({
       it: 'se il gatto mangiasse, il cane starebbe per correre.',
       fr: 'si le chat mangeait, le chien serait sur le point de courir.',
@@ -166,12 +166,41 @@ describe('known bugs: aspect drops the conditional mood', () => {
   // its present resultative collapses to the pretérito perfeito (fixed A9), so under a conditional
   // apodosis that collapse must be bypassed for the true conditional perfect "teria corrido", not
   // the present-indicative "correu" it emits today.
-  test.fails('the resultative apodosis should be the conditional perfect', () => {
+  test('the resultative apodosis should be the conditional perfect', () => {
     expect(hypothetical('present', 'resultative', 'present', 'neutral')).toMatchObject({
       it: 'se il gatto mangiasse, il cane avrebbe corso.',
       fr: 'si le chat mangeait, le chien aurait couru.',
       es: 'si el gato comiera, el perro habría corrido.',
       pt: 'se o gato comesse, o cão teria corrido.',
     });
+  });
+
+  // The same fix carries the *protasis*: a marked aspect on the IF clause takes the imperfect
+  // subjunctive of its auxiliary (fr: the imparfait), not the plain present indicative — the
+  // auxiliary is the finite element, so mood reaches it exactly as it does a plain verb. The
+  // irregular auxiliary subjunctives are exercised here: it stesse / avesse, es estuviera /
+  // hubiera, pt estivesse / tivesse, fr était / avait.
+  test('a marked aspect on the protasis takes the subjunctive of its auxiliary', () => {
+    expect(hypothetical('present', 'neutral', 'present', 'progressive')).toMatchObject({
+      it: 'se il gatto stesse mangiando, il cane correrebbe.',
+      fr: 'si le chat était en train de manger, le chien courrait.',
+      es: 'si el gato estuviera comiendo, el perro correría.',
+      pt: 'se o gato estivesse comendo, o cão correria.',
+    });
+    expect(hypothetical('present', 'neutral', 'present', 'resultative')).toMatchObject({
+      it: 'se il gatto avesse mangiato, il cane correrebbe.',
+      fr: 'si le chat avait mangé, le chien courrait.',
+      es: 'si el gato hubiera comido, el perro correría.',
+      pt: 'se o gato tivesse comido, o cão correria.',
+    });
+  });
+
+  // Regression on the A9 interaction: OUTSIDE a hypothetical (no mood) the Portuguese present
+  // resultative still collapses to the pretérito perfeito ("o gato correu"), not "tem corrido".
+  // The conditional perfect above is a genuine perfect, so it bypasses that collapse; a plain
+  // clause is unaffected.
+  test('the Portuguese present resultative still collapses to the pretérito outside a conditional', () => {
+    expect(sayAll(clause(np('DOG'), 'RUN', { verbPhrase: { aspect: 'resultative' } })).pt)
+      .toBe('o cão correu.');
   });
 });

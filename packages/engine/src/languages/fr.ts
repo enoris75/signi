@@ -298,21 +298,34 @@ function agreeParticipleFr(base: string, subjectForms: Record<string, string>): 
  * verb (the seed marks the être-selecting ones with forms.aux = "be"), and only an être
  * participle agrees with the subject — "elle est allée" but "elle a vu".
  */
+// The aspect auxiliaries as minimal concepts, so `moodForm` derives their conditional (serait /
+// aurait, from the future stem) and imparfait protasis (était via the BE stem / avait from the
+// "nous" present) — the same way it handles a plain verb. Without this a marked aspect under a
+// hypothetical dropped the mood and kept the plain present indicative.
+const ETRE_AUX: ConceptForms = { conceptId: 'BE', forms: { '1sg_future': 'serai', '1pl_present': 'sommes' } };
+const AVOIR_AUX: ConceptForms = { conceptId: 'AVOIR', forms: { '1sg_future': 'aurai', '1pl_present': 'avons' } };
+
+/** The aspect auxiliary's finite form: its mood form under a hypothetical, else the tense form. */
+function auxFiniteFr(aux: ConceptForms, table: Record<Tense, Record<string, string>>, subjectForms: Record<string, string>, tense: Tense, mood?: Mood): string {
+  return moodForm('fr', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
+}
+
 function aspectVerbFr(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
+  mood?: Mood,
 ): { finite: string; tail: string } {
-  const key = auxKey(subjectForms);
   const inf = verbForms['base'] ?? '';
   const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
-  if (aspect === 'progressive') return { finite: ETRE_FR[tense][key], tail: `en train ${deInf}` };
-  if (aspect === 'prospective') return { finite: ETRE_FR[tense][key], tail: `sur le point ${deInf}` };
+  const etreFinite = auxFiniteFr(ETRE_AUX, ETRE_FR, subjectForms, tense, mood);
+  if (aspect === 'progressive') return { finite: etreFinite, tail: `en train ${deInf}` };
+  if (aspect === 'prospective') return { finite: etreFinite, tail: `sur le point ${deInf}` };
   const etre = verbForms['aux'] === 'be'; // resultative
   const part = verbForms['participle'] ?? inf;
   return {
-    finite: (etre ? ETRE_FR : AVOIR_FR)[tense][key],
+    finite: etre ? etreFinite : auxFiniteFr(AVOIR_AUX, AVOIR_FR, subjectForms, tense, mood),
     tail: etre ? agreeParticipleFr(part, subjectForms) : part,
   };
 }
@@ -640,7 +653,7 @@ function predicateText(
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
-    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect);
+    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood);
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
   } else if (verbNegative || aucun || modifierIsNegative) {
