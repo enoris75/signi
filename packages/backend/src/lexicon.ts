@@ -68,6 +68,13 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   if (!lexeme.countable) forms['uncountable'] = '1'; // mass noun — changes quantifier words / blocks pluralisation
   if (lexeme.proper) forms['proper'] = '1'; // proper noun — the language fixes the article, not the user
 
+  // The concept's hypernym (its direct is-a). A continent goal keys its Romance adposition off
+  // this: "ANTARCTICA isA CONTINENT" → "in Antartide" / "en Antarctique", not "all'Antartide".
+  const hyper = db.prepare<[string], { concept_b_id: string }>(
+    "SELECT concept_b_id FROM concept_relations WHERE concept_a_id = ? AND relation = 'hypernym'"
+  ).get(conceptId);
+  if (hyper) forms['isA'] = hyper.concept_b_id;
+
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }
 

@@ -106,11 +106,10 @@ describe('hypothetical: anchored cells', () => {
     // The `dovesse` (imperfect subjunctive of *dovere*) protasis governs the progressive verb
     // group as an infinitive ("dovesse stare andando"), so aspect there is untouched by mood. The
     // prospective main clause is the apodosis and now carries the conditional on its auxiliary
-    // ("starebbe per bere" — gap A38 fixed). KNOWN BUG A31: the `direction` goal renders
-    // "all'Antartide" (a + article), but Italian selects *in* (no article) for a continent —
-    // "in Antartide". Pinned as current output; flip it when A31 lands.
+    // ("starebbe per bere" — gap A38 fixed). The `direction` goal to a continent selects *in* (no
+    // article) — "in Antartide" — since A31 landed (was "all'Antartide").
     expect(said).toMatchObject({
-      it: "se l'animale dovesse stare andando all'Antartide, l'angelo starebbe per bere l'acqua.",
+      it: "se l'animale dovesse stare andando in Antartide, l'angelo starebbe per bere l'acqua.",
     });
     expect(said).toMatchSnapshot();
   });

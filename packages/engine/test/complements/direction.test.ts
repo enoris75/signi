@@ -145,16 +145,45 @@ describe('known bugs: direction', () => {
   // A continent goal is a proper noun that fixes its own article (correct as a subject:
   // "l'Antartide è fredda"), but a continent takes a DIFFERENT goal preposition in Italian and
   // French — *in* / *en*, and with no article: "va in Antartide", "va en Antarctique". The engine
-  // applies the default inanimate-goal adposition (*a* / *à*) and keeps the proper-noun article,
-  // so it emits "va all'Antartide" / "va à l'Antarctique" — wrong on both counts. This is A29's
-  // article defect (there for the *locative*) plus a preposition-selection error unique to the
-  // goal. Spanish/Portuguese genuinely keep the article ("a la Antártida", "à Antártida") and are
-  // right; German "zur Antarktis" is acceptable. Fixing it needs continent-awareness in the two
-  // engines (ANTARCTICA isA CONTINENT), which the goal preposition can key off.
-  test.fails('Italian/French select "in"/"en" (no article) for a continent goal', () => {
+  // used to apply the default inanimate-goal adposition (*a* / *à*) and keep the proper-noun
+  // article, emitting "va all'Antartide" / "va à l'Antarctique" — wrong on both counts. It now keys
+  // the adposition off the goal's hypernym (ANTARCTICA isA CONTINENT, threaded into the noun forms).
+  // Spanish/Portuguese genuinely keep the article ("a la Antártida", "à Antártida") and are right;
+  // German "zur Antarktis" is acceptable.
+  test('Italian/French select "in"/"en" (no article) for a continent goal', () => {
     expect(goTo(np('ANTARCTICA'))).toMatchObject({
       it: 'il gatto va in Antartide.',
       fr: 'le chat va en Antarctique.',
     });
+  });
+
+  // Every continent goal drops the article the same way, including a compound name.
+  test('the continent-goal preposition covers the other continents', () => {
+    expect(goTo(np('EUROPE'))).toMatchObject({
+      it: 'il gatto va in Europa.', fr: 'le chat va en Europe.',
+    });
+    expect(goTo(np('AFRICA'))).toMatchObject({
+      it: 'il gatto va in Africa.', fr: 'le chat va en Afrique.',
+    });
+    expect(goTo(np('NORTH_AMERICA'))).toMatchObject({
+      it: 'il gatto va in America del Nord.', fr: 'le chat va en Amérique du Nord.',
+    });
+  });
+
+  // Spanish and Portuguese genuinely keep the article for a continent goal, and German articles this
+  // one continent ("zur Antarktis") — none is touched by the Italian/French fix.
+  test('Spanish, Portuguese and German keep their continent-goal forms', () => {
+    expect(goTo(np('ANTARCTICA'))).toMatchObject({
+      es: 'el gato va a la Antártida.',
+      pt: 'o gato vai à Antártida.',
+      de: 'der Kater geht zur Antarktis.',
+    });
+  });
+
+  // Regression: a common-noun place goal still takes "a" + article ("al mercato" / "au marché"), and
+  // an animate goal still takes "da" / "vers" — only a continent switches to "in" / "en".
+  test('Italian/French leave the common-place and animate goals untouched', () => {
+    expect(goTo(place())).toMatchObject({ it: 'il gatto va al mercato.', fr: 'le chat va au marché.' });
+    expect(goTo(person())).toMatchObject({ it: 'il gatto va dal ragazzo.', fr: 'le chat va vers le garçon.' });
   });
 });

@@ -604,7 +604,12 @@ function complementsPhrase(
         type === 'locative'  ? (nf['proper'] === '1' ? 'in' : prepDet('in', nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         type === 'instrumental' ? prepDet('con', nf, plural, lead) :
-        type === 'direction' ? prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead) :
+        type === 'direction' ? (
+          // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with
+          // the proper noun's article ("all'Antartide"); an animate goal takes "da", a place "a".
+          nf['isA'] === 'CONTINENT' ? 'in' :
+          prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
+        ) :
         type === 'source'    ? `via ${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grazie ${prepArt('a', nf, plural, lead)}` :

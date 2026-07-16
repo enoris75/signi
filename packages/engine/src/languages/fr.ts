@@ -633,7 +633,12 @@ function complementsPhrase(
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
         type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
-        type === 'direction' ? (nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)) :
+        type === 'direction' ? (
+          // A continent goal takes bare "en" ("va en Antarctique"), not the default place "à" with
+          // the proper noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à".
+          nf['isA'] === 'CONTINENT' ? 'en' :
+          nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
+        ) :
         type === 'source'    ? `loin ${deDet(nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grâce ${datPrep(nf, plural, lead)}` :
