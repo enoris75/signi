@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (63 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (62 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A20 | [A20-german-modifier-adjective-hoist.md](A-must-fix/A20-german-modifier-adjective-hoist.md) | German |
 | A21 | [A21-english-group-genitive.md](A-must-fix/A21-english-group-genitive.md) | English |
 | A22 | [A22-english-frequency-adverb-modal.md](A-must-fix/A22-english-frequency-adverb-modal.md) | English |
 | A23 | [A23-english-must-negative-scope.md](A-must-fix/A23-english-must-negative-scope.md) | English |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A17 | [A17-german-relative-clause-closing-comma.md](fixed/A17-german-relative-clause-closing-comma.md) | German | 2026-07-16 |
 | A18 | [A18-german-relative-clause-aspect.md](fixed/A18-german-relative-clause-aspect.md) | German | 2026-07-16 |
 | A19 | [A19-german-prospective-aspect-negation.md](fixed/A19-german-prospective-aspect-negation.md) | German | 2026-07-16 |
+| A20 | [A20-german-modifier-adjective-hoist.md](fixed/A20-german-modifier-adjective-hoist.md) | German | 2026-07-16 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---

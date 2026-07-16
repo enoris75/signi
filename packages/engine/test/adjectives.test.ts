@@ -409,19 +409,56 @@ describe('known bugs: adjectives', () => {
       .toMatchObject({ pt: 'o gato grande, velho e belo come.' });
   });
 
-  // German CHANGES THE MEANING here. An adjective belonging to the attributive noun is hoisted
-  // out onto the head: "der semantische alte Phraseschöpfer" says the *creator* is semantic, when
-  // the plan says the *phrases* are. A German compound cannot take an internal adjective, so the
-  // compound has to be abandoned when the modifier carries one — the genitive does it: "der alte
-  // Schöpfer semantischer Phrasen". Compare Italian, which is correct: "il vecchio creatore di
-  // frasi semantiche".
-  test.fails('German must not hoist the modifier\'s adjective onto the head', () => {
+  // German used to CHANGE THE MEANING here. An adjective belonging to the attributive noun was
+  // hoisted out onto the head: "der semantische alte Phraseschöpfer" said the *creator* was
+  // semantic, when the plan says the *phrases* are. A German compound cannot take an internal
+  // adjective, so the compound is abandoned when the modifier carries one — a postposed genitive
+  // does it: "der alte Schöpfer semantischer Phrasen". Compare Italian, likewise correct: "il
+  // vecchio creatore di frasi semantiche".
+  test('German must not hoist the modifier\'s adjective onto the head', () => {
     expect(sayAll(clause(np('CREATOR', {
       adjectives: ['OLD'],
       nounModifiers: [{
         concept: 'PHRASE', relation: 'material', number: 'plural', adjectives: ['SEMANTIC'],
       }],
     }), 'BURN'))).toMatchObject({ de: 'der alte Schöpfer semantischer Phrasen brennt.' });
+  });
+
+  // A singular neuter modifier takes the genitive singular: strong -en on the adjective and the
+  // noun's own -es ("großen Wortes"), the head keeping none of it.
+  test('German renders a singular modifier-with-adjective as a genitive singular', () => {
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [{ concept: 'WORD', relation: 'material', adjectives: ['BIG'] }],
+    }), 'BURN')).de).toBe('der Schöpfer großen Wortes brennt.');
+  });
+
+  // Two modifiers, one bare and one adjective-bearing: the bare one still compounds onto the head
+  // ("Wortschöpfer"), only the adjective-bearing one breaks out into the genitive.
+  test('German compounds the bare modifier but genitivises the adjective-bearing one', () => {
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [
+        { concept: 'WORD', relation: 'material' },
+        { concept: 'PHRASE', relation: 'material', number: 'plural', adjectives: ['SEMANTIC'] },
+      ],
+    }), 'BURN')).de).toBe('der Wortschöpfer semantischer Phrasen brennt.');
+  });
+
+  // The genitive modifier is invariant to the head's case: the head declines accusative
+  // ("den alten Schöpfer") while "semantischer Phrasen" stays put.
+  test('German keeps the modifier genitive when the head is an accusative object', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('CREATOR', {
+        adjectives: ['OLD'],
+        nounModifiers: [{ concept: 'PHRASE', relation: 'material', number: 'plural', adjectives: ['SEMANTIC'] }],
+      }),
+    })).de).toBe('der Kater sieht den alten Schöpfer semantischer Phrasen.');
+  });
+
+  // Regression: an adjective-LESS modifier still forms the closed compound it always did.
+  test('German still compounds a modifier that carries no adjective', () => {
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [{ concept: 'WORD', relation: 'material' }],
+    }), 'BURN')).de).toBe('der Wortschöpfer brennt.');
   });
 });
 

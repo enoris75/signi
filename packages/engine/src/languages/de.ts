@@ -170,16 +170,11 @@ function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'definite
       return `${deDegPrefix(a)}${decline(deDegStem(a, base))}`;
     })
     .filter(Boolean);
-  // German can't attach an adjective *inside* a compound ("Phrasenschöpfer"), so an
-  // attributive noun's adjective is scoped over the whole compound as a prenominal
-  // declined adjective ("semantischer Phrasenschöpfer") — an approximation of the
-  // narrower English/Romance scope, but grammatical.
-  const modAdjs = np.nounModifiers
-    .flatMap((m) => m.adjectives.map((a) => a.forms['base']))
-    .filter((b): b is string => Boolean(b))
-    .map((base) => decline(base));
+  // An attributive noun's own adjective is NOT hoisted onto the head here: a modifier that carries
+  // one is pulled out of the compound and rendered as a postposed genitive (see `modifierGenitives`),
+  // where its adjective belongs to it — the head keeps only its own adjectives.
   const inherent = f['adjective'];
-  return [...modAdjs, ...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
+  return [...own, inherent ? decline(inherent) : ''].filter(Boolean).join(' ');
 }
 
 function defArticle(forms: Record<string, string>, _case: Case, plural = false): string {
@@ -453,7 +448,7 @@ function possessorText(np: ResolvedNounPhrase): string {
   const von = art === 'dem' ? 'vom' : `von ${art}`;
   const declined = adjPhrase(poss, 'dat');
   const adj = declined ? `${declined} ` : '';
-  return ` ${von} ${adj}${word}${possessorText(poss)}${subordinateClause(poss)}`;
+  return ` ${von} ${adj}${word}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`;
 }
 
 /**
@@ -464,10 +459,40 @@ function possessorText(np: ResolvedNounPhrase): string {
  * morphemes like the -s- in "Arbeitsplatz" are a known simplification.)
  */
 function germanCompound(np: ResolvedNounPhrase, headWord: string): string {
-  const mods = np.nounModifiers.map((m) => m.concept.forms['base']).filter(Boolean);
+  // A modifier that carries its own adjective can't join the compound — German has no way to put
+  // an adjective *inside* a compound — so it breaks out into a postposed bare genitive instead
+  // (see `modifierGenitives`). Only the adjective-less modifiers prefix onto the head here.
+  const mods = np.nounModifiers
+    .filter((m) => m.adjectives.length === 0)
+    .map((m) => m.concept.forms['base'])
+    .filter(Boolean);
   if (!mods.length || !headWord) return headWord;
   return [...mods, headWord]
     .map((p, i) => (i === 0 ? p : p.charAt(0).toLowerCase() + p.slice(1)))
+    .join('');
+}
+
+/**
+ * A modifier that carries its own adjective is rendered as a postposed bare genitive, not folded
+ * into the compound: "der alte Schöpfer semantischer Phrasen", never "*der semantische alte
+ * Phraseschöpfer" — which would (wrongly) attribute the adjective to the head. Article-less, so the
+ * adjective takes the strong genitive ending ("semantischer") and the noun its genitive -(e)s on a
+ * masculine/neuter singular. Empty when no modifier carries an adjective. One space-led phrase per
+ * such modifier, in order.
+ */
+function modifierGenitives(np: ResolvedNounPhrase): string {
+  return np.nounModifiers
+    .filter((m) => m.adjectives.length > 0)
+    .map((m) => {
+      const f = m.concept.forms;
+      const plural = (f['number'] ?? f['count']) === 'plural';
+      const gender = f['gender'] ?? 'neut';
+      const noun = genitiveS(plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''), 'gen', f, plural);
+      const adjs = m.adjectives.map((a) => declineAdj(a.forms['base'] ?? '', 'gen', gender, plural, 'bare'));
+      return [...adjs, noun].filter(Boolean).join(' ');
+    })
+    .filter(Boolean)
+    .map((phrase) => ` ${phrase}`)
     .join('');
 }
 
@@ -521,7 +546,7 @@ function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   const a = declined ? `${declined} ` : '';
   const art = determiner(forms, _case, plural); // der/die/das · ein/eine/einen · (bare)
   const lead = art ? `${art} ` : '';
-  return `${lead}${a}${word}${possessorText(np)}${subordinateClause(np)}`;
+  return `${lead}${a}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
 }
 
 function subjectPhrase(np: ResolvedNounPhrase): string {
@@ -714,7 +739,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const word = f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
-      const rest = `${adj}${word}${possessorText(np)}${subordinateClause(np)}`;
+      const rest = `${adj}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       });
     })
