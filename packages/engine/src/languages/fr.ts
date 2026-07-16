@@ -447,7 +447,9 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const { pre, post } = splitAdjectives(np);
   const lead = pre[0] ?? noun;
   const core = joinArt(headFor(plural, lead), [...pre, noun].join(' '));
-  const postStr = post.join(' et ');
+  // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
+  // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
+  const postStr = joinConjuncts(post, ', ', () => ' et ');
   const postAdj = postStr ? `${core} ${postStr}` : core;
   // Attributive nouns are postnominal and bare, the relation choosing the preposition:
   // feature "à" (bateau à voile), purpose/material "de" (lunettes de soleil). Distinct

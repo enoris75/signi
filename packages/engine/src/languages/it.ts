@@ -338,10 +338,14 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const preSurfaces = prenominalChain(pre, gender, plural, noun);
   const lead = preSurfaces[0] ?? noun;
   const core = joinArt(headFor(plural, lead), joinWords([...preSurfaces, noun]));
-  const postStr = post
-    .map((a) => itDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural)))
-    .filter(Boolean)
-    .join(' e '); // coordinate multiple postnominal adjectives ("grande e forte")
+  // Coordinate the postnominal adjectives as a list: commas between all but the last pair, the
+  // conjunction only before the last ("forte, felice e freddo"), the way a coordinated noun slot
+  // is joined — not the conjunction repeated between every pair.
+  const postStr = joinConjuncts(
+    post.map((a) => itDeg(a, agreeAdj(a.forms['base'] ?? '', gender, plural))),
+    ', ',
+    (next) => (/^e/i.test(next) ? ' ed ' : ' e '),
+  );
   const postAdj = postStr ? `${core} ${postStr}` : core;
   // Attributive nouns are postnominal and bare (no article), the relation choosing the
   // preposition: feature "a" (barca a vela), purpose "da" (occhiali da sole), material

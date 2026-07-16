@@ -394,17 +394,17 @@ describe('documented simplifications: degree', () => {
 });
 
 describe('known bugs: adjectives', () => {
-  // Three or more postnominal adjectives repeat the conjunction: "grande y viejo y hermoso".
+  // Three or more coordinated adjectives used to repeat the conjunction: "grande y viejo y hermoso".
   // Iberian Romance coordinates a list the same way it coordinates nouns — comma-separated, with
-  // the conjunction only before the last: "grande, viejo y hermoso". The engine already does this
-  // correctly for coordinated NOUNS ("el gato, el perro y el ratón"), so the rule exists; it is
-  // simply not applied to the adjective list.
-  test.fails('Spanish should comma-separate three adjectives, not repeat "y"', () => {
+  // the conjunction only before the last: "grande, viejo y hermoso". The engine already did this
+  // correctly for coordinated NOUNS ("el gato, el perro y el ratón"), so the rule existed; it is
+  // now applied to the adjective list too.
+  test('Spanish comma-separates three adjectives, not repeat "y"', () => {
     expect(cat({ adjectives: ['BIG', 'OLD', 'BEAUTIFUL'] }))
       .toMatchObject({ es: 'el gato grande, viejo y hermoso come.' });
   });
 
-  test.fails('Portuguese should comma-separate three adjectives, not repeat "e"', () => {
+  test('Portuguese comma-separates three adjectives, not repeat "e"', () => {
     expect(cat({ adjectives: ['BIG', 'OLD', 'BEAUTIFUL'] }))
       .toMatchObject({ pt: 'o gato grande, velho e belo come.' });
   });
@@ -955,23 +955,54 @@ describe('Romance: a prenominal and a postnominal adjective', () => {
 });
 
 describe('known bugs: Romance postnominal coordination', () => {
-  // Three postnominal adjectives repeat the conjunction — "forte e felice e freddo" — where the
-  // list should be comma-separated with the coordinator only before the last: "forte, felice e
+  // Three postnominal adjectives used to repeat the conjunction — "forte e felice e freddo" — where
+  // the list should be comma-separated with the coordinator only before the last: "forte, felice e
   // freddo". This is the SAME defect already pinned for Spanish/Portuguese (with BIG/OLD/BEAUTIFUL),
   // but those adjectives are prenominal in Italian and French, so they juxtapose and hide it.
-  // A postnominal triple shows that Italian and French have the bug too — it is Romance-wide.
-  test.fails('Italian should comma-separate three postnominal adjectives', () => {
+  // A postnominal triple shows Italian and French had the bug too — it was Romance-wide.
+  test('Italian comma-separates three postnominal adjectives', () => {
     expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
       .toMatchObject({ it: 'il gatto forte, felice e freddo mangia.' });
   });
 
-  test.fails('French should comma-separate three postnominal adjectives', () => {
+  test('French comma-separates three postnominal adjectives', () => {
     expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
       .toMatchObject({ fr: 'le chat fort, heureux et froid mange.' });
   });
 
-  test.fails('Spanish, likewise, for a postnominal triple', () => {
+  test('Spanish, likewise, for a postnominal triple', () => {
     expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
       .toMatchObject({ es: 'el gato fuerte, feliz y frío come.' });
+  });
+
+  // Portuguese completes the Romance set (its qualifying adjectives are postnominal too).
+  test('Portuguese comma-separates a postnominal triple', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY', 'COLD'] }))
+      .toMatchObject({ pt: 'o gato forte, feliz e frio come.' });
+  });
+
+  // Regression: a PAIR takes only the conjunction, no comma ("forte e felice", "fort et heureux").
+  test('a postnominal pair keeps just the conjunction, no comma', () => {
+    expect(cat({ adjectives: ['STRONG', 'HAPPY'] })).toMatchObject({
+      it: 'il gatto forte e felice mangia.',
+      fr: 'le chat fort et heureux mange.',
+      es: 'el gato fuerte y feliz come.',
+      pt: 'o gato forte e feliz come.',
+    });
+  });
+
+  // The euphonic conjunction survives the list join: Spanish "y" → "e" before an i- sound, so a
+  // list ending in "interesante" reads "fuerte e interesante", not "fuerte y interesante".
+  test('the list join keeps the Spanish euphonic "e" before an i- sound', () => {
+    expect(cat({ adjectives: ['STRONG', 'INTERESTING'] }).es).toBe('el gato fuerte e interesante come.');
+  });
+
+  // Regression: PRENOMINAL adjectives (Italian/French BAGS set) still juxtapose with no comma and
+  // no conjunction — the fix touches only the coordinated (postnominal / Iberian) list.
+  test('prenominal adjectives still juxtapose, uncoordinated', () => {
+    expect(cat({ adjectives: ['BIG', 'OLD', 'BEAUTIFUL'] })).toMatchObject({
+      it: 'il grande vecchio bel gatto mangia.',
+      fr: 'le grand vieux beau chat mange.',
+    });
   });
 });

@@ -168,7 +168,9 @@ function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
       if (surface) post.push(surface);
     }
   }
-  return { pre: pre.join(' '), post: post.join(' e ') };
+  // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "e"
+  // only before the last ("grande, velho e belo"), like a coordinated noun slot.
+  return { pre: pre.join(' '), post: joinConjuncts(post, ', ', () => ' e ') };
 }
 
 /** A noun with its adjectives set around it: the prenominal ones, the noun, then the rest. */

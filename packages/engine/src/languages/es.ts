@@ -113,13 +113,13 @@ function agreeAdj(base: string, gender: string, plural: boolean): string {
   return plural ? pluralize(sg) : sg;
 }
 
-/** Coordinate adjectives with "y", switching to "e" before an i-/hi- sound (but not "hie-"). */
+/**
+ * Coordinate an adjective list the way a coordinated noun slot is joined: commas between all but
+ * the last pair, the conjunction only before the last ("grande, viejo y hermoso") — not "y"
+ * repeated between every pair. "y" becomes "e" before an i-/hi- sound (but not "hie-").
+ */
 function coordinate(parts: string[]): string {
-  return parts.reduce((acc, w, i) => {
-    if (i === 0) return w;
-    const conj = /^(i|hi(?!e))/i.test(w) ? 'e' : 'y';
-    return `${acc} ${conj} ${w}`;
-  }, '');
+  return joinConjuncts(parts, ', ', (next) => (/^(i|hi(?!e))/i.test(next) ? ' e ' : ' y '));
 }
 
 /**
