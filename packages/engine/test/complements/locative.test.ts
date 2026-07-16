@@ -118,18 +118,43 @@ describe('known bugs: locative', () => {
   // A proper noun keeps the article its language fixes for it — correct as a SUBJECT ("l'Europa
   // mangia") — but Italian and French drop that article after a locative preposition:
   //
-  //     got   "corre nell'Europa" / "court dans l'Europe"
-  //     want  "corre in Europa"   / "court en Europe"
+  //     was   "corre nell'Europa" / "court dans l'Europe"
+  //     now   "corre in Europa"   / "court en Europe"
   //
-  // The engine applies the proper-noun article rule uniformly, so the fixed article survives into
-  // a position that forbids it. Spanish ("en Europa"), German ("in Europa") and Portuguese ("na
-  // Europa" — Portuguese genuinely does keep it) are all right.
-  test.fails('Italian should say "in Europa", not "nell\'Europa"', () => {
+  // The engine used to apply the proper-noun article rule uniformly, so the fixed article survived
+  // into a position that forbids it. The locative now drops the article for a proper noun. Spanish
+  // ("en Europa"), German ("in Europa") and Portuguese ("na Europa" — Portuguese genuinely keeps
+  // it) were all already right.
+  test('Italian says "in Europa", not "nell\'Europa"', () => {
     expect(inPlace('RUN', np('EUROPE'))).toMatchObject({ it: 'il gatto corre in Europa.' });
   });
 
-  test.fails('French should say "en Europe", not "dans l\'Europe"', () => {
+  test('French says "en Europe", not "dans l\'Europe"', () => {
     expect(inPlace('RUN', np('EUROPE'))).toMatchObject({ fr: 'le chat court en Europe.' });
+  });
+
+  // Every seeded continent drops the article the same way, including a compound name.
+  test('the article-drop covers the other continents, compound names included', () => {
+    expect(inPlace('RUN', np('AFRICA'))).toMatchObject({
+      it: 'il gatto corre in Africa.', fr: 'le chat court en Afrique.',
+    });
+    expect(inPlace('RUN', np('ASIA'))).toMatchObject({
+      it: 'il gatto corre in Asia.', fr: 'le chat court en Asie.',
+    });
+    expect(inPlace('RUN', np('NORTH_AMERICA'))).toMatchObject({
+      it: 'il gatto corre in America del Nord.', fr: 'le chat court en Amérique du Nord.',
+    });
+  });
+
+  // Regression: a COMMON noun in the locative still takes the article-fused preposition, and the
+  // proper noun keeps its article as a SUBJECT — only the locative position drops it.
+  test('a common-noun locative still contracts, and a proper-noun subject keeps its article', () => {
+    expect(inPlace('RUN', np('HOUSE'))).toMatchObject({
+      it: 'il gatto corre nella casa.', fr: 'le chat court dans la maison.',
+    });
+    expect(sayAll(clause(np('EUROPE'), 'EAT'))).toMatchObject({
+      it: "l'Europa mangia.", fr: "l'Europe mange.",
+    });
   });
 
   test('the other four get the proper noun right', () => {

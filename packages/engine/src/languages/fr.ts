@@ -605,9 +605,13 @@ function complementsPhrase(
       // out in front of a coordinated complement — each conjunct carries its own contracted head
       // ("au chat et au chien"). Repeating it also lets each conjunct pick its own preposition,
       // which `direction` needs: an animate goal takes "vers", a place "à".
+      // A locative proper noun (a continent — "Europe", "Afrique") drops the definite article it
+      // carries as a subject ("l'Europe mange"): the "in place" locative is a bare "en Europe", not
+      // the article-bearing "dans l'Europe". (All seeded continents are feminine/vowel-initial, which
+      // "en" fits; a masculine country would take "au" and a city "à", but none is seeded.)
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? prepDet('dans', nf, plural, lead) :
+        type === 'locative'  ? (nf['proper'] === '1' ? 'en' : prepDet('dans', nf, plural, lead)) :
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
         type === 'instrumental' ? prepDet('avec', nf, plural, lead) :

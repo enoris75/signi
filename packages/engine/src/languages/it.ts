@@ -596,9 +596,12 @@ function complementsPhrase(
       // "nella casa e nel bosco", never "*nella casa e il bosco". Repeating it also lets each
       // conjunct choose its own preposition, which `direction` needs — the animate goal takes
       // "da" and the place goal "a" ("corro dal bambino e alla casa").
+      // A locative proper noun (a continent — "Europa", "Africa") drops the definite article it
+      // carries as a subject ("l'Europa mangia"): the "in place" locative takes a bare "in Europa",
+      // not the article-fused "nell'Europa". (Cities would take "a", but only continents are seeded.)
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? prepDet('in', nf, plural, lead) :
+        type === 'locative'  ? (nf['proper'] === '1' ? 'in' : prepDet('in', nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         type === 'instrumental' ? prepDet('con', nf, plural, lead) :
         type === 'direction' ? prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead) :
