@@ -264,14 +264,30 @@ function genitiveMarker(np: ResolvedNounPhrase): string {
   return plural && word.endsWith('s') ? "'" : "'s";
 }
 
+/** The possessor rendered as a full standalone noun phrase — its own determiner, possessor and
+ *  relative clause — the shape both the Saxon prefix and the of-genitive build on. */
+function possessorPhrase(poss: ResolvedNounPhrase): string {
+  return withRelative(nounPhrase(poss.head.forms, npAdj(poss), nounMods(poss), poss.possessor, npHasSuperlative(poss)), poss);
+}
+
 /**
  * A possessor rendered as a Saxon-genitive prefix ("the cat's "). The possessor is a
  * definite noun phrase (recursing for its own possessor / relative clause) followed by
  * the genitive marker; the possessed head drops its own article.
  */
 function possessivePrefix(poss: ResolvedNounPhrase): string {
-  const inner = withRelative(nounPhrase(poss.head.forms, npAdj(poss), nounMods(poss), poss.possessor, npHasSuperlative(poss)), poss);
-  return `${inner}${genitiveMarker(poss)} `;
+  return `${possessorPhrase(poss)}${genitiveMarker(poss)} `;
+}
+
+/**
+ * Whether a possessor is post-modified — so heavy that the Saxon clitic "'s" would land on the
+ * wrong word (the last word of a relative clause) rather than on the possessor's head. English
+ * forbids the Saxon genitive here (the "group genitive" constraint) and uses the of-genitive
+ * instead. A relative clause is the post-modifier; it propagates up a possessor chain, since a
+ * possessor whose own possessor is post-modified is itself rendered with a trailing of-phrase.
+ */
+function isPostModified(np: ResolvedNounPhrase): boolean {
+  return !!np.relative || (!!np.possessor && isPostModified(np.possessor));
 }
 
 /**
@@ -298,10 +314,16 @@ function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, 
   const a = adj ? `${adj} ` : '';
   // Noun-modifiers sit between the adjectives and the head: "the big sail boat".
   const m = mods ? `${mods} ` : '';
-  // A possessor replaces the article: "the cat's book", not "the cat's the book".
-  if (possessor) return `${possessivePrefix(possessor)}${a}${m}${word}`;
   // "a/an" agrees with the first word after the article (adjective, else modifier, else noun).
   const lead = adj || mods || word;
+  // A post-modified possessor can't take the Saxon clitic (it would land on the last word of the
+  // relative clause), so English uses the of-genitive: "the book of the cat that eats the mouse",
+  // the head keeping its own article. Otherwise the possessor replaces the article as a Saxon
+  // prefix: "the cat's book", not "the cat's the book".
+  if (possessor && isPostModified(possessor)) {
+    return `${determiner(forms, lead, superlative)}${a}${m}${word} of ${possessorPhrase(possessor)}`;
+  }
+  if (possessor) return `${possessivePrefix(possessor)}${a}${m}${word}`;
   return `${determiner(forms, lead, superlative)}${a}${m}${word}`;
 }
 

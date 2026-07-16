@@ -144,26 +144,56 @@ describe('known bugs: possessor', () => {
   //   want:  "the book of the cat that eats the mouse"
   //
   // English resolves this by abandoning the Saxon genitive for the of-genitive whenever the
-  // possessor is post-modified (the "group genitive" constraint). The engine never switches, so
-  // every SVO possessor comes out attached to the wrong noun — or worse, see below.
-  test.fails('English should use the of-genitive when the possessor carries a clause', () => {
+  // possessor is post-modified (the "group genitive" constraint). The engine now switches, so an
+  // SVO possessor reads "the book OF the cat that eats the mouse" instead of a misattached clitic.
+  test('English uses the of-genitive when the possessor carries a clause', () => {
     expect(bookOf(np('CAT', { relative: eatsTheMouse })))
       .toMatchObject({ en: 'the book of the cat that eats the mouse burns.' });
   });
 
-  // The same bug, but the clause ends in a VERB rather than a noun — so the clitic lands on the
-  // verb and the output is not English at all: "the mouse that the cat EATS'S book burns."
-  test.fails('English must never attach the genitive clitic to a verb ("eats\'s")', () => {
+  // The same plan with a clause that ends in a VERB rather than a noun: the of-genitive keeps the
+  // clitic off the verb entirely (the old bug produced "the cat EATS'S book").
+  test('English must never attach the genitive clitic to a verb ("eats\'s")', () => {
     expect(bookOf(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
     })).en).not.toContain("eats's");
   });
 
-  // And when the possessor is PLURAL, the apostrophe-only form of the plural genitive is chosen
-  // from the possessor's number but written onto whatever word ends the clause — giving
-  // "the big cats who eat the mouse' book", an apostrophe hanging off a singular noun.
-  test.fails('English must not put the plural genitive apostrophe on the clause\'s last word', () => {
+  // And a PLURAL possessor: the plural apostrophe is no longer written onto whatever word ends the
+  // clause (the old bug gave "the mouse' book", an apostrophe on a singular noun).
+  test('English must not put the plural genitive apostrophe on the clause\'s last word', () => {
     expect(bookOf(np('CAT', { number: 'plural', adjectives: ['BIG'], relative: eatsTheMouse })).en)
       .not.toContain("mouse'");
+  });
+
+  // The positive forms the three guards above imply — an object-gap clause, and a plural possessor
+  // with its own adjective — both come out as clean of-genitives.
+  test('English of-genitive: an object-gap clause and a plural possessor', () => {
+    expect(bookOf(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    })).en).toBe('the book of the mouse that the cat eats burns.');
+    expect(bookOf(np('CAT', { number: 'plural', adjectives: ['BIG'], relative: eatsTheMouse })).en)
+      .toBe('the book of the big cats that eat the mouse burns.');
+  });
+
+  // The of-genitive works wherever the possessed head sits, including a direct object.
+  test('English of-genitive works in an object slot', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', {
+      directObject: np('BOOK', { possessor: np('CAT', { relative: eatsTheMouse }) }),
+    })).en).toBe('the dog sees the book of the cat that eats the mouse.');
+  });
+
+  // The constraint propagates up a possessor chain: a possessor with no clause of its own but
+  // whose OWN possessor carries one is still post-modified, so the whole chain uses "of".
+  test('English of-genitive propagates up a nested possessor chain', () => {
+    expect(sayAll(clause(np('BOOK', {
+      possessor: np('FATHER', { possessor: np('CAT', { relative: eatsTheMouse }) }),
+    }), 'BURN')).en).toBe('the book of the father of the cat that eats the mouse burns.');
+  });
+
+  // Regression: a plain nested possessor with no relative clause anywhere keeps the Saxon genitive.
+  test('English keeps the Saxon genitive when no possessor is post-modified', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: np('FATHER', { possessor: np('CAT') }) }), 'BURN')).en)
+      .toBe("the cat's father's book burns.");
   });
 });
