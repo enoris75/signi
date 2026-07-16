@@ -272,6 +272,16 @@ function auxFinite(aux: ConceptForms, table: Record<Tense, Record<string, string
   return moodForm('es', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
 }
 
+// A reflexive verb's clitic, agreeing with the subject (me/te/se/nos/os/se). Reflexivity is lexical:
+// the infinitive ends in the enclitic -se ("volverse"), and the finite present carries the clitic as
+// a proclitic word ("se vuelve"). The participle ("vuelto") drops it, so the compound perfect must
+// restore it before the auxiliary — "se ha vuelto" (become), not "ha vuelto" (returned).
+const ES_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'te', '3sg': 'se', '1pl': 'nos', '2pl': 'os', '3pl': 'se' };
+function reflexiveClitic(verbForms: Record<string, string>, subjectForms: Record<string, string>): string {
+  if (!(verbForms['base'] ?? '').endsWith('se')) return '';
+  return ES_REFLEXIVE[auxKey(subjectForms)] ?? 'se';
+}
+
 function aspectVerb(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
@@ -283,7 +293,10 @@ function aspectVerb(
   const estar = auxFinite(ESTAR_AUX, ESTAR_ES, subjectForms, tense, mood);
   if (aspect === 'progressive') return `${estar} ${verbForms['gerund'] ?? inf}`;
   if (aspect === 'prospective') return `${estar} a punto de ${inf}`;
-  return `${auxFinite(HABER_AUX, HABER_ES, subjectForms, tense, mood)} ${verbForms['participle'] ?? inf}`; // resultative
+  // resultative: the reflexive clitic (if any) leads the auxiliary — "se ha vuelto".
+  const perfect = `${auxFinite(HABER_AUX, HABER_ES, subjectForms, tense, mood)} ${verbForms['participle'] ?? inf}`;
+  const clitic = reflexiveClitic(verbForms, subjectForms);
+  return clitic ? `${clitic} ${perfect}` : perfect;
 }
 
 /**

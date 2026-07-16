@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (38 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (36 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A30 | [A30-romance-pronominal-clitic-compound-past.md](A-must-fix/A30-romance-pronominal-clitic-compound-past.md) | French, Spanish |
 | A31 | [A31-romance-directional-continent-goal.md](A-must-fix/A31-romance-directional-continent-goal.md) | Italian, French |
 | A32 | [A32-object-pronoun-not-cliticised.md](A-must-fix/A32-object-pronoun-not-cliticised.md) | en, it, fr, es, pt, de |
 | A33 | [A33-romance-complement-negative-concord.md](A-must-fix/A33-romance-complement-negative-concord.md) | it, fr, es, pt |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A27 | [A27-romance-adjective-list-coordination.md](fixed/A27-romance-adjective-list-coordination.md) | Romance | 2026-07-16 |
 | A28 | [A28-italian-frequency-adverb-participle.md](fixed/A28-italian-frequency-adverb-participle.md) | Italian | 2026-07-16 |
 | A29 | [A29-romance-locative-proper-noun-article.md](fixed/A29-romance-locative-proper-noun-article.md) | Italian, French | 2026-07-16 |
+| A30 | [A30-romance-pronominal-clitic-compound-past.md](fixed/A30-romance-pronominal-clitic-compound-past.md) | French, Spanish | 2026-07-16 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---

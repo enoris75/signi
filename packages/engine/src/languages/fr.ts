@@ -324,6 +324,21 @@ function auxFiniteFr(aux: ConceptForms, table: Record<Tense, Record<string, stri
   return moodForm('fr', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
 }
 
+// A reflexive verb's clitic, agreeing with the subject (me/te/se/nous/vous/se) and eliding before a
+// vowel (m'/t'/s'). Reflexivity is lexical: the infinitive begins with the clitic ("s'effondrer"),
+// which the finite present carries ("s'effondre") but the participle ("effondré") drops — so the
+// compound perfect must restore it before the auxiliary: "s'est effondrée", not "est effondrée".
+const FR_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'te', '3sg': 'se', '1pl': 'nous', '2pl': 'vous', '3pl': 'se' };
+function reflexiveFinite(verbForms: Record<string, string>, subjectForms: Record<string, string>, finite: string): string {
+  const base = verbForms['base'] ?? '';
+  if (!(base.startsWith("s'") || base.startsWith('se '))) return finite;
+  const clitic = FR_REFLEXIVE[auxKey(subjectForms)] ?? 'se';
+  // me/te/se elide to m'/t'/s' before a vowel-initial auxiliary ("s'est"); nous/vous never elide.
+  return /^(me|te|se)$/.test(clitic) && VOWEL_START.test(finite)
+    ? `${clitic[0]}'${finite}`
+    : `${clitic} ${finite}`;
+}
+
 function aspectVerbFr(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
@@ -338,8 +353,11 @@ function aspectVerbFr(
   if (aspect === 'prospective') return { finite: etreFinite, tail: `sur le point ${deInf}` };
   const etre = verbForms['aux'] === 'be'; // resultative
   const part = verbForms['participle'] ?? inf;
+  // A reflexive verb restores its clitic before the auxiliary ("s'est effondrée"); the participle
+  // had dropped it. Only être-selecting verbs are reflexive here, but the helper is a no-op otherwise.
+  const auxWord = etre ? etreFinite : auxFiniteFr(AVOIR_AUX, AVOIR_FR, subjectForms, tense, mood);
   return {
-    finite: etre ? etreFinite : auxFiniteFr(AVOIR_AUX, AVOIR_FR, subjectForms, tense, mood),
+    finite: reflexiveFinite(verbForms, subjectForms, auxWord),
     tail: etre ? agreeParticipleFr(part, subjectForms) : part,
   };
 }

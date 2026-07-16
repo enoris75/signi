@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { VerbPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
@@ -541,20 +541,54 @@ describe('the perfect auxiliary: Spanish and German', () => {
 });
 
 describe('known bugs: reflexive verbs in the compound tense', () => {
-  // A pronominal verb keeps its clitic in the simple present but LOSES it in the compound past:
+  // A pronominal verb keeps its clitic in the simple present and now also in the compound past,
+  // where it used to LOSE it:
   //
-  //   COLLAPSE fr   present "la chatte s'effondre"   resultative "la chatte est effondrée"
-  //   BECOME   es   present "la gata se vuelve"       resultative "la gata ha vuelto"
+  //   COLLAPSE fr   present "la chatte s'effondre"   resultative "la chatte s'est effondrée"
+  //   BECOME   es   present "la gata se vuelve"       resultative "la gata se ha vuelto"
   //
-  // The clitic has to move to before the auxiliary, not vanish: "s'est effondrée", "se ha vuelto".
+  // The clitic moves to before the auxiliary, agreeing with the subject, rather than vanishing.
   // The Spanish case even changes the meaning — "ha vuelto" without the reflexive is "has
-  // RETURNED" (volver), not "has become" (volverse). The auxiliary and the agreement are right;
-  // only the reflexive pronoun is dropped.
-  test.fails('French pronominal verb keeps its clitic: "s\'est effondrée"', () => {
+  // RETURNED" (volver), not "has become" (volverse). The auxiliary and the agreement were already
+  // right; only the reflexive pronoun was dropped.
+  test('French pronominal verb keeps its clitic: "s\'est effondrée"', () => {
     expect(femResult('COLLAPSE').fr).toBe("la chatte s'est effondrée.");
   });
 
-  test.fails('Spanish pronominal verb keeps its clitic: "se ha vuelto", not "ha vuelto"', () => {
+  test('Spanish pronominal verb keeps its clitic: "se ha vuelto", not "ha vuelto"', () => {
     expect(femResult('BECOME').es).toBe('la gata se ha vuelto.');
+  });
+
+  const result = (subject: NounPhrase, verb: string, extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(subject, verb, { verbPhrase: { aspect: 'resultative', ...extra } }));
+
+  // A masculine subject drops the French participle -e but keeps the clitic; Spanish never agrees.
+  test('the clitic survives with a masculine subject', () => {
+    expect(result(np('CAT'), 'COLLAPSE').fr).toBe("le chat s'est effondré.");
+    expect(result(np('CAT'), 'BECOME').es).toBe('el gato se ha vuelto.');
+  });
+
+  // Plural subjects: the clitic is "se"/"se" (3pl), the auxiliary agrees, and the French participle
+  // takes -s / -es for gender.
+  test('the clitic survives with plural subjects, participle agreeing in French', () => {
+    expect(result(np('CAT', { number: 'plural' }), 'COLLAPSE').fr).toBe('les chats se sont effondrés.');
+    expect(result(np('CAT', { gender: 'fem', number: 'plural' }), 'COLLAPSE').fr)
+      .toBe('les chattes se sont effondrées.');
+    expect(result(np('CAT', { number: 'plural' }), 'BECOME').es).toBe('los gatos se han vuelto.');
+  });
+
+  // French negation brackets the clitic + auxiliary: "ne s'est pas effondrée".
+  test('French negation wraps the reflexive auxiliary correctly', () => {
+    expect(result(np('CAT', { gender: 'fem' }), 'COLLAPSE', { negative: true }).fr)
+      .toBe("la chatte ne s'est pas effondrée.");
+  });
+
+  // Regression: the simple present already carried the clitic (it rides inside the finite form) and
+  // is unchanged; a NON-reflexive verb's compound is untouched ("est allée", "ha ido").
+  test('the present is unchanged and a non-reflexive compound is untouched', () => {
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'COLLAPSE')).fr).toBe("la chatte s'effondre.");
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'BECOME')).es).toBe('la gata se vuelve.');
+    expect(femResult('GO').fr).toBe('la chatte est allée.');
+    expect(femResult('GO').es).toBe('la gata ha ido.');
   });
 });
