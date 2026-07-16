@@ -36,9 +36,19 @@ function jaComparisonAdj(concept: ConceptForms): { base: string; reading?: strin
   return { base: negate(base), reading: reading ? negate(reading) : reading };
 }
 
-/** A segment for one word: attach the furigana reading only when it differs from the surface. */
+/** Fold katakana to hiragana, so a kana word compares equal however it is written. */
+function toHiragana(s: string): string {
+  return s.replace(/[ァ-ヶ]/g, (c) => String.fromCharCode(c.charCodeAt(0) - 0x60));
+}
+
+/**
+ * A segment for one word: attach the furigana reading only when it differs from the surface. The
+ * comparison folds katakana to hiragana first, so a katakana word (ネズミ) seeded with a redundant
+ * hiragana reading (ねずみ) is recognised as the same word and takes no ruby — Japanese never
+ * furiganas katakana. A kanji surface never folds to its all-kana reading, so it keeps its ruby.
+ */
 function wordSeg(surface: string, reading?: string): RubySegment {
-  return reading && reading !== surface ? { t: surface, r: reading } : { t: surface };
+  return reading && toHiragana(reading) !== toHiragana(surface) ? { t: surface, r: reading } : { t: surface };
 }
 
 /** Postposition particle per complement type. (Route を is safe: motion verbs are intransitive.) */

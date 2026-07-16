@@ -97,23 +97,34 @@ describe('known bugs: furigana', () => {
   // AFRICA/FOX/EUROPE escape it only because their seed carries no separate reading at all; MOUSE,
   // NODE, PHRASE, SLOT and SLOT_MACHINE were given a redundant hiragana one. The robust fix is in
   // the engine — compare kana-insensitively — so it holds however the corpus is seeded.
-  test.fails('MOUSE (ネズミ) should take no furigana, not ネズミ[ねずみ]', () => {
+  test('MOUSE (ネズミ) should take no furigana, not ネズミ[ねずみ]', () => {
     expect(bare('MOUSE')).toEqual([]);
   });
 
-  test.fails('NODE (ノード) should take no furigana', () => {
+  test('NODE (ノード) should take no furigana', () => {
     expect(bare('NODE')).toEqual([]);
   });
 
-  test.fails('PHRASE (フレーズ) should take no furigana', () => {
+  test('PHRASE (フレーズ) should take no furigana', () => {
     expect(bare('PHRASE')).toEqual([]);
   });
 
-  test.fails('SLOT (スロット) should take no furigana', () => {
+  test('SLOT (スロット) should take no furigana', () => {
     expect(bare('SLOT')).toEqual([]);
   });
 
-  test.fails('SLOT_MACHINE (スロットマシン) should take no furigana', () => {
+  test('SLOT_MACHINE (スロットマシン) should take no furigana', () => {
     expect(bare('SLOT_MACHINE')).toEqual([]);
+  });
+
+  // The suppression is a property of the word, not the position: a katakana noun anywhere in the
+  // sentence contributes no ruby, while the kanji words around it still do — here 猫→ねこ and
+  // 食べます→たべます are the only readings; the katakana object ネズミ adds none.
+  test('a katakana noun takes no furigana in a full sentence either', () => {
+    expect(furigana(clause(np('CAT'), 'EAT', { directObject: np('MOUSE') })))
+      .toEqual(['ねこ', 'たべます']);
+    // Regression: a kanji noun in the same slot keeps its reading.
+    expect(furigana(clause(np('CAT'), 'EAT', { directObject: np('DOG') })))
+      .toEqual(['ねこ', 'いぬ', 'たべます']);
   });
 });

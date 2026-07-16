@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (76 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (71 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A15 | [A15-japanese-katakana-furigana.md](A-must-fix/A15-japanese-katakana-furigana.md) | Japanese |
 | A16 | [A16-german-inanimate-terminus-dative.md](A-must-fix/A16-german-inanimate-terminus-dative.md) | German |
 | A17 | [A17-german-relative-clause-closing-comma.md](A-must-fix/A17-german-relative-clause-closing-comma.md) | German |
 | A18 | [A18-german-relative-clause-aspect.md](A-must-fix/A18-german-relative-clause-aspect.md) | German |
@@ -117,6 +116,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A12 | [A12-japanese-prospective-aspect-negation.md](fixed/A12-japanese-prospective-aspect-negation.md) | Japanese | 2026-07-15 |
 | A13 | [A13-japanese-hortative-negation.md](fixed/A13-japanese-hortative-negation.md) | Japanese | 2026-07-16 |
 | A14 | [A14-japanese-brown-linker.md](fixed/A14-japanese-brown-linker.md) | Japanese | 2026-07-16 |
+| A15 | [A15-japanese-katakana-furigana.md](fixed/A15-japanese-katakana-furigana.md) | Japanese | 2026-07-16 |
 
 ---
 
