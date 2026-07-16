@@ -230,7 +230,9 @@ export const nouns: ConceptSeed[] = [
     forms: {
       en: { base: 'man', plural: 'men', count: 'singular' },
       it: { base: 'uomo', plural: 'uomini', gender: 'masc', count: 'singular' },
-      fr: { base: 'homme', plural: 'hommes', gender: 'masc', count: 'singular' },
+      // "homme" begins with an h muet: silent, so the article elides ("l'homme") exactly as before
+      // a vowel. The flag marks that; an h aspiré noun ("héros" → le héros) would carry none.
+      fr: { base: 'homme', plural: 'hommes', gender: 'masc', count: 'singular', elides: '1' },
       de: { base: 'Mann', plural: 'Männer', gender: 'masc', count: 'singular' },
       es: { base: 'hombre', plural: 'hombres', gender: 'masc', count: 'singular' },
       ja: { base: '男', count: 'singular', reading: 'おとこ' },

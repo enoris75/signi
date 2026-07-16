@@ -81,6 +81,20 @@ function agreeAdjFr(base: string, gender: string, plural: boolean): string {
 const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
 
 /**
+ * Whether the article elides before a phrase whose lead word is `lead`. French elides before a
+ * vowel SOUND: a first-letter test catches true vowels but misses an h muet ("homme" → l'homme)
+ * and must NOT fire for an h aspiré ("héros" → le héros). That split is lexical, so a noun the
+ * corpus marks `elides` counts as vowel-initial. The flag is the head noun's, so it is honoured
+ * only when the noun itself leads — a prenominal adjective (never h muet in the lexicon) is judged
+ * on its own spelling.
+ */
+function elidesBefore(forms: Record<string, string>, lead: string): boolean {
+  if (VOWEL_START.test(lead)) return true;
+  const nounLeads = lead === forms['base'] || lead === forms['plural'];
+  return nounLeads && forms['elides'] === '1';
+}
+
+/**
  * Concept IDs of the "BAGS" adjectives (beauty, age, goodness, size) that precede the
  * noun in French — beau, bon, grand, petit, vieux, jeune, nouveau, mauvais. Every other
  * adjective (heureux, triste, fort, …) follows the noun.
@@ -101,7 +115,7 @@ function defArticle(forms: Record<string, string>, plural = false, lead?: string
   const gender = forms['gender'] ?? 'masc';
   if (plural) return 'les';
   const base = lead ?? forms['base'] ?? '';
-  if (VOWEL_START.test(base)) return "l'";
+  if (elidesBefore(forms, base)) return "l'";
   return gender === 'fem' ? 'la' : 'le';
 }
 
@@ -125,7 +139,7 @@ function indefArticle(forms: Record<string, string>, plural: boolean): string {
 function demArticle(forms: Record<string, string>, plural: boolean, lead: string): string {
   if (plural) return 'ces';
   if ((forms['gender'] ?? 'masc') === 'fem') return 'cette';
-  return VOWEL_START.test(lead) ? 'cet' : 'ce';
+  return elidesBefore(forms, lead) ? 'cet' : 'ce';
 }
 
 /**
@@ -141,7 +155,7 @@ function artFor(forms: Record<string, string>, plural: boolean, lead: string): s
   if (forms['proper'] === '1') return defArticle(forms, plural, lead);
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
-  const de = VOWEL_START.test(lead) ? "d'" : 'de';
+  const de = elidesBefore(forms, lead) ? "d'" : 'de';
   // Mass nouns ("eau") stay singular and take the partitive "de l'/du/de la" for
   // some/indefinite; "beaucoup/peu de" already work; "all" → "tout/toute" + article.
   if (forms['uncountable'] === '1') {
@@ -247,7 +261,7 @@ function deDet(forms: Record<string, string>, plural: boolean, lead: string): st
   if (def === 'definite') return dePrep(forms, plural, lead);
   const det = artFor(forms, plural, lead);
   const drops = det === 'des' || (forms['uncountable'] === '1' && (def === 'indefinite' || def === 'some'));
-  if (!det || drops) return VOWEL_START.test(lead) ? "d'" : 'de';
+  if (!det || drops) return elidesBefore(forms, lead) ? "d'" : 'de';
   return VOWEL_START.test(det) ? `d'${det}` : `de ${det}`;
 }
 

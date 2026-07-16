@@ -70,22 +70,43 @@ describe('determiners', () => {
 });
 
 describe('known bugs: determiners', () => {
-  // French elides before a vowel (l'ange, l'eau — asserted above) but NOT before a silent h, and
+  // French elides before a vowel (l'ange, l'eau — asserted above) AND before a silent h, and
   // "homme" begins with one: h muet is not pronounced, so the article elides exactly as it would
-  // before a vowel. The engine tests the first LETTER rather than the first SOUND, so it emits
-  // "le homme" — and the same miss propagates into every contraction built on the article
-  // ("du homme" for "de l'homme").
+  // before a vowel. The engine now consults the noun's lexical `elides` flag (the sound), not just
+  // the first letter, so it emits "l'homme" — and the fix propagates into every contraction built
+  // on the article ("de l'homme").
   //
-  // Italian gets the equivalent right (l'uomo, dell'uomo), so this is French-specific. Fixing it
-  // needs the h-muet / h-aspiré distinction, which is lexical — "homme" elides, "héros" does not
-  // ("le héros") — so it belongs on the noun lexeme in the corpus, not in a rule.
-  test.fails('French should elide before a silent h: "l\'homme", not "le homme"', () => {
+  // Italian gets the equivalent right (l'uomo, dell'uomo). The h-muet / h-aspiré distinction is
+  // lexical — "homme" elides, "héros" would not ("le héros") — so it lives on the noun lexeme in
+  // the corpus, not in a rule.
+  test('French elides before a silent h: "l\'homme", not "le homme"', () => {
     expect(sayAll(clause(np('MAN'), 'EAT'))).toMatchObject({ fr: "l'homme mange." });
   });
 
-  test.fails('the miss propagates into the contracted forms: "de l\'homme", not "du homme"', () => {
+  test('the fix propagates into the contracted forms: "de l\'homme", not "du homme"', () => {
     expect(sayAll(clause(np('BOOK', { possessor: np('MAN') }), 'BURN')))
       .toMatchObject({ fr: "le livre de l'homme brûle." });
+  });
+
+  // The demonstrative elides its sound too: "cet homme", the form it takes before any vowel sound.
+  test('French uses "cet" before a silent h: "cet homme"', () => {
+    expect(sayAll(clause(np('MAN', { definiteness: 'this' }), 'EAT')).fr).toBe('cet homme mange.');
+  });
+
+  // The indefinite article does NOT elide ("un" has no euphonic variant), and the plural takes
+  // "les" — neither is touched by the elision flag.
+  test('French keeps "un homme" and "les hommes" — no article elides there', () => {
+    expect(sayAll(clause(np('MAN', { definiteness: 'indefinite' }), 'EAT')).fr).toBe('un homme mange.');
+    expect(sayAll(clause(np('MAN', { number: 'plural' }), 'EAT')).fr).toBe('les hommes mangent.');
+  });
+
+  // The flag is the head noun's and fires only when the noun itself leads: a nested possessor still
+  // contracts on each head ("du père de l'homme"), and a leading prenominal adjective blocks the
+  // elision on its own consonant ("le jeune homme"), leaving the article un-elided.
+  test('French honours the elision flag only when the noun leads the article', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: np('FATHER', { possessor: np('MAN') }) }), 'BURN')).fr)
+      .toBe("le livre du père de l'homme brûle.");
+    expect(sayAll(clause(np('YOUNG_MAN'), 'EAT')).fr).toBe('le jeune homme mange.');
   });
 });
 
