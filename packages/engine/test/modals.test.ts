@@ -270,7 +270,9 @@ describe('modals: a pair with negation', () => {
 
   test('MUST outermost', () => {
     expect(negPair('MUST', 'CAN')).toMatchObject({
-      en: 'the cat must not be able to eat.',
+      // English scopes a negated MUST as ¬obligation ("does not have to"), consistent with its own
+      // past and with German/Japanese — see "known bugs: modals" below. The others were already so.
+      en: 'the cat does not have to be able to eat.',
       it: 'il gatto non deve poter mangiare.', // "non" precedes the finite modal only
       fr: 'le chat ne doit pas pouvoir manger.', // ne … pas brackets the FINITE modal
       de: 'der Kater muss nicht essen können.',
@@ -278,7 +280,7 @@ describe('modals: a pair with negation', () => {
     });
 
     expect(negPair('MUST', 'WILL')).toMatchObject({
-      en: 'the cat must not want to eat.',
+      en: 'the cat does not have to want to eat.',
       it: 'il gatto non deve voler mangiare.',
       es: 'el gato no debe querer comer.',
     });
@@ -364,7 +366,7 @@ describe('modals: with an adverb', () => {
 
     expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'FAST', negative: true }))
       .toMatchObject({
-        en: 'the cat must not be able to eat fast.',
+        en: 'the cat does not have to be able to eat fast.', // ¬obligation scope (see below)
         it: 'il gatto non deve poter mangiare velocemente.',
         fr: 'le chat ne doit pas pouvoir manger vite.',
         de: 'der Kater muss nicht schnell essen können.',
@@ -419,31 +421,53 @@ describe('documented simplifications: modals', () => {
 });
 
 describe('known bugs: modals', () => {
-  // English contradicts ITSELF across tenses. Negating MUST gives:
+  // English used to contradict ITSELF across tenses. Negating MUST gave:
   //
   //     present  "the cat must not eat."           → prohibition        (must ¬eat)
   //     past     "the cat did not have to eat."    → no obligation      (¬must eat)
   //
   // Those are opposite scopes for the same plan, and nothing in the plan chose between them —
-  // `negative` is a flag on the verb phrase, with no scope marker. Whichever reading Signi wants,
-  // the two tenses have to agree; the present is the odd one out, since the past, German and
-  // Japanese all take the ¬must reading.
-  test.fails('English MUST + negative must not flip scope between present and past', () => {
+  // `negative` is a flag on the verb phrase, with no scope marker. Signi resolves it to the ¬must
+  // reading (no obligation) that the past, German and Japanese already take, so the present now
+  // reads "does not have to eat" — the "have to" periphrasis with do-support, like every tense.
+  test('English MUST + negative does not flip scope between present and past', () => {
     expect(catModal({ modals: ['MUST'], negative: true }))
       .toMatchObject({ en: 'the cat does not have to eat.' });
   });
 
   // The same divergence ACROSS languages, on one plan. German "muss nicht" is "does not have to"
-  // (absence of obligation); German for the prohibition English renders is "darf nicht essen".
-  // So the same plan is a prohibition in English and a permission-to-abstain in German/Japanese.
-  // Fixing this needs a decision about what `negative` scopes over, not just a lexeme change.
-  test.fails('MUST + negative should mean the same thing in every language', () => {
+  // (absence of obligation); the prohibition would be "darf nicht essen". English now agrees with
+  // German/Japanese on the ¬must reading, so the same plan no longer reads as opposites.
+  test('MUST + negative means the same thing in every language', () => {
     const said = catModal({ modals: ['MUST'], negative: true });
-    // Whatever is chosen, English and German must not read as opposites.
+    // English and German must not read as opposites.
     expect([said.en, said.de]).not.toEqual([
       'the cat must not eat.', // prohibition
       'der Kater muss nicht essen.', // absence of obligation
     ]);
+  });
+
+  // One ¬obligation scope in every tense: "does not / did not / will not have to eat" — no tense
+  // is the odd one out any longer.
+  test('English negates MUST periphrastically in every tense', () => {
+    expect(catModal({ modals: ['MUST'], negative: true }).en).toBe('the cat does not have to eat.');
+    expect(catModal({ modals: ['MUST'], tense: 'past', negative: true }).en).toBe('the cat did not have to eat.');
+    expect(catModal({ modals: ['MUST'], tense: 'future', negative: true }).en).toBe('the cat will not have to eat.');
+  });
+
+  // The do-support agrees with the subject: "the cats do not have to eat".
+  test('English MUST negation takes plural do-support', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'EAT', {
+      verbPhrase: { modals: ['MUST'], negative: true },
+    })).en).toBe('the cats do not have to eat.');
+  });
+
+  // Regression: the other true modals are untouched — a negated CAN is still the prohibitive
+  // "cannot", and MUST as the INNER member of a chain keeps its "have to" citation ("cannot have
+  // to eat"), since only the finite (outermost) form is chosen here.
+  test('English still negates CAN as "cannot", and MUST-inner as "have to"', () => {
+    expect(catModal({ modals: ['CAN'], negative: true }).en).toBe('the cat cannot eat.');
+    expect(catModal({ modals: ['CAN', 'MUST'], negative: true }).en).toBe('the cat cannot have to eat.');
   });
 
   // Japanese modality is suffixal, so a CHAIN has to nest suffixes — and the engine stacks them

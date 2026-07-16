@@ -241,7 +241,12 @@ function modalFinite(
   const finite = conjugate(m.forms, subjectForms, tense);
   if (!negative) return finite;
   const [first, ...rest] = finite.split(' ');
-  if (MODAL_AUX.has(first)) {
+  // A true modal auxiliary takes "not" straight after it ("could not", "will not") — with the
+  // orthographic "can not" → "cannot". "must" is the exception: Signi scopes a negated MUST as
+  // ¬obligation ("does not have to"), the reading its own past ("did not have to"), German and
+  // Japanese all take — never the prohibitive "must not". So "must" negates periphrastically via
+  // the "have to" do-support below (as its past/future already do), keeping one scope across tenses.
+  if (MODAL_AUX.has(first) && first !== 'must') {
     if (first === 'can' && rest.length === 0) return 'cannot';
     return [first, 'not', ...rest].join(' ');
   }
