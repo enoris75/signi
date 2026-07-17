@@ -42,7 +42,6 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 | # | File | Concept → gloss |
 |---|---|---|
-| A03 | [A03-young-woman.md](A-ready/A03-young-woman.md) | YOUNG_WOMAN → a young female person |
 | A04 | [A04-child.md](A-ready/A04-child.md) | CHILD → a young person |
 | A05 | [A05-creator.md](A-ready/A05-creator.md) | CREATOR → a person who makes objects |
 | A06 | [A06-builder.md](A-ready/A06-builder.md) | BUILDER → a person who makes objects |
@@ -78,6 +77,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 |---|---|---|
 | A01 | [done/A01-boy.md](done/A01-boy.md) | BOY → a young male person |
 | A02 | [done/A02-young-man.md](done/A02-young-man.md) | YOUNG_MAN → a young male person |
+| A03 | [done/A03-young-woman.md](done/A03-young-woman.md) | YOUNG_WOMAN → a young female person |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.
