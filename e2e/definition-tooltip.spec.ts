@@ -206,6 +206,30 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('una persona que hace objetos');
   });
 
+  test('a genus+relative-clause noun definition renders (localize-seed A07: BUTCHER)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + a subject-gap relative clause (KILL + bare-plural ANIMAL).
+    await app.subjectInput.fill('butcher');
+    const butcherEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="BUTCHER"]',
+    );
+    await expect(butcherEn).toBeVisible();
+    await butcherEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a person who kills animals');
+
+    // Italian: the same plan, localized by the engine — no Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('butcher');
+    const butcherIt = page.locator(
+      '[data-testid="typeahead-option"][data-concept="BUTCHER"]',
+    );
+    await expect(butcherIt).toBeVisible();
+    await butcherIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona che uccide animali');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

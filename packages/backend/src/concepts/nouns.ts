@@ -322,9 +322,11 @@ export const nouns: ConceptSeed[] = [
     id: 'BUTCHER',
     role: 'noun',
     description: 'a person who slaughters animals or sells meat',
+    definition: whoGloss('PERSON', 'KILL', 'ANIMAL'),
     emoji: '🔪',
     animate: true,
     human: true,
+    isA: 'PERSON',
     forms: {
       en: { base: 'butcher', plural: 'butchers', count: 'singular' },
       it: { base: 'macellaio', plural: 'macellai', gender: 'masc', count: 'singular', fem: 'macellaia', fem_plural: 'macellaie' },
@@ -578,6 +580,7 @@ export const nouns: ConceptSeed[] = [
     definition: whoGloss('PERSON', 'MAKE', 'OBJECT_THING'),
     emoji: '✨',
     animate: true,
+    isA: 'PERSON',
     forms: {
       en: { base: 'creator', plural: 'creators', count: 'singular' },
       it: { base: 'creatore', plural: 'creatori', gender: 'masc', count: 'singular', fem: 'creatrice', fem_plural: 'creatrici' },

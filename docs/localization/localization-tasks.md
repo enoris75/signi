@@ -42,7 +42,6 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 | # | File | Concept → gloss |
 |---|---|---|
-| A07 | [A07-butcher.md](A-ready/A07-butcher.md) | BUTCHER → a person who kills animals |
 | A08 | [A08-first-person.md](A-ready/A08-first-person.md) | FIRST_PERSON → the first person |
 | A09 | [A09-second-person.md](A-ready/A09-second-person.md) | SECOND_PERSON → the second person |
 | A10 | [A10-third-person.md](A-ready/A10-third-person.md) | THIRD_PERSON → the third person |
@@ -78,6 +77,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 | A04 | [done/A04-child.md](done/A04-child.md) | CHILD → a young person |
 | A05 | [done/A05-creator.md](done/A05-creator.md) | CREATOR → a person who makes objects |
 | A06 | [done/A06-builder.md](done/A06-builder.md) | BUILDER → a person who makes objects |
+| A07 | [done/A07-butcher.md](done/A07-butcher.md) | BUTCHER → a person who kills animals |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.
