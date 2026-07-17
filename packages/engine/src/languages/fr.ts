@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -688,10 +688,12 @@ function predicateText(
   // "doit toujours aller"), not trailing the whole group. Manner adverbs still trail.
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
-  // ("aucun garçon ne pleure") or an object ("il ne voit aucun garçon").
+  // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
+  // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne".
   const aucun =
     subjectForms['definiteness'] === 'no' ||
-    (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false);
+    (directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false) ||
+    hasNegativeComplement(complements);
   // Wrap a finite verb in "ne … pas" (or "ne" alone, when a self-negating "aucun"/"jamais"
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched.

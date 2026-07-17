@@ -184,33 +184,62 @@ describe('complement determiner: the negative, and negative concord', () => {
 
 describe('known bugs: complement negative concord', () => {
   // A postverbal negative word obliges the preverbal negator, and a complement is postverbal — so
-  // "il gatto corre in nessuna casa" is not an approximation but ungrammatical (it must be "il
-  // gatto NON corre in nessuna casa"). The direct-object path adds it correctly (pinned above), so
-  // the concord machinery exists; it simply is not reached from the complement path. Same defect in
-  // all four Romance languages, on every adposition-bearing complement.
-  test.fails('Italian needs "non" for a negative locative', () => {
+  // "il gatto corre in nessuna casa" was ungrammatical; it must be "il gatto NON corre in nessuna
+  // casa". The concord now reaches the complement path (as it always did the direct object), in all
+  // four Romance languages, on every adposition-bearing complement.
+  test('Italian needs "non" for a negative locative', () => {
     expect(inHouse('no')).toMatchObject({ it: 'il gatto non corre in nessuna casa.' });
   });
 
-  test.fails('French needs "ne" for a negative locative', () => {
+  test('French needs "ne" for a negative locative', () => {
     expect(inHouse('no')).toMatchObject({ fr: 'le chat ne court dans aucune maison.' });
   });
 
-  test.fails('Spanish needs "no" for a negative locative', () => {
+  test('Spanish needs "no" for a negative locative', () => {
     expect(inHouse('no')).toMatchObject({ es: 'el gato no corre en ninguna casa.' });
   });
 
-  test.fails('Portuguese needs "não" for a negative locative', () => {
+  test('Portuguese needs "não" for a negative locative', () => {
     expect(inHouse('no')).toMatchObject({ pt: 'o gato não corre em nenhuma casa.' });
   });
 
-  // And it is not specific to the locative — the same drop on a `direction` goal.
-  test.fails('the concord is dropped on a negative direction goal too', () => {
+  // And it is not specific to the locative — the same concord on a `direction` goal.
+  test('the concord fires on a negative direction goal too', () => {
     expect(toMarket('no')).toMatchObject({
       it: 'il gatto non va a nessun mercato.',
       fr: 'le chat ne va à aucun marché.',
       es: 'el gato no va a ningún mercado.',
       pt: 'o gato não vai a nenhum mercado.',
+    });
+  });
+
+  // …and on a `terminus`, even alongside a (positive) direct object — the negative complement alone
+  // obliges the negator ("non dà il libro a nessun cane").
+  test('the concord fires on a negative terminus with a direct object present', () => {
+    expect(toDog('no')).toMatchObject({
+      it: 'il gatto non dà il libro a nessun cane.',
+      fr: 'le chat ne donne le livre à aucun chien.',
+      es: 'el gato no da el libro a ningún perro.',
+      pt: 'o gato não dá o livro a nenhum cão.',
+    });
+  });
+
+  // A negative verb AND a negative complement together take a SINGLE negator, not two.
+  test('a negative verb and a negative complement do not double the negator', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      verbPhrase: { negative: true },
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } },
+    }))).toMatchObject({
+      it: 'il gatto non corre in nessuna casa.',
+      fr: 'le chat ne court dans aucune maison.',
+    });
+  });
+
+  // Regression: a positive (definite) complement adds no negator.
+  test('a positive complement takes no concord negator', () => {
+    expect(inHouse('definite')).toMatchObject({
+      it: 'il gatto corre nella casa.',
+      es: 'el gato corre en la casa.',
     });
   });
 });
