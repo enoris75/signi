@@ -30,17 +30,23 @@ describe('conditionals', () => {
   });
 });
 
-describe('documented simplifications: conditionals', () => {
-  // Deliberate: de.ts calls verb-final ordering in the "wenn" clause "a documented
-  // approximation". Recorded here as the correct target, not as an oversight.
-  //
-  // German gets both halves of the word order wrong. A subordinate "wenn" clause is verb-final
-  // ("wenn der Kater essen würde"), and a main clause that FOLLOWS a fronted subordinate clause
-  // inverts, because the subordinate clause occupies the first position ("würde der Hund
-  // laufen"). The engine emits main-clause order in the protasis and no inversion in the
-  // apodosis: "wenn der Kater würde essen, der Hund würde laufen."
-  test.fails('German conditionals need verb-final protasis and an inverted apodosis', () => {
+describe('German conditional word order', () => {
+  // A subordinate "wenn" clause is verb-final ("wenn der Kater essen würde"), and the main clause
+  // that FOLLOWS a fronted subordinate inverts, because the subordinate occupies the first
+  // position and pushes the finite verb ahead of the subject ("würde der Hund laufen"). Was B03.
+  test('the "wenn" clause is verb-final and the main clause inverts after it', () => {
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT') }))
       .toMatchObject({ de: 'wenn der Kater essen würde, würde der Hund laufen.' });
+  });
+
+  // Both clauses keep their objects, and the protasis object sits in the Mittelfeld of the
+  // verb-final clause, before the infinitive+finite tail: "wenn der Kater das Buch essen würde".
+  test('objects sit in the Mittelfeld of the verb-final protasis', () => {
+    expect(sayAll({
+      ...clause(np('DOG'), 'SEE', { directObject: np('MOUSE') }),
+      condition: clause(np('CAT'), 'EAT', { directObject: np('BOOK') }),
+    })).toMatchObject({
+      de: 'wenn der Kater das Buch essen würde, würde der Hund die Maus sehen.',
+    });
   });
 });

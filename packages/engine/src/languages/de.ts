@@ -309,7 +309,8 @@ const WERDEN: Record<string, string> = {
 // conditional in both clauses ("wenn … essen würde, würde … laufen"). Structurally it
 // behaves exactly like the future WERDEN (finite in V2, main verb infinitive at the clause
 // end), so the verb-group builders treat the conditional mood like the future, only swapping
-// the auxiliary. Verb-final ordering in the "wenn" clause is a documented approximation.
+// the auxiliary. The "wenn" clause is rendered verb-final and the following main clause inverts
+// (see `renderClause`'s `verbFinal` flag and the conditional assembly in `render`).
 const WUERDE: Record<string, string> = {
   '1sg': 'würde', '2sg': 'würdest', '3sg': 'würde',
   '1pl': 'würden', '2pl': 'würdet', '3pl': 'würden',
@@ -863,9 +864,11 @@ function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: 
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 // `inverted` renders the clause with the finite verb ahead of the subject, for when something
-// else already fills the front field (see COORD_INVERTS). A verbless or imperative clause has
-// no V2 slot to invert, so the flag is inert there.
-function renderClause(phrase: ResolvedPhrase, inverted = false): string {
+// else already fills the front field (see COORD_INVERTS). `verbFinal` renders it as a subordinate
+// clause — the finite verb closes it behind the non-finite tail ("wenn der Kater essen würde"),
+// the same order the relative clause uses; it overrides `inverted`. A verbless or imperative
+// clause has no V2 slot to move, so both flags are inert there.
+function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false): string {
     const { subject, verbPhrase, directObject } = phrase;
     // The dative recipient leads the accusative object; the other complements trail it, and a
     // subordinate means clause trails even the verb (see `splitMeansClause`).
@@ -952,6 +955,13 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const negComplement = !negProspective && applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
     const negAfter  = !negProspective && applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
+    // Verb-final (subordinate) order: the subject leads and the finite verb closes the clause,
+    // behind the non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. Used
+    // for the "wenn" protasis of a conditional.
+    if (verbFinal) {
+      return [subj, negAspectMid, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, verbText, meansText]
+        .filter(Boolean).join(' ').trim();
+    }
     const head = inverted ? [verbText, subj] : [subj, verbText];
     return [...head, negAspectMid, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
@@ -996,11 +1006,15 @@ function punctuate(sentence: string): string {
 export const germanEngine: LanguageEngine = {
   language: 'de',
   render(phrase: ResolvedPhrase): string {
-    const main = renderClause(phrase);
     // Hypothetical conditional: "wenn <protasis>, <apodosis>", both realised with the
-    // würde-periphrasis. The "wenn" clause's verb-final ordering is approximated (a documented
-    // gap it shares with the future/relative word order).
-    const sentence = phrase.condition ? `wenn ${renderClause(phrase.condition)}, ${main}` : main;
+    // würde-periphrasis. The "wenn" clause is a verb-final subordinate ("wenn der Kater essen
+    // würde"); the main clause that follows it is inverted, because the fronted subordinate clause
+    // occupies the front field, pushing the finite verb ahead of the subject ("würde der Hund
+    // laufen"). Without a condition the main clause takes ordinary V2 order.
+    const main = renderClause(phrase, /*inverted*/ !!phrase.condition);
+    const sentence = phrase.condition
+      ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${main}`
+      : main;
     // Coordination: "<first clause>, <conjunction> <second clause>" — with the second clause
     // inverted when the conjunction is an adverb that claims the front field.
     if (!phrase.coordination) return punctuate(sentence);
