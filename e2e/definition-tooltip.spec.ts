@@ -156,6 +156,31 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('una giovane persona');
   });
 
+  test('a genus+relative-clause noun definition renders (localize-seed A05: CREATOR)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + a subject-gap relative clause (MAKE + bare-plural OBJECT_THING).
+    await app.subjectInput.fill('creator');
+    const creatorEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CREATOR"]',
+    );
+    await expect(creatorEn).toBeVisible();
+    await creatorEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a person who makes objects');
+
+    // German: the same plan, localized by the engine — the relative clause is comma-set and
+    // verb-final. No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('creator');
+    const creatorDe = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CREATOR"]',
+    );
+    await expect(creatorDe).toBeVisible();
+    await creatorDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Person, die Gegenstände macht');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

@@ -10,6 +10,21 @@ const glossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
   subject: { concept: genus, definiteness: 'indefinite', adjectives },
 });
 
+// A genus + subject-gap relative-clause gloss: an indefinite head noun restricted by a relative
+// clause whose subject the head fills — whoGloss('PERSON', 'MAKE', 'OBJECT_THING') → en "a person
+// who makes objects", it "una persona che fa oggetti", de "eine Person, die Gegenstände macht", ja
+// "物体を作る人". The optional object renders as a bare plural ("objects", not "the objects").
+const whoGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
+  subject: {
+    concept: genus,
+    definiteness: 'indefinite',
+    relative: {
+      verbPhrase: { verb },
+      ...(object ? { directObject: { concept: object, definiteness: 'bare', number: 'plural' } } : {}),
+    },
+  },
+});
+
 export const nouns: ConceptSeed[] = [
   // ── NOUNS ────────────────────────────────────────────────────────
   {
@@ -559,6 +574,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CREATOR',
     role: 'noun',
     description: 'someone or something that creates things',
+    definition: whoGloss('PERSON', 'MAKE', 'OBJECT_THING'),
     emoji: '✨',
     animate: true,
     forms: {
