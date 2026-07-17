@@ -323,6 +323,13 @@ export interface Concept {
   id: string;
   role: GrammaticalRole;
   description: string;
+  /**
+   * The concept's dictionary definition, keyed by language, for the tooltip a picker shows on
+   * hover. Only English is seeded for now (from `description`); other languages have no entry
+   * yet, so a picker showing another language falls back to `en`. Schema and API carry all
+   * seven so a translated definition is a data add, not a code change.
+   */
+  definitions?: Partial<Record<LanguageCode, string>>;
   label?: string;              // English base form, e.g. "cat", "eat", "I"
   /**
    * The concept's citation form in every seeded language ("cat" / "gatto" / "Katze"), taken
@@ -419,13 +426,49 @@ export interface NounPhrase {
    */
   relative?: RelativeClause;
   /**
-   * An optional possessing noun phrase — a Saxon genitive ("the cat's book" → the head
-   * is "book", the possessor is "the cat"). Only nouns possess (pronoun possessives like
-   * "my" are out of scope). Being a noun phrase itself, a possessor carries its own
-   * number/gender/adjectives and may in turn have a possessor ("the cat's owner's book").
+   * An optional possessor — one of two shapes (see `Possessor`):
+   *  - a full owning **noun phrase**, the Saxon genitive ("the cat's book" → the head is
+   *    "book", the possessor is "the cat"). Being a noun phrase itself it carries its own
+   *    number/gender/adjectives and may in turn have a possessor ("the cat's owner's book").
+   *  - a **pronominal possessor** ("the boy and *his* horse"), the features of an antecedent
+   *    the possessor corefers with. The engine renders a possessive pronoun agreeing (in
+   *    Romance/German) with *this* possessed head. See `PronominalPossessor`.
    */
-  possessor?: NounPhrase;
+  possessor?: Possessor;
 }
+
+/**
+ * A possessor whose surface is a **possessive pronoun** ("my" / "his" / "their"), rather than a
+ * full genitive noun phrase. It carries only the grammatical features of the antecedent it
+ * corefers with — the person/number/(natural) gender the pronoun agrees *with*. In English and
+ * German those features fully determine the word (his/her/its, sein/ihr); in the Romance
+ * languages the pronoun *also* agrees in gender/number with the possessed head, which the engine
+ * reads off that head, so 3rd-singular his/her collapse to one form ("il **suo** cavallo").
+ *
+ * The coreference itself is resolved before the plan is built (the UI points at another noun in
+ * the same period and materialises its features here), so the engine sees only features — never a
+ * link.
+ */
+export interface PronominalPossessor {
+  kind: 'pronominal';
+  person: '1' | '2' | '3';
+  number: 'singular' | 'plural';
+  /** Natural gender of the antecedent — distinguishes en his/her/its and de sein/ihr. */
+  gender?: 'masc' | 'fem' | 'neut';
+}
+
+/** A noun phrase's possessor: a genitive noun phrase, or a coreferent possessive pronoun. */
+export type Possessor = NounPhrase | PronominalPossessor;
+
+/**
+ * Whether a possessor is the pronominal (possessive-pronoun) kind rather than a genitive phrase.
+ * Generic over the possessor's static type so it narrows equally on the plan-level `Possessor`
+ * and on the engine's *resolved* possessor union (a `ResolvedNounPhrase | PronominalPossessor`),
+ * which has the same discriminator but a different phrase shape.
+ */
+export const isPronominalPossessor = <T>(p: T): p is Extract<T, PronominalPossessor> =>
+  typeof p === 'object' && p !== null && 'kind' in p &&
+  (p as { kind?: unknown }).kind === 'pronominal';
 
 /**
  * Two or more noun phrases coordinated into one noun element ("Peter **and** Paul", "aramaic
@@ -731,7 +774,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 5;
+export const SAVED_PHRASE_VERSION = 6;
 
 /**
  * The grain of a saved workspace:

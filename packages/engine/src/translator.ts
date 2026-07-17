@@ -1,5 +1,5 @@
 import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounElement, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
-import { canCoordinateImperative, defaultDefiniteness, isNounGroup, nounConjuncts } from '@signi/shared';
+import { canCoordinateImperative, defaultDefiniteness, isNounGroup, isPronominalPossessor, nounConjuncts } from '@signi/shared';
 import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -130,9 +130,15 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     // head. Recursing through resolveNounPhrase (its objects/complements are noun
     // phrases that may themselves carry `relative`) handles arbitrary nesting.
     relative: np.relative ? resolveRelativeClause(np.relative, language, lookup) : undefined,
-    // A possessor is itself a noun phrase; recursing handles its own adjectives,
-    // number/gender, and any nested possessor ("the cat's owner's book").
-    possessor: np.possessor ? resolveNounPhrase(np.possessor, language, lookup) : undefined,
+    // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical
+    // features — it needs no lexicon lookup, so it passes straight through for the engine to
+    // spell as a possessive pronoun. A genitive possessor is itself a noun phrase; recursing
+    // handles its own adjectives, number/gender, and any nested possessor ("the cat's owner's book").
+    possessor: np.possessor
+      ? (isPronominalPossessor(np.possessor)
+          ? np.possessor
+          : resolveNounPhrase(np.possessor, language, lookup))
+      : undefined,
   };
 }
 

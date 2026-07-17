@@ -1,6 +1,7 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronounElement, isRelativeSuperlative, joinConjuncts, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
+import { possessiveFr } from '../possessive.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
 // "plus"/"moins"; the superlative repeats the definite article to distinguish them ("un chat
@@ -495,7 +496,20 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const noun = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const { pre, post } = splitAdjectives(np);
   const lead = pre[0] ?? noun;
-  const core = joinArt(headFor(plural, lead), [...pre, noun].join(' '));
+  // A pronominal possessor ("**son** chien") is a prenominal possessive that replaces the article,
+  // agreeing with *this* possessed head; mon/ton/son stand in before a vowel-initial feminine.
+  const poss = np.possessor;
+  const core = poss && isPronominalPossessor(poss)
+    ? [
+        possessiveFr(
+          poss,
+          { gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
+          elidesBefore(forms, lead),
+        ),
+        ...pre,
+        noun,
+      ].join(' ')
+    : joinArt(headFor(plural, lead), [...pre, noun].join(' '));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
   const postStr = joinConjuncts(post, ', ', () => ' et ');
@@ -505,10 +519,10 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   // from the possessor's contracted "du/de la".
   const mods = frMods(np);
   const withPost = mods ? `${postAdj} ${mods}` : postAdj;
-  // A possessor is postnominal, headed by "de"+article contracted ("le livre du chat").
-  // Rendering it through renderNP recurses for its own adjectives / nested possessor.
-  const poss = np.possessor;
-  const base = poss
+  // A genitive possessor is postnominal, headed by "de"+article contracted ("le livre du chat").
+  // Rendering it through renderNP recurses for its own adjectives / nested possessor. (A
+  // pronominal possessor was already rendered prenominally above.)
+  const base = poss && !isPronominalPossessor(poss)
     ? `${withPost} ${renderNP(poss, (plural, lead) => dePrep(poss.head.forms, plural, lead))}`
     : withPost;
   const rel = relativeText(np);

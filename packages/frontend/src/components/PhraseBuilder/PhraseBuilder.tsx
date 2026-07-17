@@ -50,6 +50,7 @@ import {
   cycleTense,
   removeConjunct,
   removePossessor,
+  clearPossessorRef,
   setDefiniteness,
   setImperativePerson,
   setImperativeRegister,
@@ -96,6 +97,7 @@ import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
+import { CorefPickContext, useCorefPick, useProvideCorefPick } from "./CorefPickContext.tsx";
 import { ConjunctPanels, openConjunctsFor } from "./ConjunctPanels.tsx";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
@@ -169,6 +171,17 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
+  // Coref-pick coordinator for pronominal possessors ("the boy and his horse"). The outermost
+  // period builder owns one (keyed to the whole period selection) and re-provides it below; a
+  // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
+  const parentCoref = useCorefPick();
+  const ownCoref = useProvideCorefPick(selection);
+  const coref = parentCoref ?? ownCoref;
+  // Map a local noun key to its period-root address (what a coref reference stores / points at):
+  // a nested builder's head "subject" is its `possessorPath`; a top-level builder's keys are
+  // themselves. Mirrors the mapping `adaptPossessorBinding` does for relative links.
+  const corefAddr = (key: NounKey): NounAddress =>
+    possessorPath && key === "subject" ? possessorPath : key;
   // This period is the instrument of another clause, and its reification degree decides what it
   // holds — so the canvas shows exactly the boxes the sentence will read (see AbstractionLevel):
   //  · object            → a bare noun phrase ("with a word"): the subject box alone, no predicate.
@@ -349,9 +362,10 @@ export function PhraseBuilder({
   // "relative clause" satellite starts/removes a link via `binding`, and the target
   // container is folded in at serialization time — no in-selection relative slice.
 
-  // Remove a noun block's possessor entirely and collapse its reveal.
+  // Remove a noun block's possessor entirely (genitive phrase or pronominal reference) and
+  // collapse its reveal.
   function handleRemovePossessor(which: NounKey) {
-    onPhraseUpdate((prev) => removePossessor(prev, which));
+    onPhraseUpdate((prev) => clearPossessorRef(removePossessor(prev, which), which));
     setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
     // Drop any relative-clause link sourced from the possessor head that just vanished.
     binding?.relative.onRemoveLink(possessorAddress(possessorPath ?? which));
@@ -900,14 +914,21 @@ export function PhraseBuilder({
     dimmedKeys: linkBinding
       ? (linkBinding.relative.targetKeys as Set<string>)
       : undefined,
-    isPickTarget: linkBinding
-      ? (key) =>
-          NOUN_KEYS.includes(key as NounKey) &&
-          linkBinding.relative.isPickTarget(key as NounKey)
-      : undefined,
-    onPickTarget: linkBinding
-      ? (key) => linkBinding.relative.onPick(key as NounKey)
-      : undefined,
+    // A noun box lights up as a pick target for either an in-progress relative-clause link
+    // (cross-container) or a pronominal-possessor coref pick (same period). The coref pick takes
+    // precedence while active, since the two never run at once.
+    isPickTarget: (key) => {
+      if (!NOUN_KEYS.includes(key as NounKey)) return false;
+      if (coref.picking) return coref.isEligible(corefAddr(key as NounKey));
+      return Boolean(linkBinding?.relative.isPickTarget(key as NounKey));
+    },
+    onPickTarget: (key) => {
+      if (coref.picking && NOUN_KEYS.includes(key as NounKey)) {
+        coref.pick(corefAddr(key as NounKey));
+        return;
+      }
+      linkBinding?.relative.onPick(key as NounKey);
+    },
     // The verb-phrase dotted box's complement-toggle row is where an instrumental link starts,
     // so the workspace measures its connector from there.
     registerVerbAnchor: linkBinding?.geometry.registerVerbAnchor,
@@ -967,6 +988,8 @@ export function PhraseBuilder({
           }}
           binding={binding}
           possessorPath={possessorPath}
+          coref={coref}
+          corefAddr={corefAddr}
           Builder={PhraseBuilder}
         />
       )}
@@ -990,7 +1013,7 @@ export function PhraseBuilder({
     </>
   );
 
-  return (
+  const tree = (
     <Box
       ref={rootRef}
       sx={{
@@ -1051,5 +1074,13 @@ export function PhraseBuilder({
         onConceptSelect={handleConceptSelect}
       />
     </Box>
+  );
+
+  // The outermost period builder provides the coref-pick coordinator to its whole subtree; a
+  // nested builder inherited `parentCoref` and re-provides nothing.
+  return parentCoref ? (
+    tree
+  ) : (
+    <CorefPickContext.Provider value={ownCoref}>{tree}</CorefPickContext.Provider>
   );
 }

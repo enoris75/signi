@@ -60,6 +60,13 @@ function seed() {
       'INSERT INTO semantic_concepts (id, role, description, emoji, transitivity, complements, animate, human, synonym, countable, modal, proper) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)'
     ),
 
+    // Only English is seeded (from the concept's `description`). Other languages are left
+    // empty on purpose — a picker showing them falls back to English until a translated
+    // definition is added here.
+    insertDefinition: db.prepare<[string, string, string]>(
+      'INSERT INTO concept_definitions (concept_id, language, definition) VALUES (?, ?, ?)'
+    ),
+
     insertHypernym: db.prepare<[string, string]>(
       "INSERT INTO concept_relations (concept_a_id, concept_b_id, relation) VALUES (?, ?, 'hypernym')"
     ),
@@ -84,6 +91,8 @@ function seed() {
 
     for (const c of concepts) {
       stmts.insertConcept.run(c.id, c.role, c.description, c.emoji ?? null, c.transitivity ?? null, c.complements?.length ? c.complements.join(',') : null, c.animate ? 1 : 0, c.human ? 1 : 0, c.synonym ?? null, c.countable === false ? 0 : 1, c.modal ? 1 : 0, c.proper ? 1 : 0);
+      // Seed the English definition from `description`; other languages stay empty (fallback to en).
+      stmts.insertDefinition.run(c.id, 'en', c.description);
 
       const rs = roleStmts[c.role];
       if (!rs) continue;

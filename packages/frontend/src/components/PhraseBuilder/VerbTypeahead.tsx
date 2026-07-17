@@ -3,11 +3,8 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
-import { ConceptWord } from "../../i18n/ConceptWord.tsx";
-import {
-  useConceptGloss,
-  useConceptSearch,
-} from "../../i18n/useConceptLabel.ts";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { ConceptOption } from "./ConceptOption.tsx";
 
 export function VerbTypeahead({
   onSelect,
@@ -16,7 +13,6 @@ export function VerbTypeahead({
 }) {
   const { data: allVerbs = [] } = useConcepts("verb");
   const t = useUiString();
-  const gloss = useConceptGloss();
   const matches = useConceptSearch();
   const prompt = `${t("slot.verb.placeholder")}…`;
   const [query, setQuery] = useState("");
@@ -103,35 +99,13 @@ export function VerbTypeahead({
           sx={{ minWidth: 160, maxHeight: 200, overflow: "auto", py: 0.5 }}
         >
           {filtered.map((v, i) => (
-            <Box
+            <ConceptOption
               key={v.id}
-              data-testid="typeahead-option"
-              data-concept={v.id}
-              onMouseDown={(e) => e.preventDefault()}
+              concept={v}
+              highlighted={i === highlightedIdx}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: "0.85rem",
-                fontStyle: "italic",
-                cursor: "pointer",
-                bgcolor:
-                  i === highlightedIdx ? "action.selected" : "transparent",
-                "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <ConceptWord concept={v} />
-              {gloss(v) ? (
-                <Box
-                  component="span"
-                  sx={{ ml: 0.5, color: "text.secondary", fontStyle: "normal" }}
-                >
-                  ({gloss(v)})
-                </Box>
-              ) : null}
-            </Box>
+            />
           ))}
         </Paper>
       </Popper>

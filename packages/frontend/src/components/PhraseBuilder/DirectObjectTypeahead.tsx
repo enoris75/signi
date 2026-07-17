@@ -2,8 +2,8 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
-import { ConceptWord } from "../../i18n/ConceptWord.tsx";
 import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { ConceptOption } from "./ConceptOption.tsx";
 
 export function DirectObjectTypeahead({
   onSelect,
@@ -112,27 +112,13 @@ export function DirectObjectTypeahead({
             sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}
           >
             {filtered.map((n, i) => (
-            <Box
-              key={n.id}
-              data-testid="typeahead-option"
-              data-concept={n.id}
-              onMouseDown={(e) => e.preventDefault()}
-              onMouseEnter={() => setHighlightedIdx(i)}
-              onClick={() => commit(i)}
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: "0.85rem",
-                fontStyle: "italic",
-                cursor: "pointer",
-                bgcolor:
-                  i === highlightedIdx ? "action.selected" : "transparent",
-                "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <ConceptWord concept={n} />
-            </Box>
+              <ConceptOption
+                key={n.id}
+                concept={n}
+                highlighted={i === highlightedIdx}
+                onMouseEnter={() => setHighlightedIdx(i)}
+                onClick={() => commit(i)}
+              />
             ))}
           </Box>
         </Paper>

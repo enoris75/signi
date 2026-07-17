@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { possessiveJa } from '../possessive.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -111,8 +112,15 @@ const REL_NOUN_READING: Record<PathSpecifier, string> = {
 function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const core: RubySegment[] = [];
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
-  // adjectives / nested possessor / relative clause ("子供の猫の本").
-  if (np.possessor) core.push(...npSegs(np.possessor), { t: 'の' });
+  // adjectives / nested possessor / relative clause ("子供の猫の本"). A pronominal possessor
+  // ("彼の犬") is the antecedent pronoun + の, invariant of the possessed head.
+  if (np.possessor) {
+    core.push(
+      ...(isPronominalPossessor(np.possessor)
+        ? possessiveJa(np.possessor)
+        : [...npSegs(np.possessor), { t: 'の' }]),
+    );
+  }
   // Attributive nouns ("sail boat") are also の-linked in Japanese (ガラスのコップ); the
   // relation is neutralised, so every relation renders the same の. The modifier's own
   // adjectives are bare (Japanese adjectives don't agree) and precede it (意味的なフレーズ

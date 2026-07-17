@@ -1,5 +1,5 @@
-import type { ComplementType, NounElement, NounPhrase, PhrasePlan, RelativeClause } from "@signi/shared";
-import { COMPLEMENT_TYPES, isActionLevel, nounConjuncts } from "@signi/shared";
+import type { ComplementType, NounElement, NounPhrase, PhrasePlan, Possessor, RelativeClause } from "@signi/shared";
+import { COMPLEMENT_TYPES, isActionLevel, isPronominalPossessor, nounConjuncts } from "@signi/shared";
 import { NounAddress, NounKey, PhraseContainer, PhraseLink, isConditionalLink, isCoordinativeLink, isInstrumentalLink, isRelativeLink } from "./interfaces.ts";
 import { selectionToPlan } from "./selectionToPlan.ts";
 
@@ -27,7 +27,10 @@ function getNoun(plan: Partial<PhrasePlan>, address: NounAddress): NounPhrase | 
   for (let i = 0; i < steps.length; i++) {
     if (!np) return undefined;
     if (steps[i] === "possessor") {
-      np = np.possessor;
+      // A pronominal possessor ("his") is not a real noun phrase, so it cannot be a
+      // relative-clause endpoint — descending into it yields nothing.
+      const p: Possessor | undefined = np.possessor;
+      np = p && !isPronominalPossessor(p) ? p : undefined;
     } else if (steps[i] === "conjunct") {
       // `conjunct/<i>` addresses the i-th *extra* conjunct, so it is offset by one past the head.
       const index = Number(steps[++i]);

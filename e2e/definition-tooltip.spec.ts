@@ -1,0 +1,82 @@
+import { test, expect } from './fixtures';
+
+// Hovering a word in a picker dropdown surfaces the concept's definition in a tooltip.
+//
+// A definition comes from one of two sources, both keyed by the current UI language and both
+// falling back to English:
+//   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
+//     concepts into every language, so the tooltip is localized like the rest of the UI;
+//   - the stored `concept_definitions` literal (DOG → "domestic canine animal"), of which only
+//     English is seeded.
+test.describe('word definition tooltip', () => {
+  const tooltip = '.MuiTooltip-tooltip';
+
+  test('shows the definition on hover in the subject picker', async ({ app, page }) => {
+    await app.subjectInput.fill('dog');
+    const option = page.locator(
+      '[data-testid="typeahead-option"][data-concept="DOG"]',
+    );
+    await expect(option).toBeVisible();
+
+    await option.hover();
+
+    await expect(page.locator(tooltip)).toBeVisible();
+    await expect(page.locator(tooltip)).toHaveText('domestic canine animal');
+  });
+
+  test('shows the definition on hover in the verb picker', async ({ app, page }) => {
+    // The verb slot only becomes active (and its picker rendered) once a subject is chosen.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('eat');
+    const option = page.locator(
+      '[data-testid="typeahead-option"][data-concept="EAT"]',
+    );
+    await expect(option).toBeVisible();
+
+    await option.hover();
+
+    await expect(page.locator(tooltip)).toHaveText('to consume food');
+  });
+
+  test('an engine-composed definition renders in the current UI language', async ({
+    app,
+    page,
+  }) => {
+    // English: the composed plan (genus MAMMAL + differentia SMALL) supersedes CAT's stored
+    // English literal.
+    await app.subjectInput.fill('cat');
+    const catEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CAT"]',
+    );
+    await expect(catEn).toBeVisible();
+    await catEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a small mammal');
+
+    // Italian: the same plan, localized by the engine — no Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('gatt');
+    const catIt = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CAT"]',
+    );
+    await expect(catIt).toBeVisible();
+    await catIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un piccolo mammifero');
+  });
+
+  test('a literal definition falls back to English under a non-English UI language', async ({
+    app,
+    page,
+  }) => {
+    // DOG has no definition plan and only an English literal, so an Italian UI reverts to it.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('cane');
+    const option = page.locator(
+      '[data-testid="typeahead-option"][data-concept="DOG"]',
+    );
+    await expect(option).toBeVisible();
+
+    await option.hover();
+
+    await expect(page.locator(tooltip)).toHaveText('domestic canine animal');
+  });
+});

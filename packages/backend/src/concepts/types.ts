@@ -1,7 +1,17 @@
+import type { PhrasePlan } from '@signi/shared';
+
 export interface ConceptSeed {
   id: string;
   role: string;
   description: string;
+  /**
+   * An optional engine-composed definition: a semantic period the grammar engine renders into
+   * every language, so the picker tooltip is localized the same way the rest of the UI is (see
+   * the payoff tagline). When present it supersedes the stored `description`/`concept_definitions`
+   * literal for all languages; the literal remains the fallback for concepts without a plan.
+   * Shaped as a bare/indefinite noun phrase — a genus-differentia gloss ("a small mammal").
+   */
+  definition?: PhrasePlan;
   emoji?: string;
   transitivity?: string; // only for verbs
   modal?: boolean; // verb that governs another verb's infinitive rather than heading a clause

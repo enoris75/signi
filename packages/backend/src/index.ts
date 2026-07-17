@@ -4,6 +4,7 @@ import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
 import { buildUiStrings } from './uiStrings.js';
+import { buildConceptDefinitions } from './definitions.js';
 import { randomUUID } from 'crypto';
 import type {
   ConceptsResponse,
@@ -27,6 +28,11 @@ app.use(express.json());
 
 // Ensure DB is initialized on startup
 getDb();
+
+// Engine-composed concept definitions, rendered once from the seed's `definition` plans into
+// every language (like the UI-string bundle). A plan that fails to render in some language throws
+// here, on boot, rather than serving a broken tooltip. Merged over the stored literals per request.
+const CONCEPT_DEFINITIONS = buildConceptDefinitions();
 
 interface ConceptRow {
   id: string;
@@ -55,6 +61,14 @@ const GENDERED_NOUNS_SQL = `
   FROM noun_forms nf
   JOIN concept_noun_links cnl ON cnl.lexeme_id = nf.lexeme_id AND cnl.is_primary = 1
   WHERE nf.form_key = 'fem'
+`;
+
+// Every concept's per-language definitions — the tooltip gloss a picker shows on hover.
+// Only English is seeded so far; the map ships with the concept list (like labels) so the
+// picker can read the definition in whatever language it's already showing, falling back to
+// English client-side when the chosen language has no row.
+const DEFINITION_SQL = `
+  SELECT concept_id, language, definition FROM concept_definitions
 `;
 
 // Every is_a edge, read as "a is_a b". A concept has at most one (the table's UNIQUE says so),
@@ -138,6 +152,27 @@ app.get('/api/concepts', (req, res) => {
     }
   }
 
+  const definitionRows = db
+    .prepare<[], { concept_id: string; language: LanguageCode; definition: string }>(
+      DEFINITION_SQL,
+    )
+    .all();
+  const definitions = new Map<string, Partial<Record<LanguageCode, string>>>();
+  for (const r of definitionRows) {
+    const byLanguage = definitions.get(r.concept_id) ?? {};
+    byLanguage[r.language] = r.definition;
+    definitions.set(r.concept_id, byLanguage);
+  }
+  // An engine-composed definition (rendered from the concept's `definition` plan) supersedes the
+  // stored literal, in every language it renders — so a planned concept reads consistently across
+  // languages rather than mixing an English literal with translated fragments.
+  const definitionFor = (id: string): Partial<Record<LanguageCode, string>> | undefined => {
+    const literal = definitions.get(id);
+    const composed = CONCEPT_DEFINITIONS.get(id);
+    if (!literal && !composed) return undefined;
+    return { ...literal, ...composed };
+  };
+
   const genderedNounRows = db.prepare<[], { concept_id: string }>(GENDERED_NOUNS_SQL).all();
   const genderedNouns = new Set(genderedNounRows.map((r) => r.concept_id));
 
@@ -157,6 +192,7 @@ app.get('/api/concepts', (req, res) => {
       id: r.id,
       role: r.role,
       description: r.description,
+      definitions: definitionFor(r.id),
       label: labels.get(r.id)?.en,
       labels: labels.get(r.id),
       readings: readings.get(r.id),

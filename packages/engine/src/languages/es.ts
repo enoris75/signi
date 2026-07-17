@@ -1,6 +1,7 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
+import { possessiveEs } from '../possessive.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "más"/"menos"; the noun phrase's definite article distinguishes them ("un gato más
@@ -319,10 +320,25 @@ function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect):
   return inf;
 }
 
-function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives): string {
+// The prenominal possessive determiner ("su") for a pronominal possessor, agreeing with this
+// possessed head in number (and, for nuestro/vuestro, gender). Empty for a genitive/absent
+// possessor — that one is postnominal ("de") and handled by `possessorText`.
+function esPossessiveWord(np: ResolvedNounPhrase): string {
+  const poss = np.possessor;
+  if (!poss || !isPronominalPossessor(poss)) return '';
+  const forms = np.head.forms;
+  return possessiveEs(poss, {
+    gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem',
+    number: isPlural(forms) ? 'plural' : 'singular',
+  });
+}
+
+function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives, possessive?: string): string {
   const plural = isPlural(forms);
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const noun = withAdj(word, adj);
+  // A pronominal possessive ("su perro") replaces the article, whatever determiner was picked.
+  if (possessive) return `${possessive} ${noun}`;
   const art = artFor(artForms(forms, adj), plural); // definite / indefinite / bare
   return art ? `${art} ${noun}` : noun;
 }
@@ -340,12 +356,12 @@ function predicativeForms(forms: Record<string, string>): Record<string, string>
   return { ...forms, definiteness: 'bare' };
 }
 
-function subjectPhrase(forms: Record<string, string>, adj?: EsAdjectives): string {
+function subjectPhrase(forms: Record<string, string>, adj?: EsAdjectives, possessive?: string): string {
   if (forms['person']) {
     if (forms['number'] === 'plural' && forms['plural']) return forms['plural'];
     return forms['base'] ?? '';
   }
-  return nounPhrase(forms, adj); // noun — definite article
+  return nounPhrase(forms, adj, possessive); // noun — definite article, or a pronominal possessive
 }
 
 /**
@@ -364,12 +380,12 @@ function coordinateElement(el: ResolvedNounElement, render: (np: ResolvedNounPhr
 
 /** A subject slot: each conjunct with its own article/adjectives/relative, coordinated. */
 function subjectText(el: ResolvedNounElement): string {
-  return coordinateElement(el, (np) => withRelative(subjectPhrase(np.head.forms, esAdj(np)), np));
+  return coordinateElement(el, (np) => withRelative(subjectPhrase(np.head.forms, esAdj(np), esPossessiveWord(np)), np));
 }
 
 /** One conjunct as a plain noun phrase carrying its own determiner ("una palabra"). */
 function npText(np: ResolvedNounPhrase): string {
-  return withRelative(nounPhrase(np.head.forms, esAdj(np)), np);
+  return withRelative(nounPhrase(np.head.forms, esAdj(np), esPossessiveWord(np)), np);
 }
 
 /**
@@ -506,7 +522,9 @@ function complementsPhrase(
  */
 function possessorText(np: ResolvedNounPhrase): string {
   const poss = np.possessor;
-  if (!poss) return '';
+  // A pronominal possessor ("su") is prenominal — rendered by `esPossessiveWord` in place of the
+  // article — so it contributes nothing postnominally here.
+  if (!poss || isPronominalPossessor(poss)) return '';
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');

@@ -10,10 +10,12 @@ import type {
   NounModifier,
   NounPhrase,
   PhrasePlan,
+  Possessor,
+  PronominalPossessor,
   VerbPhrase,
 } from "@signi/shared";
 import type { Concept } from "@signi/shared";
-import { CONJUNCTION_KEY, CONJUNCTS_KEY, NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
+import { CONJUNCTION_KEY, CONJUNCTS_KEY, NounAddress, NounKey, PhraseSelection, POSSESSOR_KEY, POSSESSOR_REF_KEY } from "./interfaces.ts";
 import { adjectiveSlots, BOX_COMPLEMENT_TYPES, modalAdverbFor, MODAL_SLOTS } from "./slots.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
@@ -54,16 +56,63 @@ function modifiers(sel: PhraseSelection, which: NounKey): { adjectives: string[]
   return { adjectives, adjectiveDegrees, nounModifiers };
 }
 
+// Resolve a *pronominal* possessor reference into concrete features. `address` points at an
+// antecedent noun elsewhere in the same period (`root`); we navigate to it — mirroring `getNoun`
+// in workspacePlan, but over the selection so we can read the Concept's own person — and read off
+// the person/number/gender the possessive pronoun agrees with. A pronoun antecedent supplies its
+// own person/number; a noun is 3rd person, singular unless the user set it plural. The gender is
+// the antecedent's grammatical-gender pick (drives en his/her/its, de sein/ihr). Returns undefined
+// if the address no longer resolves (the antecedent was deleted), so the possessor just drops.
+export function resolveAntecedent(
+  root: PhraseSelection,
+  address: NounAddress,
+): { concept: Concept; features: PronominalPossessor } | undefined {
+  const [base, ...steps] = address.split("/");
+  let sel: PhraseSelection = root;
+  let key = base;
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i] === "possessor") {
+      const child = field<PhraseSelection>(sel, `${key}Possessor`);
+      if (!child) return undefined;
+      sel = child;
+      key = "subject";
+    } else if (steps[i] === "conjunct") {
+      const idx = Number(steps[++i]);
+      const child = field<PhraseSelection[]>(sel, `${key}Conjuncts`)?.[idx];
+      if (!child) return undefined;
+      sel = child;
+      key = "subject";
+    } else {
+      return undefined;
+    }
+  }
+  const concept = field<Concept>(sel, key);
+  if (!concept) return undefined;
+  const person = (concept.person ?? "3") as "1" | "2" | "3";
+  const number = field<"singular" | "plural">(sel, `${key}Number`) ?? concept.number ?? "singular";
+  const gender = field<"masc" | "fem" | "neut">(sel, `${key}Gender`);
+  return { concept, features: { kind: "pronominal", person, number, ...(gender && { gender }) } };
+}
+
 // Build one noun phrase from the flat `${which}*` fields. Relative clauses are no longer
 // stored in the selection — they are cross-container links assembled in workspacePlan.ts,
-// which attaches `.relative` to the noun phrases this returns.
-export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhrase | undefined {
+// which attaches `.relative` to the noun phrases this returns. `root` is the whole period
+// selection, needed to resolve a pronominal possessor's antecedent address; it defaults to
+// `sel` for the top-level call and is threaded unchanged through every recursion.
+export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: PhraseSelection = sel): NounPhrase | undefined {
   const concept = field<Concept>(sel, which);
   if (!concept) return undefined;
-  // A possessor is a nested noun phrase whose head lives in its `subject` slot; recursing
-  // through buildNounPhrase gives it its own number/gender/adjectives/nested possessor.
+  // A possessor is one of two shapes. A pronominal reference ("his") points at an antecedent noun
+  // in the period and resolves to its features; otherwise a genitive possessor is a nested noun
+  // phrase whose head lives in its `subject` slot, recursing for its own number/gender/adjectives/
+  // nested possessor. The reference wins when both somehow coexist (the UI keeps them exclusive).
+  const possRef = field<NounAddress>(sel, POSSESSOR_REF_KEY(which));
   const possSel = field<PhraseSelection>(sel, POSSESSOR_KEY(which));
-  const possessor = possSel ? buildNounPhrase(possSel, "subject") : undefined;
+  const possessor: Possessor | undefined = possRef
+    ? resolveAntecedent(root, possRef)?.features
+    : possSel
+      ? buildNounPhrase(possSel, "subject", root)
+      : undefined;
   const { adjectives, adjectiveDegrees, nounModifiers } = modifiers(sel, which);
   return {
     concept: concept.id,
@@ -94,11 +143,11 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey): NounPhras
  * contributes nothing and the slot stays a plain noun phrase — the same rule the instrumental
  * link follows (a half-built period renders no complement rather than half of one).
  */
-export function buildNounElement(sel: PhraseSelection, which: NounKey): NounElement | undefined {
-  const head = buildNounPhrase(sel, which);
+export function buildNounElement(sel: PhraseSelection, which: NounKey, root: PhraseSelection = sel): NounElement | undefined {
+  const head = buildNounPhrase(sel, which, root);
   if (!head) return undefined;
   const conjuncts = (field<PhraseSelection[]>(sel, CONJUNCTS_KEY(which)) ?? [])
-    .map((c) => buildNounPhrase(c, "subject"))
+    .map((c) => buildNounPhrase(c, "subject", root))
     .filter((np): np is NounPhrase => Boolean(np));
   if (conjuncts.length === 0) return head;
   return {

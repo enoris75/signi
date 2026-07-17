@@ -43,6 +43,18 @@ function initSchema(db: Database.Database): void {
       proper       INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1))
     );
 
+    -- ── Per-language concept definitions ──────────────────────────────
+    -- The dictionary gloss a picker shows on hover, one row per language. Kept out of
+    -- semantic_concepts (which holds one English description column) so a concept can carry a
+    -- definition in every language it's translated into. Only English is seeded for now
+    -- (from that description); a language with no row here falls back to English at read time.
+    CREATE TABLE IF NOT EXISTS concept_definitions (
+      concept_id TEXT NOT NULL REFERENCES semantic_concepts(id) ON DELETE CASCADE,
+      language   TEXT NOT NULL CHECK (language IN ('en','it','fr','de','es','ja','pt')),
+      definition TEXT NOT NULL,
+      PRIMARY KEY (concept_id, language)
+    );
+
     -- ── Per-type lexeme tables ─────────────────────────────────────────
     -- Each table carries only the attributes that are meaningful for that
     -- grammatical category. Structured fields (gender, person, number) are

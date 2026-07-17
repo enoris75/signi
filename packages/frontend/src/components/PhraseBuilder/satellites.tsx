@@ -224,7 +224,8 @@ export function buildSatellites(
       // A possessor (Saxon genitive) attaches only to a noun head; its own head noun
       // lives in the nested selection's `subject` slot.
       available: subjectRole === "noun",
-      hasValue: Boolean(selection.subjectPossessor?.subject),
+      // Set by either a genitive possessor phrase or a pronominal reference to another noun.
+      hasValue: Boolean(selection.subjectPossessor?.subject) || Boolean(selection.subjectPossessorRef),
     },
     {
       key: "subjectConjunct",
@@ -421,7 +422,7 @@ export function buildSatellites(
       label: "Possessor",
       icon: <KeyIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
-      hasValue: Boolean(selection.directObjectPossessor?.subject),
+      hasValue: Boolean(selection.directObjectPossessor?.subject) || Boolean(selection.directObjectPossessorRef),
     },
     {
       key: "directObjectConjunct",
@@ -564,13 +565,14 @@ export function buildSatellites(
           label: "Possessor",
           icon: <KeyIcon sx={iconSx} />,
           available: concept?.role === "noun",
-          hasValue: Boolean(
-            (
-              selection[`${type}Possessor` as keyof PhraseSelection] as
-                | PhraseSelection
-                | undefined
-            )?.subject,
-          ),
+          hasValue:
+            Boolean(
+              (
+                selection[`${type}Possessor` as keyof PhraseSelection] as
+                  | PhraseSelection
+                  | undefined
+              )?.subject,
+            ) || Boolean(selection[`${type}PossessorRef` as keyof PhraseSelection]),
         },
         {
           key: `${type}Conjunct`,

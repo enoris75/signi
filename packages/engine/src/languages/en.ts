@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { possessiveEn } from '../possessive.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -302,7 +303,9 @@ function possessivePrefix(poss: ResolvedNounPhrase): string {
  * possessor whose own possessor is post-modified is itself rendered with a trailing of-phrase.
  */
 function isPostModified(np: ResolvedNounPhrase): boolean {
-  return !!np.relative || (!!np.possessor && isPostModified(np.possessor));
+  // A pronominal possessor ("his") is a bare prenominal word — never post-modified — so only a
+  // genitive possessor can propagate post-modification up the chain.
+  return !!np.relative || (!!np.possessor && !isPronominalPossessor(np.possessor) && isPostModified(np.possessor));
 }
 
 /**
@@ -323,7 +326,7 @@ function nounMods(np: ResolvedNounPhrase): string {
     .join(' ');
 }
 
-function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase, superlative = false): string {
+function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, possessor?: ResolvedNounPhrase | PronominalPossessor, superlative = false): string {
   const count = forms['number'] ?? forms['count'] ?? 'singular';
   const word = count === 'plural' ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const a = adj ? `${adj} ` : '';
@@ -331,6 +334,11 @@ function nounPhrase(forms: Record<string, string>, adj?: string, mods?: string, 
   const m = mods ? `${mods} ` : '';
   // "a/an" agrees with the first word after the article (adjective, else modifier, else noun).
   const lead = adj || mods || word;
+  // A pronominal possessor ("his") is a possessive pronoun that replaces the article ("his book",
+  // never "the his book"); English's is invariant of the possessed head.
+  if (possessor && isPronominalPossessor(possessor)) {
+    return `${possessiveEn(possessor)} ${a}${m}${word}`;
+  }
   // A post-modified possessor can't take the Saxon clitic (it would land on the last word of the
   // relative clause), so English uses the of-genitive: "the book of the cat that eats the mouse",
   // the head keeping its own article. Otherwise the possessor replaces the article as a Saxon

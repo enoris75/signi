@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { possessiveDe } from '../possessive.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -446,7 +447,9 @@ function modalVerbGroup(
  */
 function possessorText(np: ResolvedNounPhrase): string {
   const poss = np.possessor;
-  if (!poss) return '';
+  // A pronominal possessor ("sein") is prenominal — rendered as an ein-word in place of the
+  // article — so it adds nothing as a postposed von-phrase here.
+  if (!poss || isPronominalPossessor(poss)) return '';
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const compound = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
@@ -549,10 +552,17 @@ function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
   const word = forms['weak'] === '1'
     ? weakN(compound, _case, plural)
     : genitiveS(datPluralN(compound, _case, plural), _case, forms, plural);
-  const definiteness = forms['definiteness'] ?? 'definite';
+  // A pronominal possessor ("sein Hund") is a prenominal ein-word possessive replacing the
+  // article, declined for this possessed head's case/gender/number. Following adjectives then take
+  // the mixed (ein-word) declension, so the phrase declines like an indefinite one.
+  const poss = np.possessor;
+  const pronominalPoss = poss && isPronominalPossessor(poss);
+  const definiteness = pronominalPoss ? 'indefinite' : (forms['definiteness'] ?? 'definite');
   const declined = adjPhrase(np, _case, definiteness);
   const a = declined ? `${declined} ` : '';
-  const art = determiner(forms, _case, plural); // der/die/das · ein/eine/einen · (bare)
+  const art = poss && isPronominalPossessor(poss)
+    ? possessiveDe(poss, _case, { gender: (forms['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })
+    : determiner(forms, _case, plural); // der/die/das · ein/eine/einen · (bare)
   const lead = art ? `${art} ` : '';
   return `${lead}${a}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
 }

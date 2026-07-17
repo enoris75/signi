@@ -260,6 +260,20 @@ export interface PhraseSelection {
     routePossessor?: PhraseSelection;
     causePossessor?: PhraseSelection;
     terminusPossessor?: PhraseSelection;
+    // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
+    // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
+    // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
+    // with the antecedent's person/number/gender (see `resolveAntecedent` in selectionToPlan).
+    // Mutually exclusive with the matching `${which}Possessor` — the reducers keep only one set.
+    subjectPossessorRef?: NounAddress;
+    directObjectPossessorRef?: NounAddress;
+    predicativePossessorRef?: NounAddress;
+    locativePossessorRef?: NounAddress;
+    directionPossessorRef?: NounAddress;
+    sourcePossessorRef?: NounAddress;
+    routePossessorRef?: NounAddress;
+    causePossessorRef?: NounAddress;
+    terminusPossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun
@@ -296,6 +310,9 @@ export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
 
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
+
+export const POSSESSOR_REF_KEY = (which: NounKey) =>
+  `${which}PossessorRef` as keyof PhraseSelection;
 
 export const CONJUNCTS_KEY = (which: NounKey) =>
   `${which}Conjuncts` as keyof PhraseSelection;

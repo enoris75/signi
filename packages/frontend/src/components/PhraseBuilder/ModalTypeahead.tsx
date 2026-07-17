@@ -2,11 +2,8 @@ import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
-import { ConceptWord } from "../../i18n/ConceptWord.tsx";
-import {
-  useConceptGloss,
-  useConceptSearch,
-} from "../../i18n/useConceptLabel.ts";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { ConceptOption } from "./ConceptOption.tsx";
 
 // Picker for a modal slot. Modals are verb concepts, so they arrive on the same
 // `role=verb` fetch as the main verbs; `Concept.modal` is what separates the two lists
@@ -17,7 +14,6 @@ export function ModalTypeahead({
   onSelect: (concept: Concept) => void;
 }) {
   const { data: verbs = [] } = useConcepts("verb");
-  const gloss = useConceptGloss();
   const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -98,35 +94,13 @@ export function ModalTypeahead({
           sx={{ minWidth: 160, maxHeight: 200, overflow: "auto", py: 0.5 }}
         >
           {filtered.map((v, i) => (
-            <Box
+            <ConceptOption
               key={v.id}
-              data-testid="typeahead-option"
-              data-concept={v.id}
-              onMouseDown={(e) => e.preventDefault()}
+              concept={v}
+              highlighted={i === highlightedIdx}
               onMouseEnter={() => setHighlightedIdx(i)}
               onClick={() => commit(i)}
-              sx={{
-                px: 1.5,
-                py: 0.5,
-                fontFamily: '"Lora", Georgia, serif',
-                fontSize: "0.85rem",
-                fontStyle: "italic",
-                cursor: "pointer",
-                bgcolor:
-                  i === highlightedIdx ? "action.selected" : "transparent",
-                "&:hover": { bgcolor: "action.hover" },
-              }}
-            >
-              <ConceptWord concept={v} />
-              {gloss(v) ? (
-                <Box
-                  component="span"
-                  sx={{ ml: 0.5, color: "text.secondary", fontStyle: "normal" }}
-                >
-                  ({gloss(v)})
-                </Box>
-              ) : null}
-            </Box>
+            />
           ))}
         </Paper>
       </Popper>

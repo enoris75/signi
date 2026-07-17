@@ -138,7 +138,7 @@ export function SlotBox({
   const t = useUiString();
   const word = useConceptLabel();
   return (
-    <Box sx={{ position: "relative", display: "inline-block" }}>
+    <Box data-testid={`box-${slot.key}`} sx={{ position: "relative", display: "inline-block" }}>
       <Paper
         variant="outlined"
         sx={{

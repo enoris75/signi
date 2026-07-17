@@ -16,10 +16,12 @@ import {
   CONJUNCTS_KEY,
   GenderSlot,
   ImperativePerson,
+  NounAddress,
   NounKey,
   NumberSlot,
   PhraseSelection,
   POSSESSOR_KEY,
+  POSSESSOR_REF_KEY,
   SlotKey,
 } from "./interfaces.ts";
 import {
@@ -389,12 +391,16 @@ export function updatePossessor(
   which: NounKey,
   updater: (prev: PhraseSelection) => PhraseSelection,
 ): PhraseSelection {
-  return {
+  const next: PhraseSelection = {
     ...prev,
     [POSSESSOR_KEY(which)]: updater(
       (prev[POSSESSOR_KEY(which)] as PhraseSelection | undefined) ?? {},
     ),
   };
+  // A genitive possessor and a pronominal reference are two ways to fill the one possessor slot,
+  // so editing the genitive drops any reference that was there.
+  delete next[POSSESSOR_REF_KEY(which)];
+  return next;
 }
 
 // Remove a noun block's possessor entirely.
@@ -404,6 +410,33 @@ export function removePossessor(
 ): PhraseSelection {
   const next = { ...prev };
   delete next[POSSESSOR_KEY(which)];
+  return next;
+}
+
+// The antecedent a noun block's pronominal possessor points at, if any ("the boy and *his* horse").
+export function possessorRefOf(prev: PhraseSelection, which: NounKey): NounAddress | undefined {
+  return prev[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
+}
+
+// Point a noun block's possessor at an antecedent noun (a pronominal possessor), clearing any
+// genitive possessor — the two share the one slot.
+export function setPossessorRef(
+  prev: PhraseSelection,
+  which: NounKey,
+  address: NounAddress,
+): PhraseSelection {
+  const next: PhraseSelection = { ...prev, [POSSESSOR_REF_KEY(which)]: address };
+  delete next[POSSESSOR_KEY(which)];
+  return next;
+}
+
+// Remove a noun block's pronominal possessor reference.
+export function clearPossessorRef(
+  prev: PhraseSelection,
+  which: NounKey,
+): PhraseSelection {
+  const next = { ...prev };
+  delete next[POSSESSOR_REF_KEY(which)];
   return next;
 }
 

@@ -1,4 +1,14 @@
 import type { ConceptSeed } from './types.js';
+import type { PhrasePlan } from '@signi/shared';
+
+// A genus-differentia gloss the engine renders into every language: an indefinite noun phrase
+// whose head is the genus (usually the concept's own hypernym) carrying differentia adjectives —
+// glossOf('MAMMAL', 'SMALL') → en "a small mammal", it "un piccolo mammifero", de "ein kleines
+// Säugetier", ja "小さい哺乳類". Set as a concept's `definition` to localize its picker tooltip
+// without hand-writing a literal per language (see ConceptSeed.definition).
+const glossOf = (genus: string, ...adjectives: string[]): PhrasePlan => ({
+  subject: { concept: genus, definiteness: 'indefinite', adjectives },
+});
 
 export const nouns: ConceptSeed[] = [
   // ── NOUNS ────────────────────────────────────────────────────────
@@ -40,6 +50,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CAT',
     role: 'noun',
     description: 'domestic feline animal',
+    definition: glossOf('MAMMAL', 'SMALL'),
     emoji: '🐱',
     animate: true,
     isA: 'MAMMAL',
@@ -188,6 +199,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FOX',
     role: 'noun',
     description: 'a carnivorous mammal with reddish fur',
+    definition: glossOf('MAMMAL', 'BROWN'),
     emoji: '🦊',
     animate: true,
     isA: 'MAMMAL',
@@ -260,6 +272,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COW',
     role: 'noun',
     description: 'an adult female bovine kept for milk or meat',
+    definition: glossOf('MAMMAL', 'BIG'),
     emoji: '🐄',
     animate: true,
     forms: {
@@ -340,6 +353,7 @@ export const nouns: ConceptSeed[] = [
     id: 'MOUSE',
     role: 'noun',
     description: 'a small rodent',
+    definition: glossOf('MAMMAL', 'SMALL'),
     emoji: '🐭',
     animate: true,
     synonym: 'rodent',

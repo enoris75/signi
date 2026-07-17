@@ -13,11 +13,8 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
-import { ConceptWord } from "../../i18n/ConceptWord.tsx";
-import {
-  useConceptGloss,
-  useConceptSearch,
-} from "../../i18n/useConceptLabel.ts";
+import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { ConceptOption } from "./ConceptOption.tsx";
 import { ConceptSelectOpts } from "./interfaces.ts";
 
 export function SubjectTypeahead({
@@ -38,7 +35,6 @@ export function SubjectTypeahead({
   onKindChange?: (kind: string) => void;
 }) {
   const t = useUiString();
-  const gloss = useConceptGloss();
   const matches = useConceptSearch();
   const prompt = placeholder ?? `${t("slot.subject.placeholder")}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
@@ -249,38 +245,13 @@ export function SubjectTypeahead({
             <Box ref={listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
               {showList ? (
                 filteredNouns.map((n, i) => (
-                  <Box
+                  <ConceptOption
                     key={n.id}
-                    data-testid="typeahead-option"
-                    data-concept={n.id}
+                    concept={n}
+                    highlighted={i === highlightedIdx}
                     onMouseEnter={() => setHighlightedIdx(i)}
                     onClick={() => commitNoun(i)}
-                    sx={{
-                      px: 1.5,
-                      py: 0.5,
-                      fontFamily: '"Lora", Georgia, serif',
-                      fontSize: "0.85rem",
-                      fontStyle: "italic",
-                      cursor: "pointer",
-                      bgcolor:
-                        i === highlightedIdx ? "action.selected" : "transparent",
-                      "&:hover": { bgcolor: "action.hover" },
-                    }}
-                  >
-                    <ConceptWord concept={n} />
-                    {gloss(n) ? (
-                      <Box
-                        component="span"
-                        sx={{
-                          ml: 0.5,
-                          color: "text.secondary",
-                          fontStyle: "normal",
-                        }}
-                      >
-                        ({gloss(n)})
-                      </Box>
-                    ) : null}
-                  </Box>
+                  />
                 ))
               ) : (
                 <Box

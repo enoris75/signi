@@ -1,6 +1,7 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
+import { possessiveIt } from '../possessive.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
 // share "più"/"meno" in Italian — the noun phrase's definite article is what distinguishes
@@ -339,8 +340,18 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   const noun = surface(forms, plural);
   const { pre, post } = splitAdjectives(np);
   const preSurfaces = prenominalChain(pre, gender, plural, noun);
-  const lead = preSurfaces[0] ?? noun;
-  const core = joinArt(headFor(plural, lead), joinWords([...preSurfaces, noun]));
+  // A pronominal possessor ("il **suo** cane") is a prenominal possessive adjective agreeing with
+  // *this* possessed head in gender/number, carried by the definite article ("il/la/i/le"). It
+  // leads the prenominal chain and forces the definite article, whatever determiner was picked.
+  const poss = np.possessor;
+  const pronominalPoss = poss ? isPronominalPossessor(poss) : false;
+  const possWord = poss && isPronominalPossessor(poss)
+    ? possessiveIt(poss, { gender: gender as 'masc' | 'fem', number: plural ? 'plural' : 'singular' })
+    : '';
+  const preChain = pronominalPoss ? [possWord, ...preSurfaces] : preSurfaces;
+  const lead = preChain[0] ?? noun;
+  const head = pronominalPoss ? defArticle(forms, plural, lead) : headFor(plural, lead);
+  const core = joinArt(head, joinWords([...preChain, noun]));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, the
   // conjunction only before the last ("forte, felice e freddo"), the way a coordinated noun slot
   // is joined — not the conjunction repeated between every pair.
@@ -355,10 +366,10 @@ function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: strin
   // "di" (bicchiere di vino). This is deliberately distinct from the possessor's "del".
   const mods = itMods(np);
   const withPost = mods ? `${postAdj} ${mods}` : postAdj;
-  // A possessor is postnominal, headed by "di"+article fused ("il libro del gatto").
-  // Rendering it through renderNP recurses for its own adjectives / nested possessor.
-  const poss = np.possessor;
-  const base = poss
+  // A genitive possessor is postnominal, headed by "di"+article fused ("il libro del gatto").
+  // Rendering it through renderNP recurses for its own adjectives / nested possessor. (A
+  // pronominal possessor was already rendered prenominally above, so it is excluded here.)
+  const base = poss && !isPronominalPossessor(poss)
     ? `${withPost} ${renderNP(poss, (plural, lead) => prepArt('di', poss.head.forms, plural, lead))}`
     : withPost;
   const rel = relativeText(np);

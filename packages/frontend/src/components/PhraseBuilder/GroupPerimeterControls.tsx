@@ -101,6 +101,7 @@ export function GroupPerimeterControls({
                 )}
                 {entry?.possessor && (
                   <Box
+                    data-testid={`possessor-ctl-${nounKey}`}
                     ref={(el: HTMLElement | null) =>
                       registerPossessorControl(nounKey, el)
                     }

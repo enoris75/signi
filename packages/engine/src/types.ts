@@ -1,7 +1,8 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, ModifierRelation, PathSpecifier, RubySegment, Specifier, Tense } from '@signi/shared';
-import { isActionLevel } from '@signi/shared';
+import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, ModifierRelation, PathSpecifier, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
+import { isActionLevel, isPronominalPossessor } from '@signi/shared';
 
-export type { RubySegment };
+export type { RubySegment, PronominalPossessor };
+export { isPronominalPossessor };
 
 export interface ConceptForms {
   conceptId: string;
@@ -41,8 +42,12 @@ export interface ResolvedNounPhrase {
   nounModifiers: ResolvedNounModifier[];
   /** A resolved relative clause; the head above is implicitly its subject. */
   relative?: ResolvedRelativeClause;
-  /** A resolved possessing noun phrase (Saxon genitive): "the cat's book" → "the cat". */
-  possessor?: ResolvedNounPhrase;
+  /**
+   * A resolved possessor: either a genitive noun phrase (Saxon genitive, "the cat's book" → "the
+   * cat"), or a pronominal possessor whose features spell a possessive pronoun ("his"). Narrow
+   * with `isPronominalPossessor`. The pronominal form carries no lexicon — it is pure features.
+   */
+  possessor?: ResolvedNounPhrase | PronominalPossessor;
 }
 
 /**
