@@ -106,6 +106,210 @@ describe('direction: a plural goal', () => {
   });
 });
 
+// GO licenses the whole spatial family at once (locative, direction, source, route — see
+// motion.ts), so a single clause can carry several. What is worth pinning is that they compose
+// without interfering: each keeps the adposition it renders in isolation, and they surface in the
+// fixed COMPLEMENT_RENDER_ORDER — source, then direction, then route, then locative — regardless of
+// the order the plan lists them in.
+const goWith = (complements: Record<string, unknown>) =>
+  sayAll(clause(np('CAT'), 'GO', { complements }));
+
+describe('direction: combined with the other directionals', () => {
+  test('source + direction — "from X to Y", each with its own adposition', () => {
+    expect(goWith({
+      source: { phrase: place() },
+      direction: { phrase: np('HOUSE') },
+    })).toEqual({
+      en: 'the cat goes from the market to the house.',
+      it: 'il gatto va dal mercato alla casa.', // da+il=dal, a+la=alla
+      fr: 'le chat va du marché à la maison.', // de+le=du
+      es: 'el gato va del mercado a la casa.',
+      pt: 'o gato vai do mercado à casa.', // a+a=à
+      de: 'der Kater geht aus dem Markt zum Haus.', // aus (source) + zu (direction)
+      ja: '猫は市場から家へ行きます。', // から (source) … へ (direction)
+    });
+  });
+
+  test('direction + route — the goal and the path it takes to get there', () => {
+    expect(goWith({
+      direction: { phrase: place() },
+      route: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'through' }] },
+    })).toEqual({
+      en: 'the cat goes to the market through the house.',
+      it: 'il gatto va al mercato attraverso la casa.',
+      fr: 'le chat va au marché à travers la maison.',
+      es: 'el gato va al mercado por la casa.',
+      pt: 'o gato vai ao mercado pela casa.', // por+a=pela
+      de: 'der Kater geht zum Markt durch das Haus.', // durch governs the accusative: das Haus
+      ja: '猫は市場へ家を行きます。', // へ (direction) … を (traversed path)
+    });
+  });
+
+  test('source + direction + route — the full path "from X through Z to Y"', () => {
+    expect(goWith({
+      source: { phrase: np('HOUSE') },
+      direction: { phrase: place() },
+      route: { phrase: np('ANGEL'), specifiers: [{ kind: 'path', value: 'over' }] },
+    })).toEqual({
+      en: 'the cat goes from the house to the market over the angel.',
+      it: "il gatto va dalla casa al mercato sopra l'angelo.",
+      fr: "le chat va de la maison au marché au-dessus de l'ange.",
+      es: 'el gato va de la casa al mercado por encima del ángel.',
+      pt: 'o gato vai da casa ao mercado por cima do anjo.',
+      de: 'der Kater geht aus dem Haus zum Markt über dem Engel.', // über is two-way: dative here
+      ja: '猫は家から市場へ天使の上を行きます。',
+    });
+  });
+
+  test('all four directionals at once — source, direction, route, locative', () => {
+    // Every adposition each complement uses in isolation survives the pile-up, and they appear in
+    // COMPLEMENT_RENDER_ORDER: source ("from the house"), direction ("to the market"), route
+    // ("through the market"), locative ("in the house") — the last where the going happens.
+    expect(goWith({
+      locative: { phrase: np('HOUSE') },
+      route: { phrase: place(), specifiers: [{ kind: 'path', value: 'through' }] },
+      direction: { phrase: place() },
+      source: { phrase: np('HOUSE') },
+    })).toEqual({
+      en: 'the cat goes from the house to the market through the market in the house.',
+      it: 'il gatto va dalla casa al mercato attraverso il mercato nella casa.',
+      fr: 'le chat va de la maison au marché à travers le marché dans la maison.',
+      es: 'el gato va de la casa al mercado por el mercado en la casa.',
+      pt: 'o gato vai da casa ao mercado pelo mercado na casa.',
+      de: 'der Kater geht aus dem Haus zum Markt durch den Markt im Haus.',
+      ja: '猫は家から市場へ市場を家で行きます。',
+    });
+  });
+
+  test('the render order is fixed, not the order the plan lists the complements in', () => {
+    // Two plans that disagree only on key order produce the identical sentence, because the engine
+    // walks COMPLEMENT_RENDER_ORDER, not object insertion order.
+    const listedOneWay = goWith({
+      source: { phrase: np('HOUSE') },
+      direction: { phrase: place() },
+    });
+    const listedReversed = goWith({
+      direction: { phrase: place() },
+      source: { phrase: np('HOUSE') },
+    });
+    expect(listedReversed).toEqual(listedOneWay);
+    expect(listedOneWay).toMatchObject({
+      en: 'the cat goes from the house to the market.',
+      it: 'il gatto va dalla casa al mercato.',
+      ja: '猫は家から市場へ行きます。',
+    });
+  });
+});
+
+// COME licenses the same spatial family as GO (locative, direction, source, route — see
+// intransitive.ts), and the marking belongs to the complement, not the verb: swapping the verb
+// only swaps the verb form (comes / viene / vient / vem / kommt / 来ます), every adposition and its
+// render order is unchanged from GO above. That verb-independence is the point of this block.
+const comeWith = (complements: Record<string, unknown>) =>
+  sayAll(clause(np('CAT'), 'COME', { complements }));
+
+describe('COME takes the combined directionals the same way GO does', () => {
+  test('source + direction', () => {
+    expect(comeWith({
+      source: { phrase: np('HOUSE') },
+      direction: { phrase: place() },
+    })).toEqual({
+      en: 'the cat comes from the house to the market.',
+      it: 'il gatto viene dalla casa al mercato.',
+      fr: 'le chat vient de la maison au marché.',
+      es: 'el gato viene de la casa al mercado.',
+      pt: 'o gato vem da casa ao mercado.',
+      de: 'der Kater kommt aus dem Haus zum Markt.',
+      ja: '猫は家から市場へ来ます。',
+    });
+  });
+
+  test('direction + route', () => {
+    expect(comeWith({
+      direction: { phrase: place() },
+      route: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'through' }] },
+    })).toEqual({
+      en: 'the cat comes to the market through the house.',
+      it: 'il gatto viene al mercato attraverso la casa.',
+      fr: 'le chat vient au marché à travers la maison.',
+      es: 'el gato viene al mercado por la casa.',
+      pt: 'o gato vem ao mercado pela casa.',
+      de: 'der Kater kommt zum Markt durch das Haus.', // durch → accusative das Haus
+      ja: '猫は市場へ家を来ます。',
+    });
+  });
+
+  test('all four directionals at once — only the verb form differs from GO', () => {
+    expect(comeWith({
+      source: { phrase: np('HOUSE') },
+      direction: { phrase: place() },
+      route: { phrase: place(), specifiers: [{ kind: 'path', value: 'through' }] },
+      locative: { phrase: np('HOUSE') },
+    })).toEqual({
+      en: 'the cat comes from the house to the market through the market in the house.',
+      it: 'il gatto viene dalla casa al mercato attraverso il mercato nella casa.',
+      fr: 'le chat vient de la maison au marché à travers le marché dans la maison.',
+      es: 'el gato viene de la casa al mercado por el mercado en la casa.',
+      pt: 'o gato vem da casa ao mercado pelo mercado na casa.',
+      de: 'der Kater kommt aus dem Haus zum Markt durch den Markt im Haus.',
+      ja: '猫は家から市場へ市場を家で来ます。',
+    });
+  });
+});
+
+// The continent article-drop (see the known-bugs block below: Italian/French say "in"/"en" with no
+// article for a continent GOAL) is not a GO-only rule — it fires on COME too, because it keys off
+// the goal's hypernym, not the verb. And it is a GOAL phenomenon: the same continent as a SOURCE
+// keeps its article ("viene dall'Europa"), so a "from one continent to another" clause shows both
+// treatments of the same word side by side.
+describe('COME to a continent — the article-dropping goal', () => {
+  test('Italian/French drop the article for a continent goal, on COME as on GO', () => {
+    expect(comeWith({ direction: { phrase: np('EUROPE') } })).toMatchObject({
+      en: 'the cat comes to Europe.',
+      it: 'il gatto viene in Europa.', // in, no article
+      fr: 'le chat vient en Europe.', // en, no article
+      ja: '猫はヨーロッパへ来ます。',
+    });
+  });
+
+  test('the drop covers the other continents, compound names included', () => {
+    expect(comeWith({ direction: { phrase: np('ANTARCTICA') } })).toMatchObject({
+      it: 'il gatto viene in Antartide.', fr: 'le chat vient en Antarctique.',
+    });
+    expect(comeWith({ direction: { phrase: np('AFRICA') } })).toMatchObject({
+      it: 'il gatto viene in Africa.', fr: 'le chat vient en Afrique.',
+    });
+    expect(comeWith({ direction: { phrase: np('NORTH_AMERICA') } })).toMatchObject({
+      it: 'il gatto viene in America del Nord.', fr: 'le chat vient en Amérique du Nord.',
+    });
+  });
+
+  test('a continent SOURCE keeps its article — the drop is goal-only', () => {
+    // Contrast the goal above: as an origin the continent behaves like any other proper noun,
+    // so Italian fuses and elides da + l' = dall', and French keeps "de l'".
+    expect(comeWith({ source: { phrase: np('EUROPE') } })).toMatchObject({
+      en: 'the cat comes from Europe.',
+      it: "il gatto viene dall'Europa.",
+      fr: "le chat vient de l'Europe.",
+      de: 'der Kater kommt aus Europa.',
+      ja: '猫はヨーロッパから来ます。',
+    });
+  });
+
+  test('from one continent to another — the article kept on the source, dropped on the goal', () => {
+    expect(comeWith({
+      source: { phrase: np('AFRICA') },
+      direction: { phrase: np('EUROPE') },
+    })).toMatchObject({
+      en: 'the cat comes from Africa to Europe.',
+      it: "il gatto viene dall'Africa in Europa.", // dall' (source, kept) … in (goal, dropped)
+      fr: "le chat vient de l'Afrique en Europe.",
+      de: 'der Kater kommt aus Afrika zu Europa.',
+      ja: '猫はアフリカからヨーロッパへ来ます。',
+    });
+  });
+});
+
 describe('known bugs: direction', () => {
   // Junge is a weak masculine (n-declension) noun: every case but the nominative singular is
   // "Jungen". The engine misses it — but ONLY in the singular, because the plural happens to be

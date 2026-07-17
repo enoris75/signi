@@ -48,7 +48,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-_All Part A defects have been fixed — see the **Fixed** section below._
+| # | File |
+|---|---|
+| A39 | [A39-spanish-continent-goal-source-article.md](A-must-fix/A39-spanish-continent-goal-source-article.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
