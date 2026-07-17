@@ -42,22 +42,64 @@ describe('cause', () => {
   });
 });
 
-// DELIBERATE, not oversights — do not "fix" without a product decision.
-//
-// English and German collapse the negative sentiment onto the neutral connector: en.ts notes
-// English has no distinct one (the blame sense "rides on 'because of' itself"), and de.ts notes
-// the "durch … Schuld" periphrasis is not built.
-//
-// Worth weighing, though: the other five languages DO distinguish it, so the stance the user
-// picked is silently lost in exactly two of the seven — the negative renders as the neutral.
-describe('documented simplifications: cause', () => {
-  test.fails('English collapses the negative sentiment onto "because of"', () => {
+// English and German now distinguish the negative sentiment too, so all seven languages carry the
+// user's stance. English uses the "through the fault of" periphrasis; German the genitive "durch
+// die Schuld" + the blamed party in the genitive ("durch die Schuld des Hundes"). Was B02.
+describe('cause: the negative sentiment in English and German', () => {
+  test('English lays blame with "through the fault of"', () => {
     expect(criesBecauseOf('negative'))
       .toMatchObject({ en: 'the cat cries through the fault of the dog.' });
   });
 
-  test.fails('German collapses the negative sentiment onto "wegen"', () => {
+  test('German lays blame with the genitive "durch die Schuld"', () => {
     expect(criesBecauseOf('negative'))
       .toMatchObject({ de: 'der Kater weint durch die Schuld des Hundes.' });
+  });
+
+  // The genitive is the whole point of the German periphrasis, so exercise the article/ending
+  // across gender and number: neuter "des Wortes", feminine "der Katze", plural "der Hunde".
+  const blamedOn = (party: Parameters<typeof np>[0], opts?: Parameters<typeof np>[1]) =>
+    sayAll(clause(np('CAT'), 'CRY', {
+      complements: { cause: { phrase: np(party, opts), specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
+    }));
+
+  test('German genitive declines for gender and number', () => {
+    expect(blamedOn('WORD')).toMatchObject({ de: 'der Kater weint durch die Schuld des Wortes.' }); // neuter -es
+    expect(blamedOn('MOUSE')).toMatchObject({ de: 'der Kater weint durch die Schuld der Maus.' }); // feminine, no ending
+    expect(blamedOn('DOG', { number: 'plural' })).toMatchObject({ de: 'der Kater weint durch die Schuld der Hunde.' }); // plural
+  });
+
+  test('English "through the fault of" reaches a plural and an indefinite', () => {
+    expect(blamedOn('DOG', { number: 'plural' })).toMatchObject({ en: 'the cat cries through the fault of the dogs.' });
+    expect(blamedOn('DOG', { definiteness: 'indefinite' })).toMatchObject({ en: 'the cat cries through the fault of a dog.' });
+  });
+
+  // A pronoun cause carries the stance too: English reuses the connector ("through the fault of
+  // him"); German the possessive periphrasis ("durch seine Schuld"), the possessive agreeing with
+  // feminine "Schuld".
+  const blamedOnPerson = (person: 'FIRST_PERSON' | 'SECOND_PERSON' | 'THIRD_PERSON', opts?: Parameters<typeof np>[1]) =>
+    sayAll(clause(np('CAT'), 'CRY', {
+      complements: { cause: { phrase: np(person, opts), specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
+    }));
+
+  test('a negative pronoun cause: English connector, German possessive', () => {
+    expect(blamedOnPerson('THIRD_PERSON')).toMatchObject({
+      en: 'the cat cries through the fault of him.',
+      de: 'der Kater weint durch seine Schuld.',
+    });
+    expect(blamedOnPerson('FIRST_PERSON')).toMatchObject({
+      en: 'the cat cries through the fault of me.',
+      de: 'der Kater weint durch meine Schuld.',
+    });
+    expect(blamedOnPerson('THIRD_PERSON', { gender: 'fem' })).toMatchObject({
+      de: 'der Kater weint durch ihre Schuld.',
+    });
+  });
+
+  // Regression: the neutral and positive connectors are untouched by the negative fix.
+  test('neutral and positive connectors are unchanged', () => {
+    expect(criesBecauseOf('positive')).toMatchObject({ en: 'the cat cries thanks to the dog.', de: 'der Kater weint dank dem Hund.' });
+    expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG') } } })))
+      .toMatchObject({ en: 'the cat cries because of the dog.', de: 'der Kater weint wegen dem Hund.' });
   });
 });

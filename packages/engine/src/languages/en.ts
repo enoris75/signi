@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
@@ -91,6 +91,15 @@ const PREP: Record<ComplementType, string> = {
   instrumental: 'with', // means / tool — "starts with a word"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
+};
+
+// The causal connector carries the speaker's stance: neutral "because of", positive "thanks to",
+// negative "through the fault of" — the periphrasis English uses to lay blame ("cries through the
+// fault of the dog"). All three take the same "<connector> <NP>" shape.
+const CAUSE_PREP: Record<CauseSentiment, string> = {
+  neutral: 'because of',
+  positive: 'thanks to',
+  negative: 'through the fault of',
 };
 
 const PATH_PREP: Record<PathSpecifier, string> = {
@@ -372,11 +381,11 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // surface is rendered from every conjunct.
       const f = firstConjunct(c.phrase).head.forms;
       // A pronoun complement ("because of him/her/them") takes the oblique form with no
-      // article — only the causal adjunct accepts a pronoun in the UI today. Positive credits
-      // with "thanks to"; English has no distinct neutral/negative connector, so both read
-      // "because of" (the blame sense rides on "because of" itself).
+      // article — only the causal adjunct accepts a pronoun in the UI today. The sentiment
+      // picks the connector: positive "thanks to", negative "through the fault of", neutral
+      // "because of" ("thanks to her", "through the fault of them", "because of him").
       if (type === 'cause' && f['person']) {
-        const prep = causeSentiment(c) === 'positive' ? 'thanks to' : 'because of';
+        const prep = CAUSE_PREP[causeSentiment(c)];
         const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
         return `${prep} ${pronouns}`;
       }
@@ -409,7 +418,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
-        : type === 'cause' ? (causeSentiment(c) === 'positive' ? 'thanks to' : 'because of')
+        : type === 'cause' ? CAUSE_PREP[causeSentiment(c)]
         : PREP[type];
       return `${prep} ${coordinate(c.phrase, npText)}`;
     })

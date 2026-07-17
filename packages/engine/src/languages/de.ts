@@ -652,12 +652,29 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const f = firstConjunct(c.phrase).head.forms;
       // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
       // colloquial dative that "wegen" already takes. Positive credits with "dank" ("dank
-      // dir"); German has no clean prepositional blame connector short of the genitive
-      // "durch … Schuld", so negative renders like neutral ("wegen"). Only cause takes a pronoun.
+      // dir"); negative lays blame with the possessive periphrasis "durch <possessive> Schuld"
+      // ("durch meine/deine/seine Schuld"), the possessive agreeing with feminine "Schuld".
+      // Only cause takes a pronoun.
       if (type === 'cause' && f['person']) {
-        const prep = causeSentiment(c) === 'positive' ? 'dank' : 'wegen';
+        const sent = causeSentiment(c);
+        if (sent === 'negative') {
+          const plural = f['number'] === 'plural';
+          const poss =
+            f['person'] === '1' ? (plural ? 'unsere' : 'meine') :
+            f['person'] === '2' ? (plural ? 'eure' : 'deine') :
+            plural ? 'ihre' : (f['gender'] === 'fem' ? 'ihre' : 'seine');
+          return `durch ${poss} Schuld`;
+        }
+        const prep = sent === 'positive' ? 'dank' : 'wegen';
         const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
         return `${prep} ${pronouns}`;
+      }
+      // A negative noun cause takes the genitive periphrasis "durch die Schuld" (through the
+      // fault) + the cause in the genitive: "durch die Schuld des Hundes". "durch" governs the
+      // accusative of the fixed "die Schuld"; the blamed party hangs off it as a genitive. Emitted
+      // once before the group ("durch die Schuld des Hundes und der Katze").
+      if (type === 'cause' && causeSentiment(c) === 'negative') {
+        return `durch die Schuld ${coordinate(c.phrase, (np) => nounPhrase(np, 'gen'))}`;
       }
       // An instrument presented as an action. German has no gerund, so the two levels part ways
       // completely. The process level is a subordinate means clause — "indem man ein Wort wählt",
@@ -718,7 +735,8 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       } else {
         _case = 'dat';
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
-        // standard in speech and reuses the dative determiners; positive credits with "dank".
+        // standard in speech and reuses the dative determiners; positive credits with "dank". The
+        // negative sentiment never reaches here — it took the "durch die Schuld" genitive path above.
         if (type === 'locative')  head = prepDet('in', f, 'dat', plural);
         else if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
