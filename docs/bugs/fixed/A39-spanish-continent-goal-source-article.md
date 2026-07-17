@@ -41,3 +41,23 @@ route a proper noun through the same `artFor` gate the locative uses, dropping t
 
 Note the fix must not regress a **common-noun** goal/source, which still articles and contracts
 normally (`va al mercado`, `viene del mercado`), nor Antártida, nor Portuguese.
+
+## Resolved
+
+Fixed 2026-07-17.
+
+**Engine change:** [`packages/engine/src/languages/es.ts`](../../../packages/engine/src/languages/es.ts).
+`datPrep`/`dePrep` (the `a`/`de` + definite-article contraction used by the goal, source, and terminus
+heads) chose the article with `defArticle` **unconditionally**, articling every continent. They now
+route through a shared `contractArt` helper: a **proper** noun's article comes from the same `artFor`
+gate the locative uses (`takes_article === '1' ? defArticle(…) : ''`), so `Europa`/`África`/`América
+del Norte` go bare (`a Europa`, `de África`) while lexically-articled `la Antártida` keeps its article;
+a **common** noun still articles and contracts as before (`al mercado`, `del mercado`). The empty-article
+case falls back to the bare preposition (`a`/`de`).
+
+**Tests guarding it:** `packages/engine/test/complements/direction.test.ts` → *known bugs: Spanish
+over-articles a continent goal/source*. The two former `test.fails` (continent goal drop, continent
+source drop) are now plain passing tests, plus added coverage: the drop fires on `COME` as on `GO`
+(verb-independence), the source drop across the other continents (compound name included), the
+Antártida control (article kept, goal and source), and a common-noun regression guard (`al mercado` /
+`del mercado` still contract).

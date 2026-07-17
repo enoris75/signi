@@ -402,16 +402,32 @@ describe('known bugs: direction', () => {
 // control happened to check — masking the miss on all the others. Same coincidence shape as the
 // German weak-noun plural above.
 describe('known bugs: Spanish over-articles a continent goal/source', () => {
-  test.fails('a continent goal drops the article: "a Europa", not "a la Europa"', () => {
+  test('a continent goal drops the article: "a Europa", not "a la Europa"', () => {
     expect(goTo(np('EUROPE')).es).toBe('el gato va a Europa.');
     expect(goTo(np('AFRICA')).es).toBe('el gato va a África.');
     expect(goTo(np('NORTH_AMERICA')).es).toBe('el gato va a América del Norte.');
   });
 
-  test.fails('a continent source drops it too: "de Europa" / "de África a Europa"', () => {
+  test('a continent source drops it too: "de Europa" / "de África a Europa"', () => {
     expect(comeWith({ source: { phrase: np('EUROPE') } }).es).toBe('el gato viene de Europa.');
     expect(comeWith({ source: { phrase: np('AFRICA') }, direction: { phrase: np('EUROPE') } }).es)
       .toBe('el gato viene de África a Europa.');
+  });
+
+  // The drop is verb-independent: it fires on COME's goal exactly as on GO's, because it keys off
+  // the goal being a bare proper noun ("a Europa"), not on the verb.
+  test('the goal drop fires on COME too, not just GO', () => {
+    expect(comeWith({ direction: { phrase: np('EUROPE') } }).es).toBe('el gato viene a Europa.');
+    expect(comeWith({ direction: { phrase: np('NORTH_AMERICA') } }).es)
+      .toBe('el gato viene a América del Norte.');
+  });
+
+  // The source drop covers the other continents too, the compound name included — the sibling of
+  // the goal case in the flipped test above.
+  test('a continent source drops the article across the continents', () => {
+    expect(comeWith({ source: { phrase: np('AFRICA') } }).es).toBe('el gato viene de África.');
+    expect(comeWith({ source: { phrase: np('NORTH_AMERICA') } }).es)
+      .toBe('el gato viene de América del Norte.');
   });
 
   // Control — passes today and must keep passing after the fix: Antártida is lexically articled
@@ -420,5 +436,12 @@ describe('known bugs: Spanish over-articles a continent goal/source', () => {
   test('Antártida keeps its article, as a goal and as a source', () => {
     expect(goTo(np('ANTARCTICA')).es).toBe('el gato va a la Antártida.');
     expect(comeWith({ source: { phrase: np('ANTARCTICA') } }).es).toBe('el gato viene de la Antártida.');
+  });
+
+  // Regression: a common-noun goal/source is untouched by the proper-noun gate — it still articles
+  // and contracts ("al mercado" / "del mercado"), so "a"/"de" fusion is not lost.
+  test('a common-noun goal and source still article and contract', () => {
+    expect(goTo(place()).es).toBe('el gato va al mercado.');
+    expect(comeWith({ source: { phrase: place() } }).es).toBe('el gato viene del mercado.');
   });
 });

@@ -192,21 +192,31 @@ function artForms(forms: Record<string, string>, adj?: EsAdjectives): Record<str
   return adj?.pre ? { ...forms, stressed_a: '' } : forms;
 }
 
-/** Spanish "de" (from) + article: de+el=del; otherwise "de la/los/las". */
+/**
+ * The definite article a "de"/"a" contraction should carry, gated the same way the locative's
+ * `artFor` gates a proper noun: a common noun always articles ("del gato"), but a proper noun
+ * articles only when lexically marked ("de la Antártida"), and otherwise goes bare ("de Europa",
+ * not "de la Europa"). `artFor` returns '' for a proper noun without `takes_article`.
+ */
+function contractArt(forms: Record<string, string>, plural: boolean): string {
+  return forms['proper'] === '1' ? artFor(forms, plural) : defArticle(forms, plural);
+}
+
+/** Spanish "de" (from) + article: de+el=del; bare "de" for an unarticled proper noun; else "de la/los/las". */
 function dePrep(forms: Record<string, string>, plural = false): string {
-  const art = defArticle(forms, plural);
+  const art = contractArt(forms, plural);
   if (art === 'el') return 'del';
-  return `de ${art}`;
+  return art ? `de ${art}` : 'de';
 }
 
 /**
  * Spanish "a" (to) + definite article contractions:
- * a+el=al (only masculine singular contracts)
+ * a+el=al (only masculine singular contracts); bare "a" for an unarticled proper noun.
  */
 function datPrep(forms: Record<string, string>, plural = false): string {
-  const art = defArticle(forms, plural);
+  const art = contractArt(forms, plural);
   if (art === 'el') return 'al';
-  return `a ${art}`;
+  return art ? `a ${art}` : 'a';
 }
 
 /**

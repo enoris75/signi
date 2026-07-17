@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A39 | [A39-spanish-continent-goal-source-article.md](A-must-fix/A39-spanish-continent-goal-source-article.md) |
 | A40 | [A40-romance-pro-drop-subject-pronoun.md](A-must-fix/A40-romance-pro-drop-subject-pronoun.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
@@ -114,6 +113,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A36 | [A36-feminine-plural-pronoun.md](fixed/A36-feminine-plural-pronoun.md) | fr, es, pt | 2026-07-17 |
 | A37 | [A37-french-preceding-object-participle-agreement.md](fixed/A37-french-preceding-object-participle-agreement.md) | French | 2026-07-17 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
+| A39 | [A39-spanish-continent-goal-source-article.md](fixed/A39-spanish-continent-goal-source-article.md) | Spanish | 2026-07-17 |
 | B1 | [B01-romance-source-ablative-adverb.md](fixed/B01-romance-source-ablative-adverb.md) | it, fr, es, pt | 2026-07-17 |
 | B1b | [B01b-romance-source-adverb-inverts-nonmotion.md](fixed/B01b-romance-source-adverb-inverts-nonmotion.md) | it, fr, es, pt | 2026-07-17 |
 | B2 | [B02-english-german-negative-cause-sentiment.md](fixed/B02-english-german-negative-cause-sentiment.md) | English, German | 2026-07-17 |
