@@ -4,6 +4,7 @@ import type {
   CoordConjunction,
   Definiteness,
   Degree,
+  ModalVerb,
   ModifierRelation,
   NounElement,
   NounModifier,
@@ -13,7 +14,7 @@ import type {
 } from "@signi/shared";
 import type { Concept } from "@signi/shared";
 import { CONJUNCTION_KEY, CONJUNCTS_KEY, NounKey, PhraseSelection, POSSESSOR_KEY } from "./interfaces.ts";
-import { adjectiveSlots, BOX_COMPLEMENT_TYPES, MODAL_SLOTS } from "./slots.ts";
+import { adjectiveSlots, BOX_COMPLEMENT_TYPES, modalAdverbFor, MODAL_SLOTS } from "./slots.ts";
 
 // Read a dynamically-keyed field off a selection. The flat keys (`${which}Number`,
 // `${which}Adjective`, …) all exist on PhraseSelection; the union index widens the
@@ -111,10 +112,15 @@ export function buildNounElement(sel: PhraseSelection, which: NounKey): NounElem
 export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
   if (!sel.verb) return undefined;
   // The modal chain, outermost first. Filtering (rather than stopping at the first empty
-  // slot) keeps a chain with a hole in it meaningful: whatever modals are set still apply.
-  const modals = MODAL_SLOTS.map((key) => field<Concept>(sel, key)?.id).filter(
-    (id): id is string => Boolean(id),
-  );
+  // slot) keeps a chain with a hole in it meaningful: whatever modals are set still apply. Each
+  // modal carries its own adverb (paired slot) when one is set — "never wanted to always go".
+  const modals = MODAL_SLOTS.map((key): ModalVerb | undefined => {
+    const verb = field<Concept>(sel, key)?.id;
+    if (!verb) return undefined;
+    const adverbKey = modalAdverbFor(key);
+    const modifier = adverbKey ? field<Concept>(sel, adverbKey)?.id : undefined;
+    return modifier ? { verb, modifier } : { verb };
+  }).filter((m): m is ModalVerb => Boolean(m));
   return {
     verb: sel.verb.id,
     negative: sel.verbNegative,

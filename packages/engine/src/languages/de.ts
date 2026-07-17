@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -393,9 +393,16 @@ function verbGroup(
  * finite in the V2 slot it is left out of the stack ("er will gehen können"); in the future
  * "werden" holds V2 instead, so every modal stacks ("er wird gehen müssen").
  */
-function modalStack(modals: ConceptForms[], includeOutermost: boolean): string[] {
-  const infinitives = modals.map((m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '');
+function modalStack(modals: ResolvedModal[], includeOutermost: boolean): string[] {
+  const infinitives = modals.map((m) => m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '');
   return (includeOutermost ? infinitives : infinitives.slice(1)).reverse().filter(Boolean);
+}
+
+/** Each verb's own adverb, in scope order (outermost modal first, main verb last), for the German
+ *  Mittelfeld — "will nie immer gehen": the outermost modal's "nie" leads, the main verb's "immer"
+ *  sits nearest the clause-final verb cluster. The caller appends the main verb's adverb after. */
+function modalAdverbs(modals: ResolvedModal[]): string {
+  return modals.map((m) => m.modifier?.forms['base'] ?? '').filter(Boolean).join(' ');
 }
 
 /**
@@ -407,7 +414,7 @@ function modalStack(modals: ConceptForms[], includeOutermost: boolean): string[]
  * Katze gesehen haben" and "er wird gehen müssen" both fall out of the same shape.
  */
 function modalVerbGroup(
-  modals: ConceptForms[],
+  modals: ResolvedModal[],
   verbForms: Record<string, string>,
   pn: string,
   tense: Tense,
@@ -426,7 +433,7 @@ function modalVerbGroup(
   const conditional = isConditionalMood(mood);
   const periphrastic = tense === 'future' || conditional;
   return {
-    v2: periphrastic ? (conditional ? (WUERDE[pn] ?? 'würde') : (WERDEN[pn] ?? 'wird')) : conjPn(modals[0].forms, pn, tense),
+    v2: periphrastic ? (conditional ? (WUERDE[pn] ?? 'würde') : (WERDEN[pn] ?? 'wird')) : conjPn(modals[0].verb.forms, pn, tense),
     mid: group.mid,
     tail: [...group.tail, ...modalStack(modals, periphrastic)].join(' '),
   };
@@ -812,11 +819,11 @@ function subordinateClause(np: ResolvedNounPhrase): string {
   const dativeText = complementsPhrase(dative);
   const directObjectText = rel.directObject ? elementPhrase(rel.directObject, 'acc') : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  const nicht = verbNegative && !modifierIsNegative ? 'nicht' : '';
+  const modalAdverbsText = modalAdverbs(modals);
+  const nicht = verbNegative && !groupHasNegativeAdverb(rel.verbPhrase) ? 'nicht' : '';
   const complementsText = complementsPhrase(rest);
 
-  const body = [pronoun, clauseSubjectText, mid, dativeText, directObjectText, complementsText, modifierText, nicht, tail, finite]
+  const body = [pronoun, clauseSubjectText, mid, dativeText, directObjectText, complementsText, modalAdverbsText, modifierText, nicht, tail, finite]
     .filter(Boolean)
     .join(' ');
   return `, ${body},`;
@@ -923,7 +930,8 @@ function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = fals
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
       : verbGroup(verb.forms, pn, tense, aspect, mood);
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+    // A negative adverb ("nie") on the main verb or ANY modal is itself the clause negator.
+    const modifierIsNegative = groupHasNegativeAdverb(verbPhrase);
     // A `no` object's "kein" is itself the clause negator (kein = nicht + ein). With a NEGATIVE
     // ADVERB ("nie") also present, "nie keine Maus" would double the negative, so the object drops to
     // a plain indefinite — "isst nie eine Maus". (With a negated verb instead, "keine" stays and the
@@ -934,6 +942,11 @@ function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = fals
       : directObject;
     const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+    // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
+    // main verb's adverb: "er will nie immer gehen" (never wants to always go).
+    const modalAdverbsText = modalAdverbs(verbPhrase.modals);
+    // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
+    const anyMidAdverb = modalAdverbsText || modifierText;
 
     // "nicht" precedes the modifier when one exists ("nicht immer"),
     // otherwise trails after objects ("das Brot nicht").
@@ -951,19 +964,19 @@ function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = fals
     // present the "nicht immer" placement already covers it, so guard on !modifierText.
     const hasPredicative = !!phrase.complements?.['predicative'];
     const negAspectMid = negProspective ? 'nicht' : '';
-    const negBefore = !negProspective && applyNicht && modifierText ? 'nicht' : '';
-    const negComplement = !negProspective && applyNicht && hasPredicative && !modifierText ? 'nicht' : '';
-    const negAfter  = !negProspective && applyNicht && !modifierText && !hasPredicative ? 'nicht' : '';
+    const negBefore = !negProspective && applyNicht && anyMidAdverb ? 'nicht' : '';
+    const negComplement = !negProspective && applyNicht && hasPredicative && !anyMidAdverb ? 'nicht' : '';
+    const negAfter  = !negProspective && applyNicht && !anyMidAdverb && !hasPredicative ? 'nicht' : '';
     const complementsText = complementsPhrase(rest);
     // Verb-final (subordinate) order: the subject leads and the finite verb closes the clause,
     // behind the non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. Used
     // for the "wenn" protasis of a conditional.
     if (verbFinal) {
-      return [subj, negAspectMid, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, verbText, meansText]
+      return [subj, negAspectMid, aspectMid, negBefore, modalAdverbsText, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, verbText, meansText]
         .filter(Boolean).join(' ').trim();
     }
     const head = inverted ? [verbText, subj] : [subj, verbText];
-    return [...head, negAspectMid, aspectMid, negBefore, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
+    return [...head, negAspectMid, aspectMid, negBefore, modalAdverbsText, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
 }
 

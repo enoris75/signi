@@ -27,6 +27,7 @@ import {
   BOX_COMPLEMENT_TYPES,
   COMPLEMENT_KEY_SET,
   getActiveSlots,
+  modalAdverbFor,
   MODAL_SLOTS,
   NOUN_KEYS,
 } from "./slots.ts";
@@ -60,8 +61,12 @@ function clearChainedAdjectives(
 function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
   const idx = MODAL_SLOTS.indexOf(slot);
   if (idx === -1 && slot !== "verb") return;
-  for (const key of MODAL_SLOTS.slice(idx + 1))
+  for (const key of MODAL_SLOTS.slice(idx + 1)) {
     delete sel[key as keyof PhraseSelection];
+    // A cleared modal takes its own adverb with it — the adverb's control rides the modal's box.
+    const advKey = modalAdverbFor(key);
+    if (advKey) delete sel[advKey as keyof PhraseSelection];
+  }
 }
 
 // Pure state transform: place `concept` into `slot`, cascading the side effects
@@ -156,6 +161,9 @@ export function applyClear(
 ): PhraseSelection {
   const next = { ...prev };
   delete next[slot];
+  // Clearing a modal clears its own adverb (its control lives on the modal's box).
+  const clearedModalAdverb = modalAdverbFor(slot);
+  if (clearedModalAdverb) delete next[clearedModalAdverb as keyof PhraseSelection];
   if (slot === "verb") {
     delete next.directObject;
     delete next.directObjectNumber;
@@ -316,6 +324,8 @@ export function toggleImperative(prev: PhraseSelection): PhraseSelection {
     verbAspect: "neutral",
     verbModal: undefined,
     verbModal2: undefined,
+    verbModalAdverb: undefined,
+    verbModal2Adverb: undefined,
   };
 }
 

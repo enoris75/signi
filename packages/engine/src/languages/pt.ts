@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -592,9 +592,19 @@ function predicateText(
   const finite = (m: ConceptForms) => moodForm('pt', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
   // prepended below and lands in front of it, exactly as for a plain verb.
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // Portuguese fronts one negative frequency adverb ("nunca") preverbally without "não", whichever
+  // verb it modifies. Scan the group outermost-first (each modal, then the main verb); the first
+  // negative adverb takes that slot. `frontIdx` indexes this array: 0…n-1 modals, n = main verb.
+  const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
+  const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
+  const preVerbNunca = frontIdx >= 0;
   const conjugated = modals.length > 0
     ? [
-        ...modalChain(modals, finite),
+        // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
+        // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
+        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
         verbGroupInfinitive(verb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
@@ -604,13 +614,11 @@ function predicateText(
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // The preverbal "não" is emitted only when the clause needs a preverbal negator AND none is already
-  // there. A preverbal negative subject ("nenhum gato …") or a preverbal "nunca" already negates the
-  // clause, so "não" is dropped — "nenhum gato come nenhum rato", "nunca come nenhum rato".
+  // there. A preverbal negative subject ("nenhum gato …") or a preverbal "nunca" (the finite adverb)
+  // already negates the clause, so "não" is dropped.
   const subjectIsNegative = subjectForms['definiteness'] === 'no';
-  const preVerbNunca = modifierIsNegative && !verbNegative;
-  const needsNao = verbNegative || objectIsNegative || hasNegativeComplement(complements);
+  const needsNao = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${conjugated}` : conjugated;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
@@ -618,11 +626,11 @@ function predicateText(
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  // "nunca" goes pre-verbal without "não": "eu nunca bebo"
-  // but post-verbal with "não": "eu não bebo nunca"
-  const preVerb = preVerbNunca ? modifierText : '';
-  const postVerb = preVerbNunca ? '' : modifierText;
+  // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
+  // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
+  const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
+  const mainIsFronted = frontIdx === modals.length;
+  const postVerb = mainIsFronted ? '' : modifierText;
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")

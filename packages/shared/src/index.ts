@@ -492,17 +492,34 @@ export interface RelativeClause {
   complements?: Partial<Record<ComplementType, Complement>>;
 }
 
+/**
+ * One link in the modal chain: a modal verb concept plus, optionally, its *own* adverb. Every
+ * verb in a group can carry its own adverb — the main verb via `VerbPhrase.modifier`, each modal
+ * via this `modifier`. "I **never** wanted to **always** go" is WILL with `modifier: 'NEVER'`
+ * governing GO with `VerbPhrase.modifier: 'ALWAYS'`.
+ */
+export interface ModalVerb {
+  verb: string;                    // modal verb concept id (`Concept.modal`)
+  modifier?: string;               // adverb id scoped to *this* modal, not the main verb
+}
+
+/**
+ * A modal chain link. A bare string is shorthand for a modal with no adverb of its own
+ * (`'MUST'` ≡ `{ verb: 'MUST' }`), so the common adverb-free chain stays terse.
+ */
+export type ModalRef = string | ModalVerb;
+
 /** The predicate head: a core verb, optional negation, and an optional adverb. */
 export interface VerbPhrase {
   verb: string;                    // core verb id
   negative?: boolean;
-  modifier?: string;               // adverb id
+  modifier?: string;               // adverb id scoped to the main verb
   tense?: Tense;                   // defaults to 'present'
   aspect?: Aspect;                 // defaults to 'neutral'
   /**
    * Modal verbs governing this predicate, outermost first — obligation (must / dovere),
-   * ability (can / potere), volition (will / volere). `["WILL", "CAN"]` over GO is "voglio
-   * poter andare", "I want to be able to go". Each is an ordinary verb concept flagged
+   * ability (can / potere), volition (will / volere). `[{verb:'WILL'}, {verb:'CAN'}]` over GO is
+   * "voglio poter andare", "I want to be able to go". Each is an ordinary verb concept flagged
    * `Concept.modal`, so it conjugates out of the lexicon; what marks a modal out is that
    * it *governs* a non-finite verb group instead of heading one.
    *
@@ -514,13 +531,18 @@ export interface VerbPhrase {
    * language-specific joinery: `nonfinite` (default: `base`) and `link`, a particle emitted
    * before the governed element (English "want **to** go"; empty elsewhere).
    *
+   * Each link may also carry its own `modifier` (an adverb scoped to that modal). A negative
+   * adverb (polarity `negative`, e.g. NEVER) anywhere in the group forces sentential negation
+   * onto the finite element regardless of which verb it modifies.
+   *
    * Japanese has no modal verbs — modality is suffixal (〜必要がある / 〜ことができる /
    * 〜たい) — so its lexemes carry `governs` / `suffix_dict` / `suffix_stem` / `kind`
    * instead, and its engine drops `aspect` under a modal (a documented gap).
    *
-   * The UI chains two today; the model is uncapped.
+   * The UI chains two today; the model is uncapped. A link may be a bare id string (shorthand
+   * for an adverb-free modal) or a `ModalVerb` object carrying its own `modifier`.
    */
-  modals?: string[];
+  modals?: ModalRef[];
 }
 
 /**
@@ -709,7 +731,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 4;
+export const SAVED_PHRASE_VERSION = 5;
 
 /**
  * The grain of a saved workspace:

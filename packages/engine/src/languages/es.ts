@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -582,9 +582,20 @@ function predicateText(
   const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
   // prepended below and lands in front of it, exactly as for a plain verb.
+  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // Spanish fronts one negative frequency adverb ("nunca") preverbally without "no", whichever verb
+  // it modifies. Scan the group outermost-first (each modal, then the main verb); the first negative
+  // adverb takes that slot and is suppressed from its in-group position. `frontIdx` indexes this
+  // array: 0…n-1 are the modals, n is the main verb.
+  const groupAdverbs = [...modals.map((m) => m.modifier), modifier];
+  const frontIdx = verbNegative ? -1 : groupAdverbs.findIndex((a) => a?.forms['polarity'] === 'negative');
+  const preVerbNunca = frontIdx >= 0;
   const conjugated = modals.length > 0
     ? [
-        ...modalChain(modals, finite),
+        // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
+        // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
+        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
         verbGroupInfinitive(verb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
@@ -594,14 +605,11 @@ function predicateText(
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // The preverbal "no" is emitted only when the clause needs a preverbal negator AND none is already
-  // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (a negative adverb,
-  // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped —
-  // "ningún gato come ningún ratón", "nunca come ningún ratón", never the doubled "… no come …".
+  // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (the finite adverb,
+  // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
   const subjectIsNegative = subjectForms['definiteness'] === 'no';
-  const preVerbNunca = modifierIsNegative && !verbNegative;
-  const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements);
+  const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${conjugated}` : conjugated;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object (or a
@@ -609,11 +617,11 @@ function predicateText(
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  // "nunca" goes pre-verbal without "no": "yo nunca bebo"
-  // but post-verbal with "no": "yo no bebo nunca"
-  const preVerb = preVerbNunca ? modifierText : '';
-  const postVerb = preVerbNunca ? '' : modifierText;
+  // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
+  // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
+  const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
+  const mainIsFronted = frontIdx === modals.length;
+  const postVerb = mainIsFronted ? '' : modifierText;
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command

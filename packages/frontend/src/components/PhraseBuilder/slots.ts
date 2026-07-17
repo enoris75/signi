@@ -75,6 +75,28 @@ const MODAL_SLOT_SET = new Set<SlotKey>(MODAL_SLOTS);
 
 export const isModalSlot = (key: string): boolean => MODAL_SLOT_SET.has(key as SlotKey);
 
+// Each modal may carry its own adverb — the adverb slot paired to MODAL_SLOTS by index, so
+// `verbModalAdverb` scopes `verbModal` and `verbModal2Adverb` scopes `verbModal2`. They mirror the
+// main verb's `modifier`, and each is revealed from a control on its modal's box once it holds a word.
+export const MODAL_ADVERB_SLOTS: SlotKey[] = ["verbModalAdverb", "verbModal2Adverb"];
+
+const MODAL_ADVERB_SLOT_SET = new Set<SlotKey>(MODAL_ADVERB_SLOTS);
+
+export const isModalAdverbSlot = (key: string): boolean =>
+  MODAL_ADVERB_SLOT_SET.has(key as SlotKey);
+
+/** The adverb slot for a modal slot (by index), or undefined for a non-modal key. */
+export const modalAdverbFor = (key: string): SlotKey | undefined => {
+  const idx = MODAL_SLOTS.indexOf(key as SlotKey);
+  return idx === -1 ? undefined : MODAL_ADVERB_SLOTS[idx];
+};
+
+/** The modal slot an adverb slot hangs off (its box carries the adverb's reveal control). */
+export const modalAdverbParent = (key: string): SlotKey | undefined => {
+  const idx = MODAL_ADVERB_SLOTS.indexOf(key as SlotKey);
+  return idx === -1 ? undefined : MODAL_SLOTS[idx];
+};
+
 /** The box a modal's reveal control rides: the previous link in its chain, else the verb. */
 export const modalChainParent = (key: string): SlotKey | undefined => {
   const idx = MODAL_SLOTS.indexOf(key as SlotKey);
@@ -157,6 +179,23 @@ export const ALL_SLOTS: SlotConfig[] = [
     required: false,
     roles: ["verb"],
     color: "secondary",
+  },
+  // Each modal's own adverb (like the main verb's Adverb slot), revealed from its modal's box.
+  {
+    key: "verbModalAdverb",
+    label: "Modal Adverb",
+    labelKey: "slot.adverb",
+    required: false,
+    roles: ["adverb"],
+    color: "info",
+  },
+  {
+    key: "verbModal2Adverb",
+    label: "Modal 2 Adverb",
+    labelKey: "slot.adverb",
+    required: false,
+    roles: ["adverb"],
+    color: "info",
   },
   {
     key: "directObject",
@@ -255,6 +294,7 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
   ...adjectiveSlots("subject"),
   "modifier",
   ...MODAL_SLOTS,
+  ...MODAL_ADVERB_SLOTS,
   ...adjectiveSlots("directObject"),
   ...BOX_COMPLEMENT_TYPES,
   ...BOX_COMPLEMENT_TYPES.flatMap((type) => adjectiveSlots(type)),
@@ -291,7 +331,7 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Verb Phrase",
     mainKey: "verb",
-    childKeys: ["modifier", ...MODAL_SLOTS, "verbTense", "verbAspect"],
+    childKeys: ["modifier", ...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect"],
   },
   {
     label: "Direct Object",
@@ -354,6 +394,9 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   // outermost-first left to right ("voglio" then "poter", governing "andare" below).
   verbModal: { x: 42, y: 10 },
   verbModal2: { x: 62, y: 10 },
+  // Each modal's own adverb sits just above-left of its modal, mirroring the main verb's Adverb.
+  verbModalAdverb: { x: 32, y: 1 },
+  verbModal2Adverb: { x: 52, y: 1 },
   directObject: { x: 80, y: 42 },
   directObjectAdjective: { x: 68, y: 16 },
   directObjectAdjective2: { x: 84, y: 14 },

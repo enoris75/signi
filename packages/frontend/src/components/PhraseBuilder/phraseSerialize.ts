@@ -16,7 +16,7 @@ import type {
   PhraseLink,
   PhraseSelection,
 } from "./interfaces.ts";
-import { MODAL_SLOTS } from "./slots.ts";
+import { MODAL_ADVERB_SLOTS, MODAL_SLOTS } from "./slots.ts";
 
 // ── Selection ⇄ serialized selection ────────────────────────────────────────
 // A PhraseSelection embeds whole Concept objects (DB-derived) and nests further
@@ -34,6 +34,7 @@ const CONCEPT_BASE_KEYS = new Set<string>([
   "directObject",
   "modifier",
   ...MODAL_SLOTS,
+  ...MODAL_ADVERB_SLOTS,
   ...COMPLEMENT_TYPES,
 ]);
 

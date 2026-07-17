@@ -391,3 +391,34 @@ describe('known bugs: direction', () => {
     expect(goTo(person())).toMatchObject({ it: 'il gatto va dal ragazzo.', fr: 'le chat va vers le garçon.' });
   });
 });
+
+// A39. Spanish drops the definite article before most continent names ("va a Europa", "viene de
+// África"), keeping it only for the lexically-articled few — "la Antártida", "los Estados Unidos".
+// The locative already gets this right ("corre en Europa", the A29 fix) because it routes the proper
+// noun through `artFor`, which honors the `takes_article` flag. But the `direction` (goal) and
+// `source` heads use `aDet`/`deDet`, whose definite branch (`datPrep`/`dePrep`) calls `defArticle`
+// UNCONDITIONALLY — so every continent is articled: "a la Europa", "de la África". Antártida
+// (takes_article=1) then comes out right BY COINCIDENCE, and it is the one continent A31's Spanish
+// control happened to check — masking the miss on all the others. Same coincidence shape as the
+// German weak-noun plural above.
+describe('known bugs: Spanish over-articles a continent goal/source', () => {
+  test.fails('a continent goal drops the article: "a Europa", not "a la Europa"', () => {
+    expect(goTo(np('EUROPE')).es).toBe('el gato va a Europa.');
+    expect(goTo(np('AFRICA')).es).toBe('el gato va a África.');
+    expect(goTo(np('NORTH_AMERICA')).es).toBe('el gato va a América del Norte.');
+  });
+
+  test.fails('a continent source drops it too: "de Europa" / "de África a Europa"', () => {
+    expect(comeWith({ source: { phrase: np('EUROPE') } }).es).toBe('el gato viene de Europa.');
+    expect(comeWith({ source: { phrase: np('AFRICA') }, direction: { phrase: np('EUROPE') } }).es)
+      .toBe('el gato viene de África a Europa.');
+  });
+
+  // Control — passes today and must keep passing after the fix: Antártida is lexically articled
+  // (takes_article=1), so it KEEPS the article under either treatment. Its passing today is the
+  // coincidence that hid the bug, not evidence the rule works.
+  test('Antártida keeps its article, as a goal and as a source', () => {
+    expect(goTo(np('ANTARCTICA')).es).toBe('el gato va a la Antártida.');
+    expect(comeWith({ source: { phrase: np('ANTARCTICA') } }).es).toBe('el gato viene de la Antártida.');
+  });
+});

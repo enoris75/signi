@@ -2,6 +2,7 @@ import { COMPLEMENT_LABELS } from "@signi/shared";
 import { BoxComplementType, SlotConfig } from "./interfaces.ts";
 import {
   adjectiveChainParent,
+  modalAdverbParent,
   adjectiveSlots,
   modalChainParent,
   BOX_COMPLEMENT_TYPES,
@@ -233,6 +234,7 @@ export function buildGraph({
       const parentKey =
         adjectiveChainParent(slot.key) ??
         modalChainParent(slot.key) ??
+        modalAdverbParent(slot.key) ??
         (slot.key === "subjectAdjective"
           ? "subject"
           : slot.key === "directObjectAdjective"

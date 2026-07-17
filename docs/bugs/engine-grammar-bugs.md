@@ -51,6 +51,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | # | File |
 |---|---|
 | A39 | [A39-spanish-continent-goal-source-article.md](A-must-fix/A39-spanish-continent-goal-source-article.md) |
+| A40 | [A40-romance-pro-drop-subject-pronoun.md](A-must-fix/A40-romance-pro-drop-subject-pronoun.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

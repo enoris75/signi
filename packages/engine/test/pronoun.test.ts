@@ -129,3 +129,60 @@ describe('known bugs: feminine plural pronoun', () => {
     });
   });
 });
+
+// A40. Italian, Spanish and Portuguese are null-subject (pro-drop) languages: a personal-pronoun
+// subject is dropped by default, the verb ending alone carrying the person ("mangio", not "io
+// mangio"). The engine emits it overtly in every clause, so "esso deve essere stato un angelo" for
+// "it must have been an angel" where a native speaker says "deve essere stato un angelo". French,
+// German and English are NOT pro-drop and correctly keep the subject; Japanese topic-drop is a
+// separate question and out of scope. The drop is default-only — an overt pronoun surfaces for
+// emphasis/contrast, but the plan has no focus feature, so dropping is the right default here.
+//
+// NOTE: this DIRECTLY CONTRADICTS the passing tests above (`esso mangia.` / `ello come.` /
+// `isso come.` are asserted there as correct). Fixing A40 flips those — they must be updated in the
+// same change. Only a single bare pronoun subject drops (`isPronounElement`); a NOUN subject
+// ("il gatto mangia") and a coordinated subject keep their surface.
+describe('known bugs: Romance pro-drop — a pronoun subject is dropped', () => {
+  // The reported case: "it must have been an angel" — a neuter subject, epistemic modal + perfect.
+  test.fails('the pronoun subject is dropped in it/es/pt ("it must have been an angel")', () => {
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'neut' }), 'BE', {
+      verbPhrase: { modals: ['MUST'], aspect: 'resultative' },
+      complements: { predicative: { phrase: np('ANGEL', { definiteness: 'indefinite' }) } },
+    }))).toMatchObject({
+      it: 'deve essere stato un angelo.', // not "esso deve essere stato un angelo."
+      es: 'debe haber sido un ángel.',    // not "ello debe haber sido un ángel."
+      pt: 'deve ter sido um anjo.',       // not "isso deve ter sido um anjo."
+    });
+  });
+
+  // The drop is general to every person, not just the neuter the reporter happened to hit.
+  test.fails('a first-person pronoun subject is dropped ("io mangio" → "mangio")', () => {
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT'))).toMatchObject({
+      it: 'mangio.',  // not "io mangio."
+      es: 'como.',    // not "yo como."
+      pt: 'como.',    // not "eu como."
+    });
+  });
+
+  test.fails('a third-person pronoun subject is dropped ("esso mangia" → "mangia")', () => {
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'neut' }), 'EAT'))).toMatchObject({
+      it: 'mangia.', // not "esso mangia."
+      es: 'come.',   // not "ello come."
+      pt: 'come.',   // not "isso come."
+    });
+  });
+
+  // Regression guards — these must stay green through the fix. A NOUN subject is NOT dropped, and
+  // the two non-pro-drop languages keep their overt subject pronoun.
+  test('a noun subject is never dropped', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT'))).toMatchObject({
+      it: 'il gatto mangia.', es: 'el gato come.', pt: 'o gato come.',
+    });
+  });
+
+  test('French and German keep their subject pronoun (not pro-drop)', () => {
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'neut' }), 'EAT'))).toMatchObject({
+      fr: 'cela mange.', de: 'es isst.',
+    });
+  });
+});

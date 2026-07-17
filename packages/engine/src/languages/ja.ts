@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -558,8 +558,9 @@ function predicateSegs(
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
   // phrase itself isn't marked negative. The adverb is still emitted; only the ending flips.
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  const negated = negative === true || modifierIsNegative;
+  // A negative-polarity adverb anywhere in the group — the main verb's or any modal's — forces
+  // the negated predicate (決して…ない).
+  const negated = negative === true || groupHasNegativeAdverb(verbPhrase);
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive and licenses only the predicative, so no objects or other complements occur;
   // an adverb (いつも) simply precedes the predicate.
@@ -596,6 +597,12 @@ function predicateSegs(
   }
   segs.push(...complementSegs(complements));
   if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
+  // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
+  // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.
+  for (const m of modals) {
+    const b = m.modifier?.forms['base'] ?? '';
+    if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
+  }
   if (modifier) {
     const base = modifier.forms['base'] ?? '';
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
@@ -607,7 +614,7 @@ function predicateSegs(
   if (mood === 'subjunctive') segs.push(taraSeg(verb));
   // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
   // periphrasis to compose with here, so it is dropped (see the Modality note above).
-  else if (modals.length > 0) segs.push(...modalSegs(modals, verb, tense, negated));
+  else if (modals.length > 0) segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated));
   // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫).
   // Negation still routes through the polite verbSeg — the plain negative (ない/なかった) needs a
   // nai-form the lexicon doesn't store — a documented remaining gap.

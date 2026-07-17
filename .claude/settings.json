@@ -17,7 +17,8 @@
       "Bash(*sqlite3*)",
       "Bash(npm *)",
       "Bash(python3 -c ' *)",
-      "Bash(sqlite3 signi.db *)"
+      "Bash(sqlite3 signi.db *)",
+      "Bash(npm test *)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",

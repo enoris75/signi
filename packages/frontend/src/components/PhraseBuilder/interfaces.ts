@@ -52,6 +52,8 @@ export interface SlotConfig {
     "verb" |
     "verbModal" |
     "verbModal2" |
+    "verbModalAdverb" |
+    "verbModal2Adverb" |
     "directObject" |
     "modifier" |
     "subjectAdjective" |
@@ -119,6 +121,11 @@ export interface PhraseSelection {
     // `verbModal` holds a word. Both hold modal verb concepts (`Concept.modal`).
     verbModal?: Concept;
     verbModal2?: Concept;
+    // Each modal may carry its own adverb, exactly as the main verb carries `modifier` — "never
+    // wanted to always go" is `verbModal` = WILL with `verbModalAdverb` = NEVER over the verb GO
+    // with `modifier` = ALWAYS. Each is revealed once its modal holds a word.
+    verbModalAdverb?: Concept;
+    verbModal2Adverb?: Concept;
     directObject?: Concept;
     modifier?: Concept;
     // Each noun block chains up to three adjectives; each one is revealed from a control

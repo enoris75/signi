@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -438,6 +438,13 @@ function afterFirstAux(verbText: string, adverb: string): string {
   return [aux, adverb, ...rest].join(' ');
 }
 
+/** A modal link's own adverb for the generic (non-finite) chain: frequency before, manner after. */
+function modalAdverbEn(m: ResolvedModal): { pre?: string; post?: string } {
+  const t = m.modifier?.forms['base'] ?? '';
+  if (!t) return {};
+  return isFrequencyAdverb(m.modifier) ? { pre: t } : { post: t };
+}
+
 function predicateParts(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
@@ -452,12 +459,16 @@ function predicateParts(
   // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
   // that would give "the I"; a noun object (or a coordination) renders as an ordinary noun phrase.
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A negative adverb (NEVER) *anywhere* in the group — on the main verb or on any modal — is
+  // itself the clause negator, so the finite verb takes no separate "not" (English has no negative
+  // concord) and a `no` object switches to the "any"-series NPI.
+  const groupNegative = groupHasNegativeAdverb(verbPhrase);
   // A `no` object with ANOTHER clause negator present (a negated verb, or a NEVER adverb) would
   // double the negative ("does not eat NO mouse", "never eats NO mouse"); English has no negative
   // concord, so the object switches to the "any"-series NPI — "does not eat any mouse", "never eats
   // any mouse". A lone `no` object keeps "no" ("eats no mouse").
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  const anyObject = objectIsNegative && (verbNegative === true || modifierIsNegative);
+  const anyObject = objectIsNegative && (verbNegative === true || groupNegative);
   const directObjectText = !directObject ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : coordinate(directObject, anyObject ? (np) => npText(withDefiniteness(np, 'any')) : npText);
@@ -465,7 +476,7 @@ function predicateParts(
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements);
 
-  const negateVerb = verbNegative === true && !modifierIsNegative;
+  const negateVerb = verbNegative === true && !groupNegative;
 
   // Imperative: a subjectless command on the bare base ("eat the food!", "run!"). The subject
   // pronoun's person selects the form — 1st-plural is the "let's …" cohortative ("let's eat"),
@@ -490,7 +501,7 @@ function predicateParts(
   // so it takes "not" directly and carries no tense/agreement itself.
   if (mood === 'conditional') {
     const groups = modals.length > 0
-      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? ''), verbGroupInfinitive(verb.forms, aspect)]
+      ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn), verbGroupInfinitive(verb.forms, aspect)]
       : [verbGroupInfinitive(verb.forms, aspect)];
     const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
     const preVerb = isFrequency ? modifierText : '';
@@ -502,16 +513,33 @@ function predicateParts(
   // agreement, and the negation — and every other element non-finite, down to the main
   // verb's whole group in the infinitive ("must not have seen the cat").
   if (modals.length > 0) {
-    const verbText = [
-      ...modalChain(modals, (m) => modalFinite(m, subjectForms, tense, negateVerb)),
-      verbGroupInfinitive(verb.forms, aspect),
-    ].join(' ');
-    // A frequency adverb follows the finite (outermost) modal — "must always eat", "must never
-    // eat" — not before it; a manner adverb trails the whole group ("eat fast").
-    if (isFrequency && modifierText) {
-      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
-    }
-    return ['', verbText, directObjectText, complementsText, modifierText];
+    // Each verb in the group can carry its own adverb. A frequency adverb precedes the verb it
+    // modifies ("never wanted", "to always go"), except on a true modal *auxiliary* finite, where
+    // it follows it ("must always eat"); a manner adverb trails its verb. The main verb's own
+    // frequency adverb sits right before its group; its manner adverb trails the whole clause.
+    const words: string[] = [];
+    modals.forEach((m, i) => {
+      const adv = m.modifier?.forms['base'] ?? '';
+      const freq = isFrequencyAdverb(m.modifier);
+      if (i === 0) {
+        const finite = modalFinite(m.verb, subjectForms, tense, negateVerb);
+        if (adv && freq && MODAL_AUX.has(finite.split(' ')[0])) words.push(afterFirstAux(finite, adv));
+        else if (adv && freq) words.push(adv, finite);
+        else if (adv) words.push(finite, adv);
+        else words.push(finite);
+      } else {
+        const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
+        if (adv && freq) words.push(adv, word);
+        else if (adv) words.push(word, adv);
+        else words.push(word);
+      }
+      if (m.verb.forms['link']) words.push(m.verb.forms['link']);
+    });
+    const mainGroup = verbGroupInfinitive(verb.forms, aspect);
+    if (modifierText && isFrequency) words.push(modifierText, mainGroup);
+    else words.push(mainGroup);
+    const trailingMod = modifierText && !isFrequency ? modifierText : '';
+    return ['', words.filter(Boolean).join(' '), directObjectText, complementsText, trailingMod];
   }
 
   // A non-neutral aspect (progressive/prospective/resultative) is periphrastic on "be",

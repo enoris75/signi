@@ -1,7 +1,7 @@
 import { ReactNode } from "react";
 import { type Concept } from "@signi/shared";
 import { ConceptSelectOpts, PhraseSelection, slotCategories, SlotKey } from "./interfaces.ts";
-import { COMPLEMENT_KEY_SET } from "./slots.ts";
+import { COMPLEMENT_KEY_SET, MODAL_ADVERB_SLOTS } from "./slots.ts";
 import { DirectObjectTypeahead } from "./DirectObjectTypeahead.tsx";
 import { ModalTypeahead } from "./ModalTypeahead.tsx";
 import { ModifierTypeahead } from "./ModifierTypeahead.tsx";
@@ -94,8 +94,9 @@ function pickerFor(
             options={slotCategories(slotKey)?.options}
           />
         );
-      // The verb's adverb slot — a single-vocabulary adverb picker.
-      if (slotKey === "modifier") return <AdverbTypeahead onSelect={pick} />;
+      // The verb's adverb slot and each modal's own adverb slot — a single-vocabulary adverb picker.
+      if (slotKey === "modifier" || MODAL_ADVERB_SLOTS.includes(slotKey as SlotKey))
+        return <AdverbTypeahead onSelect={pick} />;
       // The causal complement ("because of him") also accepts a pronoun, so it uses the
       // pronoun-inclusive picker; the motion/locative complements stay noun-only.
       if (slotKey === "cause")

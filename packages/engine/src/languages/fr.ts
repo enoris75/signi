@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronounElement, isRelativeSuperlative, joinConjuncts, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -394,24 +394,38 @@ function verbGroupInfinitiveFr(
 }
 
 /**
- * The modal chain split for negation: the outermost modal is the finite verb that "ne … pas"
- * wraps ("je ne veux pas pouvoir aller"), and everything it governs — the inner modals'
- * infinitives, then the main verb group's — trails after.
+ * The modal chain split for negation and per-modal adverbs. The outermost modal is the finite verb
+ * that "ne … pas" wraps ("je ne veux pas pouvoir aller"); its own frequency adverb sits right after
+ * it (returned as `finiteAdverb`, so it lands *after* the "ne … (pas)" bracket). Everything it
+ * governs — the inner modals' infinitives, then the main verb group — trails in `tail`, each verb
+ * carrying its own adverb (a frequency adverb before its infinitive, a manner adverb after). The
+ * main verb's frequency adverb is passed in as `mainFreqAdverb` (its manner adverb still trails the
+ * whole clause, handled by the caller).
  */
 function modalGroupFr(
-  modals: ConceptForms[],
+  modals: ResolvedModal[],
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   tense: Tense,
   aspect: Aspect,
-  mood?: Mood,
-): { finite: string; tail: string } {
+  mood: Mood | undefined,
+  mainFreqAdverb: string,
+): { finite: string; finiteAdverb: string; tail: string } {
   const pn = moodPN(subjectForms);
-  const [finite, ...governed] = modalChain(modals, (m) => moodForm('fr', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense));
-  return {
-    finite,
-    tail: [...governed, verbGroupInfinitiveFr(verbForms, subjectForms, aspect)].join(' '),
-  };
+  const finite = moodForm('fr', modals[0].verb, pn, mood) ?? conjugate(modals[0].verb.forms, subjectForms, tense);
+  const finiteAdverb = modals[0].modifier?.forms['base'] ?? '';
+  const inner: string[] = [];
+  modals.slice(1).forEach((m) => {
+    const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
+    const adv = m.modifier?.forms['base'] ?? '';
+    if (adv && isFrequencyAdverb(m.modifier)) inner.push(adv, word);
+    else if (adv) inner.push(word, adv);
+    else inner.push(word);
+    if (m.verb.forms['link']) inner.push(m.verb.forms['link']);
+  });
+  const mainGroup = verbGroupInfinitiveFr(verbForms, subjectForms, aspect);
+  const mainPart = mainFreqAdverb ? [mainFreqAdverb, mainGroup] : [mainGroup];
+  return { finite, finiteAdverb, tail: [...inner, ...mainPart].join(' ') };
 }
 
 /** French linking preposition for an attributive noun, by relation (bare, no article). */
@@ -707,8 +721,9 @@ function predicateText(
   // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
   const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
+  // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.
+  const groupNegative = groupHasNegativeAdverb(verbPhrase);
   // A frequency adverb (jamais, toujours, souvent) sits right after the finite verb — which
   // in a compound tense means between the auxiliary and the participle ("n'a jamais été",
   // "doit toujours aller"), not trailing the whole group. Manner adverbs still trail.
@@ -724,9 +739,9 @@ function predicateText(
   // already carries the negation). Shared by the periphrastic aspect and the modal chain,
   // which both negate their finite auxiliary and leave the non-finite tail untouched.
   const negateFinite = (finite: string): string => {
-    if (!verbNegative && !aucun && !modifierIsNegative) return finite;
+    if (!verbNegative && !aucun && !groupNegative) return finite;
     const ne = VOWEL_START.test(finite) ? "n'" : 'ne ';
-    const pas = verbNegative && !modifierIsNegative && !aucun ? ' pas' : '';
+    const pas = verbNegative && !groupNegative && !aucun ? ' pas' : '';
     return `${ne}${finite}${pas}`;
   };
   let effectiveVerb: string;
@@ -735,8 +750,8 @@ function predicateText(
     // The outermost modal is the finite verb — it takes the tense, the agreement, and the
     // negation — and governs the inner modals' infinitives down to the main verb group's
     // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
-    const { finite, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect, mood);
-    effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
+    const { finite, finiteAdverb, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '');
+    effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
   } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
@@ -746,7 +761,7 @@ function predicateText(
     const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms);
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
-  } else if (verbNegative || aucun || modifierIsNegative) {
+  } else if (verbNegative || aucun || groupNegative) {
     // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
     // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais).
     effectiveVerb = negateFinite(conjugated);

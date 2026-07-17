@@ -294,6 +294,26 @@ export function buildSatellites(
       hasValue: Boolean(selection.verbModal2),
       valueLabel: label(selection.verbModal2),
     },
+    // Each modal's own adverb, revealed from its modal's box once it holds a word — the same
+    // Adverb control the main verb carries, scoped to that modal ("never wanted to always go").
+    {
+      key: "verbModalAdverb",
+      parent: "verbModal",
+      label: "Modal Adverb",
+      icon: <TuneIcon sx={iconSx} />,
+      available: !selection.imperative && Boolean(selection.verbModal),
+      hasValue: Boolean(selection.verbModalAdverb),
+      valueLabel: label(selection.verbModalAdverb),
+    },
+    {
+      key: "verbModal2Adverb",
+      parent: "verbModal2",
+      label: "Modal 2 Adverb",
+      icon: <TuneIcon sx={iconSx} />,
+      available: !selection.imperative && Boolean(selection.verbModal2),
+      hasValue: Boolean(selection.verbModal2Adverb),
+      valueLabel: label(selection.verbModal2Adverb),
+    },
     {
       key: "modifier",
       parent: "verb",

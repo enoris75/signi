@@ -218,8 +218,18 @@ function resolveVerbPhrase(
     register: imperative ? (register ?? 'request') : undefined,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
     // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
-    // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys.
-    modals: imperative ? [] : (vp.modals ?? []).map((id) => resolve(id, language, lookup)),
+    // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys; each may
+    // also carry its own adverb, resolved alongside.
+    modals: imperative
+      ? []
+      : (vp.modals ?? []).map((ref) => {
+          // A bare string is shorthand for a modal with no adverb of its own.
+          const m = typeof ref === 'string' ? { verb: ref } : ref;
+          return {
+            verb: resolve(m.verb, language, lookup),
+            modifier: m.modifier ? resolve(m.modifier, language, lookup) : undefined,
+          };
+        }),
   };
 }
 

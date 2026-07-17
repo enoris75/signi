@@ -542,10 +542,13 @@ describe('known bugs: modals', () => {
       .toMatchObject({ en: 'the cat has always eaten.' });
   });
 
-  // The adverb follows the OUTERMOST (finite) modal of a chain, not each one: "must always be
-  // able to eat", never "always must be able to eat".
-  test('English places the frequency adverb after the outermost modal of a chain', () => {
+  // A chain-level `modifier` is the MAIN verb's own adverb, so it sits right before the main verb
+  // ("must be able to always eat"). To adverb a modal itself, give that modal its own `modifier` —
+  // then the frequency adverb follows that (true modal auxiliary) finite: "must always be able to".
+  test('English scopes a chain-level adverb to the main verb, a modal adverb to the modal', () => {
     expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'ALWAYS' }).en)
+      .toBe('the cat must be able to always eat.');
+    expect(catModal({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }, 'CAN'] }).en)
       .toBe('the cat must always be able to eat.');
   });
 
@@ -565,5 +568,52 @@ describe('known bugs: modals', () => {
   test('English keeps a frequency adverb pre-verbal when there is no auxiliary', () => {
     expect(catModal({ modifier: 'ALWAYS' }).en).toBe('the cat always eats.');
     expect(catModal({ tense: 'past', modifier: 'ALWAYS' }).en).toBe('the cat always ate.');
+  });
+});
+
+// Every verb in a modal group can carry its OWN adverb — the main verb via `modifier`, each modal
+// via its own `{ verb, modifier }`. This is what lets "I never wanted to always go" put NEVER on the
+// volition modal and ALWAYS on the main verb, two adverbs at two scope points in one group.
+describe('per-modal adverbs', () => {
+  // The anchor case: NEVER scopes the outermost (volition) modal, ALWAYS scopes the main verb.
+  test('an adverb on the modal and another on the main verb, at once', () => {
+    expect(catModal({ modals: [{ verb: 'WILL', modifier: 'NEVER' }], modifier: 'ALWAYS', tense: 'past' }))
+      .toEqual({
+        en: 'the cat never wanted to always eat.',
+        it: 'il gatto non volle mai mangiare sempre.',
+        fr: 'le chat ne voulut jamais toujours manger.',
+        es: 'el gato nunca quiso comer siempre.',
+        pt: 'o gato nunca quis comer sempre.',
+        de: 'der Kater wollte nie immer essen.',
+        ja: '猫は決していつも食べたくなかったです。',
+      });
+  });
+
+  // A modal's own frequency adverb sits with that modal (after the finite verb in most langs),
+  // distinct from a chain-level adverb, which belongs to the main verb.
+  test('a frequency adverb scoped to the modal itself', () => {
+    expect(catModal({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toEqual({
+      en: 'the cat must always eat.',
+      it: 'il gatto deve sempre mangiare.',
+      fr: 'le chat doit toujours manger.',
+      es: 'el gato debe siempre comer.',
+      pt: 'o gato deve sempre comer.',
+      de: 'der Kater muss immer essen.',
+      ja: '猫はいつも食べる必要があります。',
+    });
+  });
+
+  // Negation scope: a NEVER on the modal forces the whole predicate negative — the finite verb is
+  // negated (or the adverb itself carries the negation) even though nothing else is marked negative.
+  test('a negative-polarity adverb on the modal negates the predicate', () => {
+    expect(catModal({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] })).toEqual({
+      en: 'the cat never wants to eat.',
+      it: 'il gatto non vuole mai mangiare.',
+      fr: 'le chat ne veut jamais manger.',
+      es: 'el gato nunca quiere comer.',
+      pt: 'o gato nunca quer comer.',
+      de: 'der Kater will nie essen.',
+      ja: '猫は決して食べたくないです。',
+    });
   });
 });

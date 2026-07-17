@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -654,7 +654,9 @@ function predicateText(
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
   const verbText = modals.length > 0
     ? [
-        ...modalChain(modals, finite),
+        // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
+        // voglio mai poter sempre andare"); the main verb's adverb is appended after the group.
+        ...modalChain(modals, finite, (m) => ({ post: m.modifier?.forms['base'] })),
         verbGroupInfinitive(verb.forms, subjectForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
@@ -663,7 +665,8 @@ function predicateText(
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A negative adverb (mai) anywhere in the group — main verb or any modal — forces "non".
+  const modifierIsNegative = groupHasNegativeAdverb(verbPhrase);
   // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   // A postverbal negative word — a `no`-determined direct object OR complement ("in nessuna casa",

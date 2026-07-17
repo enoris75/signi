@@ -153,7 +153,13 @@ export interface ResolvedVerbPhrase {
   register?: ImperativeRegister;
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
-  modals: ConceptForms[];
+  modals: ResolvedModal[];
+}
+
+/** A resolved modal link: the modal verb's forms plus its own resolved adverb (if any). */
+export interface ResolvedModal {
+  verb: ConceptForms;
+  modifier?: ConceptForms;
 }
 
 /**
@@ -300,15 +306,41 @@ export function npAdj(np: ResolvedNounPhrase): string {
  * and Japanese suffixes them, so both build their own chain.
  */
 export function modalChain(
-  modals: ConceptForms[],
+  modals: ResolvedModal[],
   finite: (m: ConceptForms) => string,
+  adverb?: (m: ResolvedModal, i: number) => { pre?: string; post?: string },
 ): string[] {
   const words: string[] = [];
   modals.forEach((m, i) => {
-    words.push(i === 0 ? finite(m) : (m.forms['nonfinite'] ?? m.forms['base'] ?? ''));
-    if (m.forms['link']) words.push(m.forms['link']);
+    const a = adverb?.(m, i) ?? {};
+    if (a.pre) words.push(a.pre);
+    words.push(i === 0 ? finite(m.verb) : (m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? ''));
+    if (a.post) words.push(a.post);
+    if (m.verb.forms['link']) words.push(m.verb.forms['link']);
   });
   return words.filter(Boolean);
+}
+
+/** An adverb whose polarity demands a negated predicate (NEVER → non/ne…pas/nicht/ない). */
+export function isNegativeAdverb(a?: ConceptForms): boolean {
+  return a?.forms['polarity'] === 'negative';
+}
+
+/** A frequency adverb (always / never), placed differently from manner adverbs in most langs. */
+export function isFrequencyAdverb(a?: ConceptForms): boolean {
+  return a?.forms['subtype'] === 'frequency';
+}
+
+/**
+ * Does *any* adverb in the verb group — the main verb's `modifier` or any modal's — carry
+ * negative polarity? A negative adverb forces sentential negation onto the finite element no
+ * matter which verb it modifies ("I **never** wanted to go" ⇒ negate the finite "want").
+ */
+export function groupHasNegativeAdverb(vp: {
+  modifier?: ConceptForms;
+  modals: ResolvedModal[];
+}): boolean {
+  return isNegativeAdverb(vp.modifier) || vp.modals.some((m) => isNegativeAdverb(m.modifier));
 }
 
 export interface LanguageEngine {
