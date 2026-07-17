@@ -34,6 +34,11 @@ jobs:
           cache: npm
       - run: npm ci
 
+      # The e2e backend runs from source under tsx, but it imports @signi/engine and
+      # @signi/shared as package specifiers, which resolve to their built dist. npm ci does
+      # not build workspaces, so build the two consumed packages before booting the server.
+      - run: npm run build --workspace=packages/shared --workspace=packages/engine
+
       # Only Chromium: the suite drives a canvas, and the geometry it asserts on is the same in
       # every engine. Add browsers here if a rendering difference ever becomes the bug.
       - run: npx playwright install --with-deps chromium

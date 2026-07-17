@@ -63,6 +63,27 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un piccolo mammifero');
   });
 
+  test('a genus+differentia noun definition renders (localize-seed A01: BOY)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + YOUNG + MALE.
+    await app.subjectInput.fill('boy');
+    const boyEn = page.locator('[data-testid="typeahead-option"][data-concept="BOY"]');
+    await expect(boyEn).toBeVisible();
+    await boyEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a young male person');
+
+    // German: the same plan, localized by the engine. (Filling the English label still matches —
+    // the picker searches the English label alongside the shown word.)
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('boy');
+    const boyDe = page.locator('[data-testid="typeahead-option"][data-concept="BOY"]');
+    await expect(boyDe).toBeVisible();
+    await boyDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine junge männliche Person');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,
