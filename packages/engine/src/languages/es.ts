@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -393,7 +393,12 @@ function routeHead(c: ResolvedComplement, plural: boolean, f: Record<string, str
 function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
+  verbConceptId: string,
 ): string {
+  // "lejos" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
+  // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
+  // "de" ("el gato viene de la casa", "carga el libro del contenedor").
+  const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'lejos ' : '';
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
@@ -466,9 +471,10 @@ function complementsPhrase(
       // locative→en, direction→a (al/a la), source→"lejos de" (lejos del/de la),
       // route→path preposition. A direction toward an *animate* goal takes "hacia"
       // (toward) — bare "a" + person doesn't read as a motion destination ("corro hacia
-      // el niño", not "*al niño"); "hacia" doesn't contract. Source is prefixed with the
-      // ablative adverb "lejos" so it reads as motion away ("corro lejos del niño"); bare
-      // "de" reads as origin/possession, not departure.
+      // el niño", not "*al niño"); "hacia" doesn't contract. A self-propelled motion verb
+      // prefixes source with the ablative adverb "lejos" so it reads as motion away ("corro
+      // lejos del niño"); bare "de" reads as origin/possession, not departure — which is right
+      // for COME/GO and the transitive LOAD/IMPORT, whose source is an origin.
       // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro"); the
       // sentiment swaps the connector — negative "por culpa del perro", positive "gracias al
       // perro" ("a"-contracted via datPrep).
@@ -479,7 +485,7 @@ function complementsPhrase(
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
         type === 'instrumental' ? prepDet('con', af, plural) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
-        type === 'source'    ? `lejos ${deDet(af, plural)}` :
+        type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `gracias ${datPrep(af, plural)}` :
           causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
@@ -608,7 +614,7 @@ function predicateText(
   // but post-verbal with "no": "yo no bebo nunca"
   const preVerb = preVerbNunca ? modifierText : '';
   const postVerb = preVerbNunca ? '' : modifierText;
-  const complementsText = complementsPhrase(complements, subjectForms);
+  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
   // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here.

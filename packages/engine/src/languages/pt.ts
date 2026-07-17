@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -404,7 +404,12 @@ function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boo
 function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
+  verbConceptId: string,
 ): string {
+  // "longe" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
+  // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
+  // "de" ("o gato vem da casa", "carrega o livro do contentor").
+  const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'longe ' : '';
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
@@ -475,9 +480,10 @@ function complementsPhrase(
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para
-      // a criança", not "*à criança"); "para" doesn't contract. Source is prefixed with
-      // the ablative adverb "longe" so it reads as motion away ("corro longe da criança");
-      // bare "de" reads as origin/possession, not departure.
+      // a criança", not "*à criança"); "para" doesn't contract. A self-propelled motion verb
+      // prefixes source with the ablative adverb "longe" so it reads as motion away ("corro
+      // longe da criança"); bare "de" reads as origin/possession, not departure — which is right
+      // for COME/GO and the transitive LOAD/IMPORT, whose source is an origin.
       // Cause reads "por causa de" + the "de"-contracted article ("por causa do cão"); the
       // sentiment swaps the connector — negative "por culpa do cão", positive "graças ao cão"
       // ("a"-contracted via datPrep).
@@ -489,7 +495,7 @@ function complementsPhrase(
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
         type === 'instrumental' ? prepDet('com', f, plural) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
-        type === 'source'    ? `longe ${contractDet(dePrep, 'de', f, plural)}` :
+        type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `graças ${datPrep(f, plural)}` :
           causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :
@@ -617,7 +623,7 @@ function predicateText(
   // but post-verbal with "não": "eu não bebo nunca"
   const preVerb = preVerbNunca ? modifierText : '';
   const postVerb = preVerbNunca ? '' : modifierText;
-  const complementsText = complementsPhrase(complements, subjectForms);
+  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")
   // prefixes "não". The adverb simply trails the verb here.

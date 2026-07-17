@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -525,8 +525,13 @@ function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boo
 function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
+  verbConceptId: string,
 ): string {
   if (!complements) return '';
+  // The ablative adverb "via" disambiguates source from direction, but only self-propelled
+  // motion verbs (RUN/JUMP) need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the
+  // transitive LOAD/IMPORT keep bare "da" ("viene dalla casa", "carica il libro dal contenitore").
+  const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'via ' : '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
@@ -589,9 +594,10 @@ function complementsPhrase(
       // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.
       // A direction toward an *animate* goal takes "da" ("corro dal bambino" = to/towards
       // the child — the "andare da qualcuno" construction), not bare "a", which is for
-      // places ("corro alla casa"). Because source also governs "da", it is prefixed with
-      // the ablative adverb "via" so the two senses never collide: "corro dal bambino"
-      // (motion to) vs "corro via dal bambino" (motion away from).
+      // places ("corro alla casa"). Because source also governs "da", a self-propelled motion
+      // verb prefixes it with the ablative adverb "via" so the two senses never collide: "corro
+      // dal bambino" (motion to) vs "corro via dal bambino" (motion away from). COME/GO and the
+      // transitive LOAD/IMPORT take an origin, not a departure, so they keep bare "da".
       // Cause reads "a causa di" + the "di"-fused article ("a causa del cane"); the sentiment
       // swaps the connector — negative "per colpa del cane", positive "grazie al cane" ("a"-fused).
       // The preposition fuses with the article ("in"+"la" → "nella"), so it cannot be factored
@@ -613,7 +619,7 @@ function complementsPhrase(
           nf['isA'] === 'CONTINENT' ? 'in' :
           prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
         ) :
-        type === 'source'    ? `via ${prepDet('da', nf, plural, lead)}` :
+        type === 'source'    ? `${sourceAdverb}${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grazie ${prepArt('a', nf, plural, lead)}` :
           causeSent === 'negative' ? `per colpa ${prepArt('di', nf, plural, lead)}` :
@@ -673,7 +679,7 @@ function predicateText(
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  const complementsText = complementsPhrase(complements, subjectForms);
+  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
   // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.

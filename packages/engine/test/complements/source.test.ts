@@ -76,104 +76,133 @@ describe('source', () => {
 });
 
 // Italian, French, Spanish and Portuguese in full. Each fuses its ablative preposition (da / de)
-// with the article, and that machinery is CORRECT — it is only the adverb in front of it that is
-// not (see the documented simplification below).
+// with the article, and that machinery — the part these cases exist to test — is CORRECT.
 //
-// These assert the current output, adverb and all. If the simplification is ever undone, BOTH
-// these and the `test.fails` below have to change: the contraction is the part that must survive.
+// These use COME, a verb whose `source` is an origin, not a departure, so it renders bare "da"/"de"
+// with NO ablative adverb (see the per-verb condition below, formerly a documented simplification).
+// The contraction is the invariant under test: da+la→dalla, de+le→du, da+l'→dall', across gender,
+// number, elision and the indefinite. The adverb belongs only to RUN/JUMP (asserted below).
 describe('source: Romance', () => {
   test('the preposition fuses with a feminine singular article', () => {
     expect(from('COME')).toMatchObject({
-      it: 'il gatto viene via dalla casa.', // da + la = dalla
-      fr: 'le chat vient loin de la maison.', // de la — no fusion in the feminine
-      es: 'el gato viene lejos de la casa.',
-      pt: 'o gato vem longe da casa.', // de + a = da
+      it: 'il gatto viene dalla casa.', // da + la = dalla
+      fr: 'le chat vient de la maison.', // de la — no fusion in the feminine
+      es: 'el gato viene de la casa.',
+      pt: 'o gato vem da casa.', // de + a = da
     });
   });
 
   test('…with a masculine singular article', () => {
     expect(from('COME', np('MARKET'))).toMatchObject({
-      it: 'il gatto viene via dal mercato.', // da + il = dal
-      fr: 'le chat vient loin du marché.', // de + le = du
-      es: 'el gato viene lejos del mercado.', // de + el = del
-      pt: 'o gato vem longe do mercado.', // de + o = do
+      it: 'il gatto viene dal mercato.', // da + il = dal
+      fr: 'le chat vient du marché.', // de + le = du
+      es: 'el gato viene del mercado.', // de + el = del
+      pt: 'o gato vem do mercado.', // de + o = do
     });
   });
 
   test('…with a plural article, of each gender', () => {
     expect(from('COME', np('HOUSE', { number: 'plural' }))).toMatchObject({
-      it: 'il gatto viene via dalle case.', // da + le = dalle
-      fr: 'le chat vient loin des maisons.', // de + les = des
-      es: 'el gato viene lejos de las casas.',
-      pt: 'o gato vem longe das casas.', // de + as = das
+      it: 'il gatto viene dalle case.', // da + le = dalle
+      fr: 'le chat vient des maisons.', // de + les = des
+      es: 'el gato viene de las casas.',
+      pt: 'o gato vem das casas.', // de + as = das
     });
 
     expect(from('COME', np('MARKET', { number: 'plural' }))).toMatchObject({
-      it: 'il gatto viene via dai mercati.', // da + i = dai
-      fr: 'le chat vient loin des marchés.',
-      es: 'el gato viene lejos de los mercados.',
-      pt: 'o gato vem longe dos mercados.', // de + os = dos
+      it: 'il gatto viene dai mercati.', // da + i = dai
+      fr: 'le chat vient des marchés.',
+      es: 'el gato viene de los mercados.',
+      pt: 'o gato vem dos mercados.', // de + os = dos
     });
   });
 
   test('…and elides before a vowel', () => {
     expect(from('COME', np('ANGEL'))).toMatchObject({
-      it: "il gatto viene via dall'angelo.", // da + l' = dall'
-      fr: "le chat vient loin de l'ange.",
-      es: 'el gato viene lejos del ángel.',
-      pt: 'o gato vem longe do anjo.',
+      it: "il gatto viene dall'angelo.", // da + l' = dall'
+      fr: "le chat vient de l'ange.",
+      es: 'el gato viene del ángel.',
+      pt: 'o gato vem do anjo.',
     });
   });
 
   test('an indefinite origin — nothing to fuse with', () => {
     expect(from('COME', np('HOUSE', { definiteness: 'indefinite' }))).toMatchObject({
-      it: 'il gatto viene via da una casa.', // bare "da"
-      fr: "le chat vient loin d'une maison.", // de + une → d'une
-      es: 'el gato viene lejos de una casa.',
-      pt: 'o gato vem longe de uma casa.',
+      it: 'il gatto viene da una casa.', // bare "da"
+      fr: "le chat vient d'une maison.", // de + une → d'une
+      es: 'el gato viene de una casa.',
+      pt: 'o gato vem de uma casa.',
     });
   });
 });
 
-// DELIBERATE, not an oversight — but read the LOAD/IMPORT note before defending it.
+// Romance gates the ablative adverb ("via da", "loin de", "lejos de", "longe de") on the verb.
+// It exists to keep source and direction apart on the shared preposition: "corro dal bambino" is
+// motion TO the boy, so "corro via dal bambino" is what forces the AWAY reading. But only the
+// self-propelled motion verbs (RUN/JUMP) need that disambiguation. On the other four it inverts
+// the meaning, so they render bare "da"/"de":
 //
-// Romance prefixes an ablative adverb ("via da", "loin de", "lejos de", "longe de") because
-// source and direction would otherwise collide on the same preposition: "corro dal bambino" is
-// motion TO the boy, so "corro via dal bambino" is what forces the AWAY reading. See the comments
-// in it.ts / fr.ts / es.ts / pt.ts.
-//
-// It reads acceptably on a verb of departure ("corre via dalla casa" — runs AWAY from the house).
-// It does not survive the other four:
-//
-//   COME    "il gatto viene via dalla casa."          = comes AWAY from the house
-//   LOAD    "il gatto carica il libro via dalla casa." = loads the book AWAY FROM the house
-//   IMPORT  "le chat importe le livre loin de la maison." = imports the book FAR FROM the house
+//   COME    "il gatto viene dalla casa."            = comes from the house (not "AWAY from")
+//   LOAD    "il gatto carica il libro dal contenitore." = loads the book from the container
+//   IMPORT  "le chat importe le livre de la maison." = imports the book from the house
 //
 // LOAD and IMPORT are not motion-away verbs at all — their source is an origin, not a departure —
-// so the disambiguation the adverb buys is not needed there, and what it costs is the meaning.
-// A per-verb (or per-transitivity) condition on the adverb would keep the RUN/JUMP reading and
-// fix the rest.
-describe('documented simplifications: source', () => {
-  test.fails('Italian source reads as "away from" with a non-departure verb', () => {
-    expect(from('COME')).toMatchObject({ it: 'il gatto viene dalla casa.' });
+// and COME/GO read "da"/"de" as an origin unambiguously. See SOURCE_ABLATIVE_ADVERB_VERBS in
+// types.ts and the per-verb `sourceAdverb` in it.ts / fr.ts / es.ts / pt.ts. Was B01 / B01b.
+describe('source: the ablative adverb is gated on the verb', () => {
+  test('a non-departure verb (COME) renders bare "da"/"de", no adverb', () => {
+    expect(from('COME')).toMatchObject({
+      it: 'il gatto viene dalla casa.',
+      fr: 'le chat vient de la maison.',
+      es: 'el gato viene de la casa.',
+      pt: 'o gato vem da casa.',
+    });
   });
 
-  test.fails('French source reads as "far from" with a non-departure verb', () => {
-    expect(from('COME')).toMatchObject({ fr: 'le chat vient de la maison.' });
+  test('GO likewise takes no ablative adverb', () => {
+    expect(from('GO')).toMatchObject({
+      it: 'il gatto va dalla casa.',
+      fr: 'le chat va de la maison.',
+      es: 'el gato va de la casa.',
+      pt: 'o gato vai da casa.',
+    });
   });
 
-  test.fails('Spanish source reads as "far from" with a non-departure verb', () => {
-    expect(from('COME')).toMatchObject({ es: 'el gato viene de la casa.' });
-  });
-
-  test.fails('Portuguese source reads as "far from" with a non-departure verb', () => {
-    expect(from('COME')).toMatchObject({ pt: 'o gato vem da casa.' });
-  });
-
-  test.fails('LOAD is not a motion verb — the ablative adverb inverts its meaning', () => {
+  test('the transitive LOAD is an origin, not a departure — no adverb', () => {
     expect(from('LOAD', np('CONTAINER'))).toMatchObject({
       it: 'il gatto carica il libro dal contenitore.',
       fr: 'le chat charge le livre du récipient.',
+      es: 'el gato carga el libro del recipiente.',
+      pt: 'o gato carrega o livro do recipiente.',
+    });
+  });
+
+  test('IMPORT, the other transitive source verb, also drops the adverb', () => {
+    expect(from('IMPORT', np('HOUSE'))).toMatchObject({
+      it: 'il gatto importa il libro dalla casa.',
+      fr: 'le chat importe le livre de la maison.',
+      es: 'el gato importa el libro de la casa.',
+      pt: 'o gato importa o livro da casa.',
+    });
+  });
+
+  // The disambiguation that motivates the adverb in the first place: it MUST survive on the
+  // self-propelled motion verbs, whose "da"/"de" would otherwise be read as a direction-toward goal.
+  test('RUN keeps the adverb — the reading the whole mechanism exists to protect', () => {
+    expect(from('RUN')).toMatchObject({
+      it: 'il gatto corre via dalla casa.',
+      fr: 'le chat court loin de la maison.',
+      es: 'el gato corre lejos de la casa.',
+      pt: 'o gato corre longe da casa.',
+    });
+  });
+
+  test('JUMP keeps it too, and the article still fuses behind it', () => {
+    expect(from('JUMP', np('MARKET'))).toMatchObject({
+      it: 'il gatto salta via dal mercato.', // adverb + da + il = via dal
+      fr: 'le chat saute loin du marché.', // loin + de + le = loin du
+      es: 'el gato salta lejos del mercado.',
+      pt: 'o gato pula longe do mercado.',
     });
   });
 });

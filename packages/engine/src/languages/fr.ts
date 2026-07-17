@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, hasNegativeComplement, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -556,8 +556,13 @@ function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boo
 function complementsPhrase(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   subjectForms: Record<string, string> = {},
+  verbConceptId = '',
 ): string {
   if (!complements) return '';
+  // "loin" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
+  // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
+  // "de" ("le chat vient de la maison", "charge le livre du récipient").
+  const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'loin ' : '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
@@ -621,9 +626,10 @@ function complementsPhrase(
       // locative→dans, direction→à (au/aux/à la), source→"loin de" (loin du/des/de la),
       // route→path preposition. A direction toward an *animate* goal takes "vers"
       // (toward) — French doesn't use bare "à" for a person destination ("je cours vers
-      // l'enfant", not "*à l'enfant"); "vers" doesn't contract with the article. Source is
-      // prefixed with the ablative adverb "loin" so it clearly reads as motion away ("je
-      // cours loin de l'enfant"); bare "de" reads as a partitive/complement, not departure.
+      // l'enfant", not "*à l'enfant"); "vers" doesn't contract with the article. A self-propelled
+      // motion verb prefixes source with the ablative adverb "loin" so it clearly reads as motion
+      // away ("je cours loin de l'enfant"); bare "de" reads as a partitive/complement, not
+      // departure — which is exactly right for COME/GO and the transitive LOAD/IMPORT.
       // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien"); the
       // sentiment swaps the connector — negative "par la faute du chien", positive "grâce au
       // chien" ("à"-contracted via datPrep).
@@ -647,7 +653,7 @@ function complementsPhrase(
           nf['isA'] === 'CONTINENT' ? 'en' :
           nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
         ) :
-        type === 'source'    ? `loin ${deDet(nf, plural, lead)}` :
+        type === 'source'    ? `${sourceAdverb}${deDet(nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grâce ${datPrep(nf, plural, lead)}` :
           causeSent === 'negative' ? `par la faute ${dePrep(nf, plural, lead)}` :
@@ -746,7 +752,7 @@ function predicateText(
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
-  const complementsText = complementsPhrase(complements, subjectForms);
+  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
   // by `negateFinite` ("ne cours pas", "ne sois pas prudent", "aucun"/"jamais" taking bare "ne").
