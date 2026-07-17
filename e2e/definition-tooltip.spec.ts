@@ -181,6 +181,31 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('eine Person, die Gegenstände macht');
   });
 
+  test('a genus+relative-clause noun definition renders (localize-seed A06: BUILDER)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + a subject-gap relative clause (MAKE + bare-plural
+    // OBJECT_THING) — shares CREATOR's gloss, since BUILD/CONSTRUCT are not seeded.
+    await app.subjectInput.fill('builder');
+    const builderEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="BUILDER"]',
+    );
+    await expect(builderEn).toBeVisible();
+    await builderEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a person who makes objects');
+
+    // Spanish: the same plan, localized by the engine — no Spanish literal is stored.
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('builder');
+    const builderEs = page.locator(
+      '[data-testid="typeahead-option"][data-concept="BUILDER"]',
+    );
+    await expect(builderEs).toBeVisible();
+    await builderEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona que hace objetos');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

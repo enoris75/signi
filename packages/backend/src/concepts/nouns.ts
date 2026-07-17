@@ -556,6 +556,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BUILDER',
     role: 'noun',
     description: 'a person who constructs things',
+    definition: whoGloss('PERSON', 'MAKE', 'OBJECT_THING'),
     emoji: '👷',
     animate: true,
     human: true,
