@@ -84,6 +84,30 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('eine junge männliche Person');
   });
 
+  test('a genus+differentia noun definition renders (localize-seed A02: YOUNG_MAN)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + YOUNG + MALE (shared with BOY).
+    await app.subjectInput.fill('young man');
+    const youngManEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="YOUNG_MAN"]',
+    );
+    await expect(youngManEn).toBeVisible();
+    await youngManEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a young male person');
+
+    // Italian: the same plan, localized by the engine — no Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('young man');
+    const youngManIt = page.locator(
+      '[data-testid="typeahead-option"][data-concept="YOUNG_MAN"]',
+    );
+    await expect(youngManIt).toBeVisible();
+    await youngManIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una giovane persona maschile');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

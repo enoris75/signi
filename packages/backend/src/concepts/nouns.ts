@@ -482,6 +482,7 @@ export const nouns: ConceptSeed[] = [
     id: 'YOUNG_MAN',
     role: 'noun',
     description: 'a young male person',
+    definition: glossOf('PERSON', 'YOUNG', 'MALE'),
     emoji: '👱‍♂️',
     animate: true,
     human: true,

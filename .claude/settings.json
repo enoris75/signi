@@ -20,7 +20,8 @@
       "Bash(sqlite3 signi.db *)",
       "Bash(npm test *)",
       "Bash(sed *)",
-      "Edit(/.claude/skills/localize-seed/**)"
+      "Edit(/.claude/skills/localize-seed/**)",
+      "Bash(git checkout *)"
     ],
     "additionalDirectories": [
       "/private/tmp/claude-501/-Users-enoris-Code-signi/142be12d-8b7e-456d-91ea-42a45ca4e125/scratchpad",
