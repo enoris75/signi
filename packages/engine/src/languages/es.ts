@@ -95,6 +95,13 @@ function artFor(forms: Record<string, string>, plural = false): string {
   }
 }
 
+/** Whether a noun phrase surfaces as plural. A `no`-determined phrase is always singular in Spanish
+ *  — the negative quantifier "ninguno" has no plural — so a requested plural is ignored ("ningún
+ *  ratón", never the mismatched "ningún ratones"). */
+function isPlural(forms: Record<string, string>): boolean {
+  return (forms['number'] ?? forms['count']) === 'plural' && forms['definiteness'] !== 'no';
+}
+
 /** Spanish noun/adjective pluralisation: vowel → +s, -z → -ces, consonant → +es. */
 function pluralize(word: string): string {
   if (/[aeiouáéíóú]$/i.test(word)) return `${word}s`;
@@ -151,7 +158,7 @@ interface EsAdjectives {
 /** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
 function esAdj(np: ResolvedNounPhrase): EsAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
-  const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
+  const plural = isPlural(np.head.forms);
   const pre: string[] = [];
   const post: string[] = [];
   for (const a of np.adjectives) {
@@ -313,8 +320,7 @@ function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect):
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: EsAdjectives): string {
-  const count = forms['number'] ?? forms['count'] ?? 'singular';
-  const plural = count === 'plural';
+  const plural = isPlural(forms);
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const noun = withAdj(word, adj);
   const art = artFor(artForms(forms, adj), plural); // definite / indefinite / bare
@@ -450,7 +456,7 @@ function complementsPhrase(
       // which `direction` needs: an animate goal takes "hacia", a place "a".
       return coordinateElement(c.phrase, (np) => {
       const f = np.head.forms;
-      const plural = (f['number'] ?? f['count']) === 'plural';
+      const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const adj = esAdj(np);
       const noun = withAdj(word, adj);

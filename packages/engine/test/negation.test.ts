@@ -70,23 +70,62 @@ describe('negative direct object: Japanese does not express it', () => {
 });
 
 describe('known bugs: negative determiner with a plural noun', () => {
-  // `no` + a plural noun over-pluralises the noun while the determiner stays singular, giving the
-  // agreement mismatch "nessun topi" (singular nessun + plural topi). The Romance negative
-  // quantifiers (nessuno / ninguno / nenhum) are singular-only, so a `no` phrase must stay
+  // `no` + a plural noun used to over-pluralise the noun while the determiner stayed singular,
+  // giving the agreement mismatch "nessun topi" (singular nessun + plural topi). The Romance
+  // negative quantifiers (nessuno / ninguno / nenhum) are singular-only, so a `no` phrase now stays
   // singular — "nessun topo" — regardless of the requested number. English pluralises correctly
-  // ("no mice") and German too ("keine Mäuse"); only it/es/pt produce the mismatch.
+  // ("no mice") and German too ("keine Mäuse"); only it/es/pt produced the mismatch.
   const noMice = () => eats(noNP('MOUSE', { number: 'plural' }));
 
-  test.fails('Italian must not pair singular "nessun" with a plural noun', () => {
+  test('Italian forces a `no` phrase singular: "nessun topo", not "nessun topi"', () => {
     expect(noMice()).toMatchObject({ it: 'il gatto non mangia nessun topo.' });
   });
 
-  test.fails('Spanish must not pair singular "ningún" with a plural noun', () => {
+  test('Spanish forces a `no` phrase singular: "ningún ratón", not "ningún ratones"', () => {
     expect(noMice()).toMatchObject({ es: 'el gato no come ningún ratón.' });
   });
 
-  test.fails('Portuguese must not pair singular "nenhum" with a plural noun', () => {
+  test('Portuguese forces a `no` phrase singular: "nenhum rato", not "nenhum ratos"', () => {
     expect(noMice()).toMatchObject({ pt: 'o gato não come nenhum rato.' });
+  });
+
+  // It is not specific to the object slot: a `no`-plural phrase in a COMPLEMENT stays singular too.
+  test('a `no`-plural complement is singular in Romance', () => {
+    const noHouses = sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'no', number: 'plural' }) } },
+    }));
+    expect(noHouses).toMatchObject({
+      it: 'il gatto non corre in nessuna casa.',
+      es: 'el gato no corre en ninguna casa.',
+      pt: 'o gato não corre em nenhuma casa.',
+    });
+  });
+
+  // A modifying adjective agrees with the (now singular) phrase, not the requested plural.
+  test('an adjective on a `no`-plural phrase is singular too', () => {
+    const bigMice = eats(np('MOUSE', { definiteness: 'no', number: 'plural', adjectives: ['BIG'] }));
+    expect(bigMice).toMatchObject({
+      it: 'il gatto non mangia nessun grande topo.',
+      es: 'el gato no come ningún ratón grande.',
+    });
+  });
+
+  // Regression: English and German DO pluralise a `no` phrase (their negatives have a plural), and
+  // French already forces the singular ("aucune souris"); none of them is touched.
+  test('English/German pluralise `no`, and French keeps its singular', () => {
+    expect(noMice()).toMatchObject({
+      en: 'the cat eats no mice.',
+      de: 'der Kater isst keine Mäuse.',
+      fr: 'le chat ne mange aucune souris.',
+    });
+  });
+
+  // Regression: an ordinary (positive) plural object still pluralises.
+  test('a positive plural noun still pluralises', () => {
+    expect(eats(np('MOUSE', { number: 'plural' }))).toMatchObject({
+      it: 'il gatto mangia i topi.',
+      es: 'el gato come los ratones.',
+    });
   });
 });
 

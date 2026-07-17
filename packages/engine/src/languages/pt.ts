@@ -113,6 +113,13 @@ const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
   mau: ['mau', 'má', 'maus', 'más'],
 };
 
+/** Whether a noun phrase surfaces as plural. A `no`-determined phrase is always singular in
+ *  Portuguese — the negative quantifier "nenhum" has no plural — so a requested plural is ignored
+ *  ("nenhum rato", never the mismatched "nenhum ratos"). */
+function isPlural(forms: Record<string, string>): boolean {
+  return (forms['number'] ?? forms['count']) === 'plural' && forms['definiteness'] !== 'no';
+}
+
 /** Portuguese noun/adjective pluralisation: -m → -ns, -r/-z → -es, -l → -is, else +s. */
 function pluralize(word: string): string {
   if (/m$/i.test(word)) return `${word.slice(0, -1)}ns`;
@@ -153,7 +160,7 @@ interface PtAdjectives {
 /** Agree a noun phrase's adjectives with the head's gender/number and split them around it. */
 function ptAdj(np: ResolvedNounPhrase): PtAdjectives {
   const gender = np.head.forms['gender'] ?? 'masc';
-  const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
+  const plural = isPlural(np.head.forms);
   const pre: string[] = [];
   const post: string[] = [];
   for (const a of np.adjectives) {
@@ -328,8 +335,7 @@ function verbGroupInfinitive(verbForms: Record<string, string>, aspect: Aspect):
 }
 
 function nounPhrase(forms: Record<string, string>, adj?: PtAdjectives): string {
-  const count = forms['number'] ?? forms['count'] ?? 'singular';
-  const plural = count === 'plural';
+  const plural = isPlural(forms);
   const word = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
   const noun = withAdj(word, adj);
   const art = artFor(forms, plural); // definite / indefinite / bare
@@ -463,7 +469,7 @@ function complementsPhrase(
       // which `direction` needs: an animate goal takes "para", a place "a".
       return coordinateElement(c.phrase, (np) => {
       const f = np.head.forms;
-      const plural = (f['number'] ?? f['count']) === 'plural';
+      const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const noun = withAdj(word, ptAdj(np));
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
