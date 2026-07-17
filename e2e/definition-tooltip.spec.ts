@@ -6,22 +6,23 @@ import { test, expect } from './fixtures';
 // falling back to English:
 //   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
 //     concepts into every language, so the tooltip is localized like the rest of the UI;
-//   - the stored `concept_definitions` literal (DOG → "domestic canine animal"), of which only
-//     English is seeded.
+//   - the stored `concept_definitions` literal (BOOK → "a written or printed work"), of which
+//     only English is seeded.
 test.describe('word definition tooltip', () => {
   const tooltip = '.MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
-    await app.subjectInput.fill('dog');
+    // BOOK carries only a stored English literal (no definition plan), so the tooltip shows it.
+    await app.subjectInput.fill('book');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="DOG"]',
+      '[data-testid="typeahead-option"][data-concept="BOOK"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
     await expect(page.locator(tooltip)).toBeVisible();
-    await expect(page.locator(tooltip)).toHaveText('domestic canine animal');
+    await expect(page.locator(tooltip)).toHaveText('a written or printed work');
   });
 
   test('shows the definition on hover in the verb picker', async ({ app, page }) => {
@@ -230,20 +231,61 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('una persona che uccide animali');
   });
 
+  test('a genus+two-differentia noun definition renders (localize-seed B01: DOG)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from MAMMAL + DOMESTIC + CANINE, superseding DOG's stored English literal.
+    await app.subjectInput.fill('dog');
+    const dogEn = page.locator('[data-testid="typeahead-option"][data-concept="DOG"]');
+    await expect(dogEn).toBeVisible();
+    await dogEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a domestic canine mammal');
+
+    // Italian: the same plan, localized by the engine — the two postnominal adjectives coordinate
+    // with "e". No Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('dog');
+    const dogIt = page.locator('[data-testid="typeahead-option"][data-concept="DOG"]');
+    await expect(dogIt).toBeVisible();
+    await dogIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un mammifero domestico e canino');
+  });
+
+  test('a genus+two-differentia noun definition renders (localize-seed B01: WOLF)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from MAMMAL + WILD + CANINE.
+    await app.subjectInput.fill('wolf');
+    const wolfEn = page.locator('[data-testid="typeahead-option"][data-concept="WOLF"]');
+    await expect(wolfEn).toBeVisible();
+    await wolfEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a wild canine mammal');
+
+    // German: the same plan, localized by the engine — both differentia are prenominal and agree.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('wolf');
+    const wolfDe = page.locator('[data-testid="typeahead-option"][data-concept="WOLF"]');
+    await expect(wolfDe).toBeVisible();
+    await wolfDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein wildes hundeartiges Säugetier');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,
   }) => {
-    // DOG has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // BOOK has no definition plan and only an English literal, so an Italian UI reverts to it.
     await app.setUiLanguage('it');
-    await app.subjectInput.fill('cane');
+    await app.subjectInput.fill('book');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="DOG"]',
+      '[data-testid="typeahead-option"][data-concept="BOOK"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
-    await expect(page.locator(tooltip)).toHaveText('domestic canine animal');
+    await expect(page.locator(tooltip)).toHaveText('a written or printed work');
   });
 });

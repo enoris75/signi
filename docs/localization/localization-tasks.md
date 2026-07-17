@@ -40,17 +40,12 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 
 ### Part A — Ready (`A-ready/`)
 
-| # | File | Concept → gloss |
-|---|---|---|
-| A08 | [A08-first-person.md](A-ready/A08-first-person.md) | FIRST_PERSON → the first person |
-| A09 | [A09-second-person.md](A-ready/A09-second-person.md) | SECOND_PERSON → the second person |
-| A10 | [A10-third-person.md](A-ready/A10-third-person.md) | THIRD_PERSON → the third person |
+_None outstanding — every catalogued A-task is done (see the Done section). New A-tasks land here._
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
 | # | File | Seed first → unlocks |
 |---|---|---|
-| B01 | [B01-wild-domestic-animals.md](B-needs-seed/B01-wild-domestic-animals.md) | WILD, DOMESTIC → WOLF, DOG |
 | B02 | [B02-adult-kin.md](B-needs-seed/B02-adult-kin.md) | ADULT, PARENT, WOMAN → MAN, FATHER, OX |
 | B03 | [B03-places.md](B-needs-seed/B03-places.md) | PLACE/BUILDING, LIVE, CONFINE → HOUSE, HOME, MARKET, PRISON |
 | B04 | [B04-possession.md](B-needs-seed/B04-possession.md) | OWN, HOLD → POSSESSOR, CONTAINER |
@@ -66,6 +61,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 | C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | adverb manner render — all 6 adverbs |
 | C04 | [C04-impersonal-subject.md](C-needs-engine/C04-impersonal-subject.md) | generic/impersonal subject — FOOD & patient-defined nouns |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
+| C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 
 ### Done
 
@@ -78,6 +74,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 | A05 | [done/A05-creator.md](done/A05-creator.md) | CREATOR → a person who makes objects |
 | A06 | [done/A06-builder.md](done/A06-builder.md) | BUILDER → a person who makes objects |
 | A07 | [done/A07-butcher.md](done/A07-butcher.md) | BUTCHER → a person who kills animals |
+| B01 | [done/B01-wild-domestic-animals.md](done/B01-wild-domestic-animals.md) | DOG → a domestic canine mammal; WOLF → a wild canine mammal |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

@@ -719,8 +719,9 @@ describe('known bugs: degree (extended)', () => {
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'], ['BROWN', 'brown'],
-  ['CAREFUL', 'careful'], ['COLD', 'cold'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'],
-  ['DISTAL', 'distal'], ['FEMALE', 'female'], ['FIRST', 'first'], ['GOOD', 'good'],
+  ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['COLD', 'cold'], ['DEFINITE', 'definite'],
+  ['DIRECT', 'direct'], ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['FEMALE', 'female'],
+  ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['MALE', 'male'], ['MULTAL', 'multal'],
@@ -729,7 +730,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['QUICK', 'quick'], ['SAD', 'sad'], ['SAVED', 'saved'], ['SECOND', 'second'],
   ['SEMANTIC', 'semantic'], ['SINGULAR', 'singular'], ['SMALL', 'small'], ['STRONG', 'strong'],
   ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'], ['UNIVERSAL', 'universal'],
-  ['WEAK', 'weak'], ['WHOLE', 'whole'], ['YOUNG', 'young'], ['ZERO', 'zero'],
+  ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];
 
 describe('every adjective renders attributively', () => {
@@ -768,6 +769,9 @@ describe('adjective position: Italian', () => {
     expect(it('INTERESTING')).toBe('il gatto interessante mangia.');
     expect(it('SEMANTIC')).toBe('il gatto semantico mangia.');
     expect(it('QUICK')).toBe('il gatto veloce mangia.');
+    expect(it('WILD')).toBe('il gatto selvatico mangia.');
+    expect(it('DOMESTIC')).toBe('il gatto domestico mangia.');
+    expect(it('CANINE')).toBe('il gatto canino mangia.');
   });
 });
 
@@ -791,6 +795,9 @@ describe('adjective linker: Japanese', () => {
 
   test('a noun-adjective takes の', () => {
     expect(ja('MALE')).toBe('男性の猫は食べます。');
+    expect(ja('WILD')).toBe('野生の猫は食べます。');
+    expect(ja('DOMESTIC')).toBe('家庭の猫は食べます。');
+    expect(ja('CANINE')).toBe('犬の猫は食べます。');
     expect(ja('SEMANTIC')).not.toContain('意味的の'); // …but a na-adjective must not take の
   });
 

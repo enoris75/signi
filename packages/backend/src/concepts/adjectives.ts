@@ -321,6 +321,55 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    id: 'WILD',
+    role: 'adjective',
+    description: 'living in nature, not tamed',
+    emoji: '🌿',
+    forms: {
+      en: { base: 'wild' },
+      it: { base: 'selvatico' },
+      fr: { base: 'sauvage' },
+      de: { base: 'wild' },
+      es: { base: 'salvaje' },
+      ja: { base: '野生の', reading: 'やせいの' },
+      pt: { base: 'selvagem' },
+    },
+  },
+  {
+    // "domestic" in the animal sense — kept by or living with people. German has no plain
+    // adjective for it (Haus- is a prefix, Haustier); zahm ("tame") is the standalone adjective
+    // that inflects. Japanese 家畜の is specifically livestock, so 家庭の ("of the household").
+    id: 'DOMESTIC',
+    role: 'adjective',
+    description: 'kept by or living with people',
+    emoji: '🏠',
+    forms: {
+      en: { base: 'domestic' },
+      it: { base: 'domestico' },
+      fr: { base: 'domestique' },
+      de: { base: 'zahm' },
+      es: { base: 'doméstico' },
+      ja: { base: '家庭の', reading: 'かていの' },
+      pt: { base: 'doméstico' },
+    },
+  },
+  {
+    // "canine" — of or resembling dogs. German Hunde- is a prefix; hundeartig is the adjective.
+    id: 'CANINE',
+    role: 'adjective',
+    description: 'of or resembling dogs',
+    emoji: '🐕',
+    forms: {
+      en: { base: 'canine' },
+      it: { base: 'canino' },
+      fr: { base: 'canin' },
+      de: { base: 'hundeartig' },
+      es: { base: 'canino' },
+      ja: { base: '犬の', reading: 'いぬの' },
+      pt: { base: 'canino' },
+    },
+  },
+  {
     id: 'LAZY',
     role: 'adjective',
     description: 'unwilling to work or use energy',
