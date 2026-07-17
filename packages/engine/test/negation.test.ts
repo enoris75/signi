@@ -130,15 +130,16 @@ describe('known bugs: negative determiner with a plural noun', () => {
 });
 
 describe('known bugs: stacked negation is not collapsed', () => {
-  // A `no` object already negates the clause. When a SECOND negation source is present — the verb's
+  // A `no` object already negates the clause. When a SECOND negation source was present — the verb's
   // own `negative`, a `NEVER` adverb, or a `no` subject — the languages that manage a single
-  // preverbal negator fail to de-duplicate, and a double negative escapes. The single-`no` cases
-  // above are correct, so the concord itself works; it just is not idempotent across sources.
+  // preverbal negator failed to de-duplicate, and a double negative escaped. They now collapse to a
+  // single negation: the non-concord languages (English/German) switch the object to a non-negative
+  // form ("any mouse" / a plain "eine Maus"), and Romance drops the redundant preverbal negator.
 
-  // The surface each language should settle on is a design call (drop the redundant negator, or
-  // switch the object to an "any"-series word), so these are asserted negatively: whatever is
-  // chosen, the doubled form is wrong.
-  test.fails('a `negative` verb plus a `no` object must not double-negate (en, de)', () => {
+  // The surface for the verb-`negative` / `NEVER` cases was a design call (English uses the "any"
+  // NPI; German keeps "kein" for the negated verb but a plain indefinite under a negative adverb),
+  // so those stay asserted negatively: whatever is chosen, the doubled form is wrong.
+  test('a `negative` verb plus a `no` object must not double-negate (en, de)', () => {
     const said = sayAll(clause(np('CAT'), 'EAT', {
       verbPhrase: { negative: true }, directObject: noNP('MOUSE'),
     }));
@@ -146,7 +147,7 @@ describe('known bugs: stacked negation is not collapsed', () => {
     expect(said.de).not.toBe('der Kater isst keine Maus nicht.'); // kein AND nicht
   });
 
-  test.fails('a NEVER adverb plus a `no` object must not stack negators (en, es, pt, de)', () => {
+  test('a NEVER adverb plus a `no` object must not stack negators (en, es, pt, de)', () => {
     const said = sayAll(clause(np('CAT'), 'EAT', {
       verbPhrase: { modifier: 'NEVER' }, directObject: noNP('MOUSE'),
     }));
@@ -159,7 +160,7 @@ describe('known bugs: stacked negation is not collapsed', () => {
     expect(said.fr).toBe('le chat ne mange jamais aucune souris.');
   });
 
-  test.fails('a `no` subject must not add a postverbal negator to a `no` object (it, es, pt)', () => {
+  test('a `no` subject must not add a postverbal negator to a `no` object (it, es, pt)', () => {
     // A preverbal negative subject already negates the clause, so Italian/Spanish/Portuguese take
     // NO further preverbal negator — "nessun gatto mangia nessun topo", not "… non mangia …".
     // (French keeps "ne" everywhere and is correct: "aucun chat ne mange aucune souris".)
@@ -168,6 +169,48 @@ describe('known bugs: stacked negation is not collapsed', () => {
       it: 'nessun gatto mangia nessun topo.',
       es: 'ningún gato come ningún ratón.',
       pt: 'nenhum gato come nenhum rato.',
+    });
+  });
+
+  // The chosen collapsed surfaces, now pinned positively. A negated verb + `no` object: English's
+  // "any" NPI, German's "kein" (with the redundant "nicht" gone), and the single Romance negator.
+  test('the collapsed surface for a negated verb + `no` object', () => {
+    const said = sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { negative: true }, directObject: noNP('MOUSE'),
+    }));
+    expect(said).toMatchObject({
+      en: 'the cat does not eat any mouse.',
+      de: 'der Kater isst keine Maus.',
+      it: 'il gatto non mangia nessun topo.',
+      es: 'el gato no come ningún ratón.',
+      pt: 'o gato não come nenhum rato.',
+      fr: 'le chat ne mange aucune souris.',
+    });
+  });
+
+  // A NEVER adverb + `no` object: English's "any", German's plain indefinite under the adverb
+  // ("nie eine Maus"), and Spanish/Portuguese with the single preverbal "nunca".
+  test('the collapsed surface for NEVER + `no` object', () => {
+    const said = sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modifier: 'NEVER' }, directObject: noNP('MOUSE'),
+    }));
+    expect(said).toMatchObject({
+      en: 'the cat never eats any mouse.',
+      de: 'der Kater isst nie eine Maus.',
+      es: 'el gato nunca come ningún ratón.',
+      pt: 'o gato nunca come nenhum rato.',
+    });
+  });
+
+  // Regression: a LONE `no` object is unchanged — English keeps "no" (not "any"), and the Romance
+  // preverbal negator is present, since there is no second source to de-duplicate against.
+  test('a lone `no` object is unchanged (no over-collapse)', () => {
+    const said = sayAll(clause(np('CAT'), 'EAT', { directObject: noNP('MOUSE') }));
+    expect(said).toMatchObject({
+      en: 'the cat eats no mouse.',
+      de: 'der Kater isst keine Maus.',
+      it: 'il gatto non mangia nessun topo.',
+      es: 'el gato no come ningún ratón.',
     });
   });
 });

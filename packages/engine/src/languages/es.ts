@@ -588,9 +588,15 @@ function predicateText(
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  // A postverbal negative word — a `no`-determined direct object OR complement ("en ninguna casa",
-  // "a ningún mercado") — obliges the preverbal "no", the same concord as a negative object.
-  const verbText = verbNegative || objectIsNegative || hasNegativeComplement(complements) ? `no ${conjugated}` : conjugated;
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // The preverbal "no" is emitted only when the clause needs a preverbal negator AND none is already
+  // there. A preverbal negative subject ("ningún gato …") or a preverbal "nunca" (a negative adverb,
+  // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped —
+  // "ningún gato come ningún ratón", "nunca come ningún ratón", never the doubled "… no come …".
+  const subjectIsNegative = subjectForms['definiteness'] === 'no';
+  const preVerbNunca = modifierIsNegative && !verbNegative;
+  const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements);
+  const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${conjugated}` : conjugated;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object (or a
   // coordination) keeps the post-verbal slot.
@@ -600,9 +606,8 @@ function predicateText(
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "no": "yo nunca bebo"
   // but post-verbal with "no": "yo no bebo nunca"
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  const preVerb = (modifierIsNegative && !verbNegative) ? modifierText : '';
-  const postVerb = (modifierIsNegative && !verbNegative) ? '' : modifierText;
+  const preVerb = preVerbNunca ? modifierText : '';
+  const postVerb = preVerbNunca ? '' : modifierText;
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command

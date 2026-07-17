@@ -86,6 +86,16 @@ export function isPronounElement(el: ResolvedNounElement): boolean {
 }
 
 /**
+ * A shallow copy of a resolved noun phrase with its head's `definiteness` overridden — used to
+ * re-render a `no` object under a non-negative determiner when the clause is negated elsewhere
+ * (English "any", German the plain indefinite), so the double negative is avoided. The original
+ * forms are left untouched.
+ */
+export function withDefiniteness(np: ResolvedNounPhrase, definiteness: string): ResolvedNounPhrase {
+  return { ...np, head: { ...np.head, forms: { ...np.head.forms, definiteness } } };
+}
+
+/**
  * Join the rendered conjuncts of a coordinated slot the way a language coordinates: every
  * junction but the last takes `separator` (a comma in the European languages, と in Japanese),
  * and the last takes whatever `link` returns for the conjunct that follows it — a function, not a

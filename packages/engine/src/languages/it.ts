@@ -661,8 +661,11 @@ function predicateText(
   // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   // A postverbal negative word — a `no`-determined direct object OR complement ("in nessuna casa",
-  // "a nessun mercato") — obliges the preverbal "non", the same concord as a negative object.
-  const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)) ? 'non' : '';
+  // "a nessun mercato") — obliges the preverbal "non", the same concord as a negative object. But a
+  // preverbal negative SUBJECT ("nessun gatto") already negates the clause and carries it, so the
+  // "non" is suppressed then: "nessun gatto mangia nessun topo", not "… non mangia …".
+  const subjectIsNegative = subjectForms['definiteness'] === 'no';
+  const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)) && !subjectIsNegative ? 'non' : '';
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
   // on the imperative ("guardami"); a noun object (or a coordination) keeps the post-verbal slot.

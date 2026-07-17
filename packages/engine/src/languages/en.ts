@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -129,6 +129,7 @@ function determiner(forms: Record<string, string>, lead: string, superlative = f
     case 'that':  return plural ? 'those ' : 'that ';
     case 'some':  return 'some ';
     case 'no':    return 'no ';
+    case 'any':   return 'any '; // the NPI a `no` object switches to when the clause is negated elsewhere
     case 'many':  return mass ? 'much ' : 'many ';   // mass: much water
     case 'few':   return mass ? 'little ' : 'few ';  // mass: little water
     case 'all':   return 'all ';
@@ -441,13 +442,19 @@ function predicateParts(
 
   // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
   // that would give "the I"; a noun object (or a coordination) renders as an ordinary noun phrase.
+  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+  // A `no` object with ANOTHER clause negator present (a negated verb, or a NEVER adverb) would
+  // double the negative ("does not eat NO mouse", "never eats NO mouse"); English has no negative
+  // concord, so the object switches to the "any"-series NPI — "does not eat any mouse", "never eats
+  // any mouse". A lone `no` object keeps "no" ("eats no mouse").
+  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
+  const anyObject = objectIsNegative && (verbNegative === true || modifierIsNegative);
   const directObjectText = !directObject ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
-    : coordinate(directObject, npText);
+    : coordinate(directObject, anyObject ? (np) => npText(withDefiniteness(np, 'any')) : npText);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements);
-  const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
 
   const negateVerb = verbNegative === true && !modifierIsNegative;
 

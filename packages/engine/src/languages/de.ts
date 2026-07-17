@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -902,14 +902,23 @@ function renderClause(phrase: ResolvedPhrase, inverted = false): string {
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
       : verbGroup(verb.forms, pn, tense, aspect, mood);
-    const directObjectText = directObject ? elementPhrase(directObject, 'acc') : '';
+    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
+    // A `no` object's "kein" is itself the clause negator (kein = nicht + ein). With a NEGATIVE
+    // ADVERB ("nie") also present, "nie keine Maus" would double the negative, so the object drops to
+    // a plain indefinite — "isst nie eine Maus". (With a negated verb instead, "keine" stays and the
+    // now-redundant "nicht" is dropped below.)
+    const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
+    const objectToRender = directObject && modifierIsNegative && objectIsNegative
+      ? { ...directObject, conjuncts: directObject.conjuncts.map((np) => withDefiniteness(np, 'indefinite')) }
+      : directObject;
+    const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
 
     // "nicht" precedes the modifier when one exists ("nicht immer"),
     // otherwise trails after objects ("das Brot nicht").
-    // Skip "nicht" when the modifier is already negative ("nie" = never).
-    const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-    const applyNicht = verbNegative && !modifierIsNegative;
+    // Skip "nicht" when the modifier is already negative ("nie" = never), or when the object's own
+    // "kein" already negates the clause ("isst keine Maus", not "isst keine Maus nicht").
+    const applyNicht = verbNegative && !modifierIsNegative && !objectIsNegative;
     // The prospective's "im Begriff …" is a predicate the negation scopes over as a whole, so
     // "nicht" precedes it on the finite auxiliary — "ist NICHT im Begriff zu essen" (is NOT about
     // to eat), never "ist im Begriff NICHT zu essen" (is about to NOT eat). It is the only aspect
