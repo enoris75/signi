@@ -283,6 +283,7 @@ export function PhraseWorkspace({
           startIcon={<AddIcon />}
           size="small"
           variant="outlined"
+          data-testid="add-period-container"
           sx={{ textTransform: "none" }}
         >
           {t("action.addPeriodContainer")}

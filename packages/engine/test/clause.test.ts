@@ -79,22 +79,25 @@ describe('clause', () => {
   });
 
   test('the verb agrees with the person of a pronoun subject', () => {
+    // Italian, Spanish and Portuguese are pro-drop: the pronoun subject is dropped and the verb
+    // ending alone carries the person ("mangio", not "io mangio"). French, German and English keep
+    // the overt pronoun, so the agreement shows there as the pronoun + inflected verb.
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT'))).toEqual({
       en: 'I eat.',
-      it: 'io mangio.',
+      it: 'mangio.',
       fr: 'je mange.',
-      es: 'yo como.',
-      pt: 'eu como.',
+      es: 'como.',
+      pt: 'como.',
       de: 'ich esse.',
       ja: '私は食べます。',
     });
 
     expect(sayAll(clause(np('THIRD_PERSON', { number: 'plural' }), 'EAT'))).toEqual({
       en: 'they eat.',
-      it: 'loro mangiano.',
+      it: 'mangiano.',
       fr: 'ils mangent.',
-      es: 'ellos comen.',
-      pt: 'eles comem.',
+      es: 'comen.',
+      pt: 'comem.',
       de: 'sie essen.',
       ja: '彼らは食べます。',
     });

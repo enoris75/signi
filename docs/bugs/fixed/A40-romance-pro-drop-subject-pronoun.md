@@ -61,3 +61,39 @@ must now drop. Every it/es/pt assertion in that file that shows an overt pronoun
 updated in the same change. The `neut`-selects-the-language's-"it" distinction is still testable off
 `translateWord`/the object path (`esso`/`ello`/`isso` remain the surface forms); it just no longer
 appears as a subject.
+
+## Resolved
+
+Fixed 2026-07-17.
+
+**Engine change:** `renderClause` in
+[`it.ts`](../../../packages/engine/src/languages/it.ts),
+[`es.ts`](../../../packages/engine/src/languages/es.ts) and
+[`pt.ts`](../../../packages/engine/src/languages/pt.ts). Each already dropped the subject for an
+imperative (`subj = ''`, the person still driving the verb off `subject.agreement`). The guard is
+extended: `dropSubject = !!phrase.verbPhrase && (mood === 'imperative' || isPronounElement(subject))`,
+so a single bare pronoun subject drops by default (`mangio`, not `io mangio`). A **noun** subject and
+a **coordination** are not `isPronounElement`, so they fall through to `subjectText` unchanged; the
+drop is gated on there being a finite verb to carry the person. French, German and English are
+untouched (not pro-drop).
+
+**Tests now guarding it** — all in [`pronoun.test.ts`](../../../packages/engine/test/pronoun.test.ts):
+- *known bugs: Romance pro-drop* — the three former `test.fails` (neuter "it must have been an angel",
+  1st person, 3rd person) are now plain passing tests, plus added coverage: a **coordinated** pronoun
+  subject is kept (`io e lui mangiamo`), the drop fires **per clause** across a coordination
+  (`mangio, e corro`) and in **both halves of a hypothetical** (`se corressi, mangerebbe`), and the
+  noun-subject / French-German controls stay green.
+- *third-person pronoun by gender* and *feminine plural pronoun*: every overt it/es/pt subject-pronoun
+  assertion was updated to the dropped form. Because pro-drop removes the Spanish/Portuguese feminine
+  **pronoun** surface (`ellas`/`nosotras`), that block was re-anchored: French still surfaces the overt
+  `elles`/`nous`, and the feminine agreement (the A36 feature) is now shown on a **gender-distinct
+  predicate adjective** — `sembrano stanche` / `parecen cansadas` / `parecem cansadas` vs the masculine
+  `stanchi`/`cansados` — which surfaces the feature even with the subject dropped. (`grande` is
+  gender-invariant in it/es/pt and could not, so `TIRED` replaced `BIG` there.)
+
+**Also updated** (same reason — clauses with an overt Romance pronoun subject): the snapshot in
+[`verb.conjugation.test.ts`](../../../packages/engine/test/verb.conjugation.test.ts) was re-baselined
+(`vitest -u`; 3240 it/es/pt cells each lost their leading pronoun, verb forms unchanged), and the
+hand-written cases in [`clause.test.ts`](../../../packages/engine/test/clause.test.ts),
+[`coordination.test.ts`](../../../packages/engine/test/coordination.test.ts) and
+[`modals.test.ts`](../../../packages/engine/test/modals.test.ts).

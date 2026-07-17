@@ -92,6 +92,7 @@ export function GroupPerimeterControls({
               >
                 {entry?.relative && (
                   <Box
+                    data-testid={`relative-ctl-${nounKey}`}
                     ref={(el: HTMLElement | null) =>
                       registerSourceAnchor?.(nounKey, el)
                     }

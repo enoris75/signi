@@ -67,6 +67,70 @@ export class Builder {
     await expect(this.groupBox('Verb Phrase')).toBeVisible();
   }
 
+  // ── Multi-period helpers ───────────────────────────────────────────────────
+  // Subordinate clauses (relative / condition / coordination) are cross-container links: each
+  // clause is its own period, and joining them folds one into the other's sentence. The
+  // single-container helpers above find slots by a page-wide data-testid, which is ambiguous once
+  // a second period is on the canvas, so these scope every lookup to one period by index.
+
+  /** The nth period container on the canvas (0-based). */
+  period(index: number): Locator {
+    return this.page.getByTestId('period-container').nth(index);
+  }
+
+  /** Add another empty period to the workspace and wait for it to mount. */
+  async addPeriod(): Promise<void> {
+    const containers = this.page.getByTestId('period-container');
+    const before = await containers.count();
+    await this.page.getByTestId('add-period-container').click();
+    await expect(containers).toHaveCount(before + 1);
+  }
+
+  /** `pick`, scoped to one period's slot — the multi-clause form. The option dropdown is a
+   *  single page-level popper, so only the input is scoped. */
+  private async pickIn(scope: Locator, slotTestId: string, conceptId: string): Promise<void> {
+    const input = scope.getByTestId(slotTestId);
+    await expect(input).toBeVisible();
+    await input.fill(conceptId.toLowerCase());
+    await this.page
+      .locator(`[data-testid="typeahead-option"][data-concept="${conceptId}"]`)
+      .click();
+  }
+
+  /** Subject → verb inside a specific period. */
+  async buildClauseIn(index: number, subject: string, verb: string): Promise<void> {
+    const scope = this.period(index);
+    await this.pickIn(scope, 'typeahead-subject', subject);
+    await this.pickIn(scope, 'typeahead-verb', verb);
+    await expect(
+      scope.locator('[data-testid="group-box"][data-group="Verb Phrase"]'),
+    ).toBeVisible();
+  }
+
+  /** Set the direct object of a specific period. */
+  async setDirectObjectIn(index: number, conceptId: string): Promise<void> {
+    await this.pickIn(this.period(index), 'typeahead-noun', conceptId);
+  }
+
+  /**
+   * Attach the clause in period `clauseIndex` to a noun in period `headIndex` as a restrictive
+   * relative clause. Two clicks, the way the canvas takes it: start the link from the head noun's
+   * relative-clause control, then click the gap slot's box in the clause period. The gap slot must
+   * already hold a word to be an eligible pick target — its surface is dropped for the head's.
+   */
+  async linkRelative(
+    headIndex: number,
+    headSlot: string,
+    clauseIndex: number,
+    gapSlot: string,
+  ): Promise<void> {
+    await this.period(headIndex)
+      .getByTestId(`relative-ctl-${headSlot}`)
+      .locator('button')
+      .click();
+    await this.period(clauseIndex).getByTestId(`box-${gapSlot}`).click();
+  }
+
   /** The dashed bounding box of one role group, e.g. "Subject" / "Verb Phrase". */
   groupBox(label: string): Locator {
     return this.page.locator(`[data-testid="group-box"][data-group="${label}"]`);

@@ -1016,6 +1016,8 @@ export function PhraseBuilder({
   const tree = (
     <Box
       ref={rootRef}
+      data-testid="period-container"
+      data-container-id={binding?.containerId}
       sx={{
         position: position ? "fixed" : "relative",
         ...(position && { left: `${position.x}px`, top: `${position.y}px` }),

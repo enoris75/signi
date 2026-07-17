@@ -673,8 +673,13 @@ function predicateText(
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
-  // An imperative drops its subject (the person still drives the form — see predicateText).
-  const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
+  // Portuguese is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
+  // ending alone carrying the person ("como", not "eu como"). An imperative likewise drops its
+  // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun
+  // subject and a coordination fall through to subjectText and keep their surface.
+  const dropSubject = !!phrase.verbPhrase &&
+    (phrase.verbPhrase.mood === 'imperative' || isPronounElement(subject));
+  const subj = dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("últimas notícias").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(

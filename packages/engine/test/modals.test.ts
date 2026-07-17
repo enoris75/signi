@@ -64,7 +64,7 @@ describe('modals', () => {
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['CAN'] } })))
       .toMatchObject({
         en: 'I can eat.',
-        it: 'io posso mangiare.', // posso, 1sg
+        it: 'posso mangiare.', // posso, 1sg — the pro-drop subject is gone, the ending carries the person
         de: 'ich kann essen.',
       });
   });

@@ -300,8 +300,11 @@ describe('coordinated clauses: an imperative and an indicative', () => {
   });
 
   test('an INDICATIVE parent coerces the other way — the command becomes a statement', () => {
-    // Symmetric: the coordinated clause is flagged `imperative`, and the flag is ignored. The
-    // subject comes back, and both halves conjugate as statements.
+    // Symmetric: the coordinated clause is flagged `imperative`, and the flag is ignored. Both
+    // halves conjugate as statements (the indicative "you run", not the command "run"). In the
+    // pro-drop languages the second-person subject is dropped either way, so what marks the
+    // coercion there is the verb taking its indicative statement form; French, German and English
+    // show it with the overt subject restored.
     expect(sayAll({
       ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('FOOD') }),
       coordination: {
@@ -310,10 +313,10 @@ describe('coordinated clauses: an imperative and an indicative', () => {
       },
     })).toEqual({
       en: 'you eat the food, and you run.',
-      it: 'tu mangi il cibo, e tu corri.',
+      it: 'mangi il cibo, e corri.',
       fr: 'tu manges la nourriture, et tu cours.',
-      es: 'tú comes la comida, y tú corres.',
-      pt: 'você come a comida, e você corre.',
+      es: 'comes la comida, y corres.',
+      pt: 'come a comida, e corre.',
       de: 'du isst das Essen, und du läufst.',
       ja: 'あなたは食べ物を食べます、そしてあなたは走ります。',
     });
