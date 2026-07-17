@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -549,6 +549,13 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
  * top-level sentence and by relative clauses, which pass the head noun's forms as
  * `subjectForms` so the verb agrees with the head.
  */
+/** Place an object clitic before a finite verb, after a leading "no " in the negative ("no me ve").
+ *  Spanish object clitics do not elide. A no-op when there is no clitic. */
+function esCliticize(clitic: string, verb: string): string {
+  if (!clitic) return verb;
+  return verb.startsWith('no ') ? `no ${clitic} ${verb.slice(3)}` : `${clitic} ${verb}`;
+}
+
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
@@ -576,7 +583,12 @@ function predicateText(
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const verbText = verbNegative || objectIsNegative ? `no ${conjugated}` : conjugated;
-  const directObjectText = directObject ? coordinateElement(directObject, npText) : '';
+  // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
+  // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object (or a
+  // coordination) keeps the post-verbal slot.
+  const objectClitic = directObject && isPronounElement(directObject)
+    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "no": "yo nunca bebo"
   // but post-verbal with "no": "yo no bebo nunca"
@@ -595,11 +607,11 @@ function predicateText(
       ? (verb.forms['base'] ?? conjugated)
       : (imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `no ${impForm}` : impForm;
-    return [impVerb, modifierText, directObjectText, complementsText]
+    return [esCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, verbText, postVerb, directObjectText, complementsText]
+  return [preVerb, esCliticize(objectClitic, verbText), postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

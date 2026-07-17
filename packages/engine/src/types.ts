@@ -62,6 +62,30 @@ export function firstConjunct(element: ResolvedNounElement): ResolvedNounPhrase 
 }
 
 /**
+ * The object (accusative / clitic) surface of a pronoun, by number/gender — the direct-object
+ * counterpart of the subject citation form (`base`/`plural`/`singular_fem`…). English/German use it
+ * post-verbally without an article ("sees me", "sieht ihn"); Romance uses it as the proclitic that
+ * moves before the finite verb ("mi vede"). Falls back through plural/base when a form is absent.
+ */
+export function objectPronounForm(forms: Record<string, string>): string {
+  const plural = (forms['number'] ?? forms['count']) === 'plural';
+  if (plural) return forms['object_plural'] ?? forms['plural'] ?? forms['object'] ?? forms['base'] ?? '';
+  const gender = forms['gender'];
+  if (gender === 'fem') return forms['object_fem'] ?? forms['object'] ?? forms['base'] ?? '';
+  if (gender === 'neut') return forms['object_neut'] ?? forms['object'] ?? forms['base'] ?? '';
+  return forms['object'] ?? forms['base'] ?? '';
+}
+
+/**
+ * Whether a resolved noun slot is a single pronoun — one conjunct with a `person`. This is the case
+ * that takes the pronoun-object path (oblique form, no article, and a Romance clitic before the
+ * verb); a noun object, or a coordination, keeps the ordinary post-verbal noun-phrase rendering.
+ */
+export function isPronounElement(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && !!el.conjuncts[0].head.forms['person'];
+}
+
+/**
  * Join the rendered conjuncts of a coordinated slot the way a language coordinates: every
  * junction but the last takes `separator` (a comma in the European languages, と in Japanese),
  * and the last takes whatever `link` returns for the conjunct that follows it — a function, not a

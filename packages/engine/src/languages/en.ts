@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
 // beautiful"). English marks the superlative with "the", which the noun's own determiner
@@ -439,7 +439,11 @@ function predicateParts(
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
 
-  const directObjectText = directObject ? coordinate(directObject, npText) : '';
+  // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
+  // that would give "the I"; a noun object (or a coordination) renders as an ordinary noun phrase.
+  const directObjectText = !directObject ? ''
+    : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
+    : coordinate(directObject, npText);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements);

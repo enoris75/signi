@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -559,6 +559,13 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
  * top-level sentence and by relative clauses, which pass the head noun's forms as
  * `subjectForms` so the verb agrees with the head.
  */
+/** Place an object clitic before a finite verb (Brazilian proclisis), after a leading "não " in the
+ *  negative ("não me vê"). Portuguese object clitics do not elide here. A no-op with no clitic. */
+function ptCliticize(clitic: string, verb: string): string {
+  if (!clitic) return verb;
+  return verb.startsWith('não ') ? `não ${clitic} ${verb.slice(4)}` : `${clitic} ${verb}`;
+}
+
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
@@ -586,7 +593,12 @@ function predicateText(
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const verbText = verbNegative || objectIsNegative ? `não ${conjugated}` : conjugated;
-  const directObjectText = directObject ? coordinateElement(directObject, npText) : '';
+  // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
+  // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
+  // object (or a coordination) keeps the post-verbal slot.
+  const objectClitic = directObject && isPronounElement(directObject)
+    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "nunca" goes pre-verbal without "não": "eu nunca bebo"
   // but post-verbal with "não": "eu não bebo nunca"
@@ -605,11 +617,11 @@ function predicateText(
       ? (verb.forms['base'] ?? conjugated)
       : (imperativeForm('pt', verb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `não ${impForm}` : impForm;
-    return [impVerb, modifierText, directObjectText, complementsText]
+    return [ptCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, verbText, postVerb, directObjectText, complementsText]
+  return [preVerb, ptCliticize(objectClitic, verbText), postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, joinConjuncts, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, type ConceptForms, type ResolvedComplement, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
 function deComparative(base: string): string {
@@ -573,6 +573,9 @@ function coordinate(el: ResolvedNounElement, render: (np: ResolvedNounPhrase) =>
  * Stock"), it cannot be factored out in front of the group.
  */
 function elementPhrase(el: ResolvedNounElement, _case: 'nom' | 'acc' | 'dat'): string {
+  // A pronoun direct object takes its accusative form with no article ("sieht ihn"), not the noun
+  // path that would give "den ich". elementPhrase is only ever called for the accusative object.
+  if (_case === 'acc' && isPronounElement(el)) return objectPronounForm(firstConjunct(el).head.forms);
   return coordinate(el, (np) => nounPhrase(np, _case));
 }
 

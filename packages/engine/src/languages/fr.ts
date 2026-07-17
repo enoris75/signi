@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
@@ -657,6 +657,19 @@ function complementsPhrase(
  * top-level sentence and by relative clauses, which pass the head noun's forms as
  * `subjectForms` so the verb agrees with the head.
  */
+/**
+ * Place an object clitic before a finite verb: inside any leading "ne "/"n'" bracket ("ne me voit
+ * pas"), and eliding me/te/le/la/se → m'/t'/l'/s' before a vowel-initial verb ("m'aime"). A no-op
+ * when there is no clitic.
+ */
+function frCliticize(clitic: string, verb: string): string {
+  if (!clitic) return verb;
+  const m = /^(ne |n')/.exec(verb);
+  const rest = m ? verb.slice(m[0].length) : verb;
+  const c = /^(me|te|le|la|se)$/.test(clitic) && VOWEL_START.test(rest) ? `${clitic[0]}'` : `${clitic} `;
+  return `${m?.[0] ?? ''}${c}${rest}`;
+}
+
 function predicateText(
   subjectForms: Record<string, string>,
   verbPhrase: ResolvedVerbPhrase,
@@ -714,7 +727,12 @@ function predicateText(
     effectiveVerb = conjugated;
     effectiveMod = modifierText;
   }
-  const directObjectText = directObject ? coordinate(directObject, npText) : '';
+  // A pronoun direct object is a proclitic before the finite verb ("le chat me voit"), not a
+  // post-verbal noun ("voit le je"). It sits inside any "ne … pas" bracket ("ne me voit pas") and
+  // elides me/te/le/la → m'/t'/l' before a vowel; a noun object keeps the post-verbal slot.
+  const objectClitic = directObject && isPronounElement(directObject)
+    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
@@ -725,16 +743,16 @@ function predicateText(
     if (register === 'instruction') {
       const inf = verb.forms['base'] ?? conjugated;
       const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-      return [infVerb, modifierText, directObjectText, complementsText]
+      return [frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
         .filter(Boolean)
         .join(' ');
     }
     const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
-    return [negateFinite(impForm), modifierText, directObjectText, complementsText]
+    return [frCliticize(objectClitic, negateFinite(impForm)), modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [effectiveVerb, effectiveMod, directObjectText, complementsText]
+  return [frCliticize(objectClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

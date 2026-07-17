@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isRelativeSuperlative, joinConjuncts, modalChain, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the (agreed) adjective. Comparative and relative superlative
@@ -658,7 +658,12 @@ function predicateText(
   // Any "nessun" conjunct triggers the concord — "non vede nessun ragazzo e nessuna ragazza".
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const negText = (verbNegative || modifierIsNegative || objectIsNegative) ? 'non' : '';
-  const directObjectText = directObject ? coordinate(directObject, npText) : '';
+  // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
+  // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
+  // on the imperative ("guardami"); a noun object (or a coordination) keeps the post-verbal slot.
+  const objectClitic = directObject && isPronounElement(directObject)
+    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms);
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
@@ -669,7 +674,7 @@ function predicateText(
     // so an instruction only pins the person to tu — it has no addressee to take noi/voi from.
     const impPN = register === 'instruction' ? '2sg' : moodPN(subjectForms);
     const impForm = imperativeForm('it', verb, impPN, negText === 'non') ?? verbText;
-    return [negText, impForm, modifierText, directObjectText, complementsText]
+    return [negText, impForm + objectClitic, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -682,9 +687,9 @@ function predicateText(
   if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
     const [aux, ...rest] = verbText.split(' ');
     const withAdverb = [aux, modifierText, ...rest].join(' ');
-    return [negText, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
+    return [negText, objectClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
   }
-  return [negText, verbText, modifierText, directObjectText, complementsText]
+  return [negText, objectClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

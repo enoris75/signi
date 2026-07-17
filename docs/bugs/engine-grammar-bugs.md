@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (35 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (28 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -50,7 +50,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File | Language |
 |---|---|---|
-| A32 | [A32-object-pronoun-not-cliticised.md](A-must-fix/A32-object-pronoun-not-cliticised.md) | en, it, fr, es, pt, de |
 | A33 | [A33-romance-complement-negative-concord.md](A-must-fix/A33-romance-complement-negative-concord.md) | it, fr, es, pt |
 | A34 | [A34-romance-negative-determiner-plural-noun.md](A-must-fix/A34-romance-negative-determiner-plural-noun.md) | it, es, pt |
 | A35 | [A35-stacked-negation-not-collapsed.md](A-must-fix/A35-stacked-negation-not-collapsed.md) | en, de, es, pt, it |
@@ -116,6 +115,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A29 | [A29-romance-locative-proper-noun-article.md](fixed/A29-romance-locative-proper-noun-article.md) | Italian, French | 2026-07-16 |
 | A30 | [A30-romance-pronominal-clitic-compound-past.md](fixed/A30-romance-pronominal-clitic-compound-past.md) | French, Spanish | 2026-07-16 |
 | A31 | [A31-romance-directional-continent-goal.md](fixed/A31-romance-directional-continent-goal.md) | Italian, French | 2026-07-16 |
+| A32 | [A32-object-pronoun-not-cliticised.md](fixed/A32-object-pronoun-not-cliticised.md) | en, it, fr, es, pt, de | 2026-07-17 |
 | A38 | [A38-romance-aspect-drops-conditional-mood.md](fixed/A38-romance-aspect-drops-conditional-mood.md) | it, fr, es, pt | 2026-07-16 |
 
 ---

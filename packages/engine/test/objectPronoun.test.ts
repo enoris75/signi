@@ -34,16 +34,13 @@ describe('object pronoun: Japanese', () => {
   });
 });
 
-// The European languages all get this wrong the same way: the engine renders a pronoun object as
-// though it were a NOUN — it prepends an article and keeps the nominative citation form ("the cat
-// sees THE I", "il gatto vede L'IO", "der Kater sieht DEN ICH"). A pronoun takes no article, uses
-// its object form, and in Romance cliticises before the verb. Each `test.fails` asserts the
-// correct target; drop the marker when the engine cliticises/case-marks a pronoun object.
-//
-// Root: a pronoun head in an object slot is routed through the noun-phrase renderer (determiner +
-// citation form) instead of a pronoun-object path. Same defect in all six, one per language below.
+// The European languages used to get this wrong the same way: the engine rendered a pronoun object
+// as though it were a NOUN — an article on the nominative citation form ("the cat sees THE I", "il
+// gatto vede L'IO", "der Kater sieht DEN ICH"). A pronoun object now takes no article and its object
+// form: English/German use it post-verbally ("sees me", "sieht ihn"), and Romance cliticises it
+// before the finite verb ("il gatto mi vede"). One per language below.
 describe('known bugs: object pronoun', () => {
-  test.fails('English uses the object form, no article: "sees me/us/you/him/her/them"', () => {
+  test('English uses the object form, no article: "sees me/us/you/him/her/them"', () => {
     expect(sees(...P1SG)).toMatchObject({ en: 'the cat sees me.' });
     expect(sees(...P1PL)).toMatchObject({ en: 'the cat sees us.' });
     expect(sees(...P2SG)).toMatchObject({ en: 'the cat sees you.' });
@@ -52,7 +49,7 @@ describe('known bugs: object pronoun', () => {
     expect(sees(...P3PL)).toMatchObject({ en: 'the cat sees them.' });
   });
 
-  test.fails('Italian cliticises before the verb: "il gatto mi/ti/lo/la/ci/vi/li vede"', () => {
+  test('Italian cliticises before the verb: "il gatto mi/ti/lo/la/ci/vi/li vede"', () => {
     expect(sees(...P1SG)).toMatchObject({ it: 'il gatto mi vede.' });
     expect(sees(...P1PL)).toMatchObject({ it: 'il gatto ci vede.' });
     expect(sees(...P2SG)).toMatchObject({ it: 'il gatto ti vede.' });
@@ -62,7 +59,7 @@ describe('known bugs: object pronoun', () => {
     expect(sees(...P3PL)).toMatchObject({ it: 'il gatto li vede.' });
   });
 
-  test.fails('French cliticises before the verb: "le chat me/te/le/la/nous/vous/les voit"', () => {
+  test('French cliticises before the verb: "le chat me/te/le/la/nous/vous/les voit"', () => {
     expect(sees(...P1SG)).toMatchObject({ fr: 'le chat me voit.' });
     expect(sees(...P1PL)).toMatchObject({ fr: 'le chat nous voit.' });
     expect(sees(...P2SG)).toMatchObject({ fr: 'le chat te voit.' });
@@ -72,7 +69,7 @@ describe('known bugs: object pronoun', () => {
     expect(sees(...P3PL)).toMatchObject({ fr: 'le chat les voit.' });
   });
 
-  test.fails('Spanish cliticises before the verb: "el gato me/te/lo/la/nos/os/los ve"', () => {
+  test('Spanish cliticises before the verb: "el gato me/te/lo/la/nos/os/los ve"', () => {
     expect(sees(...P1SG)).toMatchObject({ es: 'el gato me ve.' });
     expect(sees(...P1PL)).toMatchObject({ es: 'el gato nos ve.' });
     expect(sees(...P2SG)).toMatchObject({ es: 'el gato te ve.' });
@@ -85,7 +82,7 @@ describe('known bugs: object pronoun', () => {
   // Portuguese asserted as the Brazilian proclitic ("o gato me vê"), consistent with the corpus's
   // Brazilian choices elsewhere (você / vocês). European Portuguese would enclise ("o gato vê-me");
   // whichever is chosen, the current "o gato vê o eu" — article + nominative — is wrong.
-  test.fails('Portuguese cliticises: "o gato me/te/o/a/nos/vos/os vê"', () => {
+  test('Portuguese cliticises: "o gato me/te/o/a/nos/vos/os vê"', () => {
     expect(sees(...P1SG)).toMatchObject({ pt: 'o gato me vê.' });
     expect(sees(...P1PL)).toMatchObject({ pt: 'o gato nos vê.' });
     expect(sees(...P2SG)).toMatchObject({ pt: 'o gato te vê.' });
@@ -94,7 +91,7 @@ describe('known bugs: object pronoun', () => {
     expect(sees(...P3PL)).toMatchObject({ pt: 'o gato os vê.' });
   });
 
-  test.fails('German uses the accusative form, no article: "sieht mich/dich/ihn/sie/uns/euch"', () => {
+  test('German uses the accusative form, no article: "sieht mich/dich/ihn/sie/uns/euch"', () => {
     expect(sees(...P1SG)).toMatchObject({ de: 'der Kater sieht mich.' });
     expect(sees(...P1PL)).toMatchObject({ de: 'der Kater sieht uns.' });
     expect(sees(...P2SG)).toMatchObject({ de: 'der Kater sieht dich.' });
@@ -106,12 +103,56 @@ describe('known bugs: object pronoun', () => {
 
   // The single clearest symptom, asserted directly: no European language should attach an article
   // to a pronoun object. This is what "the cat sees THE I" / "vede L'IO" / "sieht DEN ICH" all share.
-  test.fails('no European language attaches an article to a pronoun object', () => {
+  test('no European language attaches an article to a pronoun object', () => {
     expect(sees(...P1SG).en).not.toContain('the I');
     expect(sees(...P1SG).it).not.toContain("l'io");
     expect(sees(...P1SG).fr).not.toContain('le je');
     expect(sees(...P1SG).es).not.toContain('el yo');
     expect(sees(...P1SG).pt).not.toContain('o eu');
     expect(sees(...P1SG).de).not.toContain('den ich');
+  });
+
+  // Negation composes with the clitic/object placement: English do-support, German "nicht" after
+  // the object, and the Romance clitic sitting inside the negator ("non/ne … pas/no/não me …").
+  const seesNeg = (concept: string, extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: np(concept, extra), verbPhrase: { negative: true } }));
+  test('negation composes with the object pronoun', () => {
+    expect(seesNeg(...P1SG)).toMatchObject({
+      en: 'the cat does not see me.',
+      de: 'der Kater sieht mich nicht.',
+      it: 'il gatto non mi vede.',
+      fr: 'le chat ne me voit pas.',
+      es: 'el gato no me ve.',
+      pt: 'o gato não me vê.',
+    });
+  });
+
+  // French elides me/te/le/la → m'/t'/l' before a vowel-initial verb ("m'ajoute", "l'ajoute").
+  const frAdds = (concept: string) =>
+    sayAll(clause(np('CAT'), 'ADD', { directObject: np(concept) })).fr;
+  test('French elides the clitic before a vowel-initial verb', () => {
+    expect(frAdds('FIRST_PERSON')).toBe("le chat m'ajoute.");
+    expect(frAdds('THIRD_PERSON')).toBe("le chat l'ajoute.");
+  });
+
+  // The neuter third person takes its own object form ("lo" / "es" / "it").
+  test('the neuter third person object', () => {
+    expect(sees('THIRD_PERSON', { gender: 'neut' })).toMatchObject({
+      en: 'the cat sees it.',
+      it: 'il gatto lo vede.',
+      de: 'der Kater sieht es.',
+    });
+  });
+
+  // Regression: a NOUN direct object is untouched — it keeps its article and post-verbal position.
+  test('a noun direct object is unchanged', () => {
+    expect(sees('MOUSE')).toMatchObject({
+      en: 'the cat sees the mouse.',
+      it: 'il gatto vede il topo.',
+      fr: 'le chat voit la souris.',
+      es: 'el gato ve el ratón.',
+      pt: 'o gato vê o rato.',
+      de: 'der Kater sieht die Maus.',
+    });
   });
 });
