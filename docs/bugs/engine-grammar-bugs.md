@@ -38,7 +38,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (4 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (3 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,7 +54,6 @@ _All Part A defects have been fixed — see the **Fixed** section below._
 
 | # | File |
 |---|---|
-| B4 | [B04-french-relative-superlative-second-article.md](B-can-fix/B04-french-relative-superlative-second-article.md) |
 | B5 | [B05-japanese-resultative-completive.md](B-can-fix/B05-japanese-resultative-completive.md) |
 | B6 | [B06-german-means-clause-impersonal-man.md](B-can-fix/B06-german-means-clause-impersonal-man.md) |
 | B7 | [B07-japanese-aspect-under-modal.md](B-can-fix/B07-japanese-aspect-under-modal.md) |
@@ -116,9 +115,10 @@ _All Part A defects have been fixed — see the **Fixed** section below._
 | B1b | [B01b-romance-source-adverb-inverts-nonmotion.md](fixed/B01b-romance-source-adverb-inverts-nonmotion.md) | it, fr, es, pt | 2026-07-17 |
 | B2 | [B02-english-german-negative-cause-sentiment.md](fixed/B02-english-german-negative-cause-sentiment.md) | English, German | 2026-07-17 |
 | B3 | [B03-german-conditional-clause-order.md](fixed/B03-german-conditional-clause-order.md) | German | 2026-07-17 |
+| B4 | [B04-french-relative-superlative-second-article.md](fixed/B04-french-relative-superlative-second-article.md) | French | 2026-07-17 |
 
-_B1 / B1b / B2 / B3 were documented simplifications (Part B), fixed after a product decision rather
-than as outright bugs._
+_B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
+rather than as outright bugs._
 
 ---
 

@@ -3,8 +3,8 @@ import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstCon
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 
 // Degree adverb placed before the adjective. Comparative and relative superlative share
-// "plus"/"moins"; the noun phrase's definite article distinguishes them ("un chat plus
-// grand" vs "le chat le plus grand" — the second article is an MVP approximation we skip).
+// "plus"/"moins"; the superlative repeats the definite article to distinguish them ("un chat
+// plus grand" vs "le chat le plus grand" — the doubled article is added in `splitAdjectives`).
 // Equality uses "aussi" ("aussi grand").
 const FR_DEGREE: Record<Degree, string> = {
   positive: '', more: 'plus', most: 'plus', less: 'moins', least: 'moins', equally: 'aussi',
@@ -450,8 +450,17 @@ function splitAdjectives(np: ResolvedNounPhrase): { pre: string[]; post: string[
   const gender = np.head.forms['gender'] ?? 'masc';
   const plural = (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   for (const a of np.adjectives) {
-    const word = frComparison(a, gender, plural);
+    let word = frComparison(a, gender, plural);
     if (!word) continue;
+    // A postnominal relative superlative repeats the definite article, agreed with the noun:
+    // "le chat LE plus grand", "la souris LA plus grande", "les chats LES plus grands" — the
+    // doubled article is what distinguishes the superlative from the homophonous comparative
+    // ("le chat plus grand"). Suppletives double too ("le chat le meilleur"). "plus"/"moins" are
+    // consonant-initial, so the article never elides. (Italian/Spanish/Portuguese do NOT double —
+    // there the single article is deliberate; see C01.)
+    if (isRelativeSuperlative(a)) {
+      word = `${plural ? 'les' : gender === 'fem' ? 'la' : 'le'} ${word}`;
+    }
     // A comparative/superlative adjective is postnominal in French ("le chat plus grand",
     // "le chat meilleur"), even when its plain form would precede the noun — this also avoids
     // elision artefacts ("l'aussi grand chat").

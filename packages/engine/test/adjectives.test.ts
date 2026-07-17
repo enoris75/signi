@@ -383,13 +383,47 @@ describe('known bugs: degree', () => {
 
 });
 
-// Deliberate: fr.ts says of the doubled superlative article, "the second article is an MVP
-// approximation we skip". Recorded as the correct target, not filed as an oversight.
-describe('documented simplifications: degree', () => {
-  test.fails('the French relative superlative repeats the article: le chat le plus grand', () => {
+// French doubles the definite article on a postnominal relative superlative — "le chat le plus
+// grand" — which is what distinguishes it from the homophonous comparative "le chat plus grand".
+// Italian/Spanish/Portuguese do NOT double (that homophony is deliberate; see C01). Was B04.
+describe('French relative superlative doubles the article', () => {
+  test('masculine singular: le chat le plus grand', () => {
     expect(sayAll(clause(np('CAT', {
       adjectives: ['BIG'], adjectiveDegrees: ['most'],
     }), 'EAT'))).toMatchObject({ fr: 'le chat le plus grand mange.' });
+  });
+
+  test('feminine singular agrees the article: la souris la plus grande', () => {
+    expect(sayAll(clause(np('MOUSE', {
+      adjectives: ['BIG'], adjectiveDegrees: ['most'],
+    }), 'EAT'))).toMatchObject({ fr: 'la souris la plus grande mange.' });
+  });
+
+  test('the lowered superlative ("least") doubles too: le chat le moins grand', () => {
+    expect(sayAll(clause(np('CAT', {
+      adjectives: ['BIG'], adjectiveDegrees: ['least'],
+    }), 'EAT'))).toMatchObject({ fr: 'le chat le moins grand mange.' });
+  });
+
+  test('a suppletive superlative doubles as well: le chat le meilleur', () => {
+    expect(sayAll(clause(np('CAT', {
+      adjectives: ['GOOD'], adjectiveDegrees: ['most'],
+    }), 'EAT'))).toMatchObject({ fr: 'le chat le meilleur mange.' });
+  });
+
+  // Regression: the doubling is French-only. The comparative keeps a single article in French,
+  // and Italian/Spanish/Portuguese keep a single article for the superlative (C01 homophony).
+  test('French comparative is NOT doubled, and It/Es/Pt superlatives keep one article', () => {
+    expect(sayAll(clause(np('CAT', {
+      adjectives: ['BIG'], adjectiveDegrees: ['more'],
+    }), 'EAT'))).toMatchObject({ fr: 'le chat plus grand mange.' });
+    expect(sayAll(clause(np('CAT', {
+      adjectives: ['BIG'], adjectiveDegrees: ['most'],
+    }), 'EAT'))).toMatchObject({
+      it: 'il gatto più grande mangia.',
+      es: 'el gato más grande come.',
+      pt: 'o gato maior come.',
+    });
   });
 });
 
@@ -557,7 +591,7 @@ describe('superlative with each determiner', () => {
     expect(most('definite')).toMatchObject({
       en: 'the biggest cat eats.',
       it: 'il gatto più grande mangia.', // definite article carries the superlative
-      fr: 'le chat plus grand mange.',
+      fr: 'le chat le plus grand mange.', // French doubles the article for the superlative
       es: 'el gato más grande come.',
       de: 'der größte Kater isst.', // umlaut + irregular superlative (größt), the ending is right
     });
@@ -579,7 +613,7 @@ describe('superlative with each determiner', () => {
     expect(most('all')).toMatchObject({
       en: 'all biggest cats eat.',
       it: 'tutti i gatti più grandi mangiano.',
-      fr: 'tous les chats plus grands mangent.',
+      fr: 'tous les chats les plus grands mangent.', // doubled article, agreed plural
       es: 'todos los gatos más grandes comen.',
     });
   });
