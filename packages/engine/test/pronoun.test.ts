@@ -64,9 +64,10 @@ describe('third-person pronoun by gender', () => {
 
 describe('known bugs: feminine plural pronoun', () => {
   // French, Spanish and Portuguese have a distinct FEMININE plural personal pronoun (elles / ellas /
-  // elas), but the engine renders the masculine one for a feminine-plural pronoun. Italian ("loro"),
-  // German ("sie") and English ("they") have no gendered plural, so they are unaffected.
-  test.fails('a feminine third-plural pronoun is elles / ellas / elas, not the masculine', () => {
+  // elas), which the engine now selects for a feminine-plural pronoun (it used to render the
+  // masculine). Italian ("loro"), German ("sie") and English ("they") have no gendered plural, so
+  // they are unaffected.
+  test('a feminine third-plural pronoun is elles / ellas / elas, not the masculine', () => {
     expect(sayAll(clause(np('THIRD_PERSON', { gender: 'fem', number: 'plural' }), 'RUN')))
       .toMatchObject({
         fr: 'elles courent.', // not "ils courent."
@@ -79,7 +80,7 @@ describe('known bugs: feminine plural pronoun', () => {
   // tracked correctly — the predicate adjective comes out feminine ("grandes") — so the phrase is
   // internally contradictory, a masculine pronoun with a feminine adjective ("ils semblent
   // grandes"). Only the pronoun's own form is wrong.
-  test.fails('the pronoun surface must match the feminine agreement it already carries', () => {
+  test('the pronoun surface must match the feminine agreement it already carries', () => {
     expect(sayAll(clause(np('THIRD_PERSON', { gender: 'fem', number: 'plural' }), 'SEEM', {
       complements: { predicative: { phrase: np('BIG') } },
     }))).toMatchObject({
@@ -92,8 +93,39 @@ describe('known bugs: feminine plural pronoun', () => {
   // Spanish carries the feminine through the whole plural paradigm (nosotras / vosotras / ellas), so
   // the miss is not limited to the third person: a feminine first-plural is "nosotras", not
   // "nosotros".
-  test.fails('Spanish feminine first-plural is "nosotras", not "nosotros"', () => {
+  test('Spanish feminine first-plural is "nosotras", not "nosotros"', () => {
     expect(sayAll(clause(np('FIRST_PERSON', { gender: 'fem', number: 'plural' }), 'RUN')))
       .toMatchObject({ es: 'nosotras corremos.' });
+  });
+
+  // …and the second-plural completes the Spanish paradigm: "vosotras", not "vosotros".
+  test('Spanish feminine second-plural is "vosotras"', () => {
+    expect(sayAll(clause(np('SECOND_PERSON', { gender: 'fem', number: 'plural' }), 'RUN')))
+      .toMatchObject({ es: 'vosotras corréis.' });
+  });
+
+  // Regression: a MASCULINE plural is unchanged (the default gender), across all three.
+  test('a masculine plural pronoun is unchanged', () => {
+    expect(sayAll(clause(np('THIRD_PERSON', { number: 'plural' }), 'RUN'))).toMatchObject({
+      fr: 'ils courent.',
+      es: 'ellos corren.',
+      pt: 'eles correm.',
+    });
+    expect(sayAll(clause(np('FIRST_PERSON', { number: 'plural' }), 'RUN')).es).toBe('nosotros corremos.');
+  });
+
+  // Regression: French and Portuguese have no distinct feminine first-plural, so a feminine referent
+  // keeps the invariant "nous" / "nós"; and the languages with no gendered plural are untouched.
+  test('languages without a feminine plural keep their invariant form', () => {
+    const fem3pl = { gender: 'fem', number: 'plural' } as const;
+    expect(sayAll(clause(np('FIRST_PERSON', { gender: 'fem', number: 'plural' }), 'RUN'))).toMatchObject({
+      fr: 'nous courons.',
+      pt: 'nós corremos.',
+    });
+    expect(sayAll(clause(np('THIRD_PERSON', fem3pl), 'RUN'))).toMatchObject({
+      it: 'loro corrono.',
+      de: 'sie laufen.',
+      en: 'they run.',
+    });
   });
 });

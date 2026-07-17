@@ -58,7 +58,11 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     head.forms['gender'] = gender;
     // Keep the furigana reading (if any) in step with whichever surface we select.
     if (number === 'plural') {
-      if (head.forms['plural']) head.forms['base'] = head.forms['plural'];
+      // French/Spanish/Portuguese have a distinct feminine-plural pronoun (elles / ellas / elas, and
+      // Spanish nosotras / vosotras); select it for a feminine referent, else the plain plural.
+      // Italian/German/English/Japanese have no gendered plural and carry only `plural`.
+      const pluralSurface = (gender === 'fem' && head.forms['plural_fem']) || head.forms['plural'];
+      if (pluralSurface) { head.forms['base'] = pluralSurface; head.forms['plural'] = pluralSurface; }
       if (head.forms['plural_reading']) head.forms['reading'] = head.forms['plural_reading'];
     } else if (head.forms['person'] === '3') {
       const gf = head.forms[`singular_${gender}`];
