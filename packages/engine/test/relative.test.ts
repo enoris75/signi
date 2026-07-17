@@ -294,17 +294,45 @@ describe('relative clauses: preceding-object participle agreement', () => {
 
 describe('known bugs: French preceding-object participle agreement', () => {
   // French obligatorily agrees the participle with a preceding direct object, so a feminine
-  // antecedent gives "mangée" (singular) / "mangées" (plural). The engine leaves the participle in
-  // its base ("a mangé"), which is a spelling error in French. fr.ts documents only that avoir does
-  // not agree with the SUBJECT ("elle a vu") — it says nothing about the preceding-OBJECT exception,
-  // so this is an undocumented gap, not a stated simplification.
-  test.fails('French agrees with a feminine singular antecedent: "a mangée"', () => {
+  // antecedent gives "mangée" (singular) / "mangées" (plural). The engine now agrees an avoir
+  // participle with the antecedent of an object-relative clause (the accord du COD antéposé); it
+  // still does not agree with the SUBJECT ("elle a vu").
+  test('French agrees with a feminine singular antecedent: "a mangée"', () => {
     expect(eatenByCat('MOUSE')).toMatchObject({ fr: 'la souris que le chat a mangée court.' });
   });
 
-  test.fails('…and with a feminine plural antecedent: "a mangées"', () => {
+  test('…and with a feminine plural antecedent: "a mangées"', () => {
     expect(eatenByCat('MOUSE', { number: 'plural' }))
       .toMatchObject({ fr: 'les souris que le chat a mangées courent.' });
+  });
+
+  // A masculine PLURAL antecedent also shows the agreement — the plural -s is visible even without a
+  // gender change: "les livres que le chat a mangés".
+  test('French agrees with a masculine plural antecedent: "a mangés"', () => {
+    expect(eatenByCat('BOOK', { number: 'plural' }))
+      .toMatchObject({ fr: 'les livres que le chat a mangés courent.' });
+  });
+
+  // Regression: the agreement is triggered by a preceding OBJECT only. A feminine head that is the
+  // clause's SUBJECT (a subject-relative whose object follows) does NOT agree the participle, and
+  // neither does a plain main clause — avoir never agrees with its subject.
+  test('French does not agree the participle with the subject', () => {
+    expect(sayAll(clause(np('CAT', {
+      gender: 'fem',
+      relative: { verbPhrase: { verb: 'EAT', aspect: 'resultative' }, directObject: np('MOUSE') },
+    }), 'RUN')).fr).toBe('la chatte qui a mangé la souris court.');
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'EAT', {
+      verbPhrase: { aspect: 'resultative' }, directObject: np('MOUSE'),
+    })).fr).toBe('la chatte a mangé la souris.');
+  });
+
+  // Regression: Spanish and Portuguese still never agree the haber/ter participle with the
+  // antecedent, plural or not.
+  test('Spanish and Portuguese still do not agree with a plural antecedent', () => {
+    expect(eatenByCat('MOUSE', { number: 'plural' })).toMatchObject({
+      es: 'los ratones que el gato ha comido corren.',
+      pt: 'os ratos que o gato comeu correm.',
+    });
   });
 });
 

@@ -28,3 +28,28 @@ is currently blocked by A32.)
 |---|---|
 | **Test** | `relative.test.ts` → *known bugs: French preceding-object participle agreement* (2 tests) |
 | **Correct today** | same file → *relative clauses: preceding-object participle agreement* (es/pt + masculine control) |
+
+## Resolved
+
+Fixed 2026-07-17, in [`fr.ts`](../../../packages/engine/src/languages/fr.ts):
+
+- **`aspectVerbFr`** gained an optional `precedingObjectForms` argument. An **avoir** resultative
+  participle, which still does not agree with the subject (`elle a vu`), now agrees with a *preceding
+  direct object* when one is supplied — `agreeParticipleFr(part, precedingObjectForms)` — the *accord
+  du participe passé du COD antéposé*.
+- **`predicateText`** threads the argument through to `aspectVerbFr`.
+- **`relativeText`** passes the antecedent's forms (`np.head.forms`) as the preceding object **only
+  when `rel.headRole === 'directObject'`** — an object-relative. A subject-relative or a
+  complement-role head passes nothing, so no agreement fires there.
+
+Result: `la souris que le chat a mangée` (fem sg), `les souris que le chat a mangées` (fem pl), `les
+livres que le chat a mangés` (masc pl — the -s is visible). A feminine *subject* (`la chatte qui a
+mangé la souris`) and a plain main clause (`la chatte a mangé la souris`) are unchanged, since avoir
+never agrees with its subject. Italian's optional relative-clause agreement and Spanish/Portuguese's
+non-agreeing `haber`/`ter` participles are untouched.
+
+- **Tests:** [`packages/engine/test/relative.test.ts`](../../../packages/engine/test/relative.test.ts)
+  → *known bugs: French preceding-object participle agreement*. Both pinning `test.fails` are now
+  passing `test`s, plus added cases: a masculine-plural antecedent (`a mangés`), a regression that the
+  participle does NOT agree with a subject (object-following relative, and a main clause), and a
+  regression that Spanish/Portuguese still do not agree a plural antecedent.

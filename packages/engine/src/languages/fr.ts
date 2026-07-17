@@ -345,6 +345,9 @@ function aspectVerbFr(
   tense: Tense,
   aspect: Aspect,
   mood?: Mood,
+  // The gender/number of a PRECEDING direct object, when there is one — the antecedent of an
+  // object-relative clause. French agrees an avoir participle with it (see the tail below).
+  precedingObjectForms?: Record<string, string>,
 ): { finite: string; tail: string } {
   const inf = verbForms['base'] ?? '';
   const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
@@ -358,7 +361,12 @@ function aspectVerbFr(
   const auxWord = etre ? etreFinite : auxFiniteFr(AVOIR_AUX, AVOIR_FR, subjectForms, tense, mood);
   return {
     finite: reflexiveFinite(verbForms, subjectForms, auxWord),
-    tail: etre ? agreeParticipleFr(part, subjectForms) : part,
+    // An être participle agrees with the subject ("elle est allée"). An avoir participle does NOT
+    // agree with the subject ("elle a vu"), but DOES agree with a PRECEDING direct object — the
+    // accord du COD antéposé: "la souris que le chat a mangée". Without one it keeps its base.
+    tail: etre
+      ? agreeParticipleFr(part, subjectForms)
+      : precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part,
   };
 }
 
@@ -675,6 +683,9 @@ function predicateText(
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  // Set when this is an object-relative clause: the antecedent's forms, which an avoir participle
+  // agrees with (the accord du COD antéposé). Absent for a main clause / subject-relative.
+  precedingObjectForms?: Record<string, string>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
@@ -717,7 +728,7 @@ function predicateText(
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
-    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood);
+    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms);
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
   } else if (verbNegative || aucun || modifierIsNegative) {
@@ -774,7 +785,10 @@ function relativeText(np: ResolvedNounPhrase): string {
   }
   const subjText = subjectText(rel.subject);
   const relzr = joinArt(VOWEL_START.test(subjText) ? "qu'" : 'que', subjText);
-  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements);
+  // When the head is the clause's DIRECT OBJECT, it is a preceding object and an avoir participle
+  // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement.
+  const precedingObject = rel.headRole === 'directObject' ? np.head.forms : undefined;
+  const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject);
   return `${relzr} ${pred}`.trim();
 }
 
