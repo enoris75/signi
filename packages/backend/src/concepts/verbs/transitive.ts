@@ -6,7 +6,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'CUT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'terminus', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to divide or wound with a sharp edge',
     emoji: '✂️',
     forms: {
@@ -72,7 +72,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'EAT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume food',
     emoji: '🍴',
     forms: {
@@ -138,7 +138,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'DRINK',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume liquid',
     emoji: '🥤',
     forms: {
@@ -204,7 +204,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'SEE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to perceive with the eyes',
     emoji: '👁️',
     forms: {
@@ -270,7 +270,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'LOVE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to feel deep affection',
     emoji: '❤️',
     forms: {
@@ -336,7 +336,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'KILL',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to cause the death of',
     emoji: '🔪',
     forms: {
@@ -468,7 +468,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'READ',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'terminus', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to look at and understand written text',
     emoji: '📖',
     forms: {
@@ -534,7 +534,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'CRY_OUT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative', 'terminus'],
+    complements: ['manner', 'cause', 'locative', 'terminus'],
     description: 'to cry out; to shout or exclaim loudly',
     emoji: '📢',
     synonym: 'shout',
@@ -601,7 +601,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'BITE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to grip or cut into with the teeth',
     emoji: '🦷',
     forms: {
@@ -667,7 +667,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'BEAT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to strike repeatedly; to defeat in a contest',
     emoji: '🥊',
     synonym: 'hit/defeat',
@@ -734,7 +734,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'SET_ON_FIRE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to set (something) on fire; to cause to burn',
     emoji: '🧨',
     synonym: 'set on fire',
@@ -803,7 +803,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'EXTINGUISH',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to put out (a fire); to cause to stop burning',
     emoji: '🧯',
     synonym: 'extinguish',
@@ -872,7 +872,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'BUY',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative', 'source', 'instrumental'],
+    complements: ['manner', 'cause', 'locative', 'source', 'instrumental'],
     description: 'to acquire in exchange for money',
     emoji: '🛒',
     forms: {
@@ -1004,7 +1004,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'HOLD',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to contain or keep',
     emoji: '📦',
     forms: {
@@ -1070,7 +1070,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'MAKE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to bring into existence by shaping or assembling',
     emoji: '🔨',
     synonym: 'create',
@@ -1137,7 +1137,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'CLICK',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to press a mouse button or select by pressing',
     emoji: '🖱️',
     forms: {
@@ -1203,7 +1203,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'CHOOSE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to pick one option from several',
     emoji: '☑️',
     synonym: 'select',
@@ -1270,7 +1270,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'SELECT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     // Distinct from CHOOSE: not "pick one option over the others" but "mark this item as
     // the one acted on" — the interface sense (select a word, select a slot).
     description: 'to mark out an item as the one to act on',
@@ -1342,7 +1342,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'TYPE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to write with a keyboard',
     emoji: '⌨️',
     forms: {
@@ -1409,7 +1409,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'SAVE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to store something so it can be retrieved later',
     emoji: '💾',
     forms: {
@@ -1476,7 +1476,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'LOAD',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['source', 'cause'],
+    complements: ['manner', 'source', 'cause'],
     description: 'to bring stored content back in',
     emoji: '📂',
     forms: {
@@ -1543,7 +1543,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'ADD',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to put something together with something else',
     emoji: '➕',
     forms: {
@@ -1610,7 +1610,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'EXPORT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to send content out to another place or format',
     emoji: '📤',
     forms: {
@@ -1677,7 +1677,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'IMPORT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['source', 'cause'],
+    complements: ['manner', 'source', 'cause'],
     description: 'to bring content in from another place or format',
     emoji: '📥',
     forms: {
@@ -1744,7 +1744,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'CLEAR',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause'],
+    complements: ['manner', 'cause'],
     description: 'to empty something of its contents',
     emoji: '🧹',
     forms: {
@@ -1811,7 +1811,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'COORDINATE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative', 'instrumental'],
+    complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to make separate parts or people work together',
     emoji: '🎛️',
     forms: {
@@ -1878,7 +1878,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'TIDY_UP',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to put back in order what was left in a mess',
     emoji: '🧹',
     forms: {
@@ -1948,7 +1948,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'COMPACT',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause'],
+    complements: ['manner', 'instrumental', 'cause'],
     description: 'to press something into a smaller space without losing what it holds',
     emoji: '🗜️',
     synonym: 'compress',
@@ -2017,7 +2017,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'EXPAND',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'cause'],
+    complements: ['manner', 'instrumental', 'cause'],
     description: 'to open something out into a larger space',
     emoji: '↔️',
     synonym: 'enlarge',
@@ -2088,7 +2088,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'HIDE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['locative', 'cause', 'instrumental'],
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to put something out of sight',
     emoji: '🙈',
     forms: {
@@ -2156,7 +2156,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'START',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['instrumental', 'terminus', 'cause', 'locative'],
+    complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to cause something to begin',
     emoji: '▶️',
     forms: {
@@ -2225,7 +2225,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'NAME',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause'],
+    complements: ['manner', 'cause'],
     description: 'to be the name of; to give a name to',
     emoji: '🏷️',
     forms: {
@@ -2291,7 +2291,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'DESCRIBE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'instrumental'],
+    complements: ['manner', 'cause', 'instrumental'],
     description: 'to say what something is like',
     emoji: '🖊️',
     forms: {
@@ -2357,7 +2357,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'MODIFY',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative', 'instrumental'],
+    complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to qualify or alter another word',
     emoji: '🔧',
     forms: {
@@ -2423,7 +2423,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'EXPRESS',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to convey or put into words',
     emoji: '🗣️',
     forms: {
@@ -2489,7 +2489,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'REPLACE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['cause', 'locative'],
+    complements: ['manner', 'cause', 'locative'],
     description: 'to stand in for; to take the place of',
     emoji: '🔄',
     synonym: 'stand for',

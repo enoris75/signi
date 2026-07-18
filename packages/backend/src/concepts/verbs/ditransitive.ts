@@ -7,7 +7,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'GIVE',
     role: 'verb',
     transitivity: 'ditransitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to hand something to someone',
     emoji: '🎁',
     forms: {
@@ -71,7 +71,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'SHOW',
     role: 'verb',
     transitivity: 'ditransitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to make something visible to someone',
     emoji: '👁️',
     forms: {
@@ -137,7 +137,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'SEND',
     role: 'verb',
     transitivity: 'ditransitive',
-    complements: ['terminus', 'cause'],
+    complements: ['manner', 'terminus', 'cause'],
     description: 'to dispatch something to someone',
     emoji: '📨',
     forms: {

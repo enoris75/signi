@@ -6,7 +6,7 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'GO',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['locative', 'direction', 'source', 'route', 'cause'],
+    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move or travel from one place to another',
     emoji: '🚶',
     forms: {
