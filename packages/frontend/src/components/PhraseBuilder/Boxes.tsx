@@ -289,6 +289,7 @@ export function SatelliteButton({
     <Tooltip title={tooltip}>
       <IconButton
         size="small"
+        data-testid={`satellite-${sat.key}`}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={sat.onToggle}
         sx={{

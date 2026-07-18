@@ -1,5 +1,6 @@
 import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounElement, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import { canCoordinateImperative, defaultDefiniteness, isNounGroup, isPronominalPossessor, nounConjuncts } from '@signi/shared';
+import { mannerRelation } from './types.js';
 import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
@@ -261,8 +262,26 @@ function resolveComplements(
     const phrase: NounElement = isNounGroup(value.phrase)
       ? { ...value.phrase, conjuncts: value.phrase.conjuncts.map(withDeterminer) }
       : withDeterminer(value.phrase);
+    const resolvedPhrase = resolveNounElement(phrase, language, lookup);
+    // An *adjective-modified* measure manner adverbial names a generic rate ("at high speed"),
+    // not an identifiable one, so a definite article reads oddly ("at *the* high speed"). Force
+    // it bare. Two cases keep their article, as they are genuinely specific: a bare measure noun
+    // is anaphoric ("at *the* speed" — a known speed), and a possessor makes it specific ("at
+    // *the* speed of light"). Applied after resolution because the manner relation and adjectives
+    // are only known once the head is looked up; the determiner is fixed for this slot in the UI.
+    if (type === 'manner') {
+      for (const conjunct of resolvedPhrase.conjuncts) {
+        if (
+          mannerRelation(conjunct.head.forms) === 'measure' &&
+          conjunct.adjectives.length > 0 &&
+          !conjunct.possessor
+        ) {
+          conjunct.head.forms['definiteness'] = 'bare';
+        }
+      }
+    }
     out[type as ComplementType] = {
-      phrase: resolveNounElement(phrase, language, lookup),
+      phrase: resolvedPhrase,
       // The action an instrument *is* at the process/concept levels ("by **choosing** a word").
       // It is non-finite — it takes no tense, mood or agreement of its own — so it resolves with
       // none, and each engine reads the lexical forms (gerund / infinitive / te-form) it needs.

@@ -50,6 +50,50 @@ describe('manner adverbial (complemento di modo)', () => {
     });
   });
 
+  // A measure names a rate, not an identifiable thing, so a *definite* article reads oddly
+  // ("at the high speed"). The translator forces a possessor-less measure adverbial bare, so
+  // the definite determiner renders identically to the bare one above — never "at the …".
+  test('measure — a definite determiner with no possessor is forced bare', () => {
+    expect(runManner(np('SPEED', { adjectives: ['HIGH'], definiteness: 'definite' }))).toEqual({
+      en: 'the cat runs at high speed.',
+      it: 'il gatto corre a velocità alta.',
+      fr: 'le chat court à vitesse haute.',
+      es: 'el gato corre a velocidad alta.',
+      pt: 'o gato corre a velocidade alta.',
+      de: 'der Kater läuft mit hoher Geschwindigkeit.',
+      ja: '猫は高い速さで走ります。',
+    });
+  });
+
+  // The bare-forcing is gated on an adjective: a *plain* measure noun is anaphoric ("at the
+  // speed" — a known speed), and a bare measure noun alone is non-idiomatic in Romance
+  // ("a velocità"), so the definite article is kept.
+  test('measure — a plain measure noun (no adjective) keeps its article', () => {
+    expect(runManner(np('SPEED', { definiteness: 'definite' }))).toEqual({
+      en: 'the cat runs at the speed.',
+      it: 'il gatto corre alla velocità.',
+      fr: 'le chat court à la vitesse.',
+      es: 'el gato corre a la velocidad.',
+      pt: 'o gato corre à velocidade.',
+      de: 'der Kater läuft mit der Geschwindigkeit.',
+      ja: '猫は速さで走ります。',
+    });
+  });
+
+  // A possessor makes the measure specific, so the definite article is correct and kept —
+  // the bare-forcing rule is gated on there being no possessor.
+  test('measure — a possessor keeps the definite article', () => {
+    expect(runManner(np('SPEED', { possessor: np('LIGHT'), definiteness: 'definite' }))).toEqual({
+      en: "the cat runs at the light's speed.",
+      it: 'il gatto corre alla velocità della luce.',
+      fr: 'le chat court à la vitesse de la lumière.',
+      es: 'el gato corre a la velocidad de la luz.',
+      pt: 'o gato corre à velocidade da luz.',
+      de: 'der Kater läuft mit der Geschwindigkeit vom Licht.',
+      ja: '猫は光の速さで走ります。',
+    });
+  });
+
   // means → "with": the unmarked relation (CARE declares none explicitly → default means).
   test('means — CARE takes "with"', () => {
     expect(runManner(np('CARE', { definiteness: 'bare' }))).toEqual({

@@ -26,5 +26,49 @@ test.describe('adverbial of manner', () => {
 
     // There is no preposition selector on the manner box — the relation is not user-chosen.
     await expect(page.getByRole('button', { name: 'at — measure / degree' })).toHaveCount(0);
+
+    // A measure adverbial is fixed bare — the determiner is not user-changeable — so its
+    // determiner satellite is withdrawn (the subject keeps its own).
+    await expect(page.getByTestId('satellite-mannerDefiniteness')).toHaveCount(0);
+    await expect(page.getByTestId('satellite-subjectDefiniteness')).toBeVisible();
+  });
+
+  // An adjective-modified measure names a *generic* rate ("at high speed"), so the definite
+  // article the plain case carries would read oddly ("at the high speed"). The engine forces it
+  // bare end-to-end, the moment the adjective is added — no determiner input involved.
+  test('an adjective on a measure adverbial renders bare, not "at the high speed"', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'RUN');
+    await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+
+    const box = page.getByTestId('box-manner');
+    await box.getByTestId('typeahead-noun').fill('speed');
+    await page.locator('[data-testid="typeahead-option"][data-concept="SPEED"]').click();
+
+    // Reveal the adjective satellite on the manner box and pick HIGH.
+    await page.getByTestId('satellite-mannerAdjective').click();
+    const adjInput = page.getByTestId('box-mannerAdjective').getByPlaceholder('type an adjective…');
+    await adjInput.fill('high');
+    await page.locator('[data-testid="typeahead-option"][data-concept="HIGH"]').click();
+
+    expect(await app.sentence('en')).toBe('the cat runs at high speed.');
+    expect(await app.sentence('it')).toBe('il gatto corre a velocità alta.');
+    expect(await app.sentence('de')).toBe('der Kater läuft mit hoher Geschwindigkeit.');
+  });
+
+  // A similative manner noun (WATER, "like the water") *does* keep a user-changeable determiner —
+  // the withdrawal is specific to the measure relation, so its determiner satellite is present.
+  test('a similative manner adverbial keeps its determiner control', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+
+    const box = page.getByTestId('box-manner');
+    await box.getByTestId('typeahead-noun').fill('water');
+    await page.locator('[data-testid="typeahead-option"][data-concept="WATER"]').click();
+
+    // The similative manner adverbial keeps its own determiner reveal control.
+    await expect(page.getByTestId('satellite-mannerDefiniteness')).toBeVisible();
   });
 });

@@ -544,9 +544,13 @@ export function buildSatellites(
           icon: <ArticleOutlinedIcon sx={iconSx} />,
           // The predicative plus the adposition-bearing spatial/dative complements carry a
           // determiner, and only for a noun head (a pronoun cause takes none). Cause is not
-          // in the set — it folds the quantifier into its connector.
+          // in the set — it folds the quantifier into its connector. A *measure* manner adverbial
+          // names a rate, not an identifiable thing, so the engine fixes it bare (see the
+          // translator) — the determiner is not user-changeable there, so it is withdrawn.
           available:
-            DETERMINER_COMPLEMENT_TYPES.includes(type) && concept?.role === "noun",
+            DETERMINER_COMPLEMENT_TYPES.includes(type) &&
+            concept?.role === "noun" &&
+            !(type === "manner" && concept?.mannerRelation === "measure"),
           hasValue: Boolean(
             def && def !== defaultDefiniteness(type),
           ),
