@@ -1340,6 +1340,7 @@ export const nouns: ConceptSeed[] = [
     id: 'CONTAINER',
     role: 'noun',
     description: 'an object that holds or stores things',
+    definition: whoGloss('OBJECT_THING', 'HOLD', 'OBJECT_THING'),
     emoji: '📦',
     forms: {
       en: { base: 'container', plural: 'containers', count: 'singular' },
@@ -1580,6 +1581,7 @@ export const nouns: ConceptSeed[] = [
     id: 'POSSESSOR',
     role: 'noun',
     description: 'the one who owns or holds something',
+    definition: whoGloss('PERSON', 'OWN', 'OBJECT_THING'),
     emoji: '🔑',
     animate: true,
     forms: {

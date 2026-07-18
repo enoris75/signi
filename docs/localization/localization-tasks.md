@@ -46,7 +46,6 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 | # | File | Seed first → unlocks |
 |---|---|---|
-| B03 | [B03-places.md](B-needs-seed/B03-places.md) | PLACE/BUILDING, LIVE, CONFINE → HOUSE, HOME, MARKET, PRISON |
 | B04 | [B04-possession.md](B-needs-seed/B04-possession.md) | OWN, HOLD → POSSESSOR, CONTAINER |
 | B05 | [B05-artifacts.md](B-needs-seed/B05-artifacts.md) | WRITTEN, ROUND, MONEY → BOOK, COIN |
 | B06 | [B06-grammar-words.md](B-needs-seed/B06-grammar-words.md) | NAME, DESCRIBE, MODIFY, EXPRESS → NOUN, VERB, ADJECTIVE, ADVERB, PRONOUN |
@@ -60,6 +59,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | adverb manner render — all 6 adverbs |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
+| C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
 
 ### Done
 

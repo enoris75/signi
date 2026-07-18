@@ -458,10 +458,12 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['EXPAND', 'la gatta ha espanso.'], ['EXPORT', 'la gatta ha esportato.'],
     ['EXTINGUISH', 'la gatta ha spento.'], ['GIVE', 'la gatta ha dato.'],
     ['GO', 'la gatta è andata.'], ['HIDE', 'la gatta ha nascosto.'],
+    ['HOLD', 'la gatta ha contenuto.'],
     ['IMPORT', 'la gatta ha importato.'], ['JUMP', 'la gatta ha saltato.'],
     ['KILL', 'la gatta ha ucciso.'], ['KNOW', 'la gatta ha saputo.'],
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
-    ['MAKE', 'la gatta ha fatto.'], ['READ', 'la gatta ha letto.'],
+    ['MAKE', 'la gatta ha fatto.'], ['OWN', 'la gatta ha posseduto.'],
+    ['READ', 'la gatta ha letto.'],
     ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
     ['SEE', 'la gatta ha visto.'], ['SEEM', 'la gatta è sembrata.'],
     ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
@@ -472,6 +474,63 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
 
   test.each(IT)('%s → %s', (id, expected) => {
     expect(femResult(id).it).toBe(expected);
+  });
+});
+
+// The two stative possession verbs (OWN, HOLD): pin their transitive paradigm — present and the
+// simple past — across every language, so a refactor can't silently break their conjugation.
+describe('possession verbs: OWN and HOLD', () => {
+  const owns = (extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'OWN', { directObject: np('MOUSE'), verbPhrase: extra }));
+  const holds = (extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'HOLD', { directObject: np('MOUSE'), verbPhrase: extra }));
+
+  test('OWN in the present', () => {
+    expect(owns()).toEqual({
+      en: 'the cat owns the mouse.',
+      it: 'il gatto possiede il topo.',
+      fr: 'le chat possède la souris.',
+      es: 'el gato posee el ratón.',
+      pt: 'o gato possui o rato.',
+      de: 'der Kater besitzt die Maus.',
+      ja: '猫はネズミを所有します。',
+    });
+  });
+
+  test('OWN in the past', () => {
+    expect(owns({ tense: 'past' })).toEqual({
+      en: 'the cat owned the mouse.',
+      it: 'il gatto possedé il topo.',
+      fr: 'le chat posséda la souris.',
+      es: 'el gato poseyó el ratón.',
+      pt: 'o gato possuiu o rato.',
+      de: 'der Kater besaß die Maus.',
+      ja: '猫はネズミを所有しました。',
+    });
+  });
+
+  test('HOLD in the present', () => {
+    expect(holds()).toEqual({
+      en: 'the cat holds the mouse.',
+      it: 'il gatto contiene il topo.',
+      fr: 'le chat contient la souris.',
+      es: 'el gato contiene el ratón.',
+      pt: 'o gato contém o rato.',
+      de: 'der Kater enthält die Maus.',
+      ja: '猫はネズミを保持します。',
+    });
+  });
+
+  test('HOLD in the past', () => {
+    expect(holds({ tense: 'past' })).toEqual({
+      en: 'the cat held the mouse.',
+      it: 'il gatto contenne il topo.',
+      fr: 'le chat contint la souris.',
+      es: 'el gato contuvo el ratón.',
+      pt: 'o gato conteve o rato.',
+      de: 'der Kater enthielt die Maus.',
+      ja: '猫はネズミを保持しました。',
+    });
   });
 });
 
