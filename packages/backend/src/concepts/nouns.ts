@@ -1652,6 +1652,21 @@ export const nouns: ConceptSeed[] = [
   {
     // The physical thing, as against the grammatical OBJECT_GRAMMAR the same English word also
     // means: this is the one a hand closes on (ja 物体, not 目的語), which is why the ids split.
+    id: 'ACTION',
+    role: 'noun',
+    description: 'a thing done; what a verb expresses',
+    emoji: '🎬',
+    forms: {
+      en: { base: 'action', plural: 'actions', count: 'singular' },
+      it: { base: 'azione', plural: 'azioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'action', plural: 'actions', gender: 'fem', count: 'singular' },
+      de: { base: 'Handlung', plural: 'Handlungen', gender: 'fem', count: 'singular' },
+      es: { base: 'acción', plural: 'acciones', gender: 'fem', count: 'singular' },
+      ja: { base: '動作', count: 'singular', reading: 'どうさ' },
+      pt: { base: 'ação', plural: 'ações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'OBJECT_THING',
     role: 'noun',
     description: 'a material thing one can hold or use',

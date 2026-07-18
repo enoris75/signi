@@ -439,6 +439,31 @@ describe('subject: B02 kin and cattle nouns', () => {
   });
 });
 
+// ACTION, seeded for B06 (the VERB definition — "a word that expresses actions"). Feminine in
+// every gendered language (azione / action / Handlung / acción / ação), and vowel-initial in
+// Italian and French so the definite article elides (l'azione / l'action).
+describe('subject: the B06 abstract noun ACTION', () => {
+  test('ACTION is feminine, elides the article in it/fr, and pluralises', () => {
+    expect(subject(np('ACTION'))).toEqual({
+      en: 'the action runs.',
+      it: "l'azione corre.",
+      fr: "l'action court.",
+      de: 'die Handlung läuft.',
+      es: 'la acción corre.',
+      ja: '動作は走ります。',
+      pt: 'a ação corre.',
+    });
+    expect(subject(np('ACTION', { number: 'plural' }))).toMatchObject({
+      en: 'the actions run.',
+      it: 'le azioni corrono.',
+      fr: 'les actions courent.',
+      de: 'die Handlungen laufen.',
+      es: 'las acciones corren.',
+      pt: 'as ações correm.',
+    });
+  });
+});
+
 // `gender` carries three values, but 'neut' is meaningful only for a pronoun head ("it"). On a
 // noun it is a no-op: the head keeps its own (default/masculine) lexeme and gender.
 describe('subject: the neuter gender value on a noun head', () => {
