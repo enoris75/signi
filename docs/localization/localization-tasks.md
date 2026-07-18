@@ -46,7 +46,6 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 | # | File | Seed first → unlocks |
 |---|---|---|
-| B02 | [B02-adult-kin.md](B-needs-seed/B02-adult-kin.md) | ADULT, PARENT, WOMAN → MAN, FATHER, OX |
 | B03 | [B03-places.md](B-needs-seed/B03-places.md) | PLACE/BUILDING, LIVE, CONFINE → HOUSE, HOME, MARKET, PRISON |
 | B04 | [B04-possession.md](B-needs-seed/B04-possession.md) | OWN, HOLD → POSSESSOR, CONTAINER |
 | B05 | [B05-artifacts.md](B-needs-seed/B05-artifacts.md) | WRITTEN, ROUND, MONEY → BOOK, COIN |
@@ -75,6 +74,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | A06 | [done/A06-builder.md](done/A06-builder.md) | BUILDER → a person who makes objects |
 | A07 | [done/A07-butcher.md](done/A07-butcher.md) | BUTCHER → a person who kills animals |
 | B01 | [done/B01-wild-domestic-animals.md](done/B01-wild-domestic-animals.md) | DOG → a domestic canine mammal; WOLF → a wild canine mammal |
+| B02 | [done/B02-adult-kin.md](done/B02-adult-kin.md) | MAN → an adult male person; WOMAN → an adult female person; FATHER → a male parent; OX → a castrated adult male bovine |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

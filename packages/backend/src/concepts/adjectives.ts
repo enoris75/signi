@@ -126,6 +126,23 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // "adult" in the general sense — fully grown — applying to people and animals alike, so
+    // Japanese takes the everyday 大人の rather than the human-only, legal 成人の. Noun-adjective (の).
+    id: 'ADULT',
+    role: 'adjective',
+    description: 'fully grown',
+    emoji: '🧑',
+    forms: {
+      en: { base: 'adult' },
+      it: { base: 'adulto' },
+      fr: { base: 'adulte' },
+      de: { base: 'erwachsen' },
+      es: { base: 'adulto' },
+      ja: { base: '大人の', reading: 'おとなの' },
+      pt: { base: 'adulto' },
+    },
+  },
+  {
     id: 'MALE',
     role: 'adjective',
     description: 'of the sex that produces sperm; masculine',
@@ -153,6 +170,23 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'femenino' },
       ja: { base: '女性の', reading: 'じょせいの' },
       pt: { base: 'feminino' },
+    },
+  },
+  {
+    // A past-participle adjective: agrees in Romance (castrato/castrata) and, in Japanese, is
+    // verb-derived — the plain past 去勢された attaches directly, like 疲れた (TIRED), no linker.
+    id: 'CASTRATED',
+    role: 'adjective',
+    description: 'having the testicles removed',
+    emoji: '✂️',
+    forms: {
+      en: { base: 'castrated' },
+      it: { base: 'castrato' },
+      fr: { base: 'castré' },
+      de: { base: 'kastriert' },
+      es: { base: 'castrado' },
+      ja: { base: '去勢された', reading: 'きょせいされた' },
+      pt: { base: 'castrado' },
     },
   },
   {

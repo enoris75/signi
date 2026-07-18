@@ -272,6 +272,87 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('ein wildes hundeartiges Säugetier');
   });
 
+  test('a genus+differentia noun definition renders (localize-seed B02: MAN)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + ADULT + MALE.
+    await app.subjectInput.fill('man');
+    const manEn = page.locator('[data-testid="typeahead-option"][data-concept="MAN"]');
+    await expect(manEn).toBeVisible();
+    await manEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an adult male person');
+
+    // Italian: the adjectives agree with the grammatically feminine "persona", and the two
+    // postnominal ones coordinate with "e" — "una persona adulta e maschile".
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('man');
+    const manIt = page.locator('[data-testid="typeahead-option"][data-concept="MAN"]');
+    await expect(manIt).toBeVisible();
+    await manIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una persona adulta e maschile');
+  });
+
+  test('a genus+differentia noun definition renders (localize-seed B02: WOMAN)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + ADULT + FEMALE.
+    await app.subjectInput.fill('woman');
+    const womanEn = page.locator('[data-testid="typeahead-option"][data-concept="WOMAN"]');
+    await expect(womanEn).toBeVisible();
+    await womanEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an adult female person');
+
+    // French: the same plan, localized by the engine.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('woman');
+    const womanFr = page.locator('[data-testid="typeahead-option"][data-concept="WOMAN"]');
+    await expect(womanFr).toBeVisible();
+    await womanFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('une personne adulte et féminine');
+  });
+
+  test('a genus+differentia noun definition renders (localize-seed B02: FATHER)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from the kinship genus PARENT + MALE.
+    await app.subjectInput.fill('father');
+    const fatherEn = page.locator('[data-testid="typeahead-option"][data-concept="FATHER"]');
+    await expect(fatherEn).toBeVisible();
+    await fatherEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a male parent');
+
+    // German: the same plan — "ein männliches Elternteil" (neuter Elternteil, agreed adjective).
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('father');
+    const fatherDe = page.locator('[data-testid="typeahead-option"][data-concept="FATHER"]');
+    await expect(fatherDe).toBeVisible();
+    await fatherDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein männliches Elternteil');
+  });
+
+  test('a genus+three-differentia noun definition renders (localize-seed B02: OX)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from BOVINE + CASTRATED + ADULT + MALE — three differentia on one genus.
+    await app.subjectInput.fill('ox');
+    const oxEn = page.locator('[data-testid="typeahead-option"][data-concept="OX"]');
+    await expect(oxEn).toBeVisible();
+    await oxEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a castrated adult male bovine');
+
+    // Spanish: three postnominal adjectives, comma-separated with "y" before the last.
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('ox');
+    const oxEs = page.locator('[data-testid="typeahead-option"][data-concept="OX"]');
+    await expect(oxEs).toBeVisible();
+    await oxEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('un bovino castrado, adulto y masculino');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

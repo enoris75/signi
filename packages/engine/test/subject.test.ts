@@ -378,6 +378,67 @@ describe('subject: three genders, indefinite + two adjectives', () => {
   });
 });
 
+// The kinship and cattle nouns seeded for B02 (MAN/FATHER/OX localization): WOMAN (inherently
+// feminine), PARENT (a genus with a feminine counterpart), BOVINE (a genus, German neuter Rind).
+describe('subject: B02 kin and cattle nouns', () => {
+  test('WOMAN is inherently feminine, and pluralises', () => {
+    expect(subject(np('WOMAN'))).toEqual({
+      en: 'the woman runs.',
+      it: 'la donna corre.',
+      fr: 'la femme court.',
+      de: 'die Frau läuft.',
+      es: 'la mujer corre.',
+      ja: '女は走ります。',
+      pt: 'a mulher corre.',
+    });
+    expect(subject(np('WOMAN', { number: 'plural' }))).toMatchObject({
+      en: 'the women run.', // irregular English plural
+      it: 'le donne corrono.',
+      de: 'die Frauen laufen.',
+      es: 'las mujeres corren.',
+      pt: 'as mulheres correm.',
+    });
+  });
+
+  test('PARENT is a masculine genus with a feminine counterpart', () => {
+    expect(subject(np('PARENT'))).toEqual({
+      en: 'the parent runs.',
+      it: 'il genitore corre.',
+      fr: 'le parent court.',
+      de: 'das Elternteil läuft.', // neuter
+      es: 'el progenitor corre.',
+      ja: '親は走ります。',
+      pt: 'o progenitor corre.',
+    });
+    // gender:'fem' selects the feminine lexeme where the language has one (genitrice / progenitora);
+    // French and German, which do not, keep the base form.
+    expect(subject(np('PARENT', { gender: 'fem', number: 'plural' }))).toMatchObject({
+      it: 'le genitrici corrono.',
+      es: 'las progenitoras corren.',
+      pt: 'as progenitoras correm.',
+      fr: 'les parents courent.',
+      de: 'die Elternteile laufen.',
+    });
+  });
+
+  test('BOVINE is a genus — masculine in Romance, neuter (Rind) in German', () => {
+    expect(subject(np('BOVINE'))).toEqual({
+      en: 'the bovine runs.',
+      it: 'il bovino corre.',
+      fr: 'le bovin court.',
+      de: 'das Rind läuft.', // neuter
+      es: 'el bovino corre.',
+      ja: '牛は走ります。',
+      pt: 'o bovino corre.',
+    });
+    expect(subject(np('BOVINE', { number: 'plural' }))).toMatchObject({
+      it: 'i bovini corrono.',
+      de: 'die Rinder laufen.', // Rind → Rinder
+      es: 'los bovinos corren.',
+    });
+  });
+});
+
 // `gender` carries three values, but 'neut' is meaningful only for a pronoun head ("it"). On a
 // noun it is a no-op: the head keeps its own (default/masculine) lexeme and gender.
 describe('subject: the neuter gender value on a noun head', () => {

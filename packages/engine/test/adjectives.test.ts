@@ -718,10 +718,10 @@ describe('known bugs: degree (extended)', () => {
 // grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
-  ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'], ['BROWN', 'brown'],
-  ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['COLD', 'cold'], ['DEFINITE', 'definite'],
-  ['DIRECT', 'direct'], ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['FEMALE', 'female'],
-  ['FIRST', 'first'], ['GOOD', 'good'],
+  ['ADULT', 'adult'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
+  ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
+  ['COLD', 'cold'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISTAL', 'distal'],
+  ['DOMESTIC', 'domestic'], ['FEMALE', 'female'], ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['MALE', 'male'], ['MULTAL', 'multal'],
@@ -772,6 +772,8 @@ describe('adjective position: Italian', () => {
     expect(it('WILD')).toBe('il gatto selvatico mangia.');
     expect(it('DOMESTIC')).toBe('il gatto domestico mangia.');
     expect(it('CANINE')).toBe('il gatto canino mangia.');
+    expect(it('ADULT')).toBe('il gatto adulto mangia.');
+    expect(it('CASTRATED')).toBe('il gatto castrato mangia.'); // past participle, postnominal
   });
 });
 
@@ -798,12 +800,14 @@ describe('adjective linker: Japanese', () => {
     expect(ja('WILD')).toBe('野生の猫は食べます。');
     expect(ja('DOMESTIC')).toBe('家庭の猫は食べます。');
     expect(ja('CANINE')).toBe('犬の猫は食べます。');
+    expect(ja('ADULT')).toBe('大人の猫は食べます。');
     expect(ja('SEMANTIC')).not.toContain('意味的の'); // …but a na-adjective must not take の
   });
 
   test('a verb-derived adjective takes its plain past', () => {
     expect(ja('TIRED')).toBe('疲れた猫は食べます。'); // 疲れる → 疲れた
     expect(ja('UNCONNECTED')).toBe('孤立した猫は食べます。');
+    expect(ja('CASTRATED')).toBe('去勢された猫は食べます。'); // 去勢される → 去勢された
   });
 });
 
