@@ -464,6 +464,106 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un piccolo oggetto rotondo');
   });
 
+  test('a genus+relative-clause noun definition renders (localize-seed B06: NOUN)', async ({
+    app,
+    page,
+  }) => {
+    // English: WORD + a subject-gap relative clause (NAME + bare-plural OBJECT_THING).
+    await app.subjectInput.fill('noun');
+    const nounEn = page.locator('[data-testid="typeahead-option"][data-concept="NOUN"]');
+    await expect(nounEn).toBeVisible();
+    await nounEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that names objects');
+
+    // German: the same plan, comma-set and verb-final. No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('noun');
+    const nounDe = page.locator('[data-testid="typeahead-option"][data-concept="NOUN"]');
+    await expect(nounDe).toBeVisible();
+    await nounDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Wort, das Gegenstände benennt');
+  });
+
+  test('a genus+relative-clause noun definition renders (localize-seed B06: VERB)', async ({
+    app,
+    page,
+  }) => {
+    // English: WORD + a subject-gap relative clause (EXPRESS + bare-plural ACTION).
+    await app.subjectInput.fill('verb');
+    const verbEn = page.locator('[data-testid="typeahead-option"][data-concept="VERB"]');
+    await expect(verbEn).toBeVisible();
+    await verbEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that expresses actions');
+
+    // French: the same plan, localized by the engine — no French literal is stored.
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('verb');
+    const verbFr = page.locator('[data-testid="typeahead-option"][data-concept="VERB"]');
+    await expect(verbFr).toBeVisible();
+    await verbFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un mot qui exprime actions');
+  });
+
+  test('a genus+relative-clause noun definition renders (localize-seed B06: ADJECTIVE)', async ({
+    app,
+    page,
+  }) => {
+    // English: WORD + a subject-gap relative clause (DESCRIBE + bare-plural NOUN).
+    await app.subjectInput.fill('adjective');
+    const adjEn = page.locator('[data-testid="typeahead-option"][data-concept="ADJECTIVE"]');
+    await expect(adjEn).toBeVisible();
+    await adjEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that describes nouns');
+
+    // Italian: the same plan, localized by the engine — no Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('adjective');
+    const adjIt = page.locator('[data-testid="typeahead-option"][data-concept="ADJECTIVE"]');
+    await expect(adjIt).toBeVisible();
+    await adjIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('una parola che descrive sostantivi');
+  });
+
+  test('a genus+relative-clause noun definition renders (localize-seed B06: ADVERB)', async ({
+    app,
+    page,
+  }) => {
+    // English: WORD + a subject-gap relative clause (MODIFY + bare-plural VERB).
+    await app.subjectInput.fill('adverb');
+    const advEn = page.locator('[data-testid="typeahead-option"][data-concept="ADVERB"]');
+    await expect(advEn).toBeVisible();
+    await advEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that modifies verbs');
+
+    // Spanish: the same plan, localized by the engine — no Spanish literal is stored.
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('adverb');
+    const advEs = page.locator('[data-testid="typeahead-option"][data-concept="ADVERB"]');
+    await expect(advEs).toBeVisible();
+    await advEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('una palabra que modifica verbos');
+  });
+
+  test('a genus+relative-clause noun definition renders (localize-seed B06: PRONOUN)', async ({
+    app,
+    page,
+  }) => {
+    // English: WORD + a subject-gap relative clause (REPLACE + bare-plural NOUN).
+    await app.subjectInput.fill('pronoun');
+    const proEn = page.locator('[data-testid="typeahead-option"][data-concept="PRONOUN"]');
+    await expect(proEn).toBeVisible();
+    await proEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that replaces nouns');
+
+    // Portuguese: the same plan, localized by the engine — no Portuguese literal is stored.
+    await app.setUiLanguage('pt');
+    await app.subjectInput.fill('pronoun');
+    const proPt = page.locator('[data-testid="typeahead-option"][data-concept="PRONOUN"]');
+    await expect(proPt).toBeVisible();
+    await proPt.hover();
+    await expect(page.locator(tooltip)).toHaveText('uma palavra que substitui substantivos');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

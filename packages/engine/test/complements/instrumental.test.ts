@@ -6,11 +6,13 @@ import { clause, np, sayAll } from '../harness.js';
 // gradient: the same instrument can be presented as a thing, as an action, or as an action
 // nominalised. The two action levels render the verb non-finitely and take `Complement.action`.
 //
-// Thirteen verbs license it. The direct object is left off throughout: it is not what these are
+// Eighteen verbs license it. The direct object is left off throughout: it is not what these are
 // about, and dropping it keeps the instrument next to the verb where it can be read.
 const INSTRUMENTAL_VERBS = [
   'CUT', 'EAT', 'DRINK', 'SEE', 'KILL', 'READ', 'BEAT',
   'SET_ON_FIRE', 'EXTINGUISH', 'MAKE', 'COMPACT', 'EXPAND', 'START',
+  'BUY', 'COORDINATE', 'HIDE', // acquiring / arranging / concealing with a means
+  'DESCRIBE', 'MODIFY', // B06 grammar-word verbs
 ];
 
 const withStick = (verb: string, level: AbstractionLevel) =>
@@ -129,6 +131,40 @@ describe('instrumental: the verbs that are not one word', () => {
     expect(withStick('EXPAND', 'process')).toMatchObject({
       en: 'the cat expands by choosing the stick.',
       it: 'il gatto espande scegliendo il bastone.',
+    });
+  });
+});
+
+// BUY, COORDINATE and HIDE recently grew an instrumental — the means one buys / arranges / conceals
+// with — as did the B06 grammar-word verbs DESCRIBE and MODIFY. Both the object and process levels.
+describe('instrumental: the newly-licensing verbs', () => {
+  test('BUY, COORDINATE and HIDE take an object-level instrument', () => {
+    expect(withStick('BUY', 'object')).toMatchObject({
+      en: 'the cat buys with the stick.',
+      it: 'il gatto compra con il bastone.',
+      de: 'der Kater kauft mit dem Stock.',
+      ja: '猫は棒で買います。',
+    });
+    expect(withStick('COORDINATE', 'object')).toMatchObject({
+      en: 'the cat coordinates with the stick.',
+      fr: 'le chat coordonne avec le bâton.',
+    });
+    expect(withStick('HIDE', 'object')).toMatchObject({
+      en: 'the cat hides with the stick.',
+      de: 'der Kater versteckt mit dem Stock.',
+    });
+  });
+
+  test('the B06 verbs render the process level too', () => {
+    expect(withStick('DESCRIBE', 'process')).toMatchObject({
+      en: 'the cat describes by choosing the stick.',
+      it: 'il gatto descrive scegliendo il bastone.',
+      de: 'der Kater beschreibt, indem man den Stock wählt.',
+      ja: '猫は棒を選んで描写します。',
+    });
+    expect(withStick('MODIFY', 'object')).toMatchObject({
+      en: 'the cat modifies with the stick.',
+      es: 'el gato modifica con el palo.',
     });
   });
 });

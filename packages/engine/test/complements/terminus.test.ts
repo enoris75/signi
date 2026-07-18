@@ -2,8 +2,11 @@ import { describe, expect, test } from 'vitest';
 import { clause, np, sayAll } from '../harness.js';
 
 // The recipient. Not a slot of its own — it is the `terminus` complement, declared by every verb
-// that licenses one. Nine do: the three ditransitives, and six transitives that take a goal.
-const TERMINUS_VERBS = ['GIVE', 'SHOW', 'SEND', 'CUT', 'READ', 'SAVE', 'ADD', 'EXPORT', 'START'];
+// that licenses one. These ten take a transitive recipient — the three ditransitives, and seven
+// transitives that take a goal — so the helper below gives each an object to hand over. (SEEM and
+// APPEAR license a terminus too, but as an experiencer with no object — "seems to me" — so they
+// get their own block at the end.)
+const TERMINUS_VERBS = ['GIVE', 'SHOW', 'SEND', 'CUT', 'READ', 'CRY_OUT', 'SAVE', 'ADD', 'EXPORT', 'START'];
 
 const sendTo = (verb: string, recipient: string) =>
   sayAll(clause(np('CAT'), verb, {
@@ -103,6 +106,49 @@ describe('terminus: an inanimate goal', () => {
     });
     expect(sendTo('SEND', 'DOG')).toMatchObject({
       it: 'il gatto manda il libro al cane.',
+    });
+  });
+});
+
+// CRY_OUT — shouting something TO someone. Transitive, so it fits the frame above, but its lexeme
+// is a plain "cry" in English, giving the slightly odd "cries the book to the dog"; the dative
+// marking is what matters, and it is the same as every other recipient.
+describe('terminus: CRY_OUT shouts it to a recipient', () => {
+  test('the recipient is dativised like any other', () => {
+    expect(sendTo('CRY_OUT', 'DOG')).toMatchObject({
+      en: 'the cat cries the book to the dog.',
+      it: 'il gatto grida il libro al cane.',
+      de: 'der Kater ruft dem Hund das Buch.',
+      ja: '猫は犬に本を叫びます。',
+    });
+  });
+});
+
+// SEEM and APPEAR take a terminus as an EXPERIENCER — the one it seems that way *to* — not as the
+// goal of a handed-over object. They are intransitive, so no direct object: "the cat seems to the
+// dog". The dative marking is the same one the ditransitives use, which is the point worth pinning.
+describe('terminus: the copular experiencer', () => {
+  const seemsTo = (verb: string, experiencer: string) =>
+    sayAll(clause(np('CAT'), verb, { complements: { terminus: { phrase: np(experiencer) } } }));
+
+  test('SEEM marks its experiencer with the dative', () => {
+    expect(seemsTo('SEEM', 'DOG')).toMatchObject({
+      en: 'the cat seems to the dog.',
+      it: 'il gatto sembra al cane.',
+      fr: 'le chat semble au chien.',
+      es: 'el gato parece al perro.',
+      pt: 'o gato parece ao cão.',
+      de: 'der Kater scheint dem Hund.',
+      ja: '猫は犬に思えます。',
+    });
+  });
+
+  test('APPEAR marks it the same way', () => {
+    expect(seemsTo('APPEAR', 'DOG')).toMatchObject({
+      en: 'the cat appears to the dog.',
+      it: 'il gatto appare al cane.',
+      de: 'der Kater erscheint dem Hund.',
+      ja: '猫は犬に見えます。',
     });
   });
 });

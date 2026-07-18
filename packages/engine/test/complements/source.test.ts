@@ -2,10 +2,11 @@ import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
-// Where a motion started — the ablative. Six verbs license it: the four motion verbs, and LOAD
-// and IMPORT, which are Signi's own vocabulary ("load the phrase FROM the container").
-const SOURCE_VERBS = ['RUN', 'JUMP', 'COME', 'GO', 'LOAD', 'IMPORT'];
-const TRANSITIVE = new Set(['LOAD', 'IMPORT']);
+// Where a motion started — the ablative. Seven verbs license it: the four motion verbs; LOAD and
+// IMPORT, which are Signi's own vocabulary ("load the phrase FROM the container"); and BUY, whose
+// source is where the thing was bought ("buys the book FROM the house").
+const SOURCE_VERBS = ['RUN', 'JUMP', 'COME', 'GO', 'LOAD', 'IMPORT', 'BUY'];
+const TRANSITIVE = new Set(['LOAD', 'IMPORT', 'BUY']);
 
 const from = (verb: string, place: NounPhrase = np('HOUSE')) =>
   sayAll(clause(np('CAT'), verb, {
@@ -71,6 +72,16 @@ describe('source', () => {
       en: 'the cat loads the book from the container.',
       de: 'der Kater lädt das Buch aus dem Behälter.',
       ja: '猫は容器から本を読み込みます。',
+    });
+  });
+
+  test('BUY — the source is where the thing was bought', () => {
+    expect(from('BUY')).toMatchObject({
+      en: 'the cat buys the book from the house.',
+      it: 'il gatto compra il libro dalla casa.',
+      fr: 'le chat achète le livre de la maison.',
+      de: 'der Kater kauft das Buch aus dem Haus.',
+      ja: '猫は家から本を買います。',
     });
   });
 });
@@ -183,6 +194,15 @@ describe('source: the ablative adverb is gated on the verb', () => {
       fr: 'le chat importe le livre de la maison.',
       es: 'el gato importa el libro de la casa.',
       pt: 'o gato importa o livro da casa.',
+    });
+  });
+
+  test('BUY is an origin, not a departure — bare "da"/"de", no adverb', () => {
+    expect(from('BUY')).toMatchObject({
+      it: 'il gatto compra il libro dalla casa.',
+      fr: 'le chat achète le livre de la maison.',
+      es: 'el gato compra el libro de la casa.',
+      pt: 'o gato compra o livro da casa.',
     });
   });
 

@@ -72,7 +72,7 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'BECOME',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['predicative'],
+    complements: ['predicative', 'cause'],
     description: 'to come to be; to change into a different state',
     emoji: '🦋',
     forms: {
@@ -138,7 +138,7 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'SEEM',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['predicative'],
+    complements: ['predicative', 'locative', 'cause', 'terminus'],
     description: 'to give the impression of being; to appear to be',
     emoji: '🤔',
     forms: {
@@ -204,7 +204,7 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'APPEAR',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['predicative'],
+    complements: ['predicative', 'locative', 'cause', 'terminus'],
     description: 'to come into view; to look or seem a certain way',
     emoji: '👀',
     forms: {
@@ -275,15 +275,15 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'BE',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['predicative'],
+    complements: ['predicative', 'locative', 'cause'],
     description: 'to have a quality or state; the copula',
     emoji: '🟰',
     forms: {
       en: {
         base: 'be', copula: '1',
-        '1sg_present': 'am',  '2sg_present': 'are', '3sg_present': 'is',
+        '1sg_present': 'am', '2sg_present': 'are', '3sg_present': 'is',
         '1pl_present': 'are', '2pl_present': 'are', '3pl_present': 'are',
-        '1sg_past': 'was',  '2sg_past': 'were', '3sg_past': 'was',
+        '1sg_past': 'was', '2sg_past': 'were', '3sg_past': 'was',
         '1pl_past': 'were', '2pl_past': 'were', '3pl_past': 'were',
       },
       it: {

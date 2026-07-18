@@ -42,6 +42,39 @@ describe('cause', () => {
   });
 });
 
+// The copulars (BECOME, SEEM, APPEAR, BE) recently grew a cause: a state can be held *because of*
+// something. The connector is the same neutral "because of" the action verbs use — the marking
+// belongs to the complement, not to the verb, so a copula carries it identically.
+describe('cause: the copular verbs', () => {
+  const because = (verb: string) =>
+    sayAll(clause(np('CAT'), verb, { complements: { cause: { phrase: np('DOG') } } }));
+
+  test('BECOME takes a neutral cause', () => {
+    expect(because('BECOME')).toMatchObject({
+      en: 'the cat becomes because of the dog.',
+      it: 'il gatto diventa a causa del cane.',
+      fr: 'le chat devient à cause du chien.',
+      de: 'der Kater wird wegen dem Hund.',
+      ja: '猫は犬のためになります。',
+    });
+  });
+
+  test('SEEM, APPEAR and BE mark it the same way', () => {
+    expect(because('SEEM')).toMatchObject({
+      en: 'the cat seems because of the dog.',
+      it: 'il gatto sembra a causa del cane.',
+    });
+    expect(because('APPEAR')).toMatchObject({
+      en: 'the cat appears because of the dog.',
+      de: 'der Kater erscheint wegen dem Hund.',
+    });
+    expect(because('BE')).toMatchObject({
+      en: 'the cat is because of the dog.',
+      fr: 'le chat est à cause du chien.',
+    });
+  });
+});
+
 // English and German now distinguish the negative sentiment too, so all seven languages carry the
 // user's stance. English uses the "through the fault of" periphrasis; German the genitive "durch
 // die Schuld" + the blamed party in the genitive ("durch die Schuld des Hundes"). Was B02.

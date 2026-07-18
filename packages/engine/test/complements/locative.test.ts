@@ -2,9 +2,20 @@ import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
-// Where the action happens — a static place, with no motion implied. Six verbs license it: the
-// five intransitives, and HIDE, the only transitive one among them.
-const LOCATIVE_VERBS = ['RUN', 'JUMP', 'COME', 'COLLAPSE', 'GO', 'HIDE'];
+// Where the action happens — a static place, with no motion implied. Most verbs that denote a
+// concrete act license it: something happens, and it happens *somewhere*. The list mirrors the
+// corpus (the `locative` complement on each verb seed) — the five motion/intransitives, the
+// copulars ("is in the house"), the plain transitives, the app's own vocabulary, and the B06
+// grammar-word verbs. The invariant below is that they all mark the place identically.
+const LOCATIVE_VERBS = [
+  'RUN', 'JUMP', 'COME', 'COLLAPSE', 'GO', // motion / intransitive
+  'CRY', 'BURN', // the other two intransitives
+  'SEEM', 'APPEAR', 'BE', // copular
+  'CUT', 'EAT', 'DRINK', 'SEE', 'LOVE', 'KILL', 'READ', 'CRY_OUT', 'BITE', 'BEAT',
+  'SET_ON_FIRE', 'EXTINGUISH', 'BUY', 'OWN', 'HOLD', 'MAKE', 'CLICK', 'CHOOSE',
+  'SELECT', 'TYPE', 'COORDINATE', 'TIDY_UP', 'HIDE', 'START', // transitive / app vocabulary
+  'MODIFY', 'EXPRESS', 'REPLACE', // B06 grammar-word verbs
+];
 
 const inPlace = (verb: string, place: NounPhrase = np('HOUSE')) =>
   sayAll(clause(np('CAT'), verb, {
@@ -70,7 +81,7 @@ describe('locative', () => {
     });
   });
 
-  test('HIDE — the one transitive verb, so the object and the place both render', () => {
+  test('HIDE — the object and the place both render (the helper gives it one to hide)', () => {
     expect(inPlace('HIDE')).toMatchObject({
       en: 'the cat hides the book in the house.',
       it: 'il gatto nasconde il libro nella casa.',
@@ -78,6 +89,66 @@ describe('locative', () => {
       de: 'der Kater versteckt das Buch im Haus.',
       // Japanese puts the place BEFORE the object; both precede the verb.
       ja: '猫は家で本を隠します。',
+    });
+  });
+});
+
+// The plain transitives and the app's own vocabulary license a locative too: the action still
+// happens somewhere. The helper leaves their object off, keeping the place next to the verb, so
+// these read "eats in the house" — the object is beside the point here.
+describe('locative: the transitive verbs', () => {
+  test('EAT, LOVE and the app-vocabulary CLICK all place the action the same way', () => {
+    expect(inPlace('EAT')).toMatchObject({
+      en: 'the cat eats in the house.',
+      it: 'il gatto mangia nella casa.',
+      de: 'der Kater isst im Haus.',
+      ja: '猫は家で食べます。',
+    });
+    expect(inPlace('LOVE')).toMatchObject({
+      en: 'the cat loves in the house.',
+      es: 'el gato ama en la casa.',
+      pt: 'o gato ama na casa.',
+    });
+    expect(inPlace('CLICK')).toMatchObject({
+      en: 'the cat clicks in the house.',
+      fr: 'le chat clique dans la maison.',
+      de: 'der Kater klickt im Haus.',
+    });
+  });
+
+  test('the B06 grammar-word verbs license it too', () => {
+    expect(inPlace('MODIFY')).toMatchObject({
+      en: 'the cat modifies in the house.',
+      it: 'il gatto modifica nella casa.',
+      ja: '猫は家で修飾します。',
+    });
+    expect(inPlace('REPLACE')).toMatchObject({
+      en: 'the cat replaces in the house.',
+      de: 'der Kater ersetzt im Haus.',
+    });
+  });
+});
+
+// The copulars carry a locative — "the cat is in the house", the plainest use of all. SEEM and
+// APPEAR license it as well; their reading is marginal, but they mark the place like everyone else.
+describe('locative: the copular verbs', () => {
+  test('BE places the subject — "is in the house"', () => {
+    expect(inPlace('BE')).toMatchObject({
+      en: 'the cat is in the house.',
+      it: 'il gatto è nella casa.',
+      fr: 'le chat est dans la maison.',
+      de: 'der Kater ist im Haus.',
+    });
+  });
+
+  test('SEEM and APPEAR mark the place the same way', () => {
+    expect(inPlace('SEEM')).toMatchObject({
+      en: 'the cat seems in the house.',
+      it: 'il gatto sembra nella casa.',
+    });
+    expect(inPlace('APPEAR')).toMatchObject({
+      en: 'the cat appears in the house.',
+      de: 'der Kater erscheint im Haus.',
     });
   });
 });
@@ -171,5 +242,26 @@ describe('known bugs: locative', () => {
   // in an oblique case hits it. "im Junge" should be "im Jungen".
   test('German should decline the weak masculine in a locative too: "im Jungen"', () => {
     expect(inPlace('RUN', np('BOY'))).toMatchObject({ de: 'der Kater läuft im Jungen.' });
+  });
+
+  // A41. HOME resists the plain "in the <place>" locative: every language marks "at home" with a
+  // fixed idiom, not the article-fused preposition the engine reaches for on any common noun. So
+  // "the cat runs at home" comes out as "in the home" / "dans le foyer" / "en el hogar" / "no lar"
+  // / "im Zuhause" — each grammatical but wrong: HOME names a hearth, and none of these idioms
+  // takes a locative that way. The fix is a per-noun locative override on HOME (like the
+  // proper-noun article-drop of A29, but keyed to the lexeme, not to `proper`); it is a property
+  // of the NOUN, so every licensing verb inherits it. Japanese is already right — 家で is exactly
+  // "at home" — and HOUSE ("in the house", "nella casa", …) stays untouched, which is why the
+  // suite tests the complement itself with HOUSE, not HOME.
+  test.fails('HOME wants the "at home" idiom, not "in the <home-word>"', () => {
+    expect(inPlace('RUN', np('HOME'))).toMatchObject({
+      en: 'the cat runs at home.',
+      it: 'il gatto corre a casa.',
+      fr: 'le chat court à la maison.',
+      es: 'el gato corre en casa.',
+      pt: 'o gato corre em casa.',
+      de: 'der Kater läuft zu Hause.',
+      ja: '猫は家で走ります。', // already correct
+    });
   });
 });

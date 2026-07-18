@@ -1187,6 +1187,7 @@ export const nouns: ConceptSeed[] = [
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
+    definition: whoGloss('WORD', 'NAME', 'OBJECT_THING'),
     emoji: '🏷️',
     forms: {
       en: { base: 'noun', plural: 'nouns', count: 'singular' },
@@ -1202,6 +1203,7 @@ export const nouns: ConceptSeed[] = [
     id: 'PRONOUN',
     role: 'noun',
     description: 'a word standing in for a noun phrase (grammar)',
+    definition: whoGloss('WORD', 'REPLACE', 'NOUN'),
     emoji: '👉',
     forms: {
       en: { base: 'pronoun', plural: 'pronouns', count: 'singular' },
@@ -1217,6 +1219,7 @@ export const nouns: ConceptSeed[] = [
     id: 'VERB',
     role: 'noun',
     description: 'a word expressing an action or a state (grammar)',
+    definition: whoGloss('WORD', 'EXPRESS', 'ACTION'),
     emoji: '⚡',
     forms: {
       en: { base: 'verb', plural: 'verbs', count: 'singular' },
@@ -1232,6 +1235,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ADVERB',
     role: 'noun',
     description: 'a word modifying a verb, an adjective or another adverb (grammar)',
+    definition: whoGloss('WORD', 'MODIFY', 'VERB'),
     emoji: '💨',
     forms: {
       en: { base: 'adverb', plural: 'adverbs', count: 'singular' },
@@ -1247,6 +1251,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ADJECTIVE',
     role: 'noun',
     description: 'a word describing a noun (grammar)',
+    definition: whoGloss('WORD', 'DESCRIBE', 'NOUN'),
     emoji: '🎨',
     forms: {
       en: { base: 'adjective', plural: 'adjectives', count: 'singular' },
