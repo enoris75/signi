@@ -51,6 +51,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | # | File |
 |---|---|
 | A41 | [A41-home-locative-at-home-idiom.md](A-must-fix/A41-home-locative-at-home-idiom.md) |
+| A42 | [A42-japanese-locative-dropped-under-predicate-nominal.md](A-must-fix/A42-japanese-locative-dropped-under-predicate-nominal.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
