@@ -373,6 +373,56 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un oggetto che si mangia');
   });
 
+  test('a genus+relative-clause noun definition renders (localize-seed B04: POSSESSOR)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from PERSON + a subject-gap relative clause (OWN + bare-plural OBJECT_THING).
+    await app.subjectInput.fill('possessor');
+    const possessorEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="POSSESSOR"]',
+    );
+    await expect(possessorEn).toBeVisible();
+    await possessorEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a person who owns objects');
+
+    // German: the same plan, localized by the engine — the relative clause is comma-set and
+    // verb-final. No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('possessor');
+    const possessorDe = page.locator(
+      '[data-testid="typeahead-option"][data-concept="POSSESSOR"]',
+    );
+    await expect(possessorDe).toBeVisible();
+    await possessorDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Person, die Gegenstände besitzt');
+  });
+
+  test('a genus+relative-clause noun definition renders (localize-seed B04: CONTAINER)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from OBJECT_THING + a subject-gap relative clause (HOLD + bare-plural
+    // OBJECT_THING) — an object genus rather than a person, so English relativises with "that".
+    await app.subjectInput.fill('container');
+    const containerEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CONTAINER"]',
+    );
+    await expect(containerEn).toBeVisible();
+    await containerEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an object that holds objects');
+
+    // Italian: the same plan, localized by the engine — no Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('container');
+    const containerIt = page.locator(
+      '[data-testid="typeahead-option"][data-concept="CONTAINER"]',
+    );
+    await expect(containerIt).toBeVisible();
+    await containerIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un oggetto che contiene oggetti');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

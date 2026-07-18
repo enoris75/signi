@@ -46,7 +46,6 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 | # | File | Seed first → unlocks |
 |---|---|---|
-| B04 | [B04-possession.md](B-needs-seed/B04-possession.md) | OWN, HOLD → POSSESSOR, CONTAINER |
 | B05 | [B05-artifacts.md](B-needs-seed/B05-artifacts.md) | WRITTEN, ROUND, MONEY → BOOK, COIN |
 | B06 | [B06-grammar-words.md](B-needs-seed/B06-grammar-words.md) | NAME, DESCRIBE, MODIFY, EXPRESS → NOUN, VERB, ADJECTIVE, ADVERB, PRONOUN |
 
@@ -74,6 +73,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | A07 | [done/A07-butcher.md](done/A07-butcher.md) | BUTCHER → a person who kills animals |
 | B01 | [done/B01-wild-domestic-animals.md](done/B01-wild-domestic-animals.md) | DOG → a domestic canine mammal; WOLF → a wild canine mammal |
 | B02 | [done/B02-adult-kin.md](done/B02-adult-kin.md) | MAN → an adult male person; WOMAN → an adult female person; FATHER → a male parent; OX → a castrated adult male bovine |
+| B04 | [done/B04-possession.md](done/B04-possession.md) | POSSESSOR → a person who owns objects; CONTAINER → an object that holds objects (seeded OWN, HOLD first) |
 | C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
