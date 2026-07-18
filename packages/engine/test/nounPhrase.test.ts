@@ -39,6 +39,21 @@ describe('determiners', () => {
     });
   });
 
+  test('MONEY is a mass noun — keeps its gender and never pluralises', () => {
+    // Forcing number:'plural' on the object leaves it singular in every language.
+    expect(sayAll(clause(np('CAT'), 'DRINK', {
+      directObject: np('MONEY', { number: 'plural' }),
+    }))).toEqual({
+      en: 'the cat drinks the money.',
+      it: 'il gatto beve il denaro.',
+      fr: "le chat boit l'argent.", // masc, but elides before a vowel
+      es: 'el gato bebe el dinero.',
+      pt: 'o gato bebe o dinheiro.',
+      de: 'der Kater trinkt das Geld.',
+      ja: '猫はお金を飲みます。',
+    });
+  });
+
   test('the article elides before a vowel', () => {
     expect(sayAll(clause(np('ANGEL'), 'EAT'))).toMatchObject({
       fr: "l'ange mange.",

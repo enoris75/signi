@@ -119,6 +119,7 @@ export const nouns: ConceptSeed[] = [
     id: 'BOOK',
     role: 'noun',
     description: 'a written or printed work',
+    definition: glossOf('OBJECT_THING', 'WRITTEN'),
     emoji: '📚',
     forms: {
       en: { base: 'book', plural: 'books', count: 'singular' },
@@ -147,6 +148,22 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'agua', gender: 'fem', stressed_a: '1', count: 'singular' },
       ja: { base: '水', count: 'singular', reading: 'みず' },
       pt: { base: 'água', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'MONEY',
+    role: 'noun',
+    description: 'a medium of exchange',
+    emoji: '💰',
+    countable: false,
+    forms: {
+      en: { base: 'money', count: 'singular' },
+      it: { base: 'denaro', gender: 'masc', count: 'singular' },
+      fr: { base: 'argent', gender: 'masc', count: 'singular' },
+      de: { base: 'Geld', gender: 'neut', count: 'singular' },
+      es: { base: 'dinero', gender: 'masc', count: 'singular' },
+      ja: { base: 'お金', count: 'singular', reading: 'おかね' },
+      pt: { base: 'dinheiro', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -535,6 +552,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COIN',
     role: 'noun',
     description: 'a small round piece of metal used as money',
+    definition: glossOf('OBJECT_THING', 'SMALL', 'ROUND'),
     emoji: '🪙',
     forms: {
       en: { base: 'coin', plural: 'coins', count: 'singular' },

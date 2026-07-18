@@ -727,10 +727,11 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['MALE', 'male'], ['MULTAL', 'multal'],
   ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEW', 'new'], ['OLD', 'old'],
   ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'], ['PROXIMAL', 'proximal'],
-  ['QUICK', 'quick'], ['SAD', 'sad'], ['SAVED', 'saved'], ['SECOND', 'second'],
-  ['SEMANTIC', 'semantic'], ['SINGULAR', 'singular'], ['SMALL', 'small'], ['STRONG', 'strong'],
-  ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'], ['UNIVERSAL', 'universal'],
-  ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'], ['YOUNG', 'young'], ['ZERO', 'zero'],
+  ['QUICK', 'quick'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
+  ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
+  ['STRONG', 'strong'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
+  ['UNIVERSAL', 'universal'], ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'],
+  ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];
 
 describe('every adjective renders attributively', () => {
@@ -774,6 +775,8 @@ describe('adjective position: Italian', () => {
     expect(it('CANINE')).toBe('il gatto canino mangia.');
     expect(it('ADULT')).toBe('il gatto adulto mangia.');
     expect(it('CASTRATED')).toBe('il gatto castrato mangia.'); // past participle, postnominal
+    expect(it('ROUND')).toBe('il gatto rotondo mangia.');
+    expect(it('WRITTEN')).toBe('il gatto scritto mangia.'); // past participle, agrees & postnominal
   });
 });
 

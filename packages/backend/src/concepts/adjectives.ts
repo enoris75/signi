@@ -449,6 +449,38 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    id: 'ROUND',
+    role: 'adjective',
+    description: 'shaped like a circle or ball',
+    emoji: '⭕',
+    forms: {
+      en: { base: 'round' },
+      it: { base: 'rotondo' },
+      fr: { base: 'rond' },
+      de: { base: 'rund' },
+      es: { base: 'redondo' },
+      ja: { base: '丸い', reading: 'まるい' },
+      pt: { base: 'redondo' },
+    },
+  },
+  {
+    // A past-participle adjective: agrees in Romance (scritto/scritta) and, in Japanese, is
+    // verb-derived — the plain past 書かれた attaches directly, like 去勢された (CASTRATED), no linker.
+    id: 'WRITTEN',
+    role: 'adjective',
+    description: 'set down in words',
+    emoji: '✍️',
+    forms: {
+      en: { base: 'written' },
+      it: { base: 'scritto' },
+      fr: { base: 'écrit' },
+      de: { base: 'geschrieben' },
+      es: { base: 'escrito' },
+      ja: { base: '書かれた', reading: 'かかれた' },
+      pt: { base: 'escrito' },
+    },
+  },
+  {
     id: 'LOADED',
     role: 'adjective',
     description: 'brought in from storage and ready to use',
@@ -737,6 +769,25 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'tercero' },
       ja: { base: '第三の', reading: 'だいさんの' },
       pt: { base: 'terceiro' },
+    },
+  },
+  // Not standing for any particular person — the grammatical category of the generic subject
+  // ("one eats"), GENERIC_PERSON. Offered in the pronoun chooser's person row alongside the three
+  // ordinals, and naming the concept in the picker/chip, so it is seeded like them: an adjective
+  // that agrees with the "person" noun (it "impersonale", de "unpersönliche").
+  {
+    id: 'IMPERSONAL',
+    role: 'adjective',
+    description: 'not standing for any particular person (grammar)',
+    emoji: '🫥',
+    forms: {
+      en: { base: 'impersonal' },
+      it: { base: 'impersonale' },
+      fr: { base: 'impersonnel' },
+      de: { base: 'unpersönlich' },
+      es: { base: 'impersonal' },
+      ja: { base: '非人称の', reading: 'ひにんしょうの' },
+      pt: { base: 'impessoal' },
     },
   },
   {

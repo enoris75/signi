@@ -31,6 +31,9 @@ export function conceptWord(
   if (concept.role === 'pronoun') {
     const person = concept.person;
     if (!t || !person) return concept.description;
+    // The generic subject shares 3rd-person agreement with he/she/it but is not that person, so
+    // it is named by its own category ("impersonal") rather than "third person".
+    if (concept.id === 'GENERIC_PERSON') return t('pronoun.person.impersonal');
     return t(`pronoun.person.${person}` as UiStringKey);
   }
   return concept.labels?.[language] ?? concept.label ?? concept.description;

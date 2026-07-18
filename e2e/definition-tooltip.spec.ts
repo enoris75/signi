@@ -6,23 +6,23 @@ import { test, expect } from './fixtures';
 // falling back to English:
 //   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
 //     concepts into every language, so the tooltip is localized like the rest of the UI;
-//   - the stored `concept_definitions` literal (BOOK → "a written or printed work"), of which
+//   - the stored `concept_definitions` literal (HOUSE → "a building used as a dwelling"), of which
 //     only English is seeded.
 test.describe('word definition tooltip', () => {
   const tooltip = '.MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
-    // BOOK carries only a stored English literal (no definition plan), so the tooltip shows it.
-    await app.subjectInput.fill('book');
+    // HOUSE carries only a stored English literal (no definition plan), so the tooltip shows it.
+    await app.subjectInput.fill('house');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="BOOK"]',
+      '[data-testid="typeahead-option"][data-concept="HOUSE"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
     await expect(page.locator(tooltip)).toBeVisible();
-    await expect(page.locator(tooltip)).toHaveText('a written or printed work');
+    await expect(page.locator(tooltip)).toHaveText('a building used as a dwelling');
   });
 
   test('shows the definition on hover in the verb picker', async ({ app, page }) => {
@@ -423,20 +423,61 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un oggetto che contiene oggetti');
   });
 
+  test('a genus+differentia noun definition renders (localize-seed B05: BOOK)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from OBJECT_THING + WRITTEN, superseding BOOK's stored English literal.
+    await app.subjectInput.fill('book');
+    const bookEn = page.locator('[data-testid="typeahead-option"][data-concept="BOOK"]');
+    await expect(bookEn).toBeVisible();
+    await bookEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a written object');
+
+    // German: the same plan — the past-participle adjective is prenominal and agrees.
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('book');
+    const bookDe = page.locator('[data-testid="typeahead-option"][data-concept="BOOK"]');
+    await expect(bookDe).toBeVisible();
+    await bookDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein geschriebener Gegenstand');
+  });
+
+  test('a genus+two-differentia noun definition renders (localize-seed B05: COIN)', async ({
+    app,
+    page,
+  }) => {
+    // English: composed from OBJECT_THING + SMALL + ROUND, superseding COIN's stored English literal.
+    await app.subjectInput.fill('coin');
+    const coinEn = page.locator('[data-testid="typeahead-option"][data-concept="COIN"]');
+    await expect(coinEn).toBeVisible();
+    await coinEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a small round object');
+
+    // Italian: the two postnominal adjectives coordinate with "e" — "un piccolo oggetto rotondo"
+    // (SMALL is prenominal in Italian, ROUND postnominal). No Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('coin');
+    const coinIt = page.locator('[data-testid="typeahead-option"][data-concept="COIN"]');
+    await expect(coinIt).toBeVisible();
+    await coinIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un piccolo oggetto rotondo');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,
   }) => {
-    // BOOK has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // HOUSE has no definition plan and only an English literal, so an Italian UI reverts to it.
     await app.setUiLanguage('it');
-    await app.subjectInput.fill('book');
+    await app.subjectInput.fill('house');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="BOOK"]',
+      '[data-testid="typeahead-option"][data-concept="HOUSE"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
-    await expect(page.locator(tooltip)).toHaveText('a written or printed work');
+    await expect(page.locator(tooltip)).toHaveText('a building used as a dwelling');
   });
 });

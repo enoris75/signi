@@ -555,6 +555,15 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Third person',
   },
+  // The generic subject (GENERIC_PERSON) as the chip/picker names it. It stands for no ordinal
+  // person, so it is named by the IMPERSONAL adjective on its own — not "third person", which is
+  // the deictic he/she/it — capitalized like the others (it "Impersonale", ja 非人称の).
+  'pronoun.person.impersonal': {
+    word: 'IMPERSONAL',
+    agreesWith: 'PERSON_GRAMMAR',
+    format: { capitalize: true },
+    fallback: 'Impersonal',
+  },
 
   // The values those rows offer. Each is a bare adjective — a word, not a period: a sentence
   // shows an adjective only in agreement with a noun, and here the noun is not in the label but
@@ -565,9 +574,10 @@ export const UI_STRINGS = defineUiStrings({
   'pronoun.second': { word: 'SECOND', agreesWith: 'PERSON_GRAMMAR', fallback: 'second' },
   'pronoun.third': { word: 'THIRD', agreesWith: 'PERSON_GRAMMAR', fallback: 'third' },
   // The generic / impersonal subject, offered in the person row alongside the three persons. It
-  // is not an ordinal category but a pronoun in its own right, so it is labelled by its own
-  // surface — en "one", it "si", fr "on", de "man", es/pt "se", ja 人 — not by an agreeing word.
-  'pronoun.generic': { word: 'GENERIC_PERSON', fallback: 'one' },
+  // is not an ordinal category but a category of its own, so the row value describes it rather
+  // than showing its surface word ("one"/"si"): the IMPERSONAL adjective agreeing with "person",
+  // like the ordinals beside it (it "impersonale", de "unpersönliche", ja 非人称の).
+  'pronoun.generic': { word: 'IMPERSONAL', agreesWith: 'PERSON_GRAMMAR', fallback: 'impersonal' },
   'pronoun.singular': { word: 'SINGULAR', agreesWith: 'NUMBER_GRAMMAR', fallback: 'singular' },
   'pronoun.plural': { word: 'PLURAL', agreesWith: 'NUMBER_GRAMMAR', fallback: 'plural' },
   'pronoun.male': { word: 'MALE', agreesWith: 'GENDER', fallback: 'male' },
