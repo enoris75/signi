@@ -35,6 +35,24 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Motivating case: "at high speed" — a manner adverbial with a measure head. German "hoch"
+    // is irregular attributively (hoh- before an ending: "hohe Geschwindigkeit"), so its
+    // declension stem is stored separately from the predicative base.
+    id: 'HIGH',
+    role: 'adjective',
+    description: 'great in vertical extent or degree',
+    emoji: '⛰️',
+    forms: {
+      en: { base: 'high' },
+      it: { base: 'alto' },
+      fr: { base: 'haut' },
+      de: { base: 'hoch', attributive: 'hoh' },
+      es: { base: 'alto' },
+      ja: { base: '高い', reading: 'たかい' },
+      pt: { base: 'alto' },
+    },
+  },
+  {
     id: 'GOOD',
     role: 'adjective',
     description: 'of high quality or virtue',

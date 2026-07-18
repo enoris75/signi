@@ -1,5 +1,10 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type MannerRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+
+// The preposition each manner relation takes in Italian: similative "come" (fuses with nothing —
+// "come il vento"), means "con", measure "a" (→ alla velocità), mode "in" (→ in modo). prepDet
+// handles the article fusion; "come" and "con" take the non-fusing path.
+const IT_MANNER_PREP: Record<MannerRelation, 'come' | 'con' | 'a' | 'in'> = { similative: 'come', means: 'con', measure: 'a', mode: 'in' };
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveIt } from '../possessive.js';
 
@@ -200,8 +205,9 @@ function prepArt(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, 
  * "con" (the instrumental) is the exception that fuses with nothing: modern standard Italian
  * writes "con il coltello", leaving the fused "col" to speech.
  */
-function prepDet(prep: 'a' | 'da' | 'in' | 'di' | 'con', forms: Record<string, string>, plural: boolean, lead: string): string {
-  if (prep !== 'con' && (forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
+function prepDet(prep: 'a' | 'da' | 'in' | 'di' | 'con' | 'come', forms: Record<string, string>, plural: boolean, lead: string): string {
+  // "con" (instrumental) and "come" (similative) fuse with no article — "con il", "come il".
+  if (prep !== 'con' && prep !== 'come' && (forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
 }
@@ -624,6 +630,7 @@ function complementsPhrase(
         type === 'locative'  ? (nf['proper'] === '1' ? 'in' : prepDet('in', nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         type === 'instrumental' ? prepDet('con', nf, plural, lead) :
+        type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
         type === 'direction' ? (
           // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with
           // the proper noun's article ("all'Antartide"); an animate goal takes "da", a place "a".

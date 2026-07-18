@@ -151,6 +151,79 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // Head of the flagship manner adverbial "at the speed of light" — the `at` specifier plus a
+    // genitive possessor. Italian "velocità" is invariable in the plural.
+    id: 'SPEED',
+    role: 'noun',
+    description: 'the rate at which something moves',
+    emoji: '💨',
+    // A measure: a manner adverbial headed by SPEED reads "at [the] speed", not "with".
+    mannerRelation: 'measure',
+    forms: {
+      en: { base: 'speed', plural: 'speeds', count: 'singular' },
+      it: { base: 'velocità', plural: 'velocità', gender: 'fem', count: 'singular' },
+      fr: { base: 'vitesse', plural: 'vitesses', gender: 'fem', count: 'singular' },
+      de: { base: 'Geschwindigkeit', plural: 'Geschwindigkeiten', gender: 'fem', count: 'singular' },
+      es: { base: 'velocidad', plural: 'velocidades', gender: 'fem', count: 'singular' },
+      ja: { base: '速さ', count: 'singular', reading: 'はやさ' },
+      pt: { base: 'velocidade', plural: 'velocidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The genitive possessor of the flagship manner example ("della luce" = of light).
+    id: 'LIGHT',
+    role: 'noun',
+    description: 'the natural agent that makes things visible',
+    emoji: '💡',
+    forms: {
+      en: { base: 'light', plural: 'lights', count: 'singular' },
+      it: { base: 'luce', plural: 'luci', gender: 'fem', count: 'singular' },
+      fr: { base: 'lumière', plural: 'lumières', gender: 'fem', count: 'singular' },
+      de: { base: 'Licht', plural: 'Lichter', gender: 'neut', count: 'singular' },
+      es: { base: 'luz', plural: 'luces', gender: 'fem', count: 'singular' },
+      ja: { base: '光', count: 'singular', reading: 'ひかり' },
+      pt: { base: 'luz', plural: 'luzes', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A mode: a manner adverbial headed by WAY reads "in a … way" — it "in modo", de "auf …
+    // Weise", Romance "de … manière/manera/maneira". Motivating phrase: "in a good way".
+    id: 'WAY',
+    role: 'noun',
+    description: 'a manner or fashion in which something is done',
+    emoji: '🔀',
+    mannerRelation: 'mode',
+    forms: {
+      en: { base: 'way', plural: 'ways', count: 'singular' },
+      it: { base: 'modo', plural: 'modi', gender: 'masc', count: 'singular' },
+      fr: { base: 'manière', plural: 'manières', gender: 'fem', count: 'singular' },
+      de: { base: 'Weise', plural: 'Weisen', gender: 'fem', count: 'singular' },
+      es: { base: 'manera', plural: 'maneras', gender: 'fem', count: 'singular' },
+      ja: { base: '方法', count: 'singular', reading: 'ほうほう' },
+      pt: { base: 'maneira', plural: 'maneiras', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Head of the `with` manner example — "with (good) care" / "con (buona) cura". A means, so it
+    // is marked explicitly now that the unmarked default is the similative "like". Uncountable,
+    // like WATER, so a determiner still applies ("con la cura") but no plural is needed.
+    id: 'CARE',
+    role: 'noun',
+    description: 'serious attention or heed given to something',
+    emoji: '🫧',
+    countable: false,
+    mannerRelation: 'means',
+    forms: {
+      en: { base: 'care', count: 'singular' },
+      it: { base: 'cura', gender: 'fem', count: 'singular' },
+      fr: { base: 'soin', gender: 'masc', count: 'singular' },
+      de: { base: 'Sorgfalt', gender: 'fem', count: 'singular' },
+      es: { base: 'cuidado', gender: 'masc', count: 'singular' },
+      ja: { base: '注意', count: 'singular', reading: 'ちゅうい' },
+      pt: { base: 'cuidado', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'MONEY',
     role: 'noun',
     description: 'a medium of exchange',
@@ -1181,6 +1254,26 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'complemento circunstancial de instrumento', plural: 'complementos circunstanciales de instrumento', gender: 'masc', count: 'singular' },
       ja: { base: '手段語', count: 'singular', reading: 'しゅだんご' },
       pt: { base: 'adjunto adverbial de instrumento', plural: 'adjuntos adverbiais de instrumento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The name of the manner adverbial — the "complemento di modo", how an action is carried out
+    // ("run at the speed of light", "cut with care"). Like INSTRUMENTAL, each grammar tradition
+    // names it its own way (a full phrase in the Romance/German ones), so it is seeded as one noun
+    // concept per language; it titles the slot and its satellite.
+    id: 'ADVERBIAL_OF_MANNER',
+    role: 'noun',
+    description: 'the complement naming the manner in which an action is carried out (grammar)',
+    emoji: '🎭',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'adverbial of manner', plural: 'adverbials of manner', count: 'singular' },
+      it: { base: 'complemento di modo', plural: 'complementi di modo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de manière', plural: 'compléments circonstanciels de manière', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung der Art und Weise', plural: 'adverbiale Bestimmungen der Art und Weise', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de modo', plural: 'complementos circunstanciales de modo', gender: 'masc', count: 'singular' },
+      ja: { base: '状態の副詞語句', count: 'singular', reading: 'じょうたいのふくしごく' },
+      pt: { base: 'adjunto adverbial de modo', plural: 'adjuntos adverbiais de modo', gender: 'masc', count: 'singular' },
     },
   },
   {

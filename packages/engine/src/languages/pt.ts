@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessivePt } from '../possessive.js';
 
@@ -510,6 +510,14 @@ function complementsPhrase(
         // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
         type === 'instrumental' ? prepDet('com', f, plural) :
+        // Manner: similative "como" (como o vento — the default), means "com" (com cuidado),
+        // measure "a" (à velocidade da luz), mode "de" (de maneira…). Read off the head noun.
+        type === 'manner'    ? (
+          mannerRelation(f) === 'means'   ? prepDet('com', f, plural) :
+          mannerRelation(f) === 'measure' ? contractDet(datPrep, 'a', f, plural) :
+          mannerRelation(f) === 'mode'    ? contractDet(dePrep, 'de', f, plural) :
+          prepDet('como', f, plural)
+        ) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
         type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (

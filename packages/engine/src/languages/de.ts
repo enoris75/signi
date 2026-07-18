@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 import { possessiveDe } from '../possessive.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
@@ -47,7 +47,9 @@ function deDegStem(a: ConceptForms, base: string): string {
     const stem = deStem(a, base);
     return `${stem}${deSuperlativeSuffix(stem)}`;
   }
-  return base;
+  // The positive degree declines the attributive stem, which for most adjectives is the base but
+  // for a few is irregular (hoch → hoh-: "hohe Geschwindigkeit"); the predicative base stays "hoch".
+  return a.forms['attributive'] ?? base;
 }
 /** Invariant adverb placed before the declined adjective for the periphrastic degrees. */
 function deDegPrefix(a: ConceptForms): string {
@@ -760,6 +762,15 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
         // doesn't exist for "mit", so prepDet leaves it uncontracted.
         else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);
+        // Manner: similative "wie" + nominative ("wie der Wind" — the default); means/measure
+        // "mit" + dative ("mit der Geschwindigkeit des Lichts", "mit Sorgfalt"); mode "auf" +
+        // accusative ("auf eine gute Weise"). Read off the head noun.
+        else if (type === 'manner') {
+          const rel = mannerRelation(f);
+          if (rel === 'mode') { _case = 'acc'; head = prepDet('auf', f, 'acc', plural); }
+          else if (rel === 'means' || rel === 'measure') head = prepDet('mit', f, 'dat', plural);
+          else { _case = 'nom'; head = prepDet('wie', f, 'nom', plural); }
+        }
         else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
         // Terminus. An animate recipient is a bare dative — no preposition, just the dative
         // determiner ("der Katze"), the same case German gives the plain indirect object. An

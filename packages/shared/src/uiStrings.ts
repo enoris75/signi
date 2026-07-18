@@ -290,6 +290,16 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Instrumental',
   },
 
+  // The manner adverbial's box title and satellite label — the "complemento di modo". Like the
+  // instrumental and subject-complement labels, each language names the relation with a phrase its
+  // own grammar tradition uses ("complemento di modo", "complément circonstanciel de manière"), so
+  // it is seeded as one noun concept per language rather than composed from parts.
+  'slot.manner': {
+    plan: nameOf('ADVERBIAL_OF_MANNER'),
+    format: NAME_FORMAT,
+    fallback: 'Adverbial of manner',
+  },
+
   // The subject complement's box title and satellite label — a bare name-noun like the
   // instrumental, for the same reason: the grammar traditions name the relation in words that do
   // not decompose ("attribut du sujet", "complemento predicativo del soggetto", es just

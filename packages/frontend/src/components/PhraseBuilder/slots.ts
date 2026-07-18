@@ -113,6 +113,7 @@ export const modalChainParent = (key: string): SlotKey | undefined => {
 export const COMPLEMENT_LABEL_KEYS: Partial<Record<ComplementType, UiStringKey>> = {
   instrumental: "slot.instrumental",
   predicative: "slot.predicative",
+  manner: "slot.manner",
 };
 
 /**
@@ -430,6 +431,13 @@ export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
   terminusAdjective: { x: 88, y: 50 },
   terminusAdjective2: { x: 94, y: 46 },
   terminusAdjective3: { x: 90, y: 38 },
+  // Adverbial of manner ("at the speed of light") — parked mid-right, in the open region an
+  // intransitive verb leaves where a direct object would sit. Its adjective boxes extend left
+  // into that space so they clear the reveal controls fanned around the box.
+  manner: { x: 70, y: 58 },
+  mannerAdjective: { x: 56, y: 58 },
+  mannerAdjective2: { x: 46, y: 58 },
+  mannerAdjective3: { x: 36, y: 58 },
 };
 
 // Number is a direct-toggle satellite — the "#" border icon flips singular ⇄ plural
@@ -445,6 +453,7 @@ const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
   locative: { x: 94, y: 96 },
   cause: { x: 46, y: 96 },
   terminus: { x: 96, y: 70 },
+  manner: { x: 84, y: 64 },
 };
 
 // Every satellite needs an entry, including the direct toggles (number / gender /
@@ -482,6 +491,8 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   causeGender: { x: 58, y: 96 },
   terminusNumber: NUMBER_TOGGLE_DEFAULTS.terminus,
   terminusGender: { x: 82, y: 60 },
+  mannerNumber: NUMBER_TOGGLE_DEFAULTS.manner,
+  mannerGender: { x: 84, y: 52 },
   // Determiner (the / a / bare / quantifier) reveal icons for the adposition-bearing
   // complements — icon-only (cycle on click), aimed just outboard of each noun box.
   sourceDefiniteness: { x: 12, y: 78 },
@@ -489,6 +500,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   routeDefiniteness: { x: 68, y: 82 },
   locativeDefiniteness: { x: 92, y: 78 },
   terminusDefiniteness: { x: 84, y: 50 },
+  mannerDefiniteness: { x: 58, y: 50 },
   // Relative-clause reveal icons — no canvas node of their own; these only aim each
   // icon at the bottom edge of its noun box (clauses expand into panels below).
   subjectRelative: { x: 26, y: 64 },
@@ -499,6 +511,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   locativeRelative: { x: 84, y: 99 },
   causeRelative: { x: 52, y: 99 },
   terminusRelative: { x: 92, y: 70 },
+  mannerRelative: { x: 70, y: 70 },
   // Possessor reveal icons — same role as the relative ones (aim the icon at the noun
   // box edge; the possessor editor docks in a panel below). Offset left of the relative
   // anchor so both icons ride the box without overlapping.
@@ -514,6 +527,7 @@ export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
   locativePossessor: { x: 78, y: 99 },
   causePossessor: { x: 48, y: 99 },
   terminusPossessor: { x: 86, y: 70 },
+  mannerPossessor: { x: 58, y: 68 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

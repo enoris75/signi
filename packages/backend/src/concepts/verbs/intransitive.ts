@@ -6,7 +6,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     id: 'RUN',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['locative', 'direction', 'source', 'route', 'cause'],
+    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move quickly on foot',
     emoji: '🏃',
     forms: {

@@ -199,10 +199,10 @@ export const ASPECT_LABELS: Record<Aspect, string> = {
  * article (predicate nominative, German nominative case) and an adjective head agrees
  * with the subject (Romance) — English/German predicate adjectives are uninflected.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'terminus' | 'predicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'terminus' | 'predicative';
 
 /** Canonical UI order (matches how complements are presented to the user). */
-export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'locative', 'direction', 'source', 'route', 'cause'];
+export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'cause'];
 
 /**
  * Order in which active complements are rendered within a sentence. The subject
@@ -215,12 +215,13 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'i
  * means belongs with the act ("cuts the bread **with the knife** in the house"), before the
  * path and the place it happens in.
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
   terminus: 'Terminus',
   instrumental: 'Instrumental',
+  manner: 'Adverbial of manner',
   locative: 'Locative',
   direction: 'Direction',
   source: 'Source',
@@ -236,7 +237,7 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'locative', 'direction', 'source', 'route'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route'];
 
 /**
  * Spatial relations a `route` (path) complement can express. English needs a
@@ -275,6 +276,25 @@ export const CAUSE_SENTIMENT_LABELS: Record<CauseSentiment, string> = {
   negative: 'Negative — fault of',
   positive: 'Positive — thanks to',
 };
+
+/**
+ * The relation a `manner` adverbial (complemento di modo) draws between the act and its noun.
+ * It is a **property of the head noun's meaning**, not a choice the speaker makes: WIND is a
+ * comparison, SPEED a measure, CARE a means, WAY a mode — so the same noun always enters a
+ * manner phrase the same way, and each engine renders the relation with its own adposition
+ * (which is grammar, not a decision to expose). Carried on the noun concept
+ * (`Concept.mannerRelation`) and read by the engines; a noun that declares none defaults to
+ * `similative` — the neutral "in the manner of X", which reads for any noun and, unlike the
+ * means "with", never collides with the instrumental complement's own "with".
+ *   similative — the act is done *like* the thing (the default): "runs **like** the wind"
+ *                (like / come / comme / como / wie / …のように)
+ *   means      — the act is done *with* the thing/quality: "runs **with** care" (con / avec / mit / で)
+ *   measure    — the act reaches a degree/rate:            "runs **at** the speed" (a→alla / à / mit / で)
+ *   mode       — the act is done *in* a fashion:           "runs **in** a good way" (in / de / auf / で)
+ */
+export type MannerRelation = 'similative' | 'means' | 'measure' | 'mode';
+
+export const MANNER_RELATIONS: MannerRelation[] = ['similative', 'means', 'measure', 'mode'];
 
 /**
  * How far an instrument is *reified* — the abstraction gradient between doing something and
@@ -355,6 +375,7 @@ export interface Concept {
   animate?: boolean;            // referent is animate (human/animal) — affects motion-goal adposition
   human?: boolean;              // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
+  mannerRelation?: MannerRelation; // how this noun enters a manner adverbial (SPEED→measure, CARE→means); default means
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
   /**
    * The concept's hypernym — the id of the concept it *is a* kind of (CARAVEL → SAILING_SHIP).

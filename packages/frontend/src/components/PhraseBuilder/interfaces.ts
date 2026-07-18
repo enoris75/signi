@@ -208,6 +208,15 @@ export interface PhraseSelection {
     terminusAdjective?: Concept;
     terminusAdjective2?: Concept;
     terminusAdjective3?: Concept;
+    // Adverbial of manner ("runs *at the speed of light*", "cuts *with care*"). A full noun
+    // phrase, like the motion complements. Its preposition is not a field here: it follows the
+    // head noun's semantic manner relation (SPEED→"at", CARE→"with"), resolved in the engine.
+    manner?: Concept;
+    mannerNumber?: "singular" | "plural";
+    mannerGender?: "masc" | "fem" | "neut";
+    mannerAdjective?: Concept;
+    mannerAdjective2?: Concept;
+    mannerAdjective3?: Concept;
     // Semantic relation for any adjective slot whose picked concept is a *noun* used
     // attributively ("sail boat"). Keyed by the adjective slot key (e.g. "subjectAdjective").
     // Only consulted when that slot holds a noun; adjective concepts ignore it. Defaults
@@ -260,6 +269,7 @@ export interface PhraseSelection {
     routePossessor?: PhraseSelection;
     causePossessor?: PhraseSelection;
     terminusPossessor?: PhraseSelection;
+    mannerPossessor?: PhraseSelection;
     // A *pronominal* possessor: instead of a genitive `${which}Possessor` phrase, the noun's
     // possessor corefers with another noun in the same period ("the boy and *his* horse"), stored
     // as that antecedent's `NounAddress`. The engine then renders a possessive pronoun agreeing
@@ -274,6 +284,7 @@ export interface PhraseSelection {
     routePossessorRef?: NounAddress;
     causePossessorRef?: NounAddress;
     terminusPossessorRef?: NounAddress;
+    mannerPossessorRef?: NounAddress;
 }
 
 // Extra grammatical settings a picker can commit alongside a concept. The pronoun

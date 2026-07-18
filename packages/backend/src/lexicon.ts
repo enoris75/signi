@@ -46,8 +46,8 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number }>(`
-    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper FROM concept_noun_links cnl
+  const lexeme = db.prepare<[string, string], { id: number; singular: string; plural: string | null; gender: string | null; animate: number; human: number; countable: number; proper: number; manner_relation: string | null }>(`
+    SELECT nl.id, nl.singular, nl.plural, nl.gender, sc.animate, sc.human, sc.countable, sc.proper, sc.manner_relation FROM concept_noun_links cnl
     JOIN noun_lexemes nl ON nl.id = cnl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cnl.concept_id
     WHERE cnl.concept_id = ? AND nl.language = ? AND cnl.is_primary = 1
@@ -67,6 +67,9 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
   if (lexeme.human) forms['human'] = '1'; // concept-level personhood (English relativises "who" on this)
   if (!lexeme.countable) forms['uncountable'] = '1'; // mass noun — changes quantifier words / blocks pluralisation
   if (lexeme.proper) forms['proper'] = '1'; // proper noun — the language fixes the article, not the user
+  // How this noun enters a manner adverbial (measure / means / mode); the engine maps it to the
+  // adposition ("at the speed" vs "with care"). Concept-level, so it is the same in every language.
+  if (lexeme.manner_relation) forms['mannerRelation'] = lexeme.manner_relation;
 
   // The concept's hypernym (its direct is-a). A continent goal keys its Romance adposition off
   // this: "ANTARCTICA isA CONTINENT" → "in Antartide" / "en Antarctique", not "all'Antartide".

@@ -20,6 +20,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import BuildIcon from "@mui/icons-material/Build";
+import SpeedIcon from "@mui/icons-material/Speed";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import {
@@ -108,6 +109,7 @@ const complementIcons: Record<ComplementType, ReactNode> = {
   route: <RouteIcon sx={iconSx} />,
   cause: <HelpOutlineIcon sx={iconSx} />,
   instrumental: <BuildIcon sx={iconSx} />,
+  manner: <SpeedIcon sx={iconSx} />,
   terminus: <CallReceivedIcon sx={iconSx} />,
 };
 

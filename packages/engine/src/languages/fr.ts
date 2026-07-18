@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveFr } from '../possessive.js';
 
@@ -684,6 +684,14 @@ function complementsPhrase(
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
         type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
+        // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
+        // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
+        type === 'manner'    ? (
+          mannerRelation(nf) === 'means'   ? prepDet('avec', nf, plural, lead) :
+          mannerRelation(nf) === 'measure' ? aDet(nf, plural, lead) :
+          mannerRelation(nf) === 'mode'    ? deDet(nf, plural, lead) :
+          prepDet('comme', nf, plural, lead)
+        ) :
         type === 'direction' ? (
           // A continent goal takes bare "en" ("va en Antarctique"), not the default place "à" with
           // the proper noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à".

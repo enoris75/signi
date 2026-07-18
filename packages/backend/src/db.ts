@@ -40,7 +40,11 @@ function initSchema(db: Database.Database): void {
       -- 1 for a proper noun (Africa): its article is fixed by the language, not chosen —
       -- en/de/es/ja take none, it/fr/pt take the definite one — so the determiner the user
       -- picks is ignored for this head.
-      proper       INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1))
+      proper       INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1)),
+      -- how a noun enters a manner adverbial (complemento di modo): 'similative' (like the wind),
+      -- 'measure' (at the speed), 'means' (with care), 'mode' (in a … way). The engine maps it to
+      -- the adposition; a noun that declares none is treated as 'similative'. NULL for non-manner nouns.
+      manner_relation TEXT CHECK (manner_relation IN ('similative','measure','means','mode') OR manner_relation IS NULL)
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -312,6 +316,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('proper')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN proper INTEGER NOT NULL DEFAULT 0 CHECK (proper IN (0,1))');
+  }
+  if (!conceptCols.includes('manner_relation')) {
+    db.exec("ALTER TABLE semantic_concepts ADD COLUMN manner_relation TEXT CHECK (manner_relation IN ('similative','measure','means','mode') OR manner_relation IS NULL)");
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

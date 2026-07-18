@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type MannerRelation, type PathSpecifier, type Tense } from '@signi/shared';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveEn } from '../possessive.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
@@ -90,9 +90,15 @@ const PREP: Record<ComplementType, string> = {
   route: 'through',
   cause: 'because of',
   instrumental: 'with', // means / tool — "starts with a word"
+  manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
   terminus: 'to', // dative recipient — "cut the hair to the cat"
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
 };
+
+// The manner adverbial's preposition follows the head noun's relation — similative "like (the
+// wind)", means "with (care)", measure "at (the speed)", mode "in (a good way)" — read off the
+// noun, not chosen by the speaker. 'like' is the default, and keeps clear of instrumental "with".
+const MANNER_PREP: Record<MannerRelation, string> = { similative: 'like', means: 'with', measure: 'at', mode: 'in' };
 
 // The causal connector carries the speaker's stance: neutral "because of", positive "thanks to",
 // negative "through the fault of" — the periphrasis English uses to lay blame ("cries through the
@@ -427,6 +433,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
         : type === 'cause' ? CAUSE_PREP[causeSentiment(c)]
+        : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         : PREP[type];
       return `${prep} ${coordinate(c.phrase, npText)}`;
     })

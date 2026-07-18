@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isGenericSubject, isPronominalPossessor, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isGenericSubject, isPronominalPossessor, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveJa } from '../possessive.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
@@ -64,6 +64,10 @@ const PARTICLE: Record<ComplementType, string> = {
   // Instrumental (means / tool) — で, the same particle the locative takes: Japanese marks
   // "with a word" (言葉で) and "at the house" (家で) alike, and only the verb tells them apart.
   instrumental: 'で',
+  // Manner adverbial (complemento di modo) — で, the same means/locative particle: "at the speed
+  // of light" is 光の速さで, "with care" 注意で. で serves every manner specifier; the possessor
+  // (光の) renders through the shared noun-phrase path.
+  manner: 'で',
   // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
   terminus: 'に',
   // Subject complement: a noun/na-adjective predicate takes に (伝説になる); an i-adjective
@@ -449,7 +453,13 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       const spec = pathSpecifier(c);
       if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
     }
-    segs.push({ t: type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)] : PARTICLE[type] });
+    // Manner: a similative head takes 〜のように ("風のように" = like the wind), not the で the
+    // means/measure/mode relations share; every other complement uses its fixed particle.
+    const particle =
+      type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
+      : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
+      : PARTICLE[type];
+    segs.push({ t: particle });
   }
   return segs;
 }

@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveEs } from '../possessive.js';
 
@@ -510,6 +510,14 @@ function complementsPhrase(
         type === 'terminus'  ? aDet(af, plural) :
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
         type === 'instrumental' ? prepDet('con', af, plural) :
+        // Manner: similative "como" (como el viento — the default), means "con" (con cuidado),
+        // measure "a" (a la velocidad de la luz), mode "de" (de manera…). Read off the head noun.
+        type === 'manner'    ? (
+          mannerRelation(af) === 'means'   ? prepDet('con', af, plural) :
+          mannerRelation(af) === 'measure' ? aDet(af, plural) :
+          mannerRelation(af) === 'mode'    ? deDet(af, plural) :
+          prepDet('como', af, plural)
+        ) :
         type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
         type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
