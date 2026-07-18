@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveIt } from '../possessive.js';
 
@@ -691,6 +691,10 @@ function predicateText(
   // on the imperative ("guardami"); a noun object (or a coordination) keeps the post-verbal slot.
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  // The impersonal "si" is a preverbal clitic standing in for a generic subject ("si mangia" —
+  // "one eats"). It sits after any "non" and before the verb (and before an object clitic, in the
+  // rare "non se lo …" order); the subject word itself is suppressed upstream.
+  const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
@@ -715,9 +719,9 @@ function predicateText(
   if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
     const [aux, ...rest] = verbText.split(' ');
     const withAdverb = [aux, modifierText, ...rest].join(' ');
-    return [negText, objectClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
+    return [negText, impersonalClitic, objectClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
   }
-  return [negText, objectClitic, verbText, modifierText, directObjectText, complementsText]
+  return [negText, impersonalClitic, objectClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }
@@ -732,7 +736,9 @@ function relativeText(np: ResolvedNounPhrase): string {
   if (!rel) return '';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
-  const subjText = subjectRelative ? '' : subjectText(rel.subject!);
+  // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
+  // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia".
+  const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `che ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }

@@ -25,6 +25,24 @@ const whoGloss = (genus: string, verb: string, object?: string): PhrasePlan => (
   },
 });
 
+// A patient gloss: a genus restricted by an object-gap relative clause whose subject is the
+// generic/impersonal "one" — the head is what the action is done *to*, not what does it.
+// patientGloss('OBJECT_THING', 'EAT') → en "an object that one eats", it "un oggetto che si
+// mangia", fr "un objet qu'on mange", de "ein Gegenstand, den man isst", ja "食べる物体". The
+// GENERIC_PERSON subject renders as a placed word (en/de/fr) or an impersonal clitic (it/es/pt),
+// and drops in Japanese — see its seed and isGenericSubject in the engine.
+const patientGloss = (genus: string, verb: string): PhrasePlan => ({
+  subject: {
+    concept: genus,
+    definiteness: 'indefinite',
+    relative: {
+      headRole: 'directObject',
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb },
+    },
+  },
+});
+
 export const nouns: ConceptSeed[] = [
   // ── NOUNS ────────────────────────────────────────────────────────
   {
@@ -135,6 +153,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FOOD',
     role: 'noun',
     description: 'nourishment, something to eat',
+    definition: patientGloss('OBJECT_THING', 'EAT'),
     emoji: '🍽️',
     countable: false,
     forms: {

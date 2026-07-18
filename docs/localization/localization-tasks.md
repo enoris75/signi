@@ -58,7 +58,6 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | C01 | [C01-verb-definitions.md](C-needs-engine/C01-verb-definitions.md) | verb-definition render — all 48 verbs |
 | C02 | [C02-adjective-definitions.md](C-needs-engine/C02-adjective-definitions.md) | adjective predicate render — all 47 adjectives |
 | C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | adverb manner render — all 6 adverbs |
-| C04 | [C04-impersonal-subject.md](C-needs-engine/C04-impersonal-subject.md) | generic/impersonal subject — FOOD & patient-defined nouns |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 
@@ -75,6 +74,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | A07 | [done/A07-butcher.md](done/A07-butcher.md) | BUTCHER → a person who kills animals |
 | B01 | [done/B01-wild-domestic-animals.md](done/B01-wild-domestic-animals.md) | DOG → a domestic canine mammal; WOLF → a wild canine mammal |
 | B02 | [done/B02-adult-kin.md](done/B02-adult-kin.md) | MAN → an adult male person; WOMAN → an adult female person; FATHER → a male parent; OX → a castrated adult male bovine |
+| C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

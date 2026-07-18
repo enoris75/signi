@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isGenericSubject, isPronominalPossessor, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveJa } from '../possessive.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
@@ -156,8 +156,11 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // predicate is built with `plain` set.
   const rel = np.relative;
   if (!rel) return core;
+  // A generic ("one") subject is dropped, leaving the bare prenominal clause (食べる物 "a thing one
+  // eats"); a specific non-subject relative leads with its own subject marked by が (私が読む本).
   const clauseSubjectSegs: RubySegment[] =
-    rel.headRole !== 'subject' && rel.subject ? [...elSegs(rel.subject), { t: 'が' }] : [];
+    rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
+      ? [...elSegs(rel.subject), { t: 'が' }] : [];
   return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true), ...core];
 }
 

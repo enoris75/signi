@@ -564,6 +564,10 @@ export const UI_STRINGS = defineUiStrings({
   'pronoun.first': { word: 'FIRST', agreesWith: 'PERSON_GRAMMAR', fallback: 'first' },
   'pronoun.second': { word: 'SECOND', agreesWith: 'PERSON_GRAMMAR', fallback: 'second' },
   'pronoun.third': { word: 'THIRD', agreesWith: 'PERSON_GRAMMAR', fallback: 'third' },
+  // The generic / impersonal subject, offered in the person row alongside the three persons. It
+  // is not an ordinal category but a pronoun in its own right, so it is labelled by its own
+  // surface — en "one", it "si", fr "on", de "man", es/pt "se", ja 人 — not by an agreeing word.
+  'pronoun.generic': { word: 'GENERIC_PERSON', fallback: 'one' },
   'pronoun.singular': { word: 'SINGULAR', agreesWith: 'NUMBER_GRAMMAR', fallback: 'singular' },
   'pronoun.plural': { word: 'PLURAL', agreesWith: 'NUMBER_GRAMMAR', fallback: 'plural' },
   'pronoun.male': { word: 'MALE', agreesWith: 'GENDER', fallback: 'male' },

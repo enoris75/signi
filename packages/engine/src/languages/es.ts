@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveEs } from '../possessive.js';
 
@@ -579,7 +579,9 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   if (!rel) return withPoss;
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
-  const subjText = subjectRelative ? '' : subjectText(rel.subject!);
+  // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
+  // on agreeForms), not as a subject word — "una cosa que se come".
+  const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }
@@ -644,6 +646,10 @@ function predicateText(
   // coordination) keeps the post-verbal slot.
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
+  // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
+  const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
+  const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
   const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
@@ -666,7 +672,7 @@ function predicateText(
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, esCliticize(objectClitic, verbText), postVerb, directObjectText, complementsText]
+  return [preVerb, esCliticize(proclitics, verbText), postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

@@ -41,4 +41,22 @@ test.describe('translation', () => {
     expect(await app.sentence('it')).toBe('il gatto mangia il topo.');
     expect(await app.sentence('de')).toBe('der Kater isst die Maus.');
   });
+
+  // The generic / impersonal subject, chosen from the pronoun chooser's "one" option (the pronoun
+  // the person toggle can't reach). It renders as a placed word (en/de/fr), an impersonal clitic
+  // (it/es/pt), or a dropped subject (ja) — see the engine's isGenericSubject.
+  test('the generic "one" subject renders impersonally in every language', async ({ app }) => {
+    await app.setGenericSubject();
+    await app.setVerb('EAT');
+    await expect(app.groupBox('Direct Object')).toBeVisible();
+    await app.setDirectObject('MOUSE');
+
+    await expect.poll(() => app.sentence('en')).toBe('one eats the mouse.');
+    expect(await app.sentence('it')).toBe('si mangia il topo.'); // impersonal "si" proclitic
+    expect(await app.sentence('fr')).toBe('on mange la souris.');
+    expect(await app.sentence('es')).toBe('se come el ratón.');
+    expect(await app.sentence('pt')).toBe('se come o rato.');
+    expect(await app.sentence('de')).toBe('man isst die Maus.');
+    expect(await app.sentence('ja')).toBe('人はネズミを食べます。');
+  });
 });

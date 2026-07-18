@@ -353,6 +353,26 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un bovino castrado, adulto y masculino');
   });
 
+  test('a patient (impersonal-subject) noun definition renders (localize-seed C04: FOOD)', async ({
+    app,
+    page,
+  }) => {
+    // English: an object-gap relative with the generic "one" as subject — "an object that one eats".
+    await app.subjectInput.fill('food');
+    const foodEn = page.locator('[data-testid="typeahead-option"][data-concept="FOOD"]');
+    await expect(foodEn).toBeVisible();
+    await foodEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('an object that one eats');
+
+    // Italian: the generic subject surfaces as the impersonal "si" proclitic — "che si mangia".
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('food');
+    const foodIt = page.locator('[data-testid="typeahead-option"][data-concept="FOOD"]');
+    await expect(foodIt).toBeVisible();
+    await foodIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un oggetto che si mangia');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

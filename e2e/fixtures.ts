@@ -52,6 +52,18 @@ export class Builder {
     await this.pick(this.subjectInput, conceptId);
   }
 
+  /**
+   * Pick the generic / impersonal subject ("one") from the pronoun chooser — the one pronoun not
+   * reachable by the person toggle (it shares 3rd person with THIRD_PERSON). Open the subject box,
+   * switch to the pronoun tab, choose "one", and commit.
+   */
+  async setGenericSubject(): Promise<void> {
+    await this.subjectInput.click();
+    await this.page.getByTestId('pronoun-tab').click();
+    await this.page.getByTestId('pronoun-generic').click();
+    await this.page.getByTestId('pronoun-commit').click();
+  }
+
   async setVerb(conceptId: string): Promise<void> {
     await this.pick(this.verbInput, conceptId);
   }

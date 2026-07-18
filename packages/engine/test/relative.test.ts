@@ -292,6 +292,69 @@ describe('relative clauses: preceding-object participle agreement', () => {
   });
 });
 
+// A generic / impersonal subject (GENERIC_PERSON) filling the subject of an object-gap relative —
+// "a thing one eats". The head is the clause's direct object (the gap); the generic subject is what
+// C04 needed. Its surface splits three ways: a placed subject word in en/de/fr ("one"/"man"/"on",
+// French eliding to "qu'on"), a preverbal impersonal clitic in the Romance clitic languages (it
+// "si", es/pt "se") with no subject word, and dropped entirely in Japanese (食べる物体).
+describe('generic / impersonal subject', () => {
+  // The patient gloss as a bare noun phrase, exactly as a concept `definition` renders it.
+  const patient = (genus: string, verb: string, negative = false) =>
+    sayAll({
+      subject: np(genus, {
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: np('GENERIC_PERSON'),
+          verbPhrase: { verb, ...(negative ? { negative: true } : {}) },
+        },
+      }),
+    });
+
+  test('the impersonal subject renders per language — placed word, clitic, or dropped', () => {
+    expect(patient('OBJECT_THING', 'EAT')).toEqual({
+      en: 'an object that one eats.',
+      it: 'un oggetto che si mangia.', // impersonal "si" proclitic, no subject word
+      fr: "un objet qu'on mange.", // "on" placed, "que" elided
+      de: 'ein Gegenstand, den man isst.', // "man" placed, verb-final
+      es: 'un objeto que se come.', // impersonal "se"
+      ja: '食べる物体。', // the generic subject is dropped, leaving the bare prenominal clause
+      pt: 'um objeto que se come.',
+    });
+  });
+
+  // Negation is where a placed "si"/"se" subject word would come out wrong ("che si non mangia"):
+  // the clitic must sit AFTER the negator — "non si mangia" / "no se come" / "não se come".
+  test('the impersonal clitic sits after the negator', () => {
+    expect(patient('OBJECT_THING', 'EAT', true)).toMatchObject({
+      en: 'an object that one does not eat.',
+      it: 'un oggetto che non si mangia.',
+      fr: "un objet qu'on ne mange pas.",
+      de: 'ein Gegenstand, den man nicht isst.',
+      es: 'un objeto que no se come.',
+      pt: 'um objeto que não se come.',
+    });
+  });
+
+  // The same subject at clause level, not just in a relative: pro-drop still hides the pronoun in
+  // it/es/pt, but the impersonal clitic must survive it ("si mangia il topo", not "mangia il topo").
+  test('a top-level impersonal subject keeps its clitic through pro-drop', () => {
+    expect(sayAll({
+      subject: np('GENERIC_PERSON'),
+      verbPhrase: { verb: 'EAT' },
+      directObject: np('MOUSE'),
+    })).toEqual({
+      en: 'one eats the mouse.',
+      it: 'si mangia il topo.',
+      fr: 'on mange la souris.',
+      de: 'man isst die Maus.',
+      es: 'se come el ratón.',
+      ja: '人はネズミを食べます。',
+      pt: 'se come o rato.',
+    });
+  });
+});
+
 describe('known bugs: French preceding-object participle agreement', () => {
   // French obligatorily agrees the participle with a preceding direct object, so a feminine
   // antecedent gives "mangée" (singular) / "mangées" (plural). The engine now agrees an avoir

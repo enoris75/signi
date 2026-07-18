@@ -58,4 +58,29 @@ export const pronouns: ConceptSeed[] = [
       pt: { base: 'ele',  person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela',    singular_neut: 'isso', plural: 'eles',  plural_fem: 'elas', disjunctive: 'ele', disjunctive_fem: 'ela',  disjunctive_neut: 'isso', disjunctive_plural: 'eles', object: 'o', object_fem: 'a', object_neut: 'o', object_plural: 'os' },
     },
   },
+  {
+    // The generic / impersonal subject — "one eats", "a thing one eats". Agreement is
+    // 3rd-person singular everywhere, but the surface splits three ways (the `generic` flag lets
+    // the engines tell it apart from a deictic 3rd person):
+    //   · en/de/fr place it as an ordinary subject word — "one" / "man" / "on" (French elides,
+    //     "qu'on"); nothing more than this seed is needed there.
+    //   · it/es/pt render it as a preverbal impersonal clitic — "si" / "se" / "se" — with no
+    //     subject word ("una cosa che si mangia"); the engines read `base` as that clitic.
+    //   · ja drops it, leaving the bare prenominal clause (食べる物 "a thing one eats"); 人 is kept
+    //     only so the picker shows a word.
+    id: 'GENERIC_PERSON',
+    role: 'pronoun',
+    description: 'one (generic person)',
+    synonym: 'one',
+    emoji: '🫥',
+    forms: {
+      en: { base: 'one', person: '3', number: 'singular', generic: '1' },
+      it: { base: 'si',  person: '3', number: 'singular', generic: '1' },
+      fr: { base: 'on',  person: '3', number: 'singular', generic: '1' },
+      de: { base: 'man', person: '3', number: 'singular', generic: '1' },
+      es: { base: 'se',  person: '3', number: 'singular', generic: '1' },
+      ja: { base: '人',  person: '3', number: 'singular', generic: '1', reading: 'ひと' },
+      pt: { base: 'se',  person: '3', number: 'singular', generic: '1' },
+    },
+  },
 ];

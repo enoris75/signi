@@ -47,8 +47,10 @@ export function SubjectTypeahead({
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
-  // The pronoun chooser's in-progress decision: person, number, gender.
-  const [person, setPerson] = useState<"1" | "2" | "3">("1");
+  // The pronoun chooser's in-progress decision: person, number, gender. "generic" is the
+  // impersonal "one" (GENERIC_PERSON) — a pronoun in its own right, always 3rd-singular, so it
+  // hides the number/gender rows when chosen.
+  const [person, setPerson] = useState<"1" | "2" | "3" | "generic">("1");
   const [number, setNumber] = useState<"singular" | "plural">("singular");
   const [gender, setGender] = useState<"masc" | "fem" | "neut">("masc");
   const anchorRef = useRef<HTMLDivElement>(null);
@@ -64,7 +66,16 @@ export function SubjectTypeahead({
   }
 
   function commitPronoun() {
-    const concept = pronouns.find((p) => p.person === person);
+    // The generic ("one") is a distinct pronoun concept, not one of the 1/2/3 persons (it shares
+    // person 3 with THIRD_PERSON, so it must be matched by id); it is inherently 3rd-singular.
+    if (person === "generic") {
+      const generic = pronouns.find((p) => p.id === "GENERIC_PERSON");
+      if (!generic) return;
+      onSelect(generic, { number: "singular" });
+      reset();
+      return;
+    }
+    const concept = pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON");
     if (!concept) return;
     // Gender is carried for every person (it drives participle/adjective agreement in
     // Romance languages — "tu sei stato/stata"). Neuter is 3rd-person only ("it").
@@ -174,8 +185,8 @@ export function SubjectTypeahead({
               },
             }}
           >
-            <Tab value="noun" label={t("category.noun")} />
-            <Tab value="pronoun" label={t("category.pronoun")} />
+            <Tab value="noun" label={t("category.noun")} data-testid="pronoun-tab-noun" />
+            <Tab value="pronoun" label={t("category.pronoun")} data-testid="pronoun-tab" />
           </Tabs>
 
           {tab === "pronoun" ? (
@@ -195,43 +206,51 @@ export function SubjectTypeahead({
                   <ToggleButton value="1">{t("pronoun.first")}</ToggleButton>
                   <ToggleButton value="2">{t("pronoun.second")}</ToggleButton>
                   <ToggleButton value="3">{t("pronoun.third")}</ToggleButton>
+                  {/* The generic / impersonal "one" — a pronoun of its own, not a 4th person. */}
+                  <ToggleButton value="generic" data-testid="pronoun-generic">{t("pronoun.generic")}</ToggleButton>
                 </ToggleButtonGroup>
               </ChooserRow>
 
-              <ChooserRow label={t("pronoun.number")}>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={number}
-                  onChange={(_, v) => v && setNumber(v)}
-                >
-                  <ToggleButton value="singular">{t("pronoun.singular")}</ToggleButton>
-                  <ToggleButton value="plural">{t("pronoun.plural")}</ToggleButton>
-                </ToggleButtonGroup>
-              </ChooserRow>
+              {/* The generic ("one") is inherently 3rd-singular, so it offers no number/gender. */}
+              {person !== "generic" && (
+                <>
+                  <ChooserRow label={t("pronoun.number")}>
+                    <ToggleButtonGroup
+                      exclusive
+                      size="small"
+                      value={number}
+                      onChange={(_, v) => v && setNumber(v)}
+                    >
+                      <ToggleButton value="singular">{t("pronoun.singular")}</ToggleButton>
+                      <ToggleButton value="plural">{t("pronoun.plural")}</ToggleButton>
+                    </ToggleButtonGroup>
+                  </ChooserRow>
 
-              {/* Gender matters for every person (participle/adjective agreement in
-                  Romance); neuter ("it") is offered only in the 3rd person. */}
-              <ChooserRow label={t("pronoun.gender")}>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={gender}
-                  onChange={(_, v) => v && setGender(v)}
-                >
-                  <ToggleButton value="masc">{t("pronoun.male")}</ToggleButton>
-                  <ToggleButton value="fem">{t("pronoun.female")}</ToggleButton>
-                  {person === "3" && (
-                    <ToggleButton value="neut">{t("pronoun.neuter")}</ToggleButton>
-                  )}
-                </ToggleButtonGroup>
-              </ChooserRow>
+                  {/* Gender matters for every person (participle/adjective agreement in
+                      Romance); neuter ("it") is offered only in the 3rd person. */}
+                  <ChooserRow label={t("pronoun.gender")}>
+                    <ToggleButtonGroup
+                      exclusive
+                      size="small"
+                      value={gender}
+                      onChange={(_, v) => v && setGender(v)}
+                    >
+                      <ToggleButton value="masc">{t("pronoun.male")}</ToggleButton>
+                      <ToggleButton value="fem">{t("pronoun.female")}</ToggleButton>
+                      {person === "3" && (
+                        <ToggleButton value="neut">{t("pronoun.neuter")}</ToggleButton>
+                      )}
+                    </ToggleButtonGroup>
+                  </ChooserRow>
+                </>
+              )}
 
               <Button
                 size="small"
                 variant="contained"
                 disableElevation
                 onClick={commitPronoun}
+                data-testid="pronoun-commit"
                 sx={{
                   mt: 0.5,
                   textTransform: "none",
