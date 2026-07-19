@@ -564,6 +564,32 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('uma palavra que substitui substantivos');
   });
 
+  test('a scalar adjective definition renders in the adjective picker (localize-seed B07: BIG)', async ({
+    app,
+    page,
+  }) => {
+    // The adjective-definition gloss: BIG's plan is a verbless dimension-noun fragment
+    // (SIZE + degree GREAT), rendered as a prepositional fragment — "of great size". Reached
+    // through the subject's adjective slot, not the core noun picker. German is asserted as the
+    // second language (its "von großer Größe" is correct; French carries the known A44/A45 gloss
+    // defects, so it is deliberately not pinned here).
+    await app.setSubject('CAT');
+    await app.openSubjectAdjective('big');
+    const bigEn = page.locator('[data-testid="typeahead-option"][data-concept="BIG"]');
+    await expect(bigEn).toBeVisible();
+    await bigEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('of great size');
+
+    // German: the same plan, localized by the engine — the degree adjective agrees in the dative
+    // ("großer") and the "von" adposition governs it. No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.openSubjectAdjective('big');
+    const bigDe = page.locator('[data-testid="typeahead-option"][data-concept="BIG"]');
+    await expect(bigDe).toBeVisible();
+    await bigDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('von großer Größe');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

@@ -72,6 +72,23 @@ export class Builder {
     await this.pick(this.nounInput, conceptId);
   }
 
+  /**
+   * Reveal the subject's first adjective slot and type into its picker. Adjectives are reached
+   * differently from the core slots: a satellite on the subject box reveals the adjective box
+   * (`satellite-subjectAdjective` → `box-subjectAdjective`), which holds the adjective typeahead.
+   * The caller then hovers the `typeahead-option` row it wants (its tooltip is the definition).
+   */
+  async openSubjectAdjective(query: string): Promise<void> {
+    // The satellite is a toggle, so reveal only when the box isn't already up (a second call —
+    // e.g. after switching UI language — would otherwise collapse it).
+    const input = this.page.getByTestId('box-subjectAdjective').locator('input');
+    if (!(await input.isVisible().catch(() => false))) {
+      await this.page.getByTestId('satellite-subjectAdjective').click();
+    }
+    await expect(input).toBeVisible();
+    await input.fill(query);
+  }
+
   /** Subject → verb: the shortest path to a translatable clause and a painted canvas. */
   async buildClause(subject: string, verb: string): Promise<void> {
     await this.setSubject(subject);

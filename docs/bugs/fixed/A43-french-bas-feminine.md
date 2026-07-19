@@ -42,3 +42,17 @@ An `-s → -sse` rule branch would also work, but the family is tiny (bas, gras,
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: adjectives* (1 `test.fails`: "French feminine of \"bas\" (LOW) is \"basse\", not \"base\"") |
+
+## Resolved
+
+Fixed 2026-07-19. Added `bas: ['bas', 'basse', 'bas', 'basses']` to `FR_ADJ_IRREGULAR` in
+[fr.ts](../../../packages/engine/src/languages/fr.ts) (the same stored-irregular table beau/nouveau/
+vieux use), then rebuilt the engine dist. The feminine now doubles the s ("la chatte basse"); the
+masculine is unchanged ("le chat bas", invariable in the plural).
+
+The pinning `test.fails` was flipped to a passing `test` in
+[adjectives.test.ts](../../../packages/engine/test/adjectives.test.ts) (*known bugs: adjectives*),
+and coverage was extended there (feminine plural "basses"; a masculine sg/pl regression) and in
+[adjective-gloss.test.ts](../../../packages/engine/test/adjective-gloss.test.ts) with the real
+trigger — the `measure` gloss `TEMPERATURE` + `LOW` → "à température basse" (COLD's future
+definition), correct in all seven languages.

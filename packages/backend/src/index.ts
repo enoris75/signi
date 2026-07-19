@@ -1,5 +1,7 @@
 import express from 'express';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
 import { lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
@@ -362,6 +364,25 @@ app.delete('/api/phrases/:id', (req, res) => {
     return;
   }
   res.status(204).end();
+});
+
+// ── Static frontend ──────────────────────────────────────────────────────────
+// In production the built SPA is served from this same origin, so the deploy needs to
+// expose only one port. The frontend calls the API at the relative /api path, which the
+// routes above already answer; every other GET falls through to index.html so client-side
+// routing survives a hard refresh. In dev this directory doesn't exist and Vite serves the
+// frontend itself — express.static just 404s, and the catch-all below is never reached
+// because dev requests go to Vite's port, not here.
+const frontendDist = path.join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'frontend', 'dist');
+app.use(express.static(frontendDist));
+app.get('*', (req, res) => {
+  // Unknown API paths are a 404, not the SPA shell — returning HTML for a missing endpoint
+  // would mask bugs and confuse fetch callers expecting JSON.
+  if (req.path.startsWith('/api/')) {
+    res.status(404).json({ error: 'Not found' });
+    return;
+  }
+  res.sendFile(path.join(frontendDist, 'index.html'));
 });
 
 const PORT = process.env['PORT'] ?? 3001;

@@ -52,7 +52,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 |---|---|
 | A41 | [A41-home-locative-at-home-idiom.md](A-must-fix/A41-home-locative-at-home-idiom.md) |
 | A42 | [A42-japanese-locative-dropped-under-predicate-nominal.md](A-must-fix/A42-japanese-locative-dropped-under-predicate-nominal.md) |
-| A43 | [A43-french-bas-feminine.md](A-must-fix/A43-french-bas-feminine.md) |
+| A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
+| A45 | [A45-french-gloss-great-postnominal.md](A-must-fix/A45-french-gloss-great-postnominal.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -122,6 +123,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | B2 | [B02-english-german-negative-cause-sentiment.md](fixed/B02-english-german-negative-cause-sentiment.md) | English, German | 2026-07-17 |
 | B3 | [B03-german-conditional-clause-order.md](fixed/B03-german-conditional-clause-order.md) | German | 2026-07-17 |
 | B4 | [B04-french-relative-superlative-second-article.md](fixed/B04-french-relative-superlative-second-article.md) | French | 2026-07-17 |
+| A43 | [A43-french-bas-feminine.md](fixed/A43-french-bas-feminine.md) | French | 2026-07-19 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

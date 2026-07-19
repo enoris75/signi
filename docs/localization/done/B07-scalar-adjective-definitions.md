@@ -76,3 +76,38 @@ Notes:
   once this is an A (add the `definition` in
   [adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts), boot to render all 7
   languages, add e2e coverage).
+
+## Done
+
+Localized 2026-07-19. Added a `dimGloss(dimension, degree)` helper and a `definition` plan to **11**
+adjectives in [adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts). **LOW** was left
+off for the same reason as SMALL — its gloss (HEIGHT + LOW → "of low height") reuses the word as its
+own degree, tautological. The backend boots clean and every definition renders in all 7 languages.
+
+Rendered strings (engine is source of truth):
+
+| concept | plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|---|
+| BIG | SIZE+GREAT | of great size | di dimensione grande | de taille grande † | von großer Größe | de tamaño grande | 大きさが大きい | de tamanho grande |
+| HIGH | HEIGHT+GREAT | of great height | di altezza grande | de hauteur grande † | von großer Höhe | de altura grande | 高さが大きい | de altura grande |
+| GOOD | QUALITY+HIGH | of high quality | di qualità alta | de qualité haute | von hoher Qualität | de calidad alta | 質が高い | de qualidade alta |
+| BAD | QUALITY+LOW | of low quality | di qualità bassa | de qualité basse | von niedriger Qualität | de calidad baja | 質が低い | de qualidade baixa |
+| OLD | AGE+GREAT | of great age | di età grande | de âge grand †‡ | von großem Alter | de edad grande | 年齢が大きい | de idade grande |
+| YOUNG | AGE+LOW | of low age | di età bassa | de âge bas ‡ | von niedrigem Alter | de edad baja | 年齢が低い | de idade baixa |
+| STRONG | STRENGTH+GREAT | of great strength | di forza grande | de force grande † | von großer Stärke | de fuerza grande | 強さが大きい | de força grande |
+| WEAK | STRENGTH+LOW | of low strength | di forza bassa | de force basse | von niedriger Stärke | de fuerza baja | 強さが低い | de força baixa |
+| QUICK | SPEED+HIGH | of high speed | di velocità alta | de vitesse haute | von hoher Geschwindigkeit | de velocidad alta | 速さが高い | de velocidade alta |
+| HOT | TEMPERATURE+HIGH | at high temperature | a temperatura alta | à température haute | bei hoher Temperatur | a temperatura alta | 温度が高い | a temperatura alta |
+| COLD | TEMPERATURE+LOW | at low temperature | a temperatura bassa | à température basse | bei niedriger Temperatur | a temperatura baja | 温度が低い | a temperatura baixa |
+
+† French places GREAT postnominally ("de taille grande") — should be "de grande taille": bug
+[A45](../../bugs/A-must-fix/A45-french-gloss-great-postnominal.md).
+‡ French does not elide "de" before "âge" ("de âge …") — should be "d'âge": bug
+[A44](../../bugs/A-must-fix/A44-french-gloss-de-elision.md). Both were surfaced by this task, filed,
+and left on the current output (a product decision to ship now and fix the French via `/fix-bug`).
+
+e2e coverage added in
+[definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts) (BIG en + de, driven through the
+subject's adjective picker via a new `openSubjectAdjective` fixture helper). Unit coverage: the gloss
+construct and its `measure`/`extent` adpositions are pinned in
+[adjective-gloss.test.ts](../../../packages/engine/test/adjective-gloss.test.ts).

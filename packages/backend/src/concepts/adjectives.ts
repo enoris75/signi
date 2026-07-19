@@ -1,4 +1,14 @@
 import type { ConceptSeed } from './types.js';
+import type { PhrasePlan } from '@signi/shared';
+
+// An adjective-definition gloss: a dimension noun carrying a degree adjective, rendered verblessly as
+// a prepositional fragment whose adposition the noun's `dimensionRelation` selects — dimGloss('SIZE',
+// 'GREAT') → en "of great size", it "di grande dimensione", de "von großer Größe", ja "大きさが大きい";
+// dimGloss('TEMPERATURE', 'HIGH') → "at high temperature" (the `measure` relation). See
+// NounPhrase.dimensionGloss and the engines' verbless branch.
+const dimGloss = (dimension: string, degree: string): PhrasePlan => ({
+  subject: { concept: dimension, definiteness: 'bare', adjectives: [degree], dimensionGloss: true },
+});
 
 export const adjectives: ConceptSeed[] = [
   // ── ADJECTIVES ───────────────────────────────────────────────────
@@ -6,6 +16,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'BIG',
     role: 'adjective',
     description: 'large in size',
+    definition: dimGloss('SIZE', 'GREAT'),
     emoji: '🔭',
     forms: {
       en: { base: 'big' },
@@ -41,6 +52,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'HIGH',
     role: 'adjective',
     description: 'great in vertical extent or degree',
+    definition: dimGloss('HEIGHT', 'GREAT'),
     emoji: '⛰️',
     forms: {
       en: { base: 'high' },
@@ -91,6 +103,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'GOOD',
     role: 'adjective',
     description: 'of high quality or virtue',
+    definition: dimGloss('QUALITY', 'HIGH'),
     emoji: '✨',
     forms: {
       en: { base: 'good' },
@@ -107,6 +120,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'BAD',
     role: 'adjective',
     description: 'of poor quality or harmful',
+    definition: dimGloss('QUALITY', 'LOW'),
     emoji: '💀',
     forms: {
       en: { base: 'bad' },
@@ -152,6 +166,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'OLD',
     role: 'adjective',
     description: 'having existed for a long time',
+    definition: dimGloss('AGE', 'GREAT'),
     emoji: '🧓',
     forms: {
       en: { base: 'old' },
@@ -167,6 +182,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'YOUNG',
     role: 'adjective',
     description: 'having lived or existed for a short time',
+    definition: dimGloss('AGE', 'LOW'),
     emoji: '🧒',
     forms: {
       en: { base: 'young' },
@@ -276,6 +292,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'STRONG',
     role: 'adjective',
     description: 'having great physical power or force',
+    definition: dimGloss('STRENGTH', 'GREAT'),
     emoji: '💪',
     forms: {
       en: { base: 'strong' },
@@ -291,6 +308,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'WEAK',
     role: 'adjective',
     description: 'lacking physical power or force',
+    definition: dimGloss('STRENGTH', 'LOW'),
     emoji: '🥀',
     forms: {
       en: { base: 'weak' },
@@ -336,6 +354,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'COLD',
     role: 'adjective',
     description: 'at a low temperature',
+    definition: dimGloss('TEMPERATURE', 'LOW'),
     emoji: '🥶',
     forms: {
       en: { base: 'cold' },
@@ -351,6 +370,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'HOT',
     role: 'adjective',
     description: 'at a high temperature',
+    definition: dimGloss('TEMPERATURE', 'HIGH'),
     emoji: '🔥',
     forms: {
       en: { base: 'hot' },
@@ -381,6 +401,7 @@ export const adjectives: ConceptSeed[] = [
     id: 'QUICK',
     role: 'adjective',
     description: 'moving or capable of moving fast',
+    definition: dimGloss('SPEED', 'HIGH'),
     emoji: '⚡',
     forms: {
       en: { base: 'quick' },

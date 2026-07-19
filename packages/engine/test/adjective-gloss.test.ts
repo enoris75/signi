@@ -66,6 +66,20 @@ describe('adjective-definition gloss (C02 fragment)', () => {
     });
   });
 
+  // The low pole on the same measure noun: TEMPERATURE + LOW, the gloss COLD will use. French agrees
+  // the feminine of "bas" correctly ("température basse") — regression guard for bug A43.
+  test('a measure dimension, low pole ("at low temperature")', () => {
+    expect(gloss('TEMPERATURE', 'LOW')).toEqual({
+      en: 'at low temperature.',
+      it: 'a temperatura bassa.',
+      fr: 'à température basse.',
+      es: 'a temperatura baja.',
+      pt: 'a temperatura baixa.',
+      de: 'bei niedriger Temperatur.',
+      ja: '温度が低い。',
+    });
+  });
+
   // No degree adjective: the fragment is the bare dimension noun under its adposition, so the
   // construct degrades to "of speed" rather than throwing or dropping the preposition.
   test('a dimension gloss with no degree renders the bare dimension noun', () => {
@@ -78,5 +92,23 @@ describe('adjective-definition gloss (C02 fragment)', () => {
       de: 'von Geschwindigkeit.',
       ja: '速さ。',
     });
+  });
+});
+
+describe('known bugs: adjective-definition gloss (French)', () => {
+  // A44. The gloss builds its adposition as a manual `de ` + noun phrase and skips French elision:
+  // "de" before a vowel-initial dimension noun must contract to "d'". AGE is the only seeded
+  // vowel-initial dimension noun, so it is the one that surfaces it (YOUNG → AGE + LOW). LOW ("bas")
+  // is postnominal, so the noun leads and only the elision differs.
+  test.fails('French elides "de" before a vowel-initial dimension noun (d\'âge)', () => {
+    expect(gloss('AGE', 'LOW').fr).toBe("d'âge bas.");
+  });
+
+  // A45. GREAT ("grand") is a canonical BAGS adjective and must PRECEDE the noun in French — "de
+  // grande taille", not "de taille grande". GREAT was seeded as a gloss degree word but never added
+  // to French's PRENOMINAL set, so it falls postnominal. SIZE is consonant-initial, isolating the
+  // placement from the A44 elision. (The same likely applies to HIGH → "de haute qualité".)
+  test.fails('French places GREAT before the noun in a gloss (de grande taille)', () => {
+    expect(gloss('SIZE', 'GREAT').fr).toBe('de grande taille.');
   });
 });

@@ -44,9 +44,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-| # | File | Seed first |
-|---|---|---|
-| B07 | [B07-scalar-adjective-definitions.md](B-needs-seed/B07-scalar-adjective-definitions.md) | scalar adjectives via `dimensionGloss` — seed `TEMPERATURE`, then author 12 (was C02; render mode landed) |
+_None outstanding — every catalogued B-task is done (see the Done section). New B-tasks land here._
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
@@ -74,6 +72,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | B04 | [done/B04-possession.md](done/B04-possession.md) | POSSESSOR → a person who owns objects; CONTAINER → an object that holds objects (seeded OWN, HOLD first) |
 | B05 | [done/B05-artifacts.md](done/B05-artifacts.md) | BOOK → a written object; COIN → a small round object (seeded WRITTEN, ROUND, MONEY first) |
 | B06 | [done/B06-grammar-words.md](done/B06-grammar-words.md) | NOUN → a word that names objects; VERB → a word that expresses actions; ADJECTIVE → …describes nouns; ADVERB → …modifies verbs; PRONOUN → …replaces nouns (seeded NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE, ACTION first) |
+| B07 | [done/B07-scalar-adjective-definitions.md](done/B07-scalar-adjective-definitions.md) | 11 scalar adjectives via `dimensionGloss` — BIG → of great size, GOOD → of high quality, HOT → at high temperature, … (was C02; seeded TEMPERATURE first, filed fr bugs A44/A45) |
 | C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):

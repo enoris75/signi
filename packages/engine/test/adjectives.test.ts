@@ -501,9 +501,23 @@ describe('known bugs: adjectives', () => {
   // +e. Latent until a feminine noun took LOW; the seeded feminine dimension noun TEMPERATURE
   // surfaces it — the gloss COLD will use reads "à température basse". Fix: add
   // `bas: ['bas', 'basse', 'bas', 'basses']` to FR_ADJ_IRREGULAR in fr.ts.
-  test.fails('French feminine of "bas" (LOW) is "basse", not "base"', () => {
+  test('French feminine of "bas" (LOW) is "basse", not "base"', () => {
     expect(cat({ gender: 'fem', adjectives: ['LOW'] }))
       .toMatchObject({ fr: 'la chatte basse mange.' });
+  });
+
+  // Feminine plural is the feminine stem + s: "basses" (not "bases").
+  test('French feminine plural of "bas" is "basses"', () => {
+    expect(cat({ gender: 'fem', number: 'plural', adjectives: ['LOW'] }))
+      .toMatchObject({ fr: 'les chattes basses mangent.' });
+  });
+
+  // Regression: the masculine is unchanged by the fix — "bas" in the singular, and invariable in
+  // the plural (the -s/-x masculine-plural rule at the tail of agreeAdjFr), never "*base".
+  test('French masculine of "bas" stays "bas", invariable in the plural', () => {
+    expect(cat({ adjectives: ['LOW'] })).toMatchObject({ fr: 'le chat bas mange.' });
+    expect(cat({ number: 'plural', adjectives: ['LOW'] }))
+      .toMatchObject({ fr: 'les chats bas mangent.' });
   });
 });
 

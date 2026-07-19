@@ -54,6 +54,9 @@ const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string]> = {
   beau: ['beau', 'belle', 'beaux', 'belles'],
   nouveau: ['nouveau', 'nouvelle', 'nouveaux', 'nouvelles'],
   vieux: ['vieux', 'vieille', 'vieux', 'vieilles'],
+  // -s adjectives double the s in the feminine ("bas → basse"); the rule below has no -s branch and
+  // would give the wrong "base". Only "bas" (LOW) is seeded; masc plural stays "bas" (invariable).
+  bas: ['bas', 'basse', 'bas', 'basses'],
 };
 function agreeAdjFr(base: string, gender: string, plural: boolean): string {
   if (!base) return '';
