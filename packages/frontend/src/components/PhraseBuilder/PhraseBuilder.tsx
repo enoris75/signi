@@ -852,6 +852,17 @@ export function PhraseBuilder({
     string,
     { w: number; h: number }
   > | null>(null);
+  // The last geometry this effect actually resolved against. It runs after *every* commit
+  // (no deps) so it can track a box dragged around, but that also means a commit driven by
+  // something with no bearing on the layout — a parent re-render, a sibling's link line, or
+  // React StrictMode's extra invocation — re-runs it against unchanged geometry. Re-resolving
+  // there is not just wasted work: the rank heuristic below reads `prevGroupSizesRef`, whose
+  // "just grew" signal is a one-commit pulse, so a redundant pass sees it already cleared and
+  // resolves the same overlap a *different* way, writing new positions that trigger the next
+  // redundant pass — an unbounded bump loop (Maximum update depth exceeded). Skipping when the
+  // geometry is byte-for-byte what we last resolved keeps every real trigger (a drag, a grown
+  // box, a resize) while dropping the passenger re-runs. See e2e/manner-possessor-crash.spec.ts.
+  const lastResolvedRef = useRef<string | null>(null);
   useLayoutEffect(() => {
     if (compact || groupRects.length === 0) return;
     // The rebase that follows a height change re-renders, so nothing is lost by waiting
@@ -867,6 +878,21 @@ export function PhraseBuilder({
         return [g.label, { w: r.width, h: r.height }] as const;
       }),
     );
+    // A drag has to re-resolve on every pointer move (and size the canvas to the dragged box),
+    // so it never takes the skip; outside a drag, bail when nothing that feeds the resolution
+    // has moved since we last ran it.
+    const dragging = Boolean(dragRef.current?.keys);
+    if (!dragging) {
+      const signature = JSON.stringify([
+        groupRects.map((g) => [g.label, g.nodeKeys, pos(g.nodeKeys[0])]),
+        [...sizes],
+        graphSize,
+      ]);
+      if (signature === lastResolvedRef.current) return;
+      lastResolvedRef.current = signature;
+    } else {
+      lastResolvedRef.current = null;
+    }
     const before = prevGroupSizesRef.current;
     prevGroupSizesRef.current = sizes;
 
