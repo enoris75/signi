@@ -52,7 +52,7 @@ _None outstanding — every catalogued B-task is done (see the Done section). Ne
 |---|---|---|
 | C01 | [C01-verb-definitions.md](C-needs-engine/C01-verb-definitions.md) | verb-definition render — all 48 verbs |
 | C02 | [C02-adjective-definitions.md](C-needs-engine/C02-adjective-definitions.md) | adjective predicate render — all 47 adjectives |
-| C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | adverb manner render — all 6 adverbs |
+| C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | `mannerGloss` render — 5 manner/frequency adverbs (TOGETHER stays literal) |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
