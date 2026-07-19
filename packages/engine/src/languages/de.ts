@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type DimensionRelation, type Tense } from '@signi/shared';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 import { possessiveDe } from '../possessive.js';
 
 /** The comparative stem: "-er", or a bare "-r" on a base already ending in -e (müde → müder). */
@@ -896,8 +896,31 @@ function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: 
 // clause — the finite verb closes it behind the non-finite tail ("wenn der Kater essen würde"),
 // the same order the relative clause uses; it overrides `inverted`. A verbless or imperative
 // clause has no V2 slot to move, so both flags are inert there.
+// The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
+// "von" (**von** großer Größe, **von** hoher Qualität), measure "bei". Each governs the dative, so
+// the noun phrase (dimension noun + degree adjective) renders in the dative, its adjective declined.
+const DE_DIM_PREP: Record<DimensionRelation, string> = { extent: 'von', quality: 'von', measure: 'bei' };
+
+/**
+ * An adjective-definition gloss fragment ("von großer Größe"): the dimension noun phrase (its
+ * degree adjective declined and placed by the ordinary NP path) rendered in the dative the
+ * adposition its `dimensionRelation` selects governs. The one place a verbless period is a
+ * prepositional fragment rather than a bare subject noun phrase — see `renderClause`.
+ */
+function dimensionGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
+  const prep = DE_DIM_PREP[dimensionRelation(np.head.forms)];
+  return `${prep} ${elementPhrase(el, 'dat')}`.trim();
+}
+
+function isDimensionGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false): string {
     const { subject, verbPhrase, directObject } = phrase;
+    // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("von
+    // großer Größe"), not a bare subject noun phrase — wrap the dimension NP (dative) in its adposition.
+    if (!verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
     // The dative recipient leads the accusative object; the other complements trail it, and a
     // subordinate means clause trails even the verb (see `splitMeansClause`).
     const { dative, rest: undative } = splitDative(phrase.complements);

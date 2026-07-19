@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, ImperativeRegister, LanguageCode, MannerRelation, ModifierRelation, PathSpecifier, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, ImperativeRegister, LanguageCode, MannerRelation, ModifierRelation, PathSpecifier, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
 import { isActionLevel, isPronominalPossessor } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
@@ -48,6 +48,13 @@ export interface ResolvedNounPhrase {
    * with `isPronominalPossessor`. The pronominal form carries no lexicon — it is pure features.
    */
   possessor?: ResolvedNounPhrase | PronominalPossessor;
+  /**
+   * Whether this phrase is an **adjective-definition gloss** (see NounPhrase.dimensionGloss): a bare
+   * dimension-noun + degree-adjective phrase the engines render as a prepositional fragment ("of
+   * great size"), the adposition chosen by the head noun's `dimensionRelation`. Set on the verbless
+   * subject; the head is the dimension noun and the degree is in `adjectives`.
+   */
+  dimensionGloss?: boolean;
 }
 
 /**
@@ -264,6 +271,17 @@ export function causeSentiment(c: ResolvedComplement): CauseSentiment {
 export function mannerRelation(forms: ConceptForms['forms']): MannerRelation {
   const r = forms['mannerRelation'];
   return r === 'means' || r === 'measure' || r === 'mode' ? r : 'similative';
+}
+
+/**
+ * The dimension relation a noun heads an adjective-definition gloss with ("great **in** size",
+ * "high **of** quality") — a property of the noun's meaning, read from its resolved forms. A noun
+ * that declares none is an `extent` ("in …"), the neutral case. Each engine maps the relation to
+ * its own adposition, exactly as `mannerRelation` does for the manner adverbial.
+ */
+export function dimensionRelation(forms: ConceptForms['forms']): DimensionRelation {
+  const r = forms['dimensionRelation'];
+  return r === 'quality' || r === 'measure' ? r : 'extent';
 }
 
 /**

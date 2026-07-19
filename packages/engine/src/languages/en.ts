@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type MannerRelation, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type PathSpecifier, type Tense } from '@signi/shared';
+import { abstractionLevel, actionGerund, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveEn } from '../possessive.js';
 
 // Periphrastic degree words placed before the adjective ("more beautiful", "the most
@@ -99,6 +99,11 @@ const PREP: Record<ComplementType, string> = {
 // wind)", means "with (care)", measure "at (the speed)", mode "in (a good way)" — read off the
 // noun, not chosen by the speaker. 'like' is the default, and keeps clear of instrumental "with".
 const MANNER_PREP: Record<MannerRelation, string> = { similative: 'like', means: 'with', measure: 'at', mode: 'in' };
+
+// The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
+// "of" (**of** great size, **of** high quality), measure "at". The noun phrase (dimension noun +
+// degree adjective) follows bare, its adjective already agreed and placed by the ordinary NP path.
+const DIM_PREP: Record<DimensionRelation, string> = { extent: 'of', quality: 'of', measure: 'at' };
 
 // The causal connector carries the speaker's stance: neutral "because of", positive "thanks to",
 // negative "through the fault of" — the periphrasis English uses to lay blame ("cries through the
@@ -637,9 +642,28 @@ function withRelative(text: string, np: ResolvedNounPhrase): string {
   return rel ? `${text} ${rel}` : text;
 }
 
+/**
+ * An adjective-definition gloss fragment ("of great size"): the dimension noun phrase (its degree
+ * adjective already agreed and placed by the ordinary NP path — "great size") wrapped in the
+ * adposition its `dimensionRelation` selects. The one place a verbless period is a prepositional
+ * fragment rather than a bare subject noun phrase — see `renderClause`.
+ */
+function dimensionGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
+  const prep = DIM_PREP[dimensionRelation(np.head.forms)];
+  return `${prep} ${subjectText(el)}`.trim();
+}
+
+/** Whether a resolved noun slot is a single adjective-definition gloss phrase (see NounPhrase.dimensionGloss). */
+function isDimensionGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
+}
+
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
+  // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("of
+  // great size"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
+  if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
   // An imperative drops its subject from the surface, but the subject's person/number still
   // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
   const imperative = phrase.verbPhrase?.mood === 'imperative';

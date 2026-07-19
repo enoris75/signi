@@ -192,9 +192,20 @@ export function PhraseBuilder({
   // A conjunct panel is the other bare-noun-phrase canvas (see `nounPhraseOnly`).
   const nounPhraseMode = nounPhraseOnly || (isInstrument && instrumentLevel === "object");
   const actionMode = isInstrument && instrumentLevel !== "object";
+  useLayoutEffect(() => {
+    ((window as any).__diag ??= []).push(
+      "MOUNT " + (possessorPath ? "SUB " + String(possessorPath) : "OUT") +
+      " subj=" + ((selection.subject as { id?: string } | undefined)?.id ?? "∅"),
+    );
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+  const __tr = <T,>(name: string, tuple: [T, React.Dispatch<React.SetStateAction<T>>]): [T, React.Dispatch<React.SetStateAction<T>>] => {
+    const [v, s] = tuple;
+    return [v, (u) => { if (possessorPath) ((window as any).__diag ??= []).push("SET " + name); return s(u); }];
+  };
   // A period starts on its subject noun phrase — translation begins as soon as a subject
   // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
-  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("subject");
+  const [activeSlot, setActiveSlot] = __tr("activeSlot", useState<SlotKey | null>("subject"));
   // A filled word box the user clicked to change its word: its inline picker is shown
   // over the current word. Null when no box is being re-picked. Cleared on select or blur.
   const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
@@ -558,6 +569,26 @@ export function PhraseBuilder({
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
   });
 
+  if (possessorPath) {
+    const w = window as any;
+    w.__rc ??= {};
+    const rk = "SUB:" + String(possessorPath);
+    w.__rc[rk] = (w.__rc[rk] ?? 0) + 1;
+    const snap = {
+      activeSlot, editingSlot, slotKindState, revealed, collapsedGroups, compact,
+      draggingKey, svgSize, graphHeight,
+      boxSizesKeys: Object.keys(boxSizes).sort().join(","),
+      relN: relConnectors.length,
+      posSubjY: (positions as any).subject?.y,
+    };
+    const prev = w.__snap;
+    if (prev) {
+      const ch = Object.keys(snap).filter((k) => JSON.stringify((prev as any)[k]) !== JSON.stringify((snap as any)[k]));
+      (w.__diag ??= []).push("RENDER changed=[" + ch.join(",") + "]");
+    }
+    w.__snap = snap;
+  }
+
   // Resizing the container must not move the content vertically. Node y's are % of the
   // canvas, so a height change alone would slide them all; rebase them onto the new height
   // to hold each node's pixel offset from the canvas top. Runs before paint, so the nodes
@@ -572,6 +603,7 @@ export function PhraseBuilder({
     if (prevH === graphHeight) return;
     prevGraphHeightRef.current = graphHeight;
     positionsStaleRef.current = true;
+    ((window as any).__diag ??= []).push("RSC " + (possessorPath ? "SUB" : "OUT") + " " + prevH + "->" + graphHeight);
     setPositions((prev) => rescaleYForHeight(prev, prevH, graphHeight));
     // A drag in flight holds the grabbed nodes' start y's in the old height's % too — and
     // the canvas can grow mid-drag, when a box shoved aside has to go down instead. Rebase
@@ -588,9 +620,11 @@ export function PhraseBuilder({
   useLayoutEffect(() => {
     if (!containerRef.current) return;
     const { width, height } = containerRef.current.getBoundingClientRect();
+    ((window as any).__diag ??= []).push("SVG-MOUNT " + (possessorPath ? "SUB" : "OUT") + " " + width.toFixed(1) + "x" + height.toFixed(1));
     setSvgSize({ w: width, h: height });
     const obs = new ResizeObserver((entries) => {
       const { width: w, height: h } = entries[0].contentRect;
+      ((window as any).__diag ??= []).push("SVG-RO " + (possessorPath ? "SUB" : "OUT") + " " + w.toFixed(1) + "x" + h.toFixed(1));
       setSvgSize({ w, h });
     });
     obs.observe(containerRef.current);
@@ -606,7 +640,18 @@ export function PhraseBuilder({
       const r = el.getBoundingClientRect();
       next[key] = { w: r.width, h: r.height };
     }
-    setBoxSizes((prev) => (sameBoxSizes(prev, next) ? prev : next));
+    setBoxSizes((prev) => {
+      if (sameBoxSizes(prev, next)) return prev;
+      const diffs: string[] = [];
+      const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
+      for (const k of keys) {
+        const a = prev[k], b = next[k];
+        if (!a || !b || Math.abs(a.w - b.w) > 0.5 || Math.abs(a.h - b.h) > 0.5)
+          diffs.push(`${k}:${a ? `${a.w.toFixed(1)}x${a.h.toFixed(1)}` : "∅"}->${b ? `${b.w.toFixed(1)}x${b.h.toFixed(1)}` : "∅"}`);
+      }
+      ((window as any).__diag ??= []).push("BSZ " + (possessorPath ? "SUB" : "OUT") + " " + diffs.join(" "));
+      return next;
+    });
   });
 
   // After every render, measure each open possessor's connector dot-to-dot: from the
@@ -657,17 +702,53 @@ export function PhraseBuilder({
         conjunctDotEls.current.get(which),
         "conj",
       );
-    setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
+    setRelConnectors((prev) => {
+      if (sameRelConnectors(prev, next)) return prev;
+      // eslint-disable-next-line no-console
+      console.log("[REL]", possessorPath ? "SUB" : "OUT", prev.length, "->", next.length, JSON.stringify(next.map((n) => [n.which, Math.round(n.x1), Math.round(n.y1), Math.round(n.x2), Math.round(n.y2)])));
+      return next;
+    });
   });
 
   // Tell the workspace to re-measure its cross-container link lines whenever this
   // container's canvas geometry changes — a box dragged, the canvas resized, a group
   // collapsed. The workspace can't observe our internal drag state, so it would
-  // otherwise draw stale subordinate connectors. Keyed on the geometry-bearing state
-  // only, so a workspace re-render (new binding object) doesn't refire it into a loop.
+  // otherwise draw stale subordinate connectors.
+  //
+  // `onGeometryChange` (bumpGeom) forces a *workspace* re-render, which re-renders this
+  // container, which re-runs this effect — so it must fire only on a real geometry change,
+  // or it drives an unbounded bump→render→bump loop. Keying on the geometry state alone is
+  // not enough: those are fresh objects on every commit even when their values are identical
+  // (the overlap resolver writes a new positions object each pass; React StrictMode re-runs
+  // the layout effects that produce them). So compare the *serialized* geometry against the
+  // last value we actually reported, and bump only when it truly moved. An embedded possessor
+  // sub-builder mounting with content into a cramped canvas hit this loop hardest — the
+  // reopened panel's boxes settle over a few commits, each with a new positions identity but
+  // the same final values. See e2e/manner-possessor-crash.spec.ts.
   const notifyGeometry = binding?.geometry.onGeometryChange;
+  const lastGeometryRef = useRef<string | null>(null);
   useLayoutEffect(() => {
-    notifyGeometry?.();
+    if (!notifyGeometry) return;
+    const signature = JSON.stringify([
+      positions,
+      boxSizes,
+      svgSize,
+      graphHeight,
+      collapsedGroups,
+      compact,
+    ]);
+    if (signature === lastGeometryRef.current) return;
+    const w = window as any;
+    const prevSig = lastGeometryRef.current;
+    let which = "<first>";
+    if (prevSig) {
+      const names = ["positions", "boxSizes", "svgSize", "graphHeight", "collapsedGroups", "compact"];
+      const a = JSON.parse(prevSig), b = JSON.parse(signature);
+      which = names.filter((_, i) => JSON.stringify(a[i]) !== JSON.stringify(b[i])).join(",");
+    }
+    (w.__diag ??= []).push("GUARD " + (possessorPath ? "SUB" : "OUT") + " notify; changed=" + which);
+    lastGeometryRef.current = signature;
+    notifyGeometry();
   }, [
     notifyGeometry,
     positions,
@@ -799,7 +880,10 @@ export function PhraseBuilder({
           });
     // Null once the boxes are clear of each other — which is the common case, and what
     // lets this run on every commit without chasing its own writes.
-    if (separated) setPositions((prev) => ({ ...prev, ...separated.positions }));
+    if (separated) {
+      ((window as any).__diag ??= []).push("OVL-setPos " + (possessorPath ? "SUB" : "OUT") + " " + JSON.stringify(separated.positions) + " minH=" + separated.minHeight + " gH=" + graphHeight);
+      setPositions((prev) => ({ ...prev, ...separated.positions }));
+    }
 
     // Only once the pointer has travelled: a press that turns out to be a click on a slot
     // must not resize anything under the user's finger.
@@ -829,8 +913,10 @@ export function PhraseBuilder({
     // Outside a drag the canvas only ever grows, and only to meet a box the separation
     // pushed down past the bottom edge. Shrinking here would fight the resize grip, whose
     // whole purpose is to hold a height the content didn't ask for.
-    if (separated && separated.minHeight > graphHeight)
+    if (separated && separated.minHeight > graphHeight) {
+      ((window as any).__diag ??= []).push("OVL-setGH " + (possessorPath ? "SUB" : "OUT") + " " + graphHeight + "->" + separated.minHeight);
       setGraphHeight(separated.minHeight);
+    }
   });
 
   // Tidy the whole period: tidy each dotted box on its own — the same re-arrange its own

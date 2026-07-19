@@ -140,6 +140,10 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
           ? np.possessor
           : resolveNounPhrase(np.possessor, language, lookup))
       : undefined,
+    // An adjective-definition gloss ("of great size"): a bare dimension-noun + degree-adjective
+    // phrase the engines wrap in the preposition its head noun's `dimensionRelation` selects. The
+    // flag rides through; the head noun and its adjective resolve on the ordinary path above.
+    dimensionGloss: np.dimensionGloss,
   };
 }
 

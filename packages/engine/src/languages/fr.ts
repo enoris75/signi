@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveFr } from '../possessive.js';
 
@@ -845,8 +845,31 @@ function relativeText(np: ResolvedNounPhrase): string {
 }
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+// The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
+// "de" (**de** grande taille, **de** haute qualité), measure "à". The noun phrase (dimension noun +
+// degree adjective) follows bare, its adjective already agreed and placed by the ordinary NP path.
+const FR_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', quality: 'de', measure: 'à' };
+
+/**
+ * An adjective-definition gloss fragment ("de grande taille"): the dimension noun phrase (its
+ * degree adjective already agreed and placed by the ordinary NP path — "grande taille") wrapped in
+ * the adposition its `dimensionRelation` selects. The one place a verbless period is a
+ * prepositional fragment rather than a bare subject noun phrase — see `renderClause`.
+ */
+function dimensionGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
+  const prep = FR_DIM_PREP[dimensionRelation(np.head.forms)];
+  return `${prep} ${subjectText(el)}`.trim();
+}
+
+function isDimensionGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
+  // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
+  // grande taille"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
+  if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
   // An imperative drops its subject (the person still drives the form — see predicateText).
   const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").

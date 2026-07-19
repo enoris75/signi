@@ -6,8 +6,10 @@ same predicate/complement machinery as C02 and dimension nouns (SPEED, WAY, TIME
 
 ## What's needed
 
-- The manner-phrase render (builds on C02's construct).
-- Nouns: SPEED, MANNER/WAY, TIME (for FAST/SLOWLY, WELL, ALWAYS/NEVER).
+- The manner-phrase render (builds on C02's construct). **Still blocked on this.**
+- ~~Nouns: SPEED, MANNER/WAY, TIME (for FAST/SLOWLY, WELL, ALWAYS/NEVER).~~ All seeded
+  (SPEED, WAY as `measure`/`mode` manner nouns; TIME seeded 2026-07-18 as a `measure` noun for
+  "at all times"/"at no time"). The only remaining blocker is the adverb-definition render mode.
 
 ## Blocks
 

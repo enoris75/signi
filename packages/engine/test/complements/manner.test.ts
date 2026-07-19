@@ -94,6 +94,35 @@ describe('manner adverbial (complemento di modo)', () => {
     });
   });
 
+  // measure — TIME, the temporal head of the frequency adverbials ALWAYS / NEVER (C03). A measure
+  // like SPEED, so it takes "at"; here in the definite singular ("at the time"), pinning its gender
+  // and the Romance article contractions (al / au / ao).
+  test('measure — TIME takes "at" (definite singular)', () => {
+    expect(runManner(np('TIME', { definiteness: 'definite' }))).toEqual({
+      en: 'the cat runs at the time.',
+      it: 'il gatto corre al tempo.',
+      fr: 'le chat court au temps.',
+      es: 'el gato corre al tiempo.',
+      pt: 'o gato corre ao tempo.',
+      de: 'der Kater läuft mit der Zeit.',
+      ja: '猫は時間で走ります。',
+    });
+  });
+
+  // measure — TIME in the plural ("at the times"), pinning the plural forms and their plural
+  // article contractions (ai / aux / a los / aos). German Zeit → Zeiten; Japanese is invariant.
+  test('measure — TIME in the plural ("at the times")', () => {
+    expect(runManner(np('TIME', { number: 'plural', definiteness: 'definite' }))).toEqual({
+      en: 'the cat runs at the times.',
+      it: 'il gatto corre ai tempi.',
+      fr: 'le chat court aux temps.',
+      es: 'el gato corre a los tiempos.',
+      pt: 'o gato corre aos tempos.',
+      de: 'der Kater läuft mit den Zeiten.',
+      ja: '猫は時間で走ります。',
+    });
+  });
+
   // means → "with": the unmarked relation (CARE declares none explicitly → default means).
   test('means — CARE takes "with"', () => {
     expect(runManner(np('CARE', { definiteness: 'bare' }))).toEqual({

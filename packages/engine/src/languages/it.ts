@@ -1,5 +1,5 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type MannerRelation, type ModifierRelation, type Tense } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // The preposition each manner relation takes in Italian: similative "come" (fuses with nothing —
 // "come il vento"), means "con", measure "a" (→ alla velocità), mode "in" (→ in modo). prepDet
@@ -751,8 +751,31 @@ function relativeText(np: ResolvedNounPhrase): string {
 }
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
+// The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
+// "di" (**di** grande dimensione, **di** alta qualità), measure "a" (**ad** alta temperatura). The
+// noun phrase (dimension noun + degree adjective) follows bare, its adjective already agreed/placed.
+const IT_DIM_PREP: Record<DimensionRelation, string> = { extent: 'di', quality: 'di', measure: 'a' };
+
+/**
+ * An adjective-definition gloss fragment ("di grande dimensione"): the dimension noun phrase (its
+ * degree adjective already agreed and placed attributively by the ordinary NP path — "grande
+ * dimensione") wrapped in the adposition its `dimensionRelation` selects. The one place a verbless
+ * period is a prepositional fragment rather than a bare subject noun phrase — see `renderClause`.
+ */
+function dimensionGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
+  const prep = IT_DIM_PREP[dimensionRelation(np.head.forms)];
+  return `${prep} ${subjectText(el)}`.trim();
+}
+
+function isDimensionGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
+  // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("di
+  // grande dimensione"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
+  if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
   // Italian is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("mangio", not "io mangio"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun

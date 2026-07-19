@@ -204,6 +204,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The temporal head of the frequency adverbials ALWAYS / NEVER — "at all times" / "at no
+    // time". A measure, like SPEED, so it enters a manner/frequency adverbial under "at" (it/es/pt
+    // "a", fr "à"). Countable: "at no time" is singular, "at all times" plural.
+    id: 'TIME',
+    role: 'noun',
+    description: 'the indefinite continued progress of existence; an occasion',
+    emoji: '⏰',
+    mannerRelation: 'measure',
+    forms: {
+      en: { base: 'time', plural: 'times', count: 'singular' },
+      it: { base: 'tempo', plural: 'tempi', gender: 'masc', count: 'singular' },
+      fr: { base: 'temps', plural: 'temps', gender: 'masc', count: 'singular' },
+      de: { base: 'Zeit', plural: 'Zeiten', gender: 'fem', count: 'singular' },
+      es: { base: 'tiempo', plural: 'tiempos', gender: 'masc', count: 'singular' },
+      ja: { base: '時間', count: 'singular', reading: 'じかん' },
+      pt: { base: 'tempo', plural: 'tempos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // Head of the `with` manner example — "with (good) care" / "con (buona) cura". A means, so it
     // is marked explicitly now that the unmarked default is the similative "like". Uncountable,
     // like WATER, so a determiner still applies ("con la cura") but no plural is needed.
@@ -221,6 +240,97 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'cuidado', gender: 'masc', count: 'singular' },
       ja: { base: '注意', count: 'singular', reading: 'ちゅうい' },
       pt: { base: 'cuidado', gender: 'masc', count: 'singular' },
+    },
+  },
+
+  // ── Dimension nouns ──────────────────────────────────────────────
+  // The scalar dimensions an adjective-definition gloss measures on — BIG is "of great size", GOOD
+  // "of high quality" (see the engines' dimensionGloss render + Concept.dimensionRelation). Their
+  // `dimensionRelation` selects the gloss adposition: `extent` → "of …" (di/de/von), `quality` →
+  // "of …" too but reserved for worth (di qualità), `measure` → "at a …" (temperature). Ordinary
+  // countable abstract nouns otherwise.
+  {
+    id: 'SIZE',
+    role: 'noun',
+    description: 'how large or small something is',
+    emoji: '📏',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'size', plural: 'sizes', count: 'singular' },
+      it: { base: 'dimensione', plural: 'dimensioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'taille', plural: 'tailles', gender: 'fem', count: 'singular' },
+      de: { base: 'Größe', plural: 'Größen', gender: 'fem', count: 'singular' },
+      es: { base: 'tamaño', plural: 'tamaños', gender: 'masc', count: 'singular' },
+      ja: { base: '大きさ', count: 'singular', reading: 'おおきさ' },
+      pt: { base: 'tamanho', plural: 'tamanhos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'HEIGHT',
+    role: 'noun',
+    description: 'how high something is; vertical extent',
+    emoji: '📐',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'height', plural: 'heights', count: 'singular' },
+      it: { base: 'altezza', plural: 'altezze', gender: 'fem', count: 'singular' },
+      fr: { base: 'hauteur', plural: 'hauteurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Höhe', plural: 'Höhen', gender: 'fem', count: 'singular' },
+      es: { base: 'altura', plural: 'alturas', gender: 'fem', count: 'singular' },
+      ja: { base: '高さ', count: 'singular', reading: 'たかさ' },
+      pt: { base: 'altura', plural: 'alturas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Italian/Portuguese "qualità/qualidade" and the Romance feminines; `quality` relation so a
+    // gloss reads "of high quality" (di alta qualità). Italian "qualità" is invariable in the plural.
+    id: 'QUALITY',
+    role: 'noun',
+    description: 'how good or bad something is; standard of worth',
+    emoji: '⭐',
+    dimensionRelation: 'quality',
+    forms: {
+      en: { base: 'quality', plural: 'qualities', count: 'singular' },
+      it: { base: 'qualità', plural: 'qualità', gender: 'fem', count: 'singular' },
+      fr: { base: 'qualité', plural: 'qualités', gender: 'fem', count: 'singular' },
+      de: { base: 'Qualität', plural: 'Qualitäten', gender: 'fem', count: 'singular' },
+      es: { base: 'calidad', plural: 'calidades', gender: 'fem', count: 'singular' },
+      ja: { base: '質', count: 'singular', reading: 'しつ' },
+      pt: { base: 'qualidade', plural: 'qualidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'STRENGTH',
+    role: 'noun',
+    description: 'how much physical power or force something has',
+    emoji: '💪',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'strength', plural: 'strengths', count: 'singular' },
+      it: { base: 'forza', plural: 'forze', gender: 'fem', count: 'singular' },
+      fr: { base: 'force', plural: 'forces', gender: 'fem', count: 'singular' },
+      de: { base: 'Stärke', plural: 'Stärken', gender: 'fem', count: 'singular' },
+      es: { base: 'fuerza', plural: 'fuerzas', gender: 'fem', count: 'singular' },
+      ja: { base: '強さ', count: 'singular', reading: 'つよさ' },
+      pt: { base: 'força', plural: 'forças', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // "età/idade" are invariable / feminine in the Romance languages; German "Alter" is neuter and
+    // invariable in the plural. Age as a scalar dimension ("of great age"), not a lifetime.
+    id: 'AGE',
+    role: 'noun',
+    description: 'how old something is',
+    emoji: '⏳',
+    dimensionRelation: 'extent',
+    forms: {
+      en: { base: 'age', plural: 'ages', count: 'singular' },
+      it: { base: 'età', plural: 'età', gender: 'fem', count: 'singular' },
+      fr: { base: 'âge', plural: 'âges', gender: 'masc', count: 'singular' },
+      de: { base: 'Alter', plural: 'Alter', gender: 'neut', count: 'singular' },
+      es: { base: 'edad', plural: 'edades', gender: 'fem', count: 'singular' },
+      ja: { base: '年齢', count: 'singular', reading: 'ねんれい' },
+      pt: { base: 'idade', plural: 'idades', gender: 'fem', count: 'singular' },
     },
   },
   {

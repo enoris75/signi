@@ -37,6 +37,11 @@ export function PhraseWorkspace({
   wordsPanelOpen,
   onWordsPanelClose,
 }: Props) {
+  {
+    const w = window as any;
+    w.__rc ??= {};
+    w.__rc.WORKSPACE = (w.__rc.WORKSPACE ?? 0) + 1;
+  }
   const t = useUiString();
   // The cross-container link graph — the four relations a period can take part in, plus the
   // pick-mode that builds them. It owns the rules (no cycles, one subordinate role per period)

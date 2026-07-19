@@ -650,7 +650,33 @@ function predicateSegs(
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
  * Particles: は (topic/subject), を (direct object), に (indirect object/dative)
  */
+/** Whether a resolved noun slot is a single adjective-definition gloss phrase (see NounPhrase.dimensionGloss). */
+function isDimensionGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
+}
+
+/**
+ * An adjective-definition gloss fragment ("大きさが大きい" — of great size): the dimension noun
+ * (the head) marked with が, then its degree adjective in plain form (an い-adjective stays 大きい;
+ * a na-adjective drops the attributive な). Japanese has no adposition here — the が-predicate is
+ * the natural gloss — so, unlike the other engines, it does not read the `dimensionRelation`.
+ */
+function dimensionGlossSegs(np: ResolvedNounPhrase): RubySegment[] {
+  const nounSeg = wordSeg(np.head.forms['base'] ?? '', np.head.forms['reading']);
+  const adj = np.adjectives[0];
+  if (!adj) return [nounSeg];
+  const { base, reading } = jaComparisonAdj(adj);
+  const na = base.endsWith('な');
+  const adjSeg = wordSeg(na ? base.slice(0, -1) : base, na && reading?.endsWith('な') ? reading.slice(0, -1) : reading);
+  const deg = JA_DEGREE[adjDegree(adj)];
+  const degSegs: RubySegment[] = deg ? [{ t: deg }] : [];
+  return [nounSeg, { t: 'が' }, ...degSegs, adjSeg];
+}
+
 function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
+  // A verbless period marked as an adjective-definition gloss is a が-predicate ("大きさが大きい"),
+  // not a bare noun-phrase title — render the dimension noun + が + its degree adjective.
+  if (!phrase.verbPhrase && isDimensionGloss(phrase.subject)) return dimensionGlossSegs(firstConjunct(phrase.subject));
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
   if (!phrase.verbPhrase) return elSegs(phrase.subject);
   const segs: RubySegment[] = [];

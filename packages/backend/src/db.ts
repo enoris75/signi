@@ -44,7 +44,11 @@ function initSchema(db: Database.Database): void {
       -- how a noun enters a manner adverbial (complemento di modo): 'similative' (like the wind),
       -- 'measure' (at the speed), 'means' (with care), 'mode' (in a … way). The engine maps it to
       -- the adposition; a noun that declares none is treated as 'similative'. NULL for non-manner nouns.
-      manner_relation TEXT CHECK (manner_relation IN ('similative','measure','means','mode') OR manner_relation IS NULL)
+      manner_relation TEXT CHECK (manner_relation IN ('similative','measure','means','mode') OR manner_relation IS NULL),
+      -- how a dimension noun enters an adjective-definition gloss: 'extent' (of great size),
+      -- 'quality' (of high quality), 'measure' (at a high temperature). The engine maps it to the
+      -- adposition; a noun that declares none is treated as 'extent'. NULL for non-dimension nouns.
+      dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL)
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -319,6 +323,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('manner_relation')) {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN manner_relation TEXT CHECK (manner_relation IN ('similative','measure','means','mode') OR manner_relation IS NULL)");
+  }
+  if (!conceptCols.includes('dimension_relation')) {
+    db.exec("ALTER TABLE semantic_concepts ADD COLUMN dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL)");
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

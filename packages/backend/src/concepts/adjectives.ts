@@ -53,6 +53,41 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // A degree word for the adjective-definition glosses (BIG → "of great size", STRONG → "of great
+    // strength"). Same surface as BIG in most languages ("grande"/"groß") — a dictionary defines
+    // "big" as "of great size", so the reuse is the gloss, not a bug. German umlauts like BIG.
+    id: 'GREAT',
+    role: 'adjective',
+    description: 'large in amount, degree, or extent',
+    emoji: '📈',
+    forms: {
+      en: { base: 'great' },
+      it: { base: 'grande' },
+      fr: { base: 'grand' },
+      de: { base: 'groß', umlaut: 'true', superlative: 'größt' },
+      es: { base: 'grande' },
+      ja: { base: '大きい', reading: 'おおきい' },
+      pt: { base: 'grande' },
+    },
+  },
+  {
+    // The low-degree counterpart of HIGH/GREAT, for glosses like BAD → "of low quality". German
+    // "niedrig" is the scalar "low" (not "tief", which is depth).
+    id: 'LOW',
+    role: 'adjective',
+    description: 'small in amount, degree, or extent',
+    emoji: '📉',
+    forms: {
+      en: { base: 'low' },
+      it: { base: 'basso' },
+      fr: { base: 'bas' },
+      de: { base: 'niedrig' },
+      es: { base: 'bajo' },
+      ja: { base: '低い', reading: 'ひくい' },
+      pt: { base: 'baixo' },
+    },
+  },
+  {
     id: 'GOOD',
     role: 'adjective',
     description: 'of high quality or virtue',

@@ -20,6 +20,7 @@ export interface ConceptSeed {
   human?: boolean; // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative
+  dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user
   synonym?: string; // short disambiguating gloss shown in parentheses in the picker (e.g. 'weep' for CRY)
   isA?: string;     // immediate hypernym — CARAVEL isA SAILING_SHIP. One parent only; see concepts/hierarchy.ts

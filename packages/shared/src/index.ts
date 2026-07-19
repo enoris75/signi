@@ -297,6 +297,23 @@ export type MannerRelation = 'similative' | 'means' | 'measure' | 'mode';
 export const MANNER_RELATIONS: MannerRelation[] = ['similative', 'means', 'measure', 'mode'];
 
 /**
+ * The relation a **dimension noun** bears to the adjective it scales, in an adjective-definition
+ * gloss ("great **in** size", "high **in** quality", "hot → high **at** a temperature"). Like
+ * `MannerRelation` it is a property of the noun's meaning — SIZE / STRENGTH / AGE are *extents*
+ * ("in"), QUALITY / VIRTUE are *qualities* ("of"), TEMPERATURE is a *measure* ("at a …") — and each
+ * engine renders it with its own adposition and article. Carried on the noun concept
+ * (`Concept.dimensionRelation`) and read by the engines when an adjective-headed fragment names one
+ * as its `NounPhrase.dimension`; a noun that declares none defaults to `extent`, the neutral "in".
+ *   extent  — the adjective measures how much of a scalar property: "great **in** size"
+ *             (in / di / en / an / de / …の点で)
+ *   quality — the adjective grades a kind/worth: "high **of** quality" ("of" family)
+ *   measure — the adjective names a point on a scale reached: "high **at** a temperature"
+ */
+export type DimensionRelation = 'extent' | 'quality' | 'measure';
+
+export const DIMENSION_RELATIONS: DimensionRelation[] = ['extent', 'quality', 'measure'];
+
+/**
  * How far an instrument is *reified* — the abstraction gradient between doing something and
  * holding a thing. One and the same instrument can be presented at three degrees, and each
  * language has its own grammar for them. Only the `instrumental` complement carries it, and it
@@ -376,6 +393,7 @@ export interface Concept {
   human?: boolean;              // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean;          // false for mass/uncountable nouns (water, food) — changes quantifier words
   mannerRelation?: MannerRelation; // how this noun enters a manner adverbial (SPEED→measure, CARE→means); default means
+  dimensionRelation?: DimensionRelation; // how this noun enters an adjective-definition gloss (SIZE→extent "in"); default extent
   complements?: ComplementType[]; // complements a verb licenses (motion/locative/cause, or the copular `predicative`)
   /**
    * The concept's hypernym — the id of the concept it *is a* kind of (CARAVEL → SAILING_SHIP).
@@ -456,6 +474,17 @@ export interface NounPhrase {
    *    Romance/German) with *this* possessed head. See `PronominalPossessor`.
    */
   possessor?: Possessor;
+  /**
+   * Render this phrase as an **adjective-definition gloss**: a bare noun phrase of a *dimension
+   * noun* carrying a *degree adjective* ("great size" / "grande dimensione"), realised as a
+   * prepositional fragment whose adposition the head noun's `dimensionRelation` selects — BIG →
+   * "of great size" / "di grande dimensione", GOOD → "of high quality". Only meaningful on the
+   * subject of a verbless period (see the engines' verbless branch); the head is the dimension
+   * noun and the degree lives in `adjectives`. The adjective agrees with and is positioned against
+   * the dimension noun by the ordinary noun-phrase machinery — the preposition is all that is
+   * added. Ignored when a verb phrase is present or the head is not a noun.
+   */
+  dimensionGloss?: boolean;
 }
 
 /**
