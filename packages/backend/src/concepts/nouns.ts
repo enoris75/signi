@@ -334,6 +334,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The `measure` dimension relation: a gloss reads "at a high/low temperature" (en at / it a /
+    // de bei), a point reached on a scale, where the `extent` nouns above read "of great …".
+    id: 'TEMPERATURE',
+    role: 'noun',
+    description: 'how hot or cold something is',
+    emoji: '🌡️',
+    dimensionRelation: 'measure',
+    forms: {
+      en: { base: 'temperature', plural: 'temperatures', count: 'singular' },
+      it: { base: 'temperatura', plural: 'temperature', gender: 'fem', count: 'singular' },
+      fr: { base: 'température', plural: 'températures', gender: 'fem', count: 'singular' },
+      de: { base: 'Temperatur', plural: 'Temperaturen', gender: 'fem', count: 'singular' },
+      es: { base: 'temperatura', plural: 'temperaturas', gender: 'fem', count: 'singular' },
+      ja: { base: '温度', count: 'singular', reading: 'おんど' },
+      pt: { base: 'temperatura', plural: 'temperaturas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'MONEY',
     role: 'noun',
     description: 'a medium of exchange',

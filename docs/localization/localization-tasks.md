@@ -44,14 +44,15 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-_None outstanding — every catalogued B-task is done (see the Done section). New B-tasks land here._
+| # | File | Seed first |
+|---|---|---|
+| B07 | [B07-scalar-adjective-definitions.md](B-needs-seed/B07-scalar-adjective-definitions.md) | scalar adjectives via `dimensionGloss` — seed `TEMPERATURE`, then author 12 (was C02; render mode landed) |
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
 | # | File | Blocked on |
 |---|---|---|
 | C01 | [C01-verb-definitions.md](C-needs-engine/C01-verb-definitions.md) | verb-definition render — all 48 verbs |
-| C02 | [C02-adjective-definitions.md](C-needs-engine/C02-adjective-definitions.md) | adjective predicate render — all 47 adjectives |
 | C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | `mannerGloss` render — 5 manner/frequency adverbs (TOGETHER stays literal) |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |

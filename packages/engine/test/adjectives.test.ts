@@ -494,6 +494,17 @@ describe('known bugs: adjectives', () => {
       nounModifiers: [{ concept: 'WORD', relation: 'material' }],
     }), 'BURN')).de).toBe('der Wortschöpfer brennt.');
   });
+
+  // A43. French forms the feminine of an adjective by rule (+e), correct for "grand → grande",
+  // "haut → haute", but WRONG for the irregular "bas" (LOW): its feminine doubles the s → "basse",
+  // not "base". The rule in fr.ts (agreeAdjFr) has no -s branch, so it falls through to the plain
+  // +e. Latent until a feminine noun took LOW; the seeded feminine dimension noun TEMPERATURE
+  // surfaces it — the gloss COLD will use reads "à température basse". Fix: add
+  // `bas: ['bas', 'basse', 'bas', 'basses']` to FR_ADJ_IRREGULAR in fr.ts.
+  test.fails('French feminine of "bas" (LOW) is "basse", not "base"', () => {
+    expect(cat({ gender: 'fem', adjectives: ['LOW'] }))
+      .toMatchObject({ fr: 'la chatte basse mange.' });
+  });
 });
 
 // A full sweep: six adjectives spanning the inflection classes — BIG/OLD (short, inflecting),

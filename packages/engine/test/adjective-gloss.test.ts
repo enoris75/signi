@@ -50,6 +50,22 @@ describe('adjective-definition gloss (C02 fragment)', () => {
     expect(gloss('SPEED', 'CAREFUL').ja).toBe('速さが慎重。');
   });
 
+  // The `measure` dimension relation, on the seeded TEMPERATURE noun: a point reached on a scale, so
+  // its adposition is "at" (en at / it-es-pt a / fr à / de bei) where the `extent` nouns take "of".
+  // HIGH is regular in every language's feminine (haut → haute), so this pins the measure adposition
+  // cleanly across all seven; TEMPERATURE is feminine in the Romance languages and German.
+  test('a measure dimension ("at high temperature")', () => {
+    expect(gloss('TEMPERATURE', 'HIGH')).toEqual({
+      en: 'at high temperature.',
+      it: 'a temperatura alta.',
+      fr: 'à température haute.',
+      es: 'a temperatura alta.',
+      pt: 'a temperatura alta.',
+      de: 'bei hoher Temperatur.',
+      ja: '温度が高い。',
+    });
+  });
+
   // No degree adjective: the fragment is the bare dimension noun under its adposition, so the
   // construct degrades to "of speed" rather than throwing or dropping the preposition.
   test('a dimension gloss with no degree renders the bare dimension noun', () => {
