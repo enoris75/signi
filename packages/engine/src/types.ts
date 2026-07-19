@@ -55,6 +55,13 @@ export interface ResolvedNounPhrase {
    * subject; the head is the dimension noun and the degree is in `adjectives`.
    */
   dimensionGloss?: boolean;
+  /**
+   * Whether this phrase is a **manner-definition gloss** (see NounPhrase.mannerGloss): a manner-noun
+   * phrase the engines render as the bare prepositional adverbial defining an adverb ("at high
+   * speed", "in a good way"), the adposition chosen by the head noun's `mannerRelation`. Set on the
+   * verbless subject; unlike `dimensionGloss` the phrase keeps its own determiner.
+   */
+  mannerGloss?: boolean;
 }
 
 /**

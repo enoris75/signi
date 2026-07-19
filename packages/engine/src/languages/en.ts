@@ -670,12 +670,31 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * A manner-definition gloss fragment ("at high speed", "in a good way"): the manner noun phrase —
+ * its determiner and any degree adjective already placed by the ordinary NP path — wrapped in the
+ * adposition its `mannerRelation` selects. Unlike `dimensionGloss` the article is kept, so the
+ * phrase's own `definiteness` gives "a good way" / "all times" / "no time".
+ */
+function mannerGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
+  const prep = MANNER_PREP[mannerRelation(np.head.forms)];
+  return `${prep} ${subjectText(el)}`.trim();
+}
+
+/** Whether a resolved noun slot is a single manner-definition gloss phrase (see NounPhrase.mannerGloss). */
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("of
   // great size"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A verbless period marked as a manner-definition gloss is the adverbial fragment that defines an
+  // adverb ("at high speed"), the manner noun phrase under the adposition its `mannerRelation` picks.
+  if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(firstConjunct(subject), subject);
   // An imperative drops its subject from the surface, but the subject's person/number still
   // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
   // An infinitive citation ("to consume food") is likewise subject-less on the surface.

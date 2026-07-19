@@ -590,6 +590,52 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('von großer Größe');
   });
 
+  test('a manner adverb definition renders in the adverb picker (localize-seed C03: FAST)', async ({
+    app,
+    page,
+  }) => {
+    // The manner-definition gloss: FAST's plan is a verbless manner-noun fragment (SPEED, a
+    // `measure` noun, + degree HIGH), rendered as the prepositional adverbial "at high speed".
+    // Reached through the verb's adverb slot, not the core pickers.
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('fast');
+    const fastEn = page.locator('[data-testid="typeahead-option"][data-concept="FAST"]');
+    await expect(fastEn).toBeVisible();
+    await fastEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('at high speed');
+
+    // German: the same plan, localized by the engine — a `measure` noun takes "mit" and the dative
+    // ("hoher Geschwindigkeit"). No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.openVerbAdverb('fast');
+    const fastDe = page.locator('[data-testid="typeahead-option"][data-concept="FAST"]');
+    await expect(fastDe).toBeVisible();
+    await fastDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('mit hoher Geschwindigkeit');
+  });
+
+  test('a manner adverb definition renders in the adverb picker (localize-seed C03: WELL)', async ({
+    app,
+    page,
+  }) => {
+    // WELL glosses WAY (a `mode` noun → "in") + GOOD, indefinite — "in a good way". Pins the mode
+    // relation alongside FAST's measure, and the kept determiner (the dimension gloss strips it).
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('well');
+    const wellEn = page.locator('[data-testid="typeahead-option"][data-concept="WELL"]');
+    await expect(wellEn).toBeVisible();
+    await wellEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('in a good way');
+
+    // French: the same plan — mode → "de", eliding before the indefinite ("d'une bonne manière").
+    await app.setUiLanguage('fr');
+    await app.openVerbAdverb('well');
+    const wellFr = page.locator('[data-testid="typeahead-option"][data-concept="WELL"]');
+    await expect(wellFr).toBeVisible();
+    await wellFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("d'une bonne manière");
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

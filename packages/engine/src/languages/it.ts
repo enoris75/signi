@@ -783,11 +783,30 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * A manner-definition gloss fragment ("a velocità alta", "in un modo buono"): the manner noun phrase
+ * under the adposition its `mannerRelation` selects. Unlike the dimension gloss it keeps the
+ * determiner and so routes through `prepDet` — the same fusing path the `manner` complement uses —
+ * so "a" + a definite article would fuse ("alla …") while the indefinite/quantifier stays apart
+ * ("in un modo", "a tutti i tempi", "a nessun tempo").
+ */
+function mannerGloss(el: ResolvedNounElement): string {
+  return coordinate(el, (np) =>
+    renderNP(np, (plural, lead) => prepDet(IT_MANNER_PREP[mannerRelation(np.head.forms)], np.head.forms, plural, lead)),
+  );
+}
+
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("di
   // grande dimensione"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A manner-definition gloss ("in un modo buono") is the adverbial fragment defining an adverb.
+  if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // Italian is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("mangio", not "io mangio"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun

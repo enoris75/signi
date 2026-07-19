@@ -916,11 +916,36 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * A manner-definition gloss fragment ("mit hoher Geschwindigkeit", "auf eine gute Weise"): the
+ * manner noun phrase in the case its `mannerRelation` governs — the same preposition + case the
+ * `manner` complement chooses (mode "auf" + accusative, means/measure "mit" + dative, similative
+ * "wie" + nominative). The element is single-conjunct (see `isMannerGloss`), so its head noun's
+ * relation fixes the case for the whole fragment; `elementPhrase` supplies the determiner and
+ * declines the adjective by that case, so the preposition leads bare — exactly as the dimension
+ * gloss leads with a bare "von"/"bei". None of auf/mit/wie fuses with an article, and the authored
+ * glosses are never definite, so no fusion is lost.
+ */
+function mannerGloss(el: ResolvedNounElement): string {
+  const rel = mannerRelation(firstConjunct(el).head.forms);
+  const [prep, _case] =
+    rel === 'mode' ? ['auf', 'acc'] as const :
+    rel === 'means' || rel === 'measure' ? ['mit', 'dat'] as const :
+    ['wie', 'nom'] as const;
+  return `${prep} ${elementPhrase(el, _case)}`.trim();
+}
+
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false): string {
     const { subject, verbPhrase, directObject } = phrase;
     // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("von
     // großer Größe"), not a bare subject noun phrase — wrap the dimension NP (dative) in its adposition.
     if (!verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+    // A manner-definition gloss ("mit hoher Geschwindigkeit") is the adverbial fragment defining an adverb.
+    if (!verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
     // The dative recipient leads the accusative object; the other complements trail it, and a
     // subordinate means clause trails even the verb (see `splitMeansClause`).
     const { dative, rest: undative } = splitDative(phrase.complements);

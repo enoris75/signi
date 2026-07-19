@@ -688,10 +688,28 @@ function dimensionGlossSegs(np: ResolvedNounPhrase): RubySegment[] {
   return [nounSeg, { t: 'が' }, ...degSegs, adjSeg];
 }
 
+/** Whether a resolved noun slot is a single manner-definition gloss phrase (see NounPhrase.mannerGloss). */
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
+/**
+ * A manner-definition gloss fragment ("高い速さで" — at high speed): the manner noun phrase (its
+ * degree adjective attributive, its determiner placed by the ordinary NP path) closed by the manner
+ * particle — the で the means/measure/mode relations share, or 〜のように for a similative head, exactly
+ * as a `manner` complement closes. Unlike the が-predicate dimension gloss, this is an adverbial.
+ */
+function mannerGlossSegs(el: ResolvedNounElement): RubySegment[] {
+  const particle = mannerRelation(firstConjunct(el).head.forms) === 'similative' ? 'のように' : 'で';
+  return [...elSegs(el), { t: particle }];
+}
+
 function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): RubySegment[] {
   // A verbless period marked as an adjective-definition gloss is a が-predicate ("大きさが大きい"),
   // not a bare noun-phrase title — render the dimension noun + が + its degree adjective.
   if (!phrase.verbPhrase && isDimensionGloss(phrase.subject)) return dimensionGlossSegs(firstConjunct(phrase.subject));
+  // A manner-definition gloss ("高い速さで") is the adverbial fragment defining an adverb.
+  if (!phrase.verbPhrase && isMannerGloss(phrase.subject)) return mannerGlossSegs(phrase.subject);
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
   if (!phrase.verbPhrase) return elSegs(phrase.subject);
   const segs: RubySegment[] = [];

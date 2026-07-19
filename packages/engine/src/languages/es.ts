@@ -717,11 +717,46 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * The manner adposition for a noun, contracting with its article — the same selection the `manner`
+ * complement makes: means "con", measure "a" (→ al / a la), mode "de" (→ del / de la), similative
+ * "como". Shared so the gloss and the complement never drift.
+ */
+function esMannerHead(af: Record<string, string>, plural: boolean): string {
+  return mannerRelation(af) === 'means'   ? prepDet('con', af, plural) :
+         mannerRelation(af) === 'measure' ? aDet(af, plural) :
+         mannerRelation(af) === 'mode'    ? deDet(af, plural) :
+         prepDet('como', af, plural);
+}
+
+/**
+ * A manner-definition gloss fragment ("a velocidad alta", "de una manera buena"): the manner noun
+ * phrase under the adposition its `mannerRelation` selects, keeping its determiner — the same body
+ * the `manner` complement builds, so the article fuses with the preposition when definite.
+ */
+function mannerGloss(el: ResolvedNounElement): string {
+  return coordinateElement(el, (np) => {
+    const f = np.head.forms;
+    const plural = isPlural(f);
+    const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+    const adj = esAdj(np);
+    const noun = withAdj(word, adj);
+    const af = artForms(f, adj);
+    return withRelative(`${esMannerHead(af, plural)} ${noun}`, np);
+  });
+}
+
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de gran
   // tamaño"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A manner-definition gloss ("a velocidad alta") is the adverbial fragment defining an adverb.
+  if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // Spanish is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("como", not "yo como"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun

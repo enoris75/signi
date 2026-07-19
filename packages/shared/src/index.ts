@@ -485,6 +485,18 @@ export interface NounPhrase {
    * added. Ignored when a verb phrase is present or the head is not a noun.
    */
   dimensionGloss?: boolean;
+  /**
+   * Render this phrase as a **manner-definition gloss**: a *manner noun* phrase realised as the
+   * bare prepositional adverbial that defines an adverb — FAST → "at high speed", WELL → "in a good
+   * way", ALWAYS → "at all times", NEVER → "at no time". The adposition is chosen by the head noun's
+   * `mannerRelation` (measure → "at", mode → "in", means → "with", similative → "like"), exactly as
+   * a `manner` complement selects it; unlike `dimensionGloss` the article is *not* stripped — the
+   * phrase's own `definiteness` supplies it ("**a** good way", "**all** times", "**no** time"), so
+   * the same NP machinery that renders a manner complement renders this fragment. Only meaningful on
+   * the subject of a verbless period (see the engines' verbless branch); ignored when a verb phrase
+   * is present or the head is not a noun.
+   */
+  mannerGloss?: boolean;
 }
 
 /**

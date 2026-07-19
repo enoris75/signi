@@ -144,6 +144,10 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
     // phrase the engines wrap in the preposition its head noun's `dimensionRelation` selects. The
     // flag rides through; the head noun and its adjective resolve on the ordinary path above.
     dimensionGloss: np.dimensionGloss,
+    // A manner-definition gloss ("at high speed", "in a good way"): a manner-noun phrase the engines
+    // wrap in the adposition its head noun's `mannerRelation` selects, keeping its own determiner.
+    // The flag rides through; the head noun and its adjective resolve on the ordinary path above.
+    mannerGloss: np.mannerGloss,
   };
 }
 

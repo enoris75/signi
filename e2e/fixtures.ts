@@ -89,6 +89,23 @@ export class Builder {
     await input.fill(query);
   }
 
+  /**
+   * Reveal the verb's adverb slot and type into its picker. The adverb (`modifier`) is a satellite
+   * on the verb phrase (`satellite-modifier` → `box-modifier`), revealed once a verb is set — the
+   * same shape as `openSubjectAdjective`. The caller then hovers the `typeahead-option` row it wants
+   * (its tooltip is the definition).
+   */
+  async openVerbAdverb(query: string): Promise<void> {
+    // The satellite is a toggle, so reveal only when the box isn't already up (a second call —
+    // e.g. after switching UI language — would otherwise collapse it).
+    const input = this.page.getByTestId('box-modifier').locator('input');
+    if (!(await input.isVisible().catch(() => false))) {
+      await this.page.getByTestId('satellite-modifier').click();
+    }
+    await expect(input).toBeVisible();
+    await input.fill(query);
+  }
+
   /** Subject → verb: the shortest path to a translatable clause and a painted canvas. */
   async buildClause(subject: string, verb: string): Promise<void> {
     await this.setSubject(subject);

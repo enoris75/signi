@@ -716,11 +716,44 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * The manner adposition for a noun, contracting with its article — the same selection the `manner`
+ * complement makes: means "com", measure "a" (→ ao / à), mode "de" (→ do / da), similative "como".
+ * Shared so the gloss and the complement never drift.
+ */
+function ptMannerHead(f: Record<string, string>, plural: boolean): string {
+  return mannerRelation(f) === 'means'   ? prepDet('com', f, plural) :
+         mannerRelation(f) === 'measure' ? contractDet(datPrep, 'a', f, plural) :
+         mannerRelation(f) === 'mode'    ? contractDet(dePrep, 'de', f, plural) :
+         prepDet('como', f, plural);
+}
+
+/**
+ * A manner-definition gloss fragment ("a velocidade alta", "de uma maneira boa"): the manner noun
+ * phrase under the adposition its `mannerRelation` selects, keeping its determiner — the same body
+ * the `manner` complement builds, so the article fuses with the preposition when definite.
+ */
+function mannerGloss(el: ResolvedNounElement): string {
+  return coordinateElement(el, (np) => {
+    const f = np.head.forms;
+    const plural = isPlural(f);
+    const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+    const noun = withAdj(word, ptAdj(np));
+    return withRelative(`${ptMannerHead(f, plural)} ${noun}`, np);
+  });
+}
+
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande tamanho"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A manner-definition gloss ("a velocidade alta") is the adverbial fragment defining an adverb.
+  if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // Portuguese is null-subject (pro-drop): a bare pronoun subject is dropped by default, the verb
   // ending alone carrying the person ("como", not "eu como"). An imperative likewise drops its
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun

@@ -1,4 +1,15 @@
 import type { ConceptSeed } from './types.js';
+import type { Definiteness, PhrasePlan } from '@signi/shared';
+
+// A manner-definition gloss the engine renders into every language: a *manner noun* phrase realised
+// as the bare prepositional adverbial that defines an adverb, the adposition chosen by the noun's
+// `mannerRelation` — mannerGloss('SPEED', 'bare', 'HIGH') → en "at high speed", fr "à vitesse haute",
+// de "mit hoher Geschwindigkeit", ja "高い速さで"; mannerGloss('WAY', 'indefinite', 'GOOD') → "in a
+// good way". Set as an adverb's `definition` to localize its picker tooltip (see the engines'
+// mannerGloss render + Concept.mannerRelation).
+const mannerGloss = (noun: string, definiteness: Definiteness, ...adjectives: string[]): PhrasePlan => ({
+  subject: { concept: noun, definiteness, adjectives, mannerGloss: true },
+});
 
 export const adverbs: ConceptSeed[] = [
   // ── ADVERBS ──────────────────────────────────────────────────────
@@ -6,6 +17,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'FAST',
     role: 'adverb',
     description: 'at high speed',
+    definition: mannerGloss('SPEED', 'bare', 'HIGH'),
     emoji: '⚡',
     forms: {
       en: { base: 'fast' },
@@ -21,6 +33,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'SLOWLY',
     role: 'adverb',
     description: 'at low speed',
+    definition: mannerGloss('SPEED', 'bare', 'LOW'),
     emoji: '🐢',
     forms: {
       en: { base: 'slowly' },
@@ -36,6 +49,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'WELL',
     role: 'adverb',
     description: 'in a good or satisfactory way',
+    definition: mannerGloss('WAY', 'indefinite', 'GOOD'),
     emoji: '✅',
     forms: {
       en: { base: 'well' },

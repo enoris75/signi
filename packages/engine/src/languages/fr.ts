@@ -878,11 +878,38 @@ function isDimensionGloss(el: ResolvedNounElement): boolean {
   return el.conjuncts.length === 1 && el.conjuncts[0].dimensionGloss === true;
 }
 
+/**
+ * The manner adposition for a noun, contracting with its article — the same selection the `manner`
+ * complement makes (see the complement branch): similative "comme", means "avec", measure "à" (→ au
+ * / à la / aux), mode "de" (→ du / de la / des, elided "d'"). Shared so the gloss and the complement
+ * never drift.
+ */
+const frMannerHead = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
+  mannerRelation(nf) === 'means'   ? prepDet('avec', nf, plural, lead) :
+  mannerRelation(nf) === 'measure' ? aDet(nf, plural, lead) :
+  mannerRelation(nf) === 'mode'    ? deDet(nf, plural, lead) :
+  prepDet('comme', nf, plural, lead);
+
+/**
+ * A manner-definition gloss fragment ("à vitesse haute", "d'une manière bonne"): the manner noun
+ * phrase under the adposition its `mannerRelation` selects. Unlike the dimension gloss it keeps its
+ * determiner, so it routes through the contracting/eliding manner head — "de" + "une" → "d'une".
+ */
+function mannerGloss(el: ResolvedNounElement): string {
+  return coordinate(el, (np) => renderNP(np, frMannerHead(np.head.forms)));
+}
+
+function isMannerGloss(el: ResolvedNounElement): boolean {
+  return el.conjuncts.length === 1 && el.conjuncts[0].mannerGloss === true;
+}
+
 function renderClause(phrase: ResolvedPhrase): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande taille"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
+  // A manner-definition gloss ("à vitesse haute") is the adverbial fragment defining an adverb.
+  if (!phrase.verbPhrase && isMannerGloss(subject)) return mannerGloss(subject);
   // An imperative drops its subject (the person still drives the form — see predicateText); an
   // infinitive citation ("consommer la nourriture") is likewise subject-less on the surface.
   const subj =
