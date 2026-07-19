@@ -516,6 +516,18 @@ function predicateParts(
     return [preVerb, verbText, directObjectText, complementsText, postVerb];
   }
 
+  // Infinitive / citation phrase: the dictionary "to" + base ("to consume food"). Subject-less
+  // and tenseless (aspect is forced neutral, so the group is the bare base); a negative citation
+  // reads "not to …". This is the true infinitive, distinct from the instruction register's bare
+  // base ("consume food") above — the "to" is what makes it a gloss rather than a directive.
+  if (mood === 'infinitive') {
+    const group = verbGroupInfinitive(verb.forms, aspect);
+    const verbText = negateVerb ? `not to ${group}` : `to ${group}`;
+    const preVerb = isFrequency ? modifierText : '';
+    const postVerb = isFrequency ? '' : modifierText;
+    return [preVerb, verbText, directObjectText, complementsText, postVerb];
+  }
+
   // Conditional apodosis: "would" + the verb group ("would run", "would not run", "would be
   // running", "would have seen", "would want to go"). "would" is a defective modal auxiliary,
   // so it takes "not" directly and carries no tense/agreement itself.
@@ -666,8 +678,10 @@ function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
   // An imperative drops its subject from the surface, but the subject's person/number still
   // drives the choice of imperative form (2nd person vs "let's …"), so it is kept for agreement.
-  const imperative = phrase.verbPhrase?.mood === 'imperative';
-  const subj = imperative ? '' : subjectText(subject);
+  // An infinitive citation ("to consume food") is likewise subject-less on the surface.
+  const dropsSubject =
+    phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive';
+  const subj = dropsSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
   return [

@@ -1485,6 +1485,27 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The infinitive / citation render mode, named as a grammar construct (see PhrasePlan.infinitive
+    // and the seven-engine infinitive surfaces). It names the mode's UI control and its own picker
+    // tooltip, engine-composed like the other part-of-speech grammar nouns above — "a phrase that
+    // names actions", the nominalising sense that sets the infinitive apart from a finite VERB
+    // ("a word that expresses actions").
+    id: 'INFINITIVE_PHRASE',
+    role: 'noun',
+    description: 'a verb phrase in its dictionary citation form — "to consume food" (grammar)',
+    definition: whoGloss('PHRASE', 'NAME', 'ACTION'),
+    emoji: '♾️',
+    forms: {
+      en: { base: 'infinitive phrase', plural: 'infinitive phrases', count: 'singular' },
+      it: { base: 'frase infinitiva', plural: 'frasi infinitive', gender: 'fem', count: 'singular' },
+      fr: { base: 'proposition infinitive', plural: 'propositions infinitives', gender: 'fem', count: 'singular' },
+      de: { base: 'Infinitivphrase', plural: 'Infinitivphrasen', gender: 'fem', count: 'singular' },
+      es: { base: 'frase de infinitivo', plural: 'frases de infinitivo', gender: 'fem', count: 'singular' },
+      ja: { base: '不定詞句', count: 'singular', reading: 'ふていしく' },
+      pt: { base: 'frase infinitiva', plural: 'frases infinitivas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'DETERMINER',
     role: 'noun',
     description: 'a word fixing the reference of a noun — the, a, this, some (grammar)',

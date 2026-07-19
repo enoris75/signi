@@ -963,6 +963,20 @@ function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = fals
       return parts.filter(Boolean).join(' ').trim();
     }
 
+    // Infinitive / citation phrase: the dictionary infinitive, clause-final and subject-less, with
+    // its object ahead of it ("Nahrung konsumieren", "das Brot nicht essen"). This is the surface
+    // German already gives the imperative `instruction` register above; the infinitive is `base`.
+    if (mood === 'infinitive') {
+      const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
+      const infDirect = directObject ? elementPhrase(directObject, 'acc') : '';
+      const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
+      const infComplements = complementsPhrase(rest);
+      return [infModifier, dativeText, infDirect, infComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? '', meansText]
+        .filter(Boolean)
+        .join(' ')
+        .trim();
+    }
+
     // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
     // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"
     // follows it, and the non-finite tail (infinitive / Partizip / "zu …" / the modal stack)

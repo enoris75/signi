@@ -817,6 +817,16 @@ function predicateText(
       .filter(Boolean)
       .join(' ');
   }
+  // Infinitive / citation phrase: the bare infinitive ("consommer la nourriture"), the same surface
+  // French already gives the imperative `instruction` register above. Negation brackets the whole
+  // infinitive ("ne pas consommer"); an object pronoun is proclitic ("le consommer"), via frCliticize.
+  if (mood === 'infinitive') {
+    const inf = verb.forms['base'] ?? conjugated;
+    const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
+    return [frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   return [frCliticize(objectClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -870,8 +880,12 @@ function renderClause(phrase: ResolvedPhrase): string {
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande taille"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
   if (!phrase.verbPhrase && isDimensionGloss(subject)) return dimensionGloss(firstConjunct(subject), subject);
-  // An imperative drops its subject (the person still drives the form — see predicateText).
-  const subj = phrase.verbPhrase?.mood === 'imperative' ? '' : subjectText(subject);
+  // An imperative drops its subject (the person still drives the form — see predicateText); an
+  // infinitive citation ("consommer la nourriture") is likewise subject-less on the surface.
+  const subj =
+    phrase.verbPhrase?.mood === 'imperative' || phrase.verbPhrase?.mood === 'infinitive'
+      ? ''
+      : subjectText(subject);
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(

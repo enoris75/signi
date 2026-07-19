@@ -201,6 +201,76 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // The genus of EAT ("to consume food") and DRINK ("to consume liquid") — the ingestion verb
+    // their dictionary definitions cite as their genus (see the C01 verb-definition catalogue and
+    // the infinitive render mode). Japanese has no single "consume food+drink" verb; 摂取する
+    // ("to ingest / take in") is the natural hypernym of 食べる and 飲む.
+    id: 'CONSUME',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to ingest food or drink',
+    emoji: '🍽️',
+    forms: {
+      en: {
+        base: 'consume',
+        '1sg_present': 'consume', '2sg_present': 'consume', '3sg_present': 'consumes',
+        '1pl_present': 'consume', '2pl_present': 'consume', '3pl_present': 'consume',
+        past: 'consumed',
+      },
+      it: {
+        base: 'consumare',
+        '1sg_present': 'consumo', '2sg_present': 'consumi', '3sg_present': 'consuma',
+        '1pl_present': 'consumiamo', '2pl_present': 'consumate', '3pl_present': 'consumano',
+        '1sg_past': 'consumai', '2sg_past': 'consumasti', '3sg_past': 'consumò',
+        '1pl_past': 'consumammo', '2pl_past': 'consumaste', '3pl_past': 'consumarono',
+        '1sg_future': 'consumerò', '2sg_future': 'consumerai', '3sg_future': 'consumerà',
+        '1pl_future': 'consumeremo', '2pl_future': 'consumerete', '3pl_future': 'consumeranno',
+      },
+      fr: {
+        base: 'consommer',
+        '1sg_present': 'consomme', '2sg_present': 'consommes', '3sg_present': 'consomme',
+        '1pl_present': 'consommons', '2pl_present': 'consommez', '3pl_present': 'consomment',
+        '1sg_past': 'consommai', '2sg_past': 'consommas', '3sg_past': 'consomma',
+        '1pl_past': 'consommâmes', '2pl_past': 'consommâtes', '3pl_past': 'consommèrent',
+        '1sg_future': 'consommerai', '2sg_future': 'consommeras', '3sg_future': 'consommera',
+        '1pl_future': 'consommerons', '2pl_future': 'consommerez', '3pl_future': 'consommeront',
+      },
+      de: {
+        base: 'konsumieren',
+        '1sg_present': 'konsumiere', '2sg_present': 'konsumierst', '3sg_present': 'konsumiert',
+        '1pl_present': 'konsumieren', '2pl_present': 'konsumiert', '3pl_present': 'konsumieren',
+        '1sg_past': 'konsumierte', '2sg_past': 'konsumiertest', '3sg_past': 'konsumierte',
+        '1pl_past': 'konsumierten', '2pl_past': 'konsumiertet', '3pl_past': 'konsumierten',
+      },
+      es: {
+        base: 'consumir',
+        '1sg_present': 'consumo', '2sg_present': 'consumes', '3sg_present': 'consume',
+        '1pl_present': 'consumimos', '2pl_present': 'consumís', '3pl_present': 'consumen',
+        '1sg_past': 'consumí', '2sg_past': 'consumiste', '3sg_past': 'consumió',
+        '1pl_past': 'consumimos', '2pl_past': 'consumisteis', '3pl_past': 'consumieron',
+        '1sg_future': 'consumiré', '2sg_future': 'consumirás', '3sg_future': 'consumirá',
+        '1pl_future': 'consumiremos', '2pl_future': 'consumiréis', '3pl_future': 'consumirán',
+      },
+      ja: {
+        base: '摂取する',
+        reading: 'せっしゅする',
+        masu_present: '摂取します',
+        masu_present_reading: 'せっしゅします',
+      },
+      pt: {
+        base: 'consumir',
+        '1sg_present': 'consumo', '2sg_present': 'consome', '3sg_present': 'consome',
+        '1pl_present': 'consumimos', '2pl_present': 'consomem', '3pl_present': 'consomem',
+        '1sg_past': 'consumi', '2sg_past': 'consumiu', '3sg_past': 'consumiu',
+        '1pl_past': 'consumimos', '2pl_past': 'consumiram', '3pl_past': 'consumiram',
+        '1sg_future': 'consumirei', '2sg_future': 'consumirá', '3sg_future': 'consumirá',
+        '1pl_future': 'consumiremos', '2pl_future': 'consumirão', '3pl_future': 'consumirão',
+      },
+    },
+  },
+
+  {
     id: 'SEE',
     role: 'verb',
     transitivity: 'transitive',

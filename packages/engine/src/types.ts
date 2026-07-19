@@ -156,9 +156,15 @@ export function joinConjuncts(
  * imperfect-subjunctive, "if the cat ate"). For a command the verb is `'imperative'` ("eat!",
  * "don't run!"), the subject is dropped from the surface, and the subject's person/number
  * selects the imperative form (2sg default, 1pl "let's…", 2pl). Absent ⇒ plain `'indicative'`.
- * Each engine maps this onto its own conditional / subjunctive / imperative forms.
+ *
+ * `'infinitive'` is the subject-less, tenseless citation form a verb definition is phrased as
+ * ("to consume food"; see PhrasePlan.infinitive). Like the imperative it occupies the finite/mood
+ * slot — the subject is dropped and there is no tense/aspect/modal — but it is not a speech act,
+ * so it carries no register. Each engine maps this onto its own dictionary infinitive.
+ *
+ * Each engine maps this onto its own conditional / subjunctive / imperative / infinitive forms.
  */
-export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'imperative';
+export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'imperative' | 'infinitive';
 
 /** A resolved verb phrase: the verb, negation flag, tense, aspect, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {

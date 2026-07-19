@@ -717,6 +717,18 @@ function predicateText(
       .filter(Boolean)
       .join(' ');
   }
+  // Infinitive / citation phrase: the bare infinitive ("consumare il cibo"). This is the true
+  // dictionary form — distinct from the imperative `instruction` register above, which Italian
+  // renders as the 2sg ("consuma"). Negation is preverbal "non"; an object pronoun (never a
+  // definition's own full-NP object, but supported for completeness) attaches enclitically,
+  // dropping the infinitive's final -e ("consumarlo").
+  if (mood === 'infinitive') {
+    const inf = verb.forms['base'] ?? verbText;
+    const infWithClitic = objectClitic ? inf.replace(/e$/, '') + objectClitic : inf;
+    return [negText, infWithClitic, modifierText, directObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   // Italian slots a FREQUENCY adverb between the auxiliary and the past participle of a compound
   // perfect ("ha SEMPRE mangiato", "non ha MAI mangiato"), not after the whole group — where a
   // MANNER adverb does belong ("ha mangiato bene"). Only the resultative splits the verb into
@@ -781,7 +793,9 @@ function renderClause(phrase: ResolvedPhrase): string {
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun
   // subject and a coordination fall through to subjectText and keep their surface.
   const dropSubject = !!phrase.verbPhrase &&
-    (phrase.verbPhrase.mood === 'imperative' || isPronounElement(subject));
+    (phrase.verbPhrase.mood === 'imperative' ||
+      phrase.verbPhrase.mood === 'infinitive' ||
+      isPronounElement(subject));
   const subj = dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
   if (!phrase.verbPhrase) return subj.trim();

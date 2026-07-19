@@ -49,6 +49,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'bebendo', participle: 'bebido' },
     ja: { te: '飲んで', te_reading: 'のんで' },
   },
+  CONSUME: {
+    en: { gerund: 'consuming', participle: 'consumed' },
+    it: { gerund: 'consumando', participle: 'consumato' },
+    fr: { participle: 'consommé' }, de: { participle: 'konsumiert' },
+    es: { gerund: 'consumiendo', participle: 'consumido' },
+    pt: { gerund: 'consumindo', participle: 'consumido' },
+    ja: { te: '摂取して', te_reading: 'せっしゅして' },
+  },
   RUN: {
     en: { gerund: 'running', participle: 'run' },
     it: { gerund: 'correndo', participle: 'corso' },

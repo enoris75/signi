@@ -216,22 +216,24 @@ function resolveVerbPhrase(
   mood?: Mood,
   register?: ImperativeRegister,
 ): ResolvedVerbPhrase {
-  // An imperative is a mood that occupies the finite/mood slot: it is always present-tense,
-  // neutral-aspect and modal-free. The UI already enforces this, but normalise defensively so
-  // a stale or hand-built plan can't feed a tensed/aspectual/modal imperative to the engines.
+  // An imperative or an infinitive is a mood that occupies the finite/mood slot: it is always
+  // present-tense, neutral-aspect and modal-free. The UI already enforces this, but normalise
+  // defensively so a stale or hand-built plan can't feed a tensed/aspectual/modal one to the
+  // engines. Only the imperative carries a register (it is a speech act); the infinitive does not.
   const imperative = mood === 'imperative';
+  const finiteSlotTaken = imperative || mood === 'infinitive';
   return {
     verb: resolve(vp.verb, language, lookup),
     negative: vp.negative,
-    tense: imperative ? 'present' : vp.tense,
-    aspect: imperative ? 'neutral' : vp.aspect,
+    tense: finiteSlotTaken ? 'present' : vp.tense,
+    aspect: finiteSlotTaken ? 'neutral' : vp.aspect,
     mood,
     register: imperative ? (register ?? 'request') : undefined,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
     // Modal verbs governing the predicate, outermost first. Each is a verb concept, so it
     // resolves to its own conjugation table plus the `nonfinite` / `link` joinery keys; each may
     // also carry its own adverb, resolved alongside.
-    modals: imperative
+    modals: finiteSlotTaken
       ? []
       : (vp.modals ?? []).map((ref) => {
           // A bare string is shorthand for a modal with no adverb of its own.
@@ -446,10 +448,17 @@ export function translateDeterminer(
 export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[] {
   return engines.map((engine) => {
     // The top clause's mood: 'conditional' when a hypothetical condition is attached,
-    // 'imperative' for a command, else plain indicative (undefined). These are mutually
-    // exclusive (the UI never sets both). A command hands its mood on to a coordinated
-    // second clause (see resolvePhrase) but never to a relative clause.
-    const topMood: Mood | undefined = plan.condition ? 'conditional' : plan.imperative ? 'imperative' : undefined;
+    // 'imperative' for a command, 'infinitive' for a bare citation phrase (a verb definition),
+    // else plain indicative (undefined). These are mutually exclusive (the UI never sets more
+    // than one). A command hands its mood on to a coordinated second clause (see resolvePhrase)
+    // but never to a relative clause.
+    const topMood: Mood | undefined = plan.condition
+      ? 'conditional'
+      : plan.imperative
+        ? 'imperative'
+        : plan.infinitive
+          ? 'infinitive'
+          : undefined;
     const resolved = resolvePhrase(plan, engine.language, lookup, topMood);
     // Every rendered period closes with its language's full stop, appended here rather
     // than by each engine — the ruby segments must carry the same one, unread.

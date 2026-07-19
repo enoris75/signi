@@ -731,6 +731,26 @@ export interface PhrasePlan {
    *    base) and Italian (2sg) happen to reuse their imperative surface.
    */
   imperativeRegister?: ImperativeRegister;
+  /**
+   * When true this clause is rendered as a bare **infinitive / citation phrase** — the
+   * dictionary form of the verb group, subject-less and tenseless ("to consume food",
+   * "consumare il cibo", "Nahrung konsumieren", ja 「食物を消費する」). It is what a verb's
+   * definition is naturally phrased as, and unlike an imperative it is not a speech act: no
+   * one is addressed, so there is no register and no addressee person.
+   *
+   * Structurally it behaves like `imperative`: it occupies the finite/mood slot, so it forces
+   * present tense / neutral aspect / no modals and drops the subject from every surface. The
+   * `subject` field is still required by the type but is never rendered — a plan supplies a
+   * throwaway impersonal subject (GENERIC_PERSON) purely to satisfy resolution. It is a mood,
+   * so it is mutually exclusive with `imperative` and a hypothetical `condition` (the UI
+   * enforces this; the translator also normalises it defensively).
+   *
+   * The one language-by-language difference from the imperative `instruction` register (which
+   * also surfaces as an infinitive in fr/es/pt/de) is that this is a true citation form: English
+   * prefixes "to " ("to consume", not the bare "consume" an instruction shows) and Italian uses
+   * the infinitive ("consumare", not the 2sg "consuma" its imperative shows).
+   */
+  infinitive?: boolean;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */

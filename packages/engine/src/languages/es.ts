@@ -680,6 +680,17 @@ function predicateText(
       .filter(Boolean)
       .join(' ');
   }
+  // Infinitive / citation phrase: the bare infinitive ("consumir el alimento"), the same surface
+  // Spanish already gives the imperative `instruction` register above. Negation prefixes "no" ("no
+  // consumir"); an object pronoun attaches enclitically ("consumirlo"), via esCliticize.
+  if (mood === 'infinitive') {
+    const inf = verb.forms['base'] ?? conjugated;
+    const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
+    const infVerb = infNeg ? `no ${inf}` : inf;
+    return [esCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+      .filter(Boolean)
+      .join(' ');
+  }
   return [preVerb, esCliticize(proclitics, verbText), postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
@@ -716,7 +727,9 @@ function renderClause(phrase: ResolvedPhrase): string {
   // subject; both keep driving the verb form off subject.agreement (see predicateText). A noun
   // subject and a coordination fall through to subjectText and keep their surface.
   const dropSubject = !!phrase.verbPhrase &&
-    (phrase.verbPhrase.mood === 'imperative' || isPronounElement(subject));
+    (phrase.verbPhrase.mood === 'imperative' ||
+      phrase.verbPhrase.mood === 'infinitive' ||
+      isPronounElement(subject));
   const subj = dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("últimas noticias").
   if (!phrase.verbPhrase) return subj.trim();

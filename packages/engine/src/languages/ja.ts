@@ -604,6 +604,21 @@ function predicateSegs(
     segs.push(...jaImperativeSegs(verb, pn, negated, register === 'instruction'));
     return segs;
   }
+  // Infinitive / citation phrase: the plain dictionary form (SOV, subject-less) — 「食物を消費する」.
+  // This is the true citation, distinct from the imperative `instruction` register above, which
+  // Japanese renders as the verbal noun (消費). A copula predicate falls through to the です block
+  // (a copula citation won't arise for a verb definition). The plain negative needs a nai-form the
+  // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
+  if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
+    segs.push(...complementSegs(complements));
+    if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
+    if (modifier) {
+      const b = modifier.forms['base'] ?? '';
+      if (b) segs.push(wordSeg(b, modifier.forms['reading']));
+    }
+    segs.push(negated ? verbSeg(verb, true, 'present') : plainVerbSeg(verb, 'present'));
+    return segs;
+  }
   if (verb.forms['copula'] === '1' && predicative) {
     if (modifier) {
       const base = modifier.forms['base'] ?? '';
@@ -680,10 +695,12 @@ function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): R
   // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
   if (!phrase.verbPhrase) return elSegs(phrase.subject);
   const segs: RubySegment[] = [];
-  // An imperative drops its subject/topic; the subject's person still selects the form.
+  // An imperative drops its subject/topic; the subject's person still selects the form. An
+  // infinitive citation (「食物を消費する」) is likewise subject-less on the surface.
   const imperative = phrase.verbPhrase.mood === 'imperative';
+  const dropsSubject = imperative || phrase.verbPhrase.mood === 'infinitive';
   // One topic particle for the whole subject, coordinated or not: 「ピーターとパウロは」.
-  if (!imperative) segs.push(...elSegs(phrase.subject), { t: subjectParticle });
+  if (!dropsSubject) segs.push(...elSegs(phrase.subject), { t: subjectParticle });
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN));
   return segs;
