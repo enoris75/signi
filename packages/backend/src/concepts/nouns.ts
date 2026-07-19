@@ -385,6 +385,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The differentia object of DRINK's dictionary definition ("to consume liquid"). A mass noun,
+    // modelled on FOOD — uncountable, no plural, and rendered bare in the gloss.
+    id: 'LIQUID',
+    role: 'noun',
+    description: 'a fluid substance, something to drink',
+    emoji: '💧',
+    countable: false,
+    forms: {
+      en: { base: 'liquid', count: 'singular' },
+      it: { base: 'liquido', gender: 'masc', count: 'singular' },
+      fr: { base: 'liquide', gender: 'masc', count: 'singular' },
+      de: { base: 'Flüssigkeit', gender: 'fem', count: 'singular' },
+      es: { base: 'líquido', gender: 'masc', count: 'singular' },
+      ja: { base: '液体', count: 'singular', reading: 'えきたい' },
+      pt: { base: 'líquido', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'HOUSE',
     role: 'noun',
     description: 'a building used as a dwelling',

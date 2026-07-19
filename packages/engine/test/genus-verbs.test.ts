@@ -125,3 +125,33 @@ describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
     });
   });
 });
+
+// The C01 verb definitions authored on the infinitive render mode: a verb's picker tooltip is now
+// its localized dictionary gloss (infinitiveGloss(genus, differentia)), not the English literal.
+// The differentia object renders bare (a mass noun: "food", "liquid"); French omits the partitive,
+// the same simplification whoGloss makes for its bare objects.
+describe('C01 verb definitions (infinitive citations)', () => {
+  test('EAT → "to consume food"', () => {
+    expect(definitionAll('EAT')).toEqual({
+      en: 'to consume food.',
+      it: 'consumare cibo.',
+      fr: 'consommer nourriture.',
+      de: 'Essen konsumieren.',
+      es: 'consumir comida.',
+      ja: '食べ物を摂取する。',
+      pt: 'consumir comida.',
+    });
+  });
+
+  test('DRINK → "to consume liquid"', () => {
+    expect(definitionAll('DRINK')).toEqual({
+      en: 'to consume liquid.',
+      it: 'consumare liquido.',
+      fr: 'consommer liquide.',
+      de: 'Flüssigkeit konsumieren.',
+      es: 'consumir líquido.',
+      ja: '液体を摂取する。',
+      pt: 'consumir líquido.',
+    });
+  });
+});

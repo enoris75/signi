@@ -1,4 +1,18 @@
+import type { PhrasePlan } from '@signi/shared';
 import type { ConceptSeed } from '../types.js';
+
+// A verb's dictionary definition as an infinitive citation: a subject-less, tenseless plan on the
+// infinitive render mode (see PhrasePlan.infinitive) whose verb is the genus and whose optional
+// object is the differentia, rendered bare — infinitiveGloss('CONSUME', 'FOOD') → en "to consume
+// food", it "consumare cibo", de "Nahrung konsumieren", ja "食べ物を摂取する". The GENERIC_PERSON
+// subject is a throwaway the infinitive drops from every surface. Set as a verb's `definition` to
+// localize its picker tooltip, the same way glossOf/whoGloss do for nouns.
+const infinitiveGloss = (verb: string, object?: string): PhrasePlan => ({
+  subject: { concept: 'GENERIC_PERSON' },
+  verbPhrase: { verb },
+  ...(object ? { directObject: { concept: object, definiteness: 'bare' } } : {}),
+  infinitive: true,
+});
 
 // Plain transitive verbs.
 export const transitiveVerbs: ConceptSeed[] = [
@@ -74,6 +88,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume food',
+    definition: infinitiveGloss('CONSUME', 'FOOD'),
     emoji: '🍴',
     forms: {
       en: {
@@ -140,6 +155,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to consume liquid',
+    definition: infinitiveGloss('CONSUME', 'LIQUID'),
     emoji: '🥤',
     forms: {
       en: {
