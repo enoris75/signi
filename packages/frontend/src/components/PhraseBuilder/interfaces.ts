@@ -109,6 +109,12 @@ export interface PhraseSelection {
     // default) or an impersonal instruction (see ImperativeAddress). Only meaningful when
     // `imperative`; passed straight through to the plan.
     imperativeRegister?: ImperativeRegister;
+    // When set, this period is an infinitive / citation phrase ("to consume food"). Like an
+    // imperative it is a mood occupying the finite slot: the subject box becomes the infinitive box
+    // and the subject is dropped by the engines, tense/aspect are forced present/neutral and modals
+    // cleared. Mutually exclusive with `imperative` and with a conditional/coordination (the UI
+    // enforces this). Unlike an imperative it addresses nobody, so it carries no person or register.
+    infinitive?: boolean;
     verb?: Concept;
     verbNegative?: boolean;
     verbTense?: Tense;

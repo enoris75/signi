@@ -321,7 +321,32 @@ export function toggleImperative(prev: PhraseSelection): PhraseSelection {
   return {
     ...prev,
     imperative: true,
+    // Imperative and infinitive both occupy the finite/mood slot, so turning one on turns the
+    // other off.
+    infinitive: false,
     imperativePerson: prev.imperativePerson ?? "2sg",
+    verbTense: "present",
+    verbAspect: "neutral",
+    verbModal: undefined,
+    verbModal2: undefined,
+    verbModalAdverb: undefined,
+    verbModal2Adverb: undefined,
+  };
+}
+
+// Toggle the infinitive / citation render mode on this period. Like the imperative it is a mood
+// occupying the finite slot, so turning it on forces present tense / neutral aspect / no modals,
+// drops the (throwaway) subject, and is mutually exclusive with the imperative and with a
+// conditional / coordination (the UI gates those). Unlike the imperative it takes no person or
+// register — a citation addresses nobody. Turning it off leaves everything else intact.
+export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
+  if (prev.infinitive) {
+    return { ...prev, infinitive: false };
+  }
+  return {
+    ...prev,
+    infinitive: true,
+    imperative: false,
     verbTense: "present",
     verbAspect: "neutral",
     verbModal: undefined,

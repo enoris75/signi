@@ -58,6 +58,7 @@ import {
   setSpecifier,
   toggleGender,
   toggleImperative,
+  toggleInfinitive,
   toggleNegative,
   toggleNumber,
 } from "./phraseReducers.ts";
@@ -249,7 +250,8 @@ export function PhraseBuilder({
   // Before that, the empty state offers the single opening word picker.
   // An instrument-as-action period draws its canvas from the start: its first box is the verb,
   // not the subject, so the subject-picking empty state would have nothing to offer.
-  const showCanvas = hasSubject || hasVerb || Boolean(selection.imperative) || actionMode;
+  const showCanvas =
+    hasSubject || hasVerb || Boolean(selection.imperative) || Boolean(selection.infinitive) || actionMode;
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
@@ -299,13 +301,17 @@ export function PhraseBuilder({
         Boolean(selection.subjectAdjective),
         concept.complements,
       );
-      const subjectEmpty = !selection.subject;
+      // A subject-dropping mood (command / infinitive citation) has no subject box to land on, so
+      // after the verb the focus advances to the object instead of the dropped subject.
+      const subjectDropped = Boolean(selection.imperative || selection.infinitive);
+      const subjectEmpty = !selection.subject && !subjectDropped;
       setActiveSlot(
         subjectEmpty
           ? "subject"
           : (slots.find(
               (s) =>
                 s.key !== "verb" &&
+                s.key !== "subject" &&
                 !SATELLITE_SLOT_KEYS.has(s.key) &&
                 !selection[s.key],
             )?.key ?? null),
@@ -429,6 +435,12 @@ export function PhraseBuilder({
     // otherwise sit on a box that no longer exists. Move it to the verb — the one thing still to
     // pick, and the whole point of a command.
     if (!selection.imperative && !selection.verb) setActiveSlot("verb");
+  };
+  const handleToggleInfinitive = () => {
+    onPhraseUpdate(toggleInfinitive);
+    // Switching the infinitive on replaces the subject box with the infinitive box, so move focus
+    // to the verb — the citation's whole content — for the same reason the command toggle does.
+    if (!selection.infinitive && !selection.verb) setActiveSlot("verb");
   };
   const handleSetImperativePerson = (person: ImperativePerson) =>
     onPhraseUpdate((prev) => setImperativePerson(prev, person));
@@ -1144,6 +1156,19 @@ export function PhraseBuilder({
               binding.coordinative.hasTarget
             : false,
           onToggle: handleToggleImperative,
+        }}
+        infinitive={{
+          active: Boolean(selection.infinitive),
+          // Like the imperative, the infinitive is a mood occupying the finite slot, so it can't be
+          // flipped on a period that takes part in a conditional or a coordination — clear the
+          // relation first.
+          disabled: binding
+            ? binding.conditional.hasSource ||
+              binding.conditional.hasTarget ||
+              binding.coordinative.hasSource ||
+              binding.coordinative.hasTarget
+            : false,
+          onToggle: handleToggleInfinitive,
         }}
       >
         {content}

@@ -24,6 +24,7 @@ import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
 import { SatelliteControls } from "./SatelliteControls.tsx";
 import { GroupPerimeterControls } from "./GroupPerimeterControls.tsx";
 import { ImperativeSubjectSelector } from "./ImperativeSubjectSelector.tsx";
+import { InfinitivePhraseBox } from "./InfinitivePhraseBox.tsx";
 
 export interface PhraseCanvasProps {
   // The shared render bag threaded to every noun/verb phrase builder; the canvas reads
@@ -106,6 +107,14 @@ export function PhraseCanvas({
     />
   );
 
+  // The box that replaces the subject box under a subject-dropping mood: the command box under an
+  // imperative, the infinitive box under a citation. Null under neither, when the subject box stands.
+  const moodBox = selection.imperative
+    ? commandBox
+    : selection.infinitive
+      ? <InfinitivePhraseBox />
+      : null;
+
   return (
     <Box sx={{ minWidth: 0 }}>
       {!showCanvas ? (
@@ -119,9 +128,9 @@ export function PhraseCanvas({
             height: canvasHeight,
           }}
         >
-          {selection.imperative ? (
-            // A command drops its subject — the box is the command box instead.
-            commandBox
+          {moodBox ? (
+            // A subject-dropping mood (command / infinitive) replaces the subject box with its own.
+            moodBox
           ) : (
             <SlotBox
               slot={subjectSlot}
@@ -163,16 +172,17 @@ export function PhraseCanvas({
           />
 
           <>
-            {ctx.showSubject === false ? null : selection.imperative ? (
-              // A command drops its subject, so the subject box has no noun to hold: the command
-              // box *is* the subject node — dragged, positioned and measured as one, so the layout
-              // wraps it exactly as it wrapped the box it replaces. The subject's own satellites
-              // are withdrawn with it (see buildSatellites), leaving nothing to overlay.
+            {ctx.showSubject === false ? null : moodBox ? (
+              // A subject-dropping mood (command / infinitive) drops the subject, so the subject box
+              // has no noun to hold: the mood box *is* the subject node — dragged, positioned and
+              // measured as one, so the layout wraps it exactly as it wrapped the box it replaces.
+              // The subject's own satellites are withdrawn with it (see buildSatellites), leaving
+              // nothing to overlay.
               <Box
                 {...ctx.makeDragProps("subject", () => {})}
                 ref={nodeElRef(ctx, "subject")}
               >
-                {commandBox}
+                {moodBox}
               </Box>
             ) : (
               <NounPhraseBuilder which="subject" ctx={ctx} />

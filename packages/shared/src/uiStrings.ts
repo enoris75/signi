@@ -855,6 +855,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Command',
   },
 
+  // The infinitive-phrase box, which replaces the subject box under the infinitive render mode (the
+  // subject is dropped from every surface — a citation addresses nobody). Its caption is the bare
+  // INFINITIVE_PHRASE grammar noun, the same concept the mode is named by.
+  'infinitive.phrase': {
+    plan: nameOf('INFINITIVE_PHRASE'),
+    format: NAME_FORMAT,
+    fallback: 'Infinitive phrase',
+  },
+
   // Where the second command of a coordination gets its (locked) choices from — the tooltip on
   // the link icon in its box. The pair is one speech act, so the first clause makes them.
   'imperative.firstCommand': {

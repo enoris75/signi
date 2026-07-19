@@ -19,6 +19,7 @@ import ArrowDownwardIcon from "@mui/icons-material/ArrowDownward";
 import AltRouteIcon from "@mui/icons-material/AltRoute";
 import CallMergeIcon from "@mui/icons-material/CallMerge";
 import CampaignIcon from "@mui/icons-material/Campaign";
+import AllInclusiveIcon from "@mui/icons-material/AllInclusive";
 import { useUiString } from "../../i18n/useUiString.ts";
 import {
   COORD_CONJUNCTION_LABEL,
@@ -104,6 +105,16 @@ export interface ImperativeControl {
   onToggle: () => void;
 }
 
+// The infinitive (citation) toggle on the card border, a sibling of the imperative one. Also a
+// mood occupying the finite slot, so it is mutually exclusive with the imperative (toggling one
+// clears the other) and, like the imperative, disabled while the period takes part in a conditional
+// or a coordination — the relation must be cleared before the mood can be flipped.
+export interface InfinitiveControl {
+  active: boolean;
+  disabled: boolean;
+  onToggle: () => void;
+}
+
 // Derive the conditional/coordinative control bags from a workspace binding, keeping
 // PeriodContainer ignorant of WorkspaceBinding itself. A standalone period has no binding and
 // can't take part in a clause-level relation, so both come back undefined. `selection` is read
@@ -134,9 +145,11 @@ export function periodControls(
       isPickTarget: conditional.isPickTarget,
       pickActive: binding.pickActive,
       // An IF clause can't also be a main clause (conditionals don't chain), and a period already
-      // in a coordination — or acting as a command — can't also start a conditional.
+      // in a coordination — or acting as a command or an infinitive citation — can't also start a
+      // conditional (a citation is a leaf; a command is a mood incompatible with a conditional).
       canStart:
         !selection.imperative &&
+        !selection.infinitive &&
         !conditional.hasTarget &&
         !coordinative.hasSource &&
         !coordinative.hasTarget,
@@ -154,8 +167,10 @@ export function periodControls(
       pickActive: binding.pickActive,
       // A period can take part in only one clause-level relation at a time: not a second clause
       // already, and not tied into a conditional. A command may coordinate — with a second
-      // command, which the workspace enforces when it picks the target.
+      // command, which the workspace enforces when it picks the target. An infinitive citation is
+      // a leaf and does not coordinate.
       canStart:
+        !selection.infinitive &&
         !coordinative.hasTarget &&
         !conditional.hasSource &&
         !conditional.hasTarget,
@@ -207,6 +222,9 @@ export interface PeriodContainerProps {
   instrumental?: InstrumentalControl;
   // Imperative (command) toggle on the card border. Present for every period.
   imperative?: ImperativeControl;
+  // Infinitive (citation) toggle on the card border, a sibling of the imperative one. Present for
+  // every period.
+  infinitive?: InfinitiveControl;
   children: React.ReactNode;
 }
 
@@ -237,6 +255,7 @@ export function PeriodContainer({
   coordinative,
   instrumental,
   imperative,
+  infinitive,
   children,
 }: PeriodContainerProps) {
   const t = useUiString();
@@ -410,7 +429,9 @@ export function PeriodContainer({
                     ? "secondary.main"
                     : imperative?.active
                       ? "success.main"
-                      : "text.secondary",
+                      : infinitive?.active
+                        ? "primary.main"
+                        : "text.secondary",
         boxShadow: condDroppable
           ? "0 0 0 2px rgba(237,108,2,0.35)"
           : coordDroppable
@@ -436,7 +457,7 @@ export function PeriodContainer({
       {/* The clause-level controls (imperative on top, then conditional, then coordinative),
           stacked on the card's right border. The conditional/coordinative connectors run from
           this cluster's registered anchor. */}
-      {(conditional || coordinative || imperative) && (
+      {(conditional || coordinative || imperative || infinitive) && (
         <Box
           ref={conditional?.registerBorderAnchor}
           onPointerDown={(e) => e.stopPropagation()}
@@ -477,6 +498,36 @@ export function PeriodContainer({
                   }}
                 >
                   <CampaignIcon sx={{ fontSize: 15 }} />
+                </IconButton>
+              </span>
+            </Tooltip>
+          )}
+          {infinitive && (
+            <Tooltip
+              title={
+                infinitive.disabled
+                  ? "Remove the IF / coordination link to make this an infinitive phrase"
+                  : infinitive.active
+                    ? "This period is an infinitive phrase — turn it off"
+                    : "Make this period an infinitive phrase (a citation, e.g. “to consume food”)"
+              }
+            >
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={infinitive.onToggle}
+                  disabled={infinitive.disabled}
+                  aria-label="Toggle infinitive phrase (citation)"
+                  sx={{
+                    p: 0.25,
+                    bgcolor: "background.paper",
+                    border: "1px solid",
+                    borderColor: infinitive.active ? "primary.main" : "divider",
+                    color: infinitive.active ? "primary.main" : "text.secondary",
+                    "&:hover": { bgcolor: "background.paper" },
+                  }}
+                >
+                  <AllInclusiveIcon sx={{ fontSize: 15 }} />
                 </IconButton>
               </span>
             </Tooltip>
@@ -606,7 +657,9 @@ export function PeriodContainer({
               ? t("slot.instrumental")
               : imperative?.active
                 ? "Command"
-                : conditional?.hasCondition
+                : infinitive?.active
+                  ? "Infinitive"
+                  : conditional?.hasCondition
                   ? "Main clause"
                   : conditional?.isIfClause
                     ? "If clause"

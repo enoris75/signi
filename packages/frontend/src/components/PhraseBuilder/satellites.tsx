@@ -127,6 +127,10 @@ export function buildSatellites(
 ): { satellites: Satellite[]; shownMap: Record<string, boolean> } {
   const label = (c?: Concept) => conceptWord(c, language, t);
   const subjectRole = selection.subject?.role;
+  // A command and an infinitive citation are both moods occupying the finite slot: each forces
+  // present tense / neutral aspect / no modals and drops the subject, so the tense, aspect and
+  // modal controls (and the whole subject family, below) are withdrawn under either.
+  const finiteSlotTaken = Boolean(selection.imperative || selection.infinitive);
   // How many phrases are coordinated with a noun block's own head ("Peter *and Paul*").
   const conjunctCount = (which: NounKey): number =>
     ((selection[CONJUNCTS_KEY(which)] as PhraseSelection[] | undefined) ?? []).length;
@@ -257,7 +261,7 @@ export function buildSatellites(
       label: "Tense",
       icon: <AccessTimeIcon sx={iconSx} />,
       // An imperative is tenseless (present command), so the control is withdrawn under it.
-      available: !selection.imperative,
+      available: !finiteSlotTaken,
       // Non-default (solid) once the tense is anything but the implicit present.
       hasValue: Boolean(selection.verbTense) && selection.verbTense !== "present",
       alwaysSet: true,
@@ -269,7 +273,7 @@ export function buildSatellites(
       label: "Aspect",
       icon: <TimelapseIcon sx={iconSx} />,
       // An imperative forces neutral aspect, so the control is withdrawn under it.
-      available: !selection.imperative,
+      available: !finiteSlotTaken,
       // Non-default (solid) once the aspect is anything but the implicit neutral.
       hasValue: Boolean(selection.verbAspect) && selection.verbAspect !== "neutral",
       alwaysSet: true,
@@ -284,7 +288,7 @@ export function buildSatellites(
       label: "Modal",
       icon: <GavelIcon sx={iconSx} />,
       // A modal fills the same finite/mood slot as the command, so it's withdrawn under it.
-      available: !selection.imperative,
+      available: !finiteSlotTaken,
       hasValue: Boolean(selection.verbModal),
       valueLabel: label(selection.verbModal),
     },
@@ -293,7 +297,7 @@ export function buildSatellites(
       parent: "verbModal",
       label: "Modal 2",
       icon: <GavelIcon sx={iconSx} />,
-      available: !selection.imperative && Boolean(selection.verbModal),
+      available: !finiteSlotTaken && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModal2),
       valueLabel: label(selection.verbModal2),
     },
@@ -304,7 +308,7 @@ export function buildSatellites(
       parent: "verbModal",
       label: "Modal Adverb",
       icon: <TuneIcon sx={iconSx} />,
-      available: !selection.imperative && Boolean(selection.verbModal),
+      available: !finiteSlotTaken && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModalAdverb),
       valueLabel: label(selection.verbModalAdverb),
     },
@@ -313,7 +317,7 @@ export function buildSatellites(
       parent: "verbModal2",
       label: "Modal 2 Adverb",
       icon: <TuneIcon sx={iconSx} />,
-      available: !selection.imperative && Boolean(selection.verbModal2),
+      available: !finiteSlotTaken && Boolean(selection.verbModal2),
       hasValue: Boolean(selection.verbModal2Adverb),
       valueLabel: label(selection.verbModal2Adverb),
     },
@@ -595,13 +599,13 @@ export function buildSatellites(
     }),
   ];
 
-  // A command drops its subject: the subject box is replaced by the command box (PhraseCanvas),
-  // so the whole subject family — its adjectives, number/gender, determiner, relative clause and
-  // possessor — has no head to hang off and is withdrawn. Every one of those satellites is keyed
-  // off the subject, and dropping them here is what keeps their controls, their boxes and their
-  // connectors from floating over the box that took its place.
+  // A command or an infinitive citation drops its subject: the subject box is replaced by the mood
+  // box (PhraseCanvas), so the whole subject family — its adjectives, number/gender, determiner,
+  // relative clause and possessor — has no head to hang off and is withdrawn. Every one of those
+  // satellites is keyed off the subject, and dropping them here is what keeps their controls, their
+  // boxes and their connectors from floating over the box that took its place.
   const subjectDropped = (key: string) =>
-    Boolean(selection.imperative) && key.startsWith("subject");
+    finiteSlotTaken && key.startsWith("subject");
 
   // Folding the direct object's box away takes its whole family with it — its adjectives,
   // number/gender, determiner, relative clause, possessor and conjuncts all hang off a head

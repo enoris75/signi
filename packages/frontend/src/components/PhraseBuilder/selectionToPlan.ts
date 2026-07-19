@@ -222,12 +222,20 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
   // leaking the synthesised addressee pronoun ("you.") that the subject-dropping mood would
   // otherwise render with no verb to attach to.
   const imperative = Boolean(sel.imperative && sel.verb);
+  // The infinitive citation is likewise a subject-dropping mood that needs a verb to cite; until
+  // one is picked the period stays a plain (buildable) subject. The engines drop the subject, so
+  // it takes a throwaway GENERIC_PERSON purely to satisfy the plan's required `subject` field —
+  // the same placeholder the seeded verb definitions use.
+  const infinitive = Boolean(sel.infinitive && sel.verb);
   return {
     // An imperative synthesises its subject from the chosen addressee (the user's own subject
-    // pick is left untouched in the selection, so toggling the command off restores it).
+    // pick is left untouched in the selection, so toggling the command off restores it); an
+    // infinitive drops it entirely behind the impersonal placeholder.
     subject: imperative
       ? imperativeSubject(sel.imperativePerson)
-      : buildNounElement(sel, "subject"),
+      : infinitive
+        ? { concept: "GENERIC_PERSON" }
+        : buildNounElement(sel, "subject"),
     verbPhrase: buildVerbPhrase(sel),
     directObject: buildNounElement(sel, "directObject"),
     complements: buildComplements(sel),
@@ -237,5 +245,6 @@ export function selectionToPlan(sel: PhraseSelection): Partial<PhrasePlan> {
       imperative: true,
       ...(sel.imperativeRegister && { imperativeRegister: sel.imperativeRegister }),
     }),
+    ...(infinitive && { infinitive: true }),
   };
 }
