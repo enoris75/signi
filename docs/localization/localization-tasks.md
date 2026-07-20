@@ -44,9 +44,25 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
+Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
+task. **Start with B09** — it is the only one that is purely additive (no builder change, both
+differentiae already seeded). **B14 owns the shared builder change** that also gates B11's READ,
+B12's BUY, all of B13, and B18's TYPE, so it is the highest-leverage task once B09–B12's easy wins
+are in.
+
 | # | File | Seed first |
 |---|---|---|
-| B08 | [B08-verb-definitions.md](B-needs-seed/B08-verb-definitions.md) | verb glosses via `infinitiveGloss` — EAT/DRINK done; 46 remaining, each gated on seeding its genus verb (MOVE, PERCEIVE, CREATE, TRANSFER, …) (was C01; render mode landed) |
+| B09 | [B09-create-verbs.md](B-needs-seed/B09-create-verbs.md) | **CREATE** → MAKE, SET_ON_FIRE — ✅ purely additive, do this first |
+| B10 | [B10-destruction-verbs.md](B-needs-seed/B10-destruction-verbs.md) | **DESTROY** (+ LIFE/CONTENT) → KILL, EXTINGUISH, CLEAR |
+| B11 | [B11-perception-verbs.md](B-needs-seed/B11-perception-verbs.md) | **PERCEIVE, UNDERSTAND** → SEE, KNOW (additive); READ needs the builder |
+| B12 | [B12-possession-verbs.md](B-needs-seed/B12-possession-verbs.md) | **HAVE, ACQUIRE** (+ PROPERTY) → OWN, HOLD (additive); BUY needs the builder |
+| B13 | [B13-contact-verbs.md](B-needs-seed/B13-contact-verbs.md) | **DIVIDE, STRIKE** (+ EDGE, TOOTH) → CUT, BITE, BEAT — all need the builder |
+| B14 | [B14-motion-verbs.md](B-needs-seed/B14-motion-verbs.md) | **MOVE, PLACE** → GO, RUN, COME, JUMP, COLLAPSE — **owns the shared builder change** |
+| B15 | [B15-transfer-verbs.md](B-needs-seed/B15-transfer-verbs.md) | **TRANSFER** → GIVE, SEND, SHOW — ditransitive, needs an indirect object in the builder |
+| B16 | [B16-word-verbs.md](B-needs-seed/B16-word-verbs.md) | **INDICATE, CHANGE** → NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE — additive but low priority |
+| B17 | [B17-feeling-and-sound-verbs.md](B-needs-seed/B17-feeling-and-sound-verbs.md) | **FEEL, PRODUCE_SOUND** (+ AFFECTION, TEAR) → LOVE additive; CRY/CRY_OUT may become Cs |
+| B18 | [B18-selection-verbs.md](B-needs-seed/B18-selection-verbs.md) | **INDICATE, PRESS** (+ OPTION, BUTTON, KEYBOARD) → CLICK, CHOOSE, SELECT, TYPE |
+| B19 | [B19-data-verbs.md](B-needs-seed/B19-data-verbs.md) | 11 app verbs (SAVE, LOAD, EXPORT, …) — **recommended: leave on English literals**, poor vocabulary ratio |
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
@@ -56,6 +72,8 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
+| C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08) |
+| C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
 
 ### Done
 
@@ -75,6 +93,7 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 | B06 | [done/B06-grammar-words.md](done/B06-grammar-words.md) | NOUN → a word that names objects; VERB → a word that expresses actions; ADJECTIVE → …describes nouns; ADVERB → …modifies verbs; PRONOUN → …replaces nouns (seeded NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE, ACTION first) |
 | B07 | [done/B07-scalar-adjective-definitions.md](done/B07-scalar-adjective-definitions.md) | 11 scalar adjectives via `dimensionGloss` — BIG → of great size, GOOD → of high quality, HOT → at high temperature, … (was C02; seeded TEMPERATURE first, filed fr bugs A44/A45) |
 | C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
+| B08 | [done/B08-verb-definitions.md](done/B08-verb-definitions.md) | EAT → to consume food; DRINK → to consume liquid (seeded CONSUME, LIQUID, INFINITIVE_PHRASE). **Retired by splitting** the remaining 54 verbs into B09–B19, C08, C09 (was C01) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.
