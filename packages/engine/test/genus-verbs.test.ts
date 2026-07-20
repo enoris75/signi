@@ -14,7 +14,7 @@ function definitionAll(id: string): Record<LanguageCode, string> {
   ) as Record<LanguageCode, string>;
 }
 
-// Concepts seeded to support the C01 verb-definition catalogue on the infinitive render mode:
+// Concepts seeded to support the B08 verb-definition catalogue on the infinitive render mode:
 //   · CONSUME — the genus verb of EAT ("to consume food") and DRINK ("to consume liquid"), the
 //     verb their dictionary definitions cite as their genus.
 //   · INFINITIVE_PHRASE — the grammar meta-noun naming the infinitive / citation mode itself.
@@ -126,11 +126,11 @@ describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
   });
 });
 
-// The C01 verb definitions authored on the infinitive render mode: a verb's picker tooltip is now
+// The B08 verb definitions authored on the infinitive render mode: a verb's picker tooltip is now
 // its localized dictionary gloss (infinitiveGloss(genus, differentia)), not the English literal.
 // The differentia object renders bare (a mass noun: "food", "liquid"); French omits the partitive,
 // the same simplification whoGloss makes for its bare objects.
-describe('C01 verb definitions (infinitive citations)', () => {
+describe('B08 verb definitions (infinitive citations)', () => {
   test('EAT → "to consume food"', () => {
     expect(definitionAll('EAT')).toEqual({
       en: 'to consume food.',

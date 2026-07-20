@@ -218,7 +218,7 @@ export const transitiveVerbs: ConceptSeed[] = [
 
   {
     // The genus of EAT ("to consume food") and DRINK ("to consume liquid") — the ingestion verb
-    // their dictionary definitions cite as their genus (see the C01 verb-definition catalogue and
+    // their dictionary definitions cite as their genus (see the B08 verb-definition catalogue and
     // the infinitive render mode). Japanese has no single "consume food+drink" verb; 摂取する
     // ("to ingest / take in") is the natural hypernym of 食べる and 飲む.
     id: 'CONSUME',

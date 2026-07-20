@@ -72,3 +72,95 @@ quality regression, so they are **held**. Unblocking needs a Japanese quantifier
 need a different frequency-gloss shape). The other six languages are ready the moment Japanese is.
 
 Lowest priority: 2 concepts, blocked on a Japanese-only construct.
+
+## Feature — Japanese quantifier render (the unblock)
+
+The determiner *words* already exist. [`JA_DETERMINERS`](../../../packages/engine/src/languages/ja.ts)
+maps `all → すべての`, `no → どの…もない`, plus the demonstratives and `some`/`many`/`few` — but they
+are wired only to the UI determiner menu (`renderDeterminer`). The sentence path
+([`npSegs`](../../../packages/engine/src/languages/ja.ts)) **drops every determiner**, which is why
+`all`/`no` vanish from the gloss. Two of the three steps are small; the third is the real design call.
+
+1. **Emit the prenominal quantifier in `npSegs`.** Add a leading segment for the determiner word when
+   it is a plain prenominal form (この / その / いくつかの / 多くの / 少しの / **すべての**) — the `の` is
+   already part of the attributive value, so it needs no extra particle. This alone gives ALWAYS →
+   **すべての時間で**. It is a **general** change to Japanese NP rendering, so it is scoped by a
+   decision: emit quantifiers for *every* Japanese noun phrase (articles still render nothing, so
+   only NPs that actually set a demonstrative/quantifier change), or gate the emission to the gloss
+   fragment. Prefer the general form — it is the correct behaviour everywhere — but it means
+   re-pinning any existing Japanese sentence that carries a demonstrative/quantifier determiner.
+
+2. **Pin ALWAYS.** With step 1, `TIME` + `all` + `mannerGloss` → すべての時間で. Add it to
+   [manner-gloss.test.ts](../../../packages/engine/test/manner-gloss.test.ts) and author the
+   `definition` in [adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts).
+
+3. **NEVER needs a different shape — `no` is not prenominal in Japanese.** Its value どの…もない is a
+   **circumfix**: どの 時間 も … ない — a leading どの, a も on the noun, and a clause-final ない. A
+   verbless manner fragment has no verb to host the ない, so the quantifier path cannot render "at no
+   time" the way it renders "at all times". Options, cheapest first:
+   - **Japanese literal fallback for NEVER only** — keep its stored `description` in Japanese
+     (決して…ない is the natural frequency adverb) and let the other six use `mannerGloss`. Smallest
+     change; NEVER's tooltip is then not engine-composed in Japanese, which the definitions API
+     already supports (per-language fallback).
+   - **A dedicated frequency-gloss** — a small construct that renders どの時間も + a fragment-final
+     ない (どの時間もない), sidestepping the manner path for the negative frequency case. More faithful,
+     more engine work, and needs its own guard so the ない never leaks into a real clause.
+
+   Decide 3 before authoring NEVER; steps 1–2 (ALWAYS) can land independently.
+
+Tests: after step 1, run the whole Japanese suite — the determiner emission touches the shared NP
+path, so any existing pin with a demonstrative/quantifier must be re-pinned to the engine's new
+(correct) output.
+
+### Plan for step 3 — NEVER's negative-frequency gloss (どの時間もない)
+
+Target: NEVER → **どの時間もない**, distinct from ALWAYS's すべての時間で.
+
+**The precedent that makes this tractable.** Japanese already realises negation as a word-final ない
+that behaves like an **い-adjective** — `jaComparisonAdj`'s `negate()` turns 大きい → 大きくない, and
+every downstream position (attributive, adverbial, copula) then handles it by the ordinary
+い-adjective machinery. So a verbless fragment ending in ない is well-formed in exactly the way the
+dimension gloss's 速さが高い is. The circumfix also **splits by owner**:
+
+- the **noun phrase** contributes どの … も
+- the **predicate** contributes ない
+
+That split is the whole design; each half goes where it belongs.
+
+1. **Split the circumfix in `JA_DETERMINERS`.** Today `no: 'どの…もない'` is a single display string for
+   the UI menu. Sentence rendering needs the halves separately — a prenominal どの and a post-head
+   も. Add a structured entry (or a dedicated `JA_NEGATIVE_DETERMINER = { pre: 'どの', post: 'も' }`)
+   and leave the menu string untouched so `renderDeterminer` is unchanged.
+
+2. **Emit どの … も in `npSegs`**, alongside step 1's prenominal quantifiers: どの leads the
+   adjectives/head, も follows the head noun. **The one invasive bit:** も *replaces* the case
+   particle the NP would otherwise take — Japanese does not stack も with が/を — so every site that
+   appends a particle after `elSegs(...)` (`{ t: 'を' }`, the subject's が/は, the complement
+   particles) must skip it when the NP is negative. Audit those call sites together; they are the
+   regression surface.
+
+3. **Supply the ない from the right host** — two cases:
+   - **Verbless gloss fragment (the NEVER case).** Special-case a `no` head in ja's
+     `mannerGlossSegs`: render どの + noun + も + ない and **drop the manner で** — the negative
+     existential replaces the manner adverbial, and どの時間もでない is not Japanese. Yields どの時間もない.
+   - **Real clause.** The predicate already has the machinery: mirror `groupHasNegativeAdverb` by
+     letting a `no`-determiner NP force `negated` in the verb-phrase builder, so the existing
+     決して…ない concord fires (どの時間も食べない). The shared
+     [`hasNegativeComplement`](../../../packages/engine/src/types.ts) helper already detects
+     `definiteness === 'no'` for complements — Italian drives its `non` off it — and **Japanese
+     references none of it today**, so this is genuinely new ja behaviour.
+
+4. **Pin it.** In [manner-gloss.test.ts](../../../packages/engine/test/manner-gloss.test.ts): NEVER →
+   どの時間もない and ALWAYS → すべての時間で, asserted as *distinct* (the whole point). Add clause-level
+   Japanese pins for a `no` subject/object too, since step 3's concord is new behaviour, not just a
+   gloss detail.
+
+5. **Author NEVER** in [adverbs.ts](../../../packages/backend/src/concepts/adverbs.ts) once Japanese
+   is distinct, and move both adverbs into the Done table above.
+
+**Scope control.** Steps 2–3 reach beyond the tooltip: they change how every Japanese noun phrase
+with a `no` determiner renders, and add clause-level negative concord. If that is more than this task
+should carry, gate steps 2–3 to the **gloss fragment only** and file the clause-level `no` concord as
+its own engine task — NEVER's tooltip is the deliverable here, and the fragment path can special-case
+どの…も…ない without touching `npSegs`. The cheaper fallback (a Japanese literal for NEVER alone)
+stays available if neither is worth the spend.
