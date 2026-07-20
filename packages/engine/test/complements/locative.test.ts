@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import { PATH_SPECIFIERS, type NounPhrase, type PathSpecifier } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // Where the action happens — a static place, with no motion implied. Most verbs that denote a
@@ -185,6 +185,129 @@ describe('locative: the place is a full noun phrase', () => {
   });
 });
 
+// The locative carries the same spatial specifier the route does — without it there is no way to
+// say "the cat is under the bed" or "behind the tree", only the containment "in" the bare
+// complement defaults to. The relation is the same one route names; what differs is the verb, not
+// the adposition ("goes under the bed" / "is under the bed"), so every language reuses the phrase
+// it already builds for a route and only the default changes: locative falls back to `in`, route
+// to `through`.
+const atPlace = (value: PathSpecifier, verb = 'BE', place: NounPhrase = np('HOUSE')) =>
+  sayAll(clause(np('CAT'), verb, {
+    complements: { locative: { phrase: place, specifiers: [{ kind: 'path', value }] } },
+  }));
+
+describe('locative: spatial specifiers', () => {
+  test('under — the relation the bare locative cannot express', () => {
+    expect(atPlace('under')).toMatchObject({
+      en: 'the cat is under the house.',
+      it: 'il gatto è sotto la casa.',
+      fr: 'le chat est sous la maison.',
+      // unter is a two-way (Wechsel-) preposition; a static place takes the DATIVE, the same case
+      // the route already gives it — "unter dem Haus", never the accusative "unter das Haus".
+      de: 'der Kater ist unter dem Haus.',
+      es: 'el gato es debajo de la casa.',
+      pt: 'o gato é debaixo da casa.',
+      // The relational noun 下 sits between the place and its particle, exactly as it does for a
+      // route (市場の下を) — only the particle differs.
+      ja: '猫は家の下でです。',
+    });
+  });
+
+  test('behind', () => {
+    expect(atPlace('behind')).toMatchObject({
+      en: 'the cat is behind the house.',
+      it: 'il gatto è dietro la casa.',
+      fr: 'le chat est derrière la maison.',
+      de: 'der Kater ist hinter dem Haus.', // dative — hinter is two-way
+      es: 'el gato es detrás de la casa.',
+      pt: 'o gato é atrás da casa.',
+      ja: '猫は家の後ろでです。',
+    });
+  });
+
+  test('over and in front of', () => {
+    expect(atPlace('over')).toMatchObject({
+      en: 'the cat is over the house.',
+      fr: 'le chat est au-dessus de la maison.',
+      de: 'der Kater ist über dem Haus.',
+      es: 'el gato es por encima de la casa.',
+    });
+    expect(atPlace('in_front_of')).toMatchObject({
+      en: 'the cat is in front of the house.',
+      it: 'il gatto è davanti alla casa.', // davanti a + la = alla
+      de: 'der Kater ist vor dem Haus.',
+      ja: '猫は家の前でです。',
+    });
+  });
+
+  // "um" governs the accusative whether the relation is a path or a place ("die Mauer um das
+  // Haus"), so `around` is the one locative relation that does NOT take the dative.
+  test('around takes the accusative in German, unlike the two-way prepositions', () => {
+    expect(atPlace('around')).toMatchObject({
+      en: 'the cat is around the house.',
+      it: 'il gatto è intorno alla casa.',
+      de: 'der Kater ist um das Haus.',
+      pt: 'o gato é ao redor da casa.',
+    });
+  });
+
+  // The default is what makes locative and route different complements: neither the absent
+  // specifier nor an explicit `in` may drift from the containment reading pinned at the top.
+  test('an absent specifier and an explicit `in` are the same containment', () => {
+    expect(atPlace('in', 'RUN')).toEqual(inPlace('RUN'));
+    expect(atPlace('in')).toEqual(inPlace('BE'));
+  });
+
+  // The relation belongs to the complement, not the verb: an action placed under something marks
+  // it exactly as the copula does, and only the verb changes.
+  test('a non-copular verb takes the same relation', () => {
+    expect(atPlace('under', 'RUN')).toMatchObject({
+      en: 'the cat runs under the house.',
+      it: 'il gatto corre sotto la casa.',
+      fr: 'le chat court sous la maison.',
+      de: 'der Kater läuft unter dem Haus.',
+      ja: '猫は家の下で走ります。',
+    });
+  });
+
+  // Every relation renders in every language — no dropped adposition, no empty place.
+  test.each(PATH_SPECIFIERS)('%s renders in every language', (value) => {
+    const said = atPlace(value);
+    for (const lang of ['en', 'it', 'fr', 'es', 'pt', 'de', 'ja'] as const) {
+      expect(said[lang]).toMatch(/[.。]$/);
+      expect(said[lang]).not.toContain('undefined');
+    }
+    expect(said.ja).toContain('家');
+  });
+
+  // The place stays an ordinary noun phrase under a relation: the determiner still declines and
+  // still fuses where the language fuses it.
+  test('the place still declines under a relation', () => {
+    expect(atPlace('under', 'RUN', np('HOUSE', { definiteness: 'indefinite' }))).toMatchObject({
+      en: 'the cat runs under a house.',
+      it: 'il gatto corre sotto una casa.',
+      fr: 'le chat court sous une maison.',
+      de: 'der Kater läuft unter einem Haus.', // dative indefinite
+    });
+    expect(atPlace('behind', 'RUN', np('HOUSE', { number: 'plural' }))).toMatchObject({
+      en: 'the cat runs behind the houses.',
+      de: 'der Kater läuft hinter den Häusern.', // dative plural
+      pt: 'o gato corre atrás das casas.',
+    });
+  });
+
+  // The continent article-drop is a property of plain containment ("corre in Europa"), not of the
+  // locative slot: a relational locative keeps the adverb and the article the relation governs.
+  test('a proper-noun place keeps its article under a relation', () => {
+    expect(atPlace('under', 'RUN', np('EUROPE'))).toMatchObject({
+      it: "il gatto corre sotto l'Europa.",
+      fr: "le chat court sous l'Europe.",
+    });
+    // …while the bare containment still drops it.
+    expect(inPlace('RUN', np('EUROPE'))).toMatchObject({ it: 'il gatto corre in Europa.' });
+  });
+});
+
 describe('known bugs: locative', () => {
   // A proper noun keeps the article its language fixes for it — correct as a SUBJECT ("l'Europa
   // mangia") — but Italian and French drop that article after a locative preposition:
@@ -262,6 +385,42 @@ describe('known bugs: locative', () => {
       pt: 'o gato corre em casa.',
       de: 'der Kater läuft zu Hause.',
       ja: '猫は家で走ります。', // already correct
+    });
+  });
+});
+
+// A47. Spanish and Portuguese split the copula: `ser` for identity and inherent properties,
+// `estar` for location and transient states. The engine has only one BE lexeme (ser/ser), so a
+// located subject comes out as "*el gato es en la casa" / "*o gato é na casa" — the single most
+// basic thing es/pt do that the other five languages do not. The locative half is mechanical:
+// a place is ALWAYS estar, whatever the noun and whatever the spatial relation.
+describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
+  test.fails('a located subject takes estar, not ser', () => {
+    expect(inPlace('BE')).toMatchObject({
+      es: 'el gato está en la casa.',
+      pt: 'o gato está na casa.',
+    });
+  });
+
+  test.fails('the spatial relations take estar too', () => {
+    expect(atPlace('under')).toMatchObject({
+      es: 'el gato está debajo de la casa.',
+      pt: 'o gato está debaixo da casa.',
+    });
+    expect(atPlace('behind')).toMatchObject({
+      es: 'el gato está detrás de la casa.',
+      pt: 'o gato está atrás da casa.',
+    });
+  });
+
+  // The past inherits the same choice — the preterite of estar, not of ser ("fue"/"foi").
+  test.fails('the past locative is the preterite of estar', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase: { verb: 'BE', tense: 'past' },
+      complements: { locative: { phrase: np('HOUSE') } },
+    }))).toMatchObject({
+      es: 'el gato estuvo en la casa.',
+      pt: 'o gato esteve na casa.',
     });
   });
 });

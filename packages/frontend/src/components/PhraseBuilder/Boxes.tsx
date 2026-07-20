@@ -10,6 +10,7 @@ import {
 import ClearIcon from "@mui/icons-material/Clear";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
 import VerticalAlignBottomIcon from "@mui/icons-material/VerticalAlignBottom";
+import VerticalAlignCenterIcon from "@mui/icons-material/VerticalAlignCenter";
 import VerticalAlignTopIcon from "@mui/icons-material/VerticalAlignTop";
 import LoopIcon from "@mui/icons-material/Loop";
 import FlipToBackIcon from "@mui/icons-material/FlipToBack";
@@ -381,6 +382,8 @@ export function DeterminerToggleBox({ value }: { value: Definiteness }) {
 }
 
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
+  // Containment — the locative's default relation, and the one the route never falls back on.
+  in: <VerticalAlignCenterIcon sx={{ fontSize: 15 }} />,
   through: <DoubleArrowIcon sx={{ fontSize: 15 }} />,
   under: <VerticalAlignBottomIcon sx={{ fontSize: 15 }} />,
   over: <VerticalAlignTopIcon sx={{ fontSize: 15 }} />,
@@ -389,8 +392,9 @@ const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   in_front_of: <FlipToFrontIcon sx={{ fontSize: 15 }} />,
 };
 
-// A toolbar of path relations for the route complement — one selectable icon per
-// specifier, the active one highlighted. Rendered on top of the route dotted box.
+// A toolbar of spatial relations — one selectable icon per specifier, the active one highlighted.
+// Shared by the route and locative complements, which draw on the same relations; the caller
+// passes the value (and so the default) its own complement carries.
 export function SpecifierSelector({
   value,
   onSelect,

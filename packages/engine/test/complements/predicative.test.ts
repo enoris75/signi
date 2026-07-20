@@ -316,3 +316,26 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
     });
   });
 });
+
+// A47, the predicative half. Unlike the locative — where a place is always `estar` — a predicate
+// complement splits on WHAT IS ASCRIBED, so the corpus has to say which is which:
+//   · a predicate NOUN is always `ser` ("es una leyenda") — already correct, pinned as a regression
+//   · an INHERENT property is `ser` ("es grande") — already correct
+//   · a TRANSIENT state is `estar` ("está cansado") — wrong today, the engine says "es cansado"
+describe('known bugs: Spanish/Portuguese ser vs estar in a predicative', () => {
+  const isThat = (adjective: string) =>
+    sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np(adjective) } } }));
+
+  test.fails('a transient state takes estar, not ser', () => {
+    expect(isThat('TIRED')).toMatchObject({
+      es: 'el gato está cansado.',
+      pt: 'o gato está cansado.',
+    });
+  });
+
+  test('regression: an inherent property and a predicate noun keep ser', () => {
+    expect(isThat('BIG')).toMatchObject({ es: 'el gato es grande.', pt: 'o gato é grande.' });
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: legend() } } })))
+      .toMatchObject({ es: 'el gato es una leyenda.', pt: 'o gato é uma lenda.' });
+  });
+});

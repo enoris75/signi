@@ -7,9 +7,10 @@ const goVia = (value: PathSpecifier) =>
     complements: { route: { phrase: np('MARKET'), specifiers: [{ kind: 'path', value }] } },
   }));
 
-// The path a motion takes. Unlike the other complements the route carries a specifier, which
-// selects the spatial relation — through / under / over / around / behind / in front of. Each of
-// the six is a distinct adposition in every language, so all six are pinned here.
+// The path a motion takes. The route carries a spatial specifier selecting the relation — through
+// / under / over / around / behind / in front of / in. Each is a distinct adposition in every
+// language, so all are pinned here. The locative shares the set (see locative.test.ts); what makes
+// the two complements differ is the fallback, `through` here and `in` there.
 describe('route', () => {
   test('through', () => {
     expect(goVia('through')).toEqual({
@@ -88,9 +89,9 @@ describe('route', () => {
   });
 });
 
-// German is the interesting axis: durch and um govern the accusative, while the four two-way
-// (Wechsel-) prepositions — unter / über / hinter / vor — take the dative for a path. So the case
-// on the article ("den Markt" vs "dem Markt") splits the six into two classes.
+// German is the interesting axis: durch and um govern the accusative, while the two-way (Wechsel-)
+// prepositions — in / unter / über / hinter / vor — take the dative for a path. So the case on the
+// article ("den Markt" vs "dem Markt") splits the relations into two classes.
 describe('route: German accusative vs dative', () => {
   test('durch and um take the accusative', () => {
     expect(goVia('through').de).toBe('der Kater geht durch den Markt.');
@@ -112,7 +113,7 @@ describe('route: every specifier renders in every language', () => {
       expect(said[lang]).toMatch(/[.。]$/);
       expect(said[lang]).not.toContain('undefined');
     }
-    // The traversed noun and its を survive in Japanese for all six.
+    // The traversed noun and its を survive in Japanese for every relation.
     expect(said.ja).toContain('市場');
     expect(said.ja).toContain('を行きます');
   });

@@ -1,5 +1,9 @@
 import { Box } from "@mui/material";
-import { CAUSE_SENTIMENTS, PATH_SPECIFIERS } from "@signi/shared";
+import {
+  CAUSE_SENTIMENTS,
+  DEFAULT_LOCATIVE_SPECIFIER,
+  DEFAULT_ROUTE_SPECIFIER,
+} from "@signi/shared";
 import {
   AspectToggleBox,
   SatelliteButton,
@@ -29,6 +33,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleCycleTense,
     handleCycleAspect,
     handleSelectSpecifier,
+    handleSelectLocativeSpecifier,
     handleSelectSentiment,
     registerVerbAnchor,
   } = ctx;
@@ -44,6 +49,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
   const verbPhraseRect = groupRects.find((g) => g.label === "Verb Phrase");
   const routeRect = groupRects.find((g) => g.removeKey === "route");
+  const locativeRect = groupRects.find((g) => g.removeKey === "locative");
   const causeRect = groupRects.find((g) => g.removeKey === "cause");
 
   // Where the direct object's control sits on the verb-phrase box: exactly where the connector
@@ -129,8 +135,28 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           }}
         >
           <SpecifierSelector
-            value={selection.routeSpecifier ?? PATH_SPECIFIERS[0]}
+            value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
             onSelect={handleSelectSpecifier}
+          />
+        </Box>
+      )}
+
+      {/* The locative takes the same relation toolbar as the route — it is what lets the
+          place read "under the bed" or "behind the tree" rather than only "in the bed".
+          Same relations, different default: the locative falls back on containment. */}
+      {selection.locative && locativeRect && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: locativeRect.x + locativeRect.width / 2,
+            top: locativeRect.y,
+            transform: "translate(-50%, -50%)",
+            zIndex: 3,
+          }}
+        >
+          <SpecifierSelector
+            value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
+            onSelect={handleSelectLocativeSpecifier}
           />
         </Box>
       )}

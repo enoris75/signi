@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isGenericSubject, isPronominalPossessor, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveJa } from '../possessive.js';
 

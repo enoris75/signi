@@ -101,6 +101,7 @@ export function applyConceptSelect(
         delete next[`${type}Gender`];
         clearAdjectives(next, type);
         if (type === "route") delete next.routeSpecifier;
+        if (type === "locative") delete next.locativeSpecifier;
         if (type === "cause") delete next.causeSentiment;
       }
     }
@@ -179,6 +180,7 @@ export function applyClear(
       clearAdjectives(next, type);
     }
     delete next.routeSpecifier;
+    delete next.locativeSpecifier;
     delete next.causeSentiment;
   }
   if (slot === "subject") {
@@ -196,6 +198,7 @@ export function applyClear(
     delete next[`${slot}Gender` as keyof PhraseSelection];
     clearAdjectives(next, slot as NounKey);
     if (slot === "route") delete next.routeSpecifier;
+    if (slot === "locative") delete next.locativeSpecifier;
     if (slot === "cause") delete next.causeSentiment;
   }
   // Clearing an adjective drops the ones chained after it — their reveal controls
@@ -392,12 +395,16 @@ export function cycleAspect(prev: PhraseSelection): PhraseSelection {
   return { ...prev, verbAspect: ASPECTS[(idx + 1) % ASPECTS.length] };
 }
 
-// Set the route complement's path relation (through / under / over / …).
+// Set a spatial complement's relation (through / under / over / …). Route and locative draw on
+// the same relations but keep their own key, since their defaults differ (through vs in).
 export function setSpecifier(
   prev: PhraseSelection,
   spec: PathSpecifier,
+  which: "route" | "locative" = "route",
 ): PhraseSelection {
-  return { ...prev, routeSpecifier: spec };
+  return which === "locative"
+    ? { ...prev, locativeSpecifier: spec }
+    : { ...prev, routeSpecifier: spec };
 }
 
 // Set the cause complement's affective sentiment (neutral / negative / positive).

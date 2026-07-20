@@ -107,6 +107,7 @@ export interface PhraseRenderContext {
   handleCycleTense: () => void;
   handleCycleAspect: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
+  handleSelectLocativeSpecifier: (spec: PathSpecifier) => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   // Compact a dotted box's child nodes into a tidy centered cluster.

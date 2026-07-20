@@ -192,6 +192,10 @@ export interface PhraseSelection {
     routeAdjective3?: Concept;
     // The path relation (through / under / over / …) for the route complement.
     routeSpecifier?: PathSpecifier;
+    // The same relation set for the locative complement — what lets it say "under the bed" or
+    // "behind the tree" rather than only the containment it falls back on. Route and locative
+    // share the relations but not the default (through vs in), so they need separate keys.
+    locativeSpecifier?: PathSpecifier;
     // Cause / reason adjunct ("cried because of the dog"). Its one specifier is the
     // affective sentiment — neutral (because of) / negative (fault of) / positive (thanks to),
     // selected on the cause dotted box. Defaults to 'neutral' when absent.

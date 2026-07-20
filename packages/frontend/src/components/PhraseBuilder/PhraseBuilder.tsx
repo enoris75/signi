@@ -447,7 +447,9 @@ export function PhraseBuilder({
   const handleSetImperativeRegister = (register: ImperativeRegister) =>
     onPhraseUpdate((prev) => setImperativeRegister(prev, register));
   const handleSelectSpecifier = (spec: PathSpecifier) =>
-    onPhraseUpdate((prev) => setSpecifier(prev, spec));
+    onPhraseUpdate((prev) => setSpecifier(prev, spec, "route"));
+  const handleSelectLocativeSpecifier = (spec: PathSpecifier) =>
+    onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative"));
   const handleSelectSentiment = (sentiment: CauseSentiment) =>
     onPhraseUpdate((prev) => setSentiment(prev, sentiment));
 
@@ -1023,6 +1025,7 @@ export function PhraseBuilder({
     handleCycleTense,
     handleCycleAspect,
     handleSelectSpecifier,
+    handleSelectLocativeSpecifier,
     handleSelectSentiment,
     handleToggleCollapse,
     handleRearrangeGroup,

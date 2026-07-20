@@ -55,6 +55,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
 | A45 | [A45-french-gloss-great-postnominal.md](A-must-fix/A45-french-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
+| A47 | [A47-spanish-portuguese-ser-vs-estar.md](A-must-fix/A47-spanish-portuguese-ser-vs-estar.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
