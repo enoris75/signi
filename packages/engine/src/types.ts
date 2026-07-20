@@ -1,5 +1,5 @@
 import type { AbstractionLevel, Aspect, CauseSentiment, ComplementType, CoordConjunction, Degree, DimensionRelation, ImperativeRegister, LanguageCode, MannerRelation, ModifierRelation, PathSpecifier, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
-import { isActionLevel, isPronominalPossessor } from '@signi/shared';
+import { DEFAULT_ROUTE_SPECIFIER, isActionLevel, isPronominalPossessor } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 export { isPronominalPossessor };
@@ -265,9 +265,13 @@ export interface ResolvedPhrase {
   coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
 }
 
-/** The path relation chosen for a `route` complement; defaults to `through`. */
-export function pathSpecifier(c: ResolvedComplement): PathSpecifier {
-  return c.specifiers?.find((s) => s.kind === 'path')?.value ?? 'through';
+/**
+ * The spatial relation chosen for a `route` or `locative` complement. The two share the set of
+ * relations but not the default, so the caller passes the fallback its complement falls back on:
+ * a bare route is a traversal (`through`), a bare locative is containment (`in`).
+ */
+export function pathSpecifier(c: ResolvedComplement, fallback: PathSpecifier = DEFAULT_ROUTE_SPECIFIER): PathSpecifier {
+  return c.specifiers?.find((s) => s.kind === 'path')?.value ?? fallback;
 }
 
 /** The affective stance chosen for a `cause` complement; defaults to `neutral`. */

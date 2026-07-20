@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { Degree, NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
+import { concepts } from '../../../backend/src/concepts/index.js';
 
 // The subject complement — what the subject *is* or *becomes*, rather than what it acts on. It is
 // the one complement whose head may be an ADJECTIVE (a predicate adjective, "seems happy") as
@@ -276,5 +277,42 @@ describe('known bugs: predicative degree', () => {
     expect(isBig('least')).toBe('猫は最も大きくないです。');
     expect(isBig('less')).toBe('猫はそれほど大きくないです。');
     expect(isBig('most')).toBe('猫は最も大きいです。'); // regression: raised is affirmative
+  });
+});
+
+// The subject complement belongs to the SEEMING verb, not to the coming-into-view one. APPEAR
+// means "to come into view" (its opposite is disappearing) and says nothing about what the
+// subject is like, so it licenses no `predicative` — the slot the builder would otherwise offer
+// produced "*il gatto appare una leggenda" / "*der Kater erscheint eine Legende", ill-formed in
+// every language whose APPEAR lexeme is the come-into-view verb. SEEM carries that sense instead.
+describe('predicative is licensed by SEEM, not by APPEAR', () => {
+  const licenses = (verb: string) =>
+    concepts.find((c) => c.id === verb)?.complements?.includes('predicative') ?? false;
+
+  test('SEEM licenses a subject complement; APPEAR does not', () => {
+    expect(licenses('SEEM')).toBe(true);
+    expect(licenses('APPEAR')).toBe(false);
+    // The other copular verbs are unaffected — they are what the complement was built for.
+    expect(licenses('BECOME')).toBe(true);
+    expect(licenses('BE')).toBe(true);
+  });
+});
+
+// A46. The `predicative` renderer branches on the COMPLEMENT head (adjective vs noun) but never
+// on the VERB. That is right for BECOME and BE, where every language takes a bare predicate
+// nominative ("becomes a legend", "wird eine Legende"), and it is what SEEM inherits — but the
+// seeming verb does not license a bare predicate noun on the same terms in English or German.
+// A predicate ADJECTIVE is fine under all three verbs; only the nominal complement is affected.
+describe('known bugs: a predicate NOUN under SEEM', () => {
+  // English "seems a legend" is archaic/literary; the modern form raises an infinitival copula.
+  // German `scheinen` cannot take a predicate nominative at all — it needs "… zu sein".
+  // Romance is already correct: sembrare/sembler/parecer do license a bare predicate noun.
+  test.fails('SEEM + a predicate noun needs an infinitival copula in English and German', () => {
+    expect(seems(legend())).toMatchObject({
+      en: 'the cat seems to be a legend.',
+      de: 'der Kater scheint eine Legende zu sein.',
+      it: 'il gatto sembra una leggenda.', // regression: Romance is already right
+      es: 'el gato parece una leyenda.',
+    });
   });
 });

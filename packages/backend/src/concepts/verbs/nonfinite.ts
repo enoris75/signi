@@ -287,7 +287,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'apparu', aux: 'be' }, de: { participle: 'erschienen', aux: 'be' },
     es: { gerund: 'apareciendo', participle: 'aparecido' },
     pt: { gerund: 'aparecendo', participle: 'aparecido' },
-    ja: { te: '見えて', te_reading: 'みえて' },
+    ja: { te: '現れて', te_reading: 'あらわれて' },
   },
   SAVE: {
     en: { gerund: 'saving', participle: 'saved' },

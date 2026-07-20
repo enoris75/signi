@@ -138,8 +138,12 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'SEEM',
     role: 'verb',
     transitivity: 'intransitive',
+    // The SEEMING verb: it ascribes a resemblance, so it takes a subject complement — the thing
+    // the subject looks like ("seems tired", "seems a legend"). Deliberately disjoint from
+    // APPEAR, which is the coming-into-view verb and licenses no `predicative` at all.
     complements: ['predicative', 'locative', 'cause', 'terminus'],
-    description: 'to give the impression of being; to appear to be',
+    description: 'to look like; to give the impression of being similar to',
+    synonym: 'look like',
     emoji: '🤔',
     forms: {
       en: {
@@ -204,8 +208,15 @@ export const motionVerbs: ConceptSeed[] = [
     id: 'APPEAR',
     role: 'verb',
     transitivity: 'intransitive',
-    complements: ['predicative', 'locative', 'cause', 'terminus'],
-    description: 'to come into view; to look or seem a certain way',
+    // The COMING-INTO-VIEW verb — the one whose opposite is disappearing, not the seeming verb.
+    // It says *that* the subject shows up (and where, and to whom), never *what it is like*, so
+    // it licenses NO `predicative`: "the cat appears in the house / to the dog", but not
+    // "*the cat appears a legend" (that is SEEM). Every language's lexeme here is the
+    // come-into-view verb — apparire / apparaître / aparecer / erscheinen / 現れる — and none of
+    // them takes a predicate nominative, which is why the slot is withheld rather than repaired.
+    complements: ['locative', 'cause', 'terminus'],
+    description: 'to come into view; to become visible',
+    synonym: 'come into view',
     emoji: '👀',
     forms: {
       en: {
@@ -248,11 +259,14 @@ export const motionVerbs: ConceptSeed[] = [
         '1sg_future': 'apareceré', '2sg_future': 'aparecerás', '3sg_future': 'aparecerá',
         '1pl_future': 'apareceremos', '2pl_future': 'apareceréis', '3pl_future': 'aparecerán',
       },
+      // 現れる, not 見える: 見える is "be visible / look like", the SEEM sense, and it collides
+      // with the terminus に ("猫は犬に見えます" reads as *looks like a dog*, not "appears to the
+      // dog"). 現れる is unambiguously the coming-into-view verb.
       ja: {
-        base: '見える',
-        reading: 'みえる',
-        masu_present: '見えます',
-        masu_present_reading: 'みえます',
+        base: '現れる',
+        reading: 'あらわれる',
+        masu_present: '現れます',
+        masu_present_reading: 'あらわれます',
       },
       pt: {
         base: 'aparecer',

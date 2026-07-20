@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveEs } from '../possessive.js';
@@ -399,13 +399,17 @@ function npText(np: ResolvedNounPhrase): string {
 }
 
 /**
- * route path relation → preposition, honoring the head's determiner. Most are "de"-locutions
- * (debajo de, alrededor de, …) whose "de" fuses only with "el" ("debajo del árbol" but
- * "debajo de una casa"), via `deDet`; "through" is the bare preposition "por", which takes a
- * non-fusing article ("por la casa" / "por una casa").
+ * A spatial relation → preposition, honoring the head's determiner. Shared by route and locative:
+ * Spanish uses the same locution for the path under something and the place under it ("va debajo
+ * de la cama" / "está debajo de la cama"), so one map serves both — only the default differs.
+ *
+ * Most are "de"-locutions (debajo de, alrededor de, …) whose "de" fuses only with "el" ("debajo
+ * del árbol" but "debajo de una casa"), via `deDet`; "through" is the bare preposition "por", which
+ * takes a non-fusing article ("por la casa" / "por una casa"), as does plain "en".
  */
-function routeHead(c: ResolvedComplement, plural: boolean, f: Record<string, string>): string {
-  switch (pathSpecifier(c)) {
+function spatialHead(spec: PathSpecifier, plural: boolean, f: Record<string, string>): string {
+  switch (spec) {
+    case 'in':          return prepDet('en', f, plural);
     case 'under':       return `debajo ${deDet(f, plural)}`;
     case 'over':        return `por encima ${deDet(f, plural)}`;
     case 'around':      return `alrededor ${deDet(f, plural)}`;
@@ -506,7 +510,7 @@ function complementsPhrase(
       // perro" ("a"-contracted via datPrep).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
-        type === 'locative'  ? prepDet('en', af, plural) :
+        type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), plural, af) :
         type === 'terminus'  ? aDet(af, plural) :
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
         type === 'instrumental' ? prepDet('con', af, plural) :
@@ -525,7 +529,7 @@ function complementsPhrase(
           causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
           `a causa ${dePrep(af, plural)}`
         ) :
-        routeHead(c, plural, af);
+        spatialHead(pathSpecifier(c), plural, af);
       return withRelative(`${head} ${noun}`, np);
       });
     })

@@ -686,7 +686,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "apareceremos.",
     "fr": "nous apparaîtrons.",
     "it": "appariremo.",
-    "ja": "私たちは見えます。",
+    "ja": "私たちは現れます。",
     "pt": "apareceremos.",
   },
   "future · progressive": {
@@ -695,7 +695,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estaremos apareciendo.",
     "fr": "nous serons en train d'apparaître.",
     "it": "staremo apparendo.",
-    "ja": "私たちは見えています。",
+    "ja": "私たちは現れています。",
     "pt": "estaremos aparecendo.",
   },
   "future · prospective": {
@@ -704,7 +704,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estaremos a punto de aparecer.",
     "fr": "nous serons sur le point d'apparaître.",
     "it": "staremo per apparire.",
-    "ja": "私たちは見えるところです。",
+    "ja": "私たちは現れるところです。",
     "pt": "estaremos prestes a aparecer.",
   },
   "future · resultative": {
@@ -713,7 +713,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "habremos aparecido.",
     "fr": "nous serons apparus.",
     "it": "saremo apparsi.",
-    "ja": "私たちは見えてしまいます。",
+    "ja": "私たちは現れてしまいます。",
     "pt": "teremos aparecido.",
   },
   "past · neutral": {
@@ -722,7 +722,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "aparecimos.",
     "fr": "nous apparûmes.",
     "it": "apparimmo.",
-    "ja": "私たちは見えました。",
+    "ja": "私たちは現れました。",
     "pt": "aparecemos.",
   },
   "past · progressive": {
@@ -731,7 +731,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estábamos apareciendo.",
     "fr": "nous étions en train d'apparaître.",
     "it": "stavamo apparendo.",
-    "ja": "私たちは見えていました。",
+    "ja": "私たちは現れていました。",
     "pt": "estávamos aparecendo.",
   },
   "past · prospective": {
@@ -740,7 +740,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estábamos a punto de aparecer.",
     "fr": "nous étions sur le point d'apparaître.",
     "it": "stavamo per apparire.",
-    "ja": "私たちは見えるところでした。",
+    "ja": "私たちは現れるところでした。",
     "pt": "estávamos prestes a aparecer.",
   },
   "past · resultative": {
@@ -749,7 +749,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "habíamos aparecido.",
     "fr": "nous étions apparus.",
     "it": "eravamo apparsi.",
-    "ja": "私たちは見えてしまいました。",
+    "ja": "私たちは現れてしまいました。",
     "pt": "tínhamos aparecido.",
   },
   "present · neutral": {
@@ -758,7 +758,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "aparecemos.",
     "fr": "nous apparaissons.",
     "it": "appariamo.",
-    "ja": "私たちは見えます。",
+    "ja": "私たちは現れます。",
     "pt": "aparecemos.",
   },
   "present · progressive": {
@@ -767,7 +767,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estamos apareciendo.",
     "fr": "nous sommes en train d'apparaître.",
     "it": "stiamo apparendo.",
-    "ja": "私たちは見えています。",
+    "ja": "私たちは現れています。",
     "pt": "estamos aparecendo.",
   },
   "present · prospective": {
@@ -776,7 +776,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "estamos a punto de aparecer.",
     "fr": "nous sommes sur le point d'apparaître.",
     "it": "stiamo per apparire.",
-    "ja": "私たちは見えるところです。",
+    "ja": "私たちは現れるところです。",
     "pt": "estamos prestes a aparecer.",
   },
   "present · resultative": {
@@ -785,7 +785,7 @@ exports[`conjugation: APPEAR > 1st plural 1`] = `
     "es": "hemos aparecido.",
     "fr": "nous sommes apparus.",
     "it": "siamo apparsi.",
-    "ja": "私たちは見えてしまいます。",
+    "ja": "私たちは現れてしまいます。",
     "pt": "aparecemos.",
   },
 }
@@ -799,7 +799,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "apareceré.",
     "fr": "je apparaîtrai.",
     "it": "apparirò.",
-    "ja": "私は見えます。",
+    "ja": "私は現れます。",
     "pt": "aparecerei.",
   },
   "future · progressive": {
@@ -808,7 +808,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estaré apareciendo.",
     "fr": "je serai en train d'apparaître.",
     "it": "starò apparendo.",
-    "ja": "私は見えています。",
+    "ja": "私は現れています。",
     "pt": "estarei aparecendo.",
   },
   "future · prospective": {
@@ -817,7 +817,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estaré a punto de aparecer.",
     "fr": "je serai sur le point d'apparaître.",
     "it": "starò per apparire.",
-    "ja": "私は見えるところです。",
+    "ja": "私は現れるところです。",
     "pt": "estarei prestes a aparecer.",
   },
   "future · resultative": {
@@ -826,7 +826,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "habré aparecido.",
     "fr": "je serai apparu.",
     "it": "sarò apparso.",
-    "ja": "私は見えてしまいます。",
+    "ja": "私は現れてしまいます。",
     "pt": "terei aparecido.",
   },
   "past · neutral": {
@@ -835,7 +835,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "aparecí.",
     "fr": "je apparus.",
     "it": "apparvi.",
-    "ja": "私は見えました。",
+    "ja": "私は現れました。",
     "pt": "apareci.",
   },
   "past · progressive": {
@@ -844,7 +844,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estaba apareciendo.",
     "fr": "je étais en train d'apparaître.",
     "it": "stavo apparendo.",
-    "ja": "私は見えていました。",
+    "ja": "私は現れていました。",
     "pt": "estava aparecendo.",
   },
   "past · prospective": {
@@ -853,7 +853,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estaba a punto de aparecer.",
     "fr": "je étais sur le point d'apparaître.",
     "it": "stavo per apparire.",
-    "ja": "私は見えるところでした。",
+    "ja": "私は現れるところでした。",
     "pt": "estava prestes a aparecer.",
   },
   "past · resultative": {
@@ -862,7 +862,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "había aparecido.",
     "fr": "je étais apparu.",
     "it": "ero apparso.",
-    "ja": "私は見えてしまいました。",
+    "ja": "私は現れてしまいました。",
     "pt": "tinha aparecido.",
   },
   "present · neutral": {
@@ -871,7 +871,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "aparezco.",
     "fr": "je apparais.",
     "it": "appaio.",
-    "ja": "私は見えます。",
+    "ja": "私は現れます。",
     "pt": "apareço.",
   },
   "present · progressive": {
@@ -880,7 +880,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estoy apareciendo.",
     "fr": "je suis en train d'apparaître.",
     "it": "sto apparendo.",
-    "ja": "私は見えています。",
+    "ja": "私は現れています。",
     "pt": "estou aparecendo.",
   },
   "present · prospective": {
@@ -889,7 +889,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "estoy a punto de aparecer.",
     "fr": "je suis sur le point d'apparaître.",
     "it": "sto per apparire.",
-    "ja": "私は見えるところです。",
+    "ja": "私は現れるところです。",
     "pt": "estou prestes a aparecer.",
   },
   "present · resultative": {
@@ -898,7 +898,7 @@ exports[`conjugation: APPEAR > 1st singular 1`] = `
     "es": "he aparecido.",
     "fr": "je suis apparu.",
     "it": "sono apparso.",
-    "ja": "私は見えてしまいます。",
+    "ja": "私は現れてしまいます。",
     "pt": "apareci.",
   },
 }
@@ -912,7 +912,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "apareceréis.",
     "fr": "vous apparaîtrez.",
     "it": "apparirete.",
-    "ja": "あなたたちは見えます。",
+    "ja": "あなたたちは現れます。",
     "pt": "aparecerão.",
   },
   "future · progressive": {
@@ -921,7 +921,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estaréis apareciendo.",
     "fr": "vous serez en train d'apparaître.",
     "it": "starete apparendo.",
-    "ja": "あなたたちは見えています。",
+    "ja": "あなたたちは現れています。",
     "pt": "estareis aparecendo.",
   },
   "future · prospective": {
@@ -930,7 +930,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estaréis a punto de aparecer.",
     "fr": "vous serez sur le point d'apparaître.",
     "it": "starete per apparire.",
-    "ja": "あなたたちは見えるところです。",
+    "ja": "あなたたちは現れるところです。",
     "pt": "estareis prestes a aparecer.",
   },
   "future · resultative": {
@@ -939,7 +939,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "habréis aparecido.",
     "fr": "vous serez apparus.",
     "it": "sarete apparsi.",
-    "ja": "あなたたちは見えてしまいます。",
+    "ja": "あなたたちは現れてしまいます。",
     "pt": "tereis aparecido.",
   },
   "past · neutral": {
@@ -948,7 +948,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "aparecisteis.",
     "fr": "vous apparûtes.",
     "it": "appariste.",
-    "ja": "あなたたちは見えました。",
+    "ja": "あなたたちは現れました。",
     "pt": "apareceram.",
   },
   "past · progressive": {
@@ -957,7 +957,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estabais apareciendo.",
     "fr": "vous étiez en train d'apparaître.",
     "it": "stavate apparendo.",
-    "ja": "あなたたちは見えていました。",
+    "ja": "あなたたちは現れていました。",
     "pt": "estáveis aparecendo.",
   },
   "past · prospective": {
@@ -966,7 +966,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estabais a punto de aparecer.",
     "fr": "vous étiez sur le point d'apparaître.",
     "it": "stavate per apparire.",
-    "ja": "あなたたちは見えるところでした。",
+    "ja": "あなたたちは現れるところでした。",
     "pt": "estáveis prestes a aparecer.",
   },
   "past · resultative": {
@@ -975,7 +975,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "habíais aparecido.",
     "fr": "vous étiez apparus.",
     "it": "eravate apparsi.",
-    "ja": "あなたたちは見えてしまいました。",
+    "ja": "あなたたちは現れてしまいました。",
     "pt": "tínheis aparecido.",
   },
   "present · neutral": {
@@ -984,7 +984,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "aparecéis.",
     "fr": "vous apparaissez.",
     "it": "apparite.",
-    "ja": "あなたたちは見えます。",
+    "ja": "あなたたちは現れます。",
     "pt": "aparecem.",
   },
   "present · progressive": {
@@ -993,7 +993,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estáis apareciendo.",
     "fr": "vous êtes en train d'apparaître.",
     "it": "state apparendo.",
-    "ja": "あなたたちは見えています。",
+    "ja": "あなたたちは現れています。",
     "pt": "estais aparecendo.",
   },
   "present · prospective": {
@@ -1002,7 +1002,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "estáis a punto de aparecer.",
     "fr": "vous êtes sur le point d'apparaître.",
     "it": "state per apparire.",
-    "ja": "あなたたちは見えるところです。",
+    "ja": "あなたたちは現れるところです。",
     "pt": "estais prestes a aparecer.",
   },
   "present · resultative": {
@@ -1011,7 +1011,7 @@ exports[`conjugation: APPEAR > 2nd plural 1`] = `
     "es": "habéis aparecido.",
     "fr": "vous êtes apparus.",
     "it": "siete apparsi.",
-    "ja": "あなたたちは見えてしまいます。",
+    "ja": "あなたたちは現れてしまいます。",
     "pt": "apareceram.",
   },
 }
@@ -1025,7 +1025,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "aparecerás.",
     "fr": "tu apparaîtras.",
     "it": "apparirai.",
-    "ja": "あなたは見えます。",
+    "ja": "あなたは現れます。",
     "pt": "aparecerá.",
   },
   "future · progressive": {
@@ -1034,7 +1034,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estarás apareciendo.",
     "fr": "tu seras en train d'apparaître.",
     "it": "starai apparendo.",
-    "ja": "あなたは見えています。",
+    "ja": "あなたは現れています。",
     "pt": "estarás aparecendo.",
   },
   "future · prospective": {
@@ -1043,7 +1043,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estarás a punto de aparecer.",
     "fr": "tu seras sur le point d'apparaître.",
     "it": "starai per apparire.",
-    "ja": "あなたは見えるところです。",
+    "ja": "あなたは現れるところです。",
     "pt": "estarás prestes a aparecer.",
   },
   "future · resultative": {
@@ -1052,7 +1052,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "habrás aparecido.",
     "fr": "tu seras apparu.",
     "it": "sarai apparso.",
-    "ja": "あなたは見えてしまいます。",
+    "ja": "あなたは現れてしまいます。",
     "pt": "terás aparecido.",
   },
   "past · neutral": {
@@ -1061,7 +1061,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "apareciste.",
     "fr": "tu apparus.",
     "it": "apparisti.",
-    "ja": "あなたは見えました。",
+    "ja": "あなたは現れました。",
     "pt": "apareceu.",
   },
   "past · progressive": {
@@ -1070,7 +1070,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estabas apareciendo.",
     "fr": "tu étais en train d'apparaître.",
     "it": "stavi apparendo.",
-    "ja": "あなたは見えていました。",
+    "ja": "あなたは現れていました。",
     "pt": "estavas aparecendo.",
   },
   "past · prospective": {
@@ -1079,7 +1079,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estabas a punto de aparecer.",
     "fr": "tu étais sur le point d'apparaître.",
     "it": "stavi per apparire.",
-    "ja": "あなたは見えるところでした。",
+    "ja": "あなたは現れるところでした。",
     "pt": "estavas prestes a aparecer.",
   },
   "past · resultative": {
@@ -1088,7 +1088,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "habías aparecido.",
     "fr": "tu étais apparu.",
     "it": "eri apparso.",
-    "ja": "あなたは見えてしまいました。",
+    "ja": "あなたは現れてしまいました。",
     "pt": "tinhas aparecido.",
   },
   "present · neutral": {
@@ -1097,7 +1097,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "apareces.",
     "fr": "tu apparais.",
     "it": "appari.",
-    "ja": "あなたは見えます。",
+    "ja": "あなたは現れます。",
     "pt": "apareces.",
   },
   "present · progressive": {
@@ -1106,7 +1106,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estás apareciendo.",
     "fr": "tu es en train d'apparaître.",
     "it": "stai apparendo.",
-    "ja": "あなたは見えています。",
+    "ja": "あなたは現れています。",
     "pt": "estás aparecendo.",
   },
   "present · prospective": {
@@ -1115,7 +1115,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "estás a punto de aparecer.",
     "fr": "tu es sur le point d'apparaître.",
     "it": "stai per apparire.",
-    "ja": "あなたは見えるところです。",
+    "ja": "あなたは現れるところです。",
     "pt": "estás prestes a aparecer.",
   },
   "present · resultative": {
@@ -1124,7 +1124,7 @@ exports[`conjugation: APPEAR > 2nd singular 1`] = `
     "es": "has aparecido.",
     "fr": "tu es apparu.",
     "it": "sei apparso.",
-    "ja": "あなたは見えてしまいます。",
+    "ja": "あなたは現れてしまいます。",
     "pt": "apareceu.",
   },
 }
@@ -1138,7 +1138,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "aparecerán.",
     "fr": "ils apparaîtront.",
     "it": "appariranno.",
-    "ja": "彼らは見えます。",
+    "ja": "彼らは現れます。",
     "pt": "aparecerão.",
   },
   "future · progressive": {
@@ -1147,7 +1147,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "estarán apareciendo.",
     "fr": "ils seront en train d'apparaître.",
     "it": "staranno apparendo.",
-    "ja": "彼らは見えています。",
+    "ja": "彼らは現れています。",
     "pt": "estarão aparecendo.",
   },
   "future · prospective": {
@@ -1156,7 +1156,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "estarán a punto de aparecer.",
     "fr": "ils seront sur le point d'apparaître.",
     "it": "staranno per apparire.",
-    "ja": "彼らは見えるところです。",
+    "ja": "彼らは現れるところです。",
     "pt": "estarão prestes a aparecer.",
   },
   "future · resultative": {
@@ -1165,7 +1165,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "habrán aparecido.",
     "fr": "ils seront apparus.",
     "it": "saranno apparsi.",
-    "ja": "彼らは見えてしまいます。",
+    "ja": "彼らは現れてしまいます。",
     "pt": "terão aparecido.",
   },
   "past · neutral": {
@@ -1174,7 +1174,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "aparecieron.",
     "fr": "ils apparurent.",
     "it": "apparvero.",
-    "ja": "彼らは見えました。",
+    "ja": "彼らは現れました。",
     "pt": "apareceram.",
   },
   "past · progressive": {
@@ -1183,7 +1183,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "estaban apareciendo.",
     "fr": "ils étaient en train d'apparaître.",
     "it": "stavano apparendo.",
-    "ja": "彼らは見えていました。",
+    "ja": "彼らは現れていました。",
     "pt": "estavam aparecendo.",
   },
   "past · prospective": {
@@ -1192,7 +1192,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "estaban a punto de aparecer.",
     "fr": "ils étaient sur le point d'apparaître.",
     "it": "stavano per apparire.",
-    "ja": "彼らは見えるところでした。",
+    "ja": "彼らは現れるところでした。",
     "pt": "estavam prestes a aparecer.",
   },
   "past · resultative": {
@@ -1201,7 +1201,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "habían aparecido.",
     "fr": "ils étaient apparus.",
     "it": "erano apparsi.",
-    "ja": "彼らは見えてしまいました。",
+    "ja": "彼らは現れてしまいました。",
     "pt": "tinham aparecido.",
   },
   "present · neutral": {
@@ -1210,7 +1210,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "aparecen.",
     "fr": "ils apparaissent.",
     "it": "appaiono.",
-    "ja": "彼らは見えます。",
+    "ja": "彼らは現れます。",
     "pt": "aparecem.",
   },
   "present · progressive": {
@@ -1219,7 +1219,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "están apareciendo.",
     "fr": "ils sont en train d'apparaître.",
     "it": "stanno apparendo.",
-    "ja": "彼らは見えています。",
+    "ja": "彼らは現れています。",
     "pt": "estão aparecendo.",
   },
   "present · prospective": {
@@ -1228,7 +1228,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "están a punto de aparecer.",
     "fr": "ils sont sur le point d'apparaître.",
     "it": "stanno per apparire.",
-    "ja": "彼らは見えるところです。",
+    "ja": "彼らは現れるところです。",
     "pt": "estão prestes a aparecer.",
   },
   "present · resultative": {
@@ -1237,7 +1237,7 @@ exports[`conjugation: APPEAR > 3rd plural 1`] = `
     "es": "han aparecido.",
     "fr": "ils sont apparus.",
     "it": "sono apparsi.",
-    "ja": "彼らは見えてしまいます。",
+    "ja": "彼らは現れてしまいます。",
     "pt": "apareceram.",
   },
 }
@@ -1251,7 +1251,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "aparecerá.",
     "fr": "il apparaîtra.",
     "it": "apparirà.",
-    "ja": "彼は見えます。",
+    "ja": "彼は現れます。",
     "pt": "aparecerá.",
   },
   "future · progressive": {
@@ -1260,7 +1260,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "estará apareciendo.",
     "fr": "il sera en train d'apparaître.",
     "it": "starà apparendo.",
-    "ja": "彼は見えています。",
+    "ja": "彼は現れています。",
     "pt": "estará aparecendo.",
   },
   "future · prospective": {
@@ -1269,7 +1269,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "estará a punto de aparecer.",
     "fr": "il sera sur le point d'apparaître.",
     "it": "starà per apparire.",
-    "ja": "彼は見えるところです。",
+    "ja": "彼は現れるところです。",
     "pt": "estará prestes a aparecer.",
   },
   "future · resultative": {
@@ -1278,7 +1278,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "habrá aparecido.",
     "fr": "il sera apparu.",
     "it": "sarà apparso.",
-    "ja": "彼は見えてしまいます。",
+    "ja": "彼は現れてしまいます。",
     "pt": "terá aparecido.",
   },
   "past · neutral": {
@@ -1287,7 +1287,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "apareció.",
     "fr": "il apparut.",
     "it": "apparve.",
-    "ja": "彼は見えました。",
+    "ja": "彼は現れました。",
     "pt": "apareceu.",
   },
   "past · progressive": {
@@ -1296,7 +1296,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "estaba apareciendo.",
     "fr": "il était en train d'apparaître.",
     "it": "stava apparendo.",
-    "ja": "彼は見えていました。",
+    "ja": "彼は現れていました。",
     "pt": "estava aparecendo.",
   },
   "past · prospective": {
@@ -1305,7 +1305,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "estaba a punto de aparecer.",
     "fr": "il était sur le point d'apparaître.",
     "it": "stava per apparire.",
-    "ja": "彼は見えるところでした。",
+    "ja": "彼は現れるところでした。",
     "pt": "estava prestes a aparecer.",
   },
   "past · resultative": {
@@ -1314,7 +1314,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "había aparecido.",
     "fr": "il était apparu.",
     "it": "era apparso.",
-    "ja": "彼は見えてしまいました。",
+    "ja": "彼は現れてしまいました。",
     "pt": "tinha aparecido.",
   },
   "present · neutral": {
@@ -1323,7 +1323,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "aparece.",
     "fr": "il apparaît.",
     "it": "appare.",
-    "ja": "彼は見えます。",
+    "ja": "彼は現れます。",
     "pt": "aparece.",
   },
   "present · progressive": {
@@ -1332,7 +1332,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "está apareciendo.",
     "fr": "il est en train d'apparaître.",
     "it": "sta apparendo.",
-    "ja": "彼は見えています。",
+    "ja": "彼は現れています。",
     "pt": "está aparecendo.",
   },
   "present · prospective": {
@@ -1341,7 +1341,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "está a punto de aparecer.",
     "fr": "il est sur le point d'apparaître.",
     "it": "sta per apparire.",
-    "ja": "彼は見えるところです。",
+    "ja": "彼は現れるところです。",
     "pt": "está prestes a aparecer.",
   },
   "present · resultative": {
@@ -1350,7 +1350,7 @@ exports[`conjugation: APPEAR > 3rd singular 1`] = `
     "es": "ha aparecido.",
     "fr": "il est apparu.",
     "it": "è apparso.",
-    "ja": "彼は見えてしまいます。",
+    "ja": "彼は現れてしまいます。",
     "pt": "apareceu.",
   },
 }

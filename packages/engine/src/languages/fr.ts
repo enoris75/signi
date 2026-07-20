@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isFrequencyAdverb, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessiveFr } from '../possessive.js';
@@ -576,13 +576,17 @@ function npText(np: ResolvedNounPhrase): string {
 }
 
 /**
- * route path relation → preposition, honoring the head's determiner. The plain adverbs
- * (sous / derrière / devant / à travers) take a non-fusing article straight off `artFor`
- * ("sous une maison" / "sous la maison"); "au-dessus" and "autour" govern "de", which fuses
- * only with the definite ("autour de la maison" but "autour d'une maison"), via `deDet`.
+ * A spatial relation → preposition, honoring the head's determiner. Shared by route and locative:
+ * French uses the same adposition for the path under something and the place under it ("va sous le
+ * lit" / "est sous le lit"), so one map serves both — only the default relation differs.
+ *
+ * The plain adverbs (sous / derrière / devant / à travers) take a non-fusing article straight off
+ * `artFor` ("sous une maison" / "sous la maison"); "au-dessus" and "autour" govern "de", which
+ * fuses only with the definite ("autour de la maison" but "autour d'une maison"), via `deDet`.
  */
-function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean, lead: string): string {
-  switch (pathSpecifier(c)) {
+function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, lead: string): string {
+  switch (spec) {
+    case 'in':          return prepDet('dans', f, plural, lead);
     case 'under':       return prepDet('sous', f, plural, lead);
     case 'over':        return `au-dessus ${deDet(f, plural, lead)}`;
     case 'around':      return `autour ${deDet(f, plural, lead)}`;
@@ -681,9 +685,12 @@ function complementsPhrase(
       // carries as a subject ("l'Europe mange"): the "in place" locative is a bare "en Europe", not
       // the article-bearing "dans l'Europe". (All seeded continents are feminine/vowel-initial, which
       // "en" fits; a masculine country would take "au" and a city "à", but none is seeded.)
+      // That bare form belongs to plain containment only — a relational locative keeps its adverb
+      // and article ("sous l'Europe"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
+      const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (nf['proper'] === '1' ? 'en' : prepDet('dans', nf, plural, lead)) :
+        type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'en' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
         type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
@@ -707,7 +714,7 @@ function complementsPhrase(
           causeSent === 'negative' ? `par la faute ${dePrep(nf, plural, lead)}` :
           `à cause ${dePrep(nf, plural, lead)}`
         ) :
-        routeHead(c, nf, plural, lead);
+        spatialHead(pathSpecifier(c), nf, plural, lead);
       return coordinate(c.phrase, (np) => renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)

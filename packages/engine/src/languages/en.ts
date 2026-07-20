@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type PathSpecifier, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type Aspect, type CauseSentiment, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionGerund, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type PronominalPossessor, type ResolvedComplement, type ResolvedModal, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveEn } from '../possessive.js';
 
@@ -84,7 +84,7 @@ function npHasSuperlative(np: ResolvedNounPhrase): boolean {
 }
 
 const PREP: Record<ComplementType, string> = {
-  locative: 'in',
+  locative: 'in', // place — relation-driven like route, see PATH_PREP; 'in' is the default relation
   direction: 'to',
   source: 'from',
   route: 'through',
@@ -114,7 +114,10 @@ const CAUSE_PREP: Record<CauseSentiment, string> = {
   negative: 'through the fault of',
 };
 
+// The spatial relations, shared by route and locative — English uses one preposition per relation
+// for both ("goes under the bed", "is under the bed"), so a single map serves the two complements.
 const PATH_PREP: Record<PathSpecifier, string> = {
+  in: 'in',
   through: 'through',
   under: 'under',
   over: 'over',
@@ -437,6 +440,7 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
+        : type === 'locative' ? PATH_PREP[pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER)]
         : type === 'cause' ? CAUSE_PREP[causeSentiment(c)]
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         : PREP[type];

@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type MannerRelation, type ModifierRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 
 // The preposition each manner relation takes in Italian: similative "come" (fuses with nothing —
@@ -520,15 +520,19 @@ function npText(np: ResolvedNounPhrase): string {
 }
 
 /**
- * route path relation → preposition, honoring the head's determiner. The place adverbs
- * (sotto/sopra/dietro/attraverso) take a plain, non-fusing article, so the determiner rides
- * straight off `artFor` ("sotto la casa" / "sotto una casa" / "sotto casa"). "intorno" and
- * "davanti" govern "a", which fuses only with the definite ("intorno alla casa" but
- * "intorno a una casa"), so they route through `prepDet`.
+ * A spatial relation → preposition, honoring the head's determiner. Shared by route and locative:
+ * Italian draws no distinction between the path under something and the place under it ("va sotto
+ * il letto" / "è sotto il letto"), so one map serves both — only the default relation differs.
+ *
+ * The place adverbs (sotto/sopra/dietro/attraverso) take a plain, non-fusing article, so the
+ * determiner rides straight off `artFor` ("sotto la casa" / "sotto una casa" / "sotto casa").
+ * "intorno" and "davanti" govern "a", which fuses only with the definite ("intorno alla casa" but
+ * "intorno a una casa"), so they route through `prepDet`. Plain "in" fuses outright ("nella casa").
  */
-function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean, lead: string): string {
+function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, lead: string): string {
   const adv = (a: string): string => { const det = artFor(f, plural, lead); return det ? `${a} ${det}` : a; };
-  switch (pathSpecifier(c)) {
+  switch (spec) {
+    case 'in':          return prepDet('in', f, plural, lead);
     case 'under':       return adv('sotto');
     case 'over':        return adv('sopra');
     case 'around':      return `intorno ${prepDet('a', f, plural, lead)}`;
@@ -625,9 +629,12 @@ function complementsPhrase(
       // A locative proper noun (a continent — "Europa", "Africa") drops the definite article it
       // carries as a subject ("l'Europa mangia"): the "in place" locative takes a bare "in Europa",
       // not the article-fused "nell'Europa". (Cities would take "a", but only continents are seeded.)
+      // That bare form belongs to plain containment only — a relational locative keeps its adverb
+      // and article ("sotto l'Europa"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
+      const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (nf['proper'] === '1' ? 'in' : prepDet('in', nf, plural, lead)) :
+        type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
         type === 'instrumental' ? prepDet('con', nf, plural, lead) :
         type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
@@ -643,7 +650,7 @@ function complementsPhrase(
           causeSent === 'negative' ? `per colpa ${prepArt('di', nf, plural, lead)}` :
           `a causa ${prepArt('di', nf, plural, lead)}`
         ) :
-        routeHead(c, nf, plural, lead);
+        spatialHead(pathSpecifier(c), nf, plural, lead);
       return coordinate(c.phrase, (np) => renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)

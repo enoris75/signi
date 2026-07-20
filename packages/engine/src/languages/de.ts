@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type DimensionRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type Aspect, type ComplementType, type CoordConjunction, type DimensionRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, isPronominalPossessor, isPronounElement, joinConjuncts, mannerRelation, objectPronounForm, pathSpecifier, withDefiniteness, type ConceptForms, type ResolvedComplement, type ResolvedModal, type LanguageEngine, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedPhrase } from '../types.js';
 import { possessiveDe } from '../possessive.js';
 
@@ -604,17 +604,20 @@ function subjectText(el: ResolvedNounElement): string {
   return coordinate(el, subjectPhrase);
 }
 
-// durch/um govern accusative; the static-relation two-way preps
-// (unter/über/hinter/vor) take dative here.
-function routeCase(c: ResolvedComplement): 'acc' | 'dat' {
-  const spec = pathSpecifier(c);
+// durch/um govern accusative; the two-way (Wechsel-) prepositions — in/unter/über/hinter/vor —
+// take the dative, the case German uses for a static relation. That is why route and locative can
+// share one map: the two-way preps are already in the dative for a route, which is the case a
+// locative needs anyway ("geht unter dem Bett" / "ist unter dem Bett" — same phrase).
+function spatialCase(spec: PathSpecifier): 'acc' | 'dat' {
   return spec === 'through' || spec === 'around' ? 'acc' : 'dat';
 }
 
-// route path relation → preposition + case-declined determiner (none of these preps fuse).
-function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean): string {
-  const _case = routeCase(c);
-  switch (pathSpecifier(c)) {
+// A spatial relation → preposition + case-declined determiner. "in" fuses with the dative "dem"
+// (in+dem → im), which prepDet handles; none of the others fuse.
+function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean): string {
+  const _case = spatialCase(spec);
+  switch (spec) {
+    case 'in':          return prepDet('in', f, _case, plural);
     case 'under':       return prepDet('unter', f, _case, plural);
     case 'over':        return prepDet('über', f, _case, plural);
     case 'around':      return prepDet('um', f, _case, plural);
@@ -744,21 +747,23 @@ function complementsPhrase(complements?: Partial<Record<ComplementType, Resolved
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = f['definiteness'] ?? 'definite';
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
-      // route → path preposition (+ its case); locative/direction/source → two-way preps +
+      // route/locative → spatial preposition (+ its case); direction/source → two-way preps +
       // dative. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire only for a definite
       // article; any other determiner (einem, keiner, vielen, bare) stays uncontracted.
       let head: string;
       let _case: 'nom' | 'acc' | 'dat';
-      if (type === 'route') {
-        _case = routeCase(c);
-        head = routeHead(c, f, plural);
+      if (type === 'route' || type === 'locative') {
+        // Both read their relation off the same specifier set; only the default differs, and the
+        // case falls out of the preposition ("im Markt", "unter dem Markt", "um den Markt").
+        const spec = pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER);
+        _case = spatialCase(spec);
+        head = spatialHead(spec, f, plural);
       } else {
         _case = 'dat';
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
         // standard in speech and reuses the dative determiners; positive credits with "dank". The
         // negative sentiment never reaches here — it took the "durch die Schuld" genitive path above.
-        if (type === 'locative')  head = prepDet('in', f, 'dat', plural);
-        else if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
+        if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
         // doesn't exist for "mit", so prepDet leaves it uncontracted.
         else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);

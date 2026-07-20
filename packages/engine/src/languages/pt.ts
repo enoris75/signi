@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type Tense } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type Aspect, type ComplementType, type CoordConjunction, type Degree, type DimensionRelation, type ModifierRelation, type PathSpecifier, type Tense } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, adjDegree, causeSentiment, dimensionRelation, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, isPronounElement, isRelativeSuperlative, joinConjuncts, mannerRelation, modalChain, objectPronounForm, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ConceptForms, type Mood, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { imperativeForm, moodForm, moodPN } from '../mood.js';
 import { possessivePt } from '../possessive.js';
@@ -400,13 +400,18 @@ function npText(np: ResolvedNounPhrase): string {
 }
 
 /**
- * route path relation → preposition, honoring the head's determiner. Most are "de"-locutions
- * (debaixo de, ao redor de, …) whose "de" fuses only with the definite ("debaixo do carro"
- * but "debaixo de uma casa"); "through" is "por", which fuses to pelo/pela with the definite
- * ("pela casa") and stays "por" + determiner otherwise ("por uma casa").
+ * A spatial relation → preposition, honoring the head's determiner. Shared by route and locative:
+ * Portuguese uses the same locution for the path under something and the place under it ("vai
+ * debaixo da cama" / "está debaixo da cama"), so one map serves both — only the default differs.
+ *
+ * Most are "de"-locutions (debaixo de, ao redor de, …) whose "de" fuses only with the definite
+ * ("debaixo do carro" but "debaixo de uma casa"); "through" is "por", which fuses to pelo/pela
+ * with the definite ("pela casa") and stays "por" + determiner otherwise ("por uma casa"). Plain
+ * "em" fuses the same way (no/na).
  */
-function routeHead(c: ResolvedComplement, f: Record<string, string>, plural: boolean): string {
-  switch (pathSpecifier(c)) {
+function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean): string {
+  switch (spec) {
+    case 'in':          return contractDet(emPrep, 'em', f, plural);
     case 'under':       return `debaixo ${contractDet(dePrep, 'de', f, plural)}`;
     case 'over':        return `por cima ${contractDet(dePrep, 'de', f, plural)}`;
     case 'around':      return `ao redor ${contractDet(dePrep, 'de', f, plural)}`;
@@ -505,7 +510,7 @@ function complementsPhrase(
       // ("a"-contracted via datPrep).
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
-        type === 'locative'  ? contractDet(emPrep, 'em', f, plural) :
+        type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), f, plural) :
         type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
         // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
@@ -525,7 +530,7 @@ function complementsPhrase(
           causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :
           `por causa ${dePrep(f, plural)}`
         ) :
-        routeHead(c, f, plural);
+        spatialHead(pathSpecifier(c), f, plural);
       return withRelative(`${head} ${noun}`, np);
       });
     })

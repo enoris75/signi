@@ -143,12 +143,15 @@ describe('terminus: the copular experiencer', () => {
     });
   });
 
+  // APPEAR marks the witness the same way — but only Japanese distinguishes the two verbs here.
+  // 見える + に is "looks like a dog", the SEEM reading; the coming-into-view verb 現れる keeps
+  // に unambiguously the person the subject shows up before.
   test('APPEAR marks it the same way', () => {
     expect(seemsTo('APPEAR', 'DOG')).toMatchObject({
       en: 'the cat appears to the dog.',
       it: 'il gatto appare al cane.',
       de: 'der Kater erscheint dem Hund.',
-      ja: '猫は犬に見えます。',
+      ja: '猫は犬に現れます。',
     });
   });
 });

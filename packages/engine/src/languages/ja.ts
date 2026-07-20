@@ -87,8 +87,15 @@ const CAUSE_PARTICLE: Record<CauseSentiment, string> = {
   positive: 'のおかげで',
 };
 
-/** Path relations expressed via a relational noun before を ("橋の下を" = under the bridge). */
+/**
+ * Spatial relations expressed via a relational noun before the complement's particle — "橋の下を"
+ * (route: under the bridge) and "ベッドの下に" (locative: under the bed). Japanese builds both the
+ * same way, from the same noun; only the particle that follows differs (を for a traversed path,
+ * に for a place), which is why route and locative share this map. The neutral relations add no
+ * noun: a bare route is 市場を, a bare locative 家に.
+ */
 const REL_NOUN: Record<PathSpecifier, string> = {
+  in: '',
   through: '',
   under: 'の下',
   over: 'の上',
@@ -99,6 +106,7 @@ const REL_NOUN: Record<PathSpecifier, string> = {
 
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
 const REL_NOUN_READING: Record<PathSpecifier, string> = {
+  in: '',
   through: '',
   under: 'のした',
   over: 'のうえ',
@@ -449,8 +457,10 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
     }
     // The particle below attaches to the whole group, not to each conjunct: 「猫と犬に」.
     segs.push(...elSegs(c.phrase));
-    if (type === 'route') {
-      const spec = pathSpecifier(c);
+    // The relational noun sits between the place and its particle, for a path and a place alike:
+    // 市場の下を行きます (goes under the market), ベッドの下にいます (is under the bed).
+    if (type === 'route' || type === 'locative') {
+      const spec = pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER);
       if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
     }
     // Manner: a similative head takes 〜のように ("風のように" = like the wind), not the で the

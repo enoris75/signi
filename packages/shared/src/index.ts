@@ -240,16 +240,29 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
 export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route'];
 
 /**
- * Spatial relations a `route` (path) complement can express. English needs a
- * distinct preposition for each ("through" vs "over" vs "around"); every
- * language maps these to its own adposition (and case, in German). Only the
- * `route` complement carries a specifier; it defaults to `through`.
+ * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs
+ * a distinct preposition for each ("through" vs "over" vs "around"); every language maps these to
+ * its own adposition (and case, in German).
+ *
+ * The two complements share the set but not the default: a route with no specifier is a traversal
+ * ("goes **through** the market"), a locative with none is plain containment ("is **in** the
+ * market"). Everything else reads the same either way — the difference between "goes under the
+ * bed" and "is under the bed" is carried by the verb, not the relation. That is what lets the
+ * locative express "I am under the bed" / "I am behind the tree" at all.
+ *
+ * `in` and `through` are both members, so either complement can name either relation explicitly;
+ * only the fallback differs (see DEFAULT_ROUTE_SPECIFIER / DEFAULT_LOCATIVE_SPECIFIER).
  */
-export type PathSpecifier = 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of';
+export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of';
 
-export const PATH_SPECIFIERS: PathSpecifier[] = ['through', 'under', 'over', 'around', 'behind', 'in_front_of'];
+export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over', 'around', 'behind', 'in_front_of'];
+
+/** The relation each specifier-bearing complement falls back on when none is chosen. */
+export const DEFAULT_ROUTE_SPECIFIER: PathSpecifier = 'through';
+export const DEFAULT_LOCATIVE_SPECIFIER: PathSpecifier = 'in';
 
 export const PATH_SPECIFIER_LABELS: Record<PathSpecifier, string> = {
+  in: 'in',
   through: 'through',
   under: 'under',
   over: 'over',
@@ -651,8 +664,8 @@ export interface VerbPhrase {
 }
 
 /**
- * A specifier attached to a complement. Discriminated by `kind`: `path` is the route
- * complement's spatial relation, `sentiment` is the cause complement's affective stance
+ * A specifier attached to a complement. Discriminated by `kind`: `path` is the spatial relation
+ * of a route or locative complement, `sentiment` is the cause complement's affective stance
  * (blame / credit / neutral). New specifier families can be added as further members.
  */
 export type Specifier =
