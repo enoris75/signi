@@ -1,11 +1,6 @@
 import { defineConfig } from 'vitest/config';
 import path from 'path';
 
-// Unit tests for the translation engine. They run against the real corpus through the real
-// lexicon (see packages/engine/test/harness.ts), so nothing needs building or serving first —
-// which is the point of having them alongside the Playwright suite: the engine's grammar is a
-// pure function and deserves to be tested combinatorially, in milliseconds, rather than three
-// sentences at a time through a browser.
 export default defineConfig({
   resolve: {
     alias: {
@@ -15,11 +10,38 @@ export default defineConfig({
     },
   },
   test: {
-    include: ['packages/*/test/**/*.test.ts'],
-    // The harness seeds an in-memory database on import. Sharing one module registry across the
-    // spec files seeds it once for the whole run instead of once per file; the tests only read
-    // from it, so there is no isolation to lose.
-    isolate: false,
-    fileParallelism: false,
+    projects: [
+      {
+        extends: true,
+        test: {
+          // Unit tests for the translation engine. They run against the real corpus through the
+          // real lexicon (see packages/engine/test/harness.ts), so nothing needs building or
+          // serving first — which is the point of having them alongside the Playwright suite: the
+          // engine's grammar is a pure function and deserves to be tested combinatorially, in
+          // milliseconds, rather than three sentences at a time through a browser.
+          name: 'engine',
+          include: ['packages/engine/test/**/*.test.ts'],
+          // The harness seeds an in-memory database on import. Sharing one module registry across
+          // the spec files seeds it once for the whole run instead of once per file; the tests
+          // only read from it, so there is no isolation to lose.
+          isolate: false,
+          fileParallelism: false,
+          // Projects with different worker counts must run as separate groups; the engine goes first.
+          sequence: { groupOrder: 0 },
+        },
+      },
+      {
+        extends: true,
+        test: {
+          // Component tests for the frontend: one component rendered into jsdom, no backend. The
+          // geometry and wiring of the whole builder stay with the Playwright suite.
+          name: 'frontend',
+          include: ['packages/frontend/test/**/*.test.{ts,tsx}'],
+          environment: 'jsdom',
+          setupFiles: ['packages/frontend/test/setup.ts'],
+          sequence: { groupOrder: 1 },
+        },
+      },
+    ],
   },
 });
