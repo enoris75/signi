@@ -636,6 +636,50 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText("d'une bonne manière");
   });
 
+  test('a frequency adverb definition renders, incl. the Japanese quantifier (localize-seed C03: ALWAYS)', async ({
+    app,
+    page,
+  }) => {
+    // ALWAYS glosses TIME (a `measure` noun → "at") with the `all` quantifier, plural — "at all
+    // times". The point of this pin is Japanese: the ja engine now renders the prenominal quantifier
+    // (すべての), which it used to drop — so ALWAYS is no longer indistinguishable from NEVER.
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('always');
+    const alwaysEn = page.locator('[data-testid="typeahead-option"][data-concept="ALWAYS"]');
+    await expect(alwaysEn).toBeVisible();
+    await alwaysEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('at all times');
+
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('always');
+    const alwaysJa = page.locator('[data-testid="typeahead-option"][data-concept="ALWAYS"]');
+    await expect(alwaysJa).toBeVisible();
+    await alwaysJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('すべての時間で');
+  });
+
+  test('a frequency adverb definition renders the Japanese negative circumfix (localize-seed C03: NEVER)', async ({
+    app,
+    page,
+  }) => {
+    // NEVER glosses TIME with the `no` quantifier — "at no time". In Japanese `no` is the circumfix
+    // どの…も…ない: the manner で is replaced by a fragment-final ない (どの時間もない), distinct from
+    // ALWAYS's すべての時間で. This end-to-end pin is the C03 unblock's whole reason for being.
+    await app.buildClause('CAT', 'EAT');
+    await app.openVerbAdverb('never');
+    const neverEn = page.locator('[data-testid="typeahead-option"][data-concept="NEVER"]');
+    await expect(neverEn).toBeVisible();
+    await neverEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('at no time');
+
+    await app.setUiLanguage('ja');
+    await app.openVerbAdverb('never');
+    const neverJa = page.locator('[data-testid="typeahead-option"][data-concept="NEVER"]');
+    await expect(neverJa).toBeVisible();
+    await neverJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('どの時間もない');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,

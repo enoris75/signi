@@ -73,11 +73,11 @@ describe('manner-definition gloss (C03 fragment)', () => {
 });
 
 describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
-  // The frequency adverbs would gloss TIME (measure → "at") with a quantifier — "at all times" /
-  // "at no time". Six languages render the quantifier, but Japanese has no articles and its NP path
-  // emits no determiner, so both collapse to the same "時間で" — which is why ALWAYS/NEVER are held
-  // back from a shipped definition until Japanese can distinguish them (they stay in C03).
-  test('"at all times" renders the "all" quantifier outside Japanese (ALWAYS)', () => {
+  // The frequency adverbs gloss TIME (measure → "at") with a quantifier — "at all times" / "at no
+  // time". Japanese now renders both: すべての leads the phrase for `all`, and the `no` circumfix
+  // どの…も…ない replaces the manner で with a fragment-final ない — so ALWAYS and NEVER are DISTINCT
+  // in all seven languages (the whole point; shipping two opposite adverbs identical was the block).
+  test('"at all times" — the "all" quantifier renders in all seven languages (ALWAYS)', () => {
     expect(gloss('TIME', { definiteness: 'all', number: 'plural' })).toEqual({
       en: 'at all times.',
       it: 'a tutti i tempi.',
@@ -85,11 +85,11 @@ describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
       es: 'a todos los tiempos.',
       pt: 'a todos os tempos.',
       de: 'mit allen Zeiten.',
-      ja: '時間で。', // no article: the "all" is lost — the JA gap that keeps ALWAYS in C03
+      ja: 'すべての時間で。',
     });
   });
 
-  test('"at no time" renders the "no" quantifier outside Japanese (NEVER)', () => {
+  test('"at no time" — the "no" circumfix renders どの時間もない (NEVER)', () => {
     expect(gloss('TIME', { definiteness: 'no' })).toEqual({
       en: 'at no time.',
       it: 'a nessun tempo.',
@@ -97,7 +97,15 @@ describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
       es: 'a ningún tiempo.',
       pt: 'a nenhum tempo.',
       de: 'mit keiner Zeit.',
-      ja: '時間で。', // identical to ALWAYS in JA — the two are indistinguishable without a determiner
+      ja: 'どの時間もない。',
     });
+  });
+
+  test('ALWAYS and NEVER are distinct in Japanese', () => {
+    const always = gloss('TIME', { definiteness: 'all', number: 'plural' }).ja;
+    const never = gloss('TIME', { definiteness: 'no' }).ja;
+    expect(always).toBe('すべての時間で。');
+    expect(never).toBe('どの時間もない。');
+    expect(always).not.toBe(never);
   });
 });

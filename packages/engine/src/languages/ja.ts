@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type CauseSentiment, type ComplementType, type CoordConjunction, type Definiteness, type Degree, type PathSpecifier, type Tense } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, isGenericSubject, isPronominalPossessor, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
+import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isGenericSubject, isPronominalPossessor, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase, type RubySegment, type LanguageEngine, type ResolvedPhrase } from '../types.js';
 import { possessiveJa } from '../possessive.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
@@ -123,6 +123,15 @@ const REL_NOUN_READING: Record<PathSpecifier, string> = {
  */
 function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const core: RubySegment[] = [];
+  // The determiner leads the phrase. Japanese spells no article, but the demonstratives and
+  // quantifiers are real prenominal words (この / すべての …) that render in a sentence; their の is
+  // part of the value, so they need no extra particle. The `no` quantifier is a circumfix — its
+  // prenominal どの leads here and its も is appended after the head below (its clause-final ない is
+  // the predicate's job — see predicateSegs / mannerGlossSegs).
+  const definiteness = (np.head.forms['definiteness'] ?? 'definite') as Definiteness;
+  const prenominalDet = JA_PRENOMINAL_DET[definiteness];
+  if (prenominalDet) core.push({ t: prenominalDet });
+  else if (definiteness === 'no') core.push({ t: JA_NEGATIVE_DETERMINER.pre });
   // A possessor is prenominal, marked by の ("猫の本"); recursing handles its own
   // adjectives / nested possessor / relative clause ("子供の猫の本"). A pronominal possessor
   // ("彼の犬") is the antecedent pronoun + の, invariant of the possessed head.
@@ -159,6 +168,10 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   core.push(...adjSegs);
   const head = np.head.forms;
   core.push(wordSeg(head['base'] ?? '', head['reading']));
+  // The `no` circumfix's も follows the head noun (どの時間も). It *replaces* the case particle the
+  // NP would otherwise take — Japanese does not stack も with が/を/etc. — so every caller skips its
+  // particle for a negative group (see isNegativeGroup).
+  if (definiteness === 'no') core.push({ t: JA_NEGATIVE_DETERMINER.post });
   // A relative clause is prenominal in Japanese: the whole predicate precedes the head
   // noun with no relative pronoun (泣いた少年 = "the boy who cried"). For a non-subject
   // (e.g. object) relative the clause's own subject leads, marked by が (私が読む本 = "the
@@ -172,8 +185,9 @@ function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // eats"); a specific non-subject relative leads with its own subject marked by が (私が読む本).
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
-      ? [...elSegs(rel.subject), { t: 'が' }] : [];
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true), ...core];
+      ? [...elSegs(rel.subject), ...(isNegativeGroup(rel.subject) ? [] : [{ t: 'が' }])] : [];
+  const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true, relSubjNeg), ...core];
 }
 
 /**
@@ -433,7 +447,7 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
           takesNi = true;
         }
       });
-      if (takesNi) segs.push({ t: 'に' });
+      if (takesNi && !isNegativeGroup(c.phrase)) segs.push({ t: 'に' });
       continue;
     }
     // An instrument presented as an action, with the noun phrase as its direct object (を). The
@@ -444,7 +458,7 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       const level = abstractionLevel(c);
       if (level !== 'object') {
         const v = c.action.verb.forms;
-        segs.push(...elSegs(c.phrase), { t: 'を' });
+        segs.push(...elSegs(c.phrase), ...(isNegativeGroup(c.phrase) ? [] : [{ t: 'を' }]));
         const adverb = c.action.modifier;
         if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
         if (level === 'process') {
@@ -469,7 +483,8 @@ function complementSegs(complements?: Partial<Record<ComplementType, ResolvedCom
       type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       : PARTICLE[type];
-    segs.push({ t: particle });
+    // A `no` group ends in も, which replaces this case particle (どの市場も, not どの市場もに).
+    if (!isNegativeGroup(c.phrase)) segs.push({ t: particle });
   }
   return segs;
 }
@@ -583,6 +598,7 @@ function predicateSegs(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
   plain = false,
+  subjectNegative = false,
 ): RubySegment[] {
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   const segs: RubySegment[] = [];
@@ -590,8 +606,13 @@ function predicateSegs(
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
   // phrase itself isn't marked negative. The adverb is still emitted; only the ending flips.
   // A negative-polarity adverb anywhere in the group — the main verb's or any modal's — forces
-  // the negated predicate (決して…ない).
-  const negated = negative === true || groupHasNegativeAdverb(verbPhrase);
+  // the negated predicate (決して…ない). A `no`-determiner argument (subject, object, or complement)
+  // is likewise a negative-concord trigger: its も needs the clause-final ない to complete the
+  // circumfix (どの時間も食べない), mirroring how Italian's `non` fires off hasNegativeComplement.
+  const negated = negative === true || groupHasNegativeAdverb(verbPhrase)
+    || subjectNegative
+    || (directObject !== undefined && isNegativeGroup(directObject))
+    || hasNegativeComplement(complements);
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive and licenses only the predicative, so no objects or other complements occur;
   // an adverb (いつも) simply precedes the predicate.
@@ -606,7 +627,7 @@ function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(complements));
-    if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
+    if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -621,7 +642,7 @@ function predicateSegs(
   // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
     segs.push(...complementSegs(complements));
-    if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
+    if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -642,7 +663,7 @@ function predicateSegs(
     return segs;
   }
   segs.push(...complementSegs(complements));
-  if (directObject) segs.push(...elSegs(directObject), { t: 'を' });
+  if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.
   for (const m of modals) {
@@ -704,12 +725,25 @@ function isMannerGloss(el: ResolvedNounElement): boolean {
 }
 
 /**
+ * Whether a noun group carries a `no` determiner on any conjunct. Such a group ends in the
+ * circumfix's も (laid down by npSegs), which replaces the case particle the group would otherwise
+ * take — so every site that appends が/を/に/で after the group skips it when this is true.
+ */
+function isNegativeGroup(el: ResolvedNounElement): boolean {
+  return el.conjuncts.some((np) => np.head.forms['definiteness'] === 'no');
+}
+
+/**
  * A manner-definition gloss fragment ("高い速さで" — at high speed): the manner noun phrase (its
  * degree adjective attributive, its determiner placed by the ordinary NP path) closed by the manner
  * particle — the で the means/measure/mode relations share, or 〜のように for a similative head, exactly
  * as a `manner` complement closes. Unlike the が-predicate dimension gloss, this is an adverbial.
  */
 function mannerGlossSegs(el: ResolvedNounElement): RubySegment[] {
+  // A negative-frequency gloss (NEVER → どの時間もない): the circumfix's ない replaces the manner
+  // adverbial — どの時間もでない is not Japanese — so drop the manner で and close the verbless
+  // fragment with ない. npSegs has already laid down どの … も; only the clause-final ない is added.
+  if (isNegativeGroup(el)) return [...elSegs(el), { t: 'ない' }];
   const particle = mannerRelation(firstConjunct(el).head.forms) === 'similative' ? 'のように' : 'で';
   return [...elSegs(el), { t: particle }];
 }
@@ -728,9 +762,11 @@ function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: string): R
   const imperative = phrase.verbPhrase.mood === 'imperative';
   const dropsSubject = imperative || phrase.verbPhrase.mood === 'infinitive';
   // One topic particle for the whole subject, coordinated or not: 「ピーターとパウロは」.
-  if (!dropsSubject) segs.push(...elSegs(phrase.subject), { t: subjectParticle });
+  const subjectNegative = isNegativeGroup(phrase.subject);
+  // A `no` subject ends in も, which replaces the topic/subject particle (どの時間も, not どの時間もは).
+  if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...(subjectNegative ? [] : [{ t: subjectParticle }]));
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
-  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN));
+  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative));
   return segs;
 }
 
@@ -760,6 +796,30 @@ function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
     ...buildClauseSegments(phrase.coordination.clause, 'は'),
   ];
 }
+
+/**
+ * Prenominal determiner words that render in a *sentence* (unlike the articles, which spell
+ * nothing in Japanese). The demonstratives and quantifiers are real attributive words — their
+ * linking の is part of the value, so they need no extra particle and simply lead the noun phrase
+ * (すべての時間 = "all times"). The `no` quantifier is absent here: it is a circumfix, not a plain
+ * prenominal word, and is handled by JA_NEGATIVE_DETERMINER.
+ */
+const JA_PRENOMINAL_DET: Partial<Record<Definiteness, string>> = {
+  this: 'この',
+  that: 'その',
+  some: 'いくつかの',
+  many: '多くの',
+  few: '少しの',
+  all: 'すべての',
+};
+
+/**
+ * The `no` quantifier is a circumfix (どの … も … ない), split across three owners: the noun phrase
+ * contributes the prenominal `pre` (どの) and the post-head `post` (も, which *replaces* the case
+ * particle the NP would otherwise take), and the predicate contributes the clause-final ない
+ * (supplied by predicateSegs's negation or, for a verbless gloss, by mannerGlossSegs).
+ */
+const JA_NEGATIVE_DETERMINER = { pre: 'どの', post: 'も' } as const;
 
 /**
  * The Japanese determiner words, for the UI's determiner menu only (see renderDeterminer). The

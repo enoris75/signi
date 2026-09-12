@@ -55,17 +55,23 @@ describe('negative direct object: concord', () => {
   });
 });
 
-// Japanese renders no article and does not weave determiner-borne negation into the verb, so a
-// `no` object comes out identical to a plain one — the negation is not expressed. This is the same
-// standing limitation pinned for complement determiners (see determiner.test.ts): Japanese has no
-// article surface, and quantifier/negator-on-a-noun-phrase is a larger unbuilt feature. Pinned as
-// current behaviour, not filed as a per-value bug.
-describe('negative direct object: Japanese does not express it', () => {
-  test('a `no` object is rendered like a plain object', () => {
-    expect(eats(noNP('MOUSE')).ja).toBe('猫はネズミを食べます。');
-    // The verb DOES negate when the negation is on the verb phrase itself, rather than the object.
+// Japanese expresses a `no` object with the どの…も…ない circumfix: どの leads the noun phrase, も
+// replaces the object particle を (Japanese does not stack も with を), and the negation weaves into
+// the verb as clause-final concord — どのネズミも食べません, exactly as 決して…ない fires for a
+// negative-polarity adverb. (See determiner.test.ts for the demonstrative/quantifier NP rendering
+// this shares.)
+describe('negative direct object: the どの…も…ない circumfix', () => {
+  test('a `no` object forces the negative concord: どのネズミも食べません', () => {
+    expect(eats(noNP('MOUSE')).ja).toBe('猫はどのネズミも食べません。');
+    // The same negated verb arises when the negation is on the verb phrase itself, with a plain
+    // (particle-bearing) object: ネズミを食べません.
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: np('MOUSE') })).ja)
       .toBe('猫はネズミを食べません。');
+  });
+
+  test('a `no` subject forces the concord and drops は: どの猫もネズミを食べません', () => {
+    expect(sayAll(clause(noNP('CAT'), 'EAT', { directObject: np('MOUSE') })).ja)
+      .toBe('どの猫もネズミを食べません。');
   });
 });
 

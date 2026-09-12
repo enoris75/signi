@@ -140,15 +140,27 @@ describe('complement determiner: fusion is definite-only on direction and termin
   });
 });
 
-// Japanese marks the place with で and does not spell an article, so a complement-phrase determiner
-// has no surface there — every determiner renders the locative identically. Correct for the article
-// values (Japanese has none); the quantifiers (some / many / no) are silently not expressed, a
-// standing limitation rather than a per-value bug. Pinned as current behaviour.
-describe('complement determiner: Japanese is determiner-invariant', () => {
-  test('every determiner renders the same 家で', () => {
-    for (const d of ['definite', 'indefinite', 'this', 'some', 'many', 'all', 'no'] as const) {
+// Japanese spells no article, so the two article values render the locative bare (家で); the
+// demonstratives and quantifiers are real prenominal words that now DO surface (この家で,
+// すべての家で …). The `no` quantifier is the circumfix — its も replaces the locative で and its
+// negation weaves into the verb (どの家も走りません), the complement-path concord that Romance also
+// requires below.
+describe('complement determiner: Japanese renders the demonstratives and quantifiers', () => {
+  test('the article values render the locative bare — 家で', () => {
+    for (const d of ['definite', 'indefinite'] as const) {
       expect(inHouse(d).ja).toBe('猫は家で走ります。');
     }
+  });
+
+  test('a demonstrative/quantifier leads the phrase; the locative で is kept', () => {
+    expect(inHouse('this').ja).toBe('猫はこの家で走ります。');
+    expect(inHouse('some').ja).toBe('猫はいくつかの家で走ります。');
+    expect(inHouse('many').ja).toBe('猫は多くの家で走ります。');
+    expect(inHouse('all').ja).toBe('猫はすべての家で走ります。');
+  });
+
+  test('the `no` circumfix replaces で with も and negates the verb — どの家も走りません', () => {
+    expect(inHouse('no').ja).toBe('猫はどの家も走りません。');
   });
 });
 

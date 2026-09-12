@@ -11,6 +11,14 @@ const mannerGloss = (noun: string, definiteness: Definiteness, ...adjectives: st
   subject: { concept: noun, definiteness, adjectives, mannerGloss: true },
 });
 
+// The frequency adverbs gloss TIME (measure → "at") with a quantifier determiner and no adjective:
+// ALWAYS → "at all times" (plural), NEVER → "at no time". Japanese renders these すべての時間で and
+// どの時間もない — the second via the どの…も…ない circumfix, which the ja engine composes from the
+// `no` determiner (see the ja mannerGloss / npSegs negative-determiner path).
+const frequencyGloss = (definiteness: Definiteness, number?: 'singular' | 'plural'): PhrasePlan => ({
+  subject: { concept: 'TIME', definiteness, number, mannerGloss: true },
+});
+
 export const adverbs: ConceptSeed[] = [
   // ── ADVERBS ──────────────────────────────────────────────────────
   {
@@ -80,6 +88,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'ALWAYS',
     role: 'adverb',
     description: 'at all times, on every occasion',
+    definition: frequencyGloss('all', 'plural'),
     emoji: '♾️',
     forms: {
       en: { base: 'always', subtype: 'frequency' },
@@ -95,6 +104,7 @@ export const adverbs: ConceptSeed[] = [
     id: 'NEVER',
     role: 'adverb',
     description: 'at no time, not ever',
+    definition: frequencyGloss('no'),
     emoji: '🚫',
     forms: {
       en: { base: 'never', subtype: 'frequency', polarity: 'negative' },
