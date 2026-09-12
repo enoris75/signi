@@ -24,5 +24,5 @@ none of it is purely additive. Do [B14](B14-motion-verbs.md)'s builder work firs
 | BEAT | STRIKE + manner "repeatedly" | to strike repeatedly | ⚠ builder + manner adverb |
 
 BEAT's differentia is a manner adverb, not a noun — check whether `mannerGloss` (landed for
-[C03](../C-needs-engine/C03-adverb-definitions.md)) composes inside an infinitive plan before
+[C03](../done/C03-adverb-definitions.md)) composes inside an infinitive plan before
 committing to that shape.

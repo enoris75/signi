@@ -68,7 +68,6 @@ are in.
 
 | # | File | Blocked on |
 |---|---|---|
-| C03 | [C03-adverb-definitions.md](C-needs-engine/C03-adverb-definitions.md) | `mannerGloss` render **landed** — FAST/SLOWLY/WELL done; ALWAYS/NEVER now gated on Japanese determiner rendering; TOGETHER stays literal |
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
@@ -94,6 +93,7 @@ are in.
 | B07 | [done/B07-scalar-adjective-definitions.md](done/B07-scalar-adjective-definitions.md) | 11 scalar adjectives via `dimensionGloss` — BIG → of great size, GOOD → of high quality, HOT → at high temperature, … (was C02; seeded TEMPERATURE first, filed fr bugs A44/A45) |
 | C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
 | B08 | [done/B08-verb-definitions.md](done/B08-verb-definitions.md) | EAT → to consume food; DRINK → to consume liquid (seeded CONSUME, LIQUID, INFINITIVE_PHRASE). **Retired by splitting** the remaining 54 verbs into B09–B19, C08, C09 (was C01) |
+| C03 | [done/C03-adverb-definitions.md](done/C03-adverb-definitions.md) | FAST → at high speed; SLOWLY → at low speed; WELL → in a good way; ALWAYS → at all times; NEVER → at no time (built `mannerGloss` + Japanese determiner rendering and the どの…も…ない circumfix); TOGETHER stays literal by design |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.
