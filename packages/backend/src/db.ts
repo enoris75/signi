@@ -48,7 +48,11 @@ function initSchema(db: Database.Database): void {
       -- how a dimension noun enters an adjective-definition gloss: 'extent' (of great size),
       -- 'quality' (of high quality), 'measure' (at a high temperature). The engine maps it to the
       -- adposition; a noun that declares none is treated as 'extent'. NULL for non-dimension nouns.
-      dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL)
+      dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL),
+      -- 1 for an adjective that ascribes a TRANSIENT state (tired, hungry, saved) rather than an
+      -- inherent property (big, canine). Spanish/Portuguese predicate a transient adjective with
+      -- estar, an inherent one with ser (A47); default 0 (inherent). Ignored for non-adjectives.
+      transient    INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1))
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -326,6 +330,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('dimension_relation')) {
     db.exec("ALTER TABLE semantic_concepts ADD COLUMN dimension_relation TEXT CHECK (dimension_relation IN ('extent','quality','measure') OR dimension_relation IS NULL)");
+  }
+  if (!conceptCols.includes('transient')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN transient INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1))');
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

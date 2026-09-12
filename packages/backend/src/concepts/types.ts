@@ -19,6 +19,7 @@ export interface ConceptSeed {
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   human?: boolean; // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
+  transient?: boolean; // adjective ascribing a transient state (tired, saved), not an inherent property (big) — es/pt predicate it with `estar`, not `ser` (A47); default inherent
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative
   dimensionRelation?: 'extent' | 'quality' | 'measure'; // how a dimension noun enters an adjective-definition gloss (SIZE→extent); default extent
   proper?: boolean; // proper noun (Africa) — the language fixes the article, not the user

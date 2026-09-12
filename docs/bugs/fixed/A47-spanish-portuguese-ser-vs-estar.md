@@ -74,3 +74,41 @@ Portuguese tracks Spanish closely enough that one classification serves both; th
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: Spanish/Portuguese ser vs estar in a locative* (3 `test.fails`) · `complements/predicative.test.ts` → *known bugs: Spanish/Portuguese ser vs estar in a predicative* (1 `test.fails` + 1 regression) |
+
+## Resolved
+
+**2026-07-21.** Both halves fixed; the copula now splits `ser` / `estar` in Spanish and Portuguese.
+
+**The engine.** A new `ESTAR_COPULA` concept in
+[`es.ts`](../../../packages/engine/src/languages/es.ts) and
+[`pt.ts`](../../../packages/engine/src/languages/pt.ts) — shaped exactly like the seeded BE (`ser`)
+paradigm, so `conjugate` and `moodForm` inflect it identically (present/preterite/future by
+person-number, the future stem driving the conditional, the 3pl preterite the subjunctive). In
+`predicateText` the finite copula selects `ESTAR_COPULA` when the verb is `BE` **and** either:
+
+- the clause carries a **locative** and no predicative — a place is `estar` unconditionally,
+  whatever the spatial relation (a locative *alongside* a predicate nominal, "es una leyenda en la
+  casa", is a mere adjunct and keeps `ser`); the past inherits the preterite ("estuvo" / "esteve"),
+  consistent with the **C6** simple-past-as-perfective mapping; or
+- the **predicative** complement is an adjective the corpus marks transient.
+
+**The corpus.** A new concept-level `transient` flag (`stative` in the original write-up): a
+`transient?: boolean` on `ConceptSeed`
+([`concepts/types.ts`](../../../packages/backend/src/concepts/types.ts)), a `transient` column on
+`semantic_concepts` with a migration ([`db.ts`](../../../packages/backend/src/db.ts)), threaded
+through [`seed.ts`](../../../packages/backend/src/seed.ts) and surfaced onto adjective forms in
+[`lexicon.ts`](../../../packages/backend/src/lexicon.ts). Ten of the 58 seeded adjectives are marked
+transient in [`adjectives.ts`](../../../packages/backend/src/concepts/adjectives.ts): the physical
+states TIRED / HUNGRY / COLD / HOT, the resultant-state participles WRITTEN / LOADED / SAVED /
+HIDDEN, and the emotions HAPPY / SAD. Everything else defaults to inherent (`ser`).
+
+**The one product decision** (the both-copula adjectives): emotions take the transient reading
+("está feliz / triste"), age keeps the inherent one ("es viejo / é velho") — the commoner
+predication of each. Recorded loss: a single boolean can't express "ser feliz" (a happy person by
+nature) or "estar viejo" (looking aged); those readings are unavailable.
+
+**Guarding it.** The 4 formerly-`test.fails` are now plain passing tests, with the spatial-specifier
+block's mispinned `es`/`é` assertions corrected to `está`. Added coverage: estar agreement (plural
+"están / estão") and the future ("estará"); SEEM keeps its own verb under a locative (no estar
+leakage); the full transient class (hungry / cold / saved / written), the emotion-vs-age product
+call, and a regression that an inherent adjective and BECOME are untouched by the split.

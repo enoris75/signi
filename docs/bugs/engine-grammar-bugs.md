@@ -55,7 +55,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
 | A45 | [A45-french-gloss-great-postnominal.md](A-must-fix/A45-french-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
-| A47 | [A47-spanish-portuguese-ser-vs-estar.md](A-must-fix/A47-spanish-portuguese-ser-vs-estar.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -126,6 +125,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | B3 | [B03-german-conditional-clause-order.md](fixed/B03-german-conditional-clause-order.md) | German | 2026-07-17 |
 | B4 | [B04-french-relative-superlative-second-article.md](fixed/B04-french-relative-superlative-second-article.md) | French | 2026-07-17 |
 | A43 | [A43-french-bas-feminine.md](fixed/A43-french-bas-feminine.md) | French | 2026-07-19 |
+| A47 | [A47-spanish-portuguese-ser-vs-estar.md](fixed/A47-spanish-portuguese-ser-vs-estar.md) | Spanish, Portuguese | 2026-07-21 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

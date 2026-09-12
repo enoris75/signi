@@ -107,9 +107,10 @@ function lookupPronoun(conceptId: string, language: string): LexicalEntry | unde
 
 function lookupAdjective(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number }>(`
-    SELECT al.id FROM concept_adjective_links cal
+  const lexeme = db.prepare<[string, string], { id: number; transient: number }>(`
+    SELECT al.id, sc.transient FROM concept_adjective_links cal
     JOIN adjective_lexemes al ON al.id = cal.lexeme_id
+    JOIN semantic_concepts sc ON sc.id = cal.concept_id
     WHERE cal.concept_id = ? AND al.language = ? AND cal.is_primary = 1
   `).get(conceptId, language);
   if (!lexeme) return undefined;
@@ -118,7 +119,13 @@ function lookupAdjective(conceptId: string, language: string): LexicalEntry | un
     'SELECT form_key, form_value FROM adjective_forms WHERE lexeme_id = ?'
   ).all(lexeme.id);
 
-  return { conceptId, language: language as LexicalEntry['language'], forms: formsFromRows(rows) };
+  const forms = formsFromRows(rows);
+  // Concept-level: 1 if this adjective ascribes a transient state (tired, saved) rather than an
+  // inherent property. Spanish/Portuguese predicate a transient adjective with `estar`, not `ser`
+  // (A47). Concept-level, so it is the same in every language.
+  if (lexeme.transient) forms['transient'] = '1';
+
+  return { conceptId, language: language as LexicalEntry['language'], forms };
 }
 
 function lookupAdverb(conceptId: string, language: string): LexicalEntry | undefined {

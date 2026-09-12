@@ -205,8 +205,9 @@ describe('locative: spatial specifiers', () => {
       // unter is a two-way (Wechsel-) preposition; a static place takes the DATIVE, the same case
       // the route already gives it — "unter dem Haus", never the accusative "unter das Haus".
       de: 'der Kater ist unter dem Haus.',
-      es: 'el gato es debajo de la casa.',
-      pt: 'o gato é debaixo da casa.',
+      // es/pt: a located subject takes estar, not ser (A47).
+      es: 'el gato está debajo de la casa.',
+      pt: 'o gato está debaixo da casa.',
       // The relational noun 下 sits between the place and its particle, exactly as it does for a
       // route (市場の下を) — only the particle differs.
       ja: '猫は家の下でです。',
@@ -219,8 +220,8 @@ describe('locative: spatial specifiers', () => {
       it: 'il gatto è dietro la casa.',
       fr: 'le chat est derrière la maison.',
       de: 'der Kater ist hinter dem Haus.', // dative — hinter is two-way
-      es: 'el gato es detrás de la casa.',
-      pt: 'o gato é atrás da casa.',
+      es: 'el gato está detrás de la casa.', // estar, not ser (A47)
+      pt: 'o gato está atrás da casa.',
       ja: '猫は家の後ろでです。',
     });
   });
@@ -230,7 +231,7 @@ describe('locative: spatial specifiers', () => {
       en: 'the cat is over the house.',
       fr: 'le chat est au-dessus de la maison.',
       de: 'der Kater ist über dem Haus.',
-      es: 'el gato es por encima de la casa.',
+      es: 'el gato está por encima de la casa.', // estar, not ser (A47)
     });
     expect(atPlace('in_front_of')).toMatchObject({
       en: 'the cat is in front of the house.',
@@ -247,7 +248,7 @@ describe('locative: spatial specifiers', () => {
       en: 'the cat is around the house.',
       it: 'il gatto è intorno alla casa.',
       de: 'der Kater ist um das Haus.',
-      pt: 'o gato é ao redor da casa.',
+      pt: 'o gato está ao redor da casa.', // estar, not ser (A47)
     });
   });
 
@@ -395,14 +396,14 @@ describe('known bugs: locative', () => {
 // basic thing es/pt do that the other five languages do not. The locative half is mechanical:
 // a place is ALWAYS estar, whatever the noun and whatever the spatial relation.
 describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
-  test.fails('a located subject takes estar, not ser', () => {
+  test('a located subject takes estar, not ser', () => {
     expect(inPlace('BE')).toMatchObject({
       es: 'el gato está en la casa.',
       pt: 'o gato está na casa.',
     });
   });
 
-  test.fails('the spatial relations take estar too', () => {
+  test('the spatial relations take estar too', () => {
     expect(atPlace('under')).toMatchObject({
       es: 'el gato está debajo de la casa.',
       pt: 'o gato está debaixo da casa.',
@@ -414,13 +415,43 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
   });
 
   // The past inherits the same choice — the preterite of estar, not of ser ("fue"/"foi").
-  test.fails('the past locative is the preterite of estar', () => {
+  test('the past locative is the preterite of estar', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       verbPhrase: { verb: 'BE', tense: 'past' },
       complements: { locative: { phrase: np('HOUSE') } },
     }))).toMatchObject({
       es: 'el gato estuvo en la casa.',
       pt: 'o gato esteve na casa.',
+    });
+  });
+
+  // estar inflects for the whole paradigm, not just 3sg-present: the estar concept carries the
+  // same person/tense/number keys ser does, so agreement and tense ride along.
+  test('estar agrees in number — a plural located subject', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', {
+      complements: { locative: { phrase: np('HOUSE') } },
+    }))).toMatchObject({
+      es: 'los gatos están en la casa.',
+      pt: 'os gatos estão na casa.',
+    });
+  });
+
+  test('the future locative is the future of estar', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase: { verb: 'BE', tense: 'future' },
+      complements: { locative: { phrase: np('HOUSE') } },
+    }))).toMatchObject({
+      es: 'el gato estará en la casa.',
+      pt: 'o gato estará na casa.',
+    });
+  });
+
+  // Regression: the estar switch is keyed to BE. SEEM/APPEAR are not copulas that split, and their
+  // locative keeps the ser-family verb (parecer / aparecer) it already had — no estar leakage.
+  test('SEEM keeps its own verb under a locative — no estar', () => {
+    expect(inPlace('SEEM')).toMatchObject({
+      es: 'el gato parece en la casa.',
+      pt: 'o gato parece na casa.',
     });
   });
 });

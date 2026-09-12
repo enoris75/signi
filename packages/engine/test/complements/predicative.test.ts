@@ -326,7 +326,7 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a predicative', () => {
   const isThat = (adjective: string) =>
     sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np(adjective) } } }));
 
-  test.fails('a transient state takes estar, not ser', () => {
+  test('a transient state takes estar, not ser', () => {
     expect(isThat('TIRED')).toMatchObject({
       es: 'el gato está cansado.',
       pt: 'o gato está cansado.',
@@ -337,5 +337,34 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a predicative', () => {
     expect(isThat('BIG')).toMatchObject({ es: 'el gato es grande.', pt: 'o gato é grande.' });
     expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: legend() } } })))
       .toMatchObject({ es: 'el gato es una leyenda.', pt: 'o gato é uma lenda.' });
+  });
+
+  // The transient reading covers the whole marked class, not just cansado: physical states,
+  // emotions, and resultant-state participles all predicate with estar.
+  test('other transient states also take estar', () => {
+    expect(isThat('HUNGRY')).toMatchObject({ es: 'el gato está hambriento.', pt: 'o gato está faminto.' });
+    expect(isThat('COLD')).toMatchObject({ es: 'el gato está frío.', pt: 'o gato está frio.' });
+    // Resultant-state participles — "the file is saved / written" → está guardado / escrito.
+    expect(isThat('SAVED')).toMatchObject({ es: 'el gato está guardado.', pt: 'o gato está salvo.' });
+    expect(isThat('WRITTEN')).toMatchObject({ es: 'el gato está escrito.', pt: 'o gato está escrito.' });
+  });
+
+  // The product call for the both-copula adjectives: emotions take the transient reading
+  // (está feliz / triste), age keeps the inherent one (es viejo / é velho). One boolean per
+  // adjective, so the alternate reading (ser feliz "a happy person"; estar viejo "looking aged")
+  // is the documented loss.
+  test('emotions read as transient (estar); age reads as inherent (ser)', () => {
+    expect(isThat('HAPPY')).toMatchObject({ es: 'el gato está feliz.', pt: 'o gato está feliz.' });
+    expect(isThat('SAD')).toMatchObject({ es: 'el gato está triste.', pt: 'o gato está triste.' });
+    expect(isThat('OLD')).toMatchObject({ es: 'el gato es viejo.', pt: 'o gato é velho.' });
+    expect(isThat('YOUNG')).toMatchObject({ es: 'el gato es joven.', pt: 'o gato é jovem.' });
+  });
+
+  // Regression: an unmarked inherent adjective keeps ser, and the estar switch is BE-only —
+  // BECOME (se vuelve / torna-se) never routes through it, transient adjective or not.
+  test('an inherent adjective keeps ser; BECOME is untouched by the split', () => {
+    expect(isThat('BEAUTIFUL')).toMatchObject({ es: 'el gato es hermoso.', pt: 'o gato é belo.' });
+    expect(sayAll(clause(np('CAT'), 'BECOME', { complements: { predicative: { phrase: np('TIRED') } } })))
+      .toMatchObject({ es: 'el gato se vuelve cansado.', pt: 'o gato se torna cansado.' });
   });
 });

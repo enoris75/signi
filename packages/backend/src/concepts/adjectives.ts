@@ -135,6 +135,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'HAPPY',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing joy',
     emoji: '😊',
     forms: {
@@ -150,6 +151,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'SAD',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling or expressing sorrow',
     emoji: '😢',
     forms: {
@@ -323,6 +325,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'TIRED',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to rest or sleep',
     emoji: '😴',
     forms: {
@@ -338,6 +341,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'HUNGRY',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'feeling a need to eat',
     emoji: '🤤',
     forms: {
@@ -353,6 +357,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'COLD',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'at a low temperature',
     definition: dimGloss('TEMPERATURE', 'LOW'),
     emoji: '🥶',
@@ -369,6 +374,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'HOT',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'at a high temperature',
     definition: dimGloss('TEMPERATURE', 'HIGH'),
     emoji: '🔥',
@@ -542,6 +548,7 @@ export const adjectives: ConceptSeed[] = [
     // verb-derived — the plain past 書かれた attaches directly, like 去勢された (CASTRATED), no linker.
     id: 'WRITTEN',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'set down in words',
     emoji: '✍️',
     forms: {
@@ -557,6 +564,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'LOADED',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'brought in from storage and ready to use',
     emoji: '📂',
     forms: {
@@ -572,6 +580,7 @@ export const adjectives: ConceptSeed[] = [
   {
     id: 'SAVED',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'stored so it can be retrieved later',
     emoji: '💾',
     forms: {
@@ -933,6 +942,7 @@ export const adjectives: ConceptSeed[] = [
     // rather than 隠れた, which is something concealing itself.
     id: 'HIDDEN',
     role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
     description: 'kept out of sight',
     emoji: '🙈',
     forms: {

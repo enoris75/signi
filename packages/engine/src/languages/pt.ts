@@ -296,6 +296,24 @@ const TER_PT: Record<Tense, Record<string, string>> = {
 const ESTAR_AUX: ConceptForms = { conceptId: 'ESTAR', forms: { '1sg_future': 'estarei', '3pl_past': 'estiveram' } };
 const TER_AUX: ConceptForms = { conceptId: 'TER', forms: { '1sg_future': 'terei', '3pl_past': 'tiveram' } };
 
+// A47: the *copular* "estar" — the finite copula a located subject takes ("o gato está na casa"),
+// distinct from the aspect auxiliary above (which carries the imperfect past "estava"). Shaped like
+// the seeded BE (ser) paradigm so `conjugate` and `moodForm` inflect it the same way: the past is
+// the pretérito ("esteve"), consistent with the C6 simple-past-as-perfective mapping, and the future
+// stem drives the conditional (estaria), the 3pl preterite the subjunctive (estivesse).
+const ESTAR_COPULA: ConceptForms = {
+  conceptId: 'ESTAR',
+  forms: {
+    base: 'estar',
+    '1sg_present': 'estou', '2sg_present': 'estás', '3sg_present': 'está',
+    '1pl_present': 'estamos', '2pl_present': 'estais', '3pl_present': 'estão',
+    '1sg_past': 'estive', '2sg_past': 'estiveste', '3sg_past': 'esteve',
+    '1pl_past': 'estivemos', '2pl_past': 'estivestes', '3pl_past': 'estiveram',
+    '1sg_future': 'estarei', '2sg_future': 'estarás', '3sg_future': 'estará',
+    '1pl_future': 'estaremos', '2pl_future': 'estareis', '3pl_future': 'estarão',
+  },
+};
+
 /** The aspect auxiliary's finite form: its mood form under a hypothetical, else the tense form. */
 function auxFinite(aux: ConceptForms, table: Record<Tense, Record<string, string>>, subjectForms: Record<string, string>, tense: Tense, mood?: Mood): string {
   return moodForm('pt', aux, moodPN(subjectForms), mood) ?? table[tense][auxKey(subjectForms)];
@@ -623,6 +641,22 @@ function predicateText(
   // auxiliary (aspect under a conditional is a documented gap).
   const pn = moodPN(subjectForms);
   const finite = (m: ConceptForms) => moodForm('pt', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
+  // A47: Portuguese splits the copula. `estar` covers two BE frames; `ser` everything else.
+  //  · Location — "o gato está na casa", never "*é na casa". A place is `estar` unconditionally,
+  //    whatever the spatial relation, so a locative alone selects it; the past inherits the choice
+  //    as the pretérito ("esteve"). But a locative alongside a predicate nominal ("é uma lenda na
+  //    casa") is a mere adjunct — the predicative decides the copula there — so estar fires for a
+  //    locative only when it is the sole predication.
+  //  · A transient predicate adjective — "está cansado", not "*é cansado". Inherent adjectives
+  //    ("é grande") and predicate nouns ("é uma lenda") keep `ser`; the corpus marks which
+  //    adjectives are transient (`forms['transient']`), read off the first conjunct.
+  const predicativeHead = complements?.predicative
+    ? firstConjunct(complements.predicative.phrase).head.forms : undefined;
+  const transientPredicative =
+    predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
+  const locativeAlone = !!complements?.locative && !complements?.predicative;
+  const copulaVerb =
+    verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
   // prepended below and lands in front of it, exactly as for a plain verb.
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
@@ -641,7 +675,7 @@ function predicateText(
         verbGroupInfinitive(verb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
-      ? finite(verb)
+      ? finite(copulaVerb)
       : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
