@@ -28,3 +28,27 @@ of those words also suppletises.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: Portuguese GREAT comparison* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 with the sturdier option the fix proposed. `PT_SUPPLETIVE` in
+[`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts) is now keyed by the
+Portuguese base (`grande`, `bom`, `pequeno`, `mau`), not by concept.
+[`ptComparison.ts`](../../../packages/engine/src/languages/pt/ptComparison.ts) looks it up by
+`forms.base`. GREAT, spelled `grande`, now suppletises like BIG, and so will any later concept with
+one of those spellings.
+
+Every row now renders as wanted: `o gato maior come.`, `as casas maiores ardem.`, `a casa parece
+maior.`, `o gato é o maior.`.
+
+Unchanged:
+- the lowered and equal degrees of GREAT (`menos grande`);
+- BIG, GOOD and SMALL;
+- Spanish `más grande`.
+
+No other seeded Portuguese adjective shares those four bases.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: Portuguese GREAT comparison*. The pinning `test.fails` is now a passing `test`. New
+  cases cover the lowered degree and the other suppletives.
+- Unit test: `ptComparison.test.ts`.

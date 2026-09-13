@@ -256,6 +256,13 @@ describe('complementsPhrase', () => {
       expect(render({ cause: complement(np(ELES)) })).toBe('por causa deles');
     });
 
+    // A105: "de" fuses with the neuter demonstrative too.
+    test('"de" fuses with the neuter isso and the demonstratives', () => {
+      expect(render({ cause: complement(np(ELE, { gender: 'neut', disjunctive: 'isso' })) })).toBe('por causa disso');
+      expect(render({ cause: complement(np(ELE, { gender: 'neut', disjunctive: 'aquilo' })) })).toBe('por causa daquilo');
+      expect(render({ cause: complement(np(ELE, { gender: 'neut', disjunctive: 'isso' }), [sentiment('positive')]) })).toBe('graças a isso');
+    });
+
     test('a positive pronoun cause is "graças a" + the tonic form', () => {
       expect(render({ cause: complement(np(EU), [sentiment('positive')]) })).toBe('graças a mim');
       expect(render({ cause: complement(np(ELA), [sentiment('positive')]) })).toBe('graças a ela');
@@ -273,7 +280,7 @@ describe('complementsPhrase', () => {
     test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
       expect(render({ cause: complement(el(np(CAO), np(ELE))) })).toBe('por causa do cão e dele');
       expect(render({ cause: complement(el(np(EU), np(RAPOSA)), [sentiment('positive')]) })).toBe('graças a mim e à raposa');
-      expect(render({ cause: complement(el(np(EU), np(VOCE)), [sentiment('negative')]) })).toBe('por minha culpa e por tua culpa');
+      expect(render({ cause: complement(el(np(EU), np(VOCE)), [sentiment('negative')]) })).toBe('por minha culpa e por sua culpa');
     });
   });
 

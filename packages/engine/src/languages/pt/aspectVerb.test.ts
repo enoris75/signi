@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { aspectVerb } from './aspectVerb.js';
-import { COMER, ELES, EU, GATO, IR, NOS, VER } from './pt.fixtures.js';
+import { COMER, ELES, EU, GATO, IR, NOS, VER, VOCE } from './pt.fixtures.js';
 
 describe('aspectVerb', () => {
   test('the progressive is estar + gerúndio, estar in the imperfect for the past', () => {
@@ -36,5 +36,12 @@ describe('aspectVerb', () => {
   test('a hypothetical present resultative is a genuine perfect, not the pretérito', () => {
     expect(aspectVerb(COMER, GATO, 'present', 'resultative', 'conditional')).toBe('teria comido');
     expect(aspectVerb(COMER, EU, 'present', 'resultative', 'subjunctive')).toBe('tivesse comido');
+  });
+
+  // A108: você / vocês agree as the 3rd person in the auxiliaries.
+  test('você and vocês take the 3rd-person estar and ter', () => {
+    expect(aspectVerb(COMER, VOCE, 'present', 'progressive')).toBe('está comendo');
+    expect(aspectVerb(COMER, { ...VOCE, number: 'plural' }, 'past', 'progressive')).toBe('estavam comendo');
+    expect(aspectVerb(COMER, VOCE, 'past', 'resultative')).toBe('tinha comido');
   });
 });

@@ -50,6 +50,14 @@ describe('predicateText', () => {
   });
 
   describe('hypothetical mood', () => {
+    // A101: a reflexive verb's mood form takes the subject's clitic, not the stored one.
+    test('a reflexive verb in the conditional or imperfect subjunctive takes the subject\'s clitic', () => {
+      expect(predicateText(GATO, vp(VOLVERSE, { mood: 'conditional' }))).toBe('se volvería');
+      expect(predicateText(TU, vp(VOLVERSE, { mood: 'conditional' }))).toBe('te volverías');
+      expect(predicateText(YO, vp(VOLVERSE, { mood: 'subjunctive' }))).toBe('me volviera');
+      expect(predicateText(VOSOTROS, vp(VOLVERSE, { mood: 'subjunctive', negative: true }))).toBe('no os volvierais');
+    });
+
     test('the conditional and imperfect subjunctive come off the stored stems', () => {
       expect(predicateText(GATO, vp(COMER, { mood: 'conditional' }))).toBe('comería');
       expect(predicateText(NOSOTROS, vp(COMER, { mood: 'conditional' }))).toBe('comeríamos');

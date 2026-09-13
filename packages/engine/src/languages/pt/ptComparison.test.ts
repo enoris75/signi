@@ -20,6 +20,13 @@ describe('ptComparison', () => {
     expect(ptComparison(concept({ ...MAU, degree: 'more' }, 'BAD'), 'masc', false)).toBe('pior');
   });
 
+  // A106: keyed by the Portuguese base, so GREAT ("grande") suppletises like BIG.
+  test('any concept spelled grande suppletises', () => {
+    expect(ptComparison(concept({ ...GRANDE, degree: 'more' }, 'GREAT'), 'masc', false)).toBe('maior');
+    expect(ptComparison(concept({ ...GRANDE, degree: 'most' }, 'GREAT'), 'fem', true)).toBe('maiores');
+    expect(ptComparison(concept({ ...GRANDE, degree: 'less' }, 'GREAT'), 'masc', false)).toBe('menos grande');
+  });
+
   test('a suppletive is gender-invariant and pluralises in -es', () => {
     expect(ptComparison(concept({ ...GRANDE, degree: 'more' }, 'BIG'), 'fem', true)).toBe('maiores');
     expect(ptComparison(concept({ ...BOM, degree: 'more' }, 'GOOD'), 'masc', true)).toBe('melhores');

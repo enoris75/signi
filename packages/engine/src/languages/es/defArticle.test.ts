@@ -20,6 +20,8 @@ describe('defArticle', () => {
   test('a stressed-a feminine takes el in the singular only', () => {
     expect(defArticle(AGUA)).toBe('el');
     expect(defArticle(AGUA, true)).toBe('las');
+    // A104: WING carries the corpus flag too.
+    expect(defArticle({ base: 'ala', plural: 'alas', gender: 'fem', stressed_a: '1', count: 'singular' })).toBe('el');
   });
 
   test('defaults to the masculine without a gender', () => {

@@ -1,6 +1,7 @@
 import type { ComplementType } from '@signi/shared';
 import { groupHasNegativeAdverb, hasNegativeComplement, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase, type RubySegment } from '../../types.js';
 import type { JaIPN } from './ja.types.js';
+import { JA_ARU, JA_IRU } from './ja.consts.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
@@ -22,13 +23,29 @@ import { wordSeg } from './wordSeg.js';
  * the plain form instead of the polite ます (see plainVerbSeg).
  */
 export function predicateSegs(
-  verbPhrase: ResolvedVerbPhrase,
+  givenVerbPhrase: ResolvedVerbPhrase,
   directObject: ResolvedNounElement | undefined,
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   imperativePN?: JaIPN,
   plain = false,
   subjectNegative = false,
+  // Whether the subject is animate (a person or an animal); picks いる over ある for a located subject.
+  animateSubject = false,
 ): RubySegment[] {
+  // BE with a locative and no predicative states where the subject is: Japanese uses the existential
+  // verb, いる for an animate subject and ある for an inanimate one, and marks the place with に
+  // (猫は家にいます, 本は家にあります). The existential is a real verb, so the plain, modal, command
+  // and たら paths below compose on it. Being somewhere is a state, so a periphrastic aspect has
+  // nothing to add, except the resultative, which reads as the past (家にいました).
+  const existential = givenVerbPhrase.verb.forms['copula'] === '1' && !complements?.['predicative'] && !!complements?.['locative'];
+  const verbPhrase: ResolvedVerbPhrase = existential
+    ? {
+        ...givenVerbPhrase,
+        verb: animateSubject ? JA_IRU : JA_ARU,
+        aspect: 'neutral',
+        tense: givenVerbPhrase.aspect === 'resultative' ? 'past' : givenVerbPhrase.tense,
+      }
+    : givenVerbPhrase;
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
@@ -47,15 +64,19 @@ export function predicateSegs(
   // precede the predicate, as they precede an ordinary verb.
   const predicative = complements?.['predicative'];
   // Imperative: a subjectless command (SOV — objects/complements first, verb last). The copula
-  // command routes through する: "…にしてください" / "…にしないでください" (する's nai-form is fixed, so
-  // the copula negative *can* stay polite, unlike ordinary verbs).
+  // command is built on なる, "be / become X": 伝説になってください, 大きくなりましょう. する would be
+  // causative ("make it X"). なる's nai-form is fixed, so the 2nd-person negative stays polite
+  // (伝説にならないでください) rather than the plain prohibitive ordinary verbs take.
   if (mood === 'imperative') {
     const pn = imperativePN ?? '2sg';
     if (verb.forms['copula'] === '1' && predicative) {
-      segs.push(...complementSegs({ predicative }), { t: negated ? 'しないでください' : 'してください' });
+      const naru = pn === '1pl'
+        ? (negated ? 'なるのはやめましょう' : 'なりましょう')
+        : (negated ? 'ならないでください' : 'なってください');
+      segs.push(...complementSegs({ predicative }), { t: naru });
       return segs;
     }
-    segs.push(...complementSegs(complements));
+    segs.push(...complementSegs(complements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
@@ -70,7 +91,7 @@ export function predicateSegs(
   // (a copula citation won't arise for a verb definition). The plain negative needs a nai-form the
   // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
-    segs.push(...complementSegs(complements));
+    segs.push(...complementSegs(complements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
@@ -95,7 +116,7 @@ export function predicateSegs(
     segs.push(...copulaSegs(predicative, copTense, negated));
     return segs;
   }
-  segs.push(...complementSegs(complements));
+  segs.push(...complementSegs(complements, existential));
   if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.

@@ -37,7 +37,15 @@ export function predicateText(
     && !directObject.conjuncts.some((np) => np.head.forms['person'] || takesPersonalA(np));
   const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
-  const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
+  // A reflexive verb's stored forms carry a fixed clitic ("me volveré", "se volvieron"), so its mood
+  // form is derived from the plain verb and takes the subject's clitic in front: "se volvería", "me
+  // volviera".
+  const moodFinite = (m: ConceptForms): string | undefined => {
+    const form = moodForm('es', nonReflexiveVerb(m), pn, mood);
+    const clitic = reflexiveClitic(m.forms, agreeForms);
+    return form && clitic ? `${clitic} ${form}` : form;
+  };
+  const finite = (m: ConceptForms) => moodFinite(m) ?? conjugate(m.forms, agreeForms, tense);
   // A47: Spanish splits the copula. `estar` covers two BE frames; `ser` everything else.
   //  · Location — "el gato está en la casa", never "*es en la casa". A place is `estar`
   //    unconditionally, whatever the spatial relation, so a locative alone selects it; the past
@@ -72,7 +80,7 @@ export function predicateText(
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
         ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(copulaVerb.forms, aspect),
+        verbGroupInfinitive(copulaVerb.forms, agreeForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)

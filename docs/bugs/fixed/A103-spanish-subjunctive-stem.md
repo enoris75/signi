@@ -45,3 +45,31 @@ Portuguese shares `subjPresent` and is not checked here.
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: Spanish present-subjunctive stem in commands* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. Both changes are in [`mood.ts`](../../../packages/engine/src/mood.ts).
+
+- **Stem changes.** The new `unstressedStem` gives Spanish -ar/-er verbs their 1st/2nd-plural
+  subjunctive stem. It keeps the 1sg stem unless undoing one stressed-vowel change (`ue`→`o`/`u`,
+  `ie`→`e`, `í`→`i`, `ú`→`u`) turns it into the `1pl_present` stem. So `mordamos`, `mostremos`,
+  `empecemos` and `enviemos` come out right, while an irregular 1sg keeps its stem (`vengamos`,
+  `hagáis`, `elijáis`). The tú negative keeps the stressed stem (`no muerdas`). -ir verbs and
+  Portuguese are left as they were.
+- **GO and GIVE.** `ES_SUBJ_OVERRIDE` gains `vayas / vayamos / vayáis` and `des / demos / deis`.
+  `ES_IMP_OVERRIDE` gains GO's `ve` and `vamos`. The bug file had listed the affirmative tú as right,
+  but it read `va.`.
+
+Every row now renders as wanted. A sweep compared all five command forms of all 57 seeded verbs
+before and after. The only Spanish changes are the pinned verbs and three more:
+- the modals CAN and WILL (`podamos`, `no queráis`);
+- the reflexive BECOME from A100 (`volvámonos`, `no nos volvamos`, `no os volváis`);
+- GO's `ve`.
+
+No Portuguese output changed.
+
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: Spanish present-subjunctive stem in commands*. Both pinning `test.fails` are now
+  passing `test`s. New cases cover the other persons, the modals, BECOME and every GO/GIVE command,
+  with a guard for the tú negative and the irregular 1sg stems.
+- Unit tests: the new `mood.test.ts`, covering `imperativeForm` for Spanish and a Portuguese guard.

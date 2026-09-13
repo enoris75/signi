@@ -58,8 +58,8 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'dar',
-        '1sg_present': 'dou', '2sg_present': 'dás', '3sg_present': 'dá',
-        '1pl_present': 'damos', '2pl_present': 'dais', '3pl_present': 'dão',
+        '1sg_present': 'dou', '2sg_present': 'dá', '3sg_present': 'dá',
+        '1pl_present': 'damos', '2pl_present': 'dão', '3pl_present': 'dão',
         '1sg_past': 'dei', '2sg_past': 'deu', '3sg_past': 'deu',
         '1pl_past': 'demos', '2pl_past': 'deram', '3pl_past': 'deram',
         '1sg_future': 'darei', '2sg_future': 'dará', '3sg_future': 'dará',
@@ -124,7 +124,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'mostrar',
-        '1sg_present': 'mostro', '2sg_present': 'mostras', '3sg_present': 'mostra',
+        '1sg_present': 'mostro', '2sg_present': 'mostra', '3sg_present': 'mostra',
         '1pl_present': 'mostramos', '2pl_present': 'mostram', '3pl_present': 'mostram',
         '1sg_past': 'mostrei', '2sg_past': 'mostrou', '3sg_past': 'mostrou',
         '1pl_past': 'mostramos', '2pl_past': 'mostraram', '3pl_past': 'mostraram',

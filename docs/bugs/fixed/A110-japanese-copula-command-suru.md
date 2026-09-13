@@ -43,3 +43,29 @@ instead take `でいてください` ("stay X"). Pick one; the test accepts eith
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: Japanese copula command* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed, choosing なる. The copula command branch of
+[`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts) keeps the
+predicative as before (`伝説に`, `大きく`, `幸せに`) and follows it with なる's command:
+
+- **2nd person, singular or plural:** `なってください`, or `ならないでください` in the negative. The
+  negative stays polite, not `jaImperativeSegs`' plain `なるな`.
+- **1st plural:** `なりましょう`, or `なるのはやめましょう` in the negative.
+
+The branch now honours `imperativePN` instead of hard-coding the request.
+
+Every row now renders as wanted: `伝説になってください`, `幸せになってください`, `大きくなってください`,
+`伝説にならないでください`, `大きくなりましょう`. Also covered: `慎重になってください`, the plural
+addressee and the 1pl negative.
+
+Unchanged: the BECOME command (`大きくなってください`) and the declarative copula (`猫は大きいです`). The
+unit test that pinned the する route, *a copula command routes through する*, is renamed *a copula
+command is built on なる* and asserts the なる forms for every addressee.
+
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: Japanese copula command*. The pinning `test.fails` is now a passing `test`. New cases
+  cover the na-adjective, the plural and the 1pl negative, with a guard for BECOME and the declarative
+  copula.
+- Unit test: `predicateSegs.test.ts` (ja).

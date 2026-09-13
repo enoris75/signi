@@ -811,7 +811,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'ala', plural: 'ali', gender: 'fem', count: 'singular' },
       fr: { base: 'aile', plural: 'ailes', gender: 'fem', count: 'singular' },
       de: { base: 'Flügel', plural: 'Flügel', gender: 'masc', count: 'singular' },
-      es: { base: 'ala', plural: 'alas', gender: 'fem', count: 'singular' },
+      es: { base: 'ala', plural: 'alas', gender: 'fem', stressed_a: '1', count: 'singular' },
       ja: { base: '翼', count: 'singular', reading: 'つばさ' },
       pt: { base: 'asa', plural: 'asas', gender: 'fem', count: 'singular' },
     },

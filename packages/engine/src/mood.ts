@@ -30,12 +30,13 @@ type PN = '1sg' | '2sg' | '3sg' | '1pl' | '2pl' | '3pl';
 
 const IT_COND: Record<PN, string> = { '1sg': 'ei', '2sg': 'esti', '3sg': 'ebbe', '1pl': 'emmo', '2pl': 'este', '3pl': 'ebbero' };
 const ES_COND: Record<PN, string> = { '1sg': 'ía', '2sg': 'ías', '3sg': 'ía', '1pl': 'íamos', '2pl': 'íais', '3pl': 'ían' };
-const PT_COND: Record<PN, string> = { '1sg': 'ia', '2sg': 'ias', '3sg': 'ia', '1pl': 'íamos', '2pl': 'íeis', '3pl': 'iam' };
+// Portuguese 2nd person is você / vocês, agreeing as the 3rd (A108).
+const PT_COND: Record<PN, string> = { '1sg': 'ia', '2sg': 'ia', '3sg': 'ia', '1pl': 'íamos', '2pl': 'iam', '3pl': 'iam' };
 const FR_COND: Record<PN, string> = { '1sg': 'ais', '2sg': 'ais', '3sg': 'ait', '1pl': 'ions', '2pl': 'iez', '3pl': 'aient' };
 
 const IT_SUBJ: Record<PN, string> = { '1sg': 'ssi', '2sg': 'ssi', '3sg': 'sse', '1pl': 'ssimo', '2pl': 'ste', '3pl': 'ssero' };
 const ES_SUBJ: Record<PN, string> = { '1sg': 'ra', '2sg': 'ras', '3sg': 'ra', '1pl': 'ramos', '2pl': 'rais', '3pl': 'ran' };
-const PT_SUBJ: Record<PN, string> = { '1sg': 'sse', '2sg': 'sses', '3sg': 'sse', '1pl': 'ssemos', '2pl': 'sseis', '3pl': 'ssem' };
+const PT_SUBJ: Record<PN, string> = { '1sg': 'sse', '2sg': 'sse', '3sg': 'sse', '1pl': 'ssemos', '2pl': 'ssem', '3pl': 'ssem' };
 const FR_IMPARF: Record<PN, string> = { '1sg': 'ais', '2sg': 'ais', '3sg': 'ait', '1pl': 'ions', '2pl': 'iez', '3pl': 'aient' };
 
 // Italian imperfect-subjunctive stems that the "infinitive minus -re" rule gets wrong.
@@ -150,16 +151,21 @@ const ES_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   BE:   { '2sg': 'seas', '1pl': 'seamos', '2pl': 'seáis' },   // ser → sea…
   ESTAR: { '2sg': 'estés', '1pl': 'estemos', '2pl': 'estéis' }, // estar → esté… (1sg "estoy" breaks the -o rule)
   KNOW: { '2sg': 'sepas', '1pl': 'sepamos', '2pl': 'sepáis' }, // saber → sepa…
+  GO:   { '2sg': 'vayas', '1pl': 'vayamos', '2pl': 'vayáis' }, // ir → vaya… (1sg "voy" breaks the -o rule)
+  GIVE: { '2sg': 'des', '1pl': 'demos', '2pl': 'deis' },       // dar → dé… (1sg "doy" breaks the -o rule)
 };
 const PT_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   BE:   { '2sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam' },   // ser → seja… (você/vocês)
   ESTAR: { '2sg': 'esteja', '1pl': 'estejamos', '2pl': 'estejam' }, // estar → esteja… (1sg "estou" breaks the -o rule)
   KNOW: { '2sg': 'saiba', '1pl': 'saibamos', '2pl': 'saibam' }, // saber → saiba…
+  GIVE: { '2sg': 'dê', '1pl': 'demos', '2pl': 'deem' },         // dar → dê… (1sg "dou" breaks the -o rule)
+  GO:   { '2sg': 'vá', '1pl': 'vamos', '2pl': 'vão' },          // ir → vá… (1sg "vou" breaks the -o rule)
 };
 
 // Irregular *affirmative familiar* imperative forms (indicative-based paradigm) by concept.
 const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE: { '2sg': 'sé', '1pl': 'seamos', '2pl': 'sed' },          // ser: sé / seamos / sed
+  GO: { '2sg': 've', '1pl': 'vamos' },                         // ir: ve / vamos (vosotros "id" is regular)
 };
 const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE:   { '2sg': 'sii', '1pl': 'siamo', '2pl': 'siate' },      // essere: sii / siamo / siate
@@ -182,13 +188,27 @@ const FR_IMP_OVERRIDE: Record<string, Record<IPN, string>> = {
  * change sound: the spelling absorbs it (cargar → carguemos, tocar → toque, cruzar → cruce).
  * A stem already ending in -gu/-qu is left alone. Only -ar verbs need this — an -er/-ir stem
  * comes off the 1sg present, which already carries the shift (coger → cojo → coja).
+ * Portuguese respells ç → c (começar → comece) and keeps z (cruzar → cruze).
  */
-function arSubjStem(stem: string): string {
+function arSubjStem(stem: string, lang: 'es' | 'pt'): string {
   if (/(?:gu|qu)$/.test(stem)) return stem;
-  return stem
+  if (lang === 'pt' && stem.endsWith('ç')) return `${stem.slice(0, -1)}c`;
+  const respelled = stem
     .replace(/g$/, 'gu')
-    .replace(/c$/, 'qu')
-    .replace(/z$/, 'c');
+    .replace(/c$/, 'qu');
+  return lang === 'es' ? respelled.replace(/z$/, 'c') : respelled;
+}
+
+/**
+ * The Spanish 1st/2nd-plural subjunctive stem of an -ar/-er verb. Those persons are stressed on the
+ * ending, so a stem-changing verb takes its unstressed stem: "muerd-" → "mord-" (mordamos), "empiez-"
+ * → "empez-", "enví-" → "envi-". The 1sg stem is kept unless undoing one stressed-vowel change turns
+ * it into the 1pl-present stem, so an irregular 1sg ("veng-", "hag-", "elij-") stays.
+ */
+function unstressedStem(raw: string, forms: Record<string, string>): string {
+  const plural = (forms['1pl_present'] ?? '').replace(/[aei]mos$/, '');
+  const candidates = [raw.replace(/ue/, 'o'), raw.replace(/ue/, 'u'), raw.replace(/ie/, 'e'), raw.replace(/í/, 'i'), raw.replace(/ú/, 'u')];
+  return candidates.find((c) => c !== raw && c === plural) ?? raw;
 }
 
 function subjPresent(
@@ -201,7 +221,10 @@ function subjPresent(
   const raw = (verb.forms['1sg_present'] ?? '').replace(/o$/, '');
   const base = verb.forms['base'] ?? '';
   const cls = base.endsWith('ar') ? 'ar' : 'er';
-  const stem = cls === 'ar' ? arSubjStem(raw) : raw;
+  const unstressed = lang === 'es' && pn !== '2sg' && !base.endsWith('ir') ? unstressedStem(raw, verb.forms) : raw;
+  // A Portuguese -ear verb inserts its i only under stress, so the 1st plural drops it: nomeie, nomeemos.
+  const unstressedPt = lang === 'pt' && pn === '1pl' && base.endsWith('ear') ? unstressed.replace(/ei$/, 'e') : unstressed;
+  const stem = cls === 'ar' ? arSubjStem(unstressedPt, lang) : unstressedPt;
   return stem + (lang === 'es' ? ES_SUBJ_PRES_END : PT_SUBJ_PRES_END)[cls][pn];
 }
 

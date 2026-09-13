@@ -3,6 +3,7 @@ import { adjDegree, isGenericSubject, isPronominalPossessor, type ResolvedNounPh
 import { possessiveJa } from '../../possessive.js';
 import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
+import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { predicateSegs } from './predicateSegs.js';
@@ -80,5 +81,7 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
       ? [...elSegs(rel.subject), ...(isNegativeGroup(rel.subject) ? [] : [{ t: 'が' }])] : [];
   const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true, relSubjNeg), ...core];
+  // The clause's subject is the head itself for a subject relative, else its own subject.
+  const relAnimate = isAnimate(rel.headRole !== 'subject' && rel.subject ? rel.subject.conjuncts : [np]);
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true, relSubjNeg, relAnimate), ...core];
 }

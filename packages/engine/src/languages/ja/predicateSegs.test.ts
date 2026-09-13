@@ -10,6 +10,26 @@ const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
 const careful = complements({ predicative: complement(np(SHINCHOU)) });
 
 describe('predicateSegs', () => {
+  // A109: BE with a locative and no predicative is the existential いる / ある, the place taking に.
+  describe('existential BE', () => {
+    const inHouse = complements({ locative: complement(np(IE)) });
+
+    test('an animate subject takes いる, an inanimate one ある', () => {
+      expect(text(predicateSegs(vp(DESU), undefined, inHouse, undefined, false, false, true))).toBe('家にいます');
+      expect(text(predicateSegs(vp(DESU), undefined, inHouse))).toBe('家にあります');
+      expect(text(predicateSegs(vp(DESU, { negative: true, tense: 'past' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいませんでした');
+    });
+
+    test('the plain, modal, command, たら and aspect paths compose on the existential verb', () => {
+      expect(text(predicateSegs(vp(DESU), undefined, inHouse, undefined, true, false, true))).toBe('家にいる');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, inHouse, undefined, false, false, true))).toBe('家にいる必要があります');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, inHouse, '2sg', false, false, true))).toBe('家にいてください');
+      expect(text(predicateSegs(vp(DESU, { mood: 'subjunctive' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいたら');
+      expect(text(predicateSegs(vp(DESU, { aspect: 'progressive' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいます');
+      expect(text(predicateSegs(vp(DESU, { aspect: 'resultative' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいました');
+    });
+  });
+
   describe('tense and polarity', () => {
     test('the polite ます form carries tense and negation', () => {
       expect(predicateSegs(vp(TABERU), undefined, undefined)).toEqual([{ t: '食べます', r: 'たべます' }]);
@@ -156,10 +176,13 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(HOZON_SURU, { mood: 'imperative', register: 'instruction' }), el(np(HON)), undefined))).toBe('本を保存');
     });
 
-    // The する route is A110 ("make it X" for a noun or i-adjective); a na-adjective reads naturally.
-    test('a copula command routes through する', () => {
-      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, careful))).toBe('慎重にしてください');
-      expect(text(predicateSegs(vp(DESU, { mood: 'imperative', negative: true }), undefined, careful))).toBe('慎重にしないでください');
+    // A110: a copula command is built on なる, following the addressee; する would be causative.
+    test('a copula command is built on なる', () => {
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, careful))).toBe('慎重になってください');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative', negative: true }), undefined, careful))).toBe('慎重にならないでください');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, careful, '1pl'))).toBe('慎重になりましょう');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative', negative: true }), undefined, careful, '1pl'))).toBe('慎重になるのはやめましょう');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, careful, '2pl'))).toBe('慎重になってください');
     });
   });
 

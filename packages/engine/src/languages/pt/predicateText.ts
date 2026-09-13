@@ -6,6 +6,7 @@ import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
 import { ptCliticize } from './ptCliticize.js';
 import { ptEnclitic } from './ptEnclitic.js';
@@ -110,12 +111,20 @@ export function predicateText(
     const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Portuguese ("Carregar um período", "Não correr"), not the imperative.
+    // A pronominal command is derived from the plain verb and takes the addressee's reflexive — "se"
+    // for você / vocês, "nos" for nós — after an affirmative command ("torne-se", "tornemo-nos", the
+    // -s dropping) and before a negative one ("não se torne"). The instruction keeps "tornar-se".
+    const impPN = moodPN(subjectForms);
+    const reflexive = register !== 'instruction' && (copulaVerb.forms['base'] ?? '').endsWith('-se')
+      ? (impPN === '1pl' ? 'nos' : 'se') : '';
     const impForm = register === 'instruction'
       ? (copulaVerb.forms['base'] ?? conjugated)
-      : (imperativeForm('pt', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
-    const impVerb = !impNeg && thirdPersonClitic
-      ? ptEnclitic(impForm, thirdPersonClitic)
-      : ptCliticize(objectClitic, impNeg ? `não ${impForm}` : impForm);
+      : (imperativeForm('pt', nonReflexiveVerb(copulaVerb), impPN, impNeg) ?? conjugated);
+    const impVerb = reflexive
+      ? (impNeg ? `não ${reflexive} ${impForm}` : `${reflexive === 'nos' ? impForm.replace(/s$/, '') : impForm}-${reflexive}`)
+      : !impNeg && thirdPersonClitic
+        ? ptEnclitic(impForm, thirdPersonClitic)
+        : ptCliticize(objectClitic, impNeg ? `não ${impForm}` : impForm);
     return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

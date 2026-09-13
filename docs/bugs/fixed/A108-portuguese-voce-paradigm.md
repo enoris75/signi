@@ -70,3 +70,40 @@ tests (`és`, `sois`, `te tornas`, `deves`…).
 | | |
 |---|---|
 | **Test** | `pronoun.test.ts` → *known bugs: Portuguese você agreement* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed: a data fix in the four places listed.
+
+1. **Corpus:** in the nine verbs, every Portuguese `2sg_*` / `2pl_*` cell now repeats its `3sg_*` /
+   `3pl_*` form (32 cells). The verbs are MUST, CAN, WILL, BE, GIVE, BECOME, SHOW, SEEM and APPEAR. A
+   script checked every seeded verb, so no 2nd-person cell differs from the 3rd any more. The database
+   is reseeded.
+2. **[`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts):** the same in `ESTAR_PT`,
+   `TER_PT` and `ESTAR_COPULA` (18 cells).
+3. **[`mood.ts`](../../../packages/engine/src/mood.ts):** `PT_COND` takes `2sg: 'ia'` and `2pl: 'iam'`;
+   `PT_SUBJ` takes `2sg: 'sse'` and `2pl: 'ssem'`.
+4. **[`complementsPhrase.ts`](../../../packages/engine/src/languages/pt/complementsPhrase.ts):** the
+   negative pronoun cause builds its possessive with `possessivePt`, agreeing with feminine `culpa`
+   (`por sua culpa`), in place of the local `minha` / `tua` / `vossa` table.
+
+`pt.fixtures.ts` was brought in line with the corpus (29 cells).
+
+Every row of both pinned tests now renders as wanted. The fix also covers:
+- `podem comer`, `serão fortes`, `estão cansados`, `esteve na casa`, `estarão comendo`, `parece cansado`;
+- the plural hypotheticals (`correriam`, `se comessem`) and `teria comido`.
+
+These are unchanged: the 1st person (`sou`, `correríamos`), `por nossa culpa`, the 3rd-person
+`por sua culpa` and `você e o gato são fortes`.
+
+Test updates:
+- Two passing tests pinned `por tua culpa` for a group holding `você`: `complements/cause.test.ts` and
+  the pt `complementsPhrase.test.ts`. They now assert `por sua culpa`.
+- The 90 Portuguese 2nd-person snapshot cells were re-baselined. A script confirmed all 737 changed
+  lines are Portuguese tu/vós → você/vocês substitutions.
+
+- **Tests:** [`packages/engine/test/pronoun.test.ts`](../../../packages/engine/test/pronoun.test.ts)
+  → *known bugs: Portuguese você agreement*. Both pinning `test.fails` are now passing `test`s. New
+  cases cover the modals, BE and `estar`, the auxiliaries and the hypothetical, with a guard for the
+  1st person, the other blamers and the coordinated `você`.
+- Unit tests: `aspectVerb.test.ts` and `predicateText.test.ts` (pt).

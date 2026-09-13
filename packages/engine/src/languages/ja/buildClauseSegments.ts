@@ -1,6 +1,7 @@
 import { firstConjunct, type ResolvedPhrase, type RubySegment } from '../../types.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
+import { isAnimate } from './isAnimate.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
@@ -30,6 +31,6 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   // A `no` subject ends in も, which replaces the topic/subject particle (どの時間も, not どの時間もは).
   if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...(subjectNegative ? [] : [{ t: subjectParticle }]));
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
-  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative));
+  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative, isAnimate(phrase.subject.conjuncts)));
   return segs;
 }

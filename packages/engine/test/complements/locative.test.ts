@@ -49,7 +49,8 @@ describe('locative', () => {
     expect(said.es).toMatch(/ en la casa\.$/);
     expect(said.pt).toMatch(/ na casa\.$/);
     expect(said.de).toMatch(/ im Haus\.$/);
-    expect(said.ja).toMatch(/^猫は家で/);
+    // Japanese BE states where the subject is, with the existential verb and に (A109).
+    expect(said.ja).toMatch(verb === 'BE' ? /^猫は家に/ : /^猫は家で/);
   });
 
   test('the five intransitive verbs', () => {
@@ -210,7 +211,7 @@ describe('locative: spatial specifiers', () => {
       pt: 'o gato está debaixo da casa.',
       // The relational noun 下 sits between the place and its particle, exactly as it does for a
       // route (市場の下を) — only the particle differs.
-      ja: '猫は家の下でです。', // wrong, pinned as-is: A109
+      ja: '猫は家の下にいます。', // the existential いる, its place marked with に (A109)
     });
   });
 
@@ -222,7 +223,7 @@ describe('locative: spatial specifiers', () => {
       de: 'der Kater ist hinter dem Haus.', // dative — hinter is two-way
       es: 'el gato está detrás de la casa.', // estar, not ser (A47)
       pt: 'o gato está atrás da casa.',
-      ja: '猫は家の後ろでです。', // wrong, pinned as-is: A109
+      ja: '猫は家の後ろにいます。'
     });
   });
 
@@ -237,7 +238,7 @@ describe('locative: spatial specifiers', () => {
       en: 'the cat is in front of the house.',
       it: 'il gatto è davanti alla casa.', // davanti a + la = alla
       de: 'der Kater ist vor dem Haus.',
-      ja: '猫は家の前でです。', // wrong, pinned as-is: A109
+      ja: '猫は家の前にいます。'
     });
   });
 
@@ -402,7 +403,7 @@ describe('known bugs: locative', () => {
     expect(said.es).toMatch(/ en casa\.$/);
     expect(said.pt).toMatch(/ em casa\.$/);
     expect(said.de).toMatch(/ zu Hause\.$/);
-    expect(said.ja).toMatch(/^猫は家で/);
+    expect(said.ja).toMatch(verb === 'BE' ? /^猫は家に/ : /^猫は家で/); // existential に for BE (A109)
   });
 
   test('"is at home" — the copula, with es/pt still selecting estar for the place', () => {
@@ -601,7 +602,7 @@ describe('known bugs: Spanish estar outside the plain finite verb', () => {
 // modal and command all glued on). Japanese states location with いる (animate) / ある
 // (inanimate) and に. Not A42, which is a predicate noun PLUS a locative.
 describe('known bugs: Japanese BE with a locative', () => {
-  test.fails('Japanese renders a located subject with いる / ある and に', () => {
+  test('Japanese renders a located subject with いる / ある and に', () => {
     const inHouse = (subject: string, verbPhrase: { negative?: boolean; tense?: 'past'; modals?: string[] } = {}) =>
       sayAll(clause(np(subject), 'BE', { verbPhrase, complements: { locative: { phrase: np('HOUSE') } } })).ja;
     expect(inHouse('CAT')).toBe('猫は家にいます。');
@@ -613,5 +614,23 @@ describe('known bugs: Japanese BE with a locative', () => {
     expect(inHouse('CAT', { modals: ['MUST'] })).toBe('猫は家にいる必要があります。');
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), imperative: true }).ja)
       .toBe('家にいてください。');
+  });
+
+  test('Japanese composes the existential in a relative, a condition, the citation, the past and a group', () => {
+    const inHouse = { locative: { phrase: np('HOUSE') } };
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: inHouse } }), 'RUN')).ja).toBe('家にいる猫は走ります。');
+    expect(sayAll(clause(np('BOOK', { relative: { verbPhrase: { verb: 'BE' }, complements: inHouse } }), 'BURN')).ja).toBe('家にある本は燃えます。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE', { complements: inHouse }) }).ja).toBe('もし猫が家にいたら、犬は走ります。');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BE', { complements: inHouse }), infinitive: true }).ja).toBe('家にいる。');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'progressive' }, complements: inHouse })).ja).toBe('猫は家にいます。');
+    expect(sayAll(clause(np('BOOK'), 'BE', { verbPhrase: { negative: true }, complements: inHouse })).ja).toBe('本は家にありません。');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BE', { complements: inHouse })).ja).toBe('私は家にいます。');
+    expect(sayAll(clause({ conjuncts: [np('BOOK'), np('CAT')], conjunction: 'and' }, 'BE', { complements: inHouse })).ja).toBe('本と猫は家にいます。');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'BE', { complements: inHouse }), imperative: true }).ja).toBe('家にいましょう。');
+  });
+
+  test('regression: a predicative BE keeps the copula, and another verb keeps で', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY') } } })).ja).toBe('猫は幸せです。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE') } } })).ja).toBe('猫は家で食べます。');
   });
 });

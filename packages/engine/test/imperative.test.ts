@@ -568,7 +568,7 @@ describe('known bugs: Spanish present-subjunctive stem in commands', () => {
     imperative: true,
   }).es;
 
-  test.fails('Spanish builds the 1st- and 2nd-plural command on the unstressed stem', () => {
+  test('Spanish builds the 1st- and 2nd-plural command on the unstressed stem', () => {
     expect(command('BITE', 'nosotros')).toBe('mordamos.');
     expect(command('BITE', 'vosotros', true)).toBe('no mordáis.');
     expect(command('SHOW', 'nosotros')).toBe('mostremos.');
@@ -577,11 +577,41 @@ describe('known bugs: Spanish present-subjunctive stem in commands', () => {
     expect(command('SEND', 'vosotros', true)).toBe('no enviéis.');
   });
 
-  test.fails('Spanish GO and GIVE take their irregular subjunctive in commands', () => {
+  test('Spanish GO and GIVE take their irregular subjunctive in commands', () => {
     expect(command('GO', 'tú', true)).toBe('no vayas.');
     expect(command('GO', 'nosotros')).toBe('vamos.');
     expect(command('GIVE', 'tú', true)).toBe('no des.');
     expect(command('GIVE', 'nosotros')).toBe('demos.');
+  });
+
+  test('Spanish unstresses the stem of every stem-changing -ar/-er verb, the modals and the reflexive BECOME too', () => {
+    expect(command('SHOW', 'vosotros', true)).toBe('no mostréis.');
+    expect(command('START', 'vosotros', true)).toBe('no empecéis.');
+    expect(command('CAN', 'nosotros')).toBe('podamos.');
+    expect(command('WILL', 'vosotros', true)).toBe('no queráis.');
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    const become = (subject: ReturnType<typeof np>, negative = false) =>
+      sayAll({ ...clause(subject, 'BECOME', { verbPhrase: { negative }, complements: legend }), imperative: true }).es;
+    expect(become(np('FIRST_PERSON', { number: 'plural' }))).toBe('volvámonos una leyenda.');
+    expect(become(np('FIRST_PERSON', { number: 'plural' }), true)).toBe('no nos volvamos una leyenda.');
+    expect(become(np('SECOND_PERSON', { number: 'plural' }), true)).toBe('no os volváis una leyenda.');
+  });
+
+  test('Spanish GO and GIVE take their irregular forms in every command', () => {
+    expect(command('GO', 'tú')).toBe('ve.');
+    expect(command('GO', 'nosotros', true)).toBe('no vayamos.');
+    expect(command('GO', 'vosotros')).toBe('id.');
+    expect(command('GO', 'vosotros', true)).toBe('no vayáis.');
+    expect(command('GIVE', 'tú')).toBe('da.');
+    expect(command('GIVE', 'vosotros', true)).toBe('no deis.');
+  });
+
+  test('regression: the tú negative keeps the stressed stem, and an irregular 1sg stem stays', () => {
+    expect(command('BITE', 'tú', true)).toBe('no muerdas.');
+    expect(command('SEND', 'tú', true)).toBe('no envíes.');
+    expect(command('COME', 'nosotros')).toBe('vengamos.');
+    expect(command('CHOOSE', 'vosotros', true)).toBe('no elijáis.');
+    expect(command('BITE', 'vosotros')).toBe('morded.');
   });
 });
 
@@ -596,7 +626,7 @@ describe('known bugs: Portuguese imperative stems', () => {
   const youAll = np('SECOND_PERSON', { number: 'plural' });
   const strong = { predicative: { phrase: np('STRONG') } };
 
-  test.fails('Portuguese builds the present-subjunctive command of every seeded verb correctly', () => {
+  test('Portuguese builds the present-subjunctive command of every seeded verb correctly', () => {
     expect(command('GIVE')).toBe('dê.');
     expect(command('GIVE', we)).toBe('demos.');
     expect(command('GIVE', youAll)).toBe('deem.');
@@ -608,6 +638,24 @@ describe('known bugs: Portuguese imperative stems', () => {
     expect(command('BECOME', np('SECOND_PERSON'), { complements: strong })).toBe('torne-se forte.');
     expect(command('BECOME', np('SECOND_PERSON'), { complements: strong, verbPhrase: { negative: true } })).toBe('não se torne forte.');
   });
+
+  test('Portuguese carries the fixed stems into the negative and the reflexive into every person', () => {
+    expect(command('GIVE', np('SECOND_PERSON'), { verbPhrase: { negative: true } })).toBe('não dê.');
+    expect(command('GO', youAll, { verbPhrase: { negative: true } })).toBe('não vão.');
+    expect(command('START', youAll)).toBe('comecem.');
+    expect(command('BECOME', we, { complements: strong })).toBe('tornemo-nos fortes.');
+    expect(command('BECOME', youAll, { complements: strong })).toBe('tornem-se fortes.');
+    expect(command('BECOME', we, { complements: strong, verbPhrase: { negative: true } })).toBe('não nos tornemos fortes.');
+  });
+
+  test('regression: regular stems, the 1sg-borne irregulars, the respellings and the instruction are unchanged', () => {
+    expect(command('EAT')).toBe('coma.');
+    expect(command('MAKE')).toBe('faça.');
+    expect(command('LOAD')).toBe('carregue.');
+    expect(command('NAME')).toBe('nomeie.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { complements: strong }), imperative: true, imperativeRegister: 'instruction' }).pt)
+      .toBe('tornar-se forte.');
+  });
 });
 
 // A110. `predicateSegs` builds a BE command as the になる-style predicative + してください. With する
@@ -615,7 +663,7 @@ describe('known bugs: Portuguese imperative stems', () => {
 // ignores the addressee, so "let's be big" is a request. Want なる: 大きくなってください, 1pl
 // 大きくなりましょう. A noun or na-adjective may take でいてください instead, and both are accepted.
 describe('known bugs: Japanese copula command', () => {
-  test.fails('Japanese builds a copula command on なる (or いる), not on する', () => {
+  test('Japanese builds a copula command on なる (or いる), not on する', () => {
     const be = (predicate: string, subject = np('SECOND_PERSON'), negative = false) => sayAll({
       ...clause(subject, 'BE', { verbPhrase: { negative }, complements: { predicative: { phrase: np(predicate) } } }),
       imperative: true,
@@ -625,5 +673,21 @@ describe('known bugs: Japanese copula command', () => {
     expect(be('BIG')).toBe('大きくなってください。');
     expect(be('LEGEND', np('SECOND_PERSON'), true)).toMatch(/^伝説(にならないで|でいないで)ください。$/);
     expect(be('BIG', np('FIRST_PERSON', { number: 'plural' }))).toBe('大きくなりましょう。');
+  });
+
+  test('Japanese builds the na-adjective, the plural and the 1pl negative copula command on なる', () => {
+    const be = (predicate: string, subject = np('SECOND_PERSON'), negative = false) => sayAll({
+      ...clause(subject, 'BE', { verbPhrase: { negative }, complements: { predicative: { phrase: np(predicate) } } }),
+      imperative: true,
+    }).ja;
+    expect(be('CAREFUL')).toBe('慎重になってください。');
+    expect(be('HAPPY', np('SECOND_PERSON', { number: 'plural' }))).toBe('幸せになってください。');
+    expect(be('BIG', np('FIRST_PERSON', { number: 'plural' }), true)).toBe('大きくなるのはやめましょう。');
+  });
+
+  test('regression: the BECOME command and a declarative copula are unchanged', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { complements: { predicative: { phrase: np('BIG') } } }), imperative: true }).ja)
+      .toBe('大きくなってください。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG') } } })).ja).toBe('猫は大きいです。');
   });
 });

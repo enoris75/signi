@@ -44,3 +44,39 @@ subject forms passed in, and `aspectVerb` should use the helper for the progress
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: Spanish reflexive verb in a non-finite verb group* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The new
+[`reflexiveNonfinite.ts`](../../../packages/engine/src/languages/es/reflexiveNonfinite.ts) strips
+the lexical `se` from a stored non-finite form. It then attaches `reflexiveClitic(verbForms,
+subjectForms)` through `esEnclitic`, which places the accent (`volverme`, `volviéndonos`). A form
+without a `se`, such as `haber`, takes the clitic the same way.
+
+It is used in two places:
+
+- [`verbGroupInfinitive.ts`](../../../packages/engine/src/languages/es/verbGroupInfinitive.ts), which
+  now takes the subject forms, passed in from `predicateText`. The clitic goes on the infinitive or
+  gerund (`debo volverme`, `debo estar volviéndome`), and on `haber` in the perfect (`debe haberse
+  vuelto`).
+- the progressive and prospective of [`aspectVerb.ts`](../../../packages/engine/src/languages/es/aspectVerb.ts)
+  (`estoy volviéndome`, `estoy a punto de volverme`).
+
+Every row now renders as wanted. The fix also covers:
+
+- stacked modals (`quiero poder volverme`), `vosotros` (`debéis volveros`) and `nosotros` in the perfect
+  (`debemos habernos vuelto`);
+- a negation, the relative (`que debe haberse vuelto`) and a modal under a condition (`debería
+  volverme`, left over from A101).
+
+Unchanged: the 3rd person (`debe volverse`, `está volviéndose`), the finite perfect (`me he vuelto`),
+the citation infinitive and a plain verb (`debo haber comido`). A generic subject still doubles the
+clitic (`se debe volverse`), as before the fix.
+
+The 24 BECOME progressive and prospective cells in `verb.conjugation.test.ts.snap` were updated. A
+script confirmed they are exactly the cells the bug file listed.
+
+- **Tests:** [`packages/engine/test/verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known
+  bugs: Spanish reflexive verb in a non-finite verb group*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the siblings above, with a guard for the unchanged forms.
+- Unit tests: the new `reflexiveNonfinite.test.ts`, plus `verbGroupInfinitive.test.ts` and `aspectVerb.test.ts` (es).

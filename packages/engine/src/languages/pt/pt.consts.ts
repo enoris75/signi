@@ -13,11 +13,15 @@ export const PT_DEGREE: Record<Degree, string> = {
  * synthetic word, never "mais" + base: grande → maior, bom → melhor, pequeno → menor, mau →
  * pior. Only "more"/"most" suppletise; the lowered and equal degrees stay periphrastic ("menos
  * grande", "igualmente bom"). All four suppletives are gender-invariant and pluralise in -es
- * (maiores, melhores), which `agreeAdj` derives from the base.
+ * (maiores, melhores), which `agreeAdj` derives from the base. The table is keyed by the Portuguese
+ * base, not the concept, so every concept spelled so suppletises (BIG and GREAT are both "grande").
  */
 export const PT_SUPPLETIVE: Record<string, string> = {
-  BIG: 'maior', GOOD: 'melhor', SMALL: 'menor', BAD: 'pior',
+  grande: 'maior', bom: 'melhor', pequeno: 'menor', mau: 'pior',
 };
+
+/** The tonic pronouns "de" fuses with: de + ele → dele, de + isso → disso, de + aquilo → daquilo. */
+export const PT_DE_FUSING_PRONOUN = /^(?:el[ae]s?|isso|isto|aquilo|aquel[ae]s?)$/i;
 
 /** Irregular Portuguese adjectives: base → [masc sg, fem sg, masc pl, fem pl]. */
 export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
@@ -34,19 +38,19 @@ export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerúndio / "prestes a" +
 // infinitivo. Past uses the imperfect ("estava"). The gerund progressive is the Brazilian norm
-// ("está indo").
+// ("está indo"). The 2nd person is você / vocês, agreeing as the 3rd, in this and the tables below.
 export const ESTAR_PT: Record<Tense, Record<string, string>> = {
-  present: { '1sg': 'estou', '2sg': 'estás', '3sg': 'está', '1pl': 'estamos', '2pl': 'estais', '3pl': 'estão' },
-  past:    { '1sg': 'estava', '2sg': 'estavas', '3sg': 'estava', '1pl': 'estávamos', '2pl': 'estáveis', '3pl': 'estavam' },
-  future:  { '1sg': 'estarei', '2sg': 'estarás', '3sg': 'estará', '1pl': 'estaremos', '2pl': 'estareis', '3pl': 'estarão' },
+  present: { '1sg': 'estou', '2sg': 'está', '3sg': 'está', '1pl': 'estamos', '2pl': 'estão', '3pl': 'estão' },
+  past:    { '1sg': 'estava', '2sg': 'estava', '3sg': 'estava', '1pl': 'estávamos', '2pl': 'estavam', '3pl': 'estavam' },
+  future:  { '1sg': 'estarei', '2sg': 'estará', '3sg': 'estará', '1pl': 'estaremos', '2pl': 'estarão', '3pl': 'estarão' },
 };
 
 // "ter" — the resultative auxiliary. Like Spanish, Portuguese has no essere/avere split (and
 // unlike Spanish it uses "ter", not "haver"); the participle does not agree with the subject.
 export const TER_PT: Record<Tense, Record<string, string>> = {
-  present: { '1sg': 'tenho', '2sg': 'tens', '3sg': 'tem', '1pl': 'temos', '2pl': 'tendes', '3pl': 'têm' },
-  past:    { '1sg': 'tinha', '2sg': 'tinhas', '3sg': 'tinha', '1pl': 'tínhamos', '2pl': 'tínheis', '3pl': 'tinham' },
-  future:  { '1sg': 'terei', '2sg': 'terás', '3sg': 'terá', '1pl': 'teremos', '2pl': 'tereis', '3pl': 'terão' },
+  present: { '1sg': 'tenho', '2sg': 'tem', '3sg': 'tem', '1pl': 'temos', '2pl': 'têm', '3pl': 'têm' },
+  past:    { '1sg': 'tinha', '2sg': 'tinha', '3sg': 'tinha', '1pl': 'tínhamos', '2pl': 'tinham', '3pl': 'tinham' },
+  future:  { '1sg': 'terei', '2sg': 'terá', '3sg': 'terá', '1pl': 'teremos', '2pl': 'terão', '3pl': 'terão' },
 };
 
 // The aspect auxiliaries as minimal concepts, so `moodForm` derives their conditional (estaria /
@@ -66,12 +70,12 @@ export const ESTAR_COPULA: ConceptForms = {
   conceptId: 'ESTAR',
   forms: {
     base: 'estar', participle: 'estado', gerund: 'estando',
-    '1sg_present': 'estou', '2sg_present': 'estás', '3sg_present': 'está',
-    '1pl_present': 'estamos', '2pl_present': 'estais', '3pl_present': 'estão',
-    '1sg_past': 'estive', '2sg_past': 'estiveste', '3sg_past': 'esteve',
-    '1pl_past': 'estivemos', '2pl_past': 'estivestes', '3pl_past': 'estiveram',
-    '1sg_future': 'estarei', '2sg_future': 'estarás', '3sg_future': 'estará',
-    '1pl_future': 'estaremos', '2pl_future': 'estareis', '3pl_future': 'estarão',
+    '1sg_present': 'estou', '2sg_present': 'está', '3sg_present': 'está',
+    '1pl_present': 'estamos', '2pl_present': 'estão', '3pl_present': 'estão',
+    '1sg_past': 'estive', '2sg_past': 'esteve', '3sg_past': 'esteve',
+    '1pl_past': 'estivemos', '2pl_past': 'estiveram', '3pl_past': 'estiveram',
+    '1sg_future': 'estarei', '2sg_future': 'estará', '3sg_future': 'estará',
+    '1pl_future': 'estaremos', '2pl_future': 'estarão', '3pl_future': 'estarão',
   },
 };
 

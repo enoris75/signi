@@ -909,7 +909,7 @@ describe('known bugs: French reflexive infinitive', () => {
 // never add a clitic that agrees with the subject. So the 3rd-person "se" is stuck on every
 // person, and under a modal the resultative loses it altogether ("haber vuelto" = "have returned").
 describe('known bugs: Spanish reflexive verb in a non-finite verb group', () => {
-  test.fails('Spanish keeps the reflexive clitic, agreeing, on "haber", the infinitive and the gerund', () => {
+  test('Spanish keeps the reflexive clitic, agreeing, on "haber", the infinitive and the gerund', () => {
     const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
     expect(sayAll(clause(np('CAT'), 'BECOME', { verbPhrase: { modals: [{ verb: 'MUST' }], aspect: 'resultative' }, complements: legend })).es)
       .toBe('el gato debe haberse vuelto una leyenda.');
@@ -919,5 +919,29 @@ describe('known bugs: Spanish reflexive verb in a non-finite verb group', () => 
       .toBe('estoy a punto de volverme una leyenda.');
     expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { aspect: 'progressive' }, complements: legend })).es)
       .toBe('estoy volviéndome una leyenda.');
+  });
+
+  test('Spanish agrees the clitic under stacked modals, a negation, a modal progressive, a relative and a condition', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    const become = (subject: ReturnType<typeof np>, verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase']) =>
+      sayAll(clause(subject, 'BECOME', { verbPhrase, complements: legend })).es;
+    expect(become(np('FIRST_PERSON'), { modals: ['WILL', 'CAN'] })).toBe('quiero poder volverme una leyenda.');
+    expect(become(np('SECOND_PERSON', { number: 'plural' }), { modals: ['MUST'] })).toBe('debéis volveros una leyenda.');
+    expect(become(np('FIRST_PERSON', { number: 'plural' }), { modals: ['MUST'], aspect: 'resultative' })).toBe('debemos habernos vuelto una leyenda.');
+    expect(become(np('FIRST_PERSON'), { modals: ['MUST'], aspect: 'progressive' })).toBe('debo estar volviéndome una leyenda.');
+    expect(become(np('FIRST_PERSON'), { modals: ['MUST'], negative: true })).toBe('no debo volverme una leyenda.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'BECOME', modals: ['MUST'], aspect: 'resultative' }, complements: legend } }), 'RUN')).es)
+      .toBe('el perro que debe haberse vuelto una leyenda corre.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { modals: ['MUST'] }, complements: legend }), condition: clause(np('DOG'), 'EAT') }).es)
+      .toBe('si el perro comiera, debería volverme una leyenda.');
+  });
+
+  test('regression: the 3rd person, the finite perfect, the citation infinitive and a plain verb are unchanged', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    expect(sayAll(clause(np('CAT'), 'BECOME', { verbPhrase: { modals: ['MUST'] }, complements: legend })).es).toBe('el gato debe volverse una leyenda.');
+    expect(sayAll(clause(np('CAT'), 'BECOME', { verbPhrase: { aspect: 'progressive' }, complements: legend })).es).toBe('el gato está volviéndose una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { aspect: 'resultative' }, complements: legend })).es).toBe('me he vuelto una leyenda.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BECOME', { complements: legend }), infinitive: true }).es).toBe('volverse una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).es).toBe('debo haber comido.');
   });
 });

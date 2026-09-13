@@ -263,11 +263,24 @@ describe('known bugs: English a/an by spelling', () => {
 // ala"), like `agua`. The corpus does not mark WING with `stressed_a`, so `defArticle` and
 // `indefArticle` give it the feminine form.
 describe('known bugs: Spanish stressed-a noun WING', () => {
-  test.fails('Spanish gives "ala" the article "el" / "un"', () => {
+  test('Spanish gives "ala" the article "el" / "un"', () => {
     expect(sayAll(clause(np('WING'), 'BURN')).es).toBe('el ala arde.');
     expect(sayAll(clause(np('WING', { definiteness: 'indefinite' }), 'BURN')).es).toBe('un ala arde.');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('WING') } } })).es)
       .toBe('el gato corre en el ala.');
     expect(sayAll(clause(np('BOOK', { possessor: np('WING') }), 'BURN')).es).toBe('el libro del ala arde.');
+  });
+
+  test('Spanish gives "ala" the masculine article after "a" / "de" and before a postnominal adjective and a predicate', () => {
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('WING') } } })).es).toBe('el gato va al ala.');
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('WING') } } })).es).toBe('el gato viene del ala.');
+    expect(sayAll(clause(np('WING', { adjectives: ['BIG'] }), 'BURN')).es).toBe('el ala grande arde.');
+    expect(sayAll(clause(np('WING'), 'BE', { complements: { predicative: { phrase: np('BIG') } } })).es).toBe('el ala es grande.');
+  });
+
+  test('regression: the plural, the demonstrative and a prenominal adjective keep the feminine', () => {
+    expect(sayAll(clause(np('WING', { number: 'plural' }), 'BURN')).es).toBe('las alas arden.');
+    expect(sayAll(clause(np('WING', { definiteness: 'this' }), 'BURN')).es).toBe('esta ala arde.');
+    expect(sayAll(clause(np('WING', { adjectives: ['FIRST'] }), 'BURN')).es).toBe('la primera ala arde.');
   });
 });

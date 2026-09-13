@@ -135,27 +135,27 @@ export const IR: Forms = {
 /** BE — the copula "ser" (the located / transient "estar" is `ESTAR_COPULA` in pt.consts). */
 export const SER: Forms = {
   base: 'ser', copula: '1', gerund: 'sendo', participle: 'sido',
-  '1sg_present': 'sou', '2sg_present': 'és', '3sg_present': 'é',
-  '1pl_present': 'somos', '2pl_present': 'sois', '3pl_present': 'são',
-  '1sg_past': 'fui', '2sg_past': 'foste', '3sg_past': 'foi',
-  '1pl_past': 'fomos', '2pl_past': 'fostes', '3pl_past': 'foram',
-  '1sg_future': 'serei', '2sg_future': 'serás', '3sg_future': 'será',
-  '1pl_future': 'seremos', '2pl_future': 'sereis', '3pl_future': 'serão',
+  '1sg_present': 'sou', '2sg_present': 'é', '3sg_present': 'é',
+  '1pl_present': 'somos', '2pl_present': 'são', '3pl_present': 'são',
+  '1sg_past': 'fui', '2sg_past': 'foi', '3sg_past': 'foi',
+  '1pl_past': 'fomos', '2pl_past': 'foram', '3pl_past': 'foram',
+  '1sg_future': 'serei', '2sg_future': 'será', '3sg_future': 'será',
+  '1pl_future': 'seremos', '2pl_future': 'serão', '3pl_future': 'serão',
 };
 /** BECOME — a pronominal verb whose finite forms carry their clitic ("se torna"). */
 export const TORNAR_SE: Forms = {
   base: 'tornar-se', gerund: 'tornando-se', participle: 'tornado',
-  '1sg_present': 'me torno', '2sg_present': 'te tornas', '3sg_present': 'se torna',
+  '1sg_present': 'me torno', '2sg_present': 'se torna', '3sg_present': 'se torna',
   '1pl_present': 'nos tornamos', '2pl_present': 'se tornam', '3pl_present': 'se tornam',
-  '1sg_past': 'me tornei', '2sg_past': 'te tornaste', '3sg_past': 'se tornou',
+  '1sg_past': 'me tornei', '2sg_past': 'se tornou', '3sg_past': 'se tornou',
   '1pl_past': 'nos tornamos', '2pl_past': 'se tornaram', '3pl_past': 'se tornaram',
-  '1sg_future': 'me tornarei', '2sg_future': 'te tornarás', '3sg_future': 'se tornará',
+  '1sg_future': 'me tornarei', '2sg_future': 'se tornará', '3sg_future': 'se tornará',
   '1pl_future': 'nos tornaremos', '2pl_future': 'se tornarão', '3pl_future': 'se tornarão',
 };
 export const DAR: Forms = {
   base: 'dar', gerund: 'dando', participle: 'dado',
-  '1sg_present': 'dou', '2sg_present': 'dás', '3sg_present': 'dá',
-  '1pl_present': 'damos', '2pl_present': 'dais', '3pl_present': 'dão',
+  '1sg_present': 'dou', '2sg_present': 'dá', '3sg_present': 'dá',
+  '1pl_present': 'damos', '2pl_present': 'dão', '3pl_present': 'dão',
   '1sg_past': 'dei', '2sg_past': 'deu', '3sg_past': 'deu',
   '1pl_past': 'demos', '2pl_past': 'deram', '3pl_past': 'deram',
   '1sg_future': 'darei', '2sg_future': 'dará', '3sg_future': 'dará',
@@ -183,30 +183,30 @@ export const ESCOLHER: Forms = {
 // Modals: conjugated like ordinary verbs, governing a bare infinitive.
 export const DEVER: Forms = {
   base: 'dever',
-  '1sg_present': 'devo', '2sg_present': 'deves', '3sg_present': 'deve',
-  '1pl_present': 'devemos', '2pl_present': 'deveis', '3pl_present': 'devem',
-  '1sg_past': 'devi', '2sg_past': 'deveste', '3sg_past': 'deveu',
-  '1pl_past': 'devemos', '2pl_past': 'devestes', '3pl_past': 'deveram',
-  '1sg_future': 'deverei', '2sg_future': 'deverás', '3sg_future': 'deverá',
-  '1pl_future': 'deveremos', '2pl_future': 'devereis', '3pl_future': 'deverão',
+  '1sg_present': 'devo', '2sg_present': 'deve', '3sg_present': 'deve',
+  '1pl_present': 'devemos', '2pl_present': 'devem', '3pl_present': 'devem',
+  '1sg_past': 'devi', '2sg_past': 'deveu', '3sg_past': 'deveu',
+  '1pl_past': 'devemos', '2pl_past': 'deveram', '3pl_past': 'deveram',
+  '1sg_future': 'deverei', '2sg_future': 'deverá', '3sg_future': 'deverá',
+  '1pl_future': 'deveremos', '2pl_future': 'deverão', '3pl_future': 'deverão',
 };
 export const PODER: Forms = {
   base: 'poder',
-  '1sg_present': 'posso', '2sg_present': 'podes', '3sg_present': 'pode',
-  '1pl_present': 'podemos', '2pl_present': 'podeis', '3pl_present': 'podem',
-  '1sg_past': 'pude', '2sg_past': 'pudeste', '3sg_past': 'pôde',
-  '1pl_past': 'pudemos', '2pl_past': 'pudestes', '3pl_past': 'puderam',
-  '1sg_future': 'poderei', '2sg_future': 'poderás', '3sg_future': 'poderá',
-  '1pl_future': 'poderemos', '2pl_future': 'podereis', '3pl_future': 'poderão',
+  '1sg_present': 'posso', '2sg_present': 'pode', '3sg_present': 'pode',
+  '1pl_present': 'podemos', '2pl_present': 'podem', '3pl_present': 'podem',
+  '1sg_past': 'pude', '2sg_past': 'pôde', '3sg_past': 'pôde',
+  '1pl_past': 'pudemos', '2pl_past': 'puderam', '3pl_past': 'puderam',
+  '1sg_future': 'poderei', '2sg_future': 'poderá', '3sg_future': 'poderá',
+  '1pl_future': 'poderemos', '2pl_future': 'poderão', '3pl_future': 'poderão',
 };
 /** WILL — "querer" (want). */
 export const QUERER: Forms = {
   base: 'querer',
-  '1sg_present': 'quero', '2sg_present': 'queres', '3sg_present': 'quer',
-  '1pl_present': 'queremos', '2pl_present': 'quereis', '3pl_present': 'querem',
-  '1sg_past': 'quis', '2sg_past': 'quiseste', '3sg_past': 'quis',
-  '1pl_past': 'quisemos', '2pl_past': 'quisestes', '3pl_past': 'quiseram',
-  '1sg_future': 'quererei', '2sg_future': 'quererás', '3sg_future': 'quererá',
-  '1pl_future': 'quereremos', '2pl_future': 'querereis', '3pl_future': 'quererão',
+  '1sg_present': 'quero', '2sg_present': 'quer', '3sg_present': 'quer',
+  '1pl_present': 'queremos', '2pl_present': 'querem', '3pl_present': 'querem',
+  '1sg_past': 'quis', '2sg_past': 'quis', '3sg_past': 'quis',
+  '1pl_past': 'quisemos', '2pl_past': 'quiseram', '3pl_past': 'quiseram',
+  '1sg_future': 'quererei', '2sg_future': 'quererá', '3sg_future': 'quererá',
+  '1pl_future': 'quereremos', '2pl_future': 'quererão', '3pl_future': 'quererão',
 };
 export const LENDA: Forms = { base: 'lenda', plural: 'lendas', gender: 'fem', count: 'singular' };

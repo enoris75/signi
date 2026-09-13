@@ -46,3 +46,31 @@ In `subjPresent`, for Portuguese:
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: Portuguese imperative stems* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- **dar, ir:** [`mood.ts`](../../../packages/engine/src/mood.ts) adds GIVE (`dê / demos / deem`) and GO
+  (`vá / vamos / vão`) to `PT_SUBJ_OVERRIDE`.
+- **começar:** `arSubjStem` now takes the language. Portuguese respells `ç` → `c` and keeps `z`
+  (`cruze`); Spanish keeps its `z` → `c`.
+- **nomear:** an `-ear` verb drops the `i` in the 1st plural (`nomeemos`) and keeps it under stress
+  (`nomeie`, `nomeiem`).
+- **tornar-se:** the new [`nonReflexiveVerb.ts`](../../../packages/engine/src/languages/pt/nonReflexiveVerb.ts)
+  strips `-se` and the stored clitic, so the class comes from `tornar`. The imperative branch of
+  [`predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) places the
+  addressee's reflexive: `se` for você / vocês, `nos` for nós. It goes after an affirmative command
+  (`torne-se`, `tornem-se`, `tornemo-nos`, dropping the `-s`) and before a negative one (`não se torne`,
+  `não nos tornemos`). The instruction keeps `tornar-se`.
+
+Every row now renders as wanted, and so do the negatives (`não dê`, `não vão`, `não comece`). A sweep
+compared every command form of all 57 seeded verbs, both polarities and registers, before and after.
+The Portuguese changes are exactly GIVE, GO, START, NAME's 1st plural and BECOME, and the instruction
+register is unchanged.
+
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: Portuguese imperative stems*. The pinning `test.fails` is now a passing `test`. New
+  cases cover the negatives, `comecem` and the reflexive in every person. A guard covers the regular
+  stems, the irregulars the 1sg already carries, the respellings and the instruction.
+- Unit tests: `mood.test.ts` (pt), the new `nonReflexiveVerb.test.ts` (pt) and `predicateText.test.ts` (pt).

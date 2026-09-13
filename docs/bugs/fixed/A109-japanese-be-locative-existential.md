@@ -54,3 +54,41 @@ existing plain / modal / imperative / たら paths then compose on the real verb
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: Japanese BE with a locative* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed, choosing the verb in the engine.
+
+- **Verb choice.** [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+  treats BE with a locative and no predicative as existential. It swaps in `JA_IRU` or `JA_ARU` from
+  [`ja.consts.ts`](../../../packages/engine/src/languages/ja/ja.consts.ts), whose full forms are
+  `いる`/`います`/`いて` and `ある`/`あります`/`あって`.
+  - The choice follows the subject's animacy, passed in as a new argument.
+  - The new [`isAnimate.ts`](../../../packages/engine/src/languages/ja/isAnimate.ts) counts an
+    animate noun or a pronoun as animate.
+  - The callers are `buildClauseSegments` (the clause subject) and `npSegs` (the relative's subject,
+    or the head for a subject relative).
+- **Aspect.** Being somewhere is a state, so the progressive and prospective render as the plain
+  verb, and the resultative as the past.
+- **Particle.** [`complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts)
+  takes an `existential` flag and marks the locative with `に` in place of `で`.
+
+Every pinned row now renders as wanted, and so do the unpinned table rows: progressive `猫は家にいます`,
+`家にいる猫は走ります`, `もし猫が家にいたら`, the citation `家にいる`. Also covered:
+- `家にある本`, `本は家にありません`, `私は家にいます`;
+- a mixed group (`本と猫は家にいます`) and `家にいましょう`.
+
+A predicative BE keeps the copula (`猫は幸せです`), and other verbs keep `で` (`猫は家で食べます`). BE with
+both a predicative and a locative (`猫は家で伝説です`) is A42's case and was not touched. The negative
+command follows the ordinary verbs' plain prohibitive (`家にいるな`).
+
+The passing tests the bug file listed as pinning `でです` now assert the fix. The `test.each` rows for
+BE in *locative* and in the HOME idiom expect `猫は家に`, and the three spatial-specifier cases assert
+`猫は家の下にいます`, `の後ろにいます` and `の前にいます`. BE's seed comment no longer says BE is never
+picked without a predicative.
+
+- **Tests:** [`packages/engine/test/complements/locative.test.ts`](../../../packages/engine/test/complements/locative.test.ts)
+  → *known bugs: Japanese BE with a locative*. The pinning `test.fails` is now a passing `test`. New
+  cases cover the relative, the condition, the citation, the progressive, the inanimate negative,
+  the pronoun, the group and the 1pl command, with a guard for the copula and for other verbs.
+- Unit tests: the new `isAnimate.test.ts`, plus `complementSegs.test.ts` and `predicateSegs.test.ts` (ja).

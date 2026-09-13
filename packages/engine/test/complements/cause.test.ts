@@ -323,9 +323,17 @@ describe('known bugs: Portuguese cause determiner', () => {
 // starts with e- (dele, dela, deles). The neuter THIRD_PERSON is "isso", which fuses just as
 // obligatorily (de + isso → disso), so it comes out as the unfused "de isso".
 describe('known bugs: Portuguese neuter pronoun cause', () => {
-  test.fails('Portuguese fuses "de" with "isso"', () => {
+  test('Portuguese fuses "de" with "isso"', () => {
     expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('THIRD_PERSON', { gender: 'neut' }) } } })).pt)
       .toBe('o gato chora por causa disso.');
+  });
+
+  test('Portuguese fuses "disso" in a group and keeps the unfused persons', () => {
+    const cry = (phrase: NonNullable<NonNullable<Parameters<typeof clause>[2]>['complements']>['cause']) => sayAll(clause(np('CAT'), 'CRY', { complements: { cause: phrase } })).pt;
+    expect(cry({ phrase: { conjuncts: [np('THIRD_PERSON', { gender: 'neut' }), np('DOG')], conjunction: 'and' } })).toBe('o gato chora por causa disso e do cão.');
+    expect(cry({ phrase: np('THIRD_PERSON') })).toBe('o gato chora por causa dele.');
+    expect(cry({ phrase: np('FIRST_PERSON') })).toBe('o gato chora por causa de mim.');
+    expect(cry({ phrase: np('SECOND_PERSON') })).toBe('o gato chora por causa de você.');
   });
 });
 
@@ -488,8 +496,8 @@ describe('known bugs: Portuguese cause with coordinated pronouns', () => {
 
   // The negative connector holds a possessive, so every conjunct repeats it and none is dropped.
   test('Portuguese repeats the negative connector per conjunct', () => {
-    expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('o gato corre por minha culpa e por tua culpa.');
-    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('o gato corre por culpa do cão e por tua culpa.');
+    expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('o gato corre por minha culpa e por sua culpa.');
+    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('o gato corre por culpa do cão e por sua culpa.');
   });
 
   test('regression: a lone pronoun and a group of nouns are unchanged', () => {

@@ -1366,7 +1366,7 @@ describe('known bugs: Spanish plural adjective accent', () => {
 // "mais grande", which standard Portuguese rejects: the comparative and superlative of "grande"
 // are "maior" / "o maior", whichever concept carries the word.
 describe('known bugs: Portuguese GREAT comparison', () => {
-  test.fails('Portuguese raises GREAT to the suppletive "maior"', () => {
+  test('Portuguese raises GREAT to the suppletive "maior"', () => {
     expect(sayAll(clause(np('CAT', { adjectives: ['GREAT'], adjectiveDegrees: ['more'] }), 'EAT')).pt)
       .toBe('o gato maior come.');
     expect(sayAll(clause(np('HOUSE', { number: 'plural', adjectives: ['GREAT'], adjectiveDegrees: ['more'] }), 'BURN')).pt)
@@ -1375,6 +1375,13 @@ describe('known bugs: Portuguese GREAT comparison', () => {
       .toBe('a casa parece maior.');
     expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('GREAT', { headDegree: 'most' }) } } })).pt)
       .toBe('o gato é o maior.');
+  });
+
+  test('Portuguese keeps the lowered degree of GREAT periphrastic, and the suppletives of BIG, GOOD and SMALL', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['GREAT'], adjectiveDegrees: ['less'] }), 'EAT')).pt).toBe('o gato menos grande come.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['GOOD'], adjectiveDegrees: ['more'] }), 'EAT')).pt).toBe('o gato melhor come.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['SMALL'], adjectiveDegrees: ['more'] }), 'EAT')).pt).toBe('o gato menor come.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['GREAT'], adjectiveDegrees: ['more'] }), 'EAT')).es).toBe('el gato más grande come.');
   });
 });
 

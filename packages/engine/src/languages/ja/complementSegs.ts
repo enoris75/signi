@@ -7,7 +7,12 @@ import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { npSegs } from './npSegs.js';
 import { wordSeg } from './wordSeg.js';
 
-export function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>): RubySegment[] {
+/**
+ * The complements in Japanese order, each with its particle. `existential` marks a clause whose verb
+ * is いる / ある: its locative states where the subject is, with に (家にいます), not the で of a place
+ * where something happens (家で食べます).
+ */
+export function complementSegs(complements?: Partial<Record<ComplementType, ResolvedComplement>>, existential = false): RubySegment[] {
   if (!complements) return [];
   const segs: RubySegment[] = [];
   for (const type of COMPLEMENT_RENDER_ORDER) {
@@ -83,7 +88,8 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     // Manner: a similative head takes 〜のように ("風のように" = like the wind), not the で the
     // means/measure/mode relations share; every other complement uses its fixed particle.
     const particle =
-      type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
+      type === 'locative' && existential ? 'に'
+      : type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       : PARTICLE[type];
     // A `no` group ends in も, which replaces this case particle (どの市場も, not どの市場もに).

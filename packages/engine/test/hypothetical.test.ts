@@ -240,7 +240,7 @@ describe('documented simplifications: Portuguese 1st-plural imperfect subjunctiv
 // the stored `3pl_past`. For a reflexive verb those forms carry a clitic ("me volveré", "se
 // volvieron"), so every person gets "me volvería" and "se volviera".
 describe('known bugs: Spanish reflexive verb in a conditional', () => {
-  test.fails('Spanish agrees the reflexive clitic of the conditional and the imperfect subjunctive', () => {
+  test('Spanish agrees the reflexive clitic of the conditional and the imperfect subjunctive', () => {
     const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
     expect(sayAll({ ...clause(np('DOG'), 'BECOME', { complements: legend }), condition: clause(np('CAT'), 'EAT') }).es)
       .toBe('si el gato comiera, el perro se volvería una leyenda.');
@@ -250,6 +250,22 @@ describe('known bugs: Spanish reflexive verb in a conditional', () => {
       .toBe('si me volviera una leyenda, el perro correría.');
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('SECOND_PERSON'), 'BECOME', { complements: legend }) }).es)
       .toBe('si te volvieras una leyenda, el perro correría.');
+  });
+
+  test('Spanish agrees the clitic in the plural persons and keeps it inside the negation', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    expect(sayAll({ ...clause(np('DOG'), 'BECOME', { complements: legend, verbPhrase: { negative: true } }), condition: clause(np('CAT'), 'EAT') }).es)
+      .toBe('si el gato comiera, el perro no se volvería una leyenda.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'BECOME', { complements: legend }), condition: clause(np('CAT'), 'EAT') }).es)
+      .toBe('si el gato comiera, nos volveríamos una leyenda.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('SECOND_PERSON', { number: 'plural' }), 'BECOME', { complements: legend }) }).es)
+      .toBe('si os volvierais una leyenda, el perro correría.');
+  });
+
+  test('regression: the compound conditional keeps its clitic before the auxiliary', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    expect(sayAll({ ...clause(np('DOG'), 'BECOME', { complements: legend, verbPhrase: { aspect: 'resultative' } }), condition: clause(np('CAT'), 'EAT') }).es)
+      .toBe('si el gato comiera, el perro se habría vuelto una leyenda.');
   });
 });
 

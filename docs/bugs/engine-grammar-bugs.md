@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (31 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (19 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,16 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A101 | [A101-spanish-reflexive-mood-clitic.md](A-must-fix/A101-spanish-reflexive-mood-clitic.md) |
-| A102 | [A102-spanish-reflexive-nonfinite.md](A-must-fix/A102-spanish-reflexive-nonfinite.md) |
-| A103 | [A103-spanish-subjunctive-stem.md](A-must-fix/A103-spanish-subjunctive-stem.md) |
-| A104 | [A104-spanish-wing-stressed-a.md](A-must-fix/A104-spanish-wing-stressed-a.md) |
-| A105 | [A105-portuguese-cause-disso.md](A-must-fix/A105-portuguese-cause-disso.md) |
-| A106 | [A106-portuguese-great-suppletive.md](A-must-fix/A106-portuguese-great-suppletive.md) |
-| A107 | [A107-portuguese-imperative-subjunctive-stem.md](A-must-fix/A107-portuguese-imperative-subjunctive-stem.md) |
-| A108 | [A108-portuguese-voce-paradigm.md](A-must-fix/A108-portuguese-voce-paradigm.md) |
-| A109 | [A109-japanese-be-locative-existential.md](A-must-fix/A109-japanese-be-locative-existential.md) |
-| A110 | [A110-japanese-copula-command-suru.md](A-must-fix/A110-japanese-copula-command-suru.md) |
 | A111 | [A111-japanese-instruction-label-furigana.md](A-must-fix/A111-japanese-instruction-label-furigana.md) |
 | A112 | [A112-japanese-lowered-degree-no-ta-adjective.md](A-must-fix/A112-japanese-lowered-degree-no-ta-adjective.md) |
 | A113 | [A113-japanese-modal-bridge-drops-tai.md](A-must-fix/A113-japanese-modal-bridge-drops-tai.md) |
@@ -207,6 +197,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A98 | [A98-spanish-personal-a.md](fixed/A98-spanish-personal-a.md) | Spanish | 2026-09-13 |
 | A99 | [A99-spanish-plural-adjective-accent.md](fixed/A99-spanish-plural-adjective-accent.md) | Spanish | 2026-09-13 |
 | A100 | [A100-spanish-reflexive-imperative.md](fixed/A100-spanish-reflexive-imperative.md) | Spanish | 2026-09-13 |
+| A103 | [A103-spanish-subjunctive-stem.md](fixed/A103-spanish-subjunctive-stem.md) | Spanish | 2026-09-13 |
+| A101 | [A101-spanish-reflexive-mood-clitic.md](fixed/A101-spanish-reflexive-mood-clitic.md) | Spanish | 2026-09-13 |
+| A102 | [A102-spanish-reflexive-nonfinite.md](fixed/A102-spanish-reflexive-nonfinite.md) | Spanish | 2026-09-13 |
+| A104 | [A104-spanish-wing-stressed-a.md](fixed/A104-spanish-wing-stressed-a.md) | Spanish | 2026-09-13 |
+| A105 | [A105-portuguese-cause-disso.md](fixed/A105-portuguese-cause-disso.md) | Portuguese | 2026-09-13 |
+| A106 | [A106-portuguese-great-suppletive.md](fixed/A106-portuguese-great-suppletive.md) | Portuguese | 2026-09-13 |
+| A107 | [A107-portuguese-imperative-subjunctive-stem.md](fixed/A107-portuguese-imperative-subjunctive-stem.md) | Portuguese | 2026-09-13 |
+| A108 | [A108-portuguese-voce-paradigm.md](fixed/A108-portuguese-voce-paradigm.md) | Portuguese | 2026-09-13 |
+| A109 | [A109-japanese-be-locative-existential.md](fixed/A109-japanese-be-locative-existential.md) | Japanese | 2026-09-13 |
+| A110 | [A110-japanese-copula-command-suru.md](fixed/A110-japanese-copula-command-suru.md) | Japanese | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

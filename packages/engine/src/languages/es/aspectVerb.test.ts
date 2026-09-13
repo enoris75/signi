@@ -50,4 +50,11 @@ describe('aspectVerb', () => {
   test('any other mood keeps the tense table', () => {
     expect(aspectVerb(COMER, GATO, 'past', 'resultative', 'indicative')).toBe('había comido');
   });
+
+  // A102: a reflexive gerund or infinitive agrees its attached clitic with the subject.
+  test('a reflexive progressive or prospective agrees the attached clitic', () => {
+    expect(aspectVerb(VOLVERSE, YO, 'present', 'progressive')).toBe('estoy volviéndome');
+    expect(aspectVerb(VOLVERSE, NOSOTROS, 'past', 'prospective')).toBe('estábamos a punto de volvernos');
+    expect(aspectVerb(VOLVERSE, GATO, 'present', 'progressive')).toBe('está volviéndose');
+  });
 });

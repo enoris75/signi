@@ -1,4 +1,5 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier } from '@signi/shared';
+import type { ConceptForms } from '../../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -121,3 +122,11 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
   few: '少しの',
   all: 'すべての',
 };
+
+/**
+ * The existential verbs a located subject takes in place of the copula: いる for an animate subject,
+ * ある for an inanimate one (猫は家にいます, 本は家にあります). Written in kana, so they carry no
+ * reading. The te-form drives the command (いてください), the past (いた) and たら (いたら).
+ */
+export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて' } };
+export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって' } };

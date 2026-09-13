@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
+import { possessivePt } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
@@ -10,7 +11,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { LOCATIVE_IDIOMS } from './pt.consts.js';
+import { LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
@@ -129,14 +130,11 @@ export function complementsPhrase(
           const disj = pf['disjunctive'] ?? pf['base'] ?? '';
           if (sent === 'positive') return `a ${disj}`;
           if (sent === 'negative') {
-            const plural = pf['number'] === 'plural';
-            const poss =
-              pf['person'] === '1' ? (plural ? 'nossa' : 'minha') :
-              pf['person'] === '2' ? (plural ? 'vossa' : 'tua') :
-              'sua';
-            return `por ${poss} culpa`;
+            // The possessive agrees with the feminine "culpa"; você / vocês take "sua" (see `possessivePt`).
+            const owner = { kind: 'pronominal', person: (pf['person'] ?? '3') as '1' | '2' | '3', number: pf['number'] === 'plural' ? 'plural' : 'singular' } as const;
+            return `por ${possessivePt(owner, { gender: 'fem', number: 'singular' })} culpa`;
           }
-          return /^e/i.test(disj) ? `d${disj}` : `de ${disj}`;
+          return PT_DE_FUSING_PRONOUN.test(disj) ? `d${disj}` : `de ${disj}`;
         };
         const shared = sent !== 'negative';
         const conjuncts = coordinateElement(c.phrase, (np) =>

@@ -133,6 +133,13 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ locative: complement(np(IE), [path('in')]) })))).toBe('家で');
     });
 
+    // A109: the existential いる / ある marks where the subject is with に.
+    test('an existential clause marks its locative with に, and only the locative', () => {
+      expect(text(complementSegs(complements({ locative: complement(np(IE)) }), true))).toBe('家に');
+      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('under')]) }), true))).toBe('家の下に');
+      expect(text(complementSegs(complements({ locative: complement(np(IE)), cause: complement(np(NEKO)) }), true))).toBe('家に猫のために');
+    });
+
     test('a spatial relation puts its relational noun before で', () => {
       expect(complementSegs(complements({ locative: complement(np(IE), [path('under')]) })))
         .toEqual([{ t: '家', r: 'いえ' }, { t: 'の下', r: 'のした' }, { t: 'で' }]);

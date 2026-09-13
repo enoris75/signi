@@ -10,7 +10,8 @@ import { ptDeg } from './ptDeg.js';
  */
 export function ptComparison(a: ConceptForms, gender: string, plural: boolean): string {
   const degree = adjDegree(a);
-  const suppletive = PT_SUPPLETIVE[a.conceptId];
+  // Keyed by the Portuguese word, so every concept spelled grande / bom / pequeno / mau suppletises.
+  const suppletive = PT_SUPPLETIVE[a.forms['base'] ?? ''];
   if (suppletive && (degree === 'more' || degree === 'most')) {
     return agreeAdj(suppletive, gender, plural);
   }

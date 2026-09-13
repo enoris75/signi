@@ -3,7 +3,7 @@ import { predicateText } from './predicateText.js';
 import {
   BOM, CANSADO, CAO, CASA, COMER, complement, complements, concept, CRIANCA, DAR, DEVER, el, ELA, ELE, ELES, EU, FELIZ,
   type Forms, GATA, GATO, GRANDE, LENDA, LIVRO, MENINO, modal, NOS, np, NUNCA, PODER, QUERER, RAPIDAMENTE, RAPOSA,
-  RATO, SE, SEMPRE, SER, VER, VOCE, vp,
+  RATO, SE, SEMPRE, SER, TORNAR_SE, VER, VOCE, vp,
 } from './pt.fixtures.js';
 
 const CORRER: Forms = {
@@ -71,6 +71,14 @@ describe('predicateText', () => {
 
     test('a modal takes the conditional under a hypothetical', () => {
       expect(predicateText(GATO, vp(COMER, { mood: 'conditional', modals: [modal(DEVER)] }))).toBe('deveria comer');
+    });
+
+    // A108: você / vocês agree as the 3rd person, in the modal and in the hypothetical endings.
+    test('você and vocês agree as the 3rd person', () => {
+      expect(predicateText(VOCE, vp(COMER, { modals: [modal(DEVER)] }))).toBe('deve comer');
+      expect(predicateText(VOCE, vp(COMER, { mood: 'subjunctive' }))).toBe('comesse');
+      expect(predicateText({ ...VOCE, number: 'plural' }, vp(COMER, { mood: 'conditional' }))).toBe('comeriam');
+      expect(predicateText(VOCE, be())).toBe('é');
     });
 
     test('a modal’s adverb trails the modal, the main verb’s the whole group', () => {
@@ -219,6 +227,15 @@ describe('predicateText', () => {
       expect(predicateText({ ...VOCE, number: 'plural' }, command())).toBe('comam');
       expect(predicateText(NOS, command())).toBe('comamos');
       expect(predicateText(VOCE, be({ mood: 'imperative' }), undefined, complements({ predicative: complement(np(BOM)) }))).toBe('seja bom');
+    });
+
+    // A107: a pronominal command takes se / nos, after an affirmative and before a negative command.
+    test('a pronominal command takes the addressee\'s reflexive', () => {
+      const become = (extra: Parameters<typeof vp>[1] = {}) => vp(TORNAR_SE, { mood: 'imperative', ...extra }, 'BECOME');
+      expect(predicateText(VOCE, become())).toBe('torne-se');
+      expect(predicateText(NOS, become())).toBe('tornemo-nos');
+      expect(predicateText({ ...VOCE, number: 'plural' }, become({ negative: true }))).toBe('não se tornem');
+      expect(predicateText(VOCE, become({ register: 'instruction' }))).toBe('tornar-se');
     });
 
     test('the adverb trails the verb, then the object and complements', () => {

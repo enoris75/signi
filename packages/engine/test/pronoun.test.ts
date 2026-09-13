@@ -294,7 +294,7 @@ describe('known bugs: Portuguese você agreement', () => {
   const you = np('SECOND_PERSON');
   const youAll = np('SECOND_PERSON', { number: 'plural' });
 
-  test.fails('Portuguese agrees a 2nd-person subject as você / vocês', () => {
+  test('Portuguese agrees a 2nd-person subject as você / vocês', () => {
     expect(sayAll(clause(you, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('é forte.');
     expect(sayAll(clause(youAll, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('são fortes.');
     expect(sayAll(clause(you, 'BE', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('está cansado.');
@@ -310,11 +310,35 @@ describe('known bugs: Portuguese você agreement', () => {
     expect(sayAll({ ...clause(you, 'RUN'), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, correria.');
   });
 
-  test.fails('Portuguese blames você / vocês with "sua culpa"', () => {
+  test('Portuguese blames você / vocês with "sua culpa"', () => {
     const blame = (who: Parameters<typeof np>[1]) => sayAll(clause(np('CAT'), 'CRY', {
       complements: { cause: { phrase: np('SECOND_PERSON', who), specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
     })).pt;
     expect(blame({})).toBe('o gato chora por sua culpa.');
     expect(blame({ number: 'plural' })).toBe('o gato chora por sua culpa.');
+  });
+
+  test('Portuguese agrees vocês in every table: modals, BE and estar, the auxiliaries and the hypothetical', () => {
+    const strong = { predicative: { phrase: np('STRONG') } };
+    expect(sayAll(clause(youAll, 'EAT', { verbPhrase: { modals: ['CAN'] } })).pt).toBe('podem comer.');
+    expect(sayAll(clause(youAll, 'BE', { complements: strong, verbPhrase: { tense: 'future' } })).pt).toBe('serão fortes.');
+    expect(sayAll(clause(youAll, 'BE', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('estão cansados.');
+    expect(sayAll(clause(you, 'BE', { complements: { locative: { phrase: np('HOUSE') } }, verbPhrase: { tense: 'past' } })).pt).toBe('esteve na casa.');
+    expect(sayAll(clause(youAll, 'EAT', { verbPhrase: { aspect: 'progressive', tense: 'future' } })).pt).toBe('estarão comendo.');
+    expect(sayAll(clause(you, 'SEEM', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('parece cansado.');
+    expect(sayAll({ ...clause(youAll, 'RUN'), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, correriam.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(youAll, 'EAT') }).pt).toBe('se comessem, o cão correria.');
+    expect(sayAll({ ...clause(you, 'EAT', { verbPhrase: { aspect: 'resultative' } }), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, teria comido.');
+  });
+
+  test('regression: the 1st person, the other blamers and a coordinated você keep their forms', () => {
+    const blame = (who: ReturnType<typeof np>) =>
+      sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: who, specifiers: [{ kind: 'sentiment', value: 'negative' }] } } })).pt;
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('sou forte.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'RUN'), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, correríamos.');
+    expect(blame(np('FIRST_PERSON', { number: 'plural' }))).toBe('o gato chora por nossa culpa.');
+    expect(blame(np('THIRD_PERSON'))).toBe('o gato chora por sua culpa.');
+    expect(sayAll(clause({ conjuncts: [you, np('CAT')], conjunction: 'and' }, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt)
+      .toBe('você e o gato são fortes.');
   });
 });

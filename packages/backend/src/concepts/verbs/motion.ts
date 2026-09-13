@@ -124,11 +124,11 @@ export const motionVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'tornar-se',
-        '1sg_present': 'me torno', '2sg_present': 'te tornas', '3sg_present': 'se torna',
+        '1sg_present': 'me torno', '2sg_present': 'se torna', '3sg_present': 'se torna',
         '1pl_present': 'nos tornamos', '2pl_present': 'se tornam', '3pl_present': 'se tornam',
-        '1sg_past': 'me tornei', '2sg_past': 'te tornaste', '3sg_past': 'se tornou',
+        '1sg_past': 'me tornei', '2sg_past': 'se tornou', '3sg_past': 'se tornou',
         '1pl_past': 'nos tornamos', '2pl_past': 'se tornaram', '3pl_past': 'se tornaram',
-        '1sg_future': 'me tornarei', '2sg_future': 'te tornarás', '3sg_future': 'se tornará',
+        '1sg_future': 'me tornarei', '2sg_future': 'se tornará', '3sg_future': 'se tornará',
         '1pl_future': 'nos tornaremos', '2pl_future': 'se tornarão', '3pl_future': 'se tornarão',
       },
     },
@@ -197,7 +197,7 @@ export const motionVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'parecer', seeming: '1',
-        '1sg_present': 'pareço', '2sg_present': 'pareces', '3sg_present': 'parece',
+        '1sg_present': 'pareço', '2sg_present': 'parece', '3sg_present': 'parece',
         '1pl_present': 'parecemos', '2pl_present': 'parecem', '3pl_present': 'parecem',
         '1sg_past': 'pareci', '2sg_past': 'pareceu', '3sg_past': 'pareceu',
         '1pl_past': 'parecemos', '2pl_past': 'pareceram', '3pl_past': 'pareceram',
@@ -273,7 +273,7 @@ export const motionVerbs: ConceptSeed[] = [
       },
       pt: {
         base: 'aparecer',
-        '1sg_present': 'apareço', '2sg_present': 'apareces', '3sg_present': 'aparece',
+        '1sg_present': 'apareço', '2sg_present': 'aparece', '3sg_present': 'aparece',
         '1pl_present': 'aparecemos', '2pl_present': 'aparecem', '3pl_present': 'aparecem',
         '1sg_past': 'apareci', '2sg_past': 'apareceu', '3sg_past': 'apareceu',
         '1pl_past': 'aparecemos', '2pl_past': 'apareceram', '3pl_past': 'apareceram',
@@ -339,19 +339,19 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_future': 'seremos', '2pl_future': 'seréis', '3pl_future': 'serán',
       },
       ja: {
-        // Rendered specially by the engine (copula です on the predicate), so these are a
-        // safety fallback only — BE is never picked without a predicative.
+        // Rendered specially by the engine: the copula です on a predicative, or the existential
+        // いる / ある for a locative alone (predicateSegs). These forms are a safety fallback only.
         base: 'です', copula: '1',
         masu_present: 'です',
       },
       pt: {
         base: 'ser', copula: '1',
-        '1sg_present': 'sou', '2sg_present': 'és', '3sg_present': 'é',
-        '1pl_present': 'somos', '2pl_present': 'sois', '3pl_present': 'são',
-        '1sg_past': 'fui', '2sg_past': 'foste', '3sg_past': 'foi',
-        '1pl_past': 'fomos', '2pl_past': 'fostes', '3pl_past': 'foram',
-        '1sg_future': 'serei', '2sg_future': 'serás', '3sg_future': 'será',
-        '1pl_future': 'seremos', '2pl_future': 'sereis', '3pl_future': 'serão',
+        '1sg_present': 'sou', '2sg_present': 'é', '3sg_present': 'é',
+        '1pl_present': 'somos', '2pl_present': 'são', '3pl_present': 'são',
+        '1sg_past': 'fui', '2sg_past': 'foi', '3sg_past': 'foi',
+        '1pl_past': 'fomos', '2pl_past': 'foram', '3pl_past': 'foram',
+        '1sg_future': 'serei', '2sg_future': 'será', '3sg_future': 'será',
+        '1pl_future': 'seremos', '2pl_future': 'serão', '3pl_future': 'serão',
       },
     },
   },
