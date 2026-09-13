@@ -86,6 +86,10 @@ export const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', pu
 // degree adjective) follows bare, its adjective already agreed and placed by the ordinary NP path.
 export const FR_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', quality: 'de', measure: 'à' };
 
+// The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
+// French says "à la maison", not "dans le foyer" — the hearth-word gives way to "maison".
+export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'à la maison' };
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'et',
   or: 'ou',

@@ -162,6 +162,22 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(HAUS), [path('around')]) }))).toBe('um das Haus');
       expect(complementsPhrase(complements({ locative: complement(np(KATZE), [path('behind')]) }))).toBe('hinter der Katze');
     });
+
+    // Fixed A41: HOME in plain containment is the fixed "zu Hause" — no "im", no dative on the
+    // hearth-word "Zuhause" — and any other determiner, an adjective or a relation keeps the place.
+    test('HOME takes the "zu Hause" idiom; a marked determiner, adjective or relation keeps the place', () => {
+      const ZUHAUSE: Forms = { base: 'Zuhause', plural: 'Zuhause', gender: 'neut', count: 'singular' };
+      const home = (extra: Forms = {}, rest: Parameters<typeof np>[2] = {}) =>
+        ({ ...np(ZUHAUSE, extra, rest), head: concept({ ...ZUHAUSE, ...extra }, 'HOME') });
+      const at = (c: Parameters<typeof complement>[0], specifiers: Specifier[] = []) =>
+        complementsPhrase(complements({ locative: complement(c, specifiers) }));
+      expect(at(home())).toBe('zu Hause');
+      expect(at(home({ definiteness: 'bare' }))).toBe('zu Hause');
+      expect(at(el(home(), np(MARKT)))).toBe('zu Hause und im Markt');
+      expect(at(home({ definiteness: 'indefinite' }))).toBe('in einem Zuhause');
+      expect(at(home({}, { adjectives: [adj(GROSS)] }))).toBe('im großen Zuhause');
+      expect(at(home(), [path('behind')])).toBe('hinter dem Zuhause');
+    });
   });
 
   describe('cause', () => {

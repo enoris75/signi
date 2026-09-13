@@ -81,6 +81,10 @@ export const AVERE_AUX: ConceptForms = { conceptId: 'AVERE', forms: { '1sg_futur
 // noun phrase (dimension noun + degree adjective) follows bare, its adjective already agreed/placed.
 export const IT_DIM_PREP: Record<DimensionRelation, string> = { extent: 'di', quality: 'di', measure: 'a' };
 
+// The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
+// Italian says "a casa" (or "in casa"), not "nella casa".
+export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'a casa' };
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'e',
   or: 'o',

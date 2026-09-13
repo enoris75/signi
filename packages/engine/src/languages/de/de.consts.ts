@@ -103,6 +103,10 @@ export const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
 // the noun phrase (dimension noun + degree adjective) renders in the dative, its adjective declined.
 export const DE_DIM_PREP: Record<DimensionRelation, string> = { extent: 'von', quality: 'von', measure: 'bei' };
 
+// The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
+// German says "zu Hause" (with the old dative -e), not "im Zuhause".
+export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'zu Hause' };
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'und',
   or: 'oder',

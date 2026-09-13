@@ -187,6 +187,19 @@ describe('complementsPhrase', () => {
       expect(render({ locative: complement(np(LIBRO), [path('under')]) })).toBe('debajo del libro');
       expect(render({ locative: complement(np(CASA), [path('through')]) })).toBe('por la casa');
     });
+
+    // Fixed A41: HOME in plain containment is a bare "en casa" — the hearth-word "hogar" gives way to
+    // "casa" — and any other determiner, a plural or a relation keeps "hogar" as a place.
+    test('HOME takes the "en casa" idiom; a marked determiner, plural or relation keeps the place', () => {
+      const HOGAR: Forms = { base: 'hogar', plural: 'hogares', gender: 'masc', count: 'singular' };
+      const home = (extra: Forms = {}) => ({ ...np(HOGAR, extra), head: concept({ ...HOGAR, ...extra }, 'HOME') });
+      expect(render({ locative: complement(home()) })).toBe('en casa');
+      expect(render({ locative: complement(home({ definiteness: 'bare' })) })).toBe('en casa');
+      expect(render({ locative: complement(el(home(), np(MERCADO))) })).toBe('en casa y en el mercado');
+      expect(render({ locative: complement(home({ definiteness: 'indefinite' })) })).toBe('en un hogar');
+      expect(render({ locative: complement(home({ number: 'plural' })) })).toBe('en los hogares');
+      expect(render({ locative: complement(home(), [path('under')]) })).toBe('debajo del hogar');
+    });
   });
 
   describe('cause', () => {

@@ -3,7 +3,7 @@ import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from 
 import { complementsPhrase } from './complementsPhrase.js';
 import {
   AFRIQUE, ANGE, ANTARCTIQUE, BATON, BON, CHAT, CHIEN, CHOISIR, complement, complements, concept, el, ENFANT, EUROPE,
-  FATIGUE, FEMME, type Forms, GRAND, group, HEUREUX, HOMME, IL, INTERESSANT, JE, LEGENDE, LENTEMENT, LUMIERE, MAISON,
+  FATIGUE, FEMME, type Forms, FOYER, GRAND, group, HEUREUX, HOMME, IL, INTERESSANT, JE, LEGENDE, LENTEMENT, LUMIERE, MAISON,
   MANGER, MANIERE, MARCHE, MOT, NOURRITURE, np, PETIT, PHRASE, RENARD, SAVOIR, SOIN, SOURIS, TRISTE, TU, VITESSE, vp,
 } from './fr.fixtures.js';
 
@@ -219,6 +219,20 @@ describe('complementsPhrase', () => {
 
     test('a negative determiner stays on the noun', () => {
       expect(complementsPhrase(complements({ locative: complement(np(MAISON, { definiteness: 'no' })) }))).toBe('dans aucune maison');
+    });
+
+    // Fixed A41: HOME in plain containment is the fixed "à la maison" — the hearth-word "foyer" gives
+    // way to "maison" — and any other determiner, a plural or a relation keeps "foyer" as a place.
+    test('HOME takes the "à la maison" idiom; a marked determiner, plural or relation keeps the place', () => {
+      const home = (extra: Forms = {}) => ({ ...np(FOYER, extra), head: concept({ ...FOYER, ...extra }, 'HOME') });
+      const at = (c: Parameters<typeof complement>[0], specifiers: Specifier[] = []) =>
+        complementsPhrase(complements({ locative: complement(c, specifiers) }));
+      expect(at(home())).toBe('à la maison');
+      expect(at(home({ definiteness: 'bare' }))).toBe('à la maison');
+      expect(at(el(home(), np(MARCHE)))).toBe('à la maison et dans le marché');
+      expect(at(home({ definiteness: 'indefinite' }))).toBe('dans un foyer');
+      expect(at(home({ number: 'plural' }))).toBe('dans les foyers');
+      expect(at(home(), [path('under')])).toBe('sous le foyer');
     });
   });
 

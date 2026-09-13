@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
-import { IT_MANNER_PREP } from './it.consts.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { coordinate } from './coordinate.js';
 import { defArticle } from './defArticle.js';
@@ -121,7 +121,10 @@ export function complementsPhrase(
           `a causa ${prepArt('di', nf, plural, lead)}`
         ) :
         spatialHead(pathSpecifier(c), nf, plural, lead);
-      return coordinate(c.phrase, (np) => renderNP(np, headFor(np.head.forms)));
+      // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
+      // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
+      return coordinate(c.phrase, (np) =>
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)
     .join(' ');

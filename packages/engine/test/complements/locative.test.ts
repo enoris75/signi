@@ -369,15 +369,17 @@ describe('known bugs: locative', () => {
   });
 
   // A41. HOME resists the plain "in the <place>" locative: every language marks "at home" with a
-  // fixed idiom, not the article-fused preposition the engine reaches for on any common noun. So
-  // "the cat runs at home" comes out as "in the home" / "dans le foyer" / "en el hogar" / "no lar"
-  // / "im Zuhause" — each grammatical but wrong: HOME names a hearth, and none of these idioms
-  // takes a locative that way. The fix is a per-noun locative override on HOME (like the
-  // proper-noun article-drop of A29, but keyed to the lexeme, not to `proper`); it is a property
-  // of the NOUN, so every licensing verb inherits it. Japanese is already right — 家で is exactly
-  // "at home" — and HOUSE ("in the house", "nella casa", …) stays untouched, which is why the
-  // suite tests the complement itself with HOUSE, not HOME.
-  test.fails('HOME wants the "at home" idiom, not "in the <home-word>"', () => {
+  // fixed idiom, not the article-fused preposition the engine reaches for on any common noun:
+  //
+  //     was   "in the home" / "nella casa" / "dans le foyer" / "en el hogar" / "no lar" / "im Zuhause"
+  //     now   "at home"     / "a casa"     / "à la maison"   / "en casa"     / "em casa" / "zu Hause"
+  //
+  // The locative now takes a per-noun idiom keyed to the concept (like the proper-noun article-drop
+  // of A29, but keyed to HOME rather than to `proper`); it is a property of the NOUN, so every
+  // licensing verb inherits it. Japanese was already right — 家で is exactly "at home" — and HOUSE
+  // ("in the house", "nella casa", …) stays untouched, which is why the suite tests the complement
+  // itself with HOUSE, not HOME.
+  test('HOME wants the "at home" idiom, not "in the <home-word>"', () => {
     expect(inPlace('RUN', np('HOME'))).toMatchObject({
       en: 'the cat runs at home.',
       it: 'il gatto corre a casa.',
@@ -387,6 +389,94 @@ describe('known bugs: locative', () => {
       de: 'der Kater läuft zu Hause.',
       ja: '猫は家で走ります。', // already correct
     });
+  });
+
+  // The idiom belongs to the noun, so every licensing verb inherits it — the same invariant the
+  // suite holds HOUSE to above, only with the idiom in place of the fused preposition.
+  test.each(LOCATIVE_VERBS)('%s takes HOME as "at home" too', (verb) => {
+    const said = inPlace(verb, np('HOME'));
+
+    expect(said.en).toMatch(/ at home\.$/);
+    expect(said.it).toMatch(/ a casa\.$/);
+    expect(said.fr).toMatch(/ à la maison\.$/);
+    expect(said.es).toMatch(/ en casa\.$/);
+    expect(said.pt).toMatch(/ em casa\.$/);
+    expect(said.de).toMatch(/ zu Hause\.$/);
+    expect(said.ja).toMatch(/^猫は家で/);
+  });
+
+  test('"is at home" — the copula, with es/pt still selecting estar for the place', () => {
+    expect(inPlace('BE', np('HOME'))).toMatchObject({
+      en: 'the cat is at home.',
+      it: 'il gatto è a casa.',
+      fr: 'le chat est à la maison.',
+      es: 'el gato está en casa.',
+      pt: 'o gato está em casa.',
+      de: 'der Kater ist zu Hause.',
+    });
+  });
+
+  test('the bare determiner reads as the same idiom', () => {
+    expect(inPlace('RUN', np('HOME', { definiteness: 'bare' }))).toEqual(inPlace('RUN', np('HOME')));
+  });
+
+  // The idiom is frozen: a marked determiner, a plural, a modifier or a spatial relation turns HOME
+  // back into an ordinary place, which takes the preposition and article like any other noun.
+  test('an indefinite, plural, modified or related HOME is an ordinary place again', () => {
+    expect(inPlace('RUN', np('HOME', { definiteness: 'indefinite' }))).toMatchObject({
+      en: 'the cat runs in a home.',
+      it: 'il gatto corre in una casa.',
+      fr: 'le chat court dans un foyer.',
+      es: 'el gato corre en un hogar.',
+      pt: 'o gato corre em um lar.',
+      de: 'der Kater läuft in einem Zuhause.',
+    });
+    expect(inPlace('RUN', np('HOME', { number: 'plural' }))).toMatchObject({
+      en: 'the cat runs in the homes.',
+      it: 'il gatto corre nelle case.',
+      fr: 'le chat court dans les foyers.',
+      pt: 'o gato corre nos lares.',
+    });
+    expect(inPlace('RUN', np('HOME', { adjectives: ['BIG'] }))).toMatchObject({
+      en: 'the cat runs in the big home.',
+      fr: 'le chat court dans le grand foyer.',
+      de: 'der Kater läuft im großen Zuhause.',
+    });
+    expect(inPlace('RUN', np('HOME', { possessor: np('BOY') }))).toMatchObject({
+      en: "the cat runs in the boy's home.",
+      it: 'il gatto corre nella casa del ragazzo.',
+    });
+    expect(atPlace('under', 'RUN', np('HOME'))).toMatchObject({
+      en: 'the cat runs under the home.',
+      it: 'il gatto corre sotto la casa.',
+      fr: 'le chat court sous le foyer.',
+      es: 'el gato corre debajo del hogar.',
+      pt: 'o gato corre debaixo do lar.',
+      de: 'der Kater läuft unter dem Zuhause.',
+    });
+  });
+
+  // English shares one preposition across a coordinated place ("in the house and the market"), but
+  // the idiom brings its own, so a group holding it gives each conjunct its own preposition.
+  test('a coordinated place keeps the idiom on its HOME conjunct', () => {
+    const inGroup = (conjunction: 'and' | 'or', ...conjuncts: NounPhrase[]) =>
+      sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: { conjuncts, conjunction } } } }));
+
+    expect(inGroup('and', np('HOME'), np('MARKET'))).toMatchObject({
+      en: 'the cat runs at home and in the market.',
+      it: 'il gatto corre a casa e nel mercato.',
+      fr: 'le chat court à la maison et dans le marché.',
+      es: 'el gato corre en casa y en el mercado.',
+      pt: 'o gato corre em casa e no mercado.',
+      de: 'der Kater läuft zu Hause und im Markt.',
+      ja: '猫は家と市場で走ります。',
+    });
+    expect(inGroup('or', np('MARKET'), np('HOME'))).toMatchObject({
+      en: 'the cat runs in the market or at home.',
+      de: 'der Kater läuft im Markt oder zu Hause.',
+    });
+    // Regression: a group without HOME still shares the English preposition.
+    expect(inGroup('and', np('HOUSE'), np('MARKET')).en).toBe('the cat runs in the house and the market.');
   });
 });
 

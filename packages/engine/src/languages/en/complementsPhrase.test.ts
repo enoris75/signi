@@ -143,6 +143,40 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(HOUSE, { number: 'plural' }), [path('behind')]) }))).toBe('behind the houses');
       expect(complementsPhrase(complements({ locative: complement(np(HOUSE), [path('in_front_of')]) }))).toBe('in front of the house');
     });
+
+    // Fixed A41: HOME in plain containment is the fixed idiom "at home"; any determiner other than
+    // the definite/bare one, a plural, a modifier or a relation makes it an ordinary place again.
+    describe('HOME takes the "at home" idiom', () => {
+      const HOME_FORMS: Forms = { base: 'home', plural: 'homes', count: 'singular' };
+      const home = (extra: Forms = {}, rest: Parameters<typeof np>[2] = {}) =>
+        ({ ...np(HOME_FORMS, extra, rest), head: concept({ ...HOME_FORMS, ...extra }, 'HOME') });
+      const at = (c: Parameters<typeof complement>[0], specifiers: Specifier[] = []) =>
+        complementsPhrase(complements({ locative: complement(c, specifiers) }));
+
+      test('in plain containment, under the definite or bare determiner', () => {
+        expect(at(home())).toBe('at home');
+        expect(at(home({ definiteness: 'bare' }))).toBe('at home');
+        expect(at(home(), [path('in')])).toBe('at home');
+      });
+
+      test('a marked determiner, a plural, an adjective or a relation keeps the ordinary place', () => {
+        expect(at(home({ definiteness: 'indefinite' }))).toBe('in a home');
+        expect(at(home({ number: 'plural' }))).toBe('in the homes');
+        expect(at(home({}, { adjectives: [adj(BIG)] }))).toBe('in the big home');
+        expect(at(home(), [path('under')])).toBe('under the home');
+      });
+
+      test('a group holding the idiom gives every conjunct its own preposition', () => {
+        expect(at(el(home(), np(MARKET)))).toBe('at home and in the market');
+        expect(at(group('or', np(MARKET), home()))).toBe('in the market or at home');
+        // …while a group without it still shares one preposition.
+        expect(at(el(np(HOUSE), np(MARKET)))).toBe('in the house and the market');
+      });
+
+      test('only the concept HOME — the same word under another concept is an ordinary place', () => {
+        expect(at(np(HOME_FORMS))).toBe('in the home');
+      });
+    });
   });
 
   describe('cause', () => {

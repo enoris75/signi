@@ -83,6 +83,10 @@ export const REL_PREP_PT: Record<ModifierRelation, string> = { feature: 'a', pur
 // + degree adjective) follows bare, its adjective already agreed and placed by the ordinary NP path.
 export const PT_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', quality: 'de', measure: 'a' };
 
+// The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
+// Portuguese says a bare "em casa", not "no lar" — the hearth-word gives way to "casa".
+export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'em casa' };
+
 export const COORD_WORDS: Record<CoordConjunction, string> = {
   and: 'e',
   or: 'ou',

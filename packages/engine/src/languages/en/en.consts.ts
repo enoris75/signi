@@ -61,6 +61,10 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
   in_front_of: 'in front of',
 };
 
+// The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
+// English says "at home", not "in the home".
+export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'at home' };
+
 /**
  * The true English modal auxiliaries. They are defective — no infinitive, no participle,
  * no do-support — and take "not" straight after themselves ("must not go", "could not go").

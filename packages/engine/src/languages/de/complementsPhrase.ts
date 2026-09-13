@@ -1,9 +1,10 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, firstConjunct, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, firstConjunct, locativeIdiom, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
 import { declineAdj } from './declineAdj.js';
+import { LOCATIVE_IDIOMS } from './de.consts.js';
 import { dePredAdj } from './dePredAdj.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
@@ -94,6 +95,10 @@ export function complementsPhrase(complements?: Partial<Record<ComplementType, R
       // The preposition governs a case, and the case is spelled on each conjunct's own article
       // ("mit dem Messer und dem Stock"), so preposition and determiner are emitted per conjunct.
       return coordinate(c.phrase, (np) => {
+      // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "zu Hause",
+      // not "im Zuhause" — so no preposition, case or declension is chosen for it.
+      const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
+      if (idiom) return idiom;
       const f = np.head.forms;
       const plural = (f['number'] ?? f['count']) === 'plural';
       const definiteness = f['definiteness'] ?? 'definite';

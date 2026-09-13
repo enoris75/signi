@@ -4,7 +4,7 @@ import type { ResolvedComplement } from '../../types.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import {
   adj, AFRICA, AGUA, ALTO, ANTARTIDA, BOM, CANSADO, CAO, CASA, complement, complements, concept, CRIANCA, CUIDADO, el,
-  ELA, ELE, ELES, ESCOLHER, EU, EUROPA, FELIZ, type Forms, GATA, GATO, GRANDE, group, LENDA, LIVRO, LUZ, MANEIRA,
+  ELA, ELE, ELES, ESCOLHER, EU, EUROPA, FELIZ, type Forms, GATA, GATO, GRANDE, group, LAR, LENDA, LIVRO, LUZ, MANEIRA,
   MENINO, NOS, nounModifier, np, PALAVRA, PAU, RAPIDAMENTE, RAPOSA, TEMPO, VELHO, VELOCIDADE, VOCE, vp,
 } from './pt.fixtures.js';
 
@@ -214,6 +214,18 @@ describe('complementsPhrase', () => {
       expect(render({ locative: complement(np(CASA, { number: 'plural' }), [path('behind')]) })).toBe('atrás das casas');
       expect(render({ locative: complement(np(CASA), [path('around')]) })).toBe('ao redor da casa');
       expect(render({ locative: complement(np(MERCADO), [path('in_front_of')]) })).toBe('em frente do mercado');
+    });
+
+    // Fixed A41: HOME in plain containment is a bare "em casa" — the hearth-word "lar" gives way to
+    // "casa", uncontracted — and any other determiner, a plural or a relation keeps "lar" as a place.
+    test('HOME takes the "em casa" idiom; a marked determiner, plural or relation keeps the place', () => {
+      const home = (extra: Forms = {}) => ({ ...np(LAR, extra), head: concept({ ...LAR, ...extra }, 'HOME') });
+      expect(render({ locative: complement(home()) })).toBe('em casa');
+      expect(render({ locative: complement(home({ definiteness: 'bare' })) })).toBe('em casa');
+      expect(render({ locative: complement(el(home(), np(MERCADO))) })).toBe('em casa e no mercado');
+      expect(render({ locative: complement(home({ definiteness: 'indefinite' })) })).toBe('em um lar');
+      expect(render({ locative: complement(home({ number: 'plural' })) })).toBe('nos lares');
+      expect(render({ locative: complement(home(), [path('under')]) })).toBe('debaixo do lar');
     });
   });
 

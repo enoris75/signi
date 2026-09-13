@@ -200,6 +200,19 @@ describe('complementsPhrase', () => {
       expect(one('locative', complement(np(EUROPA)))).toBe('in Europa');
       expect(one('locative', complement(np(EUROPA), [path('under')]))).toBe("sotto l'Europa");
     });
+
+    // Fixed A41: HOME in plain containment is the fixed idiom "a casa", with no article to fuse.
+    // HOUSE shares the word "casa" but not the idiom — the override keys off the concept.
+    test('HOME takes the "a casa" idiom; a marked determiner, plural or relation keeps the place', () => {
+      const home = (extra: Forms = {}) => ({ ...np(CASA, extra), head: concept({ ...CASA, ...extra }, 'HOME') });
+      expect(one('locative', complement(home()))).toBe('a casa');
+      expect(one('locative', complement(home({ definiteness: 'bare' })))).toBe('a casa');
+      expect(one('locative', complement(el(home(), np(MERCATO))))).toBe('a casa e nel mercato');
+      expect(one('locative', complement(home({ definiteness: 'indefinite' })))).toBe('in una casa');
+      expect(one('locative', complement(home({ number: 'plural' })))).toBe('nelle case');
+      expect(one('locative', complement(home(), [path('under')]))).toBe('sotto la casa');
+      expect(one('locative', complement(np(CASA)))).toBe('nella casa');
+    });
   });
 
   describe('cause', () => {

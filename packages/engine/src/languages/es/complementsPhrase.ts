@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -8,6 +8,7 @@ import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
 import { dePrep } from './dePrep.js';
+import { LOCATIVE_IDIOMS } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
 import { isPlural } from './isPlural.js';
@@ -89,6 +90,10 @@ export function complementsPhrase(
       // ("al gato y al perro"). Repeating it also lets each conjunct pick its own preposition,
       // which `direction` needs: an animate goal takes "hacia", a place "a".
       return coordinateElement(c.phrase, (np) => {
+      // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — a bare
+      // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
+      const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
+      if (idiom) return idiom;
       const f = np.head.forms;
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');

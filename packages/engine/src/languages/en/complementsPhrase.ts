@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, causeSentiment, firstConjunct, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
-import { CAUSE_PREP, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
+import { abstractionLevel, actionGerund, causeSentiment, firstConjunct, locativeIdiom, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
+import { CAUSE_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
@@ -57,6 +57,12 @@ export function complementsPhrase(complements?: Partial<Record<ComplementType, R
         : type === 'cause' ? CAUSE_PREP[causeSentiment(c)]
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         : PREP[type];
+      // A hearth noun takes its fixed locative idiom in place of preposition + noun phrase ("at
+      // home", not "in the home"). The idiom carries its own preposition, so a group holding one
+      // gives every conjunct its own instead of sharing it: "at home and in the market".
+      if (type === 'locative' && c.phrase.conjuncts.some((np) => locativeIdiom(c, np, LOCATIVE_IDIOMS))) {
+        return coordinate(c.phrase, (np) => locativeIdiom(c, np, LOCATIVE_IDIOMS) ?? `${prep} ${npText(np)}`);
+      }
       return `${prep} ${coordinate(c.phrase, npText)}`;
     })
     .filter(Boolean)
