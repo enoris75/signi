@@ -153,10 +153,10 @@ describe('direction: combined with the other directionals', () => {
     })).toEqual({
       en: 'the cat goes from the house to the market over the angel.',
       it: "il gatto va dalla casa al mercato sopra l'angelo.",
-      fr: "le chat va de la maison au marché au-dessus de l'ange.",
+      fr: "le chat va de la maison au marché au-dessus de l'ange.", // A125: a route crosses with par-dessus
       es: 'el gato va de la casa al mercado por encima del ángel.',
       pt: 'o gato vai da casa ao mercado por cima do anjo.',
-      de: 'der Kater geht aus dem Haus zum Markt über dem Engel.', // über is two-way: dative here
+      de: 'der Kater geht aus dem Haus zum Markt über dem Engel.', // A125: a route crosses with über + accusative, "über den Engel"
       ja: '猫は家から市場へ天使の上を行きます。',
     });
   });

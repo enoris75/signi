@@ -206,7 +206,7 @@ describe('complementsPhrase', () => {
 
     test('a path specifier picks the preposition', () => {
       expect(complementsPhrase(complements({ route: complement(np(MARCHE), [path('under')]) }))).toBe('sous le marché');
-      expect(complementsPhrase(complements({ route: complement(np(MARCHE), [path('over')]) }))).toBe('au-dessus du marché');
+      expect(complementsPhrase(complements({ route: complement(np(MARCHE), [path('over')]) }))).toBe('au-dessus du marché'); // A125: want 'par-dessus le marché'
       expect(complementsPhrase(complements({ route: complement(np(MAISON), [path('around')]) }))).toBe('autour de la maison');
       expect(complementsPhrase(complements({ route: complement(np(MAISON), [path('in')]) }))).toBe('dans la maison');
     });

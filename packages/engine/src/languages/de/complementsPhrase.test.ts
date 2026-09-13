@@ -171,7 +171,7 @@ describe('complementsPhrase', () => {
     test('a path specifier picks the preposition and its case', () => {
       expect(complementsPhrase(complements({ route: complement(np(MARKT), [path('around')]) }))).toBe('um den Markt');
       expect(complementsPhrase(complements({ route: complement(np(MARKT), [path('under')]) }))).toBe('unter dem Markt');
-      expect(complementsPhrase(complements({ route: complement(np(MARKT), [path('over')]) }))).toBe('über dem Markt');
+      expect(complementsPhrase(complements({ route: complement(np(MARKT), [path('over')]) }))).toBe('über dem Markt'); // A125: want 'über den Markt'
       expect(complementsPhrase(complements({ route: complement(np(MARKT), [path('in')]) }))).toBe('im Markt');
     });
   });

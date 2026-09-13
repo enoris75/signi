@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (17 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (20 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -58,6 +58,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A121 | [A121-coordinated-copula-elided-predicate.md](A-must-fix/A121-coordinated-copula-elided-predicate.md) |
 | A122 | [A122-japanese-clause-coordination-connective.md](A-must-fix/A122-japanese-clause-coordination-connective.md) |
 | A123 | [A123-japanese-relative-on-copula-predicative.md](A-must-fix/A123-japanese-relative-on-copula-predicative.md) |
+| A124 | [A124-alarm-cry-plain-object.md](A-must-fix/A124-alarm-cry-plain-object.md) |
+| A125 | [A125-route-over-static-form.md](A-must-fix/A125-route-over-static-form.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

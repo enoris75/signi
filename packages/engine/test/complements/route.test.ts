@@ -44,8 +44,8 @@ describe('route', () => {
     expect(goVia('over')).toEqual({
       en: 'the cat goes over the market.',
       it: 'il gatto va sopra il mercato.',
-      fr: 'le chat va au-dessus du marché.',
-      de: 'der Kater geht über dem Markt.', // dative again — über is two-way
+      fr: 'le chat va au-dessus du marché.', // A125: a route crosses with par-dessus
+      de: 'der Kater geht über dem Markt.', // A125: a route crosses with über + accusative, "über den Markt"
       es: 'el gato va por encima del mercado.',
       pt: 'o gato vai por cima do mercado.',
       ja: '猫は市場の上を行きます。',
@@ -99,6 +99,7 @@ describe('route: German accusative vs dative', () => {
   });
 
   test('the two-way prepositions take the dative', () => {
+    // A125: `over` should not be here. A route over its landmark crosses it and takes the accusative.
     for (const value of ['under', 'over', 'behind', 'in_front_of'] as const) {
       expect(goVia(value).de).toContain('dem Markt.');
     }
@@ -116,5 +117,29 @@ describe('route: every specifier renders in every language', () => {
     // The traversed noun and its を survive in Japanese for every relation.
     expect(said.ja).toContain('市場');
     expect(said.ja).toContain('を行きます');
+  });
+});
+
+// A125. A route over its landmark crosses it. German marks the crossing with über + accusative ("geht
+// über den Markt", "springt über den Hund"), and French with par-dessus ("saute par-dessus le chien").
+// `spatialHead` renders the static forms of a locative for both complements: über + dative, because
+// `spatialCase` gives every two-way preposition the dative, and au-dessus de. "über dem Hund" and
+// "au-dessus du chien" say where the jump happens, not what it crosses.
+describe('known bugs: a route over crosses its landmark', () => {
+  const jumpOver = (tense?: 'past') => sayAll(clause(np('CAT'), 'JUMP', {
+    verbPhrase: { tense },
+    complements: { route: { phrase: np('DOG'), specifiers: [{ kind: 'path', value: 'over' }] } },
+  }));
+
+  test.fails('German crosses with über + accusative, French with par-dessus', () => {
+    expect(goVia('over').de).toBe('der Kater geht über den Markt.');
+    expect(jumpOver()).toMatchObject({
+      de: 'der Kater springt über den Hund.',
+      fr: 'le chat saute par-dessus le chien.',
+    });
+    expect(jumpOver('past')).toMatchObject({
+      de: 'der Kater sprang über den Hund.',
+      fr: 'le chat sauta par-dessus le chien.',
+    });
   });
 });
