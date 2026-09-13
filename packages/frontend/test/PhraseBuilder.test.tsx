@@ -1,0 +1,1056 @@
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, screen, within } from '@testing-library/react';
+import { useState, type ComponentProps } from 'react';
+import type { Concept, GrammaticalRole } from '@signi/shared';
+import type {
+  PhraseSelection,
+  WorkspaceBinding,
+} from '../src/components/PhraseBuilder/interfaces.ts';
+import {
+  PhraseBuilder,
+  type PhraseBuilderProps,
+} from '../src/components/PhraseBuilder/PhraseBuilder.tsx';
+import type { PhraseSidebar } from '../src/components/PhraseBuilder/PhraseSidebar.tsx';
+import { renderWithProviders } from './render.tsx';
+
+// jsdom has no ResizeObserver: the canvas reads as a fixed 600 px wide.
+vi.mock('../src/components/PhraseBuilder/hooks/useElementSize.ts', () => ({
+  useElementSize: (_ref: unknown, initial: { w: number; h: number }) => initial,
+}));
+// Every box measures 0×0 in jsdom, so the resolver would shove boxes about on no real footprint.
+vi.mock('../src/components/PhraseBuilder/hooks/useOverlapResolution.ts', () => ({
+  useOverlapResolution: () => {},
+}));
+// The words panel lists whole vocabularies and its word map loads the entire lexicon. The stub
+// records what the period hands it, keyed by the element it renders.
+const wordsPanels = vi.hoisted(() => new Map<Element, unknown>());
+vi.mock('../src/components/PhraseBuilder/PhraseSidebar.tsx', () => ({
+  PhraseSidebar: (props: unknown) => (
+    <div
+      data-testid="words-panel"
+      ref={(el) => {
+        if (el) wordsPanels.set(el, props);
+      }}
+    />
+  ),
+}));
+
+// jsdom implements no pointer capture, which the canvas drag takes on every press.
+Element.prototype.setPointerCapture = () => {};
+
+type Updater = (prev: PhraseSelection) => PhraseSelection;
+type WordsPanelProps = ComponentProps<typeof PhraseSidebar>;
+
+const concept = (id: string, role: GrammaticalRole, extra: Partial<Concept> = {}): Concept => ({
+  id,
+  role,
+  description: id,
+  label: id.toLowerCase(),
+  ...extra,
+});
+
+const BOY = concept('BOY', 'noun');
+const CAT = concept('CAT', 'noun');
+const DOG = concept('DOG', 'noun');
+const HORSE = concept('HORSE', 'noun');
+const HOUSE = concept('HOUSE', 'noun');
+const PARK = concept('PARK', 'noun');
+const SAIL = concept('SAIL', 'noun');
+const GIRL = concept('GIRL', 'noun', { gendered: true });
+const THIRD = concept('THIRD_PERSON', 'pronoun', { person: '3' });
+const EAT = concept('EAT', 'verb', { transitivity: 'transitive' });
+const SLEEP = concept('SLEEP', 'verb', { transitivity: 'intransitive' });
+const WALK = concept('WALK', 'verb', {
+  transitivity: 'intransitive',
+  complements: ['route', 'locative', 'cause'],
+});
+const BIG = concept('BIG', 'adjective');
+
+const CONCEPTS = {
+  noun: [BOY, CAT, DOG, HORSE, HOUSE, PARK, SAIL, GIRL],
+  pronoun: [THIRD],
+  verb: [EAT, SLEEP, WALK],
+  adjective: [BIG],
+  adverb: [],
+};
+
+type Compartments = Omit<WorkspaceBinding, 'containerId' | 'pickActive'>;
+type BindingOverrides = { [K in keyof Compartments]?: Partial<Compartments[K]> };
+
+// A workspace binding with nothing linked and every hook a spy.
+function makeBinding(overrides: BindingOverrides = {}): WorkspaceBinding {
+  const base: WorkspaceBinding = {
+    containerId: 'c1',
+    pickActive: false,
+    geometry: {
+      registerBox: vi.fn(),
+      registerSourceAnchor: vi.fn(),
+      registerTargetAnchor: vi.fn(),
+      registerBorderAnchor: vi.fn(),
+      registerVerbAnchor: vi.fn(),
+      onGeometryChange: vi.fn(),
+    },
+    relative: {
+      sourceKeys: new Set(),
+      targetKeys: new Set(),
+      isPickTarget: () => false,
+      onPick: vi.fn(),
+      onStartLink: vi.fn(),
+      onRemoveLink: vi.fn(),
+    },
+    conditional: {
+      hasSource: false,
+      hasTarget: false,
+      isPickTarget: false,
+      onStart: vi.fn(),
+      onClear: vi.fn(),
+      onPick: vi.fn(),
+    },
+    coordinative: {
+      hasSource: false,
+      hasTarget: false,
+      isPickTarget: false,
+      onStart: vi.fn(),
+      onClear: vi.fn(),
+      onPick: vi.fn(),
+    },
+    instrumental: {
+      hasSource: false,
+      hasTarget: false,
+      level: 'object',
+      onLevelChange: vi.fn(),
+      isPickTarget: false,
+      onStart: vi.fn(),
+      onClear: vi.fn(),
+      onPick: vi.fn(),
+    },
+  };
+  return {
+    ...base,
+    geometry: { ...base.geometry, ...overrides.geometry },
+    relative: { ...base.relative, ...overrides.relative },
+    conditional: { ...base.conditional, ...overrides.conditional },
+    coordinative: { ...base.coordinative, ...overrides.coordinative },
+    instrumental: { ...base.instrumental, ...overrides.instrumental },
+  };
+}
+
+type PeriodProps = Omit<PhraseBuilderProps, 'selection' | 'onPhraseUpdate'>;
+
+// The period as its owner holds it: every updater the builder hands up is recorded, then
+// applied, so the canvas re-renders on the selection it produced.
+function renderPeriod(initial: PhraseSelection = {}, props: PeriodProps = {}) {
+  const onPhraseUpdate = vi.fn<(updater: Updater) => void>();
+  const state = { selection: initial };
+  function Period() {
+    const [selection, setSelection] = useState(initial);
+    state.selection = selection;
+    return (
+      <PhraseBuilder
+        {...props}
+        selection={selection}
+        onPhraseUpdate={(updater) => {
+          onPhraseUpdate(updater);
+          setSelection(updater);
+        }}
+      />
+    );
+  }
+  const view = renderWithProviders(<Period />, { concepts: CONCEPTS });
+  // The updater of the latest edit, applied to `prev`.
+  const lastEdit = (prev: PhraseSelection) => onPhraseUpdate.mock.calls.at(-1)![0](prev);
+  return { ...view, onPhraseUpdate, lastEdit, selection: () => state.selection };
+}
+
+// A press that never travelled: what the canvas drag machinery reads as a click on a box.
+function press(el: HTMLElement) {
+  fireEvent.pointerDown(el);
+  fireEvent.pointerUp(el);
+}
+
+const box = (key: string) => screen.getByTestId(`box-${key}`);
+const boxes = () => screen.queryAllByTestId(/^box-/).map((b) => b.dataset['testid']!.slice(4));
+const groups = () => screen.queryAllByTestId('group-box').map((g) => g.dataset['group']);
+const satellite = (key: string) => screen.getByTestId(`satellite-${key}`);
+
+// The words panel of the outermost period (a nested builder's panel renders before it).
+const wordsPanel = () =>
+  wordsPanels.get(screen.getAllByTestId('words-panel').at(-1)!) as WordsPanelProps;
+
+// Pick a word from an open picker's list.
+const pickOption = (id: string) =>
+  fireEvent.click(
+    screen.getAllByTestId('typeahead-option').find((o) => o.dataset['concept'] === id)!,
+  );
+
+describe('PhraseBuilder', () => {
+  describe('an empty period', () => {
+    it('offers the opening subject picker instead of a canvas', () => {
+      renderPeriod();
+
+      expect(screen.getByTestId('typeahead-subject')).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Noun' })).toHaveAttribute('aria-pressed', 'true');
+      expect(boxes()).toEqual(['subject']);
+      expect(groups()).toEqual([]);
+    });
+
+    it('picks the subject into its slot and moves on to the verb', () => {
+      const { lastEdit } = renderPeriod();
+
+      pickOption('CAT');
+
+      expect(lastEdit({})).toEqual({ subject: CAT });
+      expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
+    });
+
+    it('commits the pronoun chooser’s number and gender with the pronoun', () => {
+      const { lastEdit } = renderPeriod();
+      fireEvent.click(screen.getByTestId('pronoun-tab'));
+      fireEvent.click(screen.getByRole('button', { name: 'third' }));
+      fireEvent.click(screen.getByRole('button', { name: 'plural' }));
+      fireEvent.click(screen.getByRole('button', { name: 'female' }));
+
+      fireEvent.click(screen.getByTestId('pronoun-commit'));
+
+      expect(lastEdit({ subjectGender: 'masc' })).toEqual({
+        subject: THIRD,
+        subjectNumber: 'plural',
+        subjectGender: 'fem',
+      });
+    });
+
+    it('shares the word class between the box’s switch and the picker’s tabs', () => {
+      renderPeriod();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pronoun' }));
+
+      expect(screen.getByTestId('pronoun-tab')).toHaveAttribute('aria-selected', 'true');
+      expect(screen.getByRole('button', { name: 'Pronoun' })).toHaveAttribute(
+        'aria-pressed',
+        'true',
+      );
+    });
+  });
+
+  describe('the canvas', () => {
+    it('opens on the subject and verb once a subject is chosen', () => {
+      renderPeriod({ subject: CAT });
+
+      expect(boxes()).toEqual(['subject', 'verb']);
+      expect(groups()).toEqual(['Subject', 'Verb Phrase']);
+      expect(screen.queryByTestId('typeahead-subject')).not.toBeInTheDocument();
+    });
+
+    it('opens for a verb alone', () => {
+      renderPeriod({ verb: SLEEP });
+
+      expect(boxes()).toEqual(['subject', 'verb']);
+    });
+
+    it('offers the direct object once a transitive verb is chosen', () => {
+      renderPeriod({ subject: CAT, verb: EAT });
+
+      expect(boxes()).toEqual(['subject', 'verb', 'directObject']);
+      expect(groups()).toEqual(['Subject', 'Verb Phrase', 'Direct Object']);
+    });
+
+    it('offers no direct object to an intransitive verb', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP });
+
+      expect(boxes()).toEqual(['subject', 'verb']);
+    });
+
+    it('draws only the subject box for a bare noun phrase', () => {
+      renderPeriod({ subject: CAT }, { nounPhraseOnly: true });
+
+      expect(boxes()).toEqual(['subject']);
+      expect(groups()).toEqual(['Subject']);
+      expect(screen.queryByTestId('satellite-verbNegative')).not.toBeInTheDocument();
+    });
+
+    it('draws an object-level instrument as a bare noun phrase', () => {
+      const binding = makeBinding({ instrumental: { hasTarget: true, level: 'object' } });
+      renderPeriod({ subject: CAT }, { binding });
+
+      expect(boxes()).toEqual(['subject']);
+    });
+
+    it('draws an instrument act as its verb phrase from the start, with no subject', () => {
+      const binding = makeBinding({ instrumental: { hasTarget: true, level: 'process' } });
+      renderPeriod({}, { binding });
+
+      expect(boxes()).toEqual(['verb']);
+      expect(groups()).toEqual(['Verb Phrase']);
+    });
+  });
+
+  describe('a command or an infinitive', () => {
+    it('replaces the subject with the command box and opens the canvas at once', () => {
+      renderPeriod({ imperative: true });
+
+      expect(boxes()).toEqual(['verb']);
+      expect(screen.getByRole('button', { name: 'Order' })).toHaveAttribute('aria-pressed', 'true');
+      expect(screen.queryByTestId('satellite-subjectNumber')).not.toBeInTheDocument();
+    });
+
+    it('replaces the subject with the infinitive box', () => {
+      renderPeriod({ infinitive: true, subject: CAT });
+
+      expect(boxes()).toEqual(['verb']);
+      expect(screen.getByText('Infinitive phrase')).toBeInTheDocument();
+    });
+
+    it('turns a command on and moves the focus to the verb to command', () => {
+      const { lastEdit } = renderPeriod();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+
+      expect(lastEdit({ verbModal: EAT })).toMatchObject({
+        imperative: true,
+        imperativePerson: '2sg',
+        verbModal: undefined,
+      });
+      expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
+    });
+
+    it('turns an infinitive on and moves the focus to the verb to cite', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }));
+
+      expect(lastEdit({ imperative: true })).toMatchObject({ infinitive: true, imperative: false });
+      expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
+    });
+
+    it('leaves the focus where it was when the verb is already chosen', () => {
+      renderPeriod({ subject: CAT, verb: EAT });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+      expect(wordsPanel().activeSlot).toBe('subject');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }));
+      expect(wordsPanel().activeSlot).toBe('subject');
+    });
+
+    it('leaves the focus where it was when turning a command off', () => {
+      renderPeriod({ imperative: true });
+      act(() => wordsPanel().onSlotClick('modifier'));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+
+      expect(wordsPanel().activeSlot).toBe('modifier');
+    });
+
+    it('sets whom the command addresses and the register it is spoken in', () => {
+      const { lastEdit } = renderPeriod({ imperative: true });
+
+      fireEvent.click(screen.getByRole('button', { name: 'first plural' }));
+      expect(lastEdit({ imperative: true })).toEqual({ imperative: true, imperativePerson: '1pl' });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Instruction' }));
+      expect(lastEdit({ imperative: true })).toEqual({
+        imperative: true,
+        imperativeRegister: 'instruction',
+      });
+    });
+
+    it.each([
+      ['conditional', 'hasSource'],
+      ['conditional', 'hasTarget'],
+      ['coordinative', 'hasSource'],
+      ['coordinative', 'hasTarget'],
+    ] as const)('locks the mood while the period is in a %s (%s)', (relation, end) => {
+      renderPeriod({ subject: CAT }, { binding: makeBinding({ [relation]: { [end]: true } }) });
+
+      expect(screen.getByRole('button', { name: 'Toggle imperative (command)' })).toBeDisabled();
+      expect(
+        screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }),
+      ).toBeDisabled();
+    });
+
+    it('leaves the mood free in a workspace period with no clause relation', () => {
+      renderPeriod({ subject: CAT }, { binding: makeBinding() });
+
+      expect(screen.getByRole('button', { name: 'Toggle imperative (command)' })).toBeEnabled();
+      expect(
+        screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }),
+      ).toBeEnabled();
+    });
+  });
+
+  describe('picking a word', () => {
+    it('sends the focus back to an empty subject after the verb', () => {
+      const { lastEdit } = renderPeriod();
+
+      act(() => wordsPanel().onConceptSelect(EAT, 'verb'));
+
+      expect(lastEdit({})).toEqual({ verb: EAT });
+      expect(within(box('subject')).getByTestId('typeahead-subject')).toBeInTheDocument();
+    });
+
+    it('moves on from the verb to the first word it still wants', () => {
+      renderPeriod({ subject: CAT });
+
+      act(() => wordsPanel().onConceptSelect(EAT, 'verb'));
+
+      expect(within(box('directObject')).getByTestId('typeahead-noun')).toBeInTheDocument();
+    });
+
+    it('moves a command on from the verb to its object, past the dropped subject', () => {
+      renderPeriod({ imperative: true });
+
+      act(() => wordsPanel().onConceptSelect(EAT, 'verb'));
+
+      expect(within(box('directObject')).getByTestId('typeahead-noun')).toBeInTheDocument();
+    });
+
+    it('closes the picker after a verb that wants nothing more', () => {
+      renderPeriod({ subject: CAT });
+
+      act(() => wordsPanel().onConceptSelect(SLEEP, 'verb'));
+
+      expect(wordsPanel().activeSlot).toBeNull();
+    });
+
+    it('re-picks a filled word in place without moving the focus on', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT });
+
+      act(() => wordsPanel().onConceptSelect(DOG, 'subject'));
+
+      expect(lastEdit({ subject: CAT, verb: EAT })).toEqual({ subject: DOG, verb: EAT });
+      expect(wordsPanel().activeSlot).toBe('subject');
+    });
+
+    it('fills the active slot when the words panel names none', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT });
+      act(() => wordsPanel().onSlotClick('verb'));
+
+      act(() => wordsPanel().onConceptSelect(SLEEP));
+
+      expect(lastEdit({ subject: CAT })).toEqual({ subject: CAT, verb: SLEEP });
+    });
+
+    it('does nothing with no slot to fill', () => {
+      const { onPhraseUpdate } = renderPeriod({ subject: CAT });
+      act(() => wordsPanel().onConceptSelect(SLEEP, 'verb'));
+      onPhraseUpdate.mockClear();
+
+      act(() => wordsPanel().onConceptSelect(EAT));
+
+      expect(onPhraseUpdate).not.toHaveBeenCalled();
+    });
+
+    it('opens a filled word’s picker over it, and restores the word when focus leaves', () => {
+      renderPeriod({ subject: CAT, verb: EAT });
+
+      press(box('verb'));
+      expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
+      expect(wordsPanel().activeSlot).toBe('verb');
+
+      fireEvent.focusOut(screen.getByTestId('typeahead-verb'), { relatedTarget: document.body });
+      expect(screen.queryByTestId('typeahead-verb')).not.toBeInTheDocument();
+      expect(box('verb')).toHaveTextContent('eat');
+    });
+
+    it('closes a word’s picker once the new word is chosen', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
+      press(box('directObject'));
+
+      pickOption('HOUSE');
+
+      expect(lastEdit({ directObject: HORSE })).toEqual({ directObject: HOUSE });
+      expect(screen.queryByTestId('typeahead-noun')).not.toBeInTheDocument();
+      expect(box('directObject')).toHaveTextContent('house');
+    });
+
+    it('opens a re-picked word on its own word class', () => {
+      renderPeriod({ subject: THIRD, verb: SLEEP });
+
+      press(box('subject'));
+
+      expect(screen.getByTestId('pronoun-tab')).toHaveAttribute('aria-selected', 'true');
+
+      fireEvent.click(screen.getByTestId('pronoun-tab-noun'));
+
+      expect(screen.getByTestId('pronoun-tab-noun')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('closes the picker once an adjective is chosen', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: SLEEP });
+      fireEvent.click(satellite('subjectAdjective'));
+      expect(screen.getByPlaceholderText('type an adjective…')).toBeInTheDocument();
+
+      pickOption('BIG');
+
+      expect(lastEdit({ subject: CAT })).toEqual({ subject: CAT, subjectAdjective: BIG });
+      expect(wordsPanel().activeSlot).toBeNull();
+    });
+  });
+
+  describe('clearing', () => {
+    it('clears a word with everything that hung off it', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, subjectAdjective: BIG, verb: SLEEP });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Clear Subject' }));
+
+      expect(lastEdit({ subject: CAT, subjectAdjective: BIG, verb: SLEEP })).toEqual({
+        verb: SLEEP,
+      });
+    });
+
+    it('returns the focus to the verb box when the verb is cleared', () => {
+      renderPeriod({ subject: CAT, verb: EAT });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Clear Verb' }));
+
+      expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
+    });
+
+    it('leaves the focus alone when any other word is cleared', () => {
+      renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Clear Direct Object' }));
+
+      expect(wordsPanel().activeSlot).toBe('subject');
+    });
+
+    it('removes a complement, folds its box away and hands the focus back to the verb', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: WALK });
+      fireEvent.click(satellite('locative'));
+      expect(wordsPanel().activeSlot).toBe('locative');
+      pickOption('HOUSE');
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove Locative' }));
+
+      expect(lastEdit({ verb: WALK, locative: HOUSE, locativeSpecifier: 'under' })).toEqual({
+        verb: WALK,
+      });
+      expect(boxes()).not.toContain('locative');
+      expect(wordsPanel().activeSlot).toBe('verb');
+    });
+
+    it('keeps the focus when the complement removed was not the one in hand', () => {
+      renderPeriod({ subject: CAT, verb: WALK, locative: HOUSE });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove Locative' }));
+
+      expect(boxes()).not.toContain('locative');
+      expect(wordsPanel().activeSlot).toBe('subject');
+    });
+  });
+
+  describe('the grammatical controls', () => {
+    it('reveals an empty satellite with its picker in hand, and folds it away again', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP });
+
+      fireEvent.click(satellite('modifier'));
+      expect(within(box('modifier')).getByPlaceholderText('type an adverb…')).toBeInTheDocument();
+      expect(wordsPanel().activeSlot).toBe('modifier');
+
+      fireEvent.click(satellite('modifier'));
+      expect(boxes()).not.toContain('modifier');
+    });
+
+    it('folds the direct object away from its control', () => {
+      renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
+
+      fireEvent.click(satellite('directObject'));
+
+      expect(boxes()).toEqual(['subject', 'verb']);
+    });
+
+    it('flips the subject’s number and the verb’s polarity in place', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: SLEEP });
+
+      fireEvent.click(satellite('subjectNumber'));
+      expect(lastEdit({ subjectNumber: 'singular' })).toEqual({ subjectNumber: 'plural' });
+
+      fireEvent.click(satellite('verbNegative'));
+      expect(lastEdit({})).toEqual({ verbNegative: true });
+    });
+
+    it('cycles the gender of the noun whose control is pressed', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT, directObject: GIRL });
+
+      fireEvent.click(satellite('directObjectGender'));
+
+      expect(lastEdit({ directObject: GIRL })).toEqual({
+        directObject: GIRL,
+        directObjectGender: 'fem',
+      });
+    });
+
+    it('cycles the tense and the aspect from their boxes, which open without the focus', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: SLEEP });
+      fireEvent.click(satellite('verbTense'));
+      fireEvent.click(satellite('verbAspect'));
+      expect(wordsPanel().activeSlot).toBe('subject');
+
+      press(screen.getByText('Tense'));
+      expect(lastEdit({ verbTense: 'past' })).toEqual({ verbTense: 'future' });
+
+      press(screen.getByText('Aspect'));
+      expect(lastEdit({})).toEqual({ verbAspect: 'progressive' });
+    });
+
+    it('sets a noun’s determiner from its menu', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
+      fireEvent.click(satellite('directObjectDefiniteness'));
+
+      press(screen.getByText('Determiner'));
+      fireEvent.click(screen.getByRole('menuitem', { name: /Paucal/ }));
+
+      expect(lastEdit({ subjectDefiniteness: 'this' })).toEqual({
+        subjectDefiniteness: 'this',
+        directObjectDefiniteness: 'few',
+      });
+    });
+
+    it('sets the route’s and the locative’s relations and the cause’s stance', () => {
+      const { lastEdit } = renderPeriod({
+        subject: CAT,
+        verb: WALK,
+        route: PARK,
+        locative: HOUSE,
+        cause: DOG,
+      });
+      const [routeUnder, locativeUnder] = screen.getAllByRole('button', { name: 'under' });
+
+      fireEvent.click(routeUnder!);
+      expect(lastEdit({})).toEqual({ routeSpecifier: 'under' });
+
+      fireEvent.click(locativeUnder!);
+      expect(lastEdit({})).toEqual({ locativeSpecifier: 'under' });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Positive — thanks to' }));
+      expect(lastEdit({})).toEqual({ causeSentiment: 'positive' });
+    });
+
+    it('cycles a noun modifier’s relation and number, and sets the adjective describing it', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, subjectAdjective: SAIL, verb: SLEEP });
+
+      fireEvent.click(screen.getByLabelText(/^Relation:/));
+      expect(lastEdit({})).toEqual({ modifierRelations: { subjectAdjective: 'purpose' } });
+
+      fireEvent.click(screen.getByLabelText(/^Modifier number:/));
+      expect(lastEdit({})).toEqual({ modifierNumbers: { subjectAdjective: 'plural' } });
+
+      fireEvent.click(screen.getByLabelText('Add an adjective describing this modifier'));
+      pickOption('BIG');
+      expect(lastEdit({})).toEqual({ modifierAdjectives: { subjectAdjective: BIG } });
+    });
+
+    it('cycles a real adjective’s degree', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT, subjectAdjective: BIG, verb: SLEEP });
+
+      fireEvent.click(screen.getByLabelText(/^Degree:/));
+
+      expect(lastEdit({})).toEqual({ adjectiveDegrees: { subjectAdjective: 'more' } });
+    });
+  });
+
+  // A possessor's or a conjunct's builder wears the full period card, so its own "Remove main
+  // clause" control is how it is removed.
+  describe('a possessor', () => {
+    it('opens a panel whose edits land in the possessor slice', () => {
+      const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
+
+      fireEvent.click(satellite('subjectPossessor'));
+      pickOption('BOY');
+
+      expect(selection()).toEqual({
+        subject: CAT,
+        verb: SLEEP,
+        subjectPossessor: { subject: BOY },
+      });
+    });
+
+    it('keeps the full canvas, verb and all', () => {
+      renderPeriod({ subject: CAT, verb: EAT, subjectPossessor: { subject: BOY } });
+
+      expect(screen.getAllByTestId('box-verb')).toHaveLength(2);
+    });
+
+    it('is removed with any reference it held, unlinking the head it had', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const binding = makeBinding();
+      const { lastEdit } = renderPeriod(
+        { subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } },
+        { binding },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+
+      expect(
+        lastEdit({ subject: CAT, subjectPossessor: { subject: BOY }, subjectPossessorRef: 'x' }),
+      ).toEqual({ subject: CAT });
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('subject/possessor');
+      expect(screen.queryByRole('button', { name: 'Owned by a phrase' })).not.toBeInTheDocument();
+    });
+
+    it('folds its panel away when removed while still empty', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP });
+      fireEvent.click(satellite('subjectPossessor'));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+
+      expect(screen.queryByRole('button', { name: 'Owned by a phrase' })).not.toBeInTheDocument();
+    });
+
+    it('unlinks a nested builder’s possessor head by its full address', () => {
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: DOG },
+        { binding, possessorPath: 'directObject/conjunct/0', nounPhraseOnly: true },
+      );
+      fireEvent.click(satellite('subjectPossessor'));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
+        'directObject/conjunct/0/possessor',
+      );
+    });
+
+    it('points at a noun picked on the canvas, never at itself', () => {
+      const { lastEdit } = renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE });
+      fireEvent.click(satellite('directObjectPossessor'));
+      fireEvent.click(screen.getByRole('button', { name: 'Refers to a noun' }));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Pick a noun…' }));
+      expect(pickable()).toEqual(['subject']);
+
+      press(box('subject'));
+      expect(lastEdit({ directObject: HORSE })).toEqual({
+        directObject: HORSE,
+        directObjectPossessorRef: 'subject',
+      });
+      expect(pickable()).toEqual([]);
+      expect(screen.getByRole('button', { name: /boy/ })).toHaveTextContent('boy · “his”');
+    });
+
+    it('can point at the head of another noun’s possessor, by its address', () => {
+      const { lastEdit } = renderPeriod({
+        subject: BOY,
+        verb: EAT,
+        directObject: HORSE,
+        directObjectPossessor: { subject: DOG },
+      });
+      // The period's own control comes first; the dog's builder carries one too.
+      fireEvent.click(screen.getAllByTestId('satellite-subjectPossessor')[0]!);
+      fireEvent.click(screen.getAllByRole('button', { name: 'Refers to a noun' })[0]!);
+      fireEvent.click(screen.getByRole('button', { name: 'Pick a noun…' }));
+
+      const [, dog] = screen.getAllByTestId('box-subject');
+      press(dog!);
+
+      expect(lastEdit({})).toEqual({ subjectPossessorRef: 'directObject/possessor' });
+    });
+  });
+
+  describe('coordination', () => {
+    it('appends a conjunct, edited as a bare noun phrase', () => {
+      const { selection } = renderPeriod({ subject: CAT, verb: EAT });
+
+      fireEvent.click(satellite('subjectConjunct'));
+      expect(selection().subjectConjuncts).toEqual([{}]);
+
+      pickOption('DOG');
+      expect(selection().subjectConjuncts).toEqual([{ subject: DOG }]);
+      expect(screen.getAllByTestId('box-verb')).toHaveLength(1);
+    });
+
+    it('drops a conjunct and unlinks every relative clause from it onwards', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const binding = makeBinding();
+      const group: PhraseSelection = {
+        subject: CAT,
+        subjectConjuncts: [{ subject: DOG }, { subject: HORSE }, { subject: BOY }],
+        verb: SLEEP,
+      };
+      const { lastEdit } = renderPeriod(group, { binding });
+
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove main clause' })[1]!);
+
+      expect(lastEdit(group)).toEqual({
+        ...group,
+        subjectConjuncts: [{ subject: DOG }, { subject: BOY }],
+      });
+      expect(vi.mocked(binding.relative.onRemoveLink).mock.calls).toEqual([
+        ['subject/conjunct/1'],
+        ['subject/conjunct/2'],
+      ]);
+    });
+
+    it('unlinks a nested builder’s conjuncts by their full address', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: DOG, subjectConjuncts: [{ subject: CAT }] },
+        { binding, possessorPath: 'directObject/possessor' },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
+        'directObject/possessor/conjunct/0',
+      );
+    });
+
+    it('cycles the conjunction joining the group', () => {
+      const { lastEdit } = renderPeriod({
+        subject: CAT,
+        subjectConjuncts: [{ subject: DOG }],
+        verb: SLEEP,
+      });
+
+      fireEvent.click(screen.getByRole('button', { name: 'And' }));
+
+      expect(lastEdit({ subjectConjunction: 'and' })).toEqual({ subjectConjunction: 'or' });
+    });
+  });
+
+  describe('cross-container links', () => {
+    it('registers its noun boxes, and a possessor’s head under its address', () => {
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: BOY, verb: EAT, directObject: HORSE, subjectPossessor: { subject: DOG } },
+        { binding },
+      );
+
+      const registered = vi
+        .mocked(binding.geometry.registerBox)
+        .mock.calls.filter(([, el]) => el)
+        .map(([key]) => key);
+      expect(new Set(registered)).toEqual(
+        new Set(['subject', 'directObject', 'subject/possessor']),
+      );
+    });
+
+    it('greys out a noun another clause relativises, leaving nothing to clear', () => {
+      const binding = makeBinding({ relative: { targetKeys: new Set(['directObject']) } });
+      renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE }, { binding });
+
+      expect(getComputedStyle(box('directObject').firstElementChild!).opacity).toBe('0.45');
+      expect(getComputedStyle(box('subject').firstElementChild!).opacity).toBe('1');
+      expect(screen.queryByRole('button', { name: 'Clear Direct Object' })).not.toBeInTheDocument();
+    });
+
+    it('lights up the nouns a pending link may land on, and lands it on a press', () => {
+      const binding = makeBinding({ relative: { isPickTarget: () => true } });
+      renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE }, { binding });
+
+      expect(pickable()).toEqual(['subject', 'directObject']);
+
+      press(box('directObject'));
+
+      expect(binding.relative.onPick).toHaveBeenCalledExactlyOnceWith('directObject');
+    });
+  });
+
+  describe('the period card', () => {
+    it('carries its workspace container id', () => {
+      renderPeriod({}, { binding: makeBinding() });
+
+      expect(screen.getByTestId('period-container')).toHaveAttribute('data-container-id', 'c1');
+    });
+
+    it('tells the user what to do next', () => {
+      const { unmount } = renderPeriod();
+      expect(screen.getByText(/start by choosing a subject/)).toBeInTheDocument();
+      unmount();
+
+      renderPeriod({ subject: CAT });
+      expect(screen.getByText(/click a slot and then choose a word/)).toBeInTheDocument();
+    });
+
+    it('floats a standalone card dragged by its border', () => {
+      renderPeriod({ subject: CAT });
+      const card = screen.getByTestId('period-container');
+
+      fireEvent.pointerDown(card.firstElementChild!, { clientX: 2, clientY: 2 });
+      fireEvent.pointerMove(card.firstElementChild!, { clientX: 42, clientY: 32 });
+
+      expect(card).toHaveStyle({ position: 'fixed', left: '40px', top: '30px' });
+    });
+
+    it('keeps a workspace card in the stack', () => {
+      renderPeriod({ subject: CAT }, { binding: makeBinding() });
+      const card = screen.getByTestId('period-container');
+
+      fireEvent.pointerDown(card.firstElementChild!, { clientX: 2, clientY: 2 });
+      fireEvent.pointerMove(card.firstElementChild!, { clientX: 42, clientY: 32 });
+
+      expect(card).toHaveStyle({ position: 'relative' });
+    });
+
+    it.each<[string, boolean, PhraseSelection]>([
+      ['an untouched period', false, {}],
+      ['an empty possessor', false, { subjectPossessor: {} }],
+      ['an empty conjunct list', false, { subjectConjuncts: [] }],
+      ['a picked word', true, { subject: CAT }],
+      ['a toggle', true, { verbNegative: true }],
+    ])('counts %s as something to save: %s', (_what, enabled, selection) => {
+      renderPeriod(selection, { onSave: () => {} });
+
+      expect(screen.getByRole('button', { name: 'Save period' })).toHaveProperty(
+        'disabled',
+        !enabled,
+      );
+    });
+
+    it('forwards the reorder, save and remove controls', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const handlers = {
+        onMoveUp: vi.fn(),
+        onMoveDown: vi.fn(),
+        onSave: vi.fn(),
+        onRemove: vi.fn(),
+      };
+      renderPeriod({ subject: CAT }, handlers);
+
+      fireEvent.click(screen.getByRole('button', { name: 'Move this period up' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move this period down' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Save period' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+
+      Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledOnce());
+    });
+
+    it('clears the sole period in place rather than removing it', () => {
+      renderPeriod({ subject: CAT }, { onRemove: () => {}, soleContainer: true });
+
+      expect(screen.getByRole('button', { name: 'Clear main clause' })).toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
+    });
+  });
+
+  describe('the canvas view', () => {
+    it('collapses a dotted box down to its main word, and expands it again', () => {
+      renderPeriod({ subject: CAT, subjectAdjective: BIG, verb: SLEEP });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+      expect(boxes()).toEqual(['subject', 'verb']);
+      expect(screen.queryByTestId('satellite-subjectNumber')).not.toBeInTheDocument();
+      expect(satellite('verbTense')).toBeInTheDocument();
+
+      fireEvent.click(screen.getByRole('button', { name: 'Expand Subject' }));
+      expect(boxes()).toEqual(['subjectAdjective', 'subject', 'verb']);
+    });
+
+    it('compacts every box at once, keeping the boxes collapsed by hand', () => {
+      renderPeriod({
+        subject: CAT,
+        subjectAdjective: BIG,
+        verb: EAT,
+        directObject: HORSE,
+        directObjectAdjective: BIG,
+      });
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+
+      fireEvent.click(screen.getByTestId('period-compact-toggle'));
+      expect(boxes()).toEqual(['subject', 'verb', 'directObject']);
+      expect(groups()).toEqual([]);
+      expect(screen.queryByTestId('satellite-directObjectNumber')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('possessor-ctl-subject')).not.toBeInTheDocument();
+      expect(screen.queryByRole('separator')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('period-compact-toggle'));
+      expect(boxes()).toEqual(['subject', 'verb', 'directObject', 'directObjectAdjective']);
+      expect(screen.getByRole('separator')).toBeInTheDocument();
+    });
+
+    it('asks the workspace to re-measure when a box collapses or the period compacts', () => {
+      const binding = makeBinding();
+      renderPeriod({ subject: CAT }, { binding });
+      const onGeometryChange = vi.mocked(binding.geometry.onGeometryChange);
+
+      onGeometryChange.mockClear();
+      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+      expect(onGeometryChange).toHaveBeenCalled();
+
+      onGeometryChange.mockClear();
+      fireEvent.click(screen.getByTestId('period-compact-toggle'));
+      expect(onGeometryChange).toHaveBeenCalled();
+    });
+
+    it('resizes the canvas from its bottom edge, and remembers the height', () => {
+      renderPeriod({ subject: CAT });
+      expect(canvasHeight()).toBe(340);
+
+      fireEvent.keyDown(screen.getByRole('separator'), { key: 'ArrowDown' });
+
+      expect(canvasHeight()).toBe(356);
+      expect(localStorage.getItem('signi:graphHeight')).toBe('356');
+    });
+
+    it('opens on the remembered height, but never below the minimum', () => {
+      localStorage.setItem('signi:graphHeight', '100');
+      renderPeriod({ subject: CAT });
+
+      expect(canvasHeight()).toBe(160);
+    });
+  });
+
+  describe('the words panel', () => {
+    it('is closed unless the page opens it, and asks the page to close it', () => {
+      const { unmount } = renderPeriod();
+      expect(wordsPanel().open).toBe(false);
+      expect(() => wordsPanel().onClose()).not.toThrow();
+      unmount();
+
+      const onWordsPanelClose = vi.fn();
+      renderPeriod({}, { wordsPanelOpen: true, onWordsPanelClose });
+      expect(wordsPanel().open).toBe(true);
+      wordsPanel().onClose();
+      expect(onWordsPanelClose).toHaveBeenCalledOnce();
+    });
+
+    it('opens at its remembered width, and follows a resize', () => {
+      const { unmount } = renderPeriod();
+      expect(wordsPanel().width).toBe(160);
+      unmount();
+
+      localStorage.setItem('signi:phraseBuilderSidebarWidth', '240');
+      renderPeriod();
+      expect(wordsPanel().width).toBe(240);
+
+      act(() => wordsPanel().onWidthChange(300));
+      expect(wordsPanel().width).toBe(300);
+    });
+
+    it('offers no object slots before a verb, and names the slot in hand', () => {
+      // Objects hang off the verb, so a verbless period lists none, whatever could follow.
+      renderPeriod({ subject: CAT });
+      expect(wordsPanel().activeSlotConfig?.key).toBe('subject');
+      expect(wordsPanel().visibleSlots.map((s) => s.key)).toEqual(
+        expect.not.arrayContaining(['directObject', 'directObjectAdjective']),
+      );
+
+      act(() => wordsPanel().onSlotClick('directObject'));
+      expect(wordsPanel().activeSlot).toBe('directObject');
+      expect(wordsPanel().activeSlotConfig).toBeNull();
+    });
+
+    it('lists a transitive verb’s object among the slots', () => {
+      renderPeriod({ subject: CAT, verb: EAT });
+
+      expect(wordsPanel().visibleSlots.map((s) => s.key)).toEqual(
+        expect.arrayContaining(['directObject', 'directObjectAdjective']),
+      );
+    });
+  });
+});
+
+// The noun boxes lit up as targets of a pending pick (their frame turns dashed).
+const pickable = () =>
+  screen
+    .queryAllByTestId(/^box-/)
+    .filter((b) => getComputedStyle(b.firstElementChild!).borderStyle === 'dashed')
+    .map((b) => b.dataset['testid']!.slice(4));
+
+// The canvas's drawn height, read off its connectors layer.
+function canvasHeight() {
+  const layer = document.querySelector('svg[viewBox^="0 0 600 "]')!;
+  return parseFloat(getComputedStyle(layer.parentElement!).height);
+}

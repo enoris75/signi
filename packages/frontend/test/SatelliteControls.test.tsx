@@ -1,0 +1,127 @@
+import { describe, expect, it, vi } from 'vitest';
+import { fireEvent, render, screen } from '@testing-library/react';
+import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
+import { SatelliteControls } from '../src/components/PhraseBuilder/SatelliteControls.tsx';
+
+// A set satellite fills its button with the slot colour; the tests render without the app
+// theme, so these are MUI's default palette mains.
+const PRIMARY = 'rgb(25, 118, 210)';
+const SECONDARY = 'rgb(156, 39, 176)';
+const SUCCESS = 'rgb(46, 125, 50)';
+
+function satellite(key: string, overrides: Partial<SatelliteIcon> = {}): SatelliteIcon {
+  return {
+    key,
+    icon: <span />,
+    label: key,
+    active: false,
+    isSet: true,
+    valued: false,
+    onToggle: () => {},
+    ...overrides,
+  };
+}
+
+const control = (key: string) => screen.getByTestId(`satellite-${key}`);
+// The positioned wrapper each control sits in.
+const anchor = (key: string) => getComputedStyle(control(key).parentElement!);
+
+describe('SatelliteControls', () => {
+  it('renders one control per satellite, box by box', () => {
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{
+          subject: [satellite('subjectAdjective'), satellite('subjectNumber')],
+          verb: [satellite('verbAdverb')],
+        }}
+        controlPos={{
+          subjectAdjective: { x: 1, y: 1 },
+          subjectNumber: { x: 2, y: 2 },
+          verbAdverb: { x: 3, y: 3 },
+        }}
+      />,
+    );
+
+    expect(screen.getAllByRole('button').map((b) => b.dataset['testid'])).toEqual([
+      'satellite-subjectAdjective',
+      'satellite-subjectNumber',
+      'satellite-verbAdverb',
+    ]);
+  });
+
+  it('centres each control on its canvas position', () => {
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{ subject: [satellite('subjectAdjective')] }}
+        controlPos={{ subjectAdjective: { x: 140, y: 62 } }}
+      />,
+    );
+
+    const style = anchor('subjectAdjective');
+    expect(style.position).toBe('absolute');
+    expect(style.left).toBe('140px');
+    expect(style.top).toBe('62px');
+    expect(style.transform).toBe('translate(-50%, -50%)');
+  });
+
+  it('leaves out a satellite that has no position yet', () => {
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{
+          subject: [satellite('subjectAdjective'), satellite('subjectNumber')],
+        }}
+        controlPos={{ subjectNumber: { x: 10, y: 10 } }}
+      />,
+    );
+
+    expect(screen.queryByTestId('satellite-subjectAdjective')).not.toBeInTheDocument();
+    expect(control('subjectNumber')).toBeInTheDocument();
+  });
+
+  it('colours each control after the slot of the box it rides', () => {
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{
+          verb: [satellite('verbAdverb')],
+          directObject: [satellite('directObjectAdjective')],
+        }}
+        controlPos={{ verbAdverb: { x: 0, y: 0 }, directObjectAdjective: { x: 0, y: 0 } }}
+      />,
+    );
+
+    expect(getComputedStyle(control('verbAdverb')).backgroundColor).toBe(SECONDARY);
+    expect(getComputedStyle(control('directObjectAdjective')).backgroundColor).toBe(SUCCESS);
+  });
+
+  it('falls back to the primary colour for a box that is not a slot', () => {
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{ tense: [satellite('tenseAdverb')] }}
+        controlPos={{ tenseAdverb: { x: 0, y: 0 } }}
+      />,
+    );
+
+    expect(getComputedStyle(control('tenseAdverb')).backgroundColor).toBe(PRIMARY);
+  });
+
+  it('toggles the satellite whose control is clicked', () => {
+    const onAdjective = vi.fn();
+    const onNumber = vi.fn();
+    render(
+      <SatelliteControls
+        satelliteIconsByParent={{
+          subject: [
+            satellite('subjectAdjective', { onToggle: onAdjective }),
+            satellite('subjectNumber', { onToggle: onNumber }),
+          ],
+        }}
+        controlPos={{ subjectAdjective: { x: 0, y: 0 }, subjectNumber: { x: 0, y: 0 } }}
+      />,
+    );
+
+    fireEvent.click(control('subjectNumber'));
+
+    expect(onNumber).toHaveBeenCalledOnce();
+    expect(onAdjective).not.toHaveBeenCalled();
+  });
+});
