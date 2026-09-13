@@ -15,13 +15,17 @@ interface UseDragArgs {
   positions: Positions;
   setPositions: React.Dispatch<React.SetStateAction<Positions>>;
   containerRef: React.RefObject<HTMLDivElement | null>;
+  // The boxes are painted from a derived layout (compact view), not from `positions`: a press
+  // still activates a box, but a drag moves nothing — it would shift a stored position the
+  // canvas isn't showing.
+  frozen?: boolean;
 }
 
 // Node-drag machinery for the phrase canvas: individual boxes (makeDragProps) and whole
 // dotted groups (makeGroupDragProps) are dragged by pointer, writing back % positions.
 // `dragRef` and `draggingKey` are also read by the owning component's layout effects (the
 // height rebase and the overlap resolver both need to know what's being dragged).
-export function useDrag({ positions, setPositions, containerRef }: UseDragArgs) {
+export function useDrag({ positions, setPositions, containerRef, frozen = false }: UseDragArgs) {
   const dragRef = useRef<DragState | null>(null);
   const [draggingKey, setDraggingKey] = useState<string | null>(null);
 
@@ -49,6 +53,7 @@ export function useDrag({ positions, setPositions, containerRef }: UseDragArgs) 
     ) {
       dragRef.current.moved = true;
     }
+    if (frozen) return;
     const { keys, origPositions } = dragRef.current;
     setPositions((prev) => {
       const next = { ...prev };
@@ -87,9 +92,13 @@ export function useDrag({ positions, setPositions, containerRef }: UseDragArgs) 
     setDraggingKey(null);
   }
 
-  function makeDragProps(key: string, onActivate: () => void) {
+  // `at` is where the box is painted, when that isn't its stored position (compact view).
+  function makeDragProps(
+    key: string,
+    onActivate: () => void,
+    at: { x: number; y: number } = positions[key] ?? DEFAULT_POSITIONS[key],
+  ) {
     const isDragging = draggingKey === key;
-    const p = positions[key] ?? DEFAULT_POSITIONS[key];
     return {
       onPointerDown: (e: React.PointerEvent) => startDrag(e, key),
       onPointerMove: moveDrag,
@@ -97,11 +106,11 @@ export function useDrag({ positions, setPositions, containerRef }: UseDragArgs) 
       onPointerCancel: () => endDrag(),
       sx: {
         position: "absolute" as const,
-        left: `${p.x}%`,
-        top: `${p.y}%`,
+        left: `${at.x}%`,
+        top: `${at.y}%`,
         transform: "translate(-50%, -50%)",
         zIndex: isDragging ? 10 : 1,
-        cursor: isDragging ? "grabbing" : "grab",
+        cursor: frozen ? "pointer" : isDragging ? "grabbing" : "grab",
         touchAction: "none",
         outline: "none",
       },

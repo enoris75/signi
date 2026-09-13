@@ -27,6 +27,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     shownMap,
     makeDragProps,
     selection,
+    compact,
     complementToggleIcons,
     directObjectToggle,
     groupRects,
@@ -125,8 +126,9 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       )}
 
       {/* Path-relation toolbar rides the top edge of the Route dotted box — one
-          selectable icon per specifier. */}
-      {selection.route && routeRect && (
+          selectable icon per specifier. Like the dotted box's other chrome, the relation
+          toolbars are withdrawn in compact view, which leaves no headroom for them. */}
+      {!compact && selection.route && routeRect && (
         <Box
           sx={{
             position: "absolute",
@@ -146,7 +148,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {/* The locative takes the same relation toolbar as the route — it is what lets the
           place read "under the bed" or "behind the tree" rather than only "in the bed".
           Same relations, different default: the locative falls back on containment. */}
-      {selection.locative && locativeRect && (
+      {!compact && selection.locative && locativeRect && (
         <Box
           sx={{
             position: "absolute",
@@ -165,7 +167,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
 
       {/* Sentiment toolbar rides the top edge of the Cause dotted box — neutral /
           negative / positive, mirroring the route's path-relation toolbar. */}
-      {selection.cause && causeRect && (
+      {!compact && selection.cause && causeRect && (
         <Box
           sx={{
             position: "absolute",

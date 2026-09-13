@@ -233,26 +233,41 @@ export function packPeriod(
 // Compact-view layout: pack the visible core words into centered rows and size the canvas
 // to just wrap them. The caller derives (rather than stores) this each render, so it never
 // goes stale on a resize and the full-view positions/height stay pristine.
+//
+// `corner` is how far the period's own controls, floated over the canvas's top-right corner in
+// compact view, reach into the canvas: `w` in from its right edge, `h` down from its top. The
+// first row stops a gap short of them — shifted left, and holding fewer words if it must, since a
+// word box's clear button pokes out past its cell. When not even one word fits beside them, the
+// whole grid starts below them instead.
 export function computeCompactLayout(
   keys: string[],
   svgW: number,
+  corner: { w: number; h: number } = { w: 0, h: 0 },
 ): { positions: PositionMap; height: number } {
   const boxW = 2 * COMPACT_PAD_H;
   const rowH = COMPACT_PAD_TOP + COMPACT_PAD_BOT;
   const gap = 16;
   const margin = 4;
-  const perRow = Math.max(1, Math.floor((svgW - 2 * margin + gap) / (boxW + gap)));
+  // How many cells fit across a span of `w` px.
+  const fit = (w: number) => Math.floor((w + gap) / (boxW + gap));
+  const perRow = Math.max(1, fit(svgW - 2 * margin));
+  const firstRight = corner.w > 0 ? svgW - corner.w - gap : svgW - margin;
+  const beside = Math.min(perRow, Math.max(0, fit(firstRight - margin)));
+  const firstCount = beside || perRow;
   const rows: string[][] = [];
-  for (let i = 0; i < keys.length; i += perRow) rows.push(keys.slice(i, i + perRow));
+  if (keys.length > 0) rows.push(keys.slice(0, firstCount));
+  for (let i = firstCount; i < keys.length; i += perRow) rows.push(keys.slice(i, i + perRow));
+  const gridTop = beside ? margin : margin + corner.h + gap / 2;
   const height = Math.max(
     rowH,
-    Math.round(rows.length * rowH + gap * Math.max(rows.length - 1, 0) + 2 * margin),
+    Math.round(gridTop + rows.length * rowH + gap * Math.max(rows.length - 1, 0) + margin),
   );
   const positions: PositionMap = {};
-  let top = margin;
-  for (const row of rows) {
+  let top = gridTop;
+  for (const [r, row] of rows.entries()) {
     const rowW = row.length * boxW + gap * (row.length - 1);
-    let left = Math.max(margin, (svgW - rowW) / 2);
+    const right = r === 0 && beside ? firstRight : svgW - margin;
+    let left = Math.max(margin, Math.min((svgW - rowW) / 2, right - rowW));
     for (const key of row) {
       positions[key] = {
         x: ((left + COMPACT_PAD_H) / Math.max(svgW, 1)) * 100,

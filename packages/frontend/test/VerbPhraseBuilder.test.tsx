@@ -369,6 +369,17 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleSelectSentiment).toHaveBeenCalledExactlyOnceWith('positive');
     });
 
+    it('are withdrawn in compact view, with the rest of the dotted boxes’ chrome', () => {
+      renderVerb({
+        selection: { route: noun('PARK'), locative: noun('BED'), cause: noun('DOG') },
+        groupRects: [ROUTE, LOCATIVE, CAUSE],
+        compact: true,
+      });
+
+      expect(screen.queryByTestId('specifier-toolbar')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('sentiment-toolbar')).not.toBeInTheDocument();
+    });
+
     it('need both the complement’s word and its box', () => {
       const toolbars = () => [
         ...screen.queryAllByRole('button', { name: 'under' }),

@@ -85,6 +85,7 @@ import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
 import { useDrag } from "./hooks/useDrag.ts";
 import { useHeightRebase } from "./hooks/useHeightRebase.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
+import { useCornerOverlap } from "./hooks/useCornerOverlap.ts";
 import { useBoxSizes } from "./hooks/useBoxSizes.ts";
 import { usePanelConnectors } from "./hooks/usePanelConnectors.ts";
 import { useGeometryNotify } from "./hooks/useGeometryNotify.ts";
@@ -528,6 +529,8 @@ export function PhraseBuilder({
     positions,
     setPositions,
     containerRef,
+    // Compact paints the boxes where its packing puts them, so there is nothing to drag.
+    frozen: compact,
   });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
     const saved = localStorage.getItem("signi:graphHeight");
@@ -540,6 +543,9 @@ export function PhraseBuilder({
   // The canvas's rendered size. The canvas only mounts once `showCanvas` flips, so the
   // observer re-attaches on that.
   const svgSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  // The period's header controls, which compact view floats over the canvas's top-right corner.
+  const periodControlsRef = useRef<HTMLDivElement>(null);
+  const controlsCorner = useCornerOverlap(periodControlsRef, containerRef, compact, showCanvas);
   const { slotEls, boxSizes, sizeOf } = useBoxSizes();
   const openPossessors = openPossessorsFor(selection, shownMap);
   const openConjuncts = openConjunctsFor(selection);
@@ -569,15 +575,17 @@ export function PhraseBuilder({
   // from the current width every render, it never goes stale on a resize, and the stored
   // full-view positions/height stay pristine for when compact turns back off. The core
   // words are exactly `renderedSlots` in compact (satellites are already filtered out).
+  // The packing keeps clear of the period's controls, which reserve no room of their own.
   const compactLayout = React.useMemo(
     () =>
       compact
         ? computeCompactLayout(
             renderedSlots.map((s) => s.key),
             svgSize.w,
+            controlsCorner,
           )
         : null,
-    [compact, renderedSlots, svgSize.w],
+    [compact, renderedSlots, svgSize.w, controlsCorner],
   );
 
   // Canvas height + the size buildGraph measures against: the tight compact height when
@@ -684,7 +692,8 @@ export function PhraseBuilder({
     collapsedGroups: effectiveCollapsed,
     compact,
     draggingKey,
-    makeDragProps,
+    // Painted where `pos` says — the compact packing, while compact — not at the stored position.
+    makeDragProps: (key, onActivate) => makeDragProps(key, onActivate, pos(key)),
     makeGroupDragProps,
     slotEls,
     handleSlotClick,
@@ -850,6 +859,7 @@ export function PhraseBuilder({
         onRemove={onRemove}
         onToggleCompact={handleToggleCompact}
         onTidy={handleTidyPeriod}
+        controlsRef={periodControlsRef}
         conditional={clauseControls.conditional}
         coordinative={clauseControls.coordinative}
         instrumental={clauseControls.instrumental}

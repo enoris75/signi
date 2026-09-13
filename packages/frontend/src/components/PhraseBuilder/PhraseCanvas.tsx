@@ -159,6 +159,7 @@ export function PhraseCanvas({
       ) : (
         <Box
           ref={containerRef}
+          data-testid="phrase-canvas"
           sx={{
             position: "relative",
             height: canvasHeight,

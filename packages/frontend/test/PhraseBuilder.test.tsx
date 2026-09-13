@@ -18,6 +18,10 @@ import { renderWithProviders } from './render.tsx';
 vi.mock('../src/components/PhraseBuilder/hooks/useElementSize.ts', () => ({
   useElementSize: (_ref: unknown, initial: { w: number; h: number }) => initial,
 }));
+// Nor any layout: the period's compact controls reach nowhere into the canvas.
+vi.mock('../src/components/PhraseBuilder/hooks/useCornerOverlap.ts', () => ({
+  useCornerOverlap: () => ({ w: 0, h: 0 }),
+}));
 // Every box measures 0×0 in jsdom, so the resolver would shove boxes about on no real footprint.
 vi.mock('../src/components/PhraseBuilder/hooks/useOverlapResolution.ts', () => ({
   useOverlapResolution: () => {},
@@ -1051,6 +1055,32 @@ describe('PhraseBuilder', () => {
       fireEvent.click(screen.getByTestId('period-compact-toggle'));
       expect(boxes()).toEqual(['subject', 'verb', 'directObject', 'directObjectAdjective']);
       expect(screen.getByRole('separator')).toBeInTheDocument();
+    });
+
+    it('paints the compacted words where it packs them, and drags none of them', () => {
+      renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
+      const keys = ['subject', 'verb', 'directObject'];
+      // The positioned node a word box is dragged by.
+      const node = (key: string) => {
+        let el: HTMLElement | null = box(key);
+        while (el && getComputedStyle(el).position !== 'absolute') el = el.parentElement;
+        return el!;
+      };
+      const lefts = () => keys.map((k) => parseFloat(getComputedStyle(node(k)).left));
+      const expanded = lefts();
+
+      fireEvent.click(screen.getByTestId('period-compact-toggle'));
+      // Three 132 px cells 16 px apart, centred on the 600 px canvas: 152, 300 and 448 px.
+      const packed = lefts();
+      [152, 300, 448].forEach((px, i) => expect(packed[i]).toBeCloseTo((px / 600) * 100));
+
+      fireEvent.pointerDown(node('verb'), { clientX: 0, clientY: 0 });
+      fireEvent.pointerMove(node('verb'), { clientX: 120, clientY: 40 });
+      fireEvent.pointerUp(node('verb'));
+      expect(lefts()).toEqual(packed);
+
+      fireEvent.click(screen.getByTestId('period-compact-toggle'));
+      expect(lefts()).toEqual(expanded);
     });
 
     it('asks the workspace to re-measure when a box collapses or the period compacts', () => {

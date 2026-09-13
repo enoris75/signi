@@ -217,6 +217,9 @@ export interface PeriodContainerProps {
   onRemove?: () => void;
   onToggleCompact: () => void;
   onTidy: () => void;
+  // The header controls, for the owner to measure: compact view floats them over the canvas's
+  // top-right corner, and the canvas packs its words clear of them.
+  controlsRef?: React.Ref<HTMLDivElement>;
   // Conditional (IF/MAIN) connector control on the card border. Absent for a standalone period.
   conditional?: ConditionalControl;
   // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
@@ -256,6 +259,7 @@ export function PeriodContainer({
   onRemove,
   onToggleCompact,
   onTidy,
+  controlsRef,
   conditional,
   coordinative,
   instrumental,
@@ -465,6 +469,7 @@ export function PeriodContainer({
       {(conditional || coordinative || imperative || infinitive) && (
         <Box
           ref={conditional?.registerBorderAnchor}
+          data-testid="period-border-controls"
           onPointerDown={(e) => e.stopPropagation()}
           sx={{
             position: "absolute",
@@ -628,6 +633,7 @@ export function PeriodContainer({
         ))}
       </Menu>
       <Box
+        ref={controlsRef}
         sx={{
           display: "flex",
           alignItems: "center",
@@ -722,7 +728,7 @@ export function PeriodContainer({
             })}
           </Box>
         )}
-        <Box sx={{ display: "flex", alignItems: "center" }}>
+        <Box data-testid="period-controls" sx={{ display: "flex", alignItems: "center" }}>
           {/* Reorder within the workspace stack. Both controls stay mounted while the
               workspace holds more than one period, so the cluster doesn't shift width
               as a period reaches an end; the one with nowhere to go is disabled. */}

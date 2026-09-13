@@ -8,15 +8,15 @@ import { attach, placed } from './dom.ts';
 
 // The owning component keeps positions in state and the canvas in a ref; the hook reads both.
 // The canvas is 400×200 px, so 4 px across and 2 px down are each 1%.
-function useCanvas(initial: Positions) {
+function useCanvas(initial: Positions, frozen: boolean) {
   const [positions, setPositions] = useState(initial);
   const containerRef = useRef<HTMLDivElement>(null);
-  const drag = useDrag({ positions, setPositions, containerRef });
+  const drag = useDrag({ positions, setPositions, containerRef, frozen });
   return { positions, containerRef, ...drag };
 }
 
-function renderCanvas(initial: Positions = { subject: { x: 50, y: 50 } }) {
-  const hook = renderHook(() => useCanvas(initial));
+function renderCanvas(initial: Positions = { subject: { x: 50, y: 50 } }, { frozen = false } = {}) {
+  const hook = renderHook(() => useCanvas(initial, frozen));
   attach(hook.result.current.containerRef, placed(0, 0, 400, 200));
   return hook;
 }
@@ -94,6 +94,34 @@ describe('useDrag', () => {
         zIndex: 1,
         cursor: 'grab',
       });
+    });
+  });
+
+  describe('a canvas painted from a derived layout', () => {
+    it('paints a node where it is told, not at its stored position', () => {
+      const { result } = renderCanvas();
+
+      expect(result.current.makeDragProps('subject', () => {}, { x: 10, y: 20 }).sx).toMatchObject({
+        left: '10%',
+        top: '20%',
+      });
+    });
+
+    it('moves nothing while frozen, but still clicks a box that was pressed', () => {
+      const { result } = renderCanvas(undefined, { frozen: true });
+      const onActivate = vi.fn();
+
+      act(() => result.current.makeDragProps('subject', onActivate).onPointerDown(pointer(100, 100)));
+      act(() => result.current.makeDragProps('subject', onActivate).onPointerMove(pointer(180, 140)));
+      expect(result.current.positions.subject).toEqual({ x: 50, y: 50 });
+      expect(result.current.makeDragProps('subject', onActivate).sx).toMatchObject({ cursor: 'pointer' });
+
+      act(() => result.current.makeDragProps('subject', onActivate).onPointerUp());
+      expect(onActivate).not.toHaveBeenCalled();
+
+      act(() => result.current.makeDragProps('subject', onActivate).onPointerDown(pointer(100, 100)));
+      act(() => result.current.makeDragProps('subject', onActivate).onPointerUp());
+      expect(onActivate).toHaveBeenCalledOnce();
     });
   });
 
