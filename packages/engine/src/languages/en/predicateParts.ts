@@ -40,11 +40,12 @@ export function predicateParts(
   // any mouse". A lone `no` object keeps "no" ("eats no mouse").
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const anyObject = objectIsNegative && (verbNegative === true || groupNegative);
-  // The choice is per conjunct, so a group mixes the two ("sees the dog and me").
+  // The choice is per conjunct, so a group mixes the two ("sees the dog and me"). Only a conjunct
+  // that is itself `no` switches to "any": "does not eat the mouse or any food".
   const directObjectText = !directObject ? ''
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounForm(np.head.forms)
-      : npText(anyObject ? withDefiniteness(np, 'any') : np));
+      : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements, verb.forms);
@@ -141,11 +142,13 @@ export function predicateParts(
 
   if (verbNegative && !modifierIsNegative) {
     // The copula negates on itself — "is not careful", "was not careful", "will not be
-    // careful" — never with do-support.
+    // careful" — never with do-support. A frequency adverb follows the "not", as it does after an
+    // auxiliary: "is not always tired", "will not always be tired".
     if (verb.forms['copula'] === '1') {
+      const frequency = isFrequency && modifierText ? `${modifierText} ` : '';
       const negVerb = tense === 'future'
-        ? `will not ${verb.forms['base'] ?? 'be'}`
-        : `${conjugate(verb.forms, subjectForms, tense)} not`;
+        ? `will not ${frequency}${verb.forms['base'] ?? 'be'}`
+        : `${conjugate(verb.forms, subjectForms, tense)} not ${frequency}`.trim();
       const trailingMod = isFrequency ? '' : modifierText;
       return [negVerb, directObjectText, complementsText, trailingMod];
     }
@@ -171,6 +174,11 @@ export function predicateParts(
   // slot the perfect and a modal give it. With no auxiliary (present/past) it stays pre-verbal.
   if (isFrequency && modifierText && tense === 'future') {
     return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+  }
+  // The copula is an auxiliary for adverb placement: a frequency adverb follows its finite form
+  // ("is always tired", "was never tired"), where a lexical verb takes it before ("always becomes").
+  if (isFrequency && modifierText && verb.forms['copula'] === '1') {
+    return ['', `${verbText} ${modifierText}`, directObjectText, complementsText, ''];
   }
   // Frequency adverbs (always, never) precede the main verb: S Adv V Obj
   // Manner adverbs (fast, slowly) follow the verb/object: S V Obj Adv

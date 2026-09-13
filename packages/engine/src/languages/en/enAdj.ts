@@ -15,7 +15,8 @@ export function enAdj(a: ConceptForms): string {
   if (degree === 'more' || degree === 'most') {
     const irregular = EN_IRREGULAR[base];
     if (irregular) return degree === 'more' ? irregular[0] : irregular[1];
-    if (inflects(base)) return inflect(base, degree === 'more' ? 'er' : 'est');
+    // A two-syllable adjective the lexicon marks `inflects` compares with -er/-est ("cleverer").
+    if (inflects(base, a.forms['inflects'] === '1')) return inflect(base, degree === 'more' ? 'er' : 'est');
   }
   const d = EN_DEGREE[degree];
   return d ? `${d} ${base}` : base;

@@ -531,13 +531,33 @@ describe('known bugs: Portuguese ser vs estar outside the finite copula', () => 
 // like a lexical verb and puts the adverb first ("always is tired"). A negated BE drops a
 // frequency adverb altogether ("is not tired").
 describe('known bugs: English frequency adverb with the copula', () => {
-  test.fails('English puts ALWAYS/NEVER after the finite "be" and its "not"', () => {
+  test('English puts ALWAYS/NEVER after the finite "be" and its "not"', () => {
     expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is always tired.');
     expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'NEVER' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is never tired.');
     expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', tense: 'past' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat was always tired.');
     expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', negative: true }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is not always tired.');
     expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', negative: true, tense: 'future' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat will not always be tired.');
     expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'BE', modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } } }), 'RUN'), 'en')).toBe('the dog that is always tired runs.');
+  });
+
+  const beTired = (verbPhrase: Partial<VerbPhrase>, subject = np('CAT')) =>
+    say(clause(subject, 'BE', { verbPhrase, complements: { predicative: { phrase: np('TIRED') } } }), 'en');
+
+  test('English keeps the slot for every person, a location, a negated past, a negated relative and NEVER with not', () => {
+    expect(beTired({ modifier: 'ALWAYS' }, np('FIRST_PERSON'))).toBe('I am always tired.');
+    expect(beTired({ modifier: 'NEVER', tense: 'past' }, np('SECOND_PERSON'))).toBe('you were never tired.');
+    expect(beTired({ modifier: 'ALWAYS', negative: true, tense: 'past' })).toBe('the cat was not always tired.');
+    expect(beTired({ modifier: 'NEVER', negative: true })).toBe('the cat is never tired.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS' }, complements: { locative: { phrase: np('HOUSE') } } }), 'en')).toBe('the cat is always in the house.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'BE', modifier: 'ALWAYS', negative: true }, complements: { predicative: { phrase: np('TIRED') } } } }), 'RUN'), 'en'))
+      .toBe('the dog that is not always tired runs.');
+  });
+
+  test('regression: the future, a modal, an aspect and a lexical verb are unchanged', () => {
+    expect(beTired({ modifier: 'ALWAYS', tense: 'future' })).toBe('the cat will always be tired.');
+    expect(beTired({ modifier: 'ALWAYS', modals: [{ verb: 'MUST' }] })).toBe('the cat must always be tired.');
+    expect(beTired({ modifier: 'ALWAYS', aspect: 'progressive' })).toBe('the cat is always being tired.');
+    expect(say(clause(np('CAT'), 'BECOME', { verbPhrase: { modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat always becomes tired.');
   });
 });
 

@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (59 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (56 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A74 | [A74-english-any-object-conjuncts.md](A-must-fix/A74-english-any-object-conjuncts.md) |
-| A75 | [A75-english-comparative-two-syllable.md](A-must-fix/A75-english-comparative-two-syllable.md) |
-| A76 | [A76-english-frequency-adverb-copula.md](A-must-fix/A76-english-frequency-adverb-copula.md) |
 | A77 | [A77-english-frequency-adverb-mood.md](A-must-fix/A77-english-frequency-adverb-mood.md) |
 | A78 | [A78-english-frequency-adverb-negator.md](A-must-fix/A78-english-frequency-adverb-negator.md) |
 | A79 | [A79-english-indefinite-article-by-spelling.md](A-must-fix/A79-english-indefinite-article-by-spelling.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A71 | [A71-pronominal-possessor-on-complement.md](fixed/A71-pronominal-possessor-on-complement.md) | Italian, French, German, Spanish, Portuguese | 2026-09-13 |
 | A72 | [A72-feminine-plural-object-clitic.md](fixed/A72-feminine-plural-object-clitic.md) | Italian, Spanish, Portuguese | 2026-09-13 |
 | A73 | [A73-impersonal-se-plural-object.md](fixed/A73-impersonal-se-plural-object.md) | Italian, Spanish | 2026-09-13 |
+| A74 | [A74-english-any-object-conjuncts.md](fixed/A74-english-any-object-conjuncts.md) | English | 2026-09-13 |
+| A75 | [A75-english-comparative-two-syllable.md](fixed/A75-english-comparative-two-syllable.md) | English | 2026-09-13 |
+| A76 | [A76-english-frequency-adverb-copula.md](fixed/A76-english-frequency-adverb-copula.md) | English | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

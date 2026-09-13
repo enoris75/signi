@@ -37,3 +37,25 @@ always`, `was never`).
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: English frequency adverb with the copula* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed, in
+[`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts):
+
+- The negated copula branch places a frequency adverb after its `not` instead of dropping it: `is not
+  always tired`, `was not always tired`, `will not always be tired`.
+- Before the generic present/past branch, an affirmative copula puts a frequency adverb after its
+  finite form, the slot an auxiliary gives it: `is always tired`, `was never tired`.
+
+Every row now renders as wanted, including the relative clause. The fix also covers other persons (`I
+am always tired`, `you were never tired`), a location (`is always in the house`), a negated relative
+(`that is not always tired`), and NEVER beside a negated copula (`is never tired`). The future, a
+modal, an aspect and a lexical verb are unchanged (`will always be`, `must always be`, `is always
+being`, `always becomes`). The conditional (`always would be`) is the separate mood-auxiliary defect.
+
+- **Tests:** [`packages/engine/test/complements/predicative.test.ts`](../../../packages/engine/test/complements/predicative.test.ts)
+  → *known bugs: English frequency adverb with the copula*. The pinning `test.fails` is now a
+  passing `test`. New cases cover persons, a location, the negated past and relative, and NEVER, with
+  a guard for the future, modal, aspect and lexical verb.
+- Unit test: `predicateParts.test.ts` (en).

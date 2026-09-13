@@ -117,6 +117,10 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(EAT, { modals: [modal(MUST, NEVER)] }), noMouse)).toBe('must never eat any mouse');
       expect(said(CAT, vp(EAT, { negative: true }), el(np(MOUSE, { number: 'plural', definiteness: 'no' })))).toBe('does not eat any mice');
     });
+
+    test('in a group only the `no` conjunct becomes any', () => {
+      expect(said(CAT, vp(EAT, { negative: true }), el(np(DOG), np(MOUSE, { definiteness: 'no' })))).toBe('does not eat the dog and any mouse');
+    });
   });
 
   describe('negation', () => {
@@ -132,6 +136,14 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(EAT, { negative: true, modifier: always }))).toBe('does not always eat');
       expect(said(CAT, vp(EAT, { tense: 'past', negative: true, modifier: always }))).toBe('did not always eat');
       expect(said(CAT, vp(EAT, { negative: true, modifier: fast }), mouse)).toBe('does not eat the mouse fast');
+    });
+
+    // A76: the copula is an auxiliary for adverb placement.
+    test('a frequency adverb follows the copula and its not', () => {
+      expect(said(CAT, vp(BE, { modifier: always }), undefined, tired)).toBe('is always tired');
+      expect(said(CAT, vp(BE, { tense: 'past', modifier: never }), undefined, tired)).toBe('was never tired');
+      expect(said(CAT, vp(BE, { negative: true, modifier: always }), undefined, tired)).toBe('is not always tired');
+      expect(said(CAT, vp(BE, { negative: true, tense: 'future', modifier: always }), undefined, tired)).toBe('will not always be tired');
     });
 
     test('the copula negates on itself, never with do-support', () => {

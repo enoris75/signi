@@ -38,3 +38,26 @@ regularly. Whether an adjective can take a degree at all is not modelled.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: English comparison of two-syllable adjectives* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- [`inflects.ts`](../../../packages/engine/src/languages/en/inflects.ts): the two-syllable rule accepts
+  `-le` only after a consonant, so FEMALE is periphrastic. It drops the spelling `-er`; a
+  two-syllable adjective in `-er` inflects only when the lexicon marks it `inflects`, which
+  [`enAdj.ts`](../../../packages/engine/src/languages/en/enAdj.ts) passes on. No seeded adjective needs
+  the flag.
+- [`inflect.ts`](../../../packages/engine/src/languages/en/inflect.ts) doubles a final consonant only in
+  a one-syllable base (`big` → `bigger`, a marked `clever` → `cleverer`).
+
+Every row now renders as wanted, and the superlative follows (`the most female cat`, `seems most
+neuter`). A sweep of every seeded English adjective's comparative before and after the change shows
+only FEMALE and NEUTER moving; `lazier`, `happier` and `lower` stay.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: English comparison of two-syllable adjectives*. The pinning `test.fails` is now a
+  passing `test`. New cases cover the superlative and the predicate, with a guard for the other
+  two-syllable adjectives.
+- Unit tests: `inflects.test.ts` (female, neuter, and the flagged `clever`) and `inflect.test.ts`
+  (`cleverer`).

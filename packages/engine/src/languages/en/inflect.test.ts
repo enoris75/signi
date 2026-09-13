@@ -21,7 +21,8 @@ describe('inflect', () => {
     expect(inflect('grey', 'er')).toBe('greyer');
   });
 
-  test('doubles the final consonant of a consonant-vowel-consonant ending', () => {
+  test('doubles the final consonant of a one-syllable consonant-vowel-consonant ending', () => {
+    expect(inflect('clever', 'er')).toBe('cleverer');
     expect(inflect('big', 'er')).toBe('bigger');
     expect(inflect('sad', 'est')).toBe('saddest');
     expect(inflect('hot', 'er')).toBe('hotter');

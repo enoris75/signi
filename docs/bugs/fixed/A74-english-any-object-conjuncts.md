@@ -26,3 +26,19 @@ that are themselves `no`: `coordinate(directObject, (np) => npText(anyObject && 
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: English "any" on every conjunct of a negated object* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+[`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) still decides for the
+whole slot whether the `any` switch applies, but rewrites only the conjuncts that are themselves `no`.
+Every row now renders as wanted, including the relative clause. The fix also covers a modal's own
+NEVER (`must never eat the mouse or any food`), either order (`any food and a mouse`), and a
+pronoun conjunct beside a `no` noun (`any dog and him`). Two `no` conjuncts still both switch, and the
+affirmative mix keeps `no`.
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: English "any" on every conjunct of a negated object*. The pinning `test.fails` is
+  now a passing `test`. New cases cover the relative, the modal's NEVER and the reversed order, with
+  guards for two `no` conjuncts and the affirmative.
+- Unit test: `predicateParts.test.ts` (en).

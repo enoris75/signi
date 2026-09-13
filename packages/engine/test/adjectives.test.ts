@@ -1235,11 +1235,23 @@ describe('known bugs: Portuguese invariable "zero"', () => {
 // syllable, true only of a monosyllable) and gives "neuterrer"; FEMALE, whose -le is not the
 // syllabic -le of "simple", gives "femaler". Both compare with more/most.
 describe('known bugs: English comparison of two-syllable adjectives', () => {
-  test.fails('English compares NEUTER and FEMALE with more/most', () => {
+  test('English compares NEUTER and FEMALE with more/most', () => {
     expect(say(clause(np('CAT', { adjectives: ['NEUTER'], adjectiveDegrees: ['more'] }), 'RUN'), 'en')).toBe('the more neuter cat runs.');
     expect(say(clause(np('CAT', { adjectives: ['NEUTER'], adjectiveDegrees: ['most'] }), 'RUN'), 'en')).toBe('the most neuter cat runs.');
     expect(say(clause(np('CAT', { adjectives: ['FEMALE'], adjectiveDegrees: ['more'] }), 'RUN'), 'en')).toBe('the more female cat runs.');
     expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('FEMALE', { headDegree: 'more' }) } } }), 'en')).toBe('the cat seems more female.');
+  });
+
+  test('English compares them with most in the superlative and the predicate too', () => {
+    expect(say(clause(np('CAT', { adjectives: ['FEMALE'], adjectiveDegrees: ['most'] }), 'RUN'), 'en')).toBe('the most female cat runs.');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('NEUTER', { headDegree: 'most' }) } } }), 'en')).toBe('the cat seems most neuter.');
+  });
+
+  test('regression: the other two-syllable adjectives keep -er / -est', () => {
+    const more = (adjective: string) => say(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: ['more'] }), 'RUN'), 'en');
+    expect(more('LAZY')).toBe('the lazier cat runs.');
+    expect(more('HAPPY')).toBe('the happier cat runs.');
+    expect(more('LOW')).toBe('the lower cat runs.');
   });
 });
 

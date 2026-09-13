@@ -226,10 +226,27 @@ describe('known bugs: stacked negation is not collapsed', () => {
 // definite or demonstrative conjunct loses its own determiner ("any mouse or any food"). Only the
 // `no` conjunct should become "any".
 describe('known bugs: English "any" on every conjunct of a negated object', () => {
-  test.fails('English switches only the `no` conjunct to "any"', () => {
+  test('English switches only the `no` conjunct to "any"', () => {
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat does not eat the mouse or any food.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE', { definiteness: 'this' }), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat does not eat this mouse or any food.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'NEVER' }, directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat never eats the mouse or any food.');
+  });
+
+  test('English switches only the `no` conjunct in a relative clause, under a modal\'s NEVER and in either order', () => {
+    const mouseOrNoFood = { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' as const };
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: mouseOrNoFood } }), 'RUN'), 'en'))
+      .toBe('the dog that does not eat the mouse or any food runs.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST', modifier: 'NEVER' }] }, directObject: mouseOrNoFood }), 'en'))
+      .toBe('the cat must never eat the mouse or any food.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('FOOD', { definiteness: 'no' }), np('MOUSE', { definiteness: 'indefinite' })], conjunction: 'and' } }), 'en'))
+      .toBe('the cat does not eat any food and a mouse.');
+  });
+
+  test('regression: every `no` conjunct still switches, and the affirmative keeps "no"', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE', { definiteness: 'no' }), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en'))
+      .toBe('the cat does not eat any mouse or any food.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en'))
+      .toBe('the cat eats the mouse or no food.');
   });
 });
 
