@@ -144,6 +144,18 @@ describe('known bugs: German "nicht" in the infinitive', () => {
   });
 });
 
+// A119, the infinitive half. The citation phrase shares the command's negation gate: "nicht" stays
+// beside a "kein" object, and "kein" stays under "nie".
+describe('known bugs: German "kein" object in the infinitive', () => {
+  const noMouse = np('MOUSE', { definiteness: 'no' });
+
+  test.fails('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
+    expect(sayAll(infinitive({ directObject: noMouse }, { negative: true })).de).toBe('keine Maus essen.');
+    expect(sayAll(infinitive({ directObject: noMouse }, { negative: true, modifier: 'FAST' })).de).toBe('schnell keine Maus essen.');
+    expect(sayAll(infinitive({ directObject: noMouse }, { modifier: 'NEVER' })).de).toBe('nie eine Maus essen.');
+  });
+});
+
 // A91. A negated French infinitive puts both negators before it and the clitic after them: "ne pas
 // le voir", "ne jamais manger", "ne manger aucune souris". The infinitive and instruction branches
 // of `predicateText` prefix a fixed "ne pas" only when `negative` is set, ignore jamais/aucun, and

@@ -391,6 +391,31 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
   });
 });
 
+// A119. The command and the instruction register skip the declarative's two "kein" rules. A negated
+// verb keeps its "nicht" beside a "kein" object ("iss keine Maus nicht"), and "nie" leaves the
+// object's "kein" in place ("iss nie keine Maus") where the declarative drops it to "eine"
+// ("isst nie eine Maus"). Each builds its own negation gate, which checks only for "nie".
+describe('known bugs: German "kein" object in commands and instructions', () => {
+  const noMouse = np('MOUSE', { definiteness: 'no' });
+  const eat = (plan: Partial<PhrasePlan>, verbPhrase: Partial<VerbPhrase>, addressee: NounPhrase = np('SECOND_PERSON')) =>
+    sayAll(command({ directObject: noMouse, ...plan }, addressee, verbPhrase)).de;
+
+  test.fails('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
+    expect(eat({}, { negative: true })).toBe('iss keine Maus.');
+    expect(eat({}, { negative: true }, np('SECOND_PERSON', { number: 'plural' }))).toBe('esst keine Maus.');
+    expect(eat({}, { negative: true, modifier: 'FAST' })).toBe('iss schnell keine Maus.');
+    expect(eat({}, { modifier: 'NEVER' })).toBe('iss nie eine Maus.');
+    expect(eat({ imperativeRegister: 'instruction' }, { negative: true })).toBe('keine Maus essen.');
+    expect(eat({ imperativeRegister: 'instruction' }, { modifier: 'NEVER' })).toBe('nie eine Maus essen.');
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'GIVE', {
+        directObject: np('BOOK', { definiteness: 'no' }), complements: { terminus: { phrase: np('BOY') } }, verbPhrase: { negative: true },
+      }),
+      imperative: true,
+    }).de).toBe('gib dem Jungen kein Buch.');
+  });
+});
+
 // A70. In an affirmative French command the object pronoun follows the verb, hyphenated, with
 // me/te as moi/toi: "vois-moi", "effondre-toi". The imperative branch of `predicateText` uses the
 // proclitic `frCliticize` for both polarities, and a reflexive verb's imperative is its present
