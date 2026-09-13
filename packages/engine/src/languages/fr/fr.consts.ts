@@ -1,0 +1,96 @@
+import type { CoordConjunction, Degree, DimensionRelation, ModifierRelation, Tense } from '@signi/shared';
+import type { ConceptForms } from '../../types.js';
+
+// Degree adverb placed before the adjective. Comparative and relative superlative share
+// "plus"/"moins"; the superlative repeats the definite article to distinguish them ("un chat
+// plus grand" vs "le chat le plus grand" — the doubled article is added in `splitAdjectives`).
+// Equality uses "aussi" ("aussi grand").
+export const FR_DEGREE: Record<Degree, string> = {
+  positive: '', more: 'plus', most: 'plus', less: 'moins', least: 'moins', equally: 'aussi',
+};
+
+/**
+ * The raised degrees (more/most) of these adjectives are suppletive in French — a single
+ * word, never "plus" + base: bon → meilleur, mauvais → pire. "plus bon" is ungrammatical;
+ * "plus mauvais" is merely dispreferred. Only "more"/"most" suppletise — the lowered and
+ * equal degrees stay periphrastic ("moins bon", "aussi bon"). petit → moindre is deliberately
+ * omitted: moindre is figurative-only, and the literal size comparative "plus petit" is
+ * correct and by far the common case.
+ */
+export const FR_SUPPLETIVE: Record<string, string> = { GOOD: 'meilleur', BAD: 'pire' };
+
+// Adjectives whose feminine and plural no rule in `agreeAdjFr` derives, seeded whole.
+export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string]> = {
+  // [masc.sg, fem.sg, masc.pl, fem.pl]
+  beau: ['beau', 'belle', 'beaux', 'belles'],
+  nouveau: ['nouveau', 'nouvelle', 'nouveaux', 'nouvelles'],
+  vieux: ['vieux', 'vieille', 'vieux', 'vieilles'],
+  // -s adjectives double the s in the feminine ("bas → basse"); the rule in `agreeAdjFr` has no -s branch and
+  // would give the wrong "base". Only "bas" (LOW) is seeded; masc plural stays "bas" (invariable).
+  bas: ['bas', 'basse', 'bas', 'basses'],
+};
+
+export const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
+
+/**
+ * Concept IDs of the "BAGS" adjectives (beauty, age, goodness, size) that precede the
+ * noun in French — beau, bon, grand, petit, vieux, jeune, nouveau, mauvais. Every other
+ * adjective (heureux, triste, fort, …) follows the noun.
+ */
+// The ordinals join them: an ordinal precedes its noun in French ("le premier père", "la
+// deuxième fois"), whatever its "BAGS" membership.
+export const PRENOMINAL = new Set([
+  'BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
+  'FIRST', 'SECOND', 'THIRD',
+]);
+
+// The verbs whose present-participle stem the "nous" present rule misses (see `presentParticiple`).
+export const FR_PARTICIPLE_STEM: Record<string, string> = { BE: 'ét', HAVE: 'ay', KNOW: 'sach' };
+
+// "être" — the finite verb of the progressive and prospective, and the resultative auxiliary
+// of the verbs that select it. French has no synthetic progressive, so the progressive/
+// prospective are "être en train de" / "être sur le point de" + infinitive; the resultative is
+// être/avoir + past participle. Past uses the imparfait ("était").
+export const ETRE_FR: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'suis', '2sg': 'es', '3sg': 'est', '1pl': 'sommes', '2pl': 'êtes', '3pl': 'sont' },
+  past:    { '1sg': 'étais', '2sg': 'étais', '3sg': 'était', '1pl': 'étions', '2pl': 'étiez', '3pl': 'étaient' },
+  future:  { '1sg': 'serai', '2sg': 'seras', '3sg': 'sera', '1pl': 'serons', '2pl': 'serez', '3pl': 'seront' },
+};
+
+// "avoir" — the resultative auxiliary everywhere else ("a vu"), the majority case.
+export const AVOIR_FR: Record<Tense, Record<string, string>> = {
+  present: { '1sg': 'ai', '2sg': 'as', '3sg': 'a', '1pl': 'avons', '2pl': 'avez', '3pl': 'ont' },
+  past:    { '1sg': 'avais', '2sg': 'avais', '3sg': 'avait', '1pl': 'avions', '2pl': 'aviez', '3pl': 'avaient' },
+  future:  { '1sg': 'aurai', '2sg': 'auras', '3sg': 'aura', '1pl': 'aurons', '2pl': 'aurez', '3pl': 'auront' },
+};
+
+// The aspect auxiliaries as minimal concepts, so `moodForm` derives their conditional (serait /
+// aurait, from the future stem) and imparfait protasis (était via the BE stem / avait from the
+// "nous" present) — the same way it handles a plain verb. Without this a marked aspect under a
+// hypothetical dropped the mood and kept the plain present indicative.
+export const ETRE_AUX: ConceptForms = { conceptId: 'BE', forms: { '1sg_future': 'serai', '1pl_present': 'sommes' } };
+
+export const AVOIR_AUX: ConceptForms = { conceptId: 'AVOIR', forms: { '1sg_future': 'aurai', '1pl_present': 'avons' } };
+
+// A reflexive verb's clitic, agreeing with the subject (me/te/se/nous/vous/se) and eliding before a
+// vowel (m'/t'/s'). Reflexivity is lexical: the infinitive begins with the clitic ("s'effondrer"),
+// which the finite present carries ("s'effondre") but the participle ("effondré") drops — so the
+// compound perfect must restore it before the auxiliary: "s'est effondrée", not "est effondrée".
+export const FR_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'te', '3sg': 'se', '1pl': 'nous', '2pl': 'vous', '3pl': 'se' };
+
+/** French linking preposition for an attributive noun, by relation (bare, no article). */
+export const REL_PREP_FR: Record<ModifierRelation, string> = { feature: 'à', purpose: 'de', material: 'de' };
+
+// The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality
+// "de" (**de** grande taille, **de** haute qualité), measure "à". The noun phrase (dimension noun +
+// degree adjective) follows bare, its adjective already agreed and placed by the ordinary NP path.
+export const FR_DIM_PREP: Record<DimensionRelation, string> = { extent: 'de', quality: 'de', measure: 'à' };
+
+export const COORD_WORDS: Record<CoordConjunction, string> = {
+  and: 'et',
+  or: 'ou',
+  but: 'mais',
+  that_is: "c'est-à-dire",
+  therefore: 'donc',
+  then: 'et puis',
+};

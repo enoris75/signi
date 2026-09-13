@@ -2,13 +2,13 @@ import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister
 import { canCoordinateImperative, defaultDefiniteness, isNounGroup, isPronominalPossessor, nounConjuncts } from '@signi/shared';
 import { mannerRelation } from './types.js';
 import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
-import { englishEngine } from './languages/en.js';
-import { italianEngine } from './languages/it.js';
-import { frenchEngine } from './languages/fr.js';
+import { englishEngine } from './languages/en/index.js';
+import { italianEngine } from './languages/it/index.js';
+import { frenchEngine } from './languages/fr/index.js';
 import { germanEngine } from './languages/de/index.js';
-import { spanishEngine } from './languages/es.js';
-import { japaneseEngine } from './languages/ja.js';
-import { portugueseEngine } from './languages/pt.js';
+import { spanishEngine } from './languages/es/index.js';
+import { japaneseEngine } from './languages/ja/index.js';
+import { portugueseEngine } from './languages/pt/index.js';
 
 export const engines: LanguageEngine[] = [
   englishEngine,

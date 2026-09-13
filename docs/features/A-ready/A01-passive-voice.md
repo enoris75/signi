@@ -85,12 +85,12 @@ builder(s) and renders the agent oblique. Reuse the existing auxiliary + partici
 
 | Lang | Passive construction | Reuses | Agent prep |
 |------|----------------------|--------|-----------|
-| en | `be` + participle: *is/was/will be eaten*; prog *is being eaten*; modal *must be eaten*; cond *would be eaten*. Negation on aux. | `auxBe` (en.ts:170), `participle` | `by` |
-| it | `essere` + participio **agreeing w/ new subject** | `ESSERE_IT` (it.ts:404), `agreeAdj` (it.ts:215) | `da` |
+| en | `be` + participle: *is/was/will be eaten*; prog *is being eaten*; modal *must be eaten*; cond *would be eaten*. Negation on aux. | `auxBe` (en/auxBe.ts), `participle` | `by` |
+| it | `essere` + participio **agreeing w/ new subject** | `ESSERE_IT` (it/it.consts.ts), `agreeAdj` (it/agreeAdj.ts) | `da` |
 | fr | `être` + participe agreeing | `agreeAdjFr`, `participle` | `par` |
 | es | `ser` + participio agreeing | `participle`, es `agreeAdj` | `por` |
 | pt | `ser` + particípio agreeing | `participle`, pt `agreeAdj` | `por` |
-| de | `werden` + Partizip II: *wird/wurde gegessen*; future *wird gegessen werden* | `WERDEN` (de.ts:304), `participle` | `von` |
+| de | `werden` + Partizip II: *wird/wurde gegessen*; future *wird gegessen werden* | `WERDEN` (de/de.consts.ts), `participle` | `von` |
 | ja | verb `passive` form (〜れる/られる) + polite ます; patient は, agent に | new `passive`/`passive_reading` seed form (§5) | `に` |
 
 **Documented gaps** (consistent with existing ja/de gap notes): de passive-perfect *…worden*

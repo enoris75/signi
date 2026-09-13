@@ -58,11 +58,14 @@ passes without `.fails`, the bug is already fixed — stop and report that (guar
 fails, fix that first; a plan built on an invalid literal makes a working feature look broken.
 
 ### 3. Fix the engine
-The engine is [packages/engine/src/](../../packages/engine/src/): one module per language
-(`languages/{en,it,fr,es,pt,de,ja}.ts`), with shared plumbing in `translator.ts` (resolves a
-`PhrasePlan` into per-language `ConceptForms`) and `mood.ts`; the plan model is typed in
-[packages/shared/src/index.ts](../../packages/shared/src/index.ts). Edit the language module named by
-the bug's **Language** row. Make the **Want** row true; change nothing else. A few defects (A7, A8,
+The engine is [packages/engine/src/](../../packages/engine/src/): one folder per language
+(`languages/{en,it,fr,es,pt,de,ja}/`, one file per function plus `<lang>.consts.ts` /
+`<lang>.types.ts`), with shared plumbing in `translator.ts` (resolves a `PhrasePlan` into
+per-language `ConceptForms`) and `mood.ts`; the plan model is typed in
+[packages/shared/src/index.ts](../../packages/shared/src/index.ts). Edit the language folder named by
+the bug's **Language** row. Make the **Want** row true; change nothing else. Each function has a
+colocated unit test (`<fn>.test.ts`) — update it alongside the fix, and add a case for the new
+behaviour. A few defects (A7, A8,
 A21) need a corpus/schema change, not just an engine edit — the bug file says so; follow it.
 
 ### 4. Verify, then flip the marker
@@ -98,7 +101,7 @@ rather than padding.
   (today is available in context), the engine file(s) changed, and the tests now guarding it.
   **Fix the relative-link depth for the new location:** a file in `fixed/` is one directory below
   `docs/bugs/`, so links back to the repo root need `../../../` (e.g.
-  `../../../packages/engine/src/languages/en.ts`), not the `../../` an `A-must-fix/` file would use.
+  `../../../packages/engine/src/languages/en/renderClause.ts`), not the `../../` an `A-must-fix/` file would use.
 - Update [docs/bugs/engine-grammar-bugs.md](../../docs/bugs/engine-grammar-bugs.md): remove the
   defect's row from the **Part A** table and add it to a **"Fixed"** section (create the section if
   absent) with a link to its new `fixed/` path. Keep the running count in the prose accurate (the

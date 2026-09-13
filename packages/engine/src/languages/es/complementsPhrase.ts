@@ -1,0 +1,137 @@
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { aDet } from './aDet.js';
+import { agreeAdj } from './agreeAdj.js';
+import { artForms } from './artForms.js';
+import { coordinateElement } from './coordinateElement.js';
+import { datPrep } from './datPrep.js';
+import { deDet } from './deDet.js';
+import { defArticle } from './defArticle.js';
+import { dePrep } from './dePrep.js';
+import { esAdj } from './esAdj.js';
+import { esDeg } from './esDeg.js';
+import { isPlural } from './isPlural.js';
+import { nounPhrase } from './nounPhrase.js';
+import { npText } from './npText.js';
+import { predicativeForms } from './predicativeForms.js';
+import { prepDet } from './prepDet.js';
+import { spatialHead } from './spatialHead.js';
+import { withAdj } from './withAdj.js';
+import { withRelative } from './withRelative.js';
+
+export function complementsPhrase(
+  complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
+  subjectForms: Record<string, string>,
+  verbConceptId: string,
+): string {
+  // "lejos" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
+  // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
+  // "de" ("el gato viene de la casa", "carga el libro del contenedor").
+  const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'lejos ' : '';
+  if (!complements) return '';
+  return COMPLEMENT_RENDER_ORDER
+    .map((type) => {
+      const c = complements[type];
+      if (!c) return '';
+      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
+      // its surface is rendered from every conjunct, each with its own article and agreement.
+      const f = firstConjunct(c.phrase).head.forms;
+      // Subject complement: a predicate adjective agrees with the *subject* ("parece
+      // cansada") and carries its own degree ("parece más cansada"); a predicate noun keeps
+      // its own article, no preposition ("se vuelve una leyenda"). Coordinated conjuncts each
+      // agree with the subject: "parece cansada y feliz".
+      if (type === 'predicative') {
+        const gender = subjectForms['gender'] ?? 'masc';
+        const plural = subjectForms['number'] === 'plural';
+        return coordinateElement(c.phrase, (np) => {
+          if (np.head.forms['role'] !== 'adjective') {
+            return withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np);
+          }
+          const surface = esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+          // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
+          // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
+          return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+        });
+      }
+      // An instrument presented as an action: the bare gerundio for the process level
+      // ("eligiendo una palabra"), the substantivized infinitive for the concept level ("con el
+      // elegir una palabra") — a masculine singular noun, hence the invariant "el", whatever the
+      // infinitive. The noun phrase is the action's direct object either way.
+      if (type === 'instrumental' && c.action) {
+        const level = abstractionLevel(c);
+        if (level !== 'object') {
+          const object = coordinateElement(c.phrase, npText);
+          const verb =
+            level === 'process'
+              ? actionGerund(c.action)
+              : `con el ${actionInfinitive(c.action)}`;
+          const adverb = c.action.modifier?.forms['base'] ?? '';
+          return [verb, object, adverb].filter(Boolean).join(' ');
+        }
+      }
+      // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
+      // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
+      if (type === 'cause' && f['person']) {
+        const sent = causeSentiment(c);
+        if (sent === 'positive') return `gracias a ${f['disjunctive'] ?? f['base'] ?? ''}`;
+        if (sent === 'negative') {
+          const plural = f['number'] === 'plural';
+          const poss =
+            f['person'] === '1' ? (plural ? 'nuestra' : 'mi') :
+            f['person'] === '2' ? (plural ? 'vuestra' : 'tu') :
+            'su';
+          return `por ${poss} culpa`;
+        }
+        return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
+      }
+      // The preposition contracts with the article ("a"+"el" → "al"), so it cannot be factored
+      // out in front of a coordinated complement — each conjunct carries its own contracted head
+      // ("al gato y al perro"). Repeating it also lets each conjunct pick its own preposition,
+      // which `direction` needs: an animate goal takes "hacia", a place "a".
+      return coordinateElement(c.phrase, (np) => {
+      const f = np.head.forms;
+      const plural = isPlural(f);
+      const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+      const adj = esAdj(np);
+      const noun = withAdj(word, adj);
+      // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
+      // stressed-a nouns take ("en la primera agua").
+      const af = artForms(f, adj);
+      // locative→en, direction→a (al/a la), source→"lejos de" (lejos del/de la),
+      // route→path preposition. A direction toward an *animate* goal takes "hacia"
+      // (toward) — bare "a" + person doesn't read as a motion destination ("corro hacia
+      // el niño", not "*al niño"); "hacia" doesn't contract. A self-propelled motion verb
+      // prefixes source with the ablative adverb "lejos" so it reads as motion away ("corro
+      // lejos del niño"); bare "de" reads as origin/possession, not departure — which is right
+      // for COME/GO and the transitive LOAD/IMPORT, whose source is an origin.
+      // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro"); the
+      // sentiment swaps the connector — negative "por culpa del perro", positive "gracias al
+      // perro" ("a"-contracted via datPrep).
+      const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
+      const head =
+        type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), plural, af) :
+        type === 'terminus'  ? aDet(af, plural) :
+        // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
+        type === 'instrumental' ? prepDet('con', af, plural) :
+        // Manner: similative "como" (como el viento — the default), means "con" (con cuidado),
+        // measure "a" (a la velocidad de la luz), mode "de" (de manera…). Read off the head noun.
+        type === 'manner'    ? (
+          mannerRelation(af) === 'means'   ? prepDet('con', af, plural) :
+          mannerRelation(af) === 'measure' ? aDet(af, plural) :
+          mannerRelation(af) === 'mode'    ? deDet(af, plural) :
+          prepDet('como', af, plural)
+        ) :
+        type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
+        type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
+        type === 'cause'     ? (
+          causeSent === 'positive' ? `gracias ${datPrep(af, plural)}` :
+          causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
+          `a causa ${dePrep(af, plural)}`
+        ) :
+        spatialHead(pathSpecifier(c), plural, af);
+      return withRelative(`${head} ${noun}`, np);
+      });
+    })
+    .filter(Boolean)
+    .join(' ');
+}
