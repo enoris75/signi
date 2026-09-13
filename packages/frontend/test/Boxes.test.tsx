@@ -1,7 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import type { ReactElement, ReactNode } from 'react';
 import {
   ASPECTS,
   ASPECT_LABELS,
@@ -13,10 +11,7 @@ import {
   TENSE_LABELS,
   type Concept,
   type Definiteness,
-  type LanguageCode,
-  type UiStringKey,
 } from '@signi/shared';
-import { LanguageProvider } from '../src/i18n/LanguageContext.tsx';
 import {
   AspectToggleBox,
   CategoryToggle,
@@ -31,22 +26,7 @@ import {
   type SatelliteIcon,
 } from '../src/components/PhraseBuilder/Boxes.tsx';
 import type { SlotCategory, SlotConfig } from '../src/components/PhraseBuilder/interfaces.ts';
-
-type SeededStrings = Partial<Record<UiStringKey, Partial<Record<LanguageCode, string>>>>;
-
-// The boxes read UI strings through react-query and the UI language through its context. The
-// bundle is seeded rather than fetched, so no request goes out: an empty bundle leaves every
-// string on its static English fallback, exactly as the app renders before the backend answers.
-function renderWithProviders(ui: ReactElement, strings: SeededStrings = {}) {
-  const client = new QueryClient();
-  client.setQueryData(['ui-strings'], strings);
-  const wrapper = ({ children }: { children: ReactNode }) => (
-    <QueryClientProvider client={client}>
-      <LanguageProvider>{children}</LanguageProvider>
-    </QueryClientProvider>
-  );
-  return render(ui, { wrapper });
-}
+import { renderWithProviders } from './render.tsx';
 
 const SUBJECT: SlotConfig = {
   key: 'subject',
@@ -143,7 +123,7 @@ describe('CategoryToggle', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     renderWithProviders(
       <CategoryToggle options={NOUN_OR_PRONOUN} value="noun" onChange={() => {}} />,
-      { 'category.noun': { it: 'Nome' }, 'category.pronoun': { it: 'Pronome' } },
+      { strings: { 'category.noun': { it: 'Nome' }, 'category.pronoun': { it: 'Pronome' } } },
     );
 
     expect(screen.getByRole('button', { name: 'Nome' })).toBeInTheDocument();
@@ -287,7 +267,7 @@ describe('SlotBox', () => {
         isActive={false}
         onClear={() => {}}
       />,
-      { 'slot.subject': { it: 'Soggetto' } },
+      { strings: { 'slot.subject': { it: 'Soggetto' } } },
     );
 
     const box = screen.getByTestId('box-subject');
