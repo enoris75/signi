@@ -3,6 +3,7 @@ import type {
   MutableRefObject,
   RefObject,
 } from "react";
+import { useRef } from "react";
 import { Box } from "@mui/material";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
 import { CategoryToggle, SlotBox } from "./Boxes.tsx";
@@ -16,7 +17,9 @@ import {
   WorkspaceBinding,
 } from "./interfaces.ts";
 import { ALL_SLOTS, BOX_COMPLEMENT_TYPES } from "./slots.ts";
-import type { Edge } from "./graph.ts";
+import { DEFAULT_NODE_SIZE, type Edge } from "./graph.ts";
+import { innerRadius } from "./ringLayout.ts";
+import { useElementSize } from "./hooks/useElementSize.ts";
 import { nodeElRef, type PhraseRenderContext } from "./phraseRender.tsx";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
@@ -117,6 +120,12 @@ export function PhraseCanvas({
       ? <InfinitivePhraseBox />
       : null;
 
+  // The empty period's opening word picker, measured so its ring fits round it. It is on the page
+  // only before the canvas is drawn and while no mood box stands in for it.
+  const openingRef = useRef<HTMLDivElement>(null);
+  const openingPicker = !showCanvas && !moodBox;
+  const openingSize = useElementSize(openingRef, DEFAULT_NODE_SIZE, openingPicker);
+
   return (
     <Box sx={{ minWidth: 0 }}>
       {!showCanvas ? (
@@ -134,28 +143,33 @@ export function PhraseCanvas({
             // A subject-dropping mood (command / infinitive) replaces the subject box with its own.
             moodBox
           ) : (
-            <SlotBox
-              slot={subjectSlot}
-              concept={undefined}
-              isActive={activeSlot === "subject"}
-              onClear={() => handleClear("subject")}
-              categoryToggle={
-                <CategoryToggle
-                  options={slotCategories("subject")!.options}
-                  value={slotKind("subject")}
-                  onChange={(v) => onSlotKindChange("subject", v)}
-                />
-              }
-              emptyContent={
-                <SubjectTypeahead
-                  onSelect={(c, opts) =>
-                    handleConceptSelect(c, "subject", opts)
-                  }
-                  kind={slotKind("subject")}
-                  onKindChange={(v) => onSlotKindChange("subject", v)}
-                />
-              }
-            />
+            // The opening word sits in a solid ring like every word on the canvas, sized to what the
+            // ring holds. The wrapper measures that content alone: the ring is drawn out of flow.
+            <Box ref={openingRef} sx={{ display: "inline-block" }}>
+              <SlotBox
+                slot={subjectSlot}
+                concept={undefined}
+                isActive={activeSlot === "subject"}
+                onClear={() => handleClear("subject")}
+                shape={{ r: innerRadius(openingSize), kind: "ring" }}
+                categoryToggle={
+                  <CategoryToggle
+                    options={slotCategories("subject")!.options}
+                    value={slotKind("subject")}
+                    onChange={(v) => onSlotKindChange("subject", v)}
+                  />
+                }
+                emptyContent={
+                  <SubjectTypeahead
+                    onSelect={(c, opts) =>
+                      handleConceptSelect(c, "subject", opts)
+                    }
+                    kind={slotKind("subject")}
+                    onKindChange={(v) => onSlotKindChange("subject", v)}
+                  />
+                }
+              />
+            </Box>
           )}
         </Box>
       ) : (

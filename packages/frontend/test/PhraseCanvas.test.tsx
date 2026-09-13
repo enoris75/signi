@@ -14,6 +14,7 @@ import {
 } from '../src/components/PhraseBuilder/ImperativeSubjectSelector.tsx';
 import { BOX_COMPLEMENT_TYPES } from '../src/components/PhraseBuilder/slots.ts';
 import type { Edge, GroupRect } from '../src/components/PhraseBuilder/graph.ts';
+import { innerRadius } from '../src/components/PhraseBuilder/ringLayout.ts';
 import type { WorkspaceBinding } from '../src/components/PhraseBuilder/interfaces.ts';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
 import { renderWithProviders } from './render.tsx';
@@ -30,6 +31,11 @@ vi.mock('../src/components/PhraseBuilder/Boxes.tsx', async (importOriginal) => (
   )),
 }));
 // The opening picker searches the concept corpus.
+// jsdom has no layout and no ResizeObserver: the opening picker measures at a fixed size.
+const OPENING_SIZE = { w: 120, h: 60 };
+vi.mock('../src/components/PhraseBuilder/hooks/useElementSize.ts', () => ({
+  useElementSize: () => OPENING_SIZE,
+}));
 vi.mock('../src/components/PhraseBuilder/SubjectTypeahead.tsx', () => ({
   SubjectTypeahead: vi.fn(() => <div data-testid="subject-typeahead" />),
 }));
@@ -144,14 +150,16 @@ beforeEach(() => {
 
 describe('PhraseCanvas', () => {
   describe('an empty period', () => {
-    it('offers only the subject box, with the opening word picker, at the canvas height', () => {
+    it('offers only the subject, in its solid ring with the opening word picker, at the canvas height', () => {
       renderCanvas({ showCanvas: false, canvasHeight: 280 });
 
       const box = screen.getByTestId('box-subject');
       expect(box).toContainElement(screen.getByTestId('subject-typeahead'));
       expect(propsOf(SlotBox).slot.key).toBe('subject');
       expect(propsOf(SlotBox).concept).toBeUndefined();
-      expect(box.parentElement).toHaveStyle({ height: '280px' });
+      // Sized to fit round the content it measures.
+      expect(propsOf(SlotBox).shape).toEqual({ r: innerRadius(OPENING_SIZE), kind: 'ring' });
+      expect(box.parentElement!.parentElement).toHaveStyle({ height: '280px' });
       expect(phrases()).toEqual([]);
       expect(screen.queryByTestId('connectors-layer')).not.toBeInTheDocument();
     });
