@@ -24,7 +24,7 @@ the propositional level active and passive are the **same** event —
 not two phrases. Passive only adds a discourse difference (promote the patient to topic,
 optionally demote/drop the agent).
 
-Today there is **no voice** — [`uiStrings.ts:214`](../../../packages/engine/src/uiStrings.ts#L214)
+Today there is **no voice** — [`uiStrings.ts:214`](../../../../packages/shared/src/uiStrings.ts#L214)
 notes the engine "has no passive voice … no participle" to render one with. The data model
 also conflates thematic role with grammatical slot: `subject` *is* the agent, `directObject`
 *is* the patient. Voice is therefore a **realisation feature on the verb phrase** (like
@@ -49,7 +49,7 @@ flag on an intransitive verb normalises back to active — the same defensive no
   each engine branches in its predicate builder. The auxiliaries and participles needed
   **already exist**, so almost no new lexical data is required.
 
-## 1. Shared types — [`packages/shared/src/index.ts`](../../../packages/shared/src/index.ts)
+## 1. Shared types — [`packages/shared/src/index.ts`](../../../../packages/shared/src/index.ts)
 
 Mirror the `Aspect` block (≈ lines 166–200):
 
@@ -65,9 +65,9 @@ by-phrase.
 
 ## 2. Engine types & translator
 
-- [`packages/engine/src/types.ts`](../../../packages/engine/src/types.ts) — add `voice?: Voice`
+- [`packages/engine/src/types.ts`](../../../../packages/engine/src/types.ts) — add `voice?: Voice`
   to `ResolvedVerbPhrase` (≈ line 145); import `Voice`.
-- [`packages/engine/src/translator.ts`](../../../packages/engine/src/translator.ts)
+- [`packages/engine/src/translator.ts`](../../../../packages/engine/src/translator.ts)
   - `resolveVerbPhrase` (line 207): thread `voice`. Gate on the verb's transitivity (thread
     `transitivity` into forms via `lexicon.ts`, the trick `role`/`animate` use — see §5);
     passive on a non-transitive verb ⇒ `voice = 'active'`.
@@ -117,7 +117,7 @@ Follow the `verbAspect` satellite wiring exactly:
 
 - **`lexicon.ts`** — thread `transitivity` into verb `forms` in `lookupLexicalEntry` (where
   `role`/`animate` are exposed), so the translator can gate passive with no DB change.
-- **[`concepts/verbs/nonfinite.ts`](../../../packages/backend/src/concepts/verbs/nonfinite.ts)**
+- **[`concepts/verbs/nonfinite.ts`](../../../../packages/backend/src/concepts/verbs/nonfinite.ts)**
   — add ja `passive` + `passive_reading` to each **transitive** verb (EAT 食べられる/たべられる,
   DRINK 飲まれる, SEE 見られる, READ 読まれる, LOVE 愛される, KNOW 知られる, plus CUT/BUY/…
   and ditransitives GIVE/SHOW/SEND). Stored explicitly, not rule-derived: ichidan +られる,

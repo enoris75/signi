@@ -5,13 +5,13 @@ boxes and periods, every grammatical control, clause relations, panels, save/loa
 **Shape:** one cursor, and keys that act on whatever the cursor is on — a box, or the period once
 you step out. <kbd>Ctrl</kbd> keys act on the app. There is no Alt/⌥ layer. One keymap registry drives the
 handlers, key tips, tooltips and the shortcuts sheet.
-**Relation to [P02](P02-phrase-console.md):** P02's phrase console is the fast, typed way to build a
+**Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
 **Status:** planning — see [Open questions](#open-questions).
-**Drawings:** page *Keyboard access (P01)* of the
-[design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), plus the
-ASCII sketches in [§3](#3-ui-elements-that-change).
+**Drawings:** [`artwork/`](artwork/) — seven images exported from page *Keyboard access (P01)* of
+the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded
+in [§3](#3-ui-elements-that-change) next to their ASCII sketches.
 
 Key notation: <kbd>Ctrl</kbd> is <kbd>⌘</kbd> on a Mac; everything else is the same on every platform.
 Nothing on the canvas moves or is removed; mouse users see today's UI.
@@ -26,17 +26,17 @@ box. Everything *around* the words is mouse-only. An audit of the frontend found
 
 | Works by keyboard today | Mouse only today |
 |---|---|
-| Word pickers (↑ ↓ ↵ esc) | Changing a filled word (click the box) — [`phraseRender.tsx:423`](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L423) ignores ↵ / Space |
-| ⇥ / ← → cycle the boxes of one period | Determiner menu, tense and aspect boxes, modifier relation / number / + adj chips, degree chip — they fire on pointer-up in [`useDrag.ts:96`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts#L96) |
+| Word pickers (↑ ↓ ↵ esc) | Changing a filled word (click the box) — [`phraseRender.tsx:423`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L423) ignores ↵ / Space |
+| ⇥ / ← → cycle the boxes of one period | Determiner menu, tense and aspect boxes, modifier relation / number / + adj chips, degree chip — they fire on pointer-up in [`useDrag.ts:96`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts#L96) |
 | Border controls are real buttons (reachable by DOM ⇥, but ⇥ is captured by the slot loop) | Completing a relative-clause, instrumental or possessor-reference pick (click the target) |
 | Canvas resize grip (↑ ↓) | Moving boxes and groups, words-panel width, word-map pan/zoom |
 | Save / load dialogs (↵, esc) | Choosing from the words panel (rows are plain `Box`es) |
-| Language selector | Conjunction chip in coordinated nouns ([`ConjunctPanels.tsx:64`](../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx#L64) has `role="button"` but no `tabIndex` / key handler) |
+| Language selector | Conjunction chip in coordinated nouns ([`ConjunctPanels.tsx:64`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx#L64) has `role="button"` but no `tabIndex` / key handler) |
 
 There is one global key handler in the app (esc cancels a workspace pick,
-[`useWorkspaceLinks.ts:89`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts#L89))
+[`useWorkspaceLinks.ts:89`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts#L89))
 and no focus styling on canvas nodes (`outline: "none"` in
-[`useDrag.ts:106`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts#L106)).
+[`useDrag.ts:106`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts#L106)).
 
 ## Principles
 
@@ -137,9 +137,11 @@ unchanged, apart from keycaps in tooltips and the Console button.
 
 ## 3. UI elements that change
 
-Hi-fi versions are on the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), page *Keyboard access (P01)*.
+Each subsection shows the drawing from [`artwork/`](artwork/) first and a text sketch after it. The editable originals are on the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), page *Keyboard access (P01)*.
 
 ### 3.1 Word box under the cursor — *artboards "Keyboard mode, at rest", "Focus and key hints"*
+
+![Focus and key hints: keys, word box states, border controls, period cursor, regions](artwork/02-focus-and-key-hints.png)
 
 ```
    ┌ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ─ ┐      dotted Subject group (unchanged)
@@ -160,6 +162,8 @@ Hi-fi versions are on the [design canvas](https://claude.ai/code/artifact/7a68e6
 - Tooltips everywhere gain a keycap: `Number: Singular  [N]`.
 
 ### 3.2 Hint line — *artboard "Keyboard mode, at rest"*
+
+![The app in keyboard mode, cursor on the subject cat, hint line docked at the bottom](artwork/01-keyboard-mode-at-rest.png)
 
 While the console (P02) is shown and focus is on the canvas, its prompt line doubles as the hint line:
 its right side lists the keys for whatever the cursor is on, read from the keymap. When the console is
@@ -198,6 +202,8 @@ letter it answers to.
 
 ### 3.5 Word picker — *artboard "Choosing a word"*
 
+![Word picker and pronoun chooser with keyboard footers](artwork/04-choosing-a-word.png)
+
 ```
  ╔═══════════════════╗
  ║ SUBJECT *         ║
@@ -222,6 +228,8 @@ letter it answers to.
 
 ### 3.6 Picking a link — *artboard "Picking a link"*
 
+![Relative-clause pick with numbered targets and the pick banner](artwork/03-picking-a-link.png)
+
 ```
  ┃ child ─── read ─── book                      period 1: (⑂) on child is the source (solid)
  ┃
@@ -239,6 +247,8 @@ the numbers. The possessor "refers to a noun" pick uses the same badges and gain
 (it has none today). The console shows the same numbers inline (P02 §2).
 
 ### 3.7 Menus with accelerators — *artboard "Menus with accelerators"*
+
+![Determiner, complement and coordination menus and spatial toolbars with accelerators](artwork/05-menus-with-accelerators.png)
 
 ```
  Determiner (D)             Add a complement (+) — new     Coordination (J on a period)
@@ -264,10 +274,14 @@ The complement menu is the only new menu: it lists exactly the complements the v
 
 ### 3.8 Shortcuts sheet (?) — *artboard "Shortcuts sheet"*
 
+![Keyboard shortcuts sheet](artwork/06-shortcuts-sheet.png)
+
 A dialog rendering §4 from the keymap, three columns, with a **Windows & Linux / Mac** switch that
 re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own reference (`/help`, P02).
 
 ### 3.9 Translations, words panel, undo — *artboard "Header, translations, words, undo"*
+
+![Header toolbar, translations rows, words panel and undo toast](artwork/07-header-translations-words-undo.png)
 
 ```
  TRANSLATIONS (F6)                              WORDS (Ctrl B)        [⌖ M] [✕]
@@ -286,10 +300,10 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 ```
 
 - The focused translation row shows its copy button (today `opacity: 0` unless hovered,
-  [`TranslationPanel.tsx:156`](../../../packages/frontend/src/components/TranslationPanel.tsx#L156)).
+  [`TranslationPanel.tsx:156`](../../../../packages/frontend/src/components/TranslationPanel.tsx#L156)).
 - The words panel: typing jumps to a word, <kbd>↵</kbd> fills the focused box and returns to the
   canvas, <kbd>M</kbd> opens the word map. When closed it becomes `inert` (today it only gets
-  `pointerEvents: none`, [`PhraseSidebar.tsx:93`](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L93), so ⇥ can land inside it).
+  `pointerEvents: none`, [`PhraseSidebar.tsx:93`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L93), so ⇥ can land inside it).
 - The undo toast reuses the existing filled `Alert` snackbar, in `info`.
 
 ---
@@ -478,22 +492,22 @@ button does.
 
 | File | Change |
 |---|---|
-| [`PhraseBuilder.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) | Register this container's `KeyContext` with the provider; `activeSlot` (line 188) becomes the cursor; remember the last focused box for ↵-from-period. Expose "open determiner / specifier menu for slot" setters. |
-| [`phraseRender.tsx`](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx) | `SlotNode` (lines 415–440): replace the Tab/←→ loop with `data-kb-scope`, ↵/Space → `handleEditSlot`, key tips for its own controls; footer chips (relation, number, + adj, degree) become buttons. |
-| [`hooks/useDrag.ts`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts) | Drop `outline: "none"`; add a `:focus-visible` ring; expose `nudge(key, dx, dy)` for ⇧+arrows. |
-| [`NounPhraseBuilder.tsx`](../../../packages/frontend/src/components/PhraseBuilder/NounPhraseBuilder.tsx) | `DeterminerMenu` opens from a key (anchor = determiner box or satellite); digit accelerators on rows. |
-| [`VerbPhraseBuilder.tsx`](../../../packages/frontend/src/components/PhraseBuilder/VerbPhraseBuilder.tsx) | Tense / aspect boxes keyboard-activatable; new *Add a complement* menu built from `complementToggleIcons` + `directObjectToggle`; specifier / sentiment toolbars get letter / digit accelerators. |
-| [`PeriodContainer.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx) | `data-kb-scope="period"`, period cursor ring and key tips, conjunction-menu accelerators, numbered badge when the card is a pick target, keyboard caption. `window.confirm` (line 835) replaced by undo in phase 5. |
-| [`PhraseWorkspace.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx) | Focus registry across containers (↑↓ between periods, N focuses the new one). |
-| [`hooks/useWorkspaceLinks.ts`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | `eligibleTargets(): Target[]` in reading order (drives badges and digits); its esc listener moves into the provider. |
-| [`CorefPickContext.tsx`](../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx) | Same `eligibleTargets` + badges; esc cancels (missing today). |
-| Typeaheads (`SubjectTypeahead`, `VerbTypeahead`, `DirectObjectTypeahead`, `AdjectiveTypeahead`, `AdverbTypeahead`, `ModalTypeahead`, `ModifierTypeahead`) | Shared `usePickerKeys`: ⇥ commit-and-advance, double esc, ↑ into tabs / category toggle, footer hints. Fix `ModalTypeahead` ↓ not reopening a closed list ([line 37](../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L37)). |
-| [`ImperativeSubjectSelector.tsx`](../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`PossessorPanels.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx), [`ConjunctPanels.tsx`](../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx) | Scopes and accelerators; the conjunction chip becomes a real button. |
-| [`PhraseSidebar.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx), [`ConceptPalette.tsx`](../../../packages/frontend/src/components/ConceptPalette.tsx) | `inert` when closed; roving focus list, type-to-jump, ↵ fills the active slot and returns focus; resize handle as a `separator` with ←→. |
-| [`WordMap/WordMap.tsx`](../../../packages/frontend/src/components/WordMap/WordMap.tsx) | Pan / zoom / reset keys; ⇥ cycles nodes applying the hover highlight. |
-| [`TranslationPanel.tsx`](../../../packages/frontend/src/components/TranslationPanel.tsx) | Rows focusable; copy button visible on `:focus-within`; ↵ / C copy. |
-| [`SavedPhrasesToolbar.tsx`](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx), [`PeriodSaveLoad.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx) | Open from Ctrl S / Ctrl O / Ctrl ⇧ S / Ctrl ⇧ O and period S / L; ⌫ on a load-list row. |
-| [`App.tsx`](../../../packages/frontend/src/App.tsx) | `KeyboardProvider`; header `role="toolbar"` with the Console button; F6 landmarks; undo history (phase 5). |
+| [`PhraseBuilder.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) | Register this container's `KeyContext` with the provider; `activeSlot` (line 188) becomes the cursor; remember the last focused box for ↵-from-period. Expose "open determiner / specifier menu for slot" setters. |
+| [`phraseRender.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx) | `SlotNode` (lines 415–440): replace the Tab/←→ loop with `data-kb-scope`, ↵/Space → `handleEditSlot`, key tips for its own controls; footer chips (relation, number, + adj, degree) become buttons. |
+| [`hooks/useDrag.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useDrag.ts) | Drop `outline: "none"`; add a `:focus-visible` ring; expose `nudge(key, dx, dy)` for ⇧+arrows. |
+| [`NounPhraseBuilder.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/NounPhraseBuilder.tsx) | `DeterminerMenu` opens from a key (anchor = determiner box or satellite); digit accelerators on rows. |
+| [`VerbPhraseBuilder.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/VerbPhraseBuilder.tsx) | Tense / aspect boxes keyboard-activatable; new *Add a complement* menu built from `complementToggleIcons` + `directObjectToggle`; specifier / sentiment toolbars get letter / digit accelerators. |
+| [`PeriodContainer.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx) | `data-kb-scope="period"`, period cursor ring and key tips, conjunction-menu accelerators, numbered badge when the card is a pick target, keyboard caption. `window.confirm` (line 835) replaced by undo in phase 5. |
+| [`PhraseWorkspace.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx) | Focus registry across containers (↑↓ between periods, N focuses the new one). |
+| [`hooks/useWorkspaceLinks.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | `eligibleTargets(): Target[]` in reading order (drives badges and digits); its esc listener moves into the provider. |
+| [`CorefPickContext.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx) | Same `eligibleTargets` + badges; esc cancels (missing today). |
+| Typeaheads (`SubjectTypeahead`, `VerbTypeahead`, `DirectObjectTypeahead`, `AdjectiveTypeahead`, `AdverbTypeahead`, `ModalTypeahead`, `ModifierTypeahead`) | Shared `usePickerKeys`: ⇥ commit-and-advance, double esc, ↑ into tabs / category toggle, footer hints. Fix `ModalTypeahead` ↓ not reopening a closed list ([line 37](../../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L37)). |
+| [`ImperativeSubjectSelector.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`PossessorPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx), [`ConjunctPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx) | Scopes and accelerators; the conjunction chip becomes a real button. |
+| [`PhraseSidebar.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx), [`ConceptPalette.tsx`](../../../../packages/frontend/src/components/ConceptPalette.tsx) | `inert` when closed; roving focus list, type-to-jump, ↵ fills the active slot and returns focus; resize handle as a `separator` with ←→. |
+| [`WordMap/WordMap.tsx`](../../../../packages/frontend/src/components/WordMap/WordMap.tsx) | Pan / zoom / reset keys; ⇥ cycles nodes applying the hover highlight. |
+| [`TranslationPanel.tsx`](../../../../packages/frontend/src/components/TranslationPanel.tsx) | Rows focusable; copy button visible on `:focus-within`; ↵ / C copy. |
+| [`SavedPhrasesToolbar.tsx`](../../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx), [`PeriodSaveLoad.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx) | Open from Ctrl S / Ctrl O / Ctrl ⇧ S / Ctrl ⇧ O and period S / L; ⌫ on a load-list row. |
+| [`App.tsx`](../../../../packages/frontend/src/App.tsx) | `KeyboardProvider`; header `role="toolbar"` with the Console button; F6 landmarks; undo history (phase 5). |
 | i18n | New UI strings (hint labels, captions) start as English keys in the UI-string catalogue, ready for `/localize`. |
 
 ### 5.4 Accessibility

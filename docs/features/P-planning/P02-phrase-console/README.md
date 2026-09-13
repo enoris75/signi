@@ -7,12 +7,13 @@ previews on the canvas, and every canvas action is written back to the console a
 equals.
 **Shape:** a pure text ⇄ selection layer (parse, complete, apply, print) over the existing reducers,
 and one console component. No change to the engine, the API or the saved-phrase format.
-**Relation to [P01](P01-keyboard-first-ux.md):** P01 keeps the canvas itself fully reachable from
+**Relation to [P01](../P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
 the keyboard (cursor, focus ring, key tips, box letters). The console is the fast path, and it
 replaces P01's command palette and hint bar.
 **Status:** planning. Direction settled on 2026-09-13 ([Decisions](#decisions)); no open questions.
-**Drawings:** page *Phrase console (P02)* of the
-[design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f).
+**Drawings:** [`artwork/`](artwork/) — six images exported from page *Phrase console (P02)* of
+the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded in
+the sections they illustrate.
 
 ---
 
@@ -51,8 +52,7 @@ Settled on 2026-09-13:
 | `/verb eat /obj food` <kbd>↵</kbd> | Verb and object filled. | *the brown cats eat the food.* |
 | *(click the polarity control on eat)* | eat turns negative. | `⌖ /not · eat` — *the brown cats do not eat the food.* |
 | `/modal ca` <kbd>⇥</kbd> <kbd>↵</kbd> | A modal box *can*, previewed then committed. | *the brown cats cannot eat the food.* |
-| `/new /subj dog /verb see /obj cat` <kbd>↵</kbd> | A second period appears. | *the dog sees the cat.* |
-| `#1 /subj /rel #` <kbd>2</kbd> <kbd>↵</kbd> | Period 2 becomes a relative clause on *cat*. | The list numbers the nouns period 2 offers; <kbd>2</kbd> picks *cat*. |
+| `/subj /rel obj ( /subj dog /verb see )` <kbd>↵</kbd> | A second period appears, already linked to *cats* as a relative clause. | *the brown cats that the dog sees cannot eat the food.* |
 | <kbd>↑</kbd> | — | The previous line comes back from history. |
 | <kbd>esc</kbd> <kbd>&#96;</kbd> | The page gets its full height back; the cursor is on the canvas again. | esc clears the line; &#96; hides the console. |
 
@@ -61,6 +61,8 @@ Settled on 2026-09-13:
 ## 2. The console
 
 ### 2.1 Placement and states — *artboard "Console and canvas together"*
+
+![The console docked under the page, previewing a modal on the canvas, with completion open](artwork/01-console-and-canvas.png)
 
 Docked to the bottom of the viewport, full page width (stopping at the words panel when it is open),
 on the page's paper with the source strip on the canvas colour. The page gains bottom padding equal
@@ -100,8 +102,11 @@ to the console's height so nothing hides under it.
 
 ### 2.2 Anatomy — *artboard "The console"*
 
+![The console's states: at rest, typing, a mistake, editing the source, picking a link; token colours](artwork/04-the-console.png)
+
 - **Context chip** `1 · VERB eat ›` — where the next command will attach: the console's equivalent
-  of a working directory. It follows the canvas cursor and moves it.
+  of a working directory. It follows the canvas cursor and moves it. Inside brackets it shows the path
+  in: `1 › rel › 2 · OBJ cat ›` (§3, Subordinate phrases).
 - **Prompt** — syntax-coloured as you type, with the type-ahead ghost after the caret (§2.4).
 - **Diagnostics** — a wavy underline and one line saying what is wrong and how to fix it:
   *`/past` sets a verb's tense, and food is a noun. Put it after eat, or write `/verb /past`.*
@@ -129,6 +134,8 @@ Type: **IBM Plex Mono** (added to `index.html` next to Lora / Playfair / Inter),
 
 ### 2.4 Completion and type-ahead — *artboard "Completion and type-ahead"*
 
+![Completion and type-ahead at each caret position, history, and the console's keys](artwork/03-completion-and-type-ahead.png)
+
 The console completes at every keystroke. Two things show at once:
 
 - **The ghost** — the single best completion, drawn faintly after the caret (`/modal ca▏n`).
@@ -143,6 +150,8 @@ The console completes at every keystroke. Two things show at once:
 | `/` or `/partial` | Commands valid for the context: a noun gets `/adj /pl /fem /the /poss /rel /and …`, a verb gets `/modal /adv /past /not …`, a period gets `/command /if /join …`; app commands always. Each row shows the current value it would change (*`/pl` plural · now singular*). | `language/commands.ts` filtered by context kind and `when` (the same availability as `Satellite.available`) |
 | the argument of a role command (`/adj b`) | Words of that role in the interface language: nouns for `/obj`, adjectives for `/adj`, modals for `/modal`, nouns *and* pronouns for `/subj` and `/cause`. Hovering a row shows its definition, as in the pickers. | `useConcepts(role)` + `useConceptSearch` + `slotCategories` — the pickers' own data and matcher |
 | the argument of a value command (`/join `, `/command `, `/level `, `/lang `, `/load `, `/help `) | The allowed values — only the four conjunctions two commands can take when the period is a command; saved-phrase names for `/load`. | `COORD_CONJUNCTION_OPTIONS` / `coordConjunctionOptions`, `ABSTRACTION_LEVELS`, languages, saved phrases |
+| after `/rel `, `/if `, `/inst `, `/join and `, `/poss `, `/and ` | New phrases first — `subj (` and `obj (` for `/rel` (*new clause · child is its subject*), `(` for the others — then the existing periods the link rules allow, numbered. | `commands.ts` + `linkRules.ts` |
+| inside `( … )` | Everything above, for the new phrase's context; the ghost offers ` )` once the phrase is complete. | the bracket stack from the lexer |
 | `#` or `#2.` | Periods, then their nouns — for link commands only the targets the link rules allow, numbered (*1 #2.subj dog*, *2 #2.obj cat*); a digit picks. | `linkRules.ts` (extracted from `useWorkspaceLinks`) |
 | a word typed without a command (`ca`) | *Did you mean* — the role command for the box under the cursor: `/subj cat`. The line itself never keeps a bare word. | context + that role's vocabulary |
 | an empty prompt, ↑ / ↓ | Earlier lines from history (§ History). | `history.ts` |
@@ -198,12 +207,14 @@ synchronously on every keystroke.
 
 ## 3. The language — *artboard "The phrase language"*
 
+![Reference sheet of the phrase language: shape, examples and commands](artwork/05-the-phrase-language.png)
+
 ### Shape
 
 ```
 line        = item …
 item        = /command [argument]  ·  #reference
-argument    = a word (the text up to the next / or #)  ·  a value  ·  a #reference
+argument    = a word (the text up to the next / or #)  ·  a value  ·  a #reference  ·  ( line )
 #reference  = #2  ·  #2.obj  ·  #1.subj.poss
 ```
 
@@ -239,12 +250,12 @@ matches. "Code" is the existing function each one reaches.
 | `/subj` `/verb` `/obj` | subject, verb, direct object | `applyConceptSelect` |
 | `/pred` `/term` `/manner` | subject complement, terminus, manner | `applyConceptSelect` |
 | `/loc` `/dir` `/src` `/route` `/cause` | place, direction, source, route, cause | `applyConceptSelect` |
-| `/inst #n` | instrumental: period *n* | instrumental link (`useWorkspaceLinks`) |
+| `/inst #n` · `/inst ( … )` | instrumental: period *n*, or a new one | instrumental link (`useWorkspaceLinks`) |
 | `/adj` | adjective on the closest noun (next of 3); on a noun modifier, its own adjective | `applyConceptSelect` / `setModifierAdjective` |
 | `/adv` | adverb of the verb, or of the closest modal | `applyConceptSelect` (`modifier`, `verbModal*Adverb`) |
 | `/modal` | modal (next of 2) | `applyConceptSelect` (`verbModal`, `verbModal2`) |
-| `/poss` | possessor phrase — or, with `#n.role`, a possessor that refers to a noun | nested selection / `setPossessorRef` |
-| `/and` `/or` | coordinate another phrase | `addConjunct` + conjunction |
+| `/poss` · `/poss ( … )` | possessor phrase — or, with `#n.role`, a possessor that refers to a noun | nested selection / `setPossessorRef` |
+| `/and` `/or` · `/and ( … )` | coordinate another phrase | `addConjunct` + conjunction |
 
 **Noun**
 
@@ -254,7 +265,7 @@ matches. "Code" is the existing function each one reaches.
 | `/masc` `/fem` `/neut` | gender | `setGender` *(new)* |
 | `/the` `/a` `/zero` `/this` `/that` | article, demonstrative | `setDefiniteness` |
 | `/some` `/no` `/many` `/few` `/all` | quantifier | `setDefiniteness` |
-| `/rel #n.role` | relative clause | relative link |
+| `/rel #n.role` · `/rel subj\|obj ( … )` | relative clause on an existing period, or a new one with the head as its subject or object | relative link (+ `addContainer`) |
 | `/in` `/through` `/under` `/over` `/around` `/behind` `/front` | spatial relation (locative, route) | `setSpecifier` |
 | `/because` `/fault` `/thanks` | sentiment (cause) | `setSentiment` |
 
@@ -281,8 +292,8 @@ matches. "Code" is the existing function each one reaches.
 | `#n` | go to period *n* | cursor |
 | `/command [you\|lets\|youall] [order\|instruction]` | command mood and addressee | `setImperative` *(new)*, `setImperativePerson`, `setImperativeRegister` |
 | `/inf` · `/statement` | infinitive · back to a plain statement | `setInfinitive` *(new)* |
-| `/if #n` | if-condition | conditional link |
-| `/join and\|or\|but\|thatis\|therefore\|then #n` | coordination | coordinative link |
+| `/if #n` · `/if ( … )` | if-condition: an existing period, or a new one | conditional link (+ `addContainer`) |
+| `/join and\|or\|but\|thatis\|therefore\|then #n` · `… ( … )` | coordination with an existing or a new period | coordinative link (+ `addContainer`) |
 | `/level process\|concept\|object` | reification of an instrument period | `instrumental.onLevelChange` |
 | `/edit` | load this period's source into the prompt | console |
 | `/del [adj 2 \| obj \| rel \| period …]` | remove what the context names | `applyClear`, `removePossessor`, `removeConjunct`, link removal, `removeContainer` |
@@ -297,14 +308,62 @@ matches. "Code" is the existing function each one reaches.
 | `/undo` · `/redo` | history (P01 phase 5) |
 | `/words` · `/help [command]` | words panel · help |
 
-New grammar features add a command in the same change — e.g. [A01 passive voice](../A-ready/A01-passive-voice.md) would add `/passive` · `/active`.
+New grammar features add a command in the same change — e.g. [A01 passive voice](../../A-ready/A01-passive-voice/README.md) would add `/passive` · `/active`.
+
+### Subordinate phrases — *artboard "Subordinate phrases"*
+
+![Subordinate phrases: a relative clause typed in brackets, previewed as a new linked period, with forms, completion and rules](artwork/06-subordinate-phrases.png)
+
+A clause can be written where it belongs. Brackets after a link command create the new phrase,
+link it, and hand the line back to the head when they close:
+
+```
+/subj child /rel subj ( /verb love /obj cat ) /verb read /obj book
+→ the child who loves the cat reads the book.
+
+/subj cat /rel obj ( /subj dog /verb see ) /verb run
+→ the cat that the dog sees runs.
+
+/subj dog /verb run /if ( /subj cat /verb eat )
+→ if the cat ate, the dog would run.
+
+/subj child /verb eat /obj food /inst ( /subj stick )
+→ the child eats the food with a stick.
+
+/subj child /poss ( /subj man /adj old ) /pl /verb run
+→ the old man's children run.
+
+/subj dog /verb run /if ( /subj cat /rel subj ( /verb see /obj child ) /verb eat )
+→ if the cat that sees the child ate, the dog would run.
+```
+
+(Sample renderings.)
+
+- **`(`** after `/rel`, `/if`, `/inst`, `/join`, `/poss` or `/and` opens a new phrase already linked
+  to the command before it: a new period for the clause-level links, a nested phrase for possessors
+  and conjuncts.
+- **Inside**, commands attach within the brackets. **`)`** closes them, and what follows attaches to
+  the head again — in the possessor line, `/pl` lands on *child*, not *man*.
+- **`/rel subj` or `/rel obj` names the gap:** that box of the new clause takes the head's word and
+  becomes the link target, exactly as a pick on the canvas makes it.
+- **Brackets nest**, and <kbd>↵</kbd> closes any that are still open, so a line may end inside one.
+- **The link rules still apply** (no cycles, one subordinate role per period, mood rules): a bracket
+  that would break one is underlined with the rule's message, as for a `#reference`.
+- **Colour:** brackets take their link's colour — relative and possessor primary, if warning,
+  instrument secondary, join info — the colours of the canvas connectors.
+- **Preview:** while a bracket is open, the new period is drawn as a dashed card with a dashed link to
+  the head, and translations preview the whole sentence.
+- **Existing periods** are still linked with references (`/rel #2.subj`); completion offers both.
 
 ### Canonical printing
 
 `print(period)` is deterministic: subject block → verb block (modals, adverb, tense, aspect,
 polarity) → object → complements in `COMPLEMENT_RENDER_ORDER` → period relations; within a noun,
 word → adjectives → number → gender → determiner → possessor → conjuncts → relative link. Only
-non-default values are printed. The printer also returns a span per token →
+non-default values are printed. Clauses are periods of their own, so each prints on its own line and
+links print as references (`/rel #2.subj`), never as brackets. Phrases that live inside a period —
+possessors, and conjuncts carrying settings — print in brackets (`/poss ( /subj man /adj old )`),
+which keeps their settings unambiguous. The printer also returns a span per token →
 `{containerId, slotKey}`, which drives highlighting in both directions.
 
 **Invariant:** for every reachable state, `apply(empty, parse(print(state))) ≡ state`.
@@ -312,6 +371,8 @@ non-default values are printed. The printer also returns a span per token →
 ---
 
 ## 4. Keeping the two views in sync — *artboard "One phrase, two views"*
+
+![Storyboard: type to preview, enter to commit, click to echo, point to highlight](artwork/02-one-phrase-two-views.png)
 
 The state stays where it is: `containers` and `links` in `App.tsx`. The console never keeps its own
 copy of the phrase; it derives text from state and turns text into state changes.
@@ -330,7 +391,8 @@ copy of the phrase; it derives text from state and turns text into state changes
    state. The result is handed to the workspace and translations as a *display* state; boxes whose
    value differs from the committed state render in a new `preview` style (dashed, no halo, a
    ↵ tag). Translations for previewed periods are requested debounced (200 ms) and labelled
-   *Preview*. Clearing the line drops the preview.
+   *Preview*. A bracketed clause previews as a new dashed period card with a dashed link. Clearing
+   the line drops the preview.
 2. **Commit (↵ with no list open).** The preview becomes the state — one undo step. The typed line
    goes to the transcript and to history, with the resulting sentence, and the context advances like
    the pickers' auto-advance.
@@ -355,10 +417,10 @@ shows a diagnostic.
 | File | Role |
 |---|---|
 | `language/commands.ts` | The catalogue: name, aliases, where it applies, argument kind (word of a role · value · reference), `apply`, `print`, description, current-value label. |
-| `language/lex.ts`, `parse.ts` | Tokens with spans; error recovery so the valid prefix still previews. |
+| `language/lex.ts`, `parse.ts` | Tokens with spans and a bracket stack; error recovery so the valid prefix still previews. A bracket becomes a nested op list owned by its link command. |
 | `language/resolve.ts` | Words → concepts (vocabulary for the role, interface language, ids); references → `NounAddress` / container ids. |
 | `language/complete.ts` | Candidates, ranking and the ghost for a caret position (§2.4). |
-| `language/apply.ts` | Pure: ops + `{containers, links}` → new `{containers, links}`, via `phraseReducers` and the extracted link rules. |
+| `language/apply.ts` | Pure: ops + `{containers, links}` → new `{containers, links}`, via `phraseReducers` and the extracted link rules; a bracketed clause adds a container and its link in one step. |
 | `language/print.ts` | Pure: state → canonical text + token spans. |
 | `language/diff.ts` | Echo diffs. |
 | `history.ts` | The persisted line history. |
@@ -373,15 +435,15 @@ The `language/` layer imports no React and is fully unit-testable.
 
 | File | Change |
 |---|---|
-| [`phraseReducers.ts`](../../../packages/frontend/src/components/PhraseBuilder/phraseReducers.ts) | Set-value reducers next to today's toggles and cycles: `setNumber`, `setGender`, `setNegative`, `setTense`, `setAspect`, `setDegree`, `setModifierRelation`, `setModifierNumber`, `setImperative`, `setInfinitive`, `setNounConjunction`. The toggles become thin wrappers over them. |
-| [`hooks/useWorkspaceLinks.ts`](../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | Extract the link rules (no cycles, one subordinate role per period, mood rules) into a pure `linkRules.ts`, so `apply.ts` and `complete.ts` accept exactly what a pick accepts. |
-| [`App.tsx`](../../../packages/frontend/src/App.tsx) | Own the console state and the preview; pass the display state to `PhraseWorkspace` and `useTranslations`; render `PhraseConsole`; bottom padding; the header's Console button. |
-| [`PhraseWorkspace.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx), [`PhraseBuilder.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) | Accept `previewKeys` and `highlightKeys` per container; report and accept cursor moves. |
-| [`Boxes.tsx`](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx) | `SlotBox` gains `preview` and hover-`highlight` states. |
-| [`ConceptOption.tsx`](../../../packages/frontend/src/components/PhraseBuilder/ConceptOption.tsx) | Reused as the word row of the completion list. |
-| [`TranslationPanel.tsx`](../../../packages/frontend/src/components/TranslationPanel.tsx) | *Preview* label on previewed rows. |
-| [`index.html`](../../../packages/frontend/index.html) | Add IBM Plex Mono to the Google Fonts link. |
-| [`phraseSerialize.ts`](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize.ts) | Unchanged — saved phrases stay JSON (decision 4). |
+| [`phraseReducers.ts`](../../../../packages/frontend/src/components/PhraseBuilder/phraseReducers.ts) | Set-value reducers next to today's toggles and cycles: `setNumber`, `setGender`, `setNegative`, `setTense`, `setAspect`, `setDegree`, `setModifierRelation`, `setModifierNumber`, `setImperative`, `setInfinitive`, `setNounConjunction`. The toggles become thin wrappers over them. |
+| [`hooks/useWorkspaceLinks.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | Extract the link rules (no cycles, one subordinate role per period, mood rules) into a pure `linkRules.ts`, so `apply.ts` and `complete.ts` accept exactly what a pick accepts. |
+| [`App.tsx`](../../../../packages/frontend/src/App.tsx) | Own the console state and the preview; pass the display state to `PhraseWorkspace` and `useTranslations`; render `PhraseConsole`; bottom padding; the header's Console button. |
+| [`PhraseWorkspace.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx), [`PhraseBuilder.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) | Accept `previewKeys` and `highlightKeys` per container; report and accept cursor moves. |
+| [`Boxes.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx) | `SlotBox` gains `preview` and hover-`highlight` states. |
+| [`ConceptOption.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConceptOption.tsx) | Reused as the word row of the completion list. |
+| [`TranslationPanel.tsx`](../../../../packages/frontend/src/components/TranslationPanel.tsx) | *Preview* label on previewed rows. |
+| [`index.html`](../../../../packages/frontend/index.html) | Add IBM Plex Mono to the Google Fonts link. |
+| [`phraseSerialize.ts`](../../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize.ts) | Unchanged — saved phrases stay JSON (decision 4). |
 | i18n | Console captions, list titles and messages through the UI-string catalogue. Command names are not translated (decision 3). |
 
 ---
@@ -393,7 +455,7 @@ The `language/` layer imports no React and is fully unit-testable.
 | **1 · Language core** | Catalogue for subject, verb, object, adjectives, adverbs, modals, noun and verb settings; lex / parse / resolve / complete / apply / print; set-value reducers. No UI. | The round-trip invariant holds on generated states and on every saved-phrase fixture those commands cover; completion golden tests pass for every position kind. |
 | **2 · Console with completion** | Docked console, coloured prompt, **ghost type-ahead and the completion list** (commands, role words, values), history, transcript with sentences, source strip, context chip; ↵ applies; echo of canvas actions. | A period can be built from the console alone without typing any name in full, and clicking on the canvas shows up in the console. |
 | **3 · Live preview and cursor** | Preview state, dashed boxes, preview translations, diagnostics, shared cursor, hover highlight both ways, token click, `/edit`. | Typing a line previews on the canvas before ↵; esc leaves the state untouched. |
-| **4 · The whole language** | Complements and relations, possessors, conjuncts, moods, periods (`/new`, `#n`), links with references and numbered completion, `/del`, workspace commands, multi-line paste. | Every control on the canvas has a command (coverage test), and a pasted multi-period script rebuilds the workspace. |
+| **4 · The whole language** | Complements and relations, possessors, conjuncts, moods, periods (`/new`, `#n`), links with references and numbered completion, bracketed subordinate phrases, `/del`, workspace commands, multi-line paste. | Every control on the canvas has a command (coverage test), and a pasted multi-period script rebuilds the workspace. |
 | **5 · Polish** | Recency ranking, `/help` pages, pinning, interface-language aliases if wanted. | — |
 
 ## 7. Testing
@@ -402,6 +464,9 @@ The `language/` layer imports no React and is fully unit-testable.
   generator, or `fast-check` as a dev dependency) and assert the invariant; also run it over the
   existing saved-phrase fixtures.
 - **Golden tests** per command: parse, apply, print, and the diagnostic for its common misuse.
+- **Bracket tests:** each form above creates the right container and link; `)` returns attachment to
+  the head; nesting; <kbd>↵</kbd> closes open brackets; a bracket that breaks a link rule is refused;
+  the printed result uses references and still round-trips.
 - **Completion tests** per position kind (command, role word, value, reference, word without a
   command, history): candidates, order, ghost and replace range for a given text and caret —
   including aliases (`/plural` → `/pl`) and the command-only conjunctions.
