@@ -49,7 +49,6 @@ function renderControls(overrides: Partial<ComponentProps<typeof GroupPerimeterC
     registerSourceAnchor: vi.fn(),
     registerTargetAnchor: vi.fn(),
     registerPossessorControl: vi.fn(),
-    registerConjunctControl: vi.fn(),
   };
   const view = render(
     <GroupPerimeterControls
@@ -128,7 +127,7 @@ describe('GroupPerimeterControls', () => {
   });
 
   it('registers each control as the start of its connector, and releases it on unmount', () => {
-    const { registerSourceAnchor, registerPossessorControl, registerConjunctControl, unmount } =
+    const { registerSourceAnchor, registerPossessorControl, unmount } =
       renderControls({ perimeterByNoun: { subject: everyControl('subject') } });
 
     expect(registered(registerSourceAnchor, 'subject')).toBe(
@@ -137,15 +136,10 @@ describe('GroupPerimeterControls', () => {
     expect(registered(registerPossessorControl, 'subject')).toBe(
       screen.getByTestId('possessor-ctl-subject'),
     );
-    expect(registered(registerConjunctControl, 'subject')).toBe(
-      screen.getByTestId('satellite-subjectConjunct').parentElement,
-    );
-
     unmount();
 
     expect(registerSourceAnchor).toHaveBeenLastCalledWith('subject', null);
     expect(registerPossessorControl).toHaveBeenLastCalledWith('subject', null);
-    expect(registerConjunctControl).toHaveBeenLastCalledWith('subject', null);
   });
 
   it('places a receiving dot where the ring layout seated it on a link target’s dotted ring', () => {
@@ -191,6 +185,17 @@ describe('GroupPerimeterControls', () => {
     expect(fill(registered(registerTargetAnchor, 'directObject')!)).toBe(SUCCESS);
   });
 
+  it('wears a colour it is handed in place of the noun’s own — a conjunct’s head, its role’s', () => {
+    renderControls({
+      perimeterByNoun: { subject: everyControl('subject') },
+      recolor: { subject: 'success' },
+    });
+
+    expect(getComputedStyle(screen.getByTestId('satellite-subjectPossessor')).backgroundColor).toBe(
+      SUCCESS,
+    );
+  });
+
   it('renders in a standalone period, with no workspace to register links with', () => {
     render(
       <GroupPerimeterControls
@@ -198,7 +203,6 @@ describe('GroupPerimeterControls', () => {
         perimeterByNoun={{ subject: everyControl('subject') }}
         linkTargetKeys={new Set<NounKey>(['subject'])}
         registerPossessorControl={() => {}}
-        registerConjunctControl={() => {}}
       />,
     );
 

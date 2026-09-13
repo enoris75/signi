@@ -32,6 +32,11 @@ export type GroupDef = {
   nodeKeys: string[];
   // Set on complement groups — these carry a control to remove the whole constituent.
   removeKey?: BoxComplementType;
+  // A conjunct's ring also carries a remove control: it drops that phrase out of its group.
+  removable?: boolean;
+  // Set on a conjunct's ring as its head's canvas sees it: the head's group label, and which of
+  // the head's conjuncts it is. Tidying packs it right after the rings before it in its group.
+  conjunct?: { head: string; index: number };
 };
 
 export const VERB_PHRASE = "Verb Phrase";
@@ -121,6 +126,7 @@ export function buildRingSpecs({
   clearable,
   toolbars,
   centerOf,
+  linkPorts = {},
 }: {
   groups: GroupDef[];
   // Compact view keeps only the words and their clear buttons.
@@ -137,6 +143,9 @@ export function buildRingSpecs({
   toolbars: Partial<Record<BoxComplementType, readonly string[]>>;
   // A constituent's centre on the canvas, in px, by its word's key.
   centerOf: (mainKey: string) => Pt;
+  // Ports for the lines joining a coordinated group's rings, by the word whose ring carries them:
+  // each faces the ring its line runs to.
+  linkPorts?: Record<string, readonly { key: string; toward: Pt }[]>;
 }): Record<string, RingSpec> {
   const verb = groups.find((g) => g.label === VERB_PHRASE);
   const specs: Record<string, RingSpec> = {};
@@ -180,7 +189,10 @@ export function buildRingSpecs({
 
     // ── Dotted ring ──
     outer.push({ key: collapseControlKey(label), aim: { clock: COLLAPSE_HOUR } });
-    if (group.removeKey) outer.push({ key: removeControlKey(label), aim: { clock: REMOVE_HOUR } });
+    if (group.removeKey || group.removable)
+      outer.push({ key: removeControlKey(label), aim: { clock: REMOVE_HOUR } });
+    for (const port of linkPorts[mainKey] ?? [])
+      outer.push({ key: port.key, aim: { point: port.toward }, half: PORT_HALF });
 
     if (NOUN_KEYS.includes(mainKey as NounKey)) {
       if (linkTargetKeys?.has(mainKey))

@@ -117,7 +117,7 @@ test.describe('noun phrase', () => {
   }) => {
     await app.buildClause('CAT', 'RUN');
 
-    // The coordination control appends a conjunct panel — a nested noun-phrase builder.
+    // The coordination control adds a conjunct's ring to the subject's group, on the same canvas.
     await app.satellite('subjectConjunct').click();
     await page.getByTestId('typeahead-subject').last().fill('dog');
     await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
@@ -131,6 +131,9 @@ test.describe('noun phrase', () => {
       pt: 'o gato e o cão correm.',
       ja: '猫と犬は走ります。',
     });
+    const period = app.period(0);
+    await expect(period.getByTestId('phrase-canvas')).toHaveCount(1);
+    await expect(period.getByTestId('group-box')).toHaveCount(3);
 
     // "or" makes the verb agree with the nearest conjunct — singular again.
     await page.getByRole('button', { name: /^and$/i }).click();
@@ -144,5 +147,29 @@ test.describe('noun phrase', () => {
       ja: '猫か犬は走ります。',
     });
     await expect(page.getByRole('button', { name: /^or$/i })).toBeVisible();
+  });
+
+  test('a group grows from its last ring and drops a conjunct from its own ring', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.satellite('subjectConjunct').click();
+    await page.getByTestId('typeahead-subject').last().fill('dog');
+    await page.locator('[data-testid="typeahead-option"][data-concept="DOG"]').click();
+
+    // The control that extends the group has moved to the dog's ring, the group's last.
+    await expect(app.satellite('subjectConjunct')).toHaveCount(1);
+    await app.satellite('subjectConjunct').click();
+    await page.getByTestId('typeahead-subject').last().fill('fox');
+    await page.locator('[data-testid="typeahead-option"][data-concept="FOX"]').click();
+
+    await app.expectSentences({ en: 'the cat, the dog and the fox run.' });
+    await expect(page.getByRole('button', { name: /^and$/i })).toHaveCount(2);
+
+    await page.getByRole('button', { name: 'Remove this conjunct' }).first().click();
+
+    await app.expectSentences({ en: 'the cat and the fox run.' });
+    await expect(page.getByRole('button', { name: /^and$/i })).toHaveCount(1);
   });
 });

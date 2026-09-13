@@ -654,8 +654,8 @@ describe('PhraseBuilder', () => {
     });
   });
 
-  // A possessor's or a conjunct's builder wears the full period card, so its own "Remove main
-  // clause" control is how it is removed.
+  // A possessor's builder wears the full period card, so its own "Remove phrase" control is how it
+  // is removed.
   describe('a possessor', () => {
     it('opens a panel whose edits land in the possessor slice', () => {
       const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
@@ -780,8 +780,57 @@ describe('PhraseBuilder', () => {
       expect(screen.getAllByTestId('box-verb')).toHaveLength(1);
     });
 
+    it('draws each conjunct as a ring on its head’s canvas, joined to it by the conjunction', () => {
+      renderPeriod({ subject: CAT, subjectConjuncts: [{ subject: DOG }, { subject: HORSE }], verb: SLEEP });
+
+      expect(screen.getAllByTestId('phrase-canvas')).toHaveLength(1);
+      expect(screen.getAllByTestId('period-container')).toHaveLength(1);
+      expect(groups()).toEqual(['Subject', 'Verb Phrase', 'Subject', 'Subject']);
+      expect(screen.getAllByRole('button', { name: 'And' })).toHaveLength(2);
+    });
+
+    it('lets a conjunct’s head be a pronoun', () => {
+      const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
+      fireEvent.click(satellite('subjectConjunct'));
+
+      fireEvent.click(screen.getByTestId('pronoun-tab'));
+      fireEvent.click(screen.getByRole('button', { name: 'third' }));
+      fireEvent.click(screen.getByTestId('pronoun-commit'));
+
+      expect(selection().subjectConjuncts).toEqual([
+        expect.objectContaining({ subject: THIRD }),
+      ]);
+    });
+
+    it('names a conjunct’s ring after the role it shares with its head', () => {
+      renderPeriod({
+        subject: BOY,
+        verb: EAT,
+        directObject: HORSE,
+        directObjectConjuncts: [{ subject: DOG }],
+      });
+
+      expect(screen.getAllByRole('button', { name: 'Clear Direct Object' })).toHaveLength(2);
+      expect(screen.getAllByRole('button', { name: 'Clear Subject' })).toHaveLength(1);
+    });
+
+    it('extends the group from its last ring only, adding to the head’s group', () => {
+      const { selection } = renderPeriod({
+        subject: CAT,
+        subjectConjuncts: [{ subject: DOG }, { subject: HORSE }],
+        verb: SLEEP,
+      });
+
+      // Neither the head nor the first conjunct carries the control; the last conjunct does.
+      expect(screen.getAllByTestId('satellite-subjectConjunct')).toHaveLength(1);
+      fireEvent.click(satellite('subjectConjunct'));
+
+      expect(selection().subjectConjuncts).toEqual([{ subject: DOG }, { subject: HORSE }, {}]);
+      // The new, still empty conjunct is last now, and has nothing to extend the group from.
+      expect(screen.queryAllByTestId('satellite-subjectConjunct')).toHaveLength(0);
+    });
+
     it('drops a conjunct and unlinks every relative clause from it onwards', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       const binding = makeBinding();
       const group: PhraseSelection = {
         subject: CAT,
@@ -790,7 +839,7 @@ describe('PhraseBuilder', () => {
       };
       const { lastEdit } = renderPeriod(group, { binding });
 
-      fireEvent.click(screen.getAllByRole('button', { name: 'Remove phrase' })[1]!);
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove this conjunct' })[1]!);
 
       expect(lastEdit(group)).toEqual({
         ...group,
@@ -803,14 +852,13 @@ describe('PhraseBuilder', () => {
     });
 
     it('unlinks a nested builder’s conjuncts by their full address', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       const binding = makeBinding();
       renderPeriod(
         { subject: DOG, subjectConjuncts: [{ subject: CAT }] },
         { binding, possessorPath: 'directObject/possessor' },
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this conjunct' }));
 
       expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
         'directObject/possessor/conjunct/0',
@@ -818,18 +866,28 @@ describe('PhraseBuilder', () => {
     });
 
     it('unlinks the conjuncts of a nested builder’s object by that object’s address', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
       const binding = makeBinding();
       renderPeriod(
         { subject: DOG, verb: EAT, directObject: HORSE, directObjectConjuncts: [{ subject: CAT }] },
         { binding, possessorPath: 'subject/possessor' },
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this conjunct' }));
 
       expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
         'subject/possessor/directObject/conjunct/0',
       );
+    });
+
+    it('registers a conjunct’s head with the workspace under its address', () => {
+      const binding = makeBinding();
+      renderPeriod({ subject: CAT, subjectConjuncts: [{ subject: DOG }], verb: SLEEP }, { binding });
+
+      const registered = vi
+        .mocked(binding.geometry.registerBox)
+        .mock.calls.filter(([, el]) => el)
+        .map(([key]) => key);
+      expect(new Set(registered)).toEqual(new Set(['subject', 'subject/conjunct/0']));
     });
 
     it('cycles the conjunction joining the group', () => {
@@ -972,7 +1030,7 @@ describe('PhraseBuilder', () => {
       Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledOnce());
     });
 
-    it('gives a possessor or conjunct panel none of a period’s own controls', () => {
+    it('gives a possessor panel none of a period’s own controls', () => {
       const onMoveUp = vi.fn();
       renderPeriod(
         { subject: DOG },

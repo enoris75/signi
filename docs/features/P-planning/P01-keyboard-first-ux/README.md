@@ -31,7 +31,8 @@ box. Everything *around* the words is mouse-only. An audit of the frontend found
 | Border controls are real buttons (reachable by DOM ⇥, but ⇥ is captured by the slot loop) | Completing a relative-clause, instrumental or possessor-reference pick (click the target) |
 | Canvas resize grip (↑ ↓) | Moving boxes and groups, words-panel width, word-map pan/zoom |
 | Save / load dialogs (↵, esc) | Choosing from the words panel (rows are plain `Box`es) |
-| Language selector | Conjunction chip in coordinated nouns ([`ConjunctPanels.tsx:64`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx#L64) has `role="button"` but no `tabIndex` / key handler) |
+| Language selector | |
+| Conjunction chip on the links of a coordinated noun (↵ / Space, [`ConjunctRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx)) | |
 
 There is one global key handler in the app (esc cancels a workspace pick,
 [`useWorkspaceLinks.ts:89`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts#L89))
@@ -113,12 +114,12 @@ Boxes are freely placed on the canvas, so arrow keys use geometry, not DOM order
 box's centre, pick the box whose centre lies inside a 90° cone in that direction, minimising
 `distance + 2 × perpendicular offset`. The rects are already measured (`slotEls`, `boxSizes`).
 At the canvas edge, <kbd>↑</kbd>/<kbd>↓</kbd> cross into the neighbouring period (and into
-possessor / conjunct panels, which sit below the canvas).
+possessor panels, which sit below the canvas).
 
 ### ⇥ is reading order, across the whole document
 
-<kbd>⇥</kbd> walks subject → its adjectives → verb → modals / adverbs → object → complements →
-possessor and conjunct panels → the next period → *Add a period* → translations. It no longer loops
+<kbd>⇥</kbd> walks subject → its adjectives → its conjuncts → verb → modals / adverbs → object →
+complements → possessor panels → the next period → *Add a period* → translations. It no longer loops
 inside one period (today's loop in `SlotNode` traps focus), so the page keeps a normal tab order.
 
 ### Regions
@@ -373,7 +374,7 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 | <kbd>P</kbd> | Possessor: reveal the panel, cursor into its head | ⚿ |
 | <kbd>R</kbd> | Relative clause: start the pick / remove the link | ⑂ (AccountTree) |
 | <kbd>C</kbd> | Coordinate: add an "and …" conjunct, cursor into it | Y (CallSplit) |
-| <kbd>⇧</kbd><kbd>C</kbd> | Conjunction and ⇄ or (inside a conjunct panel) | conjunction chip |
+| <kbd>⇧</kbd><kbd>C</kbd> | Conjunction and ⇄ or (on a coordinated noun or one of its conjuncts) | conjunction chip |
 | <kbd>S</kbd> | Spatial relation (locative, route) or sentiment (cause) | selector toolbar |
 | <kbd>⇧</kbd><kbd>⌫</kbd> | Remove the complement | group ✕ |
 
@@ -502,7 +503,7 @@ button does.
 | [`hooks/useWorkspaceLinks.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | `eligibleTargets(): Target[]` in reading order (drives badges and digits); its esc listener moves into the provider. |
 | [`CorefPickContext.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx) | Same `eligibleTargets` + badges; esc cancels (missing today). |
 | Typeaheads (`SubjectTypeahead`, `VerbTypeahead`, `DirectObjectTypeahead`, `AdjectiveTypeahead`, `AdverbTypeahead`, `ModalTypeahead`, `ModifierTypeahead`) | Shared `usePickerKeys`: ⇥ commit-and-advance, double esc, ↑ into tabs / category toggle, footer hints. Fix `ModalTypeahead` ↓ not reopening a closed list ([line 37](../../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L37)). |
-| [`ImperativeSubjectSelector.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`PossessorPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx), [`ConjunctPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctPanels.tsx) | Scopes and accelerators; the conjunction chip becomes a real button. |
+| [`ImperativeSubjectSelector.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`PossessorPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx), [`ConjunctRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx) | Scopes and accelerators. |
 | [`PhraseSidebar.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx), [`ConceptPalette.tsx`](../../../../packages/frontend/src/components/ConceptPalette.tsx) | `inert` when closed; roving focus list, type-to-jump, ↵ fills the active slot and returns focus; resize handle as a `separator` with ←→. |
 | [`WordMap/WordMap.tsx`](../../../../packages/frontend/src/components/WordMap/WordMap.tsx) | Pan / zoom / reset keys; ⇥ cycles nodes applying the hover highlight. |
 | [`TranslationPanel.tsx`](../../../../packages/frontend/src/components/TranslationPanel.tsx) | Rows focusable; copy button visible on `:focus-within`; ↵ / C copy. |

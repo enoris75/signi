@@ -46,6 +46,9 @@ export interface PhraseRenderContext {
   // Verbless noun-phrase mode (the possessor editor): the `subject` slot is the
   // possessor head and must use the noun-only picker rather than the subject picker.
   nounPhrase?: boolean;
+  // A noun-phrase canvas whose head may still be a pronoun: a conjunct's ("you and I"). Its
+  // `subject` slot keeps the pronoun-inclusive picker, which a possessor head does without.
+  pronounHead?: boolean;
   // Whether the subject box is drawn at all. False for an instrument period at an action level:
   // the act ("by choosing a word") has no subject of its own — the clause it serves supplies it.
   showSubject?: boolean;
@@ -113,6 +116,8 @@ export interface PhraseRenderContext {
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;
+  // Set for a conjunct's builder: drop this phrase out of its group (the ring's remove control).
+  removeConjunct?: () => void;
   // ── Cross-container linking (top-level containers only; undefined for possessors) ──
   // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
   onBoxRef?: (key: SlotKey, el: HTMLElement | null) => void;
@@ -265,6 +270,7 @@ export function SlotNode({
     handleSetModifierAdjective,
     handleCycleDegree,
     nounPhrase,
+    pronounHead,
     onBoxRef,
     dimmedKeys,
     isPickTarget,
@@ -274,6 +280,8 @@ export function SlotNode({
     handleCancelEdit,
   } = ctx;
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
+  // Whether this canvas's `subject` slot is a noun-only head (see PhraseRenderContext.pronounHead).
+  const nounSubject = Boolean(nounPhrase) && !pronounHead;
 
   // Is this filled box currently open for re-picking its word?
   const editing = editingSlot === slot.key;
@@ -285,7 +293,7 @@ export function SlotNode({
   // A clean click on a filled word box (one that offers an inline picker) opens it for
   // re-picking; otherwise it just selects the slot.
   const canRepick =
-    Boolean(selection[slot.key]) && slotHasInlinePicker(slot.key, nounPhrase);
+    Boolean(selection[slot.key]) && slotHasInlinePicker(slot.key, nounSubject);
   const onActivate = pickTarget
     ? () => onPickTarget?.(slot.key)
     : dimmed
@@ -407,7 +415,7 @@ export function SlotNode({
   // A switchable slot (subject/cause = noun|pronoun; predicative + adjectives = noun|adj)
   // wears its category toggle on the empty box; the same value threads into the picker so
   // the in-dropdown selector matches. Single-vocabulary slots return null → no toggle.
-  const categories = slotCategories(slot.key, nounPhrase);
+  const categories = slotCategories(slot.key, nounSubject);
   const categoryToggle =
     categories && !held ? (
       <CategoryToggle
@@ -467,7 +475,7 @@ export function SlotNode({
           activeSlot,
           selection,
           onSelect: handleConceptSelect,
-          nounSubject: nounPhrase,
+          nounSubject,
           editing,
           kind: categories ? slotKind(slot.key) : undefined,
           onKindChange: categories

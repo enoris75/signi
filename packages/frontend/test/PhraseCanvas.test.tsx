@@ -135,7 +135,6 @@ function renderCanvas(
     onSetImperativeRegister: vi.fn(),
     containerRef: createRef<HTMLDivElement>(),
     possessorControlEls: { current: new Map<string, HTMLElement>() },
-    conjunctControlEls: { current: new Map<string, HTMLElement>() },
     ...overrides,
   };
   const view = renderWithProviders(<PhraseCanvas {...props} />);
@@ -371,25 +370,16 @@ describe('PhraseCanvas', () => {
       expect(props.registerTargetAnchor).toBeUndefined();
     });
 
-    it('records each noun’s possessor and coordination controls for their connectors', () => {
-      const { possessorControlEls, conjunctControlEls } = renderCanvas();
-      const { registerPossessorControl, registerConjunctControl } = propsOf(GroupPerimeterControls);
+    it('records each noun’s possessor control for its connector', () => {
+      const { possessorControlEls } = renderCanvas();
+      const { registerPossessorControl } = propsOf(GroupPerimeterControls);
       const possessor = document.createElement('span');
-      const conjunct = document.createElement('span');
 
-      act(() => {
-        registerPossessorControl('directObject', possessor);
-        registerConjunctControl('subject', conjunct);
-      });
+      act(() => registerPossessorControl('directObject', possessor));
       expect([...possessorControlEls.current]).toEqual([['directObject', possessor]]);
-      expect([...conjunctControlEls.current]).toEqual([['subject', conjunct]]);
 
-      act(() => {
-        registerPossessorControl('directObject', null);
-        registerConjunctControl('subject', null);
-      });
+      act(() => registerPossessorControl('directObject', null));
       expect(possessorControlEls.current.size).toBe(0);
-      expect(conjunctControlEls.current.size).toBe(0);
     });
   });
 });

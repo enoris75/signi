@@ -139,7 +139,7 @@ export function buildNounPhrase(sel: PhraseSelection, which: NounKey, root: Phra
  * slot, so it goes through `buildNounPhrase` exactly as a possessor does — which is what gives
  * a conjunct its own determiner, number/gender, adjectives, possessor and relative clause.
  *
- * A group needs at least two phrases, so a conjunct panel that is open but still empty
+ * A group needs at least two phrases, so a conjunct that has been added but is still empty
  * contributes nothing and the slot stays a plain noun phrase — the same rule the instrumental
  * link follows (a half-built period renders no complement rather than half of one).
  */

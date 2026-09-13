@@ -197,7 +197,7 @@ export interface PeriodContainerProps {
   // This is the only period in the workspace, so it can't be deleted — the remove
   // control clears its content in place instead.
   soleContainer: boolean;
-  // A possessor or conjunct panel: a noun phrase inside a period, wearing the card without being
+  // A possessor panel: a noun phrase inside a period, wearing the card without being
   // a period. It has no place in the workspace stack to move within, and its remove control
   // removes just that phrase.
   nested?: boolean;
@@ -240,7 +240,7 @@ export interface PeriodContainerProps {
 // floats a standalone card around the viewport. Its `children` are the period's own
 // content — the canvas, the resize grip, and any possessor panels.
 //
-// A possessor or conjunct panel wears this card too, as `nested`; its owner passes it none of
+// A possessor panel wears this card too, as `nested`; its owner passes it none of
 // the period-level controls (moods, connectors, save), and the card offers no reordering.
 export function PeriodContainer({
   paperPad,

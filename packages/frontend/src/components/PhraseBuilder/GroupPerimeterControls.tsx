@@ -19,7 +19,7 @@ export function GroupPerimeterControls({
   registerSourceAnchor,
   registerTargetAnchor,
   registerPossessorControl,
-  registerConjunctControl,
+  recolor,
 }: {
   // Where every ring control sits on the canvas, keyed by control.
   controlPos: Record<string, Pt>;
@@ -32,11 +32,11 @@ export function GroupPerimeterControls({
   registerTargetAnchor?: (nounKey: NounKey, el: HTMLElement | null) => void;
   // Register the possessor control (its connector's start) with the local builder.
   registerPossessorControl: (nounKey: NounKey, el: HTMLElement | null) => void;
-  // Register the coordination control — the start of the connector down to the conjunct panels.
-  registerConjunctControl: (nounKey: NounKey, el: HTMLElement | null) => void;
+  // Slot colours to use in place of a noun's own, by noun (a conjunct's head wears its role's).
+  recolor?: Partial<Record<string, SlotConfig["color"]>>;
 }) {
   const colorFor = (nounKey: NounKey): SlotConfig["color"] =>
-    ALL_SLOTS.find((s) => s.key === nounKey)?.color ?? "primary";
+    recolor?.[nounKey] ?? ALL_SLOTS.find((s) => s.key === nounKey)?.color ?? "primary";
 
   // Every noun that needs either a perimeter control or a receiving dot.
   const nounKeys = new Set<NounKey>([
@@ -99,10 +99,7 @@ export function GroupPerimeterControls({
               </Box>
             )}
             {conjunct && (
-              <Box
-                ref={(el: HTMLElement | null) => registerConjunctControl(nounKey, el)}
-                sx={seat(conjunct)}
-              >
+              <Box sx={seat(conjunct)}>
                 <SatelliteButton sat={entry!.conjunct!} color={color} />
               </Box>
             )}

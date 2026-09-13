@@ -1,6 +1,7 @@
 import type {
   ComponentProps,
   MutableRefObject,
+  ReactNode,
   RefObject,
 } from "react";
 import { useRef } from "react";
@@ -14,6 +15,7 @@ import {
   imperativeRegisterOf,
   NounKey,
   slotCategories,
+  SlotConfig,
   WorkspaceBinding,
 } from "./interfaces.ts";
 import { ALL_SLOTS, BOX_COMPLEMENT_TYPES } from "./slots.ts";
@@ -59,7 +61,14 @@ export interface PhraseCanvasProps {
   // Receives each noun's possessor control element (its connector's start), measured up in
   // the parent against the root Box.
   possessorControlEls: MutableRefObject<Map<string, HTMLElement>>;
-  conjunctControlEls: MutableRefObject<Map<string, HTMLElement>>;
+  // The rings coordinated with this canvas's nouns, and the chips on the links joining them — drawn
+  // among the canvas's own constituents (see ConjunctRings).
+  coordination?: ReactNode;
+  // Slot colours to use in place of a slot's own, by slot key: a conjunct's head wears its role's.
+  recolor?: Partial<Record<string, SlotConfig["color"]>>;
+  // A conjunct's builder paints its ring onto its head's canvas, which is already on the page: it
+  // draws its constituent and controls with no canvas box of its own.
+  overlay?: boolean;
 }
 
 const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
@@ -83,7 +92,9 @@ export function PhraseCanvas({
   onSetImperativeRegister,
   containerRef,
   possessorControlEls,
-  conjunctControlEls,
+  coordination,
+  recolor,
+  overlay = false,
 }: PhraseCanvasProps) {
   const {
     selection,
@@ -125,6 +136,78 @@ export function PhraseCanvas({
   const openingRef = useRef<HTMLDivElement>(null);
   const openingPicker = !showCanvas && !moodBox;
   const openingSize = useElementSize(openingRef, DEFAULT_NODE_SIZE, openingPicker);
+
+  // What the populated canvas draws: the links, the constituents, and the controls on their rings.
+  const drawing = (
+    <>
+      <ConnectorsLayer
+        svgSize={graphSize}
+        groupEdges={groupEdges}
+        edges={edges}
+      />
+
+      <>
+        {ctx.showSubject === false ? null : moodBox ? (
+          // A subject-dropping mood (command / infinitive) drops the subject, so the subject box
+          // has no noun to hold: the mood box *is* the subject node — dragged, positioned and
+          // measured as one, so the layout wraps it exactly as it wrapped the box it replaces.
+          // The subject's own satellites are withdrawn with it (see buildSatellites), leaving
+          // nothing to overlay.
+          <Box
+            {...ctx.makeDragProps("subject", () => {})}
+            ref={nodeElRef(ctx, "subject")}
+          >
+            {moodBox}
+          </Box>
+        ) : (
+          <NounPhraseBuilder which="subject" ctx={ctx} />
+        )}
+        {/* A noun-phrase period has no predicate — an instrument ("a word") is a noun
+            phrase, not a clause, so its canvas is the subject box alone. */}
+        {!ctx.nounPhrase && (
+          <>
+            <VerbPhraseBuilder ctx={ctx} />
+            <NounPhraseBuilder which="directObject" ctx={ctx} />
+            {BOX_COMPLEMENT_TYPES.map((type) => (
+              <NounPhraseBuilder key={type} which={type} ctx={ctx} />
+            ))}
+          </>
+        )}
+      </>
+
+      {/* Compact view is just the words in their solid rings, each with its clear button — no
+          reveal icons and no dotted-ring controls. */}
+      <SatelliteControls
+        satelliteIconsByParent={compact ? {} : satelliteIconsByParent}
+        clearControls={clearControls}
+        controlPos={controlPos}
+        recolor={recolor}
+      />
+
+      {!compact && (
+        <GroupPerimeterControls
+          controlPos={controlPos}
+          perimeterByNoun={perimeterByNoun}
+          recolor={recolor}
+          linkTargetKeys={
+            linkBinding
+              ? (linkBinding.relative.targetKeys as Set<NounKey>)
+              : undefined
+          }
+          registerSourceAnchor={linkBinding?.geometry.registerSourceAnchor}
+          registerTargetAnchor={linkBinding?.geometry.registerTargetAnchor}
+          registerPossessorControl={(nounKey, el) => {
+            if (el) possessorControlEls.current.set(nounKey, el);
+            else possessorControlEls.current.delete(nounKey);
+          }}
+        />
+      )}
+
+      {coordination}
+    </>
+  );
+
+  if (overlay) return drawing;
 
   return (
     <Box sx={{ minWidth: 0 }}>
@@ -182,70 +265,7 @@ export function PhraseCanvas({
             touchAction: "none",
           }}
         >
-          <ConnectorsLayer
-            svgSize={graphSize}
-            groupEdges={groupEdges}
-            edges={edges}
-          />
-
-          <>
-            {ctx.showSubject === false ? null : moodBox ? (
-              // A subject-dropping mood (command / infinitive) drops the subject, so the subject box
-              // has no noun to hold: the mood box *is* the subject node — dragged, positioned and
-              // measured as one, so the layout wraps it exactly as it wrapped the box it replaces.
-              // The subject's own satellites are withdrawn with it (see buildSatellites), leaving
-              // nothing to overlay.
-              <Box
-                {...ctx.makeDragProps("subject", () => {})}
-                ref={nodeElRef(ctx, "subject")}
-              >
-                {moodBox}
-              </Box>
-            ) : (
-              <NounPhraseBuilder which="subject" ctx={ctx} />
-            )}
-            {/* A noun-phrase period has no predicate — an instrument ("a word") is a noun
-                phrase, not a clause, so its canvas is the subject box alone. */}
-            {!ctx.nounPhrase && (
-              <>
-                <VerbPhraseBuilder ctx={ctx} />
-                <NounPhraseBuilder which="directObject" ctx={ctx} />
-                {BOX_COMPLEMENT_TYPES.map((type) => (
-                  <NounPhraseBuilder key={type} which={type} ctx={ctx} />
-                ))}
-              </>
-            )}
-          </>
-
-          {/* Compact view is just the words in their solid rings, each with its clear button — no
-              reveal icons and no dotted-ring controls. */}
-          <SatelliteControls
-            satelliteIconsByParent={compact ? {} : satelliteIconsByParent}
-            clearControls={clearControls}
-            controlPos={controlPos}
-          />
-
-          {!compact && (
-            <GroupPerimeterControls
-              controlPos={controlPos}
-              perimeterByNoun={perimeterByNoun}
-              linkTargetKeys={
-                linkBinding
-                  ? (linkBinding.relative.targetKeys as Set<NounKey>)
-                  : undefined
-              }
-              registerSourceAnchor={linkBinding?.geometry.registerSourceAnchor}
-              registerTargetAnchor={linkBinding?.geometry.registerTargetAnchor}
-              registerPossessorControl={(nounKey, el) => {
-                if (el) possessorControlEls.current.set(nounKey, el);
-                else possessorControlEls.current.delete(nounKey);
-              }}
-              registerConjunctControl={(nounKey, el) => {
-                if (el) conjunctControlEls.current.set(nounKey, el);
-                else conjunctControlEls.current.delete(nounKey);
-              }}
-            />
-          )}
+          {drawing}
         </Box>
       )}
     </Box>

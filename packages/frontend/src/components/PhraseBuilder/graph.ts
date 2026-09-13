@@ -179,6 +179,7 @@ export function buildEdges({
   complementToggleIcons,
   directObjectToggle,
   compact,
+  standIns = {},
 }: {
   groupRects: GroupRect[];
   discs: Record<string, Disc>;
@@ -186,6 +187,10 @@ export function buildEdges({
   complementToggleIcons: readonly SatelliteIcon[];
   directObjectToggle?: SatelliteIcon;
   compact: boolean;
+  // The other rings that stand for a constituent, by its label: a coordinated noun's conjuncts. In
+  // compact view the line to the verb phrase runs to whichever ring of the group sits nearest it,
+  // rather than through the rest of the group packed beside it.
+  standIns?: Record<string, readonly { center: Pt; rIn: number }[]>;
 }): { edges: Edge[]; groupEdges: Edge[] } {
   const edges: Edge[] = [];
   for (const group of groupRects) {
@@ -207,8 +212,12 @@ export function buildEdges({
       let from: Pt | undefined;
       let to: Pt | undefined;
       if (compact) {
-        from = onCircle(verb.center, verb.rIn, angleTo(verb.center, group.center));
-        to = onCircle(group.center, group.rIn, angleTo(group.center, verb.center));
+        const dist = (p: Pt) => Math.hypot(p.x - verb.center.x, p.y - verb.center.y);
+        const end = [group, ...(standIns[group.label] ?? [])].reduce((a, b) =>
+          dist(b.center) < dist(a.center) ? b : a,
+        );
+        from = onCircle(verb.center, verb.rIn, angleTo(verb.center, end.center));
+        to = onCircle(end.center, end.rIn, angleTo(end.center, verb.center));
       } else {
         const end = verbEnd(group, complementToggleIcons, directObjectToggle);
         from = controlPos[end ?? portKey(VERB_PHRASE, group.label)];

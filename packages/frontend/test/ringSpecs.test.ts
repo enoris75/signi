@@ -218,6 +218,22 @@ describe('buildRingSpecs', () => {
     }
   });
 
+  it("gives a conjunct's ring a remove control, and a port facing each ring its links run to", () => {
+    const [subject] = groups([]);
+    const toward = { x: 150, y: 450 };
+    const { Subject } = specs([{ ...subject, removable: true }], {
+      linkPorts: { subject: [{ key: 'port:subject>subject+1', toward }] },
+    });
+
+    expect(keys(Subject.outer)).toEqual([
+      collapseControlKey('Subject'),
+      removeControlKey('Subject'),
+      'port:subject>subject+1',
+    ]);
+    expect(aimOf(Subject.outer, 'port:subject>subject+1')).toEqual({ point: toward });
+    expect(Subject.outer.find((c) => c.key === 'port:subject>subject+1')!.half).toBeLessThan(11);
+  });
+
   it('keeps only the clear button in compact view', () => {
     const defs = groups(['subjectAdjective']);
     const { Subject } = specs(defs, {
@@ -286,5 +302,23 @@ describe('buildRings and buildEdges', () => {
     expect(groupEdges[0].x1).toBeCloseTo(CENTERS.verb.x - verb.rIn);
     expect(groupEdges[0].x2).toBeCloseTo(CENTERS.subject.x + subject.rIn);
     expect(subject.width).toBeCloseTo(2 * (subject.rIn + 11));
+  });
+
+  it("runs the compact line to a coordinated noun from whichever of its group's rings is nearest the verb", () => {
+    const defs = groups([]);
+    const ringSpecs = specs(defs, { compact: true });
+    const rings = buildRings({ groups: defs, specs: ringSpecs, centerOf, sizeOf, compact: true });
+    // The subject's conjunct is packed right beside the verb; the head is further off.
+    const conjunct = { center: { x: 330, y: 150 }, rIn: 40 };
+    const { groupEdges } = buildEdges({
+      ...rings,
+      complementToggleIcons: [],
+      compact: true,
+      standIns: { Subject: [conjunct] },
+    });
+
+    const verb = rings.groupRects.find((g) => g.label === VERB_PHRASE)!;
+    expect(groupEdges[0].x1).toBeCloseTo(CENTERS.verb.x - verb.rIn);
+    expect(groupEdges[0].x2).toBeCloseTo(conjunct.center.x + conjunct.rIn);
   });
 });

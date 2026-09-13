@@ -1,6 +1,7 @@
 import { COMPLEMENT_LABELS, COMPLEMENT_TYPES } from "@signi/shared";
 import type { GroupRect } from "./graph.ts";
 import { BOTTOM_MARGIN } from "./overlap.ts";
+import { CONJUNCT_GAP } from "./conjunctChain.ts";
 
 // Node positions on the canvas, in % of the canvas box, keyed by node key.
 export type PositionMap = Record<string, { x: number; y: number }>;
@@ -62,10 +63,15 @@ export function packPeriod(
     const i = READING_ORDER.indexOf(label);
     return i === -1 ? READING_ORDER.length : i;
   };
-  const boxes = [...groupRects].sort((a, b) => rank(a.label) - rank(b.label));
+  // A conjunct's ring reads straight after the rings before it in its group: "the cat or the dog".
+  const order = (g: GroupRect) =>
+    g.conjunct ? rank(g.conjunct.head) + (g.conjunct.index + 1) / 100 : rank(g.label);
+  const boxes = [...groupRects].sort((a, b) => order(a) - order(b));
 
   const gap = 20; // gutter between footprints, px
   const margin = 6;
+  // The gutter before a box: a conjunct's is wide enough for the conjunction chip on its link.
+  const gapBefore = (box: GroupRect) => (box.conjunct ? CONJUNCT_GAP : gap);
   const { w: svgW } = svgSize;
 
   // Fill each row until the next footprint would overhang the canvas; one wider than the canvas
@@ -75,12 +81,12 @@ export function packPeriod(
   let row: GroupRect[] = [];
   let rowW = 0;
   for (const box of boxes) {
-    if (row.length && rowW + gap + box.width > maxRowW) {
+    if (row.length && rowW + gapBefore(box) + box.width > maxRowW) {
       rows.push(row);
       row = [];
       rowW = 0;
     }
-    rowW += (row.length ? gap : 0) + box.width;
+    rowW += (row.length ? gapBefore(box) : 0) + box.width;
     row.push(box);
   }
   if (row.length) rows.push(row);
@@ -95,16 +101,17 @@ export function packPeriod(
   const positions: PositionMap = {};
   let rowTop = stackTop;
   rows.forEach((r, i) => {
-    const width = r.reduce((s, b) => s + b.width, 0) + gap * (r.length - 1);
+    const width = r.reduce((s, b, j) => s + b.width + (j ? gapBefore(b) : 0), 0);
     let left = Math.max(margin, (svgW - width) / 2);
     const middle = rowTop + rowHeights[i] / 2;
-    for (const box of r) {
+    r.forEach((box, j) => {
+      if (j) left += gapBefore(box);
       positions[box.mainKey] = {
         x: ((left + box.width / 2) / Math.max(svgW, 1)) * 100,
         y: (middle / Math.max(svgSize.h, 1)) * 100,
       };
-      left += box.width + gap;
-    }
+      left += box.width;
+    });
     rowTop += rowHeights[i] + gap;
   });
 

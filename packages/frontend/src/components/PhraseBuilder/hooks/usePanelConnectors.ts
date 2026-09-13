@@ -5,28 +5,24 @@ import { sameRelConnectors, type RelConnector } from "../measure.ts";
 
 interface UsePanelConnectorsArgs {
   openPossessors: NounKey[];
-  openConjuncts: NounKey[];
   collapsedGroups: Record<string, boolean>;
 }
 
-// The connector lines from a noun box down to its docked possessor / conjunct panels.
+// The connector lines from a noun box down to its docked possessor panels.
 //
 // Each runs dot-to-dot: from the control on the noun's dotted ring (start) to the
-// receiving dot on the panel's top edge (end). The possessor control and the "Coordinate"
-// control register in their `*ControlEls` map, the panels' dots in their `*DotEls` map.
+// receiving dot on the panel's top edge (end). The possessor control registers in
+// `possessorControlEls`, the panels' dots in `possessorDotEls`.
 // Both ends are measured relative to `rootRef` — the builder's outermost positioned Box —
 // so the SVG overlay can span the gap down to the panels, which live below the canvas.
 // Guarded so it settles; runs every commit, so it tracks a noun box dragged around.
 export function usePanelConnectors({
   openPossessors,
-  openConjuncts,
   collapsedGroups,
 }: UsePanelConnectorsArgs) {
   const rootRef = useRef<HTMLDivElement>(null);
   const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
   const possessorDotEls = useRef<Map<string, HTMLElement>>(new Map());
-  const conjunctControlEls = useRef<Map<string, HTMLElement>>(new Map());
-  const conjunctDotEls = useRef<Map<string, HTMLElement>>(new Map());
   const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
 
   useLayoutEffect(() => {
@@ -65,13 +61,6 @@ export function usePanelConnectors({
         possessorDotEls.current.get(which),
         "poss",
       );
-    for (const which of openConjuncts)
-      measure(
-        which,
-        conjunctControlEls.current.get(which),
-        conjunctDotEls.current.get(which),
-        "conj",
-      );
     setRelConnectors((prev) => (sameRelConnectors(prev, next) ? prev : next));
   });
 
@@ -79,8 +68,6 @@ export function usePanelConnectors({
     rootRef,
     possessorControlEls,
     possessorDotEls,
-    conjunctControlEls,
-    conjunctDotEls,
     relConnectors,
   };
 }

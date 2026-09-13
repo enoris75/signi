@@ -674,7 +674,7 @@ export function buildSatelliteIcons({
   onToggleNegative: () => void;
   onToggleReveal: (sat: Satellite) => void;
   // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
-  // coordinate any number of phrases, so each click opens one more panel.
+  // coordinate any number of phrases, so each click adds one more ring to the group.
   onAddConjunct: (which: NounKey) => void;
 }): {
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
@@ -739,8 +739,8 @@ export function buildSatelliteIcons({
       };
       continue;
     }
-    // The "Coordinate" satellite rides the perimeter beside the possessor control and, like it,
-    // anchors a connector down into the panels below. Clicking it appends one more conjunct.
+    // The "Coordinate" satellite rides the perimeter beside the possessor control. Clicking it
+    // appends one more conjunct, whose ring joins the group on the canvas.
     const conjunctNoun: NounKey | null = sat.key.endsWith("Conjunct")
       ? (sat.key.slice(0, -"Conjunct".length) as NounKey)
       : null;

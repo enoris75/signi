@@ -50,9 +50,9 @@ function RingButton({
 
 // The dotted ring round one constituent — the subject, verb phrase, an object, or a complement —
 // painted behind its word and satellites. The ring is draggable (moving the whole constituent) and
-// carries the collapse/expand toggle and, for complements, the remove button, both seated on it by
-// the ring layout among the ring's other controls. Rendered by each Noun/VerbPhraseBuilder for its
-// own constituent.
+// carries the collapse/expand toggle and, for complements and conjuncts, the remove button, both
+// seated on it by the ring layout among the ring's other controls. Rendered by each
+// Noun/VerbPhraseBuilder for its own constituent.
 export function GroupBox({
   rect,
   ctx,
@@ -68,6 +68,7 @@ export function GroupBox({
     makeGroupDragProps,
     handleToggleCollapse,
     handleRemoveComplement,
+    removeConjunct,
   } = ctx;
   // Compact view hides the dotted rings entirely — only the words in their solid rings remain.
   if (compact) return null;
@@ -111,6 +112,17 @@ export function GroupBox({
           at={controlPos[removeControlKey(rect.label)]}
           title={`Remove ${rect.label}`}
           onClick={() => handleRemoveComplement(rect.removeKey!)}
+        >
+          <ClearIcon sx={{ fontSize: 11 }} />
+        </RingButton>
+      )}
+
+      {/* A conjunct's ring drops its phrase out of the group. */}
+      {rect.removable && removeConjunct && (
+        <RingButton
+          at={controlPos[removeControlKey(rect.label)]}
+          title="Remove this conjunct"
+          onClick={removeConjunct}
         >
           <ClearIcon sx={{ fontSize: 11 }} />
         </RingButton>

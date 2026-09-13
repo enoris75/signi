@@ -2,6 +2,7 @@ import { Box } from "@mui/material";
 import { ClearButton, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import { clearControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
+import type { SlotConfig } from "./interfaces.ts";
 
 interface SatelliteControlsProps {
   // Satellite reveal icons grouped by the node (slot key) that carries them: a constituent's word,
@@ -11,6 +12,8 @@ interface SatelliteControlsProps {
   clearControls: { mainKey: string; label: string; onClear: () => void }[];
   // Where every ring control sits on the canvas, keyed by control.
   controlPos: Record<string, { x: number; y: number }>;
+  // Slot colours to use in place of a slot's own, by slot key (a conjunct's head wears its role's).
+  recolor?: Partial<Record<string, SlotConfig["color"]>>;
 }
 
 // The controls about the words: each satellite's reveal control and each direct toggle on its
@@ -22,6 +25,7 @@ export function SatelliteControls({
   satelliteIconsByParent,
   clearControls,
   controlPos,
+  recolor,
 }: SatelliteControlsProps) {
   const seat = (p: { x: number; y: number }) =>
     ({
@@ -34,7 +38,8 @@ export function SatelliteControls({
   return (
     <>
       {Object.entries(satelliteIconsByParent).flatMap(([parentKey, icons]) => {
-        const color = ALL_SLOTS.find((s) => s.key === parentKey)?.color ?? "primary";
+        const color =
+          recolor?.[parentKey] ?? ALL_SLOTS.find((s) => s.key === parentKey)?.color ?? "primary";
         return icons.map((icon) => {
           const p = controlPos[icon.key];
           if (!p) return null;

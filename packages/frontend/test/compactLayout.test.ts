@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
-import { computeCompactLayout } from '../src/components/PhraseBuilder/layout.ts';
+import { computeCompactLayout, packPeriod } from '../src/components/PhraseBuilder/layout.ts';
+import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
+import { CONJUNCT_GAP } from '../src/components/PhraseBuilder/conjunctChain.ts';
 
 // Compact packs each word into a 132 px cell, 16 px apart, rows 60 px tall, 4 px in from the
 // canvas's edges. The helpers read the packed cells back in canvas px.
@@ -60,5 +62,43 @@ describe('computeCompactLayout', () => {
     // Clear of the controls' 17 px, and half a gap more.
     expect(at('subject').center - open.at('subject').center).toBeCloseTo(17 + 8);
     expect(height).toBe(open.height + 17 + 8);
+  });
+});
+
+describe('packPeriod', () => {
+  const rect = (label: string, width: number, conjunct?: GroupRect['conjunct']): GroupRect => ({
+    label,
+    color: '',
+    mainKey: label,
+    nodeKeys: [label],
+    conjunct,
+    x: 0,
+    y: 0,
+    width,
+    height: 100,
+    center: { x: 0, y: 0 },
+    rIn: 0,
+    orbit: 0,
+    rOut: 0,
+  });
+
+  it("packs a coordinated noun's conjuncts straight after it, a chip's gap apart", () => {
+    const { positions } = packPeriod(
+      [
+        rect('Verb Phrase', 100),
+        rect('subject+2', 100, { head: 'Subject', index: 1 }),
+        rect('Subject', 100),
+        rect('subject+1', 100, { head: 'Subject', index: 0 }),
+      ],
+      { w: 2000, h: 400 },
+    );
+
+    const order = Object.entries(positions)
+      .sort(([, a], [, b]) => a.x - b.x)
+      .map(([key]) => key);
+    expect(order).toEqual(['Subject', 'subject+1', 'subject+2', 'Verb Phrase']);
+    const px = (key: string) => (positions[key]!.x / 100) * 2000;
+    expect(px('subject+1') - px('Subject')).toBeCloseTo(100 + CONJUNCT_GAP);
+    expect(px('Verb Phrase') - px('subject+2')).toBeCloseTo(100 + 20);
   });
 });

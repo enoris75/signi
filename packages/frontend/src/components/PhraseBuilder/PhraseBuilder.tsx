@@ -1,4 +1,5 @@
-import React, { useRef, useState } from "react";
+import React, { useCallback, useLayoutEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import { Box } from "@mui/material";
 import {
   CAUSE_SENTIMENTS,
@@ -37,6 +38,7 @@ import {
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
+  MUI_COLOR_HEX,
 } from "./slots.ts";
 import {
   applyConceptSelect,
@@ -75,19 +77,33 @@ import {
   computeCompactLayout,
   packPeriod,
 } from "./layout.ts";
-import { buildEdges, buildRings, roleGroups } from "./graph.ts";
+import { buildEdges, buildRings, roleGroups, type Edge } from "./graph.ts";
 import { buildRingSpecs } from "./ringSpecs.ts";
-import { BUTTON_HALF, innerRadius } from "./ringLayout.ts";
+import { BUTTON_HALF, innerRadius, type Pt } from "./ringLayout.ts";
+import { BOTTOM_MARGIN } from "./overlap.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
 import { CorefPickContext, useCorefPick, useProvideCorefPick } from "./CorefPickContext.tsx";
-import { ConjunctPanels, openConjunctsFor } from "./ConjunctPanels.tsx";
+import { ConjunctRings, type ConjunctHost } from "./ConjunctRings.tsx";
+import {
+  belowRing,
+  chainKeys,
+  chainPortKey,
+  conjunctKey,
+  conjunctLinks,
+  conjunctRect,
+  dropConjunctPosition,
+  openConjunctsFor,
+  sameConjunctRing,
+  UNMEASURED_R,
+  type ConjunctRing,
+} from "./conjunctChain.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
-import { useDrag } from "./hooks/useDrag.ts";
+import { useDrag, type Positions } from "./hooks/useDrag.ts";
 import { useHeightRebase } from "./hooks/useHeightRebase.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
 import { useCornerOverlap } from "./hooks/useCornerOverlap.ts";
@@ -137,6 +153,12 @@ export interface PhraseBuilderProps {
    * the full canvas.
    */
   nounPhraseOnly?: boolean;
+  /**
+   * Set for a conjunct's builder: its ring is drawn on its head's canvas, not on a canvas of its
+   * own. It borrows that canvas's place, size, view and drag machinery, and reports the ring it drew
+   * back (see ConjunctRings).
+   */
+  conjunctHost?: ConjunctHost;
 }
 
 export function PhraseBuilder({
@@ -152,6 +174,7 @@ export function PhraseBuilder({
   binding,
   possessorPath,
   nounPhraseOnly = false,
+  conjunctHost,
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
   const t = useUiString();
@@ -209,7 +232,9 @@ export function PhraseBuilder({
   // Compact view: collapse every dotted ring down to just its core word at once — a
   // period-level toggle over the per-group collapse below. It doesn't touch
   // `collapsedGroups`, so any manual per-box collapses are preserved when it turns off.
-  const [compact, setCompact] = useState(false);
+  const [compactView, setCompact] = useState(false);
+  // A conjunct's ring is one more constituent of its head's canvas, so it follows that canvas's view.
+  const compact = conjunctHost?.compact ?? compactView;
   const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
     const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
     return saved ? Number(saved) : 160;
@@ -220,6 +245,28 @@ export function PhraseBuilder({
   const [position, setPosition] = useState<{ x: number; y: number } | null>(
     null,
   );
+  // The rings coordinated with this canvas's nouns, as each conjunct's builder reports drawing it,
+  // keyed by its node key here (see conjunctKey).
+  const [conjunctRings, setConjunctRings] = useState<Record<string, ConjunctRing>>({});
+  // The reports are set as whole values worked out here, never as updaters: an updater React
+  // replays (rebasing a queue a skipped update left behind) would build a fresh object each time,
+  // and a fresh object re-renders every conjunct, which reports again — an unbounded loop.
+  const conjunctRingsRef = useRef(conjunctRings);
+  const reportConjunctRing = useCallback((key: string, ring: ConjunctRing | null) => {
+    const prev = conjunctRingsRef.current;
+    let next = prev;
+    if (ring) {
+      if (!sameConjunctRing(prev[key], ring)) next = { ...prev, [key]: ring };
+    } else if (key in prev) {
+      next = { ...prev };
+      delete next[key];
+    }
+    if (next === prev) return;
+    conjunctRingsRef.current = next;
+    setConjunctRings(next);
+  }, []);
+  // Where the conjuncts' own panels dock — below this canvas, after its possessor panels.
+  const [conjunctPanelHost, setConjunctPanelHost] = useState<HTMLElement | null>(null);
   const hasVerb = Boolean(selection.verb);
   const hasSubject = Boolean(selection.subject);
   // Has the user put anything in this clause? An untouched container is `{}`; any picked
@@ -235,8 +282,13 @@ export function PhraseBuilder({
   // Before that, the empty state offers the single opening word picker.
   // An instrument-as-action period draws its canvas from the start: its first box is the verb,
   // not the subject, so the subject-picking empty state would have nothing to offer.
+  // A conjunct's ring is drawn from the start too: an empty conjunct is its word picker, in its ring.
   const showCanvas =
+    Boolean(conjunctHost) ||
     hasSubject || hasVerb || Boolean(selection.imperative) || Boolean(selection.infinitive) || actionMode;
+  // A conjunct's head word plays the role of the noun it is coordinated with, so its ring wears that
+  // role's name and colour ("DIRECT OBJECT", in green) rather than its builder's `subject` slot's.
+  const roleSlot = conjunctHost && ALL_SLOTS.find((s) => s.key === conjunctHost.role);
   const visibleSlots = getActiveSlots(
     selection.verb?.transitivity,
     selection.subject?.role,
@@ -245,7 +297,12 @@ export function PhraseBuilder({
   )
     // Objects hang off the verb, so a subject-only (verbless) period shows none —
     // otherwise an empty Direct Object box would appear before any verb is chosen.
-    .filter((s) => hasVerb || !s.key.startsWith("directObject"));
+    .filter((s) => hasVerb || !s.key.startsWith("directObject"))
+    .map((s) =>
+      roleSlot && s.key === "subject"
+        ? { ...s, label: roleSlot.label, labelKey: roleSlot.labelKey, required: roleSlot.required, color: roleSlot.color }
+        : s,
+    );
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
 
@@ -374,22 +431,23 @@ export function PhraseBuilder({
   }
 
   // Coordinate one more phrase with a noun block's head ("Peter *and Paul*"). Unlike the
-  // possessor, this is not a reveal but an append: each click opens one more conjunct panel.
+  // possessor, this is not a reveal but an append: each click adds one more ring to the group.
   function handleAddConjunct(which: NounKey) {
     onPhraseUpdate((prev) => addConjunct(prev, which));
   }
 
-  // Drop one conjunct out of a block's group. The panels below it shift up by one, so every
+  // Drop one conjunct out of a block's group. The conjuncts after it shift up by one, so every
   // relative-clause link sourced from a conjunct at or after `i` is now aimed at the wrong
   // phrase — an address is positional. Rather than renumber them (and silently move a user's
   // clause onto a different noun), drop those links: the conjunct they described is gone or
-  // has moved, and re-linking is one click.
+  // has moved, and re-linking is one click. The rings after it keep the places they had.
   function handleRemoveConjunct(which: NounKey, i: number) {
     const base = nounAddress(which);
     const count = conjunctsOf(selection, which).length;
     for (let j = i; j < count; j++)
       binding?.relative.onRemoveLink(conjunctAddress(base, j));
     onPhraseUpdate((prev) => removeConjunct(prev, which, i));
+    setPositions((prev) => dropConjunctPosition(prev, which, i, count));
   }
 
   const handleCycleConjunction = (which: NounKey) =>
@@ -498,8 +556,18 @@ export function PhraseBuilder({
       onToggleGender: handleToggleGender,
       onToggleNegative: handleToggleNegative,
       onToggleReveal: handleToggleReveal,
-      onAddConjunct: handleAddConjunct,
+      onAddConjunct: conjunctHost ? () => conjunctHost.onAddConjunct() : handleAddConjunct,
     });
+  // The control that extends a coordinated group rides the group's last ring: the head's while it
+  // stands alone, then the newest conjunct's — whose click adds to the head's group, not a group of
+  // its own.
+  for (const which of openConjunctsFor(selection)) delete perimeterByNoun[which]?.conjunct;
+  const extend = perimeterByNoun.subject?.conjunct;
+  if (conjunctHost && extend) {
+    if (conjunctHost.isLast)
+      perimeterByNoun.subject!.conjunct = { ...extend, isSet: true, valueLabel: "Add another conjunct" };
+    else delete perimeterByNoun.subject!.conjunct;
+  }
 
   // Satellite slots (adjective / adverb) only render when revealed or filled; the direct
   // object, only while its own control on the verb-phrase box has it unfolded.
@@ -534,17 +602,13 @@ export function PhraseBuilder({
   const controlsCorner = useCornerOverlap(periodControlsRef, containerRef, compact, showCanvas);
   const { slotEls, boxSizes, sizeOf } = useBoxSizes();
   const openPossessors = openPossessorsFor(selection, shownMap);
-  const openConjuncts = openConjunctsFor(selection);
   const {
     rootRef,
     possessorControlEls,
     possessorDotEls,
-    conjunctControlEls,
-    conjunctDotEls,
     relConnectors,
   } = usePanelConnectors({
     openPossessors,
-    openConjuncts,
     collapsedGroups: effectiveCollapsed,
   });
   useGeometryNotify(binding?.geometry.onGeometryChange, {
@@ -568,7 +632,22 @@ export function PhraseBuilder({
     showSubject: !actionMode,
     visibleSlots,
     shownMap,
-  });
+  })
+    // A conjunct's builder draws one ring — its phrase's — and that ring drops the phrase out of
+    // its group.
+    .map((g) =>
+      conjunctHost
+        ? { ...g, removable: true, ...(roleSlot && { color: MUI_COLOR_HEX[roleSlot.color] }) }
+        : g,
+    );
+
+  // The coordinated nouns whose ring is on this canvas: each draws its conjuncts' rings after its
+  // own. (A conjunct's builder hosts none — a conjunct extends its head's group, not one of its own.)
+  const chains = conjunctHost
+    ? []
+    : openConjunctsFor(selection)
+        .filter((which) => groups.some((g) => g.mainKey === which))
+        .map((which) => ({ which, count: conjunctsOf(selection, which).length }));
 
   // Compact-view layout, derived (not stored) each render: pack the visible core words
   // into centered rows and size the canvas to just wrap them. Because it's recomputed
@@ -577,21 +656,33 @@ export function PhraseBuilder({
   // words are exactly `renderedSlots` in compact (satellites are already filtered out).
   // The packing keeps clear of the period's controls, which reserve no room of their own.
   // Each cell is big enough for the biggest solid ring and the clear button straddling it.
+  // A coordinated noun's conjuncts are packed straight after it, each in a cell of its own.
+  const compactKeys = renderedSlots.flatMap((s) => {
+    const chain = chains.find((c) => c.which === s.key);
+    return chain ? chainKeys(chain.which, chain.count) : [s.key];
+  });
   const ringHalf =
-    Math.max(0, ...groups.map((g) => innerRadius(sizeOf(g.mainKey)))) + BUTTON_HALF;
+    Math.max(
+      0,
+      ...groups.map((g) => innerRadius(sizeOf(g.mainKey))),
+      ...compactKeys.map((k) => conjunctRings[k]?.rIn ?? 0),
+    ) + BUTTON_HALF;
   const cellHalfW = Math.max(COMPACT_PAD_H, Math.ceil(ringHalf));
   const cellHalfH = Math.max(COMPACT_PAD_V, Math.ceil(ringHalf));
   const compactLayout = React.useMemo(
     () =>
-      compact
+      // A conjunct's builder has no canvas of its own to pack: its ring is placed by its head's.
+      compact && !conjunctHost
         ? computeCompactLayout(
-            renderedSlots.map((s) => s.key),
+            compactKeys,
             svgSize.w,
             controlsCorner,
             { halfW: cellHalfW, halfH: cellHalfH },
           )
         : null,
-    [compact, renderedSlots, svgSize.w, controlsCorner, cellHalfW, cellHalfH],
+    // The keys are a fresh array every render; what they spell is what the packing depends on.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [compact, Boolean(conjunctHost), compactKeys.join(), svgSize.w, controlsCorner, cellHalfW, cellHalfH],
   );
 
   // Canvas height + the size the rings are laid out against: the tight compact height when
@@ -603,7 +694,7 @@ export function PhraseBuilder({
   // hold a box it pushed down, it has to see the height it just asked for, or it re-reads
   // the old one and pushes the box down again.
   const canvasHeight = compactLayout ? compactLayout.height : graphHeight;
-  const graphSize = { w: svgSize.w, h: canvasHeight };
+  const graphSize = conjunctHost?.graphSize ?? { w: svgSize.w, h: canvasHeight };
 
   // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
   // with the container's bottom border, so the two must stay in step.
@@ -611,12 +702,37 @@ export function PhraseBuilder({
 
   // Where a constituent's word sits: its stored position, or the compact packing while compact.
   // The word is the centre of its rings; everything else on the constituent is placed round it.
-  const wordPos = (key: string) =>
-    compactLayout?.positions[key] ?? positions[key] ?? DEFAULT_POSITIONS[key];
+  // A conjunct's builder paints its one word where its head's canvas puts it.
+  const wordPos = (key: string): Pt =>
+    conjunctHost?.at ??
+    compactLayout?.positions[key] ??
+    positions[key] ??
+    DEFAULT_POSITIONS[key] ??
+    unplacedConjunct(key);
   const centerOf = (key: string) => {
     const p = wordPos(key);
     return { x: (p.x / 100) * graphSize.w, y: (p.y / 100) * graphSize.h };
   };
+  // A conjunct's ring that has not been placed yet (see the placement effect below) sits straight
+  // below the ring before it in its group.
+  function unplacedConjunct(key: string): Pt {
+    for (const { which, count } of chains) {
+      const keys = chainKeys(which, count);
+      const i = keys.indexOf(key);
+      if (i < 1) continue;
+      const c = belowRing(centerOf(keys[i - 1]), UNMEASURED_R);
+      return { x: (c.x / Math.max(graphSize.w, 1)) * 100, y: (c.y / Math.max(graphSize.h, 1)) * 100 };
+    }
+    return { x: 50, y: 50 };
+  }
+
+  // The port on each coordinated noun's dotted ring that the line to its first conjunct leaves from.
+  const headLinkPorts: Record<string, { key: string; toward: Pt }[]> = Object.fromEntries(
+    chains.map(({ which }) => {
+      const first = conjunctKey(which, 0);
+      return [which, [{ key: chainPortKey(which, first), toward: centerOf(first) }]];
+    }),
+  );
 
   // The words whose solid ring carries a clear button: a chosen word that is not a link target's
   // greyed endpoint, not open for re-picking, and not the subject a mood has replaced.
@@ -651,6 +767,7 @@ export function PhraseBuilder({
         ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
       },
       centerOf,
+      linkPorts: conjunctHost ? { subject: conjunctHost.ports } : headLinkPorts,
     }),
     centerOf,
     sizeOf,
@@ -668,6 +785,21 @@ export function PhraseBuilder({
   const dragKeyOf = (key: string) =>
     groups.find((g) => g.nodeKeys.includes(key))?.mainKey ?? key;
 
+  // ── Coordination on this canvas ──
+  // Each conjunct's ring as one more constituent here — kept clear of the others, and packed by a
+  // tidy — once its builder has reported drawing it.
+  const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
+  const conjunctRects = chains.flatMap(({ which, count }) => {
+    const head = headOf(which);
+    if (!head) return [];
+    return Array.from({ length: count }, (_, i) => conjunctKey(which, i)).flatMap((key, i) => {
+      const ring = conjunctRings[key];
+      if (!ring) return [];
+      return [conjunctRect({ key, color: head.color, head: head.label, index: i, center: centerOf(key), ring, compact })];
+    });
+  });
+  const canvasRects = [...groupRects, ...conjunctRects];
+
   const { edges, groupEdges } = buildEdges({
     groupRects,
     discs,
@@ -675,20 +807,127 @@ export function PhraseBuilder({
     complementToggleIcons,
     directObjectToggle,
     compact,
+    standIns: Object.fromEntries(
+      chains.flatMap(({ which }) => {
+        const head = headOf(which);
+        return head ? [[head.label, conjunctRects.filter((r) => r.conjunct?.head === head.label)]] : [];
+      }),
+    ),
   });
+  // The lines joining each group's rings, drawn like the lines to the verb phrase; the chip on each
+  // says how the group is joined.
+  const links = conjunctLinks({
+    chains,
+    centerOf,
+    headRing: headOf,
+    headPort: (port) => controlPos[port],
+    rings: conjunctRings,
+    compact,
+  });
+  const linkEdges: Edge[] = links.map((link) => ({
+    x1: link.from.x,
+    y1: link.from.y,
+    x2: link.to.x,
+    y2: link.to.y,
+    color: headOf(link.which)?.color ?? "",
+    dashed: false,
+  }));
+
+  // What conjunct `i` of `which` borrows from this canvas to draw its ring here.
+  const hostFor = (which: NounKey, i: number): ConjunctHost => {
+    const count = chains.find((c) => c.which === which)?.count ?? 0;
+    const keys = chainKeys(which, count);
+    const key = keys[i + 1];
+    const neighbours = [keys[i], keys[i + 2]].filter((k): k is string => Boolean(k));
+    return {
+      key,
+      role: which,
+      at: wordPos(key),
+      graphSize,
+      compact,
+      draggingKey,
+      makeDragProps,
+      makeGroupDragProps,
+      ports: neighbours.map((n) => ({ key: chainPortKey(key, n), toward: centerOf(n) })),
+      onRing: (ring) => reportConjunctRing(key, ring),
+      isLast: i === count - 1,
+      onAddConjunct: () => handleAddConjunct(which),
+      panelHost: conjunctPanelHost,
+    };
+  };
+
+  // A conjunct's builder tells its head's canvas about the ring it just drew: how far it reaches, and
+  // where its link ports sit on it.
+  const ownRing = conjunctHost ? groupRects[0] : undefined;
+  // Only a ring that really changed is reported: this runs after every commit, and even a report
+  // the head would ignore costs it a render (React's eager bail-out can't always see the no-op), which
+  // re-renders this builder, which reports again — an unbounded loop.
+  const reportedRing = useRef<ConjunctRing | undefined>(undefined);
+  useLayoutEffect(() => {
+    if (!conjunctHost || !ownRing) return;
+    const ports: Record<string, Pt> = {};
+    for (const { key } of conjunctHost.ports) {
+      const at = controlPos[key];
+      if (at) ports[key] = { x: at.x - ownRing.center.x, y: at.y - ownRing.center.y };
+    }
+    const ring = { rIn: ownRing.rIn, orbit: ownRing.orbit, rOut: ownRing.rOut, ports };
+    if (sameConjunctRing(reportedRing.current, ring)) return;
+    reportedRing.current = ring;
+    conjunctHost.onRing(ring);
+  });
+  // …and that it is gone, once it is — or once it answers to another key (a conjunct before it was
+  // removed). The report is bound to the key it was made under.
+  const hostKey = conjunctHost?.key;
+  useLayoutEffect(() => {
+    const onRing = conjunctHost?.onRing;
+    return () => {
+      reportedRing.current = undefined;
+      onRing?.(null);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hostKey]);
 
   // The clear button on each word's solid ring.
   const clearControls = [...clearable].map((mainKey) => ({
     mainKey,
-    label: ALL_SLOTS.find((s) => s.key === mainKey)?.label ?? mainKey,
+    label: visibleSlots.find((s) => s.key === mainKey)?.label ?? mainKey,
     onClear: () => handleClear(mainKey as SlotKey),
   }));
+
+  // Place each conjunct's ring the first time it appears: straight below the ring before it in its
+  // group, a chip's height clear, growing the canvas when it would land past the bottom edge.
+  // Placed in the stored (full-view) positions, so the ring has somewhere to be dragged from even
+  // while compact view packs it elsewhere.
+  useLayoutEffect(() => {
+    if (conjunctHost || chains.length === 0) return;
+    const seeds: Positions = {};
+    let bottom = 0;
+    for (const { which, count } of chains) {
+      const keys = chainKeys(which, count);
+      for (let i = 1; i < keys.length; i++) {
+        const key = keys[i];
+        if (positions[key]) continue;
+        const prev = keys[i - 1];
+        const p = seeds[prev] ?? positions[prev] ?? DEFAULT_POSITIONS[prev];
+        if (!p) continue;
+        const prevR = (i === 1 ? headOf(which)?.rOut : conjunctRings[prev]?.rOut) ?? UNMEASURED_R;
+        const c = belowRing({ x: (p.x / 100) * svgSize.w, y: (p.y / 100) * graphHeight }, prevR);
+        seeds[key] = { x: (c.x / Math.max(svgSize.w, 1)) * 100, y: (c.y / graphHeight) * 100 };
+        bottom = Math.max(bottom, c.y + UNMEASURED_R + BUTTON_HALF + BOTTOM_MARGIN);
+      }
+    }
+    if (Object.keys(seeds).length === 0) return;
+    setPositions((prev) => ({ ...prev, ...seeds }));
+    // The height rebase that follows holds every stored position's pixel offset, seeds included.
+    if (bottom > graphHeight) setGraphHeight(Math.ceil(bottom));
+  });
 
   // Keep the rings clear of each other, growing the canvas when a shove needs room
   // (see useOverlapResolution).
   useOverlapResolution({
     compact,
-    groupRects,
+    // A conjunct's builder has only its own ring, which its head's canvas keeps clear.
+    groupRects: conjunctHost ? [] : canvasRects,
     pos,
     graphSize,
     graphHeight,
@@ -704,7 +943,7 @@ export function PhraseBuilder({
   // revealed.
   function handleTidyPeriod() {
     if (groupRects.length === 0) return;
-    const { positions: packed, height } = packPeriod(groupRects, graphSize);
+    const { positions: packed, height } = packPeriod(canvasRects, graphSize);
     setPositions((prev) => ({ ...prev, ...packed }));
     // Fit the container to the grid we just laid out — growing when expanded boxes need
     // more room than the canvas has, and shrinking when they need less, so tidying clears
@@ -727,6 +966,7 @@ export function PhraseBuilder({
   const ctx: PhraseRenderContext = {
     selection,
     nounPhrase: nounPhraseMode,
+    pronounHead: Boolean(conjunctHost),
     showSubject: !actionMode,
     activeSlot,
     renderedSlots,
@@ -739,12 +979,17 @@ export function PhraseBuilder({
     controlPos,
     collapsedGroups: effectiveCollapsed,
     compact,
-    draggingKey,
+    // A conjunct's ring is dragged about its head's canvas, by the key it goes by there.
+    draggingKey: conjunctHost ? conjunctHost.draggingKey : draggingKey,
     // Painted where `pos` says — on the orbit, or the compact packing — not at the stored
     // position; a satellite drags its whole constituent.
     makeDragProps: (key, onActivate) =>
-      makeDragProps(key, onActivate, pos(key), dragKeyOf(key)),
-    makeGroupDragProps,
+      conjunctHost
+        ? conjunctHost.makeDragProps(key, onActivate, pos(key), conjunctHost.key)
+        : makeDragProps(key, onActivate, pos(key), dragKeyOf(key)),
+    makeGroupDragProps: conjunctHost
+      ? () => conjunctHost.makeGroupDragProps([conjunctHost.key])
+      : makeGroupDragProps,
     slotEls,
     handleSlotClick,
     editingSlot,
@@ -769,6 +1014,7 @@ export function PhraseBuilder({
     handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,
+    removeConjunct: conjunctHost ? onRemove : undefined,
     // Cross-container linking: forward noun boxes to the workspace registry and expose
     // greying (link targets) + pick-mode (eligible targets). Only NOUN_KEYS participate.
     onBoxRef: linkBinding
@@ -804,26 +1050,84 @@ export function PhraseBuilder({
   // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
   const clauseControls = nested ? {} : periodControls(binding, selection);
 
-  // The card's contents — the canvas, its resize grip, and any docked possessor panels.
+  const possessorPanels = showCanvas && (
+    <PossessorPanels
+      openPossessors={openPossessors}
+      selection={selection}
+      onPhraseUpdate={onPhraseUpdate}
+      onRemovePossessor={handleRemovePossessor}
+      registerDot={(which, el) => {
+        if (el) possessorDotEls.current.set(which, el);
+        else possessorDotEls.current.delete(which);
+      }}
+      binding={binding}
+      possessorPath={possessorPath}
+      coref={coref}
+      corefAddr={nounAddress}
+      Builder={PhraseBuilder}
+    />
+  );
+
+  const canvas = (
+    <PhraseCanvas
+      ctx={ctx}
+      showCanvas={showCanvas}
+      canvasHeight={canvasHeight}
+      graphSize={graphSize}
+      edges={edges}
+      groupEdges={[...groupEdges, ...linkEdges]}
+      controlPos={controlPos}
+      clearControls={clearControls}
+      perimeterByNoun={perimeterByNoun}
+      linkBinding={linkBinding}
+      onSetImperativePerson={handleSetImperativePerson}
+      onSetImperativeRegister={handleSetImperativeRegister}
+      containerRef={containerRef}
+      possessorControlEls={possessorControlEls}
+      recolor={roleSlot ? { subject: roleSlot.color } : undefined}
+      overlay={Boolean(conjunctHost)}
+      coordination={
+        chains.length > 0 && (
+          <ConjunctRings
+            chains={chains}
+            selection={selection}
+            onPhraseUpdate={onPhraseUpdate}
+            onRemoveConjunct={handleRemoveConjunct}
+            onCycleConjunction={handleCycleConjunction}
+            hostFor={hostFor}
+            links={links}
+            binding={binding}
+            possessorPath={possessorPath}
+            Builder={PhraseBuilder}
+          />
+        )
+      }
+    />
+  );
+
+  // A conjunct's builder paints its ring onto its head's canvas and docks its possessor panel with
+  // its head's panels, below that canvas. It wears no card of its own.
+  if (conjunctHost) {
+    return (
+      <>
+        {canvas}
+        {conjunctHost.panelHost &&
+          createPortal(
+            <Box ref={rootRef} sx={{ position: "relative" }}>
+              <RelativePhraseConnectors connectors={relConnectors} />
+              {possessorPanels}
+            </Box>,
+            conjunctHost.panelHost,
+          )}
+      </>
+    );
+  }
+
+  // The card's contents — the canvas, its resize grip, and the docked panels: the possessors', then
+  // those of the phrases coordinated on the canvas.
   const content = (
     <>
-      <PhraseCanvas
-        ctx={ctx}
-        showCanvas={showCanvas}
-        canvasHeight={canvasHeight}
-        graphSize={graphSize}
-        edges={edges}
-        groupEdges={groupEdges}
-        controlPos={controlPos}
-        clearControls={clearControls}
-        perimeterByNoun={perimeterByNoun}
-        linkBinding={linkBinding}
-        onSetImperativePerson={handleSetImperativePerson}
-        onSetImperativeRegister={handleSetImperativeRegister}
-        containerRef={containerRef}
-        possessorControlEls={possessorControlEls}
-        conjunctControlEls={conjunctControlEls}
-      />
+      {canvas}
 
       {/* The container's own bottom edge is the resize grip, so it bleeds back through
           the Paper's padding. No manual resize while compact — the canvas is auto-sized
@@ -841,40 +1145,9 @@ export function PhraseBuilder({
         </Box>
       )}
 
-      {showCanvas && (
-        <PossessorPanels
-          openPossessors={openPossessors}
-          selection={selection}
-          onPhraseUpdate={onPhraseUpdate}
-          onRemovePossessor={handleRemovePossessor}
-          registerDot={(which, el) => {
-            if (el) possessorDotEls.current.set(which, el);
-            else possessorDotEls.current.delete(which);
-          }}
-          binding={binding}
-          possessorPath={possessorPath}
-          coref={coref}
-          corefAddr={nounAddress}
-          Builder={PhraseBuilder}
-        />
-      )}
+      {possessorPanels}
 
-      {showCanvas && (
-        <ConjunctPanels
-          openConjuncts={openConjuncts}
-          selection={selection}
-          onPhraseUpdate={onPhraseUpdate}
-          onRemoveConjunct={handleRemoveConjunct}
-          onCycleConjunction={handleCycleConjunction}
-          registerDot={(which, el) => {
-            if (el) conjunctDotEls.current.set(which, el);
-            else conjunctDotEls.current.delete(which);
-          }}
-          binding={binding}
-          possessorPath={possessorPath}
-          Builder={PhraseBuilder}
-        />
-      )}
+      {showCanvas && <Box ref={setConjunctPanelHost} data-testid="conjunct-panels" />}
     </>
   );
 

@@ -7,11 +7,10 @@ import { attach, place, placed } from './dom.ts';
 
 interface Args {
   openPossessors: NounKey[];
-  openConjuncts: NounKey[];
   collapsedGroups: Record<string, boolean>;
 }
 
-const NONE_OPEN: Args = { openPossessors: [], openConjuncts: [], collapsedGroups: {} };
+const NONE_OPEN: Args = { openPossessors: [], collapsedGroups: {} };
 
 function renderConnectors(args: Partial<Args> = {}) {
   const hook = renderHook((props: Args) => usePanelConnectors(props), {
@@ -47,28 +46,28 @@ describe('usePanelConnectors', () => {
     ]);
   });
 
-  it('draws a conjunct line alongside a possessor line on the same noun, under its own id', () => {
-    const open: Args = { ...NONE_OPEN, openPossessors: ['subject'], openConjuncts: ['subject'] };
+  it('draws one line per open possessor, each under its own id', () => {
+    const open: Args = { ...NONE_OPEN, openPossessors: ['subject', 'directObject'] };
     const { result, rerender } = renderConnectors(open);
     const els = result.current;
     els.possessorControlEls.current.set('subject', placed(200, 150, 20, 20));
     els.possessorDotEls.current.set('subject', placed(300, 400, 10, 10));
-    els.conjunctControlEls.current.set('subject', placed(240, 150, 20, 20));
-    els.conjunctDotEls.current.set('subject', placed(500, 400, 10, 10));
+    els.possessorControlEls.current.set('directObject', placed(600, 150, 20, 20));
+    els.possessorDotEls.current.set('directObject', placed(300, 500, 10, 10));
 
     rerender(open);
 
     expect(result.current.relConnectors.map((c) => c.which)).toEqual([
       'poss:subject',
-      'conj:subject',
+      'poss:directObject',
     ]);
   });
 
   it('colours each line by its noun', () => {
-    const open: Args = { ...NONE_OPEN, openConjuncts: ['directObject'] };
+    const open: Args = { ...NONE_OPEN, openPossessors: ['directObject'] };
     const { result, rerender } = renderConnectors(open);
-    result.current.conjunctControlEls.current.set('directObject', placed(0, 0, 10, 10));
-    result.current.conjunctDotEls.current.set('directObject', placed(0, 100, 10, 10));
+    result.current.possessorControlEls.current.set('directObject', placed(0, 0, 10, 10));
+    result.current.possessorDotEls.current.set('directObject', placed(0, 100, 10, 10));
 
     rerender(open);
 
@@ -80,9 +79,9 @@ describe('usePanelConnectors', () => {
     const els = result.current;
     els.possessorControlEls.current.set('subject', placed(200, 150, 20, 20));
     els.possessorDotEls.current.set('subject', placed(300, 400, 10, 10));
-    els.conjunctControlEls.current.set('directObject', placed(200, 150, 20, 20));
+    els.possessorControlEls.current.set('directObject', placed(200, 150, 20, 20));
 
-    rerender({ ...NONE_OPEN, openConjuncts: ['directObject'] });
+    rerender({ ...NONE_OPEN, openPossessors: ['directObject'] });
 
     expect(result.current.relConnectors).toEqual([]);
   });
