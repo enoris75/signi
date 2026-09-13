@@ -139,21 +139,24 @@ export const motionVerbs: ConceptSeed[] = [
     role: 'verb',
     transitivity: 'intransitive',
     // The SEEMING verb: it ascribes a resemblance, so it takes a subject complement — the thing
-    // the subject looks like ("seems tired", "seems a legend"). Deliberately disjoint from
+    // the subject looks like ("seems tired", "seems to be a legend"). Deliberately disjoint from
     // APPEAR, which is the coming-into-view verb and licenses no `predicative` at all.
+    // `seeming: '1'` marks the seeming verb on every lexeme, the way `copula` marks BE: each engine
+    // decides whether its seeming verb takes a bare predicate noun. en/de do not, and add the
+    // infinitival copula ("seems to be a legend", "scheint eine Legende zu sein"); it/fr/es/pt/ja do.
     complements: ['predicative', 'locative', 'cause', 'terminus'],
     description: 'to look like; to give the impression of being similar to',
     synonym: 'look like',
     emoji: '🤔',
     forms: {
       en: {
-        base: 'seem',
+        base: 'seem', seeming: '1',
         '1sg_present': 'seem', '2sg_present': 'seem', '3sg_present': 'seems',
         '1pl_present': 'seem', '2pl_present': 'seem', '3pl_present': 'seem',
         past: 'seemed',
       },
       it: {
-        base: 'sembrare',
+        base: 'sembrare', seeming: '1',
         '1sg_present': 'sembro', '2sg_present': 'sembri', '3sg_present': 'sembra',
         '1pl_present': 'sembriamo', '2pl_present': 'sembrate', '3pl_present': 'sembrano',
         '1sg_past': 'sembrai', '2sg_past': 'sembrasti', '3sg_past': 'sembrò',
@@ -162,7 +165,7 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_future': 'sembreremo', '2pl_future': 'sembrerete', '3pl_future': 'sembreranno',
       },
       fr: {
-        base: 'sembler',
+        base: 'sembler', seeming: '1',
         '1sg_present': 'semble', '2sg_present': 'sembles', '3sg_present': 'semble',
         '1pl_present': 'semblons', '2pl_present': 'semblez', '3pl_present': 'semblent',
         '1sg_past': 'semblai', '2sg_past': 'semblas', '3sg_past': 'sembla',
@@ -171,14 +174,14 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_future': 'semblerons', '2pl_future': 'semblerez', '3pl_future': 'sembleront',
       },
       de: {
-        base: 'scheinen',
+        base: 'scheinen', seeming: '1',
         '1sg_present': 'scheine', '2sg_present': 'scheinst', '3sg_present': 'scheint',
         '1pl_present': 'scheinen', '2pl_present': 'scheint', '3pl_present': 'scheinen',
         '1sg_past': 'schien', '2sg_past': 'schienst', '3sg_past': 'schien',
         '1pl_past': 'schienen', '2pl_past': 'schient', '3pl_past': 'schienen',
       },
       es: {
-        base: 'parecer',
+        base: 'parecer', seeming: '1',
         '1sg_present': 'parezco', '2sg_present': 'pareces', '3sg_present': 'parece',
         '1pl_present': 'parecemos', '2pl_present': 'parecéis', '3pl_present': 'parecen',
         '1sg_past': 'parecí', '2sg_past': 'pareciste', '3sg_past': 'pareció',
@@ -187,13 +190,13 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_future': 'pareceremos', '2pl_future': 'pareceréis', '3pl_future': 'parecerán',
       },
       ja: {
-        base: '思える',
+        base: '思える', seeming: '1',
         reading: 'おもえる',
         masu_present: '思えます',
         masu_present_reading: 'おもえます',
       },
       pt: {
-        base: 'parecer',
+        base: 'parecer', seeming: '1',
         '1sg_present': 'pareço', '2sg_present': 'pareces', '3sg_present': 'parece',
         '1pl_present': 'parecemos', '2pl_present': 'parecem', '3pl_present': 'parecem',
         '1sg_past': 'pareci', '2sg_past': 'pareceu', '3sg_past': 'pareceu',

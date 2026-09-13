@@ -113,12 +113,34 @@ describe('infinitive normalisation', () => {
 // A49, the infinitive half. The citation phrase shares the instruction register's word order, and
 // its "nicht" placement with it: after the adverb and after the predicate complement.
 describe('known bugs: German "nicht" in the infinitive', () => {
-  test.fails('German puts "nicht" before the adverb and the predicate complement', () => {
+  test('German puts "nicht" before the adverb and the predicate complement', () => {
     expect(sayAll(infinitive({}, { negative: true, modifier: 'ALWAYS' })).de).toBe('nicht immer essen.');
     expect(sayAll({
       ...clause(np('GENERIC_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }),
       infinitive: true,
     }).de).toBe('nicht müde sein.');
+  });
+
+  const predicate = (verb: string, phrase: NounPhrase, verbPhrase: Partial<VerbPhrase>) =>
+    sayAll({ ...clause(np('GENERIC_PERSON'), verb, { verbPhrase, complements: { predicative: { phrase } } }), infinitive: true }).de;
+
+  // A manner adverb takes the same slot as a frequency one; an adverb leads a predicate complement
+  // too ("nicht immer müde sein"); BECOME and SEEM's predicate take the "nicht" of BE's.
+  test('German puts "nicht" before every adverb and every predicate complement', () => {
+    expect(sayAll(infinitive({}, { negative: true, modifier: 'FAST' })).de).toBe('nicht schnell essen.');
+    expect(sayAll(infinitive({ directObject: np('FOOD') }, { negative: true, modifier: 'ALWAYS' })).de).toBe('nicht immer das Essen essen.');
+    expect(predicate('BE', np('TIRED'), { negative: true, modifier: 'ALWAYS' })).toBe('nicht immer müde sein.');
+    expect(predicate('BECOME', np('TIRED'), { negative: true })).toBe('nicht müde werden.');
+    expect(predicate('SEEM', np('LEGEND', { definiteness: 'indefinite' }), { negative: true })).toBe('nicht eine Legende zu sein scheinen.');
+  });
+
+  // Regression guards: "nicht" still trails the objects with no adverb or predicate, and "nie" still
+  // stands in for it.
+  test('German keeps "nicht" after the objects, and "nie" in its place', () => {
+    expect(sayAll(infinitive({ directObject: np('FOOD') }, { negative: true })).de).toBe('das Essen nicht essen.');
+    expect(sayAll(infinitive({}, { negative: true })).de).toBe('nicht essen.');
+    expect(sayAll(infinitive({}, { negative: true, modifier: 'NEVER' })).de).toBe('nie essen.');
+    expect(predicate('BE', np('TIRED'), {})).toBe('müde sein.');
   });
 });
 

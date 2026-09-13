@@ -1,11 +1,19 @@
 import { describe, expect, test } from 'vitest';
-import { BON, CHAT, concept, FORT, GRAND, HEUREUX, MAISON, np, PREMIER, SOURIS, VIEUX } from './fr.fixtures.js';
+import { BON, CHAT, concept, FORT, GRAND, HAUT, HAUTEUR, HEUREUX, MAISON, np, PREMIER, SOURIS, TAILLE, VIEUX } from './fr.fixtures.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
 describe('splitAdjectives', () => {
   test('a positive BAGS adjective or ordinal precedes the noun; the rest follow it', () => {
     const phrase = np(CHAT, {}, { adjectives: [concept(PREMIER, 'FIRST'), concept(GRAND, 'BIG'), concept(HEUREUX, 'HAPPY')] });
     expect(splitAdjectives(phrase)).toEqual({ pre: ['premier', 'grand'], post: ['heureux'] });
+  });
+
+  // A45: GREAT, the gloss degree word, is the same "grand" as BIG and precedes like it; HIGH follows.
+  test('GREAT precedes like BIG; HIGH follows', () => {
+    const phrase = np(TAILLE, {}, { adjectives: [concept(GRAND, 'GREAT')] });
+    expect(splitAdjectives(phrase)).toEqual({ pre: ['grande'], post: [] });
+    const high = np(HAUTEUR, {}, { adjectives: [concept(HAUT, 'HIGH')] });
+    expect(splitAdjectives(high)).toEqual({ pre: [], post: ['haute'] });
   });
 
   test('every adjective agrees with the head noun', () => {

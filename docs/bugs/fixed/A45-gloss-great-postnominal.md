@@ -59,3 +59,56 @@ as in French. `IT_DIM_PREP`'s comment writes `di alta qualità` / `ad alta tempe
 | | |
 |---|---|
 | **Test** | `adjective-gloss.test.ts` → *known bugs: adjective-definition gloss (French)* (1 `test.fails`: "French places GREAT before the noun in a gloss (de grande taille)")<br>`adjective-gloss.test.ts` → *known bugs: adjective-definition gloss (Italian)* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 by adding GREAT to both prenominal sets, as the shape of the fix proposed. No gloss
+code changed.
+
+- [`fr.consts.ts`](../../../packages/engine/src/languages/fr/fr.consts.ts) and
+  [`it.consts.ts`](../../../packages/engine/src/languages/it/it.consts.ts): `GREAT` is now in
+  `PRENOMINAL`, next to `BIG`. It has the same surface as BIG, so it goes in the same place. All four
+  GREAT glosses changed:
+
+  | Gloss | French | Italian |
+  |---|---|---|
+  | BIG (SIZE) | `de grande taille.` | `di grande dimensione.` |
+  | HIGH (HEIGHT) | `de grande hauteur.` | `di grande altezza.` |
+  | OLD (AGE) | `de grand âge.` | `di grande età.` |
+  | STRONG (STRENGTH) | `de grande force.` | `di grande forza.` |
+
+  As expected, `de grand âge` no longer elides (A44), because a consonant now leads. A compared GREAT
+  still follows the noun, like any compared BAGS adjective (`de taille plus grande`,
+  `di dimensione più grande`). GREAT used as an ordinary attribute now reads like BIG: `le grand
+  chat`, `le grand animal`, `les grandes maisons`, `il grande gatto`, `le grandi case`.
+
+- **HIGH stays after the noun.** This was a deliberate choice. "haut"/"alto" is not a BAGS
+  adjective, and a literal noun phrase puts it after the noun (`une tour haute`, `la torre alta`).
+  The prenominal `de haute qualité` / `di alta qualità` is a set phrase that belongs to the abstract
+  scale nouns, not a rule about the adjective. Putting HIGH before the noun would also make Italian
+  measure glosses read `a alta temperatura`, because the gloss adposition does not add the euphonic
+  `ad`. So GOOD, QUICK and HOT keep `de qualité haute` / `di qualità alta`. Both `PRENOMINAL`
+  comments record this choice. If the product wants the set-phrase forms, that belongs to the
+  dimension noun or the gloss, not to the adjective sets.
+
+- **Tests:** [`packages/engine/test/adjective-gloss.test.ts`](../../../packages/engine/test/adjective-gloss.test.ts)
+  → *known bugs: adjective-definition gloss (French)* and *(Italian)*. Both pinning `test.fails` are
+  now passing `test`s. New cases:
+  - every GREAT gloss in both languages (HEIGHT, AGE, STRENGTH);
+  - a guard that a compared GREAT and HIGH stay after the noun;
+  - GREAT as an ordinary attribute in a clause.
+
+  Colocated unit tests:
+  - [`it/splitAdjectives.test.ts`](../../../packages/engine/src/languages/it/splitAdjectives.test.ts)
+    used GREAT as its example of a postnominal "grande". It now checks that GREAT precedes, that
+    placement still depends on the concept rather than the surface (`grande` under an unlisted
+    concept follows), and that HIGH follows.
+  - [`fr/splitAdjectives.test.ts`](../../../packages/engine/src/languages/fr/splitAdjectives.test.ts)
+    now checks the same two cases, GREAT preceding and HIGH following.
+  - [`it/dimensionGloss.test.ts`](../../../packages/engine/src/languages/it/dimensionGloss.test.ts)
+    and [`fr/dimensionGloss.test.ts`](../../../packages/engine/src/languages/fr/dimensionGloss.test.ts)
+    now render the SIZE gloss with GREAT itself.
+  - The `it.fixtures.ts` comment on `GRANDE` is updated.
+
+  The comment in `e2e/definition-tooltip.spec.ts` that skips French for the BIG tooltip because of
+  A44/A45 is now out of date. French could be pinned there (`de grande taille`).

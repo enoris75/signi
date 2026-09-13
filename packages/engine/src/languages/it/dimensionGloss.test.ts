@@ -11,7 +11,7 @@ const gloss = (noun: Forms, ...adjectives: ConceptForms[]) => {
 
 describe('dimensionGloss', () => {
   test('an extent or quality noun is di + the bare noun phrase', () => {
-    expect(gloss(DIMENSIONE, concept(GRANDE, 'BIG'))).toBe('di grande dimensione');
+    expect(gloss(DIMENSIONE, concept(GRANDE, 'GREAT'))).toBe('di grande dimensione');
     expect(gloss(QUALITA, concept(BUONO, 'GOOD'))).toBe('di buona qualità');
   });
 

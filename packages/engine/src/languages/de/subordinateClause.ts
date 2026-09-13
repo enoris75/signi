@@ -53,7 +53,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
   const nicht = verbNegative && !groupHasNegativeAdverb(rel.verbPhrase) ? 'nicht' : '';
-  const complementsText = complementsPhrase(rest);
+  const complementsText = complementsPhrase(rest, verb.forms);
 
   const body = [pronoun, clauseSubjectText, mid, dativeText, directObjectText, complementsText, modalAdverbsText, modifierText, nicht, tail, finite]
     .filter(Boolean)

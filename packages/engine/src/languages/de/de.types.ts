@@ -17,3 +17,15 @@ export interface VerbComplex {
   mid: string;
   tail: string;
 }
+
+/**
+ * The Mittelfeld slots a negating "nicht" may take (see `nichtSlots`): before the prospective's "im
+ * Begriff", before a Mittelfeld adverb, before a predicate complement, or after the objects and
+ * complements. Each holds "nicht" or "", and at most one holds it.
+ */
+export interface NichtSlots {
+  beforeAspect: string;
+  beforeAdverb: string;
+  beforePredicative: string;
+  after: string;
+}

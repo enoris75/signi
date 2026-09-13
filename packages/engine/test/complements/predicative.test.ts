@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Degree, NounPhrase } from '@signi/shared';
+import type { Degree, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from '../harness.js';
 import { concepts } from '../../../backend/src/concepts/index.js';
 
@@ -307,12 +307,130 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
   // English "seems a legend" is archaic/literary; the modern form raises an infinitival copula.
   // German `scheinen` cannot take a predicate nominative at all — it needs "… zu sein".
   // Romance is already correct: sembrare/sembler/parecer do license a bare predicate noun.
-  test.fails('SEEM + a predicate noun needs an infinitival copula in English and German', () => {
+  test('SEEM + a predicate noun needs an infinitival copula in English and German', () => {
     expect(seems(legend())).toMatchObject({
       en: 'the cat seems to be a legend.',
       de: 'der Kater scheint eine Legende zu sein.',
       it: 'il gatto sembra una leggenda.', // regression: Romance is already right
       es: 'el gato parece una leyenda.',
+    });
+  });
+
+  const seemsIn = (verbPhrase: Partial<VerbPhrase>, plan: Partial<PhrasePlan> = {}, subject: NounPhrase = np('CAT')) =>
+    sayAll({ ...clause(subject, 'SEEM', { verbPhrase, complements: { predicative: { phrase: legend() } } }), ...plan });
+
+  // The copula rides along with the verb group: English puts it after whatever carries tense,
+  // negation or the modal; German closes the Mittelfeld with it, against the non-finite tail.
+  test('the infinitival copula holds across tense, negation and modals', () => {
+    expect(seemsIn({ tense: 'past' })).toMatchObject({
+      en: 'the cat seemed to be a legend.',
+      de: 'der Kater schien eine Legende zu sein.',
+      it: 'il gatto sembrò una leggenda.',
+    });
+    expect(seemsIn({ negative: true })).toMatchObject({
+      en: 'the cat does not seem to be a legend.',
+      de: 'der Kater scheint nicht eine Legende zu sein.',
+      fr: 'le chat ne semble pas une légende.',
+    });
+    expect(seemsIn({ tense: 'future' })).toMatchObject({
+      en: 'the cat will seem to be a legend.',
+      de: 'der Kater wird eine Legende zu sein scheinen.', // "zu sein" before the clause-final infinitive
+    });
+    expect(seemsIn({ modals: ['CAN'] })).toMatchObject({
+      en: 'the cat can seem to be a legend.',
+      de: 'der Kater kann eine Legende zu sein scheinen.',
+    });
+    expect(seemsIn({ aspect: 'resultative' })).toMatchObject({
+      en: 'the cat has seemed to be a legend.',
+      de: 'der Kater hat eine Legende zu sein geschienen.',
+    });
+    expect(seemsIn({ modifier: 'ALWAYS' })).toMatchObject({
+      en: 'the cat always seems to be a legend.',
+      de: 'der Kater scheint immer eine Legende zu sein.',
+    });
+  });
+
+  test('the infinitival copula holds in the moods and in verb-final clauses', () => {
+    expect(seemsIn({}, { imperative: true }, np('SECOND_PERSON'))).toMatchObject({
+      en: 'seem to be a legend.',
+      de: 'schein eine Legende zu sein.',
+      it: 'sembra una leggenda.',
+    });
+    expect(seemsIn({}, { infinitive: true }, np('GENERIC_PERSON'))).toMatchObject({
+      en: 'to seem to be a legend.',
+      de: 'eine Legende zu sein scheinen.',
+      it: 'sembrare una leggenda.',
+    });
+    // The "wenn" protasis is verb-final, so "zu sein" lands before the finite "würde".
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend() } } }) }))
+      .toMatchObject({
+        en: 'if the cat seemed to be a legend, the dog would run.',
+        de: 'wenn der Kater eine Legende zu sein scheinen würde, würde der Hund laufen.',
+        it: 'se il gatto sembrasse una leggenda, il cane correrebbe.',
+      });
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEEM' }, complements: { predicative: { phrase: legend() } } } }), 'EAT')))
+      .toMatchObject({
+        en: 'the dog that seems to be a legend eats.',
+        de: 'der Hund, der eine Legende zu sein scheint, isst.',
+        it: 'il cane che sembra una leggenda mangia.',
+      });
+  });
+
+  // German closes every complement before "zu sein"; English keeps "to be" on the predicate. A
+  // relative clause on the predicate noun is bracketed by its commas ahead of "zu sein".
+  test('the infinitival copula with other complements and a relative clause', () => {
+    expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend() }, locative: { phrase: np('MARKET') } } })))
+      .toMatchObject({
+        en: 'the cat seems to be a legend in the market.',
+        de: 'der Kater scheint eine Legende im Markt zu sein.',
+      });
+    expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend() }, terminus: { phrase: np('DOG') } } })))
+      .toMatchObject({
+        en: 'the cat seems to be a legend to the dog.',
+        de: 'der Kater scheint dem Hund eine Legende zu sein.', // the dative recipient leads
+      });
+    expect(seems(legend({ relative: { verbPhrase: { verb: 'BURN' } } }))).toMatchObject({
+      en: 'the cat seems to be a legend that burns.',
+      de: 'der Kater scheint eine Legende, die brennt, zu sein.',
+      fr: 'le chat semble une légende qui brûle.',
+    });
+  });
+
+  // One noun conjunct is enough: the copula then carries the whole group.
+  test('a coordination holding a predicate noun takes the copula once, for the group', () => {
+    const seemsGroup = (...conjuncts: NounPhrase[]) =>
+      sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: { conjuncts, conjunction: 'and' } } } }));
+    expect(seemsGroup(np('TIRED'), legend())).toMatchObject({
+      en: 'the cat seems to be tired and a legend.',
+      de: 'der Kater scheint müde und eine Legende zu sein.',
+      it: 'il gatto sembra stanco e una leggenda.',
+    });
+    expect(seemsGroup(legend(), np('DOG', { definiteness: 'indefinite' }))).toMatchObject({
+      en: 'the cat seems to be a legend and a dog.',
+      de: 'der Kater scheint eine Legende und ein Hund zu sein.',
+    });
+  });
+
+  // Regression guards: the repair keys off the seeming verb AND a noun complement. A predicate
+  // adjective under SEEM stays bare, and BECOME/BE keep their bare predicate nominative.
+  test('a predicate adjective under SEEM and a predicate noun under BECOME or BE stay bare', () => {
+    expect(seems(np('TIRED'))).toMatchObject({ en: 'the cat seems tired.', de: 'der Kater scheint müde.' });
+    expect(sayAll(clause(np('CAT'), 'SEEM', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } })))
+      .toMatchObject({ en: 'the cat does not seem tired.', de: 'der Kater scheint nicht müde.' });
+    expect(becomes(legend())).toMatchObject({ en: 'the cat becomes a legend.', de: 'der Kater wird eine Legende.' });
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: legend() } } })))
+      .toMatchObject({ en: 'the cat is a legend.', de: 'der Kater ist eine Legende.' });
+  });
+
+  // Japanese and Romance license the bare predicate noun under their seeming verb, so the corpus
+  // flag changes nothing there.
+  test('the other languages keep the bare predicate noun under SEEM', () => {
+    expect(seems(legend())).toMatchObject({
+      it: 'il gatto sembra una leggenda.',
+      fr: 'le chat semble une légende.',
+      es: 'el gato parece una leyenda.',
+      pt: 'o gato parece uma lenda.',
+      ja: '猫は伝説に思えます。',
     });
   });
 });

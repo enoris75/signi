@@ -37,10 +37,12 @@ export const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
  * noun in French — beau, bon, grand, petit, vieux, jeune, nouveau, mauvais. Every other
  * adjective (heureux, triste, fort, …) follows the noun.
  */
+// GREAT, the gloss degree word, is the same "grand" as BIG and precedes like it ("de grande
+// taille"). HIGH ("haut") stays after the noun: it is not a BAGS adjective ("une tour haute").
 // The ordinals join them: an ordinal precedes its noun in French ("le premier père", "la
 // deuxième fois"), whatever its "BAGS" membership.
 export const PRENOMINAL = new Set([
-  'BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
+  'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
   'FIRST', 'SECOND', 'THIRD',
 ]);
 

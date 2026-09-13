@@ -45,7 +45,7 @@ export function predicateParts(
     : coordinate(directObject, anyObject ? (np) => npText(withDefiniteness(np, 'any')) : npText);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
-  const complementsText = complementsPhrase(complements);
+  const complementsText = complementsPhrase(complements, verb.forms);
 
   const negateVerb = verbNegative === true && !groupNegative;
 

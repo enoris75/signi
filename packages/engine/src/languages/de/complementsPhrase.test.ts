@@ -3,7 +3,7 @@ import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from 
 import { complementsPhrase } from './complementsPhrase.js';
 import {
   adj, BEHAELTER, BOOT, BUCH, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
-  GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHNELL, SEGEL, SORGFALT, vp, WAEHLEN,
+  GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SCHNELL, SEGEL, SORGFALT, vp, WAEHLEN,
   WASSER, WEISE, WIND, WORT,
 } from './de.fixtures.js';
 
@@ -35,6 +35,22 @@ describe('complementsPhrase', () => {
 
     test('coordinated predicates render conjunct by conjunct', () => {
       expect(complementsPhrase(complements({ predicative: complement(group('or', np(MUEDE), np(GROSS))) }))).toBe('müde oder groß');
+    });
+
+    // A46: "scheinen" takes no predicate nominative, only "zu sein", which carries a mixed group.
+    test('under a seeming verb a predicate noun takes the infinitival copula', () => {
+      const under = (phrase: Parameters<typeof complement>[0], verb: Forms) =>
+        complementsPhrase(complements({ predicative: complement(phrase) }), verb);
+      expect(under(np(LEGENDE, { definiteness: 'indefinite' }), SCHEINEN)).toBe('eine Legende zu sein');
+      expect(under(el(np(MUEDE), np(LEGENDE, { definiteness: 'indefinite' })), SCHEINEN)).toBe('müde und eine Legende zu sein');
+      expect(under(np(MUEDE), SCHEINEN)).toBe('müde');
+      expect(under(np(LEGENDE, { definiteness: 'indefinite' }), BRENNEN)).toBe('eine Legende');
+    });
+
+    test('the infinitival copula closes the complements, against the verb cluster', () => {
+      expect(complementsPhrase(complements({
+        predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })), locative: complement(np(MARKT)),
+      }), SCHEINEN)).toBe('eine Legende im Markt zu sein');
     });
   });
 

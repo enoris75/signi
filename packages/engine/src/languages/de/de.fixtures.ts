@@ -78,6 +78,11 @@ export const GEBEN: Forms = {
 export const SCHNEIDEN: Forms = { base: 'schneiden', participle: 'geschnitten', '3sg_present': 'schneidet' };
 export const WAEHLEN: Forms = { base: 'wählen', participle: 'gewählt', '3sg_present': 'wählt' };
 export const WERDEN_VERB: Forms = { base: 'werden', participle: 'geworden', aux: 'be', '3sg_present': 'wird' };
+/** The seeming verb (`seeming`): a predicate noun under it takes "zu sein". */
+export const SCHEINEN: Forms = {
+  base: 'scheinen', participle: 'geschienen', seeming: '1',
+  '3sg_present': 'scheint', '3pl_present': 'scheinen', '3sg_past': 'schien',
+};
 export const MUESSEN: Forms = { base: 'müssen', '1sg_present': 'muss', '3sg_present': 'muss', '3pl_present': 'müssen', '3sg_past': 'musste' };
 export const KOENNEN: Forms = { base: 'können', '3sg_present': 'kann' };
 export const WOLLEN: Forms = { base: 'wollen', '3sg_present': 'will' };

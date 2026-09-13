@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS,
   GUT, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
-  SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
+  SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
 import { renderClause } from './renderClause.js';
 
@@ -14,6 +14,8 @@ const ZEIGEN: Forms = { base: 'zeigen', participle: 'gezeigt', '3sg_present': 'z
 
 const mouse = el(np(MAUS));
 const tired = complements({ predicative: complement(np(MUEDE)) });
+const LEGENDE: Forms = { base: 'Legende', plural: 'Legenden', gender: 'fem', count: 'singular' };
+const aLegend = complements({ predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })) });
 const toTheBoy = complements({ terminus: complement(np(JUNGE)) });
 // "indem man ein Messer wählt" — a process-level instrument. The subject is "man" throughout, so
 // the means clause's impersonal "man" (B06) is also the right German here.
@@ -132,6 +134,22 @@ describe('renderClause', () => {
       expect(gives(true)).toBe('der Mann gibt dem Jungen das Buch nicht');
     });
 
+    // A46: "zu sein" closes the complements, so it sits against the non-finite tail in every order.
+    test('a predicate noun under the seeming verb takes "zu sein" before the verb cluster', () => {
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN), { complements: aLegend }))).toBe('der Kater scheint eine Legende zu sein');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN, { negative: true }), { complements: aLegend })))
+        .toBe('der Kater scheint nicht eine Legende zu sein');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN, { tense: 'future' }), { complements: aLegend })))
+        .toBe('der Kater wird eine Legende zu sein scheinen');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN, { modals: [modal(KOENNEN)] }), { complements: aLegend })))
+        .toBe('der Kater kann eine Legende zu sein scheinen');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN, { mood: 'conditional' }), { complements: aLegend }), false, true))
+        .toBe('der Kater eine Legende zu sein scheinen würde');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN, { mood: 'infinitive' }), { complements: aLegend }))).toBe('eine Legende zu sein scheinen');
+      expect(renderClause(clause(np(KATER), vp(WERDEN_VERB), { complements: aLegend }))).toBe('der Kater wird eine Legende');
+      expect(renderClause(clause(np(KATER), vp(SCHEINEN), { complements: tired }))).toBe('der Kater scheint müde');
+    });
+
     test('a means clause trails the whole verb complex', () => {
       // Its leading comma is pulled onto the verb later, by `punctuate`.
       expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { complements: byChoosingAKnife })))
@@ -193,6 +211,15 @@ describe('renderClause', () => {
         .toBe('seid nicht müde');
     });
 
+    // A49: the command takes the declarative's slots, so "nicht" leads the adverb as well.
+    test('nicht leads an adverb, ahead of the object and a predicate complement', () => {
+      expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(SCHNELL) })))).toBe('iss nicht schnell');
+      expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(IMMER) }), { directObject: mouse })))
+        .toBe('iss nicht immer die Maus');
+      expect(renderClause(clause(np(DU), command(SEIN, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
+        .toBe('sei nicht immer müde');
+    });
+
     test('a negative adverb stands in for nicht', () => {
       expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(NIE) })))).toBe('iss nie');
     });
@@ -208,6 +235,9 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(DU), instruction(ESSEN), { directObject: mouse }))).toBe('die Maus essen');
       expect(renderClause(clause(np(DU), instruction(ESSEN, { negative: true }), { directObject: mouse }))).toBe('die Maus nicht essen');
       expect(renderClause(clause(np(DU), instruction(ESSEN, { modifier: concept(SCHNELL) })))).toBe('schnell essen');
+      // A49: "nicht" leads the adverb and the predicate complement, not the infinitive.
+      expect(renderClause(clause(np(DU), instruction(ESSEN, { negative: true, modifier: concept(IMMER) })))).toBe('nicht immer essen');
+      expect(renderClause(clause(np(DU), instruction(SEIN, { negative: true }), { complements: tired }))).toBe('nicht müde sein');
       expect(renderClause(clause(np(DU), instruction(ZEIGEN), { directObject: el(np(BUCH)), complements: toTheBoy })))
         .toBe('dem Jungen das Buch zeigen');
       expect(renderClause(clause(np(DU), instruction(SCHNEIDEN), { complements: byChoosingAKnife })))
@@ -225,9 +255,18 @@ describe('renderClause', () => {
         .toBe('dem Jungen das Buch zeigen');
     });
 
-    test('nicht sits just before the infinitive, unless a negative adverb negates', () => {
+    test('nicht trails the objects, unless a negative adverb negates', () => {
       expect(renderClause(clause(np(KATER), infinitive(ESSEN, { negative: true }), { directObject: mouse }))).toBe('die Maus nicht essen');
       expect(renderClause(clause(np(KATER), infinitive(ESSEN, { negative: true, modifier: concept(NIE) })))).toBe('nie essen');
+    });
+
+    // A49: the infinitive takes the declarative's slots.
+    test('nicht leads an adverb and a predicate complement', () => {
+      expect(renderClause(clause(np(KATER), infinitive(ESSEN, { negative: true, modifier: concept(IMMER) }), { directObject: mouse })))
+        .toBe('nicht immer die Maus essen');
+      expect(renderClause(clause(np(KATER), infinitive(SEIN, { negative: true }), { complements: tired }))).toBe('nicht müde sein');
+      expect(renderClause(clause(np(KATER), infinitive(WERDEN_VERB, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
+        .toBe('nicht immer müde werden');
     });
   });
 });

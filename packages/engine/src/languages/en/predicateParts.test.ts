@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
 import {
-  ALWAYS, BE, BOOK, CAN, CAT, complement, complements, concept, DOG, EAT, el, FAST, type Forms, GIVE, GO, HE, HOUSE, I, modal, MOUSE,
-  MUST, NEVER, np, SEE, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, YOU,
+  ALWAYS, BE, BECOME, BOOK, CAN, CAT, complement, complements, concept, DOG, EAT, el, FAST, type Forms, GIVE, GO, HE, HOUSE, I,
+  LEGEND, modal, MOUSE, MUST, NEVER, np, SEE, SEEM, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, YOU,
 } from './en.fixtures.js';
 import { predicateParts } from './predicateParts.js';
 
@@ -57,6 +57,16 @@ describe('predicateParts', () => {
 
     test('complements follow the object', () => {
       expect(said(CAT, vp(GIVE), el(np(BOOK)), complements({ terminus: complement(np(DOG)) }))).toBe('gives the book to the dog');
+    });
+
+    // A46: the governing verb reaches the predicative, so SEEM repairs a predicate noun where BECOME does not.
+    test('a predicate noun under the seeming verb takes "to be" in every verb group', () => {
+      const legend = complements({ predicative: complement(np(LEGEND, { definiteness: 'indefinite' })) });
+      expect(said(CAT, vp(SEEM), undefined, legend)).toBe('seems to be a legend');
+      expect(said(CAT, vp(SEEM, { tense: 'past', negative: true }), undefined, legend)).toBe('did not seem to be a legend');
+      expect(said(CAT, vp(SEEM, { modals: [modal(CAN)] }), undefined, legend)).toBe('can seem to be a legend');
+      expect(said(CAT, vp(BECOME), undefined, legend)).toBe('becomes a legend');
+      expect(said(CAT, vp(SEEM), undefined, tired)).toBe('seems tired');
     });
   });
 

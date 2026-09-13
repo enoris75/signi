@@ -9,6 +9,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
+import { nichtSlots } from './nichtSlots.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
@@ -38,34 +39,25 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     if (!verbPhrase) return subj.trim();
     const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
-    // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" negates,
-    // sitting before a predicate complement ("sei nicht vorsichtig") but after the objects
-    // otherwise ("iss das Brot nicht").
+    const hasPredicative = !!phrase.complements?.['predicative'];
+
+    // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" takes the
+    // declarative's slots (see `nichtSlots`): before the adverb ("iss nicht schnell"), before a
+    // predicate complement ("sei nicht vorsichtig"), otherwise after the objects ("iss das Brot nicht").
     if (mood === 'imperative') {
       const word = deImperativeWord(verb.forms, deImperativePN(subject.agreement));
       const impDirect = directObject ? elementPhrase(directObject, 'acc') : '';
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
-      const hasPredicative = !!phrase.complements?.['predicative'];
-      const impComplements = complementsPhrase(rest);
+      const neg = nichtSlots(applyNicht, { adverb: !!impModifier, predicative: hasPredicative });
+      const impComplements = complementsPhrase(rest, verb.forms);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
-      if (register === 'instruction') {
-        return [impModifier, dativeText, impDirect, impComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? word, meansText]
-          .filter(Boolean)
-          .join(' ')
-          .trim();
-      }
-      const parts = [word, impModifier, dativeText, impDirect];
-      if (hasPredicative) {
-        if (applyNicht) parts.push('nicht');
-        parts.push(impComplements);
-      } else {
-        parts.push(impComplements);
-        if (applyNicht) parts.push('nicht');
-      }
-      parts.push(meansText);
+      const mittelfeld = [neg.beforeAdverb, impModifier, dativeText, impDirect, neg.beforePredicative, impComplements, neg.after];
+      const parts = register === 'instruction'
+        ? [...mittelfeld, verb.forms['base'] ?? word, meansText]
+        : [word, ...mittelfeld, meansText];
       return parts.filter(Boolean).join(' ').trim();
     }
 
@@ -76,8 +68,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const infDirect = directObject ? elementPhrase(directObject, 'acc') : '';
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
-      const infComplements = complementsPhrase(rest);
-      return [infModifier, dativeText, infDirect, infComplements, applyNicht ? 'nicht' : '', verb.forms['base'] ?? '', meansText]
+      const neg = nichtSlots(applyNicht, { adverb: !!infModifier, predicative: hasPredicative });
+      const infComplements = complementsPhrase(rest, verb.forms);
+      return [neg.beforeAdverb, infModifier, dativeText, infDirect, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -112,34 +105,25 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
     const anyMidAdverb = modalAdverbsText || modifierText;
 
-    // "nicht" precedes the modifier when one exists ("nicht immer"),
-    // otherwise trails after objects ("das Brot nicht").
     // Skip "nicht" when the modifier is already negative ("nie" = never), or when the object's own
     // "kein" already negates the clause ("isst keine Maus", not "isst keine Maus nicht").
-    const applyNicht = verbNegative && !modifierIsNegative && !objectIsNegative;
-    // The prospective's "im Begriff …" is a predicate the negation scopes over as a whole, so
-    // "nicht" precedes it on the finite auxiliary — "ist NICHT im Begriff zu essen" (is NOT about
-    // to eat), never "ist im Begriff NICHT zu essen" (is about to NOT eat). It is the only aspect
-    // whose "mid" behaves this way; the progressive's adverb "gerade" takes "nicht" after it
-    // ("isst gerade nicht"). When it fires it is the sole "nicht", so the other slots stand down.
-    const negProspective = applyNicht && aspect === 'prospective';
-    // A predicate complement (copula/BECOME: "ist vorsichtig") is negated by "nicht"
-    // *before* it — "ist nicht vorsichtig", not "*ist vorsichtig nicht". With an adverb
-    // present the "nicht immer" placement already covers it, so guard on !modifierText.
-    const hasPredicative = !!phrase.complements?.['predicative'];
-    const negAspectMid = negProspective ? 'nicht' : '';
-    const negBefore = !negProspective && applyNicht && anyMidAdverb ? 'nicht' : '';
-    const negComplement = !negProspective && applyNicht && hasPredicative && !anyMidAdverb ? 'nicht' : '';
-    const negAfter  = !negProspective && applyNicht && !anyMidAdverb && !hasPredicative ? 'nicht' : '';
-    const complementsText = complementsPhrase(rest);
+    const applyNicht = verbNegative === true && !modifierIsNegative && !objectIsNegative;
+    // "nicht" leads a Mittelfeld adverb ("nicht immer") or a predicate complement ("ist nicht
+    // vorsichtig") and otherwise trails the objects ("das Brot nicht"). The prospective's "im Begriff
+    // …" is a predicate the negation scopes over as a whole, so "nicht" precedes it on the finite
+    // auxiliary — "ist NICHT im Begriff zu essen" (is NOT about to eat), never "ist im Begriff NICHT
+    // zu essen" (is about to NOT eat). It is the only aspect whose "mid" behaves this way; the
+    // progressive's adverb "gerade" takes "nicht" after it ("isst gerade nicht").
+    const neg = nichtSlots(applyNicht, { prospective: aspect === 'prospective', adverb: !!anyMidAdverb, predicative: hasPredicative });
+    const complementsText = complementsPhrase(rest, verb.forms);
     // Verb-final (subordinate) order: the subject leads and the finite verb closes the clause,
     // behind the non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. Used
     // for the "wenn" protasis of a conditional.
     if (verbFinal) {
-      return [subj, negAspectMid, aspectMid, negBefore, modalAdverbsText, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, verbText, meansText]
+      return [subj, neg.beforeAspect, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, verbText, meansText]
         .filter(Boolean).join(' ').trim();
     }
     const head = inverted ? [verbText, subj] : [subj, verbText];
-    return [...head, negAspectMid, aspectMid, negBefore, modalAdverbsText, modifierText, dativeText, directObjectText, negComplement, complementsText, negAfter, infinitiveTail, meansText]
+    return [...head, neg.beforeAspect, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, meansText]
       .filter(Boolean).join(' ').trim();
 }

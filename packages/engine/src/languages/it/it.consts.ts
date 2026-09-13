@@ -26,10 +26,12 @@ export const SPECIAL_START = /^(s[^aeiou]|z|ps|gn|x|y)/i;
  * (grande/piccolo) precede, so they behave consistently — the trade-off is that a
  * size + beauty pair stacks before the noun ("il grande bel cane").
  */
+// GREAT, the gloss degree word, is the same "grande" as BIG and precedes like it ("di grande
+// dimensione"). HIGH ("alto") stays after the noun: it is not a BAGS adjective ("la torre alta").
 // The ordinals join them: an ordinal precedes its noun in Italian ("il primo padre", "la
 // seconda volta"), unlike the qualifying adjectives that follow it.
 export const PRENOMINAL = new Set([
-  'BIG', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
+  'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
   'FIRST', 'SECOND', 'THIRD',
 ]);
 

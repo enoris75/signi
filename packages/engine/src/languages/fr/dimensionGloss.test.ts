@@ -8,6 +8,7 @@ describe('dimensionGloss', () => {
   test('an extent or quality noun takes de', () => {
     expect(gloss(np(TAILLE, { definiteness: 'bare' }, { adjectives: [concept(PETIT, 'SMALL')], dimensionGloss: true }))).toBe('de petite taille');
     expect(gloss(np(QUALITE, { definiteness: 'bare' }, { adjectives: [concept(BON, 'GOOD')], dimensionGloss: true }))).toBe('de bonne qualité');
+    expect(gloss(np(TAILLE, { definiteness: 'bare' }, { adjectives: [concept(GRAND, 'GREAT')], dimensionGloss: true }))).toBe('de grande taille');
   });
 
   test('a measure noun takes à', () => {

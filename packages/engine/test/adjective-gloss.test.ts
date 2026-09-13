@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { np, say, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // The adjective-definition gloss (C02): a *verbless* period marked `dimensionGloss`, whose subject
 // is a bare noun phrase of a **dimension noun** carrying a **degree adjective** ("great size"),
@@ -121,8 +121,31 @@ describe('known bugs: adjective-definition gloss (French)', () => {
   // grande taille", not "de taille grande". GREAT was seeded as a gloss degree word but never added
   // to French's PRENOMINAL set, so it falls postnominal. SIZE is consonant-initial, isolating the
   // placement from the A44 elision. (The same likely applies to HIGH → "de haute qualité".)
-  test.fails('French places GREAT before the noun in a gloss (de grande taille)', () => {
+  test('French places GREAT before the noun in a gloss (de grande taille)', () => {
     expect(gloss('SIZE', 'GREAT').fr).toBe('de grande taille.');
+  });
+
+  // Every GREAT gloss the corpus defines: HIGH (HEIGHT), OLD (AGE), STRONG (STRENGTH). A prenominal
+  // "grand" leads the vowel-initial AGE, so "de" stays whole (A44) and "grand" stays masculine.
+  test('French places GREAT before the noun in every GREAT gloss', () => {
+    expect(gloss('HEIGHT', 'GREAT').fr).toBe('de grande hauteur.');
+    expect(gloss('AGE', 'GREAT').fr).toBe('de grand âge.');
+    expect(gloss('STRENGTH', 'GREAT').fr).toBe('de grande force.');
+  });
+
+  // The placement only moves the positive degree: a compared GREAT follows the noun like any compared
+  // BAGS adjective, and HIGH ("haut") is not in the prenominal set.
+  test('French keeps a compared GREAT and HIGH after the noun', () => {
+    const more = sayAll({ subject: np('SIZE', { adjectives: ['GREAT'], adjectiveDegrees: ['more'], definiteness: 'bare', dimensionGloss: true }) });
+    expect(more.fr).toBe('de taille plus grande.');
+    expect(gloss('QUALITY', 'HIGH').fr).toBe('de qualité haute.');
+  });
+
+  // Outside a gloss GREAT reads like BIG: before the noun, agreed, linking before a vowel.
+  test('French places an attributive GREAT before the noun in a clause', () => {
+    expect(say(clause(np('CAT', { adjectives: ['GREAT'] }), 'EAT'), 'fr')).toBe('le grand chat mange.');
+    expect(say(clause(np('ANIMAL', { adjectives: ['GREAT'] }), 'EAT'), 'fr')).toBe('le grand animal mange.');
+    expect(say(clause(np('HOUSE', { number: 'plural', adjectives: ['GREAT'] }), 'BURN'), 'fr')).toBe('les grandes maisons brûlent.');
   });
 });
 
@@ -130,9 +153,28 @@ describe('known bugs: adjective-definition gloss (French)', () => {
 // is, so every GREAT gloss puts it after the noun: "di dimensione grande". The corpus and
 // `dimensionGloss` comments both give "di grande dimensione". (HIGH is left undecided, as in French.)
 describe('known bugs: adjective-definition gloss (Italian)', () => {
-  test.fails('Italian places GREAT before the noun in a gloss (di grande dimensione)', () => {
+  test('Italian places GREAT before the noun in a gloss (di grande dimensione)', () => {
     expect(say({ subject: np('SIZE', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande dimensione.');
     expect(say({ subject: np('AGE', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande età.');
     expect(say({ subject: np('STRENGTH', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande forza.');
+  });
+
+  // The fourth GREAT gloss the corpus defines, HIGH → HEIGHT + GREAT.
+  test('Italian places GREAT before the noun in the HEIGHT gloss (di grande altezza)', () => {
+    expect(gloss('HEIGHT', 'GREAT').it).toBe('di grande altezza.');
+  });
+
+  // A compared GREAT follows the noun like any compared BAGS adjective; HIGH ("alto") is not in the
+  // prenominal set and stays after the noun.
+  test('Italian keeps a compared GREAT and HIGH after the noun', () => {
+    const more = sayAll({ subject: np('SIZE', { adjectives: ['GREAT'], adjectiveDegrees: ['more'], definiteness: 'bare', dimensionGloss: true }) });
+    expect(more.it).toBe('di dimensione più grande.');
+    expect(gloss('QUALITY', 'HIGH').it).toBe('di qualità alta.');
+  });
+
+  // Outside a gloss GREAT reads like BIG: before the noun, agreed in number.
+  test('Italian places an attributive GREAT before the noun in a clause', () => {
+    expect(say(clause(np('CAT', { adjectives: ['GREAT'] }), 'EAT'), 'it')).toBe('il grande gatto mangia.');
+    expect(say(clause(np('HOUSE', { number: 'plural', adjectives: ['GREAT'] }), 'BURN'), 'it')).toBe('le grandi case bruciano.');
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ConceptForms } from '../../types.js';
-import { adj, BELLO, concept, FELICE, FORTE, GATTO, GRANDE, np, PRIMO, STANCO, VECCHIO } from './it.fixtures.js';
+import { adj, ALTO, BELLO, concept, DIMENSIONE, FELICE, FORTE, GATTO, GRANDE, np, PRIMO, STANCO, VECCHIO } from './it.fixtures.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
 const ids = (xs: ConceptForms[]) => xs.map((a) => a.conceptId);
@@ -21,11 +21,23 @@ describe('splitAdjectives', () => {
     expect(post).toEqual([]);
   });
 
-  // GREAT belongs before the noun (A45); this pins the current placement, which the fix changes.
-  test('placement keys off the concept, not the surface: GREAT grande follows', () => {
-    const { pre, post } = splitAdjectives(np(GATTO, {}, { adjectives: [concept(GRANDE, 'GREAT')] }));
+  // A45: GREAT, the gloss degree word, is the same "grande" as BIG and precedes like it.
+  test('GREAT precedes like BIG: grande dimensione', () => {
+    const { pre, post } = splitAdjectives(np(DIMENSIONE, {}, { adjectives: [concept(GRANDE, 'GREAT')] }));
+    expect(ids(pre)).toEqual(['GREAT']);
+    expect(post).toEqual([]);
+  });
+
+  test('placement keys off the concept, not the surface: grande under an unlisted concept follows', () => {
+    const { pre, post } = splitAdjectives(np(GATTO, {}, { adjectives: [concept(GRANDE, 'HUGE')] }));
     expect(pre).toEqual([]);
-    expect(ids(post)).toEqual(['GREAT']);
+    expect(ids(post)).toEqual(['HUGE']);
+  });
+
+  test('HIGH alto is not a BAGS adjective and follows', () => {
+    const { pre, post } = splitAdjectives(np(DIMENSIONE, {}, { adjectives: [concept(ALTO, 'HIGH')] }));
+    expect(pre).toEqual([]);
+    expect(ids(post)).toEqual(['HIGH']);
   });
 
   test('a graded prenominal adjective moves after the noun: il gatto più bello', () => {

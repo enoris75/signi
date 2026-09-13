@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, firstConjunct, locativeIdiom, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, firstConjunct, isSeemingPredicateNoun, locativeIdiom, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
@@ -16,9 +16,14 @@ import { spatialHead } from './spatialHead.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
 
-export function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+// `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
+// complements with the infinitival copula ("scheint eine Legende zu sein").
+export function complementsPhrase(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  verb: ConceptForms['forms'] = {},
+): string {
   if (!complements) return '';
-  return COMPLEMENT_RENDER_ORDER
+  const text = COMPLEMENT_RENDER_ORDER
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
@@ -156,4 +161,11 @@ export function complementsPhrase(complements?: Partial<Record<ComplementType, R
     })
     .filter(Boolean)
     .join(' ');
+  // "scheinen" takes no predicate nominative at all — "*scheint eine Legende" — only the infinitive
+  // "zu sein" (a predicate adjective alone stays bare: "scheint müde"). The infinitive is
+  // non-finite, so it closes the complements and sits against the verb cluster, whatever the clause
+  // order: "scheint eine Legende im Markt zu sein", "eine Legende zu sein scheinen wird", ", die eine
+  // Legende zu sein scheint,".
+  const predicative = complements['predicative'];
+  return predicative && isSeemingPredicateNoun(predicative, verb) ? `${text} zu sein` : text;
 }

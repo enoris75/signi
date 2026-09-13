@@ -136,7 +136,8 @@ export const GIVE: Forms = { base: 'give', ...present('give', 'gives'), past: 'g
 /** A verb whose resultative selects BE ("is gone", not "has gone"). */
 export const GO: Forms = { base: 'go', ...present('go', 'goes'), past: 'went', gerund: 'going', participle: 'gone', aux: 'be' };
 export const BECOME: Forms = { base: 'become', ...present('become', 'becomes'), past: 'became', gerund: 'becoming', participle: 'become' };
-export const SEEM: Forms = { base: 'seem', ...present('seem', 'seems'), past: 'seemed', gerund: 'seeming', participle: 'seemed' };
+/** The seeming verb (`seeming`): a predicate noun under it takes "to be". */
+export const SEEM: Forms = { base: 'seem', seeming: '1', ...present('seem', 'seems'), past: 'seemed', gerund: 'seeming', participle: 'seemed' };
 /** The copula: fully suppletive, per-person past, negates on itself (`copula`). */
 export const BE: Forms = {
   base: 'be', copula: '1',

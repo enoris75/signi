@@ -334,7 +334,7 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
   const eatNot = (modifier: string, plan: Partial<PhrasePlan> = {}) =>
     sayAll(command(plan, np('SECOND_PERSON'), { negative: true, modifier })).de;
 
-  test.fails('German puts "nicht" before the adverb and the predicate complement', () => {
+  test('German puts "nicht" before the adverb and the predicate complement', () => {
     expect(eatNot('FAST')).toBe('iss nicht schnell.');
     expect(eatNot('ALWAYS')).toBe('iss nicht immer.');
     expect(eatNot('ALWAYS', { imperativeRegister: 'instruction' })).toBe('nicht immer essen.');
@@ -343,6 +343,51 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
       imperative: true,
       imperativeRegister: 'instruction',
     }).de).toBe('nicht müde sein.');
+  });
+
+  const beNot = (addressee: NounPhrase, modifier?: string, plan: Partial<PhrasePlan> = {}) =>
+    sayAll({
+      ...clause(addressee, 'BE', { verbPhrase: { negative: true, modifier }, complements: { predicative: { phrase: np('TIRED') } } }),
+      imperative: true,
+      ...plan,
+    }).de;
+  const ihr = np('SECOND_PERSON', { number: 'plural' });
+  const wir = np('FIRST_PERSON', { number: 'plural' });
+
+  // The same slots in every person: the ihr command and the wir cohortative.
+  test('German puts "nicht" before the adverb in the ihr and wir forms too', () => {
+    expect(sayAll(command({}, ihr, { negative: true, modifier: 'FAST' })).de).toBe('esst nicht schnell.');
+    expect(sayAll(command({}, wir, { negative: true, modifier: 'ALWAYS' })).de).toBe('essen wir nicht immer.');
+    expect(beNot(ihr)).toBe('seid nicht müde.');
+    expect(beNot(wir)).toBe('seien wir nicht müde.');
+  });
+
+  // An adverb and a predicate complement together: "nicht" leads the adverb, as in "ist nicht immer müde".
+  test('German puts "nicht" before an adverb that precedes the object or the predicate complement', () => {
+    expect(eatNot('ALWAYS', { directObject: np('MOUSE') })).toBe('iss nicht immer die Maus.');
+    expect(beNot(np('SECOND_PERSON'), 'ALWAYS')).toBe('sei nicht immer müde.');
+    expect(beNot(np('SECOND_PERSON'), 'ALWAYS', { imperativeRegister: 'instruction' })).toBe('nicht immer müde sein.');
+    expect(eatNot('FAST', { imperativeRegister: 'instruction' })).toBe('nicht schnell essen.');
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'BECOME', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }),
+      imperative: true,
+    }).de).toBe('werde nicht müde.');
+  });
+
+  // Regression guards: with no adverb or predicate complement "nicht" still trails the objects, a
+  // negative adverb still replaces it, and an affirmative command is untouched.
+  test('German keeps "nicht" after the objects, and "nie" in its place', () => {
+    const eat = (plan: Partial<PhrasePlan>, verbPhrase: Partial<VerbPhrase>) => sayAll(command(plan, np('SECOND_PERSON'), verbPhrase)).de;
+    expect(eat({ directObject: np('MOUSE') }, { negative: true })).toBe('iss die Maus nicht.');
+    expect(eat({ directObject: np('MOUSE'), imperativeRegister: 'instruction' }, { negative: true })).toBe('die Maus nicht essen.');
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } }, verbPhrase: { negative: true } }),
+      imperative: true,
+    }).de).toBe('gib dem Jungen das Buch nicht.');
+    expect(eat({ complements: { locative: { phrase: np('MARKET') } } }, { negative: true })).toBe('iss im Markt nicht.');
+    expect(eat({}, { negative: true, modifier: 'NEVER' })).toBe('iss nie.');
+    expect(eat({ imperativeRegister: 'instruction' }, { negative: true, modifier: 'NEVER' })).toBe('nie essen.');
+    expect(eat({ directObject: np('MOUSE') }, { modifier: 'FAST' })).toBe('iss schnell die Maus.');
   });
 });
 

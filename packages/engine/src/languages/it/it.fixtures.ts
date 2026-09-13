@@ -105,7 +105,7 @@ export const SI: Forms = { base: 'si', person: '3', number: 'singular', generic:
 // ── Adjectives ──────────────────────────────────────────────────────────────
 // Prenominal ones (it.consts PRENOMINAL) are keyed by concept id — pass it to `concept`.
 
-/** BIG (prenominal). GREAT shares the surface "grande" but is postnominal. */
+/** BIG (prenominal). GREAT shares the surface "grande" and is prenominal too. */
 export const GRANDE: Forms = { role: 'adjective', base: 'grande' };
 /** SMALL (prenominal). */
 export const PICCOLO: Forms = { role: 'adjective', base: 'piccolo' };

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
   BEHAELTER, BUCH, complement, concept, el, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
-  MANN, modal, MUESSEN, NIE, np, SCHNELL, vp, WOLLEN,
+  MANN, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNELL, vp, WOLLEN,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
 
@@ -134,6 +134,17 @@ describe('subordinateClause', () => {
       expect(relativeOn(MANN, {
         headRole: 'subject', verbPhrase: vp(LESEN), directObject: el(np(BUCH)), complements: { locative: complement(np(HAUS)) },
       })).toBe(', der das Buch im Haus liest,');
+    });
+
+    // A46: a predicate noun under the seeming verb closes on "zu sein", right before the finite verb.
+    test('a predicate noun under the seeming verb takes "zu sein" before the verb', () => {
+      const LEGENDE: Forms = { base: 'Legende', plural: 'Legenden', gender: 'fem', count: 'singular' };
+      expect(relativeOn(KATER, {
+        headRole: 'subject', verbPhrase: vp(SCHEINEN), complements: { predicative: complement(np(LEGENDE, { definiteness: 'indefinite' })) },
+      })).toBe(', der eine Legende zu sein scheint,');
+      expect(relativeOn(KATER, {
+        headRole: 'subject', verbPhrase: vp(SCHEINEN), complements: { predicative: complement(np(MUEDE)) },
+      })).toBe(', der müde scheint,');
     });
 
     test('a relative clause nests inside another', () => {

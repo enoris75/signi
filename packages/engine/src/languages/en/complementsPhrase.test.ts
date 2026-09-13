@@ -3,7 +3,7 @@ import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from 
 import { complementsPhrase } from './complementsPhrase.js';
 import {
   adj, AFRICA, BEAUTIFUL, BIG, BOY, CARE, CAT, CHILD, CHOOSE, complement, complements, concept, CRY, DOG, el, EUROPE, FAST, type Forms,
-  FOX, GOOD, group, HAPPY, HE, HIGH, HOUSE, I, LEGEND, np, OBJECT, SHE, SPEED, STICK, TIRED, vp, WAY, WE, WORD,
+  FOX, GOOD, group, HAPPY, HE, HIGH, HOUSE, I, LEGEND, np, OBJECT, SEEM, SHE, SPEED, STICK, TIRED, vp, WAY, WE, WORD,
 } from './en.fixtures.js';
 
 const MARKET: Forms = { base: 'market', plural: 'markets', count: 'singular' };
@@ -45,6 +45,22 @@ describe('complementsPhrase', () => {
     test('a predicate noun may carry a relative clause', () => {
       const legend = np(LEGEND, { definiteness: 'indefinite' }, { relative: { headRole: 'subject', verbPhrase: vp(BURN) } });
       expect(complementsPhrase(complements({ predicative: complement(legend) }))).toBe('a legend that burns');
+    });
+
+    // A46: a seeming verb takes a predicate noun only through "to be", which carries a mixed group.
+    test('under a seeming verb a predicate noun takes the infinitival copula', () => {
+      const under = (phrase: Parameters<typeof complement>[0], verb: Forms) =>
+        complementsPhrase(complements({ predicative: complement(phrase) }), verb);
+      expect(under(np(LEGEND, { definiteness: 'indefinite' }), SEEM)).toBe('to be a legend');
+      expect(under(el(np(TIRED), np(LEGEND, { definiteness: 'indefinite' })), SEEM)).toBe('to be tired and a legend');
+      expect(under(np(TIRED), SEEM)).toBe('tired');
+      expect(under(np(LEGEND, { definiteness: 'indefinite' }), BURN)).toBe('a legend');
+    });
+
+    test('the copula stays with the predicate, ahead of the other complements', () => {
+      expect(complementsPhrase(complements({
+        predicative: complement(np(LEGEND, { definiteness: 'indefinite' })), locative: complement(np(MARKET)),
+      }), SEEM)).toBe('to be a legend in the market');
     });
   });
 

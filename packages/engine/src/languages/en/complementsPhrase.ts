@@ -1,11 +1,16 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, causeSentiment, firstConjunct, locativeIdiom, mannerRelation, pathSpecifier, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, causeSentiment, firstConjunct, isSeemingPredicateNoun, locativeIdiom, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
 import { CAUSE_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
 
-export function complementsPhrase(complements?: Partial<Record<ComplementType, ResolvedComplement>>): string {
+// `verb` is the governing verb's forms: the predicative reads it to repair a predicate noun under a
+// seeming verb ("seems to be a legend").
+export function complementsPhrase(
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  verb: ConceptForms['forms'] = {},
+): string {
   if (!complements) return '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
@@ -44,12 +49,16 @@ export function complementsPhrase(complements?: Partial<Record<ComplementType, R
       // Subject complement: a predicate adjective takes no article and doesn't agree, but
       // carries its own degree ("seems happier"); a predicate noun keeps its own article,
       // with no preposition ("becomes a legend"). Coordinated conjuncts are rendered one by
-      // one, so a group may mix the two ("seems a legend and happy" is odd, but "seems happy
+      // one, so a group may mix the two ("becomes a legend and happy" is odd, but "seems happy
       // or tired" and "becomes a legend and an icon" both fall out of the same map).
+      // A seeming verb takes a predicate noun only through the infinitival copula — "seems to be a
+      // legend", not the archaic "seems a legend" — which then carries the whole group ("seems to be
+      // tired and a legend"). BECOME and BE keep the bare noun; an adjective alone stays bare.
       if (type === 'predicative') {
-        return coordinate(c.phrase, (np) =>
+        const predicate = coordinate(c.phrase, (np) =>
           np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),
         );
+        return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
