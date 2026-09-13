@@ -4,5 +4,7 @@
     "outDir": "./dist",
     "rootDir": "./src"
   },
-  "include": ["src"]
+  "include": ["src"],
+  // Unit tests (and their fixture builders) sit next to the source they test; keep them out of dist.
+  "exclude": ["src/**/*.test.ts", "src/**/*.fixtures.ts"]
 }

@@ -19,8 +19,10 @@ export default defineConfig({
           // serving first — which is the point of having them alongside the Playwright suite: the
           // engine's grammar is a pure function and deserves to be tested combinatorially, in
           // milliseconds, rather than three sentences at a time through a browser.
+          // Function-level unit tests live next to the source they test (src/**/*.test.ts) and build
+          // their resolved inputs by hand instead of going through the lexicon.
           name: 'engine',
-          include: ['packages/engine/test/**/*.test.ts'],
+          include: ['packages/engine/test/**/*.test.ts', 'packages/engine/src/**/*.test.ts'],
           // The harness seeds an in-memory database on import. Sharing one module registry across
           // the spec files seeds it once for the whole run instead of once per file; the tests
           // only read from it, so there is no isolation to lose.
