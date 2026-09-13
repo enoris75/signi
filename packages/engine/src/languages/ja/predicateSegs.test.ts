@@ -183,6 +183,14 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(DESU, { aspect: 'resultative' }), undefined, careful))).toBe('慎重でした');
     });
 
+    // A42. The predicate closes on です, so the adjuncts are preposed rather than dropped.
+    test('the locative and cause precede the adverb and the predicate', () => {
+      const adjuncts = complements({ predicative: complement(np(SHINCHOU)), locative: complement(np(IE)), cause: complement(np(INU)) });
+      expect(predicateSegs(vp(DESU), undefined, complements({ predicative: complement(np(SHINCHOU)), locative: complement(np(IE)) })))
+        .toEqual([{ t: '家', r: 'いえ' }, { t: 'で' }, { t: '慎重', r: 'しんちょう' }, { t: 'です' }]);
+      expect(text(predicateSegs(vp(DESU, { modifier: concept(ITSUMO) }), undefined, adjuncts))).toBe('家で犬のためにいつも慎重です');
+    });
+
     test('negation, including a negative adverb’s, reaches the copula', () => {
       expect(text(predicateSegs(vp(DESU, { negative: true }), undefined, careful))).toBe('慎重ではありません');
       expect(text(predicateSegs(vp(DESU, { modifier: concept(KESSHITE) }), undefined, careful))).toBe('決して慎重ではありません');

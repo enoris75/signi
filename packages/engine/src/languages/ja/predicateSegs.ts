@@ -43,8 +43,8 @@ export function predicateSegs(
     || (directObject !== undefined && isNegativeGroup(directObject))
     || hasNegativeComplement(complements);
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
-  // intransitive and licenses only the predicative, so no objects or other complements occur;
-  // an adverb (いつも) simply precedes the predicate.
+  // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
+  // precede the predicate, as they precede an ordinary verb.
   const predicative = complements?.['predicative'];
   // Imperative: a subjectless command (SOV — objects/complements first, verb last). The copula
   // command routes through する: "…にしてください" / "…にしないでください" (する's nai-form is fixed, so
@@ -80,6 +80,10 @@ export function predicateSegs(
     return segs;
   }
   if (verb.forms['copula'] === '1' && predicative) {
+    // The predicate noun closes the clause, so every other complement is preposed ahead of it
+    // (猫は家で犬のために伝説です) rather than lost behind です.
+    const { predicative: _, ...adjuncts } = complements ?? {};
+    segs.push(...complementSegs(adjuncts));
     if (modifier) {
       const base = modifier.forms['base'] ?? '';
       if (base) segs.push(wordSeg(base, modifier.forms['reading']));

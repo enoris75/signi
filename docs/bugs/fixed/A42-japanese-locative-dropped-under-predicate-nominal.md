@@ -48,3 +48,31 @@ the way the action verbs already carry `家で` before the verb.
 |---|---|
 | **Test** | `complements/combined.test.ts` → *known bugs: combined complements* (locative, 1 `test.fails`) |
 | | `complements/combined-triples.test.ts` → *known bugs: three complements* (locative + cause, 1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13, in the Japanese copular branch of the predicate builder:
+
+- [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts): the `BE` +
+  predicative path (the です frame) now renders every non-predicative complement through
+  `complementSegs` **before** the adverb and the inflected copula, the same slot they take ahead of
+  an ordinary verb. So `猫は家で伝説です。` and `猫は家で犬のために伝説です。` keep both the place and
+  the cause. The predicate itself is unchanged: `copulaSegs` still inflects it, and tense, polarity
+  and a spatial relation carry through (`猫は家で伝説ではありませんでした。`, `猫は家の下で伝説です。`).
+  Verb-like copulars (SEEM → 思えます) never took this branch and are unaffected.
+
+Out of scope, not addressed: the copular **imperative** (`…にしてください`) still passes only the
+predicative to `complementSegs`, and a copular **relative clause** keeps its polite です (A116).
+Neither was pinned by this defect.
+
+- **Tests:** [`packages/engine/test/complements/combined.test.ts`](../../../packages/engine/test/complements/combined.test.ts)
+  → *known bugs: combined complements*, and
+  [`packages/engine/test/complements/combined-triples.test.ts`](../../../packages/engine/test/complements/combined-triples.test.ts)
+  → *known bugs: three complements*. Both pinning `test.fails` are now passing `test`s, and the
+  pair/triple tables that had recorded the truncated `猫は伝説です。` now assert the full sentence.
+  Added cases: predicate noun + cause under BE across all seven languages; the preposed place
+  survives an adverb (`いつも`), the `under` relation, and past negation; na- and i-adjective
+  predicates take the place too; a regression guard that a bare predicate nominal and SEEM's order
+  are unchanged. Unit case in
+  [`languages/ja/predicateSegs.test.ts`](../../../packages/engine/src/languages/ja/predicateSegs.test.ts)
+  pins the segment order: locative, cause, adverb, predicate, copula.

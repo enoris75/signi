@@ -239,7 +239,7 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       es: 'el gato parece feliz al perro en la casa.',
       pt: 'o gato parece feliz ao cão na casa.',
       de: 'der Kater scheint dem Hund glücklich im Haus.',
-      ja: '猫は幸せに犬に家で思えます。', // SEEM (思えます) is verb-like, so the adjuncts survive — unlike BE below
+      ja: '猫は幸せに犬に家で思えます。', // SEEM (思えます) is verb-like; BE below preposes its adjuncts before です
     });
   });
 
@@ -257,10 +257,8 @@ describe('three complements: the copular frame (SEEM / BE)', () => {
       es: 'el gato es una leyenda en la casa a causa del perro.',
       pt: 'o gato é uma lenda na casa por causa do cão.',
       de: 'der Kater ist eine Legende im Haus wegen dem Hund.',
-      // A42. The です predicate-nominal frame swallows BOTH trailing adjuncts in Japanese — the
-      // place AND the cause — leaving only "猫は伝説です。". The other six keep both. The intended
-      // output is asserted (failing) in the known-bugs block below.
-      ja: '猫は伝説です。',
+      // Both adjuncts — the place AND the cause — are preposed ahead of the predicate noun (A42).
+      ja: '猫は家で犬のために伝説です。',
     });
   });
 });
@@ -270,7 +268,7 @@ describe('known bugs: three complements', () => {
   // dropped: "is a legend in the house because of the dog" loses both the locative and the cause,
   // rendering "猫は伝説です。". The fix preposes the adjuncts ahead of the predicate noun so both
   // survive: 猫は家で犬のために伝説です。
-  test.fails('Japanese should keep the locative AND the cause under a predicate nominal', () => {
+  test('Japanese should keep the locative AND the cause under a predicate nominal', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       complements: {
         predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) },

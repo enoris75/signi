@@ -57,10 +57,8 @@ describe('complement pairs: predicative + …', () => {
       es: 'el gato es una leyenda en la casa.',
       pt: 'o gato é uma lenda na casa.',
       de: 'der Kater ist eine Legende im Haus.',
-      // KNOWN LIMITATION: Japanese drops the locative under a predicate-nominal copula — the
-      // です construction leaves no slot for it, so only "猫は伝説です。" survives. Pinned as the
-      // current behaviour; the intended output is asserted (failing) in the known-bugs block below.
-      ja: '猫は伝説です。',
+      // The locative is preposed ahead of the predicate noun, which closes on です (A42).
+      ja: '猫は家で伝説です。',
     });
   });
 
@@ -291,12 +289,64 @@ describe('known bugs: combined complements', () => {
   // renders "猫は伝説です。", losing the place the other six languages keep. です closes the clause
   // with no room for the 家で adjunct; the fix preposes it — 猫は家で伝説です — so the place survives
   // ahead of the predicate noun.
-  test.fails('Japanese should keep the locative under a predicate nominal', () => {
+  test('Japanese should keep the locative under a predicate nominal', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       complements: {
         predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) },
         locative: { phrase: np('HOUSE') },
       },
     }))).toMatchObject({ ja: '猫は家で伝説です。' });
+  });
+
+  // BE licenses a cause as well as a place; the です frame swallowed it the same way.
+  test('Japanese keeps a cause under a predicate nominal', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: {
+        predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) },
+        cause: { phrase: np('DOG') },
+      },
+    }))).toEqual({
+      en: 'the cat is a legend because of the dog.',
+      it: 'il gatto è una leggenda a causa del cane.',
+      fr: 'le chat est une légende à cause du chien.',
+      es: 'el gato es una leyenda a causa del perro.',
+      pt: 'o gato é uma lenda por causa do cão.',
+      de: 'der Kater ist eine Legende wegen dem Hund.',
+      ja: '猫は犬のために伝説です。',
+    });
+  });
+
+  // The place leads the whole predicate: an adverb, a spatial relation, tense and polarity all
+  // stay where they were, with the inflected copula still closing the clause.
+  test('the preposed place survives an adverb, a spatial relation, tense and negation', () => {
+    const legendInHouse = (verbPhrase: object, locative: object = {}) => sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase,
+      complements: {
+        predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) },
+        locative: { phrase: np('HOUSE'), ...locative },
+      },
+    })).ja;
+    expect(legendInHouse({ modifier: 'ALWAYS' })).toBe('猫は家でいつも伝説です。');
+    expect(legendInHouse({}, { specifiers: [{ kind: 'path', value: 'under' }] })).toBe('猫は家の下で伝説です。');
+    expect(legendInHouse({ tense: 'past', negative: true })).toBe('猫は家で伝説ではありませんでした。');
+  });
+
+  test('an adjectival predicate takes the preposed place too', () => {
+    const inHouse = (predicate: string) => sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np(predicate) }, locative: { phrase: np('HOUSE') } },
+    })).ja;
+    expect(inHouse('HAPPY')).toBe('猫は家で幸せです。'); // na-adjective + です
+    expect(inHouse('BIG')).toBe('猫は家で大きいです。'); // i-adjective inflects itself
+  });
+
+  // Regression guard: with no adjunct the copular frame is unchanged, and a verb-like copular
+  // (SEEM → 思えます) keeps its own complement order.
+  test('a bare predicate nominal and a verb-like copular are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } },
+    })).ja).toBe('猫は伝説です。');
+    expect(sayAll(clause(np('CAT'), 'SEEM', {
+      complements: { predicative: { phrase: np('HAPPY') }, locative: { phrase: np('HOUSE') } },
+    })).ja).toBe('猫は幸せに家で思えます。');
   });
 });
