@@ -6,15 +6,16 @@ import {
   MANGIARE, nounModifier, np, PADRE, RAGAZZO, SLOT, TOPO, UOMO, VECCHIO, VELA, vp,
 } from './it.fixtures.js';
 import { renderNP } from './renderNP.js';
-import { possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
+import { itPossessedHeadForms } from './itPossessedHeadForms.js';
+import type { ResolvedNounPhrase } from '../../types.js';
 
 const BIG = concept(GRANDE, 'BIG');
 const OLD = concept(VECCHIO, 'OLD');
 const BEAUTIFUL = concept(BELLO, 'BEAUTIFUL');
 const ELEGANTE: Forms = { role: 'adjective', base: 'elegante' };
 
-/** The phrase under the determiner its own forms carry, read as every caller reads them (`possessedHeadForms`). */
-const withDeterminer = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(possessedHeadForms(phrase, 'definite'), plural, lead));
+/** The phrase under the determiner its own forms carry, read as every caller reads them (`itPossessedHeadForms`). */
+const withDeterminer = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(itPossessedHeadForms(phrase), plural, lead));
 const pronominal = (person: '1' | '2' | '3', number: 'singular' | 'plural' = 'singular'): PronominalPossessor =>
   ({ kind: 'pronominal', person, number });
 
@@ -105,6 +106,12 @@ describe('renderNP', () => {
 
     test('a noun possessor can carry its own possessor', () => {
       expect(withDeterminer(np(LIBRO, {}, { possessor: np(PADRE, {}, { possessor: np(GATTO) }) }))).toBe('il libro del padre del gatto');
+    });
+
+    test('a possessive before a singular, unmodified kinship noun takes no article, even inside a noun possessor', () => {
+      expect(withDeterminer(np(PADRE, {}, { possessor: pronominal('1') }))).toBe('mio padre');
+      expect(withDeterminer(np(LIBRO, {}, { possessor: np(PADRE, {}, { possessor: pronominal('2') }) }))).toBe('il libro di tuo padre');
+      expect(withDeterminer(np(PADRE, {}, { possessor: pronominal('3', 'plural') }))).toBe('il loro padre');
     });
   });
 

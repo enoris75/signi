@@ -3,6 +3,7 @@ import type { Mood } from '../../types.js';
 import { AVOIR_AUX, AVOIR_FR, ETRE_AUX, ETRE_FR, VOWEL_START } from './fr.consts.js';
 import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { auxFiniteFr } from './auxFiniteFr.js';
+import { frCliticize } from './frCliticize.js';
 import { reflexiveFinite } from './reflexiveFinite.js';
 
 /**
@@ -22,9 +23,14 @@ export function aspectVerbFr(
   // The gender/number of a PRECEDING direct object, when there is one — the antecedent of an
   // object-relative clause. French agrees an avoir participle with it (see the tail below).
   precedingObjectForms?: Record<string, string>,
+  // An object clitic governed by the progressive / prospective infinitive, which it precedes ("en
+  // train de me voir"); "de" elides against the clitic, not the verb ("de l'ajouter"). The resultative
+  // ignores it: the compound past keeps its clitic on the auxiliary ("l'a vu"), placed by the caller.
+  clitic = '',
 ): { finite: string; tail: string } {
   const inf = verbForms['base'] ?? '';
-  const deInf = VOWEL_START.test(inf) ? `d'${inf}` : `de ${inf}`;
+  const group = frCliticize(clitic, inf);
+  const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
   const etreFinite = auxFiniteFr(ETRE_AUX, ETRE_FR, subjectForms, tense, mood);
   if (aspect === 'progressive') return { finite: etreFinite, tail: `en train ${deInf}` };
   if (aspect === 'prospective') return { finite: etreFinite, tail: `sur le point ${deInf}` };

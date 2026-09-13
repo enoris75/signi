@@ -30,3 +30,23 @@ means a small `agreementForms(subjectForms)` helper used by the predicative bran
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: Italian agreement with the impersonal si* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed, together with A83. The new
+[`agreementForms.ts`](../../../packages/engine/src/languages/it/agreementForms.ts) gives the features a
+word agreeing with the subject reads: masculine plural for the impersonal `si`, the subject itself
+otherwise. The finite verb still conjugates against the 3sg.
+
+- The predicative branch of [`complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts)
+  uses it: `si è stanchi`, `si diventa stanchi`, `si sembra stanchi`.
+- The lexical-`essere` participle in [`aspectVerb.ts`](../../../packages/engine/src/languages/it/aspectVerb.ts)
+  uses it: `si è andati`, `si era andati`.
+
+Every row now renders as wanted, and so does the unpinned compound of BECOME (`si è diventati stanchi`).
+A noun subject agrees as itself (`la gatta è stanca`). Spanish and Portuguese are untouched.
+
+- **Tests:** [`packages/engine/test/complements/predicative.test.ts`](../../../packages/engine/test/complements/predicative.test.ts)
+  → *known bugs: Italian agreement with the impersonal si*. The pinning `test.fails` is now a passing
+  `test`. New cases cover SEEM, the past and the compound of BECOME, with a guard for a noun subject.
+- Unit tests: the new `agreementForms.test.ts`, and `aspectVerb.test.ts` (it).

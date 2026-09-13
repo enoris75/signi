@@ -27,7 +27,7 @@ export const RAGAZZO: Forms = { base: 'ragazzo', plural: 'ragazzi', gender: 'mas
 export const BAMBINO: Forms = { base: 'bambino', plural: 'bambini', gender: 'masc', count: 'singular', animate: '1' };
 export const DONNA: Forms = { base: 'donna', plural: 'donne', gender: 'fem', count: 'singular', animate: '1' };
 export const PERSONA: Forms = { base: 'persona', plural: 'persone', gender: 'fem', count: 'singular', animate: '1' };
-export const PADRE: Forms = { base: 'padre', plural: 'padri', gender: 'masc', count: 'singular', animate: '1' };
+export const PADRE: Forms = { base: 'padre', plural: 'padri', gender: 'masc', count: 'singular', animate: '1', kinship: '1' };
 /** Vowel-initial masculine: l'uomo / gli uomini / un uomo. */
 export const UOMO: Forms = { base: 'uomo', plural: 'uomini', gender: 'masc', count: 'singular', animate: '1' };
 /** Vowel-initial masculine: l'animale / gli animali. */

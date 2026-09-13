@@ -49,4 +49,16 @@ describe('aspectVerbFr', () => {
     expect(aspectVerbFr(MANGER, CHAT, 'present', 'progressive', 'subjunctive')).toEqual({ finite: 'était', tail: 'en train de manger' });
     expect(aspectVerbFr(MANGER, CHAT, 'present', 'resultative', 'subjunctive')).toEqual({ finite: 'avait', tail: 'mangé' });
   });
+
+  // A88: no clitic climbing — the clitic precedes the progressive / prospective infinitive.
+  test('an object clitic goes before the periphrastic infinitive, de eliding against the clitic', () => {
+    expect(aspectVerbFr(MANGER, CHAT, 'present', 'progressive', undefined, undefined, 'me')).toEqual({ finite: 'est', tail: 'en train de me manger' });
+    expect(aspectVerbFr(MANGER, CHAT, 'present', 'prospective', undefined, undefined, 'nous')).toEqual({ finite: 'est', tail: 'sur le point de nous manger' });
+    expect(aspectVerbFr({ base: 'ajouter', participle: 'ajouté' }, CHAT, 'present', 'progressive', undefined, undefined, 'le'))
+      .toEqual({ finite: 'est', tail: "en train de l'ajouter" });
+  });
+
+  test('the resultative leaves the clitic to the caller', () => {
+    expect(aspectVerbFr(MANGER, CHAT, 'present', 'resultative', undefined, undefined, 'le')).toEqual({ finite: 'a', tail: 'mangé' });
+  });
 });

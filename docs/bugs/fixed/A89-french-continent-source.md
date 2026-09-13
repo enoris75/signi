@@ -33,3 +33,34 @@ explicitly.
 | | |
 |---|---|
 | **Test** | `complements/source.test.ts` → *known bugs: French continent source* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The `source` head in
+[`complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts) now returns a
+bare `de` for a continent, elided by `elidesBefore` (`d'Europe`). Three cases keep the article:
+
+- **Masculine continents:** only `Antarctique` is seeded. The rule applies to feminine continents
+  alone, so it keeps `de l'Antarctique` as the bug file recommended.
+- **`loin de`:** a self-propelled verb keeps `loin de l'Europe`.
+- **Other nouns:** they still go through `deDet`.
+
+Every row now renders as wanted. The fix also covers:
+
+- ASIA (`d'Asie`);
+- a coordinated source (`d'Europe et d'Afrique`);
+- a transitive verb (`importe le livre d'Europe`).
+
+The two passing tests in [`complements/direction.test.ts`](../../../packages/engine/test/complements/direction.test.ts)
+that pinned `de l'Europe` and `de l'Afrique en Europe` now assert the bare form, with their names and
+comment updated. Italian keeps `dall'Europa`.
+
+A continent with an adjective also drops the article now (`d'Europe froide`, `de vieille Europe`). The
+goal and the locative already do the same (`en vieille Europe`). Bringing the article back on a
+modified continent would be a separate change covering all three.
+
+- **Tests:** [`packages/engine/test/complements/source.test.ts`](../../../packages/engine/test/complements/source.test.ts)
+  → *known bugs: French continent source*. The pinning `test.fails` is now a passing `test`. New cases
+  cover ASIA, the group and the transitive verb, with guards for Antarctique, `loin de`, a common noun
+  and a cause.
+- Unit test: `complementsPhrase.test.ts` (fr).

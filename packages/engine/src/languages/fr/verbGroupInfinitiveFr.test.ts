@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, CHAT, FEMME, MANGER } from './fr.fixtures.js';
+import { ALLER, CHAT, FEMME, MANGER, SOURIS } from './fr.fixtures.js';
 import { verbGroupInfinitiveFr } from './verbGroupInfinitiveFr.js';
 
 describe('verbGroupInfinitiveFr', () => {
@@ -17,5 +17,18 @@ describe('verbGroupInfinitiveFr', () => {
     expect(verbGroupInfinitiveFr(MANGER, FEMME, 'resultative')).toBe('avoir mangé');
     expect(verbGroupInfinitiveFr(ALLER, CHAT, 'resultative')).toBe('être allé');
     expect(verbGroupInfinitiveFr(ALLER, { ...FEMME, number: 'plural' }, 'resultative')).toBe('être allées');
+  });
+
+  // A88: the clitic precedes the infinitive that governs it, and the avoir participle agrees with it.
+  test('an object clitic goes before the governing infinitive', () => {
+    expect(verbGroupInfinitiveFr(MANGER, CHAT, 'neutral', 'me')).toBe('me manger');
+    expect(verbGroupInfinitiveFr(MANGER, CHAT, 'progressive', 'le')).toBe('être en train de le manger');
+    expect(verbGroupInfinitiveFr({ base: 'ajouter', participle: 'ajouté' }, CHAT, 'prospective', 'le')).toBe("être sur le point de l'ajouter");
+    expect(verbGroupInfinitiveFr(MANGER, CHAT, 'resultative', 'le')).toBe("l'avoir mangé");
+  });
+
+  test('an avoir participle agrees with the preceding object', () => {
+    expect(verbGroupInfinitiveFr(MANGER, CHAT, 'resultative', 'la', SOURIS)).toBe("l'avoir mangée");
+    expect(verbGroupInfinitiveFr(MANGER, CHAT, 'resultative', '', SOURIS)).toBe('avoir mangée');
   });
 });

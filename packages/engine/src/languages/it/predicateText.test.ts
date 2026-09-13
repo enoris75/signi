@@ -138,6 +138,12 @@ describe('predicateText', () => {
       expect(predicateText(SI, vp(MANGIARE, { negative: true }), mouse)).toBe('non si mangia il topo');
     });
 
+    // A82: an object clitic comes before the impersonal si.
+    test('an object clitic precedes si, after non', () => {
+      expect(predicateText(SI, vp(MANGIARE), el(np(LUI)))).toBe('lo si mangia');
+      expect(predicateText(SI, vp(MANGIARE, { negative: true }), el(np(LEI)))).toBe('non la si mangia');
+    });
+
     // A73: with a plural noun object si is passive, and the finite verb agrees with its patient.
     test('a plural noun object agrees the finite verb, a clitic or singular object does not', () => {
       expect(predicateText(SI, vp(MANGIARE), el(np(TOPO, { number: 'plural' })))).toBe('si mangiano i topi');
@@ -186,6 +192,20 @@ describe('predicateText', () => {
     test('an object pronoun attaches enclitically', () => {
       expect(predicateText(TU, command(), el(np(LUI)))).toBe('mangialo');
       expect(predicateText(NOI, command(), el(np(LEI)))).toBe('mangiamola');
+    });
+
+    // A86: the negative tu's infinitive drops its -e before the clitic.
+    test('an object pronoun on the negative tu attaches to the infinitive without its -e', () => {
+      expect(predicateText(TU, command({ negative: true }), el(np(LUI)))).toBe('non mangiarlo');
+      expect(predicateText(TU, command({ negative: true }, VEDERE, 'SEE'), el(np(IO)))).toBe('non vedermi');
+      expect(predicateText(VOI, command({ negative: true }), el(np(LUI)))).toBe('non mangiatelo');
+    });
+
+    // A87: dare / fare / andare take the short tu command, which doubles an enclitic's consonant.
+    test('the short tu command of dare doubles the clitic consonant', () => {
+      expect(predicateText(TU, command({}, DARE, 'GIVE'), el(np(LIBRO)))).toBe("da' il libro");
+      expect(predicateText(TU, command({}, DARE, 'GIVE'), el(np(LUI)))).toBe('dallo');
+      expect(predicateText(TU, command({ negative: true }, DARE, 'GIVE'), el(np(LUI)))).toBe('non darlo');
     });
 
     test('the adverb precedes the object and the complements close', () => {

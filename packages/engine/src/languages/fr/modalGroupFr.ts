@@ -21,6 +21,10 @@ export function modalGroupFr(
   aspect: Aspect,
   mood: Mood | undefined,
   mainFreqAdverb: string,
+  // The object clitic and the preceding object's forms, handed to the main verb group, which takes the
+  // clitic before its infinitive ("doit me voir", "doit l'avoir vue") — never onto the modal.
+  clitic = '',
+  precedingObjectForms?: Record<string, string>,
 ): { finite: string; finiteAdverb: string; tail: string } {
   const pn = moodPN(subjectForms);
   const finite = moodForm('fr', modals[0].verb, pn, mood) ?? conjugate(modals[0].verb.forms, subjectForms, tense);
@@ -34,7 +38,7 @@ export function modalGroupFr(
     else inner.push(word);
     if (m.verb.forms['link']) inner.push(m.verb.forms['link']);
   });
-  const mainGroup = verbGroupInfinitiveFr(verbForms, subjectForms, aspect);
+  const mainGroup = verbGroupInfinitiveFr(verbForms, subjectForms, aspect, clitic, precedingObjectForms);
   const mainPart = mainFreqAdverb ? [mainFreqAdverb, mainGroup] : [mainGroup];
   return { finite, finiteAdverb, tail: [...inner, ...mainPart].join(' ') };
 }

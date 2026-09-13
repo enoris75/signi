@@ -745,7 +745,8 @@ export const nouns: ConceptSeed[] = [
     human: true,
     forms: {
       en: { base: 'father', plural: 'fathers', count: 'singular' },
-      it: { base: 'padre', plural: 'padri', gender: 'masc', count: 'singular' },
+      // kinship: Italian drops the article after a possessive on the singular ("mio padre").
+      it: { base: 'padre', plural: 'padri', gender: 'masc', count: 'singular', kinship: '1' },
       fr: { base: 'père', plural: 'pères', gender: 'masc', count: 'singular' },
       de: { base: 'Vater', plural: 'Väter', gender: 'masc', count: 'singular' },
       es: { base: 'padre', plural: 'padres', gender: 'masc', count: 'singular' },

@@ -49,4 +49,13 @@ describe('modalGroupFr', () => {
     expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'present', 'neutral', undefined, 'toujours').tail).toBe('toujours manger');
     expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'present', 'resultative', undefined, 'toujours').tail).toBe('toujours avoir mangé');
   });
+
+  // A88: the clitic goes before the main verb group's infinitive, never onto a modal.
+  test('an object clitic leads the main verb group, after any inner modal and adverb', () => {
+    expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'present', 'neutral', undefined, '', 'me').tail).toBe('me manger');
+    expect(modalGroupFr([modal(VOULOIR), modal(POUVOIR)], MANGER, CHAT, 'present', 'neutral', undefined, 'toujours', 'le').tail)
+      .toBe('pouvoir toujours le manger');
+    expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'present', 'resultative', undefined, '', 'la', { gender: 'fem', number: 'singular' }).tail)
+      .toBe("l'avoir mangée");
+  });
 });

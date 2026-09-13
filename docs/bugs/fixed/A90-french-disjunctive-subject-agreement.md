@@ -38,3 +38,32 @@ single person keeps the nearest-conjunct rule.
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: French disjunction of different persons* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 with the first shape the fix proposed: a per-language switch in `groupAgreement`
+([`translator.ts`](../../../packages/engine/src/translator.ts)). The new `OR_RESOLVES_MIXED_PERSONS`
+lists `fr`. For those languages, an `or` group whose conjuncts differ in person resolves as `and` does:
+plural, the lowest person, and feminine only if every conjunct is. French `subjectText` then resumes
+the group with `nous` / `vous` unchanged, so the clitic and the verb agree.
+
+Every row now renders as wanted. The fix also covers:
+
+- the second person (`toi ou le chat, vous mangez`);
+- gender (`toi ou la femme, vous êtes fatiguées`);
+- the compound past (`moi ou toi, nous sommes allés`);
+- negation;
+- a resumed object (`le chat nous a vus, toi ou moi`).
+
+An `or` group of one person keeps the nearest-conjunct rule (`le chat ou le chien court`, `le chat ou
+les chiens courent`).
+
+Italian, Spanish and Portuguese are untouched, still `io o tu mangi.`. The bug file flagged that output
+as questionable but pinned only French, so it is not asserted either way.
+
+- **Tests:** [`packages/engine/test/coordination.test.ts`](../../../packages/engine/test/coordination.test.ts)
+  → *known bugs: French disjunction of different persons*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the second person, gender, the compound past, negation and the resumed
+  object, with a guard for a group of one person.
+- No colocated unit test: `groupAgreement` is private to `translator.ts`, which has no unit test file.
+  The sentence-level tests drive it through `translate`.

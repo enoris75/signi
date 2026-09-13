@@ -1,10 +1,12 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
+import { agreementForms } from './agreementForms.js';
 import { coordinate } from './coordinate.js';
 import { defArticle } from './defArticle.js';
 import { itDeg } from './itDeg.js';
+import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { npText } from './npText.js';
@@ -31,9 +33,11 @@ export function complementsPhrase(
       // its own article, no preposition ("diventa una leggenda"). Every conjunct agrees with
       // the subject independently, so a coordinated one reads "sembra stanca e felice" — and a
       // coordinated *subject* resolves to masculine plural first, giving "sembrano stanchi".
+      // The impersonal si agrees as masculine plural ("si è stanchi", see `agreementForms`).
       if (type === 'predicative') {
-        const gender = subjectForms['gender'] ?? 'masc';
-        const plural = subjectForms['number'] === 'plural';
+        const agreeWith = agreementForms(subjectForms);
+        const gender = agreeWith['gender'] ?? 'masc';
+        const plural = agreeWith['number'] === 'plural';
         return coordinate(c.phrase, (np) => {
           if (np.head.forms['role'] !== 'adjective') return npText(np);
           const surface = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
@@ -124,7 +128,7 @@ export function complementsPhrase(
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(possessedHeadForms(np, 'definite'))));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(itPossessedHeadForms(np))));
     })
     .filter(Boolean)
     .join(' ');

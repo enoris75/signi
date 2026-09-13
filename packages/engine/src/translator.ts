@@ -155,6 +155,13 @@ function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLook
 const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
 
 /**
+ * Languages whose "or" group of mixed persons agrees as the plural of the prevailing person, like
+ * "and" — French "toi ou moi, nous mangeons" (Grevisse, *Le Bon Usage*). A group of one person keeps
+ * the nearest-conjunct rule ("le chat ou le chien court").
+ */
+const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
+
+/**
  * The person / number / gender a coordinated group agrees as. The rules are the same in the six
  * languages that agree at all (ja agrees with nothing), so they live here rather than per engine:
  *
@@ -164,7 +171,8 @@ const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
  *    conjunct masculinises the whole ("il gatto e la volpe sono stanch**i**").
  *  · **or** — the group agrees with the conjunct *nearest* the verb, i.e. the last ("Peter or the
  *    boys **speak**", "o Pietro o i ragazzi parl**ano**"): the disjunction asserts one of them,
- *    not both, so there is no group to resolve.
+ *    not both, so there is no group to resolve. French is the exception when the conjuncts differ
+ *    in person (`OR_RESOLVES_MIXED_PERSONS`): the group resolves as under **and**.
  *
  * A single conjunct resolves to its own head's forms untouched, which is exactly what the engines
  * read before coordination existed.
@@ -172,14 +180,17 @@ const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
 function groupAgreement(
   conjuncts: ResolvedNounPhrase[],
   conjunction: CoordConjunction,
+  language: string,
 ): Record<string, string> {
   const last = conjuncts[conjuncts.length - 1].head.forms;
+  const persons = conjuncts.map((c) => c.head.forms['person'] ?? '3');
+  const resolves = conjunction === 'and'
+    || (conjunction === 'or' && OR_RESOLVES_MIXED_PERSONS.has(language) && new Set(persons).size > 1);
   const features: Record<string, string> =
     // Disjunction: the nearest conjunct is the one the verb agrees with — take its features whole.
-    conjunction !== 'and'
+    !resolves
       ? Object.fromEntries(AGREEMENT_KEYS.filter((k) => last[k] !== undefined).map((k) => [k, last[k]]))
       : (() => {
-          const persons = conjuncts.map((c) => c.head.forms['person'] ?? '3');
           const person = ['1', '2', '3'].find((p) => persons.includes(p)) ?? '3';
           const feminine = conjuncts.every((c) => c.head.forms['gender'] === 'fem');
           return { person, number: 'plural', gender: feminine ? 'fem' : 'masc' };
@@ -207,7 +218,7 @@ function resolveNounElement(el: NounElement, language: string, lookup: LexiconLo
   return {
     conjuncts,
     conjunction: el.conjunction,
-    agreement: groupAgreement(conjuncts, el.conjunction),
+    agreement: groupAgreement(conjuncts, el.conjunction, language),
   };
 }
 

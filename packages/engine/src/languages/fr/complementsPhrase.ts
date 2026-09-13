@@ -5,6 +5,7 @@ import { coordinate } from './coordinate.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
+import { elidesBefore } from './elidesBefore.js';
 import { LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { joinArt } from './joinArt.js';
@@ -105,7 +106,13 @@ export function complementsPhrase(
           nf['isA'] === 'CONTINENT' ? 'en' :
           nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
         ) :
-        type === 'source'    ? `${sourceAdverb}${deDet(nf, plural, lead)}` :
+        type === 'source'    ? (
+          // A continent of origin takes a bare "de" ("vient d'Europe", "d'Amérique du Nord"), the
+          // counterpart of the goal's "en". The masculine Antarctique keeps its article, as usage has
+          // it ("de l'Antarctique"), and so does the "loin de" of a self-propelled verb.
+          nf['isA'] === 'CONTINENT' && nf['gender'] === 'fem' && !sourceAdverb ? (elidesBefore(nf, lead) ? "d'" : 'de') :
+          `${sourceAdverb}${deDet(nf, plural, lead)}`
+        ) :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grâce ${aDet(nf, plural, lead)}` :
           causeSent === 'negative' ? `par la faute ${deDet(nf, plural, lead)}` :

@@ -284,26 +284,27 @@ describe('COME to a continent — the article-dropping goal', () => {
     });
   });
 
-  test('a continent SOURCE keeps its article — the drop is goal-only', () => {
-    // Contrast the goal above: as an origin the continent behaves like any other proper noun,
-    // so Italian fuses and elides da + l' = dall', and French keeps "de l'".
+  test('a continent SOURCE keeps its article in Italian, and takes a bare d\' in French', () => {
+    // Contrast the goal above: as an origin the continent behaves like any other proper noun in
+    // Italian, which fuses and elides da + l' = dall'. French drops the article on both sides
+    // ("en Europe", "d'Europe", A89).
     expect(comeWith({ source: { phrase: np('EUROPE') } })).toMatchObject({
       en: 'the cat comes from Europe.',
       it: "il gatto viene dall'Europa.",
-      fr: "le chat vient de l'Europe.", // wrong, pinned as-is: A89
+      fr: "le chat vient d'Europe.",
       de: 'der Kater kommt aus Europa.',
       ja: '猫はヨーロッパから来ます。',
     });
   });
 
-  test('from one continent to another — the article kept on the source, dropped on the goal', () => {
+  test('from one continent to another — Italian keeps the article on the source, dropping it on the goal', () => {
     expect(comeWith({
       source: { phrase: np('AFRICA') },
       direction: { phrase: np('EUROPE') },
     })).toMatchObject({
       en: 'the cat comes from Africa to Europe.',
       it: "il gatto viene dall'Africa in Europa.", // dall' (source, kept) … in (goal, dropped)
-      fr: "le chat vient de l'Afrique en Europe.", // wrong, pinned as-is: A89
+      fr: "le chat vient d'Afrique en Europe.", // d' (source) … en (goal), both bare
       de: 'der Kater kommt aus Afrika zu Europa.',
       ja: '猫はアフリカからヨーロッパへ来ます。',
     });

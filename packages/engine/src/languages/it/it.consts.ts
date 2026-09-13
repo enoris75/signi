@@ -101,3 +101,15 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * the agreement rule would otherwise inflect it like any adjective with its ending.
  */
 export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero']);
+
+/**
+ * The "-ico" adjectives of three or more syllables that keep the hard "-chi" in the masculine plural,
+ * because they are stressed on the second-to-last syllable: antìco → antichi, càrico → carichi.
+ */
+export const HARD_ICO_ADJ: ReadonlySet<string> = new Set(['antico', 'carico']);
+
+/**
+ * Verbs whose tu command is a monosyllable (da', fa', va') that doubles an enclitic's consonant:
+ * "dallo", "fammi", "vacci". Keyed by concept, not by the apostrophe.
+ */
+export const IT_SHORT_IMPERATIVE: ReadonlySet<string> = new Set(['GIVE', 'MAKE', 'GO']);

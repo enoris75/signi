@@ -164,6 +164,10 @@ const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
 const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE:   { '2sg': 'sii', '1pl': 'siamo', '2pl': 'siate' },      // essere: sii / siamo / siate
   KNOW: { '2sg': 'sappi', '1pl': 'sappiamo', '2pl': 'sappiate' }, // sapere: sappi / sappiamo / sappiate
+  // The tu command of the short -are verbs is not their 3sg indicative (dà / fa / va).
+  GIVE: { '2sg': "da'" },                                        // dare: da'
+  MAKE: { '2sg': "fa'" },                                        // fare: fa'
+  GO:   { '2sg': "va'" },                                        // andare: va'
 };
 // French imperative is a single paradigm (negation only wraps it), so one override table.
 const FR_IMP_OVERRIDE: Record<string, Record<IPN, string>> = {

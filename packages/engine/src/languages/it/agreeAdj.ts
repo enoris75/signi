@@ -1,10 +1,15 @@
-import { INVARIABLE_ADJ } from './it.consts.js';
+import { HARD_ICO_ADJ, INVARIABLE_ADJ } from './it.consts.js';
 
 /**
  * Inflect an Italian adjective (given in masculine-singular "base" form) to agree
  * with the head noun's gender and number.
  * - "-o" class: freddo → fredda / freddi / fredde (hard c/g kept: stanco → stanchi/stanche)
  * - "-e" class: grande → grande / grandi (gender-invariant, plural -i)
+ *
+ * An "-ico" adjective stressed on its third-to-last syllable softens its masculine plural to "-ici"
+ * (domèstico → domestici, selvàtico → selvatici); the feminine keeps "-che" (domestiche). The stress
+ * is not in the spelling, so three or more syllables stand in for it, and the few exceptions keep
+ * "-chi" (antico → antichi, see HARD_ICO_ADJ).
  */
 export function agreeAdj(base: string, gender: string, plural: boolean): string {
   if (!base) return '';
@@ -18,6 +23,8 @@ export function agreeAdj(base: string, gender: string, plural: boolean): string 
       base.endsWith('go') ? `${base.slice(0, -2)}gh` :
       stem;
     if (fem) return `${hardStem}e`;
+    const syllables = base.match(/[aeiouàèéìòù]+/gi)?.length ?? 0;
+    if (base.endsWith('ico') && syllables >= 3 && !HARD_ICO_ADJ.has(base)) return `${base.slice(0, -1)}i`;
     return hardStem.endsWith('i') ? hardStem : `${hardStem}i`;
   }
   if (base.endsWith('e')) {

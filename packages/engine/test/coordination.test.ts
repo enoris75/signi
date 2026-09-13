@@ -490,12 +490,30 @@ describe('known bugs: Spanish comma after a discourse connector', () => {
 // with its last conjunct, while French `subjectText` resumes it with the plural "nous"/"vous", so
 // the clitic and the verb disagree ("moi ou toi, vous manges", "toi ou moi, nous mange").
 describe('known bugs: French disjunction of different persons', () => {
-  test.fails('French resolves "ou" across persons to the plural of the prevailing person', () => {
+  test('French resolves "ou" across persons to the plural of the prevailing person', () => {
     const eat = (...ids: string[]) =>
       sayAll(clause({ conjuncts: ids.map((id) => np(id)), conjunction: 'or' }, 'EAT')).fr;
     expect(eat('FIRST_PERSON', 'SECOND_PERSON')).toBe('moi ou toi, nous mangeons.');
     expect(eat('SECOND_PERSON', 'FIRST_PERSON')).toBe('toi ou moi, nous mangeons.');
     expect(eat('CAT', 'FIRST_PERSON')).toBe('le chat ou moi, nous mangeons.');
     expect(eat('FIRST_PERSON', 'CAT')).toBe('moi ou le chat, nous mangeons.');
+  });
+
+  test('French resolves the second person, gender, the compound past and negation the same way', () => {
+    const or = (...conjuncts: ReturnType<typeof np>[]) => ({ conjuncts, conjunction: 'or' as const });
+    expect(sayAll(clause(or(np('SECOND_PERSON'), np('CAT')), 'EAT')).fr).toBe('toi ou le chat, vous mangez.');
+    expect(sayAll(clause(or(np('CAT'), np('SECOND_PERSON')), 'RUN')).fr).toBe('le chat ou toi, vous courez.');
+    expect(sayAll(clause(or(np('SECOND_PERSON', { gender: 'fem' }), np('WOMAN')), 'BE', { complements: { predicative: { phrase: np('TIRED') } } })).fr)
+      .toBe('toi ou la femme, vous êtes fatiguées.');
+    expect(sayAll(clause(or(np('FIRST_PERSON'), np('SECOND_PERSON')), 'GO', { verbPhrase: { aspect: 'resultative' } })).fr).toBe('moi ou toi, nous sommes allés.');
+    expect(sayAll(clause(or(np('FIRST_PERSON'), np('SECOND_PERSON')), 'EAT', { verbPhrase: { negative: true } })).fr).toBe('moi ou toi, nous ne mangeons pas.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: or(np('SECOND_PERSON'), np('FIRST_PERSON')), verbPhrase: { aspect: 'resultative' } })).fr)
+      .toBe('le chat nous a vus, toi ou moi.');
+  });
+
+  test('regression: a French "ou" of one person keeps the nearest conjunct', () => {
+    const or = (...conjuncts: ReturnType<typeof np>[]) => ({ conjuncts, conjunction: 'or' as const });
+    expect(sayAll(clause(or(np('CAT'), np('DOG')), 'RUN')).fr).toBe('le chat ou le chien court.');
+    expect(sayAll(clause(or(np('CAT'), np('DOG', { number: 'plural' })), 'RUN')).fr).toBe('le chat ou les chiens courent.');
   });
 });

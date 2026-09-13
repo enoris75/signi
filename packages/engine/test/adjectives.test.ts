@@ -1259,11 +1259,17 @@ describe('known bugs: English comparison of two-syllable adjectives', () => {
 // on its second-to-last syllable (stanco → stanchi). One stressed a syllable earlier (domestico,
 // selvatico, semantico) takes -ci. The feminine plural (-che) is right for both.
 describe('known bugs: Italian masculine plural of -ico adjectives', () => {
-  test.fails('Italian pluralises domestico/selvatico/semantico to -ici', () => {
+  test('Italian pluralises domestico/selvatico/semantico to -ici', () => {
     expect(say(clause(np('ANIMAL', { number: 'plural', adjectives: ['DOMESTIC'] }), 'EAT'), 'it')).toBe('gli animali domestici mangiano.');
     expect(say(clause(np('CAT', { number: 'plural', adjectives: ['WILD'] }), 'EAT'), 'it')).toBe('i gatti selvatici mangiano.');
     expect(say(clause(np('BOOK', { number: 'plural', adjectives: ['SEMANTIC'] }), 'BURN'), 'it')).toBe('i libri semantici bruciano.');
     expect(say(clause(np('CAT', { number: 'plural' }), 'SEEM', { complements: { predicative: { phrase: np('WILD') } } }), 'it')).toBe('i gatti sembrano selvatici.');
+  });
+
+  test('regression: the feminine plural and a two-syllable -co keep the hard sound', () => {
+    expect(say(clause(np('CAT', { number: 'plural', gender: 'fem', adjectives: ['WILD'] }), 'EAT'), 'it')).toBe('le gatte selvatiche mangiano.');
+    expect(say(clause(np('WORD', { number: 'plural', adjectives: ['SEMANTIC'] }), 'BURN'), 'it')).toBe('le parole semantiche bruciano.');
+    expect(say(clause(np('CAT', { number: 'plural', adjectives: ['TIRED'] }), 'EAT'), 'it')).toBe('i gatti stanchi mangiano.');
   });
 });
 

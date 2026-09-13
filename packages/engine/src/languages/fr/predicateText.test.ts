@@ -152,6 +152,14 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL)))).toBe("l'a vu");
     });
 
+    // A88: no clitic climbing onto être or a modal.
+    test('it goes before the infinitive of a periphrasis or a modal', () => {
+      expect(predicateText(CHAT, vp(VOIR, { aspect: 'progressive' }), el(np(JE)))).toBe('est en train de me voir');
+      expect(predicateText(CHAT, vp(AIMER, { aspect: 'prospective', negative: true }), el(np(IL)))).toBe("n'est pas sur le point de l'aimer");
+      expect(predicateText(CHAT, vp(VOIR, { modals: [modal(DEVOIR)], negative: true }), el(np(JE)))).toBe('ne doit pas me voir');
+      expect(predicateText(CHAT, vp(VOIR, { modals: [modal(DEVOIR)], aspect: 'resultative' }), el(np(IL, { gender: 'fem' })))).toBe("doit l'avoir vue");
+    });
+
     test('an avoir participle agrees with the preceding clitic', () => {
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL, { gender: 'fem' })))).toBe("l'a vue");
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL, { number: 'plural', gender: 'fem' })))).toBe('les a vues');

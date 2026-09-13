@@ -33,3 +33,28 @@ for the bare form.
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: Italian tu command of dare, fare and andare* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- `IT_IMP_OVERRIDE` in [`mood.ts`](../../../packages/engine/src/mood.ts) gives GIVE, MAKE and GO the
+  `tu` commands `da'`, `fa'` and `va'`.
+- The new `IT_SHORT_IMPERATIVE` in [`it.consts.ts`](../../../packages/engine/src/languages/it/it.consts.ts)
+  lists those three verbs by concept, as the fix asked.
+- In [`predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts), the imperative branch
+  passes an affirmative `tu` command of one of those verbs to
+  [`itEnclitic.ts`](../../../packages/engine/src/languages/it/itEnclitic.ts) as a `short` host. That
+  host drops the apostrophe and doubles the clitic's consonant (`dallo`, `fammi`, `dacci`), except
+  before `gli` (`dagli`). This is the same helper A86 introduced.
+
+Every row now renders as wanted: `da' il libro al cane.`, `dallo al cane.`, `fallo.`, `fa' il libro.`,
+`va'.`. The fix also covers the other clitics (`dalli`, `dalla`), a complement (`va' al mercato`) and
+the instruction register (`va'.`, `fallo.`). The negative (`non darlo`, `non fare`), `noi`
+(`facciamolo`) and `voi` (`datelo`) are unchanged.
+
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: Italian tu command of dare, fare and andare*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the other clitics, the complement and the instruction register, with a guard
+  for the negative, `noi` and `voi`.
+- Unit tests: `itEnclitic.test.ts`, and `predicateText.test.ts` (it).

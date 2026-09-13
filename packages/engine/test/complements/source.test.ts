@@ -240,7 +240,7 @@ describe('known bugs: source', () => {
 // counterpart of the goal's bare "en" (A31). The `source` head in `complementsPhrase` sends the
 // proper noun through `deDet` → `dePrep`, which keeps its fixed article ("de l'Europe").
 describe('known bugs: French continent source', () => {
-  test.fails('French drops the article on a continent source', () => {
+  test('French drops the article on a continent source', () => {
     const comeFrom = (source: string) =>
       sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np(source) } } })).fr;
     expect(comeFrom('EUROPE')).toBe("le chat vient d'Europe.");
@@ -249,5 +249,20 @@ describe('known bugs: French continent source', () => {
     expect(sayAll(clause(np('CAT'), 'COME', {
       complements: { source: { phrase: np('AFRICA') }, direction: { phrase: np('EUROPE') } },
     })).fr).toBe("le chat vient d'Afrique en Europe.");
+  });
+
+  test('French drops it on every feminine continent, in a group and after a transitive verb', () => {
+    const comeFrom = (source: NonNullable<Parameters<typeof clause>[2]>['complements']) => sayAll(clause(np('CAT'), 'COME', { complements: source })).fr;
+    expect(comeFrom({ source: { phrase: np('ASIA') } })).toBe("le chat vient d'Asie.");
+    expect(comeFrom({ source: { phrase: { conjuncts: [np('EUROPE'), np('AFRICA')], conjunction: 'and' } } })).toBe("le chat vient d'Europe et d'Afrique.");
+    expect(sayAll(clause(np('CAT'), 'IMPORT', { directObject: np('BOOK'), complements: { source: { phrase: np('EUROPE') } } })).fr)
+      .toBe("le chat importe le livre d'Europe.");
+  });
+
+  test('French keeps the article on Antarctique, after loin and on any other noun', () => {
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('ANTARCTICA') } } })).fr).toBe("le chat vient de l'Antarctique.");
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { source: { phrase: np('EUROPE') } } })).fr).toBe("le chat court loin de l'Europe.");
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE') } } })).fr).toBe('le chat vient de la maison.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: np('EUROPE') } } })).fr).toBe("le chat court à cause de l'Europe.");
   });
 });

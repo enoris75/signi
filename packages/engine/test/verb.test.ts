@@ -797,14 +797,18 @@ describe('passive si / se: the verb agrees with a plural patient', () => {
       .toBe('i topi che si devono mangiare corrono.');
   });
 
-  test('regression: a singular or clitic object, no object, and the Italian compound tense keep the singular', () => {
+  test('regression: a singular or clitic object and no object keep the singular', () => {
     expect(oneEats(np('MOUSE'))).toMatchObject({ it: 'si mangia il topo.', es: 'se come el ratón.' });
     expect(oneEats(np('THIRD_PERSON', { number: 'plural' })).es).toBe('se los come.');
     expect(sayAll(clause(np('GENERIC_PERSON'), 'EAT'))).toMatchObject({ it: 'si mangia.', es: 'se come.' });
     expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'RUN')).it)
       .toBe('il topo che si mangia corre.');
-    // The Italian passive si's compound tense needs essere and participle agreement (A83).
-    expect(oneEats(mice, { aspect: 'resultative' }).it).toBe('si ha mangiato i topi.');
+  });
+
+  // A83 gave si its essere, so the passive si's compound tense agrees the auxiliary and the participle.
+  test('Italian agrees the passive si\'s compound tense with its patient', () => {
+    expect(oneEats(mice, { aspect: 'resultative' }).it).toBe('si sono mangiati i topi.');
+    expect(oneEats(np('HOUSE', { number: 'plural' }), { aspect: 'resultative', tense: 'past' }).it).toBe('si erano mangiate le case.');
   });
 });
 
@@ -842,11 +846,25 @@ describe('known bugs: English frequency adverb before a mood auxiliary', () => {
 // auxiliary ("si è mangiato", "si è corso"). `aspectVerb` picks the auxiliary from the verb's
 // lexical `aux` alone, so an "avere" verb renders "si ha mangiato".
 describe('known bugs: Italian impersonal si in the compound tense', () => {
-  test.fails('Italian takes essere with the impersonal si', () => {
+  test('Italian takes essere with the impersonal si', () => {
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è mangiato.');
     expect(say(clause(np('GENERIC_PERSON'), 'RUN', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è corso.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' }, directObject: np('MOUSE') }), 'it')).toBe('si è mangiato il topo.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative', tense: 'past' } }), 'it')).toBe('si era mangiato.');
+  });
+
+  test('Italian keeps essere under si when negated, with a clitic, an adverb and in a condition', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative', negative: true } }), 'it')).toBe('non si è mangiato.');
+    // An avere participle agrees with a preceding clitic, not with si.
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON', { number: 'plural' }), verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('li si è mangiati.');
+    expect(say(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('THIRD_PERSON'), verbPhrase: { aspect: 'resultative', modifier: 'ALWAYS' } }), 'it')).toBe('lo si è sempre visto.');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }) }, 'it'))
+      .toBe('se si fosse mangiato, il cane correrebbe.');
+  });
+
+  test('regression: a noun subject keeps its lexical auxiliary', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('il gatto ha mangiato.');
+    expect(say(clause(np('WOMAN'), 'GO', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('la donna è andata.');
   });
 });
 

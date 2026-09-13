@@ -1,10 +1,12 @@
 import type { ComplementType } from '@signi/shared';
 import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
+import { IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
+import { itEnclitic } from './itEnclitic.js';
 import { npText } from './npText.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
@@ -24,18 +26,17 @@ export function predicateText(
   // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
   // With a plural noun object the impersonal si is the passive si, and the finite verb agrees with its
-  // patient: "si mangiano i topi", "si devono mangiare i topi". A clitic object keeps si impersonal
-  // ("li si mangia"). The compound tense would need essere and its participle agreement ("si sono
-  // mangiati"), so it is left as it is.
+  // patient: "si mangiano i topi", "si devono mangiare i topi", and in the compound tense the participle
+  // too ("si sono mangiati i topi"). A clitic object keeps si impersonal ("li si mangia").
   const passiveSi = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
-    && directObject.agreement['number'] === 'plural' && aspect !== 'resultative';
+    && directObject.agreement['number'] === 'plural';
   const agreeForms = passiveSi ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
   // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
   // and left out.
   const cliticObject = directObject && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
-  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : undefined;
+  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : passiveSi ? directObject!.agreement : undefined;
   const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
@@ -72,8 +73,8 @@ export function predicateText(
   // form with no article ("vede il cane e te", "vede lui e me").
   const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np);
   // The impersonal "si" is a preverbal clitic standing in for a generic subject ("si mangia" —
-  // "one eats"). It sits after any "non" and before the verb (and before an object clitic, in the
-  // rare "non se lo …" order); the subject word itself is suppressed upstream.
+  // "one eats"). It sits after any "non", closest to the verb, so an object clitic comes before it
+  // ("lo si mangia", "non lo si mangia", "mi si vede"); the subject word itself is suppressed upstream.
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const directObjectText = directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
@@ -86,7 +87,12 @@ export function predicateText(
     // so an instruction only pins the person to tu — it has no addressee to take noi/voi from.
     const impPN = register === 'instruction' ? '2sg' : moodPN(subjectForms);
     const impForm = imperativeForm('it', verb, impPN, negText === 'non') ?? verbText;
-    return [negText, impForm + objectClitic, modifierText, directObjectText, complementsText]
+    // The clitic attaches after the command: the negative tu's infinitive drops its -e ("non
+    // mangiarlo"), and the short da' / fa' / va' double its consonant ("dallo", "fammi").
+    const infinitive = negText === 'non' && impPN === '2sg';
+    const short = !infinitive && impPN === '2sg' && IT_SHORT_IMPERATIVE.has(verb.conceptId);
+    const impVerb = itEnclitic(impForm, objectClitic, infinitive ? 'infinitive' : short ? 'short' : 'plain');
+    return [negText, impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
@@ -97,7 +103,7 @@ export function predicateText(
   // dropping the infinitive's final -e ("consumarlo").
   if (mood === 'infinitive') {
     const inf = verb.forms['base'] ?? verbText;
-    const infWithClitic = objectClitic ? inf.replace(/e$/, '') + objectClitic : inf;
+    const infWithClitic = itEnclitic(inf, objectClitic, 'infinitive');
     return [negText, infWithClitic, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -111,9 +117,9 @@ export function predicateText(
   if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
     const [aux, ...rest] = verbText.split(' ');
     const withAdverb = [aux, modifierText, ...rest].join(' ');
-    return [negText, impersonalClitic, objectClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
+    return [negText, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
   }
-  return [negText, impersonalClitic, objectClitic, verbText, modifierText, directObjectText, complementsText]
+  return [negText, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

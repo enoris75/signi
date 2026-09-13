@@ -565,10 +565,21 @@ describe('known bugs: English frequency adverb with the copula', () => {
 // participle agreeing with it is masculine plural ("si è stanchi", "si è andati"). The engine agrees
 // both with GENERIC_PERSON's seeded 3sg features.
 describe('known bugs: Italian agreement with the impersonal si', () => {
-  test.fails('Italian agrees a predicate with the impersonal si in the masculine plural', () => {
+  test('Italian agrees a predicate with the impersonal si in the masculine plural', () => {
     expect(say(clause(np('GENERIC_PERSON'), 'BE', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('si è stanchi.');
     expect(say(clause(np('GENERIC_PERSON'), 'BECOME', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('si diventa stanchi.');
     expect(say(clause(np('GENERIC_PERSON'), 'GO', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è andati.');
+  });
+
+  test('Italian agrees in the masculine plural under SEEM, in the past and in the compound of BECOME', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'SEEM', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('si sembra stanchi.');
+    expect(say(clause(np('GENERIC_PERSON'), 'GO', { verbPhrase: { aspect: 'resultative', tense: 'past' } }), 'it')).toBe('si era andati.');
+    expect(say(clause(np('GENERIC_PERSON'), 'BECOME', { verbPhrase: { aspect: 'resultative' }, complements: { predicative: { phrase: np('TIRED') } } }), 'it'))
+      .toBe('si è diventati stanchi.');
+  });
+
+  test('regression: a noun subject agrees as itself', () => {
+    expect(say(clause(np('CAT', { gender: 'fem' }), 'BE', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('la gatta è stanca.');
   });
 });
 

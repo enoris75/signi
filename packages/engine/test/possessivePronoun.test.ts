@@ -281,9 +281,28 @@ describe('pronominal possessor on a complement: every language', () => {
 // padre", "suo padre"), except with "loro". `renderNP` always gives a pronominal possessor the
 // definite article, so FATHER reads "il suo padre". The plural, a modified noun and "loro" keep it.
 describe('known bugs: Italian possessive before a kinship noun', () => {
-  test.fails('Italian drops the article before a possessive + a singular kinship noun', () => {
+  test('Italian drops the article before a possessive + a singular kinship noun', () => {
     expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }), 'RUN'), 'it')).toBe('suo padre corre.');
     expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'plural' } }), 'RUN'), 'it')).toBe('nostro padre corre.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('FATHER', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) }), 'it')).toBe('il gatto vede tuo padre.');
+  });
+
+  test('Italian keeps the article with loro, in the plural and with an adjective', () => {
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }), 'RUN'), 'it')).toBe('il loro padre corre.');
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' }, number: 'plural' }), 'RUN'), 'it')).toBe('i miei padri corrono.');
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' }, adjectives: ['OLD'] }), 'RUN'), 'it')).toBe('il mio vecchio padre corre.');
+  });
+
+  test('Italian leaves a bare preposition, a bare genitive and a relative head before a kinship noun', () => {
+    expect(say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('FATHER', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'it'))
+      .toBe('il gatto va da tuo padre.');
+    expect(say(clause(np('BOOK', { possessor: np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BE', { complements: { predicative: { phrase: np('BIG') } } }), 'it'))
+      .toBe('il libro di mio padre è grande.');
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'singular' }, relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN'), 'it'))
+      .toBe('mio padre che mangia corre.');
+  });
+
+  test('regression: a non-kinship noun keeps the article', () => {
+    expect(say(clause(np('DOG', { possessor: { kind: 'pronominal', person: '3', number: 'singular' } }), 'RUN'), 'it')).toBe('il suo cane corre.');
   });
 });

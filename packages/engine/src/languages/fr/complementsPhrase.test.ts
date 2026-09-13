@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from '@signi/shared';
 import { complementsPhrase } from './complementsPhrase.js';
 import {
-  AFRIQUE, ANGE, ANTARCTIQUE, BATON, BON, CHAT, CHIEN, CHOISIR, complement, complements, concept, el, ENFANT, EUROPE,
+  AFRIQUE, ANGE, ANTARCTIQUE, ASIE, BATON, BON, CHAT, CHIEN, CHOISIR, complement, complements, concept, el, ENFANT, EUROPE,
   FATIGUE, FEMME, type Forms, FOYER, GRAND, group, HEUREUX, HOMME, IL, INTERESSANT, JE, LEGENDE, LENTEMENT, LUMIERE, MAISON,
   MANGER, MANIERE, MARCHE, MOT, NOURRITURE, np, PETIT, PHRASE, RENARD, SAVOIR, SOIN, SOURIS, TRISTE, TU, VITESSE, vp,
 } from './fr.fixtures.js';
@@ -168,6 +168,14 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ source: complement(np(ENFANT)) }), {}, 'RUN')).toBe("loin de l'enfant");
       expect(complementsPhrase(complements({ source: complement(np(MAISON)) }), {}, 'JUMP')).toBe('loin de la maison');
       expect(complementsPhrase(complements({ source: complement(np(MAISON)) }), {}, 'COME')).toBe('de la maison');
+    });
+
+    // A89: a feminine continent of origin drops its article; Antarctique and "loin de" keep it.
+    test('a feminine continent takes a bare de, eliding before its vowel', () => {
+      expect(complementsPhrase(complements({ source: complement(np(EUROPE)) }), {}, 'COME')).toBe("d'Europe");
+      expect(complementsPhrase(complements({ source: complement(el(np(AFRIQUE), np(ASIE))) }), {}, 'COME')).toBe("d'Afrique et d'Asie");
+      expect(complementsPhrase(complements({ source: complement(np(ANTARCTIQUE)) }), {}, 'COME')).toBe("de l'Antarctique");
+      expect(complementsPhrase(complements({ source: complement(np(EUROPE)) }), {}, 'RUN')).toBe("loin de l'Europe");
     });
   });
 

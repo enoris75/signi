@@ -406,11 +406,24 @@ describe('feminine plural object clitic: through the other clitic paths', () => 
 // `predicateText` emits the impersonal clitic first ("si lo mangia"); its comment mistakes this for
 // the "se lo" order, which belongs to the reflexive/dative si.
 describe('known bugs: Italian object clitic before the impersonal si', () => {
-  test.fails('Italian puts the object clitic before the impersonal si (lo si mangia)', () => {
+  test('Italian puts the object clitic before the impersonal si (lo si mangia)', () => {
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), 'it')).toBe('lo si mangia.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), 'it')).toBe('non lo si mangia.');
     expect(say(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('FIRST_PERSON') }), 'it')).toBe('mi si vede.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { modals: [{ verb: 'MUST' }] } }), 'it')).toBe('lo si deve mangiare.');
+  });
+
+  test('Italian keeps the order for every clitic and tense', () => {
+    const oneSees = (directObject: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) => say(clause(np('GENERIC_PERSON'), 'SEE', { directObject, verbPhrase }), 'it');
+    expect(oneSees(np('THIRD_PERSON', { number: 'plural' }))).toBe('li si vede.');
+    expect(oneSees(np('THIRD_PERSON', { gender: 'fem' }))).toBe('la si vede.');
+    expect(oneSees(np('FIRST_PERSON', { number: 'plural' }))).toBe('ci si vede.');
+    expect(oneSees(np('THIRD_PERSON'), { tense: 'past' })).toBe('lo si vide.');
+  });
+
+  test('regression: si with a noun object and a clitic with a noun subject are unchanged', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('MOUSE') }), 'it')).toBe('si vede il topo.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON') }), 'it')).toBe('il gatto lo vede.');
   });
 });
 
@@ -422,13 +435,36 @@ describe('known bugs: French object clitic in a periphrasis', () => {
   const sees = (verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase'], object = 'FIRST_PERSON', verb = 'SEE') =>
     sayAll(clause(np('CAT'), verb, { directObject: np(object), verbPhrase })).fr;
 
-  test.fails('French puts the object clitic before the governed infinitive', () => {
+  test('French puts the object clitic before the governed infinitive', () => {
     expect(sees({ aspect: 'progressive' })).toBe('le chat est en train de me voir.');
     expect(sees({ aspect: 'prospective' })).toBe('le chat est sur le point de me voir.');
     expect(sees({ aspect: 'progressive' }, 'THIRD_PERSON', 'ADD')).toBe("le chat est en train de l'ajouter.");
     expect(sees({ modals: ['MUST'] })).toBe('le chat doit me voir.');
     expect(sees({ modals: ['MUST'], negative: true })).toBe('le chat ne doit pas me voir.');
     expect(sees({ modals: ['MUST'], aspect: 'resultative' }, 'THIRD_PERSON')).toBe("le chat doit l'avoir vu.");
+  });
+
+  test('French keeps the clitic on the infinitive through agreement, adverbs, stacked modals and a resumed group', () => {
+    expect(sees({ modals: ['MUST'], aspect: 'resultative' }, 'THIRD_PERSON')).toBe("le chat doit l'avoir vu.");
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).fr)
+      .toBe("le chat doit l'avoir vue.");
+    expect(sees({ modals: ['MUST'], modifier: 'ALWAYS' })).toBe('le chat doit toujours me voir.');
+    expect(sees({ modals: ['MUST'], modifier: 'NEVER' })).toBe('le chat ne doit jamais me voir.');
+    expect(sees({ modals: ['WILL', 'CAN'] })).toBe('le chat veut pouvoir me voir.');
+    expect(sees({ modals: ['MUST'], aspect: 'progressive' })).toBe('le chat doit être en train de me voir.');
+    expect(sees({ aspect: 'progressive', negative: true })).toBe("le chat n'est pas en train de me voir.");
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' }, verbPhrase: { modals: ['MUST'] } })).fr)
+      .toBe('le chat doit nous voir, lui et moi.');
+  });
+
+  test('French agrees a modal perfect participle with an object relative', () => {
+    expect(sayAll(clause(np('MOUSE', { relative: { verbPhrase: { verb: 'EAT', modals: ['MUST'], aspect: 'resultative' }, subject: np('CAT'), headRole: 'directObject' } }), 'RUN')).fr)
+      .toBe('la souris que le chat doit avoir mangée court.');
+  });
+
+  test('regression: the compound past keeps the clitic on the auxiliary, and a noun object stays after', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } })).fr).toBe("le chat l'a vue.");
+    expect(sees({ modals: ['MUST'] }, 'DOG')).toBe('le chat doit voir le chien.');
   });
 });
 

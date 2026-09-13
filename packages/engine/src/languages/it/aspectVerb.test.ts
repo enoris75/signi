@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { aspectVerb } from './aspectVerb.js';
-import { ANDARE, GATTA, GATTO, IO, MANGIARE, NOI, VEDERE } from './it.fixtures.js';
+import { ANDARE, GATTA, GATTO, IO, MANGIARE, NOI, SI, VEDERE } from './it.fixtures.js';
 
 const VOI = { person: '2', number: 'plural' };
 
@@ -16,6 +16,12 @@ describe('aspectVerb', () => {
     expect(aspectVerb(MANGIARE, GATTO, 'present', 'prospective')).toBe('sta per mangiare');
     expect(aspectVerb(MANGIARE, GATTO, 'past', 'prospective')).toBe('stava per mangiare');
     expect(aspectVerb(MANGIARE, VOI, 'present', 'prospective')).toBe('state per mangiare');
+  });
+
+  // A83/A84: si takes essere; a lexical essere participle agrees with si as masculine plural.
+  test('the impersonal si takes essere, agreeing only a lexical essere participle', () => {
+    expect(aspectVerb(MANGIARE, SI, 'present', 'resultative')).toBe('è mangiato');
+    expect(aspectVerb(ANDARE, SI, 'present', 'resultative')).toBe('è andati');
   });
 
   test('an avere participle agrees with a preceding object clitic passed in', () => {

@@ -1,10 +1,11 @@
-import { isPronominalPossessor, joinConjuncts, possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor, joinConjuncts, type ResolvedNounPhrase } from '../../types.js';
 import { possessiveIt } from '../../possessive.js';
 import { agreeAdj } from './agreeAdj.js';
 import { defArticle } from './defArticle.js';
 import { isPlural } from './isPlural.js';
 import { itDeg } from './itDeg.js';
 import { itMods } from './itMods.js';
+import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { prenominalChain } from './prenominalChain.js';
@@ -17,7 +18,8 @@ import { surface } from './surface.js';
  * Render a noun phrase: [head] [prenominal adjectives] noun [postnominal adjectives].
  * `headFor` builds the article/preposition, receiving the plurality and the surface of
  * the word that will follow it (`lead`) so it can pick the right form/elision. A caller builds it from
- * `possessedHeadForms(np, 'definite')`, so a pronominal possessor's definite article comes out of it.
+ * `itPossessedHeadForms(np)`, so a pronominal possessor's definite article (or none, before a kinship
+ * noun) comes out of it.
  */
 export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead: string) => string): string {
   const forms = np.head.forms;
@@ -36,8 +38,8 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
     : '';
   const preChain = pronominalPoss ? [possWord, ...preSurfaces] : preSurfaces;
   const lead = preChain[0] ?? noun;
-  // The caller builds the head from `possessedHeadForms`, so a possessive gets the definite article, or
-  // the preposition fused with it ("il tuo cane", "al tuo cane", "nella mia casa").
+  // The caller builds the head from `itPossessedHeadForms`, so a possessive gets the definite article,
+  // or the preposition fused with it ("il tuo cane", "al tuo cane", "nella mia casa").
   const head = headFor(plural, lead);
   const core = joinArt(head, joinWords([...preChain, noun]));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, the
@@ -59,7 +61,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor was
   // already rendered prenominally above, so it is excluded here.)
   const base = poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => prepDet('di', possessedHeadForms(poss, 'definite'), plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => prepDet('di', itPossessedHeadForms(poss), plural, lead))}`
     : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;

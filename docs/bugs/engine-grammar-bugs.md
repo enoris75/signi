@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (52 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (42 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,16 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A81 | [A81-italian-ico-adjective-plural.md](A-must-fix/A81-italian-ico-adjective-plural.md) |
-| A82 | [A82-italian-impersonal-si-clitic-order.md](A-must-fix/A82-italian-impersonal-si-clitic-order.md) |
-| A83 | [A83-italian-impersonal-si-perfect-auxiliary.md](A-must-fix/A83-italian-impersonal-si-perfect-auxiliary.md) |
-| A84 | [A84-italian-impersonal-si-plural-agreement.md](A-must-fix/A84-italian-impersonal-si-plural-agreement.md) |
-| A85 | [A85-italian-kinship-possessive-article.md](A-must-fix/A85-italian-kinship-possessive-article.md) |
-| A86 | [A86-italian-negative-imperative-clitic.md](A-must-fix/A86-italian-negative-imperative-clitic.md) |
-| A87 | [A87-italian-short-imperative-dare-fare-andare.md](A-must-fix/A87-italian-short-imperative-dare-fare-andare.md) |
-| A88 | [A88-french-clitic-periphrasis.md](A-must-fix/A88-french-clitic-periphrasis.md) |
-| A89 | [A89-french-continent-source.md](A-must-fix/A89-french-continent-source.md) |
-| A90 | [A90-french-disjunctive-subject-agreement.md](A-must-fix/A90-french-disjunctive-subject-agreement.md) |
 | A91 | [A91-french-infinitive-negation.md](A-must-fix/A91-french-infinitive-negation.md) |
 | A92 | [A92-french-je-elision.md](A-must-fix/A92-french-je-elision.md) |
 | A93 | [A93-french-ne-elision-before-clitic.md](A-must-fix/A93-french-ne-elision-before-clitic.md) |
@@ -207,6 +197,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A78 | [A78-english-frequency-adverb-negator.md](fixed/A78-english-frequency-adverb-negator.md) | English | 2026-09-13 |
 | A79 | [A79-english-indefinite-article-by-spelling.md](fixed/A79-english-indefinite-article-by-spelling.md) | English | 2026-09-13 |
 | A80 | [A80-english-manner-adverb-on-modal.md](fixed/A80-english-manner-adverb-on-modal.md) | English | 2026-09-13 |
+| A81 | [A81-italian-ico-adjective-plural.md](fixed/A81-italian-ico-adjective-plural.md) | Italian | 2026-09-13 |
+| A82 | [A82-italian-impersonal-si-clitic-order.md](fixed/A82-italian-impersonal-si-clitic-order.md) | Italian | 2026-09-13 |
+| A83 | [A83-italian-impersonal-si-perfect-auxiliary.md](fixed/A83-italian-impersonal-si-perfect-auxiliary.md) | Italian | 2026-09-13 |
+| A84 | [A84-italian-impersonal-si-plural-agreement.md](fixed/A84-italian-impersonal-si-plural-agreement.md) | Italian | 2026-09-13 |
+| A85 | [A85-italian-kinship-possessive-article.md](fixed/A85-italian-kinship-possessive-article.md) | Italian | 2026-09-13 |
+| A86 | [A86-italian-negative-imperative-clitic.md](fixed/A86-italian-negative-imperative-clitic.md) | Italian | 2026-09-13 |
+| A87 | [A87-italian-short-imperative-dare-fare-andare.md](fixed/A87-italian-short-imperative-dare-fare-andare.md) | Italian | 2026-09-13 |
+| A88 | [A88-french-clitic-periphrasis.md](fixed/A88-french-clitic-periphrasis.md) | French | 2026-09-13 |
+| A89 | [A89-french-continent-source.md](fixed/A89-french-continent-source.md) | French | 2026-09-13 |
+| A90 | [A90-french-disjunctive-subject-agreement.md](fixed/A90-french-disjunctive-subject-agreement.md) | French | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

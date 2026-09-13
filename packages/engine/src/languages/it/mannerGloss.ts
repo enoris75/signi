@@ -1,4 +1,5 @@
-import { mannerRelation, possessedHeadForms, type ResolvedNounElement } from '../../types.js';
+import { mannerRelation, type ResolvedNounElement } from '../../types.js';
+import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { IT_MANNER_PREP } from './it.consts.js';
 import { coordinate } from './coordinate.js';
 import { prepDet } from './prepDet.js';
@@ -13,6 +14,6 @@ import { renderNP } from './renderNP.js';
  */
 export function mannerGloss(el: ResolvedNounElement): string {
   return coordinate(el, (np) =>
-    renderNP(np, (plural, lead) => prepDet(IT_MANNER_PREP[mannerRelation(np.head.forms)], possessedHeadForms(np, 'definite'), plural, lead)),
+    renderNP(np, (plural, lead) => prepDet(IT_MANNER_PREP[mannerRelation(np.head.forms)], itPossessedHeadForms(np), plural, lead)),
   );
 }

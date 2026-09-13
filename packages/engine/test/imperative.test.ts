@@ -455,7 +455,7 @@ describe('known bugs: French affirmative imperative enclisis', () => {
 // clitic to the whole infinitive: "non mangiarelo". The infinitive drops its -e before an enclitic
 // ("non mangiarlo"), as the infinitive mood already does. "non lo mangiare" is equally standard.
 describe('known bugs: Italian negative tu command with an object pronoun', () => {
-  test.fails('Italian drops the infinitive\'s -e before the clitic (non mangiarlo)', () => {
+  test('Italian drops the infinitive\'s -e before the clitic (non mangiarlo)', () => {
     expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), imperative: true }, 'it'))
       .toMatch(/^non (?:mangiarlo|lo mangiare)\.$/);
     expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { verbPhrase: { negative: true }, directObject: np('FIRST_PERSON') }), imperative: true }, 'it'))
@@ -465,13 +465,28 @@ describe('known bugs: Italian negative tu command with an object pronoun', () =>
     expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), imperative: true, imperativeRegister: 'instruction' }, 'it'))
       .toMatch(/^non (?:mangiarlo|lo mangiare)\.$/);
   });
+
+  test('Italian attaches every clitic to the negative tu infinitive, with a frequency adverb after it', () => {
+    const neg = (verb: string, object: ReturnType<typeof np>, extra = {}) =>
+      say({ ...clause(np('SECOND_PERSON'), verb, { verbPhrase: { negative: true }, directObject: object, ...extra }), imperative: true }, 'it');
+    expect(neg('SEE', np('SECOND_PERSON'))).toBe('non vederti.');
+    expect(neg('SEE', np('THIRD_PERSON', { number: 'plural', gender: 'fem' }))).toBe('non vederle.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { modifier: 'NEVER' } }), imperative: true }, 'it'))
+      .toBe('non mangiarlo mai.');
+  });
+
+  test('regression: the affirmative and the negative voi keep their enclitic', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }, 'it')).toBe('mangialo.');
+    expect(say({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), imperative: true }, 'it'))
+      .toBe('non mangiatelo.');
+  });
 });
 
 // A87. The Italian tu command of an -are verb is built from its 3sg present, which for dare/fare/
 // andare is the indicative "dà/fa/va", not the command "da'/fa'/va'" (or "dai/fai/vai"). After those
 // short forms an enclitic doubles its consonant ("dallo", "fallo"), but the clitic is just appended.
 describe('known bugs: Italian tu command of dare, fare and andare', () => {
-  test.fails('Italian uses da\'/fa\'/va\' and doubles the clitic after them', () => {
+  test('Italian uses da\'/fa\'/va\' and doubles the clitic after them', () => {
     expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG') } } }), imperative: true }, 'it'))
       .toMatch(/^(?:da'|dai) il libro al cane\.$/);
     expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('THIRD_PERSON'), complements: { terminus: { phrase: np('DOG') } } }), imperative: true }, 'it'))
@@ -479,6 +494,24 @@ describe('known bugs: Italian tu command of dare, fare and andare', () => {
     expect(say({ ...clause(np('SECOND_PERSON'), 'MAKE', { directObject: np('THIRD_PERSON') }), imperative: true }, 'it')).toBe('fallo.');
     expect(say({ ...clause(np('SECOND_PERSON'), 'MAKE', { directObject: np('BOOK') }), imperative: true }, 'it')).toMatch(/^(?:fa'|fai) il libro\.$/);
     expect(say({ ...clause(np('SECOND_PERSON'), 'GO'), imperative: true }, 'it')).toMatch(/^(?:va'|vai)\.$/);
+  });
+
+  test('Italian doubles every clitic after da\' and fa\', and keeps the short form with a complement and as an instruction', () => {
+    const tu = (verb: string, extra = {}, more = {}) => say({ ...clause(np('SECOND_PERSON'), verb, extra), imperative: true, ...more }, 'it');
+    expect(tu('MAKE', { directObject: np('FIRST_PERSON') })).toBe('fammi.');
+    expect(tu('GIVE', { directObject: np('FIRST_PERSON', { number: 'plural' }) })).toBe('dacci.');
+    expect(tu('GIVE', { directObject: np('THIRD_PERSON', { number: 'plural' }) })).toBe('dalli.');
+    expect(tu('GIVE', { directObject: np('THIRD_PERSON', { gender: 'fem' }) })).toBe('dalla.');
+    expect(tu('GO', { complements: { direction: { phrase: np('MARKET') } } })).toBe("va' al mercato.");
+    expect(tu('GO', {}, { imperativeRegister: 'instruction' })).toBe("va'.");
+    expect(tu('MAKE', { directObject: np('THIRD_PERSON') }, { imperativeRegister: 'instruction' })).toBe('fallo.');
+  });
+
+  test('regression: the negative, noi and voi keep their forms', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), imperative: true }, 'it')).toBe('non darlo.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'MAKE', { verbPhrase: { negative: true } }), imperative: true }, 'it')).toBe('non fare.');
+    expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'MAKE', { directObject: np('THIRD_PERSON') }), imperative: true }, 'it')).toBe('facciamolo.');
+    expect(say({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'GIVE', { directObject: np('THIRD_PERSON') }), imperative: true }, 'it')).toBe('datelo.');
   });
 });
 

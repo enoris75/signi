@@ -16,6 +16,15 @@ describe('agreeAdj', () => {
     expect(agreeAdj('lungo', 'fem', true)).toBe('lunghe');
   });
 
+  // A81: a proparoxytone -ico softens its masculine plural; the feminine and the exceptions stay hard.
+  test('an -ico adjective of three or more syllables takes -ici in the masculine plural', () => {
+    expect(agreeAdj('domestico', 'masc', true)).toBe('domestici');
+    expect(agreeAdj('selvatico', 'masc', true)).toBe('selvatici');
+    expect(agreeAdj('pratico', 'masc', true)).toBe('pratici');
+    expect(agreeAdj('selvatico', 'fem', true)).toBe('selvatiche');
+    expect(agreeAdj('antico', 'masc', true)).toBe('antichi');
+  });
+
   test('-io does not double its i in the masculine plural', () => {
     expect(agreeAdj('vecchio', 'masc', true)).toBe('vecchi');
     expect(agreeAdj('vecchio', 'fem', true)).toBe('vecchie');

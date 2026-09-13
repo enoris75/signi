@@ -77,13 +77,20 @@ export function predicateText(
   // et moi"). An object relative passes its antecedent instead (`precedingObjectForms`).
   const cliticObjectForms = !objectClitic ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
+  // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
+  // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit
+  // l'avoir vu"); only the compound past keeps it on the finite auxiliary ("l'a vu").
+  const infinitiveClitic = modals.length > 0 || aspect === 'progressive' || aspect === 'prospective' ? objectClitic : '';
+  const finiteClitic = infinitiveClitic ? '' : objectClitic;
   let effectiveVerb: string;
   let effectiveMod: string;
   if (modals.length > 0) {
     // The outermost modal is the finite verb — it takes the tense, the agreement, and the
     // negation — and governs the inner modals' infinitives down to the main verb group's
     // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
-    const { finite, finiteAdverb, tail } = modalGroupFr(modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '');
+    const { finite, finiteAdverb, tail } = modalGroupFr(
+      modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic, precedingObjectForms ?? cliticObjectForms,
+    );
     effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
   } else if (aspect !== 'neutral') {
@@ -91,7 +98,7 @@ export function predicateText(
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
-    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms);
+    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic);
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency ? '' : modifierText;
   } else if (verbNegative || aucun || groupNegative) {
@@ -140,7 +147,7 @@ export function predicateText(
       .filter(Boolean)
       .join(' '));
   }
-  return withDislocated([frCliticize(objectClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
+  return withDislocated([frCliticize(finiteClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
     .filter(Boolean)
     .join(' '));
 }
