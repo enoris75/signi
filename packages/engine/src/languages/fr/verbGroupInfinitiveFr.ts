@@ -2,6 +2,8 @@ import type { Aspect } from '@signi/shared';
 import { VOWEL_START } from './fr.consts.js';
 import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { frCliticize } from './frCliticize.js';
+import { reflexiveFinite } from './reflexiveFinite.js';
+import { reflexiveInfinitive } from './reflexiveInfinitive.js';
 
 /**
  * The main verb's whole group as an infinitive — what a modal governs. Neutral is the bare
@@ -13,6 +15,9 @@ import { frCliticize } from './frCliticize.js';
  * the verb ("me voir"), the progressive's ("être en train de me voir", "de" eliding against the
  * clitic) or the compound's auxiliary ("l'avoir vu"). That avoir participle agrees with the preceding
  * object, `precedingObjectForms` ("l'avoir vue").
+ *
+ * A reflexive verb's clitic agrees with the subject, on the infinitive ("doit m'effondrer") and before
+ * the auxiliary of the perfect ("doit s'être effondré").
  */
 export function verbGroupInfinitiveFr(
   verbForms: Record<string, string>,
@@ -22,7 +27,7 @@ export function verbGroupInfinitiveFr(
   precedingObjectForms?: Record<string, string>,
 ): string {
   const inf = verbForms['base'] ?? '';
-  const group = frCliticize(clitic, inf);
+  const group = frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms));
   const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
   if (aspect === 'progressive') return `être en train ${deInf}`;
   if (aspect === 'prospective') return `être sur le point ${deInf}`;
@@ -30,7 +35,7 @@ export function verbGroupInfinitiveFr(
     const etre = verbForms['aux'] === 'be';
     const part = verbForms['participle'] ?? inf;
     return etre
-      ? frCliticize(clitic, `être ${agreeParticipleFr(part, subjectForms)}`)
+      ? frCliticize(clitic, reflexiveFinite(verbForms, subjectForms, `être ${agreeParticipleFr(part, subjectForms)}`))
       : frCliticize(clitic, `avoir ${precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part}`);
   }
   return group;

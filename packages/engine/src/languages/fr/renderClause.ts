@@ -2,6 +2,7 @@ import { firstConjunct, type ResolvedPhrase } from '../../types.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
+import { joinSubject } from './joinSubject.js';
 import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
 import { subjectText } from './subjectText.js';
@@ -25,5 +26,5 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const predicate = predicateText(
     subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subj, predicate].filter(Boolean).join(' ').trim();
+  return joinSubject(subj, predicate).trim();
 }

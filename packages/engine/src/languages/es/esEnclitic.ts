@@ -24,9 +24,19 @@ function nuclei(word: string): Array<[number, number]> {
  * syllable, so the written accent follows the general rules for the longer word: it is added when the
  * stress now falls three syllables or more from the end ("come" → "cómelo"), and a verb's own accent
  * is dropped when it no longer needs one ("está" → "estate"). A no-op with no clitic.
+ *
+ * Two junctions lose a letter: the 1st plural's -s before "nos" ("volvamos" + "nos" → "volvámonos")
+ * and the 2nd plural's -d before "os" ("volved" + "os" → "volveos").
  */
 export function esEnclitic(verb: string, clitic: string): string {
   if (!clitic) return verb;
+  const joined = attach(verb, clitic);
+  const drops = (/mos$/.test(verb) && clitic.startsWith('nos')) || (/d$/.test(verb) && clitic.startsWith('os'));
+  return drops ? `${joined.slice(0, verb.length - 1)}${joined.slice(verb.length)}` : joined;
+}
+
+/** `esEnclitic` without the junction losses: the clitic attached and the accent placed. */
+function attach(verb: string, clitic: string): string {
   const spans = nuclei(verb);
   if (spans.length === 0) return `${verb}${clitic}`;
   // The stressed nucleus: the one carrying a written accent, else the penultimate for a word ending

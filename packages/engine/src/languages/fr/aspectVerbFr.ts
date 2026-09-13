@@ -5,6 +5,7 @@ import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { auxFiniteFr } from './auxFiniteFr.js';
 import { frCliticize } from './frCliticize.js';
 import { reflexiveFinite } from './reflexiveFinite.js';
+import { reflexiveInfinitive } from './reflexiveInfinitive.js';
 
 /**
  * The verb group for a non-neutral aspect, split into the finite auxiliary (which negation
@@ -29,7 +30,8 @@ export function aspectVerbFr(
   clitic = '',
 ): { finite: string; tail: string } {
   const inf = verbForms['base'] ?? '';
-  const group = frCliticize(clitic, inf);
+  // A reflexive infinitive agrees its clitic with the subject ("en train de m'effondrer").
+  const group = frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms));
   const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
   const etreFinite = auxFiniteFr(ETRE_AUX, ETRE_FR, subjectForms, tense, mood);
   if (aspect === 'progressive') return { finite: etreFinite, tail: `en train ${deInf}` };

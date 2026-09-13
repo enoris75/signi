@@ -20,14 +20,14 @@ export const FR_DEGREE: Record<Degree, string> = {
 export const FR_SUPPLETIVE: Record<string, string> = { GOOD: 'meilleur', BAD: 'pire' };
 
 // Adjectives whose feminine and plural no rule in `agreeAdjFr` derives, seeded whole.
-export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string]> = {
-  // [masc.sg, fem.sg, masc.pl, fem.pl]
-  beau: ['beau', 'belle', 'beaux', 'belles'],
-  nouveau: ['nouveau', 'nouvelle', 'nouveaux', 'nouvelles'],
-  vieux: ['vieux', 'vieille', 'vieux', 'vieilles'],
+export const FR_ADJ_IRREGULAR: Record<string, [string, string, string, string, string]> = {
+  // [masc.sg, fem.sg, masc.pl, fem.pl, masc.sg before a vowel sound ("un bel ange", "le vieil homme")]
+  beau: ['beau', 'belle', 'beaux', 'belles', 'bel'],
+  nouveau: ['nouveau', 'nouvelle', 'nouveaux', 'nouvelles', 'nouvel'],
+  vieux: ['vieux', 'vieille', 'vieux', 'vieilles', 'vieil'],
   // -s adjectives double the s in the feminine ("bas → basse"); the rule in `agreeAdjFr` has no -s branch and
   // would give the wrong "base". Only "bas" (LOW) is seeded; masc plural stays "bas" (invariable).
-  bas: ['bas', 'basse', 'bas', 'basses'],
+  bas: ['bas', 'basse', 'bas', 'basses', 'bas'],
 };
 
 export const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;

@@ -42,6 +42,15 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(IL, { gender: 'fem', number: 'plural', base: 'elles', plural: 'elles' }), vp(COURIR)))).toBe('elles courent');
     });
 
+    // A92: the subject clitic je elides before a vowel-initial predicate.
+    test('je elides before a vowel, not before a consonant, a clitic or ne', () => {
+      expect(renderClause(clause(np(JE), vp(MANGER, { aspect: 'resultative' })))).toBe("j'ai mangé");
+      expect(renderClause(clause(np(JE), vp(MANGER, { aspect: 'progressive', tense: 'past' })))).toBe("j'étais en train de manger");
+      expect(renderClause(clause(np(JE), vp(MANGER)))).toBe('je mange');
+      expect(renderClause(clause(np(JE), vp(VOIR, { aspect: 'resultative' }), { directObject: el(np(IL)) }))).toBe("je l'ai vu");
+      expect(renderClause(clause(np(JE), vp(MANGER, { aspect: 'resultative', negative: true })))).toBe("je n'ai pas mangé");
+    });
+
     test('the verb agrees with the subject slot as a group', () => {
       expect(renderClause(clause(el(np(CHAT), np(CHIEN)), vp(COURIR)))).toBe('le chat et le chien courent');
       expect(renderClause(clause(el(np(JE), np(CHAT)), vp(MANGER)))).toBe('moi et le chat, nous mangeons');

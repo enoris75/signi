@@ -31,3 +31,32 @@ follow without further change.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: French bel/nouvel/vieil before a vowel* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- `FR_ADJ_IRREGULAR` in [`fr.consts.ts`](../../../packages/engine/src/languages/fr/fr.consts.ts)
+  gains a fifth cell, the masculine singular before a vowel sound: `bel`, `nouvel`, `vieil`. `bas`
+  repeats `bas`.
+- The new [`liaisonAdjectives.ts`](../../../packages/engine/src/languages/fr/liaisonAdjectives.ts)
+  swaps that cell in for a masculine singular prenominal adjective. The test is `elidesBefore` against
+  the next word: the next prenominal adjective, or else the noun.
+- [`renderNP.ts`](../../../packages/engine/src/languages/fr/renderNP.ts) applies it before choosing
+  the article and the possessive, so `le vieil`, `ce nouvel`, `mon nouvel` follow. `frMods` uses it
+  too (A94).
+
+Every row now renders as wanted: `le vieil homme`, `un bel ange`, `ce nouvel argent`, `le nouvel
+enfant`. The fix also covers:
+- a possessive (`mon nouvel enfant`);
+- an object and a complement (`le vieil homme`);
+- a second adjective (`le beau vieil homme`), each adjective judged on the word that follows it.
+
+The plural (`les vieux hommes`), the feminine (`la belle aile`), a consonant (`le vieux chat`) and the
+postnominal superlative (`l'homme le plus vieux`) are unchanged.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: French bel/nouvel/vieil before a vowel*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the possessive, the object, the complement and the second adjective, with a
+  guard for the unchanged forms.
+- Unit tests: the new `liaisonAdjectives.test.ts`, and `renderNP.test.ts` (fr).

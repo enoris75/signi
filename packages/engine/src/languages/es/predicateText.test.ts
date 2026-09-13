@@ -144,6 +144,13 @@ describe('predicateText', () => {
   });
 
   describe('objects', () => {
+    // A98: the personal "a" before a human with a determiner.
+    test('a human noun object takes the personal a; a non-human does not', () => {
+      expect(predicateText(GATO, vp(VER), el(np(NINO)))).toBe('ve al niño');
+      expect(predicateText(GATO, vp(VER), el(np(NINO), np(GATO)))).toBe('ve al niño y el gato');
+      expect(predicateText(GATO, vp(VER), el(np(RATON)))).toBe('ve el ratón');
+    });
+
     test('a noun object follows the verb, each conjunct with its article', () => {
       expect(predicateText(GATO, vp(VER), el(np(LIBRO)))).toBe('ve el libro');
       expect(predicateText(GATO, vp(VER), el(np(LIBRO), np(CASA, { definiteness: 'indefinite' })))).toBe('ve el libro y una casa');
@@ -185,6 +192,11 @@ describe('predicateText', () => {
       expect(predicateText(SE, vp(COMER), el(np(RATON, { number: 'plural' })))).toBe('se comen los ratones');
       expect(predicateText(SE, vp(COMER, { aspect: 'resultative' }), el(np(RATON, { number: 'plural' })))).toBe('se han comido los ratones');
       expect(predicateText(SE, vp(COMER), el(np(ELLOS)))).toBe('se los come');
+    });
+
+    // A98: an object with the personal "a" keeps se impersonal and the verb singular.
+    test('a plural human object takes the personal a and keeps the verb singular', () => {
+      expect(predicateText(SE, vp(VER), el(np(NINO, { number: 'plural' })))).toBe('se ve a los niños');
     });
 
     test('a recipient follows the object', () => {
@@ -276,6 +288,19 @@ describe('predicateText', () => {
     test('the adverb, object and complements follow the verb', () => {
       expect(predicateText(TU, command(COMER, 'EAT', { modifier: concept(RAPIDO_ADV) }), food)).toBe('come rápido la comida');
       expect(predicateText(TU, command(CORRER, 'RUN'), undefined, complements({ direction: complement(np(CASA)) }))).toBe('corre a la casa');
+    });
+
+    // A100: a reflexive command takes the addressee's clitic, attached when affirmative (the 1st plural
+    // losing -s before nos, the 2nd plural -d before os) and in front when negative.
+    test('a reflexive command takes the addressee\'s clitic', () => {
+      const LAVARSE: Forms = { base: 'lavarse', '1sg_present': 'me lavo', '3sg_present': 'se lava', '1pl_present': 'nos lavamos' };
+      expect(predicateText(TU, command(LAVARSE, 'WASH'))).toBe('lávate');
+      expect(predicateText(NOSOTROS, command(LAVARSE, 'WASH'))).toBe('lavémonos');
+      expect(predicateText(VOSOTROS, command(LAVARSE, 'WASH'))).toBe('lavaos');
+      expect(predicateText(TU, command(LAVARSE, 'WASH', { negative: true }))).toBe('no te laves');
+      expect(predicateText(NOSOTROS, command(LAVARSE, 'WASH', { negative: true }))).toBe('no nos lavemos');
+      expect(predicateText(VOSOTROS, command(LAVARSE, 'WASH', { negative: true }))).toBe('no os lavéis');
+      expect(predicateText(TU, command(LAVARSE, 'WASH', { register: 'instruction' }))).toBe('lavarse');
     });
 
     test('a negative command keeps a pronoun object proclitic', () => {

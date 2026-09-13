@@ -289,7 +289,7 @@ describe('known bugs: English frequency adverb inside a negated auxiliary', () =
 // word's sound, so a negated group comes out with "y". `predicateText`'s own comment gives the
 // target: "no veo ningún niño ni ninguna niña".
 describe('known bugs: Spanish "ni" in a negative coordination', () => {
-  test.fails('Spanish joins negative conjuncts with "ni"', () => {
+  test('Spanish joins negative conjuncts with "ni"', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', {
       directObject: { conjuncts: [np('MOUSE', { definiteness: 'no' }), np('COW', { definiteness: 'no' })], conjunction: 'and' },
     })).es).toBe('el gato no ve ningún ratón ni ninguna vaca.');
@@ -305,5 +305,23 @@ describe('known bugs: Spanish "ni" in a negative coordination', () => {
       }),
       imperative: true,
     }).es).toBe('no comas ningún ratón ni ninguna vaca.');
+  });
+
+  test('Spanish uses "ni" after "o", in a relative, an infinitive and a direction', () => {
+    const no = (id: string) => np(id, { definiteness: 'no' });
+    const and = (...conjuncts: ReturnType<typeof np>[]) => ({ conjuncts, conjunction: 'and' as const });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [no('MOUSE'), no('COW')], conjunction: 'or' } })).es)
+      .toBe('el gato no ve ningún ratón ni ninguna vaca.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: and(no('MOUSE'), no('COW')) } }), 'RUN')).es)
+      .toBe('el perro que no ve ningún ratón ni ninguna vaca corre.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: and(no('MOUSE'), no('COW')) }), infinitive: true }).es)
+      .toBe('no comer ningún ratón ni ninguna vaca.');
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: and(no('HOUSE'), no('MARKET')) } } })).es)
+      .toBe('el gato no va a ninguna casa ni a ningún mercado.');
+  });
+
+  test('regression: an affirmative object group under a negated verb keeps "y"', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE'), np('COW')], conjunction: 'and' } })).es)
+      .toBe('el gato no ve el ratón y la vaca.');
   });
 });

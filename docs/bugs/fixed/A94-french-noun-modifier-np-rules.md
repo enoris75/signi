@@ -30,3 +30,32 @@ adjective, or else the noun). The relation still chooses the bare preposition, w
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: French attributive noun modifier* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+[`frMods.ts`](../../../packages/engine/src/languages/fr/frMods.ts) now renders each modifier with the
+noun-phrase pieces:
+
+- **Adjective position:** it builds a stand-in noun phrase from the modifier concept and its
+  adjectives and runs `splitAdjectives` on it, so a `PRENOMINAL` adjective precedes the modifier
+  noun and the rest follow.
+- **Liaison:** `liaisonAdjectives` (A95) gives the liaison form.
+- **Elision:** `de` elides by `elidesBefore` against the word right after it, so a mute h counts.
+
+Every row now renders as wanted: `la prison d'hommes`, `le créateur de petites maisons`, `le créateur
+de belles maisons`. The fix also covers:
+
+- a prenominal and a postnominal adjective together (`de petites maisons froides`);
+- BIG (`de grandes maisons`);
+- a liaison form (`de vieil homme`).
+
+A true vowel (`d'enfants`), the postnominal `de phrases sémantiques` and a feature `à homme` are
+unchanged. Several postnominal adjectives on a modifier are still joined by spaces, not listed with
+`et` as in a noun phrase.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: French attributive noun modifier*. The pinning `test.fails` is now a passing `test`.
+  New cases cover the split, BIG and the liaison form, with a guard for the true vowel and the feature
+  `à`.
+- Unit test: `frMods.test.ts`.

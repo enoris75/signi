@@ -30,4 +30,11 @@ describe('frCliticize', () => {
     expect(frCliticize('me', 'ne voit pas')).toBe('ne me voit pas');
     expect(frCliticize('les', 'ne voit jamais')).toBe('ne les voit jamais');
   });
+
+  // A93: "ne" is judged against the clitic, never left elided before one.
+  test('restores a ne elided against a vowel-initial verb', () => {
+    expect(frCliticize('me', "n'aime pas")).toBe("ne m'aime pas");
+    expect(frCliticize('le', "n'a pas vu")).toBe("ne l'a pas vu");
+    expect(frCliticize('nous', "n'aime jamais")).toBe('ne nous aime jamais');
+  });
 });

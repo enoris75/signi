@@ -108,7 +108,7 @@ describe('clause', () => {
 // hombre"). `predicateText` renders every noun object with `npText`, so the "a" is never there. The
 // corpus already marks personhood (`human`, surfaced on the forms since A7).
 describe('known bugs: Spanish personal "a"', () => {
-  test.fails('Spanish marks a human direct object with "a"', () => {
+  test('Spanish marks a human direct object with "a"', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY') })).es).toBe('el gato ve al niño.');
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('WOMAN') })).es).toBe('el gato ve a la mujer.');
     expect(sayAll(clause(np('CAT'), 'KILL', { directObject: np('MAN', { definiteness: 'indefinite' }) })).es)
@@ -119,5 +119,30 @@ describe('known bugs: Spanish personal "a"', () => {
       .toBe('el perro que ve al niño corre.');
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'LOVE', { directObject: np('CHILD') }), imperative: true }).es)
       .toBe('ama al niño.');
+  });
+
+  test('Spanish marks the plural, a quantifier, a demonstrative, a possessive, a group and the infinitive', () => {
+    const sees = (directObject: NonNullable<Parameters<typeof clause>[2]>['directObject']) => sayAll(clause(np('CAT'), 'SEE', { directObject })).es;
+    expect(sees(np('MAN', { number: 'plural' }))).toBe('el gato ve a los hombres.');
+    expect(sees(np('PERSON', { number: 'plural', definiteness: 'some' }))).toBe('el gato ve a algunas personas.');
+    expect(sees(np('WOMAN', { definiteness: 'this' }))).toBe('el gato ve a esta mujer.');
+    expect(sees(np('FATHER', { possessor: { kind: 'pronominal', person: '3', number: 'singular' } }))).toBe('el gato ve a su padre.');
+    expect(sees(np('FATHER', { possessor: np('BOY') }))).toBe('el gato ve al padre del niño.');
+    expect(sees(np('MAN', { adjectives: ['OLD'] }))).toBe('el gato ve al hombre viejo.');
+    expect(sees({ conjuncts: [np('BOY'), np('WOMAN')], conjunction: 'and' })).toBe('el gato ve al niño y a la mujer.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'LOVE', { directObject: np('CHILD') }), infinitive: true }).es).toBe('amar al niño.');
+  });
+
+  test('Spanish keeps the impersonal se singular before the personal "a"', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('BOY', { number: 'plural' }) })).es).toBe('se ve a los niños.');
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } })).es)
+      .toBe('se nos ve a él y a mí.');
+  });
+
+  test('regression: a bare human, an animal, a thing and the passive se keep their forms', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY', { number: 'plural', definiteness: 'bare' }) })).es).toBe('el gato ve niños.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG') })).es).toBe('el gato ve el perro.');
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('HOUSE', { number: 'plural' }) })).es).toBe('se ven las casas.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } } })).es).toBe('el gato da el libro al niño.');
   });
 });

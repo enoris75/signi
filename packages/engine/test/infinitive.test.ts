@@ -166,7 +166,7 @@ describe('known bugs: French negative infinitive', () => {
   const instruction = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
     sayAll({ ...clause(np('SECOND_PERSON'), verb, extra), imperative: true, imperativeRegister: 'instruction' }).fr;
 
-  test.fails('French builds "ne pas / ne jamais / ne … aucun" around the infinitive', () => {
+  test('French builds "ne pas / ne jamais / ne … aucun" around the infinitive', () => {
     expect(instruction('SEE', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).toBe('ne pas le voir.');
     expect(inf('ADD', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).toBe("ne pas l'ajouter.");
     expect(inf('EAT', { verbPhrase: { modifier: 'NEVER' } })).toBe('ne jamais manger.');
@@ -175,5 +175,21 @@ describe('known bugs: French negative infinitive', () => {
     expect(instruction('EAT', { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('ne manger aucune souris.');
     expect(inf('RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
       .toBe('ne courir dans aucune maison.');
+  });
+
+  test('French keeps the negation in front with a vowel-initial verb, a feminine clitic and a dislocated group', () => {
+    expect(inf('LOVE', { directObject: np('CAT', { definiteness: 'no' }) })).toBe("n'aimer aucun chat.");
+    expect(inf('LOVE', { verbPhrase: { negative: true } })).toBe('ne pas aimer.');
+    expect(inf('SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { modifier: 'NEVER' } })).toBe('ne jamais la voir.');
+    expect(inf('EAT', { directObject: np('MOUSE', { definiteness: 'no' }), verbPhrase: { negative: true } })).toBe('ne manger aucune souris.');
+    expect(instruction('RUN', { verbPhrase: { modifier: 'NEVER' } })).toBe('ne jamais courir.');
+    expect(instruction('LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { negative: true } })).toBe("ne pas m'aimer.");
+    expect(instruction('SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' }, verbPhrase: { negative: true } }))
+      .toBe('ne pas nous voir, lui et moi.');
+  });
+
+  test('regression: an affirmative infinitive is unchanged', () => {
+    expect(inf('EAT')).toBe('manger.');
+    expect(inf('EAT', { directObject: np('THIRD_PERSON') })).toBe('le manger.');
   });
 });

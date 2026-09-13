@@ -19,7 +19,26 @@ describe('pluralize', () => {
     expect(pluralize('buey')).toBe('bueyes');
   });
 
+  // A99: the extra syllable of -es moves the written accent.
+  test('a stressed final vowel before -n or -s loses its accent', () => {
+    expect(pluralize('marrón')).toBe('marrones');
+    expect(pluralize('alemán')).toBe('alemanes');
+    expect(pluralize('inglés')).toBe('ingleses');
+  });
+
+  test('an unaccented word in -n or -s gains an accent on its second-to-last syllable', () => {
+    expect(pluralize('joven')).toBe('jóvenes');
+    expect(pluralize('examen')).toBe('exámenes');
+    expect(pluralize('imagen')).toBe('imágenes');
+  });
+
+  test('a one-syllable word in -n or -s needs no accent', () => {
+    expect(pluralize('gris')).toBe('grises');
+    expect(pluralize('pan')).toBe('panes');
+  });
+
   test('a multi-word form pluralises its last word', () => {
+    expect(pluralize('muy joven')).toBe('muy jóvenes');
     expect(pluralize('no conectado')).toBe('no conectados');
   });
 });

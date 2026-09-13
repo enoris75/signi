@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, CHAT, FEMME, MANGER, SOURIS } from './fr.fixtures.js';
+import { ALLER, CHAT, EFFONDRER, FEMME, JE, MANGER, SOURIS } from './fr.fixtures.js';
 import { verbGroupInfinitiveFr } from './verbGroupInfinitiveFr.js';
 
 describe('verbGroupInfinitiveFr', () => {
@@ -30,5 +30,13 @@ describe('verbGroupInfinitiveFr', () => {
   test('an avoir participle agrees with the preceding object', () => {
     expect(verbGroupInfinitiveFr(MANGER, CHAT, 'resultative', 'la', SOURIS)).toBe("l'avoir mangée");
     expect(verbGroupInfinitiveFr(MANGER, CHAT, 'resultative', '', SOURIS)).toBe('avoir mangée');
+  });
+
+  // A96: a reflexive clitic agrees with the subject, before the infinitive or the perfect's être.
+  test('a reflexive verb agrees its clitic with the subject', () => {
+    expect(verbGroupInfinitiveFr(EFFONDRER, JE, 'neutral')).toBe("m'effondrer");
+    expect(verbGroupInfinitiveFr(EFFONDRER, { ...JE, number: 'plural' }, 'progressive')).toBe('être en train de nous effondrer');
+    expect(verbGroupInfinitiveFr(EFFONDRER, CHAT, 'resultative')).toBe("s'être effondré");
+    expect(verbGroupInfinitiveFr(EFFONDRER, { ...FEMME }, 'resultative')).toBe("s'être effondrée");
   });
 });

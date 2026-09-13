@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, GARCON, IL, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
+import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, GARCON, IL, JE, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
 import { relativeText } from './relativeText.js';
 
 describe('relativeText', () => {
@@ -32,6 +32,15 @@ describe('relativeText', () => {
     expect(eatenBy(el(np(ON)))).toBe("qu'on mange");
     expect(eatenBy(el(np(IL)))).toBe("qu'il mange");
     expect(eatenBy(el(np(ANGE, { definiteness: 'indefinite' })))).toBe("qu'un ange mange");
+  });
+
+  // A92: the clause's je elides against its predicate; que stays whole before the j'.
+  test('a je subject elides before a vowel-initial predicate, after que or a lequel', () => {
+    expect(relativeText(np(SOURIS, {}, { relative: { headRole: 'directObject', subject: el(np(JE)), verbPhrase: vp(MANGER, { aspect: 'resultative' }) } })))
+      .toBe("que j'ai mangée");
+    expect(relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(JE)), verbPhrase: vp(MANGER, { aspect: 'resultative' }) } })))
+      .toBe("dans laquelle j'ai mangé");
+    expect(relativeText(np(SOURIS, {}, { relative: { headRole: 'directObject', subject: el(np(JE)), verbPhrase: vp(MANGER) } }))).toBe('que je mange');
   });
 
   // The accord du COD antéposé: the head is the preceding direct object.

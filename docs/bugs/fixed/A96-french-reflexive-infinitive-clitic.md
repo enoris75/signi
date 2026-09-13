@@ -38,3 +38,35 @@ Factor the clitic agreement out of `reflexiveFinite`: strip `s'`/`se ` from the 
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: French reflexive infinitive* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 with the shape the fix proposed, reusing `reflexiveFinite` rather than factoring it
+apart. The new [`reflexiveInfinitive.ts`](../../../packages/engine/src/languages/fr/reflexiveInfinitive.ts)
+strips `s'` / `se ` from the base and hands the bare infinitive to `reflexiveFinite`. That adds
+`FR_REFLEXIVE[auxKey(subject)]` back, elided before a vowel. It is used in two places:
+
+- [`aspectVerbFr.ts`](../../../packages/engine/src/languages/fr/aspectVerbFr.ts), for the progressive
+  and prospective tails.
+- [`verbGroupInfinitiveFr.ts`](../../../packages/engine/src/languages/fr/verbGroupInfinitiveFr.ts),
+  for the modal chain. Its `être` resultative also goes through `reflexiveFinite`, giving
+  `s'être effondré`.
+
+Every row now renders as wanted. The fix also covers:
+- every person of the modal perfect (`je dois m'être effondré`, `nous devons nous être effondrés`,
+  `la chatte doit s'être effondrée`);
+- stacked modals (`je veux pouvoir m'effondrer`) and a negation (`je ne dois pas m'effondrer`);
+- a modal over the progressive (`je dois être en train de m'effondrer`).
+
+Unchanged: the third person (`on doit s'effondrer`), the finite forms (`je m'effondre`, `la chatte
+s'est effondrée`), the citation infinitive and a non-reflexive verb (`je dois avoir mangé`).
+
+The 24 COLLAPSE cells in `verb.conjugation.test.ts.snap` were updated. A script confirmed each change
+is only `s'effondrer` → the agreeing clitic.
+
+- **Tests:** [`packages/engine/test/verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known
+  bugs: French reflexive infinitive*. The pinning `test.fails` is now a passing `test`. New cases cover
+  every person of the modal perfect, a stacked modal, a negation and a modal progressive, with a guard
+  for the unchanged forms.
+- Unit tests: the new `reflexiveInfinitive.test.ts`, plus `aspectVerbFr.test.ts` and
+  `verbGroupInfinitiveFr.test.ts`.

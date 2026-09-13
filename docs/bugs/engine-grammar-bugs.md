@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (42 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (31 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,16 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A91 | [A91-french-infinitive-negation.md](A-must-fix/A91-french-infinitive-negation.md) |
-| A92 | [A92-french-je-elision.md](A-must-fix/A92-french-je-elision.md) |
-| A93 | [A93-french-ne-elision-before-clitic.md](A-must-fix/A93-french-ne-elision-before-clitic.md) |
-| A94 | [A94-french-noun-modifier-np-rules.md](A-must-fix/A94-french-noun-modifier-np-rules.md) |
-| A95 | [A95-french-prenominal-liaison-form.md](A-must-fix/A95-french-prenominal-liaison-form.md) |
-| A96 | [A96-french-reflexive-infinitive-clitic.md](A-must-fix/A96-french-reflexive-infinitive-clitic.md) |
-| A97 | [A97-spanish-negative-coordination-ni.md](A-must-fix/A97-spanish-negative-coordination-ni.md) |
-| A98 | [A98-spanish-personal-a.md](A-must-fix/A98-spanish-personal-a.md) |
-| A99 | [A99-spanish-plural-adjective-accent.md](A-must-fix/A99-spanish-plural-adjective-accent.md) |
-| A100 | [A100-spanish-reflexive-imperative.md](A-must-fix/A100-spanish-reflexive-imperative.md) |
 | A101 | [A101-spanish-reflexive-mood-clitic.md](A-must-fix/A101-spanish-reflexive-mood-clitic.md) |
 | A102 | [A102-spanish-reflexive-nonfinite.md](A-must-fix/A102-spanish-reflexive-nonfinite.md) |
 | A103 | [A103-spanish-subjunctive-stem.md](A-must-fix/A103-spanish-subjunctive-stem.md) |
@@ -207,6 +197,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A88 | [A88-french-clitic-periphrasis.md](fixed/A88-french-clitic-periphrasis.md) | French | 2026-09-13 |
 | A89 | [A89-french-continent-source.md](fixed/A89-french-continent-source.md) | French | 2026-09-13 |
 | A90 | [A90-french-disjunctive-subject-agreement.md](fixed/A90-french-disjunctive-subject-agreement.md) | French | 2026-09-13 |
+| A91 | [A91-french-infinitive-negation.md](fixed/A91-french-infinitive-negation.md) | French | 2026-09-13 |
+| A93 | [A93-french-ne-elision-before-clitic.md](fixed/A93-french-ne-elision-before-clitic.md) | French | 2026-09-13 |
+| A92 | [A92-french-je-elision.md](fixed/A92-french-je-elision.md) | French | 2026-09-13 |
+| A94 | [A94-french-noun-modifier-np-rules.md](fixed/A94-french-noun-modifier-np-rules.md) | French | 2026-09-13 |
+| A95 | [A95-french-prenominal-liaison-form.md](fixed/A95-french-prenominal-liaison-form.md) | French | 2026-09-13 |
+| A96 | [A96-french-reflexive-infinitive-clitic.md](fixed/A96-french-reflexive-infinitive-clitic.md) | French | 2026-09-13 |
+| A97 | [A97-spanish-negative-coordination-ni.md](fixed/A97-spanish-negative-coordination-ni.md) | Spanish | 2026-09-13 |
+| A98 | [A98-spanish-personal-a.md](fixed/A98-spanish-personal-a.md) | Spanish | 2026-09-13 |
+| A99 | [A99-spanish-plural-adjective-accent.md](fixed/A99-spanish-plural-adjective-accent.md) | Spanish | 2026-09-13 |
+| A100 | [A100-spanish-reflexive-imperative.md](fixed/A100-spanish-reflexive-imperative.md) | Spanish | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

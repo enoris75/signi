@@ -61,4 +61,11 @@ describe('aspectVerbFr', () => {
   test('the resultative leaves the clitic to the caller', () => {
     expect(aspectVerbFr(MANGER, CHAT, 'present', 'resultative', undefined, undefined, 'le')).toEqual({ finite: 'a', tail: 'mangé' });
   });
+
+  // A96: the progressive / prospective infinitive of a reflexive verb agrees its clitic.
+  test('a reflexive periphrastic infinitive agrees its clitic with the subject', () => {
+    expect(aspectVerbFr(EFFONDRER, JE, 'present', 'progressive')).toEqual({ finite: 'suis', tail: "en train de m'effondrer" });
+    expect(aspectVerbFr(EFFONDRER, { ...JE, number: 'plural' }, 'present', 'prospective')).toEqual({ finite: 'sommes', tail: 'sur le point de nous effondrer' });
+    expect(aspectVerbFr(EFFONDRER, CHAT, 'present', 'progressive')).toEqual({ finite: 'est', tail: "en train de s'effondrer" });
+  });
 });

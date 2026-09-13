@@ -35,3 +35,26 @@ Build the non-finite negation once for both branches, as `ne` + (`pas` | `jamais
 | | |
 |---|---|
 | **Test** | `infinitive.test.ts` → *known bugs: French negative infinitive* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. [`predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts)
+builds the non-finite negation once, in `negateInfinitive`, for both the instruction register and the
+infinitive mood. The result is `ne` + a negator + the cliticised infinitive:
+
+- **Negator:** `pas`; a negative adverb in its place (`jamais`, no longer trailing); or nothing when
+  `aucun` negates.
+- **`ne` elision:** judged against the word that follows (`n'aimer aucun chat`).
+
+Every row now renders as wanted. Also covered:
+
+- a feminine clitic (`ne jamais la voir`) and a negated `aucun` (`ne manger aucune souris`);
+- the instruction with `jamais` (`ne jamais courir`) or a vowel-initial verb (`ne pas m'aimer`);
+- a dislocated group (`ne pas nous voir, lui et moi`).
+
+The affirmative infinitive (`manger`, `le manger`) is unchanged.
+
+- **Tests:** [`packages/engine/test/infinitive.test.ts`](../../../packages/engine/test/infinitive.test.ts)
+  → *known bugs: French negative infinitive*. The pinning `test.fails` is now a passing `test`. New
+  cases cover the siblings above, with a guard for the affirmative.
+- Unit test: `predicateText.test.ts` (fr), in the infinitive-mood and instruction cases.

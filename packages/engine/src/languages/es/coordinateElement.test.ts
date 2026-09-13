@@ -40,4 +40,18 @@ describe('coordinateElement', () => {
   test('a conjunct that renders empty drops out of the list', () => {
     expect(coordinateElement(el(word('gato'), word(''), word('perro')), base)).toBe('gato y perro');
   });
+
+  // A97: after the verb, a negative last conjunct is linked with ni.
+  test('after the verb a last conjunct determined no takes ni, under either conjunction', () => {
+    const no = (forms: typeof RATON) => np(forms, { definiteness: 'no' });
+    expect(coordinateElement(el(no(RATON), no(CASA)), npText, true)).toBe('ningún ratón ni ninguna casa');
+    expect(coordinateElement(el(no(RATON), no(CASA), no(PERRO)), npText, true)).toBe('ningún ratón, ninguna casa ni ningún perro');
+    expect(coordinateElement(group('or', no(RATON), no(CASA)), npText, true)).toBe('ningún ratón ni ninguna casa');
+  });
+
+  test('a subject group, or an affirmative one after the verb, keeps y', () => {
+    const no = (forms: typeof RATON) => np(forms, { definiteness: 'no' });
+    expect(coordinateElement(el(no(RATON), no(CASA)), npText)).toBe('ningún ratón y ninguna casa');
+    expect(coordinateElement(el(np(RATON), np(CASA)), npText, true)).toBe('el ratón y la casa');
+  });
 });

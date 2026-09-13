@@ -472,7 +472,7 @@ describe('known bugs: French object clitic in a periphrasis', () => {
 // slips the object clitic in after it, so the elided "n'" ends up in front of a consonant clitic:
 // "n'm'aime", "n'l'a". The clitic is what follows "ne", and me/te/le/la/nous/vous/les never elide it.
 describe('known bugs: French ne before an object clitic', () => {
-  test.fails('French keeps "ne" whole in front of an object clitic', () => {
+  test('French keeps "ne" whole in front of an object clitic', () => {
     expect(sayAll(clause(np('CAT'), 'LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { negative: true } })).fr)
       .toBe("le chat ne m'aime pas.");
     expect(sayAll(clause(np('CAT'), 'ADD', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).fr)
@@ -482,6 +482,24 @@ describe('known bugs: French ne before an object clitic', () => {
     })).fr).toBe("le chat ne l'a pas vu.");
     expect(sayAll(clause(np('CAT'), 'LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { modifier: 'NEVER' } })).fr)
       .toBe("le chat ne m'aime jamais.");
+  });
+
+  test('French restores ne before every clitic, in a command, a relative, a periphrasis and a resumed group', () => {
+    const cat = (extra: Parameters<typeof clause>[2]) => sayAll(clause(np('CAT'), 'LOVE', extra)).fr;
+    expect(cat({ directObject: np('FIRST_PERSON', { number: 'plural' }), verbPhrase: { negative: true } })).toBe('le chat ne nous aime pas.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { negative: true } }), imperative: true }).fr)
+      .toBe("ne m'aime pas.");
+    expect(sayAll(clause(np('MOUSE', { relative: { verbPhrase: { verb: 'LOVE', negative: true }, directObject: np('FIRST_PERSON') } }), 'RUN')).fr)
+      .toBe("la souris qui ne m'aime pas court.");
+    expect(cat({ directObject: np('THIRD_PERSON'), complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
+      .toBe("le chat ne l'aime dans aucune maison.");
+    expect(cat({ directObject: np('FIRST_PERSON'), verbPhrase: { negative: true, aspect: 'progressive' } })).toBe("le chat n'est pas en train de m'aimer.");
+    expect(cat({ directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' }, verbPhrase: { negative: true } }))
+      .toBe('le chat ne nous aime pas, lui et moi.');
+  });
+
+  test('regression: a vowel-initial verb with no clitic keeps n\'', () => {
+    expect(sayAll(clause(np('CAT'), 'LOVE', { verbPhrase: { negative: true } })).fr).toBe("le chat n'aime pas.");
   });
 });
 

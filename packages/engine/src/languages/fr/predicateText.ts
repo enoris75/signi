@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
+import { firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isNegativeAdverb, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
@@ -111,6 +111,19 @@ export function predicateText(
     effectiveMod = modifierText;
   }
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
+  // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
+  // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"
+  // takes "ne" alone ("ne manger aucune souris"), as `negateFinite` has it; "ne" elides against the
+  // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
+  const negativeAdverb = isNegativeAdverb(modifier);
+  const infinitiveMod = negativeAdverb ? '' : modifierText;
+  const negateInfinitive = (inf: string): string => {
+    const group = frCliticize(objectClitic, inf);
+    if (!verbNegative && !aucun && !negativeAdverb) return group;
+    const negator = negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '';
+    const tail = [negator, group].filter(Boolean).join(' ');
+    return `${VOWEL_START.test(tail) ? "n'" : 'ne '}${tail}`;
+  };
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
   // by `negateFinite` ("ne cours pas", "ne sois pas prudent", "aucun"/"jamais" taking bare "ne").
@@ -118,9 +131,7 @@ export function predicateText(
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in French ("Charger une période", "Ne pas courir"), not the imperative.
     if (register === 'instruction') {
-      const inf = verb.forms['base'] ?? conjugated;
-      const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-      return withDislocated([frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+      return withDislocated([negateInfinitive(verb.forms['base'] ?? conjugated), infinitiveMod, directObjectText, complementsText]
         .filter(Boolean)
         .join(' '));
     }
@@ -138,12 +149,11 @@ export function predicateText(
       .join(' '));
   }
   // Infinitive / citation phrase: the bare infinitive ("consommer la nourriture"), the same surface
-  // French already gives the imperative `instruction` register above. Negation brackets the whole
-  // infinitive ("ne pas consommer"); an object pronoun is proclitic ("le consommer"), via frCliticize.
+  // French already gives the imperative `instruction` register above. Negation precedes the whole
+  // infinitive ("ne pas consommer"); an object pronoun is proclitic ("le consommer"), via
+  // `negateInfinitive`.
   if (mood === 'infinitive') {
-    const inf = verb.forms['base'] ?? conjugated;
-    const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-    return withDislocated([frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+    return withDislocated([negateInfinitive(verb.forms['base'] ?? conjugated), infinitiveMod, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
   }

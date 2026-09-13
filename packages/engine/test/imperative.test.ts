@@ -523,16 +523,33 @@ describe('known bugs: Italian tu command of dare, fare and andare', () => {
 describe('known bugs: Spanish reflexive imperative', () => {
   const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
 
-  test.fails("Spanish puts the addressee's clitic before a negative command", () => {
+  test("Spanish puts the addressee's clitic before a negative command", () => {
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { verbPhrase: { negative: true }, complements: legend }), imperative: true }).es)
       .toBe('no te vuelvas una leyenda.');
   });
 
-  test.fails("Spanish attaches the addressee's clitic to an affirmative command", () => {
+  test("Spanish attaches the addressee's clitic to an affirmative command", () => {
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { complements: legend }), imperative: true }).es)
       .toBe('vuélvete una leyenda.');
     expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'BECOME', { complements: legend }), imperative: true }).es)
       .toBe('volveos una leyenda.');
+  });
+
+  test('Spanish keeps the clitic in front with nunca, and the instruction, the infinitive and the finite verb unchanged', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { verbPhrase: { modifier: 'NEVER' }, complements: legend }), imperative: true }).es)
+      .toBe('no te vuelvas nunca una leyenda.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { complements: legend }), imperative: true, imperativeRegister: 'instruction' }).es)
+      .toBe('volverse una leyenda.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { verbPhrase: { negative: true }, complements: legend }), imperative: true, imperativeRegister: 'instruction' }).es)
+      .toBe('no volverse una leyenda.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BECOME', { complements: legend }), infinitive: true }).es).toBe('volverse una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { complements: legend })).es).toBe('me vuelvo una leyenda.');
+  });
+
+  test('regression: a plain verb\'s enclitic keeps the 1st plural -s and the 2nd plural -d before other clitics', () => {
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es).toBe('comámoslo.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'SEE', { directObject: np('FIRST_PERSON', { number: 'plural' }) }), imperative: true }).es)
+      .toBe('vednos.');
   });
 });
 

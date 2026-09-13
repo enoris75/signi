@@ -37,3 +37,30 @@ seeded. They would need a seeded plural, as nouns already have.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: Spanish plural adjective accent* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. When [`pluralize.ts`](../../../packages/engine/src/languages/es/pluralize.ts)
+adds `-es`, it now moves the written accent with the stress:
+
+- A stressed final vowel before `-n`/`-s` loses its accent: `marrón` → `marrones`, `inglés` →
+  `ingleses`.
+- An unaccented word in `-n`/`-s` of two or more syllables gains an accent on its second-to-last
+  syllable's vowel, on the strong vowel of a diphthong: `joven` → `jóvenes`, `orden` → `órdenes`. A
+  one-syllable word needs none (`gris` → `grises`).
+
+It works on the last word of a multi-word form.
+
+Every row now renders as wanted. Also covered:
+- the feminine (`las vacas marrones`, `las mujeres jóvenes`);
+- SEEM (`parecen jóvenes`);
+- the comparative (`más jóvenes`).
+
+The singular and the `-l`/`-z` adjectives (`débiles`, `felices`) are unchanged. Every seeded Spanish
+base in `-n`/`-s` was checked. The only odd result is the adverb `juntos`, which no path pluralises.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: Spanish plural adjective accent*. The pinning `test.fails` is now a passing `test`.
+  New cases cover the feminine, SEEM and the comparative, with a guard for the singular and the
+  `-l`/`-z` adjectives.
+- Unit test: `pluralize.test.ts` (es).

@@ -34,3 +34,33 @@ through the same `subjectText`.
 | | |
 |---|---|
 | **Test** | `pronoun.test.ts` → *known bugs: French je elision* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The new
+[`joinSubject.ts`](../../../packages/engine/src/languages/fr/joinSubject.ts) joins a subject to its
+predicate. It writes `j'` with no space when the subject text is exactly `je` and the predicate starts
+with a vowel. Otherwise it joins with a space.
+
+Two callers use it:
+
+- [`renderClause.ts`](../../../packages/engine/src/languages/fr/renderClause.ts), for main clauses,
+  conditions and coordinated clauses.
+- [`relativeText.ts`](../../../packages/engine/src/languages/fr/relativeText.ts). Its relativiser now
+  comes before the joined clause, so `que` is judged against `j'` and stays whole (`que j'aime`).
+
+Every row now renders as wanted. The fix also covers a `lequel` relative (`dans laquelle j'ai mangé`),
+a conditional apodosis (`si je courais, j'aimerais`) and a coordinated clause (`et j'aime le chien`).
+
+These stay unchanged:
+- a consonant (`je mange`), a clitic (`je l'aime`) and a negation (`je n'aime pas`);
+- a coordinated tonic (`moi et le chat, nous aimons`).
+
+The 249 cells in `verb.conjugation.test.ts.snap` were updated. A script check confirmed that every
+changed cell is a French `je ` → `j'` and nothing else.
+
+- **Tests:** [`packages/engine/test/pronoun.test.ts`](../../../packages/engine/test/pronoun.test.ts)
+  → *known bugs: French je elision*. The pinning `test.fails` is now a passing `test`. New cases cover
+  the `lequel` relative, the apodosis and the coordinated clause, with a guard for the unchanged
+  contexts.
+- Unit tests: the new `joinSubject.test.ts`, plus `renderClause.test.ts` and `relativeText.test.ts` (fr).

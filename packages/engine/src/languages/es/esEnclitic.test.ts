@@ -22,6 +22,14 @@ describe('esEnclitic', () => {
     expect(esEnclitic('está', 'te')).toBe('estate');
   });
 
+  // A100: the 1st plural drops -s before nos, the 2nd plural -d before os.
+  test('the 1st plural loses its -s before nos and the 2nd plural its -d before os', () => {
+    expect(esEnclitic('volvamos', 'nos')).toBe('volvámonos');
+    expect(esEnclitic('volved', 'os')).toBe('volveos');
+    expect(esEnclitic('vuelve', 'te')).toBe('vuélvete');
+    expect(esEnclitic('comamos', 'lo')).toBe('comámoslo');
+  });
+
   test('is a no-op with no clitic', () => {
     expect(esEnclitic('come', '')).toBe('come');
   });

@@ -149,6 +149,7 @@ describe('predicateText', () => {
 
     test('it sits inside ne … pas and before the auxiliary', () => {
       expect(predicateText(CHAT, vp(VOIR, { negative: true }), el(np(JE)))).toBe('ne me voit pas');
+      expect(predicateText(CHAT, vp(AIMER, { negative: true }), el(np(JE)))).toBe("ne m'aime pas");
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL)))).toBe("l'a vu");
     });
 
@@ -224,6 +225,8 @@ describe('predicateText', () => {
       expect(predicateText(TU, instruction(CHARGER), el(np(PERIODE, { definiteness: 'indefinite' })))).toBe('charger une période');
       expect(predicateText(TU, instruction(COURIR, { negative: true }))).toBe('ne pas courir');
       expect(predicateText(TU, instruction(VOIR), el(np(IL)))).toBe('le voir');
+      expect(predicateText(TU, instruction(AIMER, { negative: true }), el(np(JE)))).toBe("ne pas m'aimer");
+      expect(predicateText(TU, instruction(COURIR, { modifier: concept(JAMAIS) }))).toBe('ne jamais courir');
     });
   });
 
@@ -237,6 +240,15 @@ describe('predicateText', () => {
 
     test('ne pas brackets the whole infinitive', () => {
       expect(predicateText(CHAT, infinitive(MANGER, { negative: true }), el(np(NOURRITURE)))).toBe('ne pas manger la nourriture');
+    });
+
+    // A91: the whole negation precedes the clitic and the infinitive.
+    test('the negation precedes the clitic; jamais replaces pas and aucun takes ne alone', () => {
+      expect(predicateText(CHAT, infinitive(VOIR, { negative: true }), el(np(IL)))).toBe('ne pas le voir');
+      expect(predicateText(CHAT, infinitive(MANGER, { modifier: concept(JAMAIS) }))).toBe('ne jamais manger');
+      expect(predicateText(CHAT, infinitive(VOIR, { modifier: concept(JAMAIS), negative: true }), el(np(IL, { gender: 'fem' })))).toBe('ne jamais la voir');
+      expect(predicateText(CHAT, infinitive(MANGER), el(np(SOURIS, { definiteness: 'no' })))).toBe('ne manger aucune souris');
+      expect(predicateText(CHAT, infinitive(AIMER), el(np(CHAT, { definiteness: 'no' })))).toBe("n'aimer aucun chat");
     });
 
     test('an object pronoun is proclitic to the infinitive', () => {

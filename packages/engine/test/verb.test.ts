@@ -873,7 +873,7 @@ describe('known bugs: Italian impersonal si in the compound tense', () => {
 // `verbGroupInfinitiveFr` use the citation "s'effondrer" for every person, and the modal
 // resultative "être + participle" never restores the clitic.
 describe('known bugs: French reflexive infinitive', () => {
-  test.fails('French agrees the reflexive clitic on the infinitive and keeps it in the perfect', () => {
+  test('French agrees the reflexive clitic on the infinitive and keeps it in the perfect', () => {
     const collapse = (subject: string, verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase'], number?: 'plural') =>
       sayAll(clause(np(subject, number ? { number } : {}), 'COLLAPSE', { verbPhrase })).fr;
     expect(collapse('FIRST_PERSON', { modals: ['MUST'] })).toBe("je dois m'effondrer.");
@@ -881,6 +881,26 @@ describe('known bugs: French reflexive infinitive', () => {
     expect(collapse('FIRST_PERSON', { aspect: 'progressive' })).toBe("je suis en train de m'effondrer.");
     expect(collapse('FIRST_PERSON', { aspect: 'prospective' }, 'plural')).toBe('nous sommes sur le point de nous effondrer.');
     expect(collapse('CAT', { modals: ['MUST'], aspect: 'resultative' })).toBe("le chat doit s'être effondré.");
+  });
+
+  test('French agrees the clitic in every person of the modal perfect, a stacked modal, a negation and a modal progressive', () => {
+    const collapse = (subject: string, verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase'], extra: NonNullable<Parameters<typeof np>[1]> = {}) =>
+      sayAll(clause(np(subject, extra), 'COLLAPSE', { verbPhrase })).fr;
+    expect(collapse('SECOND_PERSON', { modals: ['MUST'] }, { number: 'plural' })).toBe('vous devez vous effondrer.');
+    expect(collapse('FIRST_PERSON', { modals: ['MUST'], aspect: 'resultative' })).toBe("je dois m'être effondré.");
+    expect(collapse('FIRST_PERSON', { modals: ['MUST'], aspect: 'resultative' }, { number: 'plural' })).toBe('nous devons nous être effondrés.');
+    expect(collapse('CAT', { modals: ['MUST'], aspect: 'resultative' }, { gender: 'fem' })).toBe("la chatte doit s'être effondrée.");
+    expect(collapse('FIRST_PERSON', { modals: ['WILL', 'CAN'] })).toBe("je veux pouvoir m'effondrer.");
+    expect(collapse('FIRST_PERSON', { modals: ['MUST'], negative: true })).toBe("je ne dois pas m'effondrer.");
+    expect(collapse('FIRST_PERSON', { modals: ['MUST'], aspect: 'progressive' })).toBe("je dois être en train de m'effondrer.");
+  });
+
+  test('regression: the third person, the finite forms, the citation infinitive and a plain verb are unchanged', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'COLLAPSE', { verbPhrase: { modals: ['MUST'] } })).fr).toBe("on doit s'effondrer.");
+    expect(sayAll(clause(np('FIRST_PERSON'), 'COLLAPSE')).fr).toBe("je m'effondre.");
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'COLLAPSE', { verbPhrase: { aspect: 'resultative' } })).fr).toBe("la chatte s'est effondrée.");
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'COLLAPSE'), infinitive: true }).fr).toBe("s'effondrer.");
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).fr).toBe('je dois avoir mangé.');
   });
 });
 

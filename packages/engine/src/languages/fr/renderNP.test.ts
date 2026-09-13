@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 import {
-  AILE, ANGE, ANIMAL, BON, CHAT, CHIEN, concept, CREATEUR, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
+  AILE, ANGE, ANIMAL, BEAU, BON, CHAT, CHIEN, concept, CREATEUR, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
   MANGER, nounModifier, np, PERE, PETIT, PHRASE, SEMANTIQUE, SOURIS, TRISTE, VIEUX, vp,
 } from './fr.fixtures.js';
 import { artFor } from './artFor.js';
@@ -37,6 +37,13 @@ describe('renderNP', () => {
   test('the article is chosen on a prenominal adjective, not the noun', () => {
     expect(withArticle(np(ANGE))).toBe("l'ange");
     expect(withArticle(np(ANGE, {}, { adjectives: [concept(PETIT, 'SMALL')] }))).toBe('le petit ange');
+  });
+
+  // A95: bel / nouvel / vieil before a vowel sound, the article then chosen on that form.
+  test('a masculine singular beau, nouveau or vieux takes its liaison form before a vowel', () => {
+    expect(withArticle(np(ANGE, {}, { adjectives: [concept(VIEUX, 'OLD')] }))).toBe('le vieil ange');
+    expect(withArticle(np(HOMME, { definiteness: 'indefinite' }, { adjectives: [concept(BEAU, 'BEAUTIFUL')] }))).toBe('un bel homme');
+    expect(withArticle(np(ANGE, { number: 'plural' }, { adjectives: [concept(VIEUX, 'OLD')] }))).toBe('les vieux anges');
   });
 
   test('the BAGS adjectives precede the noun and the rest follow, all agreeing with it', () => {

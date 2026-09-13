@@ -258,7 +258,7 @@ describe('known bugs: Romance pro-drop — a pronoun subject is dropped', () => 
 // `subjectPhrase` returns "je" and `renderClause` / `relativeText` join it to the predicate with a
 // space, so nothing elides it ("je ai mangé", "que je aime").
 describe('known bugs: French je elision', () => {
-  test.fails('French elides "je" before a vowel', () => {
+  test('French elides "je" before a vowel', () => {
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } })).fr).toBe("j'ai mangé.");
     expect(sayAll(clause(np('FIRST_PERSON'), 'LOVE', { directObject: np('CAT') })).fr).toBe("j'aime le chat.");
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'progressive', tense: 'past' } })).fr)
@@ -268,6 +268,21 @@ describe('known bugs: French je elision', () => {
     }), 'RUN')).fr).toBe("la souris que j'aime court.");
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), condition: clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }) }).fr)
       .toBe("si j'avais mangé, le chat courrait.");
+  });
+
+  test('French elides "je" in a lequel relative, a conditional apodosis and a coordinated clause', () => {
+    expect(sayAll(clause(np('HOUSE', { relative: { headRole: 'locative', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT', aspect: 'resultative' } } }), 'BURN')).fr)
+      .toBe("la maison dans laquelle j'ai mangé brûle.");
+    expect(sayAll({ ...clause(np('FIRST_PERSON'), 'LOVE'), condition: clause(np('FIRST_PERSON'), 'RUN') }).fr).toBe("si je courais, j'aimerais.");
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'and', clause: clause(np('FIRST_PERSON'), 'LOVE', { directObject: np('DOG') }) } }).fr)
+      .toBe("le chat court, et j'aime le chien.");
+  });
+
+  test('regression: je stays whole before a consonant, a clitic and ne, and a tonic moi never elides', () => {
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT')).fr).toBe('je mange.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'LOVE', { directObject: np('THIRD_PERSON') })).fr).toBe("je l'aime.");
+    expect(sayAll(clause(np('FIRST_PERSON'), 'LOVE', { verbPhrase: { negative: true } })).fr).toBe("je n'aime pas.");
+    expect(sayAll(clause({ conjuncts: [np('FIRST_PERSON'), np('CAT')], conjunction: 'and' }, 'LOVE')).fr).toBe('moi et le chat, nous aimons.');
   });
 });
 

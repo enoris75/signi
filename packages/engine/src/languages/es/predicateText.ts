@@ -8,7 +8,10 @@ import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
 import { esCliticize } from './esCliticize.js';
 import { esEnclitic } from './esEnclitic.js';
-import { npText } from './npText.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { objectNounText } from './objectNounText.js';
+import { reflexiveClitic } from './reflexiveClitic.js';
+import { takesPersonalA } from './takesPersonalA.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -27,9 +30,11 @@ export function predicateText(
   // or imperfect-subjunctive (protasis, "comiera") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
   // With a plural noun object the impersonal se is the passive se, and the finite verb agrees with its
-  // patient: "se comen los ratones", "se han comido los ratones". A clitic object keeps se impersonal.
+  // patient: "se comen los ratones", "se han comido los ratones". A clitic object keeps se impersonal,
+  // and so does an object marked with the personal "a", a pronoun or a human: "se ve a los niños".
   const passiveSe = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
-    && directObject.agreement['number'] === 'plural';
+    && directObject.agreement['number'] === 'plural'
+    && !directObject.conjuncts.some((np) => np.head.forms['person'] || takesPersonalA(np));
   const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
@@ -93,12 +98,13 @@ export function predicateText(
   const objectClitic = !directObject ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : pronounGroup ? groupObjectClitic(directObject) : '';
-  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
+  // A human noun takes the personal "a" too ("ve al niño"), see `objectNounText`.
+  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
-  const directObjectText = directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun) : '';
+  const directObjectText = directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun, true) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
@@ -114,13 +120,17 @@ export function predicateText(
     const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Spanish ("Cargar un período", "No correr"), not the imperative.
+    // A reflexive command is derived from the plain verb and takes the addressee's clitic, ahead of
+    // any object clitic: "no te vuelvas", "vuélvete", "volveos". The instruction keeps the citation
+    // infinitive ("volverse").
+    const reflexive = register === 'instruction' ? '' : reflexiveClitic(copulaVerb.forms, subjectForms);
     const impForm = register === 'instruction'
       ? (copulaVerb.forms['base'] ?? conjugated)
-      : (imperativeForm('es', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
+      : (imperativeForm('es', nonReflexiveVerb(copulaVerb), moodPN(subjectForms), impNeg) ?? conjugated);
     const enclitic = register === 'instruction' || !impNeg;
     const impVerb = enclitic
-      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, objectClitic)}`
-      : esCliticize(objectClitic, `no ${impForm}`);
+      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, `${reflexive}${objectClitic}`)}`
+      : esCliticize([reflexive, objectClitic].filter(Boolean).join(' '), `no ${impForm}`);
     return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');

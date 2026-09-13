@@ -1278,7 +1278,7 @@ describe('known bugs: Italian masculine plural of -ico adjectives', () => {
 // flag) is missed, and it puts every adjective after the modifier noun, so the prenominal
 // petit / beau stay behind it.
 describe('known bugs: French attributive noun modifier', () => {
-  test.fails('French elides "de" before a mute h and places a prenominal adjective before the modifier noun', () => {
+  test('French elides "de" before a mute h and places a prenominal adjective before the modifier noun', () => {
     expect(sayAll(clause(np('PRISON', {
       nounModifiers: [{ concept: 'MAN', relation: 'purpose', number: 'plural' }],
     }), 'BURN')).fr).toBe("la prison d'hommes brûle.");
@@ -1289,6 +1289,19 @@ describe('known bugs: French attributive noun modifier', () => {
       nounModifiers: [{ concept: 'HOUSE', relation: 'purpose', number: 'plural', adjectives: ['BEAUTIFUL'] }],
     }), 'EAT')).fr).toBe('le créateur de belles maisons mange.');
   });
+
+  test('French splits the modifier\'s adjectives around it, takes the liaison form and elides before a vowel', () => {
+    const creatorOf = (modifier: NonNullable<Parameters<typeof np>[1]>['nounModifiers']) => sayAll(clause(np('CREATOR', { nounModifiers: modifier }), 'EAT')).fr;
+    expect(creatorOf([{ concept: 'HOUSE', relation: 'purpose', number: 'plural', adjectives: ['SMALL', 'COLD'] }])).toBe('le créateur de petites maisons froides mange.');
+    expect(creatorOf([{ concept: 'HOUSE', relation: 'purpose', number: 'plural', adjectives: ['BIG'] }])).toBe('le créateur de grandes maisons mange.');
+    expect(creatorOf([{ concept: 'MAN', relation: 'purpose', adjectives: ['OLD'] }])).toBe('le créateur de vieil homme mange.');
+  });
+
+  test('regression: a true vowel still elides and a feature à never does', () => {
+    expect(sayAll(clause(np('PRISON', { nounModifiers: [{ concept: 'CHILD', relation: 'purpose', number: 'plural' }] }), 'BURN')).fr)
+      .toBe("la prison d'enfants brûle.");
+    expect(sayAll(clause(np('HOUSE', { nounModifiers: [{ concept: 'MAN', relation: 'feature' }] }), 'BURN')).fr).toBe('la maison à homme brûle.');
+  });
 });
 
 // A95. A masculine singular "beau" / "nouveau" / "vieux" takes its liaison form "bel" / "nouvel" /
@@ -1296,7 +1309,7 @@ describe('known bugs: French attributive noun modifier', () => {
 // fem.pl cells of FR_ADJ_IRREGULAR and never sees the word that follows, so the prenominal
 // adjective keeps "beau" / "nouveau" / "vieux" in front of "ange", "argent", "enfant", "homme".
 describe('known bugs: French bel/nouvel/vieil before a vowel', () => {
-  test.fails('French uses the liaison form of beau/nouveau/vieux before a vowel or mute h', () => {
+  test('French uses the liaison form of beau/nouveau/vieux before a vowel or mute h', () => {
     expect(sayAll(clause(np('MAN', { adjectives: ['OLD'] }), 'EAT')).fr).toBe('le vieil homme mange.');
     expect(sayAll(clause(np('ANGEL', { adjectives: ['BEAUTIFUL'], definiteness: 'indefinite' }), 'EAT')).fr)
       .toBe('un bel ange mange.');
@@ -1304,18 +1317,47 @@ describe('known bugs: French bel/nouvel/vieil before a vowel', () => {
       .toBe('ce nouvel argent brûle.');
     expect(sayAll(clause(np('CHILD', { adjectives: ['NEW'] }), 'EAT')).fr).toBe('le nouvel enfant mange.');
   });
+
+  test('French takes the liaison form after a possessive, as an object and a complement, and before another adjective', () => {
+    expect(sayAll(clause(np('CHILD', { adjectives: ['NEW'], possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), 'EAT')).fr)
+      .toBe('mon nouvel enfant mange.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('MAN', { adjectives: ['OLD'] }) })).fr).toBe('le chat voit le vieil homme.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('MAN', { adjectives: ['OLD'] }) } } })).fr)
+      .toBe('le chat mange dans le vieil homme.');
+    expect(sayAll(clause(np('MAN', { adjectives: ['BEAUTIFUL', 'OLD'] }), 'EAT')).fr).toBe('le beau vieil homme mange.');
+  });
+
+  test('regression: the plural, the feminine, a consonant and the superlative keep the plain form', () => {
+    expect(sayAll(clause(np('MAN', { adjectives: ['OLD'], number: 'plural' }), 'EAT')).fr).toBe('les vieux hommes mangent.');
+    expect(sayAll(clause(np('WING', { adjectives: ['BEAUTIFUL'] }), 'BURN')).fr).toBe('la belle aile brûle.');
+    expect(sayAll(clause(np('CAT', { adjectives: ['OLD'] }), 'EAT')).fr).toBe('le vieux chat mange.');
+    expect(sayAll(clause(np('MAN', { adjectives: ['OLD'], adjectiveDegrees: ['most'] }), 'EAT')).fr).toBe("l'homme le plus vieux mange.");
+  });
 });
 
 // A99. `pluralize` adds -es to a consonant-final adjective and never changes its written accent. A
 // word stressed on the syllable before the new -es needs an accent it doesn't have ("jovenes",
 // want "jóvenes"). An oxytone in -ón has to drop the one it has ("marrónes", want "marrones").
 describe('known bugs: Spanish plural adjective accent', () => {
-  test.fails('Spanish adjusts the written accent when an adjective takes -es', () => {
+  test('Spanish adjusts the written accent when an adjective takes -es', () => {
     expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['YOUNG'] }), 'EAT')).es).toBe('los gatos jóvenes comen.');
     expect(sayAll(clause(np('DOG', { number: 'plural', adjectives: ['BROWN'] }), 'EAT')).es).toBe('los perros marrones comen.');
     expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', {
       complements: { predicative: { phrase: np('BROWN') } },
     })).es).toBe('los gatos son marrones.');
+  });
+
+  test('Spanish keeps the accent right in the feminine, under SEEM and in the comparative', () => {
+    expect(sayAll(clause(np('COW', { number: 'plural', adjectives: ['BROWN'] }), 'EAT')).es).toBe('las vacas marrones comen.');
+    expect(sayAll(clause(np('WOMAN', { number: 'plural', adjectives: ['YOUNG'] }), 'EAT')).es).toBe('las mujeres jóvenes comen.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'SEEM', { complements: { predicative: { phrase: np('YOUNG') } } })).es).toBe('los gatos parecen jóvenes.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['YOUNG'], adjectiveDegrees: ['more'] }), 'EAT')).es).toBe('los gatos más jóvenes comen.');
+  });
+
+  test('regression: the singular and -l / -z adjectives are unchanged', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['YOUNG'] }), 'EAT')).es).toBe('el gato joven come.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['WEAK'] }), 'EAT')).es).toBe('los gatos débiles comen.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['HAPPY'] }), 'EAT')).es).toBe('los gatos felices comen.');
   });
 });
 

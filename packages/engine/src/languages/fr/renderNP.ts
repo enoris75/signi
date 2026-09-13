@@ -4,6 +4,7 @@ import { deDet } from './deDet.js';
 import { elidesBefore } from './elidesBefore.js';
 import { frMods } from './frMods.js';
 import { joinArt } from './joinArt.js';
+import { liaisonAdjectives } from './liaisonAdjectives.js';
 import { relativeText } from './relativeText.js';
 import { splitAdjectives } from './splitAdjectives.js';
 
@@ -16,7 +17,11 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const forms = np.head.forms;
   const plural = (forms['number'] ?? forms['count']) === 'plural';
   const noun = plural ? (forms['plural'] ?? forms['base'] ?? '') : (forms['base'] ?? '');
-  const { pre, post } = splitAdjectives(np);
+  const split = splitAdjectives(np);
+  const { post } = split;
+  // A masculine singular beau / nouveau / vieux before a vowel sound takes bel / nouvel / vieil; the
+  // article is then chosen against that form ("le vieil homme", "ce nouvel argent").
+  const pre = liaisonAdjectives(split.pre, forms, noun, plural);
   const lead = pre[0] ?? noun;
   // A pronominal possessor ("**son** chien") is a prenominal possessive that replaces the article,
   // agreeing with *this* possessed head; mon/ton/son stand in before a vowel-initial feminine. The

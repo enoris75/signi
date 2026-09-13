@@ -2,6 +2,7 @@ import { relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { VOWEL_START } from './fr.consts.js';
 import { joinArt } from './joinArt.js';
+import { joinSubject } from './joinSubject.js';
 import { predicateText } from './predicateText.js';
 import { subjectText } from './subjectText.js';
 
@@ -23,12 +24,13 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const fem = np.head.forms['gender'] === 'fem';
   const gap = relativeGapComplement(np, { base: fem ? 'quelle' : 'quel', plural: fem ? 'quelles' : 'quels', definiteness: 'definite' });
   // "lequel" is written as one word with its article, contracted or not: lequel, laquelle, duquel, auxquels.
-  const relzr = gap
-    ? `${complementsPhrase(gap, {}, '').replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${subjText}`
-    : joinArt(VOWEL_START.test(subjText) ? "qu'" : 'que', subjText);
   // When the head is the clause's DIRECT OBJECT, it is a preceding object and an avoir participle
   // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement.
   const precedingObject = rel.headRole === 'directObject' ? np.head.forms : undefined;
   const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject);
-  return `${relzr} ${pred}`.trim();
+  // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
+  const clause = joinSubject(subjText, pred);
+  return (gap
+    ? `${complementsPhrase(gap, {}, '').replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`
+    : joinArt(VOWEL_START.test(clause) ? "qu'" : 'que', clause)).trim();
 }

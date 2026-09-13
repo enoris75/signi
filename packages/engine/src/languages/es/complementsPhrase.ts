@@ -145,7 +145,7 @@ export function complementsPhrase(
           np.head.forms['person'] ? pronoun(np.head.forms) : conjunctText(np, shared));
         return shared ? `${sent === 'positive' ? 'gracias' : 'a causa'} ${conjuncts}` : conjuncts;
       }
-      return coordinateElement(c.phrase, (np) => conjunctText(np));
+      return coordinateElement(c.phrase, (np) => conjunctText(np), true);
     })
     .filter(Boolean)
     .join(' ');
