@@ -37,6 +37,9 @@ export type GroupDef = {
   // Set on a conjunct's ring as its head's canvas sees it: the head's group label, and which of
   // the head's conjuncts it is. Tidying packs it right after the rings before it in its group.
   conjunct?: { head: string; index: number };
+  // Set on an owner's ring the same way: the group it belongs with, and its place there — just after
+  // the ring it owns (see possessionsFor).
+  owner?: { head: string; index: number };
 };
 
 export const VERB_PHRASE = "Verb Phrase";
@@ -127,6 +130,7 @@ export function buildRingSpecs({
   toolbars,
   centerOf,
   linkPorts = {},
+  possessorAims = {},
 }: {
   groups: GroupDef[];
   // Compact view keeps only the words and their clear buttons.
@@ -146,6 +150,9 @@ export function buildRingSpecs({
   // Ports for the lines joining a coordinated group's rings, by the word whose ring carries them:
   // each faces the ring its line runs to.
   linkPorts?: Record<string, readonly { key: string; toward: Pt }[]>;
+  // Where each noun's possessor control faces while the noun has an owner — the owner's ring, or the
+  // ring of the noun it points to — by noun: the line to the owner leaves from the control.
+  possessorAims?: Record<string, Pt>;
 }): Record<string, RingSpec> {
   const verb = groups.find((g) => g.label === VERB_PHRASE);
   const specs: Record<string, RingSpec> = {};
@@ -198,7 +205,11 @@ export function buildRingSpecs({
       if (linkTargetKeys?.has(mainKey))
         outer.push({ key: perimeterControlKey("incoming", mainKey), aim: { clock: INCOMING_HOUR }, half: DOT_HALF });
       const entry = perimeterByNoun[mainKey as NounKey];
-      const relations = (["relative", "possessor", "conjunct"] as const).filter((kind) => entry?.[kind]);
+      const ownerAt = entry?.possessor ? possessorAims[mainKey] : undefined;
+      if (ownerAt) outer.push({ key: perimeterControlKey("possessor", mainKey), aim: { point: ownerAt } });
+      const relations = (["relative", "possessor", "conjunct"] as const).filter(
+        (kind) => entry?.[kind] && !(kind === "possessor" && ownerAt),
+      );
       relations.forEach((kind, i) =>
         outer.push({
           key: perimeterControlKey(kind, mainKey),

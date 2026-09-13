@@ -2,10 +2,8 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { Concept } from '@signi/shared';
-import {
-  ConjunctRings,
-  type ConjunctHost,
-} from '../src/components/PhraseBuilder/ConjunctRings.tsx';
+import { ConjunctRings } from '../src/components/PhraseBuilder/ConjunctRings.tsx';
+import type { RingHost } from '../src/components/PhraseBuilder/ringHost.ts';
 import type { ConjunctLink } from '../src/components/PhraseBuilder/conjunctChain.ts';
 import type {
   NounKey,
@@ -65,7 +63,7 @@ function stubBuilder() {
 }
 
 // What the head canvas hands conjunct `i` of `which` — only its key matters here.
-const hostFor = (which: NounKey, i: number) => ({ key: `${which}+${i + 1}` }) as ConjunctHost;
+const hostFor = (which: NounKey, i: number) => ({ key: `${which}+${i + 1}` }) as RingHost;
 
 function renderRings(overrides: Partial<ComponentProps<typeof ConjunctRings>> = {}) {
   const { Builder, props } = stubBuilder();
@@ -118,9 +116,9 @@ describe('ConjunctRings', () => {
     expect(paul.selection).toBe(SELECTION.subjectConjuncts![0]);
     expect(paul.nounPhraseOnly).toBe(true);
     expect(paul.binding).toBe(binding);
-    expect(paul.conjunctHost?.key).toBe('subject+1');
-    expect(builderProps.get('subject/conjunct/1')!.conjunctHost?.key).toBe('subject+2');
-    expect(builderProps.get('directObject/conjunct/0')!.conjunctHost?.key).toBe('directObject+1');
+    expect(paul.ringHost?.key).toBe('subject+1');
+    expect(builderProps.get('subject/conjunct/1')!.ringHost?.key).toBe('subject+2');
+    expect(builderProps.get('directObject/conjunct/0')!.ringHost?.key).toBe('directObject+1');
   });
 
   it('addresses conjuncts under the possessor path when the canvas is a possessor’s', () => {

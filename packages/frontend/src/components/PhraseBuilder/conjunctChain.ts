@@ -30,17 +30,21 @@ export const CONJUNCT_GAP = 44;
 // How far a conjunct's dotted ring is taken to reach before its builder has measured it.
 export const UNMEASURED_R = 72;
 
-/** What a conjunct's builder reports about the ring it drew. */
-export type ConjunctRing = {
+/**
+ * What a hosted ring's builder — a conjunct's or an owner's — reports about the ring it drew on the
+ * canvas it is hosted on.
+ */
+export type HostedRing = {
   rIn: number;
   orbit: number;
   rOut: number;
-  // Where each of its link ports sits, relative to the ring's centre, keyed by port.
+  // Where each of its link ports — and its own possessor control, where the line to its owner
+  // leaves from — sits, relative to the ring's centre, keyed by control.
   ports: Record<string, Pt>;
 };
 
 /** Equal within half a pixel everywhere — lets the report settle instead of looping. */
-export function sameConjunctRing(a: ConjunctRing | undefined, b: ConjunctRing): boolean {
+export function sameHostedRing(a: HostedRing | undefined, b: HostedRing): boolean {
   if (!a) return false;
   const close = (p: number, q: number) => Math.abs(p - q) <= 0.5;
   if (!close(a.rIn, b.rIn) || !close(a.orbit, b.orbit) || !close(a.rOut, b.rOut)) return false;
@@ -69,12 +73,15 @@ export function belowRing(prevCenter: Pt, prevROut: number, rOut: number = UNMEA
 }
 
 /**
- * A conjunct's ring as one constituent of its head's canvas — the footprint the overlap resolver
+ * A hosted ring as one constituent of the canvas it is drawn on — the footprint the overlap resolver
  * keeps clear and tidying packs. Its only node is its own key, so shoving it moves its whole ring.
+ * A conjunct's ring stands in for its head in compact view; an owner's is only packed after the ring
+ * it owns.
  */
-export function conjunctRect({
+export function hostedRect({
   key,
   color,
+  kind,
   head,
   index,
   center,
@@ -83,14 +90,16 @@ export function conjunctRect({
 }: {
   key: string;
   color: string;
-  // The head's group label, and which conjunct of it this is.
+  kind: "conjunct" | "owner";
+  // The group label of the period noun the ring belongs with, and where it reads among that group's
+  // rings (a conjunct's index; an owner's fractional order — see possessionsFor).
   head: string;
   index: number;
   center: Pt;
-  ring: ConjunctRing;
+  ring: HostedRing;
   compact: boolean;
 }): GroupRect {
-  const def: GroupDef = { label: key, color, mainKey: key, nodeKeys: [key], conjunct: { head, index } };
+  const def: GroupDef = { label: key, color, mainKey: key, nodeKeys: [key], [kind]: { head, index } };
   return {
     ...def,
     ...ringFootprint(center, compact ? ring.rIn : ring.rOut),
@@ -129,7 +138,7 @@ export function conjunctLinks({
   // The head's own ring (from the head canvas's layout), and where its ports sit.
   headRing: (which: NounKey) => { rIn: number; rOut: number } | undefined;
   headPort: (port: string) => Pt | undefined;
-  rings: Record<string, ConjunctRing>;
+  rings: Record<string, HostedRing>;
   compact: boolean;
 }): ConjunctLink[] {
   const links: ConjunctLink[] = [];

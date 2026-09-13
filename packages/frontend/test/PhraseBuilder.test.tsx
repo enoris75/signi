@@ -11,7 +11,6 @@ import {
   type PhraseBuilderProps,
 } from '../src/components/PhraseBuilder/PhraseBuilder.tsx';
 import type { PhraseSidebar } from '../src/components/PhraseBuilder/PhraseSidebar.tsx';
-import { place } from './hooks/dom.ts';
 import { renderWithProviders } from './render.tsx';
 
 // jsdom has no ResizeObserver: the canvas reads as a fixed 600 px wide.
@@ -654,10 +653,13 @@ describe('PhraseBuilder', () => {
     });
   });
 
-  // A possessor's builder wears the full period card, so its own "Remove phrase" control is how it
-  // is removed.
+  // A noun's owner is filled from its possessor control, one of two ways: named, in a ring of its own
+  // on the period's canvas, or pointed to — a dashed line to another noun's ring.
   describe('a possessor', () => {
-    it('opens a panel whose edits land in the possessor slice', () => {
+    const possessorControls = () => screen.getAllByTestId(/^satellite-\w+Possessor$/);
+    const clearPossessor = () => screen.queryAllByRole('button', { name: 'Clear Possessor' });
+
+    it('names the owner in a ring on the period’s canvas, its word landing in the possessor slice', () => {
       const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
 
       fireEvent.click(satellite('subjectPossessor'));
@@ -668,101 +670,180 @@ describe('PhraseBuilder', () => {
         verb: SLEEP,
         subjectPossessor: { subject: BOY },
       });
+      expect(screen.getAllByTestId('phrase-canvas')).toHaveLength(1);
+      expect(screen.getAllByTestId('period-container')).toHaveLength(1);
+      expect(groups()).toEqual(['Subject', 'Verb Phrase', 'Subject']);
+      expect(clearPossessor()).toHaveLength(1);
     });
 
-    it('keeps the full canvas, verb and all', () => {
-      renderPeriod({ subject: CAT, verb: EAT, subjectPossessor: { subject: BOY } });
-
-      expect(screen.getAllByTestId('box-verb')).toHaveLength(2);
-    });
-
-    it('is removed with any reference it held, unlinking the head it had', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const binding = makeBinding();
-      const { lastEdit } = renderPeriod(
-        { subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } },
-        { binding },
+    it('draws the owner as a bare noun phrase, with no verb of its own', () => {
+      renderPeriod(
+        { subject: CAT, verb: EAT, subjectPossessor: { subject: BOY } },
+        { binding: makeBinding() },
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
-
-      expect(
-        lastEdit({ subject: CAT, subjectPossessor: { subject: BOY }, subjectPossessorRef: 'x' }),
-      ).toEqual({ subject: CAT });
-      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('subject/possessor');
-      expect(screen.queryByRole('button', { name: 'Owned by a phrase' })).not.toBeInTheDocument();
+      // The period's verb alone: the plan reads only a possessor's head, so its verb would be lost.
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
+      expect(screen.getAllByTestId('box-verb')).toHaveLength(1);
+      // Its head still sources a relative clause, which is how a clause reaches a possessor.
+      expect(screen.getAllByTestId('satellite-subjectRelative')).toHaveLength(2);
     });
 
-    it('folds its panel away when removed while still empty', () => {
+    it('offers nouns alone for the owner’s head', () => {
       renderPeriod({ subject: CAT, verb: SLEEP });
+
       fireEvent.click(satellite('subjectPossessor'));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
-
-      expect(screen.queryByRole('button', { name: 'Owned by a phrase' })).not.toBeInTheDocument();
+      // A pronoun owner is a pointed-to one: the empty ring's picker has no pronoun tab.
+      expect(screen.getByTestId('typeahead-noun')).toBeInTheDocument();
+      expect(screen.queryByTestId('pronoun-tab')).not.toBeInTheDocument();
     });
 
-    it('unlinks a nested builder’s possessor head by its full address', () => {
-      const binding = makeBinding();
-      renderPeriod(
-        { subject: DOG },
-        { binding, possessorPath: 'directObject/conjunct/0', nounPhraseOnly: true },
-      );
-      fireEvent.click(satellite('subjectPossessor'));
+    it('gives the owner’s head no coordination: the plan reads an owner as one noun phrase', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
-
-      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
-        'directObject/conjunct/0/possessor',
-      );
+      expect(screen.getAllByTestId('satellite-subjectConjunct')).toHaveLength(1);
     });
 
-    it('unlinks the possessor of a nested builder’s object by that object’s address', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const binding = makeBinding();
-      renderPeriod(
-        { subject: DOG, verb: EAT, directObject: HORSE, directObjectPossessor: { subject: BOY } },
-        { binding, possessorPath: 'subject/possessor' },
-      );
-
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
-
-      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
-        'subject/possessor/directObject/possessor',
-      );
-    });
-
-    it('points at a noun picked on the canvas, never at itself', () => {
+    it('lights up the nouns an opened owner could point to instead, and points to the one clicked', () => {
       const { lastEdit } = renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE });
-      fireEvent.click(satellite('directObjectPossessor'));
-      fireEvent.click(screen.getByRole('button', { name: 'Refers to a noun' }));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Pick a noun…' }));
+      fireEvent.click(satellite('directObjectPossessor'));
+      // The empty owner's ring is its picker; the boy is lit, never the horse or the empty owner.
+      expect(clearPossessor()).toHaveLength(0);
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(2);
       expect(pickable()).toEqual(['subject']);
 
-      press(box('subject'));
+      press(screen.getAllByTestId('box-subject')[0]!);
+
       expect(lastEdit({ directObject: HORSE })).toEqual({
         directObject: HORSE,
         directObjectPossessorRef: 'subject',
       });
       expect(pickable()).toEqual([]);
-      expect(screen.getByRole('button', { name: /boy/ })).toHaveTextContent('boy · “his”');
+      // The empty ring goes; a dashed line to the boy carries the pronoun it renders.
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(1);
+      expect(screen.getByTestId('pronoun-chip')).toHaveTextContent('his');
+      expect(satellite('directObjectPossessor')).toHaveAccessibleName(
+        'Possessor: points to boy (“his”) — click to remove',
+      );
     });
 
-    it('can point at the head of another noun’s possessor, by its address', () => {
+    it('stops lighting up nouns once the owner is named', () => {
+      renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE });
+      fireEvent.click(satellite('directObjectPossessor'));
+
+      pickOption('DOG');
+
+      expect(pickable()).toEqual([]);
+      expect(screen.queryByTestId('pronoun-chip')).not.toBeInTheDocument();
+    });
+
+    it('closes an empty owner from its control, ending the pick', () => {
+      renderPeriod({ subject: BOY, verb: EAT, directObject: HORSE });
+      fireEvent.click(satellite('directObjectPossessor'));
+
+      fireEvent.click(satellite('directObjectPossessor'));
+
+      expect(screen.getAllByTestId('box-subject')).toHaveLength(1);
+      expect(pickable()).toEqual([]);
+    });
+
+    it('folds a named owner’s ring away and back, keeping the owner', () => {
+      const { onPhraseUpdate } = renderPeriod({
+        subject: CAT,
+        verb: SLEEP,
+        subjectPossessor: { subject: BOY },
+      });
+
+      fireEvent.click(possessorControls()[0]!);
+      expect(clearPossessor()).toHaveLength(0);
+
+      fireEvent.click(possessorControls()[0]!);
+      expect(clearPossessor()).toHaveLength(1);
+      expect(onPhraseUpdate).not.toHaveBeenCalled();
+    });
+
+    it('takes a pointed-to owner away from its control', () => {
+      const { lastEdit } = renderPeriod({
+        subject: BOY,
+        verb: EAT,
+        directObject: HORSE,
+        directObjectPossessorRef: 'subject',
+      });
+      expect(screen.getByTestId('pronoun-chip')).toBeInTheDocument();
+
+      fireEvent.click(satellite('directObjectPossessor'));
+
+      expect(lastEdit({ directObject: HORSE, directObjectPossessorRef: 'subject' })).toEqual({
+        directObject: HORSE,
+      });
+      expect(screen.queryByTestId('pronoun-chip')).not.toBeInTheDocument();
+    });
+
+    it('removes a named owner from its ring, with the owners it holds and their relative clauses', () => {
+      const binding = makeBinding();
+      const period: PhraseSelection = {
+        subject: CAT,
+        verb: SLEEP,
+        subjectPossessor: { subject: BOY, subjectPossessor: { subject: DOG } },
+      };
+      const { lastEdit } = renderPeriod(period, { binding });
+
+      // The boy's ring comes first: owners are drawn parents first.
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove this possessor' })[0]!);
+
+      expect(lastEdit(period)).toEqual({ subject: CAT, verb: SLEEP });
+      expect(vi.mocked(binding.relative.onRemoveLink).mock.calls).toEqual([
+        ['subject/possessor'],
+        ['subject/possessor/possessor'],
+      ]);
+      expect(clearPossessor()).toHaveLength(0);
+    });
+
+    it('draws an owner’s owner and a conjunct’s owner on the one canvas, editing each at its address', () => {
+      const { selection } = renderPeriod({
+        subject: CAT,
+        verb: SLEEP,
+        subjectConjuncts: [{ subject: DOG, subjectPossessor: { subject: HORSE } }],
+        subjectPossessor: { subject: BOY },
+      });
+      expect(screen.getAllByTestId('phrase-canvas')).toHaveLength(1);
+      expect(clearPossessor()).toHaveLength(2);
+
+      // The boy's own control, on his ring: the period's subject's, the dog's (a conjunct's ring is
+      // drawn before the owners'), the boy's, the horse's.
+      fireEvent.click(possessorControls()[2]!);
+      pickOption('PARK');
+
+      expect(selection().subjectPossessor).toEqual({ subject: BOY, subjectPossessor: { subject: PARK } });
+      expect(selection().subjectConjuncts).toEqual([{ subject: DOG, subjectPossessor: { subject: HORSE } }]);
+      expect(clearPossessor()).toHaveLength(3);
+    });
+
+    it('unlinks a conjunct’s owner by its full address', () => {
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: CAT, verb: SLEEP, subjectConjuncts: [{ subject: DOG, subjectPossessor: { subject: BOY } }] },
+        { binding },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this possessor' }));
+
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('subject/conjunct/0/possessor');
+    });
+
+    it('can point at the head of another noun’s owner, by its address', () => {
       const { lastEdit } = renderPeriod({
         subject: BOY,
         verb: EAT,
         directObject: HORSE,
         directObjectPossessor: { subject: DOG },
       });
-      // The period's own control comes first; the dog's builder carries one too.
-      fireEvent.click(screen.getAllByTestId('satellite-subjectPossessor')[0]!);
-      fireEvent.click(screen.getAllByRole('button', { name: 'Refers to a noun' })[0]!);
-      fireEvent.click(screen.getByRole('button', { name: 'Pick a noun…' }));
+      fireEvent.click(possessorControls()[0]!);
 
-      const [, dog] = screen.getAllByTestId('box-subject');
-      press(dog!);
+      // The boy, the subject's empty owner, then the dog's ring.
+      press(screen.getAllByTestId('box-subject').at(-1)!);
 
       expect(lastEdit({})).toEqual({ subjectPossessorRef: 'directObject/possessor' });
     });
@@ -920,13 +1001,15 @@ describe('PhraseBuilder', () => {
       );
     });
 
-    it('registers a possessor’s own object under its head, not as the period’s', () => {
+    it('draws nothing of a verb a saved possessor still holds, and registers only its head', () => {
+      // A possessor saved before it lost its verb box: its verb and object stay in the slice,
+      // but the plan never read them, so the canvas neither draws nor links them.
       const binding = makeBinding();
       renderPeriod(
         {
           subject: BOY,
           verb: SLEEP,
-          subjectPossessor: { subject: DOG, verb: EAT, directObject: HORSE },
+          subjectPossessor: { subject: DOG, verb: WALK, locative: HOUSE },
         },
         { binding },
       );
@@ -935,9 +1018,9 @@ describe('PhraseBuilder', () => {
         .mocked(binding.geometry.registerBox)
         .mock.calls.filter(([, el]) => el)
         .map(([key]) => key);
-      expect(new Set(registered)).toEqual(
-        new Set(['subject', 'subject/possessor', 'subject/possessor/directObject']),
-      );
+      expect(new Set(registered)).toEqual(new Set(['subject', 'subject/possessor']));
+      // The period's subject and verb phrase, and the possessor's head: no ring left empty.
+      expect(groups()).toEqual(['Subject', 'Verb Phrase', 'Subject']);
     });
 
     it('greys out a noun another clause relativises, leaving nothing to clear', () => {
@@ -1030,46 +1113,30 @@ describe('PhraseBuilder', () => {
       Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledOnce());
     });
 
-    it('gives a possessor panel none of a period’s own controls', () => {
-      const onMoveUp = vi.fn();
+    it('gives an owner no card of its own, nor any of a period’s controls', () => {
       renderPeriod(
-        { subject: DOG },
-        { binding: makeBinding(), possessorPath: 'subject/possessor', onMoveUp, onRemove: vi.fn() },
+        { subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } },
+        { binding: makeBinding(), onMoveUp: vi.fn(), onRemove: vi.fn() },
       );
 
+      expect(screen.getAllByTestId('period-container')).toHaveLength(1);
       for (const name of [
         'Toggle imperative (command)',
         'Toggle infinitive phrase (citation)',
-        'Add an IF condition (this becomes the main clause)',
-        'Coordinate this period with another',
         'Move this period up',
-        'Move this period down',
       ]) {
-        expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+        expect(screen.getAllByRole('button', { name })).toHaveLength(1);
       }
-      expect(screen.getByRole('button', { name: 'Remove phrase' })).toBeInTheDocument();
-      // Only the outermost period has a words panel; a nested builder's could never open.
-      expect(screen.queryByTestId('words-panel')).not.toBeInTheDocument();
+      // Only the outermost period has a words panel.
+      expect(screen.getAllByTestId('words-panel')).toHaveLength(1);
     });
 
-    it('does not turn a possessor panel of an instrument period into an instrument too', () => {
-      const binding = makeBinding({ instrumental: { hasTarget: true, level: 'object' } });
-      renderPeriod({ subject: DOG, verb: SLEEP }, { binding, possessorPath: 'subject/possessor' });
+    it('does not turn an owner in an instrument period into an instrument too', () => {
+      const binding = makeBinding({ instrumental: { hasTarget: true, level: 'process' } });
+      renderPeriod({ verb: EAT, directObject: HORSE, directObjectPossessor: { subject: BOY } }, { binding });
 
-      // An object-level instrument is a bare noun phrase; the possessor keeps its whole canvas.
-      expect(boxes()).toContain('verb');
-    });
-
-    it('keeps a possessor panel in place, never floated off by its border', () => {
-      renderPeriod({ subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } });
-      const [, nested] = screen.getAllByTestId('period-container');
-      // The panel's card, as a 400×300 box at (100, 100), pressed on its left border.
-      const card = place(nested!.querySelector<HTMLElement>('.MuiPaper-root')!, 100, 100, 400, 300);
-
-      fireEvent.pointerDown(card, { clientX: 103, clientY: 250, pointerId: 3 });
-      fireEvent.pointerMove(card, { clientX: 133, clientY: 230 });
-
-      expect(getComputedStyle(nested!).position).toBe('relative');
+      // An instrument act drops its subject; the owner's head is its whole phrase and stays.
+      expect(boxes()).toEqual(['verb', 'directObject', 'subject']);
     });
 
     it('clears the sole period in place rather than removing it', () => {

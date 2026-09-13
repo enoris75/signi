@@ -28,8 +28,11 @@ export type Edge = {
   x2: number;
   y2: number;
   color: string;
-  // dashed = the faint satellite links; the links between constituents are solid.
+  // dashed = the faint satellite links, and a noun's line to the noun it points to as its owner; the
+  // links between constituents are solid.
   dashed: boolean;
+  // A line that bows, through this control point of a quadratic curve, rather than running straight.
+  via?: Pt;
 };
 
 export type Rect = { x: number; y: number; width: number; height: number };

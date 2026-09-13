@@ -9,16 +9,15 @@ type Pt = { x: number; y: number };
 
 // The relative-clause, possessor and coordination controls (and the receiving dot for an incoming
 // link) ride each noun's *dotted* ring rather than its solid one: they are about the noun phrase's
-// links to other phrases, and each is where its connector line starts — or, for the dot, where an
-// incoming subordinate link lands. The ring layout seats them (see ringSpecs), so they follow the
-// whole constituent as it moves.
+// links to other phrases, and each is where its connector line starts — the possessor control's to
+// the noun's owner — or, for the dot, where an incoming subordinate link lands. The ring layout
+// seats them (see ringSpecs), so they follow the whole constituent as it moves.
 export function GroupPerimeterControls({
   controlPos,
   perimeterByNoun,
   linkTargetKeys,
   registerSourceAnchor,
   registerTargetAnchor,
-  registerPossessorControl,
   recolor,
 }: {
   // Where every ring control sits on the canvas, keyed by control.
@@ -30,8 +29,6 @@ export function GroupPerimeterControls({
   // the workspace so it can measure the cross-container link between containers.
   registerSourceAnchor?: (nounKey: NounKey, el: HTMLElement | null) => void;
   registerTargetAnchor?: (nounKey: NounKey, el: HTMLElement | null) => void;
-  // Register the possessor control (its connector's start) with the local builder.
-  registerPossessorControl: (nounKey: NounKey, el: HTMLElement | null) => void;
   // Slot colours to use in place of a noun's own, by noun (a conjunct's head wears its role's).
   recolor?: Partial<Record<string, SlotConfig["color"]>>;
 }) {
@@ -90,11 +87,7 @@ export function GroupPerimeterControls({
               </Box>
             )}
             {possessor && (
-              <Box
-                data-testid={`possessor-ctl-${nounKey}`}
-                ref={(el: HTMLElement | null) => registerPossessorControl(nounKey, el)}
-                sx={seat(possessor)}
-              >
+              <Box data-testid={`possessor-ctl-${nounKey}`} sx={seat(possessor)}>
                 <SatelliteButton sat={entry!.possessor!} color={color} />
               </Box>
             )}

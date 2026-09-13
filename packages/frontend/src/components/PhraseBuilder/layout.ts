@@ -64,14 +64,18 @@ export function packPeriod(
     return i === -1 ? READING_ORDER.length : i;
   };
   // A conjunct's ring reads straight after the rings before it in its group: "the cat or the dog".
-  const order = (g: GroupRect) =>
-    g.conjunct ? rank(g.conjunct.head) + (g.conjunct.index + 1) / 100 : rank(g.label);
+  // An owner's reads straight after the ring it owns.
+  const order = (g: GroupRect) => {
+    const hosted = g.conjunct ?? g.owner;
+    return hosted ? rank(hosted.head) + (hosted.index + 1) / 100 : rank(g.label);
+  };
   const boxes = [...groupRects].sort((a, b) => order(a) - order(b));
 
   const gap = 20; // gutter between footprints, px
   const margin = 6;
-  // The gutter before a box: a conjunct's is wide enough for the conjunction chip on its link.
-  const gapBefore = (box: GroupRect) => (box.conjunct ? CONJUNCT_GAP : gap);
+  // The gutter before a box: a conjunct's is wide enough for the conjunction chip on its link, and an
+  // owner's matches it.
+  const gapBefore = (box: GroupRect) => (box.conjunct || box.owner ? CONJUNCT_GAP : gap);
   const { w: svgW } = svgSize;
 
   // Fill each row until the next footprint would overhang the canvas; one wider than the canvas

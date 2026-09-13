@@ -48,7 +48,6 @@ function renderControls(overrides: Partial<ComponentProps<typeof GroupPerimeterC
   const handlers = {
     registerSourceAnchor: vi.fn(),
     registerTargetAnchor: vi.fn(),
-    registerPossessorControl: vi.fn(),
   };
   const view = render(
     <GroupPerimeterControls
@@ -115,7 +114,7 @@ describe('GroupPerimeterControls', () => {
   });
 
   it('skips a noun whose controls the ring layout has not seated', () => {
-    const { registerTargetAnchor, registerPossessorControl } = renderControls({
+    const { registerSourceAnchor, registerTargetAnchor } = renderControls({
       controlPos: {},
       perimeterByNoun: { subject: everyControl('subject') },
       linkTargetKeys: new Set<NounKey>(['subject']),
@@ -123,23 +122,19 @@ describe('GroupPerimeterControls', () => {
 
     expect(buttons()).toEqual([]);
     expect(registerTargetAnchor).not.toHaveBeenCalled();
-    expect(registerPossessorControl).not.toHaveBeenCalled();
+    expect(registerSourceAnchor).not.toHaveBeenCalled();
   });
 
-  it('registers each control as the start of its connector, and releases it on unmount', () => {
-    const { registerSourceAnchor, registerPossessorControl, unmount } =
+  it('registers the relative-clause control as the start of its link, and releases it on unmount', () => {
+    const { registerSourceAnchor, unmount } =
       renderControls({ perimeterByNoun: { subject: everyControl('subject') } });
 
     expect(registered(registerSourceAnchor, 'subject')).toBe(
       screen.getByTestId('relative-ctl-subject'),
     );
-    expect(registered(registerPossessorControl, 'subject')).toBe(
-      screen.getByTestId('possessor-ctl-subject'),
-    );
     unmount();
 
     expect(registerSourceAnchor).toHaveBeenLastCalledWith('subject', null);
-    expect(registerPossessorControl).toHaveBeenLastCalledWith('subject', null);
   });
 
   it('places a receiving dot where the ring layout seated it on a link target’s dotted ring', () => {
@@ -202,7 +197,6 @@ describe('GroupPerimeterControls', () => {
         controlPos={CONTROL_POS}
         perimeterByNoun={{ subject: everyControl('subject') }}
         linkTargetKeys={new Set<NounKey>(['subject'])}
-        registerPossessorControl={() => {}}
       />,
     );
 

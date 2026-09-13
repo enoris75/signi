@@ -330,10 +330,10 @@ export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
   `${base}/conjunct/${i}`;
 
 // The address of noun `which` in a builder whose head sits at `headPath` — undefined for a
-// top-level container, whose nouns are their own addresses. A nested (possessor or conjunct)
-// builder's head is its `subject`. Its other nouns — the verb phrase a possessor's canvas also
-// offers — are no part of the period's plan, so they get addresses of their own under the head,
-// which resolve to nothing, rather than the container's own noun of the same key.
+// top-level container, whose nouns are their own addresses. A nested (owner or conjunct)
+// builder's head is its `subject`. It draws no other noun, but should one reach it (a slice saved
+// with a verb phrase) it is no part of the period's plan, so it gets an address of its own under the
+// head, which resolves to nothing, rather than the container's own noun of the same key.
 export const builderNounAddress = (
   headPath: NounAddress | undefined,
   which: NounKey,
@@ -599,12 +599,12 @@ export interface WorkspaceBinding {
   instrumental: InstrumentalBinding;
 }
 
-// Wrap a container's `binding` for an embedded possessor sub-builder whose head is
-// addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
+// Wrap a container's `binding` for a hosted ring's builder — an owner's or a conjunct's — whose head
+// is addressed `headPath`. The builder speaks in its own internal noun keys (its head is
 // `"subject"`); this maps each onto its address (see builderNounAddress) before forwarding to
-// the container, so the possessor head registers/links under its workspace address. A possessor
-// head is only ever a link *source* (relativising it), never a target, so target/dimming is
-// suppressed, and it is never a clause endpoint, so both clause compartments are inert.
+// the container, so the head registers/links under its workspace address. Such a head is only
+// ever a link *source* (relativising it), never a target, so target/dimming is suppressed, and it
+// is never a clause endpoint, so both clause compartments are inert.
 export function adaptPossessorBinding(
   root: WorkspaceBinding,
   headPath: NounAddress,
@@ -620,7 +620,7 @@ export function adaptPossessorBinding(
         root.geometry.registerSourceAnchor(map(nounKey), el),
       registerTargetAnchor: (nounKey, el) =>
         root.geometry.registerTargetAnchor(map(nounKey), el),
-      // A possessor sub-builder is never a clause endpoint, so it anchors no clause connector,
+      // A hosted ring's builder is never a clause endpoint, so it anchors no clause connector,
       // and it has no verb phrase to hang an instrument off.
       registerBorderAnchor: () => {},
       registerVerbAnchor: () => {},
@@ -636,7 +636,7 @@ export function adaptPossessorBinding(
       onStartLink: (nounKey) => root.relative.onStartLink(map(nounKey)),
       onRemoveLink: (nounKey) => root.relative.onRemoveLink(map(nounKey)),
     },
-    // Inert: a possessor sub-builder is never a conditional/coordinative endpoint.
+    // Inert: a hosted ring's builder is never a conditional/coordinative endpoint.
     conditional: {
       hasSource: false,
       hasTarget: false,

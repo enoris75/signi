@@ -70,7 +70,7 @@ const centerY = (r: Rect) => (r.top + r.bottom) / 2;
 /** One snapshot of a period's canvas: its size, its dotted rings, and its word nodes. */
 async function snapshot(period: Locator): Promise<Layout> {
   return period.evaluate((root) => {
-    // Only this period's own canvas — a nested possessor panel is another period's card.
+    // Only this period's own canvas.
     const own = (el: Element) => el.closest('[data-testid="period-container"]') === root;
     const groupEls = [...root.querySelectorAll<HTMLElement>('[data-testid="group-box"]')].filter(own);
     const canvas = groupEls[0]?.offsetParent as HTMLElement | null;

@@ -113,13 +113,13 @@ The same session in the console is P02 §1.
 Boxes are freely placed on the canvas, so arrow keys use geometry, not DOM order: from the focused
 box's centre, pick the box whose centre lies inside a 90° cone in that direction, minimising
 `distance + 2 × perpendicular offset`. The rects are already measured (`slotEls`, `boxSizes`).
-At the canvas edge, <kbd>↑</kbd>/<kbd>↓</kbd> cross into the neighbouring period (and into
-possessor panels, which sit below the canvas).
+At the canvas edge, <kbd>↑</kbd>/<kbd>↓</kbd> cross into the neighbouring period. Conjunct and owner
+rings sit on the canvas itself, so they are reached like any other box.
 
 ### ⇥ is reading order, across the whole document
 
-<kbd>⇥</kbd> walks subject → its adjectives → its conjuncts → verb → modals / adverbs → object →
-complements → possessor panels → the next period → *Add a period* → translations. It no longer loops
+<kbd>⇥</kbd> walks subject → its adjectives → its owner → its conjuncts (each followed by its owner) →
+verb → modals / adverbs → object → complements → the next period → *Add a period* → translations. It no longer loops
 inside one period (today's loop in `SlotNode` traps focus), so the page keeps a normal tab order.
 
 ### Regions
@@ -244,8 +244,8 @@ letter it answers to.
 ```
 
 Same for the period-level picks (if-condition, join, instrument): the eligible *period cards* get
-the numbers. The possessor "refers to a noun" pick uses the same badges and gains <kbd>esc</kbd>
-(it has none today). The console shows the same numbers inline (P02 §2).
+the numbers. The "point to the owner" pick (an opened owner lights up the nouns it could point to)
+uses the same badges and gains <kbd>esc</kbd> (it has none today). The console shows the same numbers inline (P02 §2).
 
 ### 3.7 Menus with accelerators — *artboard "Menus with accelerators"*
 
@@ -503,7 +503,7 @@ button does.
 | [`hooks/useWorkspaceLinks.ts`](../../../../packages/frontend/src/components/PhraseBuilder/hooks/useWorkspaceLinks.ts) | `eligibleTargets(): Target[]` in reading order (drives badges and digits); its esc listener moves into the provider. |
 | [`CorefPickContext.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx) | Same `eligibleTargets` + badges; esc cancels (missing today). |
 | Typeaheads (`SubjectTypeahead`, `VerbTypeahead`, `DirectObjectTypeahead`, `AdjectiveTypeahead`, `AdverbTypeahead`, `ModalTypeahead`, `ModifierTypeahead`) | Shared `usePickerKeys`: ⇥ commit-and-advance, double esc, ↑ into tabs / category toggle, footer hints. Fix `ModalTypeahead` ↓ not reopening a closed list ([line 37](../../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L37)). |
-| [`ImperativeSubjectSelector.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`PossessorPanels.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx), [`ConjunctRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx) | Scopes and accelerators. |
+| [`ImperativeSubjectSelector.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ImperativeSubjectSelector.tsx), [`OwnerRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx), [`ConjunctRings.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConjunctRings.tsx) | Scopes and accelerators. |
 | [`PhraseSidebar.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx), [`ConceptPalette.tsx`](../../../../packages/frontend/src/components/ConceptPalette.tsx) | `inert` when closed; roving focus list, type-to-jump, ↵ fills the active slot and returns focus; resize handle as a `separator` with ←→. |
 | [`WordMap/WordMap.tsx`](../../../../packages/frontend/src/components/WordMap/WordMap.tsx) | Pan / zoom / reset keys; ⇥ cycles nodes applying the hover highlight. |
 | [`TranslationPanel.tsx`](../../../../packages/frontend/src/components/TranslationPanel.tsx) | Rows focusable; copy button visible on `:focus-within`; ↵ / C copy. |

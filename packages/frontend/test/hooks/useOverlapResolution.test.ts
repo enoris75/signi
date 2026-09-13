@@ -46,7 +46,7 @@ function rings(scene: Scene, positions = scene.positions): GroupRect[] {
 
 // Renders the hook over a fixed scene. The setters are spies, not state: nothing it writes
 // feeds back in, so each test sees exactly what one commit asks for.
-function renderResolver(initial: Scene) {
+function renderResolver(initial: Scene, yielding?: ReadonlySet<string>) {
   const setPositions = vi.fn();
   const setGraphHeight = vi.fn();
   const dragRef: { current: DragState | null } = { current: null };
@@ -64,6 +64,7 @@ function renderResolver(initial: Scene) {
         setGraphHeight,
         dragRef,
         positionsStaleRef,
+        yielding,
       });
     },
     { initialProps: initial },
@@ -158,6 +159,20 @@ describe('useOverlapResolution', () => {
       expect(patch()).not.toHaveProperty('verb');
       expect(patch().subject.x).toBeLessThan(25);
       const [subject, verb] = footprints({ ...grown.positions, ...patch() }, grown);
+      expect(intersects(subject, verb)).toBe(false);
+    });
+
+    it('moves a yielding box out of the way, even one that just appeared', () => {
+      // The verb's ring has just come onto the canvas over the subject's, but it is passing through.
+      const before: Scene = { positions: { subject: { x: 25, y: 50 } }, words: ['subject'] };
+      const arrived: Scene = { positions: { subject: { x: 25, y: 50 }, verb: { x: 35, y: 50 } } };
+      const { rerender, setPositions, patch } = renderResolver(before, new Set(['Verb Phrase']));
+
+      rerender(arrived);
+
+      expect(setPositions).toHaveBeenCalledOnce();
+      expect(patch()).not.toHaveProperty('subject');
+      const [subject, verb] = footprints({ ...arrived.positions, ...patch() }, arrived);
       expect(intersects(subject, verb)).toBe(false);
     });
   });

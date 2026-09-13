@@ -27,8 +27,8 @@ export function slotTypeahead({
   activeSlot: SlotKey | null;
   selection: PhraseSelection;
   onSelect: (concept: Concept, slot: SlotKey, opts?: ConceptSelectOpts) => void;
-  // In noun-phrase mode (possessor editor) the `subject` slot is a possessor head, which
-  // is noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
+  // In noun-phrase mode (an owner's ring) the `subject` slot is the owner's head, which is
+  // noun-only — so it uses the noun picker rather than the pronoun-inclusive one.
   nounSubject?: boolean;
   // Re-picking the word of an already-filled box: bypass the empty/active guard so the
   // picker renders over the current word.

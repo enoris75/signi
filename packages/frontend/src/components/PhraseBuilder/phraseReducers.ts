@@ -490,7 +490,7 @@ export function addConjunct(prev: PhraseSelection, which: NounKey): PhraseSelect
 
 // Apply `updater` to the i-th conjunct of `which`. Lets the nested noun-phrase-mode builder
 // editing that conjunct write into `${which}Conjuncts[i]` without knowing it is embedded —
-// the same lens `updatePossessor` gives a possessor sub-builder.
+// the same lens `updatePossessor` gives an owner's builder.
 export function updateConjunct(
   prev: PhraseSelection,
   which: NounKey,
@@ -530,4 +530,59 @@ export function cycleNounConjunction(
   const i = NOUN_COORD_CONJUNCTIONS.indexOf(current);
   const next = NOUN_COORD_CONJUNCTIONS[(i + 1) % NOUN_COORD_CONJUNCTIONS.length];
   return { ...prev, [CONJUNCTION_KEY(which)]: next };
+}
+
+// ── Addressed edits ──
+// A period's nouns nest: a possessor or a conjunct is a phrase slice of its own, whose head is its
+// `subject`. A `NounAddress` names any of them from the period root (see interfaces.ts), so these let
+// the root builder read and edit the slice that holds a noun, however deep it sits.
+
+/**
+ * The slice holding the noun at `address`, and that noun's key within it: the period itself for a
+ * top-level noun, else the nested slice whose `subject` the noun is. Undefined when a step along
+ * the way is missing.
+ */
+export function nounSliceAt(
+  root: PhraseSelection,
+  address: NounAddress,
+): { slice: PhraseSelection; which: NounKey } | undefined {
+  const [base, ...steps] = address.split("/");
+  let slice = root;
+  let which = base as NounKey;
+  for (let i = 0; i < steps.length; i++) {
+    if (steps[i] === "possessor") {
+      const child = slice[POSSESSOR_KEY(which)] as PhraseSelection | undefined;
+      if (!child) return undefined;
+      slice = child;
+    } else if (steps[i] === "conjunct") {
+      const child = conjunctsOf(slice, which)[Number(steps[++i])];
+      if (!child) return undefined;
+      slice = child;
+    } else {
+      return undefined;
+    }
+    which = "subject";
+  }
+  return { slice, which };
+}
+
+/**
+ * Apply `fn` to the slice holding the noun at `address` (see nounSliceAt), seeding any possessor
+ * slice on the way — the same lens `updatePossessor` and `updateConjunct` give one level down.
+ */
+export function updateNounAt(
+  root: PhraseSelection,
+  address: NounAddress,
+  fn: (slice: PhraseSelection, which: NounKey) => PhraseSelection,
+): PhraseSelection {
+  const [base, ...steps] = address.split("/");
+  const walk = (slice: PhraseSelection, which: NounKey, i: number): PhraseSelection => {
+    if (i >= steps.length) return fn(slice, which);
+    if (steps[i] === "possessor")
+      return updatePossessor(slice, which, (child) => walk(child, "subject", i + 1));
+    if (steps[i] === "conjunct")
+      return updateConjunct(slice, which, Number(steps[i + 1]), (child) => walk(child, "subject", i + 2));
+    return slice;
+  };
+  return walk(root, base as NounKey, 0);
 }

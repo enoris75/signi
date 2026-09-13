@@ -74,7 +74,7 @@ tasks start at A11. **Do A15's group-key refactor before B23**: the group labels
 | # | File | Strings |
 |---|---|---|
 | A11 | [A11-ui-typeahead-placeholders.md](A-ready/A11-ui-typeahead-placeholders.md) | 4 placeholders — "type an adjective / adverb / noun / noun or pronoun…" |
-| A12 | [A12-ui-commands-on-seeded-verbs.md](A-ready/A12-ui-commands-on-seeded-verbs.md) | choose…, Clear, Pick a noun…, Save, Clear this period, Coordinate this period |
+| A12 | [A12-ui-commands-on-seeded-verbs.md](A-ready/A12-ui-commands-on-seeded-verbs.md) | choose…, clear, Save, Clear this period, Coordinate this period |
 | A13 | [A13-ui-save-load-dialogs.md](A-ready/A13-ui-save-load-dialogs.md) | 4 dialog titles, 3 success toasts ("Phrase saved." → "saved phrase"), date locale |
 | A14 | [A14-ui-satellite-and-badge-labels.md](A-ready/A14-ui-satellite-and-badge-labels.md) | satellite labels Adjective / Adverb / Object / Gender / Possessor, gender values, Command / Infinitive badges |
 | A15 | [A15-ui-slot-scoped-commands.md](A-ready/A15-ui-slot-scoped-commands.md) | "Clear / Show / Hide / Expand / Tidy up" + slot name, as key families; owns the group-key refactor |

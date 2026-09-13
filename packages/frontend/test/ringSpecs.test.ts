@@ -181,6 +181,20 @@ describe('buildRingSpecs', () => {
     expect(hour(perimeterControlKey('incoming', 'subject'))).toBe(12);
   });
 
+  it("turns a noun's possessor control to face its owner, out of the row of relations", () => {
+    const [subject] = groups([]);
+    const owner = { x: 420, y: 380 };
+    const { Subject } = specs([subject], {
+      perimeterByNoun: { subject: { relative: icon('r'), possessor: icon('p'), conjunct: icon('c') } },
+      possessorAims: { subject: owner },
+    });
+
+    expect(aimOf(Subject.outer, perimeterControlKey('possessor', 'subject'))).toEqual({ point: owner });
+    const hour = (key: string) => (aimOf(Subject.outer, key) as { clock: number }).clock;
+    // The two left in the row fan about the bottom of the ring as a pair.
+    expect((hour(perimeterControlKey('relative', 'subject')) + hour(perimeterControlKey('conjunct', 'subject'))) / 2).toBeCloseTo(6);
+  });
+
   it("fans a complement's relation toolbar across the top of its ring, beside its remove control", () => {
     const defs = groups(['route'], ['subject', 'verb', 'route']);
     const route = specs(defs, { toolbars: { route: ['in', 'through', 'under'] } }).Route;

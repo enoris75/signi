@@ -12,44 +12,76 @@ import {
 } from "./interfaces.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
 import { conjunctionOf, conjunctsOf, updateConjunct } from "./phraseReducers.ts";
-import type { ConjunctLink, ConjunctRing } from "./conjunctChain.ts";
+import type { ConjunctLink } from "./conjunctChain.ts";
 import type { Pt } from "./ringLayout.ts";
-import type { DragBoxProps, GroupDragProps } from "./phraseRender.tsx";
+import type { RingHost } from "./ringHost.ts";
 import type { PhraseBuilderProps } from "./PhraseBuilder.tsx";
-
-/**
- * Everything a conjunct's builder borrows from the canvas its ring is drawn on — its head's. The ring
- * is one more constituent there: placed, dragged and kept clear of the other rings by the head's
- * builder, so the conjunct's builder paints at the place it is handed and reports back the ring it
- * drew.
- */
-export interface ConjunctHost {
-  // The ring's node key on the head canvas (see conjunctKey).
-  key: string;
-  // The noun the conjunct is coordinated with. Its head word plays the same role — a direct
-  // object's conjunct is a direct object too — so its ring wears that role's name and colour.
-  role: NounKey;
-  // Where the conjunct's word sits, in % of the head canvas, and that canvas's size in px.
-  at: Pt;
-  graphSize: { w: number; h: number };
-  compact: boolean;
-  // The head canvas's drag machinery: pressing anything on the ring drags the ring by `key`.
-  draggingKey: string | null;
-  makeDragProps: (key: string, onActivate: () => void, at: Pt, moveKey: string) => DragBoxProps;
-  makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
-  // The ports the ring's links leave from, each facing the ring its line runs to.
-  ports: { key: string; toward: Pt }[];
-  // Report the ring as drawn, and null once it is gone.
-  onRing: (ring: ConjunctRing | null) => void;
-  // The group's last ring carries the control that extends the group.
-  isLast: boolean;
-  onAddConjunct: () => void;
-  // Where the conjunct's own panels (its possessor) dock: below the head canvas, with the head's.
-  panelHost: HTMLElement | null;
-}
 
 const nounColor = (which: NounKey) =>
   MUI_COLOR_HEX[ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"];
+
+/**
+ * A chip sitting on a line between two rings, saying what the line means: the conjunction joining a
+ * coordinated group, or the possessive pronoun a pointed-to owner renders. Clickable when it does
+ * something.
+ */
+export function LinkChip({
+  label,
+  color,
+  at,
+  onClick,
+  dashed = true,
+  testId,
+}: {
+  label: string;
+  color: string;
+  at: Pt;
+  onClick?: () => void;
+  dashed?: boolean;
+  testId: string;
+}) {
+  return (
+    <Box
+      {...(onClick && {
+        role: "button",
+        tabIndex: 0,
+        onClick,
+        onKeyDown: (e: React.KeyboardEvent) => {
+          if (e.key !== "Enter" && e.key !== " ") return;
+          e.preventDefault();
+          onClick();
+        },
+      })}
+      data-testid={testId}
+      onPointerDown={(e) => e.stopPropagation()}
+      sx={{
+        position: "absolute",
+        left: at.x,
+        top: at.y,
+        transform: "translate(-50%, -50%)",
+        zIndex: 3,
+        px: 0.75,
+        py: 0.1,
+        cursor: onClick ? "pointer" : "default",
+        borderRadius: 1,
+        border: `1px ${dashed ? "dashed" : "solid"}`,
+        borderColor: color,
+        bgcolor: "background.paper",
+        color,
+        fontSize: "0.65rem",
+        fontWeight: 700,
+        letterSpacing: "0.06em",
+        lineHeight: 1.6,
+        textTransform: "uppercase",
+        whiteSpace: "nowrap",
+        userSelect: "none",
+        ...(onClick && { "&:hover, &:focus-visible": { bgcolor: "action.hover", outline: "none" } }),
+      }}
+    >
+      {label}
+    </Box>
+  );
+}
 
 /**
  * The conjunction joining a group, as a chip sitting on a link between two of its rings. One
@@ -68,43 +100,13 @@ export function ConjunctionChip({
   onClick: () => void;
 }) {
   return (
-    <Box
-      role="button"
-      tabIndex={0}
-      data-testid="conjunction-chip"
-      onPointerDown={(e) => e.stopPropagation()}
+    <LinkChip
+      label={COORD_CONJUNCTION_LABEL[conjunction]}
+      color={color}
+      at={at}
       onClick={onClick}
-      onKeyDown={(e) => {
-        if (e.key !== "Enter" && e.key !== " ") return;
-        e.preventDefault();
-        onClick();
-      }}
-      sx={{
-        position: "absolute",
-        left: at.x,
-        top: at.y,
-        transform: "translate(-50%, -50%)",
-        zIndex: 3,
-        px: 0.75,
-        py: 0.1,
-        cursor: "pointer",
-        borderRadius: 1,
-        border: "1px dashed",
-        borderColor: color,
-        bgcolor: "background.paper",
-        color,
-        fontSize: "0.65rem",
-        fontWeight: 700,
-        letterSpacing: "0.06em",
-        lineHeight: 1.6,
-        textTransform: "uppercase",
-        whiteSpace: "nowrap",
-        userSelect: "none",
-        "&:hover, &:focus-visible": { bgcolor: "action.hover", outline: "none" },
-      }}
-    >
-      {COORD_CONJUNCTION_LABEL[conjunction]}
-    </Box>
+      testId="conjunction-chip"
+    />
   );
 }
 
@@ -116,7 +118,7 @@ interface ConjunctRingsProps {
   onRemoveConjunct: (which: NounKey, i: number) => void;
   onCycleConjunction: (which: NounKey) => void;
   // The head canvas's hand-off to conjunct `i` of `which`.
-  hostFor: (which: NounKey, i: number) => ConjunctHost;
+  hostFor: (which: NounKey, i: number) => RingHost;
   // The lines joining each group's rings, where the chips sit.
   links: ConjunctLink[];
   binding?: WorkspaceBinding;
@@ -172,7 +174,7 @@ export function ConjunctRings({
             // A conjunct is a noun *phrase*, not a clause: it has no predicate of its own, so its
             // ring is the noun's alone.
             nounPhraseOnly
-            conjunctHost={hostFor(which, i)}
+            ringHost={hostFor(which, i)}
           />
         ));
       })}

@@ -6,6 +6,7 @@ import {
   RANK_DRAGGED,
   RANK_FREE,
   RANK_GROWN,
+  RANK_YIELDING,
 } from "../overlap.ts";
 import { MIN_GRAPH_HEIGHT } from "../slots.ts";
 import type { DragState, Positions } from "./useDrag.ts";
@@ -22,6 +23,10 @@ interface UseOverlapResolutionArgs {
   // From useHeightRebase: set on the commit that sees a new height before the rebased
   // positions land. Read and cleared here, so this hook must be called after that one.
   positionsStaleRef: React.MutableRefObject<boolean>;
+  // Labels of the boxes that give way to every other, however they appeared: rings that are there
+  // only for a moment (an owner's empty word picker, gone once the owner is named or pointed to),
+  // which must not leave the rings they met shoved out of place.
+  yielding?: ReadonlySet<string>;
 }
 
 // Rings never overlap. A constituent's footprint grows with what orbits it, so revealing a
@@ -47,6 +52,7 @@ export function useOverlapResolution({
   setGraphHeight,
   dragRef,
   positionsStaleRef,
+  yielding,
 }: UseOverlapResolutionArgs) {
   const prevGroupSizesRef = useRef<Map<
     string,
@@ -94,6 +100,7 @@ export function useOverlapResolution({
     const dragKeys = dragRef.current?.keys;
     const rankOf = (g: GroupRect) => {
       if (dragKeys?.some((k) => g.nodeKeys.includes(k))) return RANK_DRAGGED;
+      if (yielding?.has(g.label)) return RANK_YIELDING;
       if (!before) return RANK_FREE;
       const was = before.get(g.label);
       const now = sizes.get(g.label)!;

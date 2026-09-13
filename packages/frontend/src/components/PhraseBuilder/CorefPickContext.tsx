@@ -3,12 +3,12 @@ import type { Concept, PronominalPossessor } from "@signi/shared";
 import { NounAddress, PhraseSelection } from "./interfaces.ts";
 import { resolveAntecedent } from "./selectionToPlan.ts";
 
-// Coordinating the "pinpoint a noun" gesture for a *pronominal* possessor ("the boy and his
-// horse"). The possessor control lives on a noun that may be nested (a coordinated conjunct's
-// possessor), while its antecedent is another noun anywhere in the same period — so the pick can
-// only be arbitrated at the period root, which owns the whole selection tree. This context is
-// provided there and consumed by every descendant noun box (to highlight/accept a click) and by
-// the possessor panels (to start a pick, and to describe the antecedent already chosen).
+// Coordinating the "point to a noun" gesture for a *pronominal* possessor ("the boy and his
+// horse"). The possessor control lives on a noun that may be nested (a conjunct's, or an owner's),
+// while its antecedent is another noun anywhere in the same period — so the pick can only be
+// arbitrated at the period root, which owns the whole selection tree. This context is provided
+// there and consumed by every descendant noun box (to highlight/accept a click) and by the
+// possessor controls (to start a pick when an owner opens, and to describe the antecedent chosen).
 
 export interface CorefPick {
   // The address of the noun whose possessor is currently being pinpointed, or null when idle.
@@ -82,9 +82,9 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
   );
 }
 
-// A short English possessive-pronoun hint for the chosen antecedent ("his", "their"), shown beside
-// the reference chip so the user sees what the link will render — the same features every engine
-// spells its own way. English only; a display aid, not the rendered output.
+// A short English possessive-pronoun hint for the chosen antecedent ("his", "their"), shown on the
+// line to it so the user sees what the link will render — the same features every engine spells its
+// own way. English only; a display aid, not the rendered output.
 const EN_POSSESSIVE: Record<string, string> = {
   "1sg": "my",
   "2sg": "your",

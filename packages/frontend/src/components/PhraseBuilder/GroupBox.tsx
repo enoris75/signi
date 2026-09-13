@@ -68,7 +68,7 @@ export function GroupBox({
     makeGroupDragProps,
     handleToggleCollapse,
     handleRemoveComplement,
-    removeConjunct,
+    removeRing,
   } = ctx;
   // Compact view hides the dotted rings entirely — only the words in their solid rings remain.
   if (compact) return null;
@@ -117,12 +117,12 @@ export function GroupBox({
         </RingButton>
       )}
 
-      {/* A conjunct's ring drops its phrase out of the group. */}
-      {rect.removable && removeConjunct && (
+      {/* A hosted ring drops its phrase: a conjunct out of its group, an owner off its noun. */}
+      {rect.removable && removeRing && (
         <RingButton
           at={controlPos[removeControlKey(rect.label)]}
-          title="Remove this conjunct"
-          onClick={removeConjunct}
+          title={removeRing.title}
+          onClick={removeRing.onRemove}
         >
           <ClearIcon sx={{ fontSize: 11 }} />
         </RingButton>

@@ -53,6 +53,22 @@ describe('ConnectorsLayer', () => {
     ]);
   });
 
+  it('bows a link that has a bend into a dashed curve between its ports', () => {
+    const svg = renderLayer({
+      groupEdges: [{ ...edge(400, 50, 100, 50, '#2c4a6e'), dashed: true, via: { x: 250, y: 180 } }],
+    });
+
+    const link = svg.querySelector(':scope > g[data-link="group"]')!;
+    expect(link.querySelector('line')).toBeNull();
+    const curve = link.querySelector('path')!;
+    expect(curve).toHaveAttribute('d', 'M 400 50 Q 250 180 100 50');
+    expect(curve).toHaveAttribute('stroke-dasharray', '6 4');
+    expect([...link.querySelectorAll('circle')].map((c) => coords(c, 'cx', 'cy'))).toEqual([
+      ['400', '50'],
+      ['100', '50'],
+    ]);
+  });
+
   it('draws each satellite link as a dashed line with a dot on the satellite end', () => {
     const svg = renderLayer({ edges: [edge(50, 60, 90, 120, '#3a6e3a')] });
 

@@ -273,6 +273,13 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Object',
   },
 
+  // An owner's ring title ("the cat's book" — the cat's ring): the POSSESSOR noun, one who owns.
+  'slot.possessor': {
+    plan: nameOf('POSSESSOR'),
+    format: NAME_FORMAT,
+    fallback: 'Possessor',
+  },
+
   // The adverb (modifier) box's title and sidebar heading — the bare grammar noun, like `slot.verb`.
   'slot.adverb': {
     plan: nameOf('ADVERB'),

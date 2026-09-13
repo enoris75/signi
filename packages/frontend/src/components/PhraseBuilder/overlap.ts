@@ -27,10 +27,12 @@ const EPS_PX = 0.01;
 export const BOTTOM_MARGIN = 8;
 
 // How hard a box resists being pushed. The box under the pointer never yields; a box that
-// just grew or just appeared yields only to that one; everything else is free to be shoved.
+// just grew or just appeared yields only to that one; everything else is free to be shoved — and a
+// yielding box, a passing one like an owner's empty word picker, gives way to all of them.
 // Two boxes of equal rank split the shove evenly, which guarantees every overlapping pair
 // makes progress — otherwise two boxes that grew in the same commit would deadlock.
-type Rank = 0 | 1 | 2;
+type Rank = -1 | 0 | 1 | 2;
+export const RANK_YIELDING: Rank = -1;
 export const RANK_FREE: Rank = 0;
 export const RANK_GROWN: Rank = 1;
 export const RANK_DRAGGED: Rank = 2;

@@ -66,12 +66,18 @@ describe('computeCompactLayout', () => {
 });
 
 describe('packPeriod', () => {
-  const rect = (label: string, width: number, conjunct?: GroupRect['conjunct']): GroupRect => ({
+  const rect = (
+    label: string,
+    width: number,
+    conjunct?: GroupRect['conjunct'],
+    owner?: GroupRect['owner'],
+  ): GroupRect => ({
     label,
     color: '',
     mainKey: label,
     nodeKeys: [label],
     conjunct,
+    owner,
     x: 0,
     y: 0,
     width,
@@ -100,5 +106,31 @@ describe('packPeriod', () => {
     const px = (key: string) => (positions[key]!.x / 100) * 2000;
     expect(px('subject+1') - px('Subject')).toBeCloseTo(100 + CONJUNCT_GAP);
     expect(px('Verb Phrase') - px('subject+2')).toBeCloseTo(100 + 20);
+  });
+
+  it('packs each owner straight after the ring it owns, and an owner’s owner after that', () => {
+    const { positions } = packPeriod(
+      [
+        rect('Verb Phrase', 100),
+        rect('subject+1', 100, { head: 'Subject', index: 0 }),
+        rect('subject/possessor/possessor', 100, undefined, { head: 'Subject', index: -0.25 }),
+        rect('subject+1/possessor', 100, undefined, { head: 'Subject', index: 0.5 }),
+        rect('Subject', 100),
+        rect('subject/possessor', 100, undefined, { head: 'Subject', index: -0.5 }),
+      ],
+      { w: 2000, h: 400 },
+    );
+
+    const order = Object.entries(positions)
+      .sort(([, a], [, b]) => a.x - b.x)
+      .map(([key]) => key);
+    expect(order).toEqual([
+      'Subject',
+      'subject/possessor',
+      'subject/possessor/possessor',
+      'subject+1',
+      'subject+1/possessor',
+      'Verb Phrase',
+    ]);
   });
 });

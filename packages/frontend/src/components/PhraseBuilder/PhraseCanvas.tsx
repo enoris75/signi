@@ -1,9 +1,4 @@
-import type {
-  ComponentProps,
-  MutableRefObject,
-  ReactNode,
-  RefObject,
-} from "react";
+import type { ComponentProps, ReactNode, RefObject } from "react";
 import { useRef } from "react";
 import { Box } from "@mui/material";
 import { SubjectTypeahead } from "./SubjectTypeahead.tsx";
@@ -52,21 +47,18 @@ export interface PhraseCanvasProps {
   perimeterByNoun: ComponentProps<
     typeof GroupPerimeterControls
   >["perimeterByNoun"];
-  // The cross-container link hooks (undefined for possessor sub-builders that don't link).
+  // The cross-container link hooks (undefined for a standalone period, which doesn't link).
   linkBinding: WorkspaceBinding | undefined;
   onSetImperativePerson: (person: ImperativePerson) => void;
   onSetImperativeRegister: (register: ImperativeRegister) => void;
   // Attached to the positioned canvas Box; the parent measures it with a ResizeObserver.
   containerRef: RefObject<HTMLDivElement>;
-  // Receives each noun's possessor control element (its connector's start), measured up in
-  // the parent against the root Box.
-  possessorControlEls: MutableRefObject<Map<string, HTMLElement>>;
-  // The rings coordinated with this canvas's nouns, and the chips on the links joining them — drawn
-  // among the canvas's own constituents (see ConjunctRings).
-  coordination?: ReactNode;
+  // The rings hosted on this canvas — its nouns' conjuncts and owners — and the chips on the lines
+  // joining them, drawn among the canvas's own constituents (see ConjunctRings, OwnerRings).
+  hosted?: ReactNode;
   // Slot colours to use in place of a slot's own, by slot key: a conjunct's head wears its role's.
   recolor?: Partial<Record<string, SlotConfig["color"]>>;
-  // A conjunct's builder paints its ring onto its head's canvas, which is already on the page: it
+  // A hosted ring's builder paints its ring onto the period's canvas, which is already on the page: it
   // draws its constituent and controls with no canvas box of its own.
   overlay?: boolean;
 }
@@ -91,8 +83,7 @@ export function PhraseCanvas({
   onSetImperativePerson,
   onSetImperativeRegister,
   containerRef,
-  possessorControlEls,
-  coordination,
+  hosted,
   recolor,
   overlay = false,
 }: PhraseCanvasProps) {
@@ -196,14 +187,10 @@ export function PhraseCanvas({
           }
           registerSourceAnchor={linkBinding?.geometry.registerSourceAnchor}
           registerTargetAnchor={linkBinding?.geometry.registerTargetAnchor}
-          registerPossessorControl={(nounKey, el) => {
-            if (el) possessorControlEls.current.set(nounKey, el);
-            else possessorControlEls.current.delete(nounKey);
-          }}
         />
       )}
 
-      {coordination}
+      {hosted}
     </>
   );
 

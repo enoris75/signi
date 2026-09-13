@@ -1,5 +1,5 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { createRef, type ComponentProps } from 'react';
 import type { Concept } from '@signi/shared';
 import { PhraseCanvas } from '../src/components/PhraseBuilder/PhraseCanvas.tsx';
@@ -134,7 +134,6 @@ function renderCanvas(
     onSetImperativePerson: vi.fn(),
     onSetImperativeRegister: vi.fn(),
     containerRef: createRef<HTMLDivElement>(),
-    possessorControlEls: { current: new Map<string, HTMLElement>() },
     ...overrides,
   };
   const view = renderWithProviders(<PhraseCanvas {...props} />);
@@ -368,18 +367,6 @@ describe('PhraseCanvas', () => {
       expect(props.linkTargetKeys).toBeUndefined();
       expect(props.registerSourceAnchor).toBeUndefined();
       expect(props.registerTargetAnchor).toBeUndefined();
-    });
-
-    it('records each noun’s possessor control for its connector', () => {
-      const { possessorControlEls } = renderCanvas();
-      const { registerPossessorControl } = propsOf(GroupPerimeterControls);
-      const possessor = document.createElement('span');
-
-      act(() => registerPossessorControl('directObject', possessor));
-      expect([...possessorControlEls.current]).toEqual([['directObject', possessor]]);
-
-      act(() => registerPossessorControl('directObject', null));
-      expect(possessorControlEls.current.size).toBe(0);
     });
   });
 });

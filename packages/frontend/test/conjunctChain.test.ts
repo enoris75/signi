@@ -7,12 +7,12 @@ import {
   CONJUNCT_GAP,
   conjunctKey,
   conjunctLinks,
-  conjunctRect,
   dropConjunctPosition,
+  hostedRect,
   openConjunctsFor,
-  sameConjunctRing,
+  sameHostedRing,
   UNMEASURED_R,
-  type ConjunctRing,
+  type HostedRing,
 } from '../src/components/PhraseBuilder/conjunctChain.ts';
 import { BUTTON_HALF } from '../src/components/PhraseBuilder/ringLayout.ts';
 
@@ -24,7 +24,7 @@ const CAT = noun('CAT');
 const DOG = noun('DOG');
 const FOX = noun('FOX');
 
-const ring = (rOut: number, ports: ConjunctRing['ports'] = {}): ConjunctRing => ({
+const ring = (rOut: number, ports: HostedRing['ports'] = {}): HostedRing => ({
   rIn: rOut - 30,
   orbit: rOut - 20,
   rOut,
@@ -76,10 +76,11 @@ describe('belowRing', () => {
   });
 });
 
-describe('conjunctRect', () => {
+describe('hostedRect', () => {
   const args = {
     key: 'subject+2',
     color: '#123',
+    kind: 'conjunct' as const,
     head: 'Subject',
     index: 1,
     center: { x: 200, y: 300 },
@@ -87,7 +88,7 @@ describe('conjunctRect', () => {
   };
 
   it('is a constituent of its own whose only node is its key, marked as its head’s conjunct', () => {
-    const rect = conjunctRect({ ...args, compact: false });
+    const rect = hostedRect({ ...args, compact: false });
 
     expect(rect).toMatchObject({
       label: 'subject+2',
@@ -103,7 +104,14 @@ describe('conjunctRect', () => {
   });
 
   it('takes up only its solid ring in compact view', () => {
-    expect(conjunctRect({ ...args, compact: true }).width).toBeCloseTo(2 * (60 + BUTTON_HALF + 1));
+    expect(hostedRect({ ...args, compact: true }).width).toBeCloseTo(2 * (60 + BUTTON_HALF + 1));
+  });
+
+  it('marks an owner’s ring as an owner of its group, not a conjunct standing in for its head', () => {
+    const rect = hostedRect({ ...args, key: 'subject/possessor', kind: 'owner', index: -0.5, compact: false });
+
+    expect(rect).toMatchObject({ mainKey: 'subject/possessor', owner: { head: 'Subject', index: -0.5 } });
+    expect(rect.conjunct).toBeUndefined();
   });
 });
 
@@ -215,17 +223,17 @@ describe('dropConjunctPosition', () => {
   });
 });
 
-describe('sameConjunctRing', () => {
+describe('sameHostedRing', () => {
   const a = ring(80, { p: { x: 1, y: 2 } });
 
   it('reads sub-pixel jitter as the same ring', () => {
-    expect(sameConjunctRing(a, { ...a, rOut: 80.3, ports: { p: { x: 1.4, y: 2 } } })).toBe(true);
+    expect(sameHostedRing(a, { ...a, rOut: 80.3, ports: { p: { x: 1.4, y: 2 } } })).toBe(true);
   });
 
   it('tells a grown ring, a moved port or a new port apart', () => {
-    expect(sameConjunctRing(undefined, a)).toBe(false);
-    expect(sameConjunctRing(a, { ...a, rOut: 90 })).toBe(false);
-    expect(sameConjunctRing(a, { ...a, ports: { p: { x: 5, y: 2 } } })).toBe(false);
-    expect(sameConjunctRing(a, { ...a, ports: { ...a.ports, q: { x: 0, y: 0 } } })).toBe(false);
+    expect(sameHostedRing(undefined, a)).toBe(false);
+    expect(sameHostedRing(a, { ...a, rOut: 90 })).toBe(false);
+    expect(sameHostedRing(a, { ...a, ports: { p: { x: 5, y: 2 } } })).toBe(false);
+    expect(sameHostedRing(a, { ...a, ports: { ...a.ports, q: { x: 0, y: 0 } } })).toBe(false);
   });
 });

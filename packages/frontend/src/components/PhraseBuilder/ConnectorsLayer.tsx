@@ -29,15 +29,29 @@ export function ConnectorsLayer({
     >
       {groupEdges.map((edge, i) => (
         <g key={`group-${i}`} data-link="group">
-          <line
-            x1={edge.x1}
-            y1={edge.y1}
-            x2={edge.x2}
-            y2={edge.y2}
-            stroke={edge.color}
-            strokeWidth="1.5"
-            strokeOpacity="0.4"
-          />
+          {edge.via ? (
+            // A pointed-to owner's line bows past the rings between its ends, dashed: it points to a
+            // noun rather than joining a constituent.
+            <path
+              d={`M ${edge.x1} ${edge.y1} Q ${edge.via.x} ${edge.via.y} ${edge.x2} ${edge.y2}`}
+              fill="none"
+              stroke={edge.color}
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
+              strokeDasharray={edge.dashed ? "6 4" : undefined}
+            />
+          ) : (
+            <line
+              x1={edge.x1}
+              y1={edge.y1}
+              x2={edge.x2}
+              y2={edge.y2}
+              stroke={edge.color}
+              strokeWidth="1.5"
+              strokeOpacity="0.4"
+              strokeDasharray={edge.dashed ? "6 4" : undefined}
+            />
+          )}
           {/* The ports the link joins, on each dotted ring. */}
           <circle cx={edge.x1} cy={edge.y1} r="3" fill={edge.color} fillOpacity="0.6" />
           <circle cx={edge.x2} cy={edge.y2} r="3" fill={edge.color} fillOpacity="0.6" />

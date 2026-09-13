@@ -792,8 +792,8 @@ export function buildSatelliteIcons({
       directObjectToggle = iconEntry;
       continue;
     }
-    // The possessor reveal toggle likewise rides the dotted ring and anchors
-    // its own connector down to the possessor panel.
+    // The possessor control likewise rides the dotted ring: the line to the noun's owner leaves
+    // from it. PhraseBuilder gives it what it does (name or point to the owner).
     const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
       ? (sat.key.slice(0, -"Possessor".length) as NounKey)
       : null;

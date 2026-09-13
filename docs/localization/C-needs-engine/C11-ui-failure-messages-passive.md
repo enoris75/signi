@@ -25,8 +25,6 @@ the phrase"), so it is not a fix.
 | Could not load saved periods. | [PeriodSaveLoad.tsx:150](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L150) | — |
 | Could not reach the translation server. | [App.tsx:222](../../../packages/frontend/src/App.tsx#L222) | SERVER, REACH |
 | Could not load the words. | [WordMap.tsx:208](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L208) (first sentence; the question after it is [C10](C10-ui-questions.md)) | — |
-| Owned by a phrase (possessor mode) | [PossessorPanels.tsx:147](../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx#L147) | a passive participle with its agent ("by a phrase") |
-| Refers to a noun (the other mode) | [PossessorPanels.tsx:148](../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx#L148) | REFER; it isn't a passive, but the toggle pair should be phrased in parallel, so it waits with its partner |
 
 All modals, tense and negation these need already render. Voice is the only missing piece.
 
@@ -43,6 +41,4 @@ seeded, and it drops what failed to save.
 
 ## Tests that select on these literals
 
-`Could not` → `SavedPhrasesToolbar.test.tsx`, `App.test.tsx`, `WordMap.test.tsx`, `PeriodSaveLoad.test.tsx`;
-`Owned by a phrase` → `PossessorPanels.test.tsx`, `PhraseBuilder.test.tsx`; `Refers to a noun` →
-`possessor-reference.spec.ts`, `PossessorPanels.test.tsx`, `PhraseBuilder.test.tsx`.
+`Could not` → `SavedPhrasesToolbar.test.tsx`, `App.test.tsx`, `WordMap.test.tsx`, `PeriodSaveLoad.test.tsx`.

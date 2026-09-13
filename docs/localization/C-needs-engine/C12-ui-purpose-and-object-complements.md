@@ -20,6 +20,7 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 |---|---|---|
 | … — click to change (tail of the chip tooltips) | [phraseRender.tsx:179](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L179), 317, 331, 355 | 1 |
 | Linked — click to remove | [satellites.tsx:709](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L709), 733 | 1 (+ LINKED, REMOVE) |
+| points to ${noun} (“${pronoun}”) — click to remove (a pointed-to owner's possessor control) | [PhraseBuilder.tsx](../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) (`perimeterByNoun[which].possessor`) | 1 (+ POINT, REMOVE); the pronoun is the English display hint `possessiveHintEn`, which would become a rendered possessive |
 | Drag to resize | [Resizer.tsx:41](../../../packages/frontend/src/components/PhraseBuilder/Resizer.tsx#L41) | 1 (+ DRAG, RESIZE) |
 | Click a slot to filter. | [PhraseSidebar.tsx:198](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L198) | 1 (+ FILTER) |
 | Select at least a subject and a verb to see translations. | [TranslationPanel.tsx:71](../../../packages/frontend/src/components/TranslationPanel.tsx#L71) | 1 (+ "at least") |
@@ -30,7 +31,6 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 | Remove the IF / coordination link to make this an infinitive phrase | [PeriodContainer.tsx:519](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L519) | 1 + 2 |
 | Use this period as the IF condition | [PeriodContainer.tsx:326](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L326) | 2 |
 | Use this period as the coordinated clause | [PeriodContainer.tsx:360](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L360) | 2 |
-| Click a noun in this period to be the owner… | [PossessorPanels.tsx:191](../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx#L191) | 1 + 2 |
 | Click the period to coordinate with “${conj}” — in another phrase container. | [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337) | 1 + 3; the conjunction word is [C13](C13-ui-grammatical-function-words.md) |
 | Click the period holding the instrumental — a period with no verb, whose noun is what the action is done with. | [PhraseWorkspace.tsx:339](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L339) | 4 |
 

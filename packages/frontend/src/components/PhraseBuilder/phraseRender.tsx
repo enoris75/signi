@@ -43,8 +43,8 @@ export type GroupDragProps = {
 // keyboard-nav list, and selection handlers, so we thread one bag through.
 export interface PhraseRenderContext {
   selection: PhraseSelection;
-  // Verbless noun-phrase mode (the possessor editor): the `subject` slot is the
-  // possessor head and must use the noun-only picker rather than the subject picker.
+  // Verbless noun-phrase mode (an owner's or a conjunct's ring): the `subject` slot is the
+  // phrase's head and uses the noun-only picker rather than the subject picker.
   nounPhrase?: boolean;
   // A noun-phrase canvas whose head may still be a pronoun: a conjunct's ("you and I"). Its
   // `subject` slot keeps the pronoun-inclusive picker, which a possessor head does without.
@@ -116,9 +116,10 @@ export interface PhraseRenderContext {
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;
-  // Set for a conjunct's builder: drop this phrase out of its group (the ring's remove control).
-  removeConjunct?: () => void;
-  // ── Cross-container linking (top-level containers only; undefined for possessors) ──
+  // Set for a hosted ring's builder: its ring's remove control, which drops the phrase — a conjunct
+  // out of its group, an owner off the noun it owns.
+  removeRing?: { title: string; onRemove: () => void };
+  // ── Cross-container linking (workspace containers only; undefined for a standalone period) ──
   // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
   onBoxRef?: (key: SlotKey, el: HTMLElement | null) => void;
   // Noun keys that are a relative-clause link target — rendered greyed and inert.

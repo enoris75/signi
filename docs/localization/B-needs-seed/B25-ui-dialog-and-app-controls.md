@@ -24,7 +24,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 
 | literal | where | key | plan |
 |---|---|---|---|
-| Cancel | [SavedPhrasesToolbar.tsx:220](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L220), [PeriodSaveLoad.tsx:130](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L130), [PhraseWorkspace.tsx:348](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L348), [PossessorPanels.tsx:194](../../../packages/frontend/src/components/PhraseBuilder/PossessorPanels.tsx#L194) | `action.cancel` | `commandOf('CANCEL')`, `NAME_FORMAT` |
+| Cancel | [SavedPhrasesToolbar.tsx:220](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L220), [PeriodSaveLoad.tsx:130](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L130), [PhraseWorkspace.tsx:348](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L348) | `action.cancel` | `commandOf('CANCEL')`, `NAME_FORMAT` |
 | Name (text-field label) | [SavedPhrasesToolbar.tsx:208](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L208), [PeriodSaveLoad.tsx:118](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L118) | `field.name` | `nameOf('NAME_NOUN')` |
 | Loading… | [SavedPhrasesToolbar.tsx:239](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L239), [PeriodSaveLoad.tsx:149](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L149) | `status.loading` | `nameOf('LOADING')`; call site appends "…" |
 | Retry | [WordMap.tsx:211](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L211) | `action.retry` | `commandOf('RETRY')` |
@@ -46,7 +46,7 @@ to it first.
 
 ## Tests that select on these literals
 
-`Cancel` → about 15 unit suites (`SavedPhrasesToolbar`, `PhraseWorkspace`, `PossessorPanels`,
+`Cancel` → about 15 unit suites (`SavedPhrasesToolbar`, `PhraseWorkspace`,
 `PeriodSaveLoad`, …); `Interface language` → `fixtures.ts`, `App.test.tsx`, `LanguageSelector.test.tsx`;
 `Close word map` / `Retry` → `WordMap.test.tsx`; `no matches` → `SubjectTypeahead.test.tsx`;
 `Untitled phrase` → `SavedPhrasesToolbar.test.tsx`; `empty` → `Boxes.test.tsx` (the word is common;

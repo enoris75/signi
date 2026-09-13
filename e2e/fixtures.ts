@@ -350,7 +350,6 @@ export class Builder {
    */
   async tidy(periodIndex = 0): Promise<void> {
     const period = this.period(periodIndex);
-    // A nested possessor panel wears the same card and wand; the period's own comes first.
     const button = period.getByTestId('period-tidy').first();
     const settled = async () => {
       await button.click();
