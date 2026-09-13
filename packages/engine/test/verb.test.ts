@@ -455,7 +455,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['COORDINATE', 'la gatta ha coordinato.'], ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
     ['CRY_OUT', 'la gatta ha gridato.'], ['CUT', 'la gatta ha tagliato.'],
-    ['DESCRIBE', 'la gatta ha descritto.'],
+    ['DESCRIBE', 'la gatta ha descritto.'], ['DESTROY', 'la gatta ha distrutto.'],
     ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],
     ['EXPAND', 'la gatta ha espanso.'], ['EXPORT', 'la gatta ha esportato.'],
     ['EXPRESS', 'la gatta ha espresso.'],

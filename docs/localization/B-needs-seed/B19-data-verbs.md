@@ -12,15 +12,16 @@ distinguishing element is a *direction* or *purpose clause*, not an object.
 ## Why this is one bucket rather than per-genus tasks
 
 Unlike B09–B18, there is no shared genus verb worth seeding here — each would need its own (STORE,
-RETRIEVE, COMBINE, COMPRESS, …) for a single verb, and the differentia nouns (CONTENT, FORMAT,
-WORKSPACE) are all unseeded and exist only to serve these glosses. That is a poor ratio: a lot of new
+RETRIEVE, COMBINE, COMPRESS, …) for a single verb, and the differentia nouns (FORMAT, WORKSPACE)
+are unseeded and exist only to serve these glosses. (CONTENT is seeded, for
+[B10](../done/B10-destruction-verbs.md)'s CLEAR.) That is a poor ratio: a lot of new
 corpus vocabulary that no user-facing phrase composes with, purely to fill eleven tooltips.
 
 ## Recommendation
 
 **Leave these on their English literals for now.** Revisit only if either becomes true:
 
-1. A user-facing need appears for the nouns (CONTENT, FORMAT, PLACE) independent of these tooltips.
+1. A user-facing need appears for the nouns (FORMAT, PLACE) independent of these tooltips.
 2. The picker starts surfacing these verbs prominently enough that untranslated tooltips are a
    visible gap in the non-English UIs.
 

@@ -170,6 +170,136 @@ describe('CREATE (genus of MAKE / SET_ON_FIRE)', () => {
   });
 });
 
+// DESTROY — the genus verb of KILL ("to destroy life"), EXTINGUISH ("to destroy fire") and CLEAR
+// ("to destroy content"), seeded for the B10 verb-definition task. Pinned across the persons, tenses
+// and aspects its languages inflect: Italian distruggere has a strong remote past (distrusse) and
+// participle (distrutto), German zerstören is inseparable (zerstört, no ge-), Spanish destruir
+// inserts y (destruye / destruyó), and every Romance resultative selects HAVE.
+describe('DESTROY (genus of KILL / EXTINGUISH / CLEAR)', () => {
+  const destroy = (extra: Partial<PhrasePlan> = {}): PhrasePlan =>
+    clause(np('DOG'), 'DESTROY', { directObject: np('HOUSE'), ...extra });
+
+  test('present conjugates across languages', () => {
+    expect(sayAll(destroy())).toEqual({
+      en: 'the dog destroys the house.',
+      it: 'il cane distrugge la casa.',
+      fr: 'le chien détruit la maison.',
+      de: 'der Hund zerstört das Haus.',
+      es: 'el perro destruye la casa.',
+      ja: '犬は家を破壊します。',
+      pt: 'o cão destrói a casa.',
+    });
+  });
+
+  test('plural subject agrees', () => {
+    expect(sayAll(clause(np('DOG', { number: 'plural' }), 'DESTROY', { directObject: np('HOUSE') })))
+      .toMatchObject({
+        en: 'the dogs destroy the house.',
+        it: 'i cani distruggono la casa.',
+        fr: 'les chiens détruisent la maison.',
+        de: 'die Hunde zerstören das Haus.',
+        es: 'los perros destruyen la casa.',
+        pt: 'os cães destroem a casa.',
+      });
+  });
+
+  test('past tense', () => {
+    expect(sayAll(destroy({ verbPhrase: { verb: 'DESTROY', tense: 'past' } }))).toEqual({
+      en: 'the dog destroyed the house.',
+      it: 'il cane distrusse la casa.',
+      fr: 'le chien détruisit la maison.',
+      de: 'der Hund zerstörte das Haus.',
+      es: 'el perro destruyó la casa.',
+      ja: '犬は家を破壊しました。',
+      pt: 'o cão destruiu a casa.',
+    });
+  });
+
+  test('future tense', () => {
+    expect(sayAll(destroy({ verbPhrase: { verb: 'DESTROY', tense: 'future' } }))).toMatchObject({
+      en: 'the dog will destroy the house.',
+      it: 'il cane distruggerà la casa.',
+      fr: 'le chien détruira la maison.',
+      de: 'der Hund wird das Haus zerstören.',
+      es: 'el perro destruirá la casa.',
+      pt: 'o cão destruirá a casa.',
+    });
+  });
+
+  test('resultative uses the right auxiliary and participle (avere / haber / haben / ter→pretérito)', () => {
+    expect(sayAll(clause(np('CAT'), 'DESTROY', { directObject: np('HOUSE'), verbPhrase: { verb: 'DESTROY', aspect: 'resultative' } })))
+      .toEqual({
+        en: 'the cat has destroyed the house.',
+        it: 'il gatto ha distrutto la casa.',
+        fr: 'le chat a détruit la maison.',
+        de: 'der Kater hat das Haus zerstört.',
+        es: 'el gato ha destruido la casa.',
+        ja: '猫は家を破壊してしまいます。',
+        pt: 'o gato destruiu a casa.', // pt present resultative is the pretérito (documented)
+      });
+  });
+
+  test('progressive reads the gerund / te-form', () => {
+    expect(sayAll(clause(np('CAT'), 'DESTROY', { directObject: np('HOUSE'), verbPhrase: { verb: 'DESTROY', aspect: 'progressive' } })))
+      .toEqual({
+        en: 'the cat is destroying the house.',
+        it: 'il gatto sta distruggendo la casa.',
+        fr: 'le chat est en train de détruire la maison.',
+        de: 'der Kater zerstört gerade das Haus.',
+        es: 'el gato está destruyendo la casa.',
+        ja: '猫は家を破壊しています。',
+        pt: 'o gato está destruindo a casa.',
+      });
+  });
+});
+
+// LIFE and CONTENT — the differentia nouns seeded for KILL's and CLEAR's definitions. Both are
+// countable, so their plurals and gender agreement are pinned alongside the bare singular the
+// glosses use.
+describe('LIFE and CONTENT (B10 differentia nouns)', () => {
+  test('LIFE — feminine in Romance, neuter German with an unchanged plural', () => {
+    expect(sayAll({ subject: np('LIFE', { definiteness: 'definite' }) })).toEqual({
+      en: 'the life.',
+      it: 'la vita.',
+      fr: 'la vie.',
+      de: 'das Leben.',
+      es: 'la vida.',
+      ja: '生命。',
+      pt: 'a vida.',
+    });
+    expect(sayAll({ subject: np('LIFE', { number: 'plural', definiteness: 'definite' }) })).toEqual({
+      en: 'the lives.',
+      it: 'le vite.',
+      fr: 'les vies.',
+      de: 'die Leben.',
+      es: 'las vidas.',
+      ja: '生命。',
+      pt: 'as vidas.',
+    });
+  });
+
+  test('CONTENT — masculine throughout, German Inhalt / Inhalte', () => {
+    expect(sayAll({ subject: np('CONTENT', { definiteness: 'definite' }) })).toEqual({
+      en: 'the content.',
+      it: 'il contenuto.',
+      fr: 'le contenu.',
+      de: 'der Inhalt.',
+      es: 'el contenido.',
+      ja: '内容。',
+      pt: 'o conteúdo.',
+    });
+    expect(sayAll({ subject: np('CONTENT', { number: 'plural', definiteness: 'definite' }) })).toEqual({
+      en: 'the contents.',
+      it: 'i contenuti.',
+      fr: 'les contenus.',
+      de: 'die Inhalte.',
+      es: 'los contenidos.',
+      ja: '内容。',
+      pt: 'os conteúdos.',
+    });
+  });
+});
+
 describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
   test('the noun surface, with gender agreement', () => {
     expect(sayAll({ subject: np('INFINITIVE_PHRASE', { definiteness: 'definite' }) })).toEqual({
@@ -263,6 +393,46 @@ describe('B09 verb definitions (CREATE genus)', () => {
       es: 'crear fuego.',
       ja: '火を生み出す。',
       pt: 'criar fogo.',
+    });
+  });
+});
+
+// The B10 destruction-verb definitions on the DESTROY genus. All three differentiae render
+// bare-singular: FIRE the way B09's SET_ON_FIRE does, and LIFE and CONTENT in their mass sense.
+describe('B10 verb definitions (DESTROY genus)', () => {
+  test('KILL → "to destroy life"', () => {
+    expect(definitionAll('KILL')).toEqual({
+      en: 'to destroy life.',
+      it: 'distruggere vita.',
+      fr: 'détruire vie.',
+      de: 'Leben zerstören.',
+      es: 'destruir vida.',
+      ja: '生命を破壊する。',
+      pt: 'destruir vida.',
+    });
+  });
+
+  test('EXTINGUISH → "to destroy fire"', () => {
+    expect(definitionAll('EXTINGUISH')).toEqual({
+      en: 'to destroy fire.',
+      it: 'distruggere fuoco.',
+      fr: 'détruire feu.',
+      de: 'Feuer zerstören.',
+      es: 'destruir fuego.',
+      ja: '火を破壊する。',
+      pt: 'destruir fogo.',
+    });
+  });
+
+  test('CLEAR → "to destroy content"', () => {
+    expect(definitionAll('CLEAR')).toEqual({
+      en: 'to destroy content.',
+      it: 'distruggere contenuto.',
+      fr: 'détruire contenu.',
+      de: 'Inhalt zerstören.',
+      es: 'destruir contenido.',
+      ja: '内容を破壊する。',
+      pt: 'destruir conteúdo.',
     });
   });
 });

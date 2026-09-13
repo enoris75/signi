@@ -45,15 +45,14 @@ _None outstanding — every catalogued A-task is done (see the Done section). Ne
 ### Part B — Needs seeding (`B-needs-seed/`)
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
-task. B09 is done; **start with B11 or B12** — SEE/KNOW and HOLD are additive once their genus is
-seeded. **B14 owns the shared builder change** that also gates B11's READ, B12's BUY, all of B13, and
-B18's TYPE, so it is the highest-leverage task once B10–B12's easy wins are in. A count-noun object
+task. B09 and B10 are done; **start with B11 or B12** — SEE/KNOW and HOLD are additive once their
+genus is seeded. **B14 owns the shared builder change** that also gates B11's READ, B12's BUY, all of
+B13, and B18's TYPE, so it is the highest-leverage task once B11–B12's easy wins are in. A count-noun object
 must pass `'plural'` to `infinitiveGloss` ("to have objects", not "to have object") — see
 [done/B09](done/B09-create-verbs.md).
 
 | # | File | Seed first |
 |---|---|---|
-| B10 | [B10-destruction-verbs.md](B-needs-seed/B10-destruction-verbs.md) | **DESTROY** (+ LIFE/CONTENT) → KILL, EXTINGUISH, CLEAR |
 | B11 | [B11-perception-verbs.md](B-needs-seed/B11-perception-verbs.md) | **PERCEIVE, UNDERSTAND** → SEE, KNOW (additive); READ needs the builder |
 | B12 | [B12-possession-verbs.md](B-needs-seed/B12-possession-verbs.md) | **HAVE, ACQUIRE** (+ PROPERTY) → OWN, HOLD (additive); BUY needs the builder |
 | B13 | [B13-contact-verbs.md](B-needs-seed/B13-contact-verbs.md) | **DIVIDE, STRIKE** (+ EDGE, TOOTH) → CUT, BITE, BEAT — all need the builder |
@@ -95,6 +94,7 @@ must pass `'plural'` to `infinitiveGloss` ("to have objects", not "to have objec
 | B08 | [done/B08-verb-definitions.md](done/B08-verb-definitions.md) | EAT → to consume food; DRINK → to consume liquid (seeded CONSUME, LIQUID, INFINITIVE_PHRASE). **Retired by splitting** the remaining 54 verbs into B09–B19, C08, C09 (was C01) |
 | C03 | [done/C03-adverb-definitions.md](done/C03-adverb-definitions.md) | FAST → at high speed; SLOWLY → at low speed; WELL → in a good way; ALWAYS → at all times; NEVER → at no time (built `mannerGloss` + Japanese determiner rendering and the どの…も…ない circumfix); TOGETHER stays literal by design |
 | B09 | [done/B09-create-verbs.md](done/B09-create-verbs.md) | MAKE → to create objects; SET_ON_FIRE → to create fire (seeded CREATE; `infinitiveGloss` gained an optional `'plural'` for count-noun objects) |
+| B10 | [done/B10-destruction-verbs.md](done/B10-destruction-verbs.md) | KILL → to destroy life; EXTINGUISH → to destroy fire; CLEAR → to destroy content (seeded DESTROY, LIFE, CONTENT) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

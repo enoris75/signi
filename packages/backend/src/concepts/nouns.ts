@@ -404,6 +404,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The differentia object of CLEAR's dictionary definition ("to destroy content") — what a
+    // container, a field or a page holds. Countable ("the contents"), but rendered bare-singular in
+    // the gloss the way FIRE is.
+    id: 'CONTENT',
+    role: 'noun',
+    description: 'what something holds or contains',
+    emoji: '🗃️',
+    forms: {
+      en: { base: 'content', plural: 'contents', count: 'singular' },
+      it: { base: 'contenuto', plural: 'contenuti', gender: 'masc', count: 'singular' },
+      fr: { base: 'contenu', plural: 'contenus', gender: 'masc', count: 'singular' },
+      de: { base: 'Inhalt', plural: 'Inhalte', gender: 'masc', count: 'singular' },
+      es: { base: 'contenido', plural: 'contenidos', gender: 'masc', count: 'singular' },
+      ja: { base: '内容', count: 'singular', reading: 'ないよう' },
+      pt: { base: 'conteúdo', plural: 'conteúdos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'HOUSE',
     role: 'noun',
     description: 'a building used as a dwelling',
@@ -647,6 +665,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'ángel', plural: 'ángeles', gender: 'masc', count: 'singular' },
       ja: { base: '天使', count: 'singular', reading: 'てんし' },
       pt: { base: 'anjo', plural: 'anjos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The differentia object of KILL's dictionary definition ("to destroy life"), and DEATH's
+    // antonym. Countable like DEATH ("lives"), but rendered bare-singular in the gloss the way FIRE
+    // is. Japanese takes 生命 (life as a phenomenon) over 命 (one's own life).
+    id: 'LIFE',
+    role: 'noun',
+    description: 'the condition of being alive',
+    emoji: '🌱',
+    forms: {
+      en: { base: 'life', plural: 'lives', count: 'singular' },
+      it: { base: 'vita', plural: 'vite', gender: 'fem', count: 'singular' },
+      fr: { base: 'vie', plural: 'vies', gender: 'fem', count: 'singular' },
+      de: { base: 'Leben', plural: 'Leben', gender: 'neut', count: 'singular' },
+      es: { base: 'vida', plural: 'vidas', gender: 'fem', count: 'singular' },
+      ja: { base: '生命', count: 'singular', reading: 'せいめい' },
+      pt: { base: 'vida', plural: 'vidas', gender: 'fem', count: 'singular' },
     },
   },
   {

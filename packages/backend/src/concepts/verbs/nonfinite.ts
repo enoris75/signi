@@ -382,6 +382,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'criando', participle: 'criado' },
     ja: { te: '生み出して', te_reading: 'うみだして', nai: '生み出さない', nai_reading: 'うみださない' },
   },
+  DESTROY: {
+    en: { gerund: 'destroying', participle: 'destroyed' },
+    it: { gerund: 'distruggendo', participle: 'distrutto' },
+    fr: { participle: 'détruit' }, de: { participle: 'zerstört' },
+    es: { gerund: 'destruyendo', participle: 'destruido' },
+    pt: { gerund: 'destruindo', participle: 'destruído' },
+    ja: { te: '破壊して', te_reading: 'はかいして', nai: '破壊しない', nai_reading: 'はかいしない' },
+  },
   COMPACT: {
     en: { gerund: 'compacting', participle: 'compacted' },
     it: { gerund: 'compattando', participle: 'compattato' },

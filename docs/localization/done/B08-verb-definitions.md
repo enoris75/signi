@@ -57,7 +57,7 @@ shipped under this id; the remaining 54 verbs were too coarse a bucket to drive 
 | # | task | verbs | additive? |
 |---|---|---|---|
 | [B09](B09-create-verbs.md) | CREATE | MAKE, SET_ON_FIRE | ✅ no builder change, differentiae seeded |
-| [B10](../B-needs-seed/B10-destruction-verbs.md) | DESTROY | KILL, EXTINGUISH, CLEAR | partly — 2 nouns to seed |
+| [B10](B10-destruction-verbs.md) | DESTROY | KILL, EXTINGUISH, CLEAR | partly — 2 nouns to seed |
 | [B11](../B-needs-seed/B11-perception-verbs.md) | PERCEIVE / UNDERSTAND | SEE, KNOW, READ | ✅ for SEE + KNOW |
 | [B12](../B-needs-seed/B12-possession-verbs.md) | HAVE / ACQUIRE | OWN, HOLD, BUY | ✅ for HOLD |
 | [B13](../B-needs-seed/B13-contact-verbs.md) | DIVIDE / STRIKE | CUT, BITE, BEAT | ⚠ builder + seeds |

@@ -430,6 +430,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to cause the death of',
+    definition: infinitiveGloss('DESTROY', 'LIFE'),
     emoji: '🔪',
     forms: {
       en: {
@@ -900,6 +901,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to put out (a fire); to cause to stop burning',
+    definition: infinitiveGloss('DESTROY', 'FIRE'),
     emoji: '🧯',
     synonym: 'extinguish',
     forms: {
@@ -1296,6 +1298,77 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'criamos', '2pl_past': 'criaram', '3pl_past': 'criaram',
         '1sg_future': 'criarei', '2sg_future': 'criará', '3sg_future': 'criará',
         '1pl_future': 'criaremos', '2pl_future': 'criarão', '3pl_future': 'criarão',
+      },
+    },
+  },
+
+  {
+    // The genus of KILL ("to destroy life"), EXTINGUISH ("to destroy fire") and CLEAR ("to destroy
+    // content") — the destruction verb their dictionary definitions cite as their genus (see the
+    // B10 verb-definition task), and CREATE's antonym. Its own tooltip stays on the literal, as
+    // CREATE's and CONSUME's do. Japanese takes the Sino-Japanese 破壊する, which echoes none of
+    // 殺す / 消す / 消去する in their glosses.
+    id: 'DESTROY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to put an end to; to ruin',
+    emoji: '💥',
+    forms: {
+      en: {
+        base: 'destroy',
+        '1sg_present': 'destroy', '2sg_present': 'destroy', '3sg_present': 'destroys',
+        '1pl_present': 'destroy', '2pl_present': 'destroy', '3pl_present': 'destroy',
+        past: 'destroyed',
+      },
+      it: {
+        base: 'distruggere',
+        '1sg_present': 'distruggo', '2sg_present': 'distruggi', '3sg_present': 'distrugge',
+        '1pl_present': 'distruggiamo', '2pl_present': 'distruggete', '3pl_present': 'distruggono',
+        '1sg_past': 'distrussi', '2sg_past': 'distruggesti', '3sg_past': 'distrusse',
+        '1pl_past': 'distruggemmo', '2pl_past': 'distruggeste', '3pl_past': 'distrussero',
+        '1sg_future': 'distruggerò', '2sg_future': 'distruggerai', '3sg_future': 'distruggerà',
+        '1pl_future': 'distruggeremo', '2pl_future': 'distruggerete', '3pl_future': 'distruggeranno',
+      },
+      fr: {
+        base: 'détruire',
+        '1sg_present': 'détruis', '2sg_present': 'détruis', '3sg_present': 'détruit',
+        '1pl_present': 'détruisons', '2pl_present': 'détruisez', '3pl_present': 'détruisent',
+        '1sg_past': 'détruisis', '2sg_past': 'détruisis', '3sg_past': 'détruisit',
+        '1pl_past': 'détruisîmes', '2pl_past': 'détruisîtes', '3pl_past': 'détruisirent',
+        '1sg_future': 'détruirai', '2sg_future': 'détruiras', '3sg_future': 'détruira',
+        '1pl_future': 'détruirons', '2pl_future': 'détruirez', '3pl_future': 'détruiront',
+      },
+      de: {
+        base: 'zerstören',
+        '1sg_present': 'zerstöre', '2sg_present': 'zerstörst', '3sg_present': 'zerstört',
+        '1pl_present': 'zerstören', '2pl_present': 'zerstört', '3pl_present': 'zerstören',
+        '1sg_past': 'zerstörte', '2sg_past': 'zerstörtest', '3sg_past': 'zerstörte',
+        '1pl_past': 'zerstörten', '2pl_past': 'zerstörtet', '3pl_past': 'zerstörten',
+      },
+      es: {
+        base: 'destruir',
+        '1sg_present': 'destruyo', '2sg_present': 'destruyes', '3sg_present': 'destruye',
+        '1pl_present': 'destruimos', '2pl_present': 'destruís', '3pl_present': 'destruyen',
+        '1sg_past': 'destruí', '2sg_past': 'destruiste', '3sg_past': 'destruyó',
+        '1pl_past': 'destruimos', '2pl_past': 'destruisteis', '3pl_past': 'destruyeron',
+        '1sg_future': 'destruiré', '2sg_future': 'destruirás', '3sg_future': 'destruirá',
+        '1pl_future': 'destruiremos', '2pl_future': 'destruiréis', '3pl_future': 'destruirán',
+      },
+      ja: {
+        base: '破壊する',
+        reading: 'はかいする',
+        masu_present: '破壊します',
+        masu_present_reading: 'はかいします',
+      },
+      pt: {
+        base: 'destruir',
+        '1sg_present': 'destruo', '2sg_present': 'destrói', '3sg_present': 'destrói',
+        '1pl_present': 'destruímos', '2pl_present': 'destroem', '3pl_present': 'destroem',
+        '1sg_past': 'destruí', '2sg_past': 'destruiu', '3sg_past': 'destruiu',
+        '1pl_past': 'destruímos', '2pl_past': 'destruíram', '3pl_past': 'destruíram',
+        '1sg_future': 'destruirei', '2sg_future': 'destruirá', '3sg_future': 'destruirá',
+        '1pl_future': 'destruiremos', '2pl_future': 'destruirão', '3pl_future': 'destruirão',
       },
     },
   },
@@ -1923,6 +1996,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to empty something of its contents',
+    definition: infinitiveGloss('DESTROY', 'CONTENT'),
     emoji: '🧹',
     forms: {
       en: {

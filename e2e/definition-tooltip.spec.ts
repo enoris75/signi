@@ -83,6 +83,71 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('火を生み出す');
   });
 
+  test('a genus+mass-noun verb definition renders (localize-seed B10: KILL)', async ({
+    app,
+    page,
+  }) => {
+    // English: an infinitive citation on the DESTROY genus with the differentia LIFE — "to destroy
+    // life", replacing the stored literal "to cause the death of".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('kill');
+    const killEn = page.locator('[data-testid="typeahead-option"][data-concept="KILL"]');
+    await expect(killEn).toBeVisible();
+    await killEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to destroy life');
+
+    // Italian: the same plan, the true infinitive before a bare object. No Italian literal is stored.
+    await app.setUiLanguage('it');
+    await app.verbInput.fill('kill');
+    const killIt = page.locator('[data-testid="typeahead-option"][data-concept="KILL"]');
+    await expect(killIt).toBeVisible();
+    await killIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('distruggere vita');
+  });
+
+  test('a genus+mass-noun verb definition renders (localize-seed B10: EXTINGUISH)', async ({
+    app,
+    page,
+  }) => {
+    // English: DESTROY + FIRE — "to destroy fire". Searched by its synonym, since its English label
+    // is the phrasal "put out".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('extinguish');
+    const extEn = page.locator('[data-testid="typeahead-option"][data-concept="EXTINGUISH"]');
+    await expect(extEn).toBeVisible();
+    await extEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to destroy fire');
+
+    // French: the same plan, the object bare after the infinitive — "détruire feu".
+    await app.setUiLanguage('fr');
+    await app.verbInput.fill('extinguish');
+    const extFr = page.locator('[data-testid="typeahead-option"][data-concept="EXTINGUISH"]');
+    await expect(extFr).toBeVisible();
+    await extFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('détruire feu');
+  });
+
+  test('a genus+mass-noun verb definition renders (localize-seed B10: CLEAR)', async ({
+    app,
+    page,
+  }) => {
+    // English: DESTROY + CONTENT — "to destroy content".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('clear');
+    const clearEn = page.locator('[data-testid="typeahead-option"][data-concept="CLEAR"]');
+    await expect(clearEn).toBeVisible();
+    await clearEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to destroy content');
+
+    // Japanese: the same plan, object-marked and verb-final in dictionary form — "内容を破壊する".
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('clear');
+    const clearJa = page.locator('[data-testid="typeahead-option"][data-concept="CLEAR"]');
+    await expect(clearJa).toBeVisible();
+    await clearJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('内容を破壊する');
+  });
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,
