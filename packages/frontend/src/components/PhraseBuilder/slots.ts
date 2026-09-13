@@ -7,7 +7,7 @@ import {
   type Transitivity,
   type UiStringKey,
 } from "@signi/shared";
-import { BoxComplementType, NounKey, NumberSlot, SlotConfig, SlotKey } from "./interfaces.ts";
+import { BoxComplementType, NounKey, SlotConfig, SlotKey } from "./interfaces.ts";
 
 /**
  * The complements realized as a cross-container link rather than a box on this canvas — their
@@ -303,7 +303,7 @@ export const SATELLITE_SLOT_KEYS = new Set<SlotKey>([
 
 /**
  * Every slot whose box is on the canvas only while its control says so — the satellites above
- * plus the direct object, which carries a control of its own on the verb-phrase dotted box.
+ * plus the direct object, which carries a control of its own on the verb-phrase dotted ring.
  *
  * The object is deliberately *not* a satellite: it is a core role, so it is offered open by
  * default and stays in the keyboard auto-advance after the verb (both of which key off
@@ -315,7 +315,7 @@ export const REVEALABLE_SLOT_KEYS = new Set<SlotKey>([
   "directObject",
 ]);
 
-// Collapsible role groups: each dashed box can be collapsed to show only its main
+// Collapsible role groups: each dotted ring can be collapsed to show only its main
 // word (the verb, the subject noun, …). `childKeys` are the satellite nodes hidden
 // while collapsed; keyed by the group's `label` (matches GroupRect.label). Direct
 // toggles (number / gender / polarity) have no node, so they never appear here.
@@ -379,155 +379,27 @@ export function getActiveSlots(
   });
 }
 
-export const NODE_POS: Record<SlotKey, { x: number; y: number }> = {
-  // Subject complement (predicative) — copular verbs (become/seem/appear) are
-  // intransitive, so it reuses the otherwise-empty direct-object region after the verb.
-  predicative: { x: 80, y: 42 },
-  predicativeAdjective: { x: 68, y: 16 },
-  predicativeAdjective2: { x: 84, y: 14 },
-  predicativeAdjective3: { x: 76, y: 26 },
-  subjectAdjective: { x: 12, y: 14 },
-  subjectAdjective2: { x: 12, y: 26 },
-  subjectAdjective3: { x: 24, y: 20 },
-  subject: { x: 26, y: 42 },
-  verb: { x: 52, y: 42 },
-  // Modal chain — its own row above the verb's tense/aspect toggles, reading
-  // outermost-first left to right ("voglio" then "poter", governing "andare" below).
-  verbModal: { x: 42, y: 10 },
-  verbModal2: { x: 62, y: 10 },
-  // Each modal's own adverb sits just above-left of its modal, mirroring the main verb's Adverb.
-  verbModalAdverb: { x: 32, y: 1 },
-  verbModal2Adverb: { x: 52, y: 1 },
-  directObject: { x: 80, y: 42 },
-  directObjectAdjective: { x: 68, y: 16 },
-  directObjectAdjective2: { x: 84, y: 14 },
-  directObjectAdjective3: { x: 76, y: 26 },
-  modifier: { x: 52, y: 74 },
-  // Motion complements — arranged below the verb, each its own little cluster,
-  // with its adjectives stacked just above the complement noun.
-  source: { x: 20, y: 88 },
-  sourceAdjective: { x: 24, y: 78 },
-  sourceAdjective2: { x: 28, y: 70 },
-  sourceAdjective3: { x: 32, y: 62 },
-  direction: { x: 40, y: 92 },
-  directionAdjective: { x: 44, y: 82 },
-  directionAdjective2: { x: 48, y: 74 },
-  directionAdjective3: { x: 52, y: 66 },
-  route: { x: 62, y: 92 },
-  routeAdjective: { x: 58, y: 82 },
-  routeAdjective2: { x: 54, y: 74 },
-  routeAdjective3: { x: 50, y: 66 },
-  locative: { x: 84, y: 88 },
-  locativeAdjective: { x: 80, y: 78 },
-  locativeAdjective2: { x: 76, y: 70 },
-  locativeAdjective3: { x: 72, y: 62 },
-  // Cause ("because of …") — a non-motion adjunct; parked center-bottom under the verb.
-  cause: { x: 52, y: 90 },
-  causeAdjective: { x: 50, y: 80 },
-  causeAdjective2: { x: 54, y: 72 },
-  causeAdjective3: { x: 58, y: 64 },
-  // Terminus ("to the cat") — the dative recipient; parked right-of-verb near the object row.
-  terminus: { x: 90, y: 60 },
-  terminusAdjective: { x: 88, y: 50 },
-  terminusAdjective2: { x: 94, y: 46 },
-  terminusAdjective3: { x: 90, y: 38 },
-  // Adverbial of manner ("at the speed of light") — parked mid-right, in the open region an
-  // intransitive verb leaves where a direct object would sit. Its adjective boxes extend left
-  // into that space so they clear the reveal controls fanned around the box.
-  manner: { x: 70, y: 58 },
-  mannerAdjective: { x: 56, y: 58 },
-  mannerAdjective2: { x: 46, y: 58 },
-  mannerAdjective3: { x: 36, y: 58 },
-};
-
-// Number is a direct-toggle satellite — the "#" border icon flips singular ⇄ plural
-// in place, with no canvas box. These points are only the icon's aim target: the icon
-// migrates around its noun box onto the ray toward this spot (see controlLayout).
-const NUMBER_TOGGLE_DEFAULTS: Record<NumberSlot, { x: number; y: number }> = {
-  predicative: { x: 80, y: 62 },
-  subject: { x: 12, y: 72 },
-  directObject: { x: 80, y: 62 },
-  source: { x: 12, y: 96 },
-  direction: { x: 32, y: 99 },
-  route: { x: 70, y: 99 },
-  locative: { x: 94, y: 96 },
-  cause: { x: 46, y: 96 },
-  terminus: { x: 96, y: 70 },
-  manner: { x: 84, y: 64 },
-};
-
-// Every satellite needs an entry, including the direct toggles (number / gender /
-// polarity) that never render a canvas node: computeControlPositions reads each
-// satellite's position to aim its icon around the parent box's perimeter.
+// Where each constituent's word starts on the canvas, in % of the canvas box. Only the words have
+// positions of their own: a satellite is always seated on its constituent's orbit (see ringLayout),
+// so it goes wherever its word goes. Constituents that start out overlapping are pushed apart by
+// the overlap resolver, which grows the canvas when it has to.
 export const DEFAULT_POSITIONS: Record<string, { x: number; y: number }> = {
-  ...NODE_POS,
-  predicativeNumber: NUMBER_TOGGLE_DEFAULTS.predicative,
-  predicativeGender: { x: 93, y: 30 },
-  // Determiner reveal icon for the predicate-noun subject complement (reuses the DO region).
-  predicativeDefiniteness: { x: 66, y: 26 },
-  predicativeRelative: { x: 80, y: 64 },
-  predicativePossessor: { x: 74, y: 64 },
-  subjectNumber: NUMBER_TOGGLE_DEFAULTS.subject,
-  subjectGender: { x: 12, y: 57 },
-  // Determiner (the / a / bare) reveal icons — icon-only (cycle on click), no canvas
-  // node; these just aim the icon at the noun box edge.
-  subjectDefiniteness: { x: 34, y: 30 },
-  directObjectDefiniteness: { x: 66, y: 30 },
-  subjectAdjective2Gender: { x: 20, y: 26 },
-  verbNegative: { x: 52, y: 62 },
-  verbTense: { x: 40, y: 22 },
-  verbAspect: { x: 64, y: 22 },
-  directObjectNumber: NUMBER_TOGGLE_DEFAULTS.directObject,
-  directObjectGender: { x: 93, y: 30 },
-  sourceNumber: NUMBER_TOGGLE_DEFAULTS.source,
-  sourceGender: { x: 8, y: 80 },
-  directionNumber: NUMBER_TOGGLE_DEFAULTS.direction,
-  directionGender: { x: 28, y: 84 },
-  routeNumber: NUMBER_TOGGLE_DEFAULTS.route,
-  routeGender: { x: 74, y: 84 },
-  locativeNumber: NUMBER_TOGGLE_DEFAULTS.locative,
-  locativeGender: { x: 96, y: 80 },
-  causeNumber: NUMBER_TOGGLE_DEFAULTS.cause,
-  causeGender: { x: 58, y: 96 },
-  terminusNumber: NUMBER_TOGGLE_DEFAULTS.terminus,
-  terminusGender: { x: 82, y: 60 },
-  mannerNumber: NUMBER_TOGGLE_DEFAULTS.manner,
-  mannerGender: { x: 84, y: 52 },
-  // Determiner (the / a / bare / quantifier) reveal icons for the adposition-bearing
-  // complements — icon-only (cycle on click), aimed just outboard of each noun box.
-  sourceDefiniteness: { x: 12, y: 78 },
-  directionDefiniteness: { x: 32, y: 82 },
-  routeDefiniteness: { x: 68, y: 82 },
-  locativeDefiniteness: { x: 92, y: 78 },
-  terminusDefiniteness: { x: 84, y: 50 },
-  mannerDefiniteness: { x: 58, y: 50 },
-  // Relative-clause reveal icons — no canvas node of their own; these only aim each
-  // icon at the bottom edge of its noun box (clauses expand into panels below).
-  subjectRelative: { x: 26, y: 64 },
-  directObjectRelative: { x: 80, y: 64 },
-  sourceRelative: { x: 20, y: 99 },
-  directionRelative: { x: 40, y: 99 },
-  routeRelative: { x: 62, y: 99 },
-  locativeRelative: { x: 84, y: 99 },
-  causeRelative: { x: 52, y: 99 },
-  terminusRelative: { x: 92, y: 70 },
-  mannerRelative: { x: 70, y: 70 },
-  // Possessor reveal icons — same role as the relative ones (aim the icon at the noun
-  // box edge; the possessor editor docks in a panel below). Offset left of the relative
-  // anchor so both icons ride the box without overlapping.
-  subjectPossessor: { x: 20, y: 64 },
-  directObjectPossessor: { x: 74, y: 64 },
-  // Conjunct reveal icons — same role again (the conjuncts dock in panels below the noun).
-  subjectConjunct: { x: 14, y: 64 },
-  directObjectConjunct: { x: 68, y: 64 },
-  predicativeConjunct: { x: 68, y: 64 },
-  sourcePossessor: { x: 14, y: 99 },
-  directionPossessor: { x: 34, y: 99 },
-  routePossessor: { x: 56, y: 99 },
-  locativePossessor: { x: 78, y: 99 },
-  causePossessor: { x: 48, y: 99 },
-  terminusPossessor: { x: 86, y: 70 },
-  mannerPossessor: { x: 58, y: 68 },
+  subject: { x: 22, y: 42 },
+  verb: { x: 52, y: 42 },
+  directObject: { x: 82, y: 42 },
+  // Subject complement (predicative) — copular verbs (become/seem/appear) are intransitive, so it
+  // reuses the otherwise-empty direct-object region after the verb.
+  predicative: { x: 82, y: 42 },
+  // Terminus ("to the cat") and the adverbial of manner — parked right of the verb, in the open
+  // region an intransitive verb leaves where a direct object would sit.
+  terminus: { x: 88, y: 70 },
+  manner: { x: 72, y: 70 },
+  // The motion complements and the cause — a row below the verb.
+  source: { x: 16, y: 80 },
+  direction: { x: 34, y: 84 },
+  cause: { x: 52, y: 84 },
+  route: { x: 66, y: 84 },
+  locative: { x: 84, y: 80 },
 };
 
 export const MUI_COLOR_HEX: Record<SlotConfig["color"], string> = {

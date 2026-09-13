@@ -76,8 +76,8 @@ export function VerbTypeahead({
         onKeyDown={handleKeyDown}
         placeholder={prompt}
         // Size the field to its placeholder rather than the browser default
-        // (~20ch); otherwise the empty verb box overflows the 160px-wide dashed
-        // group box that's padded to PIX_PAD_H (widest-slot half-width) each side.
+        // (~20ch); otherwise the empty verb ring swells round a field far wider than
+        // the prompt it holds.
         inputProps={{ size: prompt.length, "data-testid": "typeahead-verb" }}
         sx={{
           fontFamily: '"Inter", sans-serif',

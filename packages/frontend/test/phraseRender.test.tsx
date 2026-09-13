@@ -7,7 +7,7 @@ import {
   type PhraseRenderContext,
 } from '../src/components/PhraseBuilder/phraseRender.tsx';
 import type { PhraseSelection, SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
-import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
+import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
 import { renderWithProviders, type Seed } from './render.tsx';
 
@@ -48,6 +48,8 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     satelliteIconsByParent: {},
     complementToggleIcons: [],
     groupRects: [],
+    discs: {},
+    controlPos: {},
     collapsedGroups: {},
     compact: false,
     draggingKey: null,
@@ -88,7 +90,6 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectLocativeSpecifier: vi.fn(() => {}),
     handleSelectSentiment: vi.fn(() => {}),
     handleToggleCollapse: vi.fn(() => {}),
-    handleRearrangeGroup: vi.fn(() => {}),
     handleRemoveComplement: vi.fn(() => {}),
     ...overrides,
   };
@@ -647,27 +648,53 @@ describe('SlotNode', () => {
     expect(screen.queryByText('feature')).not.toBeInTheDocument();
   });
 
-  describe('width', () => {
-    const controls = (count: number): SatelliteIcon[] =>
-      Array.from({ length: count }, (_, i) => ({
-        key: `control${i}`,
-        icon: null,
-        label: `Control ${i}`,
-        active: false,
-        isSet: false,
-        valued: false,
-        onToggle: () => {},
-      }));
+  describe('shape', () => {
+    // The ring layout sizes each shape from the content it measured; these hand it a radius.
+    const ring = (mainKey: string, rIn: number): GroupRect => ({
+      label: mainKey,
+      color: '#000',
+      mainKey,
+      nodeKeys: [mainKey],
+      center: { x: 200, y: 150 },
+      rIn,
+      orbit: rIn,
+      rOut: rIn + 26,
+      x: 0,
+      y: 0,
+      width: 0,
+      height: 0,
+    });
 
-    it.each<[string, Record<string, SatelliteIcon[]>, string]>([
-      ['keeps the default width for a box with no controls', {}, '80px'],
-      ['keeps the default width while its controls fit', { verb: controls(3) }, '80px'],
-      ['widens to seat many controls along its border', { verb: controls(5) }, '110px'],
-      ['counts only the controls on its own border', { subject: controls(6) }, '80px'],
-    ])('%s', (_, satelliteIconsByParent, minWidth) => {
-      renderNode('verb', { selection: { verb: SEE }, satelliteIconsByParent });
+    it("draws a constituent's word inside its solid ring, at the ring's radius", () => {
+      renderNode('verb', { selection: { verb: SEE }, groupRects: [ring('verb', 40)] });
 
-      expect(getComputedStyle(cardOf('verb')).minWidth).toBe(minWidth);
+      expect(screen.getByTestId('box-verb')).toHaveAttribute('data-shape', 'ring');
+      const circle = getComputedStyle(cardOf('verb'));
+      expect(circle.width).toBe('80px');
+      expect(circle.height).toBe('80px');
+      expect(circle.borderRadius).toBe('50%');
+      // A word's clear button is one of its ring's controls, not part of the shape.
+      expect(screen.queryByLabelText('Clear Verb')).not.toBeInTheDocument();
+    });
+
+    it('draws a satellite as a disc that says only its word, its degree on the rim', () => {
+      renderNode('subjectAdjective', {
+        selection: { subject: CAT, subjectAdjective: BIG },
+        discs: { subjectAdjective: { x: 100, y: 40, r: 22, a: 0 } },
+      });
+
+      expect(screen.getByTestId('box-subjectAdjective')).toHaveAttribute('data-shape', 'disc');
+      expect(getComputedStyle(cardOf('subjectAdjective')).width).toBe('44px');
+      expect(screen.queryByText('Adjective')).not.toBeInTheDocument();
+      expect(screen.getByTestId('degree-subjectAdjective')).toHaveTextContent('±');
+      expect(screen.getByLabelText('Clear Adjective')).toBeInTheDocument();
+    });
+
+    it('keeps the plain box for a slot with no ring or disc to sit in', () => {
+      renderNode('verb', { selection: { verb: SEE } });
+
+      expect(screen.getByTestId('box-verb')).not.toHaveAttribute('data-shape');
+      expect(getComputedStyle(cardOf('verb')).minWidth).toBe('80px');
     });
   });
 });

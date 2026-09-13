@@ -54,10 +54,10 @@ import {
 } from "./slots.ts";
 
 // Satellite elements (gender / number / polarity / adjective / adverb) are hidden
-// by default and revealed via the small icons on each main box border.
+// by default and revealed via the small controls round each word's solid ring.
 export type Satellite = {
   key: string;
-  // The box whose border carries this satellite's control. Usually a core word box,
+  // The node that carries this satellite's control. Usually a constituent's word,
   // but a chained satellite rides another satellite's box (Adjective 2 on Adjective 1).
   parent: SlotKey;
   label: string;
@@ -73,7 +73,7 @@ export type Satellite = {
   // direct object overrides it: it is a core role, offered open the moment a transitive
   // verb licenses it, and its control is there to *hide* it.
   defaultShown?: boolean;
-  // directToggle = the border icon *is* the control: clicking it flips the value
+  // directToggle = the ring icon *is* the control: clicking it flips the value
   // (singular ⇄ plural, positive ⇄ negative) in place, with no expandable canvas box.
   // Such satellites never `shown` (there is nothing to reveal); the icon's
   // solid/outlined state indicates the current value and its tooltip spells it out.
@@ -87,7 +87,7 @@ const iconSx = { fontSize: 13 };
 
 type Gender = "masc" | "fem" | "neut";
 
-// Gender is a direct-toggle satellite: its border icon *is* the glyph for the current
+// Gender is a direct-toggle satellite: its ring icon *is* the glyph for the current
 // value (♂ / ♀ / ⚧), so cycling it swaps the icon rather than revealing a box.
 const genderIcon = (gen?: Gender): ReactNode =>
   gen === "fem" ? (
@@ -330,8 +330,8 @@ export function buildSatellites(
       hasValue: Boolean(selection.modifier),
       valueLabel: label(selection.modifier),
     },
-    // The direct object's own control. It rides the verb-phrase dotted box, like the complement
-    // toggles, and anchors the connector that runs from there to the object's dotted box — which
+    // The direct object's own control. It rides the verb-phrase dotted ring, like the complement
+    // toggles, and anchors the connector that runs from there to the object's dotted ring — which
     // otherwise starts nowhere. Unlike a complement it is shown by default: a transitive verb
     // wants its object, so the box is offered open and this control folds it away.
     {
@@ -439,7 +439,7 @@ export function buildSatellites(
       hasValue: conjunctCount("directObject") > 0,
     },
     // The instrumental has no box on this canvas: its noun phrase lives in a period container
-    // of its own, and this control on the verb-phrase dotted box is the link to it (started,
+    // of its own, and this control on the verb-phrase dotted ring is the link to it (started,
     // and later cleared, in buildSatelliteIcons off the workspace binding — like the
     // relative-clause control, `hasValue` is a fact about the links, not the selection).
     {
@@ -623,7 +623,7 @@ export function buildSatellites(
     return {
       ...s,
       available,
-      // A direct-toggle satellite (number) has no box to reveal — its border icon
+      // A direct-toggle satellite (number) has no box to reveal — its ring icon
       // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
       shown:
         available &&
@@ -638,17 +638,18 @@ export function buildSatellites(
   return { satellites, shownMap };
 }
 
-// The relative-clause, possessor and coordination controls a noun carries on its *dotted-box*
-// perimeter, rather than on its word box border.
+// The relative-clause, possessor and coordination controls a noun carries on its *dotted* ring,
+// rather than on its word's solid ring.
 export type PerimeterEntry = {
   relative?: SatelliteIcon;
   possessor?: SatelliteIcon;
   conjunct?: SatelliteIcon;
 };
 
-// Sort every available satellite into the three places its control can render: on its
-// parent word box's border, on the verb-phrase dotted box (the complement toggles), or
-// on a noun's dotted-box perimeter (the relative-clause + possessor controls, which also
+// Sort every available satellite into the three places its control can render: keyed by the
+// node that carries it (a word, whose solid ring seats it, or — chained — the satellite before
+// it, after whose disc it rides the orbit), on the verb-phrase dotted ring (the complement
+// toggles), or on a noun's dotted ring (the relative-clause + possessor controls, which also
 // anchor their connector lines). Pure derivation from the satellites and the current
 // collapse / link state; the three `on*` callbacks are what each icon does when clicked.
 export function buildSatelliteIcons({
@@ -684,14 +685,14 @@ export function buildSatelliteIcons({
   const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
   const complementToggleIcons: SatelliteIcon[] = [];
   const perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>> = {};
-  // Sits apart from the complement-toggle row: it is pinned to the point where the object's
-  // connector leaves the verb-phrase dotted box, so it reads as that line's start (VerbPhraseBuilder).
+  // Sits apart from the complement toggles: it is seated at the point where the object's
+  // connector leaves the verb-phrase dotted ring, so it reads as that line's start (VerbPhraseBuilder).
   let directObjectToggle: SatelliteIcon | undefined;
 
   for (const sat of satellites) {
     if (!sat.available) continue;
     // The instrumental control is a cross-container link, not a reveal: it rides the verb-phrase
-    // dotted box (with the other complement toggles) and points at the period holding the
+    // dotted ring (with the other complement toggles) and points at the period holding the
     // instrument. Clicking it starts a pick, or removes the link once one is made. It exists
     // only in a workspace container — a standalone period has nowhere to link to.
     if (sat.key === "instrumental") {
@@ -760,7 +761,7 @@ export function buildSatelliteIcons({
       continue;
     }
     // A direct-toggle satellite (number / gender / polarity) has no reveal box — its
-    // border icon flips the value in place (singular ⇄ plural, positive ⇄ negative, or
+    // ring icon flips the value in place (singular ⇄ plural, positive ⇄ negative, or
     // cycling masc → fem → …). `which` is the slot key minus the "Number" / "Gender" suffix.
     const numberSlot: NumberSlot | null =
       sat.directToggle && sat.key.endsWith("Number")
@@ -791,7 +792,7 @@ export function buildSatelliteIcons({
       directObjectToggle = iconEntry;
       continue;
     }
-    // The possessor reveal toggle likewise rides the dotted-box perimeter and anchors
+    // The possessor reveal toggle likewise rides the dotted ring and anchors
     // its own connector down to the possessor panel.
     const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
       ? (sat.key.slice(0, -"Possessor".length) as NounKey)

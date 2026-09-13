@@ -40,7 +40,7 @@ export function coordConjunctionOptions(
 /**
  * The complements that get a word box on the canvas — every one except those realized as a
  * cross-container link. The `instrumental` is the one such link today: its noun phrase lives in
- * a period container of its own, reached from the control on the verb-phrase dotted box (see
+ * a period container of its own, reached from the control on the verb-phrase dotted ring (see
  * PhraseLink's 'instrumental' kind), so it has no box, no adjective slots and no fields in the
  * selection. Everything keyed by "a noun block on this canvas" — slots, positions, number/gender
  * toggles, possessors — is keyed by this rather than by ComplementType.
@@ -198,7 +198,7 @@ export interface PhraseSelection {
     locativeSpecifier?: PathSpecifier;
     // Cause / reason adjunct ("cried because of the dog"). Its one specifier is the
     // affective sentiment — neutral (because of) / negative (fault of) / positive (thanks to),
-    // selected on the cause dotted box. Defaults to 'neutral' when absent.
+    // selected on the cause dotted ring. Defaults to 'neutral' when absent.
     cause?: Concept;
     causeNumber?: "singular" | "plural";
     causeGender?: "masc" | "fem" | "neut";
@@ -207,7 +207,7 @@ export interface PhraseSelection {
     causeAdjective3?: Concept;
     causeSentiment?: CauseSentiment;
     // The instrumental complement has no fields here: its noun phrase lives in a period
-    // container of its own, linked from the verb-phrase dotted box (see BoxComplementType and
+    // container of its own, linked from the verb-phrase dotted ring (see BoxComplementType and
     // the 'instrumental' PhraseLink), and is folded into the plan by workspacePlan.
     // Terminus — the recipient or goal, "to whom / to what": the traditional indirect object
     // ("gives the book *to the cat*") and the dative adjunct a plain transitive verb can take
@@ -436,7 +436,7 @@ export type PhraseLink =
       // The instrumental complement: the *source* container is the clause that acts, and the
       // *target* container holds the noun phrase it acts with — its subject noun and nothing
       // else, since a period with no verb is a bare noun phrase ("a word"). Sourced from the
-      // control on the verb-phrase dotted box, so it carries no noun key: the target's own
+      // control on the verb-phrase dotted ring, so it carries no noun key: the target's own
       // subject is the instrument. Unlike the conditional and the coordination, which join two
       // *clauses*, this one pulls a noun phrase out into a period of its own.
       id: string;
@@ -474,7 +474,7 @@ export const isInstrumentalLink = (
 // Pick-mode: awaiting a target click. A `relative` pick started from a source noun's satellite
 // and lands on a target noun; a `conditional` pick started from a container's border control
 // and lands on another container (which becomes the "if" clause); an `instrumental` pick started
-// from the verb-phrase dotted box's control and lands on the container holding the instrument.
+// from the verb-phrase dotted ring's control and lands on the container holding the instrument.
 export type PickMode =
   | { active: false }
   | { active: true; kind: 'relative'; source: { containerId: string; nounKey: NounAddress } }
@@ -498,14 +498,14 @@ export interface WorkspaceGeometry {
   // A noun box, for cross-container measuring & greying.
   registerBox: (nounKey: NounAddress, el: HTMLElement | null) => void;
   // The little anchor dots a relative link line runs between: the relative-clause control on
-  // the source noun's dotted box (line start) and the receiving dot on the target noun's
-  // dotted box (line end). The workspace measures between these when present, else the boxes.
+  // the source noun's dotted ring (line start) and the receiving dot on the target noun's
+  // dotted ring (line end). The workspace measures between these when present, else the boxes.
   registerSourceAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
   registerTargetAnchor: (nounKey: NounAddress, el: HTMLElement | null) => void;
   // The border-control cluster: the endpoint the conditional/coordinative connector lines run
   // between (one anchor shared by both clause-level relations).
   registerBorderAnchor: (el: HTMLElement | null) => void;
-  // The complement-toggle row on the verb-phrase dotted box — where an instrumental link
+  // The instrumental toggle on the verb-phrase dotted ring — where an instrumental link
   // starts, since the instrument is something the *verb* takes.
   registerVerbAnchor: (el: HTMLElement | null) => void;
   // Signal that this container's canvas geometry changed (a box was dragged, the canvas

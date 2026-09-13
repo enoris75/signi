@@ -1,5 +1,5 @@
 import React, { useLayoutEffect, useRef } from "react";
-import { rawGroupRect, type GroupRect, type SizeFn } from "../graph.ts";
+import type { GroupRect } from "../graph.ts";
 import {
   resolveGroupOverlaps,
   BOTTOM_MARGIN,
@@ -14,7 +14,6 @@ interface UseOverlapResolutionArgs {
   compact: boolean;
   groupRects: GroupRect[];
   pos: (key: string) => { x: number; y: number };
-  sizeOf: SizeFn;
   graphSize: { w: number; h: number };
   graphHeight: number;
   setPositions: React.Dispatch<React.SetStateAction<Positions>>;
@@ -25,9 +24,9 @@ interface UseOverlapResolutionArgs {
   positionsStaleRef: React.MutableRefObject<boolean>;
 }
 
-// Dotted boxes never overlap. A box's footprint is derived from the nodes inside it, so
-// revealing a satellite, adding an adjective, expanding a group or dragging a node out
-// all grow it — potentially straight over a neighbour. After every commit, measure the
+// Rings never overlap. A constituent's footprint grows with what orbits it, so revealing a
+// satellite, adding an adjective or expanding a group all grow it — potentially straight over a
+// neighbour. After every commit, measure the
 // boxes and slide the ones that would be covered aside or down until each is clear.
 //
 // The box that caused the growth holds its ground and everything else yields to it: the
@@ -42,7 +41,6 @@ export function useOverlapResolution({
   compact,
   groupRects,
   pos,
-  sizeOf,
   graphSize,
   graphHeight,
   setPositions,
@@ -74,19 +72,14 @@ export function useOverlapResolution({
       positionsStaleRef.current = false;
       return;
     }
-    const sizes = new Map(
-      groupRects.map((g) => {
-        const r = rawGroupRect(g, pos, graphSize, false, sizeOf);
-        return [g.label, { w: r.width, h: r.height }] as const;
-      }),
-    );
+    const sizes = new Map(groupRects.map((g) => [g.label, { w: g.width, h: g.height }] as const));
     // A drag has to re-resolve on every pointer move (and size the canvas to the dragged box),
     // so it never takes the skip; outside a drag, bail when nothing that feeds the resolution
     // has moved since we last ran it.
     const dragging = Boolean(dragRef.current?.keys);
     if (!dragging) {
       const signature = JSON.stringify([
-        groupRects.map((g) => [g.label, g.nodeKeys, pos(g.nodeKeys[0])]),
+        groupRects.map((g) => [g.label, g.nodeKeys, pos(g.mainKey)]),
         [...sizes],
         graphSize,
       ]);
@@ -114,7 +107,6 @@ export function useOverlapResolution({
         : resolveGroupOverlaps({
             groupRects,
             pos,
-            sizeOf,
             svgSize: graphSize,
             rankOf,
           });
@@ -130,11 +122,11 @@ export function useOverlapResolution({
       // back so pulling that box up again doesn't strand a band of dead space beneath the
       // boxes. Measured against the positions the separation just wrote, or this would
       // fit the canvas to where the boxes were before they were shoved clear.
-      const settled = (key: string) => separated?.positions[key] ?? pos(key);
       const bottom = Math.max(
         ...groupRects.map((g) => {
-          const r = rawGroupRect(g, settled, graphSize, false, sizeOf);
-          return r.y + r.height;
+          const settled = separated?.positions[g.mainKey]?.y ?? pos(g.mainKey).y;
+          const shift = ((settled - pos(g.mainKey).y) / 100) * graphSize.h;
+          return g.y + g.height + shift;
         }),
       );
       const fitted = Math.max(

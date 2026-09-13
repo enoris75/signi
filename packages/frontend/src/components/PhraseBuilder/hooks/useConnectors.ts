@@ -54,13 +54,13 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
   const workspaceRef = useRef<HTMLDivElement>(null);
   const boxEls = useRef<Map<string, HTMLElement>>(new Map());
   // The anchor dots the link line snaps to: the source noun's relative-clause control
-  // and the target noun's receiving dot, both pinned on their dotted-box perimeter.
+  // and the target noun's receiving dot, both pinned on their dotted ring.
   const sourceAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const targetAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   // The border-control element per container — the endpoint the conditional connector runs
   // between (main clause's control → "if" clause's control).
   const borderAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
-  // The complement-toggle row on each container's verb-phrase dotted box — where an
+  // The instrumental toggle on each container's verb-phrase dotted ring — where an
   // instrumental connector starts (the instrument is the verb's, not the clause's).
   const verbAnchorEls = useRef<Map<string, HTMLElement>>(new Map());
   const [connectors, setConnectors] = useState<Connector[]>([]);

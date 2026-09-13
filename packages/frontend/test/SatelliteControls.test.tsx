@@ -2,6 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
 import { SatelliteControls } from '../src/components/PhraseBuilder/SatelliteControls.tsx';
+import { clearControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
 
 // A set satellite fills its button with the slot colour; the tests render without the app
 // theme, so these are MUI's default palette mains.
@@ -30,6 +31,7 @@ describe('SatelliteControls', () => {
   it('renders one control per satellite, box by box', () => {
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{
           subject: [satellite('subjectAdjective'), satellite('subjectNumber')],
           verb: [satellite('verbAdverb')],
@@ -52,6 +54,7 @@ describe('SatelliteControls', () => {
   it('centres each control on its canvas position', () => {
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{ subject: [satellite('subjectAdjective')] }}
         controlPos={{ subjectAdjective: { x: 140, y: 62 } }}
       />,
@@ -67,6 +70,7 @@ describe('SatelliteControls', () => {
   it('leaves out a satellite that has no position yet', () => {
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{
           subject: [satellite('subjectAdjective'), satellite('subjectNumber')],
         }}
@@ -81,6 +85,7 @@ describe('SatelliteControls', () => {
   it('colours each control after the slot of the box it rides', () => {
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{
           verb: [satellite('verbAdverb')],
           directObject: [satellite('directObjectAdjective')],
@@ -96,6 +101,7 @@ describe('SatelliteControls', () => {
   it('falls back to the primary colour for a box that is not a slot', () => {
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{ tense: [satellite('tenseAdverb')] }}
         controlPos={{ tenseAdverb: { x: 0, y: 0 } }}
       />,
@@ -109,6 +115,7 @@ describe('SatelliteControls', () => {
     const onNumber = vi.fn();
     render(
       <SatelliteControls
+        clearControls={[]}
         satelliteIconsByParent={{
           subject: [
             satellite('subjectAdjective', { onToggle: onAdjective }),
@@ -123,5 +130,34 @@ describe('SatelliteControls', () => {
 
     expect(onNumber).toHaveBeenCalledOnce();
     expect(onAdjective).not.toHaveBeenCalled();
+  });
+
+  it("seats each word's clear button on its solid ring, and clears that word", () => {
+    const onClearSubject = vi.fn();
+    const onClearVerb = vi.fn();
+    render(
+      <div onPointerDown={() => onClearVerb('dragged')}>
+        <SatelliteControls
+          satelliteIconsByParent={{}}
+          clearControls={[
+            { mainKey: 'subject', label: 'Subject', onClear: onClearSubject },
+            { mainKey: 'verb', label: 'Verb', onClear: onClearVerb },
+          ]}
+          controlPos={{ [clearControlKey('subject')]: { x: 90, y: 30 } }}
+        />
+      </div>,
+    );
+
+    // The verb's clear button has no seat yet, so it is left out.
+    expect(screen.queryByLabelText('Clear Verb')).not.toBeInTheDocument();
+    const clear = screen.getByLabelText('Clear Subject');
+    const style = getComputedStyle(clear);
+    expect({ left: style.left, top: style.top }).toEqual({ left: '90px', top: '30px' });
+
+    fireEvent.pointerDown(clear);
+    fireEvent.click(clear);
+
+    expect(onClearSubject).toHaveBeenCalledOnce();
+    expect(onClearVerb).not.toHaveBeenCalled();
   });
 });

@@ -1,11 +1,11 @@
-import { rawGroupRect, type GroupRect, type SizeFn } from "./graph.ts";
+import type { GroupRect } from "./graph.ts";
 import type { CanvasSize, PositionMap } from "./layout.ts";
 
-// Keeps the dotted role boxes from ever covering one another. A box's footprint is derived
-// from its child nodes, so it grows whenever a satellite is revealed, an adjective is added,
-// a group is expanded, or a node is dragged out of the cluster — and nothing about that
-// derivation stops the new footprint landing on top of a neighbour. This module takes the
-// freshly measured rects and works out how far each box has to slide to be clear again.
+// Keeps the constituents' rings from ever covering one another. A ring's footprint grows whenever
+// a satellite is revealed, an adjective is added, or a constituent is expanded — and nothing about
+// that stops the new footprint landing on top of a neighbour. This module takes the freshly laid
+// out footprints (the square each dotted ring and its controls take up) and works out how far each
+// has to slide to be clear again.
 //
 // A box never gives up any of its footprint to make room: a shove stops dead at the canvas
 // wall, and a pair that can't fit side by side is separated top-to-bottom instead. Downward
@@ -76,7 +76,7 @@ function allocate(
   return a + b >= need - EPS_PX ? [a, b] : null;
 }
 
-// Separate every overlapping pair of dotted boxes, pushing each along whichever axis needs
+// Separate every overlapping pair of dotted rings, pushing each along whichever axis needs
 // the shorter travel — aside when they sit side by side, down when they sit one above the
 // other. Returns the new positions of the moved boxes' nodes (plus any extra canvas height
 // the downward shoves need), or null when the boxes are already clear of each other — the
@@ -84,13 +84,11 @@ function allocate(
 export function resolveGroupOverlaps({
   groupRects,
   pos,
-  sizeOf,
   svgSize,
   rankOf,
 }: {
   groupRects: GroupRect[];
   pos: (key: string) => { x: number; y: number };
-  sizeOf: SizeFn;
   svgSize: CanvasSize;
   rankOf: (group: GroupRect) => Rank;
 }): Separation | null {
@@ -98,8 +96,7 @@ export function resolveGroupOverlaps({
 
   const boxes = groupRects.map((g) => ({
     group: g,
-    // Raw, unclipped footprints — see rawGroupRect.
-    rect: rawGroupRect(g, pos, svgSize, false, sizeOf),
+    rect: { x: g.x, y: g.y, width: g.width, height: g.height },
     rank: rankOf(g),
     dx: 0,
     dy: 0,

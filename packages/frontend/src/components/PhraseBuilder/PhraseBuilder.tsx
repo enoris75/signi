@@ -1,6 +1,8 @@
 import React, { useRef, useState } from "react";
 import { Box } from "@mui/material";
 import {
+  CAUSE_SENTIMENTS,
+  PATH_SPECIFIERS,
   type Concept,
   type CauseSentiment,
   type Definiteness,
@@ -25,6 +27,7 @@ import {
   WorkspaceBinding,
 } from "./interfaces.ts";
 import {
+  ALL_SLOTS,
   COLLAPSIBLE_GROUPS,
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
@@ -67,16 +70,18 @@ import {
   type Satellite,
 } from "./satellites.tsx";
 import {
+  COMPACT_PAD_H,
+  COMPACT_PAD_V,
   computeCompactLayout,
   packPeriod,
-  rearrangeGroupPositions,
 } from "./layout.ts";
-import { buildGraph, type GroupShape } from "./graph.ts";
+import { buildEdges, buildRings, roleGroups } from "./graph.ts";
+import { buildRingSpecs } from "./ringSpecs.ts";
+import { BUTTON_HALF, innerRadius } from "./ringLayout.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
 import { Resizer } from "./Resizer.tsx";
-import { computeControlPositions } from "./controlLayout.ts";
 import { openPossessorsFor, PossessorPanels } from "./PossessorPanels.tsx";
 import { CorefPickContext, useCorefPick, useProvideCorefPick } from "./CorefPickContext.tsx";
 import { ConjunctPanels, openConjunctsFor } from "./ConjunctPanels.tsx";
@@ -201,7 +206,7 @@ export function PhraseBuilder({
   const [collapsedGroups, setCollapsedGroups] = useState<
     Record<string, boolean>
   >({});
-  // Compact view: collapse every dotted box down to just its core word at once — a
+  // Compact view: collapse every dotted ring down to just its core word at once — a
   // period-level toggle over the per-group collapse below. It doesn't touch
   // `collapsedGroups`, so any manual per-box collapses are preserved when it turns off.
   const [compact, setCompact] = useState(false);
@@ -348,7 +353,7 @@ export function PhraseBuilder({
   }
 
   // Remove a complement entirely: clear its concept/number/gender and collapse
-  // its dotted box (un-reveal so it doesn't linger as an empty group).
+  // its dotted ring (un-reveal so it doesn't linger as an empty group).
   function handleRemoveComplement(type: BoxComplementType) {
     handleClear(type);
     setRevealed((prev) => ({ ...prev, [type]: false }));
@@ -468,25 +473,6 @@ export function PhraseBuilder({
     setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
   }
 
-  // Re-arrange a single dotted box in place — compacting its child nodes around the
-  // group's own current center. The tidied cluster is laid out from the nodes' real
-  // footprints, so it can come back taller than the canvas (a box of long words, or one
-  // wearing all three rows); when it does, the container grows to hold it rather than the
-  // cluster being squashed back into a canvas that was never sized for it.
-  function handleRearrangeGroup(group: GroupShape) {
-    if (group.nodeKeys.length === 0) return;
-    const { positions: tidied, minHeight } = rearrangeGroupPositions(
-      group,
-      (k) => positions[k] ?? DEFAULT_POSITIONS[k] ?? { x: 50, y: 50 },
-      { w: svgSize.w, h: graphHeight },
-      sizeOf,
-    );
-    setPositions((prev) => ({ ...prev, ...tidied }));
-    // Growing rebases every y onto the new height (see rescaleYForHeight), so the cluster
-    // we just placed keeps the pixel position it was laid out at.
-    if (minHeight > graphHeight) setGraphHeight(minHeight);
-  }
-
   function handleToggleReveal(sat: Satellite) {
     const willShow = !sat.shown;
     setRevealed((prev) => ({ ...prev, [sat.key]: willShow }));
@@ -495,9 +481,9 @@ export function PhraseBuilder({
     }
   }
 
-  // Sort every satellite's control into: its parent word box's border, the verb-phrase
-  // dotted box (complement toggles), or a noun's dotted-box perimeter (relative-clause +
-  // possessor controls, which also anchor their connector lines).
+  // Sort every satellite's control into: its word's solid ring (or, chained, the orbit gap after
+  // the satellite before it), the verb phrase's dotted ring (complement toggles), or a noun's
+  // dotted ring (relative-clause + possessor controls, which also anchor their connector lines).
   const {
     satelliteIconsByParent,
     complementToggleIcons,
@@ -570,12 +556,31 @@ export function PhraseBuilder({
     compact,
   });
 
+  // The constituents on the canvas, and which of their satellites are shown.
+  const groups = roleGroups({
+    drawCanvas: showCanvas,
+    // An `object`-level instrument holds a bare noun phrase, not a clause: no verb phrase, no
+    // objects.
+    nounPhrase: nounPhraseMode,
+    // The possessor's own head is a word on this canvas; in a relative clause the subject is the
+    // external head, so it isn't drawn — and neither is an instrument act's, which is the acting
+    // clause's subject, not one of its own.
+    showSubject: !actionMode,
+    visibleSlots,
+    shownMap,
+  });
+
   // Compact-view layout, derived (not stored) each render: pack the visible core words
   // into centered rows and size the canvas to just wrap them. Because it's recomputed
   // from the current width every render, it never goes stale on a resize, and the stored
   // full-view positions/height stay pristine for when compact turns back off. The core
   // words are exactly `renderedSlots` in compact (satellites are already filtered out).
   // The packing keeps clear of the period's controls, which reserve no room of their own.
+  // Each cell is big enough for the biggest solid ring and the clear button straddling it.
+  const ringHalf =
+    Math.max(0, ...groups.map((g) => innerRadius(sizeOf(g.mainKey)))) + BUTTON_HALF;
+  const cellHalfW = Math.max(COMPACT_PAD_H, Math.ceil(ringHalf));
+  const cellHalfH = Math.max(COMPACT_PAD_V, Math.ceil(ringHalf));
   const compactLayout = React.useMemo(
     () =>
       compact
@@ -583,12 +588,13 @@ export function PhraseBuilder({
             renderedSlots.map((s) => s.key),
             svgSize.w,
             controlsCorner,
+            { halfW: cellHalfW, halfH: cellHalfH },
           )
         : null,
-    [compact, renderedSlots, svgSize.w, controlsCorner],
+    [compact, renderedSlots, svgSize.w, controlsCorner, cellHalfW, cellHalfH],
   );
 
-  // Canvas height + the size buildGraph measures against: the tight compact height when
+  // Canvas height + the size the rings are laid out against: the tight compact height when
   // compact, else the (resizable) full-view height. Both the group rects and the box %
   // positions are computed against this same height, so they stay consistent.
   //
@@ -603,46 +609,87 @@ export function PhraseBuilder({
   // with the container's bottom border, so the two must stay in step.
   const paperPad = compact ? 1 : 2;
 
-  function pos(key: string) {
-    if (compactLayout?.positions[key]) return compactLayout.positions[key];
-    return positions[key] ?? DEFAULT_POSITIONS[key];
-  }
+  // Where a constituent's word sits: its stored position, or the compact packing while compact.
+  // The word is the centre of its rings; everything else on the constituent is placed round it.
+  const wordPos = (key: string) =>
+    compactLayout?.positions[key] ?? positions[key] ?? DEFAULT_POSITIONS[key];
+  const centerOf = (key: string) => {
+    const p = wordPos(key);
+    return { x: (p.x / 100) * graphSize.w, y: (p.y / 100) * graphSize.h };
+  };
 
-  // Canvas-pixel position of each satellite reveal control, keyed by satellite
-  // key; also fed to buildGraph as each link's origin (see controlLayout).
-  const controlPos = computeControlPositions({
-    satelliteIconsByParent,
-    boxSizes,
-    pos,
-    svgSize: graphSize,
-  });
+  // The words whose solid ring carries a clear button: a chosen word that is not a link target's
+  // greyed endpoint, not open for re-picking, and not the subject a mood has replaced.
+  const moodSubject = Boolean(selection.imperative || selection.infinitive);
+  const clearable = new Set(
+    groups
+      .map((g) => g.mainKey)
+      .filter(
+        (k) =>
+          Boolean(selection[k as SlotKey]) &&
+          !linkBinding?.relative.targetKeys.has(k as NounKey) &&
+          editingSlot !== k &&
+          !(k === "subject" && moodSubject),
+      ),
+  );
 
-  const { edges, groupRects, groupEdges } = buildGraph({
-    drawCanvas: showCanvas,
-    // An `object`-level instrument holds a bare noun phrase, not a clause: no verb phrase, no
-    // objects.
-    nounPhrase: nounPhraseMode,
-    // The possessor's own head is a box on this canvas; in a relative clause the subject is the
-    // external head, so it isn't drawn — and neither is an instrument act's, which is the acting
-    // clause's subject, not one of its own.
-    showSubject: !actionMode,
-    compact,
-    renderedSlots,
-    visibleSlots,
-    shownMap,
-    pos,
-    controlPos,
+  // Seat every satellite and control on its constituent's rings (see ringSpecs / ringLayout).
+  const { groupRects, discs, controlPos } = buildRings({
+    groups,
+    specs: buildRingSpecs({
+      groups,
+      compact,
+      satelliteIconsByParent,
+      complementToggleIcons,
+      directObjectToggle,
+      perimeterByNoun,
+      linkTargetKeys: linkBinding?.relative.targetKeys,
+      clearable,
+      toolbars: {
+        ...(selection.route && { route: PATH_SPECIFIERS }),
+        ...(selection.locative && { locative: PATH_SPECIFIERS }),
+        ...(selection.cause && { cause: CAUSE_SENTIMENTS }),
+      },
+      centerOf,
+    }),
+    centerOf,
     sizeOf,
-    svgSize: graphSize,
+    compact,
   });
 
-  // Keep the dotted boxes clear of each other, growing the canvas when a shove needs room
+  // Where a node sits, in % of the canvas: a satellite where its orbit seats it, a word where
+  // it was put.
+  function pos(key: string) {
+    const disc = discs[key];
+    if (disc) return { x: (disc.x / graphSize.w) * 100, y: (disc.y / graphSize.h) * 100 };
+    return wordPos(key);
+  }
+  // A satellite is dragged by its constituent: pressing its disc moves the whole ring.
+  const dragKeyOf = (key: string) =>
+    groups.find((g) => g.nodeKeys.includes(key))?.mainKey ?? key;
+
+  const { edges, groupEdges } = buildEdges({
+    groupRects,
+    discs,
+    controlPos,
+    complementToggleIcons,
+    directObjectToggle,
+    compact,
+  });
+
+  // The clear button on each word's solid ring.
+  const clearControls = [...clearable].map((mainKey) => ({
+    mainKey,
+    label: ALL_SLOTS.find((s) => s.key === mainKey)?.label ?? mainKey,
+    onClear: () => handleClear(mainKey as SlotKey),
+  }));
+
+  // Keep the rings clear of each other, growing the canvas when a shove needs room
   // (see useOverlapResolution).
   useOverlapResolution({
     compact,
     groupRects,
     pos,
-    sizeOf,
     graphSize,
     graphHeight,
     setPositions,
@@ -651,14 +698,13 @@ export function PhraseBuilder({
     positionsStaleRef,
   });
 
-  // Tidy the whole period: tidy each dotted box on its own — the same re-arrange its own
-  // button runs — then pack the tidied boxes into non-overlapping rows in reading order:
-  // subject · verb phrase · direct object · complements. Collapse state
-  // is left alone; one click re-flows the container into a clean grid without hiding
-  // anything the user had revealed.
+  // Tidy the whole period: pack the constituents' rings into non-overlapping rows in reading
+  // order: subject · verb phrase · direct object · complements. Collapse state is left alone;
+  // one click re-flows the container into a clean grid without hiding anything the user had
+  // revealed.
   function handleTidyPeriod() {
     if (groupRects.length === 0) return;
-    const { positions: packed, height } = packPeriod(groupRects, graphSize, sizeOf);
+    const { positions: packed, height } = packPeriod(groupRects, graphSize);
     setPositions((prev) => ({ ...prev, ...packed }));
     // Fit the container to the grid we just laid out — growing when expanded boxes need
     // more room than the canvas has, and shrinking when they need less, so tidying clears
@@ -689,11 +735,15 @@ export function PhraseBuilder({
     complementToggleIcons,
     directObjectToggle,
     groupRects,
+    discs,
+    controlPos,
     collapsedGroups: effectiveCollapsed,
     compact,
     draggingKey,
-    // Painted where `pos` says — the compact packing, while compact — not at the stored position.
-    makeDragProps: (key, onActivate) => makeDragProps(key, onActivate, pos(key)),
+    // Painted where `pos` says — on the orbit, or the compact packing — not at the stored
+    // position; a satellite drags its whole constituent.
+    makeDragProps: (key, onActivate) =>
+      makeDragProps(key, onActivate, pos(key), dragKeyOf(key)),
     makeGroupDragProps,
     slotEls,
     handleSlotClick,
@@ -718,7 +768,6 @@ export function PhraseBuilder({
     handleSelectLocativeSpecifier,
     handleSelectSentiment,
     handleToggleCollapse,
-    handleRearrangeGroup,
     handleRemoveComplement,
     // Cross-container linking: forward noun boxes to the workspace registry and expose
     // greying (link targets) + pick-mode (eligible targets). Only NOUN_KEYS participate.
@@ -746,8 +795,8 @@ export function PhraseBuilder({
       }
       linkBinding?.relative.onPick(key as NounKey);
     },
-    // The verb-phrase dotted box's complement-toggle row is where an instrumental link starts,
-    // so the workspace measures its connector from there.
+    // The instrumental toggle on the verb phrase's dotted ring is where an instrumental link
+    // starts, so the workspace measures its connector from there.
     registerVerbAnchor: linkBinding?.geometry.registerVerbAnchor,
   };
 
@@ -766,6 +815,7 @@ export function PhraseBuilder({
         edges={edges}
         groupEdges={groupEdges}
         controlPos={controlPos}
+        clearControls={clearControls}
         perimeterByNoun={perimeterByNoun}
         linkBinding={linkBinding}
         onSetImperativePerson={handleSetImperativePerson}

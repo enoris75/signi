@@ -39,9 +39,11 @@ export interface PhraseCanvasProps {
   graphSize: { w: number; h: number };
   edges: Edge[];
   groupEdges: Edge[];
-  // Absolute canvas-pixel position of each satellite reveal control, keyed by satellite key.
+  // Where every ring control sits on the canvas, in px, keyed by control (see ringSpecs).
   controlPos: Record<string, { x: number; y: number }>;
-  // The relative-clause + possessor controls that ride each noun's dotted-box perimeter.
+  // The clear button on each chosen word's solid ring.
+  clearControls: ComponentProps<typeof SatelliteControls>["clearControls"];
+  // The relative-clause + possessor controls that ride each noun's dotted ring.
   perimeterByNoun: ComponentProps<
     typeof GroupPerimeterControls
   >["perimeterByNoun"];
@@ -61,7 +63,7 @@ const subjectSlot = ALL_SLOTS.find((s) => s.key === "subject")!;
 
 // The period's drawing surface: either the empty opening word picker, or the populated
 // canvas — the connectors layer, the noun/verb phrase builders, and the satellite +
-// dotted-box perimeter controls. Split out of PhraseBuilder, which owns the state this
+// dotted ring controls. Split out of PhraseBuilder, which owns the state this
 // paints from and threads it in through `ctx` plus the canvas-geometry props above.
 export function PhraseCanvas({
   ctx,
@@ -71,6 +73,7 @@ export function PhraseCanvas({
   edges,
   groupEdges,
   controlPos,
+  clearControls,
   perimeterByNoun,
   linkBinding,
   onSetImperativePerson,
@@ -83,7 +86,6 @@ export function PhraseCanvas({
     selection,
     activeSlot,
     compact,
-    groupRects,
     satelliteIconsByParent,
     handleClear,
     handleConceptSelect,
@@ -201,18 +203,17 @@ export function PhraseCanvas({
             )}
           </>
 
-          {/* Compact view is just the bare core-word chips — no reveal icons
-              on the box borders and no dotted-box perimeter controls. */}
-          {!compact && (
-            <SatelliteControls
-              satelliteIconsByParent={satelliteIconsByParent}
-              controlPos={controlPos}
-            />
-          )}
+          {/* Compact view is just the words in their solid rings, each with its clear button — no
+              reveal icons and no dotted-ring controls. */}
+          <SatelliteControls
+            satelliteIconsByParent={compact ? {} : satelliteIconsByParent}
+            clearControls={clearControls}
+            controlPos={controlPos}
+          />
 
           {!compact && (
             <GroupPerimeterControls
-              groupRects={groupRects}
+              controlPos={controlPos}
               perimeterByNoun={perimeterByNoun}
               linkTargetKeys={
                 linkBinding

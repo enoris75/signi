@@ -11,7 +11,7 @@ interface UsePanelConnectorsArgs {
 
 // The connector lines from a noun box down to its docked possessor / conjunct panels.
 //
-// Each runs dot-to-dot: from the control on the noun's dotted-box perimeter (start) to the
+// Each runs dot-to-dot: from the control on the noun's dotted ring (start) to the
 // receiving dot on the panel's top edge (end). The possessor control and the "Coordinate"
 // control register in their `*ControlEls` map, the panels' dots in their `*DotEls` map.
 // Both ends are measured relative to `rootRef` — the builder's outermost positioned Box —

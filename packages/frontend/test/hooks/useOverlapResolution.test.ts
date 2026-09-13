@@ -2,31 +2,46 @@ import { describe, expect, it, vi } from 'vitest';
 import { renderHook } from '@testing-library/react';
 import { useOverlapResolution } from '../../src/components/PhraseBuilder/hooks/useOverlapResolution.ts';
 import type { DragState, Positions } from '../../src/components/PhraseBuilder/hooks/useDrag.ts';
-import {
-  DEFAULT_NODE_SIZE,
-  rawGroupRect,
-  type GroupRect,
-  type NodeSize,
-} from '../../src/components/PhraseBuilder/graph.ts';
+import type { GroupRect } from '../../src/components/PhraseBuilder/graph.ts';
 import { BOTTOM_MARGIN } from '../../src/components/PhraseBuilder/overlap.ts';
+import { ringFootprint } from '../../src/components/PhraseBuilder/ringLayout.ts';
 import { MIN_GRAPH_HEIGHT } from '../../src/components/PhraseBuilder/slots.ts';
 
-// Two one-word dotted boxes. With nominal word boxes each footprint is 160 px wide and 100 px
-// tall around its word (see groupPads), so on an 800 px canvas words 80 px apart overlap by 90.
-const SUBJECT = group('Subject', 'subject');
-const VERB = group('Verb Phrase', 'verb');
-
-function group(label: string, ...nodeKeys: string[]): GroupRect {
-  // The hook only reads a group's label and node keys; its rect is re-derived from them.
-  return { label, nodeKeys, color: '', x: 0, y: 0, width: 0, height: 0 };
-}
+// Two one-word constituents. A dotted ring of radius 69 takes up a 160 px square with the controls
+// straddling it, so on an 800 px canvas words 80 px apart overlap by 90.
+const RADIUS = 69;
+const LABELS: Record<string, string> = { subject: 'Subject', verb: 'Verb Phrase' };
 
 interface Scene {
   positions: Positions;
-  sizes?: Record<string, NodeSize>;
-  groupRects?: GroupRect[];
+  // Each constituent's dotted-ring radius, by its word; RADIUS unless given.
+  radii?: Record<string, number>;
+  words?: string[];
   graphSize?: { w: number; h: number };
   compact?: boolean;
+}
+
+// The rings the ring layout would lay out for a scene: each centred on its word.
+function rings(scene: Scene, positions = scene.positions): GroupRect[] {
+  const size = scene.graphSize ?? { w: 800, h: 300 };
+  return (scene.words ?? ['subject', 'verb']).map((word) => {
+    const center = {
+      x: (positions[word].x / 100) * size.w,
+      y: (positions[word].y / 100) * size.h,
+    };
+    const rOut = scene.radii?.[word] ?? RADIUS;
+    return {
+      label: LABELS[word],
+      color: '',
+      mainKey: word,
+      nodeKeys: [word],
+      center,
+      rIn: 34,
+      orbit: 34,
+      rOut,
+      ...ringFootprint(center, rOut),
+    };
+  });
 }
 
 // Renders the hook over a fixed scene. The setters are spies, not state: nothing it writes
@@ -37,19 +52,20 @@ function renderResolver(initial: Scene) {
   const dragRef: { current: DragState | null } = { current: null };
   const positionsStaleRef = { current: false };
   const hook = renderHook(
-    ({ positions, sizes = {}, groupRects = [SUBJECT, VERB], graphSize = { w: 800, h: 300 }, compact = false }: Scene) =>
-      useOverlapResolution({
-        compact,
-        groupRects,
-        pos: (k) => positions[k],
-        sizeOf: (k) => sizes[k] ?? DEFAULT_NODE_SIZE,
+    (scene: Scene) => {
+      const graphSize = scene.graphSize ?? { w: 800, h: 300 };
+      return useOverlapResolution({
+        compact: scene.compact ?? false,
+        groupRects: rings(scene),
+        pos: (k) => scene.positions[k],
         graphSize,
         graphHeight: graphSize.h,
         setPositions,
         setGraphHeight,
         dragRef,
         positionsStaleRef,
-      }),
+      });
+    },
     { initialProps: initial },
   );
   // The patch a setPositions call merges in.
@@ -66,13 +82,7 @@ const clear = (h = 300): Scene => ({
   graphSize: { w: 800, h },
 });
 
-function footprints(positions: Positions, scene: Scene) {
-  const size = scene.graphSize ?? { w: 800, h: 300 };
-  const sizeOf = (k: string) => scene.sizes?.[k] ?? DEFAULT_NODE_SIZE;
-  return (scene.groupRects ?? [SUBJECT, VERB]).map((g) =>
-    rawGroupRect(g, (k) => positions[k], size, false, sizeOf),
-  );
-}
+const footprints = (positions: Positions, scene: Scene) => rings(scene, positions);
 
 const intersects = (
   a: { x: number; y: number; width: number; height: number },
@@ -104,7 +114,7 @@ describe('useOverlapResolution', () => {
     });
 
     it('has nothing to do with a single box', () => {
-      const { setPositions } = renderResolver({ ...overlapping(), groupRects: [SUBJECT] });
+      const { setPositions } = renderResolver({ ...overlapping(), words: ['subject'] });
 
       expect(setPositions).not.toHaveBeenCalled();
     });
@@ -136,9 +146,9 @@ describe('useOverlapResolution', () => {
     });
 
     it('lets a box that just grew hold its ground, pushing its neighbour away', () => {
-      // The verb box sits clear of the subject's, then its word widens to 300 px and reaches over.
+      // The verb's ring sits clear of the subject's, then a satellite widens it and it reaches over.
       const before: Scene = { positions: { subject: { x: 25, y: 50 }, verb: { x: 55, y: 50 } } };
-      const grown: Scene = { ...before, sizes: { verb: { w: 300, h: DEFAULT_NODE_SIZE.h } } };
+      const grown: Scene = { ...before, radii: { verb: 150 } };
       const { rerender, setPositions, patch } = renderResolver(before);
       expect(setPositions).not.toHaveBeenCalled();
 
@@ -210,13 +220,13 @@ describe('useOverlapResolution', () => {
     });
 
     it('fits the canvas to the boxes while a drag is under way', () => {
-      // Both boxes end 52 px below their words at 300 px.
+      // Both footprints end 80 px below their words at 300 px.
       const { rerender, setGraphHeight, dragRef } = renderResolver(clear(600));
       dragRef.current = { keys: ['verb'], startX: 0, startY: 0, origPositions: {}, moved: true };
 
       rerender(clear(600));
 
-      expect(setGraphHeight).toHaveBeenCalledExactlyOnceWith(Math.ceil(352 + BOTTOM_MARGIN));
+      expect(setGraphHeight).toHaveBeenCalledExactlyOnceWith(Math.ceil(380 + BOTTOM_MARGIN));
     });
 
     it('fits no smaller than the minimum canvas height', () => {

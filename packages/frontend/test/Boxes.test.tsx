@@ -18,7 +18,6 @@ import {
   CategoryToggle,
   DeterminerToggleBox,
   SatelliteButton,
-  SatelliteRow,
   SentimentSelector,
   SlotBox,
   SpecifierSelector,
@@ -376,36 +375,23 @@ describe('SatelliteButton', () => {
   });
 });
 
-describe('SatelliteRow', () => {
-  it('renders one button per satellite, in order', () => {
-    const onNumber = vi.fn();
-    render(
-      <SatelliteRow
-        color="warning"
-        satellites={[
-          satellite({ key: 'number', label: 'Number', valued: true, onToggle: onNumber }),
-          satellite({ key: 'gender', label: 'Gender', valued: true }),
-          satellite({ key: 'adjective', label: 'Adjective' }),
-        ]}
-      />,
-    );
-
-    expect(screen.getAllByRole('button').map((b) => b.dataset['testid'])).toEqual([
-      'satellite-number',
-      'satellite-gender',
-      'satellite-adjective',
-    ]);
-    fireEvent.click(screen.getByTestId('satellite-number'));
-    expect(onNumber).toHaveBeenCalledOnce();
-  });
-});
-
 describe('ToggleBox', () => {
   it('shows its label over its value', () => {
     render(<ToggleBox label="Polarity" value="Negative" />);
 
     expect(screen.getByText('Polarity')).toBeInTheDocument();
     expect(screen.getByText('Negative')).toBeInTheDocument();
+  });
+
+  it('as a disc on an orbit, says only its value, naming itself in a tooltip', () => {
+    const { container } = render(<ToggleBox label="Tense" value="Past" disc={24} />);
+
+    expect(screen.queryByText('Tense')).not.toBeInTheDocument();
+    expect(screen.getByText('Past')).toBeInTheDocument();
+    expect(screen.getByTitle('Tense: Past')).toBeInTheDocument();
+    const circle = getComputedStyle(container.querySelector('.slot-circle')!);
+    expect(circle.width).toBe('48px');
+    expect(circle.borderRadius).toBe('50%');
   });
 });
 
@@ -467,6 +453,19 @@ describe('SpecifierSelector', () => {
     fireEvent.pointerDown(screen.getByRole('button', { name: 'over' }));
 
     expect(onCanvasPointerDown).not.toHaveBeenCalled();
+  });
+
+  it('seats each relation where its ring places it, leaving out any it has no seat for', () => {
+    const seats: Partial<Record<(typeof PATH_SPECIFIERS)[number], { x: number; y: number }>> = {
+      in: { x: 120, y: 30 },
+      over: { x: 150, y: 24 },
+    };
+    render(<SpecifierSelector value="in" onSelect={() => {}} placeAt={(s) => seats[s]} />);
+
+    const buttons = screen.getAllByRole('button');
+    expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['in', 'over']);
+    const seat = getComputedStyle(buttons[1].parentElement!);
+    expect({ left: seat.left, top: seat.top }).toEqual({ left: '150px', top: '24px' });
   });
 });
 

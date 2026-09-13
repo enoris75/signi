@@ -92,15 +92,18 @@ export function useDrag({ positions, setPositions, containerRef, frozen = false 
     setDraggingKey(null);
   }
 
-  // `at` is where the box is painted, when that isn't its stored position (compact view).
+  // `at` is where the box is painted, when that isn't its stored position (compact view, or a
+  // satellite seated on its constituent's orbit). `moveKey` is the node a drag actually moves: a
+  // satellite's is its constituent's word, so pressing a disc drags the whole ring.
   function makeDragProps(
     key: string,
     onActivate: () => void,
     at: { x: number; y: number } = positions[key] ?? DEFAULT_POSITIONS[key],
+    moveKey: string = key,
   ) {
-    const isDragging = draggingKey === key;
+    const isDragging = draggingKey === moveKey;
     return {
-      onPointerDown: (e: React.PointerEvent) => startDrag(e, key),
+      onPointerDown: (e: React.PointerEvent) => startDrag(e, moveKey),
       onPointerMove: moveDrag,
       onPointerUp: () => endDrag(onActivate),
       onPointerCancel: () => endDrag(),

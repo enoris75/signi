@@ -77,7 +77,7 @@ export interface CoordinativeControl {
 
 // The instrumental control state, threaded from the workspace binding. Unlike the two clause-level
 // relations this period has no *border* control for it: the link is started from the verb-phrase
-// dotted box of the clause that acts (inside the canvas), so all a period needs here is the target
+// dotted ring of the clause that acts (inside the canvas), so all a period needs here is the target
 // side — light up as droppable during a pick, take the click, and caption itself once linked.
 export interface InstrumentalControl {
   // This period *is* the instrument phrase of some other period.
@@ -225,7 +225,7 @@ export interface PeriodContainerProps {
   // Coordinative (AND/OR/BUT/…) connector control on the card border. Absent for a standalone period.
   coordinative?: CoordinativeControl;
   // Instrumental link state — target side only (the control that starts it lives on the verb
-  // phrase's dotted box). Absent for a standalone period.
+  // phrase's dotted ring). Absent for a standalone period.
   instrumental?: InstrumentalControl;
   // Imperative (command) toggle on the card border. Present for every period.
   imperative?: ImperativeControl;

@@ -43,36 +43,42 @@ test.describe('canvas', () => {
     expect(Math.round(retidied.y)).toBe(Math.round(settled.y));
   });
 
-  test("a word box's controls ride its border, clear of its word and of each other", async ({ app }) => {
+  test("a word's controls ride its solid ring, clear of its word and of each other", async ({ app }) => {
     // "be" is a short verb carrying the full set of controls — tense, aspect, modal, polarity,
-    // adverb — on a box barely taller than the word. Tense and the modal aim the same way, and
-    // fanning them apart used to sink the modal into the box, over the word. The subject's
-    // controls crowd its box the same way.
+    // adverb, and its clear button. Tense and the modal aim much the same way; fanning them apart
+    // on a box used to sink the modal over the word. On a ring they spread along its circumference,
+    // which clears the word's corners by a control's width. The subject's controls crowd it the
+    // same way.
     await app.buildClause('AFRICA', 'BE');
     await app.page.mouse.move(0, 0);
 
     const RADIUS = 10; // a control button is 20px across
     const SLACK = 0.5; // sub-pixel rounding
     for (const [slot, word, controls] of [
-      ['verb', 'be', '[data-testid^="satellite-verb"], [data-testid="satellite-modifier"]'],
-      // The relative, possessor and conjunct controls ride the subject's dotted box, not its word box.
+      [
+        'verb',
+        'be',
+        '[data-testid^="satellite-verb"], [data-testid="satellite-modifier"], [aria-label="Clear Verb"]',
+      ],
+      // The relative, possessor and conjunct controls ride the subject's dotted ring, not its solid one.
       [
         'subject',
         'Africa',
-        ['Relative', 'Possessor', 'Conjunct'].reduce(
+        `${['Relative', 'Possessor', 'Conjunct'].reduce(
           (sel, kind) => `${sel}:not([data-testid$="${kind}"])`,
           '[data-testid^="satellite-subject"]',
-        ),
+        )}, [aria-label="Clear Subject"]`,
       ],
     ]) {
       // The layout settles over a few frames as boxes are measured, so the geometry is polled.
       await expect(async () => {
-        const { paper, glyphs, centers } = await app.page.evaluate(
+        const { ring, glyphs, centers } = await app.page.evaluate(
           ({ slot, word, controls }) => {
             const rect = (r: DOMRect) => ({ l: r.left, r: r.right, t: r.top, b: r.bottom });
-            const paper = document.querySelector(`[data-testid="box-${slot}"] .MuiPaper-root`)!;
-            // The word's glyphs, not its line: a control may straddle the border beside it.
-            const walker = document.createTreeWalker(paper, NodeFilter.SHOW_TEXT);
+            const box = document.querySelector(`[data-testid="box-${slot}"]`)!;
+            const circle = box.querySelector('.slot-circle')!.getBoundingClientRect();
+            // The word's glyphs, not its line.
+            const walker = document.createTreeWalker(box, NodeFilter.SHOW_TEXT);
             let glyphs = null;
             for (let n = walker.nextNode(); n; n = walker.nextNode()) {
               if (n.textContent?.trim() !== word) continue;
@@ -84,16 +90,19 @@ test.describe('canvas', () => {
               const r = el.getBoundingClientRect();
               return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
             });
-            return { paper: rect(paper.getBoundingClientRect()), glyphs, centers };
+            return {
+              ring: { x: circle.left + circle.width / 2, y: circle.top + circle.height / 2, r: circle.width / 2 },
+              glyphs,
+              centers,
+            };
           },
           { slot, word, controls },
         );
         expect(glyphs).not.toBeNull();
         expect(centers.length).toBeGreaterThanOrEqual(3);
         for (const c of centers) {
-          // On the border: the center within a few px of the box's edge, inside or out.
-          const depth = Math.min(c.x - paper.l, paper.r - c.x, c.y - paper.t, paper.b - c.y);
-          expect(Math.abs(depth)).toBeLessThanOrEqual(3);
+          // On the ring: the center within a few px of its circle, inside or out.
+          expect(Math.abs(Math.hypot(c.x - ring.x, c.y - ring.y) - ring.r)).toBeLessThanOrEqual(3);
           // Clear of the word.
           const dx = Math.max(glyphs!.l - c.x, 0, c.x - glyphs!.r);
           const dy = Math.max(glyphs!.t - c.y, 0, c.y - glyphs!.b);

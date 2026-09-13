@@ -70,13 +70,18 @@ const COMMAND = {
 const CAT: Concept = { id: 'CAT', role: 'noun', description: 'a small feline', label: 'cat' };
 
 const GROUP: GroupRect = {
-  x: 10,
-  y: 20,
-  width: 100,
-  height: 60,
   label: 'Subject',
   color: 'primary',
+  mainKey: 'subject',
   nodeKeys: ['subject'],
+  center: { x: 60, y: 50 },
+  rIn: 34,
+  orbit: 34,
+  rOut: 60,
+  x: -11,
+  y: -21,
+  width: 142,
+  height: 142,
 };
 
 function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
@@ -117,6 +122,7 @@ function renderCanvas(
     edges: [] as Edge[],
     groupEdges: [] as Edge[],
     controlPos: { 'subject.number': { x: 40, y: 50 } },
+    clearControls: [],
     perimeterByNoun: {},
     linkBinding: undefined,
     onSetImperativePerson: vi.fn(),
@@ -311,29 +317,29 @@ describe('PhraseCanvas', () => {
       });
     });
 
-    it('rides the satellite controls on the canvas at their computed positions', () => {
-      const { ctx, controlPos } = renderCanvas();
+    it('rides the satellite controls and clear buttons on the canvas where the rings seat them', () => {
+      const clearControls = [{ mainKey: 'subject', label: 'Subject', onClear: () => {} }];
+      const { ctx, controlPos } = renderCanvas({ clearControls });
 
       expect(propsOf(SatelliteControls)).toEqual({
         satelliteIconsByParent: ctx.satelliteIconsByParent,
+        clearControls,
         controlPos,
       });
     });
 
-    it('rides the perimeter controls on the dotted boxes', () => {
+    it('rides the perimeter controls on the dotted rings', () => {
       const perimeterByNoun = { subject: {} };
-      renderCanvas({ perimeterByNoun });
+      const { controlPos } = renderCanvas({ perimeterByNoun });
 
-      expect(propsOf(GroupPerimeterControls)).toMatchObject({
-        groupRects: [GROUP],
-        perimeterByNoun,
-      });
+      expect(propsOf(GroupPerimeterControls)).toMatchObject({ controlPos, perimeterByNoun });
     });
 
-    it('draws neither kind of control in the compact view', () => {
-      renderCanvas({}, { compact: true });
+    it('keeps only the clear buttons in the compact view', () => {
+      const clearControls = [{ mainKey: 'subject', label: 'Subject', onClear: () => {} }];
+      renderCanvas({ clearControls }, { compact: true });
 
-      expect(screen.queryByTestId('satellite-controls')).not.toBeInTheDocument();
+      expect(propsOf(SatelliteControls)).toMatchObject({ satelliteIconsByParent: {}, clearControls });
       expect(screen.queryByTestId('perimeter-controls')).not.toBeInTheDocument();
       expect(phrases()).toContain('subject');
     });

@@ -13,10 +13,10 @@ import {
   SlotKey,
   slotCategories,
 } from "./interfaces.ts";
-import { CategoryToggle, SlotBox, type SatelliteIcon } from "./Boxes.tsx";
+import { CategoryToggle, SlotBox, type SatelliteIcon, type SlotShape } from "./Boxes.tsx";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
-import { CONTROL_GAP } from "./controlLayout.ts";
-import type { GroupRect, GroupShape } from "./graph.ts";
+import type { GroupRect } from "./graph.ts";
+import type { Disc, Pt } from "./ringLayout.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
 
 // Props spread onto each draggable node — the absolute positioning + pointer
@@ -29,9 +29,8 @@ export type DragBoxProps = {
   sx: SxProps<Theme>;
 };
 
-// Pointer handlers for dragging a whole role group (its dashed box moves every
-// child node at once). Unlike DragBoxProps this omits `sx` — the dashed GroupBox
-// owns its own positioning.
+// Pointer handlers for dragging a whole constituent by its dotted ring. Unlike DragBoxProps this
+// omits `sx` — the GroupBox owns its own positioning.
 export type GroupDragProps = {
   onPointerDown: (e: React.PointerEvent) => void;
   onPointerMove: (e: React.PointerEvent) => void;
@@ -55,24 +54,27 @@ export interface PhraseRenderContext {
   shownMap: Record<string, boolean>;
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   complementToggleIcons: SatelliteIcon[];
-  // The direct object's fold-away control. Not part of the toggle row: it is pinned to the point
-  // where the object's connector leaves the verb-phrase dotted box, so it reads as its start.
+  // The direct object's fold-away control, seated where the line to the object leaves the verb
+  // phrase's dotted ring, so it reads as that line's start.
   directObjectToggle?: SatelliteIcon;
+  // Each constituent's rings and footprint.
   groupRects: GroupRect[];
+  // Where each satellite disc sits on its constituent's orbit, and its radius, keyed by node.
+  discs: Record<string, Disc>;
+  // Where every ring control sits on the canvas, keyed by control (see ringSpecs).
+  controlPos: Record<string, Pt>;
   // Which group boxes are collapsed (keyed by GroupRect.label). Read by the
   // GroupBox to pick its collapse/expand icon.
   collapsedGroups: Record<string, boolean>;
-  // Compact view: the dashed group boxes and their border controls are suppressed,
-  // leaving just the tightly-packed core-word chips. Read by GroupBox (renders nothing).
+  // Compact view: the dotted rings, the satellites and their controls are suppressed, leaving just
+  // the tightly-packed words in their solid rings. Read by GroupBox (renders nothing).
   compact: boolean;
-  // "__group__" while a dashed box is being dragged — the GroupBox uses it to
-  // switch its cursor.
+  // "__group__" while a dotted ring is being dragged — the GroupBox uses it to switch its cursor.
   draggingKey: string | null;
   makeDragProps: (key: string, onActivate: () => void) => DragBoxProps;
   makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
-  // Every draggable node's DOM element, keyed by node key — the word boxes and the
-  // tense / aspect / determiner toggle boxes alike. Measured each commit so the dotted
-  // boxes and the tidy layout can work from real footprints rather than assumed ones.
+  // Every draggable node's DOM element, keyed by node key — the words and the tense / aspect /
+  // determiner toggles alike. Measured each commit, so each ring and disc is sized to its content.
   slotEls: React.MutableRefObject<Map<string, HTMLElement>>;
   handleSlotClick: (slot: SlotKey) => void;
   // Which filled word box is currently open for re-picking its word (null = none).
@@ -110,8 +112,6 @@ export interface PhraseRenderContext {
   handleSelectLocativeSpecifier: (spec: PathSpecifier) => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
-  // Compact a dotted box's child nodes into a tidy centered cluster.
-  handleRearrangeGroup: (group: GroupShape) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;
   // ── Cross-container linking (top-level containers only; undefined for possessors) ──
   // Report a noun box's DOM element up to the workspace registry (for connectors/greying).
@@ -121,13 +121,13 @@ export interface PhraseRenderContext {
   // In pick-mode: is this noun an eligible link target? Clicking it completes the link.
   isPickTarget?: (key: SlotKey) => boolean;
   onPickTarget?: (key: SlotKey) => void;
-  // Register the complement-toggle row on the verb-phrase dotted box with the workspace — the
+  // Register the instrumental toggle on the verb phrase's dotted ring with the workspace — the
   // start of an instrumental link's connector. Undefined for a standalone period.
   registerVerbAnchor?: (el: HTMLElement | null) => void;
 }
 
 // Register one draggable node's element in the measurement map under `key`. Every node on
-// the canvas goes in — a box left out reads as nominally sized, and its dotted box would
+// the canvas goes in — a node left out reads as nominally sized, and its ring or disc would
 // then be cut too tight around it.
 export function nodeElRef(ctx: PhraseRenderContext, key: string) {
   return (el: HTMLElement | null) => {
@@ -155,6 +155,16 @@ const FOOTER_CHIP_SX = {
   color: "text.secondary",
   "&:hover": { borderColor: "text.secondary" },
 } as const;
+
+// The sign a degree chip shows on a satellite disc's rim, where a word would not fit.
+const DEGREE_MARKS: Record<Degree, string> = {
+  positive: "±",
+  more: "+",
+  most: "++",
+  less: "−",
+  least: "−−",
+  equally: "=",
+};
 
 // The footer chip that picks the adjective modifying a noun-modifier itself ("semantic
 // *phrase* creator"). Empty → a muted "+ adj" affordance; filled → the adjective's label
@@ -349,37 +359,48 @@ export function SlotNode({
       />
     </Box>
   ) : undefined;
+  // A constituent's word sits in its solid ring; a satellite is a disc on the orbit.
+  const ring = ctx.groupRects.find((g) => g.mainKey === slot.key);
+  const disc = ctx.discs[slot.key];
+  const shape: SlotShape | undefined = ring
+    ? { r: ring.rIn, kind: "ring" }
+    : disc
+      ? { r: disc.r, kind: "disc" }
+      : undefined;
+  const onDisc = shape?.kind === "disc";
+
   // Same chip styling as the relation chip; shown for a real adjective. A positive
   // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
+  // On a disc it is a small round chip on the rim, marked with a sign rather than a word.
   const degreeChip = isRealAdjective ? (
     <Tooltip title={`Degree: ${DEGREE_LABELS[degree]} — click to change`}>
       <Box
         component="span"
+        data-testid={`degree-${slot.key}`}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={(e) => {
           e.stopPropagation();
           handleCycleDegree(slot.key);
         }}
         sx={{
-          display: "inline-block",
-          mt: 0.5,
-          px: 0.75,
-          py: 0.1,
-          borderRadius: 1,
-          border: "1px solid",
-          borderColor: "divider",
-          bgcolor: "background.paper",
-          cursor: "pointer",
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.55rem",
-          fontWeight: 700,
-          letterSpacing: "0.06em",
-          textTransform: "uppercase",
+          ...FOOTER_CHIP_SX,
+          ...(onDisc
+            ? {
+                display: "grid",
+                placeItems: "center",
+                minWidth: 18,
+                height: 18,
+                px: 0.25,
+                py: 0,
+                borderRadius: "9px",
+                fontSize: "0.6rem",
+                letterSpacing: 0,
+              }
+            : { mt: 0.5 }),
           color: degree === "positive" ? "text.disabled" : "text.secondary",
-          "&:hover": { borderColor: "text.secondary" },
         }}
       >
-        {degree === "positive" ? "±" : degree}
+        {onDisc ? DEGREE_MARKS[degree] : degree === "positive" ? "±" : degree}
       </Box>
     </Tooltip>
   ) : undefined;
@@ -395,14 +416,6 @@ export function SlotNode({
         onChange={(v) => onSlotKindChange(slot.key, v)}
       />
     ) : undefined;
-
-  // Widen the box to seat the satellite controls that ride its border. A short word
-  // (e.g. the verb "become") otherwise leaves too little edge for its controls, and
-  // their border points collide. Reserve one CONTROL_GAP slot per control so they can
-  // fan along an edge without piling up, keeping the 80px SlotBox default as the floor.
-  const controlCount = ctx.satelliteIconsByParent[slot.key]?.length ?? 0;
-  const minWidth =
-    controlCount > 0 ? Math.max(80, controlCount * CONTROL_GAP) : undefined;
 
   return (
     <Box
@@ -446,7 +459,7 @@ export function SlotNode({
         dimmed={dimmed}
         highlight={pickTarget}
         editing={editing}
-        minWidth={minWidth}
+        shape={shape}
         onClear={() => handleClear(slot.key)}
         categoryToggle={categoryToggle}
         emptyContent={slotTypeahead({
@@ -461,7 +474,8 @@ export function SlotNode({
             ? (v) => onSlotKindChange(slot.key, v)
             : undefined,
         })}
-        footer={modifierFooter ?? degreeChip}
+        footer={modifierFooter ?? (onDisc ? undefined : degreeChip)}
+        rim={onDisc ? degreeChip : undefined}
       />
     </Box>
   );

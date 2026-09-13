@@ -1,16 +1,26 @@
-import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, PATH_SPECIFIERS } from "@signi/shared";
-import { BoxComplementType, SlotConfig } from "./interfaces.ts";
+import { COMPLEMENT_LABELS } from "@signi/shared";
+import { SlotConfig } from "./interfaces.ts";
+import type { SatelliteIcon } from "./Boxes.tsx";
 import {
-  adjectiveChainParent,
-  modalAdverbParent,
   adjectiveSlots,
-  modalChainParent,
+  ALL_SLOTS,
   BOX_COMPLEMENT_TYPES,
+  MODAL_ADVERB_SLOTS,
   MODAL_SLOTS,
-  COMPLEMENT_ADJECTIVE_TYPE,
-  COMPLEMENT_KEY_SET,
   MUI_COLOR_HEX,
 } from "./slots.ts";
+import {
+  angleTo,
+  layoutRing,
+  onCircle,
+  ringFootprint,
+  type Disc,
+  type Pt,
+  type RingSpec,
+} from "./ringLayout.ts";
+import { portKey, verbEnd, VERB_PHRASE, type GroupDef } from "./ringSpecs.ts";
+
+export type { Pt } from "./ringLayout.ts";
 
 export type Edge = {
   x1: number;
@@ -18,389 +28,195 @@ export type Edge = {
   x2: number;
   y2: number;
   color: string;
-  // dashed = the faint satellite/adjective links; group links are solid.
+  // dashed = the faint satellite links; the links between constituents are solid.
   dashed: boolean;
 };
 
 export type Rect = { x: number; y: number; width: number; height: number };
 
-export type GroupRect = Rect & {
-  label: string;
-  color: string;
-  nodeKeys: string[];
-  // Set on complement groups — these carry an "x" to remove the whole box.
-  removeKey?: BoxComplementType;
-};
+/**
+ * One constituent as laid out on the canvas: its rings, and the square they (and the controls
+ * straddling the dotted ring) take up — the footprint that tidying and overlap resolution pack.
+ */
+export type GroupRect = Rect &
+  GroupDef & {
+    center: Pt;
+    rIn: number;
+    orbit: number;
+    rOut: number;
+  };
 
-// The identity of a role group, before its rect is measured.
-export type GroupShape = { nodeKeys: string[]; removeKey?: BoxComplementType };
-
-export type Pt = { x: number; y: number };
-type PosFn = (key: string) => Pt;
-
-// A word box's measured pixel footprint. Nodes are centered on their position, so a box
-// spans half its size either side of that point.
+// A node's measured content, in px. Nodes are centred on their position.
 export type NodeSize = { w: number; h: number };
 export type SizeFn = (key: string) => NodeSize;
 
-// Role-group bounding-rect padding, in SVG pixels.
-export const PIX_PAD_H = 80; // left & right — covers widest slot box half-width
-// Top & bottom must clear not just the box half-height but the satellite reveal
-// controls that ride the box border (each ~20px tall, straddling the edge) plus the
-// clear/adjective toggles on the corners — otherwise they superimpose on the dashed edge.
-export const PIX_PAD_TOP = 48;
-export const PIX_PAD_BOT = 52;
-// The route, locative and cause boxes each carry a toolbar on their top edge (path
-// relation / sentiment); give them extra headroom so it clears the box label.
-export const ROUTE_PAD_TOP = 40;
+// What a node measures before anyone has measured it: a labelled one-word box.
+export const DEFAULT_NODE_SIZE: NodeSize = { w: 64, h: 32 };
 
-// The toolbar a complement box wears centred on its top edge (SpecifierSelector /
-// SentimentSelector): 22px buttons 2px apart, inside 2px of padding and a 1px border.
-const TOOLBAR_BUTTON = 22;
-const TOOLBAR_GAP = 2;
-const TOOLBAR_INSET = 3;
-// How far in from a top corner the box's own buttons reach (GroupBox): the collapse toggle
-// straddling the corner and the tidy-up button beside it, plus a hair of air before a toolbar.
-const CORNER_BUTTONS_W = 33;
-
-// How many buttons the toolbar on a complement box's top edge holds; 0 for a box without one.
-function toolbarButtons(removeKey: BoxComplementType | undefined): number {
-  if (removeKey === "route" || removeKey === "locative") return PATH_SPECIFIERS.length;
-  if (removeKey === "cause") return CAUSE_SENTIMENTS.length;
-  return 0;
-}
-
-// The word box the pads above are cut to fit: a minimum-width slot box, half its size.
-// A node is only allowed to push its dotted box out by however much it exceeds this, so a
-// box of ordinary words keeps exactly the geometry the pads were tuned for, and one
-// holding a long word — or a tall one, wearing a degree/relation chip — grows to wrap it.
-const NOMINAL_HALF_W = 54;
-const NOMINAL_HALF_H = 26;
-// What a node's box measures before anyone has measured it (the first frame, and the
-// toggle boxes on a canvas that hasn't painted yet).
-export const DEFAULT_NODE_SIZE: NodeSize = {
-  w: NOMINAL_HALF_W * 2,
-  h: NOMINAL_HALF_H * 2,
-};
-
-// Compact-view padding: the dashed boxes and their border controls are hidden, so a
-// group rect only has to hug its lone core word (plus a hair of gap for the spine).
-// Much tighter than the full-view pads above — this is what shrinks the canvas.
-export const COMPACT_PAD_H = 66;
-export const COMPACT_PAD_TOP = 30;
-export const COMPACT_PAD_BOT = 30;
-
-// The padding a group's dotted box wraps around its node cluster, in SVG pixels.
-// Compact hugs the lone core word with tight, uniform pads (no toolbar headroom, since
-// the specifier toolbars are hidden too); full view uses the generous pads above.
-export function groupPads(
-  removeKey: BoxComplementType | undefined,
-  compact: boolean,
-): { padH: number; padTop: number; padBot: number } {
-  if (compact)
-    return {
-      padH: COMPACT_PAD_H,
-      padTop: COMPACT_PAD_TOP,
-      padBot: COMPACT_PAD_BOT,
-    };
-  return {
-    padH: PIX_PAD_H,
-    padTop: toolbarButtons(removeKey) > 0 ? PIX_PAD_TOP + ROUTE_PAD_TOP : PIX_PAD_TOP,
-    padBot: PIX_PAD_BOT,
-  };
-}
-
-// The narrowest a group's dotted box may be, in SVG pixels. A box with a toolbar on its top
-// edge has to seat it between the buttons on its top corners: the path-relation toolbar is
-// wider than a one-word box, and centred on the edge its end buttons would cover the collapse
-// and remove buttons. Compact view hides both, so it sets no floor.
-function groupMinWidth(
-  removeKey: BoxComplementType | undefined,
-  compact: boolean,
-): number {
-  const buttons = toolbarButtons(removeKey);
-  if (compact || buttons === 0) return 0;
-  const toolbar = buttons * TOOLBAR_BUTTON + (buttons - 1) * TOOLBAR_GAP + 2 * TOOLBAR_INSET;
-  return toolbar + 2 * CORNER_BUTTONS_W;
-}
-
-// The dotted box a group's nodes trace out, in canvas pixels, before the canvas-edge
-// clamp that `buildGraph` applies for painting. The overlap resolver works on these raw
-// rects: a box shoved against the canvas edge must still report its true footprint, or it
-// would read as narrower than it is and never get pushed clear of its neighbour.
-//
-// Each node claims its own pad, widened by however far its box overhangs the nominal one
-// the pads assume — so a group holding a long word wraps that word rather than letting it
-// spill through the dashed border. `sizeOf` may be omitted where the nodes are known to be
-// ordinary, in which case every pad is the plain one.
-export function rawGroupRect(
-  group: GroupShape,
-  pos: PosFn,
-  svgSize: { w: number; h: number },
-  compact: boolean,
-  sizeOf: SizeFn = () => DEFAULT_NODE_SIZE,
-): Rect {
-  const { padH, padTop, padBot } = groupPads(group.removeKey, compact);
-  const extents = group.nodeKeys.map((k) => {
-    const p = pos(k);
-    const size = sizeOf(k);
-    const overH = Math.max(0, size.w / 2 - NOMINAL_HALF_W);
-    const overV = Math.max(0, size.h / 2 - NOMINAL_HALF_H);
-    const cx = (p.x / 100) * svgSize.w;
-    const cy = (p.y / 100) * svgSize.h;
-    return {
-      left: cx - padH - overH,
-      right: cx + padH + overH,
-      top: cy - padTop - overV,
-      bottom: cy + padBot + overV,
-    };
-  });
-  const left = Math.min(...extents.map((e) => e.left));
-  const right = Math.max(...extents.map((e) => e.right));
-  const y = Math.min(...extents.map((e) => e.top));
-  // Widened about its centre to the box's floor, so the nodes stay centred in it.
-  const width = Math.max(right - left, groupMinWidth(group.removeKey, compact));
-  return {
-    x: (left + right - width) / 2,
-    y,
-    width,
-    height: Math.max(...extents.map((e) => e.bottom)) - y,
-  };
-}
-
-export const rectCenter = (r: Rect): Pt => ({
-  x: r.x + r.width / 2,
-  y: r.y + r.height / 2,
-});
-
-// Point where the segment from r's center toward (tx, ty) crosses r's border,
-// so the link starts/ends on the dashed box edge rather than inside it.
-export const rectBorderPoint = (r: Rect, tx: number, ty: number): Pt => {
-  const cx = r.x + r.width / 2;
-  const cy = r.y + r.height / 2;
-  const dx = tx - cx;
-  const dy = ty - cy;
-  if (dx === 0 && dy === 0) return { x: cx, y: cy };
-  const hw = r.width / 2;
-  const hh = r.height / 2;
-  const scale = 1 / Math.max(Math.abs(dx) / hw, Math.abs(dy) / hh);
-  return { x: cx + dx * scale, y: cy + dy * scale };
-};
-
-// Assemble everything the SVG layer draws: the faint intra-group satellite edges,
-// the dashed role-group bounding boxes, and the solid links between those boxes.
-export function buildGraph({
+// The constituents a canvas holds, and which of their nodes are shown.
+export function roleGroups({
   drawCanvas,
   nounPhrase = false,
   showSubject = true,
-  compact = false,
-  renderedSlots,
   visibleSlots,
   shownMap,
-  pos,
-  controlPos,
-  sizeOf,
-  svgSize,
 }: {
   // Whether to paint the canvas at all: true once the period has a subject or verb (or in
   // noun-phrase mode). Before that the builder shows its empty-state opening picker instead.
   drawCanvas: boolean;
-  // Verbless noun-phrase mode: the canvas holds a single noun phrase (the `subject`
-  // box + its satellites) with no verb phrase, objects, or inter-group links. Used by
-  // the possessor editor, which is a full noun phrase but has no predicate.
+  // Verbless noun-phrase mode: the canvas holds a single noun phrase (the `subject` word and its
+  // satellites) with no verb phrase, objects, or links between constituents.
   nounPhrase?: boolean;
-  // Whether the Subject role group is drawn. False inside a relative clause, whose
-  // subject is the (external) head noun rather than a box on this canvas.
+  // Whether the Subject constituent is drawn. False where the subject is not a word on this canvas.
   showSubject?: boolean;
-  // Compact view: shrink the group rects to hug their core word (the dashed boxes and
-  // their border controls are hidden), so the spine connects tightly-packed chips.
-  compact?: boolean;
-  renderedSlots: SlotConfig[];
   visibleSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
-  pos: PosFn;
-  // Measured pixel centers (canvas-relative) of the satellite reveal controls
-  // riding each core box's border, keyed by satellite key. When present, a
-  // satellite's dashed link starts here — from its own control — instead of the
-  // core box center. Missing (not yet measured) → fall back to the box center.
-  controlPos: Record<string, Pt>;
-  // Measured pixel size of every node box, so a group rect can wrap a word wider or
-  // taller than the padding assumes.
+}): GroupDef[] {
+  if (!drawCanvas) return [];
+  const shown = (keys: string[]) => keys.filter((k) => shownMap[k]);
+  return [
+    ...(showSubject
+      ? [
+          {
+            label: "Subject",
+            color: MUI_COLOR_HEX.primary,
+            mainKey: "subject",
+            nodeKeys: ["subject", ...shown([...adjectiveSlots("subject"), "subjectDefiniteness"])],
+          },
+        ]
+      : []),
+    // The verb phrase and the constituents hanging off it exist only in a full phrase.
+    ...(nounPhrase
+      ? []
+      : [
+          {
+            label: VERB_PHRASE,
+            color: MUI_COLOR_HEX.secondary,
+            mainKey: "verb",
+            nodeKeys: [
+              "verb",
+              ...shown([...MODAL_SLOTS, ...MODAL_ADVERB_SLOTS, "verbTense", "verbAspect", "modifier"]),
+            ],
+          },
+        ]),
+    // The object, like a complement, is on the canvas only while its control on the verb phrase
+    // says so — the difference being that its control starts out saying yes.
+    ...(visibleSlots.some((s) => s.key === "directObject") && shownMap.directObject
+      ? [
+          {
+            label: "Direct Object",
+            color: MUI_COLOR_HEX.success,
+            mainKey: "directObject",
+            nodeKeys: [
+              "directObject",
+              ...shown([...adjectiveSlots("directObject"), "directObjectDefiniteness"]),
+            ],
+          },
+        ]
+      : []),
+    ...BOX_COMPLEMENT_TYPES.filter((type) => shownMap[type]).map((type) => ({
+      label: COMPLEMENT_LABELS[type],
+      color: MUI_COLOR_HEX.warning,
+      mainKey: type as string,
+      removeKey: type,
+      nodeKeys: [type as string, ...shown([...adjectiveSlots(type), `${type}Definiteness`])],
+    })),
+  ];
+}
+
+/**
+ * Lay out every constituent's rings round its word, returning each constituent's rings and
+ * footprint, where every satellite disc sits, and where every control sits — keyed by control.
+ */
+export function buildRings({
+  groups,
+  specs,
+  centerOf,
+  sizeOf,
+  compact,
+}: {
+  groups: GroupDef[];
+  specs: Record<string, RingSpec>;
+  centerOf: (mainKey: string) => Pt;
   sizeOf: SizeFn;
-  svgSize: { w: number; h: number };
-}): { edges: Edge[]; groupRects: GroupRect[]; groupEdges: Edge[] } {
-  const px = (pct: number, dim: number) => (pct / 100) * dim;
-  const pxPt = (pt: Pt): Pt => ({
-    x: px(pt.x, svgSize.w),
-    y: px(pt.y, svgSize.h),
-  });
-  // A satellite link: from its control icon on the core box (measured) to the
-  // satellite node, both in canvas pixels.
-  const satEdge = (coreKey: string, satKey: string, color: string): Edge => {
-    const from = controlPos[satKey] ?? pxPt(pos(coreKey));
-    const to = pxPt(pos(satKey));
-    return { x1: from.x, y1: from.y, x2: to.x, y2: to.y, color, dashed: true };
-  };
-
-  // Both the satellite edges and the role-group rects draw whenever the canvas is shown —
-  // a period with a subject/verb, or a lone noun phrase (nounPhrase mode).
-  const edges: Edge[] = [];
-  if (drawCanvas) {
-    for (const slot of renderedSlots) {
-      if (slot.key === "verb") continue;
-      // Main constituents (subject, objects, complements) link group-to-group
-      // (dotted box ↔ dotted box) below, not box-to-box here. Adjectives/adverb
-      // still link within their own box.
-      if (
-        slot.key === "subject" ||
-        slot.key === "directObject" ||
-        COMPLEMENT_KEY_SET.has(slot.key)
-      )
-        continue;
-      // A chained adjective hangs off the previous one, so its link starts on that box
-      // rather than on the noun; the first adjective links back to its noun. Modals chain
-      // the same way, the first one hanging off the verb.
-      const complementParent = COMPLEMENT_ADJECTIVE_TYPE[slot.key];
-      const parentKey =
-        adjectiveChainParent(slot.key) ??
-        modalChainParent(slot.key) ??
-        modalAdverbParent(slot.key) ??
-        (slot.key === "subjectAdjective"
-          ? "subject"
-          : slot.key === "directObjectAdjective"
-            ? "directObject"
-            : (complementParent ?? "verb"));
-      edges.push(satEdge(parentKey, slot.key, MUI_COLOR_HEX[slot.color]));
-    }
-    if (shownMap.verbTense)
-      edges.push(satEdge("verb", "verbTense", MUI_COLOR_HEX.secondary));
-    if (shownMap.verbAspect)
-      edges.push(satEdge("verb", "verbAspect", MUI_COLOR_HEX.secondary));
-    if (shownMap.subjectDefiniteness)
-      edges.push(satEdge("subject", "subjectDefiniteness", "#888"));
-    if (shownMap.directObjectDefiniteness)
-      edges.push(
-        satEdge(
-          "directObject",
-          "directObjectDefiniteness",
-          MUI_COLOR_HEX.success,
-        ),
-      );
-    for (const type of BOX_COMPLEMENT_TYPES) {
-      if (shownMap[`${type}Definiteness`])
-        edges.push(satEdge(type, `${type}Definiteness`, MUI_COLOR_HEX.warning));
-    }
-  }
-
-  // Role-group bounding rects (coordinates in SVG pixels = CSS pixels since the
-  // viewBox matches the container).
+  // Compact view draws only the solid rings, so a constituent takes up just that much room.
+  compact: boolean;
+}): { groupRects: GroupRect[]; discs: Record<string, Disc>; controlPos: Record<string, Pt> } {
   const groupRects: GroupRect[] = [];
-  if (drawCanvas) {
-    const roleGroups: Array<{
-      label: string;
-      color: string;
-      nodeKeys: string[];
-      removeKey?: BoxComplementType;
-    }> = [
-      ...(showSubject
-        ? [
-            {
-              label: "Subject",
-              color: MUI_COLOR_HEX.primary,
-              nodeKeys: [
-                ...adjectiveSlots("subject").filter((k) => shownMap[k]),
-                "subject",
-                ...(shownMap.subjectDefiniteness
-                  ? ["subjectDefiniteness"]
-                  : []),
-              ],
-            },
-          ]
-        : []),
-      // The verb phrase and its satellite objects/complements exist only in a full
-      // phrase — a lone noun phrase (possessor editor) has just the subject group.
-      ...(nounPhrase ? [] : [{
-        label: "Verb Phrase",
-        color: MUI_COLOR_HEX.secondary,
-        nodeKeys: [
-          ...MODAL_SLOTS.filter((k) => shownMap[k]),
-          "verb",
-          ...(shownMap.verbTense ? ["verbTense"] : []),
-          ...(shownMap.verbAspect ? ["verbAspect"] : []),
-          ...(shownMap.modifier ? ["modifier"] : []),
-        ],
-      }]),
-      // The object's box, like a complement's, is on the canvas only while its control on the
-      // verb-phrase box says so — the difference being that its control starts out saying yes.
-      ...(visibleSlots.some((s) => s.key === "directObject") &&
-      shownMap.directObject
-        ? [
-            {
-              label: "Direct Object",
-              color: MUI_COLOR_HEX.success,
-              nodeKeys: [
-                "directObject",
-                ...adjectiveSlots("directObject").filter((k) => shownMap[k]),
-                ...(shownMap.directObjectDefiniteness
-                  ? ["directObjectDefiniteness"]
-                  : []),
-              ],
-            },
-          ]
-        : []),
-      // One dashed box per revealed complement (Locative / Direction / Source / Route).
-      ...BOX_COMPLEMENT_TYPES.filter((type) => shownMap[type]).map((type) => ({
-        label: COMPLEMENT_LABELS[type],
-        color: MUI_COLOR_HEX.warning,
-        removeKey: type,
-        nodeKeys: [
-          ...adjectiveSlots(type).filter((k) => shownMap[k]),
-          type,
-          ...(shownMap[`${type}Definiteness`] ? [`${type}Definiteness`] : []),
-        ],
-      })),
-    ];
+  const discs: Record<string, Disc> = {};
+  const controlPos: Record<string, Pt> = {};
+  for (const group of groups) {
+    const ring = layoutRing(centerOf(group.mainKey), specs[group.label], sizeOf, group.mainKey);
+    Object.assign(discs, ring.discs);
+    Object.assign(controlPos, ring.controls);
+    groupRects.push({
+      ...group,
+      ...ringFootprint(ring.center, compact ? ring.rIn : ring.rOut),
+      center: ring.center,
+      rIn: ring.rIn,
+      orbit: ring.orbit,
+      rOut: ring.rOut,
+    });
+  }
+  return { groupRects, discs, controlPos };
+}
 
-    // Painted rects are the raw footprints clipped to the canvas, so a box that spills
-    // over an edge is drawn flush against it rather than off-screen.
-    for (const g of roleGroups) {
-      const raw = rawGroupRect(g, pos, svgSize, compact, sizeOf);
-      const rx = Math.max(0, raw.x);
-      const ry = Math.max(0, raw.y);
-      groupRects.push({
-        label: g.label,
-        color: g.color,
-        nodeKeys: g.nodeKeys,
-        removeKey: g.removeKey,
-        x: rx,
-        y: ry,
-        width: Math.min(svgSize.w, raw.x + raw.width) - rx,
-        height: Math.min(svgSize.h, raw.y + raw.height) - ry,
-      });
+// The colour a satellite's link is drawn in: its own slot's, else its constituent's.
+function satelliteColor(key: string, group: GroupRect): string {
+  const slot = ALL_SLOTS.find((s) => s.key === key);
+  return slot ? MUI_COLOR_HEX[slot.color] : group.color;
+}
+
+/**
+ * The lines the connector layer paints: a faint one from each satellite's reveal control to its
+ * disc, and a solid one from the verb phrase to each other constituent — port to port on their
+ * dotted rings (or solid ring to solid ring in compact view, which has no dotted rings).
+ */
+export function buildEdges({
+  groupRects,
+  discs,
+  controlPos,
+  complementToggleIcons,
+  directObjectToggle,
+  compact,
+}: {
+  groupRects: GroupRect[];
+  discs: Record<string, Disc>;
+  controlPos: Record<string, Pt>;
+  complementToggleIcons: readonly SatelliteIcon[];
+  directObjectToggle?: SatelliteIcon;
+  compact: boolean;
+}): { edges: Edge[]; groupEdges: Edge[] } {
+  const edges: Edge[] = [];
+  for (const group of groupRects) {
+    for (const key of group.nodeKeys) {
+      const disc = discs[key];
+      if (!disc) continue;
+      const from = controlPos[key] ?? group.center;
+      // End on the disc's rim, where the dot marking the satellite's end stays visible.
+      const end = onCircle(disc, disc.r, angleTo(disc, from));
+      edges.push({ x1: from.x, y1: from.y, x2: end.x, y2: end.y, color: satelliteColor(key, group), dashed: true });
     }
   }
 
-  // Links between the dashed constituent boxes. Each phrase group connects to the
-  // verb phrase (dotted box ↔ dotted box), mirroring the sentence's spine.
   const groupEdges: Edge[] = [];
-  const verbRect = groupRects.find((g) => g.label === "Verb Phrase");
-  if (verbRect) {
-    const vC = rectCenter(verbRect);
-    for (const g of groupRects) {
-      if (g === verbRect) continue;
-      const gC = rectCenter(g);
-      const p1 = rectBorderPoint(g, vC.x, vC.y);
-      const p2 = rectBorderPoint(verbRect, gC.x, gC.y);
-      groupEdges.push({
-        x1: p1.x,
-        y1: p1.y,
-        x2: p2.x,
-        y2: p2.y,
-        color: g.color,
-        dashed: false,
-      });
+  const verb = groupRects.find((g) => g.label === VERB_PHRASE);
+  if (verb) {
+    for (const group of groupRects) {
+      if (group === verb) continue;
+      let from: Pt | undefined;
+      let to: Pt | undefined;
+      if (compact) {
+        from = onCircle(verb.center, verb.rIn, angleTo(verb.center, group.center));
+        to = onCircle(group.center, group.rIn, angleTo(group.center, verb.center));
+      } else {
+        const end = verbEnd(group, complementToggleIcons, directObjectToggle);
+        from = controlPos[end ?? portKey(VERB_PHRASE, group.label)];
+        to = controlPos[portKey(group.label, VERB_PHRASE)];
+      }
+      if (!from || !to) continue;
+      groupEdges.push({ x1: from.x, y1: from.y, x2: to.x, y2: to.y, color: group.color, dashed: false });
     }
   }
-
-  return { edges, groupRects, groupEdges };
+  return { edges, groupEdges };
 }

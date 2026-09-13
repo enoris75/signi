@@ -306,18 +306,20 @@ export class Builder {
   }
 
   /**
-   * Drag a whole role group across the canvas, moving every word in it at once.
+   * Drag a whole constituent across the canvas by its dotted ring, moving everything on it at once.
    *
-   * Grabbed 12px in from the bottom-left corner — inside the dashed box but clear of the word
-   * chips, which have their own drag handlers — and moved in steps: the builder only treats a
-   * pointer sequence as a drag once it has travelled past a 6px threshold, so a single jump
-   * move registers as a click and moves nothing.
+   * Grabbed at half past seven, 12px inside the ring — in the clear strip between the dotted
+   * ring's controls (which straddle it) and whatever orbits inside, all of which have handlers of
+   * their own — and moved in steps: the builder only treats a pointer sequence as a drag once it
+   * has travelled past a 6px threshold, so a single jump move registers as a click and moves
+   * nothing.
    */
   async dragGroup(label: string, dx: number, dy: number): Promise<void> {
     const box = await this.groupBox(label).boundingBox();
     if (!box) throw new Error(`group box "${label}" is not on the canvas`);
-    const startX = box.x + 12;
-    const startY = box.y + box.height - 12;
+    const r = box.width / 2 - 12;
+    const startX = box.x + box.width / 2 - r * Math.SQRT1_2;
+    const startY = box.y + box.height / 2 + r * Math.SQRT1_2;
 
     await this.page.mouse.move(startX, startY);
     await this.page.mouse.down();

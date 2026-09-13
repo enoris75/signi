@@ -1,21 +1,22 @@
 import type { Locator, Page } from '@playwright/test';
 import { test, expect, type Builder } from './fixtures';
 
-// The tidy wands. The one on the period header re-flows the whole canvas: every dotted box is
-// compacted around its main word, then the boxes are packed into centered rows in reading order
-// (subject · verb phrase · direct object · complements) and the canvas is resized to hug the
-// stack. The one on a dotted box's corner compacts just that box, in place.
+// The tidy wand on the period header. Every constituent's satellites already sit on its orbit, so
+// tidy has nothing to arrange inside one: it packs the constituents' rings into centered rows in
+// reading order (subject · verb phrase · direct object · complements) and resizes the canvas to
+// hug the stack.
 //
 // Tidy is pure geometry, so these measure the DOM rather than trusting the positions the layout
 // code meant to produce: the invariants a user sees — nothing overlaps, nothing is lost off the
-// canvas, the order reads left-to-right and top-to-bottom, a second tidy moves nothing — are
-// checked against the rendered boxes, across the kinds of phrase that give the canvas different
-// shapes and at the window sizes that give it different widths.
+// canvas, the order reads left-to-right and top-to-bottom, a second tidy moves nothing, no control
+// covers another or a word — are checked against the rendered rings, across the kinds of phrase
+// that give the canvas different shapes and at the window sizes that give it different widths.
 
 // ── Geometry ─────────────────────────────────────────────────────────────────
 
 type Rect = { left: number; top: number; right: number; bottom: number };
-// A box tidy places as one unit: a painted dotted box, or a stand-in (below).
+// A constituent tidy places as one unit: a painted dotted ring (its `group-box`, measured by the
+// square round it), or a stand-in (below).
 type Placed = { label: string; rect: Rect };
 type Layout = {
   canvas: { width: number; height: number };
@@ -23,26 +24,26 @@ type Layout = {
   // two measurements never reads as movement.
   groups: Placed[];
   // A subject-dropping mood swaps the subject word for its own box (the command box), which the
-  // layout still wraps in a Subject box — one it never paints. The stand-in is the Subject for
-  // ordering and overlap, but the dotted footprint the layout measured it by is invisible.
+  // layout still lays out as a Subject ring — one it never paints. The stand-in is the Subject for
+  // ordering and overlap, but the footprint the layout measured it by is invisible.
   standIns: Placed[];
   words: { key: string; rect: Rect }[];
-  // The clickable controls painted on the canvas (reveal icons, corner buttons, relation
-  // toolbars) — named by test id or accessible name — and the text inside the word boxes. Only
-  // the known-bug tests read these: see the end of the file.
+  // The clickable controls painted on the canvas (reveal icons, ring chrome, relation toolbars) —
+  // named by test id or accessible name — and the text inside the word nodes. The coverage checks
+  // read these: see the end of the file.
   controls: { name: string; toolbar: boolean; rect: Rect }[];
   texts: { box: string; text: string; rect: Rect }[];
 };
 
 // Sub-pixel rounding in the percentage positions: two edges this close count as touching.
 const TOLERANCE = 1;
-// The layout's own spacing (layout.ts / overlap.ts / slots.ts).
+// The layout's own spacing (layout.ts / overlap.ts / slots.ts / ringLayout.ts).
 const STACK_MARGIN = 6;
 const ROW_GAP = 20;
 const BOTTOM_MARGIN = 8;
 const MIN_GRAPH_HEIGHT = 160;
-const NODE_GAP_Y = 26;
-const NODE_GAP_X = 40;
+// How far the controls straddling a dotted ring reach past it: tidy packs the ring with them.
+const CONTROL_REACH = 11;
 
 const overlaps = (a: Rect, b: Rect) =>
   a.left < b.right - TOLERANCE &&
@@ -66,14 +67,14 @@ const depth = (a: Rect, b: Rect) =>
   );
 const centerY = (r: Rect) => (r.top + r.bottom) / 2;
 
-/** One snapshot of a period's canvas: its size, its dotted boxes, and its word boxes. */
+/** One snapshot of a period's canvas: its size, its dotted rings, and its word nodes. */
 async function snapshot(period: Locator): Promise<Layout> {
   return period.evaluate((root) => {
     // Only this period's own canvas — a nested possessor panel is another period's card.
     const own = (el: Element) => el.closest('[data-testid="period-container"]') === root;
     const groupEls = [...root.querySelectorAll<HTMLElement>('[data-testid="group-box"]')].filter(own);
     const canvas = groupEls[0]?.offsetParent as HTMLElement | null;
-    if (!canvas) throw new Error('the period has no dotted boxes on its canvas');
+    if (!canvas) throw new Error('the period has no dotted rings on its canvas');
     const origin = canvas.getBoundingClientRect();
     const rect = (el: Element) => {
       const r = el.getBoundingClientRect();
@@ -215,8 +216,8 @@ function rounded(layout: Layout) {
 /**
  * Everything a tidied period promises, checked against the rendered canvas.
  *
- * `order` is the boxes' labels in reading order. A dotted box can be wider than a narrow canvas
- * on its own (it carries padding for its border controls); tidy then gives it a row to itself,
+ * `order` is the boxes' labels in reading order. A dotted ring can be wider than a narrow canvas
+ * on its own (with the controls straddling it); tidy then gives it a row to itself,
  * pins its left edge and lets it hang off the right, where the canvas clips it — so the
  * right-hand checks are relaxed for exactly those rows. The checks that need a box's exact
  * footprint (centering, margins) skip a row whose footprint is unpainted.
@@ -250,12 +251,12 @@ function expectTidy(layout: Layout, order: string[]): void {
   expect(bottom, 'the last row is on the canvas').toBeLessThanOrEqual(canvas.height + TOLERANCE);
   if (first.painted) {
     expect(top, 'the first row sits at the top of the canvas').toBeLessThanOrEqual(
-      STACK_MARGIN + TOLERANCE,
+      STACK_MARGIN + CONTROL_REACH + TOLERANCE,
     );
   }
   if (last.painted && Math.round(canvas.height) > MIN_GRAPH_HEIGHT) {
     expect(canvas.height - bottom, 'the canvas is trimmed to the stack').toBeLessThanOrEqual(
-      BOTTOM_MARGIN + 2 * TOLERANCE,
+      BOTTOM_MARGIN + CONTROL_REACH + 2 * TOLERANCE,
     );
   }
 
@@ -266,10 +267,12 @@ function expectTidy(layout: Layout, order: string[]): void {
       STACK_MARGIN - TOLERANCE,
     );
     if (!row.painted) continue;
-    if (right >= canvas.width - TOLERANCE) {
+    // A row is packed with the controls straddling its rings: too wide once those no longer fit
+    // between the margins, even while the rings themselves still do.
+    if (right + CONTROL_REACH > canvas.width - STACK_MARGIN + TOLERANCE) {
       // Too wide for the canvas: alone on its row, pinned to the left margin.
       expect(row.boxes, `the overflowing box "${labels(row)}" has a row to itself`).toHaveLength(1);
-      expect(Math.abs(left - STACK_MARGIN)).toBeLessThanOrEqual(TOLERANCE);
+      expect(Math.abs(left - STACK_MARGIN - CONTROL_REACH)).toBeLessThanOrEqual(TOLERANCE);
     } else {
       // A row that fits is centered.
       expect(
@@ -290,7 +293,7 @@ function expectTidy(layout: Layout, order: string[]): void {
   }
 
   // Every word box stays on the canvas: never off its top, left or bottom, and past the right
-  // edge only inside a box that was already too wide for the canvas — a clipped dotted box, or a
+  // edge only inside a box that was already too wide for the canvas — a clipped dotted ring, or a
   // stand-in given a row of its own (the only place tidy puts a footprint too wide to share one).
   const aloneStandIns = packed
     .filter((row) => !row.painted && row.boxes.length === 1)
@@ -341,7 +344,7 @@ function word(layout: Layout, key: string): Rect {
 
 function group(layout: Layout, label: string): Rect {
   const found = layout.groups.find((g) => g.label === label);
-  if (!found) throw new Error(`no dotted box "${label}" on the canvas`);
+  if (!found) throw new Error(`no dotted ring "${label}" on the canvas`);
   return found.rect;
 }
 
@@ -367,7 +370,7 @@ async function dragWord(page: Page, key: string, dx: number, dy: number): Promis
 type Phrase = {
   name: string;
   build: (app: Builder, page: Page) => Promise<void>;
-  // The dotted boxes the phrase paints, in reading order.
+  // The dotted rings the phrase paints, in reading order.
   groups: string[];
 };
 
@@ -492,14 +495,14 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
-// ── One dotted box ───────────────────────────────────────────────────────────
+// ── One constituent ──────────────────────────────────────────────────────────
 
-test.describe('tidy one box', () => {
+test.describe('a ring', () => {
   for (const viewport of [VIEWPORTS[1], VIEWPORTS[2]]) {
     test.describe(`${viewport.name} (${viewport.width}×${viewport.height})`, () => {
       test.use({ viewport: { width: viewport.width, height: viewport.height } });
 
-      test('stacks the adjectives above the word and the determiner below it', async ({
+      test('moves as one: pressing a satellite drags its whole constituent, which stays on its orbit', async ({
         app,
         page,
       }) => {
@@ -510,68 +513,42 @@ test.describe('tidy one box', () => {
         await app.setDeterminer('subject', 'Indefinite');
         await app.expectSentences({ en: 'a big brown dog sees the cat.' });
         await app.tidy();
+        await page.mouse.move(0, 0);
 
-        // Pull the first adjective out of its row, down and to the side of the head noun.
+        const keys = ['subject', 'subjectAdjective', 'subjectAdjective2', 'subjectDefiniteness'];
         const before = await settledLayout(app.period(0));
-        await dragWord(page, 'subjectAdjective', 70, word(before, 'subject').bottom - word(before, 'subjectAdjective').top);
-        const dragged = await settledLayout(app.period(0));
-        expect(
-          Math.abs(centerY(word(dragged, 'subjectAdjective')) - centerY(word(dragged, 'subjectAdjective2'))),
-          'the drag pulled the adjective out of its row',
-        ).toBeGreaterThan(20);
+        // Pull the first adjective down and to the side: the subject's ring comes with it.
+        await dragWord(page, 'subjectAdjective', 70, 40);
+        const after = await settledLayout(app.period(0));
 
-        await page.getByRole('button', { name: 'Tidy up Subject' }).click();
-        const tidied = await settledLayout(app.period(0));
-
-        const noun = word(tidied, 'subject');
-        const big = word(tidied, 'subjectAdjective');
-        const brown = word(tidied, 'subjectAdjective2');
-        const determiner = word(tidied, 'subjectDefiniteness');
-
-        // Top row: the adjectives, side by side in chain order, clear of the noun below.
-        expect(Math.abs(centerY(big) - centerY(brown)), 'the adjectives share a row').toBeLessThanOrEqual(TOLERANCE);
-        expect(brown.left - big.right, 'the adjectives keep their gap').toBeGreaterThanOrEqual(NODE_GAP_X - 2 * TOLERANCE);
-        expect(noun.top - Math.max(big.bottom, brown.bottom), 'the adjective row clears the noun').toBeGreaterThanOrEqual(NODE_GAP_Y - 2 * TOLERANCE);
-        // Bottom row: the determiner, clear of the noun above.
-        expect(determiner.top - noun.bottom, 'the determiner sits below the noun').toBeGreaterThanOrEqual(NODE_GAP_Y - 2 * TOLERANCE);
-        // Every row hangs from one center line.
-        const rowCenter = (big.left + brown.right) / 2;
-        expect(Math.abs(rowCenter - centerX(noun)), 'the adjective row is centered over the noun').toBeLessThanOrEqual(2 * TOLERANCE);
-        expect(Math.abs(centerX(determiner) - centerX(noun)), 'the determiner is centered under the noun').toBeLessThanOrEqual(2 * TOLERANCE);
-
-        // The box and its words stay on the canvas, and no box ends up covering another.
-        const subject = group(tidied, 'Subject');
-        expect(subject.left).toBeGreaterThanOrEqual(-TOLERANCE);
-        expect(subject.right).toBeLessThanOrEqual(tidied.canvas.width + TOLERANCE);
-        for (const { rect } of tidied.words) {
-          expect(rect.left).toBeGreaterThanOrEqual(-TOLERANCE);
-          expect(rect.right).toBeLessThanOrEqual(tidied.canvas.width + TOLERANCE);
-          expect(rect.bottom).toBeLessThanOrEqual(tidied.canvas.height + TOLERANCE);
+        const shift = (key: string) => ({
+          x: centerX(word(after, key)) - centerX(word(before, key)),
+          y: centerY(word(after, key)) - centerY(word(before, key)),
+        });
+        const moved = shift('subject');
+        expect(Math.hypot(moved.x, moved.y), 'the drag moved the constituent').toBeGreaterThan(20);
+        for (const key of keys) {
+          const s = shift(key);
+          expect(Math.abs(s.x - moved.x), `${key} kept its place on the orbit`).toBeLessThanOrEqual(2 * TOLERANCE);
+          expect(Math.abs(s.y - moved.y), `${key} kept its place on the orbit`).toBeLessThanOrEqual(2 * TOLERANCE);
         }
-        for (const [i, a] of tidied.groups.entries())
-          for (const b of tidied.groups.slice(i + 1))
-            expect(overlaps(a.rect, b.rect), `"${a.label}" overlaps "${b.label}"`).toBe(false);
-
         await app.expectSentences({ en: 'a big brown dog sees the cat.' });
       });
 
-      test('pulls a box dragged over the canvas edge back inside', async ({ app, page }) => {
+      test('dragged over the canvas edge, comes back inside with a tidy', async ({ app, page }) => {
         await app.buildClause('CAT', 'EAT');
         await app.revealAndPick('subjectAdjective', 'BIG');
         await app.tidy();
 
-        // Shove the Subject box well past the left edge: the drag clamps each word's center to
-        // the canvas, so the words end up hanging half off it.
+        // Shove the Subject ring well past the left edge: the drag clamps its word's center to the
+        // canvas, so the ring ends up hanging half off it.
         const before = await settledLayout(app.period(0));
         await app.groupBox('Subject').scrollIntoViewIfNeeded();
         await app.dragGroup('Subject', -before.canvas.width, 0);
         const dragged = await settledLayout(app.period(0));
-        expect(
-          Math.min(word(dragged, 'subject').left, word(dragged, 'subjectAdjective').left),
-          'the drag left the words hanging off the left edge',
-        ).toBeLessThan(0);
+        expect(group(dragged, 'Subject').left, 'the drag left the ring hanging off the left edge').toBeLessThan(0);
 
-        await page.getByRole('button', { name: 'Tidy up Subject' }).click();
+        await app.tidy();
         const tidied = await settledLayout(app.period(0));
         for (const key of ['subject', 'subjectAdjective']) {
           const rect = word(tidied, key);
@@ -579,36 +556,17 @@ test.describe('tidy one box', () => {
           expect(rect.right).toBeLessThanOrEqual(tidied.canvas.width + TOLERANCE);
         }
         expect(group(tidied, 'Subject').left).toBeGreaterThanOrEqual(-TOLERANCE);
-        expect(word(tidied, 'subject').top - word(tidied, 'subjectAdjective').bottom).toBeGreaterThanOrEqual(
-          NODE_GAP_Y - 2 * TOLERANCE,
-        );
       });
     });
   }
 
-  test('is offered only when a box has more than its word, and not while collapsed', async ({
-    app,
-    page,
-  }) => {
-    const tidySubject = page.getByRole('button', { name: 'Tidy up Subject' });
-    const tidyVerb = page.getByRole('button', { name: 'Tidy up Verb Phrase' });
-
-    // A lone word has nothing to arrange.
+  test('offers no tidy of its own: its satellites always sit on its orbit', async ({ app, page }) => {
     await app.buildClause('CAT', 'RUN');
-    await expect(app.groupBox('Subject')).toBeVisible();
-    await expect(tidySubject).toHaveCount(0);
-    await expect(tidyVerb).toHaveCount(0);
-
-    // An adjective gives the subject box a second node; the verb box still has one.
     await app.revealAndPick('subjectAdjective', 'BIG');
-    await expect(tidySubject).toBeVisible();
-    await expect(tidyVerb).toHaveCount(0);
+    await expect(app.groupBox('Subject')).toBeVisible();
 
-    // Collapsed, the satellites are hidden, so there is nothing to tidy until it opens again.
-    await page.getByRole('button', { name: 'Collapse Subject' }).click();
-    await expect(tidySubject).toHaveCount(0);
-    await page.getByRole('button', { name: 'Expand Subject' }).click();
-    await expect(tidySubject).toBeVisible();
+    await expect(page.getByRole('button', { name: /^Tidy up (Subject|Verb Phrase)$/ })).toHaveCount(0);
+    await expect(page.getByTestId('period-tidy')).toBeVisible();
   });
 });
 
@@ -692,7 +650,7 @@ test.describe('tidy the period · around it', () => {
     await motion(app);
     const tidied = await tidyAndCheck(app, motionGroups);
 
-    // Compact hides the dotted boxes and packs the bare words; the stored full layout is left
+    // Compact hides the dotted rings and packs the bare words; the stored full layout is left
     // untouched underneath, so expanding again restores the tidy grid exactly.
     await app.compactToggle.click();
     await expect(app.page.getByTestId('group-box')).toHaveCount(0);
@@ -704,7 +662,30 @@ test.describe('tidy the period · around it', () => {
 
 // ── Edge cases ───────────────────────────────────────────────────────────────
 
-/** Fill a noun box to the brim: the full three-adjective chain, then a determiner. */
+// How deep one painted thing has to sink into another to cover it. The controls are 18–22px
+// icons; sinking a third of one reads as covered, while a couple of px is just two borders
+// touching. A word is covered sooner: its glyphs fill only the middle of an 18px line, so an icon
+// 3px in is already on the letters.
+const COVER = 6;
+const TEXT_COVER = 3;
+
+/** The promise the rings make: no control covers another control, and none covers a word. */
+function expectNothingCovered(layout: Layout): void {
+  const { controls, texts } = layout;
+  const stacked: string[] = [];
+  for (const [i, a] of controls.entries())
+    for (const b of controls.slice(i + 1))
+      if (depth(a.rect, b.rect) >= COVER) stacked.push(`${a.name} × ${b.name}`);
+  expect(stacked, 'controls stacked on one another').toEqual([]);
+  const onWords = controls.flatMap((control) =>
+    texts
+      .filter((t) => depth(control.rect, t.rect) >= TEXT_COVER)
+      .map((t) => `${control.name} × ${t.box} "${t.text}"`),
+  );
+  expect(onWords, 'controls covering words').toEqual([]);
+}
+
+/** Fill a noun to the brim: the full three-adjective chain, then a determiner. */
 async function fillNoun(app: Builder, noun: string, { determiner = true } = {}): Promise<void> {
   for (const [suffix, adjective] of [
     ['Adjective', 'BIG'],
@@ -716,15 +697,14 @@ async function fillNoun(app: Builder, noun: string, { determiner = true } = {}):
   if (determiner) await app.setDeterminer(noun, 'Indefinite');
 }
 
-/**
- * Fill the verb phrase: tense, aspect, the two-modal chain, negation and the adverb. The modals'
- * own adverbs are left out — tidy doesn't place them yet, which is pinned under known bugs below.
- */
+/** Fill the verb phrase: tense, aspect, the two-modal chain with each modal's adverb, negation and the adverb. */
 async function fillVerb(app: Builder): Promise<void> {
   await app.cycle('verbTense');
   await app.cycle('verbAspect');
   await app.revealAndPick('verbModal', 'MUST');
+  await app.revealAndPick('verbModalAdverb', 'ALWAYS');
   await app.revealAndPick('verbModal2', 'CAN');
+  await app.revealAndPick('verbModal2Adverb', 'WELL');
   await app.revealAndPick('modifier', 'FAST');
   await app.satellite('verbNegative').click();
 }
@@ -733,22 +713,23 @@ test.describe('tidy the period · edge cases', () => {
   test.use({ viewport: { width: 1920, height: 1080 } });
 
   // A phrase with every slot filled takes a minute and more to build, so it is built once and then
-  // re-tidied at each window size, widest to narrowest, rather than rebuilt per size.
+  // re-tidied at each window size, widest to narrowest, rather than rebuilt per size. At each size
+  // the tidied canvas must also keep every control clear of every other control and of the words.
   async function checkAtEverySize(app: Builder, page: Page, order: string[]): Promise<void> {
     const sentence = await app.sentence('en');
     for (const viewport of VIEWPORTS) {
       await test.step(`${viewport.name} (${viewport.width}×${viewport.height})`, async () => {
         await page.setViewportSize({ width: viewport.width, height: viewport.height });
-        await tidyAndCheck(app, order);
+        await page.mouse.move(0, 0);
+        expectNothingCovered(await tidyAndCheck(app, order));
       });
     }
     expect(await app.sentence('en')).toBe(sentence);
   }
 
-  // Building one of these is also the case for tidying as you go: a freshly revealed slot opens at
-  // a fixed default spot, so on a full canvas it lands on the controls of the words already there.
-  // Tidying after each box — as a user filling the canvas would — keeps every next control
-  // reachable.
+  // A freshly revealed complement opens at its default spot and is shoved clear of whatever is
+  // already there, which on a full canvas can leave the stack ragged; tidying after each step, as
+  // a user filling the canvas would, keeps it compact while it grows.
 
   test('every slot on an intransitive motion verb, at every window size', async ({ app, page }) => {
     test.setTimeout(300_000);
@@ -791,16 +772,6 @@ test.describe('tidy the period · edge cases', () => {
     await app.buildClause('BOY', 'READ');
     // The object's picker is open only until another slot takes the focus, so it goes first.
     await app.setDirectObject('BOOK');
-    // Every complement is opened before the first tidy: once tidy stacks the object box under the
-    // verb phrase, the object's control lands on the complement toggles and blocks them (pinned
-    // under known bugs below).
-    const complements = [
-      ['terminus', 'CHILD'],
-      ['manner', 'WATER'],
-      ['locative', 'HOUSE'],
-      ['cause', 'DOG'],
-    ];
-    for (const [type, noun] of complements) await app.revealAndPick(type, noun);
     await app.tidy();
     await fillNoun(app, 'subject');
     await app.tidy();
@@ -808,7 +779,17 @@ test.describe('tidy the period · edge cases', () => {
     await app.tidy();
     await fillNoun(app, 'directObject');
     await app.tidy();
-    for (const [type] of complements) {
+    // The complements are opened only now, with the object already tidied under the verb phrase:
+    // their toggles share the verb's dotted ring with the object's control, and stay clickable.
+    const complements = [
+      ['terminus', 'CHILD'],
+      ['manner', 'WATER'],
+      ['locative', 'HOUSE'],
+      ['cause', 'DOG'],
+    ];
+    for (const [type, noun] of complements) {
+      await app.revealAndPick(type, noun);
+      await app.tidy();
       await fillNoun(app, type, { determiner: type !== 'cause' });
       await app.tidy();
     }
@@ -824,9 +805,9 @@ test.describe('tidy the period · edge cases', () => {
     ]);
   });
 
-  test('complement boxes revealed but still empty', async ({ app }) => {
+  test('complement rings revealed but still empty', async ({ app }) => {
     await app.buildClause('CAT', 'RUN');
-    // An empty box holds an open picker, wider than any word, and tidy packs it at that size.
+    // An empty complement holds an open picker, wider than any word, and tidy packs it at that size.
     for (const type of ['locative', 'direction', 'source']) {
       await app.satellite(type).click();
       await expect(app.page.getByTestId(`box-${type}`).locator('input')).toBeVisible();
@@ -834,7 +815,7 @@ test.describe('tidy the period · edge cases', () => {
     await tidyAndCheck(app, ['Subject', 'Verb Phrase', 'Locative', 'Direction', 'Source']);
   });
 
-  test('a collapsed box is packed at its collapsed size, and re-packs when it opens', async ({
+  test('a collapsed ring is packed at its collapsed size, and re-packs when it opens', async ({
     app,
     page,
   }) => {
@@ -849,7 +830,7 @@ test.describe('tidy the period · edge cases', () => {
     expect(collapsed.words.map((w) => w.key)).not.toContain('subjectAdjective');
     expect(
       group(collapsed, 'Subject').bottom - group(collapsed, 'Subject').top,
-      'the collapsed box is packed at its own, shorter height',
+      'the collapsed ring is packed at its own, smaller size',
     ).toBeLessThan(group(open, 'Subject').bottom - group(open, 'Subject').top);
 
     // Opening it again and tidying lands on exactly the grid it had before it was collapsed.
@@ -877,27 +858,15 @@ test.describe('tidy the period · edge cases', () => {
   });
 });
 
-// ── Known bugs ───────────────────────────────────────────────────────────────
-// Each asserts the layout a user should get and is marked test.fail(): the suite stays green while
-// the defect stands, and Playwright reports "expected to fail, but passed" the moment it is fixed —
-// the signal to drop the marker and keep the test. They were found filling a canvas to the brim.
+// ── Controls on a crowded canvas ─────────────────────────────────────────────
+// Each of these was a defect of the box layout — controls placed by rules that never saw one
+// another, landing on one another or on a word. The rings seat every control by one rule, so they
+// now stand as ordinary tests.
 
-// How deep one painted thing has to sink into another to hide it. The controls are 18–22px
-// icons; sinking a third of one reads as covered, while a couple of px is just two borders
-// touching (and there are plenty of those — not pinned here). A word hides sooner: its glyphs
-// fill only the middle of an 18px line, so an icon 3px in is already on the letters.
-const COVER = 6;
-const TEXT_COVER = 3;
-
-test.describe('known bugs: overlap on a tidied canvas', () => {
+test.describe('controls on a crowded canvas', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
 
-  test('tidy gathers the modal adverbs into the Verb Phrase box', async ({ app }) => {
-    test.fail(
-      true,
-      'graph.ts builds the Verb Phrase group without verbModalAdverb / verbModal2Adverb, so the ' +
-        'dotted box never wraps them and tidy leaves them wherever they opened — on the subject',
-    );
+  test("the Verb Phrase ring holds the modals' adverbs", async ({ app }) => {
     await app.buildClause('CAT', 'RUN');
     await app.revealAndPick('subjectAdjective', 'BIG');
     await app.revealAndPick('subjectAdjective2', 'BROWN');
@@ -913,14 +882,15 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
     const stray = ['verbModalAdverb', 'verbModal2Adverb'].filter(
       (key) => !contains(verbPhrase, word(layout, key)),
     );
-    expect(stray, 'modal adverbs outside the Verb Phrase box').toEqual([]);
+    expect(stray, 'modal adverbs outside the Verb Phrase ring').toEqual([]);
     expectTidy(layout, ['Subject', 'Verb Phrase']);
   });
 
-  test("the verb box's controls keep clear of the verb", async ({ app }) => {
+  test("the verb's controls keep clear of the verb", async ({ app }) => {
     await app.buildClause('CAT', 'RUN');
     await fillVerb(app);
     await app.tidy();
+    await app.page.mouse.move(0, 0);
 
     const layout = await settledLayout(app.period(0));
     const verb = layout.texts.filter((t) => t.box === 'verb');
@@ -931,35 +901,24 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
     expect(covering, 'controls covering the verb').toEqual([]);
   });
 
-  test('controls on a full verb phrase keep clear of each other', async ({ app }) => {
-    test.fail(
-      true,
-      'the second modal\'s reveal icon lands on the first modal\'s clear button, and the verb ' +
-        'box border icons stack on one another',
-    );
+  test('controls on a full verb phrase keep clear of each other and of its words', async ({ app }) => {
     await app.buildClause('CAT', 'RUN');
     await fillVerb(app);
     await app.tidy();
+    await app.page.mouse.move(0, 0);
 
-    const { controls } = await settledLayout(app.period(0));
-    const stacked: string[] = [];
-    for (const [i, a] of controls.entries())
-      for (const b of controls.slice(i + 1))
-        if (depth(a.rect, b.rect) >= COVER) stacked.push(`${a.name} × ${b.name}`);
-    expect(stacked, 'controls stacked on one another').toEqual([]);
+    expectNothingCovered(await settledLayout(app.period(0)));
   });
 
-  test("a complement's relation toolbar keeps clear of its box's corner buttons", async ({
-    app,
-  }) => {
+  test("a complement's relation toolbar keeps clear of its ring's other controls", async ({ app }) => {
     await app.buildClause('CAT', 'RUN');
     await app.revealAndPick('locative', 'HOUSE');
     await app.tidy();
+    await app.page.mouse.move(0, 0);
 
     const { controls } = await settledLayout(app.period(0));
-    const corners = controls.filter((c) => /^(Collapse|Expand|Tidy up|Remove) Locative$/.test(c.name));
-    expect(corners.map((c) => c.name)).toEqual(['Collapse Locative', 'Remove Locative']);
-    // Nor on the controls riding the top of the locative's word box, just below the toolbar.
+    const chrome = controls.filter((c) => /^(Collapse|Expand|Remove) Locative$/.test(c.name));
+    expect(chrome.map((c) => c.name)).toEqual(['Collapse Locative', 'Remove Locative']);
     const covered = controls
       .filter((c) => c.toolbar)
       .flatMap((bar) =>
@@ -970,18 +929,13 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
     expect(covered, 'toolbar buttons covering other controls').toEqual([]);
   });
 
-  test('the complement toggles stay clickable when the object box sits under the verb phrase', async ({
+  test('the complement toggles stay clickable when the object sits under the verb phrase', async ({
     app,
     page,
   }) => {
-    test.fail(
-      true,
-      "the direct object's control sits where the object's connector leaves the Verb Phrase box; " +
-        'when tidy stacks the object below the verb phrase, that is the bottom edge, on the row of ' +
-        'complement toggles, and it takes their clicks',
-    );
-    // A phone-width canvas stacks every box in one column, which puts the object under the verb;
-    // with READ's five complement toggles, the object's control lands square on the manner one.
+    // A phone-width canvas stacks every ring in one column, which puts the object under the verb.
+    // Its control faces the object's ring, so it sits at the bottom of the verb's dotted ring —
+    // among READ's five complement toggles, which the ring spreads round it.
     await page.setViewportSize({ width: 390, height: 844 });
     await app.buildClause('BOY', 'READ');
     await app.setDirectObject('BOOK');

@@ -1,18 +1,19 @@
 import { Box } from "@mui/material";
 import { SatelliteButton } from "./Boxes.tsx";
-import type { GroupRect } from "./graph.ts";
 import type { NounKey, SlotConfig } from "./interfaces.ts";
 import type { PerimeterEntry } from "./satellites.tsx";
+import { perimeterControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
 
-// The relative-clause + possessor + coordination controls (and the receiving dots for incoming
-// links) ride each noun's *dotted-box* perimeter rather than the word box: the
-// controls sit on the box's bottom edge and are where the dotted connector lines
-// start, while a small dot on the top edge marks where an incoming subordinate
-// link lands. Because they're pinned to the group rect, they follow the whole
-// constituent as its boxes move.
+type Pt = { x: number; y: number };
+
+// The relative-clause, possessor and coordination controls (and the receiving dot for an incoming
+// link) ride each noun's *dotted* ring rather than its solid one: they are about the noun phrase's
+// links to other phrases, and each is where its connector line starts — or, for the dot, where an
+// incoming subordinate link lands. The ring layout seats them (see ringSpecs), so they follow the
+// whole constituent as it moves.
 export function GroupPerimeterControls({
-  groupRects,
+  controlPos,
   perimeterByNoun,
   linkTargetKeys,
   registerSourceAnchor,
@@ -20,10 +21,10 @@ export function GroupPerimeterControls({
   registerPossessorControl,
   registerConjunctControl,
 }: {
-  groupRects: GroupRect[];
+  // Where every ring control sits on the canvas, keyed by control.
+  controlPos: Record<string, Pt>;
   perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>>;
-  // Nouns that are the target ("gap") of an incoming subordinate link — they get a
-  // receiving dot on their top edge.
+  // Nouns that are the target ("gap") of an incoming subordinate link — they get a receiving dot.
   linkTargetKeys?: Set<NounKey>;
   // Register the relative-clause control (line start) / receiving dot (line end) with
   // the workspace so it can measure the cross-container link between containers.
@@ -34,8 +35,6 @@ export function GroupPerimeterControls({
   // Register the coordination control — the start of the connector down to the conjunct panels.
   registerConjunctControl: (nounKey: NounKey, el: HTMLElement | null) => void;
 }) {
-  const rectFor = (nounKey: NounKey) =>
-    groupRects.find((g) => g.nodeKeys.includes(nounKey));
   const colorFor = (nounKey: NounKey): SlotConfig["color"] =>
     ALL_SLOTS.find((s) => s.key === nounKey)?.color ?? "primary";
 
@@ -45,80 +44,66 @@ export function GroupPerimeterControls({
     ...(linkTargetKeys ? [...linkTargetKeys] : []),
   ]);
 
+  const seat = (at: Pt) =>
+    ({
+      position: "absolute",
+      left: at.x,
+      top: at.y,
+      transform: "translate(-50%, -50%)",
+      zIndex: 3,
+    }) as const;
+
   return (
     <>
       {[...nounKeys].map((nounKey) => {
-        const rect = rectFor(nounKey);
-        if (!rect) return null;
         const color = colorFor(nounKey);
         const entry = perimeterByNoun[nounKey];
-        const isTarget = linkTargetKeys?.has(nounKey) ?? false;
-        const cx = rect.x + rect.width / 2;
+        const dot = linkTargetKeys?.has(nounKey) ? controlPos[perimeterControlKey("incoming", nounKey)] : undefined;
+        const relative = entry?.relative && controlPos[perimeterControlKey("relative", nounKey)];
+        const possessor = entry?.possessor && controlPos[perimeterControlKey("possessor", nounKey)];
+        const conjunct = entry?.conjunct && controlPos[perimeterControlKey("conjunct", nounKey)];
 
         return (
           <Box key={nounKey} component="span">
-            {/* Receiving dot on the top edge — where an incoming subordinate link lands. */}
-            {isTarget && (
+            {/* Receiving dot — where an incoming subordinate link lands. */}
+            {dot && (
               <Box
                 ref={(el: HTMLElement | null) => registerTargetAnchor?.(nounKey, el)}
                 sx={{
-                  position: "absolute",
-                  left: cx,
-                  top: rect.y,
-                  transform: "translate(-50%, -50%)",
+                  ...seat(dot),
                   width: 10,
                   height: 10,
                   borderRadius: "50%",
                   bgcolor: `${color}.main`,
                   border: "2px solid",
                   borderColor: "background.paper",
-                  zIndex: 3,
                 }}
               />
             )}
-            {/* Relative + possessor + coordination controls on the bottom edge — each the
-                start of its connector line. */}
-            {(entry?.relative || entry?.possessor || entry?.conjunct) && (
+            {relative && (
               <Box
-                sx={{
-                  position: "absolute",
-                  left: cx,
-                  top: rect.y + rect.height,
-                  transform: "translate(-50%, -50%)",
-                  display: "flex",
-                  gap: 0.5,
-                  zIndex: 3,
-                }}
+                data-testid={`relative-ctl-${nounKey}`}
+                ref={(el: HTMLElement | null) => registerSourceAnchor?.(nounKey, el)}
+                sx={seat(relative)}
               >
-                {entry?.relative && (
-                  <Box
-                    data-testid={`relative-ctl-${nounKey}`}
-                    ref={(el: HTMLElement | null) =>
-                      registerSourceAnchor?.(nounKey, el)
-                    }
-                  >
-                    <SatelliteButton sat={entry.relative} color={color} />
-                  </Box>
-                )}
-                {entry?.possessor && (
-                  <Box
-                    data-testid={`possessor-ctl-${nounKey}`}
-                    ref={(el: HTMLElement | null) =>
-                      registerPossessorControl(nounKey, el)
-                    }
-                  >
-                    <SatelliteButton sat={entry.possessor} color={color} />
-                  </Box>
-                )}
-                {entry?.conjunct && (
-                  <Box
-                    ref={(el: HTMLElement | null) =>
-                      registerConjunctControl(nounKey, el)
-                    }
-                  >
-                    <SatelliteButton sat={entry.conjunct} color={color} />
-                  </Box>
-                )}
+                <SatelliteButton sat={entry!.relative!} color={color} />
+              </Box>
+            )}
+            {possessor && (
+              <Box
+                data-testid={`possessor-ctl-${nounKey}`}
+                ref={(el: HTMLElement | null) => registerPossessorControl(nounKey, el)}
+                sx={seat(possessor)}
+              >
+                <SatelliteButton sat={entry!.possessor!} color={color} />
+              </Box>
+            )}
+            {conjunct && (
+              <Box
+                ref={(el: HTMLElement | null) => registerConjunctControl(nounKey, el)}
+                sx={seat(conjunct)}
+              >
+                <SatelliteButton sat={entry!.conjunct!} color={color} />
               </Box>
             )}
           </Box>

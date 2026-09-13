@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { Box } from "@mui/material";
 import {
   CAUSE_SENTIMENTS,
@@ -7,20 +8,19 @@ import {
 import {
   AspectToggleBox,
   SatelliteButton,
-  SatelliteRow,
   SentimentSelector,
   SpecifierSelector,
   TenseToggleBox,
 } from "./Boxes.tsx";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
-import { rectBorderPoint, rectCenter } from "./graph.ts";
+import { toolbarControlKey, VERB_PHRASE } from "./ringSpecs.ts";
 import { isModalAdverbSlot, isModalSlot } from "./slots.ts";
 
-// Renders the verb phrase onto the shared canvas: the verb box, the adverb box,
-// the tense and aspect boxes, the complement-toggle row that rides the Verb Phrase
-// dotted box, and — when a route is set — the path-specifier toolbar on the
-// route box. (Polarity is a direct toggle on the verb box border, not a box here.)
+// Renders the verb phrase onto the shared canvas: the verb in its solid ring, the adverb, modal and
+// tense/aspect satellites on its orbit, the complement and direct-object toggles on its dotted
+// ring, and — on the route, locative and cause rings — the relation toolbar. (Polarity is a direct
+// toggle on the verb's solid ring, drawn with the other satellite controls.)
 export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
   const {
     renderedSlots,
@@ -31,6 +31,8 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     complementToggleIcons,
     directObjectToggle,
     groupRects,
+    controlPos,
+    discs,
     handleCycleTense,
     handleCycleAspect,
     handleSelectSpecifier,
@@ -39,7 +41,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     registerVerbAnchor,
   } = ctx;
 
-  // The verb, its adverb, and its modal chain are all word boxes on the verb phrase.
+  // The verb, its adverb, and its modal chain are all word slots on the verb phrase.
   const verbSlots = renderedSlots.filter(
     (s) =>
       s.key === "verb" ||
@@ -48,25 +50,23 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       isModalAdverbSlot(s.key),
   );
 
-  const verbPhraseRect = groupRects.find((g) => g.label === "Verb Phrase");
-  const routeRect = groupRects.find((g) => g.removeKey === "route");
-  const locativeRect = groupRects.find((g) => g.removeKey === "locative");
-  const causeRect = groupRects.find((g) => g.removeKey === "cause");
+  const verbPhraseRect = groupRects.find((g) => g.label === VERB_PHRASE);
+  const toolbarAt = (type: string) => (value: string) => controlPos[toolbarControlKey(type, value)];
 
-  // Where the direct object's control sits on the verb-phrase box: exactly where the connector
-  // to the object leaves that box (buildGraph draws the line from the same point), so the icon
-  // reads as the line's start. Folded away, there is no object box to aim at and no line — the
-  // icon parks on the right edge, the side the object is dealt on the canvas.
-  const doRect = groupRects.find((g) => g.label === "Direct Object");
-  const doAnchor =
-    !verbPhraseRect || !directObjectToggle
-      ? null
-      : doRect
-        ? rectBorderPoint(verbPhraseRect, rectCenter(doRect).x, rectCenter(doRect).y)
-        : {
-            x: verbPhraseRect.x + verbPhraseRect.width,
-            y: verbPhraseRect.y + verbPhraseRect.height / 2,
-          };
+  // A control on the verb phrase's dotted ring, centred where the ring layout seats it.
+  const seated = (key: string, children: ReactNode, ref?: (el: HTMLElement | null) => void) => {
+    const p = controlPos[key];
+    if (!p) return null;
+    return (
+      <Box
+        key={key}
+        ref={ref}
+        sx={{ position: "absolute", left: p.x, top: p.y, transform: "translate(-50%, -50%)", zIndex: 3 }}
+      >
+        {children}
+      </Box>
+    );
+  };
 
   return (
     <>
@@ -80,7 +80,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           {...makeDragProps("verbTense", handleCycleTense)}
           ref={nodeElRef(ctx, "verbTense")}
         >
-          <TenseToggleBox value={selection.verbTense ?? "present"} />
+          <TenseToggleBox value={selection.verbTense ?? "present"} disc={discs.verbTense?.r} />
         </Box>
       )}
       {shownMap.verbAspect && (
@@ -89,99 +89,54 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
           {...makeDragProps("verbAspect", handleCycleAspect)}
           ref={nodeElRef(ctx, "verbAspect")}
         >
-          <AspectToggleBox value={selection.verbAspect ?? "neutral"} />
+          <AspectToggleBox value={selection.verbAspect ?? "neutral"} disc={discs.verbAspect?.r} />
         </Box>
       )}
 
-      {/* Complement toggles ride the bottom edge of the Verb Phrase dotted box,
-          not the verb box itself. */}
-      {complementToggleIcons.length > 0 && verbPhraseRect && (
-        <Box
-          ref={registerVerbAnchor}
-          sx={{
-            position: "absolute",
-            left: verbPhraseRect.x + verbPhraseRect.width / 2,
-            top: verbPhraseRect.y + verbPhraseRect.height,
-            transform: "translate(-50%, -50%)",
-            zIndex: 3,
-          }}
-        >
-          <SatelliteRow satellites={complementToggleIcons} color="secondary" />
-        </Box>
-      )}
+      {/* Complement toggles ride the verb phrase's dotted ring, each facing its complement's ring
+          once it is shown. The instrumental's is where its cross-container link starts. */}
+      {!compact &&
+        complementToggleIcons.map((icon) =>
+          seated(
+            icon.key,
+            <SatelliteButton sat={icon} color="secondary" />,
+            icon.key === "instrumental" ? registerVerbAnchor : undefined,
+          ),
+        )}
 
-      {/* The direct object's fold-away control, on the verb-phrase box where its connector starts. */}
-      {directObjectToggle && doAnchor && (
-        <Box
-          sx={{
-            position: "absolute",
-            left: doAnchor.x,
-            top: doAnchor.y,
-            transform: "translate(-50%, -50%)",
-            zIndex: 3,
-          }}
-        >
-          <SatelliteButton sat={directObjectToggle} color="success" />
-        </Box>
-      )}
+      {/* The direct object's fold-away control, where the line to the object leaves the ring. */}
+      {!compact &&
+        directObjectToggle &&
+        seated(directObjectToggle.key, <SatelliteButton sat={directObjectToggle} color="success" />)}
 
-      {/* Path-relation toolbar rides the top edge of the Route dotted box — one
-          selectable icon per specifier. Like the dotted box's other chrome, the relation
-          toolbars are withdrawn in compact view, which leaves no headroom for them. */}
-      {!compact && selection.route && routeRect && (
-        <Box
-          sx={{
-            position: "absolute",
-            left: routeRect.x + routeRect.width / 2,
-            top: routeRect.y,
-            transform: "translate(-50%, -50%)",
-            zIndex: 3,
-          }}
-        >
-          <SpecifierSelector
-            value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
-            onSelect={handleSelectSpecifier}
-          />
-        </Box>
+      {/* The relation toolbars ride the top of the route, locative and cause rings — one button per
+          relation, seated among the ring's other controls. Like the ring's other controls, they are
+          withdrawn in compact view. */}
+      {!compact && selection.route && (
+        <SpecifierSelector
+          value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
+          onSelect={handleSelectSpecifier}
+          placeAt={toolbarAt("route")}
+        />
       )}
 
       {/* The locative takes the same relation toolbar as the route — it is what lets the
           place read "under the bed" or "behind the tree" rather than only "in the bed".
           Same relations, different default: the locative falls back on containment. */}
-      {!compact && selection.locative && locativeRect && (
-        <Box
-          sx={{
-            position: "absolute",
-            left: locativeRect.x + locativeRect.width / 2,
-            top: locativeRect.y,
-            transform: "translate(-50%, -50%)",
-            zIndex: 3,
-          }}
-        >
-          <SpecifierSelector
-            value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
-            onSelect={handleSelectLocativeSpecifier}
-          />
-        </Box>
+      {!compact && selection.locative && (
+        <SpecifierSelector
+          value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
+          onSelect={handleSelectLocativeSpecifier}
+          placeAt={toolbarAt("locative")}
+        />
       )}
 
-      {/* Sentiment toolbar rides the top edge of the Cause dotted box — neutral /
-          negative / positive, mirroring the route's path-relation toolbar. */}
-      {!compact && selection.cause && causeRect && (
-        <Box
-          sx={{
-            position: "absolute",
-            left: causeRect.x + causeRect.width / 2,
-            top: causeRect.y,
-            transform: "translate(-50%, -50%)",
-            zIndex: 3,
-          }}
-        >
-          <SentimentSelector
-            value={selection.causeSentiment ?? CAUSE_SENTIMENTS[0]}
-            onSelect={handleSelectSentiment}
-          />
-        </Box>
+      {!compact && selection.cause && (
+        <SentimentSelector
+          value={selection.causeSentiment ?? CAUSE_SENTIMENTS[0]}
+          onSelect={handleSelectSentiment}
+          placeAt={toolbarAt("cause")}
+        />
       )}
     </>
   );

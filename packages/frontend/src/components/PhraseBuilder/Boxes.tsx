@@ -7,6 +7,7 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  type SxProps,
   type Theme,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
@@ -107,6 +108,53 @@ export interface SatelliteIcon {
   onToggle: () => void;
 }
 
+// A word slot's shape on the canvas. A constituent's word sits inside its solid `ring`; a satellite
+// is a smaller `disc` on its constituent's orbit. Either is drawn behind the content at radius `r`,
+// which the ring layout derives from the content's own size — so the content is what gets measured
+// and the circle never feeds back into it. Undefined draws the plain box the empty opening picker
+// uses, which has no constituent round it.
+export type SlotShape = { r: number; kind: "ring" | "disc" };
+
+// The width a word picker takes inside a ring or a disc.
+const PICKER_WIDTH = 100;
+
+// The small round clear button: on a solid ring it is one of the ring's controls, placed by the
+// ring layout; on a disc it sits on the disc's rim at half past one.
+export function ClearButton({
+  label,
+  onClear,
+  sx,
+}: {
+  label: string;
+  onClear: () => void;
+  sx?: SxProps<Theme>;
+}) {
+  return (
+    <Tooltip title={`Clear ${label}`}>
+      <IconButton
+        size="small"
+        onPointerDown={(e) => e.stopPropagation()}
+        onClick={onClear}
+        sx={[
+          {
+            width: 18,
+            height: 18,
+            p: 0,
+            bgcolor: "background.paper",
+            border: "1px solid",
+            borderColor: "divider",
+            opacity: 0.7,
+            "&:hover": { opacity: 1, bgcolor: "background.paper" },
+          },
+          ...(Array.isArray(sx) ? sx : [sx]),
+        ]}
+      >
+        <ClearIcon sx={{ fontSize: 11 }} />
+      </IconButton>
+    </Tooltip>
+  );
+}
+
 export function SlotBox({
   slot,
   concept,
@@ -118,7 +166,8 @@ export function SlotBox({
   dimmed = false,
   highlight = false,
   editing = false,
-  minWidth = 80,
+  shape,
+  rim,
 }: {
   slot: SlotConfig;
   concept?: Concept;
@@ -138,139 +187,175 @@ export function SlotBox({
   // The user clicked this filled box to change its word: show `emptyContent` (the picker)
   // over the current word instead of the word itself.
   editing?: boolean;
-  // Minimum box width in px. Widened above the 80px default for boxes that host many
-  // satellite controls on their border (e.g. a short verb like "become"), so the controls
-  // have room to fan out along the edge instead of piling up over each other.
-  minWidth?: number;
+  shape?: SlotShape;
+  // A small control a filled disc wears on its rim at half past seven (the degree chip), rather
+  // than in a footer that would swell the disc.
+  rim?: ReactNode;
 }) {
   const t = useUiString();
   const word = useConceptLabel();
+  const filled = Boolean(concept) && !editing;
+  // A filled disc says only its word: the control that revealed it already says what it is, and
+  // the slot name would swell the disc to twice the word's size.
+  const showLabel = slot.key !== "verb" && !(shape?.kind === "disc" && filled);
+  const outline = {
+    borderWidth: shape?.kind === "disc" ? 1.5 : 2,
+    borderColor: highlight || isActive ? `${slot.color}.main` : filled && shape ? `${slot.color}.main` : "divider",
+    borderStyle: highlight ? "dashed" : "solid",
+    boxShadow: highlight ? (theme: Theme) => `0 0 0 3px ${theme.palette[slot.color].main}33` : "none",
+    bgcolor: isActive || concept ? wash(slot.color) : "background.paper",
+    transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
+  };
+  const faded = { opacity: dimmed ? 0.45 : 1, filter: dimmed ? "grayscale(1)" : "none" };
+
+  const content = (
+    <>
+      {showLabel && (
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.55rem",
+            fontWeight: 700,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "text.secondary",
+            display: "block",
+            mb: 0.25,
+          }}
+        >
+          {slot.labelKey ? t(slot.labelKey) : slot.label}
+          {slot.required ? " *" : ""}
+        </Typography>
+      )}
+      {filled ? (
+        <Typography
+          sx={{
+            fontFamily: '"Lora", Georgia, serif',
+            fontSize: shape?.kind === "disc" ? "0.8rem" : "0.9rem",
+            fontWeight: 600,
+            fontStyle: "italic",
+            color: `${slot.color}.dark`,
+            lineHeight: 1.3,
+          }}
+        >
+          {word(concept!)}
+        </Typography>
+      ) : (
+        <>
+          {/* Only a genuinely-empty box wears the on-box category switch; a filled box
+              being re-picked (editing) keeps its word's class. */}
+          {!concept && categoryToggle}
+          {emptyContent && shape ? (
+            // A picker's input would otherwise take the browser's default width, and the ring
+            // round it would swell to twice the size of the word it is choosing.
+            <Box sx={{ width: PICKER_WIDTH, mx: "auto" }}>{emptyContent}</Box>
+          ) : emptyContent ?? (
+            <Typography
+              sx={{
+                fontFamily: '"Inter", sans-serif',
+                fontSize: "0.8rem",
+                color: "text.disabled",
+                fontStyle: "italic",
+              }}
+            >
+              {isActive ? "choose…" : "empty"}
+            </Typography>
+          )}
+        </>
+      )}
+      {filled && footer}
+    </>
+  );
+
+  if (!shape) {
+    return (
+      <Box data-testid={`box-${slot.key}`} sx={{ position: "relative", display: "inline-block" }}>
+        <Paper
+          variant="outlined"
+          sx={{
+            px: 1.5,
+            py: 0.75,
+            minWidth: 80,
+            cursor: "inherit",
+            borderRadius: 2,
+            ...outline,
+            ...faded,
+            "&:hover": { borderColor: `${slot.color}.main` },
+            userSelect: "none",
+          }}
+        >
+          {content}
+        </Paper>
+        {concept && !dimmed && !editing && (
+          <ClearButton label={slot.label} onClear={onClear} sx={{ position: "absolute", top: -8, right: -8 }} />
+        )}
+      </Box>
+    );
+  }
+
+  const { r, kind } = shape;
+  // How far across and up a disc's rim is at half past one (its clear button) and half past seven
+  // (its rim control).
+  const diagonal = r * Math.SQRT1_2;
   return (
-    <Box data-testid={`box-${slot.key}`} sx={{ position: "relative", display: "inline-block" }}>
+    <Box
+      data-testid={`box-${slot.key}`}
+      data-shape={kind}
+      sx={{
+        position: "relative",
+        display: "inline-block",
+        "&:hover > .slot-circle": { borderColor: `${slot.color}.main` },
+      }}
+    >
       <Paper
+        className="slot-circle"
         variant="outlined"
         sx={{
-          px: 1.5,
-          py: 0.75,
-          minWidth,
-          cursor: "inherit",
-          borderRadius: 2,
-          borderWidth: 2,
-          borderColor: highlight
-            ? `${slot.color}.main`
-            : isActive
-              ? `${slot.color}.main`
-              : "divider",
-          borderStyle: highlight ? "dashed" : "solid",
-          boxShadow: highlight ? (t) => `0 0 0 3px ${t.palette[slot.color].main}33` : "none",
-          bgcolor: isActive || concept ? wash(slot.color) : "background.paper",
-          opacity: dimmed ? 0.45 : 1,
-          filter: dimmed ? "grayscale(1)" : "none",
-          transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
-          "&:hover": { borderColor: `${slot.color}.main` },
-          userSelect: "none",
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: 2 * r,
+          height: 2 * r,
+          transform: "translate(-50%, -50%)",
+          borderRadius: "50%",
+          ...outline,
+          ...faded,
         }}
-      >
-        {slot.key !== "verb" && (
-          <Typography
-            sx={{
-              fontFamily: '"Inter", sans-serif',
-              fontSize: "0.55rem",
-              fontWeight: 700,
-              letterSpacing: "0.14em",
-              textTransform: "uppercase",
-              color: "text.secondary",
-              display: "block",
-              mb: 0.25,
-            }}
-          >
-            {slot.labelKey ? t(slot.labelKey) : slot.label}
-            {slot.required ? " *" : ""}
-          </Typography>
-        )}
-        {concept && !editing ? (
-          <Typography
-            sx={{
-              fontFamily: '"Lora", Georgia, serif',
-              fontSize: "0.9rem",
-              fontWeight: 600,
-              fontStyle: "italic",
-              color: `${slot.color}.dark`,
-              lineHeight: 1.3,
-            }}
-          >
-            {word(concept)}
-          </Typography>
-        ) : (
-          <>
-            {/* Only a genuinely-empty box wears the on-box category switch; a filled box
-                being re-picked (editing) keeps its word's class. */}
-            {!concept && categoryToggle}
-            {emptyContent ?? (
-              <Typography
-                sx={{
-                  fontFamily: '"Inter", sans-serif',
-                  fontSize: "0.8rem",
-                  color: "text.disabled",
-                  fontStyle: "italic",
-                }}
-              >
-                {isActive ? "choose…" : "empty"}
-              </Typography>
-            )}
-          </>
-        )}
-        {concept && !editing && footer}
-      </Paper>
-      {concept && !dimmed && !editing && (
-        <Tooltip title={`Clear ${slot.label}`}>
-          <IconButton
-            size="small"
-            onPointerDown={(e) => e.stopPropagation()}
-            onClick={onClear}
-            sx={{
-              position: "absolute",
-              top: -8,
-              right: -8,
-              width: 18,
-              height: 18,
-              p: 0,
-              bgcolor: "background.paper",
-              border: "1px solid",
-              borderColor: "divider",
-              opacity: 0.7,
-              "&:hover": { opacity: 1, bgcolor: "background.paper" },
-            }}
-          >
-            <ClearIcon sx={{ fontSize: 11 }} />
-          </IconButton>
-        </Tooltip>
+      />
+      <Box sx={{ position: "relative", textAlign: "center", userSelect: "none", whiteSpace: "nowrap", ...faded }}>
+        {content}
+      </Box>
+      {kind === "disc" && concept && !dimmed && !editing && (
+        <ClearButton
+          label={slot.label}
+          onClear={onClear}
+          sx={{
+            position: "absolute",
+            left: `calc(50% + ${diagonal}px)`,
+            top: `calc(50% - ${diagonal}px)`,
+            transform: "translate(-50%, -50%)",
+          }}
+        />
+      )}
+      {kind === "disc" && filled && rim && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: `calc(50% - ${diagonal}px)`,
+            top: `calc(50% + ${diagonal}px)`,
+            transform: "translate(-50%, -50%)",
+            display: "flex",
+          }}
+        >
+          {rim}
+        </Box>
       )}
     </Box>
   );
 }
 
-// A horizontal row of satellite toggle icons. Rendered on the border of a slot
-// box (via SlotBox) or overlaid on a dotted role-group box (complement toggles).
-export function SatelliteRow({
-  satellites,
-  color,
-}: {
-  satellites: SatelliteIcon[];
-  color: SlotConfig["color"];
-}) {
-  return (
-    <Box sx={{ display: "flex", gap: 0.5 }}>
-      {satellites.map((sat) => (
-        <SatelliteButton key={sat.key} sat={sat} color={color} />
-      ))}
-    </Box>
-  );
-}
-
-// One satellite reveal/toggle button. Rendered inline in a SatelliteRow (the
-// complement toggles) or, on the phrase canvas, positioned individually on its
-// core box's border pointing toward the satellite it governs.
+// One satellite reveal/toggle button, seated on one of its constituent's rings by the ring layout:
+// facing the satellite it governs, or the constituent it shows.
 export function SatelliteButton({
   sat,
   color,
@@ -327,55 +412,121 @@ export function SatelliteButton({
   );
 }
 
-export function ToggleBox({ label, value }: { label: string; value: string }) {
-  return (
-    <Paper
-      variant="outlined"
-      sx={{
-        px: 1.5,
-        py: 0.75,
-        minWidth: 80,
-        cursor: "inherit",
-        borderRadius: 2,
-        borderWidth: 2,
-        borderColor: "divider",
-        bgcolor: "background.paper",
-        transition: "border-color 0.15s",
-        userSelect: "none",
-        "&:hover": { borderColor: "text.secondary" },
-      }}
-    >
-      <Typography
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.55rem",
-          fontWeight: 700,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "text.secondary",
-          display: "block",
-          mb: 0.25,
-        }}
-      >
-        {label}
-      </Typography>
+// A value-cycling satellite (tense, aspect, determiner): its name over its current value. Drawn as
+// a disc of radius `disc` on its constituent's orbit, or as a plain box without one. `active` marks
+// a value away from the unmarked default in the constituent's colour.
+export function ToggleBox({
+  label,
+  value,
+  active = false,
+  color = "secondary",
+  disc,
+}: {
+  label: string;
+  value: string;
+  active?: boolean;
+  color?: SlotConfig["color"];
+  disc?: number;
+}) {
+  const outline = {
+    borderWidth: disc === undefined ? 2 : 1.5,
+    borderColor: active ? `${color}.main` : "divider",
+    bgcolor: active ? wash(color) : "background.paper",
+    transition: "border-color 0.15s, background-color 0.15s",
+  };
+  const content = (
+    <>
+      {/* A disc says only its value — "Past", "Progressive", "Definite" name themselves, and the
+          control that revealed the disc says what it is — so its name moves to a tooltip. */}
+      {disc === undefined && (
+        <Typography
+          sx={{
+            fontFamily: '"Inter", sans-serif',
+            fontSize: "0.55rem",
+            fontWeight: 700,
+            letterSpacing: "0.14em",
+            textTransform: "uppercase",
+            color: "text.secondary",
+            display: "block",
+            mb: 0.25,
+          }}
+        >
+          {label}
+        </Typography>
+      )}
       <Typography
         sx={{
           fontFamily: '"Lora", Georgia, serif',
-          fontSize: "0.9rem",
+          fontSize: disc === undefined ? "0.9rem" : "0.75rem",
           fontWeight: 600,
           fontStyle: "italic",
-          color: "text.primary",
+          color: active ? `${color}.dark` : "text.primary",
           lineHeight: 1.3,
         }}
       >
         {value}
       </Typography>
-    </Paper>
+    </>
+  );
+  if (disc === undefined) {
+    return (
+      <Paper
+        variant="outlined"
+        sx={{
+          px: 1.5,
+          py: 0.75,
+          minWidth: 80,
+          cursor: "inherit",
+          borderRadius: 2,
+          userSelect: "none",
+          ...outline,
+          "&:hover": { borderColor: active ? `${color}.dark` : "text.secondary" },
+        }}
+      >
+        {content}
+      </Paper>
+    );
+  }
+  return (
+    <Box
+      data-shape="disc"
+      title={`${label}: ${value}`}
+      sx={{
+        position: "relative",
+        display: "inline-block",
+        "&:hover > .slot-circle": { borderColor: active ? `${color}.dark` : "text.secondary" },
+      }}
+    >
+      <Paper
+        className="slot-circle"
+        variant="outlined"
+        sx={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          width: 2 * disc,
+          height: 2 * disc,
+          transform: "translate(-50%, -50%)",
+          borderRadius: "50%",
+          ...outline,
+        }}
+      />
+      <Box sx={{ position: "relative", textAlign: "center", userSelect: "none", whiteSpace: "nowrap" }}>
+        {content}
+      </Box>
+    </Box>
   );
 }
 
-export function DeterminerToggleBox({ value }: { value: Definiteness }) {
+export function DeterminerToggleBox({
+  value,
+  color,
+  disc,
+}: {
+  value: Definiteness;
+  color?: SlotConfig["color"];
+  disc?: number;
+}) {
   const t = useUiString();
   // The box names the value the way the menu row that set it did — "Definite", "Multal" — not the
   // word it spells. The surface word is already in the rendered phrase; repeating it here would
@@ -384,6 +535,8 @@ export function DeterminerToggleBox({ value }: { value: Definiteness }) {
     <ToggleBox
       label={t("satellite.determiner")}
       value={t(`determiner.name.${value}`)}
+      color={color}
+      disc={disc}
     />
   );
 }
@@ -399,19 +552,85 @@ const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   in_front_of: <FlipToFrontIcon sx={{ fontSize: 15 }} />,
 };
 
-// A toolbar of spatial relations — one selectable icon per specifier, the active one highlighted.
-// Shared by the route and locative complements, which draw on the same relations; the caller
-// passes the value (and so the default) its own complement carries.
-export function SpecifierSelector({
+// A toolbar of selectable values for a complement's relation — one icon per value, the active one
+// highlighted. As a plain row, or — given `placeAt` — each button seated on the canvas where the
+// ring layout puts it on the complement's dotted ring.
+function RelationToolbar<V extends string>({
+  testId,
+  values,
   value,
+  labels,
+  icons,
   onSelect,
+  placeAt,
 }: {
-  value: PathSpecifier;
-  onSelect: (s: PathSpecifier) => void;
+  testId: string;
+  values: readonly V[];
+  value: V;
+  labels: Record<V, string>;
+  icons: Record<V, ReactNode>;
+  onSelect: (v: V) => void;
+  placeAt?: (v: V) => { x: number; y: number } | undefined;
 }) {
+  const button = (v: V) => {
+    const selected = v === value;
+    return (
+      <Tooltip key={v} title={labels[v]}>
+        <IconButton
+          size="small"
+          onPointerDown={(e) => e.stopPropagation()}
+          onClick={() => onSelect(v)}
+          sx={{
+            width: placeAt ? 20 : 22,
+            height: placeAt ? 20 : 22,
+            p: 0,
+            borderRadius: 1,
+            bgcolor: selected ? "warning.main" : placeAt ? "background.paper" : "transparent",
+            border: placeAt ? "1px solid" : "none",
+            borderColor: selected ? "warning.main" : "divider",
+            color: selected ? "common.white" : "text.secondary",
+            transition: "background-color 0.15s, color 0.15s",
+            "&:hover": {
+              bgcolor: selected ? "warning.dark" : "action.hover",
+              color: selected ? "common.white" : "warning.main",
+            },
+          }}
+        >
+          {icons[v]}
+        </IconButton>
+      </Tooltip>
+    );
+  };
+
+  if (placeAt) {
+    return (
+      // No box of its own: each button is positioned against the canvas, where its ring seats it.
+      <Box data-testid={testId} sx={{ display: "contents" }}>
+        {values.map((v) => {
+          const p = placeAt(v);
+          if (!p) return null;
+          return (
+            <Box
+              key={v}
+              sx={{
+                position: "absolute",
+                left: p.x,
+                top: p.y,
+                transform: "translate(-50%, -50%)",
+                display: "flex",
+                zIndex: 3,
+              }}
+            >
+              {button(v)}
+            </Box>
+          );
+        })}
+      </Box>
+    );
+  }
   return (
     <Box
-      data-testid="specifier-toolbar"
+      data-testid={testId}
       sx={{
         display: "flex",
         gap: 0.25,
@@ -423,34 +642,32 @@ export function SpecifierSelector({
         boxShadow: 1,
       }}
     >
-      {PATH_SPECIFIERS.map((s) => {
-        const selected = s === value;
-        return (
-          <Tooltip key={s} title={PATH_SPECIFIER_LABELS[s]}>
-            <IconButton
-              size="small"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => onSelect(s)}
-              sx={{
-                width: 22,
-                height: 22,
-                p: 0,
-                borderRadius: 1,
-                bgcolor: selected ? "warning.main" : "transparent",
-                color: selected ? "common.white" : "text.secondary",
-                transition: "background-color 0.15s, color 0.15s",
-                "&:hover": {
-                  bgcolor: selected ? "warning.dark" : "action.hover",
-                  color: selected ? "common.white" : "warning.main",
-                },
-              }}
-            >
-              {SPECIFIER_ICONS[s]}
-            </IconButton>
-          </Tooltip>
-        );
-      })}
+      {values.map(button)}
     </Box>
+  );
+}
+
+// Spatial relations, shared by the route and locative complements, which draw on the same
+// relations; the caller passes the value (and so the default) its own complement carries.
+export function SpecifierSelector({
+  value,
+  onSelect,
+  placeAt,
+}: {
+  value: PathSpecifier;
+  onSelect: (s: PathSpecifier) => void;
+  placeAt?: (s: PathSpecifier) => { x: number; y: number } | undefined;
+}) {
+  return (
+    <RelationToolbar
+      testId="specifier-toolbar"
+      values={PATH_SPECIFIERS}
+      value={value}
+      labels={PATH_SPECIFIER_LABELS}
+      icons={SPECIFIER_ICONS}
+      onSelect={onSelect}
+      placeAt={placeAt}
+    />
   );
 }
 
@@ -460,158 +677,36 @@ const SENTIMENT_ICONS: Record<CauseSentiment, ReactNode> = {
   positive: <SentimentSatisfiedAltIcon sx={{ fontSize: 15 }} />,
 };
 
-// A toolbar of affective stances for the cause complement — neutral (because of),
-// negative (fault of), positive (thanks to), the active one highlighted. Rendered on
-// top of the cause dotted box, mirroring the route's SpecifierSelector.
+// Affective stances for the cause complement — neutral (because of), negative (fault of),
+// positive (thanks to) — mirroring the route's SpecifierSelector.
 export function SentimentSelector({
   value,
   onSelect,
+  placeAt,
 }: {
   value: CauseSentiment;
   onSelect: (s: CauseSentiment) => void;
+  placeAt?: (s: CauseSentiment) => { x: number; y: number } | undefined;
 }) {
   return (
-    <Box
-      data-testid="sentiment-toolbar"
-      sx={{
-        display: "flex",
-        gap: 0.25,
-        p: 0.25,
-        bgcolor: "background.paper",
-        border: "1px solid",
-        borderColor: "divider",
-        borderRadius: 1.5,
-        boxShadow: 1,
-      }}
-    >
-      {CAUSE_SENTIMENTS.map((s) => {
-        const selected = s === value;
-        return (
-          <Tooltip key={s} title={CAUSE_SENTIMENT_LABELS[s]}>
-            <IconButton
-              size="small"
-              onPointerDown={(e) => e.stopPropagation()}
-              onClick={() => onSelect(s)}
-              sx={{
-                width: 22,
-                height: 22,
-                p: 0,
-                borderRadius: 1,
-                bgcolor: selected ? "warning.main" : "transparent",
-                color: selected ? "common.white" : "text.secondary",
-                transition: "background-color 0.15s, color 0.15s",
-                "&:hover": {
-                  bgcolor: selected ? "warning.dark" : "action.hover",
-                  color: selected ? "common.white" : "warning.main",
-                },
-              }}
-            >
-              {SENTIMENT_ICONS[s]}
-            </IconButton>
-          </Tooltip>
-        );
-      })}
-    </Box>
+    <RelationToolbar
+      testId="sentiment-toolbar"
+      values={CAUSE_SENTIMENTS}
+      value={value}
+      labels={CAUSE_SENTIMENT_LABELS}
+      icons={SENTIMENT_ICONS}
+      onSelect={onSelect}
+      placeAt={placeAt}
+    />
   );
 }
 
-export function TenseToggleBox({ value }: { value: Tense }) {
+export function TenseToggleBox({ value, disc }: { value: Tense; disc?: number }) {
   // Present is the implicit default → styled neutral; past/future read as "set".
-  const active = value !== "present";
-  return (
-    <Paper
-      variant="outlined"
-      sx={{
-        px: 1.5,
-        py: 0.75,
-        minWidth: 80,
-        cursor: "inherit",
-        borderRadius: 2,
-        borderWidth: 2,
-        borderColor: active ? "secondary.main" : "divider",
-        bgcolor: active ? wash("secondary") : "background.paper",
-        transition: "border-color 0.15s, background-color 0.15s",
-        userSelect: "none",
-        "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },
-      }}
-    >
-      <Typography
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.55rem",
-          fontWeight: 700,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "text.secondary",
-          display: "block",
-          mb: 0.25,
-        }}
-      >
-        Tense
-      </Typography>
-      <Typography
-        sx={{
-          fontFamily: '"Lora", Georgia, serif',
-          fontSize: "0.9rem",
-          fontWeight: 600,
-          fontStyle: "italic",
-          color: active ? "secondary.dark" : "text.primary",
-          lineHeight: 1.3,
-        }}
-      >
-        {TENSE_LABELS[value]}
-      </Typography>
-    </Paper>
-  );
+  return <ToggleBox label="Tense" value={TENSE_LABELS[value]} active={value !== "present"} disc={disc} />;
 }
 
-export function AspectToggleBox({ value }: { value: Aspect }) {
+export function AspectToggleBox({ value, disc }: { value: Aspect; disc?: number }) {
   // Neutral is the implicit default → styled neutral; the marked aspects read as "set".
-  const active = value !== "neutral";
-  return (
-    <Paper
-      variant="outlined"
-      sx={{
-        px: 1.5,
-        py: 0.75,
-        minWidth: 80,
-        cursor: "inherit",
-        borderRadius: 2,
-        borderWidth: 2,
-        borderColor: active ? "secondary.main" : "divider",
-        bgcolor: active ? wash("secondary") : "background.paper",
-        transition: "border-color 0.15s, background-color 0.15s",
-        userSelect: "none",
-        "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },
-      }}
-    >
-      <Typography
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.55rem",
-          fontWeight: 700,
-          letterSpacing: "0.14em",
-          textTransform: "uppercase",
-          color: "text.secondary",
-          display: "block",
-          mb: 0.25,
-        }}
-      >
-        Aspect
-      </Typography>
-      <Typography
-        sx={{
-          fontFamily: '"Lora", Georgia, serif',
-          fontSize: "0.9rem",
-          fontWeight: 600,
-          fontStyle: "italic",
-          color: active ? "secondary.dark" : "text.primary",
-          lineHeight: 1.3,
-        }}
-      >
-        {ASPECT_LABELS[value]}
-      </Typography>
-    </Paper>
-  );
+  return <ToggleBox label="Aspect" value={ASPECT_LABELS[value]} active={value !== "neutral"} disc={disc} />;
 }
-

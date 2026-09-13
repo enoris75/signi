@@ -2,9 +2,9 @@ import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
-import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import { GroupPerimeterControls } from '../src/components/PhraseBuilder/GroupPerimeterControls.tsx';
 import type { NounKey } from '../src/components/PhraseBuilder/interfaces.ts';
+import { perimeterControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
 import type { PerimeterEntry } from '../src/components/PhraseBuilder/satellites.tsx';
 
 // A set control fills with its slot colour; the tests render without the app theme, so these are
@@ -12,25 +12,17 @@ import type { PerimeterEntry } from '../src/components/PhraseBuilder/satellites.
 const PRIMARY = 'rgb(25, 118, 210)';
 const SUCCESS = 'rgb(46, 125, 50)';
 
-// The subject's dotted box spans 100..300 across and 40..160 down, around its adjective too.
-const SUBJECT_GROUP: GroupRect = {
-  x: 100,
-  y: 40,
-  width: 200,
-  height: 120,
-  label: 'Subject',
-  color: '#2c4a6e',
-  nodeKeys: ['subjectAdjective', 'subject'],
-};
-
-const OBJECT_GROUP: GroupRect = {
-  x: 400,
-  y: 60,
-  width: 160,
-  height: 100,
-  label: 'Direct object',
-  color: '#3a6e3a',
-  nodeKeys: ['directObject'],
+// Where the ring layout seated each noun's dotted-ring controls: the relations fanned along the
+// bottom of the ring, the receiving dot at its top.
+const CONTROL_POS = {
+  [perimeterControlKey('relative', 'subject')]: { x: 178, y: 190 },
+  [perimeterControlKey('possessor', 'subject')]: { x: 200, y: 192 },
+  [perimeterControlKey('conjunct', 'subject')]: { x: 222, y: 190 },
+  [perimeterControlKey('incoming', 'subject')]: { x: 200, y: 8 },
+  [perimeterControlKey('relative', 'directObject')]: { x: 478, y: 190 },
+  [perimeterControlKey('possessor', 'directObject')]: { x: 500, y: 192 },
+  [perimeterControlKey('conjunct', 'directObject')]: { x: 522, y: 190 },
+  [perimeterControlKey('incoming', 'directObject')]: { x: 500, y: 8 },
 };
 
 function satellite(key: string, overrides: Partial<SatelliteIcon> = {}): SatelliteIcon {
@@ -61,7 +53,7 @@ function renderControls(overrides: Partial<ComponentProps<typeof GroupPerimeterC
   };
   const view = render(
     <GroupPerimeterControls
-      groupRects={[SUBJECT_GROUP, OBJECT_GROUP]}
+      controlPos={CONTROL_POS}
       perimeterByNoun={{}}
       {...handlers}
       {...overrides}
@@ -76,8 +68,13 @@ const buttons = () => screen.queryAllByRole('button').map((b) => b.dataset['test
 const registered = (register: ReturnType<typeof vi.fn>, noun: NounKey) =>
   register.mock.calls.filter(([n, el]) => n === noun && el).at(-1)?.[1] as HTMLElement | undefined;
 
+const seat = (el: Element) => {
+  const style = getComputedStyle(el);
+  return { position: style.position, left: style.left, top: style.top, transform: style.transform };
+};
+
 describe('GroupPerimeterControls', () => {
-  it('lines up a noun’s relative, possessor and coordination controls, in that order', () => {
+  it('shows a noun’s relative, possessor and coordination controls', () => {
     renderControls({ perimeterByNoun: { subject: everyControl('subject') } });
 
     expect(buttons()).toEqual([
@@ -87,14 +84,17 @@ describe('GroupPerimeterControls', () => {
     ]);
   });
 
-  it('centres the control row on the bottom edge of the noun’s dotted box', () => {
+  it('centres each control where the ring layout seated it on the noun’s dotted ring', () => {
     renderControls({ perimeterByNoun: { subject: everyControl('subject') } });
 
-    const row = getComputedStyle(screen.getByTestId('relative-ctl-subject').parentElement!);
-    expect(row.position).toBe('absolute');
-    expect(row.left).toBe('200px');
-    expect(row.top).toBe('160px');
-    expect(row.transform).toBe('translate(-50%, -50%)');
+    const center = { position: 'absolute', transform: 'translate(-50%, -50%)' };
+    expect(seat(screen.getByTestId('relative-ctl-subject'))).toEqual({ ...center, left: '178px', top: '190px' });
+    expect(seat(screen.getByTestId('possessor-ctl-subject'))).toEqual({ ...center, left: '200px', top: '192px' });
+    expect(seat(screen.getByTestId('satellite-subjectConjunct').parentElement!)).toEqual({
+      ...center,
+      left: '222px',
+      top: '190px',
+    });
   });
 
   it.each(['relative', 'possessor', 'conjunct'] as const)(
@@ -115,9 +115,9 @@ describe('GroupPerimeterControls', () => {
     expect(registered(registerTargetAnchor, 'subject')).toBeUndefined();
   });
 
-  it('skips a noun whose dotted box is not measured yet', () => {
+  it('skips a noun whose controls the ring layout has not seated', () => {
     const { registerTargetAnchor, registerPossessorControl } = renderControls({
-      groupRects: [OBJECT_GROUP],
+      controlPos: {},
       perimeterByNoun: { subject: everyControl('subject') },
       linkTargetKeys: new Set<NounKey>(['subject']),
     });
@@ -148,15 +148,17 @@ describe('GroupPerimeterControls', () => {
     expect(registerConjunctControl).toHaveBeenLastCalledWith('subject', null);
   });
 
-  it('places a receiving dot on the top edge of a link target’s dotted box', () => {
+  it('places a receiving dot where the ring layout seated it on a link target’s dotted ring', () => {
     const { registerTargetAnchor } = renderControls({
       linkTargetKeys: new Set<NounKey>(['subject']),
     });
 
-    const dot = getComputedStyle(registered(registerTargetAnchor, 'subject')!);
-    expect(dot.left).toBe('200px');
-    expect(dot.top).toBe('40px');
-    expect(dot.transform).toBe('translate(-50%, -50%)');
+    expect(seat(registered(registerTargetAnchor, 'subject')!)).toEqual({
+      position: 'absolute',
+      left: '200px',
+      top: '8px',
+      transform: 'translate(-50%, -50%)',
+    });
     expect(buttons()).toEqual([]);
   });
 
@@ -192,7 +194,7 @@ describe('GroupPerimeterControls', () => {
   it('renders in a standalone period, with no workspace to register links with', () => {
     render(
       <GroupPerimeterControls
-        groupRects={[SUBJECT_GROUP]}
+        controlPos={CONTROL_POS}
         perimeterByNoun={{ subject: everyControl('subject') }}
         linkTargetKeys={new Set<NounKey>(['subject'])}
         registerPossessorControl={() => {}}

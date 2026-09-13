@@ -15,11 +15,16 @@ const slots = (...keys: SlotKey[]) => keys.map((k) => ALL_SLOTS.find((s) => s.ke
 const groupRect = (label: string, nodeKeys: string[]): GroupRect => ({
   label,
   color: '#000',
+  mainKey: nodeKeys[0],
   nodeKeys,
-  x: 10,
-  y: 10,
-  width: 200,
-  height: 100,
+  center: { x: 110, y: 110 },
+  rIn: 40,
+  orbit: 40,
+  rOut: 80,
+  x: 19,
+  y: 19,
+  width: 182,
+  height: 182,
 });
 
 // The render bag PhraseBuilder threads down, with inert handlers. Each drag prop set releases
@@ -34,6 +39,8 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     satelliteIconsByParent: {},
     complementToggleIcons: [],
     groupRects: [],
+    discs: {},
+    controlPos: {},
     collapsedGroups: {},
     compact: false,
     draggingKey: null,
@@ -73,7 +80,6 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectLocativeSpecifier: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
-    handleRearrangeGroup: vi.fn(),
     handleRemoveComplement: vi.fn(),
     ...overrides,
   };

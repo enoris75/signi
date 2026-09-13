@@ -591,10 +591,10 @@ describe('PhraseBuilder', () => {
       fireEvent.click(satellite('verbAspect'));
       expect(wordsPanel().activeSlot).toBe('subject');
 
-      press(screen.getByText('Tense'));
+      press(box('verbTense'));
       expect(lastEdit({ verbTense: 'past' })).toEqual({ verbTense: 'future' });
 
-      press(screen.getByText('Aspect'));
+      press(box('verbAspect'));
       expect(lastEdit({})).toEqual({ verbAspect: 'progressive' });
     });
 
@@ -602,7 +602,7 @@ describe('PhraseBuilder', () => {
       const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
       fireEvent.click(satellite('directObjectDefiniteness'));
 
-      press(screen.getByText('Determiner'));
+      press(box('directObjectDefiniteness'));
       fireEvent.click(screen.getByRole('menuitem', { name: /Paucal/ }));
 
       expect(lastEdit({ subjectDefiniteness: 'this' })).toEqual({

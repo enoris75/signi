@@ -103,7 +103,7 @@ export function NounPhraseBuilder({
   const slotKeys: string[] = [...adjectiveSlots(which), which];
   const mySlots = renderedSlots.filter((s) => slotKeys.includes(s.key));
 
-  // The dashed box for this constituent — its main word key is one of its nodes.
+  // The dotted ring for this constituent — its main word key is one of its nodes.
   // Absent (e.g. an unrevealed complement) means there's nothing to draw.
   const myRect = groupRects.find((g) => g.nodeKeys.includes(which));
 
@@ -134,7 +134,7 @@ export function NounPhraseBuilder({
               setNodeEl(el);
             }}
           >
-            <DeterminerToggleBox value={definiteness} />
+            <DeterminerToggleBox value={definiteness} disc={ctx.discs[`${which}Definiteness`]?.r} />
           </Box>
           {/* A sibling of the drag box, never a child: MUI portals the menu into the body,
               but React still propagates its events along the React tree, so nesting it would

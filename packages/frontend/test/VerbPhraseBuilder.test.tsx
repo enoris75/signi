@@ -1,10 +1,16 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
-import { CAUSE_SENTIMENT_LABELS, type Concept } from '@signi/shared';
+import {
+  CAUSE_SENTIMENT_LABELS,
+  CAUSE_SENTIMENTS,
+  PATH_SPECIFIERS,
+  type Concept,
+} from '@signi/shared';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
 import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import type { SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
+import { toolbarControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
 import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
 import { VerbPhraseBuilder } from '../src/components/PhraseBuilder/VerbPhraseBuilder.tsx';
 import { renderWithProviders } from './render.tsx';
@@ -13,14 +19,24 @@ const noun = (id: string): Concept => ({ id, role: 'noun', description: id, labe
 
 const slots = (...keys: SlotKey[]) => keys.map((k) => ALL_SLOTS.find((s) => s.key === k)!);
 
-const group = (
-  label: string,
-  [x, y, width, height]: [number, number, number, number],
-  extra: Partial<GroupRect> = {},
-): GroupRect => ({ label, color: '#000', nodeKeys: [], x, y, width, height, ...extra });
+// A constituent's rings, as the ring layout lays them out: centred at (200, 150), radius 80.
+const ring = (label: string, mainKey: string, extra: Partial<GroupRect> = {}): GroupRect => ({
+  label,
+  color: '#000',
+  mainKey,
+  nodeKeys: [mainKey],
+  center: { x: 200, y: 150 },
+  rIn: 40,
+  orbit: 40,
+  rOut: 80,
+  x: 109,
+  y: 59,
+  width: 182,
+  height: 182,
+  ...extra,
+});
 
-// Centred at (200, 150).
-const VERB_PHRASE = group('Verb Phrase', [100, 100, 200, 100], { nodeKeys: ['verb'] });
+const VERB_PHRASE = ring('Verb Phrase', 'verb');
 
 const toggle = (key: string): SatelliteIcon => ({
   key,
@@ -43,6 +59,8 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}): PhraseRenderCont
     satelliteIconsByParent: {},
     complementToggleIcons: [],
     groupRects: [],
+    discs: {},
+    controlPos: {},
     collapsedGroups: {},
     compact: false,
     draggingKey: null,
@@ -82,7 +100,6 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}): PhraseRenderCont
     handleSelectLocativeSpecifier: vi.fn(),
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
-    handleRearrangeGroup: vi.fn(),
     handleRemoveComplement: vi.fn(),
     ...overrides,
   };
@@ -96,7 +113,7 @@ function renderVerb(overrides: Partial<PhraseRenderContext> = {}) {
 
 const boxes = () => screen.queryAllByTestId(/^box-/).map((b) => b.dataset['testid']);
 
-// A toggle box, found by its heading.
+// A toggle as a plain box (no disc to sit in), found by its heading.
 const toggleBox = (heading: string) =>
   screen.getByText(heading).closest<HTMLElement>('.MuiPaper-root')!;
 
@@ -108,22 +125,19 @@ function pinOf(el: HTMLElement) {
   return { x: parseFloat(style.left), y: parseFloat(style.top) };
 }
 
-// The relation / stance each toolbar has highlighted (its filled buttons).
+// The relation / stance each toolbar has highlighted: the button filled in its colour. On a ring
+// the others sit on the plain paper (MUI's default, white) rather than on nothing.
 const highlighted = () =>
   screen
     .getAllByRole('button')
-    .filter((b) => getComputedStyle(b).backgroundColor !== 'rgba(0, 0, 0, 0)')
+    .filter((b) => !['rgba(0, 0, 0, 0)', 'rgb(255, 255, 255)'].includes(getComputedStyle(b).backgroundColor))
     .map((b) => b.getAttribute('aria-label'));
 
 describe('VerbPhraseBuilder', () => {
-  describe('its boxes', () => {
-    it('draws the verb phrase’s dotted box, and no other', () => {
+  describe('its rings and words', () => {
+    it('draws the verb phrase’s dotted ring, and no other', () => {
       renderVerb({
-        groupRects: [
-          group('Subject', [0, 0, 50, 50]),
-          VERB_PHRASE,
-          group('Direct Object', [300, 0, 50, 50]),
-        ],
+        groupRects: [ring('Subject', 'subject'), VERB_PHRASE, ring('Direct Object', 'directObject')],
       });
 
       expect(screen.getAllByTestId('group-box').map((g) => g.dataset['group'])).toEqual([
@@ -131,8 +145,8 @@ describe('VerbPhraseBuilder', () => {
       ]);
     });
 
-    it('draws no dotted box before the verb phrase has one', () => {
-      renderVerb({ groupRects: [group('Subject', [0, 0, 50, 50])] });
+    it('draws no dotted ring before the verb phrase has one', () => {
+      renderVerb({ groupRects: [ring('Subject', 'subject')] });
 
       expect(screen.queryByTestId('group-box')).not.toBeInTheDocument();
     });
@@ -164,7 +178,7 @@ describe('VerbPhraseBuilder', () => {
     });
   });
 
-  describe('the tense and aspect boxes', () => {
+  describe('the tense and aspect toggles', () => {
     it('stay off the canvas until their controls reveal them', () => {
       renderVerb({ shownMap: { modifier: true } });
 
@@ -189,7 +203,23 @@ describe('VerbPhraseBuilder', () => {
       expect(toggleBox('Aspect')).toHaveTextContent('Progressive');
     });
 
-    it('cycle the tense and the aspect each from its own box', () => {
+    it('sit on the orbit as discs of the radius the ring layout gave them', () => {
+      renderVerb({
+        shownMap: { verbTense: true, verbAspect: true },
+        discs: {
+          verbTense: { x: 150, y: 60, r: 20, a: 0 },
+          verbAspect: { x: 250, y: 60, r: 30, a: 0 },
+        },
+      });
+
+      const width = (key: string) =>
+        getComputedStyle(screen.getByTestId(`box-${key}`).querySelector('.slot-circle')!).width;
+      expect(width('verbTense')).toBe('40px');
+      expect(width('verbAspect')).toBe('60px');
+      expect(screen.getByTitle('Tense: Present')).toBeInTheDocument();
+    });
+
+    it('cycle the tense and the aspect each from its own toggle', () => {
       const { ctx } = renderVerb({ shownMap: { verbTense: true, verbAspect: true } });
 
       fireEvent.pointerUp(toggleBox('Tense'));
@@ -201,7 +231,7 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleCycleTense).toHaveBeenCalledOnce();
     });
 
-    it('drag as their own nodes, and register for measuring under their keys', () => {
+    it('drag under their own keys, and register for measuring under them', () => {
       const { ctx, unmount } = renderVerb({ shownMap: { verbTense: true, verbAspect: true } });
 
       expect(vi.mocked(ctx.makeDragProps).mock.calls.map(([key]) => key)).toEqual([
@@ -218,20 +248,25 @@ describe('VerbPhraseBuilder', () => {
   });
 
   describe('the complement toggles', () => {
-    it('ride the middle of the verb phrase box’s bottom edge', () => {
+    it('each sit where the ring layout seated it on the verb phrase’s dotted ring', () => {
       renderVerb({
         groupRects: [VERB_PHRASE],
         complementToggleIcons: [toggle('locative'), toggle('cause')],
+        controlPos: { locative: { x: 190, y: 240 }, cause: { x: 212, y: 240 } },
       });
 
-      expect(pinOf(screen.getByTestId('satellite-locative'))).toEqual({ x: 200, y: 200 });
-      expect(pinOf(screen.getByTestId('satellite-cause'))).toEqual({ x: 200, y: 200 });
+      expect(pinOf(screen.getByTestId('satellite-locative'))).toEqual({ x: 190, y: 240 });
+      expect(pinOf(screen.getByTestId('satellite-cause'))).toEqual({ x: 212, y: 240 });
     });
 
     it('each reveal their own complement', () => {
       const locative = toggle('locative');
       const cause = toggle('cause');
-      renderVerb({ groupRects: [VERB_PHRASE], complementToggleIcons: [locative, cause] });
+      renderVerb({
+        groupRects: [VERB_PHRASE],
+        complementToggleIcons: [locative, cause],
+        controlPos: { locative: { x: 0, y: 0 }, cause: { x: 30, y: 0 } },
+      });
 
       fireEvent.click(screen.getByTestId('satellite-cause'));
 
@@ -239,63 +274,66 @@ describe('VerbPhraseBuilder', () => {
       expect(locative.onToggle).not.toHaveBeenCalled();
     });
 
-    it('register their row as the anchor an instrumental link starts from', () => {
+    it('register the instrumental’s toggle as the anchor an instrumental link starts from', () => {
       const registerVerbAnchor = vi.fn();
       renderVerb({
         groupRects: [VERB_PHRASE],
-        complementToggleIcons: [toggle('locative')],
+        complementToggleIcons: [toggle('locative'), toggle('instrumental')],
+        controlPos: { locative: { x: 0, y: 0 }, instrumental: { x: 30, y: 0 } },
         registerVerbAnchor,
       });
 
       const anchor = registerVerbAnchor.mock.calls.at(-1)![0] as HTMLElement;
-      expect(anchor).toContainElement(screen.getByTestId('satellite-locative'));
+      expect(anchor).toContainElement(screen.getByTestId('satellite-instrumental'));
+      expect(anchor).not.toContainElement(screen.getByTestId('satellite-locative'));
     });
 
-    it('are not drawn for a verb that licenses no complement', () => {
-      const registerVerbAnchor = vi.fn();
-      renderVerb({ groupRects: [VERB_PHRASE], registerVerbAnchor });
-
-      expect(screen.queryByTestId(/^satellite-/)).not.toBeInTheDocument();
-      expect(registerVerbAnchor).not.toHaveBeenCalled();
-    });
-
-    it('wait for the verb phrase box to exist', () => {
+    it('are left off until the ring layout seats them', () => {
       renderVerb({ complementToggleIcons: [toggle('locative')] });
+
+      expect(screen.queryByTestId('satellite-locative')).not.toBeInTheDocument();
+    });
+
+    it('are withdrawn in compact view', () => {
+      renderVerb({
+        complementToggleIcons: [toggle('locative')],
+        controlPos: { locative: { x: 0, y: 0 } },
+        compact: true,
+      });
 
       expect(screen.queryByTestId('satellite-locative')).not.toBeInTheDocument();
     });
   });
 
   describe('the direct object control', () => {
-    it('sits where the connector to the object leaves the verb phrase box', () => {
-      // Object box centred at (400, 300): the ray from (200, 150) exits the bottom edge.
+    it('sits where the ring layout seated it, where the line to the object leaves the ring', () => {
       renderVerb({
-        groupRects: [VERB_PHRASE, group('Direct Object', [350, 250, 100, 100])],
+        groupRects: [VERB_PHRASE, ring('Direct Object', 'directObject')],
         directObjectToggle: toggle('directObject'),
+        controlPos: { directObject: { x: 290, y: 150 } },
       });
 
-      const pin = pinOf(screen.getByTestId('satellite-directObject'));
-      expect(pin.x).toBeCloseTo(200 + 200 / 3);
-      expect(pin.y).toBeCloseTo(200);
-    });
-
-    it('parks on the right edge while the object is folded away', () => {
-      renderVerb({ groupRects: [VERB_PHRASE], directObjectToggle: toggle('directObject') });
-
-      expect(pinOf(screen.getByTestId('satellite-directObject'))).toEqual({ x: 300, y: 150 });
+      expect(pinOf(screen.getByTestId('satellite-directObject'))).toEqual({ x: 290, y: 150 });
     });
 
     it('folds the object from its control', () => {
       const directObject = toggle('directObject');
-      renderVerb({ groupRects: [VERB_PHRASE], directObjectToggle: directObject });
+      renderVerb({
+        groupRects: [VERB_PHRASE],
+        directObjectToggle: directObject,
+        controlPos: { directObject: { x: 290, y: 150 } },
+      });
 
       fireEvent.click(screen.getByTestId('satellite-directObject'));
 
       expect(directObject.onToggle).toHaveBeenCalledOnce();
     });
 
-    it('is not drawn for an intransitive verb, or before the verb phrase box exists', () => {
-      const { rerender } = renderVerb({ groupRects: [VERB_PHRASE] });
+    it('is not drawn for an intransitive verb, or before the ring layout seats it', () => {
+      const { rerender } = renderVerb({
+        groupRects: [VERB_PHRASE],
+        controlPos: { directObject: { x: 290, y: 150 } },
+      });
       expect(screen.queryByTestId('satellite-directObject')).not.toBeInTheDocument();
 
       rerender(<VerbPhraseBuilder ctx={makeCtx({ directObjectToggle: toggle('directObject') })} />);
@@ -304,21 +342,30 @@ describe('VerbPhraseBuilder', () => {
   });
 
   describe('the relation toolbars', () => {
-    const ROUTE = group('Route', [20, 240, 160, 80], { removeKey: 'route' });
-    const LOCATIVE = group('Locative', [220, 240, 120, 80], { removeKey: 'locative' });
-    const CAUSE = group('Cause', [400, 240, 100, 80], { removeKey: 'cause' });
+    const ROUTE = ring('Route', 'route', { removeKey: 'route' });
+    const LOCATIVE = ring('Locative', 'locative', { removeKey: 'locative' });
+    const CAUSE = ring('Cause', 'cause', { removeKey: 'cause' });
+    // One seat per relation, fanned across the top of each complement's dotted ring.
+    const seats = (type: string, values: readonly string[], x: number) =>
+      Object.fromEntries(values.map((v, i) => [toolbarControlKey(type, v), { x: x + 22 * i, y: 40 }]));
+    const CONTROL_POS = {
+      ...seats('route', PATH_SPECIFIERS, 20),
+      ...seats('locative', PATH_SPECIFIERS, 220),
+      ...seats('cause', CAUSE_SENTIMENTS, 420),
+    };
 
-    it('ride the top edge of the route box, on "through" until one is chosen', () => {
-      renderVerb({ selection: { route: noun('PARK') }, groupRects: [ROUTE] });
+    it('ride the top of the route’s ring, on "through" until one is chosen', () => {
+      renderVerb({ selection: { route: noun('PARK') }, groupRects: [ROUTE], controlPos: CONTROL_POS });
 
       expect(highlighted()).toEqual(['through']);
-      expect(pinOf(screen.getByRole('button', { name: 'under' }))).toEqual({ x: 100, y: 240 });
+      expect(pinOf(screen.getByRole('button', { name: 'under' }))).toEqual({ x: 64, y: 40 });
     });
 
     it('show and set the route’s relation', () => {
       const { ctx } = renderVerb({
         selection: { route: noun('PARK'), routeSpecifier: 'around' },
         groupRects: [ROUTE],
+        controlPos: CONTROL_POS,
       });
       expect(highlighted()).toEqual(['around']);
 
@@ -328,17 +375,18 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleSelectLocativeSpecifier).not.toHaveBeenCalled();
     });
 
-    it('ride the top edge of the locative box, on "in" until one is chosen', () => {
-      renderVerb({ selection: { locative: noun('BED') }, groupRects: [LOCATIVE] });
+    it('ride the top of the locative’s ring, on "in" until one is chosen', () => {
+      renderVerb({ selection: { locative: noun('BED') }, groupRects: [LOCATIVE], controlPos: CONTROL_POS });
 
       expect(highlighted()).toEqual(['in']);
-      expect(pinOf(screen.getByRole('button', { name: 'over' }))).toEqual({ x: 280, y: 240 });
+      expect(pinOf(screen.getByRole('button', { name: 'over' }))).toEqual({ x: 286, y: 40 });
     });
 
     it('show and set the locative’s relation', () => {
       const { ctx } = renderVerb({
         selection: { locative: noun('BED'), locativeSpecifier: 'under' },
         groupRects: [LOCATIVE],
+        controlPos: CONTROL_POS,
       });
       expect(highlighted()).toEqual(['under']);
 
@@ -348,12 +396,12 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleSelectSpecifier).not.toHaveBeenCalled();
     });
 
-    it('ride the top edge of the cause box, neutral until a stance is chosen', () => {
-      renderVerb({ selection: { cause: noun('DOG') }, groupRects: [CAUSE] });
+    it('ride the top of the cause’s ring, neutral until a stance is chosen', () => {
+      renderVerb({ selection: { cause: noun('DOG') }, groupRects: [CAUSE], controlPos: CONTROL_POS });
 
       expect(highlighted()).toEqual([CAUSE_SENTIMENT_LABELS.neutral]);
       expect(pinOf(screen.getByRole('button', { name: CAUSE_SENTIMENT_LABELS.positive }))).toEqual(
-        { x: 450, y: 240 },
+        { x: 464, y: 40 },
       );
     });
 
@@ -361,6 +409,7 @@ describe('VerbPhraseBuilder', () => {
       const { ctx } = renderVerb({
         selection: { cause: noun('DOG'), causeSentiment: 'negative' },
         groupRects: [CAUSE],
+        controlPos: CONTROL_POS,
       });
       expect(highlighted()).toEqual([CAUSE_SENTIMENT_LABELS.negative]);
 
@@ -369,10 +418,11 @@ describe('VerbPhraseBuilder', () => {
       expect(ctx.handleSelectSentiment).toHaveBeenCalledExactlyOnceWith('positive');
     });
 
-    it('are withdrawn in compact view, with the rest of the dotted boxes’ chrome', () => {
+    it('are withdrawn in compact view, with the rest of the dotted rings’ controls', () => {
       renderVerb({
         selection: { route: noun('PARK'), locative: noun('BED'), cause: noun('DOG') },
         groupRects: [ROUTE, LOCATIVE, CAUSE],
+        controlPos: CONTROL_POS,
         compact: true,
       });
 
@@ -380,12 +430,12 @@ describe('VerbPhraseBuilder', () => {
       expect(screen.queryByTestId('sentiment-toolbar')).not.toBeInTheDocument();
     });
 
-    it('need both the complement’s word and its box', () => {
+    it('need both the complement’s word and their seats on its ring', () => {
       const toolbars = () => [
         ...screen.queryAllByRole('button', { name: 'under' }),
         ...screen.queryAllByRole('button', { name: CAUSE_SENTIMENT_LABELS.neutral }),
       ];
-      const { rerender } = renderVerb({ groupRects: [ROUTE, LOCATIVE, CAUSE] });
+      const { rerender } = renderVerb({ groupRects: [ROUTE, LOCATIVE, CAUSE], controlPos: CONTROL_POS });
       expect(toolbars()).toEqual([]);
 
       rerender(

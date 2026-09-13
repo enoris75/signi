@@ -35,24 +35,28 @@ describe('ConnectorsLayer', () => {
     expect(getComputedStyle(svg).pointerEvents).toBe('none');
   });
 
-  it('draws each group link as a solid line', () => {
+  it('draws each group link as a solid line between the ports on the two dotted rings', () => {
     const svg = renderLayer({
       groupEdges: [edge(10, 20, 110, 30, '#2c4a6e'), edge(120, 40, 150, 90, '#8b3e2a')],
     });
 
-    const lines = [...svg.querySelectorAll(':scope > line')];
+    const links = [...svg.querySelectorAll(':scope > g[data-link="group"]')];
+    const lines = links.map((g) => g.querySelector('line')!);
     expect(lines.map((l) => coords(l, 'x1', 'y1', 'x2', 'y2', 'stroke'))).toEqual([
       ['10', '20', '110', '30', '#2c4a6e'],
       ['120', '40', '150', '90', '#8b3e2a'],
     ]);
     lines.forEach((l) => expect(l).not.toHaveAttribute('stroke-dasharray'));
-    expect(svg.querySelector('circle')).not.toBeInTheDocument();
+    expect([...links[0].querySelectorAll('circle')].map((c) => coords(c, 'cx', 'cy', 'fill'))).toEqual([
+      ['10', '20', '#2c4a6e'],
+      ['110', '30', '#2c4a6e'],
+    ]);
   });
 
   it('draws each satellite link as a dashed line with a dot on the satellite end', () => {
     const svg = renderLayer({ edges: [edge(50, 60, 90, 120, '#3a6e3a')] });
 
-    const link = svg.querySelector(':scope > g')!;
+    const link = svg.querySelector(':scope > g[data-link="satellite"]')!;
     const line = link.querySelector('line')!;
     const dot = link.querySelector('circle')!;
     expect(coords(line, 'x1', 'y1', 'x2', 'y2', 'stroke')).toEqual(
@@ -68,6 +72,10 @@ describe('ConnectorsLayer', () => {
       edges: [edge(0, 0, 1, 1, '#000'), edge(1, 1, 2, 2, '#000')],
     });
 
-    expect([...svg.children].map((c) => c.tagName)).toEqual(['line', 'g', 'g']);
+    expect([...svg.children].map((c) => c.getAttribute('data-link'))).toEqual([
+      'group',
+      'satellite',
+      'satellite',
+    ]);
   });
 });

@@ -1,10 +1,10 @@
 import { Box } from "@mui/material";
 import type { Edge } from "./graph.ts";
 
-// The SVG layer behind everything: the solid group-to-group links (constituent
-// dashed box ↔ verb phrase) and the faint dashed satellite/adjective links. The
-// dashed group boxes themselves are drawn by each Noun/VerbPhraseBuilder now, so
-// this layer only paints the connecting lines.
+// The SVG layer behind everything: the solid links between constituents (verb phrase ↔ each
+// other constituent, port to port on their dotted rings) and the faint dashed links from each
+// satellite's reveal control to its disc. The rings themselves are drawn by each
+// Noun/VerbPhraseBuilder, so this layer only paints the connecting lines.
 export function ConnectorsLayer({
   svgSize,
   groupEdges,
@@ -28,19 +28,23 @@ export function ConnectorsLayer({
       viewBox={`0 0 ${svgSize.w} ${svgSize.h}`}
     >
       {groupEdges.map((edge, i) => (
-        <line
-          key={`group-${i}`}
-          x1={edge.x1}
-          y1={edge.y1}
-          x2={edge.x2}
-          y2={edge.y2}
-          stroke={edge.color}
-          strokeWidth="1.5"
-          strokeOpacity="0.4"
-        />
+        <g key={`group-${i}`} data-link="group">
+          <line
+            x1={edge.x1}
+            y1={edge.y1}
+            x2={edge.x2}
+            y2={edge.y2}
+            stroke={edge.color}
+            strokeWidth="1.5"
+            strokeOpacity="0.4"
+          />
+          {/* The ports the link joins, on each dotted ring. */}
+          <circle cx={edge.x1} cy={edge.y1} r="3" fill={edge.color} fillOpacity="0.6" />
+          <circle cx={edge.x2} cy={edge.y2} r="3" fill={edge.color} fillOpacity="0.6" />
+        </g>
       ))}
       {edges.map((edge, i) => (
-        <g key={i}>
+        <g key={i} data-link="satellite">
           <line
             x1={edge.x1}
             y1={edge.y1}
