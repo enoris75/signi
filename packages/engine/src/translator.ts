@@ -5,7 +5,7 @@ import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, Resolved
 import { englishEngine } from './languages/en.js';
 import { italianEngine } from './languages/it.js';
 import { frenchEngine } from './languages/fr.js';
-import { germanEngine } from './languages/de.js';
+import { germanEngine } from './languages/de/index.js';
 import { spanishEngine } from './languages/es.js';
 import { japaneseEngine } from './languages/ja.js';
 import { portugueseEngine } from './languages/pt.js';
