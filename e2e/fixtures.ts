@@ -113,6 +113,73 @@ export class Builder {
     await expect(this.groupBox('Verb Phrase')).toBeVisible();
   }
 
+  /**
+   * Choose a personal pronoun subject from the pronoun chooser — the person / number / gender rows,
+   * then commit. The row buttons are engine-rendered UI strings, so this assumes the English UI.
+   */
+  async setPronounSubject(
+    person: 'first' | 'second' | 'third',
+    number: 'singular' | 'plural',
+    gender: 'male' | 'female',
+  ): Promise<void> {
+    await this.subjectInput.click();
+    await this.page.getByTestId('pronoun-tab').click();
+    for (const choice of [person, number, gender]) {
+      await this.page.getByRole('button', { name: choice, exact: true }).click();
+    }
+    await this.page.getByTestId('pronoun-commit').click();
+  }
+
+  /** A satellite's control on its parent box border (`subjectNumber`, `verbTense`, `locative`, …). */
+  satellite(key: string): Locator {
+    return this.page.getByTestId(`satellite-${key}`);
+  }
+
+  /**
+   * Reveal a satellite word slot from its control and pick its word — an adjective, a complement,
+   * a modal. Every such slot renders its picker inside `box-<key>` once revealed.
+   */
+  async revealAndPick(slotKey: string, conceptId: string): Promise<void> {
+    await this.satellite(slotKey).click();
+    await this.pick(this.page.getByTestId(`box-${slotKey}`).locator('input'), conceptId);
+  }
+
+  /**
+   * Advance a cycling verb toggle one step: tense (present → past → future) or aspect (neutral →
+   * progressive → prospective → resultative). The toggle box is revealed on first use.
+   */
+  async cycle(toggle: 'verbTense' | 'verbAspect'): Promise<void> {
+    const box = this.page.getByTestId(`box-${toggle}`);
+    if (!(await box.isVisible())) await this.satellite(toggle).click();
+    await box.click();
+  }
+
+  /**
+   * Set a noun's determiner from the grouped menu, by the value's grammar name ("Indefinite",
+   * "Multal"). Each menu row reads name then surface word, so the name is matched as a prefix.
+   */
+  async setDeterminer(noun: string, name: string): Promise<void> {
+    const box = this.page.getByTestId(`box-${noun}Definiteness`);
+    if (!(await box.isVisible())) await this.satellite(`${noun}Definiteness`).click();
+    await box.click();
+    await this.page.getByRole('menuitem', { name: new RegExp(`^${name}`) }).click();
+  }
+
+  /**
+   * Assert several languages' sentences at once. Polls the whole set together, so a translation
+   * still in flight is waited out and a mismatch reports every language in one diff.
+   */
+  async expectSentences(want: Partial<Record<LanguageCode, string>>): Promise<void> {
+    const languages = Object.keys(want) as LanguageCode[];
+    await expect
+      .poll(async () => {
+        const got: Partial<Record<LanguageCode, string>> = {};
+        for (const language of languages) got[language] = await this.sentence(language);
+        return got;
+      })
+      .toEqual(want);
+  }
+
   // ── Multi-period helpers ───────────────────────────────────────────────────
   // Subordinate clauses (relative / condition / coordination) are cross-container links: each
   // clause is its own period, and joining them folds one into the other's sentence. The
@@ -175,6 +242,43 @@ export class Builder {
       .locator('button')
       .click();
     await this.period(clauseIndex).getByTestId(`box-${gapSlot}`).click();
+  }
+
+  /**
+   * Make period `ifIndex` the IF condition of period `mainIndex`. Two clicks: the main clause's IF
+   * control starts the pick, then the condition period's own control (lit as a target) takes it.
+   */
+  async linkCondition(mainIndex: number, ifIndex: number): Promise<void> {
+    await this.period(mainIndex)
+      .getByRole('button', { name: 'Add an IF condition (this becomes the main clause)' })
+      .click();
+    await this.period(ifIndex)
+      .getByRole('button', { name: 'Use this period as the IF condition' })
+      .click();
+  }
+
+  /**
+   * Coordinate period `secondIndex` onto period `firstIndex`. Starting a coordination opens the
+   * conjunction menu first ("And", "But", …, matched as a prefix of the row); the pick follows.
+   */
+  async linkCoordination(firstIndex: number, secondIndex: number, conjunction: string): Promise<void> {
+    await this.period(firstIndex)
+      .getByRole('button', { name: 'Coordinate this period with another' })
+      .click();
+    await this.page.getByRole('menuitem', { name: new RegExp(`^${conjunction}`) }).click();
+    await this.period(secondIndex)
+      .getByRole('button', { name: 'Use this period as the coordinated clause' })
+      .click();
+  }
+
+  /**
+   * Link period `instrumentIndex` as the instrumental of the verb in period `clauseIndex`. The
+   * instrumental has no target-side control: a pending pick lights the whole card, and a click on
+   * it — clear of the border, where a press starts a card drag instead — makes the link.
+   */
+  async linkInstrument(clauseIndex: number, instrumentIndex: number): Promise<void> {
+    await this.period(clauseIndex).getByTestId('satellite-instrumental').click();
+    await this.period(instrumentIndex).click({ position: { x: 20, y: 20 } });
   }
 
   /** The dashed bounding box of one role group, e.g. "Subject" / "Verb Phrase". */

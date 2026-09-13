@@ -37,4 +37,33 @@ test.describe('saved phrases', () => {
     await expect.poll(() => app.sentence('en')).toBe('the cat eats.');
     expect(await app.sentence('it')).toBe('il gatto mangia.');
   });
+
+  // The file round trip: export downloads a `.signi.json`, import reads it back through the same
+  // hydration as a database load. Built on a two-period workspace with a condition link, so the
+  // file carries links as well as selections.
+  test('exports a workspace to a file and imports it back', async ({ app, page }, testInfo) => {
+    await app.buildClauseIn(0, 'DOG', 'RUN');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'EAT');
+    await app.linkCondition(0, 1);
+    await expect.poll(() => app.sentence('en')).toBe('if the cat ate, the dog would run.');
+
+    const [download] = await Promise.all([
+      page.waitForEvent('download'),
+      page.getByRole('button', { name: 'Export the phrase' }).click(),
+    ]);
+    expect(download.suggestedFilename()).toBe('untitled-phrase.signi.json');
+    const file = testInfo.outputPath(download.suggestedFilename());
+    await download.saveAs(file);
+
+    await app.goto();
+    await expect(page.getByTestId('translations-empty')).toBeVisible();
+
+    // Import's button only clicks a hidden file input, so the file goes to the input directly.
+    await page.locator('input[type="file"]').setInputFiles(file);
+    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+
+    await expect.poll(() => app.sentence('en')).toBe('if the cat ate, the dog would run.');
+    expect(await app.sentence('it')).toBe('se il gatto mangiasse, il cane correrebbe.');
+  });
 });

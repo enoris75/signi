@@ -75,6 +75,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       ))}
       {shownMap.verbTense && (
         <Box
+          data-testid="box-verbTense"
           {...makeDragProps("verbTense", handleCycleTense)}
           ref={nodeElRef(ctx, "verbTense")}
         >
@@ -83,6 +84,7 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       )}
       {shownMap.verbAspect && (
         <Box
+          data-testid="box-verbAspect"
           {...makeDragProps("verbAspect", handleCycleAspect)}
           ref={nodeElRef(ctx, "verbAspect")}
         >

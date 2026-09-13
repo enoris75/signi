@@ -45,4 +45,34 @@ test.describe('subordinate clauses', () => {
     await expect.poll(() => app.sentence('en')).toBe('the dog that the boy sees runs.');
     expect(await app.sentence('it')).toBe('il cane che il ragazzo vede corre.');
   });
+
+  test('a relative clause survives a save/load round-trip', async ({ app, page }, testInfo) => {
+    const name = `Relative ${testInfo.testId}-${testInfo.repeatEachIndex}`;
+
+    await app.buildClauseIn(0, 'BOY', 'SEE');
+    await app.setDirectObjectIn(0, 'DOG');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'BOY', 'CRY');
+    await app.linkRelative(0, 'subject', 1, 'subject');
+    await expect.poll(() => app.sentence('en')).toBe('the boy who cries sees the dog.');
+
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    const saveDialog = page.getByRole('dialog');
+    await saveDialog.getByLabel('Name').fill(name);
+    await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByText('Phrase saved.')).toBeVisible();
+
+    await app.goto();
+    await expect(page.getByTestId('translations-empty')).toBeVisible();
+
+    await page.getByRole('button', { name: 'Load a saved phrase' }).click();
+    await page.getByRole('dialog').getByText(name).click();
+    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+
+    // Both periods and the link between them come back: still one sentence, not two.
+    await expect(page.getByTestId('period-container')).toHaveCount(2);
+    await expect.poll(() => app.sentence('en')).toBe('the boy who cries sees the dog.');
+    await expect(app.sentences('en')).toHaveCount(1);
+    expect(await app.sentence('de')).toBe('der Junge, der weint, sieht den Hund.');
+  });
 });

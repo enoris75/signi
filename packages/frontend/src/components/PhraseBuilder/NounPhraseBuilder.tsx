@@ -127,6 +127,7 @@ export function NounPhraseBuilder({
       {shownMap[`${which}Definiteness`] && (
         <>
           <Box
+            data-testid={`box-${which}Definiteness`}
             {...makeDragProps(`${which}Definiteness`, () => setMenuOpen(true))}
             ref={(el: HTMLElement | null) => {
               determinerBox.current = el;
