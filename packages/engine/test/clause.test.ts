@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { PhrasePlan } from '@signi/shared';
+import type { PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // The shape of a clause: subject, verb, object — agreement, case, and word order.
@@ -144,5 +144,28 @@ describe('known bugs: Spanish personal "a"', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG') })).es).toBe('el gato ve el perro.');
     expect(sayAll(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('HOUSE', { number: 'plural' }) })).es).toBe('se ven las casas.');
     expect(sayAll(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } } })).es).toBe('el gato da el libro al niño.');
+  });
+});
+
+// A120. BE with no complement at all ("the cat is", "Antarctica will not be") takes neither the copula
+// path, which needs a predicative, nor A109's existential, which needs a locative. It falls through to
+// the ordinary verb path on BE's fallback lexeme です, which has no stem, so the tense and polarity are
+// lost and the modal, aspect, command and relative glue onto it: 猫はです, 猫はですことができます,
+// ですください. The existential いる / ある already carries every form.
+describe('known bugs: Japanese BE with no complement', () => {
+  test.fails('Japanese renders a bare BE as the existential いる / ある', () => {
+    const be = (subject: string, verbPhrase: Partial<VerbPhrase> = {}) =>
+      sayAll(clause(np(subject), 'BE', { verbPhrase })).ja;
+    expect(be('CAT')).toBe('猫はいます。');
+    expect(be('BOOK')).toBe('本はあります。');
+    expect(be('CAT', { negative: true })).toBe('猫はいません。');
+    expect(be('CAT', { tense: 'past' })).toBe('猫はいました。');
+    expect(be('CAT', { tense: 'past', negative: true })).toBe('猫はいませんでした。');
+    expect(be('ANTARCTICA', { tense: 'future', negative: true })).toBe('南極大陸はありません。');
+    expect(be('CAT', { modals: ['CAN'] })).toBe('猫はいることができます。');
+    expect(be('CAT', { aspect: 'progressive' })).toBe('猫はいます。');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE'), imperative: true }).ja).toBe('いてください。');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'BE' } } }), 'RUN')).ja).toBe('いる犬は走ります。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE') }).ja).toBe('もし猫がいたら、犬は走ります。');
   });
 });
