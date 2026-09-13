@@ -101,7 +101,7 @@ describe('App', () => {
         'translations.heading': { it: 'Traduzioni' },
       });
 
-      const selector = within(screen.getByLabelText('Interface language')).getByRole('combobox');
+      const selector = screen.getByRole('combobox', { name: 'Interface language' });
       fireEvent.mouseDown(selector);
       fireEvent.click(screen.getByRole('option', { name: /Italian/ }));
 

@@ -156,7 +156,7 @@ describe('PeriodSaveLoad', () => {
       expect(savePhrase).toHaveBeenCalledOnce();
     });
 
-    it('cannot be sent twice while the save is in flight', async () => {
+    it('cannot be sent twice while the save is in flight, by button or by Enter', async () => {
       const pending = deferred<SavedPhraseRecord>();
       vi.mocked(savePhrase).mockReturnValue(pending.promise);
       renderSaveLoad({ saveTarget: PERIOD });
@@ -166,6 +166,9 @@ describe('PeriodSaveLoad', () => {
 
       await waitFor(() => expect(screen.getByRole('button', { name: 'Save' })).toBeDisabled());
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
+      fireEvent.keyDown(nameField(), { key: 'Enter' });
+      // A mutation reaches its request a microtask after `mutate`; let a second one get there.
+      await act(async () => {});
       expect(savePhrase).toHaveBeenCalledOnce();
 
       pending.resolve(record(BREAKFAST, []));
@@ -279,6 +282,26 @@ describe('PeriodSaveLoad', () => {
       expect(fetchSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');
       expect(props.onAppendPeriod).toHaveBeenCalledExactlyOnceWith({ subject: CAT, verb: EAT });
       expect(getComputedStyle(await findNotice('Period added.')).backgroundColor).toBe(SUCCESS);
+    });
+
+    it('waits for the word catalog before adding a period', async () => {
+      const catalog = deferred<Concept[]>();
+      vi.mocked(fetchConcepts).mockReturnValue(catalog.promise);
+      vi.mocked(listSavedPhrases).mockResolvedValue([BREAKFAST]);
+      vi.mocked(fetchSavedPhrase).mockResolvedValue(
+        record(BREAKFAST, [{ id: 'saved-c', selection: { subject: 'CAT', verb: 'EAT' } }]),
+      );
+      const { props } = renderSaveLoad({ loadOpen: true });
+
+      fireEvent.click(await screen.findByText('Breakfast'));
+      await waitFor(() => expect(fetchSavedPhrase).toHaveBeenCalledOnce());
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(props.onAppendPeriod).not.toHaveBeenCalled();
+
+      catalog.resolve([CAT, EAT]);
+
+      await findNotice('Period added.');
+      expect(props.onAppendPeriod).toHaveBeenCalledExactlyOnceWith({ subject: CAT, verb: EAT });
     });
 
     it.each([

@@ -11,6 +11,7 @@ import {
   type PhraseBuilderProps,
 } from '../src/components/PhraseBuilder/PhraseBuilder.tsx';
 import type { PhraseSidebar } from '../src/components/PhraseBuilder/PhraseSidebar.tsx';
+import { place } from './hooks/dom.ts';
 import { renderWithProviders } from './render.tsx';
 
 // jsdom has no ResizeObserver: the canvas reads as a fixed 600 px wide.
@@ -679,7 +680,7 @@ describe('PhraseBuilder', () => {
         { binding },
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
 
       expect(
         lastEdit({ subject: CAT, subjectPossessor: { subject: BOY }, subjectPossessorRef: 'x' }),
@@ -692,7 +693,7 @@ describe('PhraseBuilder', () => {
       renderPeriod({ subject: CAT, verb: SLEEP });
       fireEvent.click(satellite('subjectPossessor'));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
 
       expect(screen.queryByRole('button', { name: 'Owned by a phrase' })).not.toBeInTheDocument();
     });
@@ -705,10 +706,25 @@ describe('PhraseBuilder', () => {
       );
       fireEvent.click(satellite('subjectPossessor'));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
 
       expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
         'directObject/conjunct/0/possessor',
+      );
+    });
+
+    it('unlinks the possessor of a nested builder’s object by that object’s address', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: DOG, verb: EAT, directObject: HORSE, directObjectPossessor: { subject: BOY } },
+        { binding, possessorPath: 'subject/possessor' },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
+
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
+        'subject/possessor/directObject/possessor',
       );
     });
 
@@ -770,7 +786,7 @@ describe('PhraseBuilder', () => {
       };
       const { lastEdit } = renderPeriod(group, { binding });
 
-      fireEvent.click(screen.getAllByRole('button', { name: 'Remove main clause' })[1]!);
+      fireEvent.click(screen.getAllByRole('button', { name: 'Remove phrase' })[1]!);
 
       expect(lastEdit(group)).toEqual({
         ...group,
@@ -790,10 +806,25 @@ describe('PhraseBuilder', () => {
         { binding, possessorPath: 'directObject/possessor' },
       );
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
 
       expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
         'directObject/possessor/conjunct/0',
+      );
+    });
+
+    it('unlinks the conjuncts of a nested builder’s object by that object’s address', () => {
+      vi.spyOn(window, 'confirm').mockReturnValue(true);
+      const binding = makeBinding();
+      renderPeriod(
+        { subject: DOG, verb: EAT, directObject: HORSE, directObjectConjuncts: [{ subject: CAT }] },
+        { binding, possessorPath: 'subject/possessor' },
+      );
+
+      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
+
+      expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith(
+        'subject/possessor/directObject/conjunct/0',
       );
     });
 
@@ -824,6 +855,26 @@ describe('PhraseBuilder', () => {
         .map(([key]) => key);
       expect(new Set(registered)).toEqual(
         new Set(['subject', 'directObject', 'subject/possessor']),
+      );
+    });
+
+    it('registers a possessor’s own object under its head, not as the period’s', () => {
+      const binding = makeBinding();
+      renderPeriod(
+        {
+          subject: BOY,
+          verb: SLEEP,
+          subjectPossessor: { subject: DOG, verb: EAT, directObject: HORSE },
+        },
+        { binding },
+      );
+
+      const registered = vi
+        .mocked(binding.geometry.registerBox)
+        .mock.calls.filter(([, el]) => el)
+        .map(([key]) => key);
+      expect(new Set(registered)).toEqual(
+        new Set(['subject', 'subject/possessor', 'subject/possessor/directObject']),
       );
     });
 
@@ -915,6 +966,48 @@ describe('PhraseBuilder', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
 
       Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledOnce());
+    });
+
+    it('gives a possessor or conjunct panel none of a period’s own controls', () => {
+      const onMoveUp = vi.fn();
+      renderPeriod(
+        { subject: DOG },
+        { binding: makeBinding(), possessorPath: 'subject/possessor', onMoveUp, onRemove: vi.fn() },
+      );
+
+      for (const name of [
+        'Toggle imperative (command)',
+        'Toggle infinitive phrase (citation)',
+        'Add an IF condition (this becomes the main clause)',
+        'Coordinate this period with another',
+        'Move this period up',
+        'Move this period down',
+      ]) {
+        expect(screen.queryByRole('button', { name })).not.toBeInTheDocument();
+      }
+      expect(screen.getByRole('button', { name: 'Remove phrase' })).toBeInTheDocument();
+      // Only the outermost period has a words panel; a nested builder's could never open.
+      expect(screen.queryByTestId('words-panel')).not.toBeInTheDocument();
+    });
+
+    it('does not turn a possessor panel of an instrument period into an instrument too', () => {
+      const binding = makeBinding({ instrumental: { hasTarget: true, level: 'object' } });
+      renderPeriod({ subject: DOG, verb: SLEEP }, { binding, possessorPath: 'subject/possessor' });
+
+      // An object-level instrument is a bare noun phrase; the possessor keeps its whole canvas.
+      expect(boxes()).toContain('verb');
+    });
+
+    it('keeps a possessor panel in place, never floated off by its border', () => {
+      renderPeriod({ subject: CAT, verb: SLEEP, subjectPossessor: { subject: BOY } });
+      const [, nested] = screen.getAllByTestId('period-container');
+      // The panel's card, as a 400×300 box at (100, 100), pressed on its left border.
+      const card = place(nested!.querySelector<HTMLElement>('.MuiPaper-root')!, 100, 100, 400, 300);
+
+      fireEvent.pointerDown(card, { clientX: 103, clientY: 250, pointerId: 3 });
+      fireEvent.pointerMove(card, { clientX: 133, clientY: 230 });
+
+      expect(getComputedStyle(nested!).position).toBe('relative');
     });
 
     it('clears the sole period in place rather than removing it', () => {

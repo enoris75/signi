@@ -329,6 +329,17 @@ export const possessorAddress = (base: NounAddress): NounAddress => `${base}/pos
 export const conjunctAddress = (base: NounAddress, i: number): NounAddress =>
   `${base}/conjunct/${i}`;
 
+// The address of noun `which` in a builder whose head sits at `headPath` — undefined for a
+// top-level container, whose nouns are their own addresses. A nested (possessor or conjunct)
+// builder's head is its `subject`. Its other nouns — the verb phrase a possessor's canvas also
+// offers — are no part of the period's plan, so they get addresses of their own under the head,
+// which resolve to nothing, rather than the container's own noun of the same key.
+export const builderNounAddress = (
+  headPath: NounAddress | undefined,
+  which: NounKey,
+): NounAddress =>
+  headPath === undefined ? which : which === "subject" ? headPath : `${headPath}/${which}`;
+
 export const POSSESSOR_KEY = (which: NounKey) =>
   `${which}Possessor` as keyof PhraseSelection;
 
@@ -590,16 +601,16 @@ export interface WorkspaceBinding {
 
 // Wrap a container's `binding` for an embedded possessor sub-builder whose head is
 // addressed `headPath`. The sub-builder speaks in its own internal noun keys (its head is
-// `"subject"`); this maps that head onto `headPath` before forwarding to the container, so
-// the possessor head registers/links under its workspace address. A possessor head is only
-// ever a link *source* (relativising it), never a target, so target/dimming is suppressed,
-// and it is never a clause endpoint, so both clause compartments are inert.
+// `"subject"`); this maps each onto its address (see builderNounAddress) before forwarding to
+// the container, so the possessor head registers/links under its workspace address. A possessor
+// head is only ever a link *source* (relativising it), never a target, so target/dimming is
+// suppressed, and it is never a clause endpoint, so both clause compartments are inert.
 export function adaptPossessorBinding(
   root: WorkspaceBinding,
   headPath: NounAddress,
 ): WorkspaceBinding {
   const map = (nounKey: NounAddress): NounAddress =>
-    nounKey === "subject" ? headPath : nounKey;
+    builderNounAddress(headPath, nounKey as NounKey);
   return {
     containerId: root.containerId,
     pickActive: root.pickActive,

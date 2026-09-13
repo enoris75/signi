@@ -26,10 +26,7 @@ function renderSelector(strings: SeededStrings = {}) {
   );
 }
 
-// The label lands on the Select's outer box rather than on its combobox, so the combobox is
-// found inside the labelled box.
-const selector = () =>
-  within(screen.getByLabelText('Interface language')).getByRole('combobox');
+const selector = () => screen.getByRole('combobox', { name: 'Interface language' });
 
 // MUI's Select opens on mouseDown and lists its options in a portal.
 function openSelector() {

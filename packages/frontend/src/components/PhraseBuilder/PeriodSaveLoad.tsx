@@ -23,7 +23,7 @@ import {
   listSavedPhrases,
   savePhrase,
 } from "../../api.ts";
-import { useConcepts } from "../../hooks/useConcepts.ts";
+import { conceptsQuery } from "../../hooks/useConcepts.ts";
 import type { PhraseContainer, PhraseSelection } from "./interfaces.ts";
 import { hydrateWorkspace, serializePeriod } from "./phraseSerialize.ts";
 
@@ -48,7 +48,6 @@ export function PeriodSaveLoad({
   onAppendPeriod,
 }: Props) {
   const queryClient = useQueryClient();
-  const { data: concepts } = useConcepts();
   const [name, setName] = useState("");
   const [toast, setToast] = useState<{ severity: "success" | "error"; msg: string } | null>(
     null,
@@ -86,7 +85,10 @@ export function PeriodSaveLoad({
   async function handleLoad(id: string) {
     try {
       const record = await fetchSavedPhrase(id);
-      const { containers, missing } = hydrateWorkspace(record.workspace, concepts ?? []);
+      // Awaited, not read off a hook: a period added before the catalog arrives would otherwise
+      // find none of its words.
+      const catalog = await queryClient.ensureQueryData(conceptsQuery());
+      const { containers, missing } = hydrateWorkspace(record.workspace, catalog);
       const selection = containers[0]?.selection;
       if (!selection) throw new Error("empty period");
       onAppendPeriod(selection);
@@ -117,7 +119,9 @@ export function PeriodSaveLoad({
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && name.trim()) saveMutation.mutate();
+              if (e.key === "Enter" && name.trim() && !saveMutation.isPending) {
+                saveMutation.mutate();
+              }
             }}
             sx={{ mt: 1 }}
           />

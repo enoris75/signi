@@ -1,4 +1,5 @@
 import {
+  alpha,
   Box,
   Paper,
   Typography,
@@ -6,6 +7,7 @@ import {
   IconButton,
   ToggleButton,
   ToggleButtonGroup,
+  type Theme,
 } from "@mui/material";
 import ClearIcon from "@mui/icons-material/Clear";
 import DoubleArrowIcon from "@mui/icons-material/DoubleArrow";
@@ -36,6 +38,11 @@ import { ReactNode } from "react";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
+
+// The light wash a set or active box wears in its colour. The theme defines only each colour's
+// main/light/dark (no 50…900 scale), so the wash is `main` at MUI's selected opacity.
+const wash = (color: SlotConfig["color"]) => (theme: Theme) =>
+  alpha(theme.palette[color].main, theme.palette.action.selectedOpacity);
 
 // The word-category switch (Noun | Pronoun, or Noun | Adj) shown both on an empty box and
 // inside the open word picker. Purely a vocabulary chooser — the two places share one
@@ -156,11 +163,7 @@ export function SlotBox({
               : "divider",
           borderStyle: highlight ? "dashed" : "solid",
           boxShadow: highlight ? (t) => `0 0 0 3px ${t.palette[slot.color].main}33` : "none",
-          bgcolor: isActive
-            ? `${slot.color}.50`
-            : concept
-              ? `${slot.color}.50`
-              : "background.paper",
+          bgcolor: isActive || concept ? wash(slot.color) : "background.paper",
           opacity: dimmed ? 0.45 : 1,
           filter: dimmed ? "grayscale(1)" : "none",
           transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
@@ -520,7 +523,7 @@ export function TenseToggleBox({ value }: { value: Tense }) {
         borderRadius: 2,
         borderWidth: 2,
         borderColor: active ? "secondary.main" : "divider",
-        bgcolor: active ? "secondary.50" : "background.paper",
+        bgcolor: active ? wash("secondary") : "background.paper",
         transition: "border-color 0.15s, background-color 0.15s",
         userSelect: "none",
         "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },
@@ -570,7 +573,7 @@ export function AspectToggleBox({ value }: { value: Aspect }) {
         borderRadius: 2,
         borderWidth: 2,
         borderColor: active ? "secondary.main" : "divider",
-        bgcolor: active ? "secondary.50" : "background.paper",
+        bgcolor: active ? wash("secondary") : "background.paper",
         transition: "border-color 0.15s, background-color 0.15s",
         userSelect: "none",
         "&:hover": { borderColor: active ? "secondary.dark" : "text.secondary" },

@@ -28,7 +28,8 @@ export function LanguageSelector() {
       startAdornment={
         <TranslateIcon sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.75 }} />
       }
-      aria-label="Interface language"
+      // Through inputProps, so the name lands on the combobox itself rather than its outer box.
+      inputProps={{ 'aria-label': 'Interface language' }}
       sx={{
         fontFamily: '"Inter", sans-serif',
         fontSize: '0.8rem',

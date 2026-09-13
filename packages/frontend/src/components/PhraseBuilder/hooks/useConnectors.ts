@@ -69,8 +69,6 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
   // child effect that calls it doesn't refire on every workspace render.
   const [, setGeomTick] = useState(0);
   const bumpGeom = useCallback(() => {
-    const w = window as any;
-    (w.__diag ??= []).push("bumpGeom <- " + (new Error().stack ?? "").split("\n")[2]?.trim());
     setGeomTick((t) => t + 1);
   }, []);
 
@@ -200,11 +198,7 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
         ];
       next.push({ id: link.id, kind: "relative", x1, y1, x2, y2, color });
     }
-    setConnectors((prev) => {
-      if (sameConnectors(prev, next)) return prev;
-      ((window as any).__diag ??= []).push("setConnectors " + prev.length + "->" + next.length);
-      return next;
-    });
+    setConnectors((prev) => (sameConnectors(prev, next) ? prev : next));
   });
 
   return {

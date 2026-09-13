@@ -10,6 +10,7 @@ import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
+import { useWindowDrag } from "./hooks/useWindowDrag.ts";
 import { useTranslations } from "./hooks/useTranslation.ts";
 import { useUiString } from "./i18n/useUiString.ts";
 
@@ -27,6 +28,7 @@ export default function App() {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
   });
+  const startDrag = useWindowDrag();
   // The word-palette overlay's open state, owned here so the header control can
   // toggle it while the panel itself lives inside PhraseBuilder. Off by default.
   const [wordsPanelOpen, setWordsPanelOpen] = useState<boolean>(() => {
@@ -177,28 +179,23 @@ export default function App() {
               let currentPct = startPct;
               const rect = splitContainerRef.current?.getBoundingClientRect();
               if (!rect) return;
-              const onMove = (ev: PointerEvent) => {
-                currentPct = Math.max(
-                  20,
-                  Math.min(
-                    100,
-                    startPct + ((ev.clientX - startX) / rect.width) * 100,
+              startDrag(
+                (ev) => {
+                  currentPct = Math.max(
+                    20,
+                    Math.min(
+                      100,
+                      startPct + ((ev.clientX - startX) / rect.width) * 100,
+                    ),
+                  );
+                  setLeftWidthPct(currentPct);
+                },
+                () =>
+                  localStorage.setItem(
+                    "signi:leftWidth",
+                    String(Math.round(currentPct * 10) / 10),
                   ),
-                );
-                setLeftWidthPct(currentPct);
-              };
-              const onUp = () => {
-                localStorage.setItem(
-                  "signi:leftWidth",
-                  String(Math.round(currentPct * 10) / 10),
-                );
-                window.removeEventListener("pointermove", onMove);
-                window.removeEventListener("pointerup", onUp);
-                window.removeEventListener("pointercancel", onUp);
-              };
-              window.addEventListener("pointermove", onMove);
-              window.addEventListener("pointerup", onUp);
-              window.addEventListener("pointercancel", onUp);
+              );
             }}
             sx={{
               width: 6,

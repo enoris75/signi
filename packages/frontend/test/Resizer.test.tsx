@@ -165,6 +165,18 @@ describe('Resizer', () => {
       expect(onResizeEnd).not.toHaveBeenCalled();
     });
 
+    it('lets go of the pointer when the bar goes away mid-drag', () => {
+      const { bar, onResize, onResizeEnd, unmount } = renderResizer();
+      fireEvent.pointerDown(bar, { clientY: 500 });
+
+      unmount();
+      fireEvent.pointerMove(window, { clientY: 600 });
+      fireEvent.pointerUp(window);
+
+      expect(onResize).not.toHaveBeenCalled();
+      expect(onResizeEnd).not.toHaveBeenCalled();
+    });
+
     it('drags without a listener for the end of the resize', () => {
       const { bar, onResize } = renderResizer({ withEnd: false });
 

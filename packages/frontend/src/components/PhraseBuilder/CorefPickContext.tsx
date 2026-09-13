@@ -61,12 +61,15 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
     [state],
   );
 
-  const pick = useCallback((candidate: NounAddress) => {
-    setState((s) => {
-      if (s) s.commit(candidate);
-      return null;
-    });
-  }, []);
+  // Commit outside the state updater: React may run an updater twice (StrictMode does), and the
+  // antecedent would be stored twice.
+  const pick = useCallback(
+    (candidate: NounAddress) => {
+      state?.commit(candidate);
+      setState(null);
+    },
+    [state],
+  );
 
   const resolve = useCallback(
     (address: NounAddress) => resolveAntecedent(rootSelection, address),

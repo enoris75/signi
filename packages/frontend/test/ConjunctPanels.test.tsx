@@ -134,6 +134,16 @@ describe('ConjunctPanels', () => {
     ]);
   });
 
+  it('addresses a nested builder’s other nouns’ conjuncts under its head', () => {
+    renderPanels({ possessorPath: 'subject/possessor' });
+
+    expect(conjuncts()).toEqual([
+      'subject/possessor/conjunct/0=PAUL',
+      'subject/possessor/conjunct/1=MARY',
+      'subject/possessor/directObject/conjunct/0=DOG',
+    ]);
+  });
+
   it('routes a builder edit into its own conjunct only', () => {
     const { builderProps, onPhraseUpdate } = renderPanels();
 

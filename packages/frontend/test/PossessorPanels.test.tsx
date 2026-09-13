@@ -163,6 +163,15 @@ describe('PossessorPanels', () => {
       expect(possessors()).toEqual(['directObject/conjunct/0/possessor=undefined']);
     });
 
+    it('addresses a nested builder’s other nouns’ possessors under its head', () => {
+      renderPanels({ possessorPath: 'subject/possessor' });
+
+      expect(possessors()).toEqual([
+        'subject/possessor/possessor=undefined',
+        'subject/possessor/directObject/possessor=CAT',
+      ]);
+    });
+
     it('routes a builder edit into its own possessor slice only', () => {
       const { builderProps, onPhraseUpdate } = renderPanels();
 

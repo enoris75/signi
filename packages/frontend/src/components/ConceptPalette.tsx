@@ -1,4 +1,5 @@
 import {
+  alpha,
   Box,
   Typography,
   Skeleton,
@@ -75,13 +76,22 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
                     : selectedId === concept.id
                       ? `${config.color}.dark`
                       : 'text.primary',
-                  bgcolor: selectedId === concept.id ? `${config.color}.50` : 'transparent',
+                  // The theme has no 50…900 scale, so the selected wash is derived from `main`.
+                  bgcolor: selectedId === concept.id
+                    ? (t) => alpha(t.palette[config.color].main, t.palette.action.selectedOpacity)
+                    : 'transparent',
                   fontWeight: selectedId === concept.id ? 700 : 400,
                   whiteSpace: 'nowrap',
                   overflow: 'hidden',
                   textOverflow: 'ellipsis',
                   '&:hover': disabledIds.includes(concept.id) ? {} : {
-                    bgcolor: selectedId === concept.id ? `${config.color}.100` : 'action.hover',
+                    bgcolor: selectedId === concept.id
+                      ? (t) =>
+                          alpha(
+                            t.palette[config.color].main,
+                            t.palette.action.selectedOpacity + t.palette.action.hoverOpacity,
+                          )
+                      : 'action.hover',
                   },
                 }}
               >

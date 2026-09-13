@@ -6,6 +6,7 @@ import { type Concept } from "@signi/shared";
 import ConceptPalette from "../ConceptPalette.tsx";
 import { WordMap } from "../WordMap/WordMap.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { useWindowDrag } from "../../hooks/useWindowDrag.ts";
 import {
   PhraseSelection,
   SlotConfig,
@@ -68,6 +69,7 @@ export function PhraseSidebar({
   const [mapOpen, setMapOpen] = useState(false);
   const headerOffset = useHeaderOffset();
   const t = useUiString();
+  const startDrag = useWindowDrag();
 
   return (
     <Paper
@@ -98,25 +100,20 @@ export function PhraseSidebar({
           const startX = e.clientX;
           const startW = width;
           let currentW = startW;
-          const onMove = (ev: PointerEvent) => {
-            currentW = Math.max(
-              80,
-              Math.min(400, startW - (ev.clientX - startX)),
-            );
-            onWidthChange(currentW);
-          };
-          const onUp = () => {
-            localStorage.setItem(
-              "signi:phraseBuilderSidebarWidth",
-              String(Math.round(currentW)),
-            );
-            window.removeEventListener("pointermove", onMove);
-            window.removeEventListener("pointerup", onUp);
-            window.removeEventListener("pointercancel", onUp);
-          };
-          window.addEventListener("pointermove", onMove);
-          window.addEventListener("pointerup", onUp);
-          window.addEventListener("pointercancel", onUp);
+          startDrag(
+            (ev) => {
+              currentW = Math.max(
+                80,
+                Math.min(400, startW - (ev.clientX - startX)),
+              );
+              onWidthChange(currentW);
+            },
+            () =>
+              localStorage.setItem(
+                "signi:phraseBuilderSidebarWidth",
+                String(Math.round(currentW)),
+              ),
+          );
         }}
         sx={{
           position: "absolute",

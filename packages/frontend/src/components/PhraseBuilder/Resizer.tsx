@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { useWindowDrag } from "../../hooks/useWindowDrag.ts";
 
 interface ResizerProps {
   // Current canvas height in px — the drag baseline.
@@ -15,8 +16,8 @@ interface ResizerProps {
 const KEY_STEP = 16;
 
 // The period container's bottom edge: a grab bar carrying a centred grip. Dragging it
-// vertically resizes the canvas above. Listens on window so the drag survives the
-// pointer leaving the bar. Rendered flush with the container's bottom border, so the
+// vertically resizes the canvas above. Follows the pointer across the window, so the drag
+// survives the pointer leaving the bar. Rendered flush with the container's bottom border, so the
 // caller bleeds it through the container's padding.
 export function Resizer({
   height,
@@ -24,6 +25,8 @@ export function Resizer({
   onResize,
   onResizeEnd,
 }: ResizerProps) {
+  const startDrag = useWindowDrag();
+
   function nudge(delta: number) {
     const next = Math.max(minHeight, height + delta);
     onResize(next);
@@ -51,19 +54,13 @@ export function Resizer({
         const startY = e.clientY;
         const startH = height;
         let currentH = startH;
-        const onMove = (ev: PointerEvent) => {
-          currentH = Math.max(minHeight, startH + (ev.clientY - startY));
-          onResize(currentH);
-        };
-        const onUp = () => {
-          onResizeEnd?.(currentH);
-          window.removeEventListener("pointermove", onMove);
-          window.removeEventListener("pointerup", onUp);
-          window.removeEventListener("pointercancel", onUp);
-        };
-        window.addEventListener("pointermove", onMove);
-        window.addEventListener("pointerup", onUp);
-        window.addEventListener("pointercancel", onUp);
+        startDrag(
+          (ev) => {
+            currentH = Math.max(minHeight, startH + (ev.clientY - startY));
+            onResize(currentH);
+          },
+          () => onResizeEnd?.(currentH),
+        );
       }}
       sx={{
         display: "flex",

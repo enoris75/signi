@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import LinkIcon from "@mui/icons-material/Link";
 import {
+  builderNounAddress,
   NounAddress,
   NounKey,
   PhraseSelection,
@@ -157,7 +158,7 @@ export function PossessorPanels({
                 // Forward the container's binding so the possessor's head can source a
                 // relative-clause link.
                 binding={binding}
-                possessorPath={possessorAddress(possessorPath ?? which)}
+                possessorPath={possessorAddress(builderNounAddress(possessorPath, which))}
               />
             ) : resolved ? (
               // A reference is set: show what it points at and the pronoun it will render.

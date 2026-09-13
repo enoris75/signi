@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
+import { StrictMode } from 'react';
 import type { Concept, PronominalPossessor } from '@signi/shared';
 import {
   CorefPickContext,
@@ -83,6 +84,16 @@ describe('useProvideCorefPick', () => {
     expect(commit).toHaveBeenCalledExactlyOnceWith('subject/conjunct/0');
     expect(result.current.picking).toBeNull();
     expect(result.current.isEligible('subject')).toBe(false);
+  });
+
+  it('commits a pick once, even where React runs state updates twice', () => {
+    const commit = vi.fn();
+    const { result } = renderHook(() => useProvideCorefPick(SELECTION), { wrapper: StrictMode });
+    act(() => result.current.start('directObject', commit));
+
+    act(() => result.current.pick('subject'));
+
+    expect(commit).toHaveBeenCalledExactlyOnceWith('subject');
   });
 
   it('ignores a pick while no pick is under way', () => {

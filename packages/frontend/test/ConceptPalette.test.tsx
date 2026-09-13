@@ -112,6 +112,9 @@ describe('ConceptPalette', () => {
     const weight = (word: string) => getComputedStyle(row(word)).fontWeight;
     expect([weight('cat'), weight('dog'), weight('fox')]).toEqual(['400', '700', '400']);
     expect(getComputedStyle(row('dog')).color).not.toBe(getComputedStyle(row('cat')).color);
+    // Washed in the noun colour: MUI's default success, rgb(46, 125, 50), at 0.08 opacity.
+    expect(getComputedStyle(row('dog')).backgroundColor).toBe('rgba(46, 125, 50, 0.08)');
+    expect(getComputedStyle(row('cat')).backgroundColor).toBe('rgba(0, 0, 0, 0)');
   });
 
   it('keeps a selected word pickable', () => {

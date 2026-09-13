@@ -28,7 +28,7 @@ import {
   listSavedPhrases,
   savePhrase,
 } from "../api.ts";
-import { useConcepts } from "../hooks/useConcepts.ts";
+import { conceptsQuery } from "../hooks/useConcepts.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import type {
   PhraseContainer,
@@ -58,7 +58,6 @@ const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
 export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   const t = useUiString();
   const queryClient = useQueryClient();
-  const { data: concepts } = useConcepts();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [saveOpen, setSaveOpen] = useState(false);
@@ -70,11 +69,13 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
   const empty = isEmpty(containers, links);
 
-  // Rehydrate a serialized workspace against the live catalog and hand it to the app.
-  function applyWorkspace(workspace: SerializedWorkspace) {
+  // Rehydrate a serialized workspace against the catalog and hand it to the app. The catalog is
+  // awaited, not read off a hook: a phrase loaded before it arrives would find none of its words.
+  async function applyWorkspace(workspace: SerializedWorkspace) {
+    const catalog = await queryClient.ensureQueryData(conceptsQuery());
     const { containers: hydrated, links: hydratedLinks, missing } = hydrateWorkspace(
       workspace,
-      concepts ?? [],
+      catalog,
     );
     onLoad(hydrated, hydratedLinks);
     if (missing.length > 0) {
@@ -117,7 +118,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   async function handleLoad(id: string) {
     try {
       const record = await fetchSavedPhrase(id);
-      applyWorkspace(record.workspace);
+      await applyWorkspace(record.workspace);
       setLoadOpen(false);
     } catch {
       setToast({ severity: "error", msg: "Could not load that phrase." });
@@ -131,7 +132,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   async function handleImportFile(file: File) {
     try {
       const doc = await readSavedPhraseFile(file);
-      applyWorkspace(doc.workspace);
+      await applyWorkspace(doc.workspace);
     } catch (err) {
       setToast({ severity: "error", msg: err instanceof Error ? err.message : "Import failed." });
     }
@@ -167,8 +168,15 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         </Button>
       </Tooltip>
       <Tooltip title={t("action.export.tooltip")}>
+        {/* The span lets the tooltip show while the button is disabled, but takes the tooltip's
+            label with it, so the button is named in its own right. */}
         <span>
-          <IconButton size="small" onClick={handleExport} disabled={empty}>
+          <IconButton
+            size="small"
+            onClick={handleExport}
+            disabled={empty}
+            aria-label={t("action.export.tooltip")}
+          >
             <FileDownloadOutlinedIcon fontSize="small" />
           </IconButton>
         </span>
@@ -201,7 +209,9 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
-              if (e.key === "Enter" && name.trim()) saveMutation.mutate();
+              if (e.key === "Enter" && name.trim() && !saveMutation.isPending) {
+                saveMutation.mutate();
+              }
             }}
             sx={{ mt: 1 }}
           />

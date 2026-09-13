@@ -1,4 +1,4 @@
-import React, { useLayoutEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Box } from "@mui/material";
 import {
   type Concept,
@@ -17,6 +17,7 @@ import {
   NounKey,
   NumberSlot,
   PhraseSelection,
+  builderNounAddress,
   conjunctAddress,
   possessorAddress,
   slotCategories,
@@ -157,41 +158,34 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
+  // A possessor or conjunct panel: a noun phrase inside a period, not a period of its own. It
+  // takes no part in the period's moods, connectors or instrument, though `binding` is the
+  // container's own.
+  const nested = Boolean(possessorPath);
   // Coref-pick coordinator for pronominal possessors ("the boy and his horse"). The outermost
   // period builder owns one (keyed to the whole period selection) and re-provides it below; a
   // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
   const parentCoref = useCorefPick();
   const ownCoref = useProvideCorefPick(selection);
   const coref = parentCoref ?? ownCoref;
-  // Map a local noun key to its period-root address (what a coref reference stores / points at):
-  // a nested builder's head "subject" is its `possessorPath`; a top-level builder's keys are
-  // themselves. Mirrors the mapping `adaptPossessorBinding` does for relative links.
-  const corefAddr = (key: NounKey): NounAddress =>
-    possessorPath && key === "subject" ? possessorPath : key;
+  // Map a local noun key to its period-root address (what a coref reference stores / points at,
+  // and what a link is keyed by): a top-level builder's keys are themselves, a nested builder's
+  // head "subject" is its `possessorPath`, and its other nouns sit under that (see
+  // builderNounAddress). The same mapping `adaptPossessorBinding` applies.
+  const nounAddress = (key: NounKey): NounAddress => builderNounAddress(possessorPath, key);
   // This period is the instrument of another clause, and its reification degree decides what it
   // holds — so the canvas shows exactly the boxes the sentence will read (see AbstractionLevel):
   //  · object            → a bare noun phrase ("with a word"): the subject box alone, no predicate.
   //  · process / concept → an act ("by choosing a word"): a verb and its direct object, and *no*
   //                        subject — the clause above is the one doing it.
-  const isInstrument = Boolean(binding?.instrumental.hasTarget);
+  const isInstrument = !nested && Boolean(binding?.instrumental.hasTarget);
   const instrumentLevel = binding?.instrumental.level ?? "object";
   // A conjunct panel is the other bare-noun-phrase canvas (see `nounPhraseOnly`).
   const nounPhraseMode = nounPhraseOnly || (isInstrument && instrumentLevel === "object");
   const actionMode = isInstrument && instrumentLevel !== "object";
-  useLayoutEffect(() => {
-    ((window as any).__diag ??= []).push(
-      "MOUNT " + (possessorPath ? "SUB " + String(possessorPath) : "OUT") +
-      " subj=" + ((selection.subject as { id?: string } | undefined)?.id ?? "∅"),
-    );
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  const __tr = <T,>(name: string, tuple: [T, React.Dispatch<React.SetStateAction<T>>]): [T, React.Dispatch<React.SetStateAction<T>>] => {
-    const [v, s] = tuple;
-    return [v, (u) => { if (possessorPath) ((window as any).__diag ??= []).push("SET " + name); return s(u); }];
-  };
   // A period starts on its subject noun phrase — translation begins as soon as a subject
   // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
-  const [activeSlot, setActiveSlot] = __tr("activeSlot", useState<SlotKey | null>("subject"));
+  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("subject");
   // A filled word box the user clicked to change its word: its inline picker is shown
   // over the current word. Null when no box is being re-picked. Cleared on select or blur.
   const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
@@ -370,7 +364,7 @@ export function PhraseBuilder({
     onPhraseUpdate((prev) => clearPossessorRef(removePossessor(prev, which), which));
     setRevealed((prev) => ({ ...prev, [`${which}Possessor`]: false }));
     // Drop any relative-clause link sourced from the possessor head that just vanished.
-    binding?.relative.onRemoveLink(possessorAddress(possessorPath ?? which));
+    binding?.relative.onRemoveLink(possessorAddress(nounAddress(which)));
   }
 
   // Coordinate one more phrase with a noun block's head ("Peter *and Paul*"). Unlike the
@@ -385,7 +379,7 @@ export function PhraseBuilder({
   // clause onto a different noun), drop those links: the conjunct they described is gone or
   // has moved, and re-linking is one click.
   function handleRemoveConjunct(which: NounKey, i: number) {
-    const base = possessorPath ?? which;
+    const base = nounAddress(which);
     const count = conjunctsOf(selection, which).length;
     for (let j = i; j < count; j++)
       binding?.relative.onRemoveLink(conjunctAddress(base, j));
@@ -570,26 +564,6 @@ export function PhraseBuilder({
     compact,
   });
 
-  if (possessorPath) {
-    const w = window as any;
-    w.__rc ??= {};
-    const rk = "SUB:" + String(possessorPath);
-    w.__rc[rk] = (w.__rc[rk] ?? 0) + 1;
-    const snap = {
-      activeSlot, editingSlot, slotKindState, revealed, collapsedGroups, compact,
-      draggingKey, svgSize, graphHeight,
-      boxSizesKeys: Object.keys(boxSizes).sort().join(","),
-      relN: relConnectors.length,
-      posSubjY: (positions as any).subject?.y,
-    };
-    const prev = w.__snap;
-    if (prev) {
-      const ch = Object.keys(snap).filter((k) => JSON.stringify((prev as any)[k]) !== JSON.stringify((snap as any)[k]));
-      (w.__diag ??= []).push("RENDER changed=[" + ch.join(",") + "]");
-    }
-    w.__snap = snap;
-  }
-
   // Compact-view layout, derived (not stored) each render: pack the visible core words
   // into centered rows and size the canvas to just wrap them. Because it's recomputed
   // from the current width every render, it never goes stale on a resize, and the stored
@@ -753,12 +727,12 @@ export function PhraseBuilder({
     // precedence while active, since the two never run at once.
     isPickTarget: (key) => {
       if (!NOUN_KEYS.includes(key as NounKey)) return false;
-      if (coref.picking) return coref.isEligible(corefAddr(key as NounKey));
+      if (coref.picking) return coref.isEligible(nounAddress(key as NounKey));
       return Boolean(linkBinding?.relative.isPickTarget(key as NounKey));
     },
     onPickTarget: (key) => {
       if (coref.picking && NOUN_KEYS.includes(key as NounKey)) {
-        coref.pick(corefAddr(key as NounKey));
+        coref.pick(nounAddress(key as NounKey));
         return;
       }
       linkBinding?.relative.onPick(key as NounKey);
@@ -770,11 +744,9 @@ export function PhraseBuilder({
 
   // The clause-level connector controls on the card border, derived from the workspace binding
   // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
-  const clauseControls = periodControls(binding, selection);
+  const clauseControls = nested ? {} : periodControls(binding, selection);
 
   // The card's contents — the canvas, its resize grip, and any docked possessor panels.
-  // Shared by both chromes below: a top-level period wears the PeriodContainer card
-  // or possessor the plainer Paper drawn inline.
   const content = (
     <>
       <PhraseCanvas
@@ -823,7 +795,7 @@ export function PhraseBuilder({
           binding={binding}
           possessorPath={possessorPath}
           coref={coref}
-          corefAddr={corefAddr}
+          corefAddr={nounAddress}
           Builder={PhraseBuilder}
         />
       )}
@@ -866,9 +838,10 @@ export function PhraseBuilder({
         hasGroups={groupRects.length > 0}
         hasContent={hasContent}
         soleContainer={soleContainer}
+        nested={nested}
         // A workspace container stays in the managed stack so the cross-container
         // connectors measure correctly; only a standalone period may be floated.
-        floatable={!binding}
+        floatable={!binding && !nested}
         position={position}
         onPositionChange={setPosition}
         onMoveUp={onMoveUp}
@@ -880,48 +853,60 @@ export function PhraseBuilder({
         conditional={clauseControls.conditional}
         coordinative={clauseControls.coordinative}
         instrumental={clauseControls.instrumental}
-        imperative={{
-          active: Boolean(selection.imperative),
-          // An imperative is a mood: mutually exclusive with a conditional, and shared by the two
-          // clauses of a coordination. Either way the mood can't be flipped on this period alone
-          // while it takes part in one — the relation has to be cleared first.
-          disabled: binding
-            ? binding.conditional.hasSource ||
-              binding.conditional.hasTarget ||
-              binding.coordinative.hasSource ||
-              binding.coordinative.hasTarget
-            : false,
-          onToggle: handleToggleImperative,
-        }}
-        infinitive={{
-          active: Boolean(selection.infinitive),
-          // Like the imperative, the infinitive is a mood occupying the finite slot, so it can't be
-          // flipped on a period that takes part in a conditional or a coordination — clear the
-          // relation first.
-          disabled: binding
-            ? binding.conditional.hasSource ||
-              binding.conditional.hasTarget ||
-              binding.coordinative.hasSource ||
-              binding.coordinative.hasTarget
-            : false,
-          onToggle: handleToggleInfinitive,
-        }}
+        imperative={
+          nested
+            ? undefined
+            : {
+                active: Boolean(selection.imperative),
+                // An imperative is a mood: mutually exclusive with a conditional, and shared by
+                // the two clauses of a coordination. Either way the mood can't be flipped on this
+                // period alone while it takes part in one — the relation has to be cleared first.
+                disabled: binding
+                  ? binding.conditional.hasSource ||
+                    binding.conditional.hasTarget ||
+                    binding.coordinative.hasSource ||
+                    binding.coordinative.hasTarget
+                  : false,
+                onToggle: handleToggleImperative,
+              }
+        }
+        infinitive={
+          nested
+            ? undefined
+            : {
+                active: Boolean(selection.infinitive),
+                // Like the imperative, the infinitive is a mood occupying the finite slot, so it
+                // can't be flipped on a period that takes part in a conditional or a coordination
+                // — clear the relation first.
+                disabled: binding
+                  ? binding.conditional.hasSource ||
+                    binding.conditional.hasTarget ||
+                    binding.coordinative.hasSource ||
+                    binding.coordinative.hasTarget
+                  : false,
+                onToggle: handleToggleInfinitive,
+              }
+        }
       >
         {content}
       </PeriodContainer>
 
-      <PhraseSidebar
-        open={wordsPanelOpen}
-        onClose={() => onWordsPanelClose?.()}
-        width={sidebarWidth}
-        onWidthChange={setSidebarWidth}
-        selection={selection}
-        activeSlot={activeSlot}
-        activeSlotConfig={activeSlotConfig}
-        visibleSlots={visibleSlots}
-        onSlotClick={handleSlotClick}
-        onConceptSelect={handleConceptSelect}
-      />
+      {/* The words panel is the page's, opened from its header: only the outermost period
+          has one. */}
+      {!nested && (
+        <PhraseSidebar
+          open={wordsPanelOpen}
+          onClose={() => onWordsPanelClose?.()}
+          width={sidebarWidth}
+          onWidthChange={setSidebarWidth}
+          selection={selection}
+          activeSlot={activeSlot}
+          activeSlotConfig={activeSlotConfig}
+          visibleSlots={visibleSlots}
+          onSlotClick={handleSlotClick}
+          onConceptSelect={handleConceptSelect}
+        />
+      )}
     </Box>
   );
 

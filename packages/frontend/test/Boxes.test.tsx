@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, render, screen } from '@testing-library/react';
+import type { ReactElement } from 'react';
 import {
   ASPECTS,
   ASPECT_LABELS,
@@ -192,6 +193,26 @@ describe('SlotBox', () => {
       />,
     );
     expect(screen.queryByText('category switch')).not.toBeInTheDocument();
+  });
+
+  // Rendered with MUI's default theme, whose primary is rgb(25, 118, 210); a set box wears it at
+  // the theme's 0.08 selected opacity.
+  it('washes a filled or active box in its slot colour, leaving an idle empty one plain', () => {
+    const background = (ui: ReactElement) => {
+      const { unmount } = renderWithProviders(ui);
+      const paper = screen.getByTestId('box-subject').firstElementChild!;
+      const color = getComputedStyle(paper).backgroundColor;
+      unmount();
+      return color;
+    };
+    const wash = 'rgba(25, 118, 210, 0.08)';
+
+    expect(background(<SlotBox slot={SUBJECT} concept={CAT} isActive={false} onClear={() => {}} />))
+      .toBe(wash);
+    expect(background(<SlotBox slot={SUBJECT} isActive onClear={() => {}} />)).toBe(wash);
+    expect(background(<SlotBox slot={SUBJECT} isActive={false} onClear={() => {}} />)).not.toBe(
+      wash,
+    );
   });
 
   it('shows a filled slot as its word and footer, with a clear button', () => {
@@ -478,6 +499,9 @@ describe('SentimentSelector', () => {
   });
 });
 
+// MUI's default secondary, rgb(156, 39, 176), at the theme's 0.08 selected opacity.
+const MARKED_WASH = 'rgba(156, 39, 176, 0.08)';
+
 describe('TenseToggleBox', () => {
   it.each(TENSES)('shows %s under the Tense heading', (tense) => {
     render(<TenseToggleBox value={tense} />);
@@ -486,14 +510,16 @@ describe('TenseToggleBox', () => {
     expect(screen.getByText(TENSE_LABELS[tense])).toBeInTheDocument();
   });
 
-  it('styles only a marked tense as set', () => {
+  it('styles only a marked tense as set, washed in the secondary colour', () => {
     const { container, rerender } = render(<TenseToggleBox value="present" />);
-    const border = () => getComputedStyle(container.firstElementChild!).borderColor;
-    const unmarked = border();
+    const style = () => getComputedStyle(container.firstElementChild!);
+    const unmarked = style().borderColor;
+    expect(style().backgroundColor).not.toBe(MARKED_WASH);
 
     rerender(<TenseToggleBox value="past" />);
 
-    expect(border()).not.toBe(unmarked);
+    expect(style().borderColor).not.toBe(unmarked);
+    expect(style().backgroundColor).toBe(MARKED_WASH);
   });
 });
 
@@ -505,13 +531,15 @@ describe('AspectToggleBox', () => {
     expect(screen.getByText(ASPECT_LABELS[aspect])).toBeInTheDocument();
   });
 
-  it('styles only a marked aspect as set', () => {
+  it('styles only a marked aspect as set, washed in the secondary colour', () => {
     const { container, rerender } = render(<AspectToggleBox value="neutral" />);
-    const border = () => getComputedStyle(container.firstElementChild!).borderColor;
-    const unmarked = border();
+    const style = () => getComputedStyle(container.firstElementChild!);
+    const unmarked = style().borderColor;
+    expect(style().backgroundColor).not.toBe(MARKED_WASH);
 
     rerender(<AspectToggleBox value="progressive" />);
 
-    expect(border()).not.toBe(unmarked);
+    expect(style().borderColor).not.toBe(unmarked);
+    expect(style().backgroundColor).toBe(MARKED_WASH);
   });
 });

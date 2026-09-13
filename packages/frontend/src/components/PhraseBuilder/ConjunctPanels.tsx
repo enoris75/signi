@@ -2,6 +2,7 @@ import React from "react";
 import { Box } from "@mui/material";
 import type { CoordConjunction } from "@signi/shared";
 import {
+  builderNounAddress,
   CONJUNCTS_KEY,
   conjunctAddress,
   COORD_CONJUNCTION_LABEL,
@@ -156,7 +157,7 @@ export function ConjunctPanels({
                     // Forward the container's binding so a conjunct's head can source a
                     // relative-clause link of its own ("Peter and the dog *that barks*").
                     binding={binding}
-                    possessorPath={conjunctAddress(possessorPath ?? which, i)}
+                    possessorPath={conjunctAddress(builderNounAddress(possessorPath, which), i)}
                     // A conjunct is a noun *phrase*, not a clause: it has no predicate of its
                     // own, so its canvas is the noun box alone. (A possessor panel, by contrast,
                     // keeps the full canvas — a possessor can head a clause: "the boy who cried

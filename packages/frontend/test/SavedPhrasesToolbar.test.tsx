@@ -18,6 +18,7 @@ import {
 } from '@signi/shared';
 import {
   deleteSavedPhrase,
+  fetchConcepts,
   fetchSavedPhrase,
   listSavedPhrases,
   savePhrase,
@@ -101,7 +102,7 @@ const saveButton = () => screen.getByRole('button', { name: 'Save' });
 const loadButton = () => screen.getByRole('button', { name: 'Load a saved phrase' });
 const importButton = () => screen.getByRole('button', { name: 'Import phrase' });
 // The export icon has no name of its own; its tooltip labels the span that wraps it.
-const exportButton = () => within(screen.getByLabelText('Export phrase')).getByRole('button');
+const exportButton = () => screen.getByRole('button', { name: 'Export phrase' });
 
 function openSaveDialog() {
   fireEvent.click(saveButton());
@@ -193,7 +194,7 @@ describe('SavedPhrasesToolbar', () => {
       expect(screen.getByRole('button', { name: 'Carica una frase salvata' })).toHaveTextContent(
         'Carica',
       );
-      expect(within(screen.getByLabelText('Esporta la frase')).getByRole('button')).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Esporta la frase' })).toBeEnabled();
       expect(screen.getByRole('button', { name: 'Importa una frase' })).toBeInTheDocument();
     });
   });
@@ -234,6 +235,25 @@ describe('SavedPhrasesToolbar', () => {
       );
     });
 
+    it('cannot be sent twice while the save is in flight, by button or by Enter', async () => {
+      let finish!: (record: SavedPhraseRecord) => void;
+      vi.mocked(savePhrase).mockReturnValue(new Promise((resolve) => (finish = resolve)));
+      renderToolbar();
+      const { name, save } = openSaveDialog();
+
+      type(name, 'The cat sleeps');
+      fireEvent.keyDown(name, { key: 'Enter' });
+      await waitFor(() => expect(save).toBeDisabled());
+      fireEvent.keyDown(name, { key: 'Enter' });
+      fireEvent.click(save);
+      // A mutation reaches its request a microtask after `mutate`; let a second one get there.
+      await act(async () => {});
+      expect(savePhrase).toHaveBeenCalledOnce();
+
+      finish(RECORD);
+      expect(await findToast()).toHaveTextContent('Phrase saved.');
+    });
+
     it('will not save without a name', () => {
       renderToolbar();
       const { name, save } = openSaveDialog();
@@ -258,18 +278,6 @@ describe('SavedPhrasesToolbar', () => {
       await waitForElementToBeRemoved(first.dialog);
 
       expect(openSaveDialog().name).toHaveValue('');
-    });
-
-    it('cannot be sent twice while a save is in flight', async () => {
-      vi.mocked(savePhrase).mockReturnValue(new Promise(() => {}));
-      renderToolbar();
-      const { name, save } = openSaveDialog();
-      type(name, 'The cat sleeps');
-
-      fireEvent.click(save);
-
-      await waitFor(() => expect(save).toBeDisabled());
-      expect(savePhrase).toHaveBeenCalledOnce();
     });
 
     it('keeps the dialog and the name when the save fails, and says so', async () => {
@@ -355,6 +363,33 @@ describe('SavedPhrasesToolbar', () => {
         [LINK],
       );
       await waitFor(() => expect(dialog).not.toBeInTheDocument());
+    });
+
+    it('waits for the word catalog before loading a phrase', async () => {
+      let deliver!: (concepts: Concept[]) => void;
+      vi.mocked(fetchConcepts).mockReturnValue(new Promise((resolve) => (deliver = resolve)));
+      vi.mocked(listSavedPhrases).mockResolvedValue([SUMMARY]);
+      vi.mocked(fetchSavedPhrase).mockResolvedValue(RECORD);
+      const onLoad = vi.fn();
+      // No catalog seeded: it is still on its way when the phrase is picked.
+      renderWithProviders(<SavedPhrasesToolbar containers={FILLED} links={[]} onLoad={onLoad} />);
+      const dialog = openLoadDialog();
+
+      fireEvent.click(await within(dialog).findByText('The cat sleeps'));
+      await waitFor(() => expect(fetchSavedPhrase).toHaveBeenCalledOnce());
+      await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
+      expect(onLoad).not.toHaveBeenCalled();
+
+      deliver([CAT, SLEEP]);
+
+      expect(await findToast()).toHaveTextContent('Phrase loaded.');
+      expect(onLoad).toHaveBeenCalledExactlyOnceWith(
+        [
+          { id: 'c1', selection: { subject: CAT, verb: SLEEP } },
+          { id: 'c2', selection: { subject: CAT } },
+        ],
+        [LINK],
+      );
     });
 
     it('loads what it can and names the words no longer in the catalog', async () => {

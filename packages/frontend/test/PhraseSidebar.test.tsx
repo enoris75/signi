@@ -300,6 +300,18 @@ describe('PhraseSidebar', () => {
       expect(localStorage.getItem(WIDTH_KEY)).toBe('320');
     });
 
+    it('lets go of the pointer when the panel goes away mid-drag', () => {
+      const { panel, onWidthChange, unmount } = renderSidebar({ width: 250 });
+      fireEvent.pointerDown(resizeHandle(panel), { clientX: 600 });
+
+      unmount();
+      fireEvent.pointerMove(window, { clientX: 500 });
+      fireEvent.pointerUp(window);
+
+      expect(onWidthChange).not.toHaveBeenCalled();
+      expect(localStorage.getItem(WIDTH_KEY)).toBeNull();
+    });
+
     it('ends the drag when the pointer is cancelled too', () => {
       const { panel, onWidthChange } = renderSidebar({ width: 250 });
 
