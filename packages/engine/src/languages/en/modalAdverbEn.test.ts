@@ -1,0 +1,22 @@
+import { describe, expect, test } from 'vitest';
+import { ALWAYS, CAN, modal, MUST, NEVER, SLOWLY, WILL } from './en.fixtures.js';
+import { modalAdverbEn } from './modalAdverbEn.js';
+
+describe('modalAdverbEn', () => {
+  test('a modal with no adverb places nothing', () => {
+    expect(modalAdverbEn(modal(MUST))).toEqual({});
+  });
+
+  test('a frequency adverb goes before the modal', () => {
+    expect(modalAdverbEn(modal(WILL, ALWAYS))).toEqual({ pre: 'always' });
+    expect(modalAdverbEn(modal(CAN, NEVER))).toEqual({ pre: 'never' });
+  });
+
+  test('a manner adverb goes after it', () => {
+    expect(modalAdverbEn(modal(WILL, SLOWLY))).toEqual({ post: 'slowly' });
+  });
+
+  test('an adverb with no English base places nothing', () => {
+    expect(modalAdverbEn(modal(MUST, { subtype: 'frequency' }))).toEqual({});
+  });
+});

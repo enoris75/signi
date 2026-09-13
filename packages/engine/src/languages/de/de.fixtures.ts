@@ -1,13 +1,13 @@
-import type { ComplementType, CoordConjunction, ModifierRelation, Specifier } from '@signi/shared';
-import type { ConceptForms, ResolvedComplement, ResolvedModal, ResolvedNounElement, ResolvedNounModifier, ResolvedNounPhrase, ResolvedPhrase, ResolvedVerbPhrase } from '../../types.js';
+import type { Forms } from '../resolved.fixtures.js';
+
+export * from '../resolved.fixtures.js';
 
 // Hand-built resolved inputs for the German function-level unit tests. The forms mirror the seeded
 // German lexicon (packages/backend/src/concepts) plus the keys the lexicon and translator thread
 // onto them (animate, uncountable, proper, role, definiteness, number, degree…), trimmed to what the
 // functions read — so each test shows exactly which forms drive its output. Rendering through the
-// real lexicon is covered by the sentence-level suite in packages/engine/test.
-
-export type Forms = Record<string, string>;
+// real lexicon is covered by the sentence-level suite in packages/engine/test. The builders come
+// from the language-neutral `resolved.fixtures.ts`.
 
 // ── Lexicon ─────────────────────────────────────────────────────────────────
 
@@ -79,75 +79,3 @@ export const WERDEN_VERB: Forms = { base: 'werden', participle: 'geworden', aux:
 export const MUESSEN: Forms = { base: 'müssen', '1sg_present': 'muss', '3sg_present': 'muss', '3pl_present': 'müssen', '3sg_past': 'musste' };
 export const KOENNEN: Forms = { base: 'können', '3sg_present': 'kann' };
 export const WOLLEN: Forms = { base: 'wollen', '3sg_present': 'will' };
-
-// ── Builders ────────────────────────────────────────────────────────────────
-
-/** A resolved concept: a copy of `forms` (so a test can't leak edits into the shared entries). */
-export function concept(forms: Forms, conceptId = 'TEST'): ConceptForms {
-  return { conceptId, forms: { ...forms } };
-}
-
-/** A resolved noun phrase headed by `forms`, with `extra` forms merged onto the head. */
-export function np(forms: Forms, extra: Forms = {}, rest: Partial<Omit<ResolvedNounPhrase, 'head'>> = {}): ResolvedNounPhrase {
-  return { head: concept({ ...forms, ...extra }), adjectives: [], nounModifiers: [], ...rest };
-}
-
-/** A resolved attributive noun ("Segel" in "Segelboot"), optionally carrying its own adjectives. */
-export function nounModifier(forms: Forms, adjectives: ConceptForms[] = [], relation: ModifierRelation = 'feature'): ResolvedNounModifier {
-  return { concept: concept(forms), relation, adjectives };
-}
-
-/** A resolved adjective concept, with `extra` forms (e.g. `{ degree: 'more' }`). */
-export function adj(forms: Forms, extra: Forms = {}): ConceptForms {
-  return concept({ ...forms, ...extra });
-}
-
-/**
- * A noun slot: one conjunct agrees as itself; several agree as a group (3rd plural, masculine unless
- * every conjunct is feminine), joined by `conjunction` (default 'and').
- */
-export function el(first: ResolvedNounPhrase, ...others: ResolvedNounPhrase[]): ResolvedNounElement {
-  if (others.length === 0) return { conjuncts: [first], agreement: first.head.forms };
-  return { conjuncts: [first, ...others], conjunction: 'and', agreement: { person: '3', number: 'plural' } };
-}
-
-/** A coordinated noun slot with an explicit conjunction. */
-export function group(conjunction: CoordConjunction, ...conjuncts: ResolvedNounPhrase[]): ResolvedNounElement {
-  return { ...el(conjuncts[0], ...conjuncts.slice(1)), conjunction };
-}
-
-/** A resolved verb phrase (no modals unless given). */
-export function vp(forms: Forms, extra: Partial<Omit<ResolvedVerbPhrase, 'verb'>> = {}, conceptId = 'TEST'): ResolvedVerbPhrase {
-  return { verb: concept(forms, conceptId), modals: [], ...extra };
-}
-
-/** A resolved modal link, optionally with its own adverb. */
-export function modal(forms: Forms, modifier?: Forms): ResolvedModal {
-  return { verb: concept(forms), ...(modifier ? { modifier: concept(modifier) } : {}) };
-}
-
-/** A resolved complement over a noun slot, with optional specifiers and action. */
-export function complement(
-  phrase: ResolvedNounPhrase | ResolvedNounElement,
-  specifiers: Specifier[] = [],
-  action?: ResolvedVerbPhrase,
-): ResolvedComplement {
-  const element = 'conjuncts' in phrase ? phrase : el(phrase);
-  return { phrase: element, ...(specifiers.length ? { specifiers } : {}), ...(action ? { action } : {}) };
-}
-
-/** A complements map. */
-export function complements(
-  map: Partial<Record<ComplementType, ResolvedComplement>>,
-): Partial<Record<ComplementType, ResolvedComplement>> {
-  return map;
-}
-
-/** A resolved clause: `subject` (a phrase or a slot), an optional verb phrase, and anything else. */
-export function clause(
-  subject: ResolvedNounPhrase | ResolvedNounElement,
-  verbPhrase?: ResolvedVerbPhrase,
-  rest: Partial<Omit<ResolvedPhrase, 'subject' | 'verbPhrase'>> = {},
-): ResolvedPhrase {
-  return { subject: 'conjuncts' in subject ? subject : el(subject), ...(verbPhrase ? { verbPhrase } : {}), ...rest };
-}

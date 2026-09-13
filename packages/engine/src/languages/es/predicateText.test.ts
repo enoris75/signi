@@ -1,0 +1,280 @@
+import { describe, expect, test } from 'vitest';
+import {
+  BUENO, CANSADO, CASA, COMER, COMIDA, complement, complements, concept, CORRER, DAR, DEBER, EL, el, ELLA, ELLOS, FELIZ, type Forms,
+  GATO, GRANDE, IR, LEYENDA, LIBRO, modal, MUJER, NINO, NOSOTROS, np, NUNCA, PARECER, PODER, QUERER, RAPIDO_ADV, RATON, SE, SER,
+  SIEMPRE, TU, VACA, VENIR, VER, VOLVERSE, VOSOTROS, vp, YO,
+} from './es.fixtures.js';
+import { predicateText } from './predicateText.js';
+
+const GATOS: Forms = { ...GATO, number: 'plural' };
+const food = el(np(COMIDA));
+const aLegend = complements({ predicative: complement(np(LEYENDA, { definiteness: 'indefinite' })) });
+const inTheHouse = complements({ locative: complement(np(CASA)) });
+const tired = complements({ predicative: complement(np(CANSADO)) });
+
+describe('predicateText', () => {
+  describe('tense and agreement', () => {
+    test('the finite verb agrees with the subject in person and number', () => {
+      expect(predicateText(GATO, vp(COMER))).toBe('come');
+      expect(predicateText(YO, vp(COMER))).toBe('como');
+      expect(predicateText(TU, vp(COMER))).toBe('comes');
+      expect(predicateText(NOSOTROS, vp(COMER))).toBe('comemos');
+      expect(predicateText(VOSOTROS, vp(COMER))).toBe('coméis');
+      expect(predicateText(GATOS, vp(COMER))).toBe('comen');
+    });
+
+    // C6: the simple past is the preterite (perfective); the perfect is the resultative aspect.
+    test('the past is the preterite and the future is synthetic', () => {
+      expect(predicateText(GATO, vp(COMER, { tense: 'past' }))).toBe('comió');
+      expect(predicateText(YO, vp(IR, { tense: 'past' }))).toBe('fui');
+      expect(predicateText(GATOS, vp(COMER, { tense: 'future' }))).toBe('comerán');
+    });
+
+    test('a reflexive verb’s finite form already carries its clitic', () => {
+      expect(predicateText(GATO, vp(VOLVERSE, {}, 'BECOME'), undefined, aLegend)).toBe('se vuelve una leyenda');
+      expect(predicateText(NOSOTROS, vp(VOLVERSE, { tense: 'past' }, 'BECOME'), undefined, aLegend)).toBe('nos volvimos una leyenda');
+    });
+  });
+
+  describe('aspect', () => {
+    test('the marked aspects build on estar and haber', () => {
+      expect(predicateText(GATO, vp(COMER, { aspect: 'progressive' }))).toBe('está comiendo');
+      expect(predicateText(GATOS, vp(COMER, { aspect: 'progressive', tense: 'past' }))).toBe('estaban comiendo');
+      expect(predicateText(GATO, vp(COMER, { aspect: 'prospective' }))).toBe('está a punto de comer');
+      expect(predicateText(YO, vp(COMER, { aspect: 'resultative' }), food)).toBe('he comido la comida');
+    });
+
+    test('a reflexive verb leads the perfect with its clitic', () => {
+      expect(predicateText(GATO, vp(VOLVERSE, { aspect: 'resultative' }, 'BECOME'), undefined, aLegend)).toBe('se ha vuelto una leyenda');
+    });
+  });
+
+  describe('hypothetical mood', () => {
+    test('the conditional and imperfect subjunctive come off the stored stems', () => {
+      expect(predicateText(GATO, vp(COMER, { mood: 'conditional' }))).toBe('comería');
+      expect(predicateText(NOSOTROS, vp(COMER, { mood: 'conditional' }))).toBe('comeríamos');
+      expect(predicateText(GATO, vp(IR, { mood: 'conditional' }))).toBe('iría');
+      expect(predicateText(GATO, vp(COMER, { mood: 'subjunctive' }))).toBe('comiera');
+      expect(predicateText(GATO, vp(IR, { mood: 'subjunctive' }))).toBe('fuera');
+      expect(predicateText(GATO, vp(SER, { mood: 'conditional' }, 'BE'), undefined, aLegend)).toBe('sería una leyenda');
+    });
+
+    test('a marked aspect puts the mood on its auxiliary', () => {
+      expect(predicateText(GATO, vp(COMER, { mood: 'conditional', aspect: 'progressive' }))).toBe('estaría comiendo');
+      expect(predicateText(GATO, vp(COMER, { mood: 'subjunctive', aspect: 'resultative' }))).toBe('hubiera comido');
+    });
+
+    test('a modal takes the mood, and no still leads', () => {
+      expect(predicateText(GATO, vp(COMER, { mood: 'conditional', modals: [modal(DEBER)] }))).toBe('debería comer');
+      expect(predicateText(GATO, vp(COMER, { mood: 'subjunctive', modals: [modal(PODER)] }))).toBe('pudiera comer');
+      expect(predicateText(GATO, vp(COMER, { mood: 'conditional', negative: true }))).toBe('no comería');
+    });
+  });
+
+  describe('modals', () => {
+    test('the outermost modal is finite and the rest are infinitives', () => {
+      expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER)] }))).toBe('debe comer');
+      expect(predicateText(YO, vp(COMER, { modals: [modal(QUERER)] }))).toBe('quiero comer');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(DEBER)] }))).toBe('debió comer');
+      expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER), modal(PODER)] }))).toBe('quiere poder comer');
+    });
+
+    test('a marked aspect puts its auxiliary in the infinitive', () => {
+      expect(predicateText(GATO, vp(COMER, { aspect: 'resultative', modals: [modal(DEBER)] }))).toBe('debe haber comido');
+      expect(predicateText(GATO, vp(COMER, { aspect: 'progressive', modals: [modal(DEBER)] }))).toBe('debe estar comiendo');
+      expect(predicateText(GATO, vp(COMER, { aspect: 'prospective', modals: [modal(PODER)] }))).toBe('puede estar a punto de comer');
+    });
+
+    test('no leads the finite modal', () => {
+      expect(predicateText(GATO, vp(COMER, { negative: true, modals: [modal(PODER)] }))).toBe('no puede comer');
+      expect(predicateText(GATO, vp(COMER, { negative: true, modals: [modal(QUERER), modal(DEBER)] }))).toBe('no quiere deber comer');
+    });
+
+    test('a modal’s adverb trails the modal, the verb’s trails the verb', () => {
+      expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER, SIEMPRE)] }))).toBe('debe siempre comer');
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(RAPIDO_ADV), modals: [modal(PODER)] }))).toBe('puede comer rápido');
+    });
+
+    test('a pronoun object climbs ahead of the finite modal', () => {
+      expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER)] }), el(np(EL)))).toBe('lo debe comer');
+      expect(predicateText(GATO, vp(VER, { negative: true, modals: [modal(PODER)] }), el(np(ELLA)))).toBe('no la puede ver');
+    });
+  });
+
+  describe('adverbs', () => {
+    test('the adverb trails the verb, ahead of the object', () => {
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(RAPIDO_ADV) }))).toBe('come rápido');
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(SIEMPRE) }), food)).toBe('come siempre la comida');
+    });
+  });
+
+  describe('negation', () => {
+    test('no precedes the whole verb group', () => {
+      expect(predicateText(GATO, vp(COMER, { negative: true }))).toBe('no come');
+      expect(predicateText(GATO, vp(COMER, { negative: true, aspect: 'resultative' }))).toBe('no ha comido');
+      expect(predicateText(GATO, vp(COMER, { negative: true, aspect: 'progressive' }))).toBe('no está comiendo');
+      expect(predicateText(GATO, vp(VOLVERSE, { negative: true }, 'BECOME'), undefined, aLegend)).toBe('no se vuelve una leyenda');
+    });
+
+    test('nunca fronts and replaces no, whichever verb it modifies', () => {
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA) }))).toBe('nunca come');
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), aspect: 'resultative' }))).toBe('nunca ha comido');
+      expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER, NUNCA)] }))).toBe('nunca debe comer');
+      expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), modals: [modal(QUERER)] }))).toBe('nunca quiere comer');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modifier: concept(SIEMPRE), modals: [modal(QUERER, NUNCA)] })))
+        .toBe('nunca quiso comer siempre');
+    });
+
+    test('an explicitly negated verb keeps no, and nunca stays after it', () => {
+      expect(predicateText(GATO, vp(COMER, { negative: true, modifier: concept(NUNCA) }))).toBe('no come nunca');
+    });
+
+    test('a postverbal ningún object or complement requires no', () => {
+      expect(predicateText(GATO, vp(VER), el(np(RATON, { definiteness: 'no' })))).toBe('no ve ningún ratón');
+      expect(predicateText(GATO, vp(VER, { negative: true }), el(np(VACA, { definiteness: 'no' })))).toBe('no ve ninguna vaca');
+      expect(predicateText(GATO, vp(CORRER, {}, 'RUN'), undefined, complements({ direction: complement(np(CASA, { definiteness: 'no' })) })))
+        .toBe('no corre a ninguna casa');
+    });
+
+    test('a preverbal ningún subject already negates, so no is dropped', () => {
+      const noCat = { ...GATO, definiteness: 'no' };
+      expect(predicateText(noCat, vp(COMER, { negative: true }))).toBe('come');
+      expect(predicateText(noCat, vp(VER), el(np(RATON, { definiteness: 'no' })))).toBe('ve ningún ratón');
+    });
+  });
+
+  describe('objects', () => {
+    test('a noun object follows the verb, each conjunct with its article', () => {
+      expect(predicateText(GATO, vp(VER), el(np(LIBRO)))).toBe('ve el libro');
+      expect(predicateText(GATO, vp(VER), el(np(LIBRO), np(CASA, { definiteness: 'indefinite' })))).toBe('ve el libro y una casa');
+    });
+
+    test('a pronoun object is a proclitic before the finite verb', () => {
+      expect(predicateText(GATO, vp(VER), el(np(YO)))).toBe('me ve');
+      expect(predicateText(GATO, vp(VER), el(np(TU)))).toBe('te ve');
+      expect(predicateText(GATO, vp(VER), el(np(NOSOTROS)))).toBe('nos ve');
+      expect(predicateText(GATO, vp(VER), el(np(ELLA)))).toBe('la ve');
+      expect(predicateText(GATO, vp(VER), el(np(ELLOS)))).toBe('los ve');
+    });
+
+    test('the clitic sits after no and before the auxiliary', () => {
+      expect(predicateText(GATO, vp(VER, { negative: true }), el(np(YO)))).toBe('no me ve');
+      expect(predicateText(GATO, vp(VER, { aspect: 'resultative' }), el(np(YO)))).toBe('me ha visto');
+      expect(predicateText(GATO, vp(VER, { aspect: 'progressive' }), el(np(ELLA)))).toBe('la está viendo');
+    });
+
+    test('a generic subject is the impersonal se, ahead of any object clitic', () => {
+      expect(predicateText(SE, vp(COMER))).toBe('se come');
+      expect(predicateText(SE, vp(COMER, { negative: true }))).toBe('no se come');
+      expect(predicateText(SE, vp(COMER), el(np(EL)))).toBe('se lo come');
+    });
+
+    test('a recipient follows the object', () => {
+      expect(predicateText(GATO, vp(DAR, {}, 'GIVE'), el(np(LIBRO)), complements({ terminus: complement(np(NINO)) }))).toBe('da el libro al niño');
+    });
+  });
+
+  // A47: estar for location and for a transient state; ser everywhere else.
+  describe('ser and estar', () => {
+    const be = (extra: Parameters<typeof vp>[1] = {}) => vp(SER, extra, 'BE');
+
+    test('a locative on its own selects estar, in every tense and mood', () => {
+      expect(predicateText(GATO, be(), undefined, inTheHouse)).toBe('está en la casa');
+      expect(predicateText(YO, be(), undefined, inTheHouse)).toBe('estoy en la casa');
+      expect(predicateText(GATOS, be({ tense: 'past' }), undefined, inTheHouse)).toBe('estuvieron en la casa');
+      expect(predicateText(GATO, be({ mood: 'conditional' }), undefined, inTheHouse)).toBe('estaría en la casa');
+      expect(predicateText(GATO, be({ mood: 'subjunctive' }), undefined, inTheHouse)).toBe('estuviera en la casa');
+      expect(predicateText(GATO, be({ negative: true }), undefined, inTheHouse)).toBe('no está en la casa');
+    });
+
+    test('a transient predicate adjective selects estar', () => {
+      expect(predicateText(GATO, be(), undefined, tired)).toBe('está cansado');
+      expect(predicateText(MUJER, be(), undefined, tired)).toBe('está cansada');
+      expect(predicateText(GATOS, be(), undefined, complements({ predicative: complement(np(FELIZ)) }))).toBe('están felices');
+    });
+
+    test('an inherent adjective or a predicate noun keeps ser', () => {
+      expect(predicateText(GATO, be(), undefined, complements({ predicative: complement(np(GRANDE)) }))).toBe('es grande');
+      expect(predicateText(GATO, be(), undefined, aLegend)).toBe('es una leyenda');
+    });
+
+    test('beside a predicate noun a locative is an adjunct, and ser stays', () => {
+      expect(predicateText(GATO, be(), undefined, { ...aLegend, ...inTheHouse })).toBe('es una leyenda en la casa');
+    });
+
+    test('only the copula is swapped', () => {
+      expect(predicateText(GATO, vp(COMER, {}, 'EAT'), undefined, inTheHouse)).toBe('come en la casa');
+      expect(predicateText(MUJER, vp(PARECER, {}, 'SEEM'), undefined, tired)).toBe('parece cansada');
+    });
+  });
+
+  describe('imperative', () => {
+    const command = (verb: Forms, conceptId: string, extra: Parameters<typeof vp>[1] = {}) =>
+      vp(verb, { mood: 'imperative', ...extra }, conceptId);
+
+    test('the tú form is the 3sg present, nosotros the subjunctive, vosotros -d', () => {
+      expect(predicateText(TU, command(COMER, 'EAT'), food)).toBe('come la comida');
+      expect(predicateText(NOSOTROS, command(COMER, 'EAT'), food)).toBe('comamos la comida');
+      expect(predicateText(VOSOTROS, command(COMER, 'EAT'), food)).toBe('comed la comida');
+    });
+
+    test('every negative command is the present subjunctive', () => {
+      expect(predicateText(TU, command(COMER, 'EAT', { negative: true }))).toBe('no comas');
+      expect(predicateText(NOSOTROS, command(COMER, 'EAT', { negative: true }))).toBe('no comamos');
+      expect(predicateText(VOSOTROS, command(COMER, 'EAT', { negative: true }))).toBe('no comáis');
+    });
+
+    test('ser has its own command forms', () => {
+      const good = complements({ predicative: complement(np(BUENO)) });
+      expect(predicateText(TU, command(SER, 'BE'), undefined, good)).toBe('sé bueno');
+      expect(predicateText(VOSOTROS, command(SER, 'BE'), undefined, good)).toBe('sed buenos');
+      expect(predicateText(TU, command(SER, 'BE', { negative: true }), undefined, good)).toBe('no seas bueno');
+    });
+
+    test('a ningún object or nunca makes the command negative', () => {
+      expect(predicateText(TU, command(COMER, 'EAT'), el(np(COMIDA, { definiteness: 'no' })))).toBe('no comas ninguna comida');
+      expect(predicateText(TU, command(COMER, 'EAT', { modifier: concept(NUNCA) }))).toBe('no comas nunca');
+    });
+
+    test('the adverb, object and complements follow the verb', () => {
+      expect(predicateText(TU, command(COMER, 'EAT', { modifier: concept(RAPIDO_ADV) }), food)).toBe('come rápido la comida');
+      expect(predicateText(TU, command(CORRER, 'RUN'), undefined, complements({ direction: complement(np(CASA)) }))).toBe('corre a la casa');
+    });
+
+    test('a negative command keeps a pronoun object proclitic', () => {
+      expect(predicateText(TU, command(COMER, 'EAT', { negative: true }), el(np(EL)))).toBe('no lo comas');
+    });
+
+    test('the instruction register is the infinitive, for any addressee', () => {
+      const instruction = (extra: Parameters<typeof vp>[1] = {}) => command(COMER, 'EAT', { register: 'instruction', ...extra });
+      expect(predicateText(TU, instruction(), food)).toBe('comer la comida');
+      expect(predicateText(NOSOTROS, instruction(), food)).toBe('comer la comida');
+      expect(predicateText(TU, instruction({ negative: true }), food)).toBe('no comer la comida');
+    });
+  });
+
+  describe('infinitive mood', () => {
+    const infinitive = (verb: Forms, extra: Parameters<typeof vp>[1] = {}, conceptId?: string) =>
+      vp(verb, { mood: 'infinitive', ...extra }, conceptId);
+
+    test('the bare infinitive, followed by its adverb, object and complements', () => {
+      expect(predicateText(SE, infinitive(COMER), food)).toBe('comer la comida');
+      expect(predicateText(GATO, infinitive(COMER, { modifier: concept(RAPIDO_ADV) }))).toBe('comer rápido');
+      expect(predicateText(GATO, infinitive(VENIR, {}, 'COME'), undefined, complements({ source: complement(np(CASA)) }))).toBe('venir de la casa');
+    });
+
+    test('negation, a ningún object or nunca prefixes no', () => {
+      expect(predicateText(GATO, infinitive(COMER, { negative: true }))).toBe('no comer');
+      expect(predicateText(GATO, infinitive(COMER), el(np(COMIDA, { definiteness: 'no' })))).toBe('no comer ninguna comida');
+      expect(predicateText(GATO, infinitive(COMER, { modifier: concept(NUNCA) }))).toBe('no comer nunca');
+    });
+  });
+
+  describe('complements', () => {
+    test('the source adverb is keyed off the verb', () => {
+      const fromTheHouse = complements({ source: complement(np(CASA)) });
+      expect(predicateText(GATO, vp(CORRER, {}, 'RUN'), undefined, fromTheHouse)).toBe('corre lejos de la casa');
+      expect(predicateText(GATO, vp(VENIR, {}, 'COME'), undefined, fromTheHouse)).toBe('viene de la casa');
+    });
+  });
+});
