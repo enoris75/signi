@@ -407,6 +407,7 @@ export function SpecifierSelector({
 }) {
   return (
     <Box
+      data-testid="specifier-toolbar"
       sx={{
         display: "flex",
         gap: 0.25,
@@ -467,6 +468,7 @@ export function SentimentSelector({
 }) {
   return (
     <Box
+      data-testid="sentiment-toolbar"
       sx={{
         display: "flex",
         gap: 0.25,

@@ -60,6 +60,7 @@ export function ImperativeSubjectSelector({
 
   return (
     <Box
+      data-testid="command-box"
       sx={{
         display: "flex",
         flexDirection: "column",

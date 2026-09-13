@@ -39,9 +39,20 @@ export class Builder {
     return this.page.getByTestId('typeahead-noun');
   }
 
+  /**
+   * Scroll a control to the middle of the viewport, ahead of a click. Playwright's own
+   * scroll-into-view stops as soon as the control is inside the viewport, which on a canvas tall
+   * enough to scroll the page can leave it under the sticky header — and the click lands there.
+   */
+  private async centered(target: Locator): Promise<Locator> {
+    await target.evaluate((el) => el.scrollIntoView({ block: 'center', inline: 'nearest' }));
+    return target;
+  }
+
   /** Type into a picker, then click the option that carries this exact concept. */
   private async pick(input: Locator, conceptId: string): Promise<void> {
     await expect(input).toBeVisible();
+    await this.centered(input);
     await input.fill(conceptId.toLowerCase());
     await this.page
       .locator(`[data-testid="typeahead-option"][data-concept="${conceptId}"]`)
@@ -140,7 +151,7 @@ export class Builder {
    * a modal. Every such slot renders its picker inside `box-<key>` once revealed.
    */
   async revealAndPick(slotKey: string, conceptId: string): Promise<void> {
-    await this.satellite(slotKey).click();
+    await (await this.centered(this.satellite(slotKey))).click();
     await this.pick(this.page.getByTestId(`box-${slotKey}`).locator('input'), conceptId);
   }
 
@@ -150,8 +161,8 @@ export class Builder {
    */
   async cycle(toggle: 'verbTense' | 'verbAspect'): Promise<void> {
     const box = this.page.getByTestId(`box-${toggle}`);
-    if (!(await box.isVisible())) await this.satellite(toggle).click();
-    await box.click();
+    if (!(await box.isVisible())) await (await this.centered(this.satellite(toggle))).click();
+    await (await this.centered(box)).click();
   }
 
   /**
@@ -160,8 +171,10 @@ export class Builder {
    */
   async setDeterminer(noun: string, name: string): Promise<void> {
     const box = this.page.getByTestId(`box-${noun}Definiteness`);
-    if (!(await box.isVisible())) await this.satellite(`${noun}Definiteness`).click();
-    await box.click();
+    if (!(await box.isVisible())) {
+      await (await this.centered(this.satellite(`${noun}Definiteness`))).click();
+    }
+    await (await this.centered(box)).click();
     await this.page.getByRole('menuitem', { name: new RegExp(`^${name}`) }).click();
   }
 
@@ -323,18 +336,29 @@ export class Builder {
   }
 
   /**
-   * Tidy the period, and wait for the layout to reach its fixed point.
+   * Tidy a period (the first by default), and wait for the layout to reach its fixed point.
    *
    * Tidying is convergent, not one-shot: the first pass collapses the canvas to its tidy
    * height while still positioning the groups against the height it had before, leaving them
    * a few pixels off; a second pass settles them. Clicking twice is what "tidy" means from a
    * caller's point of view, so the loop lives here rather than in every spec.
+   *
+   * Every dotted box in the period is fingerprinted, by its offset inside the canvas rather than
+   * in the viewport, so a page scroll brought on by the click doesn't read as the layout moving.
    */
-  async tidy(): Promise<void> {
+  async tidy(periodIndex = 0): Promise<void> {
+    const period = this.period(periodIndex);
+    // A nested possessor panel wears the same card and wand; the period's own comes first.
+    const button = period.getByTestId('period-tidy').first();
     const settled = async () => {
-      await this.tidyButton.click();
-      const box = await this.groupBox('Subject').boundingBox();
-      return box ? `${Math.round(box.x)},${Math.round(box.y)}` : '';
+      await button.click();
+      return period
+        .locator('[data-testid="group-box"]')
+        .evaluateAll((boxes) =>
+          (boxes as HTMLElement[])
+            .map((b) => `${b.offsetLeft},${b.offsetTop},${b.offsetWidth},${b.offsetHeight}`)
+            .join(' '),
+        );
     };
     let previous = await settled();
     for (let pass = 0; pass < 4; pass++) {
