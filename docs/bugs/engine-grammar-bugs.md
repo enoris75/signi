@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (56 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (52 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,10 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A77 | [A77-english-frequency-adverb-mood.md](A-must-fix/A77-english-frequency-adverb-mood.md) |
-| A78 | [A78-english-frequency-adverb-negator.md](A-must-fix/A78-english-frequency-adverb-negator.md) |
-| A79 | [A79-english-indefinite-article-by-spelling.md](A-must-fix/A79-english-indefinite-article-by-spelling.md) |
-| A80 | [A80-english-manner-adverb-on-modal.md](A-must-fix/A80-english-manner-adverb-on-modal.md) |
 | A81 | [A81-italian-ico-adjective-plural.md](A-must-fix/A81-italian-ico-adjective-plural.md) |
 | A82 | [A82-italian-impersonal-si-clitic-order.md](A-must-fix/A82-italian-impersonal-si-clitic-order.md) |
 | A83 | [A83-italian-impersonal-si-perfect-auxiliary.md](A-must-fix/A83-italian-impersonal-si-perfect-auxiliary.md) |
@@ -207,6 +203,10 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A74 | [A74-english-any-object-conjuncts.md](fixed/A74-english-any-object-conjuncts.md) | English | 2026-09-13 |
 | A75 | [A75-english-comparative-two-syllable.md](fixed/A75-english-comparative-two-syllable.md) | English | 2026-09-13 |
 | A76 | [A76-english-frequency-adverb-copula.md](fixed/A76-english-frequency-adverb-copula.md) | English | 2026-09-13 |
+| A77 | [A77-english-frequency-adverb-mood.md](fixed/A77-english-frequency-adverb-mood.md) | English | 2026-09-13 |
+| A78 | [A78-english-frequency-adverb-negator.md](fixed/A78-english-frequency-adverb-negator.md) | English | 2026-09-13 |
+| A79 | [A79-english-indefinite-article-by-spelling.md](fixed/A79-english-indefinite-article-by-spelling.md) | English | 2026-09-13 |
+| A80 | [A80-english-manner-adverb-on-modal.md](fixed/A80-english-manner-adverb-on-modal.md) | English | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

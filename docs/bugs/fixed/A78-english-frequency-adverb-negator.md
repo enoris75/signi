@@ -44,3 +44,25 @@ defect (`always do not eat`, `always would not run`) needs the same helper.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: English frequency adverb inside a negated auxiliary* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 together with A77, as the shape of the fix proposed.
+
+- [`afterFirstAux.ts`](../../../packages/engine/src/languages/en/afterFirstAux.ts) steps over a `not`
+  after the first word, and `cannot` counts as one word. So the aspect branch places the adverb after
+  the negator: `has not always eaten`, `is not always eating`, `will not always have eaten`.
+- In the modal branch of
+  [`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts), a negated finite
+  always takes its own frequency adverb through `afterFirstAux`: `cannot always eat`, `could not
+  always eat`, `will not always be able to eat`, `does not always have to eat`, `did not always have
+  to eat`, `does not always want to eat`.
+
+Every row now renders as wanted, including the relative clause. Unchanged: `has always eaten`, `must
+always eat`, `never wants to eat`, and ALWAYS on the main verb under a negated modal (`cannot always
+eat`).
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: English frequency adverb inside a negated auxiliary*. The pinning `test.fails` is now
+  a passing `test`. New cases cover every row of the table, with a guard for the affirmative groups.
+- Unit tests: `afterFirstAux.test.ts` and `predicateParts.test.ts` (en).

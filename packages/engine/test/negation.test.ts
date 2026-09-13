@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A `no`-determined DIRECT OBJECT ("the cat eats no mouse"). Unlike the article determiners, the
@@ -255,13 +255,32 @@ describe('known bugs: English "any" on every conjunct of a negated object', () =
 // always not eaten", "could always not eat"). A modal's own adverb is placed from the first word of
 // the negated finite, so "cannot" and do-support ("does not have to") get it in front.
 describe('known bugs: English frequency adverb inside a negated auxiliary', () => {
-  test.fails('English puts ALWAYS after the auxiliary\'s "not"', () => {
+  test('English puts ALWAYS after the auxiliary\'s "not"', () => {
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'resultative' } }), 'en')).toBe('the cat has not always eaten.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'progressive' } }), 'en')).toBe('the cat is not always eating.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat cannot always eat.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, tense: 'past', modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat could not always eat.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always have to eat.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'WILL', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always want to eat.');
+  });
+
+  test('English puts the adverb after "not" in every negated group of the table', () => {
+    const cat = (verbPhrase: Partial<VerbPhrase>) => say(clause(np('CAT'), 'EAT', { verbPhrase }), 'en');
+    expect(cat({ modifier: 'ALWAYS', negative: true, aspect: 'progressive' })).toBe('the cat is not always eating.');
+    expect(cat({ modifier: 'ALWAYS', negative: true, aspect: 'resultative', tense: 'future' })).toBe('the cat will not always have eaten.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', modifier: 'ALWAYS', negative: true, aspect: 'resultative' } } }), 'RUN'), 'en'))
+      .toBe('the dog that has not always eaten runs.');
+    expect(cat({ negative: true, tense: 'future', modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] })).toBe('the cat will not always be able to eat.');
+    expect(cat({ negative: true, tense: 'past', modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('the cat did not always have to eat.');
+    expect(cat({ negative: true, modals: [{ verb: 'WILL', modifier: 'ALWAYS' }] })).toBe('the cat does not always want to eat.');
+  });
+
+  test('regression: the affirmative groups keep their slots', () => {
+    const cat = (verbPhrase: Partial<VerbPhrase>) => say(clause(np('CAT'), 'EAT', { verbPhrase }), 'en');
+    expect(cat({ modifier: 'ALWAYS', aspect: 'resultative' })).toBe('the cat has always eaten.');
+    expect(cat({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('the cat must always eat.');
+    expect(cat({ modals: [{ verb: 'WILL', modifier: 'NEVER' }] })).toBe('the cat never wants to eat.');
+    expect(cat({ negative: true, modifier: 'ALWAYS', modals: [{ verb: 'CAN' }] })).toBe('the cat cannot always eat.');
   });
 });
 

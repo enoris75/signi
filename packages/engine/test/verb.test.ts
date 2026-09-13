@@ -813,7 +813,7 @@ describe('passive si / se: the verb agrees with a plural patient', () => {
 // eat", "always let's eat", "always would run", "always not to eat". The adverb belongs after
 // "do not" / "let's (not)" / "would (not)" and after "not", as "does not always eat" already does.
 describe('known bugs: English frequency adverb before a mood auxiliary', () => {
-  test.fails('English puts ALWAYS/NEVER after "do not", "let\'s", "would" and "not"', () => {
+  test('English puts ALWAYS/NEVER after "do not", "let\'s", "would" and "not"', () => {
     expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true }, 'en')).toBe('do not always eat.');
     expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } }), imperative: true }, 'en')).toBe("let's always eat.");
     expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true }, 'en')).toBe("let's not always eat.");
@@ -821,6 +821,20 @@ describe('known bugs: English frequency adverb before a mood auxiliary', () => {
     expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'NEVER' } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would never run.');
     expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would not always run.');
     expect(say({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), infinitive: true }, 'en')).toBe('not always to eat.');
+  });
+
+  test('English keeps the adverb after the auxiliary in the instruction, the progressive conditional and under a modal', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true, imperativeRegister: 'instruction' }, 'en')).toBe('do not always eat.');
+    expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'NEVER' } }), imperative: true }, 'en')).toBe("let's never eat.");
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'ALWAYS', aspect: 'progressive' } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would always be running.');
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { negative: true, modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en'))
+      .toBe('if the cat ate, the dog would not always be able to run.');
+  });
+
+  test('regression: a bare command and the affirmative infinitive keep the adverb first, a manner adverb trails', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } }), imperative: true }, 'en')).toBe('always eat.');
+    expect(say({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } }), infinitive: true }, 'en')).toBe('always to eat.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'FAST', negative: true } }), imperative: true }, 'en')).toBe('do not eat fast.');
   });
 });
 

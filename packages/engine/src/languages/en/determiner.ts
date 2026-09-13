@@ -1,3 +1,5 @@
+import { indefiniteArticle } from './indefiniteArticle.js';
+
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'):
  * "the", "a/an", nothing (bare), a demonstrative (this/these, that/those), or a quantifier
@@ -33,7 +35,7 @@ export function determiner(forms: Record<string, string>, lead: string, superlat
       if (mass) return '';                            // no "a water" — bare
       const count = forms['number'] ?? forms['count'] ?? 'singular';
       if (count === 'plural') return '';
-      return /^[aeiou]/i.test(lead) ? 'an ' : 'a ';
+      return `${indefiniteArticle(lead)} `;
     }
     default:      return 'the ';
   }

@@ -666,12 +666,22 @@ describe('known bugs: German double infinitive in a verb-final clause', () => {
 // it trails the verb group and its object, where the main verb's manner adverb already goes
 // ("can eat the mouse fast").
 describe('known bugs: English manner adverb on a modal', () => {
-  test.fails('English trails a modal\'s manner adverb after the verb group', () => {
+  test('English trails a modal\'s manner adverb after the verb group', () => {
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), 'en')).toBe('the cat can eat fast.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'WILL', modifier: 'FAST' }] } }), 'en')).toBe('the cat wants to eat fast.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] }, directObject: np('MOUSE') }), 'en')).toBe('the cat can eat the mouse fast.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['MUST', { verb: 'CAN', modifier: 'FAST' }] } }), 'en')).toBe('the cat must be able to eat fast.');
     expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would be able to run fast.');
+  });
+
+  test('English trails a modal\'s manner adverb in every row of the table', () => {
+    const cat = (verbPhrase: Partial<VerbPhrase>, extra: object = {}) => say(clause(np('CAT'), 'EAT', { verbPhrase, ...extra }), 'en');
+    expect(cat({ modals: [{ verb: 'WILL', modifier: 'FAST' }] })).toBe('the cat wants to eat fast.');
+    expect(cat({ negative: true, modals: [{ verb: 'CAN', modifier: 'FAST' }] })).toBe('the cat cannot eat fast.');
+    expect(cat({ modals: [{ verb: 'MUST' }, { verb: 'CAN', modifier: 'FAST' }] })).toBe('the cat must be able to eat fast.');
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en'))
+      .toBe('if the cat ate, the dog would be able to run fast.');
+    expect(cat({ modals: [{ verb: 'CAN', modifier: 'TOGETHER' }] })).toBe('the cat can eat together.');
   });
 });
 

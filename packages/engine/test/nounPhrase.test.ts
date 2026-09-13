@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Definiteness } from '@signi/shared';
+import type { Definiteness, NounPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
@@ -239,9 +239,23 @@ describe('known bugs: German adjective on an article-less mass noun', () => {
 // "universal", which starts with the consonant sound /j/, gets "an". The article follows the
 // sound: "a universal cat", as in "a unit", "a European".
 describe('known bugs: English a/an by spelling', () => {
-  test.fails('English writes "a" before a vowel letter that sounds as a consonant', () => {
+  test('English writes "a" before a vowel letter that sounds as a consonant', () => {
     expect(say(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['UNIVERSAL'] }), 'RUN'), 'en')).toBe('a universal cat runs.');
     expect(say(clause(np('DOG'), 'SEE', { directObject: np('CAT', { definiteness: 'indefinite', adjectives: ['UNIVERSAL'] }) }), 'en')).toBe('the dog sees a universal cat.');
+  });
+
+  test('English follows the word right after the article, whichever it is', () => {
+    const aCat = (adjectives: string[], extra: Partial<NounPhrase> = {}) =>
+      say(clause(np('CAT', { definiteness: 'indefinite', adjectives, ...extra }), 'RUN'), 'en');
+    expect(aCat(['UNIVERSAL', 'OLD'])).toBe('a universal old cat runs.');
+    expect(aCat(['UNIVERSAL'], { adjectiveDegrees: ['less'] })).toBe('a less universal cat runs.');
+  });
+
+  test('regression: a vowel sound still takes "an", a consonant "a"', () => {
+    const aCat = (adjective: string) => say(clause(np('CAT', { definiteness: 'indefinite', adjectives: [adjective] }), 'RUN'), 'en');
+    expect(aCat('OLD')).toBe('an old cat runs.');
+    expect(aCat('UNCONNECTED')).toBe('an unconnected cat runs.');
+    expect(aCat('HIGH')).toBe('a high cat runs.');
   });
 });
 

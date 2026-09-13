@@ -49,14 +49,19 @@ export function predicateParts(
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements, verb.forms);
+  // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
+  // clause with the main verb's: "can eat the mouse fast".
+  const modalManner = modals.filter((m) => m.modifier && !isFrequencyAdverb(m.modifier)).map((m) => m.modifier!.forms['base'] ?? '');
+  const trailing = (mainManner: string) => [...modalManner, mainManner].filter(Boolean).join(' ');
 
   const negateVerb = verbNegative === true && !groupNegative;
 
   // Imperative: a subjectless command on the bare base ("eat the food!", "run!"). The subject
   // pronoun's person selects the form — 1st-plural is the "let's …" cohortative ("let's eat"),
   // 2nd person (singular or plural share a form in English) is the plain base. Negation is
-  // "do not …" for 2nd person and "let's not …" for the cohortative; a frequency adverb keeps
-  // its pre-verb slot ("always eat"), manner adverbs trail ("eat slowly").
+  // "do not …" for 2nd person and "let's not …" for the cohortative. A frequency adverb leads a bare
+  // command ("always eat") and follows an auxiliary and its "not" ("do not always eat", "let's
+  // always eat", "let's not always eat"); manner adverbs trail ("eat slowly").
   if (mood === 'imperative') {
     const base = verb.forms['base'] ?? conjugate(verb.forms, subjectForms);
     // An instruction ("Load a period" on a button) is addressed to nobody, so it takes the bare
@@ -65,6 +70,10 @@ export function predicateParts(
     const verbText = cohortative
       ? (negateVerb ? `let's not ${base}` : `let's ${base}`)
       : (negateVerb ? `do not ${base}` : base);
+    const hasAux = cohortative || negateVerb;
+    if (isFrequency && modifierText && hasAux) {
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+    }
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
     return [preVerb, verbText, directObjectText, complementsText, postVerb];
@@ -73,10 +82,14 @@ export function predicateParts(
   // Infinitive / citation phrase: the dictionary "to" + base ("to consume food"). Subject-less
   // and tenseless (aspect is forced neutral, so the group is the bare base); a negative citation
   // reads "not to …". This is the true infinitive, distinct from the instruction register's bare
-  // base ("consume food") above — the "to" is what makes it a gloss rather than a directive.
+  // base ("consume food") above — the "to" is what makes it a gloss rather than a directive. A
+  // frequency adverb leads the "to", after any "not": "always to eat", "not always to eat".
   if (mood === 'infinitive') {
     const group = verbGroupInfinitive(verb.forms, aspect);
     const verbText = negateVerb ? `not to ${group}` : `to ${group}`;
+    if (isFrequency && modifierText && negateVerb) {
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+    }
     const preVerb = isFrequency ? modifierText : '';
     const postVerb = isFrequency ? '' : modifierText;
     return [preVerb, verbText, directObjectText, complementsText, postVerb];
@@ -90,9 +103,11 @@ export function predicateParts(
       ? [...modalChain(modals, (m) => m.forms['nonfinite'] ?? m.forms['base'] ?? '', modalAdverbEn), verbGroupInfinitive(verb.forms, aspect)]
       : [verbGroupInfinitive(verb.forms, aspect)];
     const verbText = [negateVerb ? 'would not' : 'would', ...groups].join(' ');
-    const preVerb = isFrequency ? modifierText : '';
-    const postVerb = isFrequency ? '' : modifierText;
-    return [preVerb, verbText, directObjectText, complementsText, postVerb];
+    // A frequency adverb follows "would" and its "not": "would always run", "would not always run".
+    if (isFrequency && modifierText) {
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, trailing('')];
+    }
+    return ['', verbText, directObjectText, complementsText, trailing(modifierText)];
   }
 
   // A modal chain makes the outermost modal the finite verb — it takes the tense, the
@@ -100,23 +115,22 @@ export function predicateParts(
   // verb's whole group in the infinitive ("must not have seen the cat").
   if (modals.length > 0) {
     // Each verb in the group can carry its own adverb. A frequency adverb precedes the verb it
-    // modifies ("never wanted", "to always go"), except on a true modal *auxiliary* finite, where
-    // it follows it ("must always eat"); a manner adverb trails its verb. The main verb's own
-    // frequency adverb sits right before its group; its manner adverb trails the whole clause.
+    // modifies ("never wanted", "to always go"), except on a true modal *auxiliary* finite or a
+    // negated finite, where it follows the auxiliary and its "not" ("must always eat", "cannot always
+    // eat", "does not always have to eat"). A manner adverb trails the whole clause, the main verb's
+    // and the modals' alike. The main verb's own frequency adverb sits right before its group.
     const words: string[] = [];
     modals.forEach((m, i) => {
       const adv = m.modifier?.forms['base'] ?? '';
       const freq = isFrequencyAdverb(m.modifier);
       if (i === 0) {
         const finite = modalFinite(m.verb, subjectForms, tense, negateVerb);
-        if (adv && freq && MODAL_AUX.has(finite.split(' ')[0])) words.push(afterFirstAux(finite, adv));
+        if (adv && freq && (negateVerb || MODAL_AUX.has(finite.split(' ')[0]))) words.push(afterFirstAux(finite, adv));
         else if (adv && freq) words.push(adv, finite);
-        else if (adv) words.push(finite, adv);
         else words.push(finite);
       } else {
         const word = m.verb.forms['nonfinite'] ?? m.verb.forms['base'] ?? '';
         if (adv && freq) words.push(adv, word);
-        else if (adv) words.push(word, adv);
         else words.push(word);
       }
       if (m.verb.forms['link']) words.push(m.verb.forms['link']);
@@ -124,7 +138,7 @@ export function predicateParts(
     const mainGroup = verbGroupInfinitive(verb.forms, aspect);
     if (modifierText && isFrequency) words.push(modifierText, mainGroup);
     else words.push(mainGroup);
-    const trailingMod = modifierText && !isFrequency ? modifierText : '';
+    const trailingMod = trailing(modifierText && !isFrequency ? modifierText : '');
     return ['', words.filter(Boolean).join(' '), directObjectText, complementsText, trailingMod];
   }
 

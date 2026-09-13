@@ -40,3 +40,27 @@ the two can share a fix.
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: English frequency adverb before a mood auxiliary* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 together with A78, which shares the helper.
+[`afterFirstAux.ts`](../../../packages/engine/src/languages/en/afterFirstAux.ts) steps over a `not` that
+follows the first word, and `let's` and `cannot` count as one word. In
+[`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) three branches stop
+prepending the adverb and insert it through `afterFirstAux`:
+
+- the imperative when it has an auxiliary: `do not always eat`, `let's always eat`, `let's never
+  eat`, `let's not always eat`, and the instruction `do not always eat`;
+- the negated infinitive: `not always to eat`;
+- the conditional: `would always run`, `would never run`, `would not always run`, `would always be
+  running`.
+
+Every row now renders as wanted. Unchanged: a bare command (`always eat.`), the affirmative infinitive
+(`always to eat.`), a manner adverb (`do not eat fast.`), and a modal's own adverb under `would`
+(`would always want to run`, `would not always be able to run`).
+
+- **Tests:** [`packages/engine/test/verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known
+  bugs: English frequency adverb before a mood auxiliary*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the instruction, NEVER, the progressive conditional and the modal under
+  `would`, with a guard for the bare command, the affirmative infinitive and a manner adverb.
+- Unit tests: `afterFirstAux.test.ts` and `predicateParts.test.ts` (en).

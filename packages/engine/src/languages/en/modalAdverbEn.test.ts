@@ -12,8 +12,9 @@ describe('modalAdverbEn', () => {
     expect(modalAdverbEn(modal(CAN, NEVER))).toEqual({ pre: 'never' });
   });
 
-  test('a manner adverb goes after it', () => {
-    expect(modalAdverbEn(modal(WILL, SLOWLY))).toEqual({ post: 'slowly' });
+  // A80: a manner adverb has no slot inside the chain; `predicateParts` trails it after the clause.
+  test('a manner adverb places nothing inside the chain', () => {
+    expect(modalAdverbEn(modal(WILL, SLOWLY))).toEqual({});
   });
 
   test('an adverb with no English base places nothing', () => {

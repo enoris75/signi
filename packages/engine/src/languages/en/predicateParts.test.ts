@@ -76,6 +76,20 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(EAT, { tense: 'past', modifier: never }))).toBe('never ate');
     });
 
+    // A77/A78/A80: an auxiliary and its "not" come before a frequency adverb; a modal's manner adverb trails.
+    test('a frequency adverb follows a mood auxiliary and a negated finite modal', () => {
+      expect(said(YOU, vp(EAT, { mood: 'imperative', negative: true, modifier: always }))).toBe('do not always eat');
+      expect(said({ ...WE }, vp(EAT, { mood: 'imperative', modifier: always }))).toBe("let's always eat");
+      expect(said(CAT, vp(EAT, { mood: 'conditional', negative: true, modifier: always }))).toBe('would not always eat');
+      expect(said(CAT, vp(EAT, { negative: true, modals: [modal(CAN, ALWAYS)] }))).toBe('cannot always eat');
+      expect(said(CAT, vp(EAT, { negative: true, modals: [modal(MUST, ALWAYS)] }))).toBe('does not always have to eat');
+    });
+
+    test('a modal\'s manner adverb trails the clause', () => {
+      expect(said(CAT, vp(EAT, { modals: [modal(CAN, SLOWLY)] }), mouse)).toBe('can eat the mouse slowly');
+      expect(said(CAT, vp(EAT, { modals: [modal(WILL, SLOWLY)] }))).toBe('wants to eat slowly');
+    });
+
     test('a frequency adverb follows the future auxiliary', () => {
       expect(said(CAT, vp(EAT, { tense: 'future', modifier: always }))).toBe('will always eat');
       expect(said(CAT, vp(EAT, { tense: 'future', modifier: never }))).toBe('will never eat');

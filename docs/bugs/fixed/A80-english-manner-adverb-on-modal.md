@@ -37,3 +37,24 @@ Frequency adverbs keep their current placement.
 | | |
 |---|---|
 | **Test** | `modals.test.ts` → *known bugs: English manner adverb on a modal* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- [`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) collects the modals'
+  non-frequency adverbs and trails them with the main verb's manner adverb, in the modal branch and in
+  the conditional.
+- [`modalAdverbEn.ts`](../../../packages/engine/src/languages/en/modalAdverbEn.ts) no longer places a
+  manner adverb inside the chain; a frequency adverb keeps its slot.
+
+Every row now renders as wanted: `can eat fast`, `wants to eat fast`, `can eat the mouse fast`,
+`cannot eat fast`, `must be able to eat fast`, `would be able to run fast`, `can eat together`. A manner
+adverb on the modal and another on the main verb reads `can eat fast slowly`, which stays unpinned as
+the bug file noted.
+
+- **Tests:** [`packages/engine/test/modals.test.ts`](../../../packages/engine/test/modals.test.ts) →
+  *known bugs: English manner adverb on a modal*. The pinning `test.fails` is now a passing `test`, and
+  a new case covers every row of the table.
+- Unit tests: `modalAdverbEn.test.ts` (a manner adverb now places nothing in the chain) and
+  `predicateParts.test.ts` (en).
