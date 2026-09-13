@@ -195,6 +195,14 @@ describe('renderClause', () => {
         .toBe('der Kater nicht müde wird');
     });
 
+    // A61: a double infinitive (a modal under würde) fronts the finite auxiliary.
+    test('verb-final puts würde ahead of a double infinitive', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'subjunctive', modals: [modal(MUESSEN)] }), { directObject: mouse }), false, true))
+        .toBe('der Kater die Maus würde essen müssen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'subjunctive', negative: true, modals: [modal(KOENNEN)] })), false, true))
+        .toBe('der Kater nicht würde essen können');
+    });
+
     // A52: a bare zu-infinitive stays inside the bracket; a longer group is extraposed after the
     // finite verb. Inverted order is V2 and keeps the group after the verb cluster.
     test('the prospective closes on the finite verb, or extraposes a longer group after it', () => {

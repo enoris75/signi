@@ -9,6 +9,7 @@ import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
+import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
 
 /**
@@ -43,13 +44,14 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // The verb complex is built by the same `verbGroup`/`modalVerbGroup` the main clause uses, so a
   // relative clause renders its aspect too (resultative "gegessen hat", progressive "gerade isst",
   // prospective "im Begriff zu essen ist"). The clause is verb-final: the finite verb (`v2`) closes
-  // it, sitting after the non-finite `tail` (Partizip / infinitive / the modal stack), while the
-  // aspect adverbial (`mid`: "gerade") sits in the Mittelfeld before the objects — the mirror of the
-  // main clause, whose finite verb leads from the V2 slot instead.
+  // it, sitting after the non-finite `tail` (Partizip / infinitive / the modal stack) unless that is a
+  // double infinitive ("der das Buch wird essen müssen", see `verbFinalCluster`), while the aspect
+  // adverbial (`mid`: "gerade") sits in the Mittelfeld before the objects — the mirror of the main
+  // clause, whose finite verb leads from the V2 slot instead.
   const complex = modals.length > 0
     ? modalVerbGroup(modals, verb.forms, pn, tense, aspect, mood)
     : verbGroup(verb.forms, pn, tense, aspect, mood);
-  const { v2: finite, mid, tail } = complex;
+  const { mid } = complex;
 
   // The dative recipient leads the accusative object, and a subordinate means clause trails the
   // finite verb, as in the main clause (see `splitMeansClause`): "der isst, indem man ein Wort wählt".
@@ -72,7 +74,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText,
       adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
     }, true)
-    : [mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, tail, finite];
+    : [mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');

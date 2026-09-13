@@ -39,5 +39,8 @@ export function modalVerbGroup(
     mid: group.mid,
     tail: [...group.tail, ...modalStack(modals, periphrastic)].join(' '),
     zuInfinitive: group.zuInfinitive,
+    // Under werden/würde the cluster closes on a modal infinitive: a double infinitive, which
+    // fronts the finite auxiliary in a verb-final clause ("wenn er die Maus würde essen müssen").
+    ...(periphrastic ? { finiteLeadsTail: true as const } : {}),
   };
 }

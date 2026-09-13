@@ -22,7 +22,7 @@ supplies "a good way" / "all times" / "no time".
 - Pinned in all seven languages: [manner-gloss.test.ts](../../../packages/engine/test/manner-gloss.test.ts).
 - The **NEVER wrinkle** the brief flagged — `definiteness: 'no'` triggering negative concord — does
   **not** fire: a verbless fragment has no finite verb to negate, so "at no time" / "a nessun tempo"
-  / "à aucun temps" / "mit keiner Zeit" render as plain fragments (pinned in the test).
+  / "à aucun temps" / "zu keiner Zeit" render as plain fragments (pinned in the test).
 
 ## Scope — 5 adverbs, not 6
 
@@ -50,8 +50,12 @@ Rendered strings (engine is source of truth):
 | FAST | SPEED `bare` + HIGH | at high speed | a velocità alta | à vitesse haute | mit hoher Geschwindigkeit | a velocidad alta | 高い速さで | a velocidade alta |
 | SLOWLY | SPEED `bare` + LOW | at low speed | a velocità bassa | à vitesse basse | mit niedriger Geschwindigkeit | a velocidad baja | 低い速さで | a velocidade baixa |
 | WELL | WAY `indefinite` + GOOD | in a good way | in un buon modo | d'une bonne manière | auf eine gute Weise | de una manera buena | 良い方法で | de uma maneira boa |
-| ALWAYS | TIME `all` (plural) | at all times | a tutti i tempi | à tous les temps | mit allen Zeiten | a todos los tiempos | すべての時間で | a todos os tempos |
-| NEVER | TIME `no` | at no time | a nessun tempo | à aucun temps | mit keiner Zeit | a ningún tiempo | どの時間もない | a nenhum tempo |
+| ALWAYS | TIME `all` (plural) | at all times | a tutti i tempi | à tous les temps | zu allen Zeiten ¹ | a todos los tiempos | すべての時間で | a todos os tempos |
+| NEVER | TIME `no` | at no time | a nessun tempo | à aucun temps | zu keiner Zeit ¹ | a ningún tiempo | どの時間もない | a nenhum tempo |
+
+¹ Originally rendered with measure's `mit` ("mit allen Zeiten"). Fixed by
+[A60](../../bugs/fixed/A60-german-temporal-manner-gloss.md): the German word `Zeit` is marked
+`temporal` and takes `zu`.
 
 SLOWLY's French "basse" (not "base") is correct because bug A43 was fixed before this landed; the
 test guards it. ALWAYS/NEVER are authored via a `frequencyGloss('all'|'no', …)` helper in

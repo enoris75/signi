@@ -104,7 +104,7 @@ describe('manner adverbial (complemento di modo)', () => {
       fr: 'le chat court au temps.',
       es: 'el gato corre al tiempo.',
       pt: 'o gato corre ao tempo.',
-      de: 'der Kater läuft mit der Zeit.',
+      de: 'der Kater läuft zur Zeit.', // a point in time takes "zu" (A60), fused with the definite article
       ja: '猫は時間で走ります。',
     });
   });
@@ -118,7 +118,7 @@ describe('manner adverbial (complemento di modo)', () => {
       fr: 'le chat court aux temps.',
       es: 'el gato corre a los tiempos.',
       pt: 'o gato corre aos tempos.',
-      de: 'der Kater läuft mit den Zeiten.',
+      de: 'der Kater läuft zu den Zeiten.',
       ja: '猫は時間で走ります。',
     });
   });

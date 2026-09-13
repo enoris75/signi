@@ -15,6 +15,7 @@ import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
+import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
@@ -112,6 +113,6 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
         nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText,
         adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
       }, verbFinal)
-      : [aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, verbFinal ? verbText : ''];
+      : [aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail])];
     return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

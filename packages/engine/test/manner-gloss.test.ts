@@ -84,7 +84,7 @@ describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
       fr: 'à tous les temps.',
       es: 'a todos los tiempos.',
       pt: 'a todos os tempos.',
-      de: 'mit allen Zeiten.', // wrong preposition, pinned as-is: A60
+      de: 'zu allen Zeiten.', // a point in time takes "zu" (A60)
       ja: 'すべての時間で。',
     });
   });
@@ -96,7 +96,7 @@ describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
       fr: 'à aucun temps.',
       es: 'a ningún tiempo.',
       pt: 'a nenhum tempo.',
-      de: 'mit keiner Zeit.', // wrong preposition, pinned as-is: A60
+      de: 'zu keiner Zeit.',
       ja: 'どの時間もない。',
     });
   });
@@ -112,10 +112,14 @@ describe('manner gloss: the quantifier determiner (ALWAYS / NEVER)', () => {
 
 // A60. TIME is a `measure` manner noun, and German renders measure with "mit". A point in time
 // takes "zu" ("zu allen Zeiten", "zu keiner Zeit"); "mit allen Zeiten" reads "together with all
-// times". The C03 tests above pin the current German; they change with the fix.
+// times". The German word carries a `temporal` mark that `mannerPrepCase` reads.
 describe('known bugs: German temporal manner gloss', () => {
-  test.fails('German glosses ALWAYS / NEVER with "zu", not "mit"', () => {
+  test('German glosses ALWAYS / NEVER with "zu", not "mit"', () => {
     expect(gloss('TIME', { definiteness: 'all', number: 'plural' }).de).toBe('zu allen Zeiten.');
     expect(gloss('TIME', { definiteness: 'no' }).de).toBe('zu keiner Zeit.');
+  });
+
+  test('regression: the other measure nouns keep "mit"', () => {
+    expect(gloss('SPEED', { definiteness: 'bare' }).de).toBe('mit Geschwindigkeit.');
   });
 });

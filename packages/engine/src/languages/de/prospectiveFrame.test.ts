@@ -41,6 +41,13 @@ describe('prospectiveFrame', () => {
       expect(frame(present, theMouse, true)).toBe('im Begriff ist , die Maus zu essen');
       expect(frame(future, { ...bare, adverb: 'schnell' }, true)).toBe('im Begriff sein wird , schnell zu essen');
     });
+
+    test('over a double infinitive the finite werden leads "sein" and the modals', () => {
+      const doubleInfinitive: VerbComplex = { ...mustFuture, finiteLeadsTail: true };
+      expect(frame(doubleInfinitive, bare, true)).toBe('im Begriff zu essen wird sein müssen');
+      expect(frame(doubleInfinitive, theMouse, true)).toBe('im Begriff wird sein müssen , die Maus zu essen');
+      expect(frame(doubleInfinitive, bare, false)).toBe('im Begriff sein müssen zu essen');
+    });
   });
 
   test('the group gathers the adverb, the dative, the object and the complements, in that order', () => {

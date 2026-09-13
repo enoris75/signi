@@ -188,7 +188,24 @@ describe('known bugs: terminus', () => {
 // A59. The preposition-article fusion covers in+dem, zu+dem and zu+der, but not in+das. An inanimate
 // neuter goal takes "in" + the accusative "das", which standard German contracts to "ins".
 describe('known bugs: German "ins" contraction', () => {
-  test.fails('German contracts "in das" to "ins"', () => {
+  test('German contracts "in das" to "ins"', () => {
     expect(sendTo('SAVE', 'HOUSE').de).toBe('der Kater speichert das Buch ins Haus.');
+  });
+
+  const saveInto = (goal: Parameters<typeof np>[1]) =>
+    sayAll(clause(np('CAT'), 'SAVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('HOUSE', goal) } } })).de;
+
+  test('German contracts before an adjective and inside a relative clause', () => {
+    expect(saveInto({ adjectives: ['SMALL'] })).toBe('der Kater speichert das Buch ins kleine Haus.');
+    expect(sayAll(clause(np('MAN', {
+      relative: { verbPhrase: { verb: 'SAVE' }, directObject: np('BOOK'), complements: { terminus: { phrase: np('HOUSE') } } },
+    }), 'RUN')).de).toBe('der Mann, der das Buch ins Haus speichert, läuft.');
+  });
+
+  test('regression: only the definite neuter singular contracts', () => {
+    expect(saveInto({ definiteness: 'indefinite' })).toBe('der Kater speichert das Buch in ein Haus.');
+    expect(saveInto({ definiteness: 'this' })).toBe('der Kater speichert das Buch in dieses Haus.');
+    expect(saveInto({ number: 'plural' })).toBe('der Kater speichert das Buch in die Häuser.');
+    expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
   });
 });

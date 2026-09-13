@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, el, GESCHWINDIGKEIT, GROSS, GUT, HOCH, np, SORGFALT, WEISE, WIND } from './de.fixtures.js';
+import { adj, el, GESCHWINDIGKEIT, GROSS, GUT, HOCH, np, SORGFALT, WEISE, WIND, ZEIT } from './de.fixtures.js';
 import { mannerGloss } from './mannerGloss.js';
 
 describe('mannerGloss', () => {
@@ -18,5 +18,10 @@ describe('mannerGloss', () => {
 
   test('a noun with no manner relation is similative "wie" + nominative', () => {
     expect(mannerGloss(el(np(WIND, {}, { mannerGloss: true })))).toBe('wie der Wind');
+  });
+
+  test('a temporal noun takes "zu" + dative (ALWAYS / NEVER)', () => {
+    expect(mannerGloss(el(np(ZEIT, { definiteness: 'all', number: 'plural' }, { mannerGloss: true })))).toBe('zu allen Zeiten');
+    expect(mannerGloss(el(np(ZEIT, { definiteness: 'no' }, { mannerGloss: true })))).toBe('zu keiner Zeit');
   });
 });

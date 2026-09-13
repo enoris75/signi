@@ -23,3 +23,19 @@ Add `in` + `das` → `ins` to `prepDet`'s definite-article contractions.
 | | |
 |---|---|
 | **Test** | `complements/terminus.test.ts` → *known bugs: German "ins" contraction* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+[`prepDet.ts`](../../../packages/engine/src/languages/de/prepDet.ts) fuses `in` + the definite `das` to
+`ins`, beside `im` / `zum` / `zur`. The row now renders as wanted. The contraction follows through an
+adjective (`ins kleine Haus`) and a relative clause (`der das Buch ins Haus speichert`). Every other
+determiner, the plural and a masculine goal stay apart (`in ein Haus`, `in dieses Haus`, `in die
+Häuser`, `in den Behälter`), and so does the colloquial `um das`.
+
+- **Tests:** [`packages/engine/test/complements/terminus.test.ts`](../../../packages/engine/test/complements/terminus.test.ts)
+  → *known bugs: German "ins" contraction*. The pinning `test.fails` is now a passing `test`. New
+  cases:
+  - an adjective and a relative clause;
+  - a guard that only the definite neuter singular contracts.
+- Unit test: `prepDet.test.ts`.

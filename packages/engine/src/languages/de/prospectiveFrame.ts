@@ -1,4 +1,5 @@
 import type { VerbComplex } from './de.types.js';
+import { verbFinalCluster } from './verbFinalCluster.js';
 
 /**
  * The prospective laid out from its "nicht" to the end of the clause. German builds it as the
@@ -19,7 +20,7 @@ import type { VerbComplex } from './de.types.js';
  * the caller has already placed it.
  */
 export function prospectiveFrame(
-  { v2, mid, tail, zuInfinitive }: VerbComplex,
+  complex: VerbComplex,
   { nicht, modalAdverbs, adverb, dative, directObject, complements }: {
     nicht: string;
     modalAdverbs: string;
@@ -30,9 +31,10 @@ export function prospectiveFrame(
   },
   verbFinal: boolean,
 ): string[] {
+  const { mid, tail, zuInfinitive } = complex;
   const own = [adverb, dative, directObject, complements].filter(Boolean);
-  const finite = verbFinal ? v2 : '';
-  if (own.length === 0 && verbFinal) return [nicht, modalAdverbs, mid, zuInfinitive, tail, finite];
+  const cluster = verbFinal ? verbFinalCluster(complex) : [tail];
+  if (own.length === 0 && verbFinal) return [nicht, modalAdverbs, mid, zuInfinitive, ...cluster];
   const group = own.length === 0 ? zuInfinitive : `, ${[...own, zuInfinitive].join(' ')}`;
-  return [nicht, modalAdverbs, mid, tail, finite, group];
+  return [nicht, modalAdverbs, mid, ...cluster, group];
 }

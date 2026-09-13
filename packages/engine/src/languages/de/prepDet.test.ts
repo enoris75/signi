@@ -3,8 +3,9 @@ import { EUROPA, HAUS, KATER, KATZE, SCHWEIZ, WASSER } from './de.fixtures.js';
 import { prepDet } from './prepDet.js';
 
 describe('prepDet', () => {
-  test('a definite dative article fuses with in and zu', () => {
+  test('a definite article fuses with in (dative dem, accusative das) and zu', () => {
     expect(prepDet('in', HAUS, 'dat', false)).toBe('im');
+    expect(prepDet('in', HAUS, 'acc', false)).toBe('ins');
     expect(prepDet('zu', KATER, 'dat', false)).toBe('zum');
     expect(prepDet('zu', KATZE, 'dat', false)).toBe('zur');
     expect(prepDet('zu', SCHWEIZ, 'dat', false)).toBe('zur');
@@ -15,6 +16,8 @@ describe('prepDet', () => {
     expect(prepDet('zu', HAUS, 'dat', true)).toBe('zu den');
     expect(prepDet('aus', HAUS, 'dat', false)).toBe('aus dem');
     expect(prepDet('unter', KATER, 'acc', false)).toBe('unter den');
+    // "ums" / "durchs" are colloquial, so only "ins" fuses in the accusative.
+    expect(prepDet('um', HAUS, 'acc', false)).toBe('um das');
   });
 
   test('a non-definite determiner never fuses', () => {

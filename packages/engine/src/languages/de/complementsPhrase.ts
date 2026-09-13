@@ -1,10 +1,11 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, isSeemingPredicateNoun, locativeIdiom, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
 import { declineAdj } from './declineAdj.js';
 import { LOCATIVE_IDIOMS } from './de.consts.js';
+import { mannerPrepCase } from './mannerPrepCase.js';
 import { dePredAdj } from './dePredAdj.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
@@ -140,12 +141,12 @@ export function complementsPhrase(
         else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);
         // Manner: similative "wie" + nominative ("wie der Wind" — the default); means/measure
         // "mit" + dative ("mit der Geschwindigkeit des Lichts", "mit Sorgfalt"); mode "auf" +
-        // accusative ("auf eine gute Weise"). Read off the head noun.
+        // accusative ("auf eine gute Weise"); a temporal noun "zu" + dative ("zu allen Zeiten").
+        // Read off the head noun (`mannerPrepCase`).
         else if (type === 'manner') {
-          const rel = mannerRelation(f);
-          if (rel === 'mode') { _case = 'acc'; head = prepDet('auf', f, 'acc', plural); }
-          else if (rel === 'means' || rel === 'measure') head = prepDet('mit', f, 'dat', plural);
-          else { _case = 'nom'; head = prepDet('wie', f, 'nom', plural); }
+          const [prep, mannerCase] = mannerPrepCase(f);
+          _case = mannerCase;
+          head = prepDet(prep, f, mannerCase, plural);
         }
         else if (type === 'cause') head = prepDet(causeSentiment(c) === 'positive' ? 'dank' : 'wegen', f, 'dat', plural);
         // Terminus. An animate recipient is a bare dative — no preposition, just the dative

@@ -35,6 +35,7 @@ export const GESCHWINDIGKEIT: Forms = { base: 'Geschwindigkeit', plural: 'Geschw
 export const SORGFALT: Forms = { base: 'Sorgfalt', gender: 'fem', count: 'singular', uncountable: '1', mannerRelation: 'means' };
 export const WEISE: Forms = { base: 'Weise', plural: 'Weisen', gender: 'fem', count: 'singular', mannerRelation: 'mode' };
 export const WIND: Forms = { base: 'Wind', plural: 'Winde', gender: 'masc', count: 'singular' };
+export const ZEIT: Forms = { base: 'Zeit', plural: 'Zeiten', gender: 'fem', count: 'singular', mannerRelation: 'measure', temporal: '1' };
 export const GROESSE: Forms = { base: 'Größe', plural: 'Größen', gender: 'fem', count: 'singular', dimensionRelation: 'extent' };
 export const QUALITAET: Forms = { base: 'Qualität', plural: 'Qualitäten', gender: 'fem', count: 'singular', dimensionRelation: 'quality' };
 

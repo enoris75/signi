@@ -2,7 +2,7 @@
 
 exports[`hypothetical: anchored cells > a fully-loaded conditional: motion goal, direct object, aspect, tense and a modal 1`] = `
 {
-  "de": "wenn das Tier gerade zur Antarktis gehen müssen würde, würde der Engel im Begriff sein, das Wasser zu trinken.",
+  "de": "wenn das Tier gerade zur Antarktis würde gehen müssen, würde der Engel im Begriff sein, das Wasser zu trinken.",
   "en": "if the animal had to be going to Antarctica, the angel would be about to drink the water.",
   "es": "si el animal debiera estar yendo a la Antártida, el ángel estaría a punto de beber el agua.",
   "fr": "si l'animal devait être en train d'aller en Antarctique, l'ange serait sur le point de boire l'eau.",
@@ -14,7 +14,7 @@ exports[`hypothetical: anchored cells > a fully-loaded conditional: motion goal,
 
 exports[`hypothetical: anchored cells > prospective present main, with a future progressive MUST-governed if clause 1`] = `
 {
-  "de": "wenn der Kater gerade essen müssen würde, würde der Hund im Begriff sein zu laufen.",
+  "de": "wenn der Kater gerade würde essen müssen, würde der Hund im Begriff sein zu laufen.",
   "en": "if the cat had to be eating, the dog would be about to run.",
   "es": "si el gato debiera estar comiendo, el perro estaría a punto de correr.",
   "fr": "si le chat devait être en train de manger, le chien serait sur le point de courir.",

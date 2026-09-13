@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (93 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (90 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A59 | [A59-german-ins-contraction.md](A-must-fix/A59-german-ins-contraction.md) |
-| A60 | [A60-german-temporal-manner-gloss.md](A-must-fix/A60-german-temporal-manner-gloss.md) |
-| A61 | [A61-german-double-infinitive-verb-final.md](A-must-fix/A61-german-double-infinitive-verb-final.md) |
 | A62 | [A62-relative-clause-on-complement-slot.md](A-must-fix/A62-relative-clause-on-complement-slot.md) |
 | A63 | [A63-articled-proper-name-fusion.md](A-must-fix/A63-articled-proper-name-fusion.md) |
 | A64 | [A64-german-isch-superlative.md](A-must-fix/A64-german-isch-superlative.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A56 | [A56-german-mass-noun-strong-adjective.md](fixed/A56-german-mass-noun-strong-adjective.md) | German | 2026-09-13 |
 | A57 | [A57-german-weak-noun-genitive-modifier.md](fixed/A57-german-weak-noun-genitive-modifier.md) | German | 2026-09-13 |
 | A58 | [A58-possessor-determiner.md](fixed/A58-possessor-determiner.md) | German, Italian, French, Spanish, Portuguese | 2026-09-13 |
+| A59 | [A59-german-ins-contraction.md](fixed/A59-german-ins-contraction.md) | German | 2026-09-13 |
+| A60 | [A60-german-temporal-manner-gloss.md](fixed/A60-german-temporal-manner-gloss.md) | German | 2026-09-13 |
+| A61 | [A61-german-double-infinitive-verb-final.md](fixed/A61-german-double-infinitive-verb-final.md) | German | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

@@ -105,6 +105,13 @@ describe('subordinateClause', () => {
         .toBe(', der gegessen haben muss,');
     });
 
+    test('over a double infinitive the future auxiliary leads the infinitives', () => {
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { tense: 'future', modals: [modal(KOENNEN)] }), directObject: el(np(BUCH)) }))
+        .toBe(', der das Buch wird lesen können,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { tense: 'future', modals: [modal(WOLLEN), modal(KOENNEN)] }) }))
+        .toBe(', der wird essen können wollen,');
+    });
+
     test('adverbs follow the objects, a modal’s before the main verb’s', () => {
       expect(relativeOn(MANN, {
         headRole: 'subject',

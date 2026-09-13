@@ -4,7 +4,7 @@ import { complementsPhrase } from './complementsPhrase.js';
 import {
   adj, BEHAELTER, BOOT, BUCH, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
   GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SCHNELL, SEGEL, SORGFALT, vp, WAEHLEN,
-  WASSER, WEISE, WIND, WORT,
+  WASSER, WEISE, WIND, WORT, ZEIT,
 } from './de.fixtures.js';
 
 const LEGENDE: Forms = { base: 'Legende', plural: 'Legenden', gender: 'fem', count: 'singular' };
@@ -126,6 +126,11 @@ describe('complementsPhrase', () => {
         manner: complement(np(WEISE, { definiteness: 'indefinite' }, { adjectives: [adj(GUT)] })),
       }))).toBe('auf eine gute Weise');
       expect(complementsPhrase(complements({ manner: complement(np(WEISE, { definiteness: 'this' })) }))).toBe('auf diese Weise');
+    });
+
+    test('a temporal noun takes "zu" + dative, fusing with the definite article', () => {
+      expect(complementsPhrase(complements({ manner: complement(np(ZEIT)) }))).toBe('zur Zeit');
+      expect(complementsPhrase(complements({ manner: complement(np(ZEIT, { definiteness: 'all', number: 'plural' })) }))).toBe('zu allen Zeiten');
     });
   });
 

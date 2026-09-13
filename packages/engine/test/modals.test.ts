@@ -623,7 +623,7 @@ describe('per-modal adverbs', () => {
 // essen müssen", "wenn der Kater würde essen müssen". The engine appends the finite verb last, as it
 // does for a single infinitive ("der das Buch essen wird", which is right).
 describe('known bugs: German double infinitive in a verb-final clause', () => {
-  test.fails('German puts werden/würde before the infinitive cluster', () => {
+  test('German puts werden/würde before the infinitive cluster', () => {
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] }, directObject: np('BOOK') },
     }), 'RUN')).de).toBe('der Hund, der das Buch wird essen müssen, läuft.');
@@ -631,6 +631,33 @@ describe('known bugs: German double infinitive in a verb-final clause', () => {
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') }),
     }).de).toBe('wenn der Kater die Maus würde essen müssen, würde der Hund laufen.');
+  });
+
+  const dogWho = (verbPhrase: Partial<VerbPhrase>, extra: object = { directObject: np('BOOK') }) =>
+    sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase }, ...extra } }), 'RUN')).de;
+
+  test('German fronts the auxiliary over a modal chain, a perfect, a progressive, a negation and an object relative', () => {
+    expect(dogWho({ tense: 'future', modals: [{ verb: 'WILL' }, { verb: 'CAN' }] })).toBe('der Hund, der das Buch wird essen können wollen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'resultative', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch wird gegessen haben müssen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'progressive', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der gerade das Buch wird essen müssen, läuft.');
+    expect(dogWho({ tense: 'future', negative: true, modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch nicht wird essen müssen, läuft.');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] } },
+    }), 'RUN')).de).toBe('die Maus, die der Kater wird essen müssen, läuft.');
+  });
+
+  test('German fronts the auxiliary ahead of the prospective\'s "sein" and the modals', () => {
+    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] }, {})).toBe('der Hund, der im Begriff zu essen wird sein müssen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff wird sein müssen, das Buch zu essen, läuft.');
+  });
+
+  test('regression: a single infinitive keeps the finite verb last, and the main clause is unchanged', () => {
+    expect(dogWho({ tense: 'future' })).toBe('der Hund, der das Buch essen wird, läuft.');
+    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch essen muss, läuft.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }) }).de)
+      .toBe('wenn der Kater die Maus essen würde, würde der Hund laufen.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'future', modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') })).de)
+      .toBe('der Kater wird die Maus essen müssen.');
   });
 });
 

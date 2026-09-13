@@ -15,12 +15,17 @@ export type DeIPN = '2sg' | '1pl' | '2pl';
  * and `tail` the clause-final non-finite material (infinitive, Partizip II, the prospective's "sein",
  * the modal stack). `zuInfinitive` is the prospective's "zu essen", which heads a group of its own
  * rather than closing the clause (see `prospectiveFrame`); it is "" for every other aspect.
+ *
+ * `finiteLeadsTail` marks a double infinitive: a modal's infinitive stacked under werden/würde. A
+ * verb-final clause then puts the finite auxiliary ahead of the infinitive cluster instead of after
+ * it ("der das Buch wird essen müssen"), see `verbFinalCluster`. It is absent everywhere else.
  */
 export interface VerbComplex {
   v2: string;
   mid: string;
   tail: string;
   zuInfinitive: string;
+  finiteLeadsTail?: true;
 }
 
 /**
