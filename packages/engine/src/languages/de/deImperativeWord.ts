@@ -1,13 +1,25 @@
 import type { DeIPN } from './de.types.js';
-import { DE_IMPERATIVE } from './de.consts.js';
 
 /** The German imperative verb surface for a person: a single word for du/ihr, "<inf> wir" for the
- *  cohortative. Regular du is the infinitive stem (laufen→lauf); ihr the stored 2pl-present. */
-export function deImperativeWord(forms: Record<string, string>, conceptId: string, pn: DeIPN): string {
+ *  cohortative. A form the lexeme stores as `<pn>_imperative` wins (the strong e→i/ie du forms
+ *  iss/lies/sieh/gib, suppletive sei/seien/wisse); otherwise du is derived by `deDuImperative`, ihr
+ *  is the stored 2pl-present, and the cohortative verb is the infinitive. */
+export function deImperativeWord(forms: Record<string, string>, pn: DeIPN): string {
   const base = forms['base'] ?? '';
+  const stored = forms[`${pn}_imperative`];
+  if (pn === '2sg') return stored ?? deDuImperative(base);
+  if (pn === '2pl') return stored ?? forms['2pl_present'] ?? `${base.replace(/e?n$/, '')}t`;
+  return `${stored ?? base} wir`; // 1pl cohortative
+}
+
+/** The regular du-imperative of an infinitive: the bare stem (laufen→lauf, kommen→komm), keeping
+ *  the -e where the bare stem would be unpronounceable — after -d/-t (schneide, töte) and after a
+ *  consonant + m/n other than l/r/m/n or a lengthening h (ordne, atme, rechne; but lern, komm, wohn).
+ *  -ern/-eln verbs keep the -e too, and -eln drops the stem's own e before it (erweitere, vermittle).
+ *  The a→ä and e→i/ie changes of the 2sg present never carry over; e→i/ie is stored on the lexeme. */
+function deDuImperative(base: string): string {
+  if (base.endsWith('eln')) return `${base.slice(0, -3)}le`;
+  if (base.endsWith('ern')) return `${base.slice(0, -1)}e`;
   const stem = base.replace(/e?n$/, '');
-  const ov = DE_IMPERATIVE[conceptId];
-  if (pn === '2sg') return ov?.['2sg'] ?? stem ?? base;
-  if (pn === '2pl') return ov?.['2pl'] ?? forms['2pl_present'] ?? `${stem}t`;
-  return `${ov?.['1pl'] ?? base} wir`; // 1pl cohortative
+  return /(?:[dt]|(?:[^aeiouäöülrmnh]|ch)[mn])$/.test(stem) ? `${stem}e` : stem;
 }

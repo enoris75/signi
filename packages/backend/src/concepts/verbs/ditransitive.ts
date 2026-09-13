@@ -41,6 +41,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'geben', '2pl_present': 'gebt', '3pl_present': 'geben',
         '1sg_past': 'gab', '2sg_past': 'gabst', '3sg_past': 'gab',
         '1pl_past': 'gaben', '2pl_past': 'gabt', '3pl_past': 'gaben',
+        '2sg_imperative': 'gib', // strong e→i: the du command keeps the vowel change
       },
       es: {
         base: 'dar',

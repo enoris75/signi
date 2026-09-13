@@ -259,14 +259,19 @@ describe('known bugs: imperative', () => {
   });
 });
 
-// A48. The German du-imperative is the bare infinitive stem ("lauf", "geh"), and a concept-keyed
-// override table patches the verbs that need more — but only some of them. A stem in -d/-t or in a
-// consonant + n keeps the -e ("schneide", "ordne"), -ern/-eln keep or shift it ("erweitere",
-// "vermittle"), and a strong e→i verb raises the vowel ("gib"). Nine seeded verbs fall through.
+// A48. The German du-imperative was the bare infinitive stem ("lauf", "geh"), with a concept-keyed
+// override table patching some of the verbs that need more. Nine seeded verbs fell through:
+//
+//     was   schneid / töt / enthalt / verdicht / werd / ordn / erweiter / vermittel / geb
+//     now   schneide / töte / enthalte / verdichte / werde / ordne / erweitere / vermittle / gib
+//
+// The regular cases are now a rule: a stem in -d/-t or in a consonant + m/n keeps the -e, and
+// -ern/-eln keep or shift it. The strong e→i/ie verbs (iss, lies, sieh, gib) and the suppletive
+// sei/seien/wisse are stored on the lexeme as `2sg_imperative` / `1pl_imperative`.
 describe('known bugs: German du-imperative forms', () => {
   const du = (verb: string) => sayAll({ ...clause(np('SECOND_PERSON'), verb), imperative: true }).de;
 
-  test.fails('German builds the du-imperative of every seeded verb correctly', () => {
+  test('German builds the du-imperative of every seeded verb correctly', () => {
     expect(du('CUT')).toBe('schneide.');
     expect(du('KILL')).toBe('töte.');
     expect(du('HOLD')).toBe('enthalte.');
@@ -276,6 +281,49 @@ describe('known bugs: German du-imperative forms', () => {
     expect(du('EXPAND')).toBe('erweitere.');
     expect(du('EXPRESS')).toBe('vermittle.');
     expect(du('GIVE')).toBe('gib.');
+  });
+
+  // Every seeded verb, so a new verb whose du form the rule gets wrong shows up here. The bare stems
+  // (lauf, konsumier, lösch) are optional-e forms and correct; SELECT/ADD/EXPORT/IMPORT/CLEAR/
+  // COORDINATE store the -e form on the lexeme.
+  test.each([
+    ['ADD', 'addiere'], ['APPEAR', 'erschein'], ['BE', 'sei'], ['BEAT', 'schlag'], ['BECOME', 'werde'],
+    ['BITE', 'beiß'], ['BURN', 'brenn'], ['BUY', 'kauf'], ['CHOOSE', 'wähl'], ['CLEAR', 'lösche'],
+    ['CLICK', 'klick'], ['COLLAPSE', 'kollabier'], ['COME', 'komm'], ['COMPACT', 'verdichte'],
+    ['CONSUME', 'konsumier'], ['COORDINATE', 'koordiniere'], ['CREATE', 'erschaff'], ['CRY', 'wein'],
+    ['CRY_OUT', 'ruf'], ['CUT', 'schneide'], ['DESCRIBE', 'beschreib'], ['DRINK', 'trink'], ['EAT', 'iss'],
+    ['EXPAND', 'erweitere'], ['EXPORT', 'exportiere'], ['EXPRESS', 'vermittle'], ['EXTINGUISH', 'lösch'],
+    ['GIVE', 'gib'], ['GO', 'geh'], ['HIDE', 'versteck'], ['HOLD', 'enthalte'], ['IMPORT', 'importiere'],
+    ['JUMP', 'spring'], ['KILL', 'töte'], ['KNOW', 'wisse'], ['LOAD', 'lade'], ['LOVE', 'lieb'],
+    ['MAKE', 'mach'], ['MODIFY', 'modifizier'], ['NAME', 'benenn'], ['OWN', 'besitz'], ['READ', 'lies'],
+    ['REPLACE', 'ersetz'], ['RUN', 'lauf'], ['SAVE', 'speichere'], ['SEE', 'sieh'], ['SEEM', 'schein'],
+    ['SELECT', 'selektiere'], ['SEND', 'schick'], ['SET_ON_FIRE', 'verbrenn'], ['SHOW', 'zeig'],
+    ['START', 'beginn'], ['TIDY_UP', 'ordne'], ['TYPE', 'tipp'],
+  ])('%s → "%s."', (verb, want) => {
+    expect(du(verb)).toBe(`${want}.`);
+  });
+
+  test('the du form carries the rest of the command', () => {
+    const de = (verb: string, extra: Parameters<typeof clause>[2]) =>
+      sayAll({ ...clause(np('SECOND_PERSON'), verb, extra), imperative: true }).de;
+    expect(de('CUT', { verbPhrase: { negative: true }, directObject: np('FOOD') })).toBe('schneide das Essen nicht.');
+    expect(de('GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } } })).toBe('gib dem Jungen das Buch.');
+    expect(de('BECOME', { complements: { predicative: { phrase: np('TIRED') } } })).toBe('werde müde.');
+    expect(de('EXPAND', { verbPhrase: { modifier: 'FAST' } })).toBe('erweitere schnell.');
+  });
+
+  test('ihr, the wir cohortative and the instruction register are unchanged', () => {
+    const de = (verb: string, subject: NounPhrase, plan: Partial<PhrasePlan> = {}) =>
+      sayAll({ ...clause(subject, verb), imperative: true, ...plan }).de;
+    const ihr = np('SECOND_PERSON', { number: 'plural' });
+    const wir = np('FIRST_PERSON', { number: 'plural' });
+    expect(de('GIVE', ihr)).toBe('gebt.');
+    expect(de('CUT', ihr)).toBe('schneidet.');
+    expect(de('GIVE', wir)).toBe('geben wir.');
+    expect(de('BE', wir)).toBe('seien wir.');
+    expect(de('BE', ihr)).toBe('seid.');
+    expect(de('GIVE', np('SECOND_PERSON'), { imperativeRegister: 'instruction' })).toBe('geben.');
+    expect(de('CUT', np('SECOND_PERSON'), { imperativeRegister: 'instruction' })).toBe('schneiden.');
   });
 });
 

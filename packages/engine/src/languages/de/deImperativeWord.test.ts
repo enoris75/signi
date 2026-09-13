@@ -1,40 +1,77 @@
 import { describe, expect, test } from 'vitest';
-import { ESSEN, type Forms, GEHEN, WAEHLEN } from './de.fixtures.js';
+import { ESSEN, type Forms, GEBEN, GEHEN, WAEHLEN } from './de.fixtures.js';
 import { deImperativeWord } from './deImperativeWord.js';
 
-const LAUFEN: Forms = { base: 'laufen', '2pl_present': 'lauft' };
+const LAUFEN: Forms = { base: 'laufen', '2sg_present': 'läufst', '2pl_present': 'lauft' };
+const du = (base: string) => deImperativeWord({ base }, '2sg');
 
 describe('deImperativeWord', () => {
   test('du is the bare infinitive stem', () => {
-    expect(deImperativeWord(GEHEN, 'GO', '2sg')).toBe('geh');
-    expect(deImperativeWord(LAUFEN, 'RUN', '2sg')).toBe('lauf');
+    expect(deImperativeWord(GEHEN, '2sg')).toBe('geh');
+    expect(deImperativeWord(LAUFEN, '2sg')).toBe('lauf');
+    expect(du('konsumieren')).toBe('konsumier');
+    expect(du('löschen')).toBe('lösch');
+  });
+
+  test('a stem in -d or -t keeps the du -e', () => {
+    expect(du('schneiden')).toBe('schneide');
+    expect(du('laden')).toBe('lade');
+    expect(du('werden')).toBe('werde');
+    expect(du('töten')).toBe('töte');
+    expect(du('verdichten')).toBe('verdichte');
+  });
+
+  test('a consonant + m/n keeps the du -e, unless that consonant is l, r, m, n or a lengthening h', () => {
+    expect(du('ordnen')).toBe('ordne');
+    expect(du('atmen')).toBe('atme');
+    expect(du('rechnen')).toBe('rechne');
+    expect(du('kommen')).toBe('komm');
+    expect(du('beginnen')).toBe('beginn');
+    expect(du('lernen')).toBe('lern');
+    expect(du('filmen')).toBe('film');
+    expect(du('wohnen')).toBe('wohn');
+    expect(du('weinen')).toBe('wein');
+  });
+
+  test('-ern keeps the du -e, and -eln also drops the stem\'s own e', () => {
+    expect(du('erweitern')).toBe('erweitere');
+    expect(du('speichern')).toBe('speichere');
+    expect(du('vermitteln')).toBe('vermittle');
+    expect(du('sammeln')).toBe('sammle');
+  });
+
+  test('the 2sg-present vowel change never carries over to the rule', () => {
+    expect(deImperativeWord(LAUFEN, '2sg')).toBe('lauf'); // läufst
+    expect(deImperativeWord({ base: 'schlagen', '2sg_present': 'schlägst' }, '2sg')).toBe('schlag');
+    expect(deImperativeWord({ base: 'enthalten', '2sg_present': 'enthältst' }, '2sg')).toBe('enthalte');
   });
 
   test('ihr is the stored 2pl present, else the stem + -t', () => {
-    expect(deImperativeWord(GEHEN, 'GO', '2pl')).toBe('geht');
-    expect(deImperativeWord(WAEHLEN, 'CHOOSE', '2pl')).toBe('wählt');
+    expect(deImperativeWord(GEHEN, '2pl')).toBe('geht');
+    expect(deImperativeWord(WAEHLEN, '2pl')).toBe('wählt');
   });
 
   test('the wir cohortative is the infinitive with an inverted wir', () => {
-    expect(deImperativeWord(GEHEN, 'GO', '1pl')).toBe('gehen wir');
+    expect(deImperativeWord(GEHEN, '1pl')).toBe('gehen wir');
   });
 
-  test('an irregular du form is looked up by concept id; ihr and wir stay regular', () => {
-    expect(deImperativeWord(ESSEN, 'EAT', '2sg')).toBe('iss');
-    expect(deImperativeWord(ESSEN, 'EAT', '2pl')).toBe('esst');
-    expect(deImperativeWord(ESSEN, 'EAT', '1pl')).toBe('essen wir');
+  test('a stored du form wins over the rule; ihr and wir stay regular', () => {
+    expect(deImperativeWord(ESSEN, '2sg')).toBe('iss');
+    expect(deImperativeWord(ESSEN, '2pl')).toBe('esst');
+    expect(deImperativeWord(ESSEN, '1pl')).toBe('essen wir');
+    expect(deImperativeWord(GEBEN, '2sg')).toBe('gib');
+    expect(deImperativeWord(GEBEN, '2pl')).toBe('gebt');
+  });
+
+  test('a stored du form can keep the optional -e the rule leaves off', () => {
+    expect(deImperativeWord({ base: 'addieren', '2sg_imperative': 'addiere' }, '2sg')).toBe('addiere');
+    expect(deImperativeWord({ base: 'löschen', '2sg_imperative': 'lösche' }, '2sg')).toBe('lösche');
   });
 
   test('sein is suppletive in every person', () => {
-    const sein = { base: 'sein' };
-    expect(deImperativeWord(sein, 'BE', '2sg')).toBe('sei');
-    expect(deImperativeWord(sein, 'BE', '2pl')).toBe('seid');
-    expect(deImperativeWord(sein, 'BE', '1pl')).toBe('seien wir');
-  });
-
-  test('stems in -er, -d and -sch keep the du -e through the override', () => {
-    expect(deImperativeWord({ base: 'speichern' }, 'SAVE', '2sg')).toBe('speichere');
-    expect(deImperativeWord({ base: 'laden' }, 'LOAD', '2sg')).toBe('lade');
-    expect(deImperativeWord({ base: 'löschen' }, 'CLEAR', '2sg')).toBe('lösche');
+    const sein = { base: 'sein', '2pl_present': 'seid', '2sg_imperative': 'sei', '1pl_imperative': 'seien' };
+    expect(deImperativeWord(sein, '2sg')).toBe('sei');
+    expect(deImperativeWord(sein, '2pl')).toBe('seid');
+    expect(deImperativeWord(sein, '1pl')).toBe('seien wir');
   });
 });

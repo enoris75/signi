@@ -125,6 +125,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'essen', '2pl_present': 'esst', '3pl_present': 'essen',
         '1sg_past': 'aß', '2sg_past': 'aßest', '3sg_past': 'aß',
         '1pl_past': 'aßen', '2pl_past': 'aßt', '3pl_past': 'aßen',
+        '2sg_imperative': 'iss', // strong e→i: the du command keeps the vowel change
       },
       es: {
         base: 'comer',
@@ -328,6 +329,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'sehen', '2pl_present': 'seht', '3pl_present': 'sehen',
         '1sg_past': 'sah', '2sg_past': 'sahst', '3sg_past': 'sah',
         '1pl_past': 'sahen', '2pl_past': 'saht', '3pl_past': 'sahen',
+        '2sg_imperative': 'sieh', // strong e→ie: the du command keeps the vowel change
       },
       es: {
         base: 'ver',
@@ -526,6 +528,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'wissen', '2pl_present': 'wisst', '3pl_present': 'wissen',
         '1sg_past': 'wusste', '2sg_past': 'wusstest', '3sg_past': 'wusste',
         '1pl_past': 'wussten', '2pl_past': 'wusstet', '3pl_past': 'wussten',
+        '2sg_imperative': 'wisse', // suppletive du command
       },
       es: {
         base: 'saber',
@@ -592,6 +595,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'lesen', '2pl_present': 'lest', '3pl_present': 'lesen',
         '1sg_past': 'las', '2sg_past': 'lasest', '3sg_past': 'las',
         '1pl_past': 'lasen', '2pl_past': 'last', '3pl_past': 'lasen',
+        '2sg_imperative': 'lies', // strong e→ie: the du command keeps the vowel change
       },
       es: {
         base: 'leer',
@@ -1473,6 +1477,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'selektieren', '2pl_present': 'selektiert', '3pl_present': 'selektieren',
         '1sg_past': 'selektierte', '2sg_past': 'selektiertest', '3sg_past': 'selektierte',
         '1pl_past': 'selektierten', '2pl_past': 'selektiertet', '3pl_past': 'selektierten',
+        '2sg_imperative': 'selektiere', // the optional du -e, kept
       },
       es: {
         base: 'seleccionar',
@@ -1740,6 +1745,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'addieren', '2pl_present': 'addiert', '3pl_present': 'addieren',
         '1sg_past': 'addierte', '2sg_past': 'addiertest', '3sg_past': 'addierte',
         '1pl_past': 'addierten', '2pl_past': 'addiertet', '3pl_past': 'addierten',
+        '2sg_imperative': 'addiere', // the optional du -e, kept
       },
       es: {
         base: 'añadir',
@@ -1807,6 +1813,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'exportieren', '2pl_present': 'exportiert', '3pl_present': 'exportieren',
         '1sg_past': 'exportierte', '2sg_past': 'exportiertest', '3sg_past': 'exportierte',
         '1pl_past': 'exportierten', '2pl_past': 'exportiertet', '3pl_past': 'exportierten',
+        '2sg_imperative': 'exportiere', // the optional du -e, kept
       },
       es: {
         base: 'exportar',
@@ -1874,6 +1881,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'importieren', '2pl_present': 'importiert', '3pl_present': 'importieren',
         '1sg_past': 'importierte', '2sg_past': 'importiertest', '3sg_past': 'importierte',
         '1pl_past': 'importierten', '2pl_past': 'importiertet', '3pl_past': 'importierten',
+        '2sg_imperative': 'importiere', // the optional du -e, kept
       },
       es: {
         base: 'importar',
@@ -1941,6 +1949,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'löschen', '2pl_present': 'löscht', '3pl_present': 'löschen',
         '1sg_past': 'löschte', '2sg_past': 'löschtest', '3sg_past': 'löschte',
         '1pl_past': 'löschten', '2pl_past': 'löschtet', '3pl_past': 'löschten',
+        '2sg_imperative': 'lösche', // the optional du -e, kept
       },
       es: {
         base: 'borrar',
@@ -2008,6 +2017,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_present': 'koordinieren', '2pl_present': 'koordiniert', '3pl_present': 'koordinieren',
         '1sg_past': 'koordinierte', '2sg_past': 'koordiniertest', '3sg_past': 'koordinierte',
         '1pl_past': 'koordinierten', '2pl_past': 'koordiniertet', '3pl_past': 'koordinierten',
+        '2sg_imperative': 'koordiniere', // the optional du -e, kept
       },
       es: {
         base: 'coordinar',

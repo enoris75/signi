@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (121 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (120 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -56,7 +56,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 |---|---|
 | A45 | [A45-gloss-great-postnominal.md](A-must-fix/A45-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
-| A48 | [A48-german-du-imperative-forms.md](A-must-fix/A48-german-du-imperative-forms.md) |
 | A49 | [A49-german-nicht-in-commands-and-infinitives.md](A-must-fix/A49-german-nicht-in-commands-and-infinitives.md) |
 | A50 | [A50-german-relative-clause-negation.md](A-must-fix/A50-german-relative-clause-negation.md) |
 | A51 | [A51-german-relative-clause-means-clause.md](A-must-fix/A51-german-relative-clause-means-clause.md) |
@@ -206,6 +205,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A41 | [A41-home-locative-at-home-idiom.md](fixed/A41-home-locative-at-home-idiom.md) | en, it, fr, es, pt, de | 2026-09-13 |
 | A44 | [A44-french-gloss-de-elision.md](fixed/A44-french-gloss-de-elision.md) | French | 2026-09-13 |
 | A42 | [A42-japanese-locative-dropped-under-predicate-nominal.md](fixed/A42-japanese-locative-dropped-under-predicate-nominal.md) | Japanese | 2026-09-13 |
+| A48 | [A48-german-du-imperative-forms.md](fixed/A48-german-du-imperative-forms.md) | German | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

@@ -6,7 +6,10 @@ import {
 } from './de.fixtures.js';
 import { renderClause } from './renderClause.js';
 
-const SEIN: Forms = { base: 'sein', participle: 'gewesen', aux: 'be', copula: '1', '3sg_present': 'ist', '2pl_present': 'seid' };
+const SEIN: Forms = {
+  base: 'sein', participle: 'gewesen', aux: 'be', copula: '1', '3sg_present': 'ist', '2pl_present': 'seid',
+  '2sg_imperative': 'sei', '1pl_imperative': 'seien',
+};
 const ZEIGEN: Forms = { base: 'zeigen', participle: 'gezeigt', '3sg_present': 'zeigt', '2pl_present': 'zeigt' };
 
 const mouse = el(np(MAUS));
@@ -159,54 +162,55 @@ describe('renderClause', () => {
 
     test('both flags are inert on verbless and imperative clauses', () => {
       expect(renderClause(clause(np(KATER)), true)).toBe('der Kater');
-      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative' }, 'EAT'), { directObject: mouse }), true, true)).toBe('iss die Maus');
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative' }), { directObject: mouse }), true, true)).toBe('iss die Maus');
     });
   });
 
   describe('imperative', () => {
-    const command = (verb: Forms, conceptId: string, extra: Parameters<typeof vp>[1] = {}) =>
-      vp(verb, { mood: 'imperative', ...extra }, conceptId);
+    const command = (verb: Forms, extra: Parameters<typeof vp>[1] = {}) => vp(verb, { mood: 'imperative', ...extra });
 
     test('a subjectless V1 command in the du, ihr or wir form', () => {
-      expect(renderClause(clause(np(DU), command(ESSEN, 'EAT'), { directObject: mouse }))).toBe('iss die Maus');
-      expect(renderClause(clause(np(DU, { number: 'plural' }), command(ESSEN, 'EAT'), { directObject: mouse }))).toBe('esst die Maus');
-      expect(renderClause(clause(np(ICH, { number: 'plural' }), command(ESSEN, 'EAT'), { directObject: mouse }))).toBe('essen wir die Maus');
+      expect(renderClause(clause(np(DU), command(ESSEN), { directObject: mouse }))).toBe('iss die Maus');
+      expect(renderClause(clause(np(DU, { number: 'plural' }), command(ESSEN), { directObject: mouse }))).toBe('esst die Maus');
+      expect(renderClause(clause(np(ICH, { number: 'plural' }), command(ESSEN), { directObject: mouse }))).toBe('essen wir die Maus');
     });
 
-    test('the du form is the infinitive stem unless the concept id has an irregular override', () => {
-      expect(renderClause(clause(np(DU), command(GEHEN, 'GO')))).toBe('geh');
-      expect(renderClause(clause(np(DU), command(SEIN, 'BE'), { complements: tired }))).toBe('sei müde');
+    test('the du form is derived from the infinitive unless the lexeme stores one', () => {
+      expect(renderClause(clause(np(DU), command(GEHEN)))).toBe('geh');
+      expect(renderClause(clause(np(DU), command(SCHNEIDEN)))).toBe('schneide');
+      expect(renderClause(clause(np(DU), command(GEBEN), { directObject: el(np(BUCH)), complements: toTheBoy }))).toBe('gib dem Jungen das Buch');
+      expect(renderClause(clause(np(DU), command(SEIN), { complements: tired }))).toBe('sei müde');
+      expect(renderClause(clause(np(ICH, { number: 'plural' }), command(SEIN), { complements: tired }))).toBe('seien wir müde');
     });
 
     test('nicht trails the objects', () => {
-      expect(renderClause(clause(np(DU), command(ESSEN, 'EAT', { negative: true }), { directObject: mouse }))).toBe('iss die Maus nicht');
+      expect(renderClause(clause(np(DU), command(ESSEN, { negative: true }), { directObject: mouse }))).toBe('iss die Maus nicht');
     });
 
     test('nicht precedes a predicate complement', () => {
-      expect(renderClause(clause(np(DU), command(SEIN, 'BE', { negative: true }), { complements: tired }))).toBe('sei nicht müde');
-      expect(renderClause(clause(np(DU, { number: 'plural' }), command(SEIN, 'BE', { negative: true }), { complements: tired })))
+      expect(renderClause(clause(np(DU), command(SEIN, { negative: true }), { complements: tired }))).toBe('sei nicht müde');
+      expect(renderClause(clause(np(DU, { number: 'plural' }), command(SEIN, { negative: true }), { complements: tired })))
         .toBe('seid nicht müde');
     });
 
     test('a negative adverb stands in for nicht', () => {
-      expect(renderClause(clause(np(DU), command(ESSEN, 'EAT', { negative: true, modifier: concept(NIE) })))).toBe('iss nie');
+      expect(renderClause(clause(np(DU), command(ESSEN, { negative: true, modifier: concept(NIE) })))).toBe('iss nie');
     });
 
     test('the adverb and dative recipient follow the verb, ahead of the object', () => {
-      expect(renderClause(clause(np(DU), command(ESSEN, 'EAT', { modifier: concept(SCHNELL) })))).toBe('iss schnell');
-      expect(renderClause(clause(np(DU), command(ZEIGEN, 'SHOW'), { directObject: el(np(BUCH)), complements: toTheBoy })))
+      expect(renderClause(clause(np(DU), command(ESSEN, { modifier: concept(SCHNELL) })))).toBe('iss schnell');
+      expect(renderClause(clause(np(DU), command(ZEIGEN), { directObject: el(np(BUCH)), complements: toTheBoy })))
         .toBe('zeig dem Jungen das Buch');
     });
 
     test('the instruction register is the clause-final infinitive', () => {
-      const instruction = (verb: Forms, conceptId: string, extra: Parameters<typeof vp>[1] = {}) =>
-        command(verb, conceptId, { register: 'instruction', ...extra });
-      expect(renderClause(clause(np(DU), instruction(ESSEN, 'EAT'), { directObject: mouse }))).toBe('die Maus essen');
-      expect(renderClause(clause(np(DU), instruction(ESSEN, 'EAT', { negative: true }), { directObject: mouse }))).toBe('die Maus nicht essen');
-      expect(renderClause(clause(np(DU), instruction(ESSEN, 'EAT', { modifier: concept(SCHNELL) })))).toBe('schnell essen');
-      expect(renderClause(clause(np(DU), instruction(ZEIGEN, 'SHOW'), { directObject: el(np(BUCH)), complements: toTheBoy })))
+      const instruction = (verb: Forms, extra: Parameters<typeof vp>[1] = {}) => command(verb, { register: 'instruction', ...extra });
+      expect(renderClause(clause(np(DU), instruction(ESSEN), { directObject: mouse }))).toBe('die Maus essen');
+      expect(renderClause(clause(np(DU), instruction(ESSEN, { negative: true }), { directObject: mouse }))).toBe('die Maus nicht essen');
+      expect(renderClause(clause(np(DU), instruction(ESSEN, { modifier: concept(SCHNELL) })))).toBe('schnell essen');
+      expect(renderClause(clause(np(DU), instruction(ZEIGEN), { directObject: el(np(BUCH)), complements: toTheBoy })))
         .toBe('dem Jungen das Buch zeigen');
-      expect(renderClause(clause(np(DU), instruction(SCHNEIDEN, 'CUT'), { complements: byChoosingAKnife })))
+      expect(renderClause(clause(np(DU), instruction(SCHNEIDEN), { complements: byChoosingAKnife })))
         .toBe('schneiden , indem man ein Messer wählt');
     });
   });

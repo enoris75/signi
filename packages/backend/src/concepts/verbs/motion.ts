@@ -324,6 +324,7 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_present': 'sind', '2pl_present': 'seid', '3pl_present': 'sind',
         '1sg_past': 'war', '2sg_past': 'warst', '3sg_past': 'war',
         '1pl_past': 'waren', '2pl_past': 'wart', '3pl_past': 'waren',
+        '2sg_imperative': 'sei', '1pl_imperative': 'seien', // suppletive command: sei / seien wir
       },
       es: {
         base: 'ser', copula: '1',

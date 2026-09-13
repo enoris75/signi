@@ -60,6 +60,7 @@ export const ESSEN: Forms = {
   '1pl_present': 'essen', '2pl_present': 'esst', '3pl_present': 'essen',
   '1sg_past': 'aß', '2sg_past': 'aßest', '3sg_past': 'aß',
   '1pl_past': 'aßen', '2pl_past': 'aßt', '3pl_past': 'aßen',
+  '2sg_imperative': 'iss',
 };
 /** A sein-selecting verb ("ist gegangen"). */
 export const GEHEN: Forms = {
@@ -72,6 +73,7 @@ export const GEBEN: Forms = {
   base: 'geben', participle: 'gegeben',
   '1sg_present': 'gebe', '2sg_present': 'gibst', '3sg_present': 'gibt',
   '1pl_present': 'geben', '2pl_present': 'gebt', '3pl_present': 'geben',
+  '2sg_imperative': 'gib',
 };
 export const SCHNEIDEN: Forms = { base: 'schneiden', participle: 'geschnitten', '3sg_present': 'schneidet' };
 export const WAEHLEN: Forms = { base: 'wählen', participle: 'gewählt', '3sg_present': 'wählt' };

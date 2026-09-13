@@ -1,5 +1,5 @@
 import type { CoordConjunction, DimensionRelation } from '@signi/shared';
-import type { Case, DeIPN, Slot } from './de.types.js';
+import type { Case, Slot } from './de.types.js';
 
 // The umlauted counterpart of each comparison-relevant stem vowel (see `deUmlaut`).
 export const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
@@ -75,27 +75,6 @@ export const SEIN: Record<'present' | 'past', Record<string, string>> = {
 export const HABEN: Record<'present' | 'past', Record<string, string>> = {
   present: { '1sg': 'habe', '2sg': 'hast', '3sg': 'hat', '1pl': 'haben', '2pl': 'habt', '3pl': 'haben' },
   past:    { '1sg': 'hatte', '2sg': 'hattest', '3sg': 'hatte', '1pl': 'hatten', '2pl': 'hattet', '3pl': 'hatten' },
-};
-
-// Irregular imperative surfaces by concept. The du (2sg) form is the one that misbehaves: strong
-// e→i/ie verbs keep the vowel change (essen→iss, lesen→lies, sehen→sieh) that the plain infinitive
-// stem loses, and sein/wissen are suppletive. ihr (2pl) is the ordinary 2pl-present, and the wir
-// cohortative is the infinitive with inverted "wir" ("laufen wir", but "seien wir").
-export const DE_IMPERATIVE: Record<string, Partial<Record<DeIPN, string>>> = {
-  BE:   { '2sg': 'sei', '1pl': 'seien', '2pl': 'seid' }, // sein
-  EAT:  { '2sg': 'iss' },
-  READ: { '2sg': 'lies' },
-  SEE:  { '2sg': 'sieh' },
-  KNOW: { '2sg': 'wisse' }, // wissen
-  // Stems in -er / -d keep the du -e (speichere, lade); the bare stem rule drops it.
-  SAVE: { '2sg': 'speichere' },
-  LOAD: { '2sg': 'lade' },
-  ADD:  { '2sg': 'addiere' },
-  EXPORT: { '2sg': 'exportiere' },
-  IMPORT: { '2sg': 'importiere' },
-  COORDINATE: { '2sg': 'koordiniere' },
-  SELECT: { '2sg': 'selektiere' },
-  CLEAR: { '2sg': 'lösche' }, // löschen: the -sch stem keeps the du -e
 };
 
 // The adposition an adjective-definition gloss wraps its dimension noun phrase in — extent/quality

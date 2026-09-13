@@ -42,7 +42,7 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // sitting before a predicate complement ("sei nicht vorsichtig") but after the objects
     // otherwise ("iss das Brot nicht").
     if (mood === 'imperative') {
-      const word = deImperativeWord(verb.forms, verb.conceptId, deImperativePN(subject.agreement));
+      const word = deImperativeWord(verb.forms, deImperativePN(subject.agreement));
       const impDirect = directObject ? elementPhrase(directObject, 'acc') : '';
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
