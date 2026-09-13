@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (19 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (9 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,15 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A111 | [A111-japanese-instruction-label-furigana.md](A-must-fix/A111-japanese-instruction-label-furigana.md) |
-| A112 | [A112-japanese-lowered-degree-no-ta-adjective.md](A-must-fix/A112-japanese-lowered-degree-no-ta-adjective.md) |
-| A113 | [A113-japanese-modal-bridge-drops-tai.md](A-must-fix/A113-japanese-modal-bridge-drops-tai.md) |
-| A114 | [A114-japanese-negative-determiner-particle.md](A-must-fix/A114-japanese-negative-determiner-particle.md) |
-| A115 | [A115-japanese-predicate-no-ta-adjective.md](A-must-fix/A115-japanese-predicate-no-ta-adjective.md) |
-| A116 | [A116-japanese-relative-modal-copula-polite.md](A-must-fix/A116-japanese-relative-modal-copula-polite.md) |
-| A117 | [A117-japanese-tara-copular-condition.md](A-must-fix/A117-japanese-tara-copular-condition.md) |
-| A118 | [A118-japanese-tara-protasis-bare-verb.md](A-must-fix/A118-japanese-tara-protasis-bare-verb.md) |
-| A119 | [A119-german-kein-object-in-commands-and-infinitives.md](A-must-fix/A119-german-kein-object-in-commands-and-infinitives.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -207,6 +198,15 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A108 | [A108-portuguese-voce-paradigm.md](fixed/A108-portuguese-voce-paradigm.md) | Portuguese | 2026-09-13 |
 | A109 | [A109-japanese-be-locative-existential.md](fixed/A109-japanese-be-locative-existential.md) | Japanese | 2026-09-13 |
 | A110 | [A110-japanese-copula-command-suru.md](fixed/A110-japanese-copula-command-suru.md) | Japanese | 2026-09-13 |
+| A119 | [A119-german-kein-object-in-commands-and-infinitives.md](fixed/A119-german-kein-object-in-commands-and-infinitives.md) | German | 2026-09-13 |
+| A113 | [A113-japanese-modal-bridge-drops-tai.md](fixed/A113-japanese-modal-bridge-drops-tai.md) | Japanese | 2026-09-13 |
+| A111 | [A111-japanese-instruction-label-furigana.md](fixed/A111-japanese-instruction-label-furigana.md) | Japanese | 2026-09-13 |
+| A112 | [A112-japanese-lowered-degree-no-ta-adjective.md](fixed/A112-japanese-lowered-degree-no-ta-adjective.md) | Japanese | 2026-09-13 |
+| A115 | [A115-japanese-predicate-no-ta-adjective.md](fixed/A115-japanese-predicate-no-ta-adjective.md) | Japanese | 2026-09-13 |
+| A116 | [A116-japanese-relative-modal-copula-polite.md](fixed/A116-japanese-relative-modal-copula-polite.md) | Japanese | 2026-09-13 |
+| A117 | [A117-japanese-tara-copular-condition.md](fixed/A117-japanese-tara-copular-condition.md) | Japanese | 2026-09-13 |
+| A114 | [A114-japanese-negative-determiner-particle.md](fixed/A114-japanese-negative-determiner-particle.md) | Japanese | 2026-09-13 |
+| A118 | [A118-japanese-tara-protasis-bare-verb.md](fixed/A118-japanese-tara-protasis-bare-verb.md) | Japanese | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

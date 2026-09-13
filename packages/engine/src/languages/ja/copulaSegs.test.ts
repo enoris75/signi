@@ -34,6 +34,50 @@ describe('copulaSegs', () => {
     });
   });
 
+  // A115: the の- and た-adjectives lose their attributive ending in a predicate.
+  describe('の- and た-adjectives', () => {
+    const CHAIRO: Forms = { role: 'adjective', base: '茶色の', reading: 'ちゃいろの' };
+    const TSUKARETA: Forms = { role: 'adjective', base: '疲れた', reading: 'つかれた' };
+
+    test('a の-adjective drops its の and takes the copula, with its degree adverb', () => {
+      expect(copulaSegs(pred(CHAIRO), 'present', false)).toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'です' }]);
+      expect(text(copulaSegs(pred(CHAIRO), 'past', true))).toBe('茶色ではありませんでした');
+      expect(text(copulaSegs(pred(CHAIRO, { degree: 'more' }), 'present', false))).toBe('もっと茶色です');
+    });
+
+    test('a た-adjective names the state 〜ている', () => {
+      expect(copulaSegs(pred(TSUKARETA), 'present', false)).toEqual([{ t: '疲れて', r: 'つかれて' }, { t: 'います' }]);
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', true))).toBe('疲れていません');
+      expect(text(copulaSegs(pred(TSUKARETA), 'past', false))).toBe('疲れていました');
+    });
+  });
+
+  // A116 / A117: the prenominal form of a relative clause and the たら form of an "if" clause.
+  describe('prenominal and たら forms', () => {
+    test('a prenominal copula drops です: い / な / の stay attributive, a noun takes である', () => {
+      expect(text(copulaSegs(pred(OOKII), 'past', false, 'prenominal'))).toBe('大きかった');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', false, 'prenominal'))).toBe('幸せな');
+      expect(text(copulaSegs(pred({ role: 'adjective', base: '茶色の', reading: 'ちゃいろの' }), 'present', false, 'prenominal'))).toBe('茶色の');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'prenominal'))).toBe('幸せだった');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'prenominal'))).toBe('伝説である');
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', true, 'prenominal'))).toBe('幸せではない');
+    });
+
+    test('a たら copula carries no tense', () => {
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'tara'))).toBe('大きかったら');
+      expect(text(copulaSegs(pred(OOKII), 'present', true, 'tara'))).toBe('大きくなかったら');
+      expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'tara'))).toBe('幸せだったら');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'tara'))).toBe('伝説ではなかったら');
+      expect(text(copulaSegs(pred({ role: 'adjective', base: '疲れた', reading: 'つかれた' }), 'present', false, 'tara'))).toBe('疲れていたら');
+    });
+  });
+
+  // A114: a no noun predicate closes its circumfix in the copula.
+  test('a no noun predicate takes でも in the negative copula', () => {
+    expect(text(copulaSegs(complement(np(DENSETSU, { definiteness: 'no' })), 'present', true))).toBe('どの伝説でもありません');
+    expect(text(copulaSegs(complement(np(DENSETSU, { definiteness: 'no' })), 'past', true, 'prenominal'))).toBe('どの伝説でもなかった');
+  });
+
   describe('na-adjective', () => {
     test('drops its attributive な and takes the copula', () => {
       expect(copulaSegs(pred(SHINCHOU), 'present', false)).toEqual([{ t: '慎重', r: 'しんちょう' }, { t: 'です' }]);

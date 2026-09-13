@@ -58,3 +58,42 @@ lands, a polite `食べませんでしたら` is a grammatical stopgap.
 | | |
 |---|---|
 | **Test** | `hypothetical.test.ts` → *known bugs: Japanese たら protasis* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. Its negated bare verb uses the nai-form B13 proposed
+seeding, which the user approved seeding for this fix.
+
+- **Corpus:** [`nonfinite.ts`](../../../packages/backend/src/concepts/verbs/nonfinite.ts) seeds
+  `nai` / `nai_reading` next to `te` on all 53 ja verbs. The forms were derived from the masu-stem
+  and checked by hand, which corrected 愛する → `愛さない` and 知る → `知らない`. The database is reseeded.
+  `JA_IRU` / `JA_ARU` carry `いない` / `ない`.
+- **Engine:** in [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts) the
+  subjunctive no longer short-circuits. The protasis runs the ordinary verb group, and its last
+  inflected element takes the たら form:
+  - **modal:** `modalEndingSegs` takes a `JaEnding` of `polite` / `plain` / `tara` (A116's `plain`
+    folded in): `必要があったら`, `ことができなかったら`, `たかったら`;
+  - **aspect:** `aspectVerbSegs` gives `ていたら` / `てしまったら` / `ところだったら` and their negatives;
+  - **bare verb:** [`taraSeg.ts`](../../../packages/engine/src/languages/ja/taraSeg.ts) builds the
+    negative on the nai-form (`食べなかったら`). A verb with no nai-form falls back to the polite
+    `〜ませんでしたら`.
+
+Every row now renders as wanted: the negative, the NEVER adverb, the `no` subject and object, CAN, WILL,
+MUST, the negated CAN and the three aspects. Also covered: `食べていなかったら`, `食べるところだったら`,
+`来なかったら`, `愛さなかったら`, A109's `家にいなかったら`.
+
+The apodosis keeps its polite negation. B13 is not fixed: only the たら clause reads the nai-form, so a
+negated relative clause and citation keep their polite `食べません` and B13's pin still fails as
+designed.
+
+The hypothetical snapshot was re-baselined:
+- **108 aspect cells:** 9 per `main:` block, now `食べていたら` / `食べてしまったら` / `食べるところだったら`.
+- **2 anchored cells:** now `食べる必要があったら` and `南極大陸へ行く必要があったら`.
+
+A script confirmed these are the only changed lines.
+
+- **Tests:** [`packages/engine/test/hypothetical.test.ts`](../../../packages/engine/test/hypothetical.test.ts)
+  → *known bugs: Japanese たら protasis*. The pinning `test.fails` is now a passing `test`. New cases
+  cover MUST, the negated modals and aspects, the prospective, the `no` object, the irregular verbs and
+  the existential. A guard covers the apodosis and B13's relative clause.
+- Unit tests: `taraSeg.test.ts`, `aspectVerbSegs.test.ts` and `modalEndingSegs.test.ts`.

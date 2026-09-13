@@ -37,3 +37,10 @@ unblocks the negative たら protasis (`食べなかったら`) and the polite `
 | | |
 |---|---|
 | **Test** | `relative.test.ts` → *documented simplifications: Japanese plain negative* (1 `test.fails`) |
+
+## Update 2026-09-13
+
+A118 seeded `nai` / `nai_reading` on every ja verb (in `verbs/nonfinite.ts`) and uses it for the negative
+たら protasis. The first half of the fix above is therefore in place. What remains is the product decision
+and the wiring: `plainVerbSeg` taking a `negative` flag, and the relative-clause and citation call
+sites in `predicateSegs` using it.

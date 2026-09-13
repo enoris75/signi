@@ -400,7 +400,7 @@ describe('known bugs: German "kein" object in commands and instructions', () => 
   const eat = (plan: Partial<PhrasePlan>, verbPhrase: Partial<VerbPhrase>, addressee: NounPhrase = np('SECOND_PERSON')) =>
     sayAll(command({ directObject: noMouse, ...plan }, addressee, verbPhrase)).de;
 
-  test.fails('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
+  test('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
     expect(eat({}, { negative: true })).toBe('iss keine Maus.');
     expect(eat({}, { negative: true }, np('SECOND_PERSON', { number: 'plural' }))).toBe('esst keine Maus.');
     expect(eat({}, { negative: true, modifier: 'FAST' })).toBe('iss schnell keine Maus.');
@@ -413,6 +413,18 @@ describe('known bugs: German "kein" object in commands and instructions', () => 
       }),
       imperative: true,
     }).de).toBe('gib dem Jungen kein Buch.');
+  });
+
+  test('German gates the cohortative the same way', () => {
+    expect(eat({}, { negative: true }, np('FIRST_PERSON', { number: 'plural' }))).toBe('essen wir keine Maus.');
+  });
+
+  test('regression: a definite object keeps "nicht", "nie" leaves it alone, and a predicate takes "nicht" first', () => {
+    expect(eat({ directObject: np('MOUSE') }, { negative: true })).toBe('iss die Maus nicht.');
+    expect(eat({ directObject: np('MOUSE') }, { modifier: 'NEVER' })).toBe('iss nie die Maus.');
+    expect(eat({ directObject: np('MOUSE'), imperativeRegister: 'instruction' }, { negative: true })).toBe('die Maus nicht essen.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('CAREFUL') } } }), imperative: true }).de)
+      .toBe('sei nicht vorsichtig.');
   });
 });
 

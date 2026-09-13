@@ -19,4 +19,11 @@ describe('taraSeg', () => {
   test('a kana verb takes no ruby', () => {
     expect(taraSeg(concept(AGERU))).toEqual({ t: 'あげたら' });
   });
+
+  // A118: the negative たら is built on the seeded plain negative.
+  test('the negative turns the nai-form\'s い into かったら, falling back to the polite past', () => {
+    expect(taraSeg(concept({ ...TABERU, nai: '食べない', nai_reading: 'たべない' }), true)).toEqual({ t: '食べなかったら', r: 'たべなかったら' });
+    expect(taraSeg(concept({ ...KURU, nai: '来ない', nai_reading: 'こない' }), true)).toEqual({ t: '来なかったら', r: 'こなかったら' });
+    expect(taraSeg(concept(TABERU), true)).toEqual({ t: '食べませんでしたら', r: 'たべませんでしたら' });
+  });
 });

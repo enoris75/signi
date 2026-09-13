@@ -48,6 +48,14 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ predicative: complement(el(np(DENSETSU), np(NEKO))) })))).toBe('伝説と猫に');
       expect(text(complementSegs(complements({ predicative: complement(group('or', np(DENSETSU), np(NEKO))) })))).toBe('伝説か猫に');
     });
+
+    // A115: a の-adjective takes its bare stem + に, a た-adjective the state as a ように clause.
+    test('a の-adjective drops its の before に, and a た-adjective takes 〜ているように', () => {
+      expect(complementSegs(complements({ predicative: complement(np({ role: 'adjective', base: '茶色の', reading: 'ちゃいろの' })) })))
+        .toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'に' }]);
+      expect(complementSegs(complements({ predicative: complement(np({ role: 'adjective', base: '疲れた', reading: 'つかれた' })) })))
+        .toEqual([{ t: '疲れて', r: 'つかれて' }, { t: 'いるように' }]);
+    });
   });
 
   describe('terminus', () => {
@@ -138,6 +146,13 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({ locative: complement(np(IE)) }), true))).toBe('家に');
       expect(text(complementSegs(complements({ locative: complement(np(IE), [path('under')]) }), true))).toBe('家の下に');
       expect(text(complementSegs(complements({ locative: complement(np(IE)), cause: complement(np(NEKO)) }), true))).toBe('家に猫のために');
+    });
+
+    // A114: a no group closes its circumfix after the particle and the relational noun.
+    test('a no group takes も after で, behind the relational noun', () => {
+      expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' })) })))).toBe('どの家でも');
+      expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' }), [path('under')]) })))).toBe('どの家の下でも');
+      expect(text(complementSegs(complements({ predicative: complement(np(DENSETSU, { definiteness: 'no' })) })))).toBe('どの伝説にも');
     });
 
     test('a spatial relation puts its relational noun before で', () => {

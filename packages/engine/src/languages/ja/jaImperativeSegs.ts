@@ -20,7 +20,7 @@ import { wordSeg } from './wordSeg.js';
 export function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, instruction = false): RubySegment[] {
   if (instruction && !negative) {
     const label = verb.forms['label'];
-    if (label) return [wordSeg(label)];
+    if (label) return [wordSeg(label, verb.forms['label_reading'] ?? labelReading(verb, label))];
     const st = masuStem(verb);
     if (st) return [wordSeg(st.stem.replace(/し$/, ''), st.reading?.replace(/し$/, ''))];
   }
@@ -43,4 +43,17 @@ export function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolea
   const te = verb.forms['te'];
   const teSeg = te ? wordSeg(te, verb.forms['te_reading']) : wordSeg(verb.forms['base'] ?? '', verb.forms['reading']);
   return [teSeg, { t: 'ください' }];
+}
+
+/**
+ * The reading of a verbal-noun label with no seeded `label_reading`, when the label is the verb's
+ * masu-stem or that stem without its する (読み込み ← 読み込み, 保存 ← 保存し): the stem's reading,
+ * trimmed the same way. Otherwise none.
+ */
+function labelReading(verb: ConceptForms, label: string): string | undefined {
+  const st = masuStem(verb);
+  if (!st?.reading) return undefined;
+  if (st.stem === label) return st.reading;
+  if (st.stem === `${label}し` && st.reading.endsWith('し')) return st.reading.slice(0, -1);
+  return undefined;
 }

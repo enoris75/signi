@@ -23,6 +23,14 @@ describe('jaComparisonAdj', () => {
     expect(jaComparisonAdj(shizuka)).toEqual({ base: '静かではない', reading: 'しずかではない' });
   });
 
+  // A112: the の / た adjectives lose their attributive ending before the negative.
+  test('a lowered の-adjective drops の, and a た-adjective takes the negative state ていない', () => {
+    expect(jaComparisonAdj(adj({ role: 'adjective', base: '茶色の', reading: 'ちゃいろの' }, { degree: 'less' })))
+      .toEqual({ base: '茶色ではない', reading: 'ちゃいろではない' });
+    expect(jaComparisonAdj(adj({ role: 'adjective', base: '疲れた', reading: 'つかれた' }, { degree: 'least' })))
+      .toEqual({ base: '疲れていない', reading: 'つかれていない' });
+  });
+
   test('a lowered adjective without a reading stays without one', () => {
     expect(jaComparisonAdj(adj({ role: 'adjective', base: 'すごい' }, { degree: 'less' }))).toEqual({ base: 'すごくない', reading: undefined });
   });

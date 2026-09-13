@@ -133,7 +133,7 @@ describe('known bugs: furigana', () => {
 // no reading, and the corpus seeds none. The eight labelled verbs lose their furigana, while an
 // unlabelled verb keeps its masu-stem reading (食べ → たべ).
 describe('known bugs: Japanese instruction label furigana', () => {
-  test.fails('Japanese gives a kanji instruction label its reading', () => {
+  test('Japanese gives a kanji instruction label its reading', () => {
     const label = (verb: string) => furigana({
       ...clause(np('SECOND_PERSON'), verb, { directObject: np('BOOK') }),
       imperative: true,
@@ -141,5 +141,24 @@ describe('known bugs: Japanese instruction label furigana', () => {
     });
     expect(label('SAVE')).toEqual(['ほん', 'ほぞん']);
     expect(label('LOAD')).toEqual(['ほん', 'よみこみ']);
+  });
+
+  test('Japanese reads every seeded label', () => {
+    const label = (verb: string) => furigana({
+      ...clause(np('SECOND_PERSON'), verb, { directObject: np('BOOK') }),
+      imperative: true,
+      imperativeRegister: 'instruction',
+    });
+    expect(label('TYPE')).toEqual(['ほん', 'にゅうりょく']);
+    expect(label('ADD')).toEqual(['ほん', 'ついか']);
+    expect(label('EXPORT')).toEqual(['ほん', 'かきだし']);
+    expect(label('IMPORT')).toEqual(['ほん', 'とりこみ']);
+    expect(label('CLEAR')).toEqual(['ほん', 'しょうきょ']);
+    expect(label('COORDINATE')).toEqual(['ほん', 'ちょうせい']);
+  });
+
+  test('regression: an unlabelled verb keeps its masu-stem reading', () => {
+    expect(furigana({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('BOOK') }), imperative: true, imperativeRegister: 'instruction' }))
+      .toEqual(['ほん', 'たべ']);
   });
 });

@@ -102,9 +102,10 @@ export const JA_PRENOMINAL_DET: Partial<Record<Definiteness, string>> = {
 
 /**
  * The `no` quantifier is a circumfix (どの … も … ない), split across three owners: the noun phrase
- * contributes the prenominal `pre` (どの) and the post-head `post` (も, which *replaces* the case
- * particle the NP would otherwise take), and the predicate contributes the clause-final ない
- * (supplied by predicateSegs's negation or, for a verbless gloss, by mannerGlossSegs).
+ * contributes the prenominal `pre` (どの); whoever places the group's case particle closes it with
+ * `post` (も), which replaces が / を / は and follows any other particle (see `jaParticleSegs`); and the
+ * predicate contributes the clause-final ない (predicateSegs's negation or, for a verbless gloss,
+ * mannerGlossSegs).
  */
 export const JA_NEGATIVE_DETERMINER = { pre: 'どの', post: 'も' } as const;
 
@@ -126,7 +127,8 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
 /**
  * The existential verbs a located subject takes in place of the copula: いる for an animate subject,
  * ある for an inanimate one (猫は家にいます, 本は家にあります). Written in kana, so they carry no
- * reading. The te-form drives the command (いてください), the past (いた) and たら (いたら).
+ * reading. The te-form drives the command (いてください), the past (いた) and たら (いたら); the nai-form
+ * the negative たら (いなかったら, なかったら).
  */
-export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて' } };
-export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって' } };
+export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない' } };
+export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };

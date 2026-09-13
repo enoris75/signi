@@ -600,7 +600,7 @@ describe('documented simplifications: Japanese coordinated copula predicate', ()
 // 30 の-adjectives read 茶色のです / 茶色のになります, the 4 た-adjectives 疲れたです. Want 茶色です /
 // 茶色になります / 疲れています.
 describe('known bugs: Japanese の/た adjective as a predicate', () => {
-  test.fails('Japanese drops the attributive の and turns た into ている in a predicate', () => {
+  test('Japanese drops the attributive の and turns た into ている in a predicate', () => {
     const catIs = (verb: string, adjective: string, headDegree: 'positive' | 'more' = 'positive') =>
       sayAll(clause(np('CAT'), verb, { complements: { predicative: { phrase: np(adjective, { headDegree }) } } })).ja;
     expect(catIs('BE', 'BROWN')).toBe('猫は茶色です。');
@@ -609,5 +609,23 @@ describe('known bugs: Japanese の/た adjective as a predicate', () => {
     expect(catIs('SEEM', 'ADULT')).toBe('猫は大人に思えます。');
     expect(catIs('BE', 'TIRED')).toBe('猫は疲れています。');
     expect(catIs('SEEM', 'TIRED')).toBe('猫は疲れているように思えます。');
+  });
+
+  test('Japanese inflects the の/た predicate for tense and polarity', () => {
+    const catIs = (adjective: string, verbPhrase: object) =>
+      sayAll(clause(np('CAT'), 'BE', { verbPhrase, complements: { predicative: { phrase: np(adjective) } } })).ja;
+    expect(catIs('ADULT', {})).toBe('猫は大人です。');
+    expect(catIs('BROWN', { negative: true, tense: 'past' })).toBe('猫は茶色ではありませんでした。');
+    expect(catIs('TIRED', { negative: true })).toBe('猫は疲れていません。');
+    expect(catIs('TIRED', { tense: 'past' })).toBe('猫は疲れていました。');
+  });
+
+  test('regression: the i- and na-adjectives and the noun predicate are unchanged', () => {
+    const catIs = (verb: string, predicate: string) =>
+      sayAll(clause(np('CAT'), verb, { complements: { predicative: { phrase: np(predicate) } } })).ja;
+    expect(catIs('BE', 'BIG')).toBe('猫は大きいです。');
+    expect(catIs('BE', 'CAREFUL')).toBe('猫は慎重です。');
+    expect(catIs('SEEM', 'HAPPY')).toBe('猫は幸せに思えます。');
+    expect(catIs('BECOME', 'LEGEND')).toBe('猫は伝説になります。');
   });
 });

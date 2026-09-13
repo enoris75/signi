@@ -273,7 +273,7 @@ describe('known bugs: Spanish reflexive verb in a conditional', () => {
 // therefore keeps the main-clause です and never takes たら: もし猫が幸せです、犬は走ります, two finite
 // clauses in a row. Want the たら form of the copula: 幸せだったら / 大きかったら / 伝説だったら.
 describe('known bugs: Japanese copular condition', () => {
-  test.fails('Japanese puts a copular condition in the たら form', () => {
+  test('Japanese puts a copular condition in the たら form', () => {
     const ifCatIs = (predicate: string) => sayAll({
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np(predicate) } } }),
@@ -282,13 +282,30 @@ describe('known bugs: Japanese copular condition', () => {
     expect(ifCatIs('BIG')).toBe('もし猫が大きかったら、犬は走ります。');
     expect(ifCatIs('LEGEND')).toBe('もし猫が伝説だったら、犬は走ります。');
   });
+
+  test('Japanese puts the negative, lowered, の and た copular conditions in the たら form', () => {
+    const ifCatIs = (predicate: string, verbPhrase: object = {}, extra: NonNullable<Parameters<typeof np>[1]> = {}) => sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'BE', { verbPhrase, complements: { predicative: { phrase: np(predicate, extra) } } }),
+    }).ja;
+    expect(ifCatIs('HAPPY', { negative: true })).toBe('もし猫が幸せではなかったら、犬は走ります。');
+    expect(ifCatIs('BIG', { negative: true })).toBe('もし猫が大きくなかったら、犬は走ります。');
+    expect(ifCatIs('BIG', {}, { headDegree: 'less' })).toBe('もし猫がそれほど大きくなかったら、犬は走ります。');
+    expect(ifCatIs('BROWN')).toBe('もし猫が茶色だったら、犬は走ります。');
+    expect(ifCatIs('TIRED')).toBe('もし猫が疲れていたら、犬は走ります。');
+  });
+
+  test('regression: a copular main clause under a condition keeps です', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY') } } }), condition: clause(np('DOG'), 'RUN') }).ja)
+      .toBe('もし犬が走ったら、猫は幸せです。');
+  });
 });
 
 // A118. `predicateSegs` renders the subjunctive "if" clause as taraSeg(verb) alone, before the modal
 // and aspect branches and with no polarity. Negation (negative, NEVER, a `no` argument), modals and
 // aspect all vanish, so "if the cat did not eat" reads "if the cat ate" (もし猫が食べたら).
 describe('known bugs: Japanese たら protasis', () => {
-  test.fails('Japanese keeps the negation, modal and aspect of the たら clause', () => {
+  test('Japanese keeps the negation, modal and aspect of the たら clause', () => {
     const ifCat = (verbPhrase: object, subject = np('CAT')) =>
       sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(subject, 'EAT', { verbPhrase }) }).ja;
     expect(ifCat({ negative: true })).toBe('もし猫が食べなかったら、犬は走ります。');
@@ -298,5 +315,25 @@ describe('known bugs: Japanese たら protasis', () => {
     expect(ifCat({ modals: ['WILL'] })).toBe('もし猫が食べたかったら、犬は走ります。');
     expect(ifCat({ aspect: 'progressive' })).toBe('もし猫が食べていたら、犬は走ります。');
     expect(ifCat({ aspect: 'resultative' })).toBe('もし猫が食べてしまったら、犬は走ります。');
+  });
+
+  test('Japanese builds the たら clause on MUST, the negated modals and aspects, a no object and irregular verbs', () => {
+    const ifCat = (verbPhrase: object, extra: object = {}, verb = 'EAT') =>
+      sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), verb, { verbPhrase, ...extra }) }).ja;
+    expect(ifCat({ modals: ['MUST'] })).toBe('もし猫が食べる必要があったら、犬は走ります。');
+    expect(ifCat({ modals: ['CAN'], negative: true })).toBe('もし猫が食べることができなかったら、犬は走ります。');
+    expect(ifCat({ modals: ['WILL'], negative: true })).toBe('もし猫が食べたくなかったら、犬は走ります。');
+    expect(ifCat({ aspect: 'progressive', negative: true })).toBe('もし猫が食べていなかったら、犬は走ります。');
+    expect(ifCat({ aspect: 'prospective' })).toBe('もし猫が食べるところだったら、犬は走ります。');
+    expect(ifCat({}, { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('もし猫がどのネズミも食べなかったら、犬は走ります。');
+    expect(ifCat({ negative: true }, {}, 'COME')).toBe('もし猫が来なかったら、犬は走ります。');
+    expect(ifCat({ negative: true }, { directObject: np('DOG') }, 'LOVE')).toBe('もし猫が犬を愛さなかったら、犬は走ります。');
+    expect(ifCat({ negative: true }, { complements: { locative: { phrase: np('HOUSE') } } }, 'BE')).toBe('もし猫が家にいなかったら、犬は走ります。');
+  });
+
+  test('regression: the apodosis keeps its polite negation, and a negated relative clause keeps B13\'s polite form', () => {
+    expect(sayAll({ ...clause(np('DOG'), 'RUN', { verbPhrase: { negative: true } }), condition: clause(np('CAT'), 'EAT') }).ja)
+      .toBe('もし猫が食べたら、犬は走りません。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true } } }), 'RUN')).ja).toBe('食べません猫は走ります。');
   });
 });

@@ -52,3 +52,32 @@ never learned the same trim.
 | | |
 |---|---|
 | **Test** | `complements/predicative.test.ts` → *known bugs: Japanese の/た adjective as a predicate* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. Both predicate renderers now classify the
+adjective through the shared [`jaAdjClass.ts`](../../../packages/engine/src/languages/ja/jaAdjClass.ts)
+(A112).
+
+- [`copulaSegs.ts`](../../../packages/engine/src/languages/ja/copulaSegs.ts) handles every adjective
+  class with its degree adverb:
+  - a の-adjective drops its の and takes the copula like a na-adjective (`茶色です`, `茶色ではありませんでした`,
+    `もっと茶色です`);
+  - a た-adjective names the state 〜ている (`疲れています`, `疲れていません`, `疲れていました`).
+
+  The ending tables also carry the prenominal and たら forms used by A116 and A117.
+- The predicative branch of [`complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts)
+  gives a の-adjective its bare stem + `に` (`茶色になります`, `大人に思えます`). A た-adjective takes
+  `〜ているように` (`疲れているように思えます`).
+
+Every pinned row now renders as wanted. Also covered: `猫は大人です`, `猫は茶色ではありませんでした`,
+`猫は疲れていません`, `猫は疲れていました`. Unchanged: `猫は大きいです`, `猫は慎重です`, `猫は幸せに思えます`,
+`猫は伝説になります`.
+
+BECOME + TIRED, which the bug file called a design call and did not pin, now reads
+`猫は疲れているようになります` ("comes to be tired").
+
+- **Tests:** [`packages/engine/test/complements/predicative.test.ts`](../../../packages/engine/test/complements/predicative.test.ts)
+  → *known bugs: Japanese の/た adjective as a predicate*. The pinning `test.fails` is now a passing
+  `test`. New cases cover tense and polarity, with a guard for the i- and na-adjectives and the noun.
+- Unit tests: `copulaSegs.test.ts` and `complementSegs.test.ts` (ja).

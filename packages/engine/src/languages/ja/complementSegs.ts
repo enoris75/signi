@@ -2,8 +2,9 @@ import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPEC
 import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, mannerRelation, pathSpecifier, type ResolvedComplement, type RubySegment } from '../../types.js';
 import { CAUSE_PARTICLE, JA_DEGREE, PARTICLE, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
-import { isNegativeGroup } from './isNegativeGroup.js';
+import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -20,7 +21,9 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     if (!c) continue;
     // Subject complement (of なる/見える etc.), by head type:
     //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
-    //  · na-adjective (…な) → drop the attributive な, then に (幸せな → "幸せになる")
+    //  · na-adjective (…な) or の-adjective (…の) → drop the particle, then に (幸せな → "幸せになる",
+    //    茶色の → "茶色になる")
+    //  · た-adjective (…た) → the state 〜ている as a ように clause (疲れた → "疲れているように見える")
     //  · noun → 〜に (伝説 → "伝説になる")
     // The furigana reading tracks the same trailing-mora substitution. A predicate adjective
     // takes its degree adverb before it, as an attributive one does (もっと楽しくなる).
@@ -38,24 +41,30 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
         const f = np.head.forms;
         const isAdj = f['role'] === 'adjective';
         // The lowered degrees negate the adjective (幸せな → 幸せではない, itself an い-adjective).
-        const { base, reading } = isAdj ? jaComparisonAdj(np.head) : { base: f['base'] ?? '', reading: f['reading'] };
-        const deg = isAdj ? JA_DEGREE[adjDegree(np.head)] : '';
-        if (deg) segs.push({ t: deg });
-        if (isAdj && base.endsWith('い')) {
-          segs.push(wordSeg(
-            `${base.slice(0, -1)}く`,
-            reading?.endsWith('い') ? `${reading.slice(0, -1)}く` : reading,
-          ));
-          takesNi = false;
-        } else if (isAdj && base.endsWith('な')) {
-          segs.push(wordSeg(base.slice(0, -1), reading?.endsWith('な') ? reading.slice(0, -1) : reading));
-          takesNi = true;
-        } else {
+        if (!isAdj) {
           segs.push(...npSegs(np));
+          takesNi = true;
+          return;
+        }
+        const { base, reading } = jaComparisonAdj(np.head);
+        const deg = JA_DEGREE[adjDegree(np.head)];
+        if (deg) segs.push({ t: deg });
+        // By class (see `jaAdjClass`): an i-adjective takes its く-form, a na- or の-adjective its bare
+        // stem + に (幸せに, 茶色に), and a た-adjective the state 〜ている as a ように clause, which takes no
+        // に either (疲れているように思える).
+        const { kind, stem, reading: stemReading } = jaAdjClass(base, reading);
+        if (kind === 'i') {
+          segs.push(wordSeg(`${stem}く`, stemReading === undefined ? undefined : `${stemReading}く`));
+          takesNi = false;
+        } else if (kind === 'ta') {
+          segs.push(wordSeg(stem, stemReading), { t: 'いるように' });
+          takesNi = false;
+        } else {
+          segs.push(wordSeg(stem, stemReading));
           takesNi = true;
         }
       });
-      if (takesNi && !isNegativeGroup(c.phrase)) segs.push({ t: 'に' });
+      if (takesNi) segs.push(...jaParticleSegs(c.phrase, 'に'));
       continue;
     }
     // An instrument presented as an action, with the noun phrase as its direct object (を). The
@@ -66,7 +75,7 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
       const level = abstractionLevel(c);
       if (level !== 'object') {
         const v = c.action.verb.forms;
-        segs.push(...elSegs(c.phrase), ...(isNegativeGroup(c.phrase) ? [] : [{ t: 'を' }]));
+        segs.push(...elSegs(c.phrase), ...jaParticleSegs(c.phrase, 'を'));
         const adverb = c.action.modifier;
         if (adverb) segs.push(wordSeg(adverb.forms['base'] ?? '', adverb.forms['reading']));
         if (level === 'process') {
@@ -92,8 +101,9 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
       : type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       : PARTICLE[type];
-    // A `no` group ends in も, which replaces this case particle (どの市場も, not どの市場もに).
-    if (!isNegativeGroup(c.phrase)) segs.push({ t: particle });
+    // A `no` group closes its circumfix here: も after the particle (どの家でも, どの犬にも), or in place of
+    // the route's を (どの市場も).
+    segs.push(...jaParticleSegs(c.phrase, particle));
   }
   return segs;
 }

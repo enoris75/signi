@@ -45,6 +45,15 @@ describe('jaImperativeSegs', () => {
       expect(text(jaImperativeSegs(concept(HOZON_SURU), '1pl', false, true))).toBe('保存');
     });
 
+    // A111: the label carries its reading, seeded or derived from the masu-stem.
+    test('the label carries its reading: the seeded one, else the matching masu-stem reading', () => {
+      expect(jaImperativeSegs(concept({ ...HOZON_SURU, label_reading: 'ほぞん' }), '2sg', false, true)).toEqual([{ t: '保存', r: 'ほぞん' }]);
+      expect(jaImperativeSegs(concept(HOZON_SURU), '2sg', false, true)).toEqual([{ t: '保存', r: 'ほぞん' }]);
+      const YOMIKOMU = { base: '読み込む', reading: 'よみこむ', masu_present: '読み込みます', masu_present_reading: 'よみこみます', label: '読み込み' };
+      expect(jaImperativeSegs(concept(YOMIKOMU), '2sg', false, true)).toEqual([{ t: '読み込み', r: 'よみこみ' }]);
+      expect(jaImperativeSegs(concept({ ...HOZON_SURU, label: '記録' }), '2sg', false, true)).toEqual([{ t: '記録' }]);
+    });
+
     test('without a label derives the noun from the masu-stem, minus a する-verb’s し', () => {
       expect(jaImperativeSegs(concept(TABERU), '2sg', false, true)).toEqual([{ t: '食べ', r: 'たべ' }]);
       expect(jaImperativeSegs(concept(SESSHU_SURU), '2sg', false, true)).toEqual([{ t: '摂取', r: 'せっしゅ' }]);

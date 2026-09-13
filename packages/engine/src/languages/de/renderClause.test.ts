@@ -102,6 +102,15 @@ describe('renderClause', () => {
   });
 
   describe('negation', () => {
+    // A119: the command, the instruction and the infinitive share the declarative's negation gate.
+    test('a kein object negates a command or an infinitive alone, and drops to ein under nie', () => {
+      const noMouse = el(np(MAUS, { definiteness: 'no' }));
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative', negative: true }), { directObject: noMouse }))).toBe('iss keine Maus');
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative', modifier: concept(NIE) }), { directObject: noMouse }))).toBe('iss nie eine Maus');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'infinitive', negative: true }), { directObject: noMouse }))).toBe('keine Maus essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'infinitive', modifier: concept(NIE) }), { directObject: noMouse }))).toBe('nie eine Maus essen');
+    });
+
     test('nicht trails the objects, ahead of the non-finite tail', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true }), { directObject: mouse }))).toBe('der Kater isst die Maus nicht');
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'resultative' }), { directObject: mouse })))

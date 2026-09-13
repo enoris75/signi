@@ -47,3 +47,38 @@ verb nai-form gap.
 | | |
 |---|---|
 | **Test** | `relative.test.ts` → *known bugs: Japanese relative clause with a modal or a copula* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+threads `plain` into both branches:
+
+- **Modals:** [`modalSegs.ts`](../../../packages/engine/src/languages/ja/modalSegs.ts) carries it to
+  the outermost modal. [`modalEndingSegs.ts`](../../../packages/engine/src/languages/ja/modalEndingSegs.ts)
+  then gives the plain ending, all fixed:
+  - 〜ある → `ある / あった / ない / なかった`;
+  - the ichidan `できる` → `できる / できた / できない / できなかった`;
+  - 〜たい → `たい / たかった / たくない / たくなかった`.
+- **Copula:** [`copulaSegs.ts`](../../../packages/engine/src/languages/ja/copulaSegs.ts) takes a
+  `prenominal` form:
+  - an i-adjective drops `です` (`大きい`, `大きかった`);
+  - a na- or の-adjective keeps its attributive particle (`幸せな`, `茶色の`), past `幸せだった`;
+  - a noun takes `である` / `だった`;
+  - a た-adjective takes `ている` / `ていた`.
+
+Every row now renders as wanted:
+
+| Kind | Output |
+|---|---|
+| modals | `食べることができる猫`, `食べたい猫`, `食べる必要があった猫`, `猫が食べることができるネズミ` |
+| copula | `幸せな猫`, `大きかった猫`, `伝説である猫` |
+
+The negatives come for free (`食べることができない猫`, `食べたくない猫`, `食べる必要がなかった猫`,
+`幸せではない猫`). So do the bridged chain (`食べたいと思うことができる猫`), `伝説だった猫`, `茶色の猫` and
+`疲れている猫`. The main clause keeps its polite modal (`猫は食べることができます`).
+
+- **Tests:** [`packages/engine/test/relative.test.ts`](../../../packages/engine/test/relative.test.ts)
+  → *known bugs: Japanese relative clause with a modal or a copula*. The pinning `test.fails` is now a
+  passing `test`. New cases cover the negatives, the past, the object gap, the bridged chain and the
+  の/た predicates, with a guard for the main clause.
+- Unit tests: `modalEndingSegs.test.ts` and `copulaSegs.test.ts`.

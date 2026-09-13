@@ -1389,7 +1389,7 @@ describe('known bugs: Portuguese GREAT comparison', () => {
 // anything else + ではない. A の-adjective (茶色の, 大人の) keeps its linker (茶色のではない) and a
 // た-adjective (疲れた) gets a bare ではない (疲れたではない). Want 茶色ではない / 疲れていない.
 describe('known bugs: Japanese lowered degree on a の/た adjective', () => {
-  test.fails('Japanese negates a の/た adjective without keeping its attributive ending', () => {
+  test('Japanese negates a の/た adjective without keeping its attributive ending', () => {
     const lowered = (adjective: string, degree: 'less' | 'least') =>
       sayAll(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: [degree] }), 'EAT')).ja;
     expect(lowered('BROWN', 'less')).toBe('それほど茶色ではない猫は食べます。');
@@ -1398,5 +1398,19 @@ describe('known bugs: Japanese lowered degree on a の/た adjective', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       complements: { predicative: { phrase: np('BROWN', { headDegree: 'less' }) } },
     })).ja).toBe('猫はそれほど茶色ではないです。');
+  });
+
+  test('Japanese negates the other た-adjectives and carries the negative into SEEM and BE', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['UNCONNECTED'], adjectiveDegrees: ['least'] }), 'EAT')).ja).toBe('最も孤立していない猫は食べます。');
+    expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('BROWN', { headDegree: 'less' }) } } })).ja)
+      .toBe('猫はそれほど茶色ではなく思えます。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('TIRED', { headDegree: 'less' }) } } })).ja)
+      .toBe('猫はそれほど疲れていないです。');
+  });
+
+  test('regression: the i- and na-adjectives and the positive の-adjective are unchanged', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['less'] }), 'EAT')).ja).toBe('それほど大きくない猫は食べます。');
+    expect(sayAll(clause(np('CAT', { adjectives: ['HAPPY'], adjectiveDegrees: ['least'] }), 'EAT')).ja).toBe('最も幸せではない猫は食べます。');
+    expect(sayAll(clause(np('CAT', { adjectives: ['BROWN'] }), 'EAT')).ja).toBe('茶色の猫は食べます。');
   });
 });

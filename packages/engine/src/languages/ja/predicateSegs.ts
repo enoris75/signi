@@ -8,6 +8,7 @@ import { copulaSegs } from './copulaSegs.js';
 import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
+import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
 import { plainVerbSeg } from './plainVerbSeg.js';
 import { taraSeg } from './taraSeg.js';
@@ -77,7 +78,7 @@ export function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(complements, existential));
-    if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
+    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -92,7 +93,7 @@ export function predicateSegs(
   // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
     segs.push(...complementSegs(complements, existential));
-    if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
+    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -113,11 +114,12 @@ export function predicateSegs(
     // ("has been X"), a past state — rendered as the past copula (美しくなかった). Progressive /
     // prospective on a copula stay best-effort present. (Aspect on a copula is marginal.)
     const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
-    segs.push(...copulaSegs(predicative, copTense, negated));
+    // An "if" clause takes the たら form (幸せだったら) and a relative clause the prenominal one (幸せな猫).
+    segs.push(...copulaSegs(predicative, copTense, negated, mood === 'subjunctive' ? 'tara' : plain ? 'prenominal' : 'polite'));
     return segs;
   }
   segs.push(...complementSegs(complements, existential));
-  if (directObject) segs.push(...elSegs(directObject), ...(isNegativeGroup(directObject) ? [] : [{ t: 'を' }]));
+  if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.
   for (const m of modals) {
@@ -128,20 +130,22 @@ export function predicateSegs(
     const base = modifier.forms['base'] ?? '';
     if (base) segs.push(wordSeg(base, modifier.forms['reading']));
   }
-  // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form. The main
-  // clause (conditional) falls through to the ordinary polite main-clause path — Japanese has
-  // no dedicated conditional inflection, and keeping the normal path preserves tense and,
-  // crucially, negation (走りません). The たら protasis carries the hypothetical meaning.
-  if (mood === 'subjunctive') segs.push(taraSeg(verb));
+  // Hypothetical conditional: the "if" clause (subjunctive) takes the ～たら form on whatever closes
+  // its verb group — the verb (食べたら, 食べなかったら), the outermost modal (食べることができたら) or the
+  // aspect (食べていたら). The main clause (conditional) falls through to the ordinary polite
+  // main-clause path — Japanese has no dedicated conditional inflection, and keeping the normal path
+  // preserves tense and, crucially, negation (走りません). The たら protasis carries the hypothetical.
+  const tara = mood === 'subjunctive';
   // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
   // periphrasis to compose with here, so it is dropped (see the Modality note on `modalSegs`).
-  else if (modals.length > 0) segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated));
+  if (modals.length > 0) segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite'));
+  else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));
   // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫).
   // Negation still routes through the polite verbSeg — the plain negative (ない/なかった) needs a
   // nai-form the lexicon doesn't store — a documented remaining gap.
   else if (aspect === 'neutral') {
     segs.push(plain && !negated ? plainVerbSeg(verb, tense) : verbSeg(verb, negated, tense));
   }
-  else segs.push(...aspectVerbSegs(verbPhrase, negated));
+  else segs.push(...aspectVerbSegs(verbPhrase, negated, tara));
   return segs;
 }

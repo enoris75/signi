@@ -44,3 +44,28 @@ clause needs the same gate (A50, whose `kein` row is the verb-final form of this
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: German "kein" object in commands and instructions* (1 `test.fails`); `infinitive.test.ts` → *known bugs: German "kein" object in the infinitive* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The command, the instruction and the infinitive in
+[`renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts) no longer build their own
+`applyNicht`. They call [`finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts),
+the gate the declarative, the verb-final protasis and the relative clause already share. So a `kein`
+object negates alone, and under `nie` it drops to the indefinite (the returned object is rendered).
+
+Every row now renders as wanted: `iss keine Maus.`, `esst keine Maus.`, `iss schnell keine Maus.`,
+`iss nie eine Maus.`, `gib dem Jungen kein Buch.`, and the instruction and infinitive rows. The fix also
+covers the cohortative (`essen wir keine Maus.`).
+
+These stay unchanged: `iss die Maus nicht.`, `iss nie die Maus.`, `die Maus nicht essen.`, `nie essen.`
+and `sei nicht vorsichtig.`.
+
+A `kein` *complement* with a negated verb still keeps `nicht` (`iss in keinem Haus nicht`), in the
+declarative as well. The gate checks only the object, as the bug file scoped it.
+
+- **Tests:** [`packages/engine/test/imperative.test.ts`](../../../packages/engine/test/imperative.test.ts)
+  → *known bugs: German "kein" object in commands and instructions*, and
+  [`packages/engine/test/infinitive.test.ts`](../../../packages/engine/test/infinitive.test.ts) →
+  *known bugs: German "kein" object in the infinitive*. Both pinning `test.fails` are now passing
+  `test`s. New cases cover the cohortative, with guards for a definite object, `nie` and a predicate.
+- Unit test: `renderClause.test.ts` (de).

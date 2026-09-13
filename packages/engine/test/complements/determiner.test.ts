@@ -142,8 +142,8 @@ describe('complement determiner: fusion is definite-only on direction and termin
 
 // Japanese spells no article, so the two article values render the locative bare (家で); the
 // demonstratives and quantifiers are real prenominal words that now DO surface (この家で,
-// すべての家で …). The `no` quantifier is the circumfix — its も replaces the locative で and its
-// negation weaves into the verb (どの家も走りません), the complement-path concord that Romance also
+// すべての家で …). The `no` quantifier is the circumfix — its も follows the locative で and its
+// negation weaves into the verb (どの家でも走りません), the complement-path concord that Romance also
 // requires below.
 describe('complement determiner: Japanese renders the demonstratives and quantifiers', () => {
   test('the article values render the locative bare — 家で', () => {
@@ -159,8 +159,8 @@ describe('complement determiner: Japanese renders the demonstratives and quantif
     expect(inHouse('all').ja).toBe('猫はすべての家で走ります。');
   });
 
-  test('the `no` circumfix replaces で with も and negates the verb — どの家も走りません', () => {
-    expect(inHouse('no').ja).toBe('猫はどの家も走りません。'); // wrong, pinned as-is: A114
+  test('the `no` circumfix follows で with も and negates the verb — どの家でも走りません', () => {
+    expect(inHouse('no').ja).toBe('猫はどの家でも走りません。');
   });
 });
 
@@ -261,7 +261,7 @@ describe('known bugs: complement negative concord', () => {
 // and のために Japanese keeps the particle and adds も (どの家でも, どの犬にも). A relational noun lands
 // after the も (どの家もの下), and the BE predicate noun reads どの伝説もではありません.
 describe('known bugs: Japanese どの…も on a complement', () => {
-  test.fails('Japanese keeps the complement particle before も', () => {
+  test('Japanese keeps the complement particle before も', () => {
     const no = (concept: string) => np(concept, { definiteness: 'no' });
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: no('HOUSE') } } })).ja)
       .toBe('猫はどの家でも走りません。');
@@ -278,5 +278,23 @@ describe('known bugs: Japanese どの…も on a complement', () => {
       .toBe('猫はどの伝説にもなりません。');
     expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: no('LEGEND') } } })).ja)
       .toBe('猫はどの伝説でもありません。');
+  });
+
+  test('Japanese closes the circumfix after every other particle, the existential に and the relative clause', () => {
+    const no = (concept: string) => np(concept, { definiteness: 'no' });
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: no('MARKET') } } })).ja).toBe('猫はどの市場へも行きません。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { instrumental: { phrase: no('WORD') } } })).ja).toBe('猫はどの単語でも食べません。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: no('SPEED') } } })).ja).toBe('猫はどの速さでも走りません。');
+    expect(sayAll(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: no('LEGEND') } } })).ja).toBe('猫はどの伝説にも思えません。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { locative: { phrase: no('HOUSE') } } })).ja).toBe('猫はどの家にもいません。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: no('LEGEND') } } } }), 'RUN')).ja)
+      .toBe('どの伝説でもない猫は走ります。');
+  });
+
+  test('regression: も still replaces が, を and the route\'s を', () => {
+    const no = (concept: string) => np(concept, { definiteness: 'no' });
+    expect(sayAll(clause(no('CAT'), 'EAT', { directObject: np('MOUSE') })).ja).toBe('どの猫もネズミを食べません。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: no('MOUSE') })).ja).toBe('猫はどのネズミも食べません。');
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { route: { phrase: no('MARKET') } } })).ja).toBe('猫はどの市場も行きません。');
   });
 });

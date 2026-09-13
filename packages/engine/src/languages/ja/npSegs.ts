@@ -6,6 +6,7 @@ import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
+import { jaParticleSegs } from './jaParticleSegs.js';
 import { predicateSegs } from './predicateSegs.js';
 import { wordSeg } from './wordSeg.js';
 
@@ -20,8 +21,8 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // The determiner leads the phrase. Japanese spells no article, but the demonstratives and
   // quantifiers are real prenominal words (この / すべての …) that render in a sentence; their の is
   // part of the value, so they need no extra particle. The `no` quantifier is a circumfix — its
-  // prenominal どの leads here and its も is appended after the head below (its clause-final ない is
-  // the predicate's job — see predicateSegs / mannerGlossSegs).
+  // prenominal どの leads here, its も closes the group with its case particle (see `jaParticleSegs`),
+  // and its clause-final ない is the predicate's job (see predicateSegs / mannerGlossSegs).
   const definiteness = (np.head.forms['definiteness'] ?? 'definite') as Definiteness;
   const prenominalDet = JA_PRENOMINAL_DET[definiteness];
   if (prenominalDet) core.push({ t: prenominalDet });
@@ -33,7 +34,8 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
     core.push(
       ...(isPronominalPossessor(np.possessor)
         ? possessiveJa(np.possessor)
-        : [...npSegs(np.possessor), { t: 'の' }]),
+        // A `no` possessor keeps its も before the の (a separate, unhandled case: どの猫もの本).
+        : [...npSegs(np.possessor), ...(np.possessor.head.forms['definiteness'] === 'no' ? [{ t: JA_NEGATIVE_DETERMINER.post }] : []), { t: 'の' }]),
     );
   }
   // Attributive nouns ("sail boat") are also の-linked in Japanese (ガラスのコップ); the
@@ -62,10 +64,6 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   core.push(...adjSegs);
   const head = np.head.forms;
   core.push(wordSeg(head['base'] ?? '', head['reading']));
-  // The `no` circumfix's も follows the head noun (どの時間も). It *replaces* the case particle the
-  // NP would otherwise take — Japanese does not stack も with が/を/etc. — so every caller skips its
-  // particle for a negative group (see isNegativeGroup).
-  if (definiteness === 'no') core.push({ t: JA_NEGATIVE_DETERMINER.post });
   // A relative clause is prenominal in Japanese: the whole predicate precedes the head
   // noun with no relative pronoun (泣いた少年 = "the boy who cried"). For a non-subject
   // (e.g. object) relative the clause's own subject leads, marked by が (私が読む本 = "the
@@ -79,7 +77,7 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // eats"); a specific non-subject relative leads with its own subject marked by が (私が読む本).
   const clauseSubjectSegs: RubySegment[] =
     rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
-      ? [...elSegs(rel.subject), ...(isNegativeGroup(rel.subject) ? [] : [{ t: 'が' }])] : [];
+      ? [...elSegs(rel.subject), ...jaParticleSegs(rel.subject, 'が')] : [];
   const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // The clause's subject is the head itself for a subject relative, else its own subject.
   const relAnimate = isAnimate(rel.headRole !== 'subject' && rel.subject ? rel.subject.conjuncts : [np]);

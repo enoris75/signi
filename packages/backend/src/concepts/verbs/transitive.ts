@@ -1560,6 +1560,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '入力します',
         masu_present_reading: 'にゅうりょくします',
         label: '入力',
+        label_reading: 'にゅうりょく',
       },
       pt: {
         base: 'digitar',
@@ -1627,6 +1628,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '保存します',
         masu_present_reading: 'ほぞんします',
         label: '保存',
+        label_reading: 'ほぞん',
       },
       pt: {
         base: 'salvar',
@@ -1694,6 +1696,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '読み込みます',
         masu_present_reading: 'よみこみます',
         label: '読み込み',
+        label_reading: 'よみこみ',
       },
       pt: {
         base: 'carregar',
@@ -1762,6 +1765,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '加えます',
         masu_present_reading: 'くわえます',
         label: '追加',
+        label_reading: 'ついか',
       },
       pt: {
         base: 'adicionar',
@@ -1830,6 +1834,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '書き出します',
         masu_present_reading: 'かきだします',
         label: '書き出し',
+        label_reading: 'かきだし',
       },
       pt: {
         base: 'exportar',
@@ -1898,6 +1903,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '取り込みます',
         masu_present_reading: 'とりこみます',
         label: '取り込み',
+        label_reading: 'とりこみ',
       },
       pt: {
         base: 'importar',
@@ -1966,6 +1972,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '消去します',
         masu_present_reading: 'しょうきょします',
         label: '消去',
+        label_reading: 'しょうきょ',
       },
       pt: {
         base: 'limpar',
@@ -2034,6 +2041,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '調整します',
         masu_present_reading: 'ちょうせいします',
         label: '調整',
+        label_reading: 'ちょうせい',
       },
       pt: {
         base: 'coordenar',

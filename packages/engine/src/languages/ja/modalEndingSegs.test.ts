@@ -32,4 +32,24 @@ describe('modalEndingSegs', () => {
   test('〜たい reuses the present for the future', () => {
     expect(text(modalEndingSegs(concept(TAI), 'future', false))).toBe('たいです');
   });
+
+  // A116: the plain ending a prenominal relative clause needs.
+  test('the plain ending: 〜ある is irregular, できる is ichidan, 〜たい drops です', () => {
+    expect(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'past', false, 'plain')).toEqual([{ t: '必要が', r: 'ひつようが' }, { t: 'あった' }]);
+    expect(text(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'present', true, 'plain'))).toBe('必要がない');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'present', false, 'plain'))).toBe('ことができる');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'past', true, 'plain'))).toBe('ことができなかった');
+    expect(text(modalEndingSegs(concept(TAI), 'present', false, 'plain'))).toBe('たい');
+    expect(text(modalEndingSegs(concept(TAI), 'past', true, 'plain'))).toBe('たくなかった');
+  });
+
+  // A118: the たら ending is the plain past + ら.
+  test('the たら ending, which carries no tense', () => {
+    expect(text(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'present', false, 'tara'))).toBe('必要があったら');
+    expect(text(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'past', true, 'tara'))).toBe('必要がなかったら');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'present', false, 'tara'))).toBe('ことができたら');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'present', true, 'tara'))).toBe('ことができなかったら');
+    expect(text(modalEndingSegs(concept(TAI), 'present', false, 'tara'))).toBe('たかったら');
+    expect(text(modalEndingSegs(concept(TAI), 'present', true, 'tara'))).toBe('たくなかったら');
+  });
 });

@@ -66,6 +66,13 @@ describe('modalSegs', () => {
     expect(text(modalSegs([MUST, WANT], concept(TABERU), 'past', false))).toBe('食べたいと思う必要がありました');
   });
 
+  // A113: governed, the ようになる bridge keeps its 〜たい in the form the outer modal asks for.
+  test('a governed ようになる bridge keeps its 〜たい', () => {
+    expect(text(modalSegs([MUST, WANT, CAN], concept(TABERU), 'present', false))).toBe('食べることができるようになりたいと思う必要があります');
+    expect(text(modalSegs([MUST, WANT, CAN], concept(TABERU), 'past', true))).toBe('食べることができるようになりたいと思う必要がありませんでした');
+    expect(text(modalSegs([WANT, CAN], concept(TABERU), 'present', false, 0, 'stem'))).toBe('食べることができるようになりたく');
+  });
+
   test('a bridged pair nests under a further modal', () => {
     expect(text(modalSegs([MUST, CAN, WANT], concept(TABERU), 'present', false))).toBe('食べたいと思うことができる必要があります');
   });

@@ -44,3 +44,33 @@ The same class helper can serve the predicate fix.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: Japanese lowered degree on a の/た adjective* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The new
+[`jaAdjClass.ts`](../../../packages/engine/src/languages/ja/jaAdjClass.ts) classifies the stored
+attributive base and returns the stem each class builds on, with its reading cut the same way:
+
+- `…い` → i-adjective;
+- `…な` / `…の` → na-adjective (the particle dropped);
+- `…た` / `…だ` → the te-form (`疲れて`);
+- anything else → a bare na stem.
+
+[`jaComparisonAdj.ts`](../../../packages/engine/src/languages/ja/jaComparisonAdj.ts) builds the
+lowered degree on it: `くない`, `ではない`, or the negative state `いない` on the te-form. The same helper
+serves A115's predicate fix.
+
+Every row now renders as wanted: `それほど茶色ではない猫`, `最も大人ではない猫`, `それほど疲れていない猫`,
+`猫はそれほど茶色ではないです`, `猫はそれほど茶色ではなく思えます`. Also covered: `最も孤立していない猫` and
+`猫はそれほど疲れていないです`.
+
+Unchanged:
+- the i- and na-adjectives (`それほど大きくない`, `最も幸せではない`);
+- the bare stem (`静かではない`);
+- the positive `茶色の猫`.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: Japanese lowered degree on a の/た adjective*. The pinning `test.fails` is now a
+  passing `test`. New cases cover `孤立した` and the SEEM and BE positions, with a guard for the other
+  classes.
+- Unit tests: the new `jaAdjClass.test.ts`, and `jaComparisonAdj.test.ts`, with the の/た cases it lacked.

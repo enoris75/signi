@@ -925,7 +925,7 @@ describe('documented simplifications: Japanese aspect in a relative clause', () 
 // head noun: 食べることができます猫, 幸せです猫. Their plain endings are fixed and need no nai-form,
 // unlike the documented negation/aspect gaps.
 describe('known bugs: Japanese relative clause with a modal or a copula', () => {
-  test.fails('Japanese puts a modal or copular relative clause in the plain form', () => {
+  test('Japanese puts a modal or copular relative clause in the plain form', () => {
     const eatsWho = (verbPhrase: object) =>
       sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
     const isWho = (predicate: string, tense: 'present' | 'past' = 'present') =>
@@ -937,5 +937,27 @@ describe('known bugs: Japanese relative clause with a modal or a copula', () => 
     expect(eatsWho({ modals: ['MUST'], tense: 'past' })).toBe('食べる必要があった猫は走ります。');
     expect(isWho('HAPPY')).toBe('幸せな猫は走ります。');
     expect(isWho('BIG', 'past')).toBe('大きかった猫は走ります。');
+  });
+
+  test('Japanese keeps the plain form under negation, past, an object gap, a の/た predicate and a bridged chain', () => {
+    const eatsWho = (verbPhrase: object) =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
+    const isWho = (predicate: string, verbPhrase: object = {}) =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', ...verbPhrase }, complements: { predicative: { phrase: np(predicate) } } } }), 'RUN')).ja;
+    expect(eatsWho({ modals: ['CAN'], negative: true })).toBe('食べることができない猫は走ります。');
+    expect(eatsWho({ modals: ['WILL'], negative: true })).toBe('食べたくない猫は走ります。');
+    expect(eatsWho({ modals: ['MUST'], negative: true, tense: 'past' })).toBe('食べる必要がなかった猫は走ります。');
+    expect(eatsWho({ modals: ['CAN', 'WILL'] })).toBe('食べたいと思うことができる猫は走ります。');
+    expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', modals: ['CAN'] } } }), 'RUN')).ja)
+      .toBe('猫が食べることができるネズミは走ります。');
+    expect(isWho('LEGEND')).toBe('伝説である猫は走ります。');
+    expect(isWho('LEGEND', { tense: 'past' })).toBe('伝説だった猫は走ります。');
+    expect(isWho('HAPPY', { negative: true })).toBe('幸せではない猫は走ります。');
+    expect(isWho('BROWN')).toBe('茶色の猫は走ります。');
+    expect(isWho('TIRED')).toBe('疲れている猫は走ります。');
+  });
+
+  test('regression: the main clause keeps its polite modal', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['CAN'] } })).ja).toBe('猫は食べることができます。');
   });
 });

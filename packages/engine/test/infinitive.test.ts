@@ -149,10 +149,15 @@ describe('known bugs: German "nicht" in the infinitive', () => {
 describe('known bugs: German "kein" object in the infinitive', () => {
   const noMouse = np('MOUSE', { definiteness: 'no' });
 
-  test.fails('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
+  test('German drops "nicht" beside a "kein" object, and "kein" under "nie"', () => {
     expect(sayAll(infinitive({ directObject: noMouse }, { negative: true })).de).toBe('keine Maus essen.');
     expect(sayAll(infinitive({ directObject: noMouse }, { negative: true, modifier: 'FAST' })).de).toBe('schnell keine Maus essen.');
     expect(sayAll(infinitive({ directObject: noMouse }, { modifier: 'NEVER' })).de).toBe('nie eine Maus essen.');
+  });
+
+  test('regression: a definite object keeps "nicht", and "nie" alone negates', () => {
+    expect(sayAll(infinitive({ directObject: np('MOUSE') }, { negative: true })).de).toBe('die Maus nicht essen.');
+    expect(sayAll(infinitive({}, { modifier: 'NEVER' })).de).toBe('nie essen.');
   });
 });
 

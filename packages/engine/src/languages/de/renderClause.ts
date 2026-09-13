@@ -10,7 +10,6 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
-import { nichtSlots } from './nichtSlots.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
@@ -40,7 +39,7 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     const subj = subjectText(subject);
     // Verbless period: a bare noun phrase ("aktuelle Nachrichten").
     if (!verbPhrase) return subj.trim();
-    const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
+    const { verb, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
     const hasPredicative = !!phrase.complements?.['predicative'];
 
@@ -49,10 +48,11 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // predicate complement ("sei nicht vorsichtig"), otherwise after the objects ("iss das Brot nicht").
     if (mood === 'imperative') {
       const word = deImperativeWord(verb.forms, deImperativePN(subject.agreement));
-      const impDirect = directObject ? elementPhrase(directObject, 'acc') : '';
+      // The command negates as the declarative does: no "nicht" beside "nie" or a "kein" object, and
+      // "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie eine Maus").
+      const { nicht: neg, directObject: impObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
+      const impDirect = impObject ? elementPhrase(impObject, 'acc') : '';
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
-      const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
-      const neg = nichtSlots(applyNicht, { adverb: !!impModifier, predicative: hasPredicative });
       const impComplements = complementsPhrase(rest, verb.forms);
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
@@ -69,9 +69,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // German already gives the imperative `instruction` register above; the infinitive is `base`.
     if (mood === 'infinitive') {
       const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
-      const infDirect = directObject ? elementPhrase(directObject, 'acc') : '';
-      const applyNicht = verbNegative === true && modifier?.forms['polarity'] !== 'negative';
-      const neg = nichtSlots(applyNicht, { adverb: !!infModifier, predicative: hasPredicative });
+      // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
+      const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
+      const infDirect = infObject ? elementPhrase(infObject, 'acc') : '';
       const infComplements = complementsPhrase(rest, verb.forms);
       return [neg.beforeAdverb, infModifier, dativeText, infDirect, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
         .filter(Boolean)

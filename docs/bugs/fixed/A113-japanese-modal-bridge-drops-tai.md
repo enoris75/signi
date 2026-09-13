@@ -29,3 +29,26 @@ In Case A's governed branch, keep the たい: return `なり` + `たい` in the 
 | | |
 |---|---|
 | **Test** | `modals.test.ts` → *known bugs: Japanese 〜たい bridge inside a longer modal chain* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. In [`modalSegs.ts`](../../../packages/engine/src/languages/ja/modalSegs.ts),
+Case A's governed branch now returns `ように` + `なり` + `modalSuffixSeg(m, form)`: `なりたい` in the
+dictionary form, `なりたく` in the stem form. It no longer returns a bare `なる`/`なり`, so the outer
+modal's と思う bridge attaches to `…ようになりたい`.
+
+Every row now renders as wanted:
+- `食べることができるようになりたいと思う必要があります`
+- `…ようになりたいと思うことができます`
+- `食べる必要があるようになりたいと思うことができます`
+
+The fix also covers a negative past (`…必要がありませんでした`) and a four-modal chain (`…ようになりたいと思う
+ことができるようになりたいです`). The two-modal bridges are unchanged.
+
+A relative clause with the chain still ends in the polite `…必要があります` before its head; that is A116.
+
+- **Tests:** [`packages/engine/test/modals.test.ts`](../../../packages/engine/test/modals.test.ts) →
+  *known bugs: Japanese 〜たい bridge inside a longer modal chain*. The pinning `test.fails` is now a
+  passing `test`. New cases cover tense and polarity and the four-modal chain, with a guard for the
+  two-modal bridges.
+- Unit test: `modalSegs.test.ts`.

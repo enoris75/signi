@@ -30,3 +30,24 @@ of the stem's reading.
 | | |
 |---|---|
 | **Test** | `furigana.test.ts` → *known bugs: Japanese instruction label furigana* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 with both parts of the shape the fix proposed.
+
+- **Corpus:** the eight ja lexemes in [`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)
+  carry `label_reading` next to `label`: `にゅうりょく`, `ほぞん`, `よみこみ`, `ついか`, `かきだし`, `とりこみ`,
+  `しょうきょ`, `ちょうせい`. The database is reseeded.
+- **Engine:** [`jaImperativeSegs.ts`](../../../packages/engine/src/languages/ja/jaImperativeSegs.ts)
+  passes the reading to `wordSeg`. A label with no seeded reading derives one from the masu-stem
+  when the label is that stem (`読み込み`) or the stem without its する (`保存` ← `保存し`). Any other
+  label stays bare.
+
+Every row now reads as wanted: `['ほん', 'ほぞん']`, `['ほん', 'よみこみ']`, and the other six labels read
+too. An unlabelled verb keeps its masu-stem reading (`['ほん', 'たべ']`). The text is unchanged.
+
+- **Tests:** [`packages/engine/test/furigana.test.ts`](../../../packages/engine/test/furigana.test.ts)
+  → *known bugs: Japanese instruction label furigana*. The pinning `test.fails` is now a passing
+  `test`. New cases cover the other six labels, with a guard for an unlabelled verb.
+- Unit test: `jaImperativeSegs.test.ts`, covering the seeded reading, both derived readings and a
+  label with no match.

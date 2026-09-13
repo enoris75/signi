@@ -49,4 +49,14 @@ describe('aspectVerbSegs', () => {
   test('a kana te-form takes no ruby', () => {
     expect(aspectVerbSegs(vp(AGERU, { aspect: 'progressive' }), false)).toEqual([{ t: 'あげて' }, { t: 'います' }]);
   });
+
+  // A118: an "if" clause puts the aspect's fixed ending in the たら form.
+  test('the たら form of each aspect, affirmative and negative', () => {
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'progressive' }), false, true))).toBe('食べていたら');
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'progressive' }), true, true))).toBe('食べていなかったら');
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'resultative', tense: 'past' }), false, true))).toBe('食べてしまったら');
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'resultative' }), true, true))).toBe('食べてしまわなかったら');
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'prospective' }), false, true))).toBe('食べるところだったら');
+    expect(text(aspectVerbSegs(vp(TABERU, { aspect: 'prospective' }), true, true))).toBe('食べるところではなかったら');
+  });
 });

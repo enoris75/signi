@@ -4,8 +4,9 @@ import { modalAdverbs } from './modalAdverbs.js';
 import { nichtSlots } from './nichtSlots.js';
 
 /**
- * How a finite clause negates: the declarative, the verb-final "wenn" protasis and the relative
- * clause all decide it the same way, and place "nicht" by the shared `nichtSlots`.
+ * How a clause negates: the declarative, the verb-final "wenn" protasis, the relative clause, the
+ * command, the instruction and the infinitive all decide it the same way, and place "nicht" by the
+ * shared `nichtSlots`.
  *
  * - A negative adverb ("nie") on the main verb or any modal is itself the negator, so there is no
  *   "nicht" ("isst nie", "der nie isst").

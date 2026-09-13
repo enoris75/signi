@@ -33,3 +33,24 @@ The lowered degree already ends in ない (`大きくない`), so it takes the i
 | | |
 |---|---|
 | **Test** | `hypothetical.test.ts` → *known bugs: Japanese copular condition* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. [`copulaSegs.ts`](../../../packages/engine/src/languages/ja/copulaSegs.ts)
+takes a `tara` form, and [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+selects it when the mood is `subjunctive`. All the endings are fixed, and the form carries no tense:
+
+- i-adjective: `〜かったら` / `〜くなかったら`;
+- na-adjective, の-adjective or noun: `〜だったら` / `〜ではなかったら`;
+- た-adjective: `〜ていたら` / `〜ていなかったら`.
+
+The lowered degree already ends in ない, so it takes the i-adjective row.
+
+Every row now renders as wanted: `もし猫が幸せだったら`, `大きかったら`, `伝説だったら`, `幸せではなかったら`. Also
+covered: `大きくなかったら`, `それほど大きくなかったら`, `茶色だったら`, `疲れていたら`. A copular main clause
+under a condition keeps `です`.
+
+- **Tests:** [`packages/engine/test/hypothetical.test.ts`](../../../packages/engine/test/hypothetical.test.ts)
+  → *known bugs: Japanese copular condition*. The pinning `test.fails` is now a passing `test`. New cases
+  cover the negatives, the lowered degree and the の/た adjectives, with a guard for the main clause.
+- Unit test: `copulaSegs.test.ts`.

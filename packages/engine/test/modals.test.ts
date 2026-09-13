@@ -690,10 +690,22 @@ describe('known bugs: English manner adverb on a modal', () => {
 // "must think it comes to be able to eat" (…ようになると思う必要があります). Only a three-modal plan
 // reaches it; the UI chains two.
 describe('known bugs: Japanese 〜たい bridge inside a longer modal chain', () => {
-  test.fails('Japanese keeps 〜たい when the ようになる bridge is itself governed', () => {
+  test('Japanese keeps 〜たい when the ようになる bridge is itself governed', () => {
     const eats = (modals: string[]) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals } })).ja;
     expect(eats(['MUST', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思う必要があります。');
     expect(eats(['CAN', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思うことができます。');
     expect(eats(['CAN', 'WILL', 'MUST'])).toBe('猫は食べる必要があるようになりたいと思うことができます。');
+  });
+
+  test('Japanese keeps 〜たい through tense and polarity and in a four-modal chain', () => {
+    const eats = (modals: string[], verbPhrase = {}) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals, ...verbPhrase } })).ja;
+    expect(eats(['MUST', 'WILL', 'CAN'], { negative: true, tense: 'past' })).toBe('猫は食べることができるようになりたいと思う必要がありませんでした。');
+    expect(eats(['WILL', 'CAN', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思うことができるようになりたいです。');
+  });
+
+  test('regression: the two-modal bridges are unchanged', () => {
+    const eats = (modals: string[]) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals } })).ja;
+    expect(eats(['WILL', 'CAN'])).toBe('猫は食べることができるようになりたいです。');
+    expect(eats(['CAN', 'WILL'])).toBe('猫は食べたいと思うことができます。');
   });
 });

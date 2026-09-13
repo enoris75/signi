@@ -54,3 +54,41 @@ concord on the verb. That is a separate case, not pinned here.
 | | |
 |---|---|
 | **Test** | `complements/determiner.test.ts` → *known bugs: Japanese どの…も on a complement* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+[`npSegs.ts`](../../../packages/engine/src/languages/ja/npSegs.ts) no longer lays down も; it keeps only
+the prenominal `どの`. The new [`jaParticleSegs.ts`](../../../packages/engine/src/languages/ja/jaParticleSegs.ts)
+closes the circumfix wherever the group's case particle goes: `も` alone in place of `が` / `を` / `は`,
+and particle + `も` for anything else. Every site that used to skip its particle for a negative group
+now calls it:
+
+- the subject in `buildClauseSegments`;
+- the three object positions in `predicateSegs`;
+- the relative-clause subject in `npSegs`;
+- in `complementSegs`, the predicative `に`, the instrumental action's `を` and every other complement
+  (after the relational noun: `の下でも`).
+
+Two more sites close it themselves. `mannerGlossSegs` adds `も` before its `ない` (`どの時間もない`, unchanged).
+[`copulaSegs.ts`](../../../packages/engine/src/languages/ja/copulaSegs.ts) gives a `no` noun predicate
+`でも…` in place of `では…` (`どの伝説でもありません`).
+
+Every row now renders as wanted. Also covered:
+- the direction (`どの市場へも`), the instrumental and manner `でも`, and SEEM's `にも`;
+- A109's existential (`どの家にもいません`);
+- the prenominal copula (`どの伝説でもない猫`).
+
+The subject, the object and the route still take `も` alone. A `no` possessor keeps its old `どの猫もの本`,
+since the bug file calls it a separate, unpinned case.
+
+The passing test that pinned the wrong locative in `complements/determiner.test.ts` (*the `no`
+circumfix replaces で with も*) now asserts `猫はどの家でも走りません。`, and its comment is updated.
+`npSegs.test.ts` no longer expects `も` from `npSegs`.
+
+- **Tests:** [`packages/engine/test/complements/determiner.test.ts`](../../../packages/engine/test/complements/determiner.test.ts)
+  → *known bugs: Japanese どの…も on a complement*. The pinning `test.fails` is now a passing `test`.
+  New cases cover the direction, instrumental, manner, SEEM, the existential and the relative copula,
+  with a guard for が / を / the route.
+- Unit tests: the new `jaParticleSegs.test.ts`, plus `npSegs.test.ts`, `complementSegs.test.ts` and
+  `copulaSegs.test.ts`.

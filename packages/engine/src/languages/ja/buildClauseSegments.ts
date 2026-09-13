@@ -6,6 +6,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { jaImperativePN } from './jaImperativePN.js';
+import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
 
@@ -28,8 +29,8 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const dropsSubject = imperative || phrase.verbPhrase.mood === 'infinitive';
   // One topic particle for the whole subject, coordinated or not: 「ピーターとパウロは」.
   const subjectNegative = isNegativeGroup(phrase.subject);
-  // A `no` subject ends in も, which replaces the topic/subject particle (どの時間も, not どの時間もは).
-  if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...(subjectNegative ? [] : [{ t: subjectParticle }]));
+  // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
+  if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, subjectParticle));
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative, isAnimate(phrase.subject.conjuncts)));
   return segs;

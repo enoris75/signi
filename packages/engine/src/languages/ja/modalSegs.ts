@@ -1,6 +1,6 @@
 import type { Tense } from '@signi/shared';
 import type { ConceptForms, RubySegment } from '../../types.js';
-import type { JaForm } from './ja.types.js';
+import type { JaEnding, JaForm } from './ja.types.js';
 import { modalEndingSegs } from './modalEndingSegs.js';
 import { modalSuffixSeg } from './modalSuffixSeg.js';
 import { verbFormSeg } from './verbFormSeg.js';
@@ -31,6 +31,8 @@ export function modalSegs(
   negative: boolean,
   index = 0,
   form?: JaForm,
+  // The outermost modal's ending: polite, plain (a prenominal relative clause) or たら (an "if" clause).
+  ending: JaEnding = 'polite',
 ): RubySegment[] {
   if (index === modals.length) return [verbFormSeg(verb, form ?? 'dict')];
   const m = modals[index];
@@ -44,25 +46,27 @@ export function modalSegs(
   //
   // Case A — 〜たい *over* a verb-kind modal (want to be able to …): the inner modal rides
   // ようになる ("come to be able"), and 〜たい inflects なる (its polite stem なり + たい):
-  // 食べることができるようになりたいです.
+  // 食べることができるようになりたいです. Governed by an outer modal it keeps its たい, in the form
+  // that modal asks for (なりたい, なりたく), so the desire survives the outer bridge:
+  // 食べることができるようになりたいと思う必要があります.
   if (isIadj && innerModal && !innerIsIadj) {
-    const inner = modalSegs(modals, verb, tense, negative, index + 1, 'dict');
+    const inner = modalSegs(modals, verb, tense, negative, index + 1, 'dict', ending);
     return form === undefined
-      ? [...inner, { t: 'ように' }, { t: 'なり' }, ...modalEndingSegs(m, tense, negative)]
-      : [...inner, { t: 'ように' }, { t: form === 'stem' ? 'なり' : 'なる' }];
+      ? [...inner, { t: 'ように' }, { t: 'なり' }, ...modalEndingSegs(m, tense, negative, ending)]
+      : [...inner, { t: 'ように' }, { t: 'なり' }, modalSuffixSeg(m, form)];
   }
   // Case B — a nominalising verb-kind modal *over* 〜たい (… can want to eat): the desire is made
   // a clause with と思う ("think that …") before the modal nominalises it: 食べたいと思うことができます.
   if (!isIadj && innerIsIadj) {
-    const inner = modalSegs(modals, verb, tense, negative, index + 1, governed);
+    const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending);
     const bridge: RubySegment[] = [{ t: 'と' }, wordSeg('思う', 'おもう')];
     return form === undefined
-      ? [...inner, ...bridge, ...modalEndingSegs(m, tense, negative)]
+      ? [...inner, ...bridge, ...modalEndingSegs(m, tense, negative, ending)]
       : [...inner, ...bridge, modalSuffixSeg(m, form)];
   }
-  const inner = modalSegs(modals, verb, tense, negative, index + 1, governed);
+  const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending);
   // No `form` means this is the outermost modal: it takes the finite, inflected ending.
   return form === undefined
-    ? [...inner, ...modalEndingSegs(m, tense, negative)]
+    ? [...inner, ...modalEndingSegs(m, tense, negative, ending)]
     : [...inner, modalSuffixSeg(m, form)];
 }

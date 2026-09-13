@@ -54,8 +54,9 @@ describe('npSegs', () => {
     expect(text(npSegs(np(NEKO, { definiteness: 'all', number: 'plural' }, { adjectives: [adj(OOKII)] })))).toBe('すべての大きい猫');
   });
 
-  test('the no determiner is the circumfix どの … も around the head', () => {
-    expect(npSegs(np(NEKO, { definiteness: 'no' }))).toEqual([{ t: 'どの' }, { t: '猫', r: 'ねこ' }, { t: 'も' }]);
+  // A114: the も closes the circumfix with the case particle (see jaParticleSegs), not here.
+  test('the no determiner leads with どの; its も is left to the particle', () => {
+    expect(npSegs(np(NEKO, { definiteness: 'no' }))).toEqual([{ t: 'どの' }, { t: '猫', r: 'ねこ' }]);
   });
 
   test('a noun possessor precedes the head, linked by の, and nests', () => {

@@ -8,9 +8,22 @@ import { wordSeg } from './wordSeg.js';
  *   prospective → dictionary form + ところです ("行くところです", past ～ところでした)
  * Future reuses the present, as elsewhere in the Japanese engine.
  */
-export function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase, negative: boolean): RubySegment[] {
+export function aspectVerbSegs(verbPhrase: ResolvedVerbPhrase, negative: boolean, tara = false): RubySegment[] {
   const { verb, tense = 'present', aspect = 'neutral' } = verbPhrase;
   const past = tense === 'past';
+  // An "if" clause puts the aspect's own fixed ending in the たら form, whatever the tense: 食べていたら,
+  // 食べてしまったら, 食べるところだったら, and in the negative いなかったら / しまわなかったら / ところではなかったら.
+  if (tara) {
+    if (aspect === 'prospective') {
+      return [wordSeg(verb.forms['base'] ?? '', verb.forms['reading']), { t: 'ところ' }, { t: negative ? 'ではなかったら' : 'だったら' }];
+    }
+    const te = verb.forms['te'];
+    const teSeg = te ? wordSeg(te, verb.forms['te_reading']) : wordSeg(verb.forms['base'] ?? '', verb.forms['reading']);
+    const suffix = aspect === 'resultative'
+      ? (negative ? 'しまわなかったら' : 'しまったら')
+      : (negative ? 'いなかったら' : 'いたら');
+    return [teSeg, { t: suffix }];
+  }
   if (aspect === 'prospective') {
     // The copula carries the polarity: affirmative です/でした, negative ではありません(でした) —
     // the same copula negation the na-adjective/noun predicate uses. Without this the prospective
