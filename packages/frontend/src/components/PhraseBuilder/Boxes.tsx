@@ -297,6 +297,10 @@ export function SatelliteButton({
         onPointerDown={(e) => e.stopPropagation()}
         onClick={sat.onToggle}
         sx={{
+          // Block-level, so the box that positions a control hugs it. Left inline, the button
+          // sits in a 28px line box and lands 2px below the point it was placed at — off the
+          // border it rides and off the start of its connector.
+          display: "flex",
           width: 20,
           height: 20,
           p: 0,

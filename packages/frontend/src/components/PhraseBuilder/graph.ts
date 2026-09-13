@@ -1,4 +1,4 @@
-import { COMPLEMENT_LABELS } from "@signi/shared";
+import { CAUSE_SENTIMENTS, COMPLEMENT_LABELS, PATH_SPECIFIERS } from "@signi/shared";
 import { BoxComplementType, SlotConfig } from "./interfaces.ts";
 import {
   adjectiveChainParent,
@@ -50,9 +50,25 @@ export const PIX_PAD_H = 80; // left & right — covers widest slot box half-wid
 // clear/adjective toggles on the corners — otherwise they superimpose on the dashed edge.
 export const PIX_PAD_TOP = 48;
 export const PIX_PAD_BOT = 52;
-// The route and cause boxes each carry a specifier toolbar on their top edge (path
+// The route, locative and cause boxes each carry a toolbar on their top edge (path
 // relation / sentiment); give them extra headroom so it clears the box label.
 export const ROUTE_PAD_TOP = 40;
+
+// The toolbar a complement box wears centred on its top edge (SpecifierSelector /
+// SentimentSelector): 22px buttons 2px apart, inside 2px of padding and a 1px border.
+const TOOLBAR_BUTTON = 22;
+const TOOLBAR_GAP = 2;
+const TOOLBAR_INSET = 3;
+// How far in from a top corner the box's own buttons reach (GroupBox): the collapse toggle
+// straddling the corner and the tidy-up button beside it, plus a hair of air before a toolbar.
+const CORNER_BUTTONS_W = 33;
+
+// How many buttons the toolbar on a complement box's top edge holds; 0 for a box without one.
+function toolbarButtons(removeKey: BoxComplementType | undefined): number {
+  if (removeKey === "route" || removeKey === "locative") return PATH_SPECIFIERS.length;
+  if (removeKey === "cause") return CAUSE_SENTIMENTS.length;
+  return 0;
+}
 
 // The word box the pads above are cut to fit: a minimum-width slot box, half its size.
 // A node is only allowed to push its dotted box out by however much it exceeds this, so a
@@ -89,12 +105,23 @@ export function groupPads(
     };
   return {
     padH: PIX_PAD_H,
-    padTop:
-      removeKey === "route" || removeKey === "cause"
-        ? PIX_PAD_TOP + ROUTE_PAD_TOP
-        : PIX_PAD_TOP,
+    padTop: toolbarButtons(removeKey) > 0 ? PIX_PAD_TOP + ROUTE_PAD_TOP : PIX_PAD_TOP,
     padBot: PIX_PAD_BOT,
   };
+}
+
+// The narrowest a group's dotted box may be, in SVG pixels. A box with a toolbar on its top
+// edge has to seat it between the buttons on its top corners: the path-relation toolbar is
+// wider than a one-word box, and centred on the edge its end buttons would cover the collapse
+// and remove buttons. Compact view hides both, so it sets no floor.
+function groupMinWidth(
+  removeKey: BoxComplementType | undefined,
+  compact: boolean,
+): number {
+  const buttons = toolbarButtons(removeKey);
+  if (compact || buttons === 0) return 0;
+  const toolbar = buttons * TOOLBAR_BUTTON + (buttons - 1) * TOOLBAR_GAP + 2 * TOOLBAR_INSET;
+  return toolbar + 2 * CORNER_BUTTONS_W;
 }
 
 // The dotted box a group's nodes trace out, in canvas pixels, before the canvas-edge
@@ -128,12 +155,15 @@ export function rawGroupRect(
       bottom: cy + padBot + overV,
     };
   });
-  const x = Math.min(...extents.map((e) => e.left));
+  const left = Math.min(...extents.map((e) => e.left));
+  const right = Math.max(...extents.map((e) => e.right));
   const y = Math.min(...extents.map((e) => e.top));
+  // Widened about its centre to the box's floor, so the nodes stay centred in it.
+  const width = Math.max(right - left, groupMinWidth(group.removeKey, compact));
   return {
-    x,
+    x: (left + right - width) / 2,
     y,
-    width: Math.max(...extents.map((e) => e.right)) - x,
+    width,
     height: Math.max(...extents.map((e) => e.bottom)) - y,
   };
 }

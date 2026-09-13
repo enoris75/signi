@@ -918,11 +918,6 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
   });
 
   test("the verb box's controls keep clear of the verb", async ({ app }) => {
-    test.fail(
-      true,
-      'the reveal controls ride the verb box border and crowd onto a short verb once the verb ' +
-        'phrase is full: the modal icon sits on the "r" of "run", tense and aspect on its top edge',
-    );
     await app.buildClause('CAT', 'RUN');
     await fillVerb(app);
     await app.tidy();
@@ -957,11 +952,6 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
   test("a complement's relation toolbar keeps clear of its box's corner buttons", async ({
     app,
   }) => {
-    test.fail(
-      true,
-      'the specifier toolbar is centred on the top edge of the Locative box and is wider than a ' +
-        'one-word box, so its end buttons land on the collapse and remove buttons at the corners',
-    );
     await app.buildClause('CAT', 'RUN');
     await app.revealAndPick('locative', 'HOUSE');
     await app.tidy();
@@ -969,12 +959,15 @@ test.describe('known bugs: overlap on a tidied canvas', () => {
     const { controls } = await settledLayout(app.period(0));
     const corners = controls.filter((c) => /^(Collapse|Expand|Tidy up|Remove) Locative$/.test(c.name));
     expect(corners.map((c) => c.name)).toEqual(['Collapse Locative', 'Remove Locative']);
+    // Nor on the controls riding the top of the locative's word box, just below the toolbar.
     const covered = controls
       .filter((c) => c.toolbar)
       .flatMap((bar) =>
-        corners.filter((corner) => depth(bar.rect, corner.rect) >= COVER).map((c) => `${bar.name} × ${c.name}`),
+        controls
+          .filter((other) => !other.toolbar && depth(bar.rect, other.rect) >= COVER)
+          .map((other) => `${bar.name} × ${other.name}`),
       );
-    expect(covered, 'toolbar buttons covering the corner buttons').toEqual([]);
+    expect(covered, 'toolbar buttons covering other controls').toEqual([]);
   });
 
   test('the complement toggles stay clickable when the object box sits under the verb phrase', async ({
