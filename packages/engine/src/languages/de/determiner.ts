@@ -3,6 +3,7 @@ import { defArticle } from './defArticle.js';
 import { demForm } from './demForm.js';
 import { indefArticle } from './indefArticle.js';
 import { keinForm } from './keinForm.js';
+import { relativePronoun } from './relativePronoun.js';
 
 /**
  * The determiner for a noun phrase, from its `definiteness` (default 'definite'), declined
@@ -20,6 +21,8 @@ export function determiner(forms: Record<string, string>, _case: Case, plural: b
   }
   const definiteness = forms['definiteness'] ?? 'definite';
   if (definiteness === 'definite') return defArticle(forms, _case, plural);
+  // The relativizer stand-in of a complement relative (see `relativeGapComplement`): "in dem", "mit denen".
+  if (definiteness === 'relative') return relativePronoun(forms, _case, plural);
   const gender = forms['gender'] ?? 'neut';
   // Mass nouns ("Wasser") stay singular and take the invariant mass quantifiers
   // "etwas / viel / wenig"; "all das Wasser"; no indefinite article.

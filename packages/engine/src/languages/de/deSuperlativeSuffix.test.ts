@@ -11,6 +11,14 @@ describe('deSuperlativeSuffix', () => {
     expect(deSuperlativeSuffix('hübsch')).toBe('est');
   });
 
+  // Only a stressed root does: a monosyllabic -sch keeps it.
+  test('takes a bare -st after an unstressed -isch or a participle\'s -end', () => {
+    expect(deSuperlativeSuffix('semantisch')).toBe('st');
+    expect(deSuperlativeSuffix('typisch')).toBe('st');
+    expect(deSuperlativeSuffix('spannend')).toBe('st');
+    expect(deSuperlativeSuffix('frisch')).toBe('est');
+  });
+
   test('takes a bare -st elsewhere', () => {
     expect(deSuperlativeSuffix('jüng')).toBe('st');
     expect(deSuperlativeSuffix('schnell')).toBe('st');

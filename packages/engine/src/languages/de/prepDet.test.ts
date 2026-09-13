@@ -9,6 +9,8 @@ describe('prepDet', () => {
     expect(prepDet('zu', KATER, 'dat', false)).toBe('zum');
     expect(prepDet('zu', KATZE, 'dat', false)).toBe('zur');
     expect(prepDet('zu', SCHWEIZ, 'dat', false)).toBe('zur');
+    // An articled name fuses whatever determiner was picked, since its article surfaces regardless.
+    expect(prepDet('zu', { ...SCHWEIZ, definiteness: 'indefinite' }, 'dat', false)).toBe('zur');
   });
 
   test('any other preposition-article pair stays apart', () => {

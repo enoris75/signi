@@ -453,9 +453,22 @@ describe('known bugs: German fusion on an articled proper name', () => {
   const goesTo = (definiteness: Definiteness) =>
     sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('ANTARCTICA', { definiteness }) } } })).de;
 
-  test.fails('German fuses zu + der to zur whatever determiner was picked', () => {
+  test('German fuses zu + der to zur whatever determiner was picked', () => {
     expect(goesTo('indefinite')).toBe('der Kater geht zur Antarktis.');
     expect(goesTo('bare')).toBe('der Kater geht zur Antarktis.');
+  });
+
+  test('German fuses under a demonstrative or negative pick too, and leaves an unfused article apart', () => {
+    expect(goesTo('this')).toBe('der Kater geht zur Antarktis.');
+    expect(goesTo('no')).toBe('der Kater geht zur Antarktis.');
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('ANTARCTICA', { definiteness: 'indefinite' }) } } })).de)
+      .toBe('der Kater kommt aus der Antarktis.');
+    expect(sayAll(clause(np('BOOK', { possessor: np('ANTARCTICA', { definiteness: 'indefinite' }) }), 'BURN')).de).toBe('das Buch von der Antarktis brennt.');
+  });
+
+  test('regression: a bare-name continent keeps no article', () => {
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } })).de)
+      .toBe('der Kater geht zu Europa.');
   });
 });
 
@@ -463,10 +476,22 @@ describe('known bugs: German fusion on an articled proper name', () => {
 // determiner was picked, but `prepDet` fuses the preposition only when the *picked* determiner is
 // definite. An indefinite or demonstrative pick renders "da l'Africa" / "a l'Europa".
 describe('known bugs: Italian fusion on an articled proper name', () => {
-  test.fails('Italian fuses the preposition with a continent\'s article whatever the determiner', () => {
+  test('Italian fuses the preposition with a continent\'s article whatever the determiner', () => {
     expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('AFRICA', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto viene dall'Africa.");
     expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('EUROPE', { definiteness: 'this' }) } } }), 'it')).toBe("il gatto viene dall'Europa.");
     expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto dà il libro all'Europa.");
     expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('EUROPE', { definiteness: 'indefinite' }), specifiers: [{ kind: 'path', value: 'around' }] } } }), 'it')).toBe("il gatto mangia intorno all'Europa.");
+  });
+
+  test('Italian fuses in front of, in a cause and in a possessor too', () => {
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('AFRICA', { definiteness: 'bare' }), specifiers: [{ kind: 'path', value: 'in_front_of' }] } } }), 'it'))
+      .toBe("il gatto mangia davanti all'Africa.");
+    expect(say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto corre a causa dell'Europa.");
+    expect(say(clause(np('BOOK', { possessor: np('EUROPE', { definiteness: 'indefinite' }) }), 'BURN'), 'it')).toBe("il libro dell'Europa brucia.");
+  });
+
+  test('regression: con never fuses, and a plain "in" continent stays bare', () => {
+    expect(say(clause(np('CAT'), 'CUT', { complements: { instrumental: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto taglia con l'Europa.");
+    expect(say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe('il gatto va in Europa.');
   });
 });

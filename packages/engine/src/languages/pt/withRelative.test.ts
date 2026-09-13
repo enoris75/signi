@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  CAO, COMER, complement, complements, DAR, el, EU, type Forms, GATO, LIVRO, MENINO, nounModifier, np, PALAVRA, RATO, SE, VER, vp,
+  CAO, CASA, COMER, complement, complements, DAR, el, EU, type Forms, GATO, LIVRO, MENINO, MULHER, nounModifier, np, PALAVRA, RATO, SE, VER, vp,
 } from './pt.fixtures.js';
 import { withRelative } from './withRelative.js';
 
@@ -50,5 +50,15 @@ describe('withRelative', () => {
   test('the relative follows the possessor', () => {
     expect(withRelative('o livro', np(LIVRO, {}, { possessor: np(GATO), relative: subjectRelative(vp(ARDER)) })))
       .toBe('o livro do gato que arde');
+  });
+
+  test('a head filling a complement takes its preposition with the article and qual', () => {
+    expect(withRelative('a casa', np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
+      .toBe('a casa na qual o gato come');
+    expect(withRelative('a mulher', np(MULHER, {}, {
+      relative: { headRole: 'terminus', subject: el(np(GATO)), verbPhrase: vp(DAR, {}, 'GIVE'), directObject: el(np(LIVRO)) },
+    }))).toBe('a mulher à qual o gato dá o livro');
+    expect(withRelative('os meninos', np(MENINO, { number: 'plural' }, { relative: { headRole: 'source', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
+      .toBe('os meninos dos quais o gato come');
   });
 });

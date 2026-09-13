@@ -603,6 +603,13 @@ export const NOUN_COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
 export interface RelativeClause {
   /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
   headRole?: 'subject' | 'directObject' | ComplementType;
+  /**
+   * The specifiers of the complement the head fills, when `headRole` is a complement: its spatial
+   * relation or sentiment. The complement's noun phrase is the head itself, so these are all that
+   * survive the gap, and they pick the relativizer's preposition ("the house *under* which the cat
+   * eats", "the dog *thanks to* which…").
+   */
+  headSpecifiers?: Specifier[];
   /** The clause's own subject — present when headRole !== 'subject' (drives agreement). */
   subject?: NounElement;
   verbPhrase: VerbPhrase;

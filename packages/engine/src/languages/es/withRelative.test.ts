@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ARDER, CASA, COMER, COMIDA, complement, CORRER, CREADOR, el, type Forms, FRASE, GATO, LIBRO, NINO, nounModifier, np, SE, vp, YO } from './es.fixtures.js';
+import { ARDER, CASA, COMER, COMIDA, complement, CORRER, CREADOR, DAR, el, type Forms, FRASE, GATO, LIBRO, MUJER, NINO, nounModifier, np, SE, vp, YO } from './es.fixtures.js';
 import { withRelative } from './withRelative.js';
 
 const LLORAR: Forms = { base: 'llorar', '3sg_present': 'llora', '3pl_present': 'lloran' };
@@ -46,5 +46,16 @@ describe('withRelative', () => {
   test('the relative clause follows the possessor', () => {
     const burns = { headRole: 'subject' as const, verbPhrase: vp(ARDER) };
     expect(withRelative('el libro', np(LIBRO, {}, { possessor: np(GATO), relative: burns }))).toBe('el libro del gato que arde');
+  });
+
+  test('a head filling a complement takes its preposition with the article and que', () => {
+    expect(withRelative('la casa', np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
+      .toBe('la casa en la que el gato come');
+    expect(withRelative('las mujeres', np(MUJER, { number: 'plural' }, {
+      relative: { headRole: 'terminus', subject: el(np(GATO)), verbPhrase: vp(DAR, {}, 'GIVE'), directObject: el(np(LIBRO)) },
+    }))).toBe('las mujeres a las que el gato da el libro');
+    expect(withRelative('el niño', np(NINO, {}, {
+      relative: { headRole: 'cause', subject: el(np(GATO)), verbPhrase: vp(COMER), headSpecifiers: [{ kind: 'sentiment', value: 'positive' }] },
+    }))).toBe('el niño gracias al que el gato come');
   });
 });

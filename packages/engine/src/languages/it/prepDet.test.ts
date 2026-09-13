@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ACQUA, BASTONE, CASA, CURA, GATTO, MODO, UOMO, VELOCITA } from './it.fixtures.js';
+import { ACQUA, BASTONE, CASA, CURA, EUROPA, GATTO, MODO, UOMO, VELOCITA } from './it.fixtures.js';
 import { prepDet } from './prepDet.js';
 
 describe('prepDet', () => {
@@ -9,6 +9,12 @@ describe('prepDet', () => {
     expect(prepDet('da', { ...UOMO, definiteness: 'definite' }, false, 'uomo')).toBe("dall'");
     expect(prepDet('in', MODO, false, 'modo')).toBe('nel');
     expect(prepDet('di', GATTO, true, 'gatti')).toBe('dei');
+  });
+
+  // A continent takes the definite article whatever was picked (see `artFor`), so it fuses like one.
+  test('a proper noun fuses whatever determiner was picked', () => {
+    expect(prepDet('da', { ...EUROPA, definiteness: 'indefinite' }, false, 'Europa')).toBe("dall'");
+    expect(prepDet('a', { ...EUROPA, definiteness: 'this' }, false, 'Europa')).toBe("all'");
   });
 
   test('con and come never fuse', () => {

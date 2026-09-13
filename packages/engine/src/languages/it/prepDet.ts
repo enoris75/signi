@@ -12,8 +12,11 @@ import { prepArt } from './prepArt.js';
  * writes "con il coltello", leaving the fused "col" to speech.
  */
 export function prepDet(prep: 'a' | 'da' | 'in' | 'di' | 'con' | 'come', forms: Record<string, string>, plural: boolean, lead: string): string {
-  // "con" (instrumental) and "come" (similative) fuse with no article — "con il", "come il".
-  if (prep !== 'con' && prep !== 'come' && (forms['definiteness'] ?? 'definite') === 'definite') return prepArt(prep, forms, plural, lead);
+  // "con" (instrumental) and "come" (similative) fuse with no article — "con il", "come il". A proper
+  // noun takes the definite article whatever was picked (see `artFor`), so it fuses like one:
+  // "dall'Africa", "all'Europa".
+  const definite = (forms['definiteness'] ?? 'definite') === 'definite' || forms['proper'] === '1';
+  if (prep !== 'con' && prep !== 'come' && definite) return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;
 }

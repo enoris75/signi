@@ -315,6 +315,7 @@ function resolveRelativeClause(
 ): ResolvedRelativeClause {
   return {
     headRole: clause.headRole ?? 'subject',
+    ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     subject: clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined,
     verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
     directObject: clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined,

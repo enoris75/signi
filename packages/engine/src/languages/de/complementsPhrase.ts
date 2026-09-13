@@ -12,6 +12,7 @@ import { modifierGenitives } from './modifierGenitives.js';
 import { nounPhrase } from './nounPhrase.js';
 import { possessorText } from './possessorText.js';
 import { prepDet } from './prepDet.js';
+import { relativePronoun } from './relativePronoun.js';
 import { spatialCase } from './spatialCase.js';
 import { spatialHead } from './spatialHead.js';
 import { subordinateClause } from './subordinateClause.js';
@@ -65,6 +66,11 @@ export function complementsPhrase(
       // accusative of the fixed "die Schuld"; the blamed party hangs off it as a genitive. Emitted
       // once before the group ("durch die Schuld des Hundes und der Katze").
       if (type === 'cause' && causeSentiment(c) === 'negative') {
+        // A relativizer blames through its genitive, ahead of "Schuld": "der Hund, durch dessen Schuld …".
+        const blamed = c.phrase.conjuncts[0].head.forms;
+        if (blamed['definiteness'] === 'relative') {
+          return `durch ${relativePronoun(blamed, 'gen', (blamed['number'] ?? blamed['count']) === 'plural')} Schuld`;
+        }
         return `durch die Schuld ${coordinate(c.phrase, (np) => nounPhrase(np, 'gen'))}`;
       }
       // An instrument presented as an action. German has no gerund, so the two levels part ways
@@ -161,6 +167,8 @@ export function complementsPhrase(
         }
         else /* source */         head = prepDet('aus', f, 'dat', plural);
       }
+      // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
+      if (definiteness === 'relative') return head;
       // A weak masculine goal/place declines to -(e)n in the oblique ("zum/im/aus dem Jungen");
       // every other noun takes the regular dative-plural -n.
       const word = f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);

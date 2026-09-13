@@ -1,4 +1,5 @@
-import { isGenericSubject, type ResolvedNounPhrase } from '../../types.js';
+import { isGenericSubject, relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
+import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
 import { predicateText } from './predicateText.js';
@@ -7,8 +8,9 @@ import { subjectText } from './subjectText.js';
 /**
  * Append a noun phrase's attributive nouns, possessor, and relative clause (invariant
  * "que" + predicate). A subject-relative agrees with the head ("el niño que llora"); an
- * object-relative carries the clause's own subject, which drives agreement ("el libro
- * que yo leo").
+ * object-relative carries the clause's own subject, which drives agreement ("el libro que yo leo").
+ * When the head fills a complement, the relativizer is that complement's preposition with the
+ * article and "que", agreeing with the head ("la casa en la que el gato come", "el niño al que el hombre da el libro").
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
@@ -20,5 +22,7 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // on agreeForms), not as a subject word — "una cosa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
-  return `${withPoss} que ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
+  const gap = relativeGapComplement(np, { base: 'que', plural: 'que', definiteness: 'definite' });
+  const relativizer = gap ? complementsPhrase(gap, {}, '') : 'que';
+  return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

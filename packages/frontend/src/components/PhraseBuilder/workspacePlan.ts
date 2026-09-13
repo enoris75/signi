@@ -178,7 +178,8 @@ function attachInstrumental(
 
 // Serialise a target container as a relative clause whose head fills the `gap` slot. The
 // gap slot is dropped (its surface comes from the head above); any other slot is kept. A
-// non-subject relative keeps the clause's own subject, which drives agreement.
+// non-subject relative keeps the clause's own subject, which drives agreement. A complement gap
+// keeps its specifiers, which pick the relativizer's preposition ("the house under which …").
 function buildRelativeClause(
   container: PhraseContainer,
   gap: NounKey,
@@ -189,9 +190,11 @@ function buildRelativeClause(
   const plan = selectionToPlan(container.selection);
   attachLinks(plan, container, links, byId, new Set([...seen, container.id]));
   const complements = plan.complements ? { ...plan.complements } : undefined;
+  const headSpecifiers = COMPLEMENT_KEYS.has(gap) ? complements?.[gap as ComplementType]?.specifiers : undefined;
   if (complements && COMPLEMENT_KEYS.has(gap)) delete complements[gap as ComplementType];
   return {
     headRole: gap,
+    ...(headSpecifiers?.length ? { headSpecifiers } : {}),
     // The head fills the gap, so it is omitted; a non-subject relative keeps its own subject.
     subject: gap === "subject" ? undefined : plan.subject,
     verbPhrase: plan.verbPhrase!,

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
-import { CANE, complement, complements, DARE, el, type Forms, GATTO, IO, LIBRO, MANGIARE, MONETA, np, SI, TOPO, vp } from './it.fixtures.js';
+import { CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LIBRO, MANGIARE, MONETA, np, SI, TOPO, vp } from './it.fixtures.js';
 import { relativeText } from './relativeText.js';
 
 const LEGGERE: Forms = { base: 'leggere', '1sg_present': 'leggo', '3sg_present': 'legge', '3pl_present': 'leggono' };
@@ -42,5 +42,14 @@ describe('relativeText', () => {
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(SI))) }))).toBe('che si mangia');
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(SI)), { verbPhrase: vp(MANGIARE, { negative: true }) }) })))
       .toBe('che non si mangia');
+  });
+
+  test('a head filling a complement takes its preposition fused with an agreeing il quale', () => {
+    expect(relativeText(np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATTO)), verbPhrase: vp(MANGIARE) } }))).toBe('nella quale il gatto mangia');
+    expect(relativeText(np(CASA, { number: 'plural' }, {
+      relative: { headRole: 'locative', subject: el(np(GATTO)), verbPhrase: vp(MANGIARE), headSpecifiers: [{ kind: 'path', value: 'under' }] },
+    }))).toBe('sotto le quali il gatto mangia');
+    expect(relativeText(np(DONNA, {}, { relative: { headRole: 'terminus', subject: el(np(GATTO)), verbPhrase: vp(DARE, {}, 'GIVE'), directObject: el(np(LIBRO)) } })))
+      .toBe('alla quale il gatto dà il libro');
   });
 });

@@ -26,7 +26,8 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // Europa"); only the definite "dem" fuses to "vom".
   const definiteness = f['definiteness'] ?? 'definite';
   const art = determiner(f, 'dat', plural);
-  const von = art === 'dem' && definiteness === 'definite' ? 'vom' : art ? `von ${art}` : 'von';
+  const articled = f['proper'] === '1' && f['takes_article'] === '1';
+  const von = art === 'dem' && (definiteness === 'definite' || articled) ? 'vom' : art ? `von ${art}` : 'von';
   const declined = adjPhrase(poss, 'dat', definiteness);
   const adj = declined ? `${declined} ` : '';
   return ` ${von} ${adj}${word}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`;

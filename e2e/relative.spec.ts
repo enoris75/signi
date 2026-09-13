@@ -46,6 +46,30 @@ test.describe('subordinate clauses', () => {
     expect(await app.sentence('it')).toBe('il cane che il ragazzo vede corre.');
   });
 
+  test('a relative on a complement slot takes that complement\'s preposition and relation', async ({
+    app,
+    page,
+  }) => {
+    // The relative clause "… under which the cat runs": its locative is the gap, set to "under",
+    // and holds a placeholder word only to be an eligible pick target. Built while it is the only
+    // period, so the page-wide slot helpers are unambiguous.
+    await app.buildClause('CAT', 'RUN');
+    await app.revealAndPick('locative', 'HOUSE');
+    await page.getByRole('button', { name: 'under', exact: true }).click();
+
+    // Main clause "the house burns" in a second period; its subject is the head.
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'HOUSE', 'BURN');
+    await app.linkRelative(1, 'subject', 0, 'locative');
+
+    await app.expectSentences({
+      en: 'the house under which the cat runs burns.',
+      de: 'das Haus, unter dem der Kater läuft, brennt.',
+      it: 'la casa sotto la quale il gatto corre brucia.',
+      fr: 'la maison sous laquelle le chat court brûle.',
+    });
+  });
+
   test('a relative clause survives a save/load round-trip', async ({ app, page }, testInfo) => {
     const name = `Relative ${testInfo.testId}-${testInfo.repeatEachIndex}`;
 

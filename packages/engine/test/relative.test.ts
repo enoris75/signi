@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Complement, NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
+import type { Complement, ComplementType, NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // A restrictive relative clause. The head noun fills one slot of the clause — its subject by
@@ -756,7 +756,7 @@ describe('known bugs: German means clause inside a relative clause', () => {
 // eats", German the accusative "das". The relative needs the complement's preposition and case.
 // Only English and German are pinned; see the bug file for the Romance targets.
 describe('known bugs: relative clause on a complement slot', () => {
-  test.fails('the relative keeps the complement\'s preposition and case', () => {
+  test('the relative keeps the complement\'s preposition and case', () => {
     expect(sayAll(clause(np('HOUSE', {
       relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
     }), 'BURN'))).toMatchObject({
@@ -768,6 +768,127 @@ describe('known bugs: relative clause on a complement slot', () => {
     }), 'RUN'))).toMatchObject({
       en: 'the boy to whom the man gives the book runs.',
       de: 'der Junge, dem der Mann das Buch gibt, läuft.',
+    });
+  });
+
+  // The Romance languages have several standard forms; the engines take the preposition with the
+  // article and "il quale" / "lequel" / "el que" / "o qual", which falls out of each complement path.
+  test('the Romance languages take the complement\'s preposition with an agreeing "quale / lequel / que / qual"', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN'))).toMatchObject({
+      it: 'la casa nella quale il gatto mangia brucia.',
+      fr: 'la maison dans laquelle le chat mange brûle.',
+      es: 'la casa en la que el gato come arde.',
+      pt: 'a casa na qual o gato come arde.',
+    });
+    expect(sayAll(clause(np('BOY', {
+      relative: { headRole: 'terminus', subject: np('MAN'), verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK') },
+    }), 'RUN'))).toMatchObject({
+      it: 'il ragazzo al quale l\'uomo dà il libro corre.',
+      fr: 'le garçon auquel l\'homme donne le livre court.',
+      es: 'el niño al que el hombre da el libro corre.',
+      pt: 'o menino ao qual o homem dá o livro corre.',
+    });
+  });
+
+  const gapped = (head: string, headRole: ComplementType, verb: string, extra: Partial<RelativeClause> = {}, headExtra: Partial<NounPhrase> = {}) => {
+    const all = sayAll(clause(np(head, { ...headExtra, relative: { headRole, subject: np('CAT'), verbPhrase: { verb }, ...extra } }), 'BURN'));
+    return { en: all.en, de: all.de, it: all.it, fr: all.fr, es: all.es, pt: all.pt };
+  };
+
+  test('the gap\'s specifiers pick the preposition, and the relativizer agrees in gender and number', () => {
+    expect(gapped('HOUSE', 'locative', 'EAT', { headSpecifiers: [{ kind: 'path', value: 'under' }] })).toEqual({
+      en: 'the house under which the cat eats burns.',
+      de: 'das Haus, unter dem der Kater isst, brennt.',
+      it: 'la casa sotto la quale il gatto mangia brucia.',
+      fr: 'la maison sous laquelle le chat mange brûle.',
+      es: 'la casa debajo de la que el gato come arde.',
+      pt: 'a casa debaixo da qual o gato come arde.',
+    });
+    expect(gapped('HOUSE', 'locative', 'EAT', { headSpecifiers: [{ kind: 'path', value: 'around' }] }, { number: 'plural' })).toEqual({
+      en: 'the houses around which the cat eats burn.',
+      de: 'die Häuser, um die der Kater isst, brennen.',
+      it: 'le case intorno alle quali il gatto mangia bruciano.',
+      fr: 'les maisons autour desquelles le chat mange brûlent.',
+      es: 'las casas alrededor de las que el gato come arden.',
+      pt: 'as casas ao redor das quais o gato come ardem.',
+    });
+    expect(gapped('DOG', 'cause', 'RUN', { headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] })).toEqual({
+      en: 'the dog through the fault of which the cat runs burns.',
+      de: 'der Hund, durch dessen Schuld der Kater läuft, brennt.',
+      it: 'il cane per colpa del quale il gatto corre brucia.',
+      fr: 'le chien par la faute duquel le chat court brûle.',
+      es: 'el perro por culpa del que el gato corre arde.',
+      pt: 'o cão por culpa do qual o gato corre arde.',
+    });
+    expect(gapped('WOMAN', 'cause', 'RUN', { headSpecifiers: [{ kind: 'sentiment', value: 'positive' }] })).toEqual({
+      en: 'the woman thanks to whom the cat runs burns.',
+      de: 'die Frau, dank der der Kater läuft, brennt.',
+      it: 'la donna grazie alla quale il gatto corre brucia.',
+      fr: 'la femme grâce à laquelle le chat court brûle.',
+      es: 'la mujer gracias a la que el gato corre arde.',
+      pt: 'a mulher graças à qual o gato corre arde.',
+    });
+  });
+
+  test('every other complement takes its own preposition and case', () => {
+    expect(gapped('HOUSE', 'source', 'COME')).toEqual({
+      en: 'the house from which the cat comes burns.',
+      de: 'das Haus, aus dem der Kater kommt, brennt.',
+      it: 'la casa dalla quale il gatto viene brucia.',
+      fr: 'la maison de laquelle le chat vient brûle.',
+      es: 'la casa de la que el gato viene arde.',
+      pt: 'a casa da qual o gato vem arde.',
+    });
+    // The source's ablative "via / loin / lejos / longe" belongs to the verb's own complement, not to the relativizer.
+    expect(gapped('HOUSE', 'source', 'RUN').it).toBe('la casa dalla quale il gatto corre brucia.');
+    expect(gapped('MARKET', 'direction', 'GO')).toEqual({
+      en: 'the market to which the cat goes burns.',
+      de: 'der Markt, zu dem der Kater geht, brennt.',
+      it: 'il mercato al quale il gatto va brucia.',
+      fr: 'le marché auquel le chat va brûle.',
+      es: 'el mercado al que el gato va arde.',
+      pt: 'o mercado ao qual o gato vai arde.',
+    });
+    expect(sayAll(clause(np('STICK', {
+      relative: { headRole: 'instrumental', subject: np('MAN'), verbPhrase: { verb: 'CUT' }, directObject: np('BOOK') },
+    }), 'BURN'))).toMatchObject({
+      en: 'the stick with which the man cuts the book burns.',
+      de: 'der Stock, mit dem der Mann das Buch schneidet, brennt.',
+      it: 'il bastone con il quale l\'uomo taglia il libro brucia.',
+      fr: 'le bâton avec lequel l\'homme coupe le livre brûle.',
+      es: 'el palo con el que el hombre corta el libro arde.',
+      pt: 'o pau com o qual o homem corta o livro arde.',
+    });
+    expect(gapped('SPEED', 'manner', 'RUN')).toEqual({
+      en: 'the speed at which the cat runs burns.',
+      de: 'die Geschwindigkeit, mit der der Kater läuft, brennt.',
+      it: 'la velocità alla quale il gatto corre brucia.',
+      fr: 'la vitesse à laquelle le chat court brûle.',
+      es: 'la velocidad a la que el gato corre arde.',
+      pt: 'a velocidade à qual o gato corre arde.',
+    });
+  });
+
+  test('German declines the pronoun for the case the preposition governs', () => {
+    expect(gapped('BOY', 'terminus', 'GIVE', { directObject: np('BOOK') }, { number: 'plural' }).de).toBe('die Jungen, denen der Kater das Buch gibt, brennen.');
+    expect(gapped('WOMAN', 'terminus', 'GIVE', { directObject: np('BOOK') }).de).toBe('die Frau, der der Kater das Buch gibt, brennt.');
+    // An inanimate goal takes "in" + the accusative, which a relative pronoun never fuses with.
+    expect(gapped('CONTAINER', 'terminus', 'SAVE', { directObject: np('BOOK') }).de).toBe('der Behälter, in den der Kater das Buch speichert, brennt.');
+    expect(gapped('HOUSE', 'route', 'RUN', { headSpecifiers: [{ kind: 'path', value: 'through' }] }).de).toBe('das Haus, durch das der Kater läuft, brennt.');
+    expect(gapped('WOMAN', 'cause', 'RUN', { headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] }).de).toBe('die Frau, durch deren Schuld der Kater läuft, brennt.');
+    expect(gapped('TIME', 'manner', 'RUN').de).toBe('die Zeit, zu der der Kater läuft, brennt.');
+  });
+
+  test('a predicate-noun gap takes no preposition, and German puts its pronoun in the nominative', () => {
+    expect(gapped('DOG', 'predicative', 'BECOME')).toEqual({
+      en: 'the dog that the cat becomes burns.',
+      de: 'der Hund, der der Kater wird, brennt.',
+      it: 'il cane che il gatto diventa brucia.',
+      fr: 'le chien que le chat devient brûle.',
+      es: 'el perro que el gato se vuelve arde.',
+      pt: 'o cão que o gato se torna arde.',
     });
   });
 });

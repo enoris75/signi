@@ -9,7 +9,10 @@ import { determiner } from './determiner.js';
  */
 export function prepDet(prep: string, forms: Record<string, string>, _case: Case, plural: boolean): string {
   const det = determiner(forms, _case, plural);
-  if ((forms['definiteness'] ?? 'definite') === 'definite') {
+  // An inherently articled name ("die Antarktis") surfaces the definite article whatever was
+  // picked (see `determiner`), so it fuses like one: "zur Antarktis".
+  const articled = forms['proper'] === '1' && forms['takes_article'] === '1';
+  if ((forms['definiteness'] ?? 'definite') === 'definite' || articled) {
     if (prep === 'in' && det === 'dem') return 'im';
     // The accusative of motion into a neuter ("speichert das Buch ins Haus"); "in das" reads as
     // the emphatic "into *that* house".

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, IL, LIVRE, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
+import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, GARCON, IL, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
 import { relativeText } from './relativeText.js';
 
 describe('relativeText', () => {
@@ -42,5 +42,15 @@ describe('relativeText', () => {
     expect(eaten(np(SOURIS, { number: 'plural' }))).toBe('que le chat a mangées');
     expect(eaten(np(LIVRE, { number: 'plural' }))).toBe('que le chat a mangés');
     expect(eaten(np(LIVRE))).toBe('que le chat a mangé');
+  });
+
+  // "lequel" is written as one word with its article, contracted or not.
+  test('a head filling a complement takes its preposition with an agreeing lequel', () => {
+    expect(relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(CHAT)), verbPhrase: vp(MANGER) } }))).toBe('dans laquelle le chat mange');
+    expect(relativeText(np(GARCON, { number: 'plural' }, { relative: { headRole: 'direction', subject: el(np(CHAT)), verbPhrase: vp(ALLER, {}, 'GO') } })))
+      .toBe('vers lesquels le chat va');
+    expect(relativeText(np(CHIEN, {}, {
+      relative: { headRole: 'cause', subject: el(np(CHAT)), verbPhrase: vp(MANGER), headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] },
+    }))).toBe('par la faute duquel le chat mange');
   });
 });

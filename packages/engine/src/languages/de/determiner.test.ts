@@ -59,4 +59,10 @@ describe('determiner', () => {
     expect(determiner(SCHWEIZ, 'nom', false)).toBe('die');
     expect(determiner({ ...SCHWEIZ, definiteness: 'indefinite' }, 'dat', false)).toBe('der');
   });
+
+  test('a relativizer stand-in takes the relative pronoun', () => {
+    expect(determiner({ ...KATER, definiteness: 'relative' }, 'dat', false)).toBe('dem');
+    expect(determiner({ ...KATER, definiteness: 'relative' }, 'dat', true)).toBe('denen');
+    expect(determiner({ ...KATZE, definiteness: 'relative' }, 'gen', false)).toBe('deren');
+  });
 });

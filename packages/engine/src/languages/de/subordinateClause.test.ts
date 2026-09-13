@@ -244,4 +244,25 @@ describe('subordinateClause', () => {
         .toBe(', der die Katze, die geht, isst,');
     });
   });
+
+  describe('a head filling a complement', () => {
+    test('takes the complement\'s preposition and the pronoun in its case', () => {
+      expect(relativeOn(HAUS, { headRole: 'locative', subject: el(np(KATER)), verbPhrase: vp(ESSEN) })).toBe(', in dem der Kater isst,');
+      expect(relativeOn(HAUS, { headRole: 'locative', subject: el(np(KATER)), verbPhrase: vp(ESSEN), headSpecifiers: [{ kind: 'path', value: 'under' }] }, { number: 'plural' }))
+        .toBe(', unter denen der Kater isst,');
+      expect(relativeOn(BEHAELTER, { headRole: 'terminus', subject: el(np(MANN)), verbPhrase: vp(GEBEN, {}, 'GIVE'), directObject: el(np(BUCH)) }))
+        .toBe(', in den der Mann das Buch gibt,');
+    });
+
+    test('an animate recipient is the bare dative, and a negative cause the genitive ahead of "Schuld"', () => {
+      expect(relativeOn(JUNGE, { headRole: 'terminus', subject: el(np(MANN)), verbPhrase: vp(GEBEN, {}, 'GIVE'), directObject: el(np(BUCH)) }))
+        .toBe(', dem der Mann das Buch gibt,');
+      expect(relativeOn(KATZE, { headRole: 'cause', subject: el(np(MANN)), verbPhrase: vp(ESSEN), headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] }))
+        .toBe(', durch deren Schuld der Mann isst,');
+    });
+
+    test('a predicate noun takes the nominative pronoun, with no preposition', () => {
+      expect(relativeOn(JUNGE, { headRole: 'predicative', subject: el(np(MANN)), verbPhrase: vp(WERDEN_VERB) })).toBe(', der der Mann wird,');
+    });
+  });
 });

@@ -1141,11 +1141,26 @@ describe('known bugs: German weak noun as a genitive modifier', () => {
 // "hübschest"). An unstressed derivational -isch does not take it: "semantischste", "am
 // semantischsten", like "typischste" and "praktischste". The rule matches on -sch alone.
 describe('known bugs: German superlative after -isch', () => {
-  test.fails('German builds the -isch superlative with a bare -st', () => {
+  test('German builds the -isch superlative with a bare -st', () => {
     expect(sayAll(clause(np('WORD', { adjectives: ['SEMANTIC'], adjectiveDegrees: ['most'] }), 'BURN')).de)
       .toBe('das semantischste Wort brennt.');
     expect(sayAll(clause(np('WORD'), 'BECOME', { complements: { predicative: { phrase: np('SEMANTIC', { headDegree: 'most' }) } } })).de)
       .toBe('das Wort wird am semantischsten.');
+  });
+
+  test('German takes the bare -st on every seeded -isch adjective, in any case and number', () => {
+    const mostWord = (adjective: string, extra: Partial<NounPhrase> = {}) =>
+      sayAll(clause(np('WORD', { adjectives: [adjective], adjectiveDegrees: ['most'], ...extra }), 'BURN')).de;
+    expect(mostWord('SINGULAR')).toBe('das singularischste Wort brennt.');
+    expect(mostWord('PLURAL')).toBe('das pluralischste Wort brennt.');
+    expect(mostWord('SEMANTIC', { number: 'plural' })).toBe('die semantischsten Wörter brennen.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { adjectives: ['SEMANTIC'], adjectiveDegrees: ['most'] }) } } })).de)
+      .toBe('der Kater läuft im semantischsten Haus.');
+  });
+
+  test('regression: a monosyllabic dental root keeps its -e-, and the comparative is unchanged', () => {
+    expect(sayAll(clause(np('WORD', { adjectives: ['COLD'], adjectiveDegrees: ['most'] }), 'BURN')).de).toBe('das kälteste Wort brennt.');
+    expect(sayAll(clause(np('WORD', { adjectives: ['SEMANTIC'], adjectiveDegrees: ['more'] }), 'BURN')).de).toBe('das semantischere Wort brennt.');
   });
 });
 

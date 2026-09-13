@@ -1,11 +1,11 @@
-import type { ResolvedNounPhrase } from '../../types.js';
+import { relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
 import { complementsPhrase } from './complementsPhrase.js';
-import { defArticle } from './defArticle.js';
 import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
+import { relativePronoun } from './relativePronoun.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
@@ -18,9 +18,8 @@ import { verbGroup } from './verbGroup.js';
  * the end. A subject-relative uses a nominative pronoun and the head drives agreement
  * ("der Junge, der weint"). A direct-object relative uses an accusative pronoun, renders
  * the clause's own subject, and that subject drives agreement ("das Buch, das ich lese").
- * For nominative/accusative the relative pronoun coincides with the definite article
- * (der/die/das · den/die/das); genitive ("dessen") and dative ("denen") relatives —
- * indirect/complement — are not modelled and fall back to accusative. Returns "" if `np`
+ * A head filling a complement takes that complement's preposition and case ("das Haus, in dem der
+ * Kater isst", "der Junge, dem der Mann das Buch gibt"), see `relativePronoun`. Returns "" if `np`
  * has no relative. The clause is bracketed by commas at both ends; a closing comma that lands
  * against the sentence-final stop (or another comma) is tidied up in `punctuate`.
  */
@@ -30,8 +29,13 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const f = np.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  // nom for a subject-relative, acc for a (direct-)object relative. TODO: gen/dat pronouns.
-  const pronoun = defArticle(f, subjectRelative ? 'nom' : 'acc', plural);
+  // Nominative for a subject-relative and for a predicate noun ("der Held, der er wird"), accusative
+  // for a direct-object relative. A head filling any other complement takes that complement's
+  // preposition and case ("in dem", "mit denen", the bare dative "dem", "durch dessen Schuld").
+  const gap = relativeGapComplement(np, { definiteness: 'relative' });
+  const pronoun = gap
+    ? complementsPhrase(gap)
+    : relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural);
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;

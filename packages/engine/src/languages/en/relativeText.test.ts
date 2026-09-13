@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BOOK, BOY, CAT, complement, CRY, DOG, EAT, el, HOUSE, I, MAN, MOUSE, np, READ, RUN, SEE, vp,
+  BOOK, BOY, CAT, complement, CRY, DOG, EAT, el, GIVE, HOUSE, I, MAN, MOUSE, np, READ, RUN, SEE, vp, WOMAN,
 } from './en.fixtures.js';
 import { relativeText } from './relativeText.js';
 
@@ -47,5 +47,14 @@ describe('relativeText', () => {
     expect(relativeText(np(CAT, { number: 'plural' }, { relative: subjectRelative(vp(EAT, { tense: 'future' })) }))).toBe('that will eat');
     expect(relativeText(np(DOG, {}, { relative: subjectRelative(vp(RUN), { complements: { locative: complement(np(HOUSE)) } }) })))
       .toBe('that runs in the house');
+  });
+
+  test('a head filling a complement takes its preposition, with whom for a person and which otherwise', () => {
+    expect(relativeText(np(HOUSE, {}, { relative: { headRole: 'locative', subject: el(np(CAT)), verbPhrase: vp(EAT) } }))).toBe('in which the cat eats');
+    expect(relativeText(np(HOUSE, {}, {
+      relative: { headRole: 'locative', subject: el(np(CAT)), verbPhrase: vp(EAT), headSpecifiers: [{ kind: 'path', value: 'under' }] },
+    }))).toBe('under which the cat eats');
+    expect(relativeText(np(WOMAN, {}, { relative: { headRole: 'terminus', subject: el(np(MAN)), verbPhrase: vp(GIVE), directObject: el(np(BOOK)) } })))
+      .toBe('to whom the man gives the book');
   });
 });
