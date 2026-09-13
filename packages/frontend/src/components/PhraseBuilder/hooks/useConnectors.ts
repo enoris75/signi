@@ -7,8 +7,8 @@ import {
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
-} from "./interfaces.ts";
-import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
+} from "../interfaces.ts";
+import { ALL_SLOTS, MUI_COLOR_HEX } from "../slots.ts";
 
 export const boxKey = (containerId: string, nounKey: NounAddress) =>
   `${containerId}:${nounKey}`;

@@ -24,7 +24,6 @@ import {
   WorkspaceBinding,
 } from "./interfaces.ts";
 import {
-  ALL_SLOTS,
   COLLAPSIBLE_GROUPS,
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
@@ -34,7 +33,6 @@ import {
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
-  MUI_COLOR_HEX,
 } from "./slots.ts";
 import {
   applyConceptSelect,
@@ -71,27 +69,8 @@ import {
   computeCompactLayout,
   packPeriod,
   rearrangeGroupPositions,
-  rescaleYForHeight,
 } from "./layout.ts";
-import {
-  sameBoxSizes,
-  sameRelConnectors,
-  type RelConnector,
-} from "./measure.ts";
-import {
-  buildGraph,
-  rawGroupRect,
-  DEFAULT_NODE_SIZE,
-  type GroupRect,
-  type GroupShape,
-} from "./graph.ts";
-import {
-  resolveGroupOverlaps,
-  BOTTOM_MARGIN,
-  RANK_DRAGGED,
-  RANK_FREE,
-  RANK_GROWN,
-} from "./overlap.ts";
+import { buildGraph, type GroupShape } from "./graph.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
@@ -102,7 +81,13 @@ import { CorefPickContext, useCorefPick, useProvideCorefPick } from "./CorefPick
 import { ConjunctPanels, openConjunctsFor } from "./ConjunctPanels.tsx";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { RelativePhraseConnectors } from "./RelativePhraseConnectors.tsx";
-import { useDrag } from "./useDrag.ts";
+import { useDrag } from "./hooks/useDrag.ts";
+import { useHeightRebase } from "./hooks/useHeightRebase.ts";
+import { useElementSize } from "./hooks/useElementSize.ts";
+import { useBoxSizes } from "./hooks/useBoxSizes.ts";
+import { usePanelConnectors } from "./hooks/usePanelConnectors.ts";
+import { useGeometryNotify } from "./hooks/useGeometryNotify.ts";
+import { useOverlapResolution } from "./hooks/useOverlapResolution.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 
@@ -542,30 +527,6 @@ export function PhraseBuilder({
   );
 
   const containerRef = useRef<HTMLDivElement>(null);
-  // The outermost positioned Box — connectors from a noun to its relative-clause
-  // panel are measured relative to this, since the panels live below the canvas.
-  const rootRef = useRef<HTMLDivElement>(null);
-  // The possessor connector runs dot-to-dot: from the possessor control on the noun's
-  // dotted-box perimeter (start) to the receiving dot on the panel's top edge (end).
-  const possessorControlEls = useRef<Map<string, HTMLElement>>(new Map());
-  const possessorDotEls = useRef<Map<string, HTMLElement>>(new Map());
-  // The coordination connector runs the same way: from the "Coordinate" control on the noun's
-  // dotted-box perimeter down to the receiving dot atop its stack of conjunct panels.
-  const conjunctControlEls = useRef<Map<string, HTMLElement>>(new Map());
-  const conjunctDotEls = useRef<Map<string, HTMLElement>>(new Map());
-  const [relConnectors, setRelConnectors] = useState<RelConnector[]>([]);
-  const slotEls = useRef<Map<string, HTMLElement>>(new Map());
-  // Measured pixel sizes of each core word box, keyed by slot key. Needed to place
-  // each satellite reveal control on the box border facing its satellite (and to
-  // start that satellite's connector from there).
-  const [boxSizes, setBoxSizes] = useState<
-    Record<string, { w: number; h: number }>
-  >({});
-  // A node's box as of the last paint. Everything that reasons about a node's footprint —
-  // the dotted box that wraps it, the overlap resolver, the tidy layout — reads it through
-  // here, so the three agree on where a box's edges are. A node not yet measured reads as
-  // the nominal box the paddings already leave room for.
-  const sizeOf = (key: string) => boxSizes[key] ?? DEFAULT_NODE_SIZE;
   const [positions, setPositions] = useState<
     Record<string, { x: number; y: number }>
   >(() => ({ ...DEFAULT_POSITIONS }));
@@ -574,13 +535,39 @@ export function PhraseBuilder({
     setPositions,
     containerRef,
   });
-  const [svgSize, setSvgSize] = useState<{ w: number; h: number }>({
-    w: 600,
-    h: GRAPH_HEIGHT,
-  });
   const [graphHeight, setGraphHeight] = useState<number>(() => {
     const saved = localStorage.getItem("signi:graphHeight");
     return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
+  });
+
+  // Rebase node y's when the canvas height changes (see useHeightRebase). Must stay above
+  // the overlap resolver, which reads the stale flag in the same commit.
+  const positionsStaleRef = useHeightRebase({ graphHeight, setPositions, dragRef });
+  // The canvas's rendered size. The canvas only mounts once `showCanvas` flips, so the
+  // observer re-attaches on that.
+  const svgSize = useElementSize(containerRef, { w: 600, h: GRAPH_HEIGHT }, showCanvas);
+  const { slotEls, boxSizes, sizeOf } = useBoxSizes();
+  const openPossessors = openPossessorsFor(selection, shownMap);
+  const openConjuncts = openConjunctsFor(selection);
+  const {
+    rootRef,
+    possessorControlEls,
+    possessorDotEls,
+    conjunctControlEls,
+    conjunctDotEls,
+    relConnectors,
+  } = usePanelConnectors({
+    openPossessors,
+    openConjuncts,
+    collapsedGroups: effectiveCollapsed,
+  });
+  useGeometryNotify(binding?.geometry.onGeometryChange, {
+    positions,
+    boxSizes,
+    svgSize,
+    graphHeight,
+    collapsedGroups,
+    compact,
   });
 
   if (possessorPath) {
@@ -602,176 +589,6 @@ export function PhraseBuilder({
     }
     w.__snap = snap;
   }
-
-  // Resizing the container must not move the content vertically. Node y's are % of the
-  // canvas, so a height change alone would slide them all; rebase them onto the new height
-  // to hold each node's pixel offset from the canvas top. Runs before paint, so the nodes
-  // never render at the un-rebased position — the resized edge just yields empty space.
-  const prevGraphHeightRef = useRef(graphHeight);
-  // Set for the one commit that sees a new height but the positions the old one was laid
-  // out against — the rebase below only lands on the render after. Any footprint measured
-  // in between reads too tall, so whoever measures them sits that commit out.
-  const positionsStaleRef = useRef(false);
-  useLayoutEffect(() => {
-    const prevH = prevGraphHeightRef.current;
-    if (prevH === graphHeight) return;
-    prevGraphHeightRef.current = graphHeight;
-    positionsStaleRef.current = true;
-    ((window as any).__diag ??= []).push("RSC " + (possessorPath ? "SUB" : "OUT") + " " + prevH + "->" + graphHeight);
-    setPositions((prev) => rescaleYForHeight(prev, prevH, graphHeight));
-    // A drag in flight holds the grabbed nodes' start y's in the old height's % too — and
-    // the canvas can grow mid-drag, when a box shoved aside has to go down instead. Rebase
-    // them with everything else, or the box under the pointer jumps on the next move.
-    const drag = dragRef.current;
-    if (drag)
-      drag.origPositions = rescaleYForHeight(
-        drag.origPositions,
-        prevH,
-        graphHeight,
-      );
-  }, [graphHeight]);
-
-  useLayoutEffect(() => {
-    if (!containerRef.current) return;
-    const { width, height } = containerRef.current.getBoundingClientRect();
-    ((window as any).__diag ??= []).push("SVG-MOUNT " + (possessorPath ? "SUB" : "OUT") + " " + width.toFixed(1) + "x" + height.toFixed(1));
-    setSvgSize({ w: width, h: height });
-    const obs = new ResizeObserver((entries) => {
-      const { width: w, height: h } = entries[0].contentRect;
-      ((window as any).__diag ??= []).push("SVG-RO " + (possessorPath ? "SUB" : "OUT") + " " + w.toFixed(1) + "x" + h.toFixed(1));
-      setSvgSize({ w, h });
-    });
-    obs.observe(containerRef.current);
-    return () => obs.disconnect();
-  }, [showCanvas]);
-
-  // After every render, measure each core word box's pixel size. Control icons and
-  // their connectors are placed on the box border, so we need the box's half-extents.
-  // Runs on every commit; settles because it only sets state on an actual size change.
-  useLayoutEffect(() => {
-    const next: Record<string, { w: number; h: number }> = {};
-    for (const [key, el] of slotEls.current) {
-      const r = el.getBoundingClientRect();
-      next[key] = { w: r.width, h: r.height };
-    }
-    setBoxSizes((prev) => {
-      if (sameBoxSizes(prev, next)) return prev;
-      const diffs: string[] = [];
-      const keys = new Set([...Object.keys(prev), ...Object.keys(next)]);
-      for (const k of keys) {
-        const a = prev[k], b = next[k];
-        if (!a || !b || Math.abs(a.w - b.w) > 0.5 || Math.abs(a.h - b.h) > 0.5)
-          diffs.push(`${k}:${a ? `${a.w.toFixed(1)}x${a.h.toFixed(1)}` : "∅"}->${b ? `${b.w.toFixed(1)}x${b.h.toFixed(1)}` : "∅"}`);
-      }
-      ((window as any).__diag ??= []).push("BSZ " + (possessorPath ? "SUB" : "OUT") + " " + diffs.join(" "));
-      return next;
-    });
-  });
-
-  // After every render, measure each open possessor's connector dot-to-dot: from the
-  // possessor control on the noun's dotted-box perimeter (start) to the receiving dot
-  // on the panel's top edge (end). Both are measured relative to the root Box so the
-  // SVG overlay can span the gap down to the docked panel. Guarded so it settles; runs
-  // every commit, so it tracks a noun box dragged around the canvas.
-  useLayoutEffect(() => {
-    const root = rootRef.current;
-    if (!root) return;
-    const rootRect = root.getBoundingClientRect();
-    const next: RelConnector[] = [];
-    // Measure one control→panel-dot connector. `prefix` keeps keys distinct so a noun
-    // could carry several such connectors without their ids colliding.
-    const measure = (
-      which: string,
-      controlEl: HTMLElement | undefined,
-      dotEl: HTMLElement | undefined,
-      prefix: string,
-    ) => {
-      // Skip the connector while the noun's group box is collapsed.
-      const label = COLLAPSIBLE_GROUPS.find((g) => g.mainKey === which)?.label;
-      if (label && effectiveCollapsed[label]) return;
-      if (!controlEl || !dotEl) return;
-      const c = controlEl.getBoundingClientRect();
-      const d = dotEl.getBoundingClientRect();
-      const x1 = c.left + c.width / 2 - rootRect.left;
-      const y1 = c.top + c.height / 2 - rootRect.top;
-      const x2 = d.left + d.width / 2 - rootRect.left;
-      const y2 = d.top + d.height / 2 - rootRect.top;
-      const color =
-        MUI_COLOR_HEX[
-          ALL_SLOTS.find((s) => s.key === which)?.color ?? "primary"
-        ];
-      next.push({ which: `${prefix}:${which}`, x1, y1, x2, y2, color });
-    };
-    for (const which of openPossessors)
-      measure(
-        which,
-        possessorControlEls.current.get(which),
-        possessorDotEls.current.get(which),
-        "poss",
-      );
-    for (const which of openConjuncts)
-      measure(
-        which,
-        conjunctControlEls.current.get(which),
-        conjunctDotEls.current.get(which),
-        "conj",
-      );
-    setRelConnectors((prev) => {
-      if (sameRelConnectors(prev, next)) return prev;
-      // eslint-disable-next-line no-console
-      console.log("[REL]", possessorPath ? "SUB" : "OUT", prev.length, "->", next.length, JSON.stringify(next.map((n) => [n.which, Math.round(n.x1), Math.round(n.y1), Math.round(n.x2), Math.round(n.y2)])));
-      return next;
-    });
-  });
-
-  // Tell the workspace to re-measure its cross-container link lines whenever this
-  // container's canvas geometry changes — a box dragged, the canvas resized, a group
-  // collapsed. The workspace can't observe our internal drag state, so it would
-  // otherwise draw stale subordinate connectors.
-  //
-  // `onGeometryChange` (bumpGeom) forces a *workspace* re-render, which re-renders this
-  // container, which re-runs this effect — so it must fire only on a real geometry change,
-  // or it drives an unbounded bump→render→bump loop. Keying on the geometry state alone is
-  // not enough: those are fresh objects on every commit even when their values are identical
-  // (the overlap resolver writes a new positions object each pass; React StrictMode re-runs
-  // the layout effects that produce them). So compare the *serialized* geometry against the
-  // last value we actually reported, and bump only when it truly moved. An embedded possessor
-  // sub-builder mounting with content into a cramped canvas hit this loop hardest — the
-  // reopened panel's boxes settle over a few commits, each with a new positions identity but
-  // the same final values. See e2e/manner-possessor-crash.spec.ts.
-  const notifyGeometry = binding?.geometry.onGeometryChange;
-  const lastGeometryRef = useRef<string | null>(null);
-  useLayoutEffect(() => {
-    if (!notifyGeometry) return;
-    const signature = JSON.stringify([
-      positions,
-      boxSizes,
-      svgSize,
-      graphHeight,
-      collapsedGroups,
-      compact,
-    ]);
-    if (signature === lastGeometryRef.current) return;
-    const w = window as any;
-    const prevSig = lastGeometryRef.current;
-    let which = "<first>";
-    if (prevSig) {
-      const names = ["positions", "boxSizes", "svgSize", "graphHeight", "collapsedGroups", "compact"];
-      const a = JSON.parse(prevSig), b = JSON.parse(signature);
-      which = names.filter((_, i) => JSON.stringify(a[i]) !== JSON.stringify(b[i])).join(",");
-    }
-    (w.__diag ??= []).push("GUARD " + (possessorPath ? "SUB" : "OUT") + " notify; changed=" + which);
-    lastGeometryRef.current = signature;
-    notifyGeometry();
-  }, [
-    notifyGeometry,
-    positions,
-    boxSizes,
-    svgSize,
-    graphHeight,
-    collapsedGroups,
-    compact,
-  ]);
 
   // Compact-view layout, derived (not stored) each render: pack the visible core words
   // into centered rows and size the canvas to just wrap them. Because it's recomputed
@@ -837,126 +654,19 @@ export function PhraseBuilder({
     svgSize: graphSize,
   });
 
-  // Dotted boxes never overlap. A box's footprint is derived from the nodes inside it, so
-  // revealing a satellite, adding an adjective, expanding a group or dragging a node out
-  // all grow it — potentially straight over a neighbour. After every commit, measure the
-  // boxes and slide the ones that would be covered aside or down until each is clear.
-  //
-  // The box that caused the growth holds its ground and everything else yields to it: the
-  // box under the pointer outranks all, then any box that just grew or just appeared. The
-  // last footprint of each box is remembered so "just grew" can be read off the difference.
-  // Nothing to compare against on the first pass (`null`), so nothing is pinned and any
-  // boxes that start out overlapping share the shove evenly.
-  //
-  // Compact view packs its own non-overlapping rows and derives positions rather than
-  // storing them, so there is nothing here to resolve or to write back.
-  const prevGroupSizesRef = useRef<Map<
-    string,
-    { w: number; h: number }
-  > | null>(null);
-  // The last geometry this effect actually resolved against. It runs after *every* commit
-  // (no deps) so it can track a box dragged around, but that also means a commit driven by
-  // something with no bearing on the layout — a parent re-render, a sibling's link line, or
-  // React StrictMode's extra invocation — re-runs it against unchanged geometry. Re-resolving
-  // there is not just wasted work: the rank heuristic below reads `prevGroupSizesRef`, whose
-  // "just grew" signal is a one-commit pulse, so a redundant pass sees it already cleared and
-  // resolves the same overlap a *different* way, writing new positions that trigger the next
-  // redundant pass — an unbounded bump loop (Maximum update depth exceeded). Skipping when the
-  // geometry is byte-for-byte what we last resolved keeps every real trigger (a drag, a grown
-  // box, a resize) while dropping the passenger re-runs. See e2e/manner-possessor-crash.spec.ts.
-  const lastResolvedRef = useRef<string | null>(null);
-  useLayoutEffect(() => {
-    if (compact || groupRects.length === 0) return;
-    // The rebase that follows a height change re-renders, so nothing is lost by waiting
-    // for it — and measuring before it would size the canvas from stretched footprints,
-    // which feeds its own next measurement and ratchets the canvas taller without end.
-    if (positionsStaleRef.current) {
-      positionsStaleRef.current = false;
-      return;
-    }
-    const sizes = new Map(
-      groupRects.map((g) => {
-        const r = rawGroupRect(g, pos, graphSize, false, sizeOf);
-        return [g.label, { w: r.width, h: r.height }] as const;
-      }),
-    );
-    // A drag has to re-resolve on every pointer move (and size the canvas to the dragged box),
-    // so it never takes the skip; outside a drag, bail when nothing that feeds the resolution
-    // has moved since we last ran it.
-    const dragging = Boolean(dragRef.current?.keys);
-    if (!dragging) {
-      const signature = JSON.stringify([
-        groupRects.map((g) => [g.label, g.nodeKeys, pos(g.nodeKeys[0])]),
-        [...sizes],
-        graphSize,
-      ]);
-      if (signature === lastResolvedRef.current) return;
-      lastResolvedRef.current = signature;
-    } else {
-      lastResolvedRef.current = null;
-    }
-    const before = prevGroupSizesRef.current;
-    prevGroupSizesRef.current = sizes;
-
-    const dragKeys = dragRef.current?.keys;
-    const rankOf = (g: GroupRect) => {
-      if (dragKeys?.some((k) => g.nodeKeys.includes(k))) return RANK_DRAGGED;
-      if (!before) return RANK_FREE;
-      const was = before.get(g.label);
-      const now = sizes.get(g.label)!;
-      const grew = !was || now.w > was.w + 0.5 || now.h > was.h + 0.5;
-      return grew ? RANK_GROWN : RANK_FREE;
-    };
-
-    const separated =
-      groupRects.length < 2
-        ? null
-        : resolveGroupOverlaps({
-            groupRects,
-            pos,
-            sizeOf,
-            svgSize: graphSize,
-            rankOf,
-          });
-    // Null once the boxes are clear of each other — which is the common case, and what
-    // lets this run on every commit without chasing its own writes.
-    if (separated) {
-      ((window as any).__diag ??= []).push("OVL-setPos " + (possessorPath ? "SUB" : "OUT") + " " + JSON.stringify(separated.positions) + " minH=" + separated.minHeight + " gH=" + graphHeight);
-      setPositions((prev) => ({ ...prev, ...separated.positions }));
-    }
-
-    // Only once the pointer has travelled: a press that turns out to be a click on a slot
-    // must not resize anything under the user's finger.
-    if (dragRef.current?.moved) {
-      // A drag in flight sizes the canvas to its content: it grows so a box dragged
-      // toward the bottom edge stays whole rather than being clipped by it, and shrinks
-      // back so pulling that box up again doesn't strand a band of dead space beneath the
-      // boxes. Measured against the positions the separation just wrote, or this would
-      // fit the canvas to where the boxes were before they were shoved clear.
-      const settled = (key: string) => separated?.positions[key] ?? pos(key);
-      const bottom = Math.max(
-        ...groupRects.map((g) => {
-          const r = rawGroupRect(g, settled, graphSize, false, sizeOf);
-          return r.y + r.height;
-        }),
-      );
-      const fitted = Math.max(
-        MIN_GRAPH_HEIGHT,
-        Math.ceil(bottom + BOTTOM_MARGIN),
-      );
-      // The height rebase (above) holds every node's pixel offset, so the room only ever
-      // appears or disappears at the bottom and nothing else shifts. Not persisted: this
-      // is the content claiming space, not the user sizing the container with the grip.
-      if (fitted !== graphHeight) setGraphHeight(fitted);
-      return;
-    }
-    // Outside a drag the canvas only ever grows, and only to meet a box the separation
-    // pushed down past the bottom edge. Shrinking here would fight the resize grip, whose
-    // whole purpose is to hold a height the content didn't ask for.
-    if (separated && separated.minHeight > graphHeight) {
-      ((window as any).__diag ??= []).push("OVL-setGH " + (possessorPath ? "SUB" : "OUT") + " " + graphHeight + "->" + separated.minHeight);
-      setGraphHeight(separated.minHeight);
-    }
+  // Keep the dotted boxes clear of each other, growing the canvas when a shove needs room
+  // (see useOverlapResolution).
+  useOverlapResolution({
+    compact,
+    groupRects,
+    pos,
+    sizeOf,
+    graphSize,
+    graphHeight,
+    setPositions,
+    setGraphHeight,
+    dragRef,
+    positionsStaleRef,
   });
 
   // Tidy the whole period: tidy each dotted box on its own — the same re-arrange its own
@@ -983,9 +693,6 @@ export function PhraseBuilder({
   function handleToggleCompact() {
     setCompact((c) => !c);
   }
-
-  const openPossessors = openPossessorsFor(selection, shownMap);
-  const openConjuncts = openConjunctsFor(selection);
 
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
   // same canvas below and lean on this component's drag machinery and handlers.

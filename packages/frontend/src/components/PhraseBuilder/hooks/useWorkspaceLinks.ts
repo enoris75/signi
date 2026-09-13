@@ -15,7 +15,7 @@ import {
   isCoordinativeLink,
   isInstrumentalLink,
   isRelativeLink,
-} from "./interfaces.ts";
+} from "../interfaces.ts";
 
 /** Fresh ids for both containers and links — one source, so they never collide. */
 export const uid = () =>

@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
-import { DEFAULT_POSITIONS } from "./slots.ts";
+import { DEFAULT_POSITIONS } from "../slots.ts";
 
-type DragState = {
+export type DragState = {
   keys: string[];
   startX: number;
   startY: number;
@@ -9,7 +9,7 @@ type DragState = {
   moved: boolean;
 };
 
-type Positions = Record<string, { x: number; y: number }>;
+export type Positions = Record<string, { x: number; y: number }>;
 
 interface UseDragArgs {
   positions: Positions;

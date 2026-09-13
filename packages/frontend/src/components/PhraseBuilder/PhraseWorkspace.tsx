@@ -14,8 +14,8 @@ import {
   WorkspaceBinding,
 } from "./interfaces.ts";
 import { MUI_COLOR_HEX } from "./slots.ts";
-import { boxKey, useConnectors } from "./useConnectors.ts";
-import { uid, useWorkspaceLinks } from "./useWorkspaceLinks.ts";
+import { boxKey, useConnectors } from "./hooks/useConnectors.ts";
+import { uid, useWorkspaceLinks } from "./hooks/useWorkspaceLinks.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 
 interface Props {
