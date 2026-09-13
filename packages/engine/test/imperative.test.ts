@@ -258,3 +258,42 @@ describe('known bugs: imperative', () => {
     expect(sayAll(command({}, np('FIRST_PERSON', { number: 'plural' }), {})).ja).toBe('食べましょう。');
   });
 });
+
+// A48. The German du-imperative is the bare infinitive stem ("lauf", "geh"), and a concept-keyed
+// override table patches the verbs that need more — but only some of them. A stem in -d/-t or in a
+// consonant + n keeps the -e ("schneide", "ordne"), -ern/-eln keep or shift it ("erweitere",
+// "vermittle"), and a strong e→i verb raises the vowel ("gib"). Nine seeded verbs fall through.
+describe('known bugs: German du-imperative forms', () => {
+  const du = (verb: string) => sayAll({ ...clause(np('SECOND_PERSON'), verb), imperative: true }).de;
+
+  test.fails('German builds the du-imperative of every seeded verb correctly', () => {
+    expect(du('CUT')).toBe('schneide.');
+    expect(du('KILL')).toBe('töte.');
+    expect(du('HOLD')).toBe('enthalte.');
+    expect(du('COMPACT')).toBe('verdichte.');
+    expect(du('BECOME')).toBe('werde.');
+    expect(du('TIDY_UP')).toBe('ordne.');
+    expect(du('EXPAND')).toBe('erweitere.');
+    expect(du('EXPRESS')).toBe('vermittle.');
+    expect(du('GIVE')).toBe('gib.');
+  });
+});
+
+// A49. The imperative (and its instruction register) places "nicht" after every other word of the
+// clause, with no counterpart of the declarative "nicht immer" / "nicht müde" rules: "nicht" belongs
+// before a Mittelfeld adverb and before a predicate complement.
+describe('known bugs: German "nicht" in commands and instructions', () => {
+  const eatNot = (modifier: string, plan: Partial<PhrasePlan> = {}) =>
+    sayAll(command(plan, np('SECOND_PERSON'), { negative: true, modifier })).de;
+
+  test.fails('German puts "nicht" before the adverb and the predicate complement', () => {
+    expect(eatNot('FAST')).toBe('iss nicht schnell.');
+    expect(eatNot('ALWAYS')).toBe('iss nicht immer.');
+    expect(eatNot('ALWAYS', { imperativeRegister: 'instruction' })).toBe('nicht immer essen.');
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }),
+      imperative: true,
+      imperativeRegister: 'instruction',
+    }).de).toBe('nicht müde sein.');
+  });
+});

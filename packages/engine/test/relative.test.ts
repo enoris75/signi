@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, VerbPhrase } from '@signi/shared';
+import type { NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // A restrictive relative clause. The head noun fills one slot of the clause — its subject by
@@ -645,5 +645,64 @@ describe('known bugs: nested relative clauses', () => {
     // Same nest, tenses instead of aspects: all three levels render. The path exists.
     expect(nested({}, { tense: 'future' }, { tense: 'past' }))
       .toMatchObject({ de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.' });
+  });
+});
+
+// A50. The relative clause builds its own "nicht" slot and misses the rules the main clause
+// (`renderClause`) applies: a "kein" object already negates, "nicht" leads a predicate complement
+// and a Mittelfeld adverb, and it scopes over the whole prospective (A19, fixed only in the main clause).
+describe('known bugs: German negation inside a relative clause', () => {
+  const dogWho = (relative: RelativeClause) => sayAll(clause(np('DOG', { relative }), 'RUN')).de;
+
+  test.fails('German negates a relative clause the way it negates a main clause', () => {
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE', { definiteness: 'no' }) }))
+      .toBe('der Hund, der keine Maus isst, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true }, complements: { predicative: { phrase: np('TIRED') } } }))
+      .toBe('der Hund, der nicht müde wird, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' } }))
+      .toBe('der Hund, der nicht immer isst, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, aspect: 'prospective' } }))
+      .toBe('der Hund, der nicht im Begriff zu essen ist, läuft.');
+  });
+});
+
+// A51. A `process` instrumental is a subordinate "indem" clause, which the main clause moves to the
+// Nachfeld (`splitMeansClause`). The relative clause never splits it out, so it lands mid-clause,
+// before the relative's own verb. ("man" is the B06 simplification, kept here.)
+describe('known bugs: German means clause inside a relative clause', () => {
+  test.fails('German puts the "indem" clause after the relative clause\'s verb', () => {
+    expect(sayAll(clause(np('DOG', {
+      relative: {
+        verbPhrase: { verb: 'EAT' },
+        complements: {
+          instrumental: {
+            phrase: np('WORD', { definiteness: 'indefinite' }),
+            specifiers: [{ kind: 'abstraction', value: 'process' }],
+            action: { verb: 'CHOOSE' },
+          },
+        },
+      },
+    }), 'RUN')).de).toBe('der Hund, der isst, indem man ein Wort wählt, läuft.');
+  });
+});
+
+// A62. The UI can relativise on a complement slot ("the house the cat eats IN"), but the engines
+// render the relative as if the head were the direct object: English "the house that the cat
+// eats", German the accusative "das". The relative needs the complement's preposition and case.
+// Only English and German are pinned; see the bug file for the Romance targets.
+describe('known bugs: relative clause on a complement slot', () => {
+  test.fails('the relative keeps the complement\'s preposition and case', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN'))).toMatchObject({
+      en: 'the house in which the cat eats burns.',
+      de: 'das Haus, in dem der Kater isst, brennt.',
+    });
+    expect(sayAll(clause(np('BOY', {
+      relative: { headRole: 'terminus', subject: np('MAN'), verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK') },
+    }), 'RUN'))).toMatchObject({
+      en: 'the boy to whom the man gives the book runs.',
+      de: 'der Junge, dem der Mann das Buch gibt, läuft.',
+    });
   });
 });

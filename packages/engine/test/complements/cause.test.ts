@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { CauseSentiment } from '@signi/shared';
+import type { CauseSentiment, NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 const criesBecauseOf = (value: CauseSentiment) =>
@@ -134,5 +134,21 @@ describe('cause: the negative sentiment in English and German', () => {
     expect(criesBecauseOf('positive')).toMatchObject({ en: 'the cat cries thanks to the dog.', de: 'der Kater weint dank dem Hund.' });
     expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG') } } })))
       .toMatchObject({ en: 'the cat cries because of the dog.', de: 'der Kater weint wegen dem Hund.' });
+  });
+});
+
+// A54. The cause renderer picks its pronoun-or-noun branch from the FIRST conjunct only. A group
+// that mixes pronouns and nouns then renders every conjunct down that one branch, and the negative
+// possessive periphrasis ("durch meine Schuld") reads only the first pronoun.
+describe('known bugs: German cause with coordinated pronouns', () => {
+  const runsBecauseOf = (value: CauseSentiment, ...conjuncts: NounPhrase[]) =>
+    sayAll(clause(np('CAT'), 'RUN', {
+      complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } },
+    })).de;
+
+  test.fails('German renders each cause conjunct in its own form', () => {
+    expect(runsBecauseOf('neutral', np('MAN'), np('SECOND_PERSON'))).toBe('der Kater läuft wegen dem Mann und dir.');
+    expect(runsBecauseOf('neutral', np('SECOND_PERSON'), np('MAN'))).toBe('der Kater läuft wegen dir und dem Mann.');
+    expect(runsBecauseOf('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('der Kater läuft durch meine und deine Schuld.');
   });
 });

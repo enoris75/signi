@@ -156,3 +156,16 @@ describe('known bugs: object pronoun', () => {
     });
   });
 });
+
+// A53. The pronoun-object path (accusative form, no article) only fires for a single pronoun
+// (`isPronounElement`). A coordinated object goes down the noun path, so each pronoun conjunct gets
+// a definite article and its nominative form.
+describe('known bugs: German coordinated pronoun object', () => {
+  const catSees = (...conjuncts: NounPhrase[]) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).de;
+
+  test.fails('German renders each pronoun conjunct in its accusative form, with no article', () => {
+    expect(catSees(np('THIRD_PERSON'), np('FIRST_PERSON'))).toBe('der Kater sieht ihn und mich.');
+    expect(catSees(np('DOG'), np('SECOND_PERSON'))).toBe('der Kater sieht den Hund und dich.');
+  });
+});

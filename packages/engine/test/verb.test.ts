@@ -655,3 +655,29 @@ describe('known bugs: reflexive verbs in the compound tense', () => {
     expect(femResult('GO').es).toBe('la gata ha ido.');
   });
 });
+
+// A52. The prospective's "im Begriff … zu" frame is assembled as fixed pieces around the objects, so
+// the zu-infinitive group is split. Once a direct object, the future, a modal or a verb-final
+// clause is involved, the object or the finite verb lands inside the frame. The zu-infinitive group
+// ("die Maus zu essen") belongs together, extraposed after a comma because it depends on the noun
+// "Begriff". A verb-final clause puts the finite verb after the whole group.
+describe('known bugs: German prospective word order', () => {
+  const catEatsMouse = (verbPhrase: Partial<VerbPhrase>) =>
+    sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', ...verbPhrase }, directObject: np('MOUSE') })).de;
+
+  test.fails('German keeps the zu-infinitive group together, after "im Begriff sein"', () => {
+    expect(catEatsMouse({})).toBe('der Kater ist im Begriff, die Maus zu essen.');
+    expect(catEatsMouse({ tense: 'future' })).toBe('der Kater wird im Begriff sein, die Maus zu essen.');
+    expect(catEatsMouse({ modals: [{ verb: 'MUST' }] })).toBe('der Kater muss im Begriff sein, die Maus zu essen.');
+  });
+
+  test.fails('German closes a verb-final prospective on the finite verb', () => {
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', tense: 'future' } },
+    }), 'RUN')).de).toBe('der Hund, der im Begriff zu essen sein wird, läuft.');
+    expect(sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' } }),
+    }).de).toBe('wenn der Kater im Begriff zu essen sein würde, würde der Hund laufen.');
+  });
+});

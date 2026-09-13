@@ -184,3 +184,11 @@ describe('known bugs: terminus', () => {
     expect(sendTo('GIVE', 'DOG').de).toBe('der Kater gibt dem Hund das Buch.');
   });
 });
+
+// A59. The preposition-article fusion covers in+dem, zu+dem and zu+der, but not in+das. An inanimate
+// neuter goal takes "in" + the accusative "das", which standard German contracts to "ins".
+describe('known bugs: German "ins" contraction', () => {
+  test.fails('German contracts "in das" to "ins"', () => {
+    expect(sendTo('SAVE', 'HOUSE').de).toBe('der Kater speichert das Buch ins Haus.');
+  });
+});

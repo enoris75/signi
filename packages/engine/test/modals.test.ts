@@ -617,3 +617,19 @@ describe('per-modal adverbs', () => {
     });
   });
 });
+
+// A61. In a verb-final clause a double infinitive (a modal's infinitive under werden/würde) keeps
+// the finite auxiliary in front of the infinitive cluster, not behind it: "…, der das Buch wird
+// essen müssen", "wenn der Kater würde essen müssen". The engine appends the finite verb last, as it
+// does for a single infinitive ("der das Buch essen wird", which is right).
+describe('known bugs: German double infinitive in a verb-final clause', () => {
+  test.fails('German puts werden/würde before the infinitive cluster', () => {
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] }, directObject: np('BOOK') },
+    }), 'RUN')).de).toBe('der Hund, der das Buch wird essen müssen, läuft.');
+    expect(sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') }),
+    }).de).toBe('wenn der Kater die Maus würde essen müssen, würde der Hund laufen.');
+  });
+});

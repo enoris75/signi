@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, NounPhrase } from '@signi/shared';
+import type { Definiteness, NounElement, NounPhrase } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 // The goal of a motion — where it is headed. The adposition is chosen by the goal's ANIMACY:
@@ -443,5 +443,18 @@ describe('known bugs: Spanish over-articles a continent goal/source', () => {
   test('a common-noun goal and source still article and contract', () => {
     expect(goTo(place()).es).toBe('el gato va al mercado.');
     expect(comeWith({ source: { phrase: place() } }).es).toBe('el gato viene del mercado.');
+  });
+});
+
+// A63. An inherently articled proper name ("die Antarktis") takes the definite article whatever
+// determiner was picked, but the zu+der → zur fusion checks the picked determiner, not the article
+// that surfaces. So an indefinite or bare pick renders the unfused "zu der".
+describe('known bugs: German fusion on an articled proper name', () => {
+  const goesTo = (definiteness: Definiteness) =>
+    sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('ANTARCTICA', { definiteness }) } } })).de;
+
+  test.fails('German fuses zu + der to zur whatever determiner was picked', () => {
+    expect(goesTo('indefinite')).toBe('der Kater geht zur Antarktis.');
+    expect(goesTo('bare')).toBe('der Kater geht zur Antarktis.');
   });
 });

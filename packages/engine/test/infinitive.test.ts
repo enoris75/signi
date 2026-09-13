@@ -109,3 +109,15 @@ describe('infinitive normalisation', () => {
     expect(sayAll(infinitive({}, { modals: ['MUST'] }))).toEqual(plain);
   });
 });
+
+// A49, the infinitive half. The citation phrase shares the instruction register's word order, and
+// its "nicht" placement with it: after the adverb and after the predicate complement.
+describe('known bugs: German "nicht" in the infinitive', () => {
+  test.fails('German puts "nicht" before the adverb and the predicate complement', () => {
+    expect(sayAll(infinitive({}, { negative: true, modifier: 'ALWAYS' })).de).toBe('nicht immer essen.');
+    expect(sayAll({
+      ...clause(np('GENERIC_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }),
+      infinitive: true,
+    }).de).toBe('nicht müde sein.');
+  });
+});

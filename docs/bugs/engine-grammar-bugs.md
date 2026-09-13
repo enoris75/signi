@@ -14,11 +14,14 @@ The individual defects now live one-per-file under the three subdirectories:
 
 ## Orientation
 
-- The engine is `packages/engine/src/`. One module per language: `languages/{en,it,fr,es,pt,de,ja}.ts`.
-  Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`)
+- The engine is `packages/engine/src/`. One module per language: `languages/{en,it,fr,es,pt,ja}.ts`,
+  and German as a folder, `languages/de/`, with one file per function (`de.consts.ts`,
+  `de.types.ts`, `germanEngine.ts`) and a unit test next to each. Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`)
   and `mood.ts`. The plan model is typed in `packages/shared/src/index.ts`.
 - Tests are `packages/engine/test/`, run with **`npm run test:unit`** (~300ms, no server needed —
   the harness seeds an in-memory SQLite from the real corpus and calls the production lexicon).
+  The German function-level unit tests sit beside their source (`languages/de/*.test.ts`) and
+  build their inputs by hand; the defects below are pinned in the sentence-level suite.
 - **`npm run typecheck` before you trust a test.** Vitest does not typecheck. A plan built with an
   invalid literal (e.g. a `Degree` of `'comparative'`, which does not exist — the values are
   `positive | more | most | less | least | equally`) will run happily and take a fallback path,
@@ -38,7 +41,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (4 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (29 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -55,6 +58,23 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
 | A45 | [A45-french-gloss-great-postnominal.md](A-must-fix/A45-french-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
+| A48 | [A48-german-du-imperative-forms.md](A-must-fix/A48-german-du-imperative-forms.md) |
+| A49 | [A49-german-nicht-in-commands-and-infinitives.md](A-must-fix/A49-german-nicht-in-commands-and-infinitives.md) |
+| A50 | [A50-german-relative-clause-negation.md](A-must-fix/A50-german-relative-clause-negation.md) |
+| A51 | [A51-german-relative-clause-means-clause.md](A-must-fix/A51-german-relative-clause-means-clause.md) |
+| A52 | [A52-german-prospective-word-order.md](A-must-fix/A52-german-prospective-word-order.md) |
+| A53 | [A53-german-coordinated-pronoun-object.md](A-must-fix/A53-german-coordinated-pronoun-object.md) |
+| A54 | [A54-german-cause-coordinated-pronouns.md](A-must-fix/A54-german-cause-coordinated-pronouns.md) |
+| A55 | [A55-german-hoch-comparison.md](A-must-fix/A55-german-hoch-comparison.md) |
+| A56 | [A56-german-mass-noun-strong-adjective.md](A-must-fix/A56-german-mass-noun-strong-adjective.md) |
+| A57 | [A57-german-weak-noun-genitive-modifier.md](A-must-fix/A57-german-weak-noun-genitive-modifier.md) |
+| A58 | [A58-german-possessor-determiner.md](A-must-fix/A58-german-possessor-determiner.md) |
+| A59 | [A59-german-ins-contraction.md](A-must-fix/A59-german-ins-contraction.md) |
+| A60 | [A60-german-temporal-manner-gloss.md](A-must-fix/A60-german-temporal-manner-gloss.md) |
+| A61 | [A61-german-double-infinitive-verb-final.md](A-must-fix/A61-german-double-infinitive-verb-final.md) |
+| A62 | [A62-relative-clause-on-complement-slot.md](A-must-fix/A62-relative-clause-on-complement-slot.md) |
+| A63 | [A63-german-articled-proper-name-fusion.md](A-must-fix/A63-german-articled-proper-name-fusion.md) |
+| A64 | [A64-german-isch-superlative.md](A-must-fix/A64-german-isch-superlative.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -64,6 +84,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | B6 | [B06-german-means-clause-impersonal-man.md](B-can-fix/B06-german-means-clause-impersonal-man.md) |
 | B7 | [B07-japanese-aspect-under-modal.md](B-can-fix/B07-japanese-aspect-under-modal.md) |
 | B9 | [B09-german-genitive-vs-colloquial-dative.md](B-can-fix/B09-german-genitive-vs-colloquial-dative.md) (not pinned by a test) |
+| B10 | [B10-german-compound-linking-element.md](B-can-fix/B10-german-compound-linking-element.md) |
 
 ### Part C — Looks wrong, is right (`C-do-not-fix/`)
 

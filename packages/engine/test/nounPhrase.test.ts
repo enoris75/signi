@@ -200,3 +200,18 @@ describe('mass nouns and quantifiers', () => {
     expect(water('this')).toMatchObject({ en: 'the cat drinks this water.', it: "il gatto beve quest'acqua.", de: 'der Kater trinkt dieses Wasser.' });
   });
 });
+
+// A56. The adjective ending table is chosen from the determiner alone (`endingsFor`), so it cannot
+// tell that a mass noun takes no article where a count noun would: an "indefinite" mass noun is
+// article-less, and "etwas" is invariant. With nothing carrying the case, the adjective declines
+// strong ("mit kaltem Wasser"); the engine gives it the weak dative -en instead.
+describe('known bugs: German adjective on an article-less mass noun', () => {
+  const eatsWith = (definiteness: Definiteness) => sayAll(clause(np('CAT'), 'EAT', {
+    complements: { instrumental: { phrase: np('WATER', { definiteness, adjectives: ['COLD'] }) } },
+  })).de;
+
+  test.fails('German declines the adjective strong after etwas and with no article', () => {
+    expect(eatsWith('some')).toBe('der Kater isst mit etwas kaltem Wasser.');
+    expect(eatsWith('indefinite')).toBe('der Kater isst mit kaltem Wasser.');
+  });
+});

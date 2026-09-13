@@ -197,3 +197,14 @@ describe('known bugs: possessor', () => {
       .toBe("the cat's father's book burns.");
   });
 });
+
+// A58. The German von-possessor always takes the definite article (`defArticle`), whatever
+// determiner the possessor carries. So an indefinite or quantified possessor turns definite, and a
+// proper name gets an article it never takes. (The von + dative itself is the B09 simplification.)
+describe('known bugs: German possessor determiner', () => {
+  test.fails('German keeps the possessor\'s own determiner after "von"', () => {
+    expect(bookOf(np('CAT', { definiteness: 'indefinite' })).de).toBe('das Buch von einem Kater brennt.');
+    expect(bookOf(np('CAT', { definiteness: 'some', number: 'plural' })).de).toBe('das Buch von einigen Katern brennt.');
+    expect(bookOf(np('EUROPE')).de).toBe('das Buch von Europa brennt.');
+  });
+});

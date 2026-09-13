@@ -1079,3 +1079,55 @@ describe('known bugs: Romance postnominal coordination', () => {
     });
   });
 });
+
+// A55. HIGH is seeded with only its irregular attributive stem (`attributive: 'hoh'`), so comparison
+// runs the regular rule on the base "hoch": no umlaut, and the -ch kept. The comparative is "höher"
+// and the superlative "höchst-" — the same irregular pair A2-A4 names, never added to the corpus.
+describe('known bugs: German comparison of hoch', () => {
+  test.fails('German compares hoch as höher / höchst', () => {
+    expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['more'] }).de).toBe('die höhere Karte brennt.');
+    expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['most'] }).de).toBe('die höchste Karte brennt.');
+    expect(sayAll(clause(np('HOUSE'), 'BECOME', { complements: { predicative: { phrase: np('HIGH', { headDegree: 'more' }) } } })).de)
+      .toBe('das Haus wird höher.');
+    expect(sayAll(clause(np('HOUSE'), 'BECOME', { complements: { predicative: { phrase: np('HIGH', { headDegree: 'most' }) } } })).de)
+      .toBe('das Haus wird am höchsten.');
+  });
+});
+
+// A57. A modifier that carries an adjective breaks out of the compound into a postposed genitive
+// (A20). That genitive adds the masculine/neuter -(e)s to the noun without checking for a weak
+// noun, which takes -(e)n in every oblique case instead: "des Jungen", never "*des Junges".
+describe('known bugs: German weak noun as a genitive modifier', () => {
+  test.fails('German gives a weak noun modifier its genitive -n', () => {
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [{ concept: 'BOY', relation: 'feature', adjectives: ['SMALL'] }],
+    }), 'BURN')).de).toBe('der Schöpfer kleinen Jungen brennt.');
+  });
+});
+
+// A64. The superlative inserts an -e- after a stem-final dental or sibilant ("kältest", "heißest",
+// "hübschest"). An unstressed derivational -isch does not take it: "semantischste", "am
+// semantischsten", like "typischste" and "praktischste". The rule matches on -sch alone.
+describe('known bugs: German superlative after -isch', () => {
+  test.fails('German builds the -isch superlative with a bare -st', () => {
+    expect(sayAll(clause(np('WORD', { adjectives: ['SEMANTIC'], adjectiveDegrees: ['most'] }), 'BURN')).de)
+      .toBe('das semantischste Wort brennt.');
+    expect(sayAll(clause(np('WORD'), 'BECOME', { complements: { predicative: { phrase: np('SEMANTIC', { headDegree: 'most' }) } } })).de)
+      .toBe('das Wort wird am semantischsten.');
+  });
+});
+
+// B10. DELIBERATE — do not "fix" without a product decision. A German compound joins its parts
+// with no linking element (Fugenelement), a simplification `germanCompound` says so in its comment.
+// Many compounds need one: -n- after a feminine -e ("Phrasenschöpfer") or a weak noun
+// ("Jungenbuch"), -s- after -keit/-heit/-ung/-tät ("Geschwindigkeitswort").
+describe('documented simplifications: German compounds', () => {
+  const compound = (head: string, modifier: string) =>
+    sayAll(clause(np(head, { nounModifiers: [{ concept: modifier, relation: 'feature' }] }), 'BURN')).de;
+
+  test.fails('German compounds take their linking element', () => {
+    expect(compound('CREATOR', 'PHRASE')).toBe('der Phrasenschöpfer brennt.');
+    expect(compound('BOOK', 'BOY')).toBe('das Jungenbuch brennt.');
+    expect(compound('WORD', 'SPEED')).toBe('das Geschwindigkeitswort brennt.');
+  });
+});
