@@ -128,3 +128,18 @@ describe('known bugs: furigana', () => {
       .toEqual(['ねこ', 'いぬ', 'たべます']);
   });
 });
+
+// A111. `jaImperativeSegs` emits a seeded instruction `label` (保存, 読み込み, …) as wordSeg(label) with
+// no reading, and the corpus seeds none. The eight labelled verbs lose their furigana, while an
+// unlabelled verb keeps its masu-stem reading (食べ → たべ).
+describe('known bugs: Japanese instruction label furigana', () => {
+  test.fails('Japanese gives a kanji instruction label its reading', () => {
+    const label = (verb: string) => furigana({
+      ...clause(np('SECOND_PERSON'), verb, { directObject: np('BOOK') }),
+      imperative: true,
+      imperativeRegister: 'instruction',
+    });
+    expect(label('SAVE')).toEqual(['ほん', 'ほぞん']);
+    expect(label('LOAD')).toEqual(['ほん', 'よみこみ']);
+  });
+});

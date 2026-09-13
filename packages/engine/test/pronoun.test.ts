@@ -253,3 +253,53 @@ describe('known bugs: Romance pro-drop — a pronoun subject is dropped', () => 
     });
   });
 });
+
+// A92. The subject clitic "je" elides to "j'" before a vowel-initial verb: "j'ai mangé", "j'aime".
+// `subjectPhrase` returns "je" and `renderClause` / `relativeText` join it to the predicate with a
+// space, so nothing elides it ("je ai mangé", "que je aime").
+describe('known bugs: French je elision', () => {
+  test.fails('French elides "je" before a vowel', () => {
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } })).fr).toBe("j'ai mangé.");
+    expect(sayAll(clause(np('FIRST_PERSON'), 'LOVE', { directObject: np('CAT') })).fr).toBe("j'aime le chat.");
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'progressive', tense: 'past' } })).fr)
+      .toBe("j'étais en train de manger.");
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'LOVE' } },
+    }), 'RUN')).fr).toBe("la souris que j'aime court.");
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), condition: clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }) }).fr)
+      .toBe("si j'avais mangé, le chat courrait.");
+  });
+});
+
+// A108. Portuguese models the 2nd person as você / vocês, which agree like the 3rd person: the
+// pronoun seed, the possessive "seu", the imperative ("coma") and 48 of 57 verbs do so. Nine verbs'
+// seeded forms, the engine's estar/ter tables, the conditional/subjunctive endings in mood.ts and
+// the negative cause still carry tu / vós forms ("és", "estás", "tinhas", "comesses", "tua culpa").
+describe('known bugs: Portuguese você agreement', () => {
+  const you = np('SECOND_PERSON');
+  const youAll = np('SECOND_PERSON', { number: 'plural' });
+
+  test.fails('Portuguese agrees a 2nd-person subject as você / vocês', () => {
+    expect(sayAll(clause(you, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('é forte.');
+    expect(sayAll(clause(youAll, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('são fortes.');
+    expect(sayAll(clause(you, 'BE', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('está cansado.');
+    expect(sayAll(clause(you, 'EAT', { verbPhrase: { aspect: 'progressive' } })).pt).toBe('está comendo.');
+    expect(sayAll(clause(you, 'EAT', { verbPhrase: { tense: 'past', aspect: 'resultative' } })).pt).toBe('tinha comido.');
+    expect(sayAll(clause(you, 'EAT', { verbPhrase: { modals: ['MUST'] } })).pt).toBe('deve comer.');
+    expect(sayAll(clause(you, 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG') } } })).pt)
+      .toBe('dá o livro ao cão.');
+    expect(sayAll(clause(you, 'BECOME', { complements: { predicative: { phrase: np('STRONG') } } })).pt).toBe('se torna forte.');
+    expect(sayAll(clause(np('BOOK', { relative: { headRole: 'directObject', subject: you, verbPhrase: { verb: 'SHOW' } } }), 'BURN')).pt)
+      .toBe('o livro que você mostra arde.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(you, 'EAT') }).pt).toBe('se comesse, o cão correria.');
+    expect(sayAll({ ...clause(you, 'RUN'), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, correria.');
+  });
+
+  test.fails('Portuguese blames você / vocês with "sua culpa"', () => {
+    const blame = (who: Parameters<typeof np>[1]) => sayAll(clause(np('CAT'), 'CRY', {
+      complements: { cause: { phrase: np('SECOND_PERSON', who), specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
+    })).pt;
+    expect(blame({})).toBe('o gato chora por sua culpa.');
+    expect(blame({ number: 'plural' })).toBe('o gato chora por sua culpa.');
+  });
+});

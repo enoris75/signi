@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { np, sayAll } from './harness.js';
+import { np, say, sayAll } from './harness.js';
 
 // The adjective-definition gloss (C02): a *verbless* period marked `dimensionGloss`, whose subject
 // is a bare noun phrase of a **dimension noun** carrying a **degree adjective** ("great size"),
@@ -110,5 +110,16 @@ describe('known bugs: adjective-definition gloss (French)', () => {
   // placement from the A44 elision. (The same likely applies to HIGH → "de haute qualité".)
   test.fails('French places GREAT before the noun in a gloss (de grande taille)', () => {
     expect(gloss('SIZE', 'GREAT').fr).toBe('de grande taille.');
+  });
+});
+
+// A45 (Italian). GREAT ("grande") is not in Italian's PRENOMINAL set, though BIG (the same "grande")
+// is, so every GREAT gloss puts it after the noun: "di dimensione grande". The corpus and
+// `dimensionGloss` comments both give "di grande dimensione". (HIGH is left undecided, as in French.)
+describe('known bugs: adjective-definition gloss (Italian)', () => {
+  test.fails('Italian places GREAT before the noun in a gloss (di grande dimensione)', () => {
+    expect(say({ subject: np('SIZE', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande dimensione.');
+    expect(say({ subject: np('AGE', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande età.');
+    expect(say({ subject: np('STRENGTH', { adjectives: ['GREAT'], definiteness: 'bare', dimensionGloss: true }) }, 'it')).toBe('di grande forza.');
   });
 });

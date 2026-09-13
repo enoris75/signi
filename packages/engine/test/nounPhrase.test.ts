@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
 // mass nouns and proper nouns.
@@ -213,5 +213,28 @@ describe('known bugs: German adjective on an article-less mass noun', () => {
   test.fails('German declines the adjective strong after etwas and with no article', () => {
     expect(eatsWith('some')).toBe('der Kater isst mit etwas kaltem Wasser.');
     expect(eatsWith('indefinite')).toBe('der Kater isst mit kaltem Wasser.');
+  });
+});
+
+// A79. English chooses "a" or "an" by testing the next word's first LETTER for a vowel, so
+// "universal", which starts with the consonant sound /j/, gets "an". The article follows the
+// sound: "a universal cat", as in "a unit", "a European".
+describe('known bugs: English a/an by spelling', () => {
+  test.fails('English writes "a" before a vowel letter that sounds as a consonant', () => {
+    expect(say(clause(np('CAT', { definiteness: 'indefinite', adjectives: ['UNIVERSAL'] }), 'RUN'), 'en')).toBe('a universal cat runs.');
+    expect(say(clause(np('DOG'), 'SEE', { directObject: np('CAT', { definiteness: 'indefinite', adjectives: ['UNIVERSAL'] }) }), 'en')).toBe('the dog sees a universal cat.');
+  });
+});
+
+// A104. `ala` starts with a stressed a-, so it takes the masculine singular article ("el ala", "un
+// ala"), like `agua`. The corpus does not mark WING with `stressed_a`, so `defArticle` and
+// `indefArticle` give it the feminine form.
+describe('known bugs: Spanish stressed-a noun WING', () => {
+  test.fails('Spanish gives "ala" the article "el" / "un"', () => {
+    expect(sayAll(clause(np('WING'), 'BURN')).es).toBe('el ala arde.');
+    expect(sayAll(clause(np('WING', { definiteness: 'indefinite' }), 'BURN')).es).toBe('un ala arde.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('WING') } } })).es)
+      .toBe('el gato corre en el ala.');
+    expect(sayAll(clause(np('BOOK', { possessor: np('WING') }), 'BURN')).es).toBe('el libro del ala arde.');
   });
 });

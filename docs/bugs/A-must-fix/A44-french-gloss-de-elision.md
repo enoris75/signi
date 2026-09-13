@@ -5,7 +5,7 @@
 The adjective-definition gloss (`dimensionGloss`) wraps its dimension-noun phrase in an adposition
 the noun's `dimensionRelation` selects — `de` for `extent`/`quality`, `à` for `measure`. The French
 engine builds this as a **manual** `` `${prep} ${subjectText(el)}` `` in `dimensionGloss()`
-([fr.ts](../../../packages/engine/src/languages/fr.ts)), which prepends a literal `"de "` and so skips
+([fr/dimensionGloss.ts](../../../packages/engine/src/languages/fr/dimensionGloss.ts)), which prepends a literal `"de "` and so skips
 the ordinary French elision: `de` before a vowel-initial word must contract to `d'`.
 
 | | Now | Want |
@@ -25,7 +25,7 @@ the vowel-initial "âge" still follows "de". The two fixes are orthogonal.
 
 Elide in `dimensionGloss()` the way the rest of the French engine does — reuse the existing
 `joinHead` / elision helper (the one that already gives "d'âge" for an attributive "de" + vowel,
-`joinPrepositionElision` at the top of `fr.ts`) rather than the raw `` `${prep} ${…}` `` template, so
+`joinArt` in `languages/fr/`) rather than the raw `` `${prep} ${…}` `` template, so
 `de` + a vowel-initial lead becomes `d'`. The `à` measure preposition is unaffected.
 
 | | |

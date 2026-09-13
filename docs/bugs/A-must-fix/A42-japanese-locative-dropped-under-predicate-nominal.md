@@ -30,7 +30,8 @@ Only when the two complements co-occur on a copula (`BE` / `SEEM` / `APPEAR` —
 license `predicative` alongside `locative`). Each renders correctly **alone**:
 
 - predicate noun alone → `猫は伝説です。` (correct)
-- locative alone → `猫は家にいます。` / `猫は家で…` (correct)
+- locative alone → `猫は家で…` with a lexical verb (correct); with BE it renders `猫は家でです。`,
+  not the existential `猫は家にいます。` — a separate defect, A109
 
 It is the combination the Japanese copular frame cannot express, not either complement on its own.
 The engine walks `COMPLEMENT_RENDER_ORDER` and emits the predicative, but the Japanese predicate-noun

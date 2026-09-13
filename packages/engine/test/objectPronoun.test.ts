@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // A pronoun in the DIRECT-OBJECT slot — "the cat sees me / you / him". A pronoun object is not a
 // noun object: it takes the language's oblique/accusative form, no article, and in Romance it is a
@@ -167,5 +167,211 @@ describe('known bugs: German coordinated pronoun object', () => {
   test.fails('German renders each pronoun conjunct in its accusative form, with no article', () => {
     expect(catSees(np('THIRD_PERSON'), np('FIRST_PERSON'))).toBe('der Kater sieht ihn und mich.');
     expect(catSees(np('DOG'), np('SECOND_PERSON'))).toBe('der Kater sieht den Hund und dich.');
+  });
+});
+
+// A67. With "avere", the Italian past participle agrees with a preceding third-person object clitic
+// ("l'ha vista", "li ha visti"). `aspectVerb` agrees the participle only for an "essere" verb, with
+// the subject, and never sees the object. The pin accepts "la ha" or "l'ha" and pins the agreement.
+describe('known bugs: Italian participle agreement with a preceding object clitic', () => {
+  test.fails('Italian agrees the past participle with a preceding la/li', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } }), 'it'))
+      .toMatch(/^il gatto (?:l'|la )ha vista\.$/);
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { number: 'plural' }), verbPhrase: { aspect: 'resultative' } }), 'it'))
+      .toBe('il gatto li ha visti.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative', tense: 'past' } }), 'it'))
+      .toMatch(/^il gatto (?:l'|la )aveva mangiata\.$/);
+  });
+});
+
+// A67. An avoir participle agrees with a preceding direct object, and an object clitic always
+// precedes it: "le chat l'a vue", "les a vus". A37 threads the preceding object into
+// `aspectVerbFr` only from an object-relative clause; `predicateText` never passes the clitic's forms.
+describe('known bugs: French participle agreement with an object clitic', () => {
+  test.fails('French agrees the avoir participle with a preceding object clitic', () => {
+    const sawIt = (extra: Parameters<typeof np>[1]) =>
+      sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', extra), verbPhrase: { aspect: 'resultative' } })).fr;
+    expect(sawIt({ gender: 'fem' })).toBe("le chat l'a vue.");
+    expect(sawIt({ number: 'plural' })).toBe('le chat les a vus.');
+    expect(sawIt({ number: 'plural', gender: 'fem' })).toBe('le chat les a vues.');
+  });
+});
+
+// A70. An object pronoun attaches after an infinitive ("comerlo") and after an affirmative command
+// ("cómelo"). `predicateText` passes both through `esCliticize`, which only ever puts the clitic in
+// front of the verb. The infinitive branch's comment claims enclisis ("consumirlo") but the code
+// doesn't do it. The negative command ("no lo comas") and finite verbs are already right.
+describe('known bugs: Spanish enclitic object pronoun', () => {
+  test.fails('Spanish attaches the object pronoun after an infinitive', () => {
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), infinitive: true }).es)
+      .toBe('comerlo.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), infinitive: true }).es)
+      .toBe('no comerlo.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('FIRST_PERSON') }), infinitive: true }).es)
+      .toBe('verme.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'LOAD', { directObject: np('THIRD_PERSON') }), imperative: true, imperativeRegister: 'instruction' }).es)
+      .toBe('cargarlo.');
+  });
+
+  test.fails('Spanish attaches the object pronoun after an affirmative command', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
+      .toBe('cómelo.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
+      .toBe('comámoslo.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
+      .toBe('comedlo.');
+  });
+});
+
+// A70. `ptCliticize` puts every object clitic before the verb. That is the Brazilian order after a
+// subject or "não", and "me" / "te" may lead a clause colloquially, but a 3rd-person o / a / os / as
+// cannot open one: an affirmative command, an infinitive and a subjectless (pro-drop) clause attach
+// it after the verb ("veja-o", "comê-lo", "vejo-o").
+describe('known bugs: Portuguese clitic enclisis', () => {
+  const him = np('THIRD_PERSON');
+
+  test.fails('Portuguese attaches a 3rd-person clitic after a clause-initial verb', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: him }), imperative: true }).pt).toBe('veja-o.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }) }), imperative: true }).pt).toBe('veja-a.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { directObject: him }), imperative: true }).pt).toBe('comamo-lo.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: him }), imperative: true, imperativeRegister: 'instruction' }).pt).toBe('vê-lo.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON', { number: 'plural' }) }), infinitive: true }).pt).toBe('comê-los.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'SEE', { directObject: him })).pt).toBe('vejo-o.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'SEE', { directObject: him, verbPhrase: { modals: ['CAN'] } })).pt).toBe('posso vê-lo.');
+  });
+});
+
+// A72. `objectPronounForm` ignores gender in the plural, and the Italian THIRD_PERSON lexeme seeds only
+// `object_plural: 'li'`, so a feminine plural object renders "li" where Italian says "le" ("il gatto
+// le vede"). A36 added the feminine plural for the subject pronoun only.
+describe('known bugs: Italian feminine plural object clitic', () => {
+  test.fails('Italian uses "le" for a feminine plural object pronoun', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'it')).toBe('il gatto le vede.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), imperative: true }, 'it')).toBe('vedile.');
+  });
+});
+
+// A72 (Spanish). `objectPronounForm` ignores gender in the plural, so a feminine plural object
+// pronoun renders "los" where Spanish says "las".
+describe('known bugs: Spanish feminine plural object clitic', () => {
+  test.fails('Spanish uses "las" for a feminine plural object pronoun', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'es')).toBe('el gato las ve.');
+  });
+});
+
+// A72 (Portuguese). `objectPronounForm` ignores gender in the plural, so a feminine plural object
+// pronoun renders "os" where Portuguese says "as".
+describe('known bugs: Portuguese feminine plural object clitic', () => {
+  test.fails('Portuguese uses "as" for a feminine plural object pronoun', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'pt')).toBe('o gato as vê.');
+  });
+});
+
+// A82. An Italian object clitic precedes the impersonal "si" ("lo si mangia", "mi si vede").
+// `predicateText` emits the impersonal clitic first ("si lo mangia"); its comment mistakes this for
+// the "se lo" order, which belongs to the reflexive/dative si.
+describe('known bugs: Italian object clitic before the impersonal si', () => {
+  test.fails('Italian puts the object clitic before the impersonal si (lo si mangia)', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), 'it')).toBe('lo si mangia.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), 'it')).toBe('non lo si mangia.');
+    expect(say(clause(np('GENERIC_PERSON'), 'SEE', { directObject: np('FIRST_PERSON') }), 'it')).toBe('mi si vede.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { modals: [{ verb: 'MUST' }] } }), 'it')).toBe('lo si deve mangiare.');
+  });
+});
+
+// A88. French has no clitic climbing: an object pronoun sits before the infinitive that governs
+// it ("est en train de me voir", "doit me voir"). `predicateText` cliticises the whole verb group,
+// so the pronoun lands on the finite "être" / modal ("m'est en train de voir", "me doit voir").
+// Only the compound past keeps it on the auxiliary ("l'a vu").
+describe('known bugs: French object clitic in a periphrasis', () => {
+  const sees = (verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase'], object = 'FIRST_PERSON', verb = 'SEE') =>
+    sayAll(clause(np('CAT'), verb, { directObject: np(object), verbPhrase })).fr;
+
+  test.fails('French puts the object clitic before the governed infinitive', () => {
+    expect(sees({ aspect: 'progressive' })).toBe('le chat est en train de me voir.');
+    expect(sees({ aspect: 'prospective' })).toBe('le chat est sur le point de me voir.');
+    expect(sees({ aspect: 'progressive' }, 'THIRD_PERSON', 'ADD')).toBe("le chat est en train de l'ajouter.");
+    expect(sees({ modals: ['MUST'] })).toBe('le chat doit me voir.');
+    expect(sees({ modals: ['MUST'], negative: true })).toBe('le chat ne doit pas me voir.');
+    expect(sees({ modals: ['MUST'], aspect: 'resultative' }, 'THIRD_PERSON')).toBe("le chat doit l'avoir vu.");
+  });
+});
+
+// A93. `predicateText` elides "ne" against the finite verb ("n'aime", "n'a") before `frCliticize`
+// slips the object clitic in after it, so the elided "n'" ends up in front of a consonant clitic:
+// "n'm'aime", "n'l'a". The clitic is what follows "ne", and me/te/le/la/nous/vous/les never elide it.
+describe('known bugs: French ne before an object clitic', () => {
+  test.fails('French keeps "ne" whole in front of an object clitic', () => {
+    expect(sayAll(clause(np('CAT'), 'LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { negative: true } })).fr)
+      .toBe("le chat ne m'aime pas.");
+    expect(sayAll(clause(np('CAT'), 'ADD', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).fr)
+      .toBe("le chat ne l'ajoute pas.");
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('THIRD_PERSON'), verbPhrase: { negative: true, aspect: 'resultative' },
+    })).fr).toBe("le chat ne l'a pas vu.");
+    expect(sayAll(clause(np('CAT'), 'LOVE', { directObject: np('FIRST_PERSON'), verbPhrase: { modifier: 'NEVER' } })).fr)
+      .toBe("le chat ne m'aime jamais.");
+  });
+});
+
+// A53 (English). `predicateParts` takes the object-pronoun path only for a lone pronoun
+// (`isPronounElement`); a coordinated object renders every conjunct with `npText`, so a pronoun
+// conjunct gets "the" and its subject form.
+describe('known bugs: English coordinated pronoun object', () => {
+  test.fails('English renders each pronoun conjunct in its object form, with no article', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } }), 'en')).toBe('the cat sees him and me.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('SECOND_PERSON')], conjunction: 'and' } }), 'en')).toBe('the cat sees the dog and you.');
+  });
+});
+
+// A53 (Italian). `predicateText` cliticises only a lone pronoun object (`isPronounElement`); a
+// coordinated object renders every conjunct with `npText`, so a pronoun conjunct gets an article and
+// its subject form ("il tu", "l'io"). A coordinated pronoun stays post-verbal in its tonic form.
+describe('known bugs: Italian coordinated pronoun object', () => {
+  test.fails('Italian renders each pronoun conjunct in its tonic form, with no article', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('SECOND_PERSON')], conjunction: 'and' } }), 'it')).toBe('il gatto vede il cane e te.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } }), 'it')).toBe('il gatto vede lui e me.');
+  });
+});
+
+// A53 (French). `predicateText` takes the clitic path only for a single pronoun object
+// (`isPronounElement`); a coordinated object goes through `npText`, which gives each pronoun an
+// article and its subject form ("l'il et le je"). French cannot coordinate clitics: it uses the
+// tonic forms, resumed by the plural clitic as the subject slot already does ("moi et toi, nous").
+describe('known bugs: French coordinated pronoun object', () => {
+  test.fails('French renders a coordinated pronoun object in its tonic form, resumed by a clitic', () => {
+    const sees = (...ids: string[]) =>
+      sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: ids.map((id) => np(id)), conjunction: 'and' } })).fr;
+    expect(sees('THIRD_PERSON', 'FIRST_PERSON')).toBe('le chat nous voit, lui et moi.');
+    expect(sees('DOG', 'SECOND_PERSON')).toBe('le chat vous voit, le chien et toi.');
+  });
+});
+
+// A53 (Spanish). `predicateText` takes the clitic path only when `isPronounElement` holds, which
+// needs a single conjunct. A coordinated pronoun object goes through `coordinateElement(npText)`,
+// which gives it an article and its citation form ("ve el yo y el tú"). Spanish wants the tonic
+// forms with "a", doubled by a plural clitic.
+describe('known bugs: Spanish coordinated pronoun object', () => {
+  test.fails('Spanish renders a coordinated pronoun object as doubled tonic pronouns', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('FIRST_PERSON'), np('SECOND_PERSON')], conjunction: 'and' },
+    })).es).toBe('el gato nos ve a mí y a ti.');
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' },
+    })).es).toBe('el gato nos ve a él y a mí.');
+  });
+});
+
+// A53 (Portuguese). `predicateText` takes the clitic path only for a lone pronoun object
+// (`isPronounElement`); a coordinated object renders every conjunct through `npText`, which puts the
+// definite article in front of the pronoun's citation form. A coordinated pronoun cannot be a
+// clitic, so it takes its tonic form after the preposition "a".
+describe('known bugs: Portuguese coordinated pronoun object', () => {
+  const catSees = (...conjuncts: ReturnType<typeof np>[]) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).pt;
+
+  test.fails('Portuguese renders a coordinated pronoun object in its tonic form', () => {
+    expect(catSees(np('THIRD_PERSON'), np('FIRST_PERSON'))).toBe('o gato vê a ele e a mim.');
+    expect(catSees(np('DOG'), np('SECOND_PERSON'))).toBe('o gato vê o cão e a você.');
   });
 });

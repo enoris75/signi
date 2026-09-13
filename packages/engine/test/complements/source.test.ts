@@ -159,7 +159,7 @@ describe('source: Romance', () => {
 //
 // LOAD and IMPORT are not motion-away verbs at all — their source is an origin, not a departure —
 // and COME/GO read "da"/"de" as an origin unambiguously. See SOURCE_ABLATIVE_ADVERB_VERBS in
-// types.ts and the per-verb `sourceAdverb` in it.ts / fr.ts / es.ts / pt.ts. Was B01 / B01b.
+// types.ts and the per-verb `sourceAdverb` in the it / fr / es / pt engines. Was B01 / B01b.
 describe('source: the ablative adverb is gated on the verb', () => {
   test('a non-departure verb (COME) renders bare "da"/"de", no adverb', () => {
     expect(from('COME')).toMatchObject({
@@ -233,5 +233,21 @@ describe('known bugs: source', () => {
   // it. "aus dem Junge" should be "aus dem Jungen".
   test('German should decline the weak masculine: "aus dem Jungen"', () => {
     expect(from('COME', np('BOY'))).toMatchObject({ de: 'der Kater kommt aus dem Jungen.' });
+  });
+});
+
+// A89. A continent of origin takes bare "de" / "d'" in French ("vient d'Europe"), the source
+// counterpart of the goal's bare "en" (A31). The `source` head in `complementsPhrase` sends the
+// proper noun through `deDet` → `dePrep`, which keeps its fixed article ("de l'Europe").
+describe('known bugs: French continent source', () => {
+  test.fails('French drops the article on a continent source', () => {
+    const comeFrom = (source: string) =>
+      sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np(source) } } })).fr;
+    expect(comeFrom('EUROPE')).toBe("le chat vient d'Europe.");
+    expect(comeFrom('AFRICA')).toBe("le chat vient d'Afrique.");
+    expect(comeFrom('NORTH_AMERICA')).toBe("le chat vient d'Amérique du Nord.");
+    expect(sayAll(clause(np('CAT'), 'COME', {
+      complements: { source: { phrase: np('AFRICA') }, direction: { phrase: np('EUROPE') } },
+    })).fr).toBe("le chat vient d'Afrique en Europe.");
   });
 });

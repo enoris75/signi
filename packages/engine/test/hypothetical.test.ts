@@ -129,7 +129,7 @@ describe('known bugs: aspect drops the conditional mood', () => {
   // Gap A38 (docs/bugs/A-must-fix). A marked aspect (progressive / prospective / resultative)
   // on the apodosis loses the conditional mood in the four Romance engines: the periphrastic
   // auxiliary (stare / estar /
-  // être) is conjugated in the plain PRESENT INDICATIVE, not the conditional. See it.ts ~line 605:
+  // être) is conjugated in the plain PRESENT INDICATIVE, not the conditional. The Italian engine said:
   // "the marked aspects keep their indicative auxiliary (aspect under a conditional is a
   // documented gap)." The neutral aspect is fine — it takes the conditional ("il cane
   // correrebbe") — so the gap is invisible until an aspect is set.
@@ -201,5 +201,86 @@ describe('known bugs: aspect drops the conditional mood', () => {
   test('the Portuguese present resultative still collapses to the pretérito outside a conditional', () => {
     expect(sayAll(clause(np('DOG'), 'RUN', { verbPhrase: { aspect: 'resultative' } })).pt)
       .toBe('o cão correu.');
+  });
+});
+
+// B11. `mood.ts` derives the imperfect subjunctive from the 3pl preterite stem plus -ra endings.
+// Its header lists the 1st plural's missing stem accent as a known gap: "the es/pt 1st-plural
+// forms omit the stem accent (comieramos, not comiéramos)". The accent is required, so this is
+// the correct target.
+describe('documented simplifications: Spanish 1st-plural imperfect subjunctive', () => {
+  test.fails('Spanish writes the stem accent on the 1st-plural imperfect subjunctive', () => {
+    const ifWe = (aspect: 'neutral' | 'progressive' | 'resultative') => sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { aspect } }),
+    }).es;
+    expect(ifWe('neutral')).toBe('si comiéramos, el perro correría.');
+    expect(ifWe('resultative')).toBe('si hubiéramos comido, el perro correría.');
+    expect(ifWe('progressive')).toBe('si estuviéramos comiendo, el perro correría.');
+  });
+});
+
+// B11. `mood.ts` builds the Portuguese imperfect subjunctive as the 3pl preterite stem + the
+// endings, and its header lists "the es/pt 1st-plural forms omit the stem accent" as a known gap.
+// The 1st plural stresses the syllable before -ssemos, which Portuguese always writes with an
+// accent: comêssemos, estivéssemos, tivéssemos, fôssemos.
+describe('documented simplifications: Portuguese 1st-plural imperfect subjunctive', () => {
+  const ifWe = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON', { number: 'plural' }), verb, extra) }).pt;
+
+  test.fails('Portuguese accents the 1st-plural imperfect subjunctive', () => {
+    expect(ifWe('EAT')).toBe('se comêssemos, o cão correria.');
+    expect(ifWe('BE', { complements: { predicative: { phrase: np('STRONG') } } })).toBe('se fôssemos fortes, o cão correria.');
+    expect(ifWe('BE', { complements: { locative: { phrase: np('HOUSE') } } })).toBe('se estivéssemos na casa, o cão correria.');
+    expect(ifWe('EAT', { verbPhrase: { aspect: 'resultative' } })).toBe('se tivéssemos comido, o cão correria.');
+  });
+});
+
+// A101. `moodForm` builds the conditional on the stored `1sg_future` and the imperfect subjunctive on
+// the stored `3pl_past`. For a reflexive verb those forms carry a clitic ("me volveré", "se
+// volvieron"), so every person gets "me volvería" and "se volviera".
+describe('known bugs: Spanish reflexive verb in a conditional', () => {
+  test.fails('Spanish agrees the reflexive clitic of the conditional and the imperfect subjunctive', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    expect(sayAll({ ...clause(np('DOG'), 'BECOME', { complements: legend }), condition: clause(np('CAT'), 'EAT') }).es)
+      .toBe('si el gato comiera, el perro se volvería una leyenda.');
+    expect(sayAll({ ...clause(np('DOG', { number: 'plural' }), 'BECOME', { complements: legend }), condition: clause(np('CAT'), 'EAT') }).es)
+      .toBe('si el gato comiera, los perros se volverían una leyenda.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON'), 'BECOME', { complements: legend }) }).es)
+      .toBe('si me volviera una leyenda, el perro correría.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('SECOND_PERSON'), 'BECOME', { complements: legend }) }).es)
+      .toBe('si te volvieras una leyenda, el perro correría.');
+  });
+});
+
+// A117. The copula branch of `predicateSegs` runs before the subjunctive check. A BE "if" clause
+// therefore keeps the main-clause です and never takes たら: もし猫が幸せです、犬は走ります, two finite
+// clauses in a row. Want the たら form of the copula: 幸せだったら / 大きかったら / 伝説だったら.
+describe('known bugs: Japanese copular condition', () => {
+  test.fails('Japanese puts a copular condition in the たら form', () => {
+    const ifCatIs = (predicate: string) => sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np(predicate) } } }),
+    }).ja;
+    expect(ifCatIs('HAPPY')).toBe('もし猫が幸せだったら、犬は走ります。');
+    expect(ifCatIs('BIG')).toBe('もし猫が大きかったら、犬は走ります。');
+    expect(ifCatIs('LEGEND')).toBe('もし猫が伝説だったら、犬は走ります。');
+  });
+});
+
+// A118. `predicateSegs` renders the subjunctive "if" clause as taraSeg(verb) alone, before the modal
+// and aspect branches and with no polarity. Negation (negative, NEVER, a `no` argument), modals and
+// aspect all vanish, so "if the cat did not eat" reads "if the cat ate" (もし猫が食べたら).
+describe('known bugs: Japanese たら protasis', () => {
+  test.fails('Japanese keeps the negation, modal and aspect of the たら clause', () => {
+    const ifCat = (verbPhrase: object, subject = np('CAT')) =>
+      sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(subject, 'EAT', { verbPhrase }) }).ja;
+    expect(ifCat({ negative: true })).toBe('もし猫が食べなかったら、犬は走ります。');
+    expect(ifCat({ modifier: 'NEVER' })).toBe('もし猫が決して食べなかったら、犬は走ります。');
+    expect(ifCat({}, np('CAT', { definiteness: 'no' }))).toBe('もしどの猫も食べなかったら、犬は走ります。');
+    expect(ifCat({ modals: ['CAN'] })).toBe('もし猫が食べることができたら、犬は走ります。');
+    expect(ifCat({ modals: ['WILL'] })).toBe('もし猫が食べたかったら、犬は走ります。');
+    expect(ifCat({ aspect: 'progressive' })).toBe('もし猫が食べていたら、犬は走ります。');
+    expect(ifCat({ aspect: 'resultative' })).toBe('もし猫が食べてしまったら、犬は走ります。');
   });
 });

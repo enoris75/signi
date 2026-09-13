@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // An imperative is a MOOD, not a tense: the verb takes the command form and the subject is
 // dropped, but `subject` still carries the addressee, which is what picks the person and number
@@ -135,7 +135,7 @@ describe('imperative register', () => {
       en: 'eat.', // English labels with the plain imperative
       // …but Italian labels with the imperative ("Salva", "Carica"), so an instruction only
       // pins the person to tu; and Japanese labels with the VERBAL NOUN (保存, 読み込み), not a
-      // command at all. Both are deliberate — see it.ts and jaImperativeSegs in ja.ts.
+      // command at all. Both are deliberate — see it/predicateText.ts and ja/jaImperativeSegs.ts.
       it: 'mangia.',
       ja: '食べ。',
     });
@@ -230,7 +230,7 @@ describe('known bugs: imperative', () => {
   // Japanese negates the 2nd-person command (食べるな) but silently DROPS the negation on the
   // 1st-plural hortative: "let's not eat" comes out as 食べましょう — which is "let's eat", the
   // exact opposite. Every other language negates it (let's not eat / non mangiamo / ne mangeons
-  // pas). ja.ts documents a register gap for the 2nd person's negative, not this.
+  // pas). The Japanese engine documents a register gap for the 2nd person's negative, not this.
   //
   // The target below (～のはやめましょう, "let's stop/refrain from") is one of several possible
   // renderings — 食べないでおきましょう would do as well — so treat the surface as a design call.
@@ -295,5 +295,150 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
       imperative: true,
       imperativeRegister: 'instruction',
     }).de).toBe('nicht müde sein.');
+  });
+});
+
+// A70. In an affirmative French command the object pronoun follows the verb, hyphenated, with
+// me/te as moi/toi: "vois-moi", "effondre-toi". The imperative branch of `predicateText` uses the
+// proclitic `frCliticize` for both polarities, and a reflexive verb's imperative is its present
+// form with the reflexive clitic still in front ("t'effondre").
+describe('known bugs: French affirmative imperative enclisis', () => {
+  test.fails('French puts the clitic after an affirmative imperative', () => {
+    const cmd = (verb: string, subject: string, extra: Parameters<typeof clause>[2] = {}, number?: 'plural') =>
+      sayAll({ ...clause(np(subject, number ? { number } : {}), verb, extra), imperative: true }).fr;
+    expect(cmd('SEE', 'SECOND_PERSON', { directObject: np('FIRST_PERSON') })).toBe('vois-moi.');
+    expect(cmd('SEE', 'SECOND_PERSON', { directObject: np('THIRD_PERSON') })).toBe('vois-le.');
+    expect(cmd('SEE', 'SECOND_PERSON', { directObject: np('FIRST_PERSON') }, 'plural')).toBe('voyez-moi.');
+    expect(cmd('ADD', 'SECOND_PERSON', { directObject: np('THIRD_PERSON') })).toBe('ajoute-le.');
+    expect(cmd('COLLAPSE', 'SECOND_PERSON')).toBe('effondre-toi.');
+    expect(cmd('COLLAPSE', 'SECOND_PERSON', {}, 'plural')).toBe('effondrez-vous.');
+    expect(cmd('COLLAPSE', 'FIRST_PERSON', {}, 'plural')).toBe('effondrons-nous.');
+  });
+});
+
+// A86. The Italian negative tu command is "non" + infinitive, and `predicateText` appends the object
+// clitic to the whole infinitive: "non mangiarelo". The infinitive drops its -e before an enclitic
+// ("non mangiarlo"), as the infinitive mood already does. "non lo mangiare" is equally standard.
+describe('known bugs: Italian negative tu command with an object pronoun', () => {
+  test.fails('Italian drops the infinitive\'s -e before the clitic (non mangiarlo)', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), imperative: true }, 'it'))
+      .toMatch(/^non (?:mangiarlo|lo mangiare)\.$/);
+    expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { verbPhrase: { negative: true }, directObject: np('FIRST_PERSON') }), imperative: true }, 'it'))
+      .toMatch(/^non (?:vedermi|mi vedere)\.$/);
+    expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON'), complements: { terminus: { phrase: np('DOG') } } }), imperative: true }, 'it'))
+      .toMatch(/^non (?:darlo|lo dare) al cane\.$/);
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), imperative: true, imperativeRegister: 'instruction' }, 'it'))
+      .toMatch(/^non (?:mangiarlo|lo mangiare)\.$/);
+  });
+});
+
+// A87. The Italian tu command of an -are verb is built from its 3sg present, which for dare/fare/
+// andare is the indicative "dà/fa/va", not the command "da'/fa'/va'" (or "dai/fai/vai"). After those
+// short forms an enclitic doubles its consonant ("dallo", "fallo"), but the clitic is just appended.
+describe('known bugs: Italian tu command of dare, fare and andare', () => {
+  test.fails('Italian uses da\'/fa\'/va\' and doubles the clitic after them', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG') } } }), imperative: true }, 'it'))
+      .toMatch(/^(?:da'|dai) il libro al cane\.$/);
+    expect(say({ ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('THIRD_PERSON'), complements: { terminus: { phrase: np('DOG') } } }), imperative: true }, 'it'))
+      .toBe('dallo al cane.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'MAKE', { directObject: np('THIRD_PERSON') }), imperative: true }, 'it')).toBe('fallo.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'MAKE', { directObject: np('BOOK') }), imperative: true }, 'it')).toMatch(/^(?:fa'|fai) il libro\.$/);
+    expect(say({ ...clause(np('SECOND_PERSON'), 'GO'), imperative: true }, 'it')).toMatch(/^(?:va'|vai)\.$/);
+  });
+});
+
+// A100. `imperativeForm` builds the Spanish command from stored forms that already carry a reflexive
+// clitic. The tú form is `3sg_present` ("se vuelve"), the subjunctive stem is `1sg_present` minus -o
+// ("me vuelv-"), and vosotros is the infinitive minus -r plus -d, which does nothing to "volverse".
+// The clitic comes out in the wrong person, and in front of an affirmative command instead of
+// attached after it.
+describe('known bugs: Spanish reflexive imperative', () => {
+  const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+
+  test.fails("Spanish puts the addressee's clitic before a negative command", () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { verbPhrase: { negative: true }, complements: legend }), imperative: true }).es)
+      .toBe('no te vuelvas una leyenda.');
+  });
+
+  test.fails("Spanish attaches the addressee's clitic to an affirmative command", () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BECOME', { complements: legend }), imperative: true }).es)
+      .toBe('vuélvete una leyenda.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'BECOME', { complements: legend }), imperative: true }).es)
+      .toBe('volveos una leyenda.');
+  });
+});
+
+// A103. `subjPresent` (mood.ts) builds every present-subjunctive person on `1sg_present` minus -o.
+// A stem-changing verb then keeps its stressed stem in the 1st and 2nd plural ("muerdamos", want
+// "mordamos"), as does a stem with a written í ("envíemos"). A 1sg present not in -o gives
+// nonsense ("voy" → "voyas", "doy" → "doyes").
+describe('known bugs: Spanish present-subjunctive stem in commands', () => {
+  const command = (verb: string, addressee: 'tú' | 'nosotros' | 'vosotros', negative = false) => sayAll({
+    ...clause(
+      addressee === 'nosotros' ? np('FIRST_PERSON', { number: 'plural' })
+        : addressee === 'tú' ? np('SECOND_PERSON') : np('SECOND_PERSON', { number: 'plural' }),
+      verb,
+      { verbPhrase: { negative } },
+    ),
+    imperative: true,
+  }).es;
+
+  test.fails('Spanish builds the 1st- and 2nd-plural command on the unstressed stem', () => {
+    expect(command('BITE', 'nosotros')).toBe('mordamos.');
+    expect(command('BITE', 'vosotros', true)).toBe('no mordáis.');
+    expect(command('SHOW', 'nosotros')).toBe('mostremos.');
+    expect(command('START', 'nosotros')).toBe('empecemos.');
+    expect(command('SEND', 'nosotros')).toBe('enviemos.');
+    expect(command('SEND', 'vosotros', true)).toBe('no enviéis.');
+  });
+
+  test.fails('Spanish GO and GIVE take their irregular subjunctive in commands', () => {
+    expect(command('GO', 'tú', true)).toBe('no vayas.');
+    expect(command('GO', 'nosotros')).toBe('vamos.');
+    expect(command('GIVE', 'tú', true)).toBe('no des.');
+    expect(command('GIVE', 'nosotros')).toBe('demos.');
+  });
+});
+
+// A107. `imperativeForm` (mood.ts) builds every Portuguese command as the present subjunctive:
+// the stored 1sg present minus -o, plus -e / -a. That misses dar and ir (1sg "dou" / "vou" have no
+// -o), the ç → c spelling before -e (começar), the unstressed 1pl of -ear verbs (nomear), and a
+// pronominal verb, whose stored 1sg carries "me" and whose base ends in -ar-se, not -ar.
+describe('known bugs: Portuguese imperative stems', () => {
+  const command = (verb: string, subject = np('SECOND_PERSON'), extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll({ ...clause(subject, verb, extra), imperative: true }).pt;
+  const we = np('FIRST_PERSON', { number: 'plural' });
+  const youAll = np('SECOND_PERSON', { number: 'plural' });
+  const strong = { predicative: { phrase: np('STRONG') } };
+
+  test.fails('Portuguese builds the present-subjunctive command of every seeded verb correctly', () => {
+    expect(command('GIVE')).toBe('dê.');
+    expect(command('GIVE', we)).toBe('demos.');
+    expect(command('GIVE', youAll)).toBe('deem.');
+    expect(command('GO')).toBe('vá.');
+    expect(command('GO', we)).toBe('vamos.');
+    expect(command('GO', youAll)).toBe('vão.');
+    expect(command('START')).toBe('comece.');
+    expect(command('NAME', we)).toBe('nomeemos.');
+    expect(command('BECOME', np('SECOND_PERSON'), { complements: strong })).toBe('torne-se forte.');
+    expect(command('BECOME', np('SECOND_PERSON'), { complements: strong, verbPhrase: { negative: true } })).toBe('não se torne forte.');
+  });
+});
+
+// A110. `predicateSegs` builds a BE command as the になる-style predicative + してください. With する
+// that is causative: 大きくしてください is "make it big", 幸せにしてください "make [me] happy". It also
+// ignores the addressee, so "let's be big" is a request. Want なる: 大きくなってください, 1pl
+// 大きくなりましょう. A noun or na-adjective may take でいてください instead, and both are accepted.
+describe('known bugs: Japanese copula command', () => {
+  test.fails('Japanese builds a copula command on なる (or いる), not on する', () => {
+    const be = (predicate: string, subject = np('SECOND_PERSON'), negative = false) => sayAll({
+      ...clause(subject, 'BE', { verbPhrase: { negative }, complements: { predicative: { phrase: np(predicate) } } }),
+      imperative: true,
+    }).ja;
+    expect(be('LEGEND')).toMatch(/^伝説(になって|でいて)ください。$/);
+    expect(be('HAPPY')).toMatch(/^幸せ(になって|でいて)ください。$/);
+    expect(be('BIG')).toBe('大きくなってください。');
+    expect(be('LEGEND', np('SECOND_PERSON'), true)).toMatch(/^伝説(にならないで|でいないで)ください。$/);
+    expect(be('BIG', np('FIRST_PERSON', { number: 'plural' }))).toBe('大きくなりましょう。');
   });
 });

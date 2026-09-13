@@ -92,7 +92,7 @@ describe('infinitive negation', () => {
   });
 
   // Japanese has no stored plain nai-form, so a negative citation falls back to the polite
-  // negative 食べません — the same documented lexicon gap the relative-clause path lives with.
+  // negative 食べません — the same documented lexicon gap the relative-clause path lives with (B13).
   test('Japanese falls back to the polite negative (documented nai-form gap)', () => {
     expect(sayAll(infinitive({}, { negative: true })).ja).toBe('食べません。');
   });
@@ -119,5 +119,27 @@ describe('known bugs: German "nicht" in the infinitive', () => {
       ...clause(np('GENERIC_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } } }),
       infinitive: true,
     }).de).toBe('nicht müde sein.');
+  });
+});
+
+// A91. A negated French infinitive puts both negators before it and the clitic after them: "ne pas
+// le voir", "ne jamais manger", "ne manger aucune souris". The infinitive and instruction branches
+// of `predicateText` prefix a fixed "ne pas" only when `negative` is set, ignore jamais/aucun, and
+// let `frCliticize` slip the clitic in after "ne ".
+describe('known bugs: French negative infinitive', () => {
+  const inf = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll({ ...clause(np('GENERIC_PERSON'), verb, extra), infinitive: true }).fr;
+  const instruction = (verb: string, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll({ ...clause(np('SECOND_PERSON'), verb, extra), imperative: true, imperativeRegister: 'instruction' }).fr;
+
+  test.fails('French builds "ne pas / ne jamais / ne … aucun" around the infinitive', () => {
+    expect(instruction('SEE', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).toBe('ne pas le voir.');
+    expect(inf('ADD', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } })).toBe("ne pas l'ajouter.");
+    expect(inf('EAT', { verbPhrase: { modifier: 'NEVER' } })).toBe('ne jamais manger.');
+    expect(inf('EAT', { verbPhrase: { modifier: 'NEVER', negative: true } })).toBe('ne jamais manger.');
+    expect(inf('EAT', { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('ne manger aucune souris.');
+    expect(instruction('EAT', { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('ne manger aucune souris.');
+    expect(inf('RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'no' }) } } }))
+      .toBe('ne courir dans aucune maison.');
   });
 });

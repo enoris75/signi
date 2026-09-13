@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness, Degree, NounModifier, NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 const cat = (extra: Partial<NounPhrase>) => sayAll(clause(np('CAT', extra), 'EAT'));
 const map = (extra: Partial<NounPhrase>) => sayAll(clause(np('MAP', extra), 'BURN'));
@@ -497,10 +497,10 @@ describe('known bugs: adjectives', () => {
 
   // A43. French forms the feminine of an adjective by rule (+e), correct for "grand → grande",
   // "haut → haute", but WRONG for the irregular "bas" (LOW): its feminine doubles the s → "basse",
-  // not "base". The rule in fr.ts (agreeAdjFr) has no -s branch, so it falls through to the plain
+  // not "base". The rule in agreeAdjFr has no -s branch, so it falls through to the plain
   // +e. Latent until a feminine noun took LOW; the seeded feminine dimension noun TEMPERATURE
   // surfaces it — the gloss COLD will use reads "à température basse". Fix: add
-  // `bas: ['bas', 'basse', 'bas', 'basses']` to FR_ADJ_IRREGULAR in fr.ts.
+  // `bas: ['bas', 'basse', 'bas', 'basses']` to FR_ADJ_IRREGULAR in fr.consts.ts.
   test('French feminine of "bas" (LOW) is "basse", not "base"', () => {
     expect(cat({ gender: 'fem', adjectives: ['LOW'] }))
       .toMatchObject({ fr: 'la chatte basse mange.' });
@@ -1129,5 +1129,132 @@ describe('documented simplifications: German compounds', () => {
     expect(compound('CREATOR', 'PHRASE')).toBe('der Phrasenschöpfer brennt.');
     expect(compound('BOOK', 'BOY')).toBe('das Jungenbuch brennt.');
     expect(compound('WORD', 'SPEED')).toBe('das Geschwindigkeitswort brennt.');
+  });
+});
+
+// A68. "zéro" used as an adjective ("l'article zéro") is invariable. `agreeAdjFr` has no invariable
+// class, so it falls through to the default +e / +s and writes "zéroe" / "zéros".
+describe('known bugs: French invariable zéro', () => {
+  test.fails('French keeps "zéro" invariable', () => {
+    expect(sayAll(clause(np('PHRASE', { adjectives: ['ZERO'] }), 'BURN')).fr).toBe('la phrase zéro brûle.');
+    expect(sayAll(clause(np('ARTICLE', { adjectives: ['ZERO'], number: 'plural' }), 'BURN')).fr)
+      .toBe('les articles zéro brûlent.');
+    expect(sayAll(clause(np('PHRASE', { adjectives: ['ZERO'], number: 'plural' }), 'BURN')).fr)
+      .toBe('les phrases zéro brûlent.');
+  });
+});
+
+// A68. `agreeAdj` inflects every adjective ending in -o like "pequeno" (-a / -os / -as), so ZERO
+// ("zero") comes out as "zera" / "zeros". Used as an adjective, "zero" is invariable in gender and
+// number ("tolerância zero", "os quilômetros zero").
+describe('known bugs: Portuguese invariable "zero"', () => {
+  test.fails('Portuguese keeps ZERO invariable', () => {
+    expect(sayAll(clause(np('HOUSE', { adjectives: ['ZERO'] }), 'BURN')).pt).toBe('a casa zero arde.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['ZERO'] }), 'EAT')).pt).toBe('os gatos zero comem.');
+    expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('ZERO') } } })).pt).toBe('a casa é zero.');
+  });
+});
+
+// A75. English picks -er/-est for a two-syllable adjective from its spelling: any -er or -le ending
+// inflects. NEUTER then also doubles its final r (the doubling rule assumes a stressed final
+// syllable, true only of a monosyllable) and gives "neuterrer"; FEMALE, whose -le is not the
+// syllabic -le of "simple", gives "femaler". Both compare with more/most.
+describe('known bugs: English comparison of two-syllable adjectives', () => {
+  test.fails('English compares NEUTER and FEMALE with more/most', () => {
+    expect(say(clause(np('CAT', { adjectives: ['NEUTER'], adjectiveDegrees: ['more'] }), 'RUN'), 'en')).toBe('the more neuter cat runs.');
+    expect(say(clause(np('CAT', { adjectives: ['NEUTER'], adjectiveDegrees: ['most'] }), 'RUN'), 'en')).toBe('the most neuter cat runs.');
+    expect(say(clause(np('CAT', { adjectives: ['FEMALE'], adjectiveDegrees: ['more'] }), 'RUN'), 'en')).toBe('the more female cat runs.');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('FEMALE', { headDegree: 'more' }) } } }), 'en')).toBe('the cat seems more female.');
+  });
+});
+
+// A81. `agreeAdj` hardens every masculine plural in -co to -chi, the rule for an adjective stressed
+// on its second-to-last syllable (stanco → stanchi). One stressed a syllable earlier (domestico,
+// selvatico, semantico) takes -ci. The feminine plural (-che) is right for both.
+describe('known bugs: Italian masculine plural of -ico adjectives', () => {
+  test.fails('Italian pluralises domestico/selvatico/semantico to -ici', () => {
+    expect(say(clause(np('ANIMAL', { number: 'plural', adjectives: ['DOMESTIC'] }), 'EAT'), 'it')).toBe('gli animali domestici mangiano.');
+    expect(say(clause(np('CAT', { number: 'plural', adjectives: ['WILD'] }), 'EAT'), 'it')).toBe('i gatti selvatici mangiano.');
+    expect(say(clause(np('BOOK', { number: 'plural', adjectives: ['SEMANTIC'] }), 'BURN'), 'it')).toBe('i libri semantici bruciano.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'SEEM', { complements: { predicative: { phrase: np('WILD') } } }), 'it')).toBe('i gatti sembrano selvatici.');
+  });
+});
+
+// A94. `frMods` hand-builds the attributive noun ("de maisons") instead of using the noun-phrase
+// rules: it elides "de" on a first-letter vowel test, so the mute h of "hommes" (A24's `elides`
+// flag) is missed, and it puts every adjective after the modifier noun, so the prenominal
+// petit / beau stay behind it.
+describe('known bugs: French attributive noun modifier', () => {
+  test.fails('French elides "de" before a mute h and places a prenominal adjective before the modifier noun', () => {
+    expect(sayAll(clause(np('PRISON', {
+      nounModifiers: [{ concept: 'MAN', relation: 'purpose', number: 'plural' }],
+    }), 'BURN')).fr).toBe("la prison d'hommes brûle.");
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [{ concept: 'HOUSE', relation: 'purpose', number: 'plural', adjectives: ['SMALL'] }],
+    }), 'EAT')).fr).toBe('le créateur de petites maisons mange.');
+    expect(sayAll(clause(np('CREATOR', {
+      nounModifiers: [{ concept: 'HOUSE', relation: 'purpose', number: 'plural', adjectives: ['BEAUTIFUL'] }],
+    }), 'EAT')).fr).toBe('le créateur de belles maisons mange.');
+  });
+});
+
+// A95. A masculine singular "beau" / "nouveau" / "vieux" takes its liaison form "bel" / "nouvel" /
+// "vieil" before a vowel or a mute h. `agreeAdjFr` only knows the masc.sg / fem.sg / masc.pl /
+// fem.pl cells of FR_ADJ_IRREGULAR and never sees the word that follows, so the prenominal
+// adjective keeps "beau" / "nouveau" / "vieux" in front of "ange", "argent", "enfant", "homme".
+describe('known bugs: French bel/nouvel/vieil before a vowel', () => {
+  test.fails('French uses the liaison form of beau/nouveau/vieux before a vowel or mute h', () => {
+    expect(sayAll(clause(np('MAN', { adjectives: ['OLD'] }), 'EAT')).fr).toBe('le vieil homme mange.');
+    expect(sayAll(clause(np('ANGEL', { adjectives: ['BEAUTIFUL'], definiteness: 'indefinite' }), 'EAT')).fr)
+      .toBe('un bel ange mange.');
+    expect(sayAll(clause(np('MONEY', { adjectives: ['NEW'], definiteness: 'this' }), 'BURN')).fr)
+      .toBe('ce nouvel argent brûle.');
+    expect(sayAll(clause(np('CHILD', { adjectives: ['NEW'] }), 'EAT')).fr).toBe('le nouvel enfant mange.');
+  });
+});
+
+// A99. `pluralize` adds -es to a consonant-final adjective and never changes its written accent. A
+// word stressed on the syllable before the new -es needs an accent it doesn't have ("jovenes",
+// want "jóvenes"). An oxytone in -ón has to drop the one it has ("marrónes", want "marrones").
+describe('known bugs: Spanish plural adjective accent', () => {
+  test.fails('Spanish adjusts the written accent when an adjective takes -es', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['YOUNG'] }), 'EAT')).es).toBe('los gatos jóvenes comen.');
+    expect(sayAll(clause(np('DOG', { number: 'plural', adjectives: ['BROWN'] }), 'EAT')).es).toBe('los perros marrones comen.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', {
+      complements: { predicative: { phrase: np('BROWN') } },
+    })).es).toBe('los gatos son marrones.');
+  });
+});
+
+// A106. The Portuguese suppletive comparative (A6) is keyed by concept id, and only BIG is listed
+// for "grande". GREAT has the same base, so its raised degrees fall through to the periphrastic
+// "mais grande", which standard Portuguese rejects: the comparative and superlative of "grande"
+// are "maior" / "o maior", whichever concept carries the word.
+describe('known bugs: Portuguese GREAT comparison', () => {
+  test.fails('Portuguese raises GREAT to the suppletive "maior"', () => {
+    expect(sayAll(clause(np('CAT', { adjectives: ['GREAT'], adjectiveDegrees: ['more'] }), 'EAT')).pt)
+      .toBe('o gato maior come.');
+    expect(sayAll(clause(np('HOUSE', { number: 'plural', adjectives: ['GREAT'], adjectiveDegrees: ['more'] }), 'BURN')).pt)
+      .toBe('as casas maiores ardem.');
+    expect(sayAll(clause(np('HOUSE'), 'SEEM', { complements: { predicative: { phrase: np('GREAT', { headDegree: 'more' }) } } })).pt)
+      .toBe('a casa parece maior.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('GREAT', { headDegree: 'most' }) } } })).pt)
+      .toBe('o gato é o maior.');
+  });
+});
+
+// A112. `jaComparisonAdj` negates a less/least adjective by class: …い → …くない, …な → …ではない,
+// anything else + ではない. A の-adjective (茶色の, 大人の) keeps its linker (茶色のではない) and a
+// た-adjective (疲れた) gets a bare ではない (疲れたではない). Want 茶色ではない / 疲れていない.
+describe('known bugs: Japanese lowered degree on a の/た adjective', () => {
+  test.fails('Japanese negates a の/た adjective without keeping its attributive ending', () => {
+    const lowered = (adjective: string, degree: 'less' | 'least') =>
+      sayAll(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: [degree] }), 'EAT')).ja;
+    expect(lowered('BROWN', 'less')).toBe('それほど茶色ではない猫は食べます。');
+    expect(lowered('ADULT', 'least')).toBe('最も大人ではない猫は食べます。');
+    expect(lowered('TIRED', 'less')).toBe('それほど疲れていない猫は食べます。');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: np('BROWN', { headDegree: 'less' }) } },
+    })).ja).toBe('猫はそれほど茶色ではないです。');
   });
 });

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // A modal is an ordinary verb concept flagged `Concept.modal`; what marks it out is that it
 // GOVERNS a non-finite verb group rather than heading one. Only the outermost modal is finite —
@@ -411,7 +411,7 @@ describe('modals: with an adverb', () => {
 
 // DELIBERATE — do not "fix" without a product decision.
 describe('documented simplifications: modals', () => {
-  // ja.ts: "Known gap: `aspect` is dropped under a modal. Stacking ～ています inside 〜必要がある
+  // ja/modalSegs.ts: "Known gap: `aspect` is dropped under a modal. Stacking ～ています inside 〜必要がある
   // is [not built]." So a Japanese modal renders identically whatever the aspect, while the other
   // six compose the two ("must have eaten").
   test.fails('Japanese should not drop the aspect under a modal', () => {
@@ -631,5 +631,32 @@ describe('known bugs: German double infinitive in a verb-final clause', () => {
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') }),
     }).de).toBe('wenn der Kater die Maus würde essen müssen, würde der Hund laufen.');
+  });
+});
+
+// A80. A modal's own manner adverb is placed right after the modal ("can fast eat", "wants fast to
+// eat"). English has no slot for a manner adverb between a modal (or "want to") and its infinitive;
+// it trails the verb group and its object, where the main verb's manner adverb already goes
+// ("can eat the mouse fast").
+describe('known bugs: English manner adverb on a modal', () => {
+  test.fails('English trails a modal\'s manner adverb after the verb group', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), 'en')).toBe('the cat can eat fast.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'WILL', modifier: 'FAST' }] } }), 'en')).toBe('the cat wants to eat fast.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] }, directObject: np('MOUSE') }), 'en')).toBe('the cat can eat the mouse fast.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['MUST', { verb: 'CAN', modifier: 'FAST' }] } }), 'en')).toBe('the cat must be able to eat fast.');
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modals: [{ verb: 'CAN', modifier: 'FAST' }] } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would be able to run fast.');
+  });
+});
+
+// A113. `modalSegs` bridges WILL over a verb-kind modal with ようになる. When another modal governs
+// that WILL, the branch returns ように + なる and never emits the たい, so MUST > WILL > CAN reads
+// "must think it comes to be able to eat" (…ようになると思う必要があります). Only a three-modal plan
+// reaches it; the UI chains two.
+describe('known bugs: Japanese 〜たい bridge inside a longer modal chain', () => {
+  test.fails('Japanese keeps 〜たい when the ようになる bridge is itself governed', () => {
+    const eats = (modals: string[]) => sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals } })).ja;
+    expect(eats(['MUST', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思う必要があります。');
+    expect(eats(['CAN', 'WILL', 'CAN'])).toBe('猫は食べることができるようになりたいと思うことができます。');
+    expect(eats(['CAN', 'WILL', 'MUST'])).toBe('猫は食べる必要があるようになりたいと思うことができます。');
   });
 });

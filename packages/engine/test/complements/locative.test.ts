@@ -210,7 +210,7 @@ describe('locative: spatial specifiers', () => {
       pt: 'o gato está debaixo da casa.',
       // The relational noun 下 sits between the place and its particle, exactly as it does for a
       // route (市場の下を) — only the particle differs.
-      ja: '猫は家の下でです。',
+      ja: '猫は家の下でです。', // wrong, pinned as-is: A109
     });
   });
 
@@ -222,7 +222,7 @@ describe('locative: spatial specifiers', () => {
       de: 'der Kater ist hinter dem Haus.', // dative — hinter is two-way
       es: 'el gato está detrás de la casa.', // estar, not ser (A47)
       pt: 'o gato está atrás da casa.',
-      ja: '猫は家の後ろでです。',
+      ja: '猫は家の後ろでです。', // wrong, pinned as-is: A109
     });
   });
 
@@ -237,7 +237,7 @@ describe('locative: spatial specifiers', () => {
       en: 'the cat is in front of the house.',
       it: 'il gatto è davanti alla casa.', // davanti a + la = alla
       de: 'der Kater ist vor dem Haus.',
-      ja: '猫は家の前でです。',
+      ja: '猫は家の前でです。', // wrong, pinned as-is: A109
     });
   });
 
@@ -453,5 +453,56 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
       es: 'el gato parece en la casa.',
       pt: 'o gato parece na casa.',
     });
+  });
+});
+
+// A66. A47's ser/estar choice (`copulaVerb` in `predicateText`) reaches only the plain finite
+// verb, `finite(copulaVerb)`. The modal chain, `aspectVerb`, the imperative and the
+// infinitive/instruction branches all read the lexical BE (ser). So a location or a transient state
+// takes "ser" as soon as the verb is not a simple finite form.
+describe('known bugs: Spanish estar outside the plain finite verb', () => {
+  test.fails('Spanish selects estar under a modal and in the compound tense', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: { locative: { phrase: np('HOUSE') } } })).es)
+      .toBe('el gato debe estar en la casa.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: { predicative: { phrase: np('TIRED') } } })).es)
+      .toBe('el gato debe estar cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative' }, complements: { locative: { phrase: np('HOUSE') } } })).es)
+      .toBe('el gato ha estado en la casa.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative' }, complements: { predicative: { phrase: np('TIRED') } } })).es)
+      .toBe('el gato ha estado cansado.');
+  });
+
+  test.fails('Spanish selects estar in commands and in the infinitive', () => {
+    const inHouse = { locative: { phrase: np('HOUSE') } };
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: inHouse }), imperative: true }).es)
+      .toBe('no estés en la casa.');
+    expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'BE', { complements: inHouse }), imperative: true }).es)
+      .toBe('estemos en la casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'BE', { complements: inHouse }), imperative: true }).es)
+      .toBe('estad en la casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: inHouse }), imperative: true, imperativeRegister: 'instruction' }).es)
+      .toBe('estar en la casa.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BE', { complements: inHouse }), infinitive: true }).es)
+      .toBe('estar en la casa.');
+  });
+});
+
+// A109. BE with a locative and no predicative skips the copula path, so it takes the action
+// particle で and BE's fallback lexeme です, which has no stem: 猫は家でです (tense, negation,
+// modal and command all glued on). Japanese states location with いる (animate) / ある
+// (inanimate) and に. Not A42, which is a predicate noun PLUS a locative.
+describe('known bugs: Japanese BE with a locative', () => {
+  test.fails('Japanese renders a located subject with いる / ある and に', () => {
+    const inHouse = (subject: string, verbPhrase: { negative?: boolean; tense?: 'past'; modals?: string[] } = {}) =>
+      sayAll(clause(np(subject), 'BE', { verbPhrase, complements: { locative: { phrase: np('HOUSE') } } })).ja;
+    expect(inHouse('CAT')).toBe('猫は家にいます。');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'under' }] } },
+    })).ja).toBe('猫は家の下にいます。');
+    expect(inHouse('CAT', { negative: true, tense: 'past' })).toBe('猫は家にいませんでした。');
+    expect(inHouse('BOOK')).toBe('本は家にあります。');
+    expect(inHouse('CAT', { modals: ['MUST'] })).toBe('猫は家にいる必要があります。');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), imperative: true }).ja)
+      .toBe('家にいてください。');
   });
 });

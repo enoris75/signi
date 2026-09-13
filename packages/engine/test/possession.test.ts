@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // A possessor is a full noun phrase in the genitive, and recursive. It is the one noun slot that
 // is NOT a `NounElement`: it stays a plain `NounPhrase`, because "Peter and Paul's book" cannot
@@ -206,5 +206,58 @@ describe('known bugs: German possessor determiner', () => {
     expect(bookOf(np('CAT', { definiteness: 'indefinite' })).de).toBe('das Buch von einem Kater brennt.');
     expect(bookOf(np('CAT', { definiteness: 'some', number: 'plural' })).de).toBe('das Buch von einigen Katern brennt.');
     expect(bookOf(np('EUROPE')).de).toBe('das Buch von Europa brennt.');
+  });
+});
+
+// A58 (Italian). `renderNP` heads a genitive possessor with `prepArt('di', …)`, di + the definite
+// article, and never reads the possessor's own determiner, so "un uomo" / "alcuni uomini" / "nessun
+// uomo" all become "dell'uomo" / "degli uomini".
+describe('known bugs: Italian possessor determiner', () => {
+  test.fails('Italian keeps the possessor\'s own determiner', () => {
+    expect(say(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'indefinite' }) }), 'BURN'), 'it')).toBe('il libro di un uomo brucia.');
+    expect(say(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'this' }) }), 'BURN'), 'it')).toBe("il libro di quest'uomo brucia.");
+    expect(say(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'some', number: 'plural' }) }), 'BURN'), 'it')).toBe('il libro di alcuni uomini brucia.');
+    expect(say(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'no' }) }), 'BURN'), 'it')).toBe('il libro di nessun uomo brucia.');
+  });
+});
+
+// A58 (French). `renderNP` heads a genitive possessor with `dePrep`, the definite "de" + article
+// contraction, instead of `deDet`, so the possessor's own determiner is ignored and every
+// possessor comes out definite ("du chat", "des chats").
+describe('known bugs: French possessor determiner', () => {
+  test.fails('French keeps the possessor\'s own determiner', () => {
+    const bookOf = (extra: Parameters<typeof np>[1]) =>
+      sayAll(clause(np('BOOK', { possessor: np('CAT', extra) }), 'BURN')).fr;
+    expect(bookOf({ definiteness: 'indefinite' })).toBe("le livre d'un chat brûle.");
+    expect(bookOf({ definiteness: 'some', number: 'plural' })).toBe('le livre de quelques chats brûle.');
+    expect(bookOf({ definiteness: 'this' })).toBe('le livre de ce chat brûle.');
+    expect(bookOf({ definiteness: 'all', number: 'plural' })).toBe('le livre de tous les chats brûle.');
+  });
+});
+
+// A58 (Spanish). `possessorText` always builds "de" + the definite article (`dePrep`) and never
+// reads the possessor's `definiteness`. An indefinite, quantified or demonstrative possessor comes
+// out definite ("del hombre"). A bare proper name is already right ("de Europa").
+describe('known bugs: Spanish possessor determiner', () => {
+  test.fails("Spanish keeps the possessor's own determiner", () => {
+    expect(sayAll(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'indefinite' }) }), 'BURN')).es)
+      .toBe('el libro de un hombre arde.');
+    expect(sayAll(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'some' }) }), 'BURN')).es)
+      .toBe('el libro de algunos hombres arde.');
+    expect(sayAll(clause(np('BOOK', { possessor: np('MAN', { definiteness: 'this' }) }), 'BURN')).es)
+      .toBe('el libro de este hombre arde.');
+  });
+});
+
+// A58 (Portuguese). `possessorText` fuses "de" with the definite article (`dePrep`) whatever
+// determiner the possessor carries, so an indefinite, demonstrative or quantified possessor turns
+// definite.
+describe('known bugs: Portuguese possessor determiner', () => {
+  const bookOf = (possessor: ReturnType<typeof np>) => sayAll(clause(np('BOOK', { possessor }), 'BURN')).pt;
+
+  test.fails('Portuguese keeps the possessor\'s own determiner', () => {
+    expect(bookOf(np('CAT', { definiteness: 'indefinite' }))).toBe('o livro de um gato arde.');
+    expect(bookOf(np('CAT', { definiteness: 'this' }))).toBe('o livro deste gato arde.');
+    expect(bookOf(np('CAT', { definiteness: 'some' }))).toBe('o livro de alguns gatos arde.');
   });
 });

@@ -14,14 +14,15 @@ The individual defects now live one-per-file under the three subdirectories:
 
 ## Orientation
 
-- The engine is `packages/engine/src/`. One module per language: `languages/{en,it,fr,es,pt,ja}.ts`,
-  and German as a folder, `languages/de/`, with one file per function (`de.consts.ts`,
-  `de.types.ts`, `germanEngine.ts`) and a unit test next to each. Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`)
+- The engine is `packages/engine/src/`. One folder per language, `languages/{en,it,fr,es,pt,de,ja}/`,
+  with one file per function, `<lang>.consts.ts` / `<lang>.types.ts`, the engine object
+  (`englishEngine.ts`, …) behind an `index.ts`, and a unit test next to each function. Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`)
   and `mood.ts`. The plan model is typed in `packages/shared/src/index.ts`.
 - Tests are `packages/engine/test/`, run with **`npm run test:unit`** (~300ms, no server needed —
   the harness seeds an in-memory SQLite from the real corpus and calls the production lexicon).
-  The German function-level unit tests sit beside their source (`languages/de/*.test.ts`) and
-  build their inputs by hand; the defects below are pinned in the sentence-level suite.
+  The function-level unit tests sit beside their source (`languages/<lang>/*.test.ts`) and build
+  their inputs by hand (`languages/resolved.fixtures.ts`); the defects below are pinned in the
+  sentence-level suite.
 - **`npm run typecheck` before you trust a test.** Vitest does not typecheck. A plan built with an
   invalid literal (e.g. a `Degree` of `'comparative'`, which does not exist — the values are
   `positive | more | most | less | least | equally`) will run happily and take a fallback path,
@@ -41,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (29 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (125 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -56,25 +57,79 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A41 | [A41-home-locative-at-home-idiom.md](A-must-fix/A41-home-locative-at-home-idiom.md) |
 | A42 | [A42-japanese-locative-dropped-under-predicate-nominal.md](A-must-fix/A42-japanese-locative-dropped-under-predicate-nominal.md) |
 | A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
-| A45 | [A45-french-gloss-great-postnominal.md](A-must-fix/A45-french-gloss-great-postnominal.md) |
+| A45 | [A45-gloss-great-postnominal.md](A-must-fix/A45-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
 | A48 | [A48-german-du-imperative-forms.md](A-must-fix/A48-german-du-imperative-forms.md) |
 | A49 | [A49-german-nicht-in-commands-and-infinitives.md](A-must-fix/A49-german-nicht-in-commands-and-infinitives.md) |
 | A50 | [A50-german-relative-clause-negation.md](A-must-fix/A50-german-relative-clause-negation.md) |
 | A51 | [A51-german-relative-clause-means-clause.md](A-must-fix/A51-german-relative-clause-means-clause.md) |
 | A52 | [A52-german-prospective-word-order.md](A-must-fix/A52-german-prospective-word-order.md) |
-| A53 | [A53-german-coordinated-pronoun-object.md](A-must-fix/A53-german-coordinated-pronoun-object.md) |
-| A54 | [A54-german-cause-coordinated-pronouns.md](A-must-fix/A54-german-cause-coordinated-pronouns.md) |
+| A53 | [A53-coordinated-pronoun-object.md](A-must-fix/A53-coordinated-pronoun-object.md) |
+| A54 | [A54-cause-coordinated-pronouns.md](A-must-fix/A54-cause-coordinated-pronouns.md) |
 | A55 | [A55-german-hoch-comparison.md](A-must-fix/A55-german-hoch-comparison.md) |
 | A56 | [A56-german-mass-noun-strong-adjective.md](A-must-fix/A56-german-mass-noun-strong-adjective.md) |
 | A57 | [A57-german-weak-noun-genitive-modifier.md](A-must-fix/A57-german-weak-noun-genitive-modifier.md) |
-| A58 | [A58-german-possessor-determiner.md](A-must-fix/A58-german-possessor-determiner.md) |
+| A58 | [A58-possessor-determiner.md](A-must-fix/A58-possessor-determiner.md) |
 | A59 | [A59-german-ins-contraction.md](A-must-fix/A59-german-ins-contraction.md) |
 | A60 | [A60-german-temporal-manner-gloss.md](A-must-fix/A60-german-temporal-manner-gloss.md) |
 | A61 | [A61-german-double-infinitive-verb-final.md](A-must-fix/A61-german-double-infinitive-verb-final.md) |
 | A62 | [A62-relative-clause-on-complement-slot.md](A-must-fix/A62-relative-clause-on-complement-slot.md) |
-| A63 | [A63-german-articled-proper-name-fusion.md](A-must-fix/A63-german-articled-proper-name-fusion.md) |
+| A63 | [A63-articled-proper-name-fusion.md](A-must-fix/A63-articled-proper-name-fusion.md) |
 | A64 | [A64-german-isch-superlative.md](A-must-fix/A64-german-isch-superlative.md) |
+| A65 | [A65-romance-cause-determiner.md](A-must-fix/A65-romance-cause-determiner.md) |
+| A66 | [A66-spanish-portuguese-estar-outside-finite-copula.md](A-must-fix/A66-spanish-portuguese-estar-outside-finite-copula.md) |
+| A67 | [A67-italian-french-participle-clitic-agreement.md](A-must-fix/A67-italian-french-participle-clitic-agreement.md) |
+| A68 | [A68-french-portuguese-invariable-zero.md](A-must-fix/A68-french-portuguese-invariable-zero.md) |
+| A69 | [A69-english-spanish-connector-comma.md](A-must-fix/A69-english-spanish-connector-comma.md) |
+| A70 | [A70-romance-clitic-enclisis.md](A-must-fix/A70-romance-clitic-enclisis.md) |
+| A71 | [A71-pronominal-possessor-on-complement.md](A-must-fix/A71-pronominal-possessor-on-complement.md) |
+| A72 | [A72-feminine-plural-object-clitic.md](A-must-fix/A72-feminine-plural-object-clitic.md) |
+| A73 | [A73-impersonal-se-plural-object.md](A-must-fix/A73-impersonal-se-plural-object.md) |
+| A74 | [A74-english-any-object-conjuncts.md](A-must-fix/A74-english-any-object-conjuncts.md) |
+| A75 | [A75-english-comparative-two-syllable.md](A-must-fix/A75-english-comparative-two-syllable.md) |
+| A76 | [A76-english-frequency-adverb-copula.md](A-must-fix/A76-english-frequency-adverb-copula.md) |
+| A77 | [A77-english-frequency-adverb-mood.md](A-must-fix/A77-english-frequency-adverb-mood.md) |
+| A78 | [A78-english-frequency-adverb-negator.md](A-must-fix/A78-english-frequency-adverb-negator.md) |
+| A79 | [A79-english-indefinite-article-by-spelling.md](A-must-fix/A79-english-indefinite-article-by-spelling.md) |
+| A80 | [A80-english-manner-adverb-on-modal.md](A-must-fix/A80-english-manner-adverb-on-modal.md) |
+| A81 | [A81-italian-ico-adjective-plural.md](A-must-fix/A81-italian-ico-adjective-plural.md) |
+| A82 | [A82-italian-impersonal-si-clitic-order.md](A-must-fix/A82-italian-impersonal-si-clitic-order.md) |
+| A83 | [A83-italian-impersonal-si-perfect-auxiliary.md](A-must-fix/A83-italian-impersonal-si-perfect-auxiliary.md) |
+| A84 | [A84-italian-impersonal-si-plural-agreement.md](A-must-fix/A84-italian-impersonal-si-plural-agreement.md) |
+| A85 | [A85-italian-kinship-possessive-article.md](A-must-fix/A85-italian-kinship-possessive-article.md) |
+| A86 | [A86-italian-negative-imperative-clitic.md](A-must-fix/A86-italian-negative-imperative-clitic.md) |
+| A87 | [A87-italian-short-imperative-dare-fare-andare.md](A-must-fix/A87-italian-short-imperative-dare-fare-andare.md) |
+| A88 | [A88-french-clitic-periphrasis.md](A-must-fix/A88-french-clitic-periphrasis.md) |
+| A89 | [A89-french-continent-source.md](A-must-fix/A89-french-continent-source.md) |
+| A90 | [A90-french-disjunctive-subject-agreement.md](A-must-fix/A90-french-disjunctive-subject-agreement.md) |
+| A91 | [A91-french-infinitive-negation.md](A-must-fix/A91-french-infinitive-negation.md) |
+| A92 | [A92-french-je-elision.md](A-must-fix/A92-french-je-elision.md) |
+| A93 | [A93-french-ne-elision-before-clitic.md](A-must-fix/A93-french-ne-elision-before-clitic.md) |
+| A94 | [A94-french-noun-modifier-np-rules.md](A-must-fix/A94-french-noun-modifier-np-rules.md) |
+| A95 | [A95-french-prenominal-liaison-form.md](A-must-fix/A95-french-prenominal-liaison-form.md) |
+| A96 | [A96-french-reflexive-infinitive-clitic.md](A-must-fix/A96-french-reflexive-infinitive-clitic.md) |
+| A97 | [A97-spanish-negative-coordination-ni.md](A-must-fix/A97-spanish-negative-coordination-ni.md) |
+| A98 | [A98-spanish-personal-a.md](A-must-fix/A98-spanish-personal-a.md) |
+| A99 | [A99-spanish-plural-adjective-accent.md](A-must-fix/A99-spanish-plural-adjective-accent.md) |
+| A100 | [A100-spanish-reflexive-imperative.md](A-must-fix/A100-spanish-reflexive-imperative.md) |
+| A101 | [A101-spanish-reflexive-mood-clitic.md](A-must-fix/A101-spanish-reflexive-mood-clitic.md) |
+| A102 | [A102-spanish-reflexive-nonfinite.md](A-must-fix/A102-spanish-reflexive-nonfinite.md) |
+| A103 | [A103-spanish-subjunctive-stem.md](A-must-fix/A103-spanish-subjunctive-stem.md) |
+| A104 | [A104-spanish-wing-stressed-a.md](A-must-fix/A104-spanish-wing-stressed-a.md) |
+| A105 | [A105-portuguese-cause-disso.md](A-must-fix/A105-portuguese-cause-disso.md) |
+| A106 | [A106-portuguese-great-suppletive.md](A-must-fix/A106-portuguese-great-suppletive.md) |
+| A107 | [A107-portuguese-imperative-subjunctive-stem.md](A-must-fix/A107-portuguese-imperative-subjunctive-stem.md) |
+| A108 | [A108-portuguese-voce-paradigm.md](A-must-fix/A108-portuguese-voce-paradigm.md) |
+| A109 | [A109-japanese-be-locative-existential.md](A-must-fix/A109-japanese-be-locative-existential.md) |
+| A110 | [A110-japanese-copula-command-suru.md](A-must-fix/A110-japanese-copula-command-suru.md) |
+| A111 | [A111-japanese-instruction-label-furigana.md](A-must-fix/A111-japanese-instruction-label-furigana.md) |
+| A112 | [A112-japanese-lowered-degree-no-ta-adjective.md](A-must-fix/A112-japanese-lowered-degree-no-ta-adjective.md) |
+| A113 | [A113-japanese-modal-bridge-drops-tai.md](A-must-fix/A113-japanese-modal-bridge-drops-tai.md) |
+| A114 | [A114-japanese-negative-determiner-particle.md](A-must-fix/A114-japanese-negative-determiner-particle.md) |
+| A115 | [A115-japanese-predicate-no-ta-adjective.md](A-must-fix/A115-japanese-predicate-no-ta-adjective.md) |
+| A116 | [A116-japanese-relative-modal-copula-polite.md](A-must-fix/A116-japanese-relative-modal-copula-polite.md) |
+| A117 | [A117-japanese-tara-copular-condition.md](A-must-fix/A117-japanese-tara-copular-condition.md) |
+| A118 | [A118-japanese-tara-protasis-bare-verb.md](A-must-fix/A118-japanese-tara-protasis-bare-verb.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -85,6 +140,10 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | B7 | [B07-japanese-aspect-under-modal.md](B-can-fix/B07-japanese-aspect-under-modal.md) |
 | B9 | [B09-german-genitive-vs-colloquial-dative.md](B-can-fix/B09-german-genitive-vs-colloquial-dative.md) (not pinned by a test) |
 | B10 | [B10-german-compound-linking-element.md](B-can-fix/B10-german-compound-linking-element.md) |
+| B11 | [B11-spanish-portuguese-subjunctive-1pl-accent.md](B-can-fix/B11-spanish-portuguese-subjunctive-1pl-accent.md) |
+| B12 | [B12-japanese-copula-coordinated-adjective.md](B-can-fix/B12-japanese-copula-coordinated-adjective.md) |
+| B13 | [B13-japanese-plain-negative.md](B-can-fix/B13-japanese-plain-negative.md) |
+| B14 | [B14-japanese-relative-aspect-polite.md](B-can-fix/B14-japanese-relative-aspect-polite.md) |
 
 ### Part C — Looks wrong, is right (`C-do-not-fix/`)
 
@@ -163,7 +222,7 @@ rather than as outright bugs._
    adverb: same fix shape in English and Italian).
    - **Romance proper-noun adposition** — A29 (locative) and A31 (directional continent) share a
      root: the proper-noun article rule fires in a position that forbids it. A31 also needs a
-     continent-keyed preposition. Do them together in `it.ts` / `fr.ts`.
+     continent-keyed preposition. Do them together in `languages/it/` / `languages/fr/`.
 4. **A9 (Portuguese resultative)** — one-line mapping, but check the pluperfect still passes.
 5. **German case/clause cleanups** — A17 (closing comma), A18 (relative-clause aspect), A16, A19,
    A20.

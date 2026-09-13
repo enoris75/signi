@@ -5,5 +5,5 @@
 | | |
 |---|---|
 | **Behaviour** | Japanese resultative is `〜てしまいます` (completive, **non-past**) where the other six render a present perfect |
-| **Correct target / rationale** | `ja.ts`: resultative is mapped to completion aspect. Defensible, but the same plan then *means* different things across languages. |
+| **Correct target / rationale** | `ja/aspectVerbSegs.ts`: resultative is mapped to completion aspect. Defensible, but the same plan then *means* different things across languages. |
 | **Test** | `verb.test.ts` → *documented simplifications: aspect* (1) |

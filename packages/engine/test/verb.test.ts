@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase, VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
 const catEats = (verbPhrase: Partial<VerbPhrase>) =>
@@ -282,7 +282,7 @@ describe('adverb polarity', () => {
 
 describe('known bugs: aspect', () => {
   // Portuguese "tem comido" is ITERATIVE ("has been eating, repeatedly"), not resultative. The
-  // perfect of a bounded event is the pretérito perfeito: "o gato comeu". pt.ts documents its
+  // perfect of a bounded event is the pretérito perfeito: "o gato comeu". the Portuguese engine documents its
   // choice of `ter` as the auxiliary but not this consequence, so it reads as an oversight.
   test('resultative Portuguese should use the pretérito, not ter + particípio', () => {
     expect(catEats({ aspect: 'resultative' })).toMatchObject({ pt: 'o gato comeu.' });
@@ -424,7 +424,7 @@ describe('known bugs: adverb placement', () => {
   });
 });
 
-// Deliberate: ja.ts maps resultative onto ～てしまう, the completive aspect. It is a defensible
+// Deliberate: the Japanese engine maps resultative onto ～てしまう, the completive aspect. It is a defensible
 // reading of "resultative", but note it renders NON-PAST ("will end up eating") where the other
 // six render a present perfect ("has eaten") — so the same plan means different things.
 describe('documented simplifications: aspect', () => {
@@ -679,5 +679,91 @@ describe('known bugs: German prospective word order', () => {
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' } }),
     }).de).toBe('wenn der Kater im Begriff zu essen sein würde, würde der Hund laufen.');
+  });
+});
+
+// A73. With a plural noun object, Italian "si" is the passive si and the verb agrees with the
+// object ("si mangiano i topi"); the singular is colloquial. `predicateText` and `relativeText`
+// conjugate against GENERIC_PERSON (3sg), so the verb never agrees with its plural patient.
+describe('known bugs: Italian impersonal si with a plural object', () => {
+  test.fails('Italian agrees the verb with the plural object of the impersonal si', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }) }), 'it')).toBe('si mangiano i topi.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }), verbPhrase: { tense: 'past' } }), 'it')).toBe('si mangiarono i topi.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }), verbPhrase: { modals: [{ verb: 'MUST' }] } }), 'it')).toBe('si devono mangiare i topi.');
+    expect(say(clause(np('MOUSE', {
+      number: 'plural',
+      relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } },
+    }), 'RUN'), 'it')).toBe('i topi che si mangiano corrono.');
+  });
+});
+
+// A73 (Spanish). With a plural noun object the impersonal "se" is the passive "se", and the verb
+// agrees with the object ("se comen los ratones"). The engine conjugates against GENERIC_PERSON
+// (3sg), so the verb stays singular.
+describe('known bugs: Spanish impersonal se with a plural object', () => {
+  test.fails('Spanish agrees the verb with the plural object of the impersonal se', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }) }), 'es')).toBe('se comen los ratones.');
+  });
+});
+
+// A77. The imperative, conditional and infinitive branches of English `predicateParts` put a
+// frequency adverb in front of the whole verb text, auxiliary and negator included: "always do not
+// eat", "always let's eat", "always would run", "always not to eat". The adverb belongs after
+// "do not" / "let's (not)" / "would (not)" and after "not", as "does not always eat" already does.
+describe('known bugs: English frequency adverb before a mood auxiliary', () => {
+  test.fails('English puts ALWAYS/NEVER after "do not", "let\'s", "would" and "not"', () => {
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true }, 'en')).toBe('do not always eat.');
+    expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } }), imperative: true }, 'en')).toBe("let's always eat.");
+    expect(say({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), imperative: true }, 'en')).toBe("let's not always eat.");
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'ALWAYS' } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would always run.');
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'NEVER' } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would never run.');
+    expect(say({ ...clause(np('DOG'), 'RUN', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), condition: clause(np('CAT'), 'EAT') }, 'en')).toBe('if the cat ate, the dog would not always run.');
+    expect(say({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true } }), infinitive: true }, 'en')).toBe('not always to eat.');
+  });
+});
+
+// A83. The Italian impersonal "si" takes "essere" in the compound tenses whatever the verb's own
+// auxiliary ("si è mangiato", "si è corso"). `aspectVerb` picks the auxiliary from the verb's
+// lexical `aux` alone, so an "avere" verb renders "si ha mangiato".
+describe('known bugs: Italian impersonal si in the compound tense', () => {
+  test.fails('Italian takes essere with the impersonal si', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è mangiato.');
+    expect(say(clause(np('GENERIC_PERSON'), 'RUN', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è corso.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative' }, directObject: np('MOUSE') }), 'it')).toBe('si è mangiato il topo.');
+    expect(say(clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { aspect: 'resultative', tense: 'past' } }), 'it')).toBe('si era mangiato.');
+  });
+});
+
+// A96. A reflexive infinitive agrees its clitic with the subject ("je dois m'effondrer") and
+// keeps it in the infinitive perfect ("doit s'être effondré"). `aspectVerbFr` and
+// `verbGroupInfinitiveFr` use the citation "s'effondrer" for every person, and the modal
+// resultative "être + participle" never restores the clitic.
+describe('known bugs: French reflexive infinitive', () => {
+  test.fails('French agrees the reflexive clitic on the infinitive and keeps it in the perfect', () => {
+    const collapse = (subject: string, verbPhrase: NonNullable<Parameters<typeof clause>[2]>['verbPhrase'], number?: 'plural') =>
+      sayAll(clause(np(subject, number ? { number } : {}), 'COLLAPSE', { verbPhrase })).fr;
+    expect(collapse('FIRST_PERSON', { modals: ['MUST'] })).toBe("je dois m'effondrer.");
+    expect(collapse('SECOND_PERSON', { modals: ['MUST'] })).toBe("tu dois t'effondrer.");
+    expect(collapse('FIRST_PERSON', { aspect: 'progressive' })).toBe("je suis en train de m'effondrer.");
+    expect(collapse('FIRST_PERSON', { aspect: 'prospective' }, 'plural')).toBe('nous sommes sur le point de nous effondrer.');
+    expect(collapse('CAT', { modals: ['MUST'], aspect: 'resultative' })).toBe("le chat doit s'être effondré.");
+  });
+});
+
+// A102. A reflexive verb's non-finite forms come straight from the lexicon: `volverse`, `volviéndose`,
+// `vuelto`. `verbGroupInfinitive` (under a modal) and `aspectVerb` (progressive / prospective)
+// never add a clitic that agrees with the subject. So the 3rd-person "se" is stuck on every
+// person, and under a modal the resultative loses it altogether ("haber vuelto" = "have returned").
+describe('known bugs: Spanish reflexive verb in a non-finite verb group', () => {
+  test.fails('Spanish keeps the reflexive clitic, agreeing, on "haber", the infinitive and the gerund', () => {
+    const legend = { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } };
+    expect(sayAll(clause(np('CAT'), 'BECOME', { verbPhrase: { modals: [{ verb: 'MUST' }], aspect: 'resultative' }, complements: legend })).es)
+      .toBe('el gato debe haberse vuelto una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: legend })).es)
+      .toBe('debo volverme una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { aspect: 'prospective' }, complements: legend })).es)
+      .toBe('estoy a punto de volverme una leyenda.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'BECOME', { verbPhrase: { aspect: 'progressive' }, complements: legend })).es)
+      .toBe('estoy volviéndome una leyenda.');
   });
 });

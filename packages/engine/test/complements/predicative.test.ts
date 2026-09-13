@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Degree, NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from '../harness.js';
+import { clause, np, say, sayAll } from '../harness.js';
 import { concepts } from '../../../backend/src/concepts/index.js';
 
 // The subject complement — what the subject *is* or *becomes*, rather than what it acts on. It is
@@ -366,5 +366,83 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a predicative', () => {
     expect(isThat('BEAUTIFUL')).toMatchObject({ es: 'el gato es hermoso.', pt: 'o gato é belo.' });
     expect(sayAll(clause(np('CAT'), 'BECOME', { complements: { predicative: { phrase: np('TIRED') } } })))
       .toMatchObject({ es: 'el gato se vuelve cansado.', pt: 'o gato se torna cansado.' });
+  });
+});
+
+// A66. A47's ser/estar choice is made only for the plain finite copula in `predicateText`. The
+// modal infinitive, the imperative, the instruction/citation infinitive and the ter + participle
+// (and its present-tense preterite) all read the seeded BE, so a place or a transient state gets
+// "ser" there: "deve ser cansado", "seja na casa", "tinha sido na casa".
+describe('known bugs: Portuguese ser vs estar outside the finite copula', () => {
+  const tired = { predicative: { phrase: np('TIRED') } };
+  const atHome = { locative: { phrase: np('HOUSE') } };
+
+  test.fails('Portuguese selects estar under a modal, a command, an infinitive and ter', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: tired, verbPhrase: { modals: ['MUST'] } })).pt).toBe('o gato deve estar cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { modals: ['MUST'] } })).pt).toBe('o gato deve estar na casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: atHome }), imperative: true }).pt).toBe('esteja na casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: tired, verbPhrase: { negative: true } }), imperative: true }).pt).toBe('não esteja cansado.');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BE', { complements: atHome }), infinitive: true }).pt).toBe('estar na casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: tired }), imperative: true, imperativeRegister: 'instruction' }).pt).toBe('estar cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { aspect: 'resultative' } })).pt).toBe('o gato esteve na casa.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: tired, verbPhrase: { tense: 'past', aspect: 'resultative' } })).pt).toBe('o gato tinha estado cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).pt).toBe('o gato deve ter estado na casa.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { aspect: 'resultative' } }) }).pt)
+      .toBe('se o gato tivesse estado na casa, o cão correria.');
+  });
+});
+
+// A76. The copula BE is an auxiliary for adverb placement: ALWAYS/NEVER follow its finite form
+// ("is always tired"), and its "not" ("is not always tired"). The engine treats an affirmative BE
+// like a lexical verb and puts the adverb first ("always is tired"). A negated BE drops a
+// frequency adverb altogether ("is not tired").
+describe('known bugs: English frequency adverb with the copula', () => {
+  test.fails('English puts ALWAYS/NEVER after the finite "be" and its "not"', () => {
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is always tired.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'NEVER' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is never tired.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', tense: 'past' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat was always tired.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', negative: true }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat is not always tired.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modifier: 'ALWAYS', negative: true, tense: 'future' }, complements: { predicative: { phrase: np('TIRED') } } }), 'en')).toBe('the cat will not always be tired.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'BE', modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } } }), 'RUN'), 'en')).toBe('the dog that is always tired runs.');
+  });
+});
+
+// A84. The Italian impersonal "si" takes a singular verb, but a predicate adjective or an essere
+// participle agreeing with it is masculine plural ("si è stanchi", "si è andati"). The engine agrees
+// both with GENERIC_PERSON's seeded 3sg features.
+describe('known bugs: Italian agreement with the impersonal si', () => {
+  test.fails('Italian agrees a predicate with the impersonal si in the masculine plural', () => {
+    expect(say(clause(np('GENERIC_PERSON'), 'BE', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('si è stanchi.');
+    expect(say(clause(np('GENERIC_PERSON'), 'BECOME', { complements: { predicative: { phrase: np('TIRED') } } }), 'it')).toBe('si diventa stanchi.');
+    expect(say(clause(np('GENERIC_PERSON'), 'GO', { verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('si è andati.');
+  });
+});
+
+// B12. DELIBERATE — do not "fix" without a product decision. `copulaSegs` inflects です against
+// `firstConjunct` only ("a documented approximation"). A coordinated adjective predicate therefore
+// loses every conjunct after the first: "the cat is big and happy" → 猫は大きいです. Japanese chains
+// them with the te-form: 猫は大きくて幸せです.
+describe('documented simplifications: Japanese coordinated copula predicate', () => {
+  test.fails('Japanese keeps every conjunct of a coordinated adjective predicate', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { predicative: { phrase: { conjuncts: [np('BIG'), np('HAPPY')], conjunction: 'and' } } },
+    })).ja).toBe('猫は大きくて幸せです。');
+  });
+});
+
+// A115. `copulaSegs` and `complementSegs` sort a predicate adjective into …い or …な; anything else
+// takes the noun branch, which keeps the stored attributive base and skips the degree adverb. The
+// 30 の-adjectives read 茶色のです / 茶色のになります, the 4 た-adjectives 疲れたです. Want 茶色です /
+// 茶色になります / 疲れています.
+describe('known bugs: Japanese の/た adjective as a predicate', () => {
+  test.fails('Japanese drops the attributive の and turns た into ている in a predicate', () => {
+    const catIs = (verb: string, adjective: string, headDegree: 'positive' | 'more' = 'positive') =>
+      sayAll(clause(np('CAT'), verb, { complements: { predicative: { phrase: np(adjective, { headDegree }) } } })).ja;
+    expect(catIs('BE', 'BROWN')).toBe('猫は茶色です。');
+    expect(catIs('BE', 'BROWN', 'more')).toBe('猫はもっと茶色です。');
+    expect(catIs('BECOME', 'BROWN')).toBe('猫は茶色になります。');
+    expect(catIs('SEEM', 'ADULT')).toBe('猫は大人に思えます。');
+    expect(catIs('BE', 'TIRED')).toBe('猫は疲れています。');
+    expect(catIs('SEEM', 'TIRED')).toBe('猫は疲れているように思えます。');
   });
 });

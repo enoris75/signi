@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounGroup, PronominalPossessor } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // A *pronominal* possessor ("the boy and HIS dog") is a possessive pronoun, not a genitive noun
 // phrase. It carries only the antecedent's person/number/(natural) gender; the engine spells the
@@ -105,5 +105,100 @@ describe('pronominal possessor', () => {
       pt: 'os seus livros ardem.',
       ja: '彼の本は燃えます。',
     });
+  });
+});
+
+// A71. `renderNP` swaps the caller's `headFor` for a bare definite article whenever the possessor is
+// pronominal. A complement or genitive possessor gets its preposition from `headFor`, so a possessive
+// there loses it: "il gatto mangia la mia casa" ("eats my house") for "nella mia casa".
+describe('known bugs: Italian pronominal possessor on a complement', () => {
+  test.fails('Italian keeps the complement\'s preposition before a possessive', () => {
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'it'))
+      .toBe('il gatto dà il libro al tuo cane.');
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'it'))
+      .toBe('il gatto mangia nella mia casa.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'it'))
+      .toBe('il gatto viene dalla mia casa.');
+    expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'it'))
+      .toBe('il gatto piange a causa del mio cane.');
+    expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'it'))
+      .toBe('il libro del mio cane brucia.');
+  });
+});
+
+// A71 (French). `renderNP` renders a pronominal possessor's determiner in place of the head the
+// complement builds, so the preposition goes with it: "le chat mange ma maison" ("eats my house")
+// for "dans ma maison".
+describe('known bugs: French pronominal possessor on a complement', () => {
+  test.fails('French keeps the complement\'s preposition before a possessive', () => {
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'fr'))
+      .toBe('le chat donne le livre à ton chien.');
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'fr'))
+      .toBe('le chat mange dans ma maison.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'fr'))
+      .toBe('le chat vient de ma maison.');
+    expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'fr'))
+      .toBe('le chat pleure à cause de mon chien.');
+    expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'fr'))
+      .toBe('le livre de mon chien brûle.');
+  });
+});
+
+// A71 (German). A pronominal possessor on a complement or on a genitive possessor drops the possessive: the complement renders its own determiner ("dem Hund", "im Haus") and the pronominal possessor is never read.
+describe('known bugs: German pronominal possessor on a complement', () => {
+  test.fails('German keeps the possessive on a complement', () => {
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'de'))
+      .toBe('der Kater gibt deinem Hund das Buch.');
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
+      .toBe('der Kater isst in meinem Haus.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
+      .toBe('der Kater kommt aus meinem Haus.');
+    expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
+      .toBe('der Kater weint wegen meinem Hund.');
+    expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'de'))
+      .toBe('das Buch von meinem Hund brennt.');
+  });
+});
+
+// A71 (Spanish). A pronominal possessor on a complement or on a genitive possessor drops the possessive: the complement head is built from the definite article ("al perro", "en la casa") and the pronominal possessor is never read.
+describe('known bugs: Spanish pronominal possessor on a complement', () => {
+  test.fails('Spanish keeps the possessive on a complement', () => {
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'es'))
+      .toBe('el gato da el libro a tu perro.');
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'es'))
+      .toBe('el gato come en mi casa.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'es'))
+      .toBe('el gato viene de mi casa.');
+    expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'es'))
+      .toBe('el gato llora a causa de mi perro.');
+    expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'es'))
+      .toBe('el libro de mi perro arde.');
+  });
+});
+
+// A71 (Portuguese). A pronominal possessor on a complement or on a genitive possessor drops the possessive: the complement head is built from the definite article ("ao cão", "na casa") and the pronominal possessor is never read.
+describe('known bugs: Portuguese pronominal possessor on a complement', () => {
+  test.fails('Portuguese keeps the possessive on a complement', () => {
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'pt'))
+      .toBe('o gato dá o livro ao seu cão.');
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'pt'))
+      .toBe('o gato come na minha casa.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'pt'))
+      .toBe('o gato vem da minha casa.');
+    expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'pt'))
+      .toBe('o gato chora por causa do meu cão.');
+    expect(say(clause(np('BOOK', { possessor: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }), 'BURN'), 'pt'))
+      .toBe('o livro do meu cão arde.');
+  });
+});
+
+// A85. Italian drops the article before a possessive + a singular, unmodified kinship noun ("mio
+// padre", "suo padre"), except with "loro". `renderNP` always gives a pronominal possessor the
+// definite article, so FATHER reads "il suo padre". The plural, a modified noun and "loro" keep it.
+describe('known bugs: Italian possessive before a kinship noun', () => {
+  test.fails('Italian drops the article before a possessive + a singular kinship noun', () => {
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }), 'RUN'), 'it')).toBe('suo padre corre.');
+    expect(say(clause(np('FATHER', { possessor: { kind: 'pronominal', person: '1', number: 'plural' } }), 'RUN'), 'it')).toBe('nostro padre corre.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('FATHER', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) }), 'it')).toBe('il gatto vede tuo padre.');
   });
 });

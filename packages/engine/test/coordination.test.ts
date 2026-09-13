@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { CoordConjunction, NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // Coordinated nouns. Where the comma falls and whether the conjunction repeats is a fact about
 // each language, so the engines do the joining; each conjunct keeps its own determiner, which
@@ -137,10 +137,10 @@ describe('coordinated clauses', () => {
 
   test('explicative — "that is"', () => {
     expect(join('that_is')).toMatchObject({
-      en: 'the cat runs, that is the dog jumps.',
+      en: 'the cat runs, that is the dog jumps.', // wrong, pinned as-is: A69
       it: 'il gatto corre, cioè il cane salta.',
       fr: "le chat court, c'est-à-dire le chien saute.",
-      es: 'el gato corre, es decir el perro salta.',
+      es: 'el gato corre, es decir el perro salta.', // wrong, pinned as-is: A69
       pt: 'o gato corre, isto é o cão pula.',
       // "das heißt" is parenthetical, so — unlike "also" / "dann" — it does NOT invert.
       de: 'der Kater läuft, das heißt der Hund springt.',
@@ -441,5 +441,42 @@ describe('coordinated noun groups: group person agreement', () => {
       de: 'ich und du essen.',
       pt: 'eu e você comemos.',
     });
+  });
+});
+
+// A69. The explicative "that is" joining two clauses is set off by commas on both sides ("…, that
+// is, the dog jumps"). `englishEngine` emits only the comma before it. Without the second comma
+// the sentence reads "that is the dog" as a clause of its own.
+describe('known bugs: English comma after "that is"', () => {
+  test.fails('English puts a comma after "that is"', () => {
+    expect(say({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'that_is', clause: clause(np('DOG'), 'JUMP') } }, 'en')).toBe('the cat runs, that is, the dog jumps.');
+    expect(say({ ...clause(np('CAT'), 'EAT', { directObject: np('FOOD') }), coordination: { conjunction: 'that_is', clause: clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }) } }, 'en')).toBe('the cat eats the food, that is, the cat eats the mouse.');
+  });
+});
+
+// A69. "es decir" and "por lo tanto" are discourse connectors, not conjunctions. The RAE
+// (Ortografía 2010, §3.4.2.2.1.1) wants a comma after them. `spanishEngine.render` joins every
+// conjunction as ", <word> <clause>", with no comma after the word.
+describe('known bugs: Spanish comma after a discourse connector', () => {
+  test.fails('Spanish sets off "es decir" and "por lo tanto" with a following comma', () => {
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'that_is', clause: clause(np('DOG'), 'JUMP') } }).es)
+      .toBe('el gato corre, es decir, el perro salta.');
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'therefore', clause: clause(np('DOG'), 'JUMP') } }).es)
+      .toBe('el gato corre, por lo tanto, el perro salta.');
+  });
+});
+
+// A90. Subjects of different persons joined by "ou" take a plural verb in the prevailing person,
+// as with "et": "toi ou moi, nous mangeons". The shared `groupAgreement` makes an "or" group agree
+// with its last conjunct, while French `subjectText` resumes it with the plural "nous"/"vous", so
+// the clitic and the verb disagree ("moi ou toi, vous manges", "toi ou moi, nous mange").
+describe('known bugs: French disjunction of different persons', () => {
+  test.fails('French resolves "ou" across persons to the plural of the prevailing person', () => {
+    const eat = (...ids: string[]) =>
+      sayAll(clause({ conjuncts: ids.map((id) => np(id)), conjunction: 'or' }, 'EAT')).fr;
+    expect(eat('FIRST_PERSON', 'SECOND_PERSON')).toBe('moi ou toi, nous mangeons.');
+    expect(eat('SECOND_PERSON', 'FIRST_PERSON')).toBe('toi ou moi, nous mangeons.');
+    expect(eat('CAT', 'FIRST_PERSON')).toBe('le chat ou moi, nous mangeons.');
+    expect(eat('FIRST_PERSON', 'CAT')).toBe('moi ou le chat, nous mangeons.');
   });
 });

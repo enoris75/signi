@@ -6,7 +6,7 @@ The `predicative` complement renderer branches on the **complement head** — ad
 and never on the **verb**:
 
 ```ts
-// en.ts:433, de/complementsPhrase.ts, and the same shape in it/fr/es/pt
+// en/complementsPhrase.ts, de/complementsPhrase.ts, and the same shape in it/fr/es/pt
 if (type === 'predicative') {
   return coordinate(c.phrase, (np) =>
     np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),

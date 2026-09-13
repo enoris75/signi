@@ -73,7 +73,7 @@ describe('relative clauses', () => {
 });
 
 describe('known bugs: relative clauses', () => {
-  // en.ts now keys the relativiser off PERSONHOOD, not animacy: an animal is animate and still
+  // The English engine now keys the relativiser off PERSONHOOD, not animacy: an animal is animate and still
   // takes "that"/"which" — only a person (the `human` concept feature) takes "who". A subject
   // (CAT) and head (MOUSE) that are both non-persons therefore both relativise with "that".
   test('English should not relativise a non-person with "who"', () => {
@@ -119,7 +119,7 @@ describe('known bugs: relative clauses', () => {
     })).de).toBe('der Hund sieht den Kater, der isst.');
   });
 
-  // The clearest bug in the engine: ja.ts's own comment says the clause verb "takes the *plain*
+  // The clearest bug in the engine: the Japanese engine's own comment says the clause verb "takes the *plain*
   // form (食べた猫), not the polite ます/ました of a main clause — Japanese requires plain form on a
   // prenominal predicate (see plainVerbSeg)" — but `plainVerbSeg` was never written, and the
   // relative path calls the polite `predicateSegs`. Intent documented, never implemented.
@@ -436,7 +436,7 @@ describe('relative clauses: polarity and modals of their own', () => {
       en: 'the cat that does not eat sees the mouse.',
       fr: 'le chat qui ne mange pas voit la souris.',
       de: 'der Kater, der nicht isst, sieht die Maus.', // negation survives into the clause
-      ja: '食べません猫はネズミを見ます。',
+      ja: '食べません猫はネズミを見ます。', // documented gap, pinned as-is: B13
     });
   });
 
@@ -619,7 +619,7 @@ describe('nested relative clauses: three tenses AND three aspects', () => {
   });
 
   test('Japanese composes tense and aspect at every depth', () => {
-    // The politeness is wrong at every level (see the plain-form bug above), but the tense and
+    // The politeness is wrong at every level (B14), but the tense and
     // aspect themselves compose correctly right down the nest — worth separating the two.
     expect(nested(
       { tense: 'past', aspect: 'resultative' },
@@ -704,5 +704,52 @@ describe('known bugs: relative clause on a complement slot', () => {
       en: 'the boy to whom the man gives the book runs.',
       de: 'der Junge, dem der Mann das Buch gibt, läuft.',
     });
+  });
+});
+
+// B13. DELIBERATE — do not "fix" without a product decision. The lexicon stores no nai-form, so a
+// negated relative clause or citation falls back to the polite verbSeg (食べません猫, 食べません。), a
+// gap `predicateSegs` and `plainVerbSeg` document. Japanese wants the plain negative: 食べない猫.
+describe('documented simplifications: Japanese plain negative', () => {
+  test.fails('Japanese uses the plain negative in a relative clause and a citation', () => {
+    const eatsWho = (verbPhrase: object) =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
+    expect(eatsWho({ negative: true })).toBe('食べない猫は走ります。');
+    expect(eatsWho({ negative: true, tense: 'past' })).toBe('食べなかった猫は走ります。');
+    expect(eatsWho({ modifier: 'NEVER' })).toBe('決して食べない猫は走ります。');
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { negative: true } }), infinitive: true }).ja)
+      .toBe('食べない。');
+  });
+});
+
+// B14. DELIBERATE — do not "fix" without a product decision. `aspectVerbSegs` builds only the
+// polite forms and never sees the relative clause's `plain` flag, a gap `plainVerbSeg` documents.
+// So an aspectual relative clause keeps 〜ています / 〜てしまいます before its head noun (食べています猫).
+describe('documented simplifications: Japanese aspect in a relative clause', () => {
+  test.fails('Japanese puts an aspectual relative clause in the plain form', () => {
+    const eatsWho = (aspect: 'progressive' | 'resultative') =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', aspect } } }), 'RUN')).ja;
+    expect(eatsWho('progressive')).toBe('食べている猫は走ります。');
+    expect(eatsWho('resultative')).toBe('食べてしまう猫は走ります。');
+  });
+});
+
+// A116. `predicateSegs` hands its `plain` flag only to the neutral-aspect verb branch. A relative
+// clause with a modal (modalSegs) or a copula (copulaSegs) keeps its polite ます/です in front of the
+// head noun: 食べることができます猫, 幸せです猫. Their plain endings are fixed and need no nai-form,
+// unlike the documented negation/aspect gaps.
+describe('known bugs: Japanese relative clause with a modal or a copula', () => {
+  test.fails('Japanese puts a modal or copular relative clause in the plain form', () => {
+    const eatsWho = (verbPhrase: object) =>
+      sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase } } }), 'RUN')).ja;
+    const isWho = (predicate: string, tense: 'present' | 'past' = 'present') =>
+      sayAll(clause(np('CAT', {
+        relative: { verbPhrase: { verb: 'BE', tense }, complements: { predicative: { phrase: np(predicate) } } },
+      }), 'RUN')).ja;
+    expect(eatsWho({ modals: ['CAN'] })).toBe('食べることができる猫は走ります。');
+    expect(eatsWho({ modals: ['WILL'] })).toBe('食べたい猫は走ります。');
+    expect(eatsWho({ modals: ['MUST'], tense: 'past' })).toBe('食べる必要があった猫は走ります。');
+    expect(isWho('HAPPY')).toBe('幸せな猫は走ります。');
+    expect(isWho('BIG', 'past')).toBe('大きかった猫は走ります。');
   });
 });

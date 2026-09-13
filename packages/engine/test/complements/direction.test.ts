@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness, NounElement, NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from '../harness.js';
+import { clause, np, say, sayAll } from '../harness.js';
 
 // The goal of a motion — where it is headed. The adposition is chosen by the goal's ANIMACY:
 // Italian goes *a* a place but *da* a person, and Iberian Romance and French likewise switch.
@@ -290,7 +290,7 @@ describe('COME to a continent — the article-dropping goal', () => {
     expect(comeWith({ source: { phrase: np('EUROPE') } })).toMatchObject({
       en: 'the cat comes from Europe.',
       it: "il gatto viene dall'Europa.",
-      fr: "le chat vient de l'Europe.",
+      fr: "le chat vient de l'Europe.", // wrong, pinned as-is: A89
       de: 'der Kater kommt aus Europa.',
       ja: '猫はヨーロッパから来ます。',
     });
@@ -303,7 +303,7 @@ describe('COME to a continent — the article-dropping goal', () => {
     })).toMatchObject({
       en: 'the cat comes from Africa to Europe.',
       it: "il gatto viene dall'Africa in Europa.", // dall' (source, kept) … in (goal, dropped)
-      fr: "le chat vient de l'Afrique en Europe.",
+      fr: "le chat vient de l'Afrique en Europe.", // wrong, pinned as-is: A89
       de: 'der Kater kommt aus Afrika zu Europa.',
       ja: '猫はアフリカからヨーロッパへ来ます。',
     });
@@ -456,5 +456,17 @@ describe('known bugs: German fusion on an articled proper name', () => {
   test.fails('German fuses zu + der to zur whatever determiner was picked', () => {
     expect(goesTo('indefinite')).toBe('der Kater geht zur Antarktis.');
     expect(goesTo('bare')).toBe('der Kater geht zur Antarktis.');
+  });
+});
+
+// A63 (Italian). An Italian continent always takes the definite article ("l'Africa"), whatever
+// determiner was picked, but `prepDet` fuses the preposition only when the *picked* determiner is
+// definite. An indefinite or demonstrative pick renders "da l'Africa" / "a l'Europa".
+describe('known bugs: Italian fusion on an articled proper name', () => {
+  test.fails('Italian fuses the preposition with a continent\'s article whatever the determiner', () => {
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('AFRICA', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto viene dall'Africa.");
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('EUROPE', { definiteness: 'this' }) } } }), 'it')).toBe("il gatto viene dall'Europa.");
+    expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe("il gatto dà il libro all'Europa.");
+    expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('EUROPE', { definiteness: 'indefinite' }), specifiers: [{ kind: 'path', value: 'around' }] } } }), 'it')).toBe("il gatto mangia intorno all'Europa.");
   });
 });

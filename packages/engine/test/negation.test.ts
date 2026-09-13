@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // A `no`-determined DIRECT OBJECT ("the cat eats no mouse"). Unlike the article determiners, the
 // negative quantifier carries polarity: the Romance languages weave it into the verb as negative
@@ -218,5 +218,56 @@ describe('known bugs: stacked negation is not collapsed', () => {
       it: 'il gatto non mangia nessun topo.',
       es: 'el gato no come ningún ratón.',
     });
+  });
+});
+
+// A74. When a negated verb or NEVER meets a `no` object, English switches the object to "any" (A35).
+// `predicateParts` makes that switch for every conjunct once any one of them is `no`, so a
+// definite or demonstrative conjunct loses its own determiner ("any mouse or any food"). Only the
+// `no` conjunct should become "any".
+describe('known bugs: English "any" on every conjunct of a negated object', () => {
+  test.fails('English switches only the `no` conjunct to "any"', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat does not eat the mouse or any food.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: { conjuncts: [np('MOUSE', { definiteness: 'this' }), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat does not eat this mouse or any food.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'NEVER' }, directObject: { conjuncts: [np('MOUSE'), np('FOOD', { definiteness: 'no' })], conjunction: 'or' } }), 'en')).toBe('the cat never eats the mouse or any food.');
+  });
+});
+
+// A78. English puts a frequency adverb after a negated auxiliary's "not": "has not always eaten",
+// "cannot always eat". `afterFirstAux` inserts it after the first word, before the "not" ("has
+// always not eaten", "could always not eat"). A modal's own adverb is placed from the first word of
+// the negated finite, so "cannot" and do-support ("does not have to") get it in front.
+describe('known bugs: English frequency adverb inside a negated auxiliary', () => {
+  test.fails('English puts ALWAYS after the auxiliary\'s "not"', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'resultative' } }), 'en')).toBe('the cat has not always eaten.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS', negative: true, aspect: 'progressive' } }), 'en')).toBe('the cat is not always eating.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat cannot always eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, tense: 'past', modals: [{ verb: 'CAN', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat could not always eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always have to eat.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, modals: [{ verb: 'WILL', modifier: 'ALWAYS' }] } }), 'en')).toBe('the cat does not always want to eat.');
+  });
+});
+
+// A97. A coordinated group of negative ("ningún") conjuncts after the verb is joined with "ni" in
+// Spanish. `coordinateElement` picks its link (y/e/o/u) only from the conjunction and the next
+// word's sound, so a negated group comes out with "y". `predicateText`'s own comment gives the
+// target: "no veo ningún niño ni ninguna niña".
+describe('known bugs: Spanish "ni" in a negative coordination', () => {
+  test.fails('Spanish joins negative conjuncts with "ni"', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('MOUSE', { definiteness: 'no' }), np('COW', { definiteness: 'no' })], conjunction: 'and' },
+    })).es).toBe('el gato no ve ningún ratón ni ninguna vaca.');
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('MOUSE', { definiteness: 'no' }), np('COW', { definiteness: 'no' }), np('DOG', { definiteness: 'no' })], conjunction: 'and' },
+    })).es).toBe('el gato no ve ningún ratón, ninguna vaca ni ningún perro.');
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: { conjuncts: [np('HOUSE', { definiteness: 'no' }), np('MARKET', { definiteness: 'no' })], conjunction: 'and' } } },
+    })).es).toBe('el gato no corre en ninguna casa ni en ningún mercado.');
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON'), 'EAT', {
+        directObject: { conjuncts: [np('MOUSE', { definiteness: 'no' }), np('COW', { definiteness: 'no' })], conjunction: 'and' },
+      }),
+      imperative: true,
+    }).es).toBe('no comas ningún ratón ni ninguna vaca.');
   });
 });

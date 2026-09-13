@@ -235,7 +235,7 @@ describe('instrumental: an adverb on the action', () => {
 // DELIBERATE — do not "fix" without a product decision.
 describe('documented simplifications: instrumental', () => {
   // German's means clause needs an overt subject (it cannot drop one the way a gerund does), and
-  // de.ts fills it with the impersonal "man" — "indem MAN den Stock wählt", i.e. "by ONE choosing
+  // de/complementsPhrase.ts fills it with the impersonal "man" — "indem MAN den Stock wählt", i.e. "by ONE choosing
   // the stick". But the instrument is wielded by the clause's own subject, so the agreeing form
   // is "indem ER den Stock wählt". As it stands the German quietly generalises an action the
   // other six attribute to the cat.

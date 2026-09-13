@@ -160,7 +160,7 @@ describe('complement determiner: Japanese renders the demonstratives and quantif
   });
 
   test('the `no` circumfix replaces で with も and negates the verb — どの家も走りません', () => {
-    expect(inHouse('no').ja).toBe('猫はどの家も走りません。');
+    expect(inHouse('no').ja).toBe('猫はどの家も走りません。'); // wrong, pinned as-is: A114
   });
 });
 
@@ -253,5 +253,30 @@ describe('known bugs: complement negative concord', () => {
       it: 'il gatto corre nella casa.',
       es: 'el gato corre en la casa.',
     });
+  });
+});
+
+// A114. `npSegs` puts the どの…も circumfix's も right after the head noun, and every caller then
+// drops its particle, as if も replaced any particle. It replaces only が/を/は; with で, に, から, へ
+// and のために Japanese keeps the particle and adds も (どの家でも, どの犬にも). A relational noun lands
+// after the も (どの家もの下), and the BE predicate noun reads どの伝説もではありません.
+describe('known bugs: Japanese どの…も on a complement', () => {
+  test.fails('Japanese keeps the complement particle before も', () => {
+    const no = (concept: string) => np(concept, { definiteness: 'no' });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: no('HOUSE') } } })).ja)
+      .toBe('猫はどの家でも走りません。');
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: no('HOUSE'), specifiers: [{ kind: 'path', value: 'under' }] } },
+    })).ja).toBe('猫はどの家の下でも走りません。');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: no('DOG') } } })).ja)
+      .toBe('男はどの犬にも本をあげません。');
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { source: { phrase: no('MARKET') } } })).ja)
+      .toBe('猫はどの市場からも行きません。');
+    expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: no('DOG') } } })).ja)
+      .toBe('猫はどの犬のためにも泣きません。');
+    expect(sayAll(clause(np('CAT'), 'BECOME', { complements: { predicative: { phrase: no('LEGEND') } } })).ja)
+      .toBe('猫はどの伝説にもなりません。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: no('LEGEND') } } })).ja)
+      .toBe('猫はどの伝説でもありません。');
   });
 });

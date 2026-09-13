@@ -103,3 +103,21 @@ describe('clause', () => {
     });
   });
 });
+
+// A98. A specific human direct object takes the preposition "a" in Spanish ("ve al niño", "mata a un
+// hombre"). `predicateText` renders every noun object with `npText`, so the "a" is never there. The
+// corpus already marks personhood (`human`, surfaced on the forms since A7).
+describe('known bugs: Spanish personal "a"', () => {
+  test.fails('Spanish marks a human direct object with "a"', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY') })).es).toBe('el gato ve al niño.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('WOMAN') })).es).toBe('el gato ve a la mujer.');
+    expect(sayAll(clause(np('CAT'), 'KILL', { directObject: np('MAN', { definiteness: 'indefinite' }) })).es)
+      .toBe('el gato mata a un hombre.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOY', { definiteness: 'no' }) })).es)
+      .toBe('el gato no ve a ningún niño.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('BOY') } }), 'RUN')).es)
+      .toBe('el perro que ve al niño corre.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'LOVE', { directObject: np('CHILD') }), imperative: true }).es)
+      .toBe('ama al niño.');
+  });
+});
