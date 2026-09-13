@@ -18,11 +18,11 @@ already seeded, so several are plain `infinitiveGloss` with **no builder change*
 
 | verb | plan | gloss (en) | status |
 |---|---|---|---|
-| NAME | `infinitiveGloss('INDICATE', 'WORD')` | to indicate words | ready — but weak; see note |
-| DESCRIBE | `infinitiveGloss('INDICATE', 'QUALITY')` | to indicate qualities | ready (QUALITY ✓) |
-| EXPRESS | `infinitiveGloss('INDICATE', 'CONCEPT')` | to indicate concepts | ready (CONCEPT ✓) |
-| MODIFY | `infinitiveGloss('CHANGE', 'WORD')` | to change words | ready (WORD ✓) |
-| REPLACE | `infinitiveGloss('CHANGE', 'WORD')` | to change words | ⚠ collides with MODIFY |
+| NAME | `infinitiveGloss('INDICATE', 'WORD', 'plural')` | to indicate words | ready — but weak; see note |
+| DESCRIBE | `infinitiveGloss('INDICATE', 'QUALITY', 'plural')` | to indicate qualities | ready (QUALITY ✓) |
+| EXPRESS | `infinitiveGloss('INDICATE', 'CONCEPT', 'plural')` | to indicate concepts | ready (CONCEPT ✓) |
+| MODIFY | `infinitiveGloss('CHANGE', 'WORD', 'plural')` | to change words | ready (WORD ✓) |
+| REPLACE | `infinitiveGloss('CHANGE', 'WORD', 'plural')` | to change words | ⚠ collides with MODIFY |
 
 Two cautions before authoring:
 

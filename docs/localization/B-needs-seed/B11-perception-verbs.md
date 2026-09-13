@@ -17,12 +17,12 @@ builder change** (an adjective on the differentia).
 | verb | plan | gloss (en) | status |
 |---|---|---|---|
 | SEE | `infinitiveGloss('PERCEIVE', 'LIGHT')` | to perceive light | ready (LIGHT ✓) |
-| KNOW | `infinitiveGloss('UNDERSTAND', 'CONCEPT')` | to understand concepts | ready (CONCEPT ✓) |
+| KNOW | `infinitiveGloss('UNDERSTAND', 'CONCEPT', 'plural')` | to understand concepts | ready (CONCEPT ✓) |
 | READ | UNDERSTAND + WRITTEN·WORD | to understand written words | ⚠ builder change |
 
 ### Builder caveat (READ only)
 
-`infinitiveGloss(verb, object?)` renders the object **bare, with no adjectives**. READ's differentia
+`infinitiveGloss(verb, object?, number?)` renders the object **bare, with no adjectives**. READ's differentia
 is *written* words — WORD and WRITTEN are both seeded, but the builder must pass an `adjectives` list
 into the `directObject`. That is a one-line change in
 [transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts), not engine work, but it

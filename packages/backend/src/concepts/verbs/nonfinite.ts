@@ -371,6 +371,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'fazendo', participle: 'feito' },
     ja: { te: '作って', te_reading: 'つくって' },
   },
+  CREATE: {
+    en: { gerund: 'creating', participle: 'created' },
+    it: { gerund: 'creando', participle: 'creato' },
+    fr: { participle: 'créé' }, de: { participle: 'erschaffen' },
+    es: { gerund: 'creando', participle: 'creado' },
+    pt: { gerund: 'criando', participle: 'criado' },
+    ja: { te: '生み出して', te_reading: 'うみだして' },
+  },
   COMPACT: {
     en: { gerund: 'compacting', participle: 'compacted' },
     it: { gerund: 'compattando', participle: 'compattato' },

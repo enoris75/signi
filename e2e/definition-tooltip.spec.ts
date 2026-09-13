@@ -39,6 +39,50 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('to consume food');
   });
 
+  test('a genus+count-noun verb definition renders (localize-seed B09: MAKE)', async ({
+    app,
+    page,
+  }) => {
+    // English: an infinitive citation on the CREATE genus, with the count-noun differentia
+    // OBJECT_THING passed plural — "to create objects", not "to create object".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('make');
+    const makeEn = page.locator('[data-testid="typeahead-option"][data-concept="MAKE"]');
+    await expect(makeEn).toBeVisible();
+    await makeEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to create objects');
+
+    // German: the same plan — the bare object precedes the infinitive. No German literal is stored.
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('make');
+    const makeDe = page.locator('[data-testid="typeahead-option"][data-concept="MAKE"]');
+    await expect(makeDe).toBeVisible();
+    await makeDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Gegenstände erschaffen');
+  });
+
+  test('a genus+mass-noun verb definition renders (localize-seed B09: SET_ON_FIRE)', async ({
+    app,
+    page,
+  }) => {
+    // English: CREATE + the singular differentia FIRE — "to create fire". Searched by its synonym,
+    // since its English label "burn" also matches the intransitive BURN.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('set on fire');
+    const fireEn = page.locator('[data-testid="typeahead-option"][data-concept="SET_ON_FIRE"]');
+    await expect(fireEn).toBeVisible();
+    await fireEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to create fire');
+
+    // Japanese: the same plan, object-marked and verb-final in dictionary form — "火を生み出す".
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('set on fire');
+    const fireJa = page.locator('[data-testid="typeahead-option"][data-concept="SET_ON_FIRE"]');
+    await expect(fireJa).toBeVisible();
+    await fireJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('火を生み出す');
+  });
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,

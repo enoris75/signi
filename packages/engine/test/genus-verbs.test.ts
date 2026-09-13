@@ -88,6 +88,88 @@ describe('CONSUME (genus of EAT / DRINK)', () => {
   });
 });
 
+// CREATE — the genus verb of MAKE ("to create objects") and SET_ON_FIRE ("to create fire"), seeded
+// for the B09 verb-definition task. Pinned across the persons, tenses and aspects its languages
+// inflect: German erschaffen is strong (erschuf / erschaffen), Italian creare doubles its e in the
+// future (creerà), and every Romance resultative selects HAVE.
+describe('CREATE (genus of MAKE / SET_ON_FIRE)', () => {
+  const create = (extra: Partial<PhrasePlan> = {}): PhrasePlan =>
+    clause(np('DOG'), 'CREATE', { directObject: np('FIRE'), ...extra });
+
+  test('present conjugates across languages', () => {
+    expect(sayAll(create())).toEqual({
+      en: 'the dog creates the fire.',
+      it: 'il cane crea il fuoco.',
+      fr: 'le chien crée le feu.',
+      de: 'der Hund erschafft das Feuer.',
+      es: 'el perro crea el fuego.',
+      ja: '犬は火を生み出します。',
+      pt: 'o cão cria o fogo.',
+    });
+  });
+
+  test('plural subject agrees', () => {
+    expect(sayAll(clause(np('DOG', { number: 'plural' }), 'CREATE', { directObject: np('FIRE') })))
+      .toMatchObject({
+        en: 'the dogs create the fire.',
+        it: 'i cani creano il fuoco.',
+        fr: 'les chiens créent le feu.',
+        de: 'die Hunde erschaffen das Feuer.',
+        es: 'los perros crean el fuego.',
+        pt: 'os cães criam o fogo.',
+      });
+  });
+
+  test('past tense', () => {
+    expect(sayAll(create({ verbPhrase: { verb: 'CREATE', tense: 'past' } }))).toEqual({
+      en: 'the dog created the fire.',
+      it: 'il cane creò il fuoco.',
+      fr: 'le chien créa le feu.',
+      de: 'der Hund erschuf das Feuer.',
+      es: 'el perro creó el fuego.',
+      ja: '犬は火を生み出しました。',
+      pt: 'o cão criou o fogo.',
+    });
+  });
+
+  test('future tense', () => {
+    expect(sayAll(create({ verbPhrase: { verb: 'CREATE', tense: 'future' } }))).toMatchObject({
+      en: 'the dog will create the fire.',
+      it: 'il cane creerà il fuoco.',
+      fr: 'le chien créera le feu.',
+      de: 'der Hund wird das Feuer erschaffen.',
+      es: 'el perro creará el fuego.',
+      pt: 'o cão criará o fogo.',
+    });
+  });
+
+  test('resultative uses the right auxiliary and participle (avere / haber / haben / ter→pretérito)', () => {
+    expect(sayAll(clause(np('CAT'), 'CREATE', { directObject: np('FIRE'), verbPhrase: { verb: 'CREATE', aspect: 'resultative' } })))
+      .toEqual({
+        en: 'the cat has created the fire.',
+        it: 'il gatto ha creato il fuoco.',
+        fr: 'le chat a créé le feu.',
+        de: 'der Kater hat das Feuer erschaffen.',
+        es: 'el gato ha creado el fuego.',
+        ja: '猫は火を生み出してしまいます。',
+        pt: 'o gato criou o fogo.', // pt present resultative is the pretérito (documented)
+      });
+  });
+
+  test('progressive reads the gerund / te-form', () => {
+    expect(sayAll(clause(np('CAT'), 'CREATE', { directObject: np('FIRE'), verbPhrase: { verb: 'CREATE', aspect: 'progressive' } })))
+      .toEqual({
+        en: 'the cat is creating the fire.',
+        it: 'il gatto sta creando il fuoco.',
+        fr: 'le chat est en train de créer le feu.',
+        de: 'der Kater erschafft gerade das Feuer.',
+        es: 'el gato está creando el fuego.',
+        ja: '猫は火を生み出しています。',
+        pt: 'o gato está criando o fogo.',
+      });
+  });
+});
+
 describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
   test('the noun surface, with gender agreement', () => {
     expect(sayAll({ subject: np('INFINITIVE_PHRASE', { definiteness: 'definite' }) })).toEqual({
@@ -152,6 +234,35 @@ describe('B08 verb definitions (infinitive citations)', () => {
       es: 'consumir líquido.',
       ja: '液体を摂取する。',
       pt: 'consumir líquido.',
+    });
+  });
+});
+
+// The B09 creation-verb definitions on the CREATE genus. MAKE's differentia is a count noun, so it
+// is passed plural — a bare singular "to create object" is ungrammatical — while FIRE stays singular
+// the way FOOD and LIQUID do.
+describe('B09 verb definitions (CREATE genus)', () => {
+  test('MAKE → "to create objects"', () => {
+    expect(definitionAll('MAKE')).toEqual({
+      en: 'to create objects.',
+      it: 'creare oggetti.',
+      fr: 'créer objets.',
+      de: 'Gegenstände erschaffen.',
+      es: 'crear objetos.',
+      ja: '物体を生み出す。',
+      pt: 'criar objetos.',
+    });
+  });
+
+  test('SET_ON_FIRE → "to create fire"', () => {
+    expect(definitionAll('SET_ON_FIRE')).toEqual({
+      en: 'to create fire.',
+      it: 'creare fuoco.',
+      fr: 'créer feu.',
+      de: 'Feuer erschaffen.',
+      es: 'crear fuego.',
+      ja: '火を生み出す。',
+      pt: 'criar fogo.',
     });
   });
 });

@@ -23,7 +23,7 @@ gloss).
 | verb | plan | gloss (en) | status |
 |---|---|---|---|
 | OWN | `infinitiveGloss('HAVE', 'PROPERTY')` | to have property | seed PROPERTY |
-| HOLD | `infinitiveGloss('HAVE', 'OBJECT_THING')` | to have objects | ready (OBJECT_THING ✓) |
+| HOLD | `infinitiveGloss('HAVE', 'OBJECT_THING', 'plural')` | to have objects | ready (OBJECT_THING ✓) |
 | BUY | ACQUIRE + instrumental MONEY | to acquire in exchange for money | ⚠ builder change |
 
 ### Builder caveat (BUY only)
@@ -31,5 +31,5 @@ gloss).
 MONEY is seeded, but "in exchange for money" is an `instrumental` complement, not a direct object —
 the builder must pass a complement list through to the plan. Same gap as
 [B14](B14-motion-verbs.md); fix it once and both batches unblock. A weaker additive fallback is
-`infinitiveGloss('ACQUIRE', 'OBJECT_THING')` → "to acquire objects", but that does not distinguish
+`infinitiveGloss('ACQUIRE', 'OBJECT_THING', 'plural')` → "to acquire objects", but that does not distinguish
 BUY from any other acquisition.

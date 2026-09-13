@@ -6,11 +6,15 @@ import type { ConceptSeed } from '../types.js';
 // object is the differentia, rendered bare — infinitiveGloss('CONSUME', 'FOOD') → en "to consume
 // food", it "consumare cibo", de "Nahrung konsumieren", ja "食べ物を摂取する". The GENERIC_PERSON
 // subject is a throwaway the infinitive drops from every surface. Set as a verb's `definition` to
-// localize its picker tooltip, the same way glossOf/whoGloss do for nouns.
-const infinitiveGloss = (verb: string, object?: string): PhrasePlan => ({
+// localize its picker tooltip, the same way glossOf/whoGloss do for nouns. A mass-noun object stays
+// singular ("food"); pass 'plural' for a count noun, which reads bare only in the plural —
+// infinitiveGloss('CREATE', 'OBJECT_THING', 'plural') → "to create objects", not "to create object".
+const infinitiveGloss = (verb: string, object?: string, number?: 'plural'): PhrasePlan => ({
   subject: { concept: 'GENERIC_PERSON' },
   verbPhrase: { verb },
-  ...(object ? { directObject: { concept: object, definiteness: 'bare' } } : {}),
+  ...(object
+    ? { directObject: { concept: object, definiteness: 'bare', ...(number ? { number } : {}) } }
+    : {}),
   infinitive: true,
 });
 
@@ -822,6 +826,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to set (something) on fire; to cause to burn',
+    definition: infinitiveGloss('CREATE', 'FIRE'),
     emoji: '🧨',
     synonym: 'set on fire',
     forms: {
@@ -1158,6 +1163,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to bring into existence by shaping or assembling',
+    definition: infinitiveGloss('CREATE', 'OBJECT_THING', 'plural'),
     emoji: '🔨',
     synonym: 'create',
     forms: {
@@ -1215,6 +1221,77 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'fizemos', '2pl_past': 'fizeram', '3pl_past': 'fizeram',
         '1sg_future': 'farei', '2sg_future': 'fará', '3sg_future': 'fará',
         '1pl_future': 'faremos', '2pl_future': 'farão', '3pl_future': 'farão',
+      },
+    },
+  },
+
+  {
+    // The genus of MAKE ("to create objects") and SET_ON_FIRE ("to create fire") — the creation verb
+    // their dictionary definitions cite as their genus (see the B09 verb-definition task). Its own
+    // tooltip stays on the literal: glossing CREATE through MAKE would read as circular. German
+    // takes erschaffen (bring into being), not the ambiguous schaffen ("manage"); Japanese takes
+    // 生み出す ("bring forth"), which avoids echoing MAKE's 作る in MAKE's own gloss.
+    id: 'CREATE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to bring into existence',
+    emoji: '✨',
+    forms: {
+      en: {
+        base: 'create',
+        '1sg_present': 'create', '2sg_present': 'create', '3sg_present': 'creates',
+        '1pl_present': 'create', '2pl_present': 'create', '3pl_present': 'create',
+        past: 'created',
+      },
+      it: {
+        base: 'creare',
+        '1sg_present': 'creo', '2sg_present': 'crei', '3sg_present': 'crea',
+        '1pl_present': 'creiamo', '2pl_present': 'create', '3pl_present': 'creano',
+        '1sg_past': 'creai', '2sg_past': 'creasti', '3sg_past': 'creò',
+        '1pl_past': 'creammo', '2pl_past': 'creaste', '3pl_past': 'crearono',
+        '1sg_future': 'creerò', '2sg_future': 'creerai', '3sg_future': 'creerà',
+        '1pl_future': 'creeremo', '2pl_future': 'creerete', '3pl_future': 'creeranno',
+      },
+      fr: {
+        base: 'créer',
+        '1sg_present': 'crée', '2sg_present': 'crées', '3sg_present': 'crée',
+        '1pl_present': 'créons', '2pl_present': 'créez', '3pl_present': 'créent',
+        '1sg_past': 'créai', '2sg_past': 'créas', '3sg_past': 'créa',
+        '1pl_past': 'créâmes', '2pl_past': 'créâtes', '3pl_past': 'créèrent',
+        '1sg_future': 'créerai', '2sg_future': 'créeras', '3sg_future': 'créera',
+        '1pl_future': 'créerons', '2pl_future': 'créerez', '3pl_future': 'créeront',
+      },
+      de: {
+        base: 'erschaffen',
+        '1sg_present': 'erschaffe', '2sg_present': 'erschaffst', '3sg_present': 'erschafft',
+        '1pl_present': 'erschaffen', '2pl_present': 'erschafft', '3pl_present': 'erschaffen',
+        '1sg_past': 'erschuf', '2sg_past': 'erschufst', '3sg_past': 'erschuf',
+        '1pl_past': 'erschufen', '2pl_past': 'erschuft', '3pl_past': 'erschufen',
+      },
+      es: {
+        base: 'crear',
+        '1sg_present': 'creo', '2sg_present': 'creas', '3sg_present': 'crea',
+        '1pl_present': 'creamos', '2pl_present': 'creáis', '3pl_present': 'crean',
+        '1sg_past': 'creé', '2sg_past': 'creaste', '3sg_past': 'creó',
+        '1pl_past': 'creamos', '2pl_past': 'creasteis', '3pl_past': 'crearon',
+        '1sg_future': 'crearé', '2sg_future': 'crearás', '3sg_future': 'creará',
+        '1pl_future': 'crearemos', '2pl_future': 'crearéis', '3pl_future': 'crearán',
+      },
+      ja: {
+        base: '生み出す',
+        reading: 'うみだす',
+        masu_present: '生み出します',
+        masu_present_reading: 'うみだします',
+      },
+      pt: {
+        base: 'criar',
+        '1sg_present': 'crio', '2sg_present': 'cria', '3sg_present': 'cria',
+        '1pl_present': 'criamos', '2pl_present': 'criam', '3pl_present': 'criam',
+        '1sg_past': 'criei', '2sg_past': 'criou', '3sg_past': 'criou',
+        '1pl_past': 'criamos', '2pl_past': 'criaram', '3pl_past': 'criaram',
+        '1sg_future': 'criarei', '2sg_future': 'criará', '3sg_future': 'criará',
+        '1pl_future': 'criaremos', '2pl_future': 'criarão', '3pl_future': 'criarão',
       },
     },
   },

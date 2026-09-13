@@ -10,7 +10,7 @@ composes as a source+direction pair over PLACE. **The blocker is the backend bui
 
 ## Do this first — extend the builder
 
-`infinitiveGloss(verb, object?)` takes a **bare object** only. Extend it to pass a complement list
+`infinitiveGloss(verb, object?, number?)` takes a **bare object** only. Extend it to pass a complement list
 through to the plan, in
 [transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts). This single change also
 unblocks [B11](B11-perception-verbs.md)'s READ, [B12](B12-possession-verbs.md)'s BUY, and all of
