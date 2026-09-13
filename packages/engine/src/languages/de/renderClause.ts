@@ -1,15 +1,17 @@
-import { firstConjunct, groupHasNegativeAdverb, withDefiniteness, type ResolvedPhrase } from '../../types.js';
+import { firstConjunct, type ResolvedPhrase } from '../../types.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { elementPhrase } from './elementPhrase.js';
+import { finiteNegation } from './finiteNegation.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nichtSlots } from './nichtSlots.js';
+import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
@@ -78,52 +80,38 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
 
     // The verb complex is split across the clause: the finite verb (werden/sein, the outermost
     // modal, or the conjugated main verb) sits in the V2 slot, any "gerade"/"im Begriff"
-    // follows it, and the non-finite tail (infinitive / Partizip / "zu …" / the modal stack)
-    // closes the clause. Aspect is rendered by verbGroup/modalVerbGroup, which a relative clause
-    // reaches through the same helpers (see subordinateClause).
+    // follows it, and the non-finite tail (infinitive / Partizip / the modal stack) closes the
+    // clause. Aspect is rendered by verbGroup/modalVerbGroup, which a relative clause reaches
+    // through the same helpers (see subordinateClause).
     const person = subject.agreement['person'] ?? '3';
     const number = subject.agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
-    const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = verbPhrase.modals.length > 0
+    const complex = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
       : verbGroup(verb.forms, pn, tense, aspect, mood);
-    // A negative adverb ("nie") on the main verb or ANY modal is itself the clause negator.
-    const modifierIsNegative = groupHasNegativeAdverb(verbPhrase);
-    // A `no` object's "kein" is itself the clause negator (kein = nicht + ein). With a NEGATIVE
-    // ADVERB ("nie") also present, "nie keine Maus" would double the negative, so the object drops to
-    // a plain indefinite — "isst nie eine Maus". (With a negated verb instead, "keine" stays and the
-    // now-redundant "nicht" is dropped below.)
-    const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-    const objectToRender = directObject && modifierIsNegative && objectIsNegative
-      ? { ...directObject, conjuncts: directObject.conjuncts.map((np) => withDefiniteness(np, 'indefinite')) }
-      : directObject;
+    const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = complex;
+    // "nicht" is dropped under "nie" or a "kein" object, and otherwise leads an adverb or a predicate
+    // complement or trails the objects. It precedes the prospective's "im Begriff" as a whole: "ist
+    // NICHT im Begriff zu essen" (is NOT about to eat), never "ist im Begriff NICHT zu essen". The
+    // progressive's "gerade" takes it after instead ("isst gerade nicht").
+    const { nicht: neg, directObject: objectToRender } = finiteNegation(verbPhrase, directObject, hasPredicative);
     const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : '';
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
     // main verb's adverb: "er will nie immer gehen" (never wants to always go).
     const modalAdverbsText = modalAdverbs(verbPhrase.modals);
-    // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
-    const anyMidAdverb = modalAdverbsText || modifierText;
-
-    // Skip "nicht" when the modifier is already negative ("nie" = never), or when the object's own
-    // "kein" already negates the clause ("isst keine Maus", not "isst keine Maus nicht").
-    const applyNicht = verbNegative === true && !modifierIsNegative && !objectIsNegative;
-    // "nicht" leads a Mittelfeld adverb ("nicht immer") or a predicate complement ("ist nicht
-    // vorsichtig") and otherwise trails the objects ("das Brot nicht"). The prospective's "im Begriff
-    // …" is a predicate the negation scopes over as a whole, so "nicht" precedes it on the finite
-    // auxiliary — "ist NICHT im Begriff zu essen" (is NOT about to eat), never "ist im Begriff NICHT
-    // zu essen" (is about to NOT eat). It is the only aspect whose "mid" behaves this way; the
-    // progressive's adverb "gerade" takes "nicht" after it ("isst gerade nicht").
-    const neg = nichtSlots(applyNicht, { prospective: aspect === 'prospective', adverb: !!anyMidAdverb, predicative: hasPredicative });
     const complementsText = complementsPhrase(rest, verb.forms);
-    // Verb-final (subordinate) order: the subject leads and the finite verb closes the clause,
-    // behind the non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. Used
-    // for the "wenn" protasis of a conditional.
-    if (verbFinal) {
-      return [subj, neg.beforeAspect, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, verbText, meansText]
-        .filter(Boolean).join(' ').trim();
-    }
-    const head = inverted ? [verbText, subj] : [subj, verbText];
-    return [...head, neg.beforeAspect, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, meansText]
-      .filter(Boolean).join(' ').trim();
+    // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
+    // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
+    // non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. It is used for the
+    // "wenn" protasis of a conditional.
+    const head =verbFinal ? [subj] : inverted ? [verbText, subj] : [subj, verbText];
+    // The prospective keeps its zu-infinitive group whole ("ist im Begriff, die Maus zu essen").
+    const predicate = complex.zuInfinitive
+      ? prospectiveFrame(complex, {
+        nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText,
+        adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
+      }, verbFinal)
+      : [aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, infinitiveTail, verbFinal ? verbText : ''];
+    return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

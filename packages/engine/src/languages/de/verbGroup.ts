@@ -8,9 +8,10 @@ import { isConditionalMood } from './isConditionalMood.js';
  * verb in the V2 slot, `mid` is any material that follows it in the Mittelfeld ("gerade",
  * "im Begriff"), and `tail` is the clause-final non-finite material. German has no synthetic
  * progressive, so it is rendered with the adverb "gerade" over the plain finite verb; the
- * prospective is "im Begriff … zu + Infinitiv"; the resultative is sein/haben + Partizip II,
- * the auxiliary being a lexical property of the verb (the seed marks the sein-selecting ones
- * with forms.aux = "be") — "ist gegangen" but "hat gesehen".
+ * prospective is "im Begriff sein" + a zu-infinitive, returned apart as `zuInfinitive` because it
+ * heads a group the clause lays out on its own (see `prospectiveFrame`); the resultative is
+ * sein/haben + Partizip II, the auxiliary being a lexical property of the verb (the seed marks the
+ * sein-selecting ones with forms.aux = "be") — "ist gegangen" but "hat gesehen".
  */
 export function verbGroup(
   verbForms: Record<string, string>,
@@ -33,12 +34,14 @@ export function verbGroup(
   switch (aspect) {
     case 'progressive':
       // Plain finite verb + "gerade"; periphrastic keeps aux … Infinitiv, with "gerade" mid.
-      return { v2: conjug, mid: 'gerade', tail: periphrastic ? base : '' };
+      return { v2: conjug, mid: 'gerade', tail: periphrastic ? base : '', zuInfinitive: '' };
     case 'prospective':
+      // Future/conditional put "sein" at the clause end ("wird im Begriff sein").
       return {
         v2: periphrastic ? auxV2 : sein,
         mid: 'im Begriff',
-        tail: periphrastic ? `sein zu ${base}` : `zu ${base}`,
+        tail: periphrastic ? 'sein' : '',
+        zuInfinitive: `zu ${base}`,
       };
     case 'resultative':
       // Future/conditional perfect stacks the auxiliary's infinitive at the clause end
@@ -47,8 +50,9 @@ export function verbGroup(
         v2: periphrastic ? auxV2 : perfFinite,
         mid: '',
         tail: periphrastic ? `${participle} ${perfAux}` : participle,
+        zuInfinitive: '',
       };
     default: // neutral
-      return { v2: conjug, mid: '', tail: periphrastic ? base : '' };
+      return { v2: conjug, mid: '', tail: periphrastic ? base : '', zuInfinitive: '' };
   }
 }

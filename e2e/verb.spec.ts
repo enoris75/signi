@@ -51,12 +51,12 @@ test.describe('verb', () => {
       ja: '猫はネズミを食べています。',
     });
 
-    // German is left out: with an object the prospective splits its zu-group (A52).
     await app.cycle('verbAspect');
     await app.expectSentences({
       en: 'the cat is about to eat the mouse.',
       it: 'il gatto sta per mangiare il topo.',
       fr: 'le chat est sur le point de manger la souris.',
+      de: 'der Kater ist im Begriff, die Maus zu essen.',
       es: 'el gato está a punto de comer el ratón.',
       pt: 'o gato está prestes a comer o rato.',
       ja: '猫はネズミを食べるところです。',

@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
   BEHAELTER, BUCH, complement, concept, el, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
-  MANN, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNELL, vp, WOLLEN,
+  MANN, MAUS, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
 
@@ -79,6 +79,23 @@ describe('subordinateClause', () => {
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { aspect: 'prospective' }) })).toBe(', der im Begriff zu essen ist,');
     });
 
+    // A52: the prospective's zu-infinitive group stays whole. Bare, it stays inside the bracket; a
+    // longer group is extraposed after the finite verb, led by a comma `punctuate` tidies later.
+    test('the prospective keeps a bare zu-infinitive inside the bracket and extraposes a longer group', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { aspect: 'prospective', tense: 'future' }) }))
+        .toBe(', der im Begriff zu essen sein wird,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { aspect: 'prospective', modals: [modal(MUESSEN)] }) }))
+        .toBe(', der im Begriff zu essen sein muss,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'prospective' }), directObject: el(np(BUCH)) }))
+        .toBe(', der im Begriff ist , das Buch zu lesen,');
+      expect(relativeOn(JUNGE, {
+        headRole: 'subject',
+        verbPhrase: vp(GEBEN, { aspect: 'prospective', tense: 'future' }),
+        directObject: el(np(BUCH)),
+        complements: { terminus: complement(np(MANN)) },
+      })).toBe(', der im Begriff sein wird , dem Mann das Buch zu geben,');
+    });
+
     test('the outermost modal is finite and last, behind the infinitives', () => {
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { modals: [modal(KOENNEN)] }), directObject: el(np(BUCH)) }))
         .toBe(', der das Buch lesen kann,');
@@ -94,6 +111,14 @@ describe('subordinateClause', () => {
         verbPhrase: vp(LESEN, { modifier: concept(SCHNELL), modals: [modal(WOLLEN, IMMER)] }),
         directObject: el(np(BUCH)),
       })).toBe(', der das Buch immer schnell lesen will,');
+    });
+
+    test('adverbs lead the other complements, so a predicate complement stays against the verb', () => {
+      expect(relativeOn(MANN, {
+        headRole: 'subject', verbPhrase: vp(LESEN, { modifier: concept(IMMER) }), directObject: el(np(BUCH)), complements: { locative: complement(np(HAUS)) },
+      })).toBe(', der das Buch immer im Haus liest,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(WERDEN_VERB, { modifier: concept(IMMER) }), complements: { predicative: complement(np(MUEDE)) } }))
+        .toBe(', der immer müde wird,');
     });
   });
 
@@ -116,6 +141,65 @@ describe('subordinateClause', () => {
         .toBe(', der nie isst,');
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, modals: [modal(WOLLEN, NIE)] }) }))
         .toBe(', der nie essen will,');
+    });
+
+    // A50: the main clause's rules, through the shared `finiteNegation`.
+    test('a kein object is the negator, with no "nicht"', () => {
+      const noMouse = el(np(MAUS, { definiteness: 'no' }));
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true }), directObject: noMouse })).toBe(', der keine Maus isst,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, tense: 'future' }), directObject: noMouse }))
+        .toBe(', der keine Maus essen wird,');
+    });
+
+    test('"nicht" leads an adverb, whoever it belongs to', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, modifier: concept(IMMER) }) })).toBe(', der nicht immer isst,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, modifier: concept(IMMER) }), directObject: el(np(BUCH)) }))
+        .toBe(', der das Buch nicht immer liest,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, modals: [modal(WOLLEN, IMMER)] }) }))
+        .toBe(', der nicht immer essen will,');
+    });
+
+    test('"nicht" leads a predicate complement, behind an adverb', () => {
+      const tired = { predicative: complement(np(MUEDE)) };
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(WERDEN_VERB, { negative: true }), complements: tired })).toBe(', der nicht müde wird,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(WERDEN_VERB, { negative: true, modifier: concept(IMMER) }), complements: tired }))
+        .toBe(', der nicht immer müde wird,');
+    });
+
+    test('"nicht" leads the whole prospective, outside its zu-infinitive group', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { negative: true, aspect: 'prospective' }) }))
+        .toBe(', der nicht im Begriff zu essen ist,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, aspect: 'prospective' }), directObject: el(np(BUCH)) }))
+        .toBe(', der nicht im Begriff ist , das Buch zu lesen,');
+    });
+  });
+
+  // A51: a process-level instrument is a subordinate "indem" clause, split out as in the main clause.
+  describe('means clause', () => {
+    const byChoosingAWord = {
+      instrumental: complement(np(WORT, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
+    };
+
+    test('the "indem" clause trails the finite verb', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), complements: byChoosingAWord }))
+        .toBe(', der isst , indem man ein Wort wählt,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { negative: true, aspect: 'resultative' }), directObject: el(np(BUCH)), complements: byChoosingAWord }))
+        .toBe(', der das Buch nicht gelesen hat , indem man ein Wort wählt,');
+      expect(relativeOn(BUCH, { headRole: 'directObject', subject: el(np(ICH)), verbPhrase: vp(LESEN), complements: byChoosingAWord }))
+        .toBe(', das ich lese , indem man ein Wort wählt,');
+    });
+
+    test('…and a prospective’s extraposed zu-infinitive group', () => {
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'prospective' }), directObject: el(np(BUCH)), complements: byChoosingAWord }))
+        .toBe(', der im Begriff ist , das Buch zu lesen , indem man ein Wort wählt,');
+    });
+
+    test('a concept-level instrument is a phrase, not a clause, and stays in the Mittelfeld', () => {
+      const byTheChoosing = {
+        instrumental: complement(np(WORT, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'concept' }], vp(WAEHLEN)),
+      };
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), complements: byTheChoosing }))
+        .toBe(', der mit dem Wählen eines Wortes isst,');
     });
   });
 

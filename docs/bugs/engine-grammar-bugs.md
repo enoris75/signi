@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (117 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (113 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A50 | [A50-german-relative-clause-negation.md](A-must-fix/A50-german-relative-clause-negation.md) |
-| A51 | [A51-german-relative-clause-means-clause.md](A-must-fix/A51-german-relative-clause-means-clause.md) |
-| A52 | [A52-german-prospective-word-order.md](A-must-fix/A52-german-prospective-word-order.md) |
 | A53 | [A53-coordinated-pronoun-object.md](A-must-fix/A53-coordinated-pronoun-object.md) |
 | A54 | [A54-cause-coordinated-pronouns.md](A-must-fix/A54-cause-coordinated-pronouns.md) |
 | A55 | [A55-german-hoch-comparison.md](A-must-fix/A55-german-hoch-comparison.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A45 | [A45-gloss-great-postnominal.md](fixed/A45-gloss-great-postnominal.md) | French, Italian | 2026-09-13 |
 | A46 | [A46-predicate-noun-under-seem-appear.md](fixed/A46-predicate-noun-under-seem-appear.md) | English, German | 2026-09-13 |
 | A49 | [A49-german-nicht-in-commands-and-infinitives.md](fixed/A49-german-nicht-in-commands-and-infinitives.md) | German | 2026-09-13 |
+| A50 | [A50-german-relative-clause-negation.md](fixed/A50-german-relative-clause-negation.md) | German | 2026-09-13 |
+| A51 | [A51-german-relative-clause-means-clause.md](fixed/A51-german-relative-clause-means-clause.md) | German | 2026-09-13 |
+| A52 | [A52-german-prospective-word-order.md](fixed/A52-german-prospective-word-order.md) | German | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

@@ -70,6 +70,23 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective' })))).toBe('der Kater ist im Begriff zu essen');
     });
 
+    // A52: the prospective's zu-infinitive group stays whole, after "im Begriff" and any clause-final
+    // "sein". Its leading comma is pulled onto the previous word later, by `punctuate`.
+    test('the prospective keeps its zu-infinitive group together, after the verb cluster', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective' }), { directObject: mouse })))
+        .toBe('der Kater ist im Begriff , die Maus zu essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective', tense: 'future' }), { directObject: mouse })))
+        .toBe('der Kater wird im Begriff sein , die Maus zu essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective', modals: [modal(MUESSEN)] })))).toBe('der Kater muss im Begriff sein zu essen');
+      expect(renderClause(clause(np(MANN), vp(GEBEN, { aspect: 'prospective', modifier: concept(SCHNELL) }), { directObject: el(np(BUCH)), complements: toTheBoy })))
+        .toBe('der Mann ist im Begriff , schnell dem Jungen das Buch zu geben');
+    });
+
+    test('a modal’s adverb stays with the modal, ahead of "im Begriff"', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective', modals: [modal(MUESSEN, IMMER)] }), { directObject: mouse })))
+        .toBe('der Kater muss immer im Begriff sein , die Maus zu essen');
+    });
+
     test('a modal takes the V2 slot and the infinitives stack at the end', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { modals: [modal(KOENNEN)] }), { directObject: mouse }))).toBe('der Kater kann die Maus essen');
       expect(renderClause(clause(np(KATER), vp(ESSEN, { tense: 'past', modals: [modal(MUESSEN)] })))).toBe('der Kater musste essen');
@@ -123,6 +140,8 @@ describe('renderClause', () => {
 
     test('nicht scopes over the whole prospective, ahead of im Begriff', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective' })))).toBe('der Kater ist nicht im Begriff zu essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective', modifier: concept(IMMER) }), { directObject: mouse })))
+        .toBe('der Kater ist nicht im Begriff , immer die Maus zu essen');
     });
   });
 
@@ -154,6 +173,9 @@ describe('renderClause', () => {
       // Its leading comma is pulled onto the verb later, by `punctuate`.
       expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { complements: byChoosingAKnife })))
         .toBe('man kann schneiden , indem man ein Messer wählt');
+      // …including the prospective's zu-infinitive group.
+      expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { aspect: 'prospective' }), { directObject: mouse, complements: byChoosingAKnife })))
+        .toBe('man ist im Begriff , die Maus zu schneiden , indem man ein Messer wählt');
     });
   });
 
@@ -171,6 +193,17 @@ describe('renderClause', () => {
         .toBe('der Kater die Maus nicht gegessen hat');
       expect(renderClause(clause(np(KATER), vp(WERDEN_VERB, { negative: true }), { complements: tired }), false, true))
         .toBe('der Kater nicht müde wird');
+    });
+
+    // A52: a bare zu-infinitive stays inside the bracket; a longer group is extraposed after the
+    // finite verb. Inverted order is V2 and keeps the group after the verb cluster.
+    test('the prospective closes on the finite verb, or extraposes a longer group after it', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'subjunctive', aspect: 'prospective' })), false, true))
+        .toBe('der Kater im Begriff zu essen sein würde');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'subjunctive', aspect: 'prospective' }), { directObject: mouse }), false, true))
+        .toBe('der Kater im Begriff sein würde , die Maus zu essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'conditional', aspect: 'prospective' }), { directObject: mouse }), true))
+        .toBe('würde der Kater im Begriff sein , die Maus zu essen');
     });
 
     test('verb-final overrides inverted', () => {

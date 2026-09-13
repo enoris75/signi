@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
+import type { Complement, NounPhrase, RelativeClause, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // A restrictive relative clause. The head noun fills one slot of the clause — its subject by
@@ -654,7 +654,7 @@ describe('known bugs: nested relative clauses', () => {
 describe('known bugs: German negation inside a relative clause', () => {
   const dogWho = (relative: RelativeClause) => sayAll(clause(np('DOG', { relative }), 'RUN')).de;
 
-  test.fails('German negates a relative clause the way it negates a main clause', () => {
+  test('German negates a relative clause the way it negates a main clause', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE', { definiteness: 'no' }) }))
       .toBe('der Hund, der keine Maus isst, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true }, complements: { predicative: { phrase: np('TIRED') } } }))
@@ -664,13 +664,54 @@ describe('known bugs: German negation inside a relative clause', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, aspect: 'prospective' } }))
       .toBe('der Hund, der nicht im Begriff zu essen ist, läuft.');
   });
+
+  test('German "nicht" leads any adverb, after an object and ahead of a predicate complement', () => {
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' }, directObject: np('MOUSE') }))
+      .toBe('der Hund, der die Maus nicht immer isst, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }))
+      .toBe('der Hund, der nicht immer essen muss, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true, modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }))
+      .toBe('der Hund, der nicht immer müde wird, läuft.');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' } },
+    }), 'RUN')).de).toBe('die Maus, die der Kater nicht immer isst, läuft.');
+  });
+
+  test('German negates the relative the same way in another tense or aspect', () => {
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, tense: 'future' }, directObject: np('MOUSE', { definiteness: 'no' }) }))
+      .toBe('der Hund, der keine Maus essen wird, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true, aspect: 'resultative' }, complements: { predicative: { phrase: np('TIRED') } } }))
+      .toBe('der Hund, der nicht müde geworden ist, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, aspect: 'prospective' }, directObject: np('MOUSE') }))
+      .toBe('der Hund, der nicht im Begriff ist, die Maus zu essen, läuft.');
+    // An un-negated verb with a "kein" object is negative all the same.
+    expect(dogWho({ verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE', { definiteness: 'no' }) }))
+      .toBe('der Hund, der keine Maus isst, läuft.');
+  });
+
+  test('regression: "nicht" still trails the objects, "nie" still replaces it', () => {
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE') }))
+      .toBe('der Hund, der die Maus nicht isst, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'NEVER' } }))
+      .toBe('der Hund, der nie isst, läuft.');
+    // An adverb now leads the other complements, as in the main clause, instead of trailing them.
+    expect(dogWho({ verbPhrase: { verb: 'EAT', modifier: 'ALWAYS' }, complements: { locative: { phrase: np('MARKET') } } }))
+      .toBe('der Hund, der immer im Markt isst, läuft.');
+  });
 });
 
 // A51. A `process` instrumental is a subordinate "indem" clause, which the main clause moves to the
 // Nachfeld (`splitMeansClause`). The relative clause never splits it out, so it lands mid-clause,
 // before the relative's own verb. ("man" is the B06 simplification, kept here.)
 describe('known bugs: German means clause inside a relative clause', () => {
-  test.fails('German puts the "indem" clause after the relative clause\'s verb', () => {
+  const dogWho = (relative: RelativeClause) => sayAll(clause(np('DOG', { relative }), 'RUN')).de;
+  const byChoosing = (value: 'process' | 'concept'): Complement => ({
+    phrase: np('WORD', { definiteness: 'indefinite' }),
+    specifiers: [{ kind: 'abstraction', value }],
+    action: { verb: 'CHOOSE' },
+  });
+
+  test('German puts the "indem" clause after the relative clause\'s verb', () => {
     expect(sayAll(clause(np('DOG', {
       relative: {
         verbPhrase: { verb: 'EAT' },
@@ -683,6 +724,30 @@ describe('known bugs: German means clause inside a relative clause', () => {
         },
       },
     }), 'RUN')).de).toBe('der Hund, der isst, indem man ein Wort wählt, läuft.');
+  });
+
+  test('German keeps the "indem" clause last with an object, a tense, a negation or an object relative', () => {
+    const instrumental = byChoosing('process');
+    expect(dogWho({ verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE'), complements: { instrumental } }))
+      .toBe('der Hund, der die Maus isst, indem man ein Wort wählt, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', aspect: 'resultative' }, complements: { instrumental } }))
+      .toBe('der Hund, der gegessen hat, indem man ein Wort wählt, läuft.');
+    expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, complements: { instrumental } }))
+      .toBe('der Hund, der nicht isst, indem man ein Wort wählt, läuft.');
+    expect(sayAll(clause(np('MOUSE', {
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, complements: { instrumental } },
+    }), 'RUN')).de).toBe('die Maus, die der Kater isst, indem man ein Wort wählt, läuft.');
+  });
+
+  test('German closes a sentence-final relative on the "indem" clause', () => {
+    expect(sayAll(clause(np('DOG'), 'SEE', {
+      directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, complements: { instrumental: byChoosing('process') } } }),
+    })).de).toBe('der Hund sieht den Kater, der isst, indem man ein Wort wählt.');
+  });
+
+  test('regression: a concept-level instrument is a phrase and stays before the verb', () => {
+    expect(dogWho({ verbPhrase: { verb: 'EAT' }, complements: { instrumental: byChoosing('concept') } }))
+      .toBe('der Hund, der mit dem Wählen eines Wortes isst, läuft.');
   });
 });
 

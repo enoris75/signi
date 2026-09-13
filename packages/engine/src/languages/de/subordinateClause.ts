@@ -1,10 +1,13 @@
-import { groupHasNegativeAdverb, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounPhrase } from '../../types.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { defArticle } from './defArticle.js';
 import { elementPhrase } from './elementPhrase.js';
+import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
+import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
+import { splitMeansClause } from './splitMeansClause.js';
 import { subjectText } from './subjectText.js';
 import { verbGroup } from './verbGroup.js';
 
@@ -33,29 +36,44 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;
   const clauseSubjectText = subjectRelative ? '' : subjectText(rel.subject!);
 
-  const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, modals } = rel.verbPhrase;
+  const { verb, modifier, tense = 'present', aspect = 'neutral', mood, modals } = rel.verbPhrase;
   const person = agreeForms['person'] ?? '3';
   const aPlural = (agreeForms['number'] ?? agreeForms['count']) === 'plural';
   const pn = `${person}${aPlural ? 'pl' : 'sg'}`;
   // The verb complex is built by the same `verbGroup`/`modalVerbGroup` the main clause uses, so a
   // relative clause renders its aspect too (resultative "gegessen hat", progressive "gerade isst",
-  // prospective "im Begriff … zu essen"). The clause is verb-final: the finite verb (`v2`) closes
-  // it, sitting after the non-finite `tail` (Partizip / infinitive / "zu …" / the modal stack),
-  // while the aspect adverbial (`mid`: "gerade" / "im Begriff") sits in the Mittelfeld before the
-  // objects — the mirror of the main clause, whose finite verb leads from the V2 slot instead.
-  const { v2: finite, mid, tail } = modals.length > 0
+  // prospective "im Begriff zu essen ist"). The clause is verb-final: the finite verb (`v2`) closes
+  // it, sitting after the non-finite `tail` (Partizip / infinitive / the modal stack), while the
+  // aspect adverbial (`mid`: "gerade") sits in the Mittelfeld before the objects — the mirror of the
+  // main clause, whose finite verb leads from the V2 slot instead.
+  const complex = modals.length > 0
     ? modalVerbGroup(modals, verb.forms, pn, tense, aspect, mood)
     : verbGroup(verb.forms, pn, tense, aspect, mood);
+  const { v2: finite, mid, tail } = complex;
 
-  const { dative, rest } = splitDative(rel.complements);
+  // The dative recipient leads the accusative object, and a subordinate means clause trails the
+  // finite verb, as in the main clause (see `splitMeansClause`): "der isst, indem man ein Wort wählt".
+  const { dative, rest: undative } = splitDative(rel.complements);
+  const { means, rest } = splitMeansClause(undative);
   const dativeText = complementsPhrase(dative);
-  const directObjectText = rel.directObject ? elementPhrase(rel.directObject, 'acc') : '';
+  const meansText = complementsPhrase(means);
+  // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
+  // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
+  const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative']);
+  const directObjectText = directObject ? elementPhrase(directObject, 'acc') : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
-  const nicht = verbNegative && !groupHasNegativeAdverb(rel.verbPhrase) ? 'nicht' : '';
   const complementsText = complementsPhrase(rest, verb.forms);
 
-  const body = [pronoun, clauseSubjectText, mid, dativeText, directObjectText, complementsText, modalAdverbsText, modifierText, nicht, tail, finite]
+  // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
+  // so a predicate complement stays against the verb ("der immer müde wird").
+  const predicate = complex.zuInfinitive
+    ? prospectiveFrame(complex, {
+      nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText,
+      adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
+    }, true)
+    : [mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, tail, finite];
+  const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');
   return `, ${body},`;

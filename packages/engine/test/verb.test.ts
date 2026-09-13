@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, VerbPhrase } from '@signi/shared';
+import type { Complement, NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
@@ -665,13 +665,13 @@ describe('known bugs: German prospective word order', () => {
   const catEatsMouse = (verbPhrase: Partial<VerbPhrase>) =>
     sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', ...verbPhrase }, directObject: np('MOUSE') })).de;
 
-  test.fails('German keeps the zu-infinitive group together, after "im Begriff sein"', () => {
+  test('German keeps the zu-infinitive group together, after "im Begriff sein"', () => {
     expect(catEatsMouse({})).toBe('der Kater ist im Begriff, die Maus zu essen.');
     expect(catEatsMouse({ tense: 'future' })).toBe('der Kater wird im Begriff sein, die Maus zu essen.');
     expect(catEatsMouse({ modals: [{ verb: 'MUST' }] })).toBe('der Kater muss im Begriff sein, die Maus zu essen.');
   });
 
-  test.fails('German closes a verb-final prospective on the finite verb', () => {
+  test('German closes a verb-final prospective on the finite verb', () => {
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', tense: 'future' } },
     }), 'RUN')).de).toBe('der Hund, der im Begriff zu essen sein wird, läuft.');
@@ -679,6 +679,65 @@ describe('known bugs: German prospective word order', () => {
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' } }),
     }).de).toBe('wenn der Kater im Begriff zu essen sein würde, würde der Hund laufen.');
+  });
+
+  test('German gathers the adverb, the recipient and the complements into the group', () => {
+    expect(catEatsMouse({ tense: 'past' })).toBe('der Kater war im Begriff, die Maus zu essen.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'FAST' } })).de)
+      .toBe('der Kater ist im Begriff, schnell zu essen.');
+    expect(sayAll(clause(np('MAN'), 'GIVE', {
+      verbPhrase: { aspect: 'prospective' }, directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } },
+    })).de).toBe('der Mann ist im Begriff, dem Jungen das Buch zu geben.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, complements: { locative: { phrase: np('MARKET') } } })).de)
+      .toBe('der Kater ist im Begriff, im Markt zu essen.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE', { relative: { verbPhrase: { verb: 'RUN' } } }) })).de)
+      .toBe('der Kater ist im Begriff, die Maus, die läuft, zu essen.');
+  });
+
+  test('German keeps "nicht" and a modal\'s adverb ahead of "im Begriff", outside the group', () => {
+    expect(catEatsMouse({ negative: true })).toBe('der Kater ist nicht im Begriff, die Maus zu essen.');
+    expect(catEatsMouse({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('der Kater muss immer im Begriff sein, die Maus zu essen.');
+    expect(catEatsMouse({ tense: 'future', modals: [{ verb: 'MUST' }] })).toBe('der Kater wird im Begriff sein müssen, die Maus zu essen.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } })).de)
+      .toBe('der Kater muss nicht immer im Begriff sein zu essen.');
+  });
+
+  test('German extraposes a longer group after a verb-final clause\'s finite verb', () => {
+    const dogWho = (verbPhrase: Partial<VerbPhrase>, extra: object = {}) =>
+      sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', ...verbPhrase }, ...extra } }), 'RUN')).de;
+    expect(dogWho({}, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff ist, die Maus zu essen, läuft.');
+    expect(dogWho({ tense: 'future' }, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff sein wird, die Maus zu essen, läuft.');
+    expect(dogWho({ modifier: 'FAST' })).toBe('der Hund, der im Begriff ist, schnell zu essen, läuft.');
+    expect(sayAll({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
+    }).de).toBe('wenn der Kater im Begriff sein würde, die Maus zu essen, würde der Hund laufen.');
+    // A bare zu-infinitive under a modal stays inside the bracket.
+    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff zu essen sein muss, läuft.');
+  });
+
+  test('German puts a bare zu-infinitive after "sein" in a V2 clause, with no comma', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modals: [{ verb: 'MUST' }] } })).de)
+      .toBe('der Kater muss im Begriff sein zu essen.');
+    expect(sayAll({
+      ...clause(np('DOG'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
+      condition: clause(np('CAT'), 'RUN'),
+    }).de).toBe('wenn der Kater laufen würde, würde der Hund im Begriff sein, die Maus zu essen.');
+  });
+
+  test('German follows the group with an "indem" clause or a coordinated clause', () => {
+    const instrumental: Complement = {
+      phrase: np('WORD', { definiteness: 'indefinite' }), specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE' },
+    };
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, complements: { instrumental } })).de)
+      .toBe('der Kater ist im Begriff zu essen, indem man ein Wort wählt.');
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective' }, directObject: np('MOUSE'), complements: { instrumental } },
+    }), 'RUN')).de).toBe('der Hund, der im Begriff ist, die Maus zu essen, indem man ein Wort wählt, läuft.');
+    expect(sayAll({
+      ...clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
+      coordination: { conjunction: 'and', clause: clause(np('DOG'), 'RUN') },
+    }).de).toBe('der Kater ist im Begriff, die Maus zu essen, und der Hund läuft.');
   });
 });
 
