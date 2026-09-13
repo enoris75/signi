@@ -10,11 +10,12 @@ composes as a source+direction pair over PLACE. **The blocker is the backend bui
 
 ## Do this first — extend the builder
 
-`infinitiveGloss(verb, object?, number?)` takes a **bare object** only. Extend it to pass a complement list
-through to the plan, in
+`infinitiveGloss(verb, object?, number?, adjectives?)` takes a **bare object** only (optionally
+modified — [B11](../done/B11-perception-verbs.md) added the `adjectives` list for READ). Extend it to
+pass a complement list through to the plan, in
 [transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts). This single change also
-unblocks [B11](B11-perception-verbs.md)'s READ, [B12](B12-possession-verbs.md)'s BUY, and all of
-[B13](B13-contact-verbs.md) — so it is the highest-leverage step in the whole B08 split.
+unblocks [B12](B12-possession-verbs.md)'s BUY, all of [B13](B13-contact-verbs.md), and
+[B18](B18-selection-verbs.md)'s TYPE — so it is the highest-leverage step in the whole B08 split.
 
 ## Seed first (1 verb + 1 noun)
 

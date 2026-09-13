@@ -9,11 +9,25 @@ import type { ConceptSeed } from '../types.js';
 // localize its picker tooltip, the same way glossOf/whoGloss do for nouns. A mass-noun object stays
 // singular ("food"); pass 'plural' for a count noun, which reads bare only in the plural —
 // infinitiveGloss('CREATE', 'OBJECT_THING', 'plural') → "to create objects", not "to create object".
-const infinitiveGloss = (verb: string, object?: string, number?: 'plural'): PhrasePlan => ({
+// Adjectives on the object narrow the differentia further —
+// infinitiveGloss('UNDERSTAND', 'WORD', 'plural', ['WRITTEN']) → "to understand written words".
+const infinitiveGloss = (
+  verb: string,
+  object?: string,
+  number?: 'plural',
+  adjectives?: string[],
+): PhrasePlan => ({
   subject: { concept: 'GENERIC_PERSON' },
   verbPhrase: { verb },
   ...(object
-    ? { directObject: { concept: object, definiteness: 'bare', ...(number ? { number } : {}) } }
+    ? {
+        directObject: {
+          concept: object,
+          definiteness: 'bare',
+          ...(number ? { number } : {}),
+          ...(adjectives ? { adjectives } : {}),
+        },
+      }
     : {}),
   infinitive: true,
 });
@@ -297,6 +311,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to perceive with the eyes',
+    definition: infinitiveGloss('PERCEIVE', 'LIGHT'),
     emoji: '👁️',
     forms: {
       en: {
@@ -497,6 +512,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['cause'],
     description: 'to have knowledge or understanding of',
+    definition: infinitiveGloss('UNDERSTAND', 'CONCEPT', 'plural'),
     emoji: '🧠',
     forms: {
       en: {
@@ -564,6 +580,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to look at and understand written text',
+    definition: infinitiveGloss('UNDERSTAND', 'WORD', 'plural', ['WRITTEN']),
     emoji: '📖',
     forms: {
       en: {
@@ -1369,6 +1386,149 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'destruímos', '2pl_past': 'destruíram', '3pl_past': 'destruíram',
         '1sg_future': 'destruirei', '2sg_future': 'destruirá', '3sg_future': 'destruirá',
         '1pl_future': 'destruiremos', '2pl_future': 'destruirão', '3pl_future': 'destruirão',
+      },
+    },
+  },
+
+  {
+    // The genus of SEE ("to perceive light") — the perception verb its dictionary definition cites
+    // as its genus (see the B11 verb-definition task). Its own tooltip stays on the literal, as
+    // CREATE's and DESTROY's do. German takes the inseparable empfinden: the natural wahrnehmen is a
+    // separable verb ("nimmt … wahr"), which the engine does not split. Japanese takes 知覚する, the
+    // perception term, which echoes none of SEE's 見る.
+    id: 'PERCEIVE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to become aware of through the senses',
+    emoji: '📡',
+    forms: {
+      en: {
+        base: 'perceive',
+        '1sg_present': 'perceive', '2sg_present': 'perceive', '3sg_present': 'perceives',
+        '1pl_present': 'perceive', '2pl_present': 'perceive', '3pl_present': 'perceive',
+        past: 'perceived',
+      },
+      it: {
+        base: 'percepire',
+        '1sg_present': 'percepisco', '2sg_present': 'percepisci', '3sg_present': 'percepisce',
+        '1pl_present': 'percepiamo', '2pl_present': 'percepite', '3pl_present': 'percepiscono',
+        '1sg_past': 'percepii', '2sg_past': 'percepisti', '3sg_past': 'percepì',
+        '1pl_past': 'percepimmo', '2pl_past': 'percepiste', '3pl_past': 'percepirono',
+        '1sg_future': 'percepirò', '2sg_future': 'percepirai', '3sg_future': 'percepirà',
+        '1pl_future': 'percepiremo', '2pl_future': 'percepirete', '3pl_future': 'percepiranno',
+      },
+      fr: {
+        base: 'percevoir',
+        '1sg_present': 'perçois', '2sg_present': 'perçois', '3sg_present': 'perçoit',
+        '1pl_present': 'percevons', '2pl_present': 'percevez', '3pl_present': 'perçoivent',
+        '1sg_past': 'perçus', '2sg_past': 'perçus', '3sg_past': 'perçut',
+        '1pl_past': 'perçûmes', '2pl_past': 'perçûtes', '3pl_past': 'perçurent',
+        '1sg_future': 'percevrai', '2sg_future': 'percevras', '3sg_future': 'percevra',
+        '1pl_future': 'percevrons', '2pl_future': 'percevrez', '3pl_future': 'percevront',
+      },
+      de: {
+        base: 'empfinden',
+        '1sg_present': 'empfinde', '2sg_present': 'empfindest', '3sg_present': 'empfindet',
+        '1pl_present': 'empfinden', '2pl_present': 'empfindet', '3pl_present': 'empfinden',
+        '1sg_past': 'empfand', '2sg_past': 'empfandest', '3sg_past': 'empfand',
+        '1pl_past': 'empfanden', '2pl_past': 'empfandet', '3pl_past': 'empfanden',
+      },
+      es: {
+        base: 'percibir',
+        '1sg_present': 'percibo', '2sg_present': 'percibes', '3sg_present': 'percibe',
+        '1pl_present': 'percibimos', '2pl_present': 'percibís', '3pl_present': 'perciben',
+        '1sg_past': 'percibí', '2sg_past': 'percibiste', '3sg_past': 'percibió',
+        '1pl_past': 'percibimos', '2pl_past': 'percibisteis', '3pl_past': 'percibieron',
+        '1sg_future': 'percibiré', '2sg_future': 'percibirás', '3sg_future': 'percibirá',
+        '1pl_future': 'percibiremos', '2pl_future': 'percibiréis', '3pl_future': 'percibirán',
+      },
+      ja: {
+        base: '知覚する',
+        reading: 'ちかくする',
+        masu_present: '知覚します',
+        masu_present_reading: 'ちかくします',
+      },
+      pt: {
+        base: 'perceber',
+        '1sg_present': 'percebo', '2sg_present': 'percebe', '3sg_present': 'percebe',
+        '1pl_present': 'percebemos', '2pl_present': 'percebem', '3pl_present': 'percebem',
+        '1sg_past': 'percebi', '2sg_past': 'percebeu', '3sg_past': 'percebeu',
+        '1pl_past': 'percebemos', '2pl_past': 'perceberam', '3pl_past': 'perceberam',
+        '1sg_future': 'perceberei', '2sg_future': 'perceberá', '3sg_future': 'perceberá',
+        '1pl_future': 'perceberemos', '2pl_future': 'perceberão', '3pl_future': 'perceberão',
+      },
+    },
+  },
+
+  {
+    // The genus of KNOW ("to understand concepts") and READ ("to understand written words") — the
+    // cognition verb their dictionary definitions cite as their genus (see the B11 verb-definition
+    // task). Its own tooltip stays on the literal. The Romance languages take the comprendere family
+    // (not capire / entender), the register a dictionary gloss is written in; Portuguese in
+    // particular avoids perceber, which is PERCEIVE here. Japanese takes 理解する, echoing neither
+    // 知る nor 読む.
+    id: 'UNDERSTAND',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to grasp the meaning of',
+    emoji: '🧩',
+    forms: {
+      en: {
+        base: 'understand',
+        '1sg_present': 'understand', '2sg_present': 'understand', '3sg_present': 'understands',
+        '1pl_present': 'understand', '2pl_present': 'understand', '3pl_present': 'understand',
+        past: 'understood',
+      },
+      it: {
+        base: 'comprendere',
+        '1sg_present': 'comprendo', '2sg_present': 'comprendi', '3sg_present': 'comprende',
+        '1pl_present': 'comprendiamo', '2pl_present': 'comprendete', '3pl_present': 'comprendono',
+        '1sg_past': 'compresi', '2sg_past': 'comprendesti', '3sg_past': 'comprese',
+        '1pl_past': 'comprendemmo', '2pl_past': 'comprendeste', '3pl_past': 'compresero',
+        '1sg_future': 'comprenderò', '2sg_future': 'comprenderai', '3sg_future': 'comprenderà',
+        '1pl_future': 'comprenderemo', '2pl_future': 'comprenderete', '3pl_future': 'comprenderanno',
+      },
+      fr: {
+        base: 'comprendre',
+        '1sg_present': 'comprends', '2sg_present': 'comprends', '3sg_present': 'comprend',
+        '1pl_present': 'comprenons', '2pl_present': 'comprenez', '3pl_present': 'comprennent',
+        '1sg_past': 'compris', '2sg_past': 'compris', '3sg_past': 'comprit',
+        '1pl_past': 'comprîmes', '2pl_past': 'comprîtes', '3pl_past': 'comprirent',
+        '1sg_future': 'comprendrai', '2sg_future': 'comprendras', '3sg_future': 'comprendra',
+        '1pl_future': 'comprendrons', '2pl_future': 'comprendrez', '3pl_future': 'comprendront',
+      },
+      de: {
+        base: 'verstehen',
+        '1sg_present': 'verstehe', '2sg_present': 'verstehst', '3sg_present': 'versteht',
+        '1pl_present': 'verstehen', '2pl_present': 'versteht', '3pl_present': 'verstehen',
+        '1sg_past': 'verstand', '2sg_past': 'verstandest', '3sg_past': 'verstand',
+        '1pl_past': 'verstanden', '2pl_past': 'verstandet', '3pl_past': 'verstanden',
+      },
+      es: {
+        base: 'comprender',
+        '1sg_present': 'comprendo', '2sg_present': 'comprendes', '3sg_present': 'comprende',
+        '1pl_present': 'comprendemos', '2pl_present': 'comprendéis', '3pl_present': 'comprenden',
+        '1sg_past': 'comprendí', '2sg_past': 'comprendiste', '3sg_past': 'comprendió',
+        '1pl_past': 'comprendimos', '2pl_past': 'comprendisteis', '3pl_past': 'comprendieron',
+        '1sg_future': 'comprenderé', '2sg_future': 'comprenderás', '3sg_future': 'comprenderá',
+        '1pl_future': 'comprenderemos', '2pl_future': 'comprenderéis', '3pl_future': 'comprenderán',
+      },
+      ja: {
+        base: '理解する',
+        reading: 'りかいする',
+        masu_present: '理解します',
+        masu_present_reading: 'りかいします',
+      },
+      pt: {
+        base: 'compreender',
+        '1sg_present': 'compreendo', '2sg_present': 'compreende', '3sg_present': 'compreende',
+        '1pl_present': 'compreendemos', '2pl_present': 'compreendem', '3pl_present': 'compreendem',
+        '1sg_past': 'compreendi', '2sg_past': 'compreendeu', '3sg_past': 'compreendeu',
+        '1pl_past': 'compreendemos', '2pl_past': 'compreenderam', '3pl_past': 'compreenderam',
+        '1sg_future': 'compreenderei', '2sg_future': 'compreenderá', '3sg_future': 'compreenderá',
+        '1pl_future': 'compreenderemos', '2pl_future': 'compreenderão', '3pl_future': 'compreenderão',
       },
     },
   },

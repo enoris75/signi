@@ -467,13 +467,14 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
     ['MAKE', 'la gatta ha fatto.'], ['MODIFY', 'la gatta ha modificato.'],
     ['NAME', 'la gatta ha nominato.'], ['OWN', 'la gatta ha posseduto.'],
+    ['PERCEIVE', 'la gatta ha percepito.'],
     ['READ', 'la gatta ha letto.'], ['REPLACE', 'la gatta ha sostituito.'],
     ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
     ['SEE', 'la gatta ha visto.'], ['SEEM', 'la gatta è sembrata.'],
     ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
     ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHOW', 'la gatta ha mostrato.'],
     ['START', 'la gatta ha iniziato.'], ['TIDY_UP', 'la gatta ha riordinato.'],
-    ['TYPE', 'la gatta ha digitato.'],
+    ['TYPE', 'la gatta ha digitato.'], ['UNDERSTAND', 'la gatta ha compreso.'],
   ];
 
   test.each(IT)('%s → %s', (id, expected) => {

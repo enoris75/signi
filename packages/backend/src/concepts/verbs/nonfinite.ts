@@ -390,6 +390,22 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'destruindo', participle: 'destruído' },
     ja: { te: '破壊して', te_reading: 'はかいして', nai: '破壊しない', nai_reading: 'はかいしない' },
   },
+  PERCEIVE: {
+    en: { gerund: 'perceiving', participle: 'perceived' },
+    it: { gerund: 'percependo', participle: 'percepito' },
+    fr: { participle: 'perçu' }, de: { participle: 'empfunden' },
+    es: { gerund: 'percibiendo', participle: 'percibido' },
+    pt: { gerund: 'percebendo', participle: 'percebido' },
+    ja: { te: '知覚して', te_reading: 'ちかくして', nai: '知覚しない', nai_reading: 'ちかくしない' },
+  },
+  UNDERSTAND: {
+    en: { gerund: 'understanding', participle: 'understood' },
+    it: { gerund: 'comprendendo', participle: 'compreso' },
+    fr: { participle: 'compris' }, de: { participle: 'verstanden' },
+    es: { gerund: 'comprendiendo', participle: 'comprendido' },
+    pt: { gerund: 'compreendendo', participle: 'compreendido' },
+    ja: { te: '理解して', te_reading: 'りかいして', nai: '理解しない', nai_reading: 'りかいしない' },
+  },
   COMPACT: {
     en: { gerund: 'compacting', participle: 'compacted' },
     it: { gerund: 'compattando', participle: 'compattato' },

@@ -300,6 +300,172 @@ describe('LIFE and CONTENT (B10 differentia nouns)', () => {
   });
 });
 
+// PERCEIVE — the genus verb of SEE ("to perceive light"), seeded for the B11 verb-definition task.
+// Pinned across the persons, tenses and aspects its languages inflect: Italian percepire takes the
+// -isc- infix (percepisce / percepiscono), French percevoir the cedilla before o/u (perçoit /
+// perçut / perçu), German empfinden is strong and inseparable (empfand / empfunden, no ge-), and
+// every Romance resultative selects HAVE.
+describe('PERCEIVE (genus of SEE)', () => {
+  const perceive = (extra: Partial<PhrasePlan> = {}): PhrasePlan =>
+    clause(np('DOG'), 'PERCEIVE', { directObject: np('LIGHT'), ...extra });
+
+  test('present conjugates across languages', () => {
+    expect(sayAll(perceive())).toEqual({
+      en: 'the dog perceives the light.',
+      it: 'il cane percepisce la luce.',
+      fr: 'le chien perçoit la lumière.',
+      de: 'der Hund empfindet das Licht.',
+      es: 'el perro percibe la luz.',
+      ja: '犬は光を知覚します。',
+      pt: 'o cão percebe a luz.',
+    });
+  });
+
+  test('plural subject agrees', () => {
+    expect(sayAll(clause(np('DOG', { number: 'plural' }), 'PERCEIVE', { directObject: np('LIGHT') })))
+      .toMatchObject({
+        en: 'the dogs perceive the light.',
+        it: 'i cani percepiscono la luce.',
+        fr: 'les chiens perçoivent la lumière.',
+        de: 'die Hunde empfinden das Licht.',
+        es: 'los perros perciben la luz.',
+        pt: 'os cães percebem a luz.',
+      });
+  });
+
+  test('past tense', () => {
+    expect(sayAll(perceive({ verbPhrase: { verb: 'PERCEIVE', tense: 'past' } }))).toEqual({
+      en: 'the dog perceived the light.',
+      it: 'il cane percepì la luce.',
+      fr: 'le chien perçut la lumière.',
+      de: 'der Hund empfand das Licht.',
+      es: 'el perro percibió la luz.',
+      ja: '犬は光を知覚しました。',
+      pt: 'o cão percebeu a luz.',
+    });
+  });
+
+  test('future tense', () => {
+    expect(sayAll(perceive({ verbPhrase: { verb: 'PERCEIVE', tense: 'future' } }))).toMatchObject({
+      en: 'the dog will perceive the light.',
+      it: 'il cane percepirà la luce.',
+      fr: 'le chien percevra la lumière.',
+      de: 'der Hund wird das Licht empfinden.',
+      es: 'el perro percibirá la luz.',
+      pt: 'o cão perceberá a luz.',
+    });
+  });
+
+  test('resultative uses the right auxiliary and participle (avere / haber / haben / ter→pretérito)', () => {
+    expect(sayAll(clause(np('CAT'), 'PERCEIVE', { directObject: np('LIGHT'), verbPhrase: { verb: 'PERCEIVE', aspect: 'resultative' } })))
+      .toEqual({
+        en: 'the cat has perceived the light.',
+        it: 'il gatto ha percepito la luce.',
+        fr: 'le chat a perçu la lumière.',
+        de: 'der Kater hat das Licht empfunden.',
+        es: 'el gato ha percibido la luz.',
+        ja: '猫は光を知覚してしまいます。',
+        pt: 'o gato percebeu a luz.', // pt present resultative is the pretérito (documented)
+      });
+  });
+
+  test('progressive reads the gerund / te-form', () => {
+    expect(sayAll(clause(np('CAT'), 'PERCEIVE', { directObject: np('LIGHT'), verbPhrase: { verb: 'PERCEIVE', aspect: 'progressive' } })))
+      .toEqual({
+        en: 'the cat is perceiving the light.',
+        it: 'il gatto sta percependo la luce.',
+        fr: 'le chat est en train de percevoir la lumière.',
+        de: 'der Kater empfindet gerade das Licht.',
+        es: 'el gato está percibiendo la luz.',
+        ja: '猫は光を知覚しています。',
+        pt: 'o gato está percebendo a luz.',
+      });
+  });
+});
+
+// UNDERSTAND — the genus verb of KNOW ("to understand concepts") and READ ("to understand written
+// words"), seeded for the B11 verb-definition task. Italian comprendere has a strong remote past
+// (comprese) and participle (compreso), French comprendre doubles its n in the 3pl (comprennent),
+// English is irregular (understood), and German verstehen is strong and inseparable (verstand /
+// verstanden).
+describe('UNDERSTAND (genus of KNOW / READ)', () => {
+  const understand = (extra: Partial<PhrasePlan> = {}): PhrasePlan =>
+    clause(np('DOG'), 'UNDERSTAND', { directObject: np('WORD'), ...extra });
+
+  test('present conjugates across languages', () => {
+    expect(sayAll(understand())).toEqual({
+      en: 'the dog understands the word.',
+      it: 'il cane comprende la parola.',
+      fr: 'le chien comprend le mot.',
+      de: 'der Hund versteht das Wort.',
+      es: 'el perro comprende la palabra.',
+      ja: '犬は単語を理解します。',
+      pt: 'o cão compreende a palavra.',
+    });
+  });
+
+  test('plural subject agrees', () => {
+    expect(sayAll(clause(np('DOG', { number: 'plural' }), 'UNDERSTAND', { directObject: np('WORD') })))
+      .toMatchObject({
+        en: 'the dogs understand the word.',
+        it: 'i cani comprendono la parola.',
+        fr: 'les chiens comprennent le mot.',
+        de: 'die Hunde verstehen das Wort.',
+        es: 'los perros comprenden la palabra.',
+        pt: 'os cães compreendem a palavra.',
+      });
+  });
+
+  test('past tense', () => {
+    expect(sayAll(understand({ verbPhrase: { verb: 'UNDERSTAND', tense: 'past' } }))).toEqual({
+      en: 'the dog understood the word.',
+      it: 'il cane comprese la parola.',
+      fr: 'le chien comprit le mot.',
+      de: 'der Hund verstand das Wort.',
+      es: 'el perro comprendió la palabra.',
+      ja: '犬は単語を理解しました。',
+      pt: 'o cão compreendeu a palavra.',
+    });
+  });
+
+  test('future tense', () => {
+    expect(sayAll(understand({ verbPhrase: { verb: 'UNDERSTAND', tense: 'future' } }))).toMatchObject({
+      en: 'the dog will understand the word.',
+      it: 'il cane comprenderà la parola.',
+      fr: 'le chien comprendra le mot.',
+      de: 'der Hund wird das Wort verstehen.',
+      es: 'el perro comprenderá la palabra.',
+      pt: 'o cão compreenderá a palavra.',
+    });
+  });
+
+  test('resultative uses the right auxiliary and participle (avere / haber / haben / ter→pretérito)', () => {
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', { directObject: np('WORD'), verbPhrase: { verb: 'UNDERSTAND', aspect: 'resultative' } })))
+      .toEqual({
+        en: 'the cat has understood the word.',
+        it: 'il gatto ha compreso la parola.',
+        fr: 'le chat a compris le mot.',
+        de: 'der Kater hat das Wort verstanden.',
+        es: 'el gato ha comprendido la palabra.',
+        ja: '猫は単語を理解してしまいます。',
+        pt: 'o gato compreendeu a palavra.', // pt present resultative is the pretérito (documented)
+      });
+  });
+
+  test('progressive reads the gerund / te-form', () => {
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', { directObject: np('WORD'), verbPhrase: { verb: 'UNDERSTAND', aspect: 'progressive' } })))
+      .toEqual({
+        en: 'the cat is understanding the word.',
+        it: 'il gatto sta comprendendo la parola.',
+        fr: 'le chat est en train de comprendre le mot.',
+        de: 'der Kater versteht gerade das Wort.',
+        es: 'el gato está comprendiendo la palabra.',
+        ja: '猫は単語を理解しています。',
+        pt: 'o gato está compreendendo a palavra.',
+      });
+  });
+});
+
 describe('INFINITIVE_PHRASE (grammar meta-noun)', () => {
   test('the noun surface, with gender agreement', () => {
     expect(sayAll({ subject: np('INFINITIVE_PHRASE', { definiteness: 'definite' }) })).toEqual({
@@ -433,6 +599,49 @@ describe('B10 verb definitions (DESTROY genus)', () => {
       es: 'destruir contenido.',
       ja: '内容を破壊する。',
       pt: 'destruir conteúdo.',
+    });
+  });
+});
+
+// The B11 perception- and cognition-verb definitions, on the PERCEIVE and UNDERSTAND genera. LIGHT
+// stays bare-singular in its mass sense; CONCEPT and WORD are count nouns, so they are passed plural.
+// READ is the first gloss whose differentia carries an adjective (WRITTEN), which infinitiveGloss
+// threads onto the bare object — agreeing in Romance, strong-declined in German, and verb-derived
+// with no linker in Japanese.
+describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
+  test('SEE → "to perceive light"', () => {
+    expect(definitionAll('SEE')).toEqual({
+      en: 'to perceive light.',
+      it: 'percepire luce.',
+      fr: 'percevoir lumière.',
+      de: 'Licht empfinden.',
+      es: 'percibir luz.',
+      ja: '光を知覚する。',
+      pt: 'perceber luz.',
+    });
+  });
+
+  test('KNOW → "to understand concepts"', () => {
+    expect(definitionAll('KNOW')).toEqual({
+      en: 'to understand concepts.',
+      it: 'comprendere concetti.',
+      fr: 'comprendre concepts.',
+      de: 'Begriffe verstehen.',
+      es: 'comprender conceptos.',
+      ja: '概念を理解する。',
+      pt: 'compreender conceitos.',
+    });
+  });
+
+  test('READ → "to understand written words"', () => {
+    expect(definitionAll('READ')).toEqual({
+      en: 'to understand written words.',
+      it: 'comprendere parole scritte.',
+      fr: 'comprendre mots écrits.',
+      de: 'geschriebene Wörter verstehen.',
+      es: 'comprender palabras escritas.',
+      ja: '書かれた単語を理解する。',
+      pt: 'compreender palavras escritas.',
     });
   });
 });

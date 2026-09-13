@@ -16,6 +16,9 @@ here would also unblock those four adjectives.
 | AFFECTION | noun | warm feeling toward someone | differentia for LOVE |
 | TEAR | noun | a drop of liquid from the eye | differentia for CRY (needs plural) |
 
+German FEEL should be *fühlen*: *empfinden* is already PERCEIVE's German verb
+([B11](../done/B11-perception-verbs.md)).
+
 ## Unlocks
 
 | verb | plan | gloss (en) | status |

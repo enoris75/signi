@@ -38,7 +38,7 @@ its literal "to bring into existence", per the caveat above.
 **"No builder change" was wrong, slightly.** `infinitiveGloss` rendered its bare object singular,
 which suits mass nouns (FOOD, LIQUID, FIRE) but gave "to create **object**" for a count noun. The
 builder now takes an optional third `number` argument (`'plural'`); omitting it leaves the EAT/DRINK
-plans unchanged. The count-noun plans in [B11](../B-needs-seed/B11-perception-verbs.md),
+plans unchanged. The count-noun plans in [B11](B11-perception-verbs.md),
 [B12](../B-needs-seed/B12-possession-verbs.md) and [B16](../B-needs-seed/B16-word-verbs.md) were
 updated to pass it. French still omits the article ("créer objets"), the same simplification as EAT
 and DRINK.

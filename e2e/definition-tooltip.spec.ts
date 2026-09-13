@@ -148,6 +148,73 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('内容を破壊する');
   });
 
+  test('a genus+mass-noun verb definition renders (localize-seed B11: SEE)', async ({
+    app,
+    page,
+  }) => {
+    // English: an infinitive citation on the PERCEIVE genus with the differentia LIGHT — "to perceive
+    // light", replacing the stored literal "to perceive with the eyes".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('see');
+    const seeEn = page.locator('[data-testid="typeahead-option"][data-concept="SEE"]');
+    await expect(seeEn).toBeVisible();
+    await seeEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to perceive light');
+
+    // Spanish: the same plan, the object bare after the infinitive — "percibir luz".
+    await app.setUiLanguage('es');
+    await app.verbInput.fill('see');
+    const seeEs = page.locator('[data-testid="typeahead-option"][data-concept="SEE"]');
+    await expect(seeEs).toBeVisible();
+    await seeEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('percibir luz');
+  });
+
+  test('a genus+count-noun verb definition renders (localize-seed B11: KNOW)', async ({
+    app,
+    page,
+  }) => {
+    // English: UNDERSTAND + the count-noun differentia CONCEPT, passed plural — "to understand
+    // concepts".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('know');
+    const knowEn = page.locator('[data-testid="typeahead-option"][data-concept="KNOW"]');
+    await expect(knowEn).toBeVisible();
+    await knowEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to understand concepts');
+
+    // Portuguese: the same plan — "compreender conceitos". No Portuguese literal is stored.
+    await app.setUiLanguage('pt');
+    await app.verbInput.fill('know');
+    const knowPt = page.locator('[data-testid="typeahead-option"][data-concept="KNOW"]');
+    await expect(knowPt).toBeVisible();
+    await knowPt.hover();
+    await expect(page.locator(tooltip)).toHaveText('compreender conceitos');
+  });
+
+  test('a verb definition with an adjective on its object renders (localize-seed B11: READ)', async ({
+    app,
+    page,
+  }) => {
+    // English: UNDERSTAND + WORD modified by WRITTEN — "to understand written words", the first
+    // infinitive gloss whose differentia carries an adjective.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('read');
+    const readEn = page.locator('[data-testid="typeahead-option"][data-concept="READ"]');
+    await expect(readEn).toBeVisible();
+    await readEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to understand written words');
+
+    // German: the same plan, the adjective strong-declined on the bare plural object, which precedes
+    // the infinitive — "geschriebene Wörter verstehen".
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('read');
+    const readDe = page.locator('[data-testid="typeahead-option"][data-concept="READ"]');
+    await expect(readDe).toBeVisible();
+    await readDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('geschriebene Wörter verstehen');
+  });
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,
