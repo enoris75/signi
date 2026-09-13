@@ -116,6 +116,12 @@ describe('predicateText', () => {
     test('a coordinated object keeps the post-verbal slot', () => {
       expect(predicateText(GATTO, vp(VEDERE), el(np(CANE), np(TOPO)))).toBe('vede il cane e il topo');
     });
+
+    test('a pronoun in a coordinated object takes its tonic form, with no article', () => {
+      expect(predicateText(GATTO, vp(VEDERE), el(np(LUI), np(IO)))).toBe('vede lui e me');
+      expect(predicateText(GATTO, vp(VEDERE), el(np(CANE), np(TU)))).toBe('vede il cane e te');
+      expect(predicateText(GATTO, vp(VEDERE, { negative: true }), el(np(LEI), np(IO)))).toBe('non vede lei e me');
+    });
   });
 
   describe('impersonal si', () => {

@@ -1,5 +1,5 @@
 import type { ComplementType, Tense } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, isFrequencyAdverb, isPronounElement, modalChain, objectPronounForm, withDefiniteness, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import { groupHasNegativeAdverb, isFrequencyAdverb, modalChain, objectPronounForm, withDefiniteness, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
 import { MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -28,7 +28,7 @@ export function predicateParts(
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
 
   // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
-  // that would give "the I"; a noun object (or a coordination) renders as an ordinary noun phrase.
+  // that would give "the I"; a noun object renders as an ordinary noun phrase.
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // A negative adverb (NEVER) *anywhere* in the group — on the main verb or on any modal — is
   // itself the clause negator, so the finite verb takes no separate "not" (English has no negative
@@ -40,9 +40,11 @@ export function predicateParts(
   // any mouse". A lone `no` object keeps "no" ("eats no mouse").
   const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
   const anyObject = objectIsNegative && (verbNegative === true || groupNegative);
+  // The choice is per conjunct, so a group mixes the two ("sees the dog and me").
   const directObjectText = !directObject ? ''
-    : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
-    : coordinate(directObject, anyObject ? (np) => npText(withDefiniteness(np, 'any')) : npText);
+    : coordinate(directObject, (np) =>
+      np.head.forms['person'] ? objectPronounForm(np.head.forms)
+      : npText(anyObject ? withDefiniteness(np, 'any') : np));
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
   const complementsText = complementsPhrase(complements, verb.forms);

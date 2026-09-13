@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { coordinate } from './coordinate.js';
@@ -27,9 +27,6 @@ export function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
-      // its surface is rendered from every conjunct, each with its own article and agreement.
-      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the *subject* ("sembra
       // stanca") and carries its own degree ("sembra più stanca"); a predicate noun keeps
       // its own article, no preposition ("diventa una leggenda"). Every conjunct agrees with
@@ -71,17 +68,19 @@ export function complementsPhrase(
       // A pronoun cause: positive "grazie a me/te/lui…" uses the tonic pronoun; neutral and
       // negative take the possessive, agreeing with feminine "causa"/"colpa" — "a causa mia",
       // "per colpa mia" — NOT "a causa di me" (which sounds off, like "*per colpa di me").
-      // "loro" is invariable. Only cause accepts a pronoun in the UI today.
-      if (type === 'cause' && f['person']) {
+      // "loro" is invariable. Only cause accepts a pronoun in the UI today. It is chosen per
+      // conjunct, and every conjunct repeats its connector as a noun does, so a group mixes the two
+      // ("a causa del cane e a causa tua").
+      const pronounCause = (pf: Record<string, string>): string => {
         const sent = causeSentiment(c);
-        if (sent === 'positive') return `grazie a ${f['disjunctive'] ?? f['base'] ?? ''}`;
-        const plural = f['number'] === 'plural';
+        if (sent === 'positive') return `grazie a ${pf['disjunctive'] ?? pf['base'] ?? ''}`;
+        const plural = pf['number'] === 'plural';
         const poss =
-          f['person'] === '1' ? (plural ? 'nostra' : 'mia') :
-          f['person'] === '2' ? (plural ? 'vostra' : 'tua') :
+          pf['person'] === '1' ? (plural ? 'nostra' : 'mia') :
+          pf['person'] === '2' ? (plural ? 'vostra' : 'tua') :
           plural ? 'loro' : 'sua';
         return sent === 'negative' ? `per colpa ${poss}` : `a causa ${poss}`;
-      }
+      };
       // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.
       // A direction toward an *animate* goal takes "da" ("corro dal bambino" = to/towards
       // the child — the "andare da qualcuno" construction), not bare "a", which is for
@@ -124,6 +123,7 @@ export function complementsPhrase(
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
+        (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(np.head.forms)));
     })
     .filter(Boolean)

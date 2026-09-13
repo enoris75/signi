@@ -151,6 +151,18 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(VOIR, { negative: true }), el(np(JE)))).toBe('ne me voit pas');
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL)))).toBe("l'a vu");
     });
+
+    // The closing comma is tidied against the full stop by `punctuate`, in the engine.
+    test('a coordinated object holding a pronoun is resumed by its plural clitic and dislocated', () => {
+      expect(predicateText(CHAT, vp(VOIR), el(np(IL), np(JE)))).toBe('nous voit, lui et moi,');
+      expect(predicateText(CHAT, vp(VOIR), el(np(SOURIS), np(TU)))).toBe('vous voit, la souris et toi,');
+      expect(predicateText(CHAT, vp(VOIR), el(np(SOURIS), np(IL)))).toBe('les voit, la souris et lui,');
+      expect(predicateText(CHAT, vp(VOIR, { negative: true }), el(np(IL), np(JE)))).toBe('ne nous voit pas, lui et moi,');
+    });
+
+    test('a coordinated object of nouns keeps the post-verbal slot', () => {
+      expect(predicateText(CHAT, vp(VOIR), el(np(SOURIS), np(LIVRE)))).toBe('voit la souris et le livre');
+    });
   });
 
   describe('imperative', () => {

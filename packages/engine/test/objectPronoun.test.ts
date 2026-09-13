@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A pronoun in the DIRECT-OBJECT slot — "the cat sees me / you / him". A pronoun object is not a
@@ -164,9 +164,30 @@ describe('known bugs: German coordinated pronoun object', () => {
   const catSees = (...conjuncts: NounPhrase[]) =>
     sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).de;
 
-  test.fails('German renders each pronoun conjunct in its accusative form, with no article', () => {
+  test('German renders each pronoun conjunct in its accusative form, with no article', () => {
     expect(catSees(np('THIRD_PERSON'), np('FIRST_PERSON'))).toBe('der Kater sieht ihn und mich.');
     expect(catSees(np('DOG'), np('SECOND_PERSON'))).toBe('der Kater sieht den Hund und dich.');
+  });
+
+  test('German declines every person, gender and number, in either order', () => {
+    expect(catSees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('der Kater sieht sie und sie.');
+    expect(catSees(np('SECOND_PERSON', { number: 'plural' }), np('THIRD_PERSON', { gender: 'fem' }))).toBe('der Kater sieht euch und sie.');
+    expect(catSees(np('FIRST_PERSON'), np('DOG'))).toBe('der Kater sieht mich und den Hund.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'or' } })).de)
+      .toBe('der Kater sieht ihn oder mich.');
+  });
+
+  test('German keeps the accusative group in a negation, a perfect, a relative clause and a command', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase: { negative: true } })).de).toBe('der Kater sieht ihn und mich nicht.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase: { aspect: 'resultative' } })).de).toBe('der Kater hat ihn und mich gesehen.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN')).de)
+      .toBe('der Hund, der ihn und mich sieht, läuft.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: himAndMe }), imperative: true }).de).toBe('sieh ihn und mich.');
+  });
+
+  test('regression: a group of nouns keeps its articles', () => {
+    expect(catSees(np('DOG'), np('MOUSE'))).toBe('der Kater sieht den Hund und die Maus.');
   });
 });
 
@@ -318,9 +339,28 @@ describe('known bugs: French ne before an object clitic', () => {
 // (`isPronounElement`); a coordinated object renders every conjunct with `npText`, so a pronoun
 // conjunct gets "the" and its subject form.
 describe('known bugs: English coordinated pronoun object', () => {
-  test.fails('English renders each pronoun conjunct in its object form, with no article', () => {
+  test('English renders each pronoun conjunct in its object form, with no article', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } }), 'en')).toBe('the cat sees him and me.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('SECOND_PERSON')], conjunction: 'and' } }), 'en')).toBe('the cat sees the dog and you.');
+  });
+
+  test('English takes the object form for every gender and number, in either order', () => {
+    const sees = (...conjuncts: NounPhrase[]) => say(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } }), 'en');
+    expect(sees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('the cat sees her and them.');
+    expect(sees(np('FIRST_PERSON'), np('DOG'))).toBe('the cat sees me and the dog.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'or' } }), 'en'))
+      .toBe('the cat sees him or me.');
+  });
+
+  test('English keeps the object forms in a relative clause, a command and beside an "any" noun', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN'), 'en'))
+      .toBe('the dog that sees him and me runs.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: himAndMe }), imperative: true }, 'en')).toBe('see him and me.');
+    // Only the noun conjunct takes the "any" series under a negated verb.
+    expect(say(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('DOG', { definiteness: 'no' }), np('THIRD_PERSON')], conjunction: 'and' }, verbPhrase: { negative: true },
+    }), 'en')).toBe('the cat does not see any dog and him.');
   });
 });
 
@@ -328,9 +368,31 @@ describe('known bugs: English coordinated pronoun object', () => {
 // coordinated object renders every conjunct with `npText`, so a pronoun conjunct gets an article and
 // its subject form ("il tu", "l'io"). A coordinated pronoun stays post-verbal in its tonic form.
 describe('known bugs: Italian coordinated pronoun object', () => {
-  test.fails('Italian renders each pronoun conjunct in its tonic form, with no article', () => {
+  test('Italian renders each pronoun conjunct in its tonic form, with no article', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('SECOND_PERSON')], conjunction: 'and' } }), 'it')).toBe('il gatto vede il cane e te.');
     expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } }), 'it')).toBe('il gatto vede lui e me.');
+  });
+
+  test('Italian takes the tonic form for every person, gender and number', () => {
+    const sees = (...conjuncts: NounPhrase[]) => say(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } }), 'it');
+    expect(sees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('il gatto vede lei e loro.');
+    expect(sees(np('SECOND_PERSON', { number: 'plural' }), np('THIRD_PERSON', { gender: 'fem' }))).toBe('il gatto vede voi e lei.');
+  });
+
+  test('Italian keeps the tonic group after the verb in a negation, a perfect, a modal, a relative clause and a command', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    const sees = (verbPhrase: Partial<VerbPhrase>) => say(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase }), 'it');
+    expect(sees({ negative: true })).toBe('il gatto non vede lui e me.');
+    expect(sees({ aspect: 'resultative' })).toBe('il gatto ha visto lui e me.');
+    expect(sees({ modals: [{ verb: 'MUST' }] })).toBe('il gatto deve vedere lui e me.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN'), 'it'))
+      .toBe('il cane che vede lui e me corre.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: himAndMe }), imperative: true }, 'it')).toBe('vedi lui e me.');
+  });
+
+  test('regression: a group of nouns keeps its articles', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('MOUSE')], conjunction: 'and' } }), 'it'))
+      .toBe('il gatto vede il cane e il topo.');
   });
 });
 
@@ -339,11 +401,46 @@ describe('known bugs: Italian coordinated pronoun object', () => {
 // article and its subject form ("l'il et le je"). French cannot coordinate clitics: it uses the
 // tonic forms, resumed by the plural clitic as the subject slot already does ("moi et toi, nous").
 describe('known bugs: French coordinated pronoun object', () => {
-  test.fails('French renders a coordinated pronoun object in its tonic form, resumed by a clitic', () => {
+  test('French renders a coordinated pronoun object in its tonic form, resumed by a clitic', () => {
     const sees = (...ids: string[]) =>
       sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: ids.map((id) => np(id)), conjunction: 'and' } })).fr;
     expect(sees('THIRD_PERSON', 'FIRST_PERSON')).toBe('le chat nous voit, lui et moi.');
     expect(sees('DOG', 'SECOND_PERSON')).toBe('le chat vous voit, le chien et toi.');
+  });
+
+  test('French resumes a 3rd-person group with "les", in either order', () => {
+    const sees = (...conjuncts: NounPhrase[]) => sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).fr;
+    expect(sees(np('DOG'), np('THIRD_PERSON'))).toBe('le chat les voit, le chien et lui.');
+    expect(sees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('le chat les voit, elle et eux.');
+    expect(sees(np('FIRST_PERSON'), np('DOG'))).toBe('le chat nous voit, moi et le chien.');
+  });
+
+  test('French dislocates the group past the negation and the complements, to the end of its clause', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase: { negative: true } })).fr).toBe('le chat ne nous voit pas, lui et moi.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, complements: { locative: { phrase: np('HOUSE') } } })).fr)
+      .toBe('le chat nous voit dans la maison, lui et moi.');
+  });
+
+  test('French closes the dislocated group on a comma inside the sentence', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN')).fr)
+      .toBe('le chien qui nous voit, lui et moi, court.');
+    expect(sayAll(clause(np('DOG'), 'SEE', { directObject: np('CAT', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }) })).fr)
+      .toBe('le chien voit le chat qui nous voit, lui et moi.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'SEE', { directObject: himAndMe }) }).fr)
+      .toBe('si le chat nous voyait, lui et moi, le chien courrait.');
+    expect(sayAll({ ...clause(np('CAT'), 'SEE', { directObject: himAndMe }), coordination: { conjunction: 'and', clause: clause(np('DOG'), 'RUN') } }).fr)
+      .toBe('le chat nous voit, lui et moi, et le chien court.');
+  });
+
+  test('regression: a group of nouns, or one with an "aucun" noun, keeps the post-verbal slot', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('MOUSE')], conjunction: 'and' } })).fr)
+      .toBe('le chat voit le chien et la souris.');
+    // No clitic can resume "aucun", so the tonic pronoun stays beside it.
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: { conjuncts: [np('DOG', { definiteness: 'no' }), np('THIRD_PERSON')], conjunction: 'and' }, verbPhrase: { negative: true },
+    })).fr).toBe('le chat ne voit aucun chien et lui.');
   });
 });
 
@@ -352,13 +449,35 @@ describe('known bugs: French coordinated pronoun object', () => {
 // which gives it an article and its citation form ("ve el yo y el tú"). Spanish wants the tonic
 // forms with "a", doubled by a plural clitic.
 describe('known bugs: Spanish coordinated pronoun object', () => {
-  test.fails('Spanish renders a coordinated pronoun object as doubled tonic pronouns', () => {
+  test('Spanish renders a coordinated pronoun object as doubled tonic pronouns', () => {
     expect(sayAll(clause(np('CAT'), 'SEE', {
       directObject: { conjuncts: [np('FIRST_PERSON'), np('SECOND_PERSON')], conjunction: 'and' },
     })).es).toBe('el gato nos ve a mí y a ti.');
     expect(sayAll(clause(np('CAT'), 'SEE', {
       directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' },
     })).es).toBe('el gato nos ve a él y a mí.');
+  });
+
+  test('Spanish doubles with the group\'s own person and number', () => {
+    const sees = (...conjuncts: NounPhrase[]) => sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).es;
+    expect(sees(np('SECOND_PERSON', { number: 'plural' }), np('THIRD_PERSON', { gender: 'fem' }))).toBe('el gato os ve a vosotros y a ella.');
+    expect(sees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('el gato los ve a ella y a ellos.');
+  });
+
+  test('Spanish keeps the doubling clitic before the finite verb in a negation, a perfect, a modal and a relative clause', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    const sees = (extra: Parameters<typeof clause>[2]) => sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, ...extra })).es;
+    expect(sees({ verbPhrase: { negative: true } })).toBe('el gato no nos ve a él y a mí.');
+    expect(sees({ verbPhrase: { aspect: 'resultative' } })).toBe('el gato nos ha visto a él y a mí.');
+    expect(sees({ verbPhrase: { modals: [{ verb: 'MUST' }] } })).toBe('el gato nos debe ver a él y a mí.');
+    expect(sees({ complements: { locative: { phrase: np('HOUSE') } } })).toBe('el gato nos ve a él y a mí en la casa.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN')).es)
+      .toBe('el perro que nos ve a él y a mí corre.');
+  });
+
+  test('regression: a group of nouns keeps its articles and takes no clitic', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('DOG'), np('MOUSE')], conjunction: 'and' } })).es)
+      .toBe('el gato ve el perro y el ratón.');
   });
 });
 
@@ -370,8 +489,25 @@ describe('known bugs: Portuguese coordinated pronoun object', () => {
   const catSees = (...conjuncts: ReturnType<typeof np>[]) =>
     sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts, conjunction: 'and' } })).pt;
 
-  test.fails('Portuguese renders a coordinated pronoun object in its tonic form', () => {
+  test('Portuguese renders a coordinated pronoun object in its tonic form', () => {
     expect(catSees(np('THIRD_PERSON'), np('FIRST_PERSON'))).toBe('o gato vê a ele e a mim.');
     expect(catSees(np('DOG'), np('SECOND_PERSON'))).toBe('o gato vê o cão e a você.');
+  });
+
+  test('Portuguese takes "a" + the tonic form for every person, gender and number', () => {
+    expect(catSees(np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { number: 'plural' }))).toBe('o gato vê a ela e a eles.');
+    expect(catSees(np('SECOND_PERSON', { number: 'plural' }), np('THIRD_PERSON', { gender: 'fem' }))).toBe('o gato vê a vocês e a ela.');
+  });
+
+  test('Portuguese keeps the group after the verb in a negation, a perfect and a relative clause', () => {
+    const himAndMe = { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' as const };
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase: { negative: true } })).pt).toBe('o gato não vê a ele e a mim.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: himAndMe, verbPhrase: { aspect: 'resultative' } })).pt).toBe('o gato viu a ele e a mim.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: himAndMe } }), 'RUN')).pt)
+      .toBe('o cão que vê a ele e a mim corre.');
+  });
+
+  test('regression: a group of nouns keeps its articles', () => {
+    expect(catSees(np('DOG'), np('MOUSE'))).toBe('o gato vê o cão e o rato.');
   });
 });

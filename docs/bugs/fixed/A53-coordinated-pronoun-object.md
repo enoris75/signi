@@ -95,3 +95,47 @@ tonic pronoun object; the colloquial `vê ele e eu` is non-standard.
 | | |
 |---|---|
 | **Test** | `objectPronoun.test.ts` → *known bugs: German coordinated pronoun object* (1 `test.fails`)<br>`objectPronoun.test.ts` → *known bugs: English coordinated pronoun object* (1 `test.fails`)<br>`objectPronoun.test.ts` → *known bugs: Italian coordinated pronoun object* (1 `test.fails`)<br>`objectPronoun.test.ts` → *known bugs: French coordinated pronoun object* (1 `test.fails`)<br>`objectPronoun.test.ts` → *known bugs: Spanish coordinated pronoun object* (1 `test.fails`)<br>`objectPronoun.test.ts` → *known bugs: Portuguese coordinated pronoun object* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 by choosing pronoun or noun per conjunct, the test `subjectPhrase` already makes.
+A lone pronoun keeps its clitic path; a coordination is never a clitic.
+
+- [`elementPhrase.ts`](../../../packages/engine/src/languages/de/elementPhrase.ts) (German) and
+  [`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) (English): a
+  pronoun conjunct takes `objectPronounForm`, a noun conjunct its noun phrase (`den Hund und dich`,
+  `the dog and you`). Under a negated verb only the noun conjunct takes the "any" series.
+- [`it/predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts): a pronoun
+  conjunct takes its tonic form after the verb (`vede lui e me`).
+- [`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts): `a` + the tonic
+  form (`vê a ele e a mim`, `vê o cão e a você`).
+- [`es/predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts): `a` + the tonic
+  form. A group made only of pronouns is doubled by its plural clitic (`nos ve a mí y a ti`). A group
+  mixing in a noun is left undoubled (`ve el perro y a él`), as the doubling is optional there.
+- [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts): a group holding
+  a pronoun is resumed by its plural clitic and dislocated to the end of its clause between commas,
+  each pronoun in its tonic form (`nous voit, lui et moi`, `les voit, le chien et lui`). A group with
+  an `aucun` conjunct keeps the post-verbal slot (`ne voit aucun chien et lui`), as no clitic can
+  resume it.
+  - The new [`fr/punctuate.ts`](../../../packages/engine/src/languages/fr/punctuate.ts), applied by
+    [`frenchEngine.ts`](../../../packages/engine/src/languages/fr/frenchEngine.ts), collapses the
+    closing comma into a following clause join and drops it before the full stop:
+    `le chien qui nous voit, lui et moi, court.`, `si le chat nous voyait, lui et moi, le chien courrait.`
+- [`types.ts`](../../../packages/engine/src/types.ts): the new `groupObjectClitic` picks the plural
+  clitic for the group's person and gender through `objectPronounForm`, so a feminine group takes
+  `las` once A72 seeds the feminine plural.
+
+Not changed here: a pronoun group under a modal or in a French or Spanish command keeps the clitic
+placement a lone pronoun has (`nous doit voir`, `nos ve`), which is A88 and A70; the French participle
+does not agree with the resumptive clitic (`nous a vu`), which is A67.
+
+- **Tests:** [`packages/engine/test/objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts)
+  → the six *known bugs: … coordinated pronoun object* blocks. The pinning `test.fails` are now
+  passing `test`s. New cases:
+  - other persons, genders and numbers, either order, and an "or" group;
+  - a negation, a perfect, a modal, a complement, a relative clause and a command, where the output is
+    already right;
+  - French commas inside a relative, a condition and a coordinated clause;
+  - guards that a group of nouns is unchanged and that a French `aucun` group is not dislocated.
+- Unit tests: `elementPhrase.test.ts` (de), `predicateParts.test.ts` (en), `predicateText.test.ts`
+  (it, fr, es, pt) and the new `punctuate.test.ts` (fr).

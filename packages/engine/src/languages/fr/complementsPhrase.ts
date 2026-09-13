@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { aDet } from './aDet.js';
 import { coordinate } from './coordinate.js';
 import { datPrep } from './datPrep.js';
@@ -29,9 +29,6 @@ export function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
-      // its surface is rendered from every conjunct, each with its own article and agreement.
-      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the subject ("la chatte est
       // belle", "elles semblent heureuses") and carries its own degree ("semblent plus
       // heureuses"); a predicate noun keeps its own article, no preposition ("devient une
@@ -67,23 +64,6 @@ export function complementsPhrase(
           const adverb = c.action.modifier?.forms['base'] ?? '';
           return [verb, object, adverb].filter(Boolean).join(' ');
         }
-      }
-      // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
-      // (eliding before a vowel); positive "grâce à moi" takes it after "à" (which never
-      // elides); negative uses the possessive with "faute" ("par ma faute").
-      if (type === 'cause' && f['person']) {
-        const disj = f['disjunctive'] ?? f['base'] ?? '';
-        const sent = causeSentiment(c);
-        if (sent === 'positive') return `grâce à ${disj}`;
-        if (sent === 'negative') {
-          const plural = f['number'] === 'plural';
-          const poss =
-            f['person'] === '1' ? (plural ? 'notre' : 'ma') :
-            f['person'] === '2' ? (plural ? 'votre' : 'ta') :
-            plural ? 'leur' : 'sa';
-          return `par ${poss} faute`;
-        }
-        return `à cause ${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
       }
       // locative→dans, direction→à (au/aux/à la), source→"loin de" (loin du/des/de la),
       // route→path preposition. A direction toward an *animate* goal takes "vers"
@@ -135,6 +115,35 @@ export function complementsPhrase(
         spatialHead(pathSpecifier(c), nf, plural, lead);
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "à la maison",
       // not "dans le foyer" — so it bypasses the article and contraction machinery entirely.
+      // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"
+      // (eliding before a vowel); positive "grâce à moi" takes it after "à" (which never
+      // elides); negative uses the possessive with "faute" ("par ma faute").
+      // Each conjunct of a group takes its own form, never the first one's. The neutral and positive
+      // connector is said once, each conjunct bringing its own "de"/"à" ("à cause du chien et de
+      // toi"); the negative one holds a possessive, so every conjunct repeats it ("par ma faute et
+      // par la faute du chien").
+      if (type === 'cause' && c.phrase.conjuncts.some((np) => np.head.forms['person'])) {
+        const pronoun = (pf: Record<string, string>): string => {
+          const disj = pf['disjunctive'] ?? pf['base'] ?? '';
+          if (causeSent === 'positive') return `à ${disj}`;
+          if (causeSent === 'negative') {
+            const plural = pf['number'] === 'plural';
+            const poss =
+              pf['person'] === '1' ? (plural ? 'notre' : 'ma') :
+              pf['person'] === '2' ? (plural ? 'votre' : 'ta') :
+              plural ? 'leur' : 'sa';
+            return `par ${poss} faute`;
+          }
+          return `${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
+        };
+        if (causeSent === 'negative') {
+          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(np.head.forms)));
+        }
+        const tail = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
+          causeSent === 'positive' ? datPrep(nf, plural, lead) : dePrep(nf, plural, lead);
+        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(np.head.forms)));
+        return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
+      }
       return coordinate(c.phrase, (np) =>
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(np.head.forms)));
     })

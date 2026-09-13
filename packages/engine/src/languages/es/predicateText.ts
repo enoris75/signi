@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import { firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -75,15 +75,22 @@ export function predicateText(
   const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
   const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${conjugated}` : conjugated;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
-  // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object (or a
-  // coordination) keeps the post-verbal slot.
-  const objectClitic = directObject && isPronounElement(directObject)
-    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the
+  // post-verbal slot.
+  const pronounGroup = !!directObject && directObject.conjuncts.length > 1
+    && directObject.conjuncts.every((np) => np.head.forms['person']);
+  // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes "a" + its
+  // tonic form. A group of pronouns is doubled by its plural clitic ("el gato nos ve a mí y a ti");
+  // a group mixing in a noun, where the doubling is optional, is left undoubled.
+  const objectClitic = !directObject ? ''
+    : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
+    : pronounGroup ? groupObjectClitic(directObject) : '';
+  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
-  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
+  const directObjectText = directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';

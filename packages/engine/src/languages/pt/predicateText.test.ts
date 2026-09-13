@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { predicateText } from './predicateText.js';
 import {
-  BOM, CANSADO, CAO, CASA, COMER, complement, complements, concept, CRIANCA, DAR, DEVER, el, ELA, ELES, EU, FELIZ,
+  BOM, CANSADO, CAO, CASA, COMER, complement, complements, concept, CRIANCA, DAR, DEVER, el, ELA, ELE, ELES, EU, FELIZ,
   type Forms, GATA, GATO, GRANDE, LENDA, LIVRO, MENINO, modal, NOS, np, NUNCA, PODER, QUERER, RAPIDAMENTE, RAPOSA,
   RATO, SE, SEMPRE, SER, VER, VOCE, vp,
 } from './pt.fixtures.js';
@@ -126,6 +126,12 @@ describe('predicateText', () => {
 
     test('the clitic follows "não"', () => {
       expect(predicateText(GATO, vp(VER, { negative: true }), el(np(EU)))).toBe('não me vê');
+    });
+
+    test('a pronoun in a coordinated object is "a" + its tonic form, after the verb', () => {
+      expect(predicateText(GATO, vp(VER), el(np(ELE), np(EU)))).toBe('vê a ele e a mim');
+      expect(predicateText(GATO, vp(VER), el(np(CAO), np(VOCE)))).toBe('vê o cão e a você');
+      expect(predicateText(GATO, vp(VER, { negative: true }), el(np(ELA), np(EU)))).toBe('não vê a ela e a mim');
     });
 
     test('the impersonal "se" is a proclitic standing in for the subject', () => {

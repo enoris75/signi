@@ -234,6 +234,14 @@ describe('complementsPhrase', () => {
       expect(blame(VOSOTROS)).toBe('por vuestra culpa');
       expect(blame(ELLOS)).toBe('por su culpa');
     });
+
+    // The neutral and positive connector is said once, each conjunct bringing its own "de" / "a";
+    // the negative one holds a possessive, so every conjunct repeats it.
+    test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
+      expect(render({ cause: complement(el(np(YO), np(PERRO))) })).toBe('a causa de mí y del perro');
+      expect(render({ cause: complement(el(np(MUJER), np(TU)), [sentiment('positive')]) })).toBe('gracias a la mujer y a ti');
+      expect(render({ cause: complement(el(np(PERRO), np(YO)), [sentiment('negative')]) })).toBe('por culpa del perro y por mi culpa');
+    });
   });
 
   describe('the complement noun phrase', () => {

@@ -58,7 +58,7 @@ export const adjectives: ConceptSeed[] = [
       en: { base: 'high' },
       it: { base: 'alto' },
       fr: { base: 'haut' },
-      de: { base: 'hoch', attributive: 'hoh' },
+      de: { base: 'hoch', attributive: 'hoh', comparative: 'höher', superlative: 'höchst' },
       es: { base: 'alto' },
       ja: { base: '高い', reading: 'たかい' },
       pt: { base: 'alto' },

@@ -1084,13 +1084,28 @@ describe('known bugs: Romance postnominal coordination', () => {
 // runs the regular rule on the base "hoch": no umlaut, and the -ch kept. The comparative is "höher"
 // and the superlative "höchst-" — the same irregular pair A2-A4 names, never added to the corpus.
 describe('known bugs: German comparison of hoch', () => {
-  test.fails('German compares hoch as höher / höchst', () => {
+  test('German compares hoch as höher / höchst', () => {
     expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['more'] }).de).toBe('die höhere Karte brennt.');
     expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['most'] }).de).toBe('die höchste Karte brennt.');
     expect(sayAll(clause(np('HOUSE'), 'BECOME', { complements: { predicative: { phrase: np('HIGH', { headDegree: 'more' }) } } })).de)
       .toBe('das Haus wird höher.');
     expect(sayAll(clause(np('HOUSE'), 'BECOME', { complements: { predicative: { phrase: np('HIGH', { headDegree: 'most' }) } } })).de)
       .toBe('das Haus wird am höchsten.');
+  });
+
+  test('German declines höher / höchst like any comparison stem', () => {
+    expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['more'], definiteness: 'indefinite' }).de).toBe('eine höhere Karte brennt.');
+    expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['most'], number: 'plural' }).de).toBe('die höchsten Karten brennen.');
+    expect(map({ adjectives: ['HIGH'], adjectiveDegrees: ['more'], definiteness: 'bare', number: 'plural' }).de).toBe('höhere Karten brennen.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('DOG', { adjectives: ['HIGH'], adjectiveDegrees: ['more'], definiteness: 'indefinite' }) })).de)
+      .toBe('der Kater sieht einen höheren Hund.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { adjectives: ['HIGH'], adjectiveDegrees: ['more'] }) } } })).de)
+      .toBe('der Kater läuft im höheren Haus.');
+  });
+
+  test('regression: the positive keeps its attributive stem "hoh-" and its predicative "hoch"', () => {
+    expect(map({ adjectives: ['HIGH'] }).de).toBe('die hohe Karte brennt.');
+    expect(sayAll(clause(np('HOUSE'), 'BECOME', { complements: { predicative: { phrase: np('HIGH') } } })).de).toBe('das Haus wird hoch.');
   });
 });
 

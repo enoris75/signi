@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import { firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
@@ -81,9 +81,22 @@ export function predicateText(
   // A pronoun direct object is a proclitic before the finite verb ("le chat me voit"), not a
   // post-verbal noun ("voit le je"). It sits inside any "ne … pas" bracket ("ne me voit pas") and
   // elides me/te/le/la → m'/t'/l' before a vowel; a noun object keeps the post-verbal slot.
-  const objectClitic = directObject && isPronounElement(directObject)
-    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
-  const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
+  //
+  // French cannot coordinate clitics. A group holding a pronoun puts each pronoun in its tonic form
+  // and resumes the whole group with its plural clitic, the group itself dislocated to the end of the
+  // clause between commas ("le chat nous voit, lui et moi", "le chien qui nous voit, lui et moi,
+  // court"), as the subject slot does ("moi et toi, nous"). The closing comma is tidied against the
+  // full stop in `punctuate`. A group of nouns keeps the post-verbal slot, and so does one with an
+  // "aucun" conjunct, which no clitic can resume.
+  const dislocated = !!directObject && directObject.conjuncts.length > 1 && !aucun
+    && directObject.conjuncts.some((np) => np.head.forms['person']);
+  const objectClitic = !directObject ? ''
+    : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
+    : dislocated ? groupObjectClitic(directObject) : '';
+  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np);
+  const objectGroup = directObject && (!objectClitic || dislocated) ? coordinate(directObject, tonicOrNoun) : '';
+  const directObjectText = dislocated ? '' : objectGroup;
+  const withDislocated = (clause: string) => (dislocated ? `${clause}, ${objectGroup},` : clause);
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tu / nous / vous — the -er
   // "tu" dropping its final -s); a single paradigm serves both polarities, with negation wrapped
@@ -94,14 +107,14 @@ export function predicateText(
     if (register === 'instruction') {
       const inf = verb.forms['base'] ?? conjugated;
       const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-      return [frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+      return withDislocated([frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
         .filter(Boolean)
-        .join(' ');
+        .join(' '));
     }
     const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
-    return [frCliticize(objectClitic, negateFinite(impForm)), modifierText, directObjectText, complementsText]
+    return withDislocated([frCliticize(objectClitic, negateFinite(impForm)), modifierText, directObjectText, complementsText]
       .filter(Boolean)
-      .join(' ');
+      .join(' '));
   }
   // Infinitive / citation phrase: the bare infinitive ("consommer la nourriture"), the same surface
   // French already gives the imperative `instruction` register above. Negation brackets the whole
@@ -109,11 +122,11 @@ export function predicateText(
   if (mood === 'infinitive') {
     const inf = verb.forms['base'] ?? conjugated;
     const infVerb = verbNegative === true ? `ne pas ${inf}` : inf;
-    return [frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+    return withDislocated([frCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
       .filter(Boolean)
-      .join(' ');
+      .join(' '));
   }
-  return [frCliticize(objectClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
+  return withDislocated([frCliticize(objectClitic, effectiveVerb), effectiveMod, directObjectText, complementsText]
     .filter(Boolean)
-    .join(' ');
+    .join(' '));
 }

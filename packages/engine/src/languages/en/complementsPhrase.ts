@@ -16,18 +16,15 @@ export function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      // What *kind* of complement this is (a pronoun? an adjective?) is settled by its first
-      // conjunct — a coordination never mixes a pronoun with a noun in practice — but the
-      // surface is rendered from every conjunct.
-      const f = firstConjunct(c.phrase).head.forms;
       // A pronoun complement ("because of him/her/them") takes the oblique form with no
       // article — only the causal adjunct accepts a pronoun in the UI today. The sentiment
       // picks the connector: positive "thanks to", negative "through the fault of", neutral
-      // "because of" ("thanks to her", "through the fault of them", "because of him").
-      if (type === 'cause' && f['person']) {
-        const prep = CAUSE_PREP[causeSentiment(c)];
-        const pronouns = coordinate(c.phrase, (np) => np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '');
-        return `${prep} ${pronouns}`;
+      // "because of" ("thanks to her", "through the fault of them", "because of him"). The choice is
+      // per conjunct, so a group mixes the two under the one connector ("because of the dog and him").
+      if (type === 'cause') {
+        const conjuncts = coordinate(c.phrase, (np) =>
+          np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np));
+        return `${CAUSE_PREP[causeSentiment(c)]} ${conjuncts}`;
       }
       // An instrument presented as an action rather than a thing: "by choosing a word"
       // (process) / "with the choosing of a word" (concept). Both take the gerund — English
@@ -63,7 +60,6 @@ export function complementsPhrase(
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
         : type === 'locative' ? PATH_PREP[pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER)]
-        : type === 'cause' ? CAUSE_PREP[causeSentiment(c)]
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         : PREP[type];
       // A hearth noun takes its fixed locative idiom in place of preposition + noun phrase ("at

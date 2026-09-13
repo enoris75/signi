@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (113 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (100 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A53 | [A53-coordinated-pronoun-object.md](A-must-fix/A53-coordinated-pronoun-object.md) |
-| A54 | [A54-cause-coordinated-pronouns.md](A-must-fix/A54-cause-coordinated-pronouns.md) |
-| A55 | [A55-german-hoch-comparison.md](A-must-fix/A55-german-hoch-comparison.md) |
 | A56 | [A56-german-mass-noun-strong-adjective.md](A-must-fix/A56-german-mass-noun-strong-adjective.md) |
 | A57 | [A57-german-weak-noun-genitive-modifier.md](A-must-fix/A57-german-weak-noun-genitive-modifier.md) |
 | A58 | [A58-possessor-determiner.md](A-must-fix/A58-possessor-determiner.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A50 | [A50-german-relative-clause-negation.md](fixed/A50-german-relative-clause-negation.md) | German | 2026-09-13 |
 | A51 | [A51-german-relative-clause-means-clause.md](fixed/A51-german-relative-clause-means-clause.md) | German | 2026-09-13 |
 | A52 | [A52-german-prospective-word-order.md](fixed/A52-german-prospective-word-order.md) | German | 2026-09-13 |
+| A53 | [A53-coordinated-pronoun-object.md](fixed/A53-coordinated-pronoun-object.md) | German, English, Italian, French, Spanish, Portuguese | 2026-09-13 |
+| A54 | [A54-cause-coordinated-pronouns.md](fixed/A54-cause-coordinated-pronouns.md) | German, English, Italian, French, Spanish, Portuguese | 2026-09-13 |
+| A55 | [A55-german-hoch-comparison.md](fixed/A55-german-hoch-comparison.md) | German | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

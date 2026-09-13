@@ -115,3 +115,41 @@ other conjunct; the noun path sends a pronoun through the article-plus-noun rout
 | | |
 |---|---|
 | **Test** | `complements/cause.test.ts` → *known bugs: German cause with coordinated pronouns* (1 `test.fails`)<br>`complements/cause.test.ts` → *known bugs: English cause with coordinated pronouns* (1 `test.fails`)<br>`complements/cause.test.ts` → *known bugs: Italian cause with coordinated pronouns* (1 `test.fails`)<br>`complements/cause.test.ts` → *known bugs: French cause with coordinated pronouns* (1 `test.fails`)<br>`complements/cause.test.ts` → *known bugs: Spanish cause with coordinated pronouns* (1 `test.fails`)<br>`complements/cause.test.ts` → *known bugs: Portuguese cause with coordinated pronouns* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13. Every engine now chooses pronoun or noun per conjunct instead of from the first
+one, so no conjunct is dropped or rendered in the wrong form. A lone pronoun and a group of nouns
+render exactly as before.
+
+- [`de/complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase.ts): a group
+  holding a pronoun takes `wegen` / `dank` once, then each conjunct in the dative, a pronoun in its
+  dative form and a noun through `nounPhrase` (`wegen dem Mann und dir`). In the negative a group of
+  pronouns shares one `Schuld` (`durch meine und deine Schuld`). A negative group mixing in a noun
+  gives each conjunct its own periphrasis (`durch die Schuld des Hundes und durch deine Schuld`).
+- [`en/complementsPhrase.ts`](../../../packages/engine/src/languages/en/complementsPhrase.ts): the cause
+  takes its connector once, then each conjunct's oblique pronoun or noun phrase (`because of the dog
+  and him`, `through the fault of him and the dog`).
+- [`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts): a pronoun
+  conjunct takes its own connector and possessive or tonic form, as a noun conjunct already did
+  (`a causa del cane e a causa tua`, `grazie a me e grazie a te`).
+- [`fr`](../../../packages/engine/src/languages/fr/complementsPhrase.ts),
+  [`es`](../../../packages/engine/src/languages/es/complementsPhrase.ts) and
+  [`pt`](../../../packages/engine/src/languages/pt/complementsPhrase.ts) `complementsPhrase.ts`: in a
+  group holding a pronoun, the neutral and positive connector is said once and each conjunct brings
+  its own `de` / `à` / `a` (`à cause du chien et de toi`, `gracias a mí y a ti`, `por causa do cão e
+  dele`). The negative connector holds a possessive, so every conjunct repeats it (`par ma faute et
+  par ta faute`, `por culpa del perro y por mi culpa`). That is one of the standard targets the bug
+  file left unpinned. Spanish and Portuguese turn the per-conjunct renderer into a named
+  `conjunctText` so a noun conjunct can drop the shared connector.
+
+A group of nouns still repeats the whole connector in the Romance languages and German
+(`à cause du chien et à cause de la souris`, `wegen dem Hund und wegen der Maus`).
+
+- **Tests:** [`packages/engine/test/complements/cause.test.ts`](../../../packages/engine/test/complements/cause.test.ts)
+  → the six *known bugs: … cause with coordinated pronouns* blocks. The pinning `test.fails` are now
+  passing `test`s. New cases:
+  - the other sentiments, either order, and a three-conjunct group;
+  - the negative groups mixing a noun and a pronoun;
+  - guards that a lone pronoun and a group of nouns are unchanged.
+- Unit tests: `complementsPhrase.test.ts` in de, en, it, fr, es and pt.

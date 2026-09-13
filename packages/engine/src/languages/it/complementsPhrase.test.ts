@@ -243,6 +243,13 @@ describe('complementsPhrase', () => {
       expect(one('cause', complement(np(IO), [sentiment('negative')]))).toBe('per colpa mia');
       expect(one('cause', complement(np(LEI), [sentiment('negative')]))).toBe('per colpa sua');
     });
+
+    // Every conjunct repeats its connector, as a group of nouns already does.
+    test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
+      expect(one('cause', complement(el(np(IO), np(TU)), [sentiment('positive')]))).toBe('grazie a me e grazie a te');
+      expect(one('cause', complement(el(np(CANE), np(TU))))).toBe('a causa del cane e a causa tua');
+      expect(one('cause', complement(el(np(LUI), np(CANE)), [sentiment('negative')]))).toBe('per colpa sua e per colpa del cane');
+    });
   });
 
   describe('the complement noun phrase', () => {

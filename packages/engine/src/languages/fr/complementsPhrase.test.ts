@@ -267,6 +267,14 @@ describe('complementsPhrase', () => {
       expect(blame(TU, { number: 'plural' })).toBe('par votre faute');
       expect(blame(EUX)).toBe('par leur faute');
     });
+
+    // The neutral and positive connector is said once, each conjunct bringing its own "de" / "à";
+    // the negative one holds a possessive, so every conjunct repeats it.
+    test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
+      expect(complementsPhrase(complements({ cause: complement(el(np(CHIEN), np(TU))) }))).toBe('à cause du chien et de toi');
+      expect(complementsPhrase(complements({ cause: complement(el(np(ELLE), np(HOMME)), [sentiment('positive')]) }))).toBe("grâce à elle et à l'homme");
+      expect(complementsPhrase(complements({ cause: complement(el(np(JE), np(CHIEN)), [sentiment('negative')]) }))).toBe('par ma faute et par la faute du chien');
+    });
   });
 
   describe('the complement noun phrase', () => {

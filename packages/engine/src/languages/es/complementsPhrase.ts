@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, firstConjunct, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -34,9 +34,6 @@ export function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      // The complement's *kind* (pronoun? adjective? animate goal?) comes off its first conjunct;
-      // its surface is rendered from every conjunct, each with its own article and agreement.
-      const f = firstConjunct(c.phrase).head.forms;
       // Subject complement: a predicate adjective agrees with the *subject* ("parece
       // cansada") and carries its own degree ("parece más cansada"); a predicate noun keeps
       // its own article, no preposition ("se vuelve una leyenda"). Coordinated conjuncts each
@@ -70,26 +67,13 @@ export function complementsPhrase(
           return [verb, object, adverb].filter(Boolean).join(' ');
         }
       }
-      // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
-      // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
-      if (type === 'cause' && f['person']) {
-        const sent = causeSentiment(c);
-        if (sent === 'positive') return `gracias a ${f['disjunctive'] ?? f['base'] ?? ''}`;
-        if (sent === 'negative') {
-          const plural = f['number'] === 'plural';
-          const poss =
-            f['person'] === '1' ? (plural ? 'nuestra' : 'mi') :
-            f['person'] === '2' ? (plural ? 'vuestra' : 'tu') :
-            'su';
-          return `por ${poss} culpa`;
-        }
-        return `a causa de ${f['disjunctive'] ?? f['base'] ?? ''}`;
-      }
       // The preposition contracts with the article ("a"+"el" → "al"), so it cannot be factored
       // out in front of a coordinated complement — each conjunct carries its own contracted head
       // ("al gato y al perro"). Repeating it also lets each conjunct pick its own preposition,
-      // which `direction` needs: an animate goal takes "hacia", a place "a".
-      return coordinateElement(c.phrase, (np) => {
+      // which `direction` needs: an animate goal takes "hacia", a place "a". A cause group holding a
+      // pronoun shares its connector instead (see below), so each conjunct then brings only its
+      // contracted "de"/"a" (`connectorShared`).
+      const conjunctText = (np: ResolvedNounPhrase, connectorShared = false): string => {
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — a bare
       // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
@@ -129,13 +113,38 @@ export function complementsPhrase(
         type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
         type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `gracias ${datPrep(af, plural)}` :
+          causeSent === 'positive' ? `${connectorShared ? '' : 'gracias '}${datPrep(af, plural)}` :
           causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
-          `a causa ${dePrep(af, plural)}`
+          `${connectorShared ? '' : 'a causa '}${dePrep(af, plural)}`
         ) :
         spatialHead(pathSpecifier(c), plural, af);
       return withRelative(`${head} ${noun}`, np);
-      });
+      };
+      // A pronoun cause: neutral "a causa de mí" and positive "gracias a mí" take the tonic
+      // form after bare "de"/"a"; negative uses the possessive with "culpa" ("por mi culpa").
+      // Each conjunct of a group takes its own form, never the first one's. The neutral and positive
+      // connector is said once, each conjunct bringing its own "de"/"a" ("a causa de mí y del
+      // perro"); the negative one holds a possessive, so every conjunct repeats it ("por mi culpa y
+      // por culpa del perro").
+      if (type === 'cause' && c.phrase.conjuncts.some((np) => np.head.forms['person'])) {
+        const sent = causeSentiment(c);
+        const pronoun = (pf: Record<string, string>): string => {
+          if (sent === 'negative') {
+            const plural = pf['number'] === 'plural';
+            const poss =
+              pf['person'] === '1' ? (plural ? 'nuestra' : 'mi') :
+              pf['person'] === '2' ? (plural ? 'vuestra' : 'tu') :
+              'su';
+            return `por ${poss} culpa`;
+          }
+          return `${sent === 'positive' ? 'a' : 'de'} ${pf['disjunctive'] ?? pf['base'] ?? ''}`;
+        };
+        const shared = sent !== 'negative';
+        const conjuncts = coordinateElement(c.phrase, (np) =>
+          np.head.forms['person'] ? pronoun(np.head.forms) : conjunctText(np, shared));
+        return shared ? `${sent === 'positive' ? 'gracias' : 'a causa'} ${conjuncts}` : conjuncts;
+      }
+      return coordinateElement(c.phrase, (np) => conjunctText(np));
     })
     .filter(Boolean)
     .join(' ');

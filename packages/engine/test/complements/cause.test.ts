@@ -146,10 +146,28 @@ describe('known bugs: German cause with coordinated pronouns', () => {
       complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } },
     })).de;
 
-  test.fails('German renders each cause conjunct in its own form', () => {
+  test('German renders each cause conjunct in its own form', () => {
     expect(runsBecauseOf('neutral', np('MAN'), np('SECOND_PERSON'))).toBe('der Kater läuft wegen dem Mann und dir.');
     expect(runsBecauseOf('neutral', np('SECOND_PERSON'), np('MAN'))).toBe('der Kater läuft wegen dir und dem Mann.');
     expect(runsBecauseOf('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('der Kater läuft durch meine und deine Schuld.');
+  });
+
+  test('German shares "wegen" / "dank" across a group holding a pronoun, in any order', () => {
+    expect(runsBecauseOf('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('der Kater läuft dank dem Mann und ihnen.');
+    expect(runsBecauseOf('positive', np('THIRD_PERSON', { gender: 'fem' }), np('HOUSE'))).toBe('der Kater läuft dank ihr und dem Haus.');
+    expect(runsBecauseOf('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('der Kater läuft wegen dem Hund, mir und der Maus.');
+  });
+
+  test('German gives each conjunct its own "Schuld" in a negative group mixing a noun and a pronoun', () => {
+    expect(runsBecauseOf('negative', np('DOG'), np('SECOND_PERSON'))).toBe('der Kater läuft durch die Schuld des Hundes und durch deine Schuld.');
+    expect(runsBecauseOf('negative', np('SECOND_PERSON'), np('DOG'))).toBe('der Kater läuft durch deine Schuld und durch die Schuld des Hundes.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runsBecauseOf('neutral', np('FIRST_PERSON'))).toBe('der Kater läuft wegen mir.');
+    expect(runsBecauseOf('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('der Kater läuft durch ihre Schuld.');
+    expect(runsBecauseOf('neutral', np('DOG'), np('MOUSE'))).toBe('der Kater läuft wegen dem Hund und wegen der Maus.');
+    expect(runsBecauseOf('negative', np('DOG'), np('MOUSE'))).toBe('der Kater läuft durch die Schuld des Hundes und der Maus.');
   });
 });
 
@@ -245,10 +263,26 @@ describe('known bugs: Portuguese neuter pronoun cause', () => {
 // conjunct: a pronoun first renders every conjunct as a bare disjunctive ("him and dog"), a noun
 // first renders a following pronoun as a noun ("the dog and the he").
 describe('known bugs: English cause with coordinated pronouns', () => {
-  test.fails('English renders each cause conjunct in its own form', () => {
+  test('English renders each cause conjunct in its own form', () => {
     expect(say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts: [np('DOG'), np('THIRD_PERSON')], conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value: 'neutral' }] } } }), 'en')).toBe('the cat runs because of the dog and him.');
     expect(say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts: [np('THIRD_PERSON'), np('DOG')], conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value: 'neutral' }] } } }), 'en')).toBe('the cat runs because of him and the dog.');
     expect(say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts: [np('THIRD_PERSON'), np('DOG')], conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value: 'negative' }] } } }), 'en')).toBe('the cat runs through the fault of him and the dog.');
+  });
+
+  const runs = (value: CauseSentiment, ...conjuncts: NounPhrase[]) =>
+    say(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } } }), 'en');
+
+  test('English shares the connector across pronouns and nouns under every sentiment', () => {
+    expect(runs('neutral', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('the cat runs because of me and you.');
+    expect(runs('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('the cat runs thanks to the man and them.');
+    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('the cat runs through the fault of the dog and you.');
+    expect(runs('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('the cat runs because of the dog, me and the mouse.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runs('neutral', np('FIRST_PERSON'))).toBe('the cat runs because of me.');
+    expect(runs('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('the cat runs through the fault of her.');
+    expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('the cat runs because of the dog and the mouse.');
   });
 });
 
@@ -261,11 +295,24 @@ describe('known bugs: Italian cause with coordinated pronouns', () => {
       complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } },
     }), 'it');
 
-  test.fails('Italian renders each cause conjunct in its own form', () => {
+  test('Italian renders each cause conjunct in its own form', () => {
     expect(runs('positive', np('FIRST_PERSON'), np('SECOND_PERSON'))).toMatch(/^il gatto corre grazie a me e (?:grazie )?a te\.$/);
     expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toMatch(/^il gatto corre per colpa mia e (?:per colpa )?tua\.$/);
     expect(runs('neutral', np('SECOND_PERSON'), np('DOG'))).toMatch(/^il gatto corre a causa tua e (?:a causa )?del cane\.$/);
     expect(runs('neutral', np('DOG'), np('SECOND_PERSON'))).toBe('il gatto corre a causa del cane e a causa tua.');
+  });
+
+  test('Italian repeats the connector per conjunct, a pronoun taking its possessive or tonic form', () => {
+    expect(runs('neutral', np('DOG'), np('THIRD_PERSON'))).toBe('il gatto corre a causa del cane e a causa sua.');
+    expect(runs('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('il gatto corre grazie all\'uomo e grazie a loro.');
+    expect(runs('negative', np('SECOND_PERSON'), np('DOG'))).toBe('il gatto corre per colpa tua e per colpa del cane.');
+    expect(runs('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('il gatto corre a causa del cane, a causa mia e a causa del topo.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runs('neutral', np('FIRST_PERSON'))).toBe('il gatto corre a causa mia.');
+    expect(runs('positive', np('THIRD_PERSON', { number: 'plural' }))).toBe('il gatto corre grazie a loro.');
+    expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('il gatto corre a causa del cane e a causa del topo.');
   });
 });
 
@@ -273,7 +320,7 @@ describe('known bugs: Italian cause with coordinated pronouns', () => {
 // first conjunct: a leading pronoun renders only itself and drops the rest ("à cause de moi"), a
 // leading noun sends a following pronoun down the noun path ("à cause du tu").
 describe('known bugs: French cause with coordinated pronouns', () => {
-  test.fails('French renders every cause conjunct in its own form', () => {
+  test('French renders every cause conjunct in its own form', () => {
     const runsBecauseOf = (value: 'neutral' | 'negative' | 'positive', ...ids: string[]) =>
       sayAll(clause(np('CAT'), 'RUN', {
         complements: { cause: { phrase: { conjuncts: ids.map((id) => np(id)), conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } },
@@ -283,13 +330,35 @@ describe('known bugs: French cause with coordinated pronouns', () => {
     expect(runsBecauseOf('neutral', 'FIRST_PERSON', 'SECOND_PERSON')).toBe('le chat court à cause de moi et de toi.');
     expect(runsBecauseOf('positive', 'FIRST_PERSON', 'SECOND_PERSON')).toBe('le chat court grâce à moi et à toi.');
   });
+
+  const runs = (value: CauseSentiment, ...conjuncts: NounPhrase[]) =>
+    sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } } })).fr;
+
+  test('French shares "à cause" / "grâce", each conjunct bringing its own "de" / "à"', () => {
+    expect(runs('neutral', np('DOG'), np('THIRD_PERSON'))).toBe('le chat court à cause du chien et de lui.');
+    expect(runs('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('le chat court grâce à l\'homme et à eux.');
+    expect(runs('positive', np('THIRD_PERSON', { gender: 'fem' }), np('HOUSE'))).toBe('le chat court grâce à elle et à la maison.');
+    expect(runs('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('le chat court à cause du chien, de moi et de la souris.');
+  });
+
+  // The negative connector holds a possessive, so every conjunct repeats it and none is dropped.
+  test('French repeats the negative connector per conjunct', () => {
+    expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('le chat court par ma faute et par ta faute.');
+    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('le chat court par la faute du chien et par ta faute.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runs('neutral', np('FIRST_PERSON'))).toBe('le chat court à cause de moi.');
+    expect(runs('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('le chat court par sa faute.');
+    expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('le chat court à cause du chien et à cause de la souris.');
+  });
 });
 
 // A54 (Spanish). `complementsPhrase` takes the pronoun-cause branch when the FIRST conjunct is a
 // pronoun. That branch renders only that conjunct ("gracias a mí") and drops the rest. When the
 // first conjunct is a noun, the generic branch renders a following pronoun like a noun ("del yo").
 describe('known bugs: Spanish cause with coordinated pronouns', () => {
-  test.fails('Spanish renders each cause conjunct in its own form', () => {
+  test('Spanish renders each cause conjunct in its own form', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', {
       complements: { cause: { phrase: { conjuncts: [np('FIRST_PERSON'), np('SECOND_PERSON')], conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value: 'positive' }] } },
     })).es).toBe('el gato corre gracias a mí y a ti.');
@@ -300,6 +369,28 @@ describe('known bugs: Spanish cause with coordinated pronouns', () => {
       complements: { cause: { phrase: { conjuncts: [np('DOG'), np('FIRST_PERSON')], conjunction: 'and' } } },
     })).es).toBe('el gato corre a causa del perro y de mí.');
   });
+
+  const runs = (value: CauseSentiment, ...conjuncts: NounPhrase[]) =>
+    sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } } })).es;
+
+  test('Spanish shares "a causa" / "gracias", each conjunct bringing its own "de" / "a"', () => {
+    expect(runs('neutral', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('el gato corre a causa de mí y de ti.');
+    expect(runs('positive', np('MAN'), np('THIRD_PERSON', { number: 'plural' }))).toBe('el gato corre gracias al hombre y a ellos.');
+    expect(runs('positive', np('THIRD_PERSON', { gender: 'fem' }), np('HOUSE'))).toBe('el gato corre gracias a ella y a la casa.');
+    expect(runs('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('el gato corre a causa del perro, de mí y del ratón.');
+  });
+
+  // The negative connector holds a possessive, so every conjunct repeats it and none is dropped.
+  test('Spanish repeats the negative connector per conjunct', () => {
+    expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('el gato corre por mi culpa y por tu culpa.');
+    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('el gato corre por culpa del perro y por tu culpa.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runs('positive', np('FIRST_PERSON'))).toBe('el gato corre gracias a mí.');
+    expect(runs('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('el gato corre por su culpa.');
+    expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('el gato corre a causa del perro y a causa del ratón.');
+  });
 });
 
 // A54 (Portuguese). The cause branch of `complementsPhrase` reads pronoun-vs-noun from the first
@@ -309,9 +400,31 @@ describe('known bugs: Portuguese cause with coordinated pronouns', () => {
   const criesBecauseOf = (...conjuncts: ReturnType<typeof np>[]) =>
     sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: { conjuncts, conjunction: 'and' } } } })).pt;
 
-  test.fails('Portuguese renders each cause conjunct in its own form', () => {
+  test('Portuguese renders each cause conjunct in its own form', () => {
     expect(criesBecauseOf(np('FIRST_PERSON'), np('DOG'))).toBe('o gato chora por causa de mim e do cão.');
     expect(criesBecauseOf(np('DOG'), np('SECOND_PERSON'))).toBe('o gato chora por causa do cão e de você.');
     expect(criesBecauseOf(np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('o gato chora por causa de mim e de você.');
+  });
+
+  const runs = (value: CauseSentiment, ...conjuncts: NounPhrase[]) =>
+    sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: { conjuncts, conjunction: 'and' }, specifiers: [{ kind: 'sentiment', value }] } } })).pt;
+
+  test('Portuguese shares "por causa" / "graças", each conjunct bringing its own "de" / "a"', () => {
+    expect(runs('neutral', np('DOG'), np('THIRD_PERSON'))).toBe('o gato corre por causa do cão e dele.');
+    expect(runs('positive', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('o gato corre graças a mim e a você.');
+    expect(runs('positive', np('THIRD_PERSON', { gender: 'fem' }), np('HOUSE'))).toBe('o gato corre graças a ela e à casa.');
+    expect(runs('neutral', np('DOG'), np('FIRST_PERSON'), np('MOUSE'))).toBe('o gato corre por causa do cão, de mim e do rato.');
+  });
+
+  // The negative connector holds a possessive, so every conjunct repeats it and none is dropped.
+  test('Portuguese repeats the negative connector per conjunct', () => {
+    expect(runs('negative', np('FIRST_PERSON'), np('SECOND_PERSON'))).toBe('o gato corre por minha culpa e por tua culpa.');
+    expect(runs('negative', np('DOG'), np('SECOND_PERSON'))).toBe('o gato corre por culpa do cão e por tua culpa.');
+  });
+
+  test('regression: a lone pronoun and a group of nouns are unchanged', () => {
+    expect(runs('neutral', np('FIRST_PERSON'))).toBe('o gato corre por causa de mim.');
+    expect(runs('negative', np('THIRD_PERSON', { gender: 'fem' }))).toBe('o gato corre por sua culpa.');
+    expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('o gato corre por causa do cão e por causa do rato.');
   });
 });

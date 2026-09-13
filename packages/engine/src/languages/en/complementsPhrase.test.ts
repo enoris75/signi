@@ -215,6 +215,11 @@ describe('complementsPhrase', () => {
     test('coordinated pronouns share one connector', () => {
       expect(complementsPhrase(complements({ cause: complement(el(np(HE), np(I))) }))).toBe('because of him and me');
     });
+
+    test('a group mixing nouns and pronouns renders each conjunct in its own form under the one connector', () => {
+      expect(complementsPhrase(complements({ cause: complement(el(np(DOG), np(HE))) }))).toBe('because of the dog and him');
+      expect(complementsPhrase(complements({ cause: complement(el(np(SHE), np(DOG)), [sentiment('negative')]) }))).toBe('through the fault of her and the dog');
+    });
   });
 
   describe('the complement noun phrase', () => {

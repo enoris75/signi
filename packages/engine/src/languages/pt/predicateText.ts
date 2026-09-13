@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -75,14 +75,17 @@ export function predicateText(
   const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${conjugated}` : conjugated;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
-  // object (or a coordination) keeps the post-verbal slot.
+  // object keeps the post-verbal slot.
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes the
+  // normative tonic object, "a" + its tonic form ("vê a ele e a mim", "vê o cão e a você").
+  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
-  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, npText) : '';
+  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';

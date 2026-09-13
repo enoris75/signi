@@ -24,6 +24,9 @@ describe('deDegStem', () => {
     expect(deDegStem(adj(GUT, { degree: 'more' }), 'gut')).toBe('besser');
     expect(deDegStem(adj(GUT, { degree: 'most' }), 'gut')).toBe('best');
     expect(deDegStem(adj(GROSS, { degree: 'most' }), 'groß')).toBe('größt');
+    // hoch: the attributive "hoh-" is only the positive; its comparison forms are seeded whole.
+    expect(deDegStem(adj(HOCH, { degree: 'more' }), 'hoch')).toBe('höher');
+    expect(deDegStem(adj(HOCH, { degree: 'most' }), 'hoch')).toBe('höchst');
   });
 
   test('the periphrastic degrees keep the positive stem', () => {

@@ -230,6 +230,14 @@ describe('complementsPhrase', () => {
       expect(blame(DU, { number: 'plural' })).toBe('durch eure Schuld');
       expect(blame(ER, { number: 'plural' })).toBe('durch ihre Schuld');
     });
+
+    test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
+      expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(DU))) }))).toBe('wegen dem Mann und dir');
+      expect(complementsPhrase(complements({ cause: complement(el(np(DU), np(KATZE)), [sentiment('positive')]) }))).toBe('dank dir und der Katze');
+      expect(complementsPhrase(complements({ cause: complement(el(np(ICH), np(DU)), [sentiment('negative')]) }))).toBe('durch meine und deine Schuld');
+      expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(ER, { gender: 'fem' })), [sentiment('negative')]) })))
+        .toBe('durch die Schuld des Mannes und durch ihre Schuld');
+    });
   });
 
   describe('the complement noun phrase', () => {

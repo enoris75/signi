@@ -1,5 +1,5 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -53,14 +53,17 @@ export function predicateText(
   const negText = (verbNegative || modifierIsNegative || objectIsNegative || hasNegativeComplement(complements)) && !subjectIsNegative ? 'non' : '';
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
-  // on the imperative ("guardami"); a noun object (or a coordination) keeps the post-verbal slot.
+  // on the imperative ("guardami"); a noun object keeps the post-verbal slot.
   const objectClitic = directObject && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+  // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes its tonic
+  // form with no article ("vede il cane e te", "vede lui e me").
+  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np);
   // The impersonal "si" is a preverbal clitic standing in for a generic subject ("si mangia" —
   // "one eats"). It sits after any "non" and before the verb (and before an object clitic, in the
   // rare "non se lo …" order); the subject word itself is suppressed upstream.
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
-  const directObjectText = directObject && !objectClitic ? coordinate(directObject, npText) : '';
+  const directObjectText = directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /

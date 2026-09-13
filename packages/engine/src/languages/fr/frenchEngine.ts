@@ -2,6 +2,7 @@ import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.j
 import { COORD_WORDS } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
+import { punctuate } from './punctuate.js';
 import { renderClause } from './renderClause.js';
 
 export const frenchEngine: LanguageEngine = {
@@ -17,8 +18,8 @@ export const frenchEngine: LanguageEngine = {
       sentence = `${ifw}${cond}, ${main}`;
     }
     // Coordination: "<first clause>, <conjunction> <second clause>".
-    if (!phrase.coordination) return sentence;
-    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    if (!phrase.coordination) return punctuate(sentence);
+    return punctuate(`${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`);
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

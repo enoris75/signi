@@ -100,6 +100,12 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(SEE), el(np(MOUSE), np(DOG)))).toBe('sees the mouse and the dog');
     });
 
+    test('a coordinated object picks the object pronoun or the noun phrase per conjunct', () => {
+      expect(said(CAT, vp(SEE), el(np(HE), np(I)))).toBe('sees him and me');
+      expect(said(CAT, vp(SEE), el(np(DOG), np(SHE)))).toBe('sees the dog and her');
+      expect(said(CAT, vp(SEE, { negative: true }), el(np(MOUSE, { definiteness: 'no' }), np(THEY)))).toBe('does not see any mouse and them');
+    });
+
     test('a lone no object keeps no', () => {
       expect(said(CAT, vp(EAT), noMouse)).toBe('eats no mouse');
     });

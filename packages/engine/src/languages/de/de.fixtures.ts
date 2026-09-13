@@ -46,7 +46,7 @@ export const MAN: Forms = { base: 'man', person: '3', number: 'singular', generi
 export const GROSS: Forms = { role: 'adjective', base: 'groß', umlaut: 'true', superlative: 'größt' };
 export const KLEIN: Forms = { role: 'adjective', base: 'klein' };
 export const GUT: Forms = { role: 'adjective', base: 'gut', comparative: 'besser', superlative: 'best' };
-export const HOCH: Forms = { role: 'adjective', base: 'hoch', attributive: 'hoh' };
+export const HOCH: Forms = { role: 'adjective', base: 'hoch', attributive: 'hoh', comparative: 'höher', superlative: 'höchst' };
 export const MUEDE: Forms = { role: 'adjective', base: 'müde' };
 export const ALT: Forms = { role: 'adjective', base: 'alt', umlaut: 'true' };
 

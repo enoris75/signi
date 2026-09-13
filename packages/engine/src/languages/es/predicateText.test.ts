@@ -163,6 +163,16 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(VER, { aspect: 'progressive' }), el(np(ELLA)))).toBe('la está viendo');
     });
 
+    test('a coordinated pronoun object is "a" + each tonic pronoun, doubled by the group\'s plural clitic', () => {
+      expect(predicateText(GATO, vp(VER), el(np(YO), np(TU)))).toBe('nos ve a mí y a ti');
+      expect(predicateText(GATO, vp(VER), el(np(TU), np(EL)))).toBe('os ve a ti y a él');
+      expect(predicateText(GATO, vp(VER, { negative: true }), el(np(EL), np(YO)))).toBe('no nos ve a él y a mí');
+    });
+
+    test('a coordinated object mixing a noun and a pronoun is left undoubled', () => {
+      expect(predicateText(GATO, vp(VER), el(np(LIBRO), np(EL)))).toBe('ve el libro y a él');
+    });
+
     test('a generic subject is the impersonal se, ahead of any object clitic', () => {
       expect(predicateText(SE, vp(COMER))).toBe('se come');
       expect(predicateText(SE, vp(COMER, { negative: true }))).toBe('no se come');

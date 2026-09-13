@@ -1,4 +1,4 @@
-import { firstConjunct, isPronounElement, objectPronounForm, type ResolvedNounElement } from '../../types.js';
+import { objectPronounForm, type ResolvedNounElement } from '../../types.js';
 import { coordinate } from './coordinate.js';
 import { nounPhrase } from './nounPhrase.js';
 
@@ -9,7 +9,8 @@ import { nounPhrase } from './nounPhrase.js';
  */
 export function elementPhrase(el: ResolvedNounElement, _case: 'nom' | 'acc' | 'dat'): string {
   // A pronoun direct object takes its accusative form with no article ("sieht ihn"), not the noun
-  // path that would give "den ich". elementPhrase is only ever called for the accusative object.
-  if (_case === 'acc' && isPronounElement(el)) return objectPronounForm(firstConjunct(el).head.forms);
-  return coordinate(el, (np) => nounPhrase(np, _case));
+  // path that would give "den ich". The choice is per conjunct, so a group mixes the two ("den Hund
+  // und dich"). Only the accusative object reaches a pronoun here.
+  return coordinate(el, (np) =>
+    _case === 'acc' && np.head.forms['person'] ? objectPronounForm(np.head.forms) : nounPhrase(np, _case));
 }

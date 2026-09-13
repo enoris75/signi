@@ -24,4 +24,10 @@ describe('elementPhrase', () => {
     expect(elementPhrase(el(np(ICH)), 'acc')).toBe('mich');
     expect(elementPhrase(el(np(DU, { number: 'plural' })), 'acc')).toBe('euch');
   });
+
+  test('a coordinated object picks the pronoun or the noun form per conjunct', () => {
+    expect(elementPhrase(el(np(ER), np(ICH)), 'acc')).toBe('ihn und mich');
+    expect(elementPhrase(el(np(KATER), np(DU)), 'acc')).toBe('den Kater und dich');
+    expect(elementPhrase(group('or', np(ICH), np(KATZE)), 'acc')).toBe('mich oder die Katze');
+  });
 });
