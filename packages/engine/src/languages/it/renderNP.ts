@@ -8,7 +8,7 @@ import { itMods } from './itMods.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { prenominalChain } from './prenominalChain.js';
-import { prepArt } from './prepArt.js';
+import { prepDet } from './prepDet.js';
 import { relativeText } from './relativeText.js';
 import { splitAdjectives } from './splitAdjectives.js';
 import { surface } from './surface.js';
@@ -51,11 +51,12 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // "di" (bicchiere di vino). This is deliberately distinct from the possessor's "del".
   const mods = itMods(np);
   const withPost = mods ? `${postAdj} ${mods}` : postAdj;
-  // A genitive possessor is postnominal, headed by "di"+article fused ("il libro del gatto").
-  // Rendering it through renderNP recurses for its own adjectives / nested possessor. (A
-  // pronominal possessor was already rendered prenominally above, so it is excluded here.)
+  // A genitive possessor is postnominal, headed by "di" + its own determiner, fused only with the
+  // definite article ("il libro del gatto", "di un uomo", "di alcuni uomini"). Rendering it through
+  // renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor was
+  // already rendered prenominally above, so it is excluded here.)
   const base = poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => prepArt('di', poss.head.forms, plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => prepDet('di', poss.head.forms, plural, lead))}`
     : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;

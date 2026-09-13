@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, ALT, BOOT, GROSS, np, nounModifier, SEGEL, WORT } from './de.fixtures.js';
+import { adj, ALT, BOOT, GROSS, JUNGE, np, nounModifier, SEGEL, WORT } from './de.fixtures.js';
 import { modifierGenitives } from './modifierGenitives.js';
 
 const SCHOEPFER = { base: 'Schöpfer', plural: 'Schöpfer', gender: 'masc', count: 'singular' };
@@ -20,6 +20,11 @@ describe('modifierGenitives', () => {
   test('a masculine/neuter singular pairs -en on the adjective with -(e)s on the noun', () => {
     const phrase = np(SEGEL, {}, { nounModifiers: [nounModifier(BOOT, [adj(GROSS), adj(ALT)])] });
     expect(modifierGenitives(phrase)).toBe(' großen alten Bootes');
+  });
+
+  test('a weak noun takes its genitive -(e)n in place of the -(e)s', () => {
+    expect(modifierGenitives(np(SCHOEPFER, {}, { nounModifiers: [nounModifier(JUNGE, [adj(ALT)])] }))).toBe(' alten Jungen');
+    expect(modifierGenitives(np(SCHOEPFER, {}, { nounModifiers: [nounModifier({ ...JUNGE, number: 'plural' }, [adj(ALT)])] }))).toBe(' alter Jungen');
   });
 
   test('renders one space-led phrase per adjective-bearing modifier, in order', () => {

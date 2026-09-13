@@ -1113,10 +1113,27 @@ describe('known bugs: German comparison of hoch', () => {
 // (A20). That genitive adds the masculine/neuter -(e)s to the noun without checking for a weak
 // noun, which takes -(e)n in every oblique case instead: "des Jungen", never "*des Junges".
 describe('known bugs: German weak noun as a genitive modifier', () => {
-  test.fails('German gives a weak noun modifier its genitive -n', () => {
+  test('German gives a weak noun modifier its genitive -n', () => {
     expect(sayAll(clause(np('CREATOR', {
       nounModifiers: [{ concept: 'BOY', relation: 'feature', adjectives: ['SMALL'] }],
     }), 'BURN')).de).toBe('der Schöpfer kleinen Jungen brennt.');
+  });
+
+  test('German gives every weak noun its -n, in any case of the head, and leaves the plural alone', () => {
+    const creatorOf = (concept: string, extra: { number?: 'plural' } = {}) =>
+      sayAll(clause(np('CREATOR', { nounModifiers: [{ concept, relation: 'feature', adjectives: ['SMALL'], ...extra }] }), 'BURN')).de;
+    expect(creatorOf('OX')).toBe('der Schöpfer kleinen Ochsen brennt.');
+    expect(creatorOf('BOY', { number: 'plural' })).toBe('der Schöpfer kleiner Jungen brennt.');
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { direction: { phrase: np('CREATOR', { nounModifiers: [{ concept: 'BOY', relation: 'feature', adjectives: ['SMALL'] }] }) } },
+    })).de).toBe('der Kater läuft zum Schöpfer kleinen Jungen.');
+  });
+
+  test('regression: a strong masculine or neuter noun keeps its genitive -(e)s', () => {
+    const creatorOf = (concept: string) =>
+      sayAll(clause(np('CREATOR', { nounModifiers: [{ concept, relation: 'feature', adjectives: ['SMALL'] }] }), 'BURN')).de;
+    expect(creatorOf('DOG')).toBe('der Schöpfer kleinen Hundes brennt.');
+    expect(creatorOf('HOUSE')).toBe('der Schöpfer kleinen Hauses brennt.');
   });
 });
 

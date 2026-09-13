@@ -14,6 +14,15 @@ describe('possessorText', () => {
     expect(possessorText(np(BUCH, {}, { possessor: np(KATZE, { number: 'plural' }) }))).toBe(' von den Katzen');
   });
 
+  test('the possessor keeps its own determiner, declined for the dative; only the definite fuses', () => {
+    expect(possessorText(np(BUCH, {}, { possessor: np(KATER, { definiteness: 'indefinite' }) }))).toBe(' von einem Kater');
+    expect(possessorText(np(BUCH, {}, { possessor: np(KATZE, { definiteness: 'this' }) }))).toBe(' von dieser Katze');
+    expect(possessorText(np(BUCH, {}, { possessor: np(MANN, { definiteness: 'some', number: 'plural' }) }))).toBe(' von einigen Männern');
+    // With no article the adjective carries the dative itself.
+    expect(possessorText(np(BUCH, {}, { possessor: np(KATER, { definiteness: 'bare', number: 'plural' }, { adjectives: [adj(KLEIN)] }) })))
+      .toBe(' von kleinen Katern');
+  });
+
   test('the possessor noun takes the dative plural -n, or the weak -n', () => {
     expect(possessorText(np(HAUS, {}, { possessor: np(MANN, { number: 'plural' }) }))).toBe(' von den Männern');
     expect(possessorText(np(BUCH, {}, { possessor: np(JUNGE) }))).toBe(' vom Jungen');

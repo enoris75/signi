@@ -69,6 +69,13 @@ describe('renderNP', () => {
     expect(withArticle(np(LIVRE, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }))).toBe('leurs livres');
   });
 
+  test('a noun possessor trails as de + its own determiner, contracted only with the definite article', () => {
+    expect(withArticle(np(LIVRE, {}, { possessor: np(CHAT) }))).toBe('le livre du chat');
+    expect(withArticle(np(LIVRE, {}, { possessor: np(HOMME, { definiteness: 'indefinite' }) }))).toBe("le livre d'un homme");
+    expect(withArticle(np(LIVRE, {}, { possessor: np(CHAT, { definiteness: 'this' }) }))).toBe('le livre de ce chat');
+    expect(withArticle(np(LIVRE, {}, { possessor: np(CHAT, { definiteness: 'indefinite', number: 'plural' }) }))).toBe('le livre de chats');
+  });
+
   test('mon, ton and son stand in before a vowel-initial feminine, judged on the word that follows', () => {
     const my = { kind: 'pronominal', person: '1', number: 'singular' } as const;
     expect(withArticle(np(AILE, {}, { possessor: my }))).toBe('mon aile');

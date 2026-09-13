@@ -210,9 +210,28 @@ describe('known bugs: German adjective on an article-less mass noun', () => {
     complements: { instrumental: { phrase: np('WATER', { definiteness, adjectives: ['COLD'] }) } },
   })).de;
 
-  test.fails('German declines the adjective strong after etwas and with no article', () => {
+  test('German declines the adjective strong after etwas and with no article', () => {
     expect(eatsWith('some')).toBe('der Kater isst mit etwas kaltem Wasser.');
     expect(eatsWith('indefinite')).toBe('der Kater isst mit kaltem Wasser.');
+  });
+
+  test('German declines strong after viel / wenig, and for a feminine mass noun in the dative and genitive', () => {
+    expect(eatsWith('many')).toBe('der Kater isst mit viel kaltem Wasser.');
+    expect(eatsWith('few')).toBe('der Kater isst mit wenig kaltem Wasser.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { instrumental: { phrase: np('LIQUID', { definiteness: 'some', adjectives: ['COLD'] }) } } })).de)
+      .toBe('der Kater isst mit etwas kalter Flüssigkeit.');
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      complements: { instrumental: { phrase: np('LIQUID', { definiteness: 'indefinite', adjectives: ['COLD'] }), specifiers: [{ kind: 'abstraction', value: 'concept' }], action: { verb: 'DRINK' } } },
+    })).de).toBe('der Kater isst mit dem Trinken kalter Flüssigkeit.');
+  });
+
+  test('regression: a determiner that carries the case keeps the weak ending, and the nominative and accusative are unchanged', () => {
+    expect(eatsWith('definite')).toBe('der Kater isst mit dem kalten Wasser.');
+    expect(eatsWith('no')).toBe('der Kater isst mit keinem kalten Wasser.');
+    expect(eatsWith('this')).toBe('der Kater isst mit diesem kalten Wasser.');
+    expect(eatsWith('all')).toBe('der Kater isst mit all dem kalten Wasser.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('WATER', { definiteness: 'some', adjectives: ['COLD'] }) })).de).toBe('der Kater sieht etwas kaltes Wasser.');
+    expect(sayAll(clause(np('WATER', { definiteness: 'indefinite', adjectives: ['COLD'] }), 'BURN')).de).toBe('kaltes Wasser brennt.');
   });
 });
 

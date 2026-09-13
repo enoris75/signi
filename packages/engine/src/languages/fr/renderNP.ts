@@ -1,6 +1,6 @@
 import { isPronominalPossessor, joinConjuncts, type ResolvedNounPhrase } from '../../types.js';
 import { possessiveFr } from '../../possessive.js';
-import { dePrep } from './dePrep.js';
+import { deDet } from './deDet.js';
 import { elidesBefore } from './elidesBefore.js';
 import { frMods } from './frMods.js';
 import { joinArt } from './joinArt.js';
@@ -41,11 +41,12 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // from the possessor's contracted "du/de la".
   const mods = frMods(np);
   const withPost = mods ? `${postAdj} ${mods}` : postAdj;
-  // A genitive possessor is postnominal, headed by "de"+article contracted ("le livre du chat").
-  // Rendering it through renderNP recurses for its own adjectives / nested possessor. (A
-  // pronominal possessor was already rendered prenominally above.)
+  // A genitive possessor is postnominal, headed by "de" + its own determiner, contracted only with
+  // the definite article ("le livre du chat", "d'un chat", "de quelques chats"). Rendering it
+  // through renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor
+  // was already rendered prenominally above.)
   const base = poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => dePrep(poss.head.forms, plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(poss.head.forms, plural, lead))}`
     : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;

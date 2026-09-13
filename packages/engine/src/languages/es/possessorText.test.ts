@@ -19,6 +19,12 @@ describe('possessorText', () => {
     expect(bookOf(np(AGUA))).toBe(' del agua');
   });
 
+  test('the possessor keeps its own determiner, fusing del only for the masculine singular definite', () => {
+    expect(bookOf(np(HOMBRE, { definiteness: 'indefinite' }))).toBe(' de un hombre');
+    expect(bookOf(np(MUJER, { definiteness: 'this' }))).toBe(' de esta mujer');
+    expect(bookOf(np(GATO, { definiteness: 'some', number: 'plural' }))).toBe(' de algunos gatos');
+  });
+
   test('a proper possessor is bare unless inherently articled', () => {
     expect(bookOf(np(EUROPA))).toBe(' de Europa');
     expect(bookOf(np(ANTARTIDA))).toBe(' de la Antártida');

@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import type { Case } from './de.types.js';
+import { ARTICLELESS_MASS_DETERMINERS } from './de.consts.js';
 import { declineAdj } from './declineAdj.js';
 import { deDegPrefix } from './deDegPrefix.js';
 import { deDegStem } from './deDegStem.js';
@@ -16,7 +17,11 @@ export function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'd
   const f = np.head.forms;
   const gender = f['gender'] ?? 'neut';
   const plural = (f['number'] ?? f['count']) === 'plural';
-  const decline = (stem: string): string => declineAdj(stem, _case, gender, plural, definiteness);
+  // A mass noun takes no article where a count noun would: no "ein Wasser", and the invariant
+  // "etwas / viel / wenig" (see `determiner`). With nothing carrying the case the adjective declines
+  // strong, as after no determiner at all ("mit etwas kaltem Wasser", "mit kaltem Wasser").
+  const articleless = f['uncountable'] === '1' && ARTICLELESS_MASS_DETERMINERS.has(definiteness);
+  const decline = (stem: string): string => declineAdj(stem, _case, gender, plural, articleless ? 'bare' : definiteness);
   const own = np.adjectives
     .map((a) => {
       const base = a.forms['base'];

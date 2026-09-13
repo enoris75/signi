@@ -31,3 +31,27 @@ in `nounPhrase` and `complementsPhrase`.
 | | |
 |---|---|
 | **Test** | `nounPhrase.test.ts` → *known bugs: German adjective on an article-less mass noun* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13. The mass-noun check lives in `adjPhrase` rather than at each call site, since
+that function already reads the head's forms. It covers `nounPhrase`, `complementsPhrase` and the
+possessor alike.
+
+- [`adjPhrase.ts`](../../../packages/engine/src/languages/de/adjPhrase.ts): an `uncountable` head whose
+  determiner leaves no article declines its adjectives strong, as after `bare`.
+- [`de.consts.ts`](../../../packages/engine/src/languages/de/de.consts.ts): the new
+  `ARTICLELESS_MASS_DETERMINERS` lists those determiners (`bare`, `indefinite`, `some`, `many`,
+  `few`), matching the mass branch of `determiner`.
+
+Both rows now render as wanted. The fix also covers `viel` / `wenig` (`mit viel kaltem Wasser`) and a
+feminine mass noun in the dative and genitive (`mit etwas kalter Flüssigkeit`, `mit dem Trinken
+kalter Flüssigkeit`). A determiner that carries the case keeps the weak ending (`mit keinem / diesem /
+all dem kalten Wasser`). The nominative and accusative are unchanged (`etwas kaltes Wasser`).
+
+- **Tests:** [`packages/engine/test/nounPhrase.test.ts`](../../../packages/engine/test/nounPhrase.test.ts)
+  → *known bugs: German adjective on an article-less mass noun*. The pinning `test.fails` is now a
+  passing `test`. New cases:
+  - `viel`, `wenig` and the feminine dative and genitive;
+  - a guard for the determiners that carry the case, and for the nominative and accusative.
+- Unit test: `adjPhrase.test.ts`.

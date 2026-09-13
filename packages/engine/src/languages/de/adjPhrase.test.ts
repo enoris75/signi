@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import { adjPhrase } from './adjPhrase.js';
-import { adj, ALT, type Forms, GESCHWINDIGKEIT, GROSS, GUT, HAUS, HOCH, KATER, KATZE, KLEIN, MUEDE, np } from './de.fixtures.js';
+import { adj, ALT, type Forms, GESCHWINDIGKEIT, GROSS, GUT, HAUS, HOCH, KATER, KATZE, KLEIN, MUEDE, np, SORGFALT, WASSER } from './de.fixtures.js';
 
 const SCHOEN: Forms = { role: 'adjective', base: 'schön' };
 /** YOUNG_WOMAN: the head carries "jung" as an inherent adjective ("die junge Frau"). */
@@ -16,6 +16,17 @@ describe('adjPhrase', () => {
     expect(adjPhrase(phrase, 'nom')).toBe('kleine');
     expect(adjPhrase(phrase, 'acc')).toBe('kleinen');
     expect(adjPhrase(phrase, 'nom', 'indefinite')).toBe('kleiner');
+  });
+
+  // A mass noun has no "ein Wasser" and takes the invariant "etwas / viel / wenig", so nothing but
+  // the adjective carries the case.
+  test('declines strong on a mass noun whose determiner leaves no article', () => {
+    expect(adjPhrase(np(WASSER, {}, { adjectives: [adj(GUT)] }), 'dat', 'some')).toBe('gutem');
+    expect(adjPhrase(np(WASSER, {}, { adjectives: [adj(GUT)] }), 'dat', 'indefinite')).toBe('gutem');
+    expect(adjPhrase(np(SORGFALT, {}, { adjectives: [adj(GUT)] }), 'gen', 'indefinite')).toBe('guter');
+    // A determiner with an ending of its own still carries the case: "mit keinem guten Wasser".
+    expect(adjPhrase(np(WASSER, {}, { adjectives: [adj(GUT)] }), 'dat', 'no')).toBe('guten');
+    expect(adjPhrase(np(HAUS, {}, { adjectives: [adj(GUT)] }), 'dat', 'indefinite')).toBe('guten');
   });
 
   test('agrees with the head’s gender and number', () => {

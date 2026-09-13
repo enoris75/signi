@@ -97,6 +97,12 @@ describe('renderNP', () => {
       expect(withDeterminer(np(CASA, {}, { possessor: np(RAGAZZO, { number: 'plural' }, { adjectives: [BIG] }) }))).toBe('la casa dei grandi ragazzi');
     });
 
+    test('a noun possessor keeps its own determiner, fusing di only with the definite article', () => {
+      expect(withDeterminer(np(LIBRO, {}, { possessor: np(UOMO, { definiteness: 'indefinite' }) }))).toBe('il libro di un uomo');
+      expect(withDeterminer(np(LIBRO, {}, { possessor: np(UOMO, { definiteness: 'this' }) }))).toBe("il libro di quest'uomo");
+      expect(withDeterminer(np(LIBRO, {}, { possessor: np(RAGAZZO, { definiteness: 'some', number: 'plural' }) }))).toBe('il libro di alcuni ragazzi');
+    });
+
     test('a noun possessor can carry its own possessor', () => {
       expect(withDeterminer(np(LIBRO, {}, { possessor: np(PADRE, {}, { possessor: np(GATTO) }) }))).toBe('il libro del padre del gatto');
     });

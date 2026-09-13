@@ -36,6 +36,10 @@ export const STRONG_DAT: Record<Slot, string> = { masc: 'em', fem: 'er', neut: '
 // masculine/neuter -en leans on the noun's own -(e)s, which already marks the case there.
 export const STRONG_GEN: Record<Slot, string> = { masc: 'en', fem: 'er', neut: 'en', plural: 'er' };
 
+// The determiners that leave a mass noun without an article: no "ein Wasser", and the invariant
+// "etwas / viel / wenig", which carry no case. An adjective on such a noun declines strong.
+export const ARTICLELESS_MASS_DETERMINERS: ReadonlySet<string> = new Set(['bare', 'indefinite', 'some', 'many', 'few']);
+
 // The demonstratives dies- (this) and jen- (that), der-words that take the same case/gender
 // endings as the definite article: dieser/diesen/diesem, diese/dieser, dieses, diese/diesen.
 export const DEM_ENDINGS: Record<Case, Record<Slot, string>> = {

@@ -1,13 +1,14 @@
 import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
 import { ptAdj } from './ptAdj.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
 
 /**
- * A postnominal possessor, headed by "de"+article ("o livro do gato"). Recurses through
- * withRelative so the possessor carries its own adjectives / nested possessor / relative
- * clause. Empty when the phrase has no possessor.
+ * A postnominal possessor, headed by "de" + its own determiner ("o livro do gato", "de um gato",
+ * "deste gato"). Recurses through withRelative so the possessor carries its own adjectives /
+ * nested possessor / relative clause. Empty when the phrase has no possessor.
  */
 export function possessorText(np: ResolvedNounPhrase): string {
   const poss = np.possessor;
@@ -17,5 +18,5 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const f = poss.head.forms;
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  return ` ${withRelative(`${dePrep(f, plural)} ${withAdj(word, ptAdj(poss))}`, poss)}`;
+  return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${withAdj(word, ptAdj(poss))}`, poss)}`;
 }

@@ -1,15 +1,15 @@
 import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
 import { adjPhrase } from './adjPhrase.js';
 import { datPluralN } from './datPluralN.js';
-import { defArticle } from './defArticle.js';
+import { determiner } from './determiner.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
 
 /**
- * A possessor rendered colloquially as "von" + dative ("das Buch vom Kind"): von+dem
- * fuses to "vom", otherwise "von der/den". The possessor's adjectives decline dative;
+ * A possessor rendered colloquially as "von" + dative ("das Buch vom Kind"), with the possessor's own
+ * determiner: von+dem fuses to "vom", otherwise "von der/den/einem/einigen…". The possessor's adjectives decline dative;
  * recursion carries its own nested possessor and relative clause. Empty when absent.
  */
 export function possessorText(np: ResolvedNounPhrase): string {
@@ -22,9 +22,12 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const compound = germanCompound(poss, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
   // "von" governs the dative, so a weak masculine possessor declines to -(e)n ("vom Jungen").
   const word = f['weak'] === '1' ? weakN(compound, 'dat', plural) : datPluralN(compound, 'dat', plural);
-  const art = defArticle(f, 'dat', plural); // dem / der / den
-  const von = art === 'dem' ? 'vom' : `von ${art}`;
-  const declined = adjPhrase(poss, 'dat');
+  // The possessor keeps its own determiner ("von einem Kater", "von einigen Katern", a bare "von
+  // Europa"); only the definite "dem" fuses to "vom".
+  const definiteness = f['definiteness'] ?? 'definite';
+  const art = determiner(f, 'dat', plural);
+  const von = art === 'dem' && definiteness === 'definite' ? 'vom' : art ? `von ${art}` : 'von';
+  const declined = adjPhrase(poss, 'dat', definiteness);
   const adj = declined ? `${declined} ` : '';
   return ` ${von} ${adj}${word}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`;
 }

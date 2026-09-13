@@ -21,6 +21,12 @@ describe('possessorText', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(AFRICA) }))).toBe(' da África');
   });
 
+  test('the possessor keeps its own determiner, "de" fusing with the article or a demonstrative', () => {
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'indefinite' }) }))).toBe(' de um gato');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(RAPOSA, { definiteness: 'this' }) }))).toBe(' desta raposa');
+    expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, { definiteness: 'some', number: 'plural' }) }))).toBe(' de alguns gatos');
+  });
+
   test('the possessor carries its own adjectives, possessor and relative clause', () => {
     expect(possessorText(np(LIVRO, {}, { possessor: np(GATO, {}, { adjectives: [adj(VELHO)] }) }))).toBe(' do gato velho');
     expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: np(MENINO) }) }))).toBe(' do cão do menino');
