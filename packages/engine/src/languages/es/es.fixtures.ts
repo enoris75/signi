@@ -62,7 +62,7 @@ export const YO: Forms = { base: 'yo', person: '1', number: 'singular', plural: 
 export const TU: Forms = { base: 'tú', person: '2', number: 'singular', plural: 'vosotros', plural_fem: 'vosotras', disjunctive: 'ti', disjunctive_plural: 'vosotros', object: 'te', object_plural: 'os' };
 export const EL: Forms = {
   base: 'él', person: '3', number: 'singular', gender: 'masc', singular_fem: 'ella', singular_neut: 'ello', plural: 'ellos', plural_fem: 'ellas',
-  disjunctive: 'él', disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'los',
+  disjunctive: 'él', disjunctive_fem: 'ella', disjunctive_neut: 'ello', disjunctive_plural: 'ellos', object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'los', object_plural_fem: 'las',
 };
 /** The generic "one", realised as the impersonal clitic. */
 export const SE: Forms = { base: 'se', person: '3', number: 'singular', generic: '1' };

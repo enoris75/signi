@@ -70,7 +70,7 @@ export const VOCE: Forms = { base: 'você', person: '2', number: 'singular', gen
 export const ELE: Forms = {
   base: 'ele', person: '3', number: 'singular', gender: 'masc', singular_fem: 'ela', singular_neut: 'isso', plural: 'eles', plural_fem: 'elas',
   disjunctive: 'ele', disjunctive_fem: 'ela', disjunctive_neut: 'isso', disjunctive_plural: 'eles',
-  object: 'o', object_fem: 'a', object_neut: 'o', object_plural: 'os',
+  object: 'o', object_fem: 'a', object_neut: 'o', object_plural: 'os', object_plural_fem: 'as',
 };
 /** THIRD_PERSON resolved feminine singular. */
 export const ELA: Forms = { ...ELE, base: 'ela', gender: 'fem', disjunctive: 'ela' };

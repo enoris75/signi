@@ -350,7 +350,7 @@ describe('known bugs: Portuguese clitic enclisis', () => {
 // `object_plural: 'li'`, so a feminine plural object renders "li" where Italian says "le" ("il gatto
 // le vede"). A36 added the feminine plural for the subject pronoun only.
 describe('known bugs: Italian feminine plural object clitic', () => {
-  test.fails('Italian uses "le" for a feminine plural object pronoun', () => {
+  test('Italian uses "le" for a feminine plural object pronoun', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'it')).toBe('il gatto le vede.');
     expect(say({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), imperative: true }, 'it')).toBe('vedile.');
   });
@@ -359,7 +359,7 @@ describe('known bugs: Italian feminine plural object clitic', () => {
 // A72 (Spanish). `objectPronounForm` ignores gender in the plural, so a feminine plural object
 // pronoun renders "los" where Spanish says "las".
 describe('known bugs: Spanish feminine plural object clitic', () => {
-  test.fails('Spanish uses "las" for a feminine plural object pronoun', () => {
+  test('Spanish uses "las" for a feminine plural object pronoun', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'es')).toBe('el gato las ve.');
   });
 });
@@ -367,8 +367,38 @@ describe('known bugs: Spanish feminine plural object clitic', () => {
 // A72 (Portuguese). `objectPronounForm` ignores gender in the plural, so a feminine plural object
 // pronoun renders "os" where Portuguese says "as".
 describe('known bugs: Portuguese feminine plural object clitic', () => {
-  test.fails('Portuguese uses "as" for a feminine plural object pronoun', () => {
+  test('Portuguese uses "as" for a feminine plural object pronoun', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem', number: 'plural' }) }), 'pt')).toBe('o gato as vê.');
+  });
+});
+
+describe('feminine plural object clitic: through the other clitic paths', () => {
+  const them = np('THIRD_PERSON', { gender: 'fem', number: 'plural' });
+
+  test('the feminine plural clitic agrees the participle and attaches after a command or an infinitive', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: them, verbPhrase: { aspect: 'resultative' } }))).toMatchObject({
+      it: 'il gatto le ha viste.',
+      es: 'el gato las ha visto.',
+      pt: 'o gato as viu.',
+    });
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: them }), imperative: true })).toMatchObject({ es: 'velas.', pt: 'veja-as.' });
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: them }), infinitive: true })).toMatchObject({
+      it: 'mangiarle.',
+      es: 'comerlas.',
+      pt: 'comê-las.',
+    });
+    // A Spanish group of feminine pronouns is doubled by the feminine plural clitic.
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: { conjuncts: [np('THIRD_PERSON', { gender: 'fem' }), np('THIRD_PERSON', { gender: 'fem' })], conjunction: 'and' } })).es)
+      .toBe('el gato las ve a ella y a ella.');
+  });
+
+  test('regression: the masculine plural keeps li / los / os, and French les has no gender', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { number: 'plural' }) }))).toMatchObject({
+      it: 'il gatto li vede.',
+      es: 'el gato los ve.',
+      pt: 'o gato os vê.',
+    });
+    expect(say(clause(np('CAT'), 'SEE', { directObject: them }), 'fr')).toBe('le chat les voit.');
   });
 });
 

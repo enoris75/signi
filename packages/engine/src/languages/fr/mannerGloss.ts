@@ -1,4 +1,4 @@
-import type { ResolvedNounElement } from '../../types.js';
+import { possessedHeadForms, type ResolvedNounElement } from '../../types.js';
 import { coordinate } from './coordinate.js';
 import { frMannerHead } from './frMannerHead.js';
 import { renderNP } from './renderNP.js';
@@ -9,5 +9,5 @@ import { renderNP } from './renderNP.js';
  * determiner, so it routes through the contracting/eliding manner head — "de" + "une" → "d'une".
  */
 export function mannerGloss(el: ResolvedNounElement): string {
-  return coordinate(el, (np) => renderNP(np, frMannerHead(np.head.forms)));
+  return coordinate(el, (np) => renderNP(np, frMannerHead(possessedHeadForms(np, 'bare'))));
 }

@@ -84,6 +84,12 @@ describe('complementsPhrase', () => {
       expect(render({ terminus: complement(np(CRIANCA, { number: 'plural' })) })).toBe('às crianças');
     });
 
+    // A71: a possessive rides on the definite article, which the preposition fuses with.
+    test('a possessive follows the fused preposition and article', () => {
+      expect(render({ terminus: complement(np(CAO, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) })).toBe('ao meu cão');
+      expect(render({ locative: complement(np(CASA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) })).toBe('na minha casa');
+    });
+
     test('stays uncontracted before any other determiner', () => {
       expect(render({ terminus: complement(np(CAO, { definiteness: 'indefinite' })) })).toBe('a um cão');
       expect(render({ terminus: complement(np(CAO, { definiteness: 'this' })) })).toBe('a este cão');

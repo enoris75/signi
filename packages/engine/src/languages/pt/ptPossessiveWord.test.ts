@@ -14,6 +14,10 @@ describe('ptPossessiveWord', () => {
     expect(ptPossessiveWord(np(LIVRO, {}, { possessor: np(GATO) }))).toBe('');
   });
 
+  test('without the article it is the possessive alone, for a head that fuses the article itself', () => {
+    expect(ptPossessiveWord(np(CASA, {}, { possessor: his }), false)).toBe('sua');
+  });
+
   test('the article + possessive agree with the possessed head', () => {
     expect(ptPossessiveWord(np(CAO, {}, { possessor: his }))).toBe('o seu');
     expect(ptPossessiveWord(np(CASA, {}, { possessor: his }))).toBe('a sua');

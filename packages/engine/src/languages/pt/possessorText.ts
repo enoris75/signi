@@ -1,9 +1,10 @@
-import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor, possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 import { contractDet } from './contractDet.js';
 import { dePrep } from './dePrep.js';
 import { ptAdj } from './ptAdj.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
+import { ptPossessiveWord } from './ptPossessiveWord.js';
 
 /**
  * A postnominal possessor, headed by "de" + its own determiner ("o livro do gato", "de um gato",
@@ -15,8 +16,10 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A pronominal possessor ("o seu") is prenominal — rendered by `ptPossessiveWord` in place of
   // the article — so it contributes nothing postnominally here.
   if (!poss || isPronominalPossessor(poss)) return '';
-  const f = poss.head.forms;
+  // The possessor's own possessive rides on the article "de" fuses with ("o livro do meu cão").
+  const f = possessedHeadForms(poss, 'definite');
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-  return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${withAdj(word, ptAdj(poss))}`, poss)}`;
+  const noun = [ptPossessiveWord(poss, false), withAdj(word, ptAdj(poss))].filter(Boolean).join(' ');
+  return ` ${withRelative(`${contractDet(dePrep, 'de', f, plural)} ${noun}`, poss)}`;
 }

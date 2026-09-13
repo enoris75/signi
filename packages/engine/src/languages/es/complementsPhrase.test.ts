@@ -69,6 +69,12 @@ describe('complementsPhrase', () => {
       expect(render({ terminus: complement(np(NINO, { number: 'plural' })) })).toBe('a los niños');
       expect(render({ terminus: complement(np(NINO, { definiteness: 'indefinite' })) })).toBe('a un niño');
     });
+
+    // A71: a possessive replaces the article, so the preposition stands alone before it.
+    test('a possessive follows the bare preposition', () => {
+      expect(render({ terminus: complement(np(NINO, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) })).toBe('a mi niño');
+      expect(render({ locative: complement(np(CASA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) })).toBe('en mi casa');
+    });
   });
 
   describe('instrumental', () => {

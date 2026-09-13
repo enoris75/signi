@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { coordinate } from './coordinate.js';
@@ -124,7 +124,7 @@ export function complementsPhrase(
       // the article-fused "nella casa" — so it bypasses the article and fusion machinery entirely.
       return coordinate(c.phrase, (np) =>
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(np.head.forms)));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(possessedHeadForms(np, 'definite'))));
     })
     .filter(Boolean)
     .join(' ');

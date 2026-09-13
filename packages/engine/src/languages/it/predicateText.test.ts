@@ -103,6 +103,7 @@ describe('predicateText', () => {
       expect(predicateText(GATTO, vp(VEDERE), el(np(IO)))).toBe('mi vede');
       expect(predicateText(GATTO, vp(VEDERE), el(np(LEI)))).toBe('la vede');
       expect(predicateText(GATTO, vp(VEDERE), el(np(LORO)))).toBe('li vede');
+      expect(predicateText(GATTO, vp(VEDERE), el(np(LORO, { gender: 'fem' })))).toBe('le vede');
       expect(predicateText(GATTO, vp(VEDERE), el(np(NOI)))).toBe('ci vede');
     });
 
@@ -135,6 +136,13 @@ describe('predicateText', () => {
     test('a generic subject is the preverbal clitic si, after non', () => {
       expect(predicateText(SI, vp(MANGIARE))).toBe('si mangia');
       expect(predicateText(SI, vp(MANGIARE, { negative: true }), mouse)).toBe('non si mangia il topo');
+    });
+
+    // A73: with a plural noun object si is passive, and the finite verb agrees with its patient.
+    test('a plural noun object agrees the finite verb, a clitic or singular object does not', () => {
+      expect(predicateText(SI, vp(MANGIARE), el(np(TOPO, { number: 'plural' })))).toBe('si mangiano i topi');
+      expect(predicateText(SI, vp(MANGIARE, { modals: [modal(DOVERE)] }), el(np(TOPO, { number: 'plural' })))).toBe('si devono mangiare i topi');
+      expect(predicateText(SI, vp(MANGIARE), mouse)).toBe('si mangia il topo');
     });
   });
 

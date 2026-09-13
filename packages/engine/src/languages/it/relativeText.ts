@@ -15,7 +15,12 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  // A plural head gapped as the object of the impersonal si is the passive si's patient, and the verb
+  // agrees with it: "i topi che si mangiano" (the compound tense aside, as in `predicateText`).
+  const passiveSi = !subjectRelative && rel.headRole === 'directObject' && isGenericSubject(rel.subject!)
+    && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural' && rel.verbPhrase.aspect !== 'resultative';
+  const agreeForms = subjectRelative ? np.head.forms
+    : passiveSi ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
   // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
   // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);

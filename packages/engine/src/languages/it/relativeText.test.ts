@@ -40,6 +40,8 @@ describe('relativeText', () => {
 
   test('an impersonal subject is the si clitic, not a subject word', () => {
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(SI))) }))).toBe('che si mangia');
+    // A plural head is the passive si's patient, and the verb agrees with it.
+    expect(relativeText(np(TOPO, { number: 'plural' }, { relative: objectRelative(el(np(SI))) }))).toBe('che si mangiano');
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(SI)), { verbPhrase: vp(MANGIARE, { negative: true }) }) })))
       .toBe('che non si mangia');
   });

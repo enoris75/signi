@@ -91,7 +91,7 @@ export const TU: Forms = { base: 'tu', person: '2', number: 'singular', plural: 
 export const LUI: Forms = {
   base: 'lui', person: '3', number: 'singular', gender: 'masc', singular_fem: 'lei', singular_neut: 'esso', plural: 'loro',
   disjunctive: 'lui', disjunctive_fem: 'lei', disjunctive_neut: 'esso', disjunctive_plural: 'loro',
-  object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'li',
+  object: 'lo', object_fem: 'la', object_neut: 'lo', object_plural: 'li', object_plural_fem: 'le',
 };
 /** THIRD_PERSON resolved feminine singular. */
 export const LEI: Forms = { ...LUI, base: 'lei', gender: 'fem', disjunctive: 'lei' };

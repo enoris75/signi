@@ -8,6 +8,10 @@ describe('possessorText', () => {
     expect(possessorText(np(BUCH, {}, { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }))).toBe('');
   });
 
+  test('a possessor\'s own possessive takes the article\'s place after von', () => {
+    expect(possessorText(np(BUCH, {}, { possessor: np(KATER, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) }))).toBe(' von meinem Kater');
+  });
+
   test('von + dem fuses to vom; the feminine and plural stay von der / von den', () => {
     expect(possessorText(np(BUCH, {}, { possessor: np(KATER) }))).toBe(' vom Kater');
     expect(possessorText(np(BUCH, {}, { possessor: np(KATZE) }))).toBe(' von der Katze');

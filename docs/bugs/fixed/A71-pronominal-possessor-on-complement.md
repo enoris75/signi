@@ -89,3 +89,54 @@ The complement heads (`contractDet`, `dePrep`, `datPrep` in `languages/pt/comple
 | | |
 |---|---|
 | **Test** | `possessivePronoun.test.ts` → *known bugs: Italian pronominal possessor on a complement*; `possessivePronoun.test.ts` → *known bugs: French pronominal possessor on a complement*; `possessivePronoun.test.ts` → *known bugs: German pronominal possessor on a complement*; `possessivePronoun.test.ts` → *known bugs: Spanish pronominal possessor on a complement*; `possessivePronoun.test.ts` → *known bugs: Portuguese pronominal possessor on a complement* (5 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13. A pronominal possessor fills the determiner slot, so every head builder now reads
+the possessed head's forms through the new `possessedHeadForms`
+([`types.ts`](../../../packages/engine/src/types.ts)). The picked determiner gives way to `definite`
+where the possessive rides on the article, and to `bare` where it replaces it. Each complement then
+builds its usual contraction or bare preposition, and the engine adds the possessive after it:
+
+- **Italian** (`definite`): [`renderNP.ts`](../../../packages/engine/src/languages/it/renderNP.ts)
+  no longer swaps the caller's head for a bare article. Its callers
+  (`complementsPhrase`, `npText`, `subjectPhrase`, `mannerGloss` and the genitive possessor) pass
+  `possessedHeadForms(np, 'definite')`: `al tuo cane`, `nella mia casa`, `a causa del mio cane`,
+  `del mio cane`.
+- **French** (`bare`): [`renderNP.ts`](../../../packages/engine/src/languages/fr/renderNP.ts) puts the
+  possessive after the head its callers build from `possessedHeadForms(np, 'bare')`, which is empty
+  for a subject and the bare preposition for a complement: `à ton chien`, `dans ma maison`, `à cause
+  de mon chien`, `de mon chien`.
+- **Spanish** (`bare`): the per-conjunct renderer in
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/es/complementsPhrase.ts) and
+  [`possessorText.ts`](../../../packages/engine/src/languages/es/possessorText.ts) add `esPossessiveWord`
+  after the bare preposition: `a tu perro`, `en mi casa`, `de mi perro`.
+- **Portuguese** (`definite`): the same two files add the possessive alone (`ptPossessiveWord(np,
+  false)`) after the fused preposition and article: `ao seu cão`, `na minha casa`, `do meu cão`.
+- **German** (`bare`): the per-conjunct renderer in
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase.ts) adds
+  `possessiveDe` in the complement's case after the preposition, with the adjectives mixed:
+  `deinem Hund`, `in meinem kleinen Haus`, `wegen meinem Hund`.
+  [`possessorText.ts`](../../../packages/engine/src/languages/de/possessorText.ts) does the same after
+  `von` (`von meinem Hund`).
+  [`adjPhrase.ts`](../../../packages/engine/src/languages/de/adjPhrase.ts) no longer applies the A56
+  mass-noun strong declension under a possessive, which carries the case itself (`mit meinem kalten
+  Wasser`).
+
+Every table row now renders as wanted. The fix also covers a plural possessive, adjectives, the
+`under` relation, an indefinite pick the possessive overrides, the direction and the instrument, and
+a plural genitive possessor. A possessive on the subject and the object is unchanged. The `renderNP`
+unit tests (it, fr) build their head through `possessedHeadForms`, as every caller now does.
+
+Not changed here: Italian still keeps the article before a possessive + a kinship noun (`al mio
+padre`), which is A85.
+
+- **Tests:** [`packages/engine/test/possessivePronoun.test.ts`](../../../packages/engine/test/possessivePronoun.test.ts)
+  → the five *known bugs: … pronominal possessor on a complement* blocks. The pinning `test.fails`
+  are now passing `test`s. The new *pronominal possessor on a complement: every language* block
+  covers number, adjectives, relations, the overridden determiner, the German mass noun, the plural
+  genitive possessor, and a guard for the subject and object.
+- Unit tests:
+  - `complementsPhrase.test.ts` (it, fr, de, es, pt);
+  - `possessorText.test.ts` (de, es, pt) and `ptPossessiveWord.test.ts`;
+  - `adjPhrase.test.ts` (de) and `renderNP.test.ts` (it, fr).

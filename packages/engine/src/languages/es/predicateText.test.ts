@@ -155,6 +155,7 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(VER), el(np(NOSOTROS)))).toBe('nos ve');
       expect(predicateText(GATO, vp(VER), el(np(ELLA)))).toBe('la ve');
       expect(predicateText(GATO, vp(VER), el(np(ELLOS)))).toBe('los ve');
+      expect(predicateText(GATO, vp(VER), el(np(ELLOS, { gender: 'fem' })))).toBe('las ve');
     });
 
     test('the clitic sits after no and before the auxiliary', () => {
@@ -177,6 +178,13 @@ describe('predicateText', () => {
       expect(predicateText(SE, vp(COMER))).toBe('se come');
       expect(predicateText(SE, vp(COMER, { negative: true }))).toBe('no se come');
       expect(predicateText(SE, vp(COMER), el(np(EL)))).toBe('se lo come');
+    });
+
+    // A73: with a plural noun object se is passive, and the finite verb agrees with its patient.
+    test('a plural noun object agrees the finite verb, in the compound tense too', () => {
+      expect(predicateText(SE, vp(COMER), el(np(RATON, { number: 'plural' })))).toBe('se comen los ratones');
+      expect(predicateText(SE, vp(COMER, { aspect: 'resultative' }), el(np(RATON, { number: 'plural' })))).toBe('se han comido los ratones');
+      expect(predicateText(SE, vp(COMER), el(np(ELLOS)))).toBe('se los come');
     });
 
     test('a recipient follows the object', () => {

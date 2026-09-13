@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
 import { contractDet } from './contractDet.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
@@ -16,6 +16,7 @@ import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
+import { ptPossessiveWord } from './ptPossessiveWord.js';
 
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
@@ -75,10 +76,11 @@ export function complementsPhrase(
       // "em casa", not the contracted "no lar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      const f = np.head.forms;
+      // A possessive rides on the definite article, which the preposition fuses with ("na minha casa").
+      const f = possessedHeadForms(np, 'definite');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
-      const noun = withAdj(word, ptAdj(np));
+      const noun = [ptPossessiveWord(np, false), withAdj(word, ptAdj(np))].filter(Boolean).join(' ');
       // locative→em (no/na), direction→a (ao/à), source→"longe de" (longe do/da),
       // route→path preposition. A direction toward an *animate* goal takes "para"
       // (to/toward) — bare "a" + person doesn't read as a motion destination ("corro para

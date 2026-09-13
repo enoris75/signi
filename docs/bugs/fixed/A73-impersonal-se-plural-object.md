@@ -42,3 +42,35 @@ follows the same rule but is not pinned.
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: Italian impersonal si with a plural object*; `verb.test.ts` → *known bugs: Spanish impersonal se with a plural object* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. When the subject is generic and the direct object
+is a plural noun phrase (not a clitic), the finite element conjugates against a plural copy of the
+subject forms. In an object relative the plural gapped head does the same. The impersonal clitic
+itself is unchanged.
+
+- Italian: [`predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts) and
+  [`relativeText.ts`](../../../packages/engine/src/languages/it/relativeText.ts). The compound tense is
+  left out, since it needs essere and participle agreement (`si sono mangiati`), which is A83. It
+  keeps `si ha mangiato i topi`.
+- Spanish: [`predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [`withRelative.ts`](../../../packages/engine/src/languages/es/withRelative.ts), in every aspect (`se
+  han comido los ratones`).
+
+Every table row now renders as wanted. The fix also covers:
+
+- the progressive and prospective (`si stanno mangiando i topi`, `se están a punto de comer los ratones`);
+- the future, the negative, and a condition (`se si mangiassero i topi`);
+- a quantified patient (`si mangiano alcuni topi`) and a coordinated one (`se comen el ratón y la comida`);
+- a relative under a modal (`i topi che si devono mangiare`).
+
+A singular or clitic object, no object and a singular gapped head keep the singular. Portuguese is
+untouched, as the bug file left it. The Italian clitic order (`si li mangia`) is A82.
+
+- **Tests:** [`packages/engine/test/verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known
+  bugs: Italian impersonal si / Spanish impersonal se with a plural object*. Both pinning
+  `test.fails` are now passing `test`s. The new *passive si / se* block covers tenses, aspects, the
+  condition, quantified and coordinated patients and relatives, with guards for the singular, the
+  clitic, no object and the Italian compound tense.
+- Unit tests: `predicateText.test.ts` (it, es), `relativeText.test.ts` (it), `withRelative.test.ts` (es).

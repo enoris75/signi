@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, isPronominalPossessor, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, possessedHeadForms, type ConceptForms, type ResolvedComplement } from '../../types.js';
+import { possessiveDe } from '../../possessive.js';
 import { adjPhrase } from './adjPhrase.js';
 import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
@@ -121,9 +122,12 @@ export function complementsPhrase(
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      const f = np.head.forms;
+      // A possessive is an ein-word in place of the article, so the head is the preposition alone and
+      // the adjectives decline mixed ("in meinem kleinen Haus", "deinem Hund").
+      const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
+      const f = possessedHeadForms(np, 'bare');
       const plural = (f['number'] ?? f['count']) === 'plural';
-      const definiteness = f['definiteness'] ?? 'definite';
+      const definiteness = poss ? 'indefinite' : (f['definiteness'] ?? 'definite');
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route/locative → spatial preposition (+ its case); direction/source → two-way preps +
       // dative. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire only for a definite
@@ -174,7 +178,10 @@ export function complementsPhrase(
       const word = f['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
       const declined = adjPhrase(np, _case, definiteness);
       const adj = declined ? `${declined} ` : '';
-      const rest = `${adj}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
+      const possessive = poss
+        ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
+        : '';
+      const rest = `${possessive}${adj}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       });
     })

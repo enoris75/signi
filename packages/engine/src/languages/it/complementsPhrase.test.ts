@@ -69,6 +69,12 @@ describe('complementsPhrase', () => {
       expect(one('terminus', complement(np(UOMO, { number: 'plural' })))).toBe('agli uomini');
     });
 
+    // A71: a possessive rides on the definite article, which the preposition fuses with.
+    test('a possessive follows the fused preposition and article', () => {
+      expect(one('terminus', complement(np(CANE, { definiteness: 'indefinite' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('al mio cane');
+      expect(one('locative', complement(np(CASA, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })))).toBe('nella mia casa');
+    });
+
     test('any other determiner stays apart from a', () => {
       expect(one('terminus', complement(np(CANE, { definiteness: 'indefinite' })))).toBe('a un cane');
       expect(one('terminus', complement(np(CANE, { definiteness: 'no' })))).toBe('a nessun cane');

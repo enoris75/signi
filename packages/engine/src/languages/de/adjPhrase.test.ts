@@ -27,6 +27,8 @@ describe('adjPhrase', () => {
     // A determiner with an ending of its own still carries the case: "mit keinem guten Wasser".
     expect(adjPhrase(np(WASSER, {}, { adjectives: [adj(GUT)] }), 'dat', 'no')).toBe('guten');
     expect(adjPhrase(np(HAUS, {}, { adjectives: [adj(GUT)] }), 'dat', 'indefinite')).toBe('guten');
+    // A possessive is an ein-word that carries the case itself: "mit meinem guten Wasser".
+    expect(adjPhrase(np(WASSER, {}, { adjectives: [adj(GUT)], possessor: { kind: 'pronominal', person: '1', number: 'singular' } }), 'dat', 'indefinite')).toBe('guten');
   });
 
   test('agrees with the head’s gender and number', () => {

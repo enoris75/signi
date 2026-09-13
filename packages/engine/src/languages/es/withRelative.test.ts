@@ -41,6 +41,8 @@ describe('withRelative', () => {
   test('a generic subject is the impersonal se, not a subject word', () => {
     const eaten = { headRole: 'directObject' as const, subject: el(np(SE)), verbPhrase: vp(COMER) };
     expect(withRelative('una comida', np(COMIDA, { definiteness: 'indefinite' }, { relative: eaten }))).toBe('una comida que se come');
+    // A plural head is the passive se's patient, and the verb agrees with it.
+    expect(withRelative('las comidas', np(COMIDA, { number: 'plural' }, { relative: eaten }))).toBe('las comidas que se comen');
   });
 
   test('the relative clause follows the possessor', () => {

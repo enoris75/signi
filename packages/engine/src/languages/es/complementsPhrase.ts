@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
+import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -18,6 +18,7 @@ import { prepDet } from './prepDet.js';
 import { spatialHead } from './spatialHead.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
+import { esPossessiveWord } from './esPossessiveWord.js';
 
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
@@ -77,11 +78,12 @@ export function complementsPhrase(
       // "en casa", not "en el hogar" — so no article, adjective or relative is built for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
-      const f = np.head.forms;
+      // A possessive replaces the article, so the head is the preposition alone ("en mi casa", "a tu perro").
+      const f = possessedHeadForms(np, 'bare');
       const plural = isPlural(f);
       const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
       const adj = esAdj(np);
-      const noun = withAdj(word, adj);
+      const noun = [esPossessiveWord(np), withAdj(word, adj)].filter(Boolean).join(' ');
       // The article is chosen from `af`, not `f`: a prenominal adjective changes which one the
       // stressed-a nouns take ("en la primera agua").
       const af = artForms(f, adj);

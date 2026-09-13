@@ -1,5 +1,5 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { abstractionLevel, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
 import { aDet } from './aDet.js';
 import { coordinate } from './coordinate.js';
 import { datPrep } from './datPrep.js';
@@ -136,15 +136,15 @@ export function complementsPhrase(
           return `${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
         };
         if (causeSent === 'negative') {
-          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(np.head.forms)));
+          return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(possessedHeadForms(np, 'bare'))));
         }
         const tail = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
           causeSent === 'positive' ? aDet(nf, plural, lead) : deDet(nf, plural, lead);
-        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(np.head.forms)));
+        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(possessedHeadForms(np, 'bare'))));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
       return coordinate(c.phrase, (np) =>
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(np.head.forms)));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(possessedHeadForms(np, 'bare'))));
     })
     .filter(Boolean)
     .join(' ');

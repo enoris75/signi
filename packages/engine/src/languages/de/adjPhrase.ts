@@ -1,4 +1,4 @@
-import type { ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
 import type { Case } from './de.types.js';
 import { ARTICLELESS_MASS_DETERMINERS } from './de.consts.js';
 import { declineAdj } from './declineAdj.js';
@@ -20,7 +20,9 @@ export function adjPhrase(np: ResolvedNounPhrase, _case: Case, definiteness = 'd
   // A mass noun takes no article where a count noun would: no "ein Wasser", and the invariant
   // "etwas / viel / wenig" (see `determiner`). With nothing carrying the case the adjective declines
   // strong, as after no determiner at all ("mit etwas kaltem Wasser", "mit kaltem Wasser").
-  const articleless = f['uncountable'] === '1' && ARTICLELESS_MASS_DETERMINERS.has(definiteness);
+  // A possessive is an ein-word, which carries the case like "ein" does ("meinem kalten Wasser").
+  const possessive = !!np.possessor && isPronominalPossessor(np.possessor);
+  const articleless = f['uncountable'] === '1' && ARTICLELESS_MASS_DETERMINERS.has(definiteness) && !possessive;
   const decline = (stem: string): string => declineAdj(stem, _case, gender, plural, articleless ? 'bare' : definiteness);
   const own = np.adjectives
     .map((a) => {

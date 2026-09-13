@@ -67,6 +67,12 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(CHAT, { number: 'plural' })) }))).toBe('aux chats');
     });
 
+    // A71: a possessive replaces the article, so the preposition stands alone before it.
+    test('a possessive follows the bare preposition', () => {
+      expect(complementsPhrase(complements({ terminus: complement(np(CHIEN, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('à mon chien');
+      expect(complementsPhrase(complements({ locative: complement(np(MAISON, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('dans ma maison');
+    });
+
     test('any other determiner follows a plain à', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(CHIEN, { definiteness: 'indefinite' })) }))).toBe('à un chien');
       expect(complementsPhrase(complements({ terminus: complement(np(CHAT, { definiteness: 'some', number: 'plural' })) }))).toBe('à quelques chats');

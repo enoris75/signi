@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Complement, NounPhrase, VerbPhrase } from '@signi/shared';
+import type { Complement, NounElement, NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
@@ -745,7 +745,7 @@ describe('known bugs: German prospective word order', () => {
 // object ("si mangiano i topi"); the singular is colloquial. `predicateText` and `relativeText`
 // conjugate against GENERIC_PERSON (3sg), so the verb never agrees with its plural patient.
 describe('known bugs: Italian impersonal si with a plural object', () => {
-  test.fails('Italian agrees the verb with the plural object of the impersonal si', () => {
+  test('Italian agrees the verb with the plural object of the impersonal si', () => {
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }) }), 'it')).toBe('si mangiano i topi.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }), verbPhrase: { tense: 'past' } }), 'it')).toBe('si mangiarono i topi.');
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }), verbPhrase: { modals: [{ verb: 'MUST' }] } }), 'it')).toBe('si devono mangiare i topi.');
@@ -760,8 +760,51 @@ describe('known bugs: Italian impersonal si with a plural object', () => {
 // agrees with the object ("se comen los ratones"). The engine conjugates against GENERIC_PERSON
 // (3sg), so the verb stays singular.
 describe('known bugs: Spanish impersonal se with a plural object', () => {
-  test.fails('Spanish agrees the verb with the plural object of the impersonal se', () => {
+  test('Spanish agrees the verb with the plural object of the impersonal se', () => {
     expect(say(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE', { number: 'plural' }) }), 'es')).toBe('se comen los ratones.');
+  });
+});
+
+describe('passive si / se: the verb agrees with a plural patient', () => {
+  const oneEats = (directObject: NounElement, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('GENERIC_PERSON'), 'EAT', { directObject, verbPhrase }));
+  const mice = np('MOUSE', { number: 'plural' });
+
+  test('in every simple tense, the progressive and prospective, negated and in a condition', () => {
+    expect(oneEats(mice, { aspect: 'progressive' })).toMatchObject({ it: 'si stanno mangiando i topi.', es: 'se están comiendo los ratones.' });
+    expect(oneEats(mice, { aspect: 'prospective' })).toMatchObject({ it: 'si stanno per mangiare i topi.', es: 'se están a punto de comer los ratones.' });
+    expect(oneEats(mice, { tense: 'future' })).toMatchObject({ it: 'si mangeranno i topi.', es: 'se comerán los ratones.' });
+    expect(oneEats(mice, { negative: true })).toMatchObject({ it: 'non si mangiano i topi.', es: 'no se comen los ratones.' });
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('GENERIC_PERSON'), 'EAT', { directObject: mice }) })).toMatchObject({
+      it: 'se si mangiassero i topi, il cane correrebbe.',
+      es: 'si se comieran los ratones, el perro correría.',
+    });
+  });
+
+  test('Spanish agrees the compound tense too, and a quantified or coordinated patient counts as plural', () => {
+    expect(oneEats(mice, { aspect: 'resultative' }).es).toBe('se han comido los ratones.');
+    expect(oneEats(np('MOUSE', { definiteness: 'some' }))).toMatchObject({ it: 'si mangiano alcuni topi.', es: 'se comen algunos ratones.' });
+    expect(oneEats({ conjuncts: [np('MOUSE'), np('FOOD')], conjunction: 'and' })).toMatchObject({
+      it: 'si mangiano il topo e il cibo.',
+      es: 'se comen el ratón y la comida.',
+    });
+  });
+
+  test('a plural head gapped as the object agrees the relative\'s verb', () => {
+    expect(sayAll(clause(np('MOUSE', { number: 'plural', relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'RUN')).es)
+      .toBe('los ratones que se comen corren.');
+    expect(sayAll(clause(np('MOUSE', { number: 'plural', relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT', modals: [{ verb: 'MUST' }] } } }), 'RUN')).it)
+      .toBe('i topi che si devono mangiare corrono.');
+  });
+
+  test('regression: a singular or clitic object, no object, and the Italian compound tense keep the singular', () => {
+    expect(oneEats(np('MOUSE'))).toMatchObject({ it: 'si mangia il topo.', es: 'se come el ratón.' });
+    expect(oneEats(np('THIRD_PERSON', { number: 'plural' })).es).toBe('se los come.');
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'EAT'))).toMatchObject({ it: 'si mangia.', es: 'se come.' });
+    expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'RUN')).it)
+      .toBe('il topo che si mangia corre.');
+    // The Italian passive si's compound tense needs essere and participle agreement (A83).
+    expect(oneEats(mice, { aspect: 'resultative' }).it).toBe('si ha mangiato i topi.');
   });
 });
 

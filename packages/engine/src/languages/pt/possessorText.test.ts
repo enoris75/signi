@@ -6,6 +6,10 @@ import { adj, AFRICA, CAO, COMER, el, GATO, LIVRO, MENINO, np, RAPOSA, RATO, VEL
 const his: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' };
 
 describe('possessorText', () => {
+  test('a possessor\'s own possessive follows the fused de + article', () => {
+    expect(possessorText(np(LIVRO, {}, { possessor: np(CAO, {}, { possessor: his }) }))).toBe(' do seu cão');
+  });
+
   test('is empty without a possessor', () => {
     expect(possessorText(np(LIVRO))).toBe('');
   });

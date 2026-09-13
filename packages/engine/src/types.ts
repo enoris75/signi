@@ -97,12 +97,15 @@ export function firstConjunct(element: ResolvedNounElement): ResolvedNounPhrase 
  * The object (accusative / clitic) surface of a pronoun, by number/gender — the direct-object
  * counterpart of the subject citation form (`base`/`plural`/`singular_fem`…). English/German use it
  * post-verbally without an article ("sees me", "sieht ihn"); Romance uses it as the proclitic that
- * moves before the finite verb ("mi vede"). Falls back through plural/base when a form is absent.
+ * moves before the finite verb ("mi vede"). Falls back through plural/base when a form is absent. A
+ * feminine plural takes its own clitic where the language has one (Italian "le", Spanish "las",
+ * Portuguese "as"), as the subject pronoun takes `plural_fem`.
  */
 export function objectPronounForm(forms: Record<string, string>): string {
   const plural = (forms['number'] ?? forms['count']) === 'plural';
-  if (plural) return forms['object_plural'] ?? forms['plural'] ?? forms['object'] ?? forms['base'] ?? '';
   const gender = forms['gender'];
+  if (plural && gender === 'fem' && forms['object_plural_fem']) return forms['object_plural_fem'];
+  if (plural) return forms['object_plural'] ?? forms['plural'] ?? forms['object'] ?? forms['base'] ?? '';
   if (gender === 'fem') return forms['object_fem'] ?? forms['object'] ?? forms['base'] ?? '';
   if (gender === 'neut') return forms['object_neut'] ?? forms['object'] ?? forms['base'] ?? '';
   return forms['object'] ?? forms['base'] ?? '';
@@ -129,6 +132,18 @@ export function groupObjectClitic(el: ResolvedNounElement): string {
   const pronoun = el.conjuncts.find((np) => np.head.forms['person'] === person);
   if (!pronoun) return '';
   return objectPronounForm({ ...pronoun.head.forms, number: 'plural', gender: el.agreement['gender'] ?? 'masc' });
+}
+
+/**
+ * A noun phrase's head forms as its determiner builders read them. A pronominal possessor fills the
+ * determiner slot, so the picked determiner gives way to `definiteness`: "definite" where the
+ * possessive rides on the definite article, which the complement's preposition then fuses with
+ * (Italian "nella mia casa", Portuguese "na minha casa"), and "bare" where the possessive replaces
+ * the article and the preposition stands alone (French "dans ma maison", Spanish "en mi casa", German
+ * "in meinem Haus"). Any other noun phrase's forms are returned as they are.
+ */
+export function possessedHeadForms(np: ResolvedNounPhrase, definiteness: 'definite' | 'bare'): Record<string, string> {
+  return np.possessor && isPronominalPossessor(np.possessor) ? { ...np.head.forms, definiteness } : np.head.forms;
 }
 
 /** The head forms a relativizer stand-in keeps: agreement, and what picks a complement's preposition. */

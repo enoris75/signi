@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (69 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (59 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A71 | [A71-pronominal-possessor-on-complement.md](A-must-fix/A71-pronominal-possessor-on-complement.md) |
-| A72 | [A72-feminine-plural-object-clitic.md](A-must-fix/A72-feminine-plural-object-clitic.md) |
-| A73 | [A73-impersonal-se-plural-object.md](A-must-fix/A73-impersonal-se-plural-object.md) |
 | A74 | [A74-english-any-object-conjuncts.md](A-must-fix/A74-english-any-object-conjuncts.md) |
 | A75 | [A75-english-comparative-two-syllable.md](A-must-fix/A75-english-comparative-two-syllable.md) |
 | A76 | [A76-english-frequency-adverb-copula.md](A-must-fix/A76-english-frequency-adverb-copula.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A68 | [A68-french-portuguese-invariable-zero.md](fixed/A68-french-portuguese-invariable-zero.md) | French, Portuguese (also Italian, Spanish) | 2026-09-13 |
 | A69 | [A69-english-spanish-connector-comma.md](fixed/A69-english-spanish-connector-comma.md) | English, Spanish (also Portuguese) | 2026-09-13 |
 | A70 | [A70-romance-clitic-enclisis.md](fixed/A70-romance-clitic-enclisis.md) | French, Spanish, Portuguese | 2026-09-13 |
+| A71 | [A71-pronominal-possessor-on-complement.md](fixed/A71-pronominal-possessor-on-complement.md) | Italian, French, German, Spanish, Portuguese | 2026-09-13 |
+| A72 | [A72-feminine-plural-object-clitic.md](fixed/A72-feminine-plural-object-clitic.md) | Italian, Spanish, Portuguese | 2026-09-13 |
+| A73 | [A73-impersonal-se-plural-object.md](fixed/A73-impersonal-se-plural-object.md) | Italian, Spanish | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

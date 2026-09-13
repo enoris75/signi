@@ -6,15 +6,15 @@ import {
   MANGIARE, nounModifier, np, PADRE, RAGAZZO, SLOT, TOPO, UOMO, VECCHIO, VELA, vp,
 } from './it.fixtures.js';
 import { renderNP } from './renderNP.js';
-import type { ResolvedNounPhrase } from '../../types.js';
+import { possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 
 const BIG = concept(GRANDE, 'BIG');
 const OLD = concept(VECCHIO, 'OLD');
 const BEAUTIFUL = concept(BELLO, 'BEAUTIFUL');
 const ELEGANTE: Forms = { role: 'adjective', base: 'elegante' };
 
-/** The phrase under the determiner its own forms carry. */
-const withDeterminer = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(phrase.head.forms, plural, lead));
+/** The phrase under the determiner its own forms carry, read as every caller reads them (`possessedHeadForms`). */
+const withDeterminer = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(possessedHeadForms(phrase, 'definite'), plural, lead));
 const pronominal = (person: '1' | '2' | '3', number: 'singular' | 'plural' = 'singular'): PronominalPossessor =>
   ({ kind: 'pronominal', person, number });
 

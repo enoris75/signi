@@ -6,6 +6,10 @@ import { possessorText } from './possessorText.js';
 const bookOf = (possessor: ResolvedNounPhrase['possessor']) => possessorText(np(LIBRO, {}, { possessor }));
 
 describe('possessorText', () => {
+  test('a possessor\'s own possessive replaces its article after de', () => {
+    expect(bookOf(np(NINO, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }))).toBe(' de mi niño');
+  });
+
   test('is empty without a noun possessor', () => {
     expect(possessorText(np(LIBRO))).toBe('');
     expect(bookOf({ kind: 'pronominal', person: '3', number: 'singular' })).toBe('');

@@ -23,13 +23,20 @@ export function predicateText(
   // In a hypothetical conditional the finite element (the outermost modal, or the main verb)
   // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
-  const pn = moodPN(subjectForms);
+  // With a plural noun object the impersonal si is the passive si, and the finite verb agrees with its
+  // patient: "si mangiano i topi", "si devono mangiare i topi". A clitic object keeps si impersonal
+  // ("li si mangia"). The compound tense would need essere and its participle agreement ("si sono
+  // mangiati"), so it is left as it is.
+  const passiveSi = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
+    && directObject.agreement['number'] === 'plural' && aspect !== 'resultative';
+  const agreeForms = passiveSi ? { ...subjectForms, number: 'plural' } : subjectForms;
+  const pn = moodPN(agreeForms);
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
   // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
   // and left out.
   const cliticObject = directObject && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
   const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : undefined;
-  const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
+  const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
@@ -42,7 +49,7 @@ export function predicateText(
       ].join(' ')
     : aspect === 'neutral'
       ? finite(verb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood, agreeingObject);
+      : aspectVerb(verb.forms, agreeForms, tense, aspect, mood, agreeingObject);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.

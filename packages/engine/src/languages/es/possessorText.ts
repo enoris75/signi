@@ -1,9 +1,10 @@
-import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor, possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 import { artForms } from './artForms.js';
 import { deDet } from './deDet.js';
 import { esAdj } from './esAdj.js';
 import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
+import { esPossessiveWord } from './esPossessiveWord.js';
 
 /**
  * A postnominal possessor, headed by "de" + its own determiner ("el libro del gato", "de un
@@ -15,9 +16,11 @@ export function possessorText(np: ResolvedNounPhrase): string {
   // A pronominal possessor ("su") is prenominal — rendered by `esPossessiveWord` in place of the
   // article — so it contributes nothing postnominally here.
   if (!poss || isPronominalPossessor(poss)) return '';
-  const f = poss.head.forms;
+  // The possessor's own possessive replaces its article after "de" ("el libro de mi perro").
+  const f = possessedHeadForms(poss, 'bare');
   const plural = (f['number'] ?? f['count']) === 'plural';
   const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
   const adj = esAdj(poss);
-  return ` ${withRelative(`${deDet(artForms(f, adj), plural)} ${withAdj(word, adj)}`, poss)}`;
+  const noun = [esPossessiveWord(poss), withAdj(word, adj)].filter(Boolean).join(' ');
+  return ` ${withRelative(`${deDet(artForms(f, adj), plural)} ${noun}`, poss)}`;
 }

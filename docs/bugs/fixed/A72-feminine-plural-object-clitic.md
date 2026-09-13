@@ -44,3 +44,30 @@ The affirmative command (`los ve.`, want `velas.`) also needs the enclisis fix i
 | | |
 |---|---|
 | **Test** | `objectPronoun.test.ts` → *known bugs: Italian feminine plural object clitic*; `objectPronoun.test.ts` → *known bugs: Spanish feminine plural object clitic*; `objectPronoun.test.ts` → *known bugs: Portuguese feminine plural object clitic* (3 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- [`pronouns.ts`](../../../packages/backend/src/concepts/pronouns.ts) seeds `object_plural_fem` on
+  THIRD_PERSON in Italian (`le`), Spanish (`las`) and Portuguese (`as`). The dev database is reseeded,
+  and the pronoun fixtures mirror the corpus.
+- `objectPronounForm` ([`types.ts`](../../../packages/engine/src/types.ts)) returns it for a feminine
+  plural before falling back to `object_plural`.
+
+Every table row now renders as wanted, and the pinned command (`vedile`). The feminine plural clitic
+reaches every clitic path the earlier fixes built:
+
+- the participle agreement (A67): `le ha viste`;
+- enclisis (A70): `velas`, `veja-as`, `mangiarle`, `comerlas`, `comê-las`;
+- the Spanish doubled group (A53): `las ve a ella y a ella`.
+
+The masculine plural keeps `li` / `los` / `os`, and French `les` is unchanged. The Italian negative
+command still attaches the clitic to the full infinitive (`non vederele`), which is A86.
+
+- **Tests:** [`packages/engine/test/objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts)
+  → the three *known bugs: … feminine plural object clitic* blocks. The pinning `test.fails` are now
+  passing `test`s. The new *feminine plural object clitic: through the other clitic paths* block
+  covers the participle, enclisis and the doubled group, with a guard for the masculine plural and
+  French.
+- Unit tests: `predicateText.test.ts` (it, es, pt).

@@ -121,6 +121,7 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(VER), el(np(EU)))).toBe('me vê');
       expect(predicateText(GATO, vp(VER), el(np(ELA)))).toBe('a vê');
       expect(predicateText(GATO, vp(VER), el(np(ELES)))).toBe('os vê');
+      expect(predicateText(GATO, vp(VER), el(np(ELES, { gender: 'fem' })))).toBe('as vê');
       expect(predicateText(GATO, vp(VER, { tense: 'past' }), el(np(NOS)))).toBe('nos viu');
     });
 

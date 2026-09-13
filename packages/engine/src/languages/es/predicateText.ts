@@ -26,8 +26,13 @@ export function predicateText(
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correría")
   // or imperfect-subjunctive (protasis, "comiera") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
-  const pn = moodPN(subjectForms);
-  const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
+  // With a plural noun object the impersonal se is the passive se, and the finite verb agrees with its
+  // patient: "se comen los ratones", "se han comido los ratones". A clitic object keeps se impersonal.
+  const passiveSe = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
+    && directObject.agreement['number'] === 'plural';
+  const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
+  const pn = moodPN(agreeForms);
+  const finite = (m: ConceptForms) => moodForm('es', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
   // A47: Spanish splits the copula. `estar` covers two BE frames; `ser` everything else.
   //  · Location — "el gato está en la casa", never "*es en la casa". A place is `estar`
   //    unconditionally, whatever the spatial relation, so a locative alone selects it; the past
@@ -66,7 +71,7 @@ export function predicateText(
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
-      : aspectVerb(copulaVerb.forms, subjectForms, tense, aspect, mood);
+      : aspectVerb(copulaVerb.forms, agreeForms, tense, aspect, mood);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".

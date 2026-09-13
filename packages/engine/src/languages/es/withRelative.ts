@@ -17,7 +17,12 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return withPoss;
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
-  const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
+  // A plural head gapped as the object of the impersonal se is the passive se's patient, and the verb
+  // agrees with it: "los ratones que se comen".
+  const passiveSe = !subjectRelative && rel.headRole === 'directObject' && isGenericSubject(rel.subject!)
+    && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
+  const agreeForms = subjectRelative ? np.head.forms
+    : passiveSe ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
   // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
   // on agreeForms), not as a subject word — "una cosa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);

@@ -62,6 +62,13 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(JUNGE)) }))).toBe('dem Jungen');
     });
 
+    // A71: a possessive is an ein-word in the article's place, after the preposition alone.
+    test('a possessive replaces the article, declined for the case', () => {
+      expect(complementsPhrase(complements({ terminus: complement(np(KATZE, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('meiner Katze');
+      expect(complementsPhrase(complements({ source: complement(np(HAUS, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('aus meinem Haus');
+      expect(complementsPhrase(complements({ locative: complement(np(HAUS, {}, { ...{ possessor: { kind: 'pronominal', person: '1', number: 'singular' } }, adjectives: [adj(KLEIN)] })) }))).toBe('in meinem kleinen Haus');
+    });
+
     test('an inanimate goal takes "in" + the accusative', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER)) }))).toBe('in den Behälter');
       expect(complementsPhrase(complements({ terminus: complement(np(BEHAELTER, { definiteness: 'indefinite' })) }))).toBe('in einen Behälter');

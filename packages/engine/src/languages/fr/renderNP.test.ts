@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { ResolvedNounPhrase } from '../../types.js';
+import { possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 import {
   AILE, ANGE, ANIMAL, BON, CHAT, CHIEN, concept, CREATEUR, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
   MANGER, nounModifier, np, PERE, PETIT, PHRASE, SEMANTIQUE, SOURIS, TRISTE, VIEUX, vp,
@@ -12,8 +12,8 @@ const VOILE: Forms = { base: 'voile', plural: 'voiles', gender: 'fem', count: 's
 const PIERRE: Forms = { base: 'pierre', plural: 'pierres', gender: 'fem', count: 'singular', uncountable: '1' };
 const OBJET: Forms = { base: 'objet', plural: 'objets', gender: 'masc', count: 'singular' };
 
-/** The ordinary subject/object head: the determiner the phrase's own forms carry. */
-const withArticle = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(phrase.head.forms, plural, lead));
+/** The ordinary subject/object head: the determiner the phrase's own forms carry, read as every caller reads them. */
+const withArticle = (phrase: ResolvedNounPhrase) => renderNP(phrase, (plural, lead) => artFor(possessedHeadForms(phrase, 'bare'), plural, lead));
 
 describe('renderNP', () => {
   test('hands the head the plurality and the word that follows it', () => {
@@ -62,9 +62,11 @@ describe('renderNP', () => {
 
   test('a pronominal possessor replaces the head, agreeing with the possessed noun', () => {
     const his = { kind: 'pronominal', person: '3', number: 'singular' } as const;
-    expect(renderNP(np(CHIEN, {}, { possessor: his }), () => 'le')).toBe('son chien');
-    expect(renderNP(np(MAISON, {}, { possessor: his }), () => 'la')).toBe('sa maison');
-    expect(renderNP(np(LIVRE, { number: 'plural' }, { possessor: his }), () => 'les')).toBe('ses livres');
+    expect(withArticle(np(CHIEN, {}, { possessor: his }))).toBe('son chien');
+    expect(withArticle(np(MAISON, {}, { possessor: his }))).toBe('sa maison');
+    expect(withArticle(np(LIVRE, { number: 'plural' }, { possessor: his }))).toBe('ses livres');
+    // A complement's head keeps its preposition before the possessive.
+    expect(renderNP(np(MAISON, {}, { possessor: his }), () => 'dans')).toBe('dans sa maison');
     expect(withArticle(np(MAISON, {}, { possessor: { kind: 'pronominal', person: '1', number: 'plural' } }))).toBe('notre maison');
     expect(withArticle(np(LIVRE, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '3', number: 'plural' } }))).toBe('leurs livres');
   });

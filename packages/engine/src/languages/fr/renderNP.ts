@@ -1,4 +1,4 @@
-import { isPronominalPossessor, joinConjuncts, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor, joinConjuncts, possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
 import { possessiveFr } from '../../possessive.js';
 import { deDet } from './deDet.js';
 import { elidesBefore } from './elidesBefore.js';
@@ -19,19 +19,19 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   const { pre, post } = splitAdjectives(np);
   const lead = pre[0] ?? noun;
   // A pronominal possessor ("**son** chien") is a prenominal possessive that replaces the article,
-  // agreeing with *this* possessed head; mon/ton/son stand in before a vowel-initial feminine.
+  // agreeing with *this* possessed head; mon/ton/son stand in before a vowel-initial feminine. The
+  // caller builds the head from `possessedHeadForms(np, 'bare')`, so what is left of it is a
+  // complement's preposition alone ("à ton chien", "dans ma maison", "de mon chien").
   const poss = np.possessor;
-  const core = poss && isPronominalPossessor(poss)
-    ? [
-        possessiveFr(
-          poss,
-          { gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
-          elidesBefore(forms, lead),
-        ),
-        ...pre,
-        noun,
-      ].join(' ')
-    : joinArt(headFor(plural, lead), [...pre, noun].join(' '));
+  const possWord = poss && isPronominalPossessor(poss)
+    ? possessiveFr(
+        poss,
+        { gender: (forms['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
+        elidesBefore(forms, lead),
+      )
+    : '';
+  const words = [possWord, ...pre, noun].filter(Boolean);
+  const core = joinArt(headFor(plural, words[0] ?? noun), words.join(' '));
   // Coordinate the postnominal adjectives as a list: commas between all but the last pair, "et"
   // only before the last ("fort, heureux et froid"), like a coordinated noun slot.
   const postStr = joinConjuncts(post, ', ', () => ' et ');
@@ -46,7 +46,7 @@ export function renderNP(np: ResolvedNounPhrase, headFor: (plural: boolean, lead
   // through renderNP recurses for its own adjectives / nested possessor. (A pronominal possessor
   // was already rendered prenominally above.)
   const base = poss && !isPronominalPossessor(poss)
-    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(poss.head.forms, plural, lead))}`
+    ? `${withPost} ${renderNP(poss, (plural, lead) => deDet(possessedHeadForms(poss, 'bare'), plural, lead))}`
     : withPost;
   const rel = relativeText(np);
   return rel ? `${base} ${rel}` : base;
