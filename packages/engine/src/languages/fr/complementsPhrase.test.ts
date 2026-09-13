@@ -247,6 +247,12 @@ describe('complementsPhrase', () => {
         .toBe('par la faute des chiens');
     });
 
+    test('any other determiner follows the plain de / à', () => {
+      expect(complementsPhrase(complements({ cause: complement(np(CHIEN, { definiteness: 'indefinite' })) }))).toBe("à cause d'un chien");
+      expect(complementsPhrase(complements({ cause: complement(np(CHIEN, { definiteness: 'no' }), [sentiment('negative')]) }))).toBe("par la faute d'aucun chien");
+      expect(complementsPhrase(complements({ cause: complement(np(SOURIS, { definiteness: 'this' }), [sentiment('positive')]) }))).toBe('grâce à cette souris');
+    });
+
     test('a pronoun cause takes the tonic form, de eliding before a vowel', () => {
       expect(complementsPhrase(complements({ cause: complement(np(JE)) }))).toBe('à cause de moi');
       expect(complementsPhrase(complements({ cause: complement(np(IL)) }))).toBe('à cause de lui');

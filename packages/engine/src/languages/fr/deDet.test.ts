@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ANGE, CHAT, EAU, HOMME, MAISON, MANIERE, NOURRITURE } from './fr.fixtures.js';
+import { AFRIQUE, ANGE, CHAT, EAU, HOMME, MAISON, MANIERE, NOURRITURE } from './fr.fixtures.js';
 import { deDet } from './deDet.js';
 
 describe('deDet', () => {
@@ -8,6 +8,11 @@ describe('deDet', () => {
     expect(deDet({ ...MAISON, definiteness: 'definite' }, true, 'maisons')).toBe('des');
     expect(deDet(MAISON, false, 'maison')).toBe('de la');
     expect(deDet(HOMME, false, 'homme')).toBe("de l'");
+  });
+
+  // A proper noun takes the definite article whatever was picked, so it is not a dropped partitive.
+  test('a proper noun keeps its contracted article under any pick', () => {
+    expect(deDet({ ...AFRIQUE, definiteness: 'indefinite' }, false, 'Afrique')).toBe("de l'");
   });
 
   test('the plural indefinite des drops after de', () => {

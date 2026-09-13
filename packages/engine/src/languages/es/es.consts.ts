@@ -49,7 +49,7 @@ export const HABER_AUX: ConceptForms = { conceptId: 'HABER', forms: { '1sg_futur
 export const ESTAR_COPULA: ConceptForms = {
   conceptId: 'ESTAR',
   forms: {
-    base: 'estar',
+    base: 'estar', participle: 'estado', gerund: 'estando',
     '1sg_present': 'estoy', '2sg_present': 'estás', '3sg_present': 'está',
     '1pl_present': 'estamos', '2pl_present': 'estáis', '3pl_present': 'están',
     '1sg_past': 'estuve', '2sg_past': 'estuviste', '3sg_past': 'estuvo',

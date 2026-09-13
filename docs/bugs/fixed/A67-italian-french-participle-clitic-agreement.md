@@ -60,3 +60,41 @@ to `aspectVerbFr`. Do the same in the modal chain's resultative (`verbGroupInfin
 | | |
 |---|---|
 | **Test** | `objectPronoun.test.ts` → *known bugs: Italian participle agreement with a preceding object clitic*; `objectPronoun.test.ts` → *known bugs: French participle agreement with an object clitic* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- **Italian.** [`aspectVerb.ts`](../../../packages/engine/src/languages/it/aspectVerb.ts) and
+  [`verbGroupInfinitive.ts`](../../../packages/engine/src/languages/it/verbGroupInfinitive.ts) take an
+  optional `objectForms`, which an avere participle agrees with.
+  [`predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts) passes it for a
+  third-person object clitic only: `la ha vista`, `li ha visti`, `la aveva mangiata`, `la deve aver
+  vista`, `se il gatto la avesse vista`, `il cane che la ha vista`. With `mi` / `ti` / `ci` / `vi` the
+  agreement is optional and left out (`mi ha visto`). `lo` still reads `lo ha visto`. The clitic is not
+  elided (`la ha`, not `l'ha`); the pin accepts both.
+- **French.** [`predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts) computes
+  the object clitic before the verb group and passes its forms to `aspectVerbFr` as the preceding
+  object, unless an object relative already passes its antecedent. Every person agrees (`l'a vue`,
+  `les a vues`, `m'a vue`, `nous a vues`, `l'avait vue`, `si le chat l'avait vue`). A group resumed by
+  its clitic (A53) agrees as the group (`nous a vus, lui et moi`).
+
+Every table row now renders as wanted. A noun object, the masculine singular and the object relative
+(A37) are unchanged.
+
+Not changed here:
+
+- A feminine plural Italian object still takes the clitic `li` (`li ha viste`), which is A72.
+- A French clitic under a modal is still misplaced (`la doit avoir vu`), which is A88. Its participle
+  is left alone until the clitic sits after the modal.
+- A negated French perfect elides `ne` wrongly before the clitic (`n'l'a pas vue`), which is A93.
+
+- **Tests:** [`packages/engine/test/objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts)
+  → *known bugs: Italian / French participle agreement…*. Both pinning `test.fails` are now passing
+  `test`s. New cases:
+  - the modal, a hypothetical, the pluperfect, a relative clause, the other persons and the resumed
+    group;
+  - guards for `lo`, `mi`, a noun object, the progressive and the object relative.
+- Unit tests:
+  - `aspectVerb.test.ts` and `verbGroupInfinitive.test.ts` (it);
+  - `predicateText.test.ts` (it, fr).

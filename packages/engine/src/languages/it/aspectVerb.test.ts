@@ -18,6 +18,13 @@ describe('aspectVerb', () => {
     expect(aspectVerb(MANGIARE, VOI, 'present', 'prospective')).toBe('state per mangiare');
   });
 
+  test('an avere participle agrees with a preceding object clitic passed in', () => {
+    expect(aspectVerb(VEDERE, GATTO, 'present', 'resultative', undefined, { gender: 'fem', number: 'singular' })).toBe('ha vista');
+    expect(aspectVerb(VEDERE, GATTO, 'past', 'resultative', undefined, { gender: 'masc', number: 'plural' })).toBe('aveva visti');
+    // An essere verb still agrees with its subject.
+    expect(aspectVerb(ANDARE, GATTA, 'present', 'resultative', undefined, { gender: 'masc', number: 'plural' })).toBe('è andata');
+  });
+
   test('resultative takes avere by default, its participle unagreed', () => {
     expect(aspectVerb(VEDERE, GATTA, 'present', 'resultative')).toBe('ha visto');
     expect(aspectVerb(VEDERE, GATTO, 'past', 'resultative')).toBe('aveva visto');

@@ -225,6 +225,12 @@ describe('complementsPhrase', () => {
       expect(one('cause', complement(np(CANE, { number: 'plural' }), [sentiment('negative')]))).toBe('per colpa dei cani');
     });
 
+    test('any other determiner rides after the plain preposition', () => {
+      expect(one('cause', complement(np(CANE, { definiteness: 'indefinite' })))).toBe('a causa di un cane');
+      expect(one('cause', complement(np(CANE, { definiteness: 'no' }), [sentiment('negative')]))).toBe('per colpa di nessun cane');
+      expect(one('cause', complement(np(VOLPE, { definiteness: 'this' }), [sentiment('positive')]))).toBe('grazie a questa volpe');
+    });
+
     test('a positive pronoun cause is grazie a + the tonic pronoun', () => {
       const positive = [sentiment('positive')];
       expect(one('cause', complement(np(IO), positive))).toBe('grazie a me');

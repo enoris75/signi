@@ -551,7 +551,7 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
 // infinitive/instruction branches all read the lexical BE (ser). So a location or a transient state
 // takes "ser" as soon as the verb is not a simple finite form.
 describe('known bugs: Spanish estar outside the plain finite verb', () => {
-  test.fails('Spanish selects estar under a modal and in the compound tense', () => {
+  test('Spanish selects estar under a modal and in the compound tense', () => {
     expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: { locative: { phrase: np('HOUSE') } } })).es)
       .toBe('el gato debe estar en la casa.');
     expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: { predicative: { phrase: np('TIRED') } } })).es)
@@ -562,7 +562,7 @@ describe('known bugs: Spanish estar outside the plain finite verb', () => {
       .toBe('el gato ha estado cansado.');
   });
 
-  test.fails('Spanish selects estar in commands and in the infinitive', () => {
+  test('Spanish selects estar in commands and in the infinitive', () => {
     const inHouse = { locative: { phrase: np('HOUSE') } };
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: inHouse }), imperative: true }).es)
       .toBe('no estés en la casa.');
@@ -574,6 +574,25 @@ describe('known bugs: Spanish estar outside the plain finite verb', () => {
       .toBe('estar en la casa.');
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'BE', { complements: inHouse }), infinitive: true }).es)
       .toBe('estar en la casa.');
+  });
+
+  test('Spanish keeps estar in every compound tense, the affirmative tú command and a relative clause', () => {
+    const inHouse = { locative: { phrase: np('HOUSE') } };
+    const tired = { predicative: { phrase: np('TIRED') } };
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative', tense: 'past' }, complements: inHouse })).es).toBe('el gato había estado en la casa.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative', tense: 'future' }, complements: tired })).es).toBe('el gato habrá estado cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'CAN' }], aspect: 'resultative' }, complements: tired })).es).toBe('el gato puede haber estado cansado.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: inHouse }), imperative: true }).es).toBe('está en la casa.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true }, complements: tired }), imperative: true }).es).toBe('no estés cansado.');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', aspect: 'resultative' }, complements: tired } }), 'RUN')).es).toBe('el gato que ha estado cansado corre.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'prospective' }, complements: tired })).es).toBe('el gato está a punto de estar cansado.');
+  });
+
+  test('regression: a predicate noun keeps ser in every form', () => {
+    const legend = { predicative: { phrase: np('LEGEND') } };
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { modals: [{ verb: 'MUST' }] }, complements: legend })).es).toBe('el gato debe ser una leyenda.');
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative' }, complements: legend })).es).toBe('el gato ha sido una leyenda.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: legend }), imperative: true }).es).toBe('sé una leyenda.');
   });
 });
 

@@ -86,9 +86,9 @@ export function complementsPhrase(
       // prefixes source with the ablative adverb "longe" so it reads as motion away ("corro
       // longe da criança"); bare "de" reads as origin/possession, not departure — which is right
       // for COME/GO and the transitive LOAD/IMPORT, whose source is an origin.
-      // Cause reads "por causa de" + the "de"-contracted article ("por causa do cão"); the
-      // sentiment swaps the connector — negative "por culpa do cão", positive "graças ao cão"
-      // ("a"-contracted via datPrep).
+      // Cause reads "por causa de" + the cause's own determiner, contracted with the article or a
+      // demonstrative ("por causa do cão", "deste cão", "de um cão"); the sentiment swaps the
+      // connector — negative "por culpa do cão", positive "graças ao cão".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
         type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), f, plural) :
@@ -107,9 +107,9 @@ export function complementsPhrase(
         type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
         type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `${connectorShared ? '' : 'graças '}${datPrep(f, plural)}` :
-          causeSent === 'negative' ? `por culpa ${dePrep(f, plural)}` :
-          `${connectorShared ? '' : 'por causa '}${dePrep(f, plural)}`
+          causeSent === 'positive' ? `${connectorShared ? '' : 'graças '}${contractDet(datPrep, 'a', f, plural)}` :
+          causeSent === 'negative' ? `por culpa ${contractDet(dePrep, 'de', f, plural)}` :
+          `${connectorShared ? '' : 'por causa '}${contractDet(dePrep, 'de', f, plural)}`
         ) :
         spatialHead(pathSpecifier(c), f, plural);
       return withRelative(`${head} ${noun}`, np);

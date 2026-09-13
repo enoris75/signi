@@ -7,19 +7,25 @@ import { agreeAdj } from './agreeAdj.js';
  * stare andando", "deve stare per andare"). The resultative infinitive apocopates "avere"
  * to "aver" before the participle, as Italian does ("deve aver visto"), while the
  * essere-selecting verbs keep the full auxiliary and agree their participle with the
- * subject ("deve essere andata").
+ * subject ("deve essere andata"). An avere participle agrees with a third-person object clitic,
+ * which climbs ahead of the modal (`objectForms`: "la deve aver vista").
  */
 export function verbGroupInfinitive(
   verbForms: Record<string, string>,
   subjectForms: Record<string, string>,
   aspect: Aspect,
+  objectForms?: Record<string, string>,
 ): string {
   const inf = verbForms['base'] ?? '';
   if (aspect === 'progressive') return `stare ${verbForms['gerund'] ?? inf}`;
   if (aspect === 'prospective') return `stare per ${inf}`;
   if (aspect === 'resultative') {
     const base = verbForms['participle'] ?? inf;
-    if (verbForms['aux'] !== 'be') return `aver ${base}`;
+    if (verbForms['aux'] !== 'be') {
+      return objectForms
+        ? `aver ${agreeAdj(base, objectForms['gender'] ?? 'masc', (objectForms['number'] ?? 'singular') === 'plural')}`
+        : `aver ${base}`;
+    }
     const part = agreeAdj(base, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural');
     return `essere ${part}`;
   }

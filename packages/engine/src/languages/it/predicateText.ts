@@ -24,6 +24,11 @@ export function predicateText(
   // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
   const pn = moodPN(subjectForms);
+  // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
+  // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
+  // and left out.
+  const cliticObject = directObject && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
+  const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : undefined;
   const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
@@ -33,11 +38,11 @@ export function predicateText(
         // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
         // voglio mai poter sempre andare"); the main verb's adverb is appended after the group.
         ...modalChain(modals, finite, (m) => ({ post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(verb.forms, subjectForms, aspect),
+        verbGroupInfinitive(verb.forms, subjectForms, aspect, agreeingObject),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(verb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
+      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood, agreeingObject);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.

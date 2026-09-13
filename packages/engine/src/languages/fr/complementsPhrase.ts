@@ -5,7 +5,6 @@ import { coordinate } from './coordinate.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { dePrep } from './dePrep.js';
 import { LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { joinArt } from './joinArt.js';
@@ -72,9 +71,9 @@ export function complementsPhrase(
       // motion verb prefixes source with the ablative adverb "loin" so it clearly reads as motion
       // away ("je cours loin de l'enfant"); bare "de" reads as a partitive/complement, not
       // departure — which is exactly right for COME/GO and the transitive LOAD/IMPORT.
-      // Cause reads "à cause de" + the "de"-contracted article ("à cause du chien"); the
-      // sentiment swaps the connector — negative "par la faute du chien", positive "grâce au
-      // chien" ("à"-contracted via datPrep).
+      // Cause reads "à cause de" + the cause's own determiner, contracted only when definite ("à
+      // cause du chien", "à cause d'un chien"); the sentiment swaps the connector — negative "par la
+      // faute du chien", positive "grâce au chien".
       // The preposition contracts with the article ("à"+"le" → "au"), so it cannot be factored
       // out in front of a coordinated complement — each conjunct carries its own contracted head
       // ("au chat et au chien"). Repeating it also lets each conjunct pick its own preposition,
@@ -108,9 +107,9 @@ export function complementsPhrase(
         ) :
         type === 'source'    ? `${sourceAdverb}${deDet(nf, plural, lead)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `grâce ${datPrep(nf, plural, lead)}` :
-          causeSent === 'negative' ? `par la faute ${dePrep(nf, plural, lead)}` :
-          `à cause ${dePrep(nf, plural, lead)}`
+          causeSent === 'positive' ? `grâce ${aDet(nf, plural, lead)}` :
+          causeSent === 'negative' ? `par la faute ${deDet(nf, plural, lead)}` :
+          `à cause ${deDet(nf, plural, lead)}`
         ) :
         spatialHead(pathSpecifier(c), nf, plural, lead);
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "à la maison",
@@ -140,7 +139,7 @@ export function complementsPhrase(
           return coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, headFor(np.head.forms)));
         }
         const tail = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-          causeSent === 'positive' ? datPrep(nf, plural, lead) : dePrep(nf, plural, lead);
+          causeSent === 'positive' ? aDet(nf, plural, lead) : deDet(nf, plural, lead);
         const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person'] ? pronoun(np.head.forms) : renderNP(np, tail(np.head.forms)));
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounPhrase, VerbPhrase } from '@signi/shared';
+import type { NounElement, NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A pronoun in the DIRECT-OBJECT slot — "the cat sees me / you / him". A pronoun object is not a
@@ -195,7 +195,7 @@ describe('known bugs: German coordinated pronoun object', () => {
 // ("l'ha vista", "li ha visti"). `aspectVerb` agrees the participle only for an "essere" verb, with
 // the subject, and never sees the object. The pin accepts "la ha" or "l'ha" and pins the agreement.
 describe('known bugs: Italian participle agreement with a preceding object clitic', () => {
-  test.fails('Italian agrees the past participle with a preceding la/li', () => {
+  test('Italian agrees the past participle with a preceding la/li', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } }), 'it'))
       .toMatch(/^il gatto (?:l'|la )ha vista\.$/);
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { number: 'plural' }), verbPhrase: { aspect: 'resultative' } }), 'it'))
@@ -203,18 +203,57 @@ describe('known bugs: Italian participle agreement with a preceding object cliti
     expect(say(clause(np('CAT'), 'EAT', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative', tense: 'past' } }), 'it'))
       .toMatch(/^il gatto (?:l'|la )aveva mangiata\.$/);
   });
+
+  const sawIt = (extra: Partial<NounPhrase>, verbPhrase: Partial<VerbPhrase> = { aspect: 'resultative' }) =>
+    say(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', extra), verbPhrase }), 'it');
+
+  test('Italian agrees under a modal, in a hypothetical and in a relative clause', () => {
+    expect(sawIt({ gender: 'fem' }, { aspect: 'resultative', modals: [{ verb: 'MUST' }] })).toBe('il gatto la deve aver vista.');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } }) }, 'it'))
+      .toBe('se il gatto la avesse vista, il cane correrebbe.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE', aspect: 'resultative' }, directObject: np('THIRD_PERSON', { gender: 'fem' }) } }), 'RUN'), 'it'))
+      .toBe('il cane che la ha vista corre.');
+  });
+
+  test('regression: lo, the optional mi / ti and a noun object leave the participle alone', () => {
+    expect(sawIt({})).toBe('il gatto lo ha visto.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('FIRST_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('il gatto mi ha visto.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), verbPhrase: { aspect: 'resultative' } }), 'it')).toBe('il gatto ha visto la casa.');
+    expect(sawIt({ gender: 'fem' }, { aspect: 'progressive' })).toBe('il gatto la sta vedendo.');
+  });
 });
 
 // A67. An avoir participle agrees with a preceding direct object, and an object clitic always
 // precedes it: "le chat l'a vue", "les a vus". A37 threads the preceding object into
 // `aspectVerbFr` only from an object-relative clause; `predicateText` never passes the clitic's forms.
 describe('known bugs: French participle agreement with an object clitic', () => {
-  test.fails('French agrees the avoir participle with a preceding object clitic', () => {
+  test('French agrees the avoir participle with a preceding object clitic', () => {
     const sawIt = (extra: Parameters<typeof np>[1]) =>
       sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', extra), verbPhrase: { aspect: 'resultative' } })).fr;
     expect(sawIt({ gender: 'fem' })).toBe("le chat l'a vue.");
     expect(sawIt({ number: 'plural' })).toBe('le chat les a vus.');
     expect(sawIt({ number: 'plural', gender: 'fem' })).toBe('le chat les a vues.');
+  });
+
+  test('French agrees in every person, in the pluperfect, a hypothetical and a relative clause', () => {
+    const saw = (object: NounElement, verbPhrase: Partial<VerbPhrase> = { aspect: 'resultative' }) =>
+      sayAll(clause(np('CAT'), 'SEE', { directObject: object, verbPhrase })).fr;
+    expect(saw(np('FIRST_PERSON', { gender: 'fem' }))).toBe("le chat m'a vue.");
+    expect(saw(np('FIRST_PERSON', { number: 'plural', gender: 'fem' }))).toBe('le chat nous a vues.');
+    expect(saw(np('THIRD_PERSON', { gender: 'fem' }), { aspect: 'resultative', tense: 'past' })).toBe("le chat l'avait vue.");
+    // A resumed group agrees as the group.
+    expect(saw({ conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' })).toBe('le chat nous a vus, lui et moi.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { aspect: 'resultative' } }) }).fr)
+      .toBe("si le chat l'avait vue, le chien courrait.");
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE', aspect: 'resultative' }, directObject: np('THIRD_PERSON', { gender: 'fem' }) } }), 'RUN')).fr)
+      .toBe("le chien qui l'a vue court.");
+  });
+
+  test('regression: the masculine singular, a noun object and the object relative are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON'), verbPhrase: { aspect: 'resultative' } })).fr).toBe("le chat l'a vu.");
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('HOUSE'), verbPhrase: { aspect: 'resultative' } })).fr).toBe('le chat a vu la maison.');
+    expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', aspect: 'resultative' } } }), 'RUN')).fr)
+      .toBe('la souris que le chat a mangée court.');
   });
 });
 

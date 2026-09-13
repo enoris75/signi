@@ -124,3 +124,45 @@ rest unfused (`de um`, `de nenhum`, `a este`).
 | | |
 |---|---|
 | **Test** | `complements/cause.test.ts` → *known bugs: Italian cause determiner*; `complements/cause.test.ts` → *known bugs: French cause determiner*; `complements/cause.test.ts` → *known bugs: Spanish cause determiner*; `complements/cause.test.ts` → *known bugs: Portuguese cause determiner* (4 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed. The cause connectors use the determiner-aware
+heads the other complements use:
+
+- [`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts):
+  `prepDet('di' | 'a', …)`.
+- [`fr/complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts): `deDet`
+  after `à cause` / `par la faute`, and `aDet` after `grâce`, including the shared-connector group
+  from A54.
+- [`es/complementsPhrase.ts`](../../../packages/engine/src/languages/es/complementsPhrase.ts): `deDet` /
+  `aDet`.
+- [`pt/complementsPhrase.ts`](../../../packages/engine/src/languages/pt/complementsPhrase.ts):
+  `contractDet(dePrep | datPrep, …)`.
+
+Every table row now renders as wanted. The fix also covers the remaining determiners (`a causa di
+molti cani`, `par la faute de tous les chiens`, `gracias a esa mujer`), a feminine `no` (`a causa di
+nessuna donna`), and a determiner inside a group that shares its connector (`à cause d'un chien et
+de toi`). The definite cause is unchanged, as is the relativizer stand-in from A62 (`a causa del
+quale`).
+
+Routing the cause through these heads exposed two gaps that the source complement already had.
+Both are fixed here:
+
+- [`fr/deDet.ts`](../../../packages/engine/src/languages/fr/deDet.ts) treated an articled continent
+  under a non-definite pick as a dropped mass-noun partitive (`à cause d'Afrique`, `vient d'Afrique`).
+  A proper noun now keeps its contracted article (`à cause de l'Afrique`).
+- [`it/prepDet.ts`](../../../packages/engine/src/languages/it/prepDet.ts) stacked a preposition on a
+  mass noun's partitive (`a causa di dell'acqua`, `viene da dell'acqua`, and A58's `di dell'acqua`).
+  The partitive now fuses like the definite (`a causa dell'acqua`, `viene dall'acqua`); `con` keeps
+  `con dell'acqua`.
+
+- **Tests:** [`packages/engine/test/complements/cause.test.ts`](../../../packages/engine/test/complements/cause.test.ts)
+  → the four *known bugs: … cause determiner* blocks. The pinning `test.fails` are now passing
+  `test`s. New cases:
+  - the remaining determiners, groups and continents;
+  - the Italian partitive;
+  - guards for the definite contraction and Spanish's bare proper name.
+- Unit tests:
+  - `complementsPhrase.test.ts` (it, fr, es, pt);
+  - `deDet.test.ts` (fr) and `prepDet.test.ts` (it).

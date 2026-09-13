@@ -14,8 +14,11 @@ import { prepArt } from './prepArt.js';
 export function prepDet(prep: 'a' | 'da' | 'in' | 'di' | 'con' | 'come', forms: Record<string, string>, plural: boolean, lead: string): string {
   // "con" (instrumental) and "come" (similative) fuse with no article — "con il", "come il". A proper
   // noun takes the definite article whatever was picked (see `artFor`), so it fuses like one:
-  // "dall'Africa", "all'Europa".
-  const definite = (forms['definiteness'] ?? 'definite') === 'definite' || forms['proper'] === '1';
+  // "dall'Africa", "all'Europa". So does a mass noun's partitive, which is itself di + article and
+  // cannot follow another preposition: "a causa dell'acqua", never "di dell'acqua".
+  const definiteness = forms['definiteness'] ?? 'definite';
+  const partitive = forms['uncountable'] === '1' && definiteness === 'some';
+  const definite = definiteness === 'definite' || forms['proper'] === '1' || partitive;
   if (prep !== 'con' && prep !== 'come' && definite) return prepArt(prep, forms, plural, lead);
   const det = artFor(forms, plural, lead);
   return det ? `${prep} ${det}` : prep;

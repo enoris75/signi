@@ -8,7 +8,6 @@ import { itDeg } from './itDeg.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { npText } from './npText.js';
-import { prepArt } from './prepArt.js';
 import { prepDet } from './prepDet.js';
 import { renderNP } from './renderNP.js';
 import { spatialHead } from './spatialHead.js';
@@ -88,8 +87,9 @@ export function complementsPhrase(
       // verb prefixes it with the ablative adverb "via" so the two senses never collide: "corro
       // dal bambino" (motion to) vs "corro via dal bambino" (motion away from). COME/GO and the
       // transitive LOAD/IMPORT take an origin, not a departure, so they keep bare "da".
-      // Cause reads "a causa di" + the "di"-fused article ("a causa del cane"); the sentiment
-      // swaps the connector — negative "per colpa del cane", positive "grazie al cane" ("a"-fused).
+      // Cause reads "a causa di" + the cause's own determiner, fused only when definite ("a causa del
+      // cane", "a causa di un cane"); the sentiment swaps the connector — negative "per colpa del
+      // cane", positive "grazie al cane".
       // The preposition fuses with the article ("in"+"la" → "nella"), so it cannot be factored
       // out in front of a coordinated complement — each conjunct carries its own fused head:
       // "nella casa e nel bosco", never "*nella casa e il bosco". Repeating it also lets each
@@ -115,9 +115,9 @@ export function complementsPhrase(
         ) :
         type === 'source'    ? `${sourceAdverb}${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `grazie ${prepArt('a', nf, plural, lead)}` :
-          causeSent === 'negative' ? `per colpa ${prepArt('di', nf, plural, lead)}` :
-          `a causa ${prepArt('di', nf, plural, lead)}`
+          causeSent === 'positive' ? `grazie ${prepDet('a', nf, plural, lead)}` :
+          causeSent === 'negative' ? `per colpa ${prepDet('di', nf, plural, lead)}` :
+          `a causa ${prepDet('di', nf, plural, lead)}`
         ) :
         spatialHead(pathSpecifier(c), nf, plural, lead);
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "a casa", not

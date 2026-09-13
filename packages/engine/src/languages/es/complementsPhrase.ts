@@ -7,7 +7,6 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
-import { dePrep } from './dePrep.js';
 import { LOCATIVE_IDIOMS } from './es.consts.js';
 import { esAdj } from './esAdj.js';
 import { esDeg } from './esDeg.js';
@@ -93,9 +92,9 @@ export function complementsPhrase(
       // prefixes source with the ablative adverb "lejos" so it reads as motion away ("corro
       // lejos del niño"); bare "de" reads as origin/possession, not departure — which is right
       // for COME/GO and the transitive LOAD/IMPORT, whose source is an origin.
-      // Cause reads "a causa de" + the "de"-contracted article ("a causa del perro"); the
-      // sentiment swaps the connector — negative "por culpa del perro", positive "gracias al
-      // perro" ("a"-contracted via datPrep).
+      // Cause reads "a causa de" + the cause's own determiner, contracted only when definite ("a
+      // causa del perro", "a causa de un perro"); the sentiment swaps the connector — negative "por
+      // culpa del perro", positive "gracias al perro".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const head =
         type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), plural, af) :
@@ -113,9 +112,9 @@ export function complementsPhrase(
         type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
         type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
-          causeSent === 'positive' ? `${connectorShared ? '' : 'gracias '}${datPrep(af, plural)}` :
-          causeSent === 'negative' ? `por culpa ${dePrep(af, plural)}` :
-          `${connectorShared ? '' : 'a causa '}${dePrep(af, plural)}`
+          causeSent === 'positive' ? `${connectorShared ? '' : 'gracias '}${aDet(af, plural)}` :
+          causeSent === 'negative' ? `por culpa ${deDet(af, plural)}` :
+          `${connectorShared ? '' : 'a causa '}${deDet(af, plural)}`
         ) :
         spatialHead(pathSpecifier(c), plural, af);
       return withRelative(`${head} ${noun}`, np);

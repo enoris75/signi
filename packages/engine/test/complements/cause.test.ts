@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { CauseSentiment, NounPhrase } from '@signi/shared';
+import type { CauseSentiment, NounElement, NounPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from '../harness.js';
 
 const criesBecauseOf = (value: CauseSentiment) =>
@@ -178,7 +178,7 @@ describe('known bugs: Italian cause determiner', () => {
   const cries = (phrase: ReturnType<typeof np>, value: 'neutral' | 'negative' | 'positive' = 'neutral') =>
     say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value }] } } }), 'it');
 
-  test.fails('Italian keeps the cause\'s own determiner', () => {
+  test('Italian keeps the cause\'s own determiner', () => {
     expect(cries(np('DOG', { definiteness: 'no' }))).toBe('il gatto non piange a causa di nessun cane.');
     expect(cries(np('DOG', { definiteness: 'indefinite' }))).toBe('il gatto piange a causa di un cane.');
     expect(cries(np('DOG', { definiteness: 'this' }))).toBe('il gatto piange a causa di questo cane.');
@@ -186,13 +186,27 @@ describe('known bugs: Italian cause determiner', () => {
     expect(cries(np('DOG', { definiteness: 'some', number: 'plural' }), 'negative')).toBe('il gatto piange per colpa di alcuni cani.');
     expect(cries(np('DOG', { definiteness: 'indefinite' }), 'positive')).toBe('il gatto piange grazie a un cane.');
   });
+
+  test('Italian keeps the rest of the determiners, and fuses a continent and a partitive like the definite', () => {
+    expect(cries(np('DOG', { definiteness: 'many', number: 'plural' }))).toBe('il gatto piange a causa di molti cani.');
+    expect(cries(np('DOG', { definiteness: 'all', number: 'plural' }), 'negative')).toBe('il gatto piange per colpa di tutti i cani.');
+    expect(cries(np('WOMAN', { definiteness: 'that' }), 'positive')).toBe('il gatto piange grazie a quella donna.');
+    expect(cries(np('AFRICA', { definiteness: 'indefinite' }))).toBe("il gatto piange a causa dell'Africa.");
+    expect(cries(np('WATER', { definiteness: 'some' }))).toBe("il gatto piange a causa dell'acqua.");
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('WATER', { definiteness: 'some' }) } } }), 'it')).toBe("il gatto viene dall'acqua.");
+  });
+
+  test('regression: the definite cause still fuses', () => {
+    expect(cries(np('DOG'))).toBe('il gatto piange a causa del cane.');
+    expect(cries(np('WOMAN'), 'positive')).toBe('il gatto piange grazie alla donna.');
+  });
 });
 
 // A65. The French cause heads every noun with the definite contractions `dePrep` / `datPrep`
 // ("à cause du chien", "grâce au chien"), so the noun's own determiner is dropped. With `no` the
 // clause still takes "ne" from `hasNegativeComplement`, leaving a stray negator.
 describe('known bugs: French cause determiner', () => {
-  test.fails('French keeps the cause noun\'s determiner', () => {
+  test('French keeps the cause noun\'s determiner', () => {
     const runsBecauseOf = (value: 'neutral' | 'negative' | 'positive', extra: Parameters<typeof np>[1]) =>
       sayAll(clause(np('CAT'), 'RUN', {
         complements: { cause: { phrase: np('DOG', extra), specifiers: [{ kind: 'sentiment', value }] } },
@@ -203,6 +217,28 @@ describe('known bugs: French cause determiner', () => {
     expect(runsBecauseOf('negative', { definiteness: 'indefinite' })).toBe("le chat court par la faute d'un chien.");
     expect(runsBecauseOf('positive', { definiteness: 'indefinite' })).toBe('le chat court grâce à un chien.');
   });
+
+  const criesFr = (value: CauseSentiment, phrase: NounElement) =>
+    sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value }] } } })).fr;
+
+  test('French keeps the rest of the determiners, and a continent keeps its article', () => {
+    expect(criesFr('neutral', np('DOG', { definiteness: 'many', number: 'plural' }))).toBe('le chat pleure à cause de beaucoup de chiens.');
+    expect(criesFr('negative', np('DOG', { definiteness: 'all', number: 'plural' }))).toBe('le chat pleure par la faute de tous les chiens.');
+    expect(criesFr('neutral', np('WOMAN', { definiteness: 'no' }))).toBe("le chat ne pleure à cause d'aucune femme.");
+    expect(criesFr('neutral', np('AFRICA', { definiteness: 'indefinite' }))).toBe("le chat pleure à cause de l'Afrique.");
+  });
+
+  test('French keeps the determiners inside a group that shares its connector', () => {
+    expect(criesFr('neutral', { conjuncts: [np('DOG', { definiteness: 'indefinite' }), np('SECOND_PERSON')], conjunction: 'and' }))
+      .toBe("le chat pleure à cause d'un chien et de toi.");
+    expect(criesFr('positive', { conjuncts: [np('SECOND_PERSON'), np('WOMAN', { definiteness: 'this' })], conjunction: 'and' }))
+      .toBe('le chat pleure grâce à toi et à cette femme.');
+  });
+
+  test('regression: the definite cause still contracts', () => {
+    expect(criesFr('neutral', np('DOG'))).toBe('le chat pleure à cause du chien.');
+    expect(criesFr('positive', np('WOMAN'))).toBe('le chat pleure grâce à la femme.');
+  });
 });
 
 // A65. The noun branch of the Spanish cause renders its connector with `dePrep` / `datPrep`. Both
@@ -210,7 +246,7 @@ describe('known bugs: French cause determiner', () => {
 // are never called, so every cause comes out definite whatever its determiner. For `no` the
 // preverbal negator still fires, so the sentence means the opposite.
 describe('known bugs: Spanish cause determiner', () => {
-  test.fails("Spanish keeps the cause's own determiner", () => {
+  test("Spanish keeps the cause's own determiner", () => {
     expect(sayAll(clause(np('CAT'), 'CRY', {
       complements: { cause: { phrase: np('DOG', { definiteness: 'indefinite' }) } },
     })).es).toBe('el gato llora a causa de un perro.');
@@ -227,6 +263,23 @@ describe('known bugs: Spanish cause determiner', () => {
       complements: { cause: { phrase: np('DOG', { definiteness: 'indefinite' }), specifiers: [{ kind: 'sentiment', value: 'negative' }] } },
     })).es).toBe('el gato llora por culpa de un perro.');
   });
+
+  const criesEs = (value: CauseSentiment, phrase: NounElement) =>
+    sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value }] } } })).es;
+
+  test('Spanish keeps the rest of the determiners, including inside a group that shares its connector', () => {
+    expect(criesEs('neutral', np('DOG', { definiteness: 'many', number: 'plural' }))).toBe('el gato llora a causa de muchos perros.');
+    expect(criesEs('positive', np('WOMAN', { definiteness: 'that' }))).toBe('el gato llora gracias a esa mujer.');
+    expect(criesEs('neutral', np('WOMAN', { definiteness: 'no' }))).toBe('el gato no llora a causa de ninguna mujer.');
+    expect(criesEs('neutral', { conjuncts: [np('DOG', { definiteness: 'indefinite' }), np('SECOND_PERSON')], conjunction: 'and' }))
+      .toBe('el gato llora a causa de un perro y de ti.');
+  });
+
+  test('regression: the definite cause still contracts, and a proper name stays bare', () => {
+    expect(criesEs('neutral', np('DOG'))).toBe('el gato llora a causa del perro.');
+    expect(criesEs('positive', np('WOMAN'))).toBe('el gato llora gracias a la mujer.');
+    expect(criesEs('neutral', np('AFRICA', { definiteness: 'indefinite' }))).toBe('el gato llora a causa de África.');
+  });
 });
 
 // A65. The Portuguese noun cause fuses its connector with the definite article (`dePrep` /
@@ -239,13 +292,30 @@ describe('known bugs: Portuguese cause determiner', () => {
       complements: { cause: { phrase: np('DOG', definiteness), specifiers: [{ kind: 'sentiment', value }] } },
     })).pt;
 
-  test.fails('Portuguese keeps the cause\'s own determiner', () => {
+  test('Portuguese keeps the cause\'s own determiner', () => {
     expect(criesBecauseOf({ definiteness: 'indefinite' })).toBe('o gato chora por causa de um cão.');
     expect(criesBecauseOf({ definiteness: 'this' })).toBe('o gato chora por causa deste cão.');
     expect(criesBecauseOf({ definiteness: 'no' })).toBe('o gato não chora por causa de nenhum cão.');
     expect(criesBecauseOf({ definiteness: 'some' })).toBe('o gato chora por causa de alguns cães.');
     expect(criesBecauseOf({ definiteness: 'indefinite' }, 'negative')).toBe('o gato chora por culpa de um cão.');
     expect(criesBecauseOf({ definiteness: 'this' }, 'positive')).toBe('o gato chora graças a este cão.');
+  });
+
+  const criesPt = (value: CauseSentiment, phrase: NounElement) =>
+    sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase, specifiers: [{ kind: 'sentiment', value }] } } })).pt;
+
+  test('Portuguese keeps the rest of the determiners, including inside a group that shares its connector', () => {
+    expect(criesPt('neutral', np('DOG', { definiteness: 'many', number: 'plural' }))).toBe('o gato chora por causa de muitos cães.');
+    expect(criesPt('negative', np('DOG', { definiteness: 'all', number: 'plural' }))).toBe('o gato chora por culpa de todos os cães.');
+    expect(criesPt('positive', np('WOMAN', { definiteness: 'that' }))).toBe('o gato chora graças a essa mulher.');
+    expect(criesPt('neutral', { conjuncts: [np('DOG', { definiteness: 'indefinite' }), np('SECOND_PERSON')], conjunction: 'and' }))
+      .toBe('o gato chora por causa de um cão e de você.');
+  });
+
+  test('regression: the definite cause and a continent still contract', () => {
+    expect(criesPt('neutral', np('DOG'))).toBe('o gato chora por causa do cão.');
+    expect(criesPt('positive', np('WOMAN'))).toBe('o gato chora graças à mulher.');
+    expect(criesPt('neutral', np('AFRICA', { definiteness: 'indefinite' }))).toBe('o gato chora por causa da África.');
   });
 });
 

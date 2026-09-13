@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (86 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (77 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A65 | [A65-romance-cause-determiner.md](A-must-fix/A65-romance-cause-determiner.md) |
-| A66 | [A66-spanish-portuguese-estar-outside-finite-copula.md](A-must-fix/A66-spanish-portuguese-estar-outside-finite-copula.md) |
-| A67 | [A67-italian-french-participle-clitic-agreement.md](A-must-fix/A67-italian-french-participle-clitic-agreement.md) |
 | A68 | [A68-french-portuguese-invariable-zero.md](A-must-fix/A68-french-portuguese-invariable-zero.md) |
 | A69 | [A69-english-spanish-connector-comma.md](A-must-fix/A69-english-spanish-connector-comma.md) |
 | A70 | [A70-romance-clitic-enclisis.md](A-must-fix/A70-romance-clitic-enclisis.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A62 | [A62-relative-clause-on-complement-slot.md](fixed/A62-relative-clause-on-complement-slot.md) | English, German, Italian, French, Spanish, Portuguese | 2026-09-13 |
 | A63 | [A63-articled-proper-name-fusion.md](fixed/A63-articled-proper-name-fusion.md) | German, Italian | 2026-09-13 |
 | A64 | [A64-german-isch-superlative.md](fixed/A64-german-isch-superlative.md) | German | 2026-09-13 |
+| A65 | [A65-romance-cause-determiner.md](fixed/A65-romance-cause-determiner.md) | Italian, French, Spanish, Portuguese | 2026-09-13 |
+| A66 | [A66-spanish-portuguese-estar-outside-finite-copula.md](fixed/A66-spanish-portuguese-estar-outside-finite-copula.md) | Spanish, Portuguese | 2026-09-13 |
+| A67 | [A67-italian-french-participle-clitic-agreement.md](fixed/A67-italian-french-participle-clitic-agreement.md) | Italian, French | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

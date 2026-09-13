@@ -152,6 +152,12 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL)))).toBe("l'a vu");
     });
 
+    test('an avoir participle agrees with the preceding clitic', () => {
+      expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL, { gender: 'fem' })))).toBe("l'a vue");
+      expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL, { number: 'plural', gender: 'fem' })))).toBe('les a vues');
+      expect(predicateText(CHAT, vp(VOIR, { aspect: 'resultative' }), el(np(IL), np(JE)))).toBe('nous a vus, lui et moi,');
+    });
+
     // The closing comma is tidied against the full stop by `punctuate`, in the engine.
     test('a coordinated object holding a pronoun is resumed by its plural clitic and dislocated', () => {
       expect(predicateText(CHAT, vp(VOIR), el(np(IL), np(JE)))).toBe('nous voit, lui et moi,');

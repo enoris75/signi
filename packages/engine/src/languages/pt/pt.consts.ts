@@ -65,7 +65,7 @@ export const TER_AUX: ConceptForms = { conceptId: 'TER', forms: { '1sg_future': 
 export const ESTAR_COPULA: ConceptForms = {
   conceptId: 'ESTAR',
   forms: {
-    base: 'estar',
+    base: 'estar', participle: 'estado', gerund: 'estando',
     '1sg_present': 'estou', '2sg_present': 'estás', '3sg_present': 'está',
     '1pl_present': 'estamos', '2pl_present': 'estais', '3pl_present': 'estão',
     '1sg_past': 'estive', '2sg_past': 'estiveste', '3sg_past': 'esteve',

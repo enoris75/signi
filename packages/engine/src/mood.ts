@@ -148,10 +148,12 @@ const PT_SUBJ_PRES_END = {
 // the infinitive).
 const ES_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   BE:   { '2sg': 'seas', '1pl': 'seamos', '2pl': 'seáis' },   // ser → sea…
+  ESTAR: { '2sg': 'estés', '1pl': 'estemos', '2pl': 'estéis' }, // estar → esté… (1sg "estoy" breaks the -o rule)
   KNOW: { '2sg': 'sepas', '1pl': 'sepamos', '2pl': 'sepáis' }, // saber → sepa…
 };
 const PT_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   BE:   { '2sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam' },   // ser → seja… (você/vocês)
+  ESTAR: { '2sg': 'esteja', '1pl': 'estejamos', '2pl': 'estejam' }, // estar → esteja… (1sg "estou" breaks the -o rule)
   KNOW: { '2sg': 'saiba', '1pl': 'saibamos', '2pl': 'saibam' }, // saber → saiba…
 };
 

@@ -41,6 +41,8 @@ export function predicateText(
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
   const locativeAlone = !!complements?.locative && !complements?.predicative;
+  // Every form of the verb below reads the choice, not only the finite one: "debe estar", "ha
+  // estado", "no estés", "estar en la casa".
   const copulaVerb =
     verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
@@ -59,11 +61,11 @@ export function predicateText(
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
         ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(verb.forms, aspect),
+        verbGroupInfinitive(copulaVerb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
+      : aspectVerb(copulaVerb.forms, subjectForms, tense, aspect, mood);
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
@@ -105,8 +107,8 @@ export function predicateText(
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Spanish ("Cargar un período", "No correr"), not the imperative.
     const impForm = register === 'instruction'
-      ? (verb.forms['base'] ?? conjugated)
-      : (imperativeForm('es', verb, moodPN(subjectForms), impNeg) ?? conjugated);
+      ? (copulaVerb.forms['base'] ?? conjugated)
+      : (imperativeForm('es', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `no ${impForm}` : impForm;
     return [esCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
       .filter(Boolean)
@@ -116,7 +118,7 @@ export function predicateText(
   // Spanish already gives the imperative `instruction` register above. Negation prefixes "no" ("no
   // consumir"); an object pronoun attaches enclitically ("consumirlo"), via esCliticize.
   if (mood === 'infinitive') {
-    const inf = verb.forms['base'] ?? conjugated;
+    const inf = copulaVerb.forms['base'] ?? conjugated;
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     const infVerb = infNeg ? `no ${inf}` : inf;
     return [esCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]

@@ -17,6 +17,13 @@ describe('prepDet', () => {
     expect(prepDet('a', { ...EUROPA, definiteness: 'this' }, false, 'Europa')).toBe("all'");
   });
 
+  // The partitive is itself di + article, so it fuses rather than stacking a second preposition.
+  test('a mass noun\'s partitive fuses like the definite article', () => {
+    expect(prepDet('di', { ...ACQUA, definiteness: 'some' }, false, 'acqua')).toBe("dell'");
+    expect(prepDet('da', { ...ACQUA, definiteness: 'some' }, false, 'acqua')).toBe("dall'");
+    expect(prepDet('con', { ...ACQUA, definiteness: 'some' }, false, 'acqua')).toBe("con dell'");
+  });
+
   test('con and come never fuse', () => {
     expect(prepDet('con', BASTONE, false, 'bastone')).toBe('con il');
     expect(prepDet('con', ACQUA, false, 'acqua')).toBe("con l'");

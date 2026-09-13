@@ -41,6 +41,8 @@ export function predicateText(
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
   const locativeAlone = !!complements?.locative && !complements?.predicative;
+  // Every form of the verb below reads the choice, not only the finite one: "deve estar", "tinha
+  // estado", "esteja", "estar na casa".
   const copulaVerb =
     verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
@@ -58,11 +60,11 @@ export function predicateText(
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
         ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(verb.forms, aspect),
+        verbGroupInfinitive(copulaVerb.forms, aspect),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
-      : aspectVerb(verb.forms, subjectForms, tense, aspect, mood);
+      : aspectVerb(copulaVerb.forms, subjectForms, tense, aspect, mood);
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
@@ -100,8 +102,8 @@ export function predicateText(
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in Portuguese ("Carregar um período", "Não correr"), not the imperative.
     const impForm = register === 'instruction'
-      ? (verb.forms['base'] ?? conjugated)
-      : (imperativeForm('pt', verb, moodPN(subjectForms), impNeg) ?? conjugated);
+      ? (copulaVerb.forms['base'] ?? conjugated)
+      : (imperativeForm('pt', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
     const impVerb = impNeg ? `não ${impForm}` : impForm;
     return [ptCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
       .filter(Boolean)
@@ -111,7 +113,7 @@ export function predicateText(
   // Portuguese already gives the imperative `instruction` register above. Negation prefixes "não"
   // ("não consumir"); an object pronoun attaches enclitically ("consumi-lo"), via ptCliticize.
   if (mood === 'infinitive') {
-    const inf = verb.forms['base'] ?? conjugated;
+    const inf = copulaVerb.forms['base'] ?? conjugated;
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     const infVerb = infNeg ? `não ${inf}` : inf;
     return [ptCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]

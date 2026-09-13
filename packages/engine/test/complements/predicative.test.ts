@@ -495,7 +495,7 @@ describe('known bugs: Portuguese ser vs estar outside the finite copula', () => 
   const tired = { predicative: { phrase: np('TIRED') } };
   const atHome = { locative: { phrase: np('HOUSE') } };
 
-  test.fails('Portuguese selects estar under a modal, a command, an infinitive and ter', () => {
+  test('Portuguese selects estar under a modal, a command, an infinitive and ter', () => {
     expect(sayAll(clause(np('CAT'), 'BE', { complements: tired, verbPhrase: { modals: ['MUST'] } })).pt).toBe('o gato deve estar cansado.');
     expect(sayAll(clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { modals: ['MUST'] } })).pt).toBe('o gato deve estar na casa.');
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: atHome }), imperative: true }).pt).toBe('esteja na casa.');
@@ -507,6 +507,22 @@ describe('known bugs: Portuguese ser vs estar outside the finite copula', () => 
     expect(sayAll(clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).pt).toBe('o gato deve ter estado na casa.');
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE', { complements: atHome, verbPhrase: { aspect: 'resultative' } }) }).pt)
       .toBe('se o gato tivesse estado na casa, o cão correria.');
+  });
+
+  test('Portuguese keeps estar in the other compound tenses, a plural command and a relative clause', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: tired, verbPhrase: { tense: 'future', aspect: 'resultative' } })).pt).toBe('o gato terá estado cansado.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: tired, verbPhrase: { modals: ['CAN'], aspect: 'resultative' } })).pt).toBe('o gato pode ter estado cansado.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'BE', { complements: tired }), imperative: true }).pt).toBe('estejam cansados.');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', aspect: 'resultative' }, complements: tired } }), 'RUN')).pt).toBe('o gato que esteve cansado corre.');
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), condition: clause(np('DOG'), 'BE', { complements: atHome, verbPhrase: { aspect: 'resultative' } }) }).pt)
+      .toBe('se o cão tivesse estado na casa, o gato correria.');
+  });
+
+  test('regression: a predicate noun keeps ser in every form', () => {
+    const legend = { predicative: { phrase: np('LEGEND') } };
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: legend, verbPhrase: { modals: ['MUST'] } })).pt).toBe('o gato deve ser uma lenda.');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: legend, verbPhrase: { aspect: 'resultative' } })).pt).toBe('o gato foi uma lenda.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE', { complements: legend }), imperative: true }).pt).toBe('seja uma lenda.');
   });
 });
 

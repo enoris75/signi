@@ -96,3 +96,39 @@ otherwise build `estoue`.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: Spanish estar outside the plain finite verb*; `complements/predicative.test.ts` → *known bugs: Portuguese ser vs estar outside the finite copula* (3 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shape of the fix proposed.
+
+- [`es/predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) pass `copulaVerb` to
+  every branch: the modal chain's `verbGroupInfinitive`, `aspectVerb`, `imperativeForm`, and the
+  instruction and infinitive bases.
+- `ESTAR_COPULA` ([`es.consts.ts`](../../../packages/engine/src/languages/es/es.consts.ts),
+  [`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts)) gains `participle: 'estado'`
+  and `gerund: 'estando'`.
+- [`mood.ts`](../../../packages/engine/src/mood.ts) adds ESTAR to `ES_SUBJ_OVERRIDE` (`estés / estemos /
+  estéis`) and `PT_SUBJ_OVERRIDE` (`esteja / estejamos / estejam`). The Spanish affirmative commands
+  need no `ES_IMP_OVERRIDE` entry: `está` and `estad` fall out of the regular rule.
+
+Every table row now renders as wanted in both languages. The fix also covers:
+
+- the other compound tenses (`había estado`, `habrá estado`, `habría estado`, `terá estado`);
+- a modal perfect (`puede haber estado`, `pode ter estado`);
+- the affirmative tú command (`está en la casa`) and a plural command (`estad cansados`, `estejam
+  cansados`);
+- the prospective (`está a punto de estar cansado`);
+- a relative clause (`el gato que ha estado cansado`, `o gato que esteve cansado`).
+
+A predicate noun keeps `ser` in every form (`debe ser una leyenda`, `sé una leyenda`, `foi uma lenda`).
+The progressive (`está estando en la casa`) is left unpinned, as the bug file notes.
+
+- **Tests:**
+  - [`complements/locative.test.ts`](../../../packages/engine/test/complements/locative.test.ts) →
+    *known bugs: Spanish estar outside the plain finite verb*;
+  - [`complements/predicative.test.ts`](../../../packages/engine/test/complements/predicative.test.ts)
+    → *known bugs: Portuguese ser vs estar outside the finite copula*.
+  - The three pinning `test.fails` are now passing `test`s. New cases cover the other compound tenses,
+    commands and a relative clause, with guards that a predicate noun keeps `ser`.
+- Unit tests: `predicateText.test.ts` (es, pt).

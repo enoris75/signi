@@ -17,6 +17,10 @@ describe('verbGroupInfinitive', () => {
     expect(verbGroupInfinitive(VEDERE, GATTO, 'resultative')).toBe('aver visto');
   });
 
+  test('an avere participle agrees with a preceding object clitic passed in', () => {
+    expect(verbGroupInfinitive(VEDERE, GATTO, 'resultative', { gender: 'fem', number: 'singular' })).toBe('aver vista');
+  });
+
   test('an essere verb keeps the full auxiliary and agrees its participle with the subject', () => {
     expect(verbGroupInfinitive(ANDARE, GATTO, 'resultative')).toBe('essere andato');
     expect(verbGroupInfinitive(ANDARE, GATTA, 'resultative')).toBe('essere andata');

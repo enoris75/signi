@@ -236,6 +236,12 @@ describe('complementsPhrase', () => {
       expect(render({ cause: complement(np(CAO, { number: 'plural' }), [sentiment('negative')]) })).toBe('por culpa dos cães');
     });
 
+    test('any other determiner follows the plain de / a, de fusing with a demonstrative', () => {
+      expect(render({ cause: complement(np(CAO, { definiteness: 'indefinite' })) })).toBe('por causa de um cão');
+      expect(render({ cause: complement(np(CAO, { definiteness: 'this' })) })).toBe('por causa deste cão');
+      expect(render({ cause: complement(np(RAPOSA, { definiteness: 'no' }), [sentiment('positive')]) })).toBe('graças a nenhuma raposa');
+    });
+
     test('a pronoun cause takes its tonic form, "de" fusing with ele / ela', () => {
       expect(render({ cause: complement(np(EU)) })).toBe('por causa de mim');
       expect(render({ cause: complement(np(VOCE)) })).toBe('por causa de você');

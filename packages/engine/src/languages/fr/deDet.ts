@@ -11,7 +11,9 @@ import { elidesBefore } from './elidesBefore.js';
  */
 export function deDet(forms: Record<string, string>, plural: boolean, lead: string): string {
   const def = forms['definiteness'] ?? 'definite';
-  if (def === 'definite') return dePrep(forms, plural, lead);
+  // A proper noun takes the definite article whatever was picked (see `artFor`), so it contracts
+  // like one: "à cause de l'Afrique", not the mass-noun drop "d'Afrique".
+  if (def === 'definite' || forms['proper'] === '1') return dePrep(forms, plural, lead);
   const det = artFor(forms, plural, lead);
   const drops = det === 'des' || (forms['uncountable'] === '1' && (def === 'indefinite' || def === 'some'));
   if (!det || drops) return elidesBefore(forms, lead) ? "d'" : 'de';

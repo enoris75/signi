@@ -203,6 +203,16 @@ describe('predicateText', () => {
       expect(predicateText(GATOS, be(), undefined, complements({ predicative: complement(np(FELIZ)) }))).toBe('están felices');
     });
 
+    // A66: the choice reaches every form of the verb, not only the finite one.
+    test('estar holds under a modal, in the compound tense, the command and the infinitive', () => {
+      expect(predicateText(GATO, be({ modals: [modal(DEBER)] }), undefined, inTheHouse)).toBe('debe estar en la casa');
+      expect(predicateText(GATO, be({ aspect: 'resultative' }), undefined, tired)).toBe('ha estado cansado');
+      expect(predicateText(TU, be({ mood: 'imperative', negative: true }), undefined, inTheHouse)).toBe('no estés en la casa');
+      expect(predicateText(VOSOTROS, be({ mood: 'imperative' }), undefined, inTheHouse)).toBe('estad en la casa');
+      expect(predicateText(GATO, be({ mood: 'infinitive' }), undefined, tired)).toBe('estar cansado');
+      expect(predicateText(GATO, be({ modals: [modal(DEBER)] }), undefined, aLegend)).toBe('debe ser una leyenda');
+    });
+
     test('an inherent adjective or a predicate noun keeps ser', () => {
       expect(predicateText(GATO, be(), undefined, complements({ predicative: complement(np(GRANDE)) }))).toBe('es grande');
       expect(predicateText(GATO, be(), undefined, aLegend)).toBe('es una leyenda');

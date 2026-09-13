@@ -113,6 +113,13 @@ describe('predicateText', () => {
       expect(predicateText(GATTO, vp(VEDERE, { modals: [modal(VOLERE)] }), el(np(IO)))).toBe('mi vuole vedere');
     });
 
+    test('a third-person clitic agrees the avere participle; mi / ti leave it alone', () => {
+      expect(predicateText(GATTO, vp(VEDERE, { aspect: 'resultative' }), el(np(LEI)))).toBe('la ha vista');
+      expect(predicateText(GATTO, vp(VEDERE, { aspect: 'resultative' }), el(np(LORO)))).toBe('li ha visti');
+      expect(predicateText(GATTO, vp(VEDERE, { aspect: 'resultative', modals: [modal(DOVERE)] }), el(np(LEI)))).toBe('la deve aver vista');
+      expect(predicateText(GATTO, vp(VEDERE, { aspect: 'resultative' }), el(np(IO, { gender: 'fem' })))).toBe('mi ha visto');
+    });
+
     test('a coordinated object keeps the post-verbal slot', () => {
       expect(predicateText(GATTO, vp(VEDERE), el(np(CANE), np(TOPO)))).toBe('vede il cane e il topo');
     });

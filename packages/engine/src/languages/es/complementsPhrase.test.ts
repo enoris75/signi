@@ -216,6 +216,12 @@ describe('complementsPhrase', () => {
       expect(render({ cause: complement(np(MUJER), [sentiment('negative')]) })).toBe('por culpa de la mujer');
     });
 
+    test('any other determiner follows the plain de / a', () => {
+      expect(render({ cause: complement(np(PERRO, { definiteness: 'indefinite' })) })).toBe('a causa de un perro');
+      expect(render({ cause: complement(np(PERRO, { definiteness: 'no' }), [sentiment('negative')]) })).toBe('por culpa de ningún perro');
+      expect(render({ cause: complement(np(MUJER, { definiteness: 'this' }), [sentiment('positive')]) })).toBe('gracias a esta mujer');
+    });
+
     test('a neutral or positive pronoun cause takes its tonic form', () => {
       expect(render({ cause: complement(np(YO)) })).toBe('a causa de mí');
       expect(render({ cause: complement(np(ELLA)) })).toBe('a causa de ella');

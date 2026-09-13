@@ -9,8 +9,9 @@ import { auxFinite } from './auxFinite.js';
  * prospective = stare + "per" + infinito ("sto per andare"), resultative = essere/avere +
  * participio passato. Which auxiliary is a lexical property of the verb (the seed marks the
  * essere-selecting ones with forms.aux = "be"); only an essere participle agrees with the
- * subject — "la ragazza è andata" but "la ragazza ha visto". Negation ("non") is prepended
- * by the caller, as for the neutral verb.
+ * subject — "la ragazza è andata" but "la ragazza ha visto". An avere participle agrees instead with
+ * a third-person object clitic ahead of it, passed as `objectForms`: "l'ha vista", "li ha visti".
+ * Negation ("non") is prepended by the caller, as for the neutral verb.
  */
 export function aspectVerb(
   verbForms: Record<string, string>,
@@ -18,14 +19,16 @@ export function aspectVerb(
   tense: Tense,
   aspect: Aspect,
   mood?: Mood,
+  objectForms?: Record<string, string>,
 ): string {
   const inf = verbForms['base'] ?? '';
   if (aspect === 'resultative') {
     const essere = verbForms['aux'] === 'be';
     const aux = auxFinite(essere ? ESSERE_AUX : AVERE_AUX, essere ? ESSERE_IT : AVERE_IT, subjectForms, tense, mood);
     const base = verbForms['participle'] ?? inf;
-    const part = essere
-      ? agreeAdj(base, subjectForms['gender'] ?? 'masc', (subjectForms['number'] ?? 'singular') === 'plural')
+    const agreeWith = essere ? subjectForms : objectForms;
+    const part = agreeWith
+      ? agreeAdj(base, agreeWith['gender'] ?? 'masc', (agreeWith['number'] ?? 'singular') === 'plural')
       : base;
     return `${aux} ${part}`.trim();
   }
