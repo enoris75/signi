@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (77 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (69 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -54,9 +54,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A68 | [A68-french-portuguese-invariable-zero.md](A-must-fix/A68-french-portuguese-invariable-zero.md) |
-| A69 | [A69-english-spanish-connector-comma.md](A-must-fix/A69-english-spanish-connector-comma.md) |
-| A70 | [A70-romance-clitic-enclisis.md](A-must-fix/A70-romance-clitic-enclisis.md) |
 | A71 | [A71-pronominal-possessor-on-complement.md](A-must-fix/A71-pronominal-possessor-on-complement.md) |
 | A72 | [A72-feminine-plural-object-clitic.md](A-must-fix/A72-feminine-plural-object-clitic.md) |
 | A73 | [A73-impersonal-se-plural-object.md](A-must-fix/A73-impersonal-se-plural-object.md) |
@@ -207,6 +204,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A65 | [A65-romance-cause-determiner.md](fixed/A65-romance-cause-determiner.md) | Italian, French, Spanish, Portuguese | 2026-09-13 |
 | A66 | [A66-spanish-portuguese-estar-outside-finite-copula.md](fixed/A66-spanish-portuguese-estar-outside-finite-copula.md) | Spanish, Portuguese | 2026-09-13 |
 | A67 | [A67-italian-french-participle-clitic-agreement.md](fixed/A67-italian-french-participle-clitic-agreement.md) | Italian, French | 2026-09-13 |
+| A68 | [A68-french-portuguese-invariable-zero.md](fixed/A68-french-portuguese-invariable-zero.md) | French, Portuguese (also Italian, Spanish) | 2026-09-13 |
+| A69 | [A69-english-spanish-connector-comma.md](fixed/A69-english-spanish-connector-comma.md) | English, Spanish (also Portuguese) | 2026-09-13 |
+| A70 | [A70-romance-clitic-enclisis.md](fixed/A70-romance-clitic-enclisis.md) | French, Spanish, Portuguese | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

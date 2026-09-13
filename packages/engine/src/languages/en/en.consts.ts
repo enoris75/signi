@@ -83,3 +83,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   therefore: 'so',
   then: 'and then',
 };
+
+/**
+ * The clause connectors that are parenthetical rather than conjunctions, set off by a comma after
+ * them as well as before: "the cat runs, that is, the dog jumps". Clause joins only; a noun group
+ * never takes one.
+ */
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);

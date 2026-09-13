@@ -1,4 +1,4 @@
-import { FR_ADJ_IRREGULAR } from './fr.consts.js';
+import { FR_ADJ_IRREGULAR, INVARIABLE_ADJ } from './fr.consts.js';
 
 /**
  * Agree an adjective's masculine-singular base with the noun it modifies, deriving the
@@ -10,6 +10,7 @@ import { FR_ADJ_IRREGULAR } from './fr.consts.js';
  */
 export function agreeAdjFr(base: string, gender: string, plural: boolean): string {
   if (!base) return '';
+  if (INVARIABLE_ADJ.has(base)) return base; // zéro
   const fem = gender === 'fem';
   const irr = FR_ADJ_IRREGULAR[base];
   if (irr) return irr[(fem ? 1 : 0) + (plural ? 2 : 0)];

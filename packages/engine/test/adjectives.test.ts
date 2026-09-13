@@ -1182,7 +1182,7 @@ describe('documented simplifications: German compounds', () => {
 // A68. "zéro" used as an adjective ("l'article zéro") is invariable. `agreeAdjFr` has no invariable
 // class, so it falls through to the default +e / +s and writes "zéroe" / "zéros".
 describe('known bugs: French invariable zéro', () => {
-  test.fails('French keeps "zéro" invariable', () => {
+  test('French keeps "zéro" invariable', () => {
     expect(sayAll(clause(np('PHRASE', { adjectives: ['ZERO'] }), 'BURN')).fr).toBe('la phrase zéro brûle.');
     expect(sayAll(clause(np('ARTICLE', { adjectives: ['ZERO'], number: 'plural' }), 'BURN')).fr)
       .toBe('les articles zéro brûlent.');
@@ -1195,10 +1195,38 @@ describe('known bugs: French invariable zéro', () => {
 // ("zero") comes out as "zera" / "zeros". Used as an adjective, "zero" is invariable in gender and
 // number ("tolerância zero", "os quilômetros zero").
 describe('known bugs: Portuguese invariable "zero"', () => {
-  test.fails('Portuguese keeps ZERO invariable', () => {
+  test('Portuguese keeps ZERO invariable', () => {
     expect(sayAll(clause(np('HOUSE', { adjectives: ['ZERO'] }), 'BURN')).pt).toBe('a casa zero arde.');
     expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['ZERO'] }), 'EAT')).pt).toBe('os gatos zero comem.');
     expect(sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np('ZERO') } } })).pt).toBe('a casa é zero.');
+  });
+
+  // The same defect reached Italian "zero" ("zera") and Spanish "cero" ("cera").
+  test('Italian and Spanish keep ZERO invariable too, attributive and predicative', () => {
+    expect(sayAll(clause(np('PHRASE', { adjectives: ['ZERO'], number: 'plural' }), 'BURN'))).toMatchObject({
+      it: 'le frasi zero bruciano.',
+      es: 'las frases cero arden.',
+      pt: 'as frases zero ardem.',
+    });
+    expect(sayAll(clause(np('ARTICLE', { adjectives: ['ZERO'], number: 'plural' }), 'BURN'))).toMatchObject({
+      it: 'gli articoli zero bruciano.',
+      es: 'los artículos cero arden.',
+    });
+    expect(sayAll(clause(np('HOUSE', { number: 'plural' }), 'BE', { complements: { predicative: { phrase: np('ZERO') } } }))).toMatchObject({
+      it: 'le case sono zero.',
+      es: 'las casas son cero.',
+      fr: 'les maisons sont zéro.',
+      pt: 'as casas são zero.',
+    });
+  });
+
+  test('regression: a regular adjective still agrees', () => {
+    expect(sayAll(clause(np('PHRASE', { adjectives: ['SMALL'], number: 'plural' }), 'BURN'))).toMatchObject({
+      it: 'le piccole frasi bruciano.',
+      es: 'las frases pequeñas arden.',
+      fr: 'les petites phrases brûlent.',
+      pt: 'as frases pequenas ardem.',
+    });
   });
 });
 

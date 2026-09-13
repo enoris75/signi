@@ -68,4 +68,10 @@ describe('agreeAdjFr', () => {
   test('an empty base stays empty', () => {
     expect(agreeAdjFr('', 'fem', true)).toBe('');
   });
+
+  test('an invariable adjective keeps its base in every gender and number', () => {
+    expect(agreeAdjFr('zéro', 'fem', false)).toBe('zéro');
+    expect(agreeAdjFr('zéro', 'masc', true)).toBe('zéro');
+    expect(agreeAdjFr('zéro', 'fem', true)).toBe('zéro');
+  });
 });

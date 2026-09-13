@@ -238,6 +238,15 @@ describe('predicateText', () => {
       expect(predicateText(VOSOTROS, command(COMER, 'EAT'), food)).toBe('comed la comida');
     });
 
+    // A70: the pronoun follows an affirmative command and an infinitive, in front of a negative command.
+    test('an object pronoun attaches after an affirmative command, with its accent', () => {
+      expect(predicateText(TU, command(COMER, 'EAT'), el(np(EL)))).toBe('cómelo');
+      expect(predicateText(NOSOTROS, command(COMER, 'EAT'), el(np(EL)))).toBe('comámoslo');
+      expect(predicateText(VOSOTROS, command(COMER, 'EAT'), el(np(ELLA)))).toBe('comedla');
+      expect(predicateText(TU, command(COMER, 'EAT', { negative: true }), el(np(EL)))).toBe('no lo comas');
+      expect(predicateText(GATO, vp(COMER, { mood: 'infinitive' }, 'EAT'), el(np(EL)))).toBe('comerlo');
+    });
+
     test('every negative command is the present subjunctive', () => {
       expect(predicateText(TU, command(COMER, 'EAT', { negative: true }))).toBe('no comas');
       expect(predicateText(NOSOTROS, command(COMER, 'EAT', { negative: true }))).toBe('no comamos');

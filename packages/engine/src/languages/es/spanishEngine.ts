@@ -1,5 +1,5 @@
 import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
-import { COORD_WORDS } from './es.consts.js';
+import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
 import { renderClause } from './renderClause.js';
@@ -12,7 +12,9 @@ export const spanishEngine: LanguageEngine = {
     const sentence = phrase.condition ? `si ${renderClause(phrase.condition)}, ${main}` : main;
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
-    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    const { conjunction, clause } = phrase.coordination;
+    const connector = `${COORD_WORDS[conjunction]}${PARENTHETICAL_CONNECTORS.has(conjunction) ? ',' : ''}`;
+    return `${sentence}, ${connector} ${renderClause(clause)}`;
   },
   // No apocope here: the word stands alone, with no masculine noun behind it to shorten before.
   renderWord(word: ConceptForms): string {

@@ -37,7 +37,7 @@ describe('portugueseEngine', () => {
     expect(joined('and')).toBe('o gato come, e o cão corre');
     expect(joined('or')).toBe('o gato come, ou o cão corre');
     expect(joined('but')).toBe('o gato come, mas o cão corre');
-    expect(joined('that_is')).toBe('o gato come, isto é o cão corre');
+    expect(joined('that_is')).toBe('o gato come, isto é, o cão corre'); // explanatory: a comma after it too
     expect(joined('therefore')).toBe('o gato come, portanto o cão corre');
     expect(joined('then')).toBe('o gato come, e depois o cão corre');
   });

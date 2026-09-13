@@ -57,3 +57,32 @@ conjunctions next to `COORD_WORDS` in `es.consts.ts`. Update `coordination.test.
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: English comma after "that is"*; `coordination.test.ts` → *known bugs: Spanish comma after a discourse connector* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13. Each engine's consts gains a `PARENTHETICAL_CONNECTORS` set, and its clause join
+writes a comma after a conjunction in that set. The noun-group `coordinate` still reads the bare
+`COORD_WORDS`.
+
+- English ([`en.consts.ts`](../../../packages/engine/src/languages/en/en.consts.ts),
+  [`englishEngine.ts`](../../../packages/engine/src/languages/en/englishEngine.ts)): `that_is`
+  (`the cat runs, that is, the dog jumps`).
+- Spanish ([`es.consts.ts`](../../../packages/engine/src/languages/es/es.consts.ts),
+  [`spanishEngine.ts`](../../../packages/engine/src/languages/es/spanishEngine.ts)): `that_is` and
+  `therefore` (`…, es decir, …`, `…, por lo tanto, …`).
+- Portuguese ([`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts),
+  [`portugueseEngine.ts`](../../../packages/engine/src/languages/pt/portugueseEngine.ts)): `that_is`.
+  The explanatory `isto é` had the same missing comma (`…, isto é, …`). `portanto` heading its clause
+  may go without one, so it is left as it was.
+
+Both rows now render as wanted, and the comma holds after a condition too. The true conjunctions, the
+English `so` and a command (where the translator turns `that_is` into `and`) take no comma after the
+word. German `das heißt` and the Italian and French explicatives are unchanged.
+
+- **Tests:** [`packages/engine/test/coordination.test.ts`](../../../packages/engine/test/coordination.test.ts)
+  → *known bugs: English comma after "that is"* / *Spanish comma after a discourse connector*. Both
+  pinning `test.fails` are now passing `test`s. New cases cover the condition and Portuguese, with a
+  guard for the conjunctions and the command.
+  - The *explicative — "that is"* test pinned the missing comma in English, Spanish and Portuguese.
+    `englishEngine.test.ts` and `portugueseEngine.test.ts` pinned it too. All now assert the comma.
+- Unit tests: `englishEngine.test.ts`, `spanishEngine.test.ts`, `portugueseEngine.test.ts`.

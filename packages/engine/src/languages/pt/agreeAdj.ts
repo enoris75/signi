@@ -1,4 +1,4 @@
-import { IRREGULAR_ADJ } from './pt.consts.js';
+import { INVARIABLE_ADJ, IRREGULAR_ADJ } from './pt.consts.js';
 import { pluralize } from './pluralize.js';
 
 /**
@@ -8,6 +8,7 @@ import { pluralize } from './pluralize.js';
  */
 export function agreeAdj(base: string, gender: string, plural: boolean): string {
   if (!base) return '';
+  if (INVARIABLE_ADJ.has(base)) return base; // zero
   const fem = gender === 'fem';
   const irr = IRREGULAR_ADJ[base];
   if (irr) return irr[(fem ? 1 : 0) + (plural ? 2 : 0)];

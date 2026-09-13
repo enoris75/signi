@@ -175,6 +175,14 @@ describe('predicateText', () => {
     const command = (verb: Forms, extra: Parameters<typeof vp>[1] = {}, conceptId?: string) =>
       vp(verb, { mood: 'imperative', ...extra }, conceptId);
 
+    // A70: an affirmative command puts its pronouns after it, hyphenated.
+    test('an affirmative command takes its pronouns after the verb, a negative one before', () => {
+      expect(predicateText(TU, command(VOIR), el(np(JE)))).toBe('vois-moi');
+      expect(predicateText({ ...TU, number: 'plural' }, command(VOIR), el(np(IL)))).toBe('voyez-le');
+      expect(predicateText(TU, command(EFFONDRER, {}, 'COLLAPSE'))).toBe('effondre-toi');
+      expect(predicateText(TU, command(VOIR, { negative: true }), el(np(JE)))).toBe('ne me vois pas');
+    });
+
     test('a subjectless command in the tu, nous or vous form', () => {
       expect(predicateText(TU, command(MANGER), mouse)).toBe('mange la souris');
       expect(predicateText({ ...TU, number: 'plural' }, command(MANGER), mouse)).toBe('mangez la souris');

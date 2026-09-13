@@ -87,3 +87,16 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   therefore: 'por lo tanto',
   then: 'y luego',
 };
+
+/**
+ * The discourse connectors (conectores) among the clause conjunctions, set off by a comma after them
+ * as well as before (RAE, Ortografía 2010, §3.4.2.2.1.1): "el gato corre, es decir, el perro salta",
+ * "…, por lo tanto, …". The true conjunctions (y, o, pero, y luego) take none.
+ */
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is', 'therefore']);
+
+/**
+ * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("la frase cero, los artículos cero");
+ * the agreement rule would otherwise inflect it like any adjective with its ending.
+ */
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['cero']);

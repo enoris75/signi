@@ -31,7 +31,7 @@ describe('englishEngine', () => {
     expect(joined('and')).toBe('the cat runs, and the dog eats');
     expect(joined('or')).toBe('the cat runs, or the dog eats');
     expect(joined('but')).toBe('the cat runs, but the dog eats');
-    expect(joined('that_is')).toBe('the cat runs, that is the dog eats'); // wrong, pinned as-is: A69
+    expect(joined('that_is')).toBe('the cat runs, that is, the dog eats'); // parenthetical: a comma after it too
     expect(joined('therefore')).toBe('the cat runs, so the dog eats');
     expect(joined('then')).toBe('the cat runs, and then the dog eats');
   });

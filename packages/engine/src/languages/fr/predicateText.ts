@@ -7,6 +7,7 @@ import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
 import { frCliticize } from './frCliticize.js';
+import { frEnclitic } from './frEnclitic.js';
 import { modalGroupFr } from './modalGroupFr.js';
 import { npText } from './npText.js';
 
@@ -116,8 +117,16 @@ export function predicateText(
         .filter(Boolean)
         .join(' '));
     }
-    const impForm = imperativeForm('fr', verb, moodPN(subjectForms), false) ?? conjugated;
-    return withDislocated([frCliticize(objectClitic, negateFinite(impForm)), modifierText, directObjectText, complementsText]
+    const pn = moodPN(subjectForms);
+    const impForm = imperativeForm('fr', verb, pn, false) ?? conjugated;
+    // An affirmative command puts its pronouns after the verb ("vois-moi", "effondre-toi"); the
+    // negative one keeps them in front, inside "ne … pas" ("ne me vois pas", "ne t'effondre pas").
+    const affirmative = !verbNegative && !aucun && !groupNegative;
+    const reflexive = /^(?:s'|se )/.test(verb.forms['base'] ?? '');
+    const impVerb = affirmative
+      ? frEnclitic(impForm, objectClitic, reflexive, pn)
+      : frCliticize(objectClitic, negateFinite(impForm));
+    return withDislocated([impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
   }

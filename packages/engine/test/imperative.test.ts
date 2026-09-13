@@ -421,7 +421,7 @@ describe('known bugs: German "kein" object in commands and instructions', () => 
 // proclitic `frCliticize` for both polarities, and a reflexive verb's imperative is its present
 // form with the reflexive clitic still in front ("t'effondre").
 describe('known bugs: French affirmative imperative enclisis', () => {
-  test.fails('French puts the clitic after an affirmative imperative', () => {
+  test('French puts the clitic after an affirmative imperative', () => {
     const cmd = (verb: string, subject: string, extra: Parameters<typeof clause>[2] = {}, number?: 'plural') =>
       sayAll({ ...clause(np(subject, number ? { number } : {}), verb, extra), imperative: true }).fr;
     expect(cmd('SEE', 'SECOND_PERSON', { directObject: np('FIRST_PERSON') })).toBe('vois-moi.');
@@ -431,6 +431,23 @@ describe('known bugs: French affirmative imperative enclisis', () => {
     expect(cmd('COLLAPSE', 'SECOND_PERSON')).toBe('effondre-toi.');
     expect(cmd('COLLAPSE', 'SECOND_PERSON', {}, 'plural')).toBe('effondrez-vous.');
     expect(cmd('COLLAPSE', 'FIRST_PERSON', {}, 'plural')).toBe('effondrons-nous.');
+  });
+
+  const cmdFr = (plan: Partial<PhrasePlan>, verb = 'SEE', addressee: NounPhrase = np('SECOND_PERSON')) =>
+    sayAll({ ...clause(addressee, verb), imperative: true, ...plan }).fr;
+
+  test('French keeps enclisis with a plural object, an adverb, a resumed group and a coordinated command', () => {
+    expect(cmdFr({ directObject: np('THIRD_PERSON', { number: 'plural' }) }, 'EAT', np('SECOND_PERSON', { number: 'plural' }))).toBe('mangez-les.');
+    expect(cmdFr({ directObject: np('THIRD_PERSON'), verbPhrase: { verb: 'EAT', modifier: 'FAST' } }, 'EAT')).toBe('mange-le vite.');
+    expect(cmdFr({ directObject: { conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' } })).toBe('vois-nous, lui et moi.');
+    expect(cmdFr({ directObject: np('THIRD_PERSON'), coordination: { conjunction: 'and', clause: clause(np('SECOND_PERSON'), 'RUN') } }, 'EAT'))
+      .toBe('mange-le, et cours.');
+  });
+
+  test('regression: the negative command and the instruction keep the pronoun in front', () => {
+    expect(cmdFr({ directObject: np('THIRD_PERSON'), verbPhrase: { verb: 'SEE', negative: true } })).toBe('ne le vois pas.');
+    expect(cmdFr({ verbPhrase: { verb: 'COLLAPSE', negative: true } }, 'COLLAPSE')).toBe("ne t'effondre pas.");
+    expect(cmdFr({ directObject: np('THIRD_PERSON'), imperativeRegister: 'instruction' })).toBe('le voir.');
   });
 });
 

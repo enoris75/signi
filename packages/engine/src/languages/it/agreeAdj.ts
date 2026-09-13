@@ -1,3 +1,5 @@
+import { INVARIABLE_ADJ } from './it.consts.js';
+
 /**
  * Inflect an Italian adjective (given in masculine-singular "base" form) to agree
  * with the head noun's gender and number.
@@ -6,6 +8,7 @@
  */
 export function agreeAdj(base: string, gender: string, plural: boolean): string {
   if (!base) return '';
+  if (INVARIABLE_ADJ.has(base)) return base; // zero
   const fem = gender === 'fem';
   if (base.endsWith('o')) {
     const stem = base.slice(0, -1);

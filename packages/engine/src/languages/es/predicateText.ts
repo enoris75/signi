@@ -7,6 +7,7 @@ import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
 import { esCliticize } from './esCliticize.js';
+import { esEnclitic } from './esEnclitic.js';
 import { npText } from './npText.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
@@ -101,7 +102,9 @@ export function predicateText(
   const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
-  // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here.
+  // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here. An object pronoun
+  // attaches after an affirmative command ("cómelo", "comedlo") and after an instruction, which is an
+  // infinitive ("cargarlo", "no cargarlo"); only a negative command keeps it in front ("no lo comas").
   if (mood === 'imperative') {
     const impNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
@@ -109,19 +112,22 @@ export function predicateText(
     const impForm = register === 'instruction'
       ? (copulaVerb.forms['base'] ?? conjugated)
       : (imperativeForm('es', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
-    const impVerb = impNeg ? `no ${impForm}` : impForm;
-    return [esCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
+    const enclitic = register === 'instruction' || !impNeg;
+    const impVerb = enclitic
+      ? `${impNeg ? 'no ' : ''}${esEnclitic(impForm, objectClitic)}`
+      : esCliticize(objectClitic, `no ${impForm}`);
+    return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
   // Infinitive / citation phrase: the bare infinitive ("consumir el alimento"), the same surface
   // Spanish already gives the imperative `instruction` register above. Negation prefixes "no" ("no
-  // consumir"); an object pronoun attaches enclitically ("consumirlo"), via esCliticize.
+  // consumir"); an object pronoun attaches after it ("consumirlo", "no consumirlo").
   if (mood === 'infinitive') {
     const inf = copulaVerb.forms['base'] ?? conjugated;
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
-    const infVerb = infNeg ? `no ${inf}` : inf;
-    return [esCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+    const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
+    return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }

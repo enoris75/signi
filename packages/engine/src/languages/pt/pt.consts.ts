@@ -96,3 +96,15 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   therefore: 'portanto',
   then: 'e depois',
 };
+
+/**
+ * The explanatory connectors among the clause conjunctions, set off by a comma after them as well as
+ * before: "o gato corre, isto é, o cão pula". "portanto" heading its clause may go without one.
+ */
+export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);
+
+/**
+ * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("a casa zero, os gatos zero");
+ * the agreement rule would otherwise inflect it like any adjective with its ending.
+ */
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero']);

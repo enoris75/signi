@@ -124,6 +124,17 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(VER, { tense: 'past' }), el(np(NOS)))).toBe('nos viu');
     });
 
+    // A70: a 3rd-person clitic cannot open a clause, so with nothing ahead of the verb it follows it.
+    test('a 3rd-person clitic follows a verb that leads its clause', () => {
+      expect(predicateText(EU, vp(VER), el(np(ELE)), undefined, true)).toBe('vejo-o');
+      expect(predicateText(EU, vp(VER, { modals: [modal(PODER)] }), el(np(ELE)), undefined, true)).toBe('posso vê-lo');
+      expect(predicateText(VOCE, vp(VER, { mood: 'imperative' }), el(np(ELA)))).toBe('veja-a');
+      expect(predicateText(GATO, vp(COMER, { mood: 'infinitive' }), el(np(ELES)))).toBe('comê-los');
+      // Me leads a clause colloquially, and a preceding subject keeps the clitic in front.
+      expect(predicateText(EU, vp(VER), el(np(EU)), undefined, true)).toBe('me vejo');
+      expect(predicateText(EU, vp(VER), el(np(ELE)))).toBe('o vejo');
+    });
+
     test('the clitic follows "não"', () => {
       expect(predicateText(GATO, vp(VER, { negative: true }), el(np(EU)))).toBe('não me vê');
     });

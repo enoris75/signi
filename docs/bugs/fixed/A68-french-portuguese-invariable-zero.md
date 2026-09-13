@@ -51,3 +51,25 @@ picks up the change on its own.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: French invariable zéro*; `adjectives.test.ts` → *known bugs: Portuguese invariable "zero"* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13. The agreement functions take the adjective's base string, not its lexeme forms, so
+a lexeme flag would mean threading forms through every call site. Instead each language lists its
+invariable adjectives by base in an `INVARIABLE_ADJ` set, which its agreement function checks first:
+
+- [`fr.consts.ts`](../../../packages/engine/src/languages/fr/fr.consts.ts) / [`agreeAdjFr.ts`](../../../packages/engine/src/languages/fr/agreeAdjFr.ts): `zéro`;
+- [`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts) / [`agreeAdj.ts`](../../../packages/engine/src/languages/pt/agreeAdj.ts): `zero`;
+- [`it.consts.ts`](../../../packages/engine/src/languages/it/it.consts.ts) / [`agreeAdj.ts`](../../../packages/engine/src/languages/it/agreeAdj.ts): `zero`;
+- [`es.consts.ts`](../../../packages/engine/src/languages/es/es.consts.ts) / [`agreeAdj.ts`](../../../packages/engine/src/languages/es/agreeAdj.ts): `cero`.
+
+Italian and Spanish had the same defect (`la frase zera`, `las frases ceras`), so they are fixed too.
+Every table row now renders as wanted, and the attributive and predicative uses are invariable in all
+four languages (`le frasi zero`, `las casas son cero`, `les maisons sont zéro`, `as casas são zero`).
+Regular adjectives still agree.
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: French invariable zéro* / *Portuguese invariable "zero"*. Both pinning `test.fails`
+  are now passing `test`s. New cases cover Italian and Spanish, the plural predicative, and a guard
+  that a regular adjective still agrees.
+- Unit tests: `agreeAdjFr.test.ts` (fr) and `agreeAdj.test.ts` (it, es, pt).

@@ -1,5 +1,5 @@
 import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
-import { COORD_WORDS } from './pt.consts.js';
+import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
 import { renderClause } from './renderClause.js';
@@ -9,10 +9,12 @@ export const portugueseEngine: LanguageEngine = {
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
     // Hypothetical conditional: "se <protasis (subjunctive)>, <apodosis (conditional)>".
-    const sentence = phrase.condition ? `se ${renderClause(phrase.condition)}, ${main}` : main;
+    const sentence = phrase.condition ? `se ${renderClause(phrase.condition, true)}, ${main}` : main;
     // Coordination: "<first clause>, <conjunction> <second clause>".
     if (!phrase.coordination) return sentence;
-    return `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    const { conjunction, clause } = phrase.coordination;
+    const connector = `${COORD_WORDS[conjunction]}${PARENTHETICAL_CONNECTORS.has(conjunction) ? ',' : ''}`;
+    return `${sentence}, ${connector} ${renderClause(clause)}`;
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

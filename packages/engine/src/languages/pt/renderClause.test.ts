@@ -53,6 +53,14 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(NOS), vp(COMER)))).toBe('comemos');
     });
 
+    // A70: with the subject dropped the verb leads, so a 3rd-person clitic follows it — but not in a
+    // subordinate clause, whose conjunction precedes the verb.
+    test('a dropped subject lets the verb lead, unless the clause is subordinate', () => {
+      expect(renderClause(clause(np(EU), vp(VER), { directObject: el(np(ELE)) }))).toBe('vejo-o');
+      expect(renderClause(clause(np(EU), vp(VER), { directObject: el(np(ELE)) }), true)).toBe('o vejo');
+      expect(renderClause(clause(np(GATO), vp(VER), { directObject: el(np(ELE)) }))).toBe('o gato o vê');
+    });
+
     test('a coordination of pronouns keeps its surface', () => {
       expect(renderClause(clause(el(np(EU), np(ELE)), vp(COMER)))).toBe('eu e ele comemos');
     });

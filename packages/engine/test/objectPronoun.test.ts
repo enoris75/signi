@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { NounElement, NounPhrase, VerbPhrase } from '@signi/shared';
+import type { NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A pronoun in the DIRECT-OBJECT slot — "the cat sees me / you / him". A pronoun object is not a
@@ -262,7 +262,7 @@ describe('known bugs: French participle agreement with an object clitic', () => 
 // front of the verb. The infinitive branch's comment claims enclisis ("consumirlo") but the code
 // doesn't do it. The negative command ("no lo comas") and finite verbs are already right.
 describe('known bugs: Spanish enclitic object pronoun', () => {
-  test.fails('Spanish attaches the object pronoun after an infinitive', () => {
+  test('Spanish attaches the object pronoun after an infinitive', () => {
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), infinitive: true }).es)
       .toBe('comerlo.');
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: np('THIRD_PERSON') }), infinitive: true }).es)
@@ -273,13 +273,32 @@ describe('known bugs: Spanish enclitic object pronoun', () => {
       .toBe('cargarlo.');
   });
 
-  test.fails('Spanish attaches the object pronoun after an affirmative command', () => {
+  test('Spanish attaches the object pronoun after an affirmative command', () => {
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
       .toBe('cómelo.');
     expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
       .toBe('comámoslo.');
     expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true }).es)
       .toBe('comedlo.');
+  });
+
+  test('Spanish attaches every object pronoun, writing the accent the longer word needs', () => {
+    const command = (directObject: NounElement, extra: Partial<PhrasePlan> = {}) =>
+      sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject }), imperative: true, ...extra }).es;
+    expect(command(np('THIRD_PERSON', { gender: 'fem' }))).toBe('vela.');
+    expect(command(np('FIRST_PERSON', { number: 'plural' }))).toBe('venos.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { modifier: 'FAST' } }), imperative: true }).es).toBe('cómelo rápido.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('THIRD_PERSON') }), imperative: true, coordination: { conjunction: 'and', clause: clause(np('SECOND_PERSON'), 'RUN') } }).es)
+      .toBe('cómelo, y corre.');
+    // A doubled group's clitic attaches too.
+    expect(command({ conjuncts: [np('THIRD_PERSON'), np('FIRST_PERSON')], conjunction: 'and' })).toBe('venos a él y a mí.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'LOAD', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), imperative: true, imperativeRegister: 'instruction' }).es)
+      .toBe('no cargarlo.');
+  });
+
+  test('regression: the negative command, finite verbs and the modal keep the pronoun in front', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('THIRD_PERSON'), verbPhrase: { negative: true } }), imperative: true }).es).toBe('no lo veas.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('THIRD_PERSON'), verbPhrase: { modals: [{ verb: 'MUST' }] } })).es).toBe('el gato lo debe comer.');
   });
 });
 
@@ -290,7 +309,7 @@ describe('known bugs: Spanish enclitic object pronoun', () => {
 describe('known bugs: Portuguese clitic enclisis', () => {
   const him = np('THIRD_PERSON');
 
-  test.fails('Portuguese attaches a 3rd-person clitic after a clause-initial verb', () => {
+  test('Portuguese attaches a 3rd-person clitic after a clause-initial verb', () => {
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: him }), imperative: true }).pt).toBe('veja-o.');
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'fem' }) }), imperative: true }).pt).toBe('veja-a.');
     expect(sayAll({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'EAT', { directObject: him }), imperative: true }).pt).toBe('comamo-lo.');
@@ -298,6 +317,32 @@ describe('known bugs: Portuguese clitic enclisis', () => {
     expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('THIRD_PERSON', { number: 'plural' }) }), infinitive: true }).pt).toBe('comê-los.');
     expect(sayAll(clause(np('FIRST_PERSON'), 'SEE', { directObject: him })).pt).toBe('vejo-o.');
     expect(sayAll(clause(np('FIRST_PERSON'), 'SEE', { directObject: him, verbPhrase: { modals: ['CAN'] } })).pt).toBe('posso vê-lo.');
+  });
+
+  const iSee = (verbPhrase: Partial<VerbPhrase>, subject: NounPhrase = np('FIRST_PERSON')) =>
+    sayAll(clause(subject, 'SEE', { directObject: him, verbPhrase })).pt;
+
+  test('Portuguese hangs the clitic on the last verb that can carry it, in its enclitic allomorph', () => {
+    expect(iSee({ tense: 'past' })).toBe('vi-o.');
+    expect(iSee({ aspect: 'resultative', tense: 'past' })).toBe('tinha-o visto.');
+    expect(iSee({ aspect: 'progressive' })).toBe('estou vendo-o.');
+    expect(iSee({}, np('FIRST_PERSON', { number: 'plural' }))).toBe('vemo-lo.');
+    expect(sayAll(clause(np('THIRD_PERSON', { number: 'plural' }), 'EAT', { directObject: him })).pt).toBe('comem-no.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON', { number: 'plural' }), 'EAT', { directObject: np('THIRD_PERSON', { number: 'plural' }) }), imperative: true }).pt).toBe('comam-nos.');
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'and', clause: clause(np('FIRST_PERSON'), 'SEE', { directObject: him }) } }).pt)
+      .toBe('o gato corre, e vejo-o.');
+  });
+
+  test('regression: anything ahead of the verb keeps the clitic in front', () => {
+    expect(iSee({ negative: true })).toBe('não o vejo.');
+    expect(iSee({ modifier: 'NEVER' })).toBe('nunca o vejo.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: him })).pt).toBe('o gato o vê.');
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE' }, directObject: him } }), 'RUN')).pt).toBe('o cão que o vê corre.');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('FIRST_PERSON'), 'SEE', { directObject: him }) }).pt).toBe('se o visse, o cão correria.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'SEE', { directObject: him, verbPhrase: { negative: true } }), imperative: true }).pt).toBe('não o veja.');
+    // Me / te lead a clause colloquially, and the future would need mesoclisis, which is not modelled.
+    expect(sayAll(clause(np('SECOND_PERSON'), 'SEE', { directObject: np('FIRST_PERSON') })).pt).toBe('me vê.');
+    expect(iSee({ tense: 'future' })).toBe('o verei.');
   });
 });
 

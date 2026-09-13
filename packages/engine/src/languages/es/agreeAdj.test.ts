@@ -31,4 +31,10 @@ describe('agreeAdj', () => {
   test('an empty base stays empty', () => {
     expect(agreeAdj('', 'fem', true)).toBe('');
   });
+
+  test('an invariable adjective keeps its base in every gender and number', () => {
+    expect(agreeAdj('cero', 'fem', false)).toBe('cero');
+    expect(agreeAdj('cero', 'masc', true)).toBe('cero');
+    expect(agreeAdj('cero', 'fem', true)).toBe('cero');
+  });
 });

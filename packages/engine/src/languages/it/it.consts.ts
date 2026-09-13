@@ -95,3 +95,9 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   therefore: 'quindi',
   then: 'e poi',
 };
+
+/**
+ * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("la frase zero, gli articoli zero");
+ * the agreement rule would otherwise inflect it like any adjective with its ending.
+ */
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero']);

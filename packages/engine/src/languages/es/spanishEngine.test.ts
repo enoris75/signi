@@ -34,6 +34,9 @@ describe('spanishEngine', () => {
     expect(joined('or')).toBe('el gato come, o el perro corre');
     expect(joined('but')).toBe('el gato come, pero el perro corre');
     expect(joined('then')).toBe('el gato come, y luego el perro corre');
+    // The discourse connectors take a comma after them as well.
+    expect(joined('that_is')).toBe('el gato come, es decir, el perro corre');
+    expect(joined('therefore')).toBe('el gato come, por lo tanto, el perro corre');
   });
 
   test('coordinated commands both stay subjectless', () => {

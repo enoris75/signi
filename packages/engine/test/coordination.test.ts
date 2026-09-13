@@ -137,11 +137,11 @@ describe('coordinated clauses', () => {
 
   test('explicative — "that is"', () => {
     expect(join('that_is')).toMatchObject({
-      en: 'the cat runs, that is the dog jumps.', // wrong, pinned as-is: A69
+      en: 'the cat runs, that is, the dog jumps.', // parenthetical: a comma on both sides (A69)
       it: 'il gatto corre, cioè il cane salta.',
       fr: "le chat court, c'est-à-dire le chien saute.",
-      es: 'el gato corre, es decir el perro salta.', // wrong, pinned as-is: A69
-      pt: 'o gato corre, isto é o cão pula.',
+      es: 'el gato corre, es decir, el perro salta.',
+      pt: 'o gato corre, isto é, o cão pula.',
       // "das heißt" is parenthetical, so — unlike "also" / "dann" — it does NOT invert.
       de: 'der Kater läuft, das heißt der Hund springt.',
       ja: '猫は走ります、つまり犬は跳びます。',
@@ -448,7 +448,7 @@ describe('coordinated noun groups: group person agreement', () => {
 // is, the dog jumps"). `englishEngine` emits only the comma before it. Without the second comma
 // the sentence reads "that is the dog" as a clause of its own.
 describe('known bugs: English comma after "that is"', () => {
-  test.fails('English puts a comma after "that is"', () => {
+  test('English puts a comma after "that is"', () => {
     expect(say({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'that_is', clause: clause(np('DOG'), 'JUMP') } }, 'en')).toBe('the cat runs, that is, the dog jumps.');
     expect(say({ ...clause(np('CAT'), 'EAT', { directObject: np('FOOD') }), coordination: { conjunction: 'that_is', clause: clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }) } }, 'en')).toBe('the cat eats the food, that is, the cat eats the mouse.');
   });
@@ -458,11 +458,30 @@ describe('known bugs: English comma after "that is"', () => {
 // (Ortografía 2010, §3.4.2.2.1.1) wants a comma after them. `spanishEngine.render` joins every
 // conjunction as ", <word> <clause>", with no comma after the word.
 describe('known bugs: Spanish comma after a discourse connector', () => {
-  test.fails('Spanish sets off "es decir" and "por lo tanto" with a following comma', () => {
+  test('Spanish sets off "es decir" and "por lo tanto" with a following comma', () => {
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'that_is', clause: clause(np('DOG'), 'JUMP') } }).es)
       .toBe('el gato corre, es decir, el perro salta.');
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'therefore', clause: clause(np('DOG'), 'JUMP') } }).es)
       .toBe('el gato corre, por lo tanto, el perro salta.');
+  });
+
+  const join = (conjunction: CoordConjunction, extra: Partial<PhrasePlan> = {}) =>
+    sayAll({ ...clause(np('CAT'), 'RUN'), ...extra, coordination: { conjunction, clause: clause(np('DOG'), 'JUMP') } });
+
+  test('the connector keeps its comma after a condition, and Portuguese sets off "isto é" too', () => {
+    expect(join('that_is', { condition: clause(np('MAN'), 'EAT') })).toMatchObject({
+      en: 'if the man ate, the cat would run, that is, the dog jumps.',
+      es: 'si el hombre comiera, el gato correría, es decir, el perro salta.',
+      pt: 'se o homem comesse, o gato correria, isto é, o cão pula.',
+    });
+  });
+
+  test('regression: the true conjunctions and a command take no comma after them', () => {
+    expect(join('therefore')).toMatchObject({ en: 'the cat runs, so the dog jumps.', pt: 'o gato corre, portanto o cão pula.' });
+    expect(join('then')).toMatchObject({ en: 'the cat runs, and then the dog jumps.', es: 'el gato corre, y luego el perro salta.' });
+    // A command turns "that is" into "and", which takes no comma.
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'RUN'), imperative: true, coordination: { conjunction: 'that_is', clause: clause(np('SECOND_PERSON'), 'JUMP') } }))
+      .toMatchObject({ en: 'run, and jump.', es: 'corre, y salta.' });
   });
 });
 

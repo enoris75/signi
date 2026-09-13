@@ -6,8 +6,11 @@ import { mannerGloss } from './mannerGloss.js';
 import { predicateText } from './predicateText.js';
 import { subjectText } from './subjectText.js';
 
-/** One clause (subject + predicate), ignoring any attached hypothetical condition. */
-export function renderClause(phrase: ResolvedPhrase): string {
+/**
+ * One clause (subject + predicate), ignoring any attached hypothetical condition. A `subordinate`
+ * clause follows its conjunction ("se …"), which then precedes the verb for clitic placement.
+ */
+export function renderClause(phrase: ResolvedPhrase, subordinate = false): string {
   const { subject } = phrase;
   // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("de
   // grande tamanho"), not a bare subject noun phrase — wrap the dimension NP in its adposition.
@@ -26,7 +29,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("últimas notícias").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, dropSubject && !subordinate,
   );
   return [subj, predicate].filter(Boolean).join(' ').trim();
 }

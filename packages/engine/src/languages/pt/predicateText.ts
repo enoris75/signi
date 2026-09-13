@@ -8,6 +8,7 @@ import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
 import { npText } from './npText.js';
 import { ptCliticize } from './ptCliticize.js';
+import { ptEnclitic } from './ptEnclitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -20,6 +21,9 @@ export function predicateText(
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  // Set when nothing is rendered ahead of the predicate: a main clause whose pronoun subject was
+  // dropped (see `renderClause`). A 3rd-person clitic cannot open the clause, so it follows the verb.
+  verbLeads = false,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
@@ -87,6 +91,11 @@ export function predicateText(
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
+  // A 3rd-person o / a / os / as cannot open a clause in either norm, so wherever nothing precedes
+  // the verb it follows it, hyphenated (`ptEnclitic`): an affirmative command ("veja-o"), an
+  // instruction or infinitive ("vê-lo"), and a clause whose subject was dropped ("vejo-o"). Me / te /
+  // nos lead a clause colloquially and stay in front ("me veja").
+  const thirdPersonClitic = !!objectClitic && firstConjunct(directObject!).head.forms['person'] === '3' ? objectClitic : '';
   const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
@@ -104,23 +113,40 @@ export function predicateText(
     const impForm = register === 'instruction'
       ? (copulaVerb.forms['base'] ?? conjugated)
       : (imperativeForm('pt', copulaVerb, moodPN(subjectForms), impNeg) ?? conjugated);
-    const impVerb = impNeg ? `não ${impForm}` : impForm;
-    return [ptCliticize(objectClitic, impVerb), modifierText, directObjectText, complementsText]
+    const impVerb = !impNeg && thirdPersonClitic
+      ? ptEnclitic(impForm, thirdPersonClitic)
+      : ptCliticize(objectClitic, impNeg ? `não ${impForm}` : impForm);
+    return [impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
   // Infinitive / citation phrase: the bare infinitive ("consumir o alimento"), the same surface
   // Portuguese already gives the imperative `instruction` register above. Negation prefixes "não"
-  // ("não consumir"); an object pronoun attaches enclitically ("consumi-lo"), via ptCliticize.
+  // ("não consumir"); a 3rd-person object pronoun attaches after it ("consumi-lo"), and after "não"
+  // it leads ("não o consumir").
   if (mood === 'infinitive') {
     const inf = copulaVerb.forms['base'] ?? conjugated;
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
-    const infVerb = infNeg ? `não ${inf}` : inf;
-    return [ptCliticize(objectClitic, infVerb), modifierText, directObjectText, complementsText]
+    const infVerb = !infNeg && thirdPersonClitic
+      ? ptEnclitic(inf, thirdPersonClitic)
+      : ptCliticize(objectClitic, infNeg ? `não ${inf}` : inf);
+    return [infVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, ptCliticize(proclitics, verbText), postVerb, directObjectText, complementsText]
+  // With nothing ahead of the verb, the clitic follows the last verb of the group that can carry it:
+  // the finite verb ("vejo-o", "tinha-o visto") or a modal's infinitive ("posso vê-lo"), never a
+  // participle. A synthetic future or conditional would split for it ("vê-lo-ei"); that mesoclisis
+  // is not modelled, so those keep the clitic in front.
+  const verbFirst = verbLeads && !preVerb && !impersonalClitic && !verbText.startsWith('não ')
+    && (modals.length > 0 || aspect !== 'neutral' || (tense !== 'future' && mood !== 'conditional'));
+  const participle = copulaVerb.forms['participle'];
+  const verbWords = verbText.split(' ');
+  const host = verbWords.map((w, i) => (w !== participle ? i : -1)).filter((i) => i >= 0).pop() ?? verbWords.length - 1;
+  const cliticizedVerb = verbFirst && thirdPersonClitic
+    ? verbWords.map((w, i) => (i === host ? ptEnclitic(w, thirdPersonClitic) : w)).join(' ')
+    : ptCliticize(proclitics, verbText);
+  return [preVerb, cliticizedVerb, postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

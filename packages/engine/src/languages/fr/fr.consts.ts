@@ -100,3 +100,9 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
   therefore: 'donc',
   then: 'et puis',
 };
+
+/**
+ * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("la phrase zéro, les articles zéro");
+ * the agreement rule would otherwise inflect it like any adjective with its ending.
+ */
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro']);

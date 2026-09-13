@@ -112,3 +112,59 @@ When nothing precedes a modal, the clitic goes onto the governed infinitive (`po
 | | |
 |---|---|
 | **Test** | `imperative.test.ts` → *known bugs: French affirmative imperative enclisis*; `objectPronoun.test.ts` → *known bugs: Spanish enclitic object pronoun*; `objectPronoun.test.ts` → *known bugs: Portuguese clitic enclisis* (4 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-13 as the shapes of the fix proposed.
+
+- **French.** The new [`frEnclitic.ts`](../../../packages/engine/src/languages/fr/frEnclitic.ts)
+  hyphenates an affirmative command's pronouns after the verb, with `me` / `te` as `moi` / `toi`. A
+  reflexive verb's leading clitic is stripped and moved behind the verb by person (`effondre-toi`,
+  `effondrons-nous`, `effondrez-vous`).
+  [`predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts) uses it for the
+  affirmative command. The negative command and the instruction keep `frCliticize` (`ne le vois pas`,
+  `ne t'effondre pas`, `le voir`). A resumed group follows too (`vois-nous, lui et moi`).
+- **Spanish.** The new [`esEnclitic.ts`](../../../packages/engine/src/languages/es/esEnclitic.ts)
+  attaches the clitic and applies the accent rules to the longer word. It adds an accent when the
+  stress now falls three syllables from the end (`cómelo`, `comámoslo`) and drops one the verb no
+  longer needs (`está` → `estate`).
+  [`predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts) uses it for the
+  infinitive and the instruction, negative included (`comerlo`, `no comerlo`, `cargarlo`), and for the
+  affirmative command (`cómelo`, `comedlo`, `vela`, `venos a él y a mí`). The negative command and
+  finite verbs keep `esCliticize`.
+- **Portuguese.** The new [`ptEnclitic.ts`](../../../packages/engine/src/languages/pt/ptEnclitic.ts)
+  writes the enclitic allomorphs: `-r` / `-z` → `-lo` with the accent (`comê-lo`, `vê-lo`), `-s` →
+  `-lo` (`comamo-lo`), a nasal → `-no` (`comem-no`, `comam-nos`).
+  [`predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts) uses it for a
+  3rd-person clitic in:
+  - an affirmative command and a non-negative instruction or infinitive;
+  - a finite clause whose verb leads. The new `verbLeads` flag is set by
+    [`renderClause.ts`](../../../packages/engine/src/languages/pt/renderClause.ts) when a pronoun
+    subject is dropped, and never for the `se` protasis, which its conjunction leads.
+
+  The clitic hangs on the last verb of the group that can carry it, never a participle (`vejo-o`, `vi-o`,
+  `tinha-o visto`, `estou vendo-o`, `posso vê-lo`, `vemo-lo`, and `e vejo-o` after a coordinator). Anything
+  ahead of the verb keeps proclisis (`não o vejo`, `nunca o vejo`, `o gato o vê`, `o cão que o vê`,
+  `se o visse`). `me` / `te` / `nos` stay in front, as the bug file allows.
+
+Every table row now renders as wanted.
+
+Not changed here:
+
+- A clause-initial synthetic future or conditional in Portuguese would need mesoclisis (`vê-lo-ei`).
+  That is not modelled, so it keeps the clitic in front (`o verei`).
+- A negated French instruction still reads `ne le pas charger`. That is the infinitive-negation
+  defect, not clitic placement.
+- The Spanish nosotros command's `-s` loss before `nos` / `os` belongs to A100.
+
+- **Tests:**
+  - [`imperative.test.ts`](../../../packages/engine/test/imperative.test.ts) → *known bugs: French
+    affirmative imperative enclisis*;
+  - [`objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts) → *known bugs:
+    Spanish enclitic object pronoun* / *Portuguese clitic enclisis*.
+  - The four pinning `test.fails` are now passing `test`s. New cases cover the plural, adverb, group
+    and coordinated commands, and the Portuguese allomorphs and verb hosts. Guards cover proclisis
+    wherever something precedes the verb.
+- Unit tests:
+  - the new `frEnclitic.test.ts`, `esEnclitic.test.ts` and `ptEnclitic.test.ts`;
+  - `predicateText.test.ts` (fr, es, pt) and `renderClause.test.ts` (pt).
