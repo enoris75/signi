@@ -1,5 +1,7 @@
 import { dimensionRelation, type ResolvedNounElement, type ResolvedNounPhrase } from '../../types.js';
 import { FR_DIM_PREP } from './fr.consts.js';
+import { elidesBefore } from './elidesBefore.js';
+import { joinArt } from './joinArt.js';
 import { subjectText } from './subjectText.js';
 
 /**
@@ -10,5 +12,8 @@ import { subjectText } from './subjectText.js';
  */
 export function dimensionGloss(np: ResolvedNounPhrase, el: ResolvedNounElement): string {
   const prep = FR_DIM_PREP[dimensionRelation(np.head.forms)];
-  return `${prep} ${subjectText(el)}`.trim();
+  const text = subjectText(el);
+  // "de" elides against whatever word leads the phrase ("d'âge bas", but "de grand âge"); "à" never does.
+  const head = prep === 'de' && elidesBefore(np.head.forms, text.split(' ')[0] ?? '') ? "d'" : prep;
+  return joinArt(head, text).trim();
 }

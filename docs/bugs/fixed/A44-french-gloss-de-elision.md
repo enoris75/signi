@@ -31,3 +31,24 @@ Elide in `dimensionGloss()` the way the rest of the French engine does — reuse
 | | |
 |---|---|
 | **Test** | `adjective-gloss.test.ts` → *known bugs: adjective-definition gloss (French)* (1 `test.fails`: "French elides \"de\" before a vowel-initial dimension noun (d'âge)") |
+
+## Resolved
+
+**2026-09-13.** `dimensionGloss()` now elides its adposition against the word that leads the
+rendered fragment, the same way the rest of the French engine does: it runs the lead through
+`elidesBefore` (so an h muet noun the corpus marks `elides` contracts too, and an h aspiré one does
+not) and joins with `joinArt` (no space after `d'`). Only `de` elides; the `measure` adposition `à`
+is left whole. Because the test is on the *lead*, a prenominal degree keeps `de` intact
+(`de petit âge`), while a postnominal degree or none gives `d'âge bas` / `d'âge`.
+
+- **Engine:** [`packages/engine/src/languages/fr/dimensionGloss.ts`](../../../packages/engine/src/languages/fr/dimensionGloss.ts)
+- **Tests:** [`packages/engine/test/adjective-gloss.test.ts`](../../../packages/engine/test/adjective-gloss.test.ts)
+  → *known bugs: adjective-definition gloss (French)*. The pinning `test.fails` is now a passing
+  `test`. Added cases: AGE with another postnominal degree (`d'âge haut.`) and with no degree
+  (`d'âge.`); a prenominal degree keeps `de` whole (`de petit âge.`); the h aspiré HEIGHT is unchanged
+  (`de hauteur basse.`). Unit cases in
+  [`languages/fr/dimensionGloss.test.ts`](../../../packages/engine/src/languages/fr/dimensionGloss.test.ts)
+  cover the vowel-initial lead, the prenominal lead, an h muet (`d'humidité`) vs h aspiré noun, and
+  `à` never eliding.
+
+The OLD gloss still renders `d'âge grand.`: its placement is A45, not addressed here.

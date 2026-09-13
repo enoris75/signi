@@ -103,7 +103,7 @@ Rendered strings (engine is source of truth):
 † French places GREAT postnominally ("de taille grande") — should be "de grande taille": bug
 [A45](../../bugs/A-must-fix/A45-gloss-great-postnominal.md).
 ‡ French does not elide "de" before "âge" ("de âge …") — should be "d'âge": bug
-[A44](../../bugs/A-must-fix/A44-french-gloss-de-elision.md). Both were surfaced by this task, filed,
+[A44](../../bugs/fixed/A44-french-gloss-de-elision.md). Both were surfaced by this task, filed,
 and left on the current output (a product decision to ship now and fix the French via `/fix-bug`).
 
 e2e coverage added in

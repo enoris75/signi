@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (124 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (123 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -55,7 +55,6 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | # | File |
 |---|---|
 | A42 | [A42-japanese-locative-dropped-under-predicate-nominal.md](A-must-fix/A42-japanese-locative-dropped-under-predicate-nominal.md) |
-| A44 | [A44-french-gloss-de-elision.md](A-must-fix/A44-french-gloss-de-elision.md) |
 | A45 | [A45-gloss-great-postnominal.md](A-must-fix/A45-gloss-great-postnominal.md) |
 | A46 | [A46-predicate-noun-under-seem-appear.md](A-must-fix/A46-predicate-noun-under-seem-appear.md) |
 | A48 | [A48-german-du-imperative-forms.md](A-must-fix/A48-german-du-imperative-forms.md) |
@@ -206,6 +205,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A43 | [A43-french-bas-feminine.md](fixed/A43-french-bas-feminine.md) | French | 2026-07-19 |
 | A47 | [A47-spanish-portuguese-ser-vs-estar.md](fixed/A47-spanish-portuguese-ser-vs-estar.md) | Spanish, Portuguese | 2026-07-21 |
 | A41 | [A41-home-locative-at-home-idiom.md](fixed/A41-home-locative-at-home-idiom.md) | en, it, fr, es, pt, de | 2026-09-13 |
+| A44 | [A44-french-gloss-de-elision.md](fixed/A44-french-gloss-de-elision.md) | French | 2026-09-13 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

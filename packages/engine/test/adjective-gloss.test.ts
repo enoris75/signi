@@ -100,8 +100,21 @@ describe('known bugs: adjective-definition gloss (French)', () => {
   // "de" before a vowel-initial dimension noun must contract to "d'". AGE is the only seeded
   // vowel-initial dimension noun, so it is the one that surfaces it (YOUNG → AGE + LOW). LOW ("bas")
   // is postnominal, so the noun leads and only the elision differs.
-  test.fails('French elides "de" before a vowel-initial dimension noun (d\'âge)', () => {
+  test('French elides "de" before a vowel-initial dimension noun (d\'âge)', () => {
     expect(gloss('AGE', 'LOW').fr).toBe("d'âge bas.");
+  });
+
+  // The elision follows whichever word leads the fragment: a postnominal degree (or none) leaves the
+  // vowel-initial noun leading, so "de" contracts; a prenominal one ("petit") takes the lead and
+  // "de" stays whole. An h aspiré noun ("hauteur") is not vowel-initial and never elides.
+  test('French elides "de" whenever the vowel-initial dimension noun leads', () => {
+    expect(gloss('AGE', 'HIGH').fr).toBe("d'âge haut.");
+    expect(sayAll({ subject: np('AGE', { definiteness: 'bare', dimensionGloss: true }) }).fr).toBe("d'âge.");
+  });
+
+  test('French keeps "de" whole when a prenominal degree or a consonant leads', () => {
+    expect(gloss('AGE', 'SMALL').fr).toBe('de petit âge.');
+    expect(gloss('HEIGHT', 'LOW').fr).toBe('de hauteur basse.');
   });
 
   // A45. GREAT ("grand") is a canonical BAGS adjective and must PRECEDE the noun in French — "de
