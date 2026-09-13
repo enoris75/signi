@@ -61,19 +61,60 @@ A **locative** antecedent leaves the locative pro-form instead:
 
 Japanese `犬はいません` here is A120's existential, not a pro-form.
 
+### Beside a condition or a relative
+
+The IF condition works the same way. A bare main clause after a protasis that has a predicative elides
+that predicative. A condition on the pair, or a relative on either subject, leaves the coordination's
+elision in place:
+
+| Plan | Language | Now | Want |
+|---|---|---|---|
+| if CAT BE a legend, DOG BE (negative) | it | `se il gatto fosse una leggenda, il cane non sarebbe.` | `…, il cane non lo sarebbe.` |
+| | fr | `si le chat était une légende, le chien ne serait pas.` | `…, le chien ne le serait pas.` |
+| | es | `si el gato fuera una leyenda, el perro no sería.` | `…, el perro no lo sería.` |
+| | de | `wenn der Kater eine Legende sein würde, würde der Hund nicht sein.` | `…, würde der Hund es nicht sein.` |
+| | ja | `もし猫が伝説だったら、犬はです。` | `…犬はそうではありません。` |
+| if CAT BE happy, DOG BE | es | `si el gato estuviera feliz, el perro sería.` | `…, el perro lo estaría.` |
+| | pt | `se o gato estivesse feliz, o cão seria.` | `…, o cão estaria.` |
+| | it / fr / de | `il cane sarebbe` / `le chien serait` / `würde der Hund sein` | `il cane lo sarebbe` / `le chien le serait` / `würde der Hund es sein` |
+| | ja | `もし猫が幸せだったら、犬はです。` | `…犬はそうです。` |
+| if MAN EAT, CAT BE a legend, but DOG BE (negative) | it | `…, ma il cane non è.` | `…, ma il cane non lo è.` |
+| | de | `…, aber der Hund ist nicht.` | `…, aber der Hund ist es nicht.` |
+| CAT that RUNs BE a legend, but DOG BE (negative) | it | `il gatto che corre è una leggenda, ma il cane non è.` | `…, ma il cane non lo è.` |
+| | fr | `…, mais le chien n'est pas.` | `…, mais le chien ne l'est pas.` |
+| CAT BE a legend, but DOG that RUNs BE (negative) | es | `…, pero el perro que corre no es.` | `…, pero el perro que corre no lo es.` |
+| | de | `…, aber der Hund, der läuft, ist nicht.` | `…, aber der Hund, der läuft, ist es nicht.` |
+| | ja | `猫は伝説です、しかし走る犬はです。` | `…走る犬はそうではありません。` |
+
+The test asserts every language on each row; the table shows a sample. English and Portuguese with ser
+are right on each (`if the cat was a legend, the dog would not be`, `se o gato fosse uma lenda, o cão
+não seria`).
+
 Already right: English throughout (`but Antarctica will not be`, `but the dog is not`). Portuguese with
 ser (`mas a Antártida não será`, `mas o cão não é`): Portuguese allows the null predicate, and the
-normative `não o será` is also correct. A second clause with a predicate of its own is not elliptical
-(`but the dog is not happy`, `ma il cane non è felice`). A bare BE after a non-copular clause has no
-antecedent and stays existential (`the cat runs, but the dog is not`).
+normative `não o será` is also correct. These are not elliptical, and render correctly today:
+
+- a second clause with a predicate of its own (`but the dog is not happy`, `ma il cane non è felice`);
+- a bare BE with no predicative before it, which stays existential: after a non-copular clause (`the
+  cat runs, but the dog is not`), after another bare BE (`the cat is, but the dog is not`), after a
+  protasis with none (`if the cat ate, the dog would be`), or in a relative (`the dog that is runs`);
+- a bare BE *before* the predicative, since the ellipsis only looks back (`the cat is not, but the dog
+  is a legend`, `if the cat were not, the dog would be a legend`);
+- a relative whose head fills BE's predicative, where the relative pronoun stands for it (`a legend
+  that the dog is not`, `una leggenda che il cane non è`). Its Japanese is A123.
+
+Passing tests in `copulaWithoutComplement.test.ts` pin all of these.
+
+Not covered: an antecedent inside a relative clause (`the dog that is a legend runs, but the cat is
+not`), where the reading is marginal even in English.
 
 ## Shape of the fix
 
-Resolve the ellipsis where both clauses are visible. That is the translator, since coordination does
-not nest. The rule: the coordinated clause's verb is a copula with no complements, and the first
-clause is a copula with a predicative (or, failing that, a locative). In that case, hand the
-coordinated clause the elided complement, marked as elided, and let each engine render it as its
-pro-form:
+Resolve the ellipsis where both clauses are visible. That is the translator, since neither coordination
+nor condition nests. The rule: the clause's verb is a copula with no complements, and the clause before
+it (the first clause of a coordination, or the protasis of a main clause) is a copula with a
+predicative (or, failing that, a locative). In that case, hand the elliptical clause the elided
+complement, marked as elided, and let each engine render it as its pro-form:
 
 - **it:** `lo` (predicative) / `ci` (locative), proclitic;
 - **fr:** `le` / `y`, with elision;
@@ -90,3 +131,4 @@ already positions a proclitic before the finite verb and after `non` / `ne`.
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: a coordinated copula elides its predicate* (2 `test.fails`) |
+| | `copulaWithoutComplement.test.ts` → *known bugs: an elided subject complement beside a condition or a relative* (2 `test.fails`) |

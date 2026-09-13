@@ -40,13 +40,33 @@ Passing tests pin the wrong output: `packages/engine/test/__snapshots__/verb.con
 records the bare-BE matrix for all six persons, 72 `ja` cells (`私たちはです。`, `私たちはですいます。`,
 `私たちはですところです。`, …). The fix changes them, so update the snapshot deliberately.
 
+The same fallback shows up in every clause a period link joins:
+
+| Plan | Now | Want |
+|---|---|---|
+| if the cat were not, the dog would run | `もし猫がですたら、犬は走ります。` | `もし猫がいなかったら、犬は走ります。` |
+| if the cat ate, the dog would be | `もし猫が食べたら、犬はです。` | `もし猫が食べたら、犬はいます。` |
+| if the cat were not, the dog would be a legend | `もし猫がですたら、犬は伝説です。` | `もし猫がいなかったら、犬は伝説です。` |
+| the dog that was runs | `です犬は走ります。` | `いた犬は走ります。` |
+| the cat that is runs, but the dog jumps | `です猫は走ります、…` | `いる猫は走ります…` |
+| the cat runs, but the dog that is jumps | `…、しかしです犬は跳びます。` | `…いる犬は跳びます。` |
+| the cat is, but the dog is not | `猫はです、しかし犬はです。` | `猫はいます…犬はいません。` |
+| if the man were, the cat would run, and the dog is not | `もし男がですたら、猫は走ります、そして犬はです。` | `もし男がいたら、猫は走ります…犬はいません。` |
+
+The coordinated rows give only the clauses; their join is A122. A negated relative (`いない犬`) is left
+out: the plain negative in a relative is B13.
+
 ## Shape of the fix
 
 Drop the locative from the existential gate: BE with no predicative is existential, with or without a
 place. The prototype `copula === '1' && !predicative` produces every Want row above, and leaves
-`猫は伝説です。` and `猫は家にいます。` unchanged. A121's elliptical clause must reach its own branch
-before this gate, or it will render `ありません` where `そうではありません` is wanted.
+`猫は伝説です。` and `猫は家にいます。` unchanged. Two cases must reach their own branch before this gate:
+
+- A121's elliptical clause, or it will render `ありません` where `そうではありません` is wanted;
+- A123's relative whose head fills the subject complement: it has no predicative of its own, and the
+  prototype renders `犬がいません伝説` for "a legend that the dog is not".
 
 | | |
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: Japanese BE with no complement* (1 `test.fails`) |
+| | `copulaWithoutComplement.test.ts` → *known bugs: Japanese BE with no complement, in linked clauses* (1 `test.fails`) |
