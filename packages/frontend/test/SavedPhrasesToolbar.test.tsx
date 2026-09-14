@@ -28,7 +28,7 @@ import type {
   PhraseContainer,
   PhraseLink,
 } from '../src/components/PhraseBuilder/interfaces.ts';
-import { downloadSavedPhrase } from '../src/components/PhraseBuilder/phraseSerialize.ts';
+import { downloadSavedPhrase } from '../src/components/PhraseBuilder/phraseSerialize/index.ts';
 import { renderWithProviders, type Seed, type SeededStrings } from './render.tsx';
 
 // Every saved-phrase request goes through api.ts; no test reaches a backend.
@@ -36,8 +36,7 @@ vi.mock('../src/api.ts');
 
 // jsdom cannot download a file. The toolbar's part is handing over the right document; the
 // serializers themselves stay real.
-vi.mock('../src/components/PhraseBuilder/phraseSerialize.ts', async (importOriginal) => ({
-  ...(await importOriginal<object>()),
+vi.mock('../src/components/PhraseBuilder/phraseSerialize/functions/downloadSavedPhrase.ts', () => ({
   downloadSavedPhrase: vi.fn(),
 }));
 

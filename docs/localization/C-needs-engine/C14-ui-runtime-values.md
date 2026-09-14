@@ -19,7 +19,7 @@ order depend on it.
 |---|---|---|
 | `Loaded, but ${n} word(s) are no longer in the catalog: ${list}` | [SavedPhrasesToolbar.tsx:84](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L84), [PeriodSaveLoad.tsx:100](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L100) | a count that governs the verb's number, and a word list; also "no longer" |
 | `Delete ${p.name}` (aria-label) | [SavedPhrasesToolbar.tsx:256](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L256), [PeriodSaveLoad.tsx:166](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L166) | user-typed text as the object. [B20](../B-needs-seed/B20-ui-remove-and-delete.md) ships a nameless version |
-| `This phrase was saved by a newer version of Signi (v${doc.version}); please update.` | [phraseSerialize.ts:251](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize.ts#L251) | a version number; also passive ([C11](C11-ui-failure-messages-passive.md)) |
+| `This phrase was saved by a newer version of Signi (v${doc.version}); please update.` | [parseSavedPhrase.ts:18](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/parseSavedPhrase.ts#L18) | a version number; also passive ([C11](C11-ui-failure-messages-passive.md)) |
 
 ## To unblock (pick one)
 

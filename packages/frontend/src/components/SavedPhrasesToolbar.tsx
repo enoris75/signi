@@ -41,7 +41,7 @@ import {
   readSavedPhraseFile,
   serializeWorkspace,
   toSavedPhrase,
-} from "./PhraseBuilder/phraseSerialize.ts";
+} from "./PhraseBuilder/phraseSerialize/index.ts";
 import type { SerializedWorkspace } from "@signi/shared";
 
 interface Props {

@@ -9,7 +9,7 @@ is no catalog entry.
 | literal | where | why |
 |---|---|---|
 | Signi | [App.tsx:96](../../../packages/frontend/src/App.tsx#L96) | the product name |
-| `${slug}.signi.json` | [phraseSerialize.ts:273](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize.ts#L273) | a file name and extension |
+| `${slug}.signi.json` | [downloadSavedPhrase.ts:10](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/downloadSavedPhrase.ts#L10) | a file name and extension |
 | `1sg` / `3pl` codes | [CorefPickContext.tsx:98](../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L98) | language-neutral grammatical notation, the same choice the imperative person buttons make (`imperative.personShort.*` names them in words for the tooltip) |
 
 ## Never reaches the user

@@ -2,7 +2,7 @@
 
 **Language:** all except Japanese
 
-The builder can relativise on any slot: `workspacePlan.ts` sets `headRole` to the gap, and that
+The builder can relativise on any slot: `workspacePlan` sets `headRole` to the gap, and that
 includes complement keys. "The house the cat eats **in**" is `headRole: 'locative'`; "the boy the man
 gives the book **to**" is `headRole: 'terminus'`. The gap complement is correctly dropped from the
 clause, but no engine gives the relative pronoun the complement's preposition or case. Every language
@@ -62,7 +62,7 @@ match the complement exactly.
 
 - **The gap's specifiers survive.** `RelativeClause.headSpecifiers`
   ([`packages/shared/src/index.ts`](../../../packages/shared/src/index.ts)) carries the dropped
-  complement's specifiers. [`workspacePlan.ts`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan.ts)
+  complement's specifiers. [`buildRelativeClause.ts`](../../../packages/frontend/src/components/PhraseBuilder/workspacePlan/functions/buildRelativeClause.ts)
   copies them off the gap complement before deleting it, and
   [`translator.ts`](../../../packages/engine/src/translator.ts) passes them through.
 - **A stand-in for the head.** `relativeGapComplement`

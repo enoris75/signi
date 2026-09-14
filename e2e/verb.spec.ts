@@ -2,8 +2,8 @@ import { test } from './fixtures';
 
 // The verb's own controls: the tense and aspect toggle boxes (click to cycle), the polarity toggle
 // on the verb box border, and the modal chain. Each changes the finite verb the plan carries, a
-// path no other spec drives — and one with no unit test between the canvas and the engine, since
-// the selection → plan code (selectionToPlan.ts) is only exercised end to end.
+// path no other spec drives. The selection → plan step has unit tests of its own
+// (packages/frontend/test/selectionToPlan); this spec checks the canvas and the engines agree with it.
 test.describe('verb', () => {
   test('tense cycles present → past → future', async ({ app }) => {
     await app.buildClause('CAT', 'EAT');

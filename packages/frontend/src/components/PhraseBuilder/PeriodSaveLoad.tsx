@@ -25,7 +25,7 @@ import {
 } from "../../api.ts";
 import { conceptsQuery } from "../../hooks/useConcepts.ts";
 import type { PhraseContainer, PhraseSelection } from "./interfaces.ts";
-import { hydrateWorkspace, serializePeriod } from "./phraseSerialize.ts";
+import { hydrateWorkspace, serializePeriod } from "./phraseSerialize/index.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 

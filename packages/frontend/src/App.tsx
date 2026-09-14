@@ -6,7 +6,7 @@ import {
   type PhraseContainer,
   type PhraseLink,
 } from "./components/PhraseBuilder/interfaces.ts";
-import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan.ts";
+import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan/index.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";

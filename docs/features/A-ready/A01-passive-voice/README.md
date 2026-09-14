@@ -104,13 +104,13 @@ Follow the `verbAspect` satellite wiring exactly:
 - **Boxes.tsx** — `VoiceToggleBox` (mirror `AspectToggleBox`, ≈ line 554).
 - **phraseReducers.ts** — `verbVoice: 'active'` default (≈ line 326); `handleCycleVoice`
   (mirror `handleCycleAspect`, ≈ line 366).
-- **selectionToPlan.ts** — thread `voice: sel.verbVoice` in `buildVerbPhrase` (≈ line 177).
+- **selectionToPlan/functions/buildVerbPhrase.ts** — thread `voice: sel.verbVoice` into the verb phrase.
 - **VerbPhraseBuilder.tsx / slots.ts / satellites.tsx / graph.ts / layout.ts** — add the
   `verbVoice` satellite next to `verbAspect`. **Gate** it on the verb being transitive *and* a
   directObject present, the same conditional-availability pattern the imperative controls use.
 - Passive presentation: relabel the promoted patient as subject and caption the demoted agent
   "by" (minimal — a caption swap; agent can ride the existing subject box).
-- **phraseSerialize.ts** — `verbVoice` rides the generic string passthrough; bump
+- **phraseSerialize/** — `verbVoice` rides the generic string passthrough; bump
   `SAVED_PHRASE_VERSION` (4 → 5).
 
 ## 5. Seed / lexicon data — `packages/backend/src`

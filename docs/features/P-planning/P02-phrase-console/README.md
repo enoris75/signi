@@ -443,7 +443,7 @@ The `language/` layer imports no React and is fully unit-testable.
 | [`ConceptOption.tsx`](../../../../packages/frontend/src/components/PhraseBuilder/ConceptOption.tsx) | Reused as the word row of the completion list. |
 | [`TranslationPanel.tsx`](../../../../packages/frontend/src/components/TranslationPanel.tsx) | *Preview* label on previewed rows. |
 | [`index.html`](../../../../packages/frontend/index.html) | Add IBM Plex Mono to the Google Fonts link. |
-| [`phraseSerialize.ts`](../../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize.ts) | Unchanged — saved phrases stay JSON (decision 4). |
+| [`phraseSerialize/`](../../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/index.ts) | Unchanged — saved phrases stay JSON (decision 4). |
 | i18n | Console captions, list titles and messages through the UI-string catalogue. Command names are not translated (decision 3). |
 
 ---

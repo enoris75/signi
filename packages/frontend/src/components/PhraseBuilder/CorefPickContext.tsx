@@ -1,7 +1,7 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import type { Concept, PronominalPossessor } from "@signi/shared";
 import { NounAddress, PhraseSelection } from "./interfaces.ts";
-import { resolveAntecedent } from "./selectionToPlan.ts";
+import { resolveAntecedent } from "./selectionToPlan/index.ts";
 
 // Coordinating the "point to a noun" gesture for a *pronominal* possessor ("the boy and his
 // horse"). The possessor control lives on a noun that may be nested (a conjunct's, or an owner's),
