@@ -1,11 +1,15 @@
 import { describe, expect, it } from 'vitest';
-import type { SerializedLink } from '@signi/shared';
+import type { SerializedLink, SerializedWorkspace } from '@signi/shared';
 import { hydrateWorkspace } from '../../../src/components/PhraseBuilder/phraseSerialize/functions/hydrateWorkspace.ts';
 import { serializeWorkspace } from '../../../src/components/PhraseBuilder/phraseSerialize/functions/serializeWorkspace.ts';
 import type { PhraseLink } from '../../../src/components/PhraseBuilder/interfaces.ts';
+import { workspaceToPlans } from '../../../src/components/PhraseBuilder/workspacePlan/index.ts';
 import { BOY, CAT, CATALOG, RICH, RICH_SAVED } from '../fixtures.ts';
 
 const linksOf = (...links: SerializedLink[]) => hydrateWorkspace({ containers: [], links }, CATALOG).links;
+
+// A saved workspace as a damaged file may hold it, past what the types promise.
+const damaged = (workspace: Record<string, unknown>) => workspace as unknown as SerializedWorkspace;
 
 describe('hydrateWorkspace', () => {
   it('restores each period’s selection under its id, in order', () => {
@@ -97,6 +101,78 @@ describe('hydrateWorkspace', () => {
     ).toStrictEqual([
       { id: 'i', kind: 'instrumental', level: 'concept', source: { containerId: 'a' }, target: { containerId: 'b' } },
       { id: 'j', kind: 'instrumental', level: 'object', source: { containerId: 'a' }, target: { containerId: 'c' } },
+    ]);
+  });
+
+  it('loads a period saved with no selection as an empty one', () => {
+    expect(
+      hydrateWorkspace(damaged({ containers: [{ id: 'a' }, { id: 'b', selection: 'CAT' }], links: [] }), CATALOG).containers,
+    ).toEqual([
+      { id: 'a', selection: {} },
+      { id: 'b', selection: {} },
+    ]);
+  });
+
+  it('drops a period that is no object or has no id', () => {
+    const containers = [null, 'a', { selection: { subject: 'CAT' } }, { id: 3, selection: {} }, { id: 'b', selection: { subject: 'CAT' } }];
+
+    expect(hydrateWorkspace(damaged({ containers, links: [] }), CATALOG).containers).toEqual([
+      { id: 'b', selection: { subject: CAT } },
+    ]);
+  });
+
+  it('loads a workspace whose periods or links are no list as having none', () => {
+    expect(hydrateWorkspace(damaged({ containers: {}, links: 'r' }), CATALOG)).toEqual({ containers: [], links: [], missing: [] });
+    expect(hydrateWorkspace(damaged({ containers: [] }), CATALOG).links).toEqual([]);
+  });
+
+  it('drops a link without an id and both endpoints, keeping the rest', () => {
+    const links = [
+      null,
+      { id: 'x', kind: 'conditional', source: { containerId: 'a' } },
+      { id: 'y', source: 'a', target: { containerId: 'b' } },
+      { id: 'c', kind: 'conditional', source: { containerId: 'a' }, target: { containerId: 'b' } },
+    ];
+
+    expect(hydrateWorkspace(damaged({ containers: [], links }), CATALOG).links).toStrictEqual([
+      { id: 'c', kind: 'conditional', source: { containerId: 'a' }, target: { containerId: 'b' } },
+    ]);
+  });
+
+  it('points a relative endpoint whose address is no string at the subject', () => {
+    const link = { id: 'r', source: { containerId: 'a', nounKey: 7 }, target: { containerId: 'b', nounKey: ['subject'] } };
+
+    expect(hydrateWorkspace(damaged({ containers: [], links: [link] }), CATALOG).links).toStrictEqual([
+      { id: 'r', source: { containerId: 'a', nounKey: 'subject' }, target: { containerId: 'b', nounKey: 'subject' } },
+    ]);
+  });
+
+  it('falls back on "and" and the object for a conjunction or level it does not know', () => {
+    const links = [
+      { id: 'k', kind: 'coordinative', conjunction: 'nor', source: { containerId: 'a' }, target: { containerId: 'b' } },
+      { id: 'i', kind: 'instrumental', level: 42, source: { containerId: 'a' }, target: { containerId: 'c' } },
+    ];
+
+    expect(hydrateWorkspace(damaged({ containers: [], links }), CATALOG).links).toMatchObject([
+      { kind: 'coordinative', conjunction: 'and' },
+      { kind: 'instrumental', level: 'object' },
+    ]);
+  });
+
+  it('loads a damaged workspace into one the builder can plan', () => {
+    const { containers, links } = hydrateWorkspace(
+      damaged({
+        containers: [
+          { id: 'a', selection: { subject: 'CAT', subjectConjuncts: 'DOG', directObjectPossessor: 'BOY', modifierAdjectives: ['BIG'] } },
+          { id: 'b' },
+        ],
+        links: [{ id: 'r', source: { containerId: 'a', nounKey: 1 }, target: { containerId: 'b', nounKey: null } }, { id: 'x' }],
+      }),
+      CATALOG,
+    );
+
+    expect(workspaceToPlans(containers, links)).toEqual([
+      { containerId: 'a', plan: expect.objectContaining({ subject: expect.objectContaining({ concept: 'CAT' }) }) },
     ]);
   });
 

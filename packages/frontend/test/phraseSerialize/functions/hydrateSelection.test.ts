@@ -69,15 +69,32 @@ describe('hydrateSelection', () => {
     expect(hydrate({ subject: 'CAT', verb: null, subjectPossessor: null }).selection).toEqual({ subject: CAT });
   });
 
-  it('keeps a value whose shape does not fit its key as it is', () => {
-    const saved = {
-      subject: 42,
-      subjectPossessor: 'BOY',
-      subjectConjuncts: 'DOG',
-      modifierAdjectives: 'BIG',
-      modifierRelations: 'feature',
-    };
+  it.each<[string, SerializedSelection]>([
+    ['a concept that is no id', { directObject: { id: 'BOY' }, verb: 42 }],
+    ['a possessor that is no selection', { subjectPossessor: 'BOY', directObjectPossessor: [{ subject: 'CAT' }] }],
+    ['conjuncts that are no list', { subjectConjuncts: 'DOG', directObjectConjuncts: { subject: 'CAT' } }],
+    ['modifier adjectives that are no map', { modifierAdjectives: ['BIG'] }],
+    ['slot-keyed maps that are no map', { modifierRelations: 'feature', adjectiveDegrees: ['more'] }],
+  ])('drops %s, reporting no word missing', (_, damage) => {
+    expect(hydrate({ subject: 'CAT', ...damage })).toEqual({ selection: { subject: CAT }, missing: [] });
+  });
 
-    expect(hydrate(saved)).toEqual({ selection: saved, missing: [] });
+  it('drops the conjuncts that are no selection and keeps the rest', () => {
+    expect(hydrate({ subject: 'BOY', subjectConjuncts: [null, 'CAT', { subject: 'DOG' }, []] }).selection).toEqual({
+      subject: BOY,
+      subjectConjuncts: [{ subject: DOG }],
+    });
+  });
+
+  it('drops a modifier adjective that is no id and keeps the rest', () => {
+    expect(
+      hydrate({ modifierAdjectives: { subjectAdjective: 7, subjectAdjective2: 'SEMANTIC' } }),
+    ).toEqual({ selection: { modifierAdjectives: { subjectAdjective2: SEMANTIC } }, missing: [] });
+  });
+
+  it('keeps a scalar field whatever was saved in it', () => {
+    const saved = { subjectNumber: 3, verbTense: ['past'], subjectPossessorRef: { to: 'subject' } };
+
+    expect(hydrate(saved).selection).toEqual(saved);
   });
 });

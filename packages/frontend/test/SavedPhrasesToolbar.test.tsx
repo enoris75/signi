@@ -518,6 +518,31 @@ describe('SavedPhrasesToolbar', () => {
       );
     });
 
+    it('loads what it can of a damaged file, dropping what it cannot read', async () => {
+      const { onLoad } = renderToolbar();
+
+      pickFile(
+        JSON.stringify({
+          format: SAVED_PHRASE_FORMAT,
+          version: SAVED_PHRASE_VERSION,
+          kind: 'phrase',
+          savedAt: '2026-09-02T10:00:00Z',
+          workspace: {
+            containers: [{ id: 'c1', selection: { subject: 'CAT', subjectConjuncts: 'CAT' } }, { id: 'c2' }],
+          },
+        }),
+      );
+
+      expect(await findToast()).toHaveTextContent('Loaded phrase');
+      expect(onLoad).toHaveBeenCalledExactlyOnceWith(
+        [
+          { id: 'c1', selection: { subject: CAT } },
+          { id: 'c2', selection: {} },
+        ],
+        [],
+      );
+    });
+
     it('explains why a file could not be imported', async () => {
       const { onLoad } = renderToolbar();
 
