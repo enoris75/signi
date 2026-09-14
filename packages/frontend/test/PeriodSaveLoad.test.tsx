@@ -360,7 +360,9 @@ describe('PeriodSaveLoad', () => {
       vi.mocked(deleteSavedPhrase).mockResolvedValue();
       const { props } = renderSaveLoad({ loadOpen: true });
 
-      fireEvent.click(await screen.findByRole('button', { name: 'Delete Breakfast' }));
+      fireEvent.click(
+        await screen.findByRole('button', { name: 'Delete this saved period', description: 'Breakfast' }),
+      );
 
       await waitForElementToBeRemoved(() => screen.queryByText('Breakfast'));
       expect(deleteSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');

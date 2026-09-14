@@ -348,6 +348,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'limpando', participle: 'limpado' },
     ja: { te: '消去して', te_reading: 'しょうきょして', nai: '消去しない', nai_reading: 'しょうきょしない' },
   },
+  // it rimosso is irregular. de entfernt takes no ge- after its unstressed ent-, where löschen does
+  // (gelöscht). pt excluído keeps the accent that splits its u-i.
+  REMOVE: {
+    en: { gerund: 'removing', participle: 'removed' },
+    it: { gerund: 'rimuovendo', participle: 'rimosso' },
+    fr: { participle: 'retiré' }, de: { participle: 'entfernt' },
+    es: { gerund: 'quitando', participle: 'quitado' },
+    pt: { gerund: 'removendo', participle: 'removido' },
+    ja: { te: '取り除いて', te_reading: 'とりのぞいて', nai: '取り除かない', nai_reading: 'とりのぞかない' },
+  },
+  DELETE: {
+    en: { gerund: 'deleting', participle: 'deleted' },
+    it: { gerund: 'eliminando', participle: 'eliminato' },
+    fr: { participle: 'supprimé' }, de: { participle: 'gelöscht' },
+    es: { gerund: 'eliminando', participle: 'eliminado' },
+    pt: { gerund: 'excluindo', participle: 'excluído' },
+    ja: { te: '削除して', te_reading: 'さくじょして', nai: '削除しない', nai_reading: 'さくじょしない' },
+  },
   COORDINATE: {
     en: { gerund: 'coordinating', participle: 'coordinated' },
     it: { gerund: 'coordinando', participle: 'coordinato' },

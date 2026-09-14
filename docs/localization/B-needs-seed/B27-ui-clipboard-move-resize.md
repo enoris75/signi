@@ -5,7 +5,9 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 
 **Blocked on:** COPY, CLIPBOARD, MOVE, UP, DOWN and RESIZE are not seeded. The constructions are
 supported: a command with a `direction` complement, with an adverb modifier, or with an object
-carrying a noun-modifier. MOVE is also the genus [B14](B14-motion-verbs.md) seeds; seed it once, for both.
+carrying a noun-modifier. MOVE here is the transitive "change the position of", which no language
+says with a reflexive verb, so it takes the id MOVE. The intransitive genus of GO and RUN is a separate
+concept, blocked on reflexive verbs in Italian and German ([C17](../C-needs-engine/C17-motion-verbs-reflexive-genus.md)).
 
 ## Seed first
 
@@ -14,7 +16,7 @@ carrying a noun-modifier. MOVE is also the genus [B14](B14-motion-verbs.md) seed
 | COPY | verb, transitive | to make a duplicate of | license `direction` in `complements` |
 | COPIED | adjective | duplicated to the clipboard | the tooltip after copying |
 | CLIPBOARD | noun | temporary storage for copied content | |
-| MOVE | verb, transitive | to change the position of | shared with B14 |
+| MOVE | verb, transitive | to change the position of | it spostare, fr déplacer, de verschieben; not C17's intransitive |
 | UP / DOWN | adverbs | towards a higher / lower position | |
 | RESIZE | verb, transitive | to change the size of | |
 

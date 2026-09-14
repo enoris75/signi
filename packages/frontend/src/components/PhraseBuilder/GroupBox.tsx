@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 import type { GroupRect } from "./graph.ts";
 import type { PhraseRenderContext } from "./phraseRender.tsx";
 import { collapseControlKey, removeControlKey } from "./ringSpecs.ts";
-import { collapseTitle } from "./canvasCommands.ts";
+import { collapseTitle, removeTitle } from "./canvasCommands.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 
 // A small round chrome button on the dotted ring, centred where the ring layout seats it.
@@ -113,7 +113,7 @@ export function GroupBox({
       {rect.removeKey && (
         <RingButton
           at={controlPos[removeControlKey(rect.label)]}
-          title={`Remove ${rect.label}`}
+          title={removeTitle(t, rect.label, rect.labelKey)}
           onClick={() => handleRemoveComplement(rect.removeKey!)}
         >
           <ClearIcon sx={{ fontSize: 11 }} />

@@ -3107,6 +3107,148 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // REMOVE and DELETE are two verbs, not one, because the languages split them. REMOVE takes a thing
+  // away from where it is and can be undone: it rimuovere, fr retirer, de entfernen, es quitar, pt
+  // remover. DELETE erases a stored record for good: it eliminare, fr supprimer, es eliminar, pt excluir,
+  // ja 削除する. CLEAR (above) is neither: it empties a thing and leaves it in place.
+  // German DELETE is löschen, the verb CLEAR already uses. German says both with it, and the
+  // controls that use the two never share a screen.
+  {
+    id: 'REMOVE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
+    description: 'to take something away from where it is',
+    emoji: '➖',
+    forms: {
+      en: {
+        base: 'remove',
+        '1sg_present': 'remove', '2sg_present': 'remove', '3sg_present': 'removes',
+        '1pl_present': 'remove', '2pl_present': 'remove', '3pl_present': 'remove',
+        past: 'removed',
+      },
+      it: {
+        base: 'rimuovere',
+        '1sg_present': 'rimuovo', '2sg_present': 'rimuovi', '3sg_present': 'rimuove',
+        '1pl_present': 'rimuoviamo', '2pl_present': 'rimuovete', '3pl_present': 'rimuovono',
+        '1sg_past': 'rimossi', '2sg_past': 'rimuovesti', '3sg_past': 'rimosse',
+        '1pl_past': 'rimuovemmo', '2pl_past': 'rimuoveste', '3pl_past': 'rimossero',
+        '1sg_future': 'rimuoverò', '2sg_future': 'rimuoverai', '3sg_future': 'rimuoverà',
+        '1pl_future': 'rimuoveremo', '2pl_future': 'rimuoverete', '3pl_future': 'rimuoveranno',
+      },
+      fr: {
+        base: 'retirer',
+        '1sg_present': 'retire', '2sg_present': 'retires', '3sg_present': 'retire',
+        '1pl_present': 'retirons', '2pl_present': 'retirez', '3pl_present': 'retirent',
+        '1sg_past': 'retirai', '2sg_past': 'retiras', '3sg_past': 'retira',
+        '1pl_past': 'retirâmes', '2pl_past': 'retirâtes', '3pl_past': 'retirèrent',
+        '1sg_future': 'retirerai', '2sg_future': 'retireras', '3sg_future': 'retirera',
+        '1pl_future': 'retirerons', '2pl_future': 'retirerez', '3pl_future': 'retireront',
+      },
+      de: {
+        base: 'entfernen',
+        '1sg_present': 'entferne', '2sg_present': 'entfernst', '3sg_present': 'entfernt',
+        '1pl_present': 'entfernen', '2pl_present': 'entfernt', '3pl_present': 'entfernen',
+        '1sg_past': 'entfernte', '2sg_past': 'entferntest', '3sg_past': 'entfernte',
+        '1pl_past': 'entfernten', '2pl_past': 'entferntet', '3pl_past': 'entfernten',
+        '2sg_imperative': 'entferne', // the optional du -e, kept
+      },
+      es: {
+        base: 'quitar',
+        '1sg_present': 'quito', '2sg_present': 'quitas', '3sg_present': 'quita',
+        '1pl_present': 'quitamos', '2pl_present': 'quitáis', '3pl_present': 'quitan',
+        '1sg_past': 'quité', '2sg_past': 'quitaste', '3sg_past': 'quitó',
+        '1pl_past': 'quitamos', '2pl_past': 'quitasteis', '3pl_past': 'quitaron',
+        '1sg_future': 'quitaré', '2sg_future': 'quitarás', '3sg_future': 'quitará',
+        '1pl_future': 'quitaremos', '2pl_future': 'quitaréis', '3pl_future': 'quitarán',
+      },
+      ja: {
+        base: '取り除く',
+        reading: 'とりのぞく',
+        masu_present: '取り除きます',
+        masu_present_reading: 'とりのぞきます',
+      },
+      pt: {
+        base: 'remover',
+        '1sg_present': 'removo', '2sg_present': 'remove', '3sg_present': 'remove',
+        '1pl_present': 'removemos', '2pl_present': 'removem', '3pl_present': 'removem',
+        '1sg_past': 'removi', '2sg_past': 'removeu', '3sg_past': 'removeu',
+        '1pl_past': 'removemos', '2pl_past': 'removeram', '3pl_past': 'removeram',
+        '1sg_future': 'removerei', '2sg_future': 'removerá', '3sg_future': 'removerá',
+        '1pl_future': 'removeremos', '2pl_future': 'removerão', '3pl_future': 'removerão',
+      },
+    },
+  },
+
+  {
+    id: 'DELETE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'source', 'cause'],
+    description: 'to erase something permanently',
+    emoji: '🗑️',
+    forms: {
+      en: {
+        base: 'delete',
+        '1sg_present': 'delete', '2sg_present': 'delete', '3sg_present': 'deletes',
+        '1pl_present': 'delete', '2pl_present': 'delete', '3pl_present': 'delete',
+        past: 'deleted',
+      },
+      it: {
+        base: 'eliminare',
+        '1sg_present': 'elimino', '2sg_present': 'elimini', '3sg_present': 'elimina',
+        '1pl_present': 'eliminiamo', '2pl_present': 'eliminate', '3pl_present': 'eliminano',
+        '1sg_past': 'eliminai', '2sg_past': 'eliminasti', '3sg_past': 'eliminò',
+        '1pl_past': 'eliminammo', '2pl_past': 'eliminaste', '3pl_past': 'eliminarono',
+        '1sg_future': 'eliminerò', '2sg_future': 'eliminerai', '3sg_future': 'eliminerà',
+        '1pl_future': 'elimineremo', '2pl_future': 'eliminerete', '3pl_future': 'elimineranno',
+      },
+      fr: {
+        base: 'supprimer',
+        '1sg_present': 'supprime', '2sg_present': 'supprimes', '3sg_present': 'supprime',
+        '1pl_present': 'supprimons', '2pl_present': 'supprimez', '3pl_present': 'suppriment',
+        '1sg_past': 'supprimai', '2sg_past': 'supprimas', '3sg_past': 'supprima',
+        '1pl_past': 'supprimâmes', '2pl_past': 'supprimâtes', '3pl_past': 'supprimèrent',
+        '1sg_future': 'supprimerai', '2sg_future': 'supprimeras', '3sg_future': 'supprimera',
+        '1pl_future': 'supprimerons', '2pl_future': 'supprimerez', '3pl_future': 'supprimeront',
+      },
+      de: {
+        base: 'löschen',
+        '1sg_present': 'lösche', '2sg_present': 'löschst', '3sg_present': 'löscht',
+        '1pl_present': 'löschen', '2pl_present': 'löscht', '3pl_present': 'löschen',
+        '1sg_past': 'löschte', '2sg_past': 'löschtest', '3sg_past': 'löschte',
+        '1pl_past': 'löschten', '2pl_past': 'löschtet', '3pl_past': 'löschten',
+        '2sg_imperative': 'lösche', // the optional du -e, kept
+      },
+      es: {
+        base: 'eliminar',
+        '1sg_present': 'elimino', '2sg_present': 'eliminas', '3sg_present': 'elimina',
+        '1pl_present': 'eliminamos', '2pl_present': 'elimináis', '3pl_present': 'eliminan',
+        '1sg_past': 'eliminé', '2sg_past': 'eliminaste', '3sg_past': 'eliminó',
+        '1pl_past': 'eliminamos', '2pl_past': 'eliminasteis', '3pl_past': 'eliminaron',
+        '1sg_future': 'eliminaré', '2sg_future': 'eliminarás', '3sg_future': 'eliminará',
+        '1pl_future': 'eliminaremos', '2pl_future': 'eliminaréis', '3pl_future': 'eliminarán',
+      },
+      ja: {
+        base: '削除する',
+        reading: 'さくじょする',
+        masu_present: '削除します',
+        masu_present_reading: 'さくじょします',
+        label: '削除',
+        label_reading: 'さくじょ',
+      },
+      pt: {
+        base: 'excluir',
+        '1sg_present': 'excluo', '2sg_present': 'exclui', '3sg_present': 'exclui',
+        '1pl_present': 'excluímos', '2pl_present': 'excluem', '3pl_present': 'excluem',
+        '1sg_past': 'excluí', '2sg_past': 'excluiu', '3sg_past': 'excluiu',
+        '1pl_past': 'excluímos', '2pl_past': 'excluíram', '3pl_past': 'excluíram',
+        '1sg_future': 'excluirei', '2sg_future': 'excluirá', '3sg_future': 'excluirá',
+        '1pl_future': 'excluiremos', '2pl_future': 'excluirão', '3pl_future': 'excluirão',
+      },
+    },
+  },
+
   {
     id: 'COORDINATE',
     role: 'verb',

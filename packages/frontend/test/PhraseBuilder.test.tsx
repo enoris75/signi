@@ -1108,7 +1108,7 @@ describe('PhraseBuilder', () => {
       fireEvent.click(screen.getByRole('button', { name: 'Move this period up' }));
       fireEvent.click(screen.getByRole('button', { name: 'Move this period down' }));
       fireEvent.click(screen.getByRole('button', { name: 'Save period' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
       Object.values(handlers).forEach((handler) => expect(handler).toHaveBeenCalledOnce());
     });

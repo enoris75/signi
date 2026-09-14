@@ -437,7 +437,10 @@ describe('SavedPhrasesToolbar', () => {
       const dialog = openLoadDialog();
 
       fireEvent.click(
-        await within(dialog).findByRole('button', { name: 'Delete The cat sleeps' }),
+        await within(dialog).findByRole('button', {
+          name: 'Delete this saved phrase',
+          description: 'The cat sleeps',
+        }),
       );
 
       await waitForElementToBeRemoved(() => within(dialog).queryByText('The cat sleeps'));
@@ -446,6 +449,19 @@ describe('SavedPhrasesToolbar', () => {
       expect(within(dialog).getByText('The dog barks')).toBeInTheDocument();
       expect(fetchSavedPhrase).not.toHaveBeenCalled();
       expect(onLoad).not.toHaveBeenCalled();
+    });
+
+    it('names each row’s delete button in the UI language, described by the phrase it deletes', async () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      vi.mocked(listSavedPhrases).mockResolvedValue([SUMMARY, OTHER]);
+      renderToolbar({}, { 'action.deleteSavedPhrase': { de: 'Diese gespeicherte Phrase löschen' } });
+      const dialog = openLoadDialog();
+
+      const [first, second] = await within(dialog).findAllByRole('button', {
+        name: 'Diese gespeicherte Phrase löschen',
+      });
+      expect(first).toHaveAccessibleDescription('The cat sleeps');
+      expect(second).toHaveAccessibleDescription('The dog barks');
     });
   });
 

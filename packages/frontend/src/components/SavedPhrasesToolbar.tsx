@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useId, useRef, useState } from "react";
 import {
   Alert,
   Box,
@@ -58,6 +58,8 @@ const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
 
 export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   const t = useUiString();
+  // Prefixes the ids that tie each row's delete button to the name it deletes.
+  const rowIdPrefix = useId();
   // Saved items are dated in the UI language, not the browser's.
   const { uiLanguage } = useUiLanguage();
   const queryClient = useQueryClient();
@@ -256,7 +258,10 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
                     edge="end"
                     size="small"
                     onClick={() => deleteMutation.mutate(p.id)}
-                    aria-label={`Delete ${p.name}`}
+                    // The label says what the button does; the row's name, which a plan cannot
+                    // carry, is read out as its description.
+                    aria-label={t("action.deleteSavedPhrase")}
+                    aria-describedby={`${rowIdPrefix}-name-${p.id}`}
                   >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
@@ -265,6 +270,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
                 <ListItemButton onClick={() => void handleLoad(p.id)}>
                   <ListItemText
                     primary={p.name}
+                    primaryTypographyProps={{ id: `${rowIdPrefix}-name-${p.id}` }}
                     secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString(uiLanguage)}`}
                   />
                 </ListItemButton>

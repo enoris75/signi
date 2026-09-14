@@ -74,15 +74,13 @@ _None outstanding._ A11–A15 are done (see the Done section). A08–A10 are ret
 ### Part B — Needs seeding (`B-needs-seed/`)
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
-task. **Only B14 is left.** B09–B13 and B15–B19 are done. The builder change B14 was meant to own
+task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
+[C17](C-needs-engine/C17-motion-verbs-reflexive-genus.md): their genus MOVE is a reflexive verb in
+Italian and German, which the engine cannot render yet. The builder change B14 was meant to own
 landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `concepts/verbs/gloss.ts`) takes either the object id or a `GlossParts` object with the object's
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
-
-| # | File | Seed first |
-|---|---|---|
-| B14 | [B14-motion-verbs.md](B-needs-seed/B14-motion-verbs.md) | **MOVE** (PLACE ✓) → GO, RUN, COME, JUMP, COLLAPSE — builder done |
 
 Genus nouns (B29–B31) come from the isA audit of 2026-09-14. Each names children whose description
 cites a parent that isn't seeded. Seed the parent with
@@ -97,19 +95,18 @@ that become composable.
 
 #### UI strings
 
-**B20 and B22 are the cheapest**: two verbs, or one feature family, each unlock a whole control group.
+**B22 is the cheapest**: one feature family unlocks a whole control group. B20 is done.
 B21 is the largest and unlocks most of the period container.
 
 | # | File | Seed first |
 |---|---|---|
-| B20 | [B20-ui-remove-and-delete.md](B-needs-seed/B20-ui-remove-and-delete.md) | **REMOVE, DELETE** → Remove this period, Remove + group, Delete saved item |
 | B21 | [B21-ui-clause-and-coordination-vocabulary.md](B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md) | **CLAUSE, MAIN, CONDITION, COORDINATION, RELATIVE_CLAUSE, CONJUNCT, OTHER** (+ conjunction kinds) → clause badges, IF / coordination tooltips, pick hints |
 | B22 | [B22-ui-verb-feature-controls.md](B-needs-seed/B22-ui-verb-feature-controls.md) | **TENSE, ASPECT, POLARITY, MODAL** + their values → tense / aspect / polarity / modal controls |
 | B23 | [B23-ui-complement-and-group-names.md](B-needs-seed/B23-ui-complement-and-group-names.md) | **LOCATIVE, DIRECTION, SOURCE, ROUTE, CAUSE_COMPLEMENT, TERMINUS, VERB_PHRASE** → the six remaining complement names, group labels, word-map filter |
 | B24 | [B24-ui-noun-modifier-chips.md](B-needs-seed/B24-ui-noun-modifier-chips.md) | **MODIFIER, DEGREE, RELATION** + relation names → noun-modifier chip captions |
 | B25 | [B25-ui-dialog-and-app-controls.md](B-needs-seed/B25-ui-dialog-and-app-controls.md) | **CANCEL, CLOSE, RETRY, NAME_NOUN, LOADING, INTERFACE, EMPTY, RESULT, UNTITLED** → Cancel, Name, Loading…, Close, Retry |
 | B26 | [B26-ui-saved-item-feedback.md](B-needs-seed/B26-ui-saved-item-feedback.md) | **YET, ADDED, FAILED, IMPORT_NOUN, USE, ICON, FILE, VALID** → empty lists, "Period added.", import errors |
-| B27 | [B27-ui-clipboard-move-resize.md](B-needs-seed/B27-ui-clipboard-move-resize.md) | **COPY, CLIPBOARD, MOVE, UP, DOWN, RESIZE** → copy, move-period and resize controls (MOVE shared with B14) |
+| B27 | [B27-ui-clipboard-move-resize.md](B-needs-seed/B27-ui-clipboard-move-resize.md) | **COPY, CLIPBOARD, MOVE, UP, DOWN, RESIZE** → copy, move-period and resize controls (the transitive MOVE; C17's intransitive genus is another concept) |
 | B28 | [B28-ui-mood-toggles.md](B-needs-seed/B28-ui-mood-toggles.md) | **TURN_OFF** → command / infinitive toggle tooltips; aria-labels need no seed |
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
@@ -121,6 +118,7 @@ B21 is the largest and unlocks most of the period container.
 | C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
+| C17 | [C17-motion-verbs-reflexive-genus.md](C-needs-engine/C17-motion-verbs-reflexive-genus.md) | Italian pronominal and German reflexive verbs — the genus MOVE (*muoversi*, *sich bewegen*) of GO, RUN, COME, JUMP, COLLAPSE (was B14) |
 
 #### UI strings
 
@@ -174,6 +172,7 @@ B21 is the largest and unlocks most of the period container.
 | A13 | [done/A13-ui-save-load-dialogs.md](done/A13-ui-save-load-dialogs.md) | dialog titles reuse the button tooltips; `action.addSavedPeriod`; `toast.phraseSaved/phraseLoaded/periodSaved` ("Saved phrase"); dates in the UI language |
 | A14 | [done/A14-ui-satellite-and-badge-labels.md](done/A14-ui-satellite-and-badge-labels.md) | satellite labels from `t`, `satellite.gender`, `gender.value.*` ("Male"), Command / Infinitive phrase badges |
 | A15 | [done/A15-ui-slot-scoped-commands.md](done/A15-ui-slot-scoped-commands.md) | `action.clear/show/hide/expand/compact.<part>` families; `label` stays the group key, `labelKey` names it; fixed bug A126 (ja 隠し) |
+| B20 | [done/B20-ui-remove-and-delete.md](done/B20-ui-remove-and-delete.md) | `action.removePeriod`, `action.remove.<part>` (predicative, manner), `action.deleteSavedPhrase/deleteSavedPeriod` (seeded REMOVE, DELETE); found bug A137 |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

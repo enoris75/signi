@@ -19,10 +19,10 @@ describe('ControlButton', () => {
 
   it('takes a name of its own over the tooltip’s', () => {
     render(
-      <ControlButton title="Remove this period" aria-label="Remove main clause" icon={SaveOutlinedIcon} />,
+      <ControlButton title="Save this period" aria-label="Save" icon={SaveOutlinedIcon} />,
     );
 
-    expect(screen.getByRole('button', { name: 'Remove main clause' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Save' })).toBeInTheDocument();
   });
 
   it('keeps a control that can be disabled in a span, where the tooltip can still hear it', () => {

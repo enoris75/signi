@@ -5,7 +5,7 @@ _(split out of [B08](B08-verb-definitions.md).)_
 Genus **TRANSFER**. All three are **ditransitive** — their defining differentia is the *recipient*
 ("to someone"), not the object — so this batch needs the builder to emit an indirect object or a
 `terminus` complement. It is the most structurally demanding of the split; do it after
-[B14](../B-needs-seed/B14-motion-verbs.md)'s builder work.
+[B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md)'s builder work.
 
 ## Seed first (1 verb + 1 noun)
 

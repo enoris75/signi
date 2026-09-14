@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Complement, NounElement, NounPhrase, VerbPhrase } from '@signi/shared';
+import type { Complement, NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 /** "the cat eats", with the verb phrase varied. */
@@ -457,6 +457,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['COORDINATE', 'la gatta ha coordinato.'], ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
     ['CRY_OUT', 'la gatta ha gridato.'], ['CUT', 'la gatta ha tagliato.'],
+    ['DELETE', 'la gatta ha eliminato.'],
     ['DESCRIBE', 'la gatta ha descritto.'], ['DESTROY', 'la gatta ha distrutto.'],
     ['DIVIDE', 'la gatta ha diviso.'],
     ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],
@@ -474,7 +475,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['NAME', 'la gatta ha nominato.'], ['OWN', 'la gatta ha posseduto.'],
     ['PERCEIVE', 'la gatta ha percepito.'], ['PRESS', 'la gatta ha premuto.'],
     ['PRODUCE', 'la gatta ha prodotto.'],
-    ['READ', 'la gatta ha letto.'], ['REPLACE', 'la gatta ha sostituito.'],
+    ['READ', 'la gatta ha letto.'], ['REMOVE', 'la gatta ha rimosso.'],
+    ['REPLACE', 'la gatta ha sostituito.'],
     ['RUN', 'la gatta ha corso.'], ['SAVE', 'la gatta ha salvato.'],
     ['SEE', 'la gatta ha visto.'], ['SEEM', 'la gatta è sembrata.'],
     ['SELECT', 'la gatta ha selezionato.'], ['SEND', 'la gatta ha mandato.'],
@@ -487,6 +489,183 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
 
   test.each(IT)('%s → %s', (id, expected) => {
     expect(femResult(id).it).toBe(expected);
+  });
+});
+
+// REMOVE and DELETE, the two verbs the canvas and the saved-item lists name their controls with (B20).
+// Pinned across the persons, tenses, aspects and commands their languages inflect: Italian rimuovere
+// has the irregular rimosse / rimosso, German entfernen takes no ge- (hat entfernt) where löschen does
+// (hat gelöscht), and Portuguese excluir keeps its accent (excluímos, excluído → excluiu).
+describe('workspace verbs: REMOVE and DELETE', () => {
+  const YOU = np('SECOND_PERSON');
+  const WE = np('FIRST_PERSON', { number: 'plural' });
+  const YOU_ALL = np('SECOND_PERSON', { number: 'plural' });
+  const removes = (subject: NounElement, extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(subject, 'REMOVE', { directObject: np('STICK'), verbPhrase: extra }));
+  const deletes = (subject: NounElement, extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(subject, 'DELETE', { directObject: np('PHRASE'), verbPhrase: extra }));
+  const command = (verb: string, object: string, addressee: NounElement, negative = false) =>
+    sayAll({ ...clause(addressee, verb, { directObject: np(object), verbPhrase: { negative } }), imperative: true });
+
+  test('REMOVE: present, plural and past', () => {
+    expect(removes(np('DOG'))).toEqual({
+      en: 'the dog removes the stick.',
+      it: 'il cane rimuove il bastone.',
+      fr: 'le chien retire le bâton.',
+      de: 'der Hund entfernt den Stock.',
+      es: 'el perro quita el palo.',
+      ja: '犬は棒を取り除きます。',
+      pt: 'o cão remove o pau.',
+    });
+    expect(removes(np('DOG', { number: 'plural' }))).toMatchObject({
+      it: 'i cani rimuovono il bastone.',
+      fr: 'les chiens retirent le bâton.',
+      de: 'die Hunde entfernen den Stock.',
+      es: 'los perros quitan el palo.',
+      pt: 'os cães removem o pau.',
+    });
+    expect(removes(np('DOG'), { tense: 'past' })).toEqual({
+      en: 'the dog removed the stick.',
+      it: 'il cane rimosse il bastone.',
+      fr: 'le chien retira le bâton.',
+      de: 'der Hund entfernte den Stock.',
+      es: 'el perro quitó el palo.',
+      ja: '犬は棒を取り除きました。',
+      pt: 'o cão removeu o pau.',
+    });
+  });
+
+  test('REMOVE: future, resultative and progressive', () => {
+    expect(removes(np('DOG'), { tense: 'future' })).toMatchObject({
+      it: 'il cane rimuoverà il bastone.',
+      fr: 'le chien retirera le bâton.',
+      de: 'der Hund wird den Stock entfernen.',
+      es: 'el perro quitará el palo.',
+      pt: 'o cão removerá o pau.',
+    });
+    expect(removes(np('CAT'), { aspect: 'resultative' })).toEqual({
+      en: 'the cat has removed the stick.',
+      it: 'il gatto ha rimosso il bastone.',
+      fr: 'le chat a retiré le bâton.',
+      de: 'der Kater hat den Stock entfernt.',
+      es: 'el gato ha quitado el palo.',
+      ja: '猫は棒を取り除いてしまいます。',
+      pt: 'o gato removeu o pau.', // pt present resultative is the pretérito (documented)
+    });
+    expect(removes(np('CAT'), { aspect: 'progressive' })).toEqual({
+      en: 'the cat is removing the stick.',
+      it: 'il gatto sta rimuovendo il bastone.',
+      fr: 'le chat est en train de retirer le bâton.',
+      de: 'der Kater entfernt gerade den Stock.',
+      es: 'el gato está quitando el palo.',
+      ja: '猫は棒を取り除いています。',
+      pt: 'o gato está removendo o pau.',
+    });
+  });
+
+  test('REMOVE: commands, and the place it takes a thing from', () => {
+    expect(command('REMOVE', 'STICK', YOU)).toEqual({
+      en: 'remove the stick.',
+      it: 'rimuovi il bastone.',
+      fr: 'retire le bâton.',
+      de: 'entferne den Stock.',
+      es: 'quita el palo.',
+      ja: '棒を取り除いてください。',
+      pt: 'remova o pau.',
+    });
+    expect(command('REMOVE', 'STICK', WE)).toMatchObject({
+      it: 'rimuoviamo il bastone.',
+      de: 'entfernen wir den Stock.',
+      es: 'quitemos el palo.',
+      pt: 'removamos o pau.',
+    });
+    expect(sayAll(clause(np('DOG'), 'REMOVE', { directObject: np('STICK'), complements: { source: { phrase: np('HOUSE') } } })))
+      .toEqual({
+        en: 'the dog removes the stick from the house.',
+        it: 'il cane rimuove il bastone dalla casa.',
+        fr: 'le chien retire le bâton de la maison.',
+        de: 'der Hund entfernt den Stock aus dem Haus.',
+        es: 'el perro quita el palo de la casa.',
+        ja: '犬は家から棒を取り除きます。',
+        pt: 'o cão remove o pau da casa.',
+      });
+  });
+
+  test('DELETE: present, plural and past', () => {
+    expect(deletes(np('DOG'))).toEqual({
+      en: 'the dog deletes the phrase.',
+      it: 'il cane elimina la frase.',
+      fr: 'le chien supprime la phrase.',
+      de: 'der Hund löscht die Phrase.',
+      es: 'el perro elimina la frase.',
+      ja: '犬はフレーズを削除します。',
+      pt: 'o cão exclui a frase.',
+    });
+    expect(deletes(np('DOG', { number: 'plural' }))).toMatchObject({
+      it: 'i cani eliminano la frase.',
+      fr: 'les chiens suppriment la phrase.',
+      de: 'die Hunde löschen die Phrase.',
+      es: 'los perros eliminan la frase.',
+      pt: 'os cães excluem a frase.',
+    });
+    expect(deletes(np('DOG'), { tense: 'past' })).toEqual({
+      en: 'the dog deleted the phrase.',
+      it: 'il cane eliminò la frase.',
+      fr: 'le chien supprima la phrase.',
+      de: 'der Hund löschte die Phrase.',
+      es: 'el perro eliminó la frase.',
+      ja: '犬はフレーズを削除しました。',
+      pt: 'o cão excluiu a frase.',
+    });
+  });
+
+  test('DELETE: future, resultative and progressive', () => {
+    expect(deletes(np('DOG'), { tense: 'future' })).toMatchObject({
+      it: 'il cane eliminerà la frase.',
+      fr: 'le chien supprimera la phrase.',
+      de: 'der Hund wird die Phrase löschen.',
+      es: 'el perro eliminará la frase.',
+      pt: 'o cão excluirá a frase.',
+    });
+    expect(deletes(np('CAT'), { aspect: 'resultative' })).toEqual({
+      en: 'the cat has deleted the phrase.',
+      it: 'il gatto ha eliminato la frase.',
+      fr: 'le chat a supprimé la phrase.',
+      de: 'der Kater hat die Phrase gelöscht.',
+      es: 'el gato ha eliminado la frase.',
+      ja: '猫はフレーズを削除してしまいます。',
+      pt: 'o gato excluiu a frase.', // pt present resultative is the pretérito (documented)
+    });
+    expect(deletes(np('CAT'), { aspect: 'progressive' })).toEqual({
+      en: 'the cat is deleting the phrase.',
+      it: 'il gatto sta eliminando la frase.',
+      fr: 'le chat est en train de supprimer la phrase.',
+      de: 'der Kater löscht gerade die Phrase.',
+      es: 'el gato está eliminando la frase.',
+      ja: '猫はフレーズを削除しています。',
+      pt: 'o gato está excluindo a frase.',
+    });
+  });
+
+  test('DELETE: commands', () => {
+    expect(command('DELETE', 'PHRASE', YOU)).toEqual({
+      en: 'delete the phrase.',
+      it: 'elimina la frase.',
+      fr: 'supprime la phrase.',
+      de: 'lösche die Phrase.',
+      es: 'elimina la frase.',
+      ja: 'フレーズを削除してください。',
+      pt: 'exclua a frase.',
+    });
+    expect(command('DELETE', 'PHRASE', YOU_ALL, true)).toEqual({
+      en: 'do not delete the phrase.',
+      it: 'non eliminate la frase.',
+      fr: 'ne supprimez pas la phrase.',
+      de: 'löscht die Phrase nicht.',
+      es: 'no eliminéis la frase.',
+      ja: 'フレーズを削除するな。',
+      pt: 'não excluam a frase.',
+    });
   });
 });
 
@@ -662,6 +841,38 @@ describe('known bugs: reflexive verbs in the compound tense', () => {
     expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'BECOME')).es).toBe('la gata se vuelve.');
     expect(femResult('GO').fr).toBe('la chatte est allée.');
     expect(femResult('GO').es).toBe('la gata ha ido.');
+  });
+});
+
+// A137. A hypothetical derives its conditional from the stored 1sg future and its imperfect (fr) or
+// imperfect subjunctive (pt) from a stored present or past form. A pronominal verb carries its clitic
+// inside those forms, so the clitic of that person comes along for every subject: fr "nous effondrons"
+// → "le chat nous effondrait", "m'effondrerai" → "le chat m'effondrerait"; pt "me tornarei" → "o gato
+// me tornaria", "se tornaram" → "(eu) se tornasse". Spanish strips and re-adds its clitic, and is right.
+describe('known bugs: pronominal verb in a hypothetical', () => {
+  const hypothetical = (main: PhrasePlan, condition: PhrasePlan) => sayAll({ ...main, condition });
+  const HAPPY = { complements: { predicative: { phrase: np('HAPPY') } } };
+
+  test.fails('French: the clitic agrees with the subject in the imparfait and the conditionnel', () => {
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT'), 'COLLAPSE')).fr)
+      .toBe("si le chat s'effondrait, le chien courrait.");
+    expect(hypothetical(clause(np('CAT'), 'COLLAPSE'), clause(np('DOG'), 'RUN')).fr)
+      .toBe("si le chien courait, le chat s'effondrerait.");
+  });
+
+  test.fails('Portuguese: the clitic agrees with the subject in both clauses', () => {
+    expect(hypothetical(clause(np('CAT'), 'BECOME', HAPPY), clause(np('DOG'), 'RUN')).pt)
+      .toBe('se o cão corresse, o gato se tornaria feliz.');
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('FIRST_PERSON'), 'BECOME', HAPPY)).pt)
+      .toBe('se me tornasse feliz, o cão correria.');
+  });
+
+  // Regression guard: Spanish already re-adds the agreeing clitic.
+  test('Spanish is already right', () => {
+    expect(hypothetical(clause(np('CAT'), 'BECOME', HAPPY), clause(np('DOG'), 'RUN')).es)
+      .toBe('si el perro corriera, el gato se volvería feliz.');
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('FIRST_PERSON'), 'BECOME', HAPPY)).es)
+      .toBe('si me volviera feliz, el perro correría.');
   });
 });
 

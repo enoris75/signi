@@ -129,4 +129,42 @@ describe('buildUiStrings', () => {
         'Check the concepts it references are seeded in every language.',
     );
   });
+
+  // REMOVE takes a thing off the canvas, where undo brings it back. DELETE erases a stored record.
+  // The languages keep these apart, and CLEAR, which empties a thing in place, is a third verb (B20).
+  test('names the remove and delete controls with verbs of their own', () => {
+    const strings = buildUiStrings();
+    expect(strings['action.removePeriod']).toEqual({
+      en: 'Remove this period',
+      it: 'Rimuovi questo periodo',
+      fr: 'Retirer cette période',
+      de: 'Dieses Satzgefüge entfernen',
+      es: 'Quitar este período',
+      ja: 'この文を取り除き',
+      pt: 'Remover este período',
+    });
+    expect(strings['action.remove.manner']).toEqual({
+      en: 'Remove the adverbial of manner',
+      it: 'Rimuovi il complemento di modo',
+      fr: 'Retirer le complément circonstanciel de manière',
+      de: 'Die adverbiale Bestimmung der Art und Weise entfernen',
+      es: 'Quitar el complemento circunstancial de modo',
+      ja: '状態の副詞語句を取り除き',
+      pt: 'Remover o adjunto adverbial de modo',
+    });
+    expect(strings['action.deleteSavedPhrase']).toEqual({
+      en: 'Delete this saved phrase',
+      it: 'Elimina questa frase salvata',
+      fr: 'Supprimer cette phrase enregistrée',
+      de: 'Diese gespeicherte Phrase löschen',
+      es: 'Eliminar esta frase guardada',
+      ja: 'この保存済みのフレーズを削除',
+      pt: 'Excluir esta frase salva',
+    });
+    expect(strings['action.deleteSavedPeriod']).toMatchObject({
+      en: 'Delete this saved period',
+      it: 'Elimina questo periodo salvato',
+      de: 'Dieses gespeicherte Satzgefüge löschen',
+    });
+  });
 });

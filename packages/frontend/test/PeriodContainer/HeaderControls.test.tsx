@@ -132,14 +132,14 @@ describe('HeaderControls', () => {
     it('is left out when there is no way to remove the period', () => {
       renderHeader({ soleContainer: false, hasContent: true });
 
-      expect(screen.queryByRole('button', { name: 'Remove main clause' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Remove this period' })).not.toBeInTheDocument();
     });
 
     it('has nothing to clear on the only period while it is empty', () => {
       renderHeader({ soleContainer: true, hasContent: false, onRemove: vi.fn() });
 
       expect(screen.queryByRole('button', { name: 'Clear this period' })).not.toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Remove main clause' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Remove this period' })).not.toBeInTheDocument();
     });
 
     it('clears the only period in place once the user confirms', () => {
@@ -160,7 +160,7 @@ describe('HeaderControls', () => {
       const onRemove = vi.fn();
       renderHeader({ soleContainer: false, hasContent: true, onRemove });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
       expect(confirm).toHaveBeenCalledExactlyOnceWith(
         'Remove this main clause and everything in it?',
@@ -173,9 +173,19 @@ describe('HeaderControls', () => {
       const onRemove = vi.fn();
       renderHeader({ soleContainer: false, hasContent: true, onRemove });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
       expect(onRemove).not.toHaveBeenCalled();
+    });
+
+    it('names the removal in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      renderHeader(
+        { soleContainer: false, onRemove: vi.fn() },
+        { strings: { 'action.removePeriod': { de: 'Dieses Satzgefüge entfernen' } } },
+      );
+
+      expect(screen.getByRole('button', { name: 'Dieses Satzgefüge entfernen' })).toBeInTheDocument();
     });
 
     it('removes an empty period without asking', () => {
@@ -183,7 +193,7 @@ describe('HeaderControls', () => {
       const onRemove = vi.fn();
       renderHeader({ soleContainer: false, hasContent: false, onRemove });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
       expect(confirm).not.toHaveBeenCalled();
       expect(onRemove).toHaveBeenCalledOnce();

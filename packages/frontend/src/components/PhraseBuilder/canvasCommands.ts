@@ -1,6 +1,7 @@
 import {
   CLEARABLE_PARTS,
   COLLAPSIBLE_PARTS,
+  REMOVABLE_PARTS,
   REVEALABLE_PARTS,
   type CanvasPart,
   type UiStringKey,
@@ -8,9 +9,9 @@ import {
 import type { UiStringLookup } from "../../i18n/conceptWord.ts";
 
 // The tooltips of the controls that act on one named part of the canvas — a word's clear button, a
-// satellite's show / hide control, a ring's expand / compact toggle. The catalog says each of them
-// once per part ("clear the adjective", de "das Adjektiv löschen"), because the part's noun has to sit
-// inside the command to take its article and case.
+// satellite's show / hide control, a ring's expand / compact toggle and its remove button. The catalog
+// says each of them once per part ("clear the adjective", de "das Adjektiv löschen"), because the part's
+// noun has to sit inside the command to take its article and case.
 //
 // A box, satellite or ring is told which part it is by the key its title comes from: the slot titles
 // and satellite labels already name each part by its grammar noun, so that key doubles as the part's
@@ -63,4 +64,10 @@ export function collapseTitle(
   const part = partIn(COLLAPSIBLE_PARTS, labelKey);
   if (!part) return `${collapsed ? "Expand" : "Collapse"} ${label}`;
   return collapsed ? t(`action.expand.${part}`) : t(`action.compact.${part}`);
+}
+
+/** A complement ring's remove button's tooltip: "Remove the instrumental", or the English label. */
+export function removeTitle(t: UiStringLookup, label: string, labelKey?: UiStringKey): string {
+  const part = partIn(REMOVABLE_PARTS, labelKey);
+  return part ? t(`action.remove.${part}`) : `Remove ${label}`;
 }

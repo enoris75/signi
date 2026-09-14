@@ -24,7 +24,8 @@ complement, and a noun-modifier on CONTAINER.
 | OTHER | adjective | different from the one already named | "another container", "another conjunct" |
 | COPULATIVE, DISJUNCTIVE, ADVERSATIVE, EXPLICATIVE, CONCLUSIVE, TEMPORAL | adjectives | the six conjunction kinds | agree with CONJUNCTION |
 
-REMOVE comes from [B20](B20-ui-remove-and-delete.md).
+REMOVE is seeded ([B20](../done/B20-ui-remove-and-delete.md)), so `action.removePossessor` below needs
+no new word and can go ahead of the rest.
 
 ## Unlocks
 

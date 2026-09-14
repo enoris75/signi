@@ -130,6 +130,11 @@ export const REVEALABLE_PARTS = [
 export const COLLAPSIBLE_PARTS = [
   'subject', 'object', 'instrumental', 'predicative', 'manner',
 ] as const satisfies readonly CanvasPart[];
+// The rings a remove control drops from the clause: the boxed complements. The subject and the object
+// stay (clearing their word empties them), and the instrumental has no ring of its own to remove.
+export const REMOVABLE_PARTS = [
+  'predicative', 'manner',
+] as const satisfies readonly CanvasPart[];
 
 // One command, one entry per part it can act on: `commandOf(verb)` on the part's grammar noun,
 // definite, keyed `<key>.<part>`. The mapped return type keeps every key literal, so `t('…')` still
@@ -781,6 +786,28 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Load a saved phrase',
   },
 
+  // The delete button on each row of the load dialogs: DELETE, not REMOVE, because it erases the stored
+  // phrase or period for good and the languages have a verb of their own for that (it "elimina", de
+  // "löschen", fr "supprimer"). `this` plus SAVED, like `action.load.tooltip`: the one on this row.
+  // The label can't carry the row's name, because a plan takes no arguments. The button points
+  // `aria-describedby` at the name instead, so a screen reader still says which row it deletes.
+  'action.deleteSavedPhrase': {
+    plan: {
+      ...commandOf('DELETE'),
+      directObject: { concept: 'PHRASE', definiteness: 'this', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Delete this saved phrase',
+  },
+  'action.deleteSavedPeriod': {
+    plan: {
+      ...commandOf('DELETE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Delete this saved period',
+  },
+
   // The two file-transfer icon buttons, which have no label of their own — the tooltip is the
   // whole affordance. Export is definite (it acts on the phrase already in the workspace, like
   // `action.save.tooltip`); import is indefinite (it brings in a phrase from a file the user
@@ -920,6 +947,19 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Clear this period',
   },
 
+  // The same control on a period that is not the only one: it takes the period out of the workspace.
+  // REMOVE, not DELETE: the period goes from the canvas and undo brings it back, and the languages keep
+  // that verb apart from the one for erasing a stored record (it "rimuovi" vs "elimina", de "entfernen"
+  // vs "löschen"). `this`, like the view controls beside it. It is the tooltip and the aria-label both.
+  'action.removePeriod': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove this period',
+  },
+
   // The coordination control on a period's border, before any coordination exists: COORDINATE on
   // this period. It stops there, where the English it replaces went on "…with another": a comitative
   // "with" is not a complement the engine has, and the steps the button opens — the conjunction menu,
@@ -948,6 +988,8 @@ export const UI_STRINGS = defineUiStrings({
   ...commandOnEach('action.hide', 'HIDE', 'Hide', REVEALABLE_PARTS),
   ...commandOnEach('action.expand', 'EXPAND', 'Expand', COLLAPSIBLE_PARTS),
   ...commandOnEach('action.compact', 'COMPACT', 'Compact', COLLAPSIBLE_PARTS),
+  // A complement ring's remove button, which drops the complement from the clause.
+  ...commandOnEach('action.remove', 'REMOVE', 'Remove', REMOVABLE_PARTS),
 
   // The two icon controls in the words sidebar's header, which have no label of their own — the
   // tooltip (and the aria-label it doubles as) is the whole affordance. Both are commands.

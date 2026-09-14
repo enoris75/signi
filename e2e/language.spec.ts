@@ -41,6 +41,35 @@ test.describe('interface language', () => {
     await expect(page.getByRole('button', { name: 'Cancella questo periodo', exact: true })).toBeVisible();
   });
 
+  // REMOVE and DELETE are separate verbs because the languages keep them apart: a period or a
+  // complement comes off the canvas ("rimuovi"), a saved phrase is erased for good ("elimina").
+  test('names the remove and delete controls in the UI language', async ({ app, page }, testInfo) => {
+    const name = `Remove delete ${testInfo.testId}-${testInfo.repeatEachIndex}`;
+    await app.buildClause('CAT', 'RUN');
+    await page.getByRole('button', { name: 'Show the adverbial of manner' }).click();
+    await expect(page.getByRole('button', { name: 'Remove the adverbial of manner', exact: true })).toBeVisible();
+    await page.getByRole('button', { name: 'Save', exact: true }).click();
+    const saveDialog = page.getByRole('dialog');
+    await saveDialog.getByLabel('Name').fill(name);
+    await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
+    await expect(page.getByText('Saved phrase')).toBeVisible();
+    await app.addPeriod();
+
+    await app.setUiLanguage('it');
+
+    await expect(page.getByRole('button', { name: 'Rimuovi il complemento di modo', exact: true })).toBeVisible();
+    await expect(app.period(1).getByRole('button', { name: 'Rimuovi questo periodo', exact: true })).toBeVisible();
+
+    // The delete button can't carry the row's name, so it is described by it.
+    await page.getByRole('button', { name: 'Carica una frase salvata' }).click();
+    const loadDialog = page.getByRole('dialog');
+    const row = loadDialog.getByRole('listitem').filter({ hasText: name });
+    const del = row.getByRole('button', { name: 'Elimina questa frase salvata', exact: true });
+    await expect(del).toHaveAccessibleDescription(name);
+    await del.click();
+    await expect(loadDialog.getByText(name)).toHaveCount(0);
+  });
+
   test('leaves the translations themselves alone — every language is always shown', async ({
     app,
   }) => {

@@ -46,7 +46,7 @@ export function HeaderControls({
 }: HeaderControlsProps) {
   const t = useUiString();
   const compactTitle = t(compact ? "action.expandPeriod" : "action.compactPeriod");
-  const removeTitle = soleContainer ? t("action.clearPeriod") : "Remove this period";
+  const removeTitle = t(soleContainer ? "action.clearPeriod" : "action.removePeriod");
 
   return (
     <Box data-testid="period-controls" sx={{ display: "flex", alignItems: "center" }}>
@@ -102,7 +102,7 @@ export function HeaderControls({
       {onRemove && (!soleContainer || hasContent) && (
         <ControlButton
           title={removeTitle}
-          aria-label={soleContainer ? t("action.clearPeriod") : "Remove main clause"}
+          aria-label={removeTitle}
           icon={soleContainer ? BackspaceOutlinedIcon : CloseIcon}
           onClick={() => {
             // Confirm only when there's work to lose; an empty clause acts silently.

@@ -61,7 +61,7 @@ shipped under this id; the remaining 54 verbs were too coarse a bucket to drive 
 | [B11](B11-perception-verbs.md) | PERCEIVE / UNDERSTAND | SEE, KNOW, READ | ✅ for SEE + KNOW |
 | [B12](B12-possession-verbs.md) | HAVE / ACQUIRE | OWN, HOLD, BUY | ✅ for HOLD |
 | [B13](B13-contact-verbs.md) | DIVIDE / STRIKE | CUT, BITE, BEAT | ⚠ builder + seeds |
-| [B14](../B-needs-seed/B14-motion-verbs.md) | MOVE | GO, RUN, COME, JUMP, COLLAPSE | ⚠ **owns the builder change** |
+| [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md) | MOVE | GO, RUN, COME, JUMP, COLLAPSE | ⚠ **owns the builder change** |
 | [B15](B15-transfer-verbs.md) | TRANSFER | GIVE, SEND, SHOW | ⚠ ditransitive |
 | [B16](B16-word-verbs.md) | INDICATE / CHANGE | NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE | ✅ but low priority |
 | [B17](B17-feeling-and-sound-verbs.md) | FEEL / PRODUCE_SOUND | LOVE, CRY, CRY_OUT | partly — LOVE only |
@@ -74,7 +74,7 @@ Three findings the split surfaced, which the original bucket hid:
 
 1. **The builder change is shared, not motion-specific.** B08 scoped it to motion verbs; it actually
    gates READ (B11), BUY (B12), all of B13, and TYPE (B18) too. Doing it once in
-   [B14](../B-needs-seed/B14-motion-verbs.md) is the highest-leverage step in the split. (READ
+   [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md) is the highest-leverage step in the split. (READ
    turned out to need only an adjective on its object, which B11 added itself.)
 2. **`PLACE` is not seeded** — no generic place noun exists (HOUSE/HOME/MARKET/PRISON do). Seeding it
    serves B14, B15, and [C07](../C-needs-engine/C07-places-locative-gap.md) at once.

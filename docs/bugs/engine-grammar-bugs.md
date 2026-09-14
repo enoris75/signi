@@ -47,7 +47,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/` and
-`packages/backend/src/` appears in one of the subdirectories (9 of them, as of this writing).** If
+`packages/backend/src/` appears in one of the subdirectories (11 of them, as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -57,7 +57,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-_None open._
+| # | File |
+|---|---|
+| A137 | [A137-pronominal-verb-in-a-hypothetical.md](A-must-fix/A137-pronominal-verb-in-a-hypothetical.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

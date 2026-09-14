@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useId, useState } from "react";
 import {
   Alert,
   Box,
@@ -50,6 +50,8 @@ export function PeriodSaveLoad({
   onAppendPeriod,
 }: Props) {
   const t = useUiString();
+  // Prefixes the ids that tie each row's delete button to the name it deletes.
+  const rowIdPrefix = useId();
   // Saved items are dated in the UI language, not the browser's.
   const { uiLanguage } = useUiLanguage();
   const queryClient = useQueryClient();
@@ -168,7 +170,10 @@ export function PeriodSaveLoad({
                     edge="end"
                     size="small"
                     onClick={() => deleteMutation.mutate(p.id)}
-                    aria-label={`Delete ${p.name}`}
+                    // The label says what the button does; the row's name, which a plan cannot
+                    // carry, is read out as its description.
+                    aria-label={t("action.deleteSavedPeriod")}
+                    aria-describedby={`${rowIdPrefix}-name-${p.id}`}
                   >
                     <DeleteOutlineIcon fontSize="small" />
                   </IconButton>
@@ -177,6 +182,7 @@ export function PeriodSaveLoad({
                 <ListItemButton onClick={() => void handleLoad(p.id)}>
                   <ListItemText
                     primary={p.name}
+                    primaryTypographyProps={{ id: `${rowIdPrefix}-name-${p.id}` }}
                     secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString(uiLanguage)}`}
                   />
                 </ListItemButton>

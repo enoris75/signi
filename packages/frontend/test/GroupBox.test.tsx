@@ -204,6 +204,28 @@ describe('GroupBox', () => {
       expect(ctx.handleRemoveComplement).toHaveBeenCalledExactlyOnceWith('direction');
     });
 
+    it('names the complement it removes in the UI language', () => {
+      const manner = {
+        ...DIRECTION_GROUP,
+        label: 'Manner',
+        labelKey: 'slot.manner' as const,
+        mainKey: 'manner',
+        removeKey: 'manner' as const,
+      };
+      const controlPos = { [removeControlKey('Manner')]: { x: 547, y: 203 } };
+      const { unmount } = renderGroup(manner, { controlPos });
+      expect(screen.getByRole('button', { name: 'Remove the adverbial of manner' })).toBeInTheDocument();
+      unmount();
+
+      localStorage.setItem('signi:uiLanguage', 'de');
+      const strings = { 'action.remove.manner': { de: 'Die adverbiale Bestimmung der Art und Weise entfernen' } };
+      const { ctx } = renderGroup(manner, { controlPos }, { strings });
+      fireEvent.click(
+        screen.getByRole('button', { name: 'Die adverbiale Bestimmung der Art und Weise entfernen' }),
+      );
+      expect(ctx.handleRemoveComplement).toHaveBeenCalledExactlyOnceWith('manner');
+    });
+
     it('is offered on complements only', () => {
       renderGroup(SUBJECT_GROUP);
 
