@@ -51,13 +51,25 @@ describe('withRelative', () => {
   });
 
   test('a head filling a complement takes its preposition with the article and que', () => {
-    expect(withRelative('la casa', np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
-      .toBe('la casa en la que el gato come');
+    expect(withRelative('la casa', np(CASA, {}, {
+      relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER), headSpecifiers: [{ kind: 'path', value: 'under' }] },
+    }))).toBe('la casa debajo de la que el gato come');
     expect(withRelative('las mujeres', np(MUJER, { number: 'plural' }, {
       relative: { headRole: 'terminus', subject: el(np(GATO)), verbPhrase: vp(DAR, {}, 'GIVE'), directObject: el(np(LIBRO)) },
     }))).toBe('las mujeres a las que el gato da el libro');
     expect(withRelative('el niño', np(NINO, {}, {
       relative: { headRole: 'cause', subject: el(np(GATO)), verbPhrase: vp(COMER), headSpecifiers: [{ kind: 'sentiment', value: 'positive' }] },
     }))).toBe('el niño gracias al que el gato come');
+  });
+
+  // C07: the plain place takes the relative adverb, not "en la que".
+  test('a plain locative gap is donde, whether or not the default relation was chosen', () => {
+    const eatenIn = (subject = el(np(GATO)), extra: Record<string, unknown> = {}) =>
+      ({ headRole: 'locative' as const, subject, verbPhrase: vp(COMER), ...extra });
+    expect(withRelative('la casa', np(CASA, {}, { relative: eatenIn() }))).toBe('la casa donde el gato come');
+    expect(withRelative('la casa', np(CASA, {}, { relative: eatenIn(el(np(GATO)), { headSpecifiers: [{ kind: 'path', value: 'in' }] }) })))
+      .toBe('la casa donde el gato come');
+    // The head is no object, so a plural one does not make the se passive.
+    expect(withRelative('las casas', np(CASA, { number: 'plural' }, { relative: eatenIn(el(np(SE))) }))).toBe('las casas donde se come');
   });
 });

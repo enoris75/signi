@@ -271,8 +271,9 @@ describe('known bugs: French je elision', () => {
   });
 
   test('French elides "je" in a lequel relative, a conditional apodosis and a coordinated clause', () => {
-    expect(sayAll(clause(np('HOUSE', { relative: { headRole: 'locative', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT', aspect: 'resultative' } } }), 'BURN')).fr)
-      .toBe("la maison dans laquelle j'ai mangé brûle.");
+    expect(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', headSpecifiers: [{ kind: 'path', value: 'under' }], subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT', aspect: 'resultative' } },
+    }), 'BURN')).fr).toBe("la maison sous laquelle j'ai mangé brûle.");
     expect(sayAll({ ...clause(np('FIRST_PERSON'), 'LOVE'), condition: clause(np('FIRST_PERSON'), 'RUN') }).fr).toBe("si je courais, j'aimerais.");
     expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'and', clause: clause(np('FIRST_PERSON'), 'LOVE', { directObject: np('DOG') }) } }).fr)
       .toBe("le chat court, et j'aime le chien.");

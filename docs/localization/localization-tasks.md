@@ -35,7 +35,10 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
 - A concept's definition is a `PhrasePlan` set as its `definition` in the seed. Two shapes exist:
   - **genus + differentia** — `glossOf(genus, ...adjectives)` → "a small mammal".
   - **genus + relative clause** — `whoGloss(genus, verb, objectConcept?)` → "a person who makes
-    objects" (the head fills the clause's subject gap; the object renders bare-plural).
+    objects" (the head fills the clause's subject gap; the object renders bare-plural). The head can
+    fill another gap instead: `patientGloss` the object ("an object that one eats"), and a
+    `headRole: 'locative'` clause the place ("a place where one eats", see
+    [B32](B-needs-seed/B32-place-glosses.md)).
 - The renderer [`buildConceptDefinitions()`](../../packages/backend/src/definitions.ts) renders every
   plan into all 7 languages **at backend startup and throws if any language is missing** — so a task
   is "done" only when it boots clean. That boot check is the catalogue's pinning test.
@@ -89,8 +92,9 @@ that become composable.
 
 | # | File | Seed first |
 |---|---|---|
-| B29 | [B29-building-genus.md](B-needs-seed/B29-building-genus.md) | **BUILDING** (isA PLACE) over HOUSE, PRISON → BUILDING's gloss needs WALL; HOUSE and PRISON stay C07 |
+| B29 | [B29-building-genus.md](B-needs-seed/B29-building-genus.md) | **BUILDING** (isA PLACE) over HOUSE, PRISON → BUILDING's gloss needs WALL; HOUSE and PRISON move on to B32 |
 | B30 | [B30-feeling-genus.md](B-needs-seed/B30-feeling-genus.md) | **FEELING**, **WARM** over AFFECTION → AFFECTION "a warm feeling", maybe FEEL "to have feelings" |
+| B32 | [B32-place-glosses.md](B-needs-seed/B32-place-glosses.md) | **LIVE** → HOME "a place where one lives"; MARKET is composable today with BUY but needs a product call; HOUSE and PRISON also wait on B29 (was C07) |
 | B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | nothing: COMPLEMENT_GRAMMAR and MEANS are seeded (B23, B24). Attach SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER under it and author the glosses |
 
 #### UI strings
@@ -110,7 +114,6 @@ B20–B24 are done.
 |---|---|---|
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's) |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
-| C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
 | C17 | [C17-motion-verbs-reflexive-genus.md](C-needs-engine/C17-motion-verbs-reflexive-genus.md) | Italian pronominal and German reflexive verbs — the genus MOVE (*muoversi*, *sich bewegen*) of GO, RUN, COME, JUMP, COLLAPSE (was B14) |
@@ -145,6 +148,7 @@ B20–B24 are done.
 | B06 | [done/B06-grammar-words.md](done/B06-grammar-words.md) | NOUN → a word that names objects; VERB → a word that expresses actions; ADJECTIVE → …describes nouns; ADVERB → …modifies verbs; PRONOUN → …replaces nouns (seeded NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE, ACTION first) |
 | B07 | [done/B07-scalar-adjective-definitions.md](done/B07-scalar-adjective-definitions.md) | 11 scalar adjectives via `dimensionGloss` — BIG → of great size, GOOD → of high quality, HOT → at high temperature, … (was C02; seeded TEMPERATURE first, filed fr bugs A44/A45) |
 | C04 | [done/C04-impersonal-subject.md](done/C04-impersonal-subject.md) | FOOD → an object that one eats (built the impersonal-subject engine support + GENERIC_PERSON) |
+| C07 | [done/C07-places-locative-gap.md](done/C07-places-locative-gap.md) | engine only: a plain locative gap renders the relative adverb, "a place where one eats" (en where / it dove / fr où l'on / es donde / pt onde; de in dem, ja 食べる場所). The glosses moved to B32 |
 | B08 | [done/B08-verb-definitions.md](done/B08-verb-definitions.md) | EAT → to consume food; DRINK → to consume liquid (seeded CONSUME, LIQUID, INFINITIVE_PHRASE). **Retired by splitting** the remaining 54 verbs into B09–B19, C08, C09 (was C01) |
 | C03 | [done/C03-adverb-definitions.md](done/C03-adverb-definitions.md) | FAST → at high speed; SLOWLY → at low speed; WELL → in a good way; ALWAYS → at all times; NEVER → at no time (built `mannerGloss` + Japanese determiner rendering and the どの…も…ない circumfix); TOGETHER stays literal by design |
 | B09 | [done/B09-create-verbs.md](done/B09-create-verbs.md) | MAKE → to create objects; SET_ON_FIRE → to create fire (seeded CREATE; `infinitiveGloss` gained an optional `'plural'` for count-noun objects) |

@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateParts } from './predicateParts.js';
@@ -12,7 +13,8 @@ import { subjectText } from './subjectText.js';
  * the gap slot is already absent from the clause and it carries its own subject, which
  * is rendered after the relativizer and drives agreement ("the book that I read"). When the head
  * fills a complement, the relativizer takes that complement's preposition, "whom" for a person and
- * "which" otherwise ("the house in which the cat eats", "the boy to whom the man gives the book").
+ * "which" otherwise ("the house under which the cat eats", "the boy to whom the man gives the book").
+ * A plain locative gap is the relative adverb "where" instead ("a place where one lives", C07).
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -21,7 +23,7 @@ export function relativeText(np: ResolvedNounPhrase): string {
   // (an animal is animate but still takes "that"/"which").
   const human = np.head.forms['human'] === '1';
   const gap = relativeGapComplement(np, { base: human ? 'whom' : 'which', definiteness: 'bare' });
-  const pronoun = gap ? complementsPhrase(gap) : human ? 'who' : 'that';
+  const pronoun = isPlainLocativeGap(rel) ? 'where' : gap ? complementsPhrase(gap) : human ? 'who' : 'that';
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   const subjText = subjectRelative ? '' : subjectText(rel.subject!);

@@ -6,7 +6,7 @@ seeded.)_
 HOUSE ("a building used as a dwelling") and PRISON ("a building where people are confined") have no
 `isA`, because their genus is not a concept. Their siblings already hang under PLACE: HOME, MARKET
 and CONTINENT. This task seeds the missing level and moves the two nouns under it. It is also step 3
-of [C07](../C-needs-engine/C07-places-locative-gap.md), which asks for a BUILDING genus.
+of [C07](../done/C07-places-locative-gap.md), which asks for a BUILDING genus.
 
 ## Seed first (1 noun) — `/generalize`
 
@@ -36,8 +36,8 @@ today (`nf['isA'] === 'CONTINENT'`), and it reads a direct parent only, so no re
 | concept | gloss (en) | status |
 |---|---|---|
 | BUILDING | a place that has walls | ⚠ needs WALL seeded; probe the Japanese, where 持つ reads oddly for walls (壁がある場所 is natural) |
-| HOUSE | a building where one lives | ✗ still [C07](../C-needs-engine/C07-places-locative-gap.md): locative relative clause |
-| PRISON | a building where people are confined | ✗ still C07, and CONFINE is not seeded |
+| HOUSE | a building where one lives | ✗ still [B32](B32-place-glosses.md): LIVE is not seeded (the engine side, C07, is done) |
+| PRISON | a building where people are confined | ✗ still [B32](B32-place-glosses.md): CONFINE is not seeded, and the passive is unsupported |
 
 Probed and rejected: `patientGloss('PLACE', 'MAKE')` gives "a place that one makes"
 (ja 作る場所, "a place where one makes"), and `glossOf(…, 'BIG')` gives "a big object". Neither

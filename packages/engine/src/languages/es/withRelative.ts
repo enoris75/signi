@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
+import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
@@ -12,7 +13,8 @@ import { subjectText } from './subjectText.js';
  * "que" + predicate). A subject-relative agrees with the head ("el niño que llora"); an
  * object-relative carries the clause's own subject, which drives agreement ("el libro que yo leo").
  * When the head fills a complement, the relativizer is that complement's preposition with the
- * article and "que", agreeing with the head ("la casa en la que el gato come", "el niño al que el hombre da el libro").
+ * article and "que", agreeing with the head ("la casa debajo de la que el gato come", "el niño al que el hombre da el libro").
+ * A plain locative gap is the relative adverb "donde" instead ("un lugar donde se vive", C07).
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
@@ -30,6 +32,6 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   const gap = relativeGapComplement(np, { base: 'que', plural: 'que', definiteness: 'definite' });
-  const relativizer = gap ? complementsPhrase(gap, {}, '') : 'que';
+  const relativizer = isPlainLocativeGap(rel) ? 'donde' : gap ? complementsPhrase(gap, {}, '') : 'que';
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

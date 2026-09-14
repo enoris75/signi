@@ -49,12 +49,23 @@ describe('relativeText', () => {
   });
 
   test('a head filling a complement takes its preposition fused with an agreeing il quale', () => {
-    expect(relativeText(np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATTO)), verbPhrase: vp(MANGIARE) } }))).toBe('nella quale il gatto mangia');
     expect(relativeText(np(CASA, { number: 'plural' }, {
       relative: { headRole: 'locative', subject: el(np(GATTO)), verbPhrase: vp(MANGIARE), headSpecifiers: [{ kind: 'path', value: 'under' }] },
     }))).toBe('sotto le quali il gatto mangia');
     expect(relativeText(np(DONNA, {}, { relative: { headRole: 'terminus', subject: el(np(GATTO)), verbPhrase: vp(DARE, {}, 'GIVE'), directObject: el(np(LIBRO)) } })))
       .toBe('alla quale il gatto dà il libro');
+  });
+
+  // C07: the plain place takes the relative adverb, not "nella quale".
+  test('a plain locative gap is dove, whether or not the default relation was chosen', () => {
+    const eatenIn = (rest: Partial<ResolvedRelativeClause> = {}, extra: Forms = {}) =>
+      relativeText(np(CASA, extra, { relative: { headRole: 'locative', subject: el(np(GATTO)), verbPhrase: vp(MANGIARE), ...rest } }));
+    expect(eatenIn()).toBe('dove il gatto mangia');
+    expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'in' }] })).toBe('dove il gatto mangia');
+    // The head is no object, so a plural one does not make the si passive.
+    expect(eatenIn({ subject: el(np(SI)) }, { number: 'plural' })).toBe('dove si mangia');
+    expect(eatenIn({ subject: el(np(SI)), verbPhrase: vp(MANGIARE, { negative: true }) })).toBe('dove non si mangia');
+    expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'under' }] })).toBe('sotto la quale il gatto mangia');
   });
 
   // A129: the alarm a cry raises is the cry's a-complement, so its relative takes "al quale", not "che".

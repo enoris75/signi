@@ -1,5 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
+import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { alarmCryText } from './alarmCryText.js';
@@ -12,9 +13,10 @@ import { subjectText } from './subjectText.js';
  * subject-relative agrees with the head ("il ragazzo che piange"); an object-relative
  * carries the clause's own subject, which drives agreement ("il libro che io leggo"). When the head
  * fills a complement, the relativizer is that complement's preposition fused with "il quale",
- * agreeing with the head ("la casa nella quale il gatto mangia", "il ragazzo al quale l'uomo dà il
+ * agreeing with the head ("la casa sotto la quale il gatto mangia", "il ragazzo al quale l'uomo dà il
  * libro"). So does the alarm a cry raises, which the cry takes as its a-complement: "il lupo al quale il
- * ragazzo gridò" (A129).
+ * ragazzo gridò" (A129). A plain locative gap is the relative adverb "dove" instead ("un luogo dove si
+ * vive", C07).
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -34,6 +36,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   const gap = relativeGapComplement(np, QUALE);
-  const relativizer = alarmHead ? alarmCryText(alarmHead) : gap ? complementsPhrase(gap, {}, '') : 'che';
+  const relativizer = alarmHead ? alarmCryText(alarmHead)
+    : isPlainLocativeGap(rel) ? 'dove'
+      : gap ? complementsPhrase(gap, {}, '') : 'che';
   return `${relativizer} ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }

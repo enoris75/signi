@@ -757,10 +757,11 @@ describe('known bugs: German means clause inside a relative clause', () => {
 // Only English and German are pinned; see the bug file for the Romance targets.
 describe('known bugs: relative clause on a complement slot', () => {
   test('the relative keeps the complement\'s preposition and case', () => {
+    // A plain locative is the relative adverb where German has none to prefer (C07, see below).
     expect(sayAll(clause(np('HOUSE', {
       relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
     }), 'BURN'))).toMatchObject({
-      en: 'the house in which the cat eats burns.',
+      en: 'the house where the cat eats burns.',
       de: 'das Haus, in dem der Kater isst, brennt.',
     });
     expect(sayAll(clause(np('BOY', {
@@ -775,12 +776,12 @@ describe('known bugs: relative clause on a complement slot', () => {
   // article and "il quale" / "lequel" / "el que" / "o qual", which falls out of each complement path.
   test('the Romance languages take the complement\'s preposition with an agreeing "quale / lequel / que / qual"', () => {
     expect(sayAll(clause(np('HOUSE', {
-      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, headSpecifiers: [{ kind: 'path', value: 'behind' }] },
     }), 'BURN'))).toMatchObject({
-      it: 'la casa nella quale il gatto mangia brucia.',
-      fr: 'la maison dans laquelle le chat mange brûle.',
-      es: 'la casa en la que el gato come arde.',
-      pt: 'a casa na qual o gato come arde.',
+      it: 'la casa dietro la quale il gatto mangia brucia.',
+      fr: 'la maison derrière laquelle le chat mange brûle.',
+      es: 'la casa detrás de la que el gato come arde.',
+      pt: 'a casa atrás da qual o gato come arde.',
     });
     expect(sayAll(clause(np('BOY', {
       relative: { headRole: 'terminus', subject: np('MAN'), verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK') },
@@ -890,6 +891,96 @@ describe('known bugs: relative clause on a complement slot', () => {
       es: 'el perro que el gato se vuelve arde.',
       pt: 'o cão que o gato se torna arde.',
     });
+  });
+});
+
+// C07. A place noun is defined by what happens there: HOME is "a place where one lives". The head fills
+// the clause's locative slot, co-indexed with a locative adjunct, while the clause keeps its own
+// (often generic) subject. When the relation is the plain default `in`, every language with a locative
+// relative adverb uses it instead of the preposition + relative pronoun a marked relation needs.
+// German keeps its prepositional pronoun, and Japanese needs no relativizer at all.
+describe('locative relative clause: the place where', () => {
+  const placeWhere = (verb: string, rest: Partial<RelativeClause> = {}, head: Partial<NounPhrase> = {}) => ({
+    subject: np('PLACE', {
+      definiteness: 'indefinite',
+      ...head,
+      relative: { headRole: 'locative', subject: np('GENERIC_PERSON'), verbPhrase: { verb }, ...rest },
+    }),
+  });
+
+  test('a place where one does something, in every language', () => {
+    expect(sayAll(placeWhere('EAT'))).toEqual({
+      en: 'a place where one eats.',
+      it: 'un luogo dove si mangia.',
+      fr: "un lieu où l'on mange.",
+      de: 'ein Ort, in dem man isst.',
+      es: 'un lugar donde se come.',
+      ja: '食べる場所。',
+      pt: 'um lugar onde se come.',
+    });
+  });
+
+  test('the clause keeps its own object, negation and tense', () => {
+    expect(sayAll(placeWhere('BUY', { directObject: np('OBJECT_THING', { definiteness: 'bare', number: 'plural' }) }))).toMatchObject({
+      en: 'a place where one buys objects.',
+      it: 'un luogo dove si comprano oggetti.',
+      de: 'ein Ort, in dem man Gegenstände kauft.',
+      es: 'un lugar donde se compran objetos.',
+      ja: '物体を買う場所。',
+    });
+    expect(sayAll(placeWhere('EAT', { verbPhrase: { verb: 'EAT', negative: true } }))).toMatchObject({
+      en: 'a place where one does not eat.',
+      it: 'un luogo dove non si mangia.',
+      fr: "un lieu où l'on ne mange pas.",
+      de: 'ein Ort, in dem man nicht isst.',
+      es: 'un lugar donde no se come.',
+      pt: 'um lugar onde não se come.',
+    });
+    expect(sayAll(placeWhere('EAT', { verbPhrase: { verb: 'EAT', tense: 'past' } }))).toMatchObject({
+      en: 'a place where one ate.',
+      fr: "un lieu où l'on mangea.",
+      de: 'ein Ort, in dem man aß.',
+    });
+  });
+
+  test('a specific subject, a plural head and a sentence around it', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      number: 'plural',
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN'))).toEqual({
+      en: 'the houses where the cat eats burn.',
+      it: 'le case dove il gatto mangia bruciano.',
+      fr: 'les maisons où le chat mange brûlent.',
+      de: 'die Häuser, in denen der Kater isst, brennen.',
+      es: 'las casas donde el gato come arden.',
+      ja: '猫が食べる家は燃えます。',
+      pt: 'as casas onde o gato come ardem.',
+    });
+  });
+
+  test('choosing the default relation is the same place as leaving it out', () => {
+    const house = (headSpecifiers?: RelativeClause['headSpecifiers']) => sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, ...(headSpecifiers ? { headSpecifiers } : {}) },
+    }), 'BURN'));
+    expect(house([{ kind: 'path', value: 'in' }])).toEqual(house());
+  });
+
+  test('regression: a marked relation keeps its preposition', () => {
+    expect(sayAll(placeWhere('EAT', { headSpecifiers: [{ kind: 'path', value: 'under' }] }))).toMatchObject({
+      en: 'a place under which one eats.',
+      it: 'un luogo sotto il quale si mangia.',
+      fr: 'un lieu sous lequel on mange.',
+      de: 'ein Ort, unter dem man isst.',
+    });
+  });
+
+  test('regression: où takes the euphonic l\' only before the generic on', () => {
+    expect(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT', aspect: 'resultative' } },
+    }), 'BURN')).fr).toBe("la maison où j'ai mangé brûle.");
+    expect(sayAll(clause(np('FOOD', {
+      relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN')).fr).toBe("la nourriture qu'on mange brûle.");
   });
 });
 

@@ -7,6 +7,6 @@ import type { ResolvedComplement } from '../types.js';
  * relations but not the default, so the caller passes the fallback its complement falls back on:
  * a bare route is a traversal (`through`), a bare locative is containment (`in`).
  */
-export function pathSpecifier(c: ResolvedComplement, fallback: PathSpecifier = DEFAULT_ROUTE_SPECIFIER): PathSpecifier {
+export function pathSpecifier(c: Pick<ResolvedComplement, 'specifiers'>, fallback: PathSpecifier = DEFAULT_ROUTE_SPECIFIER): PathSpecifier {
   return c.specifiers?.find((s) => s.kind === 'path')?.value ?? fallback;
 }

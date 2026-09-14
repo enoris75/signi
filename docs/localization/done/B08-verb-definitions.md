@@ -77,7 +77,7 @@ Three findings the split surfaced, which the original bucket hid:
    [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md) is the highest-leverage step in the split. (READ
    turned out to need only an adjective on its object, which B11 added itself.)
 2. **`PLACE` is not seeded** — no generic place noun exists (HOUSE/HOME/MARKET/PRISON do). Seeding it
-   serves B14, B15, and [C07](../C-needs-engine/C07-places-locative-gap.md) at once.
+   serves B14, B15, and [C07](C07-places-locative-gap.md) at once.
 3. **Duplicate-gloss risk is real.** CHOOSE/SELECT, MODIFY/REPLACE, and NAME all reduce to the same
    genus+object string. Each affected task now says: leave the weaker member on its literal rather
    than ship two identical tooltips.

@@ -19,6 +19,11 @@ describe('pathSpecifier', () => {
     expect(pathSpecifier(complement(np(HOUSE)), 'in')).toBe('in');
   });
 
+  test('reads only the specifiers, so a gap with no complement of its own can ask too', () => {
+    expect(pathSpecifier({ specifiers: [{ kind: 'path', value: 'over' }] }, 'in')).toBe('over');
+    expect(pathSpecifier({}, 'in')).toBe('in');
+  });
+
   test('a specifier of another kind is not a path', () => {
     expect(pathSpecifier(complement(np(HOUSE), [{ kind: 'sentiment', value: 'negative' }]))).toBe('through');
   });

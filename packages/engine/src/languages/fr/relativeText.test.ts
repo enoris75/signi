@@ -38,11 +38,14 @@ describe('relativeText', () => {
   });
 
   // A92: the clause's je elides against its predicate; que stays whole before the j'.
-  test('a je subject elides before a vowel-initial predicate, after que or a lequel', () => {
+  test('a je subject elides before a vowel-initial predicate, after que, a lequel or où', () => {
     expect(relativeText(np(SOURIS, {}, { relative: { headRole: 'directObject', subject: el(np(JE)), verbPhrase: vp(MANGER, { aspect: 'resultative' }) } })))
       .toBe("que j'ai mangée");
+    expect(relativeText(np(MAISON, {}, {
+      relative: { headRole: 'locative', subject: el(np(JE)), verbPhrase: vp(MANGER, { aspect: 'resultative' }), headSpecifiers: [{ kind: 'path', value: 'under' }] },
+    }))).toBe("sous laquelle j'ai mangé");
     expect(relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(JE)), verbPhrase: vp(MANGER, { aspect: 'resultative' }) } })))
-      .toBe("dans laquelle j'ai mangé");
+      .toBe("où j'ai mangé");
     expect(relativeText(np(SOURIS, {}, { relative: { headRole: 'directObject', subject: el(np(JE)), verbPhrase: vp(MANGER) } }))).toBe('que je mange');
   });
 
@@ -58,12 +61,29 @@ describe('relativeText', () => {
 
   // "lequel" is written as one word with its article, contracted or not.
   test('a head filling a complement takes its preposition with an agreeing lequel', () => {
-    expect(relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(CHAT)), verbPhrase: vp(MANGER) } }))).toBe('dans laquelle le chat mange');
     expect(relativeText(np(GARCON, { number: 'plural' }, { relative: { headRole: 'direction', subject: el(np(CHAT)), verbPhrase: vp(ALLER, {}, 'GO') } })))
       .toBe('vers lesquels le chat va');
     expect(relativeText(np(CHIEN, {}, {
       relative: { headRole: 'cause', subject: el(np(CHAT)), verbPhrase: vp(MANGER), headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] },
     }))).toBe('par la faute duquel le chat mange');
+  });
+
+  // C07: the plain place takes the relative adverb, not "dans laquelle".
+  test('a plain locative gap is où, whether or not the default relation was chosen', () => {
+    const eatenIn = (rest: Record<string, unknown> = {}) =>
+      relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(CHAT)), verbPhrase: vp(MANGER), ...rest } }));
+    expect(eatenIn()).toBe('où le chat mange');
+    expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'in' }] })).toBe('où le chat mange');
+    expect(eatenIn({ headSpecifiers: [{ kind: 'path', value: 'behind' }] })).toBe('derrière laquelle le chat mange');
+  });
+
+  test('the generic on after où takes the euphonic l\'', () => {
+    const eatenIn = (verbPhrase = vp(MANGER)) =>
+      relativeText(np(MAISON, {}, { relative: { headRole: 'locative', subject: el(np(ON)), verbPhrase } }));
+    expect(eatenIn()).toBe("où l'on mange");
+    expect(eatenIn(vp(MANGER, { negative: true }))).toBe("où l'on ne mange pas");
+    // Only after où: que keeps its own elision.
+    expect(relativeText(np(SOURIS, {}, { relative: { headRole: 'directObject', subject: el(np(ON)), verbPhrase: vp(MANGER) } }))).toBe("qu'on mange");
   });
 
   // A129: the alarm a cry raises is the cry's à-complement, so its relative takes "auquel", not "que", and

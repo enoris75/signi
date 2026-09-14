@@ -53,12 +53,24 @@ describe('withRelative', () => {
   });
 
   test('a head filling a complement takes its preposition with the article and qual', () => {
-    expect(withRelative('a casa', np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
-      .toBe('a casa na qual o gato come');
+    expect(withRelative('a casa', np(CASA, {}, {
+      relative: { headRole: 'locative', subject: el(np(GATO)), verbPhrase: vp(COMER), headSpecifiers: [{ kind: 'path', value: 'under' }] },
+    }))).toBe('a casa debaixo da qual o gato come');
     expect(withRelative('a mulher', np(MULHER, {}, {
       relative: { headRole: 'terminus', subject: el(np(GATO)), verbPhrase: vp(DAR, {}, 'GIVE'), directObject: el(np(LIVRO)) },
     }))).toBe('a mulher à qual o gato dá o livro');
     expect(withRelative('os meninos', np(MENINO, { number: 'plural' }, { relative: { headRole: 'source', subject: el(np(GATO)), verbPhrase: vp(COMER) } })))
       .toBe('os meninos dos quais o gato come');
+  });
+
+  // C07: the plain place takes the relative adverb, not "na qual".
+  test('a plain locative gap is onde, whether or not the default relation was chosen', () => {
+    const eatenIn = (subject = el(np(GATO)), rest: Partial<ResolvedRelativeClause> = {}): ResolvedRelativeClause =>
+      ({ headRole: 'locative', subject, verbPhrase: vp(COMER), ...rest });
+    expect(withRelative('a casa', np(CASA, {}, { relative: eatenIn() }))).toBe('a casa onde o gato come');
+    expect(withRelative('a casa', np(CASA, {}, { relative: eatenIn(el(np(GATO)), { headSpecifiers: [{ kind: 'path', value: 'in' }] }) })))
+      .toBe('a casa onde o gato come');
+    expect(withRelative('um lugar', np(CASA, { definiteness: 'indefinite' }, { relative: eatenIn(el(np(SE)), { verbPhrase: vp(COMER, { negative: true }) }) })))
+      .toBe('um lugar onde não se come');
   });
 });

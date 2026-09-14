@@ -1,4 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { isGenericSubject } from '../../functions/isGenericSubject.js';
+import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { alarmCryText } from './alarmCryText.js';
@@ -14,9 +16,10 @@ import { subjectText } from './subjectText.js';
  * ("le garçon qui pleure"). A non-subject (direct-object) relative uses "que" — elided to
  * "qu'" before a vowel — followed by the clause's own subject, which drives agreement
  * ("le livre que je lis"). When the head fills a complement, the relativizer is that complement's
- * preposition with "lequel", agreeing with the head and fused with its article ("la maison dans
+ * preposition with "lequel", agreeing with the head and fused with its article ("la maison sous
  * laquelle le chat mange", "le garçon auquel l'homme donne le livre", "à cause duquel"). So does the alarm a
- * cry raises, which the cry takes as its à-complement: "le loup auquel le garçon cria" (A129).
+ * cry raises, which the cry takes as its à-complement: "le loup auquel le garçon cria" (A129). A plain
+ * locative gap is the relative adverb "où" instead ("la maison où le chat mange", C07).
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -37,6 +40,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject);
   // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
   const clause = joinSubject(subjText, pred);
+  // The generic "on" after "où" takes the euphonic l' of the written language: "un lieu où l'on vit".
+  if (isPlainLocativeGap(rel)) return `où ${isGenericSubject(rel.subject) ? `l'${clause}` : clause}`.trim();
   const lequel = alarmHead ? alarmCryText(alarmHead) : gap ? complementsPhrase(gap, {}, '') : '';
   return (lequel
     ? `${lequel.replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`

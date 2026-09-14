@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BOOK, BOY, CAT, complement, CRY, DOG, EAT, el, GIVE, HOUSE, I, MAN, MOUSE, np, READ, RUN, SEE, vp, WOMAN,
+  BOOK, BOY, CAT, complement, CRY, DOG, EAT, el, GIVE, HOUSE, I, MAN, MOUSE, np, ONE, READ, RUN, SEE, vp, WOMAN,
 } from './en.fixtures.js';
 import { relativeText } from './relativeText.js';
 
@@ -50,11 +50,22 @@ describe('relativeText', () => {
   });
 
   test('a head filling a complement takes its preposition, with whom for a person and which otherwise', () => {
-    expect(relativeText(np(HOUSE, {}, { relative: { headRole: 'locative', subject: el(np(CAT)), verbPhrase: vp(EAT) } }))).toBe('in which the cat eats');
     expect(relativeText(np(HOUSE, {}, {
       relative: { headRole: 'locative', subject: el(np(CAT)), verbPhrase: vp(EAT), headSpecifiers: [{ kind: 'path', value: 'under' }] },
     }))).toBe('under which the cat eats');
     expect(relativeText(np(WOMAN, {}, { relative: { headRole: 'terminus', subject: el(np(MAN)), verbPhrase: vp(GIVE), directObject: el(np(BOOK)) } })))
       .toBe('to whom the man gives the book');
+  });
+
+  // C07: the plain place takes the relative adverb, not "in which".
+  test('a plain locative gap is where, whether or not the default relation was chosen', () => {
+    const eatsIn = (rest: Partial<ResolvedRelativeClause> = {}) =>
+      relativeText(np(HOUSE, {}, { relative: { headRole: 'locative', subject: el(np(CAT)), verbPhrase: vp(EAT), ...rest } }));
+    expect(eatsIn()).toBe('where the cat eats');
+    expect(eatsIn({ headSpecifiers: [{ kind: 'path', value: 'in' }] })).toBe('where the cat eats');
+    expect(eatsIn({ subject: el(np(ONE)), verbPhrase: vp(EAT, { negative: true }) })).toBe('where one does not eat');
+    expect(eatsIn({ headSpecifiers: [{ kind: 'path', value: 'behind' }] })).toBe('behind which the cat eats');
+    expect(relativeText(np(HOUSE, { number: 'plural' }, { relative: { headRole: 'locative', subject: el(np(I)), verbPhrase: vp(EAT) } })))
+      .toBe('where I eat');
   });
 });

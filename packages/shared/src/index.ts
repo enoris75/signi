@@ -580,6 +580,11 @@ export const NOUN_COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
  *  - anything else: a non-subject relative, "the book *that I read*". The gap slot
  *    (e.g. `directObject`) is left undefined, the clause carries its own `subject`,
  *    and that subject drives agreement.
+ *
+ * A complement gap relativises on that complement's preposition ("the house *under which* the cat
+ * eats"). A `locative` gap in the plain default relation is the place the clause happens, "a place
+ * *where* one lives": en *where*, it *dove*, fr *où*, es *donde*, pt *onde*. German keeps the
+ * prepositional pronoun (*in dem*), and Japanese needs no relativizer (住む場所).
  */
 export interface RelativeClause {
   /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
