@@ -1,12 +1,16 @@
 import { describe, expect, test } from 'vitest';
 import {
   ANDARE, BENE, CANE, CASA, CIBO, complement, complements, concept, CORRERE, DARE, DONNA, DOVERE, el, ESSERE, type Forms, GATTA,
-  GATTO, IO, LEI, LIBRO, LORO, LUI, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
-  VELOCEMENTE, VOLERE, vp,
+  FUOCO, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
+  FELICE, VELOCEMENTE, VOLERE, vp,
 } from './it.fixtures.js';
 import { predicateText } from './predicateText.js';
 
 const VOI: Forms = { ...TU, base: 'voi', number: 'plural' };
+// CRY_OUT's lexeme raises an alarm; WOLF and FIRE name a danger (A124).
+const GRIDARE: Forms = { base: 'gridare', alarm_cry: '1', '3sg_present': 'grida', '3sg_past': 'gridò', '3pl_present': 'gridano', participle: 'gridato' };
+const ALARM_LUPO: Forms = { ...LUPO, alarm: '1' };
+const ALARM_FUOCO: Forms = { ...FUOCO, alarm: '1' };
 const PLURAL_CATS: Forms = { ...GATTO, number: 'plural' };
 const mouse = el(np(TOPO));
 
@@ -234,6 +238,42 @@ describe('predicateText', () => {
     test('an object pronoun attaches, dropping the final -e', () => {
       expect(predicateText(GATTO, infinitive(), el(np(LUI)))).toBe('mangiarlo');
       expect(predicateText(GATTO, infinitive({}, VEDERE), el(np(LEI)))).toBe('vederla');
+    });
+  });
+
+  describe('an alarm cry (A124)', () => {
+    test('a danger cried out takes "a" and the article, bare or not', () => {
+      expect(predicateText(RAGAZZO, vp(GRIDARE, { tense: 'past' }), el(np(ALARM_LUPO)))).toBe('gridò al lupo');
+      expect(predicateText(RAGAZZO, vp(GRIDARE, { tense: 'past' }), el(np(ALARM_LUPO, { definiteness: 'bare' })))).toBe('gridò al lupo');
+      expect(predicateText(RAGAZZO, vp(GRIDARE), el(np(ALARM_FUOCO, { definiteness: 'bare', number: 'plural' })))).toBe('grida ai fuochi');
+      expect(predicateText(RAGAZZO, vp(GRIDARE, { negative: true }), el(np(ALARM_LUPO), np(ALARM_FUOCO)))).toBe('non grida al lupo e al fuoco');
+    });
+
+    test('the frame needs both the crying verb and the danger', () => {
+      expect(predicateText(RAGAZZO, vp(GRIDARE), el(np(LUPO)))).toBe('grida il lupo');
+      expect(predicateText(RAGAZZO, vp(VEDERE), el(np(ALARM_LUPO)))).toBe('vede il lupo');
+    });
+
+    test('the impersonal si stays impersonal, since the cry is no direct object', () => {
+      expect(predicateText(SI, vp(GRIDARE), el(np(ALARM_LUPO, { number: 'plural' })))).toBe('si grida ai lupi');
+    });
+  });
+
+  // A121: a bare copula that elides the subject complement before it leaves its pro-form.
+  describe('an elided subject complement', () => {
+    const happy = { type: 'predicative' as const, complement: complement(np(FELICE)) };
+    const inTheHouse = { type: 'locative' as const, complement: complement(np(CASA)) };
+
+    test('a predicate leaves the invariable lo, in the clitic slot', () => {
+      expect(predicateText(CANE, vp(ESSERE, { negative: true, elided: happy }))).toBe('non lo è');
+      expect(predicateText({ ...CANE, number: 'plural' }, vp(ESSERE, { elided: happy }))).toBe('lo sono');
+      expect(predicateText(CANE, vp(ESSERE, { tense: 'future', negative: true, elided: happy }))).toBe('non lo sarà');
+    });
+
+    test('a place leaves ci, which elides before the e- forms of essere', () => {
+      expect(predicateText(CANE, vp(ESSERE, { negative: true, elided: inTheHouse }))).toBe("non c'è");
+      expect(predicateText(CANE, vp(ESSERE, { aspect: 'resultative', elided: inTheHouse }))).toBe("c'è stato");
+      expect(predicateText(CANE, vp(ESSERE, { tense: 'future', elided: inTheHouse }))).toBe('ci sarà');
     });
   });
 });

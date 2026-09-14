@@ -1364,7 +1364,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "seremos.",
     "fr": "nous serons.",
     "it": "saremo.",
-    "ja": "私たちはです。",
+    "ja": "私たちはいます。",
     "pt": "seremos.",
   },
   "future · progressive": {
@@ -1373,7 +1373,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estaremos siendo.",
     "fr": "nous serons en train d'être.",
     "it": "staremo essendo.",
-    "ja": "私たちはですいます。",
+    "ja": "私たちはいます。",
     "pt": "estaremos sendo.",
   },
   "future · prospective": {
@@ -1382,7 +1382,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estaremos a punto de ser.",
     "fr": "nous serons sur le point d'être.",
     "it": "staremo per essere.",
-    "ja": "私たちはですところです。",
+    "ja": "私たちはいます。",
     "pt": "estaremos prestes a ser.",
   },
   "future · resultative": {
@@ -1391,7 +1391,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "habremos sido.",
     "fr": "nous aurons été.",
     "it": "saremo stati.",
-    "ja": "私たちはですしまいます。",
+    "ja": "私たちはいました。",
     "pt": "teremos sido.",
   },
   "past · neutral": {
@@ -1400,7 +1400,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "fuimos.",
     "fr": "nous fûmes.",
     "it": "fummo.",
-    "ja": "私たちはです。",
+    "ja": "私たちはいました。",
     "pt": "fomos.",
   },
   "past · progressive": {
@@ -1409,7 +1409,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estábamos siendo.",
     "fr": "nous étions en train d'être.",
     "it": "stavamo essendo.",
-    "ja": "私たちはですいました。",
+    "ja": "私たちはいました。",
     "pt": "estávamos sendo.",
   },
   "past · prospective": {
@@ -1418,7 +1418,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estábamos a punto de ser.",
     "fr": "nous étions sur le point d'être.",
     "it": "stavamo per essere.",
-    "ja": "私たちはですところでした。",
+    "ja": "私たちはいました。",
     "pt": "estávamos prestes a ser.",
   },
   "past · resultative": {
@@ -1427,7 +1427,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "habíamos sido.",
     "fr": "nous avions été.",
     "it": "eravamo stati.",
-    "ja": "私たちはですしまいました。",
+    "ja": "私たちはいました。",
     "pt": "tínhamos sido.",
   },
   "present · neutral": {
@@ -1436,7 +1436,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "somos.",
     "fr": "nous sommes.",
     "it": "siamo.",
-    "ja": "私たちはです。",
+    "ja": "私たちはいます。",
     "pt": "somos.",
   },
   "present · progressive": {
@@ -1445,7 +1445,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estamos siendo.",
     "fr": "nous sommes en train d'être.",
     "it": "stiamo essendo.",
-    "ja": "私たちはですいます。",
+    "ja": "私たちはいます。",
     "pt": "estamos sendo.",
   },
   "present · prospective": {
@@ -1454,7 +1454,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "estamos a punto de ser.",
     "fr": "nous sommes sur le point d'être.",
     "it": "stiamo per essere.",
-    "ja": "私たちはですところです。",
+    "ja": "私たちはいます。",
     "pt": "estamos prestes a ser.",
   },
   "present · resultative": {
@@ -1463,7 +1463,7 @@ exports[`conjugation: BE > 1st plural 1`] = `
     "es": "hemos sido.",
     "fr": "nous avons été.",
     "it": "siamo stati.",
-    "ja": "私たちはですしまいます。",
+    "ja": "私たちはいました。",
     "pt": "fomos.",
   },
 }
@@ -1477,7 +1477,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "seré.",
     "fr": "je serai.",
     "it": "sarò.",
-    "ja": "私はです。",
+    "ja": "私はいます。",
     "pt": "serei.",
   },
   "future · progressive": {
@@ -1486,7 +1486,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estaré siendo.",
     "fr": "je serai en train d'être.",
     "it": "starò essendo.",
-    "ja": "私はですいます。",
+    "ja": "私はいます。",
     "pt": "estarei sendo.",
   },
   "future · prospective": {
@@ -1495,7 +1495,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estaré a punto de ser.",
     "fr": "je serai sur le point d'être.",
     "it": "starò per essere.",
-    "ja": "私はですところです。",
+    "ja": "私はいます。",
     "pt": "estarei prestes a ser.",
   },
   "future · resultative": {
@@ -1504,7 +1504,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "habré sido.",
     "fr": "j'aurai été.",
     "it": "sarò stato.",
-    "ja": "私はですしまいます。",
+    "ja": "私はいました。",
     "pt": "terei sido.",
   },
   "past · neutral": {
@@ -1513,7 +1513,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "fui.",
     "fr": "je fus.",
     "it": "fui.",
-    "ja": "私はです。",
+    "ja": "私はいました。",
     "pt": "fui.",
   },
   "past · progressive": {
@@ -1522,7 +1522,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estaba siendo.",
     "fr": "j'étais en train d'être.",
     "it": "stavo essendo.",
-    "ja": "私はですいました。",
+    "ja": "私はいました。",
     "pt": "estava sendo.",
   },
   "past · prospective": {
@@ -1531,7 +1531,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estaba a punto de ser.",
     "fr": "j'étais sur le point d'être.",
     "it": "stavo per essere.",
-    "ja": "私はですところでした。",
+    "ja": "私はいました。",
     "pt": "estava prestes a ser.",
   },
   "past · resultative": {
@@ -1540,7 +1540,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "había sido.",
     "fr": "j'avais été.",
     "it": "ero stato.",
-    "ja": "私はですしまいました。",
+    "ja": "私はいました。",
     "pt": "tinha sido.",
   },
   "present · neutral": {
@@ -1549,7 +1549,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "soy.",
     "fr": "je suis.",
     "it": "sono.",
-    "ja": "私はです。",
+    "ja": "私はいます。",
     "pt": "sou.",
   },
   "present · progressive": {
@@ -1558,7 +1558,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estoy siendo.",
     "fr": "je suis en train d'être.",
     "it": "sto essendo.",
-    "ja": "私はですいます。",
+    "ja": "私はいます。",
     "pt": "estou sendo.",
   },
   "present · prospective": {
@@ -1567,7 +1567,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "estoy a punto de ser.",
     "fr": "je suis sur le point d'être.",
     "it": "sto per essere.",
-    "ja": "私はですところです。",
+    "ja": "私はいます。",
     "pt": "estou prestes a ser.",
   },
   "present · resultative": {
@@ -1576,7 +1576,7 @@ exports[`conjugation: BE > 1st singular 1`] = `
     "es": "he sido.",
     "fr": "j'ai été.",
     "it": "sono stato.",
-    "ja": "私はですしまいます。",
+    "ja": "私はいました。",
     "pt": "fui.",
   },
 }
@@ -1590,7 +1590,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "seréis.",
     "fr": "vous serez.",
     "it": "sarete.",
-    "ja": "あなたたちはです。",
+    "ja": "あなたたちはいます。",
     "pt": "serão.",
   },
   "future · progressive": {
@@ -1599,7 +1599,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estaréis siendo.",
     "fr": "vous serez en train d'être.",
     "it": "starete essendo.",
-    "ja": "あなたたちはですいます。",
+    "ja": "あなたたちはいます。",
     "pt": "estarão sendo.",
   },
   "future · prospective": {
@@ -1608,7 +1608,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estaréis a punto de ser.",
     "fr": "vous serez sur le point d'être.",
     "it": "starete per essere.",
-    "ja": "あなたたちはですところです。",
+    "ja": "あなたたちはいます。",
     "pt": "estarão prestes a ser.",
   },
   "future · resultative": {
@@ -1617,7 +1617,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "habréis sido.",
     "fr": "vous aurez été.",
     "it": "sarete stati.",
-    "ja": "あなたたちはですしまいます。",
+    "ja": "あなたたちはいました。",
     "pt": "terão sido.",
   },
   "past · neutral": {
@@ -1626,7 +1626,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "fuisteis.",
     "fr": "vous fûtes.",
     "it": "foste.",
-    "ja": "あなたたちはです。",
+    "ja": "あなたたちはいました。",
     "pt": "foram.",
   },
   "past · progressive": {
@@ -1635,7 +1635,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estabais siendo.",
     "fr": "vous étiez en train d'être.",
     "it": "stavate essendo.",
-    "ja": "あなたたちはですいました。",
+    "ja": "あなたたちはいました。",
     "pt": "estavam sendo.",
   },
   "past · prospective": {
@@ -1644,7 +1644,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estabais a punto de ser.",
     "fr": "vous étiez sur le point d'être.",
     "it": "stavate per essere.",
-    "ja": "あなたたちはですところでした。",
+    "ja": "あなたたちはいました。",
     "pt": "estavam prestes a ser.",
   },
   "past · resultative": {
@@ -1653,7 +1653,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "habíais sido.",
     "fr": "vous aviez été.",
     "it": "eravate stati.",
-    "ja": "あなたたちはですしまいました。",
+    "ja": "あなたたちはいました。",
     "pt": "tinham sido.",
   },
   "present · neutral": {
@@ -1662,7 +1662,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "sois.",
     "fr": "vous êtes.",
     "it": "siete.",
-    "ja": "あなたたちはです。",
+    "ja": "あなたたちはいます。",
     "pt": "são.",
   },
   "present · progressive": {
@@ -1671,7 +1671,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estáis siendo.",
     "fr": "vous êtes en train d'être.",
     "it": "state essendo.",
-    "ja": "あなたたちはですいます。",
+    "ja": "あなたたちはいます。",
     "pt": "estão sendo.",
   },
   "present · prospective": {
@@ -1680,7 +1680,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "estáis a punto de ser.",
     "fr": "vous êtes sur le point d'être.",
     "it": "state per essere.",
-    "ja": "あなたたちはですところです。",
+    "ja": "あなたたちはいます。",
     "pt": "estão prestes a ser.",
   },
   "present · resultative": {
@@ -1689,7 +1689,7 @@ exports[`conjugation: BE > 2nd plural 1`] = `
     "es": "habéis sido.",
     "fr": "vous avez été.",
     "it": "siete stati.",
-    "ja": "あなたたちはですしまいます。",
+    "ja": "あなたたちはいました。",
     "pt": "foram.",
   },
 }
@@ -1703,7 +1703,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "serás.",
     "fr": "tu seras.",
     "it": "sarai.",
-    "ja": "あなたはです。",
+    "ja": "あなたはいます。",
     "pt": "será.",
   },
   "future · progressive": {
@@ -1712,7 +1712,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estarás siendo.",
     "fr": "tu seras en train d'être.",
     "it": "starai essendo.",
-    "ja": "あなたはですいます。",
+    "ja": "あなたはいます。",
     "pt": "estará sendo.",
   },
   "future · prospective": {
@@ -1721,7 +1721,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estarás a punto de ser.",
     "fr": "tu seras sur le point d'être.",
     "it": "starai per essere.",
-    "ja": "あなたはですところです。",
+    "ja": "あなたはいます。",
     "pt": "estará prestes a ser.",
   },
   "future · resultative": {
@@ -1730,7 +1730,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "habrás sido.",
     "fr": "tu auras été.",
     "it": "sarai stato.",
-    "ja": "あなたはですしまいます。",
+    "ja": "あなたはいました。",
     "pt": "terá sido.",
   },
   "past · neutral": {
@@ -1739,7 +1739,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "fuiste.",
     "fr": "tu fus.",
     "it": "fosti.",
-    "ja": "あなたはです。",
+    "ja": "あなたはいました。",
     "pt": "foi.",
   },
   "past · progressive": {
@@ -1748,7 +1748,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estabas siendo.",
     "fr": "tu étais en train d'être.",
     "it": "stavi essendo.",
-    "ja": "あなたはですいました。",
+    "ja": "あなたはいました。",
     "pt": "estava sendo.",
   },
   "past · prospective": {
@@ -1757,7 +1757,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estabas a punto de ser.",
     "fr": "tu étais sur le point d'être.",
     "it": "stavi per essere.",
-    "ja": "あなたはですところでした。",
+    "ja": "あなたはいました。",
     "pt": "estava prestes a ser.",
   },
   "past · resultative": {
@@ -1766,7 +1766,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "habías sido.",
     "fr": "tu avais été.",
     "it": "eri stato.",
-    "ja": "あなたはですしまいました。",
+    "ja": "あなたはいました。",
     "pt": "tinha sido.",
   },
   "present · neutral": {
@@ -1775,7 +1775,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "eres.",
     "fr": "tu es.",
     "it": "sei.",
-    "ja": "あなたはです。",
+    "ja": "あなたはいます。",
     "pt": "é.",
   },
   "present · progressive": {
@@ -1784,7 +1784,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estás siendo.",
     "fr": "tu es en train d'être.",
     "it": "stai essendo.",
-    "ja": "あなたはですいます。",
+    "ja": "あなたはいます。",
     "pt": "está sendo.",
   },
   "present · prospective": {
@@ -1793,7 +1793,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "estás a punto de ser.",
     "fr": "tu es sur le point d'être.",
     "it": "stai per essere.",
-    "ja": "あなたはですところです。",
+    "ja": "あなたはいます。",
     "pt": "está prestes a ser.",
   },
   "present · resultative": {
@@ -1802,7 +1802,7 @@ exports[`conjugation: BE > 2nd singular 1`] = `
     "es": "has sido.",
     "fr": "tu as été.",
     "it": "sei stato.",
-    "ja": "あなたはですしまいます。",
+    "ja": "あなたはいました。",
     "pt": "foi.",
   },
 }
@@ -1816,7 +1816,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "serán.",
     "fr": "ils seront.",
     "it": "saranno.",
-    "ja": "彼らはです。",
+    "ja": "彼らはいます。",
     "pt": "serão.",
   },
   "future · progressive": {
@@ -1825,7 +1825,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "estarán siendo.",
     "fr": "ils seront en train d'être.",
     "it": "staranno essendo.",
-    "ja": "彼らはですいます。",
+    "ja": "彼らはいます。",
     "pt": "estarão sendo.",
   },
   "future · prospective": {
@@ -1834,7 +1834,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "estarán a punto de ser.",
     "fr": "ils seront sur le point d'être.",
     "it": "staranno per essere.",
-    "ja": "彼らはですところです。",
+    "ja": "彼らはいます。",
     "pt": "estarão prestes a ser.",
   },
   "future · resultative": {
@@ -1843,7 +1843,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "habrán sido.",
     "fr": "ils auront été.",
     "it": "saranno stati.",
-    "ja": "彼らはですしまいます。",
+    "ja": "彼らはいました。",
     "pt": "terão sido.",
   },
   "past · neutral": {
@@ -1852,7 +1852,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "fueron.",
     "fr": "ils furent.",
     "it": "furono.",
-    "ja": "彼らはです。",
+    "ja": "彼らはいました。",
     "pt": "foram.",
   },
   "past · progressive": {
@@ -1861,7 +1861,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "estaban siendo.",
     "fr": "ils étaient en train d'être.",
     "it": "stavano essendo.",
-    "ja": "彼らはですいました。",
+    "ja": "彼らはいました。",
     "pt": "estavam sendo.",
   },
   "past · prospective": {
@@ -1870,7 +1870,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "estaban a punto de ser.",
     "fr": "ils étaient sur le point d'être.",
     "it": "stavano per essere.",
-    "ja": "彼らはですところでした。",
+    "ja": "彼らはいました。",
     "pt": "estavam prestes a ser.",
   },
   "past · resultative": {
@@ -1879,7 +1879,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "habían sido.",
     "fr": "ils avaient été.",
     "it": "erano stati.",
-    "ja": "彼らはですしまいました。",
+    "ja": "彼らはいました。",
     "pt": "tinham sido.",
   },
   "present · neutral": {
@@ -1888,7 +1888,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "son.",
     "fr": "ils sont.",
     "it": "sono.",
-    "ja": "彼らはです。",
+    "ja": "彼らはいます。",
     "pt": "são.",
   },
   "present · progressive": {
@@ -1897,7 +1897,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "están siendo.",
     "fr": "ils sont en train d'être.",
     "it": "stanno essendo.",
-    "ja": "彼らはですいます。",
+    "ja": "彼らはいます。",
     "pt": "estão sendo.",
   },
   "present · prospective": {
@@ -1906,7 +1906,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "están a punto de ser.",
     "fr": "ils sont sur le point d'être.",
     "it": "stanno per essere.",
-    "ja": "彼らはですところです。",
+    "ja": "彼らはいます。",
     "pt": "estão prestes a ser.",
   },
   "present · resultative": {
@@ -1915,7 +1915,7 @@ exports[`conjugation: BE > 3rd plural 1`] = `
     "es": "han sido.",
     "fr": "ils ont été.",
     "it": "sono stati.",
-    "ja": "彼らはですしまいます。",
+    "ja": "彼らはいました。",
     "pt": "foram.",
   },
 }
@@ -1929,7 +1929,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "será.",
     "fr": "il sera.",
     "it": "sarà.",
-    "ja": "彼はです。",
+    "ja": "彼はいます。",
     "pt": "será.",
   },
   "future · progressive": {
@@ -1938,7 +1938,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "estará siendo.",
     "fr": "il sera en train d'être.",
     "it": "starà essendo.",
-    "ja": "彼はですいます。",
+    "ja": "彼はいます。",
     "pt": "estará sendo.",
   },
   "future · prospective": {
@@ -1947,7 +1947,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "estará a punto de ser.",
     "fr": "il sera sur le point d'être.",
     "it": "starà per essere.",
-    "ja": "彼はですところです。",
+    "ja": "彼はいます。",
     "pt": "estará prestes a ser.",
   },
   "future · resultative": {
@@ -1956,7 +1956,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "habrá sido.",
     "fr": "il aura été.",
     "it": "sarà stato.",
-    "ja": "彼はですしまいます。",
+    "ja": "彼はいました。",
     "pt": "terá sido.",
   },
   "past · neutral": {
@@ -1965,7 +1965,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "fue.",
     "fr": "il fut.",
     "it": "fu.",
-    "ja": "彼はです。",
+    "ja": "彼はいました。",
     "pt": "foi.",
   },
   "past · progressive": {
@@ -1974,7 +1974,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "estaba siendo.",
     "fr": "il était en train d'être.",
     "it": "stava essendo.",
-    "ja": "彼はですいました。",
+    "ja": "彼はいました。",
     "pt": "estava sendo.",
   },
   "past · prospective": {
@@ -1983,7 +1983,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "estaba a punto de ser.",
     "fr": "il était sur le point d'être.",
     "it": "stava per essere.",
-    "ja": "彼はですところでした。",
+    "ja": "彼はいました。",
     "pt": "estava prestes a ser.",
   },
   "past · resultative": {
@@ -1992,7 +1992,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "había sido.",
     "fr": "il avait été.",
     "it": "era stato.",
-    "ja": "彼はですしまいました。",
+    "ja": "彼はいました。",
     "pt": "tinha sido.",
   },
   "present · neutral": {
@@ -2001,7 +2001,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "es.",
     "fr": "il est.",
     "it": "è.",
-    "ja": "彼はです。",
+    "ja": "彼はいます。",
     "pt": "é.",
   },
   "present · progressive": {
@@ -2010,7 +2010,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "está siendo.",
     "fr": "il est en train d'être.",
     "it": "sta essendo.",
-    "ja": "彼はですいます。",
+    "ja": "彼はいます。",
     "pt": "está sendo.",
   },
   "present · prospective": {
@@ -2019,7 +2019,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "está a punto de ser.",
     "fr": "il est sur le point d'être.",
     "it": "sta per essere.",
-    "ja": "彼はですところです。",
+    "ja": "彼はいます。",
     "pt": "está prestes a ser.",
   },
   "present · resultative": {
@@ -2028,7 +2028,7 @@ exports[`conjugation: BE > 3rd singular 1`] = `
     "es": "ha sido.",
     "fr": "il a été.",
     "it": "è stato.",
-    "ja": "彼はですしまいます。",
+    "ja": "彼はいました。",
     "pt": "foi.",
   },
 }

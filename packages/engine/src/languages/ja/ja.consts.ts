@@ -1,5 +1,5 @@
 import type { CauseSentiment, ComplementType, CoordConjunction, Definiteness, Degree, PathSpecifier } from '@signi/shared';
-import type { ConceptForms } from '../../types.js';
+import type { ConceptForms, ResolvedComplement } from '../../types.js';
 
 // Prenominal degree adverb (もっと大きい "bigger", 最も大きい "biggest"). Japanese comparison
 // is largely contextual (より marks the standard); these adverbs are the closest MVP. The two
@@ -130,5 +130,12 @@ export const JA_DETERMINERS: Partial<Record<Definiteness, string>> = {
  * reading. The te-form drives the command (いてください), the past (いた) and たら (いたら); the nai-form
  * the negative たら (いなかったら, なかったら).
  */
+// The pro-form that stands for a subject complement, as a predicate noun for the copula: そうです,
+// そうではありません. Japanese cannot leave a predicate nominal unspoken, so そう fills it where the
+// complement is elided (A121: 犬はそうではありません) and where a relative's head is the complement
+// (A123: 犬がそうではない伝説).
+export const JA_SOU: ResolvedComplement = {
+  phrase: { conjuncts: [{ head: { conceptId: 'SOU', forms: { base: 'そう' } }, adjectives: [], nounModifiers: [] }], agreement: {} },
+};
 export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない' } };
 export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };

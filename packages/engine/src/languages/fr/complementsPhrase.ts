@@ -88,7 +88,7 @@ export function complementsPhrase(
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'en' : spatialHead(locSpec, nf, plural, lead)) :
+        type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'en' : spatialHead(locSpec, nf, plural, lead, 'locative')) :
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
         type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
@@ -118,7 +118,7 @@ export function complementsPhrase(
           causeSent === 'negative' ? `par la faute ${deDet(nf, plural, lead)}` :
           `à cause ${deDet(nf, plural, lead)}`
         ) :
-        spatialHead(pathSpecifier(c), nf, plural, lead);
+        spatialHead(pathSpecifier(c), nf, plural, lead, 'route');
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "à la maison",
       // not "dans le foyer" — so it bypasses the article and contraction machinery entirely.
       // A pronoun cause: neutral "à cause de moi / d'eux" takes the disjunctive after "de"

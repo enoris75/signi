@@ -52,3 +52,22 @@ slightly informal (`ですから` / `そのため`); that word choice is out of 
 | | |
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: Japanese clause coordination* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 as the shape of the fix proposed.
+
+- **Engine:** [`buildSegments.ts`](../../../packages/engine/src/languages/ja/buildSegments.ts) closes a
+  first clause that ends on a finite polite form with `。`, then emits the connective and `、`. The
+  instruction register and the citation (`infinitive`) end on a non-polite form inside one sentence, and
+  keep `、` + the connective (`食べ物を食べ、それから走り。`). The `。`, the connective and the `、` are
+  segments of their own, so the ruby carries them.
+- Every Want row renders as wanted. The passing tests the file listed now pin the new join:
+  `coordination.test.ts` (7 cells), `relativeCoordinationImperative.test.ts` (2),
+  `buildSegments.test.ts`, `japaneseEngine.test.ts`, and `e2e/period-links.spec.ts`
+  (`犬は走ります。しかし、猫は食べます。`, run green on isolated ports).
+- **Tests:** [`coordination.test.ts`](../../../packages/engine/test/coordination.test.ts) → *known bugs:
+  Japanese clause coordination*. The pinning `test.fails` is now a passing `test`. New cases cover the
+  past negative with `だから`, the copula, the existential, a modal and the hortative `ましょう`. A regression
+  guard keeps the instruction register's join and the other languages' comma.
+- Unit tests: `buildSegments.test.ts` (the segments of the join; coordinated instructions).

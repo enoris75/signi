@@ -27,7 +27,7 @@ describe('japaneseEngine', () => {
     const conditional = clause(np(INU), vp(NAKU, { mood: 'conditional' }), { condition: clause(np(NEKO), vp(TABERU, { mood: 'subjunctive' })) });
     expect(japaneseEngine.render(conditional)).toBe('もし猫が食べたら、犬は泣きます');
     expect(japaneseEngine.render({ ...catEatsMouse, coordination: { conjunction: 'but', clause: clause(np(INU), vp(IKU)) } }))
-      .toBe('猫はネズミを食べます、しかし犬は行きます');
+      .toBe('猫はネズミを食べます。しかし、犬は行きます');
   });
 
   // A katakana word's redundant hiragana reading is dropped.

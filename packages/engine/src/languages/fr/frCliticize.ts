@@ -11,6 +11,7 @@ export function frCliticize(clitic: string, verb: string): string {
   const m = /^(ne |n')/.exec(verb);
   const rest = m ? verb.slice(m[0].length) : verb;
   const c = /^(me|te|le|la|se)$/.test(clitic) && VOWEL_START.test(rest) ? `${clitic[0]}'` : `${clitic} `;
-  const ne = !m ? '' : VOWEL_START.test(c) ? "n'" : 'ne ';
+  // "y" elides the "ne" before it too ("n'y est pas"), though it is no vowel to VOWEL_START.
+  const ne = !m ? '' : VOWEL_START.test(c) || c === 'y ' ? "n'" : 'ne ';
   return `${ne}${c}${rest}`;
 }

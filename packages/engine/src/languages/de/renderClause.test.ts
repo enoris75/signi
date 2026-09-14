@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS,
-  GUT, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
+  GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
   SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
 import { renderClause } from './renderClause.js';
@@ -317,6 +317,30 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), infinitive(SEIN, { negative: true }), { complements: tired }))).toBe('nicht müde sein');
       expect(renderClause(clause(np(KATER), infinitive(WERDEN_VERB, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
         .toBe('nicht immer müde werden');
+    });
+  });
+
+  // A121: a bare copula that elides the subject complement before it leaves its pro-form.
+  describe('an elided subject complement', () => {
+    const tiredElided = { type: 'predicative' as const, complement: complement(np(MUEDE)) };
+    const inTheHouse = { type: 'locative' as const, complement: complement(np(HAUS)) };
+
+    test('a predicate leaves es in the object slot, ahead of nicht', () => {
+      expect(renderClause(clause(np(KATER), vp(SEIN, { negative: true, elided: tiredElided })))).toBe('der Kater ist es nicht');
+      expect(renderClause(clause(np(KATER), vp(SEIN, { elided: tiredElided })))).toBe('der Kater ist es');
+      expect(renderClause(clause(np(KATER), vp(SEIN, { modals: [modal(MUESSEN)], negative: true, elided: tiredElided }))))
+        .toBe('der Kater muss es nicht sein');
+    });
+
+    test('a place leaves da, which nicht leads as it leads a predicate', () => {
+      expect(renderClause(clause(np(KATER), vp(SEIN, { negative: true, elided: inTheHouse })))).toBe('der Kater ist nicht da');
+      expect(renderClause(clause(np(KATER), vp(SEIN, { modals: [modal(KOENNEN)], elided: inTheHouse })))).toBe('der Kater kann da sein');
+    });
+
+    test('a command and an instruction take the pro-form in the same slots', () => {
+      expect(renderClause(clause(np(DU), vp(SEIN, { mood: 'imperative', negative: true, elided: tiredElided })))).toBe('sei es nicht');
+      expect(renderClause(clause(np(DU), vp(SEIN, { mood: 'imperative', register: 'instruction', negative: true, elided: inTheHouse }))))
+        .toBe('nicht da sein');
     });
   });
 });

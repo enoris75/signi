@@ -1,7 +1,8 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isNegativeAdverb, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
+import { alarmCry, firstConjunct, groupHasNegativeAdverb, groupObjectClitic, hasNegativeComplement, isNegativeAdverb, isPronounElement, objectPronounForm, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
+import { alarmCryText } from './alarmCryText.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
@@ -65,17 +66,26 @@ export function predicateText(
   // "aucun" conjunct, which no clitic can resume.
   const dislocated = !!directObject && directObject.conjuncts.length > 1 && !aucun
     && directObject.conjuncts.some((np) => np.head.forms['person']);
-  const objectClitic = !directObject ? ''
+  // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "le" for
+  // a predicate ("le chien ne l'est pas", "les chiens le sont"), "y" for a place ("il n'y est pas").
+  const elided = verbPhrase.elided;
+  const objectClitic = !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : dislocated ? groupObjectClitic(directObject) : '';
-  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np);
+  // The alarm a cry raises takes "à" and the article ("cria au loup", A124).
+  const tonicOrNoun = (np: ResolvedNounPhrase) => {
+    if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
+    const cry = alarmCry(verb, np);
+    return cry ? alarmCryText(cry) : npText(np);
+  };
   const objectGroup = directObject && (!objectClitic || dislocated) ? coordinate(directObject, tonicOrNoun) : '';
   const directObjectText = dislocated ? '' : objectGroup;
   const withDislocated = (clause: string) => (dislocated ? `${clause}, ${objectGroup},` : clause);
   // The clitic precedes the verb, so an avoir participle agrees with it as with any preceding direct
   // object ("le chat l'a vue", "les a vus"); a resumed group agrees as the group ("nous a vus, lui
   // et moi"). An object relative passes its antecedent instead (`precedingObjectForms`).
-  const cliticObjectForms = !objectClitic ? undefined
+  // A pro-form is no object, and the participle does not agree with it ("l'a été").
+  const cliticObjectForms = !objectClitic || !directObject ? undefined
     : dislocated ? directObject!.agreement : firstConjunct(directObject!).head.forms;
   // Modern French has no clitic climbing. Under a modal or the progressive / prospective the clitic
   // goes before the infinitive it belongs to ("doit me voir", "est en train de l'ajouter", "doit

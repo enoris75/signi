@@ -138,8 +138,8 @@ export function complementsPhrase(
         // Both read their relation off the same specifier set; only the default differs, and the
         // case falls out of the preposition ("im Markt", "unter dem Markt", "um den Markt").
         const spec = pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER);
-        _case = spatialCase(spec);
-        head = spatialHead(spec, f, plural);
+        _case = spatialCase(spec, type);
+        head = spatialHead(spec, f, plural, type);
       } else {
         _case = 'dat';
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is

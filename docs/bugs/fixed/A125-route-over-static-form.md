@@ -62,3 +62,29 @@ a complement type, so they change with its signature.
 |---|---|
 | **Test** | `complements/route.test.ts` → *known bugs: a route over crosses its landmark* (1 `test.fails`) |
 | | `pangram.test.ts` → *known bugs: a route over crosses the dog, in the whole sentence* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 as the shape of the fix proposed, by telling the spatial head which complement it
+serves.
+
+- **de:** [`spatialCase.ts`](../../../packages/engine/src/languages/de/spatialCase.ts) takes the
+  complement type and returns the accusative for `over` on a route.
+  [`spatialHead.ts`](../../../packages/engine/src/languages/de/spatialHead.ts) and
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase.ts) pass it on:
+  `über den Markt`, `über das Haus`, `über den Jungen`. The locative keeps `über dem`.
+- **fr:** [`spatialHead.ts`](../../../packages/engine/src/languages/fr/spatialHead.ts) takes the type
+  and renders a route over as `par-dessus` + the plain article: `par-dessus le chien`, `par-dessus l'ange`,
+  `par-dessus une maison`. The locative keeps `au-dessus de`.
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/fr/complementsPhrase.ts) passes the type.
+- The tests the file listed now pin the crossing: `complements/route.test.ts` (*over*, and a new *über
+  crosses its landmark in the accusative* beside the dative test), `complements/direction.test.ts` and
+  the de/fr `complementsPhrase.test.ts`.
+- **Tests:** [`complements/route.test.ts`](../../../packages/engine/test/complements/route.test.ts) →
+  *known bugs: a route over crosses its landmark* and [`pangram.test.ts`](../../../packages/engine/test/pangram.test.ts)
+  → *known bugs: a route over crosses the dog, in the whole sentence*. Both pinning `test.fails` are now
+  passing `test`s. New cases cover every gender, the plural, a weak noun, elision and the indefinite, and
+  a relative on the route (`über den`, `par-dessus lequel`). A regression guard covers the locative over
+  and the other languages' route.
+- Unit tests: `spatialCase.test.ts` (de), and `spatialHead.test.ts` (de, fr), whose calls now pass the
+  complement type.

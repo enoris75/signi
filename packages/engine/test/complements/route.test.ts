@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { PATH_SPECIFIERS, type PathSpecifier } from '@signi/shared';
+import { PATH_SPECIFIERS, type NounPhrase, type PathSpecifier } from '@signi/shared';
 import { clause, np, sayAll } from '../harness.js';
 
 const goVia = (value: PathSpecifier) =>
@@ -44,8 +44,10 @@ describe('route', () => {
     expect(goVia('over')).toEqual({
       en: 'the cat goes over the market.',
       it: 'il gatto va sopra il mercato.',
-      fr: 'le chat va au-dessus du marché.', // A125: a route crosses with par-dessus
-      de: 'der Kater geht über dem Markt.', // A125: a route crosses with über + accusative, "über den Markt"
+      // A route over its landmark crosses it (A125): French par-dessus, German über + accusative.
+      // The locative keeps the static forms, "au-dessus du marché", "über dem Markt".
+      fr: 'le chat va par-dessus le marché.',
+      de: 'der Kater geht über den Markt.',
       es: 'el gato va por encima del mercado.',
       pt: 'o gato vai por cima do mercado.',
       ja: '猫は市場の上を行きます。',
@@ -98,9 +100,12 @@ describe('route: German accusative vs dative', () => {
     expect(goVia('around').de).toBe('der Kater geht um den Markt.');
   });
 
-  test('the two-way prepositions take the dative', () => {
-    // A125: `over` should not be here. A route over its landmark crosses it and takes the accusative.
-    for (const value of ['under', 'over', 'behind', 'in_front_of'] as const) {
+  test('über crosses its landmark in the accusative', () => {
+    expect(goVia('over').de).toBe('der Kater geht über den Markt.');
+  });
+
+  test('the other two-way prepositions take the dative', () => {
+    for (const value of ['under', 'behind', 'in_front_of'] as const) {
       expect(goVia(value).de).toContain('dem Markt.');
     }
   });
@@ -131,7 +136,7 @@ describe('known bugs: a route over crosses its landmark', () => {
     complements: { route: { phrase: np('DOG'), specifiers: [{ kind: 'path', value: 'over' }] } },
   }));
 
-  test.fails('German crosses with über + accusative, French with par-dessus', () => {
+  test('German crosses with über + accusative, French with par-dessus', () => {
     expect(goVia('over').de).toBe('der Kater geht über den Markt.');
     expect(jumpOver()).toMatchObject({
       de: 'der Kater springt über den Hund.',
@@ -140,6 +145,68 @@ describe('known bugs: a route over crosses its landmark', () => {
     expect(jumpOver('past')).toMatchObject({
       de: 'der Kater sprang über den Hund.',
       fr: 'le chat sauta par-dessus le chien.',
+    });
+  });
+
+  const jumpOverThe = (landmark: NounPhrase, as: 'route' | 'locative' = 'route') =>
+    sayAll(clause(np('CAT'), 'JUMP', {
+      complements: { [as]: { phrase: landmark, specifiers: [{ kind: 'path', value: 'over' }] } },
+    }));
+
+  // The accusative spells out on every gender and number, and on a weak masculine ("den Jungen").
+  // par-dessus takes the plain article like sous, eliding before a vowel and keeping "une".
+  test('the crossing agrees with every landmark', () => {
+    const deFr = (landmark: NounPhrase) => {
+      const { de, fr } = jumpOverThe(landmark);
+      return { de, fr };
+    };
+    expect(deFr(np('HOUSE'))).toEqual({ de: 'der Kater springt über das Haus.', fr: 'le chat saute par-dessus la maison.' });
+    expect(deFr(np('WOMAN'))).toEqual({ de: 'der Kater springt über die Frau.', fr: 'le chat saute par-dessus la femme.' });
+    expect(deFr(np('DOG', { number: 'plural' }))).toEqual({ de: 'der Kater springt über die Hunde.', fr: 'le chat saute par-dessus les chiens.' });
+    expect(deFr(np('BOY'))).toEqual({ de: 'der Kater springt über den Jungen.', fr: 'le chat saute par-dessus le garçon.' });
+    expect(deFr(np('ANGEL'))).toEqual({ de: 'der Kater springt über den Engel.', fr: "le chat saute par-dessus l'ange." });
+    expect(deFr(np('HOUSE', { definiteness: 'indefinite' })))
+      .toEqual({ de: 'der Kater springt über ein Haus.', fr: 'le chat saute par-dessus une maison.' });
+  });
+
+  // A relative on the route keeps the crossing: "über den", "par-dessus lequel".
+  test('a relative on the route crosses its head', () => {
+    const theDogOverWhichTheCatJumps = (headRole: 'route' | 'locative', head = 'DOG', verb = 'RUN') => sayAll(clause(np(head, {
+      relative: { headRole, headSpecifiers: [{ kind: 'path', value: 'over' }], subject: np('CAT'), verbPhrase: { verb: 'JUMP' } },
+    }), verb));
+    expect(theDogOverWhichTheCatJumps('route')).toMatchObject({
+      de: 'der Hund, über den der Kater springt, läuft.',
+      fr: 'le chien par-dessus lequel le chat saute court.',
+    });
+    expect(theDogOverWhichTheCatJumps('route', 'HOUSE', 'BURN')).toMatchObject({
+      de: 'das Haus, über das der Kater springt, brennt.',
+      fr: 'la maison par-dessus laquelle le chat saute brûle.',
+    });
+    expect(theDogOverWhichTheCatJumps('locative')).toMatchObject({
+      de: 'der Hund, über dem der Kater springt, läuft.',
+      fr: 'le chien au-dessus duquel le chat saute court.',
+    });
+  });
+
+  // Regression: the locative keeps the static forms, and the other languages have one form for both.
+  test('regression: the locative over, and the route over in the other languages, are unchanged', () => {
+    expect(jumpOverThe(np('DOG'), 'locative')).toEqual({
+      en: 'the cat jumps over the dog.',
+      it: 'il gatto salta sopra il cane.',
+      fr: 'le chat saute au-dessus du chien.',
+      de: 'der Kater springt über dem Hund.',
+      es: 'el gato salta por encima del perro.',
+      pt: 'o gato pula por cima do cão.',
+      ja: '猫は犬の上で跳びます。',
+    });
+    expect(jumpOverThe(np('DOG'))).toEqual({
+      en: 'the cat jumps over the dog.',
+      it: 'il gatto salta sopra il cane.',
+      fr: 'le chat saute par-dessus le chien.',
+      de: 'der Kater springt über den Hund.',
+      es: 'el gato salta por encima del perro.',
+      pt: 'o gato pula por cima do cão.',
+      ja: '猫は犬の上を跳びます。',
     });
   });
 });

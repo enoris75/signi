@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   BUENO, CANSADO, CASA, COMER, COMIDA, complement, complements, concept, CORRER, DAR, DEBER, EL, el, ELLA, ELLOS, FELIZ, type Forms,
   GATO, GRANDE, IR, LEYENDA, LIBRO, modal, MUJER, NINO, NOSOTROS, np, NUNCA, PARECER, PODER, QUERER, RAPIDO_ADV, RATON, SE, SER,
-  SIEMPRE, TU, VACA, VENIR, VER, VOLVERSE, VOSOTROS, vp, YO,
+  PERRO, SIEMPRE, TU, VACA, VENIR, VER, VOLVERSE, VOSOTROS, vp, YO,
 } from './es.fixtures.js';
 import { predicateText } from './predicateText.js';
 
@@ -345,6 +345,26 @@ describe('predicateText', () => {
       const fromTheHouse = complements({ source: complement(np(CASA)) });
       expect(predicateText(GATO, vp(CORRER, {}, 'RUN'), undefined, fromTheHouse)).toBe('corre lejos de la casa');
       expect(predicateText(GATO, vp(VENIR, {}, 'COME'), undefined, fromTheHouse)).toBe('viene de la casa');
+    });
+  });
+
+  // A121: a bare copula that elides the subject complement before it leaves its pro-form, and takes the
+  // copula the complement would take.
+  describe('an elided subject complement', () => {
+    const be = (extra: Parameters<typeof vp>[1]) => vp(SER, extra, 'BE');
+    const aLegendElided = { type: 'predicative' as const, complement: complement(np(LEYENDA, { definiteness: 'indefinite' })) };
+    const happy = { type: 'predicative' as const, complement: complement(np(FELIZ)) };
+    const inTheHouseElided = { type: 'locative' as const, complement: complement(np(CASA)) };
+
+    test('a predicate leaves the invariable lo, with ser or estar as the predicate takes', () => {
+      expect(predicateText(PERRO, be({ negative: true, elided: aLegendElided }))).toBe('no lo es');
+      expect(predicateText(PERRO, be({ negative: true, elided: happy }))).toBe('no lo está');
+      expect(predicateText({ ...PERRO, number: 'plural' }, be({ elided: happy }))).toBe('lo están');
+      expect(predicateText(PERRO, be({ tense: 'past', negative: true, elided: happy }))).toBe('no lo estuvo');
+    });
+
+    test('a place leaves nothing, and takes estar', () => {
+      expect(predicateText(PERRO, be({ negative: true, elided: inTheHouseElided }))).toBe('no está');
     });
   });
 });

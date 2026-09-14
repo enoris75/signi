@@ -273,4 +273,20 @@ describe('predicateText', () => {
       expect(predicateText(GATO, citation({ modifier: concept(NUNCA) }))).toBe('não comer nunca');
     });
   });
+
+  // A121: a bare copula that elides the subject complement before it says nothing in its place, but
+  // takes the copula the complement would take.
+  describe('an elided subject complement', () => {
+    const be = (extra: Parameters<typeof vp>[1]) => vp(SER, extra, 'BE');
+    const aLegendElided = { type: 'predicative' as const, complement: complement(np(LENDA, { definiteness: 'indefinite' })) };
+    const happy = { type: 'predicative' as const, complement: complement(np(FELIZ)) };
+    const inTheHouseElided = { type: 'locative' as const, complement: complement(np(CASA)) };
+
+    test('the copula is the one the elided complement takes', () => {
+      expect(predicateText(CAO, be({ negative: true, elided: aLegendElided }))).toBe('não é');
+      expect(predicateText(CAO, be({ negative: true, elided: happy }))).toBe('não está');
+      expect(predicateText(CAO, be({ tense: 'past', elided: happy }))).toBe('esteve');
+      expect(predicateText(CAO, be({ negative: true, elided: inTheHouseElided }))).toBe('não está');
+    });
+  });
 });

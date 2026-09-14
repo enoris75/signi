@@ -252,6 +252,20 @@ export interface ResolvedVerbPhrase {
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ResolvedModal[];
+  /**
+   * The subject complement a bare copula leaves unspoken, set by the translator on a coordinated or
+   * main clause whose BE has no complement of its own after a clause that has one (A121): "the cat is
+   * happy, but the dog is not" elides "happy". Each engine renders its pro-form in place of the
+   * complement (it "lo" / "ci", fr "le" / "y", es "lo", de "es" / "da", ja そう), or nothing
+   * (en, pt), and reads the complement to pick its copula (es/pt estar). Never a rendered complement.
+   */
+  elided?: ElidedComplement;
+}
+
+/** An elided subject complement and the slot it came from (see ResolvedVerbPhrase.elided). */
+export interface ElidedComplement {
+  type: 'predicative' | 'locative';
+  complement: ResolvedComplement;
 }
 
 /** A resolved modal link: the modal verb's forms plus its own resolved adverb (if any). */
@@ -335,6 +349,20 @@ export interface ResolvedPhrase {
  */
 export function pathSpecifier(c: ResolvedComplement, fallback: PathSpecifier = DEFAULT_ROUTE_SPECIFIER): PathSpecifier {
   return c.specifiers?.find((s) => s.kind === 'path')?.value ?? fallback;
+}
+
+/**
+ * The noun phrase a direct-object conjunct renders as when it is the alarm a cry raises, or
+ * `undefined` when it is an ordinary object (A124). A cry raises an alarm when its lexeme says so
+ * (`alarm_cry`: Italian gridare, French crier) and the noun names a danger (`alarm`: wolf, fire).
+ * Italian and French shout it with a / à and the article, "gridò al lupo", "cria au feu", and any
+ * other object of the same verb stays plain, "gridò la parola". The article belongs to the frame, so
+ * a bare cry takes the definite one ("al lupo", never "*a lupo"); any other determiner is kept.
+ */
+export function alarmCry(verb: ConceptForms, np: ResolvedNounPhrase): ResolvedNounPhrase | undefined {
+  if (verb.forms['alarm_cry'] !== '1' || np.head.forms['alarm'] !== '1') return undefined;
+  if (np.head.forms['definiteness'] !== 'bare') return np;
+  return { ...np, head: { ...np.head, forms: { ...np.head.forms, definiteness: 'definite' } } };
 }
 
 /**

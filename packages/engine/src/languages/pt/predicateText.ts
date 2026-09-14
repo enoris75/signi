@@ -41,11 +41,15 @@ export function predicateText(
   //  · A transient predicate adjective — "está cansado", not "*é cansado". Inherent adjectives
   //    ("é grande") and predicate nouns ("é uma lenda") keep `ser`; the corpus marks which
   //    adjectives are transient (`forms['transient']`), read off the first conjunct.
-  const predicativeHead = complements?.predicative
-    ? firstConjunct(complements.predicative.phrase).head.forms : undefined;
+  //  · An elided subject complement (A121) picks the copula it would pick if spoken, so a clause keeps
+  //    its antecedent's, and says nothing in its place: "está feliz, mas o cão não está".
+  const { elided } = verbPhrase;
+  const predicative = complements?.predicative ?? (elided?.type === 'predicative' ? elided.complement : undefined);
+  const locative = complements?.locative ?? (elided?.type === 'locative' ? elided.complement : undefined);
+  const predicativeHead = predicative ? firstConjunct(predicative.phrase).head.forms : undefined;
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
-  const locativeAlone = !!complements?.locative && !complements?.predicative;
+  const locativeAlone = !!locative && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "deve estar", "tinha
   // estado", "esteja", "estar na casa".
   const copulaVerb =

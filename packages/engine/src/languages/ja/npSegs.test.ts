@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
-  adj, CHAIRO, CHIISAI, el, FUREEZU, HITO_GENERIC, HON, IMITEKI, INU, KODOMO, MIZU, NEKO, NEZUMI, NOMU, np, nounModifier, OOKII,
-  SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
+  adj, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HITO_GENERIC, HON, IE, IMITEKI, INU, KODOMO, MIZU, NARU,
+  NEKO, NEZUMI, NOMU, np, nounModifier, OOKII, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
 } from './ja.fixtures.js';
 import { npSegs } from './npSegs.js';
 
@@ -116,5 +116,21 @@ describe('npSegs', () => {
   test('a generic relative-clause subject is dropped', () => {
     const oneReads = { headRole: 'directObject' as const, subject: el(np(HITO_GENERIC)), verbPhrase: vp(YOMU) };
     expect(text(npSegs(np(HON, {}, { relative: oneReads })))).toBe('読む本');
+  });
+
+  // A123: a head filling the copula's subject complement leaves a gap Japanese fills with そう.
+  test('a relative on the copula\'s subject complement fills the gap with そう, in the plain copula', () => {
+    const theDogIs = (extra = {}) => ({ headRole: 'predicative' as const, subject: el(np(INU)), verbPhrase: vp(DESU, extra) });
+    expect(npSegs(np(DENSETSU, {}, { relative: theDogIs() }))).toEqual([
+      { t: '犬', r: 'いぬ' }, { t: 'が' }, { t: 'そう' }, { t: 'である' }, { t: '伝説', r: 'でんせつ' },
+    ]);
+    expect(text(npSegs(np(DENSETSU, {}, { relative: theDogIs({ negative: true }) })))).toBe('犬がそうではない伝説');
+    expect(text(npSegs(np(DENSETSU, {}, { relative: theDogIs({ tense: 'past' }) })))).toBe('犬がそうだった伝説');
+    expect(text(npSegs(np(DENSETSU, {}, { relative: { ...theDogIs(), complements: complements({ locative: complement(np(IE)) }) } }))))
+      .toBe('犬が家でそうである伝説');
+  });
+
+  test('regression: a real verb on the same gap keeps its own form', () => {
+    expect(text(npSegs(np(DENSETSU, {}, { relative: { headRole: 'predicative', subject: el(np(INU)), verbPhrase: vp(NARU) } })))).toBe('犬がなる伝説');
   });
 });

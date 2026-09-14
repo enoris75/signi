@@ -240,7 +240,7 @@ describe('BE without a subject complement: a coordination with a subordinate cla
 // A120, in the linked clauses. A bare BE renders です in a protasis, a main clause, a relative and a
 // coordinated clause alike. The relatives here are affirmative: a negated relative's plain form is B13.
 describe('known bugs: Japanese BE with no complement, in linked clauses', () => {
-  test.fails('Japanese renders the bare BE of a linked clause as the existential いる / ある', () => {
+  test('Japanese renders the bare BE of a linked clause as the existential いる / ある', () => {
     expect(say(ifThen(be('CAT', { negative: true }), clause(np('DOG'), 'RUN')), 'ja')).toBe('もし猫がいなかったら、犬は走ります。');
     expect(say(ifThen(clause(np('CAT'), 'EAT'), be('DOG')), 'ja')).toBe('もし猫が食べたら、犬はいます。');
     expect(say(ifThen(be('CAT', { negative: true }), be('DOG', {}, 'LEGEND')), 'ja')).toBe('もし猫がいなかったら、犬は伝説です。');
@@ -264,7 +264,7 @@ describe('known bugs: Japanese BE with no complement, in linked clauses', () => 
 // protasis ("if the cat were a legend, the dog would not be"), and the clauses may carry a condition or
 // a relative of their own; the pro-form is wanted all the same.
 describe('known bugs: an elided subject complement beside a condition or a relative', () => {
-  test.fails('a bare main clause elides the subject complement of its protasis', () => {
+  test('a bare main clause elides the subject complement of its protasis', () => {
     expect(sayAll(ifThen(be('CAT', {}, 'LEGEND'), be('DOG', { negative: true })))).toMatchObject({
       it: 'se il gatto fosse una leggenda, il cane non lo sarebbe.',
       fr: 'si le chat était une légende, le chien ne le serait pas.',
@@ -283,7 +283,7 @@ describe('known bugs: an elided subject complement beside a condition or a relat
     });
   });
 
-  test.fails('a condition on the pair, or a relative on either subject, keeps the pro-form', () => {
+  test('a condition on the pair, or a relative on either subject, keeps the pro-form', () => {
     expect(sayAll({
       ...ifThen(clause(np('MAN'), 'EAT'), be('CAT', {}, 'LEGEND')),
       coordination: { conjunction: 'but', clause: be('DOG', { negative: true }) },
@@ -322,7 +322,7 @@ describe('known bugs: an elided subject complement beside a condition or a relat
 // as a gap, so the pro-form そう takes its place, with the plain copula a relative takes: 犬がそうでは
 // ない伝説, 犬がそうである猫.
 describe('known bugs: Japanese relative on the subject complement of BE', () => {
-  test.fails('Japanese fills the subject-complement gap with そう', () => {
+  test('Japanese fills the subject-complement gap with そう', () => {
     const aLegendThatTheDogIsNot = np('LEGEND', {
       relative: { headRole: 'predicative', subject: np('DOG'), verbPhrase: { verb: 'BE', negative: true } },
     });
@@ -332,5 +332,29 @@ describe('known bugs: Japanese relative on the subject complement of BE', () => 
       relative: { headRole: 'predicative', subject: np('DOG'), verbPhrase: { verb: 'BE' } },
     });
     expect(say(clause(np('BOY'), 'SEE', { directObject: theCatThatTheDogIs }), 'ja')).toBe('男の子は犬がそうである猫を見ます。');
+  });
+
+  // The relative's tense reaches the plain copula after そう, and its own complements precede it.
+  test('Japanese inflects the copula after そう for tense, and keeps the relative\'s other complements', () => {
+    const aLegendThatTheDogIs = (verbPhrase: Partial<VerbPhrase>, complements: PhrasePlan['complements'] = undefined) =>
+      clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('LEGEND', {
+        relative: { headRole: 'predicative', subject: np('DOG'), verbPhrase: { verb: 'BE', ...verbPhrase }, complements },
+      }) } } });
+    expect(say(aLegendThatTheDogIs({ tense: 'past' }), 'ja')).toBe('猫は犬がそうだった伝説です。');
+    expect(say(aLegendThatTheDogIs({ tense: 'past', negative: true }), 'ja')).toBe('猫は犬がそうではなかった伝説です。');
+    expect(say(aLegendThatTheDogIs({ negative: true }, { locative: { phrase: np('HOUSE') } }), 'ja')).toBe('猫は犬が家でそうではない伝説です。');
+  });
+
+  // Regression: BECOME on the same gap is a real verb, and the other languages keep the relative pronoun.
+  test('regression: BECOME on the gap, and the other languages, are unchanged', () => {
+    const theManTheBoyBecomes = np('MAN', { relative: { headRole: 'predicative', subject: np('BOY'), verbPhrase: { verb: 'BECOME' } } });
+    expect(say(clause(np('BOY'), 'SEE', { directObject: theManTheBoyBecomes }), 'ja')).toBe('男の子は男の子がなる男を見ます。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('LEGEND', {
+      relative: { headRole: 'predicative', subject: np('DOG'), verbPhrase: { verb: 'BE', tense: 'past' } },
+    }) } } }))).toMatchObject({
+      en: 'the cat is a legend that the dog was.',
+      it: 'il gatto è una leggenda che il cane fu.',
+      de: 'der Kater ist eine Legende, die der Hund war.',
+    });
   });
 });

@@ -1,7 +1,8 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
+import { alarmCry, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { IT_SHORT_IMPERATIVE } from './it.consts.js';
+import { alarmCryText } from './alarmCryText.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
@@ -27,9 +28,10 @@ export function predicateText(
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
   // With a plural noun object the impersonal si is the passive si, and the finite verb agrees with its
   // patient: "si mangiano i topi", "si devono mangiare i topi", and in the compound tense the participle
-  // too ("si sono mangiati i topi"). A clitic object keeps si impersonal ("li si mangia").
+  // too ("si sono mangiati i topi"). A clitic object keeps si impersonal ("li si mangia"), and so does
+  // an alarm cry, which is not a direct object ("si grida ai lupi").
   const passiveSi = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
-    && directObject.agreement['number'] === 'plural';
+    && directObject.agreement['number'] === 'plural' && !directObject.conjuncts.every((np) => alarmCry(verb, np));
   const agreeForms = passiveSi ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
@@ -67,11 +69,22 @@ export function predicateText(
   // A pronoun direct object is a proclitic before the finite verb ("il gatto mi vede"), not a
   // post-verbal noun ("vede l'io"). It renders in front of the verb in the indicative and enclitic
   // on the imperative ("guardami"); a noun object keeps the post-verbal slot.
+  // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "lo" for
+  // a predicate ("il cane non lo è", "i cani lo sono"), "ci" for a place ("il cane non c'è").
+  const elided = verbPhrase.elided;
   const objectClitic = directObject && isPronounElement(directObject)
-    ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
+    ? objectPronounForm(firstConjunct(directObject).head.forms)
+    : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
+  // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
+  const elideCi = (text: string): string => (elided?.type === 'locative' ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'") : text);
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes its tonic
-  // form with no article ("vede il cane e te", "vede lui e me").
-  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '') : npText(np);
+  // form with no article ("vede il cane e te", "vede lui e me"). The alarm a cry raises takes "a" and
+  // the article ("gridò al lupo", A124).
+  const tonicOrNoun = (np: ResolvedNounPhrase) => {
+    if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
+    const cry = alarmCry(verb, np);
+    return cry ? alarmCryText(cry) : npText(np);
+  };
   // The impersonal "si" is a preverbal clitic standing in for a generic subject ("si mangia" —
   // "one eats"). It sits after any "non", closest to the verb, so an object clitic comes before it
   // ("lo si mangia", "non lo si mangia", "mi si vede"); the subject word itself is suppressed upstream.
@@ -117,9 +130,9 @@ export function predicateText(
   if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
     const [aux, ...rest] = verbText.split(' ');
     const withAdverb = [aux, modifierText, ...rest].join(' ');
-    return [negText, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' ');
+    return elideCi([negText, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
   }
-  return [negText, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
+  return elideCi([negText, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
-    .join(' ');
+    .join(' '));
 }

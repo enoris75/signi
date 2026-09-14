@@ -52,3 +52,35 @@ loup`, but it means "shouted at the wolf": English renders `cried to the wolf`, 
 | | |
 |---|---|
 | **Test** | `pangram.test.ts` → *known bugs: an alarm cry takes a / à in Italian and French* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 with the first of the two proposed shapes, a lexical object frame. A separate sense
+would have split "the boy cried wolf" from the CRY_OUT a user picks. The frame is keyed off a noun
+feature naming a danger, not off "not linguistic": the terminus test's `il gatto grida il libro al cane`
+must stay a plain object.
+
+- **Corpus:** a concept-level `alarm` flag, plumbed like A47's `transient`: `alarm?: boolean` on
+  `ConceptSeed` ([`concepts/types.ts`](../../../packages/backend/src/concepts/types.ts)), an `alarm`
+  column with its migration ([`db.ts`](../../../packages/backend/src/db.ts)), threaded through
+  [`seed.ts`](../../../packages/backend/src/seed.ts), and surfaced on noun forms by
+  [`lexicon.ts`](../../../packages/backend/src/lexicon.ts). WOLF and FIRE are marked
+  ([`nouns.ts`](../../../packages/backend/src/concepts/nouns.ts)). CRY_OUT's Italian and French lexemes
+  carry `alarm_cry: '1'` ([`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)).
+  The dev database needs `npm run seed` to pick the flags up.
+- **Engine:** `alarmCry` ([`types.ts`](../../../packages/engine/src/types.ts)) returns the object
+  conjunct when both flags are present, promoting a bare cry to the definite article. Each language's
+  `alarmCryText` renders it with the fused head: Italian `prepDet('a', …)`
+  ([`it/alarmCryText.ts`](../../../packages/engine/src/languages/it/alarmCryText.ts)), French `aDet`
+  ([`fr/alarmCryText.ts`](../../../packages/engine/src/languages/fr/alarmCryText.ts)). Each
+  `predicateText` uses it per object conjunct. The Italian passive si ignores an alarm cry, which is no
+  direct object (`si grida ai lupi`).
+- **Tests:** [`pangram.test.ts`](../../../packages/engine/test/pangram.test.ts) → *known bugs: an alarm
+  cry takes a / à in Italian and French*. The pinning `test.fails` is now a passing `test`. New cases
+  cover FIRE, the plural and the bare plural, the negative, a modal, the compound past, coordination, a
+  possessive, an adjective, an indefinite and the impersonal si. A regression guard covers another verb
+  (`vide il lupo`), a recipient after the cry, and English and German.
+- Unit tests: `alarmCryText.test.ts` (it, fr) and `predicateText.test.ts` (it, fr).
+
+Not covered: a relative on the cried object (`il lupo che il ragazzo gridò`), which would need `al quale`.
+The other languages stay unpinned, as the file says.

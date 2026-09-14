@@ -70,3 +70,28 @@ place. The prototype `copula === '1' && !predicative` produces every Want row ab
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: Japanese BE with no complement* (1 `test.fails`) |
 | | `copulaWithoutComplement.test.ts` → *known bugs: Japanese BE with no complement, in linked clauses* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 as the shape of the fix proposed, together with A121 and A123, the two cases that must
+reach their own branch before the gate.
+
+- **Engine:** in [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts) the
+  existential gate no longer needs a locative: BE with no predicative is `いる` / `ある`, with or without a
+  place. The predicative the gate reads includes A121's elided one (`そう`), so an elliptical clause keeps
+  the copula. A123's relative passes its `そう` predicative from
+  [`npSegs.ts`](../../../packages/engine/src/languages/ja/npSegs.ts), so it keeps the copula too.
+- Every Want row renders as wanted, in both tables. The existential's own paths carry the tense, the
+  polarity, the modal (`いることができます`), the command (`いてください`, `いましょう`), the relative (`いる犬`,
+  `あった本`) and the たら (`いたら`, `いなかったら`). Aspect reads as A109's: the resultative is the past
+  (`いました`), the progressive and prospective the present.
+- **Snapshot:** `verb.conjugation.test.ts.snap` was re-baselined deliberately. The 72 bare-BE `ja` cells
+  (6 persons × 12) change from `…はです。` / `…はですいます。` / `…はですところです。` to `…はいます。` /
+  `…はいました。`. A tally of the diff confirmed that no other language and no other verb changed.
+- **Tests:** [`clause.test.ts`](../../../packages/engine/test/clause.test.ts) → *known bugs: Japanese BE
+  with no complement* and [`copulaWithoutComplement.test.ts`](../../../packages/engine/test/copulaWithoutComplement.test.ts)
+  → *known bugs: Japanese BE with no complement, in linked clauses*. Both pinning `test.fails` are now
+  passing `test`s. New cases cover the inanimate `ある` in the past negative, under a modal, in a relative
+  and in a protasis, the resultative and the hortative. A regression guard keeps `猫は伝説です`,
+  `猫は家にいます` and `伝説である猫`.
+- Unit tests: `predicateSegs.test.ts` (BE with no complement in every form; an elided locative).

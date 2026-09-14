@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (20 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (9 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -52,14 +52,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File |
-|---|---|
-| A120 | [A120-japanese-bare-copula.md](A-must-fix/A120-japanese-bare-copula.md) |
-| A121 | [A121-coordinated-copula-elided-predicate.md](A-must-fix/A121-coordinated-copula-elided-predicate.md) |
-| A122 | [A122-japanese-clause-coordination-connective.md](A-must-fix/A122-japanese-clause-coordination-connective.md) |
-| A123 | [A123-japanese-relative-on-copula-predicative.md](A-must-fix/A123-japanese-relative-on-copula-predicative.md) |
-| A124 | [A124-alarm-cry-plain-object.md](A-must-fix/A124-alarm-cry-plain-object.md) |
-| A125 | [A125-route-over-static-form.md](A-must-fix/A125-route-over-static-form.md) |
+_None open._
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -213,6 +206,12 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A117 | [A117-japanese-tara-copular-condition.md](fixed/A117-japanese-tara-copular-condition.md) | Japanese | 2026-09-13 |
 | A114 | [A114-japanese-negative-determiner-particle.md](fixed/A114-japanese-negative-determiner-particle.md) | Japanese | 2026-09-13 |
 | A118 | [A118-japanese-tara-protasis-bare-verb.md](fixed/A118-japanese-tara-protasis-bare-verb.md) | Japanese | 2026-09-13 |
+| A125 | [A125-route-over-static-form.md](fixed/A125-route-over-static-form.md) | German, French | 2026-09-14 |
+| A124 | [A124-alarm-cry-plain-object.md](fixed/A124-alarm-cry-plain-object.md) | Italian, French | 2026-09-14 |
+| A120 | [A120-japanese-bare-copula.md](fixed/A120-japanese-bare-copula.md) | Japanese | 2026-09-14 |
+| A123 | [A123-japanese-relative-on-copula-predicative.md](fixed/A123-japanese-relative-on-copula-predicative.md) | Japanese | 2026-09-14 |
+| A122 | [A122-japanese-clause-coordination-connective.md](fixed/A122-japanese-clause-coordination-connective.md) | Japanese | 2026-09-14 |
+| A121 | [A121-coordinated-copula-elided-predicate.md](fixed/A121-coordinated-copula-elided-predicate.md) | Italian, French, Spanish, Portuguese, German, Japanese | 2026-09-14 |
 | A126 | [A126-japanese-godan-su-instruction-label.md](fixed/A126-japanese-godan-su-instruction-label.md) | Japanese | 2026-09-14 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision

@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { PhrasePlan, VerbPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, np, say, sayAll } from './harness.js';
 
 // The shape of a clause: subject, verb, object — agreement, case, and word order.
 describe('clause', () => {
@@ -153,7 +153,7 @@ describe('known bugs: Spanish personal "a"', () => {
 // lost and the modal, aspect, command and relative glue onto it: 猫はです, 猫はですことができます,
 // ですください. The existential いる / ある already carries every form.
 describe('known bugs: Japanese BE with no complement', () => {
-  test.fails('Japanese renders a bare BE as the existential いる / ある', () => {
+  test('Japanese renders a bare BE as the existential いる / ある', () => {
     const be = (subject: string, verbPhrase: Partial<VerbPhrase> = {}) =>
       sayAll(clause(np(subject), 'BE', { verbPhrase })).ja;
     expect(be('CAT')).toBe('猫はいます。');
@@ -167,5 +167,26 @@ describe('known bugs: Japanese BE with no complement', () => {
     expect(sayAll({ ...clause(np('SECOND_PERSON'), 'BE'), imperative: true }).ja).toBe('いてください。');
     expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'BE' } } }), 'RUN')).ja).toBe('いる犬は走ります。');
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'BE') }).ja).toBe('もし猫がいたら、犬は走ります。');
+  });
+
+  // An inanimate subject takes ある through every form, as an animate one takes いる. The resultative of
+  // a state is its past, and the first-person plural command is the ましょう form.
+  test('Japanese composes the inanimate ある, the resultative and the hortative the same way', () => {
+    const ja = (plan: PhrasePlan) => say(plan, 'ja');
+    expect(ja(clause(np('BOOK'), 'BE', { verbPhrase: { tense: 'past', negative: true } }))).toBe('本はありませんでした。');
+    expect(ja(clause(np('BOOK'), 'BE', { verbPhrase: { modals: ['CAN'] } }))).toBe('本はあることができます。');
+    expect(ja(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative' } }))).toBe('猫はいました。');
+    expect(ja(clause(np('BOOK', { relative: { verbPhrase: { verb: 'BE', tense: 'past' } } }), 'BURN'))).toBe('あった本は燃えます。');
+    expect(ja({ ...clause(np('DOG'), 'RUN'), condition: clause(np('BOOK'), 'BE') })).toBe('もし本があったら、犬は走ります。');
+    expect(ja({ ...clause(np('FIRST_PERSON', { number: 'plural' }), 'BE'), imperative: true })).toBe('いましょう。');
+  });
+
+  // Regression: BE with a complement keeps its own path. A predicate closes on です, and a place is the
+  // existential with に (A109), in a main clause and in a relative.
+  test('regression: Japanese BE with a predicate or a place is unchanged', () => {
+    expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('LEGEND') } } }), 'ja')).toBe('猫は伝説です。');
+    expect(say(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('猫は家にいます。');
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('LEGEND') } } } }), 'RUN'), 'ja'))
+      .toBe('伝説である猫は走ります。');
   });
 });

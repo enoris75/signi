@@ -55,11 +55,15 @@ export function predicateText(
   //  · A transient predicate adjective — "está cansado", not "*es cansado". Inherent adjectives
   //    ("es grande") and predicate nouns ("es una leyenda") keep `ser`; the corpus marks which
   //    adjectives are transient (`forms['transient']`), read off the first conjunct.
-  const predicativeHead = complements?.predicative
-    ? firstConjunct(complements.predicative.phrase).head.forms : undefined;
+  //  · An elided subject complement (A121) picks the copula it would pick if spoken, so a clause keeps
+  //    its antecedent's: "está feliz, pero el perro no lo está", "está en la casa, pero el perro no está".
+  const { elided } = verbPhrase;
+  const predicative = complements?.predicative ?? (elided?.type === 'predicative' ? elided.complement : undefined);
+  const locative = complements?.locative ?? (elided?.type === 'locative' ? elided.complement : undefined);
+  const predicativeHead = predicative ? firstConjunct(predicative.phrase).head.forms : undefined;
   const transientPredicative =
     predicativeHead?.['role'] === 'adjective' && predicativeHead['transient'] === '1';
-  const locativeAlone = !!complements?.locative && !complements?.predicative;
+  const locativeAlone = !!locative && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "debe estar", "ha
   // estado", "no estés", "estar en la casa".
   const copulaVerb =
@@ -103,7 +107,9 @@ export function predicateText(
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes "a" + its
   // tonic form. A group of pronouns is doubled by its plural clitic ("el gato nos ve a mí y a ti");
   // a group mixing in a noun, where the doubling is optional, is left undoubled.
-  const objectClitic = !directObject ? ''
+  // An elided predicate leaves the invariable "lo" in the same slot ("el perro no lo es", "los perros
+  // no lo están"); an elided place leaves nothing ("el perro no está") (A121).
+  const objectClitic = !directObject ? (verbPhrase.elided?.type === 'predicative' ? 'lo' : '')
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : pronounGroup ? groupObjectClitic(directObject) : '';
   // A human noun takes the personal "a" too ("ve al niño"), see `objectNounText`.

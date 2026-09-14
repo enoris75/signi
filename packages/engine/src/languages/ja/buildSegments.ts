@@ -9,12 +9,19 @@ export function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
   const sentence = phrase.condition
     ? [{ t: 'もし' }, ...buildClauseSegments(phrase.condition, 'が'), { t: '、' }, ...main]
     : main;
-  // Coordination: <first clause>、<conjunction> <second clause>.
   if (!phrase.coordination) return sentence;
+  // Coordination. The words that join two clauses (そして, しかし, …) are connectives (接続詞), not
+  // conjunctive particles. After a finite polite predicate (ます / です / ください) the first clause is
+  // a sentence of its own, so it closes, and the connective opens the next with its own comma:
+  // 猫は走ります。しかし、犬は跳びます (A122). The instruction register and the citation end on a
+  // non-polite form that stays inside one sentence (食べ物を食べ、それから走り), and keep the comma
+  // before the connective.
+  const vp = phrase.verbPhrase;
+  const closes = !!vp && vp.mood !== 'infinitive' && !(vp.mood === 'imperative' && vp.register === 'instruction');
+  const connective = { t: COORD_WORDS[phrase.coordination.conjunction] };
   return [
     ...sentence,
-    { t: '、' },
-    { t: COORD_WORDS[phrase.coordination.conjunction] },
+    ...(closes ? [{ t: '。' }, connective, { t: '、' }] : [{ t: '、' }, connective]),
     ...buildClauseSegments(phrase.coordination.clause, 'は'),
   ];
 }

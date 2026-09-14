@@ -13,6 +13,11 @@ describe('joinSubject', () => {
     expect(joinSubject('je', "n'aime pas")).toBe("je n'aime pas");
   });
 
+  test('je elides before the clitic y', () => {
+    expect(joinSubject('je', 'y suis')).toBe("j'y suis");
+    expect(joinSubject('je', "n'y suis pas")).toBe("je n'y suis pas");
+  });
+
   test('any other subject takes a space, and an empty side drops out', () => {
     expect(joinSubject('il', 'aime')).toBe('il aime');
     expect(joinSubject('moi et toi, nous', 'aimons')).toBe('moi et toi, nous aimons');

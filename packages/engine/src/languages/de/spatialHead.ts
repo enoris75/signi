@@ -3,9 +3,10 @@ import { prepDet } from './prepDet.js';
 import { spatialCase } from './spatialCase.js';
 
 // A spatial relation → preposition + case-declined determiner. "in" fuses with the dative "dem"
-// (in+dem → im), which prepDet handles; none of the others fuse.
-export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean): string {
-  const _case = spatialCase(spec);
+// (in+dem → im), which prepDet handles; none of the others fuse. The case depends on which
+// complement the relation serves (see `spatialCase`): a route over crosses, "über den Markt".
+export function spatialHead(spec: PathSpecifier, f: Record<string, string>, plural: boolean, type: 'route' | 'locative'): string {
+  const _case = spatialCase(spec, type);
   switch (spec) {
     case 'in':          return prepDet('in', f, _case, plural);
     case 'under':       return prepDet('unter', f, _case, plural);

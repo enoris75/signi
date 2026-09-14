@@ -28,6 +28,22 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(DESU, { aspect: 'progressive' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいます');
       expect(text(predicateSegs(vp(DESU, { aspect: 'resultative' }), undefined, inHouse, undefined, false, false, true))).toBe('家にいました');
     });
+
+    // A120: BE with no complement at all states that the subject exists, with the same verb.
+    test('with no complement at all, BE is the existential, in every form', () => {
+      expect(text(predicateSegs(vp(DESU), undefined, undefined, undefined, false, false, true))).toBe('います');
+      expect(text(predicateSegs(vp(DESU, { negative: true, tense: 'past' }), undefined, undefined))).toBe('ありませんでした');
+      expect(text(predicateSegs(vp(DESU), undefined, undefined, undefined, true, false, true))).toBe('いる');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(KOTO_GA_DEKIRU)] }), undefined, undefined, undefined, false, false, true))).toBe('いることができます');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative' }), undefined, undefined, '2sg', false, false, true))).toBe('いてください');
+      expect(text(predicateSegs(vp(DESU, { mood: 'subjunctive', negative: true }), undefined, undefined, undefined, false, false, true))).toBe('いなかったら');
+    });
+
+    // A121: an elided place has no pro-form; the clause is the existential.
+    test('an elided locative leaves the existential', () => {
+      const elided = { type: 'locative' as const, complement: complement(np(IE)) };
+      expect(text(predicateSegs(vp(DESU, { negative: true, elided }), undefined, undefined, undefined, false, false, true))).toBe('いません');
+    });
   });
 
   describe('tense and polarity', () => {
@@ -217,6 +233,15 @@ describe('predicateSegs', () => {
     test('negation, including a negative adverb’s, reaches the copula', () => {
       expect(text(predicateSegs(vp(DESU, { negative: true }), undefined, careful))).toBe('慎重ではありません');
       expect(text(predicateSegs(vp(DESU, { modifier: concept(KESSHITE) }), undefined, careful))).toBe('決して慎重ではありません');
+    });
+
+    // A121: Japanese cannot leave a predicate unspoken, so an elided one is the pro-form そう.
+    test('an elided predicate is spoken as そう, in its own tense, polarity and mood', () => {
+      const elided = { type: 'predicative' as const, complement: complement(np(SHINCHOU)) };
+      expect(predicateSegs(vp(DESU, { elided }), undefined, undefined)).toEqual([{ t: 'そう' }, { t: 'です' }]);
+      expect(text(predicateSegs(vp(DESU, { negative: true, tense: 'past', elided }), undefined, undefined))).toBe('そうではありませんでした');
+      expect(text(predicateSegs(vp(DESU, { modifier: concept(ITSUMO), elided }), undefined, undefined))).toBe('いつもそうです');
+      expect(text(predicateSegs(vp(DESU, { mood: 'imperative', negative: true, elided }), undefined, undefined))).toBe('そうならないでください');
     });
   });
 });

@@ -1,7 +1,7 @@
 import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounElement, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import { canCoordinateImperative, defaultDefiniteness, isNounGroup, isPronominalPossessor, nounConjuncts } from '@signi/shared';
 import { mannerRelation } from './types.js';
-import type { LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
+import type { ElidedComplement, LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en/index.js';
 import { italianEngine } from './languages/it/index.js';
 import { frenchEngine } from './languages/fr/index.js';
@@ -335,6 +335,34 @@ function resolveRelativeClause(
 }
 
 /**
+ * The subject complement a clause can hand on to a following bare copula: its predicative, failing
+ * that its locative, or the one it elides itself. Only a copula has one to hand on.
+ */
+function elidableComplement(antecedent: ResolvedPhrase): ElidedComplement | undefined {
+  const vp = antecedent.verbPhrase;
+  if (vp?.verb.forms['copula'] !== '1') return undefined;
+  const { predicative, locative } = antecedent.complements ?? {};
+  if (predicative) return { type: 'predicative', complement: predicative };
+  if (locative) return { type: 'locative', complement: locative };
+  return vp.elided;
+}
+
+/**
+ * A121. A copula with no complement of its own, after a clause that has one, elides that complement:
+ * "the cat is happy, but the dog is not", "if the cat were a legend, the dog would not be". The
+ * ellipsis only looks back, to the clause before it: the first clause of a coordination, or the
+ * protasis of a main clause. A bare copula with no such antecedent asserts existence ("the cat is"),
+ * and is left alone. Returns the clause with the elided complement on its verb phrase.
+ */
+function elideSubjectComplement(clause: ResolvedPhrase, antecedent: ResolvedPhrase): ResolvedPhrase {
+  const vp = clause.verbPhrase;
+  const bare = vp?.verb.forms['copula'] === '1' && !clause.directObject
+    && Object.keys(clause.complements ?? {}).length === 0;
+  const elided = bare ? elidableComplement(antecedent) : undefined;
+  return elided ? { ...clause, verbPhrase: { ...vp!, elided } } : clause;
+}
+
+/**
  * The conjunction joining a coordination, normalised for the mood of the pair. Only four of the
  * six can join two commands (see IMPERATIVE_COORD_CONJUNCTIONS); the UI never offers the other
  * two under an imperative, but a stale or hand-built plan that asks for one falls back to the
@@ -361,7 +389,7 @@ function resolvePhrase(
 ): ResolvedPhrase {
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
-  return {
+  const resolved: ResolvedPhrase = {
     subject: resolveNounElement(plan.subject, language, lookup),
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
@@ -394,6 +422,13 @@ function resolvePhrase(
         }
       : undefined,
   };
+  // A bare copula elides the subject complement of the clause before it (A121). The main clause looks
+  // back to its protasis first, so a coordinated clause can then look back to a main clause that
+  // itself elides one.
+  const main = resolved.condition ? elideSubjectComplement(resolved, resolved.condition) : resolved;
+  return main.coordination
+    ? { ...main, coordination: { ...main.coordination, clause: elideSubjectComplement(main.coordination.clause, main) } }
+    : main;
 }
 
 /**

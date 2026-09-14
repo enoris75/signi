@@ -37,4 +37,11 @@ describe('frCliticize', () => {
     expect(frCliticize('le', "n'a pas vu")).toBe("ne l'a pas vu");
     expect(frCliticize('nous', "n'aime jamais")).toBe('ne nous aime jamais');
   });
+
+  // A121: the locative pro-form "y" is no vowel to VOWEL_START, but "ne" elides before it all the same.
+  test('ne elides before y', () => {
+    expect(frCliticize('y', "n'est pas")).toBe("n'y est pas");
+    expect(frCliticize('y', 'ne sera pas')).toBe("n'y sera pas");
+    expect(frCliticize('y', 'est')).toBe('y est');
+  });
 });

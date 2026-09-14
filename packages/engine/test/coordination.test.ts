@@ -131,7 +131,7 @@ describe('coordinated clauses', () => {
       fr: 'le chat court, ou le chien saute.',
       es: 'el gato corre, o el perro salta.',
       de: 'der Kater läuft, oder der Hund springt.',
-      ja: '猫は走ります、または犬は跳びます。',
+      ja: '猫は走ります。または、犬は跳びます。',
     });
   });
 
@@ -144,7 +144,7 @@ describe('coordinated clauses', () => {
       pt: 'o gato corre, isto é, o cão pula.',
       // "das heißt" is parenthetical, so — unlike "also" / "dann" — it does NOT invert.
       de: 'der Kater läuft, das heißt der Hund springt.',
-      ja: '猫は走ります、つまり犬は跳びます。',
+      ja: '猫は走ります。つまり、犬は跳びます。',
     });
   });
 
@@ -159,7 +159,7 @@ describe('coordinated clauses', () => {
       es: 'el gato corre, y luego el perro salta.',
       pt: 'o gato corre, e depois o cão pula.',
       de: 'der Kater läuft, und dann springt der Hund.',
-      ja: '猫は走ります、それから犬は跳びます。',
+      ja: '猫は走ります。それから、犬は跳びます。',
     });
   });
 
@@ -197,7 +197,7 @@ describe('coordinated clauses: two imperatives', () => {
       es: 'come la comida, y corre.',
       pt: 'coma a comida, e corra.',
       de: 'iss das Essen, und lauf.',
-      ja: '食べ物を食べてください、そして走ってください。',
+      ja: '食べ物を食べてください。そして、走ってください。',
     });
   });
 
@@ -208,7 +208,7 @@ describe('coordinated clauses: two imperatives', () => {
       en: 'eat the food, and then run.',
       it: 'mangia il cibo, e poi corri.',
       de: 'iss das Essen, und dann lauf.',
-      ja: '食べ物を食べてください、それから走ってください。',
+      ja: '食べ物を食べてください。それから、走ってください。',
     });
     expect(joined('but')).toMatchObject({
       en: 'eat the food, but run.',
@@ -275,7 +275,7 @@ describe('coordinated clauses: an imperative and an indicative', () => {
       en: 'eat the food, and run.', // not "and you run"
       it: 'mangia il cibo, e corri.',
       de: 'iss das Essen, und lauf.',
-      ja: '食べ物を食べてください、そして走ってください。',
+      ja: '食べ物を食べてください。そして、走ってください。',
     });
 
     expect(coerced).toEqual(sayAll({
@@ -318,7 +318,7 @@ describe('coordinated clauses: an imperative and an indicative', () => {
       es: 'comes la comida, y corres.',
       pt: 'come a comida, e corre.',
       de: 'du isst das Essen, und du läufst.',
-      ja: 'あなたは食べ物を食べます、そしてあなたは走ります。',
+      ja: 'あなたは食べ物を食べます。そして、あなたは走ります。',
     });
   });
 
@@ -530,7 +530,7 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
   const catIs = (predicate: string, verbPhrase: Partial<VerbPhrase> = {}) =>
     clause(np('CAT'), 'BE', { verbPhrase, complements: { predicative: { phrase: np(predicate) } } });
 
-  test.fails('the elided predicate leaves its pro-form, in the tense, number and polarity of its clause', () => {
+  test('the elided predicate leaves its pro-form, in the tense, number and polarity of its clause', () => {
     expect(sayAll({
       ...clause(np('AFRICA'), 'BE', {
         complements: { predicative: { phrase: np('CONTINENT') }, locative: { phrase: np('ASIA') } },
@@ -589,7 +589,7 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
     });
   });
 
-  test.fails('an elided locative leaves the locative pro-form', () => {
+  test('an elided locative leaves the locative pro-form', () => {
     expect(but(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), { negative: true })).toMatchObject({
       en: 'the cat is in the house, but the dog is not.',
       it: "il gatto è nella casa, ma il cane non c'è.",
@@ -599,6 +599,90 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
       de: 'der Kater ist im Haus, aber der Hund ist nicht da.',
     });
   });
+
+  // The pro-form rides the clitic placement of each language: before the finite verb, before the
+  // infinitive under a French modal, ahead of "nicht" and the German non-finite tail.
+  test('the pro-form under a modal, in the compound past and after a pronoun subject', () => {
+    expect(but(catIs('HAPPY'), { modals: ['MUST'], negative: true })).toMatchObject({
+      it: 'il gatto è felice, ma il cane non lo deve essere.',
+      fr: "le chat est heureux, mais le chien ne doit pas l'être.",
+      es: 'el gato está feliz, pero el perro no lo debe estar.',
+      pt: 'o gato está feliz, mas o cão não deve estar.',
+      de: 'der Kater ist glücklich, aber der Hund muss es nicht sein.',
+    });
+    expect(but(catIs('LEGEND'), { aspect: 'resultative', negative: true })).toMatchObject({
+      en: 'the cat is a legend, but the dog has not been.',
+      it: 'il gatto è una leggenda, ma il cane non lo è stato.',
+      fr: "le chat est une légende, mais le chien ne l'a pas été.",
+      es: 'el gato es una leyenda, pero el perro no lo ha sido.',
+      de: 'der Kater ist eine Legende, aber der Hund ist es nicht gewesen.',
+    });
+    expect(but(catIs('LEGEND'), {}, np('FIRST_PERSON'))).toMatchObject({
+      it: 'il gatto è una leggenda, ma lo sono.',
+      fr: 'le chat est une légende, mais je le suis.',
+      es: 'el gato es una leyenda, pero lo soy.',
+      de: 'der Kater ist eine Legende, aber ich bin es.',
+      ja: '猫は伝説です。しかし、私はそうです。',
+    });
+  });
+
+  test('the locative pro-form under a modal and after a pronoun subject', () => {
+    const catInTheHouse = clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } });
+    expect(but(catInTheHouse, { modals: ['CAN'] })).toMatchObject({
+      it: 'il gatto è nella casa, ma il cane ci può essere.',
+      fr: 'le chat est dans la maison, mais le chien peut y être.',
+      es: 'el gato está en la casa, pero el perro puede estar.',
+      de: 'der Kater ist im Haus, aber der Hund kann da sein.',
+    });
+    expect(but(catInTheHouse, {}, np('FIRST_PERSON'))).toMatchObject({
+      it: 'il gatto è nella casa, ma ci sono.',
+      fr: "le chat est dans la maison, mais j'y suis.",
+      es: 'el gato está en la casa, pero estoy.',
+      pt: 'o gato está na casa, mas estou.',
+      de: 'der Kater ist im Haus, aber ich bin da.',
+    });
+  });
+
+  // Two commands coordinate like two statements, and a coordinated clause can elide a complement its
+  // main clause itself elided from the protasis.
+  test('a coordinated command, and a chain through the protasis', () => {
+    const beHappy = { ...clause(np('SECOND_PERSON'), 'BE', { complements: { predicative: { phrase: np('HAPPY') } } }), imperative: true };
+    expect(sayAll({ ...beHappy, coordination: { conjunction: 'but', clause: clause(np('SECOND_PERSON'), 'BE', { verbPhrase: { negative: true } }) } }))
+      .toMatchObject({
+        it: 'sii felice, ma non esserlo.',
+        fr: 'sois heureux, mais ne le sois pas.',
+        es: 'está feliz, pero no lo estés.',
+        de: 'sei glücklich, aber sei es nicht.',
+        ja: '幸せになってください。しかし、そうならないでください。',
+      });
+    expect(sayAll({
+      ...clause(np('DOG'), 'BE', { verbPhrase: { negative: true } }),
+      condition: catIs('LEGEND'),
+      coordination: { conjunction: 'but', clause: clause(np('MAN'), 'BE') },
+    })).toMatchObject({
+      it: 'se il gatto fosse una leggenda, il cane non lo sarebbe, ma l\'uomo lo è.',
+      fr: "si le chat était une légende, le chien ne le serait pas, mais l'homme l'est.",
+      es: 'si el gato fuera una leyenda, el perro no lo sería, pero el hombre lo es.',
+      de: 'wenn der Kater eine Legende sein würde, würde der Hund es nicht sein, aber der Mann ist es.',
+      ja: 'もし猫が伝説だったら、犬はそうではありません。しかし、男はそうです。',
+    });
+  });
+
+  // Regression: only a copula hands on a subject complement, and only a bare copula takes it. SEEM's
+  // predicate is not elided into BE, and BECOME with no complement stays a bare verb.
+  test('regression: a non-copular antecedent or ellipsis site elides nothing', () => {
+    expect(but(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('HAPPY') } } }), { negative: true })).toMatchObject({
+      it: 'il gatto sembra felice, ma il cane non è.',
+      fr: "le chat semble heureux, mais le chien n'est pas.",
+      de: 'der Kater scheint glücklich, aber der Hund ist nicht.',
+    });
+    expect(sayAll({ ...catIs('HAPPY'), coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BECOME', { verbPhrase: { negative: true } }) } }))
+      .toMatchObject({
+        it: 'il gatto è felice, ma il cane non diventa.',
+        fr: 'le chat est heureux, mais le chien ne devient pas.',
+        de: 'der Kater ist glücklich, aber der Hund wird nicht.',
+      });
+  });
 });
 
 // A122. Japanese joins two clauses as "<clause>、<connective><clause>": 猫は走ります、しかし犬は跳びます.
@@ -606,7 +690,7 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
 // a finite polite predicate (ます / です / ください) the first clause ends, and the connective opens the
 // next sentence with its own comma: 猫は走ります。しかし、犬は跳びます。
 describe('known bugs: Japanese clause coordination', () => {
-  test.fails('Japanese closes the first clause and sets the connective off with a comma', () => {
+  test('Japanese closes the first clause and sets the connective off with a comma', () => {
     const join = (conjunction: CoordConjunction, first: PhrasePlan = clause(np('CAT'), 'RUN'), second: PhrasePlan = clause(np('DOG'), 'JUMP')) =>
       say({ ...first, coordination: { conjunction, clause: second } }, 'ja');
     expect(join('but')).toBe('猫は走ります。しかし、犬は跳びます。');
@@ -627,5 +711,36 @@ describe('known bugs: Japanese clause coordination', () => {
       imperative: true,
     });
     expect(join('and', command('EAT', 'FOOD'), command('RUN'))).toBe('食べ物を食べてください。そして、走ってください。');
+  });
+
+  // Every finite polite ending closes its sentence: the past negative, the copula, the existential, a
+  // modal and the hortative ましょう.
+  test('Japanese closes the sentence after every polite ending', () => {
+    const join = (first: PhrasePlan, second: PhrasePlan = clause(np('DOG'), 'JUMP'), conjunction: CoordConjunction = 'but') =>
+      say({ ...first, coordination: { conjunction, clause: second } }, 'ja');
+    expect(join(clause(np('DOG'), 'RUN', { verbPhrase: { tense: 'past', negative: true } }), clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }), 'therefore'))
+      .toBe('犬は走りませんでした。だから、猫はネズミを食べます。');
+    expect(join(clause(np('CAT'), 'BE', { verbPhrase: { tense: 'past', negative: true }, complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toBe('猫は幸せではありませんでした。しかし、犬は跳びます。');
+    expect(join(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }))).toBe('猫は家にいます。しかし、犬は跳びます。');
+    expect(join(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['CAN'] } }))).toBe('猫は食べることができます。しかし、犬は跳びます。');
+    const letUs = (verb: string): PhrasePlan => ({ ...clause(np('FIRST_PERSON', { number: 'plural' }), verb), imperative: true });
+    expect(join(letUs('RUN'), letUs('EAT'), 'and')).toBe('走りましょう。そして、食べましょう。');
+  });
+
+  // Regression: the instruction register's 連用形 stays inside one sentence, and the other languages
+  // keep their comma.
+  test('regression: coordinated instructions and the other languages keep their join', () => {
+    const instruction = (verb: string, directObject?: string): PhrasePlan => ({
+      ...clause(np('SECOND_PERSON'), verb, directObject ? { directObject: np(directObject) } : {}),
+      imperative: true,
+      imperativeRegister: 'instruction',
+    });
+    expect(say({ ...instruction('EAT', 'FOOD'), coordination: { conjunction: 'then', clause: instruction('RUN') } }, 'ja'))
+      .toBe('食べ物を食べ、それから走り。');
+    expect(sayAll({ ...clause(np('CAT'), 'RUN'), coordination: { conjunction: 'but', clause: clause(np('DOG'), 'JUMP') } })).toMatchObject({
+      en: 'the cat runs, but the dog jumps.',
+      it: 'il gatto corre, ma il cane salta.',
+    });
   });
 });

@@ -1,9 +1,15 @@
 import { describe, expect, test } from 'vitest';
 import {
-  ALLER, CHAT, complement, complements, concept, DEVOIR, EFFONDRER, el, ETRE, FATIGUE, FEMME, type Forms, IL, JAMAIS, JE, LIVRE,
-  MAISON, MANGER, modal, np, NOURRITURE, POUVOIR, SEMBLER, SOURIS, TOUJOURS, TU, VITE, VOIR, VOULOIR, vp,
+  ALLER, CHAT, CHIEN, complement, complements, concept, DEVOIR, EFFONDRER, el, ETRE, FATIGUE, FEMME, FEU, type Forms, IL, JAMAIS, JE, LIVRE,
+  HEUREUX, MAISON, MANGER, modal, np, NOURRITURE, POUVOIR, SEMBLER, SOURIS, TOUJOURS, TU, VITE, VOIR, VOULOIR, vp,
 } from './fr.fixtures.js';
 import { predicateText } from './predicateText.js';
+
+// CRY_OUT's lexeme raises an alarm; WOLF and FIRE name a danger (A124).
+const CRIER: Forms = { base: 'crier', alarm_cry: '1', participle: 'crié', '3sg_present': 'crie', '3sg_past': 'cria' };
+const LOUP: Forms = { base: 'loup', plural: 'loups', gender: 'masc', count: 'singular', animate: '1' };
+const ALARM_LOUP: Forms = { ...LOUP, alarm: '1' };
+const ALARM_FEU: Forms = { ...FEU, alarm: '1' };
 
 const COURIR: Forms = {
   base: 'courir', participle: 'couru',
@@ -254,6 +260,43 @@ describe('predicateText', () => {
     test('an object pronoun is proclitic to the infinitive', () => {
       expect(predicateText(CHAT, infinitive(MANGER), el(np(IL)))).toBe('le manger');
       expect(predicateText(CHAT, infinitive(AIMER), el(np(JE)))).toBe("m'aimer");
+    });
+  });
+
+  describe('an alarm cry (A124)', () => {
+    test('a danger cried out takes "à" and the article, bare or not', () => {
+      expect(predicateText(CHAT, vp(CRIER, { tense: 'past' }), el(np(ALARM_LOUP)))).toBe('cria au loup');
+      expect(predicateText(CHAT, vp(CRIER, { tense: 'past' }), el(np(ALARM_LOUP, { definiteness: 'bare' })))).toBe('cria au loup');
+      expect(predicateText(CHAT, vp(CRIER), el(np(ALARM_FEU, { definiteness: 'bare', number: 'plural' })))).toBe('crie aux feux');
+      expect(predicateText(CHAT, vp(CRIER, { negative: true }), el(np(ALARM_LOUP), np(ALARM_FEU)))).toBe('ne crie pas au loup et au feu');
+    });
+
+    test('the frame needs both the crying verb and the danger', () => {
+      expect(predicateText(CHAT, vp(CRIER), el(np(LOUP)))).toBe('crie le loup');
+      expect(predicateText(CHAT, vp(VOIR), el(np(ALARM_LOUP)))).toBe('voit le loup');
+    });
+  });
+
+  // A121: a bare copula that elides the subject complement before it leaves its pro-form.
+  describe('an elided subject complement', () => {
+    const happy = { type: 'predicative' as const, complement: complement(np(HEUREUX)) };
+    const inTheHouse = { type: 'locative' as const, complement: complement(np(MAISON)) };
+
+    test('a predicate leaves the invariable le, eliding before a vowel', () => {
+      expect(predicateText(CHIEN, vp(ETRE, { negative: true, elided: happy }))).toBe("ne l'est pas");
+      expect(predicateText({ ...CHIEN, number: 'plural' }, vp(ETRE, { negative: true, elided: happy }))).toBe('ne le sont pas');
+      expect(predicateText(CHIEN, vp(ETRE, { tense: 'future', elided: happy }))).toBe('le sera');
+    });
+
+    test('a place leaves y, and ne elides before it', () => {
+      expect(predicateText(CHIEN, vp(ETRE, { elided: inTheHouse }))).toBe('y est');
+      expect(predicateText(CHIEN, vp(ETRE, { negative: true, elided: inTheHouse }))).toBe("n'y est pas");
+    });
+
+    // The pro-form is no object: the avoir participle stays "été", and a modal takes it before the infinitive.
+    test('the compound past and a modal place the pro-form as they place a clitic', () => {
+      expect(predicateText(CHIEN, vp(ETRE, { aspect: 'resultative', negative: true, elided: happy }))).toBe("ne l'a pas été");
+      expect(predicateText(CHIEN, vp(ETRE, { modals: [modal(DEVOIR)], negative: true, elided: happy }))).toBe("ne doit pas l'être");
     });
   });
 });

@@ -27,7 +27,7 @@ describe('relative × coordination × imperative', () => {
       es: 'come el ratón que corre, y luego salta.',
       pt: 'coma o rato que corre, e depois pule.',
       de: 'iss die Maus, die läuft, und dann spring.',
-      ja: '走るネズミを食べてください、それから跳んでください。',
+      ja: '走るネズミを食べてください。それから、跳んでください。',
     });
   });
 
@@ -42,7 +42,7 @@ describe('relative × coordination × imperative', () => {
       es: 'come el ratón que corre, y ve el perro que salta.',
       pt: 'coma o rato que corre, e veja o cão que pula.',
       de: 'iss die Maus, die läuft, und sieh den Hund, der springt.',
-      ja: '走るネズミを食べてください、そして跳ぶ犬を見てください。',
+      ja: '走るネズミを食べてください。そして、跳ぶ犬を見てください。',
     });
   });
 

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { Complement, NounPhrase, PhrasePlan } from '@signi/shared';
+import type { Complement, NounElement, NounPhrase, PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // "The quick brown fox of the boy who cried the wolf jumped over the lazy dog": the pangram, with a
@@ -8,8 +8,8 @@ import { clause, np, say, sayAll } from './harness.js';
 // (relative.test.ts) and the spatial complements (complements/locative, complements/route). This file
 // pins the whole sentence, so a regression in how the parts combine shows up here.
 //
-// Italian and French are asserted only in the known-bugs blocks, because CRY_OUT's shouted alarm has
-// no a / à (A124). So are German and French for the route, where "over" keeps its static form (A125).
+// Italian and French are asserted in the A124 block, where CRY_OUT's shouted alarm takes a / à, and
+// German and French for the route in the A125 block, where "over" crosses the dog.
 
 const theBoyWhoCriedTheWolf = (wolf: Partial<NounPhrase> = {}): NounPhrase =>
   np('BOY', { relative: { verbPhrase: { verb: 'CRY_OUT', tense: 'past' }, directObject: np('WOLF', wolf) } });
@@ -88,7 +88,7 @@ describe('the quick brown fox of the boy who cried the wolf', () => {
 // voleur"). The engines render it as a plain object instead: "gridò il lupo" ("shouted the wolf"), or
 // "gridò lupo" when the object is bare.
 describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
-  test.fails('Italian cries "al lupo", French "au loup"', () => {
+  test('Italian cries "al lupo", French "au loup"', () => {
     expect(say(cried(), 'it')).toBe('il ragazzo gridò al lupo.');
     expect(say(cried({ definiteness: 'bare' }), 'it')).toBe('il ragazzo gridò al lupo.');
     expect(say(cried(), 'fr')).toBe('le garçon cria au loup.');
@@ -100,6 +100,56 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
     expect(say(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'route'), 'it'))
       .toBe('la volpe veloce e marrone del ragazzo che gridò al lupo saltò sopra il cane pigro.');
   });
+
+  const itFr = (plan: PhrasePlan) => {
+    const { it, fr } = sayAll(plan);
+    return { it, fr };
+  };
+  const cry = (object: NounElement, verbPhrase: Partial<VerbPhrase> = { tense: 'past' }, subject: NounElement = np('BOY')) =>
+    itFr(clause(subject, 'CRY_OUT', { verbPhrase, directObject: object }));
+
+  // FIRE is the other seeded danger. The frame fuses its article in every number, and holds under
+  // negation, a modal and the compound past, where the cry still follows the verb.
+  test('every alarm, in every number and verb group', () => {
+    expect(cry(np('FIRE'))).toEqual({ it: 'il ragazzo gridò al fuoco.', fr: 'le garçon cria au feu.' });
+    expect(cry(np('FIRE', { definiteness: 'bare' }))).toEqual({ it: 'il ragazzo gridò al fuoco.', fr: 'le garçon cria au feu.' });
+    expect(cry(np('WOLF', { number: 'plural' }))).toEqual({ it: 'il ragazzo gridò ai lupi.', fr: 'le garçon cria aux loups.' });
+    expect(cry(np('WOLF', { number: 'plural', definiteness: 'bare' }))).toEqual({ it: 'il ragazzo gridò ai lupi.', fr: 'le garçon cria aux loups.' });
+    expect(cry(np('WOLF'), { tense: 'past', negative: true })).toEqual({ it: 'il ragazzo non gridò al lupo.', fr: 'le garçon ne cria pas au loup.' });
+    expect(cry(np('WOLF'), { modals: ['MUST'] })).toEqual({ it: 'il ragazzo deve gridare al lupo.', fr: 'le garçon doit crier au loup.' });
+    expect(cry(np('WOLF'), { aspect: 'resultative' })).toEqual({ it: 'il ragazzo ha gridato al lupo.', fr: 'le garçon a crié au loup.' });
+  });
+
+  // Each conjunct takes its own fused head. A possessive keeps its own article rules, and an adjective
+  // its place after the noun.
+  test('the alarm phrase around the noun', () => {
+    expect(cry({ conjunction: 'and', conjuncts: [np('WOLF'), np('FIRE')] }))
+      .toEqual({ it: 'il ragazzo gridò al lupo e al fuoco.', fr: 'le garçon cria au loup et au feu.' });
+    expect(cry(np('WOLF', { possessor: { kind: 'pronominal', person: '3', number: 'singular' } })))
+      .toEqual({ it: 'il ragazzo gridò al suo lupo.', fr: 'le garçon cria à son loup.' });
+    expect(cry(np('WOLF', { adjectives: ['LAZY'] })))
+      .toEqual({ it: 'il ragazzo gridò al lupo pigro.', fr: 'le garçon cria au loup paresseux.' });
+    expect(cry(np('WOLF', { definiteness: 'indefinite' })))
+      .toEqual({ it: 'il ragazzo gridò a un lupo.', fr: 'le garçon cria à un loup.' });
+  });
+
+  // The cry is no direct object, so the Italian impersonal si does not agree with a plural one.
+  test('the impersonal si stays singular before a plural alarm', () => {
+    expect(cry(np('WOLF', { number: 'plural' }), {}, np('GENERIC_PERSON'))).toEqual({ it: 'si grida ai lupi.', fr: 'on crie aux loups.' });
+  });
+
+  // Regression: the frame is CRY_OUT's, and only for a danger. A wolf seen is a plain object, a recipient
+  // keeps its own a / à after the cry, and the other languages keep the literal object.
+  test('regression: another verb, a recipient, and the other languages are unchanged', () => {
+    expect(itFr(clause(np('BOY'), 'SEE', { verbPhrase: { tense: 'past' }, directObject: np('WOLF') })))
+      .toEqual({ it: 'il ragazzo vide il lupo.', fr: 'le garçon vit le loup.' });
+    expect(itFr(clause(np('BOY'), 'CRY_OUT', { verbPhrase: { tense: 'past' }, directObject: np('WOLF'), complements: { terminus: { phrase: np('DOG') } } })))
+      .toEqual({ it: 'il ragazzo gridò al lupo al cane.', fr: 'le garçon cria au loup au chien.' });
+    expect(sayAll(cried())).toMatchObject({
+      en: 'the boy cried the wolf.',
+      de: 'der Junge rief den Wolf.',
+    });
+  });
 });
 
 // A125, in the whole sentence. A route over the dog crosses it: German takes über + accusative ("über
@@ -107,7 +157,7 @@ describe('known bugs: an alarm cry takes a / à in Italian and French', () => {
 // static forms a locative takes ("über dem", "au-dessus du"). French is matched on its ending, since
 // the cry earlier in the sentence is A124. The minimal cases are in complements/route.test.ts.
 describe('known bugs: a route over crosses the dog, in the whole sentence', () => {
-  test.fails('German "über den faulen Hund", French "par-dessus le chien paresseux"', () => {
+  test('German "über den faulen Hund", French "par-dessus le chien paresseux"', () => {
     expect(sayAll(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'route'))).toMatchObject({
       de: 'der schnelle braune Fuchs vom Jungen, der den Wolf rief, sprang über den faulen Hund.',
       fr: expect.stringMatching(/ sauta par-dessus le chien paresseux\.$/),

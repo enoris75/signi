@@ -52,7 +52,11 @@ function initSchema(db: Database.Database): void {
       -- 1 for an adjective that ascribes a TRANSIENT state (tired, hungry, saved) rather than an
       -- inherent property (big, canine). Spanish/Portuguese predicate a transient adjective with
       -- estar, an inherent one with ser (A47); default 0 (inherent). Ignored for non-adjectives.
-      transient    INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1))
+      transient    INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1)),
+      -- 1 for a noun naming a danger one cries out a warning of (wolf, fire). Italian and French
+      -- shout such a cry with a / à and the article ("gridare al lupo", "crier au feu"), where any
+      -- other cry is a plain object (A124); default 0. Ignored for non-nouns.
+      alarm        INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1))
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -333,6 +337,9 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('transient')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN transient INTEGER NOT NULL DEFAULT 0 CHECK (transient IN (0,1))');
+  }
+  if (!conceptCols.includes('alarm')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN alarm INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1))');
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

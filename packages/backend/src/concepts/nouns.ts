@@ -604,6 +604,7 @@ export const nouns: ConceptSeed[] = [
     definition: glossOf('MAMMAL', 'WILD', 'CANINE'),
     emoji: '🐺',
     animate: true,
+    alarm: true, // "cry wolf": gridare al lupo, crier au loup
     isA: 'MAMMAL',
     forms: {
       en: { base: 'wolf', plural: 'wolves', count: 'singular' },
@@ -809,6 +810,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the phenomenon of combustion; flame',
     emoji: '🔥',
+    alarm: true, // "cry fire": gridare al fuoco, crier au feu
     forms: {
       en: { base: 'fire', plural: 'fires', count: 'singular' },
       it: { base: 'fuoco', plural: 'fuochi', gender: 'masc', count: 'singular' },

@@ -132,3 +132,51 @@ already positions a proclitic before the finite verb and after `non` / `ne`.
 |---|---|
 | **Test** | `coordination.test.ts` → *known bugs: a coordinated copula elides its predicate* (2 `test.fails`) |
 | | `copulaWithoutComplement.test.ts` → *known bugs: an elided subject complement beside a condition or a relative* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 as the shape of the fix proposed.
+
+- **Translator:** [`translator.ts`](../../../packages/engine/src/translator.ts) resolves the ellipsis
+  where both clauses are visible. `elideSubjectComplement` marks a copula with no complements and no
+  object when the clause before it is a copula with a predicative (failing that, a locative). That clause
+  is the first clause of a coordination, or the protasis of a main clause. The elided complement goes on
+  the verb phrase as `ResolvedVerbPhrase.elided` ([`types.ts`](../../../packages/engine/src/types.ts)),
+  not into `complements`, so no engine renders it by accident. The main clause looks back to its protasis
+  first, so a coordinated clause can take a complement its main clause itself elided.
+- **Engines:** each renders its pro-form in the slot a clitic or pronoun already takes, so the placement
+  under modals, aspects and commands comes from the existing machinery.
+  - **it:** `lo` / `ci` as the proclitic in [`predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts).
+    The locative `ci` elides before essere's e- forms (`c'è`, `c'è stato`).
+  - **fr:** `le` / `y` in [`predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts).
+    The avoir participle does not agree with a pro-form (`ne l'a pas été`).
+    [`frCliticize.ts`](../../../packages/engine/src/languages/fr/frCliticize.ts) elides `ne` before `y`
+    (`n'y est pas`), and [`joinSubject.ts`](../../../packages/engine/src/languages/fr/joinSubject.ts)
+    elides `je` before it (`j'y suis`).
+  - **es:** `lo` for a predicate and nothing for a place, in [`predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts).
+    A47's ser/estar choice reads the elided complement, so the clause keeps the antecedent's copula
+    (`no lo está`, `no está`).
+  - **pt:** nothing, with the same copula choice, in [`predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts)
+    (`não está`, `não esteve`).
+  - **de:** `es` in the object slot, ahead of `nicht`; `da` in the predicate slot, which `nicht` leads.
+    See [`renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts)
+    (`ist es nicht`, `wird es nicht sein`, `ist nicht da`), in the declarative, the command and the
+    instruction.
+  - **ja:** `そう` + the copula ahead of A120's gate in [`predicateSegs.ts`](../../../packages/engine/src/languages/ja/predicateSegs.ts)
+    (`そうではありません`, `そうならないでください`). An elided locative leaves the existential.
+  - **en:** nothing.
+- Every Want row renders as wanted, and the passing rows in `copulaWithoutComplement.test.ts` (existence,
+  looking only back, a relative on the complement) are unchanged.
+- **Tests:** [`coordination.test.ts`](../../../packages/engine/test/coordination.test.ts) → *known bugs: a
+  coordinated copula elides its predicate* (2) and [`copulaWithoutComplement.test.ts`](../../../packages/engine/test/copulaWithoutComplement.test.ts)
+  → *known bugs: an elided subject complement beside a condition or a relative* (2). All four pinning
+  `test.fails` are now passing `test`s. New cases cover the pro-form under a modal, in the compound past
+  and after a pronoun subject, for both the predicate and the place, plus a coordinated command and a
+  chain through the protasis. A regression guard covers a SEEM antecedent and a bare BECOME, which elide
+  nothing.
+- Unit tests: `predicateText.test.ts` (it, fr, es, pt), `renderClause.test.ts` (de),
+  `predicateSegs.test.ts` (ja), `frCliticize.test.ts` and `joinSubject.test.ts`.
+
+Not covered, as before: an antecedent inside a relative clause. German places `es` where it places any
+object pronoun, after a Mittelfeld adverb (`ist immer es`); that is the engine's general pronoun order
+(`sieht immer ihn`), not this defect.

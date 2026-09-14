@@ -1,7 +1,7 @@
 import type { Definiteness } from '@signi/shared';
 import { adjDegree, isGenericSubject, isPronominalPossessor, type ResolvedNounPhrase, type RubySegment } from '../../types.js';
 import { possessiveJa } from '../../possessive.js';
-import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET } from './ja.consts.js';
+import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET, JA_SOU } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
@@ -81,5 +81,11 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // The clause's subject is the head itself for a subject relative, else its own subject.
   const relAnimate = isAnimate(rel.headRole !== 'subject' && rel.subject ? rel.subject.conjuncts : [np]);
-  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, rel.complements, undefined, true, relSubjNeg, relAnimate), ...core];
+  // A head that fills the copula's subject complement leaves a gap Japanese cannot leave empty: the
+  // pro-form そう takes its place, with the plain copula a relative takes (犬がそうではない伝説, 犬がそう
+  // である猫), rather than the existential a copula with no complement would be (A123).
+  const complements = rel.headRole === 'predicative' && rel.verbPhrase.verb.forms['copula'] === '1'
+    ? { ...rel.complements, predicative: JA_SOU }
+    : rel.complements;
+  return [...clauseSubjectSegs, ...predicateSegs(rel.verbPhrase, rel.directObject, complements, undefined, true, relSubjNeg, relAnimate), ...core];
 }

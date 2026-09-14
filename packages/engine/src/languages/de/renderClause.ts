@@ -41,7 +41,12 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     if (!verbPhrase) return subj.trim();
     const { verb, modifier, tense = 'present', aspect = 'neutral', mood, register } = verbPhrase;
 
-    const hasPredicative = !!phrase.complements?.['predicative'];
+    // An elided subject complement leaves its pro-form (A121): "es" for a predicate, a pronoun in the
+    // object slot ahead of "nicht" ("der Hund ist es nicht", "wird es nicht sein"); "da" for a place,
+    // which "nicht" leads as it leads a predicate ("der Hund ist nicht da").
+    const proObject = verbPhrase.elided?.type === 'predicative' ? 'es' : '';
+    const proPlace = verbPhrase.elided?.type === 'locative' ? 'da' : '';
+    const hasPredicative = !!phrase.complements?.['predicative'] || !!proPlace;
 
     // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" takes the
     // declarative's slots (see `nichtSlots`): before the adverb ("iss nicht schnell"), before a
@@ -51,9 +56,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       // The command negates as the declarative does: no "nicht" beside "nie" or a "kein" object, and
       // "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie eine Maus").
       const { nicht: neg, directObject: impObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
-      const impDirect = impObject ? elementPhrase(impObject, 'acc') : '';
+      const impDirect = impObject ? elementPhrase(impObject, 'acc') : proObject;
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
-      const impComplements = complementsPhrase(rest, verb.forms);
+      const impComplements = [proPlace, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
@@ -71,8 +76,8 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
       const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
-      const infDirect = infObject ? elementPhrase(infObject, 'acc') : '';
-      const infComplements = complementsPhrase(rest, verb.forms);
+      const infDirect = infObject ? elementPhrase(infObject, 'acc') : proObject;
+      const infComplements = [proPlace, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
       return [neg.beforeAdverb, infModifier, dativeText, infDirect, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
         .filter(Boolean)
         .join(' ')
@@ -96,12 +101,12 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // NICHT im Begriff zu essen" (is NOT about to eat), never "ist im Begriff NICHT zu essen". The
     // progressive's "gerade" takes it after instead ("isst gerade nicht").
     const { nicht: neg, directObject: objectToRender } = finiteNegation(verbPhrase, directObject, hasPredicative);
-    const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : '';
+    const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : proObject;
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
     // main verb's adverb: "er will nie immer gehen" (never wants to always go).
     const modalAdverbsText = modalAdverbs(verbPhrase.modals);
-    const complementsText = complementsPhrase(rest, verb.forms);
+    const complementsText = [proPlace, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
     // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
     // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
     // non-finite tail — "der Kater essen würde" — mirroring `subordinateClause`. It is used for the

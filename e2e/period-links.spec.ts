@@ -40,7 +40,7 @@ test.describe('period links', () => {
       de: 'der Hund läuft, aber der Kater isst.',
       es: 'el perro corre, pero el gato come.',
       pt: 'o cão corre, mas o gato come.',
-      ja: '犬は走ります、しかし猫は食べます。',
+      ja: '犬は走ります。しかし、猫は食べます。',
     });
     await expect(app.sentences('en')).toHaveCount(1);
 

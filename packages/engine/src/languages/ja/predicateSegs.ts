@@ -1,7 +1,7 @@
 import type { ComplementType } from '@signi/shared';
 import { groupHasNegativeAdverb, hasNegativeComplement, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase, type RubySegment } from '../../types.js';
 import type { JaIPN } from './ja.types.js';
-import { JA_ARU, JA_IRU } from './ja.consts.js';
+import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';
 import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
@@ -33,12 +33,16 @@ export function predicateSegs(
   // Whether the subject is animate (a person or an animal); picks いる over ある for a located subject.
   animateSubject = false,
 ): RubySegment[] {
-  // BE with a locative and no predicative states where the subject is: Japanese uses the existential
-  // verb, いる for an animate subject and ある for an inanimate one, and marks the place with に
-  // (猫は家にいます, 本は家にあります). The existential is a real verb, so the plain, modal, command
-  // and たら paths below compose on it. Being somewhere is a state, so a periphrastic aspect has
-  // nothing to add, except the resultative, which reads as the past (家にいました).
-  const existential = givenVerbPhrase.verb.forms['copula'] === '1' && !complements?.['predicative'] && !!complements?.['locative'];
+  // The subject complement of the copula. An elided one is spoken as the pro-form そう (A121: 犬は
+  // そうではありません); an elided locative has no pro-form, and leaves the existential below (犬はいません).
+  const predicative = complements?.['predicative']
+    ?? (givenVerbPhrase.elided?.type === 'predicative' ? JA_SOU : undefined);
+  // BE with no predicative states that the subject exists, or where it is: Japanese uses the
+  // existential verb, いる for an animate subject and ある for an inanimate one, and marks any place
+  // with に (猫はいます, 猫は家にいます, 本は家にあります). The existential is a real verb, so the plain,
+  // modal, command and たら paths below compose on it. Being somewhere is a state, so a periphrastic
+  // aspect has nothing to add, except the resultative, which reads as the past (家にいました).
+  const existential = givenVerbPhrase.verb.forms['copula'] === '1' && !predicative;
   const verbPhrase: ResolvedVerbPhrase = existential
     ? {
         ...givenVerbPhrase,
@@ -63,7 +67,6 @@ export function predicateSegs(
   // The copula (BE) has no verb of its own — the predicate carries the inflected です. It is
   // intransitive, so no object occurs; its adjuncts (locative, cause) and an adverb (いつも)
   // precede the predicate, as they precede an ordinary verb.
-  const predicative = complements?.['predicative'];
   // Imperative: a subjectless command (SOV — objects/complements first, verb last). The copula
   // command is built on なる, "be / become X": 伝説になってください, 大きくなりましょう. する would be
   // causative ("make it X"). なる's nai-form is fixed, so the 2nd-person negative stays polite
@@ -74,7 +77,8 @@ export function predicateSegs(
       const naru = pn === '1pl'
         ? (negated ? 'なるのはやめましょう' : 'なりましょう')
         : (negated ? 'ならないでください' : 'なってください');
-      segs.push(...complementSegs({ predicative }), { t: naru });
+      // The pro-form そう is adverbial and takes no に: そうなってください.
+      segs.push(...(predicative === JA_SOU ? [{ t: 'そう' }] : complementSegs({ predicative })), { t: naru });
       return segs;
     }
     segs.push(...complementSegs(complements, existential));

@@ -34,3 +34,19 @@ plain-negative gap is in the verbs; the copula's plain negative already renders 
 | | |
 |---|---|
 | **Test** | `copulaWithoutComplement.test.ts` → *known bugs: Japanese relative on the subject complement of BE* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 as the shape of the fix proposed.
+
+- **Engine:** [`npSegs.ts`](../../../packages/engine/src/languages/ja/npSegs.ts) gives a relative whose
+  `headRole` is `predicative` and whose verb is the copula the pro-form `JA_SOU`
+  ([`ja.consts.ts`](../../../packages/engine/src/languages/ja/ja.consts.ts)) as its predicative. That
+  happens before A120's existential gate, so `predicateSegs` renders the copula path in the relative's
+  plain form: `犬がそうではない伝説`, `犬がそうである猫`. A121 reuses the same constant.
+- **Tests:** [`copulaWithoutComplement.test.ts`](../../../packages/engine/test/copulaWithoutComplement.test.ts)
+  → *known bugs: Japanese relative on the subject complement of BE*. The pinning `test.fails` is now a
+  passing `test`. New cases cover the past (`そうだった`), the past negative (`そうではなかった`) and a
+  relative with a locative of its own (`犬が家でそうではない伝説`). A regression guard keeps BECOME on the
+  gap (`男の子がなる男`) and the other languages' relative pronoun.
+- Unit tests: `npSegs.test.ts`.
