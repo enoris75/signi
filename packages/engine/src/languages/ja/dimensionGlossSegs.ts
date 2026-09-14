@@ -1,5 +1,5 @@
 import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { JA_DEGREE } from './ja.consts.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { wordSeg } from './wordSeg.js';

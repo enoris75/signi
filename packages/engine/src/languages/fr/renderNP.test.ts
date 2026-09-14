@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
+import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import {
   AILE, ANGE, ANIMAL, BEAU, BON, CHAT, CHIEN, concept, CREATEUR, type Forms, FORT, GRAND, HEUREUX, HOMME, INTERESSANT, LIVRE, MAISON,
   MANGER, nounModifier, np, PERE, PETIT, PHRASE, SEMANTIQUE, SOURIS, TRISTE, VIEUX, vp,

@@ -1,5 +1,5 @@
 import type { ConceptForms } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { IT_DEGREE } from './it.consts.js';
 
 /** Prefix an adjective's degree adverb onto its already-agreed surface ("più grande"). */

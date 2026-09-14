@@ -1,6 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
-import { firstConjunct } from '../../resolved/firstConjunct.js';
-import { isPronounElement } from '../../resolved/isPronounElement.js';
+import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isPronounElement } from '../../functions/isPronounElement.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';

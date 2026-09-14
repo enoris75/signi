@@ -1,5 +1,5 @@
 import type { ConceptForms } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { EN_DEGREE, EN_IRREGULAR } from './en.consts.js';
 import { inflect } from './inflect.js';
 import { inflects } from './inflects.js';

@@ -1,5 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
+import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { artFor } from './artFor.js';
 import { renderNP } from './renderNP.js';
 

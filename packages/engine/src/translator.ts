@@ -1,6 +1,6 @@
 import type { ComplementType, CoordConjunction, Definiteness, ImperativeRegister, LexicalEntry, NounElement, NounPhrase, PhrasePlan, RelativeClause, Translation, VerbPhrase } from '@signi/shared';
 import { canCoordinateImperative, defaultDefiniteness, isNounGroup, isPronominalPossessor, nounConjuncts } from '@signi/shared';
-import { mannerRelation } from './resolved/mannerRelation.js';
+import { mannerRelation } from './functions/mannerRelation.js';
 import type { ElidedComplement, LanguageEngine, Mood, ResolvedPhrase, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedRelativeClause, ResolvedVerbPhrase, ConceptForms } from './types.js';
 import { englishEngine } from './languages/en/index.js';
 import { italianEngine } from './languages/it/index.js';

@@ -1,6 +1,6 @@
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
+import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { isPlural } from './isPlural.js';
 
 /**

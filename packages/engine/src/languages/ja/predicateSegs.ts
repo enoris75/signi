@@ -1,7 +1,7 @@
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase, RubySegment } from '../../types.js';
-import { groupHasNegativeAdverb } from '../../resolved/groupHasNegativeAdverb.js';
-import { hasNegativeComplement } from '../../resolved/hasNegativeComplement.js';
+import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import type { JaIPN } from './ja.types.js';
 import { JA_ARU, JA_IRU, JA_SOU } from './ja.consts.js';
 import { aspectVerbSegs } from './aspectVerbSegs.js';

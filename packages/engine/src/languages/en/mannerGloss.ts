@@ -1,5 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
-import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { mannerRelation } from '../../functions/mannerRelation.js';
 import { MANNER_PREP } from './en.consts.js';
 import { subjectText } from './subjectText.js';
 

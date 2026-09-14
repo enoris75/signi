@@ -1,6 +1,6 @@
 import type { ResolvedNounElement, RubySegment } from '../../types.js';
-import { firstConjunct } from '../../resolved/firstConjunct.js';
-import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { firstConjunct } from '../../functions/firstConjunct.js';
+import { mannerRelation } from '../../functions/mannerRelation.js';
 import { JA_NEGATIVE_DETERMINER } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';

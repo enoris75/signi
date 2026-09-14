@@ -1,5 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import type { EsAdjectives } from './es.types.js';
 import { PRENOMINAL } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';

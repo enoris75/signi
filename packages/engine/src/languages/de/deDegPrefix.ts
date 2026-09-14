@@ -1,5 +1,5 @@
 import type { ConceptForms } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 
 /** Invariant adverb placed before the declined adjective for the periphrastic degrees. */
 export function deDegPrefix(a: ConceptForms): string {

@@ -1,11 +1,11 @@
 import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
-import { firstConjunct } from '../../resolved/firstConjunct.js';
-import { groupHasNegativeAdverb } from '../../resolved/groupHasNegativeAdverb.js';
-import { hasNegativeComplement } from '../../resolved/hasNegativeComplement.js';
-import { isPronounElement } from '../../resolved/isPronounElement.js';
-import { modalChain } from '../../resolved/modalChain.js';
-import { objectPronounForm } from '../../resolved/objectPronounForm.js';
+import { firstConjunct } from '../../functions/firstConjunct.js';
+import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
+import { isPronounElement } from '../../functions/isPronounElement.js';
+import { modalChain } from '../../functions/modalChain.js';
+import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
 import { aspectVerb } from './aspectVerb.js';

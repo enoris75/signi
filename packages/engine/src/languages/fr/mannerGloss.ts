@@ -1,5 +1,5 @@
 import type { ResolvedNounElement } from '../../types.js';
-import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
+import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { coordinate } from './coordinate.js';
 import { frMannerHead } from './frMannerHead.js';
 import { renderNP } from './renderNP.js';

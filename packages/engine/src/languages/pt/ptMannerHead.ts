@@ -1,4 +1,4 @@
-import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { mannerRelation } from '../../functions/mannerRelation.js';
 import { contractDet } from './contractDet.js';
 import { datPrep } from './datPrep.js';
 import { dePrep } from './dePrep.js';

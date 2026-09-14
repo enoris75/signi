@@ -1,5 +1,5 @@
 import type { ConceptForms, ResolvedComplement } from '../../../types.js';
-import { causeSentiment } from '../../../resolved/causeSentiment.js';
+import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { possessiveDe, pronounPossessor } from '../../../possessive.js';
 import { coordinate } from '../coordinate.js';
 import { nounPhrase } from '../nounPhrase.js';

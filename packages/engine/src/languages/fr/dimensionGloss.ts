@@ -1,5 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
-import { dimensionRelation } from '../../resolved/dimensionRelation.js';
+import { dimensionRelation } from '../../functions/dimensionRelation.js';
 import { FR_DIM_PREP } from './fr.consts.js';
 import { elidesBefore } from './elidesBefore.js';
 import { joinArt } from './joinArt.js';

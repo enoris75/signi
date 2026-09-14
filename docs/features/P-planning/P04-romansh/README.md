@@ -128,7 +128,7 @@ fr (47 / 1,464). There is no single sibling to copy, so each piece names its mod
 
   No gerund form is needed anywhere.
 - **Modals:** *stuair* (MUST), *pudair* (CAN), *vulair* (WILL). Inner modals are infinitives: *el vul
-  pudair ir*. Served by `modalChain` (`engine/src/resolved/modalChain.ts`), with no `link` word.
+  pudair ir*. Served by `modalChain` (`engine/src/functions/modalChain.ts`), with no `link` word.
 - **Copula:** a single *esser* with an agreeing predicate adjective (*la giatta è stanchela* *(verify
   word)*). No ser/estar split.
 - **Pronominal verbs:** BECOME is *daventar*, a plain intransitive verb *(verify)*. It avoids the

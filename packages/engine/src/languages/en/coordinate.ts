@@ -1,5 +1,5 @@
 import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
-import { joinConjuncts } from '../../resolved/joinConjuncts.js';
+import { joinConjuncts } from '../../functions/joinConjuncts.js';
 import { COORD_WORDS } from './en.consts.js';
 
 /**

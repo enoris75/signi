@@ -1,6 +1,6 @@
 import type { ResolvedComplement } from '../../../types.js';
-import { abstractionLevel } from '../../../resolved/abstractionLevel.js';
-import { actionInfinitive } from '../../../resolved/actionInfinitive.js';
+import { abstractionLevel } from '../../../functions/abstractionLevel.js';
+import { actionInfinitive } from '../../../functions/actionInfinitive.js';
 import { coordinate } from '../coordinate.js';
 import { declineAdj } from '../declineAdj.js';
 import { nounPhrase } from '../nounPhrase.js';

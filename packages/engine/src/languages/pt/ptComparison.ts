@@ -1,5 +1,5 @@
 import type { ConceptForms } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { PT_SUPPLETIVE } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { ptDeg } from './ptDeg.js';

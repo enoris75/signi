@@ -1,5 +1,5 @@
 import type { ConceptForms } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
+import { adjDegree } from '../../functions/adjDegree.js';
 import { deComparative } from './deComparative.js';
 import { deDegPrefix } from './deDegPrefix.js';
 import { deStem } from './deStem.js';

@@ -1,6 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
-import { adjDegree } from '../../resolved/adjDegree.js';
-import { isRelativeSuperlative } from '../../resolved/isRelativeSuperlative.js';
+import { adjDegree } from '../../functions/adjDegree.js';
+import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { PRENOMINAL } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 

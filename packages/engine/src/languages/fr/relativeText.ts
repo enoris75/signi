@@ -1,5 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
-import { relativeGapComplement } from '../../resolved/relativeGapComplement.js';
+import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { VOWEL_START } from './fr.consts.js';
 import { joinArt } from './joinArt.js';

@@ -205,7 +205,7 @@ the elision helpers from **it** and **fr**. Language folders never import one an
 - **Modals:**
   - *haver de* (MUST, with `link: 'de'`), *poder* (CAN), *voler* (WILL).
   - Inner modals are infinitives: *vol poder anar*.
-  - The chain is served by `modalChain` in `engine/src/resolved/modalChain.ts`.
+  - The chain is served by `modalChain` in `engine/src/functions/modalChain.ts`.
 - **Copula BE:** *ser* vs *estar*, following the es engine's rule for predicate adjectives.
 - **Pronominal verbs:** BECOME is *tornar-se*, which needs the reflexive clitic.
   - Proclitic *es / s'*: *es torna feliç*. Enclitic *-se* after an infinitive: *tornar-se*.

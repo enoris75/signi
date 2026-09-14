@@ -1,6 +1,6 @@
 import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement } from '../../types.js';
-import { abstractionLevel } from '../../resolved/abstractionLevel.js';
+import { abstractionLevel } from '../../functions/abstractionLevel.js';
 
 /**
  * A `process` instrumental is not a phrase but a subordinate means clause ("indem man ein Wort
