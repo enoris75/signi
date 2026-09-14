@@ -1,4 +1,5 @@
 import type { ConceptSeed } from '../types.js';
+import { infinitiveGloss } from './gloss.js';
 
 // Ditransitive verbs (license a recipient/theme). The recipient is the `terminus` complement
 // — the dative "to whom" — which these verbs declare like any other complement-taking verb.
@@ -9,6 +10,11 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to hand something to someone',
+    definition: infinitiveGloss('TRANSFER', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
+    }),
     emoji: '🎁',
     forms: {
       en: {
@@ -64,6 +70,78 @@ export const ditransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'demos', '2pl_past': 'deram', '3pl_past': 'deram',
         '1sg_future': 'darei', '2sg_future': 'dará', '3sg_future': 'dará',
         '1pl_future': 'daremos', '2pl_future': 'darão', '3pl_future': 'darão',
+      },
+    },
+  },
+
+  {
+    // The genus of GIVE and SEND (B15) and of EXPORT and IMPORT (B19) — the verb of moving something
+    // from one holder or place to another that their dictionary definitions cite as their genus. Besides GIVE's recipient (`terminus`) it licenses the place it moves from and to
+    // (`source` / `direction`). English doubles its r (transferred / transferring), Italian
+    // trasferire takes the -isc- infix, Spanish transferir diphthongs and raises its stem
+    // (transfiere / transfirió), and German takes the strong, inseparable übertragen (überträgt /
+    // übertrug / übertragen, no ge-). Japanese takes 移す ("move to another place").
+    id: 'TRANSFER',
+    role: 'verb',
+    transitivity: 'ditransitive',
+    complements: ['manner', 'terminus', 'source', 'direction', 'cause'],
+    description: 'to move from one holder or place to another',
+    emoji: '🔁',
+    forms: {
+      en: {
+        base: 'transfer',
+        '1sg_present': 'transfer', '2sg_present': 'transfer', '3sg_present': 'transfers',
+        '1pl_present': 'transfer', '2pl_present': 'transfer', '3pl_present': 'transfer',
+        past: 'transferred',
+      },
+      it: {
+        base: 'trasferire',
+        '1sg_present': 'trasferisco', '2sg_present': 'trasferisci', '3sg_present': 'trasferisce',
+        '1pl_present': 'trasferiamo', '2pl_present': 'trasferite', '3pl_present': 'trasferiscono',
+        '1sg_past': 'trasferii', '2sg_past': 'trasferisti', '3sg_past': 'trasferì',
+        '1pl_past': 'trasferimmo', '2pl_past': 'trasferiste', '3pl_past': 'trasferirono',
+        '1sg_future': 'trasferirò', '2sg_future': 'trasferirai', '3sg_future': 'trasferirà',
+        '1pl_future': 'trasferiremo', '2pl_future': 'trasferirete', '3pl_future': 'trasferiranno',
+      },
+      fr: {
+        base: 'transférer',
+        '1sg_present': 'transfère', '2sg_present': 'transfères', '3sg_present': 'transfère',
+        '1pl_present': 'transférons', '2pl_present': 'transférez', '3pl_present': 'transfèrent',
+        '1sg_past': 'transférai', '2sg_past': 'transféras', '3sg_past': 'transféra',
+        '1pl_past': 'transférâmes', '2pl_past': 'transférâtes', '3pl_past': 'transférèrent',
+        '1sg_future': 'transférerai', '2sg_future': 'transféreras', '3sg_future': 'transférera',
+        '1pl_future': 'transférerons', '2pl_future': 'transférerez', '3pl_future': 'transféreront',
+      },
+      de: {
+        base: 'übertragen',
+        '1sg_present': 'übertrage', '2sg_present': 'überträgst', '3sg_present': 'überträgt',
+        '1pl_present': 'übertragen', '2pl_present': 'übertragt', '3pl_present': 'übertragen',
+        '1sg_past': 'übertrug', '2sg_past': 'übertrugst', '3sg_past': 'übertrug',
+        '1pl_past': 'übertrugen', '2pl_past': 'übertrugt', '3pl_past': 'übertrugen',
+      },
+      es: {
+        base: 'transferir',
+        '1sg_present': 'transfiero', '2sg_present': 'transfieres', '3sg_present': 'transfiere',
+        '1pl_present': 'transferimos', '2pl_present': 'transferís', '3pl_present': 'transfieren',
+        '1sg_past': 'transferí', '2sg_past': 'transferiste', '3sg_past': 'transfirió',
+        '1pl_past': 'transferimos', '2pl_past': 'transferisteis', '3pl_past': 'transfirieron',
+        '1sg_future': 'transferiré', '2sg_future': 'transferirás', '3sg_future': 'transferirá',
+        '1pl_future': 'transferiremos', '2pl_future': 'transferiréis', '3pl_future': 'transferirán',
+      },
+      ja: {
+        base: '移す',
+        reading: 'うつす',
+        masu_present: '移します',
+        masu_present_reading: 'うつします',
+      },
+      pt: {
+        base: 'transferir',
+        '1sg_present': 'transfiro', '2sg_present': 'transfere', '3sg_present': 'transfere',
+        '1pl_present': 'transferimos', '2pl_present': 'transferem', '3pl_present': 'transferem',
+        '1sg_past': 'transferi', '2sg_past': 'transferiu', '3sg_past': 'transferiu',
+        '1pl_past': 'transferimos', '2pl_past': 'transferiram', '3pl_past': 'transferiram',
+        '1sg_future': 'transferirei', '2sg_future': 'transferirá', '3sg_future': 'transferirá',
+        '1pl_future': 'transferiremos', '2pl_future': 'transferirão', '3pl_future': 'transferirão',
       },
     },
   },
@@ -140,6 +218,11 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to dispatch something to someone',
+    definition: infinitiveGloss('TRANSFER', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+    }),
     emoji: '📨',
     forms: {
       en: {

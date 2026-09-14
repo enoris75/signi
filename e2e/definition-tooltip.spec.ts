@@ -215,6 +215,49 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('geschriebene Wörter verstehen');
   });
 
+  // The verb glosses of localize-seed B12–B19, each in English and in one other language, the
+  // languages spread across the batch. Besides the plain genus + object shape, they cover a gloss
+  // whose differentia is a complement (BUY's instrument, GIVE's recipient, SEND's goal, IMPORT's
+  // source), an adverb (BEAT) and an object under a determiner (CHOOSE, CLICK).
+  for (const [id, query, en, language, other] of [
+    ['OWN', 'own', 'to have property', 'it', 'avere proprietà'],
+    ['HOLD', 'hold', 'to have objects', 'fr', 'avoir objets'],
+    ['BUY', 'buy', 'to acquire objects with money', 'de', 'Gegenstände mit Geld erwerben'],
+    ['CUT', 'cut', 'to divide with a sharp blade', 'es', 'dividir con una cuchilla afilada'],
+    ['BITE', 'bite', 'to cut with the teeth', 'ja', '歯で切る'],
+    ['BEAT', 'beat', 'to strike repeatedly', 'pt', 'golpear repetidamente'],
+    ['GIVE', 'give', 'to transfer objects to a person', 'de', 'einer Person Gegenstände übertragen'],
+    ['SEND', 'send', 'to transfer objects to a place', 'it', 'trasferire oggetti a un luogo'],
+    ['NAME', 'name', 'to indicate objects with words', 'ja', '単語で物体を示す'],
+    ['DESCRIBE', 'describe', 'to indicate qualities', 'fr', 'indiquer qualités'],
+    ['EXPRESS', 'express', 'to indicate concepts', 'es', 'indicar conceptos'],
+    ['MODIFY', 'modify', 'to change qualities', 'de', 'Qualitäten ändern'],
+    ['LOVE', 'love', 'to feel affection', 'it', 'provare affetto'],
+    ['CRY', 'cry', 'to shed tears', 'de', 'Tränen vergießen'],
+    ['CRY_OUT', 'cry', 'to produce loud sounds', 'fr', 'produire sons forts'],
+    ['CHOOSE', 'choose', 'to indicate an option', 'it', "indicare un'opzione"],
+    ['CLICK', 'click', 'to press a button', 'es', 'pulsar un botón'],
+    ['TYPE', 'type', 'to write with a keyboard', 'ja', 'キーボードで書く'],
+    ['EXPORT', 'export', 'to transfer content to a place', 'pt', 'transferir conteúdo a um lugar'],
+    ['IMPORT', 'import', 'to transfer content from a place', 'de', 'Inhalt aus einem Ort übertragen'],
+  ] as const) {
+    test(`a verb definition renders (localize-seed B12–B19: ${id})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,

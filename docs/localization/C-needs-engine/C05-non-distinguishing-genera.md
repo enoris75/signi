@@ -16,5 +16,10 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
 - **Grammar meta-nouns** without a differentia — GENDER, NUMBER_GRAMMAR, PERSON_GRAMMAR, CASE,
   ARTICLE, DEMONSTRATIVE, QUANTIFIER, DETERMINER, etc. Some may become feasible via B06's verbs;
   those move to B. The rest stay here.
+- **Verbs whose composable gloss would duplicate a sibling's**, 2026-09-14:
+  - **SELECT** would read the same as CHOOSE's "to indicate an option"
+    ([B18](../done/B18-selection-verbs.md)).
+  - **REPLACE** ("to take the place of") fits neither CHANGE nor INDICATE, and every shape tried read
+    like MODIFY or NAME ([B16](../done/B16-word-verbs.md)).
 
 This file is the record that the omission is **intentional**, not an oversight.

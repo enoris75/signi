@@ -186,6 +186,23 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What is heard, as LIGHT is what is seen. German Geräusch (neuter) is a sound or noise in
+    // general; Klang would be a musical tone and Laut a speech sound.
+    id: 'SOUND',
+    role: 'noun',
+    description: 'something that can be heard',
+    emoji: '🔊',
+    forms: {
+      en: { base: 'sound', plural: 'sounds', count: 'singular' },
+      it: { base: 'suono', plural: 'suoni', gender: 'masc', count: 'singular' },
+      fr: { base: 'son', plural: 'sons', gender: 'masc', count: 'singular' },
+      de: { base: 'Geräusch', plural: 'Geräusche', gender: 'neut', count: 'singular' },
+      es: { base: 'sonido', plural: 'sonidos', gender: 'masc', count: 'singular' },
+      ja: { base: '音', count: 'singular', reading: 'おと' },
+      pt: { base: 'som', plural: 'sons', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A mode: a manner adverbial headed by WAY reads "in a … way" — it "in modo", de "auf …
     // Weise", Romance "de … manière/manera/maneira". Motivating phrase: "in a good way".
     id: 'WAY',
@@ -419,6 +436,23 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'contenido', plural: 'contenidos', gender: 'masc', count: 'singular' },
       ja: { base: '内容', count: 'singular', reading: 'ないよう' },
       pt: { base: 'conteúdo', plural: 'conteúdos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A location in general, not a dwelling (HOUSE / HOME) or a named one (MARKET). French "lieu"
+    // pluralises in -x; Italian "luogo" keeps its hard g (luoghi).
+    id: 'PLACE',
+    role: 'noun',
+    description: 'a location; a particular part of space',
+    emoji: '📍',
+    forms: {
+      en: { base: 'place', plural: 'places', count: 'singular' },
+      it: { base: 'luogo', plural: 'luoghi', gender: 'masc', count: 'singular' },
+      fr: { base: 'lieu', plural: 'lieux', gender: 'masc', count: 'singular' },
+      de: { base: 'Ort', plural: 'Orte', gender: 'masc', count: 'singular' },
+      es: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
+      ja: { base: '場所', count: 'singular', reading: 'ばしょ' },
+      pt: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -701,6 +735,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // A feeling of fondness. A mass noun, like CARE — uncountable, no plural. Vowel-initial in
+    // Italian and French, so the definite article elides (l'affetto / l'affection).
+    id: 'AFFECTION',
+    role: 'noun',
+    description: 'a warm feeling of fondness toward someone',
+    emoji: '🥰',
+    countable: false,
+    forms: {
+      en: { base: 'affection', count: 'singular' },
+      it: { base: 'affetto', gender: 'masc', count: 'singular' },
+      fr: { base: 'affection', gender: 'fem', count: 'singular' },
+      de: { base: 'Zuneigung', gender: 'fem', count: 'singular' },
+      es: { base: 'afecto', gender: 'masc', count: 'singular' },
+      ja: { base: '愛情', count: 'singular', reading: 'あいじょう' },
+      pt: { base: 'afeto', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'MOUSE',
     role: 'noun',
     description: 'a small rodent',
@@ -733,6 +785,23 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'palo', plural: 'palos', gender: 'masc', count: 'singular' },
       ja: { base: '棒', count: 'singular', reading: 'ぼう' },
       pt: { base: 'pau', plural: 'paus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The cutting part of a knife or tool, not the whole implement. Feminine across the gendered
+    // languages (lama / lame / Klinge / cuchilla / lâmina).
+    id: 'BLADE',
+    role: 'noun',
+    description: 'the flat cutting part of a knife or tool',
+    emoji: '🗡️',
+    forms: {
+      en: { base: 'blade', plural: 'blades', count: 'singular' },
+      it: { base: 'lama', plural: 'lame', gender: 'fem', count: 'singular' },
+      fr: { base: 'lame', plural: 'lames', gender: 'fem', count: 'singular' },
+      de: { base: 'Klinge', plural: 'Klingen', gender: 'fem', count: 'singular' },
+      es: { base: 'cuchilla', plural: 'cuchillas', gender: 'fem', count: 'singular' },
+      ja: { base: '刃', count: 'singular', reading: 'は' },
+      pt: { base: 'lâmina', plural: 'lâminas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -850,6 +919,40 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'ala', plural: 'alas', gender: 'fem', stressed_a: '1', count: 'singular' },
       ja: { base: '翼', count: 'singular', reading: 'つばさ' },
       pt: { base: 'asa', plural: 'asas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // English "teeth" and German "Zähne" are irregular plurals; French "dent" is feminine where the
+    // other Romance languages keep the Latin masculine (dente / diente).
+    id: 'TOOTH',
+    role: 'noun',
+    description: 'a hard structure in the mouth used for biting',
+    emoji: '🦷',
+    forms: {
+      en: { base: 'tooth', plural: 'teeth', count: 'singular' },
+      it: { base: 'dente', plural: 'denti', gender: 'masc', count: 'singular' },
+      fr: { base: 'dent', plural: 'dents', gender: 'fem', count: 'singular' },
+      de: { base: 'Zahn', plural: 'Zähne', gender: 'masc', count: 'singular' },
+      es: { base: 'diente', plural: 'dientes', gender: 'masc', count: 'singular' },
+      ja: { base: '歯', count: 'singular', reading: 'は' },
+      pt: { base: 'dente', plural: 'dentes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The drop from the eye, not a rip — the synonym disambiguates the English homograph.
+    id: 'TEAR',
+    role: 'noun',
+    description: 'a drop of liquid from the eye',
+    emoji: '🥲',
+    synonym: 'teardrop',
+    forms: {
+      en: { base: 'tear', plural: 'tears', count: 'singular' },
+      it: { base: 'lacrima', plural: 'lacrime', gender: 'fem', count: 'singular' },
+      fr: { base: 'larme', plural: 'larmes', gender: 'fem', count: 'singular' },
+      de: { base: 'Träne', plural: 'Tränen', gender: 'fem', count: 'singular' },
+      es: { base: 'lágrima', plural: 'lágrimas', gender: 'fem', count: 'singular' },
+      ja: { base: '涙', count: 'singular', reading: 'なみだ' },
+      pt: { base: 'lágrima', plural: 'lágrimas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -1884,6 +1987,56 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // One of the alternatives a choice is made between. Feminine in every gendered language.
+    id: 'OPTION',
+    role: 'noun',
+    description: 'one of several possibilities to choose from',
+    emoji: '☑️',
+    forms: {
+      en: { base: 'option', plural: 'options', count: 'singular' },
+      it: { base: 'opzione', plural: 'opzioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'option', plural: 'options', gender: 'fem', count: 'singular' },
+      de: { base: 'Option', plural: 'Optionen', gender: 'fem', count: 'singular' },
+      es: { base: 'opción', plural: 'opciones', gender: 'fem', count: 'singular' },
+      ja: { base: '選択肢', count: 'singular', reading: 'せんたくし' },
+      pt: { base: 'opção', plural: 'opções', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A control one presses, not a fastener on clothing: it "pulsante" (not "bottone"), de "Taste"
+    // (not "Knopf"). The katakana ボタン carries no separate reading, like FOX — a hiragana one would
+    // be furiganaed over the katakana (see the furigana known bug).
+    id: 'BUTTON',
+    role: 'noun',
+    description: 'a control that is pressed to operate something',
+    emoji: '🔘',
+    forms: {
+      en: { base: 'button', plural: 'buttons', count: 'singular' },
+      it: { base: 'pulsante', plural: 'pulsanti', gender: 'masc', count: 'singular' },
+      fr: { base: 'bouton', plural: 'boutons', gender: 'masc', count: 'singular' },
+      de: { base: 'Taste', plural: 'Tasten', gender: 'fem', count: 'singular' },
+      es: { base: 'botón', plural: 'botones', gender: 'masc', count: 'singular' },
+      ja: { base: 'ボタン', count: 'singular' },
+      pt: { base: 'botão', plural: 'botões', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The set of keys one types on. Katakana キーボード, with no separate reading (see BUTTON).
+    id: 'KEYBOARD',
+    role: 'noun',
+    description: 'a set of keys for typing',
+    emoji: '⌨️',
+    forms: {
+      en: { base: 'keyboard', plural: 'keyboards', count: 'singular' },
+      it: { base: 'tastiera', plural: 'tastiere', gender: 'fem', count: 'singular' },
+      fr: { base: 'clavier', plural: 'claviers', gender: 'masc', count: 'singular' },
+      de: { base: 'Tastatur', plural: 'Tastaturen', gender: 'fem', count: 'singular' },
+      es: { base: 'teclado', plural: 'teclados', gender: 'masc', count: 'singular' },
+      ja: { base: 'キーボード', count: 'singular' },
+      pt: { base: 'teclado', plural: 'teclados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'CAUSE',
     role: 'noun',
     description: 'that which makes something else happen',
@@ -1913,6 +2066,25 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'poseedor', plural: 'poseedores', gender: 'masc', count: 'singular', fem: 'poseedora', fem_plural: 'poseedoras' },
       ja: { base: '所有者', count: 'singular', reading: 'しょゆうしゃ' },
       pt: { base: 'possuidor', plural: 'possuidores', gender: 'masc', count: 'singular', fem: 'possuidora', fem_plural: 'possuidoras' },
+    },
+  },
+  {
+    // What a POSSESSOR holds, taken together — possessions, not a building or a trait. A mass noun
+    // like MONEY: uncountable, no plural. German Besitz (masc) is the collective holding.
+    id: 'PROPERTY',
+    role: 'noun',
+    description: 'things that someone owns',
+    emoji: '💼',
+    countable: false,
+    synonym: 'possessions',
+    forms: {
+      en: { base: 'property', count: 'singular' },
+      it: { base: 'proprietà', gender: 'fem', count: 'singular' },
+      fr: { base: 'propriété', gender: 'fem', count: 'singular' },
+      de: { base: 'Besitz', gender: 'masc', count: 'singular' },
+      es: { base: 'propiedad', gender: 'fem', count: 'singular' },
+      ja: { base: '財産', count: 'singular', reading: 'ざいさん' },
+      pt: { base: 'propriedade', gender: 'fem', count: 'singular' },
     },
   },
 

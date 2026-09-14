@@ -749,11 +749,11 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['DOMESTIC', 'domestic'], ['FEMALE', 'female'], ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
-  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['MALE', 'male'], ['MULTAL', 'multal'],
+  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MALE', 'male'], ['MULTAL', 'multal'],
   ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEW', 'new'], ['OLD', 'old'],
   ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'], ['PROXIMAL', 'proximal'],
   ['QUICK', 'quick'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
-  ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
+  ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
   ['STRONG', 'strong'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
   ['UNIVERSAL', 'universal'], ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
@@ -802,6 +802,97 @@ describe('adjective position: Italian', () => {
     expect(it('CASTRATED')).toBe('il gatto castrato mangia.'); // past participle, postnominal
     expect(it('ROUND')).toBe('il gatto rotondo mangia.');
     expect(it('WRITTEN')).toBe('il gatto scritto mangia.'); // past participle, agrees & postnominal
+    expect(it('SHARP')).toBe('il gatto affilato mangia.');
+    expect(it('LOUD')).toBe('il gatto forte mangia.');
+  });
+});
+
+// SHARP and LOUD, the differentia adjectives of a blade and a sound. Both are postnominal in
+// Romance and agree with a feminine or plural head; German umlauts SHARP in the comparative
+// (scharf → schärfer). SHARP is a sharpened state, so es/pt predicate it with estar; LOUD is an
+// inherent property and keeps ser.
+describe('adjective agreement: SHARP and LOUD', () => {
+  test('SHARP agrees with a feminine head, singular and plural', () => {
+    expect(sayAll(clause(np('BLADE', { definiteness: 'indefinite', adjectives: ['SHARP'] }), 'RUN'))).toEqual({
+      en: 'a sharp blade runs.',
+      it: 'una lama affilata corre.',
+      fr: 'une lame tranchante court.',
+      es: 'una cuchilla afilada corre.',
+      pt: 'uma lâmina afiada corre.',
+      de: 'eine scharfe Klinge läuft.',
+      ja: '鋭い刃は走ります。',
+    });
+    expect(sayAll(clause(np('BLADE', { number: 'plural', adjectives: ['SHARP'] }), 'RUN'))).toEqual({
+      en: 'the sharp blades run.',
+      it: 'le lame affilate corrono.',
+      fr: 'les lames tranchantes courent.',
+      es: 'las cuchillas afiladas corren.',
+      pt: 'as lâminas afiadas correm.',
+      de: 'die scharfen Klingen laufen.',
+      ja: '鋭い刃は走ります。',
+    });
+  });
+
+  test('SHARP follows the head\'s own gender: masculine teeth, but feminine "dents" in French', () => {
+    expect(sayAll(clause(np('TOOTH', { number: 'plural', adjectives: ['SHARP'] }), 'RUN'))).toEqual({
+      en: 'the sharp teeth run.',
+      it: 'i denti affilati corrono.',
+      fr: 'les dents tranchantes courent.',
+      es: 'los dientes afilados corren.',
+      pt: 'os dentes afiados correm.',
+      de: 'die scharfen Zähne laufen.',
+      ja: '鋭い歯は走ります。',
+    });
+  });
+
+  test('German umlauts SHARP in the comparative', () => {
+    expect(sayAll(clause(np('BLADE', { adjectives: ['SHARP'], adjectiveDegrees: ['more'] }), 'RUN'))).toMatchObject({
+      en: 'the sharper blade runs.',
+      de: 'die schärfere Klinge läuft.',
+      it: 'la lama più affilata corre.',
+    });
+  });
+
+  test('LOUD agrees with a masculine plural and a feminine plural head', () => {
+    expect(sayAll(clause(np('SOUND', { number: 'plural', definiteness: 'indefinite', adjectives: ['LOUD'] }), 'RUN'))).toEqual({
+      en: 'loud sounds run.',
+      it: 'suoni forti corrono.',
+      fr: 'des sons forts courent.',
+      es: 'unos sonidos fuertes corren.',
+      pt: 'uns sons altos correm.',
+      de: 'laute Geräusche laufen.',
+      ja: '大きい音は走ります。',
+    });
+    expect(sayAll(clause(np('TEAR', { number: 'plural', adjectives: ['LOUD'] }), 'RUN'))).toMatchObject({
+      it: 'le lacrime forti corrono.',
+      fr: 'les larmes fortes courent.',
+      es: 'las lágrimas fuertes corren.',
+      pt: 'as lágrimas altas correm.',
+      de: 'die lauten Tränen laufen.',
+    });
+  });
+
+  test('predicatively, SHARP takes estar and LOUD keeps ser', () => {
+    const isThat = (subject: NounPhrase, adjective: string) =>
+      sayAll(clause(subject, 'BE', { complements: { predicative: { phrase: np(adjective) } } }));
+    expect(isThat(np('BLADE'), 'SHARP')).toEqual({
+      en: 'the blade is sharp.',
+      it: 'la lama è affilata.',
+      fr: 'la lame est tranchante.',
+      es: 'la cuchilla está afilada.',
+      pt: 'a lâmina está afiada.',
+      de: 'die Klinge ist scharf.',
+      ja: '刃は鋭いです。',
+    });
+    expect(isThat(np('SOUND', { number: 'plural' }), 'LOUD')).toEqual({
+      en: 'the sounds are loud.',
+      it: 'i suoni sono forti.',
+      fr: 'les sons sont forts.',
+      es: 'los sonidos son fuertes.',
+      pt: 'os sons são altos.',
+      de: 'die Geräusche sind laut.',
+      ja: '音は大きいです。',
+    });
   });
 });
 

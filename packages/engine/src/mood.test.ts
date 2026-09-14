@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { imperativeForm } from './mood.js';
+import { imperativeForm, moodForm } from './mood.js';
 
 const verb = (conceptId: string, forms: Record<string, string>) => ({ conceptId, forms });
 const MORDER = verb('BITE', { base: 'morder', '1sg_present': 'muerdo', '3sg_present': 'muerde', '1pl_present': 'mordemos' });
@@ -34,6 +34,24 @@ describe('imperativeForm (es)', () => {
     expect(imperativeForm('es', DAR, '2sg', true)).toBe('des');
   });
 
+  test('HAVE (tener) takes the short tú command ten; its other persons are regular', () => {
+    const TENER = verb('HAVE', { base: 'tener', '1sg_present': 'tengo', '3sg_present': 'tiene', '1pl_present': 'tenemos' });
+    expect(imperativeForm('es', TENER, '2sg', false)).toBe('ten');
+    expect(imperativeForm('es', TENER, '1pl', false)).toBe('tengamos');
+    expect(imperativeForm('es', TENER, '2pl', false)).toBe('tened');
+    expect(imperativeForm('es', TENER, '2sg', true)).toBe('tengas');
+  });
+
+  test('an -ir verb that diphthongs under stress raises to i in the 1st and 2nd plural', () => {
+    const SENTIR = verb('FEEL', { base: 'sentir', '1sg_present': 'siento', '3sg_present': 'siente', '1pl_present': 'sentimos' });
+    const ADQUIRIR = verb('ACQUIRE', { base: 'adquirir', '1sg_present': 'adquiero', '3sg_present': 'adquiere', '1pl_present': 'adquirimos' });
+    const TRANSFERIR = verb('TRANSFER', { base: 'transferir', '1sg_present': 'transfiero', '3sg_present': 'transfiere', '1pl_present': 'transferimos' });
+    expect(imperativeForm('es', SENTIR, '2sg', true)).toBe('sientas');
+    expect(imperativeForm('es', SENTIR, '1pl', false)).toBe('sintamos');
+    expect(imperativeForm('es', ADQUIRIR, '2pl', true)).toBe('adquiráis');
+    expect(imperativeForm('es', TRANSFERIR, '1pl', false)).toBe('transfiramos');
+  });
+
   test('Portuguese keeps the 1sg stem', () => {
     const MORDER_PT = verb('BITE', { base: 'morder', '1sg_present': 'mordo', '1pl_present': 'mordemos' });
     expect(imperativeForm('pt', MORDER_PT, '1pl', false)).toBe('mordamos');
@@ -63,5 +81,22 @@ describe('imperativeForm (pt)', () => {
     expect(imperativeForm('pt', NOMEAR, '2sg', false)).toBe('nomeie');
     expect(imperativeForm('pt', NOMEAR, '1pl', false)).toBe('nomeemos');
     expect(imperativeForm('pt', NOMEAR, '2pl', false)).toBe('nomeiem');
+  });
+});
+
+describe('imperativeForm (it) and moodForm (it): irregular stems', () => {
+  test('HAVE (avere) takes the subjunctive-based abbi / abbiamo / abbiate', () => {
+    const AVERE = verb('HAVE', { base: 'avere', '2sg_present': 'hai', '1pl_present': 'abbiamo', '2pl_present': 'avete' });
+    expect(imperativeForm('it', AVERE, '2sg', false)).toBe('abbi');
+    expect(imperativeForm('it', AVERE, '2pl', false)).toBe('abbiate');
+    expect(imperativeForm('it', AVERE, '2pl', true)).toBe('abbiate');
+    expect(imperativeForm('it', AVERE, '2sg', true)).toBe('avere'); // negative tu → infinitive
+  });
+
+  test('PRODUCE (produrre) builds its imperfect subjunctive on produc-, its conditional on produrr-', () => {
+    const PRODURRE = verb('PRODUCE', { base: 'produrre', '1sg_future': 'produrrò' });
+    expect(moodForm('it', PRODURRE, '3sg', 'subjunctive')).toBe('producesse');
+    expect(moodForm('it', PRODURRE, '1pl', 'subjunctive')).toBe('producessimo');
+    expect(moodForm('it', PRODURRE, '3sg', 'conditional')).toBe('produrrebbe');
   });
 });

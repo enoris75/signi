@@ -21,8 +21,8 @@ const bare = (id: string): string[] => furigana({ subject: np(id) } as PhrasePla
 
 // Pure-kanji nouns: the whole surface is kanji, so the reading annotates it exactly.
 const KANJI_NOUNS: [id: string, reading: string][] = [
-  ['ADJECTIVE', 'けいようし'], ['ADVERB', 'ふくし'], ['ANGEL', 'てんし'], ['ANIMAL', 'どうぶつ'],
-  ['ANTARCTICA', 'なんきょくたいりく'], ['ARTICLE', 'かんし'], ['BOOK', 'ほん'], ['BUILDER', 'けんちくしゃ'],
+  ['ADJECTIVE', 'けいようし'], ['ADVERB', 'ふくし'], ['AFFECTION', 'あいじょう'], ['ANGEL', 'てんし'], ['ANIMAL', 'どうぶつ'],
+  ['ANTARCTICA', 'なんきょくたいりく'], ['ARTICLE', 'かんし'], ['BLADE', 'は'], ['BOOK', 'ほん'], ['BUILDER', 'けんちくしゃ'],
   ['BUTCHER', 'にくや'], ['CAT', 'ねこ'], ['CAUSE', 'げんいん'], ['CHILD', 'こども'], ['COIN', 'こうか'],
   ['COMMAND', 'めいれい'], ['CONCEPT', 'がいねん'], ['CONTAINER', 'ようき'], ['CONTINENT', 'たいりく'],
   ['COW', 'うし'], ['CREATOR', 'そうぞうしゃ'], ['DEATH', 'し'], ['DEMONSTRATIVE', 'しじし'],
@@ -31,13 +31,13 @@ const KANJI_NOUNS: [id: string, reading: string][] = [
   ['INSTRUMENTAL', 'しゅだんご'], ['JAPANESE', 'にほんご'], ['LANGUAGE', 'げんご'], ['LEGEND', 'でんせつ'],
   ['MAMMAL', 'ほにゅうるい'], ['MAN', 'おとこ'], ['MAP', 'ちず'], ['MARKET', 'いちば'],
   ['NORTH_AMERICA', 'ほくべい'], ['NOUN', 'めいし'], ['NUMBER', 'かず'], ['NUMBER_GRAMMAR', 'すう'],
-  ['OBJECT_GRAMMAR', 'もくてきご'], ['OBJECT_THING', 'ぶったい'], ['ORDER', 'めいれい'], ['OX', 'おうし'],
+  ['OBJECT_GRAMMAR', 'もくてきご'], ['OBJECT_THING', 'ぶったい'], ['OPTION', 'せんたくし'], ['ORDER', 'めいれい'], ['OX', 'おうし'],
   ['PERIOD_PUNCTUATION', 'くてん'], ['PERIOD_SENTENCE', 'ぶん'], ['PERIOD_TIME', 'きかん'],
-  ['PERSON', 'ひと'], ['PERSON_GRAMMAR', 'にんしょう'], ['PLURAL_GRAMMAR', 'ふくすう'],
-  ['POSSESSOR', 'しょゆうしゃ'], ['PRISON', 'けいむしょ'], ['PROCESS', 'かてい'], ['PRONOUN', 'だいめいし'],
+  ['PERSON', 'ひと'], ['PERSON_GRAMMAR', 'にんしょう'], ['PLACE', 'ばしょ'], ['PLURAL_GRAMMAR', 'ふくすう'],
+  ['POSSESSOR', 'しょゆうしゃ'], ['PRISON', 'けいむしょ'], ['PROCESS', 'かてい'], ['PRONOUN', 'だいめいし'], ['PROPERTY', 'ざいさん'],
   ['QUANTIFIER', 'すうりょうし'], ['RELATIONSHIP', 'かんけい'], ['SINGULAR_GRAMMAR', 'たんすう'],
-  ['SOUTH_AMERICA', 'なんべい'], ['STICK', 'ぼう'], ['SUBJECT_COMPLEMENT', 'しゅかくほご'],
-  ['SUBJECT_GRAMMAR', 'しゅご'], ['TRANSLATION', 'ほんやく'], ['VERB', 'どうし'], ['WATER', 'みず'],
+  ['SOUND', 'おと'], ['SOUTH_AMERICA', 'なんべい'], ['STICK', 'ぼう'], ['SUBJECT_COMPLEMENT', 'しゅかくほご'],
+  ['SUBJECT_GRAMMAR', 'しゅご'], ['TEAR', 'なみだ'], ['TOOTH', 'は'], ['TRANSLATION', 'ほんやく'], ['VERB', 'どうし'], ['WATER', 'みず'],
   ['WING', 'つばさ'], ['WOLF', 'おおかみ'], ['WORD', 'たんご'],
 ];
 
@@ -83,7 +83,7 @@ describe('furigana: mixed kanji and kana (whole-word ruby)', () => {
 // A katakana noun reads as itself, so it takes no furigana. The engine gets this right for most
 // of them — but not all; see the bug below.
 describe('furigana: katakana nouns take none', () => {
-  test.each(['AFRICA', 'ASIA', 'EUROPE', 'FOX', 'OCEANIA'])('%s has no reading', (id) => {
+  test.each(['AFRICA', 'ASIA', 'BUTTON', 'EUROPE', 'FOX', 'KEYBOARD', 'OCEANIA'])('%s has no reading', (id) => {
     expect(bare(id)).toEqual([]);
   });
 });

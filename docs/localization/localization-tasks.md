@@ -82,23 +82,15 @@ tasks start at A11. **Do A15's group-key refactor before B23**: the group labels
 ### Part B — Needs seeding (`B-needs-seed/`)
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
-task. B09–B11 are done; **start with B12** — HOLD is additive once its genus is seeded. **B14 owns
-the shared builder change** that also gates B12's BUY, all of B13, and B18's TYPE, so it is the
-highest-leverage task once B12's easy win is in. A count-noun object must pass `'plural'` to
-`infinitiveGloss` ("to have objects", not "to have object") — see
-[done/B09](done/B09-create-verbs.md); an adjective on the object is the fourth argument — see
-[done/B11](done/B11-perception-verbs.md).
+task. **Only B14 is left.** B09–B13 and B15–B19 are done. The builder change B14 was meant to own
+landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
+`concepts/verbs/gloss.ts`) takes either the object id or a `GlossParts` object with the object's
+`definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
+("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
 
 | # | File | Seed first |
 |---|---|---|
-| B12 | [B12-possession-verbs.md](B-needs-seed/B12-possession-verbs.md) | **HAVE, ACQUIRE** (+ PROPERTY) → OWN, HOLD (additive); BUY needs the builder |
-| B13 | [B13-contact-verbs.md](B-needs-seed/B13-contact-verbs.md) | **DIVIDE, STRIKE** (+ EDGE, TOOTH) → CUT, BITE, BEAT — all need the builder |
-| B14 | [B14-motion-verbs.md](B-needs-seed/B14-motion-verbs.md) | **MOVE, PLACE** → GO, RUN, COME, JUMP, COLLAPSE — **owns the shared builder change** |
-| B15 | [B15-transfer-verbs.md](B-needs-seed/B15-transfer-verbs.md) | **TRANSFER** → GIVE, SEND, SHOW — ditransitive, needs an indirect object in the builder |
-| B16 | [B16-word-verbs.md](B-needs-seed/B16-word-verbs.md) | **INDICATE, CHANGE** → NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE — additive but low priority |
-| B17 | [B17-feeling-and-sound-verbs.md](B-needs-seed/B17-feeling-and-sound-verbs.md) | **FEEL, PRODUCE_SOUND** (+ AFFECTION, TEAR) → LOVE additive; CRY/CRY_OUT may become Cs |
-| B18 | [B18-selection-verbs.md](B-needs-seed/B18-selection-verbs.md) | **INDICATE, PRESS** (+ OPTION, BUTTON, KEYBOARD) → CLICK, CHOOSE, SELECT, TYPE |
-| B19 | [B19-data-verbs.md](B-needs-seed/B19-data-verbs.md) | 11 app verbs (SAVE, LOAD, EXPORT, …) — **recommended: leave on English literals**, poor vocabulary ratio |
+| B14 | [B14-motion-verbs.md](B-needs-seed/B14-motion-verbs.md) | **MOVE** (PLACE ✓) → GO, RUN, COME, JUMP, COLLAPSE — builder done |
 
 #### UI strings
 
@@ -121,10 +113,10 @@ B21 is the largest and unlocks most of the period container.
 
 | # | File | Blocked on |
 |---|---|---|
-| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns |
+| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's) |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C07 | [C07-places-locative-gap.md](C-needs-engine/C07-places-locative-gap.md) | locative relative clause ("a place where one lives") — HOUSE, HOME, MARKET, PRISON (was B03) |
-| C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08) |
+| C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
 
 #### UI strings
@@ -161,6 +153,13 @@ B21 is the largest and unlocks most of the period container.
 | B09 | [done/B09-create-verbs.md](done/B09-create-verbs.md) | MAKE → to create objects; SET_ON_FIRE → to create fire (seeded CREATE; `infinitiveGloss` gained an optional `'plural'` for count-noun objects) |
 | B10 | [done/B10-destruction-verbs.md](done/B10-destruction-verbs.md) | KILL → to destroy life; EXTINGUISH → to destroy fire; CLEAR → to destroy content (seeded DESTROY, LIFE, CONTENT) |
 | B11 | [done/B11-perception-verbs.md](done/B11-perception-verbs.md) | SEE → to perceive light; KNOW → to understand concepts; READ → to understand written words (seeded PERCEIVE, UNDERSTAND; `infinitiveGloss` gained an optional `adjectives` list for the object) |
+| B12 | [done/B12-possession-verbs.md](done/B12-possession-verbs.md) | OWN → to have property; HOLD → to have objects; BUY → to acquire objects with money (seeded HAVE, ACQUIRE, PROPERTY; **the complement builder change**: `infinitiveGloss` moved to `verbs/gloss.ts` and takes `GlossParts`) |
+| B13 | [done/B13-contact-verbs.md](done/B13-contact-verbs.md) | CUT → to divide with a sharp blade; BITE → to cut with the teeth; BEAT → to strike repeatedly (seeded DIVIDE, STRIKE, BLADE, TOOTH, SHARP, REPEATEDLY) |
+| B15 | [done/B15-transfer-verbs.md](done/B15-transfer-verbs.md) | GIVE → to transfer objects to a person; SEND → to transfer objects to a place (seeded TRANSFER, PLACE); SHOW → C08 |
+| B16 | [done/B16-word-verbs.md](done/B16-word-verbs.md) | NAME → to indicate objects with words; DESCRIBE → to indicate qualities; EXPRESS → to indicate concepts; MODIFY → to change qualities (seeded INDICATE, CHANGE); REPLACE → C05 |
+| B17 | [done/B17-feeling-and-sound-verbs.md](done/B17-feeling-and-sound-verbs.md) | LOVE → to feel affection; CRY → to shed tears; CRY_OUT → to produce loud sounds (seeded FEEL, SHED, PRODUCE, AFFECTION, TEAR, SOUND, LOUD) |
+| B18 | [done/B18-selection-verbs.md](done/B18-selection-verbs.md) | CHOOSE → to indicate an option; CLICK → to press a button; TYPE → to write with a keyboard (seeded PRESS, WRITE, OPTION, BUTTON, KEYBOARD); SELECT → C05 |
+| B19 | [done/B19-data-verbs.md](done/B19-data-verbs.md) | EXPORT → to transfer content to a place; IMPORT → to transfer content from a place (no new vocabulary); the other nine → C08 |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

@@ -56,7 +56,7 @@ TYPE are still gated on it.
 Word choices:
 - **German PERCEIVE is empfinden**, not the more natural *wahrnehmen*. *wahrnehmen* is separable
   (*nimmt … wahr*), and the engine cannot split a separable verb, so its finite forms would be
-  wrong. [B17](../B-needs-seed/B17-feeling-and-sound-verbs.md)'s FEEL should take *fühlen*.
+  wrong. [B17](B17-feeling-and-sound-verbs.md)'s FEEL should take *fühlen*.
 - **Romance UNDERSTAND uses the comprendere family** (not *capire* / *entender*), the register
   dictionary glosses use. In Portuguese this also avoids *perceber*, which is PERCEIVE here.
 - French leaves out the article (*comprendre mots écrits*), as EAT, DRINK, B09 and B10 do.

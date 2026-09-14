@@ -59,14 +59,14 @@ shipped under this id; the remaining 54 verbs were too coarse a bucket to drive 
 | [B09](B09-create-verbs.md) | CREATE | MAKE, SET_ON_FIRE | ✅ no builder change, differentiae seeded |
 | [B10](B10-destruction-verbs.md) | DESTROY | KILL, EXTINGUISH, CLEAR | partly — 2 nouns to seed |
 | [B11](B11-perception-verbs.md) | PERCEIVE / UNDERSTAND | SEE, KNOW, READ | ✅ for SEE + KNOW |
-| [B12](../B-needs-seed/B12-possession-verbs.md) | HAVE / ACQUIRE | OWN, HOLD, BUY | ✅ for HOLD |
-| [B13](../B-needs-seed/B13-contact-verbs.md) | DIVIDE / STRIKE | CUT, BITE, BEAT | ⚠ builder + seeds |
+| [B12](B12-possession-verbs.md) | HAVE / ACQUIRE | OWN, HOLD, BUY | ✅ for HOLD |
+| [B13](B13-contact-verbs.md) | DIVIDE / STRIKE | CUT, BITE, BEAT | ⚠ builder + seeds |
 | [B14](../B-needs-seed/B14-motion-verbs.md) | MOVE | GO, RUN, COME, JUMP, COLLAPSE | ⚠ **owns the builder change** |
-| [B15](../B-needs-seed/B15-transfer-verbs.md) | TRANSFER | GIVE, SEND, SHOW | ⚠ ditransitive |
-| [B16](../B-needs-seed/B16-word-verbs.md) | INDICATE / CHANGE | NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE | ✅ but low priority |
-| [B17](../B-needs-seed/B17-feeling-and-sound-verbs.md) | FEEL / PRODUCE_SOUND | LOVE, CRY, CRY_OUT | partly — LOVE only |
-| [B18](../B-needs-seed/B18-selection-verbs.md) | INDICATE / PRESS | CLICK, CHOOSE, SELECT, TYPE | partly |
-| [B19](../B-needs-seed/B19-data-verbs.md) | — | 11 app verbs | ❌ recommended: leave literal |
+| [B15](B15-transfer-verbs.md) | TRANSFER | GIVE, SEND, SHOW | ⚠ ditransitive |
+| [B16](B16-word-verbs.md) | INDICATE / CHANGE | NAME, DESCRIBE, MODIFY, EXPRESS, REPLACE | ✅ but low priority |
+| [B17](B17-feeling-and-sound-verbs.md) | FEEL / PRODUCE_SOUND | LOVE, CRY, CRY_OUT | partly — LOVE only |
+| [B18](B18-selection-verbs.md) | INDICATE / PRESS | CLICK, CHOOSE, SELECT, TYPE | partly |
+| [B19](B19-data-verbs.md) | — | 11 app verbs | ❌ recommended: leave literal |
 | [C08](../C-needs-engine/C08-copular-and-genus-verbs.md) | — | BE, BECOME, SEEM, APPEAR, BURN, CONSUME | ❌ engine / no genus |
 | [C09](../C-needs-engine/C09-modal-verbs.md) | — | MUST, CAN, WILL | ❌ nested infinitive |
 

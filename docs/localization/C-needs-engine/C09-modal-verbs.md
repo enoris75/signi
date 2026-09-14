@@ -22,7 +22,7 @@ available if this is ever wanted cheaply:
 
 | verb | fallback gloss | shape |
 |---|---|---|
-| MUST | to have obligation | `infinitiveGloss('HAVE', 'OBLIGATION')` — needs HAVE from [B12](../B-needs-seed/B12-possession-verbs.md) |
+| MUST | to have obligation | `infinitiveGloss('HAVE', 'OBLIGATION')` — HAVE is seeded ([B12](../done/B12-possession-verbs.md)); OBLIGATION is not |
 | CAN | to have ability | `infinitiveGloss('HAVE', 'ABILITY')` |
 | WILL | to have volition | `infinitiveGloss('HAVE', 'VOLITION')` |
 

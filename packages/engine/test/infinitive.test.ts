@@ -79,6 +79,48 @@ describe('infinitive', () => {
   });
 });
 
+// REPEATEDLY, seeded as a verb-definition differentia ("to strike repeatedly"). It carries no
+// `frequency` subtype, so it takes the manner position FAST does — after the verb in English and
+// Romance, before the clause-final infinitive in German, before the verb in Japanese — and not the
+// pre-verbal slot of the frequency adverb ALWAYS ("always eats"). French renders it as the fixed
+// phrase "à plusieurs reprises".
+describe('infinitive: the manner adverb REPEATEDLY', () => {
+  test('follows the verb, with or without an object', () => {
+    expect(sayAll(infinitive({}, { modifier: 'REPEATEDLY' }))).toEqual({
+      en: 'to eat repeatedly.',
+      it: 'mangiare ripetutamente.',
+      fr: 'manger à plusieurs reprises.',
+      es: 'comer repetidamente.',
+      pt: 'comer repetidamente.',
+      de: 'wiederholt essen.',
+      ja: '繰り返し食べる。',
+    });
+    expect(sayAll(infinitive({ directObject: np('MOUSE') }, { modifier: 'REPEATEDLY' }))).toEqual({
+      en: 'to eat the mouse repeatedly.', // English puts the object first
+      it: 'mangiare ripetutamente il topo.',
+      fr: 'manger à plusieurs reprises la souris.',
+      es: 'comer repetidamente el ratón.',
+      pt: 'comer repetidamente o rato.',
+      de: 'wiederholt die Maus essen.',
+      ja: 'ネズミを繰り返し食べる。',
+    });
+  });
+
+  test('takes the manner slot in a finite clause too, not the frequency one', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'REPEATEDLY', tense: 'past' } }))).toEqual({
+      en: 'the cat ate repeatedly.',
+      it: 'il gatto mangiò ripetutamente.',
+      fr: 'le chat mangea à plusieurs reprises.',
+      es: 'el gato comió repetidamente.',
+      pt: 'o gato comeu repetidamente.',
+      de: 'der Kater aß wiederholt.',
+      ja: '猫は繰り返し食べました。',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'REPEATEDLY' } })).en).toBe('the cat eats repeatedly.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } })).en).toBe('the cat always eats.');
+  });
+});
+
 describe('infinitive negation', () => {
   test('brackets the citation, not a finite verb', () => {
     expect(sayAll(infinitive({}, { negative: true }))).toMatchObject({

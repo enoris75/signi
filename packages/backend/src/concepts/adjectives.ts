@@ -544,6 +544,42 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Sharp of an edge — it "affilato", fr "tranchant", not the pointed or the figurative senses.
+    // Postnominal in Romance like ROUND; German umlauts it like stark. es "afilado" / pt "afiado" are
+    // sharpened-state participles, which predicate with estar ("la cuchilla está afilada").
+    id: 'SHARP',
+    role: 'adjective',
+    transient: true, // ascribes a transient state → es/pt predicate with estar (A47)
+    description: 'having an edge that cuts easily',
+    emoji: '🔪',
+    forms: {
+      en: { base: 'sharp' },
+      it: { base: 'affilato' },
+      fr: { base: 'tranchant' },
+      de: { base: 'scharf', umlaut: 'true' }, // scharf → schärfer / schärfst
+      es: { base: 'afilado' },
+      ja: { base: '鋭い', reading: 'するどい' },
+      pt: { base: 'afiado' },
+    },
+  },
+  {
+    // Loud of a sound. The Romance languages and Japanese say it with their "strong" / "big" word
+    // (it/es "forte/fuerte", fr "fort", pt "alto", ja 大きい — 大きい音 "a loud sound").
+    id: 'LOUD',
+    role: 'adjective',
+    description: 'producing much sound',
+    emoji: '📣',
+    forms: {
+      en: { base: 'loud' },
+      it: { base: 'forte' },
+      fr: { base: 'fort' },
+      de: { base: 'laut' },
+      es: { base: 'fuerte' },
+      ja: { base: '大きい', reading: 'おおきい' },
+      pt: { base: 'alto' },
+    },
+  },
+  {
     // A past-participle adjective: agrees in Romance (scritto/scritta) and, in Japanese, is
     // verb-derived — the plain past 書かれた attaches directly, like 去勢された (CASTRATED), no linker.
     id: 'WRITTEN',

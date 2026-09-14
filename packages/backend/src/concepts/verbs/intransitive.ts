@@ -1,4 +1,5 @@
 import type { ConceptSeed } from '../types.js';
+import { infinitiveGloss } from './gloss.js';
 
 // Plain intransitive verbs.
 export const intransitiveVerbs: ConceptSeed[] = [
@@ -206,6 +207,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to weep; to shed tears',
+    definition: infinitiveGloss('SHED', 'TEAR', 'plural'),
     emoji: '😭',
     synonym: 'weep',
     forms: {

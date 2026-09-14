@@ -1,36 +1,5 @@
-import type { PhrasePlan } from '@signi/shared';
 import type { ConceptSeed } from '../types.js';
-
-// A verb's dictionary definition as an infinitive citation: a subject-less, tenseless plan on the
-// infinitive render mode (see PhrasePlan.infinitive) whose verb is the genus and whose optional
-// object is the differentia, rendered bare — infinitiveGloss('CONSUME', 'FOOD') → en "to consume
-// food", it "consumare cibo", de "Nahrung konsumieren", ja "食べ物を摂取する". The GENERIC_PERSON
-// subject is a throwaway the infinitive drops from every surface. Set as a verb's `definition` to
-// localize its picker tooltip, the same way glossOf/whoGloss do for nouns. A mass-noun object stays
-// singular ("food"); pass 'plural' for a count noun, which reads bare only in the plural —
-// infinitiveGloss('CREATE', 'OBJECT_THING', 'plural') → "to create objects", not "to create object".
-// Adjectives on the object narrow the differentia further —
-// infinitiveGloss('UNDERSTAND', 'WORD', 'plural', ['WRITTEN']) → "to understand written words".
-const infinitiveGloss = (
-  verb: string,
-  object?: string,
-  number?: 'plural',
-  adjectives?: string[],
-): PhrasePlan => ({
-  subject: { concept: 'GENERIC_PERSON' },
-  verbPhrase: { verb },
-  ...(object
-    ? {
-        directObject: {
-          concept: object,
-          definiteness: 'bare',
-          ...(number ? { number } : {}),
-          ...(adjectives ? { adjectives } : {}),
-        },
-      }
-    : {}),
-  infinitive: true,
-});
+import { infinitiveGloss } from './gloss.js';
 
 // Plain transitive verbs.
 export const transitiveVerbs: ConceptSeed[] = [
@@ -40,6 +9,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to divide or wound with a sharp edge',
+    definition: infinitiveGloss('DIVIDE', {
+      complements: {
+        instrumental: { phrase: { concept: 'BLADE', definiteness: 'indefinite', adjectives: ['SHARP'] } },
+      },
+    }),
     emoji: '✂️',
     forms: {
       en: {
@@ -379,6 +353,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to feel deep affection',
+    definition: infinitiveGloss('FEEL', 'AFFECTION'),
     emoji: '❤️',
     forms: {
       en: {
@@ -648,6 +623,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'terminus'],
     description: 'to cry out; to shout or exclaim loudly',
+    definition: infinitiveGloss('PRODUCE', 'SOUND', 'plural', ['LOUD']),
     emoji: '📢',
     synonym: 'shout',
     forms: {
@@ -715,6 +691,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to grip or cut into with the teeth',
+    definition: infinitiveGloss('CUT', {
+      complements: {
+        instrumental: { phrase: { concept: 'TOOTH', definiteness: 'definite', number: 'plural' } },
+      },
+    }),
     emoji: '🦷',
     forms: {
       en: {
@@ -781,6 +762,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause', 'locative'],
     description: 'to strike repeatedly; to defeat in a contest',
+    definition: infinitiveGloss('STRIKE', { modifier: 'REPEATEDLY' }),
     emoji: '🥊',
     synonym: 'hit/defeat',
     forms: {
@@ -988,6 +970,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'source', 'instrumental'],
     description: 'to acquire in exchange for money',
+    definition: infinitiveGloss('ACQUIRE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'MONEY', definiteness: 'bare' } } },
+    }),
     emoji: '🛒',
     forms: {
       en: {
@@ -1054,6 +1041,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['cause', 'locative'],
     description: 'to have as property',
+    definition: infinitiveGloss('HAVE', 'PROPERTY'),
     emoji: '🔑',
     forms: {
       en: {
@@ -1120,6 +1108,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to contain or keep',
+    definition: infinitiveGloss('HAVE', 'OBJECT_THING', 'plural'),
     emoji: '📦',
     forms: {
       en: {
@@ -1534,11 +1523,795 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // The genus of OWN ("to have property") and HOLD ("to have objects") — the possession verb
+    // their dictionary definitions cite as their genus (see the B12 verb-definition task). Its own
+    // tooltip stays on the literal. Spanish and Portuguese take the lexical tener / ter, not the
+    // auxiliary haber; Japanese takes 持つ, which takes an object, not the existential ある. Avoir,
+    // avere and tener are irregular in their commands (aie / abbi / ten), which the engine's mood
+    // override tables carry.
+    id: 'HAVE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to possess; to keep with oneself',
+    emoji: '🤲',
+    forms: {
+      en: {
+        base: 'have',
+        '1sg_present': 'have', '2sg_present': 'have', '3sg_present': 'has',
+        '1pl_present': 'have', '2pl_present': 'have', '3pl_present': 'have',
+        past: 'had',
+      },
+      it: {
+        base: 'avere',
+        '1sg_present': 'ho', '2sg_present': 'hai', '3sg_present': 'ha',
+        '1pl_present': 'abbiamo', '2pl_present': 'avete', '3pl_present': 'hanno',
+        '1sg_past': 'ebbi', '2sg_past': 'avesti', '3sg_past': 'ebbe',
+        '1pl_past': 'avemmo', '2pl_past': 'aveste', '3pl_past': 'ebbero',
+        '1sg_future': 'avrò', '2sg_future': 'avrai', '3sg_future': 'avrà',
+        '1pl_future': 'avremo', '2pl_future': 'avrete', '3pl_future': 'avranno',
+      },
+      fr: {
+        base: 'avoir',
+        '1sg_present': 'ai', '2sg_present': 'as', '3sg_present': 'a',
+        '1pl_present': 'avons', '2pl_present': 'avez', '3pl_present': 'ont',
+        '1sg_past': 'eus', '2sg_past': 'eus', '3sg_past': 'eut',
+        '1pl_past': 'eûmes', '2pl_past': 'eûtes', '3pl_past': 'eurent',
+        '1sg_future': 'aurai', '2sg_future': 'auras', '3sg_future': 'aura',
+        '1pl_future': 'aurons', '2pl_future': 'aurez', '3pl_future': 'auront',
+      },
+      de: {
+        base: 'haben',
+        '1sg_present': 'habe', '2sg_present': 'hast', '3sg_present': 'hat',
+        '1pl_present': 'haben', '2pl_present': 'habt', '3pl_present': 'haben',
+        '1sg_past': 'hatte', '2sg_past': 'hattest', '3sg_past': 'hatte',
+        '1pl_past': 'hatten', '2pl_past': 'hattet', '3pl_past': 'hatten',
+      },
+      es: {
+        base: 'tener',
+        '1sg_present': 'tengo', '2sg_present': 'tienes', '3sg_present': 'tiene',
+        '1pl_present': 'tenemos', '2pl_present': 'tenéis', '3pl_present': 'tienen',
+        '1sg_past': 'tuve', '2sg_past': 'tuviste', '3sg_past': 'tuvo',
+        '1pl_past': 'tuvimos', '2pl_past': 'tuvisteis', '3pl_past': 'tuvieron',
+        '1sg_future': 'tendré', '2sg_future': 'tendrás', '3sg_future': 'tendrá',
+        '1pl_future': 'tendremos', '2pl_future': 'tendréis', '3pl_future': 'tendrán',
+      },
+      ja: {
+        base: '持つ',
+        reading: 'もつ',
+        masu_present: '持ちます',
+        masu_present_reading: 'もちます',
+      },
+      pt: {
+        base: 'ter',
+        '1sg_present': 'tenho', '2sg_present': 'tem', '3sg_present': 'tem',
+        '1pl_present': 'temos', '2pl_present': 'têm', '3pl_present': 'têm',
+        '1sg_past': 'tive', '2sg_past': 'teve', '3sg_past': 'teve',
+        '1pl_past': 'tivemos', '2pl_past': 'tiveram', '3pl_past': 'tiveram',
+        '1sg_future': 'terei', '2sg_future': 'terá', '3sg_future': 'terá',
+        '1pl_future': 'teremos', '2pl_future': 'terão', '3pl_future': 'terão',
+      },
+    },
+  },
+
+  {
+    // The genus of BUY ("to acquire in exchange for money") — the acquisition verb its dictionary
+    // definition cites as its genus (see the B12 verb-definition task). Italian acquisire takes the
+    // -isc- infix, French acquérir is irregular (acquiert / acquit / acquis), German erwerben is
+    // strong and inseparable (erwirbt / erwarb / erworben, du command erwirb), and Spanish adquirir
+    // diphthongs under stress (adquiere).
+    id: 'ACQUIRE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'source', 'cause', 'locative'],
+    description: 'to come to have',
+    emoji: '🫴',
+    forms: {
+      en: {
+        base: 'acquire',
+        '1sg_present': 'acquire', '2sg_present': 'acquire', '3sg_present': 'acquires',
+        '1pl_present': 'acquire', '2pl_present': 'acquire', '3pl_present': 'acquire',
+        past: 'acquired',
+      },
+      it: {
+        base: 'acquisire',
+        '1sg_present': 'acquisisco', '2sg_present': 'acquisisci', '3sg_present': 'acquisisce',
+        '1pl_present': 'acquisiamo', '2pl_present': 'acquisite', '3pl_present': 'acquisiscono',
+        '1sg_past': 'acquisii', '2sg_past': 'acquisisti', '3sg_past': 'acquisì',
+        '1pl_past': 'acquisimmo', '2pl_past': 'acquisiste', '3pl_past': 'acquisirono',
+        '1sg_future': 'acquisirò', '2sg_future': 'acquisirai', '3sg_future': 'acquisirà',
+        '1pl_future': 'acquisiremo', '2pl_future': 'acquisirete', '3pl_future': 'acquisiranno',
+      },
+      fr: {
+        base: 'acquérir',
+        '1sg_present': 'acquiers', '2sg_present': 'acquiers', '3sg_present': 'acquiert',
+        '1pl_present': 'acquérons', '2pl_present': 'acquérez', '3pl_present': 'acquièrent',
+        '1sg_past': 'acquis', '2sg_past': 'acquis', '3sg_past': 'acquit',
+        '1pl_past': 'acquîmes', '2pl_past': 'acquîtes', '3pl_past': 'acquirent',
+        '1sg_future': 'acquerrai', '2sg_future': 'acquerras', '3sg_future': 'acquerra',
+        '1pl_future': 'acquerrons', '2pl_future': 'acquerrez', '3pl_future': 'acquerront',
+      },
+      de: {
+        base: 'erwerben',
+        '1sg_present': 'erwerbe', '2sg_present': 'erwirbst', '3sg_present': 'erwirbt',
+        '1pl_present': 'erwerben', '2pl_present': 'erwerbt', '3pl_present': 'erwerben',
+        '1sg_past': 'erwarb', '2sg_past': 'erwarbst', '3sg_past': 'erwarb',
+        '1pl_past': 'erwarben', '2pl_past': 'erwarbt', '3pl_past': 'erwarben',
+        '2sg_imperative': 'erwirb', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'adquirir',
+        '1sg_present': 'adquiero', '2sg_present': 'adquieres', '3sg_present': 'adquiere',
+        '1pl_present': 'adquirimos', '2pl_present': 'adquirís', '3pl_present': 'adquieren',
+        '1sg_past': 'adquirí', '2sg_past': 'adquiriste', '3sg_past': 'adquirió',
+        '1pl_past': 'adquirimos', '2pl_past': 'adquiristeis', '3pl_past': 'adquirieron',
+        '1sg_future': 'adquiriré', '2sg_future': 'adquirirás', '3sg_future': 'adquirirá',
+        '1pl_future': 'adquiriremos', '2pl_future': 'adquiriréis', '3pl_future': 'adquirirán',
+      },
+      ja: {
+        base: '取得する',
+        reading: 'しゅとくする',
+        masu_present: '取得します',
+        masu_present_reading: 'しゅとくします',
+      },
+      pt: {
+        base: 'adquirir',
+        '1sg_present': 'adquiro', '2sg_present': 'adquire', '3sg_present': 'adquire',
+        '1pl_present': 'adquirimos', '2pl_present': 'adquirem', '3pl_present': 'adquirem',
+        '1sg_past': 'adquiri', '2sg_past': 'adquiriu', '3sg_past': 'adquiriu',
+        '1pl_past': 'adquirimos', '2pl_past': 'adquiriram', '3pl_past': 'adquiriram',
+        '1sg_future': 'adquirirei', '2sg_future': 'adquirirá', '3sg_future': 'adquirirá',
+        '1pl_future': 'adquiriremos', '2pl_future': 'adquirirão', '3pl_future': 'adquirirão',
+      },
+    },
+  },
+
+  {
+    // The genus of CUT ("to divide with a sharp blade") — the separation verb its dictionary
+    // definition cites as its genus (see the B13 verb-definition task). Italian dividere has a
+    // strong remote past (divise) and participle (diviso); German takes the plain teilen, not the
+    // separable aufteilen; Japanese takes the ichidan 分ける.
+    id: 'DIVIDE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to separate into parts',
+    emoji: '➗',
+    forms: {
+      en: {
+        base: 'divide',
+        '1sg_present': 'divide', '2sg_present': 'divide', '3sg_present': 'divides',
+        '1pl_present': 'divide', '2pl_present': 'divide', '3pl_present': 'divide',
+        past: 'divided',
+      },
+      it: {
+        base: 'dividere',
+        '1sg_present': 'divido', '2sg_present': 'dividi', '3sg_present': 'divide',
+        '1pl_present': 'dividiamo', '2pl_present': 'dividete', '3pl_present': 'dividono',
+        '1sg_past': 'divisi', '2sg_past': 'dividesti', '3sg_past': 'divise',
+        '1pl_past': 'dividemmo', '2pl_past': 'divideste', '3pl_past': 'divisero',
+        '1sg_future': 'dividerò', '2sg_future': 'dividerai', '3sg_future': 'dividerà',
+        '1pl_future': 'divideremo', '2pl_future': 'dividerete', '3pl_future': 'divideranno',
+      },
+      fr: {
+        base: 'diviser',
+        '1sg_present': 'divise', '2sg_present': 'divises', '3sg_present': 'divise',
+        '1pl_present': 'divisons', '2pl_present': 'divisez', '3pl_present': 'divisent',
+        '1sg_past': 'divisai', '2sg_past': 'divisas', '3sg_past': 'divisa',
+        '1pl_past': 'divisâmes', '2pl_past': 'divisâtes', '3pl_past': 'divisèrent',
+        '1sg_future': 'diviserai', '2sg_future': 'diviseras', '3sg_future': 'divisera',
+        '1pl_future': 'diviserons', '2pl_future': 'diviserez', '3pl_future': 'diviseront',
+      },
+      de: {
+        base: 'teilen',
+        '1sg_present': 'teile', '2sg_present': 'teilst', '3sg_present': 'teilt',
+        '1pl_present': 'teilen', '2pl_present': 'teilt', '3pl_present': 'teilen',
+        '1sg_past': 'teilte', '2sg_past': 'teiltest', '3sg_past': 'teilte',
+        '1pl_past': 'teilten', '2pl_past': 'teiltet', '3pl_past': 'teilten',
+      },
+      es: {
+        base: 'dividir',
+        '1sg_present': 'divido', '2sg_present': 'divides', '3sg_present': 'divide',
+        '1pl_present': 'dividimos', '2pl_present': 'dividís', '3pl_present': 'dividen',
+        '1sg_past': 'dividí', '2sg_past': 'dividiste', '3sg_past': 'dividió',
+        '1pl_past': 'dividimos', '2pl_past': 'dividisteis', '3pl_past': 'dividieron',
+        '1sg_future': 'dividiré', '2sg_future': 'dividirás', '3sg_future': 'dividirá',
+        '1pl_future': 'dividiremos', '2pl_future': 'dividiréis', '3pl_future': 'dividirán',
+      },
+      ja: {
+        base: '分ける',
+        reading: 'わける',
+        masu_present: '分けます',
+        masu_present_reading: 'わけます',
+      },
+      pt: {
+        base: 'dividir',
+        '1sg_present': 'divido', '2sg_present': 'divide', '3sg_present': 'divide',
+        '1pl_present': 'dividimos', '2pl_present': 'dividem', '3pl_present': 'dividem',
+        '1sg_past': 'dividi', '2sg_past': 'dividiu', '3sg_past': 'dividiu',
+        '1pl_past': 'dividimos', '2pl_past': 'dividiram', '3pl_past': 'dividiram',
+        '1sg_future': 'dividirei', '2sg_future': 'dividirá', '3sg_future': 'dividirá',
+        '1pl_future': 'dividiremos', '2pl_future': 'dividirão', '3pl_future': 'dividirão',
+      },
+    },
+  },
+
+  {
+    // The genus of BEAT ("to strike repeatedly") — the contact verb its dictionary definition cites
+    // as its genus (see the B13 verb-definition task; BITE, "to cut with the teeth", glosses on CUT). English is irregular (struck), Italian colpire takes the -isc- infix, and German
+    // schlagen is strong (schlägt / schlug / geschlagen). The Romance picks avoid BEAT's own
+    // battere / battre / batir.
+    id: 'STRIKE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to hit with force',
+    emoji: '👊',
+    synonym: 'hit',
+    forms: {
+      en: {
+        base: 'strike',
+        '1sg_present': 'strike', '2sg_present': 'strike', '3sg_present': 'strikes',
+        '1pl_present': 'strike', '2pl_present': 'strike', '3pl_present': 'strike',
+        past: 'struck',
+      },
+      it: {
+        base: 'colpire',
+        '1sg_present': 'colpisco', '2sg_present': 'colpisci', '3sg_present': 'colpisce',
+        '1pl_present': 'colpiamo', '2pl_present': 'colpite', '3pl_present': 'colpiscono',
+        '1sg_past': 'colpii', '2sg_past': 'colpisti', '3sg_past': 'colpì',
+        '1pl_past': 'colpimmo', '2pl_past': 'colpiste', '3pl_past': 'colpirono',
+        '1sg_future': 'colpirò', '2sg_future': 'colpirai', '3sg_future': 'colpirà',
+        '1pl_future': 'colpiremo', '2pl_future': 'colpirete', '3pl_future': 'colpiranno',
+      },
+      fr: {
+        base: 'frapper',
+        '1sg_present': 'frappe', '2sg_present': 'frappes', '3sg_present': 'frappe',
+        '1pl_present': 'frappons', '2pl_present': 'frappez', '3pl_present': 'frappent',
+        '1sg_past': 'frappai', '2sg_past': 'frappas', '3sg_past': 'frappa',
+        '1pl_past': 'frappâmes', '2pl_past': 'frappâtes', '3pl_past': 'frappèrent',
+        '1sg_future': 'frapperai', '2sg_future': 'frapperas', '3sg_future': 'frappera',
+        '1pl_future': 'frapperons', '2pl_future': 'frapperez', '3pl_future': 'frapperont',
+      },
+      de: {
+        base: 'schlagen',
+        '1sg_present': 'schlage', '2sg_present': 'schlägst', '3sg_present': 'schlägt',
+        '1pl_present': 'schlagen', '2pl_present': 'schlagt', '3pl_present': 'schlagen',
+        '1sg_past': 'schlug', '2sg_past': 'schlugst', '3sg_past': 'schlug',
+        '1pl_past': 'schlugen', '2pl_past': 'schlugt', '3pl_past': 'schlugen',
+      },
+      es: {
+        base: 'golpear',
+        '1sg_present': 'golpeo', '2sg_present': 'golpeas', '3sg_present': 'golpea',
+        '1pl_present': 'golpeamos', '2pl_present': 'golpeáis', '3pl_present': 'golpean',
+        '1sg_past': 'golpeé', '2sg_past': 'golpeaste', '3sg_past': 'golpeó',
+        '1pl_past': 'golpeamos', '2pl_past': 'golpeasteis', '3pl_past': 'golpearon',
+        '1sg_future': 'golpearé', '2sg_future': 'golpearás', '3sg_future': 'golpeará',
+        '1pl_future': 'golpearemos', '2pl_future': 'golpearéis', '3pl_future': 'golpearán',
+      },
+      ja: {
+        base: '打つ',
+        reading: 'うつ',
+        masu_present: '打ちます',
+        masu_present_reading: 'うちます',
+      },
+      pt: {
+        base: 'golpear',
+        '1sg_present': 'golpeio', '2sg_present': 'golpeia', '3sg_present': 'golpeia',
+        '1pl_present': 'golpeamos', '2pl_present': 'golpeiam', '3pl_present': 'golpeiam',
+        '1sg_past': 'golpeei', '2sg_past': 'golpeou', '3sg_past': 'golpeou',
+        '1pl_past': 'golpeamos', '2pl_past': 'golpearam', '3pl_past': 'golpearam',
+        '1sg_future': 'golpearei', '2sg_future': 'golpeará', '3sg_future': 'golpeará',
+        '1pl_future': 'golpearemos', '2pl_future': 'golpearão', '3pl_future': 'golpearão',
+      },
+    },
+  },
+
+  {
+    // The genus of NAME, DESCRIBE and EXPRESS (B16) and of CHOOSE (B18) — the verb of pointing
+    // something out that their dictionary definitions cite as their genus. German takes
+    // the inseparable bezeichnen: the natural anzeigen / hinweisen are separable, which the engine
+    // does not split. Italian indicare and French indiquer respell before e (indichi / indiquons).
+    id: 'INDICATE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
+    description: 'to point out; to signify',
+    emoji: '👆',
+    forms: {
+      en: {
+        base: 'indicate',
+        '1sg_present': 'indicate', '2sg_present': 'indicate', '3sg_present': 'indicates',
+        '1pl_present': 'indicate', '2pl_present': 'indicate', '3pl_present': 'indicate',
+        past: 'indicated',
+      },
+      it: {
+        base: 'indicare',
+        '1sg_present': 'indico', '2sg_present': 'indichi', '3sg_present': 'indica',
+        '1pl_present': 'indichiamo', '2pl_present': 'indicate', '3pl_present': 'indicano',
+        '1sg_past': 'indicai', '2sg_past': 'indicasti', '3sg_past': 'indicò',
+        '1pl_past': 'indicammo', '2pl_past': 'indicaste', '3pl_past': 'indicarono',
+        '1sg_future': 'indicherò', '2sg_future': 'indicherai', '3sg_future': 'indicherà',
+        '1pl_future': 'indicheremo', '2pl_future': 'indicherete', '3pl_future': 'indicheranno',
+      },
+      fr: {
+        base: 'indiquer',
+        '1sg_present': 'indique', '2sg_present': 'indiques', '3sg_present': 'indique',
+        '1pl_present': 'indiquons', '2pl_present': 'indiquez', '3pl_present': 'indiquent',
+        '1sg_past': 'indiquai', '2sg_past': 'indiquas', '3sg_past': 'indiqua',
+        '1pl_past': 'indiquâmes', '2pl_past': 'indiquâtes', '3pl_past': 'indiquèrent',
+        '1sg_future': 'indiquerai', '2sg_future': 'indiqueras', '3sg_future': 'indiquera',
+        '1pl_future': 'indiquerons', '2pl_future': 'indiquerez', '3pl_future': 'indiqueront',
+      },
+      de: {
+        base: 'bezeichnen',
+        '1sg_present': 'bezeichne', '2sg_present': 'bezeichnest', '3sg_present': 'bezeichnet',
+        '1pl_present': 'bezeichnen', '2pl_present': 'bezeichnet', '3pl_present': 'bezeichnen',
+        '1sg_past': 'bezeichnete', '2sg_past': 'bezeichnetest', '3sg_past': 'bezeichnete',
+        '1pl_past': 'bezeichneten', '2pl_past': 'bezeichnetet', '3pl_past': 'bezeichneten',
+      },
+      es: {
+        base: 'indicar',
+        '1sg_present': 'indico', '2sg_present': 'indicas', '3sg_present': 'indica',
+        '1pl_present': 'indicamos', '2pl_present': 'indicáis', '3pl_present': 'indican',
+        '1sg_past': 'indiqué', '2sg_past': 'indicaste', '3sg_past': 'indicó',
+        '1pl_past': 'indicamos', '2pl_past': 'indicasteis', '3pl_past': 'indicaron',
+        '1sg_future': 'indicaré', '2sg_future': 'indicarás', '3sg_future': 'indicará',
+        '1pl_future': 'indicaremos', '2pl_future': 'indicaréis', '3pl_future': 'indicarán',
+      },
+      ja: {
+        base: '示す',
+        reading: 'しめす',
+        masu_present: '示します',
+        masu_present_reading: 'しめします',
+      },
+      pt: {
+        base: 'indicar',
+        '1sg_present': 'indico', '2sg_present': 'indica', '3sg_present': 'indica',
+        '1pl_present': 'indicamos', '2pl_present': 'indicam', '3pl_present': 'indicam',
+        '1sg_past': 'indiquei', '2sg_past': 'indicou', '3sg_past': 'indicou',
+        '1pl_past': 'indicamos', '2pl_past': 'indicaram', '3pl_past': 'indicaram',
+        '1sg_future': 'indicarei', '2sg_future': 'indicará', '3sg_future': 'indicará',
+        '1pl_future': 'indicaremos', '2pl_future': 'indicarão', '3pl_future': 'indicarão',
+      },
+    },
+  },
+
+  {
+    // The genus of MODIFY ("to change qualities") — the verb of making different that its dictionary
+    // definition cites as its genus (see the B16 verb-definition task). French changer keeps its
+    // e before a and o (changeons / changea); German ändern is an -ern verb (ändere / änderte);
+    // Portuguese takes mudar, the everyday verb, over the narrower trocar ("swap"); Japanese takes
+    // the transitive ichidan 変える.
+    id: 'CHANGE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to make different',
+    emoji: '🔃',
+    forms: {
+      en: {
+        base: 'change',
+        '1sg_present': 'change', '2sg_present': 'change', '3sg_present': 'changes',
+        '1pl_present': 'change', '2pl_present': 'change', '3pl_present': 'change',
+        past: 'changed',
+      },
+      it: {
+        base: 'cambiare',
+        '1sg_present': 'cambio', '2sg_present': 'cambi', '3sg_present': 'cambia',
+        '1pl_present': 'cambiamo', '2pl_present': 'cambiate', '3pl_present': 'cambiano',
+        '1sg_past': 'cambiai', '2sg_past': 'cambiasti', '3sg_past': 'cambiò',
+        '1pl_past': 'cambiammo', '2pl_past': 'cambiaste', '3pl_past': 'cambiarono',
+        '1sg_future': 'cambierò', '2sg_future': 'cambierai', '3sg_future': 'cambierà',
+        '1pl_future': 'cambieremo', '2pl_future': 'cambierete', '3pl_future': 'cambieranno',
+      },
+      fr: {
+        base: 'changer',
+        '1sg_present': 'change', '2sg_present': 'changes', '3sg_present': 'change',
+        '1pl_present': 'changeons', '2pl_present': 'changez', '3pl_present': 'changent',
+        '1sg_past': 'changeai', '2sg_past': 'changeas', '3sg_past': 'changea',
+        '1pl_past': 'changeâmes', '2pl_past': 'changeâtes', '3pl_past': 'changèrent',
+        '1sg_future': 'changerai', '2sg_future': 'changeras', '3sg_future': 'changera',
+        '1pl_future': 'changerons', '2pl_future': 'changerez', '3pl_future': 'changeront',
+      },
+      de: {
+        base: 'ändern',
+        '1sg_present': 'ändere', '2sg_present': 'änderst', '3sg_present': 'ändert',
+        '1pl_present': 'ändern', '2pl_present': 'ändert', '3pl_present': 'ändern',
+        '1sg_past': 'änderte', '2sg_past': 'ändertest', '3sg_past': 'änderte',
+        '1pl_past': 'änderten', '2pl_past': 'ändertet', '3pl_past': 'änderten',
+      },
+      es: {
+        base: 'cambiar',
+        '1sg_present': 'cambio', '2sg_present': 'cambias', '3sg_present': 'cambia',
+        '1pl_present': 'cambiamos', '2pl_present': 'cambiáis', '3pl_present': 'cambian',
+        '1sg_past': 'cambié', '2sg_past': 'cambiaste', '3sg_past': 'cambió',
+        '1pl_past': 'cambiamos', '2pl_past': 'cambiasteis', '3pl_past': 'cambiaron',
+        '1sg_future': 'cambiaré', '2sg_future': 'cambiarás', '3sg_future': 'cambiará',
+        '1pl_future': 'cambiaremos', '2pl_future': 'cambiaréis', '3pl_future': 'cambiarán',
+      },
+      ja: {
+        base: '変える',
+        reading: 'かえる',
+        masu_present: '変えます',
+        masu_present_reading: 'かえます',
+      },
+      pt: {
+        base: 'mudar',
+        '1sg_present': 'mudo', '2sg_present': 'muda', '3sg_present': 'muda',
+        '1pl_present': 'mudamos', '2pl_present': 'mudam', '3pl_present': 'mudam',
+        '1sg_past': 'mudei', '2sg_past': 'mudou', '3sg_past': 'mudou',
+        '1pl_past': 'mudamos', '2pl_past': 'mudaram', '3pl_past': 'mudaram',
+        '1sg_future': 'mudarei', '2sg_future': 'mudará', '3sg_future': 'mudará',
+        '1pl_future': 'mudaremos', '2pl_future': 'mudarão', '3pl_future': 'mudarão',
+      },
+    },
+  },
+
+  {
+    // The genus of LOVE ("to feel affection") — the verb of experiencing an emotion that its
+    // dictionary definition cites as its genus (see the B17 verb-definition task). German takes
+    // fühlen: empfinden is already PERCEIVE's. Italian and French take provare / éprouver, the
+    // verbs an emotion is felt with (sentire / sentir lean to the senses, and PERCEIVE's percevoir
+    // is taken); Spanish and Portuguese sentir diphthong or raise their stem (siente / sintió,
+    // sinto). English is irregular (felt).
+    id: 'FEEL',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to experience an emotion or sensation',
+    emoji: '💓',
+    forms: {
+      en: {
+        base: 'feel',
+        '1sg_present': 'feel', '2sg_present': 'feel', '3sg_present': 'feels',
+        '1pl_present': 'feel', '2pl_present': 'feel', '3pl_present': 'feel',
+        past: 'felt',
+      },
+      it: {
+        base: 'provare',
+        '1sg_present': 'provo', '2sg_present': 'provi', '3sg_present': 'prova',
+        '1pl_present': 'proviamo', '2pl_present': 'provate', '3pl_present': 'provano',
+        '1sg_past': 'provai', '2sg_past': 'provasti', '3sg_past': 'provò',
+        '1pl_past': 'provammo', '2pl_past': 'provaste', '3pl_past': 'provarono',
+        '1sg_future': 'proverò', '2sg_future': 'proverai', '3sg_future': 'proverà',
+        '1pl_future': 'proveremo', '2pl_future': 'proverete', '3pl_future': 'proveranno',
+      },
+      fr: {
+        base: 'éprouver',
+        '1sg_present': 'éprouve', '2sg_present': 'éprouves', '3sg_present': 'éprouve',
+        '1pl_present': 'éprouvons', '2pl_present': 'éprouvez', '3pl_present': 'éprouvent',
+        '1sg_past': 'éprouvai', '2sg_past': 'éprouvas', '3sg_past': 'éprouva',
+        '1pl_past': 'éprouvâmes', '2pl_past': 'éprouvâtes', '3pl_past': 'éprouvèrent',
+        '1sg_future': 'éprouverai', '2sg_future': 'éprouveras', '3sg_future': 'éprouvera',
+        '1pl_future': 'éprouverons', '2pl_future': 'éprouverez', '3pl_future': 'éprouveront',
+      },
+      de: {
+        base: 'fühlen',
+        '1sg_present': 'fühle', '2sg_present': 'fühlst', '3sg_present': 'fühlt',
+        '1pl_present': 'fühlen', '2pl_present': 'fühlt', '3pl_present': 'fühlen',
+        '1sg_past': 'fühlte', '2sg_past': 'fühltest', '3sg_past': 'fühlte',
+        '1pl_past': 'fühlten', '2pl_past': 'fühltet', '3pl_past': 'fühlten',
+      },
+      es: {
+        base: 'sentir',
+        '1sg_present': 'siento', '2sg_present': 'sientes', '3sg_present': 'siente',
+        '1pl_present': 'sentimos', '2pl_present': 'sentís', '3pl_present': 'sienten',
+        '1sg_past': 'sentí', '2sg_past': 'sentiste', '3sg_past': 'sintió',
+        '1pl_past': 'sentimos', '2pl_past': 'sentisteis', '3pl_past': 'sintieron',
+        '1sg_future': 'sentiré', '2sg_future': 'sentirás', '3sg_future': 'sentirá',
+        '1pl_future': 'sentiremos', '2pl_future': 'sentiréis', '3pl_future': 'sentirán',
+      },
+      ja: {
+        base: '感じる',
+        reading: 'かんじる',
+        masu_present: '感じます',
+        masu_present_reading: 'かんじます',
+      },
+      pt: {
+        base: 'sentir',
+        '1sg_present': 'sinto', '2sg_present': 'sente', '3sg_present': 'sente',
+        '1pl_present': 'sentimos', '2pl_present': 'sentem', '3pl_present': 'sentem',
+        '1sg_past': 'senti', '2sg_past': 'sentiu', '3sg_past': 'sentiu',
+        '1pl_past': 'sentimos', '2pl_past': 'sentiram', '3pl_past': 'sentiram',
+        '1sg_future': 'sentirei', '2sg_future': 'sentirá', '3sg_future': 'sentirá',
+        '1pl_future': 'sentiremos', '2pl_future': 'sentirão', '3pl_future': 'sentirão',
+      },
+    },
+  },
+
+  {
+    // The genus of CRY ("to shed tears") — the verb of letting a liquid flow out that its dictionary
+    // definition cites as its genus (see the B17 verb-definition task). English shed is invariant
+    // (shed / shed, shedding); German takes the strong, inseparable vergießen (vergoss /
+    // vergossen); the Romance languages take the pouring verbs versare / verser / derramar.
+    id: 'SHED',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to let flow out; to pour forth',
+    emoji: '💦',
+    synonym: 'pour out',
+    forms: {
+      en: {
+        base: 'shed',
+        '1sg_present': 'shed', '2sg_present': 'shed', '3sg_present': 'sheds',
+        '1pl_present': 'shed', '2pl_present': 'shed', '3pl_present': 'shed',
+        past: 'shed',
+      },
+      it: {
+        base: 'versare',
+        '1sg_present': 'verso', '2sg_present': 'versi', '3sg_present': 'versa',
+        '1pl_present': 'versiamo', '2pl_present': 'versate', '3pl_present': 'versano',
+        '1sg_past': 'versai', '2sg_past': 'versasti', '3sg_past': 'versò',
+        '1pl_past': 'versammo', '2pl_past': 'versaste', '3pl_past': 'versarono',
+        '1sg_future': 'verserò', '2sg_future': 'verserai', '3sg_future': 'verserà',
+        '1pl_future': 'verseremo', '2pl_future': 'verserete', '3pl_future': 'verseranno',
+      },
+      fr: {
+        base: 'verser',
+        '1sg_present': 'verse', '2sg_present': 'verses', '3sg_present': 'verse',
+        '1pl_present': 'versons', '2pl_present': 'versez', '3pl_present': 'versent',
+        '1sg_past': 'versai', '2sg_past': 'versas', '3sg_past': 'versa',
+        '1pl_past': 'versâmes', '2pl_past': 'versâtes', '3pl_past': 'versèrent',
+        '1sg_future': 'verserai', '2sg_future': 'verseras', '3sg_future': 'versera',
+        '1pl_future': 'verserons', '2pl_future': 'verserez', '3pl_future': 'verseront',
+      },
+      de: {
+        base: 'vergießen',
+        '1sg_present': 'vergieße', '2sg_present': 'vergießt', '3sg_present': 'vergießt',
+        '1pl_present': 'vergießen', '2pl_present': 'vergießt', '3pl_present': 'vergießen',
+        '1sg_past': 'vergoss', '2sg_past': 'vergossest', '3sg_past': 'vergoss',
+        '1pl_past': 'vergossen', '2pl_past': 'vergosst', '3pl_past': 'vergossen',
+      },
+      es: {
+        base: 'derramar',
+        '1sg_present': 'derramo', '2sg_present': 'derramas', '3sg_present': 'derrama',
+        '1pl_present': 'derramamos', '2pl_present': 'derramáis', '3pl_present': 'derraman',
+        '1sg_past': 'derramé', '2sg_past': 'derramaste', '3sg_past': 'derramó',
+        '1pl_past': 'derramamos', '2pl_past': 'derramasteis', '3pl_past': 'derramaron',
+        '1sg_future': 'derramaré', '2sg_future': 'derramarás', '3sg_future': 'derramará',
+        '1pl_future': 'derramaremos', '2pl_future': 'derramaréis', '3pl_future': 'derramarán',
+      },
+      ja: {
+        base: '流す',
+        reading: 'ながす',
+        masu_present: '流します',
+        masu_present_reading: 'ながします',
+      },
+      pt: {
+        base: 'derramar',
+        '1sg_present': 'derramo', '2sg_present': 'derrama', '3sg_present': 'derrama',
+        '1pl_present': 'derramamos', '2pl_present': 'derramam', '3pl_present': 'derramam',
+        '1sg_past': 'derramei', '2sg_past': 'derramou', '3sg_past': 'derramou',
+        '1pl_past': 'derramamos', '2pl_past': 'derramaram', '3pl_past': 'derramaram',
+        '1sg_future': 'derramarei', '2sg_future': 'derramará', '3sg_future': 'derramará',
+        '1pl_future': 'derramaremos', '2pl_future': 'derramarão', '3pl_future': 'derramarão',
+      },
+    },
+  },
+
+  {
+    // The genus of CRY_OUT ("to produce loud sounds", B17) — the verb of bringing something forth
+    // that its dictionary definition cites as its genus. Italian produrre contracts its
+    // infinitive (produco / produsse / prodotto / produrrà), French produire and Spanish producir
+    // are irregular (produisit / produjo, produzco), and German takes the inseparable erzeugen.
+    // Japanese takes 出す ("put out"), which also reads for giving off a sound.
+    id: 'PRODUCE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to bring into existence; to give off',
+    emoji: '🏭',
+    forms: {
+      en: {
+        base: 'produce',
+        '1sg_present': 'produce', '2sg_present': 'produce', '3sg_present': 'produces',
+        '1pl_present': 'produce', '2pl_present': 'produce', '3pl_present': 'produce',
+        past: 'produced',
+      },
+      it: {
+        base: 'produrre',
+        '1sg_present': 'produco', '2sg_present': 'produci', '3sg_present': 'produce',
+        '1pl_present': 'produciamo', '2pl_present': 'producete', '3pl_present': 'producono',
+        '1sg_past': 'produssi', '2sg_past': 'producesti', '3sg_past': 'produsse',
+        '1pl_past': 'producemmo', '2pl_past': 'produceste', '3pl_past': 'produssero',
+        '1sg_future': 'produrrò', '2sg_future': 'produrrai', '3sg_future': 'produrrà',
+        '1pl_future': 'produrremo', '2pl_future': 'produrrete', '3pl_future': 'produrranno',
+      },
+      fr: {
+        base: 'produire',
+        '1sg_present': 'produis', '2sg_present': 'produis', '3sg_present': 'produit',
+        '1pl_present': 'produisons', '2pl_present': 'produisez', '3pl_present': 'produisent',
+        '1sg_past': 'produisis', '2sg_past': 'produisis', '3sg_past': 'produisit',
+        '1pl_past': 'produisîmes', '2pl_past': 'produisîtes', '3pl_past': 'produisirent',
+        '1sg_future': 'produirai', '2sg_future': 'produiras', '3sg_future': 'produira',
+        '1pl_future': 'produirons', '2pl_future': 'produirez', '3pl_future': 'produiront',
+      },
+      de: {
+        base: 'erzeugen',
+        '1sg_present': 'erzeuge', '2sg_present': 'erzeugst', '3sg_present': 'erzeugt',
+        '1pl_present': 'erzeugen', '2pl_present': 'erzeugt', '3pl_present': 'erzeugen',
+        '1sg_past': 'erzeugte', '2sg_past': 'erzeugtest', '3sg_past': 'erzeugte',
+        '1pl_past': 'erzeugten', '2pl_past': 'erzeugtet', '3pl_past': 'erzeugten',
+      },
+      es: {
+        base: 'producir',
+        '1sg_present': 'produzco', '2sg_present': 'produces', '3sg_present': 'produce',
+        '1pl_present': 'producimos', '2pl_present': 'producís', '3pl_present': 'producen',
+        '1sg_past': 'produje', '2sg_past': 'produjiste', '3sg_past': 'produjo',
+        '1pl_past': 'produjimos', '2pl_past': 'produjisteis', '3pl_past': 'produjeron',
+        '1sg_future': 'produciré', '2sg_future': 'producirás', '3sg_future': 'producirá',
+        '1pl_future': 'produciremos', '2pl_future': 'produciréis', '3pl_future': 'producirán',
+      },
+      ja: {
+        base: '出す',
+        reading: 'だす',
+        masu_present: '出します',
+        masu_present_reading: 'だします',
+      },
+      pt: {
+        base: 'produzir',
+        '1sg_present': 'produzo', '2sg_present': 'produz', '3sg_present': 'produz',
+        '1pl_present': 'produzimos', '2pl_present': 'produzem', '3pl_present': 'produzem',
+        '1sg_past': 'produzi', '2sg_past': 'produziu', '3sg_past': 'produziu',
+        '1pl_past': 'produzimos', '2pl_past': 'produziram', '3pl_past': 'produziram',
+        '1sg_future': 'produzirei', '2sg_future': 'produzirá', '3sg_future': 'produzirá',
+        '1pl_future': 'produziremos', '2pl_future': 'produzirão', '3pl_future': 'produzirão',
+      },
+    },
+  },
+
+  {
+    // The genus of CLICK ("to press a button") — the verb of pushing against something that its
+    // dictionary definition cites as its genus (see the B18 verb-definition task). Italian premere
+    // takes the -etti remote past (premette) and the -uto participle (premuto); German takes the
+    // plain drücken, not the separable eindrücken; Spanish takes pulsar, the verb for pressing a
+    // button or key, over the narrower apretar.
+    id: 'PRESS',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to push steadily against something',
+    emoji: '👇',
+    synonym: 'push',
+    forms: {
+      en: {
+        base: 'press',
+        '1sg_present': 'press', '2sg_present': 'press', '3sg_present': 'presses',
+        '1pl_present': 'press', '2pl_present': 'press', '3pl_present': 'press',
+        past: 'pressed',
+      },
+      it: {
+        base: 'premere',
+        '1sg_present': 'premo', '2sg_present': 'premi', '3sg_present': 'preme',
+        '1pl_present': 'premiamo', '2pl_present': 'premete', '3pl_present': 'premono',
+        '1sg_past': 'premetti', '2sg_past': 'premesti', '3sg_past': 'premette',
+        '1pl_past': 'prememmo', '2pl_past': 'premeste', '3pl_past': 'premettero',
+        '1sg_future': 'premerò', '2sg_future': 'premerai', '3sg_future': 'premerà',
+        '1pl_future': 'premeremo', '2pl_future': 'premerete', '3pl_future': 'premeranno',
+      },
+      fr: {
+        base: 'presser',
+        '1sg_present': 'presse', '2sg_present': 'presses', '3sg_present': 'presse',
+        '1pl_present': 'pressons', '2pl_present': 'pressez', '3pl_present': 'pressent',
+        '1sg_past': 'pressai', '2sg_past': 'pressas', '3sg_past': 'pressa',
+        '1pl_past': 'pressâmes', '2pl_past': 'pressâtes', '3pl_past': 'pressèrent',
+        '1sg_future': 'presserai', '2sg_future': 'presseras', '3sg_future': 'pressera',
+        '1pl_future': 'presserons', '2pl_future': 'presserez', '3pl_future': 'presseront',
+      },
+      de: {
+        base: 'drücken',
+        '1sg_present': 'drücke', '2sg_present': 'drückst', '3sg_present': 'drückt',
+        '1pl_present': 'drücken', '2pl_present': 'drückt', '3pl_present': 'drücken',
+        '1sg_past': 'drückte', '2sg_past': 'drücktest', '3sg_past': 'drückte',
+        '1pl_past': 'drückten', '2pl_past': 'drücktet', '3pl_past': 'drückten',
+      },
+      es: {
+        base: 'pulsar',
+        '1sg_present': 'pulso', '2sg_present': 'pulsas', '3sg_present': 'pulsa',
+        '1pl_present': 'pulsamos', '2pl_present': 'pulsáis', '3pl_present': 'pulsan',
+        '1sg_past': 'pulsé', '2sg_past': 'pulsaste', '3sg_past': 'pulsó',
+        '1pl_past': 'pulsamos', '2pl_past': 'pulsasteis', '3pl_past': 'pulsaron',
+        '1sg_future': 'pulsaré', '2sg_future': 'pulsarás', '3sg_future': 'pulsará',
+        '1pl_future': 'pulsaremos', '2pl_future': 'pulsaréis', '3pl_future': 'pulsarán',
+      },
+      ja: {
+        base: '押す',
+        reading: 'おす',
+        masu_present: '押します',
+        masu_present_reading: 'おします',
+      },
+      pt: {
+        base: 'pressionar',
+        '1sg_present': 'pressiono', '2sg_present': 'pressiona', '3sg_present': 'pressiona',
+        '1pl_present': 'pressionamos', '2pl_present': 'pressionam', '3pl_present': 'pressionam',
+        '1sg_past': 'pressionei', '2sg_past': 'pressionou', '3sg_past': 'pressionou',
+        '1pl_past': 'pressionamos', '2pl_past': 'pressionaram', '3pl_past': 'pressionaram',
+        '1sg_future': 'pressionarei', '2sg_future': 'pressionará', '3sg_future': 'pressionará',
+        '1pl_future': 'pressionaremos', '2pl_future': 'pressionarão', '3pl_future': 'pressionarão',
+      },
+    },
+  },
+
+  {
+    // The genus of TYPE ("to write with a keyboard") — the verb of forming letters that its
+    // dictionary definition cites as its genus (see the B18 verb-definition task). Irregular in
+    // every European language: English wrote / written, Italian scrisse / scritto, French écrivons /
+    // écrivit / écrit, German schrieb / geschrieben, and a strong -to participle in Spanish and
+    // Portuguese (escrito). Japanese takes the godan 書く (te-form 書いて).
+    id: 'WRITE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
+    description: 'to form letters or words on a surface',
+    emoji: '✏️',
+    forms: {
+      en: {
+        base: 'write',
+        '1sg_present': 'write', '2sg_present': 'write', '3sg_present': 'writes',
+        '1pl_present': 'write', '2pl_present': 'write', '3pl_present': 'write',
+        past: 'wrote',
+      },
+      it: {
+        base: 'scrivere',
+        '1sg_present': 'scrivo', '2sg_present': 'scrivi', '3sg_present': 'scrive',
+        '1pl_present': 'scriviamo', '2pl_present': 'scrivete', '3pl_present': 'scrivono',
+        '1sg_past': 'scrissi', '2sg_past': 'scrivesti', '3sg_past': 'scrisse',
+        '1pl_past': 'scrivemmo', '2pl_past': 'scriveste', '3pl_past': 'scrissero',
+        '1sg_future': 'scriverò', '2sg_future': 'scriverai', '3sg_future': 'scriverà',
+        '1pl_future': 'scriveremo', '2pl_future': 'scriverete', '3pl_future': 'scriveranno',
+      },
+      fr: {
+        base: 'écrire',
+        '1sg_present': 'écris', '2sg_present': 'écris', '3sg_present': 'écrit',
+        '1pl_present': 'écrivons', '2pl_present': 'écrivez', '3pl_present': 'écrivent',
+        '1sg_past': 'écrivis', '2sg_past': 'écrivis', '3sg_past': 'écrivit',
+        '1pl_past': 'écrivîmes', '2pl_past': 'écrivîtes', '3pl_past': 'écrivirent',
+        '1sg_future': 'écrirai', '2sg_future': 'écriras', '3sg_future': 'écrira',
+        '1pl_future': 'écrirons', '2pl_future': 'écrirez', '3pl_future': 'écriront',
+      },
+      de: {
+        base: 'schreiben',
+        '1sg_present': 'schreibe', '2sg_present': 'schreibst', '3sg_present': 'schreibt',
+        '1pl_present': 'schreiben', '2pl_present': 'schreibt', '3pl_present': 'schreiben',
+        '1sg_past': 'schrieb', '2sg_past': 'schriebst', '3sg_past': 'schrieb',
+        '1pl_past': 'schrieben', '2pl_past': 'schriebt', '3pl_past': 'schrieben',
+      },
+      es: {
+        base: 'escribir',
+        '1sg_present': 'escribo', '2sg_present': 'escribes', '3sg_present': 'escribe',
+        '1pl_present': 'escribimos', '2pl_present': 'escribís', '3pl_present': 'escriben',
+        '1sg_past': 'escribí', '2sg_past': 'escribiste', '3sg_past': 'escribió',
+        '1pl_past': 'escribimos', '2pl_past': 'escribisteis', '3pl_past': 'escribieron',
+        '1sg_future': 'escribiré', '2sg_future': 'escribirás', '3sg_future': 'escribirá',
+        '1pl_future': 'escribiremos', '2pl_future': 'escribiréis', '3pl_future': 'escribirán',
+      },
+      ja: {
+        base: '書く',
+        reading: 'かく',
+        masu_present: '書きます',
+        masu_present_reading: 'かきます',
+      },
+      pt: {
+        base: 'escrever',
+        '1sg_present': 'escrevo', '2sg_present': 'escreve', '3sg_present': 'escreve',
+        '1pl_present': 'escrevemos', '2pl_present': 'escrevem', '3pl_present': 'escrevem',
+        '1sg_past': 'escrevi', '2sg_past': 'escreveu', '3sg_past': 'escreveu',
+        '1pl_past': 'escrevemos', '2pl_past': 'escreveram', '3pl_past': 'escreveram',
+        '1sg_future': 'escreverei', '2sg_future': 'escreverá', '3sg_future': 'escreverá',
+        '1pl_future': 'escreveremos', '2pl_future': 'escreverão', '3pl_future': 'escreverão',
+      },
+    },
+  },
+
+  {
     id: 'CLICK',
     role: 'verb',
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to press a mouse button or select by pressing',
+    definition: infinitiveGloss('PRESS', { object: 'BUTTON', definiteness: 'indefinite' }),
     emoji: '🖱️',
     forms: {
       en: {
@@ -1605,6 +2378,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to pick one option from several',
+    definition: infinitiveGloss('INDICATE', { object: 'OPTION', definiteness: 'indefinite' }),
     emoji: '☑️',
     synonym: 'select',
     forms: {
@@ -1745,6 +2519,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to write with a keyboard',
+    definition: infinitiveGloss('WRITE', {
+      complements: { instrumental: { phrase: { concept: 'KEYBOARD', definiteness: 'indefinite' } } },
+    }),
     emoji: '⌨️',
     forms: {
       en: {
@@ -2018,6 +2795,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to send content out to another place or format',
+    definition: infinitiveGloss('TRANSFER', {
+      object: 'CONTENT',
+      complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+    }),
     emoji: '📤',
     forms: {
       en: {
@@ -2087,6 +2868,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'source', 'cause'],
     description: 'to bring content in from another place or format',
+    definition: infinitiveGloss('TRANSFER', {
+      object: 'CONTENT',
+      complements: { source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
+    }),
     emoji: '📥',
     forms: {
       en: {
@@ -2642,6 +3427,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause'],
     description: 'to be the name of; to give a name to',
+    definition: infinitiveGloss('INDICATE', {
+      object: 'OBJECT_THING',
+      number: 'plural',
+      complements: { instrumental: { phrase: { concept: 'WORD', definiteness: 'bare', number: 'plural' } } },
+    }),
     emoji: '🏷️',
     forms: {
       en: {
@@ -2708,6 +3498,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'instrumental'],
     description: 'to say what something is like',
+    definition: infinitiveGloss('INDICATE', 'QUALITY', 'plural'),
     emoji: '🖊️',
     forms: {
       en: {
@@ -2774,6 +3565,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to qualify or alter another word',
+    definition: infinitiveGloss('CHANGE', 'QUALITY', 'plural'),
     emoji: '🔧',
     forms: {
       en: {
@@ -2840,6 +3632,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to convey or put into words',
+    definition: infinitiveGloss('INDICATE', 'CONCEPT', 'plural'),
     emoji: '🗣️',
     forms: {
       en: {

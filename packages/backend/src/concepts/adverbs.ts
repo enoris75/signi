@@ -85,6 +85,24 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // A manner-position adverb, deliberately without the `frequency` subtype ALWAYS/NEVER carry: it
+    // follows the verb like FAST ("to strike repeatedly"), rather than preceding it ("always eats").
+    // French has no single-word form in common use, so it is the fixed phrase "à plusieurs reprises".
+    id: 'REPEATEDLY',
+    role: 'adverb',
+    description: 'many times over',
+    emoji: '🔁',
+    forms: {
+      en: { base: 'repeatedly' },
+      it: { base: 'ripetutamente' },
+      fr: { base: 'à plusieurs reprises' },
+      de: { base: 'wiederholt' },
+      es: { base: 'repetidamente' },
+      ja: { base: '繰り返し', reading: 'くりかえし' },
+      pt: { base: 'repetidamente' },
+    },
+  },
+  {
     id: 'ALWAYS',
     role: 'adverb',
     description: 'at all times, on every occasion',

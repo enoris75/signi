@@ -41,7 +41,8 @@ const FR_IMPARF: Record<PN, string> = { '1sg': 'ais', '2sg': 'ais', '3sg': 'ait'
 
 // Italian imperfect-subjunctive stems that the "infinitive minus -re" rule gets wrong.
 // STARE is the aspect auxiliary (progressive/prospective) — irregular: stessi/stesse, not *stassi.
-const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', DRINK: 'beve', STARE: 'ste' };
+// PRODUCE's contracted infinitive (produrre) hides its Latin stem: producesse, not *prodursse.
+const IT_SUBJ_STEM: Record<string, string> = { BE: 'fo', GIVE: 'de', DRINK: 'beve', STARE: 'ste', PRODUCE: 'produce' };
 // French imparfait stems the "nous-present minus -ons" rule gets wrong (être → ét-).
 const FR_IMPARF_STEM: Record<string, string> = { BE: 'ét' };
 
@@ -153,6 +154,10 @@ const ES_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   KNOW: { '2sg': 'sepas', '1pl': 'sepamos', '2pl': 'sepáis' }, // saber → sepa…
   GO:   { '2sg': 'vayas', '1pl': 'vayamos', '2pl': 'vayáis' }, // ir → vaya… (1sg "voy" breaks the -o rule)
   GIVE: { '2sg': 'des', '1pl': 'demos', '2pl': 'deis' },       // dar → dé… (1sg "doy" breaks the -o rule)
+  // -ir verbs whose stressed e→ie diphthong turns to i in the unstressed 1pl/2pl (sienta / sintamos).
+  FEEL: { '2sg': 'sientas', '1pl': 'sintamos', '2pl': 'sintáis' },                 // sentir
+  TRANSFER: { '2sg': 'transfieras', '1pl': 'transfiramos', '2pl': 'transfiráis' }, // transferir
+  ACQUIRE: { '2sg': 'adquieras', '1pl': 'adquiramos', '2pl': 'adquiráis' },       // adquirir (i→ie, back to i)
 };
 const PT_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
   BE:   { '2sg': 'seja', '1pl': 'sejamos', '2pl': 'sejam' },   // ser → seja… (você/vocês)
@@ -166,10 +171,12 @@ const PT_SUBJ_OVERRIDE: Record<string, Record<IPN, string>> = {
 const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE: { '2sg': 'sé', '1pl': 'seamos', '2pl': 'sed' },          // ser: sé / seamos / sed
   GO: { '2sg': 've', '1pl': 'vamos' },                         // ir: ve / vamos (vosotros "id" is regular)
+  HAVE: { '2sg': 'ten' },                                      // tener: ten (tengamos / tened are regular)
 };
 const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE:   { '2sg': 'sii', '1pl': 'siamo', '2pl': 'siate' },      // essere: sii / siamo / siate
   KNOW: { '2sg': 'sappi', '1pl': 'sappiamo', '2pl': 'sappiate' }, // sapere: sappi / sappiamo / sappiate
+  HAVE: { '2sg': 'abbi', '1pl': 'abbiamo', '2pl': 'abbiate' },   // avere: abbi / abbiamo / abbiate
   // The tu command of the short -are verbs is not their 3sg indicative (dà / fa / va).
   GIVE: { '2sg': "da'" },                                        // dare: da'
   MAKE: { '2sg': "fa'" },                                        // fare: fa'

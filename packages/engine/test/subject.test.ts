@@ -464,6 +464,55 @@ describe('subject: the B06 abstract noun ACTION', () => {
   });
 });
 
+// The countable differentia nouns seeded for the verb definitions (a blade, a tooth, a place, a tear,
+// a sound, an option, a button, a keyboard). Each row pins the definite singular, the definite
+// plural and the indefinite singular in every language — so the article's gender (and its elision
+// in it/fr), the plural (irregular "teeth" / "Zähne", French "lieux", Portuguese "botões") and the
+// Japanese surface are all watched. The mass nouns PROPERTY and AFFECTION are in nounPhrase.test.ts.
+type Said = Record<'en' | 'it' | 'fr' | 'de' | 'es' | 'ja' | 'pt', string>;
+const DIFFERENTIA_NOUNS: [id: string, the: Said, thePlural: Said, a: Said][] = [
+  ['BLADE',
+    { en: 'the blade runs.', it: 'la lama corre.', fr: 'la lame court.', de: 'die Klinge läuft.', es: 'la cuchilla corre.', ja: '刃は走ります。', pt: 'a lâmina corre.' },
+    { en: 'the blades run.', it: 'le lame corrono.', fr: 'les lames courent.', de: 'die Klingen laufen.', es: 'las cuchillas corren.', ja: '刃は走ります。', pt: 'as lâminas correm.' },
+    { en: 'a blade runs.', it: 'una lama corre.', fr: 'une lame court.', de: 'eine Klinge läuft.', es: 'una cuchilla corre.', ja: '刃は走ります。', pt: 'uma lâmina corre.' }],
+  ['TOOTH',
+    { en: 'the tooth runs.', it: 'il dente corre.', fr: 'la dent court.', de: 'der Zahn läuft.', es: 'el diente corre.', ja: '歯は走ります。', pt: 'o dente corre.' },
+    { en: 'the teeth run.', it: 'i denti corrono.', fr: 'les dents courent.', de: 'die Zähne laufen.', es: 'los dientes corren.', ja: '歯は走ります。', pt: 'os dentes correm.' },
+    { en: 'a tooth runs.', it: 'un dente corre.', fr: 'une dent court.', de: 'ein Zahn läuft.', es: 'un diente corre.', ja: '歯は走ります。', pt: 'um dente corre.' }],
+  ['PLACE',
+    { en: 'the place runs.', it: 'il luogo corre.', fr: 'le lieu court.', de: 'der Ort läuft.', es: 'el lugar corre.', ja: '場所は走ります。', pt: 'o lugar corre.' },
+    { en: 'the places run.', it: 'i luoghi corrono.', fr: 'les lieux courent.', de: 'die Orte laufen.', es: 'los lugares corren.', ja: '場所は走ります。', pt: 'os lugares correm.' },
+    { en: 'a place runs.', it: 'un luogo corre.', fr: 'un lieu court.', de: 'ein Ort läuft.', es: 'un lugar corre.', ja: '場所は走ります。', pt: 'um lugar corre.' }],
+  ['TEAR',
+    { en: 'the tear runs.', it: 'la lacrima corre.', fr: 'la larme court.', de: 'die Träne läuft.', es: 'la lágrima corre.', ja: '涙は走ります。', pt: 'a lágrima corre.' },
+    { en: 'the tears run.', it: 'le lacrime corrono.', fr: 'les larmes courent.', de: 'die Tränen laufen.', es: 'las lágrimas corren.', ja: '涙は走ります。', pt: 'as lágrimas correm.' },
+    { en: 'a tear runs.', it: 'una lacrima corre.', fr: 'une larme court.', de: 'eine Träne läuft.', es: 'una lágrima corre.', ja: '涙は走ります。', pt: 'uma lágrima corre.' }],
+  ['SOUND',
+    { en: 'the sound runs.', it: 'il suono corre.', fr: 'le son court.', de: 'das Geräusch läuft.', es: 'el sonido corre.', ja: '音は走ります。', pt: 'o som corre.' },
+    { en: 'the sounds run.', it: 'i suoni corrono.', fr: 'les sons courent.', de: 'die Geräusche laufen.', es: 'los sonidos corren.', ja: '音は走ります。', pt: 'os sons correm.' },
+    { en: 'a sound runs.', it: 'un suono corre.', fr: 'un son court.', de: 'ein Geräusch läuft.', es: 'un sonido corre.', ja: '音は走ります。', pt: 'um som corre.' }],
+  ['OPTION',
+    { en: 'the option runs.', it: "l'opzione corre.", fr: "l'option court.", de: 'die Option läuft.', es: 'la opción corre.', ja: '選択肢は走ります。', pt: 'a opção corre.' },
+    { en: 'the options run.', it: 'le opzioni corrono.', fr: 'les options courent.', de: 'die Optionen laufen.', es: 'las opciones corren.', ja: '選択肢は走ります。', pt: 'as opções correm.' },
+    { en: 'an option runs.', it: "un'opzione corre.", fr: 'une option court.', de: 'eine Option läuft.', es: 'una opción corre.', ja: '選択肢は走ります。', pt: 'uma opção corre.' }],
+  ['BUTTON',
+    { en: 'the button runs.', it: 'il pulsante corre.', fr: 'le bouton court.', de: 'die Taste läuft.', es: 'el botón corre.', ja: 'ボタンは走ります。', pt: 'o botão corre.' },
+    { en: 'the buttons run.', it: 'i pulsanti corrono.', fr: 'les boutons courent.', de: 'die Tasten laufen.', es: 'los botones corren.', ja: 'ボタンは走ります。', pt: 'os botões correm.' },
+    { en: 'a button runs.', it: 'un pulsante corre.', fr: 'un bouton court.', de: 'eine Taste läuft.', es: 'un botón corre.', ja: 'ボタンは走ります。', pt: 'um botão corre.' }],
+  ['KEYBOARD',
+    { en: 'the keyboard runs.', it: 'la tastiera corre.', fr: 'le clavier court.', de: 'die Tastatur läuft.', es: 'el teclado corre.', ja: 'キーボードは走ります。', pt: 'o teclado corre.' },
+    { en: 'the keyboards run.', it: 'le tastiere corrono.', fr: 'les claviers courent.', de: 'die Tastaturen laufen.', es: 'los teclados corren.', ja: 'キーボードは走ります。', pt: 'os teclados correm.' },
+    { en: 'a keyboard runs.', it: 'una tastiera corre.', fr: 'un clavier court.', de: 'eine Tastatur läuft.', es: 'un teclado corre.', ja: 'キーボードは走ります。', pt: 'um teclado corre.' }],
+];
+
+describe('subject: the differentia nouns', () => {
+  test.each(DIFFERENTIA_NOUNS)('%s takes its gendered article and pluralises', (id, the, thePlural, a) => {
+    expect(subject(np(id))).toEqual(the);
+    expect(subject(np(id, { number: 'plural' }))).toEqual(thePlural);
+    expect(subject(np(id, { definiteness: 'indefinite' }))).toEqual(a);
+  });
+});
+
 // `gender` carries three values, but 'neut' is meaningful only for a pronoun head ("it"). On a
 // noun it is a no-op: the head keeps its own (default/masculine) lexeme and gender.
 describe('subject: the neuter gender value on a noun head', () => {

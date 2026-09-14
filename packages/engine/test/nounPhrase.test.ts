@@ -54,6 +54,68 @@ describe('determiners', () => {
     });
   });
 
+  // The mass differentia nouns: PROPERTY (possessions) and AFFECTION. Like MONEY they keep their
+  // gender and never pluralise; as mass nouns they take no indefinite article (French fills the
+  // slot with the partitive) and the mass quantifier words ("much", "molto", "viel").
+  test('PROPERTY and AFFECTION are mass nouns — gendered, never plural, no indefinite article', () => {
+    const sees = (id: string, extra: Partial<NounPhrase>) =>
+      sayAll(clause(np('CAT'), 'SEE', { directObject: np(id, extra) }));
+
+    expect(sees('PROPERTY', { number: 'plural' })).toEqual({
+      en: 'the cat sees the property.',
+      it: 'il gatto vede la proprietà.',
+      fr: 'le chat voit la propriété.',
+      es: 'el gato ve la propiedad.',
+      pt: 'o gato vê a propriedade.',
+      de: 'der Kater sieht den Besitz.', // masculine accusative
+      ja: '猫は財産を見ます。',
+    });
+    expect(sees('PROPERTY', { definiteness: 'indefinite' })).toEqual({
+      en: 'the cat sees property.',
+      it: 'il gatto vede proprietà.',
+      fr: 'le chat voit de la propriété.',
+      es: 'el gato ve propiedad.',
+      pt: 'o gato vê propriedade.',
+      de: 'der Kater sieht Besitz.',
+      ja: '猫は財産を見ます。',
+    });
+    expect(sees('PROPERTY', { definiteness: 'many' })).toMatchObject({
+      en: 'the cat sees much property.',
+      it: 'il gatto vede molta proprietà.',
+      fr: 'le chat voit beaucoup de propriété.',
+      es: 'el gato ve mucha propiedad.',
+      pt: 'o gato vê muita propriedade.',
+      de: 'der Kater sieht viel Besitz.',
+    });
+
+    expect(sees('AFFECTION', { number: 'plural' })).toEqual({
+      en: 'the cat sees the affection.',
+      it: "il gatto vede l'affetto.", // vowel-initial: the article elides
+      fr: "le chat voit l'affection.",
+      es: 'el gato ve el afecto.',
+      pt: 'o gato vê o afeto.',
+      de: 'der Kater sieht die Zuneigung.',
+      ja: '猫は愛情を見ます。',
+    });
+    expect(sees('AFFECTION', { definiteness: 'indefinite' })).toEqual({
+      en: 'the cat sees affection.',
+      it: 'il gatto vede affetto.',
+      fr: "le chat voit de l'affection.",
+      es: 'el gato ve afecto.',
+      pt: 'o gato vê afeto.',
+      de: 'der Kater sieht Zuneigung.',
+      ja: '猫は愛情を見ます。',
+    });
+    expect(sees('AFFECTION', { definiteness: 'some' })).toMatchObject({
+      en: 'the cat sees some affection.',
+      it: "il gatto vede dell'affetto.", // the partitive
+      fr: "le chat voit de l'affection.",
+      es: 'el gato ve algo de afecto.',
+      pt: 'o gato vê um pouco de afeto.',
+      de: 'der Kater sieht etwas Zuneigung.',
+    });
+  });
+
   test('the article elides before a vowel', () => {
     expect(sayAll(clause(np('ANGEL'), 'EAT'))).toMatchObject({
       fr: "l'ange mange.",

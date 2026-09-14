@@ -6,26 +6,34 @@ described.)_
 Genus **MOVE**. The engine can already render the target shape — `source` and `direction` are live
 `ComplementType`s (see `COMPLEMENT_RENDER_ORDER` in
 [../../../packages/shared/src/index.ts](../../../packages/shared/src/index.ts)) — so the phrase
-composes as a source+direction pair over PLACE. **The blocker is the backend builder, not grammar.**
+composes as a source+direction pair over PLACE.
 
-## Do this first — extend the builder
+## ~~Do this first — extend the builder~~ (done, 2026-09-14)
 
-`infinitiveGloss(verb, object?, number?, adjectives?)` takes a **bare object** only (optionally
-modified — [B11](../done/B11-perception-verbs.md) added the `adjectives` list for READ). Extend it to
-pass a complement list through to the plan, in
-[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts). This single change also
-unblocks [B12](B12-possession-verbs.md)'s BUY, all of [B13](B13-contact-verbs.md), and
-[B18](B18-selection-verbs.md)'s TYPE — so it is the highest-leverage step in the whole B08 split.
+The builder change landed with [B12](../done/B12-possession-verbs.md). `infinitiveGloss` now lives
+in [verbs/gloss.ts](../../../packages/backend/src/concepts/verbs/gloss.ts) and takes a `GlossParts`
+object, `complements` and an adverb `modifier` included. It already carries B12's BUY, B13, B15's
+GIVE/SEND, B18's TYPE and B19's EXPORT/IMPORT. A motion gloss is:
 
-## Seed first (1 verb + 1 noun)
+```ts
+infinitiveGloss('MOVE', {
+  complements: {
+    source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } },
+    direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } },
+  },
+})
+```
+
+## Seed first (1 verb)
 
 | concept | role | gloss | note |
 |---|---|---|---|
 | MOVE | verb, intransitive | to change position | genus for this batch |
-| PLACE | noun | a location | **not seeded** — HOUSE/HOME/MARKET/PRISON exist, but no generic PLACE |
+| PLACE | noun | a location | ✓ seeded for [B15](../done/B15-transfer-verbs.md) |
 
-Seeding PLACE also feeds [C07](../C-needs-engine/C07-places-locative-gap.md), which is blocked on a
-locative relative clause over exactly this noun.
+PLACE also feeds [C07](../C-needs-engine/C07-places-locative-gap.md), which is blocked on a locative
+relative clause over exactly this noun. GO's "to another place" wants OTHER, which is not seeded
+([B21](B21-ui-clause-and-coordination-vocabulary.md) seeds it).
 
 ## Unlocks
 
