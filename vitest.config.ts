@@ -44,6 +44,29 @@ export default defineConfig({
           sequence: { groupOrder: 1 },
         },
       },
+      {
+        extends: true,
+        resolve: {
+          alias: {
+            // Like @signi/shared above: the engine's package entry points at dist, which is
+            // gitignored and goes stale after every engine edit, so the backend's boot renders are
+            // tested against the engine's source instead.
+            '@signi/engine': path.resolve(__dirname, 'packages/engine/src/index.ts'),
+          },
+        },
+        test: {
+          // Unit tests for the backend, next to the source they test (src/**/*.test.ts). They run
+          // against the real schema and the real corpus, seeded into an in-memory database per file:
+          // every module holds its connection in a singleton and seed.ts works on import, so each
+          // file keeps its own module registry (the default isolation) and with it its own database.
+          name: 'backend',
+          include: ['packages/backend/src/**/*.test.ts'],
+          // db.ts reads this when it is first imported, so no test can open the developer's
+          // signi.db by accident; a test that needs a file on disk points it elsewhere first.
+          env: { SIGNI_DB_PATH: ':memory:' },
+          sequence: { groupOrder: 1 },
+        },
+      },
     ],
   },
 });
