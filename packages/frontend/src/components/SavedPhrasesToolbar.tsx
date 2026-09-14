@@ -30,6 +30,7 @@ import {
 } from "../api.ts";
 import { conceptsQuery } from "../hooks/useConcepts.ts";
 import { useUiString } from "../i18n/useUiString.ts";
+import { useUiLanguage } from "../i18n/LanguageContext.tsx";
 import type {
   PhraseContainer,
   PhraseLink,
@@ -57,6 +58,8 @@ const isEmpty = (containers: PhraseContainer[], links: PhraseLink[]): boolean =>
 
 export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   const t = useUiString();
+  // Saved items are dated in the UI language, not the browser's.
+  const { uiLanguage } = useUiLanguage();
   const queryClient = useQueryClient();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -84,7 +87,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         msg: `Loaded, but ${missing.length} word(s) are no longer in the catalog: ${missing.join(", ")}`,
       });
     } else {
-      setToast({ severity: "success", msg: "Phrase loaded." });
+      setToast({ severity: "success", msg: t("toast.phraseLoaded") });
     }
   }
 
@@ -105,7 +108,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
       queryClient.invalidateQueries({ queryKey: ["savedPhrases"] });
       setSaveOpen(false);
       setName("");
-      setToast({ severity: "success", msg: "Phrase saved." });
+      setToast({ severity: "success", msg: t("toast.phraseSaved") });
     },
     onError: () => setToast({ severity: "error", msg: "Could not save the phrase." }),
   });
@@ -200,7 +203,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
       {/* Save dialog: name the phrase before persisting it to the DB. */}
       <Dialog open={saveOpen} onClose={() => setSaveOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Save phrase</DialogTitle>
+        <DialogTitle>{t("action.save.tooltip")}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -226,7 +229,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
               onClick={() => saveMutation.mutate()}
               sx={{ textTransform: "none" }}
             >
-              Save
+              {t("action.save")}
             </Button>
           </Box>
         </DialogContent>
@@ -234,7 +237,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
 
       {/* Load dialog: pick from saved phrases, or delete one. */}
       <Dialog open={loadOpen} onClose={() => setLoadOpen(false)} fullWidth maxWidth="xs">
-        <DialogTitle>Load phrase</DialogTitle>
+        <DialogTitle>{t("action.load.tooltip")}</DialogTitle>
         <DialogContent>
           {listQuery.isLoading && <Typography color="text.secondary">Loading…</Typography>}
           {listQuery.isError && <Alert severity="error">Could not load saved phrases.</Alert>}
@@ -262,7 +265,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
                 <ListItemButton onClick={() => void handleLoad(p.id)}>
                   <ListItemText
                     primary={p.name}
-                    secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString()}`}
+                    secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString(uiLanguage)}`}
                   />
                 </ListItemButton>
               </ListItem>

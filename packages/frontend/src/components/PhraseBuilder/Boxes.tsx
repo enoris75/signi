@@ -34,11 +34,13 @@ import {
   type Definiteness,
   type PathSpecifier,
   type Tense,
+  type UiStringKey,
 } from "@signi/shared";
 import { ReactNode } from "react";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
+import { clearTitle, revealTitle } from "./canvasCommands.ts";
 
 // The light wash a set or active box wears in its colour. The theme defines only each colour's
 // main/light/dark (no 50…900 scale), so the wash is `main` at MUI's selected opacity.
@@ -96,6 +98,9 @@ export interface SatelliteIcon {
   key: string;
   icon: ReactNode;
   label: string;
+  // The catalog key `label` is rendered from, when it has one — which also tells the reveal control
+  // which part it shows and hides (see canvasCommands).
+  labelKey?: UiStringKey;
   active: boolean;
   isSet: boolean;
   // valued = always carries a value (number / gender / polarity); its icon reads
@@ -122,15 +127,19 @@ const PICKER_WIDTH = 100;
 // ring layout; on a disc it sits on the disc's rim at half past one.
 export function ClearButton({
   label,
+  labelKey,
   onClear,
   sx,
 }: {
   label: string;
+  // The key the word's box is titled from, naming the part the button clears ("clear the adjective").
+  labelKey?: UiStringKey;
   onClear: () => void;
   sx?: SxProps<Theme>;
 }) {
+  const t = useUiString();
   return (
-    <Tooltip title={`Clear ${label}`}>
+    <Tooltip title={clearTitle(t, label, labelKey)}>
       <IconButton
         size="small"
         onPointerDown={(e) => e.stopPropagation()}
@@ -258,7 +267,7 @@ export function SlotBox({
                 fontStyle: "italic",
               }}
             >
-              {isActive ? "choose…" : "empty"}
+              {isActive ? `${t("slot.choose")}…` : "empty"}
             </Typography>
           )}
         </>
@@ -287,7 +296,7 @@ export function SlotBox({
           {content}
         </Paper>
         {concept && !dimmed && !editing && (
-          <ClearButton label={slot.label} onClear={onClear} sx={{ position: "absolute", top: -8, right: -8 }} />
+          <ClearButton label={slot.label} labelKey={slot.labelKey} onClear={onClear} sx={{ position: "absolute", top: -8, right: -8 }} />
         )}
       </Box>
     );
@@ -328,6 +337,7 @@ export function SlotBox({
       {kind === "disc" && concept && !dimmed && !editing && (
         <ClearButton
           label={slot.label}
+          labelKey={slot.labelKey}
           onClear={onClear}
           sx={{
             position: "absolute",
@@ -363,6 +373,7 @@ export function SatelliteButton({
   sat: SatelliteIcon;
   color: SlotConfig["color"];
 }) {
+  const t = useUiString();
   // Color tiers:
   //  • solid  → carries a non-default value (plural / fem / negative / a chosen word)
   //  • outlined → expanded, or an always-valued satellite at its default (number/gender/polarity)
@@ -373,7 +384,7 @@ export function SatelliteButton({
   const tooltip =
     !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
       ? `${sat.label}: ${sat.valueLabel}`
-      : `${sat.active ? "Hide" : "Show"} ${sat.label}`;
+      : revealTitle(t, sat.active, sat.label, sat.labelKey);
   return (
     <Tooltip title={tooltip}>
       <IconButton

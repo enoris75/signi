@@ -24,7 +24,7 @@ test.describe('per-modal adverbs', () => {
 
     await openAndPick({ page }, 'Show Modal', /type a modal/, 'want', 'WILL');
     await openAndPick({ page }, 'Show Modal Adverb', /type an adverb/, 'never', 'NEVER');
-    await openAndPick({ page }, 'Show Adverb', /type an adverb/, 'always', 'ALWAYS');
+    await openAndPick({ page }, 'Show the adverb', /type an adverb/, 'always', 'ALWAYS');
 
     expect(await app.sentence('en')).toBe('the cat never wants to always eat.');
     expect(await app.sentence('de')).toBe('der Kater will nie immer essen.');
@@ -43,14 +43,14 @@ test.describe('per-modal adverbs', () => {
     const saveDialog = page.getByRole('dialog');
     await saveDialog.getByLabel('Name').fill(name);
     await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Phrase saved.')).toBeVisible();
+    await expect(page.getByText('Saved phrase')).toBeVisible();
 
     await app.goto();
     await expect(page.getByTestId('translations-empty')).toBeVisible();
 
     await page.getByRole('button', { name: 'Load a saved phrase' }).click();
     await page.getByRole('dialog').getByText(name).click();
-    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+    await expect(page.getByText('Loaded phrase')).toBeVisible();
 
     // The modal (WILL) AND its own adverb (NEVER) both come back — the v5 round-trip.
     await expect.poll(() => app.sentence('en')).toBe('the cat never wants to eat.');

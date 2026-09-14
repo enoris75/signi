@@ -6,6 +6,8 @@ import type { ReactNode } from "react";
 import type { GroupRect } from "./graph.ts";
 import type { PhraseRenderContext } from "./phraseRender.tsx";
 import { collapseControlKey, removeControlKey } from "./ringSpecs.ts";
+import { collapseTitle } from "./canvasCommands.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 // A small round chrome button on the dotted ring, centred where the ring layout seats it.
 function RingButton({
@@ -70,6 +72,7 @@ export function GroupBox({
     handleRemoveComplement,
     removeRing,
   } = ctx;
+  const t = useUiString();
   // Compact view hides the dotted rings entirely — only the words in their solid rings remain.
   if (compact) return null;
   const isCollapsed = collapsedGroups[rect.label] ?? false;
@@ -101,7 +104,7 @@ export function GroupBox({
 
       <RingButton
         at={controlPos[collapseControlKey(rect.label)]}
-        title={`${isCollapsed ? "Expand" : "Collapse"} ${rect.label}`}
+        title={collapseTitle(t, isCollapsed, rect.label, rect.labelKey)}
         onClick={() => handleToggleCollapse(rect.label)}
       >
         {isCollapsed ? <UnfoldMoreIcon sx={{ fontSize: 12 }} /> : <UnfoldLessIcon sx={{ fontSize: 12 }} />}

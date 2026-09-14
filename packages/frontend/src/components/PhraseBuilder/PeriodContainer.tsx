@@ -362,7 +362,7 @@ export function PeriodContainer({
         ? `Remove the coordination (${coordLabel})`
         : coordinative.isCoordinated
           ? `This period is a coordinated clause (${coordLabel})`
-          : "Coordinate this period with another";
+          : t("action.coordinatePeriod");
 
   // The instrumental has no border control here — only the target side. The card lights up while
   // an instrumental pick is pending and takes the click, exactly as it does for the other two.
@@ -667,9 +667,9 @@ export function PeriodContainer({
             {instrumental?.isInstrument
               ? t("slot.instrumental")
               : imperative?.active
-                ? "Command"
+                ? t("imperative.command")
                 : infinitive?.active
-                  ? "Infinitive"
+                  ? t("infinitive.phrase")
                   : conditional?.hasCondition
                   ? "Main clause"
                   : conditional?.isIfClause
@@ -823,7 +823,7 @@ export function PeriodContainer({
             <Tooltip
               title={
                 soleContainer
-                  ? "Clear this period"
+                  ? t("action.clearPeriod")
                   : nested
                     ? "Remove this phrase"
                     : "Remove this period"
@@ -843,7 +843,7 @@ export function PeriodContainer({
                 }}
                 aria-label={
                   soleContainer
-                    ? "Clear main clause"
+                    ? t("action.clearPeriod")
                     : nested
                       ? "Remove phrase"
                       : "Remove main clause"

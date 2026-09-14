@@ -37,3 +37,27 @@ keeps its own determiner).
 `manner.spec.ts`, `manner-possessor-crash.spec.ts`, `modal-adverb.spec.ts`, `SlotTypeahead.test.tsx`,
 `AdjectiveTypeahead.test.tsx`, `AdverbTypeahead.test.tsx`, `DirectObjectTypeahead.test.tsx`,
 `SubjectTypeahead.test.tsx`, `ModifierTypeahead.test.tsx`, `PhraseBuilder.test.tsx`, `phraseRender.test.tsx`.
+
+## Done
+
+**2026-09-14.** Four entries in [uiStrings.ts](../../../packages/shared/src/uiStrings.ts), each
+`commandOf('TYPE')` on an indefinite grammar noun, lower-case (`stripPeriod`), the call site adding
+the "…". The noun-or-pronoun one coordinates its two objects with `or`.
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `slot.adjective.placeholder` | type an adjective | digita un aggettivo | taper un adjectif | ein Adjektiv tippen | teclear un adjetivo | 形容詞を入力 | digitar um adjetivo |
+| `slot.adverb.placeholder` | type an adverb | digita un avverbio | taper un adverbe | ein Adverb tippen | teclear un adverbio | 副詞を入力 | digitar um advérbio |
+| `slot.noun.placeholder` | type a noun | digita un sostantivo | taper un nom | ein Substantiv tippen | teclear un sustantivo | 名詞を入力 | digitar um substantivo |
+| `slot.nounOrPronoun.placeholder` | type a noun or a pronoun | digita un sostantivo o un pronome | taper un nom ou un pronom | ein Substantiv oder ein Pronomen tippen | teclear un sustantivo o un pronombre | 名詞か代名詞を入力 | digitar um substantivo ou um pronome |
+
+- [AdjectiveTypeahead](../../../packages/frontend/src/components/PhraseBuilder/AdjectiveTypeahead.tsx),
+  [AdverbTypeahead](../../../packages/frontend/src/components/PhraseBuilder/AdverbTypeahead.tsx) and
+  [DirectObjectTypeahead](../../../packages/frontend/src/components/PhraseBuilder/DirectObjectTypeahead.tsx)
+  read their key.
+- `slotTypeahead` is a plain function and cannot call the hook, so
+  [SubjectTypeahead](../../../packages/frontend/src/components/PhraseBuilder/SubjectTypeahead.tsx)'s
+  `placeholder` string became `placeholderKey` (default `slot.subject.placeholder`), and the cause
+  complement passes `slot.nounOrPronoun.placeholder`.
+- English changes as planned: "type a noun or **a** pronoun". Tests updated in
+  `SubjectTypeahead.test.tsx` and `SlotTypeahead.test.tsx`; the others already matched.

@@ -90,7 +90,7 @@ describe('slotTypeahead', () => {
     ['directObjectAdjective2', ADJECTIVE_OR_NOUN],
     ['sourceAdjective3', ADJECTIVE_OR_NOUN],
     ['causeAdjective', ADJECTIVE_OR_NOUN],
-    ['cause', { ...SUBJECT, prompt: 'type a noun or pronoun…' }],
+    ['cause', { ...SUBJECT, prompt: 'type a noun or a pronoun…' }],
     ['terminus', NOUN],
     ['manner', NOUN],
     ['locative', NOUN],

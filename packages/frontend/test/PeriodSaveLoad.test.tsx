@@ -137,7 +137,7 @@ describe('PeriodSaveLoad', () => {
           links: [],
         },
       });
-      expect(getComputedStyle(await findNotice('Period saved.')).backgroundColor).toBe(SUCCESS);
+      expect(getComputedStyle(await findNotice('Saved period')).backgroundColor).toBe(SUCCESS);
       expect(nameField()).toHaveValue('');
     });
 
@@ -172,7 +172,7 @@ describe('PeriodSaveLoad', () => {
       expect(savePhrase).toHaveBeenCalledOnce();
 
       pending.resolve(record(BREAKFAST, []));
-      await findNotice('Period saved.');
+      await findNotice('Saved period');
     });
 
     it('refreshes the saved-period list once saved', async () => {
@@ -229,13 +229,22 @@ describe('PeriodSaveLoad', () => {
       vi.mocked(listSavedPhrases).mockResolvedValue([BREAKFAST, SUPPER]);
       renderSaveLoad({ loadOpen: true });
 
-      expect(screen.getByRole('dialog', { name: 'Add saved period' })).toBeInTheDocument();
+      expect(screen.getByRole('dialog', { name: 'Add a saved period' })).toBeInTheDocument();
       expect(await screen.findByText('Breakfast')).toBeInTheDocument();
       expect(screen.getByText('Supper')).toBeInTheDocument();
-      const updated = new Date(BREAKFAST.updatedAt).toLocaleString();
+      const updated = new Date(BREAKFAST.updatedAt).toLocaleString('en');
       expect(screen.getAllByText(`system · ${updated}`)).toHaveLength(2);
       expect(screen.queryByText(/^No saved periods yet/)).not.toBeInTheDocument();
       expect(listSavedPhrases).toHaveBeenCalledExactlyOnceWith('period');
+    });
+
+    it('dates each saved period in the UI language, not the browser’s', async () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      vi.mocked(listSavedPhrases).mockResolvedValue([BREAKFAST]);
+      renderSaveLoad({ loadOpen: true });
+
+      const updated = new Date(BREAKFAST.updatedAt).toLocaleString('de');
+      expect(await screen.findByText(`system · ${updated}`)).toBeInTheDocument();
     });
 
     it('shows that the list is loading', async () => {
@@ -380,7 +389,7 @@ describe('PeriodSaveLoad', () => {
       rerender(<PeriodSaveLoad {...props} saveTarget={null} />);
 
       const notice = await screen.findByRole('alert');
-      expect(notice).toHaveTextContent('Period saved.');
+      expect(notice).toHaveTextContent('Saved period');
       fireEvent.click(screen.getByRole('button', { name: 'Close' }));
 
       await waitForElementToBeRemoved(() => screen.queryByRole('alert'));
@@ -395,13 +404,13 @@ describe('PeriodSaveLoad', () => {
       await act(() => vi.advanceTimersByTimeAsync(10));
       rerender(<PeriodSaveLoad {...props} saveTarget={null} />);
       await act(() => vi.advanceTimersByTimeAsync(490));
-      expect(screen.getByRole('alert')).toHaveTextContent('Period saved.');
+      expect(screen.getByRole('alert')).toHaveTextContent('Saved period');
 
       await act(() => vi.advanceTimersByTimeAsync(4000));
-      expect(screen.getByRole('alert')).toHaveTextContent('Period saved.');
+      expect(screen.getByRole('alert')).toHaveTextContent('Saved period');
 
       await act(() => vi.advanceTimersByTimeAsync(1000));
-      expect(screen.queryByText('Period saved.')).not.toBeInTheDocument();
+      expect(screen.queryByText('Saved period')).not.toBeInTheDocument();
       // The hide renders as that act ends, and the exit transition is timed from that render.
       await act(() => vi.advanceTimersByTimeAsync(1000));
       expect(screen.queryByRole('alert')).not.toBeInTheDocument();

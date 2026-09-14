@@ -825,7 +825,7 @@ test.describe('tidy the period · edge cases', () => {
     const order = ['Subject', 'Verb Phrase', 'Direct Object'];
     const open = await tidyAndCheck(app, order);
 
-    await page.getByRole('button', { name: 'Collapse Subject' }).click();
+    await page.getByRole('button', { name: 'Compact the subject' }).click();
     const collapsed = await tidyAndCheck(app, order);
     expect(collapsed.words.map((w) => w.key)).not.toContain('subjectAdjective');
     expect(
@@ -834,7 +834,7 @@ test.describe('tidy the period · edge cases', () => {
     ).toBeLessThan(group(open, 'Subject').bottom - group(open, 'Subject').top);
 
     // Opening it again and tidying lands on exactly the grid it had before it was collapsed.
-    await page.getByRole('button', { name: 'Expand Subject' }).click();
+    await page.getByRole('button', { name: 'Expand the subject' }).click();
     expect(rounded(await tidyAndCheck(app, order))).toEqual(rounded(open));
   });
 

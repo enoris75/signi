@@ -22,6 +22,25 @@ test.describe('interface language', () => {
     ).toHaveText('gatto');
   });
 
+  test('names the canvas controls after the part they act on, in the UI language', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'EAT');
+    await expect(app.satellite('subjectAdjective')).toHaveAttribute('aria-label', 'Show the adjective');
+
+    await app.setUiLanguage('it');
+
+    // The command sits on the part's own grammar noun, with the article its language gives it.
+    await expect(app.satellite('subjectAdjective')).toHaveAttribute('aria-label', "Mostra l'aggettivo");
+    await expect(page.getByRole('button', { name: 'Cancella il soggetto', exact: true })).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Compatta il soggetto', exact: true })).toBeVisible();
+    await expect(app.satellite('subjectGender')).toHaveAttribute('aria-label', 'Genere: Maschile');
+    // The object's picker, and the sole period's clear control.
+    await expect(app.nounInput).toHaveAttribute('placeholder', 'digita un sostantivo…');
+    await expect(page.getByRole('button', { name: 'Cancella questo periodo', exact: true })).toBeVisible();
+  });
+
   test('leaves the translations themselves alone — every language is always shown', async ({
     app,
   }) => {

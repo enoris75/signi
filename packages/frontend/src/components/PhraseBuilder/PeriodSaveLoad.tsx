@@ -26,6 +26,8 @@ import {
 import { conceptsQuery } from "../../hooks/useConcepts.ts";
 import type { PhraseContainer, PhraseSelection } from "./interfaces.ts";
 import { hydrateWorkspace, serializePeriod } from "./phraseSerialize.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
+import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 
 interface Props {
   // The container whose clause is being saved (dialog open while non-null).
@@ -47,6 +49,9 @@ export function PeriodSaveLoad({
   onCloseLoad,
   onAppendPeriod,
 }: Props) {
+  const t = useUiString();
+  // Saved items are dated in the UI language, not the browser's.
+  const { uiLanguage } = useUiLanguage();
   const queryClient = useQueryClient();
   const [name, setName] = useState("");
   const [toast, setToast] = useState<{ severity: "success" | "error"; msg: string } | null>(
@@ -66,7 +71,7 @@ export function PeriodSaveLoad({
       queryClient.invalidateQueries({ queryKey: ["savedPhrases"] });
       setName("");
       onCloseSave();
-      setToast({ severity: "success", msg: "Period saved." });
+      setToast({ severity: "success", msg: t("toast.periodSaved") });
     },
     onError: () => setToast({ severity: "error", msg: "Could not save the period." }),
   });
@@ -110,7 +115,7 @@ export function PeriodSaveLoad({
     <>
       {/* Save dialog: name the period before persisting it. */}
       <Dialog open={Boolean(saveTarget)} onClose={onCloseSave} fullWidth maxWidth="xs">
-        <DialogTitle>Save period</DialogTitle>
+        <DialogTitle>{t("action.savePeriod")}</DialogTitle>
         <DialogContent>
           <TextField
             autoFocus
@@ -136,7 +141,7 @@ export function PeriodSaveLoad({
               onClick={() => saveMutation.mutate()}
               sx={{ textTransform: "none" }}
             >
-              Save
+              {t("action.save")}
             </Button>
           </Box>
         </DialogContent>
@@ -144,7 +149,7 @@ export function PeriodSaveLoad({
 
       {/* Load dialog: pick a saved period to append as a new container. */}
       <Dialog open={loadOpen} onClose={onCloseLoad} fullWidth maxWidth="xs">
-        <DialogTitle>Add saved period</DialogTitle>
+        <DialogTitle>{t("action.addSavedPeriod")}</DialogTitle>
         <DialogContent>
           {listQuery.isLoading && <Typography color="text.secondary">Loading…</Typography>}
           {listQuery.isError && <Alert severity="error">Could not load saved periods.</Alert>}
@@ -172,7 +177,7 @@ export function PeriodSaveLoad({
                 <ListItemButton onClick={() => void handleLoad(p.id)}>
                   <ListItemText
                     primary={p.name}
-                    secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString()}`}
+                    secondary={`${p.author} · ${new Date(p.updatedAt).toLocaleString(uiLanguage)}`}
                   />
                 </ListItemButton>
               </ListItem>

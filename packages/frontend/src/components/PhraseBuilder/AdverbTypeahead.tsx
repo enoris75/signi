@@ -3,6 +3,7 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
 
 // The inline picker for the verb's adverb (`modifier`) slot. A single-vocabulary
@@ -14,6 +15,7 @@ export function AdverbTypeahead({
   onSelect: (concept: Concept) => void;
 }) {
   const { data: adverbs = [] } = useConcepts("adverb");
+  const t = useUiString();
   const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -75,7 +77,7 @@ export function AdverbTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type an adverb…"
+        placeholder={`${t("slot.adverb.placeholder")}…`}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",

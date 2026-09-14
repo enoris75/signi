@@ -33,7 +33,7 @@ and a genitive possessor.
 
 The "— click to change" tail on all three chips is a purpose clause:
 [C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md). The "Modifier number" chip is
-[A14](../A-ready/A14-ui-satellite-and-badge-labels.md).
+[A14](../done/A14-ui-satellite-and-badge-labels.md).
 
 ## Tests that select on these literals
 

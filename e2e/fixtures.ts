@@ -276,7 +276,7 @@ export class Builder {
    */
   async linkCoordination(firstIndex: number, secondIndex: number, conjunction: string): Promise<void> {
     await this.period(firstIndex)
-      .getByRole('button', { name: 'Coordinate this period with another' })
+      .getByRole('button', { name: 'Coordinate this period' })
       .click();
     await this.page.getByRole('menuitem', { name: new RegExp(`^${conjunction}`) }).click();
     await this.period(secondIndex)

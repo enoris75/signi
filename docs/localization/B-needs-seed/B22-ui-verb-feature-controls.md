@@ -32,10 +32,10 @@ ones the pronoun chooser and number toggle already use: a bare grammar noun for 
 | Modal / Modal 2 (slot titles) | [slots.ts:172](../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L172), 179 | `slot.modal` | `nameOf('MODAL')`; drop the numeral, as `ADJECTIVE_LABEL_KEY` did |
 | Modal / Modal 2 (satellites) | [satellites.tsx:288](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L288), 298 | reuse `slot.modal` | — |
 | Modal Adverb / Modal 2 Adverb (satellites) | [satellites.tsx:309](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L309), 318 | reuse `slot.adverb` | the slot titles already do ([slots.ts:188](../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L188), 196) |
-| type a modal… | [ModalTypeahead.tsx:75](../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L75) | `slot.modal.placeholder` | `commandOf('TYPE')` + `MODAL indefinite`, the [A11](../A-ready/A11-ui-typeahead-placeholders.md) shape |
+| type a modal… | [ModalTypeahead.tsx:75](../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L75) | `slot.modal.placeholder` | `commandOf('TYPE')` + `MODAL indefinite`, the [A11](../done/A11-ui-typeahead-placeholders.md) shape |
 
 Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
-[A15](../A-ready/A15-ui-slot-scoped-commands.md) Show/Hide/Clear families. `TENSE_LABELS` and
+[A15](../done/A15-ui-slot-scoped-commands.md) Show/Hide/Clear families. `TENSE_LABELS` and
 `ASPECT_LABELS` then have no UI caller and can be deleted from `@signi/shared`.
 
 ## Tests that select on these literals

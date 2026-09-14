@@ -5,6 +5,7 @@ import {
   adjectiveSlots,
   ALL_SLOTS,
   BOX_COMPLEMENT_TYPES,
+  COMPLEMENT_LABEL_KEYS,
   MODAL_ADVERB_SLOTS,
   MODAL_SLOTS,
   MUI_COLOR_HEX,
@@ -82,6 +83,7 @@ export function roleGroups({
       ? [
           {
             label: "Subject",
+            labelKey: "slot.subject" as const,
             color: MUI_COLOR_HEX.primary,
             mainKey: "subject",
             nodeKeys: ["subject", ...shown([...adjectiveSlots("subject"), "subjectDefiniteness"])],
@@ -108,6 +110,7 @@ export function roleGroups({
       ? [
           {
             label: "Direct Object",
+            labelKey: "slot.directObject" as const,
             color: MUI_COLOR_HEX.success,
             mainKey: "directObject",
             nodeKeys: [
@@ -119,6 +122,7 @@ export function roleGroups({
       : []),
     ...BOX_COMPLEMENT_TYPES.filter((type) => shownMap[type]).map((type) => ({
       label: COMPLEMENT_LABELS[type],
+      labelKey: COMPLEMENT_LABEL_KEYS[type],
       color: MUI_COLOR_HEX.warning,
       mainKey: type as string,
       removeKey: type,

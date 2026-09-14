@@ -11,8 +11,8 @@ test.describe('adverbial of manner', () => {
     await app.buildClause('CAT', 'RUN');
 
     // Reveal the manner complement from its toggle on the verb-phrase box. The toggle's
-    // accessible name is "Show <slot label>", the label being the engine-rendered grammar term.
-    await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+    // accessible name is the engine-rendered command on the slot's grammar noun ("Show the adverbial of manner").
+    await page.getByRole('button', { name: 'Show the adverbial of manner' }).click();
 
     // Pick SPEED — a measure noun. The engine chooses "at" (con → alla) with no user input.
     const box = page.getByTestId('box-manner');
@@ -41,7 +41,7 @@ test.describe('adverbial of manner', () => {
     page,
   }) => {
     await app.buildClause('CAT', 'RUN');
-    await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+    await page.getByRole('button', { name: 'Show the adverbial of manner' }).click();
 
     const box = page.getByTestId('box-manner');
     await box.getByTestId('typeahead-noun').fill('speed');
@@ -62,7 +62,7 @@ test.describe('adverbial of manner', () => {
   // the withdrawal is specific to the measure relation, so its determiner satellite is present.
   test('a similative manner adverbial keeps its determiner control', async ({ app, page }) => {
     await app.buildClause('CAT', 'RUN');
-    await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+    await page.getByRole('button', { name: 'Show the adverbial of manner' }).click();
 
     const box = page.getByTestId('box-manner');
     await box.getByTestId('typeahead-noun').fill('water');

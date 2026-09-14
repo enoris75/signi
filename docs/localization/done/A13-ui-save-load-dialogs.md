@@ -53,3 +53,31 @@ with it, so fixing it (*hinzufügen*) is a lexicon fix that corrects both.
 `Save phrase` / `Load phrase` → `SavedPhrasesToolbar.test.tsx`; `Save period` → `PhraseBuilder.test.tsx`,
 `PeriodContainer.test.tsx`, `PeriodSaveLoad.test.tsx`; `Add saved period` / `Period saved` →
 `PeriodSaveLoad.test.tsx`.
+
+## Done
+
+**2026-09-14.** Added `action.addSavedPeriod` and the three toasts; the other titles reuse their
+button's tooltip keys.
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `action.save.tooltip` | Save the whole phrase | Salva la frase intera | Enregistrer la phrase entière | Die ganze Phrase speichern | Guardar la frase entera | 全体のフレーズを保存 | Salvar a frase inteira |
+| `action.load.tooltip` | Load a saved phrase | Carica una frase salvata | Charger une phrase enregistrée | Eine gespeicherte Phrase laden | Cargar una frase guardada | 保存済みのフレーズを読み込み | Carregar uma frase salva |
+| `action.savePeriod` | Save the period | Salva il periodo | Enregistrer la période | Das Satzgefüge speichern | Guardar el período | 文を保存 | Salvar o período |
+| `action.addSavedPeriod` | Add a saved period | Aggiungi un periodo salvato | Ajouter une période enregistrée | Ein gespeichertes Satzgefüge addieren | Añadir un período guardado | 保存済みの文を追加 | Adicionar um período salvo |
+| `toast.phraseSaved` | Saved phrase | Frase salvata | Phrase enregistrée | Gespeicherte Phrase | Frase guardada | 保存済みのフレーズ | Frase salva |
+| `toast.phraseLoaded` | Loaded phrase | Frase caricata | Phrase chargée | Geladene Phrase | Frase cargada | 読み込み済みのフレーズ | Frase carregada |
+| `toast.periodSaved` | Saved period | Periodo salvato | Période enregistrée | Gespeichertes Satzgefüge | Período guardado | 保存済みの文 | Período salvo |
+
+- The toasts are set as `t(…)` at the moment of saving/loading, in
+  [SavedPhrasesToolbar.tsx](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx) and
+  [PeriodSaveLoad.tsx](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx).
+- Both saved-item lists date with `toLocaleString(uiLanguage)`. New test in
+  `PeriodSaveLoad.test.tsx`: a German UI dates in German.
+- English changes: "Phrase saved." → "Saved phrase", "Save phrase" → "Save the whole phrase",
+  "Load phrase" → "Load a saved phrase", "Add saved period" → "Add a saved period", and the save
+  dialog title reads "Save the period" once the bundle arrives. Updated in
+  `SavedPhrasesToolbar.test.tsx`, `PeriodSaveLoad.test.tsx`, `relative.spec.ts`,
+  `save-load.spec.ts`, `modal-adverb.spec.ts` and `possessor-reference.spec.ts`.
+- German ADD is still *addieren*. *hinzufügen* is separable, which the engine cannot split, so it
+  is not a drop-in fix; left as is.

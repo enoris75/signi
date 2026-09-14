@@ -48,3 +48,35 @@ more unit suites; `Masculine` / `Feminine` → `satellites.test.tsx`; `Possessor
 `Direct Object` → `canvas.spec.ts`, `tidy.spec.ts`, `translation.spec.ts` (several of these are group
 names, see [B23](../B-needs-seed/B23-ui-complement-and-group-names.md)); `Modifier number` →
 `PhraseBuilder.test.tsx`, `phraseRender.test.tsx`.
+
+## Done
+
+**2026-09-14.** Added `satellite.gender` and `gender.value.masc/fem/neut`. Every other label reuses
+an existing key; the possessor satellite reuses `slot.possessor` (same plan as the proposed
+`satellite.possessor`, which the owner-ring work shipped first).
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `category.adjective` | Adjective | Aggettivo | Adjectif | Adjektiv | Adjetivo | 形容詞 | Adjetivo |
+| `slot.adverb` | Adverb | Avverbio | Adverbe | Adverb | Adverbio | 副詞 | Advérbio |
+| `slot.directObject` | Object | Complemento oggetto | Complément d'objet | Objekt | Complemento | 目的語 | Objeto |
+| `satellite.gender` | Gender | Genere | Genre | Geschlecht | Género | 性 | Género |
+| `gender.value.masc` | Male | Maschile | Masculin | Männlich | Masculino | 男性 | Masculino |
+| `gender.value.fem` | Female | Femminile | Féminin | Weiblich | Femenino | 女性 | Feminino |
+| `gender.value.neut` | Neuter | Neutro | Neutre | Sächlich | Neutro | 中性 | Neutro |
+| `slot.possessor` | Possessor | Possessore | Possesseur | Besitzer | Poseedor | 所有者 | Possuidor |
+| `satellite.number` | Number | Numero | Nombre | Numerus | Número | 数 | Número |
+| `imperative.command` | Command | Comando | Commande | Befehl | Comando | 命令 | Comando |
+| `infinitive.phrase` | Infinitive phrase | Frase infinitiva | Proposition infinitive | Infinitivphrase | Frase de infinitivo | 不定詞句 | Frase infinitiva |
+
+- [satellites.tsx](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx): the
+  adjective chain (all three links read "Adjective"), adverb, object, gender label and values, and
+  possessor now come from `t`. Each satellite also carries the `labelKey` it was named from, which
+  A15's reveal tooltips key on.
+- [phraseRender.tsx](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx): the
+  modifier number chip reads `satellite.number` + `number.value.*`; its "— click to change" tail
+  stays English (C12).
+- [PeriodContainer.tsx](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx):
+  the Command / Infinitive badges read `imperative.command` / `infinitive.phrase`.
+- English changes: "Masculine / Feminine" → "Male / Female", "Direct Object" → "Object",
+  "Infinitive" → "Infinitive phrase", "Modifier number:" → "Number:".

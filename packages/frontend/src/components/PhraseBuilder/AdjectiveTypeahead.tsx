@@ -3,6 +3,7 @@ import { Concept } from "@signi/shared";
 import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
 
 export function AdjectiveTypeahead({
@@ -15,6 +16,7 @@ export function AdjectiveTypeahead({
   header?: ReactNode;
 }) {
   const { data: adjectives = [] } = useConcepts("adjective");
+  const t = useUiString();
   const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -76,7 +78,7 @@ export function AdjectiveTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type an adjective…"
+        placeholder={`${t("slot.adjective.placeholder")}…`}
         sx={{
           fontFamily: '"Inter", sans-serif',
           fontSize: "0.8rem",

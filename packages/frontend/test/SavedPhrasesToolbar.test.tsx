@@ -106,7 +106,7 @@ const exportButton = () => screen.getByRole('button', { name: 'Export phrase' })
 
 function openSaveDialog() {
   fireEvent.click(saveButton());
-  const dialog = screen.getByRole('dialog', { name: 'Save phrase' });
+  const dialog = screen.getByRole('dialog', { name: 'Save the whole phrase' });
   return {
     dialog,
     name: within(dialog).getByRole('textbox', { name: 'Name' }),
@@ -117,7 +117,7 @@ function openSaveDialog() {
 
 function openLoadDialog() {
   fireEvent.click(loadButton());
-  return screen.getByRole('dialog', { name: 'Load phrase' });
+  return screen.getByRole('dialog', { name: 'Load a saved phrase' });
 }
 
 // The toast message. It renders beside the dialogs rather than in them, so while a dialog is
@@ -209,7 +209,7 @@ describe('SavedPhrasesToolbar', () => {
       type(name, '  The cat sleeps  ');
       fireEvent.click(save);
 
-      expect(await findToast()).toHaveTextContent('Phrase saved.');
+      expect(await findToast()).toHaveTextContent('Saved phrase');
       expect(savePhrase).toHaveBeenCalledExactlyOnceWith({
         name: 'The cat sleeps',
         kind: 'phrase',
@@ -229,7 +229,7 @@ describe('SavedPhrasesToolbar', () => {
       type(name, 'The cat sleeps');
       fireEvent.keyDown(name, { key: 'Enter' });
 
-      expect(await findToast()).toHaveTextContent('Phrase saved.');
+      expect(await findToast()).toHaveTextContent('Saved phrase');
       expect(savePhrase).toHaveBeenCalledExactlyOnceWith(
         expect.objectContaining({ name: 'The cat sleeps' }),
       );
@@ -251,7 +251,7 @@ describe('SavedPhrasesToolbar', () => {
       expect(savePhrase).toHaveBeenCalledOnce();
 
       finish(RECORD);
-      expect(await findToast()).toHaveTextContent('Phrase saved.');
+      expect(await findToast()).toHaveTextContent('Saved phrase');
     });
 
     it('will not save without a name', () => {
@@ -353,7 +353,7 @@ describe('SavedPhrasesToolbar', () => {
 
       fireEvent.click(await within(dialog).findByText('The cat sleeps'));
 
-      expect(await findToast()).toHaveTextContent('Phrase loaded.');
+      expect(await findToast()).toHaveTextContent('Loaded phrase');
       expect(fetchSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');
       expect(onLoad).toHaveBeenCalledExactlyOnceWith(
         [
@@ -382,7 +382,7 @@ describe('SavedPhrasesToolbar', () => {
 
       deliver([CAT, SLEEP]);
 
-      expect(await findToast()).toHaveTextContent('Phrase loaded.');
+      expect(await findToast()).toHaveTextContent('Loaded phrase');
       expect(onLoad).toHaveBeenCalledExactlyOnceWith(
         [
           { id: 'c1', selection: { subject: CAT, verb: SLEEP } },
@@ -509,7 +509,7 @@ describe('SavedPhrasesToolbar', () => {
         }),
       );
 
-      expect(await findToast()).toHaveTextContent('Phrase loaded.');
+      expect(await findToast()).toHaveTextContent('Loaded phrase');
       expect(onLoad).toHaveBeenCalledExactlyOnceWith(
         [
           { id: 'c1', selection: { subject: CAT, verb: SLEEP } },

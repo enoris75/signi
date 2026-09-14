@@ -10,6 +10,7 @@
 //    clause / possessor / coordination controls, a complement's relation toolbar, the verb's
 //    complement and direct-object toggles — and the ports the lines to the other rings leave from.
 
+import type { UiStringKey } from "@signi/shared";
 import type { BoxComplementType } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
 import type { PerimeterEntry } from "./satellites.tsx";
@@ -24,7 +25,12 @@ import type { NounKey } from "./interfaces.ts";
 
 /** One constituent on the canvas: its word, and the satellite nodes shown round it. */
 export type GroupDef = {
+  // The constituent's English name — and its identity: collapse state, layout rank and the ring's
+  // controls are keyed by it, so it never changes with the UI language.
   label: string;
+  // The catalog key the constituent is named from in the UI language, where its noun is seeded; it
+  // also names the part its collapse toggle expands and compacts (see canvasCommands).
+  labelKey?: UiStringKey;
   color: string;
   // The word the rings are centred on (its node's position is the ring's centre).
   mainKey: string;

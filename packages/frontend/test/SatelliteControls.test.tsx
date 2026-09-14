@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithProviders } from './render.tsx';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
 import { SatelliteControls } from '../src/components/PhraseBuilder/SatelliteControls.tsx';
 import { clearControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
@@ -29,7 +30,7 @@ const anchor = (key: string) => getComputedStyle(control(key).parentElement!);
 
 describe('SatelliteControls', () => {
   it('renders one control per satellite, box by box', () => {
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{
@@ -52,7 +53,7 @@ describe('SatelliteControls', () => {
   });
 
   it('centres each control on its canvas position', () => {
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{ subject: [satellite('subjectAdjective')] }}
@@ -68,7 +69,7 @@ describe('SatelliteControls', () => {
   });
 
   it('leaves out a satellite that has no position yet', () => {
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{
@@ -83,7 +84,7 @@ describe('SatelliteControls', () => {
   });
 
   it('colours each control after the slot of the box it rides', () => {
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{
@@ -99,7 +100,7 @@ describe('SatelliteControls', () => {
   });
 
   it('falls back to the primary colour for a box that is not a slot', () => {
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{ tense: [satellite('tenseAdverb')] }}
@@ -113,7 +114,7 @@ describe('SatelliteControls', () => {
   it('toggles the satellite whose control is clicked', () => {
     const onAdjective = vi.fn();
     const onNumber = vi.fn();
-    render(
+    renderWithProviders(
       <SatelliteControls
         clearControls={[]}
         satelliteIconsByParent={{
@@ -135,7 +136,7 @@ describe('SatelliteControls', () => {
   it("seats each word's clear button on its solid ring, and clears that word", () => {
     const onClearSubject = vi.fn();
     const onClearVerb = vi.fn();
-    render(
+    renderWithProviders(
       <div onPointerDown={() => onClearVerb('dragged')}>
         <SatelliteControls
           satelliteIconsByParent={{}}

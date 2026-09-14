@@ -4,7 +4,7 @@
 by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 
 **Blocked on:** YET, ADDED, FAILED, USE, ICON, FILE, VALID and an IMPORT noun are not seeded. The
-shapes are the ones [A13](../A-ready/A13-ui-save-load-dialogs.md) authors now: a noun with a
+shapes are the ones [A13](../done/A13-ui-save-load-dialogs.md) authors now: a noun with a
 participle adjective for a status line, and a command for an instruction.
 
 ## Seed first

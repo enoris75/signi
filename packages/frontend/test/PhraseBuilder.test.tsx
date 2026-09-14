@@ -301,7 +301,7 @@ describe('PhraseBuilder', () => {
       renderPeriod({ infinitive: true, subject: CAT });
 
       expect(boxes()).toEqual(['verb']);
-      expect(screen.getByText('Infinitive phrase')).toBeInTheDocument();
+      expect(within(screen.getByTestId('infinitive-box')).getByText('Infinitive phrase')).toBeInTheDocument();
     });
 
     it('turns a command on and moves the focus to the verb to command', () => {
@@ -495,7 +495,7 @@ describe('PhraseBuilder', () => {
     it('clears a word with everything that hung off it', () => {
       const { lastEdit } = renderPeriod({ subject: CAT, subjectAdjective: BIG, verb: SLEEP });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Clear Subject' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear the subject' }));
 
       expect(lastEdit({ subject: CAT, subjectAdjective: BIG, verb: SLEEP })).toEqual({
         verb: SLEEP,
@@ -505,7 +505,7 @@ describe('PhraseBuilder', () => {
     it('returns the focus to the verb box when the verb is cleared', () => {
       renderPeriod({ subject: CAT, verb: EAT });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Clear Verb' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear the verb' }));
 
       expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
     });
@@ -513,7 +513,7 @@ describe('PhraseBuilder', () => {
     it('leaves the focus alone when any other word is cleared', () => {
       renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Clear Direct Object' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear the object' }));
 
       expect(wordsPanel().activeSlot).toBe('subject');
     });
@@ -636,7 +636,7 @@ describe('PhraseBuilder', () => {
       fireEvent.click(screen.getByLabelText(/^Relation:/));
       expect(lastEdit({})).toEqual({ modifierRelations: { subjectAdjective: 'purpose' } });
 
-      fireEvent.click(screen.getByLabelText(/^Modifier number:/));
+      fireEvent.click(screen.getByLabelText(/^Number: .* — click to change$/));
       expect(lastEdit({})).toEqual({ modifierNumbers: { subjectAdjective: 'plural' } });
 
       fireEvent.click(screen.getByLabelText('Add an adjective describing this modifier'));
@@ -657,7 +657,7 @@ describe('PhraseBuilder', () => {
   // on the period's canvas, or pointed to — a dashed line to another noun's ring.
   describe('a possessor', () => {
     const possessorControls = () => screen.getAllByTestId(/^satellite-\w+Possessor$/);
-    const clearPossessor = () => screen.queryAllByRole('button', { name: 'Clear Possessor' });
+    const clearPossessor = () => screen.queryAllByRole('button', { name: 'Clear the possessor' });
 
     it('names the owner in a ring on the period’s canvas, its word landing in the possessor slice', () => {
       const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
@@ -891,8 +891,8 @@ describe('PhraseBuilder', () => {
         directObjectConjuncts: [{ subject: DOG }],
       });
 
-      expect(screen.getAllByRole('button', { name: 'Clear Direct Object' })).toHaveLength(2);
-      expect(screen.getAllByRole('button', { name: 'Clear Subject' })).toHaveLength(1);
+      expect(screen.getAllByRole('button', { name: 'Clear the object' })).toHaveLength(2);
+      expect(screen.getAllByRole('button', { name: 'Clear the subject' })).toHaveLength(1);
     });
 
     it('extends the group from its last ring only, adding to the head’s group', () => {
@@ -1029,7 +1029,7 @@ describe('PhraseBuilder', () => {
 
       expect(getComputedStyle(box('directObject').firstElementChild!).opacity).toBe('0.45');
       expect(getComputedStyle(box('subject').firstElementChild!).opacity).toBe('1');
-      expect(screen.queryByRole('button', { name: 'Clear Direct Object' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Clear the object' })).not.toBeInTheDocument();
     });
 
     it('lights up the nouns a pending link may land on, and lands it on a press', () => {
@@ -1142,7 +1142,7 @@ describe('PhraseBuilder', () => {
     it('clears the sole period in place rather than removing it', () => {
       renderPeriod({ subject: CAT }, { onRemove: () => {}, soleContainer: true });
 
-      expect(screen.getByRole('button', { name: 'Clear main clause' })).toBeInTheDocument();
+      expect(screen.getByRole('button', { name: 'Clear this period' })).toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
     });
   });
@@ -1151,12 +1151,12 @@ describe('PhraseBuilder', () => {
     it('collapses a dotted box down to its main word, and expands it again', () => {
       renderPeriod({ subject: CAT, subjectAdjective: BIG, verb: SLEEP });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Compact the subject' }));
       expect(boxes()).toEqual(['subject', 'verb']);
       expect(screen.queryByTestId('satellite-subjectNumber')).not.toBeInTheDocument();
       expect(satellite('verbTense')).toBeInTheDocument();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Expand Subject' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Expand the subject' }));
       expect(boxes()).toEqual(['subjectAdjective', 'subject', 'verb']);
     });
 
@@ -1168,7 +1168,7 @@ describe('PhraseBuilder', () => {
         directObject: HORSE,
         directObjectAdjective: BIG,
       });
-      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Compact the subject' }));
 
       fireEvent.click(screen.getByTestId('period-compact-toggle'));
       expect(boxes()).toEqual(['subject', 'verb', 'directObject']);
@@ -1214,7 +1214,7 @@ describe('PhraseBuilder', () => {
       const onGeometryChange = vi.mocked(binding.geometry.onGeometryChange);
 
       onGeometryChange.mockClear();
-      fireEvent.click(screen.getByRole('button', { name: 'Collapse Subject' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Compact the subject' }));
       expect(onGeometryChange).toHaveBeenCalled();
 
       onGeometryChange.mockClear();

@@ -417,43 +417,43 @@ describe('buildSatellites', () => {
         'an unmarked gender is masculine',
         { subject: FRIEND },
         'subjectGender',
-        { hasValue: false, valueLabel: 'Masculine' },
+        { hasValue: false, valueLabel: 't(gender.value.masc)' },
       ],
       [
         'a masculine subject is at the default',
         { subject: FRIEND, subjectGender: 'masc' },
         'subjectGender',
-        { hasValue: false, valueLabel: 'Masculine' },
+        { hasValue: false, valueLabel: 't(gender.value.masc)' },
       ],
       [
         'a feminine subject is set',
         { subject: FRIEND, subjectGender: 'fem' },
         'subjectGender',
-        { hasValue: true, valueLabel: 'Feminine' },
+        { hasValue: true, valueLabel: 't(gender.value.fem)' },
       ],
       [
         'a neuter object is set',
         { verb: SEE, directObject: FRIEND, directObjectGender: 'neut' },
         'directObjectGender',
-        { hasValue: true, valueLabel: 'Neuter' },
+        { hasValue: true, valueLabel: 't(gender.value.neut)' },
       ],
       [
         'a masculine object is at the default',
         { verb: SEE, directObject: FRIEND, directObjectGender: 'masc' },
         'directObjectGender',
-        { hasValue: false, valueLabel: 'Masculine' },
+        { hasValue: false, valueLabel: 't(gender.value.masc)' },
       ],
       [
         'a feminine complement is set',
         { verb: GO, terminus: FRIEND, terminusGender: 'fem' },
         'terminusGender',
-        { hasValue: true, valueLabel: 'Feminine' },
+        { hasValue: true, valueLabel: 't(gender.value.fem)' },
       ],
       [
         'a masculine complement is at the default',
         { verb: GO, terminus: FRIEND, terminusGender: 'masc' },
         'terminusGender',
-        { hasValue: false, valueLabel: 'Masculine' },
+        { hasValue: false, valueLabel: 't(gender.value.masc)' },
       ],
       [
         'an unmarked subject determiner is definite',
@@ -952,7 +952,8 @@ describe('buildSatelliteIcons', () => {
 
       expect(adjective).toMatchObject({
         key: 'subjectAdjective',
-        label: 'Adjective',
+        label: 't(category.adjective)',
+        labelKey: 'category.adjective',
         active: true,
         isSet: true,
         valued: false,
@@ -1249,7 +1250,12 @@ describe('buildSatelliteIcons', () => {
         const result = icons({ subject: CAT });
         const possessor = result.perimeterByNoun['subject']!.possessor!;
 
-        expect(possessor).toMatchObject({ label: 'Possessor', active: false, isSet: false });
+        expect(possessor).toMatchObject({
+          label: 't(slot.possessor)',
+          labelKey: 'slot.possessor',
+          active: false,
+          isSet: false,
+        });
         possessor.onToggle();
         expect(result.onToggleReveal).toHaveBeenCalledExactlyOnceWith(
           result.satellite('subjectPossessor'),

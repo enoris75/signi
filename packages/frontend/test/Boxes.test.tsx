@@ -278,7 +278,7 @@ describe('SlotBox', () => {
     expect(screen.queryByRole('button', { name: 'Clear Subject' })).not.toBeInTheDocument();
   });
 
-  it('renders the heading and word in the UI language, keeping the English name for clearing', () => {
+  it('renders the heading, the word and its clear button in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     renderWithProviders(
       <SlotBox
@@ -287,13 +287,35 @@ describe('SlotBox', () => {
         isActive={false}
         onClear={() => {}}
       />,
-      { strings: { 'slot.subject': { it: 'Soggetto' } } },
+      {
+        strings: {
+          'slot.subject': { it: 'Soggetto' },
+          'action.clear.subject': { it: 'Cancella il soggetto' },
+        },
+      },
     );
 
     const box = screen.getByTestId('box-subject');
     expect(box).toHaveTextContent('Soggetto *');
     expect(box).toHaveTextContent('gatto');
-    expect(screen.getByRole('button', { name: 'Clear Subject' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Cancella il soggetto' })).toBeInTheDocument();
+  });
+
+  it('names the part it clears, while the bundle loads', () => {
+    renderWithProviders(
+      <SlotBox slot={{ ...SUBJECT, labelKey: 'slot.subject' }} concept={CAT} isActive={false} onClear={() => {}} />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Clear the subject' })).toBeInTheDocument();
+  });
+
+  it('prompts for a word in the UI language while the empty slot is active', () => {
+    localStorage.setItem('signi:uiLanguage', 'de');
+    renderWithProviders(<SlotBox slot={SUBJECT} isActive onClear={() => {}} />, {
+      strings: { 'slot.choose': { de: 'wählen' } },
+    });
+
+    expect(screen.getByTestId('box-subject')).toHaveTextContent('wählen…');
   });
 });
 
@@ -334,14 +356,40 @@ describe('SatelliteButton', () => {
       'Show Number',
     ],
   ])('%s', (_, overrides, name) => {
-    render(<SatelliteButton sat={satellite(overrides)} color="primary" />);
+    renderWithProviders(<SatelliteButton sat={satellite(overrides)} color="primary" />);
 
     expect(screen.getByRole('button', { name })).toBeInTheDocument();
   });
 
+  it.each<[string, boolean, string]>([
+    ['offers to show', false, 'Mostra l’aggettivo'],
+    ['offers to hide', true, 'Nascondi l’aggettivo'],
+  ])('names the part it %s in the UI language', (_, active, name) => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    renderWithProviders(
+      <SatelliteButton sat={satellite({ labelKey: 'category.adjective', active })} color="primary" />,
+      {
+        strings: {
+          'action.show.adjective': { it: 'Mostra l’aggettivo' },
+          'action.hide.adjective': { it: 'Nascondi l’aggettivo' },
+        },
+      },
+    );
+
+    expect(screen.getByRole('button', { name })).toBeInTheDocument();
+  });
+
+  it('keeps the English label of a part the catalog does not name yet', () => {
+    renderWithProviders(
+      <SatelliteButton sat={satellite({ key: 'verbModal', label: 'Modal' })} color="primary" />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Show Modal' })).toBeInTheDocument();
+  });
+
   it('renders its icon and toggles on click', () => {
     const onToggle = vi.fn();
-    render(<SatelliteButton sat={satellite({ onToggle })} color="primary" />);
+    renderWithProviders(<SatelliteButton sat={satellite({ onToggle })} color="primary" />);
     const button = screen.getByTestId('satellite-subjectAdjective');
 
     expect(button).toContainElement(screen.getByTestId('satellite-glyph'));
@@ -351,7 +399,7 @@ describe('SatelliteButton', () => {
 
   it('keeps a press from starting a box drag', () => {
     const onCanvasPointerDown = vi.fn();
-    render(
+    renderWithProviders(
       <div onPointerDown={onCanvasPointerDown}>
         <SatelliteButton sat={satellite()} color="primary" />
       </div>,
@@ -363,7 +411,7 @@ describe('SatelliteButton', () => {
   });
 
   it('squares off a direct toggle so its shape sets it apart from a reveal', () => {
-    render(
+    renderWithProviders(
       <>
         <SatelliteButton sat={satellite({ key: 'reveal' })} color="primary" />
         <SatelliteButton sat={satellite({ key: 'flip', directToggle: true })} color="primary" />

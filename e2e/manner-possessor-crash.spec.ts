@@ -12,7 +12,7 @@ test.use({ viewport: { width: 640, height: 720 } });
 
 async function setup(app: import('./fixtures').Builder, page: import('@playwright/test').Page) {
   await app.buildClause('ANGEL', 'RUN');
-  await page.getByRole('button', { name: 'Show Adverbial of manner' }).click();
+  await page.getByRole('button', { name: 'Show the adverbial of manner' }).click();
   const box = page.getByTestId('box-manner');
   await box.getByTestId('typeahead-noun').fill('speed');
   await page.locator('[data-testid="typeahead-option"][data-concept="SPEED"]').click();

@@ -3,6 +3,7 @@ import { Concept } from "@signi/shared";
 import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
 
 export function DirectObjectTypeahead({
@@ -15,6 +16,7 @@ export function DirectObjectTypeahead({
   header?: ReactNode;
 }) {
   const { data: nouns = [] } = useConcepts("noun");
+  const t = useUiString();
   const matches = useConceptSearch();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
@@ -76,7 +78,7 @@ export function DirectObjectTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type a noun…"
+        placeholder={`${t("slot.noun.placeholder")}…`}
         inputProps={{ "data-testid": "typeahead-noun" }}
         sx={{
           fontFamily: '"Inter", sans-serif',

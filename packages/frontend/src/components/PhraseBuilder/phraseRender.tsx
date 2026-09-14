@@ -15,6 +15,7 @@ import {
 } from "./interfaces.ts";
 import { CategoryToggle, SlotBox, type SatelliteIcon, type SlotShape } from "./Boxes.tsx";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import type { GroupRect } from "./graph.ts";
 import type { Disc, Pt } from "./ringLayout.ts";
 import { slotHasInlinePicker, slotTypeahead } from "./SlotTypeahead.tsx";
@@ -187,6 +188,7 @@ function ModifierAdjectiveChip({
 }) {
   const [anchor, setAnchor] = React.useState<HTMLElement | null>(null);
   const word = useConceptLabel();
+  const t = useUiString();
   return (
     <>
       <Tooltip
@@ -236,7 +238,7 @@ function ModifierAdjectiveChip({
               }}
               sx={{ ...FOOTER_CHIP_SX, mt: 1 }}
             >
-              clear
+              {t("action.clear")}
             </Box>
           )}
         </Box>
@@ -280,6 +282,7 @@ export function SlotNode({
     handleEditSlot,
     handleCancelEdit,
   } = ctx;
+  const t = useUiString();
   const idx = renderedSlots.findIndex((s) => s.key === slot.key);
   // Whether this canvas's `subject` slot is a noun-only head (see PhraseRenderContext.pronounHead).
   const nounSubject = Boolean(nounPhrase) && !pronounHead;
@@ -347,7 +350,7 @@ export function SlotNode({
         </Box>
       </Tooltip>
       <Tooltip
-        title={`Modifier number: ${modifierNumber === "plural" ? "Plural" : "Singular"} — click to change`}
+        title={`${t("satellite.number")}: ${t(`number.value.${modifierNumber}`)} — click to change`}
       >
         <Box
           component="span"

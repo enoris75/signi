@@ -78,3 +78,50 @@ Rendered on 2026-09-13 against a copy of the lexicon; re-verify on authoring.
 `manner-possessor-crash.spec.ts`, `Boxes.test.tsx`, `PhraseSidebar.test.tsx`; `Expand ` / `Collapse ` /
 `Tidy up ` → `tidy.spec.ts`, `screenshots.spec.ts`, `GroupBox.test.tsx`, `PhraseBuilder.test.tsx`,
 `PeriodContainer.test.tsx`.
+
+## Done
+
+**2026-09-14.** Four key families, one entry per part, built by `commandOnEach` in
+[uiStrings.ts](../../../packages/shared/src/uiStrings.ts) from exported part lists
+(`CLEARABLE_PARTS`, `REVEALABLE_PARTS`, `COLLAPSIBLE_PARTS`):
+
+- `action.clear.*`: subject, verb, object, adverb, adjective, instrumental, predicative, manner,
+  possessor
+- `action.show.*` / `action.hide.*`: adjective, adverb, object, instrumental, predicative, manner,
+  determiner, possessor
+- `action.expand.*` / `action.compact.*`: subject, object, instrumental, predicative, manner
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `action.clear.adjective` | Clear the adjective | Cancella l'aggettivo | Effacer l'adjectif | Das Adjektiv löschen | Borrar el adjetivo | 形容詞を消去 | Limpar o adjetivo |
+| `action.clear.instrumental` | Clear the instrumental | Cancella il complemento di mezzo | Effacer le complément de moyen | Den Instrumental löschen | Borrar el complemento circunstancial de instrumento | 手段語を消去 | Limpar o adjunto adverbial de instrumento |
+| `action.show.determiner` | Show the determiner | Mostra il determinante | Montrer le déterminant | Das Determinativ zeigen | Mostrar el determinante | 限定詞を見せ | Mostrar o determinante |
+| `action.hide.adjective` | Hide the adjective | Nascondi l'aggettivo | Cacher l'adjectif | Das Adjektiv verstecken | Esconder el adjetivo | 形容詞を隠し | Esconder o adjetivo |
+| `action.compact.subject` | Compact the subject | Compatta il soggetto | Compacter le sujet | Das Subjekt verdichten | Compactar el sujeto | 主語を圧縮 | Compactar o sujeito |
+| `action.expand.object` | Expand the object | Espandi il complemento oggetto | Étendre le complément d'objet | Das Objekt erweitern | Expandir el complemento | 目的語を展開 | Expandir o objeto |
+
+Changes against the plan:
+- **`action.tidy.*` is not needed.** The ring layout removed the per-group "Tidy up" control;
+  `GroupBox.test.tsx` already pins that it is gone.
+- **Number and gender have no show/hide entries.** They are direct toggles that never reveal a box,
+  so their tooltip is always "Number: Singular".
+- **The group-key refactor keeps `label` as the identity.** Collapse state, `data-group`, layout
+  rank, ring specs and control keys all stay keyed by the English `label`, which is never
+  localized. The display side is a separate `labelKey`, on
+  [GroupDef](../../../packages/frontend/src/components/PhraseBuilder/ringSpecs.ts), `Satellite` /
+  `SatelliteIcon` and the clear controls. This gives the refactor its guarantee (nothing moves when
+  the language changes) without renaming `label` across the files the concurrent ring work was
+  editing.
+- [canvasCommands.ts](../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts)
+  maps a `labelKey` to its part and builds the three tooltips. A part not in a family keeps
+  "Clear/Show/Hide/Expand/Collapse ${label}" in English: modal, tense, aspect, the verb phrase and
+  the six unseeded complements.
+- The Japanese HIDE defect is fixed in the engine, not the lexicon:
+  [A126](../../bugs/fixed/A126-japanese-godan-su-instruction-label.md). The label rule dropped the し
+  of every masu-stem, which is meant for する-verbs only, so 隠す labelled 隠. It now reads 形容詞を隠し.
+- `SatelliteButton`, `ClearButton` and `GroupBox` now call `useUiString`, so
+  `GroupBox.test.tsx`, `GroupPerimeterControls.test.tsx` and `SatelliteControls.test.tsx` render
+  through `renderWithProviders`. New tests cover the localized clear, show/hide and compact/expand
+  tooltips, and check that collapse stays keyed by the English label under a German UI. English
+  selectors changed in `canvas.spec.ts`, `manner.spec.ts`, `manner-possessor-crash.spec.ts`,
+  `modal-adverb.spec.ts`, `possessor-reference.spec.ts` and `tidy.spec.ts`.

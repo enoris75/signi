@@ -33,6 +33,7 @@ import {
   type ComplementType,
   type Definiteness,
   type LanguageCode,
+  type UiStringKey,
 } from "@signi/shared";
 import { conceptWord, type UiStringLookup } from "../../i18n/conceptWord.ts";
 import {
@@ -61,6 +62,9 @@ export type Satellite = {
   // but a chained satellite rides another satellite's box (Adjective 2 on Adjective 1).
   parent: SlotKey;
   label: string;
+  // The catalog key `label` is rendered from, where the satellite's noun is seeded — which also names
+  // the part its control shows and hides (see canvasCommands). The rest keep an English `label`.
+  labelKey?: UiStringKey;
   icon: ReactNode;
   available: boolean;
   // hasValue = carries a *non-default* value (plural / fem / negative / a chosen word).
@@ -98,8 +102,7 @@ const genderIcon = (gen?: Gender): ReactNode =>
     <MaleIcon sx={iconSx} />
   );
 
-const genderLabel = (gen?: Gender): string =>
-  gen === "fem" ? "Feminine" : gen === "neut" ? "Neuter" : "Masculine";
+const genderLabel = (t: UiStringLookup, gen?: Gender): string => t(`gender.value.${gen ?? "masc"}`);
 
 const complementIcons: Record<ComplementType, ReactNode> = {
   predicative: <LinkIcon sx={iconSx} />,
@@ -148,7 +151,8 @@ export function buildSatellites(
     {
       key: "subjectAdjective",
       parent: "subject",
-      label: "Adjective",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun",
       hasValue: Boolean(selection.subjectAdjective),
@@ -160,7 +164,8 @@ export function buildSatellites(
       // stops at three.
       key: "subjectAdjective2",
       parent: "subjectAdjective",
-      label: "Adjective 2",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun" && Boolean(selection.subjectAdjective),
       hasValue: Boolean(selection.subjectAdjective2),
@@ -169,7 +174,8 @@ export function buildSatellites(
     {
       key: "subjectAdjective3",
       parent: "subjectAdjective2",
-      label: "Adjective 3",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available: subjectRole === "noun" && Boolean(selection.subjectAdjective2),
       hasValue: Boolean(selection.subjectAdjective3),
@@ -179,6 +185,7 @@ export function buildSatellites(
       key: "subjectNumber",
       parent: "subject",
       label: t("satellite.number"),
+      labelKey: "satellite.number",
       icon: <NumbersIcon sx={iconSx} />,
       available: showSubjectNumber,
       hasValue: selection.subjectNumber === "plural",
@@ -189,18 +196,20 @@ export function buildSatellites(
     {
       key: "subjectGender",
       parent: "subject",
-      label: "Gender",
+      label: t("satellite.gender"),
+      labelKey: "satellite.gender",
       icon: genderIcon(selection.subjectGender),
       available: showSubjectGender,
       hasValue: Boolean(selection.subjectGender) && selection.subjectGender !== "masc",
       alwaysSet: true,
       directToggle: true,
-      valueLabel: genderLabel(selection.subjectGender),
+      valueLabel: genderLabel(t, selection.subjectGender),
     },
     {
       key: "subjectDefiniteness",
       parent: "subject",
       label: t("satellite.determiner"),
+      labelKey: "satellite.determiner",
       icon: <ArticleOutlinedIcon sx={iconSx} />,
       // Only a noun head takes an article; pronoun subjects render without one.
       available: subjectRole === "noun",
@@ -225,7 +234,8 @@ export function buildSatellites(
     {
       key: "subjectPossessor",
       parent: "subject",
-      label: "Possessor",
+      label: t("slot.possessor"),
+      labelKey: "slot.possessor",
       icon: <KeyIcon sx={iconSx} />,
       // A possessor (Saxon genitive) attaches only to a noun head; its own head noun
       // lives in the nested selection's `subject` slot.
@@ -324,7 +334,8 @@ export function buildSatellites(
     {
       key: "modifier",
       parent: "verb",
-      label: "Adverb",
+      label: t("slot.adverb"),
+      labelKey: "slot.adverb",
       icon: <TuneIcon sx={iconSx} />,
       available: true,
       hasValue: Boolean(selection.modifier),
@@ -337,7 +348,8 @@ export function buildSatellites(
     {
       key: "directObject",
       parent: "verb",
-      label: "Direct Object",
+      label: t("slot.directObject"),
+      labelKey: "slot.directObject",
       icon: <AdjustIcon sx={iconSx} />,
       available:
         Boolean(selection.verb) &&
@@ -349,7 +361,8 @@ export function buildSatellites(
     {
       key: "directObjectAdjective",
       parent: "directObject",
-      label: "Adjective",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectAdjective),
@@ -358,7 +371,8 @@ export function buildSatellites(
     {
       key: "directObjectAdjective2",
       parent: "directObjectAdjective",
-      label: "Adjective 2",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available:
         Boolean(selection.directObject) &&
@@ -369,7 +383,8 @@ export function buildSatellites(
     {
       key: "directObjectAdjective3",
       parent: "directObjectAdjective2",
-      label: "Adjective 3",
+      label: t("category.adjective"),
+      labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available:
         Boolean(selection.directObject) &&
@@ -381,6 +396,7 @@ export function buildSatellites(
       key: "directObjectNumber",
       parent: "directObject",
       label: t("satellite.number"),
+      labelKey: "satellite.number",
       icon: <NumbersIcon sx={iconSx} />,
       available: showDirectObjNumber,
       hasValue: selection.directObjectNumber === "plural",
@@ -391,7 +407,8 @@ export function buildSatellites(
     {
       key: "directObjectGender",
       parent: "directObject",
-      label: "Gender",
+      label: t("satellite.gender"),
+      labelKey: "satellite.gender",
       icon: genderIcon(selection.directObjectGender),
       available: showDirectObjGender,
       hasValue:
@@ -399,12 +416,13 @@ export function buildSatellites(
         selection.directObjectGender !== "masc",
       alwaysSet: true,
       directToggle: true,
-      valueLabel: genderLabel(selection.directObjectGender),
+      valueLabel: genderLabel(t, selection.directObjectGender),
     },
     {
       key: "directObjectDefiniteness",
       parent: "directObject",
       label: t("satellite.determiner"),
+      labelKey: "satellite.determiner",
       icon: <ArticleOutlinedIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(
@@ -425,7 +443,8 @@ export function buildSatellites(
     {
       key: "directObjectPossessor",
       parent: "directObject",
-      label: "Possessor",
+      label: t("slot.possessor"),
+      labelKey: "slot.possessor",
       icon: <KeyIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: Boolean(selection.directObjectPossessor?.subject) || Boolean(selection.directObjectPossessorRef),
@@ -446,6 +465,7 @@ export function buildSatellites(
       key: "instrumental",
       parent: "verb",
       label: t("slot.instrumental"),
+      labelKey: "slot.instrumental",
       icon: complementIcons.instrumental,
       available: supportedComplements.includes("instrumental"),
       hasValue: false,
@@ -480,6 +500,7 @@ export function buildSatellites(
           // A complement whose name is seeded shows it in the UI language ("complemento di
           // mezzo"); the rest still read their static English label.
           label: labelKey ? t(labelKey) : COMPLEMENT_LABELS[type],
+          labelKey,
           icon: complementIcons[type],
           available: supportedComplements.includes(type),
           hasValue: Boolean(concept),
@@ -488,7 +509,8 @@ export function buildSatellites(
         {
           key: `${type}Adjective`,
           parent: type,
-          label: "Adjective",
+          label: t("category.adjective"),
+          labelKey: "category.adjective",
           icon: <BrushIcon sx={iconSx} />,
           // Adjectives/possessor/relative attach to a noun head; a pronoun complement
           // (only `cause` allows one) takes none of them.
@@ -499,7 +521,8 @@ export function buildSatellites(
         {
           key: `${type}Adjective2`,
           parent: `${type}Adjective`,
-          label: "Adjective 2",
+          label: t("category.adjective"),
+          labelKey: "category.adjective",
           icon: <BrushIcon sx={iconSx} />,
           available: concept?.role === "noun" && Boolean(adj),
           hasValue: Boolean(adj2),
@@ -508,7 +531,8 @@ export function buildSatellites(
         {
           key: `${type}Adjective3`,
           parent: `${type}Adjective2`,
-          label: "Adjective 3",
+          label: t("category.adjective"),
+          labelKey: "category.adjective",
           icon: <BrushIcon sx={iconSx} />,
           available: concept?.role === "noun" && Boolean(adj2),
           hasValue: Boolean(adj3),
@@ -518,6 +542,7 @@ export function buildSatellites(
           key: `${type}Number`,
           parent: type,
           label: t("satellite.number"),
+          labelKey: "satellite.number",
           icon: <NumbersIcon sx={iconSx} />,
           // A predicate adjective has no number of its own — it agrees with the subject.
           available: Boolean(concept) && concept?.role !== "adjective",
@@ -529,7 +554,8 @@ export function buildSatellites(
         {
           key: `${type}Gender`,
           parent: type,
-          label: "Gender",
+          label: t("satellite.gender"),
+          labelKey: "satellite.gender",
           icon: genderIcon(gen),
           // Gendered nouns, plus a 3rd-person pronoun (he/she) so a pronoun cause can
           // render feminine ("a causa di lei", "because of her").
@@ -539,12 +565,13 @@ export function buildSatellites(
           hasValue: Boolean(gen) && gen !== "masc",
           alwaysSet: true,
           directToggle: true,
-          valueLabel: genderLabel(gen),
+          valueLabel: genderLabel(t, gen),
         },
         {
           key: `${type}Definiteness`,
           parent: type,
           label: t("satellite.determiner"),
+          labelKey: "satellite.determiner",
           icon: <ArticleOutlinedIcon sx={iconSx} />,
           // The predicative plus the adposition-bearing spatial/dative complements carry a
           // determiner, and only for a noun head (a pronoun cause takes none). Cause is not
@@ -572,7 +599,8 @@ export function buildSatellites(
         {
           key: `${type}Possessor`,
           parent: type,
-          label: "Possessor",
+          label: t("slot.possessor"),
+          labelKey: "slot.possessor",
           icon: <KeyIcon sx={iconSx} />,
           available: concept?.role === "noun",
           hasValue:
@@ -701,6 +729,7 @@ export function buildSatelliteIcons({
       complementToggleIcons.push({
         key: sat.key,
         icon: sat.icon,
+        labelKey: sat.labelKey,
         // Never "active": there is no box to reveal, so the icon reads as *set* (a link exists)
         // or not, and its tooltip says what clicking will do.
         active: false,
@@ -775,6 +804,7 @@ export function buildSatelliteIcons({
       key: sat.key,
       icon: sat.icon,
       label: sat.label,
+      labelKey: sat.labelKey,
       active: sat.shown,
       isSet: sat.hasValue,
       valued: Boolean(sat.alwaysSet),

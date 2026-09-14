@@ -84,14 +84,14 @@ test.describe('subordinate clauses', () => {
     const saveDialog = page.getByRole('dialog');
     await saveDialog.getByLabel('Name').fill(name);
     await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Phrase saved.')).toBeVisible();
+    await expect(page.getByText('Saved phrase')).toBeVisible();
 
     await app.goto();
     await expect(page.getByTestId('translations-empty')).toBeVisible();
 
     await page.getByRole('button', { name: 'Load a saved phrase' }).click();
     await page.getByRole('dialog').getByText(name).click();
-    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+    await expect(page.getByText('Loaded phrase')).toBeVisible();
 
     // Both periods and the link between them come back: still one sentence, not two.
     await expect(page.getByTestId('period-container')).toHaveCount(2);

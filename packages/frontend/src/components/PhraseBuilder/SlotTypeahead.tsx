@@ -103,7 +103,7 @@ function pickerFor(
         return (
           <SubjectTypeahead
             onSelect={pick}
-            placeholder="type a noun or pronoun…"
+            placeholderKey="slot.nounOrPronoun.placeholder"
             kind={kind}
             onKindChange={onKindChange}
           />

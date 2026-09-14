@@ -50,7 +50,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
   on a missing language, the same pinning test as definitions.
 - Plans render **once, at boot, without arguments**. A value known only at render time either stays
   outside the phrase (a count beside its noun), becomes one key per value when the set is finite
-  ([A15](A-ready/A15-ui-slot-scoped-commands.md)), or is blocked
+  ([A15](done/A15-ui-slot-scoped-commands.md)), or is blocked
   ([C14](C-needs-engine/C14-ui-runtime-values.md)).
 - A task file groups strings by the vocabulary or construct that unblocks them, not by component, so
   seeding one word clears every string that waited on it. Each file lists the literal, its file:line,
@@ -68,16 +68,8 @@ section)._
 
 #### UI strings
 
-A08–A10 are retired ids (see [C06](C-needs-engine/C06-pronoun-definitions.md)), so the UI-string A
-tasks start at A11. **Do A15's group-key refactor before B23**: the group labels are also keys.
-
-| # | File | Strings |
-|---|---|---|
-| A11 | [A11-ui-typeahead-placeholders.md](A-ready/A11-ui-typeahead-placeholders.md) | 4 placeholders — "type an adjective / adverb / noun / noun or pronoun…" |
-| A12 | [A12-ui-commands-on-seeded-verbs.md](A-ready/A12-ui-commands-on-seeded-verbs.md) | choose…, clear, Save, Clear this period, Coordinate this period |
-| A13 | [A13-ui-save-load-dialogs.md](A-ready/A13-ui-save-load-dialogs.md) | 4 dialog titles, 3 success toasts ("Phrase saved." → "saved phrase"), date locale |
-| A14 | [A14-ui-satellite-and-badge-labels.md](A-ready/A14-ui-satellite-and-badge-labels.md) | satellite labels Adjective / Adverb / Object / Gender / Possessor, gender values, Command / Infinitive badges |
-| A15 | [A15-ui-slot-scoped-commands.md](A-ready/A15-ui-slot-scoped-commands.md) | "Clear / Show / Hide / Expand / Tidy up" + slot name, as key families; owns the group-key refactor |
+_None outstanding._ A11–A15 are done (see the Done section). A08–A10 are retired ids (see
+[C06](C-needs-engine/C06-pronoun-definitions.md)).
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
@@ -160,6 +152,16 @@ B21 is the largest and unlocks most of the period container.
 | B17 | [done/B17-feeling-and-sound-verbs.md](done/B17-feeling-and-sound-verbs.md) | LOVE → to feel affection; CRY → to shed tears; CRY_OUT → to produce loud sounds (seeded FEEL, SHED, PRODUCE, AFFECTION, TEAR, SOUND, LOUD) |
 | B18 | [done/B18-selection-verbs.md](done/B18-selection-verbs.md) | CHOOSE → to indicate an option; CLICK → to press a button; TYPE → to write with a keyboard (seeded PRESS, WRITE, OPTION, BUTTON, KEYBOARD); SELECT → C05 |
 | B19 | [done/B19-data-verbs.md](done/B19-data-verbs.md) | EXPORT → to transfer content to a place; IMPORT → to transfer content from a place (no new vocabulary); the other nine → C08 |
+
+#### UI strings
+
+| # | File | Strings |
+|---|---|---|
+| A11 | [done/A11-ui-typeahead-placeholders.md](done/A11-ui-typeahead-placeholders.md) | `slot.adjective/adverb/noun/nounOrPronoun.placeholder` — "type an adjective…", "type a noun or a pronoun…" |
+| A12 | [done/A12-ui-commands-on-seeded-verbs.md](done/A12-ui-commands-on-seeded-verbs.md) | `slot.choose`, `action.clear`, `action.clearPeriod` (tooltip + aria-label), `action.coordinatePeriod`; dialogs' Save reuses `action.save` |
+| A13 | [done/A13-ui-save-load-dialogs.md](done/A13-ui-save-load-dialogs.md) | dialog titles reuse the button tooltips; `action.addSavedPeriod`; `toast.phraseSaved/phraseLoaded/periodSaved` ("Saved phrase"); dates in the UI language |
+| A14 | [done/A14-ui-satellite-and-badge-labels.md](done/A14-ui-satellite-and-badge-labels.md) | satellite labels from `t`, `satellite.gender`, `gender.value.*` ("Male"), Command / Infinitive phrase badges |
+| A15 | [done/A15-ui-slot-scoped-commands.md](done/A15-ui-slot-scoped-commands.md) | `action.clear/show/hide/expand/compact.<part>` families; `label` stays the group key, `labelKey` names it; fixed bug A126 (ja 隠し) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

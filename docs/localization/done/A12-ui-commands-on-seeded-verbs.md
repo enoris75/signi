@@ -36,3 +36,29 @@ Rendered on 2026-09-13 against a copy of the lexicon; re-verify on authoring.
 
 `Clear main clause` → `PeriodContainer.test.tsx`, `PhraseBuilder.test.tsx`; `choose…` → `Boxes.test.tsx`;
 `Clear ` → `canvas.spec.ts`, `Boxes.test.tsx`, `phraseRender.test.tsx`.
+
+## Done
+
+**2026-09-14.** Added `slot.choose`, `action.clear`, `action.clearPeriod` and
+`action.coordinatePeriod`; the dialogs' confirm button reuses `action.save`.
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `slot.choose` | choose | scegli | choisir | wählen | elegir | 選び | escolher |
+| `action.clear` | clear | cancella | effacer | löschen | borrar | 消去 | limpar |
+| `action.save` | Save | Salva | Enregistrer | Speichern | Guardar | 保存 | Salvar |
+| `action.clearPeriod` | Clear this period | Cancella questo periodo | Effacer cette période | Dieses Satzgefüge löschen | Borrar este período | この文を消去 | Limpar este período |
+| `action.coordinatePeriod` | Coordinate this period | Coordina questo periodo | Coordonner cette période | Dieses Satzgefüge koordinieren | Coordinar este período | この文を調整 | Coordenar este período |
+
+- [Boxes.tsx](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx): the active empty
+  slot says `t('slot.choose')` + "…" ("empty" is still B25).
+- [phraseRender.tsx](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx): the
+  modifier-adjective chip's "clear".
+- [PeriodContainer.tsx](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx):
+  the sole period's tooltip **and** aria-label are both `action.clearPeriod` (the "Clear main
+  clause" wording is gone); the coordination control's start tooltip is `action.coordinatePeriod`.
+- [SavedPhrasesToolbar.tsx](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx) and
+  [PeriodSaveLoad.tsx](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx):
+  the dialogs' Save button.
+- Selectors updated in `PeriodContainer.test.tsx`, `PhraseBuilder.test.tsx` and `e2e/fixtures.ts`
+  (`linkCoordination`).

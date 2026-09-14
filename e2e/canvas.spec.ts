@@ -58,7 +58,7 @@ test.describe('canvas', () => {
       [
         'verb',
         'be',
-        '[data-testid^="satellite-verb"], [data-testid="satellite-modifier"], [aria-label="Clear Verb"]',
+        '[data-testid^="satellite-verb"], [data-testid="satellite-modifier"], [aria-label="Clear the verb"]',
       ],
       // The relative, possessor and conjunct controls ride the subject's dotted ring, not its solid one.
       [
@@ -67,7 +67,7 @@ test.describe('canvas', () => {
         `${['Relative', 'Possessor', 'Conjunct'].reduce(
           (sel, kind) => `${sel}:not([data-testid$="${kind}"])`,
           '[data-testid^="satellite-subject"]',
-        )}, [aria-label="Clear Subject"]`,
+        )}, [aria-label="Clear the subject"]`,
       ],
     ]) {
       // The layout settles over a few frames as boxes are measured, so the geometry is polled.

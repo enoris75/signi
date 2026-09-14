@@ -42,14 +42,14 @@ test('a pronominal possessor survives a save/load round trip', async ({ app, pag
   const saveDialog = page.getByRole('dialog');
   await saveDialog.getByLabel('Name').fill(name);
   await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
-  await expect(page.getByText('Phrase saved.')).toBeVisible();
+  await expect(page.getByText('Saved phrase')).toBeVisible();
 
   await app.goto();
   await expect(page.getByTestId('translations-empty')).toBeVisible();
 
   await page.getByRole('button', { name: 'Load a saved phrase' }).click();
   await page.getByRole('dialog').getByText(name).click();
-  await expect(page.getByText('Phrase loaded.')).toBeVisible();
+  await expect(page.getByText('Loaded phrase')).toBeVisible();
 
   // The possessive pronoun re-resolves from the reloaded reference, and its line is drawn again.
   await expect.poll(() => app.sentence('en')).toBe('the boy sees his dog.');
@@ -71,7 +71,7 @@ test('name the owner in a ring of its own', async ({ app, page }) => {
   // One period card, one canvas: the owner is a ring on it, not a panel of its own.
   await expect(page.getByTestId('period-container')).toHaveCount(1);
   await expect(page.getByTestId('phrase-canvas')).toHaveCount(1);
-  await expect(page.getByRole('button', { name: 'Clear Possessor' })).toBeVisible();
+  await expect(page.getByRole('button', { name: 'Clear the possessor' })).toBeVisible();
 
   // Its ring's remove control takes the owner off again.
   await page.getByRole('button', { name: 'Remove this possessor' }).click();

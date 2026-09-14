@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
+import { renderWithProviders } from './render.tsx';
 import type { ComponentProps } from 'react';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
 import { GroupPerimeterControls } from '../src/components/PhraseBuilder/GroupPerimeterControls.tsx';
@@ -49,7 +50,7 @@ function renderControls(overrides: Partial<ComponentProps<typeof GroupPerimeterC
     registerSourceAnchor: vi.fn(),
     registerTargetAnchor: vi.fn(),
   };
-  const view = render(
+  const view = renderWithProviders(
     <GroupPerimeterControls
       controlPos={CONTROL_POS}
       perimeterByNoun={{}}
@@ -192,7 +193,7 @@ describe('GroupPerimeterControls', () => {
   });
 
   it('renders in a standalone period, with no workspace to register links with', () => {
-    render(
+    renderWithProviders(
       <GroupPerimeterControls
         controlPos={CONTROL_POS}
         perimeterByNoun={{ subject: everyControl('subject') }}

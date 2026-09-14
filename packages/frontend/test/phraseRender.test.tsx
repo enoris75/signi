@@ -188,7 +188,7 @@ describe('SlotNode', () => {
     it('clears its slot from the box’s clear button', () => {
       const { ctx } = renderNode('verb', { selection: { verb: SEE } });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Clear Verb' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear the verb' }));
 
       expect(ctx.handleClear).toHaveBeenCalledExactlyOnceWith('verb');
     });
@@ -264,7 +264,7 @@ describe('SlotNode', () => {
     it('greys a link target, leaving it nothing to clear', () => {
       renderNode('subject', { selection: { subject: CAT }, dimmedKeys: new Set(['subject']) });
 
-      expect(screen.queryByRole('button', { name: 'Clear Subject' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Clear the subject' })).not.toBeInTheDocument();
     });
 
     it('highlights an eligible target', () => {
@@ -333,7 +333,7 @@ describe('SlotNode', () => {
 
     it('leaves the arrow keys to a control inside the box, but still moves on Tab', () => {
       const { ctx } = renderRow();
-      const clear = screen.getByRole('button', { name: 'Clear Subject' });
+      const clear = screen.getByRole('button', { name: 'Clear the subject' });
 
       expect(fireEvent.keyDown(clear, { key: 'ArrowRight' })).toBe(true);
       expect(fireEvent.keyDown(clear, { key: 'ArrowLeft' })).toBe(true);
@@ -490,7 +490,7 @@ describe('SlotNode', () => {
 
       const chip = (name: string) => screen.getByLabelText(name);
       expect(chip('Relation: Feature / means — click to change')).toHaveTextContent('feature');
-      expect(chip('Modifier number: Singular — click to change')).toHaveTextContent('SG');
+      expect(chip('Number: Singular — click to change')).toHaveTextContent('SG');
       expect(chip('Add an adjective describing this modifier')).toHaveTextContent('+ adj');
       expect(screen.queryByText('±')).not.toBeInTheDocument();
     });
@@ -507,7 +507,7 @@ describe('SlotNode', () => {
 
       const chip = (name: string) => screen.getByLabelText(name);
       expect(chip('Relation: Material / content — click to change')).toHaveTextContent('material');
-      expect(chip('Modifier number: Plural — click to change')).toHaveTextContent('PL');
+      expect(chip('Number: Plural — click to change')).toHaveTextContent('PL');
       const adjective = chip('Adjective on modifier: semantic — click to change');
       expect(adjective).toHaveTextContent('semantic');
       expect(adjective).toHaveStyle({ fontStyle: 'italic' });
@@ -524,7 +524,7 @@ describe('SlotNode', () => {
       });
 
       expect(screen.getByLabelText(/^Relation:/)).toHaveTextContent('feature');
-      expect(screen.getByLabelText(/^Modifier number:/)).toHaveTextContent('SG');
+      expect(screen.getByLabelText(/^Number: .* — click to change$/)).toHaveTextContent('SG');
       expect(screen.getByLabelText(/describing this modifier/)).toHaveTextContent('+ adj');
     });
 
@@ -674,7 +674,7 @@ describe('SlotNode', () => {
       expect(circle.height).toBe('80px');
       expect(circle.borderRadius).toBe('50%');
       // A word's clear button is one of its ring's controls, not part of the shape.
-      expect(screen.queryByLabelText('Clear Verb')).not.toBeInTheDocument();
+      expect(screen.queryByLabelText('Clear the verb')).not.toBeInTheDocument();
     });
 
     it('draws a satellite as a disc that says only its word, its degree on the rim', () => {
@@ -687,7 +687,7 @@ describe('SlotNode', () => {
       expect(getComputedStyle(cardOf('subjectAdjective')).width).toBe('44px');
       expect(screen.queryByText('Adjective')).not.toBeInTheDocument();
       expect(screen.getByTestId('degree-subjectAdjective')).toHaveTextContent('±');
-      expect(screen.getByLabelText('Clear Adjective')).toBeInTheDocument();
+      expect(screen.getByLabelText('Clear the adjective')).toBeInTheDocument();
     });
 
     it('keeps the plain box for a slot with no ring or disc to sit in', () => {

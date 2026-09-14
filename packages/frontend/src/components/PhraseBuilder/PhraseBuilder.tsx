@@ -968,11 +968,15 @@ export function PhraseBuilder({
   useReportOwnRing(ringHost, ringHost ? groupRects[0] : undefined, controlPos);
 
   // The clear button on each word's solid ring.
-  const clearControls = [...clearable].map((mainKey) => ({
-    mainKey,
-    label: visibleSlots.find((s) => s.key === mainKey)?.label ?? mainKey,
-    onClear: () => handleClear(mainKey as SlotKey),
-  }));
+  const clearControls = [...clearable].map((mainKey) => {
+    const slot = visibleSlots.find((s) => s.key === mainKey);
+    return {
+      mainKey,
+      label: slot?.label ?? mainKey,
+      labelKey: slot?.labelKey,
+      onClear: () => handleClear(mainKey as SlotKey),
+    };
+  });
 
   // Place each hosted ring the first time it appears, in the stored (full-view) positions, so the ring
   // has somewhere to be dragged from even while compact view packs it elsewhere.

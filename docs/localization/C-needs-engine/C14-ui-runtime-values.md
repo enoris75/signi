@@ -8,7 +8,7 @@ boot and serves static text. Two workarounds already ship, and neither fits thes
 
 - **Value outside the phrase:** the word-map caption keeps the number in the component and asks the
   catalog only for the noun, in both numbers ("185 · nodes"). Works when the value trails a label.
-- **Finite set → one key per value:** [A15](../A-ready/A15-ui-slot-scoped-commands.md).
+- **Finite set → one key per value:** [A15](../done/A15-ui-slot-scoped-commands.md).
 
 These messages put an unbounded value in the middle of a sentence, where agreement, case and word
 order depend on it.

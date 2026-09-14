@@ -291,7 +291,7 @@ describe('PeriodContainer', () => {
       ['a free statement', {}, ''],
       ['an instrument phrase', inst({ isInstrument: true }), 'Instrumental'],
       ['a command', { imperative: mood(true) }, 'Command'],
-      ['an infinitive', { infinitive: mood(true) }, 'Infinitive'],
+      ['an infinitive', { infinitive: mood(true) }, 'Infinitive phrase'],
       ['a main clause', cond({ hasCondition: true }), 'Main clause'],
       ['an IF clause', cond({ isIfClause: true }), 'If clause'],
       ['a first clause', coord({ hasCoordination: true, conjunction: 'and' }), 'First clause'],
@@ -491,7 +491,7 @@ describe('PeriodContainer', () => {
     it('has nothing to clear on the only period while it is empty', () => {
       renderPeriod({ soleContainer: true, hasContent: false, onRemove: vi.fn() });
 
-      expect(screen.queryByRole('button', { name: 'Clear main clause' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Clear this period' })).not.toBeInTheDocument();
       expect(screen.queryByRole('button', { name: 'Remove main clause' })).not.toBeInTheDocument();
     });
 
@@ -500,7 +500,7 @@ describe('PeriodContainer', () => {
       const onRemove = vi.fn();
       renderPeriod({ soleContainer: true, hasContent: true, onRemove });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Clear main clause' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Clear this period' }));
 
       expect(confirm).toHaveBeenCalledExactlyOnceWith(
         'Clear this main clause and everything in it?',
@@ -702,7 +702,7 @@ describe('PeriodContainer', () => {
   });
 
   describe('coordinative control', () => {
-    const START = 'Coordinate this period with another';
+    const START = 'Coordinate this period';
 
     it.each<[string, Partial<CoordinativeControl>, string, boolean]>([
       ['a period free to start one', {}, START, true],

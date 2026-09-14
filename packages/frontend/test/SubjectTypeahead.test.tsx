@@ -67,9 +67,9 @@ describe('SubjectTypeahead', () => {
   });
 
   it('prompts with the placeholder it is given instead', () => {
-    const { input } = renderSubject({ placeholder: 'type a noun or pronoun…' });
+    const { input } = renderSubject({ placeholderKey: 'slot.nounOrPronoun.placeholder' });
 
-    expect(input).toHaveAttribute('placeholder', 'type a noun or pronoun…');
+    expect(input).toHaveAttribute('placeholder', 'type a noun or a pronoun…');
   });
 
   it('opens on the noun tab', () => {

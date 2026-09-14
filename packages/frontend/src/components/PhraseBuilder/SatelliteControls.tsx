@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import type { UiStringKey } from "@signi/shared";
 import { ClearButton, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import { clearControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
@@ -9,7 +10,7 @@ interface SatelliteControlsProps {
   // or — for a chained satellite — the satellite before it in the chain.
   satelliteIconsByParent: Record<string, SatelliteIcon[]>;
   // The words whose solid ring carries a clear button.
-  clearControls: { mainKey: string; label: string; onClear: () => void }[];
+  clearControls: { mainKey: string; label: string; labelKey?: UiStringKey; onClear: () => void }[];
   // Where every ring control sits on the canvas, keyed by control.
   controlPos: Record<string, { x: number; y: number }>;
   // Slot colours to use in place of a slot's own, by slot key (a conjunct's head wears its role's).
@@ -50,10 +51,10 @@ export function SatelliteControls({
           );
         });
       })}
-      {clearControls.map(({ mainKey, label, onClear }) => {
+      {clearControls.map(({ mainKey, label, labelKey, onClear }) => {
         const p = controlPos[clearControlKey(mainKey)];
         if (!p) return null;
-        return <ClearButton key={mainKey} label={label} onClear={onClear} sx={seat(p)} />;
+        return <ClearButton key={mainKey} label={label} labelKey={labelKey} onClear={onClear} sx={seat(p)} />;
       })}
     </>
   );

@@ -20,7 +20,7 @@ test.describe('saved phrases', () => {
     const saveDialog = page.getByRole('dialog');
     await saveDialog.getByLabel('Name').fill(name);
     await saveDialog.getByRole('button', { name: 'Save', exact: true }).click();
-    await expect(page.getByText('Phrase saved.')).toBeVisible();
+    await expect(page.getByText('Saved phrase')).toBeVisible();
 
     // Come back to an empty builder — the workspace itself isn't persisted client-side.
     await app.goto();
@@ -33,7 +33,7 @@ test.describe('saved phrases', () => {
     const loadDialog = page.getByRole('dialog');
     await loadDialog.getByText(name).click();
 
-    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+    await expect(page.getByText('Loaded phrase')).toBeVisible();
     await expect.poll(() => app.sentence('en')).toBe('the cat eats.');
     expect(await app.sentence('it')).toBe('il gatto mangia.');
   });
@@ -61,7 +61,7 @@ test.describe('saved phrases', () => {
 
     // Import's button only clicks a hidden file input, so the file goes to the input directly.
     await page.locator('input[type="file"]').setInputFiles(file);
-    await expect(page.getByText('Phrase loaded.')).toBeVisible();
+    await expect(page.getByText('Loaded phrase')).toBeVisible();
 
     await expect.poll(() => app.sentence('en')).toBe('if the cat ate, the dog would run.');
     expect(await app.sentence('it')).toBe('se il gatto mangiasse, il cane correrebbe.');

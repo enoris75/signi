@@ -9,7 +9,7 @@ import {
   ToggleButtonGroup,
   Button,
 } from "@mui/material";
-import { Concept } from "@signi/shared";
+import { Concept, type UiStringKey } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -19,15 +19,15 @@ import { ConceptSelectOpts } from "./interfaces.ts";
 
 export function SubjectTypeahead({
   onSelect,
-  placeholder,
+  placeholderKey = "slot.subject.placeholder",
   kind = "noun",
   onKindChange,
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
-  // The picker is pronoun-inclusive (pronouns + nouns); the label varies by slot
-  // (a subject vs. a causal complement, which also accepts a pronoun). Left out in the
-  // subject slot, whose prompt ("type a subject…") the engine renders in the UI language.
-  placeholder?: string;
+  // The picker is pronoun-inclusive (pronouns + nouns); the prompt varies by slot (a subject vs. a
+  // causal complement, which also accepts a pronoun). Either is rendered by the engine in the UI
+  // language; the default is the subject slot's ("type a subject…").
+  placeholderKey?: UiStringKey;
   // The word-category switch (noun / pronoun), controlled from the box so the in-dropdown
   // tabs and the on-box toggle stay in sync. Standalone callers may omit it (defaults noun,
   // switchable locally within the popper via `onKindChange`).
@@ -36,7 +36,7 @@ export function SubjectTypeahead({
 }) {
   const t = useUiString();
   const matches = useConceptSearch();
-  const prompt = placeholder ?? `${t("slot.subject.placeholder")}…`;
+  const prompt = `${t(placeholderKey)}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
   // The category is controlled when the box supplies `onKindChange`; otherwise the popper

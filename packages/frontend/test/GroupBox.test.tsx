@@ -1,5 +1,6 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
+import { renderWithProviders, type Seed } from './render.tsx';
 import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import { GroupBox } from '../src/components/PhraseBuilder/GroupBox.tsx';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
@@ -47,7 +48,11 @@ const CONTROL_POS = {
 // GroupBox reads only the collapse state, the view mode, the drag state, the seated controls and
 // its handlers from the builder's context. It paints onto the canvas, which drags on a press of
 // its own.
-function renderGroup(rect: GroupRect, overrides: Partial<PhraseRenderContext> = {}) {
+function renderGroup(
+  rect: GroupRect,
+  overrides: Partial<PhraseRenderContext> = {},
+  seed: Seed = {},
+) {
   const onCanvasPointerDown = vi.fn();
   const dragProps = {
     onPointerDown: vi.fn(),
@@ -65,10 +70,11 @@ function renderGroup(rect: GroupRect, overrides: Partial<PhraseRenderContext> = 
     handleRemoveComplement: vi.fn(),
     ...overrides,
   };
-  const view = render(
+  const view = renderWithProviders(
     <div data-testid="canvas" onPointerDown={onCanvasPointerDown}>
       <GroupBox rect={rect} ctx={ctx as PhraseRenderContext} />
     </div>,
+    seed,
   );
   return { ...view, ctx, dragProps, onCanvasPointerDown };
 }
@@ -150,6 +156,22 @@ describe('GroupBox', () => {
 
       fireEvent.click(toggle);
       expect(ctx.handleToggleCollapse).toHaveBeenCalledExactlyOnceWith('Subject');
+    });
+
+    it('names the part it compacts and expands in the UI language, keyed by its English label', () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      const named = { ...SUBJECT_GROUP, labelKey: 'slot.subject' as const };
+      const strings = {
+        'action.compact.subject': { de: 'Das Subjekt verdichten' },
+        'action.expand.subject': { de: 'Das Subjekt erweitern' },
+      };
+      const { ctx, rerender } = renderGroup(named, {}, { strings });
+      fireEvent.click(screen.getByRole('button', { name: 'Das Subjekt verdichten' }));
+      // The collapse state stays keyed by the English label, whatever language the tooltip is in.
+      expect(ctx.handleToggleCollapse).toHaveBeenCalledExactlyOnceWith('Subject');
+
+      rerender(<GroupBox rect={named} ctx={{ ...ctx, collapsedGroups: { Subject: true } } as PhraseRenderContext} />);
+      expect(screen.getByRole('button', { name: 'Das Subjekt erweitern' })).toBeInTheDocument();
     });
 
     it('reads only its own group’s collapse state', () => {

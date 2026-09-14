@@ -97,6 +97,63 @@ const commandOf = (concept: string): PhrasePlan =>
     imperativeRegister: 'instruction',
   }) as PhrasePlan;
 
+// The named parts of the canvas a control can act on, each with the grammar noun its box is titled
+// by (`slot.*`, `category.adjective`, `satellite.determiner`) and that noun's English for the fallback.
+const CANVAS_PARTS = {
+  subject: { concept: 'SUBJECT_GRAMMAR', en: 'subject' },
+  verb: { concept: 'VERB', en: 'verb' },
+  object: { concept: 'OBJECT_GRAMMAR', en: 'object' },
+  adverb: { concept: 'ADVERB', en: 'adverb' },
+  adjective: { concept: 'ADJECTIVE', en: 'adjective' },
+  instrumental: { concept: 'INSTRUMENTAL', en: 'instrumental' },
+  predicative: { concept: 'SUBJECT_COMPLEMENT', en: 'subject complement' },
+  manner: { concept: 'ADVERBIAL_OF_MANNER', en: 'adverbial of manner' },
+  determiner: { concept: 'DETERMINER', en: 'determiner' },
+  possessor: { concept: 'POSSESSOR', en: 'possessor' },
+} as const;
+
+/** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
+export type CanvasPart = keyof typeof CANVAS_PARTS;
+
+// Which parts each of those controls can act on — the members of each family below, exported so
+// the canvas asks the catalog rather than keeping its own copy. Every part whose word sits in a box
+// has a clear button; the parts behind a reveal control can be shown and hidden; the constituents
+// drawn as a ring of their own can be expanded and compacted. A part whose grammar noun is not seeded
+// yet (the modals, tense, aspect, the other complements, the verb phrase) is absent, and its control
+// keeps its English label until it is.
+export const CLEARABLE_PARTS = [
+  'subject', 'verb', 'object', 'adverb', 'adjective', 'instrumental', 'predicative', 'manner', 'possessor',
+] as const satisfies readonly CanvasPart[];
+export const REVEALABLE_PARTS = [
+  'adjective', 'adverb', 'object', 'instrumental', 'predicative', 'manner', 'determiner', 'possessor',
+] as const satisfies readonly CanvasPart[];
+export const COLLAPSIBLE_PARTS = [
+  'subject', 'object', 'instrumental', 'predicative', 'manner',
+] as const satisfies readonly CanvasPart[];
+
+// One command, one entry per part it can act on: `commandOf(verb)` on the part's grammar noun,
+// definite, keyed `<key>.<part>`. The mapped return type keeps every key literal, so `t('…')` still
+// typo-checks the family's members.
+const commandOnEach = <const K extends string, const P extends CanvasPart>(
+  key: K,
+  verb: string,
+  fallbackVerb: string,
+  parts: readonly P[],
+): Record<`${K}.${P}`, UiStringPlanDef> =>
+  Object.fromEntries(
+    parts.map((part) => [
+      `${key}.${part}`,
+      {
+        plan: {
+          ...commandOf(verb),
+          directObject: { concept: CANVAS_PARTS[part].concept, definiteness: 'definite' },
+        } as PhrasePlan,
+        format: NAME_FORMAT,
+        fallback: `${fallbackVerb} the ${CANVAS_PARTS[part].en}`,
+      },
+    ]),
+  ) as Record<`${K}.${P}`, UiStringPlanDef>;
+
 // One instrument, said three ways: the START command taking "choosing a word" as its instrumental,
 // at whichever abstraction level is asked for. At `object` the action drops away and the noun
 // phrase *is* the instrument (see AbstractionLevel), which is what makes the three read as one
@@ -328,6 +385,59 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'type a verb',
   },
 
+  // The other word pickers' placeholders, the same command on the grammar noun each one offers:
+  // "type an adjective", "type an adverb", "type a noun" (the object's and the plain complements'
+  // picker). Indefinite, like the subject's and the verb's — the user has yet to pick one.
+  'slot.adjective.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'ADJECTIVE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type an adjective',
+  },
+  'slot.adverb.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'ADVERB', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type an adverb',
+  },
+  'slot.noun.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'NOUN', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a noun',
+  },
+  // The cause complement's picker takes a pronoun as well ("because of him"), so its object is the
+  // two grammar nouns coordinated by `or`. Each conjunct keeps its own determiner, which is why
+  // English reads "a noun or a pronoun" (it "un sostantivo o un pronome", ja 「名詞か代名詞を入力」).
+  'slot.nounOrPronoun.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'NOUN', definiteness: 'indefinite' },
+          { concept: 'PRONOUN', definiteness: 'indefinite' },
+        ],
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a noun or a pronoun',
+  },
+
+  // What an active, still-empty box without a picker says: the bare CHOOSE command, lower-case like
+  // the placeholders, and the call site adds the ellipsis ("choose…", it "scegli…", de "wählen…").
+  'slot.choose': {
+    plan: commandOf('CHOOSE'),
+    format: { stripPeriod: true },
+    fallback: 'choose',
+  },
+
   // The word-category switch on a switchable box (subject/cause = noun | pronoun;
   // predicative + adjectives = noun | adjective) and the matching selector inside the open
   // picker. Each is the bare grammar noun; the toggle's CSS uppercases it.
@@ -366,6 +476,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Number',
   },
 
+  // The gender control on a noun or pronoun box — the ring icon that cycles the value in place. The
+  // bare grammar noun, like `satellite.number`; `pronoun.gender` is the same noun lower-case, as the
+  // pronoun chooser's row caption.
+  'satellite.gender': {
+    plan: nameOf('GENDER'),
+    format: NAME_FORMAT,
+    fallback: 'Gender',
+  },
+
   // The two values that control shows, keyed `number.value.<Number>` so a call site can write
   // t(`number.value.${value}`) for either. Nouns, where the pronoun chooser's `pronoun.singular`
   // is an adjective: there the value sits in a row captioned by the noun it agrees with, here the
@@ -380,6 +499,30 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('PLURAL_GRAMMAR'),
     format: NAME_FORMAT,
     fallback: 'Plural',
+  },
+
+  // The three values the gender control cycles through, shown after its name in the tooltip
+  // ("Gender: Female"). Keyed `gender.value.<Gender>` so a call site can write
+  // t(`gender.value.${value}`). The same words the pronoun chooser's `pronoun.male` / `.female` /
+  // `.neuter` offer for the same values — an adjective agreeing with GENDER (it "maschile",
+  // de "männlich") — capitalized, because here the value stands at the head of its half of the label.
+  'gender.value.masc': {
+    word: 'MALE',
+    agreesWith: 'GENDER',
+    format: { capitalize: true },
+    fallback: 'Male',
+  },
+  'gender.value.fem': {
+    word: 'FEMALE',
+    agreesWith: 'GENDER',
+    format: { capitalize: true },
+    fallback: 'Female',
+  },
+  'gender.value.neut': {
+    word: 'NEUTER',
+    agreesWith: 'GENDER',
+    format: { capitalize: true },
+    fallback: 'Neuter',
   },
 
   // The sections of the determiner menu, keyed `determiner.category.<DeterminerCategory>` so the
@@ -604,6 +747,10 @@ export const UI_STRINGS = defineUiStrings({
   // The chooser's commit button: "select (it)".
   'action.select': { plan: commandOf('SELECT'), format: NAME_FORMAT, fallback: 'Select' },
 
+  // The chip under a noun modifier's own adjective that removes it: the bare CLEAR command,
+  // lower-case like the chips beside it ("clear", it "cancella", de "löschen").
+  'action.clear': { plan: commandOf('CLEAR'), format: { stripPeriod: true }, fallback: 'clear' },
+
   // The two saved-phrase buttons, as commands: "save (it)" / "load (it)".
   'action.save': { plan: commandOf('SAVE'), format: NAME_FORMAT, fallback: 'Save' },
   'action.load': { plan: commandOf('LOAD'), format: NAME_FORMAT, fallback: 'Load' },
@@ -680,6 +827,41 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Load period',
   },
 
+  // The title of the dialog that button opens, which lists the stored periods: "add a saved period".
+  // ADD, not LOAD — the chosen period joins the workspace as a new container beside the others — on
+  // an indefinite PERIOD_SENTENCE carrying SAVED, the same shape as `action.load.tooltip`.
+  'action.addSavedPeriod': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a saved period',
+  },
+
+  // The success toasts of saving and loading. The engine has no passive voice to say "the phrase was
+  // saved" with, so each is said the way a status line says it anyway: the noun under its participle
+  // adjective — en "Saved phrase", it "Frase salvata", de "Gespeicherte Phrase", ja 「保存済みのフレーズ」.
+  // Bare: the toast names what happened to the phrase just acted on, not one of several.
+  // (`wordMap.hidden.*` takes the same way round the missing passive.)
+  'toast.phraseSaved': {
+    plan: { subject: { concept: 'PHRASE', definiteness: 'bare', adjectives: ['SAVED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Saved phrase',
+  },
+  'toast.phraseLoaded': {
+    plan: { subject: { concept: 'PHRASE', definiteness: 'bare', adjectives: ['LOADED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Loaded phrase',
+  },
+  'toast.periodSaved': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Saved period',
+  },
+
   // The save control on a period container's header. Definite, not indefinite: the command
   // acts on the period the button sits in — "save the period" ("salva il periodo"). The
   // engine has no demonstrative determiner, so `definite` is as close as it renders to "this".
@@ -725,6 +907,47 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Tidy up this period',
   },
+
+  // The sole period's clear control — its tooltip, and the aria-label it doubles as. The sole period
+  // cannot be removed (the workspace always keeps one), so the control empties it in place: CLEAR on
+  // the period under the cursor, `this` like the view controls beside it ("clear this period").
+  'action.clearPeriod': {
+    plan: {
+      ...commandOf('CLEAR'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Clear this period',
+  },
+
+  // The coordination control on a period's border, before any coordination exists: COORDINATE on
+  // this period. It stops there, where the English it replaces went on "…with another": a comitative
+  // "with" is not a complement the engine has, and the steps the button opens — the conjunction menu,
+  // then the pick — already show the other half.
+  'action.coordinatePeriod': {
+    plan: {
+      ...commandOf('COORDINATE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Coordinate this period',
+  },
+
+  // The controls that act on one named part of the canvas — a word's clear button, a satellite's
+  // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the
+  // part's own grammar noun, the one its box is titled with. That noun has to sit *inside* the plan,
+  // not be glued on after it, to take the article and case its language gives it (de "**den**
+  // Instrumental löschen", it "cancella **l'**aggettivo"); and a plan takes no arguments. So each
+  // control is a family of keys, one per part, keyed `<action>.<part>` so a call site can write
+  // t(`action.clear.${part}`). Definite: the part is the one right there on the canvas.
+  //
+  // "Collapse" is COMPACT, as the period header already pairs it with EXPAND: the seeded COLLAPSE is
+  // the intransitive "fall down".
+  ...commandOnEach('action.clear', 'CLEAR', 'Clear', CLEARABLE_PARTS),
+  ...commandOnEach('action.show', 'SHOW', 'Show', REVEALABLE_PARTS),
+  ...commandOnEach('action.hide', 'HIDE', 'Hide', REVEALABLE_PARTS),
+  ...commandOnEach('action.expand', 'EXPAND', 'Expand', COLLAPSIBLE_PARTS),
+  ...commandOnEach('action.compact', 'COMPACT', 'Compact', COLLAPSIBLE_PARTS),
 
   // The two icon controls in the words sidebar's header, which have no label of their own — the
   // tooltip (and the aria-label it doubles as) is the whole affordance. Both are commands.
