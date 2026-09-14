@@ -36,5 +36,8 @@ describe('agreeAdj', () => {
     expect(agreeAdj('cero', 'fem', false)).toBe('cero');
     expect(agreeAdj('cero', 'masc', true)).toBe('cero');
     expect(agreeAdj('cero', 'fem', true)).toBe('cero');
+    // A prepositional phrase standing for an adjective does not agree either.
+    expect(agreeAdj('sin título', 'fem', false)).toBe('sin título');
+    expect(agreeAdj('sin título', 'fem', true)).toBe('sin título');
   });
 });

@@ -740,3 +740,54 @@ describe('known bugs: German object pronoun before an adverb', () => {
   });
 });
 
+
+// A phrasal verb's particle ("turn off", "put out", "tidy up") follows a pronoun object and stays with
+// the verb before a noun one: "turn it off", "turn off the option", never "*turn off it". The particle is
+// the verb's `particle` form, moved across the pronoun wherever the verb group ends on it.
+describe('English phrasal verb with a pronoun object', () => {
+  const IT = np('THIRD_PERSON', { gender: 'neut' });
+  const turnsOff = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}, extra: Partial<PhrasePlan> = {}) =>
+    say({ ...clause(np('DOG'), 'TURN_OFF', { directObject: object, verbPhrase }), ...extra }, 'en');
+
+  test('the particle follows the pronoun in every tense and aspect', () => {
+    expect(turnsOff(IT)).toBe('the dog turns it off.');
+    expect(turnsOff(IT, { tense: 'past' })).toBe('the dog turned it off.');
+    expect(turnsOff(IT, { tense: 'future' })).toBe('the dog will turn it off.');
+    expect(turnsOff(IT, { aspect: 'resultative' })).toBe('the dog has turned it off.');
+    expect(turnsOff(IT, { aspect: 'progressive' })).toBe('the dog is turning it off.');
+    expect(turnsOff(IT, { modals: ['MUST'] })).toBe('the dog must turn it off.');
+    expect(turnsOff(IT, { negative: true })).toBe('the dog does not turn it off.');
+  });
+
+  test('and in a command, an instruction and a citation', () => {
+    const you = (verbPhrase: Partial<VerbPhrase>, extra: Partial<PhrasePlan>) =>
+      say({ ...clause(np('SECOND_PERSON'), 'TURN_OFF', { directObject: IT, verbPhrase }), ...extra }, 'en');
+    expect(you({}, { imperative: true })).toBe('turn it off.');
+    expect(you({ negative: true }, { imperative: true })).toBe('do not turn it off.');
+    expect(you({}, { imperative: true, imperativeRegister: 'instruction' })).toBe('turn it off.');
+    expect(you({}, { infinitive: true })).toBe('to turn it off.');
+  });
+
+  test('every phrasal verb that names its particle', () => {
+    expect(say(clause(np('MAN'), 'EXTINGUISH', { directObject: np('THIRD_PERSON', { gender: 'masc' }) }), 'en'))
+      .toBe('the man puts him out.');
+    expect(say(clause(np('MAN'), 'TIDY_UP', { directObject: IT }), 'en')).toBe('the man tidies it up.');
+  });
+
+  test('regression: a noun object keeps the particle beside the verb', () => {
+    expect(turnsOff(np('OPTION'))).toBe('the dog turns off the option.');
+    expect(say(clause(np('MAN'), 'EXTINGUISH', { directObject: np('FIRE') }), 'en')).toBe('the man puts out the fire.');
+  });
+
+  test('the other languages have no particle to move', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'TURN_OFF', { directObject: IT }), imperative: true })).toEqual({
+      en: 'turn it off.',
+      it: 'disattivalo.',
+      fr: 'désactive-le.',
+      de: 'deaktiviere es.',
+      es: 'desactívalo.',
+      ja: 'それをオフにしてください。',
+      pt: 'desative-o.',
+    });
+  });
+});

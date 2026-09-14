@@ -27,6 +27,36 @@ export function predicateParts(
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
+  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements);
+  return particleAfterPronoun(parts, verbPhrase, directObject);
+}
+
+/**
+ * A phrasal verb's particle ("turn **off**", seeded as the `particle` form) follows a pronoun object
+ * and may precede a noun one: "turn it off", never "*turn off it", but "turn off the light". Every
+ * verb group ends on the particle ("do not turn off", "has turned off", "must turn off"), and the
+ * object is the part right after it, so the particle moves across that one part.
+ */
+function particleAfterPronoun(parts: string[], verbPhrase: ResolvedVerbPhrase, directObject?: ResolvedNounElement): string[] {
+  const particle = verbPhrase.verb.forms['particle'];
+  const pronoun = directObject?.conjuncts.length === 1 && directObject.conjuncts[0].head.forms['person']
+    ? objectPronounForm(directObject.conjuncts[0].head.forms)
+    : undefined;
+  if (!particle || !pronoun) return parts;
+  const at = parts.indexOf(pronoun);
+  if (at < 1 || !parts[at - 1].endsWith(` ${particle}`)) return parts;
+  const out = [...parts];
+  out[at - 1] = out[at - 1].slice(0, -(particle.length + 1));
+  out[at] = `${pronoun} ${particle}`;
+  return out;
+}
+
+function predicateWords(
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounElement,
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+): string[] {
   const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.

@@ -90,7 +90,7 @@ describe('App', () => {
     it('carries the language selector and the saved-phrase toolbar', () => {
       renderApp();
 
-      expect(screen.getByLabelText('Interface language')).toBeInTheDocument();
+      expect(screen.getByRole('combobox', { name: 'Interface language' })).toBeInTheDocument();
       expect(screen.getByTestId('saved-phrases-toolbar')).toBeInTheDocument();
     });
 
@@ -101,7 +101,7 @@ describe('App', () => {
         'translations.heading': { it: 'Traduzioni' },
       });
 
-      const selector = screen.getByRole('combobox', { name: 'Interface language' });
+      const selector = screen.getByTestId('language-selector');
       fireEvent.mouseDown(selector);
       fireEvent.click(screen.getByRole('option', { name: /Italian/ }));
 

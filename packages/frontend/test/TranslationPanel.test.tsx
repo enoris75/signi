@@ -127,11 +127,13 @@ describe('TranslationPanel', () => {
     renderPanel([translated('The cat sleeps')], {
       'translations.heading': { it: 'Traduzioni' },
       'language.de': { it: 'Tedesco' },
+      'action.copyTranslation': { it: 'Copia la traduzione' },
     });
 
     expect(screen.getByText('Traduzioni')).toBeInTheDocument();
     expect(languageRow('de')).toHaveTextContent(/^🇩🇪Tedesco/);
-    expect(screen.getByRole('button', { name: 'Copy Tedesco translation' })).toBeInTheDocument();
+    // The plan can't carry the row's language, so the button's name adds it in brackets.
+    expect(screen.getByRole('button', { name: 'Copia la traduzione (Tedesco)' })).toBeInTheDocument();
   });
 
   it('rules off every row but the last', () => {
@@ -161,7 +163,7 @@ describe('TranslationPanel', () => {
     });
 
     const copyButton = (name: string) =>
-      screen.getByRole('button', { name: `Copy ${name} translation` });
+      screen.getByRole('button', { name: `Copy the translation (${name})` });
 
     // The handler awaits the clipboard before it confirms.
     const click = async (button: HTMLElement) => {
@@ -235,7 +237,7 @@ describe('TranslationPanel', () => {
 
       fireEvent.mouseOver(button);
       act(() => vi.advanceTimersByTime(100));
-      expect(screen.getByRole('tooltip')).toHaveTextContent(/^Copy to clipboard$/);
+      expect(screen.getByRole('tooltip')).toHaveTextContent(/^Copy the translation$/);
 
       await click(button);
       expect(screen.getByRole('tooltip')).toHaveTextContent(/^Copied$/);

@@ -4,10 +4,11 @@ import { test, expect } from './fixtures';
 // toggle. Turning it on drops the subject box, replaces it with the infinitive box, and renders
 // the verb group as a dictionary citation ("to consume the food") in every language.
 test.describe('infinitive phrase toggle', () => {
-  const toggle = 'Toggle infinitive phrase (citation)';
+  // Named by its mode; whether it is on is its aria-pressed.
+  const toggle = 'Infinitive phrase';
 
   test('drops the subject and renders a citation', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
 
     // The subject box is gone, replaced by the infinitive box (captioned from the seeded concept).
     await expect(app.subjectInput).toHaveCount(0);
@@ -26,20 +27,20 @@ test.describe('infinitive phrase toggle', () => {
   });
 
   test('toggling off restores the subject box', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await expect(app.subjectInput).toHaveCount(0);
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await expect(app.subjectInput).toBeVisible();
     await expect(page.getByTestId('infinitive-box')).toHaveCount(0);
   });
 
   test('is mutually exclusive with the imperative — turning one on clears the other', async ({ app }) => {
     const page = app.page;
-    await page.getByLabel('Toggle imperative (command)').click();
+    await page.getByRole('button', { name: 'Command', exact: true }).click();
     // The command box is up (its caption is the localized COMMAND noun).
     await expect(page.getByText('Command', { exact: true })).toBeVisible();
     // Turning on the infinitive clears the command: the infinitive box replaces the command box.
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await expect(page.getByTestId('infinitive-box')).toBeVisible();
     await expect(page.getByText('Command', { exact: true })).toHaveCount(0);
   });

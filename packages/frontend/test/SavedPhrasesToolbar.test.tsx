@@ -302,6 +302,16 @@ describe('SavedPhrasesToolbar', () => {
       await waitForElementToBeRemoved(dialog);
       expect(savePhrase).not.toHaveBeenCalled();
     });
+
+    it('labels its field and its cancel button in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      renderToolbar({}, { 'field.name': { it: 'Nome' }, 'action.cancel': { it: 'Annulla' } });
+      fireEvent.click(saveButton());
+      const dialog = screen.getByRole('dialog');
+
+      expect(within(dialog).getByRole('textbox', { name: 'Nome' })).toBeInTheDocument();
+      expect(within(dialog).getByRole('button', { name: 'Annulla' })).toBeInTheDocument();
+    });
   });
 
   describe('loading', () => {
@@ -328,7 +338,21 @@ describe('SavedPhrasesToolbar', () => {
 
       const dialog = openLoadDialog();
 
-      expect(await within(dialog).findByText('No saved phrases yet.')).toBeInTheDocument();
+      expect(await within(dialog).findByText('No saved phrases')).toBeInTheDocument();
+    });
+
+    it('says it is loading, and that nothing is saved, in the UI language', async () => {
+      localStorage.setItem('signi:uiLanguage', 'fr');
+      vi.mocked(listSavedPhrases).mockResolvedValue([]);
+      renderToolbar({}, {
+        'status.loading': { fr: 'Chargement' },
+        'saved.noPhrases': { fr: 'Aucune phrase enregistrée' },
+      });
+
+      const dialog = openLoadDialog();
+
+      expect(within(dialog).getByText('Chargement…')).toBeInTheDocument();
+      expect(await within(dialog).findByText('Aucune phrase enregistrée')).toBeInTheDocument();
     });
 
     it('says when the saved phrases could not be fetched', async () => {
@@ -341,7 +365,7 @@ describe('SavedPhrasesToolbar', () => {
         'Could not load saved phrases.',
       );
       expect(within(dialog).queryByText('Loading…')).not.toBeInTheDocument();
-      expect(within(dialog).queryByText('No saved phrases yet.')).not.toBeInTheDocument();
+      expect(within(dialog).queryByText('No saved phrases')).not.toBeInTheDocument();
     });
 
     it('replaces the workspace with the phrase picked, and confirms', async () => {
@@ -484,6 +508,17 @@ describe('SavedPhrasesToolbar', () => {
       });
     });
 
+    it('names an untitled document in the UI language it was exported in', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      renderToolbar({ containers: FILLED, links: [] }, { 'phrase.untitled': { it: 'Frase senza titolo' } });
+
+      fireEvent.click(exportButton());
+
+      expect(downloadSavedPhrase).toHaveBeenCalledExactlyOnceWith(
+        expect.objectContaining({ name: 'Frase senza titolo' }),
+      );
+    });
+
     it('names the document with the name typed for saving', async () => {
       renderToolbar();
       const { dialog, name, cancel } = openSaveDialog();
@@ -559,13 +594,49 @@ describe('SavedPhrasesToolbar', () => {
       );
     });
 
-    it('explains why a file could not be imported', async () => {
+    // Whatever is wrong with the file, the user can do one thing about it, so the toast says the file
+    // won't do and the particular reason goes to the console.
+    it('says a file it cannot read is not valid, and logs why', async () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const { onLoad } = renderToolbar();
 
       pickFile('{ not json');
 
-      expect(await findToast()).toHaveTextContent("That file isn't valid JSON.");
+      expect(await findToast()).toHaveTextContent(/^Failed import — this file is not valid$/);
+      expect(warn).toHaveBeenCalledExactlyOnceWith(new Error("That file isn't valid JSON."));
       expect(onLoad).not.toHaveBeenCalled();
+    });
+
+    it('says so in the UI language', async () => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+      localStorage.setItem('signi:uiLanguage', 'de');
+      renderToolbar({}, {
+        'toast.importFailed': { de: 'Fehlgeschlagener Import' },
+        'toast.invalidFile': { de: 'diese Datei ist nicht gültig' },
+      });
+
+      pickFile(JSON.stringify({ format: 'something else' }));
+
+      expect(await findToast()).toHaveTextContent(/^Fehlgeschlagener Import — diese Datei ist nicht gültig$/);
+    });
+
+    it('says the import failed when a valid file cannot be applied', async () => {
+      const onLoad = vi.fn(() => {
+        throw new Error('boom');
+      });
+      renderToolbar({ onLoad });
+
+      pickFile(
+        JSON.stringify({
+          format: SAVED_PHRASE_FORMAT,
+          version: SAVED_PHRASE_VERSION,
+          kind: 'phrase',
+          savedAt: '2026-09-02T10:00:00Z',
+          workspace: WORKSPACE,
+        }),
+      );
+
+      expect(await findToast()).toHaveTextContent(/^Failed import$/);
     });
 
     it('does nothing when the picker is dismissed without a file', async () => {
@@ -580,6 +651,10 @@ describe('SavedPhrasesToolbar', () => {
   });
 
   describe('its messages', () => {
+    beforeEach(() => {
+      vi.spyOn(console, 'warn').mockImplementation(() => {});
+    });
+
     const failImport = async () => {
       pickFile('{ not json');
       return findToast();

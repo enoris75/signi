@@ -16,7 +16,7 @@ import {
   listSavedPhrases,
   savePhrase,
 } from '../src/api.ts';
-import { renderWithProviders } from './render.tsx';
+import { renderWithProviders, type SeededStrings } from './render.tsx';
 
 // The saved-phrase endpoints and the concept catalog are the backend; no request goes out.
 vi.mock('../src/api.ts', () => ({
@@ -65,7 +65,10 @@ function deferred<T>() {
   return { promise, resolve };
 }
 
-function renderSaveLoad(overrides: Partial<Parameters<typeof PeriodSaveLoad>[0]> = {}) {
+function renderSaveLoad(
+  overrides: Partial<Parameters<typeof PeriodSaveLoad>[0]> = {},
+  strings: SeededStrings = {},
+) {
   const props = {
     saveTarget: null,
     onCloseSave: vi.fn(),
@@ -74,7 +77,7 @@ function renderSaveLoad(overrides: Partial<Parameters<typeof PeriodSaveLoad>[0]>
     onAppendPeriod: vi.fn(),
     ...overrides,
   };
-  const view = renderWithProviders(<PeriodSaveLoad {...props} />);
+  const view = renderWithProviders(<PeriodSaveLoad {...props} />, { strings });
   return { ...view, props };
 }
 
@@ -179,7 +182,7 @@ describe('PeriodSaveLoad', () => {
       vi.mocked(savePhrase).mockResolvedValue(record(BREAKFAST, []));
       vi.mocked(listSavedPhrases).mockResolvedValueOnce([]).mockResolvedValue([BREAKFAST]);
       const { rerender, props } = renderSaveLoad({ loadOpen: true });
-      await screen.findByText(/^No saved periods yet/);
+      await screen.findByText(/^No saved periods/);
       // Save from over the open picker, so its list is live when the save lands.
       rerender(<PeriodSaveLoad {...props} saveTarget={PERIOD} />);
 
@@ -234,7 +237,7 @@ describe('PeriodSaveLoad', () => {
       expect(screen.getByText('Supper')).toBeInTheDocument();
       const updated = new Date(BREAKFAST.updatedAt).toLocaleString('en');
       expect(screen.getAllByText(`system · ${updated}`)).toHaveLength(2);
-      expect(screen.queryByText(/^No saved periods yet/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^No saved periods/)).not.toBeInTheDocument();
       expect(listSavedPhrases).toHaveBeenCalledExactlyOnceWith('period');
     });
 
@@ -264,10 +267,29 @@ describe('PeriodSaveLoad', () => {
 
       expect(
         await screen.findByText(
-          'No saved periods yet — use the save icon on a phrase container.',
+          'No saved periods — use the icon that saves a period in a period container',
         ),
       ).toBeInTheDocument();
       expect(screen.queryByText('Loading…')).not.toBeInTheDocument();
+    });
+
+    it('says what it is doing, and how to save a period, in the UI language', async () => {
+      localStorage.setItem('signi:uiLanguage', 'es');
+      const pending = deferred<SavedPhraseSummary[]>();
+      vi.mocked(listSavedPhrases).mockReturnValue(pending.promise);
+      renderSaveLoad({ loadOpen: true }, {
+        'status.loading': { es: 'Carga' },
+        'saved.noPeriods': { es: 'Ningún período guardado' },
+        'saved.useSaveIcon': { es: 'usar el icono que guarda un período en un recipiente de período' },
+      });
+
+      expect(screen.getByText('Carga…')).toBeInTheDocument();
+      pending.resolve([]);
+      expect(
+        await screen.findByText(
+          'Ningún período guardado — usar el icono que guarda un período en un recipiente de período',
+        ),
+      ).toBeInTheDocument();
     });
 
     it('reports a list that could not be loaded', async () => {
@@ -275,7 +297,7 @@ describe('PeriodSaveLoad', () => {
       renderSaveLoad({ loadOpen: true });
 
       expect(await screen.findByRole('alert')).toHaveTextContent('Could not load saved periods.');
-      expect(screen.queryByText(/^No saved periods yet/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/^No saved periods/)).not.toBeInTheDocument();
     });
 
     it('appends the chosen period’s clause as a new container, then closes', async () => {
@@ -290,7 +312,7 @@ describe('PeriodSaveLoad', () => {
       await waitFor(() => expect(props.onCloseLoad).toHaveBeenCalledOnce());
       expect(fetchSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');
       expect(props.onAppendPeriod).toHaveBeenCalledExactlyOnceWith({ subject: CAT, verb: EAT });
-      expect(getComputedStyle(await findNotice('Period added.')).backgroundColor).toBe(SUCCESS);
+      expect(getComputedStyle(await findNotice('Added period')).backgroundColor).toBe(SUCCESS);
     });
 
     it('waits for the word catalog before adding a period', async () => {
@@ -309,7 +331,7 @@ describe('PeriodSaveLoad', () => {
 
       catalog.resolve([CAT, EAT]);
 
-      await findNotice('Period added.');
+      await findNotice('Added period');
       expect(props.onAppendPeriod).toHaveBeenCalledExactlyOnceWith({ subject: CAT, verb: EAT });
     });
 

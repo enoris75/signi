@@ -743,11 +743,12 @@ describe('known bugs: degree (extended)', () => {
 // grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
-  ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
+  ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
   ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
-  ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
-  ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EXPLICATIVE', 'explicative'], ['FEMALE', 'female'],
+  ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
+  ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
+  ['FAILED', 'failed'], ['FEMALE', 'female'],
   ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
@@ -758,7 +759,8 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
   ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
   ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
-  ['UNIVERSAL', 'universal'], ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'],
+  ['UNIVERSAL', 'universal'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
+  ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];
 

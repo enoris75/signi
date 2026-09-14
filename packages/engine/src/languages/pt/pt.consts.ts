@@ -118,6 +118,7 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
 
 /**
  * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("a casa zero, os gatos zero");
- * the agreement rule would otherwise inflect it like any adjective with its ending.
+ * so is a prepositional phrase standing for one ("a frase sem título"). The agreement rule would otherwise inflect
+ * either like any adjective with its ending ("*sem títula").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'sem título']);

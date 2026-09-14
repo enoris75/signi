@@ -27,6 +27,18 @@ describe('resolveNounPhrase', () => {
         .toMatchObject({ number: 'plural', definiteness: 'indefinite' });
     });
 
+    // The Romance negative quantifiers are singular ("nessun gatto", "aucun chat"); English and German
+    // keep the number picked ("no cats", "keine Kater").
+    test('the negative quantifier takes a singular noun in the Romance languages', () => {
+      const noCats: NounPhrase = { concept: 'CAT', number: 'plural', definiteness: 'no' };
+      for (const language of ['it', 'fr', 'es', 'pt']) {
+        expect(resolveNounPhrase(noCats, language, LOOKUP).head.forms['number']).toBe('singular');
+      }
+      for (const language of ['en', 'de']) {
+        expect(resolveNounPhrase(noCats, language, LOOKUP).head.forms['number']).toBe('plural');
+      }
+    });
+
     test('a plural with no plural surface stays singular', () => {
       expect(headForms({ concept: 'WATER', number: 'plural' })['number']).toBe('singular');
     });

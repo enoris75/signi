@@ -143,12 +143,13 @@ function LanguageRow({
           {name}
         </Typography>
         {text && (
-          <Tooltip title={copied ? 'Copied' : 'Copy to clipboard'} placement="top">
+          <Tooltip title={uiString(copied ? 'status.copied' : 'action.copyTranslation')} placement="top">
             <IconButton
               className="copy-btn"
               onClick={handleCopy}
               size="small"
-              aria-label={`Copy ${name} translation`}
+              // The plan can't carry the row's language, so it follows in brackets.
+              aria-label={`${uiString('action.copyTranslation')} (${name})`}
               sx={{
                 ml: 'auto',
                 p: 0.5,

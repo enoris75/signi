@@ -76,7 +76,7 @@ Changes against the plan:
   It is not two entries joined " / ", which is English typography. The chip itself, which showed the raw
   enum value (`feature`), now shows the relation's first noun in the UI language.
 - **Ids with a suffix.** DEGREE_GRAMMAR, because the plain word is also a unit of heat and a university
-  title. USE_NOUN, because [B26](../B-needs-seed/B26-ui-saved-item-feedback.md) seeds USE as a verb.
+  title. USE_NOUN, because [B26](B26-ui-saved-item-feedback.md) seeds USE as a verb.
 - **"+ adj" is an add icon.** The chip's tooltip, and the accessible name it gives, say what it does.
 - `MODIFIER_RELATION_LABELS` is deleted from `@signi/shared`. The "— click to change" tail stays English
   ([C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md)), and so do the degree values

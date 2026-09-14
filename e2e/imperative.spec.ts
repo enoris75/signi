@@ -5,10 +5,11 @@ import { test, expect } from './fixtures';
 // person the verb agrees with. The subject is dropped from every surface but still selects the
 // form, so each choice here is a different plan — asserted as rendered sentences.
 test.describe('imperative', () => {
-  const toggle = 'Toggle imperative (command)';
+  // Named by its mode; whether it is on is its aria-pressed.
+  const toggle = 'Command';
 
   test('a command drops the subject and withdraws tense, aspect and modals', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await app.setVerb('EAT');
     await app.setDirectObject('FOOD');
 
@@ -30,7 +31,7 @@ test.describe('imperative', () => {
   });
 
   test('a negative command', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await app.setVerb('EAT');
     await app.setDirectObject('FOOD');
     await app.satellite('verbNegative').click();
@@ -47,7 +48,7 @@ test.describe('imperative', () => {
   });
 
   test('the person row picks the cohortative and the plural', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await app.setVerb('RUN');
 
     await page.getByRole('button', { name: 'first plural' }).click();
@@ -74,7 +75,7 @@ test.describe('imperative', () => {
   });
 
   test('the instruction register renders outside the imperative', async ({ app, page }) => {
-    await page.getByLabel(toggle).click();
+    await page.getByRole('button', { name: toggle, exact: true }).click();
     await app.setVerb('RUN');
 
     // An instruction is addressed to nobody, so the person row goes away.

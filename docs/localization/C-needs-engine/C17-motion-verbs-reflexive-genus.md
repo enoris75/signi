@@ -60,11 +60,11 @@ Seed MOVE (verb, intransitive, "to change position"), then author the glosses th
 | GO | to move from a place to another place | `source` PLACE + `direction` PLACE with OTHER | OTHER is seeded ([B21](../done/B21-ui-clause-and-coordination-vocabulary.md)) and renders en *another*, it *un altro*, es / pt *otro* / *outro* with no article. Re-probe the whole gloss once MOVE lands. "to move to a place" is the fallback |
 | COME | to move toward the speaker | — | No composable deixis ("toward the speaker", "here"). Likely stays literal, like the C05 genera |
 | JUMP | to move into the air | `direction` AIR | AIR is not seeded. The engine's direction adposition is "to" / *a* / *zu* / へ, which gives "to move to the air"; probe that before seeding AIR |
-| COLLAPSE | to move downward suddenly | two adverbs, DOWN and SUDDENLY | `GlossParts.modifier` takes one adverb. Neither word is seeded (B27 seeds UP / DOWN) |
+| COLLAPSE | to move downward suddenly | two adverbs, DOWN and SUDDENLY | `GlossParts.modifier` takes one adverb. DOWN is seeded ([B27](../done/B27-ui-clipboard-move-resize.md)); SUDDENLY is not |
 
 ## MOVE in B27
 
-[B27](../B-needs-seed/B27-ui-clipboard-move-resize.md) planned to share MOVE with this task, but its
+[B27](../done/B27-ui-clipboard-move-resize.md) planned to share MOVE with this task, but its
 "Move this period up" is the transitive "change the position of", and that one is pronominal in no
 language: it *spostare*, fr *déplacer*, de *verschieben*, es *mover*, pt *mover*, ja 移動する. They are
 two concepts. B27 is not blocked by any of this, so it takes the id MOVE. The intransitive here gets a

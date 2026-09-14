@@ -3,7 +3,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
 import {
   ALWAYS, BE, BECOME, BOOK, CAN, CAT, complement, complements, concept, DOG, EAT, el, FAST, type Forms, GIVE, GO, HE, HOUSE, I,
-  LEGEND, modal, MOUSE, MUST, NEVER, np, SEE, SEEM, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, YOU,
+  IT, LEGEND, modal, MOUSE, MUST, NEVER, np, SEE, SEEM, SHE, SLOWLY, THEY, TIRED, vp, WE, WILL, YOU,
 } from './en.fixtures.js';
 import { predicateParts } from './predicateParts.js';
 
@@ -118,6 +118,20 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(SEE), el(np(HE), np(I)))).toBe('sees him and me');
       expect(said(CAT, vp(SEE), el(np(DOG), np(SHE)))).toBe('sees the dog and her');
       expect(said(CAT, vp(SEE, { negative: true }), el(np(MOUSE, { definiteness: 'no' }), np(THEY)))).toBe('does not see any mouse and them');
+    });
+
+    test('a phrasal verb’s particle follows a lone pronoun object, and stays with the verb before a noun', () => {
+      const TURN_OFF: Forms = {
+        base: 'turn off', '3sg_present': 'turns off', past: 'turned off', gerund: 'turning off', participle: 'turned off', particle: 'off',
+      };
+      expect(said(CAT, vp(TURN_OFF), el(np(IT)))).toBe('turns it off');
+      expect(said(CAT, vp(TURN_OFF, { tense: 'past' }), el(np(IT)))).toBe('turned it off');
+      expect(said(CAT, vp(TURN_OFF, { negative: true }), el(np(IT)))).toBe('does not turn it off');
+      expect(said(CAT, vp(TURN_OFF, { aspect: 'progressive' }), el(np(IT)))).toBe('is turning it off');
+      expect(said(CAT, vp(TURN_OFF), el(np(MOUSE)))).toBe('turns off the mouse');
+      // A group has no single pronoun to put the particle after.
+      expect(said(CAT, vp(TURN_OFF), el(np(IT), np(MOUSE)))).toBe('turns off it and the mouse');
+      expect(said(CAT, vp(SEE), el(np(IT)))).toBe('sees it');
     });
 
     test('a lone no object keeps no', () => {

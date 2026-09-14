@@ -35,9 +35,9 @@ All modals, tense and negation these need already render. Voice is the only miss
    with the thing as subject.
 
 **Ship-now fallback, vaguer:** a process noun + FAILED fragment, the
-[B26](../B-needs-seed/B26-ui-saved-item-feedback.md) "Import failed." shape ("saving failed",
-"loading failed"). It needs SAVING and a LOADING noun ([B25](../B-needs-seed/B25-ui-dialog-and-app-controls.md))
-seeded, and it drops what failed to save.
+[B26](../done/B26-ui-saved-item-feedback.md) "Import failed." shape ("saving failed",
+"loading failed"). LOADING and FAILED are seeded ([B25](../done/B25-ui-dialog-and-app-controls.md),
+B26); it still needs SAVING, and it drops what failed to save.
 
 ## Tests that select on these literals
 

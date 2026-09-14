@@ -629,6 +629,109 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'salvo' },
     },
   },
+  // What happened to an item, said as a status line says it (B25–B27): participles, since the engine
+  // has no passive to say "the period was added" with. Transient, like SAVED.
+  {
+    id: 'ADDED',
+    role: 'adjective',
+    transient: true,
+    description: 'put in with the others',
+    emoji: '➕',
+    forms: {
+      en: { base: 'added' },
+      it: { base: 'aggiunto' },
+      fr: { base: 'ajouté' },
+      de: { base: 'hinzugefügt' },
+      es: { base: 'añadido' },
+      ja: { base: '追加済みの', reading: 'ついかずみの' },
+      pt: { base: 'adicionado' },
+    },
+  },
+  {
+    // Portuguese "malsucedido" ("importação malsucedida"); "falhado" reads as European Portuguese.
+    id: 'FAILED',
+    role: 'adjective',
+    transient: true,
+    description: 'that did not succeed',
+    emoji: '❌',
+    forms: {
+      en: { base: 'failed' },
+      it: { base: 'fallito' },
+      fr: { base: 'échoué' },
+      de: { base: 'fehlgeschlagen' },
+      es: { base: 'fallido' },
+      ja: { base: '失敗した', reading: 'しっぱいした' },
+      pt: { base: 'malsucedido' },
+    },
+  },
+  {
+    // Japanese コピー済みの, like 保存済みの; katakana, so no reading (see BUTTON).
+    id: 'COPIED',
+    role: 'adjective',
+    transient: true,
+    description: 'duplicated, as to the clipboard',
+    emoji: '✅',
+    forms: {
+      en: { base: 'copied' },
+      it: { base: 'copiato' },
+      fr: { base: 'copié' },
+      de: { base: 'kopiert' },
+      es: { base: 'copiado' },
+      ja: { base: 'コピー済みの' },
+      pt: { base: 'copiado' },
+    },
+  },
+  {
+    // A prepositional phrase in the Romance languages ("senza titolo", "sans titre"), which does not
+    // agree with its noun: each engine lists it as invariable. A state a thing is left in, so transient
+    // ("la frase está sin título").
+    id: 'UNTITLED',
+    role: 'adjective',
+    transient: true,
+    description: 'having no name or title',
+    emoji: '🏷️',
+    forms: {
+      en: { base: 'untitled' },
+      it: { base: 'senza titolo' },
+      fr: { base: 'sans titre' },
+      de: { base: 'unbenannt' },
+      es: { base: 'sin título' },
+      ja: { base: '無題の', reading: 'むだいの' },
+      pt: { base: 'sem título' },
+    },
+  },
+  {
+    id: 'EMPTY',
+    role: 'adjective',
+    transient: true,
+    description: 'containing nothing',
+    emoji: '🫙',
+    forms: {
+      en: { base: 'empty' },
+      it: { base: 'vuoto' },
+      fr: { base: 'vide' },
+      de: { base: 'leer' },
+      es: { base: 'vacío' },
+      ja: { base: '空の', reading: 'からの' },
+      pt: { base: 'vazio' },
+    },
+  },
+  {
+    // Correctly formed, as a file is — not the "valid" argument of logic.
+    id: 'VALID',
+    role: 'adjective',
+    description: 'correctly formed and accepted',
+    emoji: '✔️',
+    forms: {
+      en: { base: 'valid' },
+      it: { base: 'valido' },
+      fr: { base: 'valide' },
+      de: { base: 'gültig' },
+      es: { base: 'válido' },
+      ja: { base: '有効な', reading: 'ゆうこうな' },
+      pt: { base: 'válido' },
+    },
+  },
   {
     id: 'SINGULAR',
     role: 'adjective',

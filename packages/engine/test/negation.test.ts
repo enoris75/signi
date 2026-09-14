@@ -73,6 +73,15 @@ describe('negative direct object: the どの…も…ない circumfix', () => {
     expect(sayAll(clause(noNP('CAT'), 'EAT', { directObject: np('MOUSE') })).ja)
       .toBe('どの猫もネズミを食べません。');
   });
+
+  // A verbless period has no predicate to carry the ない, so the circumfix closes on ない itself — as the
+  // manner gloss of NEVER does (どの時間もない) — rather than leaving a dangling どの.
+  test('a verbless `no` phrase closes the circumfix itself: どの結果もない', () => {
+    expect(sayAll({ subject: noNP('RESULT', { number: 'plural' }) }).ja).toBe('どの結果もない。');
+    expect(sayAll({ subject: noNP('PHRASE', { adjectives: ['SAVED'] }) }).ja).toBe('どの保存済みのフレーズもない。');
+    // Regression: a verbless phrase without `no` is still a bare title.
+    expect(sayAll({ subject: np('RESULT', { definiteness: 'bare' }) }).ja).toBe('結果。');
+  });
 });
 
 describe('known bugs: negative determiner with a plural noun', () => {
@@ -116,14 +125,27 @@ describe('known bugs: negative determiner with a plural noun', () => {
     });
   });
 
-  // Regression: English and German DO pluralise a `no` phrase (their negatives have a plural), and
-  // French already forces the singular ("aucune souris"); none of them is touched.
-  test('English/German pluralise `no`, and French keeps its singular', () => {
+  // Regression: English and German DO pluralise a `no` phrase (their negatives have a plural).
+  test('English/German pluralise `no`', () => {
     expect(noMice()).toMatchObject({
       en: 'the cat eats no mice.',
       de: 'der Kater isst keine Mäuse.',
-      fr: 'le chat ne mange aucune souris.',
     });
+  });
+
+  // French "souris" is the same in both numbers, which hid that French pluralised the noun after its
+  // singular "aucun" as well ("*aucunes phrases enregistrées"). The translator now puts every Romance
+  // `no` phrase in the singular, French included.
+  test('French forces a `no` phrase singular: "aucun livre", not "aucun livres"', () => {
+    expect(eats(noNP('MOUSE', { number: 'plural' })).fr).toBe('le chat ne mange aucune souris.');
+    expect(eats(noNP('BOOK', { number: 'plural' })).fr).toBe('le chat ne mange aucun livre.');
+    expect(sayAll({ subject: noNP('PHRASE', { number: 'plural', adjectives: ['SAVED'] }) })).toMatchObject({
+      fr: 'aucune phrase enregistrée.',
+      it: 'nessuna frase salvata.',
+      en: 'no saved phrases.',
+      de: 'keine gespeicherten Phrasen.',
+    });
+    expect(sayAll(clause(noNP('CAT', { number: 'plural' }), 'EAT')).fr).toBe('aucun chat ne mange.');
   });
 
   // Regression: an ordinary (positive) plural object still pluralises.

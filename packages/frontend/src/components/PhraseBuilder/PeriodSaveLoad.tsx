@@ -106,7 +106,7 @@ export function PeriodSaveLoad({
               severity: "error",
               msg: `Loaded, but ${missing.length} word(s) are no longer in the catalog: ${missing.join(", ")}`,
             }
-          : { severity: "success", msg: "Period added." },
+          : { severity: "success", msg: t("toast.periodAdded") },
       );
     } catch {
       setToast({ severity: "error", msg: "Could not load that period." });
@@ -122,7 +122,7 @@ export function PeriodSaveLoad({
           <TextField
             autoFocus
             fullWidth
-            label="Name"
+            label={t("field.name")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -134,7 +134,7 @@ export function PeriodSaveLoad({
           />
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
             <Button onClick={onCloseSave} sx={{ textTransform: "none" }}>
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="contained"
@@ -153,11 +153,11 @@ export function PeriodSaveLoad({
       <Dialog open={loadOpen} onClose={onCloseLoad} fullWidth maxWidth="xs">
         <DialogTitle>{t("action.addSavedPeriod")}</DialogTitle>
         <DialogContent>
-          {listQuery.isLoading && <Typography color="text.secondary">Loading…</Typography>}
+          {listQuery.isLoading && <Typography color="text.secondary">{t("status.loading")}…</Typography>}
           {listQuery.isError && <Alert severity="error">Could not load saved periods.</Alert>}
           {listQuery.data && listQuery.data.length === 0 && (
             <Typography color="text.secondary" sx={{ py: 2 }}>
-              No saved periods yet — use the save icon on a phrase container.
+              {t("saved.noPeriods")} — {t("saved.useSaveIcon")}
             </Typography>
           )}
           <List dense>

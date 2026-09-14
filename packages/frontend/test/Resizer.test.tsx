@@ -1,11 +1,12 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import { Resizer } from '../src/components/PhraseBuilder/Resizer.tsx';
+import { renderWithProviders } from './render.tsx';
 
 function renderResizer({ height = 300, minHeight = 200, withEnd = true } = {}) {
   const onResize = vi.fn();
   const onResizeEnd = vi.fn();
-  const view = render(
+  const view = renderWithProviders(
     <Resizer
       height={height}
       minHeight={minHeight}
@@ -13,7 +14,7 @@ function renderResizer({ height = 300, minHeight = 200, withEnd = true } = {}) {
       onResizeEnd={withEnd ? onResizeEnd : undefined}
     />,
   );
-  const bar = screen.getByRole('separator', { name: 'Resize period container' });
+  const bar = screen.getByRole('separator', { name: 'Resize this period container' });
   return { ...view, bar, onResize, onResizeEnd };
 }
 

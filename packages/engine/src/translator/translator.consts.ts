@@ -20,6 +20,13 @@ export const engines: LanguageEngine[] = [
 /** Determiners that are inherently plural, so they render the plural noun surface. */
 export const PLURAL_DETERMINERS = new Set(['some', 'many', 'few', 'all']);
 
+/**
+ * Languages whose negative quantifier takes a singular noun whatever number was picked: it "nessuna
+ * frase", fr "aucune phrase", es "ninguna frase", pt "nenhuma frase" — never "*aucune phrases". English
+ * and German keep the number ("no phrases", "keine Phrasen"); Japanese marks none.
+ */
+export const NO_TAKES_SINGULAR: ReadonlySet<string> = new Set(['it', 'fr', 'es', 'pt']);
+
 /** The agreement keys a group carries — see ResolvedNounElement.agreement. Nothing renderable. */
 export const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
 

@@ -2533,6 +2533,147 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'teclado', plural: 'teclados', gender: 'masc', count: 'singular' },
     },
   },
+
+  // ── A program's own things ────────────────────────────────────────
+  // What the app's dialogs, lists and messages talk about (B25–B27): the name a saved phrase is
+  // stored under, the file it is exported to, the icon one presses, the clipboard a translation is
+  // copied to. The katakana ones carry no reading (see BUTTON).
+  {
+    // The noun; NAME is the verb a noun does to things (B06). German Name is a weak noun (den Namen).
+    id: 'NAME_NOUN',
+    role: 'noun',
+    description: 'the word or words something is called by',
+    emoji: '🏷️',
+    isA: 'WORD',
+    forms: {
+      en: { base: 'name', plural: 'names', count: 'singular' },
+      it: { base: 'nome', plural: 'nomi', gender: 'masc', count: 'singular' },
+      fr: { base: 'nom', plural: 'noms', gender: 'masc', count: 'singular' },
+      de: { base: 'Name', plural: 'Namen', gender: 'masc', count: 'singular', weak: '1' },
+      es: { base: 'nombre', plural: 'nombres', gender: 'masc', count: 'singular' },
+      ja: { base: '名前', count: 'singular', reading: 'なまえ' },
+      pt: { base: 'nome', plural: 'nomes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The process, a noun in every language: it caricamento, fr chargement, de das Laden (the
+    // nominalized infinitive), ja 読み込み, the verbal noun of LOAD. Uncountable.
+    id: 'LOADING',
+    role: 'noun',
+    description: 'the process of bringing data into a program',
+    emoji: '⏳',
+    countable: false,
+    isA: 'PROCESS',
+    forms: {
+      en: { base: 'loading', count: 'singular' },
+      it: { base: 'caricamento', gender: 'masc', count: 'singular' },
+      fr: { base: 'chargement', gender: 'masc', count: 'singular' },
+      de: { base: 'Laden', gender: 'neut', count: 'singular' },
+      es: { base: 'carga', gender: 'fem', count: 'singular' },
+      ja: { base: '読み込み', count: 'singular', reading: 'よみこみ' },
+      pt: { base: 'carregamento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The part of a program a person sees and works, not a surface or a socket between machines.
+    // German takes the loanword das Interface: Oberfläche and Schnittstelle both compound with a
+    // linking -n- ("Oberflächensprache"), which the compound builder does not add (B10).
+    id: 'INTERFACE',
+    role: 'noun',
+    description: 'the part of a program a person sees and uses',
+    emoji: '🖥️',
+    forms: {
+      en: { base: 'interface', plural: 'interfaces', count: 'singular' },
+      it: { base: 'interfaccia', plural: 'interfacce', gender: 'fem', count: 'singular' },
+      fr: { base: 'interface', plural: 'interfaces', gender: 'fem', count: 'singular' },
+      de: { base: 'Interface', plural: 'Interfaces', gender: 'neut', count: 'singular' },
+      es: { base: 'interfaz', plural: 'interfaces', gender: 'fem', count: 'singular' },
+      ja: { base: 'インターフェース', count: 'singular' },
+      pt: { base: 'interface', plural: 'interfaces', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // What a search turns up — "no results" under a picker.
+    id: 'RESULT',
+    role: 'noun',
+    description: 'something found by a search',
+    emoji: '🔎',
+    forms: {
+      en: { base: 'result', plural: 'results', count: 'singular' },
+      it: { base: 'risultato', plural: 'risultati', gender: 'masc', count: 'singular' },
+      fr: { base: 'résultat', plural: 'résultats', gender: 'masc', count: 'singular' },
+      de: { base: 'Ergebnis', plural: 'Ergebnisse', gender: 'neut', count: 'singular' },
+      es: { base: 'resultado', plural: 'resultados', gender: 'masc', count: 'singular' },
+      ja: { base: '結果', count: 'singular', reading: 'けっか' },
+      pt: { base: 'resultado', plural: 'resultados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The act; IMPORT is the verb. Japanese 取り込み, the verbal noun of that verb's 取り込む.
+    id: 'IMPORT_NOUN',
+    role: 'noun',
+    description: 'the act of bringing data in from a file',
+    emoji: '📥',
+    isA: 'ACTION',
+    forms: {
+      en: { base: 'import', plural: 'imports', count: 'singular' },
+      it: { base: 'importazione', plural: 'importazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'importation', plural: 'importations', gender: 'fem', count: 'singular' },
+      de: { base: 'Import', plural: 'Importe', gender: 'masc', count: 'singular' },
+      es: { base: 'importación', plural: 'importaciones', gender: 'fem', count: 'singular' },
+      ja: { base: '取り込み', count: 'singular', reading: 'とりこみ' },
+      pt: { base: 'importação', plural: 'importações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The small picture on a control. German Symbol, the word its UIs use for it.
+    id: 'ICON',
+    role: 'noun',
+    description: 'a small picture on a control that shows what it does',
+    emoji: '🖼️',
+    forms: {
+      en: { base: 'icon', plural: 'icons', count: 'singular' },
+      it: { base: 'icona', plural: 'icone', gender: 'fem', count: 'singular' },
+      fr: { base: 'icône', plural: 'icônes', gender: 'fem', count: 'singular' },
+      de: { base: 'Symbol', plural: 'Symbole', gender: 'neut', count: 'singular' },
+      es: { base: 'icono', plural: 'iconos', gender: 'masc', count: 'singular' },
+      ja: { base: 'アイコン', count: 'singular' },
+      pt: { base: 'ícone', plural: 'ícones', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A document stored on a computer. Italian borrows "file", invariable in the plural.
+    id: 'FILE',
+    role: 'noun',
+    description: 'a document stored on a computer',
+    emoji: '📄',
+    forms: {
+      en: { base: 'file', plural: 'files', count: 'singular' },
+      it: { base: 'file', plural: 'file', gender: 'masc', count: 'singular' },
+      fr: { base: 'fichier', plural: 'fichiers', gender: 'masc', count: 'singular' },
+      de: { base: 'Datei', plural: 'Dateien', gender: 'fem', count: 'singular' },
+      es: { base: 'archivo', plural: 'archivos', gender: 'masc', count: 'singular' },
+      ja: { base: 'ファイル', count: 'singular' },
+      pt: { base: 'arquivo', plural: 'arquivos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Where copied content waits to be pasted. French and Spanish compounds are invariable
+    // (presse-papiers, portapapeles); Portuguese says "área de transferência".
+    id: 'CLIPBOARD',
+    role: 'noun',
+    description: 'the temporary store for content that has been copied',
+    emoji: '📋',
+    forms: {
+      en: { base: 'clipboard', plural: 'clipboards', count: 'singular' },
+      it: { base: 'appunti', plural: 'appunti', gender: 'masc', count: 'singular' },
+      fr: { base: 'presse-papiers', plural: 'presse-papiers', gender: 'masc', count: 'singular' },
+      de: { base: 'Zwischenablage', plural: 'Zwischenablagen', gender: 'fem', count: 'singular' },
+      es: { base: 'portapapeles', plural: 'portapapeles', gender: 'masc', count: 'singular' },
+      ja: { base: 'クリップボード', count: 'singular' },
+      pt: { base: 'área de transferência', plural: 'áreas de transferência', gender: 'fem', count: 'singular' },
+    },
+  },
   {
     id: 'CAUSE',
     role: 'noun',

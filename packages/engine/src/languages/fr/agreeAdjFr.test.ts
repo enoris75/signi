@@ -73,5 +73,8 @@ describe('agreeAdjFr', () => {
     expect(agreeAdjFr('zéro', 'fem', false)).toBe('zéro');
     expect(agreeAdjFr('zéro', 'masc', true)).toBe('zéro');
     expect(agreeAdjFr('zéro', 'fem', true)).toBe('zéro');
+    // A prepositional phrase standing for an adjective does not agree either.
+    expect(agreeAdjFr('sans titre', 'fem', false)).toBe('sans titre');
+    expect(agreeAdjFr('sans titre', 'fem', true)).toBe('sans titre');
   });
 });

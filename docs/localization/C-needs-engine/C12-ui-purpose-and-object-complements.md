@@ -43,7 +43,7 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
   edge" (seed RESIZE, DRAG, EDGE). It does not work for "click to change": the instrumental needs a
   noun for the click to act on, and "change it by clicking it" is worse than the original.
 - **Object complement → state + command.** The "on" side of the mood toggles already avoids it
-  ([B28](../B-needs-seed/B28-ui-mood-toggles.md): "this period is a command — turn it off").
+  ([B28](../done/B28-ui-mood-toggles.md): "this period is a command — turn it off").
 
 ## To unblock
 

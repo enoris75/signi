@@ -472,10 +472,25 @@ describe('WordMap', () => {
     });
   });
 
+  it('names its close and retry buttons in the UI language', async () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    vi.mocked(fetchConcepts).mockRejectedValue(new Error('offline'));
+    renderMap({
+      seed: {},
+      strings: {
+        'action.closeWordMap': { it: 'Chiudi la mappa di parole' },
+        'action.retry': { it: 'Riprova' },
+      },
+    });
+
+    expect(await screen.findByRole('button', { name: 'Riprova' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Chiudi la mappa di parole' })).toBeInTheDocument();
+  });
+
   it('closes from its close button and on Escape', () => {
     const { onClose } = renderMap();
 
-    fireEvent.click(screen.getByRole('button', { name: 'Close word map' }));
+    fireEvent.click(screen.getByRole('button', { name: 'Close the word map' }));
     expect(onClose).toHaveBeenCalledOnce();
 
     fireEvent.keyDown(screen.getByRole('dialog'), { key: 'Escape' });

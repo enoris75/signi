@@ -102,6 +102,38 @@ export const adverbs: ConceptSeed[] = [
       pt: { base: 'repetidamente' },
     },
   },
+  // Which way a thing goes (B27: "move this period up"). A phrase in French, German and Portuguese,
+  // which have no one-word adverb of direction: "vers le haut", "nach oben", "para cima".
+  {
+    id: 'UP',
+    role: 'adverb',
+    description: 'towards a higher position',
+    emoji: '⬆️',
+    forms: {
+      en: { base: 'up' },
+      it: { base: 'su' },
+      fr: { base: 'vers le haut' },
+      de: { base: 'nach oben' },
+      es: { base: 'arriba' },
+      ja: { base: '上に', reading: 'うえに' },
+      pt: { base: 'para cima' },
+    },
+  },
+  {
+    id: 'DOWN',
+    role: 'adverb',
+    description: 'towards a lower position',
+    emoji: '⬇️',
+    forms: {
+      en: { base: 'down' },
+      it: { base: 'giù' },
+      fr: { base: 'vers le bas' },
+      de: { base: 'nach unten' },
+      es: { base: 'abajo' },
+      ja: { base: '下に', reading: 'したに' },
+      pt: { base: 'para baixo' },
+    },
+  },
   {
     id: 'ALWAYS',
     role: 'adverb',

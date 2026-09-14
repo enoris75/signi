@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS } from '../translator.consts.js';
+import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { applyNounGender } from './applyNounGender.js';
 import { resolve } from './resolve.js';
@@ -62,7 +62,8 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
         : picked;
     // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
     const forcesPlural = PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1';
-    const num = forcesPlural ? 'plural' : (np.number ?? 'singular');
+    const forcesSingular = definiteness === 'no' && NO_TAKES_SINGULAR.has(language);
+    const num = forcesPlural ? 'plural' : forcesSingular ? 'singular' : (np.number ?? 'singular');
     head.forms['number'] = (num === 'plural' && !head.forms['plural']) ? 'singular' : num;
     applyNounGender(head.forms, np.gender);
     head.forms['definiteness'] = definiteness;

@@ -26,10 +26,8 @@ describe('HeaderControls', () => {
     it('are left out for the only period in the workspace', () => {
       renderHeader({ soleContainer: true, onMoveUp: vi.fn(), onMoveDown: vi.fn() });
 
-      expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole('button', { name: 'Move this period down' }),
-      ).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Move up' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Move down' })).not.toBeInTheDocument();
     });
 
     it('move a period in the middle of the stack either way', () => {
@@ -37,22 +35,38 @@ describe('HeaderControls', () => {
       const onMoveDown = vi.fn();
       renderHeader({ soleContainer: false, onMoveUp, onMoveDown });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Move this period up' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move up' }));
       expect(onMoveUp).toHaveBeenCalledOnce();
       expect(onMoveDown).not.toHaveBeenCalled();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Move this period down' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move down' }));
       expect(onMoveDown).toHaveBeenCalledOnce();
     });
 
     it('stay mounted but disabled at the ends of the stack', () => {
       const { rerender, props } = renderHeader({ soleContainer: false, onMoveDown: vi.fn() });
-      expect(screen.getByRole('button', { name: 'Move this period up' })).toBeDisabled();
-      expect(screen.getByRole('button', { name: 'Move this period down' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Move up' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Move down' })).toBeEnabled();
 
       rerender(<HeaderControls {...props} onMoveUp={vi.fn()} onMoveDown={undefined} />);
-      expect(screen.getByRole('button', { name: 'Move this period up' })).toBeEnabled();
-      expect(screen.getByRole('button', { name: 'Move this period down' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Move up' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Move down' })).toBeDisabled();
+    });
+
+    it('are named in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      renderHeader(
+        { soleContainer: false, onMoveUp: vi.fn(), onMoveDown: vi.fn() },
+        {
+          strings: {
+            'action.movePeriodUp': { de: 'Nach oben verschieben' },
+            'action.movePeriodDown': { de: 'Nach unten verschieben' },
+          },
+        },
+      );
+
+      expect(screen.getByRole('button', { name: 'Nach oben verschieben' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Nach unten verschieben' })).toBeEnabled();
     });
   });
 

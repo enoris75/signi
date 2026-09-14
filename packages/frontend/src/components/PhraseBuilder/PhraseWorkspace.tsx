@@ -345,7 +345,7 @@ export function PhraseWorkspace({
             startIcon={<CloseIcon sx={{ fontSize: 15 }} />}
             sx={{ color: "primary.contrastText", textTransform: "none" }}
           >
-            Cancel
+            {t("action.cancel")}
           </Button>
         </Box>
       )}

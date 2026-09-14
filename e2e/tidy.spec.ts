@@ -450,7 +450,7 @@ const PHRASES: Phrase[] = [
   {
     name: 'a command, where the command box stands in for the subject',
     build: async (app, page) => {
-      await page.getByLabel('Toggle imperative (command)').click();
+      await page.getByRole('button', { name: 'Command', exact: true }).click();
       await app.setVerb('EAT');
       await app.setDirectObject('FOOD');
       await app.expectSentences({ en: 'eat the food.' });

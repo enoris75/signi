@@ -51,8 +51,8 @@ function renderCard(props: Partial<PeriodCardProps> = {}, selection: PhraseSelec
   return { ...renderWithProviders(<PeriodCard {...all} />), props: all };
 }
 
-const COMMAND = 'Toggle imperative (command)';
-const CITATION = 'Toggle infinitive phrase (citation)';
+const COMMAND = 'Command';
+const CITATION = 'Infinitive phrase';
 
 describe('PeriodCard', () => {
   it('wears the canvas and the page’s words panel', () => {

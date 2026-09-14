@@ -217,7 +217,7 @@ describe('PeriodContainer', () => {
 
     it('does not start from a press on the border controls', () => {
       const { props } = renderFloating({ imperative: mood(false) });
-      const control = screen.getByRole('button', { name: 'Toggle imperative (command)' });
+      const control = screen.getByRole('button', { name: 'Command' });
 
       fireEvent.pointerDown(control, { clientX: 497, clientY: 250, pointerId: 3 });
       fireEvent.pointerMove(card(), { clientX: 527, clientY: 250 });

@@ -307,7 +307,7 @@ describe('PhraseBuilder', () => {
     it('turns a command on and moves the focus to the verb to command', () => {
       const { lastEdit } = renderPeriod();
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Command' }));
 
       expect(lastEdit({ verbModal: EAT })).toMatchObject({
         imperative: true,
@@ -320,7 +320,7 @@ describe('PhraseBuilder', () => {
     it('turns an infinitive on and moves the focus to the verb to cite', () => {
       const { lastEdit } = renderPeriod({ subject: CAT });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Infinitive phrase' }));
 
       expect(lastEdit({ imperative: true })).toMatchObject({ infinitive: true, imperative: false });
       expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
@@ -329,10 +329,10 @@ describe('PhraseBuilder', () => {
     it('leaves the focus where it was when the verb is already chosen', () => {
       renderPeriod({ subject: CAT, verb: EAT });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Command' }));
       expect(wordsPanel().activeSlot).toBe('subject');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Infinitive phrase' }));
       expect(wordsPanel().activeSlot).toBe('subject');
     });
 
@@ -340,7 +340,7 @@ describe('PhraseBuilder', () => {
       renderPeriod({ imperative: true });
       act(() => wordsPanel().onSlotClick('modifier'));
 
-      fireEvent.click(screen.getByRole('button', { name: 'Toggle imperative (command)' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Command' }));
 
       expect(wordsPanel().activeSlot).toBe('modifier');
     });
@@ -366,18 +366,18 @@ describe('PhraseBuilder', () => {
     ] as const)('locks the mood while the period is in a %s (%s)', (relation, end) => {
       renderPeriod({ subject: CAT }, { binding: makeBinding({ [relation]: { [end]: true } }) });
 
-      expect(screen.getByRole('button', { name: 'Toggle imperative (command)' })).toBeDisabled();
+      expect(screen.getByRole('button', { name: 'Command' })).toBeDisabled();
       expect(
-        screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }),
+        screen.getByRole('button', { name: 'Infinitive phrase' }),
       ).toBeDisabled();
     });
 
     it('leaves the mood free in a workspace period with no clause relation', () => {
       renderPeriod({ subject: CAT }, { binding: makeBinding() });
 
-      expect(screen.getByRole('button', { name: 'Toggle imperative (command)' })).toBeEnabled();
+      expect(screen.getByRole('button', { name: 'Command' })).toBeEnabled();
       expect(
-        screen.getByRole('button', { name: 'Toggle infinitive phrase (citation)' }),
+        screen.getByRole('button', { name: 'Infinitive phrase' }),
       ).toBeEnabled();
     });
   });
@@ -1105,8 +1105,8 @@ describe('PhraseBuilder', () => {
       };
       renderPeriod({ subject: CAT }, handlers);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Move this period up' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Move this period down' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move up' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move down' }));
       fireEvent.click(screen.getByRole('button', { name: 'Save period' }));
       fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
@@ -1120,11 +1120,7 @@ describe('PhraseBuilder', () => {
       );
 
       expect(screen.getAllByTestId('period-container')).toHaveLength(1);
-      for (const name of [
-        'Toggle imperative (command)',
-        'Toggle infinitive phrase (citation)',
-        'Move this period up',
-      ]) {
+      for (const name of ['Command', 'Infinitive phrase', 'Move up']) {
         expect(screen.getAllByRole('button', { name })).toHaveLength(1);
       }
       // Only the outermost period has a words panel.
@@ -1143,7 +1139,7 @@ describe('PhraseBuilder', () => {
       renderPeriod({ subject: CAT }, { onRemove: () => {}, soleContainer: true });
 
       expect(screen.getByRole('button', { name: 'Clear this period' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Move up' })).not.toBeInTheDocument();
     });
   });
 

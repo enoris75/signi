@@ -268,7 +268,7 @@ export function SlotBox({
                 fontStyle: "italic",
               }}
             >
-              {isActive ? `${t("slot.choose")}…` : "empty"}
+              {isActive ? `${t("slot.choose")}…` : t("slot.empty")}
             </Typography>
           )}
         </>

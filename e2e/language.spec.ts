@@ -150,6 +150,35 @@ test.describe('interface language', () => {
     await expect(page.getByLabel('Ajouter un adjectif qui décrit ce modificateur')).toBeVisible();
   });
 
+  // The dialogs, the period's reorder, resize and mood controls, and the copy button (B25–B28).
+  test('names the dialogs, the period controls and the copy button in the UI language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.addPeriod();
+    await expect(app.period(0).getByRole('button', { name: 'Command', exact: true })).toHaveAttribute('aria-pressed', 'false');
+
+    await app.setUiLanguage('it');
+
+    await expect(page.getByTestId('language-selector')).toHaveAccessibleName('Lingua di interfaccia');
+    // A mood toggle is named by its mode and says whether it is on; while on, its tooltip says how to undo it.
+    const command = app.period(0).getByRole('button', { name: 'Comando', exact: true });
+    await command.click();
+    await expect(command).toHaveAttribute('aria-pressed', 'true');
+    await expect(app.period(0).getByLabel('Questo periodo è un comando — disattivalo')).toBeAttached();
+    await expect(app.period(1).getByRole('button', { name: 'Sposta su', exact: true })).toBeEnabled();
+    await expect(app.period(0).getByRole('button', { name: 'Sposta giù', exact: true })).toBeEnabled();
+    await expect(
+      app.period(0).getByRole('separator', { name: 'Ridimensiona questo contenitore di periodo' }),
+    ).toBeAttached();
+    // The copy button can't carry its row's language in the plan, so it follows in brackets.
+    await expect(page.getByRole('button', { name: 'Copia la traduzione (Inglese)', exact: true })).toBeAttached();
+
+    await page.getByRole('button', { name: 'Salva', exact: true }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog.getByRole('textbox', { name: 'Nome' })).toBeVisible();
+    await dialog.getByRole('button', { name: 'Annulla', exact: true }).click();
+    await expect(dialog).toHaveCount(0);
+  });
+
   test('leaves the translations themselves alone — every language is always shown', async ({
     app,
   }) => {

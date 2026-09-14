@@ -51,3 +51,61 @@ to it first.
 `Close word map` / `Retry` → `WordMap.test.tsx`; `no matches` → `SubjectTypeahead.test.tsx`;
 `Untitled phrase` → `SavedPhrasesToolbar.test.tsx`; `empty` → `Boxes.test.tsx` (the word is common;
 check each hit).
+
+## Done
+
+**2026-09-14.** Seeded CANCEL, CLOSE and RETRY with the program's other control verbs in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts) (after START), NAME_NOUN,
+LOADING, INTERFACE and RESULT under *A program's own things* in
+[nouns.ts](../../../packages/backend/src/concepts/nouns.ts), and EMPTY and UNTITLED beside SAVED in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| CANCEL | cancel | annullare | annuler | annullieren | cancelar | キャンセルする (label キャンセル) | cancelar |
+| CLOSE | close | chiudere | fermer | schließen | cerrar | 閉じる (label 閉じる) | fechar |
+| RETRY | retry | riprovare | réessayer | wiederholen | reintentar | 再試行する (label 再試行) | repetir |
+| NAME_NOUN | name | nome | nom | Name (m, weak) | nombre | 名前 | nome |
+| LOADING | loading (mass) | caricamento | chargement | Laden (n) | carga | 読み込み | carregamento |
+| INTERFACE | interface | interfaccia | interface | Interface (n) | interfaz | インターフェース | interface |
+| RESULT | result | risultato | résultat | Ergebnis (n) | resultado | 結果 | resultado |
+| EMPTY | empty | vuoto | vide | leer | vacío | 空の | vazio |
+| UNTITLED | untitled | senza titolo | sans titre | unbenannt | sin título | 無題の | sem título |
+
+| key | en | it | fr | de | ja |
+|---|---|---|---|---|---|
+| `action.cancel` | Cancel | Annulla | Annuler | Annullieren | キャンセル |
+| `field.name` | Name | Nome | Nom | Name | 名前 |
+| `status.loading` (+ "…") | Loading | Caricamento | Chargement | Laden | 読み込み |
+| `action.retry` | Retry | Riprova | Réessayer | Wiederholen | 再試行 |
+| `action.closeWordMap` | Close the word map | Chiudi la mappa di parole | Fermer la carte de mots | Die Wortkarte schließen | 単語の地図を閉じる |
+| `language.selector` | Interface language | Lingua di interfaccia | Langue d'interface | Interfacesprache | インターフェースの言語 |
+| `slot.empty` | empty | vuoto | vide | leer | 空 |
+| `typeahead.noResults` | no results | nessun risultato | aucun résultat | keine Ergebnisse | どの結果もない |
+| `phrase.untitled` | Untitled phrase | Frase senza titolo | Phrase sans titre | Unbenannte Phrase | 無題のフレーズ |
+
+Changes against the plan:
+- **German keeps to inseparable verbs**, which the clause builder can place (see
+  [A138](../../bugs/A-must-fix/A138-german-add-is-arithmetic.md)): CANCEL is *annullieren*, not the dialog
+  word *abbrechen*. RETRY is *wiederholen*, the word of the classic *Abbrechen / Wiederholen / Ignorieren*
+  dialog, and Portuguese says *repetir* there too, because *tentar novamente* is two words and the
+  Portuguese imperative is derived from the first form. Once German separable verbs render, CANCEL can move
+  to *abbrechen*.
+- **German INTERFACE is the loanword *Interface*.** *Oberfläche* and *Schnittstelle* compound with a
+  linking *-n-* (*Oberflächensprache*), which `germanCompound` does not add
+  ([B10](../../bugs/B-can-fix/B10-german-compound-linking-element.md)).
+- **"no matches" is "no results"**, RESULT plural under `no`. The two engine defects the task warned about
+  are fixed, not filed: the translator now puts a Romance `no` phrase in the singular for French too (A34
+  had fixed Italian, Spanish and Portuguese; French hid behind the invariable *souris*), and a verbless
+  Japanese `no` phrase closes its circumfix on ない (*どの結果もない*).
+- **"senza titolo" does not agree.** The Romance engines list the four prepositional phrases in
+  `INVARIABLE_ADJ`, beside *zero*, so they never inflect to *senza titola*.
+- **The language selector has a test id.** `SelectDisplayProps` puts `data-testid="language-selector"` on the
+  combobox, and `fixtures.ts`, `App.test.tsx` and `LanguageSelector.test.tsx` find it by that.
+- The "Cancel" of the link banner in `PhraseWorkspace` is the same entry.
+
+Pinned by [program-controls.test.ts](../../../packages/engine/test/program-controls.test.ts) (the new words),
+[negation.test.ts](../../../packages/engine/test/negation.test.ts) (French `no` singular, Japanese verbless
+`no`), [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the dialog controls and
+says what happened to a saved item*), the frontend tests `SavedPhrasesToolbar`, `PeriodSaveLoad`, `WordMap`,
+`SubjectTypeahead` and `LanguageSelector`, and [language.spec.ts](../../../e2e/language.spec.ts).

@@ -33,8 +33,8 @@ describe('BorderControls', () => {
     });
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
-      'Toggle imperative (command)',
-      'Toggle infinitive phrase (citation)',
+      'Command',
+      'Infinitive phrase',
       'Add a condition (this period becomes the main clause)',
       'Coordinate this period',
     ]);
@@ -53,7 +53,7 @@ describe('BorderControls', () => {
     const anchor = vi.mocked(conditional.registerBorderAnchor).mock.calls[0][0]!;
     expect(anchor).toBe(screen.getByTestId('period-border-controls'));
     expect(anchor).toContainElement(
-      screen.getByRole('button', { name: 'Toggle imperative (command)' }),
+      screen.getByRole('button', { name: 'Command' }),
     );
 
     unmount();

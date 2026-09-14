@@ -6,6 +6,7 @@ import { isAnimate } from './isAnimate.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
+import { JA_NEGATIVE_DETERMINER } from './ja.consts.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
@@ -21,8 +22,14 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   if (!phrase.verbPhrase && isDimensionGloss(phrase.subject)) return dimensionGlossSegs(firstConjunct(phrase.subject));
   // A manner-definition gloss ("高い速さで") is the adverbial fragment defining an adverb.
   if (!phrase.verbPhrase && isMannerGloss(phrase.subject)) return mannerGlossSegs(phrase.subject);
-  // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate.
-  if (!phrase.verbPhrase) return elSegs(phrase.subject);
+  // Verbless period: a bare noun phrase (a title like "最新ニュース") — no topic は, no predicate. A
+  // `no` group still closes its どの … も circumfix on ない, which no predicate is there to supply
+  // ("どの保存済みのフレーズもない", "no saved phrases"), as the manner gloss does.
+  if (!phrase.verbPhrase) {
+    return isNegativeGroup(phrase.subject)
+      ? [...elSegs(phrase.subject), { t: JA_NEGATIVE_DETERMINER.post }, { t: 'ない' }]
+      : elSegs(phrase.subject);
+  }
   const segs: RubySegment[] = [];
   // An imperative drops its subject/topic; the subject's person still selects the form. An
   // infinitive citation (「食物を消費する」) is likewise subject-less on the surface.

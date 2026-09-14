@@ -98,9 +98,10 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
 
 /**
  * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("la frase zero, gli articoli zero");
- * the agreement rule would otherwise inflect it like any adjective with its ending.
+ * so is a prepositional phrase standing for one ("la frase senza titolo", "le frasi senza titolo"). The agreement
+ * rule would otherwise inflect either like any adjective with its ending ("*senza titola").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'senza titolo']);
 
 /**
  * The "-ico" adjectives of three or more syllables that keep the hard "-chi" in the masculine plural,

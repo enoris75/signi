@@ -29,7 +29,7 @@ order depend on it.
    head kinds and a cache. This also collapses A15's key families to one entry per verb.
 2. **Restructure so the value sits outside.** "Missing words: *a, b*" is a heading noun plus a list,
    authorable once MISSING and CATALOG are seeded; the count is the list's length. The version message
-   becomes the generic [B26](../B-needs-seed/B26-ui-saved-item-feedback.md) "not a valid phrase file".
+   becomes the generic [B26](../done/B26-ui-saved-item-feedback.md) "this file is not valid".
 
 ## Tests that select on these literals
 

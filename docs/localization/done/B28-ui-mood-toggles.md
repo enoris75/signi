@@ -42,3 +42,33 @@ coordination link to make this a command") needs an object complement and a purp
 `PeriodContainer/PeriodContainer.test.tsx`; `Toggle infinitive` → `infinitive.spec.ts`,
 `PhraseBuilder.test.tsx`, `PeriodContainer/MoodToggle.test.tsx`, `PeriodContainer/BorderControls.test.tsx`.
 Move them to `getByRole('button', { name, pressed })` or a `data-testid`.
+
+## Done
+
+**2026-09-14.** Seeded TURN_OFF with the control verbs in
+[transitive.ts](../../../packages/backend/src/concepts/verbs/transitive.ts): en *turn off*, it *disattivare*,
+fr *désactiver*, de *deaktivieren*, es *desactivar*, ja オフにする, pt *desativar* — the setting switched
+off, not the lamp put out (it *spegnere*).
+
+| key | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| `period.isCommand` | This period is a command | Questo periodo è un comando | Cette période est une commande | Dieses Satzgefüge ist ein Befehl | Este período es un comando | この文は命令です | Este período é um comando |
+| `period.isInfinitive` | This period is an infinitive phrase | Questo periodo è una frase infinitiva | Cette période est une proposition infinitive | Dieses Satzgefüge ist eine Infinitivphrase | Este período es una frase de infinitivo | この文は不定詞句です | Este período é uma frase infinitiva |
+| `action.turnOff` | turn it off | disattivalo | le désactiver | es deaktivieren | desactivarlo | それをオフに | desativá-lo |
+
+The toggles' tooltips while on are `period.is… — action.turnOff`. Their aria-labels are `imperative.command`
+and `infinitive.phrase`, with `aria-pressed` saying whether the mode is on.
+
+Changes against the plan:
+- **German TURN_OFF is *deaktivieren*.** *ausschalten* is separable, which renders right in the instruction
+  but not in a finite clause ([A138](../../bugs/A-must-fix/A138-german-add-is-arithmetic.md)).
+- **English phrasal verbs move their particle after a pronoun object.** The probe gave "turn off it". An
+  English verb form now names its `particle`, and `predicateParts` moves it across a lone pronoun object in
+  every verb group: "turn it off", "has turned it off", "must turn it off", while a noun object keeps it by
+  the verb ("turn off the option"). EXTINGUISH (*put out*) and TIDY_UP (*tidy up*) name theirs too.
+- The object clitic under the instruction was checked in every language, as the task asked (table above).
+
+Pinned by [objectPronoun.test.ts](../../../packages/engine/test/objectPronoun.test.ts) (*English phrasal verb
+with a pronoun object*), `predicateParts.test.ts`, [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts),
+the frontend tests `MoodToggle`, `BorderControls`, `PeriodCard`, `PeriodContainer` and `PhraseBuilder`, and
+[language.spec.ts](../../../e2e/language.spec.ts), which turns a command on in Italian.

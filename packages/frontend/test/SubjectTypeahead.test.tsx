@@ -3,7 +3,7 @@ import { fireEvent, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { Concept } from '@signi/shared';
 import { SubjectTypeahead } from '../src/components/PhraseBuilder/SubjectTypeahead.tsx';
-import { renderWithProviders } from './render.tsx';
+import { renderWithProviders, type SeededStrings } from './render.tsx';
 import { describeTypeahead, listed, press, typeInto } from './typeaheadSuite.tsx';
 
 describeTypeahead({
@@ -37,10 +37,12 @@ const DOG: Concept = { id: 'DOG', role: 'noun', description: 'a canine', label: 
 function renderSubject(
   props: Partial<ComponentProps<typeof SubjectTypeahead>> = {},
   pronouns = PRONOUNS,
+  strings: SeededStrings = {},
 ) {
   const onSelect = vi.fn();
   const view = renderWithProviders(<SubjectTypeahead onSelect={onSelect} {...props} />, {
     concepts: { noun: [CAT, DOG], pronoun: pronouns },
+    strings,
   });
   return { ...view, onSelect, input: screen.getByTestId('typeahead-subject') };
 }
@@ -86,8 +88,17 @@ describe('SubjectTypeahead', () => {
     typeInto(input, 'zzz');
 
     expect(listed()).toEqual([]);
-    expect(dropdown()).toHaveTextContent('no matches');
+    expect(dropdown()).toHaveTextContent('no results');
     expect(tab('Pronoun')).toBeInTheDocument();
+  });
+
+  it('says so in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'fr');
+    const { input } = renderSubject({}, PRONOUNS, { 'typeahead.noResults': { fr: 'aucun résultat' } });
+
+    typeInto(input, 'zzz');
+
+    expect(dropdown()).toHaveTextContent('aucun résultat');
   });
 
   it('swaps the nouns for the pronoun chooser on its own when nothing controls the tab', () => {

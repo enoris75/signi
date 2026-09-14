@@ -99,14 +99,7 @@ that become composable.
 
 #### UI strings
 
-B20–B24 are done.
-
-| # | File | Seed first |
-|---|---|---|
-| B25 | [B25-ui-dialog-and-app-controls.md](B-needs-seed/B25-ui-dialog-and-app-controls.md) | **CANCEL, CLOSE, RETRY, NAME_NOUN, LOADING, INTERFACE, EMPTY, RESULT, UNTITLED** → Cancel, Name, Loading…, Close, Retry |
-| B26 | [B26-ui-saved-item-feedback.md](B-needs-seed/B26-ui-saved-item-feedback.md) | **YET, ADDED, FAILED, IMPORT_NOUN, USE, ICON, FILE, VALID** → empty lists, "Period added.", import errors |
-| B27 | [B27-ui-clipboard-move-resize.md](B-needs-seed/B27-ui-clipboard-move-resize.md) | **COPY, CLIPBOARD, MOVE, UP, DOWN, RESIZE** → copy, move-period and resize controls (the transitive MOVE; C17's intransitive genus is another concept) |
-| B28 | [B28-ui-mood-toggles.md](B-needs-seed/B28-ui-mood-toggles.md) | **TURN_OFF** → command / infinitive toggle tooltips; aria-labels need no seed |
+_None outstanding._ B20–B28 are done (see the Done section).
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
@@ -176,6 +169,10 @@ B20–B24 are done.
 | B22 | [done/B22-ui-verb-feature-controls.md](done/B22-ui-verb-feature-controls.md) | `satellite.tense/aspect/polarity`, `tense.value.*` (nouns: de "Präteritum"), `aspect.value.*`, `polarity.value.*`, `slot.modal` + placeholder; modal, tense, aspect join the A15 families |
 | B23 | [done/B23-ui-complement-and-group-names.md](done/B23-ui-complement-and-group-names.md) | `slot.terminus/locative/direction/source/route/cause/verbPhrase`, `wordMap.relation.*`; every complement and the verb phrase join the A15 families (seeded COMPLEMENT_GRAMMAR, VERB_PHRASE, HYPERNYM; found bug A140) |
 | B24 | [done/B24-ui-noun-modifier-chips.md](done/B24-ui-noun-modifier-chips.md) | `modifier.relation` (+ `.<relation>` chip, `.<relation>.gloss` "Feature or means"), `modifier.degree/adjective/addAdjective`; "+ adj" became an icon (seeded MODIFIER, DEGREE_GRAMMAR, FEATURE, MEANS, PURPOSE, USE_NOUN, MATERIAL) |
+| B25 | [done/B25-ui-dialog-and-app-controls.md](done/B25-ui-dialog-and-app-controls.md) | `action.cancel`, `field.name`, `status.loading`, `action.retry`, `action.closeWordMap`, `language.selector` (the selector got a test id), `slot.empty`, `typeahead.noResults`, `phrase.untitled` (seeded CANCEL, CLOSE, RETRY, NAME_NOUN, LOADING, INTERFACE, RESULT, EMPTY, UNTITLED; the translator puts a French `no` phrase in the singular, Japanese closes a verbless どの…もない, "senza titolo" is invariable) |
+| B26 | [done/B26-ui-saved-item-feedback.md](done/B26-ui-saved-item-feedback.md) | `saved.noPhrases/noPeriods/useSaveIcon`, `toast.periodAdded`, `toast.importFailed` + `toast.invalidFile` ("this file is not valid"; the reasons go to the console) (seeded USE, IMPORT_NOUN, ICON, FILE, ADDED, FAILED, VALID; YET dropped: a verbless label has no verb for it) |
+| B27 | [done/B27-ui-clipboard-move-resize.md](done/B27-ui-clipboard-move-resize.md) | `action.copyTranslation` (not "to the clipboard": the direction complement can't say *into*), `status.copied`, `action.movePeriodUp/Down` ("Move up", no object), `action.resizeContainer` (seeded COPY, MOVE, RESIZE, COPIED, UP, DOWN; found bug A142) |
+| B28 | [done/B28-ui-mood-toggles.md](done/B28-ui-mood-toggles.md) | `period.isCommand/isInfinitive` + `action.turnOff` ("turn it off": English phrasal verbs move their particle after a pronoun object); the toggles are named by their mode with `aria-pressed` (seeded TURN_OFF) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

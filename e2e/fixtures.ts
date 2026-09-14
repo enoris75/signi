@@ -401,7 +401,8 @@ export class Builder {
   }
 
   async setUiLanguage(code: LanguageCode): Promise<void> {
-    await this.page.getByLabel('Interface language').click();
+    // By test id: the selector's name follows the language it sets.
+    await this.page.getByTestId('language-selector').click();
     await this.page.locator(`li[data-value="${code}"]`).click();
     await expect(this.page.locator('li[data-value]')).toHaveCount(0);
   }

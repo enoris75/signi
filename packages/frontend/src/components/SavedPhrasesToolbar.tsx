@@ -42,7 +42,7 @@ import {
   serializeWorkspace,
   toSavedPhrase,
 } from "./PhraseBuilder/phraseSerialize/index.ts";
-import type { SerializedWorkspace } from "@signi/shared";
+import type { SavedPhrase, SerializedWorkspace } from "@signi/shared";
 
 interface Props {
   containers: PhraseContainer[];
@@ -131,15 +131,24 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   }
 
   function handleExport() {
-    downloadSavedPhrase(toSavedPhrase(name.trim() || "Untitled phrase", containers, links));
+    downloadSavedPhrase(toSavedPhrase(name.trim() || t("phrase.untitled"), containers, links));
   }
 
   async function handleImportFile(file: File) {
+    let doc: SavedPhrase;
     try {
-      const doc = await readSavedPhraseFile(file);
-      await applyWorkspace(doc.workspace);
+      doc = await readSavedPhraseFile(file);
     } catch (err) {
-      setToast({ severity: "error", msg: err instanceof Error ? err.message : "Import failed." });
+      // Every reason a file is refused comes down to one thing the user can act on: pick another. The
+      // particular reason (not JSON, not a Signi file, no version…) goes to the console.
+      console.warn(err);
+      setToast({ severity: "error", msg: `${t("toast.importFailed")} — ${t("toast.invalidFile")}` });
+      return;
+    }
+    try {
+      await applyWorkspace(doc.workspace);
+    } catch {
+      setToast({ severity: "error", msg: t("toast.importFailed") });
     }
   }
 
@@ -210,7 +219,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           <TextField
             autoFocus
             fullWidth
-            label="Name"
+            label={t("field.name")}
             value={name}
             onChange={(e) => setName(e.target.value)}
             onKeyDown={(e) => {
@@ -222,7 +231,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           />
           <Box sx={{ display: "flex", justifyContent: "flex-end", gap: 1, mt: 2 }}>
             <Button onClick={() => setSaveOpen(false)} sx={{ textTransform: "none" }}>
-              Cancel
+              {t("action.cancel")}
             </Button>
             <Button
               variant="contained"
@@ -241,11 +250,11 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
       <Dialog open={loadOpen} onClose={() => setLoadOpen(false)} fullWidth maxWidth="xs">
         <DialogTitle>{t("action.load.tooltip")}</DialogTitle>
         <DialogContent>
-          {listQuery.isLoading && <Typography color="text.secondary">Loading…</Typography>}
+          {listQuery.isLoading && <Typography color="text.secondary">{t("status.loading")}…</Typography>}
           {listQuery.isError && <Alert severity="error">Could not load saved phrases.</Alert>}
           {listQuery.data && listQuery.data.length === 0 && (
             <Typography color="text.secondary" sx={{ py: 2 }}>
-              No saved phrases yet.
+              {t("saved.noPhrases")}
             </Typography>
           )}
           <List dense>

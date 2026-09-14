@@ -282,7 +282,7 @@ export function SubjectTypeahead({
                     color: "text.disabled",
                   }}
                 >
-                  no matches
+                  {t("typeahead.noResults")}
                 </Box>
               )}
             </Box>

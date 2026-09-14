@@ -103,6 +103,7 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
 
 /**
  * Adjectives invariable in gender and number, by base. A number used as an adjective is one ("la phrase zéro, les articles zéro");
- * the agreement rule would otherwise inflect it like any adjective with its ending.
+ * so is a prepositional phrase standing for one ("les phrases sans titre"). The agreement rule would otherwise
+ * inflect either like any adjective with its ending ("*sans titres").
  */
-export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro']);
+export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro', 'sans titre']);

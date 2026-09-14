@@ -182,7 +182,7 @@ export function WordMap({ open, onClose }: Props) {
               sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.7rem" }}
             />
           ))}
-          <IconButton size="small" onClick={onClose} aria-label="Close word map">
+          <IconButton size="small" onClick={onClose} aria-label={t("action.closeWordMap")}>
             <CloseIcon fontSize="small" />
           </IconButton>
         </Stack>
@@ -205,7 +205,7 @@ export function WordMap({ open, onClose }: Props) {
               Could not load the words. Is the translation server running?
             </Typography>
             <Button size="small" variant="outlined" onClick={() => refetch()}>
-              Retry
+              {t("action.retry")}
             </Button>
           </Stack>
         ) : graph.nodes.length === 0 ? (

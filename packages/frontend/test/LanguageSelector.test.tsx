@@ -26,7 +26,8 @@ function renderSelector(strings: SeededStrings = {}) {
   );
 }
 
-const selector = () => screen.getByRole('combobox', { name: 'Interface language' });
+// Found by its test id: the selector's name follows the language it sets.
+const selector = () => screen.getByTestId('language-selector');
 
 // MUI's Select opens on mouseDown and lists its options in a portal.
 function openSelector() {
@@ -39,6 +40,8 @@ describe('LanguageSelector', () => {
     renderSelector();
 
     expect(selector()).toHaveTextContent(/^🇬🇧English$/);
+    expect(selector()).toHaveRole('combobox');
+    expect(selector()).toHaveAccessibleName('Interface language');
   });
 
   it('shows the language restored from an earlier visit', () => {
@@ -75,11 +78,12 @@ describe('LanguageSelector', () => {
     expect(selector()).toHaveTextContent('🇯🇵Japanese');
   });
 
-  it('names the languages in the UI language', () => {
+  it('names the languages, and itself, in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
-    renderSelector(ITALIAN_NAMES);
+    renderSelector({ ...ITALIAN_NAMES, 'language.selector': { it: 'Lingua di interfaccia' } });
 
     expect(selector()).toHaveTextContent('🇮🇹Italiano');
+    expect(selector()).toHaveAccessibleName('Lingua di interfaccia');
     const options = openSelector();
     expect(options.getByRole('option', { name: /Inglese/ })).toBeInTheDocument();
     expect(options.getByRole('option', { name: /Giapponese/ })).toBeInTheDocument();

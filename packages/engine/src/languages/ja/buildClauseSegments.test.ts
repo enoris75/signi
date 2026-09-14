@@ -24,6 +24,11 @@ describe('buildClauseSegments', () => {
     test('a manner gloss is the で-adverbial', () => {
       expect(say(clause(np(HAYASA, {}, { adjectives: [adj(TAKAI)], mannerGloss: true })), 'は')).toBe('高い速さで');
     });
+
+    // With no predicate to supply it, a no-determined phrase closes its circumfix on ない itself.
+    test('a no-determined noun phrase closes its どの … も on ない', () => {
+      expect(say(clause(np(NEKO, { definiteness: 'no' })), 'は')).toBe('どの猫もない');
+    });
   });
 
   describe('statements', () => {

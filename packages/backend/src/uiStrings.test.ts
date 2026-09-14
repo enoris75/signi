@@ -301,4 +301,66 @@ describe('buildUiStrings', () => {
       pt: 'Adicionar um adjetivo que descreve este modificador',
     });
   });
+
+  // The dialogs' own chrome and the saved-item feedback (B25, B26). An empty list says `no` in the
+  // plural English and German use, the Romance singular, and Japanese どの…もない.
+  test('names the dialog controls and says what happened to a saved item', () => {
+    const strings = buildUiStrings();
+    expect(strings['action.cancel']).toEqual({
+      en: 'Cancel', it: 'Annulla', fr: 'Annuler', de: 'Annullieren', es: 'Cancelar', ja: 'キャンセル', pt: 'Cancelar',
+    });
+    expect(strings['field.name']).toMatchObject({ it: 'Nome', de: 'Name', ja: '名前' });
+    expect(strings['status.loading']).toMatchObject({ it: 'Caricamento', fr: 'Chargement', ja: '読み込み' });
+    expect(strings['saved.noPhrases']).toEqual({
+      en: 'No saved phrases',
+      it: 'Nessuna frase salvata',
+      fr: 'Aucune phrase enregistrée',
+      de: 'Keine gespeicherten Phrasen',
+      es: 'Ninguna frase guardada',
+      ja: 'どの保存済みのフレーズもない',
+      pt: 'Nenhuma frase salva',
+    });
+    expect(strings['typeahead.noResults']).toMatchObject({ en: 'no results', fr: 'aucun résultat', ja: 'どの結果もない' });
+    expect(strings['saved.useSaveIcon']).toMatchObject({
+      en: 'use the icon that saves a period in a period container',
+      it: "usa l'icona che salva un periodo in un contenitore di periodo",
+    });
+    expect(strings['toast.periodAdded']).toMatchObject({ en: 'Added period', it: 'Periodo aggiunto', de: 'Hinzugefügtes Satzgefüge' });
+    expect(strings['toast.importFailed']).toMatchObject({ en: 'Failed import', es: 'Importación fallida' });
+    expect(strings['toast.invalidFile']).toEqual({
+      en: 'this file is not valid',
+      it: 'questo file non è valido',
+      fr: "ce fichier n'est pas valide",
+      de: 'diese Datei ist nicht gültig',
+      es: 'este archivo no es válido',
+      ja: 'このファイルは有効ではありません',
+      pt: 'este arquivo não é válido',
+    });
+    // "senza titolo" does not agree with the feminine "frase".
+    expect(strings['phrase.untitled']).toMatchObject({ it: 'Frase senza titolo', es: 'Frase sin título', de: 'Unbenannte Phrase' });
+    expect(strings['slot.empty']).toMatchObject({ it: 'vuoto', fr: 'vide', ja: '空' });
+    expect(strings['language.selector']).toMatchObject({ en: 'Interface language', fr: "Langue d'interface" });
+  });
+
+  // The copy, reorder, resize and mood controls (B27, B28).
+  test('names the copy, reorder, resize and mood controls', () => {
+    const strings = buildUiStrings();
+    expect(strings['action.copyTranslation']).toMatchObject({ en: 'Copy the translation', ja: '翻訳をコピー' });
+    expect(strings['status.copied']).toMatchObject({ it: 'Copiata', fr: 'Copiée', ja: 'コピー済み' });
+    expect(strings['action.movePeriodUp']).toEqual({
+      en: 'Move up', it: 'Sposta su', fr: 'Déplacer vers le haut', de: 'Nach oben verschieben', es: 'Mover arriba', ja: '上に移動', pt: 'Mover para cima',
+    });
+    expect(strings['action.resizeContainer']).toMatchObject({
+      en: 'Resize this period container',
+      it: 'Ridimensiona questo contenitore di periodo',
+      ja: 'この文の容器をサイズ変更',
+    });
+    expect(strings['action.closeWordMap']).toMatchObject({ en: 'Close the word map', ja: '単語の地図を閉じる' });
+    expect(strings['action.retry']).toMatchObject({ it: 'Riprova', de: 'Wiederholen', ja: '再試行' });
+    expect(strings['period.isCommand']).toMatchObject({ en: 'This period is a command', ja: 'この文は命令です' });
+    // The pronoun object attaches the way each language attaches it.
+    expect(strings['action.turnOff']).toEqual({
+      en: 'turn it off', it: 'disattivalo', fr: 'le désactiver', de: 'es deaktivieren', es: 'desactivarlo', ja: 'それをオフに', pt: 'desativá-lo',
+    });
+  });
 });

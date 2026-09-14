@@ -228,6 +228,28 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Translations',
   },
 
+  // The copy control on each row of the translations panel. It copies that row's translation, so it
+  // says so: COPY on the definite TRANSLATION ("copia la traduzione", ja 翻訳をコピー). Not "copy to the
+  // clipboard": the destination is a direction complement, which Italian, German and Portuguese render
+  // as a goal one goes towards ("zur Zwischenablage"), not a store one puts things into ("in die").
+  // The aria-label adds the row's language after it, at the call site.
+  'action.copyTranslation': {
+    plan: {
+      ...commandOf('COPY'),
+      directObject: { concept: 'TRANSLATION', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Copy the translation',
+  },
+  // What the same control says once it has copied: the COPIED participle, agreeing with the TRANSLATION
+  // it copied (it "copiata", fr "copiée"). Japanese strips the attributive の (コピー済み).
+  'status.copied': {
+    word: 'COPIED',
+    agreesWith: 'TRANSLATION',
+    format: { capitalize: true },
+    fallback: 'Copied',
+  },
+
   // The header control that opens the word palette: the WORD noun in the plural, bare.
   'words.heading': {
     plan: { subject: { concept: 'WORD', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
@@ -536,6 +558,19 @@ export const UI_STRINGS = defineUiStrings({
     plan: commandOf('CHOOSE'),
     format: { stripPeriod: true },
     fallback: 'choose',
+  },
+  // The same box while it is not the active one: the EMPTY adjective, agreeing with the slot it describes
+  // (SLOT_COMPUTING, the box's own noun). Lower-case, like `slot.choose`.
+  'slot.empty': { word: 'EMPTY', agreesWith: 'SLOT_COMPUTING', fallback: 'empty' },
+
+  // What a picker's list says when nothing matches what was typed: RESULT under the `no` quantifier. In
+  // the plural, as English and German say it ("no results", "keine Ergebnisse"); the Romance languages
+  // put the noun back in the singular after their quantifier ("nessun risultato"), and Japanese closes
+  // the circumfix on ない (どの結果もない). Lower-case: it sits in the list where the words would.
+  'typeahead.noResults': {
+    plan: { subject: { concept: 'RESULT', number: 'plural', definiteness: 'no' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'no results',
   },
 
   // The word-category switch on a switchable box (subject/cause = noun | pronoun;
@@ -1191,6 +1226,100 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Saved period',
   },
+  // Adding a saved period to the workspace, said the same way: "Added period", it "Periodo aggiunto",
+  // de "Hinzugefügtes Satzgefüge".
+  'toast.periodAdded': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['ADDED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Added period',
+  },
+
+  // The import toast when the file could not be read. The import is the act, IMPORT_NOUN under FAILED:
+  // "Failed import", it "Importazione fallita", ja 「失敗した取り込み」. What was wrong with the file is a
+  // statement of its own, BE negated on the VALID predicate adjective ("this file is not valid", de
+  // "diese Datei ist nicht gültig"), joined after it with a dash at the call site, so lower-case. One
+  // statement stands for every reason a file is refused (not JSON, not a Signi file, no version, no
+  // workspace): those stay on the thrown Error, for the console and the tests.
+  'toast.importFailed': {
+    plan: {
+      subject: { concept: 'IMPORT_NOUN', definiteness: 'bare', adjectives: ['FAILED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Failed import',
+  },
+  'toast.invalidFile': {
+    plan: {
+      subject: { concept: 'FILE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE', negative: true },
+      complements: { predicative: { phrase: { concept: 'VALID' } } },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'this file is not valid',
+  },
+
+  // The name a phrase is exported under when the user gave it none: PHRASE with UNTITLED, "Untitled
+  // phrase", it "Frase senza titolo", de "Unbenannte Phrase". It is written into the file, so it keeps
+  // the language that was active when the phrase was exported.
+  'phrase.untitled': {
+    plan: { subject: { concept: 'PHRASE', definiteness: 'bare', adjectives: ['UNTITLED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Untitled phrase',
+  },
+
+  // The save and load dialogs' own chrome. The dialog's dismiss button is the CANCEL command ("Annulla",
+  // "Annuler", ja キャンセル); the text field is labelled by the NAME_NOUN it takes (NAME is the verb); and
+  // the list says LOADING, the process noun, while it waits (it "Caricamento", de "Laden"), with the
+  // call site adding the ellipsis.
+  'action.cancel': { plan: commandOf('CANCEL'), format: NAME_FORMAT, fallback: 'Cancel' },
+  'field.name': { plan: nameOf('NAME_NOUN'), format: NAME_FORMAT, fallback: 'Name' },
+  'status.loading': { plan: nameOf('LOADING'), format: NAME_FORMAT, fallback: 'Loading' },
+
+  // An empty load dialog: the stored phrases or periods under the `no` quantifier, in the plural English
+  // and German use ("No saved phrases", "Keine gespeicherten Phrasen"; it "Nessuna frase salvata"). The
+  // "yet" of the English it replaces is an adverb, and a verbless period has no verb for one to modify.
+  'saved.noPhrases': {
+    plan: {
+      subject: { concept: 'PHRASE', number: 'plural', definiteness: 'no', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No saved phrases',
+  },
+  'saved.noPeriods': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', number: 'plural', definiteness: 'no', adjectives: ['SAVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No saved periods',
+  },
+  // How to get one there, joined after `saved.noPeriods` with a dash: USE the icon, restricted by what it
+  // does — the one that SAVEs a period — in a period container (`action.addPeriodContainer`'s noun
+  // phrase). Lower-case, as it reads after the dash.
+  'saved.useSaveIcon': {
+    plan: {
+      ...commandOf('USE'),
+      directObject: {
+        concept: 'ICON',
+        definiteness: 'definite',
+        relative: {
+          verbPhrase: { verb: 'SAVE' },
+          directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' },
+        },
+      },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'use the icon that saves a period in a period container',
+  },
 
   // The save control on a period container's header. Definite, not indefinite: the command
   // acts on the period the button sits in — "save the period" ("salva il periodo"). The
@@ -1225,6 +1354,36 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Expand this period',
+  },
+
+  // The two reorder controls beside them: MOVE with the UP or DOWN adverb ("Sposta su", "Nach oben
+  // verschieben", ja 「上に移動」). They leave out the "this period" the others say, because the engines
+  // put an adverb of direction before a noun object in five languages ("*déplacer vers le haut cette
+  // période", A142); without an object each language says it the way its buttons do.
+  'action.movePeriodUp': {
+    plan: { ...commandOf('MOVE'), verbPhrase: { verb: 'MOVE', modifier: 'UP' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move up',
+  },
+  'action.movePeriodDown': {
+    plan: { ...commandOf('MOVE'), verbPhrase: { verb: 'MOVE', modifier: 'DOWN' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move down',
+  },
+
+  // The grab bar under a period container, named for what dragging it does: RESIZE on this container,
+  // the noun phrase of `action.addPeriodContainer` ("ridimensiona questo contenitore di periodo").
+  'action.resizeContainer': {
+    plan: {
+      ...commandOf('RESIZE'),
+      directObject: {
+        concept: 'CONTAINER',
+        definiteness: 'this',
+        nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Resize this period container',
   },
   // TIDY_UP, not a bare ORDER/ARRANGE: the button does not sort the period, it puts back in order
   // what dragging left in a mess — which is the verb every one of these languages already has for
@@ -1520,6 +1679,22 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Show the word map',
   },
+  // The map dialog's close button, on the same noun phrase ("chiudi la mappa di parole", ja 単語の地図を閉じる).
+  'action.closeWordMap': {
+    plan: {
+      ...commandOf('CLOSE'),
+      directObject: {
+        concept: 'MAP',
+        definiteness: 'definite',
+        nounModifiers: [{ concept: 'WORD', relation: 'material', number: 'plural' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Close the word map',
+  },
+  // The button that fetches the words again after the map failed to load them: the bare RETRY command
+  // ("Riprova", "Réessayer", ja 再試行).
+  'action.retry': { plan: commandOf('RETRY'), format: NAME_FORMAT, fallback: 'Retry' },
 
   // "Hide the words" — the HIDE imperative on the same plural WORD that `words.heading` titles the
   // panel with, so the control says it is putting away the thing named above it. Definite, not the
@@ -1646,6 +1821,38 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Infinitive phrase',
   },
 
+  // What the command and infinitive toggles say while on: a statement, BE with the mode as its subject
+  // complement ("this period is a command", ja 「この文は命令です」), the shape `period.isConditional` has.
+  // Then how to undo it, joined after a dash at the call site: TURN_OFF on a neuter pronoun for the mode,
+  // which each language attaches its own way — en "turn it off", it "disattivalo", fr "le désactiver",
+  // es "desactivarlo", de "es deaktivieren". Two entries, because a statement and a command are two moods.
+  'period.isCommand': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'COMMAND', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a command',
+  },
+  'period.isInfinitive': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'INFINITIVE_PHRASE', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is an infinitive phrase',
+  },
+  'action.turnOff': {
+    plan: {
+      ...commandOf('TURN_OFF'),
+      directObject: { concept: 'THIRD_PERSON', definiteness: 'bare', gender: 'neut' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'turn it off',
+  },
+
   // Where the second command of a coordination gets its (locked) choices from — the tooltip on
   // the link icon in its box. The pair is one speech act, so the first clause makes them.
   'imperative.firstCommand': {
@@ -1742,6 +1949,21 @@ export const UI_STRINGS = defineUiStrings({
   'language.es': { word: 'SPANISH', format: { capitalize: true }, fallback: 'Spanish' },
   'language.ja': { word: 'JAPANESE', format: { capitalize: true }, fallback: 'Japanese' },
   'language.pt': { word: 'PORTUGUESE', format: { capitalize: true }, fallback: 'Portuguese' },
+
+  // The selector itself, as its aria-label: the language of the interface, LANGUAGE with INTERFACE as an
+  // attributive noun (en "interface language", fr "langue d'interface", ja インターフェースの言語). Named
+  // for what it sets, not "language" alone: the translations panel lists every language as well.
+  'language.selector': {
+    plan: {
+      subject: {
+        concept: 'LANGUAGE',
+        definiteness: 'bare',
+        nounModifiers: [{ concept: 'INTERFACE', relation: 'material' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Interface language',
+  },
 });
 
 export type UiStringKey = keyof typeof UI_STRINGS;

@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { useWindowDrag } from "../../hooks/useWindowDrag.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 interface ResizerProps {
   // Current canvas height in px — the drag baseline.
@@ -25,6 +26,7 @@ export function Resizer({
   onResize,
   onResizeEnd,
 }: ResizerProps) {
+  const t = useUiString();
   const startDrag = useWindowDrag();
 
   function nudge(delta: number) {
@@ -37,7 +39,7 @@ export function Resizer({
     <Box
       role="separator"
       aria-orientation="horizontal"
-      aria-label="Resize period container"
+      aria-label={t("action.resizeContainer")}
       title="Drag to resize"
       tabIndex={0}
       onKeyDown={(e) => {

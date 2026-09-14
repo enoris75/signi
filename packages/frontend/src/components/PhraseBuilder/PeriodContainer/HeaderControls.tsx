@@ -56,13 +56,13 @@ export function HeaderControls({
       {!soleContainer && (
         <>
           <ControlButton
-            title="Move this period up"
+            title={t("action.movePeriodUp")}
             icon={ArrowUpwardIcon}
             onClick={onMoveUp}
             disabled={!onMoveUp}
           />
           <ControlButton
-            title="Move this period down"
+            title={t("action.movePeriodDown")}
             icon={ArrowDownwardIcon}
             onClick={onMoveDown}
             disabled={!onMoveDown}

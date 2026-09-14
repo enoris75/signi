@@ -1,5 +1,6 @@
 import { Box, MenuItem, Select } from '@mui/material';
 import type { SelectChangeEvent } from '@mui/material';
+import type { HTMLAttributes } from 'react';
 import TranslateIcon from '@mui/icons-material/Translate';
 import type { LanguageCode } from '@signi/shared';
 import { LANGUAGES } from '@signi/shared';
@@ -29,7 +30,9 @@ export function LanguageSelector() {
         <TranslateIcon sx={{ fontSize: '1rem', color: 'text.secondary', mr: 0.75 }} />
       }
       // Through inputProps, so the name lands on the combobox itself rather than its outer box.
-      inputProps={{ 'aria-label': 'Interface language' }}
+      inputProps={{ 'aria-label': t('language.selector') }}
+      // The name follows the language the selector sets, so tests find the combobox by its test id.
+      SelectDisplayProps={{ 'data-testid': 'language-selector' } as HTMLAttributes<HTMLDivElement>}
       sx={{
         fontFamily: '"Inter", sans-serif',
         fontSize: '0.8rem',

@@ -27,8 +27,8 @@ Not a catalog entry, but the same list: the saved-item date,
 formats in the *browser's* locale. Pass the UI language: `toLocaleString(uiLanguage)`.
 
 The rest of these two dialogs is not ready: Name / Cancel / Loading… →
-[B25](../B-needs-seed/B25-ui-dialog-and-app-controls.md); "No saved … yet", "Period added.", "Import
-failed." → [B26](../B-needs-seed/B26-ui-saved-item-feedback.md); "Could not …" →
+[B25](B25-ui-dialog-and-app-controls.md); "No saved … yet", "Period added.", "Import
+failed." → [B26](B26-ui-saved-item-feedback.md); "Could not …" →
 [C11](../C-needs-engine/C11-ui-failure-messages-passive.md); "Delete ${name}" →
 [B20](../B-needs-seed/B20-ui-remove-and-delete.md).
 
