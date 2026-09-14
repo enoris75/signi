@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { PhrasePlan, VerbPhrase } from '@signi/shared';
-import { clause, np, say, sayAll } from './harness.js';
+import { clause, np, say, sayAll, wordAll } from './harness.js';
 
 // The shape of a clause: subject, verb, object — agreement, case, and word order.
 describe('clause', () => {
@@ -188,5 +188,46 @@ describe('known bugs: Japanese BE with no complement', () => {
     expect(say(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }), 'ja')).toBe('猫は家にいます。');
     expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('LEGEND') } } } }), 'RUN'), 'ja'))
       .toBe('伝説である猫は走ります。');
+  });
+});
+
+// A133. A language name takes the article of a common noun. The seven language concepts are not
+// `proper`, so English and German article them ("the boy reads the German", "der Junge liest das
+// Deutsch" — and "the English" is the people), and the article a Romance language needs
+// disappears when none is picked ("italiano è una lingua"). A continent is already right: English
+// and German go bare (Europe, Europa), Italian, French and Portuguese always article, and Spanish
+// articles only what `takes_article` marks (la Antártida). A language name is the Spanish exception.
+describe('known bugs: the article on a language name', () => {
+  const isALanguage = (language: string, definiteness?: 'bare') =>
+    sayAll(clause(np(language, definiteness ? { definiteness } : {}), 'BE', {
+      complements: { predicative: { phrase: np('LANGUAGE', { definiteness: 'indefinite' }) } },
+    }));
+  const boy = (verb: string, language: string, definiteness?: 'bare') =>
+    sayAll(clause(np('BOY'), verb, { directObject: np(language, definiteness ? { definiteness } : {}) }));
+
+  test.fails('English and German name a language bare, and the Romance languages always article it', () => {
+    expect(isALanguage('ITALIAN')).toMatchObject({ en: 'Italian is a language.', de: 'Italienisch ist eine Sprache.' });
+    expect(boy('READ', 'GERMAN')).toMatchObject({ en: 'the boy reads German.', de: 'der Junge liest Deutsch.' });
+    expect(boy('UNDERSTAND', 'ENGLISH')).toMatchObject({ en: 'the boy understands English.', de: 'der Junge versteht Englisch.' });
+    expect(isALanguage('ITALIAN', 'bare')).toMatchObject({
+      it: "l'italiano è una lingua.", fr: "l'italien est une langue.", es: 'el italiano es un idioma.', pt: 'o italiano é uma língua.',
+    });
+    expect(boy('UNDERSTAND', 'ITALIAN', 'bare').fr).toBe("le garçon comprend l'italien.");
+  });
+
+  test('regression: the articled Romance name, the bare English and German one, continents and the word label', () => {
+    expect(isALanguage('ITALIAN')).toMatchObject({
+      it: "l'italiano è una lingua.", fr: "l'italien est une langue.", es: 'el italiano es un idioma.', pt: 'o italiano é uma língua.', ja: 'イタリア語は言語です。',
+    });
+    expect(isALanguage('ITALIAN', 'bare')).toMatchObject({ en: 'Italian is a language.', de: 'Italienisch ist eine Sprache.' });
+    const isAContinent = (continent: string) =>
+      sayAll(clause(np(continent), 'BE', { complements: { predicative: { phrase: np('CONTINENT', { definiteness: 'indefinite' }) } } }));
+    expect(isAContinent('EUROPE')).toMatchObject({
+      en: 'Europe is a continent.', it: "l'Europa è un continente.", es: 'Europa es un continente.', de: 'Europa ist ein Kontinent.',
+    });
+    expect(isAContinent('ANTARCTICA')).toMatchObject({ es: 'la Antártida es un continente.', de: 'die Antarktis ist ein Kontinent.' });
+    expect(wordAll('ITALIAN')).toEqual({
+      en: 'Italian', it: 'italiano', fr: 'italien', es: 'italiano', pt: 'italiano', de: 'Italienisch', ja: 'イタリア語',
+    });
   });
 });

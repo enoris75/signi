@@ -954,3 +954,168 @@ describe('known bugs: Spanish reflexive verb in a non-finite verb group', () => 
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['MUST'], aspect: 'resultative' } })).es).toBe('debo haber comido.');
   });
 });
+
+// A130. Romance renders every simple past as the perfective (C06), a state verb too: "the cat
+// wanted to eat" is "il gatto volle mangiare", "le chat voulut manger", "el gato quiso comer". The
+// perfective of a state is an event: volle / quiso read "insisted on", non volle "refused", poté
+// "managed to", ebbe / tuvo "got", fu nella casa is ill-formed. A state in the past is imperfective:
+// voleva, poteva, doveva, aveva, possedeva, era — as the progressive's own stava / estaba already are.
+describe('known bugs: Romance past of a state verb', () => {
+  const romance = (plan: Parameters<typeof sayAll>[0]) => {
+    const { it, fr, es, pt } = sayAll(plan);
+    return { it, fr, es, pt };
+  };
+  const catModalPast = (modal: string, extra: Partial<VerbPhrase> = {}, subject = np('CAT')) =>
+    romance(clause(subject, 'EAT', { verbPhrase: { tense: 'past', modals: [modal], ...extra } }));
+  const catWasPast = (complements: Parameters<typeof clause>[2]) =>
+    romance(clause(np('CAT'), 'BE', { verbPhrase: { tense: 'past' }, ...complements }));
+
+  test.fails('the modals, HAVE, OWN and BE take the imperfect in the past', () => {
+    expect(romance(clause(np('FOX', { possessor: np('BOY') }), 'JUMP', {
+      verbPhrase: { tense: 'past', modals: ['WILL'] },
+      complements: { route: { phrase: np('DOG'), specifiers: [{ kind: 'path', value: 'over' }] } },
+    }))).toEqual({
+      it: 'la volpe del ragazzo voleva saltare sopra il cane.',
+      fr: 'le renard du garçon voulait sauter par-dessus le chien.',
+      es: 'el zorro del niño quería saltar por encima del perro.',
+      pt: 'a raposa do menino queria pular por cima do cão.',
+    });
+    expect(catModalPast('WILL')).toEqual({
+      it: 'il gatto voleva mangiare.', fr: 'le chat voulait manger.', es: 'el gato quería comer.', pt: 'o gato queria comer.',
+    });
+    expect(catModalPast('WILL', { negative: true })).toEqual({
+      it: 'il gatto non voleva mangiare.', fr: 'le chat ne voulait pas manger.', es: 'el gato no quería comer.', pt: 'o gato não queria comer.',
+    });
+    expect(catModalPast('WILL', {}, np('CAT', { number: 'plural' }))).toEqual({
+      it: 'i gatti volevano mangiare.', fr: 'les chats voulaient manger.', es: 'los gatos querían comer.', pt: 'os gatos queriam comer.',
+    });
+    expect(catModalPast('CAN')).toEqual({
+      it: 'il gatto poteva mangiare.', fr: 'le chat pouvait manger.', es: 'el gato podía comer.', pt: 'o gato podia comer.',
+    });
+    expect(catModalPast('MUST')).toEqual({
+      it: 'il gatto doveva mangiare.', fr: 'le chat devait manger.', es: 'el gato debía comer.', pt: 'o gato devia comer.',
+    });
+    expect(romance(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', tense: 'past', modals: ['WILL'] } } }), 'RUN'))).toEqual({
+      it: 'il gatto che voleva mangiare corre.', fr: 'le chat qui voulait manger court.', es: 'el gato que quería comer corre.', pt: 'o gato que queria comer corre.',
+    });
+    expect(romance(clause(np('CAT'), 'HAVE', { verbPhrase: { tense: 'past' }, directObject: np('BOOK') }))).toEqual({
+      it: 'il gatto aveva il libro.', fr: 'le chat avait le livre.', es: 'el gato tenía el libro.', pt: 'o gato tinha o livro.',
+    });
+    expect(romance(clause(np('CAT'), 'OWN', { verbPhrase: { tense: 'past' }, directObject: np('MOUSE') }))).toEqual({
+      it: 'il gatto possedeva il topo.', fr: 'le chat possédait la souris.', es: 'el gato poseía el ratón.', pt: 'o gato possuía o rato.',
+    });
+    expect(catWasPast({ complements: { predicative: { phrase: np('HAPPY') } } })).toEqual({
+      it: 'il gatto era felice.', fr: 'le chat était heureux.', es: 'el gato estaba feliz.', pt: 'o gato estava feliz.',
+    });
+    expect(catWasPast({ complements: { locative: { phrase: np('HOUSE') } } })).toEqual({
+      it: 'il gatto era nella casa.', fr: 'le chat était dans la maison.', es: 'el gato estaba en la casa.', pt: 'o gato estava na casa.',
+    });
+  });
+
+  test('regression: an event verb keeps the perfective, and the progressive keeps its imperfect', () => {
+    expect(romance(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'past' } }))).toEqual({
+      it: 'il gatto mangiò.', fr: 'le chat mangea.', es: 'el gato comió.', pt: 'o gato comeu.',
+    });
+    // UNDERSTAND is an achievement, not a state: "capì / comprese" is the event of grasping it.
+    expect(romance(clause(np('CAT'), 'UNDERSTAND', { verbPhrase: { tense: 'past' }, directObject: np('BOOK') }))).toEqual({
+      it: 'il gatto comprese il libro.', fr: 'le chat comprit le livre.', es: 'el gato comprendió el libro.', pt: 'o gato compreendeu o livro.',
+    });
+    expect(catEats({ tense: 'past', aspect: 'progressive' })).toMatchObject({
+      it: 'il gatto stava mangiando.', es: 'el gato estaba comiendo.', pt: 'o gato estava comendo.',
+    });
+  });
+});
+
+// A131. KNOW has one verb per language, the knowing-a-fact one: sapere / savoir / saber / wissen. A
+// noun object wants the knowing-by-acquaintance verb — conoscere / connaître / conocer / conhecer /
+// kennen — so "the cat knows the boy" is "il gatto sa il ragazzo", "der Kater weiß den Jungen" and
+// "the cat knows me" is "il gatto mi sa". English "know" and Japanese 知る cover both.
+describe('known bugs: KNOW with a noun object', () => {
+  const knows = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}, subject = np('CAT')) => {
+    const { it, fr, es, pt, de } = sayAll(clause(subject, 'KNOW', { verbPhrase, directObject: object }));
+    return { it, fr, es, pt, de };
+  };
+
+  test.fails('a noun object takes conoscere / connaître / conocer / conhecer / kennen', () => {
+    expect(knows(np('BOY'))).toEqual({
+      it: 'il gatto conosce il ragazzo.', fr: 'le chat connaît le garçon.', es: 'el gato conoce al niño.', pt: 'o gato conhece o menino.', de: 'der Kater kennt den Jungen.',
+    });
+    expect(knows(np('HOUSE'))).toEqual({
+      it: 'il gatto conosce la casa.', fr: 'le chat connaît la maison.', es: 'el gato conoce la casa.', pt: 'o gato conhece a casa.', de: 'der Kater kennt das Haus.',
+    });
+    expect(knows(np('CONCEPT'))).toEqual({
+      it: 'il gatto conosce il concetto.', fr: 'le chat connaît le concept.', es: 'el gato conoce el concepto.', pt: 'o gato conhece o conceito.', de: 'der Kater kennt den Begriff.',
+    });
+    expect(knows(np('FIRST_PERSON'))).toEqual({
+      it: 'il gatto mi conosce.', fr: 'le chat me connaît.', es: 'el gato me conoce.', pt: 'o gato me conhece.', de: 'der Kater kennt mich.',
+    });
+    expect(knows(np('HOUSE'), {}, np('CAT', { number: 'plural' }))).toEqual({
+      it: 'i gatti conoscono la casa.', fr: 'les chats connaissent la maison.', es: 'los gatos conocen la casa.', pt: 'os gatos conhecem a casa.', de: 'die Kater kennen das Haus.',
+    });
+    expect(knows(np('BOY'), { negative: true })).toEqual({
+      it: 'il gatto non conosce il ragazzo.', fr: 'le chat ne connaît pas le garçon.', es: 'el gato no conoce al niño.', pt: 'o gato não conhece o menino.', de: 'der Kater kennt den Jungen nicht.',
+    });
+    expect(knows(np('HOUSE'), { tense: 'future' })).toEqual({
+      it: 'il gatto conoscerà la casa.', fr: 'le chat connaîtra la maison.', es: 'el gato conocerá la casa.', pt: 'o gato conhecerá a casa.', de: 'der Kater wird das Haus kennen.',
+    });
+    expect(knows(np('HOUSE'), { modals: ['MUST'] })).toEqual({
+      it: 'il gatto deve conoscere la casa.', fr: 'le chat doit connaître la maison.', es: 'el gato debe conocer la casa.', pt: 'o gato deve conhecer a casa.', de: 'der Kater muss das Haus kennen.',
+    });
+    const { it, fr, es, pt, de } = sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'KNOW' }, directObject: np('BOY') } }), 'RUN'));
+    expect({ it, fr, es, pt, de }).toEqual({
+      it: 'il gatto che conosce il ragazzo corre.', fr: 'le chat qui connaît le garçon court.', es: 'el gato que conoce al niño corre.', pt: 'o gato que conhece o menino corre.', de: 'der Kater, der den Jungen kennt, läuft.',
+    });
+  });
+
+  test('regression: KNOW with no object keeps sapere / savoir / saber / wissen, and English and Japanese are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'KNOW'))).toMatchObject({
+      it: 'il gatto sa.', fr: 'le chat sait.', es: 'el gato sabe.', pt: 'o gato sabe.', de: 'der Kater weiß.',
+    });
+    expect(sayAll(clause(np('CAT'), 'KNOW', { verbPhrase: { negative: true } }))).toMatchObject({
+      it: 'il gatto non sa.', fr: 'le chat ne sait pas.', de: 'der Kater weiß nicht.',
+    });
+    expect(sayAll(clause(np('CAT'), 'KNOW', { directObject: np('BOY') }))).toMatchObject({
+      en: 'the cat knows the boy.', ja: '猫は男の子を知っています。',
+    });
+  });
+});
+
+// A132. A Japanese state verb renders as an event. 持つ, 所有する, 愛する and 保持する take the plain
+// 〜ます / 〜ました, which read as the change: 猫は本を持ちます "the cat will pick up the book",
+// 持ちました "picked it up". A state is the resultant 〜ている: 持っています, 持っていました,
+// 持っていませんでした. KNOW gets 知っています only because its `masu_present` stores it, and then
+// its negative follows that form (知っていません) where 知る's negative is the plain 知りません.
+describe('known bugs: Japanese state verb in the main clause', () => {
+  const ja = (verb: string, verbPhrase: Partial<VerbPhrase> = {}, object = 'BOOK') =>
+    say(clause(np('CAT'), verb, { verbPhrase, directObject: np(object) }), 'ja');
+
+  test.fails('HAVE, OWN, LOVE and HOLD take 〜ている, and KNOW negates as 知りません', () => {
+    expect(ja('HAVE')).toBe('猫は本を持っています。');
+    expect(ja('HAVE', { tense: 'past' })).toBe('猫は本を持っていました。');
+    expect(ja('HAVE', { negative: true })).toBe('猫は本を持っていません。');
+    expect(ja('HAVE', { tense: 'past', negative: true })).toBe('猫は本を持っていませんでした。');
+    expect(ja('OWN')).toBe('猫は本を所有しています。');
+    expect(ja('OWN', { tense: 'past' })).toBe('猫は本を所有していました。');
+    expect(ja('LOVE', {}, 'DOG')).toBe('猫は犬を愛しています。');
+    expect(ja('LOVE', { tense: 'past' }, 'DOG')).toBe('猫は犬を愛していました。');
+    expect(ja('HOLD')).toBe('猫は本を保持しています。');
+    expect(ja('HOLD', { tense: 'past' })).toBe('猫は本を保持していました。');
+    expect(ja('KNOW', { negative: true })).toBe('猫は本を知りません。');
+    expect(ja('KNOW', { tense: 'past', negative: true })).toBe('猫は本を知りませんでした。');
+    // The たら protasis: 持ったら is "if the cat picked up the book".
+    const ifTheCat = (verb: string) => say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), verb, { directObject: np('BOOK') }) }, 'ja');
+    expect(ifTheCat('HAVE')).toMatch(/^もし猫が本を持っていたら、/);
+    expect(ifTheCat('KNOW')).toMatch(/^もし猫が本を知っていたら、/);
+  });
+
+  test('regression: an event verb, KNOW, the progressive and a modal keep their forms', () => {
+    expect(ja('EAT', { tense: 'past' }, 'FOOD')).toBe('猫は食べ物を食べました。');
+    expect(ja('SEE')).toBe('猫は本を見ます。');
+    expect(ja('KNOW')).toBe('猫は本を知っています。');
+    expect(ja('KNOW', { tense: 'past' })).toBe('猫は本を知っていました。');
+    expect(ja('HAVE', { aspect: 'progressive' })).toBe('猫は本を持っています。');
+    expect(ja('HAVE', { modals: ['MUST'] })).toBe('猫は本を持つ必要があります。');
+    expect(ja('HAVE', { modals: ['WILL'] })).toBe('猫は本を持ちたいです。');
+    expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { directObject: np('FOOD') }) }, 'ja')).toMatch(/^もし猫が食べ物を食べたら、/);
+  });
+});

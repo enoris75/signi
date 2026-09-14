@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (12 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (16 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -57,6 +57,10 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A127 | [A127-german-object-pronoun-after-adverb.md](A-must-fix/A127-german-object-pronoun-after-adverb.md) |
 | A128 | [A128-japanese-modal-on-copula.md](A-must-fix/A128-japanese-modal-on-copula.md) |
 | A129 | [A129-relative-on-alarm-cry.md](A-must-fix/A129-relative-on-alarm-cry.md) |
+| A130 | [A130-romance-past-of-a-state-verb.md](A-must-fix/A130-romance-past-of-a-state-verb.md) |
+| A131 | [A131-know-with-a-noun-object.md](A-must-fix/A131-know-with-a-noun-object.md) |
+| A132 | [A132-japanese-state-verb-main-clause.md](A-must-fix/A132-japanese-state-verb-main-clause.md) |
+| A133 | [A133-article-on-a-language-name.md](A-must-fix/A133-article-on-a-language-name.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
