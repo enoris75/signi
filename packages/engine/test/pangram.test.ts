@@ -164,3 +164,36 @@ describe('known bugs: a route over crosses the dog, in the whole sentence', () =
     });
   });
 });
+
+// A129. A relative clause on the cried alarm ("the wolf that the boy cried") treats the head as a
+// plain direct object: "il lupo che il ragazzo gridò", "le loup que le garçon cria". In Italian and
+// French the alarm is the a / à complement of A124, so the relative takes the preposition and the
+// relativizer a complement gap takes (A62): "al quale", "auquel". The reading is marginal even in
+// English, but the plain "che" / "que" is ungrammatical with the alarm frame.
+describe('known bugs: a relative on the alarm a cry raises', () => {
+  const theWolfTheBoyCried = (wolf: Partial<NounPhrase> = {}, head = 'WOLF', verb = 'RUN') =>
+    sayAll(clause(np(head, { ...wolf, relative: { headRole: 'directObject', subject: np('BOY'), verbPhrase: { verb: 'CRY_OUT', tense: 'past' } } }), verb));
+
+  test.fails('Italian and French relativise the alarm with al quale / auquel', () => {
+    expect(theWolfTheBoyCried()).toMatchObject({
+      it: 'il lupo al quale il ragazzo gridò corre.',
+      fr: 'le loup auquel le garçon cria court.',
+    });
+    expect(theWolfTheBoyCried({ number: 'plural' })).toMatchObject({
+      it: 'i lupi ai quali il ragazzo gridò corrono.',
+      fr: 'les loups auxquels le garçon cria courent.',
+    });
+    expect(theWolfTheBoyCried({}, 'FIRE', 'BURN')).toMatchObject({
+      it: 'il fuoco al quale il ragazzo gridò brucia.',
+      fr: 'le feu auquel le garçon cria brûle.',
+    });
+  });
+
+  test('regression: a relative on a plain cry keeps che / que', () => {
+    expect(theWolfTheBoyCried({}, 'WORD', 'BURN')).toMatchObject({
+      it: 'la parola che il ragazzo gridò brucia.',
+      fr: 'le mot que le garçon cria brûle.',
+    });
+  });
+});
+

@@ -679,3 +679,42 @@ describe('known bugs: Portuguese coordinated pronoun object', () => {
     expect(catSees(np('DOG'), np('MOUSE'))).toBe('o gato vê o cão e o rato.');
   });
 });
+
+// A127. A German object pronoun is unstressed, and an unstressed pronoun leads the Mittelfeld, ahead of
+// any adverb, "nicht" and the progressive's "gerade": "der Kater sieht ihn immer". The declarative,
+// the protasis, the command and the infinitive put the direct object after the adverb, where a noun
+// object may stand ("sieht immer den Hund"), and a pronoun reads as contrastive: "sieht immer IHN".
+// The relative clause already has the right order ("der ihn immer sieht").
+describe('known bugs: German object pronoun before an adverb', () => {
+  const sees = (verbPhrase: Partial<VerbPhrase>, object = 'THIRD_PERSON'): PhrasePlan =>
+    clause(np('CAT'), 'SEE', { verbPhrase, directObject: np(object) });
+
+  test.fails('German puts the object pronoun ahead of the adverb, nicht and gerade', () => {
+    const de = (plan: PhrasePlan) => say(plan, 'de');
+    expect(de(sees({ modifier: 'ALWAYS' }))).toBe('der Kater sieht ihn immer.');
+    expect(de(sees({ modifier: 'NEVER' }))).toBe('der Kater sieht ihn nie.');
+    expect(de(sees({ modifier: 'FAST' }))).toBe('der Kater sieht ihn schnell.');
+    expect(de(sees({ modifier: 'ALWAYS', negative: true }))).toBe('der Kater sieht ihn nicht immer.');
+    expect(de(sees({ modifier: 'ALWAYS' }, 'FIRST_PERSON'))).toBe('der Kater sieht mich immer.');
+    expect(de(sees({ aspect: 'progressive' }))).toBe('der Kater sieht ihn gerade.');
+    expect(de(sees({ modifier: 'ALWAYS', modals: ['WILL'] }))).toBe('der Kater will ihn immer sehen.');
+    expect(de(sees({ modifier: 'ALWAYS', aspect: 'resultative' }))).toBe('der Kater hat ihn immer gesehen.');
+    expect(de({ ...clause(np('DOG'), 'RUN'), condition: sees({ modifier: 'ALWAYS' }) }))
+      .toBe('wenn der Kater ihn immer sehen würde, würde der Hund laufen.');
+    expect(de({ ...clause(np('SECOND_PERSON'), 'SEE', { verbPhrase: { modifier: 'ALWAYS' }, directObject: np('THIRD_PERSON') }), imperative: true }))
+      .toBe('sieh ihn immer.');
+    expect(de({ ...sees({ modifier: 'ALWAYS' }), infinitive: true })).toBe('ihn immer sehen.');
+    // A121's pro-form "es" takes the same slot.
+    expect(de({
+      ...clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY') } } }),
+      coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modifier: 'ALWAYS' } }) },
+    })).toBe('der Kater ist glücklich, aber der Hund ist es immer.');
+  });
+
+  test('regression: a noun object and the relative clause keep their order', () => {
+    expect(say(sees({ modifier: 'ALWAYS' }, 'DOG'), 'de')).toBe('der Kater sieht immer den Hund.');
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE', modifier: 'ALWAYS' }, directObject: np('THIRD_PERSON') } }), 'RUN'), 'de'))
+      .toBe('der Hund, der ihn immer sieht, läuft.');
+  });
+});
+

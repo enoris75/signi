@@ -709,3 +709,44 @@ describe('known bugs: Japanese 〜たい bridge inside a longer modal chain', ()
     expect(eats(['CAN', 'WILL'])).toBe('猫は食べたいと思うことができます。');
   });
 });
+
+// A128. A modal on the Japanese copula is dropped. `predicateSegs` returns from its copula branch
+// (predicate + です) before the modal path, so "the cat must be happy" renders "the cat is happy"
+// (猫は幸せです), and MUST, CAN and WILL all vanish. The existential BE, a real verb, keeps its modal
+// (家にいる必要があります). The copula's plain form governs the modal as a verb's dictionary form does:
+// 幸せである必要があります, 伝説であることができます, and its stem takes 〜たい: 伝説でありたいです.
+describe('known bugs: Japanese modal on the copula', () => {
+  const isA = (predicate: string, verbPhrase: Partial<VerbPhrase>) =>
+    clause(np('CAT'), 'BE', { verbPhrase, complements: { predicative: { phrase: np(predicate) } } });
+
+  test.fails('Japanese keeps the modal on a predicate adjective or noun', () => {
+    const ja = (predicate: string, verbPhrase: Partial<VerbPhrase>) => say(isA(predicate, verbPhrase), 'ja');
+    expect(ja('HAPPY', { modals: ['MUST'] })).toBe('猫は幸せである必要があります。');
+    expect(ja('BIG', { modals: ['MUST'] })).toBe('猫は大きい必要があります。');
+    expect(ja('TIRED', { modals: ['MUST'] })).toBe('猫は疲れている必要があります。');
+    expect(ja('LEGEND', { modals: ['MUST'] })).toBe('猫は伝説である必要があります。');
+    expect(ja('HAPPY', { modals: ['MUST'], negative: true })).toBe('猫は幸せである必要がありません。');
+    expect(ja('LEGEND', { modals: ['MUST'], tense: 'past' })).toBe('猫は伝説である必要がありました。');
+    expect(ja('LEGEND', { modals: ['CAN'] })).toBe('猫は伝説であることができます。');
+    expect(ja('LEGEND', { modals: ['WILL'] })).toBe('猫は伝説でありたいです。');
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', modals: ['MUST'] }, complements: { predicative: { phrase: np('LEGEND') } } } }), 'RUN'), 'ja'))
+      .toBe('伝説である必要がある猫は走ります。');
+    // A121's elided predicate carries the modal too.
+    expect(say({
+      ...isA('HAPPY', {}),
+      coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modals: ['MUST'], negative: true } }) },
+    }, 'ja')).toMatch(/犬はそうである必要がありません。$/);
+  });
+
+  test('regression: the existential and a verb keep their modal, and the other languages render it', () => {
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { modals: ['MUST'] }, complements: { locative: { phrase: np('HOUSE') } } }), 'ja'))
+      .toBe('猫は家にいる必要があります。');
+    expect(catModal({ modals: ['MUST'] }).ja).toBe('猫は食べる必要があります。');
+    expect(sayAll(isA('HAPPY', { modals: ['MUST'] }))).toMatchObject({
+      en: 'the cat must be happy.',
+      de: 'der Kater muss glücklich sein.',
+      es: 'el gato debe estar feliz.',
+    });
+  });
+});
+

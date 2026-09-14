@@ -42,7 +42,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (9 of them, as of this writing).** If you add or move a
+appears in one of the subdirectories (12 of them, as of this writing).** If you add or move a
 `test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
 name, not the code comment.
 
@@ -52,7 +52,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-_None open._
+| # | File |
+|---|---|
+| A127 | [A127-german-object-pronoun-after-adverb.md](A-must-fix/A127-german-object-pronoun-after-adverb.md) |
+| A128 | [A128-japanese-modal-on-copula.md](A-must-fix/A128-japanese-modal-on-copula.md) |
+| A129 | [A129-relative-on-alarm-cry.md](A-must-fix/A129-relative-on-alarm-cry.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
