@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { Definiteness, NounPhrase } from '@signi/shared';
-import { clause, np, say, sayAll } from './harness.js';
+import { clause, furigana, np, say, sayAll } from './harness.js';
 
 // Determiners, number, and the two noun classes that override the user's choice of article:
 // mass nouns and proper nouns.
@@ -344,5 +344,71 @@ describe('known bugs: Spanish stressed-a noun WING', () => {
     expect(sayAll(clause(np('WING', { number: 'plural' }), 'BURN')).es).toBe('las alas arden.');
     expect(sayAll(clause(np('WING', { definiteness: 'this' }), 'BURN')).es).toBe('esta ala arde.');
     expect(sayAll(clause(np('WING', { adjectives: ['FIRST'] }), 'BURN')).es).toBe('la primera ala arde.');
+  });
+});
+
+// ICE_CREAM, a countable food noun — unlike the mass FOOD it takes the indefinite article and
+// pluralises in the serving sense ("an ice cream", "due gelati"). Feminine in French (glace) and
+// neuter in German, where "Eis" is invariable in the plural ("die Eis", "viele Eis").
+describe('a countable food noun: ICE_CREAM', () => {
+  const eats = (iceCream: NounPhrase) => sayAll(clause(np('CAT'), 'EAT', { directObject: iceCream }));
+
+  test('takes its gendered article, the indefinite, and pluralises', () => {
+    expect(eats(np('ICE_CREAM'))).toEqual({
+      en: 'the cat eats the ice cream.',
+      it: 'il gatto mangia il gelato.',
+      fr: 'le chat mange la glace.',
+      de: 'der Kater isst das Eis.',
+      es: 'el gato come el helado.',
+      ja: '猫はアイスクリームを食べます。',
+      pt: 'o gato come o sorvete.',
+    });
+    expect(eats(np('ICE_CREAM', { number: 'plural' }))).toEqual({
+      en: 'the cat eats the ice creams.',
+      it: 'il gatto mangia i gelati.',
+      fr: 'le chat mange les glaces.',
+      de: 'der Kater isst die Eis.', // invariable plural
+      es: 'el gato come los helados.',
+      ja: '猫はアイスクリームを食べます。',
+      pt: 'o gato come os sorvetes.',
+    });
+    expect(eats(np('ICE_CREAM', { definiteness: 'indefinite' }))).toEqual({
+      en: 'the cat eats an ice cream.',
+      it: 'il gatto mangia un gelato.',
+      fr: 'le chat mange une glace.',
+      de: 'der Kater isst ein Eis.',
+      es: 'el gato come un helado.',
+      ja: '猫はアイスクリームを食べます。',
+      pt: 'o gato come um sorvete.',
+    });
+  });
+
+  test('is countable: a quantifier takes the count word and the plural', () => {
+    expect(eats(np('ICE_CREAM', { definiteness: 'many' }))).toEqual({
+      en: 'the cat eats many ice creams.',
+      it: 'il gatto mangia molti gelati.',
+      fr: 'le chat mange beaucoup de glaces.',
+      de: 'der Kater isst viele Eis.',
+      es: 'el gato come muchos helados.',
+      ja: '猫は多くのアイスクリームを食べます。',
+      pt: 'o gato come muitos sorvetes.',
+    });
+  });
+
+  test('an adjective agrees with its gender', () => {
+    expect(eats(np('ICE_CREAM', { definiteness: 'indefinite', adjectives: ['BIG'] }))).toEqual({
+      en: 'the cat eats a big ice cream.',
+      it: 'il gatto mangia un grande gelato.',
+      fr: 'le chat mange une grande glace.', // feminine
+      de: 'der Kater isst ein großes Eis.', // neuter, mixed ending
+      es: 'el gato come un helado grande.',
+      ja: '猫は大きいアイスクリームを食べます。',
+      pt: 'o gato come um sorvete grande.',
+    });
+  });
+
+  test('the katakana アイスクリーム takes no furigana', () => {
+    expect(furigana(clause(np('CAT'), 'EAT', { directObject: np('ICE_CREAM') })))
+      .toEqual(['ねこ', 'たべます']);
   });
 });

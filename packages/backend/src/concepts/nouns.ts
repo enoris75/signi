@@ -403,6 +403,25 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // Ice cream in general — Italian "gelato", not the English loanword for the Italian style.
+    // Countable in the serving sense ("an ice cream", "zwei Eis"), unlike FOOD. German "Eis" is
+    // invariable in the plural and takes the long genitive (des Eises).
+    id: 'ICE_CREAM',
+    role: 'noun',
+    description: 'a sweet frozen dessert made from milk or cream',
+    emoji: '🍨',
+    isA: 'FOOD',
+    forms: {
+      en: { base: 'ice cream', plural: 'ice creams', count: 'singular' },
+      it: { base: 'gelato', plural: 'gelati', gender: 'masc', count: 'singular' },
+      fr: { base: 'glace', plural: 'glaces', gender: 'fem', count: 'singular' },
+      de: { base: 'Eis', plural: 'Eis', gender: 'neut', count: 'singular' },
+      es: { base: 'helado', plural: 'helados', gender: 'masc', count: 'singular' },
+      ja: { base: 'アイスクリーム', count: 'singular', reading: 'あいすくりーむ' },
+      pt: { base: 'sorvete', plural: 'sorvetes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The differentia object of DRINK's dictionary definition ("to consume liquid"). A mass noun,
     // modelled on FOOD — uncountable, no plural, and rendered bare in the gloss.
     id: 'LIQUID',
