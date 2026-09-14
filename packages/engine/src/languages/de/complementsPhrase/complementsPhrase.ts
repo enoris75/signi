@@ -1,23 +1,23 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, isPronominalPossessor, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, possessedHeadForms, type ConceptForms, type ResolvedComplement } from '../../types.js';
-import { possessiveDe } from '../../possessive.js';
-import { adjPhrase } from './adjPhrase.js';
-import { coordinate } from './coordinate.js';
-import { datPluralN } from './datPluralN.js';
-import { declineAdj } from './declineAdj.js';
-import { LOCATIVE_IDIOMS } from './de.consts.js';
-import { mannerPrepCase } from './mannerPrepCase.js';
-import { dePredAdj } from './dePredAdj.js';
-import { germanCompound } from './germanCompound.js';
-import { modifierGenitives } from './modifierGenitives.js';
-import { nounPhrase } from './nounPhrase.js';
-import { possessorText } from './possessorText.js';
-import { prepDet } from './prepDet.js';
-import { relativePronoun } from './relativePronoun.js';
-import { spatialCase } from './spatialCase.js';
-import { spatialHead } from './spatialHead.js';
-import { subordinateClause } from './subordinateClause.js';
-import { weakN } from './weakN.js';
+import { causeSentiment, isPronominalPossessor, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, possessedHeadForms, type ConceptForms, type ResolvedComplement } from '../../../types.js';
+import { possessiveDe } from '../../../possessive.js';
+import { adjPhrase } from '../adjPhrase.js';
+import { coordinate } from '../coordinate.js';
+import { datPluralN } from '../datPluralN.js';
+import { LOCATIVE_IDIOMS } from '../de.consts.js';
+import { mannerPrepCase } from '../mannerPrepCase.js';
+import { dePredAdj } from '../dePredAdj.js';
+import { germanCompound } from '../germanCompound.js';
+import { modifierGenitives } from '../modifierGenitives.js';
+import { nounPhrase } from '../nounPhrase.js';
+import { possessorText } from '../possessorText.js';
+import { prepDet } from '../prepDet.js';
+import { spatialCase } from '../spatialCase.js';
+import { spatialHead } from '../spatialHead.js';
+import { subordinateClause } from '../subordinateClause.js';
+import { weakN } from '../weakN.js';
+import { causePhrase } from './causePhrase.js';
+import { instrumentActionPhrase } from './instrumentActionPhrase.js';
 
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the
 // complements with the infinitival copula ("scheint eine Legende zu sein").
@@ -30,80 +30,12 @@ export function complementsPhrase(
     .map((type) => {
       const c = complements[type];
       if (!c) return '';
-      // A pronoun cause ("wegen mir/ihr/ihnen") uses the dative form with no article — the
-      // colloquial dative that "wegen" already takes. Positive credits with "dank" ("dank
-      // dir"); negative lays blame with the possessive periphrasis "durch <possessive> Schuld"
-      // ("durch meine/deine/seine Schuld"), the possessive agreeing with feminine "Schuld".
-      // Only cause takes a pronoun.
-      //
-      // A group holding a pronoun renders every conjunct in its own form, never the first one's:
-      // the preposition once, then a pronoun's dative or a noun's dative phrase ("wegen dem Mann und
-      // dir"). In the negative a group of pronouns shares one "Schuld" ("durch meine und deine
-      // Schuld"); a group mixing in a noun gives each conjunct its own periphrasis.
-      if (type === 'cause' && c.phrase.conjuncts.some((np) => np.head.forms['person'])) {
-        const sent = causeSentiment(c);
-        const possessive = (pf: Record<string, string>) => {
-          const plural = pf['number'] === 'plural';
-          return pf['person'] === '1' ? (plural ? 'unsere' : 'meine') :
-            pf['person'] === '2' ? (plural ? 'eure' : 'deine') :
-            plural ? 'ihre' : (pf['gender'] === 'fem' ? 'ihre' : 'seine');
-        };
-        if (sent === 'negative') {
-          if (c.phrase.conjuncts.every((np) => np.head.forms['person'])) {
-            return `durch ${coordinate(c.phrase, (np) => possessive(np.head.forms))} Schuld`;
-          }
-          return coordinate(c.phrase, (np) => np.head.forms['person']
-            ? `durch ${possessive(np.head.forms)} Schuld`
-            : `durch die Schuld ${nounPhrase(np, 'gen')}`);
-        }
-        const prep = sent === 'positive' ? 'dank' : 'wegen';
-        const conjuncts = coordinate(c.phrase, (np) => np.head.forms['person']
-          ? (np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '')
-          : nounPhrase(np, 'dat'));
-        return `${prep} ${conjuncts}`;
-      }
-      // A negative noun cause takes the genitive periphrasis "durch die Schuld" (through the
-      // fault) + the cause in the genitive: "durch die Schuld des Hundes". "durch" governs the
-      // accusative of the fixed "die Schuld"; the blamed party hangs off it as a genitive. Emitted
-      // once before the group ("durch die Schuld des Hundes und der Katze").
-      if (type === 'cause' && causeSentiment(c) === 'negative') {
-        // A relativizer blames through its genitive, ahead of "Schuld": "der Hund, durch dessen Schuld …".
-        const blamed = c.phrase.conjuncts[0].head.forms;
-        if (blamed['definiteness'] === 'relative') {
-          return `durch ${relativePronoun(blamed, 'gen', (blamed['number'] ?? blamed['count']) === 'plural')} Schuld`;
-        }
-        return `durch die Schuld ${coordinate(c.phrase, (np) => nounPhrase(np, 'gen'))}`;
-      }
-      // An instrument presented as an action. German has no gerund, so the two levels part ways
-      // completely. The process level is a subordinate means clause — "indem man ein Wort wählt",
-      // with the impersonal "man" and the verb pushed to the end — whose noun phrase is a plain
-      // direct object, hence *accusative*, not the dative "mit" would otherwise give it.
-      //
-      // The concept level nominalises the infinitive instead: German turns any infinitive into a
-      // neuter noun just by capitalising it ("wählen" → "das Wählen"), which "mit" then puts in
-      // the dative, and — the noun being a noun — its object arrives as an attached *genitive*:
-      // "mit dem Wählen eines Wortes". The action's adverb comes along as an attributive
-      // adjective on that noun ("mit dem schnellen Wählen"), which is what German adverbs are.
-      if (type === 'instrumental' && c.action) {
-        const level = abstractionLevel(c);
-        if (level !== 'object') {
-          const adverb = c.action.modifier?.forms['base'] ?? '';
-          if (level === 'process') {
-            const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
-            const finite3sg = c.action.verb.forms['3sg_present'] ?? c.action.verb.forms['base'] ?? '';
-            // A subordinate clause is set off by a comma ("beginnt, indem man ein Wort wählt").
-            // It is emitted as a leading comma and pulled back onto the previous word when the
-            // clause is joined (see `punctuate`), since the joiner knows nothing of punctuation.
-            return [', indem man', object, adverb, finite3sg].filter(Boolean).join(' ');
-          }
-          const object = coordinate(c.phrase, (np) => nounPhrase(np, 'gen'));
-          const infinitive = actionInfinitive(c.action);
-          const act = infinitive.charAt(0).toUpperCase() + infinitive.slice(1);
-          // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en).
-          const attr = adverb ? declineAdj(adverb, 'dat', 'neut', false, 'definite') : '';
-          return ['mit dem', attr, act, object].filter(Boolean).join(' ');
-        }
-      }
+      // A pronoun or negative cause and an instrument presented as an action take shapes of their own;
+      // a plain noun in either slot falls through to the prepositional path below.
+      const cause = type === 'cause' ? causePhrase(c) : undefined;
+      if (cause !== undefined) return cause;
+      const instrumentAction = type === 'instrumental' ? instrumentActionPhrase(c) : undefined;
+      if (instrumentAction !== undefined) return instrumentAction;
       // Subject complement: a German predicate adjective is uninflected ("wird müde",
       // "scheint groß" — no declension endings) but is still compared ("wird müder"); a
       // predicate noun takes the *nominative* case, not the dative the other complements
@@ -144,7 +76,7 @@ export function complementsPhrase(
         _case = 'dat';
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
         // standard in speech and reuses the dative determiners; positive credits with "dank". The
-        // negative sentiment never reaches here — it took the "durch die Schuld" genitive path above.
+        // negative sentiment and a pronoun never reach here — they took `causePhrase` above.
         if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
         // doesn't exist for "mit", so prepDet leaves it uncontracted.

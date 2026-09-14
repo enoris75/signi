@@ -134,9 +134,9 @@ Changes:
 - [`de/prepDet.ts`](../../../../packages/engine/src/languages/de/prepDet.ts): add the
   **von + dem → vom** fusion alongside in+dem/zu+dem. It is obligatory with the definite article.
   A01 (passive agent "vom Kater") will want it too.
-- [`de/complementsPhrase.ts`](../../../../packages/engine/src/languages/de/complementsPhrase.ts):
-  - line 136: widen `_case` to `Case` (`'nom' | 'acc' | 'dat' | 'gen'`).
-  - line 178: a genitive head noun takes `genitiveS` ("des Hauses", "des Markt**e**s"), not
+- [`de/complementsPhrase/complementsPhrase.ts`](../../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts):
+  - line 68: widen `_case` to `Case` (`'nom' | 'acc' | 'dat' | 'gen'`).
+  - line 110: a genitive head noun takes `genitiveS` ("des Hauses", "des Markt**e**s"), not
     `datPluralN`. Weak nouns already decline through `weakN(…, 'gen', …)`.
   - Check that `adjPhrase` and `possessiveDe` decline the genitive on this path
     ("in der Nähe des kleinen Hauses", "in der Nähe meines Hauses"). Both take a `Case`, but

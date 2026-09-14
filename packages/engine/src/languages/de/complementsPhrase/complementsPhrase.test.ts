@@ -2,10 +2,10 @@ import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from '@signi/shared';
 import { complementsPhrase } from './complementsPhrase.js';
 import {
-  adj, BEHAELTER, BOOT, BUCH, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
-  GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SCHNELL, SEGEL, SORGFALT, vp, WAEHLEN,
+  adj, BEHAELTER, BOOT, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
+  GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SEGEL, SORGFALT, vp, WAEHLEN,
   WASSER, WEISE, WIND, WORT, ZEIT,
-} from './de.fixtures.js';
+} from '../de.fixtures.js';
 
 const LEGENDE: Forms = { base: 'Legende', plural: 'Legenden', gender: 'fem', count: 'singular' };
 const MARKT: Forms = { base: 'Markt', plural: 'Märkte', gender: 'masc', count: 'singular' };
@@ -67,6 +67,12 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ terminus: complement(np(KATZE, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('meiner Katze');
       expect(complementsPhrase(complements({ source: complement(np(HAUS, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('aus meinem Haus');
       expect(complementsPhrase(complements({ locative: complement(np(HAUS, {}, { ...{ possessor: { kind: 'pronominal', person: '1', number: 'singular' } }, adjectives: [adj(KLEIN)] })) }))).toBe('in meinem kleinen Haus');
+      expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('in meinen Häusern');
+    });
+
+    test('a possessed noun with no gender declines its possessive as a neuter', () => {
+      const DING: Forms = { base: 'Ding', count: 'singular' };
+      expect(complementsPhrase(complements({ locative: complement(np(DING, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('in meinem Ding');
     });
 
     test('an inanimate goal takes "in" + the accusative', () => {
@@ -82,29 +88,13 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER, { number: 'plural' })) }))).toBe('mit den Messern');
     });
 
-    // The impersonal "man" is a documented simplification (B06). The leading comma is pulled back
-    // onto the previous word when the sentence is joined.
-    test('a process instrument is a comma-led "indem man" clause with an accusative object', () => {
+    // The action levels are `instrumentActionPhrase`'s; this only checks the complement routes there.
+    test('an action instrument takes its own shape', () => {
       const word = np(WORT, { definiteness: 'indefinite' });
       expect(complementsPhrase(complements({ instrumental: complement(word, [abstraction('process')], vp(WAEHLEN)) })))
         .toBe(', indem man ein Wort wählt');
-      expect(complementsPhrase(complements({
-        instrumental: complement(word, [abstraction('process')], vp(WAEHLEN, { modifier: concept(SCHNELL) })),
-      }))).toBe(', indem man ein Wort schnell wählt');
-      expect(complementsPhrase(complements({
-        instrumental: complement(el(word, np(BUCH, { definiteness: 'indefinite' })), [abstraction('process')], vp(WAEHLEN)),
-      }))).toBe(', indem man ein Wort und ein Buch wählt');
-    });
-
-    // German nominalises the infinitive ("das Wählen"); its object becomes a genitive and its
-    // adverb an attributive adjective.
-    test('a concept instrument nominalises the infinitive with a genitive object', () => {
-      const word = np(WORT, { definiteness: 'indefinite' });
       expect(complementsPhrase(complements({ instrumental: complement(word, [abstraction('concept')], vp(WAEHLEN)) })))
         .toBe('mit dem Wählen eines Wortes');
-      expect(complementsPhrase(complements({
-        instrumental: complement(np(WORT), [abstraction('concept')], vp(WAEHLEN, { modifier: concept(SCHNELL) })),
-      }))).toBe('mit dem schnellen Wählen des Wortes');
     });
 
     test('falls back to the plain object at the object level or without an action', () => {
@@ -215,40 +205,11 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ cause: complement(np(MANN), [sentiment('positive')]) }))).toBe('dank dem Mann');
     });
 
-    test('a negative noun cause hangs a genitive off "durch die Schuld"', () => {
-      const negative = [sentiment('negative')];
-      expect(complementsPhrase(complements({ cause: complement(np(MANN), negative) }))).toBe('durch die Schuld des Mannes');
-      expect(complementsPhrase(complements({ cause: complement(np(KATZE), negative) }))).toBe('durch die Schuld der Katze');
-      expect(complementsPhrase(complements({ cause: complement(np(MANN, { number: 'plural' }), negative) }))).toBe('durch die Schuld der Männer');
-    });
-
-    test('a pronoun cause takes its dative form with no article', () => {
+    // A pronoun or negative cause is `causePhrase`'s; this only checks the complement routes there.
+    test('a pronoun or negative cause takes its own shape', () => {
       expect(complementsPhrase(complements({ cause: complement(np(ER)) }))).toBe('wegen ihm');
-      expect(complementsPhrase(complements({ cause: complement(np(DU), [sentiment('positive')]) }))).toBe('dank dir');
-      expect(complementsPhrase(complements({ cause: complement(np(ICH, { number: 'plural', disjunctive: 'uns' }), [sentiment('positive')]) })))
-        .toBe('dank uns');
-    });
-
-    // The possessive agrees with feminine "Schuld", and picks its stem by the pronoun's person/number/gender.
-    test('a negative pronoun cause is "durch <possessive> Schuld"', () => {
-      const blame = (forms: Forms, extra: Forms = {}) =>
-        complementsPhrase(complements({ cause: complement(np(forms, extra), [sentiment('negative')]) }));
-      expect(blame(ICH)).toBe('durch meine Schuld');
-      expect(blame(DU)).toBe('durch deine Schuld');
-      expect(blame(ER)).toBe('durch seine Schuld');
-      expect(blame(ER, { gender: 'neut' })).toBe('durch seine Schuld');
-      expect(blame(ER, { gender: 'fem' })).toBe('durch ihre Schuld');
-      expect(blame(ICH, { number: 'plural' })).toBe('durch unsere Schuld');
-      expect(blame(DU, { number: 'plural' })).toBe('durch eure Schuld');
-      expect(blame(ER, { number: 'plural' })).toBe('durch ihre Schuld');
-    });
-
-    test('a group holding a pronoun renders each conjunct in its own form, never the first one\'s', () => {
       expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(DU))) }))).toBe('wegen dem Mann und dir');
-      expect(complementsPhrase(complements({ cause: complement(el(np(DU), np(KATZE)), [sentiment('positive')]) }))).toBe('dank dir und der Katze');
-      expect(complementsPhrase(complements({ cause: complement(el(np(ICH), np(DU)), [sentiment('negative')]) }))).toBe('durch meine und deine Schuld');
-      expect(complementsPhrase(complements({ cause: complement(el(np(MANN), np(ER, { gender: 'fem' })), [sentiment('negative')]) })))
-        .toBe('durch die Schuld des Mannes und durch ihre Schuld');
+      expect(complementsPhrase(complements({ cause: complement(np(MANN), [sentiment('negative')]) }))).toBe('durch die Schuld des Mannes');
     });
   });
 

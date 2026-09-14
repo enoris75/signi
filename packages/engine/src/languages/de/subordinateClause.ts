@@ -1,5 +1,5 @@
 import { relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
-import { complementsPhrase } from './complementsPhrase.js';
+import { complementsPhrase } from './complementsPhrase/index.js';
 import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';

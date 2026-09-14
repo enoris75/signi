@@ -1,4 +1,5 @@
 import { describe, expect, test } from 'vitest';
+import type { CauseSentiment, Specifier } from '@signi/shared';
 import {
   adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS,
   GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
@@ -22,6 +23,8 @@ const toTheBoy = complements({ terminus: complement(np(JUNGE)) });
 const byChoosingAKnife = complements({
   instrumental: complement(np(MESSER, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
 });
+const inTheHouse = complements({ locative: complement(np(HAUS)) });
+const sentiment = (value: CauseSentiment): Specifier => ({ kind: 'sentiment', value });
 
 describe('renderClause', () => {
   describe('verbless periods', () => {
@@ -178,6 +181,35 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(SCHEINEN), { complements: tired }))).toBe('der Kater scheint müde');
     });
 
+    test('the other complements trail the object, ahead of the non-finite tail', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN), { directObject: mouse, complements: inTheHouse }))).toBe('der Kater isst die Maus im Haus');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'resultative' }), { directObject: mouse, complements: inTheHouse })))
+        .toBe('der Kater hat die Maus im Haus gegessen');
+      expect(renderClause(clause(np(MANN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { directObject: el(np(BUCH)), complements: complements({ instrumental: complement(np(MESSER)) }) })))
+        .toBe('der Mann kann das Buch mit dem Messer schneiden');
+      // …while the dative recipient still leads the object.
+      expect(renderClause(clause(np(MANN), vp(GEBEN), { directObject: el(np(BUCH)), complements: complements({ terminus: complement(np(JUNGE)), locative: complement(np(HAUS)) }) })))
+        .toBe('der Mann gibt dem Jungen das Buch im Haus');
+    });
+
+    // The cause's own shapes come from `causePhrase`; the clause only places them.
+    test('a cause trails the object like any other complement', () => {
+      const eatsTheMouse = (cause: ReturnType<typeof complement>, extra: Parameters<typeof vp>[1] = {}) =>
+        renderClause(clause(np(KATER), vp(ESSEN, extra), { directObject: mouse, complements: complements({ cause }) }));
+      expect(eatsTheMouse(complement(np(ICH)))).toBe('der Kater isst die Maus wegen mir');
+      expect(eatsTheMouse(complement(el(np(MANN), np(DU)), [sentiment('positive')]))).toBe('der Kater isst die Maus dank dem Mann und dir');
+      expect(eatsTheMouse(complement(np(MANN), [sentiment('negative')]), { aspect: 'resultative' }))
+        .toBe('der Kater hat die Maus durch die Schuld des Mannes gegessen');
+    });
+
+    test('a concept-level instrument is a phrase in the Mittelfeld, not a trailing clause', () => {
+      const byTheChoosingOfAKnife = complements({
+        instrumental: complement(np(MESSER, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'concept' }], vp(WAEHLEN)),
+      });
+      expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { complements: byTheChoosingOfAKnife })))
+        .toBe('man kann mit dem Wählen eines Messers schneiden');
+    });
+
     test('a means clause trails the whole verb complex', () => {
       // Its leading comma is pulled onto the verb later, by `punctuate`.
       expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { complements: byChoosingAKnife })))
@@ -185,6 +217,14 @@ describe('renderClause', () => {
       // …including the prospective's zu-infinitive group.
       expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { aspect: 'prospective' }), { directObject: mouse, complements: byChoosingAKnife })))
         .toBe('man ist im Begriff , die Maus zu schneiden , indem man ein Messer wählt');
+    });
+
+    test('a means clause trails the verb in inverted, verb-final and infinitive order too', () => {
+      const canCut = clause(np(MAN), vp(SCHNEIDEN, { modals: [modal(KOENNEN)] }), { complements: byChoosingAKnife });
+      expect(renderClause(canCut, true)).toBe('kann man schneiden , indem man ein Messer wählt');
+      expect(renderClause(canCut, false, true)).toBe('man schneiden kann , indem man ein Messer wählt');
+      expect(renderClause(clause(np(MAN), vp(SCHNEIDEN, { mood: 'infinitive' }), { directObject: mouse, complements: byChoosingAKnife })))
+        .toBe('die Maus schneiden , indem man ein Messer wählt');
     });
   });
 
@@ -317,6 +357,22 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), infinitive(SEIN, { negative: true }), { complements: tired }))).toBe('nicht müde sein');
       expect(renderClause(clause(np(KATER), infinitive(WERDEN_VERB, { negative: true, modifier: concept(IMMER) }), { complements: tired })))
         .toBe('nicht immer müde werden');
+    });
+  });
+
+  describe('a lexeme missing a form', () => {
+    const noBase = concept({});
+
+    test('an adverb with no base form adds nothing, in every mood', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: noBase })))).toBe('der Kater isst');
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative', modifier: noBase })))).toBe('iss');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'infinitive', modifier: noBase })))).toBe('essen');
+    });
+
+    test('a verb with no infinitive leaves the instruction its command form, and the infinitive nothing', () => {
+      const STORED_ONLY: Forms = { '2sg_imperative': 'iss' };
+      expect(renderClause(clause(np(DU), vp(STORED_ONLY, { mood: 'imperative', register: 'instruction' }), { directObject: mouse }))).toBe('die Maus iss');
+      expect(renderClause(clause(np(KATER), vp(STORED_ONLY, { mood: 'infinitive' }), { directObject: mouse }))).toBe('die Maus');
     });
   });
 

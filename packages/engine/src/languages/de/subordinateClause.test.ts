@@ -1,8 +1,9 @@
 import { describe, expect, test } from 'vitest';
+import type { CauseSentiment, Specifier } from '@signi/shared';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BEHAELTER, BUCH, complement, concept, el, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
-  MANN, MAUS, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
+  BEHAELTER, BUCH, complement, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
+  MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNEIDEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
 
@@ -13,6 +14,8 @@ const LESEN: Forms = {
   '1sg_present': 'lese', '2sg_present': 'liest', '3sg_present': 'liest',
   '1pl_present': 'lesen', '2pl_present': 'lest', '3pl_present': 'lesen',
 };
+
+const sentiment = (value: CauseSentiment): Specifier => ({ kind: 'sentiment', value });
 
 /** `forms` as the head of a noun phrase carrying `relative`. */
 const relativeOn = (forms: Forms, relative: ResolvedRelativeClause, extra: Forms = {}) =>
@@ -238,10 +241,39 @@ describe('subordinateClause', () => {
       })).toBe(', der müde scheint,');
     });
 
+    // The cause's own shapes come from `causePhrase`; the clause only places them.
+    test('a cause trails the direct object, ahead of the verb', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), directObject: el(np(MAUS)), complements: { cause: complement(np(ICH)) } }))
+        .toBe(', der die Maus wegen mir isst,');
+      expect(relativeOn(KATER, {
+        headRole: 'subject', verbPhrase: vp(ESSEN, { aspect: 'resultative' }), directObject: el(np(MAUS)),
+        complements: { cause: complement(np(MANN), [sentiment('negative')]) },
+      })).toBe(', der die Maus durch die Schuld des Mannes gegessen hat,');
+      expect(relativeOn(MAUS, {
+        headRole: 'directObject', subject: el(np(KATER)), verbPhrase: vp(ESSEN), complements: { cause: complement(el(np(MANN), np(DU)), [sentiment('positive')]) },
+      })).toBe(', die der Kater dank dem Mann und dir isst,');
+    });
+
+    test('a dative recipient and a means clause split out of the same complements', () => {
+      expect(relativeOn(JUNGE, {
+        headRole: 'subject', verbPhrase: vp(GEBEN), directObject: el(np(BUCH)),
+        complements: {
+          terminus: complement(np(MANN)),
+          instrumental: complement(np(WORT, { definiteness: 'indefinite' }), [{ kind: 'abstraction', value: 'process' }], vp(WAEHLEN)),
+        },
+      })).toBe(', der dem Mann das Buch gibt , indem man ein Wort wählt,');
+    });
+
     test('a relative clause nests inside another', () => {
       const walking = np(KATZE, {}, { relative: { headRole: 'subject', verbPhrase: vp(GEHEN) } });
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN), directObject: el(walking) }))
         .toBe(', der die Katze, die geht, isst,');
+    });
+  });
+
+  describe('a lexeme missing a form', () => {
+    test('an adverb with no base form adds nothing', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { modifier: concept({}) }) })).toBe(', der isst,');
     });
   });
 
@@ -259,6 +291,25 @@ describe('subordinateClause', () => {
         .toBe(', dem der Mann das Buch gibt,');
       expect(relativeOn(KATZE, { headRole: 'cause', subject: el(np(MANN)), verbPhrase: vp(ESSEN), headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] }))
         .toBe(', durch deren Schuld der Mann isst,');
+    });
+
+    // Only a definite article fuses with its preposition ("zum", "im"); the relative pronoun never does.
+    test('the other complements\' prepositions stay apart from the pronoun', () => {
+      expect(relativeOn(MESSER, { headRole: 'instrumental', subject: el(np(MANN)), verbPhrase: vp(SCHNEIDEN) })).toBe(', mit dem der Mann schneidet,');
+      expect(relativeOn(MESSER, { headRole: 'instrumental', subject: el(np(MANN)), verbPhrase: vp(SCHNEIDEN) }, { number: 'plural' }))
+        .toBe(', mit denen der Mann schneidet,');
+      expect(relativeOn(HAUS, { headRole: 'source', subject: el(np(KATER)), verbPhrase: vp(GEHEN) })).toBe(', aus dem der Kater geht,');
+      expect(relativeOn(HAUS, { headRole: 'direction', subject: el(np(KATER)), verbPhrase: vp(GEHEN) })).toBe(', zu dem der Kater geht,');
+    });
+
+    test('a cause takes "wegen" or "dank" with the dative pronoun, and blames through the genitive', () => {
+      const cause = (forms: Forms, value: CauseSentiment, extra: Forms = {}) =>
+        relativeOn(forms, { headRole: 'cause', subject: el(np(KATER)), verbPhrase: vp(ESSEN), headSpecifiers: [sentiment(value)] }, extra);
+      expect(cause(MANN, 'neutral')).toBe(', wegen dem der Kater isst,');
+      expect(cause(KATZE, 'neutral')).toBe(', wegen der der Kater isst,');
+      expect(cause(MANN, 'positive', { number: 'plural' })).toBe(', dank denen der Kater isst,');
+      expect(cause(MANN, 'negative')).toBe(', durch dessen Schuld der Kater isst,');
+      expect(cause(MANN, 'negative', { number: 'plural' })).toBe(', durch deren Schuld der Kater isst,');
     });
 
     test('a predicate noun takes the nominative pronoun, with no preposition', () => {

@@ -1,5 +1,5 @@
 import { firstConjunct, type ResolvedPhrase } from '../../types.js';
-import { complementsPhrase } from './complementsPhrase.js';
+import { complementsPhrase } from './complementsPhrase/index.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { dimensionGloss } from './dimensionGloss.js';
