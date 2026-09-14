@@ -166,8 +166,8 @@ share code (language folders never import each other). Copy structure from `pl/`
 ## 3. Interface
 
 - **Fonts:** Lora, Inter and Playfair Display all ship Cyrillic, and the Google Fonts CSS in
-  `frontend/index.html` serves it by unicode-range with no change. Check real rendering in the e2e
-  screenshot (`docs/images/builder.png`) once the row exists.
+  `frontend/index.html` serves it by unicode-range with no change. Check real rendering in the
+  translations panel once the row exists.
 - **Line length:** Russian sentences run longer than English ones. Check the translations panel wraps
   cleanly at phone width.
 - **Typeahead:** D2 folding. Cyrillic search works as soon as the interface language is Russian.

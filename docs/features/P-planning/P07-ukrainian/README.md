@@ -175,7 +175,7 @@ it as a small `euphony.ts` with its own unit tests.
 ## 3. Interface
 
 - **Fonts:** Lora, Inter and Playfair Display ship Cyrillic including *і ї є ґ*. Also check that U+02BC
-  (*ʼ*) renders in all three (it sits in the Latin range, not Cyrillic) in the e2e screenshot.
+  (*ʼ*) renders in all three (it sits in the Latin range, not Cyrillic) in the translations panel.
 - **Typeahead:** apostrophe folding (D1). Cyrillic search works once the interface language is Ukrainian.
 
 ## 4. Testing and review

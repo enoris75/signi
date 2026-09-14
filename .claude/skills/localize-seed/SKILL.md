@@ -115,8 +115,7 @@ npm run test:e2e -- e2e/definition-tooltip.spec.ts
 npm run test:e2e
 ```
 
-Both green. (`git checkout -- docs/images/builder.png` afterwards — the screenshot spec regenerates
-it as a side effect.)
+Both green.
 
 ### 6. Retire the task file
 - **Move** it into `done/` (preserve the filename): `git mv docs/localization/A-ready/<file>

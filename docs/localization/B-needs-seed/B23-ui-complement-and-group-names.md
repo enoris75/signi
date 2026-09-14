@@ -39,7 +39,7 @@ no UI caller left.
 
 `Locative` → `tidy.spec.ts`, `WordMap.test.tsx`, `satellites/functions/rawSatellites.test.tsx` and four unit suites;
 `Direction` → `tidy.spec.ts`, `GroupBox.test.tsx`; `Terminus` → `tidy.spec.ts`, `satellites/functions/rawSatellites.test.tsx`;
-`Verb Phrase` → `fixtures.ts`, `canvas.spec.ts`, `screenshots.spec.ts`, `tidy.spec.ts`,
+`Verb Phrase` → `fixtures.ts`, `canvas.spec.ts`, `tidy.spec.ts`,
 `complements.spec.ts`, `useOverlapResolution.test.ts` and two more; `Direct Object` → `canvas.spec.ts`,
 `tidy.spec.ts`, `translation.spec.ts`. Several of these select the `data-group` attribute, which
 should keep the stable key.

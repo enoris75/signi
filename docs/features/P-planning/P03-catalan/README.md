@@ -271,7 +271,6 @@ qual / la qual* otherwise (*la casa de la qual*).
   - `translation.spec.ts` checks the `ca` row renders.
   - One `expectSentences` line per phase in an existing spec (e.g. `verb.spec.ts`).
   - `language.spec.ts` selects Catalan as the interface language once it is ready.
-  - `screenshots.spec.ts` regenerates `docs/images/builder.png` (one more row).
 
 ## 5. Phases
 

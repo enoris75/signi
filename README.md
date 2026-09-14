@@ -4,12 +4,6 @@
 
 There is no machine learning and no statistical model anywhere in the pipeline. Given the same phrase plan, Signi always produces the same output. Every article, agreement, conjugation, and word order is decided by hand-written grammar rules, one engine per language.
 
-## Screenshot
-
-![The Signi phrase builder: a canvas holding the concepts CAT · EAT · FOOD, with the same phrase rendered below in all seven languages.](docs/images/builder.png)
-
-*The builder canvas (top) and the same phrase rendered in all seven languages (bottom).*
-
 ## What problem it solves
 
 Traditional translators map *surface text* from one language to another, inheriting the ambiguity of the source sentence. Signi works the other way around: you build meaning first — a subject, a verb, optional objects, modifiers, mood, aspect, and so on — and each language engine realises that meaning in its own grammar. The result is deterministic, fully controllable output where you choose exactly which concept fills each slot.
