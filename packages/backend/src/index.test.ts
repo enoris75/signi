@@ -1,9 +1,9 @@
-import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest';
+import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from 'vitest';
 import http from 'node:http';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import { translate } from '@signi/engine';
-import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION } from '@signi/shared';
+import { SAVED_PHRASE_FORMAT, SAVED_PHRASE_VERSION, UI_STRINGS } from '@signi/shared';
 import type {
   Concept,
   ConceptsResponse,
@@ -11,6 +11,7 @@ import type {
   SavedPhraseRecord,
   SavedPhrasesResponse,
   SerializedWorkspace,
+  UiStringDef,
 } from '@signi/shared';
 import { concepts } from './concepts/index.js';
 import { getDb } from './db.js';
@@ -21,6 +22,12 @@ import { buildUiStrings } from './uiStrings.js';
 // exports nothing. So these specs drive it as a client would: over HTTP, against a server on a free
 // port (PORT=0), found by catching the server express creates when it calls `app.listen`. The
 // database is this file's in-memory one, seeded first — the boot renders need the corpus.
+//
+// The engine renders for real; the spy lets a spec make it throw, as an unexpected error would.
+vi.mock('@signi/engine', async (importOriginal) => {
+  const engine = await importOriginal<typeof import('@signi/engine')>();
+  return { ...engine, translate: vi.fn(engine.translate) };
+});
 vi.stubEnv('PORT', '0');
 const createServer = vi.spyOn(http, 'createServer');
 vi.spyOn(console, 'log').mockImplementation(() => {});
@@ -403,5 +410,100 @@ describe('unknown API paths', () => {
     expect(res.status).toBe(404);
     expect(res.headers.get('content-type')).toMatch(/^application\/json/);
     expect(await res.json()).toEqual({ error: 'Not found' });
+  });
+});
+
+// ── Known bugs ───────────────────────────────────────────────────────────────
+// Each `test.fails` asserts the correct behaviour and is catalogued in docs/bugs/A-must-fix/. When a
+// fix makes one pass, Vitest reports "expected to fail but passed": delete the `.fails` marker.
+
+describe('known bugs: translating a plan that names an unseeded concept', () => {
+  const expectRejected = async (plan: unknown, naming?: string) => {
+    const res = await post('/api/translate', { plan });
+    expect(res.status).toBe(400);
+    const { error } = (await res.json()) as { error: string };
+    if (naming) expect(error).toContain(naming);
+  };
+
+  test.fails('rejects the plan, naming the concept, wherever the concept stands', async () => {
+    await expectRejected({ subject: { concept: 'UNICORN' }, verbPhrase: { verb: 'EAT' } }, 'UNICORN');
+    await expectRejected({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'UNICORN' } }, 'UNICORN');
+    await expectRejected(
+      { subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT' }, directObject: { concept: 'UNICORN' } },
+      'UNICORN',
+    );
+    await expectRejected({ subject: { concept: 'CAT', adjectives: ['UNICORN'] }, verbPhrase: { verb: 'EAT' } }, 'UNICORN');
+    await expectRejected(
+      { subject: { conjuncts: [{ concept: 'CAT' }, { concept: 'UNICORN' }], conjunction: 'and' }, verbPhrase: { verb: 'EAT' } },
+      'UNICORN',
+    );
+    await expectRejected({ subject: { concept: 42 } });
+  });
+
+  test('regression: every plan the app renders itself is accepted', async () => {
+    const plans = [
+      ...concepts.flatMap((c) => (c.definition ? [c.definition] : [])),
+      ...Object.values(UI_STRINGS as Record<string, UiStringDef>).flatMap((d) => (d.plan ? [d.plan] : [])),
+    ];
+    const rejected: string[] = [];
+    for (const plan of plans) {
+      const res = await post('/api/translate', { plan });
+      if (res.status !== 200) rejected.push(`${res.status} ${JSON.stringify(plan)}`);
+    }
+    expect(rejected).toEqual([]);
+  });
+});
+
+describe('known bugs: a request field of the wrong JSON type', () => {
+  const WORKSPACE: SerializedWorkspace = { containers: [], links: [] };
+
+  const expectRejected = async (path: string, body: unknown) => {
+    const res = await post(path, body);
+    expect(res.status).toBe(400);
+    expect(typeof ((await res.json()) as { error?: unknown }).error).toBe('string');
+  };
+
+  test.fails('is a 400 with the route\'s JSON error, not a crash', async () => {
+    for (const name of [42, true, {}, ['cat eats']]) {
+      await expectRejected('/api/phrases', { name, kind: 'phrase', workspace: WORKSPACE });
+    }
+    for (const subject of ['CAT', 5]) {
+      await expectRejected('/api/translate', { plan: { subject } });
+    }
+    expect(db.prepare('SELECT COUNT(*) AS n FROM saved_phrases').get()).toEqual({ n: 0 });
+  });
+});
+
+describe('known bugs: API errors sent as an HTML page', () => {
+  afterEach(() => {
+    vi.mocked(translate).mockReset();
+  });
+
+  const expectJsonError = async (res: Response, statuses: number[]) => {
+    expect(statuses).toContain(res.status);
+    expect(res.headers.get('content-type')).toMatch(/^application\/json/);
+    const text = await res.text();
+    expect(typeof (JSON.parse(text) as { error?: unknown }).error).toBe('string');
+    // No stack frame ("at handler (/path/index.ts:321:28)") reaches the client.
+    expect(text).not.toMatch(/:\d+:\d+\)/);
+  };
+
+  test.fails('answers an unexpected error, malformed JSON and an unrouted method with a JSON error', async () => {
+    vi.mocked(translate).mockImplementationOnce(() => {
+      throw new Error('boom');
+    });
+    await expectJsonError(await post('/api/translate', { plan: { subject: { concept: 'CAT' } } }), [500]);
+
+    for (const path of ['/api/translate', '/api/phrases']) {
+      const res = await fetch(`${BASE}${path}`, {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: '{"name": ',
+      });
+      await expectJsonError(res, [400]);
+    }
+
+    await expectJsonError(await fetch(`${BASE}/api/phrases/some-id`, { method: 'PUT' }), [404, 405]);
+    await expectJsonError(await fetch(`${BASE}/api/concepts`, { method: 'POST' }), [404, 405]);
   });
 });

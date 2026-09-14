@@ -3,6 +3,10 @@
 A work brief. Every item below was found by running the engine against the real seeded corpus
 and reviewing its output for linguistic correctness. Each one is already pinned by a test.
 
+A134–A136 are the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
+not in the grammar. They were found while adding the backend's unit tests, and are pinned in
+`packages/backend/src/index.test.ts`.
+
 The individual defects now live one-per-file under the three subdirectories:
 
 - **[`A-must-fix/`](A-must-fix/)** — confirmed bugs (`known bugs: …` blocks). Fix these.
@@ -42,10 +46,10 @@ They live in `describe` blocks named either:
   comment. **Do not "fix" these without a product decision.** → **Part B** (`B-can-fix/`). They are
   recorded only so the correct target is written down.
 
-**This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`
-appears in one of the subdirectories (16 of them, as of this writing).** If you add or move a
-`test.fails`, add or update the matching file. Classification (A vs B) follows the `describe` block
-name, not the code comment.
+**This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/` and
+`packages/backend/src/` appears in one of the subdirectories (19 of them, as of this writing).** If
+you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
+`describe` block name, not the code comment.
 
 Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** section below.
 
@@ -62,6 +66,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A131 | [A131-know-with-a-noun-object.md](A-must-fix/A131-know-with-a-noun-object.md) |
 | A132 | [A132-japanese-state-verb-main-clause.md](A-must-fix/A132-japanese-state-verb-main-clause.md) |
 | A133 | [A133-article-on-a-language-name.md](A-must-fix/A133-article-on-a-language-name.md) |
+| A134 | [A134-translate-unseeded-concept.md](A-must-fix/A134-translate-unseeded-concept.md) (backend API) |
+| A135 | [A135-request-field-wrong-json-type.md](A-must-fix/A135-request-field-wrong-json-type.md) (backend API) |
+| A136 | [A136-api-errors-as-html.md](A-must-fix/A136-api-errors-as-html.md) (backend API) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
