@@ -147,8 +147,8 @@ describe('WordMap', () => {
 
     fireEvent.click(screen.getByRole('button', { name: 'switch language', hidden: true }));
 
-    // A word without an Italian label keeps its English one, and a complement the catalog does
-    // not name yet keeps its static English label.
+    // A word without an Italian label keeps its English one, and so does a complement whose name the
+    // bundle leaves out: its catalog entry's English fallback.
     expect(labels()).toEqual([
       'nave',
       'caravella',
@@ -253,33 +253,46 @@ describe('WordMap', () => {
     it('start with every relation shown', () => {
       renderMap();
 
-      expect(isOn('is a')).toBe(true);
-      expect(isOn('complements')).toBe(true);
+      expect(isOn('Hypernyms')).toBe(true);
+      expect(isOn('Complements')).toBe(true);
+    });
+
+    it('are named in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      renderMap({
+        strings: {
+          'wordMap.relation.isA': { de: 'Hyperonyme' },
+          'wordMap.relation.complements': { de: 'Ergänzungen' },
+        },
+      });
+
+      expect(isOn('Hyperonyme')).toBe(true);
+      expect(isOn('Ergänzungen')).toBe(true);
     });
 
     it('hide a relation, and the words only it connected, then bring them back', () => {
       renderMap();
 
-      fireEvent.click(chip('is a'));
+      fireEvent.click(chip('Hypernyms'));
 
-      expect(isOn('is a')).toBe(false);
+      expect(isOn('Hypernyms')).toBe(false);
       expect(labels()).toEqual(['cut', 'sleep', 'Instrumental', 'Locative']);
       expect(connectors()).toHaveLength(3);
       expect(caption()).toHaveTextContent(
         /^4 nodes · 3 relationships · 4 unconnected hidden words$/,
       );
 
-      fireEvent.click(chip('is a'));
+      fireEvent.click(chip('Hypernyms'));
 
-      expect(isOn('is a')).toBe(true);
+      expect(isOn('Hypernyms')).toBe(true);
       expect(connectors()).toHaveLength(5);
     });
 
     it('say there is nothing to draw once every relation is off', () => {
       renderMap();
 
-      fireEvent.click(chip('is a'));
-      fireEvent.click(chip('complements'));
+      fireEvent.click(chip('Hypernyms'));
+      fireEvent.click(chip('Complements'));
 
       expect(drawing()).toBeNull();
       expect(
@@ -352,7 +365,7 @@ describe('WordMap', () => {
       fireEvent.pointerEnter(node('cut'));
       expect(opacity('sleep')).toBe('0.15');
 
-      fireEvent.click(chip('is a'));
+      fireEvent.click(chip('Hypernyms'));
 
       expect(labels().map(opacity)).toEqual(['1', '1', '1', '1']);
     });

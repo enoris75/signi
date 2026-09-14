@@ -1,7 +1,8 @@
 import React from "react";
 import { Box, Popover, Tooltip, type SxProps, type Theme } from "@mui/material";
+import AddIcon from "@mui/icons-material/Add";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
-import { DEGREE_LABELS, MODIFIER_RELATION_LABELS, type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { DEGREE_LABELS, type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   BoxComplementType,
   ConceptSelectOpts,
@@ -174,7 +175,7 @@ const DEGREE_MARKS: Record<Degree, string> = {
 };
 
 // The footer chip that picks the adjective modifying a noun-modifier itself ("semantic
-// *phrase* creator"). Empty → a muted "+ adj" affordance; filled → the adjective's label
+// *phrase* creator"). Empty → a muted add icon; filled → the adjective's label
 // (click to reopen the picker, "clear" to remove). The picker is the shared adjective
 // typeahead docked in a popover anchored to the chip.
 function ModifierAdjectiveChip({
@@ -194,8 +195,8 @@ function ModifierAdjectiveChip({
       <Tooltip
         title={
           adjective
-            ? `Adjective on modifier: ${word(adjective)} — click to change`
-            : "Add an adjective describing this modifier"
+            ? `${t("modifier.adjective")}: ${word(adjective)} — click to change`
+            : t("modifier.addAdjective")
         }
       >
         <Box
@@ -212,7 +213,7 @@ function ModifierAdjectiveChip({
             fontStyle: adjective ? "italic" : "normal",
           }}
         >
-          {adjective ? word(adjective) : "+ adj"}
+          {adjective ? word(adjective) : <AddIcon sx={{ fontSize: "0.7rem", display: "block" }} />}
         </Box>
       </Tooltip>
       <Popover
@@ -336,7 +337,7 @@ export function SlotNode({
         justifyContent: "center",
       }}
     >
-      <Tooltip title={`Relation: ${MODIFIER_RELATION_LABELS[relation]} — click to change`}>
+      <Tooltip title={`${t("modifier.relation")}: ${t(`modifier.relation.${relation}.gloss`)} — click to change`}>
         <Box
           component="span"
           onPointerDown={(e) => e.stopPropagation()}
@@ -346,7 +347,7 @@ export function SlotNode({
           }}
           sx={FOOTER_CHIP_SX}
         >
-          {relation}
+          {t(`modifier.relation.${relation}`)}
         </Box>
       </Tooltip>
       <Tooltip
@@ -385,7 +386,7 @@ export function SlotNode({
   // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
   // On a disc it is a small round chip on the rim, marked with a sign rather than a word.
   const degreeChip = isRealAdjective ? (
-    <Tooltip title={`Degree: ${DEGREE_LABELS[degree]} — click to change`}>
+    <Tooltip title={`${t("modifier.degree")}: ${DEGREE_LABELS[degree]} — click to change`}>
       <Box
         component="span"
         data-testid={`degree-${slot.key}`}

@@ -524,7 +524,7 @@ describe('PhraseBuilder', () => {
       expect(wordsPanel().activeSlot).toBe('locative');
       pickOption('HOUSE');
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove Locative' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove the locative' }));
 
       expect(lastEdit({ verb: WALK, locative: HOUSE, locativeSpecifier: 'under' })).toEqual({
         verb: WALK,
@@ -536,7 +536,7 @@ describe('PhraseBuilder', () => {
     it('keeps the focus when the complement removed was not the one in hand', () => {
       renderPeriod({ subject: CAT, verb: WALK, locative: HOUSE });
 
-      fireEvent.click(screen.getByRole('button', { name: 'Remove Locative' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Remove the locative' }));
 
       expect(boxes()).not.toContain('locative');
       expect(wordsPanel().activeSlot).toBe('subject');
@@ -633,13 +633,13 @@ describe('PhraseBuilder', () => {
     it('cycles a noun modifier’s relation and number, and sets the adjective describing it', () => {
       const { lastEdit } = renderPeriod({ subject: CAT, subjectAdjective: SAIL, verb: SLEEP });
 
-      fireEvent.click(screen.getByLabelText(/^Relation:/));
+      fireEvent.click(screen.getByLabelText(/^Relationship:/));
       expect(lastEdit({})).toEqual({ modifierRelations: { subjectAdjective: 'purpose' } });
 
       fireEvent.click(screen.getByLabelText(/^Number: .* — click to change$/));
       expect(lastEdit({})).toEqual({ modifierNumbers: { subjectAdjective: 'plural' } });
 
-      fireEvent.click(screen.getByLabelText('Add an adjective describing this modifier'));
+      fireEvent.click(screen.getByLabelText('Add an adjective that describes this modifier'));
       pickOption('BIG');
       expect(lastEdit({})).toEqual({ modifierAdjectives: { subjectAdjective: BIG } });
     });

@@ -70,6 +70,86 @@ test.describe('interface language', () => {
     await expect(loadDialog.getByText(name)).toHaveCount(0);
   });
 
+  // A linked period's badge and controls name the clause it is (B21), as the tradition names it.
+  test('names the clauses of linked periods, and their controls, in the UI language', async ({ app }) => {
+    await app.buildClauseIn(0, 'DOG', 'RUN');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'CAT', 'EAT');
+    await app.linkCondition(0, 1);
+    // The badge leads the period's caption, before its hint.
+    await expect(app.period(0).getByText(/^Main clause·/)).toBeVisible();
+
+    await app.setUiLanguage('it');
+
+    await expect(app.period(0).getByText(/^Proposizione principale·/)).toBeVisible();
+    await expect(app.period(1).getByText(/^Proposizione condizionale·/)).toBeVisible();
+    await expect(app.period(0).getByRole('button', { name: 'Rimuovi la condizione', exact: true })).toBeVisible();
+    await expect(
+      app.period(1).getByRole('button', { name: 'Questo periodo è una proposizione condizionale', exact: true }),
+    ).toBeVisible();
+    await expect(app.period(0).getByTestId('satellite-subjectConjunct')).toHaveAttribute(
+      'aria-label',
+      'Coordinazione: Aggiungi un congiunto',
+    );
+  });
+
+  // The verb's feature controls (B22): German names a tense with a noun of its own.
+  test('names the tense, polarity and modal controls in the UI language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.cycle('verbTense');
+    await expect(page.getByTestId('box-verbTense')).toContainText('Past');
+
+    await app.setUiLanguage('de');
+
+    await expect(page.getByTestId('box-verbTense')).toContainText('Präteritum');
+    await expect(app.satellite('verbTense')).toHaveAttribute('aria-label', 'Das Tempus verstecken');
+    await expect(app.satellite('verbNegative')).toHaveAttribute('aria-label', 'Polarität: Positiv');
+    await expect(app.satellite('verbModal')).toHaveAttribute('aria-label', 'Das Modalverb zeigen');
+    await app.satellite('verbModal').click();
+    await expect(page.getByTestId('box-verbModal').locator('input')).toHaveAttribute(
+      'placeholder',
+      'ein Modalverb tippen…',
+    );
+  });
+
+  // Every complement has a name of its own now (B23), and so do the controls on its ring.
+  test('names every complement, the verb phrase and the word map filters in the UI language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'RUN');
+    await app.revealAndPick('locative', 'HOUSE');
+    await expect(page.getByRole('button', { name: 'Remove the locative', exact: true })).toBeVisible();
+
+    await app.setUiLanguage('es');
+
+    await expect(
+      page.getByRole('button', { name: 'Quitar el complemento circunstancial de lugar', exact: true }),
+    ).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Compactar el sintagma verbal', exact: true })).toBeVisible();
+
+    await page.getByRole('button', { name: 'Palabras', exact: true }).click();
+    await page.getByRole('button', { name: 'Mostrar el mapa de palabras' }).click();
+    const map = page.getByRole('dialog');
+    await expect(map.getByRole('button', { name: 'Hiperónimos', exact: true })).toBeVisible();
+    await expect(map.getByRole('button', { name: 'Complementos', exact: true })).toBeVisible();
+  });
+
+  // A noun used as a modifier carries chips of its own (B24).
+  test('names the chips of a noun used as a modifier in the UI language', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.satellite('subjectAdjective').click();
+    const box = page.getByTestId('box-subjectAdjective');
+    await box.getByRole('button', { name: 'Noun', exact: true }).click();
+    await box.locator('input').fill('book');
+    await page.locator('[data-testid="typeahead-option"][data-concept="BOOK"]').click();
+    await expect(page.getByLabel('Relationship: Feature or means — click to change')).toHaveText('feature');
+
+    await app.setUiLanguage('fr');
+
+    await expect(page.getByLabel('Relation: Caractéristique ou moyen — click to change')).toHaveText(
+      'caractéristique',
+    );
+    await expect(page.getByLabel('Ajouter un adjectif qui décrit ce modificateur')).toBeVisible();
+  });
+
   test('leaves the translations themselves alone — every language is always shown', async ({
     app,
   }) => {

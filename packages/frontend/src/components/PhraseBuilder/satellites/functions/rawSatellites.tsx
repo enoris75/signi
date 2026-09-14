@@ -11,10 +11,7 @@ import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import {
-  ASPECT_LABELS,
-  COMPLEMENT_LABELS,
   DETERMINER_COMPLEMENT_TYPES,
-  TENSE_LABELS,
   defaultDefiniteness,
   type Concept,
   type Definiteness,
@@ -143,7 +140,7 @@ export function rawSatellites(
     {
       key: "subjectRelative",
       parent: "subject",
-      label: "Relative clause",
+      label: t("satellite.relative"),
       icon: <AccountTreeIcon sx={iconSx} />,
       // A relative clause attaches only to a noun head (pronoun subjects render without
       // one). It is now a cross-container link; `hasValue` (is-a-link-source) is supplied
@@ -166,48 +163,51 @@ export function rawSatellites(
     {
       key: "subjectConjunct",
       parent: "subject",
-      label: "Coordination",
+      label: t("satellite.coordination"),
       icon: <CallSplitIcon sx={iconSx} />,
       // Anything that can head a subject can be coordinated with another — nouns ("the cat and
       // the dog") and pronouns alike ("you and I"). Clicking adds a conjunct rather than
       // revealing a box, so this control is a direct action, not a reveal (see buildSatelliteIcons).
       available: Boolean(selection.subject),
       hasValue: conjunctCount("subject") > 0,
+      valueLabel: t(conjunctCount("subject") > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
     },
     {
       key: "verbNegative",
       parent: "verb",
-      label: "Polarity",
+      label: t("satellite.polarity"),
       icon: <RemoveCircleOutlineIcon sx={iconSx} />,
       available: true,
       hasValue: Boolean(selection.verbNegative),
       alwaysSet: true,
       directToggle: true,
-      valueLabel: selection.verbNegative ? "Negative" : "Positive",
+      valueLabel: t(`polarity.value.${selection.verbNegative ? "negative" : "positive"}`),
     },
     {
       key: "verbTense",
       parent: "verb",
-      label: "Tense",
+      label: t("satellite.tense"),
+      labelKey: "satellite.tense",
       icon: <AccessTimeIcon sx={iconSx} />,
       // An imperative is tenseless (present command), so the control is withdrawn under it.
       available: !finiteSlotTaken,
       // Non-default (solid) once the tense is anything but the implicit present.
       hasValue: Boolean(selection.verbTense) && selection.verbTense !== "present",
       alwaysSet: true,
-      valueLabel: TENSE_LABELS[selection.verbTense ?? "present"],
+      valueLabel: t(`tense.value.${selection.verbTense ?? "present"}`),
     },
     {
       key: "verbAspect",
       parent: "verb",
-      label: "Aspect",
+      label: t("satellite.aspect"),
+      labelKey: "satellite.aspect",
       icon: <TimelapseIcon sx={iconSx} />,
       // An imperative forces neutral aspect, so the control is withdrawn under it.
       available: !finiteSlotTaken,
       // Non-default (solid) once the aspect is anything but the implicit neutral.
       hasValue: Boolean(selection.verbAspect) && selection.verbAspect !== "neutral",
       alwaysSet: true,
-      valueLabel: ASPECT_LABELS[selection.verbAspect ?? "neutral"],
+      valueLabel: t(`aspect.value.${selection.verbAspect ?? "neutral"}`),
     },
     {
       // Modals chain like the adjectives: the verb box carries the control for the
@@ -215,7 +215,8 @@ export function rawSatellites(
       // ("voglio" opens the control that reveals "poter", which governs "andare").
       key: "verbModal",
       parent: "verb",
-      label: "Modal",
+      label: t("slot.modal"),
+      labelKey: "slot.modal",
       icon: <GavelIcon sx={iconSx} />,
       // A modal fills the same finite/mood slot as the command, so it's withdrawn under it.
       available: !finiteSlotTaken,
@@ -225,7 +226,8 @@ export function rawSatellites(
     {
       key: "verbModal2",
       parent: "verbModal",
-      label: "Modal 2",
+      label: t("slot.modal"),
+      labelKey: "slot.modal",
       icon: <GavelIcon sx={iconSx} />,
       available: !finiteSlotTaken && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModal2),
@@ -236,7 +238,8 @@ export function rawSatellites(
     {
       key: "verbModalAdverb",
       parent: "verbModal",
-      label: "Modal Adverb",
+      label: t("slot.adverb"),
+      labelKey: "slot.adverb",
       icon: <TuneIcon sx={iconSx} />,
       available: !finiteSlotTaken && Boolean(selection.verbModal),
       hasValue: Boolean(selection.verbModalAdverb),
@@ -245,7 +248,8 @@ export function rawSatellites(
     {
       key: "verbModal2Adverb",
       parent: "verbModal2",
-      label: "Modal 2 Adverb",
+      label: t("slot.adverb"),
+      labelKey: "slot.adverb",
       icon: <TuneIcon sx={iconSx} />,
       available: !finiteSlotTaken && Boolean(selection.verbModal2),
       hasValue: Boolean(selection.verbModal2Adverb),
@@ -355,7 +359,7 @@ export function rawSatellites(
     {
       key: "directObjectRelative",
       parent: "directObject",
-      label: "Relative clause",
+      label: t("satellite.relative"),
       icon: <AccountTreeIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: false,
@@ -372,10 +376,11 @@ export function rawSatellites(
     {
       key: "directObjectConjunct",
       parent: "directObject",
-      label: "Coordination",
+      label: t("satellite.coordination"),
       icon: <CallSplitIcon sx={iconSx} />,
       available: Boolean(selection.directObject),
       hasValue: conjunctCount("directObject") > 0,
+      valueLabel: t(conjunctCount("directObject") > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
     },
     // The instrumental has no box on this canvas: its noun phrase lives in a period container
     // of its own, and this control on the verb-phrase dotted ring is the link to it (started,
@@ -417,9 +422,8 @@ export function rawSatellites(
         {
           key: type,
           parent: "verb",
-          // A complement whose name is seeded shows it in the UI language ("complemento di
-          // mezzo"); the rest still read their static English label.
-          label: labelKey ? t(labelKey) : COMPLEMENT_LABELS[type],
+          // The complement's name in the UI language ("complemento di termine").
+          label: t(labelKey),
           labelKey,
           icon: complementIcons[type],
           available: supportedComplements.includes(type),
@@ -511,7 +515,7 @@ export function rawSatellites(
         {
           key: `${type}Relative`,
           parent: type,
-          label: "Relative clause",
+          label: t("satellite.relative"),
           icon: <AccountTreeIcon sx={iconSx} />,
           available: concept?.role === "noun",
           hasValue: false,
@@ -535,13 +539,14 @@ export function rawSatellites(
         {
           key: `${type}Conjunct`,
           parent: type,
-          label: "Coordination",
+          label: t("satellite.coordination"),
           icon: <CallSplitIcon sx={iconSx} />,
           // Only the adposition-free complement coordinates today — the predicative subject
           // complement ("seems happy or tired", "becomes a legend and an icon"). See
           // COORDINABLE_NOUN_KEYS for why the prepositional ones are held back.
           available: COORDINABLE_NOUN_KEYS.includes(type) && Boolean(concept),
           hasValue: conjunctCount(type) > 0,
+          valueLabel: t(conjunctCount(type) > 0 ? "action.addAnotherConjunct" : "action.addConjunct"),
         },
       ];
     }),

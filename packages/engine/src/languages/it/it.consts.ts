@@ -29,10 +29,10 @@ export const SPECIAL_START = /^(s[^aeiou]|z|ps|gn|x|y)/i;
 // GREAT, the gloss degree word, is the same "grande" as BIG and precedes like it ("di grande
 // dimensione"). HIGH ("alto") stays after the noun: it is not a BAGS adjective ("la torre alta").
 // The ordinals join them: an ordinal precedes its noun in Italian ("il primo padre", "la
-// seconda volta"), unlike the qualifying adjectives that follow it.
+// seconda volta"), unlike the qualifying adjectives that follow it. So does OTHER ("un altro gatto").
 export const PRENOMINAL = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD',
+  'FIRST', 'SECOND', 'THIRD', 'OTHER',
 ]);
 
 // The quel- counterpart of each definite article form (see `quelloForm`).

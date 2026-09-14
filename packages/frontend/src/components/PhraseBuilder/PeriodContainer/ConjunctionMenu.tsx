@@ -1,4 +1,5 @@
 import { Menu, MenuItem, Typography } from "@mui/material";
+import { useUiString } from "../../../i18n/useUiString.ts";
 import type {
   COORD_CONJUNCTION_OPTIONS,
   CoordConjunction,
@@ -21,6 +22,7 @@ export function ConjunctionMenu({
   onSelect,
   onClose,
 }: ConjunctionMenuProps) {
+  const t = useUiString();
   return (
     <Menu
       anchorEl={anchorEl}
@@ -38,7 +40,7 @@ export function ConjunctionMenu({
             component="span"
             sx={{ ml: 1, color: "text.disabled", fontSize: "0.72rem" }}
           >
-            {o.hint}
+            {t(o.hintKey)}
           </Typography>
         </MenuItem>
       ))}

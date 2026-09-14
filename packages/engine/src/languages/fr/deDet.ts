@@ -15,7 +15,9 @@ export function deDet(forms: Record<string, string>, plural: boolean, lead: stri
   // like one: "à cause de l'Afrique", not the mass-noun drop "d'Afrique".
   if (def === 'definite' || forms['proper'] === '1') return dePrep(forms, plural, lead);
   const det = artFor(forms, plural, lead);
-  const drops = det === 'des' || (forms['uncountable'] === '1' && (def === 'indefinite' || def === 'some'));
+  const drops =
+    (def === 'indefinite' && (plural || forms['uncountable'] === '1')) ||
+    (forms['uncountable'] === '1' && def === 'some');
   if (!det || drops) return elidesBefore(forms, lead) ? "d'" : 'de';
   return VOWEL_START.test(det) ? `d'${det}` : `de ${det}`;
 }

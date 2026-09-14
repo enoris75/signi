@@ -45,3 +45,56 @@ Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
 `satellites/functions/rawSatellites.test.tsx`, `phraseRender.test.tsx`; `Present` / `Past` / `Future` / `Progressive` →
 `VerbPhraseBuilder.test.tsx`, `satellites/functions/rawSatellites.test.tsx`; `Polarity` → `Boxes.test.tsx`; `Modal` →
 `verb.spec.ts`, `imperative.spec.ts`, `modal-adverb.spec.ts`, `tidy.spec.ts` and five unit suites.
+
+## Done
+
+**2026-09-14.** Seeded the nouns in [nouns.ts](../../../packages/backend/src/concepts/nouns.ts)
+(*The verb's features*) and the adjectives in
+[adjectives.ts](../../../packages/backend/src/concepts/adjectives.ts) (*Aspects and polarity*).
+
+| concept | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| TENSE | tense | tempo (m) | temps (m) | Tempus (n) | tiempo (m) | 時制 | tempo (m) |
+| PRESENT_TENSE (isA TENSE) | present | presente | présent | Präsens | presente | 現在 | presente |
+| PAST_TENSE (isA TENSE) | past | passato | passé | Präteritum | pasado | 過去 | passado |
+| FUTURE_TENSE (isA TENSE) | future | futuro | futur | Futur | futuro | 未来 | futuro |
+| ASPECT | aspect | aspetto (m) | aspect (m) | Aspekt (m) | aspecto (m) | アスペクト | aspecto (m) |
+| NEUTRAL | neutral | neutrale | neutre | neutral | neutral | 中立の | neutro |
+| PROGRESSIVE | progressive | progressivo | progressif | progressiv | progresivo | 進行の | progressivo |
+| PROSPECTIVE | prospective | prospettivo | prospectif | prospektiv | prospectivo | 将然の | prospectivo |
+| RESULTATIVE | resultative | risultativo | résultatif | resultativ | resultativo | 結果の | resultativo |
+| POLARITY | polarity | polarità (f) | polarité (f) | Polarität (f) | polaridad (f) | 極性 | polaridade (f) |
+| POSITIVE | positive | positivo | positif | positiv | positivo | 肯定の | positivo |
+| MODAL (isA VERB) | modal | verbo servile | verbe modal | Modalverb | verbo modal | 法助動詞 | verbo modal |
+
+| key | en | it | de | ja |
+|---|---|---|---|---|
+| `satellite.tense` | Tense | Tempo | Tempus | 時制 |
+| `tense.value.present / past / future` | Present / Past / Future | Presente / Passato / Futuro | Präsens / Präteritum / Futur | 現在 / 過去 / 未来 |
+| `satellite.aspect` | Aspect | Aspetto | Aspekt | アスペクト |
+| `aspect.value.neutral … resultative` | Neutral / Progressive / Prospective / Resultative | Neutrale / Progressivo / Prospettivo / Risultativo | Neutral / Progressiv / Prospektiv / Resultativ | 中立 / 進行 / 将然 / 結果 |
+| `satellite.polarity` | Polarity | Polarità | Polarität | 極性 |
+| `polarity.value.positive / negative` | Positive / Negative | Positiva / Negativa | Positiv / Negativ | 肯定 / 否定 |
+| `slot.modal` | Modal | Verbo servile | Modalverb | 法助動詞 |
+| `slot.modal.placeholder` | type a modal | digita un verbo servile | ein Modalverb tippen | 法助動詞を入力 |
+
+Changes against the plan:
+- **The tenses are nouns, not adjectives** (PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE), like
+  `number.value.*`. The value box shows a tense on its own, and German names tenses with nouns no
+  adjective gives: *Präsens*, *Präteritum* (the simple past the engine renders), *Futur*. The aspects and
+  polarities are adjectives, as planned.
+- **TENSE and ASPECT got no suffix**, since no everyday sense is seeded. ASPECT's Japanese is アスペクト,
+  because 相 alone reads as the everyday あい.
+- **The A15 families grew:** `action.clear.modal`, `action.show/hide.modal`, `.tense`, `.aspect`. Polarity
+  is a direct toggle with no reveal, so it has no family member. Its tooltip is `satellite.polarity` and
+  its value.
+- **Both modals and both modal adverbs share one name** (`slot.modal`, `slot.adverb`), and their satellites
+  now carry `labelKey`. [modal-adverb.spec.ts](../../../e2e/modal-adverb.spec.ts) finds the controls by
+  test id, since the verb's adverb and a modal's are both "Show the adverb".
+- `TENSE_LABELS` and `ASPECT_LABELS` are deleted from `@signi/shared`.
+
+Pinned by [nounPhrase.test.ts](../../../packages/engine/test/nounPhrase.test.ts) (*grammar nouns: …*),
+[adjectives.test.ts](../../../packages/engine/test/adjectives.test.ts),
+[uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the tense, aspect, polarity and
+modal controls*), the frontend tests `Boxes`, `rawSatellites` and `ModalTypeahead`, and
+[language.spec.ts](../../../e2e/language.spec.ts), which cycles the tense and opens the modal picker in German.

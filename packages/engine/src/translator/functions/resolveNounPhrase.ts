@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { PLURAL_DETERMINERS } from '../translator.consts.js';
+import { OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { applyNounGender } from './applyNounGender.js';
 import { resolve } from './resolve.js';
@@ -55,7 +55,11 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // so each engine reads it off forms. Some quantifiers are inherently plural ("many
     // boys", "all boys"), so they force the plural surface — but only when the noun has
     // one (mass nouns like "water" stay singular: "some water").
-    const definiteness = np.definiteness ?? 'definite';
+    const picked = np.definiteness ?? 'definite';
+    const definiteness =
+      picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && np.adjectives?.includes('OTHER')
+        ? 'bare'
+        : picked;
     // Mass nouns ("water") never pluralise, so quantifiers keep them singular ("much water").
     const forcesPlural = PLURAL_DETERMINERS.has(definiteness) && head.forms['uncountable'] !== '1';
     const num = forcesPlural ? 'plural' : (np.number ?? 'singular');

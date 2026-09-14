@@ -134,12 +134,12 @@ describe('periodLabel', () => {
     ['a command', { imperative: mood(true) }, 'Command'],
     ['an infinitive', { infinitive: mood(true) }, 'Infinitive phrase'],
     ['a main clause', cond({ hasCondition: true }), 'Main clause'],
-    ['an IF clause', cond({ isIfClause: true }), 'If clause'],
+    ['an IF clause', cond({ isIfClause: true }), 'Conditional clause'],
     ['a first clause', coord({ hasCoordination: true, conjunction: 'and' }), 'First clause'],
     [
       'a coordinated clause, by its conjunction',
       coord({ isCoordinated: true, conjunction: 'but' }),
-      'But clause',
+      'Coordinated clause (But)',
     ],
     [
       'a command that coordinates another, by its mood',
@@ -161,5 +161,9 @@ describe('periodLabel', () => {
     expect(periodLabel(inst({ isInstrument: true }), translated)).toBe('<slot.instrumental>');
     expect(periodLabel({ imperative: mood(true) }, translated)).toBe('<imperative.command>');
     expect(periodLabel({ infinitive: mood(true) }, translated)).toBe('<infinitive.phrase>');
+    expect(periodLabel(cond({ hasCondition: true }), translated)).toBe('<clause.main>');
+    expect(periodLabel(cond({ isIfClause: true }), translated)).toBe('<clause.conditional>');
+    expect(periodLabel(coord({ hasCoordination: true }), translated)).toBe('<clause.first>');
+    expect(periodLabel(coord({ isCoordinated: true }), translated)).toBe('<clause.coordinated>');
   });
 });

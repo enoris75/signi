@@ -144,6 +144,25 @@ describe('rawSatellites', () => {
       expect(parentOf('verbModal2Adverb')).toBe('verbModal2');
     });
 
+    it('names the verb’s controls by the catalog keys their tooltips and titles read', () => {
+      const selection = { verb: GO, verbModal: WANT, verbModal2: CAN };
+      const named = (key: string) => {
+        const { label, labelKey } = satellite(selection, key);
+        return { label, labelKey };
+      };
+
+      expect(named('verbNegative')).toEqual({ label: 't(satellite.polarity)', labelKey: undefined });
+      expect(named('verbTense')).toEqual({ label: 't(satellite.tense)', labelKey: 'satellite.tense' });
+      expect(named('verbAspect')).toEqual({ label: 't(satellite.aspect)', labelKey: 'satellite.aspect' });
+      // Both modals, and both modals' adverbs, share one name: the numeral only told English labels apart.
+      for (const key of ['verbModal', 'verbModal2']) {
+        expect(named(key)).toEqual({ label: 't(slot.modal)', labelKey: 'slot.modal' });
+      }
+      for (const key of ['verbModalAdverb', 'verbModal2Adverb']) {
+        expect(named(key)).toEqual({ label: 't(slot.adverb)', labelKey: 'slot.adverb' });
+      }
+    });
+
     it.each(['imperative', 'infinitive'] as const)('withdraws tense, aspect and every modal in the %s mood', (mood) => {
       expect(offered({ [mood]: true, verb: SEE, verbModal: WANT, verbModal2: CAN }, 'verb')).toEqual([
         'verbNegative',
@@ -220,8 +239,9 @@ describe('rawSatellites', () => {
       ['predicative', 't(slot.predicative)'],
       ['manner', 't(slot.manner)'],
       ['instrumental', 't(slot.instrumental)'],
-      ['locative', 'Locative'],
-      ['terminus', 'Terminus'],
+      ['locative', 't(slot.locative)'],
+      ['terminus', 't(slot.terminus)'],
+      ['cause', 't(slot.cause)'],
     ])('names the %s toggle %s', (type, label) => {
       expect(satellite({ verb: GO }, type).label).toBe(label);
     });
@@ -443,49 +463,49 @@ describe('rawSatellites', () => {
         'an unmarked verb is positive',
         {},
         'verbNegative',
-        { hasValue: false, valueLabel: 'Positive' },
+        { hasValue: false, valueLabel: 't(polarity.value.positive)' },
       ],
       [
         'a negated verb is set',
         { verbNegative: true },
         'verbNegative',
-        { hasValue: true, valueLabel: 'Negative' },
+        { hasValue: true, valueLabel: 't(polarity.value.negative)' },
       ],
       [
         'an unmarked tense is present',
         {},
         'verbTense',
-        { hasValue: false, valueLabel: 'Present' },
+        { hasValue: false, valueLabel: 't(tense.value.present)' },
       ],
       [
         'the present tense is at the default',
         { verbTense: 'present' },
         'verbTense',
-        { hasValue: false, valueLabel: 'Present' },
+        { hasValue: false, valueLabel: 't(tense.value.present)' },
       ],
       [
         'the past tense is set',
         { verbTense: 'past' },
         'verbTense',
-        { hasValue: true, valueLabel: 'Past' },
+        { hasValue: true, valueLabel: 't(tense.value.past)' },
       ],
       [
         'an unmarked aspect is neutral',
         {},
         'verbAspect',
-        { hasValue: false, valueLabel: 'Neutral' },
+        { hasValue: false, valueLabel: 't(aspect.value.neutral)' },
       ],
       [
         'the neutral aspect is at the default',
         { verbAspect: 'neutral' },
         'verbAspect',
-        { hasValue: false, valueLabel: 'Neutral' },
+        { hasValue: false, valueLabel: 't(aspect.value.neutral)' },
       ],
       [
         'the progressive aspect is set',
         { verbAspect: 'progressive' },
         'verbAspect',
-        { hasValue: true, valueLabel: 'Progressive' },
+        { hasValue: true, valueLabel: 't(aspect.value.progressive)' },
       ],
     ])('%s', (_, selection, key, expected) => {
       expect(satellite(selection, key)).toMatchObject(expected);

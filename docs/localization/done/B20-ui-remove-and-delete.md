@@ -60,7 +60,7 @@ controls never share a screen.
 Changes against the plan:
 - **`action.remove.*` has two members, predicative and manner** (`REMOVABLE_PARTS`). The instrumental
   is a linked complement with no ring, so it has no remove button. The six other complements are
-  unseeded ([B23](../B-needs-seed/B23-ui-complement-and-group-names.md)), and their buttons keep
+  unseeded ([B23](B23-ui-complement-and-group-names.md), since done), and their buttons keep
   "Remove ${label}" in English. `removeTitle` in
   [canvasCommands.ts](../../../packages/frontend/src/components/PhraseBuilder/canvasCommands.ts)
   follows the other three families.
@@ -72,7 +72,7 @@ Changes against the plan:
   name, whose id is a `useId()` prefix plus the saved item's id.
 - The confirmations ("Remove this main clause and everything in it?") stay English. They are questions:
   [C10](../C-needs-engine/C10-ui-questions.md).
-- "Remove this possessor" ([B21](../B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md)) needs
+- "Remove this possessor" ([B21](B21-ui-clause-and-coordination-vocabulary.md)) needs
   nothing more now: REMOVE and POSSESSOR are both seeded.
 - Probing MOVE for B14 alongside this task turned up
   [A137](../../bugs/A-must-fix/A137-pronominal-verb-in-a-hypothetical.md), in French and Portuguese.

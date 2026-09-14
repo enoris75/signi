@@ -9,11 +9,12 @@ export const ES_DEGREE: Record<Degree, string> = {
 };
 
 /**
- * Concept IDs of the adjectives that precede their noun in Spanish. Only the ordinals do:
- * "el primer día", "la segunda vez". Every qualifying adjective (grande, feliz, rojo …)
- * follows the noun, which is why Spanish needs no "BAGS" set the way French and Italian do.
+ * Concept IDs of the adjectives that precede their noun in Spanish. Only the ordinals and OTHER
+ * do: "el primer día", "la segunda vez", "el otro gato". Every qualifying adjective (grande,
+ * feliz, rojo …) follows the noun, which is why Spanish needs no "BAGS" set the way French and
+ * Italian do.
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerundio / "a punto de"
 // + infinitivo. Past uses the imperfect ("estaba"), the aspectually-imperfective past.

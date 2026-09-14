@@ -383,6 +383,7 @@ export function PhraseBuilder({
     ringHost,
     resolve: coref.resolve,
     onTogglePossessor: handleTogglePossessor,
+    t,
   });
 
   const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
@@ -734,7 +735,7 @@ export function PhraseBuilder({
     removeRing:
       ringHost && onRemove
         ? {
-            title: ringHost.kind === "owner" ? "Remove this possessor" : "Remove this conjunct",
+            title: t(ringHost.kind === "owner" ? "action.removePossessor" : "action.removeConjunct"),
             onRemove,
           }
         : undefined,

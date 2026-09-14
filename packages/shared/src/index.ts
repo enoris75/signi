@@ -98,12 +98,6 @@ export type ModifierRelation = 'feature' | 'purpose' | 'material';
 /** Cycle order used by the UI relation chip. */
 export const MODIFIER_RELATIONS: ModifierRelation[] = ['feature', 'purpose', 'material'];
 
-export const MODIFIER_RELATION_LABELS: Record<ModifierRelation, string> = {
-  feature: 'Feature / means',
-  purpose: 'Purpose / use',
-  material: 'Material / content',
-};
-
 /**
  * Comparative degree of an adjective — an orthogonal grammatical feature layered on
  * the adjective word (distinct from *which* adjective is chosen). `positive` is the
@@ -134,12 +128,6 @@ export type Tense = 'present' | 'past' | 'future';
 
 export const TENSES: Tense[] = ['present', 'past', 'future'];
 
-export const TENSE_LABELS: Record<Tense, string> = {
-  present: 'Present',
-  past: 'Past',
-  future: 'Future',
-};
-
 /**
  * Grammatical aspect — the internal temporal shape of the event, layered orthogonally on
  * top of `tense` (each aspect is available in present / past / future). Realised
@@ -166,13 +154,6 @@ export const TENSE_LABELS: Record<Tense, string> = {
 export type Aspect = 'neutral' | 'progressive' | 'prospective' | 'resultative';
 
 export const ASPECTS: Aspect[] = ['neutral', 'progressive', 'prospective', 'resultative'];
-
-export const ASPECT_LABELS: Record<Aspect, string> = {
-  neutral: 'Neutral',
-  progressive: 'Progressive',
-  prospective: 'Prospective',
-  resultative: 'Resultative',
-};
 
 /**
  * Semantic complement types — the "varieties" of indirect object a verb can

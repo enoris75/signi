@@ -332,12 +332,12 @@ export function PhraseWorkspace({
           <AccountTreeIcon sx={{ fontSize: 18 }} />
           <Typography sx={{ fontSize: "0.8rem", flex: 1 }}>
             {pick.active && pick.kind === "conditional"
-              ? "Click the period that is the IF condition — in another phrase container."
+              ? t("pick.condition")
               : pick.active && pick.kind === "coordinative"
                 ? `Click the period to coordinate with “${COORD_CONJUNCTION_LABEL[pick.conjunction]}” — in another phrase container.`
                 : pick.active && pick.kind === "instrumental"
                   ? `Click the period holding the ${t("slot.instrumental").toLowerCase()} — a period with no verb, whose noun is what the action is done with.`
-                  : "Click the noun this clause describes — in another phrase container."}
+                  : t("pick.relativeHead")}
           </Typography>
           <Button
             size="small"

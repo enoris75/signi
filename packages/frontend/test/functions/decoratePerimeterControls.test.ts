@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import type { Concept } from '@signi/shared';
+import { UI_STRINGS, type Concept, type UiStringKey } from '@signi/shared';
 import type { SatelliteIcon } from '../../src/components/PhraseBuilder/Boxes.tsx';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { PerimeterEntry } from '../../src/components/PhraseBuilder/satellites/index.ts';
@@ -22,6 +22,9 @@ const icon = (key: string, extra: Partial<SatelliteIcon> = {}): SatelliteIcon =>
   ...extra,
 });
 
+// The catalog's English, as `t` reads it before the bundle arrives.
+const t = (key: UiStringKey) => UI_STRINGS[key].fallback;
+
 const conjunct = (which: string) => icon(`${which}Conjunct`, { valueLabel: 'Add a conjunct' });
 const possessor = (which: string) => icon(`${which}Possessor`, { active: true, valued: false });
 
@@ -40,6 +43,7 @@ const decorate = (
     ringHost: undefined,
     resolve: () => undefined,
     onTogglePossessor: () => {},
+    t,
     ...extra,
   });
 
@@ -114,6 +118,7 @@ describe('decoratePerimeterControls', () => {
       ringHost: { kind: 'conjunct', isLast: true },
       resolve: () => undefined,
       onTogglePossessor: () => {},
+      t,
     });
 
     expect(perimeterByNoun.subject).toBe(subject);

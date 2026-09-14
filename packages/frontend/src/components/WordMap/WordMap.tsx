@@ -13,8 +13,7 @@ import {
   useTheme,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { COMPLEMENT_LABELS } from "@signi/shared";
-import type { ComplementType, Concept, GrammaticalRole } from "@signi/shared";
+import type { ComplementType, Concept, GrammaticalRole, UiStringKey } from "@signi/shared";
 import { useConcepts } from "../../hooks/useConcepts.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -35,9 +34,10 @@ const LAYOUT_WIDTH = 1400;
 const LAYOUT_HEIGHT = 900;
 const PADDING = 60;
 
-const RELATION_LABEL: Record<RelationKind, string> = {
-  isA: "is a",
-  complements: "complements",
+// Each filter chip names what its edges point at: a word's hypernyms, a verb's complements.
+const RELATION_LABEL_KEY: Record<RelationKind, UiStringKey> = {
+  isA: "wordMap.relation.isA",
+  complements: "wordMap.relation.complements",
 };
 
 const NODE_HEIGHT = 22;
@@ -99,10 +99,7 @@ export function WordMap({ open, onClose }: Props) {
   const counted = (n: number, key: "wordMap.nodes" | "wordMap.relationships" | "wordMap.hidden") =>
     `${n} ${t(`${key}.${n === 1 ? "singular" : "plural"}` as const)}`;
 
-  const complementLabel = (type: ComplementType) => {
-    const key = COMPLEMENT_LABEL_KEYS[type];
-    return key ? t(key) : COMPLEMENT_LABELS[type];
-  };
+  const complementLabel = (type: ComplementType) => t(COMPLEMENT_LABEL_KEYS[type]);
 
   // Laying out ~150 nodes takes a few milliseconds, but it is pure and depends only on the corpus
   // and the relation filter — so it runs once per change rather than once per hover or pan.
@@ -177,7 +174,7 @@ export function WordMap({ open, onClose }: Props) {
           {RELATION_KINDS.map((relation) => (
             <Chip
               key={relation}
-              label={RELATION_LABEL[relation]}
+              label={t(RELATION_LABEL_KEY[relation])}
               size="small"
               variant={shown.has(relation) ? "filled" : "outlined"}
               color={shown.has(relation) ? "primary" : "default"}

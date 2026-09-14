@@ -50,6 +50,16 @@ describe('CoordinationButton', () => {
     else expect(button).toBeDisabled();
   });
 
+  it('says what it removes in the UI language, its conjunction in brackets', () => {
+    localStorage.setItem('signi:uiLanguage', 'fr');
+    renderWithProviders(
+      <CoordinationButton control={coordinativeControl({ hasCoordination: true, conjunction: 'and' })} />,
+      { strings: { 'action.removeCoordination': { fr: 'Retirer la coordination' } } },
+    );
+
+    expect(screen.getByRole('button', { name: 'Retirer la coordination (And)' })).toBeInTheDocument();
+  });
+
   it('asks for the conjunction first, offering only those this period may start with', () => {
     renderButton(coordinativeControl({ conjunctions: coordConjunctionOptions(true) }));
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();

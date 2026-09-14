@@ -57,7 +57,7 @@ Seed MOVE (verb, intransitive, "to change position"), then author the glosses th
 | verb | gloss (en) | plan | note |
 |---|---|---|---|
 | RUN | to move fast | `infinitiveGloss('MOVE', { modifier: 'FAST' })` | QUICK is an adjective; the adverb is FAST. Probed: it *muoversi velocemente*, fr *se déplacer vite*, es *moverse rápido*, ja 速く移動する |
-| GO | to move from a place to another place | `source` PLACE + `direction` PLACE with OTHER | OTHER is not seeded ([B21](../B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md)). Without it the gloss reads "from a place to a place". When OTHER lands, check en *another* (not "an other") and es / pt *a otro lugar* (no article). "to move to a place" is the fallback |
+| GO | to move from a place to another place | `source` PLACE + `direction` PLACE with OTHER | OTHER is seeded ([B21](../done/B21-ui-clause-and-coordination-vocabulary.md)) and renders en *another*, it *un altro*, es / pt *otro* / *outro* with no article. Re-probe the whole gloss once MOVE lands. "to move to a place" is the fallback |
 | COME | to move toward the speaker | — | No composable deixis ("toward the speaker", "here"). Likely stays literal, like the C05 genera |
 | JUMP | to move into the air | `direction` AIR | AIR is not seeded. The engine's direction adposition is "to" / *a* / *zu* / へ, which gives "to move to the air"; probe that before seeding AIR |
 | COLLAPSE | to move downward suddenly | two adverbs, DOWN and SUDDENLY | `GlossParts.modifier` takes one adverb. Neither word is seeded (B27 seeds UP / DOWN) |

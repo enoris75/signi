@@ -489,10 +489,29 @@ describe('SlotNode', () => {
       renderNode('subjectAdjective', { selection: MODIFIER });
 
       const chip = (name: string) => screen.getByLabelText(name);
-      expect(chip('Relation: Feature / means — click to change')).toHaveTextContent('feature');
+      expect(chip('Relationship: Feature or means — click to change')).toHaveTextContent('feature');
       expect(chip('Number: Singular — click to change')).toHaveTextContent('SG');
-      expect(chip('Add an adjective describing this modifier')).toHaveTextContent('+ adj');
+      const add = chip('Add an adjective that describes this modifier');
+      expect(add).toHaveTextContent('');
+      expect(within(add).getByTestId('AddIcon')).toBeInTheDocument();
       expect(screen.queryByText('±')).not.toBeInTheDocument();
+    });
+
+    it('names its chips in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      const { ctx } = context({ selection: { ...MODIFIER, modifierRelations: { subjectAdjective: 'purpose' } } });
+      renderWithProviders(<SlotNode slot={slot('subjectAdjective')} ctx={ctx} />, {
+        concepts: CONCEPTS,
+        strings: {
+          'modifier.relation': { it: 'Relazione' },
+          'modifier.relation.purpose': { it: 'scopo' },
+          'modifier.relation.purpose.gloss': { it: 'Scopo o uso' },
+          'modifier.addAdjective': { it: 'Aggiungi un aggettivo che descrive questo modificatore' },
+        },
+      });
+
+      expect(screen.getByLabelText('Relazione: Scopo o uso — click to change')).toHaveTextContent('scopo');
+      expect(screen.getByLabelText('Aggiungi un aggettivo che descrive questo modificatore')).toBeInTheDocument();
     });
 
     it('shows the relation, number and adjective chosen for its own slot', () => {
@@ -506,9 +525,9 @@ describe('SlotNode', () => {
       });
 
       const chip = (name: string) => screen.getByLabelText(name);
-      expect(chip('Relation: Material / content — click to change')).toHaveTextContent('material');
+      expect(chip('Relationship: Material or content — click to change')).toHaveTextContent('material');
       expect(chip('Number: Plural — click to change')).toHaveTextContent('PL');
-      const adjective = chip('Adjective on modifier: semantic — click to change');
+      const adjective = chip("The modifier's adjective: semantic — click to change");
       expect(adjective).toHaveTextContent('semantic');
       expect(adjective).toHaveStyle({ fontStyle: 'italic' });
     });
@@ -523,9 +542,9 @@ describe('SlotNode', () => {
         },
       });
 
-      expect(screen.getByLabelText(/^Relation:/)).toHaveTextContent('feature');
+      expect(screen.getByLabelText(/^Relationship:/)).toHaveTextContent('feature');
       expect(screen.getByLabelText(/^Number: .* — click to change$/)).toHaveTextContent('SG');
-      expect(screen.getByLabelText(/describing this modifier/)).toHaveTextContent('+ adj');
+      expect(screen.getByLabelText(/describes this modifier/)).toHaveTextContent('');
     });
 
     it('cycles its relation and number for its own slot', () => {
@@ -549,9 +568,13 @@ describe('SlotNode', () => {
         { concepts: CONCEPTS },
       );
 
-      for (const chip of ['feature', 'SG', '+ adj']) {
-        fireEvent.pointerDown(screen.getByText(chip));
-        fireEvent.click(screen.getByText(chip));
+      for (const chip of [
+        screen.getByText('feature'),
+        screen.getByText('SG'),
+        screen.getByLabelText('Add an adjective that describes this modifier'),
+      ]) {
+        fireEvent.pointerDown(chip);
+        fireEvent.click(chip);
       }
 
       expect(startDrag).not.toHaveBeenCalled();
@@ -561,7 +584,7 @@ describe('SlotNode', () => {
     it('picks the modifier’s adjective from a picker docked under the chip', async () => {
       const { ctx } = renderNode('subjectAdjective', { selection: MODIFIER });
 
-      fireEvent.click(screen.getByText('+ adj'));
+      fireEvent.click(screen.getByLabelText('Add an adjective that describes this modifier'));
       expect(screen.queryByText('clear')).not.toBeInTheDocument();
       fireEvent.click(option('SEMANTIC'));
 

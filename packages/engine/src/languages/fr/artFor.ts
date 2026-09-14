@@ -36,7 +36,9 @@ export function artFor(forms: Record<string, string>, plural: boolean, lead: str
   }
   switch (definiteness) {
     case 'bare':       return '';
-    case 'indefinite': return indefArticle(forms, plural);
+    // Written French drops the plural "des" to "de" before an adjective that precedes the noun:
+    // "d'autres chats", "de grands chats". The noun leading means no adjective stands in between.
+    case 'indefinite': return plural && lead !== (forms['plural'] ?? forms['base']) ? de : indefArticle(forms, plural);
     case 'this':
     case 'that':       return demArticle(forms, plural, lead);
     case 'some':       return 'quelques';

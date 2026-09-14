@@ -1,3 +1,4 @@
+import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { NounAddress, NounKey, PhraseSelection } from "../interfaces.ts";
 import { POSSESSOR_REF_KEY } from "../interfaces.ts";
 import { NOUN_KEYS } from "../slots.ts";
@@ -24,6 +25,7 @@ export function decoratePerimeterControls({
   ringHost,
   resolve,
   onTogglePossessor,
+  t,
 }: {
   perimeterByNoun: PerimeterByNoun;
   selection: PhraseSelection;
@@ -32,6 +34,7 @@ export function decoratePerimeterControls({
   // Resolves the noun a possessor points to (see CorefPickContext).
   resolve: CorefPick["resolve"];
   onTogglePossessor: (which: NounKey) => void;
+  t: UiStringLookup;
 }): PerimeterByNoun {
   const next: PerimeterByNoun = {};
   for (const which of Object.keys(perimeterByNoun) as NounKey[])
@@ -41,7 +44,7 @@ export function decoratePerimeterControls({
   const extend = next.subject?.conjunct;
   if (ringHost && extend) {
     if (ringHost.kind === "conjunct" && ringHost.isLast)
-      next.subject!.conjunct = { ...extend, isSet: true, valueLabel: "Add another conjunct" };
+      next.subject!.conjunct = { ...extend, isSet: true, valueLabel: t("action.addAnotherConjunct") };
     else delete next.subject!.conjunct;
   }
 

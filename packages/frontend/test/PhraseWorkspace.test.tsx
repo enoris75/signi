@@ -368,7 +368,7 @@ describe('PhraseWorkspace', () => {
       expect(periodProps('A').binding!.pickActive).toBe(true);
       expect(periodProps('B').binding!.pickActive).toBe(true);
       expect(banner()).toHaveTextContent(
-        'Click the noun this clause describes — in another phrase container.',
+        'Click the noun that this clause describes in another period container.',
       );
 
       fireEvent.click(screen.getByRole('button', { name: 'Cancel' }));
@@ -382,8 +382,17 @@ describe('PhraseWorkspace', () => {
       act(() => periodProps('A').binding!.conditional.onStart());
 
       expect(banner()).toHaveTextContent(
-        'Click the period that is the IF condition — in another phrase container.',
+        'Click the period that is the condition in another period container.',
       );
+    });
+
+    it('prompts for the condition in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'ja');
+      renderWorkspace({ strings: { 'pick.condition': { ja: '文の別の容器で条件である文をクリック。' } } });
+
+      act(() => periodProps('A').binding!.conditional.onStart());
+
+      expect(banner()).toHaveTextContent('文の別の容器で条件である文をクリック。');
     });
 
     it('prompts for the second clause of a coordination, naming its conjunction', () => {

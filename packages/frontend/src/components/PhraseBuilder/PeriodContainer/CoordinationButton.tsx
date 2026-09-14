@@ -27,13 +27,15 @@ export function CoordinationButton({ control }: CoordinationButtonProps) {
   const conjunction = control.conjunction
     ? COORD_CONJUNCTION_LABEL[control.conjunction]
     : "";
+  // The conjunction in brackets is a function word the catalog has no entry for yet, and picking this
+  // period "as" the coordinated clause needs a complement the engine lacks: both stay English.
   const title =
     face === "droppable"
       ? "Use this period as the coordinated clause"
       : face === "source"
-        ? `Remove the coordination (${conjunction})`
+        ? `${t("action.removeCoordination")} (${conjunction})`
         : face === "target"
-          ? `This period is a coordinated clause (${conjunction})`
+          ? `${t("period.isCoordinated")} (${conjunction})`
           : t("action.coordinatePeriod");
 
   return (

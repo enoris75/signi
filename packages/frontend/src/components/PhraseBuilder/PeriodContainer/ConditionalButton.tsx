@@ -1,17 +1,8 @@
 import AltRouteIcon from "@mui/icons-material/AltRoute";
+import { useUiString } from "../../../i18n/useUiString.ts";
 import { BorderControlButton } from "./ControlButton.tsx";
-import {
-  relationButtonState,
-  type RelationFace,
-} from "./functions/relationButtonState.ts";
+import { relationButtonState } from "./functions/relationButtonState.ts";
 import { ACCENT, type ConditionalControl } from "./PeriodContainer.types.ts";
-
-const TITLES: Record<RelationFace, string> = {
-  droppable: "Use this period as the IF condition",
-  source: "Remove the IF condition",
-  target: "This period is an IF clause",
-  free: "Add an IF condition (this becomes the main clause)",
-};
 
 export interface ConditionalButtonProps {
   control: ConditionalControl;
@@ -20,6 +11,7 @@ export interface ConditionalButtonProps {
 // The border control for a conditional: choose this period as the pending pick's IF clause; else
 // clear an attached condition; else start a new conditional, with this period as the main clause.
 export function ConditionalButton({ control }: ConditionalButtonProps) {
+  const t = useUiString();
   const { active, droppable, face, action } = relationButtonState({
     source: control.hasCondition,
     target: control.isIfClause,
@@ -27,9 +19,19 @@ export function ConditionalButton({ control }: ConditionalButtonProps) {
     pickActive: control.pickActive,
     canStart: control.canStart,
   });
+  // Picking this period "as" the condition needs a complement the engine lacks, so that face stays
+  // English. Starting a condition makes this period the main clause, which the control says in brackets.
+  const title =
+    face === "droppable"
+      ? "Use this period as the IF condition"
+      : face === "source"
+        ? t("action.removeCondition")
+        : face === "target"
+          ? t("period.isConditional")
+          : `${t("action.addCondition")} (${t("period.becomesMain")})`;
   return (
     <BorderControlButton
-      title={TITLES[face]}
+      title={title}
       icon={AltRouteIcon}
       accent={ACCENT.conditional}
       lit={active || droppable}

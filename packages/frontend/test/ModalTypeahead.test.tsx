@@ -33,6 +33,16 @@ describe('ModalTypeahead', () => {
     expect(listed()).toEqual(['MUST', 'CAN']);
   });
 
+  it('prompts in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    renderWithProviders(<ModalTypeahead onSelect={() => {}} />, {
+      concepts: { verb: [] },
+      strings: { 'slot.modal.placeholder': { it: 'digita un verbo servile' } },
+    });
+
+    expect(screen.getByPlaceholderText('digita un verbo servile…')).toBeInTheDocument();
+  });
+
   it('sizes the field to fit its prompt', () => {
     renderWithProviders(<ModalTypeahead onSelect={() => {}} />, { concepts: { verb: [] } });
 

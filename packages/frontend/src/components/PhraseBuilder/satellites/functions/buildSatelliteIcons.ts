@@ -98,7 +98,7 @@ export function buildSatelliteIcons({
         active: false,
         isSet: sat.hasValue,
         valued: true,
-        valueLabel: sat.hasValue ? "Add another conjunct" : "Add a conjunct",
+        valueLabel: sat.valueLabel,
         onToggle: () => onAddConjunct(conjunctNoun),
       };
       continue;

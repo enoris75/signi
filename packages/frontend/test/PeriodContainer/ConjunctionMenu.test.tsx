@@ -1,25 +1,28 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { fireEvent, screen, within } from '@testing-library/react';
 import { ConjunctionMenu } from '../../src/components/PhraseBuilder/PeriodContainer/ConjunctionMenu.tsx';
 import {
   COORD_CONJUNCTION_OPTIONS,
   coordConjunctionOptions,
 } from '../../src/components/PhraseBuilder/interfaces.ts';
+import { renderWithProviders, type Seed } from '../render.tsx';
 
 function renderMenu({
   open = true,
   options = COORD_CONJUNCTION_OPTIONS,
-}: { open?: boolean; options?: typeof COORD_CONJUNCTION_OPTIONS } = {}) {
+  seed,
+}: { open?: boolean; options?: typeof COORD_CONJUNCTION_OPTIONS; seed?: Seed } = {}) {
   const onSelect = vi.fn();
   const onClose = vi.fn();
   const anchor = document.body.appendChild(document.createElement('button'));
-  render(
+  renderWithProviders(
     <ConjunctionMenu
       anchorEl={open ? anchor : null}
       options={options}
       onSelect={onSelect}
       onClose={onClose}
     />,
+    seed,
   );
   return { onSelect, onClose };
 }
@@ -43,6 +46,13 @@ describe('ConjunctionMenu', () => {
       'Thereforeconclusive',
       'Thentemporal',
     ]);
+  });
+
+  it('names each relation in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    renderMenu({ seed: { strings: { 'conjunction.kind.but': { it: 'avversativa' } } } });
+
+    expect(screen.getByRole('menuitem', { name: /^But/ })).toHaveTextContent('Butavversativa');
   });
 
   it('lists only the conjunctions it is given', () => {

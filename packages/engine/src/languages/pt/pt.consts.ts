@@ -30,11 +30,12 @@ export const IRREGULAR_ADJ: Record<string, [string, string, string, string]> = {
 };
 
 /**
- * Concept IDs of the adjectives that precede their noun in Portuguese. Only the ordinals do:
- * "o primeiro dia", "a segunda vez". Every qualifying adjective follows the noun (and unlike
+ * Concept IDs of the adjectives that precede their noun in Portuguese. Only the ordinals and
+ * OTHER do: "o primeiro dia", "a segunda vez", "o outro gato". Every qualifying adjective follows
+ * the noun (and unlike
  * Spanish, no ordinal apocopates — "o primeiro dia", never "*o primer dia").
  */
-export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD']);
+export const PRENOMINAL = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
 
 // "estar" — the auxiliary of the progressive and prospective: estar + gerúndio / "prestes a" +
 // infinitivo. Past uses the imperfect ("estava"). The gerund progressive is the Brazilian norm

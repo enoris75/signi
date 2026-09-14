@@ -109,6 +109,7 @@ export function roleGroups({
       : [
           {
             label: VERB_PHRASE,
+            labelKey: "slot.verbPhrase" as const,
             color: MUI_COLOR_HEX.secondary,
             mainKey: "verb",
             nodeKeys: [

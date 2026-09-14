@@ -35,7 +35,7 @@ describe('BorderControls', () => {
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual([
       'Toggle imperative (command)',
       'Toggle infinitive phrase (citation)',
-      'Add an IF condition (this becomes the main clause)',
+      'Add a condition (this period becomes the main clause)',
       'Coordinate this period',
     ]);
   });

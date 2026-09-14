@@ -17,6 +17,13 @@ describe('artFor', () => {
     expect(artFor({ ...MAISON, definiteness: 'that' }, false, 'maison')).toBe('cette');
   });
 
+  test('a plural indefinite drops des to de before an adjective that precedes the noun', () => {
+    expect(artFor({ ...CHAT, definiteness: 'indefinite' }, true, 'grands')).toBe('de');
+    expect(artFor({ ...CHAT, definiteness: 'indefinite' }, true, 'autres')).toBe("d'");
+    // The singular keeps its article whatever leads.
+    expect(artFor({ ...CHAT, definiteness: 'indefinite' }, false, 'autre')).toBe('un');
+  });
+
   test('the countable quantifiers', () => {
     expect(artFor({ ...CHAT, definiteness: 'some' }, true, 'chats')).toBe('quelques');
     expect(artFor({ ...CHAT, definiteness: 'many' }, true, 'chats')).toBe('beaucoup de');

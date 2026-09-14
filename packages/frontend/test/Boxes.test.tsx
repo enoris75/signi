@@ -3,13 +3,11 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { ReactElement } from 'react';
 import {
   ASPECTS,
-  ASPECT_LABELS,
   CAUSE_SENTIMENTS,
   CAUSE_SENTIMENT_LABELS,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
   TENSES,
-  TENSE_LABELS,
   type Concept,
   type Definiteness,
 } from '@signi/shared';
@@ -551,14 +549,24 @@ const MARKED_WASH = 'rgba(156, 39, 176, 0.08)';
 
 describe('TenseToggleBox', () => {
   it.each(TENSES)('shows %s under the Tense heading', (tense) => {
-    render(<TenseToggleBox value={tense} />);
+    renderWithProviders(<TenseToggleBox value={tense} />);
 
     expect(screen.getByText('Tense')).toBeInTheDocument();
-    expect(screen.getByText(TENSE_LABELS[tense])).toBeInTheDocument();
+    expect(screen.getByText(tense.replace(/^./, (c) => c.toUpperCase()))).toBeInTheDocument();
+  });
+
+  it('names the tense and its value in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'de');
+    renderWithProviders(<TenseToggleBox value="past" />, {
+      strings: { 'satellite.tense': { de: 'Tempus' }, 'tense.value.past': { de: 'Präteritum' } },
+    });
+
+    expect(screen.getByText('Tempus')).toBeInTheDocument();
+    expect(screen.getByText('Präteritum')).toBeInTheDocument();
   });
 
   it('styles only a marked tense as set, washed in the secondary colour', () => {
-    const { container, rerender } = render(<TenseToggleBox value="present" />);
+    const { container, rerender } = renderWithProviders(<TenseToggleBox value="present" />);
     const style = () => getComputedStyle(container.firstElementChild!);
     const unmarked = style().borderColor;
     expect(style().backgroundColor).not.toBe(MARKED_WASH);
@@ -572,14 +580,24 @@ describe('TenseToggleBox', () => {
 
 describe('AspectToggleBox', () => {
   it.each(ASPECTS)('shows %s under the Aspect heading', (aspect) => {
-    render(<AspectToggleBox value={aspect} />);
+    renderWithProviders(<AspectToggleBox value={aspect} />);
 
     expect(screen.getByText('Aspect')).toBeInTheDocument();
-    expect(screen.getByText(ASPECT_LABELS[aspect])).toBeInTheDocument();
+    expect(screen.getByText(aspect.replace(/^./, (c) => c.toUpperCase()))).toBeInTheDocument();
+  });
+
+  it('names the aspect and its value in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    renderWithProviders(<AspectToggleBox value="progressive" />, {
+      strings: { 'satellite.aspect': { it: 'Aspetto' }, 'aspect.value.progressive': { it: 'Progressivo' } },
+    });
+
+    expect(screen.getByText('Aspetto')).toBeInTheDocument();
+    expect(screen.getByText('Progressivo')).toBeInTheDocument();
   });
 
   it('styles only a marked aspect as set, washed in the secondary colour', () => {
-    const { container, rerender } = render(<AspectToggleBox value="neutral" />);
+    const { container, rerender } = renderWithProviders(<AspectToggleBox value="neutral" />);
     const style = () => getComputedStyle(container.firstElementChild!);
     const unmarked = style().borderColor;
     expect(style().backgroundColor).not.toBe(MARKED_WASH);

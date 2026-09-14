@@ -1606,6 +1606,139 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The genus of the complement names: a phrase a verb takes to complete what it says. Suffixed like
+    // SUBJECT_GRAMMAR, because the plain word is anything that completes another thing ("a complement
+    // to the meal"), and only the grammar sense is seeded. German says Ergänzung, valency grammar's word.
+    id: 'COMPLEMENT_GRAMMAR',
+    role: 'noun',
+    description: 'a phrase that completes the meaning of a verb (grammar)',
+    emoji: '🧩',
+    synonym: 'grammar',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'complement', plural: 'complements', count: 'singular' },
+      it: { base: 'complemento', plural: 'complementi', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément', plural: 'compléments', gender: 'masc', count: 'singular' },
+      de: { base: 'Ergänzung', plural: 'Ergänzungen', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento', plural: 'complementos', gender: 'masc', count: 'singular' },
+      ja: { base: '補語', count: 'singular', reading: 'ほご' },
+      pt: { base: 'complemento', plural: 'complementos', gender: 'masc', count: 'singular' },
+    },
+  },
+  // The six complement names the canvas titles its boxes with, besides the three above. Like them,
+  // each is one noun per language, because each tradition names the relation its own way: Italian
+  // splits the place into four ("stato in luogo", "moto a / da / per luogo"), French, Spanish,
+  // Portuguese and German name it after the circumstance ("de lieu", "de lugar", "des Ortes"), and
+  // the recipient is an object in most of them (fr "complément d'objet second", es "complemento
+  // indirecto", de "Dativobjekt"). English keeps the names the builder has always used.
+  {
+    id: 'LOCATIVE',
+    role: 'noun',
+    description: 'the complement naming the place where something happens (grammar)',
+    emoji: '📍',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'locative', plural: 'locatives', count: 'singular' },
+      it: { base: 'complemento di stato in luogo', plural: 'complementi di stato in luogo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de lieu', plural: 'compléments circonstanciels de lieu', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung des Ortes', plural: 'adverbiale Bestimmungen des Ortes', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de lugar', plural: 'complementos circunstanciales de lugar', gender: 'masc', count: 'singular' },
+      ja: { base: '場所の副詞語句', count: 'singular', reading: 'ばしょのふくしごく' },
+      pt: { base: 'adjunto adverbial de lugar', plural: 'adjuntos adverbiais de lugar', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'DIRECTION',
+    role: 'noun',
+    description: 'the complement naming the place something moves towards (grammar)',
+    emoji: '➡️',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'direction', plural: 'directions', count: 'singular' },
+      it: { base: 'complemento di moto a luogo', plural: 'complementi di moto a luogo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de direction', plural: 'compléments circonstanciels de direction', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung der Richtung', plural: 'adverbiale Bestimmungen der Richtung', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de dirección', plural: 'complementos circunstanciales de dirección', gender: 'masc', count: 'singular' },
+      ja: { base: '方向の副詞語句', count: 'singular', reading: 'ほうこうのふくしごく' },
+      pt: { base: 'adjunto adverbial de direção', plural: 'adjuntos adverbiais de direção', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'SOURCE',
+    role: 'noun',
+    description: 'the complement naming the place something moves away from (grammar)',
+    emoji: '⬅️',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'source', plural: 'sources', count: 'singular' },
+      it: { base: 'complemento di moto da luogo', plural: 'complementi di moto da luogo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de provenance', plural: 'compléments circonstanciels de provenance', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung der Herkunft', plural: 'adverbiale Bestimmungen der Herkunft', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de procedencia', plural: 'complementos circunstanciales de procedencia', gender: 'masc', count: 'singular' },
+      ja: { base: '起点の副詞語句', count: 'singular', reading: 'きてんのふくしごく' },
+      pt: { base: 'adjunto adverbial de origem', plural: 'adjuntos adverbiais de origem', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'ROUTE',
+    role: 'noun',
+    description: 'the complement naming the place something moves through (grammar)',
+    emoji: '🛤️',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'route', plural: 'routes', count: 'singular' },
+      it: { base: 'complemento di moto per luogo', plural: 'complementi di moto per luogo', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de passage', plural: 'compléments circonstanciels de passage', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung des Weges', plural: 'adverbiale Bestimmungen des Weges', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de trayecto', plural: 'complementos circunstanciales de trayecto', gender: 'masc', count: 'singular' },
+      ja: { base: '経路の副詞語句', count: 'singular', reading: 'けいろのふくしごく' },
+      pt: { base: 'adjunto adverbial de percurso', plural: 'adjuntos adverbiais de percurso', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The grammar term, not the seeded CAUSE ("that which makes something else happen"): this is the
+    // complement that names one ("because of the dog").
+    id: 'CAUSE_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement naming the reason something happens (grammar)',
+    emoji: '❔',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'cause', plural: 'causes', count: 'singular' },
+      it: { base: 'complemento di causa', plural: 'complementi di causa', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément circonstanciel de cause', plural: 'compléments circonstanciels de cause', gender: 'masc', count: 'singular' },
+      de: { base: 'adverbiale Bestimmung des Grundes', plural: 'adverbiale Bestimmungen des Grundes', gender: 'fem', count: 'singular' },
+      es: { base: 'complemento circunstancial de causa', plural: 'complementos circunstanciales de causa', gender: 'masc', count: 'singular' },
+      ja: { base: '原因の副詞語句', count: 'singular', reading: 'げんいんのふくしごく' },
+      pt: { base: 'adjunto adverbial de causa', plural: 'adjuntos adverbiais de causa', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The recipient or goal of the action ("gives the book to the cat"). Italian names it after the
+    // goal ("complemento di termine"). The other traditions call it an object: the indirect one
+    // (es, pt, ja 間接目的語), the second one (fr) or the dative one (de).
+    id: 'TERMINUS',
+    role: 'noun',
+    description: 'the complement naming the recipient or goal of an action (grammar)',
+    emoji: '🎁',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'terminus', plural: 'termini', count: 'singular' },
+      it: { base: 'complemento di termine', plural: 'complementi di termine', gender: 'masc', count: 'singular' },
+      fr: { base: 'complément d\'objet second', plural: 'compléments d\'objet second', gender: 'masc', count: 'singular' },
+      de: { base: 'Dativobjekt', plural: 'Dativobjekte', gender: 'neut', count: 'singular' },
+      es: { base: 'complemento indirecto', plural: 'complementos indirectos', gender: 'masc', count: 'singular' },
+      ja: { base: '間接目的語', count: 'singular', reading: 'かんせつもくてきご' },
+      pt: { base: 'objeto indireto', plural: 'objetos indiretos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'NOUN',
     role: 'noun',
     description: 'a word naming a person, place or thing (grammar)',
@@ -1710,6 +1843,168 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'frase de infinitivo', plural: 'frases de infinitivo', gender: 'fem', count: 'singular' },
       ja: { base: '不定詞句', count: 'singular', reading: 'ふていしく' },
       pt: { base: 'frase infinitiva', plural: 'frases infinitivas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The verb with everything hanging off it: its modals, tense, aspect and adverb. It titles the
+    // verb's ring on the canvas. The Romance traditions say "sintagma" / "syntagme" for a phrase in
+    // this sense, where PHRASE is the everyday "frase"; German and Japanese compound it on the verb.
+    id: 'VERB_PHRASE',
+    role: 'noun',
+    description: 'a verb together with its objects and modifiers (grammar)',
+    emoji: '🧬',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'verb phrase', plural: 'verb phrases', count: 'singular' },
+      it: { base: 'sintagma verbale', plural: 'sintagmi verbali', gender: 'masc', count: 'singular' },
+      fr: { base: 'syntagme verbal', plural: 'syntagmes verbaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Verbalphrase', plural: 'Verbalphrasen', gender: 'fem', count: 'singular' },
+      es: { base: 'sintagma verbal', plural: 'sintagmas verbales', gender: 'masc', count: 'singular' },
+      ja: { base: '動詞句', count: 'singular', reading: 'どうしく' },
+      pt: { base: 'sintagma verbal', plural: 'sintagmas verbais', gender: 'masc', count: 'singular' },
+    },
+  },
+  // ── Clauses and their links ───────────────────────────────────────
+  // The words for how periods join: the clause a period is, the condition one period sets another,
+  // the coordination that joins two of equal rank and the conjunction that spells it, and the
+  // conjuncts a coordinated noun is made of. They name the period container's badges and controls.
+  {
+    // A unit with a verb of its own, as against the PERIOD_SENTENCE built of one or more of them.
+    // The Romance traditions call it a proposition (it "proposizione", fr "proposition", es
+    // "oración", pt "oração"); German says Satz, the word its compounds use (Hauptsatz, Relativsatz).
+    id: 'CLAUSE',
+    role: 'noun',
+    description: 'a unit of grammar with a verb of its own (grammar)',
+    emoji: '🧱',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'clause', plural: 'clauses', count: 'singular' },
+      it: { base: 'proposizione', plural: 'proposizioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'proposition', plural: 'propositions', gender: 'fem', count: 'singular' },
+      de: { base: 'Satz', plural: 'Sätze', gender: 'masc', count: 'singular' },
+      es: { base: 'oración', plural: 'oraciones', gender: 'fem', count: 'singular' },
+      ja: { base: '節', count: 'singular', reading: 'せつ' },
+      pt: { base: 'oração', plural: 'orações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // One noun per tradition name, like INSTRUMENTAL: German and Japanese compound it (Relativsatz,
+    // 関係節), which no CLAUSE + adjective would give.
+    id: 'RELATIVE_CLAUSE',
+    role: 'noun',
+    description: 'a clause that describes a noun (grammar)',
+    emoji: '🪝',
+    isA: 'CLAUSE',
+    forms: {
+      en: { base: 'relative clause', plural: 'relative clauses', count: 'singular' },
+      it: { base: 'proposizione relativa', plural: 'proposizioni relative', gender: 'fem', count: 'singular' },
+      fr: { base: 'proposition relative', plural: 'propositions relatives', gender: 'fem', count: 'singular' },
+      de: { base: 'Relativsatz', plural: 'Relativsätze', gender: 'masc', count: 'singular' },
+      es: { base: 'oración de relativo', plural: 'oraciones de relativo', gender: 'fem', count: 'singular' },
+      ja: { base: '関係節', count: 'singular', reading: 'かんけいせつ' },
+      pt: { base: 'oração relativa', plural: 'orações relativas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    id: 'CONDITION',
+    role: 'noun',
+    description: 'what must be true for something else to happen',
+    emoji: '🔀',
+    forms: {
+      en: { base: 'condition', plural: 'conditions', count: 'singular' },
+      it: { base: 'condizione', plural: 'condizioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'condition', plural: 'conditions', gender: 'fem', count: 'singular' },
+      de: { base: 'Bedingung', plural: 'Bedingungen', gender: 'fem', count: 'singular' },
+      es: { base: 'condición', plural: 'condiciones', gender: 'fem', count: 'singular' },
+      ja: { base: '条件', count: 'singular', reading: 'じょうけん' },
+      pt: { base: 'condição', plural: 'condições', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Joining clauses or phrases of equal rank ("and", "or", "but"), as against subordinating one to
+    // another. Japanese names it by the conjoining itself, 等位接続.
+    id: 'COORDINATION',
+    role: 'noun',
+    description: 'the joining of clauses or phrases of equal rank (grammar)',
+    emoji: '🔗',
+    forms: {
+      en: { base: 'coordination', plural: 'coordinations', count: 'singular' },
+      it: { base: 'coordinazione', plural: 'coordinazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'coordination', plural: 'coordinations', gender: 'fem', count: 'singular' },
+      de: { base: 'Koordination', plural: 'Koordinationen', gender: 'fem', count: 'singular' },
+      es: { base: 'coordinación', plural: 'coordinaciones', gender: 'fem', count: 'singular' },
+      ja: { base: '等位接続', count: 'singular', reading: 'とういせつぞく' },
+      pt: { base: 'coordenação', plural: 'coordenações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // One of the phrases a coordination joins ("Peter" and "Paul" in "Peter and Paul"). Italian,
+    // French and German borrow the linguists' word; Spanish and Portuguese have none, and say "the
+    // coordinated member".
+    id: 'CONJUNCT',
+    role: 'noun',
+    description: 'one of the phrases a coordination joins (grammar)',
+    emoji: '🧷',
+    forms: {
+      en: { base: 'conjunct', plural: 'conjuncts', count: 'singular' },
+      it: { base: 'congiunto', plural: 'congiunti', gender: 'masc', count: 'singular' },
+      fr: { base: 'conjoint', plural: 'conjoints', gender: 'masc', count: 'singular' },
+      de: { base: 'Konjunkt', plural: 'Konjunkte', gender: 'neut', count: 'singular' },
+      es: { base: 'miembro coordinado', plural: 'miembros coordinados', gender: 'masc', count: 'singular' },
+      ja: { base: '等位項', count: 'singular', reading: 'とういこう' },
+      pt: { base: 'membro coordenado', plural: 'membros coordenados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'CONJUNCTION',
+    role: 'noun',
+    description: 'a word that joins clauses or phrases — and, or, but (grammar)',
+    emoji: '➕',
+    isA: 'WORD',
+    forms: {
+      en: { base: 'conjunction', plural: 'conjunctions', count: 'singular' },
+      it: { base: 'congiunzione', plural: 'congiunzioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'conjonction', plural: 'conjonctions', gender: 'fem', count: 'singular' },
+      de: { base: 'Konjunktion', plural: 'Konjunktionen', gender: 'fem', count: 'singular' },
+      es: { base: 'conjunción', plural: 'conjunciones', gender: 'fem', count: 'singular' },
+      ja: { base: '接続詞', count: 'singular', reading: 'せつぞくし' },
+      pt: { base: 'conjunção', plural: 'conjunções', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A word that qualifies another, here an attributive noun ("*sail* boat"). It names that word's
+    // own controls on the canvas.
+    id: 'MODIFIER',
+    role: 'noun',
+    description: 'a word that qualifies another word (grammar)',
+    emoji: '🪄',
+    isA: 'WORD',
+    forms: {
+      en: { base: 'modifier', plural: 'modifiers', count: 'singular' },
+      it: { base: 'modificatore', plural: 'modificatori', gender: 'masc', count: 'singular' },
+      fr: { base: 'modificateur', plural: 'modificateurs', gender: 'masc', count: 'singular' },
+      de: { base: 'Modifikator', plural: 'Modifikatoren', gender: 'masc', count: 'singular' },
+      es: { base: 'modificador', plural: 'modificadores', gender: 'masc', count: 'singular' },
+      ja: { base: '修飾語', count: 'singular', reading: 'しゅうしょくご' },
+      pt: { base: 'modificador', plural: 'modificadores', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A word of broader meaning, which another word is a kind of (ANIMAL of CAT). It names the word
+    // map's "is a" relation.
+    id: 'HYPERNYM',
+    role: 'noun',
+    description: 'a word whose meaning includes that of another word (grammar)',
+    emoji: '🌳',
+    isA: 'WORD',
+    forms: {
+      en: { base: 'hypernym', plural: 'hypernyms', count: 'singular' },
+      it: { base: 'iperonimo', plural: 'iperonimi', gender: 'masc', count: 'singular' },
+      fr: { base: 'hyperonyme', plural: 'hyperonymes', gender: 'masc', count: 'singular' },
+      de: { base: 'Hyperonym', plural: 'Hyperonyme', gender: 'neut', count: 'singular' },
+      es: { base: 'hiperónimo', plural: 'hiperónimos', gender: 'masc', count: 'singular' },
+      ja: { base: '上位語', count: 'singular', reading: 'じょういご' },
+      pt: { base: 'hiperónimo', plural: 'hiperónimos', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -1990,6 +2285,151 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'género', plural: 'géneros', gender: 'masc', count: 'singular' },
     },
   },
+  // ── The verb's features ───────────────────────────────────────────
+  // What the verb phrase's controls set, each named as its grammar tradition does. The values of
+  // tense are nouns, like SINGULAR_GRAMMAR / PLURAL_GRAMMAR: the control shows a value standing
+  // alone, and German names the tenses with nouns (Präsens, Präteritum, Futur) that no adjective
+  // gives. The aspects and polarities have adjectives in every language, seeded in adjectives.ts.
+  {
+    // Grammatical time, not the TIME a clock tells. Italian, Spanish and Portuguese use the same word
+    // for both ("tempo", "tiempo"); German, Japanese and English do not.
+    id: 'TENSE',
+    role: 'noun',
+    description: 'the form of a verb that places an event in time (grammar)',
+    emoji: '⏳',
+    forms: {
+      en: { base: 'tense', plural: 'tenses', count: 'singular' },
+      it: { base: 'tempo', plural: 'tempi', gender: 'masc', count: 'singular' },
+      fr: { base: 'temps', plural: 'temps', gender: 'masc', count: 'singular' },
+      de: { base: 'Tempus', plural: 'Tempora', gender: 'neut', count: 'singular' },
+      es: { base: 'tiempo', plural: 'tiempos', gender: 'masc', count: 'singular' },
+      ja: { base: '時制', count: 'singular', reading: 'じせい' },
+      pt: { base: 'tempo', plural: 'tempos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'PRESENT_TENSE',
+    role: 'noun',
+    description: 'the tense of what is happening now (grammar)',
+    emoji: '⏺️',
+    synonym: 'grammar',
+    isA: 'TENSE',
+    forms: {
+      en: { base: 'present', plural: 'presents', count: 'singular' },
+      it: { base: 'presente', plural: 'presenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'présent', plural: 'présents', gender: 'masc', count: 'singular' },
+      de: { base: 'Präsens', plural: 'Präsentia', gender: 'neut', count: 'singular' },
+      es: { base: 'presente', plural: 'presentes', gender: 'masc', count: 'singular' },
+      ja: { base: '現在', count: 'singular', reading: 'げんざい' },
+      pt: { base: 'presente', plural: 'presentes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // German Präteritum, the simple past the engine renders ("der Kater aß"), not the Perfekt.
+    id: 'PAST_TENSE',
+    role: 'noun',
+    description: 'the tense of what has already happened (grammar)',
+    emoji: '⏮️',
+    synonym: 'grammar',
+    isA: 'TENSE',
+    forms: {
+      en: { base: 'past', plural: 'pasts', count: 'singular' },
+      it: { base: 'passato', plural: 'passati', gender: 'masc', count: 'singular' },
+      fr: { base: 'passé', plural: 'passés', gender: 'masc', count: 'singular' },
+      de: { base: 'Präteritum', plural: 'Präterita', gender: 'neut', count: 'singular' },
+      es: { base: 'pasado', plural: 'pasados', gender: 'masc', count: 'singular' },
+      ja: { base: '過去', count: 'singular', reading: 'かこ' },
+      pt: { base: 'passado', plural: 'passados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'FUTURE_TENSE',
+    role: 'noun',
+    description: 'the tense of what is yet to happen (grammar)',
+    emoji: '⏭️',
+    synonym: 'grammar',
+    isA: 'TENSE',
+    forms: {
+      en: { base: 'future', plural: 'futures', count: 'singular' },
+      it: { base: 'futuro', plural: 'futuri', gender: 'masc', count: 'singular' },
+      fr: { base: 'futur', plural: 'futurs', gender: 'masc', count: 'singular' },
+      de: { base: 'Futur', plural: 'Future', gender: 'neut', count: 'singular' },
+      es: { base: 'futuro', plural: 'futuros', gender: 'masc', count: 'singular' },
+      ja: { base: '未来', count: 'singular', reading: 'みらい' },
+      pt: { base: 'futuro', plural: 'futuros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Grammatical aspect, not how a thing looks. Japanese linguistics borrows アスペクト; the kanji 相
+    // alone would be read as the everyday あい.
+    id: 'ASPECT',
+    role: 'noun',
+    description: 'how a verb presents an event unfolding in time (grammar)',
+    emoji: '🎞️',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'aspect', plural: 'aspects', count: 'singular' },
+      it: { base: 'aspetto', plural: 'aspetti', gender: 'masc', count: 'singular' },
+      fr: { base: 'aspect', plural: 'aspects', gender: 'masc', count: 'singular' },
+      de: { base: 'Aspekt', plural: 'Aspekte', gender: 'masc', count: 'singular' },
+      es: { base: 'aspecto', plural: 'aspectos', gender: 'masc', count: 'singular' },
+      ja: { base: 'アスペクト', count: 'singular' },
+      pt: { base: 'aspecto', plural: 'aspectos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Whether a clause is affirmed or negated. Feminine in the Romance languages, which is what makes
+    // its values read "positiva / negativa".
+    id: 'POLARITY',
+    role: 'noun',
+    description: 'whether a clause is affirmed or negated (grammar)',
+    emoji: '☯️',
+    forms: {
+      en: { base: 'polarity', plural: 'polarities', count: 'singular' },
+      it: { base: 'polarità', plural: 'polarità', gender: 'fem', count: 'singular' },
+      fr: { base: 'polarité', plural: 'polarités', gender: 'fem', count: 'singular' },
+      de: { base: 'Polarität', plural: 'Polaritäten', gender: 'fem', count: 'singular' },
+      es: { base: 'polaridad', plural: 'polaridades', gender: 'fem', count: 'singular' },
+      ja: { base: '極性', count: 'singular', reading: 'きょくせい' },
+      pt: { base: 'polaridade', plural: 'polaridades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The degree of comparison of an adjective (more beautiful, most beautiful), not a unit of heat
+    // or a university title. German names it by the step of the comparison, Steigerungsstufe.
+    id: 'DEGREE_GRAMMAR',
+    role: 'noun',
+    description: 'the level of comparison an adjective expresses (grammar)',
+    emoji: '📶',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'degree', plural: 'degrees', count: 'singular' },
+      it: { base: 'grado', plural: 'gradi', gender: 'masc', count: 'singular' },
+      fr: { base: 'degré', plural: 'degrés', gender: 'masc', count: 'singular' },
+      de: { base: 'Steigerungsstufe', plural: 'Steigerungsstufen', gender: 'fem', count: 'singular' },
+      es: { base: 'grado', plural: 'grados', gender: 'masc', count: 'singular' },
+      ja: { base: '程度', count: 'singular', reading: 'ていど' },
+      pt: { base: 'grau', plural: 'graus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A modal verb (must, can, will). Italian school grammar calls these "verbi servili"; the others
+    // name them by their mood (fr "verbe modal", de "Modalverb", ja 法助動詞).
+    id: 'MODAL',
+    role: 'noun',
+    description: 'a verb that expresses necessity, ability or will (grammar)',
+    emoji: '🎚️',
+    isA: 'VERB',
+    forms: {
+      en: { base: 'modal', plural: 'modals', count: 'singular' },
+      it: { base: 'verbo servile', plural: 'verbi servili', gender: 'masc', count: 'singular' },
+      fr: { base: 'verbe modal', plural: 'verbes modaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Modalverb', plural: 'Modalverben', gender: 'neut', count: 'singular' },
+      es: { base: 'verbo modal', plural: 'verbos modales', gender: 'masc', count: 'singular' },
+      ja: { base: '法助動詞', count: 'singular', reading: 'ほうじょどうし' },
+      pt: { base: 'verbo modal', plural: 'verbos modais', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     id: 'COMMAND',
     role: 'noun',
@@ -2139,6 +2579,91 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'propiedad', gender: 'fem', count: 'singular' },
       ja: { base: '財産', count: 'singular', reading: 'ざいさん' },
       pt: { base: 'propriedade', gender: 'fem', count: 'singular' },
+    },
+  },
+
+  // ── What a modifier says of its head ──────────────────────────────
+  // The relations an attributive noun bears to the noun it modifies, named in pairs: a boat with a
+  // sail has it as a feature, or goes by it as a means; glasses for the sun have it as a purpose or
+  // a use; a ring of gold has it as its material or content (CONTENT is seeded above).
+  {
+    id: 'FEATURE',
+    role: 'noun',
+    description: 'a distinctive part or quality of something',
+    emoji: '✨',
+    forms: {
+      en: { base: 'feature', plural: 'features', count: 'singular' },
+      it: { base: 'caratteristica', plural: 'caratteristiche', gender: 'fem', count: 'singular' },
+      fr: { base: 'caractéristique', plural: 'caractéristiques', gender: 'fem', count: 'singular' },
+      de: { base: 'Merkmal', plural: 'Merkmale', gender: 'neut', count: 'singular' },
+      es: { base: 'característica', plural: 'características', gender: 'fem', count: 'singular' },
+      ja: { base: '特徴', count: 'singular', reading: 'とくちょう' },
+      pt: { base: 'característica', plural: 'características', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // That by which something is done. English "means" is the same in the plural.
+    id: 'MEANS',
+    role: 'noun',
+    description: 'that by which something is done',
+    emoji: '🛠️',
+    forms: {
+      en: { base: 'means', plural: 'means', count: 'singular' },
+      it: { base: 'mezzo', plural: 'mezzi', gender: 'masc', count: 'singular' },
+      fr: { base: 'moyen', plural: 'moyens', gender: 'masc', count: 'singular' },
+      de: { base: 'Mittel', plural: 'Mittel', gender: 'neut', count: 'singular' },
+      es: { base: 'medio', plural: 'medios', gender: 'masc', count: 'singular' },
+      ja: { base: '手段', count: 'singular', reading: 'しゅだん' },
+      pt: { base: 'meio', plural: 'meios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // What something is for. Spanish and Portuguese say "finalidad" / "finalidade", the word for the
+    // end a thing serves; "propósito" leans towards a person's intention.
+    id: 'PURPOSE',
+    role: 'noun',
+    description: 'what something is for',
+    emoji: '🎯',
+    forms: {
+      en: { base: 'purpose', plural: 'purposes', count: 'singular' },
+      it: { base: 'scopo', plural: 'scopi', gender: 'masc', count: 'singular' },
+      fr: { base: 'but', plural: 'buts', gender: 'masc', count: 'singular' },
+      de: { base: 'Zweck', plural: 'Zwecke', gender: 'masc', count: 'singular' },
+      es: { base: 'finalidad', plural: 'finalidades', gender: 'fem', count: 'singular' },
+      ja: { base: '目的', count: 'singular', reading: 'もくてき' },
+      pt: { base: 'finalidade', plural: 'finalidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The way a thing is used, a noun: suffixed because USE the verb is its own concept.
+    id: 'USE_NOUN',
+    role: 'noun',
+    description: 'the way something is used',
+    emoji: '🧰',
+    forms: {
+      en: { base: 'use', plural: 'uses', count: 'singular' },
+      it: { base: 'uso', plural: 'usi', gender: 'masc', count: 'singular' },
+      fr: { base: 'usage', plural: 'usages', gender: 'masc', count: 'singular' },
+      de: { base: 'Verwendung', plural: 'Verwendungen', gender: 'fem', count: 'singular' },
+      es: { base: 'uso', plural: 'usos', gender: 'masc', count: 'singular' },
+      ja: { base: '用途', count: 'singular', reading: 'ようと' },
+      pt: { base: 'uso', plural: 'usos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // What a thing is made of. French "matériau" (a material to build with), not "matériel" (equipment).
+    id: 'MATERIAL',
+    role: 'noun',
+    description: 'what something is made of',
+    emoji: '🧶',
+    forms: {
+      en: { base: 'material', plural: 'materials', count: 'singular' },
+      it: { base: 'materiale', plural: 'materiali', gender: 'masc', count: 'singular' },
+      fr: { base: 'matériau', plural: 'matériaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Material', plural: 'Materialien', gender: 'neut', count: 'singular' },
+      es: { base: 'material', plural: 'materiales', gender: 'masc', count: 'singular' },
+      ja: { base: '材料', count: 'singular', reading: 'ざいりょう' },
+      pt: { base: 'material', plural: 'materiais', gender: 'masc', count: 'singular' },
     },
   },
 

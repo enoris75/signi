@@ -258,12 +258,13 @@ export class Builder {
   }
 
   /**
-   * Make period `ifIndex` the IF condition of period `mainIndex`. Two clicks: the main clause's IF
-   * control starts the pick, then the condition period's own control (lit as a target) takes it.
+   * Make period `ifIndex` the IF condition of period `mainIndex`. Two clicks: the main clause's
+   * conditional control starts the pick, then the condition period's own control (lit as a target)
+   * takes it.
    */
   async linkCondition(mainIndex: number, ifIndex: number): Promise<void> {
     await this.period(mainIndex)
-      .getByRole('button', { name: 'Add an IF condition (this becomes the main clause)' })
+      .getByRole('button', { name: 'Add a condition (this period becomes the main clause)' })
       .click();
     await this.period(ifIndex)
       .getByRole('button', { name: 'Use this period as the IF condition' })

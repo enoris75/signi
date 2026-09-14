@@ -851,7 +851,7 @@ test.describe('tidy the period · edge cases', () => {
     }
     const before = await tidyAndCheck(app, ['Subject', 'Verb Phrase', 'Locative', 'Direction', 'Source', 'Cause']);
 
-    await page.getByRole('button', { name: 'Remove Source' }).click();
+    await page.getByRole('button', { name: 'Remove the source' }).click();
     await expect(app.groupBox('Source')).toHaveCount(0);
     const after = await tidyAndCheck(app, ['Subject', 'Verb Phrase', 'Locative', 'Direction', 'Cause']);
     expect(after.canvas.height).toBeLessThanOrEqual(before.canvas.height);
@@ -917,8 +917,8 @@ test.describe('controls on a crowded canvas', () => {
     await app.page.mouse.move(0, 0);
 
     const { controls } = await settledLayout(app.period(0));
-    const chrome = controls.filter((c) => /^(Collapse|Expand|Remove) Locative$/.test(c.name));
-    expect(chrome.map((c) => c.name)).toEqual(['Collapse Locative', 'Remove Locative']);
+    const chrome = controls.filter((c) => /^(Compact|Expand|Remove) the locative$/.test(c.name));
+    expect(chrome.map((c) => c.name)).toEqual(['Compact the locative', 'Remove the locative']);
     const covered = controls
       .filter((c) => c.toolbar)
       .flatMap((bar) =>

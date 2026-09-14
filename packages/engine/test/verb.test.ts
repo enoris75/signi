@@ -1454,3 +1454,64 @@ describe('known bugs: Japanese state verb in the main clause', () => {
     expect(say({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { directObject: np('FOOD') }) }, 'ja')).toMatch(/^もし猫が食べ物を食べたら、/);
   });
 });
+
+// A138. German ADD is "addieren", which adds numbers up ("zwei Zahlen addieren"). Putting a thing with
+// others is "hinzufügen", a separable verb: the particle goes to the end of a main clause ("fügt … hinzu")
+// and stays on the verb in the infinitive the instruction register cites ("eine Bedingung hinzufügen").
+// The engine has no separable verbs yet, so this is a corpus change and an engine one. The German
+// imperative row for ADD in imperative.test.ts ("addiere") moves with it.
+describe('known bugs: German ADD is the arithmetic verb', () => {
+  test.fails('German adds a thing with hinzufügen, its particle at the end of the clause', () => {
+    expect(say(clause(np('CAT'), 'ADD', { directObject: np('MOUSE', { definiteness: 'indefinite' }) }), 'de'))
+      .toBe('der Kater fügt eine Maus hinzu.');
+    expect(say(clause(np('CAT'), 'ADD', {
+      directObject: np('MOUSE', { definiteness: 'indefinite' }),
+      verbPhrase: { tense: 'past' },
+    }), 'de')).toBe('der Kater fügte eine Maus hinzu.');
+  });
+
+  test.fails('a German instruction cites hinzufügen whole', () => {
+    expect(say({
+      subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
+      verbPhrase: { verb: 'ADD' },
+      imperative: true,
+      imperativeRegister: 'instruction',
+      directObject: np('CONDITION', { definiteness: 'indefinite' }),
+    }, 'de')).toBe('eine Bedingung hinzufügen.');
+  });
+});
+
+// A139. One clicks ON a thing in five of the languages: it "cliccare su", fr "cliquer sur", de "klicken
+// auf" + accusative, es "clicar en", pt "clicar em". CLICK renders its object bare, as English and
+// Japanese (を) take it. The UI's own hints say it too: "clicca uno slot", "cliquer la période".
+describe('known bugs: CLICK takes its object with a preposition', () => {
+  test.fails('clicking on a thing', () => {
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON') }))).toEqual({
+      en: 'the cat clicks the button.',
+      it: 'il gatto clicca sul pulsante.',
+      fr: 'le chat clique sur le bouton.',
+      de: 'der Kater klickt auf die Taste.',
+      es: 'el gato clica en el botón.',
+      ja: '猫はボタンをクリックします。',
+      pt: 'o gato clica no botão.',
+    });
+  });
+
+  test.fails('an instruction to click on a thing', () => {
+    expect(sayAll({
+      subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
+      verbPhrase: { verb: 'CLICK' },
+      imperative: true,
+      imperativeRegister: 'instruction',
+      directObject: np('BUTTON'),
+    })).toEqual({
+      en: 'click the button.',
+      it: 'clicca sul pulsante.',
+      fr: 'cliquer sur le bouton.',
+      de: 'auf die Taste klicken.',
+      es: 'clicar en el botón.',
+      ja: 'ボタンをクリック。',
+      pt: 'clicar no botão.',
+    });
+  });
+});

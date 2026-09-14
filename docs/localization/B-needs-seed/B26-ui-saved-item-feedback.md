@@ -15,7 +15,7 @@ participle adjective for a status line, and a command for an instruction.
 | ADDED | adjective | put in with the others | "Period added." |
 | FAILED | adjective | not successful | "Import failed." |
 | IMPORT_NOUN | noun | the act of bringing data in from a file | IMPORT is seeded as the verb |
-| USE | verb, transitive | to employ for a purpose | |
+| USE | verb, transitive | to employ for a purpose | the noun "use" is seeded as USE_NOUN ([B24](../done/B24-ui-noun-modifier-chips.md)), so the verb takes the plain id |
 | ICON | noun | a small picture on a control | |
 | FILE | noun | a stored document on a computer | |
 | VALID | adjective | correctly formed | |

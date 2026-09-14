@@ -85,14 +85,14 @@ export function periodLabel(
   if (instrumental?.isInstrument) return t("slot.instrumental");
   if (imperative?.active) return t("imperative.command");
   if (infinitive?.active) return t("infinitive.phrase");
-  if (conditional?.hasCondition) return "Main clause";
-  if (conditional?.isIfClause) return "If clause";
-  if (coordinative?.hasCoordination) return "First clause";
+  if (conditional?.hasCondition) return t("clause.main");
+  if (conditional?.isIfClause) return t("clause.conditional");
+  if (coordinative?.hasCoordination) return t("clause.first");
+  // The conjunction is a function word the catalog has no entry for yet, so it stays English.
   if (coordinative?.isCoordinated) {
-    const conjunction = coordinative.conjunction
-      ? COORD_CONJUNCTION_LABEL[coordinative.conjunction]
-      : "";
-    return `${conjunction} clause`;
+    return coordinative.conjunction
+      ? `${t("clause.coordinated")} (${COORD_CONJUNCTION_LABEL[coordinative.conjunction]})`
+      : t("clause.coordinated");
   }
   return "";
 }

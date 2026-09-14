@@ -105,15 +105,20 @@ export const modalChainParent = (key: string): SlotKey | undefined => {
 };
 
 /**
- * The engine-rendered name of a complement, for the complements whose word is seeded. The box
- * titles itself with this in the current UI language and the satellite icon's tooltip reads it;
- * the static English `COMPLEMENT_LABELS` stays the fallback. The rest of the complements migrate
- * here as their grammar noun is seeded.
+ * The engine-rendered name of each complement. The box titles itself with this in the current UI
+ * language, and the satellite icon's tooltip and the word map read it. The static English
+ * `COMPLEMENT_LABELS` is only the ring's stable key (see COLLAPSIBLE_GROUPS).
  */
-export const COMPLEMENT_LABEL_KEYS: Partial<Record<ComplementType, UiStringKey>> = {
-  instrumental: "slot.instrumental",
+export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
   predicative: "slot.predicative",
+  terminus: "slot.terminus",
+  instrumental: "slot.instrumental",
   manner: "slot.manner",
+  locative: "slot.locative",
+  direction: "slot.direction",
+  source: "slot.source",
+  route: "slot.route",
+  cause: "slot.cause",
 };
 
 /**
@@ -170,6 +175,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "verbModal",
     label: "Modal",
+    labelKey: "slot.modal",
     required: false,
     roles: ["verb"],
     color: "secondary",
@@ -177,6 +183,7 @@ export const ALL_SLOTS: SlotConfig[] = [
   {
     key: "verbModal2",
     label: "Modal 2",
+    labelKey: "slot.modal",
     required: false,
     roles: ["verb"],
     color: "secondary",

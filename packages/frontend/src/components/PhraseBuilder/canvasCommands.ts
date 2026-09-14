@@ -28,6 +28,16 @@ const PART_BY_LABEL_KEY: Partial<Record<UiStringKey, CanvasPart>> = {
   "slot.manner": "manner",
   "slot.possessor": "possessor",
   "satellite.determiner": "determiner",
+  "slot.modal": "modal",
+  "satellite.tense": "tense",
+  "satellite.aspect": "aspect",
+  "slot.verbPhrase": "verbPhrase",
+  "slot.terminus": "terminus",
+  "slot.locative": "locative",
+  "slot.direction": "direction",
+  "slot.source": "source",
+  "slot.route": "route",
+  "slot.cause": "cause",
 };
 
 // The part `labelKey` names, if the control has a catalog family member for it.

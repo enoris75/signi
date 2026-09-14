@@ -24,8 +24,13 @@ export function nounPhrase(forms: Record<string, string>, adj?: string, mods?: s
   // the head keeping its own article. Otherwise the possessor replaces the article as a Saxon
   // prefix: "the cat's book", not "the cat's the book".
   if (possessor && isPostModified(possessor)) {
-    return `${determiner(forms, lead, superlative)}${a}${m}${word} of ${possessorPhrase(possessor)}`;
+    return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word} of ${possessorPhrase(possessor)}`;
   }
   if (possessor) return `${possessivePrefix(possessor)}${a}${m}${word}`;
-  return `${determiner(forms, lead, superlative)}${a}${m}${word}`;
+  return `${withDeterminer(determiner(forms, lead, superlative), a)}${m}${word}`;
+}
+
+// English writes "an" and a following "other" as one word: "another cat", not "an other cat".
+function withDeterminer(det: string, adj: string): string {
+  return det === 'an ' && /^other\b/.test(adj) ? `an${adj}` : `${det}${adj}`;
 }

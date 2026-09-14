@@ -743,18 +743,21 @@ describe('known bugs: degree (extended)', () => {
 // grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
-  ['ADULT', 'adult'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
+  ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
-  ['COLD', 'cold'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISTAL', 'distal'],
-  ['DOMESTIC', 'domestic'], ['FEMALE', 'female'], ['FIRST', 'first'], ['GOOD', 'good'],
+  ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
+  ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
+  ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EXPLICATIVE', 'explicative'], ['FEMALE', 'female'],
+  ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
-  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MALE', 'male'], ['MULTAL', 'multal'],
-  ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEW', 'new'], ['OLD', 'old'],
-  ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'], ['PROXIMAL', 'proximal'],
-  ['QUICK', 'quick'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
+  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MULTAL', 'multal'],
+  ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['OLD', 'old'],
+  ['OTHER', 'other'], ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'],
+  ['POSITIVE', 'positive'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],
+  ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
   ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
-  ['STRONG', 'strong'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
+  ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
   ['UNIVERSAL', 'universal'], ['WEAK', 'weak'], ['WHOLE', 'whole'], ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];
@@ -1503,5 +1506,103 @@ describe('known bugs: Japanese lowered degree on a の/た adjective', () => {
     expect(sayAll(clause(np('CAT', { adjectives: ['BIG'], adjectiveDegrees: ['less'] }), 'EAT')).ja).toBe('それほど大きくない猫は食べます。');
     expect(sayAll(clause(np('CAT', { adjectives: ['HAPPY'], adjectiveDegrees: ['least'] }), 'EAT')).ja).toBe('最も幸せではない猫は食べます。');
     expect(sayAll(clause(np('CAT', { adjectives: ['BROWN'] }), 'EAT')).ja).toBe('茶色の猫は食べます。');
+  });
+});
+
+// OTHER precedes its noun wherever an ordinal does, and says "another" in English. Spanish and
+// Portuguese do not put the indefinite article before it ("otro gato", never "*un otro gato"), and
+// written French turns the plural "des" into "d'" before it, as before any adjective that precedes
+// its noun ("d'autres chats").
+describe('OTHER', () => {
+  test('precedes the noun, and takes the place of the indefinite article in Spanish and Portuguese', () => {
+    expect(cat({ definiteness: 'indefinite', adjectives: ['OTHER'] })).toEqual({
+      en: 'another cat eats.',
+      it: 'un altro gatto mangia.',
+      fr: 'un autre chat mange.',
+      de: 'ein anderer Kater isst.',
+      es: 'otro gato come.',
+      ja: '別の猫は食べます。',
+      pt: 'outro gato come.',
+    });
+    expect(cat({ definiteness: 'indefinite', gender: 'fem', number: 'plural', adjectives: ['OTHER'] })).toEqual({
+      en: 'other cats eat.',
+      it: 'altre gatte mangiano.',
+      fr: "d'autres chattes mangent.",
+      de: 'andere Katzen essen.',
+      es: 'otras gatas comen.',
+      ja: '別の猫は食べます。',
+      pt: 'outras gatas comem.',
+    });
+  });
+
+  test('keeps the definite article, which elides before it', () => {
+    expect(cat({ gender: 'fem', adjectives: ['OTHER'] })).toEqual({
+      en: 'the other cat eats.',
+      it: "l'altra gatta mangia.",
+      fr: "l'autre chatte mange.",
+      de: 'die andere Katze isst.',
+      es: 'la otra gata come.',
+      ja: '別の猫は食べます。',
+      pt: 'a outra gata come.',
+    });
+  });
+
+  test('leaves a preposition without its article, and stays first before another adjective', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', adjectives: ['OTHER'] }) } },
+    }))).toEqual({
+      en: 'the cat eats in another house.',
+      it: "il gatto mangia in un'altra casa.",
+      fr: 'le chat mange dans une autre maison.',
+      de: 'der Kater isst in einem anderen Haus.',
+      es: 'el gato come en otra casa.',
+      ja: '猫は別の家で食べます。',
+      pt: 'o gato come em outra casa.',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      directObject: np('MOUSE', { definiteness: 'indefinite', adjectives: ['OTHER', 'BIG'] }),
+    }))).toEqual({
+      en: 'the cat eats another big mouse.',
+      it: 'il gatto mangia un altro grande topo.',
+      fr: 'le chat mange une autre grande souris.',
+      de: 'der Kater isst eine andere große Maus.',
+      es: 'el gato come otro ratón grande.',
+      ja: '猫は別の大きいネズミを食べます。',
+      pt: 'o gato come outro rato grande.',
+    });
+  });
+});
+
+describe('French: an adjective before a plural noun turns des into de', () => {
+  test('the indefinite plural, and the de a complement takes', () => {
+    expect(cat({ definiteness: 'indefinite', number: 'plural', adjectives: ['BIG'] }).fr).toBe('de grands chats mangent.');
+    expect(cat({ definiteness: 'indefinite', number: 'plural', adjectives: ['HAPPY'] }).fr).toBe('des chats heureux mangent.');
+  });
+});
+
+// The adjectives the builder names clauses, conjunction kinds, aspects and polarity with, on the noun
+// each describes. The Romance forms agree with it (CLAUSE, CONJUNCTION and POLARITY are feminine);
+// Japanese compounds the clause names on 節 (主節, 条件節, 等位節).
+describe('the grammar adjectives agree with the noun they name', () => {
+  const named = (noun: string, adjective: string) =>
+    sayAll({ subject: np(noun, { definiteness: 'indefinite', adjectives: [adjective] }) });
+
+  test.each<[string, string, Record<string, string>]>([
+    ['CLAUSE', 'MAIN', { en: 'a main clause.', it: 'una proposizione principale.', fr: 'une proposition principale.', de: 'ein übergeordneter Satz.', es: 'una oración principal.', ja: '主節。', pt: 'uma oração principal.' }],
+    ['CLAUSE', 'CONDITIONAL', { en: 'a conditional clause.', it: 'una proposizione condizionale.', fr: 'une proposition conditionnelle.', de: 'ein konditionaler Satz.', es: 'una oración condicional.', ja: '条件節。', pt: 'uma oração condicional.' }],
+    ['CLAUSE', 'COORDINATED', { en: 'a coordinated clause.', it: 'una proposizione coordinata.', fr: 'une proposition coordonnée.', de: 'ein beigeordneter Satz.', es: 'una oración coordinada.', ja: '等位節。', pt: 'uma oração coordenada.' }],
+    ['CONJUNCTION', 'COPULATIVE', { en: 'a copulative conjunction.', it: 'una congiunzione copulativa.', fr: 'une conjonction copulative.', de: 'eine kopulative Konjunktion.', es: 'una conjunción copulativa.', ja: '累加の接続詞。', pt: 'uma conjunção copulativa.' }],
+    ['CONJUNCTION', 'DISJUNCTIVE', { en: 'a disjunctive conjunction.', it: 'una congiunzione disgiuntiva.', fr: 'une conjonction disjonctive.', de: 'eine disjunktive Konjunktion.', es: 'una conjunción disyuntiva.', ja: '選択の接続詞。', pt: 'uma conjunção disjuntiva.' }],
+    ['CONJUNCTION', 'ADVERSATIVE', { en: 'an adversative conjunction.', it: 'una congiunzione avversativa.', fr: 'une conjonction adversative.', de: 'eine adversative Konjunktion.', es: 'una conjunción adversativa.', ja: '逆接の接続詞。', pt: 'uma conjunção adversativa.' }],
+    ['CONJUNCTION', 'EXPLICATIVE', { en: 'an explicative conjunction.', it: 'una congiunzione esplicativa.', fr: 'une conjonction explicative.', de: 'eine explikative Konjunktion.', es: 'una conjunción explicativa.', ja: '説明の接続詞。', pt: 'uma conjunção explicativa.' }],
+    ['CONJUNCTION', 'CONCLUSIVE', { en: 'a conclusive conjunction.', it: 'una congiunzione conclusiva.', fr: 'une conjonction conclusive.', de: 'eine konklusive Konjunktion.', es: 'una conjunción conclusiva.', ja: '順接の接続詞。', pt: 'uma conjunção conclusiva.' }],
+    ['CONJUNCTION', 'TEMPORAL', { en: 'a temporal conjunction.', it: 'una congiunzione temporale.', fr: 'une conjonction temporelle.', de: 'eine temporale Konjunktion.', es: 'una conjunción temporal.', ja: '時間的な接続詞。', pt: 'uma conjunção temporal.' }],
+    ['ASPECT', 'NEUTRAL', { en: 'a neutral aspect.', it: 'un aspetto neutrale.', fr: 'un aspect neutre.', de: 'ein neutraler Aspekt.', es: 'un aspecto neutral.', ja: '中立のアスペクト。', pt: 'um aspecto neutro.' }],
+    ['ASPECT', 'PROGRESSIVE', { en: 'a progressive aspect.', it: 'un aspetto progressivo.', fr: 'un aspect progressif.', de: 'ein progressiver Aspekt.', es: 'un aspecto progresivo.', ja: '進行のアスペクト。', pt: 'um aspecto progressivo.' }],
+    ['ASPECT', 'PROSPECTIVE', { en: 'a prospective aspect.', it: 'un aspetto prospettivo.', fr: 'un aspect prospectif.', de: 'ein prospektiver Aspekt.', es: 'un aspecto prospectivo.', ja: '将然のアスペクト。', pt: 'um aspecto prospectivo.' }],
+    ['ASPECT', 'RESULTATIVE', { en: 'a resultative aspect.', it: 'un aspetto risultativo.', fr: 'un aspect résultatif.', de: 'ein resultativer Aspekt.', es: 'un aspecto resultativo.', ja: '結果のアスペクト。', pt: 'um aspecto resultativo.' }],
+    ['POLARITY', 'POSITIVE', { en: 'a positive polarity.', it: 'una polarità positiva.', fr: 'une polarité positive.', de: 'eine positive Polarität.', es: 'una polaridad positiva.', ja: '肯定の極性。', pt: 'uma polaridade positiva.' }],
+  ])('%s %s', (noun, adjective, expected) => {
+    expect(named(noun, adjective)).toEqual(expected);
   });
 });

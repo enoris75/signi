@@ -46,7 +46,7 @@ Rendered on 2026-09-13 against a copy of the lexicon; re-verify on authoring.
 more unit suites; `Masculine` / `Feminine` → `satellites.test.tsx`; `Possessor` → `canvas.spec.ts`,
 `possessor-reference.spec.ts`, `manner-possessor-crash.spec.ts`, `satellites.test.tsx` and others;
 `Direct Object` → `canvas.spec.ts`, `tidy.spec.ts`, `translation.spec.ts` (several of these are group
-names, see [B23](../B-needs-seed/B23-ui-complement-and-group-names.md)); `Modifier number` →
+names, see [B23](B23-ui-complement-and-group-names.md)); `Modifier number` →
 `PhraseBuilder.test.tsx`, `phraseRender.test.tsx`.
 
 ## Done

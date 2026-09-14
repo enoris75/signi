@@ -22,13 +22,11 @@ import SentimentSatisfiedAltIcon from "@mui/icons-material/SentimentSatisfiedAlt
 import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import {
-  ASPECT_LABELS,
   CAUSE_SENTIMENTS,
   CAUSE_SENTIMENT_LABELS,
   Concept,
   PATH_SPECIFIERS,
   PATH_SPECIFIER_LABELS,
-  TENSE_LABELS,
   type Aspect,
   type CauseSentiment,
   type Definiteness,
@@ -713,11 +711,17 @@ export function SentimentSelector({
 }
 
 export function TenseToggleBox({ value, disc }: { value: Tense; disc?: number }) {
+  const t = useUiString();
   // Present is the implicit default → styled neutral; past/future read as "set".
-  return <ToggleBox label="Tense" value={TENSE_LABELS[value]} active={value !== "present"} disc={disc} />;
+  return (
+    <ToggleBox label={t("satellite.tense")} value={t(`tense.value.${value}`)} active={value !== "present"} disc={disc} />
+  );
 }
 
 export function AspectToggleBox({ value, disc }: { value: Aspect; disc?: number }) {
+  const t = useUiString();
   // Neutral is the implicit default → styled neutral; the marked aspects read as "set".
-  return <ToggleBox label="Aspect" value={ASPECT_LABELS[value]} active={value !== "neutral"} disc={disc} />;
+  return (
+    <ToggleBox label={t("satellite.aspect")} value={t(`aspect.value.${value}`)} active={value !== "neutral"} disc={disc} />
+  );
 }

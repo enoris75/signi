@@ -91,19 +91,14 @@ that become composable.
 |---|---|---|
 | B29 | [B29-building-genus.md](B-needs-seed/B29-building-genus.md) | **BUILDING** (isA PLACE) over HOUSE, PRISON → BUILDING's gloss needs WALL; HOUSE and PRISON stay C07 |
 | B30 | [B30-feeling-genus.md](B-needs-seed/B30-feeling-genus.md) | **FEELING**, **WARM** over AFFECTION → AFFECTION "a warm feeling", maybe FEEL "to have feelings" |
-| B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | **COMPLEMENT_GRAMMAR** (isA PHRASE, shared with B23), **MEANS** over SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER |
+| B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | nothing: COMPLEMENT_GRAMMAR and MEANS are seeded (B23, B24). Attach SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER under it and author the glosses |
 
 #### UI strings
 
-**B22 is the cheapest**: one feature family unlocks a whole control group. B20 is done.
-B21 is the largest and unlocks most of the period container.
+B20–B24 are done.
 
 | # | File | Seed first |
 |---|---|---|
-| B21 | [B21-ui-clause-and-coordination-vocabulary.md](B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md) | **CLAUSE, MAIN, CONDITION, COORDINATION, RELATIVE_CLAUSE, CONJUNCT, OTHER** (+ conjunction kinds) → clause badges, IF / coordination tooltips, pick hints |
-| B22 | [B22-ui-verb-feature-controls.md](B-needs-seed/B22-ui-verb-feature-controls.md) | **TENSE, ASPECT, POLARITY, MODAL** + their values → tense / aspect / polarity / modal controls |
-| B23 | [B23-ui-complement-and-group-names.md](B-needs-seed/B23-ui-complement-and-group-names.md) | **LOCATIVE, DIRECTION, SOURCE, ROUTE, CAUSE_COMPLEMENT, TERMINUS, VERB_PHRASE** → the six remaining complement names, group labels, word-map filter |
-| B24 | [B24-ui-noun-modifier-chips.md](B-needs-seed/B24-ui-noun-modifier-chips.md) | **MODIFIER, DEGREE, RELATION** + relation names → noun-modifier chip captions |
 | B25 | [B25-ui-dialog-and-app-controls.md](B-needs-seed/B25-ui-dialog-and-app-controls.md) | **CANCEL, CLOSE, RETRY, NAME_NOUN, LOADING, INTERFACE, EMPTY, RESULT, UNTITLED** → Cancel, Name, Loading…, Close, Retry |
 | B26 | [B26-ui-saved-item-feedback.md](B-needs-seed/B26-ui-saved-item-feedback.md) | **YET, ADDED, FAILED, IMPORT_NOUN, USE, ICON, FILE, VALID** → empty lists, "Period added.", import errors |
 | B27 | [B27-ui-clipboard-move-resize.md](B-needs-seed/B27-ui-clipboard-move-resize.md) | **COPY, CLIPBOARD, MOVE, UP, DOWN, RESIZE** → copy, move-period and resize controls (the transitive MOVE; C17's intransitive genus is another concept) |
@@ -173,6 +168,10 @@ B21 is the largest and unlocks most of the period container.
 | A14 | [done/A14-ui-satellite-and-badge-labels.md](done/A14-ui-satellite-and-badge-labels.md) | satellite labels from `t`, `satellite.gender`, `gender.value.*` ("Male"), Command / Infinitive phrase badges |
 | A15 | [done/A15-ui-slot-scoped-commands.md](done/A15-ui-slot-scoped-commands.md) | `action.clear/show/hide/expand/compact.<part>` families; `label` stays the group key, `labelKey` names it; fixed bug A126 (ja 隠し) |
 | B20 | [done/B20-ui-remove-and-delete.md](done/B20-ui-remove-and-delete.md) | `action.removePeriod`, `action.remove.<part>` (predicative, manner), `action.deleteSavedPhrase/deleteSavedPeriod` (seeded REMOVE, DELETE); found bug A137 |
+| B21 | [done/B21-ui-clause-and-coordination-vocabulary.md](done/B21-ui-clause-and-coordination-vocabulary.md) | `clause.*` badges, `period.isConditional/isCoordinated/becomesMain`, the condition, coordination and conjunct controls, `pick.condition/relativeHead`, `conjunction.kind.*` (seeded CLAUSE, RELATIVE_CLAUSE, CONDITION, COORDINATION, CONJUNCT, CONJUNCTION, MAIN, CONDITIONAL, COORDINATED, OTHER and the six conjunction kinds; OTHER precedes its noun, "another", es/pt "otro"; found bugs A138, A139, A141) |
+| B22 | [done/B22-ui-verb-feature-controls.md](done/B22-ui-verb-feature-controls.md) | `satellite.tense/aspect/polarity`, `tense.value.*` (nouns: de "Präteritum"), `aspect.value.*`, `polarity.value.*`, `slot.modal` + placeholder; modal, tense, aspect join the A15 families |
+| B23 | [done/B23-ui-complement-and-group-names.md](done/B23-ui-complement-and-group-names.md) | `slot.terminus/locative/direction/source/route/cause/verbPhrase`, `wordMap.relation.*`; every complement and the verb phrase join the A15 families (seeded COMPLEMENT_GRAMMAR, VERB_PHRASE, HYPERNYM; found bug A140) |
+| B24 | [done/B24-ui-noun-modifier-chips.md](done/B24-ui-noun-modifier-chips.md) | `modifier.relation` (+ `.<relation>` chip, `.<relation>.gloss` "Feature or means"), `modifier.degree/adjective/addAdjective`; "+ adj" became an icon (seeded MODIFIER, DEGREE_GRAMMAR, FEATURE, MEANS, PURPOSE, USE_NOUN, MATERIAL) |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

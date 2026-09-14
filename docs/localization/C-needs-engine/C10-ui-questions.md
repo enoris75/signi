@@ -11,8 +11,8 @@ de verb-first), no ja 〜か, and `UiStringFormat` can only strip a full stop, n
 
 | literal | where | also needs |
 |---|---|---|
-| Clear this main clause and everything in it? | [HeaderControls.tsx:110](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/HeaderControls.tsx#L110) | EVERYTHING (an indefinite pronoun head) + a locative whose phrase is a pronoun ("in it"); CLAUSE, MAIN ([B21](../B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md)) |
-| Remove this main clause and everything in it? | [HeaderControls.tsx:111](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/HeaderControls.tsx#L111) | the same, + REMOVE ([B20](../B-needs-seed/B20-ui-remove-and-delete.md)) |
+| Clear this main clause and everything in it? | [HeaderControls.tsx:110](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/HeaderControls.tsx#L110) | EVERYTHING (an indefinite pronoun head) + a locative whose phrase is a pronoun ("in it"); CLAUSE, MAIN (seeded by [B21](../done/B21-ui-clause-and-coordination-vocabulary.md)) |
+| Remove this main clause and everything in it? | [HeaderControls.tsx:111](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/HeaderControls.tsx#L111) | the same, + REMOVE ([B20](../done/B20-ui-remove-and-delete.md)) |
 | Is the translation server running? | [WordMap.tsx:208](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L208) (second sentence) | SERVER, RUN in the machine sense (the seeded RUN is the legs) |
 
 ## `window.confirm` can't be localized anyway

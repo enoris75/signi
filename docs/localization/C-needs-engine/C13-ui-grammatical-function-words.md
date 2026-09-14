@@ -24,10 +24,12 @@ context-dependent, and there is no citation for them.
 | Neutral — because of / Negative — fault of / Positive — thanks to | `CAUSE_SENTIMENT_LABELS` [shared/index.ts:287](../../../packages/shared/src/index.ts#L287) → sentiment tooltips ([Boxes.tsx:490](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L490)) |
 | — / More / Most / Less / Least / Equally | `DEGREE_LABELS` [shared/index.ts:120](../../../packages/shared/src/index.ts#L120) → degree chip ([phraseRender.tsx:355](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L355)) |
 
-The *names* beside these words are ordinary adjectives and can be seeded now: the conjunction kinds
-(copulative, disjunctive, …) are in [B21](../B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md);
-Neutral / Negative / Positive share NEUTRAL and POSITIVE with
-[B22](../B-needs-seed/B22-ui-verb-feature-controls.md).
+The *names* beside these words are ordinary adjectives, and are seeded: the conjunction kinds
+(copulative, disjunctive, …) are rendered as the menu's hints by
+[B21](../done/B21-ui-clause-and-coordination-vocabulary.md) (`conjunction.kind.*`), and NEUTRAL and
+POSITIVE, which the sentiment labels need beside NEGATIVE, by
+[B22](../done/B22-ui-verb-feature-controls.md). The coordinated clause's badge and the coordination
+control still add the English conjunction in brackets ("Coordinated clause (But)").
 
 ## To unblock
 

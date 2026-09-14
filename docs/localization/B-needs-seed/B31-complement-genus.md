@@ -6,14 +6,16 @@ noun is seeded.)_
 The three seeded complement names have no `isA` and no `definition`: their genus is not a concept, and
 [C05](../C-needs-engine/C05-non-distinguishing-genera.md) parks the grammar meta-nouns that lack a
 differentia. This task seeds the genus and moves the three under it.
-[B23](B23-ui-complement-and-group-names.md) already plans the same noun, `COMPLEMENT_GRAMMAR`, for the
-word map's "complements" filter. Whichever task lands first seeds it, and the other reuses it.
+[B23](../done/B23-ui-complement-and-group-names.md) seeded the same noun, `COMPLEMENT_GRAMMAR`, for the
+word map's "complements" filter, with the forms below, and the six new complement names under it.
+[B24](../done/B24-ui-noun-modifier-chips.md) seeded MEANS. **Nothing is left to seed**: run the two
+`/attach`es and author the glosses.
 
-## Seed first (1 noun, + 1 for INSTRUMENTAL) — `/generalize`
+## Seeded (by B23 and B24)
 
-Run [`/generalize`](../../../.claude/skills/generalize/SKILL.md) `SUBJECT_COMPLEMENT into
-COMPLEMENT_GRAMMAR`, then [`/attach`](../../../.claude/skills/attach/SKILL.md) INSTRUMENTAL and
-ADVERBIAL_OF_MANNER under it.
+COMPLEMENT_GRAMMAR exists, so there is nothing to `/generalize`:
+[`/attach`](../../../.claude/skills/attach/SKILL.md) SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER
+under it.
 
 | concept | role | gloss | en | it | fr | de | es | ja | pt |
 |---|---|---|---|---|---|---|---|---|---|

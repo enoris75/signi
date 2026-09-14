@@ -167,4 +167,138 @@ describe('buildUiStrings', () => {
       de: 'Dieses gespeicherte Satzgefüge löschen',
     });
   });
+
+  // A period's part in a link is a clause, named as each tradition names it (B21). Japanese compounds
+  // the name on 節, and OTHER takes the indefinite article's place in Spanish and Portuguese.
+  test('names the clauses, conditions and conjuncts of linked periods', () => {
+    const strings = buildUiStrings();
+    expect(strings['clause.main']).toEqual({
+      en: 'Main clause',
+      it: 'Proposizione principale',
+      fr: 'Proposition principale',
+      de: 'Übergeordneter Satz',
+      es: 'Oración principal',
+      ja: '主節',
+      pt: 'Oração principal',
+    });
+    expect(strings['period.isConditional']).toEqual({
+      en: 'This period is a conditional clause',
+      it: 'Questo periodo è una proposizione condizionale',
+      fr: 'Cette période est une proposition conditionnelle',
+      de: 'Dieses Satzgefüge ist ein konditionaler Satz',
+      es: 'Este período es una oración condicional',
+      ja: 'この文は条件節です',
+      pt: 'Este período é uma oração condicional',
+    });
+    // Lower-case and unformatted: it is read inside the brackets after `action.addCondition`.
+    expect(strings['period.becomesMain']).toMatchObject({
+      en: 'this period becomes the main clause',
+      it: 'questo periodo diventa la proposizione principale',
+      ja: 'この文は主節になります',
+    });
+    expect(strings['action.addAnotherConjunct']).toEqual({
+      en: 'Add another conjunct',
+      it: 'Aggiungi un altro congiunto',
+      fr: 'Ajouter un autre conjoint',
+      de: 'Ein anderes Konjunkt addieren',
+      es: 'Añadir otro miembro coordinado',
+      ja: '別の等位項を追加',
+      pt: 'Adicionar outro membro coordenado',
+    });
+    // A sentence in a banner: it keeps its full stop.
+    expect(strings['pick.condition']).toMatchObject({
+      en: 'Click the period that is the condition in another period container.',
+      it: 'Clicca il periodo che è la condizione in un altro contenitore di periodo.',
+      ja: '文の別の容器で条件である文をクリック。',
+    });
+    expect(strings['conjunction.kind.then']).toEqual({
+      en: 'temporal',
+      it: 'temporale',
+      fr: 'temporelle',
+      de: 'temporal',
+      es: 'temporal',
+      ja: '時間的',
+      pt: 'temporal',
+    });
+  });
+
+  // The verb's feature controls (B22): a tense is a noun standing alone, as German names it, and an
+  // aspect or a polarity an adjective agreeing with its row's noun.
+  test('names the tense, aspect, polarity and modal controls', () => {
+    const strings = buildUiStrings();
+    expect(strings['tense.value.past']).toEqual({
+      en: 'Past',
+      it: 'Passato',
+      fr: 'Passé',
+      de: 'Präteritum',
+      es: 'Pasado',
+      ja: '過去',
+      pt: 'Passado',
+    });
+    expect(strings['aspect.value.progressive']).toMatchObject({ it: 'Progressivo', de: 'Progressiv', ja: '進行' });
+    expect(strings['polarity.value.negative']).toMatchObject({ it: 'Negativa', fr: 'Négative', es: 'Negativa' });
+    expect(strings['slot.modal.placeholder']).toEqual({
+      en: 'type a modal',
+      it: 'digita un verbo servile',
+      fr: 'taper un verbe modal',
+      de: 'ein Modalverb tippen',
+      es: 'teclear un verbo modal',
+      ja: '法助動詞を入力',
+      pt: 'digitar um verbo modal',
+    });
+    expect(strings['action.hide.tense']).toMatchObject({ en: 'Hide the tense', de: 'Das Tempus verstecken' });
+  });
+
+  // Every complement is named now, each by its tradition's term (B23), so every ring control is too.
+  test('names every complement and the verb phrase, and the controls that act on them', () => {
+    const strings = buildUiStrings();
+    expect(strings['slot.terminus']).toEqual({
+      en: 'Terminus',
+      it: 'Complemento di termine',
+      fr: "Complément d'objet second",
+      de: 'Dativobjekt',
+      es: 'Complemento indirecto',
+      ja: '間接目的語',
+      pt: 'Objeto indireto',
+    });
+    expect(strings['action.remove.source']).toEqual({
+      en: 'Remove the source',
+      it: 'Rimuovi il complemento di moto da luogo',
+      fr: 'Retirer le complément circonstanciel de provenance',
+      de: 'Die adverbiale Bestimmung der Herkunft entfernen',
+      es: 'Quitar el complemento circunstancial de procedencia',
+      ja: '起点の副詞語句を取り除き',
+      pt: 'Remover o adjunto adverbial de origem',
+    });
+    expect(strings['action.compact.verbPhrase']).toMatchObject({
+      it: 'Compatta il sintagma verbale',
+      de: 'Die Verbalphrase verdichten',
+      ja: '動詞句を圧縮',
+    });
+    expect(strings['wordMap.relation.isA']).toMatchObject({ en: 'Hypernyms', it: 'Iperonimi', ja: '上位語' });
+  });
+
+  // The chips under an attributive noun (B24): the relation is spelled out by two nouns joined by "or".
+  test('names the chips of a noun used as a modifier', () => {
+    const strings = buildUiStrings();
+    expect(strings['modifier.relation.purpose.gloss']).toEqual({
+      en: 'Purpose or use',
+      it: 'Scopo o uso',
+      fr: 'But ou usage',
+      de: 'Zweck oder Verwendung',
+      es: 'Finalidad o uso',
+      ja: '目的か用途',
+      pt: 'Finalidade ou uso',
+    });
+    expect(strings['modifier.relation.purpose']).toMatchObject({ en: 'purpose', fr: 'but', ja: '目的' });
+    expect(strings['modifier.addAdjective']).toEqual({
+      en: 'Add an adjective that describes this modifier',
+      it: 'Aggiungi un aggettivo che descrive questo modificatore',
+      fr: 'Ajouter un adjectif qui décrit ce modificateur',
+      de: 'Ein Adjektiv, das diesen Modifikator beschreibt, addieren',
+      es: 'Añadir un adjetivo que describe este modificador',
+      ja: 'この修飾語を描写する形容詞を追加',
+      pt: 'Adicionar um adjetivo que descreve este modificador',
+    });
+  });
 });

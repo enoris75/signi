@@ -40,10 +40,10 @@ export const VOWEL_START = /^[aeiouéèêëàâîïôùûü]/i;
 // GREAT, the gloss degree word, is the same "grand" as BIG and precedes like it ("de grande
 // taille"). HIGH ("haut") stays after the noun: it is not a BAGS adjective ("une tour haute").
 // The ordinals join them: an ordinal precedes its noun in French ("le premier père", "la
-// deuxième fois"), whatever its "BAGS" membership.
+// deuxième fois"), whatever its "BAGS" membership. So does OTHER ("un autre chat").
 export const PRENOMINAL = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD',
+  'FIRST', 'SECOND', 'THIRD', 'OTHER',
 ]);
 
 // The verbs whose present-participle stem the "nous" present rule misses (see `presentParticiple`).

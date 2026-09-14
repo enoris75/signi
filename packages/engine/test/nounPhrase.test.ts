@@ -412,3 +412,129 @@ describe('a countable food noun: ICE_CREAM', () => {
       .toEqual(['ねこ', 'たべます']);
   });
 });
+
+// The grammar nouns the period container, the verb's controls, the complement boxes and the noun
+// modifier's chips are named with (localization B21–B24). Each one's indefinite singular and definite
+// plural, which pin its article, its gender and its plural in every language. The tradition names are
+// seeded as one noun each ("complemento di stato in luogo", "Dativobjekt"), so they decline as one.
+describe('grammar nouns: clauses, complements, the verb’s features, modifier relations', () => {
+  const said = (concept: string, extra: Partial<NounPhrase>) => sayAll({ subject: np(concept, extra) });
+
+  test.each<[string, Record<string, string>, Record<string, string>]>([
+    ['CLAUSE',
+      { en: 'a clause.', it: 'una proposizione.', fr: 'une proposition.', de: 'ein Satz.', es: 'una oración.', ja: '節。', pt: 'uma oração.' },
+      { en: 'the clauses.', it: 'le proposizioni.', fr: 'les propositions.', de: 'die Sätze.', es: 'las oraciones.', ja: '節。', pt: 'as orações.' }],
+    ['RELATIVE_CLAUSE',
+      { en: 'a relative clause.', it: 'una proposizione relativa.', fr: 'une proposition relative.', de: 'ein Relativsatz.', es: 'una oración de relativo.', ja: '関係節。', pt: 'uma oração relativa.' },
+      { en: 'the relative clauses.', it: 'le proposizioni relative.', fr: 'les propositions relatives.', de: 'die Relativsätze.', es: 'las oraciones de relativo.', ja: '関係節。', pt: 'as orações relativas.' }],
+    ['CONDITION',
+      { en: 'a condition.', it: 'una condizione.', fr: 'une condition.', de: 'eine Bedingung.', es: 'una condición.', ja: '条件。', pt: 'uma condição.' },
+      { en: 'the conditions.', it: 'le condizioni.', fr: 'les conditions.', de: 'die Bedingungen.', es: 'las condiciones.', ja: '条件。', pt: 'as condições.' }],
+    ['COORDINATION',
+      { en: 'a coordination.', it: 'una coordinazione.', fr: 'une coordination.', de: 'eine Koordination.', es: 'una coordinación.', ja: '等位接続。', pt: 'uma coordenação.' },
+      { en: 'the coordinations.', it: 'le coordinazioni.', fr: 'les coordinations.', de: 'die Koordinationen.', es: 'las coordinaciones.', ja: '等位接続。', pt: 'as coordenações.' }],
+    ['CONJUNCT',
+      { en: 'a conjunct.', it: 'un congiunto.', fr: 'un conjoint.', de: 'ein Konjunkt.', es: 'un miembro coordinado.', ja: '等位項。', pt: 'um membro coordenado.' },
+      { en: 'the conjuncts.', it: 'i congiunti.', fr: 'les conjoints.', de: 'die Konjunkte.', es: 'los miembros coordinados.', ja: '等位項。', pt: 'os membros coordenados.' }],
+    ['CONJUNCTION',
+      { en: 'a conjunction.', it: 'una congiunzione.', fr: 'une conjonction.', de: 'eine Konjunktion.', es: 'una conjunción.', ja: '接続詞。', pt: 'uma conjunção.' },
+      { en: 'the conjunctions.', it: 'le congiunzioni.', fr: 'les conjonctions.', de: 'die Konjunktionen.', es: 'las conjunciones.', ja: '接続詞。', pt: 'as conjunções.' }],
+    ['MODIFIER',
+      { en: 'a modifier.', it: 'un modificatore.', fr: 'un modificateur.', de: 'ein Modifikator.', es: 'un modificador.', ja: '修飾語。', pt: 'um modificador.' },
+      { en: 'the modifiers.', it: 'i modificatori.', fr: 'les modificateurs.', de: 'die Modifikatoren.', es: 'los modificadores.', ja: '修飾語。', pt: 'os modificadores.' }],
+    ['HYPERNYM',
+      { en: 'a hypernym.', it: 'un iperonimo.', fr: 'un hyperonyme.', de: 'ein Hyperonym.', es: 'un hiperónimo.', ja: '上位語。', pt: 'um hiperónimo.' },
+      { en: 'the hypernyms.', it: 'gli iperonimi.', fr: 'les hyperonymes.', de: 'die Hyperonyme.', es: 'los hiperónimos.', ja: '上位語。', pt: 'os hiperónimos.' }],
+    ['VERB_PHRASE',
+      { en: 'a verb phrase.', it: 'un sintagma verbale.', fr: 'un syntagme verbal.', de: 'eine Verbalphrase.', es: 'un sintagma verbal.', ja: '動詞句。', pt: 'um sintagma verbal.' },
+      { en: 'the verb phrases.', it: 'i sintagmi verbali.', fr: 'les syntagmes verbaux.', de: 'die Verbalphrasen.', es: 'los sintagmas verbales.', ja: '動詞句。', pt: 'os sintagmas verbais.' }],
+    ['COMPLEMENT_GRAMMAR',
+      { en: 'a complement.', it: 'un complemento.', fr: 'un complément.', de: 'eine Ergänzung.', es: 'un complemento.', ja: '補語。', pt: 'um complemento.' },
+      { en: 'the complements.', it: 'i complementi.', fr: 'les compléments.', de: 'die Ergänzungen.', es: 'los complementos.', ja: '補語。', pt: 'os complementos.' }],
+    ['LOCATIVE',
+      { en: 'a locative.', it: 'un complemento di stato in luogo.', fr: 'un complément circonstanciel de lieu.', de: 'eine adverbiale Bestimmung des Ortes.', es: 'un complemento circunstancial de lugar.', ja: '場所の副詞語句。', pt: 'um adjunto adverbial de lugar.' },
+      { en: 'the locatives.', it: 'i complementi di stato in luogo.', fr: 'les compléments circonstanciels de lieu.', de: 'die adverbiale Bestimmungen des Ortes.', es: 'los complementos circunstanciales de lugar.', ja: '場所の副詞語句。', pt: 'os adjuntos adverbiais de lugar.' }],
+    ['DIRECTION',
+      { en: 'a direction.', it: 'un complemento di moto a luogo.', fr: 'un complément circonstanciel de direction.', de: 'eine adverbiale Bestimmung der Richtung.', es: 'un complemento circunstancial de dirección.', ja: '方向の副詞語句。', pt: 'um adjunto adverbial de direção.' },
+      { en: 'the directions.', it: 'i complementi di moto a luogo.', fr: 'les compléments circonstanciels de direction.', de: 'die adverbiale Bestimmungen der Richtung.', es: 'los complementos circunstanciales de dirección.', ja: '方向の副詞語句。', pt: 'os adjuntos adverbiais de direção.' }],
+    ['SOURCE',
+      { en: 'a source.', it: 'un complemento di moto da luogo.', fr: 'un complément circonstanciel de provenance.', de: 'eine adverbiale Bestimmung der Herkunft.', es: 'un complemento circunstancial de procedencia.', ja: '起点の副詞語句。', pt: 'um adjunto adverbial de origem.' },
+      { en: 'the sources.', it: 'i complementi di moto da luogo.', fr: 'les compléments circonstanciels de provenance.', de: 'die adverbiale Bestimmungen der Herkunft.', es: 'los complementos circunstanciales de procedencia.', ja: '起点の副詞語句。', pt: 'os adjuntos adverbiais de origem.' }],
+    ['ROUTE',
+      { en: 'a route.', it: 'un complemento di moto per luogo.', fr: 'un complément circonstanciel de passage.', de: 'eine adverbiale Bestimmung des Weges.', es: 'un complemento circunstancial de trayecto.', ja: '経路の副詞語句。', pt: 'um adjunto adverbial de percurso.' },
+      { en: 'the routes.', it: 'i complementi di moto per luogo.', fr: 'les compléments circonstanciels de passage.', de: 'die adverbiale Bestimmungen des Weges.', es: 'los complementos circunstanciales de trayecto.', ja: '経路の副詞語句。', pt: 'os adjuntos adverbiais de percurso.' }],
+    ['CAUSE_COMPLEMENT',
+      { en: 'a cause.', it: 'un complemento di causa.', fr: 'un complément circonstanciel de cause.', de: 'eine adverbiale Bestimmung des Grundes.', es: 'un complemento circunstancial de causa.', ja: '原因の副詞語句。', pt: 'um adjunto adverbial de causa.' },
+      { en: 'the causes.', it: 'i complementi di causa.', fr: 'les compléments circonstanciels de cause.', de: 'die adverbiale Bestimmungen des Grundes.', es: 'los complementos circunstanciales de causa.', ja: '原因の副詞語句。', pt: 'os adjuntos adverbiais de causa.' }],
+    ['TERMINUS',
+      { en: 'a terminus.', it: 'un complemento di termine.', fr: "un complément d'objet second.", de: 'ein Dativobjekt.', es: 'un complemento indirecto.', ja: '間接目的語。', pt: 'um objeto indireto.' },
+      { en: 'the termini.', it: 'i complementi di termine.', fr: "les compléments d'objet second.", de: 'die Dativobjekte.', es: 'los complementos indirectos.', ja: '間接目的語。', pt: 'os objetos indiretos.' }],
+    ['TENSE',
+      { en: 'a tense.', it: 'un tempo.', fr: 'un temps.', de: 'ein Tempus.', es: 'un tiempo.', ja: '時制。', pt: 'um tempo.' },
+      { en: 'the tenses.', it: 'i tempi.', fr: 'les temps.', de: 'die Tempora.', es: 'los tiempos.', ja: '時制。', pt: 'os tempos.' }],
+    ['PRESENT_TENSE',
+      { en: 'a present.', it: 'un presente.', fr: 'un présent.', de: 'ein Präsens.', es: 'un presente.', ja: '現在。', pt: 'um presente.' },
+      { en: 'the presents.', it: 'i presenti.', fr: 'les présents.', de: 'die Präsentia.', es: 'los presentes.', ja: '現在。', pt: 'os presentes.' }],
+    ['PAST_TENSE',
+      { en: 'a past.', it: 'un passato.', fr: 'un passé.', de: 'ein Präteritum.', es: 'un pasado.', ja: '過去。', pt: 'um passado.' },
+      { en: 'the pasts.', it: 'i passati.', fr: 'les passés.', de: 'die Präterita.', es: 'los pasados.', ja: '過去。', pt: 'os passados.' }],
+    ['FUTURE_TENSE',
+      { en: 'a future.', it: 'un futuro.', fr: 'un futur.', de: 'ein Futur.', es: 'un futuro.', ja: '未来。', pt: 'um futuro.' },
+      { en: 'the futures.', it: 'i futuri.', fr: 'les futurs.', de: 'die Future.', es: 'los futuros.', ja: '未来。', pt: 'os futuros.' }],
+    ['ASPECT',
+      { en: 'an aspect.', it: 'un aspetto.', fr: 'un aspect.', de: 'ein Aspekt.', es: 'un aspecto.', ja: 'アスペクト。', pt: 'um aspecto.' },
+      { en: 'the aspects.', it: 'gli aspetti.', fr: 'les aspects.', de: 'die Aspekte.', es: 'los aspectos.', ja: 'アスペクト。', pt: 'os aspectos.' }],
+    ['POLARITY',
+      { en: 'a polarity.', it: 'una polarità.', fr: 'une polarité.', de: 'eine Polarität.', es: 'una polaridad.', ja: '極性。', pt: 'uma polaridade.' },
+      { en: 'the polarities.', it: 'le polarità.', fr: 'les polarités.', de: 'die Polaritäten.', es: 'las polaridades.', ja: '極性。', pt: 'as polaridades.' }],
+    ['DEGREE_GRAMMAR',
+      { en: 'a degree.', it: 'un grado.', fr: 'un degré.', de: 'eine Steigerungsstufe.', es: 'un grado.', ja: '程度。', pt: 'um grau.' },
+      { en: 'the degrees.', it: 'i gradi.', fr: 'les degrés.', de: 'die Steigerungsstufen.', es: 'los grados.', ja: '程度。', pt: 'os graus.' }],
+    ['MODAL',
+      { en: 'a modal.', it: 'un verbo servile.', fr: 'un verbe modal.', de: 'ein Modalverb.', es: 'un verbo modal.', ja: '法助動詞。', pt: 'um verbo modal.' },
+      { en: 'the modals.', it: 'i verbi servili.', fr: 'les verbes modaux.', de: 'die Modalverben.', es: 'los verbos modales.', ja: '法助動詞。', pt: 'os verbos modais.' }],
+    ['FEATURE',
+      { en: 'a feature.', it: 'una caratteristica.', fr: 'une caractéristique.', de: 'ein Merkmal.', es: 'una característica.', ja: '特徴。', pt: 'uma característica.' },
+      { en: 'the features.', it: 'le caratteristiche.', fr: 'les caractéristiques.', de: 'die Merkmale.', es: 'las características.', ja: '特徴。', pt: 'as características.' }],
+    ['MEANS',
+      { en: 'a means.', it: 'un mezzo.', fr: 'un moyen.', de: 'ein Mittel.', es: 'un medio.', ja: '手段。', pt: 'um meio.' },
+      { en: 'the means.', it: 'i mezzi.', fr: 'les moyens.', de: 'die Mittel.', es: 'los medios.', ja: '手段。', pt: 'os meios.' }],
+    ['PURPOSE',
+      { en: 'a purpose.', it: 'uno scopo.', fr: 'un but.', de: 'ein Zweck.', es: 'una finalidad.', ja: '目的。', pt: 'uma finalidade.' },
+      { en: 'the purposes.', it: 'gli scopi.', fr: 'les buts.', de: 'die Zwecke.', es: 'las finalidades.', ja: '目的。', pt: 'as finalidades.' }],
+    ['USE_NOUN',
+      { en: 'a use.', it: 'un uso.', fr: 'un usage.', de: 'eine Verwendung.', es: 'un uso.', ja: '用途。', pt: 'um uso.' },
+      { en: 'the uses.', it: 'gli usi.', fr: 'les usages.', de: 'die Verwendungen.', es: 'los usos.', ja: '用途。', pt: 'os usos.' }],
+    ['MATERIAL',
+      { en: 'a material.', it: 'un materiale.', fr: 'un matériau.', de: 'ein Material.', es: 'un material.', ja: '材料。', pt: 'um material.' },
+      { en: 'the materials.', it: 'i materiali.', fr: 'les matériaux.', de: 'die Materialien.', es: 'los materiales.', ja: '材料。', pt: 'os materiais.' }],
+  ])('%s', (concept, singular, plural) => {
+    expect(said(concept, { definiteness: 'indefinite' })).toEqual(singular);
+    expect(said(concept, { number: 'plural' })).toEqual(plural);
+  });
+});
+
+// A140. A German grammar term seeded as one noun keeps its attributive adjective inside its forms:
+// "adverbiale Bestimmung des Ortes", plural "adverbiale Bestimmungen des Ortes". The adjective then
+// never declines, which is right only where its ending happens to be -e: the nominative and accusative
+// singular, and the plural with no article. After an article in the plural, and in the dative and
+// genitive, it takes -en. The complement names LOCATIVE, DIRECTION, SOURCE, ROUTE, CAUSE_COMPLEMENT
+// and ADVERBIAL_OF_MANNER all have this shape.
+describe('known bugs: the adjective inside a German multiword noun', () => {
+  test.fails('declines with the article in the plural', () => {
+    expect(say({ subject: np('LOCATIVE', { number: 'plural' }) }, 'de')).toBe('die adverbialen Bestimmungen des Ortes.');
+    expect(say({ subject: np('ADVERBIAL_OF_MANNER', { number: 'plural' }) }, 'de'))
+      .toBe('die adverbialen Bestimmungen der Art und Weise.');
+  });
+
+  test.fails('declines in the dative', () => {
+    expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('LOCATIVE') } } }), 'de'))
+      .toBe('der Kater beginnt mit der adverbialen Bestimmung des Ortes.');
+  });
+
+  test('regression: the nominative singular and the bare plural already read right', () => {
+    expect(say({ subject: np('LOCATIVE', { definiteness: 'this' }) }, 'de')).toBe('diese adverbiale Bestimmung des Ortes.');
+    expect(say({ subject: np('LOCATIVE', { number: 'plural', definiteness: 'bare' }) }, 'de'))
+      .toBe('adverbiale Bestimmungen des Ortes.');
+  });
+});

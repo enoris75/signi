@@ -3,19 +3,19 @@ import { canCoordinateImperative } from "@signi/shared";
 
 export type { AbstractionLevel, CoordConjunction };
 
-// UI metadata for the coordinating conjunctions offered on the coordinative control: the
-// short menu label and the traditional grammatical name of each relation.
+// UI metadata for the coordinating conjunctions offered on the coordinative control: the short menu
+// label, and the catalog key of the traditional grammatical name of each relation (`conjunction.kind.*`).
 export const COORD_CONJUNCTION_OPTIONS: {
   value: CoordConjunction;
   label: string;
-  hint: string;
+  hintKey: UiStringKey;
 }[] = [
-  { value: "and", label: "And", hint: "copulative" },
-  { value: "or", label: "Or", hint: "disjunctive" },
-  { value: "but", label: "But", hint: "adversative" },
-  { value: "that_is", label: "That is", hint: "explicative" },
-  { value: "therefore", label: "Therefore", hint: "conclusive" },
-  { value: "then", label: "Then", hint: "temporal" },
+  { value: "and", label: "And", hintKey: "conjunction.kind.and" },
+  { value: "or", label: "Or", hintKey: "conjunction.kind.or" },
+  { value: "but", label: "But", hintKey: "conjunction.kind.but" },
+  { value: "that_is", label: "That is", hintKey: "conjunction.kind.that_is" },
+  { value: "therefore", label: "Therefore", hintKey: "conjunction.kind.therefore" },
+  { value: "then", label: "Then", hintKey: "conjunction.kind.then" },
 ];
 
 export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =

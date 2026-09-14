@@ -32,6 +32,15 @@ describe('nounPhrase', () => {
     expect(nounPhrase(indefinite(CREATOR), undefined, 'object')).toBe('an object creator');
   });
 
+  test('an before other is written as one word', () => {
+    const indefinite = (forms: Forms) => ({ ...forms, definiteness: 'indefinite' });
+    expect(nounPhrase(indefinite(CAT), 'other')).toBe('another cat');
+    expect(nounPhrase(indefinite(CAT), 'other big')).toBe('another big cat');
+    expect(nounPhrase({ ...CAT, definiteness: 'definite' }, 'other')).toBe('the other cat');
+    // Only the word "other" fuses: "otherworldly" is a word of its own.
+    expect(nounPhrase(indefinite(CAT), 'otherworldly')).toBe('an otherworldly cat');
+  });
+
   test('an indefinite plural or mass noun goes bare', () => {
     expect(nounPhrase({ ...MOUSE, number: 'plural', definiteness: 'indefinite' })).toBe('mice');
     expect(nounPhrase({ ...WATER, definiteness: 'indefinite' })).toBe('water');

@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+import { screen } from '@testing-library/react';
 import { buildSatelliteIcons } from '../../../src/components/PhraseBuilder/satellites/functions/buildSatelliteIcons.ts';
 import type { Satellite } from '../../../src/components/PhraseBuilder/satellites/satellites.types.tsx';
 import type {
@@ -8,7 +9,8 @@ import type {
   PhraseSelection,
   WorkspaceBinding,
 } from '../../../src/components/PhraseBuilder/interfaces.ts';
-import type { SatelliteIcon } from '../../../src/components/PhraseBuilder/Boxes.tsx';
+import { SatelliteButton, type SatelliteIcon } from '../../../src/components/PhraseBuilder/Boxes.tsx';
+import { renderWithProviders } from '../../render.tsx';
 import {
   BIG,
   CAT,
@@ -434,7 +436,7 @@ describe('buildSatelliteIcons', () => {
         const relative = icons({ subject: CAT }, { binding }).perimeterByNoun['subject']!.relative!;
 
         expect(relative).toMatchObject({
-          label: 'Relative clause',
+          label: 't(satellite.relative)',
           active: false,
           isSet: false,
           valued: false,
@@ -510,11 +512,11 @@ describe('buildSatelliteIcons', () => {
         const conjunct = result.perimeterByNoun['subject']!.conjunct!;
 
         expect(conjunct).toMatchObject({
-          label: 'Coordination',
+          label: 't(satellite.coordination)',
           active: false,
           isSet: false,
           valued: true,
-          valueLabel: 'Add a conjunct',
+          valueLabel: 't(action.addConjunct)',
         });
         conjunct.onToggle();
         expect(result.onAddConjunct).toHaveBeenCalledExactlyOnceWith('subject');
@@ -525,7 +527,7 @@ describe('buildSatelliteIcons', () => {
         const result = icons({ verb: GO, predicative: CAT, predicativeConjuncts: [{}] });
         const conjunct = result.perimeterByNoun['predicative']!.conjunct!;
 
-        expect(conjunct).toMatchObject({ isSet: true, valueLabel: 'Add another conjunct' });
+        expect(conjunct).toMatchObject({ isSet: true, valueLabel: 't(action.addAnotherConjunct)' });
         conjunct.onToggle();
         expect(result.onAddConjunct).toHaveBeenCalledExactlyOnceWith('predicative');
       });
@@ -661,5 +663,43 @@ describe('buildSatelliteIcons, on hand-built satellites', () => {
     expect(perimeterByNoun['subject']).toEqual({
       conjunct: expect.objectContaining({ key: 'subjectConjunct', isSet: true }),
     });
+  });
+});
+
+// A141. The link controls start a link to a period in another container, or remove it, but their
+// tooltip is worked out as a reveal's: it offers to "Show" what they link and, once linked, to "Hide" it.
+// The verb is the catalog's reveal fallback in English, so a non-English UI reads it half in English
+// ("Show Proposizione relativa"). The relative clause's linked face should read like the instrumental's.
+describe('known bugs: the link controls’ tooltips', () => {
+  const tooltip = (icon: SatelliteIcon) => {
+    const { unmount } = renderWithProviders(<SatelliteButton sat={icon} color="primary" />);
+    const label = screen.getByRole('button').getAttribute('aria-label');
+    unmount();
+    return label;
+  };
+
+  it.fails('the relative clause control names the link, not a reveal', () => {
+    const unlinked = icons({ subject: CAT }, { binding: workspace() }).perimeterByNoun['subject']!.relative!;
+    const linked = icons({ subject: CAT }, { binding: workspace({ relativeSources: ['subject'] }) })
+      .perimeterByNoun['subject']!.relative!;
+
+    expect(tooltip(unlinked)).toBe('t(satellite.relative)');
+    expect(tooltip(linked)).toBe('t(satellite.relative): Linked — click to remove');
+  });
+
+  it.fails('the instrumental control names the link before one is made', () => {
+    const unlinked = icons({ verb: GO }, { binding: workspace() }).complementToggleIcons.find(
+      (icon) => icon.key === 'instrumental',
+    )!;
+
+    expect(tooltip(unlinked)).toBe('t(slot.instrumental)');
+  });
+
+  it('regression: the instrumental’s linked face already names the link', () => {
+    const linked = icons({ verb: GO }, { binding: workspace({ instrumentalLinked: true }) }).complementToggleIcons.find(
+      (icon) => icon.key === 'instrumental',
+    )!;
+
+    expect(tooltip(linked)).toBe('t(slot.instrumental): Linked — click to remove');
   });
 });

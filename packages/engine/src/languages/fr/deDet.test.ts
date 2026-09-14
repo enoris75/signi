@@ -21,6 +21,11 @@ describe('deDet', () => {
     expect(deDet({ ...HOMME, definiteness: 'indefinite' }, true, 'hommes')).toBe("d'");
   });
 
+  test('so does the de it becomes before an adjective that precedes the noun', () => {
+    expect(deDet({ ...MAISON, definiteness: 'indefinite' }, true, 'grandes')).toBe('de');
+    expect(deDet({ ...CHAT, definiteness: 'indefinite' }, true, 'autres')).toBe("d'");
+  });
+
   test('a mass noun’s partitive drops after de', () => {
     expect(deDet({ ...EAU, definiteness: 'indefinite' }, false, 'eau')).toBe("d'");
     expect(deDet({ ...NOURRITURE, definiteness: 'some' }, false, 'nourriture')).toBe('de');

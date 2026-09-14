@@ -3,6 +3,7 @@ import { Concept } from "@signi/shared";
 import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
 
 // Picker for a modal slot. Modals are verb concepts, so they arrive on the same
@@ -15,6 +16,7 @@ export function ModalTypeahead({
 }) {
   const { data: verbs = [] } = useConcepts("verb");
   const matches = useConceptSearch();
+  const t = useUiString();
   const [query, setQuery] = useState("");
   const [open, setOpen] = useState(false);
   const [highlightedIdx, setHighlightedIdx] = useState(0);
@@ -72,7 +74,7 @@ export function ModalTypeahead({
           setTimeout(() => setOpen(false), 150);
         }}
         onKeyDown={handleKeyDown}
-        placeholder="type a modal…"
+        placeholder={`${t("slot.modal.placeholder")}…`}
         inputProps={{ size: 13 }}
         sx={{
           fontFamily: '"Inter", sans-serif',

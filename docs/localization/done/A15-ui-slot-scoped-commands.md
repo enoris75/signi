@@ -19,7 +19,7 @@ becomes a key family with one entry per noun.
 | `Tidy up ${rect.label}` | [GroupBox.tsx:93](../../../packages/frontend/src/components/PhraseBuilder/GroupBox.tsx#L93) |
 
 `Remove ${rect.label}` ([GroupBox.tsx:120](../../../packages/frontend/src/components/PhraseBuilder/GroupBox.tsx#L120))
-is the same family, but REMOVE is not seeded: [B20](../B-needs-seed/B20-ui-remove-and-delete.md).
+is the same family, but REMOVE is not seeded: [B20](B20-ui-remove-and-delete.md).
 
 ## Key families
 
@@ -36,10 +36,15 @@ Every entry is `commandOf(VERB)` + `directObject: <NOUN> definite`, `NAME_FORMAT
 period header already pairs COMPACT with EXPAND (`action.compactPeriod` / `action.expandPeriod`).
 
 The nouns not yet seeded join these families when their task seeds them: MODAL, TENSE, ASPECT,
-POLARITY ([B22](../B-needs-seed/B22-ui-verb-feature-controls.md)); VERB_PHRASE and the six other
-complements ([B23](../B-needs-seed/B23-ui-complement-and-group-names.md)); RELATIVE_CLAUSE,
-COORDINATION ([B21](../B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md)). Until then those
+POLARITY ([B22](B22-ui-verb-feature-controls.md)); VERB_PHRASE and the six other
+complements ([B23](B23-ui-complement-and-group-names.md)); RELATIVE_CLAUSE,
+COORDINATION ([B21](B21-ui-clause-and-coordination-vocabulary.md)). Until then those
 keys fall back to the English literal: keep `label` as the fallback.
+
+*Since done:* B22 and B23 added the modal, tense, aspect, verb phrase and all six complements.
+POLARITY is a direct toggle with nothing to show or hide, so it has no family member. RELATIVE_CLAUSE and
+COORDINATION name link and add controls, not reveals (see bug
+[A141](../../bugs/A-must-fix/A141-link-control-tooltips-offer-a-reveal.md)).
 
 If runtime arguments land first ([C14](../C-needs-engine/C14-ui-runtime-values.md)), each family
 collapses to one entry per verb. Don't wait for it.

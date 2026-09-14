@@ -22,7 +22,7 @@ test.describe('period links', () => {
     });
     await expect(app.sentences('en')).toHaveCount(1);
 
-    await app.period(0).getByRole('button', { name: 'Remove the IF condition' }).click();
+    await app.period(0).getByRole('button', { name: 'Remove the condition' }).click();
     await expect(app.sentences('en')).toHaveCount(2);
     await expect(app.sentences('en').nth(0)).toHaveText('the dog runs.');
   });

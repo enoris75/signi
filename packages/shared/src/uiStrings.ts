@@ -110,31 +110,45 @@ const CANVAS_PARTS = {
   manner: { concept: 'ADVERBIAL_OF_MANNER', en: 'adverbial of manner' },
   determiner: { concept: 'DETERMINER', en: 'determiner' },
   possessor: { concept: 'POSSESSOR', en: 'possessor' },
+  modal: { concept: 'MODAL', en: 'modal' },
+  tense: { concept: 'TENSE', en: 'tense' },
+  aspect: { concept: 'ASPECT', en: 'aspect' },
+  verbPhrase: { concept: 'VERB_PHRASE', en: 'verb phrase' },
+  terminus: { concept: 'TERMINUS', en: 'terminus' },
+  locative: { concept: 'LOCATIVE', en: 'locative' },
+  direction: { concept: 'DIRECTION', en: 'direction' },
+  source: { concept: 'SOURCE', en: 'source' },
+  route: { concept: 'ROUTE', en: 'route' },
+  cause: { concept: 'CAUSE_COMPLEMENT', en: 'cause' },
 } as const;
 
 /** A named part of the canvas — see CANVAS_PARTS and the `action.<verb>.<part>` families. */
 export type CanvasPart = keyof typeof CANVAS_PARTS;
 
+// The complements the canvas draws as a boxed ring of their own: every one but the instrumental, which
+// lives in a period container of its own and is linked to (the canvas's BOX_COMPLEMENT_TYPES).
+const BOXED_COMPLEMENT_PARTS = [
+  'predicative', 'terminus', 'manner', 'locative', 'direction', 'source', 'route', 'cause',
+] as const satisfies readonly CanvasPart[];
+
 // Which parts each of those controls can act on — the members of each family below, exported so
 // the canvas asks the catalog rather than keeping its own copy. Every part whose word sits in a box
 // has a clear button; the parts behind a reveal control can be shown and hidden; the constituents
-// drawn as a ring of their own can be expanded and compacted. A part whose grammar noun is not seeded
-// yet (the modals, tense, aspect, the other complements, the verb phrase) is absent, and its control
-// keeps its English label until it is.
+// drawn as a ring of their own can be expanded and compacted.
 export const CLEARABLE_PARTS = [
-  'subject', 'verb', 'object', 'adverb', 'adjective', 'instrumental', 'predicative', 'manner', 'possessor',
+  'subject', 'verb', 'object', 'adverb', 'adjective', 'modal', 'instrumental',
+  ...BOXED_COMPLEMENT_PARTS, 'possessor',
 ] as const satisfies readonly CanvasPart[];
 export const REVEALABLE_PARTS = [
-  'adjective', 'adverb', 'object', 'instrumental', 'predicative', 'manner', 'determiner', 'possessor',
+  'adjective', 'adverb', 'object', 'modal', 'tense', 'aspect', 'instrumental',
+  ...BOXED_COMPLEMENT_PARTS, 'determiner', 'possessor',
 ] as const satisfies readonly CanvasPart[];
 export const COLLAPSIBLE_PARTS = [
-  'subject', 'object', 'instrumental', 'predicative', 'manner',
+  'subject', 'verbPhrase', 'object', 'instrumental', ...BOXED_COMPLEMENT_PARTS,
 ] as const satisfies readonly CanvasPart[];
 // The rings a remove control drops from the clause: the boxed complements. The subject and the object
 // stay (clearing their word empties them), and the instrumental has no ring of its own to remove.
-export const REMOVABLE_PARTS = [
-  'predicative', 'manner',
-] as const satisfies readonly CanvasPart[];
+export const REMOVABLE_PARTS = BOXED_COMPLEMENT_PARTS;
 
 // One command, one entry per part it can act on: `commandOf(verb)` on the part's grammar noun,
 // definite, keyed `<key>.<part>`. The mapped return type keeps every key literal, so `t('…')` still
@@ -271,6 +285,22 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'relationships',
   },
 
+  // The map's relation filter: one chip per kind of edge, named by what the edge points at, in the
+  // plural. An "is a" edge points at a word's HYPERNYM (it "iperonimi", ja 上位語); a "complements"
+  // edge at a verb's complements (COMPLEMENT_GRAMMAR, de "Ergänzungen"). Keyed by RelationKind.
+  'wordMap.relation.isA': {
+    plan: { subject: { concept: 'HYPERNYM', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Hypernyms',
+  },
+  'wordMap.relation.complements': {
+    plan: {
+      subject: { concept: 'COMPLEMENT_GRAMMAR', number: 'plural', definiteness: 'bare' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Complements',
+  },
+
   // The third fact says the map is *not* showing something: the words no relation reaches are left
   // out of the drawing. Two adjectives on one noun — words that are unconnected, and that are
   // hidden — because the engine has no passive voice to say "…are hidden" with, and a participle
@@ -379,6 +409,63 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Subject Complement',
   },
 
+  // The other six complements' box titles and satellite labels, seeded the same way: one noun per
+  // language carrying the whole tradition name. Italian splits the place four ways ("complemento di
+  // stato in luogo", "di moto a luogo", "di moto da luogo", "di moto per luogo"), where French names
+  // the circumstance ("complément circonstanciel de lieu") and German the adverbial ("adverbiale
+  // Bestimmung des Ortes"). The recipient is an object in most traditions: fr "complément d'objet
+  // second", es "complemento indirecto", de "Dativobjekt", ja 間接目的語. English keeps the names the
+  // builder has always shown.
+  'slot.terminus': {
+    plan: nameOf('TERMINUS'),
+    format: NAME_FORMAT,
+    fallback: 'Terminus',
+  },
+  'slot.locative': {
+    plan: nameOf('LOCATIVE'),
+    format: NAME_FORMAT,
+    fallback: 'Locative',
+  },
+  'slot.direction': {
+    plan: nameOf('DIRECTION'),
+    format: NAME_FORMAT,
+    fallback: 'Direction',
+  },
+  'slot.source': {
+    plan: nameOf('SOURCE'),
+    format: NAME_FORMAT,
+    fallback: 'Source',
+  },
+  'slot.route': {
+    plan: nameOf('ROUTE'),
+    format: NAME_FORMAT,
+    fallback: 'Route',
+  },
+  // CAUSE_COMPLEMENT, the grammar term, not the CAUSE that makes something happen.
+  'slot.cause': {
+    plan: nameOf('CAUSE_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Cause',
+  },
+
+  // The verb's ring on the canvas: the verb with its modals, tense, aspect and adverb. The Romance
+  // traditions call a phrase in this sense a "sintagma" / "syntagme" (it "sintagma verbale"), and
+  // German and Japanese compound it on the verb (de "Verbalphrase", ja 動詞句).
+  'slot.verbPhrase': {
+    plan: nameOf('VERB_PHRASE'),
+    format: NAME_FORMAT,
+    fallback: 'Verb Phrase',
+  },
+
+  // The modal verb's box title and satellite label, for both modals in the chain: the numeral of
+  // "Modal 2" only told two identical English labels apart, as with the adjectives. Italian school
+  // grammar calls these "verbi servili"; the others name them by mood (de "Modalverb", ja 法助動詞).
+  'slot.modal': {
+    plan: nameOf('MODAL'),
+    format: NAME_FORMAT,
+    fallback: 'Modal',
+  },
+
   // The verb box's placeholder, the same command shape as the subject's: "type a verb" — the
   // TYPE imperative taking an indefinite VERB (the grammar noun) as its direct object.
   'slot.verb.placeholder': {
@@ -408,6 +495,14 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: { stripPeriod: true },
     fallback: 'type an adverb',
+  },
+  'slot.modal.placeholder': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'MODAL', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'type a modal',
   },
   'slot.noun.placeholder': {
     plan: {
@@ -488,6 +583,214 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('GENDER'),
     format: NAME_FORMAT,
     fallback: 'Gender',
+  },
+
+  // The verb's feature controls, each named by the bare grammar noun, like `satellite.number`: the
+  // polarity toggle, and the tense and aspect satellites with the value boxes they reveal. TENSE is
+  // grammatical time, not the TIME a clock tells, though Italian, Spanish and Portuguese use one word
+  // for both ("tempo"); German says "Tempus", Japanese 時制. Japanese borrows アスペクト for the aspect.
+  'satellite.polarity': {
+    plan: nameOf('POLARITY'),
+    format: NAME_FORMAT,
+    fallback: 'Polarity',
+  },
+  'satellite.tense': {
+    plan: nameOf('TENSE'),
+    format: NAME_FORMAT,
+    fallback: 'Tense',
+  },
+  'satellite.aspect': {
+    plan: nameOf('ASPECT'),
+    format: NAME_FORMAT,
+    fallback: 'Aspect',
+  },
+
+  // The link control on a noun that makes a period in another container its relative clause. One
+  // noun per tradition, like the complement names: German and Japanese compound it (Relativsatz,
+  // 関係節), which CLAUSE and an adjective would not give.
+  'satellite.relative': {
+    plan: nameOf('RELATIVE_CLAUSE'),
+    format: NAME_FORMAT,
+    fallback: 'Relative clause',
+  },
+
+  // The control on a noun that coordinates another phrase with it ("the cat and the dog").
+  'satellite.coordination': {
+    plan: nameOf('COORDINATION'),
+    format: NAME_FORMAT,
+    fallback: 'Coordination',
+  },
+
+  // The values of the tense satellite, keyed `tense.value.<Tense>` so a call site can write
+  // t(`tense.value.${tense}`). Nouns, like `number.value.*`: the value box shows one standing alone,
+  // and German names the tenses with nouns no adjective gives (Präsens, Präteritum, Futur). The past
+  // is the Präteritum because that is the past the engine renders ("der Kater aß").
+  'tense.value.present': {
+    plan: nameOf('PRESENT_TENSE'),
+    format: NAME_FORMAT,
+    fallback: 'Present',
+  },
+  'tense.value.past': {
+    plan: nameOf('PAST_TENSE'),
+    format: NAME_FORMAT,
+    fallback: 'Past',
+  },
+  'tense.value.future': {
+    plan: nameOf('FUTURE_TENSE'),
+    format: NAME_FORMAT,
+    fallback: 'Future',
+  },
+
+  // The values of the aspect satellite, keyed `aspect.value.<Aspect>`. Adjectives agreeing with
+  // ASPECT, like `gender.value.*` with GENDER: every language has one, and names the aspect with it
+  // ("aspetto progressivo", "progressiver Aspekt"). Japanese strips the attributive の (進行).
+  'aspect.value.neutral': {
+    word: 'NEUTRAL',
+    agreesWith: 'ASPECT',
+    format: { capitalize: true },
+    fallback: 'Neutral',
+  },
+  'aspect.value.progressive': {
+    word: 'PROGRESSIVE',
+    agreesWith: 'ASPECT',
+    format: { capitalize: true },
+    fallback: 'Progressive',
+  },
+  'aspect.value.prospective': {
+    word: 'PROSPECTIVE',
+    agreesWith: 'ASPECT',
+    format: { capitalize: true },
+    fallback: 'Prospective',
+  },
+  'aspect.value.resultative': {
+    word: 'RESULTATIVE',
+    agreesWith: 'ASPECT',
+    format: { capitalize: true },
+    fallback: 'Resultative',
+  },
+
+  // The two values of the polarity toggle, agreeing with POLARITY, which is feminine in the Romance
+  // languages: it "positiva / negativa", fr "positive / négative". Keyed `polarity.value.<value>`.
+  'polarity.value.positive': {
+    word: 'POSITIVE',
+    agreesWith: 'POLARITY',
+    format: { capitalize: true },
+    fallback: 'Positive',
+  },
+  'polarity.value.negative': {
+    word: 'NEGATIVE',
+    agreesWith: 'POLARITY',
+    format: { capitalize: true },
+    fallback: 'Negative',
+  },
+
+  // The controls under an attributive noun ("*sail* boat"). The relation chip's caption is the
+  // RELATIONSHIP noun, the word the map's edges already use (it "relazione", de "Beziehung"). The chip
+  // itself shows the relation by its first noun, lower-case because its CSS uppercases it; keyed
+  // `modifier.relation.<ModifierRelation>`.
+  'modifier.relation': {
+    plan: nameOf('RELATIONSHIP'),
+    format: NAME_FORMAT,
+    fallback: 'Relationship',
+  },
+  'modifier.relation.feature': {
+    plan: nameOf('FEATURE'),
+    format: { stripPeriod: true },
+    fallback: 'feature',
+  },
+  'modifier.relation.purpose': {
+    plan: nameOf('PURPOSE'),
+    format: { stripPeriod: true },
+    fallback: 'purpose',
+  },
+  'modifier.relation.material': {
+    plan: nameOf('MATERIAL'),
+    format: { stripPeriod: true },
+    fallback: 'material',
+  },
+  // The chip's tooltip spells the relation out with the two nouns that say what the modifier is to its
+  // head, coordinated by `or`: a sail is the boat's feature or means, the sun the glasses' purpose or
+  // use, gold the ring's material or content. Keyed `modifier.relation.<ModifierRelation>.gloss`.
+  'modifier.relation.feature.gloss': {
+    plan: {
+      subject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'FEATURE', definiteness: 'bare' },
+          { concept: 'MEANS', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Feature or means',
+  },
+  'modifier.relation.purpose.gloss': {
+    plan: {
+      subject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'PURPOSE', definiteness: 'bare' },
+          { concept: 'USE_NOUN', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Purpose or use',
+  },
+  'modifier.relation.material.gloss': {
+    plan: {
+      subject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'MATERIAL', definiteness: 'bare' },
+          { concept: 'CONTENT', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Material or content',
+  },
+
+  // The degree chip's caption on an adjective. DEGREE_GRAMMAR, the degree of comparison, not a unit
+  // of heat: German names it by the step of the comparison ("Steigerungsstufe"). The values it shows
+  // (More / Most / …) are function words, which the catalog has no entry kind for yet.
+  'modifier.degree': {
+    plan: nameOf('DEGREE_GRAMMAR'),
+    format: NAME_FORMAT,
+    fallback: 'Degree',
+  },
+
+  // The caption of the chip holding a modifier's own adjective ("*semantic* phrase creator"): the
+  // ADJECTIVE owned by the modifier, bare like the other captions (en "the modifier's adjective",
+  // it "aggettivo del modificatore", ja 修飾語の形容詞). The call site adds the adjective after it.
+  'modifier.adjective': {
+    plan: {
+      subject: {
+        concept: 'ADJECTIVE',
+        definiteness: 'bare',
+        possessor: { concept: 'MODIFIER', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "The modifier's adjective",
+  },
+
+  // The same chip while it is empty: ADD an adjective, restricted by the relative clause saying what it
+  // is for — one that DESCRIBES this modifier, the one under the cursor.
+  'modifier.addAdjective': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: {
+        concept: 'ADJECTIVE',
+        definiteness: 'indefinite',
+        relative: {
+          verbPhrase: { verb: 'DESCRIBE' },
+          directObject: { concept: 'MODIFIER', definiteness: 'this' },
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add an adjective that describes this modifier',
   },
 
   // The two values that control shows, keyed `number.value.<Number>` so a call site can write
@@ -972,6 +1275,213 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Coordinate this period',
   },
+
+  // The badge in a period's caption naming the part the period plays in a link: CLAUSE with the
+  // adjective for that part. The Romance traditions name clauses exactly so ("proposizione principale",
+  // "proposition conditionnelle", "oración coordinada"); German says "übergeordneter Satz" for the
+  // main one, and Japanese compounds each term on 節 (主節, 条件節, 等位節). A coordinated clause's
+  // conjunction ("and", "but") is a function word the catalog has no entry kind for yet, so the call
+  // site adds it in English.
+  'clause.main': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['MAIN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Main clause',
+  },
+  'clause.conditional': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['CONDITIONAL'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Conditional clause',
+  },
+  'clause.first': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['FIRST'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'First clause',
+  },
+  'clause.coordinated': {
+    plan: { subject: { concept: 'CLAUSE', definiteness: 'bare', adjectives: ['COORDINATED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Coordinated clause',
+  },
+
+  // What the conditional and coordination controls say of the period they sit on once it is the second
+  // half of a link: a statement, BE with the clause as its subject complement ("this period is a
+  // conditional clause", ja 「この文は条件節です」). Indefinite: one of the clauses the link is made of.
+  'period.isConditional': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: {
+        predicative: { phrase: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['CONDITIONAL'] } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a conditional clause',
+  },
+  'period.isCoordinated': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: {
+        predicative: { phrase: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['COORDINATED'] } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a coordinated clause',
+  },
+
+  // The conditional control before any condition exists: ADD a condition, indefinite, since the user
+  // has yet to pick the period that sets it. What pressing it does to *this* period is a statement,
+  // BECOME the main clause, kept as an entry of its own and joined in brackets at the call site: one
+  // plan cannot say both, because a clause coordinated with a command inherits its imperative mood.
+  // Lower-case, as it reads inside the brackets (the engine leaves a sentence's first word as it is).
+  'action.addCondition': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'CONDITION', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a condition',
+  },
+  'period.becomesMain': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BECOME' },
+      complements: {
+        predicative: { phrase: { concept: 'CLAUSE', definiteness: 'definite', adjectives: ['MAIN'] } },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'this period becomes the main clause',
+  },
+
+  // The same two controls on the first half of a link, which drop the link: REMOVE, the canvas verb
+  // undo reverses, on the condition or the coordination already there, so definite.
+  'action.removeCondition': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'CONDITION', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the condition',
+  },
+  'action.removeCoordination': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'COORDINATION', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the coordination',
+  },
+
+  // The remove control on a hosted ring, which drops that phrase from the noun it hangs off: one of a
+  // coordinated noun's conjuncts ("Peter" of "Peter and Paul"), or a noun's owner. `this`, the ring
+  // under the cursor. Spanish and Portuguese have no word for a conjunct and say "the coordinated
+  // member" (es "quitar este miembro coordinado").
+  'action.removeConjunct': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'CONJUNCT', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove this conjunct',
+  },
+  'action.removePossessor': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: { concept: 'POSSESSOR', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove this possessor',
+  },
+
+  // The coordination control's value: ADD a conjunct, and once there is one, another. OTHER takes the
+  // indefinite article's place in Spanish and Portuguese ("añadir otro miembro coordinado") and fuses
+  // with it in English ("another"); in Italian and French it precedes the noun ("un altro congiunto").
+  'action.addConjunct': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'CONJUNCT', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a conjunct',
+  },
+  'action.addAnotherConjunct': {
+    plan: {
+      ...commandOf('ADD'),
+      directObject: { concept: 'CONJUNCT', definiteness: 'indefinite', adjectives: ['OTHER'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add another conjunct',
+  },
+
+  // The hint banner while a link waits for its second period: CLICK the period, restricted by what it
+  // is to be, in the container it has to be found in. The container is `action.addPeriodContainer`'s,
+  // with OTHER: the pick cannot land in the container it started from. The relative clause names the
+  // role: the period that BE the condition (a subject gap), or the noun this clause DESCRIBES (an
+  // object gap, whose subject is the clause being linked).
+  'pick.condition': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: {
+        concept: 'PERIOD_SENTENCE',
+        definiteness: 'definite',
+        relative: {
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: { concept: 'CONDITION', definiteness: 'definite' } } },
+        },
+      },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            adjectives: ['OTHER'],
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+    } as PhrasePlan,
+    // The banner is a sentence, so it keeps the full stop its language ends one with ("。" in ja).
+    format: { capitalize: true },
+    fallback: 'Click the period that is the condition in another period container.',
+  },
+  'pick.relativeHead': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: {
+        concept: 'NOUN',
+        definiteness: 'definite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'CLAUSE', definiteness: 'this' },
+          verbPhrase: { verb: 'DESCRIBE' },
+        },
+      },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            adjectives: ['OTHER'],
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Click the noun that this clause describes in another period container.',
+  },
+
+  // The conjunction menu's hints: the kind of relation each conjunction sets up, as the grammar
+  // traditions name it. An adjective agreeing with CONJUNCTION, feminine in the Romance languages
+  // (it "avversativa", fr "temporelle"). Japanese names the kinds with nouns (累加, 逆接). Keyed by
+  // CoordConjunction so the menu can write t(`conjunction.kind.${value}`).
+  'conjunction.kind.and': { word: 'COPULATIVE', agreesWith: 'CONJUNCTION', fallback: 'copulative' },
+  'conjunction.kind.or': { word: 'DISJUNCTIVE', agreesWith: 'CONJUNCTION', fallback: 'disjunctive' },
+  'conjunction.kind.but': { word: 'ADVERSATIVE', agreesWith: 'CONJUNCTION', fallback: 'adversative' },
+  'conjunction.kind.that_is': { word: 'EXPLICATIVE', agreesWith: 'CONJUNCTION', fallback: 'explicative' },
+  'conjunction.kind.therefore': { word: 'CONCLUSIVE', agreesWith: 'CONJUNCTION', fallback: 'conclusive' },
+  'conjunction.kind.then': { word: 'TEMPORAL', agreesWith: 'CONJUNCTION', fallback: 'temporal' },
 
   // The controls that act on one named part of the canvas — a word's clear button, a satellite's
   // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the

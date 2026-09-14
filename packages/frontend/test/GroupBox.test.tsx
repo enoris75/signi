@@ -24,6 +24,7 @@ const SUBJECT_GROUP: GroupRect = {
 
 const DIRECTION_GROUP: GroupRect = {
   label: 'Direction',
+  labelKey: 'slot.direction',
   color: '#8b6914',
   mainKey: 'direction',
   nodeKeys: ['direction'],
@@ -174,6 +175,17 @@ describe('GroupBox', () => {
       expect(screen.getByRole('button', { name: 'Das Subjekt erweitern' })).toBeInTheDocument();
     });
 
+    it('names the verb phrase it compacts in the UI language', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      const verbPhrase = { ...SUBJECT_GROUP, label: 'Verb Phrase', labelKey: 'slot.verbPhrase' as const, mainKey: 'verb' };
+      const controlPos = { [collapseControlKey('Verb Phrase')]: { x: 136, y: 36 } };
+      const strings = { 'action.compact.verbPhrase': { it: 'Compatta il sintagma verbale' } };
+      const { ctx } = renderGroup(verbPhrase, { controlPos }, { strings });
+
+      fireEvent.click(screen.getByRole('button', { name: 'Compatta il sintagma verbale' }));
+      expect(ctx.handleToggleCollapse).toHaveBeenCalledExactlyOnceWith('Verb Phrase');
+    });
+
     it('reads only its own group’s collapse state', () => {
       renderGroup(SUBJECT_GROUP, { collapsedGroups: { Direction: true, Subject: false } });
 
@@ -196,7 +208,7 @@ describe('GroupBox', () => {
   describe('remove control', () => {
     it('removes a complement, from where the ring layout seated it', () => {
       const { ctx } = renderGroup(DIRECTION_GROUP);
-      const remove = screen.getByRole('button', { name: 'Remove Direction' });
+      const remove = screen.getByRole('button', { name: 'Remove the direction' });
 
       expect(position(remove)).toEqual({ left: '547px', top: '203px' });
 

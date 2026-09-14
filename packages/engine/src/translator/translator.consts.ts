@@ -29,3 +29,10 @@ export const AGREEMENT_KEYS = ['person', 'number', 'gender'] as const;
  * the nearest-conjunct rule ("le chat ou le chien court").
  */
 export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
+
+/**
+ * Languages where OTHER takes the place of the indefinite article rather than following it: Spanish
+ * "otro gato" and Portuguese "outro gato", never "*un otro gato". Their indefinite phrase with OTHER
+ * resolves bare. (English fuses the two into "another" instead, see en/nounPhrase.)
+ */
+export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);

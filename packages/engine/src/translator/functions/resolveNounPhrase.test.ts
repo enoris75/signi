@@ -40,6 +40,21 @@ describe('resolveNounPhrase', () => {
       expect(headForms({ concept: 'CAT', definiteness: 'this' })['number']).toBe('singular');
     });
 
+    test('OTHER takes the indefinite article’s place in Spanish and Portuguese, and follows it elsewhere', () => {
+      const other: NounPhrase = { concept: 'CAT', definiteness: 'indefinite', adjectives: ['OTHER'] };
+      const lookup = lexicon({ CAT: GATTO, BIG: GRANDE, OTHER: { role: 'adjective', base: 'altro' } });
+      const definiteness = (language: string, np: NounPhrase = other) =>
+        resolveNounPhrase(np, language, lookup).head.forms['definiteness'];
+
+      expect(definiteness('es')).toBe('bare');
+      expect(definiteness('pt')).toBe('bare');
+      expect(definiteness('it')).toBe('indefinite');
+      expect(definiteness('en')).toBe('indefinite');
+      // Only an indefinite yields: "el otro gato" keeps its article.
+      expect(definiteness('es', { ...other, definiteness: 'definite' })).toBe('definite');
+      expect(definiteness('es', { ...other, adjectives: ['BIG'] })).toBe('indefinite');
+    });
+
     test('a feminine referent takes the feminine forms', () => {
       expect(headForms({ concept: 'CAT', number: 'plural', gender: 'fem' })).toMatchObject({ base: 'gatte', gender: 'fem' });
     });

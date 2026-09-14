@@ -910,6 +910,251 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Different from the one already named: "the other cat", "another cat". Prenominal in the
+    // Romance languages (it "un altro gatto", fr "un autre chat"), and Spanish and Portuguese drop
+    // the indefinite article before it ("otro gato", "outro gato"), as English fuses it ("another").
+    id: 'OTHER',
+    role: 'adjective',
+    description: 'different from the one already named',
+    emoji: '🔁',
+    forms: {
+      en: { base: 'other' },
+      it: { base: 'altro' },
+      fr: { base: 'autre' },
+      de: { base: 'andere' },
+      es: { base: 'otro' },
+      ja: { base: '別の', reading: 'べつの' },
+      pt: { base: 'outro' },
+    },
+  },
+  // ── Kinds of clause ──────────────────────────────────────────────
+  // What a clause is to the period it sits in, said of CLAUSE: the main one the others depend on,
+  // the conditional one, and one coordinated with another. The Romance traditions name the clauses
+  // with these adjectives ("proposizione principale / condizionale / coordinata"). German says
+  // "übergeordnet" for the main clause, the adjective its compound Hauptsatz has no match for.
+  // Japanese compounds the term on 節 (主節, 条件節, 等位節), so its forms are the bare first half, which
+  // runs straight into the noun: a Japanese adjective joins its noun with no space (see npSegs).
+  {
+    id: 'MAIN',
+    role: 'adjective',
+    description: 'not depending on any other clause (grammar)',
+    emoji: '👑',
+    forms: {
+      en: { base: 'main' },
+      it: { base: 'principale' },
+      fr: { base: 'principal' },
+      de: { base: 'übergeordnet' },
+      es: { base: 'principal' },
+      ja: { base: '主', reading: 'しゅ' },
+      pt: { base: 'principal' },
+    },
+  },
+  {
+    id: 'CONDITIONAL',
+    role: 'adjective',
+    description: 'setting the condition another clause depends on (grammar)',
+    emoji: '🔀',
+    forms: {
+      en: { base: 'conditional' },
+      it: { base: 'condizionale' },
+      fr: { base: 'conditionnel' },
+      de: { base: 'konditional' },
+      es: { base: 'condicional' },
+      ja: { base: '条件', reading: 'じょうけん' },
+      pt: { base: 'condicional' },
+    },
+  },
+  {
+    id: 'COORDINATED',
+    role: 'adjective',
+    description: 'joined to another clause or phrase of equal rank (grammar)',
+    emoji: '🔗',
+    forms: {
+      en: { base: 'coordinated' },
+      it: { base: 'coordinato' },
+      fr: { base: 'coordonné' },
+      de: { base: 'beigeordnet' },
+      es: { base: 'coordinado' },
+      ja: { base: '等位', reading: 'とうい' },
+      pt: { base: 'coordenado' },
+    },
+  },
+  // ── Kinds of conjunction ─────────────────────────────────────────
+  // The relation each coordinating conjunction sets up, as the grammar traditions name it: and adds
+  // (copulative), or offers a choice (disjunctive), but opposes (adversative), that is explains
+  // (explicative), therefore concludes (conclusive), then follows in time (temporal). Said of
+  // CONJUNCTION, which is feminine in the Romance languages ("congiunzione avversativa"). Japanese
+  // names the kinds with nouns (累加, 選択, 逆接 …), seeded with the attributive の.
+  {
+    id: 'COPULATIVE',
+    role: 'adjective',
+    description: 'adding one thing to another, like "and" (grammar)',
+    emoji: '➕',
+    forms: {
+      en: { base: 'copulative' },
+      it: { base: 'copulativo' },
+      fr: { base: 'copulatif' },
+      de: { base: 'kopulativ' },
+      es: { base: 'copulativo' },
+      ja: { base: '累加の', reading: 'るいかの' },
+      pt: { base: 'copulativo' },
+    },
+  },
+  {
+    id: 'DISJUNCTIVE',
+    role: 'adjective',
+    description: 'offering a choice between things, like "or" (grammar)',
+    emoji: '🔀',
+    forms: {
+      en: { base: 'disjunctive' },
+      it: { base: 'disgiuntivo' },
+      fr: { base: 'disjonctif' },
+      de: { base: 'disjunktiv' },
+      es: { base: 'disyuntivo' },
+      ja: { base: '選択の', reading: 'せんたくの' },
+      pt: { base: 'disjuntivo' },
+    },
+  },
+  {
+    id: 'ADVERSATIVE',
+    role: 'adjective',
+    description: 'setting one thing against another, like "but" (grammar)',
+    emoji: '↔️',
+    forms: {
+      en: { base: 'adversative' },
+      it: { base: 'avversativo' },
+      fr: { base: 'adversatif' },
+      de: { base: 'adversativ' },
+      es: { base: 'adversativo' },
+      ja: { base: '逆接の', reading: 'ぎゃくせつの' },
+      pt: { base: 'adversativo' },
+    },
+  },
+  {
+    id: 'EXPLICATIVE',
+    role: 'adjective',
+    description: 'explaining what came before, like "that is" (grammar)',
+    emoji: '💬',
+    forms: {
+      en: { base: 'explicative' },
+      it: { base: 'esplicativo' },
+      fr: { base: 'explicatif' },
+      de: { base: 'explikativ' },
+      es: { base: 'explicativo' },
+      ja: { base: '説明の', reading: 'せつめいの' },
+      pt: { base: 'explicativo' },
+    },
+  },
+  {
+    id: 'CONCLUSIVE',
+    role: 'adjective',
+    description: 'drawing a conclusion from what came before, like "therefore" (grammar)',
+    emoji: '🏁',
+    forms: {
+      en: { base: 'conclusive' },
+      it: { base: 'conclusivo' },
+      fr: { base: 'conclusif' },
+      de: { base: 'konklusiv' },
+      es: { base: 'conclusivo' },
+      ja: { base: '順接の', reading: 'じゅんせつの' },
+      pt: { base: 'conclusivo' },
+    },
+  },
+  {
+    id: 'TEMPORAL',
+    role: 'adjective',
+    description: 'relating things by their order in time, like "then"',
+    emoji: '🕰️',
+    forms: {
+      en: { base: 'temporal' },
+      it: { base: 'temporale' },
+      fr: { base: 'temporel' },
+      de: { base: 'temporal' },
+      es: { base: 'temporal' },
+      ja: { base: '時間的な', reading: 'じかんてきな' },
+      pt: { base: 'temporal' },
+    },
+  },
+  // ── Aspects and polarity ─────────────────────────────────────────
+  // The values of the verb's aspect and polarity controls, said of ASPECT and POLARITY. NEGATIVE is
+  // seeded above with the determiner values. NEUTRAL is the everyday word (it "neutrale"), which the
+  // plain aspect takes as well as a neutral feeling.
+  {
+    id: 'NEUTRAL',
+    role: 'adjective',
+    description: 'taking neither one side nor the other',
+    emoji: '⚖️',
+    forms: {
+      en: { base: 'neutral' },
+      it: { base: 'neutrale' },
+      fr: { base: 'neutre' },
+      de: { base: 'neutral' },
+      es: { base: 'neutral' },
+      ja: { base: '中立の', reading: 'ちゅうりつの' },
+      pt: { base: 'neutro' },
+    },
+  },
+  {
+    id: 'PROGRESSIVE',
+    role: 'adjective',
+    description: 'presenting an event as in progress (grammar)',
+    emoji: '▶️',
+    forms: {
+      en: { base: 'progressive' },
+      it: { base: 'progressivo' },
+      fr: { base: 'progressif' },
+      de: { base: 'progressiv' },
+      es: { base: 'progresivo' },
+      ja: { base: '進行の', reading: 'しんこうの' },
+      pt: { base: 'progressivo' },
+    },
+  },
+  {
+    id: 'PROSPECTIVE',
+    role: 'adjective',
+    description: 'presenting an event as about to happen (grammar)',
+    emoji: '⏩',
+    forms: {
+      en: { base: 'prospective' },
+      it: { base: 'prospettivo' },
+      fr: { base: 'prospectif' },
+      de: { base: 'prospektiv' },
+      es: { base: 'prospectivo' },
+      ja: { base: '将然の', reading: 'しょうぜんの' },
+      pt: { base: 'prospectivo' },
+    },
+  },
+  {
+    id: 'RESULTATIVE',
+    role: 'adjective',
+    description: 'presenting the state an event has left behind (grammar)',
+    emoji: '✅',
+    forms: {
+      en: { base: 'resultative' },
+      it: { base: 'risultativo' },
+      fr: { base: 'résultatif' },
+      de: { base: 'resultativ' },
+      es: { base: 'resultativo' },
+      ja: { base: '結果の', reading: 'けっかの' },
+      pt: { base: 'resultativo' },
+    },
+  },
+  {
+    id: 'POSITIVE',
+    role: 'adjective',
+    description: 'affirming, not negating (grammar)',
+    emoji: '👍',
+    forms: {
+      en: { base: 'positive' },
+      it: { base: 'positivo' },
+      fr: { base: 'positif' },
+      de: { base: 'positiv' },
+      es: { base: 'positivo' },
+      ja: { base: '肯定の', reading: 'こうていの' },
+      pt: { base: 'positivo' },
+    },
+  },
+  {
     id: 'SEMANTIC',
     role: 'adjective',
     description: 'relating to meaning in language',
