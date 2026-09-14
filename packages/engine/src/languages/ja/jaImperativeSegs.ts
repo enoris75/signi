@@ -14,7 +14,8 @@ import { wordSeg } from './wordSeg.js';
  * does not command there: it labels with the verb's verbal noun — 保存, 読み込み, 追加 — so
  * "文を読み込んでください" ("please load a period") becomes "文を読み込み". The noun is the `label`
  * form seeded on the ja verb; failing that it derives from the masu-stem, minus the し a
- * する-verb ends on (保存し → 保存). Its negative is the prohibitive ～ないこと ("走らないこと"),
+ * する-verb ends on (保存し → 保存). Only a する-verb loses it: the し of a godan す-verb is its
+ * own stem, which is already the noun (隠し, 押し — not 隠, 押). Its negative is the prohibitive ～ないこと ("走らないこと"),
  * which the lexicon's nai-form gap likewise rules out, so a negative instruction keeps ～な.
  */
 export function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolean, instruction = false): RubySegment[] {
@@ -22,7 +23,10 @@ export function jaImperativeSegs(verb: ConceptForms, pn: JaIPN, negative: boolea
     const label = verb.forms['label'];
     if (label) return [wordSeg(label, verb.forms['label_reading'] ?? labelReading(verb, label))];
     const st = masuStem(verb);
-    if (st) return [wordSeg(st.stem.replace(/し$/, ''), st.reading?.replace(/し$/, ''))];
+    if (st) {
+      if (!verb.forms['base']?.endsWith('する')) return [wordSeg(st.stem, st.reading)];
+      return [wordSeg(st.stem.replace(/し$/, ''), st.reading?.replace(/し$/, ''))];
+    }
   }
   if (pn === '1pl') {
     if (negative) {

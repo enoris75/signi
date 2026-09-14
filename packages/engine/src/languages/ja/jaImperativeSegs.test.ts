@@ -59,6 +59,12 @@ describe('jaImperativeSegs', () => {
       expect(jaImperativeSegs(concept(SESSHU_SURU), '2sg', false, true)).toEqual([{ t: '摂取', r: 'せっしゅ' }]);
     });
 
+    // A126: a godan す-verb's stem also ends on し, but that し is the verb's own, not する's.
+    test('a godan す-verb keeps the し of its stem', () => {
+      const KAKUSU: Forms = { base: '隠す', reading: 'かくす', masu_present: '隠します', masu_present_reading: 'かくします' };
+      expect(jaImperativeSegs(concept(KAKUSU), '2sg', false, true)).toEqual([{ t: '隠し', r: 'かくし' }]);
+    });
+
     test('a negative instruction keeps the prohibitive', () => {
       expect(text(jaImperativeSegs(concept(HOZON_SURU), '2sg', true, true))).toBe('保存するな');
     });

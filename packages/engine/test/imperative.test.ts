@@ -163,6 +163,15 @@ describe('imperative register', () => {
     });
   });
 
+  // A126: the label rule dropped a trailing し as if every verb were a する-verb, so HIDE (隠す)
+  // labelled with the bare kanji 隠 — "単語を隠", the header's own "hide the words" button.
+  test('Japanese keeps the し of a godan す-verb label', () => {
+    expect(instruction('HIDE', { directObject: np('WORD', { number: 'plural' }) })).toMatchObject({
+      ja: '単語を隠し。',
+      en: 'hide the words.',
+    });
+  });
+
   test('Japanese prefers a seeded label form where the lexeme has one', () => {
     // SAVE carries a `label` form on its ja lexeme (保存), which is what the UI's button says.
     expect(instruction('SAVE', { directObject: np('BOOK') })).toMatchObject({
