@@ -1,5 +1,13 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionGerund, causeSentiment, firstConjunct, isSeemingPredicateNoun, locativeIdiom, mannerRelation, pathSpecifier, type ConceptForms, type ResolvedComplement } from '../../types.js';
+import type { ConceptForms, ResolvedComplement } from '../../types.js';
+import { abstractionLevel } from '../../resolved/abstractionLevel.js';
+import { actionGerund } from '../../resolved/actionGerund.js';
+import { causeSentiment } from '../../resolved/causeSentiment.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
+import { isSeemingPredicateNoun } from '../../resolved/isSeemingPredicateNoun.js';
+import { locativeIdiom } from '../../resolved/locativeIdiom.js';
+import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { pathSpecifier } from '../../resolved/pathSpecifier.js';
 import { CAUSE_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';

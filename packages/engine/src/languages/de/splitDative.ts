@@ -1,5 +1,6 @@
 import type { ComplementType } from '@signi/shared';
-import { firstConjunct, type ResolvedComplement } from '../../types.js';
+import type { ResolvedComplement } from '../../types.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 
 /**
  * Split the complements into the bare-dative recipient (`terminus`) and the rest. German puts a

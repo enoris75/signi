@@ -1,4 +1,5 @@
-import { objectPronounForm, type ResolvedNounElement } from '../../types.js';
+import type { ResolvedNounElement } from '../../types.js';
+import { objectPronounForm } from '../../resolved/objectPronounForm.js';
 import { coordinate } from './coordinate.js';
 import { nounPhrase } from './nounPhrase.js';
 

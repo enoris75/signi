@@ -1,5 +1,10 @@
-import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { causeSentiment, isPronominalPossessor, isSeemingPredicateNoun, locativeIdiom, pathSpecifier, possessedHeadForms, type ConceptForms, type ResolvedComplement } from '../../../types.js';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, isPronominalPossessor, type ComplementType } from '@signi/shared';
+import type { ConceptForms, ResolvedComplement } from '../../../types.js';
+import { causeSentiment } from '../../../resolved/causeSentiment.js';
+import { isSeemingPredicateNoun } from '../../../resolved/isSeemingPredicateNoun.js';
+import { locativeIdiom } from '../../../resolved/locativeIdiom.js';
+import { pathSpecifier } from '../../../resolved/pathSpecifier.js';
+import { possessedHeadForms } from '../../../resolved/possessedHeadForms.js';
 import { possessiveDe } from '../../../possessive.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { coordinate } from '../coordinate.js';

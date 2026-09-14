@@ -16,8 +16,9 @@ The individual defects now live one-per-file under the three subdirectories:
 
 - The engine is `packages/engine/src/`. One folder per language, `languages/{en,it,fr,es,pt,de,ja}/`,
   with one file per function, `<lang>.consts.ts` / `<lang>.types.ts`, the engine object
-  (`englishEngine.ts`, …) behind an `index.ts`, and a unit test next to each function. Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`)
-  and `mood.ts`. The plan model is typed in `packages/shared/src/index.ts`.
+  (`englishEngine.ts`, …) behind an `index.ts`, and a unit test next to each function. Shared plumbing is `translator.ts` (resolves a `PhrasePlan` into per-language `ConceptForms`),
+  `mood.ts`, and `resolved/` — the helpers every engine reads the resolved shapes with, one file per
+  function, over the types in `types.ts`. The plan model is typed in `packages/shared/src/index.ts`.
 - Tests are `packages/engine/test/`, run with **`npm run test:unit`** (~300ms, no server needed —
   the harness seeds an in-memory SQLite from the real corpus and calls the production lexicon).
   The function-level unit tests sit beside their source (`languages/<lang>/*.test.ts`) and build

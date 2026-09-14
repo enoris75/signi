@@ -1,4 +1,5 @@
-import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor } from '@signi/shared';
+import type { ResolvedNounPhrase } from '../../types.js';
 import type { Case } from './de.types.js';
 import { ARTICLELESS_MASS_DETERMINERS } from './de.consts.js';
 import { declineAdj } from './declineAdj.js';

@@ -1,4 +1,5 @@
-import { dimensionRelation, type ResolvedNounElement, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { dimensionRelation } from '../../resolved/dimensionRelation.js';
 import { ES_DIM_PREP } from './es.consts.js';
 import { subjectText } from './subjectText.js';
 

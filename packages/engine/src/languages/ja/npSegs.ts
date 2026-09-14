@@ -1,5 +1,8 @@
 import type { Definiteness } from '@signi/shared';
-import { adjDegree, isGenericSubject, isPronominalPossessor, type ResolvedNounPhrase, type RubySegment } from '../../types.js';
+import { isPronominalPossessor } from '@signi/shared';
+import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
+import { isGenericSubject } from '../../resolved/isGenericSubject.js';
 import { possessiveJa } from '../../possessive.js';
 import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET, JA_SOU } from './ja.consts.js';
 import { elSegs } from './elSegs.js';

@@ -1,4 +1,6 @@
-import { adjDegree, joinConjuncts, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
+import { joinConjuncts } from '../../resolved/joinConjuncts.js';
 import type { PtAdjectives } from './pt.types.js';
 import { PRENOMINAL } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';

@@ -1,4 +1,7 @@
-import { isPronominalPossessor, joinConjuncts, possessedHeadForms, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor } from '@signi/shared';
+import type { ResolvedNounPhrase } from '../../types.js';
+import { joinConjuncts } from '../../resolved/joinConjuncts.js';
+import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
 import { possessiveFr } from '../../possessive.js';
 import { deDet } from './deDet.js';
 import { elidesBefore } from './elidesBefore.js';

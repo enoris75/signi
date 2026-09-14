@@ -1,4 +1,5 @@
-import { adjDegree, type ConceptForms, type ResolvedNounPhrase } from '../../types.js';
+import type { ConceptForms, ResolvedNounPhrase } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
 import { PRENOMINAL } from './it.consts.js';
 
 /** Split a phrase's adjectives into those that precede the noun and those that follow. */

@@ -1,5 +1,14 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import type { ResolvedComplement } from '../../types.js';
+import { abstractionLevel } from '../../resolved/abstractionLevel.js';
+import { actionInfinitive } from '../../resolved/actionInfinitive.js';
+import { causeSentiment } from '../../resolved/causeSentiment.js';
+import { isRelativeSuperlative } from '../../resolved/isRelativeSuperlative.js';
+import { locativeIdiom } from '../../resolved/locativeIdiom.js';
+import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { pathSpecifier } from '../../resolved/pathSpecifier.js';
+import { possessedHeadForms } from '../../resolved/possessedHeadForms.js';
+import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../resolved/resolved.consts.js';
 import { possessiveFr, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { coordinate } from './coordinate.js';

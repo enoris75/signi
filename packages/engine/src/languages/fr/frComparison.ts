@@ -1,4 +1,5 @@
-import { adjDegree, type ConceptForms } from '../../types.js';
+import type { ConceptForms } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
 import { FR_SUPPLETIVE } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { frDeg } from './frDeg.js';

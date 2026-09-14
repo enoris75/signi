@@ -1,4 +1,5 @@
-import { joinConjuncts, type ResolvedNounElement, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounElement, ResolvedNounPhrase } from '../../types.js';
+import { joinConjuncts } from '../../resolved/joinConjuncts.js';
 
 /**
  * Render every conjunct of a noun slot and coordinate them the Spanish way: commas between all

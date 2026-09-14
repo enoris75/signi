@@ -1,5 +1,11 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, type ComplementType } from '@signi/shared';
-import { abstractionLevel, adjDegree, causeSentiment, firstConjunct, mannerRelation, pathSpecifier, type ResolvedComplement, type RubySegment } from '../../types.js';
+import type { ResolvedComplement, RubySegment } from '../../types.js';
+import { abstractionLevel } from '../../resolved/abstractionLevel.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
+import { causeSentiment } from '../../resolved/causeSentiment.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
+import { mannerRelation } from '../../resolved/mannerRelation.js';
+import { pathSpecifier } from '../../resolved/pathSpecifier.js';
 import { CAUSE_PARTICLE, JA_DEGREE, PARTICLE, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { jaAdjClass } from './jaAdjClass.js';

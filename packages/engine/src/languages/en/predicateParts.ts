@@ -1,5 +1,10 @@
 import type { ComplementType, Tense } from '@signi/shared';
-import { groupHasNegativeAdverb, isFrequencyAdverb, modalChain, objectPronounForm, withDefiniteness, type ResolvedComplement, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import { groupHasNegativeAdverb } from '../../resolved/groupHasNegativeAdverb.js';
+import { isFrequencyAdverb } from '../../resolved/isFrequencyAdverb.js';
+import { modalChain } from '../../resolved/modalChain.js';
+import { objectPronounForm } from '../../resolved/objectPronounForm.js';
+import { withDefiniteness } from '../../resolved/withDefiniteness.js';
 import { MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { aspectVerb } from './aspectVerb.js';

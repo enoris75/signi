@@ -1,4 +1,4 @@
-import { joinConjuncts } from '../../types.js';
+import { joinConjuncts } from '../../resolved/joinConjuncts.js';
 
 /**
  * Coordinate an adjective list the way a coordinated noun slot is joined: commas between all but

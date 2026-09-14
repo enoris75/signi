@@ -1,5 +1,7 @@
 import type { Tense } from '@signi/shared';
-import { adjDegree, firstConjunct, type ResolvedComplement, type RubySegment } from '../../types.js';
+import type { ResolvedComplement, RubySegment } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 import { JA_DEGREE } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';

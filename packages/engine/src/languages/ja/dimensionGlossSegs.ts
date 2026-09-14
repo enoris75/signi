@@ -1,4 +1,5 @@
-import { adjDegree, type ResolvedNounPhrase, type RubySegment } from '../../types.js';
+import type { ResolvedNounPhrase, RubySegment } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
 import { JA_DEGREE } from './ja.consts.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { wordSeg } from './wordSeg.js';

@@ -1,4 +1,5 @@
-import { relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+import { relativeGapComplement } from '../../resolved/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';

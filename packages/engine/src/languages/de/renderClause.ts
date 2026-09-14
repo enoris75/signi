@@ -1,4 +1,5 @@
-import { firstConjunct, type ResolvedPhrase } from '../../types.js';
+import type { ResolvedPhrase } from '../../types.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';

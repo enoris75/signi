@@ -1,5 +1,12 @@
 import type { ComplementType } from '@signi/shared';
-import { alarmCry, firstConjunct, groupHasNegativeAdverb, hasNegativeComplement, isPronounElement, modalChain, objectPronounForm, type ConceptForms, type ResolvedComplement, type ResolvedNounElement, type ResolvedNounPhrase, type ResolvedVerbPhrase } from '../../types.js';
+import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
+import { alarmCry } from '../../resolved/alarmCry.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
+import { groupHasNegativeAdverb } from '../../resolved/groupHasNegativeAdverb.js';
+import { hasNegativeComplement } from '../../resolved/hasNegativeComplement.js';
+import { isPronounElement } from '../../resolved/isPronounElement.js';
+import { modalChain } from '../../resolved/modalChain.js';
+import { objectPronounForm } from '../../resolved/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN } from '../../mood.js';
 import { IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { alarmCryText } from './alarmCryText.js';

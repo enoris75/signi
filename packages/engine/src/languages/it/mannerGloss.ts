@@ -1,4 +1,5 @@
-import { mannerRelation, type ResolvedNounElement } from '../../types.js';
+import type { ResolvedNounElement } from '../../types.js';
+import { mannerRelation } from '../../resolved/mannerRelation.js';
 import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { IT_MANNER_PREP } from './it.consts.js';
 import { coordinate } from './coordinate.js';

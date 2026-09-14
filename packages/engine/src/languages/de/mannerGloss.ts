@@ -1,4 +1,5 @@
-import { firstConjunct, type ResolvedNounElement } from '../../types.js';
+import type { ResolvedNounElement } from '../../types.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 import { elementPhrase } from './elementPhrase.js';
 import { mannerPrepCase } from './mannerPrepCase.js';
 

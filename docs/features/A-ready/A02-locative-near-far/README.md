@@ -54,7 +54,7 @@ and leaves both combinations and degrees out (see *Out of scope*).
 ### Decision: overlap with the Romance source adverb
 
 For RUN and JUMP, French, Spanish and Portuguese already prefix a `source` with their "far" adverb
-(`SOURCE_ABLATIVE_ADVERB_VERBS`, [`types.ts:23`](../../../../packages/engine/src/types.ts#L23)). So
+(`SOURCE_ABLATIVE_ADVERB_VERBS`, [`resolved.consts.ts:12`](../../../../packages/engine/src/resolved/resolved.consts.ts#L12)). So
 source and locative-`far` render identically on those two verbs:
 
 | | source (runs *away from*) | locative `far` (runs *far from*) |

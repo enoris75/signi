@@ -1,4 +1,5 @@
-import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor } from '@signi/shared';
+import type { ResolvedNounPhrase } from '../../types.js';
 import { possessiveEs } from '../../possessive.js';
 import { isPlural } from './isPlural.js';
 

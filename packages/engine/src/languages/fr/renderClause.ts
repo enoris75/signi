@@ -1,4 +1,5 @@
-import { firstConjunct, type ResolvedPhrase } from '../../types.js';
+import type { ResolvedPhrase } from '../../types.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 import { dimensionGloss } from './dimensionGloss.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';

@@ -1,4 +1,6 @@
-import { groupHasNegativeAdverb, withDefiniteness, type ResolvedNounElement, type ResolvedVerbPhrase } from '../../types.js';
+import type { ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import { groupHasNegativeAdverb } from '../../resolved/groupHasNegativeAdverb.js';
+import { withDefiniteness } from '../../resolved/withDefiniteness.js';
 import type { FiniteNegation } from './de.types.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { nichtSlots } from './nichtSlots.js';

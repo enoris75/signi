@@ -1,4 +1,5 @@
-import { isFrequencyAdverb, type ResolvedModal } from '../../types.js';
+import type { ResolvedModal } from '../../types.js';
+import { isFrequencyAdverb } from '../../resolved/isFrequencyAdverb.js';
 
 /**
  * A modal link's own adverb for the generic (non-finite) chain: a frequency adverb before it

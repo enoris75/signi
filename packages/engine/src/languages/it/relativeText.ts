@@ -1,4 +1,6 @@
-import { isGenericSubject, relativeGapComplement, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+import { isGenericSubject } from '../../resolved/isGenericSubject.js';
+import { relativeGapComplement } from '../../resolved/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateText } from './predicateText.js';
 import { subjectText } from './subjectText.js';

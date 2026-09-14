@@ -1,4 +1,5 @@
-import { adjDegree, type ResolvedNounPhrase } from '../../types.js';
+import type { ResolvedNounPhrase } from '../../types.js';
+import { adjDegree } from '../../resolved/adjDegree.js';
 
 /**
  * Whether the phrase carries a superlative adjective ('most'/'least'). English marks the

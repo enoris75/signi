@@ -1,4 +1,5 @@
-import { firstConjunct, type ResolvedPhrase, type RubySegment } from '../../types.js';
+import type { ResolvedPhrase, RubySegment } from '../../types.js';
+import { firstConjunct } from '../../resolved/firstConjunct.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';

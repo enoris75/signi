@@ -1,4 +1,5 @@
-import { isPronominalPossessor, type ResolvedNounPhrase } from '../../types.js';
+import { isPronominalPossessor } from '@signi/shared';
+import type { ResolvedNounPhrase } from '../../types.js';
 
 /**
  * Whether a possessor is post-modified — so heavy that the Saxon clitic "'s" would land on the

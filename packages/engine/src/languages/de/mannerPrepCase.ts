@@ -1,4 +1,4 @@
-import { mannerRelation } from '../../types.js';
+import { mannerRelation } from '../../resolved/mannerRelation.js';
 
 /**
  * The preposition and case a German manner noun governs, read off its `mannerRelation`: mode "auf" +

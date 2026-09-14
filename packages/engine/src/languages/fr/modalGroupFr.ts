@@ -1,5 +1,6 @@
 import type { Aspect, Tense } from '@signi/shared';
-import { isFrequencyAdverb, type Mood, type ResolvedModal } from '../../types.js';
+import type { Mood, ResolvedModal } from '../../types.js';
+import { isFrequencyAdverb } from '../../resolved/isFrequencyAdverb.js';
 import { moodForm, moodPN } from '../../mood.js';
 import { conjugate } from './conjugate.js';
 import { verbGroupInfinitiveFr } from './verbGroupInfinitiveFr.js';
