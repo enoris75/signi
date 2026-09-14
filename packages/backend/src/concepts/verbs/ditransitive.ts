@@ -16,6 +16,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       complements: { terminus: { phrase: { concept: 'PERSON', definiteness: 'indefinite' } } },
     }),
     emoji: '🎁',
+    isA: 'TRANSFER',
     forms: {
       en: {
         base: 'give',
@@ -224,6 +225,7 @@ export const ditransitiveVerbs: ConceptSeed[] = [
       complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
     }),
     emoji: '📨',
+    isA: 'TRANSFER',
     forms: {
       en: {
         base: 'send',

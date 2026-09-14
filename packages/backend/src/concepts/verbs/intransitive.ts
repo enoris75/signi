@@ -210,6 +210,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('SHED', 'TEAR', 'plural'),
     emoji: '😭',
     synonym: 'weep',
+    isA: 'SHED',
     forms: {
       en: {
         base: 'cry',

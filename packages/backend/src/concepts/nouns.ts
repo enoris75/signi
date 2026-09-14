@@ -121,6 +121,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a written or printed work',
     definition: glossOf('OBJECT_THING', 'WRITTEN'),
     emoji: '📚',
+    isA: 'OBJECT_THING',
     forms: {
       en: { base: 'book', plural: 'books', count: 'singular' },
       it: { base: 'libro', plural: 'libri', gender: 'masc', count: 'singular' },
@@ -137,6 +138,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the liquid H₂O',
     emoji: '💧',
     countable: false,
+    isA: 'LIQUID',
     forms: {
       en: { base: 'water', count: 'singular' },
       it: { base: 'acqua', gender: 'fem', count: 'singular' },
@@ -494,6 +496,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the place where one lives',
     emoji: '🏡',
+    isA: 'PLACE',
     forms: {
       en: { base: 'home', plural: 'homes', count: 'singular' },
       it: { base: 'casa', plural: 'case', gender: 'fem', count: 'singular' },
@@ -512,6 +515,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👦',
     animate: true,
     human: true,
+    isA: 'PERSON',
     forms: {
       en: { base: 'child', plural: 'children', count: 'singular' },
       it: { base: 'bambino', plural: 'bambini', gender: 'masc', count: 'singular', fem: 'bambina', fem_plural: 'bambine' },
@@ -659,6 +663,7 @@ export const nouns: ConceptSeed[] = [
     definition: glossOf('MAMMAL', 'BIG'),
     emoji: '🐄',
     animate: true,
+    isA: 'BOVINE',
     forms: {
       en: { base: 'cow', plural: 'cows', count: 'singular' },
       it: { base: 'mucca', plural: 'mucche', gender: 'fem', count: 'singular' },
@@ -869,6 +874,7 @@ export const nouns: ConceptSeed[] = [
     emoji: '👨',
     animate: true,
     human: true,
+    isA: 'PARENT',
     forms: {
       en: { base: 'father', plural: 'fathers', count: 'singular' },
       // kinship: Italian drops the article after a possessive on the singular ("mio padre").
@@ -885,6 +891,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a place where goods are bought and sold',
     emoji: '🏪',
+    isA: 'PLACE',
     forms: {
       en: { base: 'market', plural: 'markets', count: 'singular' },
       it: { base: 'mercato', plural: 'mercati', gender: 'masc', count: 'singular' },
@@ -901,6 +908,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a small round piece of metal used as money',
     definition: glossOf('OBJECT_THING', 'SMALL', 'ROUND'),
     emoji: '🪙',
+    isA: 'OBJECT_THING',
     forms: {
       en: { base: 'coin', plural: 'coins', count: 'singular' },
       it: { base: 'moneta', plural: 'monete', gender: 'fem', count: 'singular' },
@@ -1171,6 +1179,7 @@ export const nouns: ConceptSeed[] = [
     // normal way ("a continent", "the continents"), where its proper-noun child does not. That
     // asymmetry is carried by the `proper` / `countable` flags, not by the tree; a rule may test
     // them, but they never enter the specificity contest. Same shape as LANGUAGE over GERMAN.
+    isA: 'PLACE',
     forms: {
       en: { base: 'continent',  plural: 'continents',  count: 'singular' },
       it: { base: 'continente', plural: 'continenti',  gender: 'masc', count: 'singular' },
@@ -1602,6 +1611,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a word naming a person, place or thing (grammar)',
     definition: whoGloss('WORD', 'NAME', 'OBJECT_THING'),
     emoji: '🏷️',
+    isA: 'WORD',
     forms: {
       en: { base: 'noun', plural: 'nouns', count: 'singular' },
       it: { base: 'sostantivo', plural: 'sostantivi', gender: 'masc', count: 'singular' },
@@ -1618,6 +1628,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a word standing in for a noun phrase (grammar)',
     definition: whoGloss('WORD', 'REPLACE', 'NOUN'),
     emoji: '👉',
+    isA: 'WORD',
     forms: {
       en: { base: 'pronoun', plural: 'pronouns', count: 'singular' },
       it: { base: 'pronome', plural: 'pronomi', gender: 'masc', count: 'singular' },
@@ -1634,6 +1645,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a word expressing an action or a state (grammar)',
     definition: whoGloss('WORD', 'EXPRESS', 'ACTION'),
     emoji: '⚡',
+    isA: 'WORD',
     forms: {
       en: { base: 'verb', plural: 'verbs', count: 'singular' },
       it: { base: 'verbo', plural: 'verbi', gender: 'masc', count: 'singular' },
@@ -1650,6 +1662,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a word modifying a verb, an adjective or another adverb (grammar)',
     definition: whoGloss('WORD', 'MODIFY', 'VERB'),
     emoji: '💨',
+    isA: 'WORD',
     forms: {
       en: { base: 'adverb', plural: 'adverbs', count: 'singular' },
       it: { base: 'avverbio', plural: 'avverbi', gender: 'masc', count: 'singular' },
@@ -1666,6 +1679,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a word describing a noun (grammar)',
     definition: whoGloss('WORD', 'DESCRIBE', 'NOUN'),
     emoji: '🎨',
+    isA: 'WORD',
     forms: {
       en: { base: 'adjective', plural: 'adjectives', count: 'singular' },
       it: { base: 'aggettivo', plural: 'aggettivi', gender: 'masc', count: 'singular' },
@@ -1687,6 +1701,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a verb phrase in its dictionary citation form — "to consume food" (grammar)',
     definition: whoGloss('PHRASE', 'NAME', 'ACTION'),
     emoji: '♾️',
+    isA: 'PHRASE',
     forms: {
       en: { base: 'infinitive phrase', plural: 'infinitive phrases', count: 'singular' },
       it: { base: 'frase infinitiva', plural: 'frasi infinitive', gender: 'fem', count: 'singular' },
@@ -1702,6 +1717,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a word fixing the reference of a noun — the, a, this, some (grammar)',
     emoji: '🔖',
+    isA: 'WORD',
     forms: {
       en: { base: 'determiner', plural: 'determiners', count: 'singular' },
       it: { base: 'determinante', plural: 'determinanti', gender: 'masc', count: 'singular' },
@@ -1721,6 +1737,7 @@ export const nouns: ConceptSeed[] = [
     description: 'the determiner marking a noun as identifiable or not — the, a (grammar)',
     emoji: '📄',
     synonym: 'grammar',
+    isA: 'DETERMINER',
     forms: {
       en: { base: 'article', plural: 'articles', count: 'singular' },
       it: { base: 'articolo', plural: 'articoli', gender: 'masc', count: 'singular' },
@@ -1736,6 +1753,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the determiner that points — this, that (grammar)',
     emoji: '👆',
+    isA: 'DETERMINER',
     forms: {
       en: { base: 'demonstrative', plural: 'demonstratives', count: 'singular' },
       it: { base: 'dimostrativo', plural: 'dimostrativi', gender: 'masc', count: 'singular' },
@@ -1751,6 +1769,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the determiner of amount — some, many, few, all, no (grammar)',
     emoji: '🔢',
+    isA: 'DETERMINER',
     forms: {
       en: { base: 'quantifier', plural: 'quantifiers', count: 'singular' },
       it: { base: 'quantificatore', plural: 'quantificatori', gender: 'masc', count: 'singular' },
@@ -1799,6 +1818,7 @@ export const nouns: ConceptSeed[] = [
     description: 'an object that holds or stores things',
     definition: whoGloss('OBJECT_THING', 'HOLD', 'OBJECT_THING'),
     emoji: '📦',
+    isA: 'OBJECT_THING',
     forms: {
       en: { base: 'container', plural: 'containers', count: 'singular' },
       it: { base: 'contenitore', plural: 'contenitori', gender: 'masc', count: 'singular' },
@@ -1994,6 +2014,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a command telling someone to act',
     emoji: '📢',
+    isA: 'COMMAND',
     forms: {
       en: { base: 'order', plural: 'orders', count: 'singular' },
       it: { base: 'ordine', plural: 'ordini', gender: 'masc', count: 'singular' },

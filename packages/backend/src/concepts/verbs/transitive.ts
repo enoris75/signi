@@ -15,6 +15,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
     }),
     emoji: '✂️',
+    isA: 'DIVIDE',
     forms: {
       en: {
         base: 'cut',
@@ -82,6 +83,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to consume food',
     definition: infinitiveGloss('CONSUME', 'FOOD'),
     emoji: '🍴',
+    isA: 'CONSUME',
     forms: {
       en: {
         base: 'eat',
@@ -150,6 +152,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to consume liquid',
     definition: infinitiveGloss('CONSUME', 'LIQUID'),
     emoji: '🥤',
+    isA: 'CONSUME',
     forms: {
       en: {
         base: 'drink',
@@ -287,6 +290,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to perceive with the eyes',
     definition: infinitiveGloss('PERCEIVE', 'LIGHT'),
     emoji: '👁️',
+    isA: 'PERCEIVE',
     forms: {
       en: {
         base: 'see',
@@ -356,6 +360,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to feel deep affection',
     definition: infinitiveGloss('FEEL', 'AFFECTION'),
     emoji: '❤️',
+    isA: 'FEEL',
     forms: {
       en: {
         base: 'love',
@@ -639,6 +644,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to look at and understand written text',
     definition: infinitiveGloss('UNDERSTAND', 'WORD', 'plural', ['WRITTEN']),
     emoji: '📖',
+    isA: 'UNDERSTAND',
     forms: {
       en: {
         base: 'read',
@@ -849,6 +855,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('STRIKE', { modifier: 'REPEATEDLY' }),
     emoji: '🥊',
     synonym: 'hit/defeat',
+    isA: 'STRIKE',
     forms: {
       en: {
         base: 'beat',
@@ -1060,6 +1067,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       complements: { instrumental: { phrase: { concept: 'MONEY', definiteness: 'bare' } } },
     }),
     emoji: '🛒',
+    isA: 'ACQUIRE',
     forms: {
       en: {
         base: 'buy',
@@ -1128,6 +1136,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to have as property',
     definition: infinitiveGloss('HAVE', 'PROPERTY'),
     emoji: '🔑',
+    isA: 'HAVE',
     forms: {
       en: {
         base: 'own',
@@ -1196,6 +1205,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to contain or keep',
     definition: infinitiveGloss('HAVE', 'OBJECT_THING', 'plural'),
     emoji: '📦',
+    isA: 'HAVE',
     forms: {
       en: {
         base: 'hold',
@@ -1264,6 +1274,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('CREATE', 'OBJECT_THING', 'plural'),
     emoji: '🔨',
     synonym: 'create',
+    isA: 'CREATE',
     forms: {
       en: {
         base: 'make',
@@ -2400,6 +2411,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to press a mouse button or select by pressing',
     definition: infinitiveGloss('PRESS', { object: 'BUTTON', definiteness: 'indefinite' }),
     emoji: '🖱️',
+    isA: 'PRESS',
     forms: {
       en: {
         base: 'click',
@@ -2610,6 +2622,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       complements: { instrumental: { phrase: { concept: 'KEYBOARD', definiteness: 'indefinite' } } },
     }),
     emoji: '⌨️',
+    isA: 'WRITE',
     forms: {
       en: {
         base: 'type',
@@ -2887,6 +2900,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       complements: { direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
     }),
     emoji: '📤',
+    isA: 'TRANSFER',
     forms: {
       en: {
         base: 'export',
@@ -2960,6 +2974,7 @@ export const transitiveVerbs: ConceptSeed[] = [
       complements: { source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } } },
     }),
     emoji: '📥',
+    isA: 'TRANSFER',
     forms: {
       en: {
         base: 'import',
@@ -3654,6 +3669,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     description: 'to qualify or alter another word',
     definition: infinitiveGloss('CHANGE', 'QUALITY', 'plural'),
     emoji: '🔧',
+    isA: 'CHANGE',
     forms: {
       en: {
         base: 'modify',
