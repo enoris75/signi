@@ -25,7 +25,7 @@ carrying a noun-modifier. MOVE is also the genus [B14](B14-motion-verbs.md) seed
 | Copy to clipboard | [TranslationPanel.tsx:146](../../../packages/frontend/src/components/TranslationPanel.tsx#L146) | `action.copyToClipboard` | `commandOf('COPY')` + `direction: CLIPBOARD definite` |
 | Copied | [TranslationPanel.tsx:146](../../../packages/frontend/src/components/TranslationPanel.tsx#L146) | `status.copied` | `word: COPIED`, `agreesWith: TRANSLATION`, `capitalize` |
 | `Copy ${name} translation` (aria-label) | [TranslationPanel.tsx:151](../../../packages/frontend/src/components/TranslationPanel.tsx#L151) | `action.copyTranslation` | `commandOf('COPY')` + `TRANSLATION definite`, with the row's `language.<code>` joined at the call site ("Copy the translation (Italian)") |
-| Move this period up / down | [PeriodContainer.tsx:737-756](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L737-L756) (tooltip + aria-label) | `action.movePeriodUp` / `.movePeriodDown` | `commandOf('MOVE')` with `modifier: UP / DOWN` + `PERIOD_SENTENCE this` |
+| Move this period up / down | [HeaderControls.tsx:59-65](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/HeaderControls.tsx#L59-L65) (tooltip + aria-label) | `action.movePeriodUp` / `.movePeriodDown` | `commandOf('MOVE')` with `modifier: UP / DOWN` + `PERIOD_SENTENCE this` |
 | Resize period container (aria-label) | [Resizer.tsx:40](../../../packages/frontend/src/components/PhraseBuilder/Resizer.tsx#L40) | `action.resizeContainer` | `commandOf('RESIZE')` + `CONTAINER this, nounModifiers [PERIOD_SENTENCE]` (the `action.addPeriodContainer` noun phrase) |
 
 Putting the language inside the noun phrase ("copy the Italian translation") would need seven
@@ -35,6 +35,6 @@ avoids both. The Resizer's "Drag to resize" tooltip is a purpose clause:
 
 ## Tests that select on these literals
 
-`Move this period up` / `down` → `PeriodContainer.test.tsx`, `PhraseBuilder.test.tsx`;
+`Move this period up` / `down` → `PeriodContainer/HeaderControls.test.tsx`, `PhraseBuilder.test.tsx`;
 `Copy to clipboard` / `Copied` → `TranslationPanel.test.tsx`; `Resize period container` →
 `Resizer.test.tsx`.

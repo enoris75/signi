@@ -19,7 +19,7 @@ context-dependent, and there is no citation for them.
 
 | literal | where |
 |---|---|
-| And / Or / But / That is / Therefore / Then | `COORD_CONJUNCTION_OPTIONS` [interfaces.ts:13-18](../../../packages/frontend/src/components/PhraseBuilder/interfaces.ts#L13-L18) → conjunction menu ([PeriodContainer.tsx:624](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L624)) and every `COORD_CONJUNCTION_LABEL` use ([PeriodContainer.tsx:353](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L353), [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337)) |
+| And / Or / But / That is / Therefore / Then | `COORD_CONJUNCTION_OPTIONS` [interfaces.ts:13-18](../../../packages/frontend/src/components/PhraseBuilder/interfaces.ts#L13-L18) → conjunction menu ([ConjunctionMenu.tsx:32](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ConjunctionMenu.tsx#L32)) and every `COORD_CONJUNCTION_LABEL` use ([CoordinationButton.tsx:28](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/CoordinationButton.tsx#L28), [periodAppearance.ts:93](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L93), [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337)) |
 | in / through / under / over / around / behind / in front of | `PATH_SPECIFIER_LABELS` [shared/index.ts:264](../../../packages/shared/src/index.ts#L264) → specifier tooltips ([Boxes.tsx:429](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L429)) |
 | Neutral — because of / Negative — fault of / Positive — thanks to | `CAUSE_SENTIMENT_LABELS` [shared/index.ts:287](../../../packages/shared/src/index.ts#L287) → sentiment tooltips ([Boxes.tsx:490](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L490)) |
 | — / More / Most / Less / Least / Equally | `DEGREE_LABELS` [shared/index.ts:120](../../../packages/shared/src/index.ts#L120) → degree chip ([phraseRender.tsx:355](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L355)) |
@@ -44,6 +44,6 @@ Then author the labels, delete the four English label maps, and move their tests
 
 ## Tests that select on these literals
 
-`Therefore` → `PeriodContainer.test.tsx`; `in front of` → `Boxes.test.tsx`, `VerbPhraseBuilder.test.tsx`;
+`Therefore` → `PeriodContainer/CoordinationButton.test.tsx`, `PeriodContainer/ConjunctionMenu.test.tsx`; `in front of` → `Boxes.test.tsx`, `VerbPhraseBuilder.test.tsx`;
 `thanks to` → `complements.spec.ts`, `PhraseBuilder.test.tsx`; `Degree:` values → `phraseRender.test.tsx`,
 `NounPhraseBuilder.test.tsx`, `VerbPhraseBuilder.test.tsx`, `PhraseBuilder.test.tsx`.

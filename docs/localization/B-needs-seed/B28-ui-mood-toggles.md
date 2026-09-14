@@ -16,10 +16,10 @@ BE + predicative renders "this period is a command" in all 7 languages (probe, 2
 
 | literal | where | key | plan |
 |---|---|---|---|
-| This period is a command — turn it off | [PeriodContainer.tsx:491](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L491) | `period.isCommand` + `action.turnOff` | joined with " — " at the call site: `PERIOD_SENTENCE this` + `BE` + `predicative: COMMAND indefinite`; `commandOf('TURN_OFF')` + `directObject: THIRD_PERSON neut` |
-| This period is an infinitive phrase — turn it off | [PeriodContainer.tsx:521](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L521) | `period.isInfinitive` + `action.turnOff` | same, `predicative: INFINITIVE_PHRASE indefinite` |
-| Toggle imperative (command) (aria-label) | [PeriodContainer.tsx:500](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L500) | reuse `imperative.command` | name the toggle by its mode and expose on/off with `aria-pressed`. No new wording, no seed |
-| Toggle infinitive phrase (citation) (aria-label) | [PeriodContainer.tsx:530](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L530) | reuse `infinitive.phrase` | same |
+| This period is a command — turn it off | [MoodToggle.tsx:15](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L15) | `period.isCommand` + `action.turnOff` | joined with " — " at the call site: `PERIOD_SENTENCE this` + `BE` + `predicative: COMMAND indefinite`; `commandOf('TURN_OFF')` + `directObject: THIRD_PERSON neut` |
+| This period is an infinitive phrase — turn it off | [MoodToggle.tsx:23](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L23) | `period.isInfinitive` + `action.turnOff` | same, `predicative: INFINITIVE_PHRASE indefinite` |
+| Toggle imperative (command) (aria-label) | [MoodToggle.tsx:13](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L13) | reuse `imperative.command` | name the toggle by its mode and expose on/off with `aria-pressed`. No new wording, no seed |
+| Toggle infinitive phrase (citation) (aria-label) | [MoodToggle.tsx:20](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L20) | reuse `infinitive.phrase` | same |
 
 Check the object pronoun on authoring. Nothing in the catalog yet puts a pronoun object under an
 `instruction` imperative (it *disattivalo*, fr *le désactiver*, es *desactivarlo* each attach or
@@ -38,5 +38,7 @@ coordination link to make this a command") needs an object complement and a purp
 ## Tests that select on these literals
 
 `Toggle imperative` → `infinitive.spec.ts`, `tidy.spec.ts`, `imperative.spec.ts`, `PhraseBuilder.test.tsx`,
-`PeriodContainer.test.tsx`; `Toggle infinitive` → `infinitive.spec.ts`, `PhraseBuilder.test.tsx`,
-`PeriodContainer.test.tsx`. Move them to `getByRole('button', { name, pressed })` or a `data-testid`.
+`PeriodContainer/MoodToggle.test.tsx`, `PeriodContainer/BorderControls.test.tsx`,
+`PeriodContainer/PeriodContainer.test.tsx`; `Toggle infinitive` → `infinitive.spec.ts`,
+`PhraseBuilder.test.tsx`, `PeriodContainer/MoodToggle.test.tsx`, `PeriodContainer/BorderControls.test.tsx`.
+Move them to `getByRole('button', { name, pressed })` or a `data-testid`.

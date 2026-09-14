@@ -1,0 +1,64 @@
+import { useState } from "react";
+import CallMergeIcon from "@mui/icons-material/CallMerge";
+import { useUiString } from "../../../i18n/useUiString.ts";
+import { COORD_CONJUNCTION_LABEL } from "../interfaces.ts";
+import { ConjunctionMenu } from "./ConjunctionMenu.tsx";
+import { BorderControlButton } from "./ControlButton.tsx";
+import { relationButtonState } from "./functions/relationButtonState.ts";
+import { ACCENT, type CoordinativeControl } from "./PeriodContainer.types.ts";
+
+export interface CoordinationButtonProps {
+  control: CoordinativeControl;
+}
+
+// The border control for a coordination. It mirrors the conditional one, but starting a
+// coordination opens a conjunction menu (AND / OR / BUT / …) before entering pick-mode; picking a
+// target then creates the link with the chosen conjunction.
+export function CoordinationButton({ control }: CoordinationButtonProps) {
+  const t = useUiString();
+  const [menuAnchor, setMenuAnchor] = useState<HTMLElement | null>(null);
+  const { active, droppable, face, action } = relationButtonState({
+    source: control.hasCoordination,
+    target: control.isCoordinated,
+    isPickTarget: control.isPickTarget,
+    pickActive: control.pickActive,
+    canStart: control.canStart,
+  });
+  const conjunction = control.conjunction
+    ? COORD_CONJUNCTION_LABEL[control.conjunction]
+    : "";
+  const title =
+    face === "droppable"
+      ? "Use this period as the coordinated clause"
+      : face === "source"
+        ? `Remove the coordination (${conjunction})`
+        : face === "target"
+          ? `This period is a coordinated clause (${conjunction})`
+          : t("action.coordinatePeriod");
+
+  return (
+    <>
+      <BorderControlButton
+        title={title}
+        icon={CallMergeIcon}
+        accent={ACCENT.coordinative}
+        lit={active || droppable}
+        disabled={action === null}
+        onClick={(e) => {
+          if (action === "pick") control.onPick();
+          else if (action === "clear") control.onClear();
+          else if (action === "start") setMenuAnchor(e.currentTarget);
+        }}
+      />
+      <ConjunctionMenu
+        anchorEl={menuAnchor}
+        options={control.conjunctions}
+        onSelect={(value) => {
+          setMenuAnchor(null);
+          control.onStart(value);
+        }}
+        onClose={() => setMenuAnchor(null)}
+      />
+    </>
+  );
+}

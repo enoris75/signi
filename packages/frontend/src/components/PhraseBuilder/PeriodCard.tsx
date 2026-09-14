@@ -2,7 +2,7 @@ import { useState, type ReactNode, type Ref } from "react";
 import { Box } from "@mui/material";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
-import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
+import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
 import { Resizer } from "./Resizer.tsx";
 import { GRAPH_HEIGHT_KEY } from "./storageKeys.ts";
 
@@ -71,14 +71,14 @@ export function PeriodCard({
   children,
 }: PeriodCardProps) {
   // Where a standalone card has been dragged to by its border, in viewport pixels; null while it
-  // sits in the page flow. The drag itself lives in PeriodContainer, but the state is held here
-  // because this component's outer Box is what goes `fixed`.
+  // sits in the page flow. The drag itself lives in PeriodContainer (useBorderDrag), but the state
+  // is held here because this component's outer Box is what goes `fixed`.
   const [position, setPosition] = useState<{ x: number; y: number } | null>(null);
   // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
   // with the container's bottom border, so the two must stay in step.
   const paperPad = compact ? 1 : 2;
   // The clause-level connector controls on the card border, derived from the workspace binding
-  // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
+  // (undefined for a standalone period). See PeriodContainer/functions/periodControls.ts.
   const clauseControls = periodControls(binding, selection);
   const locked = moodLocked(binding);
 

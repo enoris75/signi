@@ -1,0 +1,131 @@
+import type React from "react";
+import { Box, Paper } from "@mui/material";
+import { BorderControls } from "./BorderControls.tsx";
+import { periodAccent, pickTarget } from "./functions/periodAppearance.ts";
+import { HeaderControls, type HeaderControlsProps } from "./HeaderControls.tsx";
+import { useBorderDrag } from "./hooks/useBorderDrag.ts";
+import { PeriodCaption } from "./PeriodCaption.tsx";
+import type { ClauseControls } from "./PeriodContainer.types.ts";
+import { ReificationSwitch } from "./ReificationSwitch.tsx";
+
+export interface PeriodContainerProps extends ClauseControls, HeaderControlsProps {
+  // The card's padding, in theme spacing units. The caller's resize grip negates it to
+  // sit flush with the bottom border, so the two must stay in step.
+  paperPad: number;
+  // Whether the canvas is drawn yet — the caption tells the user what to do next.
+  showCanvas: boolean;
+  // May this card be torn off its place in the page flow and dragged by its border?
+  // False for a workspace container, which stays in the managed stack so the
+  // cross-container connectors measure correctly.
+  floatable: boolean;
+  // Where the card has been dragged to, in viewport pixels; null while it sits in flow.
+  // The owner holds this state because its outer Box is what actually goes `fixed`.
+  position: { x: number; y: number } | null;
+  onPositionChange: (position: { x: number; y: number }) => void;
+  // The header controls, for the owner to measure: compact view floats them over the canvas's
+  // top-right corner, and the canvas packs its words clear of them.
+  controlsRef?: React.Ref<HTMLDivElement>;
+  children: React.ReactNode;
+}
+
+// The card a top-level period lives in: the accent chrome, the clause-level controls on its border,
+// the labelled header with the period-level controls (reorder, compact, tidy, save, remove), and the
+// border-drag that floats a standalone card around the viewport. Its `children` are the period's own
+// content — the canvas and the resize grip. (A period's nested phrases — conjuncts and owners — are
+// rings on its canvas, and wear no card.)
+export function PeriodContainer({
+  paperPad,
+  compact,
+  showCanvas,
+  floatable,
+  position,
+  onPositionChange,
+  controlsRef,
+  conditional,
+  coordinative,
+  instrumental,
+  imperative,
+  infinitive,
+  children,
+  ...headerControls
+}: PeriodContainerProps) {
+  const controls = { conditional, coordinative, instrumental, imperative, infinitive };
+  const { dragging, dragHandlers } = useBorderDrag({
+    enabled: floatable,
+    position,
+    onPositionChange,
+  });
+  const target = pickTarget(controls);
+  const accent = periodAccent(controls);
+
+  return (
+    <Paper
+      elevation={0}
+      {...dragHandlers}
+      // While a pick is pending, the whole card is lit as the drop target, so the whole card
+      // takes the click — not just the border control. The control's own click bubbles here
+      // too, but the second call is a no-op: the pick is already resolved.
+      onClick={target ? () => controls[target]?.onPick() : undefined}
+      sx={{
+        p: paperPad,
+        // Compact floats its controls into the top-right corner, so the Paper is the
+        // positioning context for that overlay.
+        position: "relative",
+        border: "1px solid",
+        borderColor: accent.borderColor,
+        borderLeft: "3px solid",
+        borderLeftColor: accent.borderLeftColor,
+        boxShadow: accent.boxShadow,
+        mr: accent.gutter ? "64px" : 0,
+        transition: "margin 0.15s ease",
+        bgcolor: "action.hover",
+        cursor: target
+          ? "pointer"
+          : position
+            ? dragging
+              ? "grabbing"
+              : "default"
+            : undefined,
+      }}
+    >
+      <BorderControls
+        conditional={conditional}
+        coordinative={coordinative}
+        imperative={imperative}
+        infinitive={infinitive}
+      />
+      <Box
+        ref={controlsRef}
+        sx={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          // Compact drops the label and floats the controls into the top-right corner
+          // (absolute), so they reserve no vertical space and the chips rise to the top
+          // of the reclaimed area; full view keeps the labelled header in flow.
+          ...(compact
+            ? {
+                position: "absolute",
+                top: 6,
+                right: 6,
+                zIndex: 4,
+                m: 0,
+              }
+            : { mb: 1.5 }),
+        }}
+      >
+        {/* The caption and the reification switch are chrome the compact overview doesn't need. */}
+        {!compact && <PeriodCaption controls={controls} showCanvas={showCanvas} />}
+        {!compact && instrumental?.isInstrument && (
+          <ReificationSwitch
+            level={instrumental.level}
+            onChange={instrumental.onLevelChange}
+          />
+        )}
+        <HeaderControls compact={compact} {...headerControls} />
+      </Box>
+
+      {children}
+    </Paper>
+  );
+}

@@ -26,12 +26,12 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 | Click a slot to filter. | [PhraseSidebar.tsx:198](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L198) | 1 (+ FILTER) |
 | Select at least a subject and a verb to see translations. | [TranslationPanel.tsx:71](../../../packages/frontend/src/components/TranslationPanel.tsx#L71) | 1 (+ "at least") |
 | No relationships to show. Switch one back on above. | [WordMap.tsx:217](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L217) | 1 on a noun ("to show") + a particle verb + "above" |
-| Make this period a command (imperative) | [PeriodContainer.tsx:492](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L492) | 2 |
-| Make this period an infinitive phrase (a citation, e.g. “to consume food”) | [PeriodContainer.tsx:522](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L522) | 2; the example could be a live-rendered plan |
-| Remove the IF / coordination link to make this a command | [PeriodContainer.tsx:489](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L489) | 1 + 2 |
-| Remove the IF / coordination link to make this an infinitive phrase | [PeriodContainer.tsx:519](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L519) | 1 + 2 |
-| Use this period as the IF condition | [PeriodContainer.tsx:326](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L326) | 2 |
-| Use this period as the coordinated clause | [PeriodContainer.tsx:360](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L360) | 2 |
+| Make this period a command (imperative) | [MoodToggle.tsx:16](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L16) | 2 |
+| Make this period an infinitive phrase (a citation, e.g. “to consume food”) | [MoodToggle.tsx:24](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L24) | 2; the example could be a live-rendered plan |
+| Remove the IF / coordination link to make this a command | [MoodToggle.tsx:14](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L14) | 1 + 2 |
+| Remove the IF / coordination link to make this an infinitive phrase | [MoodToggle.tsx:22](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L22) | 1 + 2 |
+| Use this period as the IF condition | [ConditionalButton.tsx:10](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ConditionalButton.tsx#L10) | 2 |
+| Use this period as the coordinated clause | [CoordinationButton.tsx:32](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/CoordinationButton.tsx#L32) | 2 |
 | Click the period to coordinate with “${conj}” — in another phrase container. | [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337) | 1 + 3; the conjunction word is [C13](C13-ui-grammatical-function-words.md) |
 | Click the period holding the instrumental — a period with no verb, whose noun is what the action is done with. | [PhraseWorkspace.tsx:339](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L339) | 4 |
 
