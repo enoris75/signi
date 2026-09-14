@@ -2,7 +2,7 @@ import { describe, expect, it, vi } from 'vitest';
 import type { Concept } from '@signi/shared';
 import type { SatelliteIcon } from '../../src/components/PhraseBuilder/Boxes.tsx';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
-import type { PerimeterEntry } from '../../src/components/PhraseBuilder/satellites.tsx';
+import type { PerimeterEntry } from '../../src/components/PhraseBuilder/satellites/index.ts';
 import { decoratePerimeterControls } from '../../src/components/PhraseBuilder/functions/decoratePerimeterControls.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id, label: id.toLowerCase() });

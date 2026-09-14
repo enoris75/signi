@@ -3,7 +3,7 @@ import { POSSESSOR_REF_KEY } from "../interfaces.ts";
 import { NOUN_KEYS } from "../slots.ts";
 import { openConjunctsFor } from "../conjunctChain.ts";
 import { possessiveHintEn, type CorefPick } from "../CorefPickContext.tsx";
-import type { PerimeterEntry } from "../satellites.tsx";
+import type { PerimeterEntry } from "../satellites/index.ts";
 import type { RingHost } from "../ringHost.ts";
 
 type PerimeterByNoun = Partial<Record<NounKey, PerimeterEntry>>;

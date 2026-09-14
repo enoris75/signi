@@ -23,15 +23,15 @@ ones the pronoun chooser and number toggle already use: a bare grammar noun for 
 
 | literal | where | key | plan |
 |---|---|---|---|
-| Tense (control heading, satellite) | [Boxes.tsx:550](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L550), [satellites.tsx:261](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L261) | `satellite.tense` | `nameOf('TENSE')`, `NAME_FORMAT` |
-| Present / Past / Future | `TENSE_LABELS` [shared/index.ts:137](../../../packages/shared/src/index.ts#L137) → [Boxes.tsx:562](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L562), [satellites.tsx:268](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L268) | `tense.value.<tense>` | `word: PRESENT/PAST/FUTURE`, `agreesWith: TENSE`, `capitalize` |
-| Aspect | [Boxes.tsx:600](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L600), [satellites.tsx:273](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L273) | `satellite.aspect` | `nameOf('ASPECT')` |
-| Neutral / Progressive / Prospective / Resultative | `ASPECT_LABELS` [shared/index.ts:170](../../../packages/shared/src/index.ts#L170) → [Boxes.tsx:612](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L612), [satellites.tsx:280](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L280) | `aspect.value.<aspect>` | `word`, `agreesWith: ASPECT` |
-| Polarity | [satellites.tsx:250](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L250) | `satellite.polarity` | `nameOf('POLARITY')` |
-| Positive / Negative | [satellites.tsx:256](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L256) | `polarity.value.positive` / `.negative` | `word: POSITIVE / NEGATIVE`, `agreesWith: POLARITY` |
+| Tense (control heading, satellite) | [Boxes.tsx:550](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L550), [rawSatellites.tsx:191](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L191) | `satellite.tense` | `nameOf('TENSE')`, `NAME_FORMAT` |
+| Present / Past / Future | `TENSE_LABELS` [shared/index.ts:137](../../../packages/shared/src/index.ts#L137) → [Boxes.tsx:562](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L562), [rawSatellites.tsx:198](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L198) | `tense.value.<tense>` | `word: PRESENT/PAST/FUTURE`, `agreesWith: TENSE`, `capitalize` |
+| Aspect | [Boxes.tsx:600](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L600), [rawSatellites.tsx:203](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L203) | `satellite.aspect` | `nameOf('ASPECT')` |
+| Neutral / Progressive / Prospective / Resultative | `ASPECT_LABELS` [shared/index.ts:170](../../../packages/shared/src/index.ts#L170) → [Boxes.tsx:612](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx#L612), [rawSatellites.tsx:210](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L210) | `aspect.value.<aspect>` | `word`, `agreesWith: ASPECT` |
+| Polarity | [rawSatellites.tsx:180](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L180) | `satellite.polarity` | `nameOf('POLARITY')` |
+| Positive / Negative | [rawSatellites.tsx:186](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L186) | `polarity.value.positive` / `.negative` | `word: POSITIVE / NEGATIVE`, `agreesWith: POLARITY` |
 | Modal / Modal 2 (slot titles) | [slots.ts:172](../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L172), 179 | `slot.modal` | `nameOf('MODAL')`; drop the numeral, as `ADJECTIVE_LABEL_KEY` did |
-| Modal / Modal 2 (satellites) | [satellites.tsx:288](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L288), 298 | reuse `slot.modal` | — |
-| Modal Adverb / Modal 2 Adverb (satellites) | [satellites.tsx:309](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L309), 318 | reuse `slot.adverb` | the slot titles already do ([slots.ts:188](../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L188), 196) |
+| Modal / Modal 2 (satellites) | [rawSatellites.tsx:218](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L218), 228 | reuse `slot.modal` | — |
+| Modal Adverb / Modal 2 Adverb (satellites) | [rawSatellites.tsx:239](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/rawSatellites.tsx#L239), 248 | reuse `slot.adverb` | the slot titles already do ([slots.ts:188](../../../packages/frontend/src/components/PhraseBuilder/slots.ts#L188), 196) |
 | type a modal… | [ModalTypeahead.tsx:75](../../../packages/frontend/src/components/PhraseBuilder/ModalTypeahead.tsx#L75) | `slot.modal.placeholder` | `commandOf('TYPE')` + `MODAL indefinite`, the [A11](../done/A11-ui-typeahead-placeholders.md) shape |
 
 Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
@@ -42,6 +42,6 @@ Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
 
 `Tense` / `Aspect` → `fixtures.ts`, `canvas.spec.ts`, `verb.spec.ts`, `tidy.spec.ts`, `imperative.spec.ts`,
 `Boxes.test.tsx`, `controlLayout.test.ts`, `VerbPhraseBuilder.test.tsx`, `PhraseBuilder.test.tsx`,
-`satellites.test.tsx`, `phraseRender.test.tsx`; `Present` / `Past` / `Future` / `Progressive` →
-`VerbPhraseBuilder.test.tsx`, `satellites.test.tsx`; `Polarity` → `Boxes.test.tsx`; `Modal` →
+`satellites/functions/rawSatellites.test.tsx`, `phraseRender.test.tsx`; `Present` / `Past` / `Future` / `Progressive` →
+`VerbPhraseBuilder.test.tsx`, `satellites/functions/rawSatellites.test.tsx`; `Polarity` → `Boxes.test.tsx`; `Modal` →
 `verb.spec.ts`, `imperative.spec.ts`, `modal-adverb.spec.ts`, `tidy.spec.ts` and five unit suites.

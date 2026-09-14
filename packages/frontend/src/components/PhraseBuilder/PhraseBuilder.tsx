@@ -37,7 +37,7 @@ import {
   buildSatelliteIcons,
   buildSatellites,
   type Satellite,
-} from "./satellites.tsx";
+} from "./satellites/index.ts";
 import { packPeriod } from "./layout.ts";
 import { buildEdges, buildRings, linkEdge, roleGroups, type Edge } from "./graph.ts";
 import { buildRingSpecs } from "./ringSpecs.ts";

@@ -38,6 +38,6 @@ The "— click to change" tail on all three chips is a purpose clause:
 ## Tests that select on these literals
 
 `Relation:` → `PhraseBuilder.test.tsx`, `phraseRender.test.tsx`, `NounPhraseBuilder.test.tsx`,
-`VerbPhraseBuilder.test.tsx`, `satellites.test.tsx`; `Degree:` → `VerbPhraseBuilder.test.tsx`,
+`VerbPhraseBuilder.test.tsx`; `Degree:` → `VerbPhraseBuilder.test.tsx`,
 `PhraseBuilder.test.tsx`, `NounPhraseBuilder.test.tsx`, `phraseRender.test.tsx`; `Add an adjective` →
 `PhraseBuilder.test.tsx`, `phraseRender.test.tsx`.

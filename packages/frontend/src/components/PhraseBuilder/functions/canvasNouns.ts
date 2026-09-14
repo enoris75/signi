@@ -1,7 +1,7 @@
 import type { NounKey, PhraseSelection } from "../interfaces.ts";
 import { openConjunctsFor } from "../conjunctChain.ts";
 import { conjunctsOf } from "../phraseReducers.ts";
-import type { Satellite } from "../satellites.tsx";
+import type { Satellite } from "../satellites/index.ts";
 
 /**
  * The coordinated nouns whose ring is on a canvas, each with its number of conjuncts: each draws its

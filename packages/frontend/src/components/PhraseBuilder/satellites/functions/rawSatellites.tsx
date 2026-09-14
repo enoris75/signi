@@ -1,26 +1,13 @@
-import { ReactNode } from "react";
 import BrushIcon from "@mui/icons-material/Brush";
 import NumbersIcon from "@mui/icons-material/Numbers";
-import MaleIcon from "@mui/icons-material/Male";
-import FemaleIcon from "@mui/icons-material/Female";
-import TransgenderIcon from "@mui/icons-material/Transgender";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
 import GavelIcon from "@mui/icons-material/Gavel";
 import TuneIcon from "@mui/icons-material/Tune";
-import PlaceIcon from "@mui/icons-material/Place";
-import ArrowForwardIcon from "@mui/icons-material/ArrowForward";
-import ArrowBackIcon from "@mui/icons-material/ArrowBack";
-import RouteIcon from "@mui/icons-material/Route";
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
 import KeyIcon from "@mui/icons-material/Key";
 import ArticleOutlinedIcon from "@mui/icons-material/ArticleOutlined";
-import LinkIcon from "@mui/icons-material/Link";
-import CallReceivedIcon from "@mui/icons-material/CallReceived";
-import BuildIcon from "@mui/icons-material/Build";
-import SpeedIcon from "@mui/icons-material/Speed";
 import CallSplitIcon from "@mui/icons-material/CallSplit";
 import AdjustIcon from "@mui/icons-material/Adjust";
 import {
@@ -30,109 +17,42 @@ import {
   TENSE_LABELS,
   defaultDefiniteness,
   type Concept,
-  type ComplementType,
   type Definiteness,
   type LanguageCode,
-  type UiStringKey,
 } from "@signi/shared";
-import { conceptWord, type UiStringLookup } from "../../i18n/conceptWord.ts";
-import {
-  GenderSlot,
-  NounKey,
-  NumberSlot,
-  PhraseSelection,
-  SlotKey,
-  CONJUNCTS_KEY,
-  WorkspaceBinding,
-} from "./interfaces.ts";
-import type { SatelliteIcon } from "./Boxes.tsx";
+import { conceptWord, type UiStringLookup } from "../../../../i18n/conceptWord.ts";
+import { NounKey, PhraseSelection, CONJUNCTS_KEY } from "../../interfaces.ts";
 import {
   BOX_COMPLEMENT_TYPES,
-  COMPLEMENT_KEY_SET,
   COMPLEMENT_LABEL_KEYS,
   COORDINABLE_NOUN_KEYS,
-  REVEALABLE_SLOT_KEYS,
-} from "./slots.ts";
+} from "../../slots.ts";
+import {
+  complementIcons,
+  iconSx,
+  type Gender,
+  type RawSatellite,
+} from "../satellites.types.tsx";
+import { genderIcon } from "./genderIcon.tsx";
+import { genderLabel } from "./genderLabel.ts";
 
-// Satellite elements (gender / number / polarity / adjective / adverb) are hidden
-// by default and revealed via the small controls round each word's solid ring.
-export type Satellite = {
-  key: string;
-  // The node that carries this satellite's control. Usually a constituent's word,
-  // but a chained satellite rides another satellite's box (Adjective 2 on Adjective 1).
-  parent: SlotKey;
-  label: string;
-  // The catalog key `label` is rendered from, where the satellite's noun is seeded — which also names
-  // the part its control shows and hides (see canvasCommands). The rest keep an English `label`.
-  labelKey?: UiStringKey;
-  icon: ReactNode;
-  available: boolean;
-  // hasValue = carries a *non-default* value (plural / fem / negative / a chosen word).
-  hasValue: boolean;
-  // alwaysSet = number / gender / polarity — these always hold a value (even the
-  // default), so their icon reads as "valued" and the tooltip shows the current one.
-  alwaysSet?: boolean;
-  // Whether the satellite's box is on the canvas before anyone touches its control.
-  // Defaults to `hasValue` — an empty satellite stays folded away until revealed. The
-  // direct object overrides it: it is a core role, offered open the moment a transitive
-  // verb licenses it, and its control is there to *hide* it.
-  defaultShown?: boolean;
-  // directToggle = the ring icon *is* the control: clicking it flips the value
-  // (singular ⇄ plural, positive ⇄ negative) in place, with no expandable canvas box.
-  // Such satellites never `shown` (there is nothing to reveal); the icon's
-  // solid/outlined state indicates the current value and its tooltip spells it out.
-  directToggle?: boolean;
-  // Human-readable current term, shown in the icon tooltip.
-  valueLabel?: string;
-  shown: boolean;
-};
-
-const iconSx = { fontSize: 13 };
-
-type Gender = "masc" | "fem" | "neut";
-
-// Gender is a direct-toggle satellite: its ring icon *is* the glyph for the current
-// value (♂ / ♀ / ⚧), so cycling it swaps the icon rather than revealing a box.
-const genderIcon = (gen?: Gender): ReactNode =>
-  gen === "fem" ? (
-    <FemaleIcon sx={iconSx} />
-  ) : gen === "neut" ? (
-    <TransgenderIcon sx={iconSx} />
-  ) : (
-    <MaleIcon sx={iconSx} />
-  );
-
-const genderLabel = (t: UiStringLookup, gen?: Gender): string => t(`gender.value.${gen ?? "masc"}`);
-
-const complementIcons: Record<ComplementType, ReactNode> = {
-  predicative: <LinkIcon sx={iconSx} />,
-  locative: <PlaceIcon sx={iconSx} />,
-  direction: <ArrowForwardIcon sx={iconSx} />,
-  source: <ArrowBackIcon sx={iconSx} />,
-  route: <RouteIcon sx={iconSx} />,
-  cause: <HelpOutlineIcon sx={iconSx} />,
-  instrumental: <BuildIcon sx={iconSx} />,
-  manner: <SpeedIcon sx={iconSx} />,
-  terminus: <CallReceivedIcon sx={iconSx} />,
-};
-
-// Derive every satellite for the current selection, resolving each one's `shown`
-// state (an explicit reveal toggle wins; otherwise a set satellite auto-expands).
-export function buildSatellites(
+// Every satellite the selection could carry, each saying whether its own head licenses it and
+// whether it holds a value. Rules that reach across satellites — a dropped subject, a folded
+// object — and whether each box is shown are left to resolveSatellites.
+export function rawSatellites(
   selection: PhraseSelection,
-  revealed: Record<string, boolean>,
   // The UI language: a satellite that carries a word (an adjective, a modal, a complement)
   // shows it as the picker offered it, not in English.
   language: LanguageCode,
   // The UI-string lookup, for the one label the lexicon cannot give on its own: a pronoun,
   // which shows the person it stands for rather than a word.
   t: UiStringLookup,
-): { satellites: Satellite[]; shownMap: Record<string, boolean> } {
+): RawSatellite[] {
   const label = (c?: Concept) => conceptWord(c, language, t);
   const subjectRole = selection.subject?.role;
   // A command and an infinitive citation are both moods occupying the finite slot: each forces
   // present tense / neutral aspect / no modals and drops the subject, so the tense, aspect and
-  // modal controls (and the whole subject family, below) are withdrawn under either.
+  // modal controls are withdrawn under either (the subject family is dropped in resolveSatellites).
   const finiteSlotTaken = Boolean(selection.imperative || selection.infinitive);
   // How many phrases are coordinated with a noun block's own head ("Peter *and Paul*").
   const conjunctCount = (which: NounKey): number =>
@@ -147,7 +67,7 @@ export function buildSatellites(
   const showDirectObjNumber = Boolean(selection.directObject);
   const showDirectObjGender = Boolean(selection.directObject?.gendered);
 
-  const rawSatellites: Omit<Satellite, "shown">[] = [
+  return [
     {
       key: "subjectAdjective",
       parent: "subject",
@@ -471,7 +391,7 @@ export function buildSatellites(
       hasValue: false,
     },
     // Complement toggles live on the VERB box; number/gender hang off each complement.
-    ...BOX_COMPLEMENT_TYPES.flatMap((type): Omit<Satellite, "shown">[] => {
+    ...BOX_COMPLEMENT_TYPES.flatMap((type): RawSatellite[] => {
       const concept = selection[type];
       const num = selection[`${type}Number` as keyof PhraseSelection] as
         | "singular"
@@ -626,228 +546,4 @@ export function buildSatellites(
       ];
     }),
   ];
-
-  // A command or an infinitive citation drops its subject: the subject box is replaced by the mood
-  // box (PhraseCanvas), so the whole subject family — its adjectives, number/gender, determiner,
-  // relative clause and possessor — has no head to hang off and is withdrawn. Every one of those
-  // satellites is keyed off the subject, and dropping them here is what keeps their controls, their
-  // boxes and their connectors from floating over the box that took its place.
-  const subjectDropped = (key: string) =>
-    finiteSlotTaken && key.startsWith("subject");
-
-  // Folding the direct object's box away takes its whole family with it — its adjectives,
-  // number/gender, determiner, relative clause, possessor and conjuncts all hang off a head
-  // that is no longer on the canvas. Same move as `subjectDropped` above, and what keeps
-  // their controls and connectors from floating over the space the box used to hold.
-  const directObject = rawSatellites.find((s) => s.key === "directObject")!;
-  const directObjectShown =
-    directObject.available && (revealed.directObject ?? true);
-  const directObjectDropped = (key: string) =>
-    !directObjectShown && key.startsWith("directObject") && key !== "directObject";
-
-  const satellites: Satellite[] = rawSatellites.map((s) => {
-    const available =
-      s.available && !subjectDropped(s.key) && !directObjectDropped(s.key);
-    return {
-      ...s,
-      available,
-      // A direct-toggle satellite (number) has no box to reveal — its ring icon
-      // carries the value. Otherwise an explicit toggle wins; else a set one auto-expands.
-      shown:
-        available &&
-        !s.directToggle &&
-        (revealed[s.key] ?? s.defaultShown ?? s.hasValue),
-    };
-  });
-  const shownMap: Record<string, boolean> = Object.fromEntries(
-    satellites.map((s) => [s.key, s.shown]),
-  );
-
-  return { satellites, shownMap };
-}
-
-// The relative-clause, possessor and coordination controls a noun carries on its *dotted* ring,
-// rather than on its word's solid ring.
-export type PerimeterEntry = {
-  relative?: SatelliteIcon;
-  possessor?: SatelliteIcon;
-  conjunct?: SatelliteIcon;
-};
-
-// Sort every available satellite into the three places its control can render: keyed by the
-// node that carries it (a word, whose solid ring seats it, or — chained — the satellite before
-// it, after whose disc it rides the orbit), on the verb-phrase dotted ring (the complement
-// toggles), or on a noun's dotted ring (the relative-clause + possessor controls, which also
-// anchor their connector lines). Pure derivation from the satellites and the current
-// collapse / link state; the three `on*` callbacks are what each icon does when clicked.
-export function buildSatelliteIcons({
-  satellites,
-  shownMap,
-  collapsedMainKeys,
-  linkBinding,
-  onToggleNumber,
-  onToggleGender,
-  onToggleNegative,
-  onToggleReveal,
-  onAddConjunct,
-}: {
-  satellites: Satellite[];
-  shownMap: Record<string, boolean>;
-  // Main-word keys of the currently collapsed groups — a collapsed group hides its
-  // own reveal icons.
-  collapsedMainKeys: Set<string>;
-  linkBinding: WorkspaceBinding | undefined;
-  onToggleNumber: (which: NumberSlot) => void;
-  onToggleGender: (which: GenderSlot) => void;
-  onToggleNegative: () => void;
-  onToggleReveal: (sat: Satellite) => void;
-  // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
-  // coordinate any number of phrases, so each click adds one more ring to the group.
-  onAddConjunct: (which: NounKey) => void;
-}): {
-  satelliteIconsByParent: Record<string, SatelliteIcon[]>;
-  complementToggleIcons: SatelliteIcon[];
-  perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>>;
-  directObjectToggle?: SatelliteIcon;
-} {
-  const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
-  const complementToggleIcons: SatelliteIcon[] = [];
-  const perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>> = {};
-  // Sits apart from the complement toggles: it is seated at the point where the object's
-  // connector leaves the verb-phrase dotted ring, so it reads as that line's start (VerbPhraseBuilder).
-  let directObjectToggle: SatelliteIcon | undefined;
-
-  for (const sat of satellites) {
-    if (!sat.available) continue;
-    // The instrumental control is a cross-container link, not a reveal: it rides the verb-phrase
-    // dotted ring (with the other complement toggles) and points at the period holding the
-    // instrument. Clicking it starts a pick, or removes the link once one is made. It exists
-    // only in a workspace container — a standalone period has nowhere to link to.
-    if (sat.key === "instrumental") {
-      if (!linkBinding) continue;
-      const linked = linkBinding.instrumental.hasSource;
-      complementToggleIcons.push({
-        key: sat.key,
-        icon: sat.icon,
-        labelKey: sat.labelKey,
-        // Never "active": there is no box to reveal, so the icon reads as *set* (a link exists)
-        // or not, and its tooltip says what clicking will do.
-        active: false,
-        label: sat.label,
-        isSet: linked,
-        valued: false,
-        valueLabel: linked ? "Linked — click to remove" : undefined,
-        onToggle: () =>
-          linked
-            ? linkBinding.instrumental.onClear()
-            : linkBinding.instrumental.onStart(),
-      });
-      continue;
-    }
-    // The "Relative clause" satellite is a cross-container link control, not a reveal.
-    // It only exists in a workspace container (needs the binding); clicking it starts a
-    // link (pick a noun in another container) or, when already a source, removes it.
-    const relativeNoun: NounKey | null = sat.key.endsWith("Relative")
-      ? (sat.key.slice(0, -"Relative".length) as NounKey)
-      : null;
-    if (relativeNoun) {
-      if (!linkBinding) continue;
-      const isSource = linkBinding.relative.sourceKeys.has(relativeNoun);
-      (perimeterByNoun[relativeNoun] ??= {}).relative = {
-        key: sat.key,
-        icon: sat.icon,
-        label: sat.label,
-        active: isSource,
-        isSet: isSource,
-        valued: false,
-        valueLabel: isSource ? "Linked — click to remove" : undefined,
-        onToggle: () =>
-          isSource
-            ? linkBinding.relative.onRemoveLink(relativeNoun)
-            : linkBinding.relative.onStartLink(relativeNoun),
-      };
-      continue;
-    }
-    // The "Coordinate" satellite rides the perimeter beside the possessor control. Clicking it
-    // appends one more conjunct, whose ring joins the group on the canvas.
-    const conjunctNoun: NounKey | null = sat.key.endsWith("Conjunct")
-      ? (sat.key.slice(0, -"Conjunct".length) as NounKey)
-      : null;
-    if (conjunctNoun) {
-      (perimeterByNoun[conjunctNoun] ??= {}).conjunct = {
-        key: sat.key,
-        icon: sat.icon,
-        label: sat.label,
-        // Never `active`: this control does not reveal a box that a second click would hide —
-        // it *appends* a phrase, and clicking it again appends another. Saying so keeps the
-        // button's tooltip on its value ("Add a conjunct") instead of offering to "Hide" it.
-        active: false,
-        isSet: sat.hasValue,
-        valued: true,
-        valueLabel: sat.hasValue ? "Add another conjunct" : "Add a conjunct",
-        onToggle: () => onAddConjunct(conjunctNoun),
-      };
-      continue;
-    }
-    // A direct-toggle satellite (number / gender / polarity) has no reveal box — its
-    // ring icon flips the value in place (singular ⇄ plural, positive ⇄ negative, or
-    // cycling masc → fem → …). `which` is the slot key minus the "Number" / "Gender" suffix.
-    const numberSlot: NumberSlot | null =
-      sat.directToggle && sat.key.endsWith("Number")
-        ? (sat.key.slice(0, -"Number".length) as NumberSlot)
-        : null;
-    const genderSlot: GenderSlot | null =
-      sat.directToggle && sat.key.endsWith("Gender")
-        ? (sat.key.slice(0, -"Gender".length) as GenderSlot)
-        : null;
-    const iconEntry: SatelliteIcon = {
-      key: sat.key,
-      icon: sat.icon,
-      label: sat.label,
-      labelKey: sat.labelKey,
-      active: sat.shown,
-      isSet: sat.hasValue,
-      valued: Boolean(sat.alwaysSet),
-      valueLabel: sat.valueLabel,
-      directToggle: sat.directToggle,
-      onToggle: numberSlot
-        ? () => onToggleNumber(numberSlot)
-        : genderSlot
-          ? () => onToggleGender(genderSlot)
-          : sat.key === "verbNegative"
-            ? onToggleNegative
-            : () => onToggleReveal(sat),
-    };
-    if (sat.key === "directObject") {
-      directObjectToggle = iconEntry;
-      continue;
-    }
-    // The possessor control likewise rides the dotted ring: the line to the noun's owner leaves
-    // from it. PhraseBuilder gives it what it does (name or point to the owner).
-    const possessorNoun: NounKey | null = sat.key.endsWith("Possessor")
-      ? (sat.key.slice(0, -"Possessor".length) as NounKey)
-      : null;
-    if (possessorNoun) {
-      (perimeterByNoun[possessorNoun] ??= {}).possessor = iconEntry;
-      continue;
-    }
-    if (COMPLEMENT_KEY_SET.has(sat.key as SlotKey)) {
-      complementToggleIcons.push(iconEntry);
-    } else {
-      // A collapsed group hides its own reveal icons; complement toggles ride
-      // the verb box but belong to sibling groups, so they stay above.
-      if (collapsedMainKeys.has(sat.parent)) continue;
-      // A control riding another satellite's box (Adjective 2 on Adjective 1) can only
-      // appear while that box is itself on the canvas.
-      if (REVEALABLE_SLOT_KEYS.has(sat.parent) && !shownMap[sat.parent]) continue;
-      (satelliteIconsByParent[sat.parent] ??= []).push(iconEntry);
-    }
-  }
-
-  return {
-    satelliteIconsByParent,
-    complementToggleIcons,
-    perimeterByNoun,
-    directObjectToggle,
-  };
 }

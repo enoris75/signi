@@ -13,7 +13,7 @@
 import type { UiStringKey } from "@signi/shared";
 import type { BoxComplementType } from "./interfaces.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
-import type { PerimeterEntry } from "./satellites.tsx";
+import type { PerimeterEntry } from "./satellites/index.ts";
 import type { OrbitChain, Pt, RingAim, RingControl, RingSpec } from "./ringLayout.ts";
 import {
   adjectiveSlots,

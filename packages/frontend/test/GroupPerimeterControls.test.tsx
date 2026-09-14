@@ -6,7 +6,7 @@ import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
 import { GroupPerimeterControls } from '../src/components/PhraseBuilder/GroupPerimeterControls.tsx';
 import type { NounKey } from '../src/components/PhraseBuilder/interfaces.ts';
 import { perimeterControlKey } from '../src/components/PhraseBuilder/ringSpecs.ts';
-import type { PerimeterEntry } from '../src/components/PhraseBuilder/satellites.tsx';
+import type { PerimeterEntry } from '../src/components/PhraseBuilder/satellites/index.ts';
 
 // A set control fills with its slot colour; the tests render without the app theme, so these are
 // MUI's default palette mains.

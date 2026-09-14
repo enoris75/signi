@@ -1,7 +1,7 @@
 import { Box } from "@mui/material";
 import { SatelliteButton } from "./Boxes.tsx";
 import type { NounKey, SlotConfig } from "./interfaces.ts";
-import type { PerimeterEntry } from "./satellites.tsx";
+import type { PerimeterEntry } from "./satellites/index.ts";
 import { perimeterControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
 
