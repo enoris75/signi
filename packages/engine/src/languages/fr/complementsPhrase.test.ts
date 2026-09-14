@@ -177,6 +177,12 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ source: complement(np(ANTARCTIQUE)) }), {}, 'COME')).toBe("de l'Antarctique");
       expect(complementsPhrase(complements({ source: complement(np(EUROPE)) }), {}, 'RUN')).toBe("loin de l'Europe");
     });
+
+    // Every seeded continent opens on a vowel; a hand-built one checks the unelided form.
+    test('a feminine continent opening on a consonant keeps de whole', () => {
+      const LAURASIE: Forms = { base: 'Laurasie', gender: 'fem', count: 'singular', proper: '1', uncountable: '1', isA: 'CONTINENT' };
+      expect(complementsPhrase(complements({ source: complement(np(LAURASIE)) }), {}, 'COME')).toBe('de Laurasie');
+    });
   });
 
   describe('direction', () => {
@@ -274,6 +280,11 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ cause: complement(np(EUX)) }))).toBe("à cause d'eux");
       expect(complementsPhrase(complements({ cause: complement(np(TU), [sentiment('positive')]) }))).toBe('grâce à toi');
       expect(complementsPhrase(complements({ cause: complement(np(EUX), [sentiment('positive')]) }))).toBe('grâce à eux');
+    });
+
+    test('a pronoun with no tonic form falls back to its base form, then to nothing', () => {
+      expect(complementsPhrase(complements({ cause: complement(np({ base: 'ça', person: '3' })) }))).toBe('à cause de ça');
+      expect(complementsPhrase(complements({ cause: complement(np({ person: '3' })) }))).toBe('à cause de ');
     });
 
     test('a negative pronoun cause is par + the possessive + faute', () => {

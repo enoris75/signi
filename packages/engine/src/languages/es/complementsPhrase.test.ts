@@ -31,6 +31,10 @@ describe('complementsPhrase', () => {
       expect(render({ predicative: complement(np(FELIZ)) }, NOSOTROS)).toBe('felices');
     });
 
+    test('a predicate adjective with no base form renders nothing', () => {
+      expect(render({ predicative: complement(np({ role: 'adjective' })) })).toBe('');
+    });
+
     test('a predicate adjective carries its own degree', () => {
       expect(render({ predicative: complement(np(CANSADO, { degree: 'more' })) }, MUJER)).toBe('más cansada');
       expect(render({ predicative: complement(np(CANSADO, { degree: 'less' })) })).toBe('menos cansado');
@@ -235,6 +239,11 @@ describe('complementsPhrase', () => {
       expect(render({ cause: complement(np(NOSOTROS), [sentiment('positive')]) })).toBe('gracias a nosotros');
     });
 
+    test('a pronoun with no tonic form falls back to its base form, then to nothing', () => {
+      expect(render({ cause: complement(np({ base: 'ello', person: '3' })) })).toBe('a causa de ello');
+      expect(render({ cause: complement(np({ person: '3' })) })).toBe('a causa de ');
+    });
+
     // The possessive agrees with feminine "culpa" and picks its stem by the pronoun's person/number.
     test('a negative pronoun cause is por + possessive + culpa', () => {
       const blame = (forms: Forms) => render({ cause: complement(np(forms), [sentiment('negative')]) });
@@ -260,6 +269,13 @@ describe('complementsPhrase', () => {
     test('its adjectives agree with the complement noun', () => {
       expect(render({ locative: complement(np(CASA, { definiteness: 'indefinite' }, { adjectives: [adj(PEQUENO)] })) })).toBe('en una casa pequeña');
       expect(render({ direction: complement(np(MERCADO, { number: 'plural' }, { adjectives: [adj(GRANDE)] })) })).toBe('a los mercados grandes');
+    });
+
+    test('a noun with no plural form reuses its base, and one with no base leaves the head alone', () => {
+      const CRISIS: Forms = { base: 'crisis', gender: 'fem', count: 'singular' };
+      expect(render({ instrumental: complement(np(CRISIS, { number: 'plural' })) })).toBe('con las crisis');
+      expect(render({ instrumental: complement(np({ gender: 'masc' })) })).toBe('con el ');
+      expect(render({ instrumental: complement(np({ gender: 'masc' }, { number: 'plural' })) })).toBe('con los ');
     });
 
     test('a stressed-a noun takes el, until a prenominal adjective intervenes', () => {

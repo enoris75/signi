@@ -1,6 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
-import { possessivePt } from '../../possessive.js';
+import { possessivePt, pronounPossessor } from '../../possessive.js';
 import { contractDet } from './contractDet.js';
 import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
@@ -131,8 +131,7 @@ export function complementsPhrase(
           if (sent === 'positive') return `a ${disj}`;
           if (sent === 'negative') {
             // The possessive agrees with the feminine "culpa"; você / vocês take "sua" (see `possessivePt`).
-            const owner = { kind: 'pronominal', person: (pf['person'] ?? '3') as '1' | '2' | '3', number: pf['number'] === 'plural' ? 'plural' : 'singular' } as const;
-            return `por ${possessivePt(owner, { gender: 'fem', number: 'singular' })} culpa`;
+            return `por ${possessivePt(pronounPossessor(pf), { gender: 'fem', number: 'singular' })} culpa`;
           }
           return PT_DE_FUSING_PRONOUN.test(disj) ? `d${disj}` : `de ${disj}`;
         };

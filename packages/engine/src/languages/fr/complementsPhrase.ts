@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import { abstractionLevel, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { possessiveFr, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { coordinate } from './coordinate.js';
 import { datPrep } from './datPrep.js';
@@ -132,13 +133,9 @@ export function complementsPhrase(
         const pronoun = (pf: Record<string, string>): string => {
           const disj = pf['disjunctive'] ?? pf['base'] ?? '';
           if (causeSent === 'positive') return `à ${disj}`;
+          // The possessive agrees with feminine "faute", which opens on a consonant: "ma", never "mon".
           if (causeSent === 'negative') {
-            const plural = pf['number'] === 'plural';
-            const poss =
-              pf['person'] === '1' ? (plural ? 'notre' : 'ma') :
-              pf['person'] === '2' ? (plural ? 'votre' : 'ta') :
-              plural ? 'leur' : 'sa';
-            return `par ${poss} faute`;
+            return `par ${possessiveFr(pronounPossessor(pf), { gender: 'fem', number: 'singular' }, false)} faute`;
           }
           return `${/^[aeiouéèêh]/i.test(disj) ? "d'" : 'de '}${disj}`;
         };

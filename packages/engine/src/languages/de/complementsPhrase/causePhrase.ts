@@ -1,5 +1,5 @@
-import { causeSentiment, type ConceptForms, type PronominalPossessor, type ResolvedComplement } from '../../../types.js';
-import { possessiveDe } from '../../../possessive.js';
+import { causeSentiment, type ConceptForms, type ResolvedComplement } from '../../../types.js';
+import { possessiveDe, pronounPossessor } from '../../../possessive.js';
 import { coordinate } from '../coordinate.js';
 import { nounPhrase } from '../nounPhrase.js';
 import { relativePronoun } from '../relativePronoun.js';
@@ -7,13 +7,7 @@ import { relativePronoun } from '../relativePronoun.js';
 // A pronoun's possessive agreeing with feminine "Schuld" in the accusative "durch" governs: "meine",
 // "deine", "seine", "ihre", "unsere", "eure".
 function schuldPossessive(forms: ConceptForms['forms']): string {
-  const owner: PronominalPossessor = {
-    kind: 'pronominal',
-    person: forms['person'] === '1' || forms['person'] === '2' ? forms['person'] : '3',
-    number: forms['number'] === 'plural' ? 'plural' : 'singular',
-    gender: forms['gender'] === 'fem' ? 'fem' : undefined,
-  };
-  return possessiveDe(owner, 'acc', { gender: 'fem', number: 'singular' });
+  return possessiveDe(pronounPossessor(forms), 'acc', { gender: 'fem', number: 'singular' });
 }
 
 // The cause shapes of their own: a group holding a pronoun, and the negative "Schuld" periphrasis.

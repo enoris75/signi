@@ -36,6 +36,11 @@ describe('complementsPhrase', () => {
       expect(render({ predicative: complement(np(BOM)) }, GATA)).toBe('boa');
     });
 
+    test('a subject with no gender agrees in the masculine', () => {
+      expect(render({ predicative: complement(np(CANSADO)) }, { person: '1', number: 'singular' })).toBe('cansado');
+      expect(render({ predicative: complement(np(CANSADO)) }, { person: '1', number: 'plural' })).toBe('cansados');
+    });
+
     test('a predicate adjective carries its own degree', () => {
       expect(render({ predicative: complement(np(FELIZ, { degree: 'more' })) })).toBe('mais feliz');
       expect(render({ predicative: complement(np(CANSADO, { degree: 'less' })) }, GATA)).toBe('menos cansada');
@@ -256,6 +261,11 @@ describe('complementsPhrase', () => {
       expect(render({ cause: complement(np(ELES)) })).toBe('por causa deles');
     });
 
+    test('a pronoun with no tonic form falls back to its base form, then to nothing', () => {
+      expect(render({ cause: complement(np({ base: 'isso', person: '3' })) })).toBe('por causa disso');
+      expect(render({ cause: complement(np({ person: '3' })) })).toBe('por causa de ');
+    });
+
     // A105: "de" fuses with the neuter demonstrative too.
     test('"de" fuses with the neuter isso and the demonstratives', () => {
       expect(render({ cause: complement(np(ELE, { gender: 'neut', disjunctive: 'isso' })) })).toBe('por causa disso');
@@ -288,6 +298,13 @@ describe('complementsPhrase', () => {
     test('its adjectives agree with its own head', () => {
       expect(render({ locative: complement(np(CASA, { definiteness: 'indefinite' }, { adjectives: [adj(VELHO)] })) })).toBe('em uma casa velha');
       expect(render({ direction: complement(np(MERCADO, { number: 'plural' }, { adjectives: [adj(GRANDE)] })) })).toBe('aos mercados grandes');
+    });
+
+    test('a noun with no plural form reuses its base, and one with no base leaves the head alone', () => {
+      const LAPIS: Forms = { base: 'lápis', gender: 'masc', count: 'singular' };
+      expect(render({ instrumental: complement(np(LAPIS, { number: 'plural' })) })).toBe('com os lápis');
+      expect(render({ instrumental: complement(np({ gender: 'masc' })) })).toBe('com o ');
+      expect(render({ instrumental: complement(np({ gender: 'masc' }, { number: 'plural' })) })).toBe('com os ');
     });
 
     test('its attributive nouns, possessor and relative clause trail it', () => {

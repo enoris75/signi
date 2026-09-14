@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement } from '../../types.js';
+import { possessiveIt, pronounPossessor } from '../../possessive.js';
 import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
@@ -77,11 +78,7 @@ export function complementsPhrase(
       const pronounCause = (pf: Record<string, string>): string => {
         const sent = causeSentiment(c);
         if (sent === 'positive') return `grazie a ${pf['disjunctive'] ?? pf['base'] ?? ''}`;
-        const plural = pf['number'] === 'plural';
-        const poss =
-          pf['person'] === '1' ? (plural ? 'nostra' : 'mia') :
-          pf['person'] === '2' ? (plural ? 'vostra' : 'tua') :
-          plural ? 'loro' : 'sua';
+        const poss = possessiveIt(pronounPossessor(pf), { gender: 'fem', number: 'singular' });
         return sent === 'negative' ? `per colpa ${poss}` : `a causa ${poss}`;
       };
       // locative→in, direction→a, source→"via da" (all fuse with article); route→path prep.

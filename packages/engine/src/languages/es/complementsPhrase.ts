@@ -1,5 +1,6 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
 import { abstractionLevel, actionGerund, actionInfinitive, causeSentiment, isRelativeSuperlative, locativeIdiom, mannerRelation, pathSpecifier, possessedHeadForms, SOURCE_ABLATIVE_ADVERB_VERBS, type ResolvedComplement, type ResolvedNounPhrase } from '../../types.js';
+import { possessiveEs, pronounPossessor } from '../../possessive.js';
 import { aDet } from './aDet.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artForms } from './artForms.js';
@@ -130,14 +131,7 @@ export function complementsPhrase(
       if (type === 'cause' && c.phrase.conjuncts.some((np) => np.head.forms['person'])) {
         const sent = causeSentiment(c);
         const pronoun = (pf: Record<string, string>): string => {
-          if (sent === 'negative') {
-            const plural = pf['number'] === 'plural';
-            const poss =
-              pf['person'] === '1' ? (plural ? 'nuestra' : 'mi') :
-              pf['person'] === '2' ? (plural ? 'vuestra' : 'tu') :
-              'su';
-            return `por ${poss} culpa`;
-          }
+          if (sent === 'negative') return `por ${possessiveEs(pronounPossessor(pf), { gender: 'fem', number: 'singular' })} culpa`;
           return `${sent === 'positive' ? 'a' : 'de'} ${pf['disjunctive'] ?? pf['base'] ?? ''}`;
         };
         const shared = sent !== 'negative';

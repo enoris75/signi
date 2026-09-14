@@ -212,6 +212,11 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ cause: complement(np(HE), [sentiment('negative')]) }))).toBe('through the fault of him');
     });
 
+    test('a pronoun with no oblique form falls back to its base form, and with neither drops out of its group', () => {
+      expect(complementsPhrase(complements({ cause: complement(np({ base: 'it', person: '3' })) }))).toBe('because of it');
+      expect(complementsPhrase(complements({ cause: complement(el(np(DOG), np({ person: '3' }))) }))).toBe('because of the dog');
+    });
+
     test('coordinated pronouns share one connector', () => {
       expect(complementsPhrase(complements({ cause: complement(el(np(HE), np(I))) }))).toBe('because of him and me');
     });

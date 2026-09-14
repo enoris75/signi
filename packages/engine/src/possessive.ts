@@ -31,6 +31,21 @@ function pn(feats: PronominalPossessor): PN {
   return `${feats.person}${n}` as PN;
 }
 
+/**
+ * The possessor a personal pronoun's forms stand for, for a construction that turns the pronoun
+ * itself into a possessive: "par **ma** faute", "per colpa **mia**", "durch **meine** Schuld". A
+ * person other than 1st or 2nd is the 3rd, and a gender outside the three is left off.
+ */
+export function pronounPossessor(forms: Record<string, string>): PronominalPossessor {
+  const { person, gender } = forms;
+  return {
+    kind: 'pronominal',
+    person: person === '1' || person === '2' ? person : '3',
+    number: forms['number'] === 'plural' ? 'plural' : 'singular',
+    ...(gender === 'masc' || gender === 'fem' || gender === 'neut' ? { gender } : {}),
+  };
+}
+
 // ── English ─────────────────────────────────────────────────────────────────
 // Invariant of the possessed. Only 3rd-singular splits on the antecedent's gender.
 export function possessiveEn(feats: PronominalPossessor): string {

@@ -35,6 +35,10 @@ describe('complementsPhrase', () => {
       expect(one('predicative', complement(np(FELICE)), { ...GATTA, number: 'plural' })).toBe('felici');
     });
 
+    test('a predicate adjective with no base form renders nothing', () => {
+      expect(one('predicative', complement(np({ role: 'adjective' })))).toBe('');
+    });
+
     test('a compared predicate adjective carries its degree adverb', () => {
       expect(one('predicative', complement(np(STANCO, { degree: 'more' })), GATTA)).toBe('più stanca');
       expect(one('predicative', complement(np(FELICE, { degree: 'equally' })), GATTO)).toBe('ugualmente felice');
@@ -242,6 +246,12 @@ describe('complementsPhrase', () => {
       expect(one('cause', complement(np(IO), positive))).toBe('grazie a me');
       expect(one('cause', complement(np(LEI), positive))).toBe('grazie a lei');
       expect(one('cause', complement(np(NOI), positive))).toBe('grazie a noi');
+    });
+
+    test('a positive pronoun with no tonic form falls back to its base form, then to nothing', () => {
+      const positive = [sentiment('positive')];
+      expect(one('cause', complement(np({ base: 'ciò', person: '3' }), positive))).toBe('grazie a ciò');
+      expect(one('cause', complement(np({ person: '3' }), positive))).toBe('grazie a ');
     });
 
     // The possessive agrees with feminine "causa"/"colpa"; "loro" is invariable.

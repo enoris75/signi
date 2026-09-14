@@ -25,6 +25,10 @@ describe('complementSegs', () => {
       expect(complementSegs(complements({ predicative: complement(np(OOKII)) }))).toEqual([{ t: '大きく', r: 'おおきく' }]);
     });
 
+    test('a kana-only i-adjective has no reading to carry onto its く-form', () => {
+      expect(complementSegs(complements({ predicative: complement(np({ role: 'adjective', base: 'すごい' })) }))).toEqual([{ t: 'すごく' }]);
+    });
+
     test('a na-adjective drops its な and takes に', () => {
       expect(complementSegs(complements({ predicative: complement(np(SHIAWASE)) }))).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'に' }]);
     });
@@ -84,6 +88,15 @@ describe('complementSegs', () => {
       expect(text(complementSegs(complements({
         instrumental: complement(np(BOU), [abstraction('concept')], vp(ERABU, { modifier: concept(HAYAKU) })),
       })))).toBe('棒を速く選ぶことで');
+    });
+
+    test('an action missing a form falls back: te-form to the base, base to nothing', () => {
+      const process = (verb: Forms, extra: Parameters<typeof vp>[1] = {}) =>
+        text(complementSegs(complements({ instrumental: complement(np(BOU), [abstraction('process')], vp(verb, extra)) })));
+      expect(process({ base: '選ぶ' })).toBe('棒を選ぶ');
+      expect(process({})).toBe('棒を');
+      expect(process(ERABU, { modifier: concept({}) })).toBe('棒を選んで');
+      expect(text(complementSegs(complements({ instrumental: complement(np(BOU), [abstraction('concept')], vp({})) })))).toBe('棒をことで');
     });
 
     test('falls back to the plain で instrument at the object level or without an action', () => {
