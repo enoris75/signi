@@ -1,7 +1,7 @@
 import type { NounKey } from "../interfaces.ts";
 import { DEFAULT_POSITIONS } from "../slots.ts";
 import type { PositionMap, CanvasSize } from "../layout.ts";
-import type { Pt } from "../ringLayout.ts";
+import { toPercent, toPx, type Pt } from "../ringLayout.ts";
 import { belowRing, chainKeys, UNMEASURED_R, type HostedRing } from "../conjunctChain.ts";
 import { besideRing, type OwnerSpot, type RingAt } from "../ownerChain.ts";
 
@@ -34,16 +34,10 @@ export function wordPlacement({
   const wordPos = (key: string): Pt =>
     at ?? compactPositions?.[key] ?? positions[key] ?? DEFAULT_POSITIONS[key] ?? unplacedRing(key);
 
-  const centerOf = (key: string): Pt => {
-    const p = wordPos(key);
-    return { x: (p.x / 100) * graphSize.w, y: (p.y / 100) * graphSize.h };
-  };
+  const centerOf = (key: string): Pt => toPx(wordPos(key), graphSize);
 
   function unplacedRing(key: string): Pt {
-    const percent = (c: Pt) => ({
-      x: (c.x / Math.max(graphSize.w, 1)) * 100,
-      y: (c.y / Math.max(graphSize.h, 1)) * 100,
-    });
+    const percent = (c: Pt) => toPercent(c, graphSize);
     for (const { which, count } of chains) {
       const keys = chainKeys(which, count);
       const i = keys.indexOf(key);

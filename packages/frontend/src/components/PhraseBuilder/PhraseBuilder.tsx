@@ -1,39 +1,21 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Box } from "@mui/material";
-import {
-  CAUSE_SENTIMENTS,
-  PATH_SPECIFIERS,
-  type Concept,
-  type CauseSentiment,
-  type Definiteness,
-  type ImperativeRegister,
-  type PathSpecifier,
-} from "@signi/shared";
+import { useRef, useState } from "react";
+import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
   adaptPossessorBinding,
   ConceptSelectOpts,
-  GenderSlot,
-  ImperativePerson,
   NounAddress,
   NounKey,
-  NumberSlot,
   PhraseSelection,
   builderNounAddress,
   conjunctAddress,
   possessorAddress,
-  POSSESSOR_KEY,
-  POSSESSOR_REF_KEY,
-  slotCategories,
-  SlotConfig,
   SlotKey,
   WorkspaceBinding,
 } from "./interfaces.ts";
 import {
-  ALL_SLOTS,
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
-  getActiveSlots,
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
@@ -42,52 +24,29 @@ import {
 import {
   applyConceptSelect,
   applyClear,
-  addConjunct,
   conjunctsOf,
-  cycleAspect,
-  cycleDegree,
-  cycleModifierRelation,
-  cycleModifierNumber,
-  cycleNounConjunction,
-  setModifierAdjective,
-  cycleTense,
   removeConjunct,
   removePossessor,
   clearPossessorRef,
   setPossessorRef,
   updateNounAt,
-  setDefiniteness,
-  setImperativePerson,
-  setImperativeRegister,
-  setSentiment,
-  setSpecifier,
-  toggleGender,
   toggleImperative,
   toggleInfinitive,
-  toggleNegative,
-  toggleNumber,
 } from "./phraseReducers.ts";
 import {
   buildSatelliteIcons,
   buildSatellites,
   type Satellite,
 } from "./satellites.tsx";
-import {
-  COMPACT_PAD_H,
-  COMPACT_PAD_V,
-  computeCompactLayout,
-  packPeriod,
-} from "./layout.ts";
-import { buildEdges, buildRings, roleGroups, type Edge } from "./graph.ts";
-import { buildRingSpecs, perimeterControlKey, portKey } from "./ringSpecs.ts";
-import { BUTTON_HALF, innerRadius, type Pt } from "./ringLayout.ts";
+import { packPeriod } from "./layout.ts";
+import { buildEdges, buildRings, linkEdge, roleGroups, type Edge } from "./graph.ts";
+import { buildRingSpecs } from "./ringSpecs.ts";
+import { toPercent, type Pt } from "./ringLayout.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
-import { Resizer } from "./Resizer.tsx";
 import {
   CorefPickContext,
-  possessiveHintEn,
   useCorefPick,
   useProvideCorefPick,
 } from "./CorefPickContext.tsx";
@@ -95,23 +54,13 @@ import { ConjunctRings } from "./ConjunctRings.tsx";
 import { OwnerRings } from "./OwnerRings.tsx";
 import type { RingHost } from "./ringHost.ts";
 import {
-  chainKeys,
   chainPortKey,
   conjunctKey,
   conjunctLinks,
   dropConjunctPosition,
-  hostedRect,
-  openConjunctsFor,
 } from "./conjunctChain.ts";
-import {
-  ownerLink,
-  ownersUnder,
-  pointerBend,
-  pointerLink,
-  possessionsFor,
-  type OwnerSpot,
-} from "./ownerChain.ts";
-import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
+import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
+import { PeriodCard } from "./PeriodCard.tsx";
 import { useDrag } from "./hooks/useDrag.ts";
 import { useHeightRebase } from "./hooks/useHeightRebase.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
@@ -123,10 +72,26 @@ import { useHostedRings } from "./hooks/useHostedRings.ts";
 import { useReportOwnRing } from "./hooks/useReportOwnRing.ts";
 import { useHostedRingPlacement } from "./hooks/useHostedRingPlacement.ts";
 import { useStoredNumber } from "./hooks/useStoredNumber.ts";
+import { useSlotFocus } from "./hooks/useSlotFocus.ts";
+import { useOwnersOpen } from "./hooks/useOwnersOpen.ts";
+import { useCompactLayout } from "./hooks/useCompactLayout.ts";
+import { useSettleCorefPick } from "./hooks/useSettleCorefPick.ts";
 import { nextActiveSlot } from "./functions/nextActiveSlot.ts";
 import { applyCollapse } from "./functions/applyCollapse.ts";
 import { decoratePerimeterControls } from "./functions/decoratePerimeterControls.ts";
 import { ringLookup, wordPlacement } from "./functions/canvasGeometry.ts";
+import { resolveBuilderMode } from "./functions/resolveBuilderMode.ts";
+import { renderedSlotsFor, roleSlotFor, visibleSlotsFor } from "./functions/visibleSlots.ts";
+import { phraseCommands } from "./functions/phraseCommands.ts";
+import { possessorToggleAction } from "./functions/possessorToggleAction.ts";
+import { canvasChains, ownableNouns } from "./functions/canvasNouns.ts";
+import { compactPacking } from "./functions/compactPacking.ts";
+import { possessorAims } from "./functions/possessorAims.ts";
+import { clearableKeys, clearControlsFor } from "./functions/clearControls.ts";
+import { hostedRectsFor } from "./functions/hostedRects.ts";
+import { possessionEdges } from "./functions/possessionEdges.ts";
+import { ringHosts } from "./functions/ringHosts.ts";
+import { linkPickHandlers } from "./functions/linkPickHandlers.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 
@@ -203,10 +168,15 @@ export function PhraseBuilder({
     binding && possessorPath
       ? adaptPossessorBinding(binding, possessorPath)
       : binding;
-  // A conjunct's or an owner's builder: a noun phrase inside a period, not a period of its own. It
-  // takes no part in the period's moods, connectors or instrument, though `binding` is the
-  // container's own.
-  const nested = Boolean(possessorPath);
+  // A period of its own, another clause's instrument, or a hosted ring's noun phrase — and so
+  // whether it draws a canvas yet (see resolveBuilderMode).
+  const { nested, nounPhraseMode, actionMode, showCanvas, hasContent } = resolveBuilderMode({
+    selection,
+    binding,
+    possessorPath,
+    nounPhraseOnly,
+    hosted: Boolean(ringHost),
+  });
   // Coref-pick coordinator for pronominal possessors ("the boy and his horse"). The outermost
   // period builder owns one (keyed to the whole period selection) and re-provides it below; a
   // nested conjunct / possessor builder inherits the parent's, so a pick spans the whole tree.
@@ -218,27 +188,18 @@ export function PhraseBuilder({
   // head "subject" is its `possessorPath`, and its other nouns sit under that (see
   // builderNounAddress). The same mapping `adaptPossessorBinding` applies.
   const nounAddress = (key: NounKey): NounAddress => builderNounAddress(possessorPath, key);
-  // This period is the instrument of another clause, and its reification degree decides what it
-  // holds — so the canvas shows exactly the boxes the sentence will read (see AbstractionLevel):
-  //  · object            → a bare noun phrase ("with a word"): the subject box alone, no predicate.
-  //  · process / concept → an act ("by choosing a word"): a verb and its direct object, and *no*
-  //                        subject — the clause above is the one doing it.
-  const isInstrument = !nested && Boolean(binding?.instrumental.hasTarget);
-  const instrumentLevel = binding?.instrumental.level ?? "object";
-  // A conjunct's or an owner's ring is the other bare noun phrase (see `nounPhraseOnly`).
-  const nounPhraseMode = nounPhraseOnly || (isInstrument && instrumentLevel === "object");
-  const actionMode = isInstrument && instrumentLevel !== "object";
-  // A period starts on its subject noun phrase — translation begins as soon as a subject
-  // is chosen, so a verbless period (a bare noun phrase like "breaking news") is possible.
-  const [activeSlot, setActiveSlot] = useState<SlotKey | null>("subject");
-  // A filled word box the user clicked to change its word: its inline picker is shown
-  // over the current word. Null when no box is being re-picked. Cleared on select or blur.
-  const [editingSlot, setEditingSlot] = useState<SlotKey | null>(null);
-  // The chosen word-category (noun|pronoun / noun|adjective) for each switchable empty box,
-  // keyed by slot. Set by the on-box toggle or the in-dropdown selector — the two read the
-  // same value here, so they stay in sync. A slot with no stored entry falls back to the
-  // held word's class (a re-pick) or the slot's default (see kindFor).
-  const [slotKindState, setSlotKindState] = useState<Record<string, string>>({});
+  // The slot in hand, the box open for re-picking, and each switchable box's word-category.
+  const {
+    activeSlot,
+    setActiveSlot,
+    editingSlot,
+    setEditingSlot,
+    selectSlot,
+    editSlot,
+    cancelEdit,
+    slotKind,
+    setSlotKind,
+  } = useSlotFocus(selection);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
@@ -252,71 +213,16 @@ export function PhraseBuilder({
   // A hosted ring is one more constituent of the period's canvas, so it follows that canvas's view.
   const compact = ringHost?.compact ?? compactView;
   const [sidebarWidth, setSidebarWidth] = useStoredNumber("signi:phraseBuilderSidebarWidth", 160);
-  // Where a standalone period card has been dragged to by its border, in viewport pixels;
-  // null while it sits in the page flow. The drag itself lives in PeriodContainer, but the
-  // state is held here because this component's outer Box is what goes `fixed`.
-  const [position, setPosition] = useState<{ x: number; y: number } | null>(
-    null,
-  );
   // The rings hosted on this canvas — conjuncts' and owners' — as each one's builder reports drawing
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
   const { hostedRings, reportRing } = useHostedRings();
-  // Which owners are open, by the address of the noun they own: an owner the user opened (still
-  // empty, or named) or folded away. Unset, a named owner shows and an empty one doesn't. The
-  // period's builder holds it for every owner on its canvas; a hosted ring's builder uses its host's.
-  const [periodOwnersOpen, setPeriodOwnersOpen] = useState<Record<NounAddress, boolean>>({});
-  const ownersOpen = ringHost?.ownersOpen ?? periodOwnersOpen;
-  const setPeriodOwnerOpen = useCallback(
-    (address: NounAddress, open: boolean) =>
-      setPeriodOwnersOpen((prev) => (prev[address] === open ? prev : { ...prev, [address]: open })),
-    [],
-  );
-  const setOwnerOpen = ringHost?.setOwnerOpen ?? setPeriodOwnerOpen;
-  const hasVerb = Boolean(selection.verb);
-  const hasSubject = Boolean(selection.subject);
-  // Has the user put anything in this clause? An untouched container is `{}`; any picked
-  // word, toggle, or nested possessor adds a key. Drives the remove-confirmation prompt.
-  const hasContent = Object.values(selection).some(
-    (v) => v != null && (typeof v !== "object" || Object.keys(v).length > 0),
-  );
-  // A canvas is shown once a subject or verb is chosen (a period starts on its subject),
-  // or, verbless, for a lone noun phrase (a hosted ring's). An imperative also shows it:
-  // its subject is the synthesised addressee (never picked into `selection`), so the canvas
-  // gives the greyed subject + addressee selector *and the verb box* — without this the empty
-  // state would show only the addressee selector, with no way to add the verb to command.
-  // Before that, the empty state offers the single opening word picker.
-  // An instrument-as-action period draws its canvas from the start: its first box is the verb,
-  // not the subject, so the subject-picking empty state would have nothing to offer.
-  // A hosted ring is drawn from the start too: an empty conjunct or owner is its word picker, in its
-  // ring.
-  const showCanvas =
-    Boolean(ringHost) ||
-    hasSubject || hasVerb || Boolean(selection.imperative) || Boolean(selection.infinitive) || actionMode;
-  // A conjunct's head word plays the role of the noun it is coordinated with, so its ring wears that
-  // role's name and colour ("DIRECT OBJECT", in green) rather than its builder's `subject` slot's. An
-  // owner's ring is named for what it is, in the colour of the noun it hangs off.
-  const hostRole = ringHost && ALL_SLOTS.find((s) => s.key === ringHost.role);
-  const roleSlot: Pick<SlotConfig, "label" | "labelKey" | "required" | "color"> | undefined =
-    hostRole &&
-    (ringHost.kind === "owner"
-      ? { label: "Possessor", labelKey: "slot.possessor", required: false, color: hostRole.color }
-      : hostRole);
-  const visibleSlots = getActiveSlots(
-    selection.verb?.transitivity,
-    selection.subject?.role,
-    Boolean(selection.subjectAdjective),
-    selection.verb?.complements,
-  )
-    // Objects hang off the verb, so a subject-only (verbless) period shows none —
-    // otherwise an empty Direct Object box would appear before any verb is chosen.
-    .filter((s) => hasVerb || !s.key.startsWith("directObject"))
-    .map((s) =>
-      roleSlot && s.key === "subject"
-        ? { ...s, label: roleSlot.label, labelKey: roleSlot.labelKey, required: roleSlot.required, color: roleSlot.color }
-        : s,
-    );
+  const { ownersOpen, setOwnerOpen } = useOwnersOpen(ringHost);
+  // A hosted ring's head slot wears its role's name and colour (see roleSlotFor).
+  const roleSlot = roleSlotFor(ringHost);
+  const visibleSlots = visibleSlotsFor(selection, roleSlot);
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
+  const commands = phraseCommands(onPhraseUpdate);
 
   function handleConceptSelect(
     concept: Concept,
@@ -336,39 +242,6 @@ export function PhraseBuilder({
     if (wasFilled) return;
     const next = nextActiveSlot({ slot, concept, selection, visibleSlots });
     if (next !== undefined) setActiveSlot(next);
-  }
-
-  function handleSlotClick(slot: SlotKey) {
-    setActiveSlot(slot);
-  }
-
-  // The effective word-category of a switchable slot: an explicit choice if the user made
-  // one, else the held word's own class (so re-picking opens on the right vocabulary), else
-  // the slot's default. Returns "" for a single-vocabulary slot (no toggle).
-  function kindFor(slot: SlotKey): string {
-    const cats = slotCategories(slot);
-    if (!cats) return "";
-    const stored = slotKindState[slot];
-    if (stored != null) return stored;
-    const held = selection[slot] as Concept | undefined;
-    if (held?.role && cats.options.some((o) => o.value === held.role))
-      return held.role;
-    return cats.fallback;
-  }
-
-  const handleSlotKindChange = (slot: SlotKey, kind: string) =>
-    setSlotKindState((prev) => ({ ...prev, [slot]: kind }));
-
-  // Click a filled word box to change its word: select the slot and open its inline
-  // picker over the current word (see SlotNode / slotTypeahead `editing`).
-  function handleEditSlot(slot: SlotKey) {
-    setActiveSlot(slot);
-    setEditingSlot(slot);
-  }
-
-  // Focus left a box being re-picked without a new word chosen — restore the word.
-  function handleCancelEdit(slot: SlotKey) {
-    setEditingSlot((cur) => (cur === slot ? null : cur));
   }
 
   function handleClear(slot: SlotKey) {
@@ -398,34 +271,26 @@ export function PhraseBuilder({
     binding?.relative.onRemoveLink(possessorAddress(address));
   }
 
-  // The possessor control on a noun's dotted ring. One control fills the owner either way: opening
-  // it draws an empty owner ring — its word picker, to name the owner — and lights up the nouns it
-  // could point to instead; clicking one of those points to it, and the empty ring goes. Once named,
-  // the control folds the owner's ring away and back like any satellite, keeping the owner; a
-  // pointed-to owner has no ring to fold, so the control takes it away.
+  // The possessor control on a noun's dotted ring (see possessorToggleAction).
   function handleTogglePossessor(which: NounKey) {
     const address = nounAddress(which);
-    if (selection[POSSESSOR_REF_KEY(which)]) {
-      handleRemovePossessor(which);
-      return;
+    switch (possessorToggleAction(selection, which, ownersOpen[address])) {
+      case "remove":
+        handleRemovePossessor(which);
+        return;
+      case "fold":
+        setOwnerOpen(address, false);
+        if (coref.picking === address) coref.cancel();
+        return;
+      case "open":
+        setOwnerOpen(address, true);
+        return;
+      case "openAndPick":
+        setOwnerOpen(address, true);
+        coref.start(address, (antecedent) =>
+          onPhraseUpdate((prev) => setPossessorRef(prev, which, antecedent)),
+        );
     }
-    const named = Boolean((selection[POSSESSOR_KEY(which)] as PhraseSelection | undefined)?.subject);
-    if (ownersOpen[address] ?? named) {
-      setOwnerOpen(address, false);
-      if (coref.picking === address) coref.cancel();
-      return;
-    }
-    setOwnerOpen(address, true);
-    if (!named)
-      coref.start(address, (antecedent) =>
-        onPhraseUpdate((prev) => setPossessorRef(prev, which, antecedent)),
-      );
-  }
-
-  // Coordinate one more phrase with a noun block's head ("Peter *and Paul*"). Unlike the
-  // possessor, this is not a reveal but an append: each click adds one more ring to the group.
-  function handleAddConjunct(which: NounKey) {
-    onPhraseUpdate((prev) => addConjunct(prev, which));
   }
 
   // Drop one conjunct out of a block's group. The conjuncts after it shift up by one, so every
@@ -442,28 +307,6 @@ export function PhraseBuilder({
     setPositions((prev) => dropConjunctPosition(prev, which, i, count));
   }
 
-  const handleCycleConjunction = (which: NounKey) =>
-    onPhraseUpdate((prev) => cycleNounConjunction(prev, which));
-
-  // Each grammatical control on the canvas is a pure selection transform (phraseReducers);
-  // these bind them to this builder's slice.
-  const handleToggleNumber = (which: NumberSlot) =>
-    onPhraseUpdate((prev) => toggleNumber(prev, which));
-  const handleToggleGender = (which: GenderSlot) =>
-    onPhraseUpdate((prev) => toggleGender(prev, which));
-  const handleToggleNegative = () => onPhraseUpdate(toggleNegative);
-  const handleSetDefiniteness = (which: NounKey, value: Definiteness) =>
-    onPhraseUpdate((prev) => setDefiniteness(prev, which, value));
-  const handleCycleModifierRelation = (slotKey: SlotKey) =>
-    onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey));
-  const handleCycleModifierNumber = (slotKey: SlotKey) =>
-    onPhraseUpdate((prev) => cycleModifierNumber(prev, slotKey));
-  const handleSetModifierAdjective = (slotKey: SlotKey, concept: Concept | undefined) =>
-    onPhraseUpdate((prev) => setModifierAdjective(prev, slotKey, concept));
-  const handleCycleDegree = (slotKey: SlotKey) =>
-    onPhraseUpdate((prev) => cycleDegree(prev, slotKey));
-  const handleCycleTense = () => onPhraseUpdate(cycleTense);
-  const handleCycleAspect = () => onPhraseUpdate(cycleAspect);
   const handleToggleImperative = () => {
     onPhraseUpdate(toggleImperative);
     // Switching a command on replaces the subject box with the command box, so focus would
@@ -477,16 +320,6 @@ export function PhraseBuilder({
     // to the verb — the citation's whole content — for the same reason the command toggle does.
     if (!selection.infinitive && !selection.verb) setActiveSlot("verb");
   };
-  const handleSetImperativePerson = (person: ImperativePerson) =>
-    onPhraseUpdate((prev) => setImperativePerson(prev, person));
-  const handleSetImperativeRegister = (register: ImperativeRegister) =>
-    onPhraseUpdate((prev) => setImperativeRegister(prev, register));
-  const handleSelectSpecifier = (spec: PathSpecifier) =>
-    onPhraseUpdate((prev) => setSpecifier(prev, spec, "route"));
-  const handleSelectLocativeSpecifier = (spec: PathSpecifier) =>
-    onPhraseUpdate((prev) => setSpecifier(prev, spec, "locative"));
-  const handleSelectSentiment = (sentiment: CauseSentiment) =>
-    onPhraseUpdate((prev) => setSentiment(prev, sentiment));
 
   // An owner's ring is shown while its owner is open, which the period's builder holds (see
   // `ownersOpen`), so that reads in place of the possessor satellite's own reveal.
@@ -535,11 +368,11 @@ export function PhraseBuilder({
       shownMap,
       collapsedMainKeys,
       linkBinding,
-      onToggleNumber: handleToggleNumber,
-      onToggleGender: handleToggleGender,
-      onToggleNegative: handleToggleNegative,
+      onToggleNumber: commands.handleToggleNumber,
+      onToggleGender: commands.handleToggleGender,
+      onToggleNegative: commands.handleToggleNegative,
       onToggleReveal: handleToggleReveal,
-      onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : handleAddConjunct,
+      onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : commands.handleAddConjunct,
     });
   // The group-extending control rides the group's last ring; each possessor control names or points
   // to its noun's owner.
@@ -551,11 +384,7 @@ export function PhraseBuilder({
     onTogglePossessor: handleTogglePossessor,
   });
 
-  // Satellite slots (adjective / adverb) only render when revealed or filled; the direct
-  // object, only while its own control on the verb-phrase box has it unfolded.
-  const renderedSlots = visibleSlots.filter(
-    (s) => !REVEALABLE_SLOT_KEYS.has(s.key) || shownMap[s.key],
-  );
+  const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const [positions, setPositions] = useState<
@@ -610,67 +439,26 @@ export function PhraseBuilder({
         : g,
     );
 
-  // The coordinated nouns whose ring is on this canvas: each draws its conjuncts' rings after its
-  // own. (A hosted ring's builder hosts none — every ring is the period canvas's.)
-  const chains = ringHost
-    ? []
-    : openConjunctsFor(selection)
-        .filter((which) => groups.some((g) => g.mainKey === which))
-        .map((which) => ({ which, count: conjunctsOf(selection, which).length }));
+  // The coordinated nouns whose ring is on this canvas. (A hosted ring's builder hosts none — every
+  // ring is the period canvas's.)
+  const chains = ringHost ? [] : canvasChains(selection, groups);
 
   // The owners on this canvas, however deep — an owner's owner, a conjunct's — and the nouns that
   // point to theirs. The period's own nouns may take one wherever their possessor control is offered.
   const { owners, pointers } = ringHost
     ? { owners: [], pointers: [] }
-    : possessionsFor({
-        selection,
-        nouns: groups
-          .map((g) => g.mainKey as NounKey)
-          .filter((k) => satellites.some((sat) => sat.key === `${k}Possessor` && sat.available)),
-        chains,
-        ownersOpen,
-      });
+    : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen });
 
-  // Compact-view layout, derived (not stored) each render: pack the visible core words
-  // into centered rows and size the canvas to just wrap them. Because it's recomputed
-  // from the current width every render, it never goes stale on a resize, and the stored
-  // full-view positions/height stay pristine for when compact turns back off. The core
-  // words are exactly `renderedSlots` in compact (satellites are already filtered out).
-  // The packing keeps clear of the period's controls, which reserve no room of their own.
-  // Each cell is big enough for the biggest solid ring and the clear button straddling it.
-  // A coordinated noun's conjuncts are packed straight after it, each in a cell of its own, and each
-  // ring's owners straight after that ring.
-  const withOwners = (key: string): string[] => [
-    key,
-    ...owners.filter((o) => o.possessedKey === key).flatMap((o) => withOwners(o.address)),
-  ];
-  const compactKeys = renderedSlots.flatMap((s) => {
-    const chain = chains.find((c) => c.which === s.key);
-    return (chain ? chainKeys(chain.which, chain.count) : [s.key]).flatMap(withOwners);
+  // What compact view packs, and in how big a cell (see compactPacking). A hosted ring's builder has
+  // no canvas of its own to pack: its ring is placed by the period's.
+  const packing = compactPacking({ renderedSlots, chains, owners, groups, sizeOf, hostedRings });
+  const compactLayout = useCompactLayout({
+    enabled: compact && !ringHost,
+    keys: packing.keys,
+    width: svgSize.w,
+    corner: controlsCorner,
+    cell: packing.cell,
   });
-  const ringHalf =
-    Math.max(
-      0,
-      ...groups.map((g) => innerRadius(sizeOf(g.mainKey))),
-      ...compactKeys.map((k) => hostedRings[k]?.rIn ?? 0),
-    ) + BUTTON_HALF;
-  const cellHalfW = Math.max(COMPACT_PAD_H, Math.ceil(ringHalf));
-  const cellHalfH = Math.max(COMPACT_PAD_V, Math.ceil(ringHalf));
-  const compactLayout = React.useMemo(
-    () =>
-      // A hosted ring's builder has no canvas of its own to pack: its ring is placed by the period's.
-      compact && !ringHost
-        ? computeCompactLayout(
-            compactKeys,
-            svgSize.w,
-            controlsCorner,
-            { halfW: cellHalfW, halfH: cellHalfH },
-          )
-        : null,
-    // The keys are a fresh array every render; what they spell is what the packing depends on.
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [compact, Boolean(ringHost), compactKeys.join(), svgSize.w, controlsCorner, cellHalfW, cellHalfH],
-  );
 
   // Canvas height + the size the rings are laid out against: the tight compact height when
   // compact, else the (resizable) full-view height. Both the group rects and the box %
@@ -683,10 +471,6 @@ export function PhraseBuilder({
   const canvasHeight = compactLayout ? compactLayout.height : graphHeight;
   const graphSize = ringHost?.graphSize ?? { w: svgSize.w, h: canvasHeight };
 
-  // The Paper's padding, in theme spacing units. The resize grip negates it to sit flush
-  // with the container's bottom border, so the two must stay in step.
-  const paperPad = compact ? 1 : 2;
-
   // Where a constituent's word sits: its stored position, or the compact packing while compact.
   // A hosted ring's builder paints its one word where the period's canvas puts it.
   const { wordPos, centerOf } = wordPlacement({
@@ -698,16 +482,8 @@ export function PhraseBuilder({
     owners,
   });
 
-  // Where each noun's possessor control faces while the noun has an owner: the owner's ring, or the
-  // bend of the line to the noun it points to. The line to the owner leaves from the control.
-  const possessorToward = (key: string): Pt | undefined => {
-    const owner = owners.find((o) => o.possessedKey === key);
-    if (owner) return centerOf(owner.address);
-    const target = pointers.find((p) => p.possessedKey === key)?.antecedentKey;
-    return target && (groups.some((g) => g.mainKey === target) || hostedRings[target])
-      ? pointerBend(centerOf(key), centerOf(target))
-      : undefined;
-  };
+  // Where each noun's possessor control faces while the noun has an owner.
+  const aims = possessorAims({ owners, pointers, groups, hostedRings, centerOf });
 
   // The port on each coordinated noun's dotted ring that the line to its first conjunct leaves from.
   const headLinkPorts: Record<string, { key: string; toward: Pt }[]> = Object.fromEntries(
@@ -717,20 +493,12 @@ export function PhraseBuilder({
     }),
   );
 
-  // The words whose solid ring carries a clear button: a chosen word that is not a link target's
-  // greyed endpoint, not open for re-picking, and not the subject a mood has replaced.
-  const moodSubject = Boolean(selection.imperative || selection.infinitive);
-  const clearable = new Set(
-    groups
-      .map((g) => g.mainKey)
-      .filter(
-        (k) =>
-          Boolean(selection[k as SlotKey]) &&
-          !linkBinding?.relative.targetKeys.has(k as NounKey) &&
-          editingSlot !== k &&
-          !(k === "subject" && moodSubject),
-      ),
-  );
+  const clearable = clearableKeys({
+    groups,
+    selection,
+    linkTargetKeys: linkBinding?.relative.targetKeys,
+    editingSlot,
+  });
 
   // Seat every satellite and control on its constituent's rings (see ringSpecs / ringLayout).
   const { groupRects, discs, controlPos } = buildRings({
@@ -753,12 +521,7 @@ export function PhraseBuilder({
       linkPorts: ringHost ? { subject: ringHost.ports } : headLinkPorts,
       possessorAims: ringHost
         ? ringHost.possessorToward && { subject: ringHost.possessorToward }
-        : Object.fromEntries(
-            groups.flatMap((g) => {
-              const toward = possessorToward(g.mainKey);
-              return toward ? [[g.mainKey, toward]] : [];
-            }),
-          ),
+        : aims.byGroup,
     }),
     centerOf,
     sizeOf,
@@ -769,45 +532,21 @@ export function PhraseBuilder({
   // it was put.
   function pos(key: string) {
     const disc = discs[key];
-    if (disc) return { x: (disc.x / graphSize.w) * 100, y: (disc.y / graphSize.h) * 100 };
-    return wordPos(key);
+    return disc ? toPercent(disc, graphSize) : wordPos(key);
   }
   // A satellite is dragged by its constituent: pressing its disc moves the whole ring.
   const dragKeyOf = (key: string) =>
     groups.find((g) => g.nodeKeys.includes(key))?.mainKey ?? key;
 
-  // ── Coordination on this canvas ──
-  // Each conjunct's ring as one more constituent here — kept clear of the others, and packed by a
-  // tidy — once its builder has reported drawing it.
+  // The hosted rings as constituents of this canvas, once their builders have reported drawing them.
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
-  const conjunctRects = chains.flatMap(({ which, count }) => {
-    const head = headOf(which);
-    if (!head) return [];
-    return Array.from({ length: count }, (_, i) => conjunctKey(which, i)).flatMap((key, i) => {
-      const ring = hostedRings[key];
-      if (!ring) return [];
-      return [hostedRect({ key, color: head.color, kind: "conjunct", head: head.label, index: i, center: centerOf(key), ring, compact })];
-    });
-  });
-
-  // ── Possession on this canvas ──
-  // Each owner's ring as one more constituent here, once its builder has reported drawing it.
-  const ownerRects = owners.flatMap((spot) => {
-    const ring = hostedRings[spot.address];
-    const head = headOf(spot.role);
-    if (!ring || !head) return [];
-    return [
-      hostedRect({
-        key: spot.address,
-        color: head.color,
-        kind: "owner",
-        head: head.label,
-        index: spot.order,
-        center: centerOf(spot.address),
-        ring,
-        compact,
-      }),
-    ];
+  const { conjunctRects, ownerRects, standIns } = hostedRectsFor({
+    chains,
+    owners,
+    groupRects,
+    hostedRings,
+    centerOf,
+    compact,
   });
   const canvasRects = [...groupRects, ...conjunctRects, ...ownerRects];
 
@@ -818,12 +557,7 @@ export function PhraseBuilder({
     complementToggleIcons,
     directObjectToggle,
     compact,
-    standIns: Object.fromEntries(
-      chains.flatMap(({ which }) => {
-        const head = headOf(which);
-        return head ? [[head.label, conjunctRects.filter((r) => r.conjunct?.head === head.label)]] : [];
-      }),
-    ),
+    standIns,
   });
   // The lines joining each group's rings, drawn like the lines to the verb phrase; the chip on each
   // says how the group is joined.
@@ -835,109 +569,30 @@ export function PhraseBuilder({
     rings: hostedRings,
     compact,
   });
-  const linkEdges: Edge[] = links.map((link) => ({
-    x1: link.from.x,
-    y1: link.from.y,
-    x2: link.to.x,
-    y2: link.to.y,
-    color: headOf(link.which)?.color ?? "",
-    dashed: false,
-  }));
+  const linkEdges: Edge[] = links.map((link) => linkEdge(link, headOf(link.which)?.color ?? "", false));
 
   // The rings on this canvas and the controls on them, its own constituents' and the hosted ones'.
   const { ringOf, controlOn } = ringLookup({ groupRects, hostedRings, controlPos, centerOf });
-  const possessorControlOn = (key: string) =>
-    controlOn(key, perimeterControlKey("possessor", key), perimeterControlKey("possessor", "subject"));
-  // The port an owner's ring faces the ring it owns from.
-  const ownerPort = (spot: OwnerSpot) => portKey(spot.address, spot.possessedKey);
-  const possessionColor = (role: NounKey) => headOf(role)?.color ?? "";
-
-  // The line from each noun to its owner's ring…
-  const ownerEdges: Edge[] = owners.flatMap((spot) => {
-    const link = ownerLink({
-      owned: ringOf(spot.possessedKey),
-      owner: ringOf(spot.address),
-      control: possessorControlOn(spot.possessedKey),
-      port: controlOn(spot.address, ownerPort(spot)),
-      compact,
-    });
-    return link
-      ? [{ x1: link.from.x, y1: link.from.y, x2: link.to.x, y2: link.to.y, color: possessionColor(spot.role), dashed: false }]
-      : [];
-  });
-  // …and the dashed line from each noun that points to its owner, with the pronoun it renders.
-  const pointerLinks = pointers.flatMap((spot) => {
-    const link = pointerLink({
-      owned: ringOf(spot.possessedKey),
-      antecedent: spot.antecedentKey ? ringOf(spot.antecedentKey) : undefined,
-      control: possessorControlOn(spot.possessedKey),
-      compact,
-    });
-    if (!link) return [];
-    const resolved = coref.resolve(spot.antecedent);
-    return [
-      {
-        spot,
-        link,
-        pronoun: resolved && possessiveHintEn(resolved.features),
-        color: possessionColor(spot.role),
-      },
-    ];
-  });
-  const possessionEdges: Edge[] = [
-    ...ownerEdges,
-    ...pointerLinks.map(({ link, color }) => ({
-      x1: link.from.x,
-      y1: link.from.y,
-      x2: link.to.x,
-      y2: link.to.y,
-      via: link.via,
-      color,
-      dashed: true,
-    })),
-  ];
-
-  // What every hosted ring borrows from this canvas alike.
-  const hosting = {
-    graphSize,
+  // The lines from each noun to its owner, and to the noun it points to.
+  const possession = possessionEdges({
+    owners,
+    pointers,
+    ringOf,
+    controlOn,
+    colorOf: (role) => headOf(role)?.color ?? "",
+    resolve: coref.resolve,
     compact,
-    draggingKey,
-    makeDragProps,
-    makeGroupDragProps,
-    ownersOpen,
-    setOwnerOpen,
-  };
+  });
 
-  // What conjunct `i` of `which` borrows from this canvas to draw its ring here.
-  const hostFor = (which: NounKey, i: number): RingHost => {
-    const count = chains.find((c) => c.which === which)?.count ?? 0;
-    const keys = chainKeys(which, count);
-    const key = keys[i + 1];
-    const neighbours = [keys[i], keys[i + 2]].filter((k): k is string => Boolean(k));
-    return {
-      ...hosting,
-      kind: "conjunct",
-      key,
-      role: which,
-      at: wordPos(key),
-      ports: neighbours.map((n) => ({ key: chainPortKey(key, n), toward: centerOf(n) })),
-      possessorToward: possessorToward(key),
-      onRing: (ring) => reportRing(key, ring),
-      isLast: i === count - 1,
-      onAddConjunct: () => handleAddConjunct(which),
-    };
-  };
-
-  // What an owner borrows from this canvas to draw its ring here.
-  const ownerHostFor = (spot: OwnerSpot): RingHost => ({
-    ...hosting,
-    kind: "owner",
-    key: spot.address,
-    role: spot.role,
-    at: wordPos(spot.address),
-    ports: [{ key: ownerPort(spot), toward: centerOf(spot.possessedKey) }],
-    possessorToward: possessorToward(spot.address),
-    onRing: (ring) => reportRing(spot.address, ring),
+  // What each hosted ring borrows from this canvas to draw its ring here.
+  const { conjunctHost, ownerHost } = ringHosts({
+    hosting: { graphSize, compact, draggingKey, makeDragProps, makeGroupDragProps, ownersOpen, setOwnerOpen },
+    chains,
+    wordPos,
+    centerOf,
+    possessorToward: aims.toward,
+    reportRing,
+    onAddConjunct: commands.handleAddConjunct,
   });
 
   // Take an owner off the noun it owns. Relative clauses sourced from it, or from an owner it holds,
@@ -957,26 +612,14 @@ export function PhraseBuilder({
     });
   }
 
-  // Naming an owner settles it: once its ring holds a word, the nouns lit up to point to instead go
-  // dark.
-  useEffect(() => {
-    if (ringHost || !coref.picking) return;
-    if (owners.some((o) => o.possessed === coref.picking && o.named)) coref.cancel();
-  });
+  // Naming an owner ends the pick that offered to point to one instead.
+  useSettleCorefPick({ enabled: !ringHost, coref, owners });
 
   // A hosted ring's builder tells the period's canvas about the ring it just drew, and that it is gone.
   useReportOwnRing(ringHost, ringHost ? groupRects[0] : undefined, controlPos);
 
   // The clear button on each word's solid ring.
-  const clearControls = [...clearable].map((mainKey) => {
-    const slot = visibleSlots.find((s) => s.key === mainKey);
-    return {
-      mainKey,
-      label: slot?.label ?? mainKey,
-      labelKey: slot?.labelKey,
-      onClear: () => handleClear(mainKey as SlotKey),
-    };
-  });
+  const clearControls = clearControlsFor({ clearable, visibleSlots, onClear: handleClear });
 
   // Place each hosted ring the first time it appears, in the stored (full-view) positions, so the ring
   // has somewhere to be dragged from even while compact view packs it elsewhere.
@@ -1027,7 +670,7 @@ export function PhraseBuilder({
   }
 
   // Compact / expand the whole period. This is a pure view toggle: the compact packing
-  // and shrunk canvas height are *derived* each render (see compactLayout below), so the
+  // and shrunk canvas height are *derived* each render (see useCompactLayout), so the
   // stored full-view positions and graphHeight are left untouched — expanding just falls
   // straight back to them, and the compact layout can never go stale on a resize.
   function handleToggleCompact() {
@@ -1064,27 +707,27 @@ export function PhraseBuilder({
       ? () => ringHost.makeGroupDragProps([ringHost.key])
       : makeGroupDragProps,
     slotEls,
-    handleSlotClick,
+    handleSlotClick: selectSlot,
     editingSlot,
-    handleEditSlot,
-    handleCancelEdit,
+    handleEditSlot: editSlot,
+    handleCancelEdit: cancelEdit,
     handleConceptSelect,
-    slotKind: kindFor,
-    onSlotKindChange: handleSlotKindChange,
+    slotKind,
+    onSlotKindChange: setSlotKind,
     handleClear,
-    handleToggleNumber,
-    handleToggleGender,
-    handleSetDefiniteness,
-    handleCycleModifierRelation,
-    handleCycleModifierNumber,
-    handleSetModifierAdjective,
-    handleCycleDegree,
-    handleToggleNegative,
-    handleCycleTense,
-    handleCycleAspect,
-    handleSelectSpecifier,
-    handleSelectLocativeSpecifier,
-    handleSelectSentiment,
+    handleToggleNumber: commands.handleToggleNumber,
+    handleToggleGender: commands.handleToggleGender,
+    handleSetDefiniteness: commands.handleSetDefiniteness,
+    handleCycleModifierRelation: commands.handleCycleModifierRelation,
+    handleCycleModifierNumber: commands.handleCycleModifierNumber,
+    handleSetModifierAdjective: commands.handleSetModifierAdjective,
+    handleCycleDegree: commands.handleCycleDegree,
+    handleToggleNegative: commands.handleToggleNegative,
+    handleCycleTense: commands.handleCycleTense,
+    handleCycleAspect: commands.handleCycleAspect,
+    handleSelectSpecifier: commands.handleSelectSpecifier,
+    handleSelectLocativeSpecifier: commands.handleSelectLocativeSpecifier,
+    handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,
     removeRing:
@@ -1094,40 +737,9 @@ export function PhraseBuilder({
             onRemove,
           }
         : undefined,
-    // Cross-container linking: forward noun boxes to the workspace registry and expose
-    // greying (link targets) + pick-mode (eligible targets). Only NOUN_KEYS participate.
-    onBoxRef: linkBinding
-      ? (key, el) => {
-          if (NOUN_KEYS.includes(key as NounKey))
-            linkBinding.geometry.registerBox(key as NounKey, el);
-        }
-      : undefined,
-    dimmedKeys: linkBinding
-      ? (linkBinding.relative.targetKeys as Set<string>)
-      : undefined,
-    // A noun box lights up as a pick target for either an in-progress relative-clause link
-    // (cross-container) or a pronominal-possessor coref pick (same period). The coref pick takes
-    // precedence while active, since the two never run at once.
-    isPickTarget: (key) => {
-      if (!NOUN_KEYS.includes(key as NounKey)) return false;
-      if (coref.picking) return coref.isEligible(nounAddress(key as NounKey));
-      return Boolean(linkBinding?.relative.isPickTarget(key as NounKey));
-    },
-    onPickTarget: (key) => {
-      if (coref.picking && NOUN_KEYS.includes(key as NounKey)) {
-        coref.pick(nounAddress(key as NounKey));
-        return;
-      }
-      linkBinding?.relative.onPick(key as NounKey);
-    },
-    // The instrumental toggle on the verb phrase's dotted ring is where an instrumental link
-    // starts, so the workspace measures its connector from there.
-    registerVerbAnchor: linkBinding?.geometry.registerVerbAnchor,
+    // How the noun boxes take part in cross-container links and coref picks (see linkPickHandlers).
+    ...linkPickHandlers({ coref, linkBinding, nounAddress }),
   };
-
-  // The clause-level connector controls on the card border, derived from the workspace binding
-  // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
-  const clauseControls = nested ? {} : periodControls(binding, selection);
 
   const canvas = (
     <PhraseCanvas
@@ -1136,13 +748,13 @@ export function PhraseBuilder({
       canvasHeight={canvasHeight}
       graphSize={graphSize}
       edges={edges}
-      groupEdges={[...groupEdges, ...linkEdges, ...possessionEdges]}
+      groupEdges={[...groupEdges, ...linkEdges, ...possession.edges]}
       controlPos={controlPos}
       clearControls={clearControls}
       perimeterByNoun={perimeterByNoun}
       linkBinding={linkBinding}
-      onSetImperativePerson={handleSetImperativePerson}
-      onSetImperativeRegister={handleSetImperativeRegister}
+      onSetImperativePerson={commands.handleSetImperativePerson}
+      onSetImperativeRegister={commands.handleSetImperativeRegister}
       containerRef={containerRef}
       recolor={roleSlot ? { subject: roleSlot.color } : undefined}
       overlay={Boolean(ringHost)}
@@ -1154,22 +766,22 @@ export function PhraseBuilder({
               selection={selection}
               onPhraseUpdate={onPhraseUpdate}
               onRemoveConjunct={handleRemoveConjunct}
-              onCycleConjunction={handleCycleConjunction}
-              hostFor={hostFor}
+              onCycleConjunction={commands.handleCycleConjunction}
+              hostFor={conjunctHost}
               links={links}
               binding={binding}
               possessorPath={possessorPath}
               Builder={PhraseBuilder}
             />
           )}
-          {(owners.length > 0 || pointerLinks.length > 0) && (
+          {(owners.length > 0 || possession.pointerLines.length > 0) && (
             <OwnerRings
               owners={owners}
-              pointers={pointerLinks}
+              pointers={possession.pointerLines}
               selection={selection}
               onPhraseUpdate={onPhraseUpdate}
               onRemoveOwner={handleRemoveOwner}
-              hostFor={ownerHostFor}
+              hostFor={ownerHost}
               binding={binding}
               Builder={PhraseBuilder}
             />
@@ -1182,117 +794,47 @@ export function PhraseBuilder({
   // A hosted ring's builder paints its ring onto the period's canvas. It wears no card of its own.
   if (ringHost) return canvas;
 
-  // The card's contents — the canvas and its resize grip.
-  const content = (
-    <>
-      {canvas}
-
-      {/* The container's own bottom edge is the resize grip, so it bleeds back through
-          the Paper's padding. No manual resize while compact — the canvas is auto-sized
-          to hug the chips, and the resizer's tall minimum would fight that. */}
-      {!compact && (
-        <Box sx={{ mt: 2, mx: -paperPad, mb: -paperPad }}>
-          <Resizer
-            height={graphHeight}
-            minHeight={MIN_GRAPH_HEIGHT}
-            onResize={setGraphHeight}
-            onResizeEnd={(h) => {
-              localStorage.setItem("signi:graphHeight", String(Math.round(h)));
-            }}
-          />
-        </Box>
-      )}
-    </>
-  );
-
   const tree = (
-    <Box
-      data-testid="period-container"
-      data-container-id={binding?.containerId}
-      sx={{
-        position: position ? "fixed" : "relative",
-        ...(position && { left: `${position.x}px`, top: `${position.y}px` }),
-        zIndex: position ? 50 : "auto",
-      }}
+    <PeriodCard
+      selection={selection}
+      binding={binding}
+      nested={nested}
+      compact={compact}
+      showCanvas={showCanvas}
+      hasGroups={groupRects.length > 0}
+      hasContent={hasContent}
+      soleContainer={soleContainer}
+      onMoveUp={onMoveUp}
+      onMoveDown={onMoveDown}
+      onSave={onSave}
+      onRemove={onRemove}
+      onToggleCompact={handleToggleCompact}
+      onTidy={handleTidyPeriod}
+      onToggleImperative={handleToggleImperative}
+      onToggleInfinitive={handleToggleInfinitive}
+      controlsRef={periodControlsRef}
+      graphHeight={graphHeight}
+      onGraphHeightChange={setGraphHeight}
+      sidebar={
+        // The words panel is the page's, opened from its header: only the outermost period has one.
+        !nested && (
+          <PhraseSidebar
+            open={wordsPanelOpen}
+            onClose={() => onWordsPanelClose?.()}
+            width={sidebarWidth}
+            onWidthChange={setSidebarWidth}
+            selection={selection}
+            activeSlot={activeSlot}
+            activeSlotConfig={activeSlotConfig}
+            visibleSlots={visibleSlots}
+            onSlotClick={selectSlot}
+            onConceptSelect={handleConceptSelect}
+          />
+        )
+      }
     >
-      <PeriodContainer
-        paperPad={paperPad}
-        compact={compact}
-        showCanvas={showCanvas}
-        hasGroups={groupRects.length > 0}
-        hasContent={hasContent}
-        soleContainer={soleContainer}
-        nested={nested}
-        // A workspace container stays in the managed stack so the cross-container
-        // connectors measure correctly; only a standalone period may be floated.
-        floatable={!binding && !nested}
-        position={position}
-        onPositionChange={setPosition}
-        onMoveUp={onMoveUp}
-        onMoveDown={onMoveDown}
-        onSave={onSave}
-        onRemove={onRemove}
-        onToggleCompact={handleToggleCompact}
-        onTidy={handleTidyPeriod}
-        controlsRef={periodControlsRef}
-        conditional={clauseControls.conditional}
-        coordinative={clauseControls.coordinative}
-        instrumental={clauseControls.instrumental}
-        imperative={
-          nested
-            ? undefined
-            : {
-                active: Boolean(selection.imperative),
-                // An imperative is a mood: mutually exclusive with a conditional, and shared by
-                // the two clauses of a coordination. Either way the mood can't be flipped on this
-                // period alone while it takes part in one — the relation has to be cleared first.
-                disabled: binding
-                  ? binding.conditional.hasSource ||
-                    binding.conditional.hasTarget ||
-                    binding.coordinative.hasSource ||
-                    binding.coordinative.hasTarget
-                  : false,
-                onToggle: handleToggleImperative,
-              }
-        }
-        infinitive={
-          nested
-            ? undefined
-            : {
-                active: Boolean(selection.infinitive),
-                // Like the imperative, the infinitive is a mood occupying the finite slot, so it
-                // can't be flipped on a period that takes part in a conditional or a coordination
-                // — clear the relation first.
-                disabled: binding
-                  ? binding.conditional.hasSource ||
-                    binding.conditional.hasTarget ||
-                    binding.coordinative.hasSource ||
-                    binding.coordinative.hasTarget
-                  : false,
-                onToggle: handleToggleInfinitive,
-              }
-        }
-      >
-        {content}
-      </PeriodContainer>
-
-      {/* The words panel is the page's, opened from its header: only the outermost period
-          has one. */}
-      {!nested && (
-        <PhraseSidebar
-          open={wordsPanelOpen}
-          onClose={() => onWordsPanelClose?.()}
-          width={sidebarWidth}
-          onWidthChange={setSidebarWidth}
-          selection={selection}
-          activeSlot={activeSlot}
-          activeSlotConfig={activeSlotConfig}
-          visibleSlots={visibleSlots}
-          onSlotClick={handleSlotClick}
-          onConceptSelect={handleConceptSelect}
-        />
-      )}
-    </Box>
+      {canvas}
+    </PeriodCard>
   );
 
   // The outermost period builder provides the coref-pick coordinator to its whole subtree; a

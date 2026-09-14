@@ -54,6 +54,15 @@ export const clock = (hour: number): number => (hour / 12) * TAU - Math.PI / 2;
 
 const wrap = (a: number) => ((a % TAU) + TAU) % TAU;
 
+/** A canvas point in px as % of the canvas. A canvas not measured yet counts as 1px across. */
+export const toPercent = (p: Pt, size: Size): Pt => ({
+  x: (p.x / Math.max(size.w, 1)) * 100,
+  y: (p.y / Math.max(size.h, 1)) * 100,
+});
+
+/** A canvas point in % of the canvas as px. */
+export const toPx = (p: Pt, size: Size): Pt => ({ x: (p.x / 100) * size.w, y: (p.y / 100) * size.h });
+
 export const angleTo = (from: Pt, to: Pt): number => Math.atan2(to.y - from.y, to.x - from.x);
 
 export const onCircle = (center: Pt, r: number, a: number): Pt => ({

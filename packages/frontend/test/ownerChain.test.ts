@@ -6,6 +6,7 @@ import {
   canvasKeyOf,
   OWNER_WALL_CLEARANCE,
   ownerLink,
+  ownerPortKey,
   ownersUnder,
   pointerBend,
   pointerLink,
@@ -130,6 +131,12 @@ describe('possessionsFor', () => {
         subjectPossessor: { subject: YOU, subjectPossessor: { subject: DOG } },
       }).owners.map((o) => o.address),
     ).toEqual(['subject/possessor']);
+  });
+});
+
+describe('ownerPortKey', () => {
+  it('names the port on an owner’s ring that faces the ring it owns', () => {
+    expect(ownerPortKey({ address: 'subject/possessor', possessedKey: 'subject' })).toBe('port:subject/possessor>subject');
   });
 });
 

@@ -6,6 +6,8 @@ import {
   innerRadius,
   layoutRing,
   spreadOnLoop,
+  toPercent,
+  toPx,
   type Ring,
   type RingSpec,
   type Size,
@@ -270,5 +272,18 @@ describe('layoutRing', () => {
     const ring = layoutRing(CENTER, spec({ outer }), sizeOf, 'verb');
     expect(Math.PI * ring.rOut).toBeGreaterThanOrEqual(16 * 2 * (BUTTON_HALF + 1) - SLACK);
     expectNothingOverlaps(ring, 'verb');
+  });
+});
+
+describe('toPercent / toPx', () => {
+  it('turns a canvas point between px and % of the canvas', () => {
+    const size = { w: 600, h: 400 };
+
+    expect(toPercent({ x: 150, y: 100 }, size)).toEqual({ x: 25, y: 25 });
+    expect(toPx({ x: 25, y: 25 }, size)).toEqual({ x: 150, y: 100 });
+  });
+
+  it('reads a canvas not measured yet as 1px across rather than dividing by nothing', () => {
+    expect(toPercent({ x: 3, y: 2 }, { w: 0, h: 0 })).toEqual({ x: 300, y: 200 });
   });
 });

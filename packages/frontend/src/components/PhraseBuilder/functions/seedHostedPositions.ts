@@ -1,7 +1,7 @@
 import type { NounKey } from "../interfaces.ts";
 import { DEFAULT_POSITIONS } from "../slots.ts";
 import type { CanvasSize, PositionMap } from "../layout.ts";
-import { BUTTON_HALF, type Pt } from "../ringLayout.ts";
+import { BUTTON_HALF, toPercent, toPx, type Pt } from "../ringLayout.ts";
 import { BOTTOM_MARGIN } from "../overlap.ts";
 import { belowRing, chainKeys, UNMEASURED_R } from "../conjunctChain.ts";
 import { besideRing, type OwnerSpot } from "../ownerChain.ts";
@@ -39,9 +39,9 @@ export function seedHostedPositions({
   const placed = (key: string) => seeds[key] ?? positions[key] ?? DEFAULT_POSITIONS[key];
   const rOutOf = (key: string) =>
     groupRects.find((g) => g.mainKey === key)?.rOut ?? hostedRings[key]?.rOut ?? UNMEASURED_R;
-  const px = (p: Pt) => ({ x: (p.x / 100) * canvas.w, y: (p.y / 100) * canvas.h });
+  const px = (p: Pt) => toPx(p, canvas);
   const seed = (key: string, c: Pt) => {
-    seeds[key] = { x: (c.x / Math.max(canvas.w, 1)) * 100, y: (c.y / canvas.h) * 100 };
+    seeds[key] = toPercent(c, canvas);
     bottom = Math.max(bottom, c.y + UNMEASURED_R + BUTTON_HALF + BOTTOM_MARGIN);
   };
 

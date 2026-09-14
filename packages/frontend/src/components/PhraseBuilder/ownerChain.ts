@@ -24,6 +24,7 @@ import {
 import { conjunctsOf } from "./phraseReducers.ts";
 import { conjunctKey, CONJUNCT_GAP, UNMEASURED_R } from "./conjunctChain.ts";
 import { angleTo, BUTTON_HALF, onCircle, type Pt } from "./ringLayout.ts";
+import { portKey } from "./ringSpecs.ts";
 
 /**
  * The key a noun's ring goes by on the period's canvas, from its address: a top-level noun's own
@@ -126,6 +127,10 @@ export function possessionsFor({
   }
   return { owners, pointers };
 }
+
+/** The port an owner's ring faces the ring it owns from, and its line lands on. */
+export const ownerPortKey = (spot: Pick<OwnerSpot, "address" | "possessedKey">): string =>
+  portKey(spot.address, spot.possessedKey);
 
 /** The owners that go when the owner at `address` does: itself, and every owner it holds, however deep. */
 export function ownersUnder(owners: readonly OwnerSpot[], address: NounAddress): OwnerSpot[] {

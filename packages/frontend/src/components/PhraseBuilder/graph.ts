@@ -36,6 +36,19 @@ export type Edge = {
   via?: Pt;
 };
 
+/** The edge a line between two rings is drawn as: straight, or bowed through its `via`. */
+export function linkEdge(link: { from: Pt; to: Pt; via?: Pt }, color: string, dashed: boolean): Edge {
+  return {
+    x1: link.from.x,
+    y1: link.from.y,
+    x2: link.to.x,
+    y2: link.to.y,
+    ...(link.via && { via: link.via }),
+    color,
+    dashed,
+  };
+}
+
 export type Rect = { x: number; y: number; width: number; height: number };
 
 /**
