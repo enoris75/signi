@@ -50,6 +50,7 @@ describe('determiner', () => {
     expect(determiner({ ...WASSER, definiteness: 'few' }, 'nom', false)).toBe('wenig');
     expect(determiner({ ...WASSER, definiteness: 'all' }, 'dat', false)).toBe('all dem');
     expect(determiner({ ...WASSER, definiteness: 'this' }, 'nom', false)).toBe('dieses');
+    expect(determiner({ ...WASSER, definiteness: 'that' }, 'dat', false)).toBe('jenem');
     expect(determiner({ ...WASSER, definiteness: 'no' }, 'acc', false)).toBe('kein');
   });
 

@@ -25,5 +25,6 @@ describe('taraSeg', () => {
     expect(taraSeg(concept({ ...TABERU, nai: '食べない', nai_reading: 'たべない' }), true)).toEqual({ t: '食べなかったら', r: 'たべなかったら' });
     expect(taraSeg(concept({ ...KURU, nai: '来ない', nai_reading: 'こない' }), true)).toEqual({ t: '来なかったら', r: 'こなかったら' });
     expect(taraSeg(concept(TABERU), true)).toEqual({ t: '食べませんでしたら', r: 'たべませんでしたら' });
+    expect(taraSeg(concept(AGERU), true)).toEqual({ t: 'あげませんでしたら' });
   });
 });

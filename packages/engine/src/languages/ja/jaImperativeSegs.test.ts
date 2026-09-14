@@ -52,6 +52,7 @@ describe('jaImperativeSegs', () => {
       const YOMIKOMU = { base: '読み込む', reading: 'よみこむ', masu_present: '読み込みます', masu_present_reading: 'よみこみます', label: '読み込み' };
       expect(jaImperativeSegs(concept(YOMIKOMU), '2sg', false, true)).toEqual([{ t: '読み込み', r: 'よみこみ' }]);
       expect(jaImperativeSegs(concept({ ...HOZON_SURU, label: '記録' }), '2sg', false, true)).toEqual([{ t: '記録' }]);
+      expect(jaImperativeSegs(concept({ ...AGERU, label: 'あげ' }), '2sg', false, true)).toEqual([{ t: 'あげ' }]);
     });
 
     test('without a label derives the noun from the masu-stem, minus a する-verb’s し', () => {

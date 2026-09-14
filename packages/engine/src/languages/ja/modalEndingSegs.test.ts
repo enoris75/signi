@@ -38,6 +38,8 @@ describe('modalEndingSegs', () => {
     expect(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'past', false, 'plain')).toEqual([{ t: '必要が', r: 'ひつようが' }, { t: 'あった' }]);
     expect(text(modalEndingSegs(concept(HITSUYOU_GA_ARU), 'present', true, 'plain'))).toBe('必要がない');
     expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'present', false, 'plain'))).toBe('ことができる');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'present', true, 'plain'))).toBe('ことができない');
+    expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'past', false, 'plain'))).toBe('ことができた');
     expect(text(modalEndingSegs(concept(KOTO_GA_DEKIRU), 'past', true, 'plain'))).toBe('ことができなかった');
     expect(text(modalEndingSegs(concept(TAI), 'present', false, 'plain'))).toBe('たい');
     expect(text(modalEndingSegs(concept(TAI), 'past', true, 'plain'))).toBe('たくなかった');

@@ -26,6 +26,11 @@ describe('modalGroupFr', () => {
       .toBe('devoir pouvoir manger');
   });
 
+  test('an inner modal’s linking preposition follows its infinitive', () => {
+    expect(modalGroupFr([modal(VOULOIR), modal({ base: 'essayer', link: 'de' })], MANGER, CHAT, 'present', 'neutral', undefined, '').tail)
+      .toBe('essayer de manger');
+  });
+
   test('a marked aspect puts the main verb group in the infinitive', () => {
     expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'present', 'resultative', undefined, '').tail).toBe('avoir mangé');
     expect(modalGroupFr([modal(DEVOIR)], ALLER, FEMME, 'present', 'resultative', undefined, '').tail).toBe('être allée');

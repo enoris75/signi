@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { imperativeForm, moodForm } from './mood.js';
+import { imperativeForm, moodForm, moodPN } from './mood.js';
 
 const verb = (conceptId: string, forms: Record<string, string>) => ({ conceptId, forms });
 const MORDER = verb('BITE', { base: 'morder', '1sg_present': 'muerdo', '3sg_present': 'muerde', '1pl_present': 'mordemos' });
@@ -81,6 +81,49 @@ describe('imperativeForm (pt)', () => {
     expect(imperativeForm('pt', NOMEAR, '2sg', false)).toBe('nomeie');
     expect(imperativeForm('pt', NOMEAR, '1pl', false)).toBe('nomeemos');
     expect(imperativeForm('pt', NOMEAR, '2pl', false)).toBe('nomeiem');
+  });
+
+  test('an -ar stem already ending in gu is not respelled again', () => {
+    const AVERIGUAR = verb('FIND_OUT', { base: 'averiguar', '1sg_present': 'averiguo' });
+    expect(imperativeForm('pt', AVERIGUAR, '2sg', false)).toBe('averigue');
+    expect(imperativeForm('pt', AVERIGUAR, '1pl', false)).toBe('averiguemos');
+  });
+});
+
+describe('imperativeForm and moodForm: the languages that build them in-engine', () => {
+  test('English, German and Japanese get no synthetic form', () => {
+    for (const lang of ['en', 'de', 'ja'] as const) {
+      const GO = verb('GO', { base: 'go', '1sg_future': 'will go', '1pl_present': 'go' });
+      expect(imperativeForm(lang, GO, '2sg', false)).toBeUndefined();
+      expect(moodForm(lang, GO, '3sg', 'conditional')).toBeUndefined();
+      expect(moodForm(lang, GO, '3sg', 'subjunctive')).toBeUndefined();
+    }
+  });
+});
+
+describe('moodForm', () => {
+  test('is undefined with no hypothetical mood', () => {
+    const ANDARE = verb('GO', { base: 'andare', '1sg_future': 'andrò' });
+    expect(moodForm('it', ANDARE, '3sg', undefined)).toBeUndefined();
+    expect(moodForm('it', ANDARE, '3sg', 'indicative')).toBeUndefined();
+  });
+
+  test('is undefined when the source stem is missing, so the caller conjugates', () => {
+    const BARE = verb('GO', {});
+    expect(moodForm('it', BARE, '3sg', 'conditional')).toBeUndefined();
+    expect(moodForm('it', BARE, '3sg', 'subjunctive')).toBeUndefined();
+    expect(moodForm('es', BARE, '3sg', 'subjunctive')).toBeUndefined();
+    expect(moodForm('pt', BARE, '3sg', 'subjunctive')).toBeUndefined();
+    expect(moodForm('fr', BARE, '3sg', 'subjunctive')).toBeUndefined();
+  });
+});
+
+describe('moodPN', () => {
+  test('reads the person and number off the subject, defaulting to the 3rd singular', () => {
+    expect(moodPN({ person: '1', number: 'plural' })).toBe('1pl');
+    expect(moodPN({ person: '2' })).toBe('2sg');
+    expect(moodPN({ number: 'plural' })).toBe('3pl');
+    expect(moodPN({})).toBe('3sg');
   });
 });
 

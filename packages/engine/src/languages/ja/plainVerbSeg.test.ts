@@ -15,6 +15,10 @@ describe('plainVerbSeg', () => {
     expect(plainVerbSeg(concept(SHIRU), 'past')).toEqual({ t: '知った', r: 'しった' });
   });
 
+  test('with no te-form stored the past falls back to the dictionary form', () => {
+    expect(plainVerbSeg(concept({ base: '食べる', reading: 'たべる' }), 'past')).toEqual({ t: '食べる', r: 'たべる' });
+  });
+
   test('a voiced te-form で gives だ', () => {
     expect(plainVerbSeg(concept(NOMU), 'past')).toEqual({ t: '飲んだ', r: 'のんだ' });
   });

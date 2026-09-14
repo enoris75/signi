@@ -15,6 +15,10 @@ describe('esEnclitic', () => {
     expect(esEnclitic('cuenta', 'me')).toBe('cuéntame');
   });
 
+  test('a diphthong of two weak vowels takes the accent on the second', () => {
+    expect(esEnclitic('cuida', 'lo')).toBe('cuídalo');
+  });
+
   test('a command whose stress stays penultimate takes none, and loses one it no longer needs', () => {
     expect(esEnclitic('comed', 'lo')).toBe('comedlo');
     expect(esEnclitic('ve', 'me')).toBe('veme');

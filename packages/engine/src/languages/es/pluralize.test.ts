@@ -30,6 +30,8 @@ describe('pluralize', () => {
     expect(pluralize('joven')).toBe('jóvenes');
     expect(pluralize('examen')).toBe('exámenes');
     expect(pluralize('imagen')).toBe('imágenes');
+    expect(pluralize('origen')).toBe('orígenes');
+    expect(pluralize('resumen')).toBe('resúmenes');
   });
 
   test('a one-syllable word in -n or -s needs no accent', () => {
