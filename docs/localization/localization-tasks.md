@@ -91,7 +91,7 @@ B21 is the largest and unlocks most of the period container.
 
 | # | File | Seed first |
 |---|---|---|
-| B20 | [B20-ui-remove-and-delete.md](B-needs-seed/B20-ui-remove-and-delete.md) | **REMOVE, DELETE** → Remove this period / phrase, Remove + group, Delete saved item |
+| B20 | [B20-ui-remove-and-delete.md](B-needs-seed/B20-ui-remove-and-delete.md) | **REMOVE, DELETE** → Remove this period, Remove + group, Delete saved item |
 | B21 | [B21-ui-clause-and-coordination-vocabulary.md](B-needs-seed/B21-ui-clause-and-coordination-vocabulary.md) | **CLAUSE, MAIN, CONDITION, COORDINATION, RELATIVE_CLAUSE, CONJUNCT, OTHER** (+ conjunction kinds) → clause badges, IF / coordination tooltips, pick hints |
 | B22 | [B22-ui-verb-feature-controls.md](B-needs-seed/B22-ui-verb-feature-controls.md) | **TENSE, ASPECT, POLARITY, MODAL** + their values → tense / aspect / polarity / modal controls |
 | B23 | [B23-ui-complement-and-group-names.md](B-needs-seed/B23-ui-complement-and-group-names.md) | **LOCATIVE, DIRECTION, SOURCE, ROUTE, CAUSE_COMPLEMENT, TERMINUS, VERB_PHRASE** → the six remaining complement names, group labels, word-map filter |

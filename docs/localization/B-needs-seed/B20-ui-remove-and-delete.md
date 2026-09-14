@@ -17,9 +17,8 @@ seeded, but it empties a thing in place; these controls take the thing away.
 
 | literal | where | key | plan |
 |---|---|---|---|
-| Remove this period | [PeriodContainer.tsx:829](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L829) | `action.removePeriod` | `commandOf('REMOVE')` + `directObject: PERIOD_SENTENCE this` |
-| Remove this phrase | [PeriodContainer.tsx:828](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L828) (nested container) | `action.removePhrase` | `commandOf('REMOVE')` + `directObject: PHRASE this` |
-| Remove main clause / Remove phrase (aria-labels) | [PeriodContainer.tsx:848-849](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L848-L849) | reuse the two keys above | point each aria-label at its tooltip's key, as [A12](../done/A12-ui-commands-on-seeded-verbs.md) does for "Clear" |
+| Remove this period | [PeriodContainer.tsx:817](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L817) | `action.removePeriod` | `commandOf('REMOVE')` + `directObject: PERIOD_SENTENCE this` |
+| Remove main clause (aria-label) | [PeriodContainer.tsx:829](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L829) | reuse the key above | point the aria-label at its tooltip's key, as [A12](../done/A12-ui-commands-on-seeded-verbs.md) does for "Clear" |
 | `Remove ${rect.label}` | [GroupBox.tsx:120](../../../packages/frontend/src/components/PhraseBuilder/GroupBox.tsx#L120) | `action.remove.<group>` | one more [A15](../done/A15-ui-slot-scoped-commands.md) family: a `commandOnEach('action.remove', 'REMOVE', …)` over the complement parts, plus a `removeTitle` in canvasCommands.ts keyed on the ring's `labelKey` |
 | `Delete ${p.name}` (aria-label) | [SavedPhrasesToolbar.tsx:256](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L256), [PeriodSaveLoad.tsx:166](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L166) | `action.deleteSavedPhrase` / `action.deleteSavedPeriod` | `commandOf('DELETE')` + `directObject: PHRASE / PERIOD_SENTENCE this, adjectives [SAVED]` |
 
@@ -32,6 +31,6 @@ live in [B21](B21-ui-clause-and-coordination-vocabulary.md).
 
 ## Tests that select on these literals
 
-`Remove this phrase` / `Remove phrase` / `Remove main clause` → `PeriodContainer.test.tsx`,
+`Remove this period` / `Remove main clause` → `PeriodContainer.test.tsx`,
 `PhraseBuilder.test.tsx`; `Remove ` (group) → `GroupBox.test.tsx`; `Delete ` →
 `SavedPhrasesToolbar.test.tsx`, `PeriodSaveLoad.test.tsx`.
