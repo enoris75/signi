@@ -70,7 +70,7 @@ ones this plan is unsure of.
 P03 §0 and P05 §0. Ukrainian-specific additions:
 
 - **Language list:** `uk` in `LanguageCode`, `LANGUAGES`, `uiStrings.ts` (`'language.uk'`) and
-  `translator.ts`; 🇺🇦 in `FLAG`.
+  `translator/translator.consts.ts`; 🇺🇦 in `FLAG`.
 - **Language-name concept `UKRAINIAN`:**
   - In Ukrainian a language name is a substantivised adjective: *українська (мова)*. Store its case
     forms as noun forms (*української, українською*); it is feminine.

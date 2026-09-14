@@ -58,7 +58,7 @@ As [P03 §0](../P03-catalan/README.md#0-groundwork--make-room-for-any-new-langua
 additions:
 
 - **Language list:** `LanguageCode` and `LANGUAGES` gain `rm: 'Romansh'`; `uiStrings.ts` gains
-  `'language.rm'`; `translator.ts` registers `romanshEngine`.
+  `'language.rm'`; `translator/translator.consts.ts` registers `romanshEngine`.
 - **Flag:** 🇨🇭 in `FLAG`. A plain emoji, so no SVG support is needed unless P03's D3 adds it.
 - **Language-name concept:** new `ROMANSH` concept.
   - Named *rumantsch* in Romansh; in the others *Romansh, romancio, romanche, Rätoromanisch, romanche,

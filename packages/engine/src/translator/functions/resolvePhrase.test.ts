@@ -1,0 +1,85 @@
+import { describe, expect, test } from 'vitest';
+import type { PhrasePlan } from '@signi/shared';
+import { LOOKUP } from '../translator.fixtures.js';
+import { resolvePhrase } from './resolvePhrase.js';
+
+const CAT_RUNS: PhrasePlan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' } };
+const DOG_EATS: PhrasePlan = { subject: { concept: 'DOG' }, verbPhrase: { verb: 'EAT' } };
+const CAT_IS_HAPPY: PhrasePlan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: { concept: 'HAPPY' } } } };
+const DOG_IS_NOT: PhrasePlan = { subject: { concept: 'DOG' }, verbPhrase: { verb: 'BE', negative: true } };
+
+describe('resolvePhrase', () => {
+  test('resolves the subject, verb phrase, object and complements, in the mood it is given', () => {
+    const resolved = resolvePhrase({ ...CAT_RUNS, directObject: { concept: 'DOG' }, complements: { locative: { phrase: { concept: 'HOUSE' } } } }, 'it', LOOKUP, 'conditional');
+    expect(resolved.subject.conjuncts[0].head.forms['base']).toBe('gatto');
+    expect(resolved.verbPhrase).toMatchObject({ verb: { conceptId: 'RUN' }, mood: 'conditional' });
+    expect(resolved.directObject?.conjuncts[0].head.forms['base']).toBe('cane');
+    expect(resolved.complements?.locative?.phrase.conjuncts[0].head.forms['base']).toBe('casa');
+    expect(resolved.condition).toBeUndefined();
+    expect(resolved.coordination).toBeUndefined();
+  });
+
+  test('a verbless period resolves just its subject', () => {
+    const resolved = resolvePhrase({ subject: { concept: 'CAT' } }, 'it', LOOKUP);
+    expect(resolved).toMatchObject({ verbPhrase: undefined, directObject: undefined, complements: undefined });
+  });
+
+  describe('a command', () => {
+    test("takes the plan's register, unless it is handed one", () => {
+      const plan: PhrasePlan = { ...CAT_RUNS, imperativeRegister: 'instruction' };
+      expect(resolvePhrase(plan, 'it', LOOKUP, 'imperative').verbPhrase?.register).toBe('instruction');
+      expect(resolvePhrase(plan, 'it', LOOKUP, 'imperative', 'request').verbPhrase?.register).toBe('request');
+      expect(resolvePhrase(CAT_RUNS, 'it', LOOKUP, 'imperative').verbPhrase?.register).toBe('request');
+    });
+
+    test('a clause that is no command takes no register', () => {
+      expect(resolvePhrase({ ...CAT_RUNS, imperativeRegister: 'instruction' }, 'it', LOOKUP).verbPhrase?.register).toBeUndefined();
+    });
+
+    test('a coordinated command goes to the same addressee in the same register, joined by a conjunction two commands allow', () => {
+      const plan: PhrasePlan = {
+        subject: { concept: 'YOU' }, verbPhrase: { verb: 'EAT' }, imperativeRegister: 'instruction',
+        coordination: { conjunction: 'therefore', clause: { subject: { concept: 'I' }, verbPhrase: { verb: 'RUN' } } },
+      };
+      const { coordination } = resolvePhrase(plan, 'it', LOOKUP, 'imperative');
+      expect(coordination?.conjunction).toBe('and');
+      expect(coordination?.clause.verbPhrase).toMatchObject({ verb: { conceptId: 'RUN' }, mood: 'imperative', register: 'instruction' });
+      expect(coordination?.clause.subject.conjuncts[0].head.conceptId).toBe('YOU');
+    });
+  });
+
+  test('a condition resolves as the subjunctive protasis of the main clause', () => {
+    const resolved = resolvePhrase({ ...CAT_RUNS, condition: DOG_EATS }, 'it', LOOKUP, 'conditional');
+    expect(resolved.verbPhrase?.mood).toBe('conditional');
+    expect(resolved.condition?.verbPhrase).toMatchObject({ verb: { conceptId: 'EAT' }, mood: 'subjunctive' });
+  });
+
+  test('a coordinated statement is a plain clause with its own subject and conjunction', () => {
+    const { coordination } = resolvePhrase({ ...CAT_RUNS, coordination: { conjunction: 'therefore', clause: DOG_EATS } }, 'it', LOOKUP, 'conditional');
+    expect(coordination?.conjunction).toBe('therefore');
+    expect(coordination?.clause.verbPhrase?.mood).toBeUndefined();
+    expect(coordination?.clause.subject.conjuncts[0].head.conceptId).toBe('DOG');
+  });
+
+  describe('a bare copula (A121)', () => {
+    test('in the main clause elides the complement of its condition', () => {
+      const resolved = resolvePhrase({ ...DOG_IS_NOT, condition: CAT_IS_HAPPY }, 'it', LOOKUP, 'conditional');
+      expect(resolved.verbPhrase?.elided).toEqual({ type: 'predicative', complement: resolved.condition?.complements?.predicative });
+    });
+
+    test("in a coordinated clause elides the first clause's complement", () => {
+      const resolved = resolvePhrase({ ...CAT_IS_HAPPY, coordination: { conjunction: 'but', clause: DOG_IS_NOT } }, 'it', LOOKUP);
+      expect(resolved.coordination?.clause.verbPhrase?.elided).toEqual({ type: 'predicative', complement: resolved.complements?.predicative });
+    });
+
+    test('elides through a main clause that elides one itself', () => {
+      const plan: PhrasePlan = { ...DOG_IS_NOT, condition: CAT_IS_HAPPY, coordination: { conjunction: 'but', clause: { ...DOG_IS_NOT, subject: { concept: 'HE' } } } };
+      const resolved = resolvePhrase(plan, 'it', LOOKUP, 'conditional');
+      expect(resolved.coordination?.clause.verbPhrase?.elided?.complement).toBe(resolved.condition?.complements?.predicative);
+    });
+
+    test('with nothing before it is left alone', () => {
+      expect(resolvePhrase(DOG_IS_NOT, 'it', LOOKUP).verbPhrase).not.toHaveProperty('elided');
+    });
+  });
+});

@@ -61,7 +61,7 @@ unless a language is complete. This section removes both obstacles once, for `ca
 | [`shared/src/index.ts:3`](../../../../packages/shared/src/index.ts#L3) `LanguageCode`, `:362` `LANGUAGES` | Add `'ca'`. `LANGUAGES` fails typecheck until the name is there. |
 | [`shared/src/uiStrings.ts:954-960`](../../../../packages/shared/src/uiStrings.ts#L954-L960) | Add `'language.ca': { plan: nameOf('CATALAN'), … }`. `LanguageSelector` and `TranslationPanel` fail typecheck without it. |
 | [`frontend/src/i18n/flags.ts`](../../../../packages/frontend/src/i18n/flags.ts) | Add the flag. D3's SVG means widening `FLAG` from `string` to a small `Flag` component that renders either an emoji or an SVG; both callers render it as text today. |
-| [`engine/src/translator.ts:5-21`](../../../../packages/engine/src/translator.ts#L5-L21) | Import and register `catalanEngine`. The array order is the order of `Translation[]`. |
+| [`engine/src/translator/translator.consts.ts:1-18`](../../../../packages/engine/src/translator/translator.consts.ts#L1-L18) | Import and register `catalanEngine`. The array order is the order of `Translation[]`. |
 | [`backend/src/concepts/nouns.ts:1160-1300`](../../../../packages/backend/src/concepts/nouns.ts#L1160) | New `CATALAN` language-name concept (`isA: 'LANGUAGE'`, `countable: false`), plus a `ca` form on the seven existing ones. |
 | `shared/src/index.d.ts`, `shared/src/index.js` | Stale compiled copies still listing seven languages, committed to git. Delete them. |
 

@@ -5,7 +5,7 @@ import { clause, np, say, sayAll } from './harness.js';
 // An imperative is a MOOD, not a tense: the verb takes the command form and the subject is
 // dropped, but `subject` still carries the addressee, which is what picks the person and number
 // of that form. Being a mood it occupies the finite slot, so it is mutually exclusive with a
-// condition and it forces present / neutral / modal-free — see `normalise` in translator.ts.
+// condition and it forces present / neutral / modal-free — see `resolveVerbPhrase` in translator/functions.
 const command = (
   plan: Partial<PhrasePlan> = {},
   addressee: NounPhrase = np('SECOND_PERSON'),

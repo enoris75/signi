@@ -66,7 +66,7 @@ other than Japanese.
 P03 §0 and P05 §0. Russian-specific additions:
 
 - **Language list:** `ru` in `LanguageCode`, `LANGUAGES`, `uiStrings.ts` (`'language.ru'`) and
-  `translator.ts`; 🇷🇺 in `FLAG` (D11).
+  `translator/translator.consts.ts`; 🇷🇺 in `FLAG` (D11).
 - **Language-name concept `RUSSIAN`:**
   - Named *русский* in Russian: a substantivised adjective (*русский язык*), so its case forms
     (*русского, русском*) are stored as noun forms. In the others *Russian, russo, russe, Russisch, ruso, russo, rus* (ca),

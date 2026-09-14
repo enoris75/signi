@@ -56,7 +56,7 @@ the decision:
   main-verb picker the way `modal: true` keeps the modals out, with full forms: *conoscere* /
   *connaître* / *conocer* / *conhecer* / *kennen* / 知る. The mood, participle, gerund, imperative and
   subjunctive machinery then reads it like any verb, and the conjugation snapshot covers it.
-  `translator.ts` swaps the concept when it resolves the verb.
+  The translator's `resolveVerbPhrase` swaps the concept when it resolves the verb.
 - **Engine constants per language**, like `ESTAR_COPULA`. This is lighter to start with, but it
   repeats a whole regular paradigm five times.
 

@@ -67,16 +67,16 @@ by-phrase.
 
 - [`packages/engine/src/types.ts`](../../../../packages/engine/src/types.ts) — add `voice?: Voice`
   to `ResolvedVerbPhrase` (≈ line 145); import `Voice`.
-- [`packages/engine/src/translator.ts`](../../../../packages/engine/src/translator.ts)
-  - `resolveVerbPhrase` (line 207): thread `voice`. Gate on the verb's transitivity (thread
+- [`packages/engine/src/translator/functions/`](../../../../packages/engine/src/translator/functions/)
+  - `resolveVerbPhrase.ts`: thread `voice`. Gate on the verb's transitivity (thread
     `transitivity` into forms via `lexicon.ts`, the trick `role`/`animate` use — see §5);
     passive on a non-transitive verb ⇒ `voice = 'active'`.
-  - `resolvePhrase` (line 314): if the top verb is passive with a directObject present, build the
+  - `resolvePhrase.ts`: if the top verb is passive with a directObject present, build the
     re-mapped element set — `grammaticalSubject = resolvedDirectObject`,
     `agent = resolvedSubject`, `directObject = undefined`. Expose the agent via a dedicated
     `ResolvedPhrase.agent?: ResolvedNounElement` (keeps `COMPLEMENT_RENDER_ORDER` and the slot
     machinery untouched). Passive with no directObject falls back to active. Relative-clause
-    verbs stay active in this cut (documented gap; recursion at `resolveRelativeClause`, line 282).
+    verbs stay active in this cut (documented gap; recursion at `resolveRelativeClause.ts`).
 
 ## 3. Per-engine morphology
 
