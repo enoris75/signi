@@ -1,7 +1,6 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
-import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
@@ -9,6 +8,7 @@ import { prospectiveFrame } from './prospectiveFrame.js';
 import { relativePronoun } from './relativePronoun.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
+import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
@@ -67,19 +67,20 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
   // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
   const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative']);
-  const directObjectText = directObject ? elementPhrase(directObject, 'acc') : '';
+  const { pronoun: objectPronounText, noun: directObjectText } = splitObject(directObject, '');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
   const complementsText = complementsPhrase(rest, verb.forms);
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
-  // so a predicate complement stays against the verb ("der immer müde wird").
+  // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads
+  // even "gerade" ("der ihn gerade sieht"), and the prospective's zu-infinitive group (see `splitObject`).
   const predicate = complex.zuInfinitive
     ? prospectiveFrame(complex, {
-      nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText,
+      nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText, pronoun: objectPronounText,
       adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
     }, true)
-    : [mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, ...verbFinalCluster(complex)];
+    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');

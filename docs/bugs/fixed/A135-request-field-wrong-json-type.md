@@ -41,3 +41,13 @@ is still wrong: the request is at fault, not the server.
 | | |
 |---|---|
 | **Test** | `packages/backend/src/index.test.ts` → *known bugs: a request field of the wrong JSON type* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above. In [`index.ts`](../../../packages/backend/src/index.ts), the
+phrases handler trims `name` only when it is a string. The translate handler requires `plan.subject` to
+be an object before `nounConjuncts`. Both answer with the route's existing `400`.
+
+- **Tests:** [`index.test.ts`](../../../packages/backend/src/index.test.ts) → *known bugs: a request field
+  of the wrong JSON type*. The pinning `test.fails` is now a passing `test`. A new case checks that the
+  error is the one a missing field gets, including a `true` or `[]` subject.

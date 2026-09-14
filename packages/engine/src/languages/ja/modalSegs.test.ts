@@ -36,6 +36,15 @@ describe('modalSegs', () => {
     expect(text(modalSegs([WANT], concept(TABERU), 'past', false))).toBe('食べたかったです');
   });
 
+  // A128: the copula's predicate stands in for the verb, in whichever form the innermost modal governs.
+  test('the governed element can be something other than the verb', () => {
+    const governed = (form: 'dict' | 'stem') => [{ t: '伝説' }, { t: form === 'dict' ? 'である' : 'であり' }];
+    expect(text(modalSegs([MUST], concept(IKU), 'present', true, 0, undefined, 'polite', governed))).toBe('伝説である必要がありません');
+    expect(text(modalSegs([WANT], concept(IKU), 'past', false, 0, undefined, 'polite', governed))).toBe('伝説でありたかったです');
+    expect(text(modalSegs([WANT, CAN], concept(IKU), 'present', false, 0, undefined, 'plain', governed))).toBe('伝説であることができるようになりたい');
+    expect(text(modalSegs([CAN, WANT], concept(IKU), 'present', false, 0, undefined, 'tara', governed))).toBe('伝説でありたいと思うことができたら');
+  });
+
   test('two verb-kind modals stack, the inner one bare in its dictionary shape', () => {
     expect(text(modalSegs([MUST, CAN], concept(TABERU), 'present', false))).toBe('食べることができる必要があります');
     expect(text(modalSegs([MUST, CAN], concept(TABERU), 'present', true))).toBe('食べることができる必要がありません');

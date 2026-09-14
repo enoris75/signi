@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { PhrasePlan } from '@signi/shared';
-import { LOOKUP } from '../translator.fixtures.js';
+import { lexicon, LOOKUP } from '../translator.fixtures.js';
 import { resolvePhrase } from './resolvePhrase.js';
 
 const CAT_RUNS: PhrasePlan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'RUN' } };
@@ -17,6 +17,14 @@ describe('resolvePhrase', () => {
     expect(resolved.complements?.locative?.phrase.conjuncts[0].head.forms['base']).toBe('casa');
     expect(resolved.condition).toBeUndefined();
     expect(resolved.coordination).toBeUndefined();
+  });
+
+  // A131: KNOW is "sapere" with no object and "conoscere" with one.
+  test("takes the verb's object sense only when the plan has a direct object", () => {
+    const KNOWING = lexicon({ KNOW: { base: 'sapere', object_sense: 'KNOW_ACQUAINTED' }, KNOW_ACQUAINTED: { base: 'conoscere' }, CAT: { base: 'gatto' }, DOG: { base: 'cane' } });
+    const knows: PhrasePlan = { subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } };
+    expect(resolvePhrase({ ...knows, directObject: { concept: 'DOG' } }, 'it', KNOWING).verbPhrase?.verb.conceptId).toBe('KNOW_ACQUAINTED');
+    expect(resolvePhrase(knows, 'it', KNOWING).verbPhrase?.verb.conceptId).toBe('KNOW');
   });
 
   test('a verbless period resolves just its subject', () => {

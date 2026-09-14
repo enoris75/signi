@@ -41,8 +41,27 @@ describe('the concept corpus', () => {
 
   test('keeps verb-only fields on verbs', () => {
     const bad = concepts
-      .filter((c) => c.role !== 'verb' && (c.transitivity || c.modal || c.complements))
+      .filter((c) => c.role !== 'verb' && (c.transitivity || c.modal || c.complements || c.stative || c.senseOf))
       .map((c) => c.id);
+    expect(bad).toEqual([]);
+  });
+
+  test('makes a lexical sense the sense of a seeded concept of its own role, not of another sense', () => {
+    const senses = concepts.filter((c) => c.senseOf);
+    expect(senses.map((c) => c.id)).toContain('KNOW_ACQUAINTED');
+    const bad = senses
+      .filter((c) => byId.get(c.senseOf!)?.role !== c.role || byId.get(c.senseOf!)?.senseOf)
+      .map((c) => `${c.id} senseOf ${c.senseOf}`);
+    expect(bad).toEqual([]);
+  });
+
+  // The translator swaps a verb for its `object_sense` when the verb takes an object (A131).
+  test('names a seeded sense of the verb itself as a lexeme\'s object sense', () => {
+    const bad = concepts.flatMap((c) =>
+      Object.entries(c.forms)
+        .filter(([, f]) => f['object_sense'] && byId.get(f['object_sense'])?.senseOf !== c.id)
+        .map(([l, f]) => `${c.id} (${l}): ${f['object_sense']}`),
+    );
     expect(bad).toEqual([]);
   });
 

@@ -167,7 +167,7 @@ export const ANDARE: Forms = {
 };
 /** BE: the copula (pass the id 'BE' — its subjunctive stem is irregular: fosse). */
 export const ESSERE: Forms = {
-  base: 'essere', copula: '1', gerund: 'essendo', participle: 'stato', aux: 'be',
+  base: 'essere', stative: '1', copula: '1', gerund: 'essendo', participle: 'stato', aux: 'be',
   '1sg_present': 'sono', '2sg_present': 'sei', '3sg_present': 'è',
   '1pl_present': 'siamo', '2pl_present': 'siete', '3pl_present': 'sono',
   '1sg_past': 'fui', '2sg_past': 'fosti', '3sg_past': 'fu',
@@ -187,7 +187,7 @@ export const DIVENTARE: Forms = {
 };
 /** SEEM: copular, essere-selecting. */
 export const SEMBRARE: Forms = {
-  base: 'sembrare', gerund: 'sembrando', participle: 'sembrato', aux: 'be',
+  base: 'sembrare', stative: '1', gerund: 'sembrando', participle: 'sembrato', aux: 'be',
   '1sg_present': 'sembro', '2sg_present': 'sembri', '3sg_present': 'sembra',
   '1pl_present': 'sembriamo', '2pl_present': 'sembrate', '3pl_present': 'sembrano',
   '1sg_past': 'sembrai', '2sg_past': 'sembrasti', '3sg_past': 'sembrò',
@@ -251,7 +251,7 @@ export const CROLLARE: Forms = {
 // Modals: `nonfinite` is the truncated infinitive used inside a modal stack ("dover mangiare").
 /** MUST. */
 export const DOVERE: Forms = {
-  base: 'dovere', nonfinite: 'dover',
+  base: 'dovere', stative: '1', nonfinite: 'dover',
   '1sg_present': 'devo', '2sg_present': 'devi', '3sg_present': 'deve',
   '1pl_present': 'dobbiamo', '2pl_present': 'dovete', '3pl_present': 'devono',
   '1sg_past': 'dovetti', '2sg_past': 'dovesti', '3sg_past': 'dovette',
@@ -261,7 +261,7 @@ export const DOVERE: Forms = {
 };
 /** CAN. */
 export const POTERE: Forms = {
-  base: 'potere', nonfinite: 'poter',
+  base: 'potere', stative: '1', nonfinite: 'poter',
   '1sg_present': 'posso', '2sg_present': 'puoi', '3sg_present': 'può',
   '1pl_present': 'possiamo', '2pl_present': 'potete', '3pl_present': 'possono',
   '1sg_past': 'potei', '2sg_past': 'potesti', '3sg_past': 'poté',
@@ -271,7 +271,7 @@ export const POTERE: Forms = {
 };
 /** WILL (volition: "vuole"). */
 export const VOLERE: Forms = {
-  base: 'volere', nonfinite: 'voler',
+  base: 'volere', stative: '1', nonfinite: 'voler',
   '1sg_present': 'voglio', '2sg_present': 'vuoi', '3sg_present': 'vuole',
   '1pl_present': 'vogliamo', '2pl_present': 'volete', '3pl_present': 'vogliono',
   '1sg_past': 'volli', '2sg_past': 'volesti', '3sg_past': 'volle',

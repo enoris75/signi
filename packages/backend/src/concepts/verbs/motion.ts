@@ -137,6 +137,7 @@ export const motionVerbs: ConceptSeed[] = [
   {
     id: 'SEEM',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'intransitive',
     // The SEEMING verb: it ascribes a resemblance, so it takes a subject complement — the thing
     // the subject looks like ("seems tired", "seems to be a legend"). Deliberately disjoint from
@@ -190,7 +191,8 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_future': 'pareceremos', '2pl_future': 'pareceréis', '3pl_future': 'parecerán',
       },
       ja: {
-        base: '思える', seeming: '1',
+        // 思える is itself a Japanese state verb, like ある: it says the state holds without 〜ている (A132).
+        base: '思える', seeming: '1', state_verb: '1',
         reading: 'おもえる',
         masu_present: '思えます',
         masu_present_reading: 'おもえます',
@@ -291,6 +293,7 @@ export const motionVerbs: ConceptSeed[] = [
     // predicative adjective agrees with the subject — the path BECOME already exercises.
     id: 'BE',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'intransitive',
     complements: ['predicative', 'locative', 'cause'],
     description: 'to have a quality or state; the copula',

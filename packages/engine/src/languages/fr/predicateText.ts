@@ -8,7 +8,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
-import { imperativeForm, moodForm, moodPN } from '../../mood.js';
+import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
 import { alarmCryText } from './alarmCryText.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
@@ -37,7 +37,9 @@ export function predicateText(
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
   // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
-  const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? conjugate(verb.forms, subjectForms, tense);
+  // A state verb's past is the imparfait ("avait", "était"), not the passé simple (A130).
+  const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? statePastForm('fr', verb, moodPN(subjectForms), tense, mood)
+    ?? conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
   // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.

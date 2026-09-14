@@ -327,7 +327,7 @@ describe('known bugs: Japanese たら protasis', () => {
     expect(ifCat({ aspect: 'prospective' })).toBe('もし猫が食べるところだったら、犬は走ります。');
     expect(ifCat({}, { directObject: np('MOUSE', { definiteness: 'no' }) })).toBe('もし猫がどのネズミも食べなかったら、犬は走ります。');
     expect(ifCat({ negative: true }, {}, 'COME')).toBe('もし猫が来なかったら、犬は走ります。');
-    expect(ifCat({ negative: true }, { directObject: np('DOG') }, 'LOVE')).toBe('もし猫が犬を愛さなかったら、犬は走ります。');
+    expect(ifCat({ negative: true }, { directObject: np('DOG') }, 'LOVE')).toBe('もし猫が犬を愛していなかったら、犬は走ります。');
     expect(ifCat({ negative: true }, { complements: { locative: { phrase: np('HOUSE') } } }, 'BE')).toBe('もし猫が家にいなかったら、犬は走ります。');
   });
 

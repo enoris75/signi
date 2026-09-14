@@ -24,6 +24,7 @@ export const modals: ConceptSeed[] = [
     id: 'MUST',
     role: 'verb',
     modal: true,
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be obliged to; necessity',
     synonym: 'have to',
     emoji: '❗',
@@ -91,6 +92,7 @@ export const modals: ConceptSeed[] = [
     id: 'CAN',
     role: 'verb',
     modal: true,
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be able to; ability or permission',
     synonym: 'be able to',
     emoji: '💪',
@@ -157,6 +159,7 @@ export const modals: ConceptSeed[] = [
     id: 'WILL',
     role: 'verb',
     modal: true,
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to want to; volition',
     // The English lemma is "want", so the gloss disambiguates rather than repeating it.
     synonym: 'wish',

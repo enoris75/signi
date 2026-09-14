@@ -1,7 +1,7 @@
 import type { Aspect, Tense } from '@signi/shared';
 import type { Mood, ResolvedModal } from '../../types.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
-import { moodForm, moodPN } from '../../mood.js';
+import { moodForm, moodPN, statePastForm } from '../../mood.js';
 import { conjugate } from './conjugate.js';
 import { verbGroupInfinitiveFr } from './verbGroupInfinitiveFr.js';
 
@@ -28,7 +28,9 @@ export function modalGroupFr(
   precedingObjectForms?: Record<string, string>,
 ): { finite: string; finiteAdverb: string; tail: string } {
   const pn = moodPN(subjectForms);
-  const finite = moodForm('fr', modals[0].verb, pn, mood) ?? conjugate(modals[0].verb.forms, subjectForms, tense);
+  // A modal names a state, so its past is the imparfait ("voulait", "devait"), not the passé simple (A130).
+  const finite = moodForm('fr', modals[0].verb, pn, mood) ?? statePastForm('fr', modals[0].verb, pn, tense, mood)
+    ?? conjugate(modals[0].verb.forms, subjectForms, tense);
   const finiteAdverb = modals[0].modifier?.forms['base'] ?? '';
   const inner: string[] = [];
   modals.slice(1).forEach((m) => {

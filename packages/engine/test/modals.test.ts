@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { VerbPhrase } from '@signi/shared';
+import type { PhrasePlan, VerbPhrase } from '@signi/shared';
 import { clause, np, say, sayAll } from './harness.js';
 
 // A modal is an ordinary verb concept flagged `Concept.modal`; what marks it out is that it
@@ -87,9 +87,9 @@ describe('modals: tense', () => {
   test('the outermost modal carries the tense', () => {
     expect(catModal({ modals: ['MUST'], tense: 'past' })).toMatchObject({
       en: 'the cat had to eat.', // English supplets: must has no past
-      it: 'il gatto dovette mangiare.',
-      fr: 'le chat dut manger.',
-      es: 'el gato debió comer.',
+      it: 'il gatto doveva mangiare.',
+      fr: 'le chat devait manger.',
+      es: 'el gato debía comer.',
       de: 'der Kater musste essen.',
       ja: '猫は食べる必要がありました。',
     });
@@ -162,8 +162,8 @@ describe('modals: chains', () => {
   test('the outermost modal of a chain carries the tense and the negation', () => {
     expect(catModal({ modals: ['MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
       en: 'the cat did not have to be able to eat.',
-      it: 'il gatto non dovette poter mangiare.',
-      fr: 'le chat ne dut pas pouvoir manger.',
+      it: 'il gatto non doveva poter mangiare.',
+      fr: 'le chat ne devait pas pouvoir manger.',
       de: 'der Kater musste nicht essen können.',
     });
   });
@@ -185,8 +185,8 @@ describe('modals: chains', () => {
   test('a three-modal chain carries tense and negation on the outermost only', () => {
     expect(catModal({ modals: ['WILL', 'MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
       en: 'the cat did not want to have to be able to eat.', // do-support: WILL is the lexical "want"
-      it: 'il gatto non volle dover poter mangiare.',
-      fr: 'le chat ne voulut pas devoir pouvoir manger.',
+      it: 'il gatto non voleva dover poter mangiare.',
+      fr: 'le chat ne voulait pas devoir pouvoir manger.',
       de: 'der Kater wollte nicht essen können müssen.',
     });
   });
@@ -318,8 +318,8 @@ describe('modals: a pair with negation', () => {
   test('a negated pair in the past — the outermost takes tense AND negation', () => {
     expect(catModal({ modals: ['MUST', 'CAN'], tense: 'past', negative: true })).toMatchObject({
       en: 'the cat did not have to be able to eat.',
-      it: 'il gatto non dovette poter mangiare.',
-      fr: 'le chat ne dut pas pouvoir manger.',
+      it: 'il gatto non doveva poter mangiare.',
+      fr: 'le chat ne devait pas pouvoir manger.',
       de: 'der Kater musste nicht essen können.',
     });
   });
@@ -385,8 +385,8 @@ describe('modals: with an adverb', () => {
       directObject: np('MOUSE'),
     }))).toMatchObject({
       en: 'the cat wanted to be able to eat the mouse fast.',
-      it: 'il gatto volle poter mangiare velocemente il topo.',
-      fr: 'le chat voulut pouvoir manger vite la souris.',
+      it: 'il gatto voleva poter mangiare velocemente il topo.',
+      fr: 'le chat voulait pouvoir manger vite la souris.',
       de: 'der Kater wollte schnell die Maus essen können.',
     });
   });
@@ -580,10 +580,10 @@ describe('per-modal adverbs', () => {
     expect(catModal({ modals: [{ verb: 'WILL', modifier: 'NEVER' }], modifier: 'ALWAYS', tense: 'past' }))
       .toEqual({
         en: 'the cat never wanted to always eat.',
-        it: 'il gatto non volle mai mangiare sempre.',
-        fr: 'le chat ne voulut jamais toujours manger.',
-        es: 'el gato nunca quiso comer siempre.',
-        pt: 'o gato nunca quis comer sempre.',
+        it: 'il gatto non voleva mai mangiare sempre.',
+        fr: 'le chat ne voulait jamais toujours manger.',
+        es: 'el gato nunca quería comer siempre.',
+        pt: 'o gato nunca queria comer sempre.',
         de: 'der Kater wollte nie immer essen.',
         ja: '猫は決していつも食べたくなかったです。',
       });
@@ -719,7 +719,7 @@ describe('known bugs: Japanese modal on the copula', () => {
   const isA = (predicate: string, verbPhrase: Partial<VerbPhrase>) =>
     clause(np('CAT'), 'BE', { verbPhrase, complements: { predicative: { phrase: np(predicate) } } });
 
-  test.fails('Japanese keeps the modal on a predicate adjective or noun', () => {
+  test('Japanese keeps the modal on a predicate adjective or noun', () => {
     const ja = (predicate: string, verbPhrase: Partial<VerbPhrase>) => say(isA(predicate, verbPhrase), 'ja');
     expect(ja('HAPPY', { modals: ['MUST'] })).toBe('猫は幸せである必要があります。');
     expect(ja('BIG', { modals: ['MUST'] })).toBe('猫は大きい必要があります。');
@@ -736,6 +736,26 @@ describe('known bugs: Japanese modal on the copula', () => {
       ...isA('HAPPY', {}),
       coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modals: ['MUST'], negative: true } }) },
     }, 'ja')).toMatch(/犬はそうである必要がありません。$/);
+  });
+
+  // The たら protasis, a modal chain, 〜たい on each adjective class, the relative's past, the modals' adverbs
+  // and the other complements, which lead the predicate as they do without a modal.
+  test('Japanese composes the copula\'s modal in the protasis, a chain and every adjective class', () => {
+    const ja = (plan: PhrasePlan) => say(plan, 'ja');
+    expect(ja({ ...clause(np('DOG'), 'RUN'), condition: isA('LEGEND', { modals: ['CAN'] }) })).toBe('もし猫が伝説であることができたら、犬は走ります。');
+    expect(ja({ ...clause(np('DOG'), 'RUN'), condition: isA('HAPPY', { modals: ['MUST'], negative: true }) }))
+      .toBe('もし猫が幸せである必要がなかったら、犬は走ります。');
+    expect(ja(isA('LEGEND', { modals: ['WILL', 'CAN'] }))).toBe('猫は伝説であることができるようになりたいです。');
+    expect(ja(isA('HAPPY', { modals: ['MUST', 'CAN'] }))).toBe('猫は幸せであることができる必要があります。');
+    expect(ja(isA('BIG', { modals: ['WILL'] }))).toBe('猫は大きくありたいです。');
+    expect(ja(isA('TIRED', { modals: ['WILL'] }))).toBe('猫は疲れていたいです。');
+    expect(ja(isA('HAPPY', { modals: ['WILL'], negative: true }))).toBe('猫は幸せでありたくないです。');
+    expect(ja(isA('TIRED', { modals: ['CAN'], tense: 'past', negative: true }))).toBe('猫は疲れていることができませんでした。');
+    expect(ja(clause(np('CAT', { relative: { verbPhrase: { verb: 'BE', modals: ['CAN'], tense: 'past' }, complements: { predicative: { phrase: np('HAPPY') } } } }), 'RUN')))
+      .toBe('幸せであることができた猫は走ります。');
+    expect(ja(isA('HAPPY', { modals: [{ verb: 'MUST', modifier: 'ALWAYS' }], modifier: 'NEVER' }))).toBe('猫はいつも決して幸せである必要がありません。');
+    expect(ja(clause(np('CAT'), 'BE', { verbPhrase: { modals: ['MUST'] }, complements: { predicative: { phrase: np('HAPPY') }, locative: { phrase: np('HOUSE') } } })))
+      .toBe('猫は家で幸せである必要があります。');
   });
 
   test('regression: the existential and a verb keep their modal, and the other languages render it', () => {

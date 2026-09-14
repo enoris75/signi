@@ -45,3 +45,19 @@ modal takes the tense, polarity and ending as it does for a verb. B07's aspect g
 | | |
 |---|---|
 | **Test** | `modals.test.ts` → *known bugs: Japanese modal on the copula* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above. [`modalSegs`](../../../packages/engine/src/languages/ja/modalSegs.ts)
+takes the governed element as a callback, defaulting to the verb's form. The copula branch of
+[`predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts) hands it the predicate in
+the form the modal governs, and pushes the modals' adverbs ahead of the predicate as the verb path does.
+[`copulaSegs`](../../../packages/engine/src/languages/ja/copulaSegs.ts) gains the two governed forms:
+`dict` (大きい, 幸せである, 疲れている, 伝説である) and `stem` (大きくあり, 幸せであり, 疲れてい, 伝説であり).
+A `no` noun predicate keeps its でも under a modal (どの伝説でもある).
+
+- **Tests:** [`modals.test.ts`](../../../packages/engine/test/modals.test.ts) → *known bugs: Japanese
+  modal on the copula*. The pinning `test.fails` is now a passing `test`. A new case covers the たら
+  protasis (伝説であることができたら), both modal chains, 〜たい on each adjective class, the relative's
+  past, the modals' adverbs and an adjunct complement.
+- Unit tests: new cases in `copulaSegs.test.ts`, `modalSegs.test.ts` and `predicateSegs.test.ts` (ja).

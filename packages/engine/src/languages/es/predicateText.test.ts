@@ -30,6 +30,15 @@ describe('predicateText', () => {
       expect(predicateText(GATOS, vp(COMER, { tense: 'future' }))).toBe('comerán');
     });
 
+    // A130: the preterite makes a state an event, so a state's past is the imperfect.
+    test('the past of a state is the imperfect', () => {
+      expect(predicateText(NOSOTROS, vp(SER, { tense: 'past' }, 'BE'), undefined, aLegend)).toBe('éramos una leyenda');
+      expect(predicateText(GATO, vp(PARECER, { tense: 'past' }), undefined, tired)).toBe('parecía cansado');
+      expect(predicateText(YO, vp(SER, { tense: 'past' }, 'BE'), undefined, tired)).toBe('estaba cansado');
+      expect(predicateText(GATOS, vp(COMER, { tense: 'past', modals: [modal(QUERER), modal(PODER)] }))).toBe('querían poder comer');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(DEBER)], mood: 'conditional' }))).toBe('debería comer');
+    });
+
     test('a reflexive verb’s finite form already carries its clitic', () => {
       expect(predicateText(GATO, vp(VOLVERSE, {}, 'BECOME'), undefined, aLegend)).toBe('se vuelve una leyenda');
       expect(predicateText(NOSOTROS, vp(VOLVERSE, { tense: 'past' }, 'BECOME'), undefined, aLegend)).toBe('nos volvimos una leyenda');
@@ -83,7 +92,7 @@ describe('predicateText', () => {
     test('the outermost modal is finite and the rest are infinitives', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER)] }))).toBe('debe comer');
       expect(predicateText(YO, vp(COMER, { modals: [modal(QUERER)] }))).toBe('quiero comer');
-      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(DEBER)] }))).toBe('debió comer');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(DEBER)] }))).toBe('debía comer');
       expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER), modal(PODER)] }))).toBe('quiere poder comer');
     });
 
@@ -130,7 +139,7 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEBER, NUNCA)] }))).toBe('nunca debe comer');
       expect(predicateText(GATO, vp(COMER, { modifier: concept(NUNCA), modals: [modal(QUERER)] }))).toBe('nunca quiere comer');
       expect(predicateText(GATO, vp(COMER, { tense: 'past', modifier: concept(SIEMPRE), modals: [modal(QUERER, NUNCA)] })))
-        .toBe('nunca quiso comer siempre');
+        .toBe('nunca quería comer siempre');
     });
 
     test('an explicitly negated verb keeps no, and nunca stays after it', () => {
@@ -219,7 +228,7 @@ describe('predicateText', () => {
     test('a locative on its own selects estar, in every tense and mood', () => {
       expect(predicateText(GATO, be(), undefined, inTheHouse)).toBe('está en la casa');
       expect(predicateText(YO, be(), undefined, inTheHouse)).toBe('estoy en la casa');
-      expect(predicateText(GATOS, be({ tense: 'past' }), undefined, inTheHouse)).toBe('estuvieron en la casa');
+      expect(predicateText(GATOS, be({ tense: 'past' }), undefined, inTheHouse)).toBe('estaban en la casa');
       expect(predicateText(GATO, be({ mood: 'conditional' }), undefined, inTheHouse)).toBe('estaría en la casa');
       expect(predicateText(GATO, be({ mood: 'subjunctive' }), undefined, inTheHouse)).toBe('estuviera en la casa');
       expect(predicateText(GATO, be({ negative: true }), undefined, inTheHouse)).toBe('no está en la casa');
@@ -360,7 +369,7 @@ describe('predicateText', () => {
       expect(predicateText(PERRO, be({ negative: true, elided: aLegendElided }))).toBe('no lo es');
       expect(predicateText(PERRO, be({ negative: true, elided: happy }))).toBe('no lo está');
       expect(predicateText({ ...PERRO, number: 'plural' }, be({ elided: happy }))).toBe('lo están');
-      expect(predicateText(PERRO, be({ tense: 'past', negative: true, elided: happy }))).toBe('no lo estuvo');
+      expect(predicateText(PERRO, be({ tense: 'past', negative: true, elided: happy }))).toBe('no lo estaba');
     });
 
     test('a place leaves nothing, and takes estar', () => {

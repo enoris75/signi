@@ -30,9 +30,10 @@ function formsFromRows(rows: FormRow[]): Record<string, string> {
 
 function lookupVerb(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number }>(`
-    SELECT vl.id FROM concept_verb_links cvl
+  const lexeme = db.prepare<[string, string], { id: number; stative: number }>(`
+    SELECT vl.id, sc.stative FROM concept_verb_links cvl
     JOIN verb_lexemes vl ON vl.id = cvl.lexeme_id
+    JOIN semantic_concepts sc ON sc.id = cvl.concept_id
     WHERE cvl.concept_id = ? AND vl.language = ? AND cvl.is_primary = 1
   `).get(conceptId, language);
   if (!lexeme) return undefined;
@@ -41,7 +42,12 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
     'SELECT form_key, form_value FROM verb_forms WHERE lexeme_id = ?'
   ).all(lexeme.id);
 
-  return { conceptId, language: language as LexicalEntry['language'], forms: formsFromRows(rows) };
+  const forms = formsFromRows(rows);
+  // A verb naming a state that holds, not an event: its Romance past is the imperfect ("voleva",
+  // A130), and Japanese says it with 〜ている ("持っています", A132). Concept-level.
+  if (lexeme.stative) forms['stative'] = '1';
+
+  return { conceptId, language: language as LexicalEntry['language'], forms };
 }
 
 function lookupNoun(conceptId: string, language: string): LexicalEntry | undefined {
@@ -171,6 +177,12 @@ export function lookupLexicalEntry(conceptId: string, language: string): Lexical
 
   entryCache.set(key, entry);
   return entry ?? undefined;
+}
+
+// Whether the concept has a `semantic_concepts` row. Not the same as having an entry: a seeded
+// concept can lack a lexeme in one language without being unknown.
+export function isSeededConcept(conceptId: string): boolean {
+  return getConceptRole(conceptId) !== null;
 }
 
 export function clearLexiconCache(): void {

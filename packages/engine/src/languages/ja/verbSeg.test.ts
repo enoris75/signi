@@ -25,7 +25,7 @@ describe('verbSeg', () => {
 
   test('the reading tracks the stem, not the dictionary form', () => {
     expect(verbSeg(concept(KURU), false, 'past')).toEqual({ t: '来ました', r: 'きました' });
-    expect(verbSeg(concept(SHIRU), true, 'past')).toEqual({ t: '知っていませんでした', r: 'しっていませんでした' });
+    expect(verbSeg(concept(SHIRU), true, 'past')).toEqual({ t: '知りませんでした', r: 'しりませんでした' });
   });
 
   test('a kana verb with no reading takes no ruby', () => {

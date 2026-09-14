@@ -141,10 +141,10 @@ describe('BE without a subject complement: the relative clause', () => {
     });
     expect(sayAll(clause(np('DOG', that({ verb: 'BE', tense: 'past', negative: true })), 'RUN'))).toMatchObject({
       en: 'the dog that was not runs.',
-      it: 'il cane che non fu corre.',
-      fr: 'le chien qui ne fut pas court.',
-      es: 'el perro que no fue corre.',
-      pt: 'o cão que não foi corre.',
+      it: 'il cane che non era corre.',
+      fr: "le chien qui n'était pas court.",
+      es: 'el perro que no era corre.',
+      pt: 'o cão que não era corre.',
       de: 'der Hund, der nicht war, läuft.',
     });
   });
@@ -353,7 +353,7 @@ describe('known bugs: Japanese relative on the subject complement of BE', () => 
       relative: { headRole: 'predicative', subject: np('DOG'), verbPhrase: { verb: 'BE', tense: 'past' } },
     }) } } }))).toMatchObject({
       en: 'the cat is a legend that the dog was.',
-      it: 'il gatto è una leggenda che il cane fu.',
+      it: 'il gatto è una leggenda che il cane era.',
       de: 'der Kater ist eine Legende, die der Hund war.',
     });
   });

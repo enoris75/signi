@@ -350,6 +350,7 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'LOVE',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to feel deep affection',
@@ -484,9 +485,15 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'KNOW',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['cause'],
     description: 'to have knowledge or understanding of',
+    // Italian, French, Spanish, Portuguese and German have two verbs for "know": one for a fact, with no
+    // object or a clause (sapere, savoir, saber, wissen), and one for a person, place, thing or idea
+    // (conoscere, connaître, conocer, conhecer, kennen). English and Japanese have one. The user picks
+    // KNOW either way; `object_sense` names the concept the translator swaps in when the verb takes an
+    // object (A131).
     definition: infinitiveGloss('UNDERSTAND', 'CONCEPT', 'plural'),
     emoji: '🧠',
     forms: {
@@ -497,7 +504,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'knew',
       },
       it: {
-        base: 'sapere',
+        base: 'sapere', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'so', '2sg_present': 'sai', '3sg_present': 'sa',
         '1pl_present': 'sappiamo', '2pl_present': 'sapete', '3pl_present': 'sanno',
         '1sg_past': 'seppi', '2sg_past': 'sapesti', '3sg_past': 'seppe',
@@ -506,7 +513,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'sapremo', '2pl_future': 'saprete', '3pl_future': 'sapranno',
       },
       fr: {
-        base: 'savoir',
+        base: 'savoir', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sais', '2sg_present': 'sais', '3sg_present': 'sait',
         '1pl_present': 'savons', '2pl_present': 'savez', '3pl_present': 'savent',
         '1sg_past': 'sus', '2sg_past': 'sus', '3sg_past': 'sut',
@@ -515,7 +522,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'saurons', '2pl_future': 'saurez', '3pl_future': 'sauront',
       },
       de: {
-        base: 'wissen',
+        base: 'wissen', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'weiß', '2sg_present': 'weißt', '3sg_present': 'weiß',
         '1pl_present': 'wissen', '2pl_present': 'wisst', '3pl_present': 'wissen',
         '1sg_past': 'wusste', '2sg_past': 'wusstest', '3sg_past': 'wusste',
@@ -523,7 +530,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '2sg_imperative': 'wisse', // suppletive du command
       },
       es: {
-        base: 'saber',
+        base: 'saber', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sé', '2sg_present': 'sabes', '3sg_present': 'sabe',
         '1pl_present': 'sabemos', '2pl_present': 'sabéis', '3pl_present': 'saben',
         '1sg_past': 'supe', '2sg_past': 'supiste', '3sg_past': 'supo',
@@ -532,19 +539,94 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'sabremos', '2pl_future': 'sabréis', '3pl_future': 'sabrán',
       },
       ja: {
+        // A state, so a main clause says it with 〜ている (知っています); but the state's negative is the
+        // plain event form, 知りません, never 知っていません (`event_negative`, A132).
         base: '知る',
         reading: 'しる',
-        masu_present: '知っています',
-        masu_present_reading: 'しっています',
+        masu_present: '知ります',
+        masu_present_reading: 'しります',
+        event_negative: '1',
       },
       pt: {
-        base: 'saber',
+        base: 'saber', object_sense: 'KNOW_ACQUAINTED',
         '1sg_present': 'sei', '2sg_present': 'sabe', '3sg_present': 'sabe',
         '1pl_present': 'sabemos', '2pl_present': 'sabem', '3pl_present': 'sabem',
         '1sg_past': 'soube', '2sg_past': 'soube', '3sg_past': 'soube',
         '1pl_past': 'soubemos', '2pl_past': 'souberam', '3pl_past': 'souberam',
         '1sg_future': 'saberei', '2sg_future': 'saberá', '3sg_future': 'saberá',
         '1pl_future': 'saberemos', '2pl_future': 'saberão', '3pl_future': 'saberão',
+      },
+    },
+  },
+
+  {
+    // KNOW's acquaintance sense: knowing a person, a place, a thing or an idea, which five languages say
+    // with a verb of its own (A131). The translator selects it for KNOW with an object (`object_sense`),
+    // so it is a sense of KNOW and no picker offers it. English and Japanese have one verb for both.
+    id: 'KNOW_ACQUAINTED',
+    role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
+    senseOf: 'KNOW',
+    transitivity: 'transitive',
+    complements: ['cause'],
+    description: 'to be acquainted or familiar with',
+    emoji: '🧠',
+    forms: {
+      en: {
+        base: 'know',
+        '1sg_present': 'know', '2sg_present': 'know', '3sg_present': 'knows',
+        '1pl_present': 'know', '2pl_present': 'know', '3pl_present': 'know',
+        past: 'knew',
+      },
+      it: {
+        base: 'conoscere',
+        '1sg_present': 'conosco', '2sg_present': 'conosci', '3sg_present': 'conosce',
+        '1pl_present': 'conosciamo', '2pl_present': 'conoscete', '3pl_present': 'conoscono',
+        '1sg_past': 'conobbi', '2sg_past': 'conoscesti', '3sg_past': 'conobbe',
+        '1pl_past': 'conoscemmo', '2pl_past': 'conosceste', '3pl_past': 'conobbero',
+        '1sg_future': 'conoscerò', '2sg_future': 'conoscerai', '3sg_future': 'conoscerà',
+        '1pl_future': 'conosceremo', '2pl_future': 'conoscerete', '3pl_future': 'conosceranno',
+      },
+      fr: {
+        base: 'connaître',
+        '1sg_present': 'connais', '2sg_present': 'connais', '3sg_present': 'connaît',
+        '1pl_present': 'connaissons', '2pl_present': 'connaissez', '3pl_present': 'connaissent',
+        '1sg_past': 'connus', '2sg_past': 'connus', '3sg_past': 'connut',
+        '1pl_past': 'connûmes', '2pl_past': 'connûtes', '3pl_past': 'connurent',
+        '1sg_future': 'connaîtrai', '2sg_future': 'connaîtras', '3sg_future': 'connaîtra',
+        '1pl_future': 'connaîtrons', '2pl_future': 'connaîtrez', '3pl_future': 'connaîtront',
+      },
+      de: {
+        base: 'kennen',
+        '1sg_present': 'kenne', '2sg_present': 'kennst', '3sg_present': 'kennt',
+        '1pl_present': 'kennen', '2pl_present': 'kennt', '3pl_present': 'kennen',
+        '1sg_past': 'kannte', '2sg_past': 'kanntest', '3sg_past': 'kannte',
+        '1pl_past': 'kannten', '2pl_past': 'kanntet', '3pl_past': 'kannten',
+      },
+      es: {
+        base: 'conocer',
+        '1sg_present': 'conozco', '2sg_present': 'conoces', '3sg_present': 'conoce',
+        '1pl_present': 'conocemos', '2pl_present': 'conocéis', '3pl_present': 'conocen',
+        '1sg_past': 'conocí', '2sg_past': 'conociste', '3sg_past': 'conoció',
+        '1pl_past': 'conocimos', '2pl_past': 'conocisteis', '3pl_past': 'conocieron',
+        '1sg_future': 'conoceré', '2sg_future': 'conocerás', '3sg_future': 'conocerá',
+        '1pl_future': 'conoceremos', '2pl_future': 'conoceréis', '3pl_future': 'conocerán',
+      },
+      ja: {
+        base: '知る',
+        reading: 'しる',
+        masu_present: '知ります',
+        masu_present_reading: 'しります',
+        event_negative: '1',
+      },
+      pt: {
+        base: 'conhecer',
+        '1sg_present': 'conheço', '2sg_present': 'conhece', '3sg_present': 'conhece',
+        '1pl_present': 'conhecemos', '2pl_present': 'conhecem', '3pl_present': 'conhecem',
+        '1sg_past': 'conheci', '2sg_past': 'conheceu', '3sg_past': 'conheceu',
+        '1pl_past': 'conhecemos', '2pl_past': 'conheceram', '3pl_past': 'conheceram',
+        '1sg_future': 'conhecerei', '2sg_future': 'conhecerá', '3sg_future': 'conhecerá',
+        '1pl_future': 'conheceremos', '2pl_future': 'conhecerão', '3pl_future': 'conhecerão',
       },
     },
   },
@@ -1040,6 +1122,7 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'OWN',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['cause', 'locative'],
     description: 'to have as property',
@@ -1107,6 +1190,7 @@ export const transitiveVerbs: ConceptSeed[] = [
   {
     id: 'HOLD',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to contain or keep',
@@ -1533,6 +1617,7 @@ export const transitiveVerbs: ConceptSeed[] = [
     // override tables carry.
     id: 'HAVE',
     role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to possess; to keep with oneself',

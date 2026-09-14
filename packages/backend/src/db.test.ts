@@ -222,12 +222,12 @@ describe('migrations', () => {
     expect(columns(db, 'semantic_concepts')).toEqual([
       'id', 'role', 'description', 'emoji', 'transitivity',
       'complements', 'animate', 'human', 'synonym', 'countable', 'modal', 'proper',
-      'manner_relation', 'dimension_relation', 'transient', 'alarm',
+      'manner_relation', 'dimension_relation', 'transient', 'alarm', 'stative', 'sense_of',
     ]);
     expect(db.prepare("SELECT * FROM semantic_concepts WHERE id = 'WATER'").get()).toEqual({
       id: 'WATER', role: 'noun', description: 'a clear liquid', emoji: null, transitivity: null,
       complements: null, animate: 0, human: 0, synonym: null, countable: 1, modal: 0, proper: 0,
-      manner_relation: null, dimension_relation: null, transient: 0, alarm: 0,
+      manner_relation: null, dimension_relation: null, transient: 0, alarm: 0, stative: 0, sense_of: null,
     });
   });
 

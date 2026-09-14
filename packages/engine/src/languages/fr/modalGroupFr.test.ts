@@ -9,7 +9,8 @@ describe('modalGroupFr', () => {
   });
 
   test('the finite modal takes the tense and agrees with the subject', () => {
-    expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'past', 'neutral', undefined, '').finite).toBe('dut');
+    // A modal names a state, so its past is the imparfait (A130).
+    expect(modalGroupFr([modal(DEVOIR)], MANGER, CHAT, 'past', 'neutral', undefined, '').finite).toBe('devait');
     expect(modalGroupFr([modal(DEVOIR)], MANGER, { ...CHAT, number: 'plural' }, 'future', 'neutral', undefined, '').finite).toBe('devront');
     expect(modalGroupFr([modal(VOULOIR)], MANGER, JE, 'present', 'neutral', undefined, '').finite).toBe('veux');
   });

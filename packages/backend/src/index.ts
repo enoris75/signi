@@ -3,7 +3,7 @@ import cors from 'cors';
 import path from 'path';
 import { fileURLToPath } from 'url';
 import { getDb } from './db.js';
-import { lookupLexicalEntry } from './lexicon.js';
+import { isSeededConcept, lookupLexicalEntry } from './lexicon.js';
 import { translate } from '@signi/engine';
 import { buildUiStrings } from './uiStrings.js';
 import { buildConceptDefinitions } from './definitions.js';
@@ -121,6 +121,8 @@ const LABEL_SQL = `
   )
 `;
 
+// A lexical sense (`sense_of`) is left out: the engine selects it in place of the concept the user
+// picked (KNOW_ACQUAINTED for KNOW with an object, A131), so no picker should offer it.
 app.get('/api/concepts', (req, res) => {
   const db = getDb();
   const role = req.query['role'] as string | undefined;
@@ -128,11 +130,11 @@ app.get('/api/concepts', (req, res) => {
   let rows: ConceptRow[];
   if (role) {
     rows = db
-      .prepare<[string], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts WHERE role = ? ORDER BY id`)
+      .prepare<[string], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts WHERE role = ? AND sense_of IS NULL ORDER BY id`)
       .all(role);
   } else {
     rows = db
-      .prepare<[], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts ORDER BY role, id`)
+      .prepare<[], ConceptRow>(`SELECT ${CONCEPT_COLS} FROM semantic_concepts WHERE sense_of IS NULL ORDER BY role, id`)
       .all();
   }
 
@@ -226,12 +228,29 @@ app.post('/api/translate', (req, res) => {
   // ("the cat and the dog") is a group of phrases rather than one, so the head to check for
   // is its first conjunct.
   const subject = body?.plan?.subject;
-  if (!subject || !nounConjuncts(subject)[0]?.concept) {
+  if (!subject || typeof subject !== 'object' || !nounConjuncts(subject)[0]?.concept) {
     res.status(400).json({ error: 'plan.subject.concept is required' });
     return;
   }
 
-  const translations = translate(body.plan, lookupLexicalEntry);
+  // The engine renders a concept the lexicon cannot find as an empty word, so a plan naming one
+  // would come back as a 200 with a hole in it. Rather than walk the plan (and keep a walker in
+  // step with the plan model), note every id the engine asks for that has no concept row: that
+  // covers every slot the engine reads.
+  const unknown = new Set<string>();
+  const lookup: typeof lookupLexicalEntry = (conceptId, language) => {
+    if (typeof conceptId !== 'string' || !isSeededConcept(conceptId)) {
+      unknown.add(String(conceptId));
+      return undefined;
+    }
+    return lookupLexicalEntry(conceptId, language);
+  };
+  const translations = translate(body.plan, lookup);
+  if (unknown.size > 0) {
+    const ids = [...unknown];
+    res.status(400).json({ error: `Unknown concept${ids.length > 1 ? 's' : ''}: ${ids.join(', ')}` });
+    return;
+  }
   const response: TranslateResponse = { translations };
   res.json(response);
 });
@@ -318,7 +337,7 @@ app.get('/api/phrases/:id', (req, res) => {
 
 app.post('/api/phrases', (req, res) => {
   const body = req.body as SavePhraseRequest;
-  const name = body?.name?.trim();
+  const name = typeof body?.name === 'string' ? body.name.trim() : undefined;
   const kind: SavedPhraseKind = body?.kind === 'period' ? 'period' : 'phrase';
   if (!name || !body?.workspace || !Array.isArray(body.workspace.containers)) {
     res.status(400).json({ error: 'name and workspace.containers are required' });
@@ -366,6 +385,13 @@ app.delete('/api/phrases/:id', (req, res) => {
   res.status(204).end();
 });
 
+// Unknown API paths are a 404, not the SPA shell — returning HTML for a missing endpoint
+// would mask bugs and confuse fetch callers expecting JSON. Every method, not just GET: a
+// PUT or POST to an unrouted path would otherwise reach Express's HTML "Cannot PUT" page.
+app.all('/api/*', (_req, res) => {
+  res.status(404).json({ error: 'Not found' });
+});
+
 // ── Static frontend ──────────────────────────────────────────────────────────
 // In production the built SPA is served from this same origin, so the deploy needs to
 // expose only one port. The frontend calls the API at the relative /api path, which the
@@ -375,14 +401,35 @@ app.delete('/api/phrases/:id', (req, res) => {
 // because dev requests go to Vite's port, not here.
 const frontendDist = path.join(fileURLToPath(new URL('.', import.meta.url)), '..', '..', 'frontend', 'dist');
 app.use(express.static(frontendDist));
-app.get('*', (req, res) => {
-  // Unknown API paths are a 404, not the SPA shell — returning HTML for a missing endpoint
-  // would mask bugs and confuse fetch callers expecting JSON.
-  if (req.path.startsWith('/api/')) {
-    res.status(404).json({ error: 'Not found' });
+app.get('*', (_req, res) => {
+  res.sendFile(path.join(frontendDist, 'index.html'));
+});
+
+// ── Errors ───────────────────────────────────────────────────────────────────
+// Without this, Express answers a thrown error (or body-parser's 400 for malformed JSON) with
+// its HTML page, stack trace included unless NODE_ENV is production. Answer JSON instead, and
+// never the stack: only a message http-errors marks safe to expose (a client error's) goes out.
+app.use((err: unknown, _req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (res.headersSent) {
+    next(err);
     return;
   }
-  res.sendFile(path.join(frontendDist, 'index.html'));
+  const { status, statusCode, expose, message } = (err ?? {}) as {
+    status?: unknown;
+    statusCode?: unknown;
+    expose?: unknown;
+    message?: unknown;
+  };
+  const code = typeof status === 'number' ? status : typeof statusCode === 'number' ? statusCode : 500;
+  const httpStatus = code >= 400 && code < 600 ? code : 500;
+  if (httpStatus >= 500) console.error(err);
+  const error =
+    expose === true && typeof message === 'string'
+      ? message
+      : httpStatus >= 500
+        ? 'Internal server error'
+        : 'Bad request';
+  res.status(httpStatus).json({ error });
 });
 
 const PORT = process.env['PORT'] ?? 3001;

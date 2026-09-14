@@ -155,7 +155,7 @@ export const VENIR: Forms = {
 };
 /** The copula (concept id BE); its resultative takes avoir ("a été"). */
 export const ETRE: Forms = {
-  base: 'être', copula: '1', participle: 'été',
+  base: 'être', stative: '1', copula: '1', participle: 'été',
   '1sg_present': 'suis', '2sg_present': 'es', '3sg_present': 'est',
   '1pl_present': 'sommes', '2pl_present': 'êtes', '3pl_present': 'sont',
   '1sg_past': 'fus', '2sg_past': 'fus', '3sg_past': 'fut',
@@ -173,7 +173,7 @@ export const DEVENIR: Forms = {
   '1pl_future': 'deviendrons', '2pl_future': 'deviendrez', '3pl_future': 'deviendront',
 };
 export const SEMBLER: Forms = {
-  base: 'sembler', participle: 'semblé',
+  base: 'sembler', stative: '1', participle: 'semblé',
   '1sg_present': 'semble', '2sg_present': 'sembles', '3sg_present': 'semble',
   '1pl_present': 'semblons', '2pl_present': 'semblez', '3pl_present': 'semblent',
   '1sg_past': 'semblai', '2sg_past': 'semblas', '3sg_past': 'sembla',
@@ -210,7 +210,7 @@ export const CHOISIR: Forms = {
 };
 /** Concept id KNOW — one of the irregular present-participle stems ("sachant"). */
 export const SAVOIR: Forms = {
-  base: 'savoir', participle: 'su',
+  base: 'savoir', stative: '1', participle: 'su',
   '1sg_present': 'sais', '2sg_present': 'sais', '3sg_present': 'sait',
   '1pl_present': 'savons', '2pl_present': 'savez', '3pl_present': 'savent',
   '1sg_past': 'sus', '2sg_past': 'sus', '3sg_past': 'sut',
@@ -235,7 +235,7 @@ export const EFFONDRER: Forms = {
 // ── Modals ──────────────────────────────────────────────────────────────────
 
 export const DEVOIR: Forms = {
-  base: 'devoir',
+  base: 'devoir', stative: '1',
   '1sg_present': 'dois', '2sg_present': 'dois', '3sg_present': 'doit',
   '1pl_present': 'devons', '2pl_present': 'devez', '3pl_present': 'doivent',
   '1sg_past': 'dus', '2sg_past': 'dus', '3sg_past': 'dut',
@@ -244,7 +244,7 @@ export const DEVOIR: Forms = {
   '1pl_future': 'devrons', '2pl_future': 'devrez', '3pl_future': 'devront',
 };
 export const POUVOIR: Forms = {
-  base: 'pouvoir',
+  base: 'pouvoir', stative: '1',
   '1sg_present': 'peux', '2sg_present': 'peux', '3sg_present': 'peut',
   '1pl_present': 'pouvons', '2pl_present': 'pouvez', '3pl_present': 'peuvent',
   '1sg_past': 'pus', '2sg_past': 'pus', '3sg_past': 'put',
@@ -253,7 +253,7 @@ export const POUVOIR: Forms = {
   '1pl_future': 'pourrons', '2pl_future': 'pourrez', '3pl_future': 'pourront',
 };
 export const VOULOIR: Forms = {
-  base: 'vouloir',
+  base: 'vouloir', stative: '1',
   '1sg_present': 'veux', '2sg_present': 'veux', '3sg_present': 'veut',
   '1pl_present': 'voulons', '2pl_present': 'voulez', '3pl_present': 'veulent',
   '1sg_past': 'voulus', '2sg_past': 'voulus', '3sg_past': 'voulut',

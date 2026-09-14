@@ -100,6 +100,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'sabendo', participle: 'sabido' },
     ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない' },
   },
+  KNOW_ACQUAINTED: {
+    en: { gerund: 'knowing', participle: 'known' },
+    it: { gerund: 'conoscendo', participle: 'conosciuto' },
+    fr: { participle: 'connu' }, de: { participle: 'gekannt' },
+    es: { gerund: 'conociendo', participle: 'conocido' },
+    pt: { gerund: 'conhecendo', participle: 'conhecido' },
+    ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない' },
+  },
   READ: {
     en: { gerund: 'reading', participle: 'read' },
     it: { gerund: 'leggendo', participle: 'letto' },

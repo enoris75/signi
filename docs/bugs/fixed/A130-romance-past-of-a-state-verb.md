@@ -88,3 +88,41 @@ flag them as regressions.
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: Romance past of a state verb* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above.
+
+- **Corpus:** a concept-level `stative` flag, plumbed like A124's `alarm`: `stative?: boolean` on
+  `ConceptSeed` ([`concepts/types.ts`](../../../packages/backend/src/concepts/types.ts)), a column with
+  its migration ([`db.ts`](../../../packages/backend/src/db.ts)), [`seed.ts`](../../../packages/backend/src/seed.ts),
+  and `forms['stative']` on verbs in [`lexicon.ts`](../../../packages/backend/src/lexicon.ts). The flag
+  is set on WILL, CAN, MUST ([`modals.ts`](../../../packages/backend/src/concepts/verbs/modals.ts)), BE,
+  SEEM ([`motion.ts`](../../../packages/backend/src/concepts/verbs/motion.ts)), HAVE, OWN, LOVE, HOLD,
+  KNOW and A131's KNOW_ACQUAINTED ([`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)).
+  The es / pt `ESTAR_COPULA` constants carry it too. The dev database needs `npm run seed`.
+- **Engine:** [`mood.ts`](../../../packages/engine/src/mood.ts) derives the imperfect indicative and
+  exposes `statePastForm`, which applies only to a stative verb, in the past, in the indicative:
+  - it: -re → -va, with essere → era and the contracted infinitives.
+  - fr: the protasis's imparfait.
+  - es: -aba / -ía, with ser, ir and ver irregular.
+  - pt: -ava / -ia, -ía after a vowel, with ser and the ter / vir / pôr families.
+
+  Each engine's finite verb calls it: [`it/predicateText.ts`](../../../packages/engine/src/languages/it/predicateText.ts),
+  [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts),
+  [`fr/modalGroupFr.ts`](../../../packages/engine/src/languages/fr/modalGroupFr.ts),
+  [`es/predicateText.ts`](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [`pt/predicateText.ts`](../../../packages/engine/src/languages/pt/predicateText.ts). The main verb
+  takes it only with neutral aspect, and the outermost modal whatever it governs.
+- **Tests:** [`verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known bugs: Romance past of
+  a state verb*. The pinning `test.fails` is now a passing `test`. A new case covers LOVE, SEEM, KNOW
+  with no object, every person, the relative and a negated plural copula. A new regression guard covers
+  the resultative, the hypothetical moods and the aspect under a modal. As predicted, the perfective
+  assertions on these verbs were flipped in `modals.test.ts`, `verb.test.ts`, `genus-verbs.test.ts`,
+  `coordination.test.ts`, `copulaWithoutComplement.test.ts`, `pronoun.test.ts`,
+  `complements/locative.test.ts` and `complements/predicative.test.ts`. The BE, KNOW, SEEM and LOVE past
+  cells of `__snapshots__/verb.conjugation.test.ts.snap` were re-baselined.
+- Unit tests: `statePastForm` in `mood.test.ts`. The it / fr / es / pt fixtures for the modals, the
+  copula and the seeming verb carry `stative`, with a new state-past case in each `predicateText.test.ts`.
+
+Still not pinned: a progressive under a volitional modal (`voleva stare saltando`).

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { imperativeForm, moodForm, moodPN } from './mood.js';
+import { imperativeForm, moodForm, moodPN, statePastForm } from './mood.js';
 
 const verb = (conceptId: string, forms: Record<string, string>) => ({ conceptId, forms });
 const MORDER = verb('BITE', { base: 'morder', '1sg_present': 'muerdo', '3sg_present': 'muerde', '1pl_present': 'mordemos' });
@@ -141,5 +141,63 @@ describe('imperativeForm (it) and moodForm (it): irregular stems', () => {
     expect(moodForm('it', PRODURRE, '3sg', 'subjunctive')).toBe('producesse');
     expect(moodForm('it', PRODURRE, '1pl', 'subjunctive')).toBe('producessimo');
     expect(moodForm('it', PRODURRE, '3sg', 'conditional')).toBe('produrrebbe');
+  });
+});
+
+// A130: a state in the past takes the imperfect, derived from the stored stems.
+describe('statePastForm', () => {
+  const state = (conceptId: string, forms: Record<string, string>) => verb(conceptId, { ...forms, stative: '1' });
+
+  test('Italian drops -re for -va, and essere and the contracted infinitives keep their own stem', () => {
+    const VOLERE = state('WILL', { base: 'volere' });
+    expect(statePastForm('it', VOLERE, '3sg', 'past', undefined)).toBe('voleva');
+    expect(statePastForm('it', VOLERE, '1pl', 'past', undefined)).toBe('volevamo');
+    expect(statePastForm('it', state('LOVE', { base: 'amare' }), '3pl', 'past', undefined)).toBe('amavano');
+    expect(statePastForm('it', state('BE', { base: 'essere' }), '1sg', 'past', undefined)).toBe('ero');
+    expect(statePastForm('it', state('BE', { base: 'essere' }), '2pl', 'past', undefined)).toBe('eravate');
+    expect(statePastForm('it', state('PRODUCE', { base: 'produrre' }), '3sg', 'past', undefined)).toBe('produceva');
+    expect(statePastForm('it', state('SAY', { base: 'dire' }), '3sg', 'past', undefined)).toBe('diceva');
+  });
+
+  test('French is the imparfait on the nous stem, être on ét-', () => {
+    expect(statePastForm('fr', state('HAVE', { base: 'avoir', '1pl_present': 'avons' }), '3sg', 'past', undefined)).toBe('avait');
+    expect(statePastForm('fr', state('KNOW', { base: 'connaître', '1pl_present': 'connaissons' }), '1pl', 'past', undefined)).toBe('connaissions');
+    expect(statePastForm('fr', state('BE', { base: 'être', '1pl_present': 'sommes' }), '3pl', 'past', undefined)).toBe('étaient');
+  });
+
+  test('Spanish takes -aba or -ía, with ser, ir and ver irregular', () => {
+    expect(statePastForm('es', state('LOVE', { base: 'amar' }), '1pl', 'past', undefined)).toBe('amábamos');
+    expect(statePastForm('es', state('HAVE', { base: 'tener' }), '3sg', 'past', undefined)).toBe('tenía');
+    expect(statePastForm('es', state('OWN', { base: 'poseer' }), '3pl', 'past', undefined)).toBe('poseían');
+    expect(statePastForm('es', state('BE', { base: 'ser' }), '1pl', 'past', undefined)).toBe('éramos');
+    expect(statePastForm('es', state('GO', { base: 'ir' }), '2sg', 'past', undefined)).toBe('ibas');
+    expect(statePastForm('es', state('SEE', { base: 'ver' }), '3sg', 'past', undefined)).toBe('veía');
+  });
+
+  test('Portuguese takes -ava or -ia, with -ía after a vowel and ser, ter, vir and pôr irregular', () => {
+    expect(statePastForm('pt', state('LOVE', { base: 'amar' }), '1pl', 'past', undefined)).toBe('amávamos');
+    expect(statePastForm('pt', state('WILL', { base: 'querer' }), '2pl', 'past', undefined)).toBe('queriam');
+    expect(statePastForm('pt', state('OWN', { base: 'possuir' }), '3sg', 'past', undefined)).toBe('possuía');
+    expect(statePastForm('pt', state('OWN', { base: 'possuir' }), '3pl', 'past', undefined)).toBe('possuíam');
+    expect(statePastForm('pt', state('BE', { base: 'ser' }), '1pl', 'past', undefined)).toBe('éramos');
+    expect(statePastForm('pt', state('HAVE', { base: 'ter', '3sg_present': 'tem' }), '3sg', 'past', undefined)).toBe('tinha');
+    expect(statePastForm('pt', state('HOLD', { base: 'conter', '3sg_present': 'contém' }), '1pl', 'past', undefined)).toBe('contínhamos');
+    expect(statePastForm('pt', state('COME', { base: 'vir', '3sg_present': 'vem' }), '3sg', 'past', undefined)).toBe('vinha');
+    expect(statePastForm('pt', state('PUT', { base: 'pôr', '3sg_present': 'põe' }), '1pl', 'past', undefined)).toBe('púnhamos');
+    // bater and servir only look like ter / vir: their 3sg is no "tem" / "vem".
+    expect(statePastForm('pt', state('BEAT', { base: 'bater', '3sg_present': 'bate' }), '3sg', 'past', undefined)).toBe('batia');
+    expect(statePastForm('pt', state('SERVE', { base: 'servir', '3sg_present': 'serve' }), '3sg', 'past', undefined)).toBe('servia');
+  });
+
+  test('is undefined for an event, another tense, a hypothetical mood, a language that builds its own past, or no stem', () => {
+    const VOLERE = state('WILL', { base: 'volere' });
+    expect(statePastForm('it', verb('EAT', { base: 'mangiare' }), '3sg', 'past', undefined)).toBeUndefined();
+    expect(statePastForm('it', VOLERE, '3sg', 'present', undefined)).toBeUndefined();
+    expect(statePastForm('it', VOLERE, '3sg', undefined, undefined)).toBeUndefined();
+    expect(statePastForm('it', VOLERE, '3sg', 'past', 'subjunctive')).toBeUndefined();
+    expect(statePastForm('it', VOLERE, '3sg', 'past', 'imperative')).toBeUndefined();
+    expect(statePastForm('it', VOLERE, '3sg', 'past', 'indicative')).toBe('voleva');
+    expect(statePastForm('de', state('WILL', { base: 'wollen' }), '3sg', 'past', undefined)).toBeUndefined();
+    expect(statePastForm('it', state('WILL', {}), '3sg', 'past', undefined)).toBeUndefined();
   });
 });

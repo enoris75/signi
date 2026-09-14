@@ -323,7 +323,7 @@ describe('known bugs: Portuguese você agreement', () => {
     expect(sayAll(clause(youAll, 'EAT', { verbPhrase: { modals: ['CAN'] } })).pt).toBe('podem comer.');
     expect(sayAll(clause(youAll, 'BE', { complements: strong, verbPhrase: { tense: 'future' } })).pt).toBe('serão fortes.');
     expect(sayAll(clause(youAll, 'BE', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('estão cansados.');
-    expect(sayAll(clause(you, 'BE', { complements: { locative: { phrase: np('HOUSE') } }, verbPhrase: { tense: 'past' } })).pt).toBe('esteve na casa.');
+    expect(sayAll(clause(you, 'BE', { complements: { locative: { phrase: np('HOUSE') } }, verbPhrase: { tense: 'past' } })).pt).toBe('estava na casa.');
     expect(sayAll(clause(youAll, 'EAT', { verbPhrase: { aspect: 'progressive', tense: 'future' } })).pt).toBe('estarão comendo.');
     expect(sayAll(clause(you, 'SEEM', { complements: { predicative: { phrase: np('TIRED') } } })).pt).toBe('parece cansado.');
     expect(sayAll({ ...clause(youAll, 'RUN'), condition: clause(np('CAT'), 'EAT') }).pt).toBe('se o gato comesse, correriam.');

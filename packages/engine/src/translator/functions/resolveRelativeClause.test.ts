@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { LOOKUP } from '../translator.fixtures.js';
+import { lexicon, LOOKUP } from '../translator.fixtures.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
 
 describe('resolveRelativeClause', () => {
@@ -33,5 +33,15 @@ describe('resolveRelativeClause', () => {
     expect(withUnder.headSpecifiers).toEqual([{ kind: 'path', value: 'under' }]);
     expect(resolveRelativeClause({ headRole: 'locative', headSpecifiers: [], verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
     expect(resolveRelativeClause({ headRole: 'locative', verbPhrase: { verb: 'RUN' } }, 'it', LOOKUP)).not.toHaveProperty('headSpecifiers');
+  });
+
+  // A131: the head gapped as the object is an object too, so KNOW takes its object sense for it.
+  test("takes the verb's object sense for its own object or for a head gapped as the object, and not otherwise", () => {
+    const KNOWING = lexicon({ KNOW: { base: 'sapere', object_sense: 'KNOW_ACQUAINTED' }, KNOW_ACQUAINTED: { base: 'conoscere' }, CAT: { base: 'gatto' } });
+    const verbOf = (clause: Parameters<typeof resolveRelativeClause>[0]) => resolveRelativeClause(clause, 'it', KNOWING).verbPhrase.verb.conceptId;
+    expect(verbOf({ verbPhrase: { verb: 'KNOW' }, directObject: { concept: 'CAT' } })).toBe('KNOW_ACQUAINTED');
+    expect(verbOf({ headRole: 'directObject', subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } })).toBe('KNOW_ACQUAINTED');
+    expect(verbOf({ verbPhrase: { verb: 'KNOW' } })).toBe('KNOW');
+    expect(verbOf({ headRole: 'cause', subject: { concept: 'CAT' }, verbPhrase: { verb: 'KNOW' } })).toBe('KNOW');
   });
 });

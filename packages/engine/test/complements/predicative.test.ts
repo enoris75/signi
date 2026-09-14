@@ -325,7 +325,7 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
     expect(seemsIn({ tense: 'past' })).toMatchObject({
       en: 'the cat seemed to be a legend.',
       de: 'der Kater schien eine Legende zu sein.',
-      it: 'il gatto sembrò una leggenda.',
+      it: 'il gatto sembrava una leggenda.',
     });
     expect(seemsIn({ negative: true })).toMatchObject({
       en: 'the cat does not seem to be a legend.',

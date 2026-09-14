@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import {
   adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS,
-  GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
+  ER, GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
   SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
 import { renderClause } from './renderClause.js';
@@ -397,6 +397,58 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(DU), vp(SEIN, { mood: 'imperative', negative: true, elided: tiredElided })))).toBe('sei es nicht');
       expect(renderClause(clause(np(DU), vp(SEIN, { mood: 'imperative', register: 'instruction', negative: true, elided: inTheHouse }))))
         .toBe('nicht da sein');
+    });
+  });
+
+  // A127: an unstressed object pronoun leads the Mittelfeld, ahead of "gerade", "nicht" and the adverbs,
+  // where a noun object follows them.
+  describe('an object pronoun', () => {
+    const him = el(np(ER));
+
+    test('leads the adverb, nicht and gerade in V2 order', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER) }), { directObject: him }))).toBe('der Kater isst ihn immer');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER), negative: true }), { directObject: him })))
+        .toBe('der Kater isst ihn nicht immer');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'progressive', negative: true }), { directObject: him })))
+        .toBe('der Kater isst ihn gerade nicht');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modals: [modal(WOLLEN, NIE)], modifier: concept(SCHNELL) }), { directObject: him })))
+        .toBe('der Kater will ihn nie schnell essen');
+    });
+
+    test('leads a noun dative recipient', () => {
+      expect(renderClause(clause(np(MANN), vp(GEBEN, { modifier: concept(IMMER) }), { directObject: el(np(ER, { gender: 'neut' })), complements: toTheBoy })))
+        .toBe('der Mann gibt es immer dem Jungen');
+    });
+
+    test('opens the prospective\'s zu-infinitive group, behind "nicht im Begriff"', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'prospective', modifier: concept(SCHNELL), negative: true }), { directObject: him })))
+        .toBe('der Kater ist nicht im Begriff , ihn schnell zu essen');
+    });
+
+    test('leads the Mittelfeld in inverted and verb-final order', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER) }), { directObject: him }), true)).toBe('isst der Kater ihn immer');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER), mood: 'conditional' }), { directObject: him }), false, true))
+        .toBe('der Kater ihn immer essen würde');
+    });
+
+    test('leads the adverb in a command, an instruction and the infinitive', () => {
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative', modifier: concept(IMMER), negative: true }), { directObject: him })))
+        .toBe('iss ihn nicht immer');
+      expect(renderClause(clause(np(DU), vp(ESSEN, { mood: 'imperative', register: 'instruction', modifier: concept(SCHNELL) }), { directObject: him })))
+        .toBe('ihn schnell essen');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { mood: 'infinitive', modifier: concept(IMMER) }), { directObject: him }))).toBe('ihn immer essen');
+    });
+
+    test('the pro-form es of an elided predicate takes the same slot', () => {
+      const tiredElided = { type: 'predicative' as const, complement: complement(np(MUEDE)) };
+      expect(renderClause(clause(np(KATER), vp(SEIN, { modifier: concept(IMMER), negative: true, elided: tiredElided })))).toBe('der Kater ist es nicht immer');
+    });
+
+    test('regression: a noun object, or a coordination of pronouns, follows the adverb', () => {
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER) }), { directObject: mouse }))).toBe('der Kater isst immer die Maus');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'progressive' }), { directObject: mouse }))).toBe('der Kater isst gerade die Maus');
+      expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER) }), { directObject: el(np(ER), np(ICH)) })))
+        .toBe('der Kater isst immer ihn und mich');
     });
   });
 });

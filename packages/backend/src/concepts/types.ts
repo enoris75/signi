@@ -19,6 +19,8 @@ export interface ConceptSeed {
   animate?: boolean; // referent is animate (human/animal) — affects motion-goal adposition
   human?: boolean; // referent is a person — English relativises "who" on this, not animacy
   countable?: boolean; // false for mass/uncountable nouns (water, food) — changes quantifier words
+  stative?: boolean; // verb naming a state that holds (have, want, be), not an event — the Romance past is its imperfect ("voleva", A130), Japanese says it with 〜ている ("持っています", A132)
+  senseOf?: string; // a lexical sense the engine selects in place of the concept named here (KNOW_ACQUAINTED of KNOW, A131); left out of /api/concepts, so no picker offers it
   alarm?: boolean; // noun naming a danger one cries out a warning of (wolf, fire) — it/fr cry it with a / à: "gridare al lupo", "crier au feu" (A124)
   transient?: boolean; // adjective ascribing a transient state (tired, saved), not an inherent property (big) — es/pt predicate it with `estar`, not `ser` (A47); default inherent
   mannerRelation?: 'similative' | 'measure' | 'means' | 'mode'; // how the noun enters a manner adverbial (SPEED→measure); default similative

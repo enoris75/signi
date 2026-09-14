@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { VerbPhrase } from '@signi/shared';
-import { CORRERE, LOOKUP, MANGIARE, SEMPRE, VOLERE } from '../translator.fixtures.js';
+import { CORRERE, lexicon, LOOKUP, MANGIARE, SEMPRE, VOLERE } from '../translator.fixtures.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
 
 const PAST_PROGRESSIVE: VerbPhrase = { verb: 'EAT', tense: 'past', aspect: 'progressive', modals: ['WANT'] };
@@ -48,6 +48,36 @@ describe('resolveVerbPhrase', () => {
   test('an infinitive takes the finite slot the same way, but carries no register', () => {
     expect(resolveVerbPhrase(PAST_PROGRESSIVE, 'it', LOOKUP, 'infinitive', 'instruction')).toMatchObject({
       mood: 'infinitive', tense: 'present', aspect: 'neutral', modals: [], register: undefined,
+    });
+  });
+
+  // A131: KNOW is "sapere" with no object and "conoscere" with one.
+  describe('a verb with a sense for an object', () => {
+    const SAPERE = { base: 'sapere', object_sense: 'KNOW_ACQUAINTED' };
+    const CONOSCERE = { base: 'conoscere' };
+    const KNOWING = lexicon({ KNOW: SAPERE, KNOW_ACQUAINTED: CONOSCERE, EAT: MANGIARE });
+
+    test('resolves to that sense when it takes an object', () => {
+      expect(resolveVerbPhrase({ verb: 'KNOW' }, 'it', KNOWING, undefined, undefined, true).verb)
+        .toEqual({ conceptId: 'KNOW_ACQUAINTED', forms: CONOSCERE });
+      expect(resolveVerbPhrase({ verb: 'KNOW' }, 'it', KNOWING, 'imperative', undefined, true).verb.conceptId).toBe('KNOW_ACQUAINTED');
+    });
+
+    test('keeps the verb itself with no object', () => {
+      expect(resolveVerbPhrase({ verb: 'KNOW' }, 'it', KNOWING).verb).toEqual({ conceptId: 'KNOW', forms: SAPERE });
+    });
+
+    test('keeps the verb itself when the sense has no entry in the language, or the verb names no sense', () => {
+      const unseeded = lexicon({ KNOW: SAPERE });
+      expect(resolveVerbPhrase({ verb: 'KNOW' }, 'it', unseeded, undefined, undefined, true).verb).toEqual({ conceptId: 'KNOW', forms: SAPERE });
+      expect(resolveVerbPhrase({ verb: 'EAT' }, 'it', KNOWING, undefined, undefined, true).verb).toEqual({ conceptId: 'EAT', forms: MANGIARE });
+    });
+
+    test('the modals are not swapped, only the verb', () => {
+      const withModal = lexicon({ KNOW: SAPERE, KNOW_ACQUAINTED: CONOSCERE, WANT: { ...VOLERE, object_sense: 'KNOW_ACQUAINTED' } });
+      const { verb, modals } = resolveVerbPhrase({ verb: 'KNOW', modals: ['WANT'] }, 'it', withModal, undefined, undefined, true);
+      expect(verb.conceptId).toBe('KNOW_ACQUAINTED');
+      expect(modals[0]!.verb.conceptId).toBe('WANT');
     });
   });
 });

@@ -49,7 +49,8 @@ export const HABER_AUX: ConceptForms = { conceptId: 'HABER', forms: { '1sg_futur
 export const ESTAR_COPULA: ConceptForms = {
   conceptId: 'ESTAR',
   forms: {
-    base: 'estar', participle: 'estado', gerund: 'estando',
+    // A state, like the copula it stands in for: its past is the imperfect (A130).
+    base: 'estar', participle: 'estado', gerund: 'estando', stative: '1',
     '1sg_present': 'estoy', '2sg_present': 'estás', '3sg_present': 'está',
     '1pl_present': 'estamos', '2pl_present': 'estáis', '3pl_present': 'están',
     '1sg_past': 'estuve', '2sg_past': 'estuviste', '3sg_past': 'estuvo',

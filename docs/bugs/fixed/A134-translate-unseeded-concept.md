@@ -54,3 +54,17 @@ language without being unknown.
 | | |
 |---|---|
 | **Test** | `packages/backend/src/index.test.ts` → *known bugs: translating a plan that names an unseeded concept* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above. The translate handler
+([`index.ts`](../../../packages/backend/src/index.ts)) wraps the lookup: any id that is not a string or
+has no `semantic_concepts` row is recorded, and the request answers `400` with `Unknown concept: …` or
+`Unknown concepts: …`, naming each id once. The row test is the new
+[`isSeededConcept`](../../../packages/backend/src/lexicon.ts), which reuses the lexicon's role cache.
+
+- **Tests:** [`index.test.ts`](../../../packages/backend/src/index.test.ts) → *known bugs: translating a
+  plan that names an unseeded concept*. The pinning `test.fails` is now a passing `test`. New cases cover
+  an unseeded adverb and complement, the error naming several ids, and a seeded concept with no words,
+  which is still accepted. The existing guard that every plan the app renders is accepted still passes.
+- Unit tests: `isSeededConcept` in `lexicon.test.ts`.

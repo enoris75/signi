@@ -134,7 +134,7 @@ export const IR: Forms = {
 };
 /** BE — the copula "ser" (the located / transient "estar" is `ESTAR_COPULA` in pt.consts). */
 export const SER: Forms = {
-  base: 'ser', copula: '1', gerund: 'sendo', participle: 'sido',
+  base: 'ser', stative: '1', copula: '1', gerund: 'sendo', participle: 'sido',
   '1sg_present': 'sou', '2sg_present': 'é', '3sg_present': 'é',
   '1pl_present': 'somos', '2pl_present': 'são', '3pl_present': 'são',
   '1sg_past': 'fui', '2sg_past': 'foi', '3sg_past': 'foi',
@@ -182,7 +182,7 @@ export const ESCOLHER: Forms = {
 
 // Modals: conjugated like ordinary verbs, governing a bare infinitive.
 export const DEVER: Forms = {
-  base: 'dever',
+  base: 'dever', stative: '1',
   '1sg_present': 'devo', '2sg_present': 'deve', '3sg_present': 'deve',
   '1pl_present': 'devemos', '2pl_present': 'devem', '3pl_present': 'devem',
   '1sg_past': 'devi', '2sg_past': 'deveu', '3sg_past': 'deveu',
@@ -191,7 +191,7 @@ export const DEVER: Forms = {
   '1pl_future': 'deveremos', '2pl_future': 'deverão', '3pl_future': 'deverão',
 };
 export const PODER: Forms = {
-  base: 'poder',
+  base: 'poder', stative: '1',
   '1sg_present': 'posso', '2sg_present': 'pode', '3sg_present': 'pode',
   '1pl_present': 'podemos', '2pl_present': 'podem', '3pl_present': 'podem',
   '1sg_past': 'pude', '2sg_past': 'pôde', '3sg_past': 'pôde',
@@ -201,7 +201,7 @@ export const PODER: Forms = {
 };
 /** WILL — "querer" (want). */
 export const QUERER: Forms = {
-  base: 'querer',
+  base: 'querer', stative: '1',
   '1sg_present': 'quero', '2sg_present': 'quer', '3sg_present': 'quer',
   '1pl_present': 'queremos', '2pl_present': 'querem', '3pl_present': 'querem',
   '1sg_past': 'quis', '2sg_past': 'quis', '3sg_past': 'quis',

@@ -4,7 +4,6 @@ import { complementsPhrase } from './complementsPhrase/index.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
 import { dimensionGloss } from './dimensionGloss.js';
-import { elementPhrase } from './elementPhrase.js';
 import { finiteNegation } from './finiteNegation.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
@@ -14,6 +13,7 @@ import { modalVerbGroup } from './modalVerbGroup.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
+import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
@@ -57,13 +57,13 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       // The command negates as the declarative does: no "nicht" beside "nie" or a "kein" object, and
       // "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie eine Maus").
       const { nicht: neg, directObject: impObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
-      const impDirect = impObject ? elementPhrase(impObject, 'acc') : proObject;
+      const impDirect = splitObject(impObject, proObject);
       const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       const impComplements = [proPlace, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
-      const mittelfeld = [neg.beforeAdverb, impModifier, dativeText, impDirect, neg.beforePredicative, impComplements, neg.after];
+      const mittelfeld = [impDirect.pronoun, neg.beforeAdverb, impModifier, dativeText, impDirect.noun, neg.beforePredicative, impComplements, neg.after];
       const parts = register === 'instruction'
         ? [...mittelfeld, verb.forms['base'] ?? word, meansText]
         : [word, ...mittelfeld, meansText];
@@ -77,9 +77,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
       const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
-      const infDirect = infObject ? elementPhrase(infObject, 'acc') : proObject;
+      const infDirect = splitObject(infObject, proObject);
       const infComplements = [proPlace, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
-      return [neg.beforeAdverb, infModifier, dativeText, infDirect, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
+      return [infDirect.pronoun, neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -102,7 +102,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // NICHT im Begriff zu essen" (is NOT about to eat), never "ist im Begriff NICHT zu essen". The
     // progressive's "gerade" takes it after instead ("isst gerade nicht").
     const { nicht: neg, directObject: objectToRender } = finiteNegation(verbPhrase, directObject, hasPredicative);
-    const directObjectText = objectToRender ? elementPhrase(objectToRender, 'acc') : proObject;
+    // An object pronoun leads the Mittelfeld, ahead of "gerade", "nicht" and the adverbs; a noun object
+    // follows them (see `splitObject`).
+    const { pronoun: objectPronounText, noun: directObjectText } = splitObject(objectToRender, proObject);
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
     // main verb's adverb: "er will nie immer gehen" (never wants to always go).
@@ -116,9 +118,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // The prospective keeps its zu-infinitive group whole ("ist im Begriff, die Maus zu essen").
     const predicate = complex.zuInfinitive
       ? prospectiveFrame(complex, {
-        nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText,
+        nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText, pronoun: objectPronounText,
         adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
       }, verbFinal)
-      : [aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail])];
+      : [objectPronounText, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail])];
     return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

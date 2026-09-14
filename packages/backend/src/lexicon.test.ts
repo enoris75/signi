@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, test } from 'vitest';
 import { getDb } from './db.js';
-import { clearLexiconCache, lookupLexicalEntry } from './lexicon.js';
+import { clearLexiconCache, isSeededConcept, lookupLexicalEntry } from './lexicon.js';
 // Seeds the real corpus into this file's in-memory database (SIGNI_DB_PATH, see vitest.config.ts).
 import './seed.js';
 
@@ -46,8 +46,8 @@ describe('lookupLexicalEntry', () => {
   });
 
   test('leaves out a noun\'s absent gender, plural and hypernym', () => {
-    const { forms } = lookupLexicalEntry('WATER', 'en')!;
-    expect(forms).toEqual({ base: 'water', count: 'singular', uncountable: '1', role: 'noun' });
+    const { forms } = lookupLexicalEntry('FOOD', 'en')!;
+    expect(forms).toEqual({ base: 'food', count: 'singular', uncountable: '1', role: 'noun' });
   });
 
   test.each([
@@ -58,6 +58,19 @@ describe('lookupLexicalEntry', () => {
     ['WOLF', 'it', { alarm: '1', animate: '1' }],
   ])('carries %s\'s concept-level noun flags in %s', (id, language, flags) => {
     expect(lookupLexicalEntry(id, language)!.forms).toMatchObject(flags);
+  });
+
+  // A130 / A132: a state verb carries its concept's flag; an event verb does not.
+  test('marks a verb stative only when its concept is', () => {
+    expect(lookupLexicalEntry('HAVE', 'it')!.forms).toMatchObject({ base: 'avere', stative: '1' });
+    expect(lookupLexicalEntry('MUST', 'ja')!.forms).toMatchObject({ stative: '1' });
+    expect(lookupLexicalEntry('EAT', 'it')!.forms).not.toHaveProperty('stative');
+  });
+
+  test('reads a lexical sense like any verb, and the verb that names it as its object sense', () => {
+    expect(lookupLexicalEntry('KNOW', 'de')!.forms).toMatchObject({ base: 'wissen', object_sense: 'KNOW_ACQUAINTED' });
+    expect(lookupLexicalEntry('KNOW_ACQUAINTED', 'de')!.forms).toMatchObject({ base: 'kennen', participle: 'gekannt', stative: '1', role: 'verb' });
+    expect(lookupLexicalEntry('KNOW', 'en')!.forms).not.toHaveProperty('object_sense');
   });
 
   test('keeps flags a noun does not have out of its forms', () => {
@@ -121,6 +134,23 @@ describe('lookupLexicalEntry', () => {
     } finally {
       db.prepare("DELETE FROM semantic_concepts WHERE id = 'DEVOUR'").run();
       db.prepare('DELETE FROM verb_lexemes WHERE id = ?').run(lexemeId);
+    }
+  });
+});
+
+describe('isSeededConcept', () => {
+  test('is true for a seeded concept of any role, and false for an unknown one', () => {
+    for (const id of ['CUT', 'CAT', 'THIRD_PERSON', 'TIRED', 'FAST', 'MUST']) expect(isSeededConcept(id)).toBe(true);
+    expect(isSeededConcept('UNICORN')).toBe(false);
+  });
+
+  test('is true for a concept with no words yet', () => {
+    db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('ZEBRA', 'noun', 'a striped horse')").run();
+    try {
+      expect(isSeededConcept('ZEBRA')).toBe(true);
+      expect(lookupLexicalEntry('ZEBRA', 'en')).toBeUndefined();
+    } finally {
+      db.prepare("DELETE FROM semantic_concepts WHERE id = 'ZEBRA'").run();
     }
   });
 });

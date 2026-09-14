@@ -54,6 +54,9 @@ describe('seeding the corpus', () => {
     expect(row('SIZE')).toMatchObject({ manner_relation: null, dimension_relation: 'extent' });
     expect(row('TIRED')).toMatchObject({ transient: 1 });
     expect(row('WOLF')).toMatchObject({ alarm: 1 });
+    expect(row('HAVE')).toMatchObject({ stative: 1, sense_of: null });
+    expect(row('EAT')).toMatchObject({ stative: 0, sense_of: null });
+    expect(row('KNOW_ACQUAINTED')).toMatchObject({ stative: 1, sense_of: 'KNOW' });
     expect(row('GENERIC_PERSON')).toMatchObject({ synonym: 'one' });
   });
 

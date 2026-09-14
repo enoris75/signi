@@ -1,6 +1,9 @@
 import { describe, expect, test } from 'vitest';
-import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, GARCON, IL, JE, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
+import { ALLER, ANGE, CHAT, CHIEN, el, FEMME, FEU, type Forms, GARCON, IL, JE, LIVRE, MAISON, MANGER, np, ON, SOURIS, vp } from './fr.fixtures.js';
 import { relativeText } from './relativeText.js';
+
+const CRIER: Forms = { base: 'crier', alarm_cry: '1', participle: 'crié', '3sg_present': 'crie', '3sg_past': 'cria' };
+const LOUP: Forms = { base: 'loup', plural: 'loups', gender: 'masc', count: 'singular', animate: '1', alarm: '1' };
 
 describe('relativeText', () => {
   test('renders nothing without a relative clause', () => {
@@ -61,5 +64,18 @@ describe('relativeText', () => {
     expect(relativeText(np(CHIEN, {}, {
       relative: { headRole: 'cause', subject: el(np(CHAT)), verbPhrase: vp(MANGER), headSpecifiers: [{ kind: 'sentiment', value: 'negative' }] },
     }))).toBe('par la faute duquel le chat mange');
+  });
+
+  // A129: the alarm a cry raises is the cry's à-complement, so its relative takes "auquel", not "que", and
+  // an avoir participle does not agree with it.
+  test('a head that is the alarm a cry raises takes an auquel, with no participle agreement', () => {
+    const cried = (extra: Parameters<typeof vp>[1] = { tense: 'past' }) =>
+      ({ headRole: 'directObject' as const, subject: el(np(GARCON)), verbPhrase: vp(CRIER, extra) });
+    expect(relativeText(np(LOUP, {}, { relative: cried() }))).toBe('auquel le garçon cria');
+    expect(relativeText(np(LOUP, { number: 'plural' }, { relative: cried() }))).toBe('auxquels le garçon cria');
+    expect(relativeText(np({ ...FEU, alarm: '1' }, {}, { relative: cried({ aspect: 'resultative' }) }))).toBe('auquel le garçon a crié');
+    expect(relativeText(np(LOUP, { number: 'plural' }, { relative: { ...cried({}), subject: el(np(ON)) } }))).toBe('auxquels on crie');
+    // A plain object of the same verb keeps que, and the agreement.
+    expect(relativeText(np(FEU, { number: 'plural' }, { relative: cried({ aspect: 'resultative' }) }))).toBe('que le garçon a criés');
   });
 });

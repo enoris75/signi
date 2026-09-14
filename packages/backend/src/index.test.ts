@@ -31,6 +31,8 @@ vi.mock('@signi/engine', async (importOriginal) => {
 vi.stubEnv('PORT', '0');
 const createServer = vi.spyOn(http, 'createServer');
 vi.spyOn(console, 'log').mockImplementation(() => {});
+// The error middleware logs a server error; keep that out of the test output.
+const consoleError = vi.spyOn(console, 'error').mockImplementation(() => {});
 await import('./seed.js');
 await import('./index.js');
 
@@ -61,16 +63,27 @@ describe('GET /api/concepts', () => {
   };
   const find = async (id: string): Promise<Concept> => (await list()).find((c) => c.id === id)!;
 
-  test('lists every concept, ordered by role and then id', async () => {
+  // A lexical sense is the engine's to select (KNOW_ACQUAINTED for KNOW with an object, A131), so no
+  // picker offers it.
+  const offered = concepts.filter((c) => !c.senseOf);
+
+  test('lists every concept but the lexical senses, ordered by role and then id', async () => {
     const ids = (await list()).map((c) => `${c.role}:${c.id}`);
-    expect(ids).toHaveLength(concepts.length);
-    expect(ids).toEqual(concepts.map((c) => `${c.role}:${c.id}`).sort());
+    expect(offered.length).toBeLessThan(concepts.length);
+    expect(ids).toHaveLength(offered.length);
+    expect(ids).toEqual(offered.map((c) => `${c.role}:${c.id}`).sort());
+  });
+
+  test('leaves a lexical sense out, whatever the role asked for', async () => {
+    expect((await list()).map((c) => c.id)).not.toContain('KNOW_ACQUAINTED');
+    expect((await list('?role=verb')).map((c) => c.id)).not.toContain('KNOW_ACQUAINTED');
+    expect((await list('?role=verb')).map((c) => c.id)).toContain('KNOW');
   });
 
   test('narrows to one role, ordered by id', async () => {
     const nouns = await list('?role=noun');
     expect(nouns.map((c) => c.id)).toEqual(
-      concepts.filter((c) => c.role === 'noun').map((c) => c.id).sort(),
+      offered.filter((c) => c.role === 'noun').map((c) => c.id).sort(),
     );
   });
 
@@ -119,9 +132,9 @@ describe('GET /api/concepts', () => {
     expect(await find('SPEED')).toMatchObject({ mannerRelation: 'measure' });
     expect(await find('SIZE')).toMatchObject({ dimensionRelation: 'extent' });
 
-    const cut = await find('CUT');
+    const divide = await find('DIVIDE');
     for (const key of ['countable', 'modal', 'synonym', 'mannerRelation', 'dimensionRelation', 'person', 'number', 'gendered', 'isA']) {
-      expect(cut).not.toHaveProperty(key);
+      expect(divide).not.toHaveProperty(key);
     }
   });
 
@@ -425,7 +438,7 @@ describe('known bugs: translating a plan that names an unseeded concept', () => 
     if (naming) expect(error).toContain(naming);
   };
 
-  test.fails('rejects the plan, naming the concept, wherever the concept stands', async () => {
+  test('rejects the plan, naming the concept, wherever the concept stands', async () => {
     await expectRejected({ subject: { concept: 'UNICORN' }, verbPhrase: { verb: 'EAT' } }, 'UNICORN');
     await expectRejected({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'UNICORN' } }, 'UNICORN');
     await expectRejected(
@@ -438,6 +451,32 @@ describe('known bugs: translating a plan that names an unseeded concept', () => 
       'UNICORN',
     );
     await expectRejected({ subject: { concept: 42 } });
+  });
+
+  test('rejects an unseeded adverb or complement too, naming every unknown concept once', async () => {
+    await expectRejected({ subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT', modifier: 'UNICORN' } }, 'UNICORN');
+    await expectRejected(
+      { subject: { concept: 'CAT' }, verbPhrase: { verb: 'EAT' }, complements: { locative: { phrase: { concept: 'UNICORN' } } } },
+      'UNICORN',
+    );
+
+    const res = await post('/api/translate', {
+      plan: { subject: { concept: 'UNICORN' }, verbPhrase: { verb: 'GRIFFIN' }, directObject: { concept: 'UNICORN' } },
+    });
+    expect(res.status).toBe(400);
+    expect(await res.json()).toEqual({ error: 'Unknown concepts: UNICORN, GRIFFIN' });
+  });
+
+  test('accepts a seeded concept that has no word in some language', async () => {
+    db.prepare("INSERT INTO semantic_concepts (id, role, description) VALUES ('ZEBRA', 'noun', 'a striped horse')").run();
+    try {
+      const plan: PhrasePlan = { subject: { concept: 'ZEBRA' }, verbPhrase: { verb: 'EAT' } };
+      const res = await post('/api/translate', { plan });
+      expect(res.status).toBe(200);
+      expect(await res.json()).toEqual({ translations: translate(plan, lookupLexicalEntry) });
+    } finally {
+      db.prepare("DELETE FROM semantic_concepts WHERE id = 'ZEBRA'").run();
+    }
   });
 
   test('regression: every plan the app renders itself is accepted', async () => {
@@ -463,7 +502,7 @@ describe('known bugs: a request field of the wrong JSON type', () => {
     expect(typeof ((await res.json()) as { error?: unknown }).error).toBe('string');
   };
 
-  test.fails('is a 400 with the route\'s JSON error, not a crash', async () => {
+  test('is a 400 with the route\'s JSON error, not a crash', async () => {
     for (const name of [42, true, {}, ['cat eats']]) {
       await expectRejected('/api/phrases', { name, kind: 'phrase', workspace: WORKSPACE });
     }
@@ -471,6 +510,16 @@ describe('known bugs: a request field of the wrong JSON type', () => {
       await expectRejected('/api/translate', { plan: { subject } });
     }
     expect(db.prepare('SELECT COUNT(*) AS n FROM saved_phrases').get()).toEqual({ n: 0 });
+  });
+
+  test('answers with the same error a missing field gets', async () => {
+    const phrases = await post('/api/phrases', { name: 42, kind: 'phrase', workspace: WORKSPACE });
+    expect(await phrases.json()).toEqual({ error: 'name and workspace.containers are required' });
+    for (const subject of [true, []]) {
+      const res = await post('/api/translate', { plan: { subject } });
+      expect(res.status).toBe(400);
+      expect(await res.json()).toEqual({ error: 'plan.subject.concept is required' });
+    }
   });
 });
 
@@ -488,7 +537,7 @@ describe('known bugs: API errors sent as an HTML page', () => {
     expect(text).not.toMatch(/:\d+:\d+\)/);
   };
 
-  test.fails('answers an unexpected error, malformed JSON and an unrouted method with a JSON error', async () => {
+  test('answers an unexpected error, malformed JSON and an unrouted method with a JSON error', async () => {
     vi.mocked(translate).mockImplementationOnce(() => {
       throw new Error('boom');
     });
@@ -505,5 +554,32 @@ describe('known bugs: API errors sent as an HTML page', () => {
 
     await expectJsonError(await fetch(`${BASE}/api/phrases/some-id`, { method: 'PUT' }), [404, 405]);
     await expectJsonError(await fetch(`${BASE}/api/concepts`, { method: 'POST' }), [404, 405]);
+  });
+
+  test('keeps an unexpected error\'s message on the server, and a client error\'s in the response', async () => {
+    consoleError.mockClear();
+    vi.mocked(translate).mockImplementationOnce(() => {
+      throw new Error('secret detail');
+    });
+    const failed = await post('/api/translate', { plan: { subject: { concept: 'CAT' } } });
+    expect(failed.status).toBe(500);
+    expect(await failed.json()).toEqual({ error: 'Internal server error' });
+    expect(consoleError).toHaveBeenCalledWith(expect.objectContaining({ message: 'secret detail' }));
+
+    consoleError.mockClear();
+    const malformed = await fetch(`${BASE}/api/translate`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: '{"name": ',
+    });
+    expect(malformed.status).toBe(400);
+    expect(((await malformed.json()) as { error: string }).error).toMatch(/JSON/);
+    expect(consoleError).not.toHaveBeenCalled();
+  });
+
+  test.each(['PUT', 'POST', 'PATCH', 'DELETE'])('answers %s on an unknown API path like a GET', async (method) => {
+    const res = await fetch(`${BASE}/api/nope`, { method });
+    expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: 'Not found' });
   });
 });

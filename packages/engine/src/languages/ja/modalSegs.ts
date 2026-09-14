@@ -33,8 +33,11 @@ export function modalSegs(
   form?: JaForm,
   // The outermost modal's ending: polite, plain (a prenominal relative clause) or たら (an "if" clause).
   ending: JaEnding = 'polite',
+  // The innermost element in the form a modal governs: the verb by default, or the copula's predicate,
+  // which has no verb of its own (幸せである必要がある, 伝説でありたい; see `copulaSegs`).
+  governedSegs: (form: JaForm) => RubySegment[] = (f) => [verbFormSeg(verb, f)],
 ): RubySegment[] {
-  if (index === modals.length) return [verbFormSeg(verb, form ?? 'dict')];
+  if (index === modals.length) return governedSegs(form ?? 'dict');
   const m = modals[index];
   const governed = (m.forms['governs'] as JaForm | undefined) ?? 'dict';
   const isIadj = m.forms['kind'] === 'iadj';
@@ -50,7 +53,7 @@ export function modalSegs(
   // that modal asks for (なりたい, なりたく), so the desire survives the outer bridge:
   // 食べることができるようになりたいと思う必要があります.
   if (isIadj && innerModal && !innerIsIadj) {
-    const inner = modalSegs(modals, verb, tense, negative, index + 1, 'dict', ending);
+    const inner = modalSegs(modals, verb, tense, negative, index + 1, 'dict', ending, governedSegs);
     return form === undefined
       ? [...inner, { t: 'ように' }, { t: 'なり' }, ...modalEndingSegs(m, tense, negative, ending)]
       : [...inner, { t: 'ように' }, { t: 'なり' }, modalSuffixSeg(m, form)];
@@ -58,13 +61,13 @@ export function modalSegs(
   // Case B — a nominalising verb-kind modal *over* 〜たい (… can want to eat): the desire is made
   // a clause with と思う ("think that …") before the modal nominalises it: 食べたいと思うことができます.
   if (!isIadj && innerIsIadj) {
-    const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending);
+    const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending, governedSegs);
     const bridge: RubySegment[] = [{ t: 'と' }, wordSeg('思う', 'おもう')];
     return form === undefined
       ? [...inner, ...bridge, ...modalEndingSegs(m, tense, negative, ending)]
       : [...inner, ...bridge, modalSuffixSeg(m, form)];
   }
-  const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending);
+  const inner = modalSegs(modals, verb, tense, negative, index + 1, governed, ending, governedSegs);
   // No `form` means this is the outermost modal: it takes the finite, inflected ending.
   return form === undefined
     ? [...inner, ...modalEndingSegs(m, tense, negative, ending)]

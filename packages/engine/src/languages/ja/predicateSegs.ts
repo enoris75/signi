@@ -112,9 +112,20 @@ export function predicateSegs(
     // (猫は家で犬のために伝説です) rather than lost behind です.
     const { predicative: _, ...adjuncts } = complements ?? {};
     segs.push(...complementSegs(adjuncts));
+    for (const m of modals) {
+      const b = m.modifier?.forms['base'] ?? '';
+      if (b) segs.push(wordSeg(b, m.modifier!.forms['reading']));
+    }
     if (modifier) {
       const base = modifier.forms['base'] ?? '';
       if (base) segs.push(wordSeg(base, modifier.forms['reading']));
+    }
+    // A modal suffixes the predicate in the form it governs, and takes the tense, polarity and ending
+    // itself, as over a verb (A128): 幸せである必要があります, 伝説でありたいです, 伝説である必要がある猫.
+    if (modals.length > 0) {
+      const ending = mood === 'subjunctive' ? 'tara' : plain ? 'plain' : 'polite';
+      segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, ending, (form) => copulaSegs(predicative, 'present', false, form)));
+      return segs;
     }
     // A copula has no verb to carry aspect; the only meaningful one is the resultative
     // ("has been X"), a past state — rendered as the past copula (美しくなかった). Progressive /
@@ -142,9 +153,17 @@ export function predicateSegs(
   // main-clause path — Japanese has no dedicated conditional inflection, and keeping the normal path
   // preserves tense and, crucially, negation (走りません). The たら protasis carries the hypothetical.
   const tara = mood === 'subjunctive';
+  // A132: a state verb (持つ, 所有する, 愛する, 知る) says in a finite clause that the state holds with the
+  // resultant 〜ている, as the progressive is built: 持っています, 持っていました, 持っていたら. Its plain
+  // 〜ます names the change of state ("picks up"). Two lexemes keep the plain form: a Japanese state verb
+  // (`state_verb`: 思える, like ある), and a state whose negative is the event's (`event_negative`: 知りません).
+  // A relative clause and the dictionary form a modal governs keep the plain verb (本を持つ猫).
+  const heldState = aspect === 'neutral' && !plain && verb.forms['stative'] === '1' && verb.forms['state_verb'] !== '1'
+    && !(negated && verb.forms['event_negative'] === '1');
   // A modal suffixes the verb and takes the tense/polarity itself; aspect has no
   // periphrasis to compose with here, so it is dropped (see the Modality note on `modalSegs`).
   if (modals.length > 0) segs.push(...modalSegs(modals.map((m) => m.verb), verb, tense, negated, 0, undefined, tara ? 'tara' : plain ? 'plain' : 'polite'));
+  else if (heldState) segs.push(...aspectVerbSegs({ ...verbPhrase, aspect: 'progressive' }, negated, tara));
   else if (tara && aspect === 'neutral') segs.push(taraSeg(verb, negated));
   // A prenominal relative clause takes the plain form on its finite verb (食べる猫 / 食べた猫).
   // Negation still routes through the polite verbSeg — the plain negative (ない/なかった) needs a

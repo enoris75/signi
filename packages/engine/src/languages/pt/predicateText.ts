@@ -6,7 +6,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
-import { imperativeForm, moodForm, moodPN } from '../../mood.js';
+import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -37,7 +37,8 @@ export function predicateText(
   // or imperfect-subjunctive (protasis, "comesse") form; marked aspects keep their indicative
   // auxiliary (aspect under a conditional is a documented gap).
   const pn = moodPN(subjectForms);
-  const finite = (m: ConceptForms) => moodForm('pt', m, pn, mood) ?? conjugate(m.forms, subjectForms, tense);
+  // A state verb's past is the imperfect ("queria", "tinha", "estava"), not the perfective (A130).
+  const finite = (m: ConceptForms) => moodForm('pt', m, pn, mood) ?? statePastForm('pt', m, pn, tense, mood) ?? conjugate(m.forms, subjectForms, tense);
   // A47: Portuguese splits the copula. `estar` covers two BE frames; `ser` everything else.
   //  · Location — "o gato está na casa", never "*é na casa". A place is `estar` unconditionally,
   //    whatever the spatial relation, so a locative alone selects it; the past inherits the choice

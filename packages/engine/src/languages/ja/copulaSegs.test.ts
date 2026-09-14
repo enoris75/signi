@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
-import { adj, complement, DENSETSU, el, type Forms, INU, NEKO, np, OMOSHIROI, OOKII, SHIAWASE, SHINCHOU } from './ja.fixtures.js';
+import { adj, CHAIRO, complement, DENSETSU, el, type Forms, INU, NEKO, np, OMOSHIROI, OOKII, SHIAWASE, SHINCHOU, TSUKARETA } from './ja.fixtures.js';
 import { copulaSegs } from './copulaSegs.js';
 
 const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
@@ -36,8 +36,6 @@ describe('copulaSegs', () => {
 
   // A115: the の- and た-adjectives lose their attributive ending in a predicate.
   describe('の- and た-adjectives', () => {
-    const CHAIRO: Forms = { role: 'adjective', base: '茶色の', reading: 'ちゃいろの' };
-    const TSUKARETA: Forms = { role: 'adjective', base: '疲れた', reading: 'つかれた' };
 
     test('a の-adjective drops its の and takes the copula, with its degree adverb', () => {
       expect(copulaSegs(pred(CHAIRO), 'present', false)).toEqual([{ t: '茶色', r: 'ちゃいろ' }, { t: 'です' }]);
@@ -69,6 +67,34 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(pred(SHIAWASE), 'past', false, 'tara'))).toBe('幸せだったら');
       expect(text(copulaSegs(pred(DENSETSU), 'present', true, 'tara'))).toBe('伝説ではなかったら');
       expect(text(copulaSegs(pred({ role: 'adjective', base: '疲れた', reading: 'つかれた' }), 'present', false, 'tara'))).toBe('疲れていたら');
+    });
+  });
+
+  // A128: under a modal the copula takes the form the modal governs, with no tense or polarity of its own.
+  describe('governed forms', () => {
+    test('the dictionary form: a na-adjective keeps である, an i-adjective and a state their own', () => {
+      expect(copulaSegs(pred(SHIAWASE), 'present', false, 'dict')).toEqual([{ t: '幸せ', r: 'しあわせ' }, { t: 'である' }]);
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'dict'))).toBe('大きい');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'dict'))).toBe('疲れている');
+      expect(text(copulaSegs(pred(CHAIRO), 'present', false, 'dict'))).toBe('茶色である');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'dict'))).toBe('伝説である');
+    });
+
+    test('the stem 〜たい attaches to', () => {
+      expect(text(copulaSegs(pred(SHIAWASE), 'present', false, 'stem'))).toBe('幸せであり');
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'stem'))).toBe('大きくあり');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'stem'))).toBe('疲れてい');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'stem'))).toBe('伝説であり');
+    });
+
+    test('ignore tense and polarity, which the modal carries', () => {
+      expect(text(copulaSegs(pred(DENSETSU), 'past', true, 'dict'))).toBe('伝説である');
+      expect(text(copulaSegs(pred(OOKII), 'past', true, 'stem'))).toBe('大きくあり');
+    });
+
+    test('keep the degree adverb and a no predicate\'s でも', () => {
+      expect(text(copulaSegs(pred(OOKII, { degree: 'more' }), 'present', false, 'dict'))).toBe('もっと大きい');
+      expect(text(copulaSegs(complement(np(DENSETSU, { definiteness: 'no' })), 'present', false, 'dict'))).toBe('どの伝説でもある');
     });
   });
 

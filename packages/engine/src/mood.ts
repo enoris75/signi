@@ -1,4 +1,4 @@
-import type { LanguageCode } from '@signi/shared';
+import type { LanguageCode, Tense } from '@signi/shared';
 import type { ConceptForms, Mood } from './types.js';
 
 /**
@@ -97,6 +97,91 @@ export function moodForm(lang: LanguageCode, verb: ConceptForms, pn: PN, mood: M
   if (mood === 'conditional') return conditionalForm(lang, verb, pn);
   if (mood === 'subjunctive') return subjunctiveForm(lang, verb, pn);
   return undefined;
+}
+
+/* ---------------------------------------------------------------------------------------------
+ * Imperfect indicative (A130).
+ *
+ * The Romance simple past (passato remoto, passé simple, pretérito) is perfective: right for an
+ * event, but it turns a state into one — "volle" / "quiso" read "insisted on", "ebbe" / "tuvo"
+ * "got", "fu nella casa" is ill-formed. A state in the past takes the imperfect instead (voleva,
+ * tenía, era), which is the neutral reading of English "wanted" / "had". The concept says which
+ * verbs name a state (`stative`), and the imperfect is derived here, as the conditional and the
+ * subjunctive above are:
+ *
+ *  - it: the infinitive minus -re + -vo/-vi/-va… (volere → voleva); essere is suppletive (era), and
+ *        a contracted infinitive keeps its Latin stem (produrre → produceva, fare → faceva).
+ *  - fr: the imparfait the protasis already uses (nous-present minus -ons; être → ét-).
+ *  - es: -ar → -aba, -er/-ir → -ía; ser (era), ir (iba) and ver (veía) are irregular.
+ *  - pt: -ar → -ava, -er/-ir → -ia (-ía after a vowel: possuía); ser (era), and ter, vir and pôr with
+ *        their compounds (tinha, continha, vinha, punha).
+ */
+
+const IT_IMPERF: Record<PN, string> = { '1sg': 'vo', '2sg': 'vi', '3sg': 'va', '1pl': 'vamo', '2pl': 'vate', '3pl': 'vano' };
+const IT_ESSERE_IMPERF: Record<PN, string> = { '1sg': 'ero', '2sg': 'eri', '3sg': 'era', '1pl': 'eravamo', '2pl': 'eravate', '3pl': 'erano' };
+// Contracted infinitives, by ending, and the stem their imperfect keeps.
+const IT_IMPERF_CONTRACTED: [RegExp, string][] = [[/urre$/, 'uce'], [/orre$/, 'one'], [/arre$/, 'ae'], [/dire$/, 'dice'], [/fare$/, 'face'], [/bere$/, 'beve']];
+const ES_IMPERF_AR: Record<PN, string> = { '1sg': 'aba', '2sg': 'abas', '3sg': 'aba', '1pl': 'ábamos', '2pl': 'abais', '3pl': 'aban' };
+const ES_IMPERF_ER: Record<PN, string> = { '1sg': 'ía', '2sg': 'ías', '3sg': 'ía', '1pl': 'íamos', '2pl': 'íais', '3pl': 'ían' };
+const ES_IMPERF_IRREGULAR: Record<string, Record<PN, string>> = {
+  ser: { '1sg': 'era', '2sg': 'eras', '3sg': 'era', '1pl': 'éramos', '2pl': 'erais', '3pl': 'eran' },
+  ir: { '1sg': 'iba', '2sg': 'ibas', '3sg': 'iba', '1pl': 'íbamos', '2pl': 'ibais', '3pl': 'iban' },
+};
+// Portuguese 2nd person is você / vocês, agreeing as the 3rd (A108).
+const PT_IMPERF_AR: Record<PN, string> = { '1sg': 'ava', '2sg': 'ava', '3sg': 'ava', '1pl': 'ávamos', '2pl': 'avam', '3pl': 'avam' };
+const PT_IMPERF_ER: Record<PN, string> = { '1sg': 'ia', '2sg': 'ia', '3sg': 'ia', '1pl': 'íamos', '2pl': 'iam', '3pl': 'iam' };
+// After a stem vowel the i is stressed and written í: possuía, saía.
+const PT_IMPERF_ER_AFTER_VOWEL: Record<PN, string> = { '1sg': 'ía', '2sg': 'ía', '3sg': 'ía', '1pl': 'íamos', '2pl': 'íam', '3pl': 'íam' };
+const PT_SER_IMPERF: Record<PN, string> = { '1sg': 'era', '2sg': 'era', '3sg': 'era', '1pl': 'éramos', '2pl': 'eram', '3pl': 'eram' };
+const PT_NH_IMPERF: Record<PN, string> = { '1sg': 'a', '2sg': 'a', '3sg': 'a', '1pl': 'amos', '2pl': 'am', '3pl': 'am' };
+
+function imperfectForm(lang: LanguageCode, verb: ConceptForms, pn: PN): string | undefined {
+  const base = verb.forms['base'];
+  if (!base) return undefined;
+  switch (lang) {
+    case 'it': {
+      if (base === 'essere') return IT_ESSERE_IMPERF[pn];
+      const contracted = IT_IMPERF_CONTRACTED.find(([ending]) => ending.test(base));
+      const stem = contracted ? base.replace(contracted[0], contracted[1]) : base.replace(/re$/, '');
+      return stem + IT_IMPERF[pn];
+    }
+    case 'fr':
+      return subjunctiveForm('fr', verb, pn);
+    case 'es': {
+      const irregular = ES_IMPERF_IRREGULAR[base];
+      if (irregular) return irregular[pn];
+      const stem = base === 'ver' ? 've' : base.slice(0, -2);
+      return stem + (base.endsWith('ar') ? ES_IMPERF_AR : ES_IMPERF_ER)[pn];
+    }
+    case 'pt': {
+      if (base === 'ser') return PT_SER_IMPERF[pn];
+      // ter / vir and their compounds (conter, convir — told from bater or servir by their 3sg "tem" /
+      // "vem"), and pôr with its compounds: tinha, vinha, punha, with the stress mark in the 1st plural.
+      const third = verb.forms['3sg_present'] ?? '';
+      const nh = /ter$/.test(base) && /t[eé]m$/.test(third) ? ['ter', 'tinh', 'tính']
+        : /vir$/.test(base) && /v[eé]m$/.test(third) ? ['vir', 'vinh', 'vính']
+        : /p[oô]r$/.test(base) ? [base.slice(-3), 'punh', 'púnh']
+        : undefined;
+      if (nh) return base.slice(0, -3) + (pn === '1pl' ? nh[2] : nh[1]) + PT_NH_IMPERF[pn];
+      const stem = base.slice(0, -2);
+      if (base.endsWith('ar')) return stem + PT_IMPERF_AR[pn];
+      return stem + (/[aeiou]$/.test(stem) ? PT_IMPERF_ER_AFTER_VOWEL : PT_IMPERF_ER)[pn];
+    }
+    default:
+      return undefined;
+  }
+}
+
+/**
+ * The finite past of a state verb (`stative` on its forms) in the indicative: the Romance imperfect
+ * (voleva, voulait, quería, queria), or undefined for any other verb, tense or mood, where the caller
+ * keeps its ordinary conjugation. The caller applies it to the finite verb only — the outermost modal,
+ * or a main verb with neutral aspect — so a governed infinitive, the resultative (ha voluto) and the
+ * hypothetical moods are untouched.
+ */
+export function statePastForm(lang: LanguageCode, verb: ConceptForms, pn: PN, tense: Tense | undefined, mood: Mood | undefined): string | undefined {
+  if (verb.forms['stative'] !== '1' || tense !== 'past' || (mood !== undefined && mood !== 'indicative')) return undefined;
+  return imperfectForm(lang, verb, pn);
 }
 
 /** Person-number key ("1sg".."3pl") from a resolved subject/head's forms. */

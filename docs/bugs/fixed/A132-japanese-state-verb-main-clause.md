@@ -59,3 +59,30 @@ forms need updating, notably *possession verbs: OWN and HOLD* in `verb.test.ts` 
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: Japanese state verb in the main clause* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above, on A130's `stative` flag.
+[`predicateSegs`](../../../packages/engine/src/languages/ja/predicateSegs.ts) renders a stative verb in a
+finite clause with neutral aspect through `aspectVerbSegs` as the progressive: 持っています, 持っていました,
+持っていたら. A relative clause, a modal, a command and the other aspects are untouched.
+
+Two lexeme keys refine it:
+
+- `event_negative` on 知る, whose negative is the plain 知りません / 知らなかったら.
+- `state_verb` on SEEM's 思える, a Japanese state verb like ある that takes no 〜ている. The bug file did
+  not foresee this one, since SEEM carries A130's flag.
+
+KNOW's `masu_present` workaround is gone: it stores 知ります
+([`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)), which also mends its
+instruction label (`本を知り`, was `本を知ってい`).
+
+- **Tests:** [`verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known bugs: Japanese state
+  verb in the main clause*. The pinning `test.fails` is now a passing `test`. A new case covers every
+  tense and polarity, the conditional apodosis, the negative protasis and KNOW with no object. A new
+  regression guard covers the relative, the command, the resultative, SEEM and the instruction label.
+  As predicted, the event forms were flipped in `verb.test.ts` (*possession verbs*),
+  `genus-verbs.test.ts` and `hypothetical.test.ts` (愛していなかったら). LOVE's ja cells were re-baselined in
+  the conjugation snapshot.
+- Unit tests: the `SHIRU`, `OMOERU` and new `MOTSU` fixtures carry the flags, with a new *a state verb*
+  block in `predicateSegs.test.ts` (ja) and an updated `verbSeg.test.ts`.

@@ -20,7 +20,8 @@ export function resolveRelativeClause(
     headRole: clause.headRole ?? 'subject',
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     subject: clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined,
-    verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup),
+    // The head gapped as the direct object is the verb's object too ("il ragazzo che il gatto conosce").
+    verbPhrase: resolveVerbPhrase(clause.verbPhrase, language, lookup, undefined, undefined, !!clause.directObject || clause.headRole === 'directObject'),
     directObject: clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined,
     complements: resolveComplements(clause.complements, language, lookup),
   };

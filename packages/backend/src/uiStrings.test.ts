@@ -81,6 +81,22 @@ describe('buildUiStrings', () => {
     });
   });
 
+  // A language name is a proper noun, which the Romance languages article in a sentence
+  // ("l'italiano è una lingua", A133). The selector's label is the word alone.
+  test('names a language without the article a sentence would give it', () => {
+    const strings = buildUiStrings();
+    expect(strings['language.it']).toEqual({
+      en: 'Italian',
+      it: 'Italiano',
+      fr: 'Italien',
+      de: 'Italienisch',
+      es: 'Italiano',
+      ja: 'イタリア語',
+      pt: 'Italiano',
+    });
+    expect(strings['language.en']).toMatchObject({ it: 'Inglese', fr: 'Anglais', es: 'Inglés', pt: 'Inglês' });
+  });
+
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
     for (const fn of [translate, translateWord, translateDeterminer]) vi.mocked(fn).mockReturnValue(rendered);

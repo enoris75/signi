@@ -7,7 +7,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
-import { imperativeForm, moodForm, moodPN } from '../../mood.js';
+import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -47,8 +47,11 @@ export function predicateText(
   // A reflexive verb's stored forms carry a fixed clitic ("me volveré", "se volvieron"), so its mood
   // form is derived from the plain verb and takes the subject's clitic in front: "se volvería", "me
   // volviera".
+  // A state verb's past is the imperfect ("quería", "tenía", "estaba"), not the perfective (A130), and is
+  // derived the same way.
   const moodFinite = (m: ConceptForms): string | undefined => {
-    const form = moodForm('es', nonReflexiveVerb(m), pn, mood);
+    const plain = nonReflexiveVerb(m);
+    const form = moodForm('es', plain, pn, mood) ?? statePastForm('es', plain, pn, tense, mood);
     const clitic = reflexiveClitic(m.forms, agreeForms);
     return form && clitic ? `${clitic} ${form}` : form;
   };

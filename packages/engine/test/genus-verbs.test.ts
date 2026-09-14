@@ -504,7 +504,7 @@ describe('HAVE (genus of OWN / HOLD)', () => {
       fr: "le chien a l'argent.",
       de: 'der Hund hat das Geld.',
       es: 'el perro tiene el dinero.',
-      ja: '犬はお金を持ちます。',
+      ja: '犬はお金を持っています。',
       pt: 'o cão tem o dinheiro.',
     });
   });
@@ -524,12 +524,12 @@ describe('HAVE (genus of OWN / HOLD)', () => {
   test('past tense', () => {
     expect(sayAll(have({ verbPhrase: { verb: 'HAVE', tense: 'past' } }))).toEqual({
       en: 'the dog had the money.',
-      it: 'il cane ebbe il denaro.',
-      fr: "le chien eut l'argent.",
+      it: 'il cane aveva il denaro.',
+      fr: "le chien avait l'argent.",
       de: 'der Hund hatte das Geld.',
-      es: 'el perro tuvo el dinero.',
-      ja: '犬はお金を持ちました。',
-      pt: 'o cão teve o dinheiro.',
+      es: 'el perro tenía el dinero.',
+      ja: '犬はお金を持っていました。',
+      pt: 'o cão tinha o dinheiro.',
     });
   });
 
@@ -624,7 +624,7 @@ describe('HAVE (genus of OWN / HOLD)', () => {
       fr: "si le chat avait l'argent, le chien aurait l'argent.",
       de: 'wenn der Kater das Geld haben würde, würde der Hund das Geld haben.',
       es: 'si el gato tuviera el dinero, el perro tendría el dinero.',
-      ja: 'もし猫がお金を持ったら、犬はお金を持ちます。',
+      ja: 'もし猫がお金を持っていたら、犬はお金を持っています。',
       pt: 'se o gato tivesse o dinheiro, o cão teria o dinheiro.',
     });
     expect(sayAll(hypothetical('HAVE', 'MONEY', WE, YOU_ALL))).toMatchObject({

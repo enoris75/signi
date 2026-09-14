@@ -505,14 +505,15 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a locative', () => {
     });
   });
 
-  // The past inherits the same choice — the preterite of estar, not of ser ("fue"/"foi").
-  test('the past locative is the preterite of estar', () => {
+  // The past inherits the same choice — estar, not ser ("era"/"era"). Being somewhere is a state, so it is
+  // estar's imperfect (A130).
+  test('the past locative is the imperfect of estar', () => {
     expect(sayAll(clause(np('CAT'), 'BE', {
       verbPhrase: { verb: 'BE', tense: 'past' },
       complements: { locative: { phrase: np('HOUSE') } },
     }))).toMatchObject({
-      es: 'el gato estuvo en la casa.',
-      pt: 'o gato esteve na casa.',
+      es: 'el gato estaba en la casa.',
+      pt: 'o gato estava na casa.',
     });
   });
 

@@ -3,8 +3,8 @@
 A work brief. Every item below was found by running the engine against the real seeded corpus
 and reviewing its output for linguistic correctness. Each one is already pinned by a test.
 
-A134–A136 are the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
-not in the grammar. They were found while adding the backend's unit tests, and are pinned in
+A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
+not in the grammar. They were found while adding the backend's unit tests, and were pinned in
 `packages/backend/src/index.test.ts`.
 
 The individual defects now live one-per-file under the three subdirectories:
@@ -47,7 +47,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/` and
-`packages/backend/src/` appears in one of the subdirectories (19 of them, as of this writing).** If
+`packages/backend/src/` appears in one of the subdirectories (9 of them, as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -57,18 +57,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File |
-|---|---|
-| A127 | [A127-german-object-pronoun-after-adverb.md](A-must-fix/A127-german-object-pronoun-after-adverb.md) |
-| A128 | [A128-japanese-modal-on-copula.md](A-must-fix/A128-japanese-modal-on-copula.md) |
-| A129 | [A129-relative-on-alarm-cry.md](A-must-fix/A129-relative-on-alarm-cry.md) |
-| A130 | [A130-romance-past-of-a-state-verb.md](A-must-fix/A130-romance-past-of-a-state-verb.md) |
-| A131 | [A131-know-with-a-noun-object.md](A-must-fix/A131-know-with-a-noun-object.md) |
-| A132 | [A132-japanese-state-verb-main-clause.md](A-must-fix/A132-japanese-state-verb-main-clause.md) |
-| A133 | [A133-article-on-a-language-name.md](A-must-fix/A133-article-on-a-language-name.md) |
-| A134 | [A134-translate-unseeded-concept.md](A-must-fix/A134-translate-unseeded-concept.md) (backend API) |
-| A135 | [A135-request-field-wrong-json-type.md](A-must-fix/A135-request-field-wrong-json-type.md) (backend API) |
-| A136 | [A136-api-errors-as-html.md](A-must-fix/A136-api-errors-as-html.md) (backend API) |
+_None open._
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -229,6 +218,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A122 | [A122-japanese-clause-coordination-connective.md](fixed/A122-japanese-clause-coordination-connective.md) | Japanese | 2026-09-14 |
 | A121 | [A121-coordinated-copula-elided-predicate.md](fixed/A121-coordinated-copula-elided-predicate.md) | Italian, French, Spanish, Portuguese, German, Japanese | 2026-09-14 |
 | A126 | [A126-japanese-godan-su-instruction-label.md](fixed/A126-japanese-godan-su-instruction-label.md) | Japanese | 2026-09-14 |
+| A127 | [A127-german-object-pronoun-after-adverb.md](fixed/A127-german-object-pronoun-after-adverb.md) | German | 2026-09-14 |
+| A128 | [A128-japanese-modal-on-copula.md](fixed/A128-japanese-modal-on-copula.md) | Japanese | 2026-09-14 |
+| A129 | [A129-relative-on-alarm-cry.md](fixed/A129-relative-on-alarm-cry.md) | Italian, French | 2026-09-14 |
+| A130 | [A130-romance-past-of-a-state-verb.md](fixed/A130-romance-past-of-a-state-verb.md) | Italian, French, Spanish, Portuguese | 2026-09-14 |
+| A131 | [A131-know-with-a-noun-object.md](fixed/A131-know-with-a-noun-object.md) | Italian, French, Spanish, Portuguese, German | 2026-09-14 |
+| A132 | [A132-japanese-state-verb-main-clause.md](fixed/A132-japanese-state-verb-main-clause.md) | Japanese | 2026-09-14 |
+| A133 | [A133-article-on-a-language-name.md](fixed/A133-article-on-a-language-name.md) | English, German, Italian, French, Spanish, Portuguese | 2026-09-14 |
+| A134 | [A134-translate-unseeded-concept.md](fixed/A134-translate-unseeded-concept.md) | Backend API | 2026-09-14 |
+| A135 | [A135-request-field-wrong-json-type.md](fixed/A135-request-field-wrong-json-type.md) | Backend API | 2026-09-14 |
+| A136 | [A136-api-errors-as-html.md](fixed/A136-api-errors-as-html.md) | Backend API | 2026-09-14 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

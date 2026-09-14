@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
 import {
   AGERU, complement, complements, concept, DESU, el, group, HAYAKU, HITSUYOU_GA_ARU, HON, HOZON_SURU, ICHIBA, IE, IKU, INU, ITSUMO,
-  KESSHITE, KOTO_GA_DEKIRU, modal, NEZUMI, NOMU, np, SHINCHOU, SHIRU, TABERU, TAI, vp,
+  KESSHITE, KOTO_GA_DEKIRU, modal, MOTSU, NEZUMI, NOMU, np, OMOERU, SHINCHOU, SHIRU, TABERU, TAI, vp,
 } from './ja.fixtures.js';
 import { predicateSegs } from './predicateSegs.js';
 
@@ -59,9 +59,6 @@ describe('predicateSegs', () => {
       expect(text(predicateSegs(vp(TABERU, { tense: 'future' }), undefined, undefined))).toBe('食べます');
     });
 
-    test('a lexically stative polite form inflects from its own stem', () => {
-      expect(predicateSegs(vp(SHIRU, { tense: 'past' }), undefined, undefined)).toEqual([{ t: '知っていました', r: 'しっていました' }]);
-    });
 
     test('a kana verb takes no ruby', () => {
       expect(predicateSegs(vp(AGERU, { tense: 'past' }), undefined, undefined)).toEqual([{ t: 'あげました' }]);
@@ -107,6 +104,42 @@ describe('predicateSegs', () => {
     });
   });
 
+  // A132: a state verb says the state holds with 〜ている; its plain 〜ます names the change of state.
+  describe('a state verb', () => {
+    test('takes 〜ている in every tense and polarity', () => {
+      expect(predicateSegs(vp(MOTSU), el(np(HON)), undefined)).toEqual([{ t: '本', r: 'ほん' }, { t: 'を' }, { t: '持って', r: 'もって' }, { t: 'います' }]);
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined))).toBe('持っていました');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), undefined, undefined))).toBe('持っていませんでした');
+      expect(text(predicateSegs(vp(SHIRU, { tense: 'past' }), undefined, undefined))).toBe('知っていました');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'conditional' }), undefined, undefined))).toBe('持っています');
+    });
+
+    test('builds the たら protasis on 〜ている', () => {
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), undefined, undefined))).toBe('持っていたら');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive', negative: true }), undefined, undefined))).toBe('持っていなかったら');
+    });
+
+    test('a state whose negative is the event\'s takes the plain negative', () => {
+      expect(text(predicateSegs(vp(SHIRU, { negative: true }), undefined, undefined))).toBe('知りません');
+      expect(text(predicateSegs(vp(SHIRU, { negative: true, tense: 'past' }), undefined, undefined))).toBe('知りませんでした');
+      expect(text(predicateSegs(vp(SHIRU, { mood: 'subjunctive', negative: true }), undefined, undefined))).toBe('知らなかったら');
+      expect(text(predicateSegs(vp(SHIRU, { mood: 'subjunctive' }), undefined, undefined))).toBe('知っていたら');
+    });
+
+    test('a Japanese state verb keeps 〜ます', () => {
+      expect(text(predicateSegs(vp(OMOERU), undefined, undefined))).toBe('思えます');
+      expect(text(predicateSegs(vp(OMOERU, { tense: 'past', negative: true }), undefined, undefined))).toBe('思えませんでした');
+    });
+
+    test('regression: a relative clause, a modal, a command and the other aspects keep their own form', () => {
+      expect(text(predicateSegs(vp(MOTSU), el(np(HON)), undefined, undefined, true))).toBe('本を持つ');
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, true))).toBe('持った');
+      expect(text(predicateSegs(vp(MOTSU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined))).toBe('持つ必要があります');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'imperative' }), undefined, undefined, '2sg'))).toBe('持ってください');
+      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), undefined, undefined))).toBe('持ってしまいます');
+    });
+  });
+
   describe('aspect', () => {
     test('the progressive is the te-form + います', () => {
       expect(predicateSegs(vp(TABERU, { aspect: 'progressive' }), undefined, undefined)).toEqual([{ t: '食べて', r: 'たべて' }, { t: 'います' }]);
@@ -139,6 +172,25 @@ describe('predicateSegs', () => {
     test('〜たい governs the polite stem and inflects as an i-adjective', () => {
       expect(text(predicateSegs(vp(TABERU, { modals: [modal(TAI)] }), undefined, undefined))).toBe('食べたいです');
       expect(text(predicateSegs(vp(TABERU, { modals: [modal(TAI)], negative: true, tense: 'past' }), undefined, undefined))).toBe('食べたくなかったです');
+    });
+
+    // A128: the copula has no verb for the modal to suffix, so the modal governs its predicate instead.
+    test('a modal on the copula governs the predicate in its dictionary form or stem', () => {
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, careful))).toBe('慎重である必要があります');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(HITSUYOU_GA_ARU)], negative: true, tense: 'past' }), undefined, careful)))
+        .toBe('慎重である必要がありませんでした');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(KOTO_GA_DEKIRU)] }), undefined, careful))).toBe('慎重であることができます');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(TAI)] }), undefined, careful))).toBe('慎重でありたいです');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(TAI), modal(KOTO_GA_DEKIRU)] }), undefined, careful)))
+        .toBe('慎重であることができるようになりたいです');
+    });
+
+    test('a modal on the copula takes the plain and たら endings, and keeps the adverbs ahead of the predicate', () => {
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, careful, undefined, true))).toBe('慎重である必要がある');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(KOTO_GA_DEKIRU)], mood: 'subjunctive' }), undefined, careful)))
+        .toBe('慎重であることができたら');
+      expect(text(predicateSegs(vp(DESU, { modals: [modal(HITSUYOU_GA_ARU, ITSUMO)], modifier: concept(HAYAKU) }), undefined, careful)))
+        .toBe('いつも速く慎重である必要があります');
     });
 
     // Aspect has no periphrasis to compose with under a modal (B07).

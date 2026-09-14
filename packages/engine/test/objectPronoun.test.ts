@@ -689,7 +689,7 @@ describe('known bugs: German object pronoun before an adverb', () => {
   const sees = (verbPhrase: Partial<VerbPhrase>, object = 'THIRD_PERSON'): PhrasePlan =>
     clause(np('CAT'), 'SEE', { verbPhrase, directObject: np(object) });
 
-  test.fails('German puts the object pronoun ahead of the adverb, nicht and gerade', () => {
+  test('German puts the object pronoun ahead of the adverb, nicht and gerade', () => {
     const de = (plan: PhrasePlan) => say(plan, 'de');
     expect(de(sees({ modifier: 'ALWAYS' }))).toBe('der Kater sieht ihn immer.');
     expect(de(sees({ modifier: 'NEVER' }))).toBe('der Kater sieht ihn nie.');
@@ -709,6 +709,28 @@ describe('known bugs: German object pronoun before an adverb', () => {
       ...clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('HAPPY') } } }),
       coordination: { conjunction: 'but', clause: clause(np('DOG'), 'BE', { verbPhrase: { modifier: 'ALWAYS' } }) },
     })).toBe('der Kater ist glücklich, aber der Hund ist es immer.');
+  });
+
+  // The prospective's zu-infinitive group, in the main clause and the relative, the relative's "gerade",
+  // negation without an adverb, the other persons and tenses, and the inverted clause after "also".
+  test('German puts the object pronoun first in the zu-infinitive group, the relative and every tense', () => {
+    const de = (plan: PhrasePlan) => say(plan, 'de');
+    expect(de(sees({ modifier: 'ALWAYS', aspect: 'prospective' }))).toBe('der Kater ist im Begriff, ihn immer zu sehen.');
+    expect(de(sees({ aspect: 'prospective', negative: true }))).toBe('der Kater ist nicht im Begriff, ihn zu sehen.');
+    expect(de(sees({ negative: true }))).toBe('der Kater sieht ihn nicht.');
+    expect(de(sees({ aspect: 'progressive', negative: true }))).toBe('der Kater sieht ihn gerade nicht.');
+    expect(de(sees({ modifier: 'ALWAYS', tense: 'past' }, 'SECOND_PERSON'))).toBe('der Kater sah dich immer.');
+    expect(de(sees({ modifier: 'ALWAYS', tense: 'future' }))).toBe('der Kater wird ihn immer sehen.');
+    expect(de(clause(np('CAT'), 'SEE', { verbPhrase: { modifier: 'ALWAYS' }, directObject: np('THIRD_PERSON', { number: 'plural' }) })))
+      .toBe('der Kater sieht sie immer.');
+    expect(de({ ...clause(np('DOG'), 'RUN'), coordination: { conjunction: 'therefore', clause: sees({ modifier: 'ALWAYS' }) } }))
+      .toBe('der Hund läuft, also sieht der Kater ihn immer.');
+    expect(de({ ...clause(np('SECOND_PERSON'), 'SEE', { verbPhrase: { modifier: 'ALWAYS' }, directObject: np('THIRD_PERSON') }), imperative: true, imperativeRegister: 'instruction' }))
+      .toBe('ihn immer sehen.');
+    const relative = (verbPhrase: Partial<VerbPhrase>) =>
+      de(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE', ...verbPhrase }, directObject: np('THIRD_PERSON') } }), 'RUN'));
+    expect(relative({ modifier: 'ALWAYS', aspect: 'prospective' })).toBe('der Hund, der im Begriff ist, ihn immer zu sehen, läuft.');
+    expect(relative({ aspect: 'progressive' })).toBe('der Hund, der ihn gerade sieht, läuft.');
   });
 
   test('regression: a noun object and the relative clause keep their order', () => {

@@ -66,3 +66,27 @@ choose. The object decides.
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: KNOW with a noun object* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 with the recommended shape, a hidden seeded concept.
+
+- **Corpus:** `KNOW_ACQUAINTED` ([`transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts))
+  carries full paradigms: conoscere, connaître, conocer, conhecer, kennen, with en "know" and ja 知る for
+  completeness. Its non-finite forms are in [`nonfinite.ts`](../../../packages/backend/src/concepts/verbs/nonfinite.ts).
+  KNOW's it / fr / es / pt / de lexemes name it as `object_sense`. It is marked `senseOf: 'KNOW'`, stored
+  as a `sense_of` column ([`db.ts`](../../../packages/backend/src/db.ts), [`seed.ts`](../../../packages/backend/src/seed.ts)).
+  `GET /api/concepts` ([`index.ts`](../../../packages/backend/src/index.ts)) leaves senses out, so no
+  picker offers a second "know". The dev database needs `npm run seed`.
+- **Engine:** [`resolveVerbPhrase`](../../../packages/engine/src/translator/functions/resolveVerbPhrase.ts)
+  takes `hasObject`, and resolves to the lexeme's `object_sense` when that sense has an entry.
+  [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) passes the plan's
+  direct object. [`resolveRelativeClause`](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+  passes its own object or a head gapped as the object. The modals are never swapped.
+- **Tests:** [`verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known bugs: KNOW with a noun
+  object*. The pinning `test.fails` is now a passing `test`. A new case covers the past (conosceva), the
+  resultative, the command and its negative, the citation, a relative on the object, a coordinated object
+  and the protasis. The regression guard adds KNOW with only a cause complement, which keeps sapere.
+- Unit tests: `resolveVerbPhrase.test.ts`, `resolvePhrase.test.ts` and `resolveRelativeClause.test.ts`.
+  Backend: `lexicon.test.ts`, `seed.test.ts`, `index.test.ts` (the sense is left out of the list) and
+  `concepts/index.test.ts` (a sense and an object sense must name seeded concepts).

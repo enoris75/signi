@@ -205,7 +205,7 @@ describe('known bugs: the article on a language name', () => {
   const boy = (verb: string, language: string, definiteness?: 'bare') =>
     sayAll(clause(np('BOY'), verb, { directObject: np(language, definiteness ? { definiteness } : {}) }));
 
-  test.fails('English and German name a language bare, and the Romance languages always article it', () => {
+  test('English and German name a language bare, and the Romance languages always article it', () => {
     expect(isALanguage('ITALIAN')).toMatchObject({ en: 'Italian is a language.', de: 'Italienisch ist eine Sprache.' });
     expect(boy('READ', 'GERMAN')).toMatchObject({ en: 'the boy reads German.', de: 'der Junge liest Deutsch.' });
     expect(boy('UNDERSTAND', 'ENGLISH')).toMatchObject({ en: 'the boy understands English.', de: 'der Junge versteht Englisch.' });
@@ -213,6 +213,29 @@ describe('known bugs: the article on a language name', () => {
       it: "l'italiano è una lingua.", fr: "l'italien est une langue.", es: 'el italiano es un idioma.', pt: 'o italiano é uma língua.',
     });
     expect(boy('UNDERSTAND', 'ITALIAN', 'bare').fr).toBe("le garçon comprend l'italien.");
+  });
+
+  // The article follows each name's own sound (it "lo spagnolo", fr "l'anglais"), the article the user
+  // picks is ignored in both directions, and an Italian or French locative drops it as it does for a
+  // continent, which is the idiom for a language too ("in italiano", "en italien").
+  test('every language name, whatever article the user picks, and the locative', () => {
+    expect(isALanguage('SPANISH')).toMatchObject({
+      en: 'Spanish is a language.', it: 'lo spagnolo è una lingua.', fr: "l'espagnol est une langue.",
+      de: 'Spanisch ist eine Sprache.', es: 'el español es un idioma.', pt: 'o espanhol é uma língua.',
+    });
+    expect(isALanguage('ENGLISH', 'bare')).toMatchObject({
+      en: 'English is a language.', it: "l'inglese è una lingua.", fr: "l'anglais est une langue.", es: 'el inglés es un idioma.',
+    });
+    expect(sayAll(clause(np('JAPANESE', { definiteness: 'indefinite' }), 'BE', {
+      complements: { predicative: { phrase: np('LANGUAGE', { definiteness: 'indefinite' }) } },
+    }))).toMatchObject({ en: 'Japanese is a language.', it: 'il giapponese è una lingua.', de: 'Japanisch ist eine Sprache.' });
+    expect(boy('READ', 'FRENCH')).toMatchObject({
+      en: 'the boy reads French.', it: 'il ragazzo legge il francese.', de: 'der Junge liest Französisch.',
+      es: 'el niño lee el francés.', pt: 'o menino lê o francês.',
+    });
+    expect(boy('READ', 'PORTUGUESE', 'bare')).toMatchObject({ it: 'il ragazzo legge il portoghese.', pt: 'o menino lê o português.' });
+    expect(sayAll(clause(np('WORD'), 'BE', { complements: { locative: { phrase: np('ITALIAN') } } })))
+      .toMatchObject({ en: 'the word is in Italian.', it: 'la parola è in italiano.', fr: 'le mot est en italien.' });
   });
 
   test('regression: the articled Romance name, the bare English and German one, continents and the word label', () => {

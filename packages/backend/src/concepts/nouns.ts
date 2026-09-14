@@ -1346,11 +1346,17 @@ export const nouns: ConceptSeed[] = [
   // capitalises all nouns. Uncountable (no plural), gender masc in the Romance languages,
   // neuter in German. All seven are LANGUAGE. See backend languages.ts for the
   // LanguageCode → concept mapping.
+  // Proper, like the continents: the language fixes the article, not the user (A133). English
+  // and German name a language bare ("Italian is a language", "Deutsch ist eine Sprache");
+  // Italian, French and Portuguese always article it ("l'italiano", "l'italien", "o italiano").
+  // Spanish does too ("el italiano es un idioma"), unlike its bare continents, so its forms
+  // carry takes_article as ANTARCTICA's does.
   {
     id: 'ENGLISH',
     role: 'noun',
     description: 'the English language',
     emoji: '🇬🇧',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1358,7 +1364,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'inglese', gender: 'masc', count: 'singular' },
       fr: { base: 'anglais', gender: 'masc', count: 'singular' },
       de: { base: 'Englisch', gender: 'neut', count: 'singular' },
-      es: { base: 'inglés', gender: 'masc', count: 'singular' },
+      es: { base: 'inglés', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: '英語', count: 'singular', reading: 'えいご' },
       pt: { base: 'inglês', gender: 'masc', count: 'singular' },
     },
@@ -1368,6 +1374,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the Italian language',
     emoji: '🇮🇹',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1375,7 +1382,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'italiano', gender: 'masc', count: 'singular' },
       fr: { base: 'italien', gender: 'masc', count: 'singular' },
       de: { base: 'Italienisch', gender: 'neut', count: 'singular' },
-      es: { base: 'italiano', gender: 'masc', count: 'singular' },
+      es: { base: 'italiano', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'イタリア語', count: 'singular', reading: 'いたりあご' },
       pt: { base: 'italiano', gender: 'masc', count: 'singular' },
     },
@@ -1385,6 +1392,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the French language',
     emoji: '🇫🇷',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1392,7 +1400,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'francese', gender: 'masc', count: 'singular' },
       fr: { base: 'français', gender: 'masc', count: 'singular' },
       de: { base: 'Französisch', gender: 'neut', count: 'singular' },
-      es: { base: 'francés', gender: 'masc', count: 'singular' },
+      es: { base: 'francés', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'フランス語', count: 'singular', reading: 'ふらんすご' },
       pt: { base: 'francês', gender: 'masc', count: 'singular' },
     },
@@ -1402,6 +1410,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the German language',
     emoji: '🇩🇪',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1409,7 +1418,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'tedesco', gender: 'masc', count: 'singular' },
       fr: { base: 'allemand', gender: 'masc', count: 'singular' },
       de: { base: 'Deutsch', gender: 'neut', count: 'singular' },
-      es: { base: 'alemán', gender: 'masc', count: 'singular' },
+      es: { base: 'alemán', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'ドイツ語', count: 'singular', reading: 'どいつご' },
       pt: { base: 'alemão', gender: 'masc', count: 'singular' },
     },
@@ -1419,6 +1428,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the Spanish language',
     emoji: '🇪🇸',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1426,7 +1436,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'spagnolo', gender: 'masc', count: 'singular' },
       fr: { base: 'espagnol', gender: 'masc', count: 'singular' },
       de: { base: 'Spanisch', gender: 'neut', count: 'singular' },
-      es: { base: 'español', gender: 'masc', count: 'singular' },
+      es: { base: 'español', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'スペイン語', count: 'singular', reading: 'すぺいんご' },
       pt: { base: 'espanhol', gender: 'masc', count: 'singular' },
     },
@@ -1436,6 +1446,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the Japanese language',
     emoji: '🇯🇵',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1443,7 +1454,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'giapponese', gender: 'masc', count: 'singular' },
       fr: { base: 'japonais', gender: 'masc', count: 'singular' },
       de: { base: 'Japanisch', gender: 'neut', count: 'singular' },
-      es: { base: 'japonés', gender: 'masc', count: 'singular' },
+      es: { base: 'japonés', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: '日本語', count: 'singular', reading: 'にほんご' },
       pt: { base: 'japonês', gender: 'masc', count: 'singular' },
     },
@@ -1453,6 +1464,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'the Portuguese language',
     emoji: '🇵🇹',
+    proper: true,
     countable: false,
     isA: 'LANGUAGE',
     forms: {
@@ -1460,7 +1472,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'portoghese', gender: 'masc', count: 'singular' },
       fr: { base: 'portugais', gender: 'masc', count: 'singular' },
       de: { base: 'Portugiesisch', gender: 'neut', count: 'singular' },
-      es: { base: 'portugués', gender: 'masc', count: 'singular' },
+      es: { base: 'portugués', gender: 'masc', takes_article: '1', count: 'singular' },
       ja: { base: 'ポルトガル語', count: 'singular', reading: 'ぽるとがるご' },
       pt: { base: 'português', gender: 'masc', count: 'singular' },
     },

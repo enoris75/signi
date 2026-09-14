@@ -56,7 +56,16 @@ function initSchema(db: Database.Database): void {
       -- 1 for a noun naming a danger one cries out a warning of (wolf, fire). Italian and French
       -- shout such a cry with a / à and the article ("gridare al lupo", "crier au feu"), where any
       -- other cry is a plain object (A124); default 0. Ignored for non-nouns.
-      alarm        INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1))
+      alarm        INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1)),
+      -- 1 for a verb naming a state that holds (want, can, be, have, own, love, seem, hold, know)
+      -- rather than an event. The Romance past of a state is the imperfect ("voleva", not the
+      -- perfective "volle", A130), and Japanese says it holds with 〜ている ("持っています", A132);
+      -- default 0 (an event). Ignored for non-verbs.
+      stative      INTEGER NOT NULL DEFAULT 0 CHECK (stative IN (0,1)),
+      -- For a lexical sense the engine selects in place of another concept, that concept's id
+      -- (KNOW_ACQUAINTED, the "know a person / thing" verb, is a sense of KNOW, A131). The user
+      -- picks the concept itself, so /api/concepts leaves a sense out; NULL for any other concept.
+      sense_of     TEXT
     );
 
     -- ── Per-language concept definitions ──────────────────────────────
@@ -340,6 +349,12 @@ function initSchema(db: Database.Database): void {
   }
   if (!conceptCols.includes('alarm')) {
     db.exec('ALTER TABLE semantic_concepts ADD COLUMN alarm INTEGER NOT NULL DEFAULT 0 CHECK (alarm IN (0,1))');
+  }
+  if (!conceptCols.includes('stative')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN stative INTEGER NOT NULL DEFAULT 0 CHECK (stative IN (0,1))');
+  }
+  if (!conceptCols.includes('sense_of')) {
+    db.exec('ALTER TABLE semantic_concepts ADD COLUMN sense_of TEXT');
   }
 
   // saved_phrases gained a `kind` column after the table first shipped; backfill it.

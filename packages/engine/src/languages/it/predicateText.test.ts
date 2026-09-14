@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
   ANDARE, BENE, CANE, CASA, CIBO, complement, complements, concept, CORRERE, DARE, DONNA, DOVERE, el, ESSERE, type Forms, GATTA,
-  FUOCO, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
+  FUOCO, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMBRARE, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
   FELICE, VELOCEMENTE, VOLERE, vp,
 } from './it.fixtures.js';
 import { predicateText } from './predicateText.js';
@@ -27,6 +27,19 @@ describe('predicateText', () => {
     test('past is the passato remoto, future the futuro semplice', () => {
       expect(predicateText(GATTO, vp(MANGIARE, { tense: 'past' }))).toBe('mangiò');
       expect(predicateText(PLURAL_CATS, vp(MANGIARE, { tense: 'future' }))).toBe('mangeranno');
+    });
+
+    // A130: the passato remoto makes a state an event, so a state's past is the imperfect.
+    test('the past of a state is the imperfect, in the finite verb only', () => {
+      expect(predicateText(GATTO, vp(SEMBRARE, { tense: 'past' }), undefined, complements({ predicative: complement(np(STANCO)) })))
+        .toBe('sembrava stanco');
+      expect(predicateText(IO, vp(ESSERE, { tense: 'past' }, 'BE'), undefined, complements({ predicative: complement(np(STANCO)) })))
+        .toBe('ero stanco');
+      expect(predicateText(PLURAL_CATS, vp(MANGIARE, { tense: 'past', modals: [modal(VOLERE), modal(POTERE)] }))).toBe('volevano poter mangiare');
+      // The resultative and the hypothetical moods keep their own forms.
+      expect(predicateText(GATTO, vp(MANGIARE, { tense: 'past', modals: [modal(DOVERE)], mood: 'subjunctive' }))).toBe('dovesse mangiare');
+      expect(predicateText(GATTO, vp(SEMBRARE, { aspect: 'resultative' }), undefined, complements({ predicative: complement(np(STANCO)) })))
+        .toBe('è sembrato stanco');
     });
 
     test('the adverb, object and complements follow the verb in that order', () => {
@@ -57,7 +70,7 @@ describe('predicateText', () => {
     test('the outermost modal is finite and each inner one an apocopated infinitive', () => {
       expect(predicateText(GATTO, vp(MANGIARE, { modals: [modal(DOVERE)] }), mouse)).toBe('deve mangiare il topo');
       expect(predicateText(PLURAL_CATS, vp(MANGIARE, { modals: [modal(DOVERE)] }))).toBe('devono mangiare');
-      expect(predicateText(GATTO, vp(MANGIARE, { tense: 'past', modals: [modal(DOVERE)] }))).toBe('dovette mangiare');
+      expect(predicateText(GATTO, vp(MANGIARE, { tense: 'past', modals: [modal(DOVERE)] }))).toBe('doveva mangiare');
       expect(predicateText(GATTO, vp(MANGIARE, { modals: [modal(VOLERE), modal(POTERE)] }))).toBe('vuole poter mangiare');
     });
 

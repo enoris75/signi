@@ -174,7 +174,7 @@ describe('known bugs: a relative on the alarm a cry raises', () => {
   const theWolfTheBoyCried = (wolf: Partial<NounPhrase> = {}, head = 'WOLF', verb = 'RUN') =>
     sayAll(clause(np(head, { ...wolf, relative: { headRole: 'directObject', subject: np('BOY'), verbPhrase: { verb: 'CRY_OUT', tense: 'past' } } }), verb));
 
-  test.fails('Italian and French relativise the alarm with al quale / auquel', () => {
+  test('Italian and French relativise the alarm with al quale / auquel', () => {
     expect(theWolfTheBoyCried()).toMatchObject({
       it: 'il lupo al quale il ragazzo gridò corre.',
       fr: 'le loup auquel le garçon cria court.',
@@ -189,11 +189,35 @@ describe('known bugs: a relative on the alarm a cry raises', () => {
     });
   });
 
+  // The present and the resultative, whose French participle does not agree with an à complement, a negated
+  // cry, a modal, and the impersonal subject, which stays impersonal: an alarm is no object for si to agree with.
+  test('Italian and French relativise the alarm the same way in every tense, under a modal and with an impersonal subject', () => {
+    const cried = (verbPhrase: Partial<VerbPhrase>, wolf: Partial<NounPhrase> = {}, subject = 'BOY') =>
+      sayAll(clause(np('WOLF', { ...wolf, relative: { headRole: 'directObject', subject: np(subject), verbPhrase: { verb: 'CRY_OUT', ...verbPhrase } } }), 'RUN'));
+    expect(cried({})).toMatchObject({ it: 'il lupo al quale il ragazzo grida corre.', fr: 'le loup auquel le garçon crie court.' });
+    expect(cried({ aspect: 'resultative' }, { number: 'plural' })).toMatchObject({
+      it: 'i lupi ai quali il ragazzo ha gridato corrono.',
+      fr: 'les loups auxquels le garçon a crié courent.',
+    });
+    expect(cried({ tense: 'past', negative: true })).toMatchObject({
+      it: 'il lupo al quale il ragazzo non gridò corre.',
+      fr: 'le loup auquel le garçon ne cria pas court.',
+    });
+    expect(cried({ modals: ['MUST'] })).toMatchObject({ it: 'il lupo al quale il ragazzo deve gridare corre.', fr: 'le loup auquel le garçon doit crier court.' });
+    expect(cried({}, { number: 'plural' }, 'GENERIC_PERSON')).toMatchObject({ it: 'i lupi ai quali si grida corrono.', fr: 'les loups auxquels on crie courent.' });
+    expect(cried({ aspect: 'resultative' }, { number: 'plural' }, 'GENERIC_PERSON')).toMatchObject({ it: 'i lupi ai quali si è gridato corrono.', fr: 'les loups auxquels on a crié courent.' });
+  });
+
   test('regression: a relative on a plain cry keeps che / que', () => {
     expect(theWolfTheBoyCried({}, 'WORD', 'BURN')).toMatchObject({
       it: 'la parola che il ragazzo gridò brucia.',
       fr: 'le mot que le garçon cria brûle.',
     });
+    // The plain cry keeps the French participle agreement, and the recipient keeps its own al quale / auquel.
+    expect(sayAll(clause(np('WORD', { number: 'plural', relative: { headRole: 'directObject', subject: np('BOY'), verbPhrase: { verb: 'CRY_OUT', aspect: 'resultative' } } }), 'BURN')))
+      .toMatchObject({ it: 'le parole che il ragazzo ha gridato bruciano.', fr: 'les mots que le garçon a criés brûlent.' });
+    expect(sayAll(clause(np('WOLF', { relative: { headRole: 'terminus', subject: np('BOY'), verbPhrase: { verb: 'CRY_OUT', tense: 'past' }, directObject: np('WORD') } }), 'RUN')))
+      .toMatchObject({ it: 'il lupo al quale il ragazzo gridò la parola corre.', fr: 'le loup auquel le garçon cria le mot court.' });
   });
 });
 

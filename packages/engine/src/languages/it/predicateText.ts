@@ -7,7 +7,7 @@ import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js'
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
-import { imperativeForm, moodForm, moodPN } from '../../mood.js';
+import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { alarmCryText } from './alarmCryText.js';
 import { aspectVerb } from './aspectVerb.js';
@@ -46,7 +46,8 @@ export function predicateText(
   // and left out.
   const cliticObject = directObject && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
   const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : passiveSi ? directObject!.agreement : undefined;
-  const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? conjugate(m.forms, agreeForms, tense);
+  // A state verb's past is the imperfect ("voleva", "aveva", "era"), not the perfective (A130).
+  const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? statePastForm('it', m, pn, tense, mood) ?? conjugate(m.forms, agreeForms, tense);
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.

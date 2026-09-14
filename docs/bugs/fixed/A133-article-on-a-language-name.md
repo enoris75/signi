@@ -65,3 +65,20 @@ Check one side effect. An Italian or French locative "in" drops a proper noun's 
 | | |
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: the article on a language name* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the corpus-only shape above. The seven language concepts are `proper: true`, and
+their `es` forms carry `takes_article: '1'` ([`nouns.ts`](../../../packages/backend/src/concepts/nouns.ts)).
+The dev database needs `npm run seed`.
+
+One side effect needed a change outside the corpus. The header's `language.*` UI strings were periods
+with a bare subject, which the Romance proper-noun rule now articles (`L'italiano`). They are word labels
+instead ([`uiStrings.ts`](../../../packages/shared/src/uiStrings.ts)), which render as before: `Italiano`,
+`Anglais`, `Español`.
+
+- **Tests:** [`clause.test.ts`](../../../packages/engine/test/clause.test.ts) → *known bugs: the article
+  on a language name*. The pinning `test.fails` is now a passing `test`. A new case covers other names
+  (`lo spagnolo`, `l'anglais`), the article the user picks being ignored either way, and the Italian and
+  French locative (`in italiano`, `en italien`).
+- Backend: `uiStrings.test.ts` pins the selector labels without the article.

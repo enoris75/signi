@@ -9,7 +9,7 @@ const bare = { nicht: '', modalAdverbs: '', adverb: '', dative: '', directObject
 const theMouse = { ...bare, directObject: 'die Maus' };
 
 /** The parts joined as a clause builder joins them (the leading comma is tidied later, by `punctuate`). */
-const frame = (complex: VerbComplex, parts: typeof bare, verbFinal: boolean) =>
+const frame = (complex: VerbComplex, parts: Parameters<typeof prospectiveFrame>[1], verbFinal: boolean) =>
   prospectiveFrame(complex, parts, verbFinal).filter(Boolean).join(' ');
 
 describe('prospectiveFrame', () => {
@@ -55,6 +55,15 @@ describe('prospectiveFrame', () => {
     const parts = { ...bare, adverb: 'schnell', dative: 'dem Jungen', directObject: 'das Buch', complements: 'im Haus' };
     expect(frame(giving, parts, false)).toBe('im Begriff , schnell dem Jungen das Buch im Haus zu geben');
     expect(frame(giving, parts, true)).toBe('im Begriff ist , schnell dem Jungen das Buch im Haus zu geben');
+  });
+
+  // A127: an unstressed object pronoun leads the group, ahead of the adverb.
+  test('an object pronoun leads the group, ahead of the adverb and the dative', () => {
+    const giving = { ...present, zuInfinitive: 'zu geben' };
+    expect(frame(present, { ...bare, pronoun: 'sie', adverb: 'immer' }, false)).toBe('im Begriff , sie immer zu essen');
+    expect(frame(giving, { ...bare, pronoun: 'es', adverb: 'schnell', dative: 'dem Jungen' }, true))
+      .toBe('im Begriff ist , es schnell dem Jungen zu geben');
+    expect(frame(present, { ...bare, pronoun: 'sie' }, true)).toBe('im Begriff ist , sie zu essen');
   });
 
   test('"nicht" and the modals\' adverbs lead "im Begriff", outside the group', () => {

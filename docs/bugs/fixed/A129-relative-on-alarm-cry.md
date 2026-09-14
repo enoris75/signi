@@ -39,3 +39,23 @@ object to `predicateText`, since the à complement is not a direct object.
 | | |
 |---|---|
 | **Test** | `pangram.test.ts` → *known bugs: a relative on the alarm a cry raises* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above. A new shared helper,
+[`relativeAlarmHead`](../../../packages/engine/src/functions/relativeAlarmHead.ts), tells a head that
+is the alarm of its relative's cry. It returns the relativizer stand-in `relativeGapComplement` builds
+for a terminus gap. Each engine renders that stand-in through its `alarmCryText`, which gives `al quale` /
+`ai quali` and `auquel` / `auxquels`.
+
+- **Engine:** [`it/relativeText.ts`](../../../packages/engine/src/languages/it/relativeText.ts) also keeps
+  an impersonal si from agreeing with the alarm (`i lupi ai quali si grida`).
+  [`fr/relativeText.ts`](../../../packages/engine/src/languages/fr/relativeText.ts) passes no preceding
+  object, so the participle does not agree (`les loups auxquels le garçon a crié`).
+- **Tests:** [`pangram.test.ts`](../../../packages/engine/test/pangram.test.ts) → *known bugs: a relative
+  on the alarm a cry raises*. The pinning `test.fails` is now a passing `test`. A new case covers the
+  present, the resultative, the negative, a modal and the impersonal subject. The regression guard adds
+  the plain cry's participle agreement and the recipient relative.
+- Unit tests: `relativeAlarmHead.test.ts`, and new cases in `relativeText.test.ts` (it, fr).
+
+Still not pinned: a pronoun alarm (`ci` / `y`).

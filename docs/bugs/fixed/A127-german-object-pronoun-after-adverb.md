@@ -47,3 +47,25 @@ inside its zu-infinitive group.
 | | |
 |---|---|
 | **Test** | `objectPronoun.test.ts` → *known bugs: German object pronoun before an adverb* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above. A new helper,
+[`splitObject`](../../../packages/engine/src/languages/de/splitObject.ts), splits the accusative object by
+kind: a single pronoun, or A121's pro-form "es", leads the Mittelfeld. A noun, or a coordination even of
+pronouns, keeps its place after the adverb.
+
+- **Engine:** [`de/renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts) puts the
+  pronoun at the head of the declarative, verb-final, command, instruction and infinitive lists, ahead of
+  "gerade", "nicht" and the adverbs. [`de/prospectiveFrame.ts`](../../../packages/engine/src/languages/de/prospectiveFrame.ts)
+  opens its zu-infinitive group with it (`ist im Begriff, ihn immer zu sehen`).
+  [`de/subordinateClause.ts`](../../../packages/engine/src/languages/de/subordinateClause.ts) does the
+  same for the relative clause, whose progressive had the same fault (`der gerade ihn sieht`).
+- **Tests:** [`objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts) → *known bugs:
+  German object pronoun before an adverb*. The pinning `test.fails` is now a passing `test`. A new case
+  covers the prospective in the main clause and the relative, the relative's "gerade", negation with no
+  adverb, other persons and tenses, the inverted clause after "also", and the instruction.
+- Unit tests: `splitObject.test.ts`, and new cases in `renderClause.test.ts`, `prospectiveFrame.test.ts`
+  and `subordinateClause.test.ts` (de).
+
+Still not pinned: a dative pronoun recipient, which does not render as a pronoun yet.

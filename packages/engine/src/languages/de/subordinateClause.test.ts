@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BEHAELTER, BUCH, complement, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
+  BEHAELTER, BUCH, complement, concept, DU, el, ER, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
   MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNEIDEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
@@ -113,6 +113,17 @@ describe('subordinateClause', () => {
         .toBe(', der das Buch wird lesen können,');
       expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(ESSEN, { tense: 'future', modals: [modal(WOLLEN), modal(KOENNEN)] }) }))
         .toBe(', der wird essen können wollen,');
+    });
+
+    // A127: an object pronoun leads even "gerade", and opens the prospective's zu-infinitive group.
+    test('an object pronoun leads the progressive adverbial and the prospective group', () => {
+      const him = el(np(ER));
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'progressive' }), directObject: him }))
+        .toBe(', der ihn gerade liest,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'prospective', modifier: concept(IMMER) }), directObject: him }))
+        .toBe(', der im Begriff ist , ihn immer zu lesen,');
+      expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { modifier: concept(IMMER), negative: true }), directObject: him }))
+        .toBe(', der ihn nicht immer liest,');
     });
 
     test('adverbs follow the objects, a modal’s before the main verb’s', () => {

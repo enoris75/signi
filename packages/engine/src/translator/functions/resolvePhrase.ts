@@ -29,7 +29,7 @@ export function resolvePhrase(
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
     verbPhrase: plan.verbPhrase
-      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister)
+      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject)
       : undefined,
     directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),

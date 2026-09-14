@@ -1,8 +1,10 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
-import { CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LIBRO, MANGIARE, MONETA, np, SI, TOPO, vp } from './it.fixtures.js';
+import { CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LIBRO, LUPO, MANGIARE, MONETA, np, SI, TOPO, vp } from './it.fixtures.js';
 import { relativeText } from './relativeText.js';
 
+const GRIDARE: Forms = { base: 'gridare', alarm_cry: '1', '3sg_present': 'grida', '3sg_past': 'gridò', '3pl_present': 'gridano' };
+const LUPO_ALARM: Forms = { ...LUPO, alarm: '1' };
 const LEGGERE: Forms = { base: 'leggere', '1sg_present': 'leggo', '3sg_present': 'legge', '3pl_present': 'leggono' };
 
 const subjectRelative = (rest: Partial<ResolvedRelativeClause> = {}): ResolvedRelativeClause =>
@@ -53,5 +55,17 @@ describe('relativeText', () => {
     }))).toBe('sotto le quali il gatto mangia');
     expect(relativeText(np(DONNA, {}, { relative: { headRole: 'terminus', subject: el(np(GATTO)), verbPhrase: vp(DARE, {}, 'GIVE'), directObject: el(np(LIBRO)) } })))
       .toBe('alla quale il gatto dà il libro');
+  });
+
+  // A129: the alarm a cry raises is the cry's a-complement, so its relative takes "al quale", not "che".
+  test('a head that is the alarm a cry raises takes a fused with an agreeing il quale', () => {
+    const cried = (subject: ResolvedRelativeClause['subject'], tense: 'present' | 'past' = 'past') =>
+      objectRelative(subject, { verbPhrase: vp(GRIDARE, { tense }) });
+    expect(relativeText(np(LUPO_ALARM, {}, { relative: cried(el(np(GATTO))) }))).toBe('al quale il gatto gridò');
+    expect(relativeText(np(LUPO_ALARM, { number: 'plural' }, { relative: cried(el(np(GATTO))) }))).toBe('ai quali il gatto gridò');
+    // The alarm is no object, so an impersonal si stays impersonal rather than agreeing with it.
+    expect(relativeText(np(LUPO_ALARM, { number: 'plural' }, { relative: cried(el(np(SI)), 'present') }))).toBe('ai quali si grida');
+    // A plain object of the same verb keeps che.
+    expect(relativeText(np(LUPO, {}, { relative: cried(el(np(GATTO))) }))).toBe('che il gatto gridò');
   });
 });

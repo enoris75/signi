@@ -32,6 +32,15 @@ describe('predicateText', () => {
       expect(predicateText({ ...JE, number: 'plural' }, vp(MANGER, { tense: 'future' }))).toBe('mangerons');
     });
 
+    // A130: the passé simple makes a state an event, so a state's past is the imparfait.
+    test('the past of a state is the imparfait', () => {
+      expect(predicateText(FEMME, vp(SEMBLER, { tense: 'past' }), undefined, complements({ predicative: complement(np(FATIGUE)) })))
+        .toBe('semblait fatiguée');
+      expect(predicateText({ ...JE, number: 'plural' }, vp(ETRE, { tense: 'past' }, 'BE'), undefined, careful)).toBe('étions prudents');
+      expect(predicateText(CHAT, vp(ETRE, { tense: 'past', negative: true }, 'BE'), undefined, careful)).toBe("n'était pas prudent");
+      expect(predicateText(CHAT, vp(MANGER, { tense: 'past', modals: [modal(DEVOIR)] }), mouse)).toBe('devait manger la souris');
+    });
+
     test('the object and then the complements follow the verb', () => {
       expect(predicateText(CHAT, vp(MANGER), mouse)).toBe('mange la souris');
       expect(predicateText(CHAT, vp(MANGER), el(np(SOURIS), np(NOURRITURE)))).toBe('mange la souris et la nourriture');
@@ -122,7 +131,7 @@ describe('predicateText', () => {
     test('the outermost modal is finite and governs the infinitives', () => {
       expect(predicateText(CHAT, vp(MANGER, { modals: [modal(DEVOIR)] }), mouse)).toBe('doit manger la souris');
       expect(predicateText({ ...CHAT, number: 'plural' }, vp(MANGER, { modals: [modal(DEVOIR)] }))).toBe('doivent manger');
-      expect(predicateText(CHAT, vp(MANGER, { tense: 'past', modals: [modal(VOULOIR), modal(POUVOIR)] }))).toBe('voulut pouvoir manger');
+      expect(predicateText(CHAT, vp(MANGER, { tense: 'past', modals: [modal(VOULOIR), modal(POUVOIR)] }))).toBe('voulait pouvoir manger');
       expect(predicateText(CHAT, vp(MANGER, { aspect: 'resultative', modals: [modal(DEVOIR)] }))).toBe('doit avoir mangé');
       expect(predicateText(CHAT, vp(MANGER, { mood: 'conditional', modals: [modal(DEVOIR)] }))).toBe('devrait manger');
     });

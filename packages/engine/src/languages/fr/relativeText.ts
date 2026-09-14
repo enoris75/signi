@@ -1,5 +1,7 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { VOWEL_START } from './fr.consts.js';
 import { joinArt } from './joinArt.js';
@@ -13,7 +15,8 @@ import { subjectText } from './subjectText.js';
  * "qu'" before a vowel — followed by the clause's own subject, which drives agreement
  * ("le livre que je lis"). When the head fills a complement, the relativizer is that complement's
  * preposition with "lequel", agreeing with the head and fused with its article ("la maison dans
- * laquelle le chat mange", "le garçon auquel l'homme donne le livre", "à cause duquel").
+ * laquelle le chat mange", "le garçon auquel l'homme donne le livre", "à cause duquel"). So does the alarm a
+ * cry raises, which the cry takes as its à-complement: "le loup auquel le garçon cria" (A129).
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
@@ -23,15 +26,19 @@ export function relativeText(np: ResolvedNounPhrase): string {
   }
   const subjText = subjectText(rel.subject);
   const fem = np.head.forms['gender'] === 'fem';
-  const gap = relativeGapComplement(np, { base: fem ? 'quelle' : 'quel', plural: fem ? 'quelles' : 'quels', definiteness: 'definite' });
+  const QUEL = { base: fem ? 'quelle' : 'quel', plural: fem ? 'quelles' : 'quels', definiteness: 'definite' };
+  const alarmHead = relativeAlarmHead(np, QUEL);
+  const gap = relativeGapComplement(np, QUEL);
   // "lequel" is written as one word with its article, contracted or not: lequel, laquelle, duquel, auxquels.
   // When the head is the clause's DIRECT OBJECT, it is a preceding object and an avoir participle
-  // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement.
-  const precedingObject = rel.headRole === 'directObject' ? np.head.forms : undefined;
+  // agrees with it ("la souris que le chat a mangée"); a complement-role head triggers no agreement, and
+  // nor does an alarm, which is the cry's à-complement ("le loup auquel le garçon a crié").
+  const precedingObject = rel.headRole === 'directObject' && !alarmHead ? np.head.forms : undefined;
   const pred = predicateText(rel.subject.agreement, rel.verbPhrase, rel.directObject, rel.complements, precedingObject);
   // The subject joins its predicate as in a main clause, "je" eliding ("que j'aime").
   const clause = joinSubject(subjText, pred);
-  return (gap
-    ? `${complementsPhrase(gap, {}, '').replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`
+  const lequel = alarmHead ? alarmCryText(alarmHead) : gap ? complementsPhrase(gap, {}, '') : '';
+  return (lequel
+    ? `${lequel.replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`
     : joinArt(VOWEL_START.test(clause) ? "qu'" : 'que', clause)).trim();
 }

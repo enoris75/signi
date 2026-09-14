@@ -31,6 +31,15 @@ describe('predicateText', () => {
       expect(predicateText(NOS, vp(COMER, { tense: 'future' }))).toBe('comeremos');
     });
 
+    // A130: the pretérito perfeito makes a state an event, so a state's past is the imperfeito.
+    test('the past of a state is the imperfeito', () => {
+      expect(predicateText(NOS, be({ tense: 'past' }), undefined, complements({ predicative: complement(np(GRANDE)) }))).toBe('éramos grandes');
+      expect(predicateText({ ...GATO, number: 'plural' }, be({ tense: 'past' }), undefined, inTheHouse)).toBe('estavam na casa');
+      expect(predicateText(EU, vp(COMER, { tense: 'past', modals: [modal(QUERER)] }))).toBe('queria comer');
+      // The present resultative keeps the pretérito perfeito (A9).
+      expect(predicateText(GATO, be({ aspect: 'resultative' }), undefined, inTheHouse)).toBe('esteve na casa');
+    });
+
     test('the object follows the verb, then the complements', () => {
       expect(predicateText(GATO, vp(VER), mouse)).toBe('vê o rato');
       expect(predicateText(GATO, vp(VER), el(np(RATO), np(RAPOSA)))).toBe('vê o rato e a raposa');
@@ -60,7 +69,7 @@ describe('predicateText', () => {
     test('the outermost modal is finite and governs the infinitive', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(DEVER)] }))).toBe('deve comer');
       expect(predicateText(EU, vp(COMER, { modals: [modal(QUERER)] }))).toBe('quero comer');
-      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(PODER)] }))).toBe('pôde comer');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modals: [modal(PODER)] }))).toBe('podia comer');
       expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER), modal(DEVER), modal(PODER)] }))).toBe('quer dever poder comer');
     });
 
@@ -116,7 +125,7 @@ describe('predicateText', () => {
 
     test('a negative adverb on a modal is fronted before the whole chain', () => {
       expect(predicateText(GATO, vp(COMER, { modals: [modal(QUERER, NUNCA)] }))).toBe('nunca quer comer');
-      expect(predicateText(GATO, vp(COMER, { tense: 'past', modifier: concept(SEMPRE), modals: [modal(QUERER, NUNCA)] }))).toBe('nunca quis comer sempre');
+      expect(predicateText(GATO, vp(COMER, { tense: 'past', modifier: concept(SEMPRE), modals: [modal(QUERER, NUNCA)] }))).toBe('nunca queria comer sempre');
     });
 
     test('under an explicit negation the negative adverb trails instead', () => {
@@ -164,7 +173,7 @@ describe('predicateText', () => {
     test('a locative alone takes estar, in every tense and mood', () => {
       expect(predicateText(GATO, be(), undefined, inTheHouse)).toBe('está na casa');
       expect(predicateText({ ...GATO, number: 'plural' }, be(), undefined, inTheHouse)).toBe('estão na casa');
-      expect(predicateText(GATO, be({ tense: 'past' }), undefined, inTheHouse)).toBe('esteve na casa');
+      expect(predicateText(GATO, be({ tense: 'past' }), undefined, inTheHouse)).toBe('estava na casa');
       expect(predicateText(GATO, be({ tense: 'future' }), undefined, inTheHouse)).toBe('estará na casa');
       expect(predicateText(GATO, be({ mood: 'conditional' }), undefined, inTheHouse)).toBe('estaria na casa');
       expect(predicateText(GATO, be({ negative: true }), undefined, complements({ locative: complement(np(CASA), [{ kind: 'path', value: 'under' }]) })))
@@ -285,7 +294,7 @@ describe('predicateText', () => {
     test('the copula is the one the elided complement takes', () => {
       expect(predicateText(CAO, be({ negative: true, elided: aLegendElided }))).toBe('não é');
       expect(predicateText(CAO, be({ negative: true, elided: happy }))).toBe('não está');
-      expect(predicateText(CAO, be({ tense: 'past', elided: happy }))).toBe('esteve');
+      expect(predicateText(CAO, be({ tense: 'past', elided: happy }))).toBe('estava');
       expect(predicateText(CAO, be({ negative: true, elided: inTheHouseElided }))).toBe('não está');
     });
   });

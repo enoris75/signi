@@ -190,7 +190,7 @@ export const VENIR: Forms = {
 };
 /** The copula "ser" (concept BE); `predicateText` swaps in "estar" by concept id. */
 export const SER: Forms = {
-  base: 'ser', copula: '1', gerund: 'siendo', participle: 'sido',
+  base: 'ser', stative: '1', copula: '1', gerund: 'siendo', participle: 'sido',
   '1sg_present': 'soy', '2sg_present': 'eres', '3sg_present': 'es',
   '1pl_present': 'somos', '2pl_present': 'sois', '3pl_present': 'son',
   '1sg_past': 'fui', '2sg_past': 'fuiste', '3sg_past': 'fue',
@@ -199,7 +199,7 @@ export const SER: Forms = {
   '1pl_future': 'seremos', '2pl_future': 'seréis', '3pl_future': 'serán',
 };
 export const PARECER: Forms = {
-  base: 'parecer', gerund: 'pareciendo', participle: 'parecido',
+  base: 'parecer', stative: '1', gerund: 'pareciendo', participle: 'parecido',
   '1sg_present': 'parezco', '2sg_present': 'pareces', '3sg_present': 'parece',
   '1pl_present': 'parecemos', '2pl_present': 'parecéis', '3pl_present': 'parecen',
   '1sg_past': 'parecí', '2sg_past': 'pareciste', '3sg_past': 'pareció',
@@ -220,7 +220,7 @@ export const VOLVERSE: Forms = {
 
 // Modals (concepts MUST / CAN / WILL).
 export const DEBER: Forms = {
-  base: 'deber',
+  base: 'deber', stative: '1',
   '1sg_present': 'debo', '2sg_present': 'debes', '3sg_present': 'debe',
   '1pl_present': 'debemos', '2pl_present': 'debéis', '3pl_present': 'deben',
   '1sg_past': 'debí', '2sg_past': 'debiste', '3sg_past': 'debió',
@@ -229,7 +229,7 @@ export const DEBER: Forms = {
   '1pl_future': 'deberemos', '2pl_future': 'deberéis', '3pl_future': 'deberán',
 };
 export const PODER: Forms = {
-  base: 'poder',
+  base: 'poder', stative: '1',
   '1sg_present': 'puedo', '2sg_present': 'puedes', '3sg_present': 'puede',
   '1pl_present': 'podemos', '2pl_present': 'podéis', '3pl_present': 'pueden',
   '1sg_past': 'pude', '2sg_past': 'pudiste', '3sg_past': 'pudo',
@@ -238,7 +238,7 @@ export const PODER: Forms = {
   '1pl_future': 'podremos', '2pl_future': 'podréis', '3pl_future': 'podrán',
 };
 export const QUERER: Forms = {
-  base: 'querer',
+  base: 'querer', stative: '1',
   '1sg_present': 'quiero', '2sg_present': 'quieres', '3sg_present': 'quiere',
   '1pl_present': 'queremos', '2pl_present': 'queréis', '3pl_present': 'quieren',
   '1sg_past': 'quise', '2sg_past': 'quisiste', '3sg_past': 'quiso',

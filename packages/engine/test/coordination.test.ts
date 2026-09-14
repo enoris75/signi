@@ -564,10 +564,10 @@ describe('known bugs: a coordinated copula elides its predicate', () => {
       de: 'der Kater ist glücklich, aber der Hund ist es nicht.',
     });
     expect(but(catIs('HAPPY', { tense: 'past' }), { tense: 'past', negative: true })).toMatchObject({
-      it: 'il gatto fu felice, ma il cane non lo fu.',
-      fr: 'le chat fut heureux, mais le chien ne le fut pas.',
-      es: 'el gato estuvo feliz, pero el perro no lo estuvo.',
-      pt: 'o gato esteve feliz, mas o cão não esteve.',
+      it: 'il gatto era felice, ma il cane non lo era.',
+      fr: "le chat était heureux, mais le chien ne l'était pas.",
+      es: 'el gato estaba feliz, pero el perro no lo estaba.',
+      pt: 'o gato estava feliz, mas o cão não estava.',
       de: 'der Kater war glücklich, aber der Hund war es nicht.',
       ja: expect.stringMatching(/犬はそうではありませんでした。$/),
     });

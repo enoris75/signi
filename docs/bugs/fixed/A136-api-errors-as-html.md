@@ -54,3 +54,20 @@ This is a backend fix, in `packages/backend/src/index.ts`:
 | | |
 |---|---|
 | **Test** | `packages/backend/src/index.test.ts` → *known bugs: API errors sent as an HTML page* (1 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14, with the shape above, in [`index.ts`](../../../packages/backend/src/index.ts):
+
+- `app.all('/api/*')` answers a JSON 404 for every method, ahead of static files and the SPA catch-all,
+  which now only serves `index.html`.
+- A four-argument error middleware after every route answers
+  `{ error }` with the error's status: `err.status`, else `err.statusCode`, else 500. It shows
+  `err.message` only when http-errors marks it `expose`, and never the stack. A server error (5xx) is
+  logged. A client error, such as malformed JSON, is not.
+
+- **Tests:** [`index.test.ts`](../../../packages/backend/src/index.test.ts) → *known bugs: API errors sent
+  as an HTML page*. The pinning `test.fails` is now a passing `test`. New cases check that an unexpected
+  error's message stays on the server and is logged, that a malformed body keeps its message and is not
+  logged, and that PUT, POST, PATCH and DELETE on an unknown API path get the JSON 404. The test file
+  silences `console.error` so the server's log stays out of the output.

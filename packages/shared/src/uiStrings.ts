@@ -79,7 +79,7 @@ export type UiStringDef = UiStringPlanDef | UiStringWordDef | UiStringDeterminer
 // them to `string` and lose the typo-checking on `t('…')`).
 const defineUiStrings = <T extends Record<string, UiStringDef>>(defs: T): T => defs;
 
-// A language name is the bare name-noun (the concepts are seeded in concepts/nouns.ts).
+// A name is the bare noun: the label of a grammar category, a slot or a mode.
 const nameOf = (concept: string): PhrasePlan =>
   ({ subject: { concept, definiteness: 'bare' } }) as PhrasePlan;
 
@@ -1180,14 +1180,16 @@ export const UI_STRINGS = defineUiStrings({
 
   // Each selectable UI language's name, so the header selector and the translations panel
   // label their rows in the current UI language. Keyed `language.<code>` so a call site can
-  // write t(`language.${code}`) for any LanguageCode.
-  'language.en': { plan: nameOf('ENGLISH'), format: NAME_FORMAT, fallback: 'English' },
-  'language.it': { plan: nameOf('ITALIAN'), format: NAME_FORMAT, fallback: 'Italian' },
-  'language.fr': { plan: nameOf('FRENCH'), format: NAME_FORMAT, fallback: 'French' },
-  'language.de': { plan: nameOf('GERMAN'), format: NAME_FORMAT, fallback: 'German' },
-  'language.es': { plan: nameOf('SPANISH'), format: NAME_FORMAT, fallback: 'Spanish' },
-  'language.ja': { plan: nameOf('JAPANESE'), format: NAME_FORMAT, fallback: 'Japanese' },
-  'language.pt': { plan: nameOf('PORTUGUESE'), format: NAME_FORMAT, fallback: 'Portuguese' },
+  // write t(`language.${code}`) for any LanguageCode. The word, not a period: a language name is
+  // a proper noun, and the Romance languages article it in a sentence ("l'italiano è una
+  // lingua"), which a label does not want.
+  'language.en': { word: 'ENGLISH', format: { capitalize: true }, fallback: 'English' },
+  'language.it': { word: 'ITALIAN', format: { capitalize: true }, fallback: 'Italian' },
+  'language.fr': { word: 'FRENCH', format: { capitalize: true }, fallback: 'French' },
+  'language.de': { word: 'GERMAN', format: { capitalize: true }, fallback: 'German' },
+  'language.es': { word: 'SPANISH', format: { capitalize: true }, fallback: 'Spanish' },
+  'language.ja': { word: 'JAPANESE', format: { capitalize: true }, fallback: 'Japanese' },
+  'language.pt': { word: 'PORTUGUESE', format: { capitalize: true }, fallback: 'Portuguese' },
 });
 
 export type UiStringKey = keyof typeof UI_STRINGS;
