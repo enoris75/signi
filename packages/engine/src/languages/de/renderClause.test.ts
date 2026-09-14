@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import {
-  adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS,
+  adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS, HINZUFUEGEN,
   ER, GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
   SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
@@ -449,6 +449,52 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { aspect: 'progressive' }), { directObject: mouse }))).toBe('der Kater isst gerade die Maus');
       expect(renderClause(clause(np(KATER), vp(ESSEN, { modifier: concept(IMMER) }), { directObject: el(np(ER), np(ICH)) })))
         .toBe('der Kater isst immer ihn und mich');
+    });
+  });
+
+  // A139: CLICK's lexeme takes its object with "auf" + accusative.
+  describe('an object a preposition leads (A139)', () => {
+    const KLICKEN: Forms = { base: 'klicken', object_prep: 'auf', participle: 'geklickt', '3sg_present': 'klickt', '2sg_imperative': 'klick' };
+
+    test('the object is a prepositional phrase, which nicht leads', () => {
+      expect(renderClause(clause(np(KATER), vp(KLICKEN), { directObject: el(np(BUCH)) }))).toBe('der Kater klickt auf das Buch');
+      expect(renderClause(clause(np(KATER), vp(KLICKEN, { negative: true }), { directObject: el(np(BUCH)) }))).toBe('der Kater klickt nicht auf das Buch');
+      expect(renderClause(clause(np(KATER), vp(KLICKEN, { aspect: 'resultative' }), { directObject: el(np(BUCH)), complements: inTheHouse })))
+        .toBe('der Kater hat auf das Buch im Haus geklickt');
+    });
+
+    test('a pronoun is no unstressed object: it follows the preposition, and a neuter one is darauf', () => {
+      expect(renderClause(clause(np(KATER), vp(KLICKEN, { modifier: concept(IMMER) }), { directObject: el(np(ER)) }))).toBe('der Kater klickt immer auf ihn');
+      expect(renderClause(clause(np(KATER), vp(KLICKEN), { directObject: el(np(ER, { gender: 'neut' })) }))).toBe('der Kater klickt darauf');
+    });
+
+    test('the command, the instruction and the infinitive', () => {
+      expect(renderClause(clause(np(DU), vp(KLICKEN, { mood: 'imperative', negative: true }), { directObject: el(np(BUCH)) }))).toBe('klick nicht auf das Buch');
+      expect(renderClause(clause(np(DU), vp(KLICKEN, { mood: 'imperative', register: 'instruction' }), { directObject: el(np(BUCH)) }))).toBe('auf das Buch klicken');
+      expect(renderClause(clause(np(MAN), vp(KLICKEN, { mood: 'infinitive' }), { directObject: el(np(BUCH)) }))).toBe('auf das Buch klicken');
+    });
+  });
+
+  // A138: a separable verb leaves its particle last in a main clause and a command, and rejoins it in
+  // verb-final order and the infinitive.
+  describe('a separable verb (A138)', () => {
+    test('the particle closes a V2 clause, after nicht and the objects', () => {
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN), { directObject: mouse }))).toBe('der Kater fügt die Maus hinzu');
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN, { negative: true, tense: 'past' }), { directObject: mouse }))).toBe('der Kater fügte die Maus nicht hinzu');
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN), { directObject: el(np(ER)), complements: inTheHouse }))).toBe('der Kater fügt ihn im Haus hinzu');
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN), { directObject: mouse }), true)).toBe('fügt der Kater die Maus hinzu');
+    });
+
+    test('the non-finite verb keeps it, and verb-final order joins it to the finite verb', () => {
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN, { aspect: 'resultative' }), { directObject: mouse }))).toBe('der Kater hat die Maus hinzugefügt');
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN, { modals: [modal(MUESSEN)] }), { directObject: mouse }))).toBe('der Kater muss die Maus hinzufügen');
+      expect(renderClause(clause(np(KATER), vp(HINZUFUEGEN), { directObject: mouse }), false, true)).toBe('der Kater die Maus hinzufügt');
+    });
+
+    test('the command puts it last; the instruction and the infinitive keep it', () => {
+      expect(renderClause(clause(np(DU), vp(HINZUFUEGEN, { mood: 'imperative', negative: true }), { directObject: mouse }))).toBe('füge die Maus nicht hinzu');
+      expect(renderClause(clause(np(DU), vp(HINZUFUEGEN, { mood: 'imperative', register: 'instruction' }), { directObject: mouse }))).toBe('die Maus hinzufügen');
+      expect(renderClause(clause(np(MAN), vp(HINZUFUEGEN, { mood: 'infinitive' }), { directObject: mouse }))).toBe('die Maus hinzufügen');
     });
   });
 });

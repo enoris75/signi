@@ -853,18 +853,49 @@ describe('known bugs: pronominal verb in a hypothetical', () => {
   const hypothetical = (main: PhrasePlan, condition: PhrasePlan) => sayAll({ ...main, condition });
   const HAPPY = { complements: { predicative: { phrase: np('HAPPY') } } };
 
-  test.fails('French: the clitic agrees with the subject in the imparfait and the conditionnel', () => {
+  test('French: the clitic agrees with the subject in the imparfait and the conditionnel', () => {
     expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT'), 'COLLAPSE')).fr)
       .toBe("si le chat s'effondrait, le chien courrait.");
     expect(hypothetical(clause(np('CAT'), 'COLLAPSE'), clause(np('DOG'), 'RUN')).fr)
       .toBe("si le chien courait, le chat s'effondrerait.");
   });
 
-  test.fails('Portuguese: the clitic agrees with the subject in both clauses', () => {
+  test('Portuguese: the clitic agrees with the subject in both clauses', () => {
     expect(hypothetical(clause(np('CAT'), 'BECOME', HAPPY), clause(np('DOG'), 'RUN')).pt)
       .toBe('se o cão corresse, o gato se tornaria feliz.');
     expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('FIRST_PERSON'), 'BECOME', HAPPY)).pt)
       .toBe('se me tornasse feliz, o cão correria.');
+  });
+
+  test('French: every person takes its own clitic, inside the negation', () => {
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('FIRST_PERSON'), 'COLLAPSE')).fr)
+      .toBe("si je m'effondrais, le chien courrait.");
+    expect(hypothetical(clause(np('FIRST_PERSON', { number: 'plural' }), 'COLLAPSE'), clause(np('DOG'), 'RUN')).fr)
+      .toBe('si le chien courait, nous nous effondrerions.');
+    expect(hypothetical(clause(np('SECOND_PERSON', { number: 'plural' }), 'COLLAPSE'), clause(np('SECOND_PERSON'), 'COLLAPSE')).fr)
+      .toBe("si tu t'effondrais, vous vous effondreriez.");
+    expect(hypothetical(clause(np('CAT', { number: 'plural' }), 'COLLAPSE', { verbPhrase: { negative: true } }), clause(np('DOG'), 'RUN')).fr)
+      .toBe("si le chien courait, les chats ne s'effondreraient pas.");
+  });
+
+  test('Portuguese: every person takes its own clitic, after the negation', () => {
+    expect(hypothetical(clause(np('FIRST_PERSON', { number: 'plural' }), 'BECOME', HAPPY), clause(np('CAT', { number: 'plural' }), 'BECOME', HAPPY)).pt)
+      .toBe('se os gatos se tornassem felizes, nos tornaríamos felizes.');
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT'), 'BECOME', { ...HAPPY, verbPhrase: { negative: true } })).pt)
+      .toBe('se o gato não se tornasse feliz, o cão correria.');
+  });
+
+  // Regression guard: the compound past and a modal already placed their own clitic, and the indicative
+  // tenses keep the stored forms.
+  test('the compound past, a modal and the indicative are unchanged', () => {
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT', { gender: 'fem' }), 'COLLAPSE', { verbPhrase: { aspect: 'resultative' } })).fr)
+      .toBe("si la chatte s'était effondrée, le chien courrait.");
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT'), 'COLLAPSE', { verbPhrase: { modals: [{ verb: 'MUST' }] } })).fr)
+      .toBe("si le chat devait s'effondrer, le chien courrait.");
+    expect(hypothetical(clause(np('DOG'), 'RUN'), clause(np('CAT'), 'BECOME', { ...HAPPY, verbPhrase: { modals: [{ verb: 'MUST' }] } })).pt)
+      .toBe('se o gato devesse tornar-se feliz, o cão correria.');
+    expect(sayAll(clause(np('FIRST_PERSON'), 'COLLAPSE', { verbPhrase: { tense: 'future' } })).fr).toBe("je m'effondrerai.");
+    expect(sayAll(clause(np('CAT'), 'BECOME', { ...HAPPY, verbPhrase: { tense: 'past' } })).pt).toBe('o gato se tornou feliz.');
   });
 
   // Regression guard: Spanish already re-adds the agreeing clitic.
@@ -1461,7 +1492,7 @@ describe('known bugs: Japanese state verb in the main clause', () => {
 // The engine has no separable verbs yet, so this is a corpus change and an engine one. The German
 // imperative row for ADD in imperative.test.ts ("addiere") moves with it.
 describe('known bugs: German ADD is the arithmetic verb', () => {
-  test.fails('German adds a thing with hinzufügen, its particle at the end of the clause', () => {
+  test('German adds a thing with hinzufügen, its particle at the end of the clause', () => {
     expect(say(clause(np('CAT'), 'ADD', { directObject: np('MOUSE', { definiteness: 'indefinite' }) }), 'de'))
       .toBe('der Kater fügt eine Maus hinzu.');
     expect(say(clause(np('CAT'), 'ADD', {
@@ -1470,7 +1501,7 @@ describe('known bugs: German ADD is the arithmetic verb', () => {
     }), 'de')).toBe('der Kater fügte eine Maus hinzu.');
   });
 
-  test.fails('a German instruction cites hinzufügen whole', () => {
+  test('a German instruction cites hinzufügen whole', () => {
     expect(say({
       subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
       verbPhrase: { verb: 'ADD' },
@@ -1479,13 +1510,60 @@ describe('known bugs: German ADD is the arithmetic verb', () => {
       directObject: np('CONDITION', { definiteness: 'indefinite' }),
     }, 'de')).toBe('eine Bedingung hinzufügen.');
   });
+
+  const de = (plan: PhrasePlan) => say(plan, 'de');
+  const aMouse = np('MOUSE', { definiteness: 'indefinite' });
+
+  test('the particle closes the clause after nicht, a pronoun and the progressive gerade', () => {
+    expect(de(clause(np('CAT'), 'ADD', { directObject: np('MOUSE'), verbPhrase: { negative: true } }))).toBe('der Kater fügt die Maus nicht hinzu.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: np('THIRD_PERSON', { gender: 'fem' }), verbPhrase: { modifier: 'FAST' } }))).toBe('der Kater fügt sie schnell hinzu.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: aMouse, verbPhrase: { aspect: 'progressive' } }))).toBe('der Kater fügt gerade eine Maus hinzu.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG') } } }))).toBe('der Kater fügt dem Hund das Buch hinzu.');
+    expect(de({ ...clause(np('DOG'), 'RUN'), coordination: { conjunction: 'then', clause: clause(np('CAT'), 'ADD', { directObject: aMouse }) } }))
+      .toBe('der Hund läuft, und dann fügt der Kater eine Maus hinzu.');
+  });
+
+  test('the infinitive and the participle keep the particle, and the zu-infinitive takes zu inside it', () => {
+    expect(de(clause(np('CAT'), 'ADD', { directObject: aMouse, verbPhrase: { tense: 'future' } }))).toBe('der Kater wird eine Maus hinzufügen.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: aMouse, verbPhrase: { aspect: 'resultative' } }))).toBe('der Kater hat eine Maus hinzugefügt.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: aMouse, verbPhrase: { modals: [{ verb: 'MUST' }] } }))).toBe('der Kater muss eine Maus hinzufügen.');
+    expect(de(clause(np('CAT'), 'ADD', { directObject: aMouse, verbPhrase: { aspect: 'prospective' } }))).toBe('der Kater ist im Begriff, eine Maus hinzuzufügen.');
+  });
+
+  test('a verb-final clause joins the particle back onto the finite verb', () => {
+    expect(de(clause(np('CAT', { relative: { verbPhrase: { verb: 'ADD' }, directObject: aMouse } }), 'RUN'))).toBe('der Kater, der eine Maus hinzufügt, läuft.');
+    expect(de(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'ADD', negative: true } } }), 'RUN')))
+      .toBe('die Maus, die der Kater nicht hinzufügt, läuft.');
+    expect(de({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'ADD', { directObject: aMouse }) }))
+      .toBe('wenn der Kater eine Maus hinzufügen würde, würde der Hund laufen.');
+    expect(de(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: aMouse, specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'ADD' } } } })))
+      .toBe('der Kater beginnt, indem man eine Maus hinzufügt.');
+  });
+
+  test('every command puts the particle last', () => {
+    const command = (subject: NounPhrase, negative = false) => de({ subject, verbPhrase: { verb: 'ADD', negative }, imperative: true, directObject: aMouse });
+    expect(command(np('SECOND_PERSON'))).toBe('füge eine Maus hinzu.');
+    expect(command(np('SECOND_PERSON', { number: 'plural' }))).toBe('fügt eine Maus hinzu.');
+    expect(command(np('FIRST_PERSON', { number: 'plural' }))).toBe('fügen wir eine Maus hinzu.');
+  });
+
+  // Regression guard: ADD's other six languages keep their verb.
+  test('regression: the other languages are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'ADD', { directObject: aMouse }))).toMatchObject({
+      en: 'the cat adds a mouse.',
+      it: 'il gatto aggiunge un topo.',
+      fr: 'le chat ajoute une souris.',
+      es: 'el gato añade un ratón.',
+      pt: 'o gato adiciona um rato.',
+    });
+  });
 });
 
 // A139. One clicks ON a thing in five of the languages: it "cliccare su", fr "cliquer sur", de "klicken
 // auf" + accusative, es "clicar en", pt "clicar em". CLICK renders its object bare, as English and
 // Japanese (を) take it. The UI's own hints say it too: "clicca uno slot", "cliquer la période".
 describe('known bugs: CLICK takes its object with a preposition', () => {
-  test.fails('clicking on a thing', () => {
+  test('clicking on a thing', () => {
     expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON') }))).toEqual({
       en: 'the cat clicks the button.',
       it: 'il gatto clicca sul pulsante.',
@@ -1497,7 +1575,7 @@ describe('known bugs: CLICK takes its object with a preposition', () => {
     });
   });
 
-  test.fails('an instruction to click on a thing', () => {
+  test('an instruction to click on a thing', () => {
     expect(sayAll({
       subject: { concept: 'SECOND_PERSON', definiteness: 'bare' },
       verbPhrase: { verb: 'CLICK' },
@@ -1513,5 +1591,117 @@ describe('known bugs: CLICK takes its object with a preposition', () => {
       ja: 'ボタンをクリック。',
       pt: 'clicar no botão.',
     });
+  });
+
+  test('a pronoun object takes its tonic form after the preposition, never a clitic', () => {
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('FIRST_PERSON') }))).toMatchObject({
+      it: 'il gatto clicca su di me.',
+      fr: 'le chat clique sur moi.',
+      de: 'der Kater klickt auf mich.',
+      es: 'el gato clica en mí.',
+      pt: 'o gato clica em mim.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('THIRD_PERSON', { gender: 'fem' }) }))).toMatchObject({
+      it: 'il gatto clicca su di lei.',
+      fr: 'le chat clique sur elle.',
+      de: 'der Kater klickt auf sie.',
+      es: 'el gato clica en ella.',
+      pt: 'o gato clica nela.',
+    });
+    expect(sayAll({ subject: { concept: 'SECOND_PERSON', definiteness: 'bare' }, verbPhrase: { verb: 'CLICK' }, imperative: true, directObject: np('FIRST_PERSON') }))
+      .toMatchObject({ it: 'clicca su di me.', fr: 'clique sur moi.', de: 'klick auf mich.', es: 'clica en mí.', pt: 'clique em mim.' });
+  });
+
+  test('the negation, a no-object and a coordinated object', () => {
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON'), verbPhrase: { negative: true } }))).toMatchObject({
+      it: 'il gatto non clicca sul pulsante.',
+      fr: 'le chat ne clique pas sur le bouton.',
+      de: 'der Kater klickt nicht auf die Taste.',
+      es: 'el gato no clica en el botón.',
+      pt: 'o gato não clica no botão.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON', { definiteness: 'no' }) }))).toMatchObject({
+      it: 'il gatto non clicca su nessun pulsante.',
+      fr: 'le chat ne clique sur aucun bouton.',
+      de: 'der Kater klickt auf keine Taste.',
+      es: 'el gato no clica en ningún botón.',
+      pt: 'o gato não clica em nenhum botão.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: { conjuncts: [np('BUTTON'), np('HOUSE')], conjunction: 'and' } }))).toMatchObject({
+      it: 'il gatto clicca sul pulsante e sulla casa.',
+      fr: 'le chat clique sur le bouton et sur la maison.',
+      de: 'der Kater klickt auf die Taste und das Haus.',
+      es: 'el gato clica en el botón y en la casa.',
+      pt: 'o gato clica no botão e na casa.',
+    });
+  });
+
+  test('the resultative, a modal, the impersonal subject and the protasis', () => {
+    expect(sayAll(clause(np('CAT', { gender: 'fem' }), 'CLICK', { directObject: np('HOUSE'), verbPhrase: { aspect: 'resultative' } }))).toMatchObject({
+      it: 'la gatta ha cliccato sulla casa.',
+      fr: 'la chatte a cliqué sur la maison.',
+      de: 'die Katze hat auf das Haus geklickt.',
+      es: 'la gata ha clicado en la casa.',
+      pt: 'a gata clicou na casa.',
+    });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('BUTTON'), verbPhrase: { modals: [{ verb: 'MUST' }] } }))).toMatchObject({
+      it: 'il gatto deve cliccare sul pulsante.',
+      fr: 'le chat doit cliquer sur le bouton.',
+      de: 'der Kater muss auf die Taste klicken.',
+      es: 'el gato debe clicar en el botón.',
+      pt: 'o gato deve clicar no botão.',
+    });
+    // No passive agreement with a prepositional object: "si clicca", never "si cliccano i pulsanti".
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'CLICK', { directObject: np('BUTTON', { number: 'plural' }) }))).toMatchObject({
+      it: 'si clicca sui pulsanti.',
+      fr: 'on clique sur les boutons.',
+      de: 'man klickt auf die Tasten.',
+      es: 'se clica en los botones.',
+      pt: 'se clica nos botões.',
+    });
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'CLICK', { directObject: np('BUTTON') }) })).toMatchObject({
+      it: 'se il gatto cliccasse sul pulsante, il cane correrebbe.',
+      fr: 'si le chat cliquait sur le bouton, le chien courrait.',
+      de: 'wenn der Kater auf die Taste klicken würde, würde der Hund laufen.',
+      es: 'si el gato clicara en el botón, el perro correría.',
+      pt: 'se o gato clicasse no botão, o cão correria.',
+    });
+  });
+
+  test('a relative on the object keeps the preposition', () => {
+    const clicked = (extra: Partial<NounPhrase>, aspect?: 'resultative') => np('BUTTON', {
+      ...extra,
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'CLICK', ...(aspect ? { aspect } : {}) } },
+    });
+    expect(sayAll(clause(clicked({}), 'RUN'))).toMatchObject({
+      it: 'il pulsante sul quale il gatto clicca corre.',
+      fr: 'le bouton sur lequel le chat clique court.',
+      es: 'el botón en el que el gato clica corre.',
+      pt: 'o botão no qual o gato clica corre.',
+    });
+    expect(say(clause(clicked({}), 'RUN'), 'de')).toMatch(/^die Taste, auf die der Kater klickt, /);
+    // No French participle agreement: the head is no preceding direct object.
+    expect(sayAll(clause(clicked({ number: 'plural' }, 'resultative'), 'RUN'))).toMatchObject({
+      it: 'i pulsanti sui quali il gatto ha cliccato corrono.',
+      fr: 'les boutons sur lesquels le chat a cliqué courent.',
+      es: 'los botones en los que el gato ha clicado corren.',
+      pt: 'os botões nos quais o gato clicou correm.',
+    });
+  });
+
+  // Regression guard: English and Japanese keep the bare object, and a plain transitive verb its clitic.
+  test('regression: English, Japanese and a plain direct object are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('FIRST_PERSON') }))).toMatchObject({
+      en: 'the cat clicks me.',
+      ja: '猫は私をクリックします。',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('FIRST_PERSON') }))).toMatchObject({
+      it: 'il gatto mi vede.',
+      fr: 'le chat me voit.',
+      de: 'der Kater sieht mich.',
+      es: 'el gato me ve.',
+      pt: 'o gato me vê.',
+    });
+    expect(say(clause(np('CAT'), 'CLICK', { complements: { locative: { phrase: np('HOUSE') } } }), 'de')).toBe('der Kater klickt im Haus.');
   });
 });

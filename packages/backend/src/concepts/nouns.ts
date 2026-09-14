@@ -1599,7 +1599,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'adverbial of manner', plural: 'adverbials of manner', count: 'singular' },
       it: { base: 'complemento di modo', plural: 'complementi di modo', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de manière', plural: 'compléments circonstanciels de manière', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung der Art und Weise', plural: 'adverbiale Bestimmungen der Art und Weise', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Art und Weise', citation: 'adverbiale Bestimmung der Art und Weise', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de modo', plural: 'complementos circunstanciales de modo', gender: 'masc', count: 'singular' },
       ja: { base: '状態の副詞語句', count: 'singular', reading: 'じょうたいのふくしごく' },
       pt: { base: 'adjunto adverbial de modo', plural: 'adjuntos adverbiais de modo', gender: 'masc', count: 'singular' },
@@ -1631,6 +1631,9 @@ export const nouns: ConceptSeed[] = [
   // Portuguese and German name it after the circumstance ("de lieu", "de lugar", "des Ortes"), and
   // the recipient is an object in most of them (fr "complément d'objet second", es "complemento
   // indirecto", de "Dativobjekt"). English keeps the names the builder has always used.
+  // A German name is a head noun between a declining adjective and a fixed genitive: the adjective is
+  // the head's inherent `adjective` ("die adverbialen Bestimmungen", "mit der adverbialen Bestimmung",
+  // A140), the genitive its `postnominal`, and `citation` the whole name the picker shows.
   {
     id: 'LOCATIVE',
     role: 'noun',
@@ -1642,7 +1645,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'locative', plural: 'locatives', count: 'singular' },
       it: { base: 'complemento di stato in luogo', plural: 'complementi di stato in luogo', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de lieu', plural: 'compléments circonstanciels de lieu', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung des Ortes', plural: 'adverbiale Bestimmungen des Ortes', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Ortes', citation: 'adverbiale Bestimmung des Ortes', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de lugar', plural: 'complementos circunstanciales de lugar', gender: 'masc', count: 'singular' },
       ja: { base: '場所の副詞語句', count: 'singular', reading: 'ばしょのふくしごく' },
       pt: { base: 'adjunto adverbial de lugar', plural: 'adjuntos adverbiais de lugar', gender: 'masc', count: 'singular' },
@@ -1659,7 +1662,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'direction', plural: 'directions', count: 'singular' },
       it: { base: 'complemento di moto a luogo', plural: 'complementi di moto a luogo', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de direction', plural: 'compléments circonstanciels de direction', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung der Richtung', plural: 'adverbiale Bestimmungen der Richtung', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Richtung', citation: 'adverbiale Bestimmung der Richtung', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de dirección', plural: 'complementos circunstanciales de dirección', gender: 'masc', count: 'singular' },
       ja: { base: '方向の副詞語句', count: 'singular', reading: 'ほうこうのふくしごく' },
       pt: { base: 'adjunto adverbial de direção', plural: 'adjuntos adverbiais de direção', gender: 'masc', count: 'singular' },
@@ -1676,7 +1679,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'source', plural: 'sources', count: 'singular' },
       it: { base: 'complemento di moto da luogo', plural: 'complementi di moto da luogo', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de provenance', plural: 'compléments circonstanciels de provenance', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung der Herkunft', plural: 'adverbiale Bestimmungen der Herkunft', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Herkunft', citation: 'adverbiale Bestimmung der Herkunft', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de procedencia', plural: 'complementos circunstanciales de procedencia', gender: 'masc', count: 'singular' },
       ja: { base: '起点の副詞語句', count: 'singular', reading: 'きてんのふくしごく' },
       pt: { base: 'adjunto adverbial de origem', plural: 'adjuntos adverbiais de origem', gender: 'masc', count: 'singular' },
@@ -1693,7 +1696,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'route', plural: 'routes', count: 'singular' },
       it: { base: 'complemento di moto per luogo', plural: 'complementi di moto per luogo', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de passage', plural: 'compléments circonstanciels de passage', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung des Weges', plural: 'adverbiale Bestimmungen des Weges', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Weges', citation: 'adverbiale Bestimmung des Weges', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de trayecto', plural: 'complementos circunstanciales de trayecto', gender: 'masc', count: 'singular' },
       ja: { base: '経路の副詞語句', count: 'singular', reading: 'けいろのふくしごく' },
       pt: { base: 'adjunto adverbial de percurso', plural: 'adjuntos adverbiais de percurso', gender: 'masc', count: 'singular' },
@@ -1712,7 +1715,7 @@ export const nouns: ConceptSeed[] = [
       en: { base: 'cause', plural: 'causes', count: 'singular' },
       it: { base: 'complemento di causa', plural: 'complementi di causa', gender: 'masc', count: 'singular' },
       fr: { base: 'complément circonstanciel de cause', plural: 'compléments circonstanciels de cause', gender: 'masc', count: 'singular' },
-      de: { base: 'adverbiale Bestimmung des Grundes', plural: 'adverbiale Bestimmungen des Grundes', gender: 'fem', count: 'singular' },
+      de: { base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'des Grundes', citation: 'adverbiale Bestimmung des Grundes', gender: 'fem', count: 'singular' },
       es: { base: 'complemento circunstancial de causa', plural: 'complementos circunstanciales de causa', gender: 'masc', count: 'singular' },
       ja: { base: '原因の副詞語句', count: 'singular', reading: 'げんいんのふくしごく' },
       pt: { base: 'adjunto adverbial de causa', plural: 'adjuntos adverbiais de causa', gender: 'masc', count: 'singular' },

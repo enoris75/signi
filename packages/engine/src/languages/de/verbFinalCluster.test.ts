@@ -10,4 +10,9 @@ describe('verbFinalCluster', () => {
   test('over a double infinitive the finite werden / würde leads the cluster', () => {
     expect(verbFinalCluster({ v2: 'würde', mid: '', tail: 'essen müssen', zuInfinitive: '', finiteLeadsTail: true })).toEqual(['würde', 'essen müssen']);
   });
+
+  // A138: a separable verb's particle rejoins its finite verb at the end of a subordinate clause.
+  test('a separable verb closes on its particle and finite verb, written as one word', () => {
+    expect(verbFinalCluster({ v2: 'fügt', mid: '', tail: '', zuInfinitive: '', particle: 'hinzu' })).toEqual(['', 'hinzufügt']);
+  });
 });

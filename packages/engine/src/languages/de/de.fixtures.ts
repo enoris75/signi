@@ -37,6 +37,10 @@ export const WEISE: Forms = { base: 'Weise', plural: 'Weisen', gender: 'fem', co
 export const WIND: Forms = { base: 'Wind', plural: 'Winde', gender: 'masc', count: 'singular' };
 export const ZEIT: Forms = { base: 'Zeit', plural: 'Zeiten', gender: 'fem', count: 'singular', mannerRelation: 'measure', temporal: '1' };
 export const GROESSE: Forms = { base: 'Größe', plural: 'Größen', gender: 'fem', count: 'singular', dimensionRelation: 'extent' };
+/** A grammar term's name: a head noun between its inherent adjective and a fixed genitive (A140). */
+export const BESTIMMUNG_RICHTUNG: Forms = {
+  base: 'Bestimmung', plural: 'Bestimmungen', adjective: 'adverbial', postnominal: 'der Richtung', gender: 'fem', count: 'singular',
+};
 export const QUALITAET: Forms = { base: 'Qualität', plural: 'Qualitäten', gender: 'fem', count: 'singular', dimensionRelation: 'quality' };
 
 export const ICH: Forms = { base: 'ich', person: '1', number: 'singular', plural: 'wir', disjunctive: 'mir', object: 'mich', object_plural: 'uns' };
@@ -78,6 +82,12 @@ export const GEBEN: Forms = {
 };
 export const SCHNEIDEN: Forms = { base: 'schneiden', participle: 'geschnitten', '3sg_present': 'schneidet' };
 export const WAEHLEN: Forms = { base: 'wählen', participle: 'gewählt', '3sg_present': 'wählt' };
+/** A separable verb: the stem verb's finite forms, its `particle` placed by the clause (A138). */
+export const HINZUFUEGEN: Forms = {
+  base: 'hinzufügen', particle: 'hinzu', participle: 'hinzugefügt',
+  '1sg_present': 'füge', '3sg_present': 'fügt', '1pl_present': 'fügen', '2pl_present': 'fügt', '3pl_present': 'fügen',
+  '3sg_past': 'fügte', '2sg_imperative': 'füge',
+};
 export const WERDEN_VERB: Forms = { base: 'werden', participle: 'geworden', aux: 'be', '3sg_present': 'wird' };
 /** The seeming verb (`seeming`): a predicate noun under it takes "zu sein". */
 export const SCHEINEN: Forms = {

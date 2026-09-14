@@ -6,6 +6,7 @@ import { datPluralN } from './datPluralN.js';
 import { determiner } from './determiner.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
+import { postnominal } from './postnominal.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
 
@@ -37,5 +38,5 @@ export function possessorText(np: ResolvedNounPhrase): string {
   const von = art === 'dem' && (definiteness === 'definite' || articled) ? 'vom' : art ? `von ${art}` : 'von';
   const declined = adjPhrase(poss, 'dat', definiteness);
   const adj = declined ? `${declined} ` : '';
-  return ` ${von} ${adj}${word}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`;
+  return ` ${von} ${adj}${word}${postnominal(f)}${modifierGenitives(poss)}${possessorText(poss)}${subordinateClause(poss)}`;
 }

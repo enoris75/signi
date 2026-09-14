@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ESSEN, type Forms, GEBEN, GEHEN, WAEHLEN } from './de.fixtures.js';
+import { ESSEN, type Forms, GEBEN, GEHEN, HINZUFUEGEN, WAEHLEN } from './de.fixtures.js';
 import { deImperativeWord } from './deImperativeWord.js';
 
 const LAUFEN: Forms = { base: 'laufen', '2sg_present': 'läufst', '2pl_present': 'lauft' };
@@ -73,5 +73,13 @@ describe('deImperativeWord', () => {
     expect(deImperativeWord(sein, '2sg')).toBe('sei');
     expect(deImperativeWord(sein, '2pl')).toBe('seid');
     expect(deImperativeWord(sein, '1pl')).toBe('seien wir');
+  });
+
+  // A138: the command is the stem verb's; the clause puts the particle last ("füge … hinzu").
+  test('a separable verb commands with its stem', () => {
+    expect(deImperativeWord(HINZUFUEGEN, '2sg')).toBe('füge');
+    expect(deImperativeWord(HINZUFUEGEN, '2pl')).toBe('fügt');
+    expect(deImperativeWord(HINZUFUEGEN, '1pl')).toBe('fügen wir');
+    expect(deImperativeWord({ base: 'hinzufügen', particle: 'hinzu' }, '2sg')).toBe('füg');
   });
 });

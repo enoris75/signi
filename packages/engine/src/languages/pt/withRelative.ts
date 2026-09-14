@@ -2,10 +2,12 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
 import { predicateText } from './predicateText.js';
+import { prepObjectText } from './prepObjectText.js';
 import { subjectText } from './subjectText.js';
 
 /**
@@ -27,7 +29,12 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
   // on agreeForms), not as a subject word — "uma coisa que se come".
   const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   const clause = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
-  const gap = relativeGapComplement(np, { base: 'qual', plural: 'quais', definiteness: 'definite' });
-  const relativizer = isPlainLocativeGap(rel) ? 'onde' : gap ? complementsPhrase(gap, {}, '') : 'que';
+  const QUAL = { base: 'qual', plural: 'quais', definiteness: 'definite' };
+  // The object of a verb that takes it with a preposition relativises on that preposition, as a
+  // complement does: "o botão no qual o gato clica" (A139).
+  const prepHead = relativePrepositionalHead(np, QUAL);
+  const gap = relativeGapComplement(np, QUAL);
+  const relativizer = prepHead ? prepObjectText(prepHead.head, prepHead.prep)
+    : isPlainLocativeGap(rel) ? 'onde' : gap ? complementsPhrase(gap, {}, '') : 'que';
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

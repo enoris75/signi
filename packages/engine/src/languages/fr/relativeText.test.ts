@@ -98,4 +98,14 @@ describe('relativeText', () => {
     // A plain object of the same verb keeps que, and the agreement.
     expect(relativeText(np(FEU, { number: 'plural' }, { relative: cried({ aspect: 'resultative' }) }))).toBe('que le garçon a criés');
   });
+
+  // A139: the object of a verb that takes it with a preposition relativises on that preposition, and no
+  // participle agrees with it.
+  test('a head that is the object of a prepositional verb takes the preposition with lequel', () => {
+    const CLIQUER: Forms = { base: 'cliquer', object_prep: 'sur', participle: 'cliqué', '3sg_present': 'clique' };
+    const clicked = { headRole: 'directObject' as const, subject: el(np(CHAT)), verbPhrase: vp(CLIQUER) };
+    expect(relativeText(np(LIVRE, {}, { relative: clicked }))).toBe('sur lequel le chat clique');
+    expect(relativeText(np(MAISON, { number: 'plural' }, { relative: { ...clicked, verbPhrase: vp(CLIQUER, { aspect: 'resultative' }) } })))
+      .toBe('sur lesquelles le chat a cliqué');
+  });
 });

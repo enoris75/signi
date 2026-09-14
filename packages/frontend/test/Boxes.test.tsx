@@ -353,6 +353,17 @@ describe('SatelliteButton', () => {
       { label: 'Number', valued: true },
       'Show Number',
     ],
+    // A141: a link control reveals no box, so it is named by what it links, then by the link once made.
+    [
+      'a link control not yet linked is named by what it links',
+      { label: 'Relative clause', link: true },
+      'Relative clause',
+    ],
+    [
+      'a linked link control reads the link',
+      { label: 'Relative clause', link: true, isSet: true, valueLabel: 'Linked — click to remove' },
+      'Relative clause: Linked — click to remove',
+    ],
   ])('%s', (_, overrides, name) => {
     renderWithProviders(<SatelliteButton sat={satellite(overrides)} color="primary" />);
 
@@ -375,6 +386,15 @@ describe('SatelliteButton', () => {
     );
 
     expect(screen.getByRole('button', { name })).toBeInTheDocument();
+  });
+
+  it('names an unlinked link control in the UI language, with no reveal verb', () => {
+    localStorage.setItem('signi:uiLanguage', 'it');
+    renderWithProviders(
+      <SatelliteButton sat={satellite({ label: 'Proposizione relativa', link: true })} color="primary" />,
+    );
+
+    expect(screen.getByRole('button', { name: 'Proposizione relativa' })).toBeInTheDocument();
   });
 
   it('keeps the English label of a part the catalog does not name yet', () => {

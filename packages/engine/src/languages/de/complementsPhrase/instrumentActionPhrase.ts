@@ -25,7 +25,9 @@ export function instrumentActionPhrase(c: ResolvedComplement): string | undefine
   const adverb = action.modifier?.forms['base'] ?? '';
   if (level === 'process') {
     const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
-    const finite3sg = action.verb.forms['3sg_present'] ?? action.verb.forms['base'] ?? '';
+    // A separable verb's finite form takes its particle back at the end of the clause: "indem man eine Maus hinzufügt" (A138).
+    const stem = action.verb.forms['3sg_present'];
+    const finite3sg = stem ? `${action.verb.forms['particle'] ?? ''}${stem}` : (action.verb.forms['base'] ?? '');
     // A subordinate clause is set off by a comma ("beginnt, indem man ein Wort wählt").
     // It is emitted as a leading comma and pulled back onto the previous word when the
     // clause is joined (see `punctuate`), since the joiner knows nothing of punctuation.

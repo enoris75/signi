@@ -453,19 +453,19 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
       { en: 'the complements.', it: 'i complementi.', fr: 'les compléments.', de: 'die Ergänzungen.', es: 'los complementos.', ja: '補語。', pt: 'os complementos.' }],
     ['LOCATIVE',
       { en: 'a locative.', it: 'un complemento di stato in luogo.', fr: 'un complément circonstanciel de lieu.', de: 'eine adverbiale Bestimmung des Ortes.', es: 'un complemento circunstancial de lugar.', ja: '場所の副詞語句。', pt: 'um adjunto adverbial de lugar.' },
-      { en: 'the locatives.', it: 'i complementi di stato in luogo.', fr: 'les compléments circonstanciels de lieu.', de: 'die adverbiale Bestimmungen des Ortes.', es: 'los complementos circunstanciales de lugar.', ja: '場所の副詞語句。', pt: 'os adjuntos adverbiais de lugar.' }],
+      { en: 'the locatives.', it: 'i complementi di stato in luogo.', fr: 'les compléments circonstanciels de lieu.', de: 'die adverbialen Bestimmungen des Ortes.', es: 'los complementos circunstanciales de lugar.', ja: '場所の副詞語句。', pt: 'os adjuntos adverbiais de lugar.' }],
     ['DIRECTION',
       { en: 'a direction.', it: 'un complemento di moto a luogo.', fr: 'un complément circonstanciel de direction.', de: 'eine adverbiale Bestimmung der Richtung.', es: 'un complemento circunstancial de dirección.', ja: '方向の副詞語句。', pt: 'um adjunto adverbial de direção.' },
-      { en: 'the directions.', it: 'i complementi di moto a luogo.', fr: 'les compléments circonstanciels de direction.', de: 'die adverbiale Bestimmungen der Richtung.', es: 'los complementos circunstanciales de dirección.', ja: '方向の副詞語句。', pt: 'os adjuntos adverbiais de direção.' }],
+      { en: 'the directions.', it: 'i complementi di moto a luogo.', fr: 'les compléments circonstanciels de direction.', de: 'die adverbialen Bestimmungen der Richtung.', es: 'los complementos circunstanciales de dirección.', ja: '方向の副詞語句。', pt: 'os adjuntos adverbiais de direção.' }],
     ['SOURCE',
       { en: 'a source.', it: 'un complemento di moto da luogo.', fr: 'un complément circonstanciel de provenance.', de: 'eine adverbiale Bestimmung der Herkunft.', es: 'un complemento circunstancial de procedencia.', ja: '起点の副詞語句。', pt: 'um adjunto adverbial de origem.' },
-      { en: 'the sources.', it: 'i complementi di moto da luogo.', fr: 'les compléments circonstanciels de provenance.', de: 'die adverbiale Bestimmungen der Herkunft.', es: 'los complementos circunstanciales de procedencia.', ja: '起点の副詞語句。', pt: 'os adjuntos adverbiais de origem.' }],
+      { en: 'the sources.', it: 'i complementi di moto da luogo.', fr: 'les compléments circonstanciels de provenance.', de: 'die adverbialen Bestimmungen der Herkunft.', es: 'los complementos circunstanciales de procedencia.', ja: '起点の副詞語句。', pt: 'os adjuntos adverbiais de origem.' }],
     ['ROUTE',
       { en: 'a route.', it: 'un complemento di moto per luogo.', fr: 'un complément circonstanciel de passage.', de: 'eine adverbiale Bestimmung des Weges.', es: 'un complemento circunstancial de trayecto.', ja: '経路の副詞語句。', pt: 'um adjunto adverbial de percurso.' },
-      { en: 'the routes.', it: 'i complementi di moto per luogo.', fr: 'les compléments circonstanciels de passage.', de: 'die adverbiale Bestimmungen des Weges.', es: 'los complementos circunstanciales de trayecto.', ja: '経路の副詞語句。', pt: 'os adjuntos adverbiais de percurso.' }],
+      { en: 'the routes.', it: 'i complementi di moto per luogo.', fr: 'les compléments circonstanciels de passage.', de: 'die adverbialen Bestimmungen des Weges.', es: 'los complementos circunstanciales de trayecto.', ja: '経路の副詞語句。', pt: 'os adjuntos adverbiais de percurso.' }],
     ['CAUSE_COMPLEMENT',
       { en: 'a cause.', it: 'un complemento di causa.', fr: 'un complément circonstanciel de cause.', de: 'eine adverbiale Bestimmung des Grundes.', es: 'un complemento circunstancial de causa.', ja: '原因の副詞語句。', pt: 'um adjunto adverbial de causa.' },
-      { en: 'the causes.', it: 'i complementi di causa.', fr: 'les compléments circonstanciels de cause.', de: 'die adverbiale Bestimmungen des Grundes.', es: 'los complementos circunstanciales de causa.', ja: '原因の副詞語句。', pt: 'os adjuntos adverbiais de causa.' }],
+      { en: 'the causes.', it: 'i complementi di causa.', fr: 'les compléments circonstanciels de cause.', de: 'die adverbialen Bestimmungen des Grundes.', es: 'los complementos circunstanciales de causa.', ja: '原因の副詞語句。', pt: 'os adjuntos adverbiais de causa.' }],
     ['TERMINUS',
       { en: 'a terminus.', it: 'un complemento di termine.', fr: "un complément d'objet second.", de: 'ein Dativobjekt.', es: 'un complemento indirecto.', ja: '間接目的語。', pt: 'um objeto indireto.' },
       { en: 'the termini.', it: 'i complementi di termine.', fr: "les compléments d'objet second.", de: 'die Dativobjekte.', es: 'los complementos indirectos.', ja: '間接目的語。', pt: 'os objetos indiretos.' }],
@@ -521,19 +521,40 @@ describe('grammar nouns: clauses, complements, the verb’s features, modifier r
 // genitive, it takes -en. The complement names LOCATIVE, DIRECTION, SOURCE, ROUTE, CAUSE_COMPLEMENT
 // and ADVERBIAL_OF_MANNER all have this shape.
 describe('known bugs: the adjective inside a German multiword noun', () => {
-  test.fails('declines with the article in the plural', () => {
+  test('declines with the article in the plural', () => {
     expect(say({ subject: np('LOCATIVE', { number: 'plural' }) }, 'de')).toBe('die adverbialen Bestimmungen des Ortes.');
     expect(say({ subject: np('ADVERBIAL_OF_MANNER', { number: 'plural' }) }, 'de'))
       .toBe('die adverbialen Bestimmungen der Art und Weise.');
   });
 
-  test.fails('declines in the dative', () => {
+  test('declines in the dative', () => {
     expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('LOCATIVE') } } }), 'de'))
       .toBe('der Kater beginnt mit der adverbialen Bestimmung des Ortes.');
   });
 
+  // The dative plural -n goes on the head, not on the fixed genitive ("der Richtung", "der Art und Weise").
+  test('declines in the dative plural and after a possessor\'s von', () => {
+    expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('DIRECTION', { number: 'plural' }) } } }), 'de'))
+      .toBe('der Kater beginnt mit den adverbialen Bestimmungen der Richtung.');
+    expect(say(clause(np('CAT'), 'START', { complements: { instrumental: { phrase: np('ADVERBIAL_OF_MANNER', { number: 'plural' }) } } }), 'de'))
+      .toBe('der Kater beginnt mit den adverbialen Bestimmungen der Art und Weise.');
+    expect(say({ subject: np('BOOK', { possessor: np('SOURCE', { number: 'plural' }) }) }, 'de'))
+      .toBe('das Buch von den adverbialen Bestimmungen der Herkunft.');
+  });
+
+  test('declines in the accusative plural, after its own adjective', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('ROUTE', { number: 'plural' }) }), 'de'))
+      .toBe('der Kater sieht die adverbialen Bestimmungen des Weges.');
+    expect(say({ subject: np('LOCATIVE', { number: 'plural', adjectives: ['BIG'] }) }, 'de'))
+      .toBe('die großen adverbialen Bestimmungen des Ortes.');
+  });
+
   test('regression: the nominative singular and the bare plural already read right', () => {
     expect(say({ subject: np('LOCATIVE', { definiteness: 'this' }) }, 'de')).toBe('diese adverbiale Bestimmung des Ortes.');
+    expect(say({ subject: np('CAUSE_COMPLEMENT', { definiteness: 'no' }) }, 'de')).toBe('keine adverbiale Bestimmung des Grundes.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('SOURCE', { definiteness: 'indefinite' }) }), 'de'))
+      .toBe('der Kater sieht eine adverbiale Bestimmung der Herkunft.');
+    expect(say({ subject: np('LOCATIVE', { number: 'plural', definiteness: 'many' }) }, 'de')).toBe('viele adverbiale Bestimmungen des Ortes.');
     expect(say({ subject: np('LOCATIVE', { number: 'plural', definiteness: 'bare' }) }, 'de'))
       .toBe('adverbiale Bestimmungen des Ortes.');
   });

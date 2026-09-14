@@ -66,6 +66,15 @@ describe('predicateText', () => {
       expect(predicateText(CHAT, vp(ETRE, { mood: 'subjunctive' }, 'BE'), undefined, careful)).toBe('était prudent');
     });
 
+    // A137: the stored forms carry one person's clitic, so a pronominal verb takes the subject's.
+    test('a pronominal verb takes the clitic of its subject', () => {
+      expect(predicateText(CHAT, vp(EFFONDRER, { mood: 'conditional' }))).toBe("s'effondrerait");
+      expect(predicateText(CHAT, vp(EFFONDRER, { mood: 'subjunctive' }))).toBe("s'effondrait");
+      expect(predicateText(JE, vp(EFFONDRER, { mood: 'subjunctive' }))).toBe("m'effondrais");
+      expect(predicateText({ ...JE, number: 'plural' }, vp(EFFONDRER, { mood: 'conditional' }))).toBe('nous effondrerions');
+      expect(predicateText(CHAT, vp(EFFONDRER, { mood: 'conditional', negative: true }))).toBe("ne s'effondrerait pas");
+    });
+
     test('a marked aspect puts the mood on its auxiliary', () => {
       expect(predicateText(CHAT, vp(COURIR, { mood: 'conditional', aspect: 'resultative' }))).toBe('aurait couru');
       expect(predicateText(CHAT, vp(MANGER, { mood: 'subjunctive', aspect: 'progressive' }))).toBe('était en train de manger');
@@ -306,6 +315,23 @@ describe('predicateText', () => {
     test('the compound past and a modal place the pro-form as they place a clitic', () => {
       expect(predicateText(CHIEN, vp(ETRE, { aspect: 'resultative', negative: true, elided: happy }))).toBe("ne l'a pas été");
       expect(predicateText(CHIEN, vp(ETRE, { modals: [modal(DEVOIR)], negative: true, elided: happy }))).toBe("ne doit pas l'être");
+    });
+  });
+
+  // A139: CLICK's lexeme takes its object with "sur".
+  describe('an object a preposition leads (A139)', () => {
+    const CLIQUER: Forms = { base: 'cliquer', object_prep: 'sur', '3sg_present': 'clique', '2sg_present': 'cliques', participle: 'cliqué' };
+
+    test('the object takes the preposition, inside ne … pas', () => {
+      expect(predicateText(CHAT, vp(CLIQUER), el(np(LIVRE)))).toBe('clique sur le livre');
+      expect(predicateText(CHAT, vp(CLIQUER, { negative: true }), el(np(LIVRE), np(MAISON)))).toBe('ne clique pas sur le livre et sur la maison');
+    });
+
+    test('a pronoun is no clitic, is never dislocated, and no participle agrees with it', () => {
+      expect(predicateText(CHAT, vp(CLIQUER), el(np(JE)))).toBe('clique sur moi');
+      expect(predicateText(CHAT, vp(CLIQUER), el(np(IL), np(JE)))).toBe('clique sur lui et sur moi');
+      expect(predicateText(CHAT, vp(CLIQUER, { aspect: 'resultative' }), el(np(MAISON)))).toBe('a cliqué sur la maison');
+      expect(predicateText(TU, vp(CLIQUER, { mood: 'imperative' }), el(np(JE)))).toBe('clique sur moi');
     });
   });
 });

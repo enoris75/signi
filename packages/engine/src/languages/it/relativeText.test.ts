@@ -79,4 +79,13 @@ describe('relativeText', () => {
     // A plain object of the same verb keeps che.
     expect(relativeText(np(LUPO, {}, { relative: cried(el(np(GATTO))) }))).toBe('che il gatto gridò');
   });
+
+  // A139: the object of a verb that takes it with a preposition relativises on that preposition.
+  test('a head that is the object of a prepositional verb takes the preposition fused with il quale', () => {
+    const CLICCARE: Forms = { base: 'cliccare', object_prep: 'su', '3sg_present': 'clicca', '3pl_present': 'cliccano' };
+    const clicked = (subject: ResolvedRelativeClause['subject']) => objectRelative(subject, { verbPhrase: vp(CLICCARE) });
+    expect(relativeText(np(LIBRO, {}, { relative: clicked(el(np(GATTO))) }))).toBe('sul quale il gatto clicca');
+    // The head is no object, so an impersonal si stays impersonal rather than agreeing with it.
+    expect(relativeText(np(LIBRO, { number: 'plural' }, { relative: clicked(el(np(SI))) }))).toBe('sui quali si clicca');
+  });
 });

@@ -147,6 +147,15 @@ describe('GET /api/concepts', () => {
     }
   });
 
+  // A140: a German complement name is stored as its head noun, with a declining adjective and a fixed
+  // genitive around it. The picker still shows the whole name.
+  test('labels a noun by its citation where one is seeded', async () => {
+    const locative = await find('LOCATIVE');
+    expect(locative.labels?.de).toBe('adverbiale Bestimmung des Ortes');
+    expect(locative.labels?.it).toBe('complemento di stato in luogo');
+    expect((await find('ADVERBIAL_OF_MANNER')).labels?.de).toBe('adverbiale Bestimmung der Art und Weise');
+  });
+
   test('gives no reading for a word already written in kana', async () => {
     const become = await find('BECOME');
     expect(become.labels?.ja).toBe('なる');
@@ -429,6 +438,24 @@ describe('unknown API paths', () => {
 // ── Known bugs ───────────────────────────────────────────────────────────────
 // Each `test.fails` asserts the correct behaviour and is catalogued in docs/bugs/A-must-fix/. When a
 // fix makes one pass, Vitest reports "expected to fail but passed": delete the `.fails` marker.
+
+// A144. A German noun can carry an inherent adjective that the engine declines (YOUNG_WOMAN is "Frau"
+// with `adjective: 'jung'`: "die junge Frau", "den jungen Frauen"). The picker's label is the lexeme's
+// singular alone, so it shows "Frau", which is WOMAN's word, not YOUNG_WOMAN's.
+describe('known bugs: the German label of a noun with an inherent adjective', () => {
+  const concept = async (id: string): Promise<Concept> =>
+    ((await (await get('/api/concepts?role=noun')).json()) as ConceptsResponse).concepts.find((c) => c.id === id)!;
+
+  test.fails('labels YOUNG_WOMAN with its adjective', async () => {
+    expect((await concept('YOUNG_WOMAN')).labels?.de).toBe('junge Frau');
+  });
+
+  // Regression guard: the other languages seed the whole name, and so do A140's complement names.
+  test('regression: the other languages and the complement names already read right', async () => {
+    expect((await concept('YOUNG_WOMAN')).labels).toMatchObject({ en: 'young woman', fr: 'jeune femme', it: 'giovane', ja: '若い女性' });
+    expect((await concept('LOCATIVE')).labels?.de).toBe('adverbiale Bestimmung des Ortes');
+  });
+});
 
 describe('known bugs: translating a plan that names an unseeded concept', () => {
   const expectRejected = async (plan: unknown, naming?: string) => {

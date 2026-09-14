@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BEHAELTER, BUCH, complement, concept, DU, el, ER, ESSEN, type Forms, GEBEN, GEHEN, HAUS, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
+  BEHAELTER, BUCH, complement, concept, DU, el, ER, ESSEN, type Forms, GEBEN, GEHEN, HAUS, HINZUFUEGEN, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
   MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNEIDEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
@@ -326,5 +326,26 @@ describe('subordinateClause', () => {
     test('a predicate noun takes the nominative pronoun, with no preposition', () => {
       expect(relativeOn(JUNGE, { headRole: 'predicative', subject: el(np(MANN)), verbPhrase: vp(WERDEN_VERB) })).toBe(', der der Mann wird,');
     });
+  });
+
+  // A139: CLICK's lexeme takes its object with "auf" + accusative.
+  describe('an object a preposition leads (A139)', () => {
+    const KLICKEN: Forms = { base: 'klicken', object_prep: 'auf', participle: 'geklickt', '3sg_present': 'klickt' };
+
+    test('a head gapped as that object takes the preposition before its pronoun', () => {
+      expect(relativeOn(BUCH, { headRole: 'directObject', subject: el(np(KATER)), verbPhrase: vp(KLICKEN) })).toBe(', auf das der Kater klickt,');
+    });
+
+    test('a relative keeping the object leads it with the preposition, after nicht', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(KLICKEN, { negative: true }), directObject: el(np(HAUS)) }))
+        .toBe(', der nicht auf das Haus klickt,');
+    });
+  });
+
+  // A138: a relative clause is verb-final, so a separable verb's particle rejoins its finite verb.
+  test('a separable verb closes the relative whole', () => {
+    expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(HINZUFUEGEN), directObject: el(np(MAUS)) })).toBe(', der die Maus hinzufügt,');
+    expect(relativeOn(MAUS, { headRole: 'directObject', subject: el(np(KATER)), verbPhrase: vp(HINZUFUEGEN, { negative: true }) })).toBe(', die der Kater nicht hinzufügt,');
+    expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(HINZUFUEGEN, { aspect: 'prospective' }) })).toBe(', der im Begriff hinzuzufügen ist,');
   });
 });

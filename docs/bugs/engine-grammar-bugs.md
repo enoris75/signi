@@ -5,7 +5,7 @@ and reviewing its output for linguistic correctness. Each one is already pinned 
 
 A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
-`packages/backend/src/index.test.ts`. A141 is a frontend defect, pinned in
+`packages/backend/src/index.test.ts`, as A144 is (a concept label). A141 was a frontend defect, pinned in
 `packages/frontend/test/`.
 
 The individual defects now live one-per-file under the three subdirectories:
@@ -48,7 +48,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (19 of them,
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (12 of them,
 as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
@@ -61,11 +61,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 | # | File |
 |---|---|
-| A137 | [A137-pronominal-verb-in-a-hypothetical.md](A-must-fix/A137-pronominal-verb-in-a-hypothetical.md) |
-| A138 | [A138-german-add-is-arithmetic.md](A-must-fix/A138-german-add-is-arithmetic.md) |
-| A139 | [A139-click-prepositional-object.md](A-must-fix/A139-click-prepositional-object.md) |
-| A140 | [A140-german-multiword-noun-adjective-declension.md](A-must-fix/A140-german-multiword-noun-adjective-declension.md) |
-| A141 | [A141-link-control-tooltips-offer-a-reveal.md](A-must-fix/A141-link-control-tooltips-offer-a-reveal.md) |
+| A143 | [A143-german-add-goal-takes-zu.md](A-must-fix/A143-german-add-goal-takes-zu.md) |
+| A144 | [A144-german-label-inherent-adjective.md](A-must-fix/A144-german-label-inherent-adjective.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -236,6 +233,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A134 | [A134-translate-unseeded-concept.md](fixed/A134-translate-unseeded-concept.md) | Backend API | 2026-09-14 |
 | A135 | [A135-request-field-wrong-json-type.md](fixed/A135-request-field-wrong-json-type.md) | Backend API | 2026-09-14 |
 | A136 | [A136-api-errors-as-html.md](fixed/A136-api-errors-as-html.md) | Backend API | 2026-09-14 |
+| A137 | [A137-pronominal-verb-in-a-hypothetical.md](fixed/A137-pronominal-verb-in-a-hypothetical.md) | French, Portuguese | 2026-09-14 |
+| A138 | [A138-german-add-is-arithmetic.md](fixed/A138-german-add-is-arithmetic.md) | German | 2026-09-14 |
+| A139 | [A139-click-prepositional-object.md](fixed/A139-click-prepositional-object.md) | Italian, French, German, Spanish, Portuguese | 2026-09-14 |
+| A140 | [A140-german-multiword-noun-adjective-declension.md](fixed/A140-german-multiword-noun-adjective-declension.md) | German | 2026-09-14 |
+| A141 | [A141-link-control-tooltips-offer-a-reveal.md](fixed/A141-link-control-tooltips-offer-a-reveal.md) | Frontend | 2026-09-14 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

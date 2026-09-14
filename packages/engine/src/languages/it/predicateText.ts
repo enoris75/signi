@@ -6,6 +6,7 @@ import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.j
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_SHORT_IMPERATIVE } from './it.consts.js';
@@ -16,6 +17,7 @@ import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
 import { itEnclitic } from './itEnclitic.js';
 import { npText } from './npText.js';
+import { prepObjectText } from './prepObjectText.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -30,6 +32,9 @@ export function predicateText(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
+  // agree with, be a clitic or become the passive si's subject: "si clicca sui pulsanti", "clicca su di me".
+  const objectPrep = objectPreposition(verb);
   // In a hypothetical conditional the finite element (the outermost modal, or the main verb)
   // takes the conditional (apodosis) or imperfect-subjunctive (protasis) form; the marked
   // aspects keep their indicative auxiliary (aspect under a conditional is a documented gap).
@@ -37,14 +42,14 @@ export function predicateText(
   // patient: "si mangiano i topi", "si devono mangiare i topi", and in the compound tense the participle
   // too ("si sono mangiati i topi"). A clitic object keeps si impersonal ("li si mangia"), and so does
   // an alarm cry, which is not a direct object ("si grida ai lupi").
-  const passiveSi = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
+  const passiveSi = subjectForms['generic'] === '1' && !!directObject && !objectPrep && !isPronounElement(directObject)
     && directObject.agreement['number'] === 'plural' && !directObject.conjuncts.every((np) => alarmCry(verb, np));
   const agreeForms = passiveSi ? { ...subjectForms, number: 'plural' } : subjectForms;
   const pn = moodPN(agreeForms);
   // A third-person object clitic sits ahead of an avere participle, which agrees with it: "l'ha
   // vista", "li ha visti", "la deve aver vista". With mi / ti / ci / vi the agreement is optional
   // and left out.
-  const cliticObject = directObject && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
+  const cliticObject = directObject && !objectPrep && isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
   const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : passiveSi ? directObject!.agreement : undefined;
   // A state verb's past is the imperfect ("voleva", "aveva", "era"), not the perfective (A130).
   const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? statePastForm('it', m, pn, tense, mood) ?? conjugate(m.forms, agreeForms, tense);
@@ -80,8 +85,8 @@ export function predicateText(
   // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "lo" for
   // a predicate ("il cane non lo è", "i cani lo sono"), "ci" for a place ("il cane non c'è").
   const elided = verbPhrase.elided;
-  const objectClitic = directObject && isPronounElement(directObject)
-    ? objectPronounForm(firstConjunct(directObject).head.forms)
+  const objectClitic = cliticObject
+    ? objectPronounForm(cliticObject)
     : elided ? (elided.type === 'predicative' ? 'lo' : 'ci') : '';
   // The locative "ci" elides before the e- forms of essere: "c'è", "c'era", "non c'è mai stato".
   const elideCi = (text: string): string => (elided?.type === 'locative' ? text.replace(/(^|\s)ci (?=[eè])/, "$1c'") : text);
@@ -89,6 +94,7 @@ export function predicateText(
   // form with no article ("vede il cane e te", "vede lui e me"). The alarm a cry raises takes "a" and
   // the article ("gridò al lupo", A124).
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
+    if (objectPrep) return prepObjectText(np, objectPrep);
     if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
     const cry = alarmCry(verb, np);
     return cry ? alarmCryText(cry) : npText(np);

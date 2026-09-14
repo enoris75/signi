@@ -40,8 +40,9 @@ describe('terminus', () => {
     expect(said.fr).toMatch(/ le livre au chien\.$/);
     expect(said.es).toMatch(/ el libro al perro\.$/);
     expect(said.pt).toMatch(/ o livro ao cão\.$/);
-    // German is the interesting one: dative recipient, then accusative object.
-    expect(said.de).toMatch(/^der Kater \w+ dem Hund das Buch\.$/);
+    // German is the interesting one: dative recipient, then accusative object. ADD's separable
+    // particle closes the clause after them ("fügt dem Hund das Buch hinzu", A138).
+    expect(said.de).toMatch(/^der Kater \p{L}+ dem Hund das Buch(?: hinzu)?\.$/u);
     expect(said.ja).toMatch(/^猫は犬に本を.+ます。$/);
   });
 });
@@ -176,12 +177,39 @@ describe('known bugs: terminus', () => {
   // So the German terminus DOES vary with animacy, unlike the other six languages.
   test('German marks an inanimate terminus with a preposition, an animate one with the dative', () => {
     expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
-    expect(sendTo('ADD', 'CONTAINER').de).toBe('der Kater addiert das Buch in den Behälter.');
     expect(sendTo('EXPORT', 'CONTAINER').de).toBe('der Kater exportiert das Buch in den Behälter.');
     expect(sendTo('SEND', 'MARKET').de).toBe('der Kater schickt das Buch in den Markt.');
     // Regression: a person recipient keeps the bare dative, leading the object.
     expect(sendTo('SEND', 'DOG').de).toBe('der Kater schickt dem Hund das Buch.');
     expect(sendTo('GIVE', 'DOG').de).toBe('der Kater gibt dem Hund das Buch.');
+  });
+});
+
+// A143. The inanimate goal's "in" + accusative is the app's default, and right for putting a thing into
+// a container ("speichert das Buch in den Behälter"). ADD is "hinzufügen" (A138), which adds a thing TO
+// something: "fügt das Buch zum Behälter hinzu", never "*fügt das Buch in den Behälter hinzu".
+describe('known bugs: German ADD takes its goal with zu', () => {
+  const addTo = (goal: ReturnType<typeof np>) =>
+    sayAll(clause(np('CAT'), 'ADD', { directObject: np('BOOK'), complements: { terminus: { phrase: goal } } })).de;
+
+  test.fails('German adds a thing to a goal with zu + dative', () => {
+    expect(addTo(np('CONTAINER'))).toBe('der Kater fügt das Buch zum Behälter hinzu.');
+    expect(addTo(np('CONDITION'))).toBe('der Kater fügt das Buch zur Bedingung hinzu.');
+    expect(addTo(np('CONTAINER', { definiteness: 'indefinite' }))).toBe('der Kater fügt das Buch zu einem Behälter hinzu.');
+    expect(addTo(np('HOUSE', { number: 'plural' }))).toBe('der Kater fügt das Buch zu den Häusern hinzu.');
+  });
+
+  test.fails('a relative on the goal takes zu too', () => {
+    expect(sayAll(clause(np('CONTAINER', {
+      relative: { headRole: 'terminus', subject: np('CAT'), verbPhrase: { verb: 'ADD' }, directObject: np('BOOK') },
+    }), 'RUN')).de).toBe('der Behälter, zu dem der Kater das Buch hinzufügt, läuft.');
+  });
+
+  // Regression guard: a verb that puts a thing into a container keeps "in", and a person recipient
+  // keeps the bare dative.
+  test('regression: SAVE keeps in, and ADD keeps the dative of a person', () => {
+    expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
+    expect(sendTo('ADD', 'DOG').de).toBe('der Kater fügt dem Hund das Buch hinzu.');
   });
 });
 

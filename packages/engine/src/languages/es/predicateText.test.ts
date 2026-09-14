@@ -376,4 +376,25 @@ describe('predicateText', () => {
       expect(predicateText(PERRO, be({ negative: true, elided: inTheHouseElided }))).toBe('no está');
     });
   });
+
+  // A139: CLICK's lexeme takes its object with "en".
+  describe('an object a preposition leads (A139)', () => {
+    const CLICAR: Forms = { base: 'clicar', object_prep: 'en', '3sg_present': 'clica', '3pl_present': 'clican', '1sg_present': 'clico', participle: 'clicado' };
+
+    test('the object takes the preposition, and no personal a', () => {
+      expect(predicateText(GATO, vp(CLICAR), el(np(LIBRO)))).toBe('clica en el libro');
+      expect(predicateText(GATO, vp(CLICAR), el(np(NINO)))).toBe('clica en el niño');
+      expect(predicateText(GATO, vp(CLICAR, { negative: true }), el(np(LIBRO), np(CASA)))).toBe('no clica en el libro y en la casa');
+    });
+
+    test('a pronoun is no clitic, alone or in a group', () => {
+      expect(predicateText(GATO, vp(CLICAR), el(np(YO)))).toBe('clica en mí');
+      expect(predicateText(GATO, vp(CLICAR), el(np(EL), np(YO)))).toBe('clica en él y en mí');
+      expect(predicateText(TU, vp(CLICAR, { mood: 'imperative' }), el(np(YO)))).toBe('clica en mí');
+    });
+
+    test('the impersonal se stays impersonal', () => {
+      expect(predicateText(SE, vp(CLICAR), el(np(LIBRO, { number: 'plural' })))).toBe('se clica en los libros');
+    });
+  });
 });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ESSEN, GEHEN, WAEHLEN } from './de.fixtures.js';
+import { ESSEN, GEHEN, HINZUFUEGEN, WAEHLEN } from './de.fixtures.js';
 import { verbGroup } from './verbGroup.js';
 
 describe('verbGroup', () => {
@@ -53,5 +53,14 @@ describe('verbGroup', () => {
     expect(verbGroup(ESSEN, '3sg', 'future', 'resultative')).toEqual({ v2: 'wird', mid: '', tail: 'gegessen haben', zuInfinitive: '' });
     expect(verbGroup(GEHEN, '3sg', 'future', 'resultative')).toEqual({ v2: 'wird', mid: '', tail: 'gegangen sein', zuInfinitive: '' });
     expect(verbGroup(ESSEN, '1sg', 'present', 'resultative', 'conditional')).toEqual({ v2: 'würde', mid: '', tail: 'gegessen haben', zuInfinitive: '' });
+  });
+
+  // A138: a separable verb's own finite form leaves its particle for the clause to place.
+  test('a separable verb: the finite stem hands over its particle; the non-finite forms keep it', () => {
+    expect(verbGroup(HINZUFUEGEN, '3sg', 'present', 'neutral')).toEqual({ v2: 'fügt', mid: '', tail: '', zuInfinitive: '', particle: 'hinzu' });
+    expect(verbGroup(HINZUFUEGEN, '3sg', 'past', 'progressive')).toEqual({ v2: 'fügte', mid: 'gerade', tail: '', zuInfinitive: '', particle: 'hinzu' });
+    expect(verbGroup(HINZUFUEGEN, '3sg', 'future', 'neutral')).toEqual({ v2: 'wird', mid: '', tail: 'hinzufügen', zuInfinitive: '' });
+    expect(verbGroup(HINZUFUEGEN, '3sg', 'present', 'resultative')).toEqual({ v2: 'hat', mid: '', tail: 'hinzugefügt', zuInfinitive: '' });
+    expect(verbGroup(HINZUFUEGEN, '3sg', 'present', 'prospective')).toEqual({ v2: 'ist', mid: 'im Begriff', tail: '', zuInfinitive: 'hinzuzufügen' });
   });
 });

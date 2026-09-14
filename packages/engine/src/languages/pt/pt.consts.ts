@@ -20,7 +20,10 @@ export const PT_SUPPLETIVE: Record<string, string> = {
   grande: 'maior', bom: 'melhor', pequeno: 'menor', mau: 'pior',
 };
 
-/** The tonic pronouns "de" fuses with: de + ele → dele, de + isso → disso, de + aquilo → daquilo. */
+/**
+ * The tonic pronouns "de" and "em" fuse with: de + ele → dele, de + isso → disso, de + aquilo → daquilo;
+ * em + ele → nele, em + isso → nisso.
+ */
 export const PT_DE_FUSING_PRONOUN = /^(?:el[ae]s?|isso|isto|aquilo|aquel[ae]s?)$/i;
 
 /** Irregular Portuguese adjectives: base → [masc sg, fem sg, masc pl, fem pl]. */
@@ -80,6 +83,10 @@ export const ESTAR_COPULA: ConceptForms = {
     '1pl_future': 'estaremos', '2pl_future': 'estarão', '3pl_future': 'estarão',
   },
 };
+
+// A pronominal verb's clitic, agreeing with the subject: "me" and "nos", and "se" for the rest — você and
+// vocês agree as the 3rd person (A108). Reflexivity is lexical: the infinitive ends in "-se" ("tornar-se").
+export const PT_REFLEXIVE: Record<string, string> = { '1sg': 'me', '2sg': 'se', '3sg': 'se', '1pl': 'nos', '2pl': 'se', '3pl': 'se' };
 
 /** Portuguese linking preposition for an attributive noun, by relation (bare, no article). */
 export const REL_PREP_PT: Record<ModifierRelation, string> = { feature: 'a', purpose: 'de', material: 'de' };

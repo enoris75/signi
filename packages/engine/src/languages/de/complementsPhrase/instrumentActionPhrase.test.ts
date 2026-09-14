@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, Specifier } from '@signi/shared';
-import { BUCH, complement, concept, el, MESSER, np, SCHNELL, vp, WAEHLEN, WORT } from '../de.fixtures.js';
+import { BUCH, complement, concept, el, HINZUFUEGEN, MESSER, np, SCHNELL, vp, WAEHLEN, WORT } from '../de.fixtures.js';
 import { instrumentActionPhrase } from './instrumentActionPhrase.js';
 
 const abstraction = (value: AbstractionLevel): Specifier => ({ kind: 'abstraction', value });
@@ -37,5 +37,13 @@ describe('instrumentActionPhrase', () => {
       .toBe('mit dem Wählen eines Wortes');
     expect(instrumentActionPhrase(complement(np(WORT), [abstraction('concept')], vp(WAEHLEN, { modifier: concept(SCHNELL) }))))
       .toBe('mit dem schnellen Wählen des Wortes');
+  });
+
+  // A138: the means clause is verb-final, so a separable verb's particle rejoins it.
+  test('a separable verb closes the means clause whole, and nominalises whole', () => {
+    expect(instrumentActionPhrase(complement(np(WORT, { definiteness: 'indefinite' }), [abstraction('process')], vp(HINZUFUEGEN))))
+      .toBe(', indem man ein Wort hinzufügt');
+    expect(instrumentActionPhrase(complement(np(WORT, { definiteness: 'indefinite' }), [abstraction('concept')], vp(HINZUFUEGEN))))
+      .toBe('mit dem Hinzufügen eines Wortes');
   });
 });

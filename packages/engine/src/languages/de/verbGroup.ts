@@ -2,6 +2,7 @@ import type { Aspect, Tense } from '@signi/shared';
 import type { VerbComplex } from './de.types.js';
 import { HABEN, SEIN, WERDEN, WUERDE } from './de.consts.js';
 import { isConditionalMood } from './isConditionalMood.js';
+import { zuInfinitive } from './zuInfinitive.js';
 
 /**
  * The German verb complex for a tense + aspect, split across the clause: `v2` is the finite
@@ -31,17 +32,19 @@ export function verbGroup(
   const perfAux = verbForms['aux'] === 'be' ? 'sein' : 'haben';
   const perfFinite = periphrastic ? '' : (perfAux === 'sein' ? SEIN : HABEN)[tense][pn];
   const conjug = periphrastic ? auxV2 : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
+  // A separable verb's own finite form leaves its particle for the clause to place (A138): "fügt … hinzu".
+  const particle = !periphrastic && verbForms['particle'] ? { particle: verbForms['particle'] } : {};
   switch (aspect) {
     case 'progressive':
       // Plain finite verb + "gerade"; periphrastic keeps aux … Infinitiv, with "gerade" mid.
-      return { v2: conjug, mid: 'gerade', tail: periphrastic ? base : '', zuInfinitive: '' };
+      return { v2: conjug, mid: 'gerade', tail: periphrastic ? base : '', zuInfinitive: '', ...particle };
     case 'prospective':
       // Future/conditional put "sein" at the clause end ("wird im Begriff sein").
       return {
         v2: periphrastic ? auxV2 : sein,
         mid: 'im Begriff',
         tail: periphrastic ? 'sein' : '',
-        zuInfinitive: `zu ${base}`,
+        zuInfinitive: zuInfinitive(verbForms),
       };
     case 'resultative':
       // Future/conditional perfect stacks the auxiliary's infinitive at the clause end
@@ -53,6 +56,6 @@ export function verbGroup(
         zuInfinitive: '',
       };
     default: // neutral
-      return { v2: conjug, mid: '', tail: periphrastic ? base : '', zuInfinitive: '' };
+      return { v2: conjug, mid: '', tail: periphrastic ? base : '', zuInfinitive: '', ...particle };
   }
 }

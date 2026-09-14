@@ -108,6 +108,9 @@ export interface SatelliteIcon {
   // directToggle = clicking flips a value in place rather than revealing a box.
   // Squared off so shape alone separates the two kinds of control.
   directToggle?: boolean;
+  // link = clicking starts a link to a period in another container, or removes it (the relative
+  // clause, the instrumental). It reveals no box, so its tooltip never offers to show or hide one.
+  link?: boolean;
   onToggle: () => void;
 }
 
@@ -378,11 +381,14 @@ export function SatelliteButton({
   //  • neutral → a collapsed, genuinely-empty satellite (adjective / adverb)
   const solid = sat.isSet;
   const outlined = !solid && (sat.active || sat.valued);
-  // Always-valued (and set) satellites show their current value; empties prompt Show/Hide.
+  // Always-valued (and set) satellites show their current value; a link control not yet linked is
+  // named by what it links (A141); empties prompt Show/Hide.
   const tooltip =
     !sat.active && (sat.valued || sat.isSet) && sat.valueLabel
       ? `${sat.label}: ${sat.valueLabel}`
-      : revealTitle(t, sat.active, sat.label, sat.labelKey);
+      : sat.link
+        ? sat.label
+        : revealTitle(t, sat.active, sat.label, sat.labelKey);
   return (
     <Tooltip title={tooltip}>
       <IconButton

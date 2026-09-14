@@ -51,6 +51,7 @@ export function buildSatelliteIcons({
         isSet: linked,
         valued: false,
         valueLabel: linked ? "Linked — click to remove" : undefined,
+        link: true,
         onToggle: () =>
           linked
             ? linkBinding.instrumental.onClear()
@@ -71,10 +72,13 @@ export function buildSatelliteIcons({
         key: sat.key,
         icon: sat.icon,
         label: sat.label,
-        active: isSource,
+        // Never "active", as the instrumental: a made link reads as *set*, and the tooltip names the
+        // link rather than offering to hide a box (A141).
+        active: false,
         isSet: isSource,
         valued: false,
         valueLabel: isSource ? "Linked — click to remove" : undefined,
+        link: true,
         onToggle: () =>
           isSource
             ? linkBinding.relative.onRemoveLink(relativeNoun)

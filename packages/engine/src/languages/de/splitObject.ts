@@ -1,4 +1,5 @@
 import type { ResolvedNounElement } from '../../types.js';
+import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { elementPhrase } from './elementPhrase.js';
 
@@ -10,12 +11,24 @@ import { elementPhrase } from './elementPhrase.js';
  *
  * `proObject` is the pro-form an elided subject complement leaves (A121's "es"), which is a pronoun
  * too: "der Hund ist es immer". A coordination is not an unstressed pronoun, so it stays with the nouns.
+ *
+ * `prep` is the preposition a verb takes its object with (A139): the object is then a prepositional
+ * phrase in the accusative ("klickt auf die Taste", "auf ihn"), which stands where a predicate
+ * complement does, after "nicht" ("klickt nicht auf die Taste"). A neuter pronoun is the da-compound
+ * ("klickt darauf").
  */
 export function splitObject(
   directObject: ResolvedNounElement | undefined,
   proObject: string,
-): { pronoun: string; noun: string } {
-  if (!directObject) return { pronoun: proObject, noun: '' };
+  prep = '',
+): { pronoun: string; noun: string; prepositional: string } {
+  if (!directObject) return { pronoun: proObject, noun: '', prepositional: '' };
+  if (prep) {
+    const pronoun = isPronounElement(directObject) ? firstConjunct(directObject).head.forms : undefined;
+    const thing = pronoun?.['person'] === '3' && pronoun['gender'] === 'neut' && pronoun['number'] !== 'plural';
+    const prepositional = thing ? `da${/^[aeiouäöü]/.test(prep) ? 'r' : ''}${prep}` : `${prep} ${elementPhrase(directObject, 'acc')}`;
+    return { pronoun: '', noun: '', prepositional };
+  }
   const text = elementPhrase(directObject, 'acc');
-  return isPronounElement(directObject) ? { pronoun: text, noun: '' } : { pronoun: '', noun: text };
+  return isPronounElement(directObject) ? { pronoun: text, noun: '', prepositional: '' } : { pronoun: '', noun: text, prepositional: '' };
 }

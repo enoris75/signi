@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { adj, BOOT, BUCH, ESSEN, HAUS, JUNGE, KATER, KATZE, KLEIN, MANN, np, nounModifier, SEGEL, vp } from './de.fixtures.js';
+import { adj, BESTIMMUNG_RICHTUNG, BOOT, BUCH, ESSEN, HAUS, JUNGE, KATER, KATZE, KLEIN, MANN, np, nounModifier, SEGEL, vp } from './de.fixtures.js';
 import { possessorText } from './possessorText.js';
 
 describe('possessorText', () => {
@@ -35,6 +35,10 @@ describe('possessorText', () => {
   test('declines the possessor’s adjectives dative and keeps its compound', () => {
     expect(possessorText(np(BUCH, {}, { possessor: np(KATER, {}, { adjectives: [adj(KLEIN)] }) }))).toBe(' vom kleinen Kater');
     expect(possessorText(np(HAUS, {}, { possessor: np(BOOT, {}, { nounModifiers: [nounModifier(SEGEL)] }) }))).toBe(' vom Segelboot');
+  });
+
+  test('a multiword possessor declines its adjective, the words after its head fixed (A140)', () => {
+    expect(possessorText(np(BUCH, {}, { possessor: np(BESTIMMUNG_RICHTUNG, { number: 'plural' }) }))).toBe(' von den adverbialen Bestimmungen der Richtung');
   });
 
   test('recurses into a nested possessor and a relative clause', () => {

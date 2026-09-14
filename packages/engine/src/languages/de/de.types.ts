@@ -19,6 +19,11 @@ export type DeIPN = '2sg' | '1pl' | '2pl';
  * `finiteLeadsTail` marks a double infinitive: a modal's infinitive stacked under werden/würde. A
  * verb-final clause then puts the finite auxiliary ahead of the infinitive cluster instead of after
  * it ("der das Buch wird essen müssen"), see `verbFinalCluster`. It is absent everywhere else.
+ *
+ * `particle` is a separable verb's particle when `v2` is that verb's own finite form (A138): a V2
+ * clause leaves it at the very end ("fügt die Maus nicht hinzu"), a verb-final one joins it back onto
+ * the finite verb ("die Maus hinzufügt"). It is absent when the verb is non-finite, where the particle
+ * stays on the infinitive and the participle ("wird hinzufügen", "hat hinzugefügt").
  */
 export interface VerbComplex {
   v2: string;
@@ -26,6 +31,7 @@ export interface VerbComplex {
   tail: string;
   zuInfinitive: string;
   finiteLeadsTail?: true;
+  particle?: string;
 }
 
 /**

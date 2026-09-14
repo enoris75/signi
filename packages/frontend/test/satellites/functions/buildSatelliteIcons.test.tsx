@@ -441,6 +441,7 @@ describe('buildSatelliteIcons', () => {
           isSet: false,
           valued: false,
           valueLabel: undefined,
+          link: true,
         });
         relative.onToggle();
         expect(binding.relative.onStartLink).toHaveBeenCalledExactlyOnceWith('subject');
@@ -452,10 +453,12 @@ describe('buildSatelliteIcons', () => {
         const { perimeterByNoun } = icons({ verb: SEE, directObject: CAT }, { binding });
         const relative = perimeterByNoun['directObject']!.relative!;
 
+        // Set, but never active: a link reveals no box (A141).
         expect(relative).toMatchObject({
-          active: true,
+          active: false,
           isSet: true,
           valueLabel: 'Linked — click to remove',
+          link: true,
         });
         relative.onToggle();
         expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('directObject');
@@ -678,7 +681,7 @@ describe('known bugs: the link controls’ tooltips', () => {
     return label;
   };
 
-  it.fails('the relative clause control names the link, not a reveal', () => {
+  it('the relative clause control names the link, not a reveal', () => {
     const unlinked = icons({ subject: CAT }, { binding: workspace() }).perimeterByNoun['subject']!.relative!;
     const linked = icons({ subject: CAT }, { binding: workspace({ relativeSources: ['subject'] }) })
       .perimeterByNoun['subject']!.relative!;
@@ -687,12 +690,31 @@ describe('known bugs: the link controls’ tooltips', () => {
     expect(tooltip(linked)).toBe('t(satellite.relative): Linked — click to remove');
   });
 
-  it.fails('the instrumental control names the link before one is made', () => {
+  it('the instrumental control names the link before one is made', () => {
     const unlinked = icons({ verb: GO }, { binding: workspace() }).complementToggleIcons.find(
       (icon) => icon.key === 'instrumental',
     )!;
 
     expect(tooltip(unlinked)).toBe('t(slot.instrumental)');
+  });
+
+  it('a linked relative clause still removes the link, and the linked face follows each noun', () => {
+    const binding = workspace({ relativeSources: ['directObject'] });
+    const { perimeterByNoun } = icons({ verb: SEE, subject: CAT, directObject: FRIEND }, { binding });
+
+    expect(tooltip(perimeterByNoun['directObject']!.relative!)).toBe('t(satellite.relative): Linked — click to remove');
+    expect(tooltip(perimeterByNoun['subject']!.relative!)).toBe('t(satellite.relative)');
+    perimeterByNoun['directObject']!.relative!.onToggle();
+    expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('directObject');
+  });
+
+  it('regression: a reveal control still offers to show and hide its box', () => {
+    const shut = icons({ subject: CAT }).perimeterByNoun['subject']!.possessor!;
+    const open = icons({ verb: GO, route: CAT, routePossessor: { subject: HOUSE } }).perimeterByNoun['route']!.possessor!;
+
+    expect(shut.link).toBeUndefined();
+    expect(tooltip(shut)).toBe('Show the possessor');
+    expect(tooltip(open)).toBe('Hide the possessor');
   });
 
   it('regression: the instrumental’s linked face already names the link', () => {

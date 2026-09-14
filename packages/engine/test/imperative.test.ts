@@ -294,9 +294,9 @@ describe('known bugs: German du-imperative forms', () => {
 
   // Every seeded verb, so a new verb whose du form the rule gets wrong shows up here. The bare stems
   // (lauf, konsumier, lösch) are optional-e forms and correct; SELECT/ADD/EXPORT/IMPORT/CLEAR/
-  // COORDINATE store the -e form on the lexeme.
+  // COORDINATE store the -e form on the lexeme. ADD is separable, so its particle closes the command (A138).
   test.each([
-    ['ADD', 'addiere'], ['APPEAR', 'erschein'], ['BE', 'sei'], ['BEAT', 'schlag'], ['BECOME', 'werde'],
+    ['ADD', 'füge hinzu'], ['APPEAR', 'erschein'], ['BE', 'sei'], ['BEAT', 'schlag'], ['BECOME', 'werde'],
     ['BITE', 'beiß'], ['BURN', 'brenn'], ['BUY', 'kauf'], ['CHOOSE', 'wähl'], ['CLEAR', 'lösche'],
     ['CLICK', 'klick'], ['COLLAPSE', 'kollabier'], ['COME', 'komm'], ['COMPACT', 'verdichte'],
     ['CONSUME', 'konsumier'], ['COORDINATE', 'koordiniere'], ['CREATE', 'erschaff'], ['CRY', 'wein'],

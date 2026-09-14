@@ -9,6 +9,7 @@ import { genitiveS } from './genitiveS.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
 import { possessorText } from './possessorText.js';
+import { postnominal } from './postnominal.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
 
@@ -35,5 +36,5 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
     ? possessiveDe(poss, _case, { gender: (forms['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })
     : determiner(forms, _case, plural); // der/die/das · ein/eine/einen · (bare)
   const lead = art ? `${art} ` : '';
-  return `${lead}${a}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
+  return `${lead}${a}${word}${postnominal(forms)}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
 }

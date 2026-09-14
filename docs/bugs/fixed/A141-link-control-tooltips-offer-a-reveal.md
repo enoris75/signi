@@ -30,3 +30,21 @@ link verb is seeded ("Link a relative clause"); the label is the honest stopgap.
 | | |
 |---|---|
 | **Test** | `packages/frontend/test/satellites/functions/buildSatelliteIcons.test.tsx` → *known bugs: the link controls' tooltips* (2 `it.fails`, plus a regression test for the instrumental's linked face) |
+
+## Resolved
+
+Fixed 2026-09-14.
+
+- **Frontend:** `SatelliteIcon` ([`Boxes.tsx`](../../../packages/frontend/src/components/PhraseBuilder/Boxes.tsx))
+  has a `link` flag. `SatelliteButton` names an unlinked link control by its label alone, and a linked one
+  still reads "label: Linked — click to remove".
+  [`buildSatelliteIcons`](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/buildSatelliteIcons.ts)
+  marks the relative clause and the instrumental as link controls. The relative clause is never `active`,
+  the same as the instrumental, so it no longer offers to "Hide". `valued` stays false, so neither control's
+  colour changes.
+- **Tests:** [`buildSatelliteIcons.test.tsx`](../../../packages/frontend/test/satellites/functions/buildSatelliteIcons.test.tsx)
+  → *known bugs: the link controls' tooltips*. Both `it.fails` are now passing `it`s. New cases: a linked
+  relative clause still removes its link, and its face follows each noun. A regression guard checks that a
+  reveal control (the possessor) still offers "Show" / "Hide". The relative-clause control test now expects
+  `active: false` and `link: true`. [`Boxes.test.tsx`](../../../packages/frontend/test/Boxes.test.tsx) covers
+  both faces of a link control, and its name in a non-English UI.

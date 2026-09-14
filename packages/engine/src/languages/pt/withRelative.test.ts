@@ -73,4 +73,12 @@ describe('withRelative', () => {
     expect(withRelative('um lugar', np(CASA, { definiteness: 'indefinite' }, { relative: eatenIn(el(np(SE)), { verbPhrase: vp(COMER, { negative: true }) }) })))
       .toBe('um lugar onde não se come');
   });
+
+  // A139: the object of a verb that takes it with a preposition relativises on that preposition.
+  test('a head that is the object of a prepositional verb takes the preposition contracted with o qual', () => {
+    const CLICAR: Forms = { base: 'clicar', object_prep: 'em', '3sg_present': 'clica' };
+    const clicked = { headRole: 'directObject' as const, subject: el(np(GATO)), verbPhrase: vp(CLICAR) };
+    expect(withRelative('o livro', np(LIVRO, {}, { relative: clicked }))).toBe('o livro no qual o gato clica');
+    expect(withRelative('as casas', np(CASA, { number: 'plural' }, { relative: clicked }))).toBe('as casas nas quais o gato clica');
+  });
 });

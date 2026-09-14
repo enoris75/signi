@@ -39,3 +39,23 @@ prepends `FR_REFLEXIVE[auxKey(subject)]` and elides it. Portuguese strips the cl
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: pronominal verb in a hypothetical* (2 `test.fails`) |
+
+## Resolved
+
+Fixed 2026-09-14 with the shape above: each engine derives the mood form from the plain verb and places
+the subject's clitic, as Spanish already did.
+
+- **French:** [`nonReflexiveVerb`](../../../packages/engine/src/languages/fr/nonReflexiveVerb.ts) (new) takes
+  `s'` / `se ` off the base and the clitic off every stored form. [`predicateText`](../../../packages/engine/src/languages/fr/predicateText.ts)
+  derives the conditionnel, the imparfait and a state verb's past from it and hands the result to
+  `reflexiveFinite`: "s'effondrerait", "je m'effondrais", "nous nous effondrerions".
+- **Portuguese:** [`reflexiveClitic`](../../../packages/engine/src/languages/pt/reflexiveClitic.ts) (new) and
+  `PT_REFLEXIVE` in [`pt.consts.ts`](../../../packages/engine/src/languages/pt/pt.consts.ts) give the subject's
+  clitic (me / nos, se for você, vocês and the 3rd person). [`predicateText`](../../../packages/engine/src/languages/pt/predicateText.ts)
+  derives the mood form with `nonReflexiveVerb` and puts that clitic in front: "se tornaria", "me tornasse".
+  The 1st-plural accent stays B11's.
+- **Tests:** [`verb.test.ts`](../../../packages/engine/test/verb.test.ts) → *known bugs: pronominal verb in a
+  hypothetical*. Both pinning `test.fails` are now passing `test`s. New cases cover every person in French
+  and a negation in each language. A regression guard covers the French compound past and a modal in the
+  if clause, and the indicative future and past. Unit tests: `fr/nonReflexiveVerb.test.ts`,
+  `pt/reflexiveClitic.test.ts`, `fr/predicateText.test.ts`, `pt/predicateText.test.ts`.

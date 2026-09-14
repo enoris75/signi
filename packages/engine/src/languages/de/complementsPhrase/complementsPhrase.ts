@@ -16,6 +16,7 @@ import { germanCompound } from '../germanCompound.js';
 import { modifierGenitives } from '../modifierGenitives.js';
 import { nounPhrase } from '../nounPhrase.js';
 import { possessorText } from '../possessorText.js';
+import { postnominal } from '../postnominal.js';
 import { prepDet } from '../prepDet.js';
 import { spatialCase } from '../spatialCase.js';
 import { spatialHead } from '../spatialHead.js';
@@ -118,7 +119,7 @@ export function complementsPhrase(
       const possessive = poss
         ? `${possessiveDe(poss, _case, { gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })} `
         : '';
-      const rest = `${possessive}${adj}${word}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
+      const rest = `${possessive}${adj}${word}${postnominal(f)}${modifierGenitives(np)}${possessorText(np)}${subordinateClause(np)}`;
       return head ? `${head} ${rest}` : rest;
       });
     })

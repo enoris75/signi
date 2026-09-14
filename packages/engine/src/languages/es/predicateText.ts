@@ -6,6 +6,7 @@ import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
@@ -17,6 +18,7 @@ import { esCliticize } from './esCliticize.js';
 import { esEnclitic } from './esEnclitic.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { objectNounText } from './objectNounText.js';
+import { prepObjectText } from './prepObjectText.js';
 import { reflexiveClitic } from './reflexiveClitic.js';
 import { takesPersonalA } from './takesPersonalA.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
@@ -39,7 +41,10 @@ export function predicateText(
   // With a plural noun object the impersonal se is the passive se, and the finite verb agrees with its
   // patient: "se comen los ratones", "se han comido los ratones". A clitic object keeps se impersonal,
   // and so does an object marked with the personal "a", a pronoun or a human: "se ve a los niños".
-  const passiveSe = subjectForms['generic'] === '1' && !!directObject && !isPronounElement(directObject)
+  // A verb that takes its object with a preposition ("clica en el botón", A139) has no direct object to
+  // be a clitic or the passive se's patient: "se clica en los botones", "clica en mí".
+  const objectPrep = objectPreposition(verb);
+  const passiveSe = subjectForms['generic'] === '1' && !!directObject && !objectPrep && !isPronounElement(directObject)
     && directObject.agreement['number'] === 'plural'
     && !directObject.conjuncts.some((np) => np.head.forms['person'] || takesPersonalA(np));
   const agreeForms = passiveSe ? { ...subjectForms, number: 'plural' } : subjectForms;
@@ -112,7 +117,7 @@ export function predicateText(
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the
   // post-verbal slot.
-  const pronounGroup = !!directObject && directObject.conjuncts.length > 1
+  const pronounGroup = !!directObject && !objectPrep && directObject.conjuncts.length > 1
     && directObject.conjuncts.every((np) => np.head.forms['person']);
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes "a" + its
   // tonic form. A group of pronouns is doubled by its plural clitic ("el gato nos ve a mí y a ti");
@@ -120,10 +125,12 @@ export function predicateText(
   // An elided predicate leaves the invariable "lo" in the same slot ("el perro no lo es", "los perros
   // no lo están"); an elided place leaves nothing ("el perro no está") (A121).
   const objectClitic = !directObject ? (verbPhrase.elided?.type === 'predicative' ? 'lo' : '')
+    : objectPrep ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : pronounGroup ? groupObjectClitic(directObject) : '';
   // A human noun takes the personal "a" too ("ve al niño"), see `objectNounText`.
-  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np);
+  const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
+    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';

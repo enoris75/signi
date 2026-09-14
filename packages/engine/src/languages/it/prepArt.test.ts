@@ -24,6 +24,17 @@ describe('prepArt', () => {
     expect(prepArt('in', CASA, true)).toBe('nelle');
   });
 
+  // A139: CLICK's object takes "su" ("clicca sul pulsante").
+  test('su fuses whole, su- before every article form', () => {
+    expect(prepArt('su', GATTO)).toBe('sul');
+    expect(prepArt('su', SLOT)).toBe('sullo');
+    expect(prepArt('su', CASA)).toBe('sulla');
+    expect(prepArt('su', UOMO)).toBe("sull'");
+    expect(prepArt('su', GATTO, true)).toBe('sui');
+    expect(prepArt('su', UOMO, true)).toBe('sugli');
+    expect(prepArt('su', CASA, true)).toBe('sulle');
+  });
+
   test('the article is chosen against the word that follows', () => {
     // "al grande uomo", not "all'grande uomo"
     expect(prepArt('a', UOMO, false, 'grande')).toBe('al');

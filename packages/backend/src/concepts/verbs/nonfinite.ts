@@ -319,7 +319,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
   ADD: {
     en: { gerund: 'adding', participle: 'added' },
     it: { gerund: 'aggiungendo', participle: 'aggiunto' },
-    fr: { participle: 'ajouté' }, de: { participle: 'addiert' },
+    fr: { participle: 'ajouté' }, de: { participle: 'hinzugefügt' },
     es: { gerund: 'añadiendo', participle: 'añadido' },
     pt: { gerund: 'adicionando', participle: 'adicionado' },
     ja: { te: '加えて', te_reading: 'くわえて', nai: '加えない', nai_reading: 'くわえない' },

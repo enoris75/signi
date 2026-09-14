@@ -83,7 +83,8 @@ const HYPERNYM_SQL = `
 `;
 
 // The citation form of every concept in every seeded language — the primary lexeme's lemma
-// (a noun's singular), with the kana reading of that lemma where the lexeme carries one (ja),
+// (a noun's singular, or its `citation` where the singular is only the head of a longer name:
+// German "adverbiale Bestimmung des Ortes", A140), with the kana reading of that lemma where the lexeme carries one (ja),
 // so the pickers can put furigana over the word they show. The pickers show the word in the
 // chosen language, so the whole catalog rides along with the concept list rather than being
 // re-fetched per language.
@@ -101,7 +102,9 @@ const LABEL_SQL = `
     FROM verb_lexemes vl
     JOIN concept_verb_links cvl ON cvl.lexeme_id = vl.id AND cvl.is_primary = 1
     UNION ALL
-    SELECT cnl.concept_id, nl.language, nl.singular AS word,
+    SELECT cnl.concept_id, nl.language,
+           COALESCE((SELECT form_value FROM noun_forms f
+                     WHERE f.lexeme_id = nl.id AND f.form_key = 'citation'), nl.singular) AS word,
            (SELECT form_value FROM noun_forms f
             WHERE f.lexeme_id = nl.id AND f.form_key = 'reading') AS reading
     FROM noun_lexemes nl

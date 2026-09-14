@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { ESSEN, GEHEN, KOENNEN, modal, MUESSEN, WOLLEN } from './de.fixtures.js';
+import { ESSEN, GEHEN, HINZUFUEGEN, KOENNEN, modal, MUESSEN, WOLLEN } from './de.fixtures.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 
 describe('modalVerbGroup', () => {
@@ -42,5 +42,12 @@ describe('modalVerbGroup', () => {
     expect(modalVerbGroup([modal(MUESSEN)], ESSEN, '3sg', 'present', 'resultative')).toEqual({ v2: 'muss', mid: '', tail: 'gegessen haben', zuInfinitive: '' });
     expect(modalVerbGroup([modal(MUESSEN)], GEHEN, '3sg', 'present', 'resultative')).toEqual({ v2: 'muss', mid: '', tail: 'gegangen sein', zuInfinitive: '' });
     expect(modalVerbGroup([modal(MUESSEN)], GEHEN, '3sg', 'future', 'resultative')).toEqual({ v2: 'wird', mid: '', tail: 'gegangen sein müssen', zuInfinitive: '', finiteLeadsTail: true });
+  });
+
+  // A138: under a modal a separable verb is non-finite, so its particle stays on it.
+  test('a separable main verb keeps its particle, and splits it only for zu', () => {
+    expect(modalVerbGroup([modal(MUESSEN)], HINZUFUEGEN, '3sg', 'present', 'neutral')).toEqual({ v2: 'muss', mid: '', tail: 'hinzufügen', zuInfinitive: '' });
+    expect(modalVerbGroup([modal(MUESSEN)], HINZUFUEGEN, '3sg', 'present', 'prospective'))
+      .toEqual({ v2: 'muss', mid: 'im Begriff', tail: 'sein', zuInfinitive: 'hinzuzufügen' });
   });
 });

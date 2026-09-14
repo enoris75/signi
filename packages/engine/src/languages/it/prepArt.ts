@@ -2,12 +2,12 @@ import { defArticle } from './defArticle.js';
 
 /**
  * Generic Italian simple-preposition + definite-article fusion for "a" (to),
- * "da" (from), "in" (in) and "di" (of): al/dal/nel/del, allo/dallo/nello/dello,
- * alla/dalla/nella/della, all'/dall'/nell'/dell', …
+ * "da" (from), "in" (in), "di" (of) and "su" (on): al/dal/nel/del/sul, allo/dallo/nello/dello/sullo,
+ * alla/dalla/nella/della/sulla, all'/dall'/nell'/dell'/sull', …
  */
-export function prepArt(prep: 'a' | 'da' | 'in' | 'di', forms: Record<string, string>, plural = false, lead?: string): string {
+export function prepArt(prep: 'a' | 'da' | 'in' | 'di' | 'su', forms: Record<string, string>, plural = false, lead?: string): string {
   const art = defArticle(forms, plural, lead);
-  const prefix = prep === 'a' ? 'a' : prep === 'da' ? 'da' : prep === 'di' ? 'de' : 'ne';
+  const prefix = prep === 'di' ? 'de' : prep === 'in' ? 'ne' : prep;
   let suffix: string;
   switch (art) {
     case 'il':  suffix = 'l'; break;

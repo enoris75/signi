@@ -113,3 +113,9 @@ export const HARD_ICO_ADJ: ReadonlySet<string> = new Set(['antico', 'carico']);
  * "dallo", "fammi", "vacci". Keyed by concept, not by the apostrophe.
  */
 export const IT_SHORT_IMPERATIVE: ReadonlySet<string> = new Set(['GIVE', 'MAKE', 'GO']);
+
+/**
+ * The prepositions a personal pronoun follows through "di": "su di me", "sotto di lui", "senza di te"
+ * (A139). The others take the tonic pronoun directly ("a me", "con lui").
+ */
+export const IT_DI_BEFORE_PRONOUN: ReadonlySet<string> = new Set(['su', 'sopra', 'sotto', 'dietro', 'dentro', 'verso', 'contro', 'senza']);

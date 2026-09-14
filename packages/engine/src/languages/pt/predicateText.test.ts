@@ -78,6 +78,15 @@ describe('predicateText', () => {
       expect(predicateText(GATO, vp(COMER, { aspect: 'progressive', modals: [modal(PODER)] }))).toBe('pode estar comendo');
     });
 
+    // A137: the stored forms carry one person's clitic, so a pronominal verb takes the subject's.
+    test('a pronominal verb takes the clitic of its subject under a hypothetical', () => {
+      const become = (extra: Parameters<typeof vp>[1]) => vp(TORNAR_SE, extra, 'BECOME');
+      expect(predicateText(GATO, become({ mood: 'conditional' }))).toBe('se tornaria');
+      expect(predicateText(EU, become({ mood: 'subjunctive' }))).toBe('me tornasse');
+      expect(predicateText(NOS, become({ mood: 'conditional' }))).toBe('nos tornaríamos');
+      expect(predicateText(GATO, become({ mood: 'subjunctive', negative: true }))).toBe('não se tornasse');
+    });
+
     test('a modal takes the conditional under a hypothetical', () => {
       expect(predicateText(GATO, vp(COMER, { mood: 'conditional', modals: [modal(DEVER)] }))).toBe('deveria comer');
     });
@@ -296,6 +305,24 @@ describe('predicateText', () => {
       expect(predicateText(CAO, be({ negative: true, elided: happy }))).toBe('não está');
       expect(predicateText(CAO, be({ tense: 'past', elided: happy }))).toBe('estava');
       expect(predicateText(CAO, be({ negative: true, elided: inTheHouseElided }))).toBe('não está');
+    });
+  });
+
+  // A139: CLICK's lexeme takes its object with "em".
+  describe('an object a preposition leads (A139)', () => {
+    const CLICAR: Forms = { base: 'clicar', object_prep: 'em', '1sg_present': 'clico', '3sg_present': 'clica', '3pl_present': 'clicam' };
+
+    test('the object takes the preposition, contracted with the article', () => {
+      expect(predicateText(GATO, vp(CLICAR), el(np(LIVRO)))).toBe('clica no livro');
+      expect(predicateText(GATO, vp(CLICAR, { negative: true }), el(np(LIVRO), np(CASA)))).toBe('não clica no livro e na casa');
+    });
+
+    test('a pronoun is no clitic, fused with em in the 3rd person', () => {
+      expect(predicateText(GATO, vp(CLICAR), el(np(EU)))).toBe('clica em mim');
+      expect(predicateText(GATO, vp(CLICAR), el(np(ELA)))).toBe('clica nela');
+      expect(predicateText(VOCE, vp(CLICAR, { mood: 'imperative' }), el(np(ELA)))).toBe('clique nela');
+      // With nothing ahead of the verb, no clitic moves after it.
+      expect(predicateText(EU, vp(CLICAR), el(np(ELE)), undefined, true)).toBe('clico nele');
     });
   });
 });

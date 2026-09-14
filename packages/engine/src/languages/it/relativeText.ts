@@ -3,9 +3,11 @@ import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateText } from './predicateText.js';
+import { prepObjectText } from './prepObjectText.js';
 import { subjectText } from './subjectText.js';
 
 /**
@@ -24,10 +26,12 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const QUALE = { base: 'quale', plural: 'quali', definiteness: 'definite' };
   const alarmHead = relativeAlarmHead(np, QUALE);
+  // So is the object of a verb that takes it with a preposition: "il pulsante sul quale si clicca" (A139).
+  const prepHead = relativePrepositionalHead(np, QUALE);
   // A plural head gapped as the object of the impersonal si is the passive si's patient, and the verb
   // agrees with it: "i topi che si mangiano" (the compound tense aside, as in `predicateText`). An alarm is
   // no object, so si stays impersonal: "i lupi ai quali si grida".
-  const passiveSi = !subjectRelative && rel.headRole === 'directObject' && !alarmHead && isGenericSubject(rel.subject!)
+  const passiveSi = !subjectRelative && rel.headRole === 'directObject' && !alarmHead && !prepHead && isGenericSubject(rel.subject!)
     && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural' && rel.verbPhrase.aspect !== 'resultative';
   const agreeForms = subjectRelative ? np.head.forms
     : passiveSi ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
@@ -37,6 +41,7 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements);
   const gap = relativeGapComplement(np, QUALE);
   const relativizer = alarmHead ? alarmCryText(alarmHead)
+    : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'dove'
       : gap ? complementsPhrase(gap, {}, '') : 'che';
   return `${relativizer} ${[subjText, pred].filter(Boolean).join(' ')}`.trim();

@@ -200,7 +200,7 @@ describe('buildUiStrings', () => {
       en: 'Add another conjunct',
       it: 'Aggiungi un altro congiunto',
       fr: 'Ajouter un autre conjoint',
-      de: 'Ein anderes Konjunkt addieren',
+      de: 'Ein anderes Konjunkt hinzufügen',
       es: 'Añadir otro miembro coordinado',
       ja: '別の等位項を追加',
       pt: 'Adicionar outro membro coordenado',
@@ -208,7 +208,7 @@ describe('buildUiStrings', () => {
     // A sentence in a banner: it keeps its full stop.
     expect(strings['pick.condition']).toMatchObject({
       en: 'Click the period that is the condition in another period container.',
-      it: 'Clicca il periodo che è la condizione in un altro contenitore di periodo.',
+      it: 'Clicca sul periodo che è la condizione in un altro contenitore di periodo.',
       ja: '文の別の容器で条件である文をクリック。',
     });
     expect(strings['conjunction.kind.then']).toEqual({
@@ -295,7 +295,7 @@ describe('buildUiStrings', () => {
       en: 'Add an adjective that describes this modifier',
       it: 'Aggiungi un aggettivo che descrive questo modificatore',
       fr: 'Ajouter un adjectif qui décrit ce modificateur',
-      de: 'Ein Adjektiv, das diesen Modifikator beschreibt, addieren',
+      de: 'Ein Adjektiv, das diesen Modifikator beschreibt, hinzufügen',
       es: 'Añadir un adjetivo que describe este modificador',
       ja: 'この修飾語を描写する形容詞を追加',
       pt: 'Adicionar um adjetivo que descreve este modificador',

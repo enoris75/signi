@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { AbstractionLevel, CauseSentiment, PathSpecifier, Specifier } from '@signi/shared';
 import { complementsPhrase } from './complementsPhrase.js';
 import {
-  adj, BEHAELTER, BOOT, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
+  adj, BEHAELTER, BESTIMMUNG_RICHTUNG, BOOT, complement, complements, concept, DU, el, ER, EUROPA, type Forms, GESCHWINDIGKEIT, GROSS, group,
   GUT, HAUS, HOCH, ICH, JUNGE, KATER, KATZE, KLEIN, MANN, MESSER, MUEDE, nounModifier, np, SCHEINEN, SEGEL, SORGFALT, vp, WAEHLEN,
   WASSER, WEISE, WIND, WORT, ZEIT,
 } from '../de.fixtures.js';
@@ -86,6 +86,13 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER)) }))).toBe('mit dem Messer');
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER, { definiteness: 'indefinite' })) }))).toBe('mit einem Messer');
       expect(complementsPhrase(complements({ instrumental: complement(np(MESSER, { number: 'plural' })) }))).toBe('mit den Messern');
+    });
+
+    // A140: a multiword name declines its adjective for the dative; the genitive after its head stays fixed.
+    test('a multiword name declines its adjective, the words after its head fixed', () => {
+      expect(complementsPhrase(complements({ instrumental: complement(np(BESTIMMUNG_RICHTUNG)) }))).toBe('mit der adverbialen Bestimmung der Richtung');
+      expect(complementsPhrase(complements({ instrumental: complement(np(BESTIMMUNG_RICHTUNG, { number: 'plural' })) })))
+        .toBe('mit den adverbialen Bestimmungen der Richtung');
     });
 
     // The action levels are `instrumentActionPhrase`'s; this only checks the complement routes there.

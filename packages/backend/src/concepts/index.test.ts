@@ -65,6 +65,20 @@ describe('the concept corpus', () => {
     expect(bad).toEqual([]);
   });
 
+  // A140: a German name seeded as its head noun, with the fixed words after it in `postnominal`, is
+  // shown in the picker by its `citation`, which must spell the whole name the engine renders. Each is
+  // feminine, so its adjective cites in -e ("adverbiale").
+  test('gives a noun with words after its head a citation that ends in the head and those words', () => {
+    const named = concepts.flatMap((c) =>
+      Object.entries(c.forms).filter(([, f]) => f['postnominal']).map(([l, f]) => ({ id: `${c.id} (${l})`, f })),
+    );
+    expect(named.map((n) => n.id)).toContain('LOCATIVE (de)');
+    const bad = named
+      .filter(({ f }) => f['citation'] !== [f['adjective'] ? `${f['adjective']}e` : '', f['base'], f['postnominal']].filter(Boolean).join(' '))
+      .map((n) => n.id);
+    expect(bad).toEqual([]);
+  });
+
   test('licenses only known complement types', () => {
     const bad = concepts.flatMap((c) =>
       (c.complements ?? [])

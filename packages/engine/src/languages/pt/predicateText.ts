@@ -5,6 +5,7 @@ import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.j
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
@@ -14,8 +15,10 @@ import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
+import { prepObjectText } from './prepObjectText.js';
 import { ptCliticize } from './ptCliticize.js';
 import { ptEnclitic } from './ptEnclitic.js';
+import { reflexiveClitic } from './reflexiveClitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -38,7 +41,15 @@ export function predicateText(
   // auxiliary (aspect under a conditional is a documented gap).
   const pn = moodPN(subjectForms);
   // A state verb's past is the imperfect ("queria", "tinha", "estava"), not the perfective (A130).
-  const finite = (m: ConceptForms) => moodForm('pt', m, pn, mood) ?? statePastForm('pt', m, pn, tense, mood) ?? conjugate(m.forms, subjectForms, tense);
+  // A pronominal verb's stored forms carry a fixed clitic ("me tornarei", "se tornaram"), so both are
+  // derived from the plain verb and take the subject's clitic in front: "se tornaria", "me tornasse" (A137).
+  const moodFinite = (m: ConceptForms): string | undefined => {
+    const plain = nonReflexiveVerb(m);
+    const form = moodForm('pt', plain, pn, mood) ?? statePastForm('pt', plain, pn, tense, mood);
+    const clitic = reflexiveClitic(m.forms, subjectForms);
+    return form && clitic ? `${clitic} ${form}` : form;
+  };
+  const finite = (m: ConceptForms) => moodFinite(m) ?? conjugate(m.forms, subjectForms, tense);
   // A47: Portuguese splits the copula. `estar` covers two BE frames; `ser` everything else.
   //  · Location — "o gato está na casa", never "*é na casa". A place is `estar` unconditionally,
   //    whatever the spatial relation, so a locative alone selects it; the past inherits the choice
@@ -94,11 +105,15 @@ export function predicateText(
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
   // object keeps the post-verbal slot.
-  const objectClitic = directObject && isPronounElement(directObject)
+  // A verb that takes its object with a preposition ("clica no botão", A139) has no direct object for a
+  // clitic to stand in for: its pronoun takes the tonic form after the preposition ("clica em mim", "nele").
+  const objectPrep = objectPreposition(verb);
+  const objectClitic = directObject && !objectPrep && isPronounElement(directObject)
     ? objectPronounForm(firstConjunct(directObject).head.forms) : '';
   // A coordination cannot be a clitic: it stays post-verbal, and a pronoun conjunct takes the
   // normative tonic object, "a" + its tonic form ("vê a ele e a mim", "vê o cão e a você").
-  const tonicOrNoun = (np: ResolvedNounPhrase) => np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
+  const tonicOrNoun = (np: ResolvedNounPhrase) => objectPrep ? prepObjectText(np, objectPrep)
+    : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';

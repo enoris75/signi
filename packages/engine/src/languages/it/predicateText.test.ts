@@ -289,4 +289,24 @@ describe('predicateText', () => {
       expect(predicateText(CANE, vp(ESSERE, { tense: 'future', elided: inTheHouse }))).toBe('ci sarà');
     });
   });
+
+  // A139: CLICK's lexeme takes its object with "su".
+  describe('an object a preposition leads (A139)', () => {
+    const CLICCARE: Forms = { base: 'cliccare', object_prep: 'su', '3sg_present': 'clicca', '3sg_past': 'cliccò', '2sg_present': 'clicchi', participle: 'cliccato' };
+
+    test('the object takes the preposition, fused with the article', () => {
+      expect(predicateText(GATTO, vp(CLICCARE), el(np(LIBRO)))).toBe('clicca sul libro');
+      expect(predicateText(GATTO, vp(CLICCARE, { negative: true }), el(np(LIBRO), np(CASA)))).toBe('non clicca sul libro e sulla casa');
+    });
+
+    test('a pronoun is no clitic, and no participle agrees with it', () => {
+      expect(predicateText(GATTO, vp(CLICCARE), el(np(IO)))).toBe('clicca su di me');
+      expect(predicateText(GATTO, vp(CLICCARE, { aspect: 'resultative' }), el(np(LEI)))).toBe('ha cliccato su di lei');
+      expect(predicateText(TU, vp(CLICCARE, { mood: 'imperative' }), el(np(IO)))).toBe('clicca su di me');
+    });
+
+    test('the impersonal si stays impersonal', () => {
+      expect(predicateText(SI, vp(CLICCARE), el(np(LIBRO, { number: 'plural' })))).toBe('si clicca sui libri');
+    });
+  });
 });

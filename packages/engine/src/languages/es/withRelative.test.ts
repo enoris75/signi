@@ -72,4 +72,13 @@ describe('withRelative', () => {
     // The head is no object, so a plural one does not make the se passive.
     expect(withRelative('las casas', np(CASA, { number: 'plural' }, { relative: eatenIn(el(np(SE))) }))).toBe('las casas donde se come');
   });
+
+  // A139: the object of a verb that takes it with a preposition relativises on that preposition.
+  test('a head that is the object of a prepositional verb takes the preposition with the article and que', () => {
+    const CLICAR: Forms = { base: 'clicar', object_prep: 'en', '3sg_present': 'clica', '3pl_present': 'clican' };
+    const clicked = (subject: ReturnType<typeof el>) => ({ headRole: 'directObject' as const, subject, verbPhrase: vp(CLICAR) });
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: clicked(el(np(GATO))) }))).toBe('el libro en el que el gato clica');
+    // The head is no object, so a plural one does not make the se passive.
+    expect(withRelative('las casas', np(CASA, { number: 'plural' }, { relative: clicked(el(np(SE))) }))).toBe('las casas en las que se clica');
+  });
 });

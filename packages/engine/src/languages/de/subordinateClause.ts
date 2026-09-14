@@ -1,4 +1,5 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
@@ -33,10 +34,13 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // Nominative for a subject-relative and for a predicate noun ("der Held, der er wird"), accusative
   // for a direct-object relative. A head filling any other complement takes that complement's
   // preposition and case ("in dem", "mit denen", the bare dative "dem", "durch dessen Schuld").
+  // A head gapped as the object of a verb that takes it with a preposition keeps that preposition, as a
+  // complement's does: "die Taste, auf die der Kater klickt" (A139).
   const gap = relativeGapComplement(np, { definiteness: 'relative' });
+  const headPrep = rel.headRole === 'directObject' ? objectPreposition(rel.verbPhrase.verb) : '';
   const pronoun = gap
     ? complementsPhrase(gap)
-    : relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural);
+    : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;
@@ -66,11 +70,13 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const meansText = complementsPhrase(means);
   // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
   // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
-  const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative']);
-  const { pronoun: objectPronounText, noun: directObjectText } = splitObject(directObject, '');
+  // An object a preposition leads stands where a predicate complement does, after "nicht" (A139).
+  const objectPrep = objectPreposition(verb);
+  const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative'] || (!!objectPrep && !!rel.directObject));
+  const { pronoun: objectPronounText, noun: directObjectText, prepositional } = splitObject(directObject, '', objectPrep);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
-  const complementsText = complementsPhrase(rest, verb.forms);
+  const complementsText = [prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads

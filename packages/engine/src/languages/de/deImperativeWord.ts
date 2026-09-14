@@ -3,9 +3,12 @@ import type { DeIPN } from './de.types.js';
 /** The German imperative verb surface for a person: a single word for du/ihr, "<inf> wir" for the
  *  cohortative. A form the lexeme stores as `<pn>_imperative` wins (the strong e→i/ie du forms
  *  iss/lies/sieh/gib, suppletive sei/seien/wisse); otherwise du is derived by `deDuImperative`, ihr
- *  is the stored 2pl-present, and the cohortative verb is the infinitive. */
+ *  is the stored 2pl-present, and the cohortative verb is the infinitive. A separable verb's command
+ *  is its stem's ("fügen wir"), the clause putting the particle last ("fügen wir die Maus hinzu", A138). */
 export function deImperativeWord(forms: Record<string, string>, pn: DeIPN): string {
-  const base = forms['base'] ?? '';
+  const particle = forms['particle'] ?? '';
+  const infinitive = forms['base'] ?? '';
+  const base = particle && infinitive.startsWith(particle) ? infinitive.slice(particle.length) : infinitive;
   const stored = forms[`${pn}_imperative`];
   if (pn === '2sg') return stored ?? deDuImperative(base);
   if (pn === '2pl') return stored ?? forms['2pl_present'] ?? `${base.replace(/e?n$/, '')}t`;

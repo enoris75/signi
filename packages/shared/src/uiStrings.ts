@@ -1562,8 +1562,8 @@ export const UI_STRINGS = defineUiStrings({
   // word for it. Not one command with two objects: the second act waits on the first. Both objects
   // are indefinite — any slot, any word. The coordinated clause inherits the mood, the register and
   // the addressee from this one, so it is built with the same `commandOf` shorthand.
-  // en "click a slot, and then choose a word", it "clicca uno slot, e poi scegli una parola",
-  // de "einen Slot klicken, und dann ein Wort wählen", ja "スロットをクリック、それから単語を選び".
+  // en "click a slot, and then choose a word", it "clicca su uno slot, e poi scegli una parola",
+  // de "auf einen Slot klicken, und dann ein Wort wählen", ja "スロットをクリック、それから単語を選び".
   'hint.chooseWord': {
     plan: {
       ...commandOf('CLICK'),

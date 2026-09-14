@@ -7,6 +7,7 @@ import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
+import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
@@ -18,7 +19,10 @@ import { coordinate } from './coordinate.js';
 import { frCliticize } from './frCliticize.js';
 import { frEnclitic } from './frEnclitic.js';
 import { modalGroupFr } from './modalGroupFr.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
+import { prepObjectText } from './prepObjectText.js';
+import { reflexiveFinite } from './reflexiveFinite.js';
 
 /**
  * The predicate half of a phrase — everything after the subject noun. Shared by the
@@ -38,8 +42,12 @@ export function predicateText(
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
   // or imparfait (protasis, "mangeait") form; marked aspects keep their indicative auxiliary.
   // A state verb's past is the imparfait ("avait", "était"), not the passé simple (A130).
-  const conjugated = moodForm('fr', verb, moodPN(subjectForms), mood) ?? statePastForm('fr', verb, moodPN(subjectForms), tense, mood)
-    ?? conjugate(verb.forms, subjectForms, tense);
+  // A pronominal verb's stored forms carry a fixed clitic ("m'effondrerai", "nous effondrons"), so these
+  // are derived from the plain verb and take the subject's clitic: "s'effondrerait", "nous effondrerions" (A137).
+  const plain = nonReflexiveVerb(verb);
+  const moodFinite = moodForm('fr', plain, moodPN(subjectForms), mood) ?? statePastForm('fr', plain, moodPN(subjectForms), tense, mood);
+  const conjugated = moodFinite !== undefined ? reflexiveFinite(verb.forms, subjectForms, moodFinite)
+    : conjugate(verb.forms, subjectForms, tense);
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
   // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.
@@ -74,16 +82,22 @@ export function predicateText(
   // court"), as the subject slot does ("moi et toi, nous"). The closing comma is tidied against the
   // full stop in `punctuate`. A group of nouns keeps the post-verbal slot, and so does one with an
   // "aucun" conjunct, which no clitic can resume.
-  const dislocated = !!directObject && directObject.conjuncts.length > 1 && !aucun
+  // A verb that takes its object with a preposition ("clique sur le bouton", A139) has no direct object
+  // for a clitic to stand in for: its pronoun takes the tonic form after the preposition ("clique sur
+  // moi"), and no participle agrees with it.
+  const objectPrep = objectPreposition(verb);
+  const dislocated = !!directObject && !objectPrep && directObject.conjuncts.length > 1 && !aucun
     && directObject.conjuncts.some((np) => np.head.forms['person']);
   // An elided subject complement leaves its pro-form in the same slot (A121): the invariable "le" for
   // a predicate ("le chien ne l'est pas", "les chiens le sont"), "y" for a place ("il n'y est pas").
   const elided = verbPhrase.elided;
   const objectClitic = !directObject ? (elided ? (elided.type === 'predicative' ? 'le' : 'y') : '')
+    : objectPrep ? ''
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : dislocated ? groupObjectClitic(directObject) : '';
   // The alarm a cry raises takes "à" and the article ("cria au loup", A124).
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
+    if (objectPrep) return prepObjectText(np, objectPrep);
     if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
     const cry = alarmCry(verb, np);
     return cry ? alarmCryText(cry) : npText(np);

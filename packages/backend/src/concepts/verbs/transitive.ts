@@ -2412,6 +2412,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     definition: infinitiveGloss('PRESS', { object: 'BUTTON', definiteness: 'indefinite' }),
     emoji: '🖱️',
     isA: 'PRESS',
+    // One clicks ON a thing in five of the languages, so their lexemes name the preposition the object
+    // takes (`object_prep`): it "clicca sul pulsante", fr "clique sur le bouton", de "klickt auf die
+    // Taste", es "clica en el botón", pt "clica no botão" (A139). English and Japanese take it bare.
     forms: {
       en: {
         base: 'click',
@@ -2420,7 +2423,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         past: 'clicked',
       },
       it: {
-        base: 'cliccare',
+        base: 'cliccare', object_prep: 'su',
         '1sg_present': 'clicco', '2sg_present': 'clicchi', '3sg_present': 'clicca',
         '1pl_present': 'clicchiamo', '2pl_present': 'cliccate', '3pl_present': 'cliccano',
         '1sg_past': 'cliccai', '2sg_past': 'cliccasti', '3sg_past': 'cliccò',
@@ -2429,7 +2432,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'cliccheremo', '2pl_future': 'cliccherete', '3pl_future': 'cliccheranno',
       },
       fr: {
-        base: 'cliquer',
+        base: 'cliquer', object_prep: 'sur',
         '1sg_present': 'clique', '2sg_present': 'cliques', '3sg_present': 'clique',
         '1pl_present': 'cliquons', '2pl_present': 'cliquez', '3pl_present': 'cliquent',
         '1sg_past': 'cliquai', '2sg_past': 'cliquas', '3sg_past': 'cliqua',
@@ -2438,14 +2441,14 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'cliquerons', '2pl_future': 'cliquerez', '3pl_future': 'cliqueront',
       },
       de: {
-        base: 'klicken',
+        base: 'klicken', object_prep: 'auf',
         '1sg_present': 'klicke', '2sg_present': 'klickst', '3sg_present': 'klickt',
         '1pl_present': 'klicken', '2pl_present': 'klickt', '3pl_present': 'klicken',
         '1sg_past': 'klickte', '2sg_past': 'klicktest', '3sg_past': 'klickte',
         '1pl_past': 'klickten', '2pl_past': 'klicktet', '3pl_past': 'klickten',
       },
       es: {
-        base: 'clicar',
+        base: 'clicar', object_prep: 'en',
         '1sg_present': 'clico', '2sg_present': 'clicas', '3sg_present': 'clica',
         '1pl_present': 'clicamos', '2pl_present': 'clicáis', '3pl_present': 'clican',
         '1sg_past': 'cliqué', '2sg_past': 'clicaste', '3sg_past': 'clicó',
@@ -2460,7 +2463,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present_reading: 'くりっくします',
       },
       pt: {
-        base: 'clicar',
+        base: 'clicar', object_prep: 'em',
         '1sg_present': 'clico', '2sg_present': 'clica', '3sg_present': 'clica',
         '1pl_present': 'clicamos', '2pl_present': 'clicam', '3pl_present': 'clicam',
         '1sg_past': 'cliquei', '2sg_past': 'clicou', '3sg_past': 'clicou',
@@ -2853,12 +2856,15 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'ajouterons', '2pl_future': 'ajouterez', '3pl_future': 'ajouteront',
       },
       de: {
-        base: 'addieren',
-        '1sg_present': 'addiere', '2sg_present': 'addierst', '3sg_present': 'addiert',
-        '1pl_present': 'addieren', '2pl_present': 'addiert', '3pl_present': 'addieren',
-        '1sg_past': 'addierte', '2sg_past': 'addiertest', '3sg_past': 'addierte',
-        '1pl_past': 'addierten', '2pl_past': 'addiertet', '3pl_past': 'addierten',
-        '2sg_imperative': 'addiere', // the optional du -e, kept
+        // Putting a thing with others is "hinzufügen"; "addieren" adds numbers up (A138). It is separable:
+        // the finite forms are the stem verb's, and the clause places the `particle` — last in a main
+        // clause ("fügt eine Maus hinzu"), back on the verb in a subordinate one ("hinzufügt").
+        base: 'hinzufügen', particle: 'hinzu',
+        '1sg_present': 'füge', '2sg_present': 'fügst', '3sg_present': 'fügt',
+        '1pl_present': 'fügen', '2pl_present': 'fügt', '3pl_present': 'fügen',
+        '1sg_past': 'fügte', '2sg_past': 'fügtest', '3sg_past': 'fügte',
+        '1pl_past': 'fügten', '2pl_past': 'fügtet', '3pl_past': 'fügten',
+        '2sg_imperative': 'füge', // the optional du -e, kept
       },
       es: {
         base: 'añadir',

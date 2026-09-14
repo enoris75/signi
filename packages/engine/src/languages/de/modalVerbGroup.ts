@@ -5,6 +5,7 @@ import { WERDEN, WUERDE } from './de.consts.js';
 import { conjPn } from './conjPn.js';
 import { isConditionalMood } from './isConditionalMood.js';
 import { modalStack } from './modalStack.js';
+import { zuInfinitive } from './zuInfinitive.js';
 
 /**
  * The verb complex when a modal chain governs the predicate. The outermost modal is the
@@ -28,7 +29,7 @@ export function modalVerbGroup(
   const perfAux = verbForms['aux'] === 'be' ? 'sein' : 'haben';
   const group =
     aspect === 'progressive' ? { mid: 'gerade', tail: [base], zuInfinitive: '' } :
-    aspect === 'prospective' ? { mid: 'im Begriff', tail: ['sein'], zuInfinitive: `zu ${base}` } :
+    aspect === 'prospective' ? { mid: 'im Begriff', tail: ['sein'], zuInfinitive: zuInfinitive(verbForms) } :
     aspect === 'resultative' ? { mid: '', tail: [participle, perfAux], zuInfinitive: '' } :
     { mid: '', tail: [base], zuInfinitive: '' };
   // Conditional stacks every modal after würde, exactly as the future does after werden.
