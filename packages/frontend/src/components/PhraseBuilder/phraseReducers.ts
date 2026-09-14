@@ -35,11 +35,37 @@ import {
   NOUN_KEYS,
 } from "./slots.ts";
 
+// The settings kept per slot in maps keyed by slot key, rather than as fields of their own:
+// an adjective's degree (or the predicate adjective's, under `predicative`) and a noun-modifier's
+// relation, number and own adjective.
+const SLOT_SETTING_MAPS = [
+  "adjectiveDegrees",
+  "modifierRelations",
+  "modifierNumbers",
+  "modifierAdjectives",
+] as const;
+
+// Drop the keyed settings of `keys`, so a word placed in one of those slots later starts from the
+// defaults rather than inheriting the last word's. Each map is copied before it is touched (`sel`
+// is a shallow copy, so its maps are still the previous selection's), and dropped once empty.
+function clearSlotSettings(sel: PhraseSelection, keys: readonly string[]): void {
+  for (const name of SLOT_SETTING_MAPS) {
+    const map = sel[name];
+    if (!map || !keys.some((key) => key in map)) continue;
+    const rest: Record<string, unknown> = { ...map };
+    for (const key of keys) delete rest[key];
+    if (Object.keys(rest).length) (sel[name] as Record<string, unknown>) = rest;
+    else delete sel[name];
+  }
+}
+
 // Drop every adjective of a noun block — the whole chain, since a later link is
-// meaningless without the earlier ones.
+// meaningless without the earlier ones — along with their keyed settings.
 function clearAdjectives(sel: PhraseSelection, which: NounKey): void {
-  for (const key of adjectiveSlots(which))
+  const chain = adjectiveSlots(which);
+  for (const key of chain)
     delete sel[key as keyof PhraseSelection];
+  clearSlotSettings(sel, chain);
 }
 
 // Drop the adjectives chained *after* `slot`, which is itself an adjective slot. Used when
@@ -53,8 +79,36 @@ function clearChainedAdjectives(
   const chain = adjectiveSlots(which);
   const idx = chain.indexOf(slot);
   if (idx === -1) return;
-  for (const key of chain.slice(idx + 1))
+  const chained = chain.slice(idx + 1);
+  for (const key of chained)
     delete sel[key as keyof PhraseSelection];
+  clearSlotSettings(sel, chained);
+}
+
+// Only a noun head makes a full noun phrase: a pronoun ("because of her") or a predicate adjective
+// ("seems happy") takes no article and no possessor — neither a genitive nor a pronominal one.
+function clearNounPhraseParts(sel: PhraseSelection, which: NounKey): void {
+  delete sel[`${which}Definiteness` as keyof PhraseSelection];
+  delete sel[POSSESSOR_KEY(which)];
+  delete sel[POSSESSOR_REF_KEY(which)];
+}
+
+// Drop everything a noun block holds besides its head — number, gender, determiner, adjectives,
+// possessor, conjuncts and the complement-specific relation — for when the head itself goes. None
+// of it is visible without a head, but left behind it would resurface on the next noun placed in
+// the block (the same resurrection `removeConjunct` guards its conjunction against).
+function clearNoun(sel: PhraseSelection, which: NounKey): void {
+  delete sel[which as keyof PhraseSelection];
+  delete sel[`${which}Number` as keyof PhraseSelection];
+  delete sel[`${which}Gender` as keyof PhraseSelection];
+  clearNounPhraseParts(sel, which);
+  clearAdjectives(sel, which);
+  clearSlotSettings(sel, [which]);
+  delete sel[CONJUNCTS_KEY(which)];
+  delete sel[CONJUNCTION_KEY(which)];
+  if (which === "route") delete sel.routeSpecifier;
+  if (which === "locative") delete sel.locativeSpecifier;
+  if (which === "cause") delete sel.causeSentiment;
 }
 
 // Drop the modals chained *after* `slot` — same reasoning as the adjectives: the control
@@ -91,27 +145,16 @@ export function applyConceptSelect(
       Boolean(prev.subjectAdjective),
       concept.complements,
     ).map((s) => s.key);
-    if (!nowVisible.includes("directObject")) {
-      delete next.directObject;
-      delete next.directObjectNumber;
-      clearAdjectives(next, "directObject");
-    }
+    if (!nowVisible.includes("directObject")) clearNoun(next, "directObject");
     if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
     // Drop complements the new verb no longer licenses.
     for (const type of BOX_COMPLEMENT_TYPES) {
-      if (!nowVisible.includes(type)) {
-        delete next[type];
-        delete next[`${type}Number`];
-        delete next[`${type}Gender`];
-        clearAdjectives(next, type);
-        if (type === "route") delete next.routeSpecifier;
-        if (type === "locative") delete next.locativeSpecifier;
-        if (type === "cause") delete next.causeSentiment;
-      }
+      if (!nowVisible.includes(type)) clearNoun(next, type);
     }
   }
   if (slot === "subject") {
     clearAdjectives(next, "subject");
+    if (concept.role !== "noun") clearNounPhraseParts(next, "subject");
     if (concept.role === "pronoun") {
       next.subjectNumber = "singular";
       // Gender applies to every pronoun person (participle/adjective agreement in Romance);
@@ -147,13 +190,9 @@ export function applyConceptSelect(
     } else {
       delete next[gKey];
     }
-    // Only a noun head is a full noun phrase. A predicate adjective ("seems happy") and a
-    // pronoun cause ("because of her") take no article and no possessor; the adjective
-    // additionally carries no number of its own — it agrees with the subject in the engine.
-    if (concept.role !== "noun") {
-      delete next[`${slot}Definiteness` as keyof PhraseSelection];
-      delete next[POSSESSOR_KEY(slot as NounKey)];
-    }
+    // A predicate adjective or a pronoun cause is no full noun phrase; the adjective additionally
+    // carries no number of its own — it agrees with the subject in the engine.
+    if (concept.role !== "noun") clearNounPhraseParts(next, slot as NounKey);
     if (concept.role === "adjective")
       delete next[`${slot}Number` as keyof PhraseSelection];
   }
@@ -172,43 +211,18 @@ export function applyClear(
 ): PhraseSelection {
   const next = { ...prev };
   delete next[slot];
+  // A cleared word's own keyed settings go with it (an adjective's degree, a noun-modifier's relation).
+  clearSlotSettings(next, [slot]);
   // Clearing a modal clears its own adverb (its control lives on the modal's box).
   const clearedModalAdverb = modalAdverbFor(slot);
   if (clearedModalAdverb) delete next[clearedModalAdverb as keyof PhraseSelection];
   if (slot === "verb") {
-    delete next.directObject;
-    delete next.directObjectNumber;
-    delete next.directObjectGender;
-    clearAdjectives(next, "directObject");
+    clearNoun(next, "directObject");
     clearAdjectives(next, "subject");
-    for (const type of BOX_COMPLEMENT_TYPES) {
-      delete next[type];
-      delete next[`${type}Number`];
-      delete next[`${type}Gender`];
-      clearAdjectives(next, type);
-    }
-    delete next.routeSpecifier;
-    delete next.locativeSpecifier;
-    delete next.causeSentiment;
+    for (const type of BOX_COMPLEMENT_TYPES) clearNoun(next, type);
   }
-  if (slot === "subject") {
-    clearAdjectives(next, "subject");
-    delete next.subjectNumber;
-    delete next.subjectGender;
-  }
-  if (slot === "directObject") {
-    delete next.directObjectNumber;
-    delete next.directObjectGender;
-    clearAdjectives(next, "directObject");
-  }
-  if (COMPLEMENT_KEY_SET.has(slot)) {
-    delete next[`${slot}Number` as keyof PhraseSelection];
-    delete next[`${slot}Gender` as keyof PhraseSelection];
-    clearAdjectives(next, slot as NounKey);
-    if (slot === "route") delete next.routeSpecifier;
-    if (slot === "locative") delete next.locativeSpecifier;
-    if (slot === "cause") delete next.causeSentiment;
-  }
+  if (slot === "subject" || slot === "directObject" || COMPLEMENT_KEY_SET.has(slot))
+    clearNoun(next, slot as NounKey);
   // Clearing an adjective drops the ones chained after it — their reveal controls
   // ride the box that just went away. Modals chain off the verb the same way.
   for (const which of NOUN_KEYS) clearChainedAdjectives(next, which, slot);
