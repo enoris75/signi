@@ -127,6 +127,11 @@ export function possessionsFor({
   return { owners, pointers };
 }
 
+/** The owners that go when the owner at `address` does: itself, and every owner it holds, however deep. */
+export function ownersUnder(owners: readonly OwnerSpot[], address: NounAddress): OwnerSpot[] {
+  return owners.filter((o) => o.address === address || o.address.startsWith(`${address}/`));
+}
+
 // How far from the canvas's side walls an owner's ring is kept when it is first placed, in px: room
 // for an empty ring, whose word picker makes it wider than a one-word ring. A ring placed overhanging
 // a wall never moves off it again — the overlap resolver shoves its neighbours instead.

@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Box } from "@mui/material";
 import {
   CAUSE_SENTIMENTS,
@@ -31,12 +31,9 @@ import {
 } from "./interfaces.ts";
 import {
   ALL_SLOTS,
-  COLLAPSIBLE_GROUPS,
   NOUN_KEYS,
   REVEALABLE_SLOT_KEYS,
-  SATELLITE_SLOT_KEYS,
   getActiveSlots,
-  isModalSlot,
   DEFAULT_POSITIONS,
   GRAPH_HEIGHT,
   MIN_GRAPH_HEIGHT,
@@ -84,7 +81,6 @@ import {
 import { buildEdges, buildRings, roleGroups, type Edge } from "./graph.ts";
 import { buildRingSpecs, perimeterControlKey, portKey } from "./ringSpecs.ts";
 import { BUTTON_HALF, innerRadius, type Pt } from "./ringLayout.ts";
-import { BOTTOM_MARGIN } from "./overlap.ts";
 import { type PhraseRenderContext } from "./phraseRender.tsx";
 import { PhraseCanvas } from "./PhraseCanvas.tsx";
 import { PhraseSidebar } from "./PhraseSidebar.tsx";
@@ -99,7 +95,6 @@ import { ConjunctRings } from "./ConjunctRings.tsx";
 import { OwnerRings } from "./OwnerRings.tsx";
 import type { RingHost } from "./ringHost.ts";
 import {
-  belowRing,
   chainKeys,
   chainPortKey,
   conjunctKey,
@@ -107,27 +102,31 @@ import {
   dropConjunctPosition,
   hostedRect,
   openConjunctsFor,
-  sameHostedRing,
-  UNMEASURED_R,
-  type HostedRing,
 } from "./conjunctChain.ts";
 import {
-  besideRing,
   ownerLink,
+  ownersUnder,
   pointerBend,
   pointerLink,
   possessionsFor,
   type OwnerSpot,
-  type RingAt,
 } from "./ownerChain.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
-import { useDrag, type Positions } from "./hooks/useDrag.ts";
+import { useDrag } from "./hooks/useDrag.ts";
 import { useHeightRebase } from "./hooks/useHeightRebase.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
 import { useCornerOverlap } from "./hooks/useCornerOverlap.ts";
 import { useBoxSizes } from "./hooks/useBoxSizes.ts";
 import { useGeometryNotify } from "./hooks/useGeometryNotify.ts";
 import { useOverlapResolution } from "./hooks/useOverlapResolution.ts";
+import { useHostedRings } from "./hooks/useHostedRings.ts";
+import { useReportOwnRing } from "./hooks/useReportOwnRing.ts";
+import { useHostedRingPlacement } from "./hooks/useHostedRingPlacement.ts";
+import { useStoredNumber } from "./hooks/useStoredNumber.ts";
+import { nextActiveSlot } from "./functions/nextActiveSlot.ts";
+import { applyCollapse } from "./functions/applyCollapse.ts";
+import { decoratePerimeterControls } from "./functions/decoratePerimeterControls.ts";
+import { ringLookup, wordPlacement } from "./functions/canvasGeometry.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 
@@ -252,10 +251,7 @@ export function PhraseBuilder({
   const [compactView, setCompact] = useState(false);
   // A hosted ring is one more constituent of the period's canvas, so it follows that canvas's view.
   const compact = ringHost?.compact ?? compactView;
-  const [sidebarWidth, setSidebarWidth] = useState<number>(() => {
-    const saved = localStorage.getItem("signi:phraseBuilderSidebarWidth");
-    return saved ? Number(saved) : 160;
-  });
+  const [sidebarWidth, setSidebarWidth] = useStoredNumber("signi:phraseBuilderSidebarWidth", 160);
   // Where a standalone period card has been dragged to by its border, in viewport pixels;
   // null while it sits in the page flow. The drag itself lives in PeriodContainer, but the
   // state is held here because this component's outer Box is what goes `fixed`.
@@ -264,24 +260,7 @@ export function PhraseBuilder({
   );
   // The rings hosted on this canvas — conjuncts' and owners' — as each one's builder reports drawing
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
-  const [hostedRings, setHostedRings] = useState<Record<string, HostedRing>>({});
-  // The reports are set as whole values worked out here, never as updaters: an updater React
-  // replays (rebasing a queue a skipped update left behind) would build a fresh object each time,
-  // and a fresh object re-renders every hosted ring, which reports again — an unbounded loop.
-  const hostedRingsRef = useRef(hostedRings);
-  const reportRing = useCallback((key: string, ring: HostedRing | null) => {
-    const prev = hostedRingsRef.current;
-    let next = prev;
-    if (ring) {
-      if (!sameHostedRing(prev[key], ring)) next = { ...prev, [key]: ring };
-    } else if (key in prev) {
-      next = { ...prev };
-      delete next[key];
-    }
-    if (next === prev) return;
-    hostedRingsRef.current = next;
-    setHostedRings(next);
-  }, []);
+  const { hostedRings, reportRing } = useHostedRings();
   // Which owners are open, by the address of the noun they own: an owner the user opened (still
   // empty, or named) or folded away. Unset, a named owner shows and an empty one doesn't. The
   // period's builder holds it for every owner on its canvas; a hosted ring's builder uses its host's.
@@ -351,57 +330,12 @@ export function PhraseBuilder({
     const wasFilled = Boolean(selection[slot]);
     setEditingSlot(null);
 
-    onPhraseUpdate((prev) => {
-      const next = applyConceptSelect(prev, slot, concept);
-      // The pronoun chooser commits its plurality/gender decision alongside the
-      // concept; override the defaults applyConceptSelect seeded.
-      if (opts?.number !== undefined)
-        (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] =
-          opts.number as never;
-      if (opts?.gender !== undefined)
-        (next as PhraseSelection)[`${slot}Gender` as keyof PhraseSelection] =
-          opts.gender as never;
-      return next;
-    });
+    onPhraseUpdate((prev) => applyConceptSelect(prev, slot, concept, opts));
 
     // Re-picking a filled word keeps focus on it; only a fresh pick auto-advances.
     if (wasFilled) return;
-
-    // Auto-advance to next empty slot (only among the main, always-visible slots)
-    let slots = visibleSlots;
-    if (slot === "verb") {
-      slots = getActiveSlots(
-        concept.transitivity,
-        selection.subject?.role,
-        Boolean(selection.subjectAdjective),
-        concept.complements,
-      );
-      // A subject-dropping mood (command / infinitive citation) has no subject box to land on, so
-      // after the verb the focus advances to the object instead of the dropped subject.
-      const subjectDropped = Boolean(selection.imperative || selection.infinitive);
-      const subjectEmpty = !selection.subject && !subjectDropped;
-      setActiveSlot(
-        subjectEmpty
-          ? "subject"
-          : (slots.find(
-              (s) =>
-                s.key !== "verb" &&
-                s.key !== "subject" &&
-                !SATELLITE_SLOT_KEYS.has(s.key) &&
-                !selection[s.key],
-            )?.key ?? null),
-      );
-    } else if (/Adjective\d?$/.test(slot) || isModalSlot(slot)) {
-      // Setting an adjective or a modal just closes the picker; the next link in the
-      // chain is opened explicitly, from the control this box now carries.
-      setActiveSlot(null);
-    } else {
-      const currentIdx = slots.findIndex((s) => s.key === slot);
-      const nextSlot = slots
-        .slice(currentIdx + 1)
-        .find((s) => !SATELLITE_SLOT_KEYS.has(s.key) && !selection[s.key]);
-      if (nextSlot) setActiveSlot(nextSlot.key);
-    }
+    const next = nextActiveSlot({ slot, concept, selection, visibleSlots });
+    if (next !== undefined) setActiveSlot(next);
   }
 
   function handleSlotClick(slot: SlotKey) {
@@ -569,29 +503,12 @@ export function PhraseBuilder({
     t,
   );
 
-  // Effective collapse state: compact view collapses every group at once; otherwise
-  // just the individually-collapsed ones. Everything downstream (shown map, group
-  // rects, the collapse icon, the drag guard) reads this rather than `collapsedGroups`.
-  const effectiveCollapsed: Record<string, boolean> = compact
-    ? Object.fromEntries(COLLAPSIBLE_GROUPS.map((g) => [g.label, true]))
-    : collapsedGroups;
-
-  // Collapse: force every child node of a collapsed group hidden. Because group
-  // rects, rendered slots, and edges all derive from shownMap, forcing these
-  // false shrinks each collapsed box down to just its main word.
-  const collapsedHiddenKeys = new Set<string>();
-  const collapsedMainKeys = new Set<string>();
-  for (const g of COLLAPSIBLE_GROUPS) {
-    if (!effectiveCollapsed[g.label]) continue;
-    collapsedMainKeys.add(g.mainKey);
-    for (const k of g.childKeys) collapsedHiddenKeys.add(k);
-  }
-  const shownMap = collapsedHiddenKeys.size
-    ? {
-        ...rawShownMap,
-        ...Object.fromEntries([...collapsedHiddenKeys].map((k) => [k, false])),
-      }
-    : rawShownMap;
+  // Hide what the collapsed dotted rings hide — every ring, in compact view.
+  const { effectiveCollapsed, collapsedMainKeys, shownMap } = applyCollapse({
+    rawShownMap,
+    collapsedGroups,
+    compact,
+  });
 
   function handleToggleCollapse(label: string) {
     setCollapsedGroups((prev) => ({ ...prev, [label]: !prev[label] }));
@@ -611,7 +528,7 @@ export function PhraseBuilder({
   const {
     satelliteIconsByParent,
     complementToggleIcons,
-    perimeterByNoun,
+    perimeterByNoun: satellitePerimeter,
     directObjectToggle,
   } = buildSatelliteIcons({
       satellites,
@@ -624,34 +541,15 @@ export function PhraseBuilder({
       onToggleReveal: handleToggleReveal,
       onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : handleAddConjunct,
     });
-  // The control that extends a coordinated group rides the group's last ring: the head's while it
-  // stands alone, then the newest conjunct's — whose click adds to the head's group, not a group of
-  // its own. An owner's head coordinates nothing: the plan reads an owner as one noun phrase.
-  for (const which of openConjunctsFor(selection)) delete perimeterByNoun[which]?.conjunct;
-  const extend = perimeterByNoun.subject?.conjunct;
-  if (ringHost && extend) {
-    if (ringHost.kind === "conjunct" && ringHost.isLast)
-      perimeterByNoun.subject!.conjunct = { ...extend, isSet: true, valueLabel: "Add another conjunct" };
-    else delete perimeterByNoun.subject!.conjunct;
-  }
-  // Each possessor control names or points to its noun's owner (see handleTogglePossessor). Pointing,
-  // it says what it points to.
-  for (const which of NOUN_KEYS) {
-    const control = perimeterByNoun[which]?.possessor;
-    if (!control) continue;
-    const antecedent = selection[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
-    const resolved = antecedent ? coref.resolve(antecedent) : undefined;
-    perimeterByNoun[which]!.possessor = {
-      ...control,
-      ...(antecedent && {
-        active: false,
-        valueLabel: resolved
-          ? `points to ${resolved.concept.label ?? resolved.concept.id} (“${possessiveHintEn(resolved.features)}”) — click to remove`
-          : "points to a noun — click to remove",
-      }),
-      onToggle: () => handleTogglePossessor(which),
-    };
-  }
+  // The group-extending control rides the group's last ring; each possessor control names or points
+  // to its noun's owner.
+  const perimeterByNoun = decoratePerimeterControls({
+    perimeterByNoun: satellitePerimeter,
+    selection,
+    ringHost,
+    resolve: coref.resolve,
+    onTogglePossessor: handleTogglePossessor,
+  });
 
   // Satellite slots (adjective / adverb) only render when revealed or filled; the direct
   // object, only while its own control on the verb-phrase box has it unfolded.
@@ -670,10 +568,7 @@ export function PhraseBuilder({
     // Compact paints the boxes where its packing puts them, so there is nothing to drag.
     frozen: compact,
   });
-  const [graphHeight, setGraphHeight] = useState<number>(() => {
-    const saved = localStorage.getItem("signi:graphHeight");
-    return saved ? Math.max(MIN_GRAPH_HEIGHT, Number(saved)) : GRAPH_HEIGHT;
-  });
+  const [graphHeight, setGraphHeight] = useStoredNumber("signi:graphHeight", GRAPH_HEIGHT, MIN_GRAPH_HEIGHT);
 
   // Rebase node y's when the canvas height changes (see useHeightRebase). Must stay above
   // the overlap resolver, which reads the stale flag in the same commit.
@@ -793,35 +688,15 @@ export function PhraseBuilder({
   const paperPad = compact ? 1 : 2;
 
   // Where a constituent's word sits: its stored position, or the compact packing while compact.
-  // The word is the centre of its rings; everything else on the constituent is placed round it.
   // A hosted ring's builder paints its one word where the period's canvas puts it.
-  const wordPos = (key: string): Pt =>
-    ringHost?.at ??
-    compactLayout?.positions[key] ??
-    positions[key] ??
-    DEFAULT_POSITIONS[key] ??
-    unplacedRing(key);
-  const centerOf = (key: string) => {
-    const p = wordPos(key);
-    return { x: (p.x / 100) * graphSize.w, y: (p.y / 100) * graphSize.h };
-  };
-  // A hosted ring that has not been placed yet (see the placement effect below): a conjunct's sits
-  // straight below the ring before it in its group, an owner's below and beside the ring it owns.
-  function unplacedRing(key: string): Pt {
-    const percent = (c: Pt) => ({
-      x: (c.x / Math.max(graphSize.w, 1)) * 100,
-      y: (c.y / Math.max(graphSize.h, 1)) * 100,
-    });
-    for (const { which, count } of chains) {
-      const keys = chainKeys(which, count);
-      const i = keys.indexOf(key);
-      if (i < 1) continue;
-      return percent(belowRing(centerOf(keys[i - 1]), UNMEASURED_R));
-    }
-    const owner = owners.find((o) => o.address === key);
-    if (owner) return percent(besideRing(centerOf(owner.possessedKey), UNMEASURED_R, graphSize.w));
-    return { x: 50, y: 50 };
-  }
+  const { wordPos, centerOf } = wordPlacement({
+    at: ringHost?.at,
+    compactPositions: compactLayout?.positions,
+    positions,
+    graphSize,
+    chains,
+    owners,
+  });
 
   // Where each noun's possessor control faces while the noun has an owner: the owner's ring, or the
   // bend of the line to the noun it points to. The line to the owner leaves from the control.
@@ -969,23 +844,8 @@ export function PhraseBuilder({
     dashed: false,
   }));
 
-  // A ring on this canvas, by its key: one of its own constituents', or a hosted one's as reported.
-  const ringOf = (key: string): RingAt | undefined => {
-    const group = groupRects.find((g) => g.mainKey === key);
-    if (group) return group;
-    const ring = hostedRings[key];
-    return ring && { center: centerOf(key), rIn: ring.rIn, rOut: ring.rOut };
-  };
-  // Where a control on a ring sits: seated here for this canvas's own constituents, or at the offset
-  // a hosted ring reported (under the key its own builder knows the control by).
-  const controlOn = (key: string, control: string, hostedControl: string = control): Pt | undefined => {
-    const at = controlPos[control];
-    if (at) return at;
-    const offset = hostedRings[key]?.ports[hostedControl];
-    if (!offset) return undefined;
-    const c = centerOf(key);
-    return { x: c.x + offset.x, y: c.y + offset.y };
-  };
+  // The rings on this canvas and the controls on them, its own constituents' and the hosted ones'.
+  const { ringOf, controlOn } = ringLookup({ groupRects, hostedRings, controlPos, centerOf });
   const possessorControlOn = (key: string) =>
     controlOn(key, perimeterControlKey("possessor", key), perimeterControlKey("possessor", "subject"));
   // The port an owner's ring faces the ring it owns from.
@@ -1083,7 +943,7 @@ export function PhraseBuilder({
   // Take an owner off the noun it owns. Relative clauses sourced from it, or from an owner it holds,
   // go with it; so does where its rings were, so that one opened again starts beside its noun.
   function handleRemoveOwner(spot: OwnerSpot) {
-    const gone = owners.filter((o) => o.address === spot.address || o.address.startsWith(`${spot.address}/`));
+    const gone = ownersUnder(owners, spot.address);
     onPhraseUpdate((prev) =>
       updateNounAt(prev, spot.possessed, (slice, which) => clearPossessorRef(removePossessor(slice, which), which)),
     );
@@ -1104,36 +964,8 @@ export function PhraseBuilder({
     if (owners.some((o) => o.possessed === coref.picking && o.named)) coref.cancel();
   });
 
-  // A hosted ring's builder tells the period's canvas about the ring it just drew: how far it
-  // reaches, and where its link ports and its possessor control sit on it.
-  const ownRing = ringHost ? groupRects[0] : undefined;
-  // Only a ring that really changed is reported: this runs after every commit, and even a report
-  // the period would ignore costs it a render (React's eager bail-out can't always see the no-op),
-  // which re-renders this builder, which reports again — an unbounded loop.
-  const reportedRing = useRef<HostedRing | undefined>(undefined);
-  useLayoutEffect(() => {
-    if (!ringHost || !ownRing) return;
-    const ports: Record<string, Pt> = {};
-    for (const key of [...ringHost.ports.map((p) => p.key), perimeterControlKey("possessor", "subject")]) {
-      const at = controlPos[key];
-      if (at) ports[key] = { x: at.x - ownRing.center.x, y: at.y - ownRing.center.y };
-    }
-    const ring = { rIn: ownRing.rIn, orbit: ownRing.orbit, rOut: ownRing.rOut, ports };
-    if (sameHostedRing(reportedRing.current, ring)) return;
-    reportedRing.current = ring;
-    ringHost.onRing(ring);
-  });
-  // …and that it is gone, once it is — or once it answers to another key (a conjunct before it was
-  // removed). The report is bound to the key it was made under.
-  const hostKey = ringHost?.key;
-  useLayoutEffect(() => {
-    const onRing = ringHost?.onRing;
-    return () => {
-      reportedRing.current = undefined;
-      onRing?.(null);
-    };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [hostKey]);
+  // A hosted ring's builder tells the period's canvas about the ring it just drew, and that it is gone.
+  useReportOwnRing(ringHost, ringHost ? groupRects[0] : undefined, controlPos);
 
   // The clear button on each word's solid ring.
   const clearControls = [...clearable].map((mainKey) => ({
@@ -1142,42 +974,18 @@ export function PhraseBuilder({
     onClear: () => handleClear(mainKey as SlotKey),
   }));
 
-  // Place each hosted ring the first time it appears — a conjunct's straight below the ring before it
-  // in its group, an owner's below and beside the ring it owns, a chip's length clear — growing the
-  // canvas when it would land past the bottom edge. Placed in the stored (full-view) positions, so
-  // the ring has somewhere to be dragged from even while compact view packs it elsewhere.
-  useLayoutEffect(() => {
-    if (ringHost || (chains.length === 0 && owners.length === 0)) return;
-    const seeds: Positions = {};
-    let bottom = 0;
-    const px = (p: Pt) => ({ x: (p.x / 100) * svgSize.w, y: (p.y / 100) * graphHeight });
-    const seed = (key: string, c: Pt) => {
-      seeds[key] = { x: (c.x / Math.max(svgSize.w, 1)) * 100, y: (c.y / graphHeight) * 100 };
-      bottom = Math.max(bottom, c.y + UNMEASURED_R + BUTTON_HALF + BOTTOM_MARGIN);
-    };
-    for (const { which, count } of chains) {
-      const keys = chainKeys(which, count);
-      for (let i = 1; i < keys.length; i++) {
-        const key = keys[i];
-        if (positions[key]) continue;
-        const prev = keys[i - 1];
-        const p = seeds[prev] ?? positions[prev] ?? DEFAULT_POSITIONS[prev];
-        if (!p) continue;
-        const prevR = (i === 1 ? headOf(which)?.rOut : hostedRings[prev]?.rOut) ?? UNMEASURED_R;
-        seed(key, belowRing(px(p), prevR));
-      }
-    }
-    // Owners come parents first, so the ring an owner is placed beside has a place already.
-    for (const spot of owners) {
-      if (positions[spot.address]) continue;
-      const p = seeds[spot.possessedKey] ?? positions[spot.possessedKey] ?? DEFAULT_POSITIONS[spot.possessedKey];
-      if (!p) continue;
-      seed(spot.address, besideRing(px(p), ringOf(spot.possessedKey)?.rOut ?? UNMEASURED_R, svgSize.w));
-    }
-    if (Object.keys(seeds).length === 0) return;
-    setPositions((prev) => ({ ...prev, ...seeds }));
-    // The height rebase that follows holds every stored position's pixel offset, seeds included.
-    if (bottom > graphHeight) setGraphHeight(Math.ceil(bottom));
+  // Place each hosted ring the first time it appears, in the stored (full-view) positions, so the ring
+  // has somewhere to be dragged from even while compact view packs it elsewhere.
+  useHostedRingPlacement({
+    enabled: !ringHost,
+    chains,
+    owners,
+    positions,
+    groupRects,
+    hostedRings,
+    canvas: { w: svgSize.w, h: graphHeight },
+    setPositions,
+    setGraphHeight,
   });
 
   // Keep the rings clear of each other, growing the canvas when a shove needs room

@@ -6,9 +6,11 @@ import {
   canvasKeyOf,
   OWNER_WALL_CLEARANCE,
   ownerLink,
+  ownersUnder,
   pointerBend,
   pointerLink,
   possessionsFor,
+  type OwnerSpot,
 } from '../src/components/PhraseBuilder/ownerChain.ts';
 import { CONJUNCT_GAP, UNMEASURED_R } from '../src/components/PhraseBuilder/conjunctChain.ts';
 import { BUTTON_HALF } from '../src/components/PhraseBuilder/ringLayout.ts';
@@ -128,6 +130,38 @@ describe('possessionsFor', () => {
         subjectPossessor: { subject: YOU, subjectPossessor: { subject: DOG } },
       }).owners.map((o) => o.address),
     ).toEqual(['subject/possessor']);
+  });
+});
+
+describe('ownersUnder', () => {
+  const spot = (address: string, possessed: string): OwnerSpot => ({
+    address,
+    possessed,
+    possessedKey: possessed,
+    role: 'subject',
+    order: 0,
+    named: true,
+  });
+  const OWNERS = [
+    spot('subject/possessor', 'subject'),
+    spot('subject/possessor/possessor', 'subject/possessor'),
+    spot('subject/possessor/possessor/possessor', 'subject/possessor/possessor'),
+    spot('subject/conjunct/0/possessor', 'subject+1'),
+    // An address that merely starts with the same letters is another noun's owner.
+    spot('subjectX/possessor', 'subjectX'),
+  ];
+
+  it('takes the owner and every owner it holds, however deep', () => {
+    expect(ownersUnder(OWNERS, 'subject/possessor').map((o) => o.address)).toEqual([
+      'subject/possessor',
+      'subject/possessor/possessor',
+      'subject/possessor/possessor/possessor',
+    ]);
+  });
+
+  it('takes nothing of the owners beside it', () => {
+    expect(ownersUnder(OWNERS, 'subject/possessor/possessor/possessor')).toEqual([OWNERS[2]]);
+    expect(ownersUnder(OWNERS, 'directObject/possessor')).toEqual([]);
   });
 });
 

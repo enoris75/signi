@@ -9,6 +9,7 @@ import {
   conjunctLinks,
   dropConjunctPosition,
   hostedRect,
+  mergeHostedRing,
   openConjunctsFor,
   sameHostedRing,
   UNMEASURED_R,
@@ -235,5 +236,28 @@ describe('sameHostedRing', () => {
     expect(sameHostedRing(a, { ...a, rOut: 90 })).toBe(false);
     expect(sameHostedRing(a, { ...a, ports: { p: { x: 5, y: 2 } } })).toBe(false);
     expect(sameHostedRing(a, { ...a, ports: { ...a.ports, q: { x: 0, y: 0 } } })).toBe(false);
+  });
+});
+
+describe('mergeHostedRing', () => {
+  it('adds a ring newly drawn, and replaces one that changed', () => {
+    const rings = { 'subject+1': ring(80) };
+
+    expect(mergeHostedRing(rings, 'subject+2', ring(70))).toEqual({ 'subject+1': ring(80), 'subject+2': ring(70) });
+    expect(mergeHostedRing(rings, 'subject+1', ring(90))).toEqual({ 'subject+1': ring(90) });
+    expect(rings).toEqual({ 'subject+1': ring(80) });
+  });
+
+  it('drops a ring reported gone', () => {
+    expect(mergeHostedRing({ 'subject+1': ring(80), 'subject+2': ring(70) }, 'subject+1', null)).toEqual({
+      'subject+2': ring(70),
+    });
+  });
+
+  it('hands back the very same rings when the report changes nothing', () => {
+    const rings = { 'subject+1': ring(80, { p: { x: 1, y: 2 } }) };
+
+    expect(mergeHostedRing(rings, 'subject+1', ring(80.4, { p: { x: 1.2, y: 2 } }))).toBe(rings);
+    expect(mergeHostedRing(rings, 'subject+2', null)).toBe(rings);
   });
 });

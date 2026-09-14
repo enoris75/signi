@@ -54,6 +54,23 @@ export function sameHostedRing(a: HostedRing | undefined, b: HostedRing): boolea
 }
 
 /**
+ * The hosted rings with one builder's report folded in: `ring` as it drew it, or null once it is gone.
+ * A report that changes nothing hands back `rings` itself, so the canvas storing them can skip the
+ * update — a fresh object would re-render every hosted ring, which reports again, without end.
+ */
+export function mergeHostedRing(
+  rings: Record<string, HostedRing>,
+  key: string,
+  ring: HostedRing | null,
+): Record<string, HostedRing> {
+  if (ring) return sameHostedRing(rings[key], ring) ? rings : { ...rings, [key]: ring };
+  if (!(key in rings)) return rings;
+  const next = { ...rings };
+  delete next[key];
+  return next;
+}
+
+/**
  * Noun blocks that currently coordinate — the ones with a head word and at least one conjunct.
  */
 export function openConjunctsFor(selection: PhraseSelection): NounKey[] {

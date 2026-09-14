@@ -14,6 +14,7 @@ import {
 import {
   CONJUNCTION_KEY,
   CONJUNCTS_KEY,
+  ConceptSelectOpts,
   GenderSlot,
   ImperativePerson,
   NounAddress,
@@ -73,11 +74,14 @@ function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
 
 // Pure state transform: place `concept` into `slot`, cascading the side effects
 // that keep the selection internally consistent (dropping now-invalid dependents,
-// seeding default gender/number, clearing chained adjectives, etc.).
+// seeding default gender/number, clearing chained adjectives, etc.). A picker that decided the
+// word's number or gender alongside it (the pronoun chooser) passes that in `opts`, which overrides
+// the defaults seeded here.
 export function applyConceptSelect(
   prev: PhraseSelection,
   slot: SlotKey,
   concept: Concept,
+  opts?: ConceptSelectOpts,
 ): PhraseSelection {
   const next = { ...prev, [slot]: concept };
   if (slot === "verb") {
@@ -153,6 +157,10 @@ export function applyConceptSelect(
     if (concept.role === "adjective")
       delete next[`${slot}Number` as keyof PhraseSelection];
   }
+  if (opts?.number !== undefined)
+    (next as PhraseSelection)[`${slot}Number` as keyof PhraseSelection] = opts.number as never;
+  if (opts?.gender !== undefined)
+    (next as PhraseSelection)[`${slot}Gender` as keyof PhraseSelection] = opts.gender as never;
   return next;
 }
 
