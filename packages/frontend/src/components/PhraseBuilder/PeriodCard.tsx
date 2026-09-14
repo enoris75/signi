@@ -4,14 +4,12 @@ import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer.tsx";
 import { Resizer } from "./Resizer.tsx";
+import { GRAPH_HEIGHT_KEY } from "./storageKeys.ts";
 
 export interface PeriodCardProps {
   selection: PhraseSelection;
   // The workspace container's linking hooks; undefined for a standalone period.
   binding?: WorkspaceBinding;
-  // A noun phrase inside a period wearing the card: it takes no part in the period's moods or
-  // connectors (see PeriodContainer `nested`).
-  nested: boolean;
   compact: boolean;
   showCanvas: boolean;
   hasGroups: boolean;
@@ -30,7 +28,7 @@ export interface PeriodCardProps {
   // The full-view canvas height the card's bottom edge resizes.
   graphHeight: number;
   onGraphHeightChange: (height: number) => void;
-  // Shown beside the card: the page's words panel, which only the outermost period has.
+  // Shown beside the card: the page's words panel.
   sidebar?: ReactNode;
   // The period's canvas.
   children: ReactNode;
@@ -53,7 +51,6 @@ const moodLocked = (binding: WorkspaceBinding | undefined): boolean =>
 export function PeriodCard({
   selection,
   binding,
-  nested,
   compact,
   showCanvas,
   hasGroups,
@@ -82,7 +79,7 @@ export function PeriodCard({
   const paperPad = compact ? 1 : 2;
   // The clause-level connector controls on the card border, derived from the workspace binding
   // (undefined for a standalone period). See periodControls in PeriodContainer.tsx.
-  const clauseControls = nested ? {} : periodControls(binding, selection);
+  const clauseControls = periodControls(binding, selection);
   const locked = moodLocked(binding);
 
   return (
@@ -102,10 +99,9 @@ export function PeriodCard({
         hasGroups={hasGroups}
         hasContent={hasContent}
         soleContainer={soleContainer}
-        nested={nested}
         // A workspace container stays in the managed stack so the cross-container
         // connectors measure correctly; only a standalone period may be floated.
-        floatable={!binding && !nested}
+        floatable={!binding}
         position={position}
         onPositionChange={setPosition}
         onMoveUp={onMoveUp}
@@ -118,12 +114,8 @@ export function PeriodCard({
         conditional={clauseControls.conditional}
         coordinative={clauseControls.coordinative}
         instrumental={clauseControls.instrumental}
-        imperative={
-          nested ? undefined : { active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }
-        }
-        infinitive={
-          nested ? undefined : { active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }
-        }
+        imperative={{ active: Boolean(selection.imperative), disabled: locked, onToggle: onToggleImperative }}
+        infinitive={{ active: Boolean(selection.infinitive), disabled: locked, onToggle: onToggleInfinitive }}
       >
         {children}
 
@@ -137,7 +129,7 @@ export function PeriodCard({
               minHeight={MIN_GRAPH_HEIGHT}
               onResize={onGraphHeightChange}
               onResizeEnd={(h) => {
-                localStorage.setItem("signi:graphHeight", String(Math.round(h)));
+                localStorage.setItem(GRAPH_HEIGHT_KEY, String(Math.round(h)));
               }}
             />
           </Box>

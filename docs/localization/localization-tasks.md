@@ -121,6 +121,7 @@ B21 is the largest and unlocks most of the period container.
 | C13 | [C13-ui-grammatical-function-words.md](C-needs-engine/C13-ui-grammatical-function-words.md) | catalog entry kinds for conjunctions, path specifiers, cause connectors, degrees |
 | C14 | [C14-ui-runtime-values.md](C-needs-engine/C14-ui-runtime-values.md) | catalog entries can't take arguments — counts, word lists, saved names, version numbers |
 | C15 | [C15-ui-literal-by-design.md](C-needs-engine/C15-ui-literal-by-design.md) | deliberate — brand, file name, person codes, never-shown errors; `WordPalettePanel` is dead code to delete |
+| C16 | [C16-ui-possessive-pronoun-chip.md](C-needs-engine/C16-ui-possessive-pronoun-chip.md) | agreement known only at render time — the English "his / her / their" chip on a pointed-to owner's line, in every UI language |
 
 ### Done
 

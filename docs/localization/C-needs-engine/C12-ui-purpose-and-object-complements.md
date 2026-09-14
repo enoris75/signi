@@ -20,7 +20,8 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 |---|---|---|
 | … — click to change (tail of the chip tooltips) | [phraseRender.tsx:179](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L179), 317, 331, 355 | 1 |
 | Linked — click to remove | [satellites.tsx:709](../../../packages/frontend/src/components/PhraseBuilder/satellites.tsx#L709), 733 | 1 (+ LINKED, REMOVE) |
-| points to ${noun} (“${pronoun}”) — click to remove (a pointed-to owner's possessor control) | [PhraseBuilder.tsx](../../../packages/frontend/src/components/PhraseBuilder/PhraseBuilder.tsx) (`perimeterByNoun[which].possessor`) | 1 (+ POINT, REMOVE); the pronoun is the English display hint `possessiveHintEn`, which would become a rendered possessive |
+| points to ${noun} (“${pronoun}”) — click to remove (a pointed-to owner's possessor control) | [decoratePerimeterControls.ts:58](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L58) | 1 (+ POINT, REMOVE); `noun` is the antecedent concept's English `label` ([C14](C14-ui-runtime-values.md)), and the pronoun is [C16](C16-ui-possessive-pronoun-chip.md) |
+| points to a noun — click to remove (the same control, its antecedent no longer resolving) | [decoratePerimeterControls.ts:59](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L59) | 1 (+ POINT, REMOVE) |
 | Drag to resize | [Resizer.tsx:41](../../../packages/frontend/src/components/PhraseBuilder/Resizer.tsx#L41) | 1 (+ DRAG, RESIZE) |
 | Click a slot to filter. | [PhraseSidebar.tsx:198](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L198) | 1 (+ FILTER) |
 | Select at least a subject and a verb to see translations. | [TranslationPanel.tsx:71](../../../packages/frontend/src/components/TranslationPanel.tsx#L71) | 1 (+ "at least") |

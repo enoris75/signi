@@ -34,7 +34,6 @@ function binding({ conditional = {}, coordinative = {} }: { conditional?: object
 function renderCard(props: Partial<PeriodCardProps> = {}, selection: PhraseSelection = { subject: CAT }) {
   const all: PeriodCardProps = {
     selection,
-    nested: false,
     compact: false,
     showCanvas: true,
     hasGroups: true,
@@ -93,13 +92,6 @@ describe('PeriodCard', () => {
 
     renderCard();
     expect(screen.getByRole('button', { name: CITATION })).toBeEnabled();
-  });
-
-  it('offers a nested phrase no moods', () => {
-    renderCard({ nested: true, binding: binding() });
-
-    expect(screen.queryByRole('button', { name: COMMAND })).not.toBeInTheDocument();
-    expect(screen.queryByRole('button', { name: CITATION })).not.toBeInTheDocument();
   });
 
   it('resizes the canvas from its bottom edge in full view, and remembers the height', () => {

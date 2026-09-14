@@ -197,10 +197,6 @@ export interface PeriodContainerProps {
   // This is the only period in the workspace, so it can't be deleted — the remove
   // control clears its content in place instead.
   soleContainer: boolean;
-  // A noun phrase inside a period, wearing the card without being a period. It has no place in
-  // the workspace stack to move within, and its remove control removes just that phrase. (The app's
-  // nested phrases — conjuncts and owners — are rings on their period's canvas, and wear no card.)
-  nested?: boolean;
   // May this card be torn off its place in the page flow and dragged by its border?
   // False for a workspace container, which stays in the managed stack so the
   // cross-container connectors measure correctly.
@@ -238,10 +234,8 @@ export interface PeriodContainerProps {
 // The card a top-level period lives in: the accent chrome, the labelled header with the
 // period-level controls (reorder, compact, tidy, save, remove), and the border-drag that
 // floats a standalone card around the viewport. Its `children` are the period's own
-// content — the canvas and the resize grip.
-//
-// A nested phrase can wear this card too, as `nested`; its owner passes it none of
-// the period-level controls (moods, connectors, save), and the card offers no reordering.
+// content — the canvas and the resize grip. (A period's nested phrases — conjuncts and owners — are
+// rings on its canvas, and wear no card.)
 export function PeriodContainer({
   paperPad,
   compact,
@@ -249,7 +243,6 @@ export function PeriodContainer({
   hasGroups,
   hasContent,
   soleContainer,
-  nested = false,
   floatable,
   position,
   onPositionChange,
@@ -732,7 +725,7 @@ export function PeriodContainer({
           {/* Reorder within the workspace stack. Both controls stay mounted while the
               workspace holds more than one period, so the cluster doesn't shift width
               as a period reaches an end; the one with nowhere to go is disabled. */}
-          {!soleContainer && !nested && (
+          {!soleContainer && (
             <>
               <Tooltip title="Move this period up">
                 <span>
@@ -821,13 +814,7 @@ export function PeriodContainer({
               a removable (non-sole) container keeps its remove control even when empty. */}
           {onRemove && (!soleContainer || hasContent) && (
             <Tooltip
-              title={
-                soleContainer
-                  ? t("action.clearPeriod")
-                  : nested
-                    ? "Remove this phrase"
-                    : "Remove this period"
-              }
+              title={soleContainer ? t("action.clearPeriod") : "Remove this period"}
             >
               <IconButton
                 size="small"
@@ -835,19 +822,11 @@ export function PeriodContainer({
                   // Confirm only when there's work to lose; an empty clause acts silently.
                   const message = soleContainer
                     ? "Clear this main clause and everything in it?"
-                    : nested
-                      ? "Remove this phrase and everything in it?"
-                      : "Remove this main clause and everything in it?";
+                    : "Remove this main clause and everything in it?";
                   if (hasContent && !window.confirm(message)) return;
                   onRemove();
                 }}
-                aria-label={
-                  soleContainer
-                    ? t("action.clearPeriod")
-                    : nested
-                      ? "Remove phrase"
-                      : "Remove main clause"
-                }
+                aria-label={soleContainer ? t("action.clearPeriod") : "Remove main clause"}
                 sx={{ p: 0.25 }}
               >
                 {soleContainer ? (

@@ -521,28 +521,6 @@ describe('PeriodContainer', () => {
       expect(onRemove).toHaveBeenCalledOnce();
     });
 
-    it('removes a nested phrase as a phrase, with no reordering offered', () => {
-      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
-      const onRemove = vi.fn();
-      renderPeriod({
-        nested: true,
-        soleContainer: false,
-        hasContent: true,
-        onMoveUp: vi.fn(),
-        onMoveDown: vi.fn(),
-        onRemove,
-      });
-
-      expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
-      expect(
-        screen.queryByRole('button', { name: 'Move this period down' }),
-      ).not.toBeInTheDocument();
-      fireEvent.click(screen.getByRole('button', { name: 'Remove phrase' }));
-
-      expect(confirm).toHaveBeenCalledExactlyOnceWith('Remove this phrase and everything in it?');
-      expect(onRemove).toHaveBeenCalledOnce();
-    });
-
     it('keeps the period when the user declines', () => {
       vi.spyOn(window, 'confirm').mockReturnValue(false);
       const onRemove = vi.fn();

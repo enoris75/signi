@@ -16,6 +16,13 @@ describe('useStoredNumber', () => {
     expect(result.current[0]).toBe(240);
   });
 
+  it.each(['wide', '', 'NaN', 'Infinity'])('starts from the fallback when the saved value is %j, not a number', (saved) => {
+    localStorage.setItem('signi:test', saved);
+    const { result } = renderHook(() => useStoredNumber('signi:test', 300, 150));
+
+    expect(result.current[0]).toBe(300);
+  });
+
   it('raises a saved value below the minimum to it', () => {
     localStorage.setItem('signi:test', '90');
     const { result } = renderHook(() => useStoredNumber('signi:test', 300, 150));

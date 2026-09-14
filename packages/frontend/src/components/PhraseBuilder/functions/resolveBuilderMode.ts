@@ -19,7 +19,6 @@ export function resolveBuilderMode({
   // Set for a hosted ring's builder, whose ring is drawn on the period's canvas.
   hosted: boolean;
 }): {
-  nested: boolean;
   nounPhraseMode: boolean;
   actionMode: boolean;
   showCanvas: boolean;
@@ -61,5 +60,5 @@ export function resolveBuilderMode({
   const hasContent = Object.values(selection).some(
     (v) => v != null && (typeof v !== "object" || Object.keys(v).length > 0),
   );
-  return { nested, nounPhraseMode, actionMode, showCanvas, hasContent };
+  return { nounPhraseMode, actionMode, showCanvas, hasContent };
 }

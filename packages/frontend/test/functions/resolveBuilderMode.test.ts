@@ -23,7 +23,6 @@ const mode = (over: Partial<Parameters<typeof resolveBuilderMode>[0]> = {}) =>
 describe('resolveBuilderMode', () => {
   it('draws no canvas for an untouched period, which offers its opening word picker', () => {
     expect(mode()).toEqual({
-      nested: false,
       nounPhraseMode: false,
       actionMode: false,
       showCanvas: false,
@@ -57,7 +56,6 @@ describe('resolveBuilderMode', () => {
 
   it('keeps a nested builder out of its container’s instrument', () => {
     expect(mode({ binding: instrument(true, 'process'), possessorPath: 'subject/possessor' })).toMatchObject({
-      nested: true,
       actionMode: false,
       nounPhraseMode: false,
     });

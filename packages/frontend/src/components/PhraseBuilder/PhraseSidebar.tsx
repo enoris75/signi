@@ -7,6 +7,7 @@ import ConceptPalette from "../ConceptPalette.tsx";
 import { WordMap } from "../WordMap/WordMap.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { useWindowDrag } from "../../hooks/useWindowDrag.ts";
+import { SIDEBAR_WIDTH_KEY } from "./storageKeys.ts";
 import {
   PhraseSelection,
   SlotConfig,
@@ -110,7 +111,7 @@ export function PhraseSidebar({
             },
             () =>
               localStorage.setItem(
-                "signi:phraseBuilderSidebarWidth",
+                SIDEBAR_WIDTH_KEY,
                 String(Math.round(currentW)),
               ),
           );

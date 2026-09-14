@@ -61,6 +61,7 @@ import {
 } from "./conjunctChain.ts";
 import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
 import { PeriodCard } from "./PeriodCard.tsx";
+import { GRAPH_HEIGHT_KEY, SIDEBAR_WIDTH_KEY } from "./storageKeys.ts";
 import { useDrag } from "./hooks/useDrag.ts";
 import { useHeightRebase } from "./hooks/useHeightRebase.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
@@ -170,7 +171,7 @@ export function PhraseBuilder({
       : binding;
   // A period of its own, another clause's instrument, or a hosted ring's noun phrase — and so
   // whether it draws a canvas yet (see resolveBuilderMode).
-  const { nested, nounPhraseMode, actionMode, showCanvas, hasContent } = resolveBuilderMode({
+  const { nounPhraseMode, actionMode, showCanvas, hasContent } = resolveBuilderMode({
     selection,
     binding,
     possessorPath,
@@ -212,7 +213,7 @@ export function PhraseBuilder({
   const [compactView, setCompact] = useState(false);
   // A hosted ring is one more constituent of the period's canvas, so it follows that canvas's view.
   const compact = ringHost?.compact ?? compactView;
-  const [sidebarWidth, setSidebarWidth] = useStoredNumber("signi:phraseBuilderSidebarWidth", 160);
+  const [sidebarWidth, setSidebarWidth] = useStoredNumber(SIDEBAR_WIDTH_KEY, 160);
   // The rings hosted on this canvas — conjuncts' and owners' — as each one's builder reports drawing
   // it, keyed by its node key here (see conjunctKey; an owner's is its address).
   const { hostedRings, reportRing } = useHostedRings();
@@ -397,7 +398,7 @@ export function PhraseBuilder({
     // Compact paints the boxes where its packing puts them, so there is nothing to drag.
     frozen: compact,
   });
-  const [graphHeight, setGraphHeight] = useStoredNumber("signi:graphHeight", GRAPH_HEIGHT, MIN_GRAPH_HEIGHT);
+  const [graphHeight, setGraphHeight] = useStoredNumber(GRAPH_HEIGHT_KEY, GRAPH_HEIGHT, MIN_GRAPH_HEIGHT);
 
   // Rebase node y's when the canvas height changes (see useHeightRebase). Must stay above
   // the overlap resolver, which reads the stale flag in the same commit.
@@ -798,7 +799,6 @@ export function PhraseBuilder({
     <PeriodCard
       selection={selection}
       binding={binding}
-      nested={nested}
       compact={compact}
       showCanvas={showCanvas}
       hasGroups={groupRects.length > 0}
@@ -816,21 +816,20 @@ export function PhraseBuilder({
       graphHeight={graphHeight}
       onGraphHeightChange={setGraphHeight}
       sidebar={
-        // The words panel is the page's, opened from its header: only the outermost period has one.
-        !nested && (
-          <PhraseSidebar
-            open={wordsPanelOpen}
-            onClose={() => onWordsPanelClose?.()}
-            width={sidebarWidth}
-            onWidthChange={setSidebarWidth}
-            selection={selection}
-            activeSlot={activeSlot}
-            activeSlotConfig={activeSlotConfig}
-            visibleSlots={visibleSlots}
-            onSlotClick={selectSlot}
-            onConceptSelect={handleConceptSelect}
-          />
-        )
+        // The words panel is the page's, opened from its header. Only a period wears a card, so only
+        // the outermost builder has one.
+        <PhraseSidebar
+          open={wordsPanelOpen}
+          onClose={() => onWordsPanelClose?.()}
+          width={sidebarWidth}
+          onWidthChange={setSidebarWidth}
+          selection={selection}
+          activeSlot={activeSlot}
+          activeSlotConfig={activeSlotConfig}
+          visibleSlots={visibleSlots}
+          onSlotClick={selectSlot}
+          onConceptSelect={handleConceptSelect}
+        />
       }
     >
       {canvas}
