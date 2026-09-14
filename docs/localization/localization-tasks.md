@@ -84,6 +84,17 @@ landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 |---|---|---|
 | B14 | [B14-motion-verbs.md](B-needs-seed/B14-motion-verbs.md) | **MOVE** (PLACE ✓) → GO, RUN, COME, JUMP, COLLAPSE — builder done |
 
+Genus nouns (B29–B31) come from the isA audit of 2026-09-14. Each names children whose description
+cites a parent that isn't seeded. Seed the parent with
+[`/generalize`](../../.claude/skills/generalize/SKILL.md), attach the siblings, then author the glosses
+that become composable.
+
+| # | File | Seed first |
+|---|---|---|
+| B29 | [B29-building-genus.md](B-needs-seed/B29-building-genus.md) | **BUILDING** (isA PLACE) over HOUSE, PRISON → BUILDING's gloss needs WALL; HOUSE and PRISON stay C07 |
+| B30 | [B30-feeling-genus.md](B-needs-seed/B30-feeling-genus.md) | **FEELING**, **WARM** over AFFECTION → AFFECTION "a warm feeling", maybe FEEL "to have feelings" |
+| B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | **COMPLEMENT_GRAMMAR** (isA PHRASE, shared with B23), **MEANS** over SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER |
+
 #### UI strings
 
 **B20 and B22 are the cheapest**: two verbs, or one feature family, each unlock a whole control group.
