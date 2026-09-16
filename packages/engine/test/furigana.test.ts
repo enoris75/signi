@@ -23,7 +23,8 @@ const bare = (id: string): string[] => furigana({ subject: np(id) } as PhrasePla
 const KANJI_NOUNS: [id: string, reading: string][] = [
   ['ADJECTIVE', 'けいようし'], ['ADVERB', 'ふくし'], ['AFFECTION', 'あいじょう'], ['ANGEL', 'てんし'], ['ANIMAL', 'どうぶつ'],
   ['ANTARCTICA', 'なんきょくたいりく'], ['ARTICLE', 'かんし'], ['BLADE', 'は'], ['BOOK', 'ほん'], ['BUILDER', 'けんちくしゃ'],
-  ['BUTCHER', 'にくや'], ['CAT', 'ねこ'], ['CAUSE', 'げんいん'], ['CHILD', 'こども'], ['COIN', 'こうか'],
+  ['BUILDING', 'たてもの'], ['BUTCHER', 'にくや'], ['CAT', 'ねこ'], ['CAUSE', 'げんいん'], ['CHILD', 'こども'],
+  ['COIN', 'こうか'],
   ['COMMAND', 'めいれい'], ['CONCEPT', 'がいねん'], ['CONTAINER', 'ようき'], ['CONTINENT', 'たいりく'],
   ['COW', 'うし'], ['CREATOR', 'そうぞうしゃ'], ['DEATH', 'し'], ['DEMONSTRATIVE', 'しじし'],
   ['DETERMINER', 'げんていし'], ['DOG', 'いぬ'], ['ENGLISH', 'えいご'], ['FATHER', 'ちち'], ['FIRE', 'ひ'],

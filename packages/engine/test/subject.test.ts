@@ -464,6 +464,59 @@ describe('subject: the B06 abstract noun ACTION', () => {
   });
 });
 
+// BUILDING, the genus seeded for B29 over HOUSE and PRISON. Worth its own case rather than a
+// DIFFERENTIA_NOUNS row for two paradigms the table's shape would not reach: German "Gebäude" is
+// one of the neuter nouns whose plural is identical to its singular, so only the article moves;
+// and Italian "edificio" is vowel-initial, which makes its masculine plural article alternate —
+// "gli edifici" bare, but "i grandi edifici" once a consonant-initial adjective comes between.
+describe('subject: the B29 genus BUILDING', () => {
+  test('BUILDING elides in it/fr and keeps an identical German plural', () => {
+    expect(subject(np('BUILDING'))).toEqual({
+      en: 'the building runs.',
+      it: "l'edificio corre.",
+      fr: 'le bâtiment court.',
+      de: 'das Gebäude läuft.',
+      es: 'el edificio corre.',
+      ja: '建物は走ります。',
+      pt: 'o edifício corre.',
+    });
+    expect(subject(np('BUILDING', { number: 'plural' }))).toEqual({
+      en: 'the buildings run.',
+      it: 'gli edifici corrono.', // vowel-initial masculine plural takes gli, not i
+      fr: 'les bâtiments courent.',
+      de: 'die Gebäude laufen.', // Gebäude → Gebäude; only the article pluralises
+      es: 'los edificios corren.',
+      ja: '建物は走ります。',
+      pt: 'os edifícios correm.',
+    });
+    expect(subject(np('BUILDING', { definiteness: 'indefinite' }))).toEqual({
+      en: 'a building runs.',
+      it: 'un edificio corre.', // masculine un does not apostrophise (cf. un'opzione)
+      fr: 'un bâtiment court.',
+      de: 'ein Gebäude läuft.',
+      es: 'un edificio corre.',
+      ja: '建物は走ります。',
+      pt: 'um edifício corre.',
+    });
+  });
+
+  test('an adjective agrees, and moves the Italian article back to i', () => {
+    expect(subject(np('BUILDING', { number: 'plural', adjectives: ['BIG'] }))).toMatchObject({
+      en: 'the big buildings run.',
+      it: 'i grandi edifici corrono.', // grandi is consonant-initial, so gli → i
+      fr: 'les grands bâtiments courent.',
+      de: 'die großen Gebäude laufen.',
+      es: 'los edificios grandes corren.', // Romance postnominal, unlike it/fr
+      pt: 'os edifícios grandes correm.',
+    });
+    expect(subject(np('BUILDING', { definiteness: 'indefinite', adjectives: ['BIG'] }))).toMatchObject({
+      de: 'ein großes Gebäude läuft.', // neuter strong -es after ein
+      it: 'un grande edificio corre.',
+      ja: '大きい建物は走ります。',
+    });
+  });
+});
+
 // The countable differentia nouns seeded for the verb definitions (a blade, a tooth, a place, a tear,
 // a sound, an option, a button, a keyboard). Each row pins the definite singular, the definite
 // plural and the indefinite singular in every language — so the article's gender (and its elision

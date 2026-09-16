@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import { COMPLEMENT_TYPES, LANGUAGES } from '@signi/shared';
 import type { GrammaticalRole } from '@signi/shared';
 import { concepts, NONFINITE } from './index.js';
-import { assertValidHierarchy } from './hierarchy.js';
+import { ancestors, assertValidHierarchy } from './hierarchy.js';
 
 // Integrity of the seed corpus: the rules the seed and the engine rely on but that neither the
 // schema nor the type of ConceptSeed (whose role, languages and complements are plain strings)
@@ -90,6 +90,19 @@ describe('the concept corpus', () => {
 
   test('forms a valid isA hierarchy', () => {
     expect(() => assertValidHierarchy(concepts)).not.toThrow();
+  });
+
+  test('hangs the building nouns under BUILDING → PLACE (B29)', () => {
+    // The one generalize failure no validator catches: BUILDING must be *inserted* above HOUSE
+    // and PRISON, not substituted for their parent. Both were roots here, so the chain is pure
+    // gain — but re-pointing BUILDING later would silently drop them out of the PLACE subtree,
+    // the seed would still succeed, and only a wrong render would show it.
+    expect(ancestors('BUILDING', byId)).toEqual(['PLACE']);
+    expect(ancestors('HOUSE', byId)).toEqual(['BUILDING', 'PLACE']);
+    expect(ancestors('PRISON', byId)).toEqual(['BUILDING', 'PLACE']);
+    // The siblings that stayed put: BUILDING joined them under PLACE, it did not come between.
+    expect(ancestors('HOME', byId)).toEqual(['PLACE']);
+    expect(ancestors('MARKET', byId)).toEqual(['PLACE']);
   });
 
   test('relates hypernyms within one role', () => {

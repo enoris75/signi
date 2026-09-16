@@ -37,8 +37,8 @@ locative adjunct. That co-indexing target does not exist in the relative-clause 
    with a locative adjunct in the embedded clause.
 2. Add per-language locative-relativiser realisation (English *where*, etc.).
 3. Then seed `PLACE`/`BUILDING`, `LIVE`/`DWELL`, `CONFINE`/`IMPRISON` and author the glosses above.
-   PLACE is seeded, and HOME and MARKET are attached under it. BUILDING, over HOUSE and PRISON, is
-   [B29](../B-needs-seed/B29-building-genus.md).
+   PLACE is seeded, and HOME and MARKET are attached under it. BUILDING, over HOUSE and PRISON,
+   landed with [B29](B29-building-genus.md); the verbs are [B32](../B-needs-seed/B32-place-glosses.md).
 
 Until step 1–2 exist, these nouns stay on the English literal.
 

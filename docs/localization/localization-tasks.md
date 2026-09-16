@@ -85,16 +85,15 @@ landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
 
-Genus nouns (B29–B31) come from the isA audit of 2026-09-14. Each names children whose description
+Genus nouns (B30–B31, and B29 before it) come from the isA audit of 2026-09-14. Each names children whose description
 cites a parent that isn't seeded. Seed the parent with
 [`/generalize`](../../.claude/skills/generalize/SKILL.md), attach the siblings, then author the glosses
 that become composable.
 
 | # | File | Seed first |
 |---|---|---|
-| B29 | [B29-building-genus.md](B-needs-seed/B29-building-genus.md) | **BUILDING** (isA PLACE) over HOUSE, PRISON → BUILDING's gloss needs WALL; HOUSE and PRISON move on to B32 |
 | B30 | [B30-feeling-genus.md](B-needs-seed/B30-feeling-genus.md) | **FEELING**, **WARM** over AFFECTION → AFFECTION "a warm feeling", maybe FEEL "to have feelings" |
-| B32 | [B32-place-glosses.md](B-needs-seed/B32-place-glosses.md) | **LIVE** → HOME "a place where one lives"; MARKET is composable today with BUY but needs a product call; HOUSE and PRISON also wait on B29 (was C07) |
+| B32 | [B32-place-glosses.md](B-needs-seed/B32-place-glosses.md) | **LIVE** → HOME "a place where one lives"; MARKET is composable today with BUY but needs a product call; HOUSE wants LIVE and PRISON wants CONFINE, with BUILDING now seeded by B29 (was C07) |
 | B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | nothing: COMPLEMENT_GRAMMAR and MEANS are seeded (B23, B24). Attach SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER under it and author the glosses |
 
 #### UI strings
@@ -105,7 +104,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 
 | # | File | Blocked on |
 |---|---|---|
-| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's) |
+| C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's); BUILDING, whose "a place that has walls" failed in fr and ja (B29) |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
@@ -173,6 +172,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B26 | [done/B26-ui-saved-item-feedback.md](done/B26-ui-saved-item-feedback.md) | `saved.noPhrases/noPeriods/useSaveIcon`, `toast.periodAdded`, `toast.importFailed` + `toast.invalidFile` ("this file is not valid"; the reasons go to the console) (seeded USE, IMPORT_NOUN, ICON, FILE, ADDED, FAILED, VALID; YET dropped: a verbless label has no verb for it) |
 | B27 | [done/B27-ui-clipboard-move-resize.md](done/B27-ui-clipboard-move-resize.md) | `action.copyTranslation` (not "to the clipboard": the direction complement can't say *into*), `status.copied`, `action.movePeriodUp/Down` ("Move up", no object), `action.resizeContainer` (seeded COPY, MOVE, RESIZE, COPIED, UP, DOWN; found bug A142) |
 | B28 | [done/B28-ui-mood-toggles.md](done/B28-ui-mood-toggles.md) | `period.isCommand/isInfinitive` + `action.turnOff` ("turn it off": English phrasal verbs move their particle after a pronoun object); the toggles are named by their mode with `aria-pressed` (seeded TURN_OFF) |
+| B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stays on the English literal (C05) and WALL was not seeded |
 
 Shipped before this catalogue existed (the genus+differentia precedent):
 [done/precedent-animals.md](done/precedent-animals.md) — CAT, MOUSE, FOX, COW.

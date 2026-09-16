@@ -477,10 +477,34 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The genus HOUSE and PRISON lacked: both are described as "a building", which was not itself a
+    // concept (B29). It sits under PLACE beside HOME, MARKET and CONTINENT, so the two nouns gain
+    // BUILDING → PLACE rather than losing anything — both were roots. No `definition`: "a place
+    // that has walls" composes, but French drops the partitive on the bare plural and Japanese
+    // says it with 持つ, which is for things one carries (see C05). German "Gebäude" is one of the
+    // neuter nouns with an identical plural; Japanese 建物 is the everyday word, 建築物 the
+    // technical one.
+    id: 'BUILDING',
+    role: 'noun',
+    description: 'a structure with walls and a roof',
+    emoji: '🏢',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'building', plural: 'buildings', count: 'singular' },
+      it: { base: 'edificio', plural: 'edifici', gender: 'masc', count: 'singular' },
+      fr: { base: 'bâtiment', plural: 'bâtiments', gender: 'masc', count: 'singular' },
+      de: { base: 'Gebäude', plural: 'Gebäude', gender: 'neut', count: 'singular' },
+      es: { base: 'edificio', plural: 'edificios', gender: 'masc', count: 'singular' },
+      ja: { base: '建物', count: 'singular', reading: 'たてもの' },
+      pt: { base: 'edifício', plural: 'edifícios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'HOUSE',
     role: 'noun',
     description: 'a building used as a dwelling',
     emoji: '🏠',
+    isA: 'BUILDING',
     forms: {
       en: { base: 'house', plural: 'houses', count: 'singular' },
       it: { base: 'casa', plural: 'case', gender: 'fem', count: 'singular' },
@@ -1032,6 +1056,7 @@ export const nouns: ConceptSeed[] = [
     role: 'noun',
     description: 'a building where people are confined as punishment',
     emoji: '🔒',
+    isA: 'BUILDING',
     forms: {
       en: { base: 'prison', plural: 'prisons', count: 'singular' },
       it: { base: 'prigione', plural: 'prigioni', gender: 'fem', count: 'singular' },

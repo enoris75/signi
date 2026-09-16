@@ -48,8 +48,8 @@ The forms are suggestions, not renders. **LIVE is polysemous.** The dwelling sen
 |---|---|---|---|
 | HOME | `whereGloss('PLACE', 'LIVE')` | a place where one lives | ✓ once LIVE is seeded |
 | MARKET | `whereGloss('PLACE', 'BUY', 'OBJECT_THING')` | a place where one buys objects | ⚠ composable **today**, but does not tell a market from a shop. The intended "buys **and sells**" needs SELL *and* a coordinated predicate inside a relative clause, which the engine cannot render (`RelativeClause` has one `verbPhrase`). A single verb like TRADE avoids that. Pick one. |
-| HOUSE | `whereGloss('BUILDING', 'LIVE')` | a building where one lives | ✗ also needs BUILDING, [B29](B29-building-genus.md) |
-| PRISON | — | a building where people are confined | ✗ needs BUILDING (B29) and CONFINE. The passive "are confined" is [features/A01](../../features/A-ready/A01-passive-voice/README.md). The active `whereGloss('BUILDING', 'CONFINE', 'PERSON')` "a building where one confines persons" avoids it, but probe the plural PERSON first. |
+| HOUSE | `whereGloss('BUILDING', 'LIVE')` | a building where one lives | ✓ once LIVE is seeded — BUILDING landed with [B29](../done/B29-building-genus.md) |
+| PRISON | — | a building where people are confined | ✗ needs CONFINE (BUILDING landed with [B29](../done/B29-building-genus.md)). The passive "are confined" is [features/A01](../../features/A-ready/A01-passive-voice/README.md). The active `whereGloss('BUILDING', 'CONFINE', 'PERSON')` "a building where one confines persons" avoids it, but probe the plural PERSON first. |
 
 Known surface simplifications these inherit:
 - French drops *des* on a bare plural object: "où l'on achète objets" ([B31](B31-complement-genus.md) notes the same).
