@@ -748,12 +748,12 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
   ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
-  ['FAILED', 'failed'], ['FEMALE', 'female'],
+  ['FAILED', 'failed'], ['FAR', 'far'], ['FEMALE', 'female'],
   ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MULTAL', 'multal'],
-  ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['OLD', 'old'],
+  ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['OLD', 'old'],
   ['OTHER', 'other'], ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'],
   ['POSITIVE', 'positive'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],
   ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
@@ -809,6 +809,8 @@ describe('adjective position: Italian', () => {
     expect(it('WRITTEN')).toBe('il gatto scritto mangia.'); // past participle, agrees & postnominal
     expect(it('SHARP')).toBe('il gatto affilato mangia.');
     expect(it('LOUD')).toBe('il gatto forte mangia.');
+    expect(it('NEAR')).toBe('il gatto vicino mangia.');
+    expect(it('FAR')).toBe('il gatto lontano mangia.');
   });
 });
 
@@ -897,6 +899,75 @@ describe('adjective agreement: SHARP and LOUD', () => {
       pt: 'os sons são altos.',
       de: 'die Geräusche sind laut.',
       ja: '音は大きいです。',
+    });
+  });
+});
+
+// NEAR and FAR, the distance adjectives. Romance builds them from the derived adjectives, not the
+// bare distance adverbs (lejos/loin/longe cannot modify a noun), so both agree and sit after the
+// head; Iberian Romance locates with estar, so both predicate with it. German umlauts NEAR under
+// comparison with an irregular superlative (nah → näher / nächst) where FAR ("fern") is regular,
+// and English compares "far" suppletively (farther/farthest).
+describe('adjective agreement and comparison: NEAR and FAR', () => {
+  test('both agree with a feminine plural head', () => {
+    expect(cat({ gender: 'fem', number: 'plural', adjectives: ['NEAR'] })).toEqual({
+      en: 'the near cats eat.',
+      it: 'le gatte vicine mangiano.',
+      fr: 'les chattes proches mangent.',
+      es: 'las gatas cercanas comen.',
+      pt: 'as gatas próximas comem.',
+      de: 'die nahen Katzen essen.', // nah + the weak plural -en
+      ja: '近い猫は食べます。',
+    });
+    expect(cat({ gender: 'fem', number: 'plural', adjectives: ['FAR'] })).toEqual({
+      en: 'the far cats eat.',
+      it: 'le gatte lontane mangiano.',
+      fr: 'les chattes lointaines mangent.', // lointain → lointaine, not the adverb "loin"
+      es: 'las gatas lejanas comen.',
+      pt: 'as gatas distantes comem.', // -e adjective: gender-invariant, plural only
+      de: 'die fernen Katzen essen.',
+      ja: '遠い猫は食べます。',
+    });
+  });
+
+  test('predicatively, both take estar in Spanish and Portuguese', () => {
+    const isThat = (adjective: string) =>
+      sayAll(clause(np('HOUSE'), 'BE', { complements: { predicative: { phrase: np(adjective) } } }));
+    expect(isThat('NEAR')).toEqual({
+      en: 'the house is near.',
+      it: 'la casa è vicina.',
+      fr: 'la maison est proche.',
+      es: 'la casa está cercana.',
+      pt: 'a casa está próxima.',
+      de: 'das Haus ist nah.', // the predicative keeps the undeclined base
+      ja: '家は近いです。',
+    });
+    expect(isThat('FAR')).toEqual({
+      en: 'the house is far.',
+      it: 'la casa è lontana.',
+      fr: 'la maison est lointaine.',
+      es: 'la casa está lejana.',
+      pt: 'a casa está distante.',
+      de: 'das Haus ist fern.',
+      ja: '家は遠いです。',
+    });
+  });
+
+  test('compare: NEAR umlauts to näher/nächst, FAR is suppletive in English', () => {
+    const degreed = (adjective: string, degree: Degree) =>
+      cat({ adjectives: [adjective], adjectiveDegrees: [degree] });
+    expect(degreed('NEAR', 'more')).toMatchObject({ en: 'the nearer cat eats.', de: 'der nähere Kater isst.' });
+    // nächst, seeded whole: the umlaut rule alone would build *nähst.
+    expect(degreed('NEAR', 'most')).toMatchObject({ en: 'the nearest cat eats.', de: 'der nächste Kater isst.' });
+    expect(degreed('FAR', 'more')).toMatchObject({ en: 'the farther cat eats.', de: 'der fernere Kater isst.' });
+    expect(degreed('FAR', 'most')).toMatchObject({ en: 'the farthest cat eats.', de: 'der fernste Kater isst.' });
+    // Romance and Japanese stay periphrastic for both.
+    expect(degreed('FAR', 'more')).toMatchObject({
+      it: 'il gatto più lontano mangia.',
+      fr: 'le chat plus lointain mange.',
+      es: 'el gato más lejano come.',
+      pt: 'o gato mais distante come.',
+      ja: 'もっと遠い猫は食べます。',
     });
   });
 });

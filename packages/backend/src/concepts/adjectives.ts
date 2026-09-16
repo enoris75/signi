@@ -100,6 +100,46 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Distance as a property of the thing itself — "the near house" — not a relation to a
+    // landmark, which is the locative's business (A02), so this stays an ordinary adjective.
+    // German declines "nah" regularly (die nahe Katze) but umlauts under comparison (näher)
+    // with an irregular superlative: nächst, not *nähst.
+    id: 'NEAR',
+    role: 'adjective',
+    transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
+    description: 'a short distance away',
+    emoji: '📍',
+    forms: {
+      en: { base: 'near' },
+      it: { base: 'vicino' },
+      fr: { base: 'proche' },
+      de: { base: 'nah', umlaut: 'true', superlative: 'nächst' },
+      es: { base: 'cercano' },
+      ja: { base: '近い', reading: 'ちかい' },
+      pt: { base: 'próximo' },
+    },
+  },
+  {
+    // The counterpart of NEAR. French/Spanish/Portuguese seed the derived adjectives, not the
+    // bare distance adverbs — loin/lejos/longe cannot modify a noun ("un pays lointain", never
+    // "un pays loin"). English "far" compares suppletively (farther/farthest), already in
+    // EN_IRREGULAR; German takes "fern", since attributive "weit" reads as wide, not distant.
+    id: 'FAR',
+    role: 'adjective',
+    transient: true, // distance is a location, and Iberian Romance locates with estar (A47)
+    description: 'a long distance away',
+    emoji: '🛰️',
+    forms: {
+      en: { base: 'far' },
+      it: { base: 'lontano' },
+      fr: { base: 'lointain' },
+      de: { base: 'fern' },
+      es: { base: 'lejano' },
+      ja: { base: '遠い', reading: 'とおい' },
+      pt: { base: 'distante' },
+    },
+  },
+  {
     id: 'GOOD',
     role: 'adjective',
     description: 'of high quality or virtue',
