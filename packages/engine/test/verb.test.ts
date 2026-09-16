@@ -455,6 +455,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['CLICK', 'la gatta ha cliccato.'], ['CLOSE', 'la gatta ha chiuso.'],
     ['COLLAPSE', 'la gatta è crollata.'],
     ['COME', 'la gatta è venuta.'], ['COMPACT', 'la gatta ha compattato.'],
+    ['CONFINE', 'la gatta ha rinchiuso.'],
     ['COORDINATE', 'la gatta ha coordinato.'], ['COPY', 'la gatta ha copiato.'],
     ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
@@ -472,6 +473,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['IMPORT', 'la gatta ha importato.'], ['INDICATE', 'la gatta ha indicato.'],
     ['JUMP', 'la gatta ha saltato.'],
     ['KILL', 'la gatta ha ucciso.'], ['KNOW', 'la gatta ha saputo.'],
+    ['LIVE', 'la gatta ha abitato.'],
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
     ['MAKE', 'la gatta ha fatto.'], ['MODIFY', 'la gatta ha modificato.'],
     ['MOVE', 'la gatta ha spostato.'],
@@ -487,6 +489,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHED', 'la gatta ha versato.'],
     ['SHOW', 'la gatta ha mostrato.'], ['START', 'la gatta ha iniziato.'],
     ['STRIKE', 'la gatta ha colpito.'], ['TIDY_UP', 'la gatta ha riordinato.'],
+    ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TURN_OFF', 'la gatta ha disattivato.'],
     ['TYPE', 'la gatta ha digitato.'],
     ['UNDERSTAND', 'la gatta ha compreso.'], ['USE', 'la gatta ha usato.'],
@@ -1709,5 +1712,108 @@ describe('known bugs: CLICK takes its object with a preposition', () => {
       pt: 'o gato me vê.',
     });
     expect(say(clause(np('CAT'), 'CLICK', { complements: { locative: { phrase: np('HOUSE') } } }), 'de')).toBe('der Kater klickt im Haus.');
+  });
+});
+
+// The three verbs B32's place glosses are built from. Each was seeded for one gloss, but a verb
+// carries its whole paradigm, so what the gloss never renders is pinned here: the persons and
+// tenses each language inflects, and the stem alternations that are easy to get wrong.
+describe('B32 verbs: LIVE, TRADE and CONFINE', () => {
+  const says = (verb: string, subject: NounElement, extra: Partial<VerbPhrase> = {}, object?: string) =>
+    sayAll(clause(subject, verb, { ...(object ? { directObject: np(object) } : {}), verbPhrase: extra }));
+
+  test('LIVE: the dwelling verb, not the be-alive one', () => {
+    // it abitare, fr habiter, de wohnen and pt morar are the dwelling senses; es vivir and ja 住む
+    // carry both. The whole point of seeding this sense is that it is NOT vivere/vivre/leben/viver.
+    expect(says('LIVE', np('CAT'))).toEqual({
+      en: 'the cat lives.',
+      it: 'il gatto abita.',
+      fr: 'le chat habite.',
+      de: 'der Kater wohnt.',
+      es: 'el gato vive.',
+      ja: '猫は住みます。',
+      pt: 'o gato mora.',
+    });
+    expect(says('LIVE', np('CAT', { number: 'plural' }))).toMatchObject({
+      en: 'the cats live.',
+      it: 'i gatti abitano.',
+      fr: 'les chats habitent.',
+      de: 'die Kater wohnen.',
+      es: 'los gatos viven.',
+      pt: 'os gatos moram.',
+    });
+    expect(says('LIVE', np('CAT'), { tense: 'past' })).toMatchObject({
+      en: 'the cat lived.',
+      it: 'il gatto abitò.',
+      fr: 'le chat habita.',
+      de: 'der Kater wohnte.',
+      es: 'el gato vivió.',
+      pt: 'o gato morou.',
+    });
+    expect(says('LIVE', np('CAT'), { tense: 'future' })).toMatchObject({
+      it: 'il gatto abiterà.',
+      fr: 'le chat habitera.',
+      de: 'der Kater wird wohnen.',
+      es: 'el gato vivirá.',
+      pt: 'o gato morará.',
+    });
+    // It licenses a locative — the complement whereGloss's relative clause gaps on.
+    expect(says('LIVE', np('CAT'), { }, undefined)).toBeTruthy();
+    expect(say(clause(np('CAT'), 'LIVE', { complements: { locative: { phrase: np('HOUSE') } } }), 'de'))
+      .toBe('der Kater wohnt im Haus.');
+  });
+
+  test('TRADE: the -eln and -cer stem alternations', () => {
+    // German -eln drops the stem -e- in the 1sg (ich handle, not handele); French -cer takes a
+    // cedilla before o (nous commerçons). Both are first-person forms no gloss ever renders.
+    expect(says('TRADE', np('FIRST_PERSON'))).toMatchObject({
+      en: 'I trade.',
+      it: 'commercio.',
+      fr: 'je commerce.',
+      de: 'ich handle.',
+      es: 'comercio.',
+      pt: 'comercio.',
+    });
+    expect(says('TRADE', np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'commerciamo.',
+      fr: 'nous commerçons.',
+      de: 'wir handeln.',
+      es: 'comerciamos.',
+      pt: 'comerciamos.',
+    });
+    expect(says('TRADE', np('CAT'))).toMatchObject({
+      en: 'the cat trades.',
+      de: 'der Kater handelt.',
+      ja: '猫は売買します。',
+    });
+  });
+
+  test('CONFINE: the Spanish personal a and the German -ieren participle', () => {
+    // PERSON is `human`, so Spanish takes the personal a (A98) — "encierra a la persona". German
+    // inhaftieren is an -ieren verb, so its participle has no ge-, and Italian rinchiudere has the
+    // irregular rinchiuso.
+    expect(says('CONFINE', np('CAT'), {}, 'PERSON')).toEqual({
+      en: 'the cat confines the person.',
+      it: 'il gatto rinchiude la persona.',
+      fr: 'le chat enferme la personne.',
+      de: 'der Kater inhaftiert die Person.',
+      es: 'el gato encierra a la persona.',
+      ja: '猫は人を閉じ込めます。',
+      pt: 'o gato encarcera a pessoa.',
+    });
+    expect(says('CONFINE', np('FIRST_PERSON', { number: 'plural' }), {}, 'PERSON')).toMatchObject({
+      it: 'rinchiudiamo la persona.',
+      fr: 'nous enfermons la personne.',
+      de: 'wir inhaftieren die Person.',
+      es: 'encerramos a la persona.', // unstressed stem: encerr-, not encierr-
+      pt: 'encarceramos a pessoa.',
+    });
+    expect(says('CONFINE', np('CAT'), { aspect: 'resultative' }, 'PERSON')).toMatchObject({
+      en: 'the cat has confined the person.',
+      it: 'il gatto ha rinchiuso la persona.', // irregular participle, avere auxiliary
+      fr: 'le chat a enfermé la personne.',
+      de: 'der Kater hat die Person inhaftiert.', // -ieren takes no ge-
+      es: 'el gato ha encerrado a la persona.',
+    });
   });
 });

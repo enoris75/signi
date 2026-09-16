@@ -36,8 +36,8 @@ today (`nf['isA'] === 'CONTINENT'`), and it reads a direct parent only, so no re
 | concept | gloss (en) | status |
 |---|---|---|
 | BUILDING | a place that has walls | ✗ **rejected on the probe** — see below. Stays on the English literal ([C05](../C-needs-engine/C05-non-distinguishing-genera.md)) |
-| HOUSE | a building where one lives | ✗ still [B32](../B-needs-seed/B32-place-glosses.md): LIVE is not seeded (the engine side, C07, is done) |
-| PRISON | a building where people are confined | ✗ still [B32](../B-needs-seed/B32-place-glosses.md): CONFINE is not seeded, and the passive is unsupported |
+| HOUSE | a building where one lives | ✗ still [B32](B32-place-glosses.md): LIVE is not seeded (the engine side, C07, is done) |
+| PRISON | a building where people are confined | ✗ still [B32](B32-place-glosses.md): CONFINE is not seeded, and the passive is unsupported |
 
 Probed and rejected: `patientGloss('PLACE', 'MAKE')` gives "a place that one makes"
 (ja 作る場所, "a place where one makes"), and `glossOf(…, 'BIG')` gives "a big object". Neither
@@ -58,8 +58,8 @@ Wand / pared / 壁 / parede), never written to a seed file:
 | pt | um lugar que tem paredes | ✓ |
 
 Two of seven are wrong, and both are engine gaps rather than word choices: the French bare-plural
-partitive is the same simplification [B31](../B-needs-seed/B31-complement-genus.md) and
-[B32](../B-needs-seed/B32-place-glosses.md) note, and Japanese existential *aru* for an inalienable
+partitive is the same simplification [B31](B31-complement-genus.md) and
+[B32](B32-place-glosses.md) note, and Japanese existential *aru* for an inalienable
 part would need the engine to pick a possession verb per language. Neither is worth opening for one
 gloss. The hierarchy change was worth doing without it, and is what shipped.
 

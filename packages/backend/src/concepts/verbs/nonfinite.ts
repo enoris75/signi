@@ -667,4 +667,31 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'substituindo', participle: 'substituído' },
     ja: { te: '置き換えて', te_reading: 'おきかえて', nai: '置き換えない', nai_reading: 'おきかえない' },
   },
+  // B32's three. it abitare and de wohnen both take the HAVE auxiliary ("ha abitato", "hat
+  // gewohnt"), unlike the motion verbs above; de inhaftieren is an -ieren verb, so its participle
+  // takes no ge-.
+  LIVE: {
+    en: { gerund: 'living', participle: 'lived' },
+    it: { gerund: 'abitando', participle: 'abitato' },
+    fr: { participle: 'habité' }, de: { participle: 'gewohnt' },
+    es: { gerund: 'viviendo', participle: 'vivido' },
+    pt: { gerund: 'morando', participle: 'morado' },
+    ja: { te: '住んで', te_reading: 'すんで', nai: '住まない', nai_reading: 'すまない' },
+  },
+  TRADE: {
+    en: { gerund: 'trading', participle: 'traded' },
+    it: { gerund: 'commerciando', participle: 'commerciato' },
+    fr: { participle: 'commercé' }, de: { participle: 'gehandelt' },
+    es: { gerund: 'comerciando', participle: 'comerciado' },
+    pt: { gerund: 'comerciando', participle: 'comerciado' },
+    ja: { te: '売買して', te_reading: 'ばいばいして', nai: '売買しない', nai_reading: 'ばいばいしない' },
+  },
+  CONFINE: {
+    en: { gerund: 'confining', participle: 'confined' },
+    it: { gerund: 'rinchiudendo', participle: 'rinchiuso' },
+    fr: { participle: 'enfermé' }, de: { participle: 'inhaftiert' },
+    es: { gerund: 'encerrando', participle: 'encerrado' },
+    pt: { gerund: 'encarcerando', participle: 'encarcerado' },
+    ja: { te: '閉じ込めて', te_reading: 'とじこめて', nai: '閉じ込めない', nai_reading: 'とじこめない' },
+  },
 };

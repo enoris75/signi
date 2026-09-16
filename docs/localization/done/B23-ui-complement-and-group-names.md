@@ -12,7 +12,7 @@ seeded, then add it to the map.
 
 ## Seed first (grammar nouns, one concept per tradition name)
 
-COMPLEMENT_GRAMMAR is shared with [B31](../B-needs-seed/B31-complement-genus.md), which seeds it as the `isA` parent
+COMPLEMENT_GRAMMAR is shared with [B31](B31-complement-genus.md), which seeds it as the `isA` parent
 of the three complement names already seeded. Seed the six new complement names under it too.
 
 | concept | role | gloss | it tradition |

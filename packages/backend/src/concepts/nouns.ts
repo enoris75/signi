@@ -43,6 +43,25 @@ const patientGloss = (genus: string, verb: string): PhrasePlan => ({
   },
 });
 
+// A place gloss: a genus restricted by a *locative*-gap relative clause — the head is where the
+// action happens, not who does it or what it is done to, and the clause carries its own generic
+// subject. whereGloss('PLACE', 'EAT') → en "a place where one eats", it "un luogo dove si mangia",
+// fr "un lieu où l'on mange", de "ein Ort, in dem man isst", ja "食べる場所". The verb must license a
+// `locative` complement. The optional object renders as a bare plural, as in whoGloss. Added for
+// B32; the engine side that renders the relative adverb is C07.
+const whereGloss = (genus: string, verb: string, object?: string): PhrasePlan => ({
+  subject: {
+    concept: genus,
+    definiteness: 'indefinite',
+    relative: {
+      headRole: 'locative',
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb },
+      ...(object ? { directObject: { concept: object, definiteness: 'bare', number: 'plural' } } : {}),
+    },
+  },
+});
+
 export const nouns: ConceptSeed[] = [
   // ── NOUNS ────────────────────────────────────────────────────────
   {
@@ -503,6 +522,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HOUSE',
     role: 'noun',
     description: 'a building used as a dwelling',
+    definition: whereGloss('BUILDING', 'LIVE'),
     emoji: '🏠',
     isA: 'BUILDING',
     forms: {
@@ -519,6 +539,7 @@ export const nouns: ConceptSeed[] = [
     id: 'HOME',
     role: 'noun',
     description: 'the place where one lives',
+    definition: whereGloss('PLACE', 'LIVE'),
     emoji: '🏡',
     isA: 'PLACE',
     forms: {
@@ -784,13 +805,35 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The genus AFFECTION lacked: it is described as "a warm feeling", which was not itself a
+    // concept, so it sat as a root (B30). FEELING stays a root in turn — CONCEPT ("a thing thought
+    // rather than held") is the wrong parent for an emotion, and nothing else seeded is above it.
+    // No `definition`: its differentia is its own genus ("a concept that one feels"), so it keeps
+    // the English literal (C05). It is also the first of the emotion nouns B07 still needs.
+    id: 'FEELING',
+    role: 'noun',
+    description: 'an emotion or sensation one feels',
+    emoji: '💗',
+    forms: {
+      en: { base: 'feeling', plural: 'feelings', count: 'singular' },
+      it: { base: 'sentimento', plural: 'sentimenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'sentiment', plural: 'sentiments', gender: 'masc', count: 'singular' },
+      de: { base: 'Gefühl', plural: 'Gefühle', gender: 'neut', count: 'singular' },
+      es: { base: 'sentimiento', plural: 'sentimientos', gender: 'masc', count: 'singular' },
+      ja: { base: '感情', count: 'singular', reading: 'かんじょう' },
+      pt: { base: 'sentimento', plural: 'sentimentos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // A feeling of fondness. A mass noun, like CARE — uncountable, no plural. Vowel-initial in
     // Italian and French, so the definite article elides (l'affetto / l'affection).
     id: 'AFFECTION',
     role: 'noun',
     description: 'a warm feeling of fondness toward someone',
+    definition: glossOf('FEELING', 'WARM'),
     emoji: '🥰',
     countable: false,
+    isA: 'FEELING',
     forms: {
       en: { base: 'affection', count: 'singular' },
       it: { base: 'affetto', gender: 'masc', count: 'singular' },
@@ -911,9 +954,13 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // "Bought and sold" needs two predicates in one relative clause, which RelativeClause's single
+    // verbPhrase cannot hold, so the gloss says it with the one verb that covers both — TRADE,
+    // seeded for it. Objectless: de "handeln" and fr "commercer" take no direct object (B32).
     id: 'MARKET',
     role: 'noun',
     description: 'a place where goods are bought and sold',
+    definition: whereGloss('PLACE', 'TRADE'),
     emoji: '🏪',
     isA: 'PLACE',
     forms: {
@@ -1052,9 +1099,13 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The literal says "are confined", a passive the engine cannot render (features/A01). The
+    // active with a generic subject says the same thing and composes today — "a building where one
+    // confines people", with PERSON plural (B32).
     id: 'PRISON',
     role: 'noun',
     description: 'a building where people are confined as punishment',
+    definition: whereGloss('BUILDING', 'CONFINE', 'PERSON'),
     emoji: '🔒',
     isA: 'BUILDING',
     forms: {
@@ -1578,8 +1629,10 @@ export const nouns: ConceptSeed[] = [
     id: 'SUBJECT_COMPLEMENT',
     role: 'noun',
     description: 'the complement a copular verb predicates of its subject (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'DESCRIBE', 'SUBJECT_GRAMMAR'),
     emoji: '🪞',
     synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
     forms: {
       en: { base: 'subject complement', plural: 'subject complements', count: 'singular' },
       it: { base: 'complemento predicativo del soggetto', plural: 'complementi predicativi del soggetto', gender: 'masc', count: 'singular' },
@@ -1598,8 +1651,10 @@ export const nouns: ConceptSeed[] = [
     id: 'INSTRUMENTAL',
     role: 'noun',
     description: 'the complement naming the means an action is carried out with (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'MEANS'),
     emoji: '🔧',
     synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
     forms: {
       en: { base: 'instrumental', plural: 'instrumentals', count: 'singular' },
       it: { base: 'complemento di mezzo', plural: 'complementi di mezzo', gender: 'masc', count: 'singular' },
@@ -1618,8 +1673,10 @@ export const nouns: ConceptSeed[] = [
     id: 'ADVERBIAL_OF_MANNER',
     role: 'noun',
     description: 'the complement naming the manner in which an action is carried out (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'WAY'),
     emoji: '🎭',
     synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
     forms: {
       en: { base: 'adverbial of manner', plural: 'adverbials of manner', count: 'singular' },
       it: { base: 'complemento di modo', plural: 'complementi di modo', gender: 'masc', count: 'singular' },
@@ -1637,6 +1694,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COMPLEMENT_GRAMMAR',
     role: 'noun',
     description: 'a phrase that completes the meaning of a verb (grammar)',
+    definition: whoGloss('PHRASE', 'MODIFY', 'VERB'),
     emoji: '🧩',
     synonym: 'grammar',
     isA: 'PHRASE',

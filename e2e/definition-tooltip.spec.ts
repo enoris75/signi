@@ -6,23 +6,24 @@ import { test, expect } from './fixtures';
 // falling back to English:
 //   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
 //     concepts into every language, so the tooltip is localized like the rest of the UI;
-//   - the stored `concept_definitions` literal (HOUSE → "a building used as a dwelling"), of which
-//     only English is seeded.
+//   - the stored `concept_definitions` literal (BUILDING → "a structure with walls and a roof"),
+//     of which only English is seeded.
 test.describe('word definition tooltip', () => {
   const tooltip = '.MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
-    // HOUSE carries only a stored English literal (no definition plan), so the tooltip shows it.
-    await app.subjectInput.fill('house');
+    // BUILDING carries only a stored English literal: its gloss "a place that has walls" was
+    // probed and rejected in B29, so C05 leaves it on the literal deliberately.
+    await app.subjectInput.fill('building');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="HOUSE"]',
+      '[data-testid="typeahead-option"][data-concept="BUILDING"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
     await expect(page.locator(tooltip)).toBeVisible();
-    await expect(page.locator(tooltip)).toHaveText('a building used as a dwelling');
+    await expect(page.locator(tooltip)).toHaveText('a structure with walls and a roof');
   });
 
   test('shows the definition on hover in the verb picker', async ({ app, page }) => {
@@ -899,20 +900,184 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('どの時間もない');
   });
 
+  test('a genus+differentia noun definition renders (localize-seed B30: AFFECTION)', async ({
+    app,
+    page,
+  }) => {
+    // AFFECTION is the first concept hung under the newly seeded FEELING genus, and the first
+    // caller of the WARM adjective — the figurative sense, so German inflects warm on a neuter
+    // head rather than reaching for the temperature word.
+    await app.subjectInput.fill('affection');
+    const affectionEn = page.locator('[data-testid="typeahead-option"][data-concept="AFFECTION"]');
+    await expect(affectionEn).toBeVisible();
+    await affectionEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a warm feeling');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('affection');
+    const affectionDe = page.locator('[data-testid="typeahead-option"][data-concept="AFFECTION"]');
+    await expect(affectionDe).toBeVisible();
+    await affectionDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein warmes Gefühl');
+  });
+
+  test('a genus verb definition renders (localize-seed B30: FEEL)', async ({ app, page }) => {
+    // The genus HAVE with FEELING as its differentia, plural — a count noun reads bare only in
+    // the plural. Italian provare / sentimenti keeps the two words apart where German does not.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('feel');
+    const feelEn = page.locator('[data-testid="typeahead-option"][data-concept="FEEL"]');
+    await expect(feelEn).toBeVisible();
+    await feelEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to have feelings');
+
+    await app.setUiLanguage('it');
+    await app.verbInput.fill('feel');
+    const feelIt = page.locator('[data-testid="typeahead-option"][data-concept="FEEL"]');
+    await expect(feelIt).toBeVisible();
+    await feelIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('avere sentimenti');
+  });
+
+  test('the complement genus definition renders (localize-seed B31: COMPLEMENT_GRAMMAR)', async ({
+    app,
+    page,
+  }) => {
+    // The genus B23 seeded and B31 glossed: PHRASE restricted by a subject-gap relative clause.
+    // Its genus (phrase, not word) is what keeps it apart from ADVERB's "a word that modifies verbs".
+    await app.subjectInput.fill('complement');
+    const complementEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="COMPLEMENT_GRAMMAR"]',
+    );
+    await expect(complementEn).toBeVisible();
+    await complementEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a phrase that modifies verbs');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('complement');
+    const complementDe = page.locator(
+      '[data-testid="typeahead-option"][data-concept="COMPLEMENT_GRAMMAR"]',
+    );
+    await expect(complementDe).toBeVisible();
+    await complementDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('eine Phrase, die Verben modifiziert');
+  });
+
+  test('a complement name is glossed on its genus (localize-seed B31: INSTRUMENTAL)', async ({
+    app,
+    page,
+  }) => {
+    // The point of the B31 hierarchy: INSTRUMENTAL's gloss is composed on COMPLEMENT_GRAMMAR, the
+    // parent it gained, not on PHRASE — so the tooltip says "complement", ja 補語.
+    await app.subjectInput.fill('instrumental');
+    const instrumentalEn = page.locator(
+      '[data-testid="typeahead-option"][data-concept="INSTRUMENTAL"]',
+    );
+    await expect(instrumentalEn).toBeVisible();
+    await instrumentalEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a complement that indicates means');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('instrumental');
+    const instrumentalJa = page.locator(
+      '[data-testid="typeahead-option"][data-concept="INSTRUMENTAL"]',
+    );
+    await expect(instrumentalJa).toBeVisible();
+    await instrumentalJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('手段を示す補語');
+  });
+
+  test('a locative-gap noun definition renders (localize-seed B32: HOME)', async ({ app, page }) => {
+    // The whereGloss shape C07 built the engine for: the head fills the relative clause's
+    // *locative* gap, and the clause carries its own generic subject. French elides l'on.
+    await app.subjectInput.fill('home');
+    const homeEn = page.locator('[data-testid="typeahead-option"][data-concept="HOME"]');
+    await expect(homeEn).toBeVisible();
+    await homeEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a place where one lives');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('home');
+    const homeFr = page.locator('[data-testid="typeahead-option"][data-concept="HOME"]');
+    await expect(homeFr).toBeVisible();
+    await homeFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("un lieu où l'on habite");
+  });
+
+  test('a locative-gap noun definition renders (localize-seed B32: HOUSE)', async ({ app, page }) => {
+    // Same plan as HOME's on the narrower genus B29 seeded — so the tooltip that used to be the
+    // stored literal is now composed, and its genus is BUILDING rather than PLACE. German says the
+    // locative relative with "in dem", not a relative adverb.
+    await app.subjectInput.fill('house');
+    const houseEn = page.locator('[data-testid="typeahead-option"][data-concept="HOUSE"]');
+    await expect(houseEn).toBeVisible();
+    await houseEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a building where one lives');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('house');
+    const houseDe = page.locator('[data-testid="typeahead-option"][data-concept="HOUSE"]');
+    await expect(houseDe).toBeVisible();
+    await houseDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Gebäude, in dem man wohnt');
+  });
+
+  test('an objectless locative-gap definition renders (localize-seed B32: MARKET)', async ({
+    app,
+    page,
+  }) => {
+    // TRADE takes no direct object, which is what makes this gloss render in all seven: the
+    // "bought and sold" of the literal needs two predicates in one relative clause, and a
+    // RelativeClause holds one verbPhrase.
+    await app.subjectInput.fill('market');
+    const marketEn = page.locator('[data-testid="typeahead-option"][data-concept="MARKET"]');
+    await expect(marketEn).toBeVisible();
+    await marketEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a place where one trades');
+
+    await app.setUiLanguage('it');
+    await app.subjectInput.fill('market');
+    const marketIt = page.locator('[data-testid="typeahead-option"][data-concept="MARKET"]');
+    await expect(marketIt).toBeVisible();
+    await marketIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('un luogo dove si commercia');
+  });
+
+  test('a locative-gap definition with an object renders (localize-seed B32: PRISON)', async ({
+    app,
+    page,
+  }) => {
+    // The active with a generic subject, standing in for the literal's passive ("are confined"),
+    // which the engine cannot render. Spanish agrees its impersonal se with the plural object.
+    await app.subjectInput.fill('prison');
+    const prisonEn = page.locator('[data-testid="typeahead-option"][data-concept="PRISON"]');
+    await expect(prisonEn).toBeVisible();
+    await prisonEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a building where one confines people');
+
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('prison');
+    const prisonEs = page.locator('[data-testid="typeahead-option"][data-concept="PRISON"]');
+    await expect(prisonEs).toBeVisible();
+    await prisonEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('un edificio donde se encierran personas');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,
   }) => {
-    // HOUSE has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // BUILDING has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // The search still finds it by its English label, which is why "building" works under it.
     await app.setUiLanguage('it');
-    await app.subjectInput.fill('house');
+    await app.subjectInput.fill('building');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="HOUSE"]',
+      '[data-testid="typeahead-option"][data-concept="BUILDING"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
-    await expect(page.locator(tooltip)).toHaveText('a building used as a dwelling');
+    await expect(page.locator(tooltip)).toHaveText('a structure with walls and a roof');
   });
 });

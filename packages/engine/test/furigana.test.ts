@@ -28,6 +28,7 @@ const KANJI_NOUNS: [id: string, reading: string][] = [
   ['COMMAND', 'めいれい'], ['CONCEPT', 'がいねん'], ['CONTAINER', 'ようき'], ['CONTINENT', 'たいりく'],
   ['COW', 'うし'], ['CREATOR', 'そうぞうしゃ'], ['DEATH', 'し'], ['DEMONSTRATIVE', 'しじし'],
   ['DETERMINER', 'げんていし'], ['DOG', 'いぬ'], ['ENGLISH', 'えいご'], ['FATHER', 'ちち'], ['FIRE', 'ひ'],
+  ['FEELING', 'かんじょう'],
   ['GENDER', 'せい'], ['HOME', 'いえ'], ['HOUSE', 'いえ'], ['INSTRUCTION', 'しじ'],
   ['INSTRUMENTAL', 'しゅだんご'], ['JAPANESE', 'にほんご'], ['LANGUAGE', 'げんご'], ['LEGEND', 'でんせつ'],
   ['MAMMAL', 'ほにゅうるい'], ['MAN', 'おとこ'], ['MAP', 'ちず'], ['MARKET', 'いちば'],

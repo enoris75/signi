@@ -1266,6 +1266,76 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Seeded for PRISON's gloss (B32): "a building where one confines people". German takes
+  // inhaftieren rather than einsperren, whose separable prefix the engine cannot place; its
+  // participle has no ge-, as -ieren verbs do not. Spanish encerrar diphthongs its stem
+  // (encierro), and Italian rinchiudere has an irregular participle (rinchiuso).
+  {
+    id: 'CONFINE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to shut in a place and prevent from leaving',
+    emoji: '🔐',
+    forms: {
+      en: {
+        base: 'confine',
+        '1sg_present': 'confine', '2sg_present': 'confine', '3sg_present': 'confines',
+        '1pl_present': 'confine', '2pl_present': 'confine', '3pl_present': 'confine',
+        past: 'confined',
+      },
+      it: {
+        base: 'rinchiudere',
+        '1sg_present': 'rinchiudo', '2sg_present': 'rinchiudi', '3sg_present': 'rinchiude',
+        '1pl_present': 'rinchiudiamo', '2pl_present': 'rinchiudete', '3pl_present': 'rinchiudono',
+        '1sg_past': 'rinchiusi', '2sg_past': 'rinchiudesti', '3sg_past': 'rinchiuse',
+        '1pl_past': 'rinchiudemmo', '2pl_past': 'rinchiudeste', '3pl_past': 'rinchiusero',
+        '1sg_future': 'rinchiuderò', '2sg_future': 'rinchiuderai', '3sg_future': 'rinchiuderà',
+        '1pl_future': 'rinchiuderemo', '2pl_future': 'rinchiuderete', '3pl_future': 'rinchiuderanno',
+      },
+      fr: {
+        base: 'enfermer',
+        '1sg_present': 'enferme', '2sg_present': 'enfermes', '3sg_present': 'enferme',
+        '1pl_present': 'enfermons', '2pl_present': 'enfermez', '3pl_present': 'enferment',
+        '1sg_past': 'enfermai', '2sg_past': 'enfermas', '3sg_past': 'enferma',
+        '1pl_past': 'enfermâmes', '2pl_past': 'enfermâtes', '3pl_past': 'enfermèrent',
+        '1sg_future': 'enfermerai', '2sg_future': 'enfermeras', '3sg_future': 'enfermera',
+        '1pl_future': 'enfermerons', '2pl_future': 'enfermerez', '3pl_future': 'enfermeront',
+      },
+      de: {
+        base: 'inhaftieren',
+        '1sg_present': 'inhaftiere', '2sg_present': 'inhaftierst', '3sg_present': 'inhaftiert',
+        '1pl_present': 'inhaftieren', '2pl_present': 'inhaftiert', '3pl_present': 'inhaftieren',
+        '1sg_past': 'inhaftierte', '2sg_past': 'inhaftiertest', '3sg_past': 'inhaftierte',
+        '1pl_past': 'inhaftierten', '2pl_past': 'inhaftiertet', '3pl_past': 'inhaftierten',
+      },
+      es: {
+        base: 'encerrar',
+        '1sg_present': 'encierro', '2sg_present': 'encierras', '3sg_present': 'encierra',
+        '1pl_present': 'encerramos', '2pl_present': 'encerráis', '3pl_present': 'encierran',
+        '1sg_past': 'encerré', '2sg_past': 'encerraste', '3sg_past': 'encerró',
+        '1pl_past': 'encerramos', '2pl_past': 'encerrasteis', '3pl_past': 'encerraron',
+        '1sg_future': 'encerraré', '2sg_future': 'encerrarás', '3sg_future': 'encerrará',
+        '1pl_future': 'encerraremos', '2pl_future': 'encerraréis', '3pl_future': 'encerrarán',
+      },
+      ja: {
+        base: '閉じ込める',
+        reading: 'とじこめる',
+        masu_present: '閉じ込めます',
+        masu_present_reading: 'とじこめます',
+      },
+      pt: {
+        base: 'encarcerar',
+        '1sg_present': 'encarcero', '2sg_present': 'encarcera', '3sg_present': 'encarcera',
+        '1pl_present': 'encarceramos', '2pl_present': 'encarceram', '3pl_present': 'encarceram',
+        '1sg_past': 'encarcerei', '2sg_past': 'encarcerou', '3sg_past': 'encarcerou',
+        '1pl_past': 'encarceramos', '2pl_past': 'encarceraram', '3pl_past': 'encarceraram',
+        '1sg_future': 'encarcerarei', '2sg_future': 'encarcerará', '3sg_future': 'encarcerará',
+        '1pl_future': 'encarceraremos', '2pl_future': 'encarcerarão', '3pl_future': 'encarcerarão',
+      },
+    },
+  },
+
   {
     id: 'MAKE',
     role: 'verb',
@@ -2059,6 +2129,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to experience an emotion or sensation',
+    // B30, once FEELING was seeded. Plural, because a count noun reads bare only in the plural.
+    // Morphologically transparent in de (fühlen / Gefühle) and es/pt (sentir / sentimiento), as
+    // BIG's "di grande dimensione" already is in Italian — the gloss still says what FEEL adds to
+    // its genus. English "to have feelings" wants "for someone" to read as the idiom; bare, it is
+    // the definition.
+    definition: infinitiveGloss('HAVE', 'FEELING', 'plural'),
     emoji: '💓',
     forms: {
       en: {

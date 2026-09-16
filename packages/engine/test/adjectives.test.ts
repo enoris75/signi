@@ -759,7 +759,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
   ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
   ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
-  ['UNIVERSAL', 'universal'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
+  ['UNIVERSAL', 'universal'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['WARM', 'warm'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
   ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];
@@ -818,6 +818,56 @@ describe('adjective position: Italian', () => {
 // Romance and agree with a feminine or plural head; German umlauts SHARP in the comparative
 // (scharf → schärfer). SHARP is a sharpened state, so es/pt predicate it with estar; LOUD is an
 // inherent property and keeps ser.
+// WARM, seeded for AFFECTION's gloss (B30). The figurative sense, so the Romance words are not the
+// temperature ones: it caloroso, fr chaleureux, pt caloroso. French is the reason this is worth a
+// case of its own — chaleureux declines by the -eux → -euse rule, and its masculine plural is
+// invariable, which no other seeded adjective exercises.
+describe('adjective agreement: the B30 adjective WARM', () => {
+  test('WARM agrees, and French chaleureux takes -euse in the feminine', () => {
+    expect(sayAll(clause(np('CAT', { gender: 'fem', adjectives: ['WARM'] }), 'RUN'))).toEqual({
+      en: 'the warm cat runs.',
+      it: 'la gatta calorosa corre.',
+      fr: 'la chatte chaleureuse court.',
+      es: 'la gata cálida corre.',
+      pt: 'a gata calorosa corre.',
+      de: 'die warme Katze läuft.',
+      ja: '温かい猫は走ります。',
+    });
+    expect(sayAll(clause(np('CAT', { gender: 'fem', number: 'plural', adjectives: ['WARM'] }), 'RUN'))).toEqual({
+      en: 'the warm cats run.',
+      it: 'le gatte calorose corrono.',
+      fr: 'les chattes chaleureuses courent.',
+      es: 'las gatas cálidas corren.',
+      pt: 'as gatas calorosas correm.',
+      de: 'die warmen Katzen laufen.',
+      ja: '温かい猫は走ります。',
+    });
+    // The masculine plural is invariable in French (chaleureux, like heureux), where Italian,
+    // Spanish and Portuguese all take -s.
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['WARM'] }), 'RUN'))).toMatchObject({
+      it: 'i gatti calorosi corrono.',
+      fr: 'les chats chaleureux courent.',
+      es: 'los gatos cálidos corren.',
+      pt: 'os gatos calorosos correm.',
+    });
+  });
+
+  test('WARM on FEELING is AFFECTION\'s gloss, rendered as a subject', () => {
+    // The exact noun phrase the AFFECTION definition composes — glossOf('FEELING', 'WARM') — but
+    // run through a clause, so the agreement is visible on a neuter German head and a masculine
+    // Romance one. Italian puts caloroso after its noun; German inflects warm before it.
+    expect(sayAll(clause(np('FEELING', { definiteness: 'indefinite', adjectives: ['WARM'] }), 'RUN'))).toEqual({
+      en: 'a warm feeling runs.',
+      it: 'un sentimento caloroso corre.',
+      fr: 'un sentiment chaleureux court.',
+      es: 'un sentimiento cálido corre.',
+      pt: 'um sentimento caloroso corre.',
+      de: 'ein warmes Gefühl läuft.',
+      ja: '温かい感情は走ります。',
+    });
+  });
+});
+
 describe('adjective agreement: SHARP and LOUD', () => {
   test('SHARP agrees with a feminine head, singular and plural', () => {
     expect(sayAll(clause(np('BLADE', { definiteness: 'indefinite', adjectives: ['SHARP'] }), 'RUN'))).toEqual({

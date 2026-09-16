@@ -412,6 +412,28 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The *figurative* sense — a warm feeling, a warm welcome — not the temperature one. The two
+    // senses split in four languages (it tiepido / caloroso, fr tiède / chaleureux, pt morno /
+    // caloroso), so only the one AFFECTION's gloss needs is seeded; B07's TEMPERATURE scale has
+    // HOT and COLD and no WARM (B30). German warm, es cálido and ja 温かい cover both senses.
+    // Inherent, not transient: a kindly feeling is what it is, so es/pt predicate it with ser —
+    // unlike HOT, which a thing can stop being. French chaleureux declines by the -eux → -euse rule.
+    id: 'WARM',
+    role: 'adjective',
+    description: 'kindly and affectionate in feeling',
+    emoji: '🤗',
+    synonym: 'kindly',
+    forms: {
+      en: { base: 'warm' },
+      it: { base: 'caloroso' },
+      fr: { base: 'chaleureux' },
+      de: { base: 'warm' },
+      es: { base: 'cálido' },
+      ja: { base: '温かい', reading: 'あたたかい' },
+      pt: { base: 'caloroso' },
+    },
+  },
+  {
     id: 'HOT',
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)

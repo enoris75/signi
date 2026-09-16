@@ -15,7 +15,13 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
   (all → "a language").
 - **Grammar meta-nouns** without a differentia — GENDER, NUMBER_GRAMMAR, PERSON_GRAMMAR, CASE,
   ARTICLE, DEMONSTRATIVE, QUANTIFIER, DETERMINER, etc. Some may become feasible via B06's verbs;
-  those move to B. The rest stay here.
+  those move to B. The rest stay here. **The nine complement names left**, 2026-09-16: once
+  COMPLEMENT_GRAMMAR was their `isA`, it was the differentia-bearing genus they had been missing,
+  and all four glosses B31 authored are composed on it ("a complement that indicates means") —
+  see [B31](../done/B31-complement-genus.md).
+- **FEELING** ("a feeling"), 2026-09-16 — seeded by [B30](../done/B30-feeling-genus.md) as
+  AFFECTION's genus. Nothing composable distinguishes it: `patientGloss('CONCEPT', 'FEEL')` gives
+  "a concept that one feels" (de "ein Begriff, den man fühlt"), which is its own genus restated.
 - **BUILDING** ("a building"), 2026-09-16 — the one entry here that is *not* a missing differentia.
   "A place that has walls" distinguishes it fine and composes; it is the **rendering** that fails, in
   two languages. French drops the partitive on the relative clause's bare plural object ("un lieu qui
@@ -23,7 +29,9 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
   carries, not for a wall that is part of the building (壁がある場所 is the idiom — an existential
   *aru* the engine cannot select per language). Full probe in
   [B29](../done/B29-building-genus.md). Unlike the rest of this file, this one is unblocked by
-  engine work, not by vocabulary: fix either gap and the gloss can ship.
+  engine work, not by vocabulary: fix either gap and the gloss can ship. It is also what the tooltip
+  e2e spec now uses as its example of a concept with **no** plan, since
+  [B32](../done/B32-place-glosses.md) gave HOUSE one.
 - **Verbs whose composable gloss would duplicate a sibling's**, 2026-09-14:
   - **SELECT** would read the same as CHOOSE's "to indicate an option"
     ([B18](../done/B18-selection-verbs.md)).

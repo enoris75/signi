@@ -407,4 +407,148 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  // The dwelling sense of "live" — where someone has their home — not "to be alive". The two are
+  // separate verbs in four languages (it abitare / vivere, fr habiter / vivre, de wohnen / leben,
+  // pt morar / viver), so the picker gloss says which one this is; es vivir and ja 住む cover
+  // both. Seeded for B32's place glosses, which need a verb licensing a `locative` complement:
+  // HOME "a place where one lives", HOUSE "a building where one lives".
+  {
+    id: 'LIVE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause'],
+    description: 'to have one\'s home in a place',
+    emoji: '🏘️',
+    synonym: 'dwell',
+    forms: {
+      en: {
+        base: 'live',
+        '1sg_present': 'live', '2sg_present': 'live', '3sg_present': 'lives',
+        '1pl_present': 'live', '2pl_present': 'live', '3pl_present': 'live',
+        past: 'lived',
+      },
+      it: {
+        base: 'abitare',
+        '1sg_present': 'abito', '2sg_present': 'abiti', '3sg_present': 'abita',
+        '1pl_present': 'abitiamo', '2pl_present': 'abitate', '3pl_present': 'abitano',
+        '1sg_past': 'abitai', '2sg_past': 'abitasti', '3sg_past': 'abitò',
+        '1pl_past': 'abitammo', '2pl_past': 'abitaste', '3pl_past': 'abitarono',
+        '1sg_future': 'abiterò', '2sg_future': 'abiterai', '3sg_future': 'abiterà',
+        '1pl_future': 'abiteremo', '2pl_future': 'abiterete', '3pl_future': 'abiteranno',
+      },
+      fr: {
+        base: 'habiter',
+        '1sg_present': 'habite', '2sg_present': 'habites', '3sg_present': 'habite',
+        '1pl_present': 'habitons', '2pl_present': 'habitez', '3pl_present': 'habitent',
+        '1sg_past': 'habitai', '2sg_past': 'habitas', '3sg_past': 'habita',
+        '1pl_past': 'habitâmes', '2pl_past': 'habitâtes', '3pl_past': 'habitèrent',
+        '1sg_future': 'habiterai', '2sg_future': 'habiteras', '3sg_future': 'habitera',
+        '1pl_future': 'habiterons', '2pl_future': 'habiterez', '3pl_future': 'habiteront',
+      },
+      de: {
+        base: 'wohnen',
+        '1sg_present': 'wohne', '2sg_present': 'wohnst', '3sg_present': 'wohnt',
+        '1pl_present': 'wohnen', '2pl_present': 'wohnt', '3pl_present': 'wohnen',
+        '1sg_past': 'wohnte', '2sg_past': 'wohntest', '3sg_past': 'wohnte',
+        '1pl_past': 'wohnten', '2pl_past': 'wohntet', '3pl_past': 'wohnten',
+      },
+      es: {
+        base: 'vivir',
+        '1sg_present': 'vivo', '2sg_present': 'vives', '3sg_present': 'vive',
+        '1pl_present': 'vivimos', '2pl_present': 'vivís', '3pl_present': 'viven',
+        '1sg_past': 'viví', '2sg_past': 'viviste', '3sg_past': 'vivió',
+        '1pl_past': 'vivimos', '2pl_past': 'vivisteis', '3pl_past': 'vivieron',
+        '1sg_future': 'viviré', '2sg_future': 'vivirás', '3sg_future': 'vivirá',
+        '1pl_future': 'viviremos', '2pl_future': 'viviréis', '3pl_future': 'vivirán',
+      },
+      ja: {
+        base: '住む',
+        reading: 'すむ',
+        masu_present: '住みます',
+        masu_present_reading: 'すみます',
+      },
+      pt: {
+        base: 'morar',
+        '1sg_present': 'moro', '2sg_present': 'mora', '3sg_present': 'mora',
+        '1pl_present': 'moramos', '2pl_present': 'moram', '3pl_present': 'moram',
+        '1sg_past': 'morei', '2sg_past': 'morou', '3sg_past': 'morou',
+        '1pl_past': 'moramos', '2pl_past': 'moraram', '3pl_past': 'moraram',
+        '1sg_future': 'morarei', '2sg_future': 'morará', '3sg_future': 'morará',
+        '1pl_future': 'moraremos', '2pl_future': 'morarão', '3pl_future': 'morarão',
+      },
+    },
+  },
+
+  // Buying and selling in one verb — the differentia MARKET's gloss needs, since a relative clause
+  // holds one verbPhrase and cannot coordinate "buys and sells" (B32). Intransitive on purpose:
+  // German "handeln" and French "commercer" take no direct object (one handelt *mit* something),
+  // so "a place where one trades" is the shape that renders in all seven. Japanese 売買する is the
+  // suru compound of 売 sell and 買 buy, which is exactly the sense wanted.
+  {
+    id: 'TRADE',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    description: 'to buy and sell goods',
+    emoji: '🤝',
+    forms: {
+      en: {
+        base: 'trade',
+        '1sg_present': 'trade', '2sg_present': 'trade', '3sg_present': 'trades',
+        '1pl_present': 'trade', '2pl_present': 'trade', '3pl_present': 'trade',
+        past: 'traded',
+      },
+      it: {
+        base: 'commerciare',
+        '1sg_present': 'commercio', '2sg_present': 'commerci', '3sg_present': 'commercia',
+        '1pl_present': 'commerciamo', '2pl_present': 'commerciate', '3pl_present': 'commerciano',
+        '1sg_past': 'commerciai', '2sg_past': 'commerciasti', '3sg_past': 'commerciò',
+        '1pl_past': 'commerciammo', '2pl_past': 'commerciaste', '3pl_past': 'commerciarono',
+        '1sg_future': 'commercerò', '2sg_future': 'commercerai', '3sg_future': 'commercerà',
+        '1pl_future': 'commerceremo', '2pl_future': 'commercerete', '3pl_future': 'commerceranno',
+      },
+      fr: {
+        // -cer keeps its soft c with a cedilla before a/o: nous commerçons.
+        base: 'commercer',
+        '1sg_present': 'commerce', '2sg_present': 'commerces', '3sg_present': 'commerce',
+        '1pl_present': 'commerçons', '2pl_present': 'commercez', '3pl_present': 'commercent',
+        '1sg_past': 'commerçai', '2sg_past': 'commerças', '3sg_past': 'commerça',
+        '1pl_past': 'commerçâmes', '2pl_past': 'commerçâtes', '3pl_past': 'commercèrent',
+        '1sg_future': 'commercerai', '2sg_future': 'commerceras', '3sg_future': 'commercera',
+        '1pl_future': 'commercerons', '2pl_future': 'commercerez', '3pl_future': 'commerceront',
+      },
+      de: {
+        // -eln verbs drop the stem -e- in the 1sg: ich handle, not ich handele.
+        base: 'handeln',
+        '1sg_present': 'handle', '2sg_present': 'handelst', '3sg_present': 'handelt',
+        '1pl_present': 'handeln', '2pl_present': 'handelt', '3pl_present': 'handeln',
+        '1sg_past': 'handelte', '2sg_past': 'handeltest', '3sg_past': 'handelte',
+        '1pl_past': 'handelten', '2pl_past': 'handeltet', '3pl_past': 'handelten',
+      },
+      es: {
+        base: 'comerciar',
+        '1sg_present': 'comercio', '2sg_present': 'comercias', '3sg_present': 'comercia',
+        '1pl_present': 'comerciamos', '2pl_present': 'comerciáis', '3pl_present': 'comercian',
+        '1sg_past': 'comercié', '2sg_past': 'comerciaste', '3sg_past': 'comerció',
+        '1pl_past': 'comerciamos', '2pl_past': 'comerciasteis', '3pl_past': 'comerciaron',
+        '1sg_future': 'comerciaré', '2sg_future': 'comerciarás', '3sg_future': 'comerciará',
+        '1pl_future': 'comerciaremos', '2pl_future': 'comerciaréis', '3pl_future': 'comerciarán',
+      },
+      ja: {
+        base: '売買する',
+        reading: 'ばいばいする',
+        masu_present: '売買します',
+        masu_present_reading: 'ばいばいします',
+      },
+      pt: {
+        base: 'comerciar',
+        '1sg_present': 'comercio', '2sg_present': 'comercia', '3sg_present': 'comercia',
+        '1pl_present': 'comerciamos', '2pl_present': 'comerciam', '3pl_present': 'comerciam',
+        '1sg_past': 'comerciei', '2sg_past': 'comerciou', '3sg_past': 'comerciou',
+        '1pl_past': 'comerciamos', '2pl_past': 'comerciaram', '3pl_past': 'comerciaram',
+        '1sg_future': 'comerciarei', '2sg_future': 'comerciará', '3sg_future': 'comerciará',
+        '1pl_future': 'comerciaremos', '2pl_future': 'comerciarão', '3pl_future': 'comerciarão',
+      },
+    },
+  },
 ];

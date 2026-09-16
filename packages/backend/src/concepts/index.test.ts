@@ -105,6 +105,27 @@ describe('the concept corpus', () => {
     expect(ancestors('MARKET', byId)).toEqual(['PLACE']);
   });
 
+  test('hangs AFFECTION under the FEELING genus (B30)', () => {
+    // Same insertion-not-substitution check as B29's. AFFECTION was a root, so the chain is pure
+    // gain; FEELING stays a root itself, which is the part a later "tidy the tree" pass could
+    // silently break by hanging it under CONCEPT — its gloss "a warm feeling" would still render.
+    expect(ancestors('FEELING', byId)).toEqual([]);
+    expect(ancestors('AFFECTION', byId)).toEqual(['FEELING']);
+  });
+
+  test('hangs the three complement names under COMPLEMENT_GRAMMAR → PHRASE (B31)', () => {
+    // B23 seeded COMPLEMENT_GRAMMAR with six children; B31 adds the three that predated it. All
+    // nine must reach PHRASE, because each one's gloss is composed on the genus, not on PHRASE.
+    expect(ancestors('COMPLEMENT_GRAMMAR', byId)).toEqual(['PHRASE']);
+    for (const id of ['SUBJECT_COMPLEMENT', 'INSTRUMENTAL', 'ADVERBIAL_OF_MANNER']) {
+      expect(ancestors(id, byId)).toEqual(['COMPLEMENT_GRAMMAR', 'PHRASE']);
+    }
+    // The six B23 seeded the same way, unchanged by B31.
+    for (const id of ['LOCATIVE', 'DIRECTION', 'SOURCE', 'ROUTE', 'CAUSE_COMPLEMENT', 'TERMINUS']) {
+      expect(ancestors(id, byId)).toEqual(['COMPLEMENT_GRAMMAR', 'PHRASE']);
+    }
+  });
+
   test('relates hypernyms within one role', () => {
     // /api/concepts?role=… relies on this: it returns isA unfiltered, trusting the parent is in
     // the same role's response.

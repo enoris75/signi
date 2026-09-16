@@ -59,7 +59,7 @@ A few covered words are still listed below, because their most common use is mis
 | D2 | One concept per word, or one per meaning? | **One per meaning**, wherever a language uses different words (the [P08 D1](../P08-collective-nouns/README.md) rule). The splits are listed in §2. Where a verb and a noun share a word, the noun takes the `_NOUN` suffix, as with USE / USE_NOUN and NAME / NAME_NOUN. | A single concept can't render both *giocare* and *suonare*. |
 | D3 | *back*, *out*, *off* | **No standalone adverbs.** Seed phrasal verbs, as TURN_OFF and EXTINGUISH ("put out") already are: `COME_BACK` and `GO_OUT` now, and others as phrases need them. | Other languages use a different verb, not verb + particle: *tornare, revenir, volver, 戻る*; *uscire, sortir, salir, 出る*. A standalone BACK would render "the cat comes back" as *il gatto viene indietro* ✗. |
 | D4 | Focus adverbs (*just, only, even, still, also, really*) | **Seed them as verb adverbs now**, with `subtype: 'frequency'` like ALWAYS and NEVER so English puts them before the verb, and pin each language's position in tests. Scope over a noun ("only the cat") goes to §3. | "The cat also runs" / "il gatto corre anche" works through the existing `VerbPhrase.modifier`. Scope over a noun needs a new construct. |
-| D5 | Seeding order | **LIVE** (dwelling) first, then **QUESTION** + **ASK**, the time words (*day, week, year, night, now, today*), and the rest by rank. FAMILY, GROUP and GOVERNMENT are seeded by [P08](../P08-collective-nouns/README.md). | LIVE unblocks [B32](../../../localization/B-needs-seed/B32-place-glosses.md) (HOME, "a place where one lives"). Time words make many plain sentences possible at once. |
+| D5 | Seeding order | ~~**LIVE** (dwelling) first~~ — **landed 2026-09-16** with [B32](../../../localization/done/B32-place-glosses.md). Then **QUESTION** + **ASK**, the time words (*day, week, year, night, now, today*), and the rest by rank. FAMILY, GROUP and GOVERNMENT are seeded by [P08](../P08-collective-nouns/README.md). | LIVE unblocked B32 (HOME, "a place where one lives") and is seeded with `synonym: 'dwell'`; LIVE_ALIVE is still open. Time words make many plain sentences possible at once. |
 
 ## 2. Seed
 
@@ -92,7 +92,7 @@ column only show where languages diverge. They are suggestions, not renders.
 | 157 | turn | `TURN` | Rotate (*girare, tourner, drehen, 回る*). TURN_OFF stays separate. |
 | 178 | hear | `HEAR` | D1: under PERCEIVE, next to SEE. |
 | 181 | play | `PLAY_GAME`, `PLAY_INSTRUMENT` | Why split: *giocare / suonare*, *jugar / tocar*, *jogar / tocar*, *遊ぶ / 弾く*. |
-| 190 | live | `LIVE`, `LIVE_ALIVE` | Why split: *abitare / vivere*, *wohnen / leben*, *morar / viver*, *住む / 生きる*. `LIVE` is the dwelling sense that B32 proposes (with *vivir* in es). |
+| 190 | live | ~~`LIVE`~~, `LIVE_ALIVE` | Why split: *abitare / vivere*, *wohnen / leben*, *morar / viver*, *住む / 生きる*. **`LIVE`, the dwelling sense, is seeded** (B32, 2026-09-16, with *vivir* in es and `synonym: 'dwell'`); `LIVE_ALIVE` is what is left of this row. |
 | 193 | believe | `BELIEVE` | With a thing as object for now: German *glauben* takes the dative for a person, which is E9. |
 | 196 | bring | `BRING` | Transitive with `direction`. |
 | 197 | happen | `HAPPEN` | Intransitive. |

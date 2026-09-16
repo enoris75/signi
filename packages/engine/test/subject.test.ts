@@ -578,3 +578,62 @@ describe('subject: the neuter gender value on a noun head', () => {
     expect(neuter).toMatchObject({ de: 'ein großer alter Kater läuft.', it: 'un grande vecchio gatto corre.' });
   });
 });
+
+// FEELING, the genus seeded for B30 over AFFECTION. The pair is worth pinning together because the
+// two nouns take opposite countability: FEELING is a count noun with a plural in every language,
+// while AFFECTION is a mass noun with none — and the mass one is what makes the Romance partitive
+// and the bare German show up.
+describe('subject: the B30 genus FEELING and its child AFFECTION', () => {
+  test('FEELING pluralises, and German Gefühl is neuter', () => {
+    expect(subject(np('FEELING'))).toEqual({
+      en: 'the feeling runs.',
+      it: 'il sentimento corre.',
+      fr: 'le sentiment court.',
+      de: 'das Gefühl läuft.', // neuter
+      es: 'el sentimiento corre.',
+      ja: '感情は走ります。',
+      pt: 'o sentimento corre.',
+    });
+    expect(subject(np('FEELING', { number: 'plural' }))).toEqual({
+      en: 'the feelings run.',
+      it: 'i sentimenti corrono.',
+      fr: 'les sentiments courent.',
+      de: 'die Gefühle laufen.',
+      es: 'los sentimientos corren.',
+      ja: '感情は走ります。',
+      pt: 'os sentimentos correm.',
+    });
+    // The bare plural FEEL's gloss renders ("to have feelings"): no article anywhere, and French
+    // drops the partitive it would otherwise take — the documented simplification B29 recorded.
+    expect(subject(np('FEELING', { definiteness: 'bare', number: 'plural' }))).toMatchObject({
+      en: 'feelings run.',
+      it: 'sentimenti corrono.',
+      fr: 'sentiments courent.',
+      de: 'Gefühle laufen.',
+      pt: 'sentimentos correm.',
+    });
+  });
+
+  test('AFFECTION stays a mass noun under its new parent, and elides in it/fr', () => {
+    expect(subject(np('AFFECTION'))).toEqual({
+      en: 'the affection runs.',
+      it: "l'affetto corre.", // vowel-initial: the definite article elides
+      fr: "l'affection court.",
+      de: 'die Zuneigung läuft.',
+      es: 'el afecto corre.',
+      ja: '愛情は走ります。',
+      pt: 'o afeto corre.',
+    });
+    // AFFECTION's own gloss, "a warm feeling", is composed on FEELING — but the word itself is
+    // uncountable, so an indefinite AFFECTION takes no article at all (French a partitive).
+    expect(subject(np('AFFECTION', { definiteness: 'indefinite', adjectives: ['WARM'] }))).toEqual({
+      en: 'warm affection runs.',
+      it: 'affetto caloroso corre.',
+      fr: "de l'affection chaleureuse court.",
+      de: 'warme Zuneigung läuft.',
+      es: 'afecto cálido corre.',
+      ja: '温かい愛情は走ります。',
+      pt: 'afeto caloroso corre.',
+    });
+  });
+});

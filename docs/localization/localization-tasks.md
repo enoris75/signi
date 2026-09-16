@@ -38,7 +38,7 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
     objects" (the head fills the clause's subject gap; the object renders bare-plural). The head can
     fill another gap instead: `patientGloss` the object ("an object that one eats"), and a
     `headRole: 'locative'` clause the place ("a place where one eats", see
-    [B32](B-needs-seed/B32-place-glosses.md)).
+    [B32](done/B32-place-glosses.md)).
 - The renderer [`buildConceptDefinitions()`](../../packages/backend/src/definitions.ts) renders every
   plan into all 7 languages **at backend startup and throws if any language is missing** — so a task
   is "done" only when it boots clean. That boot check is the catalogue's pinning test.
@@ -76,6 +76,9 @@ _None outstanding._ A11–A15 are done (see the Done section). A08–A10 are ret
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
+Concept definitions: _none outstanding — `B-needs-seed/` is empty, as `A-ready/` is. Every task that
+was waiting on a word has its word._
+
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
 [C17](C-needs-engine/C17-motion-verbs-reflexive-genus.md): their genus MOVE is a reflexive verb in
@@ -85,16 +88,9 @@ landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
 
-Genus nouns (B30–B31, and B29 before it) come from the isA audit of 2026-09-14. Each names children whose description
-cites a parent that isn't seeded. Seed the parent with
-[`/generalize`](../../.claude/skills/generalize/SKILL.md), attach the siblings, then author the glosses
-that become composable.
-
-| # | File | Seed first |
-|---|---|---|
-| B30 | [B30-feeling-genus.md](B-needs-seed/B30-feeling-genus.md) | **FEELING**, **WARM** over AFFECTION → AFFECTION "a warm feeling", maybe FEEL "to have feelings" |
-| B32 | [B32-place-glosses.md](B-needs-seed/B32-place-glosses.md) | **LIVE** → HOME "a place where one lives"; MARKET is composable today with BUY but needs a product call; HOUSE wants LIVE and PRISON wants CONFINE, with BUILDING now seeded by B29 (was C07) |
-| B31 | [B31-complement-genus.md](B-needs-seed/B31-complement-genus.md) | nothing: COMPLEMENT_GRAMMAR and MEANS are seeded (B23, B24). Attach SUBJECT_COMPLEMENT, INSTRUMENTAL, ADVERBIAL_OF_MANNER under it and author the glosses |
+Genus nouns (B29–B32) came from the isA audit of 2026-09-14 — each named children whose description
+cites a parent that isn't seeded. **All four are done** (see the Done section). The audit's remaining
+findings, if any, would be filed here.
 
 #### UI strings
 
@@ -153,6 +149,9 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B17 | [done/B17-feeling-and-sound-verbs.md](done/B17-feeling-and-sound-verbs.md) | LOVE → to feel affection; CRY → to shed tears; CRY_OUT → to produce loud sounds (seeded FEEL, SHED, PRODUCE, AFFECTION, TEAR, SOUND, LOUD) |
 | B18 | [done/B18-selection-verbs.md](done/B18-selection-verbs.md) | CHOOSE → to indicate an option; CLICK → to press a button; TYPE → to write with a keyboard (seeded PRESS, WRITE, OPTION, BUTTON, KEYBOARD); SELECT → C05 |
 | B19 | [done/B19-data-verbs.md](done/B19-data-verbs.md) | EXPORT → to transfer content to a place; IMPORT → to transfer content from a place (no new vocabulary); the other nine → C08 |
+| B30 | [done/B30-feeling-genus.md](done/B30-feeling-genus.md) | AFFECTION → a warm feeling; FEEL → to have feelings (seeded **FEELING**, a root, and **WARM**, the figurative sense only, `synonym: 'kindly'` and non-transient). FEELING itself has no differentia → C05 |
+| B31 | [done/B31-complement-genus.md](done/B31-complement-genus.md) | hierarchy + 4 glosses, **nothing seeded**: SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER hung under COMPLEMENT_GRAMMAR → PHRASE. COMPLEMENT_GRAMMAR → a phrase that modifies verbs; SUBJECT_COMPLEMENT → …that describes subjects; INSTRUMENTAL → …that indicates means; ADVERBIAL_OF_MANNER → …that indicates ways. **INDICATE replaced the proposed NAME / EXPRESS** on the probe (de *bezeichnet*, ja 示す); no MANNER noun was seeded, WAY renders the same in six of seven |
+| B32 | [done/B32-place-glosses.md](done/B32-place-glosses.md) | HOME → a place where one lives; HOUSE → a building where one lives; MARKET → a place where one trades; PRISON → a building where one confines people (seeded **LIVE**, **TRADE**, **CONFINE**; added the `whereGloss` helper). MARKET took TRADE objectless — de *handeln* / fr *commercer* take no object; PRISON shipped after all, the active with a generic subject standing in for the blocked passive |
 
 #### UI strings
 

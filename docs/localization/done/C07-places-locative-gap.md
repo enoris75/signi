@@ -38,14 +38,14 @@ locative adjunct. That co-indexing target does not exist in the relative-clause 
 2. Add per-language locative-relativiser realisation (English *where*, etc.).
 3. Then seed `PLACE`/`BUILDING`, `LIVE`/`DWELL`, `CONFINE`/`IMPRISON` and author the glosses above.
    PLACE is seeded, and HOME and MARKET are attached under it. BUILDING, over HOUSE and PRISON,
-   landed with [B29](B29-building-genus.md); the verbs are [B32](../B-needs-seed/B32-place-glosses.md).
+   landed with [B29](B29-building-genus.md); the verbs are [B32](B32-place-glosses.md).
 
 Until step 1–2 exist, these nouns stay on the English literal.
 
 ## Done
 
 2026-09-14. Built the engine support (steps 1–2). No gloss is authored yet: every one needs a word
-that isn't seeded, so step 3 moved to [B32](../B-needs-seed/B32-place-glosses.md).
+that isn't seeded, so step 3 moved to [B32](B32-place-glosses.md).
 
 **(1) The locative gap already existed.** [A62](../../bugs/fixed/A62-relative-clause-on-complement-slot.md)
 had added complement gaps before this was written: `RelativeClause.headRole: 'locative'` places the
