@@ -17,9 +17,21 @@ export type Size = { w: number; h: number };
 
 const TAU = Math.PI * 2;
 
-// A control button is 20px across; neighbours on a ring sit this far apart along it.
-export const CONTROL_GAP = 22;
 export const BUTTON_HALF = 10;
+// The key badge a control wears while the cursor rests on the box it belongs to: a square of this
+// side, seated on the button's bottom-right corner with this much of itself hanging past it. The
+// badge is drawn by KeyTip, which reads both numbers from here — the ring has to leave room for
+// something this size, so the size is the ring's business as much as the badge's.
+export const BADGE_SIZE = 15;
+export const BADGE_OVERHANG = 0.55;
+// How far the badge's far corner reaches from the centre of the button it labels.
+const BADGE_REACH = Math.SQRT2 * (BUTTON_HALF + BADGE_SIZE * BADGE_OVERHANG);
+// A control is more than its button: neighbours on a ring sit this far apart along it, so that a
+// control's badge stops short of the next control's button rather than landing on it. Sizing the
+// gap for the badge rather than the button is what keeps a ring that carries six controls — a
+// verb's tense, aspect, modal, adverb, polarity and clear — from ringing the word in a wall of
+// them, since the ring grows until what it carries fits (see INNER_FILL / OUTER_FILL).
+export const CONTROL_GAP = BADGE_REACH + BUTTON_HALF;
 // Clear space between a control band and the satellite band.
 const BAND_CLEAR = 4;
 // How far a solid-ring control stays clear of the text it surrounds, at the text's corners.
@@ -30,9 +42,9 @@ export const RING_MIN = 34;
 // on its rim at half past one; below this radius the button would reach out of the orbit band.
 const DISC_PAD = 5;
 export const DISC_MIN = 18;
-// The arc between two chained discs: room for the control that revealed the second one, 4px clear
-// either side of it.
-export const CHAIN_ROOM = 28;
+// The arc between two chained discs: room for the control that revealed the second one — the same
+// arc that control would reserve on a ring, so it keeps its badge clear of both discs.
+export const CHAIN_ROOM = CONTROL_GAP;
 // Clear arc between two discs that don't share a chain.
 const DISC_CLEAR = 6;
 // The orbit widens before its discs would fill more than this share of it, so a long chain never
@@ -331,11 +343,16 @@ export function layoutRing(
     return disc ? disc.a : clock(aim.home);
   };
   const seat = (r: number, controls: RingControl[]) => {
+    // Spans are measured along the ring, but what has to clear between two controls is the straight
+    // line between them — the chord, which is shorter than its arc, and much shorter on a small
+    // ring. So each control reserves the arc whose chord is its own half, which puts neighbours
+    // exactly `2 * halfOf` apart on the canvas however tight the ring.
+    const arcHalf = (half: number) => (half >= r ? (Math.PI / 2) * r : r * Math.asin(half / r));
     const spans = controls.map((c) => ({
       key: c.key,
       s: wrap(facing(c.aim)) * r,
-      before: halfOf(c),
-      after: halfOf(c),
+      before: arcHalf(halfOf(c)),
+      after: arcHalf(halfOf(c)),
     }));
     for (const { item, s } of spreadOnLoop(spans, TAU * r, 0)) {
       ring.controls[item.key] = onCircle(center, r, s / r);

@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+  BADGE_OVERHANG,
+  BADGE_SIZE,
   BUTTON_HALF,
   CHAIN_ROOM,
   clock,
@@ -18,6 +20,7 @@ type Pt = { x: number; y: number };
 const CENTER = { x: 400, y: 300 };
 const dist = (a: Pt, b: Pt) => Math.hypot(a.x - b.x, a.y - b.y);
 const SLACK = 0.5;
+const TAU = Math.PI * 2;
 
 // Sizes of the content each node measures at: a labelled noun, and one-word satellites.
 const SIZES: Record<string, Size> = {
@@ -163,6 +166,33 @@ describe('layoutRing', () => {
     expectNothingOverlaps(ring, 'verb');
   });
 
+  it('leaves room beside every control for the key badge it wears', () => {
+    // The six a verb carries — the ones the screenshot of a crowded ring is made of. Each wears its
+    // key on its bottom-right corner while the cursor is on the verb, so the ring has to seat them
+    // far enough apart that a badge lands beside the next control rather than on it.
+    const inner = [
+      { key: 'verbTense', aim: { clock: 11 } },
+      { key: 'verbAspect', aim: { clock: 1 } },
+      { key: 'clear', aim: { clock: 1.5 } },
+      { key: 'modifier', aim: { clock: 4.5 } },
+      { key: 'verbNegative', aim: { clock: 7 } },
+      { key: 'verbModal', aim: { clock: 8.5 } },
+    ];
+    const ring = layoutRing(CENTER, spec({ inner }), sizeOf, 'verb');
+    // How far the badge's far corner reaches from the centre of the button it labels (see KeyTip).
+    const reach = Math.SQRT2 * (BUTTON_HALF + BADGE_SIZE * BADGE_OVERHANG);
+    for (let i = 0; i < inner.length; i++) {
+      for (let j = i + 1; j < inner.length; j++) {
+        const a = inner[i].key;
+        const b = inner[j].key;
+        expect(
+          dist(ring.controls[a], ring.controls[b]),
+          `${a}'s badge clears ${b}`,
+        ).toBeGreaterThanOrEqual(reach + BUTTON_HALF - SLACK);
+      }
+    }
+  });
+
   it("faces each reveal control toward its satellite's disc", () => {
     const ring = layoutRing(
       CENTER,
@@ -199,8 +229,11 @@ describe('layoutRing', () => {
       const ring = adjectives(['brown', 'big', 'old']);
       expect(ring.discs.brown.x).toBeCloseTo(CENTER.x);
       expect(ring.discs.brown.y).toBeLessThan(CENTER.y);
-      expect(ring.discs.big.a).toBeGreaterThan(ring.discs.brown.a);
-      expect(ring.discs.old.a).toBeGreaterThan(ring.discs.big.a);
+      // Three discs reach past 3 o'clock, where the wrapped angle turns over to 0, so each step is
+      // measured round the loop from the disc before it rather than by raw angle.
+      const clockwiseStep = (from: number, to: number) => ((to - from) % TAU + TAU) % TAU;
+      expect(clockwiseStep(ring.discs.brown.a, ring.discs.big.a)).toBeLessThan(Math.PI);
+      expect(clockwiseStep(ring.discs.big.a, ring.discs.old.a)).toBeLessThan(Math.PI);
       for (const d of Object.values(ring.discs)) expect(dist(d, CENTER)).toBeCloseTo(ring.orbit);
     });
 
