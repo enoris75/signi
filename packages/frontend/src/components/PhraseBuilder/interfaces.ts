@@ -369,12 +369,12 @@ export const CONJUNCTION_KEY = (which: NounKey) =>
 export type SlotKey = SlotConfig["key"];
 
 // ── Word-category switch ─────────────────────────────────────────────────────
-// Some slots accept a word from one of two lexical classes: the subject (and the causal
-// complement) take a noun or a pronoun; the subject complement and every adjective slot
-// take a noun or an adjective. The chosen class is shown in two synced places — a toggle
-// *on the empty box*, and the category selector *inside the open word picker*. It only
+// Some slots accept a word from one of two lexical classes: the subject, the direct object
+// and the causal complement take a noun or a pronoun; the subject complement and every
+// adjective slot take a noun or an adjective. The chosen class is shown in two synced places —
+// a toggle *on the empty box*, and the category selector *inside the open word picker*. It only
 // chooses which vocabulary is searched; the picked concept's own `role` is what downstream
-// code reads. A single-vocabulary slot (verb, direct object, adverb, …) returns null.
+// code reads. A single-vocabulary slot (verb, adverb, the motion complements, …) returns null.
 export interface SlotCategory {
   value: string;
   // The label is a catalog key, not a literal: the engine renders the grammar noun
@@ -398,7 +398,9 @@ export function slotCategories(
     return nounSubject
       ? null
       : { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
-  if (slotKey === "cause")
+  // The direct object takes a pronoun on the same footing as the subject ("I see you"), and
+  // the causal complement takes one behind its adposition ("because of him").
+  if (slotKey === "directObject" || slotKey === "cause")
     return { options: [NOUN_CATEGORY, PRONOUN_CATEGORY], fallback: "noun" };
   if (slotKey === "predicative")
     return { options: [NOUN_CATEGORY, ADJECTIVE_CATEGORY], fallback: "noun" };

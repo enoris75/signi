@@ -442,7 +442,7 @@ describe('SlotNode', () => {
     it('opens in the active empty slot and commits the word picked into that slot', () => {
       const { ctx } = renderNode('directObject', { activeSlot: 'directObject' });
 
-      expect(screen.getByPlaceholderText('type a noun…')).toBeInTheDocument();
+      expect(screen.getByPlaceholderText('type a noun or a pronoun…')).toBeInTheDocument();
       fireEvent.click(option('CAT'));
 
       expect(ctx.handleConceptSelect).toHaveBeenCalledExactlyOnceWith(
@@ -455,7 +455,7 @@ describe('SlotNode', () => {
     it('stays closed in a slot that is not the active one', () => {
       renderNode('directObject', { activeSlot: 'subject' });
 
-      expect(screen.queryByPlaceholderText('type a noun…')).not.toBeInTheDocument();
+      expect(screen.queryByPlaceholderText('type a noun or a pronoun…')).not.toBeInTheDocument();
       expect(screen.getByTestId('box-directObject')).toHaveTextContent('empty');
     });
 

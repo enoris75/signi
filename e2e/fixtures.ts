@@ -125,20 +125,40 @@ export class Builder {
   }
 
   /**
-   * Choose a personal pronoun subject from the pronoun chooser — the person / number / gender rows,
-   * then commit. The row buttons are engine-rendered UI strings, so this assumes the English UI.
+   * Choose a personal pronoun from the pronoun chooser inside one box — the person / number /
+   * gender rows, then commit. The row buttons are engine-rendered UI strings, so this assumes the
+   * English UI.
    */
-  async setPronounSubject(
+  private async pickPronoun(
+    input: Locator,
     person: 'first' | 'second' | 'third',
     number: 'singular' | 'plural',
     gender: 'male' | 'female',
   ): Promise<void> {
-    await this.subjectInput.click();
+    await expect(input).toBeVisible();
+    await (await this.centered(input)).click();
     await this.page.getByTestId('pronoun-tab').click();
     for (const choice of [person, number, gender]) {
       await this.page.getByRole('button', { name: choice, exact: true }).click();
     }
     await this.page.getByTestId('pronoun-commit').click();
+  }
+
+  async setPronounSubject(
+    person: 'first' | 'second' | 'third',
+    number: 'singular' | 'plural',
+    gender: 'male' | 'female',
+  ): Promise<void> {
+    await this.pickPronoun(this.subjectInput, person, number, gender);
+  }
+
+  /** The same, in the direct-object box — which takes a pronoun on the same footing ("I see you"). */
+  async setPronounObject(
+    person: 'first' | 'second' | 'third',
+    number: 'singular' | 'plural',
+    gender: 'male' | 'female',
+  ): Promise<void> {
+    await this.pickPronoun(this.nounInput, person, number, gender);
   }
 
   /** A satellite's control on its parent box border (`subjectNumber`, `verbTense`, `locative`, …). */

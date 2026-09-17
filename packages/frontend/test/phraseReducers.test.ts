@@ -71,13 +71,16 @@ const PERIOD: PhraseSelection = {
 describe('applyConceptSelect', () => {
   const HE: Concept = { id: 'HE', role: 'pronoun', description: 'HE', label: 'he', person: '3' };
 
-  it('seeds a pronoun subject’s number and gender when the picker decided neither', () => {
-    expect(applyConceptSelect({ subjectGender: 'fem' }, 'subject', HE)).toMatchObject({
-      subject: HE,
-      subjectNumber: 'singular',
-      subjectGender: 'fem',
-    });
-  });
+  it.each<NounKey>(['subject', 'directObject'])(
+    'seeds a pronoun %s’s number and gender when the picker decided neither',
+    (which) => {
+      expect(applyConceptSelect({ [`${which}Gender`]: 'fem' }, which, HE)).toMatchObject({
+        [which]: HE,
+        [`${which}Number`]: 'singular',
+        [`${which}Gender`]: 'fem',
+      });
+    },
+  );
 
   it('takes the number and gender the picker decided alongside the word over the defaults', () => {
     expect(applyConceptSelect({}, 'subject', HE, { number: 'plural', gender: 'neut' })).toMatchObject({
@@ -119,6 +122,7 @@ describe('applyConceptSelect', () => {
   describe('a head that is no noun', () => {
     it.each<[string, NounKey, Concept]>([
       ['a pronoun subject', 'subject', SHE],
+      ['a pronoun object', 'directObject', SHE],
       ['a pronoun cause', 'cause', SHE],
       ['a predicate adjective', 'predicative', HAPPY],
     ])('takes %s without a determiner or a possessor of either kind', (_, which, head) => {

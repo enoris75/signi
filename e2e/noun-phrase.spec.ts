@@ -111,6 +111,49 @@ test.describe('noun phrase', () => {
     });
   });
 
+  // The object box takes a pronoun on the same footing as the subject, and the engines then do what
+  // each language does with one: English and German leave it after the verb in its accusative form,
+  // the Romance languages move it in front of the finite verb as a clitic, Japanese marks it with を.
+  test('a personal pronoun direct object cliticises where the language wants it', async ({ app }) => {
+    await app.setPronounSubject('first', 'singular', 'male');
+    await app.setVerb('SEE');
+    await app.setPronounObject('second', 'singular', 'male');
+
+    await app.expectSentences({
+      en: 'I see you.',
+      it: 'ti vedo.', // pro-drop subject, proclitic object
+      fr: 'je te vois.',
+      de: 'ich sehe dich.',
+      es: 'te veo.',
+      pt: 'te vejo.',
+      ja: '私はあなたを見ます。',
+    });
+  });
+
+  test('the gender toggle picks the third-person object clitic, and no article rides it', async ({
+    app,
+  }) => {
+    await app.buildClause('CAT', 'SEE');
+    await app.setPronounObject('third', 'singular', 'female');
+
+    await app.expectSentences({
+      en: 'the cat sees her.',
+      it: 'il gatto la vede.',
+      fr: 'le chat la voit.',
+      de: 'der Kater sieht sie.',
+      es: 'el gato la ve.',
+      pt: 'o gato a vê.',
+      ja: '猫は彼女を見ます。',
+    });
+
+    // What a pronoun head has: number and gender (and coordination). What it has not: the controls
+    // that only a noun phrase can wear.
+    await expect(app.satellite('directObjectNumber')).toBeVisible();
+    await expect(app.satellite('directObjectGender')).toBeVisible();
+    for (const key of ['directObjectAdjective', 'directObjectDefiniteness', 'directObjectRelative', 'directObjectPossessor'])
+      await expect(app.satellite(key)).toHaveCount(0);
+  });
+
   test('coordinating the subject adds a conjunct, and the chip cycles the conjunction', async ({
     app,
     page,

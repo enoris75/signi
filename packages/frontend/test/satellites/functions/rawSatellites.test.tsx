@@ -200,6 +200,18 @@ describe('rawSatellites', () => {
       expect(ungendered.available).toBe(false);
     });
 
+    it.each<[string, Concept, string[]]>([
+      // "il gatto la vede": only the 3rd person spells a gendered object form.
+      ['a third-person pronoun its number and gender', SHE, ['directObjectNumber', 'directObjectGender']],
+      ['a first-person pronoun only its number', I, ['directObjectNumber']],
+    ])('gives an object that is %s, and coordination', (_, directObject, controls) => {
+      expect(offered({ verb: SEE, directObject }, 'directObject')).toEqual([
+        'directObject',
+        ...controls,
+        'directObjectConjunct',
+      ]);
+    });
+
     it('chains its adjectives like the subject’s', () => {
       const selection = { verb: SEE, directObject: CAT, directObjectAdjective: BIG };
       expect(offered(selection, 'directObjectAdjective')).toEqual([

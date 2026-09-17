@@ -174,7 +174,16 @@ export function applyConceptSelect(
   }
   if (slot === "directObject") {
     clearAdjectives(next, "directObject");
-    if (concept.gendered) {
+    // A pronoun object is no full noun phrase either ("the cat sees me", not "sees the me"):
+    // it takes no article and no possessor, and it is singular until the chooser says otherwise.
+    // Gender is seeded like the subject's (neuter clamped off 1st/2nd person); what reads it is
+    // the 3rd-person clitic ("lo" / "la" / "li" / "le") and the participle that agrees with it.
+    if (concept.role !== "noun") clearNounPhraseParts(next, "directObject");
+    if (concept.role === "pronoun") {
+      next.directObjectNumber = "singular";
+      const g = prev.directObjectGender ?? "masc";
+      next.directObjectGender = concept.person !== "3" && g === "neut" ? "masc" : g;
+    } else if (concept.gendered) {
       next.directObjectGender = prev.directObjectGender ?? "masc";
     } else {
       delete next.directObjectGender;

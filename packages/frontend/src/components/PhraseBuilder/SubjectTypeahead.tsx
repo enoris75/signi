@@ -22,17 +22,22 @@ export function SubjectTypeahead({
   placeholderKey = "slot.subject.placeholder",
   kind = "noun",
   onKindChange,
+  testId = "typeahead-subject",
 }: {
   onSelect: (concept: Concept, opts?: ConceptSelectOpts) => void;
-  // The picker is pronoun-inclusive (pronouns + nouns); the prompt varies by slot (a subject vs. a
-  // causal complement, which also accepts a pronoun). Either is rendered by the engine in the UI
-  // language; the default is the subject slot's ("type a subject…").
+  // The picker is pronoun-inclusive (pronouns + nouns); the prompt varies by slot (a subject, a
+  // direct object or a causal complement — all three take a pronoun). Either is rendered by the
+  // engine in the UI language; the default is the subject slot's ("type a subject…").
   placeholderKey?: UiStringKey;
   // The word-category switch (noun / pronoun), controlled from the box so the in-dropdown
   // tabs and the on-box toggle stay in sync. Standalone callers may omit it (defaults noun,
   // switchable locally within the popper via `onKindChange`).
   kind?: string;
   onKindChange?: (kind: string) => void;
+  // The hook tests reach the field by. It names the *box*, not this component: the direct object
+  // keeps `typeahead-noun`, which it shares with the noun-only complements, so which component
+  // fills a box stays an implementation detail.
+  testId?: string;
 }) {
   const t = useUiString();
   const prompt = `${t(placeholderKey)}…`;
@@ -115,7 +120,7 @@ export function SubjectTypeahead({
           onBlur={picker.onBlur}
           onKeyDown={onKeyDown}
           placeholder={prompt}
-          inputProps={{ "data-testid": "typeahead-subject" }}
+          inputProps={{ "data-testid": testId }}
           sx={{ ...PICKER_FONT, color: "text.primary", width: "100%", "& input": { p: 0 } }}
         />
       </PromptWidth>

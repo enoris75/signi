@@ -75,7 +75,18 @@ function pickerFor(
         <SubjectTypeahead onSelect={pick} kind={kind} onKindChange={onKindChange} />
       );
     case "directObject":
-      return <DirectObjectTypeahead onSelect={pick} />;
+      // The object takes a pronoun as readily as the subject does ("I see you"), so it gets the
+      // same pronoun-inclusive picker — under the prompt the causal complement already uses,
+      // since "a subject" is not what this box wants.
+      return (
+        <SubjectTypeahead
+          onSelect={pick}
+          placeholderKey="slot.nounOrPronoun.placeholder"
+          kind={kind}
+          onKindChange={onKindChange}
+          testId="typeahead-noun"
+        />
+      );
     case "verbModal":
     case "verbModal2":
       // Modals are verb concepts, so the modal picker filters the verb list on `modal`.

@@ -61,8 +61,13 @@ export function rawSatellites(
     selection.subject?.role === "pronoun" ||
     (selection.subject?.role === "noun" &&
       Boolean(selection.subject?.gendered));
+  const directObjectRole = selection.directObject?.role;
   const showDirectObjNumber = Boolean(selection.directObject);
-  const showDirectObjGender = Boolean(selection.directObject?.gendered);
+  // Gendered nouns, plus a 3rd-person pronoun object — the one person whose object form is
+  // gendered ("lo" / "la", "him" / "her"). First and second person spell one form either way.
+  const showDirectObjGender =
+    Boolean(selection.directObject?.gendered) ||
+    (directObjectRole === "pronoun" && selection.directObject?.person === "3");
 
   return [
     {
@@ -288,7 +293,9 @@ export function rawSatellites(
       label: t("category.adjective"),
       labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
-      available: Boolean(selection.directObject),
+      // Adjectives, a determiner, a relative clause and a possessor all attach to a noun
+      // head; a pronoun object takes none of them, exactly as a pronoun subject takes none.
+      available: directObjectRole === "noun",
       hasValue: Boolean(selection.directObjectAdjective),
       valueLabel: label(selection.directObjectAdjective),
     },
@@ -299,7 +306,7 @@ export function rawSatellites(
       labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available:
-        Boolean(selection.directObject) &&
+        directObjectRole === "noun" &&
         Boolean(selection.directObjectAdjective),
       hasValue: Boolean(selection.directObjectAdjective2),
       valueLabel: label(selection.directObjectAdjective2),
@@ -311,7 +318,7 @@ export function rawSatellites(
       labelKey: "category.adjective",
       icon: <BrushIcon sx={iconSx} />,
       available:
-        Boolean(selection.directObject) &&
+        directObjectRole === "noun" &&
         Boolean(selection.directObjectAdjective2),
       hasValue: Boolean(selection.directObjectAdjective3),
       valueLabel: label(selection.directObjectAdjective3),
@@ -348,7 +355,7 @@ export function rawSatellites(
       label: t("satellite.determiner"),
       labelKey: "satellite.determiner",
       icon: <ArticleOutlinedIcon sx={iconSx} />,
-      available: Boolean(selection.directObject),
+      available: directObjectRole === "noun",
       hasValue: Boolean(
         selection.directObjectDefiniteness &&
           selection.directObjectDefiniteness !== "definite",
@@ -361,7 +368,7 @@ export function rawSatellites(
       parent: "directObject",
       label: t("satellite.relative"),
       icon: <AccountTreeIcon sx={iconSx} />,
-      available: Boolean(selection.directObject),
+      available: directObjectRole === "noun",
       hasValue: false,
     },
     {
@@ -370,7 +377,7 @@ export function rawSatellites(
       label: t("slot.possessor"),
       labelKey: "slot.possessor",
       icon: <KeyIcon sx={iconSx} />,
-      available: Boolean(selection.directObject),
+      available: directObjectRole === "noun",
       hasValue: Boolean(selection.directObjectPossessor?.subject) || Boolean(selection.directObjectPossessorRef),
     },
     {

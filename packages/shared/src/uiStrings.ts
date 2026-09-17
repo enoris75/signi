@@ -563,9 +563,10 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'type a noun',
   },
-  // The cause complement's picker takes a pronoun as well ("because of him"), so its object is the
-  // two grammar nouns coordinated by `or`. Each conjunct keeps its own determiner, which is why
-  // English reads "a noun or a pronoun" (it "un sostantivo o un pronome", ja 「名詞か代名詞を入力」).
+  // The direct object's and the cause complement's pickers take a pronoun as well ("I see you",
+  // "because of him"), so this prompt's object is the two grammar nouns coordinated by `or`. Each
+  // conjunct keeps its own determiner, which is why English reads "a noun or a pronoun"
+  // (it "un sostantivo o un pronome", ja 「名詞か代名詞を入力」).
   'slot.nounOrPronoun.placeholder': {
     plan: {
       ...commandOf('TYPE'),
@@ -602,7 +603,7 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'no results',
   },
 
-  // The word-category switch on a switchable box (subject/cause = noun | pronoun;
+  // The word-category switch on a switchable box (subject/object/cause = noun | pronoun;
   // predicative + adjectives = noun | adjective) and the matching selector inside the open
   // picker. Each is the bare grammar noun; the toggle's CSS uppercases it.
   'category.noun': {

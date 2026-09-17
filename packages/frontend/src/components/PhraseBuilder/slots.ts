@@ -226,7 +226,9 @@ export const ALL_SLOTS: SlotConfig[] = [
     label: "Direct Object",
     labelKey: "slot.directObject",
     required: false,
-    roles: ["noun"],
+    // A pronoun objects as readily as it subjects ("I see you"): it takes the language's
+    // oblique form, and in Romance cliticises before the verb ("ti vedo").
+    roles: ["pronoun", "noun"],
     color: "success",
   },
   {

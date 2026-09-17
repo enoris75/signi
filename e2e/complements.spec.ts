@@ -169,7 +169,9 @@ test.describe('instrumental', () => {
     await instrument.getByTestId('box-verb').click();
     await instrument.getByTestId('typeahead-verb').fill('choose');
     await app.page.locator('[data-testid="typeahead-option"][data-concept="CHOOSE"]').click();
-    await instrument.getByTestId('box-directObject').click();
+    // The box is activated by its title: an empty object box wears the Noun | Pronoun switch
+    // across its middle, and the switch takes the pointer for itself.
+    await instrument.getByTestId('box-directObject').getByText('Object', { exact: true }).click();
     await instrument.getByTestId('typeahead-noun').fill('word');
     await app.page.locator('[data-testid="typeahead-option"][data-concept="WORD"]').click();
 

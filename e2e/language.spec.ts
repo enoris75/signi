@@ -70,8 +70,12 @@ test.describe('interface language', () => {
     await expect(page.getByRole('button', { name: 'Cancella il soggetto', exact: true })).toBeVisible();
     await expect(page.getByRole('button', { name: 'Compatta il soggetto', exact: true })).toBeVisible();
     await expect(app.satellite('subjectGender')).toHaveAttribute('aria-label', 'Genere: Maschile');
-    // The object's picker, and the sole period's clear control.
-    await expect(app.nounInput).toHaveAttribute('placeholder', 'digita un sostantivo…');
+    // The object's picker — pronoun-inclusive, so it names both vocabularies — and the sole
+    // period's clear control.
+    await expect(app.nounInput).toHaveAttribute(
+      'placeholder',
+      'digita un sostantivo o un pronome…',
+    );
     await expect(page.getByRole('button', { name: 'Cancella questo periodo', exact: true })).toBeVisible();
   });
 

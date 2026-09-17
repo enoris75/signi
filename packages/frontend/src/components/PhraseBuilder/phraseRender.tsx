@@ -98,7 +98,7 @@ export interface PhraseRenderContext {
     targetSlot?: SlotKey,
     opts?: ConceptSelectOpts,
   ) => void;
-  // The effective word-category of a switchable slot (subject/cause = noun|pronoun;
+  // The effective word-category of a switchable slot (subject/object/cause = noun|pronoun;
   // predicative + adjectives = noun|adjective) and its setter — shared between the on-box
   // toggle and the in-dropdown selector so the two move together.
   slotKind: (slotKey: SlotKey) => string;
@@ -463,7 +463,7 @@ export function SlotNode({
       </Box>
     </Tooltip>
   ) : undefined;
-  // A switchable slot (subject/cause = noun|pronoun; predicative + adjectives = noun|adj)
+  // A switchable slot (subject/object/cause = noun|pronoun; predicative + adjectives = noun|adj)
   // wears its category toggle on the empty box; the same value threads into the picker so
   // the in-dropdown selector matches. Single-vocabulary slots return null → no toggle.
   const categories = slotCategories(slot.key, nounSubject);

@@ -70,6 +70,9 @@ const SUBJECT: Picker = {
   categories: ['Noun', 'Pronoun'],
   words: ['CAT'],
 };
+// The direct object and the causal complement share the pronoun-inclusive picker under a prompt
+// that names both vocabularies.
+const NOUN_OR_PRONOUN: Picker = { ...SUBJECT, prompt: 'type a noun or a pronoun…' };
 const ADJECTIVE_OR_NOUN: Picker = {
   prompt: 'type an adjective…',
   categories: ['Adjective', 'Noun'],
@@ -82,7 +85,7 @@ describe('slotTypeahead', () => {
     ['verbModal', MODAL],
     ['verbModal2', MODAL],
     ['subject', SUBJECT],
-    ['directObject', NOUN],
+    ['directObject', NOUN_OR_PRONOUN],
     ['modifier', ADVERB],
     ['verbModalAdverb', ADVERB],
     ['verbModal2Adverb', ADVERB],
@@ -90,7 +93,7 @@ describe('slotTypeahead', () => {
     ['directObjectAdjective2', ADJECTIVE_OR_NOUN],
     ['sourceAdjective3', ADJECTIVE_OR_NOUN],
     ['causeAdjective', ADJECTIVE_OR_NOUN],
-    ['cause', { ...SUBJECT, prompt: 'type a noun or a pronoun…' }],
+    ['cause', NOUN_OR_PRONOUN],
     ['terminus', NOUN],
     ['manner', NOUN],
     ['locative', NOUN],
@@ -152,20 +155,19 @@ describe('slotTypeahead', () => {
     expect(onSelect).toHaveBeenCalledExactlyOnceWith(BIG, 'directObjectAdjective2', undefined);
   });
 
-  it("passes on a pronoun's number and gender", () => {
-    const { input, onSelect } = renderSlot({
-      slotKey: 'subject',
-      kind: 'pronoun',
-      onKindChange: () => {},
-    });
+  it.each<SlotKey>(['subject', 'directObject'])(
+    "passes on a pronoun's number and gender, into the %s slot",
+    (slotKey) => {
+      const { input, onSelect } = renderSlot({ slotKey, kind: 'pronoun', onKindChange: () => {} });
 
-    press(input, 'Enter');
+      press(input, 'Enter');
 
-    expect(onSelect).toHaveBeenCalledExactlyOnceWith(FIRST_PERSON, 'subject', {
-      number: 'singular',
-      gender: 'masc',
-    });
-  });
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(FIRST_PERSON, slotKey, {
+        number: 'singular',
+        gender: 'masc',
+      });
+    },
+  );
 
   it("shares an adjective box's category with its picker, both ways", () => {
     const onKindChange = vi.fn();
@@ -178,7 +180,7 @@ describe('slotTypeahead', () => {
     expect(onKindChange).toHaveBeenCalledExactlyOnceWith('adjective');
   });
 
-  it.each<SlotKey>(['subject', 'cause'])(
+  it.each<SlotKey>(['subject', 'directObject', 'cause'])(
     "shares the %s box's category with its picker, both ways",
     (slotKey) => {
       const onKindChange = vi.fn();
