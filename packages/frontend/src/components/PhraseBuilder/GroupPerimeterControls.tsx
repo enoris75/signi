@@ -1,6 +1,6 @@
 import { Box } from "@mui/material";
 import { SatelliteButton } from "./Boxes.tsx";
-import type { NounKey, SlotConfig } from "./interfaces.ts";
+import type { NounKey, SlotConfig, SlotKey } from "./interfaces.ts";
 import type { PerimeterEntry } from "./satellites/index.ts";
 import { perimeterControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
@@ -19,6 +19,8 @@ export function GroupPerimeterControls({
   registerSourceAnchor,
   registerTargetAnchor,
   recolor,
+  satelliteKeys = {},
+  cursorSlot = null,
 }: {
   // Where every ring control sits on the canvas, keyed by control.
   controlPos: Record<string, Pt>;
@@ -31,6 +33,10 @@ export function GroupPerimeterControls({
   registerTargetAnchor?: (nounKey: NounKey, el: HTMLElement | null) => void;
   // Slot colours to use in place of a noun's own, by noun (a conjunct's head wears its role's).
   recolor?: Partial<Record<string, SlotConfig["color"]>>;
+  // The key each control answers to, by satellite key, and the box the cursor rests on — only its
+  // own controls wear their key as a badge (see SatelliteControls).
+  satelliteKeys?: Record<string, string>;
+  cursorSlot?: SlotKey | null;
 }) {
   const colorFor = (nounKey: NounKey): SlotConfig["color"] =>
     recolor?.[nounKey] ?? ALL_SLOTS.find((s) => s.key === nounKey)?.color ?? "primary";
@@ -83,17 +89,32 @@ export function GroupPerimeterControls({
                 ref={(el: HTMLElement | null) => registerSourceAnchor?.(nounKey, el)}
                 sx={seat(relative)}
               >
-                <SatelliteButton sat={entry!.relative!} color={color} />
+                <SatelliteButton
+                  sat={entry!.relative!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.relative!.key]}
+                  tip={nounKey === cursorSlot}
+                />
               </Box>
             )}
             {possessor && (
               <Box data-testid={`possessor-ctl-${nounKey}`} sx={seat(possessor)}>
-                <SatelliteButton sat={entry!.possessor!} color={color} />
+                <SatelliteButton
+                  sat={entry!.possessor!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.possessor!.key]}
+                  tip={nounKey === cursorSlot}
+                />
               </Box>
             )}
             {conjunct && (
               <Box sx={seat(conjunct)}>
-                <SatelliteButton sat={entry!.conjunct!} color={color} />
+                <SatelliteButton
+                  sat={entry!.conjunct!}
+                  color={color}
+                  keySpec={satelliteKeys[entry!.conjunct!.key]}
+                  tip={nounKey === cursorSlot}
+                />
               </Box>
             )}
           </Box>

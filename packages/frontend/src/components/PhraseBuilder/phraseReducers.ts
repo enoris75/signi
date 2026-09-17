@@ -234,6 +234,18 @@ export function applyClear(
 // One pure `(prev) => next` transform per grammatical control on the canvas. Each is
 // wrapped in `onPhraseUpdate` by the builder; none touches anything but the selection.
 
+/**
+ * Which value comes next in a cycle. `step` is +1 for the control's own click and −1 for the
+ * keyboard's ⇧ (see the keymap: a key that cycles a value runs it backwards with ⇧), so a user
+ * who has gone one value too far steps back rather than round.
+ */
+export type CycleStep = 1 | -1;
+
+function cycled<V>(values: readonly V[], current: V, step: CycleStep): V {
+  const idx = values.indexOf(current);
+  return values[(idx + step + values.length) % values.length];
+}
+
 export function toggleNumber(
   prev: PhraseSelection,
   which: NumberSlot,
@@ -245,6 +257,7 @@ export function toggleNumber(
 export function toggleGender(
   prev: PhraseSelection,
   which: GenderSlot,
+  step: CycleStep = 1,
 ): PhraseSelection {
   const key = `${which}Gender` as keyof PhraseSelection;
   // Every pronoun carries gender (masc/fem); only the 3rd person adds neuter (he/she/it).
@@ -254,8 +267,7 @@ export function toggleGender(
       ? ["masc", "fem", "neut"]
       : ["masc", "fem"];
   const cur = (prev[key] as "masc" | "fem" | "neut") ?? "masc";
-  const next = cycle[(cycle.indexOf(cur) + 1) % cycle.length];
-  return { ...prev, [key]: next };
+  return { ...prev, [key]: cycled(cycle, cur, step) };
 }
 
 export function toggleNegative(prev: PhraseSelection): PhraseSelection {
@@ -278,12 +290,10 @@ export function setDefiniteness(
 export function cycleModifierRelation(
   prev: PhraseSelection,
   slotKey: SlotKey,
+  step: CycleStep = 1,
 ): PhraseSelection {
   const cur = prev.modifierRelations?.[slotKey] ?? "feature";
-  const next =
-    MODIFIER_RELATIONS[
-      (MODIFIER_RELATIONS.indexOf(cur) + 1) % MODIFIER_RELATIONS.length
-    ];
+  const next = cycled(MODIFIER_RELATIONS, cur, step);
   return {
     ...prev,
     modifierRelations: { ...prev.modifierRelations, [slotKey]: next },
@@ -325,9 +335,10 @@ export function setModifierAdjective(
 export function cycleDegree(
   prev: PhraseSelection,
   slotKey: SlotKey,
+  step: CycleStep = 1,
 ): PhraseSelection {
   const cur = prev.adjectiveDegrees?.[slotKey] ?? "positive";
-  const next = DEGREES[(DEGREES.indexOf(cur) + 1) % DEGREES.length];
+  const next = cycled(DEGREES, cur, step);
   return {
     ...prev,
     adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: next },
@@ -406,15 +417,13 @@ export function setImperativeRegister(
 }
 
 // Cycle the verb tense present → past → future → present.
-export function cycleTense(prev: PhraseSelection): PhraseSelection {
-  const idx = TENSES.indexOf(prev.verbTense ?? "present");
-  return { ...prev, verbTense: TENSES[(idx + 1) % TENSES.length] };
+export function cycleTense(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
+  return { ...prev, verbTense: cycled(TENSES, prev.verbTense ?? "present", step) };
 }
 
 // Cycle the verb aspect neutral → progressive → prospective → resultative → neutral.
-export function cycleAspect(prev: PhraseSelection): PhraseSelection {
-  const idx = ASPECTS.indexOf(prev.verbAspect ?? "neutral");
-  return { ...prev, verbAspect: ASPECTS[(idx + 1) % ASPECTS.length] };
+export function cycleAspect(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
+  return { ...prev, verbAspect: cycled(ASPECTS, prev.verbAspect ?? "neutral", step) };
 }
 
 // Set a spatial complement's relation (through / under / over / …). Route and locative draw on

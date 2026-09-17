@@ -8,7 +8,9 @@ handlers, key tips, tooltips and the shortcuts sheet.
 **Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
-**Status:** planning — see [Open questions](#open-questions).
+**Status:** phase 1 shipped (the cursor and the box keys); phases 2–5 planned. See
+[Phases](#6-phases) for what each still covers and [Open questions](#open-questions) for what is
+still undecided.
 **Drawings:** [`artwork/`](artwork/) — seven images exported from page *Keyboard access (P01)* of
 the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded
 in [§3](#3-ui-elements-that-change) next to their ASCII sketches.
@@ -107,6 +109,11 @@ The same session in the console is P02 §1.
   opened them.
 
 <kbd>esc</kbd> always steps out exactly one level: popup → box → period → (nothing).
+
+*Phase 1:* there is no period level yet, so <kbd>esc</kbd> on a box lets the box go rather than
+landing on its period, and one <kbd>esc</kbd> inside the word picker both closes its list (the
+picker's own handler) and steps back onto the box. The shared picker keys of phase 2 make those
+the two distinct steps §4.5 describes.
 
 ### Arrows are spatial
 
@@ -455,24 +462,30 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 | `scope.ts` | `data-kb-scope` resolution from `document.activeElement` up to the workspace. |
 | `spatialNav.ts` | The cone-and-distance search over measured box rects. Pure, unit-tested. |
 | `Keycap.tsx`, `KeyTip.tsx` | The two atoms (paper keycap; 15px ink badge). |
+| `focusRing.ts`, `activate.ts` | The cursor's ring, and what makes a canvas box that is not a word (tense, aspect, determiner) answer to ↵ and Space. |
 | `HintLine.tsx` | The keys for the cursor's scope; later rendered inside the collapsed console (P02). |
 | `ShortcutSheet.tsx` | ? dialog; renders §4 from `keymap`, Windows & Linux / Mac switch. |
 
 ```ts
 // keymap.ts
 export type Scope =
-  | "app" | "period" | "box:noun" | "box:adjective" | "box:verb" | "box:mood"
+  | "app" | "period"
+  // `box` is every word box alike — moving about, choosing a word, clearing it — and a box is
+  // looked up in its own grammar first, then in it: ["box:noun", "box"]. That split is what lets
+  // N be the number on a noun and the negation on a verb with no modifier to tell them apart.
+  | "box" | "box:noun" | "box:adjective" | "box:verb" | "box:mood"
   | "picker" | "menu" | "pick" | "translations" | "words";
 
 export interface Command {
   id: string;                    // "noun.number"
   scope: Scope;
   keys: string[];                // ["N"], ["Shift+ArrowUp"], ["Mod+S"]; Mod = Ctrl, ⌘ on a Mac
-  label: UiStringKey | string;   // hint line, sheet, tooltip
-  group?: string;                // sheet grouping
+  label: string;                 // English: the fallback, and the name of anything not yet seeded
+  labelKey?: UiStringKey;        // rendered name, where the action's words are in the catalogue
   when?: (ctx: KeyContext) => boolean;   // e.g. satellite available, verb licenses complements
-  run: (ctx: KeyContext) => void;
+  run: (ctx: KeyContext) => void | boolean;   // false declines the keystroke, leaving it to the browser
   hint?: boolean;                // show in the hint line
+  satellite?: RegExp;            // the controls it drives, which wear its key as a tip
 }
 ```
 
@@ -480,6 +493,13 @@ export interface Command {
 `satellites` (with `available`), the handler bag it passes as `PhraseRenderContext`, and the
 container's `WorkspaceBinding`. `when` reuses `Satellite.available`, so a key exists exactly when its
 button does.
+
+Each builder publishes that assembly as a *scope* — a stable object whose builder function is
+replaced on every render — and provides it to its own subtree, so a command always runs against the
+current selection rather than the one in hand when the cursor arrived, and a hosted ring's boxes (a
+conjunct's, an owner's) answer to the builder that draws them rather than to the period's. A box
+takes the cursor while it holds DOM focus; the provider needs nothing but `document.activeElement`
+to know what a key means.
 
 ### 5.2 Matching rules
 
@@ -528,13 +548,31 @@ Each phase ships on its own and leaves the app consistent.
 
 | Phase | Scope | Done when |
 |---|---|---|
-| **1 · Cursor and box keys** | `keyboard/` module (keymap, provider, matchKey, spatialNav, Keycap, KeyTip, HintLine); focus ring; arrows / ⇥ / ↵ / ⌫ / esc on boxes; noun, adjective and verb letters that call existing handlers; tense / aspect / chips / determiner box activatable; tooltip keycaps. | A sentence with plural subject, past tense, negation, adjectives and a modal can be built and edited keyboard-only. |
+| **1 · Cursor and box keys** ✅ | `keyboard/` module (keymap, provider, matchKey, spatialNav, Keycap, KeyTip, HintLine); focus ring; arrows / ⇥ / ↵ / ⌫ / esc on boxes; noun, adjective and verb letters that call existing handlers; tense / aspect / chips / determiner box activatable; tooltip keycaps. | A sentence with plural subject, past tense, negation, adjectives and a modal can be built and edited keyboard-only. |
 | **2 · Pickers and menus** | `usePickerKeys` (⇥, double esc, tabs, pronoun grid, footer); determiner / conjunction / specifier / sentiment accelerators; new *Add a complement* menu; command-subject keys. | Every value any menu or toggle offers is one key after the key that opened it. |
 | **3 · Periods and links** | Period cursor (esc out, ↑↓, ⇧↑↓ move) and period letters; `eligibleTargets` + numbered badges for all five pick kinds; coref esc. | Relative clause, if-condition, join, instrument and possessor reference can be built keyboard-only. |
 | **4 · Regions** | F6 landmarks; header toolbar + Console button; translations rows; words panel and word map; Ctrl keys (save / load / export / import / words); ? sheet. | Every control on the page is reachable, and the sheet lists every binding in the keymap (generated, not hand-written). |
 | **5 · Undo** | History of `{containers, links}` in `App` with coalescing for rapid toggles; Ctrl Z / Ctrl ⇧ Z; undo toast after destructive actions; `window.confirm` removed. | Removing a period, clearing a box or deleting a saved phrase can be undone. |
 
 P02's console can start after phase 1 (it needs the shared cursor) and runs in parallel from there.
+
+**What phase 1 shipped, beside the table.** The cursor is `activeSlot`, and it is now never
+nowhere: choosing the last word of a period leaves it on that word rather than losing it with the
+picker that closed, and re-picking a word keeps it on the box (`nextActiveSlot` no longer
+distinguishes "close the picker" from "stay here" — both leave the cursor where it is). The
+adjective boxes of a noun now follow their head in the DOM, so ⇥ walks a group head-first, the way
+it reads. The picker rows carry `data-highlighted`, so the row ↵ would take can be seen from
+outside the component.
+
+**What phase 1 left.** Two things named in §3 need work that is not a frontend change:
+
+- **The keyboard caption** (§3.1, "· MOVE WITH THE ARROWS, TYPE TO CHOOSE A WORD"). Every caption
+  is an engine-composed catalogue string, and this one needs a concept the corpus does not hold
+  (an arrow, or a key). It is a `/seed` + `/localize` task, not a component edit — the caption
+  still reads "· click a slot, and then choose a word" under both modalities.
+- **<kbd>R</kbd> on a noun** (the relative clause) and the complement menu's <kbd>+</kbd>: both
+  open a pick or a menu that phases 2 and 3 build. Their controls carry no key tip, because the
+  tips are read off the keymap and there is nothing there yet to read.
 
 Existing defects fixed along the way (found while auditing): focus ring suppressed on canvas nodes;
 ⇥ inside a picker jumps slots; closed words panel stays in the tab order; translation copy button
@@ -552,6 +590,11 @@ ignores esc.
 - **End to end (Playwright, `e2e/keyboard.spec.ts`):** the §1 session plus an if-condition and a
   save / load round trip, checking all seven translations. The spec uses only `page.keyboard`
   (a guard fails it if `click` / `mouse` is called), so it proves the promise in the title.
+  *Shipped for phase 1:* a period composed and edited from the keyboard alone — every word, a
+  plural subject, an adjective, a negation and a tense cycled both ways — asserted in all seven
+  languages, plus the determiner menu, the object's fold-away, the hint line and the key tips.
+  The guard is a counter installed before the first navigation: it counts every `pointerdown`,
+  `mousedown` and `click` the document sees, and each test fails unless it is zero.
 
 ## 8. Risks
 
@@ -564,11 +607,24 @@ ignores esc.
 
 ## Open questions
 
-1. **Filled box = commands.** Today clicking a filled box re-picks. With this plan typing on a
-   filled box does *not* start a search (↵ does, or the console). Is that trade-off right?
+### Settled
+
+1. **Filled box = commands.** ~~Today clicking a filled box re-picks. With this plan typing on a
+   filled box does *not* start a search (↵ does, or the console). Is that trade-off right?~~
+   **Yes** — as §3 describes. On a filled box the letters are the grammar and <kbd>↵</kbd> (or
+   <kbd>Space</kbd>) opens the picker over the word; on an empty one the picker already holds the
+   cursor, so letters search. Shipped in phase 1.
+3. **Control level.** ~~Should ⇥ inside a box walk its border controls (a real sub-level), or is
+   "letters for controls, ⇥ for boxes" enough, leaving controls to DOM tabbing for assistive
+   tech?~~ **Letters for controls, ⇥ for boxes.** ⇥ stays one document-wide walk between *words*,
+   so it means one thing wherever the cursor is; each control keeps its letter, and stays a real
+   button the browser's own focus order reaches. The footer chips became buttons for that reason,
+   and the tense / aspect / determiner boxes take <kbd>↵</kbd> and <kbd>Space</kbd> without
+   joining the walk. Shipped in phase 1.
+
+### Still open
+
 2. **Undo scope.** Phase 5 undoes the phrase (selection + links), not canvas layout (box positions,
    compact, canvas height). Enough?
-3. **Control level.** Should ⇥ inside a box walk its border controls (a real sub-level), or is
-   "letters for controls, ⇥ for boxes" enough, leaving controls to DOM tabbing for assistive tech?
 4. **Typed pronouns in the picker.** Should the Subject search also list pronoun rows ("I", "you",
    "she", "we") so the Pronoun tab is never needed? (The console already accepts them.)

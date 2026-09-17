@@ -16,6 +16,8 @@ import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { toolbarControlKey, VERB_PHRASE } from "./ringSpecs.ts";
 import { isModalAdverbSlot, isModalSlot } from "./slots.ts";
+import { activatable } from "../../keyboard/activate.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb in its solid ring, the adverb, modal and
 // tense/aspect satellites on its orbit, the complement and direct-object toggles on its dotted
@@ -39,7 +41,10 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     handleSelectLocativeSpecifier,
     handleSelectSentiment,
     registerVerbAnchor,
+    satelliteKeys,
+    activeSlot,
   } = ctx;
+  const t = useUiString();
 
   // The verb, its adverb, and its modal chain are all word slots on the verb phrase.
   const verbSlots = renderedSlots.filter(
@@ -74,10 +79,15 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {verbSlots.map((slot) => (
         <SlotNode key={slot.key} slot={slot} ctx={ctx} />
       ))}
+      {/* The tense and aspect boxes are toggles, not words: ↵ and Space cycle them, and the verb's
+          own T and A reach them from the cursor without stopping on them (see activatable). */}
       {shownMap.verbTense && (
         <Box
           data-testid="box-verbTense"
-          {...makeDragProps("verbTense", handleCycleTense)}
+          {...activatable(makeDragProps("verbTense", handleCycleTense), {
+            onActivate: handleCycleTense,
+            label: t("satellite.tense"),
+          })}
           ref={nodeElRef(ctx, "verbTense")}
         >
           <TenseToggleBox value={selection.verbTense ?? "present"} disc={discs.verbTense?.r} />
@@ -86,7 +96,10 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {shownMap.verbAspect && (
         <Box
           data-testid="box-verbAspect"
-          {...makeDragProps("verbAspect", handleCycleAspect)}
+          {...activatable(makeDragProps("verbAspect", handleCycleAspect), {
+            onActivate: handleCycleAspect,
+            label: t("satellite.aspect"),
+          })}
           ref={nodeElRef(ctx, "verbAspect")}
         >
           <AspectToggleBox value={selection.verbAspect ?? "neutral"} disc={discs.verbAspect?.r} />
@@ -107,7 +120,15 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {/* The direct object's fold-away control, where the line to the object leaves the ring. */}
       {!compact &&
         directObjectToggle &&
-        seated(directObjectToggle.key, <SatelliteButton sat={directObjectToggle} color="success" />)}
+        seated(
+          directObjectToggle.key,
+          <SatelliteButton
+            sat={directObjectToggle}
+            color="success"
+            keySpec={satelliteKeys[directObjectToggle.key]}
+            tip={activeSlot === "verb"}
+          />,
+        )}
 
       {/* The relation toolbars ride the top of the route, locative and cause rings — one button per
           relation, seated among the ring's other controls. Like the ring's other controls, they are

@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef } from "react";
 import { Box, ListSubheader, Menu, MenuItem } from "@mui/material";
 import {
   DETERMINER_CATEGORIES,
@@ -12,6 +12,7 @@ import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
 import { adjectiveSlots } from "./slots.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { activatable } from "../../keyboard/activate.ts";
 
 // The determiner picker: the ten values are too many to cycle blindly, so the box opens a
 // menu grouped by the dimension each value belongs to — article / demonstrative / quantifier,
@@ -24,12 +25,17 @@ import { useUiString } from "../../i18n/useUiString.ts";
 // about what the slot is for. Both are UI strings, so both are read in the language being
 // written rather than in English.
 function DeterminerMenu({
-  anchorEl,
+  open,
+  getAnchor,
   value,
   onPick,
   onClose,
 }: {
-  anchorEl: HTMLElement | null;
+  open: boolean;
+  // The anchor as a thunk, not an element: the determiner box may only have appeared in the very
+  // commit that opened the menu (the D key reveals it first), and a ref is not attached yet while
+  // that render is in flight. MUI reads the thunk in its layout effect, by which time it is.
+  getAnchor: () => HTMLElement | null;
   value: Definiteness;
   onPick: (value: Definiteness) => void;
   onClose: () => void;
@@ -37,8 +43,8 @@ function DeterminerMenu({
   const t = useUiString();
   return (
     <Menu
-      anchorEl={anchorEl}
-      open={Boolean(anchorEl)}
+      anchorEl={() => getAnchor()!}
+      open={open}
       onClose={onClose}
       MenuListProps={{ dense: true }}
     >
@@ -97,11 +103,16 @@ export function NounPhraseBuilder({
   ctx: PhraseRenderContext;
 }) {
   const { renderedSlots, shownMap, makeDragProps, selection, groupRects } = ctx;
+  const t = useUiString();
 
   // Every noun constituent — core roles and motion complements alike — chains up
   // to three adjectives; unrevealed/unlicensed keys simply aren't in renderedSlots.
-  const slotKeys: string[] = [...adjectiveSlots(which), which];
-  const mySlots = renderedSlots.filter((s) => slotKeys.includes(s.key));
+  // The head comes first, then its adjectives in chain order: that is the order the phrase reads
+  // in, and the boxes are painted out of flow, so their DOM order is only the order ⇥ walks them.
+  const slotKeys: string[] = [which, ...adjectiveSlots(which)];
+  const mySlots = renderedSlots
+    .filter((s) => slotKeys.includes(s.key))
+    .sort((a, b) => slotKeys.indexOf(a.key) - slotKeys.indexOf(b.key));
 
   // The dotted ring for this constituent — its main word key is one of its nodes.
   // Absent (e.g. an unrevealed complement) means there's nothing to draw.
@@ -113,9 +124,10 @@ export function NounPhraseBuilder({
       | undefined) ?? defaultDefiniteness(which);
 
   // The determiner box doubles as the menu's anchor, so its node ref feeds both the canvas
-  // (which measures every box to place the connectors) and the popup.
+  // (which measures every box to place the connectors) and the popup. Whether the menu is open is
+  // the builder's, not this component's: the noun's D key opens it from wherever the cursor is.
   const determinerBox = useRef<HTMLElement | null>(null);
-  const [menuOpen, setMenuOpen] = useState(false);
+  const menuOpen = ctx.determinerMenuFor === which;
   const setNodeEl = nodeElRef(ctx, `${which}Definiteness`);
 
   return (
@@ -128,7 +140,13 @@ export function NounPhraseBuilder({
         <>
           <Box
             data-testid={`box-${which}Definiteness`}
-            {...makeDragProps(`${which}Definiteness`, () => setMenuOpen(true))}
+            {...activatable(
+              makeDragProps(`${which}Definiteness`, () => ctx.onDeterminerMenu(which as NounKey)),
+              {
+                onActivate: () => ctx.onDeterminerMenu(which as NounKey),
+                label: t("satellite.determiner"),
+              },
+            )}
             ref={(el: HTMLElement | null) => {
               determinerBox.current = el;
               setNodeEl(el);
@@ -141,12 +159,13 @@ export function NounPhraseBuilder({
               hand every menu-item pointerdown to the box's drag handler — which captures the
               pointer and swallows the pointerup the click needs. */}
           <DeterminerMenu
-            anchorEl={menuOpen ? determinerBox.current : null}
+            open={menuOpen}
+            getAnchor={() => determinerBox.current}
             value={definiteness}
             onPick={(value) =>
               ctx.handleSetDefiniteness(which as NounKey, value)
             }
-            onClose={() => setMenuOpen(false)}
+            onClose={() => ctx.onDeterminerMenu(null)}
           />
         </>
       )}

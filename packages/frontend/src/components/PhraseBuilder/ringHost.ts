@@ -26,6 +26,9 @@ export interface RingHost {
   draggingKey: string | null;
   makeDragProps: (key: string, onActivate: () => void, at: Pt, moveKey: string) => DragBoxProps;
   makeGroupDragProps: (nodeKeys: string[]) => GroupDragProps;
+  // Shift a node of the period's canvas by a few pixels — what ⇧ + an arrow does. A hosted ring's
+  // builder nudges its own ring, by the key it goes by on that canvas.
+  nudge: (key: string, dx: number, dy: number) => void;
   // The ports the ring's links leave from, each facing the ring its line runs to.
   ports: { key: string; toward: Pt }[];
   // Where the ring's own possessor control faces while its noun has an owner: that owner's ring, or

@@ -39,6 +39,9 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
 import { clearTitle, revealTitle } from "./canvasCommands.ts";
+import { KeyTip } from "../../keyboard/KeyTip.tsx";
+import { keycapText } from "../../keyboard/matchKey.ts";
+import { useKeyPlatform } from "../../keyboard/KeyboardProvider.tsx";
 
 // The light wash a set or active box wears in its colour. The theme defines only each colour's
 // main/light/dark (no 50…900 scale), so the wash is `main` at MUI's selected opacity.
@@ -370,11 +373,19 @@ export function SlotBox({
 export function SatelliteButton({
   sat,
   color,
+  keySpec,
+  tip = false,
 }: {
   sat: SatelliteIcon;
   color: SlotConfig["color"];
+  // The key this control answers to, read off the keymap by the builder. Named in the tooltip
+  // whoever is driving — that is how the mouse teaches the keyboard — and worn as a badge on the
+  // control's corner only while the cursor is on the box it belongs to.
+  keySpec?: string;
+  tip?: boolean;
 }) {
   const t = useUiString();
+  const platform = useKeyPlatform();
   // Color tiers:
   //  • solid  → carries a non-default value (plural / fem / negative / a chosen word)
   //  • outlined → expanded, or an always-valued satellite at its default (number/gender/polarity)
@@ -390,10 +401,15 @@ export function SatelliteButton({
         ? sat.label
         : revealTitle(t, sat.active, sat.label, sat.labelKey);
   return (
-    <Tooltip title={tooltip}>
+    // The tooltip shows the key; the accessible name does not. A screen reader announcing
+    // "Number: Singular N" would read the cap as part of the control's name, so the key is
+    // carried by `aria-keyshortcuts`, which is what assistive tech reads shortcuts from.
+    <Tooltip title={keySpec ? `${tooltip}  ${keycapText(keySpec, platform)}` : tooltip}>
       <IconButton
         size="small"
         data-testid={`satellite-${sat.key}`}
+        aria-label={tooltip}
+        aria-keyshortcuts={keySpec ? keycapText(keySpec, platform) : undefined}
         onPointerDown={(e) => e.stopPropagation()}
         onClick={sat.onToggle}
         sx={{
@@ -422,6 +438,7 @@ export function SatelliteButton({
         }}
       >
         {sat.icon}
+        <KeyTip spec={keySpec} show={tip} />
       </IconButton>
     </Tooltip>
   );

@@ -110,6 +110,9 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     handleConceptSelect: vi.fn(),
     slotKind: vi.fn(() => 'noun'),
     onSlotKindChange: vi.fn(),
+    satelliteKeys: {},
+    determinerMenuFor: null,
+    onDeterminerMenu: vi.fn(),
     ...overrides,
   } as unknown as PhraseRenderContext;
   return { ctx, dragPointerDown };
@@ -327,10 +330,14 @@ describe('PhraseCanvas', () => {
       const clearControls = [{ mainKey: 'subject', label: 'Subject', onClear: () => {} }];
       const { ctx, controlPos } = renderCanvas({ clearControls });
 
-      expect(propsOf(SatelliteControls)).toEqual({
+      expect(propsOf(SatelliteControls)).toMatchObject({
         satelliteIconsByParent: ctx.satelliteIconsByParent,
         clearControls,
         controlPos,
+        // Each control is handed the key it answers to, and which box the cursor is on — only
+        // that box's own controls wear their key as a badge.
+        satelliteKeys: ctx.satelliteKeys,
+        cursorSlot: ctx.activeSlot,
       });
     });
 

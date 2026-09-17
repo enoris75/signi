@@ -7,7 +7,14 @@ import type { RingHost } from "../ringHost.ts";
 /** What every hosted ring borrows from the canvas it is drawn on alike. */
 export type Hosting = Pick<
   RingHost,
-  "graphSize" | "compact" | "draggingKey" | "makeDragProps" | "makeGroupDragProps" | "ownersOpen" | "setOwnerOpen"
+  | "graphSize"
+  | "compact"
+  | "draggingKey"
+  | "makeDragProps"
+  | "makeGroupDragProps"
+  | "nudge"
+  | "ownersOpen"
+  | "setOwnerOpen"
 >;
 
 /**

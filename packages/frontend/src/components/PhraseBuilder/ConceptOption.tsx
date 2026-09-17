@@ -33,6 +33,9 @@ export function ConceptOption({
       <Box
         data-testid="typeahead-option"
         data-concept={concept.id}
+        // Which row ↵ would take. On the page so a keyboard walk down the list can be seen from
+        // outside — the highlight is otherwise only a background colour.
+        data-highlighted={highlighted ? "" : undefined}
         onMouseDown={(e) => e.preventDefault()}
         onMouseEnter={onMouseEnter}
         onClick={onClick}

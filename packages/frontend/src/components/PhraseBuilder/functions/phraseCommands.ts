@@ -30,6 +30,7 @@ import {
   toggleGender,
   toggleNegative,
   toggleNumber,
+  type CycleStep,
 } from "../phraseReducers.ts";
 
 type PhraseUpdate = (updater: (prev: PhraseSelection) => PhraseSelection) => void;
@@ -45,17 +46,21 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
     handleAddConjunct: (which: NounKey) => onPhraseUpdate((prev) => addConjunct(prev, which)),
     handleCycleConjunction: (which: NounKey) => onPhraseUpdate((prev) => cycleNounConjunction(prev, which)),
     handleToggleNumber: (which: NumberSlot) => onPhraseUpdate((prev) => toggleNumber(prev, which)),
-    handleToggleGender: (which: GenderSlot) => onPhraseUpdate((prev) => toggleGender(prev, which)),
+    // The cycling controls take a direction: +1 for a click, −1 for the keyboard's ⇧ (see keymap).
+    handleToggleGender: (which: GenderSlot, step: CycleStep = 1) =>
+      onPhraseUpdate((prev) => toggleGender(prev, which, step)),
     handleToggleNegative: () => onPhraseUpdate(toggleNegative),
     handleSetDefiniteness: (which: NounKey, value: Definiteness) =>
       onPhraseUpdate((prev) => setDefiniteness(prev, which, value)),
-    handleCycleModifierRelation: (slotKey: SlotKey) => onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey)),
+    handleCycleModifierRelation: (slotKey: SlotKey, step: CycleStep = 1) =>
+      onPhraseUpdate((prev) => cycleModifierRelation(prev, slotKey, step)),
     handleCycleModifierNumber: (slotKey: SlotKey) => onPhraseUpdate((prev) => cycleModifierNumber(prev, slotKey)),
     handleSetModifierAdjective: (slotKey: SlotKey, concept: Concept | undefined) =>
       onPhraseUpdate((prev) => setModifierAdjective(prev, slotKey, concept)),
-    handleCycleDegree: (slotKey: SlotKey) => onPhraseUpdate((prev) => cycleDegree(prev, slotKey)),
-    handleCycleTense: () => onPhraseUpdate(cycleTense),
-    handleCycleAspect: () => onPhraseUpdate(cycleAspect),
+    handleCycleDegree: (slotKey: SlotKey, step: CycleStep = 1) =>
+      onPhraseUpdate((prev) => cycleDegree(prev, slotKey, step)),
+    handleCycleTense: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleTense(prev, step)),
+    handleCycleAspect: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleAspect(prev, step)),
     handleSetImperativePerson: (person: ImperativePerson) =>
       onPhraseUpdate((prev) => setImperativePerson(prev, person)),
     handleSetImperativeRegister: (register: ImperativeRegister) =>

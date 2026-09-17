@@ -173,6 +173,8 @@ export function PhraseCanvas({
         clearControls={clearControls}
         controlPos={controlPos}
         recolor={recolor}
+        satelliteKeys={ctx.satelliteKeys}
+        cursorSlot={activeSlot}
       />
 
       {!compact && (
@@ -187,6 +189,8 @@ export function PhraseCanvas({
           }
           registerSourceAnchor={linkBinding?.geometry.registerSourceAnchor}
           registerTargetAnchor={linkBinding?.geometry.registerTargetAnchor}
+          satelliteKeys={ctx.satelliteKeys}
+          cursorSlot={activeSlot}
         />
       )}
 

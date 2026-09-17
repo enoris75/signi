@@ -101,6 +101,9 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}): PhraseRenderCont
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
     handleRemoveComplement: vi.fn(),
+    satelliteKeys: {},
+    determinerMenuFor: null,
+    onDeterminerMenu: vi.fn(),
     ...overrides,
   };
 }

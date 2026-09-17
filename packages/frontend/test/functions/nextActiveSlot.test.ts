@@ -48,13 +48,13 @@ describe('nextActiveSlot', () => {
       expect(pick('verb', EAT, { subject: CAT, verb: SLEEP })).toBe('directObject');
     });
 
-    it('closes the picker when the verb takes nothing more', () => {
-      expect(pick('verb', SLEEP, { subject: CAT })).toBeNull();
+    it('advances nowhere when the verb takes nothing more', () => {
+      expect(pick('verb', SLEEP, { subject: CAT })).toBeUndefined();
     });
 
     it('skips a filled object, and the complements, which open from the verb phrase', () => {
       const PUT = verb('PUT', 'transitive', { complements: ['locative'] });
-      expect(pick('verb', PUT, { subject: CAT, directObject: MOUSE })).toBeNull();
+      expect(pick('verb', PUT, { subject: CAT, directObject: MOUSE })).toBeUndefined();
     });
 
     it('goes to the object, not a subject a command or an infinitive has dropped', () => {
@@ -63,10 +63,12 @@ describe('nextActiveSlot', () => {
     });
   });
 
-  it('closes the picker after an adjective or a modal, whose next link opens from its own box', () => {
-    expect(pick('subjectAdjective', BIG, { subject: CAT })).toBeNull();
-    expect(pick('directObjectAdjective2', BIG, { subject: CAT, verb: EAT })).toBeNull();
-    expect(pick('verbModal', verb('WANT', 'transitive', { modal: true }), { subject: CAT, verb: EAT })).toBeNull();
+  it('advances nowhere after an adjective or a modal, whose next link opens from its own box', () => {
+    expect(pick('subjectAdjective', BIG, { subject: CAT })).toBeUndefined();
+    expect(pick('directObjectAdjective2', BIG, { subject: CAT, verb: EAT })).toBeUndefined();
+    expect(
+      pick('verbModal', verb('WANT', 'transitive', { modal: true }), { subject: CAT, verb: EAT }),
+    ).toBeUndefined();
   });
 
   it('goes on to the next empty main slot after any other word', () => {
@@ -74,7 +76,7 @@ describe('nextActiveSlot', () => {
     expect(pick('subject', CAT, { verb: EAT })).toBe('directObject');
   });
 
-  it('leaves focus where it is when every slot after the word is filled', () => {
+  it('leaves the cursor where it is when every slot after the word is filled', () => {
     expect(pick('subject', CAT, { verb: EAT, directObject: MOUSE })).toBeUndefined();
     expect(pick('directObject', MOUSE, { subject: CAT, verb: EAT })).toBeUndefined();
   });

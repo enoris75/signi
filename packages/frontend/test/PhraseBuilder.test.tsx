@@ -408,12 +408,15 @@ describe('PhraseBuilder', () => {
       expect(within(box('directObject')).getByTestId('typeahead-noun')).toBeInTheDocument();
     });
 
-    it('closes the picker after a verb that wants nothing more', () => {
+    // The cursor is `activeSlot`, so it is never nowhere: with nothing left to fill the picker
+    // closes and the cursor stays on the word just chosen (P01 §1).
+    it('closes the picker after a verb that wants nothing more, leaving the cursor on it', () => {
       renderPeriod({ subject: CAT });
 
       act(() => wordsPanel().onConceptSelect(SLEEP, 'verb'));
 
-      expect(wordsPanel().activeSlot).toBeNull();
+      expect(within(box('verb')).queryByTestId('typeahead-verb')).not.toBeInTheDocument();
+      expect(wordsPanel().activeSlot).toBe('verb');
     });
 
     it('re-picks a filled word in place without moving the focus on', () => {
@@ -434,14 +437,13 @@ describe('PhraseBuilder', () => {
       expect(lastEdit({ subject: CAT })).toEqual({ subject: CAT, verb: SLEEP });
     });
 
-    it('does nothing with no slot to fill', () => {
-      const { onPhraseUpdate } = renderPeriod({ subject: CAT });
+    it('changes the word under the cursor when the words panel names no slot', () => {
+      const { lastEdit } = renderPeriod({ subject: CAT });
       act(() => wordsPanel().onConceptSelect(SLEEP, 'verb'));
-      onPhraseUpdate.mockClear();
 
       act(() => wordsPanel().onConceptSelect(EAT));
 
-      expect(onPhraseUpdate).not.toHaveBeenCalled();
+      expect(lastEdit({ subject: CAT, verb: SLEEP })).toEqual({ subject: CAT, verb: EAT });
     });
 
     it('opens a filled word’s picker over it, and restores the word when focus leaves', () => {
@@ -487,7 +489,8 @@ describe('PhraseBuilder', () => {
       pickOption('BIG');
 
       expect(lastEdit({ subject: CAT })).toEqual({ subject: CAT, subjectAdjective: BIG });
-      expect(wordsPanel().activeSlot).toBeNull();
+      // The next link in the chain is opened from this very box, so the cursor stays on it.
+      expect(wordsPanel().activeSlot).toBe('subjectAdjective');
     });
   });
 
@@ -1153,7 +1156,7 @@ describe('PhraseBuilder', () => {
       expect(satellite('verbTense')).toBeInTheDocument();
 
       fireEvent.click(screen.getByRole('button', { name: 'Expand the subject' }));
-      expect(boxes()).toEqual(['subjectAdjective', 'subject', 'verb']);
+      expect(boxes()).toEqual(['subject', 'subjectAdjective', 'verb']);
     });
 
     it('compacts every box at once, keeping the boxes collapsed by hand', () => {

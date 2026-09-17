@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen, waitFor, within } from '@testing-library/react';
+import { useState } from 'react';
 import type { Concept } from '@signi/shared';
 import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
-import type { NumberSlot, SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
+import type { NounKey, NumberSlot, SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
 import { NounPhraseBuilder } from '../src/components/PhraseBuilder/NounPhraseBuilder.tsx';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
 import { ALL_SLOTS } from '../src/components/PhraseBuilder/slots.ts';
@@ -81,6 +82,9 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectSentiment: vi.fn(),
     handleToggleCollapse: vi.fn(),
     handleRemoveComplement: vi.fn(),
+    satelliteKeys: {},
+    determinerMenuFor: null,
+    onDeterminerMenu: vi.fn(),
     ...overrides,
   };
   return { ctx, dragPointerDown };
@@ -88,7 +92,26 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
 
 function renderNoun(which: NumberSlot, overrides: Partial<PhraseRenderContext> = {}) {
   const { ctx, dragPointerDown } = makeCtx(overrides);
-  const view = renderWithProviders(<NounPhraseBuilder which={which} ctx={ctx} />);
+  // Which determiner menu is open belongs to the period's builder, not to this component: both the
+  // box's own press and the noun's D key go through it (so the key can open a menu from wherever
+  // the cursor is). The harness stands in for that builder.
+  function Harness() {
+    const [menuFor, setMenuFor] = useState<NounKey | null>(ctx.determinerMenuFor);
+    return (
+      <NounPhraseBuilder
+        which={which}
+        ctx={{
+          ...ctx,
+          determinerMenuFor: menuFor,
+          onDeterminerMenu: (w) => {
+            ctx.onDeterminerMenu(w);
+            setMenuFor(w);
+          },
+        }}
+      />
+    );
+  }
+  const view = renderWithProviders(<Harness />);
   return { ...view, ctx, dragPointerDown };
 }
 
@@ -131,7 +154,9 @@ describe('NounPhraseBuilder', () => {
         ),
       });
 
-      expect(boxes()).toEqual(['box-subjectAdjective', 'box-subject', 'box-subjectAdjective2']);
+      // Head first, then its adjectives in chain order: that is the order the phrase reads in, and
+      // — the boxes being painted out of flow — the order ⇥ walks them in.
+      expect(boxes()).toEqual(['box-subject', 'box-subjectAdjective', 'box-subjectAdjective2']);
     });
 
     it('places a complement’s words under the complement’s own keys', () => {
@@ -139,7 +164,7 @@ describe('NounPhraseBuilder', () => {
         renderedSlots: slots('subject', 'locativeAdjective', 'locative', 'sourceAdjective'),
       });
 
-      expect(boxes()).toEqual(['box-locativeAdjective', 'box-locative']);
+      expect(boxes()).toEqual(['box-locative', 'box-locativeAdjective']);
     });
   });
 

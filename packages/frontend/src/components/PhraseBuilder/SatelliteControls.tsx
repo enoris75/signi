@@ -3,7 +3,7 @@ import type { UiStringKey } from "@signi/shared";
 import { ClearButton, SatelliteButton, type SatelliteIcon } from "./Boxes.tsx";
 import { clearControlKey } from "./ringSpecs.ts";
 import { ALL_SLOTS } from "./slots.ts";
-import type { SlotConfig } from "./interfaces.ts";
+import type { SlotConfig, SlotKey } from "./interfaces.ts";
 
 interface SatelliteControlsProps {
   // Satellite reveal icons grouped by the node (slot key) that carries them: a constituent's word,
@@ -15,6 +15,11 @@ interface SatelliteControlsProps {
   controlPos: Record<string, { x: number; y: number }>;
   // Slot colours to use in place of a slot's own, by slot key (a conjunct's head wears its role's).
   recolor?: Partial<Record<string, SlotConfig["color"]>>;
+  // The key each control answers to, by satellite key — read off the keymap by the builder, so a
+  // control can never advertise a key that is not bound (see keymap.satelliteKey).
+  satelliteKeys?: Record<string, string>;
+  // The box the cursor rests on: only its own controls wear their key as a badge.
+  cursorSlot?: SlotKey | null;
 }
 
 // The controls about the words: each satellite's reveal control and each direct toggle on its
@@ -27,6 +32,8 @@ export function SatelliteControls({
   clearControls,
   controlPos,
   recolor,
+  satelliteKeys = {},
+  cursorSlot = null,
 }: SatelliteControlsProps) {
   const seat = (p: { x: number; y: number }) =>
     ({
@@ -46,7 +53,12 @@ export function SatelliteControls({
           if (!p) return null;
           return (
             <Box key={icon.key} sx={seat(p)}>
-              <SatelliteButton sat={icon} color={color} />
+              <SatelliteButton
+                sat={icon}
+                color={color}
+                keySpec={satelliteKeys[icon.key]}
+                tip={parentKey === cursorSlot}
+              />
             </Box>
           );
         });

@@ -91,6 +91,9 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     handleSelectSentiment: vi.fn(() => {}),
     handleToggleCollapse: vi.fn(() => {}),
     handleRemoveComplement: vi.fn(() => {}),
+    satelliteKeys: {},
+    determinerMenuFor: null,
+    onDeterminerMenu: vi.fn(),
     ...overrides,
   };
   return { ctx, startDrag };
@@ -278,7 +281,7 @@ describe('SlotNode', () => {
     });
   });
 
-  describe('keyboard navigation', () => {
+  describe('the cursor', () => {
     const renderRow = () =>
       renderNodes(['subject', 'verb', 'directObject'], { selection: { subject: CAT } });
 
@@ -290,65 +293,56 @@ describe('SlotNode', () => {
       expect(ctx.handleSlotClick).toHaveBeenCalledExactlyOnceWith('verb');
     });
 
-    it('moves to the next slot on Tab and the previous on Shift+Tab, wrapping around', () => {
-      const { ctx } = renderRow();
-
-      expect(fireEvent.keyDown(nodeOf('subject'), { key: 'Tab' })).toBe(false);
-      expect(nodeOf('verb')).toHaveFocus();
-      expect(ctx.handleSlotClick).toHaveBeenLastCalledWith('verb');
-
-      fireEvent.keyDown(nodeOf('directObject'), { key: 'Tab' });
-      expect(nodeOf('subject')).toHaveFocus();
-
-      fireEvent.keyDown(nodeOf('subject'), { key: 'Tab', shiftKey: true });
-      expect(nodeOf('directObject')).toHaveFocus();
-      expect(ctx.handleSlotClick).toHaveBeenLastCalledWith('directObject');
-
-      fireEvent.keyDown(nodeOf('directObject'), { key: 'Tab', shiftKey: true });
-      expect(nodeOf('verb')).toHaveFocus();
-    });
-
-    it('selects the next slot even when it has no element to focus', () => {
-      const { ctx } = renderNodes(['subject'], {
-        renderedSlots: [slot('subject'), slot('verb')],
+    it('declares the scopes its keys are looked up in, from the word it holds', () => {
+      renderNodes(['subject', 'verb', 'subjectAdjective'], {
+        selection: { subject: CAT, verb: SEE },
       });
 
-      fireEvent.keyDown(nodeOf('subject'), { key: 'Tab' });
-
-      expect(ctx.handleSlotClick).toHaveBeenCalledExactlyOnceWith('verb');
+      expect(nodeOf('subject')).toHaveAttribute('data-kb-scope', 'box:noun box');
+      expect(nodeOf('verb')).toHaveAttribute('data-kb-scope', 'box:verb box');
+      expect(nodeOf('subjectAdjective')).toHaveAttribute('data-kb-scope', 'box:adjective box');
     });
 
-    it('moves with the arrow keys while the box itself has focus', () => {
+    it('joins the walk the arrows and ⇥ move over', () => {
       renderRow();
 
-      expect(fireEvent.keyDown(nodeOf('subject'), { key: 'ArrowRight' })).toBe(false);
-      expect(nodeOf('verb')).toHaveFocus();
-
-      expect(fireEvent.keyDown(nodeOf('verb'), { key: 'ArrowLeft' })).toBe(false);
-      expect(nodeOf('subject')).toHaveFocus();
-
-      fireEvent.keyDown(nodeOf('subject'), { key: 'ArrowLeft' });
-      expect(nodeOf('directObject')).toHaveFocus();
+      for (const key of ['subject', 'verb', 'directObject'] as const) {
+        expect(nodeOf(key)).toHaveAttribute('data-kb-box', key);
+        expect(nodeOf(key)).toHaveAttribute('tabindex', '0');
+      }
     });
 
-    it('leaves the arrow keys to a control inside the box, but still moves on Tab', () => {
+    // The box used to run a Tab/arrow loop over its period's slots, which trapped focus inside
+    // one period. Moving the cursor is now the app's one key handler's job (see KeyboardProvider),
+    // so every one of those keys passes straight through this box.
+    it('runs no navigation of its own', () => {
       const { ctx } = renderRow();
-      const clear = screen.getByRole('button', { name: 'Clear the subject' });
 
-      expect(fireEvent.keyDown(clear, { key: 'ArrowRight' })).toBe(true);
-      expect(fireEvent.keyDown(clear, { key: 'ArrowLeft' })).toBe(true);
+      for (const key of ['Tab', 'ArrowRight', 'ArrowLeft', 'ArrowUp', 'ArrowDown', 'Enter']) {
+        expect(fireEvent.keyDown(nodeOf('subject'), { key })).toBe(true);
+      }
       expect(ctx.handleSlotClick).not.toHaveBeenCalled();
-
-      fireEvent.keyDown(clear, { key: 'Tab' });
-      expect(nodeOf('verb')).toHaveFocus();
     });
 
-    it('ignores every other key', () => {
-      const { ctx } = renderRow();
+    it('steps out of the open picker back onto the box on esc', () => {
+      const { node } = renderNode('subject', { activeSlot: 'subject' });
+      const input = screen.getByPlaceholderText('type a subject…');
 
-      expect(fireEvent.keyDown(nodeOf('subject'), { key: 'Enter' })).toBe(true);
-      expect(fireEvent.keyDown(nodeOf('subject'), { key: 'ArrowDown' })).toBe(true);
-      expect(ctx.handleSlotClick).not.toHaveBeenCalled();
+      fireEvent.keyDown(input, { key: 'Escape' });
+
+      expect(node).toHaveFocus();
+    });
+
+    it('restores the word when esc steps out of a re-pick', () => {
+      const { ctx, node } = renderNode('subject', {
+        selection: { subject: CAT },
+        editingSlot: 'subject',
+      });
+
+      fireEvent.keyDown(screen.getByPlaceholderText('type a subject…'), { key: 'Escape' });
+
+      expect(node).toHaveFocus();
+      expect(ctx.handleCancelEdit).toHaveBeenCalledExactlyOnceWith('subject');
     });
   });
 

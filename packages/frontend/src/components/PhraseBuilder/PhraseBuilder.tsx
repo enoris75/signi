@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { CAUSE_SENTIMENTS, PATH_SPECIFIERS, type Concept } from "@signi/shared";
 import {
   BoxComplementType,
@@ -95,6 +95,9 @@ import { ringHosts } from "./functions/ringHosts.ts";
 import { linkPickHandlers } from "./functions/linkPickHandlers.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { BoxScopeProvider, useBoxScope } from "../../keyboard/KeyboardProvider.tsx";
+import { satelliteKey as satelliteKeyFor, type BoxContext } from "../../keyboard/keymap.ts";
+import { boxScopesOf, nounBlockOf } from "../../keyboard/scope.ts";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -202,6 +205,9 @@ export function PhraseBuilder({
     setSlotKind,
   } = useSlotFocus(selection);
   const [revealed, setRevealed] = useState<Record<string, boolean>>({});
+  // Which noun's determiner menu is open. Held here rather than in the noun's own renderer so the
+  // noun's D key can open it from wherever the cursor is (see the keymap's noun.determiner).
+  const [determinerMenuFor, setDeterminerMenuFor] = useState<NounKey | null>(null);
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
   const [collapsedGroups, setCollapsedGroups] = useState<
@@ -239,10 +245,18 @@ export function PhraseBuilder({
 
     onPhraseUpdate((prev) => applyConceptSelect(prev, slot, concept, opts));
 
-    // Re-picking a filled word keeps focus on it; only a fresh pick auto-advances.
-    if (wasFilled) return;
+    // Re-picking a filled word keeps the cursor on it; only a fresh pick auto-advances.
+    if (wasFilled) {
+      focusSlot(slot);
+      return;
+    }
     const next = nextActiveSlot({ slot, concept, selection, visibleSlots });
-    if (next !== undefined) setActiveSlot(next);
+    // Auto-advancing lands in the next empty box, whose picker takes the cursor as it opens. Where
+    // there is nothing to advance to — the last word of the period, or a chained adjective or modal
+    // whose next link is opened from this very box — the picker just closes, and the cursor stays
+    // on the word chosen rather than falling off the canvas with the picker that carried it.
+    if (next) setActiveSlot(next);
+    else focusSlot(slot);
   }
 
   function handleClear(slot: SlotKey) {
@@ -337,6 +351,15 @@ export function PhraseBuilder({
     t,
   );
 
+  // The key each satellite's control answers to, read off the keymap for the scope of the box that
+  // carries it (see keymap.satelliteKey). Built here so a control never has to know the keymap:
+  // it is handed its key, and can therefore never advertise one that is not bound.
+  const satelliteKeys: Record<string, string> = {};
+  for (const sat of satellites) {
+    const key = satelliteKeyFor(sat.key, boxScopesOf(sat.parent, selection));
+    if (key) satelliteKeys[sat.key] = key;
+  }
+
   // Hide what the collapsed dotted rings hide — every ring, in compact view.
   const { effectiveCollapsed, collapsedMainKeys, shownMap } = applyCollapse({
     rawShownMap,
@@ -392,7 +415,7 @@ export function PhraseBuilder({
   const [positions, setPositions] = useState<
     Record<string, { x: number; y: number }>
   >(() => ({ ...DEFAULT_POSITIONS }));
-  const { dragRef, draggingKey, makeDragProps, makeGroupDragProps } = useDrag({
+  const { dragRef, draggingKey, makeDragProps, makeGroupDragProps, nudge } = useDrag({
     positions,
     setPositions,
     containerRef,
@@ -411,6 +434,51 @@ export function PhraseBuilder({
   const periodControlsRef = useRef<HTMLDivElement>(null);
   const controlsCorner = useCornerOverlap(periodControlsRef, containerRef, compact, showCanvas);
   const { slotEls, boxSizes, sizeOf } = useBoxSizes();
+
+  // A box the keyboard asked for, which may not be on the canvas yet: revealing a satellite puts
+  // it there in the *next* commit, so the request is held and honoured once the box exists.
+  const pendingFocus = useRef<SlotKey | null>(null);
+  useEffect(() => {
+    const want = pendingFocus.current;
+    if (!want) return;
+    const el = slotEls.current.get(want);
+    if (!el) return;
+    pendingFocus.current = null;
+    // A newly revealed empty box opens its picker, which autofocuses: the cursor is already
+    // inside, and pulling it back out to the box would undo that.
+    if (!el.contains(document.activeElement)) el.focus();
+  });
+
+  /** Put the cursor on a box of this phrase, once it is there to be put on. */
+  function focusSlot(slotKey: SlotKey) {
+    setActiveSlot(slotKey);
+    pendingFocus.current = slotKey;
+  }
+
+  const satelliteBy = (key: string) => satellites.find((sat) => sat.key === key);
+
+  /** Show a satellite's box if it is folded away, and move the cursor into it. */
+  function revealSlot(slotKey: SlotKey, satelliteKey?: string) {
+    const sat = satelliteKey ? satelliteBy(satelliteKey) : undefined;
+    if (sat && !sat.shown) handleToggleReveal(sat);
+    focusSlot(slotKey);
+  }
+
+  /** Show or hide a satellite's box, leaving the cursor where it is (the object's fold-away). */
+  function toggleRevealByKey(satelliteKey: string) {
+    const sat = satelliteBy(satelliteKey);
+    if (sat) handleToggleReveal(sat);
+  }
+
+  /** Reveal a noun's determiner box if it is folded away, then open its menu. */
+  function openDeterminerMenu(which: NounKey | null) {
+    if (which) {
+      const sat = satelliteBy(`${which}Definiteness`);
+      if (sat && !sat.shown) handleToggleReveal(sat);
+    }
+    setDeterminerMenuFor(which);
+  }
+
   useGeometryNotify(binding?.geometry.onGeometryChange, {
     positions,
     boxSizes,
@@ -540,6 +608,11 @@ export function PhraseBuilder({
   const dragKeyOf = (key: string) =>
     groups.find((g) => g.nodeKeys.includes(key))?.mainKey ?? key;
 
+  // ⇧ + an arrow shifts the box under the cursor, by the same rule a drag follows: a satellite
+  // moves its whole constituent, and a hosted ring's builder moves its ring on the period's canvas.
+  const nudgeSlot = (key: string, dx: number, dy: number) =>
+    ringHost ? ringHost.nudge(ringHost.key, dx, dy) : nudge(dragKeyOf(key), dx, dy);
+
   // The hosted rings as constituents of this canvas, once their builders have reported drawing them.
   const headOf = (which: NounKey) => groupRects.find((g) => g.mainKey === which);
   const { conjunctRects, ownerRects, standIns } = hostedRectsFor({
@@ -588,7 +661,16 @@ export function PhraseBuilder({
 
   // What each hosted ring borrows from this canvas to draw its ring here.
   const { conjunctHost, ownerHost } = ringHosts({
-    hosting: { graphSize, compact, draggingKey, makeDragProps, makeGroupDragProps, ownersOpen, setOwnerOpen },
+    hosting: {
+      graphSize,
+      compact,
+      draggingKey,
+      makeDragProps,
+      makeGroupDragProps,
+      nudge,
+      ownersOpen,
+      setOwnerOpen,
+    },
     chains,
     wordPos,
     centerOf,
@@ -679,6 +761,53 @@ export function PhraseBuilder({
     setCompact((c) => !c);
   }
 
+  /** Fold or unfold the dotted group a box sits in, if it heads one (the box-level Z). */
+  function toggleCollapseAt(slotKey: SlotKey) {
+    const group = groupRects.find((g) => g.nodeKeys.includes(slotKey));
+    if (group) handleToggleCollapse(group.label);
+  }
+
+  // What a key pressed on one of this phrase's boxes acts on: the box, the selection round it, and
+  // the very handlers the controls' clicks call. Rebuilt on every render and published through a
+  // scope the boxes below sit in, so a command always runs against the current selection rather
+  // than the one that happened to be in hand when the cursor arrived (see KeyboardProvider).
+  const boxScope = useBoxScope((slot: SlotKey): BoxContext | null => {
+    if (!renderedSlots.some((s) => s.key === slot)) return null;
+    return {
+      slot,
+      selection,
+      nounKey: nounBlockOf(slot),
+      satellite: satelliteBy,
+      revealSlot,
+      toggleReveal: toggleRevealByKey,
+      editSlot,
+      clearSlot: handleClear,
+      removeComplement: handleRemoveComplement,
+      togglePossessor: handleTogglePossessor,
+      addConjunct: ringHost?.onAddConjunct
+        ? () => ringHost.onAddConjunct!()
+        : commands.handleAddConjunct,
+      cycleConjunction: commands.handleCycleConjunction,
+      openDeterminerMenu,
+      toggleNumber: commands.handleToggleNumber,
+      toggleGender: commands.handleToggleGender,
+      toggleNegative: commands.handleToggleNegative,
+      cycleTense: commands.handleCycleTense,
+      cycleAspect: commands.handleCycleAspect,
+      cycleDegree: commands.handleCycleDegree,
+      cycleModifierRelation: commands.handleCycleModifierRelation,
+      cycleModifierNumber: commands.handleCycleModifierNumber,
+      // The chip is its own popover's anchor, so the key presses the chip rather than the chip's
+      // open state being lifted out of the leaf that owns it (see phraseRender's chip).
+      openModifierAdjective: (slotKey) =>
+        document
+          .querySelector<HTMLElement>(`[data-kb-control="modifierAdjective:${slotKey}"]`)
+          ?.click(),
+      toggleCollapse: toggleCollapseAt,
+      nudge: nudgeSlot,
+    };
+  });
+
   // Shared bag passed to the verb/noun phrase builders — they all paint onto the
   // same canvas below and lean on this component's drag machinery and handlers.
   const ctx: PhraseRenderContext = {
@@ -732,6 +861,9 @@ export function PhraseBuilder({
     handleSelectSentiment: commands.handleSelectSentiment,
     handleToggleCollapse,
     handleRemoveComplement,
+    satelliteKeys,
+    determinerMenuFor,
+    onDeterminerMenu: openDeterminerMenu,
     removeRing:
       ringHost && onRemove
         ? {
@@ -794,7 +926,7 @@ export function PhraseBuilder({
   );
 
   // A hosted ring's builder paints its ring onto the period's canvas. It wears no card of its own.
-  if (ringHost) return canvas;
+  if (ringHost) return <BoxScopeProvider scope={boxScope}>{canvas}</BoxScopeProvider>;
 
   const tree = (
     <PeriodCard
@@ -838,10 +970,16 @@ export function PhraseBuilder({
   );
 
   // The outermost period builder provides the coref-pick coordinator to its whole subtree; a
-  // nested builder inherited `parentCoref` and re-provides nothing.
-  return parentCoref ? (
-    tree
-  ) : (
-    <CorefPickContext.Provider value={ownCoref}>{tree}</CorefPickContext.Provider>
+  // nested builder inherited `parentCoref` and re-provides nothing. The keyboard scope is every
+  // builder's own: a hosted ring's boxes answer to the builder that draws them, not to the
+  // period's, so the nearest one down the tree wins.
+  return (
+    <BoxScopeProvider scope={boxScope}>
+      {parentCoref ? (
+        tree
+      ) : (
+        <CorefPickContext.Provider value={ownCoref}>{tree}</CorefPickContext.Provider>
+      )}
+    </BoxScopeProvider>
   );
 }

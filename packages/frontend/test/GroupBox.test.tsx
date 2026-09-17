@@ -69,6 +69,9 @@ function renderGroup(
     makeGroupDragProps: vi.fn(() => dragProps),
     handleToggleCollapse: vi.fn(),
     handleRemoveComplement: vi.fn(),
+    satelliteKeys: {},
+    determinerMenuFor: null,
+    onDeterminerMenu: vi.fn(),
     ...overrides,
   };
   const view = renderWithProviders(

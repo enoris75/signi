@@ -86,6 +86,28 @@ export function useDrag({ positions, setPositions, containerRef, frozen = false 
     setDraggingKey("__group__");
   }
 
+  // Shift a node by a few pixels — what ⇧ + an arrow does from the keyboard. The positions are
+  // kept in % of the canvas, so the step is converted against the canvas's measured width; with
+  // no canvas measured yet (or while the layout is frozen) there is nothing to move.
+  function nudge(key: string, dxPx: number, dyPx: number) {
+    if (frozen) return;
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect || rect.width === 0 || rect.height === 0) return;
+    const dx = (dxPx / rect.width) * 100;
+    const dy = (dyPx / rect.height) * 100;
+    setPositions((prev) => {
+      const orig = prev[key] ?? DEFAULT_POSITIONS[key];
+      if (!orig) return prev;
+      return {
+        ...prev,
+        [key]: {
+          x: Math.max(1, Math.min(99, orig.x + dx)),
+          y: Math.max(1, Math.min(99, orig.y + dy)),
+        },
+      };
+    });
+  }
+
   function endDrag(onActivate?: () => void) {
     if (dragRef.current && !dragRef.current.moved) onActivate?.();
     dragRef.current = null;
@@ -115,7 +137,9 @@ export function useDrag({ positions, setPositions, containerRef, frozen = false 
         zIndex: isDragging ? 10 : 1,
         cursor: frozen ? "pointer" : isDragging ? "grabbing" : "grab",
         touchAction: "none",
-        outline: "none",
+        // A click leaves no ring behind, but a keyboard user's cursor must be visible: the box
+        // draws its own `:focus-visible` ring in its constituent's colour (see focusRing).
+        "&:focus:not(:focus-visible)": { outline: "none" },
       },
     };
   }
@@ -132,5 +156,5 @@ export function useDrag({ positions, setPositions, containerRef, frozen = false 
     };
   }
 
-  return { dragRef, draggingKey, makeDragProps, makeGroupDragProps };
+  return { dragRef, draggingKey, makeDragProps, makeGroupDragProps, nudge };
 }

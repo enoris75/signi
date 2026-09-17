@@ -10,6 +10,7 @@ const HOSTING: Hosting = {
   draggingKey: null,
   makeDragProps: vi.fn(),
   makeGroupDragProps: vi.fn(),
+  nudge: vi.fn(),
   ownersOpen: {},
   setOwnerOpen: vi.fn(),
 };

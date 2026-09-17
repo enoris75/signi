@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, Popover, Tooltip, type SxProps, type Theme } from "@mui/material";
+import { Box, Popover, Tooltip } from "@mui/material";
+import type { SystemStyleObject, Theme } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
 import { DEGREE_LABELS, type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
@@ -16,6 +17,9 @@ import {
 } from "./interfaces.ts";
 import { CategoryToggle, SlotBox, type SatelliteIcon, type SlotShape } from "./Boxes.tsx";
 import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
+import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
+import { focusRing } from "../../keyboard/focusRing.ts";
+import { boxScopesOf } from "../../keyboard/scope.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import type { GroupRect } from "./graph.ts";
 import type { Disc, Pt } from "./ringLayout.ts";
@@ -28,7 +32,7 @@ export type DragBoxProps = {
   onPointerMove: (e: React.PointerEvent) => void;
   onPointerUp: () => void;
   onPointerCancel: () => void;
-  sx: SxProps<Theme>;
+  sx: SystemStyleObject<Theme>;
 };
 
 // Pointer handlers for dragging a whole constituent by its dotted ring. Unlike DragBoxProps this
@@ -118,6 +122,14 @@ export interface PhraseRenderContext {
   handleSelectSentiment: (sentiment: CauseSentiment) => void;
   handleToggleCollapse: (label: string) => void;
   handleRemoveComplement: (type: BoxComplementType) => void;
+  // The key each satellite's control answers to, by satellite key — read off the keymap by the
+  // builder (see keymap.satelliteKey). A control names it in its tooltip whoever is driving, and
+  // wears it as a badge while the cursor is on the box it belongs to.
+  satelliteKeys: Record<string, string>;
+  // Which noun's determiner menu is open, and how to open or close it. Held by the builder rather
+  // than by the noun's renderer so the noun's D key can open it from wherever the cursor is.
+  determinerMenuFor: NounKey | null;
+  onDeterminerMenu: (which: NounKey | null) => void;
   // Set for a hosted ring's builder: its ring's remove control, which drops the phrase — a conjunct
   // out of its group, an owner off the noun it owns.
   removeRing?: { title: string; onRemove: () => void };
@@ -146,8 +158,11 @@ export function nodeElRef(ctx: PhraseRenderContext, key: string) {
 
 // Shared styling for the little footer chips that hang under a filled slot box (the
 // modifier relation / number / adjective controls, and the real-adjective degree chip).
+// Each chip is a real <button>: it takes ↵ and Space by itself, and the browser's own focus order
+// reaches it, so a control with no letter of its own is still reachable (the plan's principle 6).
 const FOOTER_CHIP_SX = {
   display: "inline-block",
+  appearance: "none",
   px: 0.75,
   py: 0.1,
   borderRadius: 1,
@@ -158,10 +173,12 @@ const FOOTER_CHIP_SX = {
   fontFamily: '"Inter", sans-serif',
   fontSize: "0.55rem",
   fontWeight: 700,
+  lineHeight: 1.4,
   letterSpacing: "0.06em",
   textTransform: "uppercase",
   color: "text.secondary",
   "&:hover": { borderColor: "text.secondary" },
+  ...focusRing("primary"),
 } as const;
 
 // The sign a degree chip shows on a satellite disc's rim, where a word would not fit.
@@ -200,9 +217,13 @@ function ModifierAdjectiveChip({
         }
       >
         <Box
-          component="span"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
+          component="button"
+          type="button"
+          // The chip is its own popover's anchor, so the keymap opens it by pressing it rather
+          // than by lifting its anchor out (see BoxContext.openModifierAdjective).
+          data-kb-control={`modifierAdjective:${slotKey}`}
+          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+          onClick={(e: React.MouseEvent<HTMLElement>) => {
             e.stopPropagation();
             setAnchor(e.currentTarget);
           }}
@@ -232,7 +253,8 @@ function ModifierAdjectiveChip({
           />
           {adjective && (
             <Box
-              component="span"
+              component="button"
+              type="button"
               onClick={() => {
                 onSet(slotKey, undefined);
                 setAnchor(null);
@@ -248,9 +270,14 @@ function ModifierAdjectiveChip({
   );
 }
 
-// A single draggable slot box: pointer-drag wrapper + Tab/arrow keyboard nav
-// (cycling the global renderedSlots list) + the SlotBox itself. Shared by both
-// the verb-phrase and noun-phrase builders.
+// A single draggable slot box: pointer-drag wrapper + the cursor's focus ring and scope + the
+// SlotBox itself. Shared by both the verb-phrase and noun-phrase builders.
+//
+// The box is where the keyboard cursor rests: it declares which scopes its keys are looked up in
+// (a noun's, a verb's — see boxScopesOf) and takes the cursor while it holds focus, and the one
+// window listener in the app does the rest (see KeyboardProvider). It no longer runs a Tab/arrow
+// loop of its own: that trapped focus inside one period, and the arrows now move spatially across
+// the whole page while ⇥ walks the boxes in reading order.
 export function SlotNode({
   slot,
   ctx,
@@ -259,7 +286,6 @@ export function SlotNode({
   ctx: PhraseRenderContext;
 }) {
   const {
-    renderedSlots,
     makeDragProps,
     slotEls,
     handleSlotClick,
@@ -284,7 +310,8 @@ export function SlotNode({
     handleCancelEdit,
   } = ctx;
   const t = useUiString();
-  const idx = renderedSlots.findIndex((s) => s.key === slot.key);
+  // Which keys this box answers to, and the cursor registration that decides when they apply.
+  const cursor = useBoxCursor(slot.key, boxScopesOf(slot.key, selection));
   // Whether this canvas's `subject` slot is a noun-only head (see PhraseRenderContext.pronounHead).
   const nounSubject = Boolean(nounPhrase) && !pronounHead;
 
@@ -339,9 +366,10 @@ export function SlotNode({
     >
       <Tooltip title={`${t("modifier.relation")}: ${t(`modifier.relation.${relation}.gloss`)} — click to change`}>
         <Box
-          component="span"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
+          component="button"
+          type="button"
+          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleCycleModifierRelation(slot.key);
           }}
@@ -354,9 +382,10 @@ export function SlotNode({
         title={`${t("satellite.number")}: ${t(`number.value.${modifierNumber}`)} — click to change`}
       >
         <Box
-          component="span"
-          onPointerDown={(e) => e.stopPropagation()}
-          onClick={(e) => {
+          component="button"
+          type="button"
+          onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+          onClick={(e: React.MouseEvent) => {
             e.stopPropagation();
             handleCycleModifierNumber(slot.key);
           }}
@@ -388,10 +417,11 @@ export function SlotNode({
   const degreeChip = isRealAdjective ? (
     <Tooltip title={`${t("modifier.degree")}: ${DEGREE_LABELS[degree]} — click to change`}>
       <Box
-        component="span"
+        component="button"
+        type="button"
         data-testid={`degree-${slot.key}`}
-        onPointerDown={(e) => e.stopPropagation()}
-        onClick={(e) => {
+        onPointerDown={(e: React.PointerEvent) => e.stopPropagation()}
+        onClick={(e: React.MouseEvent) => {
           e.stopPropagation();
           handleCycleDegree(slot.key);
         }}
@@ -430,39 +460,37 @@ export function SlotNode({
       />
     ) : undefined;
 
+  const { sx: dragSx, ...dragHandlers } = makeDragProps(slot.key, onActivate);
+
   return (
     <Box
-      {...makeDragProps(slot.key, onActivate)}
+      {...dragHandlers}
+      {...cursor}
+      sx={[dragSx, focusRing(slot.color)]}
       ref={(el: HTMLElement | null) => {
         if (el) slotEls.current.set(slot.key, el);
         else slotEls.current.delete(slot.key);
         onBoxRef?.(slot.key, el);
       }}
-      tabIndex={0}
-      onFocus={() => handleSlotClick(slot.key)}
-      onBlur={(e: React.FocusEvent) => {
+      onFocus={(e: React.FocusEvent<HTMLElement>) => {
+        cursor.onFocus(e);
+        handleSlotClick(slot.key);
+      }}
+      onBlur={(e: React.FocusEvent<HTMLElement>) => {
+        cursor.onBlur(e);
         // Focus left the box (clicked elsewhere) while re-picking — restore the word.
         // Popper items keep focus (mousedown preventDefault), so choosing one won't blur.
         if (editing && !e.currentTarget.contains(e.relatedTarget as Node | null))
           handleCancelEdit(slot.key);
       }}
-      onKeyDown={(e: React.KeyboardEvent) => {
-        const isDirectFocus = e.target === e.currentTarget;
-        let dir: 1 | -1 | null = null;
-        if (e.key === "Tab") {
-          dir = e.shiftKey ? -1 : 1;
-        } else if (isDirectFocus && e.key === "ArrowRight") {
-          dir = 1;
-        } else if (isDirectFocus && e.key === "ArrowLeft") {
-          dir = -1;
-        }
-        if (dir === null) return;
-        e.preventDefault();
-        const nextIdx =
-          (idx + dir + renderedSlots.length) % renderedSlots.length;
-        const nextKey = renderedSlots[nextIdx].key;
-        handleSlotClick(nextKey);
-        slotEls.current.get(nextKey)?.focus();
+      onKeyDown={(e: React.KeyboardEvent<HTMLElement>) => {
+        // esc inside the open word picker steps back out onto the box, so the cursor is on the
+        // canvas again and the arrows and letters apply. (The picker's own esc closes its list
+        // first; phase 2's shared picker keys make that the two distinct steps of §4.5.)
+        if (e.key !== "Escape" || e.target === e.currentTarget) return;
+        e.stopPropagation();
+        e.currentTarget.focus();
+        if (editing) handleCancelEdit(slot.key);
       }}
     >
       <SlotBox

@@ -218,4 +218,53 @@ describe('useDrag', () => {
       expect(result.current.draggingKey).toBeNull();
     });
   });
+
+  // What ⇧ + an arrow does from the keyboard (see the keymap's box.nudge.*). The canvas is
+  // 400×200 px, so 8 px across is 2% and 8 px down is 4%.
+  describe('a nudge', () => {
+    it('shifts a node by pixels, converted against the canvas it is placed on', () => {
+      const { result } = renderCanvas();
+
+      act(() => result.current.nudge('subject', 8, 0));
+      expect(result.current.positions.subject).toEqual({ x: 52, y: 50 });
+
+      act(() => result.current.nudge('subject', 0, -8));
+      expect(result.current.positions.subject).toEqual({ x: 52, y: 46 });
+    });
+
+    it('starts from the node’s default place when it has never been moved', () => {
+      const { result } = renderCanvas({});
+
+      act(() => result.current.nudge('verb', 8, 0));
+
+      expect(result.current.positions.verb).toEqual({
+        x: DEFAULT_POSITIONS['verb']!.x + 2,
+        y: DEFAULT_POSITIONS['verb']!.y,
+      });
+    });
+
+    it('stays inside the 1..99 band', () => {
+      const { result } = renderCanvas({ subject: { x: 2, y: 50 } });
+
+      act(() => result.current.nudge('subject', -80, 0));
+
+      expect(result.current.positions.subject).toEqual({ x: 1, y: 50 });
+    });
+
+    it('moves nothing while compact view paints the boxes elsewhere', () => {
+      const { result } = renderCanvas(undefined, { frozen: true });
+
+      act(() => result.current.nudge('subject', 8, 8));
+
+      expect(result.current.positions.subject).toEqual({ x: 50, y: 50 });
+    });
+
+    it('moves nothing before the canvas has been measured', () => {
+      const hook = renderHook(() => useCanvas({ subject: { x: 50, y: 50 } }, false));
+
+      act(() => hook.result.current.nudge('subject', 8, 8));
+
+      expect(hook.result.current.positions.subject).toEqual({ x: 50, y: 50 });
+    });
+  });
 });
