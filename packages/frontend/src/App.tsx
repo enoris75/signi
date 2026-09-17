@@ -1,23 +1,21 @@
 import { useRef, useState } from "react";
-import { Box, Container, Typography, Alert, Button } from "@mui/material";
+import { Box, Container, Typography, Alert, Button, Snackbar } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
-import {
-  type PhraseContainer,
-  type PhraseLink,
-} from "./components/PhraseBuilder/interfaces.ts";
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan/index.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
 import { SavedPhrasesToolbar } from "./components/SavedPhrasesToolbar.tsx";
 import { LanguageSelector } from "./components/LanguageSelector.tsx";
 import { useWindowDrag } from "./hooks/useWindowDrag.ts";
 import { useTranslations } from "./hooks/useTranslation.ts";
+import { useWorkspaceHistory } from "./hooks/useWorkspaceHistory.ts";
 import { useUiString } from "./i18n/useUiString.ts";
 import { KeyboardProvider } from "./keyboard/KeyboardProvider.tsx";
 import { HintLine } from "./keyboard/HintLine.tsx";
 import { ShortcutSheet } from "./keyboard/ShortcutSheet.tsx";
 import { useToolbar } from "./keyboard/useToolbar.ts";
 import { pressControl } from "./keyboard/controls.ts";
+import { Keycap } from "./keyboard/Keycap.tsx";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -25,10 +23,16 @@ const newId = () =>
     : `c${Math.random().toString(36).slice(2)}`;
 
 export default function App() {
-  const [containers, setContainers] = useState<PhraseContainer[]>(() => [
-    { id: newId(), selection: {} },
-  ]);
-  const [links, setLinks] = useState<PhraseLink[]>([]);
+  // The workspace, and every earlier state of it: what the phrase says is undoable, which is what
+  // lets a destructive act happen at once and offer Ctrl Z rather than asking first.
+  const history = useWorkspaceHistory({
+    containers: [{ id: newId(), selection: {} }],
+    links: [],
+  });
+  const { containers, links, setContainers, setLinks } = history;
+  // What the last destructive act was, and how to take it back. Shown as the toast that replaced
+  // the confirm dialog (the plan's §3.9).
+  const [undoToast, setUndoToast] = useState<string | null>(null);
   const [leftWidthPct, setLeftWidthPct] = useState<number>(() => {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
@@ -70,6 +74,8 @@ export default function App() {
       }
     },
     toggleSheet: () => setSheetOpen((open) => !open),
+    undo: history.canUndo ? history.undo : undefined,
+    redo: history.canRedo ? history.redo : undefined,
   });
 
   // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
@@ -164,10 +170,11 @@ export default function App() {
               <SavedPhrasesToolbar
                 containers={containers}
                 links={links}
-                onLoad={(nextContainers, nextLinks) => {
-                  setContainers(nextContainers);
-                  setLinks(nextLinks);
-                }}
+                // Loading or importing replaces the whole workspace in one step, so one undo
+                // puts back what was on the canvas before it.
+                onLoad={(nextContainers, nextLinks) =>
+                  history.replace({ containers: nextContainers, links: nextLinks })
+                }
               />
               <Button
                 variant={wordsPanelOpen ? "contained" : "outlined"}
@@ -211,6 +218,8 @@ export default function App() {
                 setLinks={setLinks}
                 wordsPanelOpen={wordsPanelOpen}
                 onWordsPanelClose={() => setWordsPanel(false)}
+                // English literal, for /localize.
+                onPeriodRemoved={() => setUndoToast("Period removed")}
               />
             </Box>
 
@@ -273,6 +282,40 @@ export default function App() {
         {/* What the keys do here, for whoever is driving with the keyboard. */}
         <HintLine />
         <ShortcutSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+
+        {/* The toast that replaced the confirm dialog: the act has happened, and here is the way
+            back. Reuses the filled Alert the app's other toasts use, in `info`. */}
+        <Snackbar
+          open={Boolean(undoToast)}
+          autoHideDuration={8000}
+          onClose={() => setUndoToast(null)}
+          anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        >
+          {undoToast ? (
+            <Alert
+              severity="info"
+              variant="filled"
+              data-testid="undo-toast"
+              onClose={() => setUndoToast(null)}
+              action={
+                <Button
+                  size="small"
+                  color="inherit"
+                  onClick={() => {
+                    history.undo();
+                    setUndoToast(null);
+                  }}
+                  sx={{ textTransform: "none", gap: 0.5 }}
+                >
+                  Undo
+                  <Keycap spec="Mod+Z" />
+                </Button>
+              }
+            >
+              {undoToast}
+            </Alert>
+          ) : undefined}
+        </Snackbar>
       </Box>
     </KeyboardProvider>
   );

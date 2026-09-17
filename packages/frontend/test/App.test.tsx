@@ -1,4 +1,4 @@
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { Concept, LanguageCode, PhrasePlan, Translation } from '@signi/shared';
@@ -189,6 +189,101 @@ describe('App', () => {
 
       expect(stubs.workspace.containers).toBe(containers);
       expect(stubs.workspace.links).toBe(links);
+    });
+  });
+
+  // Undo covers the phrase — the words, the grammar on them, the links — and not the canvas
+  // layout, which each period owns (the plan's open question 2).
+  describe('taking a change back', () => {
+    // The history gathers changes made within a few hundred milliseconds into one step, and a
+    // test makes all of them in the same millisecond. Hold the clock, and move it on by hand
+    // where two changes are meant to be two.
+    let now = 1_000;
+    const later = (ms: number) => {
+      now += ms;
+    };
+
+    beforeEach(() => {
+      now = 1_000;
+      vi.spyOn(Date, 'now').mockImplementation(() => now);
+    });
+
+    afterEach(() => vi.restoreAllMocks());
+
+    const press = (key: string, held: Record<string, boolean> = {}) =>
+      act(() => {
+        fireEvent.keyDown(document.body, { key, ...held });
+      });
+
+    it('puts the phrase back as it was on Ctrl Z, and forward again on Ctrl ⇧ Z', () => {
+      renderApp();
+      const before = stubs.workspace.containers;
+      const after = [period('a', { subject: CAT })];
+
+      edit(after);
+      press('z', { ctrlKey: true });
+      expect(stubs.workspace.containers).toBe(before);
+
+      press('z', { ctrlKey: true, shiftKey: true });
+      expect(stubs.workspace.containers).toBe(after);
+    });
+
+    it('takes the links back with the words', () => {
+      renderApp();
+      const links: PhraseLink[] = [
+        {
+          id: 'l1',
+          source: { containerId: 'a', nounKey: 'subject' },
+          target: { containerId: 'b', nounKey: 'subject' },
+        },
+      ];
+      edit([period('a', { subject: CAT }), period('b', { subject: DOG })], links);
+
+      press('z', { ctrlKey: true });
+
+      expect(stubs.workspace.links).toEqual([]);
+    });
+
+    it('goes back one deliberate change at a time', () => {
+      renderApp();
+      edit([period('a', { subject: CAT })]);
+      later(500);
+      edit([period('a', { subject: CAT }), period('b', { subject: DOG })]);
+
+      press('z', { ctrlKey: true });
+
+      expect(stubs.workspace.containers).toEqual([period('a', { subject: CAT })]);
+    });
+
+    // Removing a period no longer asks first: it happens, and the page says so and offers the
+    // way back (the plan's §3.9).
+    it('says a period was removed, and offers it back', async () => {
+      renderApp();
+      expect(screen.queryByTestId('undo-toast')).not.toBeInTheDocument();
+      edit([period('a'), period('b')]);
+      later(500);
+
+      edit([period('a')]);
+      act(() => stubs.workspace.onPeriodRemoved?.());
+
+      const toast = screen.getByTestId('undo-toast');
+      expect(toast).toHaveTextContent('Period removed');
+
+      fireEvent.click(within(toast).getByRole('button', { name: 'Undo' }));
+
+      expect(stubs.workspace.containers).toEqual([period('a'), period('b')]);
+      await waitFor(() => expect(screen.queryByTestId('undo-toast')).not.toBeInTheDocument());
+    });
+
+    it('puts back the phrase a loaded one replaced', () => {
+      renderApp();
+      edit([period('a', { subject: CAT })]);
+      later(500);
+
+      act(() => stubs.toolbar.onLoad([period('x', { subject: DOG })], []));
+      press('z', { ctrlKey: true });
+
+      expect(stubs.workspace.containers).toEqual([period('a', { subject: CAT })]);
     });
   });
 

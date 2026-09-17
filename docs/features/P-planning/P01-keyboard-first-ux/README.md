@@ -8,9 +8,9 @@ handlers, key tips, tooltips and the shortcuts sheet.
 **Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
-**Status:** phases 1–4 shipped — every control on the page is now reachable without a mouse. Phase
-5 (undo) is planned. See
-[Phases](#6-phases) for what each still covers and [Open questions](#open-questions) for what is
+**Status:** all five phases shipped — every control on the page is reachable without a mouse, and
+what the phrase says can be taken back with <kbd>Ctrl</kbd><kbd>Z</kbd>. See
+[Phases](#6-phases) for what each covered and [Open questions](#open-questions) for what is
 still undecided.
 **Drawings:** [`artwork/`](artwork/) — seven images exported from page *Keyboard access (P01)* of
 the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded
@@ -563,7 +563,7 @@ Each phase ships on its own and leaves the app consistent.
 | **2 · Pickers and menus** ✅ | `usePickerKeys` (⇥, double esc, tabs, pronoun grid, footer); determiner / conjunction / specifier / sentiment accelerators; new *Add a complement* menu; command-subject keys. | Every value any menu or toggle offers is one key after the key that opened it. |
 | **3 · Periods and links** ✅ | Period cursor (esc out, ↑↓, ⇧↑↓ move) and period letters; `eligibleTargets` + numbered badges for all five pick kinds; coref esc. | Relative clause, if-condition, join, instrument and possessor reference can be built keyboard-only. |
 | **4 · Regions** ✅ | F6 landmarks; header toolbar + Console button; translations rows; words panel and word map; Ctrl keys (save / load / export / import / words); ? sheet. | Every control on the page is reachable, and the sheet lists every binding in the keymap (generated, not hand-written). |
-| **5 · Undo** | History of `{containers, links}` in `App` with coalescing for rapid toggles; Ctrl Z / Ctrl ⇧ Z; undo toast after destructive actions; `window.confirm` removed. | Removing a period, clearing a box or deleting a saved phrase can be undone. |
+| **5 · Undo** ✅ | History of `{containers, links}` in `App` with coalescing for rapid toggles; Ctrl Z / Ctrl ⇧ Z; undo toast after destructive actions; `window.confirm` removed. | Removing a period, clearing a box or deleting a saved phrase can be undone. |
 
 P02's console can start after phase 1 (it needs the shared cursor) and runs in parallel from there.
 
@@ -622,6 +622,24 @@ for the machine it is running on, so either column can be read from either. The 
 live beside their own handler — a picker, a menu, a pick in flight — each declare one table that
 the sheet and the strip teaching them on screen both read.
 
+**What phase 5 shipped, beside the table.** What is undone is the *phrase* — the words, the
+grammar on them, the links between periods — and not the canvas layout, which each period owns and
+which its own effects (height rebase, overlap resolution) write back into (open question 2).
+
+History is recorded by *watching* the state, in an effect, rather than by wrapping each setter:
+React may run a state updater twice, and a side effect inside one would record twice with it. An
+effect after the commit sees each change exactly once, and a setter that changes nothing is not a
+step. Changes closer together than 400ms are one step back — cycling a tense with
+<kbd>T</kbd><kbd>T</kbd><kbd>T</kbd> is one thought, not three, and so is a removal that drops a
+period and the links that touched it in the same breath — while a change made straight after an
+undo always starts a step of its own.
+
+`window.confirm` is gone. Removing a period happens at once and the page offers
+<kbd>Ctrl</kbd><kbd>Z</kbd> in a toast: asking first charges every user a dialog to save the few
+who did not mean it, where undo costs only those few, and costs them one key. A deleted *saved*
+phrase is read before it goes, so putting it back is saving it again — under a new id, since a
+saved phrase is known by its name.
+
 **What phase 1 left.** Two things named in §3 need work that is not a frontend change:
 
 - **The keyboard caption** (§3.1, "· MOVE WITH THE ARROWS, TYPE TO CHOOSE A WORD"). Every caption
@@ -662,6 +680,11 @@ esc (3); closed words panel stays in the tab order (4); translation copy button 
   *Shipped for phase 4:* <kbd>F6</kbd> round the regions and back, the header walked with the
   arrows, a translation copied with <kbd>C</kbd>, and <kbd>Ctrl</kbd><kbd>B</kbd> and <kbd>?</kbd>
   opening the words panel and the sheet.
+  *Shipped for phase 5:* a period removed with <kbd>⌫</kbd> — no dialog asked (the spec records
+  any the page opens, and fails on one) — then taken back with <kbd>Ctrl</kbd><kbd>Z</kbd>, words
+  and translations and all, and forward again with <kbd>Ctrl</kbd><kbd>⇧</kbd><kbd>Z</kbd>. The
+  history's own rules (coalescing, the branch a new change cuts off, the depth limit) are unit
+  tests on the hook, driven by a clock held still.
 
 ## 8. Risks
 
@@ -682,6 +705,12 @@ esc (3); closed words panel stays in the tab order (4); translation copy button 
    <kbd>Space</kbd>) opens the picker over the word; on an empty one the picker already holds the
    cursor, so letters search. Shipped in phase 1; phase 2 made the two escapes §4.5 describes
    distinct — the first closes the picker's list, the second leaves the picker for its box.
+2. **Undo scope.** ~~Phase 5 undoes the phrase (selection + links), not canvas layout (box
+   positions, compact, canvas height). Enough?~~ **The phrase only.** Where a box has been dragged
+   to, whether a period is compact, how tall its canvas is: those are how the phrase is being
+   looked at, not what it says, and each period owns them. Undoing them would mean lifting that
+   state up through the effects that write back into it, which is a change of its own. Shipped in
+   phase 5.
 3. **Control level.** ~~Should ⇥ inside a box walk its border controls (a real sub-level), or is
    "letters for controls, ⇥ for boxes" enough, leaving controls to DOM tabbing for assistive
    tech?~~ **Letters for controls, ⇥ for boxes.** ⇥ stays one document-wide walk between *words*,
@@ -692,7 +721,5 @@ esc (3); closed words panel stays in the tab order (4); translation copy button 
 
 ### Still open
 
-2. **Undo scope.** Phase 5 undoes the phrase (selection + links), not canvas layout (box positions,
-   compact, canvas height). Enough?
 4. **Typed pronouns in the picker.** Should the Subject search also list pronoun rows ("I", "you",
    "she", "we") so the Pronoun tab is never needed? (The console already accepts them.)

@@ -28,6 +28,9 @@ interface Props {
   setLinks: React.Dispatch<React.SetStateAction<PhraseLink[]>>;
   wordsPanelOpen: boolean;
   onWordsPanelClose: () => void;
+  // Removing a period is destructive and no longer asks first (see HeaderControls): it happens,
+  // and the page says so with a toast that offers the undo.
+  onPeriodRemoved?: () => void;
 }
 
 // The workspace: a vertical stack of independent phrase containers plus the cross-container
@@ -39,6 +42,7 @@ export function PhraseWorkspace({
   setLinks,
   wordsPanelOpen,
   onWordsPanelClose,
+  onPeriodRemoved,
 }: Props) {
   const t = useUiString();
   // The cross-container link graph — the four relations a period can take part in, plus the
@@ -109,6 +113,7 @@ export function PhraseWorkspace({
         : cs.map((c) => (c.id === id ? { ...c, selection: {} } : c)),
     );
     dropContainer(id);
+    onPeriodRemoved?.();
   }
 
   return (

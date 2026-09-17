@@ -153,6 +153,9 @@ export interface AppContext {
   toggleWords: () => void;
   /** The ? sheet, which lists every binding there is. */
   toggleSheet: () => void;
+  /** A step back through the phrase, and forward again. Absent where there is nowhere to go. */
+  undo: (() => void) | undefined;
+  redo: (() => void) | undefined;
 }
 
 /** The context an app command runs against. */
@@ -693,6 +696,22 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     label: "Import JSON",
     labelKey: "action.import.tooltip",
     run: (ctx) => ctx.importWorkspace(),
+  },
+  {
+    id: "app.undo",
+    scope: "app",
+    keys: ["Mod+Z"],
+    label: "Undo",
+    when: (ctx) => Boolean(ctx.undo),
+    run: (ctx) => ctx.undo!(),
+  },
+  {
+    id: "app.redo",
+    scope: "app",
+    keys: ["Mod+Shift+Z"],
+    label: "Redo",
+    when: (ctx) => Boolean(ctx.redo),
+    run: (ctx) => ctx.redo!(),
   },
   {
     id: "app.words",

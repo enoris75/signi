@@ -42,7 +42,7 @@ import {
   serializeWorkspace,
   toSavedPhrase,
 } from "./PhraseBuilder/phraseSerialize/index.ts";
-import type { SavedPhrase, SerializedWorkspace } from "@signi/shared";
+import type { SavedPhrase, SavedPhraseRecord, SerializedWorkspace } from "@signi/shared";
 
 interface Props {
   containers: PhraseContainer[];
@@ -68,7 +68,13 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
   const [saveOpen, setSaveOpen] = useState(false);
   const [loadOpen, setLoadOpen] = useState(false);
   const [name, setName] = useState("");
-  const [toast, setToast] = useState<{ severity: "success" | "error"; msg: string } | null>(
+  const [toast, setToast] = useState<{
+    severity: "success" | "error" | "info";
+    msg: string;
+    // A toast may offer the way back from what it is announcing (a deletion), which is put back
+    // by saving it again rather than by the workspace's own undo — it never left the workspace.
+    undo?: () => void;
+  } | null>(
     null,
   );
 
@@ -119,6 +125,39 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
     mutationFn: (id: string) => deleteSavedPhrase(id),
     onSuccess: () => queryClient.invalidateQueries({ queryKey: ["savedPhrases"] }),
   });
+
+  /**
+   * Delete a saved phrase, and offer it back.
+   *
+   * The deletion happens at once — no dialog asking whether it was meant — and the toast holds
+   * what it was, so putting it back is saving it again. It comes back under a new id, which
+   * nothing refers to: a saved phrase is named by its name.
+   */
+  async function handleDelete(id: string, name: string) {
+    let record: SavedPhraseRecord | undefined;
+    // Read it before it goes, or there is nothing to put back.
+    try {
+      record = await fetchSavedPhrase(id);
+    } catch {
+      // Unreadable: the row is still deleted, only without the way back.
+    }
+    deleteMutation.mutate(id);
+    setToast({
+      severity: "info",
+      msg: `${t("action.deleteSavedPhrase")} — ${name}`,
+      undo: record
+        ? () => {
+            savePhrase({
+              name: record!.name,
+              kind: record!.kind,
+              workspace: record!.workspace,
+            })
+              .then(() => queryClient.invalidateQueries({ queryKey: ["savedPhrases"] }))
+              .catch(() => setToast({ severity: "error", msg: "Could not put it back." }));
+          }
+        : undefined,
+    });
+  }
 
   async function handleLoad(id: string) {
     try {
@@ -273,7 +312,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
                   <IconButton
                     edge="end"
                     size="small"
-                    onClick={() => deleteMutation.mutate(p.id)}
+                    onClick={() => void handleDelete(p.id, p.name)}
                     // The label says what the button does; the row's name, which a plan cannot
                     // carry, is read out as its description.
                     aria-label={t("action.deleteSavedPhrase")}
@@ -303,7 +342,27 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       >
         {toast ? (
-          <Alert severity={toast.severity} onClose={() => setToast(null)} variant="filled">
+          <Alert
+            severity={toast.severity}
+            onClose={() => setToast(null)}
+            variant="filled"
+            action={
+              toast.undo ? (
+                <Button
+                  size="small"
+                  color="inherit"
+                  data-testid="undo-delete"
+                  onClick={() => {
+                    toast.undo!();
+                    setToast(null);
+                  }}
+                  sx={{ textTransform: "none" }}
+                >
+                  Undo
+                </Button>
+              ) : undefined
+            }
+          >
             {toast.msg}
           </Alert>
         ) : undefined}

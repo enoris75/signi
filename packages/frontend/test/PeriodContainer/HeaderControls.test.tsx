@@ -156,40 +156,28 @@ describe('HeaderControls', () => {
       expect(screen.queryByRole('button', { name: 'Remove this period' })).not.toBeInTheDocument();
     });
 
-    it('clears the only period in place once the user confirms', () => {
-      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    // Nothing is asked before a removal, whatever it costs: the page offers Ctrl Z afterwards.
+    // A dialog would charge every user for the mistakes of a few.
+    it('clears the only period in place, at once', () => {
+      const confirm = vi.spyOn(window, 'confirm');
       const onRemove = vi.fn();
       renderHeader({ soleContainer: true, hasContent: true, onRemove });
 
       fireEvent.click(screen.getByRole('button', { name: 'Clear this period' }));
 
-      expect(confirm).toHaveBeenCalledExactlyOnceWith(
-        'Clear this main clause and everything in it?',
-      );
       expect(onRemove).toHaveBeenCalledOnce();
+      expect(confirm).not.toHaveBeenCalled();
     });
 
-    it('removes a period with content once the user confirms', () => {
-      const confirm = vi.spyOn(window, 'confirm').mockReturnValue(true);
+    it('removes a period with content, at once', () => {
+      const confirm = vi.spyOn(window, 'confirm');
       const onRemove = vi.fn();
       renderHeader({ soleContainer: false, hasContent: true, onRemove });
 
       fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
-      expect(confirm).toHaveBeenCalledExactlyOnceWith(
-        'Remove this main clause and everything in it?',
-      );
       expect(onRemove).toHaveBeenCalledOnce();
-    });
-
-    it('keeps the period when the user declines', () => {
-      vi.spyOn(window, 'confirm').mockReturnValue(false);
-      const onRemove = vi.fn();
-      renderHeader({ soleContainer: false, hasContent: true, onRemove });
-
-      fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
-
-      expect(onRemove).not.toHaveBeenCalled();
+      expect(confirm).not.toHaveBeenCalled();
     });
 
     it('names the removal in the UI language', () => {
@@ -202,14 +190,12 @@ describe('HeaderControls', () => {
       expect(screen.getByRole('button', { name: 'Dieses Satzgefüge entfernen' })).toBeInTheDocument();
     });
 
-    it('removes an empty period without asking', () => {
-      const confirm = vi.spyOn(window, 'confirm');
+    it('removes an empty period', () => {
       const onRemove = vi.fn();
       renderHeader({ soleContainer: false, hasContent: false, onRemove });
 
       fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
-      expect(confirm).not.toHaveBeenCalled();
       expect(onRemove).toHaveBeenCalledOnce();
     });
   });

@@ -431,4 +431,46 @@ test.describe('the canvas by keyboard', () => {
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });
+
+  test('removes a period at once, and takes it back on Ctrl Z', async ({ app, page }) => {
+    await watchForPointerEvents(page);
+    // Nothing may ask whether a destructive key was meant — the page offers the way back
+    // instead (the plan's §3.9). Any dialog the page opens is recorded here.
+    const dialogs: string[] = [];
+    page.on('dialog', (dialog) => {
+      dialogs.push(dialog.message());
+      void dialog.dismiss();
+    });
+    await app.goto();
+
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'run', 'RUN');
+    await toPeriod(page);
+    await page.keyboard.press('n');
+    await pickWord(page, 'child', 'CHILD');
+    await pickWord(page, 'read', 'READ');
+    await expect(page.getByTestId('period-container')).toHaveCount(2);
+    await app.expectSentences({ en: 'the cat runs.' });
+
+    // ⌫ removes the period the cursor is on. It goes, and the page says so.
+    await toPeriod(page);
+    await page.keyboard.press('Backspace');
+
+    await expect(page.getByTestId('period-container')).toHaveCount(1);
+    expect(dialogs, 'the page asked before removing').toEqual([]);
+    await expect(page.getByTestId('undo-toast')).toBeVisible();
+
+    // And the key the toast offers puts the period back, words and all.
+    await page.keyboard.press('ControlOrMeta+z');
+
+    await expect(page.getByTestId('period-container')).toHaveCount(2);
+    await expect(page.getByTestId('translation-en').getByTestId('sentence')).toHaveCount(2);
+    await expect(page.getByTestId('translation-en')).toContainText('the child reads.');
+
+    // Forward again, to where ⌫ left it.
+    await page.keyboard.press('ControlOrMeta+Shift+z');
+    await expect(page.getByTestId('period-container')).toHaveCount(1);
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
 });

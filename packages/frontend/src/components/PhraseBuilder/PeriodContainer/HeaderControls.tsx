@@ -104,14 +104,10 @@ export function HeaderControls({
           title={removeTitle}
           aria-label={removeTitle}
           icon={soleContainer ? BackspaceOutlinedIcon : CloseIcon}
-          onClick={() => {
-            // Confirm only when there's work to lose; an empty clause acts silently.
-            const message = soleContainer
-              ? "Clear this main clause and everything in it?"
-              : "Remove this main clause and everything in it?";
-            if (hasContent && !window.confirm(message)) return;
-            onRemove();
-          }}
+          // No confirmation: the removal happens, and the page offers Ctrl Z (the plan's §3.9).
+          // Asking first costs every user a dialog to save the few who did not mean it; undo
+          // costs only those few, and costs them one key.
+          onClick={onRemove}
         />
       )}
     </Box>

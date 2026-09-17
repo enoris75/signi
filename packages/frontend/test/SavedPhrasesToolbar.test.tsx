@@ -452,27 +452,71 @@ describe('SavedPhrasesToolbar', () => {
       expect(within(dialog).getByText('The cat sleeps')).toBeInTheDocument();
     });
 
+    const deleteRow = async (dialog: HTMLElement, name: string) =>
+      fireEvent.click(
+        await within(dialog).findByRole('button', {
+          name: 'Delete this saved phrase',
+          description: name,
+        }),
+      );
+
     it('deletes a saved phrase without loading it, and refreshes the list', async () => {
       vi.mocked(listSavedPhrases)
         .mockResolvedValueOnce([SUMMARY, OTHER])
         .mockResolvedValueOnce([OTHER]);
+      vi.mocked(fetchSavedPhrase).mockResolvedValue(RECORD);
       vi.mocked(deleteSavedPhrase).mockResolvedValue(undefined);
       const { onLoad } = renderToolbar();
       const dialog = openLoadDialog();
 
-      fireEvent.click(
-        await within(dialog).findByRole('button', {
-          name: 'Delete this saved phrase',
-          description: 'The cat sleeps',
-        }),
-      );
+      await deleteRow(dialog, 'The cat sleeps');
 
       await waitForElementToBeRemoved(() => within(dialog).queryByText('The cat sleeps'));
       expect(deleteSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');
       expect(listSavedPhrases).toHaveBeenCalledTimes(2);
       expect(within(dialog).getByText('The dog barks')).toBeInTheDocument();
-      expect(fetchSavedPhrase).not.toHaveBeenCalled();
+      // The phrase is read on the way out so it can be put back, but it never reaches the canvas.
       expect(onLoad).not.toHaveBeenCalled();
+    });
+
+    // Nothing asks whether the deletion was meant; the toast holds the phrase, and putting it
+    // back is saving it again — under a new id, since a saved phrase is known by its name.
+    it('offers the deleted phrase back, and saves it again as it was', async () => {
+      vi.mocked(listSavedPhrases).mockResolvedValue([SUMMARY, OTHER]);
+      vi.mocked(fetchSavedPhrase).mockResolvedValue(RECORD);
+      vi.mocked(deleteSavedPhrase).mockResolvedValue(undefined);
+      vi.mocked(savePhrase).mockResolvedValue(RECORD);
+      renderToolbar();
+      const dialog = openLoadDialog();
+
+      await deleteRow(dialog, 'The cat sleeps');
+
+      const toast = await findToast();
+      expect(toast).toHaveTextContent('The cat sleeps');
+      fireEvent.click(within(toast).getByTestId('undo-delete'));
+
+      await waitFor(() =>
+        expect(savePhrase).toHaveBeenCalledExactlyOnceWith({
+          name: 'The cat sleeps',
+          kind: 'phrase',
+          workspace: WORKSPACE,
+        }),
+      );
+      expect(toast).not.toBeInTheDocument();
+    });
+
+    it('deletes a phrase it could not read first, without a way back', async () => {
+      vi.mocked(listSavedPhrases).mockResolvedValue([SUMMARY]);
+      vi.mocked(fetchSavedPhrase).mockRejectedValue(new Error('404'));
+      vi.mocked(deleteSavedPhrase).mockResolvedValue(undefined);
+      renderToolbar();
+      const dialog = openLoadDialog();
+
+      await deleteRow(dialog, 'The cat sleeps');
+
+      const toast = await findToast();
+      expect(deleteSavedPhrase).toHaveBeenCalledExactlyOnceWith('p1');
+      expect(within(toast).queryByTestId('undo-delete')).not.toBeInTheDocument();
     });
 
     it('names each row’s delete button in the UI language, described by the phrase it deletes', async () => {

@@ -65,6 +65,9 @@ describe('the keys that work anywhere', () => {
     expect(within(sheet).getByText('Noun')).toBeInTheDocument();
     expect(within(sheet).getByText('Tense')).toBeInTheDocument();
     expect(within(sheet).getByText('If-condition')).toBeInTheDocument();
+    // Listed whether or not there is anything to take back: the sheet says what the keys are.
+    expect(within(sheet).getByText('Undo')).toBeInTheDocument();
+    expect(within(sheet).getByText('Redo')).toBeInTheDocument();
   });
 
   it('draws the Ctrl caps for whichever platform the switch is on', () => {
