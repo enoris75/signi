@@ -211,13 +211,46 @@ describe('SlotNode', () => {
       expect(ctx.handleEditSlot).not.toHaveBeenCalled();
     });
 
-    it('on a filled box opens its word for re-picking', () => {
-      const { ctx, node } = renderNode('subject', { selection: { subject: CAT } });
+    it('on a filled box that is not in hand only selects its slot', () => {
+      const { ctx, node } = renderNode('subject', {
+        selection: { subject: CAT },
+        activeSlot: 'verb',
+      });
 
+      fireEvent.pointerDown(node);
+      fireEvent.pointerUp(node);
+
+      expect(ctx.handleSlotClick).toHaveBeenCalledExactlyOnceWith('subject');
+      expect(ctx.handleEditSlot).not.toHaveBeenCalled();
+    });
+
+    it('on a filled box already in hand opens its word for re-picking', () => {
+      const { ctx, node } = renderNode('subject', {
+        selection: { subject: CAT },
+        activeSlot: 'subject',
+      });
+
+      fireEvent.pointerDown(node);
       fireEvent.pointerUp(node);
 
       expect(ctx.handleEditSlot).toHaveBeenCalledExactlyOnceWith('subject');
       expect(ctx.handleSlotClick).not.toHaveBeenCalled();
+    });
+
+    it('still only selects when focus took the slot mid-click', () => {
+      // The box takes focus on pointer-down and focus selects the slot, so the box is already
+      // in hand by the time the click it started completes. What decides is the press.
+      const { ctx } = context({ selection: { subject: CAT }, activeSlot: 'verb' });
+      const { rerender } = renderWithProviders(<SlotNode slot={slot('subject')} ctx={ctx} />, {
+        concepts: CONCEPTS,
+      });
+
+      fireEvent.pointerDown(nodeOf('subject'));
+      rerender(<SlotNode slot={slot('subject')} ctx={{ ...ctx, activeSlot: 'subject' }} />);
+      fireEvent.pointerUp(nodeOf('subject'));
+
+      expect(ctx.handleSlotClick).toHaveBeenCalledExactlyOnceWith('subject');
+      expect(ctx.handleEditSlot).not.toHaveBeenCalled();
     });
 
     it('on an eligible link target completes the link, however it is greyed', () => {
@@ -255,11 +288,13 @@ describe('SlotNode', () => {
       const onPickTarget = vi.fn(() => {});
       const { ctx, node } = renderNode('subject', {
         selection: { subject: CAT },
+        activeSlot: 'subject',
         isPickTarget: (key) => key === 'directObject',
         onPickTarget,
         dimmedKeys: new Set(['directObject']),
       });
 
+      fireEvent.pointerDown(node);
       fireEvent.pointerUp(node);
 
       expect(ctx.handleEditSlot).toHaveBeenCalledExactlyOnceWith('subject');

@@ -49,6 +49,13 @@ import { useKeyPlatform } from "../../keyboard/KeyboardProvider.tsx";
 const wash = (color: SlotConfig["color"]) => (theme: Theme) =>
   alpha(theme.palette[color].main, theme.palette.action.selectedOpacity);
 
+// The deeper wash of the box *in hand* — the one the letters command, and the one a further click
+// opens for re-picking. A filled box already wears `wash` for its word and, inside a ring, its
+// colour on the border too, so holding the cursor needs a shade of its own or a click on a word
+// would land with nothing to show for it.
+const held = (color: SlotConfig["color"]) => (theme: Theme) =>
+  alpha(theme.palette[color].main, theme.palette.action.selectedOpacity * 2.5);
+
 // The word-category switch (Noun | Pronoun, or Noun | Adj) shown both on an empty box and
 // inside the open word picker. Purely a vocabulary chooser — the two places share one
 // `value`/`onChange` so they stay in lock-step. `stopPropagation` on pointer-down keeps a
@@ -217,7 +224,7 @@ export function SlotBox({
     borderColor: highlight || isActive ? `${slot.color}.main` : filled && shape ? `${slot.color}.main` : "divider",
     borderStyle: highlight ? "dashed" : "solid",
     boxShadow: highlight ? (theme: Theme) => `0 0 0 3px ${theme.palette[slot.color].main}33` : "none",
-    bgcolor: isActive || concept ? wash(slot.color) : "background.paper",
+    bgcolor: isActive ? held(slot.color) : concept ? wash(slot.color) : "background.paper",
     transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
   };
   const faded = { opacity: dimmed ? 0.45 : 1, filter: dimmed ? "grayscale(1)" : "none" };

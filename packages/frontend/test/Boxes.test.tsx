@@ -193,8 +193,8 @@ describe('SlotBox', () => {
   });
 
   // Rendered with MUI's default theme, whose primary is rgb(25, 118, 210); a set box wears it at
-  // the theme's 0.08 selected opacity.
-  it('washes a filled or active box in its slot colour, leaving an idle empty one plain', () => {
+  // the theme's 0.08 selected opacity, and the box in hand at 2.5× that.
+  it('washes a filled box in its slot colour, and the box in hand deeper still', () => {
     const background = (ui: ReactElement) => {
       const { unmount } = renderWithProviders(ui);
       const paper = screen.getByTestId('box-subject').firstElementChild!;
@@ -203,12 +203,18 @@ describe('SlotBox', () => {
       return color;
     };
     const wash = 'rgba(25, 118, 210, 0.08)';
+    const held = 'rgba(25, 118, 210, 0.2)';
 
     expect(background(<SlotBox slot={SUBJECT} concept={CAT} isActive={false} onClear={() => {}} />))
       .toBe(wash);
-    expect(background(<SlotBox slot={SUBJECT} isActive onClear={() => {}} />)).toBe(wash);
     expect(background(<SlotBox slot={SUBJECT} isActive={false} onClear={() => {}} />)).not.toBe(
       wash,
+    );
+    // The box in hand is told apart from its neighbours whether or not it holds a word — a click
+    // that only selects a filled box has to show for itself.
+    expect(background(<SlotBox slot={SUBJECT} isActive onClear={() => {}} />)).toBe(held);
+    expect(background(<SlotBox slot={SUBJECT} concept={CAT} isActive onClear={() => {}} />)).toBe(
+      held,
     );
   });
 

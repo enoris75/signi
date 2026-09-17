@@ -22,6 +22,27 @@ test.describe('canvas', () => {
     await expect(boxes).toHaveCount(3);
   });
 
+  // A word on the canvas is reached before it is changed: the first click takes the box, and only
+  // a click on the box already in hand drops its picker over the word. Driven in the browser
+  // because the order the events really arrive in is the whole point — the box takes focus on
+  // pointer-down, which selects the slot before the click that started it has finished.
+  test('a click takes a filled word box, and a second one opens its word', async ({ app, page }) => {
+    await app.buildClause('CAT', 'EAT');
+    const subject = page.getByTestId('box-subject');
+    const word = subject.getByText('cat', { exact: true });
+    await expect(word).toBeVisible();
+
+    await word.click();
+
+    await expect(page.getByTestId('typeahead-subject')).toHaveCount(0);
+    await expect(word).toBeVisible();
+
+    await word.click();
+
+    await expect(page.getByTestId('typeahead-subject')).toBeVisible();
+    await expect(word).toHaveCount(0);
+  });
+
   test('a dragged group stays where it is put, and tidy lays it out again', async ({ app }) => {
     await app.buildClause('CAT', 'EAT');
 

@@ -330,16 +330,25 @@ export function SlotNode({
   const dimmed = dimmedKeys?.has(slot.key) ?? false;
   const pickTarget = isPickTarget?.(slot.key) ?? false;
   // A clean click on a filled word box (one that offers an inline picker) opens it for
-  // re-picking; otherwise it just selects the slot.
+  // re-picking — but only once the box is the one in hand: a click that *takes* a filled box
+  // does nothing but select it, so a word can be reached, read and commanded without its own
+  // picker dropping over it. An empty box has no word to cover, so its picker still opens as
+  // soon as the box is selected. (The keyboard says the same thing with ↵ on a filled box.)
   const canRepick =
     Boolean(selection[slot.key]) && slotHasInlinePicker(slot.key, nounSubject);
+  // Whether the box already held the slot when the pointer went down. It takes focus on
+  // pointer-down and focus selects the slot, so by the time the click completes `activeSlot`
+  // names this box whichever click it was — "was it already selected?" can only be read at
+  // the press.
+  const selectedAtPress = React.useRef(false);
   const onActivate = pickTarget
     ? () => onPickTarget?.(slot.key)
     : dimmed
       ? () => {}
-      : canRepick
-        ? () => handleEditSlot(slot.key)
-        : () => handleSlotClick(slot.key);
+      : () => {
+          if (canRepick && selectedAtPress.current) handleEditSlot(slot.key);
+          else handleSlotClick(slot.key);
+        };
 
   // An adjective slot filled with a *noun* is an attributive modifier ("sail boat"); it
   // carries a semantic relation (feature / purpose / material) that the Romance engines
@@ -467,7 +476,10 @@ export function SlotNode({
       />
     ) : undefined;
 
-  const { sx: dragSx, ...dragHandlers } = makeDragProps(slot.key, onActivate);
+  const { sx: dragSx, onPointerDown: startDrag, ...dragHandlers } = makeDragProps(
+    slot.key,
+    onActivate,
+  );
 
   return (
     <Box
@@ -477,6 +489,10 @@ export function SlotNode({
       // A real click reaches the same handler through the drag machinery's own activation, so the
       // second call is a no-op — the pick it would complete is already resolved.
       {...(pickTarget ? { [PICK_TARGET]: slot.key, onClick: () => onPickTarget?.(slot.key) } : {})}
+      onPointerDown={(e: React.PointerEvent) => {
+        selectedAtPress.current = activeSlot === slot.key;
+        startDrag(e);
+      }}
       sx={[dragSx, focusRing(slot.color), pickTarget ? pickBadgeSx : {}]}
       ref={(el: HTMLElement | null) => {
         if (el) slotEls.current.set(slot.key, el);

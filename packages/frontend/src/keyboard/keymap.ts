@@ -69,7 +69,7 @@ export interface BoxContext {
   revealSlot: (slotKey: SlotKey, satelliteKey?: string) => void;
   /** Show or hide a satellite's box without moving the cursor (the direct object's fold-away). */
   toggleReveal: (satelliteKey: string) => void;
-  /** Open this box's word picker over its word (a filled box) — what clicking it does. */
+  /** Open this box's word picker over its word (a filled box) — what clicking a box in hand does. */
   editSlot: (slotKey: SlotKey) => void;
   clearSlot: (slotKey: SlotKey) => void;
   removeComplement: (type: BoxComplementType) => void;

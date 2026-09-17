@@ -449,6 +449,13 @@ describe('PhraseBuilder', () => {
     it('opens a filled word’s picker over it, and restores the word when focus leaves', () => {
       renderPeriod({ subject: CAT, verb: EAT });
 
+      // The first press only takes the box — a filled word is not covered by its own picker
+      // until the box holding it is the one in hand.
+      press(box('verb'));
+      expect(wordsPanel().activeSlot).toBe('verb');
+      expect(within(box('verb')).queryByTestId('typeahead-verb')).not.toBeInTheDocument();
+      expect(box('verb')).toHaveTextContent('eat');
+
       press(box('verb'));
       expect(within(box('verb')).getByTestId('typeahead-verb')).toBeInTheDocument();
       expect(wordsPanel().activeSlot).toBe('verb');
@@ -460,7 +467,8 @@ describe('PhraseBuilder', () => {
 
     it('closes a word’s picker once the new word is chosen', () => {
       const { lastEdit } = renderPeriod({ subject: CAT, verb: EAT, directObject: HORSE });
-      press(box('directObject'));
+      press(box('directObject')); // takes the box
+      press(box('directObject')); // opens its word
 
       pickOption('HOUSE');
 
