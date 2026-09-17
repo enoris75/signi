@@ -5,6 +5,7 @@ import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
 import { PickerFooter } from "./PickerFooter.tsx";
+import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PronounChooser } from "./PronounChooser.tsx";
 import { usePickerKeys } from "./hooks/usePickerKeys.ts";
 import { usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
@@ -101,27 +102,23 @@ export function SubjectTypeahead({
 
   return (
     <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
-      <InputBase
-        autoFocus
-        value={picker.query}
-        onChange={(e) => {
-          picker.onChange(e);
-          // Typing is a noun search — jump to the noun tab.
-          if (e.target.value.trim()) setTab("noun");
-        }}
-        onFocus={picker.onFocus}
-        onBlur={picker.onBlur}
-        onKeyDown={onKeyDown}
-        placeholder={prompt}
-        inputProps={{ "data-testid": "typeahead-subject" }}
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.8rem",
-          color: "text.primary",
-          width: "100%",
-          "& input": { p: 0 },
-        }}
-      />
+      <PromptWidth prompt={prompt}>
+        <InputBase
+          autoFocus
+          value={picker.query}
+          onChange={(e) => {
+            picker.onChange(e);
+            // Typing is a noun search — jump to the noun tab.
+            if (e.target.value.trim()) setTab("noun");
+          }}
+          onFocus={picker.onFocus}
+          onBlur={picker.onBlur}
+          onKeyDown={onKeyDown}
+          placeholder={prompt}
+          inputProps={{ "data-testid": "typeahead-subject" }}
+          sx={{ ...PICKER_FONT, color: "text.primary", width: "100%", "& input": { p: 0 } }}
+        />
+      </PromptWidth>
       <Popper
         open={picker.open}
         anchorEl={anchorRef.current}

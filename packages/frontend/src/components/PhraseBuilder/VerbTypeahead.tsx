@@ -22,10 +22,7 @@ export function VerbTypeahead({
     <PickerList
       picker={picker}
       placeholder={prompt}
-      // Size the field to its placeholder rather than the browser default (~20ch); otherwise the
-      // empty verb ring swells round a field far wider than the prompt it holds.
-      inputProps={{ size: prompt.length, "data-testid": "typeahead-verb" }}
-      fitToPlaceholder
+      inputProps={{ "data-testid": "typeahead-verb" }}
     />
   );
 }

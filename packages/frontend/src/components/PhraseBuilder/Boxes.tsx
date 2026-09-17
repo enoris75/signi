@@ -132,8 +132,16 @@ export interface SatelliteIcon {
 // uses, which has no constituent round it.
 export type SlotShape = { r: number; kind: "ring" | "disc" };
 
-// The width a word picker takes inside a ring or a disc.
+// The least width a word picker takes inside a ring or a disc; a longer prompt widens it.
 const PICKER_WIDTH = 100;
+
+// The width a circle's title wraps at — the same width the picker takes in there, so a title and
+// a prompt fill the circle alike. A circle is sized from its content's diagonal, so a long slot
+// name laid on one line ("complemento di stato in luogo", "adverbiale Bestimmung des Ortes")
+// swells the ring to twice the width of the word it names; wrapping trades a line of height for
+// much less width, and the diagonal — so the circle — shrinks with it. Wider wraps less but
+// buys nothing: the diagonal grows back sideways as fast as the extra line saves in height.
+const LABEL_WIDTH = PICKER_WIDTH;
 
 // The small round clear button: on a solid ring it is one of the ring's controls, placed by the
 // ring layout; on a disc it sits on the disc's rim at half past one.
@@ -242,6 +250,21 @@ export function SlotBox({
             color: "text.secondary",
             display: "block",
             mb: 0.25,
+            // Only inside a circle: the plain box grows sideways at no cost, so it keeps
+            // its title on one line. `max-content` is what keeps the wrap out of the
+            // measuring loop — the title breaks at its own width capped by LABEL_WIDTH,
+            // never at the width the layout happens to be offering it this commit, which
+            // would feed the ring's size back into the ring's size. `balance` splits a
+            // wrapped title evenly rather than leaving one word alone on the last line.
+            ...(shape
+              ? {
+                  whiteSpace: "normal",
+                  width: "max-content",
+                  maxWidth: LABEL_WIDTH,
+                  mx: "auto",
+                  textWrap: "balance",
+                }
+              : null),
           }}
         >
           {slot.labelKey ? t(slot.labelKey) : slot.label}
@@ -268,8 +291,12 @@ export function SlotBox({
           {!concept && categoryToggle}
           {emptyContent && shape ? (
             // A picker's input would otherwise take the browser's default width, and the ring
-            // round it would swell to twice the size of the word it is choosing.
-            <Box sx={{ width: PICKER_WIDTH, mx: "auto" }}>{emptyContent}</Box>
+            // round it would swell to twice the size of the word it is choosing. The field sizes
+            // itself to its prompt (see PickerList), so this only holds it to a floor: pinning it
+            // to one width would cut a longer prompt off ("digita un sostantivo…").
+            <Box sx={{ minWidth: PICKER_WIDTH, width: "fit-content", mx: "auto" }}>
+              {emptyContent}
+            </Box>
           ) : emptyContent ?? (
             <Typography
               sx={{

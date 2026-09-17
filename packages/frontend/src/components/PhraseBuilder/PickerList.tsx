@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import type { Concept } from "@signi/shared";
 import { useRef } from "react";
 import { ConceptOption } from "./ConceptOption.tsx";
+import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PickerFooter } from "./PickerFooter.tsx";
 import type { PickerKeys } from "./hooks/usePickerKeys.ts";
 
@@ -17,39 +18,31 @@ export function PickerList({
   inputProps,
   header,
   minWidth = 160,
-  // The verb and modal fields sit inside a solid ring that is drawn round their content, so they
-  // are sized to their prompt rather than filling a box that has no width of its own.
-  fitToPlaceholder = false,
 }: {
   picker: PickerKeys<Concept>;
   placeholder: string;
   inputProps?: Record<string, unknown>;
   header?: ReactNode;
   minWidth?: number;
-  fitToPlaceholder?: boolean;
 }) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const { open, filtered, highlightedIdx, inTabs, listRef } = picker;
 
   return (
     <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
-      <InputBase
-        autoFocus
-        value={picker.query}
-        onChange={picker.onChange}
-        onFocus={picker.onFocus}
-        onBlur={picker.onBlur}
-        onKeyDown={picker.onKeyDown}
-        placeholder={placeholder}
-        inputProps={inputProps}
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.8rem",
-          color: "text.primary",
-          ...(fitToPlaceholder ? {} : { width: "100%" }),
-          "& input": { p: 0 },
-        }}
-      />
+      <PromptWidth prompt={placeholder}>
+        <InputBase
+          autoFocus
+          value={picker.query}
+          onChange={picker.onChange}
+          onFocus={picker.onFocus}
+          onBlur={picker.onBlur}
+          onKeyDown={picker.onKeyDown}
+          placeholder={placeholder}
+          inputProps={inputProps}
+          sx={{ ...PICKER_FONT, color: "text.primary", width: "100%", "& input": { p: 0 } }}
+        />
+      </PromptWidth>
       <Popper
         // A header keeps the dropdown up with nothing matching — the category switch is the way
         // out of an empty list, so it must not vanish with the rows it has none of.

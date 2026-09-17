@@ -20,8 +20,6 @@ export function ModalTypeahead({
     <PickerList
       picker={picker}
       placeholder={`${t("slot.modal.placeholder")}…`}
-      inputProps={{ size: 13 }}
-      fitToPlaceholder
     />
   );
 }

@@ -90,6 +90,19 @@ export function describeTypeahead(spec: TypeaheadSpec) {
       expect(listed()).toEqual(['HARD', 'LATE', 'HIGH']);
     });
 
+    // A picker sits inside a ring drawn round what its box measures, so the field can take
+    // neither the browser's default width (which swells the ring) nor a width of its own (which
+    // cuts a longer language's prompt off): the prompt paints itself under the field, out of
+    // sight, and the field is as wide as that. jsdom has no layout, so what is pinned here is
+    // that the sizer is carrying the very text the field is prompting with.
+    it('paints its prompt under the field, which is what sizes the field to it', () => {
+      const { input } = setup();
+
+      const sizer = screen.getByText(spec.placeholder);
+      expect(sizer).not.toBe(input);
+      expect(sizer).toHaveAttribute('aria-hidden', 'true');
+    });
+
     it('narrows the list to the words matching the query, ignoring case', () => {
       const { input } = setup();
 

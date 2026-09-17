@@ -153,6 +153,36 @@ describe('SlotBox', () => {
     expect(screen.getByTestId('box-directObject')).not.toHaveTextContent('*');
   });
 
+  // A circle is sized from its content's diagonal, so a long heading laid on one line swells the
+  // ring far past the word it names. `max-content` is what keeps the wrap out of the measuring
+  // loop: the heading breaks at its own width capped by the picker's, never at the width the
+  // layout happens to be offering it this commit — that fed the ring's size back into itself.
+  it('wraps a heading inside a circle at a fixed width, and leaves a plain box alone', () => {
+    const heading = (ui: ReactElement) => {
+      const { unmount } = renderWithProviders(ui);
+      const style = getComputedStyle(screen.getByText('Direct object'));
+      const read = { whiteSpace: style.whiteSpace, width: style.width, maxWidth: style.maxWidth };
+      unmount();
+      return read;
+    };
+
+    expect(
+      heading(
+        <SlotBox
+          slot={DIRECT_OBJECT}
+          isActive={false}
+          onClear={() => {}}
+          shape={{ r: 60, kind: 'ring' }}
+        />,
+      ),
+    ).toEqual({ whiteSpace: 'normal', width: 'max-content', maxWidth: '100px' });
+
+    // The plain box grows sideways at no cost, so it keeps its heading on one line.
+    expect(
+      heading(<SlotBox slot={DIRECT_OBJECT} isActive={false} onClear={() => {}} />),
+    ).toEqual({ whiteSpace: '', width: 'auto', maxWidth: 'none' });
+  });
+
   it('gives the verb box no heading', () => {
     renderWithProviders(<SlotBox slot={VERB} isActive={false} onClear={() => {}} />);
 

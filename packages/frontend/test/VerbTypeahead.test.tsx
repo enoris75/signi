@@ -29,15 +29,16 @@ describe('VerbTypeahead', () => {
     expect(listed()).toEqual(['EAT', 'RUN']);
   });
 
-  it('prompts for a verb in the UI language, with the field sized to fit the prompt', () => {
+  it('prompts for a verb in the UI language', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     renderWithProviders(<VerbTypeahead onSelect={() => {}} />, {
       strings: { 'slot.verb.placeholder': { it: 'digita un verbo' } },
       concepts: { verb: [] },
     });
 
-    const input = screen.getByTestId('typeahead-verb');
-    expect(input).toHaveAttribute('placeholder', 'digita un verbo…');
-    expect(input).toHaveAttribute('size', String('digita un verbo…'.length));
+    expect(screen.getByTestId('typeahead-verb')).toHaveAttribute(
+      'placeholder',
+      'digita un verbo…',
+    );
   });
 });

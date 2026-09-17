@@ -41,11 +41,4 @@ describe('ModalTypeahead', () => {
 
     expect(screen.getByPlaceholderText('digita un verbo servile…')).toBeInTheDocument();
   });
-
-  it('sizes the field to fit its prompt', () => {
-    renderWithProviders(<ModalTypeahead onSelect={() => {}} />, { concepts: { verb: [] } });
-
-    const input = screen.getByPlaceholderText('type a modal…');
-    expect(input).toHaveAttribute('size', String('type a modal…'.length));
-  });
 });

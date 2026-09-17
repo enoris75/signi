@@ -1,4 +1,38 @@
+import type { Locator } from '@playwright/test';
 import { test, expect } from './fixtures';
+
+// How much room a picker's field has to spare for the prompt it is showing, in px: the width of
+// the field less the width the prompt paints at the field's own font. Negative means the prompt
+// is cut off — which is invisible to a placeholder assertion, since the attribute holds the whole
+// string whatever the field shows of it. Measured un-rounded (getBoundingClientRect, not
+// clientWidth) so a field sized to its text doesn't read as a pixel short of it.
+async function promptSlack(input: Locator): Promise<number> {
+  return input.evaluate((el: HTMLInputElement) => {
+    const style = getComputedStyle(el);
+    const ctx = document.createElement('canvas').getContext('2d')!;
+    ctx.font = `${style.fontStyle} ${style.fontWeight} ${style.fontSize} ${style.fontFamily}`;
+    return el.getBoundingClientRect().width - ctx.measureText(el.placeholder).width;
+  });
+}
+
+// Whether a word box's field sits inside the ring drawn round it. The ring's radius comes from
+// the box's measured content, so a field that overflows that content — rather than widening it —
+// leaves its prompt hanging outside the circle.
+async function fieldInsideRing(box: Locator): Promise<boolean> {
+  return box.evaluate((el) => {
+    const circle = el.querySelector('.slot-circle')!.getBoundingClientRect();
+    const field = el.querySelector('input')!.getBoundingClientRect();
+    const cx = circle.left + circle.width / 2;
+    const cy = circle.top + circle.height / 2;
+    const corners = [
+      [field.left, field.top],
+      [field.right, field.top],
+      [field.left, field.bottom],
+      [field.right, field.bottom],
+    ];
+    return corners.every(([x, y]) => Math.hypot(x - cx, y - cy) <= circle.width / 2);
+  });
+}
 
 // Every string of chrome in this app is rendered by the engine from a seeded period rather
 // than hardcoded, so switching the interface language is a translation round-trip like any
@@ -39,6 +73,33 @@ test.describe('interface language', () => {
     // The object's picker, and the sole period's clear control.
     await expect(app.nounInput).toHaveAttribute('placeholder', 'digita un sostantivo…');
     await expect(page.getByRole('button', { name: 'Cancella questo periodo', exact: true })).toBeVisible();
+  });
+
+  // A prompt the field cuts off is worse than no prompt: the ring's pickers were pinned to one
+  // width, which left Italian's longest prompts ending mid-word ("digita un sostant"). Each field
+  // is sized from its own prompt now, and the ring is drawn round what that measures.
+  test('shows each slot prompt in full, however long the language writes it', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+    // The prompts are painted in Inter; measuring against a fallback would compare the wrong widths.
+    await page.evaluate(() => document.fonts.ready);
+    await expect(app.subjectInput).toHaveAttribute('placeholder', 'digita un soggetto…');
+    expect(await promptSlack(app.subjectInput)).toBeGreaterThanOrEqual(0);
+
+    // A word is searched by the label the interface language gives it, so the clause is built in
+    // English (the concept ids the fixture types are English lemmas) and read back in Italian.
+    await app.setUiLanguage('en');
+    await app.buildClause('CAT', 'EAT');
+    await app.setUiLanguage('it');
+    // The object's field is found through its box rather than a picker's test id: which picker
+    // the slot carries is the slot's business, and the prompt is the longest one on the canvas
+    // either way.
+    const objectBox = page.getByTestId('box-directObject');
+    const objectInput = objectBox.locator('input');
+    await expect(objectInput).toHaveAttribute('placeholder', /^digita un sostantivo/);
+    expect(await promptSlack(objectInput)).toBeGreaterThanOrEqual(0);
+    // And the ring grew with the field rather than leaving the prompt to hang out of it. The ring
+    // layout converges over a couple of passes, so this is polled rather than read once.
+    await expect.poll(() => fieldInsideRing(objectBox)).toBe(true);
   });
 
   // REMOVE and DELETE are separate verbs because the languages keep them apart: a period or a
