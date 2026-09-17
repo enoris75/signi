@@ -448,7 +448,9 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['ACQUIRE', 'la gatta ha acquisito.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
-    ['BECOME', 'la gatta è diventata.'], ['BITE', 'la gatta ha morso.'],
+    ['BECOME', 'la gatta è diventata.'],
+    // The inchoative BEGIN selects essere and agrees; the causative START keeps avere.
+    ['BEGIN', 'la gatta è iniziata.'], ['BITE', 'la gatta ha morso.'],
     ['BURN', 'la gatta ha bruciato.'], ['BUY', 'la gatta ha comprato.'],
     ['CANCEL', 'la gatta ha annullato.'], ['CHANGE', 'la gatta ha cambiato.'],
     ['CHOOSE', 'la gatta ha scelto.'], ['CLEAR', 'la gatta ha cancellato.'],
@@ -498,6 +500,115 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
 
   test.each(IT)('%s → %s', (id, expected) => {
     expect(femResult(id).it).toBe(expected);
+  });
+});
+
+// START and BEGIN, the causative/inchoative pair. Six of the seven languages say both halves with
+// one labile verb, so the surfaces coincide everywhere except Japanese, which lexicalises them:
+// 始める for the causative, 始まる for the inchoative. That is the whole reason BEGIN is a separate
+// concept — building "the action starts" on START rendered その動作は始めます, which says the action
+// causes something else to begin.
+describe('causative / inchoative: START and BEGIN', () => {
+  const begins = (extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('ACTION'), 'BEGIN', { verbPhrase: extra }));
+
+  test('the inchoative takes 始まる, not 始める', () => {
+    expect(begins()).toEqual({
+      en: 'the action begins.',
+      it: "l'azione inizia.",
+      fr: "l'action commence.",
+      es: 'la acción empieza.',
+      pt: 'a ação começa.',
+      de: 'die Handlung beginnt.',
+      ja: '動作は始まります。',
+    });
+  });
+
+  test('the causative keeps 始める', () => {
+    expect(sayAll(clause(np('MAN'), 'START', { directObject: np('ACTION') }))).toEqual({
+      en: 'the man starts the action.',
+      it: "l'uomo inizia l'azione.",
+      fr: "l'homme commence l'action.",
+      es: 'el hombre empieza la acción.',
+      pt: 'o homem começa a ação.',
+      de: 'der Mann beginnt die Handlung.',
+      ja: '男は動作を始めます。',
+    });
+  });
+
+  // 始まる is godan where 始める is ichidan, so every derived form differs: masu 始まります,
+  // past 始まりました, negative 始まりません, te-form 始まって under the aspects.
+  test('past, future and negative', () => {
+    expect(begins({ tense: 'past' })).toEqual({
+      en: 'the action began.',
+      it: "l'azione iniziò.",
+      fr: "l'action commença.",
+      es: 'la acción empezó.',
+      pt: 'a ação começou.',
+      de: 'die Handlung begann.',
+      ja: '動作は始まりました。',
+    });
+    // Japanese has no future: the non-past covers it (C04).
+    expect(begins({ tense: 'future' })).toMatchObject({
+      en: 'the action will begin.',
+      it: "l'azione inizierà.",
+      de: 'die Handlung wird beginnen.',
+      ja: '動作は始まります。',
+    });
+    expect(begins({ negative: true })).toMatchObject({
+      en: 'the action does not begin.',
+      fr: "l'action ne commence pas.",
+      de: 'die Handlung beginnt nicht.',
+      ja: '動作は始まりません。',
+    });
+  });
+
+  test('the aspects read the te-form 始まって', () => {
+    expect(begins({ aspect: 'progressive' })).toMatchObject({
+      en: 'the action is beginning.',
+      it: "l'azione sta iniziando.",
+      ja: '動作は始まっています。',
+    });
+    // ja maps resultative onto the completive 〜てしまう (B05), so it reads non-past here.
+    expect(begins({ aspect: 'resultative' })).toMatchObject({
+      en: 'the action has begun.',
+      it: "l'azione è iniziata.", // essere + agreement, where START takes avere
+      fr: "l'action a commencé.",
+      de: 'die Handlung hat begonnen.',
+      ja: '動作は始まってしまいます。',
+    });
+  });
+
+  test('the persons the languages inflect', () => {
+    expect(sayAll(clause(np('FIRST_PERSON', { number: 'plural' }), 'BEGIN'))).toEqual({
+      en: 'we begin.',
+      it: 'iniziamo.', // pro-drop
+      fr: 'nous commençons.', // -cer takes the cedilla before o
+      es: 'empezamos.',
+      pt: 'começamos.',
+      de: 'wir beginnen.',
+      ja: '私たちは始まります。',
+    });
+    expect(sayAll(clause(np('SECOND_PERSON'), 'BEGIN'))).toMatchObject({
+      en: 'you begin.',
+      it: 'inizi.',
+      fr: 'tu commences.',
+      es: 'empiezas.',
+      de: 'du beginnst.',
+    });
+  });
+
+  // The complement START was seeded to license, read inchoatively.
+  test('licenses the instrumental', () => {
+    const plan = clause(np('ACTION'), 'BEGIN', {
+      complements: { instrumental: { phrase: np('WORD', { definiteness: 'indefinite' }) } },
+    });
+    expect(sayAll(plan)).toMatchObject({
+      en: 'the action begins with a word.',
+      it: "l'azione inizia con una parola.",
+      de: 'die Handlung beginnt mit einem Wort.',
+      ja: '動作は単語で始まります。',
+    });
   });
 });
 

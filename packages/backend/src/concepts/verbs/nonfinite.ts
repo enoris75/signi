@@ -561,6 +561,17 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'começando', participle: 'começado' },
     ja: { te: '始めて', te_reading: 'はじめて', nai: '始めない', nai_reading: 'はじめない' },
   },
+  // The inchoative BEGIN, not START. Italian selects essere for it ("l'azione è iniziata") where
+  // the causative takes avere ("ha iniziato l'azione") — the same verb, the auxiliary carrying the
+  // difference. French commencer and German beginnen keep avoir/haben either way.
+  BEGIN: {
+    en: { gerund: 'beginning', participle: 'begun' },
+    it: { gerund: 'iniziando', participle: 'iniziato', aux: 'be' },
+    fr: { participle: 'commencé' }, de: { participle: 'begonnen' },
+    es: { gerund: 'empezando', participle: 'empezado' },
+    pt: { gerund: 'começando', participle: 'começado' },
+    ja: { te: '始まって', te_reading: 'はじまって', nai: '始まらない', nai_reading: 'はじまらない' },
+  },
   // The verbs of a program's everyday controls (B25–B28). All transitive → the HAVE default.
   CANCEL: {
     en: { gerund: 'canceling', participle: 'canceled' },

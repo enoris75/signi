@@ -69,3 +69,20 @@ Seed MOVE (verb, intransitive, "to change position"), then author the glosses th
 language: it *spostare*, fr *déplacer*, de *verschieben*, es *mover*, pt *mover*, ja 移動する. They are
 two concepts. B27 is not blocked by any of this, so it takes the id MOVE. The intransitive here gets a
 suffixed id when it is seeded (`MOVE_ONESELF`, as `SUBJECT_GRAMMAR` is suffixed).
+
+## Also waiting on the German reflexive: the inchoative CHANGE
+
+Same shape as the causative/inchoative split BEGIN resolved for START. `CHANGE` is seeded transitive
+("to make different", ja 変える), and an object-less clause built on it renders `その動作は変えます` —
+Japanese lexicalises the pair, 変える for the causative and 変わる for the inchoative, exactly as it
+does 始める / 始まる. The fix is the same: a second concept for "to become different".
+
+It is blocked here rather than seeded because German has no non-reflexive intransitive for it. "Der
+Plan ändert" is ungrammatical; the verb is *sich ändern* (or *sich verändern*, *sich wandeln*), all
+reflexive. The non-reflexive candidates mean something narrower — *wechseln* is "to switch /
+alternate between states", not "to become different" — which is the same compromise this file
+refuses for MOVE. The other six are clean and labile: en *change*, it *cambiare*, fr *changer*,
+es *cambiar*, pt *mudar*, ja 変わる.
+
+Seed it alongside MOVE once the German reflexive work above lands, as `CHANGE_ONESELF` or a
+semantic id of its own.

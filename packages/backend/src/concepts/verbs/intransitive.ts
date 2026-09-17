@@ -551,4 +551,89 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+
+  // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
+  // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
+  // action" / "the action starts"), so six of the seven paradigms below repeat START's. Japanese
+  // does not: it lexicalises the pair, 始める for the causative and 始まる for this one, so an
+  // inchoative clause built on START came out as "その動作は始めます", which is wrong.
+  //
+  // The split is semantic, not a Japanese workaround. START means "to cause something to begin"
+  // and this means "to get under way"; the plan should say which is meant rather than leave the
+  // engine to read it off an empty direct-object slot — "the man starts" is the causative with its
+  // object elided (男は始めます), not this verb. English takes "begin" to keep the two apart in the
+  // picker. Same shape as MOVE / the intransitive MOVE_ONESELF (localization C17).
+  //
+  // No `terminus`: a recipient belongs to the causative ("starts it for the cat"), not to an event
+  // getting under way. `instrumental` stays — "the lesson begins with a word" is the inchoative
+  // reading of the complement START was seeded to license.
+  {
+    id: 'BEGIN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to come into being; to get under way',
+    emoji: '▶️',
+    synonym: 'get under way',
+    forms: {
+      en: {
+        base: 'begin',
+        '1sg_present': 'begin', '2sg_present': 'begin', '3sg_present': 'begins',
+        '1pl_present': 'begin', '2pl_present': 'begin', '3pl_present': 'begin',
+        past: 'began',
+      },
+      it: {
+        base: 'iniziare',
+        '1sg_present': 'inizio', '2sg_present': 'inizi', '3sg_present': 'inizia',
+        '1pl_present': 'iniziamo', '2pl_present': 'iniziate', '3pl_present': 'iniziano',
+        '1sg_past': 'iniziai', '2sg_past': 'iniziasti', '3sg_past': 'iniziò',
+        '1pl_past': 'iniziammo', '2pl_past': 'iniziaste', '3pl_past': 'iniziarono',
+        '1sg_future': 'inizierò', '2sg_future': 'inizierai', '3sg_future': 'inizierà',
+        '1pl_future': 'inizieremo', '2pl_future': 'inizierete', '3pl_future': 'inizieranno',
+      },
+      fr: {
+        // -cer keeps its soft c with a cedilla before a/o: nous commençons, je commençai.
+        base: 'commencer',
+        '1sg_present': 'commence', '2sg_present': 'commences', '3sg_present': 'commence',
+        '1pl_present': 'commençons', '2pl_present': 'commencez', '3pl_present': 'commencent',
+        '1sg_past': 'commençai', '2sg_past': 'commenças', '3sg_past': 'commença',
+        '1pl_past': 'commençâmes', '2pl_past': 'commençâtes', '3pl_past': 'commencèrent',
+        '1sg_future': 'commencerai', '2sg_future': 'commenceras', '3sg_future': 'commencera',
+        '1pl_future': 'commencerons', '2pl_future': 'commencerez', '3pl_future': 'commenceront',
+      },
+      de: {
+        base: 'beginnen',
+        '1sg_present': 'beginne', '2sg_present': 'beginnst', '3sg_present': 'beginnt',
+        '1pl_present': 'beginnen', '2pl_present': 'beginnt', '3pl_present': 'beginnen',
+        '1sg_past': 'begann', '2sg_past': 'begannst', '3sg_past': 'begann',
+        '1pl_past': 'begannen', '2pl_past': 'begannt', '3pl_past': 'begannen',
+      },
+      es: {
+        base: 'empezar',
+        '1sg_present': 'empiezo', '2sg_present': 'empiezas', '3sg_present': 'empieza',
+        '1pl_present': 'empezamos', '2pl_present': 'empezáis', '3pl_present': 'empiezan',
+        '1sg_past': 'empecé', '2sg_past': 'empezaste', '3sg_past': 'empezó',
+        '1pl_past': 'empezamos', '2pl_past': 'empezasteis', '3pl_past': 'empezaron',
+        '1sg_future': 'empezaré', '2sg_future': 'empezarás', '3sg_future': 'empezará',
+        '1pl_future': 'empezaremos', '2pl_future': 'empezaréis', '3pl_future': 'empezarán',
+      },
+      ja: {
+        // 始まる is godan, not the ichidan 始める: te-form 始まって, plain negative 始まらない
+        // (both in NONFINITE), masu stem 始まり.
+        base: '始まる',
+        reading: 'はじまる',
+        masu_present: '始まります',
+        masu_present_reading: 'はじまります',
+      },
+      pt: {
+        base: 'começar',
+        '1sg_present': 'começo', '2sg_present': 'começa', '3sg_present': 'começa',
+        '1pl_present': 'começamos', '2pl_present': 'começam', '3pl_present': 'começam',
+        '1sg_past': 'comecei', '2sg_past': 'começou', '3sg_past': 'começou',
+        '1pl_past': 'começamos', '2pl_past': 'começaram', '3pl_past': 'começaram',
+        '1sg_future': 'começarei', '2sg_future': 'começará', '3sg_future': 'começará',
+        '1pl_future': 'começaremos', '2pl_future': 'começarão', '3pl_future': 'começarão',
+      },
+    },
+  },
 ];
