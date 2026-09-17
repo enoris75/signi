@@ -369,7 +369,7 @@ test.describe('the canvas by keyboard', () => {
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });
 
-  test('opens the words panel and the shortcuts sheet on their chords', async ({ app, page }) => {
+  test('opens the words panel and the help overlay on their chords', async ({ app, page }) => {
     await watchForPointerEvents(page);
     await app.goto();
 
@@ -386,7 +386,7 @@ test.describe('the canvas by keyboard', () => {
     await page.keyboard.press('Escape');
     expect(await cursorSlot(page)).not.toBeNull();
 
-    // ? lists every binding there is, read off the keymaps.
+    // ? opens the help, whose keyboard section lists every binding there is.
     await page.keyboard.press('?');
     const sheet = page.getByRole('dialog');
     await expect(sheet).toBeVisible();
@@ -472,5 +472,32 @@ test.describe('the canvas by keyboard', () => {
     await expect(page.getByTestId('period-container')).toHaveCount(1);
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+});
+
+/**
+ * The help overlay is the one surface the key and the icon both open, so this is the one test that
+ * is allowed a pointer: it is about the way in for whoever is using a mouse.
+ */
+test.describe('the help overlay', () => {
+  test('opens from the corner icon, with the keyboard section in it', async ({ app, page }) => {
+    await app.goto();
+
+    await page.getByTestId('help-button').click();
+
+    const overlay = page.getByTestId('help-overlay');
+    await expect(overlay.getByRole('heading', { name: 'Help' })).toBeVisible();
+    await expect(overlay.getByRole('heading', { name: 'Keyboard navigation' })).toBeVisible();
+    // Read off the keymaps: the levels, and the caps of a binding at each.
+    await expect(overlay.getByText('Anywhere')).toBeVisible();
+    await expect(overlay.getByText('Period', { exact: true })).toBeVisible();
+    await expect(overlay.getByText('Move the period up')).toBeVisible();
+
+    await overlay.getByRole('button', { name: 'Cancel' }).click();
+    await expect(overlay).toBeHidden();
+
+    // And the key opens the same overlay, from wherever the cursor is.
+    await page.keyboard.press('?');
+    await expect(page.getByTestId('help-overlay')).toBeVisible();
   });
 });

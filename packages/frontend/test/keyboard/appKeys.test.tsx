@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
-import { act, fireEvent, screen, within } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor, within } from '@testing-library/react';
 import App from '../../src/App.tsx';
 import { renderWithProviders } from '../render.tsx';
 
@@ -53,12 +53,13 @@ const activeRegion = () =>
   document.activeElement?.closest('[data-kb-region]')?.getAttribute('data-kb-region') ?? null;
 
 describe('the keys that work anywhere', () => {
-  it('opens the shortcuts sheet on ?, generated from the keymaps', () => {
+  it('opens the help overlay on ?, its keyboard section generated from the keymaps', () => {
     renderApp();
 
     press('?');
 
-    const sheet = screen.getByRole('dialog');
+    const sheet = screen.getByRole('dialog', { name: 'Help' });
+    expect(within(sheet).getByRole('heading', { name: 'Keyboard navigation' })).toBeInTheDocument();
     // Every level is listed, and each row carries the key it is actually bound to.
     expect(within(sheet).getByText('Anywhere')).toBeInTheDocument();
     expect(within(sheet).getByText('Period')).toBeInTheDocument();
@@ -68,6 +69,30 @@ describe('the keys that work anywhere', () => {
     // Listed whether or not there is anything to take back: the sheet says what the keys are.
     expect(within(sheet).getByText('Undo')).toBeInTheDocument();
     expect(within(sheet).getByText('Redo')).toBeInTheDocument();
+  });
+
+  // The key is for whoever knows it; the icon is for whoever does not.
+  it('opens the same overlay from the help icon in the corner', async () => {
+    renderApp();
+    const help = screen.getByTestId('help-button');
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    fireEvent.click(help);
+
+    const overlay = screen.getByRole('dialog', { name: 'Help' });
+    expect(within(overlay).getByRole('heading', { name: 'Keyboard navigation' })).toBeInTheDocument();
+    expect(within(overlay).getByText('Anywhere')).toBeInTheDocument();
+
+    fireEvent.click(within(overlay).getByRole('button', { name: 'Cancel' }));
+    await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+  });
+
+  it('names the help icon without reading its key as part of the name', () => {
+    renderApp();
+    const help = screen.getByTestId('help-button');
+
+    expect(help).toHaveAccessibleName('Help');
+    expect(help).toHaveAttribute('aria-keyshortcuts', '?');
   });
 
   it('draws the Ctrl caps for whichever platform the switch is on', () => {

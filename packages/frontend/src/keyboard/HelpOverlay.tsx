@@ -8,7 +8,7 @@ import {
   Typography,
 } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
-import { useState } from "react";
+import { useId, useState } from "react";
 import { useUiString } from "../i18n/useUiString.ts";
 import type { UiStringKey } from "@signi/shared";
 import { useKeyPlatform } from "./KeyboardProvider.tsx";
@@ -17,12 +17,13 @@ import { keycapLabels, type Platform } from "./matchKey.ts";
 import type { Scope } from "./scope.ts";
 
 /**
- * The <kbd>?</kbd> sheet: every binding there is, grouped by the level it belongs to.
+ * The help overlay: opened by the corner icon, or by <kbd>?</kbd> from anywhere.
  *
- * Generated from the keymaps rather than written out, so it cannot list a key that is not bound or
- * miss one that is — which is the whole reason the keymaps are data. Its <kbd>Ctrl</kbd> caps are
- * drawn for whichever platform the switch is on, so a Mac user can read the Windows column and a
- * Windows user the Mac one.
+ * Its one section for now is keyboard navigation — every binding there is, grouped by the level it
+ * belongs to. That section is generated from the keymaps rather than written out, so it cannot
+ * list a key that is not bound or miss one that is, which is the whole reason the keymaps are
+ * data. Its <kbd>Ctrl</kbd> caps are drawn for whichever platform the switch is on, so a Mac user
+ * can read the Windows column and a Windows user the Mac one.
  */
 
 /** The order the sheet reads in, and what each section is called. */
@@ -103,10 +104,14 @@ interface Binding {
 
 const ALL_BINDINGS: Binding[] = [...APP_KEYMAP, ...PERIOD_KEYMAP, ...KEYMAP];
 
-export function ShortcutSheet({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
   const here = useKeyPlatform();
   const [platform, setPlatform] = useState<Platform>(here);
   const t = useUiString();
+  // The overlay is named by its title, and its section by its heading, so what a screen reader
+  // announces on opening is what is written at the top of it.
+  const titleId = useId();
+  const sectionId = useId();
 
   const byScope = (scope: Scope) =>
     ALL_BINDINGS.filter((c) => c.scope === scope).map((c) => ({
@@ -115,50 +120,80 @@ export function ShortcutSheet({ open, onClose }: { open: boolean; onClose: () =>
     }));
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="lg" fullWidth scroll="paper">
+    <Dialog
+      open={open}
+      onClose={onClose}
+      maxWidth="lg"
+      fullWidth
+      scroll="paper"
+      aria-labelledby={titleId}
+      data-testid="help-overlay"
+    >
       <DialogContent sx={{ p: 4 }}>
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
-          <Box sx={{ flex: 1 }}>
-            <Typography variant="h5" sx={{ fontWeight: 700, mb: 1 }}>
-              Keyboard shortcuts
-            </Typography>
-            <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6 }}>
-              A bare key acts on what the cursor is on — a box, or the period once you step out with
-              esc. Ctrl acts on the app. Keys that cycle a value run backwards with ⇧.
-            </Typography>
-          </Box>
-          <ToggleButtonGroup
-            exclusive
-            size="small"
-            value={platform}
-            onChange={(_, v) => v && setPlatform(v)}
-            sx={{ flexShrink: 0 }}
+          {/* English literal, for /localize: the catalogue has no word for help yet. */}
+          <Typography id={titleId} variant="h5" sx={{ fontWeight: 700, flex: 1 }}>
+            Help
+          </Typography>
+          <IconButton
+            onClick={onClose}
+            aria-label={t("action.cancel")}
+            sx={{ flexShrink: 0, mt: -1, mr: -1 }}
           >
-            <ToggleButton value="other" sx={{ textTransform: "none", fontSize: "0.72rem" }}>
-              Windows &amp; Linux
-            </ToggleButton>
-            <ToggleButton value="mac" sx={{ textTransform: "none", fontSize: "0.72rem" }}>
-              Mac
-            </ToggleButton>
-          </ToggleButtonGroup>
-          <IconButton onClick={onClose} aria-label={t("action.cancel")} sx={{ flexShrink: 0 }}>
             <CloseIcon />
           </IconButton>
         </Box>
 
-        <Box
-          sx={{
-            columnCount: { xs: 1, md: 2, lg: 3 },
-            columnGap: 4,
-            "& > *": { breakInside: "avoid" },
-          }}
-        >
-          {SECTIONS.map(({ scope, title, note }) => (
-            <Section key={scope} title={title} note={note} rows={byScope(scope)} platform={platform} />
-          ))}
-          {HOOK_SECTIONS.map((section) => (
-            <Section key={section.title} {...section} platform={platform} />
-          ))}
+        {/* One section for now. Others (what the canvas is, saving and loading) belong beside it
+            rather than in a page of their own, which is why the overlay is not the sheet. */}
+        <Box component="section" aria-labelledby={sectionId}>
+          <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
+            <Box sx={{ flex: 1 }}>
+              {/* English literal, for /localize. */}
+              <Typography id={sectionId} variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
+                Keyboard navigation
+              </Typography>
+              <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6 }}>
+                A bare key acts on what the cursor is on — a box, or the period once you step out
+                with esc. Ctrl acts on the app. Keys that cycle a value run backwards with ⇧.
+              </Typography>
+            </Box>
+            <ToggleButtonGroup
+              exclusive
+              size="small"
+              value={platform}
+              onChange={(_, v) => v && setPlatform(v)}
+              sx={{ flexShrink: 0 }}
+            >
+              <ToggleButton value="other" sx={{ textTransform: "none", fontSize: "0.72rem" }}>
+                Windows &amp; Linux
+              </ToggleButton>
+              <ToggleButton value="mac" sx={{ textTransform: "none", fontSize: "0.72rem" }}>
+                Mac
+              </ToggleButton>
+            </ToggleButtonGroup>
+          </Box>
+
+          <Box
+            sx={{
+              columnCount: { xs: 1, md: 2, lg: 3 },
+              columnGap: 4,
+              "& > *": { breakInside: "avoid" },
+            }}
+          >
+            {SECTIONS.map(({ scope, title, note }) => (
+              <Section
+                key={scope}
+                title={title}
+                note={note}
+                rows={byScope(scope)}
+                platform={platform}
+              />
+            ))}
+            {HOOK_SECTIONS.map((section) => (
+              <Section key={section.title} {...section} platform={platform} />
+            ))}
+          </Box>
         </Box>
       </DialogContent>
     </Dialog>

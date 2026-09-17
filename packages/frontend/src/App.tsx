@@ -12,7 +12,8 @@ import { useWorkspaceHistory } from "./hooks/useWorkspaceHistory.ts";
 import { useUiString } from "./i18n/useUiString.ts";
 import { KeyboardProvider } from "./keyboard/KeyboardProvider.tsx";
 import { HintLine } from "./keyboard/HintLine.tsx";
-import { ShortcutSheet } from "./keyboard/ShortcutSheet.tsx";
+import { HelpOverlay } from "./keyboard/HelpOverlay.tsx";
+import { HelpButton } from "./keyboard/HelpButton.tsx";
 import { useToolbar } from "./keyboard/useToolbar.ts";
 import { pressControl } from "./keyboard/controls.ts";
 import { Keycap } from "./keyboard/Keycap.tsx";
@@ -49,8 +50,9 @@ export default function App() {
     setWordsPanelOpen(next);
   }
   const splitContainerRef = useRef<HTMLDivElement>(null);
-  // The ? sheet, which lists every binding there is.
-  const [sheetOpen, setSheetOpen] = useState(false);
+  // The help overlay, opened by the corner icon or by ?, whose keyboard section lists every
+  // binding there is.
+  const [helpOpen, setHelpOpen] = useState(false);
   // The header is one stop in the tab order, its controls walked with ← →.
   const toolbar = useToolbar();
 
@@ -73,7 +75,7 @@ export default function App() {
         });
       }
     },
-    toggleSheet: () => setSheetOpen((open) => !open),
+    toggleHelp: () => setHelpOpen((open) => !open),
     undo: history.canUndo ? history.undo : undefined,
     redo: history.canRedo ? history.redo : undefined,
   });
@@ -281,7 +283,10 @@ export default function App() {
 
         {/* What the keys do here, for whoever is driving with the keyboard. */}
         <HintLine />
-        <ShortcutSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
+        <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
+        {/* Last in the page's tab order, and out of the way of everything but the hint line it
+            steps over: help is wanted from wherever the work is. */}
+        <HelpButton onClick={() => setHelpOpen(true)} />
 
         {/* The toast that replaced the confirm dialog: the act has happened, and here is the way
             back. Reuses the filled Alert the app's other toasts use, in `info`. */}

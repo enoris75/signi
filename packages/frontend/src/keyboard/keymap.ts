@@ -151,8 +151,8 @@ export interface AppContext {
   importWorkspace: () => void;
   /** Show or hide the words panel, putting the cursor inside it when it opens. */
   toggleWords: () => void;
-  /** The ? sheet, which lists every binding there is. */
-  toggleSheet: () => void;
+  /** The help overlay, whose keyboard section lists every binding there is. */
+  toggleHelp: () => void;
   /** A step back through the phrase, and forward again. Absent where there is nowhere to go. */
   undo: (() => void) | undefined;
   redo: (() => void) | undefined;
@@ -645,11 +645,11 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
  */
 export const APP_KEYMAP: Command<AppKeyContext>[] = [
   {
-    id: "app.sheet",
+    id: "app.help",
     scope: "app",
     keys: ["?"],
-    label: "Keyboard shortcuts",
-    run: (ctx) => ctx.toggleSheet(),
+    label: "Help",
+    run: (ctx) => ctx.toggleHelp(),
   },
   {
     id: "app.region.next",

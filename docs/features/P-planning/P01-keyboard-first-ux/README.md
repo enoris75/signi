@@ -281,12 +281,18 @@ uses the same badges and gains <kbd>esc</kbd> (it has none today). The console s
 The complement menu is the only new menu: it lists exactly the complements the verb licenses
 (today's complement toggle row) plus the object show/hide toggle.
 
-### 3.8 Shortcuts sheet (?) — *artboard "Shortcuts sheet"*
+### 3.8 Help overlay (? or the corner icon) — *artboard "Shortcuts sheet"*
 
 ![Keyboard shortcuts sheet](artwork/06-shortcuts-sheet.png)
 
-A dialog rendering §4 from the keymap, three columns, with a **Windows & Linux / Mac** switch that
-re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own reference (`/help`, P02).
+A dialog whose **Keyboard navigation** section renders §4 from the keymap, three columns, with a
+**Windows & Linux / Mac** switch that re-renders the <kbd>Ctrl</kbd> keycaps. Other help sections
+belong beside it rather than in a page of their own, which is why the overlay is not the sheet.
+The console's commands have their own reference (`/help`, P02).
+
+A round <kbd>?</kbd> icon is docked in the bottom-right corner of the window, above the hint line
+when that strip is docked: the key is for whoever knows it, the icon for whoever does not, and both
+open the same overlay so nothing can be in one and not the other.
 
 ### 3.9 Translations, words panel, undo — *artboard "Header, translations, words, undo"*
 
@@ -327,7 +333,7 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 | Keys | Action | Today's control |
 |---|---|---|
 | <kbd>&#96;</kbd> · <kbd>/</kbd> | Show / hide the console (the key below <kbd>esc</kbd>) · <kbd>/</kbd> shows it with a command started | new (P02) |
-| <kbd>?</kbd> | Shortcuts sheet | new |
+| <kbd>?</kbd> | Help overlay (also the corner icon) | new |
 | <kbd>F6</kbd> / <kbd>⇧</kbd><kbd>F6</kbd> | Next / previous region | new |
 | <kbd>Ctrl</kbd><kbd>S</kbd> | Save the workspace… | header *Save* |
 | <kbd>Ctrl</kbd><kbd>O</kbd> | Load a workspace… | header *Load* |
