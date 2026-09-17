@@ -15,6 +15,9 @@ import { useTranslations } from "./hooks/useTranslation.ts";
 import { useUiString } from "./i18n/useUiString.ts";
 import { KeyboardProvider } from "./keyboard/KeyboardProvider.tsx";
 import { HintLine } from "./keyboard/HintLine.tsx";
+import { ShortcutSheet } from "./keyboard/ShortcutSheet.tsx";
+import { useToolbar } from "./keyboard/useToolbar.ts";
+import { pressControl } from "./keyboard/controls.ts";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -42,6 +45,32 @@ export default function App() {
     setWordsPanelOpen(next);
   }
   const splitContainerRef = useRef<HTMLDivElement>(null);
+  // The ? sheet, which lists every binding there is.
+  const [sheetOpen, setSheetOpen] = useState(false);
+  // The header is one stop in the tab order, its controls walked with ← →.
+  const toolbar = useToolbar();
+
+  // What the app's own keys press. The four save/load controls own the dialogs they open, so the
+  // keys press the buttons where they stand rather than lifting those dialogs out of them.
+  const appKeys = () => ({
+    saveWorkspace: () => pressControl("save-workspace"),
+    loadWorkspace: () => pressControl("load-workspace"),
+    exportWorkspace: () => pressControl("export-workspace"),
+    importWorkspace: () => pressControl("import-workspace"),
+    toggleWords: () => {
+      const next = !wordsPanelOpen;
+      setWordsPanel(next);
+      // Opening it puts the cursor inside, which is the point of a key that opens a panel.
+      if (next) {
+        requestAnimationFrame(() => {
+          document
+            .querySelector<HTMLElement>('[data-kb-region="words"] [data-kb-word]')
+            ?.focus();
+        });
+      }
+    },
+    toggleSheet: () => setSheetOpen((open) => !open),
+  });
 
   // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
   const t = useUiString();
@@ -56,7 +85,7 @@ export default function App() {
   return (
     // One keydown listener for the whole app: what a key does is decided by what the cursor is on
     // (see keyboard/KeyboardProvider), never by a handler hidden in the component that owns it.
-    <KeyboardProvider>
+    <KeyboardProvider app={appKeys}>
       <Box sx={{ minHeight: "100vh", bgcolor: "background.default" }}>
         {/* Header. Sticky and stacked above the word-palette overlay (which is a
             fixed drawer) so its toggle control stays clickable while the panel is
@@ -114,7 +143,16 @@ export default function App() {
                 {payoff}
               </Typography>
             </Box>
+            {/* The header is one stop in the tab order rather than seven: left as seven it sits
+                between a keyboard user and the canvas, where the work is. ← → walk it. */}
             <Box
+              ref={toolbar.ref}
+              role={toolbar.role}
+              // No aria-label: the catalogue has no word for this row yet, and a wrong name is
+              // worse than none. One for /localize.
+              data-kb-region="header"
+              onKeyDown={toolbar.onKeyDown}
+              onFocus={toolbar.onFocus}
               sx={{
                 display: "flex",
                 alignItems: "center",
@@ -158,6 +196,7 @@ export default function App() {
           >
             {/* Left: stack of phrase containers + their relative-clause links */}
             <Box
+              data-kb-region="periods"
               sx={{
                 width: `${leftWidthPct}%`,
                 flexShrink: 0,
@@ -221,7 +260,7 @@ export default function App() {
           </Box>
 
           {/* Translations: one card, each language listing every root sentence in order */}
-          <Box sx={{ mb: 3 }}>
+          <Box data-kb-region="translations" sx={{ mb: 3 }}>
             {isError && (
               <Alert severity="error" sx={{ mb: 2 }}>
                 Could not reach the translation server.
@@ -233,6 +272,7 @@ export default function App() {
 
         {/* What the keys do here, for whoever is driving with the keyboard. */}
         <HintLine />
+        <ShortcutSheet open={sheetOpen} onClose={() => setSheetOpen(false)} />
       </Box>
     </KeyboardProvider>
   );

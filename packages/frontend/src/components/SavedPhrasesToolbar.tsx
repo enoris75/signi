@@ -161,6 +161,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
             size="small"
             disableElevation
             startIcon={<SaveOutlinedIcon />}
+            data-kb-control="save-workspace"
             onClick={() => setSaveOpen(true)}
             disabled={empty}
             sx={{ textTransform: "none" }}
@@ -175,6 +176,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
           size="small"
           disableElevation
           startIcon={<FolderOpenOutlinedIcon />}
+          data-kb-control="load-workspace"
           onClick={() => setLoadOpen(true)}
           sx={{ textTransform: "none" }}
         >
@@ -187,6 +189,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         <span>
           <IconButton
             size="small"
+            data-kb-control="export-workspace"
             onClick={handleExport}
             disabled={empty}
             aria-label={t("action.export.tooltip")}
@@ -196,7 +199,11 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         </span>
       </Tooltip>
       <Tooltip title={t("action.import.tooltip")}>
-        <IconButton size="small" onClick={() => fileInputRef.current?.click()}>
+        <IconButton
+          size="small"
+          data-kb-control="import-workspace"
+          onClick={() => fileInputRef.current?.click()}
+        >
           <FileUploadOutlinedIcon fontSize="small" />
         </IconButton>
       </Tooltip>

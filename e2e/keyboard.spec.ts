@@ -328,6 +328,75 @@ test.describe('the canvas by keyboard', () => {
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });
 
+  test('reaches every region of the page, and the header’s controls, by key', async ({
+    app,
+    page,
+  }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'run', 'RUN');
+    await app.expectSentences({ en: 'the cat runs.' });
+
+    const region = () =>
+      page.evaluate(
+        () =>
+          document.activeElement?.closest('[data-kb-region]')?.getAttribute('data-kb-region') ??
+          null,
+      );
+    expect(await region()).toBe('periods');
+
+    // F6 walks the page's landmarks. The words panel is hidden, so it is not one of them yet.
+    await page.keyboard.press('F6');
+    expect(await region()).toBe('translations');
+    await page.keyboard.press('F6');
+    expect(await region()).toBe('header');
+
+    // The header is one stop, walked with the arrows; ← → move along it.
+    const focused = () => page.evaluate(() => document.activeElement?.textContent ?? '');
+    const first = await focused();
+    await page.keyboard.press('ArrowRight');
+    expect(await focused()).not.toBe(first);
+
+    // ↑ ↓ walk the translations, and C copies the row the cursor is on.
+    await page.keyboard.press('Shift+F6');
+    expect(await region()).toBe('translations');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('c');
+    await expect(page.getByTestId('translation-it').getByRole('button')).toBeVisible();
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
+  test('opens the words panel and the shortcuts sheet on their chords', async ({ app, page }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'run', 'RUN');
+
+    // Ctrl B opens the words panel with the cursor inside it; esc puts the cursor back.
+    await page.keyboard.press('ControlOrMeta+b');
+    await expect(page.locator('[data-kb-region="words"]')).not.toHaveAttribute('inert', '');
+    await expect
+      .poll(() => page.evaluate(() => Boolean(document.activeElement?.closest('[data-kb-word]'))))
+      .toBe(true);
+
+    await page.keyboard.press('Escape');
+    expect(await cursorSlot(page)).not.toBeNull();
+
+    // ? lists every binding there is, read off the keymaps.
+    await page.keyboard.press('?');
+    const sheet = page.getByRole('dialog');
+    await expect(sheet).toBeVisible();
+    await expect(sheet.getByText('Anywhere')).toBeVisible();
+    // Exactly, since the sheet also lists the backwards twin the same key takes with ⇧.
+    await expect(sheet.getByText('Tense', { exact: true })).toBeVisible();
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
   test('shows the cursor’s keys, and teaches each control the key it answers to', async ({
     app,
     page,

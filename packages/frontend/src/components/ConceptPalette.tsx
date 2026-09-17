@@ -10,6 +10,7 @@ import type { Concept, GrammaticalRole } from '@signi/shared';
 import { useConcepts } from '../hooks/useConcepts.ts';
 import { ConceptWord } from '../i18n/ConceptWord.tsx';
 import { useUiString } from '../i18n/useUiString.ts';
+import { focusRing } from '../keyboard/focusRing.ts';
 
 const ROLE_CONFIG: Record<GrammaticalRole, { color: 'primary' | 'secondary' | 'success' | 'warning' | 'info' }> = {
   pronoun: { color: 'primary' },
@@ -62,8 +63,20 @@ export default function ConceptPalette({ role, onSelect, selectedId, disabledIds
                 slotProps={{ tooltip: { sx: { fontSize: '0.72rem', maxWidth: 200 } } }}
               >
               <Box
+                // A real button: the panel is a list of words to choose from, and choosing one
+                // with ↵ is the whole point of reaching it by key (see PhraseSidebar).
+                component="button"
+                type="button"
+                data-kb-word={concept.id}
+                disabled={disabledIds.includes(concept.id)}
                 onClick={() => disabledIds.includes(concept.id) ? undefined : onSelect(concept)}
                 sx={{
+                  display: 'block',
+                  width: '100%',
+                  textAlign: 'left',
+                  appearance: 'none',
+                  border: 'none',
+                  ...focusRing(config.color),
                   px: 1,
                   py: 0.35,
                   borderRadius: 1,

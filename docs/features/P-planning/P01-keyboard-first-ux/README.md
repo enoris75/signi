@@ -8,8 +8,8 @@ handlers, key tips, tooltips and the shortcuts sheet.
 **Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
-**Status:** phases 1–3 shipped (the cursor, the box keys, the pickers and menus, the period level
-and the link picks); phases 4–5 planned. See
+**Status:** phases 1–4 shipped — every control on the page is now reachable without a mouse. Phase
+5 (undo) is planned. See
 [Phases](#6-phases) for what each still covers and [Open questions](#open-questions) for what is
 still undecided.
 **Drawings:** [`artwork/`](artwork/) — seven images exported from page *Keyboard access (P01)* of
@@ -191,7 +191,8 @@ Signi                        [▣ Console `] [文A 🇬🇧 English ▾] [Save] 
 SEMANTIC PHRASE CREATOR       └ new
 ```
 
-One new outlined button shows or hides the console and carries the <kbd>&#96;</kbd> keycap. The cluster becomes a single `role="toolbar"` stop.
+The cluster becomes a single `role="toolbar"` stop. *The Console button waits for P02:* it would
+show and hide a console that does not exist yet, so phase 4 shipped the toolbar without it.
 
 ### 3.4 Period under the cursor — *artboard "Focus and key hints"*
 
@@ -467,8 +468,10 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 | `useMenuKeys.ts` | The accelerator per row, for every menu and for an armed relation toolbar. |
 | `usePickKeys.ts` | The numbered targets of a pick in flight, for all five kinds at once. |
 | `controls.ts` | Pressing a control that owns its own popup, for the few keys that cannot call a handler. |
-| `HintLine.tsx` | The keys for the cursor's scope; later rendered inside the collapsed console (P02). |
-| `ShortcutSheet.tsx` | ? dialog; renders §4 from `keymap`, Windows & Linux / Mac switch. |
+| `regions.ts` | The page's landmarks and the F6 walk between them, each remembering where it was left. |
+| `useToolbar.ts` | A row of controls as one tab stop, walked with ← → (the header). |
+| `ShortcutSheet.tsx` | The ? dialog, generated from the keymaps, with a Windows & Linux / Mac switch. |
+| `HintLine.tsx` | The keys for the cursor's level; later rendered inside the collapsed console (P02). |
 
 ```ts
 // keymap.ts
@@ -492,8 +495,9 @@ export interface Command<C> {       // C is the level's context: a box's, or a p
   satellite?: RegExp;            // the controls it drives, which wear its key as a tip
 }
 
-export const KEYMAP: Command<BoxKeyContext>[];       // the box scopes
+export const KEYMAP: Command<BoxKeyContext>[];            // the box scopes
 export const PERIOD_KEYMAP: Command<PeriodKeyContext>[];  // the period scope
+export const APP_KEYMAP: Command<AppKeyContext>[];        // the app scope, looked up last
 ```
 
 `KeyContext` is assembled from what `PhraseBuilder` already computes — `selection`, `activeSlot`,
@@ -558,7 +562,7 @@ Each phase ships on its own and leaves the app consistent.
 | **1 · Cursor and box keys** ✅ | `keyboard/` module (keymap, provider, matchKey, spatialNav, Keycap, KeyTip, HintLine); focus ring; arrows / ⇥ / ↵ / ⌫ / esc on boxes; noun, adjective and verb letters that call existing handlers; tense / aspect / chips / determiner box activatable; tooltip keycaps. | A sentence with plural subject, past tense, negation, adjectives and a modal can be built and edited keyboard-only. |
 | **2 · Pickers and menus** ✅ | `usePickerKeys` (⇥, double esc, tabs, pronoun grid, footer); determiner / conjunction / specifier / sentiment accelerators; new *Add a complement* menu; command-subject keys. | Every value any menu or toggle offers is one key after the key that opened it. |
 | **3 · Periods and links** ✅ | Period cursor (esc out, ↑↓, ⇧↑↓ move) and period letters; `eligibleTargets` + numbered badges for all five pick kinds; coref esc. | Relative clause, if-condition, join, instrument and possessor reference can be built keyboard-only. |
-| **4 · Regions** | F6 landmarks; header toolbar + Console button; translations rows; words panel and word map; Ctrl keys (save / load / export / import / words); ? sheet. | Every control on the page is reachable, and the sheet lists every binding in the keymap (generated, not hand-written). |
+| **4 · Regions** ✅ | F6 landmarks; header toolbar + Console button; translations rows; words panel and word map; Ctrl keys (save / load / export / import / words); ? sheet. | Every control on the page is reachable, and the sheet lists every binding in the keymap (generated, not hand-written). |
 | **5 · Undo** | History of `{containers, links}` in `App` with coalescing for rapid toggles; Ctrl Z / Ctrl ⇧ Z; undo toast after destructive actions; `window.confirm` removed. | Removing a period, clearing a box or deleting a saved phrase can be undone. |
 
 P02's console can start after phase 1 (it needs the shared cursor) and runs in parallel from there.
@@ -598,6 +602,26 @@ relative clause, the if-condition, the join, the instrument and the possessor re
 to the same digits. The possessor's pick gained <kbd>esc</kbd> with them — it had no way to be
 abandoned at all.
 
+**What phase 4 shipped, beside the table.** The page gained its third level. The `app` scope is
+looked up *last*, after whatever the cursor is on, so a bare letter is always the level's before
+it is the app's — and its chords reach through an open word picker, because a chord is never what
+someone is typing.
+
+<kbd>F6</kbd> walks the landmarks, each remembering where it was left, and skips a region there is
+nothing to land in: the translations before a first sentence, the words panel while it is shut.
+That the panel is shut is now a fact the page states — `inert`, not merely `pointerEvents: none` —
+which is what stops ⇥ wandering into it and what tells <kbd>F6</kbd> to pass it by.
+
+The header became one stop instead of seven. Seven of them sat between a keyboard user and the
+canvas, where the work is; as one, ⇥ passes the header in a single press and <kbd>←</kbd>
+<kbd>→</kbd> walk it when that is what was wanted.
+
+The sheet is generated from the three keymaps, so it cannot list a key that is not bound or miss
+one that is. Its <kbd>Ctrl</kbd> caps are drawn for whichever platform its switch is on rather than
+for the machine it is running on, so either column can be read from either. The levels whose keys
+live beside their own handler — a picker, a menu, a pick in flight — each declare one table that
+the sheet and the strip teaching them on screen both read.
+
 **What phase 1 left.** Two things named in §3 need work that is not a frontend change:
 
 - **The keyboard caption** (§3.1, "· MOVE WITH THE ARROWS, TYPE TO CHOOSE A WORD"). Every caption
@@ -606,10 +630,10 @@ abandoned at all.
   still reads "· click a slot, and then choose a word" under both modalities.
 (<kbd>R</kbd> on a noun and the complement menu's <kbd>+</kbd> shipped with phases 3 and 2.)
 
-Existing defects fixed along the way (found while auditing): focus ring suppressed on canvas nodes;
-⇥ inside a picker jumps slots; closed words panel stays in the tab order; translation copy button
-invisible on focus; `ModalTypeahead` can't reopen with ↓; conjunction chip not focusable; coref pick
-ignores esc.
+Existing defects fixed along the way (found while auditing): focus ring suppressed on canvas nodes
+(1); ⇥ inside a picker jumps slots (1); `ModalTypeahead` can't reopen with ↓ (2); coref pick ignores
+esc (3); closed words panel stays in the tab order (4); translation copy button invisible on focus
+(4). One is left: the conjunction chip on a coordinated noun is still not focusable.
 
 ## 7. Testing
 
@@ -635,6 +659,9 @@ ignores esc.
   digit. The guard counts only *trusted* pointer events: a key that presses a control the app
   already has (the conjunction menu, a numbered target) dispatches a click from script, and that is
   still the keyboard driving.
+  *Shipped for phase 4:* <kbd>F6</kbd> round the regions and back, the header walked with the
+  arrows, a translation copied with <kbd>C</kbd>, and <kbd>Ctrl</kbd><kbd>B</kbd> and <kbd>?</kbd>
+  opening the words panel and the sheet.
 
 ## 8. Risks
 

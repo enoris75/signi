@@ -94,6 +94,9 @@ export function WordMap({ open, onClose }: Props) {
   const [hovered, setHovered] = useState<string | null>(null);
   const [view, setView] = useState({ k: 1, tx: 0, ty: 0 });
   const panRef = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null);
+  // Which word ⇥ has walked to. The map has no selection — it is a read-only view — so walking it
+  // lights the word the way hovering does, which is what the highlight is for.
+  const [walked, setWalked] = useState(-1);
 
   /** A number and the noun it counts, in whichever number the count calls for. */
   const counted = (n: number, key: "wordMap.nodes" | "wordMap.relationships" | "wordMap.hidden") =>
@@ -218,6 +221,38 @@ export function WordMap({ open, onClose }: Props) {
           <Box
             component="svg"
             viewBox={`${extent.x} ${extent.y} ${extent.width} ${extent.height}`}
+            tabIndex={0}
+            // The map is a picture the size of a lexicon: the arrows pan it, + and − zoom, 0 puts
+            // it back, and ⇥ walks the words, lighting each as a hover would (the plan's §4.5).
+            onKeyDown={(e: React.KeyboardEvent) => {
+              const step = extent.width / 12 / view.k;
+              const pan = { ArrowLeft: [1, 0], ArrowRight: [-1, 0], ArrowUp: [0, 1], ArrowDown: [0, -1] }[
+                e.key
+              ];
+              if (pan) {
+                e.preventDefault();
+                setView((v) => ({ ...v, tx: v.tx + pan[0]! * step, ty: v.ty + pan[1]! * step }));
+                return;
+              }
+              if (e.key === "+" || e.key === "=" || e.key === "-") {
+                e.preventDefault();
+                const factor = e.key === "-" ? 1 / 1.2 : 1.2;
+                setView((v) => ({ ...v, k: Math.min(4, Math.max(0.4, v.k * factor)) }));
+                return;
+              }
+              if (e.key === "0") {
+                e.preventDefault();
+                setView({ k: 1, tx: 0, ty: 0 });
+                return;
+              }
+              if (e.key === "Tab" && graph.nodes.length > 0) {
+                e.preventDefault();
+                const next =
+                  (walked + (e.shiftKey ? -1 : 1) + graph.nodes.length) % graph.nodes.length;
+                setWalked(next);
+                setHovered(graph.nodes[next]!.id);
+              }
+            }}
             onWheel={(e: React.WheelEvent) => {
               const k = Math.min(4, Math.max(0.4, view.k * (e.deltaY < 0 ? 1.12 : 1 / 1.12)));
               setView((v) => ({ ...v, k }));

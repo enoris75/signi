@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useRef, useState, type KeyboardEvent } from 'react';
 import {
   Box,
   Paper,
@@ -14,6 +14,7 @@ import { LANGUAGES } from '@signi/shared';
 import type { SentenceResult } from '../hooks/useTranslation.ts';
 import { FLAG } from '../i18n/flags.ts';
 import { useUiString } from '../i18n/useUiString.ts';
+import { focusRing } from '../keyboard/focusRing.ts';
 
 /** Render furigana segments: a reading `r` becomes <ruby>t<rt>r</rt></ruby>; plain runs stay text. */
 function RubyText({ segments }: { segments: RubySegment[] }) {
@@ -47,6 +48,23 @@ export default function TranslationPanel({ sentences }: Props) {
   const ready = sentences.filter((s) => s.isReady);
   const t = useUiString();
   const heading = t('translations.heading');
+  const listRef = useRef<HTMLDivElement | null>(null);
+
+  // The rows are a list, so they are walked like one: ↑ ↓ between languages, and ↵ or C copies
+  // the one the cursor is on (the plan's §4.6). Each row is its own tab stop as well, since a
+  // reader may want to tab straight to the language they are checking.
+  function onKeyDown(event: KeyboardEvent) {
+    const delta = event.key === 'ArrowDown' ? 1 : event.key === 'ArrowUp' ? -1 : 0;
+    if (!delta) return;
+    const rows = Array.from(
+      listRef.current?.querySelectorAll<HTMLElement>('[data-kb-lang]') ?? [],
+    );
+    const at = rows.findIndex((row) => row.contains(document.activeElement));
+    const next = rows[Math.min(Math.max(at + delta, 0), rows.length - 1)];
+    if (!next) return;
+    event.preventDefault();
+    next.focus();
+  }
 
   return (
     <Paper elevation={0} sx={{ p: 3, border: '1px solid', borderColor: 'divider', height: '100%' }}>
@@ -71,7 +89,7 @@ export default function TranslationPanel({ sentences }: Props) {
           Select at least a subject and a verb to see translations.
         </Typography>
       ) : (
-        <Box>
+        <Box ref={listRef} onKeyDown={onKeyDown}>
           {LANGUAGE_CODES.map((language, idx) => (
             <LanguageRow
               key={language}
@@ -120,11 +138,28 @@ function LanguageRow({
   return (
     <Box
       data-testid={`translation-${language}`}
+      data-kb-lang={language}
+      tabIndex={0}
+      aria-label={name}
+      // ↵ and C copy the row the cursor is on; the button is reachable in its own right too.
+      onKeyDown={(event) => {
+        if (event.target !== event.currentTarget) return;
+        if (event.key !== 'Enter' && event.key.toLowerCase() !== 'c') return;
+        if (!text) return;
+        event.preventDefault();
+        void handleCopy();
+      }}
       sx={{
         py: 1.75,
+        px: 1,
+        mx: -1,
+        borderRadius: 1,
         borderBottom: isLast ? 'none' : '1px solid',
         borderColor: 'divider',
-        '&:hover .copy-btn': { opacity: 1 },
+        // The copy button is drawn only for the row in hand — under the mouse, or under the
+        // cursor. Before this it showed on hover alone, so a keyboard never reached it.
+        '&:hover .copy-btn, &:focus-within .copy-btn': { opacity: 1 },
+        ...focusRing('primary'),
       }}
     >
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.75, mb: 0.5 }}>

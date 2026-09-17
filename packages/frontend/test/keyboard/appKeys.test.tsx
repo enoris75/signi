@@ -1,0 +1,163 @@
+import { describe, expect, it, vi } from 'vitest';
+import { act, fireEvent, screen, within } from '@testing-library/react';
+import App from '../../src/App.tsx';
+import { renderWithProviders } from '../render.tsx';
+
+// jsdom has no ResizeObserver, no layout and no pointer capture; the canvas reads all three.
+vi.mock('../../src/components/PhraseBuilder/hooks/useElementSize.ts', () => ({
+  useElementSize: (_ref: unknown, initial: { w: number; h: number }) => initial,
+}));
+vi.mock('../../src/components/PhraseBuilder/hooks/useCornerOverlap.ts', () => ({
+  useCornerOverlap: () => ({ w: 0, h: 0 }),
+}));
+vi.mock('../../src/components/PhraseBuilder/hooks/useOverlapResolution.ts', () => ({
+  useOverlapResolution: () => {},
+}));
+// The panel's word map loads the entire lexicon; the panel itself is what these tests drive.
+vi.mock('../../src/components/WordMap/WordMap.tsx', () => ({
+  WordMap: ({ open }: { open: boolean }) => (open ? <div data-testid="word-map" /> : null),
+}));
+// The translations come from the backend; the panel's rows are what these tests drive.
+vi.mock('../../src/hooks/useTranslation.ts', () => ({ useTranslations: () => [] }));
+
+Element.prototype.setPointerCapture = () => {};
+// The words panel measures the sticky header to know where to start.
+globalThis.ResizeObserver = class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+} as unknown as typeof ResizeObserver;
+
+const CONCEPTS = {
+  noun: [{ id: 'CAT', role: 'noun' as const, description: 'a cat', label: 'cat' }],
+  pronoun: [],
+  verb: [],
+  adjective: [],
+  adverb: [],
+};
+
+function renderApp() {
+  return renderWithProviders(<App />, { concepts: CONCEPTS });
+}
+
+/** A keystroke, to whatever holds the cursor. */
+const press = (key: string, held: Record<string, boolean> = {}) => {
+  act(() => {
+    fireEvent.keyDown(document.activeElement ?? document.body, { key, ...held });
+  });
+};
+const focus = (el: HTMLElement) => act(() => el.focus());
+const region = (name: string) =>
+  document.querySelector<HTMLElement>(`[data-kb-region="${name}"]`)!;
+const activeRegion = () =>
+  document.activeElement?.closest('[data-kb-region]')?.getAttribute('data-kb-region') ?? null;
+
+describe('the keys that work anywhere', () => {
+  it('opens the shortcuts sheet on ?, generated from the keymaps', () => {
+    renderApp();
+
+    press('?');
+
+    const sheet = screen.getByRole('dialog');
+    // Every level is listed, and each row carries the key it is actually bound to.
+    expect(within(sheet).getByText('Anywhere')).toBeInTheDocument();
+    expect(within(sheet).getByText('Period')).toBeInTheDocument();
+    expect(within(sheet).getByText('Noun')).toBeInTheDocument();
+    expect(within(sheet).getByText('Tense')).toBeInTheDocument();
+    expect(within(sheet).getByText('If-condition')).toBeInTheDocument();
+  });
+
+  it('draws the Ctrl caps for whichever platform the switch is on', () => {
+    renderApp();
+    press('?');
+    const sheet = screen.getByRole('dialog');
+
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Windows & Linux' }));
+    expect(within(sheet).getAllByText('Ctrl').length).toBeGreaterThan(0);
+
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Mac' }));
+    expect(within(sheet).queryByText('Ctrl')).not.toBeInTheDocument();
+    expect(within(sheet).getAllByText('⌘').length).toBeGreaterThan(0);
+  });
+
+  // Ctrl O is the header's Load, which the key presses where it stands so its dialog hangs off
+  // it. (Ctrl S is Save, which the header disables until there is something to save.)
+  it('presses the header’s own controls on the Ctrl chords', () => {
+    renderApp();
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument();
+
+    press('o', { ctrlKey: true });
+
+    expect(screen.getByRole('dialog')).toBeInTheDocument();
+  });
+
+  it('shows and hides the words panel on Ctrl B', () => {
+    renderApp();
+    expect(region('words')).toHaveAttribute('inert');
+
+    press('b', { ctrlKey: true });
+    expect(region('words')).not.toHaveAttribute('inert');
+
+    press('b', { ctrlKey: true });
+    expect(region('words')).toHaveAttribute('inert');
+  });
+
+  // A chord is never what someone is typing, so the app's keys reach through an open picker.
+  it('works from inside a word picker, where the bare keys do not', () => {
+    renderApp();
+    const input = screen.getByTestId('typeahead-subject');
+    focus(input);
+
+    press('b', { ctrlKey: true });
+
+    expect(region('words')).not.toHaveAttribute('inert');
+  });
+});
+
+describe('walking the page with F6', () => {
+  it('goes round the regions in order, and back', () => {
+    renderApp();
+    focus(screen.getByTestId('typeahead-subject'));
+    expect(activeRegion()).toBe('periods');
+
+    // Nothing is translated yet and the words panel is hidden, so neither is a place to go: the
+    // walk carries past them to the header rather than stopping dead.
+    press('F6');
+    expect(activeRegion()).toBe('header');
+
+    press('F6');
+    expect(activeRegion()).toBe('periods');
+
+    press('F6', { shiftKey: true });
+    expect(activeRegion()).toBe('header');
+  });
+
+  it('comes back to where a region was left', () => {
+    renderApp();
+    const input = screen.getByTestId('typeahead-subject');
+    focus(input);
+
+    press('F6');
+    press('F6');
+
+    expect(activeRegion()).toBe('periods');
+    expect(document.activeElement).toBe(input);
+  });
+});
+
+describe('the header as one toolbar stop', () => {
+  it('walks its controls with the arrows, and keeps one tab stop', () => {
+    renderApp();
+    const controls = Array.from(region('header').querySelectorAll<HTMLElement>('[data-kb-toolbar]'));
+    focus(controls[0]!);
+
+    press('ArrowRight');
+    expect(document.activeElement).toBe(controls[1]);
+
+    press('ArrowLeft');
+    expect(document.activeElement).toBe(controls[0]);
+
+    // Exactly one of them is in the page's tab order; the rest are reached from it.
+    expect(controls.filter((c) => c.getAttribute('tabindex') === '0')).toHaveLength(1);
+  });
+});

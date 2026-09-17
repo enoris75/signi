@@ -138,6 +138,31 @@ export interface PeriodContext {
   resize: (delta: number) => void;
 }
 
+/**
+ * What a key pressed *anywhere* acts on: the page itself. These are the only chords the app binds —
+ * <kbd>Ctrl</kbd> where an app conventionally uses it — plus the two keys that are about the page
+ * rather than about the phrase: the shortcuts sheet, and the walk between regions.
+ */
+export interface AppContext {
+  /** The header's own four, pressed where they stand so their dialogs hang off them. */
+  saveWorkspace: () => void;
+  loadWorkspace: () => void;
+  exportWorkspace: () => void;
+  importWorkspace: () => void;
+  /** Show or hide the words panel, putting the cursor inside it when it opens. */
+  toggleWords: () => void;
+  /** The ? sheet, which lists every binding there is. */
+  toggleSheet: () => void;
+}
+
+/** The context an app command runs against. */
+export type AppKeyContext = AppContext & { nav: RegionNav };
+
+/** Moving between the page's landmarks, which is the only movement the app level has. */
+export interface RegionNav {
+  step: (delta: 1 | -1) => void;
+}
+
 /** The context a box command runs against: the box, and the cursor's own movement. */
 export type BoxKeyContext = BoxContext & { nav: CursorNav };
 /** The context a period command runs against. */
@@ -604,6 +629,78 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
       ctx.setImperativeRegister(
         ctx.imperative.register === "instruction" ? "request" : "instruction",
       ),
+  },
+];
+
+/**
+ * The keys that work wherever the cursor is (the plan's §4.1).
+ *
+ * <kbd>Ctrl</kbd> is used only where an app conventionally uses it — save, open, undo — and the
+ * chords the browser owns (<kbd>Ctrl</kbd><kbd>N</kbd>, <kbd>T</kbd>, <kbd>W</kbd>, <kbd>L</kbd>,
+ * the digits) are never bound. These are looked up last, after the level the cursor is on, so a
+ * bare letter is always the level's before it is the app's.
+ */
+export const APP_KEYMAP: Command<AppKeyContext>[] = [
+  {
+    id: "app.sheet",
+    scope: "app",
+    keys: ["?"],
+    label: "Keyboard shortcuts",
+    run: (ctx) => ctx.toggleSheet(),
+  },
+  {
+    id: "app.region.next",
+    scope: "app",
+    keys: ["F6"],
+    label: "Next region",
+    run: (ctx) => ctx.nav.step(1),
+  },
+  {
+    id: "app.region.previous",
+    scope: "app",
+    keys: ["Shift+F6"],
+    label: "Previous region",
+    run: (ctx) => ctx.nav.step(-1),
+  },
+  {
+    id: "app.save",
+    scope: "app",
+    keys: ["Mod+S"],
+    label: "Save the workspace",
+    labelKey: "action.save.tooltip",
+    run: (ctx) => ctx.saveWorkspace(),
+  },
+  {
+    id: "app.load",
+    scope: "app",
+    keys: ["Mod+O"],
+    label: "Load a workspace",
+    labelKey: "action.load.tooltip",
+    run: (ctx) => ctx.loadWorkspace(),
+  },
+  {
+    id: "app.export",
+    scope: "app",
+    keys: ["Mod+Shift+S"],
+    label: "Export as JSON",
+    labelKey: "action.export.tooltip",
+    run: (ctx) => ctx.exportWorkspace(),
+  },
+  {
+    id: "app.import",
+    scope: "app",
+    keys: ["Mod+Shift+O"],
+    label: "Import JSON",
+    labelKey: "action.import.tooltip",
+    run: (ctx) => ctx.importWorkspace(),
+  },
+  {
+    id: "app.words",
+    scope: "app",
+    keys: ["Mod+B"],
+    label: "Show or hide the words",
+    labelKey: "words.heading",
+    run: (ctx) => ctx.toggleWords(),
   },
 ];
 

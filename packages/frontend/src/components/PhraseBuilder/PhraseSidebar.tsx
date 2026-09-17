@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type KeyboardEvent } from "react";
 import { Box, Typography, Divider, IconButton, Tooltip, Paper } from "@mui/material";
 import CloseIcon from "@mui/icons-material/Close";
 import HubIcon from "@mui/icons-material/Hub";
@@ -7,6 +7,7 @@ import ConceptPalette from "../ConceptPalette.tsx";
 import { WordMap } from "../WordMap/WordMap.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { useWindowDrag } from "../../hooks/useWindowDrag.ts";
+import { boxOf } from "../../keyboard/boxes.ts";
 import { SIDEBAR_WIDTH_KEY } from "./storageKeys.ts";
 import {
   PhraseSelection,
@@ -71,11 +72,72 @@ export function PhraseSidebar({
   const headerOffset = useHeaderOffset();
   const t = useUiString();
   const startDrag = useWindowDrag();
+  const listRef = useRef<HTMLDivElement | null>(null);
+  // What the cursor was on when the panel took it, so esc can put it back there.
+  const cameFrom = useRef<HTMLElement | null>(null);
+
+  const words = () =>
+    Array.from(listRef.current?.querySelectorAll<HTMLElement>("[data-kb-word]") ?? []);
+
+  /** Back to the canvas, at the box the panel was opened from. */
+  function leave() {
+    const back = cameFrom.current;
+    (back?.isConnected ? back : document.querySelector<HTMLElement>("[data-kb-box]"))?.focus();
+  }
+
+  /**
+   * The panel's own keys (the plan's §4.6): ↑ ↓ walk the words, typing jumps to the first one
+   * that starts with what was typed, M opens the word map, and esc goes back to the canvas.
+   * Choosing a word is the button's own ↵, which also returns the cursor (see onSelect below).
+   */
+  function onKeyDown(event: KeyboardEvent) {
+    if (event.key === "Escape") {
+      event.preventDefault();
+      leave();
+      return;
+    }
+    if (event.key.toLowerCase() === "m" && !event.metaKey && !event.ctrlKey) {
+      event.preventDefault();
+      setMapOpen(true);
+      return;
+    }
+    const all = words();
+    const delta = event.key === "ArrowDown" ? 1 : event.key === "ArrowUp" ? -1 : 0;
+    if (delta) {
+      const at = all.findIndex((w) => w === document.activeElement);
+      const next = all[Math.min(Math.max(at + delta, 0), all.length - 1)];
+      if (next) {
+        event.preventDefault();
+        next.focus();
+      }
+      return;
+    }
+    // Type to jump: a letter goes to the first word that starts with it, the way a long list of
+    // names is navigated anywhere else.
+    if (event.key.length !== 1 || event.metaKey || event.ctrlKey) return;
+    const letter = event.key.toLowerCase();
+    const hit = all.find((w) => (w.textContent ?? "").trim().toLowerCase().startsWith(letter));
+    if (!hit) return;
+    event.preventDefault();
+    hit.focus();
+  }
 
   return (
     <Paper
       elevation={8}
       square
+      data-kb-region="words"
+      // Off-screen while hidden, and inert with it: `pointerEvents: none` kept the mouse out but
+      // left every word in the page's tab order, so ⇥ wandered into a panel nobody could see.
+      // Spread as an attribute: React 18 does not type `inert`, and the browser reads the
+      // attribute rather than the property.
+      {...(open ? {} : ({ inert: "" } as Record<string, unknown>))}
+      onKeyDown={onKeyDown}
+      onFocusCapture={(event) => {
+        // Remember where the cursor came from, so esc can put it back on that box.
+        const from = boxOf(event.relatedTarget as Element | null);
+        if (from) cameFrom.current = from;
+      }}
       sx={{
         position: "fixed",
         top: headerOffset,
@@ -180,13 +242,16 @@ export function PhraseSidebar({
           </Tooltip>
         </Box>
       </Box>
-      <Box sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
+      <Box ref={listRef} sx={{ flex: 1, overflowY: "auto", px: 1.5, py: 1 }}>
         {activeSlotConfig ? (
           activeSlotConfig.roles.map((role) => (
             <ConceptPalette
               key={role}
               role={role}
-              onSelect={(c) => onConceptSelect(c, activeSlot as SlotKey)}
+              onSelect={(c) => {
+                onConceptSelect(c, activeSlot as SlotKey);
+                leave();
+              }}
               selectedId={selection[activeSlot as SlotKey]?.id}
             />
           ))
@@ -207,6 +272,7 @@ export function PhraseSidebar({
                   onSelect={(c) => {
                     onSlotClick(slot.key);
                     onConceptSelect(c, slot.key);
+                    leave();
                   }}
                   selectedId={selection[slot.key]?.id}
                 />

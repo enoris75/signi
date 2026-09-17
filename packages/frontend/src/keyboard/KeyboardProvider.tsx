@@ -10,9 +10,11 @@ import {
 import type { SlotKey } from "../components/PhraseBuilder/interfaces.ts";
 import { currentPlatform, matchesKeySpec, type Platform } from "./matchKey.ts";
 import {
+  APP_KEYMAP,
   KEYMAP,
   PERIOD_KEYMAP,
   resolveCommand,
+  type AppContext,
   type BoxContext,
   type BoxKeyContext,
   type Command,
@@ -20,8 +22,10 @@ import {
   type PeriodContext,
   type PeriodKeyContext,
   type PeriodNav,
+  type RegionNav,
 } from "./keymap.ts";
 import { boxElements, periodOf, stepBox, stepPeriod } from "./boxes.ts";
+import { stepRegion } from "./regions.ts";
 import { isEditableTarget, resolveScopes, type Scope } from "./scope.ts";
 import { nearestInDirection, type BoxRect, type Direction } from "./spatialNav.ts";
 
@@ -48,6 +52,11 @@ export interface BoxScope {
 /** A period card's live bridge into its own controls, swapped on every one of its renders. */
 export interface PeriodScope {
   build: () => PeriodContext | null;
+}
+
+/** The page's own bridge: the controls the Ctrl keys press, published once by App. */
+export interface AppScope {
+  build: () => AppContext | null;
 }
 
 /**
@@ -79,6 +88,7 @@ interface Store {
   cursor: Cursor | null;
   scope: BoxScope | null;
   period: PeriodScope | null;
+  app: AppScope | null;
   modality: Modality;
   platform: Platform;
   listeners: Set<() => void>;
@@ -90,11 +100,15 @@ interface Store {
 const StoreContext = createContext<Store | null>(null);
 const ScopeContext = createContext<BoxScope | null>(null);
 
+/** Moving between the page's landmarks — the app level's only movement. */
+const regionNav: RegionNav = { step: (delta) => stepRegion(document.activeElement, delta) };
+
 function createStore(platform: Platform): Store {
   const store: Store = {
     cursor: null,
     scope: null,
     period: null,
+    app: null,
     modality: "pointer",
     platform,
     listeners: new Set(),
@@ -192,11 +206,24 @@ function periodNav(element: HTMLElement): PeriodNav {
   };
 }
 
-export function KeyboardProvider({ children }: { children: ReactNode }) {
+export function KeyboardProvider({
+  app,
+  children,
+}: {
+  /**
+   * What the app's own keys press (see AppContext). Taken as a prop rather than through a hook
+   * because the page that owns those controls is the one that *renders* this provider, and so
+   * sits above its context.
+   */
+  app?: () => AppContext | null;
+  children: ReactNode;
+}) {
   const platform = useMemo(currentPlatform, []);
   const store = useRef<Store | null>(null);
   store.current ??= createStore(platform);
   const value = store.current;
+  // Replaced every render, like a builder's own scope, so a command runs against the page as it is.
+  value.app = app ? { build: app } : null;
 
   useEffect(() => {
     const setModality = (modality: Modality) => {
@@ -213,10 +240,21 @@ export function KeyboardProvider({ children }: { children: ReactNode }) {
       if (!event.metaKey && !event.ctrlKey && !event.altKey) setModality("keyboard");
       // An open word picker is a text field, and it owns every key inside it (the plan's §4.5
       // gives it a map of its own in phase 2).
-      if (isEditableTarget(event.target)) return;
-      const cursor = value.cursor;
-      if (!cursor) return;
       const matches = (spec: string) => matchesKeySpec(spec, event, value.platform);
+      // The app's keys work wherever the cursor is — including inside a word picker, since a
+      // chord is never what someone is typing. They are looked up *last*, so a bare letter is
+      // always the level's before it is the app's.
+      const appKeys = () => run(APP_KEYMAP, ["app"], matches, value.app?.build(), regionNav);
+      // An open word picker is a text field, and it owns every bare key inside it (§4.5).
+      if (isEditableTarget(event.target)) {
+        if (appKeys()) event.preventDefault();
+        return;
+      }
+      const cursor = value.cursor;
+      if (!cursor) {
+        if (appKeys()) event.preventDefault();
+        return;
+      }
       // The cursor's level picks the keymap, so a box key and a period key never see each other's
       // context — nor each other's letter (the plan's §2).
       const taken =
@@ -235,7 +273,7 @@ export function KeyboardProvider({ children }: { children: ReactNode }) {
               value.period?.build(),
               periodNav(cursor.element),
             );
-      if (taken) event.preventDefault();
+      if (taken || appKeys()) event.preventDefault();
     };
 
     window.addEventListener("keydown", onKeyDown);
@@ -253,9 +291,9 @@ export function KeyboardProvider({ children }: { children: ReactNode }) {
  * Look a keystroke up in one level's keymap and run what it finds. Answers whether the keystroke
  * was taken — a command may decline it (the walk off the last box), leaving it to the browser.
  */
-function run<L extends object, N extends CursorNav>(
+function run<L extends object, N>(
   commands: readonly Command<L & { nav: N }>[],
-  scopes: Scope[],
+  scopes: readonly Scope[],
   matches: (spec: string) => boolean,
   level: L | null | undefined,
   nav: N,
