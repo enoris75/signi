@@ -48,7 +48,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (13 of them,
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (16 of them,
 as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
@@ -64,6 +64,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A142 | [A142-direction-adverb-before-object.md](A-must-fix/A142-direction-adverb-before-object.md) |
 | A143 | [A143-german-add-goal-takes-zu.md](A-must-fix/A143-german-add-goal-takes-zu.md) |
 | A144 | [A144-german-label-inherent-adjective.md](A-must-fix/A144-german-label-inherent-adjective.md) |
+| A145 | [A145-italian-stacked-prenominal-adjectives.md](A-must-fix/A145-italian-stacked-prenominal-adjectives.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

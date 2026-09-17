@@ -1552,6 +1552,56 @@ describe('known bugs: French bel/nouvel/vieil before a vowel', () => {
   });
 });
 
+// A145. `splitAdjectives` (it) sends EVERY adjective in PRENOMINAL to the front of the noun, so a
+// phrase with two of them stacks both ("il bel grande angelo") and three stacks three ("il grande
+// vecchio bell'angelo"). Italian takes at most one qualifying adjective before its noun; the rest
+// follow it, coordinated the way A27 already joins a postnominal list. The allomorphy is not at
+// fault — `prenominalChain` picks bel / bei / begli / bell' correctly against whatever follows, and
+// a single prenominal adjective ("il bell'angelo", "pochi begli angeli") is right today. Only the
+// split is wrong: `pre` should keep the first and demote the rest to `post`.
+//
+// it.consts' PRENOMINAL comment calls the stacking a deliberate trade-off of putting both size
+// adjectives in the set; that comment goes when this is fixed.
+//
+// French is deliberately NOT part of this: it stacks two prenominal adjectives idiomatically ("un
+// beau grand jardin", "de beaux grands anges"), so only its three-adjective case reads wrong, and
+// the right target there is a separate call. The regression below pins French unchanged.
+describe('known bugs: Italian stacked prenominal adjectives', () => {
+  const cries = (concept: string, adjectives: string[], extra = {}) =>
+    sayAll(clause(np(concept, { adjectives, ...extra }), 'CRY_OUT'));
+
+  test.fails('Italian keeps one adjective before the noun and puts the rest after it', () => {
+    expect(cries('ANGEL', ['BEAUTIFUL', 'BIG']).it).toBe("il bell'angelo grande grida.");
+    expect(cries('CAT', ['BEAUTIFUL', 'BIG']).it).toBe('il bel gatto grande grida.');
+    expect(cries('ANGEL', ['OLD', 'BEAUTIFUL']).it).toBe('il vecchio angelo bello grida.');
+  });
+
+  test.fails('the demoted adjectives coordinate as a list (A27)', () => {
+    expect(cries('ANGEL', ['BIG', 'OLD', 'BEAUTIFUL']).it).toBe('il grande angelo vecchio e bello grida.');
+    expect(cries('CAT', ['BIG', 'OLD', 'BEAUTIFUL']).it).toBe('il grande gatto vecchio e bello grida.');
+  });
+
+  test.fails('the surviving prenominal adjective agrees with the noun it now precedes', () => {
+    // "begli" (not "bei") once "grandi" no longer stands between "bello" and the vowel of "angeli".
+    expect(cries('ANGEL', ['BEAUTIFUL', 'BIG'], { number: 'plural', definiteness: 'few' }).it)
+      .toBe('pochi begli angeli grandi gridano.');
+    expect(cries('ANGEL', ['BIG', 'OLD', 'BEAUTIFUL'], { number: 'plural', definiteness: 'few' }).it)
+      .toBe('pochi grandi angeli vecchi e belli gridano.');
+  });
+
+  test('regression: one prenominal adjective, a postnominal one, and French are already right', () => {
+    expect(cries('ANGEL', ['BEAUTIFUL']).it).toBe("il bell'angelo grida.");
+    expect(cries('ANGEL', ['BIG']).it).toBe('il grande angelo grida.');
+    expect(cries('ANGEL', ['HIGH']).it).toBe("l'angelo alto grida.");
+    expect(cries('ANGEL', ['BEAUTIFUL', 'HIGH'], { number: 'plural', definiteness: 'few' }).it)
+      .toBe('pochi begli angeli alti gridano.');
+    // French stacks two prenominal adjectives idiomatically and must not follow Italian here.
+    expect(cries('ANGEL', ['BEAUTIFUL', 'BIG']).fr).toBe('le beau grand ange crie.');
+    expect(cries('ANGEL', ['BEAUTIFUL', 'BIG'], { number: 'plural', definiteness: 'few' }).fr)
+      .toBe('peu de beaux grands anges crient.');
+  });
+});
+
 // A99. `pluralize` adds -es to a consonant-final adjective and never changes its written accent. A
 // word stressed on the syllable before the new -es needs an accent it doesn't have ("jovenes",
 // want "jóvenes"). An oxytone in -ón has to drop the one it has ("marrónes", want "marrones").
