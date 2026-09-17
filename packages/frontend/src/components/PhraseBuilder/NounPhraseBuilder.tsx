@@ -13,6 +13,14 @@ import { GroupBox } from "./GroupBox.tsx";
 import { adjectiveSlots } from "./slots.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { activatable } from "../../keyboard/activate.ts";
+import { Keycap } from "../../keyboard/Keycap.tsx";
+import { digitKeys, useMenuKeys } from "../../keyboard/useMenuKeys.ts";
+
+// The ten determiner values in menu order, each answering to the digit it is counted by: 1–9 then
+// 0, the order they sit on the keyboard.
+const DETERMINER_DIGITS = digitKeys(
+  DETERMINER_CATEGORIES.flatMap((category) => DETERMINER_CATEGORY_VALUES[category]),
+);
 
 // The determiner picker: the ten values are too many to cycle blindly, so the box opens a
 // menu grouped by the dimension each value belongs to — article / demonstrative / quantifier,
@@ -41,6 +49,9 @@ function DeterminerMenu({
   onClose: () => void;
 }) {
   const t = useUiString();
+  // A digit per row, counted down the menu as it is shown: the ten values are too many to cycle,
+  // and too many to arrow through, but each is one keystroke after the D that opened them.
+  useMenuKeys({ open, keys: DETERMINER_DIGITS, onPick: (v) => { onPick(v as Definiteness); onClose(); } });
   return (
     <Menu
       anchorEl={() => getAnchor()!}
@@ -66,6 +77,7 @@ function DeterminerMenu({
           <MenuItem
             key={v}
             selected={v === value}
+            aria-keyshortcuts={DETERMINER_DIGITS[v]}
             onClick={() => {
               onPick(v);
               onClose();
@@ -74,12 +86,15 @@ function DeterminerMenu({
               fontSize: "0.78rem",
               minHeight: 28,
               py: 0.25,
-              pl: 2.5,
+              pl: 1.25,
               gap: 1.5,
               justifyContent: "space-between",
             }}
           >
-            {t(`determiner.name.${v}`)}
+            <Box component="span" sx={{ display: "flex", alignItems: "center", gap: 1 }}>
+              <Keycap spec={DETERMINER_DIGITS[v]!} />
+              {t(`determiner.name.${v}`)}
+            </Box>
             <Box component="span" sx={{ color: "text.secondary", fontSize: "0.72rem" }}>
               {t(`determiner.value.${v}`)}
             </Box>

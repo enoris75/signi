@@ -1,10 +1,8 @@
-import { Box, InputBase, Popper, Paper } from "@mui/material";
 import { Concept } from "@signi/shared";
-import { useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
-import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
-import { ConceptOption } from "./ConceptOption.tsx";
+import { usePickerKeys } from "./hooks/usePickerKeys.ts";
+import { PickerList } from "./PickerList.tsx";
 
 export function VerbTypeahead({
   onSelect,
@@ -13,102 +11,21 @@ export function VerbTypeahead({
 }) {
   const { data: allVerbs = [] } = useConcepts("verb");
   const t = useUiString();
-  const matches = useConceptSearch();
   const prompt = `${t("slot.verb.placeholder")}…`;
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const [highlightedIdx, setHighlightedIdx] = useState(0);
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
   // Modals are verb concepts too, but they govern a verb rather than heading a clause,
   // so they belong in the modal slots (see ModalTypeahead), never here.
   const verbs = allVerbs.filter((v) => !v.modal);
-  const filtered = verbs.filter((v) => matches(v, query));
-
-  function commit(idx: number) {
-    const v = filtered[idx];
-    if (!v) return;
-    onSelect(v);
-    setOpen(false);
-    setQuery("");
-    setHighlightedIdx(0);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (!open || filtered.length === 0) return;
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      const next = Math.min(highlightedIdx + 1, filtered.length - 1);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      const next = Math.max(highlightedIdx - 1, 0);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      commit(highlightedIdx);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  }
+  const picker = usePickerKeys({ items: verbs, onSelect });
 
   return (
-    <Box
-      ref={anchorRef}
-      onPointerDown={(e) => e.stopPropagation()}
-      sx={{ mt: 0.25 }}
-    >
-      <InputBase
-        autoFocus
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setOpen(true);
-          setHighlightedIdx(0);
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
-        }}
-        onKeyDown={handleKeyDown}
-        placeholder={prompt}
-        // Size the field to its placeholder rather than the browser default
-        // (~20ch); otherwise the empty verb ring swells round a field far wider than
-        // the prompt it holds.
-        inputProps={{ size: prompt.length, "data-testid": "typeahead-verb" }}
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.8rem",
-          color: "text.primary",
-          "& input": { p: 0 },
-        }}
-      />
-      <Popper
-        open={open && filtered.length > 0}
-        anchorEl={anchorRef.current}
-        placement="bottom-start"
-        style={{ zIndex: 1300 }}
-        modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
-      >
-        <Paper
-          ref={listRef}
-          elevation={4}
-          sx={{ minWidth: 160, maxHeight: 200, overflow: "auto", py: 0.5 }}
-        >
-          {filtered.map((v, i) => (
-            <ConceptOption
-              key={v.id}
-              concept={v}
-              highlighted={i === highlightedIdx}
-              onMouseEnter={() => setHighlightedIdx(i)}
-              onClick={() => commit(i)}
-            />
-          ))}
-        </Paper>
-      </Popper>
-    </Box>
+    <PickerList
+      picker={picker}
+      placeholder={prompt}
+      // Size the field to its placeholder rather than the browser default (~20ch); otherwise the
+      // empty verb ring swells round a field far wider than the prompt it holds.
+      inputProps={{ size: prompt.length, "data-testid": "typeahead-verb" }}
+      fitToPlaceholder
+    />
   );
 }

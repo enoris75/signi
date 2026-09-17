@@ -113,6 +113,10 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     satelliteKeys: {},
     determinerMenuFor: null,
     onDeterminerMenu: vi.fn(),
+    complementMenuOpen: false,
+    onComplementMenu: vi.fn(),
+    toolbarFor: null,
+    onArmToolbar: vi.fn(),
     ...overrides,
   } as unknown as PhraseRenderContext;
   return { ctx, dragPointerDown };

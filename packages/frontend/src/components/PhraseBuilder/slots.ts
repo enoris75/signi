@@ -122,6 +122,22 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
 };
 
 /**
+ * The letter each complement answers to in the *Add a complement* menu (the plan's §3.7): the
+ * initial of its English name, and no two collide.
+ */
+export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
+  predicative: "P",
+  terminus: "T",
+  instrumental: "I",
+  manner: "M",
+  locative: "L",
+  direction: "D",
+  source: "S",
+  route: "R",
+  cause: "C",
+};
+
+/**
  * Every adjective slot names itself with the same word — the grammar noun "adjective", which is
  * what `category.adjective` already renders. The chain position ("Adjective 2") was never part of
  * the name: it disambiguated three identical English labels, and the boxes are told apart by where

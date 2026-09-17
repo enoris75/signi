@@ -20,8 +20,9 @@ export interface TypeaheadSpec {
   otherConcepts?: Seed['concepts'];
   // For a picker that pins a `header` (the category switch) above its rows.
   renderWithHeader?: (header: ReactNode) => ReactElement;
-  // The verb and modal pickers ignore every key while closed, so ArrowDown cannot reopen them.
-  reopensOnArrowDown?: boolean;
+  // A picker with a category switch has somewhere above its first row to go: ↑ from there moves
+  // the cursor up into the tabs, where ← → change vocabulary (see usePickerKeys).
+  hasTabs?: boolean;
   // The subject picker's dropdown also holds its tabs, so it stays open when nothing matches.
   staysOpenWhenNothingMatches?: boolean;
 }
@@ -152,15 +153,27 @@ export function describeTypeahead(spec: TypeaheadSpec) {
       expect(onSelect).toHaveBeenCalledExactlyOnceWith(HIGH);
     });
 
-    it('moves the highlight up with ArrowUp, stopping at the first row', () => {
+    it('moves the highlight up with ArrowUp', () => {
       const { input, onSelect } = setup();
 
       press(input, 'ArrowDown');
-      for (let i = 0; i < 3; i++) press(input, 'ArrowUp');
+      press(input, 'ArrowDown');
+      press(input, 'ArrowUp');
       press(input, 'Enter');
 
-      expect(onSelect).toHaveBeenCalledExactlyOnceWith(HARD);
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(LATE);
     });
+
+    if (!spec.hasTabs) {
+      it('stops at the first row, there being nothing above it', () => {
+        const { input, onSelect } = setup();
+
+        for (let i = 0; i < 3; i++) press(input, 'ArrowUp');
+        press(input, 'Enter');
+
+        expect(onSelect).toHaveBeenCalledExactlyOnceWith(HARD);
+      });
+    }
 
     it('scrolls the newly highlighted row into view', () => {
       const scrollIntoView = vi.spyOn(Element.prototype, 'scrollIntoView');
@@ -183,6 +196,43 @@ export function describeTypeahead(spec: TypeaheadSpec) {
       expect(onSelect).toHaveBeenCalledExactlyOnceWith(HARD);
     });
 
+    // ⇥ is "choose, and move on": a fresh pick auto-advances to the next *empty* box, which is not
+    // always the next box along, and a re-pick advances nowhere at all.
+    it('takes the highlighted word on Tab', () => {
+      const { input, onSelect } = setup();
+
+      typeInto(input, 'h');
+      press(input, 'Tab');
+
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(HARD);
+      expect(input).toHaveValue('');
+    });
+
+    it('takes nothing on Tab with nothing typed — it is only a move', () => {
+      const { input, onSelect } = setup();
+
+      press(input, 'Tab');
+
+      expect(onSelect).not.toHaveBeenCalled();
+    });
+
+    // esc steps out exactly one level: the first closes the list and is kept, the second is left
+    // for the box the picker sits in, which is what takes the cursor back out to the canvas.
+    it('closes on the first Escape and leaves the second for the box', () => {
+      const onBoxKeyDown = vi.fn();
+      const { input } = renderTypeahead(
+        spec,
+        <div onKeyDown={onBoxKeyDown}>{spec.render(() => {})}</div>,
+      );
+
+      press(input, 'Escape');
+      expect(listed()).toEqual([]);
+      expect(onBoxKeyDown).not.toHaveBeenCalled();
+
+      press(input, 'Escape');
+      expect(onBoxKeyDown).toHaveBeenCalledOnce();
+    });
+
     it('commits the row clicked', () => {
       const { onSelect } = setup();
 
@@ -201,39 +251,23 @@ export function describeTypeahead(spec: TypeaheadSpec) {
       expect(onSelect).toHaveBeenCalledExactlyOnceWith(HIGH);
     });
 
-    if (spec.reopensOnArrowDown ?? true) {
-      it('closes on Escape and reopens on ArrowDown without moving the highlight', () => {
-        const { input, onSelect } = setup();
+    it('closes on Escape and reopens on ArrowDown without moving the highlight', () => {
+      const { input, onSelect } = setup();
 
-        press(input, 'ArrowDown');
-        press(input, 'Escape');
-        expect(listed()).toEqual([]);
+      press(input, 'ArrowDown');
+      press(input, 'Escape');
+      expect(listed()).toEqual([]);
 
-        press(input, 'Enter');
-        expect(onSelect).not.toHaveBeenCalled();
+      press(input, 'Enter');
+      expect(onSelect).not.toHaveBeenCalled();
 
-        // While closed, ArrowUp leaves the highlight alone too.
-        press(input, 'ArrowUp');
-        press(input, 'ArrowDown');
-        expect(listed()).toEqual(['HARD', 'LATE', 'HIGH']);
-        press(input, 'Enter');
-        expect(onSelect).toHaveBeenCalledExactlyOnceWith(LATE);
-      });
-    } else {
-      it('closes on Escape and stays closed on ArrowDown until the query changes', () => {
-        const { input, onSelect } = setup();
-
-        press(input, 'Escape');
-        press(input, 'ArrowDown');
-        expect(listed()).toEqual([]);
-
-        press(input, 'Enter');
-        expect(onSelect).not.toHaveBeenCalled();
-
-        typeInto(input, 'h');
-        expect(listed()).toEqual(['HARD', 'HIGH']);
-      });
-    }
+      // While closed, ArrowUp leaves the highlight alone too.
+      press(input, 'ArrowUp');
+      press(input, 'ArrowDown');
+      expect(listed()).toEqual(['HARD', 'LATE', 'HIGH']);
+      press(input, 'Enter');
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(LATE);
+    });
 
     it('stays open briefly after losing focus, so a click on a row still lands', () => {
       vi.useFakeTimers({ toFake: ['setTimeout', 'clearTimeout'] });

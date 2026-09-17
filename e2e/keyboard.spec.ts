@@ -31,11 +31,30 @@ async function watchForPointerEvents(page: Page): Promise<void> {
 const pointerEvents = (page: Page) => page.evaluate(() => window.__pointerEvents);
 
 /**
+ * Wait for the cursor to land in a word picker.
+ *
+ * Choosing a word advances to the next empty box, whose picker mounts and takes the cursor — a
+ * render later. Typing into the gap would put the first letters of the next word nowhere.
+ */
+async function pickerReady(page: Page): Promise<void> {
+  await expect
+    .poll(() => page.evaluate(() => document.activeElement?.tagName))
+    .toBe('INPUT');
+}
+
+/**
  * Choose a word from the picker that holds the cursor, by walking the highlight down to it with
  * ↓ and taking it with ↵. Naming the concept rather than trusting the first substring match is
  * what keeps "eat" from selecting BEAT (see the Builder fixture).
  */
-async function pickWord(page: Page, query: string, conceptId: string): Promise<void> {
+async function pickWord(
+  page: Page,
+  query: string,
+  conceptId: string,
+  // ↵ chooses; ⇥ chooses and moves on to the next box (the plan's §4.5).
+  commit: 'Enter' | 'Tab' = 'Enter',
+): Promise<void> {
+  await pickerReady(page);
   await page.keyboard.type(query);
   const highlighted = page.locator('[data-testid="typeahead-option"][data-highlighted]');
   await expect(highlighted).toBeVisible();
@@ -44,7 +63,7 @@ async function pickWord(page: Page, query: string, conceptId: string): Promise<v
     await page.keyboard.press('ArrowDown');
   }
   await expect(highlighted).toHaveAttribute('data-concept', conceptId);
-  await page.keyboard.press('Enter');
+  await page.keyboard.press(commit);
 }
 
 /** The box the cursor rests on, as the page reports it. */
@@ -138,6 +157,71 @@ test.describe('the canvas by keyboard', () => {
 
     await page.keyboard.press('o');
     await expect(page.getByTestId('box-directObject')).toBeVisible();
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
+  test('chooses a word without the picker’s mouse: tabs, the pronoun grid, and ⇥', async ({
+    app,
+    page,
+  }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    // ↑ from the first row moves up into the Noun / Pronoun tabs, → switches to the pronoun
+    // chooser, and its three rows are one grid: 1–4 a person, ↑ ↓ a row, ← → its value.
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('ArrowRight');
+    await expect(page.getByRole('tab', { name: 'Pronoun' })).toHaveAttribute(
+      'aria-selected',
+      'true',
+    );
+    await page.keyboard.press('2');
+    await page.keyboard.press('ArrowDown');
+    await page.keyboard.press('ArrowRight');
+    await page.keyboard.press('Enter');
+
+    // ⇥ takes the highlighted word and moves on to the next box.
+    await pickWord(page, 'eat', 'EAT', 'Tab');
+    expect(await cursorSlot(page)).toBe('directObject');
+
+    await pickWord(page, 'mouse', 'MOUSE');
+    await app.expectSentences({
+      en: 'you eat the mouse.',
+      // Italian drops a subject pronoun the verb's own ending already carries.
+      it: 'mangiate il topo.',
+    });
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
+  test('picks from every menu one keystroke after the key that opened it', async ({
+    app,
+    page,
+  }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'run', 'RUN');
+
+    // + gathers the complements this verb licenses; L adds the locative and lands in its picker.
+    await page.keyboard.press('+');
+    await expect(page.getByTestId('complement-row-locative')).toBeVisible();
+    await page.keyboard.press('l');
+    await pickWord(page, 'house', 'HOUSE');
+    await app.expectSentences({ en: 'the cat runs in the house.' });
+
+    // S points the next key at the locative's relation toolbar, where U is "under".
+    await page.keyboard.press('s');
+    await page.keyboard.press('u');
+    await app.expectSentences({ en: 'the cat runs under the house.' });
+
+    // D opens the determiner menu, where a digit counts down the rows.
+    await page.keyboard.press('d');
+    await expect(page.getByRole('menu')).toBeVisible();
+    await page.keyboard.press('2');
+    await app.expectSentences({ en: 'the cat runs under a house.' });
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });

@@ -14,9 +14,10 @@
  * `pick`, `translations` and `words` scopes are declared in `Scope` and filled by the later phases.
  */
 
-import type { UiStringKey } from "@signi/shared";
+import type { ImperativeRegister, UiStringKey } from "@signi/shared";
 import type {
   BoxComplementType,
+  ImperativePerson,
   NounKey,
   PhraseSelection,
   SlotKey,
@@ -70,6 +71,14 @@ export interface BoxContext {
   addConjunct: (which: NounKey) => void;
   cycleConjunction: (which: NounKey) => void;
   openDeterminerMenu: (which: NounKey) => void;
+  /** The verb's *Add a complement* menu — every complement it licenses, one keystroke each. */
+  openComplementMenu: () => void;
+  /** Point the next keystroke at a complement's relation toolbar, or at nothing (null). */
+  armToolbar: (slot: SlotKey | null) => void;
+  setImperativePerson: (person: ImperativePerson) => void;
+  setImperativeRegister: (register: ImperativeRegister) => void;
+  /** What the command box is showing, so its keys can tell a toggle from a no-op. */
+  imperative: { person: ImperativePerson; register: ImperativeRegister };
   toggleNumber: (which: NounKey) => void;
   toggleGender: (which: NounKey, step: 1 | -1) => void;
   toggleNegative: () => void;
@@ -151,6 +160,16 @@ const filled = (ctx: BoxContext) => Boolean(ctx.selection[ctx.slot]);
 
 /** Reveal `slot` and put the cursor in it; its satellite is named when it is folded away. */
 const goTo = (ctx: KeyContext, slot: SlotKey) => ctx.revealSlot(slot, slot);
+
+/** The complements whose ring carries a relation toolbar, which S points the next key at. */
+const TOOLBAR_SLOTS: SlotKey[] = ["route", "locative", "cause"];
+
+/** The command box's three addressees, counted the way its rows are stacked. */
+const IMPERATIVE_PERSONS: [ImperativePerson, string, string][] = [
+  ["2sg", "1", "You"],
+  ["1pl", "2", "Let’s"],
+  ["2pl", "3", "You all"],
+];
 
 // ── The map ───────────────────────────────────────────────────────────────────────────────────
 
@@ -321,6 +340,18 @@ export const KEYMAP: Command[] = [
     run: (ctx) => ctx.cycleConjunction(ctx.nounKey!),
   },
   {
+    id: "noun.relation",
+    scope: "box:noun",
+    keys: ["S"],
+    label: "Relation",
+    hint: true,
+    // The spatial complements carry a relation ("under the bed"), the cause an affective stance
+    // ("thanks to" / "because of" / "the fault of"). Both are toolbars already on the ring, so S
+    // points the next key at one rather than opening anything.
+    when: (ctx) => TOOLBAR_SLOTS.includes(ctx.slot) && Boolean(ctx.selection[ctx.slot]),
+    run: (ctx) => ctx.armToolbar(ctx.slot),
+  },
+  {
     id: "noun.removeComplement",
     scope: "box:noun",
     keys: ["Shift+Backspace"],
@@ -472,6 +503,15 @@ export const KEYMAP: Command[] = [
     run: (ctx) => goTo(ctx, adverbOf(ctx.slot)!),
   },
   {
+    id: "verb.complement",
+    scope: "box:verb",
+    keys: ["+", "="],
+    label: "Add a complement",
+    hint: true,
+    when: (ctx) => ctx.slot === "verb",
+    run: (ctx) => ctx.openComplementMenu(),
+  },
+  {
     id: "verb.object",
     scope: "box:verb",
     keys: ["O"],
@@ -481,6 +521,30 @@ export const KEYMAP: Command[] = [
     satellite: /^directObject$/,
     when: (ctx) => ctx.slot === "verb" && has(ctx, "directObject"),
     run: (ctx) => ctx.toggleReveal("directObject"),
+  },
+
+  // ── The command box, which a command puts in the subject's place ───────────────────────────
+  ...IMPERATIVE_PERSONS.map(([person, key, label]): Command => ({
+    id: `mood.person.${person}`,
+    scope: "box:mood",
+    keys: [key],
+    label,
+    // An instruction is addressed to nobody, so there is no person to choose (see
+    // ImperativeSubjectSelector, which drops the row for the same reason).
+    when: (ctx) => ctx.selection.imperative === true && ctx.imperative.register !== "instruction",
+    run: (ctx) => ctx.setImperativePerson(person),
+  })),
+  {
+    id: "mood.register",
+    scope: "box:mood",
+    keys: ["R"],
+    label: "Register",
+    hint: true,
+    when: (ctx) => ctx.selection.imperative === true,
+    run: (ctx) =>
+      ctx.setImperativeRegister(
+        ctx.imperative.register === "instruction" ? "request" : "instruction",
+      ),
   },
 ];
 

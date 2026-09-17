@@ -2,7 +2,10 @@ import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, screen, within } from '@testing-library/react';
 import { useState } from 'react';
 import type { Concept, GrammaticalRole } from '@signi/shared';
-import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
+import {
+  imperativeRegisterOf,
+  type PhraseSelection,
+} from '../../src/components/PhraseBuilder/interfaces.ts';
 import { PhraseBuilder } from '../../src/components/PhraseBuilder/PhraseBuilder.tsx';
 import { KeyboardProvider } from '../../src/keyboard/KeyboardProvider.tsx';
 import { renderWithProviders } from '../render.tsx';
@@ -43,6 +46,10 @@ const EAT = concept('EAT', 'verb', { transitivity: 'transitive' });
 const SLEEP = concept('SLEEP', 'verb', { transitivity: 'intransitive' });
 const BIG = concept('BIG', 'adjective');
 const CAN = concept('CAN', 'verb', { modal: true });
+const WALK = concept('WALK', 'verb', {
+  transitivity: 'intransitive',
+  complements: ['route', 'locative', 'cause', 'manner'],
+});
 const SEEM = concept('SEEM', 'verb', { transitivity: 'intransitive', complements: ['predicative'] });
 const HAPPY = concept('HAPPY', 'adjective');
 const NEVER = concept('NEVER', 'adverb');
@@ -50,7 +57,7 @@ const NEVER = concept('NEVER', 'adverb');
 const CONCEPTS = {
   noun: [CAT, FOOD, GIRL, SAIL],
   pronoun: [],
-  verb: [EAT, SLEEP, CAN, SEEM],
+  verb: [EAT, SLEEP, CAN, SEEM, WALK],
   adjective: [BIG, HAPPY],
   adverb: [NEVER],
 };
@@ -252,6 +259,123 @@ describe('the keys on the verb box', () => {
   });
 });
 
+describe('the menus a key opens', () => {
+  it('picks a determiner by its digit, one keystroke after the D', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: SLEEP });
+    cursorTo('subject');
+
+    press('d');
+    press('8');
+
+    expect(selection().subjectDefiniteness).toBe('many');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('lists exactly the complements the verb licenses, and adds the one its letter names', () => {
+    renderPeriod({ subject: CAT, verb: WALK });
+    cursorTo('verb');
+
+    press('+');
+
+    const rows = screen.getAllByRole('menuitem').map((row) => row.dataset['testid']);
+    // In the order their toggles ride the verb phrase's ring, so the menu reads as that row does.
+    expect(rows).toEqual([
+      'complement-row-manner',
+      'complement-row-locative',
+      'complement-row-route',
+      'complement-row-cause',
+    ]);
+
+    press('l');
+
+    expect(boxes()).toContain('locative');
+    expect(screen.queryByRole('menu')).not.toBeInTheDocument();
+  });
+
+  it('offers the object’s fold-away at the foot of that menu', () => {
+    renderPeriod({ subject: CAT, verb: EAT, directObject: FOOD });
+    cursorTo('verb');
+
+    press('+');
+    expect(screen.getAllByRole('menuitem').at(-1)!.dataset['testid']).toBe(
+      'complement-row-directObject',
+    );
+
+    press('o');
+
+    expect(boxes()).not.toContain('directObject');
+  });
+
+  it('points the next key at a complement’s relation toolbar on S', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: WALK, locative: FOOD });
+    cursorTo('locative');
+
+    press('s');
+    press('u');
+
+    expect(selection().locativeSpecifier).toBe('under');
+  });
+
+  it('counts the cause’s stances rather than lettering them', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: WALK, cause: FOOD });
+    cursorTo('cause');
+
+    press('s');
+    press('3');
+
+    expect(selection().causeSentiment).toBe('positive');
+  });
+
+  it('stops waiting when the next key is not one of the toolbar’s', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: WALK, locative: FOOD });
+    cursorTo('locative');
+
+    press('s');
+    press('Escape');
+    press('u');
+
+    expect(selection().locativeSpecifier).toBeUndefined();
+  });
+});
+
+describe('the keys on the command box', () => {
+  it('picks the addressee by its digit', () => {
+    const { selection } = renderPeriod({ imperative: true, verb: SLEEP });
+    cursorTo('subject');
+
+    press('2');
+    expect(selection().imperativePerson).toBe('1pl');
+
+    press('3');
+    expect(selection().imperativePerson).toBe('2pl');
+  });
+
+  it('turns the order into an instruction, and back', () => {
+    const { selection } = renderPeriod({ imperative: true, verb: SLEEP });
+    cursorTo('subject');
+
+    press('r');
+    expect(imperativeRegisterOf(selection())).toBe('instruction');
+
+    press('r');
+    expect(imperativeRegisterOf(selection())).toBe('request');
+  });
+
+  // An instruction is addressed to nobody, so its row is gone and its digits go with it.
+  it('offers no addressee under an instruction', () => {
+    const { selection } = renderPeriod({
+      imperative: true,
+      imperativeRegister: 'instruction',
+      verb: SLEEP,
+    });
+    cursorTo('subject');
+
+    press('2');
+
+    expect(selection().imperativePerson).toBeUndefined();
+  });
+});
+
 describe('the keys on an adjective box', () => {
   // A subject complement holds either a predicate noun ("becomes a legend") or a predicate
   // adjective ("seems happy"). It answers to both grammars, adjective first: the degree is the
@@ -333,6 +457,25 @@ describe('the keys every box shares', () => {
 
     press('Tab', { shiftKey: true });
     expect(boxNode('subject')).toHaveFocus();
+  });
+
+  // Choosing a word auto-advances to the next *empty* box; ⇥ says which box to land on instead,
+  // so a re-pick — which advances nowhere — still moves on.
+  it('takes the word and moves to the next box on ⇥ inside the picker', () => {
+    const { selection } = renderPeriod({ subject: CAT, verb: EAT, directObject: FOOD });
+    cursorTo('subject');
+    press('Enter');
+
+    const input = document.activeElement as HTMLInputElement;
+    act(() => {
+      fireEvent.change(input, { target: { value: 'gi' } });
+    });
+    act(() => {
+      fireEvent.keyDown(input, { key: 'Tab' });
+    });
+
+    expect(selection().subject).toEqual(GIRL);
+    expect(boxNode('verb')).toHaveFocus();
   });
 
   it('lets the browser have ⇥ once the walk is over, rather than trapping the cursor', () => {

@@ -11,7 +11,6 @@ describeTypeahead({
   traits: { modal: true },
   placeholder: 'type a modal…',
   render: (onSelect) => <ModalTypeahead onSelect={onSelect} />,
-  reopensOnArrowDown: false,
 });
 
 const verb = (id: string, label: string, modal?: boolean): Concept => ({

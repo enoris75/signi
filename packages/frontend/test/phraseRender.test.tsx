@@ -94,6 +94,10 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     satelliteKeys: {},
     determinerMenuFor: null,
     onDeterminerMenu: vi.fn(),
+    complementMenuOpen: false,
+    onComplementMenu: vi.fn(),
+    toolbarFor: null,
+    onArmToolbar: vi.fn(),
     ...overrides,
   };
   return { ctx, startDrag };
@@ -324,12 +328,16 @@ describe('SlotNode', () => {
       expect(ctx.handleSlotClick).not.toHaveBeenCalled();
     });
 
-    it('steps out of the open picker back onto the box on esc', () => {
+    // esc steps out exactly one level: the first closes the picker's list (its own handler, which
+    // keeps the key to itself), the second leaves the picker for the box it is in.
+    it('steps out of the open picker back onto the box on a second esc', () => {
       const { node } = renderNode('subject', { activeSlot: 'subject' });
       const input = screen.getByPlaceholderText('type a subject…');
 
       fireEvent.keyDown(input, { key: 'Escape' });
+      expect(node).not.toHaveFocus();
 
+      fireEvent.keyDown(input, { key: 'Escape' });
       expect(node).toHaveFocus();
     });
 
@@ -338,9 +346,12 @@ describe('SlotNode', () => {
         selection: { subject: CAT },
         editingSlot: 'subject',
       });
+      const input = screen.getByPlaceholderText('type a subject…');
 
-      fireEvent.keyDown(screen.getByPlaceholderText('type a subject…'), { key: 'Escape' });
+      fireEvent.keyDown(input, { key: 'Escape' });
+      expect(ctx.handleCancelEdit).not.toHaveBeenCalled();
 
+      fireEvent.keyDown(input, { key: 'Escape' });
       expect(node).toHaveFocus();
       expect(ctx.handleCancelEdit).toHaveBeenCalledExactlyOnceWith('subject');
     });

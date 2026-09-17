@@ -40,6 +40,7 @@ import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { SlotCategory, SlotConfig } from "./interfaces";
 import { clearTitle, revealTitle } from "./canvasCommands.ts";
 import { KeyTip } from "../../keyboard/KeyTip.tsx";
+import { digitKeys, useMenuKeys } from "../../keyboard/useMenuKeys.ts";
 import { keycapText } from "../../keyboard/matchKey.ts";
 import { useKeyPlatform } from "../../keyboard/KeyboardProvider.tsx";
 
@@ -573,6 +574,20 @@ export function DeterminerToggleBox({
   );
 }
 
+/**
+ * The letter each spatial relation answers to while its toolbar is armed: the initial of the
+ * English preposition, with "in front of" going by its F — I is plain "in".
+ */
+const SPECIFIER_KEYS: Record<PathSpecifier, string> = {
+  in: "I",
+  through: "T",
+  under: "U",
+  over: "O",
+  around: "A",
+  behind: "B",
+  in_front_of: "F",
+};
+
 const SPECIFIER_ICONS: Record<PathSpecifier, ReactNode> = {
   // Containment — the locative's default relation, and the one the route never falls back on.
   in: <VerticalAlignCenterIcon sx={{ fontSize: 15 }} />,
@@ -593,6 +608,9 @@ function RelationToolbar<V extends string>({
   value,
   labels,
   icons,
+  keys,
+  armed = false,
+  onDisarm,
   onSelect,
   placeAt,
 }: {
@@ -601,15 +619,34 @@ function RelationToolbar<V extends string>({
   value: V;
   labels: Record<V, string>;
   icons: Record<V, ReactNode>;
+  // The key each relation answers to while the toolbar is armed (see useMenuKeys).
+  keys: Record<V, string>;
+  // The complement's S has just been pressed, so the next key is a relation. The toolbar is not a
+  // menu — it is always on the ring — so it says which keys it is listening for only while it is.
+  armed?: boolean;
+  onDisarm?: () => void;
   onSelect: (v: V) => void;
   placeAt?: (v: V) => { x: number; y: number } | undefined;
 }) {
+  useMenuKeys({
+    open: armed,
+    keys,
+    onPick: (v) => {
+      onSelect(v as V);
+      onDisarm?.();
+    },
+    onDismiss: onDisarm,
+  });
   const button = (v: V) => {
     const selected = v === value;
     return (
-      <Tooltip key={v} title={labels[v]}>
+      // The tooltip shows the key; the accessible name does not — a screen reader would read the
+      // cap as part of the control's name (see SatelliteButton, for the same reason).
+      <Tooltip key={v} title={`${labels[v]}  ${keys[v]}`}>
         <IconButton
           size="small"
+          aria-label={labels[v]}
+          aria-keyshortcuts={keys[v]}
           onPointerDown={(e) => e.stopPropagation()}
           onClick={() => onSelect(v)}
           sx={{
@@ -629,6 +666,7 @@ function RelationToolbar<V extends string>({
           }}
         >
           {icons[v]}
+          <KeyTip spec={keys[v]} show={armed} />
         </IconButton>
       </Tooltip>
     );
@@ -683,10 +721,14 @@ function RelationToolbar<V extends string>({
 // relations; the caller passes the value (and so the default) its own complement carries.
 export function SpecifierSelector({
   value,
+  armed,
+  onDisarm,
   onSelect,
   placeAt,
 }: {
   value: PathSpecifier;
+  armed?: boolean;
+  onDisarm?: () => void;
   onSelect: (s: PathSpecifier) => void;
   placeAt?: (s: PathSpecifier) => { x: number; y: number } | undefined;
 }) {
@@ -697,6 +739,9 @@ export function SpecifierSelector({
       value={value}
       labels={PATH_SPECIFIER_LABELS}
       icons={SPECIFIER_ICONS}
+      keys={SPECIFIER_KEYS}
+      armed={armed}
+      onDisarm={onDisarm}
       onSelect={onSelect}
       placeAt={placeAt}
     />
@@ -713,10 +758,14 @@ const SENTIMENT_ICONS: Record<CauseSentiment, ReactNode> = {
 // positive (thanks to) — mirroring the route's SpecifierSelector.
 export function SentimentSelector({
   value,
+  armed,
+  onDisarm,
   onSelect,
   placeAt,
 }: {
   value: CauseSentiment;
+  armed?: boolean;
+  onDisarm?: () => void;
   onSelect: (s: CauseSentiment) => void;
   placeAt?: (s: CauseSentiment) => { x: number; y: number } | undefined;
 }) {
@@ -727,6 +776,11 @@ export function SentimentSelector({
       value={value}
       labels={CAUSE_SENTIMENT_LABELS}
       icons={SENTIMENT_ICONS}
+      // Three stances with no shared initial worth the guess ("negative"/"neutral" collide), so
+      // they are counted rather than lettered.
+      keys={digitKeys(CAUSE_SENTIMENTS) as Record<CauseSentiment, string>}
+      armed={armed}
+      onDisarm={onDisarm}
       onSelect={onSelect}
       placeAt={placeAt}
     />

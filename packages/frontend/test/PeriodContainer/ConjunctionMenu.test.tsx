@@ -34,18 +34,28 @@ describe('ConjunctionMenu', () => {
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();
   });
 
-  it('lists every conjunction with the relation it expresses', () => {
+  // Each row ends in the letter it answers to: mostly the initial, but "that is" goes by its I
+  // and "therefore" by its S, T being taken by "then".
+  it('lists every conjunction with the relation it expresses, and the key it answers to', () => {
     renderMenu();
 
     const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
-      'Andcopulative',
-      'Ordisjunctive',
-      'Butadversative',
-      'That isexplicative',
-      'Thereforeconclusive',
-      'Thentemporal',
+      'AndcopulativeA',
+      'OrdisjunctiveO',
+      'ButadversativeB',
+      'That isexplicativeI',
+      'ThereforeconclusiveS',
+      'ThentemporalT',
     ]);
+  });
+
+  it('takes the conjunction its letter names', () => {
+    const { onSelect } = renderMenu();
+
+    fireEvent.keyDown(window, { key: 'i' });
+
+    expect(onSelect).toHaveBeenCalledExactlyOnceWith('that_is');
   });
 
   it('names each relation in the UI language', () => {

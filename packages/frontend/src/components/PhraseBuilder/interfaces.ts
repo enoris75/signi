@@ -18,6 +18,20 @@ export const COORD_CONJUNCTION_OPTIONS: {
   { value: "then", label: "Then", hintKey: "conjunction.kind.then" },
 ];
 
+/**
+ * The letter each conjunction answers to in the menu (the plan's §3.7). Mostly the initial of the
+ * English label, with two taken elsewhere: "that is" goes by its *I* and "therefore" by its *S*,
+ * because T is "then" and the two Ts would otherwise collide.
+ */
+export const COORD_CONJUNCTION_KEYS: Record<CoordConjunction, string> = {
+  and: "A",
+  or: "O",
+  but: "B",
+  that_is: "I",
+  therefore: "S",
+  then: "T",
+};
+
 export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =
   Object.fromEntries(
     COORD_CONJUNCTION_OPTIONS.map((o) => [o.value, o.label]),

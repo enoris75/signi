@@ -18,6 +18,9 @@ import { DEFAULT_NODE_SIZE, type Edge } from "./graph.ts";
 import { innerRadius } from "./ringLayout.ts";
 import { useElementSize } from "./hooks/useElementSize.ts";
 import { nodeElRef, type PhraseRenderContext } from "./phraseRender.tsx";
+import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
+import { focusRing } from "../../keyboard/focusRing.ts";
+import { boxScopesOf } from "../../keyboard/scope.ts";
 import { NounPhraseBuilder } from "./NounPhraseBuilder.tsx";
 import { VerbPhraseBuilder } from "./VerbPhraseBuilder.tsx";
 import { ConnectorsLayer } from "./ConnectorsLayer.tsx";
@@ -124,6 +127,9 @@ export function PhraseCanvas({
 
   // The empty period's opening word picker, measured so its ring fits round it. It is on the page
   // only before the canvas is drawn and while no mood box stands in for it.
+  // The mood box stands where the subject box stands, so the cursor reaches it the same way — and
+  // a command's own keys (its addressee and its register) apply while it is there.
+  const moodCursor = useBoxCursor("subject", boxScopesOf("subject", selection));
   const openingRef = useRef<HTMLDivElement>(null);
   const openingPicker = !showCanvas && !moodBox;
   const openingSize = useElementSize(openingRef, DEFAULT_NODE_SIZE, openingPicker);
@@ -146,7 +152,13 @@ export function PhraseCanvas({
           // nothing to overlay.
           <Box
             {...ctx.makeDragProps("subject", () => {})}
+            {...moodCursor}
+            sx={[ctx.makeDragProps("subject", () => {}).sx, focusRing("primary")]}
             ref={nodeElRef(ctx, "subject")}
+            onFocus={(e: React.FocusEvent<HTMLElement>) => {
+              moodCursor.onFocus(e);
+              ctx.handleSlotClick("subject");
+            }}
           >
             {moodBox}
           </Box>

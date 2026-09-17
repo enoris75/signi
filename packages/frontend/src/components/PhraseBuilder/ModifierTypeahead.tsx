@@ -43,9 +43,12 @@ export function ModifierTypeahead({
   const header = (
     <CategoryToggle options={options} value={value} onChange={setValue} />
   );
+  // The same switch the header draws, as the keys see it: ↑ from the first row moves the cursor up
+  // into it, and ← → change vocabulary there (see usePickerKeys).
+  const tabs = { values: options.map((o) => o.value), value, onChange: setValue };
   return value === "adjective" ? (
-    <AdjectiveTypeahead onSelect={onSelect} header={header} />
+    <AdjectiveTypeahead onSelect={onSelect} header={header} tabs={tabs} />
   ) : (
-    <DirectObjectTypeahead onSelect={onSelect} header={header} />
+    <DirectObjectTypeahead onSelect={onSelect} header={header} tabs={tabs} />
   );
 }

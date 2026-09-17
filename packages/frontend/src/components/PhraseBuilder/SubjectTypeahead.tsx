@@ -1,21 +1,20 @@
-import {
-  Box,
-  InputBase,
-  Popper,
-  Paper,
-  Tabs,
-  Tab,
-  ToggleButton,
-  ToggleButtonGroup,
-  Button,
-} from "@mui/material";
+import { Box, InputBase, Popper, Paper, Tabs, Tab } from "@mui/material";
 import { Concept, type UiStringKey } from "@signi/shared";
-import { useState, useRef } from "react";
+import { useRef, useState, type KeyboardEvent } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
 import { useUiString } from "../../i18n/useUiString.ts";
-import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
 import { ConceptOption } from "./ConceptOption.tsx";
+import { PickerFooter } from "./PickerFooter.tsx";
+import { PronounChooser } from "./PronounChooser.tsx";
+import { usePickerKeys } from "./hooks/usePickerKeys.ts";
+import { usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
+
+const TABS = ["noun", "pronoun"] as const;
+
+// The keys the tabs keep for themselves while the cursor is up in them. Everything else is a
+// reach for the vocabulary below, and brings the cursor back down to it.
+const TAB_KEYS = ["ArrowLeft", "ArrowRight", "ArrowUp", "ArrowDown", "Enter", "Escape", "Tab"];
 
 export function SubjectTypeahead({
   onSelect,
@@ -35,7 +34,6 @@ export function SubjectTypeahead({
   onKindChange?: (kind: string) => void;
 }) {
   const t = useUiString();
-  const matches = useConceptSearch();
   const prompt = `${t(placeholderKey)}…`;
   const { data: pronouns = [] } = useConcepts("pronoun");
   const { data: nouns = [] } = useConcepts("noun");
@@ -44,35 +42,24 @@ export function SubjectTypeahead({
   const [localTab, setLocalTab] = useState<string>(kind);
   const tab = onKindChange ? kind : localTab;
   const setTab = onKindChange ?? setLocalTab;
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const [highlightedIdx, setHighlightedIdx] = useState(0);
-  // The pronoun chooser's in-progress decision: person, number, gender. "generic" is the
-  // impersonal "one" (GENERIC_PERSON) — a pronoun in its own right, always 3rd-singular, so it
-  // hides the number/gender rows when chosen.
-  const [person, setPerson] = useState<"1" | "2" | "3" | "generic">("1");
-  const [number, setNumber] = useState<"singular" | "plural">("singular");
-  const [gender, setGender] = useState<"masc" | "fem" | "neut">("masc");
   const anchorRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
 
-  const filteredNouns = nouns.filter((n) => matches(n, query));
+  const picker = usePickerKeys({
+    items: nouns,
+    onSelect: (concept) => onSelect(concept),
+    // The Noun / Pronoun tabs are this picker's category switch: ↑ from the first row moves the
+    // cursor up into them, where ← → change vocabulary.
+    tabs: { values: TABS, value: tab, onChange: setTab },
+  });
 
-  function commitNoun(idx: number) {
-    const n = filteredNouns[idx];
-    if (!n) return;
-    onSelect(n);
-    reset();
-  }
-
-  function commitPronoun() {
+  function commitPronoun({ person, number, gender }: PronounChoice) {
     // The generic ("one") is a distinct pronoun concept, not one of the 1/2/3 persons (it shares
     // person 3 with THIRD_PERSON, so it must be matched by id); it is inherently 3rd-singular.
     if (person === "generic") {
       const generic = pronouns.find((p) => p.id === "GENERIC_PERSON");
       if (!generic) return;
       onSelect(generic, { number: "singular" });
-      reset();
+      picker.setOpen(false);
       return;
     }
     const concept = pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON");
@@ -83,69 +70,48 @@ export function SubjectTypeahead({
       number,
       gender: person !== "3" && gender === "neut" ? "masc" : gender,
     });
-    reset();
+    picker.setOpen(false);
   }
 
-  function reset() {
-    setOpen(false);
-    setQuery("");
-    setHighlightedIdx(0);
-  }
+  const chooser = usePronounChooser({
+    onCommit: commitPronoun,
+    onExitTop: () => picker.setInTabs(true),
+    onClose: () => picker.setOpen(false),
+  });
 
-  function handleKeyDown(e: React.KeyboardEvent) {
-    // On the pronoun tab the input only commits the current decision.
-    if (tab === "pronoun") {
-      if (e.key === "Enter") {
-        e.preventDefault();
-        commitPronoun();
-      } else if (e.key === "Escape") {
-        setOpen(false);
-      }
+  // Which handler the keys go to.
+  //
+  // While the cursor is up in the tabs, the navigation keys are the tabs' — ← → switch vocabulary,
+  // ↓ comes back down. Anything else is a reach for what the tab *holds*, and reaching for it is
+  // what brings the cursor down to it: a letter searches the nouns, a digit names a person.
+  // With the dropdown closed it is all the picker's, whose ↓ reopens it and whose esc goes on to
+  // the box (see usePickerKeys).
+  function onKeyDown(event: KeyboardEvent) {
+    const inTabs = picker.open && picker.inTabs;
+    if (inTabs && TAB_KEYS.includes(event.key)) {
+      picker.onKeyDown(event);
       return;
     }
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (!open || filteredNouns.length === 0) {
-        setOpen(true);
-        return;
-      }
-      const next = Math.min(highlightedIdx + 1, filteredNouns.length - 1);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (!open) return;
-      const next = Math.max(highlightedIdx - 1, 0);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (open && filteredNouns.length > 0) commitNoun(highlightedIdx);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
+    if (inTabs) picker.setInTabs(false);
+    if (picker.open && tab === "pronoun") chooser.onKeyDown(event);
+    else picker.onKeyDown(event);
   }
 
-  const showList = tab === "noun" && filteredNouns.length > 0;
+  const showList = tab === "noun" && picker.filtered.length > 0;
 
   return (
     <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
       <InputBase
         autoFocus
-        value={query}
+        value={picker.query}
         onChange={(e) => {
-          const v = e.target.value;
-          setQuery(v);
-          setOpen(true);
-          setHighlightedIdx(0);
+          picker.onChange(e);
           // Typing is a noun search — jump to the noun tab.
-          if (v.trim()) setTab("noun");
+          if (e.target.value.trim()) setTab("noun");
         }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
-        }}
-        onKeyDown={handleKeyDown}
+        onFocus={picker.onFocus}
+        onBlur={picker.onBlur}
+        onKeyDown={onKeyDown}
         placeholder={prompt}
         inputProps={{ "data-testid": "typeahead-subject" }}
         sx={{
@@ -157,7 +123,7 @@ export function SubjectTypeahead({
         }}
       />
       <Popper
-        open={open}
+        open={picker.open}
         anchorEl={anchorRef.current}
         placement="bottom-start"
         style={{ zIndex: 1300 }}
@@ -174,8 +140,11 @@ export function SubjectTypeahead({
             value={tab}
             onChange={(_, v) => setTab(v)}
             variant="fullWidth"
+            data-kb-tabs={picker.inTabs ? "" : undefined}
             sx={{
               minHeight: 32,
+              // While the cursor is up here, the tabs are what ← → act on — the row says so.
+              bgcolor: picker.inTabs ? "action.selected" : "transparent",
               "& .MuiTab-root": {
                 minHeight: 32,
                 py: 0.5,
@@ -190,86 +159,17 @@ export function SubjectTypeahead({
           </Tabs>
 
           {tab === "pronoun" ? (
-            <Box sx={{ p: 1.5, display: "flex", flexDirection: "column", gap: 1 }}>
-              <ChooserRow label={t("pronoun.person")}>
-                <ToggleButtonGroup
-                  exclusive
-                  size="small"
-                  value={person}
-                  onChange={(_, v) => {
-                    if (!v) return;
-                    setPerson(v);
-                    // Neuter ("it") is 3rd-person only; drop it when leaving.
-                    if (v !== "3" && gender === "neut") setGender("masc");
-                  }}
-                >
-                  <ToggleButton value="1">{t("pronoun.first")}</ToggleButton>
-                  <ToggleButton value="2">{t("pronoun.second")}</ToggleButton>
-                  <ToggleButton value="3">{t("pronoun.third")}</ToggleButton>
-                  {/* The generic / impersonal "one" — a pronoun of its own, not a 4th person. */}
-                  <ToggleButton value="generic" data-testid="pronoun-generic">{t("pronoun.generic")}</ToggleButton>
-                </ToggleButtonGroup>
-              </ChooserRow>
-
-              {/* The generic ("one") is inherently 3rd-singular, so it offers no number/gender. */}
-              {person !== "generic" && (
-                <>
-                  <ChooserRow label={t("pronoun.number")}>
-                    <ToggleButtonGroup
-                      exclusive
-                      size="small"
-                      value={number}
-                      onChange={(_, v) => v && setNumber(v)}
-                    >
-                      <ToggleButton value="singular">{t("pronoun.singular")}</ToggleButton>
-                      <ToggleButton value="plural">{t("pronoun.plural")}</ToggleButton>
-                    </ToggleButtonGroup>
-                  </ChooserRow>
-
-                  {/* Gender matters for every person (participle/adjective agreement in
-                      Romance); neuter ("it") is offered only in the 3rd person. */}
-                  <ChooserRow label={t("pronoun.gender")}>
-                    <ToggleButtonGroup
-                      exclusive
-                      size="small"
-                      value={gender}
-                      onChange={(_, v) => v && setGender(v)}
-                    >
-                      <ToggleButton value="masc">{t("pronoun.male")}</ToggleButton>
-                      <ToggleButton value="fem">{t("pronoun.female")}</ToggleButton>
-                      {person === "3" && (
-                        <ToggleButton value="neut">{t("pronoun.neuter")}</ToggleButton>
-                      )}
-                    </ToggleButtonGroup>
-                  </ChooserRow>
-                </>
-              )}
-
-              <Button
-                size="small"
-                variant="contained"
-                disableElevation
-                onClick={commitPronoun}
-                data-testid="pronoun-commit"
-                sx={{
-                  mt: 0.5,
-                  textTransform: "none",
-                  fontFamily: '"Inter", sans-serif',
-                }}
-              >
-                {t("action.select")}
-              </Button>
-            </Box>
+            <PronounChooser chooser={chooser} onCommit={() => commitPronoun(chooser.choice)} />
           ) : (
-            <Box ref={listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
+            <Box ref={picker.listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
               {showList ? (
-                filteredNouns.map((n, i) => (
+                picker.filtered.map((n, i) => (
                   <ConceptOption
                     key={n.id}
                     concept={n}
-                    highlighted={i === highlightedIdx}
-                    onMouseEnter={() => setHighlightedIdx(i)}
-                    onClick={() => commitNoun(i)}
+                    highlighted={!picker.inTabs && i === picker.highlightedIdx}
+                    onMouseEnter={() => picker.setHighlightedIdx(i)}
+                    onClick={() => picker.commit(i)}
                   />
                 ))
               ) : (
@@ -287,46 +187,9 @@ export function SubjectTypeahead({
               )}
             </Box>
           )}
+          <PickerFooter kind={tab === "pronoun" ? "grid" : "list"} />
         </Paper>
       </Popper>
-    </Box>
-  );
-}
-
-// A labelled row in the pronoun chooser: caption on the left, control on the right.
-function ChooserRow({
-  label,
-  children,
-}: {
-  label: string;
-  children: React.ReactNode;
-}) {
-  return (
-    <Box
-      sx={{
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "space-between",
-        gap: 1.5,
-        "& .MuiToggleButton-root": {
-          px: 1,
-          py: 0.25,
-          textTransform: "none",
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.7rem",
-        },
-      }}
-    >
-      <Box
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.7rem",
-          color: "text.secondary",
-        }}
-      >
-        {label}
-      </Box>
-      {children}
     </Box>
   );
 }

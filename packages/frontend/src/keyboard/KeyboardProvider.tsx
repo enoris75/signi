@@ -10,6 +10,7 @@ import {
 import type { SlotKey } from "../components/PhraseBuilder/interfaces.ts";
 import { currentPlatform, matchesKeySpec, type Platform } from "./matchKey.ts";
 import { resolveCommand, type BoxContext, type CursorNav, type KeyContext } from "./keymap.ts";
+import { boxElements, stepBox } from "./boxes.ts";
 import { isEditableTarget, resolveScopes, type Scope } from "./scope.ts";
 import { nearestInDirection, type BoxRect, type Direction } from "./spatialNav.ts";
 
@@ -90,12 +91,6 @@ const emit = (store: Store) => {
   for (const listener of store.listeners) listener();
 };
 
-/** Every box on the page, in document order — the cursor moves over these and nothing else. */
-function boxElements(): HTMLElement[] {
-  if (typeof document === "undefined") return [];
-  return Array.from(document.querySelectorAll<HTMLElement>("[data-kb-box]"));
-}
-
 const rectOf = (el: HTMLElement, key: string): BoxRect => {
   const { x, y, width, height } = el.getBoundingClientRect();
   return { key, x, y, width, height };
@@ -118,8 +113,7 @@ function cursorNav(element: HTMLElement): CursorNav {
       if (winner !== undefined) all[Number(winner)]?.focus();
     },
     step: (delta) => {
-      const all = boxElements();
-      const next = all[all.indexOf(element) + delta];
+      const next = stepBox(element, delta);
       // Past the last box the walk is over: the keystroke is left to the browser, whose own tab
       // order carries on out of the canvas rather than trapping the cursor inside it.
       if (!next) return false;

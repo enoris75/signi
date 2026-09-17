@@ -1,5 +1,8 @@
 import { Menu, MenuItem, Typography } from "@mui/material";
 import { useUiString } from "../../../i18n/useUiString.ts";
+import { Keycap } from "../../../keyboard/Keycap.tsx";
+import { useMenuKeys } from "../../../keyboard/useMenuKeys.ts";
+import { COORD_CONJUNCTION_KEYS } from "../interfaces.ts";
 import type {
   COORD_CONJUNCTION_OPTIONS,
   CoordConjunction,
@@ -23,6 +26,13 @@ export function ConjunctionMenu({
   onClose,
 }: ConjunctionMenuProps) {
   const t = useUiString();
+  // One letter per conjunction, so the join is one keystroke after the J that opened the menu.
+  // Only the conjunctions on offer are bound: a command coordinates with four of the six.
+  useMenuKeys({
+    open: Boolean(anchorEl),
+    keys: Object.fromEntries(options.map((o) => [o.value, COORD_CONJUNCTION_KEYS[o.value]])),
+    onPick: (value) => onSelect(value as CoordConjunction),
+  });
   return (
     <Menu
       anchorEl={anchorEl}
@@ -32,16 +42,23 @@ export function ConjunctionMenu({
       transformOrigin={{ vertical: "center", horizontal: "left" }}
     >
       {options.map((o) => (
-        <MenuItem key={o.value} dense onClick={() => onSelect(o.value)}>
+        <MenuItem
+          key={o.value}
+          dense
+          aria-keyshortcuts={COORD_CONJUNCTION_KEYS[o.value]}
+          onClick={() => onSelect(o.value)}
+          sx={{ gap: 1.5, justifyContent: "space-between" }}
+        >
           <Typography component="span" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
             {o.label}
+            <Typography
+              component="span"
+              sx={{ ml: 1, color: "text.disabled", fontSize: "0.72rem" }}
+            >
+              {t(o.hintKey)}
+            </Typography>
           </Typography>
-          <Typography
-            component="span"
-            sx={{ ml: 1, color: "text.disabled", fontSize: "0.72rem" }}
-          >
-            {t(o.hintKey)}
-          </Typography>
+          <Keycap spec={COORD_CONJUNCTION_KEYS[o.value]} />
         </MenuItem>
       ))}
     </Menu>

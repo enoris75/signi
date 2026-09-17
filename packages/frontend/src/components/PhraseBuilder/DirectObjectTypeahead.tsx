@@ -1,130 +1,32 @@
-import { Box, InputBase, Popper, Paper } from "@mui/material";
+import type { ReactNode } from "react";
 import { Concept } from "@signi/shared";
-import { ReactNode, useState, useRef } from "react";
 import { useConcepts } from "../../hooks/useConcepts";
-import { useConceptSearch } from "../../i18n/useConceptLabel.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
-import { ConceptOption } from "./ConceptOption.tsx";
+import { usePickerKeys, type PickerTabs } from "./hooks/usePickerKeys.ts";
+import { PickerList } from "./PickerList.tsx";
 
 export function DirectObjectTypeahead({
   onSelect,
   // Optional sticky content pinned to the top of the dropdown — used to surface the
   // word-category switch inside the picker (mirroring the on-box toggle).
   header,
+  // The same switch as key-driven state: ↑ from the first row moves the cursor up into it.
+  tabs,
 }: {
   onSelect: (concept: Concept) => void;
   header?: ReactNode;
+  tabs?: PickerTabs;
 }) {
   const { data: nouns = [] } = useConcepts("noun");
   const t = useUiString();
-  const matches = useConceptSearch();
-  const [query, setQuery] = useState("");
-  const [open, setOpen] = useState(false);
-  const [highlightedIdx, setHighlightedIdx] = useState(0);
-  const anchorRef = useRef<HTMLDivElement>(null);
-  const listRef = useRef<HTMLDivElement>(null);
-
-  const filtered = nouns.filter((n) => matches(n, query));
-
-  function commit(idx: number) {
-    const n = filtered[idx];
-    if (!n) return;
-    onSelect(n);
-    setOpen(false);
-    setQuery("");
-    setHighlightedIdx(0);
-  }
-
-  function handleKeyDown(e: React.KeyboardEvent) {
-    if (e.key === "ArrowDown") {
-      e.preventDefault();
-      if (!open || filtered.length === 0) {
-        setOpen(true);
-        return;
-      }
-      const next = Math.min(highlightedIdx + 1, filtered.length - 1);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "ArrowUp") {
-      e.preventDefault();
-      if (!open) return;
-      const next = Math.max(highlightedIdx - 1, 0);
-      setHighlightedIdx(next);
-      listRef.current?.children[next]?.scrollIntoView({ block: "nearest" });
-    } else if (e.key === "Enter") {
-      e.preventDefault();
-      if (open && filtered.length > 0) commit(highlightedIdx);
-    } else if (e.key === "Escape") {
-      setOpen(false);
-    }
-  }
+  const picker = usePickerKeys({ items: nouns, onSelect, tabs });
 
   return (
-    <Box
-      ref={anchorRef}
-      onPointerDown={(e) => e.stopPropagation()}
-      sx={{ mt: 0.25 }}
-    >
-      <InputBase
-        autoFocus
-        value={query}
-        onChange={(e) => {
-          setQuery(e.target.value);
-          setOpen(true);
-          setHighlightedIdx(0);
-        }}
-        onFocus={() => setOpen(true)}
-        onBlur={() => {
-          setTimeout(() => setOpen(false), 150);
-        }}
-        onKeyDown={handleKeyDown}
-        placeholder={`${t("slot.noun.placeholder")}…`}
-        inputProps={{ "data-testid": "typeahead-noun" }}
-        sx={{
-          fontFamily: '"Inter", sans-serif',
-          fontSize: "0.8rem",
-          color: "text.primary",
-          width: "100%",
-          "& input": { p: 0 },
-        }}
-      />
-      <Popper
-        open={(open && filtered.length > 0) || Boolean(header && open)}
-        anchorEl={anchorRef.current}
-        placement="bottom-start"
-        style={{ zIndex: 1300 }}
-        modifiers={[{ name: "offset", options: { offset: [0, 4] } }]}
-      >
-        <Paper elevation={4} sx={{ minWidth: 160, overflow: "hidden" }}>
-          {header && (
-            <Box
-              sx={{
-                px: 1,
-                py: 0.5,
-                borderBottom: "1px solid",
-                borderColor: "divider",
-                bgcolor: "background.paper",
-              }}
-            >
-              {header}
-            </Box>
-          )}
-          <Box
-            ref={listRef}
-            sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}
-          >
-            {filtered.map((n, i) => (
-              <ConceptOption
-                key={n.id}
-                concept={n}
-                highlighted={i === highlightedIdx}
-                onMouseEnter={() => setHighlightedIdx(i)}
-                onClick={() => commit(i)}
-              />
-            ))}
-          </Box>
-        </Paper>
-      </Popper>
-    </Box>
+    <PickerList
+      picker={picker}
+      placeholder={`${t("slot.noun.placeholder")}…`}
+      inputProps={{ "data-testid": "typeahead-noun" }}
+      header={header}
+    />
   );
 }

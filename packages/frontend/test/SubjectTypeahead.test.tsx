@@ -13,6 +13,7 @@ describeTypeahead({
   render: (onSelect) => <SubjectTypeahead onSelect={onSelect} />,
   otherConcepts: { pronoun: [] },
   staysOpenWhenNothingMatches: true,
+  hasTabs: true,
 });
 
 const pronoun = (id: string, label: string, person: '1' | '2' | '3'): Concept => ({
@@ -269,14 +270,114 @@ describe('SubjectTypeahead', () => {
       expect(dropdown()).toBeInTheDocument();
     });
 
-    it('closes on Escape, and ignores the arrow keys that would reopen the noun list', () => {
+    it('closes on Escape and reopens on ArrowDown, on the chooser rather than a noun list', () => {
       const { input } = renderSubject({ kind: 'pronoun' });
 
       press(input, 'Escape');
       expect(dropdown()).not.toBeInTheDocument();
 
       press(input, 'ArrowDown');
-      expect(dropdown()).not.toBeInTheDocument();
+      expect(dropdown()).toBeInTheDocument();
+      expect(listed()).toEqual([]);
+      expect(screen.getByTestId('pronoun-row-person')).toBeInTheDocument();
+    });
+
+    // The three rows are one grid: ↑ ↓ pick a row, ← → change its value, 1–4 jump to a person.
+    it('walks the rows with the arrows and changes the value of the one it is on', () => {
+      const { input } = renderSubject({ kind: 'pronoun' });
+      expect(screen.getByTestId('pronoun-row-person')).toHaveAttribute('data-active');
+
+      press(input, 'ArrowRight');
+      expect(chosen()).toEqual(['second', 'singular', 'male']);
+
+      press(input, 'ArrowDown');
+      expect(screen.getByTestId('pronoun-row-number')).toHaveAttribute('data-active');
+      press(input, 'ArrowRight');
+      expect(chosen()).toEqual(['second', 'plural', 'male']);
+
+      press(input, 'ArrowDown');
+      press(input, 'ArrowRight');
+      expect(chosen()).toEqual(['second', 'plural', 'female']);
+    });
+
+    it('stops at the last value of a row rather than wrapping round it', () => {
+      const { input } = renderSubject({ kind: 'pronoun' });
+
+      for (let i = 0; i < 6; i++) press(input, 'ArrowRight');
+      expect(chosen()).toEqual(['impersonal']);
+
+      for (let i = 0; i < 6; i++) press(input, 'ArrowLeft');
+      expect(chosen()).toEqual(['first', 'singular', 'male']);
+    });
+
+    it('jumps straight to a person on its digit, wherever the cursor is in the grid', () => {
+      const { input } = renderSubject({ kind: 'pronoun' });
+      press(input, 'ArrowDown');
+
+      press(input, '3');
+
+      expect(chosen()).toEqual(['third', 'singular', 'male']);
+      expect(screen.getByTestId('pronoun-row-person')).toHaveAttribute('data-active');
+    });
+
+    it('takes the pronoun the grid describes on Enter', () => {
+      const { input, onSelect } = renderSubject({ kind: 'pronoun' });
+
+      press(input, '3');
+      press(input, 'ArrowDown');
+      press(input, 'ArrowRight');
+      press(input, 'Enter');
+
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(THIRD, {
+        number: 'plural',
+        gender: 'masc',
+      });
+    });
+
+    it('leaves the grid for the tabs on ArrowUp from its top row', () => {
+      const { input } = renderSubject({ kind: 'pronoun' });
+
+      press(input, 'ArrowUp');
+      press(input, 'ArrowLeft');
+
+      expect(tab('Noun')).toHaveAttribute('aria-selected', 'true');
+    });
+  });
+
+  // The Noun / Pronoun tabs are this picker's category switch, and ↑ from the first row is the
+  // way up into it — the same move the adjective slots' Adj / Noun switch answers to.
+  describe('the tabs, by key', () => {
+    it('moves up into them from the first row, and switches vocabulary with the arrows', () => {
+      const { input } = renderSubject();
+
+      press(input, 'ArrowUp');
+      press(input, 'ArrowRight');
+      expect(tab('Pronoun')).toHaveAttribute('aria-selected', 'true');
+
+      press(input, 'ArrowLeft');
+      expect(tab('Noun')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('stops at the far tab rather than wrapping round', () => {
+      const { input } = renderSubject();
+
+      press(input, 'ArrowUp');
+      for (let i = 0; i < 3; i++) press(input, 'ArrowRight');
+      expect(tab('Pronoun')).toHaveAttribute('aria-selected', 'true');
+    });
+
+    it('comes back down to the rows on ArrowDown, and on typing', () => {
+      const { input, onSelect } = renderSubject();
+
+      press(input, 'ArrowUp');
+      press(input, 'ArrowDown');
+      press(input, 'Enter');
+      expect(onSelect).toHaveBeenCalledExactlyOnceWith(CAT);
+
+      press(input, 'ArrowUp');
+      typeInto(input, 'd');
+      press(input, 'Enter');
+      expect(onSelect).toHaveBeenLastCalledWith(DOG);
     });
   });
 });

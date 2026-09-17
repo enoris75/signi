@@ -17,6 +17,7 @@ import { GroupBox } from "./GroupBox.tsx";
 import { toolbarControlKey, VERB_PHRASE } from "./ringSpecs.ts";
 import { isModalAdverbSlot, isModalSlot } from "./slots.ts";
 import { activatable } from "../../keyboard/activate.ts";
+import { ComplementMenu } from "./ComplementMenu.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 
 // Renders the verb phrase onto the shared canvas: the verb in its solid ring, the adverb, modal and
@@ -43,7 +44,13 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
     registerVerbAnchor,
     satelliteKeys,
     activeSlot,
+    slotEls,
+    complementMenuOpen,
+    onComplementMenu,
+    toolbarFor,
+    onArmToolbar,
   } = ctx;
+  const disarm = () => onArmToolbar(null);
   const t = useUiString();
 
   // The verb, its adverb, and its modal chain are all word slots on the verb phrase.
@@ -136,6 +143,8 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {!compact && selection.route && (
         <SpecifierSelector
           value={selection.routeSpecifier ?? DEFAULT_ROUTE_SPECIFIER}
+          armed={toolbarFor === "route"}
+          onDisarm={disarm}
           onSelect={handleSelectSpecifier}
           placeAt={toolbarAt("route")}
         />
@@ -147,6 +156,8 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {!compact && selection.locative && (
         <SpecifierSelector
           value={selection.locativeSpecifier ?? DEFAULT_LOCATIVE_SPECIFIER}
+          armed={toolbarFor === "locative"}
+          onDisarm={disarm}
           onSelect={handleSelectLocativeSpecifier}
           placeAt={toolbarAt("locative")}
         />
@@ -155,10 +166,22 @@ export function VerbPhraseBuilder({ ctx }: { ctx: PhraseRenderContext }) {
       {!compact && selection.cause && (
         <SentimentSelector
           value={selection.causeSentiment ?? CAUSE_SENTIMENTS[0]}
+          armed={toolbarFor === "cause"}
+          onDisarm={disarm}
           onSelect={handleSelectSentiment}
           placeAt={toolbarAt("cause")}
         />
       )}
+
+      {/* Every complement the verb licenses in one list, one keystroke each — what + opens from
+          the verb box. It hangs off that box, which the canvas positions. */}
+      <ComplementMenu
+        open={complementMenuOpen}
+        getAnchor={() => slotEls.current.get("verb") ?? null}
+        icons={complementToggleIcons}
+        directObject={directObjectToggle}
+        onClose={() => onComplementMenu(false)}
+      />
     </>
   );
 }

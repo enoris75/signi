@@ -32,6 +32,11 @@ function ctx(over: Partial<KeyContext> = {}): KeyContext {
     addConjunct: () => {},
     cycleConjunction: () => {},
     openDeterminerMenu: () => {},
+    openComplementMenu: () => {},
+    armToolbar: () => {},
+    setImperativePerson: () => {},
+    setImperativeRegister: () => {},
+    imperative: { person: '2sg', register: 'request' },
     toggleNumber: () => {},
     toggleGender: () => {},
     toggleNegative: () => {},
@@ -136,6 +141,74 @@ describe('resolving a keystroke', () => {
     expect(commandFor('r', real)).toBeUndefined();
     expect(commandFor('r', attributive)).toBe('adjective.relation');
     expect(commandFor('m', attributive)).toBeUndefined();
+  });
+});
+
+describe('the menus and toolbars a key opens', () => {
+  it('opens the complement menu from the verb box, and from nowhere else', () => {
+    expect(commandFor('+', { slot: 'verb', nounKey: null })).toBe('verb.complement');
+    expect(commandFor('+', { slot: 'verbModal', nounKey: null })).toBeUndefined();
+  });
+
+  // "+" needs a shift on most layouts and none on some, so the binding does not constrain it —
+  // and "=" is the same physical key, which is why both are bound.
+  it('takes + however the layout produces it, and = beside it', () => {
+    const verb = { slot: 'verb' as const, nounKey: null };
+    expect(commandFor('=', verb)).toBe('verb.complement');
+    const shifted = resolveCommand(
+      boxScopesOf('verb', {}),
+      (spec) =>
+        matchesKeySpec(
+          spec,
+          { key: '+', shiftKey: true, ctrlKey: false, metaKey: false, altKey: false },
+          'other',
+        ),
+      ctx(verb),
+    );
+    expect(shifted?.id).toBe('verb.complement');
+  });
+
+  it('points S at a relation toolbar only where there is one, and a word on it', () => {
+    const filled = (slot: 'locative' | 'cause' | 'directObject') => ({
+      slot,
+      nounKey: slot,
+      selection: { [slot]: noun('HOUSE') } as PhraseSelection,
+    });
+    expect(commandFor('s', filled('locative'))).toBe('noun.relation');
+    expect(commandFor('s', filled('cause'))).toBe('noun.relation');
+    // The object carries no relation, and an empty complement has nothing to relate.
+    expect(commandFor('s', filled('directObject'))).toBeUndefined();
+    expect(commandFor('s', { slot: 'locative', nounKey: 'locative' })).toBeUndefined();
+  });
+});
+
+describe('the command box', () => {
+  const command = (over: Partial<KeyContext> = {}) => ({
+    slot: 'subject' as const,
+    nounKey: null,
+    selection: { imperative: true } as PhraseSelection,
+    ...over,
+  });
+
+  it('counts its three addressees', () => {
+    expect(commandFor('1', command())).toBe('mood.person.2sg');
+    expect(commandFor('2', command())).toBe('mood.person.1pl');
+    expect(commandFor('3', command())).toBe('mood.person.2pl');
+    expect(commandFor('r', command())).toBe('mood.register');
+  });
+
+  it('asks for no addressee under an instruction, which is addressed to nobody', () => {
+    const instruction = command({ imperative: { person: '2sg', register: 'instruction' } });
+    expect(commandFor('1', instruction)).toBeUndefined();
+    expect(commandFor('r', instruction)).toBe('mood.register');
+  });
+
+  // An infinitive citation is the other subject-dropping mood: it addresses nobody at all, so
+  // its box carries none of these.
+  it('offers nothing on an infinitive', () => {
+    const infinitive = command({ selection: { infinitive: true } as PhraseSelection });
+    expect(commandFor('1', infinitive)).toBeUndefined();
+    expect(commandFor('r', infinitive)).toBeUndefined();
   });
 });
 

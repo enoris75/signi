@@ -10,7 +10,6 @@ describeTypeahead({
   role: 'verb',
   placeholder: 'type a verb…',
   render: (onSelect) => <VerbTypeahead onSelect={onSelect} />,
-  reopensOnArrowDown: false,
 });
 
 const verb = (id: string, label: string, modal?: boolean): Concept => ({

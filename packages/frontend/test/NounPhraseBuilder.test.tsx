@@ -85,6 +85,10 @@ function makeCtx(overrides: Partial<PhraseRenderContext> = {}) {
     satelliteKeys: {},
     determinerMenuFor: null,
     onDeterminerMenu: vi.fn(),
+    complementMenuOpen: false,
+    onComplementMenu: vi.fn(),
+    toolbarFor: null,
+    onArmToolbar: vi.fn(),
     ...overrides,
   };
   return { ctx, dragPointerDown };
@@ -219,33 +223,45 @@ describe('NounPhraseBuilder', () => {
 
       fireEvent.pointerUp(determinerBox());
 
-      // Each row reads "name|word"; a section heading reads "# name".
+      // Each row reads "key name|word"; a section heading reads "# name". The digits count down
+      // the menu as it is shown — 1–9 then 0 — so a value is one keystroke after the D.
       const menu = screen.getByRole('menu');
       expect(
         [...menu.querySelectorAll('li')].map((li) =>
           li.getAttribute('role') === 'menuitem'
-            ? `${li.firstChild!.textContent}|${li.querySelector('span')!.textContent}`
+            // children[2] is MUI's ripple span, so the two content boxes are named by index.
+            ? `${li.children[0]!.textContent}|${li.children[1]!.textContent}`
             : `# ${li.textContent}`,
         ),
       ).toEqual([
         '# Article',
-        'Definite|the',
-        'Indefinite|a / an',
-        'Zero|—',
+        '1Definite|the',
+        '2Indefinite|a / an',
+        '3Zero|—',
         '# Demonstrative',
-        'Proximal|this',
-        'Distal|that',
+        '4Proximal|this',
+        '5Distal|that',
         '# Quantifier',
-        'Partitive|some',
-        'Negative|no',
-        'Multal|many',
-        'Paucal|few',
-        'Universal|all',
+        '6Partitive|some',
+        '7Negative|no',
+        '8Multal|many',
+        '9Paucal|few',
+        '0Universal|all',
       ]);
       expect(within(menu).getByRole('menuitem', { name: /Distal/ })).toHaveClass('Mui-selected');
       expect(within(menu).getByRole('menuitem', { name: /Definite/ })).not.toHaveClass(
         'Mui-selected',
       );
+    });
+
+    it('takes the value its digit names, wherever the menu focus is', async () => {
+      const { ctx } = renderNoun('subject', { shownMap: { subjectDefiniteness: true } });
+      fireEvent.pointerUp(determinerBox());
+
+      fireEvent.keyDown(window, { key: '8' });
+
+      expect(ctx.handleSetDefiniteness).toHaveBeenCalledExactlyOnceWith('subject', 'many');
+      await waitFor(() => expect(screen.queryByRole('menu')).not.toBeInTheDocument());
     });
 
     it('sets the picked determiner on its own block and closes the menu', async () => {

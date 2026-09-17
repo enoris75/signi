@@ -68,10 +68,10 @@ describe('CoordinationButton', () => {
 
     const items = within(screen.getByRole('menu')).getAllByRole('menuitem');
     expect(items.map((item) => item.textContent)).toEqual([
-      'Andcopulative',
-      'Ordisjunctive',
-      'Butadversative',
-      'Thentemporal',
+      'AndcopulativeA',
+      'OrdisjunctiveO',
+      'ButadversativeB',
+      'ThentemporalT',
     ]);
   });
 

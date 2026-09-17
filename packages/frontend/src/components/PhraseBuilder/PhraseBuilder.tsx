@@ -4,6 +4,8 @@ import {
   BoxComplementType,
   adaptPossessorBinding,
   ConceptSelectOpts,
+  imperativePerson,
+  imperativeRegisterOf,
   NounAddress,
   NounKey,
   PhraseSelection,
@@ -208,6 +210,11 @@ export function PhraseBuilder({
   // Which noun's determiner menu is open. Held here rather than in the noun's own renderer so the
   // noun's D key can open it from wherever the cursor is (see the keymap's noun.determiner).
   const [determinerMenuFor, setDeterminerMenuFor] = useState<NounKey | null>(null);
+  // The verb's *Add a complement* menu, opened by + from the verb box.
+  const [complementMenuOpen, setComplementMenuOpen] = useState(false);
+  // The complement whose relation toolbar is listening for a key, armed by S from its box. The
+  // toolbar is always on the ring, so it is not opened — only pointed at (see RelationToolbar).
+  const [toolbarFor, setToolbarFor] = useState<SlotKey | null>(null);
   // Which dotted role-group boxes are collapsed (keyed by group label). A
   // collapsed box shows only its main word; its satellites stay set but hidden.
   const [collapsedGroups, setCollapsedGroups] = useState<
@@ -789,6 +796,11 @@ export function PhraseBuilder({
         : commands.handleAddConjunct,
       cycleConjunction: commands.handleCycleConjunction,
       openDeterminerMenu,
+      openComplementMenu: () => setComplementMenuOpen(true),
+      armToolbar: setToolbarFor,
+      setImperativePerson: commands.handleSetImperativePerson,
+      setImperativeRegister: commands.handleSetImperativeRegister,
+      imperative: { person: imperativePerson(selection), register: imperativeRegisterOf(selection) },
       toggleNumber: commands.handleToggleNumber,
       toggleGender: commands.handleToggleGender,
       toggleNegative: commands.handleToggleNegative,
@@ -864,6 +876,10 @@ export function PhraseBuilder({
     satelliteKeys,
     determinerMenuFor,
     onDeterminerMenu: openDeterminerMenu,
+    complementMenuOpen,
+    onComplementMenu: setComplementMenuOpen,
+    toolbarFor,
+    onArmToolbar: setToolbarFor,
     removeRing:
       ringHost && onRemove
         ? {

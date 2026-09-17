@@ -130,6 +130,12 @@ export interface PhraseRenderContext {
   // than by the noun's renderer so the noun's D key can open it from wherever the cursor is.
   determinerMenuFor: NounKey | null;
   onDeterminerMenu: (which: NounKey | null) => void;
+  // The verb's *Add a complement* menu, which + opens from the verb box (see ComplementMenu).
+  complementMenuOpen: boolean;
+  onComplementMenu: (open: boolean) => void;
+  // The complement whose relation toolbar is listening for a key, armed by S from its box.
+  toolbarFor: SlotKey | null;
+  onArmToolbar: (slot: SlotKey | null) => void;
   // Set for a hosted ring's builder: its ring's remove control, which drops the phrase — a conjunct
   // out of its group, an owner off the noun it owns.
   removeRing?: { title: string; onRemove: () => void };
