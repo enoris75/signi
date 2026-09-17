@@ -22,3 +22,20 @@ export function stepBox(from: HTMLElement, delta: 1 | -1): HTMLElement | undefin
   const all = boxElements();
   return all[all.indexOf(from) + delta];
 }
+
+/** Every period card on the page, in stack order — the level the cursor steps out onto. */
+export function periodElements(): HTMLElement[] {
+  if (typeof document === "undefined") return [];
+  return Array.from(document.querySelectorAll<HTMLElement>("[data-kb-period]"));
+}
+
+/** The period card `el` belongs to — the card a box steps out onto. */
+export function periodOf(el: Element | null | undefined): HTMLElement | null {
+  return el?.closest?.("[data-kb-period]") ?? null;
+}
+
+/** The period above or below, or undefined at either end of the stack. */
+export function stepPeriod(from: HTMLElement, delta: 1 | -1): HTMLElement | undefined {
+  const all = periodElements();
+  return all[all.indexOf(from) + delta];
+}

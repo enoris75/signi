@@ -2,7 +2,7 @@ import { Box } from "@mui/material";
 import { ALL_SLOTS } from "../components/PhraseBuilder/slots.ts";
 import { useConceptLabel } from "../i18n/useConceptLabel.ts";
 import { useUiString } from "../i18n/useUiString.ts";
-import { hintsFor } from "./keymap.ts";
+import { hintsFor, KEYMAP, PERIOD_KEYMAP } from "./keymap.ts";
 import { Keycap } from "./Keycap.tsx";
 import { useCursorContext, useInputModality } from "./KeyboardProvider.tsx";
 
@@ -22,9 +22,16 @@ export function HintLine() {
 
   if (modality !== "keyboard" || !cursor) return null;
 
-  const slot = ALL_SLOTS.find((s) => s.key === cursor.cursor.slot);
-  const held = cursor.ctx.selection[cursor.cursor.slot];
-  const hints = hintsFor(cursor.scopes, cursor.ctx);
+  // What the cursor is on, and the keys that apply there: a word box says its slot and its word,
+  // and the period a level above it says so — both read off the keymap for the level.
+  const slot = cursor.box && ALL_SLOTS.find((s) => s.key === cursor.box!.slot);
+  const held = cursor.box?.selection[cursor.box.slot];
+  const hints = cursor.box
+    ? hintsFor(KEYMAP, cursor.scopes, cursor.box)
+    : hintsFor(PERIOD_KEYMAP, cursor.scopes, cursor.period);
+  const where = slot?.labelKey
+    ? t(slot.labelKey)
+    : (slot?.label ?? (cursor.box ? cursor.box.slot : t("clause.main")));
 
   return (
     <>
@@ -60,7 +67,7 @@ export function HintLine() {
             component="span"
             sx={{ fontWeight: 700, letterSpacing: "0.12em", textTransform: "uppercase" }}
           >
-            {slot?.labelKey ? t(slot.labelKey) : (slot?.label ?? cursor.cursor.slot)}
+            {where}
           </Box>
           {held && (
             <Box

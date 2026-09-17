@@ -7,6 +7,7 @@ import { useBorderDrag } from "./hooks/useBorderDrag.ts";
 import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
+import { PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
 
 export interface PeriodContainerProps extends ClauseControls, HeaderControlsProps {
   // The card's padding, in theme spacing units. The caller's resize grip negates it to
@@ -66,7 +67,11 @@ export function PeriodContainer({
       // takes the click — not just the border control. The control's own click bubbles here
       // too, but the second call is a no-op: the pick is already resolved.
       onClick={target ? () => controls[target]?.onPick() : undefined}
+      // While a pick is in flight this card is one of the places it could land, and it is numbered
+      // where it sits so a digit can take it (see usePickKeys).
+      {...(target ? { [PICK_TARGET]: target } : {})}
       sx={{
+        ...(target ? pickBadgeSx : {}),
         p: paperPad,
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.

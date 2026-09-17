@@ -20,6 +20,7 @@ import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
 import { focusRing } from "../../keyboard/focusRing.ts";
 import { boxScopesOf } from "../../keyboard/scope.ts";
+import { PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import type { GroupRect } from "./graph.ts";
 import type { Disc, Pt } from "./ringLayout.ts";
@@ -472,7 +473,11 @@ export function SlotNode({
     <Box
       {...dragHandlers}
       {...cursor}
-      sx={[dragSx, focusRing(slot.color)]}
+      // An eligible target of the pick in flight: numbered where it sits, so a digit takes it.
+      // A real click reaches the same handler through the drag machinery's own activation, so the
+      // second call is a no-op — the pick it would complete is already resolved.
+      {...(pickTarget ? { [PICK_TARGET]: slot.key, onClick: () => onPickTarget?.(slot.key) } : {})}
+      sx={[dragSx, focusRing(slot.color), pickTarget ? pickBadgeSx : {}]}
       ref={(el: HTMLElement | null) => {
         if (el) slotEls.current.set(slot.key, el);
         else slotEls.current.delete(slot.key);

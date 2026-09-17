@@ -17,6 +17,9 @@ import { MUI_COLOR_HEX } from "./slots.ts";
 import { boxKey, useConnectors } from "./hooks/useConnectors.ts";
 import { uid, useWorkspaceLinks } from "./hooks/useWorkspaceLinks.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
+import { Keycap } from "../../keyboard/Keycap.tsx";
+import { useInputModality } from "../../keyboard/KeyboardProvider.tsx";
+import { usePickKeys } from "../../keyboard/usePickKeys.ts";
 
 interface Props {
   containers: PhraseContainer[];
@@ -46,6 +49,15 @@ export function PhraseWorkspace({
     links,
     setLinks,
   );
+  // While a pick is in flight every eligible target is numbered where it sits, and its digit takes
+  // it — the keyboard's way of pointing (see usePickKeys). A target marks itself; what taking it
+  // *does* is the target's own onPick, which a click would have called.
+  const modality = useInputModality();
+  const { count } = usePickKeys({
+    active: pick.active,
+    onPick: (target) => target.click(),
+    onCancel: cancelPick,
+  });
   // Period (single-clause) save/load: which container's save dialog is open, and whether
   // the "add a saved period" picker is open. See PeriodSaveLoad.
   const [savePeriodId, setSavePeriodId] = useState<string | null>(null);
@@ -269,6 +281,8 @@ export function PhraseWorkspace({
                   : undefined
               }
               onSave={() => setSavePeriodId(c.id)}
+              onAddPeriod={addContainer}
+              onLoadPeriod={() => setLoadPeriodOpen(true)}
               // The word palette rides only the first container to avoid ambiguity.
               wordsPanelOpen={i === 0 ? wordsPanelOpen : false}
               onWordsPanelClose={onWordsPanelClose}
@@ -310,9 +324,10 @@ export function PhraseWorkspace({
         }
       />
 
-      {/* Pick-mode banner: prompt to click a noun in another container. */}
+      {/* Pick-mode banner: what the pick is looking for, and how to give it. */}
       {pick.active && (
         <Box
+          data-testid="pick-banner"
           sx={{
             position: "sticky",
             bottom: 12,
@@ -339,13 +354,30 @@ export function PhraseWorkspace({
                   ? `Click the period holding the ${t("slot.instrumental").toLowerCase()} — a period with no verb, whose noun is what the action is done with.`
                   : t("pick.relativeHead")}
           </Typography>
+          {/* How to give it from the keyboard. Only to a keyboard user: a mouse user points. */}
+          {modality === "keyboard" && count > 0 && (
+            <Box
+              sx={{ display: "flex", alignItems: "center", gap: 0.75, fontSize: "0.72rem" }}
+            >
+              {count <= 9 ? (
+                <Keycap spec="1" />
+              ) : (
+                <>
+                  <Keycap spec="Tab" />
+                  <Keycap spec="Enter" />
+                </>
+              )}
+              {count <= 9 ? `1–${count}` : "move, pick"}
+            </Box>
+          )}
           <Button
             size="small"
             onClick={cancelPick}
             startIcon={<CloseIcon sx={{ fontSize: 15 }} />}
-            sx={{ color: "primary.contrastText", textTransform: "none" }}
+            sx={{ color: "primary.contrastText", textTransform: "none", gap: 0.5 }}
           >
             {t("action.cancel")}
+            {modality === "keyboard" && <Keycap spec="Escape" />}
           </Button>
         </Box>
       )}

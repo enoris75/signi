@@ -5,9 +5,10 @@ import type { Satellite } from '../../src/components/PhraseBuilder/satellites/in
 import {
   hintsFor,
   KEYMAP,
+  PERIOD_KEYMAP,
   resolveCommand,
   satelliteKey,
-  type KeyContext,
+  type BoxKeyContext,
 } from '../../src/keyboard/keymap.ts';
 import { matchesKeySpec } from '../../src/keyboard/matchKey.ts';
 import { boxScopeChain, boxScopesOf } from '../../src/keyboard/scope.ts';
@@ -17,7 +18,7 @@ const verb = (id: string): Concept => ({ id, role: 'verb', description: id, labe
 
 // A context whose satellites are all available unless the test says otherwise — enough to ask
 // the keymap which command a keystroke resolves to.
-function ctx(over: Partial<KeyContext> = {}): KeyContext {
+function ctx(over: Partial<BoxKeyContext> = {}): BoxKeyContext {
   return {
     slot: 'subject',
     selection: {} as PhraseSelection,
@@ -31,6 +32,7 @@ function ctx(over: Partial<KeyContext> = {}): KeyContext {
     togglePossessor: () => {},
     addConjunct: () => {},
     cycleConjunction: () => {},
+    relative: undefined,
     openDeterminerMenu: () => {},
     openComplementMenu: () => {},
     armToolbar: () => {},
@@ -59,10 +61,11 @@ function ctx(over: Partial<KeyContext> = {}): KeyContext {
 }
 
 // What the provider does with a keystroke: look it up in the scopes the cursor's box declares.
-const commandFor = (key: string, over: Partial<KeyContext> = {}) => {
+const commandFor = (key: string, over: Partial<BoxKeyContext> = {}) => {
   const context = ctx(over);
   const scopes = boxScopesOf(context.slot, context.selection);
   return resolveCommand(
+    KEYMAP,
     scopes,
     (spec) =>
       matchesKeySpec(
@@ -74,9 +77,13 @@ const commandFor = (key: string, over: Partial<KeyContext> = {}) => {
   )?.id;
 };
 
+// Both levels' maps answer to the same invariants — a key bound twice in one scope, or an action
+// with no name, is a bug wherever it is.
+const ALL_COMMANDS = [...KEYMAP, ...PERIOD_KEYMAP];
+
 describe('the keymap', () => {
   it('gives every command an id of its own', () => {
-    const ids = KEYMAP.map((c) => c.id);
+    const ids = ALL_COMMANDS.map((c) => c.id);
     expect(new Set(ids).size).toBe(ids.length);
   });
 
@@ -84,7 +91,7 @@ describe('the keymap', () => {
   // declaration order — which of the two the user gets would be an accident.
   it('binds each key once per scope', () => {
     const seen = new Map<string, string>();
-    for (const command of KEYMAP) {
+    for (const command of ALL_COMMANDS) {
       for (const key of command.keys) {
         const slot = `${command.scope}/${key}`;
         expect(seen.get(slot), `${slot} is bound by both ${seen.get(slot)} and ${command.id}`)
@@ -95,7 +102,7 @@ describe('the keymap', () => {
   });
 
   it('names every action, and names it from the catalogue wherever the word is seeded', () => {
-    for (const command of KEYMAP) {
+    for (const command of ALL_COMMANDS) {
       expect(command.label, command.id).not.toBe('');
       if (command.labelKey) expect(UI_STRINGS[command.labelKey], command.id).toBeDefined();
     }
@@ -156,6 +163,7 @@ describe('the menus and toolbars a key opens', () => {
     const verb = { slot: 'verb' as const, nounKey: null };
     expect(commandFor('=', verb)).toBe('verb.complement');
     const shifted = resolveCommand(
+      KEYMAP,
       boxScopesOf('verb', {}),
       (spec) =>
         matchesKeySpec(
@@ -183,7 +191,7 @@ describe('the menus and toolbars a key opens', () => {
 });
 
 describe('the command box', () => {
-  const command = (over: Partial<KeyContext> = {}) => ({
+  const command = (over: Partial<BoxKeyContext> = {}) => ({
     slot: 'subject' as const,
     nounKey: null,
     selection: { imperative: true } as PhraseSelection,
@@ -215,7 +223,7 @@ describe('the command box', () => {
 describe('the hints for a scope', () => {
   it('lists the keys that apply here, and drops the ones that do not', () => {
     const verbCtx = ctx({ slot: 'verb', nounKey: null, selection: { verb: verb('EAT') } });
-    const ids = hintsFor(boxScopeChain('verb'), verbCtx).map((c) => c.id);
+    const ids = hintsFor(KEYMAP, boxScopeChain('verb'), verbCtx).map((c) => c.id);
 
     expect(ids).toContain('verb.tense');
     expect(ids).toContain('verb.aspect');
@@ -234,12 +242,15 @@ describe('the key a control wears', () => {
     expect(satelliteKey('modifier', boxScopeChain('verb'))).toBe('V');
     expect(satelliteKey('verbModal2Adverb', boxScopeChain('verb'))).toBe('V');
     expect(satelliteKey('directObject', boxScopeChain('verb'))).toBe('O');
+    expect(satelliteKey('subjectRelative', boxScopeChain('noun'))).toBe('R');
     // A chained adjective's control rides the adjective before it, so it is found in that scope.
     expect(satelliteKey('subjectAdjective2', boxScopeChain('adjective'))).toBe('A');
   });
 
-  it('is undefined for a control with no key bound yet', () => {
-    // The relative clause is a link pick, which phase 3 of the plan brings.
-    expect(satelliteKey('subjectRelative', boxScopeChain('noun'))).toBeUndefined();
+  it('is undefined for a control with no key of its own', () => {
+    // A complement toggle is reached through the + menu, not by a letter on the verb box: nine
+    // of them would be nine more letters to remember (see ComplementMenu).
+    expect(satelliteKey('locative', boxScopeChain('verb'))).toBeUndefined();
+    expect(satelliteKey('instrumental', boxScopeChain('verb'))).toBeUndefined();
   });
 });

@@ -98,6 +98,8 @@ import { linkPickHandlers } from "./functions/linkPickHandlers.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { BoxScopeProvider, useBoxScope } from "../../keyboard/KeyboardProvider.tsx";
+import { pressControl } from "../../keyboard/controls.ts";
+import { usePickKeys } from "../../keyboard/usePickKeys.ts";
 import { satelliteKey as satelliteKeyFor, type BoxContext } from "../../keyboard/keymap.ts";
 import { boxScopesOf, nounBlockOf } from "../../keyboard/scope.ts";
 
@@ -115,6 +117,10 @@ export interface PhraseBuilderProps {
   // Top-level only: save just this clause (a "period") to the saved-phrase store. Shown as
   // a small icon in the main-clause header.
   onSave?: () => void;
+  // Top-level only: the workspace's own two buttons under the stack. The period's N and L reach
+  // them without leaving the card (see the keymap's period scope).
+  onAddPeriod?: () => void;
+  onLoadPeriod?: () => void;
   // Top-level only: the word-palette overlay's open state, lifted to the page
   // header so a control there can toggle it. The panel reports its own close.
   wordsPanelOpen?: boolean;
@@ -156,6 +162,8 @@ export function PhraseBuilder({
   onMoveUp,
   onMoveDown,
   onSave,
+  onAddPeriod,
+  onLoadPeriod,
   wordsPanelOpen = false,
   onWordsPanelClose,
   binding,
@@ -189,6 +197,15 @@ export function PhraseBuilder({
   const parentCoref = useCorefPick();
   const ownCoref = useProvideCorefPick(selection);
   const coref = parentCoref ?? ownCoref;
+  // Pointing at the noun a pronominal possessor stands for ("the boy and **his** horse") is a pick
+  // like any other: its eligible nouns are numbered where they sit, a digit takes one, and esc
+  // abandons it — which it had no way to do at all. The period's own builder owns the pick, so it
+  // owns the keys; a nested conjunct's or owner's builder inherits the pick and binds nothing.
+  usePickKeys({
+    active: !parentCoref && Boolean(ownCoref.picking),
+    onPick: (target) => target.click(),
+    onCancel: ownCoref.cancel,
+  });
   // Map a local noun key to its period-root address (what a coref reference stores / points at,
   // and what a link is keyed by): a top-level builder's keys are themselves, a nested builder's
   // head "subject" is its `possessorPath`, and its other nouns sit under that (see
@@ -795,6 +812,18 @@ export function PhraseBuilder({
         ? () => ringHost.onAddConjunct!()
         : commands.handleAddConjunct,
       cycleConjunction: commands.handleCycleConjunction,
+      relative: (() => {
+        const which = nounBlockOf(slot);
+        // Only a noun that carries the control at all, and only in a workspace: a standalone
+        // period has no other period to point at.
+        if (!which || !linkBinding || !satelliteBy(`${which}Relative`)?.available) return undefined;
+        const address = possessorPath ? possessorAddress(nounAddress(which)) : nounAddress(which);
+        return {
+          has: linkBinding.relative.sourceKeys.has(address),
+          start: () => linkBinding.relative.onStartLink(address),
+          clear: () => linkBinding.relative.onRemoveLink(address),
+        };
+      })(),
       openDeterminerMenu,
       openComplementMenu: () => setComplementMenuOpen(true),
       armToolbar: setToolbarFor,
@@ -811,10 +840,7 @@ export function PhraseBuilder({
       cycleModifierNumber: commands.handleCycleModifierNumber,
       // The chip is its own popover's anchor, so the key presses the chip rather than the chip's
       // open state being lifted out of the leaf that owns it (see phraseRender's chip).
-      openModifierAdjective: (slotKey) =>
-        document
-          .querySelector<HTMLElement>(`[data-kb-control="modifierAdjective:${slotKey}"]`)
-          ?.click(),
+      openModifierAdjective: (slotKey) => pressControl(`modifierAdjective:${slotKey}`),
       toggleCollapse: toggleCollapseAt,
       nudge: nudgeSlot,
     };
@@ -956,6 +982,8 @@ export function PhraseBuilder({
       onMoveUp={onMoveUp}
       onMoveDown={onMoveDown}
       onSave={onSave}
+      onAddPeriod={onAddPeriod}
+      onLoadPeriod={onLoadPeriod}
       onRemove={onRemove}
       onToggleCompact={handleToggleCompact}
       onTidy={handleTidyPeriod}

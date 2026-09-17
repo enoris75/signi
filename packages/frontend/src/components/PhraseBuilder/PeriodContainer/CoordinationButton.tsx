@@ -42,6 +42,7 @@ export function CoordinationButton({ control }: CoordinationButtonProps) {
     <>
       <BorderControlButton
         title={title}
+        data-kb-control="coordinate"
         icon={CallMergeIcon}
         accent={ACCENT.coordinative}
         lit={active || droppable}

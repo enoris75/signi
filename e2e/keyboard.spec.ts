@@ -16,13 +16,19 @@ declare global {
   }
 }
 
-/** Count every pointer event the page sees, from the first paint. */
+/**
+ * Count every pointer event the *user agent* sends, from the first paint.
+ *
+ * Only trusted events: a key that presses a control the app already has — the way J opens the
+ * conjunction menu, or a digit takes a numbered pick target — dispatches a click from script, and
+ * that is still the keyboard driving. `isTrusted` is exactly the line between the two.
+ */
 async function watchForPointerEvents(page: Page): Promise<void> {
   await page.addInitScript(() => {
     window.__pointerEvents = 0;
     for (const type of ['pointerdown', 'mousedown', 'click']) {
-      window.addEventListener(type, () => {
-        window.__pointerEvents += 1;
+      window.addEventListener(type, (event) => {
+        if (event.isTrusted) window.__pointerEvents += 1;
       }, true);
     }
   });
@@ -64,6 +70,21 @@ async function pickWord(
   }
   await expect(highlighted).toHaveAttribute('data-concept', conceptId);
   await page.keyboard.press(commit);
+}
+
+/**
+ * Step out to the period the cursor is in.
+ *
+ * esc steps out exactly one level, and the cursor may be three deep — inside an open picker,
+ * inside the box it belongs to, inside the period — so the way out is one esc per level.
+ */
+async function toPeriod(page: Page): Promise<void> {
+  const onCard = () =>
+    page.evaluate(() => document.activeElement?.hasAttribute('data-kb-period') ?? false);
+  for (let level = 0; level < 4 && !(await onCard()); level++) {
+    await page.keyboard.press('Escape');
+  }
+  expect(await onCard(), 'the cursor is on the period').toBe(true);
 }
 
 /** The box the cursor rests on, as the page reports it. */
@@ -222,6 +243,87 @@ test.describe('the canvas by keyboard', () => {
     await expect(page.getByRole('menu')).toBeVisible();
     await page.keyboard.press('2');
     await app.expectSentences({ en: 'the cat runs under a house.' });
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
+  test('builds a relative clause across two periods without a pointer event', async ({
+    app,
+    page,
+  }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    await pickWord(page, 'child', 'CHILD');
+    await pickWord(page, 'read', 'READ');
+    await pickWord(page, 'book', 'BOOK');
+
+    // esc steps out of the box onto the period a level above it, where the period's own keys are.
+    await toPeriod(page);
+    // The hint line now says what the keys do *here*, a level up from the boxes.
+    await expect(page.getByTestId('hint-line')).toContainText('Command');
+    await expect(page.getByTestId('hint-line')).toContainText('If-condition');
+
+    // N is one more period, and ↵ goes into it at its subject.
+    await page.keyboard.press('n');
+    await expect(page.getByTestId('period-container')).toHaveCount(2);
+    // N leaves the cursor in the period it made, on the subject it opens on.
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'love', 'LOVE');
+    await pickWord(page, 'book', 'BOOK');
+
+    // R on the first period's object starts the clause that will describe it; the nouns it could
+    // describe are numbered where they sit, and a digit takes one.
+    await toPeriod(page);
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('Enter');
+    await page.keyboard.press('ArrowRight');
+    expect(await cursorSlot(page)).toBe('directObject');
+    await page.keyboard.press('r');
+    await expect(page.getByTestId('pick-banner')).toBeVisible();
+    // Both nouns of the other period could be the gap, numbered in the order they stand.
+    await expect(page.locator('[data-kb-pick-index="1"]')).toBeVisible();
+    await expect(page.locator('[data-kb-pick-index="2"]')).toBeVisible();
+
+    // 2 is its object: the book is what the cat loves, so the object is the gap the head fills.
+    await page.keyboard.press('2');
+    await expect(page.getByTestId('pick-banner')).toBeHidden();
+    await app.expectSentences({ en: 'the child reads the book that the cat loves.' });
+
+    expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
+  });
+
+  test('makes one period the condition of another, and abandons a pick on esc', async ({
+    app,
+    page,
+  }) => {
+    await watchForPointerEvents(page);
+    await app.goto();
+
+    await pickWord(page, 'cat', 'CAT');
+    await pickWord(page, 'run', 'RUN');
+    await toPeriod(page);
+    await page.keyboard.press('n');
+    await pickWord(page, 'child', 'CHILD');
+    await pickWord(page, 'read', 'READ');
+    await toPeriod(page);
+
+    // esc abandons a pick without taking anything.
+    await page.keyboard.press('ArrowUp');
+    await page.keyboard.press('i');
+    await expect(page.getByTestId('pick-banner')).toBeVisible();
+    await page.keyboard.press('Escape');
+    await expect(page.getByTestId('pick-banner')).toBeHidden();
+
+    // And the same key, taken through: the second period becomes the if-clause of the first.
+    await page.keyboard.press('i');
+    await page.keyboard.press('1');
+    // The engine puts the pair in the conditional mood English spells with "would".
+    await app.expectSentences({ en: 'if the child read, the cat would run.' });
+
+    // I again drops the condition it made.
+    await page.keyboard.press('i');
+    await app.expectSentences({ en: 'the cat runs.' });
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });

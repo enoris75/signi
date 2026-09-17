@@ -43,8 +43,14 @@ export interface CursorNav {
   move: (dir: Direction) => void;
   /** The next or previous box in reading order, across the whole document; false at the end. */
   step: (delta: 1 | -1) => boolean;
-  /** esc: leave the box. Phase 3 lands the cursor on the period; today it lets the box go. */
+  /** esc: step out one level — from a box onto its period, and from a period off the canvas. */
   exit: () => void;
+}
+
+/** A period's movement, which adds the way back *in*. */
+export interface PeriodNav extends CursorNav {
+  /** ↵ — into the period, at the box the cursor last rested on there. */
+  enter: () => void;
 }
 
 /**
@@ -70,6 +76,8 @@ export interface BoxContext {
   togglePossessor: (which: NounKey) => void;
   addConjunct: (which: NounKey) => void;
   cycleConjunction: (which: NounKey) => void;
+  /** The noun's relative clause: start the pick for one, or drop the link there is. */
+  relative: { has: boolean; start: () => void; clear: () => void } | undefined;
   openDeterminerMenu: (which: NounKey) => void;
   /** The verb's *Add a complement* menu — every complement it licenses, one keystroke each. */
   openComplementMenu: () => void;
@@ -95,9 +103,47 @@ export interface BoxContext {
   nudge: (slotKey: SlotKey, dx: number, dy: number) => void;
 }
 
-export type KeyContext = BoxContext & { nav: CursorNav };
+/**
+ * What a key pressed on a *period* acts on: the card the cursor rests on, and the handlers its own
+ * controls call. A period is a level above a box (the plan's §2), so its keys are looked up in a
+ * map of their own and never see a box's context, nor a box key a period's.
+ */
+export interface PeriodContext {
+  /** This period's container id in the workspace; undefined for a standalone period. */
+  id: string | undefined;
+  selection: PhraseSelection;
+  /** ⇧↑ / ⇧↓ — move the period up or down the stack. Absent at either end. */
+  move: (delta: 1 | -1) => void;
+  canMove: (delta: 1 | -1) => boolean;
+  /** N / L — one more period, empty or loaded from the saved ones. */
+  addPeriod: () => void;
+  loadPeriod: () => void;
+  /** S / ⌫ — save this period, or remove it (clear it when it is the only one). */
+  save: (() => void) | undefined;
+  remove: (() => void) | undefined;
+  hasContent: boolean;
+  /** C / T — the two moods, which share the finite slot and so exclude each other. */
+  toggleImperative: () => void;
+  toggleInfinitive: () => void;
+  moodLocked: boolean;
+  /** I / J — the two clause-level relations: start the pick, or drop the link there is. */
+  condition: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
+  coordination: { canStart: boolean; hasLink: boolean; start: () => void; clear: () => void } | undefined;
+  /** R — how far an instrument period is reified: process → concept → object. */
+  cycleLevel: (() => void) | undefined;
+  /** Z / W / + − — the view: compact, tidy, and the canvas's height. */
+  toggleCompact: () => void;
+  tidy: () => void;
+  hasGroups: boolean;
+  resize: (delta: number) => void;
+}
 
-export interface Command {
+/** The context a box command runs against: the box, and the cursor's own movement. */
+export type BoxKeyContext = BoxContext & { nav: CursorNav };
+/** The context a period command runs against. */
+export type PeriodKeyContext = PeriodContext & { nav: PeriodNav };
+
+export interface Command<C> {
   /** Stable id — what a test, the shortcuts sheet and (later) a console command name it by. */
   id: string;
   scope: Scope;
@@ -108,9 +154,9 @@ export interface Command {
   /** The catalogue key `label` is rendered from, where the action's words are already seeded. */
   labelKey?: UiStringKey;
   /** Whether the key exists here at all — the same fact the control's own presence rests on. */
-  when?: (ctx: KeyContext) => boolean;
+  when?: (ctx: C) => boolean;
   /** Returning `false` declines the keystroke, leaving it to the browser (see box.next). */
-  run: (ctx: KeyContext) => void | boolean;
+  run: (ctx: C) => void | boolean;
   /** Listed in the hint line for this scope. Movement is taught by the caption instead. */
   hint?: boolean;
   /**
@@ -159,7 +205,7 @@ const isRealAdjective = (ctx: BoxContext) => ctx.selection[ctx.slot]?.role === "
 const filled = (ctx: BoxContext) => Boolean(ctx.selection[ctx.slot]);
 
 /** Reveal `slot` and put the cursor in it; its satellite is named when it is folded away. */
-const goTo = (ctx: KeyContext, slot: SlotKey) => ctx.revealSlot(slot, slot);
+const goTo = (ctx: BoxKeyContext, slot: SlotKey) => ctx.revealSlot(slot, slot);
 
 /** The complements whose ring carries a relation toolbar, which S points the next key at. */
 const TOOLBAR_SLOTS: SlotKey[] = ["route", "locative", "cause"];
@@ -173,7 +219,7 @@ const IMPERATIVE_PERSONS: [ImperativePerson, string, string][] = [
 
 // ── The map ───────────────────────────────────────────────────────────────────────────────────
 
-export const KEYMAP: Command[] = [
+export const KEYMAP: Command<BoxKeyContext>[] = [
   // ── Every box: moving about, choosing a word, clearing it ──────────────────────────────────
   ...(
     [
@@ -182,7 +228,7 @@ export const KEYMAP: Command[] = [
       ["right", "ArrowRight"],
       ["down", "ArrowDown"],
     ] as const
-  ).map(([dir, key]): Command => ({
+  ).map(([dir, key]): Command<BoxKeyContext> => ({
     id: `box.move.${dir}`,
     scope: "box",
     keys: [key],
@@ -196,7 +242,7 @@ export const KEYMAP: Command[] = [
       ["right", "Shift+ArrowRight", NUDGE_STEP, 0],
       ["down", "Shift+ArrowDown", 0, NUDGE_STEP],
     ] as const
-  ).map(([dir, key, dx, dy]): Command => ({
+  ).map(([dir, key, dx, dy]): Command<BoxKeyContext> => ({
     id: `box.nudge.${dir}`,
     scope: "box",
     keys: [key],
@@ -338,6 +384,19 @@ export const KEYMAP: Command[] = [
     label: "Conjunction",
     when: (ctx) => Boolean(ctx.satellite(`${ctx.nounKey}Conjunct`)?.hasValue),
     run: (ctx) => ctx.cycleConjunction(ctx.nounKey!),
+  },
+  {
+    id: "noun.relative",
+    scope: "box:noun",
+    keys: ["R"],
+    label: "Relative clause",
+    labelKey: "satellite.relative",
+    hint: true,
+    satellite: /Relative$/,
+    // One key for both halves of the same idea, as the control itself is: start the pick that
+    // gives this noun a clause, or drop the clause it has.
+    when: (ctx) => Boolean(ctx.relative),
+    run: (ctx) => (ctx.relative!.has ? ctx.relative!.clear() : ctx.relative!.start()),
   },
   {
     id: "noun.relation",
@@ -524,7 +583,7 @@ export const KEYMAP: Command[] = [
   },
 
   // ── The command box, which a command puts in the subject's place ───────────────────────────
-  ...IMPERATIVE_PERSONS.map(([person, key, label]): Command => ({
+  ...IMPERATIVE_PERSONS.map(([person, key, label]): Command<BoxKeyContext> => ({
     id: `mood.person.${person}`,
     scope: "box:mood",
     keys: [key],
@@ -548,18 +607,186 @@ export const KEYMAP: Command[] = [
   },
 ];
 
+/** How far <kbd>+</kbd> and <kbd>−</kbd> grow the canvas — the step the resize grip takes. */
+export const RESIZE_STEP = 16;
+
+/**
+ * The period's own keys (the plan's §4.2), with the cursor on the card rather than in it.
+ *
+ * Every one of them is a control the card already carries: the letters are the initials of what
+ * they do, and where two would collide the commoner one wins — <kbd>C</kbd> is the command and
+ * <kbd>T</kbd> the infinitive's "to …", because a period is made a command far more often than it
+ * is cited.
+ */
+export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
+  {
+    id: "period.enter",
+    scope: "period",
+    keys: ["Enter"],
+    label: "Edit",
+    hint: true,
+    run: (ctx) => ctx.nav.enter(),
+  },
+  {
+    id: "period.previous",
+    scope: "period",
+    keys: ["ArrowUp"],
+    label: "Previous period",
+    run: (ctx) => ctx.nav.move("up"),
+  },
+  {
+    id: "period.next",
+    scope: "period",
+    keys: ["ArrowDown"],
+    label: "Next period",
+    run: (ctx) => ctx.nav.move("down"),
+  },
+  ...([
+    ["up", "Shift+ArrowUp", -1],
+    ["down", "Shift+ArrowDown", 1],
+  ] as const).map(([dir, key, delta]): Command<PeriodKeyContext> => ({
+    id: `period.move.${dir}`,
+    scope: "period",
+    keys: [key],
+    label: `Move the period ${dir}`,
+    when: (ctx) => ctx.canMove(delta),
+    run: (ctx) => ctx.move(delta),
+  })),
+  {
+    id: "period.add",
+    scope: "period",
+    keys: ["N"],
+    label: "New period",
+    labelKey: "action.addPeriodContainer",
+    hint: true,
+    run: (ctx) => ctx.addPeriod(),
+  },
+  {
+    id: "period.load",
+    scope: "period",
+    keys: ["L"],
+    label: "Load a period",
+    labelKey: "action.loadPeriod",
+    run: (ctx) => ctx.loadPeriod(),
+  },
+  {
+    id: "period.save",
+    scope: "period",
+    keys: ["S"],
+    label: "Save this period",
+    labelKey: "action.savePeriod",
+    when: (ctx) => Boolean(ctx.save) && ctx.hasContent,
+    run: (ctx) => ctx.save!(),
+  },
+  {
+    id: "period.remove",
+    scope: "period",
+    keys: ["Backspace"],
+    label: "Remove the period",
+    labelKey: "action.removePeriod",
+    when: (ctx) => Boolean(ctx.remove),
+    run: (ctx) => ctx.remove!(),
+  },
+  {
+    id: "period.command",
+    scope: "period",
+    keys: ["C"],
+    label: "Command",
+    labelKey: "imperative.command",
+    hint: true,
+    when: (ctx) => !ctx.moodLocked,
+    run: (ctx) => ctx.toggleImperative(),
+  },
+  {
+    id: "period.infinitive",
+    scope: "period",
+    keys: ["T"],
+    label: "Infinitive",
+    labelKey: "infinitive.phrase",
+    hint: true,
+    when: (ctx) => !ctx.moodLocked,
+    run: (ctx) => ctx.toggleInfinitive(),
+  },
+  {
+    id: "period.condition",
+    scope: "period",
+    keys: ["I"],
+    label: "If-condition",
+    hint: true,
+    // One key for both halves of the same idea: start the pick, or drop the condition there is.
+    when: (ctx) => Boolean(ctx.condition?.canStart || ctx.condition?.hasLink),
+    run: (ctx) => (ctx.condition!.hasLink ? ctx.condition!.clear() : ctx.condition!.start()),
+  },
+  {
+    id: "period.join",
+    scope: "period",
+    keys: ["J"],
+    label: "Join",
+    labelKey: "action.coordinatePeriod",
+    hint: true,
+    when: (ctx) => Boolean(ctx.coordination?.canStart || ctx.coordination?.hasLink),
+    run: (ctx) =>
+      ctx.coordination!.hasLink ? ctx.coordination!.clear() : ctx.coordination!.start(),
+  },
+  {
+    id: "period.level",
+    scope: "period",
+    keys: ["R"],
+    label: "Instrument level",
+    when: (ctx) => Boolean(ctx.cycleLevel),
+    run: (ctx) => ctx.cycleLevel!(),
+  },
+  {
+    id: "period.compact",
+    scope: "period",
+    keys: ["Z"],
+    label: "Compact",
+    labelKey: "action.compactPeriod",
+    when: (ctx) => ctx.hasGroups,
+    run: (ctx) => ctx.toggleCompact(),
+  },
+  {
+    id: "period.tidy",
+    scope: "period",
+    keys: ["W"],
+    label: "Tidy",
+    labelKey: "action.tidyPeriod",
+    when: (ctx) => ctx.hasGroups,
+    run: (ctx) => ctx.tidy(),
+  },
+  ...([
+    ["taller", "+", RESIZE_STEP],
+    ["taller", "=", RESIZE_STEP],
+    ["shorter", "-", -RESIZE_STEP],
+  ] as const).map(([dir, key, delta], i): Command<PeriodKeyContext> => ({
+    id: `period.${dir}${i === 1 ? ".alt" : ""}`,
+    scope: "period",
+    keys: [key],
+    label: `Canvas ${dir}`,
+    run: (ctx) => ctx.resize(delta),
+  })),
+  {
+    id: "period.out",
+    scope: "period",
+    keys: ["Escape"],
+    label: "Step out",
+    run: (ctx) => ctx.nav.exit(),
+  },
+];
+
 /**
  * The command a keystroke runs: the first match in the most specific scope that offers one. A
  * noun's <kbd>N</kbd> is found before the box-level keys are even looked at, which is what makes
  * the same letter mean the number here and the negation on a verb.
  */
-export function resolveCommand(
+export function resolveCommand<C>(
+  commands: readonly Command<C>[],
   scopes: readonly Scope[],
   matches: (spec: string) => boolean,
-  ctx: KeyContext,
-): Command | undefined {
+  ctx: C,
+): Command<C> | undefined {
   for (const scope of scopes) {
-    const hit = KEYMAP.find(
+    const hit = commands.find(
       (c) => c.scope === scope && c.keys.some(matches) && (c.when?.(ctx) ?? true),
     );
     if (hit) return hit;
@@ -568,9 +795,13 @@ export function resolveCommand(
 }
 
 /** The keys to teach for the cursor's scopes — what the hint line lists, in scope order. */
-export function hintsFor(scopes: readonly Scope[], ctx: KeyContext): Command[] {
+export function hintsFor<C>(
+  commands: readonly Command<C>[],
+  scopes: readonly Scope[],
+  ctx: C,
+): Command<C>[] {
   return scopes.flatMap((scope) =>
-    KEYMAP.filter((c) => c.scope === scope && c.hint && (c.when?.(ctx) ?? true)),
+    commands.filter((c) => c.scope === scope && c.hint && (c.when?.(ctx) ?? true)),
   );
 }
 

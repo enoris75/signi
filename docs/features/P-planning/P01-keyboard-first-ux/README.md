@@ -8,8 +8,8 @@ handlers, key tips, tooltips and the shortcuts sheet.
 **Relation to [P02](../P02-phrase-console/README.md):** P02's phrase console is the fast, typed way to build a
 phrase. This plan makes the canvas itself fully reachable, and the two share one cursor. The
 command palette and hint bar once planned here are now part of the console.
-**Status:** phases 1 and 2 shipped (the cursor, the box keys, the pickers and the menus); phases
-3–5 planned. See
+**Status:** phases 1–3 shipped (the cursor, the box keys, the pickers and menus, the period level
+and the link picks); phases 4–5 planned. See
 [Phases](#6-phases) for what each still covers and [Open questions](#open-questions) for what is
 still undecided.
 **Drawings:** [`artwork/`](artwork/) — seven images exported from page *Keyboard access (P01)* of
@@ -111,10 +111,9 @@ The same session in the console is P02 §1.
 
 <kbd>esc</kbd> always steps out exactly one level: popup → box → period → (nothing).
 
-*Phase 1:* there is no period level yet, so <kbd>esc</kbd> on a box lets the box go rather than
-landing on its period, and one <kbd>esc</kbd> inside the word picker both closes its list (the
-picker's own handler) and steps back onto the box. The shared picker keys of phase 2 make those
-the two distinct steps §4.5 describes.
+Every level of that is now real: from inside an open picker it takes three — the list, the box, the
+period — and each <kbd>esc</kbd> takes exactly one. Above the period there is nothing yet; the app
+level is phase 4's.
 
 ### Arrows are spatial
 
@@ -464,8 +463,10 @@ re-renders the <kbd>Ctrl</kbd> keycaps. The console's commands have their own re
 | `spatialNav.ts` | The cone-and-distance search over measured box rects. Pure, unit-tested. |
 | `Keycap.tsx`, `KeyTip.tsx` | The two atoms (paper keycap; 15px ink badge). |
 | `focusRing.ts`, `activate.ts` | The cursor's ring, and what makes a canvas box that is not a word (tense, aspect, determiner) answer to ↵ and Space. |
-| `boxes.ts` | The word boxes of the page as one list, which both the cursor and the open picker walk. |
+| `boxes.ts` | The word boxes and period cards of the page as two lists, which the cursor and the open picker walk. |
 | `useMenuKeys.ts` | The accelerator per row, for every menu and for an armed relation toolbar. |
+| `usePickKeys.ts` | The numbered targets of a pick in flight, for all five kinds at once. |
+| `controls.ts` | Pressing a control that owns its own popup, for the few keys that cannot call a handler. |
 | `HintLine.tsx` | The keys for the cursor's scope; later rendered inside the collapsed console (P02). |
 | `ShortcutSheet.tsx` | ? dialog; renders §4 from `keymap`, Windows & Linux / Mac switch. |
 
@@ -479,7 +480,7 @@ export type Scope =
   | "box" | "box:noun" | "box:adjective" | "box:verb" | "box:mood"
   | "picker" | "menu" | "pick" | "translations" | "words";
 
-export interface Command {
+export interface Command<C> {       // C is the level's context: a box's, or a period's
   id: string;                    // "noun.number"
   scope: Scope;
   keys: string[];                // ["N"], ["Shift+ArrowUp"], ["Mod+S"]; Mod = Ctrl, ⌘ on a Mac
@@ -490,6 +491,9 @@ export interface Command {
   hint?: boolean;                // show in the hint line
   satellite?: RegExp;            // the controls it drives, which wear its key as a tip
 }
+
+export const KEYMAP: Command<BoxKeyContext>[];       // the box scopes
+export const PERIOD_KEYMAP: Command<PeriodKeyContext>[];  // the period scope
 ```
 
 `KeyContext` is assembled from what `PhraseBuilder` already computes — `selection`, `activeSlot`,
@@ -553,7 +557,7 @@ Each phase ships on its own and leaves the app consistent.
 |---|---|---|
 | **1 · Cursor and box keys** ✅ | `keyboard/` module (keymap, provider, matchKey, spatialNav, Keycap, KeyTip, HintLine); focus ring; arrows / ⇥ / ↵ / ⌫ / esc on boxes; noun, adjective and verb letters that call existing handlers; tense / aspect / chips / determiner box activatable; tooltip keycaps. | A sentence with plural subject, past tense, negation, adjectives and a modal can be built and edited keyboard-only. |
 | **2 · Pickers and menus** ✅ | `usePickerKeys` (⇥, double esc, tabs, pronoun grid, footer); determiner / conjunction / specifier / sentiment accelerators; new *Add a complement* menu; command-subject keys. | Every value any menu or toggle offers is one key after the key that opened it. |
-| **3 · Periods and links** | Period cursor (esc out, ↑↓, ⇧↑↓ move) and period letters; `eligibleTargets` + numbered badges for all five pick kinds; coref esc. | Relative clause, if-condition, join, instrument and possessor reference can be built keyboard-only. |
+| **3 · Periods and links** ✅ | Period cursor (esc out, ↑↓, ⇧↑↓ move) and period letters; `eligibleTargets` + numbered badges for all five pick kinds; coref esc. | Relative clause, if-condition, join, instrument and possessor reference can be built keyboard-only. |
 | **4 · Regions** | F6 landmarks; header toolbar + Console button; translations rows; words panel and word map; Ctrl keys (save / load / export / import / words); ? sheet. | Every control on the page is reachable, and the sheet lists every binding in the keymap (generated, not hand-written). |
 | **5 · Undo** | History of `{containers, links}` in `App` with coalescing for rapid toggles; Ctrl Z / Ctrl ⇧ Z; undo toast after destructive actions; `window.confirm` removed. | Removing a period, clearing a box or deleting a saved phrase can be undone. |
 
@@ -580,15 +584,27 @@ type-ahead of its own. The relation toolbars are not menus — they are always o
 <kbd>S</kbd> *arms* one instead of opening it: the next key is a relation, and any other key means
 the user moved on and it stops waiting.
 
+**What phase 3 shipped, beside the table.** The cursor now has the two levels §2 describes, and a
+keymap each: a box command can no longer be handed a period's context, nor a period key a box's,
+because `Command` is generic over the level and the provider picks the map from where the cursor
+is. That is what lets <kbd>C</kbd> be the coordination on a noun and the command on the period, and
+<kbd>N</kbd> the number on a noun and a new period on the card.
+
+The numbered pick targets are one mechanism, not five. A target marks itself with an attribute —
+which every pick kind was already deciding, to highlight it — and `usePickKeys` numbers whatever
+carries that attribute, in page order, writing the number back onto the element for CSS to draw as
+its badge. No component has to know how many targets there are or where the others sit, and the
+relative clause, the if-condition, the join, the instrument and the possessor reference all answer
+to the same digits. The possessor's pick gained <kbd>esc</kbd> with them — it had no way to be
+abandoned at all.
+
 **What phase 1 left.** Two things named in §3 need work that is not a frontend change:
 
 - **The keyboard caption** (§3.1, "· MOVE WITH THE ARROWS, TYPE TO CHOOSE A WORD"). Every caption
   is an engine-composed catalogue string, and this one needs a concept the corpus does not hold
   (an arrow, or a key). It is a `/seed` + `/localize` task, not a component edit — the caption
   still reads "· click a slot, and then choose a word" under both modalities.
-- **<kbd>R</kbd> on a noun** (the relative clause) opens a pick that phase 3 builds, so its control
-  still carries no key tip — the tips are read off the keymap, and there is nothing there yet to
-  read. (The complement menu's <kbd>+</kbd> shipped with phase 2.)
+(<kbd>R</kbd> on a noun and the complement menu's <kbd>+</kbd> shipped with phases 3 and 2.)
 
 Existing defects fixed along the way (found while auditing): focus ring suppressed on canvas nodes;
 ⇥ inside a picker jumps slots; closed words panel stays in the tab order; translation copy button
@@ -614,6 +630,11 @@ ignores esc.
   *Shipped for phase 2:* a pronoun chosen from the tabs and the grid, a word taken with <kbd>⇥</kbd>
   that moves the cursor on where <kbd>↵</kbd> would not have, and a complement added, related and
   determined from three menus in six keystrokes.
+  *Shipped for phase 3:* a relative clause and an if-condition built across two periods — stepping
+  out to the card, making a second period with <kbd>N</kbd>, and taking a numbered target by its
+  digit. The guard counts only *trusted* pointer events: a key that presses a control the app
+  already has (the conjunction menu, a numbered target) dispatches a click from script, and that is
+  still the keyboard driving.
 
 ## 8. Risks
 

@@ -1,5 +1,9 @@
-import { useState, type ReactNode, type Ref } from "react";
+import { useRef, useState, type ReactNode, type Ref } from "react";
 import { Box } from "@mui/material";
+import { pressControl } from "../../keyboard/controls.ts";
+import { focusRing } from "../../keyboard/focusRing.ts";
+import { usePeriodCursor, usePeriodHasCursor } from "../../keyboard/KeyboardProvider.tsx";
+import type { PeriodContext } from "../../keyboard/keymap.ts";
 import type { PhraseSelection, WorkspaceBinding } from "./interfaces.ts";
 import { MIN_GRAPH_HEIGHT } from "./slots.ts";
 import { PeriodContainer, periodControls } from "./PeriodContainer/index.ts";
@@ -23,6 +27,10 @@ export interface PeriodCardProps {
   onTidy: () => void;
   onToggleImperative: () => void;
   onToggleInfinitive: () => void;
+  // One more period, empty or loaded from the saved ones — the workspace's own two buttons, which
+  // the period's N and L reach without leaving the card (see the keymap's period scope).
+  onAddPeriod?: () => void;
+  onLoadPeriod?: () => void;
   // The header controls, for the canvas to pack clear of in compact view.
   controlsRef?: Ref<HTMLDivElement>;
   // The full-view canvas height the card's bottom edge resizes.
@@ -64,6 +72,8 @@ export function PeriodCard({
   onTidy,
   onToggleImperative,
   onToggleInfinitive,
+  onAddPeriod,
+  onLoadPeriod,
   controlsRef,
   graphHeight,
   onGraphHeightChange,
@@ -82,15 +92,83 @@ export function PeriodCard({
   const clauseControls = periodControls(binding, selection);
   const locked = moodLocked(binding);
 
+  // What a key pressed on the card acts on: the very handlers its own controls call, published for
+  // the one key listener in the app (see KeyboardProvider). Rebuilt every render, so a command
+  // always runs against the period as it is now.
+  const cardRef = useRef<HTMLDivElement | null>(null);
+  const hasCursor = usePeriodHasCursor(cardRef.current);
+  const cursor = usePeriodCursor((): PeriodContext => {
+    const { conditional, coordinative, instrumental } = clauseControls;
+    return {
+      id: binding?.containerId,
+      selection,
+      move: (delta) => (delta === -1 ? onMoveUp?.() : onMoveDown?.()),
+      canMove: (delta) => Boolean(delta === -1 ? onMoveUp : onMoveDown),
+      addPeriod: () => {
+        onAddPeriod?.();
+        // N leaves the cursor in the period it made, on the subject it opens on — the period is
+        // appended to the stack, so it is the last card once the commit lands.
+        requestAnimationFrame(() => {
+          const stack = document.querySelectorAll<HTMLElement>("[data-kb-period]");
+          const added = stack[stack.length - 1];
+          added?.querySelector<HTMLElement>("[data-kb-box], input")?.focus();
+        });
+      },
+      loadPeriod: () => onLoadPeriod?.(),
+      save: onSave,
+      remove: onRemove,
+      hasContent,
+      toggleImperative: onToggleImperative,
+      toggleInfinitive: onToggleInfinitive,
+      moodLocked: locked,
+      condition: conditional && {
+        canStart: conditional.canStart,
+        hasLink: conditional.hasCondition,
+        start: conditional.onStart,
+        clear: conditional.onClear,
+      },
+      coordination: coordinative && {
+        canStart: coordinative.canStart,
+        hasLink: coordinative.hasCoordination,
+        // Starting a coordination asks for the conjunction first, from a menu that hangs off the
+        // border control — so J presses that control rather than lifting its menu out of it.
+        start: () => pressControl("coordinate", cardRef.current ?? document),
+        clear: coordinative.onClear,
+      },
+      // Only an instrument period carries a reification degree, and R walks the three in turn.
+      cycleLevel:
+        instrumental?.isInstrument && binding
+          ? () => {
+              const levels = ["process", "concept", "object"] as const;
+              const at = levels.indexOf(instrumental.level);
+              instrumental.onLevelChange(levels[(at + 1) % levels.length]!);
+            }
+          : undefined,
+      toggleCompact: onToggleCompact,
+      tidy: onTidy,
+      hasGroups,
+      resize: (delta) =>
+        onGraphHeightChange(Math.max(MIN_GRAPH_HEIGHT, graphHeight + delta)),
+    };
+  }, binding?.containerId);
+
   return (
     <Box
       data-testid="period-container"
       data-container-id={binding?.containerId}
-      sx={{
-        position: position ? "fixed" : "relative",
-        ...(position && { left: `${position.x}px`, top: `${position.y}px` }),
-        zIndex: position ? 50 : "auto",
-      }}
+      {...cursor}
+      ref={cardRef}
+      sx={[
+        {
+          position: position ? "fixed" : "relative",
+          ...(position && { left: `${position.x}px`, top: `${position.y}px` }),
+          zIndex: position ? 50 : "auto",
+          // The cursor rests on the card itself, a level above its boxes: it wears the same ring
+          // they do, drawn round the whole period.
+          ...(hasCursor && { borderRadius: 1 }),
+        },
+        focusRing("primary"),
+      ]}
     >
       <PeriodContainer
         paperPad={paperPad}
