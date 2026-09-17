@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Definiteness, LanguageCode, PhrasePlan } from './index.js';
+import type { AbstractionLevel, Definiteness, LanguageCode, PhrasePlan, PronominalPossessor } from './index.js';
 
 /**
  * Post-processing applied to an engine-rendered UI string, once, for every language.
@@ -25,6 +25,7 @@ export interface UiStringPlanDef extends UiStringCommon {
   plan: PhrasePlan;
   word?: never;
   determiner?: never;
+  possessive?: never;
 }
 
 /**
@@ -51,6 +52,7 @@ export interface UiStringWordDef extends UiStringCommon {
   agreesWith?: string;
   plan?: never;
   determiner?: never;
+  possessive?: never;
 }
 
 /**
@@ -71,9 +73,36 @@ export interface UiStringDeterminerDef extends UiStringCommon {
   agreesWith?: string;
   plan?: never;
   word?: never;
+  possessive?: never;
 }
 
-export type UiStringDef = UiStringPlanDef | UiStringWordDef | UiStringDeterminerDef;
+/**
+ * One possessive pronoun, named by the word it spells — the label on a coreference link. Like a
+ * determiner it is a function word with no citation form of its own: English, German and Japanese
+ * spell it from the antecedent's features alone (his/her/its, sein/ihr, 彼の), while the Romance
+ * languages *also* agree it with the noun possessed ("il **suo** cane", "la **sua** casa"). So it
+ * too is rendered by citing it with a noun rather than by looking it up.
+ */
+export interface UiStringPossessiveDef extends UiStringCommon {
+  /** The antecedent's features — person, number and (where it splits the word) natural gender. */
+  possessive: PronominalPossessor;
+  /**
+   * The noun the possessive is cited with. Its gender and initial sound settle the form the label
+   * shows (it "nome" is masculine → "suo"; a feminine noun would give "sua"), exactly as it settles
+   * a determiner label's. Defaults to the grammar noun NOUN — the label names the possessive a noun
+   * would take, since which noun the link actually possesses is a different word in each language.
+   */
+  agreesWith?: string;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+}
+
+export type UiStringDef =
+  | UiStringPlanDef
+  | UiStringWordDef
+  | UiStringDeterminerDef
+  | UiStringPossessiveDef;
 
 // Preserves the literal keys (a plain `Record<string, UiStringDef>` annotation would widen
 // them to `string` and lose the typo-checking on `t('…')`).
@@ -1086,6 +1115,52 @@ export const UI_STRINGS = defineUiStrings({
   'pronoun.male': { word: 'MALE', agreesWith: 'GENDER', fallback: 'male' },
   'pronoun.female': { word: 'FEMALE', agreesWith: 'GENDER', fallback: 'female' },
   'pronoun.neuter': { word: 'NEUTER', agreesWith: 'GENDER', fallback: 'neuter' },
+
+  // The chip on a coreference link, naming the possessive pronoun that link will spell — what the
+  // user sees on the dashed line from a noun to the noun that owns it ("his dog", "il suo cane").
+  // Not a word of the lexicon and not a period: a possessive is a function word each engine
+  // *builds*, so it is cited on the grammar noun NOUN the way the determiner values are (see
+  // UiStringPossessiveDef). Keyed `pronoun.possessive.<person><number>`, with the third singular
+  // split by the antecedent's natural gender — the only cell any of the seven spells differently
+  // for it (en his/her/its, de sein/ihr, ja 彼の/彼女の/それの) — so a call site can write
+  // t(`pronoun.possessive.${key}`) for the features it resolved.
+  //
+  // Lower-case and unformatted: a word shown as a word, like the `determiner.value.*` hints. The
+  // Romance forms agree with the cited noun rather than with the noun actually possessed, which is
+  // a different word in each language: the chip names the possessive, it does not preview the
+  // phrase (it "suo", where "la sua casa" would read "sua").
+  'pronoun.possessive.1sg': {
+    possessive: { kind: 'pronominal', person: '1', number: 'singular' },
+    fallback: 'my',
+  },
+  'pronoun.possessive.2sg': {
+    possessive: { kind: 'pronominal', person: '2', number: 'singular' },
+    fallback: 'your',
+  },
+  'pronoun.possessive.3sg.masc': {
+    possessive: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' },
+    fallback: 'his',
+  },
+  'pronoun.possessive.3sg.fem': {
+    possessive: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' },
+    fallback: 'her',
+  },
+  'pronoun.possessive.3sg.neut': {
+    possessive: { kind: 'pronominal', person: '3', number: 'singular', gender: 'neut' },
+    fallback: 'its',
+  },
+  'pronoun.possessive.1pl': {
+    possessive: { kind: 'pronominal', person: '1', number: 'plural' },
+    fallback: 'our',
+  },
+  'pronoun.possessive.2pl': {
+    possessive: { kind: 'pronominal', person: '2', number: 'plural' },
+    fallback: 'your',
+  },
+  'pronoun.possessive.3pl': {
+    possessive: { kind: 'pronominal', person: '3', number: 'plural' },
+    fallback: 'their',
+  },
 
   // The chooser's commit button: "select (it)".
   'action.select': { plan: commandOf('SELECT'), format: NAME_FORMAT, fallback: 'Select' },

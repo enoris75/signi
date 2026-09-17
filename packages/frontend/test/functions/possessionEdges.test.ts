@@ -1,5 +1,6 @@
 import { describe, expect, it } from 'vitest';
-import type { Concept } from '@signi/shared';
+import { UI_STRINGS } from '@signi/shared';
+import type { Concept, UiStringKey } from '@signi/shared';
 import {
   ownerLink,
   ownerPortKey,
@@ -20,6 +21,8 @@ const RINGS: Record<string, RingAt> = {
   'subject/possessor': { center: { x: 150, y: 300 }, rIn: 25, rOut: 50 },
 };
 const ringOf = (key: string) => RINGS[key];
+// The catalog's English fallbacks stand in for the rendered bundle, as elsewhere in these tests.
+const t = (key: UiStringKey) => UI_STRINGS[key].fallback;
 const colorOf = (role: string) => (role === 'subject' ? 'blue' : 'green');
 
 const OWNER: OwnerSpot = {
@@ -46,6 +49,7 @@ const edges = (over: Partial<Parameters<typeof possessionEdges>[0]> = {}) =>
     controlOn: () => undefined,
     colorOf,
     resolve: () => undefined,
+    t,
     compact: false,
     ...over,
   });

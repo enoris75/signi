@@ -1,4 +1,5 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessiveDe } from '../../possessive.js';
 import { COORD_INVERTS, COORD_WORDS } from './de.consts.js';
 import { determiner } from './determiner.js';
 import { punctuate } from './punctuate.js';
@@ -29,5 +30,15 @@ export const germanEngine: LanguageEngine = {
   renderDeterminer(noun: ConceptForms): string {
     const f = noun.forms;
     return determiner(f, 'nom', (f['number'] ?? f['count']) === 'plural');
+  },
+  // The possessive alone, for the label on a coreference link. A German possessive is an ein-word
+  // declined for the possessed head's case/gender/number, so it is cited on a noun in the
+  // nominative — the case a citation form is given in, as `renderDeterminer` does.
+  renderPossessive(noun: ConceptForms, possessor: PronominalPossessor): string {
+    const f = noun.forms;
+    return possessiveDe(possessor, 'nom', {
+      gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut',
+      number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
+    });
   },
 };

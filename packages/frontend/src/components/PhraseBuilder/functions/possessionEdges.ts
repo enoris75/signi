@@ -1,5 +1,6 @@
 import type { NounKey } from "../interfaces.ts";
-import { possessiveHintEn, type CorefPick } from "../CorefPickContext.tsx";
+import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
+import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
 import {
   ownerLink,
   ownerPortKey,
@@ -28,6 +29,7 @@ export function possessionEdges({
   controlOn,
   colorOf,
   resolve,
+  t,
   compact,
 }: {
   owners: readonly OwnerSpot[];
@@ -38,6 +40,7 @@ export function possessionEdges({
   // The colour of the period noun a possession belongs with.
   colorOf: (role: NounKey) => string;
   resolve: CorefPick["resolve"];
+  t: UiStringLookup;
   compact: boolean;
 }): { edges: Edge[]; pointerLines: PointerLine[] } {
   // A hosted ring's builder knows its own possessor control by its head's key.
@@ -64,7 +67,7 @@ export function possessionEdges({
     });
     if (!link) return [];
     const resolved = resolve(spot.antecedent);
-    return [{ spot, link, pronoun: resolved && possessiveHintEn(resolved.features), color: colorOf(spot.role) }];
+    return [{ spot, link, pronoun: resolved && t(possessiveHintKey(resolved.features)), color: colorOf(spot.role) }];
   });
 
   return {

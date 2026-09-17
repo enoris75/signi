@@ -1,4 +1,5 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessiveIt } from '../../possessive.js';
 import { COORD_WORDS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
@@ -27,5 +28,15 @@ export const italianEngine: LanguageEngine = {
     const plural = (f['number'] ?? f['count']) === 'plural';
     const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
     return artFor(f, plural, word);
+  },
+  // The possessive alone, for the label on a coreference link. Italian agrees it with the possessed
+  // head in gender/number, so it is cited on a noun the way a determiner is ("suo" on the masculine
+  // "nome"); the definite article the phrase puts before it is left off.
+  renderPossessive(noun: ConceptForms, possessor: PronominalPossessor): string {
+    const f = noun.forms;
+    return possessiveIt(possessor, {
+      gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
+      number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
+    });
   },
 };

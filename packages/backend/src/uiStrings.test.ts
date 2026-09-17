@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { translate, translateDeterminer, translateWord } from '@signi/engine';
+import { translate, translateDeterminer, translatePossessive, translateWord } from '@signi/engine';
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
 import type {
   LanguageCode,
@@ -7,6 +7,7 @@ import type {
   UiStringDef,
   UiStringDeterminerDef,
   UiStringPlanDef,
+  UiStringPossessiveDef,
   UiStringWordDef,
 } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -23,6 +24,7 @@ vi.mock('@signi/engine', async (importOriginal) => {
     translate: vi.fn(engine.translate),
     translateWord: vi.fn(engine.translateWord),
     translateDeterminer: vi.fn(engine.translateDeterminer),
+    translatePossessive: vi.fn(engine.translatePossessive),
   };
 });
 
@@ -30,15 +32,16 @@ const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 const CATALOG = Object.entries(UI_STRINGS as Record<string, UiStringDef>);
 const byKind = {
   determiner: CATALOG.filter((e): e is [string, UiStringDeterminerDef] => e[1].determiner !== undefined),
-  word: CATALOG.filter((e): e is [string, UiStringWordDef] => e[1].determiner === undefined && e[1].word !== undefined),
-  plan: CATALOG.filter((e): e is [string, UiStringPlanDef] => e[1].determiner === undefined && e[1].word === undefined),
+  possessive: CATALOG.filter((e): e is [string, UiStringPossessiveDef] => e[1].determiner === undefined && e[1].possessive !== undefined),
+  word: CATALOG.filter((e): e is [string, UiStringWordDef] => e[1].determiner === undefined && e[1].possessive === undefined && e[1].word !== undefined),
+  plan: CATALOG.filter((e): e is [string, UiStringPlanDef] => e[1].determiner === undefined && e[1].possessive === undefined && e[1].word === undefined),
 };
 
 const rendering = (text: (language: LanguageCode) => string): Translation[] =>
   LANGUAGE_CODES.map((language) => ({ language, text: text(language) }) as Translation);
 
 afterEach(() => {
-  for (const fn of [translate, translateWord, translateDeterminer]) vi.mocked(fn).mockReset();
+  for (const fn of [translate, translateWord, translateDeterminer, translatePossessive]) vi.mocked(fn).mockReset();
 });
 
 describe('buildUiStrings', () => {
@@ -53,13 +56,17 @@ describe('buildUiStrings', () => {
 
   test('renders each entry through the engine function for its kind', () => {
     // The catalog has entries of every kind; this spec is only meaningful while it does.
-    expect(byKind.determiner.length && byKind.word.length && byKind.plan.length).toBeTruthy();
+    expect(byKind.determiner.length && byKind.possessive.length && byKind.word.length && byKind.plan.length).toBeTruthy();
 
     buildUiStrings();
 
     expect(translateDeterminer).toHaveBeenCalledTimes(byKind.determiner.length);
     for (const [, d] of byKind.determiner) {
       expect(translateDeterminer).toHaveBeenCalledWith(d.determiner, lookupLexicalEntry, d.agreesWith);
+    }
+    expect(translatePossessive).toHaveBeenCalledTimes(byKind.possessive.length);
+    for (const [, d] of byKind.possessive) {
+      expect(translatePossessive).toHaveBeenCalledWith(d.possessive, lookupLexicalEntry, d.agreesWith);
     }
     expect(translateWord).toHaveBeenCalledTimes(byKind.word.length);
     for (const [, d] of byKind.word) {
@@ -81,6 +88,23 @@ describe('buildUiStrings', () => {
     });
   });
 
+  // The chip on a coreference link. The Romance possessive agrees with the noun it is cited on
+  // (NOUN: it "nome", masc) rather than with the antecedent, which is why "his" and "her" come out
+  // as one word there; en/de/ja read the antecedent's own gender and keep them apart.
+  test('names the possessive pronoun a coreference link spells', () => {
+    const strings = buildUiStrings();
+    expect(strings['pronoun.possessive.3sg.masc']).toEqual({
+      en: 'his', it: 'suo', fr: 'son', de: 'sein', es: 'su', ja: '彼の', pt: 'seu',
+    });
+    expect(strings['pronoun.possessive.3sg.fem']).toEqual({
+      en: 'her', it: 'suo', fr: 'son', de: 'ihr', es: 'su', ja: '彼女の', pt: 'seu',
+    });
+    expect(strings['pronoun.possessive.1pl']).toEqual({
+      en: 'our', it: 'nostro', fr: 'notre', de: 'unser', es: 'nuestro', ja: '私たちの', pt: 'nosso',
+    });
+    expect(strings['pronoun.possessive.3pl']).toMatchObject({ en: 'their', it: 'loro', de: 'ihr' });
+  });
+
   // A language name is a proper noun, which the Romance languages article in a sentence
   // ("l'italiano è una lingua", A133). The selector's label is the word alone.
   test('names a language without the article a sentence would give it', () => {
@@ -99,7 +123,7 @@ describe('buildUiStrings', () => {
 
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
-    for (const fn of [translate, translateWord, translateDeterminer]) vi.mocked(fn).mockReturnValue(rendered);
+    for (const fn of [translate, translateWord, translateDeterminer, translatePossessive]) vi.mocked(fn).mockReturnValue(rendered);
 
     const strings = buildUiStrings();
 
@@ -119,6 +143,7 @@ describe('buildUiStrings', () => {
   test('fails naming the entry and the languages it did not render in', () => {
     const [firstKey] = CATALOG[0]!;
     const fn = byKind.determiner[0]?.[0] === firstKey ? translateDeterminer
+      : byKind.possessive[0]?.[0] === firstKey ? translatePossessive
       : byKind.word[0]?.[0] === firstKey ? translateWord
       : translate;
     vi.mocked(fn).mockReturnValueOnce(

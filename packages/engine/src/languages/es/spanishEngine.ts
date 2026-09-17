@@ -1,4 +1,5 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessiveEs } from '../../possessive.js';
 import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
@@ -27,5 +28,14 @@ export const spanishEngine: LanguageEngine = {
   renderDeterminer(noun: ConceptForms): string {
     const f = noun.forms;
     return artFor(f, (f['number'] ?? f['count']) === 'plural');
+  },
+  // The possessive alone, for the label on a coreference link. Spanish agrees mi/tu/su with the
+  // possessed head in number (nuestro/vuestro also in gender), so it is cited on a noun.
+  renderPossessive(noun: ConceptForms, possessor: PronominalPossessor): string {
+    const f = noun.forms;
+    return possessiveEs(possessor, {
+      gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
+      number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
+    });
   },
 };

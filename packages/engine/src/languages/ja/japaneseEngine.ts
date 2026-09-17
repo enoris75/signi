@@ -1,7 +1,8 @@
 import type { Definiteness } from '@signi/shared';
-import type { ConceptForms, LanguageEngine, ResolvedPhrase, RubySegment } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase, RubySegment } from '../../types.js';
 import { JA_DETERMINERS } from './ja.consts.js';
 import { buildSegments } from './buildSegments.js';
+import { possessiveJa } from '../../possessive.js';
 
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
@@ -36,5 +37,11 @@ export const japaneseEngine: LanguageEngine = {
    */
   renderDeterminer(noun: ConceptForms): string {
     return JA_DETERMINERS[(noun.forms['definiteness'] ?? 'definite') as Definiteness] ?? '';
+  },
+  // The possessive alone, for the label on a coreference link: the antecedent's pronoun + の
+  // (彼の, 彼女の, 私たちの). Invariant of the possessed head, so the cited noun goes unread; the
+  // furigana of the ruby segments are dropped — a label shows the written word.
+  renderPossessive(_noun: ConceptForms, possessor: PronominalPossessor): string {
+    return possessiveJa(possessor).map((seg) => seg.t).join('');
   },
 };

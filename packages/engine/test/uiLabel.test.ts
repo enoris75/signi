@@ -1,12 +1,14 @@
 import { describe, expect, test } from 'vitest';
 import { DEFINITENESS, type Definiteness } from '@signi/shared';
-import { determinerAll, wordAll } from './harness.js';
+import type { PronominalPossessor } from '@signi/shared';
+import { determinerAll, possessiveAll, wordAll } from './harness.js';
 
 // The single-word UI-label path — `translateWord` and `translateDeterminer`, the engine entry
 // points the sentence helpers never exercise. A label is a word standing alone (a menu entry, a
 // row value), not a period: an adjective label still has to AGREE with the noun its row is about,
 // even though that noun is nowhere in the label; a determiner label is the function word the menu
-// shows for one determiner value. These back the `word` / `determiner` entries of UI_STRINGS.
+// shows for one determiner value, and a possessive label the one a coreference link spells. These
+// back the `word` / `determiner` / `possessive` entries of UI_STRINGS.
 
 // ── translateWord: an adjective label agrees with its (unseen) noun ──────────────
 // The pronoun chooser's person row shows "first / second / third" agreeing with the row's noun
@@ -154,5 +156,34 @@ describe('determiner menu: agreement with the cited noun', () => {
     // above. It is the noun's gender doing the work, not the determiner value.
     expect(determinerAll('definite')).toMatchObject({ it: 'il', fr: 'le' });
     expect(determinerAll('this')).toMatchObject({ it: 'questo', es: 'este' });
+  });
+});
+
+// The possessive label on a coreference link. Like a determiner it is a function word with no
+// citation form: the antecedent's person/number settle it everywhere, its natural gender only in
+// the languages that spell it, and the Romance/German forms then agree with the noun it is cited on.
+describe('coreference chip: the possessive the link spells', () => {
+  const of = (over: Partial<PronominalPossessor> = {}, agreesWith?: string) =>
+    possessiveAll({ kind: 'pronominal', person: '3', number: 'singular', ...over }, agreesWith);
+
+  test('the antecedent’s person and number settle the word in every language', () => {
+    expect(of({ person: '1' })).toMatchObject({ en: 'my', it: 'mio', fr: 'mon', de: 'mein', es: 'mi', ja: '私の', pt: 'meu' });
+    expect(of({ person: '2', number: 'plural' })).toMatchObject({ en: 'your', it: 'vostro', fr: 'votre', de: 'euer', es: 'vuestro' });
+    expect(of({ person: '3', number: 'plural' })).toMatchObject({ en: 'their', it: 'loro', fr: 'leur', de: 'ihr', ja: '彼らの' });
+  });
+
+  test('only the languages that spell the antecedent’s gender split his from her', () => {
+    expect(of({ gender: 'fem' })).toMatchObject({ en: 'her', de: 'ihr', ja: '彼女の' });
+    expect(of({ gender: 'neut' })).toMatchObject({ en: 'its', de: 'sein', ja: 'それの' });
+    // The Romance possessive agrees with what is possessed, not with who possesses it: one word.
+    expect(of({ gender: 'fem' })).toMatchObject({ it: 'suo', fr: 'son', es: 'su', pt: 'seu' });
+    expect(of({ gender: 'masc' })).toMatchObject({ it: 'suo', fr: 'son', es: 'su', pt: 'seu' });
+  });
+
+  test('the possessive agrees with the noun it is cited on', () => {
+    // casa / maison / casa — feminine, against the masculine grammar noun NOUN above.
+    expect(of({}, 'HOUSE')).toMatchObject({ it: 'sua', fr: 'sa', pt: 'sua' });
+    // Invariant of the possessed in the languages that do not agree it.
+    expect(of({}, 'HOUSE')).toMatchObject({ en: 'his', ja: '彼の' });
   });
 });

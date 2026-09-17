@@ -1,4 +1,6 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessiveFr } from '../../possessive.js';
+import { elidesBefore } from './elidesBefore.js';
 import { COORD_WORDS } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
@@ -34,5 +36,18 @@ export const frenchEngine: LanguageEngine = {
     const plural = (f['number'] ?? f['count']) === 'plural';
     const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
     return artFor(f, plural, word);
+  },
+  // The possessive alone, for the label on a coreference link. French agrees it with the possessed
+  // head, and mon/ton/son stand in for ma/ta/sa before a vowel sound, so it is cited on a noun the
+  // way a determiner is — the same elision test the article makes.
+  renderPossessive(noun: ConceptForms, possessor: PronominalPossessor): string {
+    const f = noun.forms;
+    const plural = (f['number'] ?? f['count']) === 'plural';
+    const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
+    return possessiveFr(
+      possessor,
+      { gender: (f['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
+      elidesBefore(f, word),
+    );
   },
 };

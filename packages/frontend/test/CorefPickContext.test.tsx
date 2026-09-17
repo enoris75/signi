@@ -1,10 +1,11 @@
 import { describe, expect, it, vi } from 'vitest';
 import { act, fireEvent, render, renderHook, screen } from '@testing-library/react';
 import { StrictMode } from 'react';
-import type { Concept, PronominalPossessor } from '@signi/shared';
+import { UI_STRINGS } from '@signi/shared';
+import type { Concept, PronominalPossessor, UiStringKey } from '@signi/shared';
 import {
   CorefPickContext,
-  possessiveHintEn,
+  possessiveHintKey,
   useCorefPick,
   useProvideCorefPick,
 } from '../src/components/PhraseBuilder/CorefPickContext.tsx';
@@ -216,7 +217,12 @@ describe('useCorefPick', () => {
   });
 });
 
-describe('possessiveHintEn', () => {
+// The key alone is what this picks; the words are the catalog's, rendered by the engine, so the
+// English fallbacks stand in for the bundle here.
+const hint = (features: Omit<PronominalPossessor, 'kind'>) =>
+  UI_STRINGS[possessiveHintKey({ kind: 'pronominal', ...features })].fallback;
+
+describe('possessiveHintKey', () => {
   it.each<[string, Omit<PronominalPossessor, 'kind'>]>([
     ['my', { person: '1', number: 'singular' }],
     ['your', { person: '2', number: 'singular' }],
@@ -226,17 +232,32 @@ describe('possessiveHintEn', () => {
     ['our', { person: '1', number: 'plural' }],
     ['your', { person: '2', number: 'plural' }],
     ['their', { person: '3', number: 'plural' }],
-  ])('hints “%s” for %o', (hint, features) => {
-    expect(possessiveHintEn({ kind: 'pronominal', ...features })).toBe(hint);
+  ])('hints \u201c%s\u201d for %o', (word, features) => {
+    expect(hint(features)).toBe(word);
   });
 
-  it('defaults a third-person singular antecedent of no set gender to “his”', () => {
-    expect(possessiveHintEn({ kind: 'pronominal', person: '3', number: 'singular' })).toBe('his');
+  it('defaults a third-person singular antecedent of no set gender to \u201chis\u201d', () => {
+    expect(hint({ person: '3', number: 'singular' })).toBe('his');
   });
 
   it('ignores gender in the plural', () => {
-    expect(
-      possessiveHintEn({ kind: 'pronominal', person: '3', number: 'plural', gender: 'fem' }),
-    ).toBe('their');
+    expect(hint({ person: '3', number: 'plural', gender: 'fem' })).toBe('their');
+  });
+
+  it('names a key the catalog actually holds, for every cell', () => {
+    const cells: Omit<PronominalPossessor, 'kind'>[] = [
+      { person: '1', number: 'singular' },
+      { person: '2', number: 'singular' },
+      { person: '3', number: 'singular', gender: 'masc' },
+      { person: '3', number: 'singular', gender: 'fem' },
+      { person: '3', number: 'singular', gender: 'neut' },
+      { person: '1', number: 'plural' },
+      { person: '2', number: 'plural' },
+      { person: '3', number: 'plural' },
+    ];
+    for (const features of cells) {
+      const key: UiStringKey = possessiveHintKey({ kind: 'pronominal', ...features });
+      expect(UI_STRINGS[key]).toBeDefined();
+    }
   });
 });

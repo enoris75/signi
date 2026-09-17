@@ -27,6 +27,27 @@ test('point to a noun as the owner', async ({ app, page }) => {
   expect(await app.sentence('es')).toBe('el niño ve su perro.');
 });
 
+// The chip names the possessive the link spells, so it is a UI string like any other: the engine
+// renders it in the interface language rather than English. It is cited on the grammar noun (it
+// "nome", masculine), so it reads "suo" even where the phrase itself says "la sua ..." — the chip
+// names the possessive, it does not preview the phrase.
+test('the pronoun chip follows the interface language', async ({ app, page }) => {
+  await app.buildClause('BOY', 'SEE');
+  await app.setDirectObject('DOG');
+  await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+  await page.getByTestId('box-subject').first().click();
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('his');
+
+  await app.setUiLanguage('it');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('suo');
+
+  await app.setUiLanguage('de');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('sein');
+
+  await app.setUiLanguage('ja');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('彼の');
+});
+
 // The reference is a `NounAddress` stored in the selection, so it must survive the trip through
 // the database (the v6 saved-phrase format) and re-resolve on load.
 test('a pronominal possessor survives a save/load round trip', async ({ app, page }, testInfo) => {

@@ -1,5 +1,5 @@
 import { createContext, useCallback, useContext, useMemo, useState } from "react";
-import type { Concept, PronominalPossessor } from "@signi/shared";
+import type { Concept, PronominalPossessor, UiStringKey } from "@signi/shared";
 import { NounAddress, PhraseSelection } from "./interfaces.ts";
 import { resolveAntecedent } from "./selectionToPlan/index.ts";
 
@@ -82,22 +82,29 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
   );
 }
 
-// A short English possessive-pronoun hint for the chosen antecedent ("his", "their"), shown on the
-// line to it so the user sees what the link will render — the same features every engine spells its
-// own way. English only; a display aid, not the rendered output.
-const EN_POSSESSIVE: Record<string, string> = {
-  "1sg": "my",
-  "2sg": "your",
-  "3sg": "his",
-  "1pl": "our",
-  "2pl": "your",
-  "3pl": "their",
-};
+// The possessive pronoun the chosen antecedent spells, as a UI-string key — shown on the line to it
+// so the user sees what the link will render. The same features every engine spells its own way, so
+// the word itself comes from the catalog (`pronoun.possessive.*`) rather than from here: this only
+// says which of its cells the features land in.
+//
+// Third singular is the only cell any of the seven languages splits on the antecedent's *natural*
+// gender (en his/her/its, de sein/ihr, ja 彼の/彼女の/それの); an antecedent with none reads as
+// masculine, the unmarked one — the same fallback `possessiveEn` makes in the engine.
+const POSSESSIVE_KEY = {
+  "1sg": "pronoun.possessive.1sg",
+  "2sg": "pronoun.possessive.2sg",
+  "1pl": "pronoun.possessive.1pl",
+  "2pl": "pronoun.possessive.2pl",
+  "3pl": "pronoun.possessive.3pl",
+} as const satisfies Record<string, UiStringKey>;
 
-export function possessiveHintEn(features: PronominalPossessor): string {
-  const key = `${features.person}${features.number === "plural" ? "pl" : "sg"}`;
-  if (key === "3sg") {
-    return features.gender === "fem" ? "her" : features.gender === "neut" ? "its" : "his";
-  }
-  return EN_POSSESSIVE[key] ?? "their";
+export function possessiveHintKey(features: PronominalPossessor): UiStringKey {
+  const pn = `${features.person}${features.number === "plural" ? "pl" : "sg"}`;
+  if (pn === "3sg")
+    return features.gender === "fem"
+      ? "pronoun.possessive.3sg.fem"
+      : features.gender === "neut"
+        ? "pronoun.possessive.3sg.neut"
+        : "pronoun.possessive.3sg.masc";
+  return POSSESSIVE_KEY[pn as keyof typeof POSSESSIVE_KEY];
 }

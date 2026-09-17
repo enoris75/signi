@@ -1,4 +1,5 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessiveEn } from '../../possessive.js';
 import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './en.consts.js';
 import { determiner } from './determiner.js';
 import { renderClause } from './renderClause.js';
@@ -22,5 +23,10 @@ export const englishEngine: LanguageEngine = {
     const plural = (f['number'] ?? f['count']) === 'plural';
     const word = plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? '');
     return determiner(f, word);
+  },
+  // The possessive pronoun alone, for the label on a coreference link. English's is invariant of
+  // the possessed head, so the noun it is cited on goes unread ("his", "their").
+  renderPossessive(_noun: ConceptForms, possessor: PronominalPossessor): string {
+    return possessiveEn(possessor);
   },
 };

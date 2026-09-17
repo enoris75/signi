@@ -1,4 +1,5 @@
-import type { ConceptForms, LanguageEngine, ResolvedPhrase } from '../../types.js';
+import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
+import { possessivePt } from '../../possessive.js';
 import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './pt.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
@@ -26,5 +27,15 @@ export const portugueseEngine: LanguageEngine = {
   renderDeterminer(noun: ConceptForms): string {
     const f = noun.forms;
     return artFor(f, (f['number'] ?? f['count']) === 'plural');
+  },
+  // The possessive alone, for the label on a coreference link. Portuguese agrees it with the
+  // possessed head in gender/number, so it is cited on a noun; the definite article the phrase puts
+  // before it ("o seu cão") is left off, as `ptPossessiveWord` does for a fused preposition.
+  renderPossessive(noun: ConceptForms, possessor: PronominalPossessor): string {
+    const f = noun.forms;
+    return possessivePt(possessor, {
+      gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
+      number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
+    });
   },
 };

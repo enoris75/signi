@@ -680,6 +680,7 @@ export function PhraseBuilder({
     controlOn,
     colorOf: (role) => headOf(role)?.color ?? "",
     resolve: coref.resolve,
+    t,
     compact,
   });
 

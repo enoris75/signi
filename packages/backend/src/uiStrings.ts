@@ -1,4 +1,4 @@
-import { translate, translateWord, translateDeterminer } from '@signi/engine';
+import { translate, translateWord, translateDeterminer, translatePossessive } from '@signi/engine';
 import { UI_STRINGS, LANGUAGES } from '@signi/shared';
 import type { LanguageCode, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -31,9 +31,11 @@ export function buildUiStrings(): UiStrings {
     const rendered =
       def.determiner !== undefined
         ? translateDeterminer(def.determiner, lookupLexicalEntry, def.agreesWith)
-        : def.word !== undefined
-          ? translateWord(def.word, lookupLexicalEntry, def.agreesWith)
-          : translate(def.plan, lookupLexicalEntry);
+        : def.possessive !== undefined
+          ? translatePossessive(def.possessive, lookupLexicalEntry, def.agreesWith)
+          : def.word !== undefined
+            ? translateWord(def.word, lookupLexicalEntry, def.agreesWith)
+            : translate(def.plan, lookupLexicalEntry);
 
     for (const t of rendered) {
       if (t.text) byLanguage[t.language] = applyFormat(t.text, def.format);

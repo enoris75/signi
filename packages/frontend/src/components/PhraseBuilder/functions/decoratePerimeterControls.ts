@@ -3,7 +3,7 @@ import type { NounAddress, NounKey, PhraseSelection } from "../interfaces.ts";
 import { POSSESSOR_REF_KEY } from "../interfaces.ts";
 import { NOUN_KEYS } from "../slots.ts";
 import { openConjunctsFor } from "../conjunctChain.ts";
-import { possessiveHintEn, type CorefPick } from "../CorefPickContext.tsx";
+import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
 import type { PerimeterEntry } from "../satellites/index.ts";
 import type { RingHost } from "../ringHost.ts";
 
@@ -58,7 +58,7 @@ export function decoratePerimeterControls({
       ...(antecedent && {
         active: false,
         valueLabel: resolved
-          ? `points to ${resolved.concept.label ?? resolved.concept.id} (“${possessiveHintEn(resolved.features)}”) — click to remove`
+          ? `points to ${resolved.concept.label ?? resolved.concept.id} (“${t(possessiveHintKey(resolved.features))}”) — click to remove`
           : "points to a noun — click to remove",
       }),
       onToggle: () => onTogglePossessor(which),

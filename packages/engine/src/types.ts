@@ -213,6 +213,17 @@ export interface LanguageEngine {
    */
   renderDeterminer?(noun: ConceptForms): string;
   /**
+   * The possessive pronoun alone, for the label the UI puts on a coreference link ("his" / "suo" /
+   * "sein" / 彼の). Like a determiner it has no citation form of its own: English, German and
+   * Japanese spell it from the antecedent's features, but the Romance languages also agree it with
+   * the possessed head, so the caller supplies one to cite it on (see `translatePossessive`) and
+   * this returns the possessive that head would take. The article some languages put before it
+   * ("**il** suo cane", "**o** seu cão") is left off: the label names the possessive, not a phrase.
+   *
+   * Optional; the translator falls back to nothing where a language spells no possessive.
+   */
+  renderPossessive?(noun: ConceptForms, possessor: PronominalPossessor): string;
+  /**
    * Optional ruby (furigana) rendering: the same surface as `render`, split into
    * segments carrying kana readings. Implemented only by languages with furigana (ja).
    */
