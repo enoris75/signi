@@ -692,6 +692,32 @@ export interface LexicalEntry {
   forms: Record<string, string>;
 }
 
+/**
+ * An infinitive complement: a subject-less clause the predicate of another clause governs — "to be
+ * able **to act**", "to desire **to eat the food**", it "essere capace **di agire**", de "fähig sein,
+ * **zu handeln**", ja 「**行動すること**が可能である」. Its subject is the governing clause's own (subject
+ * control: "the cat desires to eat" means the cat eats), so it is never spoken, and a predicate
+ * adjective inside it agrees with that subject ("la gatta desidera essere attenta").
+ *
+ * The governor is the clause's predicate adjective when it has one ("able to", "obliged to"), else
+ * its verb ("desire to"). Which word links the infinitive is a property of the governing word, not
+ * of the construction, so its lexeme names it as `infinitive_link`: it "capace **di**" / "obbligato
+ * **a**", fr "capable **de**", es / pt "capaz **de**" / "obligado **a**", and in Japanese the particle
+ * after the nominalizing こと (行動すること**が**可能 / 行動すること**を**望む). A governor without one takes
+ * the bare infinitive ("desiderare agire", "désirer agir"). English always links with "to" and German
+ * with "zu", which need no lexical entry.
+ *
+ * The clause renders as an infinitive citation (see `PhrasePlan.infinitive`), so it has no tense,
+ * aspect or modals of its own. It may be negated ("to be able not to act") and may itself govern one
+ * ("to desire to be able to act").
+ */
+export interface InfinitiveComplement {
+  verbPhrase: VerbPhrase;
+  directObject?: NounElement;
+  complements?: Partial<Record<ComplementType, Complement>>;
+  infinitiveComplement?: InfinitiveComplement;
+}
+
 export interface PhrasePlan {
   subject: NounElement;
   // Optional: a verbless period is a bare noun phrase (a newspaper-title-style fragment
@@ -787,6 +813,14 @@ export interface PhrasePlan {
    * the infinitive ("consumare", not the 2sg "consuma" its imperative shows).
    */
   infinitive?: boolean;
+  /**
+   * An optional clause this clause's predicate governs in the infinitive — "the cat is able **to
+   * eat**", "to desire **to act**" (see `InfinitiveComplement`). It follows the clause (German
+   * extraposes it after a comma), except in Japanese, where it precedes the predicate as a こと
+   * clause. Every verb definition that needs "to V" inside it — the modals' "to be obliged to act"
+   * — is built on it.
+   */
+  infinitiveComplement?: InfinitiveComplement;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */

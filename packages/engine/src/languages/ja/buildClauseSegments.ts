@@ -1,5 +1,6 @@
 import type { ResolvedPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
@@ -44,6 +45,13 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
   if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+  // An infinitive complement is a こと clause ahead of the predicate governing it, marked with the
+  // particle the governor's lexeme names: 行動することが可能です, 食べ物を食べることを望みます. The clause is
+  // itself a citation, in the dictionary form, and may govern one in turn (行動することが可能であることを望む).
+  // Negated, it inherits the citation's polite negative (B13).
+  if (phrase.infinitiveComplement) {
+    segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: 'こと' }, { t: infinitiveLink(phrase) || 'を' });
+  }
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
   segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative, animate));
   return segs;

@@ -420,6 +420,81 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Wanting as a lexical verb, the genus of the volitional modal WILL ("to desire to act",
+  // localization C09). WILL's own words are the plain "want" (volere, vouloir, wollen, querer, 〜たい),
+  // so its gloss needs a different verb in every language to say anything. It takes a direct object
+  // ("desires the food") or an infinitive complement bare in the Romance languages ("desiderare
+  // agire", "désirer agir"); Japanese 望む takes its こと clause with を. A state, like LOVE.
+  {
+    id: 'DESIRE',
+    role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to long for; to wish for strongly',
+    synonym: 'long for',
+    emoji: '🌠',
+    forms: {
+      en: {
+        base: 'desire',
+        '1sg_present': 'desire', '2sg_present': 'desire', '3sg_present': 'desires',
+        '1pl_present': 'desire', '2pl_present': 'desire', '3pl_present': 'desire',
+        past: 'desired',
+      },
+      it: {
+        base: 'desiderare',
+        '1sg_present': 'desidero', '2sg_present': 'desideri', '3sg_present': 'desidera',
+        '1pl_present': 'desideriamo', '2pl_present': 'desiderate', '3pl_present': 'desiderano',
+        '1sg_past': 'desiderai', '2sg_past': 'desiderasti', '3sg_past': 'desiderò',
+        '1pl_past': 'desiderammo', '2pl_past': 'desideraste', '3pl_past': 'desiderarono',
+        '1sg_future': 'desidererò', '2sg_future': 'desidererai', '3sg_future': 'desidererà',
+        '1pl_future': 'desidereremo', '2pl_future': 'desidererete', '3pl_future': 'desidereranno',
+      },
+      fr: {
+        base: 'désirer',
+        '1sg_present': 'désire', '2sg_present': 'désires', '3sg_present': 'désire',
+        '1pl_present': 'désirons', '2pl_present': 'désirez', '3pl_present': 'désirent',
+        '1sg_past': 'désirai', '2sg_past': 'désiras', '3sg_past': 'désira',
+        '1pl_past': 'désirâmes', '2pl_past': 'désirâtes', '3pl_past': 'désirèrent',
+        '1sg_future': 'désirerai', '2sg_future': 'désireras', '3sg_future': 'désirera',
+        '1pl_future': 'désirerons', '2pl_future': 'désirerez', '3pl_future': 'désireront',
+      },
+      de: {
+        base: 'wünschen',
+        '1sg_present': 'wünsche', '2sg_present': 'wünschst', '3sg_present': 'wünscht',
+        '1pl_present': 'wünschen', '2pl_present': 'wünscht', '3pl_present': 'wünschen',
+        '1sg_past': 'wünschte', '2sg_past': 'wünschtest', '3sg_past': 'wünschte',
+        '1pl_past': 'wünschten', '2pl_past': 'wünschtet', '3pl_past': 'wünschten',
+      },
+      es: {
+        base: 'desear',
+        '1sg_present': 'deseo', '2sg_present': 'deseas', '3sg_present': 'desea',
+        '1pl_present': 'deseamos', '2pl_present': 'deseáis', '3pl_present': 'desean',
+        '1sg_past': 'deseé', '2sg_past': 'deseaste', '3sg_past': 'deseó',
+        '1pl_past': 'deseamos', '2pl_past': 'deseasteis', '3pl_past': 'desearon',
+        '1sg_future': 'desearé', '2sg_future': 'desearás', '3sg_future': 'deseará',
+        '1pl_future': 'desearemos', '2pl_future': 'desearéis', '3pl_future': 'desearán',
+      },
+      ja: {
+        base: '望む',
+        reading: 'のぞむ',
+        masu_present: '望みます',
+        masu_present_reading: 'のぞみます',
+        // The こと clause it governs is its object: 行動することを望む.
+        infinitive_link: 'を',
+      },
+      pt: {
+        base: 'desejar',
+        '1sg_present': 'desejo', '2sg_present': 'deseja', '3sg_present': 'deseja',
+        '1pl_present': 'desejamos', '2pl_present': 'desejam', '3pl_present': 'desejam',
+        '1sg_past': 'desejei', '2sg_past': 'desejou', '3sg_past': 'desejou',
+        '1pl_past': 'desejamos', '2pl_past': 'desejaram', '3pl_past': 'desejaram',
+        '1sg_future': 'desejarei', '2sg_future': 'desejará', '3sg_future': 'desejará',
+        '1pl_future': 'desejaremos', '2pl_future': 'desejarão', '3pl_future': 'desejarão',
+      },
+    },
+  },
+
   {
     id: 'KILL',
     role: 'verb',

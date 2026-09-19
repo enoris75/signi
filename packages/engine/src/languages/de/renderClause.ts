@@ -20,14 +20,25 @@ import { splitObject } from './splitObject.js';
 import { subjectText } from './subjectText.js';
 import { verbFinalCluster } from './verbFinalCluster.js';
 import { verbGroup } from './verbGroup.js';
+import { zuInfinitive } from './zuInfinitive.js';
 
 /** One clause (subject + predicate), ignoring any attached hypothetical condition. */
 // `inverted` renders the clause with the finite verb ahead of the subject, for when something
 // else already fills the front field (see COORD_INVERTS). `verbFinal` renders it as a subordinate
 // clause — the finite verb closes it behind the non-finite tail ("wenn der Kater essen würde"),
 // the same order the relative clause uses; it overrides `inverted`. A verbless or imperative
-// clause has no V2 slot to move, so both flags are inert there.
-export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false): string {
+// clause has no V2 slot to move, so both flags are inert there. `zu` renders an infinitive clause
+// as the zu-infinitive another clause governs ("zu handeln", "das Essen zu essen").
+export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal = false, zu = false): string {
+  const clause = clauseText(phrase, inverted, verbFinal, zu);
+  // An infinitive complement is extraposed behind the whole clause, verb-final tail included, after
+  // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen".
+  return phrase.infinitiveComplement
+    ? `${clause}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
+    : clause;
+}
+
+function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean): string {
     const { subject, verbPhrase, directObject } = phrase;
     // A verbless period marked as an adjective-definition gloss is a prepositional fragment ("von
     // großer Größe"), not a bare subject noun phrase — wrap the dimension NP (dative) in its adposition.
@@ -94,7 +105,9 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
       const infDirect = splitObject(infObject, proObject, objectPrep);
       const infComplements = [proPlace, infDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
-      return [withReflexive('3sg', infDirect.pronoun), neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, plain['base'] ?? '', meansText]
+      // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen").
+      const infVerb = zu ? zuInfinitive(plain) : (plain['base'] ?? '');
+      return [withReflexive('3sg', infDirect.pronoun), neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
         .trim();

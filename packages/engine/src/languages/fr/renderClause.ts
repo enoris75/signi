@@ -1,6 +1,8 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { joinSubject } from './joinSubject.js';
@@ -27,5 +29,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const predicate = predicateText(
     subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return joinSubject(subj, predicate).trim();
+  const clause = joinSubject(subj, predicate).trim();
+  // An infinitive complement follows the clause, agreeing with the same subject ("être capable
+  // d'agir", "le chat désire manger").
+  return phrase.infinitiveComplement
+    ? `${clause} ${infinitiveComplementText(phrase.infinitiveComplement, subject.agreement, infinitiveLink(phrase))}`
+    : clause;
 }

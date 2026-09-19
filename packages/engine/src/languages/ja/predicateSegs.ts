@@ -100,9 +100,9 @@ export function predicateSegs(
   }
   // Infinitive / citation phrase: the plain dictionary form (SOV, subject-less) — 「食物を消費する」.
   // This is the true citation, distinct from the imperative `instruction` register above, which
-  // Japanese renders as the verbal noun (消費). A copula predicate falls through to the です block
-  // (a copula citation won't arise for a verb definition). The plain negative needs a nai-form the
-  // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
+  // Japanese renders as the verbal noun (消費). A copula predicate falls through to the です block,
+  // which closes a citation in the plain written style (可能である). The plain negative needs a nai-form
+  // the lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
     segs.push(...complementSegs(complements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
@@ -137,8 +137,10 @@ export function predicateSegs(
     // ("has been X"), a past state — rendered as the past copula (美しくなかった). Progressive /
     // prospective on a copula stay best-effort present. (Aspect on a copula is marginal.)
     const copTense = tense === 'past' || aspect === 'resultative' ? 'past' : tense;
-    // An "if" clause takes the たら form (幸せだったら) and a relative clause the prenominal one (幸せな猫).
-    segs.push(...copulaSegs(predicative, copTense, negated, mood === 'subjunctive' ? 'tara' : plain ? 'prenominal' : 'polite'));
+    // An "if" clause takes the たら form (幸せだったら), a relative clause the prenominal one (幸せな猫), and
+    // a citation the plain one (「行動することが可能である」 "to be able to act").
+    const form = mood === 'subjunctive' ? 'tara' : mood === 'infinitive' ? 'citation' : plain ? 'prenominal' : 'polite';
+    segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }
   segs.push(...complementSegs(complements, existential));

@@ -84,6 +84,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'amando', participle: 'amado' },
     ja: { te: '愛して', te_reading: 'あいして', nai: '愛さない', nai_reading: 'あいさない' },
   },
+  DESIRE: {
+    en: { gerund: 'desiring', participle: 'desired' },
+    it: { gerund: 'desiderando', participle: 'desiderato' },
+    fr: { participle: 'désiré' }, de: { participle: 'gewünscht' },
+    es: { gerund: 'deseando', participle: 'deseado' },
+    pt: { gerund: 'desejando', participle: 'desejado' },
+    ja: { te: '望んで', te_reading: 'のぞんで', nai: '望まない', nai_reading: 'のぞまない' },
+  },
   KILL: {
     en: { gerund: 'killing', participle: 'killed' },
     it: { gerund: 'uccidendo', participle: 'ucciso' },
@@ -717,6 +725,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'comerciando', participle: 'comerciado' },
     pt: { gerund: 'comerciando', participle: 'comerciado' },
     ja: { te: '売買して', te_reading: 'ばいばいして', nai: '売買しない', nai_reading: 'ばいばいしない' },
+  },
+  ACT: {
+    en: { gerund: 'acting', participle: 'acted' },
+    it: { gerund: 'agendo', participle: 'agito' },
+    fr: { participle: 'agi' }, de: { participle: 'gehandelt' },
+    es: { gerund: 'actuando', participle: 'actuado' },
+    pt: { gerund: 'agindo', participle: 'agido' },
+    ja: { te: '行動して', te_reading: 'こうどうして', nai: '行動しない', nai_reading: 'こうどうしない' },
   },
   CONFINE: {
     en: { gerund: 'confining', participle: 'confined' },

@@ -743,7 +743,7 @@ describe('known bugs: degree (extended)', () => {
 // grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
-  ['ACTIVE', 'active'], ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
+  ['ABLE', 'able'], ['ACTIVE', 'active'], ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
   ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
@@ -753,7 +753,8 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MISSING', 'missing'], ['MULTAL', 'multal'],
-  ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['OLD', 'old'],
+  ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'],
+  ['OBLIGED', 'obliged'], ['OLD', 'old'],
   ['OTHER', 'other'], ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'],
   ['POSITIVE', 'positive'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],
   ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],

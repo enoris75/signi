@@ -1131,4 +1131,34 @@ test.describe('word definition tooltip', () => {
 
     await expect(page.locator(tooltip)).toHaveText('an emotion or sensation one feels');
   });
+
+  test('a modal definition governs an infinitive (localization C09: CAN, WILL)', async ({
+    app,
+    page,
+  }) => {
+    // The modals sit in their own picker, revealed from the verb box. CAN is BE + ABLE governing ACT
+    // — "to be able to act"; the adjective names the link, so Italian reads "capace di agire".
+    await app.buildClause('CAT', 'EAT');
+    await app.satellite('verbModal').click();
+    const modalInput = page.getByTestId('box-verbModal').locator('input');
+    await modalInput.fill('can');
+    const canEn = page.locator('[data-testid="typeahead-option"][data-concept="CAN"]');
+    await expect(canEn).toBeVisible();
+    await canEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to be able to act');
+
+    // WILL is DESIRE governing ACT, never its own lemma "want".
+    await modalInput.fill('want');
+    const willEn = page.locator('[data-testid="typeahead-option"][data-concept="WILL"]');
+    await expect(willEn).toBeVisible();
+    await willEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to desire to act');
+
+    await app.setUiLanguage('it');
+    await modalInput.fill('can');
+    const canIt = page.locator('[data-testid="typeahead-option"][data-concept="CAN"]');
+    await expect(canIt).toBeVisible();
+    await canIt.hover();
+    await expect(page.locator(tooltip)).toHaveText('essere capace di agire');
+  });
 });

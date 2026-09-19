@@ -555,6 +555,82 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Doing anything at all: the most general activity verb, which the modals' definitions govern —
+  // "to be able to act", "to be obliged to act", "to desire to act" (localization C09). German
+  // "handeln" is TRADE's word too; both senses are the one verb there ("schnell handeln", "mit
+  // Waren handeln"). Japanese 行動する is a suru compound.
+  {
+    id: 'ACT',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    description: 'to do something; to take action',
+    synonym: 'take action',
+    emoji: '⚡',
+    forms: {
+      en: {
+        base: 'act',
+        '1sg_present': 'act', '2sg_present': 'act', '3sg_present': 'acts',
+        '1pl_present': 'act', '2pl_present': 'act', '3pl_present': 'act',
+        past: 'acted',
+      },
+      it: {
+        // An -isc- verb of the third conjugation: agisco, agisci, but agiamo, agite.
+        base: 'agire',
+        '1sg_present': 'agisco', '2sg_present': 'agisci', '3sg_present': 'agisce',
+        '1pl_present': 'agiamo', '2pl_present': 'agite', '3pl_present': 'agiscono',
+        '1sg_past': 'agii', '2sg_past': 'agisti', '3sg_past': 'agì',
+        '1pl_past': 'agimmo', '2pl_past': 'agiste', '3pl_past': 'agirono',
+        '1sg_future': 'agirò', '2sg_future': 'agirai', '3sg_future': 'agirà',
+        '1pl_future': 'agiremo', '2pl_future': 'agirete', '3pl_future': 'agiranno',
+      },
+      fr: {
+        // A second-group verb: nous agissons, and a passé simple in -is.
+        base: 'agir',
+        '1sg_present': 'agis', '2sg_present': 'agis', '3sg_present': 'agit',
+        '1pl_present': 'agissons', '2pl_present': 'agissez', '3pl_present': 'agissent',
+        '1sg_past': 'agis', '2sg_past': 'agis', '3sg_past': 'agit',
+        '1pl_past': 'agîmes', '2pl_past': 'agîtes', '3pl_past': 'agirent',
+        '1sg_future': 'agirai', '2sg_future': 'agiras', '3sg_future': 'agira',
+        '1pl_future': 'agirons', '2pl_future': 'agirez', '3pl_future': 'agiront',
+      },
+      de: {
+        // -eln verbs drop the stem -e- in the 1sg: ich handle, not ich handele.
+        base: 'handeln',
+        '1sg_present': 'handle', '2sg_present': 'handelst', '3sg_present': 'handelt',
+        '1pl_present': 'handeln', '2pl_present': 'handelt', '3pl_present': 'handeln',
+        '1sg_past': 'handelte', '2sg_past': 'handeltest', '3sg_past': 'handelte',
+        '1pl_past': 'handelten', '2pl_past': 'handeltet', '3pl_past': 'handelten',
+      },
+      es: {
+        // The stressed u takes an accent where the ending is unstressed: actúo, actúas, actúan.
+        base: 'actuar',
+        '1sg_present': 'actúo', '2sg_present': 'actúas', '3sg_present': 'actúa',
+        '1pl_present': 'actuamos', '2pl_present': 'actuáis', '3pl_present': 'actúan',
+        '1sg_past': 'actué', '2sg_past': 'actuaste', '3sg_past': 'actuó',
+        '1pl_past': 'actuamos', '2pl_past': 'actuasteis', '3pl_past': 'actuaron',
+        '1sg_future': 'actuaré', '2sg_future': 'actuarás', '3sg_future': 'actuará',
+        '1pl_future': 'actuaremos', '2pl_future': 'actuaréis', '3pl_future': 'actuarán',
+      },
+      ja: {
+        base: '行動する',
+        reading: 'こうどうする',
+        masu_present: '行動します',
+        masu_present_reading: 'こうどうします',
+      },
+      pt: {
+        // g → j before a and o: eu ajo (and the subjunctive aja the command is built on).
+        base: 'agir',
+        '1sg_present': 'ajo', '2sg_present': 'age', '3sg_present': 'age',
+        '1pl_present': 'agimos', '2pl_present': 'agem', '3pl_present': 'agem',
+        '1sg_past': 'agi', '2sg_past': 'agiu', '3sg_past': 'agiu',
+        '1pl_past': 'agimos', '2pl_past': 'agiram', '3pl_past': 'agiram',
+        '1sg_future': 'agirei', '2sg_future': 'agirá', '3sg_future': 'agirá',
+        '1pl_future': 'agiremos', '2pl_future': 'agirão', '3pl_future': 'agirão',
+      },
+    },
+  },
+
   // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
   // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
   // action" / "the action starts"), so six of the seven paradigms below repeat START's. Japanese

@@ -82,12 +82,15 @@ was waiting on a word has its word._
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
-[C17](C-needs-engine/C17-motion-verbs-reflexive-genus.md): their genus MOVE is a reflexive verb in
-Italian and German, which the engine cannot render yet. The builder change B14 was meant to own
+[C17](done/C17-motion-verbs-reflexive-genus.md): their genus MOVE_ONESELF is a reflexive verb in
+Italian and German. C17 built both and glossed RUN and GO. JUMP, COLLAPSE and COME wait in
+[C18](C-needs-engine/C18-motion-verbs-without-a-gloss.md). The builder change B14 was meant to own
 landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `concepts/verbs/gloss.ts`) takes either the object id or a `GlossParts` object with the object's
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
+[C09](done/C09-modal-verbs.md) added two more parts: a `predicate` adjective for the copular genus
+BE, and the `infinitive` a gloss governs — "to be able **to act**".
 
 Genus nouns (B29–B32) came from the isA audit of 2026-09-14 — each named children whose description
 cites a parent that isn't seeded. **All four are done** (see the Done section). The audit's remaining
@@ -104,8 +107,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns, FEELING; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's). BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
-| C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
-| C17 | [C17-motion-verbs-reflexive-genus.md](C-needs-engine/C17-motion-verbs-reflexive-genus.md) | Italian pronominal and German reflexive verbs — the genus MOVE (*muoversi*, *sich bewegen*) of GO, RUN, COME, JUMP, COLLAPSE (was B14) |
+| C18 | [C18-motion-verbs-without-a-gloss.md](C-needs-engine/C18-motion-verbs-without-a-gloss.md) | a differentia MOVE_ONESELF cannot carry: an *into* path and AIR (JUMP), two adverbs and SUDDENLY (COLLAPSE), deixis (COME) (split from C17) |
 
 #### UI strings
 
@@ -150,6 +152,8 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B19 | [done/B19-data-verbs.md](done/B19-data-verbs.md) | EXPORT → to transfer content to a place; IMPORT → to transfer content from a place (no new vocabulary); the other nine → C08 |
 | B30 | [done/B30-feeling-genus.md](done/B30-feeling-genus.md) | AFFECTION → a warm feeling; FEEL → to have feelings (seeded **FEELING**, a root, and **WARM**, the figurative sense only, `synonym: 'kindly'` and non-transient). FEELING itself has no differentia → C05 |
 | B31 | [done/B31-complement-genus.md](done/B31-complement-genus.md) | hierarchy + 4 glosses, **nothing seeded**: SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER hung under COMPLEMENT_GRAMMAR → PHRASE. COMPLEMENT_GRAMMAR → a phrase that modifies verbs; SUBJECT_COMPLEMENT → …that describes subjects; INSTRUMENTAL → …that indicates means; ADVERBIAL_OF_MANNER → …that indicates ways. **INDICATE replaced the proposed NAME / EXPRESS** on the probe (de *bezeichnet*, ja 示す); no MANNER noun was seeded, WAY renders the same in six of seven |
+| C09 | [done/C09-modal-verbs.md](done/C09-modal-verbs.md) | MUST → to be obliged to act; CAN → to be able to act; WILL → to desire to act (built the **infinitive complement**, `PhrasePlan.infinitiveComplement`: a subject-controlled clause in the citation mood, its linking word lexical on the governor — *capace **di*** / *obbligato **a*** / de extraposed *zu* / ja a こと clause before the predicate; seeded **ACT**, **DESIRE**, **ABLE**, **OBLIGED**; fixed the Italian citation's *si* agreement, "essere attento", and the Japanese copula citation, 慎重である) |
+| C17 | [done/C17-motion-verbs-reflexive-genus.md](done/C17-motion-verbs-reflexive-genus.md) | RUN → to move fast; GO → to move from a place to another place (built the **Italian pronominal verb**, *si è mosso* / *muoviti* / *ci si muove*, and the **German reflexive verb**, *bewegt sich* / *der sich bewegt* / *sich schnell bewegen*; seeded **MOVE_ONESELF** and the inchoative **CHANGE_ONESELF**, de *sich ändern*, ja 変わる; found bugs A151, A152). JUMP, COLLAPSE, COME → C18 |
 | B32 | [done/B32-place-glosses.md](done/B32-place-glosses.md) | HOME → a place where one lives; HOUSE → a building where one lives; MARKET → a place where one trades; PRISON → a building where one confines people (seeded **LIVE**, **TRADE**, **CONFINE**; added the `whereGloss` helper). MARKET took TRADE objectless — de *handeln* / fr *commercer* take no object; PRISON shipped after all, the active with a generic subject standing in for the blocked passive |
 
 #### UI strings

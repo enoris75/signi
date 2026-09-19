@@ -575,6 +575,43 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'cuidadoso' },
     },
   },
+  // ABLE and OBLIGED govern an infinitive ("able to act", PhrasePlan.infinitiveComplement), and the
+  // modals CAN and MUST are defined on them (localization C09). Which preposition links the
+  // infinitive belongs to the adjective, so each lexeme names it as `infinitive_link`: capace di,
+  // capable de, capaz de; obbligato a, obligé de, obligado a. Japanese predicates both of the こと
+  // clause, marked with が: 行動することが可能である ("acting is possible").
+  {
+    id: 'ABLE',
+    role: 'adjective',
+    description: 'having the power or the skill to do something',
+    emoji: '🦾',
+    forms: {
+      en: { base: 'able' },
+      it: { base: 'capace', infinitive_link: 'di' },
+      fr: { base: 'capable', infinitive_link: 'de' },
+      de: { base: 'fähig' },
+      es: { base: 'capaz', infinitive_link: 'de' },
+      ja: { base: '可能な', reading: 'かのうな', infinitive_link: 'が' },
+      pt: { base: 'capaz', infinitive_link: 'de' },
+    },
+  },
+  {
+    id: 'OBLIGED',
+    role: 'adjective',
+    // Bound by a duty that holds for now, not a trait: es/pt say it with estar ("estar obligado a").
+    transient: true,
+    description: 'bound to do something by a duty or a rule',
+    emoji: '📜',
+    forms: {
+      en: { base: 'obliged' },
+      it: { base: 'obbligato', infinitive_link: 'a' },
+      fr: { base: 'obligé', infinitive_link: 'de' },
+      de: { base: 'verpflichtet' },
+      es: { base: 'obligado', infinitive_link: 'a' },
+      ja: { base: '義務的な', reading: 'ぎむてきな', infinitive_link: 'が' },
+      pt: { base: 'obrigado', infinitive_link: 'a' },
+    },
+  },
   {
     id: 'WHOLE',
     role: 'adjective',

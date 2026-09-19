@@ -162,20 +162,26 @@ describe('GET /api/concepts', () => {
     expect(become).not.toHaveProperty('readings');
   });
 
+  // BE has no genus to be glossed against, so it stays on its English literal by design (localization C08).
   test('falls back to the stored literal for a concept without a definition plan', async () => {
-    expect((await find('MUST')).definitions).toEqual({ en: 'to be obliged to; necessity' });
+    expect((await find('BE')).definitions).toEqual({ en: 'to have a quality or state; the copula' });
   });
 
   test('omits definitions for a concept with neither a plan nor a stored literal', async () => {
     const [row] = db
-      .prepare<[], { definition: string }>("SELECT definition FROM concept_definitions WHERE concept_id = 'MUST'")
+      .prepare<[], { definition: string }>("SELECT definition FROM concept_definitions WHERE concept_id = 'BE'")
       .all();
-    db.prepare("DELETE FROM concept_definitions WHERE concept_id = 'MUST'").run();
+    db.prepare("DELETE FROM concept_definitions WHERE concept_id = 'BE'").run();
     try {
-      expect(await find('MUST')).not.toHaveProperty('definitions');
+      expect(await find('BE')).not.toHaveProperty('definitions');
     } finally {
-      db.prepare("INSERT INTO concept_definitions (concept_id, language, definition) VALUES ('MUST', 'en', ?)").run(row!.definition);
+      db.prepare("INSERT INTO concept_definitions (concept_id, language, definition) VALUES ('BE', 'en', ?)").run(row!.definition);
     }
+  });
+
+  // The modals are defined by the infinitive they govern (localization C09).
+  test('composes the modal definitions from an infinitive complement', async () => {
+    expect((await find('CAN')).definitions).toMatchObject({ en: 'to be able to act', it: 'essere capace di agire' });
   });
 
   test('allows any origin', async () => {

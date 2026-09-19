@@ -71,4 +71,24 @@ describe('infinitiveGloss', () => {
       definiteness: 'bare',
     });
   });
+
+  test('a governed verb becomes the infinitive complement', () => {
+    expect(infinitiveGloss('DESIRE', { infinitive: 'ACT' })).toEqual({
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'DESIRE' },
+      infinitiveComplement: { verbPhrase: { verb: 'ACT' } },
+      infinitive: true,
+    });
+  });
+
+  test('a predicate adjective joins the complements, and a whole clause may be governed', () => {
+    const eatFood = { verbPhrase: { verb: 'EAT' }, directObject: { concept: 'FOOD' } };
+    expect(infinitiveGloss('BE', { predicate: 'ABLE', infinitive: eatFood })).toEqual({
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'ABLE' } } },
+      infinitiveComplement: eatFood,
+      infinitive: true,
+    });
+  });
 });

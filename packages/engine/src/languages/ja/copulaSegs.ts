@@ -12,9 +12,10 @@ import { wordSeg } from './wordSeg.js';
 
 /**
  * Where the copula predicate stands, which picks its ending. `dict` and `stem` are the forms a modal
- * governs (see `JaForm`), which carries the tense and polarity itself.
+ * governs (see `JaForm`), which carries the tense and polarity itself. `citation` closes an infinitive
+ * citation in the plain written style (可能である, 疲れている), as a verb's citation is its dictionary form.
  */
-export type CopulaForm = 'polite' | 'prenominal' | 'tara' | JaForm;
+export type CopulaForm = 'polite' | 'prenominal' | 'tara' | 'citation' | JaForm;
 
 // The endings by class and form, as [affirmative present, affirmative past, negative present, negative
 // past]. A たら form ignores tense, so it repeats its two cells; a governed form ignores both, so it
@@ -23,6 +24,7 @@ const I_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['いです', 'かったです', 'くないです', 'くなかったです'],
   prenominal: ['い', 'かった', 'くない', 'くなかった'],
   tara: ['かったら', 'かったら', 'くなかったら', 'くなかったら'],
+  citation: ['い', 'かった', 'くない', 'くなかった'],
   dict: ['い', 'い', 'い', 'い'],
   stem: ['くあり', 'くあり', 'くあり', 'くあり'],
 };
@@ -30,6 +32,7 @@ const COPULA_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['です', 'でした', 'ではありません', 'ではありませんでした'],
   prenominal: ['である', 'だった', 'ではない', 'ではなかった'],
   tara: ['だったら', 'だったら', 'ではなかったら', 'ではなかったら'],
+  citation: ['である', 'であった', 'ではない', 'ではなかった'],
   dict: ['である', 'である', 'である', 'である'],
   stem: ['であり', 'であり', 'であり', 'であり'],
 };
@@ -37,6 +40,7 @@ const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
   polite: ['います', 'いました', 'いません', 'いませんでした'],
   prenominal: ['いる', 'いた', 'いない', 'いなかった'],
   tara: ['いたら', 'いたら', 'いなかったら', 'いなかったら'],
+  citation: ['いる', 'いた', 'いない', 'いなかった'],
   dict: ['いる', 'いる', 'いる', 'いる'],
   stem: ['い', 'い', 'い', 'い'],
 };
@@ -52,8 +56,9 @@ const STATE_ENDINGS: Record<CopulaForm, [string, string, string, string]> = {
  * - a noun is a full noun phrase with the copula (伝説です).
  *
  * `form` is where the predicate stands: the main clause (`polite`), before a head noun in a relative
- * clause (`prenominal`: 大きい / 幸せな / 伝説である / 疲れている, past 大きかった / 幸せだった), or in an
- * "if" clause (`tara`: 大きかったら / 幸せだったら / 疲れていたら), which carries no tense. Under a modal it
+ * clause (`prenominal`: 大きい / 幸せな / 伝説である / 疲れている, past 大きかった / 幸せだった), in an
+ * "if" clause (`tara`: 大きかったら / 幸せだったら / 疲れていたら), which carries no tense, or closing an
+ * infinitive citation (`citation`: 大きい / 幸せである / 疲れている / 幸せではない). Under a modal it
  * is the form the modal governs (A128): the dictionary form (`dict`: 大きい / 幸せである / 疲れている /
  * 伝説である, a na-adjective keeping である rather than its attributive な) or the stem 〜たい attaches to
  * (`stem`: 大きくあり / 幸せであり / 疲れてい / 伝説であり).

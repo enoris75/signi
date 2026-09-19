@@ -445,7 +445,7 @@ const femResult = (verb: string) =>
 
 describe('feminine subject, resultative present: Italian, every verb', () => {
   const IT: [id: string, it: string][] = [
-    ['ACQUIRE', 'la gatta ha acquisito.'],
+    ['ACQUIRE', 'la gatta ha acquisito.'], ['ACT', 'la gatta ha agito.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['BE', 'la gatta è stata.'], ['BEAT', 'la gatta ha battuto.'],
     ['BECOME', 'la gatta è diventata.'],
@@ -464,7 +464,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['CREATE', 'la gatta ha creato.'],
     ['CRY', 'la gatta ha pianto.'],
     ['CRY_OUT', 'la gatta ha gridato.'], ['CUT', 'la gatta ha tagliato.'],
-    ['DELETE', 'la gatta ha eliminato.'],
+    ['DELETE', 'la gatta ha eliminato.'], ['DESIRE', 'la gatta ha desiderato.'],
     ['DESCRIBE', 'la gatta ha descritto.'], ['DESTROY', 'la gatta ha distrutto.'],
     ['DIVIDE', 'la gatta ha diviso.'],
     ['DRINK', 'la gatta ha bevuto.'], ['EAT', 'la gatta ha mangiato.'],

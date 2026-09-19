@@ -1,7 +1,9 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
@@ -27,8 +29,22 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const subj = dropSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("ultime notizie").
   if (!phrase.verbPhrase) return subj.trim();
+  // A citation's subject is nobody: the generic subject it carries only satisfies the plan, so its
+  // predicate adjective takes the citation form, "essere attento", not the masculine plural the
+  // impersonal si would ask for ("si è attenti", see `agreementForms`).
+  const agreement = phrase.verbPhrase.mood === 'infinitive' ? withoutGeneric(subject.agreement) : subject.agreement;
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subj, predicate].filter(Boolean).join(' ').trim();
+  // An infinitive complement follows the clause, agreeing with the same subject ("essere capace di
+  // agire", "la gatta desidera essere attenta").
+  const complement = phrase.infinitiveComplement
+    ? infinitiveComplementText(phrase.infinitiveComplement, agreement, infinitiveLink(phrase))
+    : '';
+  return [subj, predicate, complement].filter(Boolean).join(' ').trim();
+}
+
+function withoutGeneric(forms: Record<string, string>): Record<string, string> {
+  const { generic: _, ...rest } = forms;
+  return rest;
 }

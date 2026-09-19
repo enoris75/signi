@@ -39,6 +39,12 @@ export function resolvePhrase(
       : undefined,
     directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
+    // An infinitive complement is a clause of its own in the infinitive mood. Its subject is this
+    // clause's (subject control: "the cat desires to eat" — the cat eats), which the infinitive never
+    // speaks but a predicate adjective inside it agrees with. It may govern one in turn.
+    infinitiveComplement: plan.infinitiveComplement
+      ? resolvePhrase({ subject: plan.subject, ...plan.infinitiveComplement }, language, lookup, 'infinitive')
+      : undefined,
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.
     condition: plan.condition

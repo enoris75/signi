@@ -189,6 +189,14 @@ export interface ResolvedPhrase {
    * itself coordinated.
    */
   coordination?: { conjunction: CoordConjunction; clause: ResolvedPhrase };
+  /**
+   * A resolved infinitive complement: the clause this clause's predicate governs ("is able **to
+   * eat**", see PhrasePlan.infinitiveComplement). Its verb is in the `'infinitive'` mood, so every
+   * engine drops its subject; the subject is this clause's own (the controller), kept for the
+   * agreement of a predicate adjective inside it. The linking word comes from the governor's
+   * lexeme (see `infinitiveLink`).
+   */
+  infinitiveComplement?: ResolvedPhrase;
 }
 
 export interface LanguageEngine {

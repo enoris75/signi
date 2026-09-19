@@ -1,8 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import {
   adj, ALTO, ANDARE, BUONO, CANE, CASA, CIBO, clause, complement, complements, concept, CORRERE, CROLLARE, DIMENSIONE, DOVERE, el,
-  GATTA, GATTO, GRANDE, IO, LEI, LORO, MANGIARE, MERCATO, modal, MODO, NOI, np, SEMBRARE, SI, TOPO, TU, VECCHIO, VEDERE, VELOCITA,
-  vp,
+  ESSERE, GATTA, GATTO, GRANDE, IO, LEI, LORO, MANGIARE, MERCATO, modal, MODO, NOI, np, SEMBRARE, SI, STANCO, TOPO, TU, VECCHIO,
+  VEDERE, VELOCITA, vp,
 } from './it.fixtures.js';
 import { renderClause } from './renderClause.js';
 
@@ -95,6 +95,30 @@ describe('renderClause', () => {
     test('drops the subject and renders the citation infinitive', () => {
       expect(renderClause(clause(np(GATTO), vp(MANGIARE, { mood: 'infinitive' }), { directObject: food }))).toBe('mangiare il cibo');
       expect(renderClause(clause(np(GATTO), vp(MANGIARE, { mood: 'infinitive', negative: true })))).toBe('non mangiare');
+    });
+
+    // The generic subject a citation carries is nobody, not the impersonal si and its plural agreement.
+    test("a citation's predicate adjective takes the citation form", () => {
+      const tired = complements({ predicative: complement(np(STANCO)) });
+      expect(renderClause(clause(np(SI), vp(ESSERE, { mood: 'infinitive' }, 'BE'), { complements: tired }))).toBe('essere stanco');
+      expect(renderClause(clause(np(SI), vp(ESSERE, {}, 'BE'), { complements: tired }))).toBe('si è stanchi');
+    });
+  });
+
+  describe('infinitive complement', () => {
+    const CAPACE = { role: 'adjective', base: 'capace', infinitive_link: 'di' };
+    const able = complements({ predicative: complement(np(CAPACE)) });
+
+    test("follows the clause after its governor's link, agreeing with the subject", () => {
+      const eats = clause(np(GATTA), vp(MANGIARE, { mood: 'infinitive' }), { directObject: food });
+      expect(renderClause(clause(np(GATTA), vp(ESSERE, {}, 'BE'), { complements: able, infinitiveComplement: eats })))
+        .toBe('la gatta è capace di mangiare il cibo');
+    });
+
+    test('a citation hands its citation agreement down', () => {
+      const tired = clause(np(SI), vp(ESSERE, { mood: 'infinitive' }, 'BE'), { complements: complements({ predicative: complement(np(STANCO)) }) });
+      expect(renderClause(clause(np(SI), vp(ESSERE, { mood: 'infinitive' }, 'BE'), { complements: able, infinitiveComplement: tired })))
+        .toBe('essere capace di essere stanco');
     });
   });
 });

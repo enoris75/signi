@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
 import { buildClauseSegments } from './buildClauseSegments.js';
 import {
-  adj, AGERU, ANATA, clause, complement, complements, el, HAYASA, HITO_GENERIC, HON, IE, INU, KABE, MOTSU, NAKU, NEKO, NEZUMI, np, ONDO,
-  OOKII, TABERU, TAKAI, vp, WATASHI,
+  adj, AGERU, ANATA, clause, complement, complements, DESU, el, HAYASA, HITO_GENERIC, HON, IE, INU, KABE, MOTSU, NAKU, NEKO, NEZUMI, np,
+  ONDO, OOKII, TABERU, TAKAI, vp, WATASHI,
 } from './ja.fixtures.js';
 
 const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
@@ -78,6 +78,24 @@ describe('buildClauseSegments', () => {
 
     test('an infinitive citation drops its subject', () => {
       expect(say(clause(np(HITO_GENERIC), vp(TABERU, { mood: 'infinitive' }), { directObject: el(np(NEZUMI)) }), 'は')).toBe('ネズミを食べる');
+    });
+  });
+
+  // An infinitive complement is a こと clause ahead of the predicate, marked with the governor's particle.
+  describe('infinitive complement', () => {
+    const KANOU = { role: 'adjective', base: '可能な', reading: 'かのうな', infinitive_link: 'が' };
+    const NOZOMU = { base: '望む', reading: 'のぞむ', masu_present: '望みます', infinitive_link: 'を' };
+    const eats = clause(np(NEKO), vp(TABERU, { mood: 'infinitive' }), { directObject: el(np(NEZUMI)) });
+
+    test("an adjective's こと clause takes が, and the copula keeps the clause's register", () => {
+      const able = complements({ predicative: complement(np(KANOU)) });
+      expect(say(clause(np(NEKO), vp(DESU), { complements: able, infinitiveComplement: eats }), 'は')).toBe('猫はネズミを食べることが可能です');
+      expect(say(clause(np(HITO_GENERIC), vp(DESU, { mood: 'infinitive' }), { complements: able, infinitiveComplement: eats }), 'は'))
+        .toBe('ネズミを食べることが可能である');
+    });
+
+    test("a verb's takes the particle its lexeme names", () => {
+      expect(say(clause(np(NEKO), vp(NOZOMU), { infinitiveComplement: eats }), 'は')).toBe('猫はネズミを食べることを望みます');
     });
   });
 });

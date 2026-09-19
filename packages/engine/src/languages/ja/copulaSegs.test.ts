@@ -135,4 +135,16 @@ describe('copulaSegs', () => {
       expect(text(copulaSegs(complement(el(np(NEKO), np(INU))), 'present', false))).toBe('猫と犬です');
     });
   });
+
+  // An infinitive citation closes in the plain written style, as a verb's closes on its dictionary form.
+  describe('citation', () => {
+    test('closes each class plainly, and negates', () => {
+      expect(text(copulaSegs(pred(SHINCHOU), 'present', false, 'citation'))).toBe('慎重である');
+      expect(text(copulaSegs(pred(OOKII), 'present', false, 'citation'))).toBe('大きい');
+      expect(text(copulaSegs(pred(TSUKARETA), 'present', false, 'citation'))).toBe('疲れている');
+      expect(text(copulaSegs(pred(DENSETSU), 'present', false, 'citation'))).toBe('伝説である');
+      expect(text(copulaSegs(pred(SHINCHOU), 'present', true, 'citation'))).toBe('慎重ではない');
+      expect(text(copulaSegs(pred(OOKII), 'present', true, 'citation'))).toBe('大きくない');
+    });
+  });
 });

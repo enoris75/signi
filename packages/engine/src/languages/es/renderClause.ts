@@ -1,7 +1,9 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { infinitiveComplementText } from './infinitiveComplementText.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
@@ -30,5 +32,10 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const predicate = predicateText(
     subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
   );
-  return [subj, predicate].filter(Boolean).join(' ').trim();
+  // An infinitive complement follows the clause, agreeing with the same subject ("ser capaz de
+  // actuar", "el gato desea comer").
+  const complement = phrase.infinitiveComplement
+    ? infinitiveComplementText(phrase.infinitiveComplement, subject.agreement, infinitiveLink(phrase))
+    : '';
+  return [subj, predicate, complement].filter(Boolean).join(' ').trim();
 }

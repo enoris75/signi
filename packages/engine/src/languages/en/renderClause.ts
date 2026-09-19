@@ -27,8 +27,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   if (!phrase.verbPhrase) return subj.trim();
   const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements);
   // A question puts the finite auxiliary before the subject: "is the server active?".
-  return (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
+  const clause = (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
     .filter(Boolean)
     .join(' ')
     .trim();
+  // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
+  // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
+  return phrase.infinitiveComplement ? `${clause} ${renderClause(phrase.infinitiveComplement)}` : clause;
 }

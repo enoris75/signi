@@ -1,4 +1,4 @@
-import type { Complement, ComplementType, Definiteness, PhrasePlan } from '@signi/shared';
+import type { Complement, ComplementType, Definiteness, InfinitiveComplement, PhrasePlan } from '@signi/shared';
 
 /**
  * The parts of a verb's gloss past its genus, for the glosses a bare object cannot carry alone: an
@@ -19,6 +19,14 @@ export interface GlossParts {
   complements?: Partial<Record<ComplementType, Complement>>;
   /** An adverb on the genus verb ("to strike repeatedly"). */
   modifier?: string;
+  /** A predicate adjective for a copular genus: BE + ABLE, "to be able". Shorthand for `complements.predicative`. */
+  predicate?: string;
+  /**
+   * The infinitive the genus governs (PhrasePlan.infinitiveComplement): a verb id, or a whole clause
+   * for one with an object of its own. "to desire **to act**"; with a predicate adjective in
+   * `complements`, the adjective governs it: "to be able **to act**".
+   */
+  infinitive?: string | InfinitiveComplement;
 }
 
 // A verb's dictionary definition as an infinitive citation: a subject-less, tenseless plan on the
@@ -36,6 +44,11 @@ export interface GlossParts {
 // infinitiveGloss('ACQUIRE', { object: 'OBJECT_THING', number: 'plural', complements: { instrumental:
 // … MONEY } }) → "to acquire objects with money"; infinitiveGloss('STRIKE', { modifier: 'REPEATEDLY' })
 // → "to strike repeatedly".
+//
+// A gloss that governs a second verb names it as `infinitive` — infinitiveGloss('DESIRE', { infinitive:
+// 'ACT' }) → "to desire to act", it "desiderare agire", de "wünschen, zu handeln"; under BE with a
+// predicate adjective the adjective governs it — infinitiveGloss('BE', { predicate: 'ABLE', infinitive:
+// 'ACT' }) → "to be able to act", it "essere capace di agire", ja "行動することが可能である".
 export function infinitiveGloss(
   verb: string,
   parts?: string | GlossParts,
@@ -56,7 +69,12 @@ export function infinitiveGloss(
           },
         }
       : {}),
-    ...(p.complements ? { complements: p.complements } : {}),
+    ...(p.complements || p.predicate
+      ? { complements: { ...p.complements, ...(p.predicate ? { predicative: { phrase: { concept: p.predicate } } } : {}) } }
+      : {}),
+    ...(p.infinitive
+      ? { infinitiveComplement: typeof p.infinitive === 'string' ? { verbPhrase: { verb: p.infinitive } } : p.infinitive }
+      : {}),
     infinitive: true,
   };
 }

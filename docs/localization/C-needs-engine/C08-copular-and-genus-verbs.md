@@ -51,3 +51,10 @@ a **causative** mode, which would clear SHOW, HIDE, COORDINATE and START in one 
 push at *inchoative + causative + passive infinitive* would clear most of this file. That is the
 argument for doing it; the argument against is that all the affected verbs are low-traffic in the
 picker.
+
+**Half of it now exists.** [C09](../done/C09-modal-verbs.md) built the **infinitive complement**
+(`PhrasePlan.infinitiveComplement`): a subject-controlled clause in the citation mood that the
+governing clause's predicate takes, its linking word named by the governor's lexeme. The inchoative
+"to begin to be —" is that nesting over the seeded BEGIN plus a predicate, and the causative "to cause
+a person to see objects" is the same nesting under a *different* controller — the object, not the
+subject, which is the part still missing. The passive infinitive (BURN) is untouched by it.

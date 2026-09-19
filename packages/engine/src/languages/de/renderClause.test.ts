@@ -533,4 +533,27 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(MAN), move({ mood: 'infinitive', modifier: concept(SCHNELL) })))).toBe('sich schnell bewegen');
     });
   });
+
+  describe('infinitive complement', () => {
+    const FAEHIG: Forms = { role: 'adjective', base: 'fähig' };
+    const able = complements({ predicative: complement(np(FAEHIG)) });
+    const eats = (subject = np(KATZE)) => clause(subject, vp(ESSEN, { mood: 'infinitive' }), { directObject: el(np(MAUS)) });
+
+    test('is extraposed behind the clause as a zu-infinitive, after a comma', () => {
+      expect(renderClause(clause(np(KATZE), vp(SEIN), { complements: able, infinitiveComplement: eats() })))
+        .toBe('die Katze ist fähig, die Maus zu essen');
+    });
+
+    test('follows a citation, and nests', () => {
+      const ableToEat = clause(np(MAN), vp(SEIN, { mood: 'infinitive' }), { complements: able, infinitiveComplement: eats(np(MAN)) });
+      expect(renderClause(ableToEat)).toBe('fähig sein, die Maus zu essen');
+      expect(renderClause(clause(np(MAN), vp(SEIN, { mood: 'infinitive' }), { complements: able, infinitiveComplement: ableToEat })))
+        .toBe('fähig sein, fähig zu sein, die Maus zu essen');
+    });
+
+    test('the zu of a separable verb goes between its particle and its stem', () => {
+      expect(renderClause(clause(np(MAN), vp(HINZUFUEGEN, { mood: 'infinitive' }), { directObject: el(np(MAUS)) }), false, false, true))
+        .toBe('die Maus hinzuzufügen');
+    });
+  });
 });

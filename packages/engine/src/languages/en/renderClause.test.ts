@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import {
-  adj, ALWAYS, BIG, BOOK, CAN, CAT, clause, complement, complements, DOG, EAT, el, GIVE, GOOD, GREAT, group, HAPPY, HE, HIGH,
+  adj, ALWAYS, BE, BIG, BOOK, CAN, CAT, clause, complement, complements, DOG, EAT, el, FOOD, GIVE, GOOD, GREAT, group, HAPPY, HE, HIGH,
   I, modal, MOUSE, MUST, np, ONE, RUN, SEEM, SIZE, SPEED, vp, WAY, WE, YOU,
 } from './en.fixtures.js';
 import { renderClause } from './renderClause.js';
@@ -92,6 +92,24 @@ describe('renderClause', () => {
     test('ignores an attached condition', () => {
       const phrase = clause(np(DOG), vp(RUN, { mood: 'conditional' }), { condition: clause(np(CAT), vp(EAT, { mood: 'subjunctive' })) });
       expect(renderClause(phrase)).toBe('the dog would run');
+    });
+  });
+
+  describe('infinitive complement', () => {
+    const ABLE = { role: 'adjective', base: 'able' };
+    const toEat = (subject = np(CAT)) => clause(subject, vp(EAT, { mood: 'infinitive' }), { directObject: el(np(FOOD)) });
+
+    test('follows the clause as its own "to"-infinitive', () => {
+      const able = clause(np(CAT), vp(BE), { complements: complements({ predicative: complement(np(ABLE)) }), infinitiveComplement: toEat() });
+      expect(renderClause(able)).toBe('the cat is able to eat the food');
+    });
+
+    test('follows a citation, and nests', () => {
+      const able = clause(np(ONE), vp(BE, { mood: 'infinitive' }), {
+        complements: complements({ predicative: complement(np(ABLE)) }),
+        infinitiveComplement: toEat(np(ONE)),
+      });
+      expect(renderClause(able)).toBe('to be able to eat the food');
     });
   });
 });

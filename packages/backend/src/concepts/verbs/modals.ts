@@ -1,5 +1,11 @@
 import type { ConceptSeed } from '../types.js';
+import { infinitiveGloss } from './gloss.js';
 
+// Each modal is defined by what it governs: an infinitive complement (PhrasePlan.infinitiveComplement)
+// under a word that says the modality in plain vocabulary — a duty (OBLIGED), a capacity (ABLE), a
+// wish (DESIRE) — over the most general activity verb, ACT (localization C09). None of the three words
+// is a modal's own lemma in any language, so no gloss repeats the word it defines: CAN is "potere",
+// its gloss "essere capace di agire"; WILL is "want", its gloss "to desire to act".
 export const modals: ConceptSeed[] = [
   // ── MODAL VERBS ──────────────────────────────────────────────────
   // A modal governs another verb's infinitive rather than heading a clause, and modals
@@ -26,6 +32,8 @@ export const modals: ConceptSeed[] = [
     modal: true,
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be obliged to; necessity',
+    // "to be obliged to act"; es/pt "estar obligado a actuar", ja 行動することが義務的である.
+    definition: infinitiveGloss('BE', { predicate: 'OBLIGED', infinitive: 'ACT' }),
     synonym: 'have to',
     emoji: '❗',
     forms: {
@@ -94,6 +102,8 @@ export const modals: ConceptSeed[] = [
     modal: true,
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to be able to; ability or permission',
+    // "to be able to act"; it "essere capace di agire", ja 行動することが可能である.
+    definition: infinitiveGloss('BE', { predicate: 'ABLE', infinitive: 'ACT' }),
     synonym: 'be able to',
     emoji: '💪',
     forms: {
@@ -161,6 +171,8 @@ export const modals: ConceptSeed[] = [
     modal: true,
     stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
     description: 'to want to; volition',
+    // "to desire to act"; de "wünschen, zu handeln", ja 行動することを望む.
+    definition: infinitiveGloss('DESIRE', { infinitive: 'ACT' }),
     // The English lemma is "want", so the gloss disambiguates rather than repeating it.
     synonym: 'wish',
     emoji: '🎯',

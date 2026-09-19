@@ -296,11 +296,11 @@ describe('known bugs: German du-imperative forms', () => {
   // (lauf, konsumier, lösch) are optional-e forms and correct; SELECT/ADD/EXPORT/IMPORT/CLEAR/
   // COORDINATE store the -e form on the lexeme. ADD is separable, so its particle closes the command (A138).
   test.each([
-    ['ADD', 'füge hinzu'], ['APPEAR', 'erschein'], ['BE', 'sei'], ['BEAT', 'schlag'], ['BECOME', 'werde'],
+    ['ACT', 'handle'], ['ADD', 'füge hinzu'], ['APPEAR', 'erschein'], ['BE', 'sei'], ['BEAT', 'schlag'], ['BECOME', 'werde'],
     ['BITE', 'beiß'], ['BURN', 'brenn'], ['BUY', 'kauf'], ['CHOOSE', 'wähl'], ['CLEAR', 'lösche'],
     ['CLICK', 'klick'], ['COLLAPSE', 'kollabier'], ['COME', 'komm'], ['COMPACT', 'verdichte'],
     ['CONSUME', 'konsumier'], ['COORDINATE', 'koordiniere'], ['CREATE', 'erschaff'], ['CRY', 'wein'],
-    ['CRY_OUT', 'ruf'], ['CUT', 'schneide'], ['DESCRIBE', 'beschreib'], ['DRINK', 'trink'], ['EAT', 'iss'],
+    ['CRY_OUT', 'ruf'], ['CUT', 'schneide'], ['DESCRIBE', 'beschreib'], ['DESIRE', 'wünsch'], ['DRINK', 'trink'], ['EAT', 'iss'],
     ['EXPAND', 'erweitere'], ['EXPORT', 'exportiere'], ['EXPRESS', 'vermittle'], ['EXTINGUISH', 'lösch'],
     ['GIVE', 'gib'], ['GO', 'geh'], ['HIDE', 'versteck'], ['HOLD', 'enthalte'], ['IMPORT', 'importiere'],
     ['JUMP', 'spring'], ['KILL', 'töte'], ['KNOW', 'wisse'], ['LOAD', 'lade'], ['LOVE', 'lieb'],
