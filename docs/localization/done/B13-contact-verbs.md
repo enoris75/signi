@@ -4,7 +4,7 @@ _(split out of [B08](B08-verb-definitions.md).)_
 
 Genus **STRIKE** / **DIVIDE**. Every gloss here names the *instrument* (a sharp edge, the teeth,
 repeatedly) rather than an object, so **this whole batch is gated on the complement builder change** —
-none of it is purely additive. Do [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md)'s builder work first, then this.
+none of it is purely additive. Do [B14](C17-motion-verbs-reflexive-genus.md)'s builder work first, then this.
 
 ## Seed first (2 verbs + 2 nouns)
 

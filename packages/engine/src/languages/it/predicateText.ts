@@ -9,15 +9,17 @@ import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
-import { IT_SHORT_IMPERATIVE } from './it.consts.js';
+import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { alarmCryText } from './alarmCryText.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
 import { itEnclitic } from './itEnclitic.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { npText } from './npText.js';
 import { prepObjectText } from './prepObjectText.js';
+import { reflexiveClitic } from './reflexiveClitic.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -53,6 +55,16 @@ export function predicateText(
   const agreeingObject = cliticObject?.['person'] === '3' ? cliticObject : passiveSi ? directObject!.agreement : undefined;
   // A state verb's past is the imperfect ("voleva", "aveva", "era"), not the perfective (A130).
   const finite = (m: ConceptForms) => moodForm('it', m, pn, mood) ?? statePastForm('it', m, pn, tense, mood) ?? conjugate(m.forms, agreeForms, tense);
+  // A pronominal verb ("muoversi") is conjugated as its plain verb, and its clitic, agreeing with the
+  // subject, is placed apart: before the finite verb and before essere in the compound tenses ("si
+  // muove", "si è mosso", "si muovesse"), attached to the infinitive and the gerund ("deve muoversi",
+  // "sta per muovermi", "sta muovendosi") and after an affirmative command ("muoviti"). Under the
+  // impersonal si it is "ci" and climbs to the finite verb whatever follows: "ci si deve muovere".
+  const plain = nonReflexiveVerb(verb);
+  const reflexive = reflexiveClitic(verb.forms, agreeForms);
+  const reflexiveLeads = subjectForms['generic'] === '1' || (modals.length === 0 && (aspect === 'neutral' || aspect === 'resultative'));
+  const leadingReflexive = reflexiveLeads ? reflexive : '';
+  const attachedReflexive = reflexiveLeads ? '' : reflexive;
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
@@ -61,11 +73,11 @@ export function predicateText(
         // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
         // voglio mai poter sempre andare"); the main verb's adverb is appended after the group.
         ...modalChain(modals, finite, (m) => ({ post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(verb.forms, subjectForms, aspect, agreeingObject),
+        verbGroupInfinitive(plain.forms, subjectForms, aspect, agreeingObject, attachedReflexive),
       ].join(' ')
     : aspect === 'neutral'
-      ? finite(verb)
-      : aspectVerb(verb.forms, agreeForms, tense, aspect, mood, agreeingObject);
+      ? finite(plain)
+      : aspectVerb(plain.forms, agreeForms, tense, aspect, mood, agreeingObject, attachedReflexive);
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
@@ -113,12 +125,15 @@ export function predicateText(
     // Italian is the one Romance language whose UI labels keep the imperative ("Salva", "Carica"),
     // so an instruction only pins the person to tu — it has no addressee to take noi/voi from.
     const impPN = register === 'instruction' ? '2sg' : moodPN(subjectForms);
-    const impForm = imperativeForm('it', verb, impPN, negText === 'non') ?? verbText;
+    const impForm = imperativeForm('it', plain, impPN, negText === 'non') ?? verbText;
     // The clitic attaches after the command: the negative tu's infinitive drops its -e ("non
-    // mangiarlo"), and the short da' / fa' / va' double its consonant ("dallo", "fammi").
+    // mangiarlo"), and the short da' / fa' / va' double its consonant ("dallo", "fammi"). A
+    // pronominal verb's clitic is the addressee's, and leads any other: "muoviti", "non muoverti",
+    // "muoviamoci".
     const infinitive = negText === 'non' && impPN === '2sg';
     const short = !infinitive && impPN === '2sg' && IT_SHORT_IMPERATIVE.has(verb.conceptId);
-    const impVerb = itEnclitic(impForm, objectClitic, infinitive ? 'infinitive' : short ? 'short' : 'plain');
+    const impReflexive = reflexive ? (IT_REFLEXIVE[impPN] ?? '') : '';
+    const impVerb = itEnclitic(impForm, `${impReflexive}${objectClitic}`, infinitive ? 'infinitive' : short ? 'short' : 'plain');
     return [negText, impVerb, modifierText, directObjectText, complementsText]
       .filter(Boolean)
       .join(' ');
@@ -144,9 +159,9 @@ export function predicateText(
   if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
     const [aux, ...rest] = verbText.split(' ');
     const withAdverb = [aux, modifierText, ...rest].join(' ');
-    return elideCi([negText, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
+    return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
   }
-  return elideCi([negText, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
+  return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]
     .filter(Boolean)
     .join(' '));
 }

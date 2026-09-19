@@ -88,6 +88,16 @@ export const HINZUFUEGEN: Forms = {
   '1sg_present': 'füge', '3sg_present': 'fügt', '1pl_present': 'fügen', '2pl_present': 'fügt', '3pl_present': 'fügen',
   '3sg_past': 'fügte', '2sg_imperative': 'füge',
 };
+/**
+ * A reflexive verb (MOVE_ONESELF): the citation leads with "sich", the finite forms are the plain
+ * verb's, and the clause places the agreeing pronoun.
+ */
+export const BEWEGEN: Forms = {
+  base: 'sich bewegen', participle: 'bewegt',
+  '1sg_present': 'bewege', '2sg_present': 'bewegst', '3sg_present': 'bewegt',
+  '1pl_present': 'bewegen', '2pl_present': 'bewegt', '3pl_present': 'bewegen',
+  '1sg_past': 'bewegte', '3sg_past': 'bewegte', '1pl_past': 'bewegten', '3pl_past': 'bewegten',
+};
 export const WERDEN_VERB: Forms = { base: 'werden', participle: 'geworden', aux: 'be', '3sg_present': 'wird' };
 /** The seeming verb (`seeming`): a predicate noun under it takes "zu sein". */
 export const SCHEINEN: Forms = {

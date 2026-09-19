@@ -11,7 +11,9 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
+import { reflexivePronoun } from './reflexivePronoun.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
 import { splitObject } from './splitObject.js';
@@ -52,12 +54,18 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     // "nicht" leads it as well: "klickt nicht auf die Taste".
     const objectPrep = objectPreposition(verb);
     const hasPredicative = !!phrase.complements?.['predicative'] || !!proPlace || (!!objectPrep && !!directObject);
+    // A reflexive verb ("sich bewegen") builds its verb forms as the plain verb, and its pronoun,
+    // agreeing with the subject, leads the Mittelfeld's pronoun slot: "bewegt sich nicht", "beweg
+    // dich", "sich schnell bewegen". An instruction and the citation are infinitives, so "sich".
+    const plain = nonReflexiveVerb(verb).forms;
+    const withReflexive = (pn: string, pronoun: string) => [reflexivePronoun(verb.forms, pn), pronoun].filter(Boolean).join(' ');
 
     // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" takes the
     // declarative's slots (see `nichtSlots`): before the adverb ("iss nicht schnell"), before a
     // predicate complement ("sei nicht vorsichtig"), otherwise after the objects ("iss das Brot nicht").
     if (mood === 'imperative') {
-      const word = deImperativeWord(verb.forms, deImperativePN(subject.agreement));
+      const ipn = deImperativePN(subject.agreement);
+      const word = deImperativeWord(plain, ipn);
       // The command negates as the declarative does: no "nicht" beside "nie" or a "kein" object, and
       // "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie eine Maus").
       const { nicht: neg, directObject: impObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
@@ -67,11 +75,12 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
-      const mittelfeld = [impDirect.pronoun, neg.beforeAdverb, impModifier, dativeText, impDirect.noun, neg.beforePredicative, impComplements, neg.after];
+      const impPronoun = withReflexive(register === 'instruction' ? '3sg' : ipn, impDirect.pronoun);
+      const mittelfeld = [impPronoun, neg.beforeAdverb, impModifier, dativeText, impDirect.noun, neg.beforePredicative, impComplements, neg.after];
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
-        ? [...mittelfeld, verb.forms['base'] ?? word, meansText]
+        ? [...mittelfeld, plain['base'] ?? word, meansText]
         : [word, ...mittelfeld, verb.forms['particle'] ?? '', meansText];
       return parts.filter(Boolean).join(' ').trim();
     }
@@ -85,7 +94,7 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
       const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
       const infDirect = splitObject(infObject, proObject, objectPrep);
       const infComplements = [proPlace, infDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
-      return [infDirect.pronoun, neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, verb.forms['base'] ?? '', meansText]
+      return [withReflexive('3sg', infDirect.pronoun), neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, plain['base'] ?? '', meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -100,8 +109,8 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     const number = subject.agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
     const complex = verbPhrase.modals.length > 0
-      ? modalVerbGroup(verbPhrase.modals, verb.forms, pn, tense, aspect, mood)
-      : verbGroup(verb.forms, pn, tense, aspect, mood);
+      ? modalVerbGroup(verbPhrase.modals, plain, pn, tense, aspect, mood)
+      : verbGroup(plain, pn, tense, aspect, mood);
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = complex;
     // "nicht" is dropped under "nie" or a "kein" object, and otherwise leads an adverb or a predicate
     // complement or trails the objects. It precedes the prospective's "im Begriff" as a whole: "ist
@@ -110,7 +119,8 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
     const { nicht: neg, directObject: objectToRender } = finiteNegation(verbPhrase, directObject, hasPredicative);
     // An object pronoun leads the Mittelfeld, ahead of "gerade", "nicht" and the adverbs; a noun object
     // follows them (see `splitObject`).
-    const { pronoun: objectPronounText, noun: directObjectText, prepositional } = splitObject(objectToRender, proObject, objectPrep);
+    const { pronoun: objectPronoun, noun: directObjectText, prepositional } = splitObject(objectToRender, proObject, objectPrep);
+    const objectPronounText = withReflexive(pn, objectPronoun);
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
     // main verb's adverb: "er will nie immer gehen" (never wants to always go).

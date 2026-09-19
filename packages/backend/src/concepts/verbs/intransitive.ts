@@ -9,7 +9,10 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move quickly on foot',
+    // "to move fast": QUICK is an adjective, the adverb is FAST (localization C17).
+    definition: infinitiveGloss('MOVE_ONESELF', { modifier: 'FAST' }),
     emoji: '🏃',
+    isA: 'MOVE_ONESELF',
     forms: {
       en: {
         base: 'run',
@@ -633,6 +636,81 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'começamos', '2pl_past': 'começaram', '3pl_past': 'começaram',
         '1sg_future': 'começarei', '2sg_future': 'começará', '3sg_future': 'começará',
         '1pl_future': 'começaremos', '2pl_future': 'começarão', '3pl_future': 'começarão',
+      },
+    },
+  },
+
+  // The inchoative half of the pair CHANGE heads, as BEGIN is START's: CHANGE is "to make different"
+  // (ja 変える), this is "to become different" (ja 変わる), so an object-less clause no longer comes out
+  // as "その動作は変えます". It waited on the German reflexive (localization C17): German has no labile
+  // verb here, "der Plan ändert" is ungrammatical, and the verb is "sich ändern". The other five are
+  // labile and repeat CHANGE's paradigm. Italian selects essere for it ("il piano è cambiato").
+  {
+    id: 'CHANGE_ONESELF',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'cause', 'locative'],
+    description: 'to become different',
+    synonym: 'become different',
+    emoji: '🦎',
+    forms: {
+      en: {
+        base: 'change',
+        '1sg_present': 'change', '2sg_present': 'change', '3sg_present': 'changes',
+        '1pl_present': 'change', '2pl_present': 'change', '3pl_present': 'change',
+        past: 'changed',
+      },
+      it: {
+        base: 'cambiare',
+        '1sg_present': 'cambio', '2sg_present': 'cambi', '3sg_present': 'cambia',
+        '1pl_present': 'cambiamo', '2pl_present': 'cambiate', '3pl_present': 'cambiano',
+        '1sg_past': 'cambiai', '2sg_past': 'cambiasti', '3sg_past': 'cambiò',
+        '1pl_past': 'cambiammo', '2pl_past': 'cambiaste', '3pl_past': 'cambiarono',
+        '1sg_future': 'cambierò', '2sg_future': 'cambierai', '3sg_future': 'cambierà',
+        '1pl_future': 'cambieremo', '2pl_future': 'cambierete', '3pl_future': 'cambieranno',
+      },
+      fr: {
+        base: 'changer',
+        '1sg_present': 'change', '2sg_present': 'changes', '3sg_present': 'change',
+        '1pl_present': 'changeons', '2pl_present': 'changez', '3pl_present': 'changent',
+        '1sg_past': 'changeai', '2sg_past': 'changeas', '3sg_past': 'changea',
+        '1pl_past': 'changeâmes', '2pl_past': 'changeâtes', '3pl_past': 'changèrent',
+        '1sg_future': 'changerai', '2sg_future': 'changeras', '3sg_future': 'changera',
+        '1pl_future': 'changerons', '2pl_future': 'changerez', '3pl_future': 'changeront',
+      },
+      de: {
+        // The plain verb's forms: the clause places the agreeing pronoun ("ändert sich").
+        base: 'sich ändern',
+        '1sg_present': 'ändere', '2sg_present': 'änderst', '3sg_present': 'ändert',
+        '1pl_present': 'ändern', '2pl_present': 'ändert', '3pl_present': 'ändern',
+        '1sg_past': 'änderte', '2sg_past': 'ändertest', '3sg_past': 'änderte',
+        '1pl_past': 'änderten', '2pl_past': 'ändertet', '3pl_past': 'änderten',
+      },
+      es: {
+        base: 'cambiar',
+        '1sg_present': 'cambio', '2sg_present': 'cambias', '3sg_present': 'cambia',
+        '1pl_present': 'cambiamos', '2pl_present': 'cambiáis', '3pl_present': 'cambian',
+        '1sg_past': 'cambié', '2sg_past': 'cambiaste', '3sg_past': 'cambió',
+        '1pl_past': 'cambiamos', '2pl_past': 'cambiasteis', '3pl_past': 'cambiaron',
+        '1sg_future': 'cambiaré', '2sg_future': 'cambiarás', '3sg_future': 'cambiará',
+        '1pl_future': 'cambiaremos', '2pl_future': 'cambiaréis', '3pl_future': 'cambiarán',
+      },
+      ja: {
+        // 変わる is godan, not the ichidan 変える: te-form 変わって, plain negative 変わらない
+        // (both in NONFINITE), masu stem 変わり.
+        base: '変わる',
+        reading: 'かわる',
+        masu_present: '変わります',
+        masu_present_reading: 'かわります',
+      },
+      pt: {
+        base: 'mudar',
+        '1sg_present': 'mudo', '2sg_present': 'muda', '3sg_present': 'muda',
+        '1pl_present': 'mudamos', '2pl_present': 'mudam', '3pl_present': 'mudam',
+        '1sg_past': 'mudei', '2sg_past': 'mudou', '3sg_past': 'mudou',
+        '1pl_past': 'mudamos', '2pl_past': 'mudaram', '3pl_past': 'mudaram',
+        '1sg_future': 'mudarei', '2sg_future': 'mudará', '3sg_future': 'mudará',
+        '1pl_future': 'mudaremos', '2pl_future': 'mudarão', '3pl_future': 'mudarão',
       },
     },
   },

@@ -1,5 +1,6 @@
 import { describe, expect, test } from 'vitest';
-import { ANDARE, GATTA, GATTO, MANGIARE, VEDERE } from './it.fixtures.js';
+import { ANDARE, GATTA, GATTO, IO, MANGIARE, MUOVERSI, VEDERE } from './it.fixtures.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 describe('verbGroupInfinitive', () => {
@@ -25,5 +26,13 @@ describe('verbGroupInfinitive', () => {
     expect(verbGroupInfinitive(ANDARE, GATTO, 'resultative')).toBe('essere andato');
     expect(verbGroupInfinitive(ANDARE, GATTA, 'resultative')).toBe('essere andata');
     expect(verbGroupInfinitive(ANDARE, { ...GATTA, number: 'plural' }, 'resultative')).toBe('essere andate');
+  });
+
+  test('a pronominal clitic attaches to the verb it belongs to', () => {
+    const plain = nonReflexiveVerb({ conceptId: 'MOVE_ONESELF', forms: MUOVERSI }).forms;
+    expect(verbGroupInfinitive(plain, IO, 'neutral', undefined, 'mi')).toBe('muovermi');
+    expect(verbGroupInfinitive(plain, IO, 'progressive', undefined, 'mi')).toBe('stare muovendomi');
+    expect(verbGroupInfinitive(plain, GATTO, 'prospective', undefined, 'si')).toBe('stare per muoversi');
+    expect(verbGroupInfinitive(plain, GATTA, 'resultative', undefined, 'si')).toBe('essersi mossa');
   });
 });

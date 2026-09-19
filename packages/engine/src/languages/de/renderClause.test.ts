@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import {
-  adj, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS, HINZUFUEGEN,
+  adj, BEWEGEN, BUCH, clause, complement, complements, concept, DU, el, ESSEN, type Forms, GEBEN, GEHEN, GESCHWINDIGKEIT, GROESSE, GROSS, HINZUFUEGEN,
   ER, GUT, HAUS, HOCH, ICH, IMMER, JUNGE, KATER, KATZE, KLEIN, KOENNEN, MAN, MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHNEIDEN,
   SCHEINEN, SCHNELL, vp, WAEHLEN, WEISE, WERDEN_VERB, WOLLEN,
 } from './de.fixtures.js';
@@ -495,6 +495,42 @@ describe('renderClause', () => {
       expect(renderClause(clause(np(DU), vp(HINZUFUEGEN, { mood: 'imperative', negative: true }), { directObject: mouse }))).toBe('füge die Maus nicht hinzu');
       expect(renderClause(clause(np(DU), vp(HINZUFUEGEN, { mood: 'imperative', register: 'instruction' }), { directObject: mouse }))).toBe('die Maus hinzufügen');
       expect(renderClause(clause(np(MAN), vp(HINZUFUEGEN, { mood: 'infinitive' }), { directObject: mouse }))).toBe('die Maus hinzufügen');
+    });
+  });
+
+  // C17: a reflexive verb's pronoun agrees with the subject and leads the Mittelfeld's pronoun slot,
+  // ahead of "gerade", "nicht" and the adverbs; the verb forms are the plain verb's.
+  describe('a reflexive verb', () => {
+    const move = (extra: Parameters<typeof vp>[1] = {}) => vp(BEWEGEN, extra);
+
+    test('the pronoun follows the finite verb and leads nicht and the adverb', () => {
+      expect(renderClause(clause(np(KATER), move()))).toBe('der Kater bewegt sich');
+      expect(renderClause(clause(np(ICH), move({ negative: true })))).toBe('ich bewege mich nicht');
+      expect(renderClause(clause(np(ICH, { number: 'plural' }), move({ modifier: concept(SCHNELL), tense: 'past' })))).toBe('wir bewegten uns schnell');
+      expect(renderClause(clause(np(KATER), move({ aspect: 'progressive' })))).toBe('der Kater bewegt sich gerade');
+    });
+
+    test('the perfect takes haben, and the non-finite verb closes the clause', () => {
+      expect(renderClause(clause(np(KATER), move({ aspect: 'resultative' })))).toBe('der Kater hat sich bewegt');
+      expect(renderClause(clause(np(KATER), move({ tense: 'future', modifier: concept(SCHNELL) })))).toBe('der Kater wird sich schnell bewegen');
+      expect(renderClause(clause(np(ICH), move({ modals: [modal(MUESSEN)] })))).toBe('ich muss mich bewegen');
+    });
+
+    // The group's comma is pulled onto "Begriff" later, by `punctuate`.
+    test('the prospective keeps the pronoun in its zu-infinitive group', () => {
+      expect(renderClause(clause(np(KATER), move({ aspect: 'prospective' })))).toBe('der Kater ist im Begriff , sich zu bewegen');
+    });
+
+    test('verb-final order keeps it after the subject', () => {
+      expect(renderClause(clause(np(KATER), move({ mood: 'conditional' })), false, true)).toBe('der Kater sich bewegen würde');
+    });
+
+    test('a command takes the addressee\'s pronoun; the instruction and the citation take sich', () => {
+      expect(renderClause(clause(np(DU), move({ mood: 'imperative' })))).toBe('beweg dich');
+      expect(renderClause(clause(np(DU, { number: 'plural' }), move({ mood: 'imperative', negative: true })))).toBe('bewegt euch nicht');
+      expect(renderClause(clause(np(ICH, { number: 'plural' }), move({ mood: 'imperative' })))).toBe('bewegen wir uns');
+      expect(renderClause(clause(np(DU), move({ mood: 'imperative', register: 'instruction' })))).toBe('sich bewegen');
+      expect(renderClause(clause(np(MAN), move({ mood: 'infinitive', modifier: concept(SCHNELL) })))).toBe('sich schnell bewegen');
     });
   });
 });

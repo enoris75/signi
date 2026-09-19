@@ -111,3 +111,8 @@ export const COORD_INVERTS: Record<CoordConjunction, boolean> = {
   therefore: true,
   then: true,
 };
+
+// A reflexive verb's accusative pronoun, agreeing with the subject (mich/dich/sich/uns/euch/sich).
+// Reflexivity is lexical: the citation infinitive leads with "sich" ("sich bewegen"), and the finite
+// forms are the plain verb's ("bewegt"), so the clause places the pronoun (see `reflexivePronoun`).
+export const DE_REFLEXIVE: Record<string, string> = { '1sg': 'mich', '2sg': 'dich', '3sg': 'sich', '1pl': 'uns', '2pl': 'euch', '3pl': 'sich' };

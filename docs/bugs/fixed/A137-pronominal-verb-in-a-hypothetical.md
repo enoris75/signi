@@ -25,7 +25,7 @@ Already right: Spanish (`el gato se volvería feliz`, `si me volviera feliz`), w
 clitic (`reflexiveClitic`); the French compound past in the if clause (`si le chat s'était effondré`);
 and every non-pronominal verb.
 
-Found while probing MOVE for [C17](../../localization/C-needs-engine/C17-motion-verbs-reflexive-genus.md): a
+Found while probing MOVE for [C17](../../localization/done/C17-motion-verbs-reflexive-genus.md): a
 French MOVE (*se déplacer*) renders `si le chat nous déplaçait`. COLLAPSE and BECOME show it today.
 
 ## Shape of the fix

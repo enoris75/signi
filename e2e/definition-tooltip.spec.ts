@@ -259,6 +259,29 @@ test.describe('word definition tooltip', () => {
     });
   }
 
+  // C17: the genus MOVE_ONESELF is a reflexive verb in Italian and German, which leads the citation with
+  // its clitic or pronoun: "muoversi da un luogo…", "sich schnell bewegen".
+  for (const [id, query, en, language, other] of [
+    ['RUN', 'run', 'to move fast', 'de', 'sich schnell bewegen'],
+    ['GO', 'go', 'to move from a place to another place', 'it', 'muoversi da un luogo a un altro luogo'],
+  ] as const) {
+    test(`a reflexive-genus verb definition renders (localize-seed C17: ${id})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,

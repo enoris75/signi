@@ -5,7 +5,9 @@ import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
+import { reflexivePronoun } from './reflexivePronoun.js';
 import { relativePronoun } from './relativePronoun.js';
 import { splitDative } from './splitDative.js';
 import { splitMeansClause } from './splitMeansClause.js';
@@ -57,9 +59,12 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // double infinitive ("der das Buch wird essen müssen", see `verbFinalCluster`), while the aspect
   // adverbial (`mid`: "gerade") sits in the Mittelfeld before the objects — the mirror of the main
   // clause, whose finite verb leads from the V2 slot instead.
+  // A reflexive verb builds its forms as the plain verb, its pronoun leading the Mittelfeld's pronoun
+  // slot: "der sich bewegt", "die sich bewegt haben" (see `reflexivePronoun`).
+  const plain = nonReflexiveVerb(verb).forms;
   const complex = modals.length > 0
-    ? modalVerbGroup(modals, verb.forms, pn, tense, aspect, mood)
-    : verbGroup(verb.forms, pn, tense, aspect, mood);
+    ? modalVerbGroup(modals, plain, pn, tense, aspect, mood)
+    : verbGroup(plain, pn, tense, aspect, mood);
   const { mid } = complex;
 
   // The dative recipient leads the accusative object, and a subordinate means clause trails the
@@ -73,7 +78,8 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // An object a preposition leads stands where a predicate complement does, after "nicht" (A139).
   const objectPrep = objectPreposition(verb);
   const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative'] || (!!objectPrep && !!rel.directObject));
-  const { pronoun: objectPronounText, noun: directObjectText, prepositional } = splitObject(directObject, '', objectPrep);
+  const { pronoun: objectPronoun, noun: directObjectText, prepositional } = splitObject(directObject, '', objectPrep);
+  const objectPronounText = [reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
   const complementsText = [prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');

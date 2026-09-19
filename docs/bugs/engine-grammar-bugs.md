@@ -48,7 +48,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (32 of them,
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (37 of them,
 as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
@@ -68,6 +68,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A146 | [A146-german-frequency-adverb-in-prospective.md](A-must-fix/A146-german-frequency-adverb-in-prospective.md) |
 | A147 | [A147-romance-frequency-adverb-after-periphrasis.md](A-must-fix/A147-romance-frequency-adverb-after-periphrasis.md) |
 | A148 | [A148-angel-not-a-person.md](A-must-fix/A148-angel-not-a-person.md) |
+| A151 | [A151-portuguese-reflexive-nonfinite.md](A-must-fix/A151-portuguese-reflexive-nonfinite.md) |
+| A152 | [A152-impersonal-se-with-reflexive-verb.md](A-must-fix/A152-impersonal-se-with-reflexive-verb.md) |
 | A153 | [A153-italian-animate-source-reads-as-goal.md](A-must-fix/A153-italian-animate-source-reads-as-goal.md) |
 | A154 | [A154-german-animate-source-takes-aus.md](A-must-fix/A154-german-animate-source-takes-aus.md) |
 | A155 | [A155-french-bien-after-nonfinite-verb.md](A-must-fix/A155-french-bien-after-nonfinite-verb.md) |

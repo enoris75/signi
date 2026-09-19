@@ -120,3 +120,8 @@ export const IT_SHORT_IMPERATIVE: ReadonlySet<string> = new Set(['GIVE', 'MAKE',
  * (A139). The others take the tonic pronoun directly ("a me", "con lui").
  */
 export const IT_DI_BEFORE_PRONOUN: ReadonlySet<string> = new Set(['su', 'sopra', 'sotto', 'dietro', 'dentro', 'verso', 'contro', 'senza']);
+
+// A pronominal verb's clitic, agreeing with the subject (mi/ti/si/ci/vi/si). Pronominality is lexical:
+// the infinitive ends in the enclitic -rsi ("muoversi"), and each stored finite form carries the clitic
+// as a proclitic word ("si muove"), as the Spanish lexicon stores "se vuelve".
+export const IT_REFLEXIVE: Record<string, string> = { '1sg': 'mi', '2sg': 'ti', '3sg': 'si', '1pl': 'ci', '2pl': 'vi', '3pl': 'si' };

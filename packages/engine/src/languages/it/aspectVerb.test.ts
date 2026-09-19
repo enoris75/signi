@@ -1,6 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import { aspectVerb } from './aspectVerb.js';
-import { ANDARE, GATTA, GATTO, IO, MANGIARE, NOI, SI, VEDERE } from './it.fixtures.js';
+import { ANDARE, GATTA, GATTO, IO, MANGIARE, MUOVERSI, NOI, SI, VEDERE } from './it.fixtures.js';
+import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 
 const VOI = { person: '2', number: 'plural' };
 
@@ -58,5 +59,14 @@ describe('aspectVerb', () => {
 
   test('the indicative mood keeps the tense form', () => {
     expect(aspectVerb(MANGIARE, GATTO, 'past', 'resultative', 'indicative')).toBe('aveva mangiato');
+  });
+
+  // C17: a pronominal verb's clitic attaches to the gerund and the infinitive; the resultative's
+  // stands before essere, placed by the caller.
+  test('a pronominal clitic attaches to the gerund and the infinitive', () => {
+    const plain = nonReflexiveVerb({ conceptId: 'MOVE_ONESELF', forms: MUOVERSI }).forms;
+    expect(aspectVerb(plain, IO, 'present', 'progressive', undefined, undefined, 'mi')).toBe('sto muovendomi');
+    expect(aspectVerb(plain, NOI, 'present', 'prospective', undefined, undefined, 'ci')).toBe('stiamo per muoverci');
+    expect(aspectVerb(plain, GATTA, 'present', 'resultative')).toBe('è mossa');
   });
 });

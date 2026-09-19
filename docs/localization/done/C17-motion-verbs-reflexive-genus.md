@@ -33,7 +33,7 @@ the Italian and German forms as the French and Spanish ones carry it. MOVE is no
 
 French, Spanish, Portuguese and Japanese render every row correctly, except French in a hypothetical:
 `si le chat nous déplaçait`. That one is not specific to MOVE. COLLAPSE already renders `si le chat nous
-effondrait`, filed as [A137](../../bugs/A-must-fix/A137-pronominal-verb-in-a-hypothetical.md), along with
+effondrait`, filed as [A137](../../bugs/fixed/A137-pronominal-verb-in-a-hypothetical.md), along with
 the same defect in Portuguese.
 
 ## What the engine needs
@@ -86,3 +86,77 @@ es *cambiar*, pt *mudar*, ja 変わる.
 
 Seed it alongside MOVE once the German reflexive work above lands, as `CHANGE_ONESELF` or a
 semantic id of its own.
+
+## Done
+
+2026-09-19. The engine work, the two seeds and the two glosses the probe supported. JUMP, COLLAPSE
+and COME moved to [C18](../C-needs-engine/C18-motion-verbs-without-a-gloss.md).
+
+**Italian pronominal verbs.** The lexeme is stored as the Spanish one is: base `muoversi`, and every
+finite form carries its clitic (`si muove`). `it/nonReflexiveVerb.ts` strips it: the base becomes
+the plain infinitive (`muovere`, and `porre` for `porsi`), the gerund loses its `-si`, and the verb
+selects essere. `it/reflexiveClitic.ts` gives the subject's clitic. `predicateText` places it:
+
+- before the finite verb and before essere, after `non` (`si muove`, `si è mossa`, `si muovesse`,
+  `si è sempre mosso`);
+- attached to the gerund and the infinitive (`sta muovendosi`, `sta per muovermi`, `devo muovermi`,
+  `deve essersi mossa`), through the new `reflexive` argument of `aspectVerb` and
+  `verbGroupInfinitive`;
+- after a command, as the addressee's (`muoviti`, `non muoverti`, `muoviamoci`, `muovetevi`).
+
+Under the impersonal `si` the clitic becomes `ci` and climbs to the finite verb (`ci si muove`, `ci si
+è mossi`, `ci si deve muovere`). The spec above did not cover that case; the probe found it.
+
+**German reflexive verbs.** The lexeme stores the plain verb's finite forms and puts `sich` on the
+citation only (`sich bewegen`). `de/nonReflexiveVerb.ts` strips it and drops any `aux`, because every
+German reflexive forms its perfect with haben. `de/reflexivePronoun.ts` gives the accusative
+pronoun for a person. `renderClause` and `subordinateClause` put it at the head of the Mittelfeld's
+pronoun slot. Dative reflexives (*sich etwas merken*) are not covered.
+
+**Seeded.** **MOVE_ONESELF** (`verbs/motion.ts`, "to change position", `synonym: 'change
+position'`), and **CHANGE_ONESELF** (`verbs/intransitive.ts`, "to become different": de *sich
+ändern*, ja 変わる, it essere). Both are in NONFINITE.
+
+**Glosses.** Both RUN and GO are `isA: 'MOVE_ONESELF'`.
+
+| Concept | Plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|---|
+| RUN | `infinitiveGloss('MOVE_ONESELF', { modifier: 'FAST' })` | to move fast | muoversi velocemente | se déplacer vite | sich schnell bewegen | moverse rápido | 速く移動する | mover-se rapidamente |
+| GO | `source` PLACE + `direction` PLACE with OTHER | to move from a place to another place | muoversi da un luogo a un altro luogo | se déplacer d'un lieu à un autre lieu | sich aus einem Ort zu einem anderen Ort bewegen | moverse de un lugar a otro lugar | 場所から別の場所へ移動する | mover-se de um lugar a outro lugar |
+
+German gives every `source` the preposition *aus*. *Von einem Ort* would be more usual here, but
+*aus einem Ort* reads as "out of a locality" and was kept.
+
+**The probe table, re-rendered** with the seeded MOVE_ONESELF. The French hypothetical was A137,
+already fixed.
+
+| Clause | it | de |
+|---|---|---|
+| CAT MOVE, present | il gatto si muove | der Kater bewegt sich |
+| negative | il gatto non si muove | der Kater bewegt sich nicht |
+| resultative | il gatto si è mosso | der Kater hat sich bewegt |
+| command, 2sg | muoviti | beweg dich |
+| command, 1pl | muoviamoci | bewegen wir uns |
+| instruction | muoviti | sich bewegen |
+| the cat that moves runs | il gatto che si muove corre | der Kater, der sich bewegt, läuft |
+| if the cat moved, … | se il gatto si muovesse, … | wenn der Kater sich bewegen würde, … |
+| gloss: MOVE + FAST | muoversi velocemente | sich schnell bewegen |
+| gloss: MOVE + source + direction | muoversi da un luogo a un altro luogo | sich aus einem Ort zu einem anderen Ort bewegen |
+
+**Found.** Seeding MOVE_ONESELF showed two defects outside Italian and German. Both were already live
+for BECOME:
+
+- [A151](../../bugs/A-must-fix/A151-portuguese-reflexive-nonfinite.md): Portuguese keeps the stored
+  `se` on the gerund and the infinitive (`estou movendo-se`), and loses it in the compound tenses
+  (`tinha movido`).
+- [A152](../../bugs/A-must-fix/A152-impersonal-se-with-reflexive-verb.md): the impersonal subject
+  doubles `se` in Spanish and Portuguese (`se se mueve`).
+
+**Tests.**
+
+- Unit tests next to each new helper, plus Italian `predicateText`, `aspectVerb` and
+  `verbGroupInfinitive` cases and German `renderClause` and `subordinateClause` cases.
+- The sentence-level `packages/engine/test/reflexive.test.ts`: the probe table, both paradigms, the
+  CHANGE / CHANGE_ONESELF pair, the two glosses, and the A151 / A152 pins.
+- MOVE_ONESELF and CHANGE_ONESELF in `verb.test.ts`'s Italian resultative table.
+- RUN (de) and GO (it) in `e2e/definition-tooltip.spec.ts`.

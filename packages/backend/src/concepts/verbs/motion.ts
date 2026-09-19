@@ -1,4 +1,5 @@
 import type { ConceptSeed } from '../types.js';
+import { infinitiveGloss } from './gloss.js';
 
 // Motion & copular verbs (license locative / direction / source / route).
 export const motionVerbs: ConceptSeed[] = [
@@ -8,7 +9,16 @@ export const motionVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move or travel from one place to another',
+    // "to move from a place to another place": the source and the goal are both a place, the goal
+    // another one (localization C17).
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      complements: {
+        source: { phrase: { concept: 'PLACE', definiteness: 'indefinite' } },
+        direction: { phrase: { concept: 'PLACE', definiteness: 'indefinite', adjectives: ['OTHER'] } },
+      },
+    }),
     emoji: '🚶',
+    isA: 'MOVE_ONESELF',
     forms: {
       en: {
         base: 'go',
@@ -64,6 +74,80 @@ export const motionVerbs: ConceptSeed[] = [
         '1pl_past': 'fomos', '2pl_past': 'foram', '3pl_past': 'foram',
         '1sg_future': 'irei', '2sg_future': 'irá', '3sg_future': 'irá',
         '1pl_future': 'iremos', '2pl_future': 'irão', '3pl_future': 'irão',
+      },
+    },
+  },
+
+  {
+    // The intransitive "move", the genus GO and RUN are kinds of: the subject changes position. MOVE is
+    // the transitive one, a thing moved by someone (localization C17). Five languages say this one
+    // with a reflexive verb, as they say BECOME: it muoversi, fr se déplacer, de sich bewegen, es
+    // moverse, pt mover-se. The Romance clitic rides inside each finite form, as in BECOME and
+    // COLLAPSE, and the engines strip it to derive the moods. The German forms are the plain verb's:
+    // the clause places the agreeing pronoun ("bewegt sich", "der sich bewegt", "sich schnell bewegen").
+    id: 'MOVE_ONESELF',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
+    description: 'to change position',
+    synonym: 'change position',
+    emoji: '🐾',
+    forms: {
+      en: {
+        base: 'move',
+        '1sg_present': 'move', '2sg_present': 'move', '3sg_present': 'moves',
+        '1pl_present': 'move', '2pl_present': 'move', '3pl_present': 'move',
+        past: 'moved',
+      },
+      it: {
+        base: 'muoversi',
+        '1sg_present': 'mi muovo', '2sg_present': 'ti muovi', '3sg_present': 'si muove',
+        '1pl_present': 'ci muoviamo', '2pl_present': 'vi muovete', '3pl_present': 'si muovono',
+        '1sg_past': 'mi mossi', '2sg_past': 'ti muovesti', '3sg_past': 'si mosse',
+        '1pl_past': 'ci muovemmo', '2pl_past': 'vi muoveste', '3pl_past': 'si mossero',
+        '1sg_future': 'mi muoverò', '2sg_future': 'ti muoverai', '3sg_future': 'si muoverà',
+        '1pl_future': 'ci muoveremo', '2pl_future': 'vi muoverete', '3pl_future': 'si muoveranno',
+      },
+      fr: {
+        // -cer keeps its soft c with a cedilla before a/o: nous déplaçons, il se déplaça.
+        base: 'se déplacer',
+        '1sg_present': 'me déplace', '2sg_present': 'te déplaces', '3sg_present': 'se déplace',
+        '1pl_present': 'nous déplaçons', '2pl_present': 'vous déplacez', '3pl_present': 'se déplacent',
+        '1sg_past': 'me déplaçai', '2sg_past': 'te déplaças', '3sg_past': 'se déplaça',
+        '1pl_past': 'nous déplaçâmes', '2pl_past': 'vous déplaçâtes', '3pl_past': 'se déplacèrent',
+        '1sg_future': 'me déplacerai', '2sg_future': 'te déplaceras', '3sg_future': 'se déplacera',
+        '1pl_future': 'nous déplacerons', '2pl_future': 'vous déplacerez', '3pl_future': 'se déplaceront',
+      },
+      de: {
+        base: 'sich bewegen',
+        '1sg_present': 'bewege', '2sg_present': 'bewegst', '3sg_present': 'bewegt',
+        '1pl_present': 'bewegen', '2pl_present': 'bewegt', '3pl_present': 'bewegen',
+        '1sg_past': 'bewegte', '2sg_past': 'bewegtest', '3sg_past': 'bewegte',
+        '1pl_past': 'bewegten', '2pl_past': 'bewegtet', '3pl_past': 'bewegten',
+      },
+      es: {
+        base: 'moverse',
+        '1sg_present': 'me muevo', '2sg_present': 'te mueves', '3sg_present': 'se mueve',
+        '1pl_present': 'nos movemos', '2pl_present': 'os movéis', '3pl_present': 'se mueven',
+        '1sg_past': 'me moví', '2sg_past': 'te moviste', '3sg_past': 'se movió',
+        '1pl_past': 'nos movimos', '2pl_past': 'os movisteis', '3pl_past': 'se movieron',
+        '1sg_future': 'me moveré', '2sg_future': 'te moverás', '3sg_future': 'se moverá',
+        '1pl_future': 'nos moveremos', '2pl_future': 'os moveréis', '3pl_future': 'se moverán',
+      },
+      ja: {
+        base: '移動する',
+        reading: 'いどうする',
+        masu_present: '移動します',
+        masu_present_reading: 'いどうします',
+      },
+      pt: {
+        base: 'mover-se',
+        '1sg_present': 'me movo', '2sg_present': 'se move', '3sg_present': 'se move',
+        '1pl_present': 'nos movemos', '2pl_present': 'se movem', '3pl_present': 'se movem',
+        '1sg_past': 'me movi', '2sg_past': 'se moveu', '3sg_past': 'se moveu',
+        '1pl_past': 'nos movemos', '2pl_past': 'se moveram', '3pl_past': 'se moveram',
+        '1sg_future': 'me moverei', '2sg_future': 'se moverá', '3sg_future': 'se moverá',
+        '1pl_future': 'nos moveremos', '2pl_future': 'se moverão', '3pl_future': 'se moverão',
       },
     },
   },

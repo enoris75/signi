@@ -29,7 +29,7 @@ into the `directObject`. That is a one-line change in
 makes READ non-additive. Author SEE and KNOW first; do READ in the same pass or a follow-up.
 
 SEE alternative: "to perceive with the eyes" would be truer, but needs an `instrumental` complement
-and an unseeded EYE — the same builder gap as [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md). LIGHT keeps it additive.
+and an unseeded EYE — the same builder gap as [B14](C17-motion-verbs-reflexive-genus.md). LIGHT keeps it additive.
 
 ## Done
 
@@ -50,7 +50,7 @@ literals, as CREATE and DESTROY do.
 puts it on the bare object. Existing plans render unchanged. The engine handled the rest with no
 changes: Romance agreement (*parole scritte*), German strong declension on a bare plural
 (*geschriebene Wörter*), and the Japanese verb-derived modifier with no linker (*書かれた単語*). This
-is **not** the complement change [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md) owns, so BUY, B13 and
+is **not** the complement change [B14](C17-motion-verbs-reflexive-genus.md) owns, so BUY, B13 and
 TYPE are still gated on it.
 
 Word choices:

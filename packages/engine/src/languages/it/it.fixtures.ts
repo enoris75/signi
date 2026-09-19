@@ -224,6 +224,19 @@ export const SCEGLIERE: Forms = {
   '1sg_future': 'sceglierò', '2sg_future': 'sceglierai', '3sg_future': 'sceglierà',
   '1pl_future': 'sceglieremo', '2pl_future': 'sceglierete', '3pl_future': 'sceglieranno',
 };
+/**
+ * MOVE_ONESELF: a pronominal verb. The clitic rides inside each finite form and on the gerund, as the
+ * seed stores it; the engine strips it (`nonReflexiveVerb`) and places the subject's own.
+ */
+export const MUOVERSI: Forms = {
+  base: 'muoversi', gerund: 'muovendosi', participle: 'mosso', aux: 'be',
+  '1sg_present': 'mi muovo', '2sg_present': 'ti muovi', '3sg_present': 'si muove',
+  '1pl_present': 'ci muoviamo', '2pl_present': 'vi muovete', '3pl_present': 'si muovono',
+  '1sg_past': 'mi mossi', '2sg_past': 'ti muovesti', '3sg_past': 'si mosse',
+  '1pl_past': 'ci muovemmo', '2pl_past': 'vi muoveste', '3pl_past': 'si mossero',
+  '1sg_future': 'mi muoverò', '2sg_future': 'ti muoverai', '3sg_future': 'si muoverà',
+  '1pl_future': 'ci muoveremo', '2pl_future': 'vi muoverete', '3pl_future': 'si muoveranno',
+};
 /** RUN: an intransitive that keeps avere ("ha corso"). */
 export const CORRERE: Forms = {
   base: 'correre', gerund: 'correndo', participle: 'corso',

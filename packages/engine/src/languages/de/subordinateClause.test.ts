@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { CauseSentiment, Specifier } from '@signi/shared';
 import type { ResolvedRelativeClause } from '../../types.js';
 import {
-  BEHAELTER, BUCH, complement, concept, DU, el, ER, ESSEN, type Forms, GEBEN, GEHEN, HAUS, HINZUFUEGEN, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
+  BEHAELTER, BEWEGEN, BUCH, complement, concept, DU, el, ER, ESSEN, type Forms, GEBEN, GEHEN, HAUS, HINZUFUEGEN, ICH, IMMER, JUNGE, KATER, KATZE, KOENNEN, MAN,
   MANN, MAUS, MESSER, modal, MUEDE, MUESSEN, NIE, np, SCHEINEN, SCHNEIDEN, SCHNELL, vp, WAEHLEN, WERDEN_VERB, WOLLEN, WORT,
 } from './de.fixtures.js';
 import { subordinateClause } from './subordinateClause.js';
@@ -347,5 +347,16 @@ describe('subordinateClause', () => {
     expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(HINZUFUEGEN), directObject: el(np(MAUS)) })).toBe(', der die Maus hinzufügt,');
     expect(relativeOn(MAUS, { headRole: 'directObject', subject: el(np(KATER)), verbPhrase: vp(HINZUFUEGEN, { negative: true }) })).toBe(', die der Kater nicht hinzufügt,');
     expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(HINZUFUEGEN, { aspect: 'prospective' }) })).toBe(', der im Begriff hinzuzufügen ist,');
+  });
+
+  // C17: the reflexive pronoun leads the verb-final clause's Mittelfeld, agreeing with the head.
+  describe('a reflexive verb', () => {
+    test('the pronoun follows the relative pronoun and leads nicht and the adverb', () => {
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(BEWEGEN) })).toBe(', der sich bewegt,');
+      expect(relativeOn(KATER, { headRole: 'subject', verbPhrase: vp(BEWEGEN, { negative: true, modifier: concept(SCHNELL) }) }))
+        .toBe(', der sich nicht schnell bewegt,');
+      expect(relativeOn(KATZE, { headRole: 'subject', verbPhrase: vp(BEWEGEN, { aspect: 'resultative' }) }, { number: 'plural' }))
+        .toBe(', die sich bewegt haben,');
+    });
   });
 });

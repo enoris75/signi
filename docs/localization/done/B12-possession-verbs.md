@@ -30,7 +30,7 @@ gloss).
 
 MONEY is seeded, but "in exchange for money" is an `instrumental` complement, not a direct object —
 the builder must pass a complement list through to the plan. Same gap as
-[B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md); fix it once and both batches unblock. A weaker additive fallback is
+[B14](C17-motion-verbs-reflexive-genus.md); fix it once and both batches unblock. A weaker additive fallback is
 `infinitiveGloss('ACQUIRE', 'OBJECT_THING', 'plural')` → "to acquire objects", but that does not distinguish
 BUY from any other acquisition.
 
@@ -52,7 +52,7 @@ synonym "possessions". All three gloss verbs are authored.
 | HOLD | to have objects | avere oggetti | avoir objets | Gegenstände haben | tener objetos | 物体を持つ | ter objetos |
 | BUY | to acquire objects with money | acquisire oggetti con denaro | acquérir objets avec argent | Gegenstände mit Geld erwerben | adquirir objetos con dinero | お金で物体を取得する | adquirir objetos com dinheiro |
 
-**The builder change is done**, here rather than in [B14](../C-needs-engine/C17-motion-verbs-reflexive-genus.md).
+**The builder change is done**, here rather than in [B14](C17-motion-verbs-reflexive-genus.md).
 `infinitiveGloss` moved to [verbs/gloss.ts](../../../packages/backend/src/concepts/verbs/gloss.ts) so that ditransitive.ts and
 intransitive.ts can use it too. Its second argument is now either the object id, which keeps the old
 positional form (`infinitiveGloss('CONSUME', 'FOOD')`), or a `GlossParts` object: `object`,

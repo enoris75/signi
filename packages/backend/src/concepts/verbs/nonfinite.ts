@@ -276,6 +276,17 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'indo', participle: 'ido' },
     ja: { te: '行って', te_reading: 'いって', nai: '行かない', nai_reading: 'いかない' },
   },
+  // A pronominal verb selects essere / être in it and fr ("si è mosso", "s'est déplacé"); the German
+  // reflexive takes haben ("hat sich bewegt"). The it / es / pt gerunds carry the clitic, which the
+  // engine agrees with the subject ("sta muovendomi", "estoy moviéndome").
+  MOVE_ONESELF: {
+    en: { gerund: 'moving', participle: 'moved' },
+    it: { gerund: 'muovendosi', participle: 'mosso', aux: 'be' },
+    fr: { participle: 'déplacé', aux: 'be' }, de: { participle: 'bewegt' },
+    es: { gerund: 'moviéndose', participle: 'movido' },
+    pt: { gerund: 'movendo-se', participle: 'movido' },
+    ja: { te: '移動して', te_reading: 'いどうして', nai: '移動しない', nai_reading: 'いどうしない' },
+  },
   BECOME: {
     en: { gerund: 'becoming', participle: 'become' },
     it: { gerund: 'diventando', participle: 'diventato', aux: 'be' },
@@ -571,6 +582,16 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'empezando', participle: 'empezado' },
     pt: { gerund: 'começando', participle: 'começado' },
     ja: { te: '始まって', te_reading: 'はじまって', nai: '始まらない', nai_reading: 'はじまらない' },
+  },
+  // The inchoative CHANGE_ONESELF, not CHANGE: essere in Italian ("il piano è cambiato"), and the
+  // German reflexive takes haben ("hat sich geändert"), as every German reflexive does.
+  CHANGE_ONESELF: {
+    en: { gerund: 'changing', participle: 'changed' },
+    it: { gerund: 'cambiando', participle: 'cambiato', aux: 'be' },
+    fr: { participle: 'changé' }, de: { participle: 'geändert' },
+    es: { gerund: 'cambiando', participle: 'cambiado' },
+    pt: { gerund: 'mudando', participle: 'mudado' },
+    ja: { te: '変わって', te_reading: 'かわって', nai: '変わらない', nai_reading: 'かわらない' },
   },
   // The verbs of a program's everyday controls (B25–B28). All transitive → the HAVE default.
   CANCEL: {

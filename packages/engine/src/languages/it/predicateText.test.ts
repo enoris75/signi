@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import {
   ANDARE, BENE, CANE, CASA, CIBO, complement, complements, concept, CORRERE, DARE, DONNA, DOVERE, el, ESSERE, type Forms, GATTA,
   FUOCO, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MAI, MANGIARE, modal, NOI, np, POTERE, RAGAZZO, SEMBRARE, SEMPRE, SI, STANCO, TOPO, TU, VEDERE,
-  FELICE, VELOCEMENTE, VOLERE, vp,
+  FELICE, MUOVERSI, VELOCEMENTE, VOLERE, vp,
 } from './it.fixtures.js';
 import { predicateText } from './predicateText.js';
 
@@ -251,6 +251,54 @@ describe('predicateText', () => {
     test('an object pronoun attaches, dropping the final -e', () => {
       expect(predicateText(GATTO, infinitive(), el(np(LUI)))).toBe('mangiarlo');
       expect(predicateText(GATTO, infinitive({}, VEDERE), el(np(LEI)))).toBe('vederla');
+    });
+  });
+
+  // C17: a pronominal verb is conjugated as its plain verb and its clitic placed apart — before the
+  // finite verb and essere, attached to the infinitive and the gerund, after a command.
+  describe('a pronominal verb', () => {
+    const move = (extra = {}) => vp(MUOVERSI, extra, 'MOVE_ONESELF');
+
+    test('the clitic leads the finite verb, after "non"', () => {
+      expect(predicateText(GATTO, move())).toBe('si muove');
+      expect(predicateText(NOI, move({ tense: 'past' }))).toBe('ci muovemmo');
+      expect(predicateText(GATTO, move({ negative: true, modifier: concept(VELOCEMENTE) }))).toBe('non si muove velocemente');
+    });
+
+    test('the compound tense takes essere, the clitic ahead of it and a frequency adverb inside', () => {
+      expect(predicateText(GATTA, move({ aspect: 'resultative' }))).toBe('si è mossa');
+      expect(predicateText(IO, move({ aspect: 'resultative', negative: true }))).toBe('non mi sono mosso');
+      expect(predicateText(GATTO, move({ aspect: 'resultative', modifier: concept(SEMPRE) }))).toBe('si è sempre mosso');
+    });
+
+    test('the clitic attaches to the gerund and the infinitive', () => {
+      expect(predicateText(IO, move({ aspect: 'progressive' }))).toBe('sto muovendomi');
+      expect(predicateText(NOI, move({ aspect: 'prospective' }))).toBe('stiamo per muoverci');
+      expect(predicateText(IO, move({ modals: [modal(DOVERE)] }))).toBe('devo muovermi');
+      expect(predicateText(GATTA, move({ modals: [modal(DOVERE)], aspect: 'resultative' }))).toBe('deve essersi mossa');
+    });
+
+    test('the moods are derived from the plain verb, the clitic in front', () => {
+      expect(predicateText(GATTO, move({ mood: 'subjunctive' }))).toBe('si muovesse');
+      expect(predicateText(NOI, move({ mood: 'conditional' }))).toBe('ci muoveremmo');
+    });
+
+    test('a command takes the addressee\'s clitic after it', () => {
+      expect(predicateText(TU, move({ mood: 'imperative' }))).toBe('muoviti');
+      expect(predicateText(TU, move({ mood: 'imperative', negative: true }))).toBe('non muoverti');
+      expect(predicateText(NOI, move({ mood: 'imperative' }))).toBe('muoviamoci');
+      expect(predicateText(VOI, move({ mood: 'imperative' }))).toBe('muovetevi');
+      expect(predicateText(TU, move({ mood: 'imperative', register: 'instruction' }))).toBe('muoviti');
+    });
+
+    test('the citation is the -rsi infinitive', () => {
+      expect(predicateText(SI, move({ mood: 'infinitive', modifier: concept(VELOCEMENTE) }))).toBe('muoversi velocemente');
+    });
+
+    test('under the impersonal si the clitic is ci, and it climbs', () => {
+      expect(predicateText(SI, move())).toBe('ci si muove');
+      expect(predicateText(SI, move({ aspect: 'resultative' }))).toBe('ci si è mossi');
+      expect(predicateText(SI, move({ modals: [modal(DOVERE)] }))).toBe('ci si deve muovere');
     });
   });
 

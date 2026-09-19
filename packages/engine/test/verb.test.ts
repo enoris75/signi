@@ -453,6 +453,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['BEGIN', 'la gatta è iniziata.'], ['BITE', 'la gatta ha morso.'],
     ['BURN', 'la gatta ha bruciato.'], ['BUY', 'la gatta ha comprato.'],
     ['CANCEL', 'la gatta ha annullato.'], ['CHANGE', 'la gatta ha cambiato.'],
+    // The inchoative CHANGE_ONESELF selects essere, as BEGIN does.
+    ['CHANGE_ONESELF', 'la gatta è cambiata.'],
     ['CHOOSE', 'la gatta ha scelto.'], ['CLEAR', 'la gatta ha cancellato.'],
     ['CLICK', 'la gatta ha cliccato.'], ['CLOSE', 'la gatta ha chiuso.'],
     ['COLLAPSE', 'la gatta è crollata.'],
@@ -479,6 +481,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['LOAD', 'la gatta ha caricato.'], ['LOVE', 'la gatta ha amato.'],
     ['MAKE', 'la gatta ha fatto.'], ['MODIFY', 'la gatta ha modificato.'],
     ['MOVE', 'la gatta ha spostato.'],
+    // A pronominal verb takes essere, its clitic ahead of it (C17).
+    ['MOVE_ONESELF', 'la gatta si è mossa.'],
     ['NAME', 'la gatta ha nominato.'], ['OWN', 'la gatta ha posseduto.'],
     ['PERCEIVE', 'la gatta ha percepito.'], ['PRESS', 'la gatta ha premuto.'],
     ['PRODUCE', 'la gatta ha prodotto.'],

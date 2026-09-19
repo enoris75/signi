@@ -4,6 +4,7 @@ import { AVERE_AUX, AVERE_IT, ESSERE_AUX, ESSERE_IT, STARE_AUX, STARE_IT } from 
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
 import { auxFinite } from './auxFinite.js';
+import { itEnclitic } from './itEnclitic.js';
 
 /**
  * The verb group for a non-neutral aspect: progressive = stare + gerundio ("sto andando"),
@@ -15,6 +16,10 @@ import { auxFinite } from './auxFinite.js';
  * avere participle agrees instead with an object ahead of it, passed as `objectForms`: a third-person
  * clitic ("l'ha vista", "li si è mangiati") or the passive si's patient ("si sono mangiati i topi").
  * Negation ("non") is prepended by the caller, as for the neutral verb.
+ *
+ * `reflexive` is a pronominal verb's clitic when it attaches to the non-finite verb: the gerund ("sta
+ * muovendosi") or the infinitive ("sta per muoversi"). The resultative's clitic stands before essere
+ * ("si è mosso"), so the caller places it there, with "non".
  */
 export function aspectVerb(
   verbForms: Record<string, string>,
@@ -23,6 +28,7 @@ export function aspectVerb(
   aspect: Aspect,
   mood?: Mood,
   objectForms?: Record<string, string>,
+  reflexive = '',
 ): string {
   const inf = verbForms['base'] ?? '';
   if (aspect === 'resultative') {
@@ -37,6 +43,6 @@ export function aspectVerb(
     return `${aux} ${part}`.trim();
   }
   const aux = auxFinite(STARE_AUX, STARE_IT, subjectForms, tense, mood);
-  if (aspect === 'prospective') return `${aux} per ${inf}`.trim();
-  return `${aux} ${verbForms['gerund'] ?? inf}`.trim(); // progressive
+  if (aspect === 'prospective') return `${aux} per ${itEnclitic(inf, reflexive, 'infinitive')}`.trim();
+  return `${aux} ${itEnclitic(verbForms['gerund'] ?? inf, reflexive, 'plain')}`.trim(); // progressive
 }

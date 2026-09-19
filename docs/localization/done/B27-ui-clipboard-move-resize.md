@@ -7,7 +7,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 supported: a command with a `direction` complement, with an adverb modifier, or with an object
 carrying a noun-modifier. MOVE here is the transitive "change the position of", which no language
 says with a reflexive verb, so it takes the id MOVE. The intransitive genus of GO and RUN is a separate
-concept, blocked on reflexive verbs in Italian and German ([C17](../C-needs-engine/C17-motion-verbs-reflexive-genus.md)).
+concept, blocked on reflexive verbs in Italian and German ([C17](C17-motion-verbs-reflexive-genus.md)).
 
 ## Seed first
 
