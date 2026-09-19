@@ -36,9 +36,9 @@ describe('ModalTypeahead', () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     renderWithProviders(<ModalTypeahead onSelect={() => {}} />, {
       concepts: { verb: [] },
-      strings: { 'slot.modal.placeholder': { it: 'digita un verbo servile' } },
+      strings: { 'slot.modal.placeholder': { it: 'digita un verbo modale' } },
     });
 
-    expect(screen.getByPlaceholderText('digita un verbo servile…')).toBeInTheDocument();
+    expect(screen.getByPlaceholderText('digita un verbo modale…')).toBeInTheDocument();
   });
 });

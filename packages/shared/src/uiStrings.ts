@@ -509,8 +509,8 @@ export const UI_STRINGS = defineUiStrings({
   },
 
   // The modal verb's box title and satellite label, for both modals in the chain: the numeral of
-  // "Modal 2" only told two identical English labels apart, as with the adjectives. Italian school
-  // grammar calls these "verbi servili"; the others name them by mood (de "Modalverb", ja 法助動詞).
+  // "Modal 2" only told two identical English labels apart, as with the adjectives. Every language
+  // names these by mood (it "verbo modale", de "Modalverb", ja 法助動詞).
   'slot.modal': {
     plan: nameOf('MODAL'),
     format: NAME_FORMAT,

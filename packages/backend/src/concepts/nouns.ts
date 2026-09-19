@@ -2499,8 +2499,8 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
-    // A modal verb (must, can, will). Italian school grammar calls these "verbi servili"; the others
-    // name them by their mood (fr "verbe modal", de "Modalverb", ja 法助動詞).
+    // A modal verb (must, can, will), named by its mood in every language (it "verbo modale",
+    // fr "verbe modal", de "Modalverb", ja 法助動詞). Italian school grammar also says "verbo servile".
     id: 'MODAL',
     role: 'noun',
     description: 'a verb that expresses necessity, ability or will (grammar)',
@@ -2508,7 +2508,7 @@ export const nouns: ConceptSeed[] = [
     isA: 'VERB',
     forms: {
       en: { base: 'modal', plural: 'modals', count: 'singular' },
-      it: { base: 'verbo servile', plural: 'verbi servili', gender: 'masc', count: 'singular' },
+      it: { base: 'verbo modale', plural: 'verbi modali', gender: 'masc', count: 'singular' },
       fr: { base: 'verbe modal', plural: 'verbes modaux', gender: 'masc', count: 'singular' },
       de: { base: 'Modalverb', plural: 'Modalverben', gender: 'neut', count: 'singular' },
       es: { base: 'verbo modal', plural: 'verbos modales', gender: 'masc', count: 'singular' },

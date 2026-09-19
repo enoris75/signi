@@ -264,7 +264,7 @@ describe('buildUiStrings', () => {
     expect(strings['polarity.value.negative']).toMatchObject({ it: 'Negativa', fr: 'Négative', es: 'Negativa' });
     expect(strings['slot.modal.placeholder']).toEqual({
       en: 'type a modal',
-      it: 'digita un verbo servile',
+      it: 'digita un verbo modale',
       fr: 'taper un verbe modal',
       de: 'ein Modalverb tippen',
       es: 'teclear un verbo modal',

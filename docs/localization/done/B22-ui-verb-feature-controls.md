@@ -17,7 +17,7 @@ ones the pronoun chooser and number toggle already use: a bare grammar noun for 
 | NEUTRAL, PROGRESSIVE, PROSPECTIVE, RESULTATIVE | adjectives | the four aspects | agree with ASPECT; NEUTRAL is also needed by [C13](../C-needs-engine/C13-ui-grammatical-function-words.md) |
 | POLARITY | noun | whether a clause is affirmed or negated | |
 | POSITIVE | adjective | affirmed | NEGATIVE is already seeded ("asserting that there is none of it") |
-| MODAL | noun | a verb that expresses necessity, ability or will | it *verbo servile*, de *Modalverb*, ja 法助動詞 |
+| MODAL | noun | a verb that expresses necessity, ability or will | it *verbo modale*, de *Modalverb*, ja 法助動詞 |
 
 ## Unlocks
 
@@ -65,7 +65,7 @@ Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
 | RESULTATIVE | resultative | risultativo | résultatif | resultativ | resultativo | 結果の | resultativo |
 | POLARITY | polarity | polarità (f) | polarité (f) | Polarität (f) | polaridad (f) | 極性 | polaridade (f) |
 | POSITIVE | positive | positivo | positif | positiv | positivo | 肯定の | positivo |
-| MODAL (isA VERB) | modal | verbo servile | verbe modal | Modalverb | verbo modal | 法助動詞 | verbo modal |
+| MODAL (isA VERB) | modal | verbo modale | verbe modal | Modalverb | verbo modal | 法助動詞 | verbo modal |
 
 | key | en | it | de | ja |
 |---|---|---|---|---|
@@ -75,8 +75,8 @@ Once seeded, TENSE, ASPECT, POLARITY and MODAL also extend the
 | `aspect.value.neutral … resultative` | Neutral / Progressive / Prospective / Resultative | Neutrale / Progressivo / Prospettivo / Risultativo | Neutral / Progressiv / Prospektiv / Resultativ | 中立 / 進行 / 将然 / 結果 |
 | `satellite.polarity` | Polarity | Polarità | Polarität | 極性 |
 | `polarity.value.positive / negative` | Positive / Negative | Positiva / Negativa | Positiv / Negativ | 肯定 / 否定 |
-| `slot.modal` | Modal | Verbo servile | Modalverb | 法助動詞 |
-| `slot.modal.placeholder` | type a modal | digita un verbo servile | ein Modalverb tippen | 法助動詞を入力 |
+| `slot.modal` | Modal | Verbo modale | Modalverb | 法助動詞 |
+| `slot.modal.placeholder` | type a modal | digita un verbo modale | ein Modalverb tippen | 法助動詞を入力 |
 
 Changes against the plan:
 - **The tenses are nouns, not adjectives** (PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE), like
