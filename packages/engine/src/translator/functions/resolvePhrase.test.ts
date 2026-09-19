@@ -62,6 +62,29 @@ describe('resolvePhrase', () => {
     expect(resolved.condition?.verbPhrase).toMatchObject({ verb: { conceptId: 'EAT' }, mood: 'subjunctive' });
   });
 
+  describe('a question', () => {
+    test('marks the verb phrase of an indicative clause, and only that', () => {
+      expect(resolvePhrase({ ...CAT_RUNS, interrogative: true }, 'it', LOOKUP).verbPhrase?.interrogative).toBe(true);
+      expect(resolvePhrase(CAT_RUNS, 'it', LOOKUP).verbPhrase).not.toHaveProperty('interrogative');
+    });
+
+    test('a condition, a command or a citation keeps its own mood and drops the flag', () => {
+      const plan: PhrasePlan = { ...CAT_RUNS, interrogative: true, condition: DOG_EATS };
+      const resolved = resolvePhrase(plan, 'it', LOOKUP, 'conditional');
+      expect(resolved.verbPhrase).not.toHaveProperty('interrogative');
+      expect(resolved.condition?.verbPhrase).not.toHaveProperty('interrogative');
+      expect(resolvePhrase({ ...CAT_RUNS, interrogative: true }, 'it', LOOKUP, 'imperative').verbPhrase).not.toHaveProperty('interrogative');
+      expect(resolvePhrase({ ...CAT_RUNS, interrogative: true }, 'it', LOOKUP, 'infinitive').verbPhrase).not.toHaveProperty('interrogative');
+    });
+
+    test('a coordinated clause shares the force of the first, whatever its own plan says', () => {
+      const asked = resolvePhrase({ ...CAT_RUNS, interrogative: true, coordination: { conjunction: 'and', clause: DOG_EATS } }, 'it', LOOKUP);
+      expect(asked.coordination?.clause.verbPhrase?.interrogative).toBe(true);
+      const stated = resolvePhrase({ ...CAT_RUNS, coordination: { conjunction: 'and', clause: { ...DOG_EATS, interrogative: true } } }, 'it', LOOKUP);
+      expect(stated.coordination?.clause.verbPhrase).not.toHaveProperty('interrogative');
+    });
+  });
+
   test('a coordinated statement is a plain clause with its own subject and conjunction', () => {
     const { coordination } = resolvePhrase({ ...CAT_RUNS, coordination: { conjunction: 'therefore', clause: DOG_EATS } }, 'it', LOOKUP, 'conditional');
     expect(coordination?.conjunction).toBe('therefore');

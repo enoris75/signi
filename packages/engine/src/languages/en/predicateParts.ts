@@ -11,6 +11,7 @@ import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinate } from './coordinate.js';
+import { doSupport } from './doSupport.js';
 import { modalAdverbEn } from './modalAdverbEn.js';
 import { modalFinite } from './modalFinite.js';
 import { npText } from './npText.js';
@@ -57,7 +58,7 @@ function predicateWords(
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals } = verbPhrase;
+  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
   // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
@@ -153,14 +154,16 @@ function predicateWords(
     // modifies ("never wanted", "to always go"), except on a true modal *auxiliary* finite or a
     // negated finite, where it follows the auxiliary and its "not" ("must always eat", "cannot always
     // eat", "does not always have to eat"). A manner adverb trails the whole clause, the main verb's
-    // and the modals' alike. The main verb's own frequency adverb sits right before its group.
+    // and the modals' alike. The main verb's own frequency adverb sits right before its group. A
+    // question's finite always opens on an auxiliary, *do* where the modal is not one, so the adverb
+    // follows it there too: "does the cat never want to go?".
     const words: string[] = [];
     modals.forEach((m, i) => {
       const adv = m.modifier?.forms['base'] ?? '';
       const freq = isFrequencyAdverb(m.modifier);
       if (i === 0) {
-        const finite = modalFinite(m.verb, subjectForms, tense, negateVerb);
-        if (adv && freq && (negateVerb || MODAL_AUX.has(finite.split(' ')[0]))) words.push(afterFirstAux(finite, adv));
+        const finite = modalFinite(m.verb, subjectForms, tense, negateVerb, interrogative);
+        if (adv && freq && (negateVerb || interrogative || MODAL_AUX.has(finite.split(' ')[0]))) words.push(afterFirstAux(finite, adv));
         else if (adv && freq) words.push(adv, finite);
         else words.push(finite);
       } else {
@@ -214,6 +217,17 @@ function predicateWords(
     const negVerb = isFrequency && modifierText ? `${aux} ${modifierText} ${base}` : `${aux} ${base}`;
     const trailingMod = isFrequency ? '' : modifierText;
     return [negVerb, directObjectText, complementsText, trailingMod];
+  }
+  // A question puts an auxiliary before its subject. A lexical verb in the present or past has none,
+  // so it takes do-support as its negation does, and a frequency adverb follows the "do": "does the
+  // cat eat?", "did the cat always run?", "does the cat never eat?". The copula and the future's
+  // "will" are auxiliaries of their own ("is the cat careful?", "will the cat eat?").
+  if (interrogative && tense !== 'future' && verb.forms['copula'] !== '1') {
+    const verbText = `${doSupport(subjectForms, tense)} ${verb.forms['base'] ?? ''}`;
+    if (isFrequency && modifierText) {
+      return ['', afterFirstAux(verbText, modifierText), directObjectText, complementsText, ''];
+    }
+    return ['', verbText, directObjectText, complementsText, modifierText];
   }
   // Future is periphrastic ("will eat"); present/past come from the forms map.
   const verbText = tense === 'future'

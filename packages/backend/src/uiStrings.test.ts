@@ -140,6 +140,25 @@ describe('buildUiStrings', () => {
     }
   });
 
+  // A Spanish question opens on "¿", which has no case, so the letter after it is the one capitalized.
+  test('capitalizes the first letter, past a mark that opens the string', () => {
+    vi.mocked(translate).mockReturnValue(rendering(() => '¿el gato come?'));
+    expect(buildUiStrings()['status.isServerActive']).toMatchObject({ es: '¿El gato come?' });
+  });
+
+  // The engine closes a question on each language's question mark, which the format keeps (C10).
+  test('asks whether the server is active, each language in its own way', () => {
+    expect(buildUiStrings()['status.isServerActive']).toEqual({
+      en: 'Is the server active?',
+      it: 'Il server è attivo?',
+      fr: 'Est-ce que le serveur est actif ?',
+      de: 'Ist der Server aktiv?',
+      es: '¿El servidor está activo?',
+      ja: 'サーバーは稼働中ですか？',
+      pt: 'O servidor está ativo?',
+    });
+  });
+
   test('fails naming the entry and the languages it did not render in', () => {
     const [firstKey] = CATALOG[0]!;
     const fn = byKind.determiner[0]?.[0] === firstKey ? translateDeterminer

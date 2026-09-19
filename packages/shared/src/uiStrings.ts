@@ -7,9 +7,15 @@ import type { AbstractionLevel, Definiteness, LanguageCode, PhrasePlan, Pronomin
  * call site re-implementing the trim.
  */
 export interface UiStringFormat {
-  /** Uppercase the first character only. A no-op for non-cased scripts (e.g. 日本語). */
+  /**
+   * Uppercase the first letter only, past any mark that opens the string (Spanish "¿" before a
+   * question: "¿El servidor…"). A no-op for non-cased scripts (e.g. 日本語).
+   */
   capitalize?: boolean;
-  /** Drop a trailing full stop — ASCII "." or Japanese "。". */
+  /**
+   * Drop a trailing full stop — ASCII "." or Japanese "。". A question ends on its question mark
+   * instead ("?", fr " ?", ja "？"), which this leaves in place, so a question needs no format of its own.
+   */
   stripPeriod?: boolean;
 }
 
@@ -1372,6 +1378,24 @@ export const UI_STRINGS = defineUiStrings({
   'action.cancel': { plan: commandOf('CANCEL'), format: NAME_FORMAT, fallback: 'Cancel' },
   'field.name': { plan: nameOf('NAME_NOUN'), format: NAME_FORMAT, fallback: 'Name' },
   'status.loading': { plan: nameOf('LOADING'), format: NAME_FORMAT, fallback: 'Loading' },
+
+  // What a failed request asks the user to check: whether the server is up. A yes/no question
+  // (`interrogative`) on BE and ACTIVE, the server in operation, which each language asks its own way:
+  // en inverts ("Is the server active?"), de puts the verb first ("Ist der Server aktiv?"), fr asks
+  // with "est-ce que" ("Est-ce que le serveur est actif ?"), es opens on "¿" and says a state with
+  // estar ("¿El servidor está activo?"), ja closes on か (サーバーは稼働中ですか？). The engine writes the
+  // question mark, so the format only capitalizes. Not "the translation server": German compounds it
+  // without the linking -s- (*Übersetzungserver, bug B10).
+  'status.isServerActive': {
+    plan: {
+      subject: { concept: 'SERVER' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'ACTIVE' } } },
+      interrogative: true,
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Is the server active?',
+  },
 
   // An empty load dialog: the stored phrases or periods under the `no` quantifier, in the plural English
   // and German use ("No saved phrases", "Keine gespeicherten Phrasen"; it "Nessuna frase salvata"). The

@@ -7,9 +7,10 @@ const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 
 function applyFormat(text: string, format?: UiStringFormat): string {
   let out = text;
-  // ASCII "." or Japanese "。".
+  // ASCII "." or Japanese "。". A question's "?" is not a full stop, so it stays.
   if (format?.stripPeriod) out = out.replace(/[.。]\s*$/, '');
-  if (format?.capitalize && out) out = out[0].toUpperCase() + out.slice(1);
+  // The first letter, past any mark that opens the string: Spanish opens a question on "¿".
+  if (format?.capitalize) out = out.replace(/^(\P{L}*)(\p{L})/u, (_, lead: string, first: string) => lead + first.toUpperCase());
   return out;
 }
 

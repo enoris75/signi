@@ -743,7 +743,7 @@ describe('known bugs: degree (extended)', () => {
 // grammar; forced onto a noun they read oddly ("the partitive cat") but must still render. English
 // is the reliable baseline — "the <word> cat eats." — so the lexeme of each is pinned here.
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
-  ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
+  ['ACTIVE', 'active'], ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
   ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],

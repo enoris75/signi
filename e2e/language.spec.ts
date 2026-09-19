@@ -229,6 +229,24 @@ test.describe('interface language', () => {
     await expect(map.getByRole('button', { name: 'Complementos', exact: true })).toBeVisible();
   });
 
+  // The one question the catalog holds (C10): what the word map asks when its request fails. The
+  // sentence before it is still English — "could not be loaded" waits on the passive voice (C11).
+  test('asks after the server in the UI language when the words cannot be loaded', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+
+    // The pickers ask for one role at a time; the whole catalog at once (`['concepts', 'all']`) is the
+    // word map's own request, made as the page loads, so failing it leaves the pickers alone. The page
+    // is reloaded because that request has already gone out — and the language is remembered across it.
+    await page.route('**/api/concepts', (route) => route.fulfill({ status: 500, body: '{}' }));
+    await page.reload();
+    await page.getByRole('button', { name: 'Parole', exact: true }).click();
+    await page.getByRole('button', { name: 'Mostra la mappa di parole' }).click();
+
+    const map = page.getByRole('dialog');
+    await expect(map.getByText('Il server è attivo?')).toBeVisible();
+    await expect(map.getByRole('button', { name: 'Riprova' })).toBeVisible();
+  });
+
   // A noun used as a modifier carries chips of its own (B24).
   test('names the chips of a noun used as a modifier in the UI language', async ({ app, page }) => {
     await app.buildClause('CAT', 'EAT');

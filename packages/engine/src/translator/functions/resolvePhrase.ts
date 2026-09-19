@@ -24,12 +24,18 @@ export function resolvePhrase(
 ): ResolvedPhrase {
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
+  // A yes/no question is a statement's clause with another force, so it holds only where the mood is
+  // indicative: a condition, a command or a citation keeps its own and drops the flag.
+  const question = !!plan.interrogative && mood === undefined;
   const resolved: ResolvedPhrase = {
     subject: resolveNounElement(plan.subject, language, lookup),
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
     verbPhrase: plan.verbPhrase
-      ? resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject)
+      ? {
+          ...resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject),
+          ...(question ? { interrogative: true } : {}),
+        }
       : undefined,
     directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
@@ -42,13 +48,16 @@ export function resolvePhrase(
     // Coordination is a symmetric join, so the second clause carries the same illocutionary
     // force as the first: under a command it is resolved in the imperative mood too, with the
     // first clause's register and addressee (its own subject is dropped from the surface, so
-    // taking the first's keeps the pair addressed to one and the same person). A conditional
-    // main clause coordinates a plain indicative clause. Coordination doesn't nest.
+    // taking the first's keeps the pair addressed to one and the same person). A question's second
+    // clause is a question too, and a statement's a statement, whatever its own plan says. A
+    // conditional main clause coordinates a plain indicative clause. Coordination doesn't nest.
     coordination: plan.coordination
       ? {
           conjunction: coordConjunction(plan.coordination.conjunction, imperative),
           clause: resolvePhrase(
-            imperative ? { ...plan.coordination.clause, subject: plan.subject } : plan.coordination.clause,
+            imperative
+              ? { ...plan.coordination.clause, subject: plan.subject }
+              : { ...plan.coordination.clause, interrogative: question },
             language,
             lookup,
             imperative ? 'imperative' : undefined,

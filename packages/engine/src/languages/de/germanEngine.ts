@@ -13,7 +13,10 @@ export const germanEngine: LanguageEngine = {
     // würde"); the main clause that follows it is inverted, because the fronted subordinate clause
     // occupies the front field, pushing the finite verb ahead of the subject ("würde der Hund
     // laufen"). Without a condition the main clause takes ordinary V2 order.
-    const main = renderClause(phrase, /*inverted*/ !!phrase.condition);
+    // A yes/no question leaves the front field empty, so its finite verb leads: V1, "ist der Server
+    // aktiv?", "isst der Kater die Maus?". A clause coordinated with it is a question too.
+    const question = !!phrase.verbPhrase?.interrogative;
+    const main = renderClause(phrase, /*inverted*/ !!phrase.condition || question);
     const sentence = phrase.condition
       ? `wenn ${renderClause(phrase.condition, false, /*verbFinal*/ true)}, ${main}`
       : main;
@@ -22,7 +25,7 @@ export const germanEngine: LanguageEngine = {
     if (!phrase.coordination) return punctuate(sentence);
     const { conjunction, clause } = phrase.coordination;
     return punctuate(
-      `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause, COORD_INVERTS[conjunction])}`,
+      `${sentence}, ${COORD_WORDS[conjunction]} ${renderClause(clause, question || COORD_INVERTS[conjunction])}`,
     );
   },
   // The determiner alone, for the menu that picks one. A German determiner is declined for case;

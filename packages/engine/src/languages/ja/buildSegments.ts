@@ -3,7 +3,10 @@ import { COORD_WORDS } from './ja.consts.js';
 import { buildClauseSegments } from './buildClauseSegments.js';
 
 export function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
-  const main = buildClauseSegments(phrase, 'は');
+  // A yes/no question keeps the statement's order and closes its polite predicate on the particle か:
+  // 猫は食べますか, サーバーは稼働中ですか. A clause coordinated with it is a question of its own.
+  const ka: RubySegment[] = phrase.verbPhrase?.interrogative ? [{ t: 'か' }] : [];
+  const main = [...buildClauseSegments(phrase, 'は'), ...ka];
   // Hypothetical conditional: もし <protasis (…たら)>、 <apodosis (…でしょう)>. The condition
   // clause's subject takes が (the neutral subject marker inside a subordinate clause).
   const sentence = phrase.condition
@@ -23,5 +26,6 @@ export function buildSegments(phrase: ResolvedPhrase): RubySegment[] {
     ...sentence,
     ...(closes ? [{ t: '。' }, connective, { t: '、' }] : [{ t: '、' }, connective]),
     ...buildClauseSegments(phrase.coordination.clause, 'は'),
+    ...ka,
   ];
 }

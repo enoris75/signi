@@ -104,6 +104,14 @@ export interface ResolvedVerbPhrase {
    * Meaningless outside `mood === 'imperative'`; the engines only read it there.
    */
   register?: ImperativeRegister;
+  /**
+   * The clause is a yes/no question (see PhrasePlan.interrogative). Not a mood: the verb keeps its
+   * indicative forms, and each engine reads this only to reorder or mark the clause. It sits here,
+   * with `mood` and `register`, because the predicate builders see the verb phrase and not the
+   * clause: English needs it inside the verb group for *do*-support. Set only on a top clause (and a
+   * clause coordinated with it) whose mood is indicative; a relative clause never carries it.
+   */
+  interrogative?: boolean;
   modifier?: ConceptForms;
   /** Resolved modal verbs governing the predicate, outermost first (see VerbPhrase.modals). */
   modals: ResolvedModal[];
@@ -230,4 +238,11 @@ export interface LanguageEngine {
   renderRuby?(phrase: ResolvedPhrase): RubySegment[];
   /** The full stop closing a rendered sentence. Defaults to '.'; ja overrides it with '。'. */
   terminator?: string;
+  /**
+   * The mark closing a question in place of `terminator` (see PhrasePlan.interrogative). Defaults
+   * to '?'; French sets it off with a no-break space (" ?") and Japanese writes the full-width "？".
+   */
+  questionMark?: string;
+  /** The mark opening a question, where the language writes one: Spanish "¿". Defaults to none. */
+  questionOpener?: string;
 }

@@ -20,13 +20,16 @@ export function translate(plan: PhrasePlan, lookup: LexiconLookup): Translation[
           : undefined;
     const resolved = resolvePhrase(plan, engine.language, lookup, topMood);
     // Every rendered period closes with its language's full stop, appended here rather
-    // than by each engine — the ruby segments must carry the same one, unread.
-    const stop = engine.terminator ?? '.';
+    // than by each engine — the ruby segments must carry the same one, unread. A question closes
+    // on its question mark instead, and opens on one where the language writes it (es "¿").
+    const question = !!resolved.verbPhrase?.interrogative;
+    const open = question ? (engine.questionOpener ?? '') : '';
+    const stop = question ? (engine.questionMark ?? '?') : (engine.terminator ?? '.');
     const ruby = engine.renderRuby?.(resolved);
     return {
       language: engine.language,
-      text: engine.render(resolved) + stop,
-      ...(ruby ? { ruby: [...ruby, { t: stop }] } : {}),
+      text: open + engine.render(resolved) + stop,
+      ...(ruby ? { ruby: [...(open ? [{ t: open }] : []), ...ruby, { t: stop }] } : {}),
     };
   });
 }

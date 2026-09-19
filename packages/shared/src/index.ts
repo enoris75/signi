@@ -727,6 +727,24 @@ export interface PhrasePlan {
    */
   coordination?: Coordination;
   /**
+   * When true this clause is a **yes/no question** ("is the server active?", "does the cat eat?").
+   * A question is a statement's clause with a different force, so its verb keeps the indicative
+   * forms, its tense, aspect and modals, and its subject. What changes is the order and the marks
+   * around it, which each language sets differently:
+   *  - en inverts the subject and the finite auxiliary, with *do*-support when there is none
+   *    ("is the server active?", "does the cat eat?", "did the cat have to go?");
+   *  - de puts the finite verb first, the V1 order ("ist der Server aktiv?", "isst der Kater?");
+   *  - fr keeps the statement behind "est-ce que" ("est-ce que le chat mange ?");
+   *  - it / es / pt keep the statement's order, and Spanish opens it with "¿";
+   *  - ja closes the polite predicate with か (猫は食べますか？).
+   * The question mark replaces the full stop: "?", fr "?" after a no-break space, ja "？".
+   *
+   * Like a mood it belongs to the top clause, so it is ignored under a `condition`, an `imperative`
+   * or an `infinitive`. A coordinated clause shares it (a question does not coordinate with a
+   * statement, see `coordination`), and a relative clause never takes it.
+   */
+  interrogative?: boolean;
+  /**
    * When true this clause is an **imperative** (a command — "eat the food!", "don't run!").
    * The verb is rendered in the imperative mood and the subject is dropped, but `subject`
    * still carries the addressee pronoun (2nd-singular by default, or 1st-plural "let's…" /

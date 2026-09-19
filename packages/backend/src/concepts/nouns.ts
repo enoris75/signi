@@ -2695,6 +2695,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The program that answers another's requests, as the translation server answers the app's — not
+    // the one who serves at table. Italian borrows "server", invariable in the plural; German der Server,
+    // plural die Server.
+    id: 'SERVER',
+    role: 'noun',
+    description: 'a program that answers the requests of other programs',
+    emoji: '🗄️',
+    forms: {
+      en: { base: 'server', plural: 'servers', count: 'singular' },
+      it: { base: 'server', plural: 'server', gender: 'masc', count: 'singular' },
+      fr: { base: 'serveur', plural: 'serveurs', gender: 'masc', count: 'singular' },
+      de: { base: 'Server', plural: 'Server', gender: 'masc', count: 'singular' },
+      es: { base: 'servidor', plural: 'servidores', gender: 'masc', count: 'singular' },
+      ja: { base: 'サーバー', count: 'singular' },
+      pt: { base: 'servidor', plural: 'servidores', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // What a search turns up — "no results" under a picker.
     id: 'RESULT',
     role: 'noun',

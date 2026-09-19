@@ -23,8 +23,8 @@ the phrase"), so it is not a fix.
 | Could not save the period. | [PeriodSaveLoad.tsx:71](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L71) | — |
 | Could not load that period. | [PeriodSaveLoad.tsx:105](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L105) | — |
 | Could not load saved periods. | [PeriodSaveLoad.tsx:150](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L150) | — |
-| Could not reach the translation server. | [App.tsx:222](../../../packages/frontend/src/App.tsx#L222) | SERVER, REACH |
-| Could not load the words. | [WordMap.tsx:208](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L208) (first sentence; the question after it is [C10](C10-ui-questions.md)) | — |
+| Could not reach the translation server. | [App.tsx:222](../../../packages/frontend/src/App.tsx#L222) | REACH (SERVER was seeded by [C10](../done/C10-ui-questions.md); German compounds "translation server" without its linking -s-, so say "the server", as C10 does) |
+| Could not load the words. | [WordMap.tsx:208](../../../packages/frontend/src/components/WordMap/WordMap.tsx#L208) (first sentence; the question after it, `status.isServerActive`, shipped with [C10](../done/C10-ui-questions.md) and is the only localized half of this message) | — |
 
 All modals, tense and negation these need already render. Voice is the only missing piece.
 

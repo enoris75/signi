@@ -369,4 +369,28 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(EAT, { mood: 'subjunctive', negative: true }))).toBe('did not eat');
     });
   });
+
+  // The clause moves the group's first word before the subject (see invertSubject), so a question's
+  // group must open on an auxiliary.
+  describe('question', () => {
+    test('a lexical verb takes do-support, agreeing with the subject', () => {
+      expect(said(CAT, vp(EAT, { interrogative: true }), mouse)).toBe('does eat the mouse');
+      expect(said(PLURAL_CATS, vp(EAT, { interrogative: true }))).toBe('do eat');
+      expect(said(CAT, vp(EAT, { interrogative: true, tense: 'past' }))).toBe('did eat');
+    });
+
+    test('a frequency adverb follows the do, a manner adverb trails', () => {
+      expect(said(CAT, vp(EAT, { interrogative: true, modifier: always }))).toBe('does always eat');
+      expect(said(CAT, vp(EAT, { interrogative: true, modifier: never }))).toBe('does never eat');
+      expect(said(CAT, vp(EAT, { interrogative: true, modifier: fast }))).toBe('does eat fast');
+    });
+
+    test('a group with an auxiliary of its own opens on it', () => {
+      expect(said(CAT, vp(EAT, { interrogative: true, tense: 'future' }))).toBe('will eat');
+      expect(said(CAT, vp(BE, { interrogative: true }), undefined, tired)).toBe('is tired');
+      expect(said(CAT, vp(EAT, { interrogative: true, aspect: 'progressive' }))).toBe('is eating');
+      expect(said(CAT, vp(EAT, { interrogative: true, negative: true }))).toBe('does not eat');
+      expect(said(CAT, vp(EAT, { interrogative: true, modals: [modal(WILL)] }))).toBe('does want to eat');
+    });
+  });
 });

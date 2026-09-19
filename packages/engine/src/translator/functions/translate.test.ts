@@ -57,4 +57,15 @@ describe('translate', () => {
   test('an infinitive is the citation form', () => {
     expect(en({ ...YOU_RUN, infinitive: true })).toBe('to run.');
   });
+
+  test("a question closes on its language's question mark, and opens on one where the language writes it", () => {
+    const translations = translate({ ...CAT_RUNS, interrogative: true }, LOOKUP);
+    expect(find(translations, 'en')?.text).toBe('does the cat run?');
+    expect(find(translations, 'fr')?.text.endsWith(' ?')).toBe(true);
+    expect(find(translations, 'es')?.text).toMatch(/^¿.*\?$/);
+    const ja = find(translations, 'ja')!;
+    expect(ja.text.endsWith('か？')).toBe(true);
+    expect(ja.ruby?.at(-1)).toEqual({ t: '？' });
+    expect(ja.ruby?.map((s) => s.t).join('')).toBe(ja.text);
+  });
 });

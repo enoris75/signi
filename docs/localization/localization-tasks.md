@@ -82,9 +82,8 @@ was waiting on a word has its word._
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
-[C17](done/C17-motion-verbs-reflexive-genus.md): their genus MOVE_ONESELF is a reflexive verb in
-Italian and German. C17 built both and glossed RUN and GO. JUMP, COLLAPSE and COME wait in
-[C18](C-needs-engine/C18-motion-verbs-without-a-gloss.md). The builder change B14 was meant to own
+[C17](C-needs-engine/C17-motion-verbs-reflexive-genus.md): their genus MOVE is a reflexive verb in
+Italian and German, which the engine cannot render yet. The builder change B14 was meant to own
 landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 `concepts/verbs/gloss.ts`) takes either the object id or a `GlossParts` object with the object's
 `definiteness`, `complements` and an adverb `modifier`. A count-noun object must pass `'plural'`
@@ -106,13 +105,12 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C09 | [C09-modal-verbs.md](C-needs-engine/C09-modal-verbs.md) | nested infinitive complement ("to be able **to do**") — MUST, CAN, WILL (split from B08) |
-| C18 | [C18-motion-verbs-without-a-gloss.md](C-needs-engine/C18-motion-verbs-without-a-gloss.md) | a differentia MOVE_ONESELF cannot carry: an *into* path and AIR (JUMP), two adverbs and SUDDENLY (COLLAPSE), deixis (COME) (split from C17) |
+| C17 | [C17-motion-verbs-reflexive-genus.md](C-needs-engine/C17-motion-verbs-reflexive-genus.md) | Italian pronominal and German reflexive verbs — the genus MOVE (*muoversi*, *sich bewegen*) of GO, RUN, COME, JUMP, COLLAPSE (was B14) |
 
 #### UI strings
 
 | # | File | Blocked on |
 |---|---|---|
-| C10 | [C10-ui-questions.md](C-needs-engine/C10-ui-questions.md) | interrogative mood — the remove / clear confirmations (and `window.confirm`'s buttons ignore the UI language) |
 | C11 | [C11-ui-failure-messages-passive.md](C-needs-engine/C11-ui-failure-messages-passive.md) | passive voice ([features/A01](../features/A-ready/A01-passive-voice/README.md)) — the eight "Could not …" messages, possessor mode toggle |
 | C12 | [C12-ui-purpose-and-object-complements.md](C-needs-engine/C12-ui-purpose-and-object-complements.md) | purpose clause, object complement, comitative, "whose" — "click to change", "make this period a command", pick hints |
 | C13 | [C13-ui-grammatical-function-words.md](C-needs-engine/C13-ui-grammatical-function-words.md) | catalog entry kinds for conjunctions, path specifiers, cause connectors, degrees |
@@ -152,7 +150,6 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B19 | [done/B19-data-verbs.md](done/B19-data-verbs.md) | EXPORT → to transfer content to a place; IMPORT → to transfer content from a place (no new vocabulary); the other nine → C08 |
 | B30 | [done/B30-feeling-genus.md](done/B30-feeling-genus.md) | AFFECTION → a warm feeling; FEEL → to have feelings (seeded **FEELING**, a root, and **WARM**, the figurative sense only, `synonym: 'kindly'` and non-transient). FEELING itself has no differentia → C05 |
 | B31 | [done/B31-complement-genus.md](done/B31-complement-genus.md) | hierarchy + 4 glosses, **nothing seeded**: SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER hung under COMPLEMENT_GRAMMAR → PHRASE. COMPLEMENT_GRAMMAR → a phrase that modifies verbs; SUBJECT_COMPLEMENT → …that describes subjects; INSTRUMENTAL → …that indicates means; ADVERBIAL_OF_MANNER → …that indicates ways. **INDICATE replaced the proposed NAME / EXPRESS** on the probe (de *bezeichnet*, ja 示す); no MANNER noun was seeded, WAY renders the same in six of seven |
-| C17 | [done/C17-motion-verbs-reflexive-genus.md](done/C17-motion-verbs-reflexive-genus.md) | RUN → to move fast; GO → to move from a place to another place (built the **Italian pronominal verb**, *si è mosso* / *muoviti* / *ci si muove*, and the **German reflexive verb**, *bewegt sich* / *der sich bewegt* / *sich schnell bewegen*; seeded **MOVE_ONESELF** and the inchoative **CHANGE_ONESELF**, de *sich ändern*, ja 変わる; found bugs A151, A152). JUMP, COLLAPSE, COME → C18 |
 | B32 | [done/B32-place-glosses.md](done/B32-place-glosses.md) | HOME → a place where one lives; HOUSE → a building where one lives; MARKET → a place where one trades; PRISON → a building where one confines people (seeded **LIVE**, **TRADE**, **CONFINE**; added the `whereGloss` helper). MARKET took TRADE objectless — de *handeln* / fr *commercer* take no object; PRISON shipped after all, the active with a generic subject standing in for the blocked passive |
 
 #### UI strings
@@ -174,6 +171,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B27 | [done/B27-ui-clipboard-move-resize.md](done/B27-ui-clipboard-move-resize.md) | `action.copyTranslation` (not "to the clipboard": the direction complement can't say *into*), `status.copied`, `action.movePeriodUp/Down` ("Move up", no object), `action.resizeContainer` (seeded COPY, MOVE, RESIZE, COPIED, UP, DOWN; found bug A142) |
 | B28 | [done/B28-ui-mood-toggles.md](done/B28-ui-mood-toggles.md) | `period.isCommand/isInfinitive` + `action.turnOff` ("turn it off": English phrasal verbs move their particle after a pronoun object); the toggles are named by their mode with `aria-pressed` (seeded TURN_OFF) |
 | C14 | [done/C14-ui-runtime-values.md](done/C14-ui-runtime-values.md) | `toast.missingWords.singular/plural` ("Loaded phrase — missing words: UNICORN, GRIFFIN"): the values stay outside the phrase, and the list gives the count (seeded MISSING). The saved name and the version number had already left the phrase in B20 and B26. Parameterized entries (option 1) were not built |
+| C10 | [done/C10-ui-questions.md](done/C10-ui-questions.md) | `status.isServerActive` ("Is the server active?", de "Ist der Server aktiv?", ja サーバーは稼働中ですか？): built **`PhrasePlan.interrogative`**, a yes/no question in all 7 engines — en subject–auxiliary inversion with do-support, de V1, fr "est-ce que", es "¿…?", ja か — plus per-language question marks and `capitalize` past an opening mark (seeded SERVER, ACTIVE). The two confirmations it was filed for had already gone: P01 replaced them with undo. Not a `Mood` value (that would have changed the verb forms), and "the translation server" lost its modifier to [B10](../bugs/B-can-fix/B10-german-compound-linking-element.md) |
 | B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stayed on the English literal (C05) and WALL was not seeded. Both gaps were fixed on 2026-09-19 (A149, A150), and BUILDING's gloss shipped under C05 |
 | C05 | [C-needs-engine/C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md#unblocked-building-2026-09-19) | BUILDING → a place that has walls (seeded **WALL**; built the French object partitive and the negative *de*, [A149](../bugs/fixed/A149-french-object-zero-article.md), which restored the article in 41 shipped French glosses, and the Japanese ある of an inanimate owner, [A150](../bugs/fixed/A150-japanese-inanimate-owner-aru.md)). The rest of C05 stays on the literal by design |
 

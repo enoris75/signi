@@ -7,6 +7,9 @@ import { renderClause } from './renderClause.js';
 
 export const spanishEngine: LanguageEngine = {
   language: 'es',
+  // Spanish opens a question as well as closing it ("¿el gato come?"). The statement keeps its order,
+  // as a yes/no question may.
+  questionOpener: '¿',
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
     // Hypothetical conditional: "si <protasis (subjunctive)>, <apodosis (conditional)>".

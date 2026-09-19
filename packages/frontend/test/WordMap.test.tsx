@@ -460,7 +460,7 @@ describe('WordMap', () => {
 
       const retry = await screen.findByRole('button', { name: 'Retry' });
       expect(
-        screen.getByText('Could not load the words. Is the translation server running?'),
+        screen.getByText('Could not load the words. Is the server active?'),
       ).toBeInTheDocument();
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(drawing()).toBeNull();
@@ -472,7 +472,7 @@ describe('WordMap', () => {
     });
   });
 
-  it('names its close and retry buttons in the UI language', async () => {
+  it('names its close and retry buttons, and asks after the server, in the UI language', async () => {
     localStorage.setItem('signi:uiLanguage', 'it');
     vi.mocked(fetchConcepts).mockRejectedValue(new Error('offline'));
     renderMap({
@@ -480,11 +480,13 @@ describe('WordMap', () => {
       strings: {
         'action.closeWordMap': { it: 'Chiudi la mappa di parole' },
         'action.retry': { it: 'Riprova' },
+        'status.isServerActive': { it: 'Il server è attivo?' },
       },
     });
 
     expect(await screen.findByRole('button', { name: 'Riprova' })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: 'Chiudi la mappa di parole' })).toBeInTheDocument();
+    expect(screen.getByText(/Il server è attivo\?$/)).toBeInTheDocument();
   });
 
   it('closes from its close button and on Escape', () => {

@@ -744,6 +744,26 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // In operation, as a server or a machine is while it runs — not the lively "active" of a child
+    // (it vivace, ja 活発な), a sense of its own. A state the thing is in, so transient: es/pt predicate
+    // it with estar ("el servidor está activo"). Japanese 稼働中 is a noun, linked by の.
+    id: 'ACTIVE',
+    role: 'adjective',
+    transient: true,
+    synonym: 'running',
+    description: 'in operation, as a running program or machine',
+    emoji: '🟢',
+    forms: {
+      en: { base: 'active' },
+      it: { base: 'attivo' },
+      fr: { base: 'actif' },
+      de: { base: 'aktiv' },
+      es: { base: 'activo' },
+      ja: { base: '稼働中の', reading: 'かどうちゅうの' },
+      pt: { base: 'ativo' },
+    },
+  },
+  {
     // A prepositional phrase in the Romance languages ("senza titolo", "sans titre"), which does not
     // agree with its noun: each engine lists it as invariable. A state a thing is left in, so transient
     // ("la frase está sin título").

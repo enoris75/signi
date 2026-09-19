@@ -1,6 +1,7 @@
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveFr } from '../../possessive.js';
 import { elidesBefore } from './elidesBefore.js';
+import { estCeQue } from './estCeQue.js';
 import { COORD_WORDS } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
@@ -9,6 +10,9 @@ import { renderClause } from './renderClause.js';
 
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
+  // French typography sets a question mark off from its sentence with a space, a no-break one so the
+  // mark never wraps to a line of its own.
+  questionMark: ' ?',
   render(phrase: ResolvedPhrase): string {
     const main = renderClause(phrase);
     let sentence = main;
@@ -20,8 +24,11 @@ export const frenchEngine: LanguageEngine = {
       sentence = `${ifw}${cond}, ${main}`;
     }
     // Coordination: "<first clause>, <conjunction> <second clause>".
-    if (!phrase.coordination) return punctuate(sentence);
-    return punctuate(`${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`);
+    if (phrase.coordination) {
+      sentence = `${sentence}, ${COORD_WORDS[phrase.coordination.conjunction]} ${renderClause(phrase.coordination.clause)}`;
+    }
+    // A yes/no question asks about the whole statement, coordinated or not, from one "est-ce que".
+    return punctuate(phrase.verbPhrase?.interrogative ? estCeQue(sentence) : sentence);
   },
   renderWord(word: ConceptForms): string {
     const f = word.forms;

@@ -41,4 +41,23 @@ describe('modalFinite', () => {
       expect(modalFinite(concept(WILL), HE, 'past', true)).toBe('did not want');
     });
   });
+
+  describe('question', () => {
+    test('a true modal auxiliary is the auxiliary a question inverts', () => {
+      expect(modalFinite(concept(MUST), HE, 'present', false, true)).toBe('must');
+      expect(modalFinite(concept(CAN), I, 'past', false, true)).toBe('could');
+      expect(modalFinite(concept(CAN), THEY, 'future', false, true)).toBe('will be able to');
+    });
+
+    test('anything else takes do-support over its bare form', () => {
+      expect(modalFinite(concept(WILL), HE, 'present', false, true)).toBe('does want');
+      expect(modalFinite(concept(WILL), WE, 'present', false, true)).toBe('do want');
+      expect(modalFinite(concept(MUST), HE, 'past', false, true)).toBe('did have to');
+    });
+
+    test('a negative question is negated as a statement is', () => {
+      expect(modalFinite(concept(CAN), HE, 'present', true, true)).toBe('cannot');
+      expect(modalFinite(concept(WILL), HE, 'present', true, true)).toBe('does not want');
+    });
+  });
 });

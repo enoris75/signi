@@ -7,6 +7,9 @@ import { possessiveJa } from '../../possessive.js';
 export const japaneseEngine: LanguageEngine = {
   language: 'ja',
   terminator: '。',
+  // The full-width question mark, after the か that already makes the sentence a question — the
+  // closing a dialog writes (削除しますか？), where running prose would keep 。.
+  questionMark: '？',
   render(phrase: ResolvedPhrase): string {
     return buildSegments(phrase)
       .map((s) => s.t)

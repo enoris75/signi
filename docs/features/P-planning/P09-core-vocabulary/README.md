@@ -45,11 +45,12 @@ A few covered words are still listed below, because their most common use is mis
 - **one** is seeded only as the impersonal pronoun (GENERIC_PERSON), not as the number.
 - **like** is written by the engine only as the manner preposition ("like the wind"). The verb is missing.
 - **own** is seeded only as the verb (OWN, "to have as property"). "My own" is missing.
-- **do** is written by the engine only as the helper in "did not". The main verb is missing.
+- **do** is written by the engine as the helper in "did not" and, since C10, in a question ("does the
+  cat eat?"). The main verb is missing.
 - **where** is written only in relative clauses ("a place where one lives"), **because** only as
   "because of", and **any** only as the automatic swap for "no" under negation.
-- **who** and **which** count as covered because relative clauses write them, but questions don't
-  exist yet (§3, E6).
+- **who** and **which** count as covered because relative clauses write them, but they are not yet
+  question words: only the yes/no question exists (§3, E6).
 
 ## 1. Decisions to make
 
@@ -183,7 +184,7 @@ when it is scheduled.
 | E3 | Time | after, before, during | No temporal complement exists yet. The same words also introduce clauses (E4). |
 | E4 | Subordinate and content clauses | when, while, because, (after, before) | Only coordination and the "if" clause exist. Content clauses ("says *that* the cat runs") serve SAY, THINK, BELIEVE, KNOW and TELL. |
 | E5 | Standard of comparison | than | [`Degree`](../../../../packages/shared/src/index.ts#L110) renders "bigger" but not "bigger *than the cat*" (*di / que / als / より*). |
-| E6 | Questions and existentials | what, how, why, where (+ who, which as question words) | No interrogative clause exists: word order, ja か, and *do*-support in questions. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
+| E6 | Questions and existentials | what, how, why, where (+ who, which as question words) | The **yes/no** question landed with [C10](../../../localization/done/C10-ui-questions.md) — `PhrasePlan.interrogative`, the word order of each language, ja か, en *do*-support — with no builder control for it yet. What is left is the **wh-question**: a word standing for the gap it asks about, fronted in six languages and in place in Japanese. "There is" (*c'è, il y a, es gibt, hay, há, ある / いる*) belongs here too. |
 | E7 | Determiners and numbers | every, each, any, another, much, such, one, two, three, something | New values for [`DETERMINER_CATEGORY_VALUES`](../../../../packages/shared/src/index.ts#L53). Numbers need agreement (*un / una*, de *ein*) and Japanese counters (二匹の猫). *something* is an indefinite pronoun (*qualcosa, quelque chose, etwas, algo, 何か*). |
 | E8 | Adverbs on adjectives | very, too | Adverbs modify only verbs today (`VerbPhrase.modifier`). "Very big" / "too big" need a degree adverb on an adjective. |
 | E9 | Verbs whose object isn't a plain accusative | like, help, let | *like* swaps its roles in Romance (*mi piace*, *me gusta*, pt *gostar de*) and becomes an adjective in Japanese (猫が好き). *help* takes the dative in German (*hilft dem Hund*). *let* takes an object plus a bare infinitive (*lascia correre il gatto*, ja 〜させる). No verb can set its object's case today. |

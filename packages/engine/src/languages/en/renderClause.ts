@@ -1,6 +1,7 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { dimensionGloss } from './dimensionGloss.js';
+import { invertSubject } from './invertSubject.js';
 import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { mannerGloss } from './mannerGloss.js';
@@ -24,10 +25,9 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const subj = dropsSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
-  return [
-    subj,
-    ...predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements),
-  ]
+  const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements);
+  // A question puts the finite auxiliary before the subject: "is the server active?".
+  return (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
     .filter(Boolean)
     .join(' ')
     .trim();
