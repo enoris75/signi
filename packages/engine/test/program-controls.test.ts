@@ -200,6 +200,13 @@ describe('what happened to a saved item', () => {
     expect(phrase('COPIED', { number: 'plural' })).toMatchObject({ it: 'le frasi copiate.', fr: 'les phrases copiées.', ja: 'コピー済みのフレーズ。' });
     expect(phrase('EMPTY', { number: 'plural' })).toMatchObject({ it: 'le frasi vuote.', es: 'las frases vacías.', de: 'die leeren Phrasen.' });
     expect(phrase('VALID', { number: 'plural' })).toMatchObject({ it: 'le frasi valide.', es: 'las frases válidas.', ja: '有効なフレーズ。' });
+    // -e and -ant adjectives: Italian and Spanish mark only the number, French adds -e for the feminine.
+    expect(phrase('MISSING', { definiteness: 'bare' })).toEqual({
+      en: 'missing phrase.', it: 'frase mancante.', fr: 'phrase manquante.', de: 'fehlende Phrase.', es: 'frase faltante.', ja: '見つからないフレーズ。', pt: 'frase faltante.',
+    });
+    expect(phrase('MISSING', { number: 'plural' })).toEqual({
+      en: 'the missing phrases.', it: 'le frasi mancanti.', fr: 'les phrases manquantes.', de: 'die fehlenden Phrasen.', es: 'las frases faltantes.', ja: '見つからないフレーズ。', pt: 'as frases faltantes.',
+    });
   });
 
   // "senza titolo" is a prepositional phrase, which does not agree: never "*senza titola".
@@ -220,6 +227,11 @@ describe('what happened to a saved item', () => {
     expect(predicate('UNTITLED')).toMatchObject({ es: 'la frase está sin título.', pt: 'a frase está sem título.', it: 'la frase è senza titolo.' });
     expect(predicate('ADDED')).toMatchObject({ es: 'la frase está añadida.', ja: 'フレーズは追加済みです。' });
     expect(predicate('VALID')).toMatchObject({ es: 'la frase es válida.', pt: 'a frase é válida.', ja: 'フレーズは有効です。' });
+    // Japanese 見つからない inflects as an i-adjective. (German would rather say "die Phrase fehlt" than
+    // "ist fehlend", a present participle used as a predicate: not pinned.)
+    expect(predicate('MISSING')).toMatchObject({
+      it: 'la frase è mancante.', fr: 'la phrase est manquante.', es: 'la frase está faltante.', ja: 'フレーズは見つからないです。', pt: 'a frase está faltante.',
+    });
   });
 
   // A label standing alone agrees with the noun its control is about.

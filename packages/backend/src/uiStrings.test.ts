@@ -361,6 +361,25 @@ describe('buildUiStrings', () => {
       ja: 'このファイルは有効ではありません',
       pt: 'este arquivo não é válido',
     });
+    // The noun and its adjective agree with the number of ids the toast lists after them.
+    expect(strings['toast.missingWords.singular']).toEqual({
+      en: 'missing word',
+      it: 'parola mancante',
+      fr: 'mot manquant',
+      de: 'fehlendes Wort',
+      es: 'palabra faltante',
+      ja: '見つからない単語',
+      pt: 'palavra faltante',
+    });
+    expect(strings['toast.missingWords.plural']).toEqual({
+      en: 'missing words',
+      it: 'parole mancanti',
+      fr: 'mots manquants',
+      de: 'fehlende Wörter',
+      es: 'palabras faltantes',
+      ja: '見つからない単語',
+      pt: 'palavras faltantes',
+    });
     // "senza titolo" does not agree with the feminine "frase".
     expect(strings['phrase.untitled']).toMatchObject({ it: 'Frase senza titolo', es: 'Frase sin título', de: 'Unbenannte Phrase' });
     expect(strings['slot.empty']).toMatchObject({ it: 'vuoto', fr: 'vide', ja: '空' });

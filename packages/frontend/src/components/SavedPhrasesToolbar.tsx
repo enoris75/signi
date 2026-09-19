@@ -90,9 +90,11 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
     );
     onLoad(hydrated, hydratedLinks);
     if (missing.length > 0) {
+      // The ids, not words: the catalog that would name them is what lost them.
+      const missingWords = t(`toast.missingWords.${missing.length === 1 ? "singular" : "plural"}` as const);
       setToast({
         severity: "error",
-        msg: `Loaded, but ${missing.length} word(s) are no longer in the catalog: ${missing.join(", ")}`,
+        msg: `${t("toast.phraseLoaded")} — ${missingWords}: ${missing.join(", ")}`,
       });
     } else {
       setToast({ severity: "success", msg: t("toast.phraseLoaded") });

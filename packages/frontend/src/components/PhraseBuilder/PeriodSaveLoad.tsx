@@ -100,14 +100,16 @@ export function PeriodSaveLoad({
       if (!selection) throw new Error("empty period");
       onAppendPeriod(selection);
       onCloseLoad();
-      setToast(
-        missing.length > 0
-          ? {
-              severity: "error",
-              msg: `Loaded, but ${missing.length} word(s) are no longer in the catalog: ${missing.join(", ")}`,
-            }
-          : { severity: "success", msg: t("toast.periodAdded") },
-      );
+      if (missing.length > 0) {
+        // The ids, not words: the catalog that would name them is what lost them.
+        const missingWords = t(`toast.missingWords.${missing.length === 1 ? "singular" : "plural"}` as const);
+        setToast({
+          severity: "error",
+          msg: `${t("toast.periodAdded")} — ${missingWords}: ${missing.join(", ")}`,
+        });
+      } else {
+        setToast({ severity: "success", msg: t("toast.periodAdded") });
+      }
     } catch {
       setToast({ severity: "error", msg: "Could not load that period." });
     }

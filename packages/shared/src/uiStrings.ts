@@ -1335,6 +1335,27 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'this file is not valid',
   },
 
+  // A load that went through but dropped words the catalog no longer has. The toast says what was
+  // loaded (`toast.phraseLoaded`, `toast.periodAdded`), then, after a dash, these words and the list of
+  // their ids: "Loaded phrase — missing words: UNICORN, GRIFFIN", it "parole mancanti", de "fehlende
+  // Wörter", ja 「見つからない単語」. The list is known only at load time and a plan renders once, at
+  // boot, so the list stays in the component and the catalog names what it lists (as with
+  // `wordMap.nodes.*`). The list's length is the count, so the number is not written again. One key
+  // per number, because the noun and its adjective agree with it: "parola mancante" is one word.
+  // Lower-case, as they follow the dash.
+  'toast.missingWords.singular': {
+    plan: { subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'missing word',
+  },
+  'toast.missingWords.plural': {
+    plan: {
+      subject: { concept: 'WORD', number: 'plural', definiteness: 'bare', adjectives: ['MISSING'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'missing words',
+  },
+
   // The name a phrase is exported under when the user gave it none: PHRASE with UNTITLED, "Untitled
   // phrase", it "Frase senza titolo", de "Unbenannte Phrase". It is written into the file, so it keeps
   // the language that was active when the phrase was exported.

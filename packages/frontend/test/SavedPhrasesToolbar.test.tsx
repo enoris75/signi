@@ -429,9 +429,7 @@ describe('SavedPhrasesToolbar', () => {
 
       fireEvent.click(await within(dialog).findByText('The cat sleeps'));
 
-      expect(await findToast()).toHaveTextContent(
-        'Loaded, but 1 word(s) are no longer in the catalog: UNICORN',
-      );
+      expect(await findToast()).toHaveTextContent('Loaded phrase — missing word: UNICORN');
       expect(onLoad).toHaveBeenCalledExactlyOnceWith(
         [{ id: 'c1', selection: { verb: SLEEP } }],
         [],

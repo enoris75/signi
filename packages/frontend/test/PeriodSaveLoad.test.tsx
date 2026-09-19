@@ -336,12 +336,8 @@ describe('PeriodSaveLoad', () => {
     });
 
     it.each([
-      ['a word', { directObject: 'UNICORN' }, '1 word(s) are no longer in the catalog: UNICORN'],
-      [
-        'words',
-        { directObject: 'UNICORN', modifier: 'GRIFFIN' },
-        '2 word(s) are no longer in the catalog: UNICORN, GRIFFIN',
-      ],
+      ['a word', { directObject: 'UNICORN' }, 'missing word: UNICORN'],
+      ['words', { directObject: 'UNICORN', modifier: 'GRIFFIN' }, 'missing words: UNICORN, GRIFFIN'],
     ])('warns about %s no longer in the catalog, and adds the rest', async (_, gone, warning) => {
       vi.mocked(listSavedPhrases).mockResolvedValue([BREAKFAST]);
       vi.mocked(fetchSavedPhrase).mockResolvedValue(
@@ -353,7 +349,7 @@ describe('PeriodSaveLoad', () => {
 
       fireEvent.click(await screen.findByText('Breakfast'));
 
-      const notice = await findNotice(`Loaded, but ${warning}`);
+      const notice = await findNotice(`Added period — ${warning}`);
       expect(getComputedStyle(notice).backgroundColor).toBe(ERROR);
       expect(props.onAppendPeriod).toHaveBeenCalledExactlyOnceWith({ subject: CAT, verb: EAT });
       expect(props.onCloseLoad).toHaveBeenCalledOnce();

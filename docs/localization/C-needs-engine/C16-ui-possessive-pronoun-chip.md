@@ -15,7 +15,7 @@ The English form depends only on the antecedent. That is a finite set, so
 Romance languages and German also agree the possessive with the **possessed** noun, whose gender is a
 per-language lexical fact: fr *son* / *sa* / *ses*, it *il suo* / *la sua*, pt *o seu* / *a sua*,
 es *su* / *sus*, de *sein* / *seine* (and case). A catalog entry renders once at boot without
-arguments ([C14](C14-ui-runtime-values.md)), so it can't supply the word. These forms illustrate the
+arguments ([C14](../done/C14-ui-runtime-values.md)), so it can't supply the word. These forms illustrate the
 agreement; they are not engine renders.
 
 ## Strings
@@ -31,8 +31,9 @@ agreement; they are not engine renders.
    with a pronominal possessor. Render that noun phrase in the UI language and show it on the chip:
    "his horse", fr *son cheval*, de *sein Pferd*. Showing the whole phrase rather than the bare
    pronoun sidesteps agreement, and keeps what the chip is for. It needs on-request rendering
-   ([C14](C14-ui-runtime-values.md) option 1), or the chip can read the phrase out of the translation
-   the panel already fetches.
+   ([C14](../done/C14-ui-runtime-values.md) option 1, which C14 did not build: it kept its values
+   outside the phrase), or the chip can read the phrase out of the translation the panel already
+   fetches.
 2. **Name the antecedent instead of the pronoun.** Label the chip with the antecedent's word in the UI
    language. That needs no agreement, but the chip then no longer shows which pronoun the link will
    render, which is its whole job. Take this only if option 1 stalls.

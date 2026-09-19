@@ -52,9 +52,10 @@ Fixed tasks move to [`done/`](done/) and are listed in the **Done** section belo
   [`buildUiStrings()`](../../packages/backend/src/uiStrings.ts) renders the catalog at boot and throws
   on a missing language, the same pinning test as definitions.
 - Plans render **once, at boot, without arguments**. A value known only at render time either stays
-  outside the phrase (a count beside its noun), becomes one key per value when the set is finite
-  ([A15](done/A15-ui-slot-scoped-commands.md)), or is blocked
-  ([C14](C-needs-engine/C14-ui-runtime-values.md)).
+  outside the phrase (a count beside its noun, a list after its noun:
+  [C14](done/C14-ui-runtime-values.md)), becomes one key per value when the set is finite
+  ([A15](done/A15-ui-slot-scoped-commands.md)), or is blocked because something in the phrase must
+  agree with it ([C16](C-needs-engine/C16-ui-possessive-pronoun-chip.md)).
 - A task file groups strings by the vocabulary or construct that unblocks them, not by component, so
   seeding one word clears every string that waited on it. Each file lists the literal, its file:line,
   the proposed key and plan, and the tests that select on the English text.
@@ -114,7 +115,6 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | C11 | [C11-ui-failure-messages-passive.md](C-needs-engine/C11-ui-failure-messages-passive.md) | passive voice ([features/A01](../features/A-ready/A01-passive-voice/README.md)) — the eight "Could not …" messages, possessor mode toggle |
 | C12 | [C12-ui-purpose-and-object-complements.md](C-needs-engine/C12-ui-purpose-and-object-complements.md) | purpose clause, object complement, comitative, "whose" — "click to change", "make this period a command", pick hints |
 | C13 | [C13-ui-grammatical-function-words.md](C-needs-engine/C13-ui-grammatical-function-words.md) | catalog entry kinds for conjunctions, path specifiers, cause connectors, degrees |
-| C14 | [C14-ui-runtime-values.md](C-needs-engine/C14-ui-runtime-values.md) | catalog entries can't take arguments — counts, word lists, saved names, version numbers |
 | C15 | [C15-ui-literal-by-design.md](C-needs-engine/C15-ui-literal-by-design.md) | deliberate — brand, file name, person codes, never-shown errors; `WordPalettePanel` is dead code to delete |
 | C16 | [C16-ui-possessive-pronoun-chip.md](C-needs-engine/C16-ui-possessive-pronoun-chip.md) | agreement known only at render time — the English "his / her / their" chip on a pointed-to owner's line, in every UI language |
 
@@ -171,6 +171,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B26 | [done/B26-ui-saved-item-feedback.md](done/B26-ui-saved-item-feedback.md) | `saved.noPhrases/noPeriods/useSaveIcon`, `toast.periodAdded`, `toast.importFailed` + `toast.invalidFile` ("this file is not valid"; the reasons go to the console) (seeded USE, IMPORT_NOUN, ICON, FILE, ADDED, FAILED, VALID; YET dropped: a verbless label has no verb for it) |
 | B27 | [done/B27-ui-clipboard-move-resize.md](done/B27-ui-clipboard-move-resize.md) | `action.copyTranslation` (not "to the clipboard": the direction complement can't say *into*), `status.copied`, `action.movePeriodUp/Down` ("Move up", no object), `action.resizeContainer` (seeded COPY, MOVE, RESIZE, COPIED, UP, DOWN; found bug A142) |
 | B28 | [done/B28-ui-mood-toggles.md](done/B28-ui-mood-toggles.md) | `period.isCommand/isInfinitive` + `action.turnOff` ("turn it off": English phrasal verbs move their particle after a pronoun object); the toggles are named by their mode with `aria-pressed` (seeded TURN_OFF) |
+| C14 | [done/C14-ui-runtime-values.md](done/C14-ui-runtime-values.md) | `toast.missingWords.singular/plural` ("Loaded phrase — missing words: UNICORN, GRIFFIN"): the values stay outside the phrase, and the list gives the count (seeded MISSING). The saved name and the version number had already left the phrase in B20 and B26. Parameterized entries (option 1) were not built |
 | B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stays on the English literal (C05) and WALL was not seeded |
 
 Shipped before this catalogue existed (the genus+differentia precedent):

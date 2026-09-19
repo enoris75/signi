@@ -752,7 +752,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['FIRST', 'first'], ['GOOD', 'good'],
   ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
-  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MULTAL', 'multal'],
+  ['LAZY', 'lazy'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MISSING', 'missing'], ['MULTAL', 'multal'],
   ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['OLD', 'old'],
   ['OTHER', 'other'], ['PARTITIVE', 'partitive'], ['PAUCAL', 'paucal'], ['PLURAL', 'plural'],
   ['POSITIVE', 'positive'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],

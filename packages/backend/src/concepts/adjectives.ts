@@ -795,6 +795,26 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // Not where it is looked for: a word a saved phrase names that the catalog no longer has. The
+    // Romance forms end in -e / -ant and agree by rule (it mancante/mancanti, fr manquant/manquante).
+    // Japanese says it with the negative potential 見つからない ("that cannot be found"), which inflects
+    // as an i-adjective.
+    id: 'MISSING',
+    role: 'adjective',
+    transient: true, // a state a thing is in, not a quality it has → es/pt predicate with estar (A47)
+    description: 'not present where it is expected',
+    emoji: '🕳️',
+    forms: {
+      en: { base: 'missing' },
+      it: { base: 'mancante' },
+      fr: { base: 'manquant' },
+      de: { base: 'fehlend' },
+      es: { base: 'faltante' },
+      ja: { base: '見つからない', reading: 'みつからない' },
+      pt: { base: 'faltante' },
+    },
+  },
+  {
     id: 'SINGULAR',
     role: 'adjective',
     description: 'referring to one (grammar)',

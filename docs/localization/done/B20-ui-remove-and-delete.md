@@ -23,7 +23,7 @@ seeded, but it empties a thing in place; these controls take the thing away.
 | `Delete ${p.name}` (aria-label) | [SavedPhrasesToolbar.tsx:256](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L256), [PeriodSaveLoad.tsx:166](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L166) | `action.deleteSavedPhrase` / `action.deleteSavedPeriod` | `commandOf('DELETE')` + `directObject: PHRASE / PERIOD_SENTENCE this, adjectives [SAVED]` |
 
 The name in `Delete ${p.name}` is what tells a screen-reader user which row the button deletes. The
-plan can't carry it ([C14](../C-needs-engine/C14-ui-runtime-values.md)), so point the button's
+plan can't carry it ([C14](C14-ui-runtime-values.md)), so point the button's
 `aria-describedby` at the row's name element.
 
 "Remove the IF condition" and "Remove the coordination" also need nouns that aren't seeded; they

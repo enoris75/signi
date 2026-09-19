@@ -34,7 +34,7 @@ The five validation messages reach the user raw, through `err.message` in the im
 ([SavedPhrasesToolbar.tsx:137](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L137)).
 Don't localize them one by one. Show "Import failed" plus the single "this file is not a valid phrase
 file", and keep the specific reasons as the thrown `Error` for the console and tests. The
-newer-version message carries a version number: [C14](../C-needs-engine/C14-ui-runtime-values.md).
+newer-version message carries a version number: [C14](C14-ui-runtime-values.md).
 
 ⚠ The `no` determiner on a verbless plural currently renders wrongly in fr and ja; see the note in
 [B25](B25-ui-dialog-and-app-controls.md).

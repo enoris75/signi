@@ -1,4 +1,5 @@
 import type { Locator } from '@playwright/test';
+import type { SavedPhrase } from '@signi/shared';
 import { test, expect } from './fixtures';
 
 // How much room a picker's field has to spare for the prompt it is showing, in px: the width of
@@ -133,6 +134,37 @@ test.describe('interface language', () => {
     await expect(del).toHaveAccessibleDescription(name);
     await del.click();
     await expect(loadDialog.getByText(name)).toHaveCount(0);
+  });
+
+  // A file naming words the catalog no longer has loads the rest, and the toast lists what it
+  // dropped (C14). The ids stay outside the phrase; the noun before them agrees with how many there
+  // are, in the UI language.
+  test('names the words a load dropped in the UI language', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+
+    // Spelled out: @signi/shared is ESM-only and the specs load as CommonJS, so only its types come
+    // in. Version 1 is the oldest, which every build still reads.
+    const file: SavedPhrase = {
+      format: 'signi.phrase',
+      version: 1,
+      kind: 'phrase',
+      savedAt: '2026-09-19T00:00:00.000Z',
+      name: 'Unicorn breakfast',
+      workspace: {
+        containers: [
+          { id: 'c1', selection: { subject: 'CAT', verb: 'EAT', directObject: 'UNICORN', modifier: 'GRIFFIN' } },
+        ],
+        links: [],
+      },
+    };
+    await page.locator('input[type="file"]').setInputFiles({
+      name: 'unicorn.signi.json',
+      mimeType: 'application/json',
+      buffer: Buffer.from(JSON.stringify(file)),
+    });
+
+    await expect(page.getByText('Frase caricata — parole mancanti: UNICORN, GRIFFIN')).toBeVisible();
+    await expect.poll(() => app.sentence('it')).toBe('il gatto mangia.');
   });
 
   // A linked period's badge and controls name the clause it is (B21), as the tradition names it.

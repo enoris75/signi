@@ -46,8 +46,9 @@ POLARITY is a direct toggle with nothing to show or hide, so it has no family me
 COORDINATION name link and add controls, not reveals (see bug
 [A141](../../bugs/A-must-fix/A141-link-control-tooltips-offer-a-reveal.md)).
 
-If runtime arguments land first ([C14](../C-needs-engine/C14-ui-runtime-values.md)), each family
-collapses to one entry per verb. Don't wait for it.
+If runtime arguments land first ([C14](C14-ui-runtime-values.md)), each family
+collapses to one entry per verb. Don't wait for it. *(C14 closed without them: it kept its values
+outside the phrase, so the families stay.)*
 
 ## Refactor first: a group's label is also its identity
 
