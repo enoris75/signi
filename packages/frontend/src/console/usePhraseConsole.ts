@@ -1,4 +1,4 @@
-import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent, type SetStateAction } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LanguageCode, PhrasePlan } from "@signi/shared";
 import { fetchSavedPhrase, listSavedPhrases, savePhrase } from "../api.ts";
@@ -7,7 +7,7 @@ import type { WorkspaceHistory } from "../hooks/useWorkspaceHistory.ts";
 import { useUiLanguage } from "../i18n/LanguageContext.tsx";
 import { hydrateWorkspace, serializeWorkspace } from "../components/PhraseBuilder/phraseSerialize/index.ts";
 import { workspaceToPlans } from "../components/PhraseBuilder/workspacePlan/index.ts";
-import type { PhraseLink } from "../components/PhraseBuilder/interfaces.ts";
+import type { PhraseContainer, PhraseLink } from "../components/PhraseBuilder/interfaces.ts";
 import { advanceContext, applyScript, wordExists, type ApplyResult, type Effect, type Frame } from "./language/apply.ts";
 import { commandNamed, type CommandDef } from "./language/commands.ts";
 import { complete, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
@@ -137,6 +137,53 @@ function rootOf(containerId: string, links: PhraseLink[]): string {
 function sentencePlan(state: WorkspaceState, containerId: string): Partial<PhrasePlan> | undefined {
   const root = rootOf(containerId, state.links);
   return workspaceToPlans(state.containers, state.links).find((s) => s.containerId === root)?.plan;
+}
+
+/**
+ * The periods `after` differs from `before` in — their words, or the links they start (a link is
+ * its source period's: that period's line prints it). None when a period came or went.
+ */
+function changedPeriods(before: WorkspaceState, after: WorkspaceState): Set<string> | undefined {
+  if (before.containers.length !== after.containers.length) return undefined;
+  const out = new Set<string>();
+  for (let i = 0; i < after.containers.length; i++) {
+    const was = before.containers[i]!;
+    const now = after.containers[i]!;
+    if (was.id !== now.id) return undefined;
+    if (was.selection !== now.selection) out.add(now.id);
+  }
+  const was = new Set(before.links);
+  const now = new Set(after.links);
+  for (const l of after.links) if (!was.has(l)) out.add(l.source.containerId);
+  for (const l of before.links) if (!now.has(l)) out.add(l.source.containerId);
+  return out;
+}
+
+/**
+ * A state the preview made, with the preview's ids made real: the periods it made take the ids the
+ * committed line gave them, and any other preview id a fresh one — so nothing the preview only
+ * proposed lingers under an id the next preview will use again.
+ */
+function withRealIds(state: WorkspaceState, previewIdsMade: string[], realIdsMade: string[]): WorkspaceState {
+  const map = new Map(previewIdsMade.map((id, i) => [id, realIdsMade[i]!]));
+  const real = (id: string) => {
+    if (!id.startsWith("preview-")) return id;
+    if (!map.has(id)) map.set(id, uid());
+    return map.get(id)!;
+  };
+  return {
+    containers: state.containers.map((c) => (c.id.startsWith("preview-") ? { ...c, id: real(c.id) } : c)),
+    links: state.links.map((l) =>
+      [l.id, l.source.containerId, l.target.containerId].some((id) => id.startsWith("preview-"))
+        ? ({
+            ...l,
+            id: real(l.id),
+            source: { ...l.source, containerId: real(l.source.containerId) },
+            target: { ...l.target, containerId: real(l.target.containerId) },
+          } as PhraseLink)
+        : l,
+    ),
+  };
 }
 
 /** A period's words cleared and its own links let go — what `/edit` replaces with the line. */
@@ -605,7 +652,12 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     }
   };
 
-  const commit = (script = text): boolean => {
+  /**
+   * Run the line: its state becomes the phrase, as one undo step. `then`, a state an edit on the
+   * canvas made from the line's preview, is written in its place — the line and then the edit, as ↵
+   * and then the click would have — and the edit is echoed.
+   */
+  const commit = (script = text, then?: WorkspaceState): boolean => {
     const line = script.trim();
     if (!line) return false;
     const result = safely(
@@ -616,15 +668,19 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
       setRefused(true);
       return false;
     }
-    const changed = result.state !== base || editing !== null;
-    if (changed && (result.state.containers !== committed.containers || result.state.links !== committed.links)) {
+    const written = then ? withRealIds(then, preview?.created ?? [], result.created) : result.state;
+    const changed = written !== base || editing !== null;
+    if (changed && (written.containers !== committed.containers || written.links !== committed.links)) {
       writing.current = true;
-      history.replace(result.state);
+      history.replace(written);
     }
     const typed = splitPeriods(script).map((p) => p.text).filter((l) => l.trim());
     const at = result.context.containerId;
     for (const t of typed)
       add({ kind: "typed", text: t.trim(), containerId: at, plan: changed ? sentencePlan(result.state, at) : undefined });
+    if (then)
+      for (const echo of diffWorkspaces(result.state, written, vocab))
+        add({ kind: "echo", parts: echo.parts, containerId: echo.containerId, plan: sentencePlan(written, echo.containerId) });
     const nextLines = typed.reduce((h, t) => pushHistory(h, t), lines);
     setLines(nextLines);
     writeHistory(nextLines);
@@ -642,6 +698,73 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     // A new period's opening picker would have taken the keyboard as it mounted: the prompt keeps it.
     focusPrompt();
     return true;
+  };
+
+  // ── Edits on the canvas ──
+  // Clicking on the canvas and typing in the prompt are one and the same. With no line waiting, an
+  // edit on the canvas is the phrase's at once, and comes back as an echo. With one waiting, the
+  // canvas shows what the line makes, and an edit there is an edit of that: it goes into the line —
+  // the period it changes printed whole, as `/edit` would, the prompt editing it — and, like
+  // anything typed, it is the phrase's on ↵. An edit that reaches beyond that period runs the line
+  // first, and lands on what it made.
+  const pendingEdit =
+    editing !== null ||
+    Boolean(preview && (preview.state.containers !== base.containers || preview.state.links !== base.links));
+  // The edits of one click, gathered: a control may set the words and then the links in the same breath.
+  const canvasDraft = useRef<{ state: WorkspaceState; fallbacks: (() => void)[] } | null>(null);
+
+  const settle = (next: WorkspaceState, fallback: () => void) => {
+    // An edit that changes nothing of what is shown — a control reporting the value it has — is none.
+    const shownNow = preview?.state ?? committed;
+    if (changedPeriods(shownNow, next)?.size === 0) return;
+    const changed = changedPeriods(committed, next);
+    const p = editing ?? (changed?.size === 1 ? [...changed][0] : undefined);
+    if (changed && p && [...changed].every((id) => id === p)) {
+      const source = printPeriod(next, p, vocab).text;
+      setEditing(p);
+      setLine(source ? `${source} ` : "");
+      setListMode("closed");
+      return;
+    }
+    if (!preview?.diagnostic && commit(text, next)) return;
+    // A line that does not run leaves the edit to the phrase underneath, as before there was one.
+    fallback();
+  };
+
+  const toDraft = (edit: (s: WorkspaceState) => WorkspaceState, fallback: () => void) => {
+    const first = canvasDraft.current === null;
+    const from = canvasDraft.current?.state ?? preview?.state ?? committed;
+    canvasDraft.current = { state: edit(from), fallbacks: [...(canvasDraft.current?.fallbacks ?? []), fallback] };
+    if (!first) return;
+    queueMicrotask(() => {
+      const draft = canvasDraft.current;
+      canvasDraft.current = null;
+      if (draft) settle(draft.state, () => draft.fallbacks.forEach((f) => f()));
+    });
+  };
+
+  // What the preview alone proposes does not exist in the phrase underneath: nothing is written to it.
+  const proposed = new Set(preview?.created ?? []);
+  const canvas = {
+    setContainers: (update: SetStateAction<PhraseContainer[]>) => {
+      if (!pendingEdit) return history.setContainers(update);
+      const apply = (cs: PhraseContainer[]) => (typeof update === "function" ? update(cs) : update);
+      toDraft(
+        (s) => ({ ...s, containers: apply(s.containers) }),
+        () => history.setContainers((cs) => apply(cs).filter((c) => !proposed.has(c.id))),
+      );
+    },
+    setLinks: (update: SetStateAction<PhraseLink[]>) => {
+      if (!pendingEdit) return history.setLinks(update);
+      const apply = (ls: PhraseLink[]) => (typeof update === "function" ? update(ls) : update);
+      toDraft(
+        (s) => ({ ...s, links: apply(s.links) }),
+        () =>
+          history.setLinks((ls) =>
+            apply(ls).filter((l) => !proposed.has(l.source.containerId) && !proposed.has(l.target.containerId)),
+          ),
+      );
+    },
   };
 
   // ── Keys in the prompt ──
@@ -874,6 +997,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     focusPrompt,
     followCursor,
     printWorkspace: () => printWorkspace(committed, vocab),
+    // the canvas's edits, which go through the line while one waits
+    canvas,
     // pins and help
     pins,
     pin,

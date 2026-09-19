@@ -450,9 +450,19 @@ copy of the phrase; it derives text from state and turns text into state changes
    `#n` moves the ring on the canvas without taking focus from the console; clicking a box or a
    token moves both. Hover highlighting uses the printer's spans.
 
-**A click while a line is pending** re-runs its preview and its completion on the new state. Because
-settings set values, the line keeps its meaning; if its context disappeared (the box was deleted), it
-shows a diagnostic.
+**A click while a line is pending is typing** (2026-09-19). While a line waits in the prompt, the
+canvas shows what that line makes. A click, a pick or a key on the canvas acts on what it shows, and
+its result goes into the line, not into the phrase:
+- The period it changes is printed whole into the prompt, which is now editing that period, as
+  `/edit` would. The click and the line become the phrase together on ↵, or are dropped together
+  with esc.
+- A line already editing a period gets the click the same way.
+- An edit that reaches beyond one period runs the line first, and lands on what the line made, as
+  ↵ and then the click would. The periods the preview made take real ids, and the edit is echoed.
+- A line that does not run leaves the edit to the phrase underneath.
+
+With no line waiting, a canvas edit is the phrase's at once, and comes back as an echo.
+(`usePhraseConsole`, `canvas`: the workspace's setters go through it.)
 
 ---
 

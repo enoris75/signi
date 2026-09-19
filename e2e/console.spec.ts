@@ -106,6 +106,29 @@ test.describe('the phrase console', () => {
     await expect(page.getByTestId('console-chip')).toContainText(/subject/i);
   });
 
+  test('writes a click on the canvas into the period being edited, as if typed', async ({ app, page }) => {
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat /verb eat');
+    await run(page);
+    await page.keyboard.type('#1 /edit');
+    await page.keyboard.press('Enter');
+    await expect(prompt(page)).toHaveValue('/subj ( cat ) /verb ( eat ) ');
+
+    // The tense clicked on the canvas goes into the line, and the canvas shows it.
+    await app.cycle('verbTense');
+    await expect(prompt(page)).toHaveValue('/subj ( cat ) /verb ( eat /past ) ');
+    await expect(page.getByTestId('box-verbTense')).toContainText(/past/i);
+    await app.expectSentences({ en: 'the cat ate.' });
+    // Nothing is the phrase's until ↵.
+    await expect(page.getByTestId('source-strip')).toContainText('/subj ( cat ) /verb ( eat )');
+    await expect(page.getByTestId('transcript-echo')).toHaveCount(0);
+
+    await prompt(page).click();
+    await run(page);
+    await expect(page.getByTestId('source-strip')).toContainText('/verb ( eat /past )');
+    await app.expectSentences({ en: 'the cat ate.' });
+  });
+
   test('refuses a line that does not parse, and leaves the phrase as it was', async ({ app, page }) => {
     // The fixture opens the app; nothing on the canvas yet.
     await expect(app.subjectInput).toBeVisible();

@@ -229,7 +229,7 @@ describe('the console', () => {
       expect(screen.getAllByTestId('transcript-typed').at(-1)).toHaveTextContent(/\/undo$/);
     });
 
-    it('keeps a link picked on the canvas off a period only the preview proposes', async () => {
+    it('runs the line when a click on the canvas reaches beyond its period, the click landing on what it made', async () => {
       const prompt = renderApp();
       await commit(prompt, '/subj cat');
       type(prompt, '/new /subj dog');
@@ -241,10 +241,13 @@ describe('the console', () => {
           { id: 'l', kind: 'conditional', source: { containerId: stubs.workspace.containers[0]!.id }, target: { containerId: proposed } },
         ]),
       );
-      key(prompt, 'Escape');
-      key(prompt, 'Escape');
-      await waitFor(() => expect(stubs.workspace.containers).toHaveLength(1));
-      expect(stubs.workspace.links).toEqual([]);
+      await waitFor(() => expect(prompt.value).toBe(''));
+      // The line ran — the new period is the phrase's, under a real id — and the link with it.
+      expect(stubs.workspace.containers).toHaveLength(2);
+      const made = stubs.workspace.containers[1]!.id;
+      expect(made).not.toMatch(/^preview-/);
+      expect(stubs.workspace.links).toEqual([expect.objectContaining({ kind: 'conditional', target: { containerId: made } })]);
+      expect(screen.getAllByTestId('transcript-typed').at(-1)).toHaveTextContent('/new /subj ( dog )');
     });
 
     it('leaves an input method’s ↵ to the input method', async () => {
@@ -410,4 +413,69 @@ describe('the console', () => {
       expect(within(screen.getByTestId('console-help-verb')).getByTestId('console-help-topic-modal')).toBeInTheDocument();
     });
   });
+
+  describe('clicking and typing are one', () => {
+    const future = () =>
+      act(() =>
+        stubs.workspace.setContainers((cs) => cs.map((c, i) => (i === 0 ? { ...c, selection: { ...c.selection, verbTense: 'future' } } : c))),
+      );
+
+    it('writes a click on the canvas into the period being edited, and shows it there', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat /verb eat');
+      key(prompt, 'Escape');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+      type(prompt, '#1 /edit');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) /verb ( eat ) '));
+      future();
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) /verb ( eat /future ) '));
+      // The canvas shows it, and nothing is the phrase's until ↵: no echo, as for a line typed.
+      expect(shown().verbTense).toBe('future');
+      expect(screen.queryByTestId('transcript-echo')).not.toBeInTheDocument();
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+      expect(shown().verbTense).toBe('future');
+    });
+
+    it('takes a click on the canvas into a line still being typed, editing its period', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat /verb eat');
+      await waitFor(() => expect(shown().verb?.id).toBe('EAT'));
+      future();
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) /verb ( eat /future ) '));
+      expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
+      expect(shown().verbTense).toBe('future');
+      expect(screen.queryByTestId('transcript-typed')).not.toBeInTheDocument();
+      // Esc leaves it all, the click with the line, as it would a line typed.
+      key(prompt, 'Escape');
+      await waitFor(() => expect(prompt.value).toBe(''));
+      expect(shown().verb).toBeUndefined();
+    });
+
+    it('leaves the line as typed when a click on the canvas changes nothing', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat /verb eat');
+      await waitFor(() => expect(shown().verb?.id).toBe('EAT'));
+      act(() => stubs.workspace.setContainers((cs) => cs.map((c) => c)));
+      await new Promise((r) => setTimeout(r, 20));
+      expect(prompt.value).toBe('/subj ( cat ) /verb ( eat )');
+      expect(screen.getByTestId('console-chip')).not.toHaveTextContent(/editing/i);
+    });
+
+    it('writes a click to the phrase at once when no line is waiting', async () => {
+      const prompt = renderApp();
+      await (async () => {
+        type(prompt, '/subj cat /verb eat');
+        key(prompt, 'Escape');
+        key(prompt, 'Enter');
+        await waitFor(() => expect(prompt.value).toBe(''));
+      })();
+      future();
+      await waitFor(() => expect(screen.getByTestId('transcript-echo')).toHaveTextContent('/future · eat'));
+      expect(prompt.value).toBe('');
+    });
+  });
 });
+

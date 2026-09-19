@@ -34,7 +34,7 @@ export default function App() {
     containers: [{ id: newId(), selection: {} }],
     links: [],
   });
-  const { containers, links, setContainers, setLinks } = history;
+  const { containers, links } = history;
   // What the last destructive act was, and how to take it back. Shown as the toast that replaced
   // the confirm dialog (the plan's §3.9).
   const [undoToast, setUndoToast] = useState<string | null>(null);
@@ -72,15 +72,6 @@ export default function App() {
     },
   });
   const shown = phraseConsole.preview?.state ?? phraseConsole.committed;
-  // The canvas picks links on what it shows, which may be a preview, and writes them to the phrase
-  // itself — where a period the preview only proposes does not exist. A link to one is no link.
-  const proposed = new Set(phraseConsole.preview?.created ?? []);
-  const setCommittedLinks: typeof setLinks = (update) =>
-    setLinks((ls) => {
-      const next = typeof update === "function" ? update(ls) : update;
-      const kept = next.filter((l) => !proposed.has(l.source.containerId) && !proposed.has(l.target.containerId));
-      return kept.length === next.length ? next : kept;
-    });
   // Translations follow the preview a beat behind the keys, so a pause asks for one and a burst of
   // typing asks for none; the committed state is never kept waiting.
   const translated = useDebounced(shown, phraseConsole.preview ? 200 : 0);
@@ -259,14 +250,14 @@ export default function App() {
                 pr: 1.5,
               }}
             >
-              {/* The canvas shows the console's preview while a line is typed, and edits the
-                  committed workspace underneath it (see usePhraseConsole). */}
+              {/* The canvas shows the console's preview while a line is typed, and its edits go
+                  into that line — clicking and typing are one (see usePhraseConsole). */}
               <ConsoleMarksProvider marks={phraseConsole.marks}>
                 <PhraseWorkspace
                   containers={shown.containers}
                   links={shown.links}
-                  setContainers={setContainers}
-                  setLinks={setCommittedLinks}
+                  setContainers={phraseConsole.canvas.setContainers}
+                  setLinks={phraseConsole.canvas.setLinks}
                   wordsPanelOpen={wordsPanelOpen}
                   onWordsPanelClose={() => setWordsPanel(false)}
                   // English literal, for /localize.
