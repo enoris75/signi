@@ -1112,6 +1112,76 @@ describe('known bugs: German prospective word order', () => {
   });
 });
 
+// A146. The main verb's adverb joins the prospective's zu-infinitive group, which is right for a
+// manner adverb ("im Begriff, schnell zu essen") but scopes a frequency adverb under "im Begriff".
+// With "nie" that inverts the meaning the way "nicht" did before A19: "war im Begriff, nie diesen
+// Engel zu lieben" is "was about to never love". The other six give it the whole prospective.
+describe('known bugs: German frequency adverb in the prospective', () => {
+  const manLovesAngel = (verbPhrase: Partial<VerbPhrase>) => say(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
+    verbPhrase: { aspect: 'prospective', tense: 'past', ...verbPhrase }, directObject: np('ANGEL', { definiteness: 'this' }),
+  }), 'de');
+
+  test.fails('German puts "nie" and "immer" ahead of "im Begriff"', () => {
+    expect(manLovesAngel({ modifier: 'NEVER' })).toBe('jener Mann war nie im Begriff, diesen Engel zu lieben.');
+    expect(manLovesAngel({ modifier: 'ALWAYS' })).toBe('jener Mann war immer im Begriff, diesen Engel zu lieben.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'ALWAYS' } }), 'de'))
+      .toBe('der Kater ist immer im Begriff zu essen.');
+  });
+
+  test.fails('…and in a verb-final relative clause', () => {
+    expect(say(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', modifier: 'NEVER' }, directObject: np('MOUSE') },
+    }), 'RUN'), 'de')).toBe('der Hund, der nie im Begriff ist, die Maus zu essen, läuft.');
+  });
+
+  test('regression: the other six give the frequency adverb the whole prospective', () => {
+    expect(sayAll(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
+      verbPhrase: { aspect: 'prospective', tense: 'past', modifier: 'NEVER' }, directObject: np('ANGEL', { definiteness: 'this' }),
+    }))).toMatchObject({
+      en: 'that man was never about to love this angel.',
+      fr: "cet homme n'était jamais sur le point d'aimer cet ange.",
+      ja: 'その男はこの天使を決して愛するところではありませんでした。',
+    });
+  });
+});
+
+// A147. Italian, Spanish and Portuguese append a frequency adverb after the whole periphrasis
+// ("stava per amare mai", "está a punto de comer siempre"), where it scopes over the infinitive.
+// French slots it right after the finite verb ("était toujours sur le point de", "n'est jamais en
+// train de"), as Italian already does for the compound perfect (A28).
+describe('known bugs: Romance frequency adverb after the prospective infinitive', () => {
+  const catEatsMouse = (verbPhrase: Partial<VerbPhrase>) =>
+    sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', ...verbPhrase }, directObject: np('MOUSE') }));
+
+  test.fails('Italian puts "mai" and "sempre" right after "stare"', () => {
+    expect(say(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
+      verbPhrase: { aspect: 'prospective', tense: 'past', modifier: 'NEVER' }, directObject: np('ANGEL', { definiteness: 'this' }),
+    }), 'it')).toBe("quell'uomo non stava mai per amare quest'angelo.");
+    expect(catEatsMouse({ modifier: 'ALWAYS' }).it).toBe('il gatto sta sempre per mangiare il topo.');
+  });
+
+  test.fails('…and in the progressive', () => {
+    expect(catEats({ aspect: 'progressive', modifier: 'ALWAYS' }).it).toBe('il gatto sta sempre mangiando.');
+    expect(catEats({ aspect: 'progressive', modifier: 'NEVER' }).it).toBe('il gatto non sta mai mangiando.');
+  });
+
+  test.fails('Spanish and Portuguese put "siempre" / "sempre" right after "estar"', () => {
+    expect(catEatsMouse({ modifier: 'ALWAYS' })).toMatchObject({
+      es: 'el gato está siempre a punto de comer el ratón.',
+      pt: 'o gato está sempre prestes a comer o rato.',
+    });
+  });
+
+  test('regression: French, a fronted "nunca" and a manner adverb are already right', () => {
+    expect(catEatsMouse({ modifier: 'ALWAYS' }).fr).toBe('le chat est toujours sur le point de manger la souris.');
+    expect(catEatsMouse({ modifier: 'NEVER' })).toMatchObject({
+      es: 'el gato nunca está a punto de comer el ratón.',
+      pt: 'o gato nunca está prestes a comer o rato.',
+    });
+    expect(catEatsMouse({ modifier: 'WELL' }).it).toBe('il gatto sta per mangiare bene il topo.');
+  });
+});
+
 // A73. With a plural noun object, Italian "si" is the passive si and the verb agrees with the
 // object ("si mangiano i topi"); the singular is colloquial. `predicateText` and `relativeText`
 // conjugate against GENERIC_PERSON (3sg), so the verb never agrees with its plural patient.

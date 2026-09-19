@@ -147,6 +147,27 @@ describe('known bugs: Spanish personal "a"', () => {
   });
 });
 
+// A148. ANGEL is seeded `animate` but not `human`, the concept-level "the referent is a person" flag.
+// Both rules that read it skip the angel: Spanish leaves out the personal "a" ("ama este ángel")
+// and English relativises with "that". The engine is right; the corpus entry is not.
+describe('known bugs: ANGEL is a person', () => {
+  test.fails('Spanish marks ANGEL with the personal "a"', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL') }), 'es')).toBe('el gato ve al ángel.');
+    expect(say(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
+      directObject: np('ANGEL', { definiteness: 'this' }), verbPhrase: { tense: 'past' },
+    }), 'es')).toBe('ese hombre amaba a este ángel.');
+  });
+
+  test.fails('English relativises ANGEL with "who"', () => {
+    expect(say(clause(np('ANGEL', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('CAT') } }), 'RUN'), 'en'))
+      .toBe('the angel who sees the cat runs.');
+  });
+
+  test('regression: Portuguese takes no personal "a"', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL') }), 'pt')).toBe('o gato vê o anjo.');
+  });
+});
+
 // A120. BE with no complement at all ("the cat is", "Antarctica will not be") takes neither the copula
 // path, which needs a predicative, nor A109's existential, which needs a locative. It falls through to
 // the ordinary verb path on BE's fallback lexeme です, which has no stem, so the tense and polarity are
