@@ -34,12 +34,14 @@ function renderApp() {
   return screen.getByTestId('console-prompt') as HTMLInputElement;
 }
 
-/** Type into the prompt as a keyboard would: the value changes, and the caret is at its end. */
+/** Type into the prompt as a keyboard would: each character at the caret, and the caret after it. */
 function type(prompt: HTMLInputElement, text: string) {
   act(() => prompt.focus());
   for (const ch of text) {
-    const value = prompt.value + ch;
-    fireEvent.change(prompt, { target: { value, selectionStart: value.length } });
+    const from = prompt.selectionStart ?? prompt.value.length;
+    const to = prompt.selectionEnd ?? from;
+    const value = prompt.value.slice(0, from) + ch + prompt.value.slice(to);
+    fireEvent.change(prompt, { target: { value, selectionStart: from + 1, selectionEnd: from + 1 } });
   }
 }
 
@@ -49,6 +51,9 @@ const key = (el: Element, k: string, init: Record<string, unknown> = {}) =>
   });
 
 const shown = () => stubs.workspace.containers[0]!.selection;
+
+/** The text selected in the prompt. */
+const selected = (prompt: HTMLInputElement) => prompt.value.slice(prompt.selectionStart ?? 0, prompt.selectionEnd ?? 0);
 
 describe('the console', () => {
   it('is docked under the page on a first visit, and remembers being hidden', () => {
@@ -66,8 +71,8 @@ describe('the console', () => {
     const list = screen.getByTestId('console-list');
     expect(within(list).getAllByTestId('console-option')[0]).toHaveAttribute('data-insert', '/subj');
     key(prompt, 'Tab');
-    expect(prompt.value).toBe('/subj ');
-    // After a role command and its space the list turns to that role's words.
+    expect(prompt.value).toBe('/subj (  )');
+    // A period's word opens its bracket, and the list turns to that role's words.
     await waitFor(() =>
       expect(within(screen.getByTestId('console-list')).getAllByTestId('console-option').map((o) => o.getAttribute('data-insert'))).toContain('cat'),
     );
@@ -83,8 +88,8 @@ describe('the console', () => {
     key(prompt, 'Enter');
     await waitFor(() => expect(prompt.value).toBe(''));
     expect(shown().subjectNumber).toBe('plural');
-    expect(within(screen.getByTestId('console-transcript')).getByTestId('transcript-typed')).toHaveTextContent('/subj cat /adj brown /pl');
-    expect(screen.getByTestId('source-strip')).toHaveTextContent('/subj cat /adj brown /pl');
+    expect(within(screen.getByTestId('console-transcript')).getByTestId('transcript-typed')).toHaveTextContent('/subj ( cat /adj brown /pl )');
+    expect(screen.getByTestId('source-strip')).toHaveTextContent('/subj ( cat /adj brown /pl )');
     // The context has moved on to the verb, as the pickers' auto-advance would.
     expect(screen.getByTestId('console-chip')).toHaveTextContent(/verb/i);
   });
@@ -106,7 +111,7 @@ describe('the console', () => {
     expect(screen.queryByTestId('console-list')).not.toBeInTheDocument();
     key(prompt, 'Enter');
     await waitFor(() => expect(screen.getByTestId('console-diagnostic')).toHaveTextContent('There is no command /frob.'));
-    expect(prompt.value).toBe('/verb eat /frob');
+    expect(prompt.value).toBe('/verb ( eat /frob )');
   });
 
   it('echoes a change made elsewhere as the command it equals', async () => {
@@ -129,9 +134,9 @@ describe('the console', () => {
     key(prompt, 'Enter');
     await waitFor(() => expect(prompt.value).toBe(''));
     key(prompt, 'ArrowUp');
-    expect(prompt.value).toBe('/subj cat');
+    expect(prompt.value).toBe('/subj ( cat )');
     expect(screen.getByTestId('console-history-tag')).toHaveTextContent('history · 1 of 1');
-    expect(JSON.parse(localStorage.getItem('signi:consoleHistory')!)).toEqual(['/subj cat']);
+    expect(JSON.parse(localStorage.getItem('signi:consoleHistory')!)).toEqual(['/subj ( cat )']);
   });
 
   it('shows and hides with the key below esc, by where it is rather than what it types', async () => {
@@ -193,13 +198,13 @@ describe('the console', () => {
       // /edit puts the period's source into the prompt, where ↵ would replace the period with it.
       type(prompt, '#1 /edit');
       key(prompt, 'Enter');
-      await waitFor(() => expect(prompt.value).toBe('/subj cat '));
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) '));
       expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
       fireEvent.change(prompt, { target: { value: '', selectionStart: 0 } });
       key(prompt, 'Escape');
       type(prompt, '#1.subj /pl /edit');
       key(prompt, 'Enter');
-      await waitFor(() => expect(prompt.value).toBe('/subj cat /pl '));
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat /pl ) '));
     });
 
     it('does not re-render the page while a period is being edited and nothing changes', async () => {
@@ -247,7 +252,162 @@ describe('the console', () => {
       type(prompt, '/subj cat');
       if (screen.queryByTestId('console-list')) key(prompt, 'Escape');
       key(prompt, 'Enter', { isComposing: true, keyCode: 229 });
-      expect(prompt.value).toBe('/subj cat');
+      expect(prompt.value).toBe('/subj ( cat )');
+    });
+  });
+
+  describe('pins and help pages (phase 5)', () => {
+    async function commit(prompt: HTMLInputElement, line: string) {
+      type(prompt, line);
+      if (screen.queryByTestId('console-list')) key(prompt, 'Escape');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+    }
+
+    it('pins the last line with /pin, and offers it first on ⇥ from an empty prompt', async () => {
+      const prompt = renderApp();
+      await commit(prompt, '/subj cat /verb eat');
+      await commit(prompt, '/subj dog');
+      // /pin alone pins the line run before it.
+      await commit(prompt, '/pin');
+      expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual(['/subj ( dog )']);
+      expect(screen.getAllByTestId('transcript-info').at(-1)).toHaveTextContent('Pinned.');
+      key(prompt, 'Tab');
+      const rows = within(screen.getByTestId('console-list')).getAllByTestId('console-option');
+      expect(rows.map((r) => r.getAttribute('data-insert'))).toEqual(['/subj ( dog )', '/pin', '/subj ( cat ) /verb ( eat )']);
+      expect(within(rows[0]!).getByTestId('console-option-pinned')).toBeInTheDocument();
+      // ⇥ again takes the highlighted line.
+      key(prompt, 'Tab');
+      expect(prompt.value).toBe('/subj ( dog ) ');
+    });
+
+    it('pins and unpins a line from the transcript', async () => {
+      const prompt = renderApp();
+      await commit(prompt, '/subj cat');
+      const pin = within(screen.getByTestId('transcript-typed')).getByTestId('pin-line');
+      expect(pin).toHaveAttribute('aria-pressed', 'false');
+      fireEvent.click(pin);
+      expect(pin).toHaveAttribute('aria-pressed', 'true');
+      expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual(['/subj ( cat )']);
+      fireEvent.click(pin);
+      expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual([]);
+    });
+
+    it('shows a command’s page with /help, and what it would act on here', async () => {
+      const prompt = renderApp();
+      await commit(prompt, '/subj cat');
+      await commit(prompt, '#1.subj /help pl');
+      const page = await screen.findByTestId('help-page');
+      expect(page).toHaveTextContent('/pl');
+      expect(page).toHaveTextContent('Written /pl');
+      expect(page).toHaveTextContent('also /plural');
+      expect(page).toHaveTextContent('/subj ( cat /pl )');
+      expect(page).toHaveTextContent('Here: on cat, now singular.');
+    });
+
+    it('opens the page of a command chosen in the help overlay', async () => {
+      renderApp();
+      act(() => screen.getByTestId('workspace'));
+      fireEvent.click(screen.getByRole('button', { name: /help/i }));
+      fireEvent.click(await screen.findByTestId('console-help-row-rel'));
+      const page = await screen.findByTestId('help-page');
+      expect(page).toHaveTextContent('/rel #n.noun · /rel subj { … } · /rel obj { … }');
+      await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());
+    });
+  });
+
+  describe('structured lines (phase 6)', () => {
+    it('brackets a line typed straight through, each command where it belongs', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat /pl /verb eat /past');
+      expect(prompt.value).toBe('/subj ( cat /pl ) /verb ( eat /past )');
+      await waitFor(() => expect(shown().verbTense).toBe('past'));
+      expect(shown().subjectNumber).toBe('plural');
+    });
+
+    it('ghosts a word in front of the closer, and → takes it there', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj ca');
+      expect(prompt.value).toBe('/subj ( ca )');
+      await waitFor(() => expect(screen.getByTestId('console-ghost')).toHaveTextContent('t'));
+      key(prompt, 'Escape');
+      key(prompt, 'ArrowRight');
+      // The word taken, and the caret after it, ready for what describes it: `cat | )`.
+      expect(prompt.value).toBe('/subj ( cat  )');
+      expect(prompt.selectionStart).toBe(12);
+      // The word being typed is not a mistake yet.
+      expect(screen.queryByTestId('console-diagnostic')).not.toBeInTheDocument();
+    });
+
+    it('leaves ⇧↵ to break the line rather than run it', () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat');
+      key(prompt, 'Enter', { shiftKey: true });
+      expect(prompt.value).toBe('/subj ( cat )');
+      expect(screen.queryByTestId('transcript-typed')).not.toBeInTheDocument();
+    });
+
+    it('runs two periods written over several lines as one step', async () => {
+      const prompt = renderApp();
+      act(() => prompt.focus());
+      fireEvent.change(prompt, { target: { value: '/subj ( cat\n  /pl )\n/subj ( dog )', selectionStart: 29 } });
+      await waitFor(() => expect(stubs.workspace.containers).toHaveLength(2));
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+      expect(shown().subjectNumber).toBe('plural');
+      expect(screen.getAllByTestId('transcript-typed').map((e) => e.textContent)).toEqual([
+        expect.stringContaining('/subj ( cat /pl )'),
+        expect.stringContaining('/subj ( dog )'),
+      ]);
+    });
+
+    it('moves word to word with ⇥ while a period is edited, the chip following the caret', async () => {
+      const prompt = renderApp();
+      type(prompt, '/subj cat /pl');
+      key(prompt, 'Escape');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+      type(prompt, '#1 /edit');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat /pl ) '));
+      act(() => prompt.setSelectionRange(0, 0));
+      fireEvent.select(prompt);
+      key(prompt, 'Tab');
+      expect([prompt.selectionStart, prompt.selectionEnd]).toEqual([0, 5]);
+      key(prompt, 'Tab');
+      expect(selected(prompt)).toBe('cat');
+      key(prompt, 'Tab');
+      expect(selected(prompt)).toBe('/pl');
+      fireEvent.select(prompt);
+      await waitFor(() => expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1 ›\s*subject\s*cat/i));
+      key(prompt, 'Tab', { shiftKey: true });
+      expect(selected(prompt)).toBe('cat');
+    });
+  });
+
+  describe('commands by topic', () => {
+    it('heads the list topic by topic, a shortcut saying what it is short for', async () => {
+      const prompt = renderApp();
+      type(prompt, '/verb eat /');
+      const list = await screen.findByTestId('console-list');
+      const headings = within(list).getAllByTestId('console-list-topic').map((h) => h.textContent);
+      expect(headings).toEqual(expect.arrayContaining(['Tense', 'Aspect']));
+      const options = within(list).getAllByTestId('console-option');
+      const past = options.find((o) => o.getAttribute('data-insert') === '/past')!;
+      expect(within(past).getByTestId('console-option-shortcut')).toHaveTextContent('= /tense past');
+      // /tense heads its topic, the shortcuts after it.
+      const inserts = options.map((o) => o.getAttribute('data-insert'));
+      expect(inserts.indexOf('/tense')).toBe(inserts.indexOf('/past') - 1);
+    });
+
+    it('lists them so in the help overlay too', async () => {
+      renderApp();
+      fireEvent.click(screen.getByRole('button', { name: /help/i }));
+      const tense = await screen.findByTestId('console-help-topic-tense');
+      expect(within(tense).getByText('/tense')).toBeInTheDocument();
+      expect(within(tense).getByText('= /tense past')).toBeInTheDocument();
+      // The verb's part holds its modal and adverb too, now listed by topic rather than as roles.
+      expect(within(screen.getByTestId('console-help-verb')).getByTestId('console-help-topic-modal')).toBeInTheDocument();
     });
   });
 });

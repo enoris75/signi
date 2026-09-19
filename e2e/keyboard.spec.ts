@@ -397,8 +397,10 @@ test.describe('the canvas by keyboard', () => {
     const sheet = page.getByRole('dialog');
     await expect(sheet).toBeVisible();
     await expect(sheet.getByText('Anywhere')).toBeVisible();
-    // Exactly, since the sheet also lists the backwards twin the same key takes with ⇧.
-    await expect(sheet.getByText('Tense', { exact: true })).toBeVisible();
+    // Exactly, since the sheet also lists the backwards twin the same key takes with ⇧ — and within
+    // the keyboard section, since the console's reference below it has a /tense of its own.
+    const keys = sheet.getByRole('region', { name: 'Keyboard navigation' });
+    await expect(keys.getByText('Tense', { exact: true })).toBeVisible();
 
     expect(await pointerEvents(page), 'the page saw a pointer event').toBe(0);
   });

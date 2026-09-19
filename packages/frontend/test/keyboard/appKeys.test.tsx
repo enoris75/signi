@@ -60,15 +60,17 @@ describe('the keys that work anywhere', () => {
 
     const sheet = screen.getByRole('dialog', { name: 'Help' });
     expect(within(sheet).getByRole('heading', { name: 'Keyboard navigation' })).toBeInTheDocument();
-    // Every level is listed, and each row carries the key it is actually bound to.
-    expect(within(sheet).getByText('Anywhere')).toBeInTheDocument();
-    expect(within(sheet).getByText('Period')).toBeInTheDocument();
-    expect(within(sheet).getByText('Noun')).toBeInTheDocument();
-    expect(within(sheet).getByText('Tense')).toBeInTheDocument();
-    expect(within(sheet).getByText('If-condition')).toBeInTheDocument();
+    // Every level is listed, and each row carries the key it is actually bound to. (The console's
+    // reference below it has rows of its own — /tense among them.)
+    const keys = within(sheet).getByRole('region', { name: 'Keyboard navigation' });
+    expect(within(keys).getByText('Anywhere')).toBeInTheDocument();
+    expect(within(keys).getByText('Period')).toBeInTheDocument();
+    expect(within(keys).getByText('Noun')).toBeInTheDocument();
+    expect(within(keys).getByText('Tense')).toBeInTheDocument();
+    expect(within(keys).getByText('If-condition')).toBeInTheDocument();
     // Listed whether or not there is anything to take back: the sheet says what the keys are.
-    expect(within(sheet).getByText('Undo')).toBeInTheDocument();
-    expect(within(sheet).getByText('Redo')).toBeInTheDocument();
+    expect(within(keys).getByText('Undo')).toBeInTheDocument();
+    expect(within(keys).getByText('Redo')).toBeInTheDocument();
   });
 
   // The key is for whoever knows it; the icon is for whoever does not.

@@ -37,7 +37,7 @@ describe('the echo of a canvas action', () => {
 
   it('writes a possessor phrase whole, and its inside changing as the change', () => {
     const owned = edit(base, (s) => R.updatePossessor(s, 'subject', (p) => R.applyConceptSelect(p, 'subject', EN.concepts.noun![3]!)));
-    expect(echo(base, owned)).toEqual(['/poss ( /subj man ) · cat']);
+    expect(echo(base, owned)).toEqual(['/poss [ man ] · cat']);
     const plural = edit(owned, (s) => R.updatePossessor(s, 'subject', (p) => R.toggleNumber(p, 'subject')));
     expect(echo(owned, plural)).toEqual(['/pl · man']);
   });

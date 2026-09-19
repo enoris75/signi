@@ -56,7 +56,9 @@ export type AppCommand =
   | "redo"
   | "words"
   | "help"
-  | "edit";
+  | "edit"
+  | "pin"
+  | "unpin";
 
 export type Action =
   /** Fill a slot of the period (or of the noun phrase in brackets) — or, with no word, go to it. */
@@ -68,6 +70,8 @@ export type Action =
   /** The next modal of the closest verb or modal. */
   | { kind: "modal" }
   | { kind: "setting"; setting: Setting }
+  /** A setting set to the value its argument names: `/tense past`, `/aspect progressive`. */
+  | { kind: "set"; id: "tense" | "aspect" }
   | { kind: "possessor" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
@@ -187,6 +191,28 @@ export const COORD_VALUES: readonly ValueDef[] = [
   },
   { name: "then", value: "then", description: "temporal", descriptionKey: "conjunction.kind.then" },
 ];
+
+export const TENSE_VALUES: readonly ValueDef[] = (["past", "present", "future"] as const).map((value) => ({
+  name: value,
+  value,
+  description: value,
+  descriptionKey: `tense.value.${value}` as UiStringKey,
+}));
+
+export const ASPECT_VALUES: readonly ValueDef[] = (
+  [
+    ["neutral", ["simple"]],
+    ["progressive", ["prog"]],
+    ["prospective", ["prosp"]],
+    ["resultative", ["result"]],
+  ] as const
+).map(([value, aliases]) => ({
+  name: value,
+  aliases,
+  value,
+  description: value,
+  descriptionKey: `aspect.value.${value}` as UiStringKey,
+}));
 
 export const PERSON_VALUES: readonly ValueDef[] = [
   { name: "you", value: "2sg", description: "you", descriptionKey: "imperative.person.2sg" },
@@ -411,7 +437,35 @@ export const COMMANDS: readonly CommandDef[] = [
   ),
 
   // ── Verb ──────────────────────────────────────────────────────────────────
-  ...(["present", "past", "future"] as const).map((value) =>
+  // A setting named, its value the argument: the family whole in one command, for whoever thinks
+  // "the tense" before "the past".
+  {
+    name: "tense",
+    aliases: [],
+    group: "verb",
+    description: "tense",
+    descriptionKey: "satellite.tense",
+    purpose: "sets a verb’s tense",
+    color: "setting",
+    arg: { kind: "values", values: TENSE_VALUES, max: 1 },
+    action: { kind: "set", id: "tense" },
+    satellites: /^verbTense$/,
+    reducers: ["setTense"],
+  },
+  {
+    name: "aspect",
+    aliases: [],
+    group: "verb",
+    description: "aspect",
+    descriptionKey: "satellite.aspect",
+    purpose: "sets a verb’s aspect",
+    color: "setting",
+    arg: { kind: "values", values: ASPECT_VALUES, max: 1 },
+    action: { kind: "set", id: "aspect" },
+    satellites: /^verbAspect$/,
+    reducers: ["setAspect"],
+  },
+  ...(["past", "present", "future"] as const).map((value) =>
     setting(value, [], "verb", { id: "tense", value }, value, `tense.value.${value}` as UiStringKey, "sets a verb’s tense", /^verbTense$/, ["setTense"]),
   ),
   ...(
@@ -658,6 +712,25 @@ export const COMMANDS: readonly CommandDef[] = [
     arg: { kind: "text" },
     action: { kind: "app", app: "help" },
   },
+  {
+    // A line worth keeping: pinned lines come first when the prompt is empty, and in the ghost.
+    name: "pin",
+    aliases: [],
+    group: "workspace",
+    description: "pin this line, or the last one run",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "pin" },
+  },
+  {
+    name: "unpin",
+    aliases: [],
+    group: "workspace",
+    description: "unpin this line, or the last one run",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "unpin" },
+  },
 ];
 
 const BY_NAME = new Map<string, CommandDef>(COMMANDS.map((c) => [c.name, c]));
@@ -675,6 +748,123 @@ export function commandNamed(name: string): CommandDef | undefined {
 export function valueNamed(values: readonly ValueDef[], word: string): ValueDef | undefined {
   const key = word.toLowerCase();
   return values.find((v) => v.name === key || v.aliases?.includes(key));
+}
+
+// ── Topics ───────────────────────────────────────────────────────────────────
+
+/**
+ * What a command is about — its tense, a noun's number, the links between periods — which is how the
+ * list and the reference order and head the commands. A setting's shortcuts sit with the command that
+ * names the setting: `/past` under *tense*, after `/tense`.
+ */
+export type TopicId =
+  | "words"
+  | "adjective"
+  | "number"
+  | "gender"
+  | "determiner"
+  | "place"
+  | "cause"
+  | "possessor"
+  | "relative"
+  | "coordination"
+  | "modal"
+  | "adverb"
+  | "tense"
+  | "aspect"
+  | "polarity"
+  | "degree"
+  | "relation"
+  | "mood"
+  | "links"
+  | "period"
+  | "workspace";
+
+export interface Topic {
+  id: TopicId;
+  /** English, the fallback for `labelKey`; the literals are for /localize. */
+  label: string;
+  labelKey?: UiStringKey;
+  /** The part of the reference it is listed in. */
+  part: CommandGroup;
+}
+
+/** Every topic, in the order the list and the reference give them. */
+export const TOPICS: readonly Topic[] = [
+  { id: "words", label: "the period’s words", part: "role" },
+  { id: "adjective", label: "adjective", labelKey: "category.adjective", part: "noun" },
+  { id: "number", label: "number", labelKey: "satellite.number", part: "noun" },
+  { id: "gender", label: "gender", labelKey: "satellite.gender", part: "noun" },
+  { id: "determiner", label: "determiner", labelKey: "satellite.determiner", part: "noun" },
+  { id: "place", label: "place or route", part: "noun" },
+  { id: "cause", label: "cause", labelKey: "slot.cause", part: "noun" },
+  { id: "possessor", label: "possessor", labelKey: "slot.possessor", part: "noun" },
+  { id: "relative", label: "relative clause", labelKey: "satellite.relative", part: "noun" },
+  { id: "coordination", label: "coordination", labelKey: "satellite.coordination", part: "noun" },
+  { id: "modal", label: "modal", labelKey: "slot.modal", part: "verb" },
+  { id: "adverb", label: "adverb", labelKey: "slot.adverb", part: "verb" },
+  { id: "tense", label: "tense", labelKey: "satellite.tense", part: "verb" },
+  { id: "aspect", label: "aspect", labelKey: "satellite.aspect", part: "verb" },
+  { id: "polarity", label: "polarity", labelKey: "satellite.polarity", part: "verb" },
+  { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
+  { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
+  { id: "mood", label: "mood", part: "period" },
+  { id: "links", label: "links between periods", part: "period" },
+  { id: "period", label: "the period", part: "period" },
+  { id: "workspace", label: "workspace", part: "workspace" },
+];
+
+const SETTING_TOPICS: Record<SettingId, TopicId> = {
+  number: "number",
+  gender: "gender",
+  determiner: "determiner",
+  specifier: "place",
+  sentiment: "cause",
+  tense: "tense",
+  aspect: "aspect",
+  polarity: "polarity",
+  degree: "degree",
+  relation: "relation",
+};
+
+/** The topic a command is listed under. */
+export function topicOf(def: CommandDef): Topic {
+  const a = def.action;
+  const id: TopicId =
+    a.kind === "role"
+      ? "words"
+      : a.kind === "adjective" || a.kind === "adverb" || a.kind === "modal" || a.kind === "possessor" || a.kind === "relative"
+        ? a.kind
+        : a.kind === "conjunct"
+          ? "coordination"
+          : a.kind === "setting"
+            ? SETTING_TOPICS[a.setting.id]
+            : a.kind === "set"
+              ? a.id
+              : a.kind === "mood"
+                ? "mood"
+                : a.kind === "condition" || a.kind === "join" || a.kind === "instrument" || a.kind === "level"
+                  ? "links"
+                  : a.kind === "new" || a.kind === "del" || (a.kind === "app" && a.app === "edit")
+                    ? "period"
+                    : "workspace";
+  return TOPICS.find((t) => t.id === id)!;
+}
+
+/** Where a command stands in its topic's order: the list's and the reference's. */
+export const topicRank = (def: CommandDef): number => TOPICS.indexOf(topicOf(def));
+
+/**
+ * The long form a command is a shortcut for, where its setting has a command of its own:
+ * `/past` → `/tense past`, `/prog` → `/aspect progressive`.
+ */
+export function shortcutOf(def: CommandDef): string | undefined {
+  const a = def.action;
+  if (a.kind !== "setting") return undefined;
+  const named = COMMANDS.find((c) => c.action.kind === "set" && c.action.id === a.setting.id);
+  if (named?.arg.kind !== "values") return undefined;
+  const value = named.arg.values.find((v) => v.value === a.setting.value);
+  return value ? `/${named.name} ${value.name}` : undefined;
 }
 
 /** The command that sets a setting to a value — what the printer writes for it. */

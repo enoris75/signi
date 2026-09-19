@@ -337,7 +337,15 @@ export default function App() {
         <CursorBridge follow={phraseConsole.followCursor} />
         {phraseConsole.open && <Box sx={{ height: phraseConsole.height }} aria-hidden />}
         <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} />
-        <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
+        <HelpOverlay
+          open={helpOpen}
+          onClose={() => setHelpOpen(false)}
+          onConsoleCommand={(name) => {
+            setHelpOpen(false);
+            phraseConsole.showHelp(name);
+            phraseConsole.focusPrompt();
+          }}
+        />
         {/* Last in the page's tab order, and out of the way of everything but the strip it steps
             over: help is wanted from wherever the work is. */}
         <HelpButton

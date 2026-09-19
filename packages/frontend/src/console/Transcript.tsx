@@ -1,4 +1,6 @@
-import { Box } from "@mui/material";
+import { Box, IconButton, Tooltip } from "@mui/material";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import PushPinOutlinedIcon from "@mui/icons-material/PushPinOutlined";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect, useRef } from "react";
 import TouchAppOutlinedIcon from "@mui/icons-material/TouchAppOutlined";
@@ -8,7 +10,9 @@ import { fetchTranslation } from "../api.ts";
 import { useUiLanguage } from "../i18n/LanguageContext.tsx";
 import { styleTokens } from "./language/parse.ts";
 import { ECHO_PARTS } from "./language/diff.ts";
-import { MONO, Token } from "./tokens.tsx";
+import { helpPage } from "./language/help.ts";
+import { useUiString } from "../i18n/useUiString.ts";
+import { MONO, Token, tokenColor } from "./tokens.tsx";
 import type { TranscriptEntry } from "./usePhraseConsole.ts";
 
 /**
@@ -17,7 +21,16 @@ import type { TranscriptEntry } from "./usePhraseConsole.ts";
  * the period's sentence in the interface language after the change — the console teaching its own
  * language to whoever is using the mouse.
  */
-export function Transcript({ entries }: { entries: TranscriptEntry[] }) {
+export function Transcript({
+  entries,
+  pins,
+  onPin,
+}: {
+  entries: TranscriptEntry[];
+  /** The lines pinned; a typed line wears a pin to pin or unpin itself. */
+  pins: readonly string[];
+  onPin: (line: string, pinned: boolean) => void;
+}) {
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
@@ -33,6 +46,7 @@ export function Transcript({ entries }: { entries: TranscriptEntry[] }) {
       {entries.map((entry) => (
         <Box
           key={entry.id}
+          className="transcript-row"
           data-testid={`transcript-${entry.kind}`}
           sx={{
             display: "grid",
@@ -55,7 +69,16 @@ export function Transcript({ entries }: { entries: TranscriptEntry[] }) {
             )}
           </Box>
           <Box sx={{ fontFamily: MONO, fontSize: "0.88rem", overflowWrap: "anywhere" }}>
-            {entry.kind === "echo" ? <Echo entry={entry} /> : <Line text={entry.text} />}
+            {entry.kind === "help" ? (
+              <HelpPage name={entry.name} here={entry.here} />
+            ) : entry.kind === "echo" ? (
+              <Echo entry={entry} />
+            ) : (
+              <Line text={entry.text} />
+            )}
+            {entry.kind === "typed" && (
+              <PinToggle pinned={pins.includes(entry.text)} onPin={(pinned) => onPin(entry.text, pinned)} />
+            )}
             {entry.kind === "error" && (
               <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "error.main" }}>{entry.message}</Box>
             )}
@@ -63,10 +86,93 @@ export function Transcript({ entries }: { entries: TranscriptEntry[] }) {
               <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "text.secondary" }}>{entry.detail}</Box>
             )}
           </Box>
-          <Box>{(entry.kind === "typed" || entry.kind === "echo") && entry.plan && <Sentence plan={entry.plan} />}</Box>
+          <Box>
+            {(entry.kind === "typed" || entry.kind === "echo" || entry.kind === "help") && entry.plan && (
+              <Sentence plan={entry.plan} />
+            )}
+          </Box>
         </Box>
       ))}
       <div ref={end} />
+    </Box>
+  );
+}
+
+/** The pin a typed line wears: shown on hover or focus, and always once pinned. */
+function PinToggle({ pinned, onPin }: { pinned: boolean; onPin: (pinned: boolean) => void }) {
+  // English literals, for /localize.
+  const label = pinned ? "Unpin this line" : "Pin this line";
+  return (
+    <Tooltip title={label}>
+      <IconButton
+        size="small"
+        aria-label={label}
+        aria-pressed={pinned}
+        data-testid="pin-line"
+        onClick={() => onPin(!pinned)}
+        sx={{
+          ml: 1,
+          p: 0.25,
+          verticalAlign: "-3px",
+          color: pinned ? "primary.main" : "text.disabled",
+          opacity: pinned ? 1 : 0,
+          ".transcript-row:hover &, &:focus-visible": { opacity: 1 },
+        }}
+      >
+        {pinned ? <PushPinIcon sx={{ fontSize: 14 }} /> : <PushPinOutlinedIcon sx={{ fontSize: 14 }} />}
+      </IconButton>
+    </Tooltip>
+  );
+}
+
+/**
+ * A command's help page: how it is written, what it does and what it acts on, its other names, the
+ * values it takes, its example (whose sentence sits in the right-hand column), and what it would act
+ * on where the page was asked from. Read from the catalogue as it is drawn, so it follows the
+ * interface language.
+ */
+function HelpPage({ name, here }: { name: string; here?: string }) {
+  const t = useUiString();
+  const page = helpPage(name);
+  if (!page) return null;
+  const { def, usage, example } = page;
+  const prose = { fontFamily: '"Inter", sans-serif', fontSize: "0.8rem", color: "text.secondary", lineHeight: 1.6 };
+  return (
+    <Box data-testid="help-page" sx={{ py: 0.5 }}>
+      <Box sx={{ display: "flex", alignItems: "baseline", gap: 1.5 }}>
+        <Box component="span" sx={{ fontWeight: 600, color: tokenColor(def.color) }}>
+          /{def.name}
+        </Box>
+        <Box component="span" sx={{ ...prose, color: "text.primary" }}>
+          {def.descriptionKey ? t(def.descriptionKey) : def.description}
+          {def.purpose ? ` — it ${def.purpose}.` : ""}
+        </Box>
+      </Box>
+      {/* English literals, for /localize. */}
+      <Box sx={prose}>
+        Written <Box component="span" sx={{ fontFamily: MONO, color: "text.primary" }}>{usage}</Box>
+        {def.aliases.length > 0 && <> · also {def.aliases.map((a) => `/${a}`).join(" ")}</>}
+      </Box>
+      {def.arg.kind === "values" && (
+        <Box sx={prose}>
+          {def.arg.values.map((v, i) => (
+            <Box component="span" key={v.name}>
+              {i > 0 && " · "}
+              <Box component="span" sx={{ fontFamily: MONO, color: "text.primary" }}>
+                {v.name}
+              </Box>{" "}
+              {v.descriptionKey ? t(v.descriptionKey) : v.description}
+            </Box>
+          ))}
+        </Box>
+      )}
+      <Box sx={{ ...prose, mt: 0.25 }}>
+        For example{" "}
+        <Box component="span" sx={{ fontFamily: MONO, fontSize: "0.85rem" }}>
+          <Line text={example} />
+        </Box>
+      </Box>
+      {here && <Box sx={{ ...prose, fontStyle: "italic" }}>{here}</Box>}
     </Box>
   );
 }

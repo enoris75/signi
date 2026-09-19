@@ -105,7 +105,16 @@ interface Binding {
 
 const ALL_BINDINGS: Binding[] = [...APP_KEYMAP, ...PERIOD_KEYMAP, ...KEYMAP];
 
-export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => void }) {
+export function HelpOverlay({
+  open,
+  onClose,
+  onConsoleCommand,
+}: {
+  open: boolean;
+  onClose: () => void;
+  /** A console command's row was chosen: show its page in the console. */
+  onConsoleCommand?: (name: string) => void;
+}) {
   const here = useKeyPlatform();
   const [platform, setPlatform] = useState<Platform>(here);
   const t = useUiString();
@@ -197,7 +206,7 @@ export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => v
             ))}
           </Box>
         </Box>
-        <ConsoleHelp />
+        <ConsoleHelp onCommand={onConsoleCommand} />
       </DialogContent>
     </Dialog>
   );

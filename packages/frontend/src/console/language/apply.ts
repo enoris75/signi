@@ -72,7 +72,9 @@ import {
   type Action,
   type AppCommand,
   type CommandDef,
+  type Setting,
 } from "./commands.ts";
+import { splitPeriods } from "./lex.ts";
 import { parse, type Item } from "./parse.ts";
 import { NOUN_NAMES, parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
 import type { ConsoleContext, Diagnostic, Span, Vocabulary, WordRef, WorkspaceState } from "./types.ts";
@@ -97,6 +99,11 @@ import {
  * the cursor counts as the word just before the line. Each bracket is a frame of its own — commands
  * inside attach inside, and once it closes, what follows attaches to the head again.
  *
+ * **A word's bracket keeps its own.** `/subj ( cat /pl )`: what describes a word is written inside its
+ * bracket, and only there — a command in it reaches the bracket's words alone, and one that belongs to
+ * the period (`/verb`) is refused until the bracket closes. Once a period's word closes its bracket,
+ * nothing before it is the closest word any more: what follows starts afresh.
+ *
  * **Settings set.** A setting sets its value rather than toggling it, so a line means the same
  * whatever the period held before: preview, replay and paste are all safe.
  *
@@ -109,9 +116,14 @@ import {
 
 export type NounFrameKind = "period" | "possessor" | "conjunct";
 
-/** A bracket level — the period itself at the top, then each phrase or clause opened inside it. */
+/**
+ * A bracket level — the period itself at the top, then each phrase or clause opened inside it. An
+ * `element` is a word's own bracket, `/subj ( cat … )`: its words are the word and what hangs off it.
+ */
+export type FrameKind = NounFrameKind | "element";
+
 export interface Frame {
-  kind: NounFrameKind;
+  kind: FrameKind;
   containerId: string;
   /** A nested phrase's head address; undefined for a period. */
   slice?: NounAddress;
@@ -119,6 +131,11 @@ export interface Frame {
   words: WordRef[];
   /** The command that opened the bracket, for the context chip ("1 › rel › 2 · OBJ cat"). */
   via?: string;
+  /**
+   * The last word whose bracket closed in this frame. Commands no longer reach it, but the context
+   * rests on it: after `/subj ( cat )` the cursor is on cat.
+   */
+  anchor?: WordRef;
 }
 
 /** What a line asks of the app rather than of the phrase. */
@@ -204,15 +221,15 @@ export function applyLine(state: WorkspaceState, text: string, opts: ApplyOption
 /**
  * Apply a script: one line, or several pasted at once. The first line applies where the context is;
  * each line after it starts a period of its own, as if it began with `/new`, unless it begins by
- * naming one (`#2 …`). A script printed from a workspace therefore rebuilds it, period by period.
+ * naming one (`#2 …`). A script printed from a workspace therefore rebuilds it, period by period. A
+ * line break inside a bracket is only a space: a long period may run over several lines.
  */
 export function applyScript(state: WorkspaceState, text: string, opts: ApplyOptions): ApplyResult {
-  const lines = text.split("\n");
-  while (lines.length > 1 && !lines[lines.length - 1]!.trim()) lines.pop();
+  const lines = splitPeriods(text);
+  while (lines.length > 1 && !lines[lines.length - 1]!.text.trim()) lines.pop();
   const run = new Run(state, opts);
-  let offset = 0;
   try {
-    lines.forEach((line, i) => {
+    lines.forEach(({ text: line, offset }, i) => {
       const parsed = parse(line);
       const shift = (d: Diagnostic): Diagnostic => ({ ...d, from: d.from + offset, to: d.to + offset });
       const items = parsed.items.map((item) => shiftItem(item, offset));
@@ -220,12 +237,16 @@ export function applyScript(state: WorkspaceState, text: string, opts: ApplyOpti
       const namesPeriod =
         first?.kind === "goto" || (first?.kind === "command" && first.def?.action.kind === "new");
       if (i > 0 && !namesPeriod) run.nextLine();
-      run.items(items, run.top);
-      if (parsed.diagnostic) {
-        const d = shift(parsed.diagnostic);
-        throw new ApplyError(d, d.message);
+      const refused = parsed.diagnostic && shift(parsed.diagnostic);
+      try {
+        run.items(items, run.top);
+      } catch (error) {
+        // An item left waiting for the argument the parser refused (`/tense soon`): the refusal says
+        // more than the wait.
+        if (refused && error instanceof ApplyError && error.incomplete) throw new ApplyError(refused, refused.message);
+        throw error;
       }
-      offset += line.length + 1;
+      if (refused) throw new ApplyError(refused, refused.message);
     });
     run.makeLinks();
     return run.result();
@@ -300,7 +321,7 @@ class Run {
       state: { containers: this.containers, links: this.links },
       diagnostic,
       frames: this.stack.map((f) => ({ ...f, words: [...f.words] })),
-      context: { containerId: top.containerId, word: top.words.at(-1) },
+      context: { containerId: top.containerId, word: top.words.at(-1) ?? top.anchor },
       effects: this.effects,
       created: this.created,
       touched: this.touched,
@@ -341,6 +362,7 @@ class Run {
   nextLine(): void {
     this.top.containerId = this.newPeriod();
     this.top.words = [];
+    this.top.anchor = undefined;
   }
 
   newPeriod(selection: PhraseSelection = {}): string {
@@ -361,6 +383,9 @@ class Run {
     const def = item.def!;
     const action = def.action;
     if (attachesToWord(action)) return this.attach(item, def, frame);
+    // A word's bracket holds what describes the word, and nothing of the period's.
+    if (frame.kind === "element")
+      fail(item.head, `/${def.name} belongs to the period, not inside /${frame.via} ( … ) — close the bracket first.`);
     switch (action.kind) {
       case "role":
         return this.role(item, def, action.slot, frame);
@@ -390,6 +415,7 @@ class Run {
     if (!c) fail(item, `There is no period ${ref.period}.`);
     frame.containerId = c!.id;
     frame.words = [];
+    frame.anchor = undefined;
     if (ref.address) {
       const word = nounWord(c!.id, ref.address);
       if (!this.info(word)) fail(item, `Period ${ref.period} has no ${ref.address.split("/")[0]} there.`);
@@ -419,13 +445,25 @@ class Run {
     if (frame.kind === "period") this.checkSlot(item, def, slot, frame.containerId);
     const ref = this.slotRef(frame, slot);
     if (item.word) {
-      const spec = wordSpecFor(slot, frame.kind);
+      const spec = wordSpecFor(slot, frame.kind as NounFrameKind);
       const concept = this.word(item.word, spec, `/${def.name}`);
       this.updateSlice(frame.containerId, frame.slice, (s) => applyConceptSelect(s, slot, concept.concept, concept.opts));
       this.touch(ref);
       if (frame === this.top) this.filled.push(ref);
     }
+    if (item.body) return this.element(item, def, ref, frame);
     frame.words.push(ref);
+  }
+
+  /**
+   * A word's own bracket, `/subj ( cat /pl )`: what is inside reaches the word and nothing else. Once
+   * it closes, the word is out of reach — of a period's word, nothing before it either.
+   */
+  element(item: Item, def: CommandDef, ref: WordRef, frame: Frame): void {
+    this.bracket(item, { kind: "element", containerId: ref.containerId, slice: ref.slice, words: [ref], via: def.name });
+    if (!item.close) return;
+    if (def.action.kind === "role") frame.words = [];
+    frame.anchor = ref;
   }
 
   /** Whether the period offers the box a role names: an object wants a transitive verb, a complement one that licenses it. */
@@ -463,6 +501,15 @@ class Run {
         this.updateSlice(w.ref.containerId, w.ref.slice, (s) => applySetting(action.setting, w, s));
         this.touch(w.ref);
         return;
+      case "set": {
+        const values = def.arg.kind === "values" ? def.arg.values : [];
+        if (!item.word) return unfinished(item.head, `Say which: /${def.name} ${values.map((v) => v.name).join(", ")}.`);
+        const value = valueNamed(values, item.word.text.trim())!.value;
+        const setting = { id: action.id, value } as Setting;
+        this.updateSlice(w.ref.containerId, w.ref.slice, (s) => applySetting(setting, w, s));
+        this.touch(w.ref);
+        return;
+      }
       case "adjective": {
         const t = adjectiveTarget(w)!;
         const ref: WordRef = { containerId: w.ref.containerId, slice: w.ref.slice, slot: t.slot, ...(t.modifierAdjective && { modifierAdjective: true }) };
@@ -474,6 +521,7 @@ class Run {
           );
           this.touch(ref);
         }
+        if (item.body) return this.element(item, def, ref, frame);
         frame.words.push(ref);
         return;
       }
@@ -486,6 +534,7 @@ class Run {
           this.updateRoot(w.ref.containerId, (s) => applyConceptSelect(s, slot, concept));
           this.touch(ref);
         }
+        if (item.body) return this.element(item, def, ref, frame);
         frame.words.push(ref);
         return;
       }
@@ -503,6 +552,13 @@ class Run {
    * it would land: "/past sets a verb’s tense, and food is a noun. Put it after eat, or write /verb /past."
    */
   noTarget(item: Item, def: CommandDef, frame: Frame): never {
+    // Past a word's closed bracket, at the period's level: what describes a word goes inside its bracket.
+    if (frame.kind !== "element" && frame.words.length === 0 && frame.anchor) {
+      const anchor = this.info(frame.anchor);
+      const role = frame.anchor.slice ? undefined : roleCommand(frame.anchor.slot);
+      if (anchor?.concept && role && takes(def.action, anchor))
+        fail(item.head, `/${def.name} describes a word: write it inside its bracket, /${role.name} ( ${this.vocab.label(anchor.concept)} … /${def.name} ).`);
+    }
     const last = frame.words.at(-1);
     const lastInfo = last && this.info(last);
     const what = def.purpose ? `/${def.name} ${def.purpose}` : `/${def.name}`;
@@ -514,7 +570,10 @@ class Run {
     let message = lastWord ? `${what}, and ${lastWord}.` : `${what}, and nothing before it takes it.`;
     if (fit?.concept) {
       const role = fit.ref.slice ? undefined : roleCommand(fit.ref.slot);
-      message += ` Put it after ${this.vocab.label(fit.concept)}${role ? `, or write /${role.name} /${def.name}` : ""}.`;
+      message +=
+        frame.kind === "element"
+          ? ` It belongs in ${this.vocab.label(fit.concept)}’s bracket${role ? `: /${role.name} ( ${this.vocab.label(fit.concept)} … /${def.name} )` : ""}.`
+          : ` Put it after ${this.vocab.label(fit.concept)}${role ? `, or write /${role.name} /${def.name}` : ""}.`;
     }
     return fail(item.head, message);
   }
@@ -557,7 +616,9 @@ class Run {
       this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept));
       this.touch(headRef);
     }
-    if (item.body) this.bracket(item, { kind: "possessor", containerId, slice: headRef.slice, words: [], via: "poss" });
+    // A bracket that opens with the head word reaches it: `/poss [ child /adj old ]`.
+    if (item.body)
+      this.bracket(item, { kind: "possessor", containerId, slice: headRef.slice, words: item.lead ? [headRef] : [], via: "poss" });
   }
 
   conjunct(item: Item, conjunction: "and" | "or", w: WordInfo): void {
@@ -573,7 +634,8 @@ class Run {
       this.updateRoot(containerId, (root) => updateConjunct(root, which, i, (c) => applyConceptSelect(c, "subject", concept, opts)));
       this.touch(headRef);
     }
-    if (item.body) this.bracket(item, { kind: "conjunct", containerId, slice, words: [], via: conjunction });
+    if (item.body)
+      this.bracket(item, { kind: "conjunct", containerId, slice, words: item.lead ? [headRef] : [], via: conjunction });
   }
 
   relative(item: Item, w: WordInfo): void {
@@ -592,7 +654,7 @@ class Run {
       this.touch(w.ref);
       return;
     }
-    if (!item.body) unfinished(item.head, "Name the clause: /rel #2.subj, or /rel subj ( … ) for a new one.");
+    if (!item.body) unfinished(item.head, "Name the clause: /rel #2.subj, or /rel subj { … } for a new one.");
     // A new clause, made where the command stands. Its gap — the box the head's word stands in for —
     // holds the head's word, as a pick on the canvas makes it.
     const gap: NounKey = item.word?.text.toLowerCase() === "obj" ? "directObject" : "subject";
@@ -647,7 +709,7 @@ class Run {
       const seed: PhraseSelection = kind === "join" && root.imperative ? setImperative({}, true) : {};
       target = { containerId: this.newPeriod(seed) };
     } else {
-      return unfinished(item.head, `Name the period: /${def.name}${kind === "join" ? ` ${item.word?.text ?? "and"}` : ""} #2, or ( … ) for a new one.`);
+      return unfinished(item.head, `Name the period: /${def.name}${kind === "join" ? ` ${item.word?.text ?? "and"}` : ""} #2, or { … } for a new one.`);
     }
     const span: Span = item;
     if (kind === "condition") this.queue.push({ kind, mainId: id, target, span });
@@ -713,6 +775,7 @@ class Run {
     const id = this.newPeriod();
     frame.containerId = id;
     frame.words = [{ containerId: id, slot: "subject" }];
+    frame.anchor = undefined;
   }
 
   // ── Removing ──
@@ -722,15 +785,18 @@ class Run {
     const index = n === undefined ? undefined : Number(n);
     const containerId = frame.containerId;
     const span = item.word ?? item.head;
+    // What to remove is looked for among the words in reach, then the word whose bracket closed last:
+    // `/subj ( cat /adj brown ) /del adj`.
     const closest = (pred: (w: WordInfo) => boolean) => {
-      for (let i = frame.words.length - 1; i >= 0; i--) {
-        const w = this.info(frame.words[i]!);
+      const words = frame.anchor ? [frame.anchor, ...frame.words] : frame.words;
+      for (let i = words.length - 1; i >= 0; i--) {
+        const w = this.info(words[i]!);
         if (w && pred(w)) return w;
       }
       return undefined;
     };
     if (!what) {
-      const last = frame.words.at(-1);
+      const last = frame.words.at(-1) ?? frame.anchor;
       const w = last && this.info(last);
       if (!w) fail(item.head, "Nothing is in hand here to remove — name it: /del obj, /del adj, /del period.");
       return this.clearWord(w!);
@@ -855,6 +921,7 @@ class Run {
     const here = this.containers[Math.max(0, at - 1)]!;
     frame.containerId = here.id;
     frame.words = [];
+    frame.anchor = undefined;
   }
 
   // ── Links, last ──

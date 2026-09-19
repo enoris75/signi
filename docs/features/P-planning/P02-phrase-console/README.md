@@ -1,8 +1,8 @@
 # P02. Phrase console — type the phrase, see it on the canvas, and back
 
 **Feature:** a terminal-like console docked under the page, where a period is built with a small
-command language — `/subj cat /adj brown /pl /verb eat /past /obj food` — with type-ahead and
-completion at every position. The console and the canvas are **two views of one phrase**: typing
+command language — `/subj ( cat /adj brown /pl ) /verb ( eat /past ) /obj ( food )` — with
+type-ahead and completion at every position. The console and the canvas are **two views of one phrase**: typing
 previews on the canvas, and every canvas action is written back to the console as the command it
 equals.
 **Shape:** a pure text ⇄ selection layer (parse, complete, apply, print) over the existing reducers,
@@ -10,12 +10,13 @@ and one console component. No change to the engine, the API or the saved-phrase 
 **Relation to [P01](../P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
 the keyboard (cursor, focus ring, key tips, box letters). The console is the fast path, and it
 replaces P01's command palette and hint bar.
-**Status:** phases 1–4 shipped, and phase 5 in part — the console builds, previews and edits every
+**Status:** phases 1–6 shipped — the console builds, previews and edits every
 part of a phrase the canvas can, and writes every canvas change back as the command it equals. See
 [Phases](#6-phases) for what each covered, and the notes under the table for what the plan left open.
 **Drawings:** [`artwork/`](artwork/) — six images exported from page *Phrase console (P02)* of
 the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded in
-the sections they illustrate.
+the sections they illustrate. They show the flat lines of phases 1–5; the bracketed lines of phase 6
+are described in the text.
 
 ---
 
@@ -31,6 +32,7 @@ Settled on 2026-09-13:
 | 4 | The text form is **not a save format** for now. | Saved phrases stay JSON; no `.signi` files until the feature has matured. Multi-line paste still works. |
 | 5 | **Type-ahead and command completion** are part of the console, not polish. | §2.4; shipped in phase 2 with the first console. |
 | 6 | **<kbd>&#96;</kbd> shows and hides the console.** | §2.1. Matched by key position (the key below <kbd>esc</kbd>), so it works on layouts without a backtick. Once shown, the console stays shown until it is hidden. |
+| 7 | **Structured lines** (2026-09-19). Every word of the period is written in its own bracket, with what describes it. The bracket's shape says what it holds: `( )` a word, `[ ]` a noun phrase hanging off a noun, `{ }` a period of its own. | §3. The console opens brackets itself and any bracket key types the right one, so none needs AltGr. Inside a bracket, completion offers only what fits there. Flat lines still read, so old pastes keep working. |
 
 ## Why
 
@@ -153,7 +155,7 @@ The console completes at every keystroke. Two things show at once:
 | the argument of a role command (`/adj b`) | Words of that role in the interface language: nouns for `/obj`, adjectives for `/adj`, modals for `/modal`, nouns *and* pronouns for `/subj` and `/cause`. Hovering a row shows its definition, as in the pickers. | `useConcepts(role)` + `useConceptSearch` + `slotCategories` — the pickers' own data and matcher |
 | the argument of a value command (`/join `, `/command `, `/level `, `/lang `, `/load `, `/help `) | The allowed values — only the four conjunctions two commands can take when the period is a command; saved-phrase names for `/load`. | `COORD_CONJUNCTION_OPTIONS` / `coordConjunctionOptions`, `ABSTRACTION_LEVELS`, languages, saved phrases |
 | after `/rel `, `/if `, `/inst `, `/join and `, `/poss `, `/and ` | New phrases first — `subj (` and `obj (` for `/rel` (*new clause · child is its subject*), `(` for the others — then the existing periods the link rules allow, numbered. | `commands.ts` + `linkRules.ts` |
-| inside `( … )` | Everything above, for the new phrase's context; the ghost offers ` )` once the phrase is complete. | the bracket stack from the lexer |
+| inside a bracket | What fits there: in a word's `( … )` that word's commands, in `[ … ]` a noun's, in `{ … }` a period's. The first word of `( … )` or `[ … ]` is the command's word, completed as its role's. The ghost offers the closer, in its shape, where the line has left one open. | the bracket stack from the lexer; the frames `apply` leaves |
 | `#` or `#2.` | Periods, then their nouns — for link commands only the targets the link rules allow, numbered (*1 #2.subj dog*, *2 #2.obj cat*); a digit picks. | `linkRules.ts` (extracted from `useWorkspaceLinks`) |
 | a word typed without a command (`ca`) | *Did you mean* — the role command for the box under the cursor: `/subj cat`. The line itself never keeps a bare word. | context + that role's vocabulary |
 | an empty prompt, ↑ / ↓ | Earlier lines from history (§ History). | `history.ts` |
@@ -169,15 +171,27 @@ The console completes at every keystroke. Two things show at once:
 The ghost is the top candidate. If the vocabulary has nothing better, the ghost offers the most
 recent history line starting with what was typed.
 
+**Before anything is typed** (just `/`, or ⇥ between commands), the commands come **topic by topic**
+instead, each topic headed. The closest word's topics come first, then the other words', then the
+period's words, the period, and the workspace. Within a topic:
+- A setting's command comes first (`/tense`, showing what the verb holds now).
+- Its shortcuts follow in their natural order, each saying what it is short for: `/past`
+  `= /tense past`.
+
+The help overlay's reference uses the same topics. The topics are defined in the catalogue
+(`TOPICS`, `topicOf`, `shortcutOf`).
+
 #### Keys inside the console
 
 | Keys | Action |
 |---|---|
 | *type* | Type-ahead: the ghost updates and the list narrows |
-| <kbd>⇥</kbd> | Accept the ghost or the highlighted row. When several candidates share a start, complete the shared part and open the list. With nothing to complete, open the list. |
-| <kbd>→</kbd> at the end of the line | Accept the ghost |
-| <kbd>↑</kbd> / <kbd>↓</kbd> | Move in the list · walk history when no list is open |
+| <kbd>⇥</kbd> | Accept the ghost or the highlighted row. When several candidates share a start, complete the shared part and open the list. With nothing typed at the caret, or a word selected, go to the next command or word and select it, or step past the next closing bracket. At the end of the line, open the list. On an empty line, offer the pinned and recent lines. |
+| <kbd>⇧⇥</kbd> | Go to the previous command or word |
+| <kbd>→</kbd> in front of the rest | Accept the ghost (at the end of the line, or with only closing brackets after the caret) |
+| <kbd>↑</kbd> / <kbd>↓</kbd> | Move in the list · move between the rows of a wrapped line · walk history from its first or last row |
 | <kbd>↵</kbd> | Choose the highlighted row · run the line when no list is open |
+| <kbd>⇧↵</kbd> | Break the line: inside a bracket it is a space, outside one it starts the next period |
 | <kbd>1</kbd>–<kbd>9</kbd> | Pick a numbered reference (while a reference list is open) |
 | <kbd>esc</kbd> | Close the list · then clear the line · then return to the canvas (the console stays shown) |
 | <kbd>&#96;</kbd> | Hide the console; from outside it, show it or take focus (§2.1) |
@@ -216,9 +230,27 @@ synchronously on every keystroke.
 ```
 line        = item …
 item        = /command [argument]  ·  #reference
-argument    = a word (the text up to the next / or #)  ·  a value  ·  a #reference  ·  ( line )
+argument    = a word (the text up to the next / or #)  ·  a value  ·  a #reference  ·  bracket
+bracket     = ( [word] line )  ·  [ [word] line ]  ·  { line }
 #reference  = #2  ·  #2.obj  ·  #1.subj.poss
 ```
+
+**Every word of the period is written in its own bracket, with what describes it** (phase 6):
+
+```
+/subj ( man /that ) /verb ( love /adv never /past /prosp ) /obj ( cat /this /pl )
+```
+
+| Shape | Holds | Written after | Inside, the list offers |
+|---|---|---|---|
+| `( … )` | A word and what describes it | A role (`/subj`, `/verb`, `/obj`, complements), or an adjective or modal that has settings of its own (`/adj ( big /more )`, `/modal ( can /adv never )`) | That word's commands: a noun's adjectives, number, determiner, possessor, conjuncts, relative clause; a verb's adverb, modals, tense, aspect, polarity. Nothing of the period's. |
+| `[ … ]` | A noun phrase hanging off a noun, its head word first | `/poss`, `/and`, `/or` | A noun's commands |
+| `{ … }` | A period of its own | `/rel subj`, `/rel obj`, `/if`, `/join <conjunction>`, `/inst` | A period's commands |
+
+The command says what the bracket holds, and the shape only shows it. The parser reads any shape
+after any command, so `(` does for all three, and a keyboard that puts `[ ] { }` behind AltGr never
+needs them. The console writes each bracket in its own shape. A line break inside a bracket is a
+space; outside every bracket it ends the period. A long period may therefore run over several lines.
 
 ### The one rule
 
@@ -229,6 +261,12 @@ So `/subj cat /adj brown /pl /verb eat /past` gives *brown* and plural to *cat* 
 `/subj cat /verb eat /obj food /past` still lands `/past` on *eat*; and `/past` typed on its own with
 the cursor on the verb sets that verb's tense. Settings **set** a value rather than toggling it, so a
 line means the same whatever the period held before — which makes preview, replay and paste safe.
+
+**Brackets bound the rule.** Inside a bracket, a command reaches the bracket's words alone. A
+command that belongs to the period (`/verb` inside `/subj ( … )`) is refused until the bracket
+closes. Once a period word's bracket closes, nothing before it is the closest word:
+`/subj ( cat ) /pl` is refused, with the bracket to write it in. So a bracketed line has one reading.
+The rule still decides flat lines, and a command typed on its own with the cursor on a box.
 
 ### Words
 
@@ -252,12 +290,12 @@ matches. "Code" is the existing function each one reaches.
 | `/subj` `/verb` `/obj` | subject, verb, direct object | `applyConceptSelect` |
 | `/pred` `/term` `/manner` | subject complement, terminus, manner | `applyConceptSelect` |
 | `/loc` `/dir` `/src` `/route` `/cause` | place, direction, source, route, cause | `applyConceptSelect` |
-| `/inst #n` · `/inst ( … )` | instrumental: period *n*, or a new one | instrumental link (`useWorkspaceLinks`) |
+| `/inst #n` · `/inst { … }` | instrumental: period *n*, or a new one | instrumental link (`useWorkspaceLinks`) |
 | `/adj` | adjective on the closest noun (next of 3); on a noun modifier, its own adjective | `applyConceptSelect` / `setModifierAdjective` |
 | `/adv` | adverb of the verb, or of the closest modal | `applyConceptSelect` (`modifier`, `verbModal*Adverb`) |
 | `/modal` | modal (next of 2) | `applyConceptSelect` (`verbModal`, `verbModal2`) |
-| `/poss` · `/poss ( … )` | possessor phrase — or, with `#n.role`, a possessor that refers to a noun | nested selection / `setPossessorRef` |
-| `/and` `/or` · `/and ( … )` | coordinate another phrase | `addConjunct` + conjunction |
+| `/poss` · `/poss [ … ]` | possessor phrase — or, with `#n.role`, a possessor that refers to a noun | nested selection / `setPossessorRef` |
+| `/and` `/or` · `/and [ … ]` | coordinate another phrase | `addConjunct` + conjunction |
 
 **Noun**
 
@@ -267,7 +305,7 @@ matches. "Code" is the existing function each one reaches.
 | `/masc` `/fem` `/neut` | gender | `setGender` *(new)* |
 | `/the` `/a` `/zero` `/this` `/that` | article, demonstrative | `setDefiniteness` |
 | `/some` `/no` `/many` `/few` `/all` | quantifier | `setDefiniteness` |
-| `/rel #n.role` · `/rel subj\|obj ( … )` | relative clause on an existing period, or a new one with the head as its subject or object | relative link (+ `addContainer`) |
+| `/rel #n.role` · `/rel subj\|obj { … }` | relative clause on an existing period, or a new one with the head as its subject or object | relative link (+ `addContainer`) |
 | `/in` `/through` `/under` `/over` `/around` `/behind` `/front` | spatial relation (locative, route) | `setSpecifier` |
 | `/because` `/fault` `/thanks` | sentiment (cause) | `setSentiment` |
 
@@ -277,6 +315,7 @@ matches. "Code" is the existing function each one reaches.
 |---|---|---|
 | `/present` `/past` `/future` | tense | `setTense` *(new; `cycleTense` today)* |
 | `/neutral` `/prog` `/prosp` `/result` | aspect | `setAspect` *(new)* |
+| `/tense past\|present\|future` · `/aspect neutral\|progressive\|prospective\|resultative` | the same, the setting named and its value the argument (`/aspect prog` reads too); the printer keeps the short form | `setTense` · `setAspect` |
 | `/not` `/pos` | polarity | `setNegative` *(new)* |
 
 **Adjective**
@@ -294,8 +333,8 @@ matches. "Code" is the existing function each one reaches.
 | `#n` | go to period *n* | cursor |
 | `/command [you\|lets\|youall] [order\|instruction]` | command mood and addressee | `setImperative` *(new)*, `setImperativePerson`, `setImperativeRegister` |
 | `/inf` · `/statement` | infinitive · back to a plain statement | `setInfinitive` *(new)* |
-| `/if #n` · `/if ( … )` | if-condition: an existing period, or a new one | conditional link (+ `addContainer`) |
-| `/join and\|or\|but\|thatis\|therefore\|then #n` · `… ( … )` | coordination with an existing or a new period | coordinative link (+ `addContainer`) |
+| `/if #n` · `/if { … }` | if-condition: an existing period, or a new one | conditional link (+ `addContainer`) |
+| `/join and\|or\|but\|thatis\|therefore\|then #n` · `… { … }` | coordination with an existing or a new period | coordinative link (+ `addContainer`) |
 | `/level process\|concept\|object` | reification of an instrument period | `instrumental.onLevelChange` |
 | `/edit` | load this period's source into the prompt | console |
 | `/del [adj 2 \| obj \| rel \| period …]` | remove what the context names | `applyClear`, `removePossessor`, `removeConjunct`, link removal, `removeContainer` |
@@ -316,36 +355,37 @@ New grammar features add a command in the same change — e.g. [A01 passive voic
 
 ![Subordinate phrases: a relative clause typed in brackets, previewed as a new linked period, with forms, completion and rules](artwork/06-subordinate-phrases.png)
 
-A clause can be written where it belongs. Brackets after a link command create the new phrase,
-link it, and hand the line back to the head when they close:
+A clause can be written where it belongs. Braces after a link command create the new period, link
+it, and hand the line back to the head when they close. A possessor or a conjunct is a noun phrase
+in square brackets, its head word first:
 
 ```
-/subj child /rel subj ( /verb love /obj cat ) /verb read /obj book
+/subj ( child /rel subj { /verb ( love ) /obj ( cat ) } ) /verb ( read ) /obj ( book )
 → the child who loves the cat reads the book.
 
-/subj cat /rel obj ( /subj dog /verb see ) /verb run
+/subj ( cat /rel obj { /subj ( dog ) /verb ( see ) } ) /verb ( run )
 → the cat that the dog sees runs.
 
-/subj dog /verb run /if ( /subj cat /verb eat )
+/subj ( dog ) /verb ( run ) /if { /subj ( cat ) /verb ( eat ) }
 → if the cat ate, the dog would run.
 
-/subj child /verb eat /obj food /inst ( /subj stick )
+/subj ( child ) /verb ( eat ) /obj ( food ) /inst { /subj ( stick ) }
 → the child eats the food with a stick.
 
-/subj child /poss ( /subj man /adj old ) /pl /verb run
+/subj ( child /poss [ man /adj old ] /pl ) /verb ( run )
 → the old man's children run.
 
-/subj dog /verb run /if ( /subj cat /rel subj ( /verb see /obj child ) /verb eat )
+/subj ( dog ) /verb ( run ) /if { /subj ( cat /rel subj { /verb ( see ) /obj ( child ) } ) /verb ( eat ) }
 → if the cat that sees the child ate, the dog would run.
 ```
 
 (Sample renderings.)
 
-- **`(`** after `/rel`, `/if`, `/inst`, `/join`, `/poss` or `/and` opens a new phrase already linked
-  to the command before it: a new period for the clause-level links, a nested phrase for possessors
-  and conjuncts.
-- **Inside**, commands attach within the brackets. **`)`** closes them, and what follows attaches to
-  the head again — in the possessor line, `/pl` lands on *child*, not *man*.
+- **`{`** after `/rel subj`, `/rel obj`, `/if`, `/inst` or `/join` opens a new period already
+  linked to the command before it. **`[`** after `/poss`, `/and` or `/or` opens a nested noun
+  phrase. Where nothing but a new period may follow, the console opens the braces itself.
+- **Inside**, commands attach within the brackets. The closer ends them, and what follows attaches
+  to the head again: in the possessor line, `/pl` lands on *child*, not *man*.
 - **`/rel subj` or `/rel obj` names the gap:** that box of the new clause takes the head's word and
   becomes the link target, exactly as a pick on the canvas makes it.
 - **Brackets nest**, and <kbd>↵</kbd> closes any that are still open, so a line may end inside one.
@@ -359,13 +399,17 @@ link it, and hand the line back to the head when they close:
 
 ### Canonical printing
 
-`print(period)` is deterministic: subject block → verb block (modals, adverb, tense, aspect,
-polarity) → object → complements in `COMPLEMENT_RENDER_ORDER` → period relations; within a noun,
+`print(period)` is deterministic: subject → verb (adverb, modals, tense, aspect, polarity) →
+object → complements in `COMPLEMENT_RENDER_ORDER` → period relations. Within a noun, the order is
 word → adjectives → number → gender → determiner → possessor → conjuncts → relative link. Only
-non-default values are printed. Clauses are periods of their own, so each prints on its own line and
-links print as references (`/rel #2.subj`), never as brackets. Phrases that live inside a period —
-possessors, and conjuncts carrying settings — print in brackets (`/poss ( /subj man /adj old )`),
-which keeps their settings unambiguous. The printer also returns a span per token →
+non-default values are printed.
+- **Brackets.** Every period word is printed in its own bracket. An adjective or a modal gets a
+  bracket only when something describes it in turn. A noun modifier gets one whenever anything
+  follows it, so what follows stays the head's.
+- **Clauses** are periods of their own, so each prints on its own line and links print as references
+  (`/rel #2.subj`), never as braces.
+- **Nested phrases** that live inside a period (possessors, and conjuncts carrying settings) print in
+  square brackets: `/poss [ man /adj old ]`. The printer also returns a span per token →
 `{containerId, slotKey}`, which drives highlighting in both directions.
 
 **Invariant:** for every reachable state, `apply(empty, parse(print(state))) ≡ state`.
@@ -458,7 +502,8 @@ The `language/` layer imports no React and is fully unit-testable.
 | **2 · Console with completion** ✅ | Docked console, coloured prompt, **ghost type-ahead and the completion list** (commands, role words, values), history, transcript with sentences, source strip, context chip; ↵ applies; echo of canvas actions. | A period can be built from the console alone without typing any name in full, and clicking on the canvas shows up in the console. |
 | **3 · Live preview and cursor** ✅ | Preview state, dashed boxes, preview translations, diagnostics, shared cursor, hover highlight both ways, token click, `/edit`. | Typing a line previews on the canvas before ↵; esc leaves the state untouched. |
 | **4 · The whole language** ✅ | Complements and relations, possessors, conjuncts, moods, periods (`/new`, `#n`), links with references and numbered completion, bracketed subordinate phrases, `/del`, workspace commands, multi-line paste. | Every control on the canvas has a command (coverage test), and a pasted multi-period script rebuilds the workspace. |
-| **5 · Polish** (in part) | Recency ranking, `/help` pages, pinning, interface-language aliases if wanted. | — |
+| **5 · Polish** ✅ | Recency ranking, `/help` pages, pinning, interface-language aliases if wanted. | Every command has a help page whose example the tests run; a pinned line survives a reload and comes back first. |
+| **6 · Structured lines** ✅ | Every word of the period in its own bracket; `( ) [ ] { }` by what they hold; completion scoped to the bracket; brackets opened, stepped over and removed as the line is typed; commands moved out of a bracket they do not belong in; a prompt that wraps and grows, with ⇧↵; ⇥ / ⇧⇥ from word to word; the editing chip following the caret. | The round trip holds in the bracketed form (5,000 seeds); a flat line typed straight through comes out bracketed; the old flat and `( … )` lines still read. |
 
 **What phase 1 shipped, beside the table.** The language is pure TypeScript under
 `console/language/`: the files §5 names, plus `words.ts` (which kind of word each box holds, and which
@@ -525,9 +570,52 @@ its surface. A paste of several lines runs as one step, each line a period. `/sa
 `/import` do. The coverage test holds every satellite, every reducer that edits the phrase, and every
 key the app binds to a command, or to an explicit note that the key only moves the cursor or the view.
 
-**What phase 5 has so far.** Recency ranking; the console's reference in the help overlay beside the
-keys, generated from the catalogue; `/help pl` writes a command's line into the transcript. Pinning and
-interface-language aliases are not done — nobody has asked for either yet.
+**What phase 5 shipped, beside the table.**
+- **Recency ranking.** Among the commands matching what was typed, those used lately rank first.
+  The whole list, before anything is typed, keeps its topics' order.
+- **Help pages.** `/help rel` puts the command's page in the transcript: how it is written, what it
+  does, its aliases and values, and an example. The sentence the example builds is shown in the
+  right-hand column. The page ends with what the command would act on at the cursor ("Here: on cat,
+  now singular."). Each example lives in `help.ts` and starts from an empty period; a test runs every
+  one, so a page cannot teach a line that fails. In the help overlay, the console's rows are buttons
+  that close the overlay and show the page.
+- **Pinning** is per line rather than per command:
+  - A line is pinned from its pin in the transcript, or with `/pin` (the line it is written in, or
+    alone, the line run before it).
+  - ⇥ on an empty prompt offers the pinned lines, then the recent ones.
+  - A pinned line is the ghost's first choice.
+  - Pins are kept per browser (`signi:consolePins`) and history never pushes them out.
+- **Interface-language aliases find a command, and nothing more.** In Italian, `/plurale` finds
+  `/pl`. Choosing it writes `/pl`, so a line reads the same in every language (decision 3). The
+  aliases are the command descriptions the UI-string catalogue already translates. They match from
+  their start, ignoring accents and case.
+
+**What phase 6 shipped, beside the table.** It came from using the console, 2026-09-19 (decision 7).
+Four problems: a single-line prompt cut long lines short; a clause that needed brackets got a
+message instead of the brackets; there was no way to move from keyword to keyword while editing; and
+in a flat line it was hard to tell which word a setting belonged to.
+- **Grammar.** The parser takes a word written first inside a bracket as its command's word (its
+  *lead*). Apply gives each word's bracket a frame of its own, an `element`: commands inside reach its
+  words only, and the period's commands are refused there. The printer writes the bracketed form.
+  The round trip holds at 5,000 seeds.
+- **Editing.** `edit.ts` is pure, and each keystroke goes through it:
+  - Finishing a period word's command opens its bracket.
+  - Where nothing but a new period may follow, the braces open (`/rel subj `, or `/if ` with no
+    period to name).
+  - Any opening bracket key types the pair its command takes.
+  - A closer steps over the one already there.
+  - ⌫ on an empty bracket removes its closer.
+  - A command that does not fit its bracket moves out to the level it fits, checked against the
+    state the line has built so far (`/obj` fits once this line gives the verb).
+  - Typing the line flat (`/subj man /that /verb love …`) therefore comes out bracketed.
+- **The prompt** is a textarea over a mirror that wraps the same way. It grows to eight rows. The
+  ghost is drawn at the caret, so it also shows in front of closers.
+- **A paste** now lands in the prompt and previews there. ↵ runs it, as for any line. Before, a paste
+  of several lines ran at once.
+- **⇥** selects the next command or word, so typing replaces it. Past a closer, the caret steps out
+  of the bracket.
+- **The chip** reads the end of the selection. While editing, it names the word the caret is on:
+  `EDITING PERIOD 1 › VERB love ›`.
 
 **Left open.** Every new caption, title and message is an English literal marked for `/localize`
 (command descriptions already come from the catalogue where the words are seeded). The IME slashes

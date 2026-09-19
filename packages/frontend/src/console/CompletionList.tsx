@@ -1,11 +1,13 @@
 import { Box, Tooltip } from "@mui/material";
-import { useEffect, useRef } from "react";
+import PushPinIcon from "@mui/icons-material/PushPin";
+import { Fragment, useEffect, useRef } from "react";
 import { ConceptWord } from "../i18n/ConceptWord.tsx";
 import { useConceptDefinition } from "../i18n/useConceptLabel.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import { Keycap } from "../keyboard/Keycap.tsx";
 import type { Candidate } from "./language/complete.ts";
-import { MONO, tokenColor } from "./tokens.tsx";
+import { styleTokens } from "./language/parse.ts";
+import { MONO, Token, tokenColor } from "./tokens.tsx";
 import type { PhraseConsoleModel } from "./usePhraseConsole.ts";
 
 /**
@@ -76,7 +78,29 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
             {c.number}
           </Box>
         )}
-        {c.kind === "word" && c.concept && c.concept.role !== "pronoun" ? (
+        {c.kind === "history" ? (
+          <Box
+            component="span"
+            sx={{ display: "inline-flex", alignItems: "baseline", gap: 1, minWidth: 0, fontFamily: MONO, fontSize: "0.88rem" }}
+          >
+            {c.pinned && (
+              <PushPinIcon
+                data-testid="console-option-pinned"
+                sx={{ fontSize: 13, color: "primary.main", alignSelf: "center" }}
+              />
+            )}
+            <Box component="span" sx={{ overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>
+              {styleTokens(c.insert).map((tok, j) => (
+                <Fragment key={j}>
+                  {j > 0 && " "}
+                  <Token style={tok.style} italic={tok.italic}>
+                    {c.insert.slice(tok.from, tok.to)}
+                  </Token>
+                </Fragment>
+              ))}
+            </Box>
+          </Box>
+        ) : c.kind === "word" && c.concept && c.concept.role !== "pronoun" ? (
           <Box
             component="span"
             sx={{
@@ -112,12 +136,25 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
             {c.detailKey ? t(c.detailKey) : c.detail}
           </Box>
         )}
-        {(c.current || c.alias) && (
+        {(c.current || c.alias || c.shortcut) && (
           <Box
             component="span"
-            sx={{ ml: "auto", pl: 2, fontFamily: '"Inter", sans-serif', fontSize: "0.72rem", color: "text.disabled" }}
+            data-testid={c.shortcut && !c.alias ? "console-option-shortcut" : undefined}
+            sx={{ ml: "auto", pl: 2, fontFamily: '"Inter", sans-serif', fontSize: "0.72rem", color: "text.disabled", whiteSpace: "nowrap" }}
           >
-            {c.alias ? `also ${c.alias}` : `now ${c.current!.key ? t(c.current!.key as never) : c.current!.value}`}
+            {/* English literals, for /localize. A shortcut says what it is short for: `/past` = `/tense past`. */}
+            {c.alias ? (
+              `also ${c.alias}`
+            ) : c.shortcut ? (
+              <>
+                ={" "}
+                <Box component="span" sx={{ fontFamily: MONO, fontSize: "0.78rem" }}>
+                  {c.shortcut}
+                </Box>
+              </>
+            ) : (
+              `now ${c.current!.key ? t(c.current!.key as never) : c.current!.value}`
+            )}
           </Box>
         )}
       </Box>
@@ -166,7 +203,36 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
         {title}
       </Box>
       <Box ref={listRef} id={id} role="listbox" sx={{ maxHeight: 260, overflowY: "auto", pb: 0.5 }}>
-        {completion.candidates.map(row)}
+        {completion.candidates.map((c, i) => {
+          // Before anything is typed the commands come topic by topic, each topic headed.
+          const heading =
+            completion.topics && c.topic && c.topic !== completion.candidates[i - 1]?.topic ? (
+              <Box
+                key={`topic:${c.topic}`}
+                role="presentation"
+                data-testid="console-list-topic"
+                sx={{
+                  px: 2,
+                  pt: i === 0 ? 0.25 : 1,
+                  pb: 0.25,
+                  fontFamily: '"Inter", sans-serif',
+                  fontSize: "0.58rem",
+                  fontWeight: 700,
+                  letterSpacing: "0.14em",
+                  textTransform: "uppercase",
+                  color: "text.disabled",
+                }}
+              >
+                {c.topicKey ? t(c.topicKey) : c.topic}
+              </Box>
+            ) : null;
+          return (
+            <Fragment key={`${c.kind}:${c.insert}:${i}`}>
+              {heading}
+              {row(c, i)}
+            </Fragment>
+          );
+        })}
       </Box>
       <Box
         sx={{

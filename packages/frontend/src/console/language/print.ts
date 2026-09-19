@@ -30,6 +30,7 @@ import {
   type Setting,
   type TokenColor,
 } from "./commands.ts";
+import { CLOSER, type Shape } from "./lex.ts";
 import { bracketColor } from "./parse.ts";
 import { printRef, printWord, wordSpecFor } from "./resolve.ts";
 import type { Span, Vocabulary, WordRef, WorkspaceState } from "./types.ts";
@@ -38,14 +39,19 @@ import { currentSetting, defaultSetting, settingTakes, wordInfo, type WordInfo }
 /**
  * The canonical text of a period — deterministic, and read back by `apply` into the same period.
  *
- * Subject block → verb block (adverb, modals and theirs, tense, aspect, polarity) → object →
- * complements in render order → the period's own links. Within a noun: word → adjectives → number →
- * gender → determiner → relation → possessor → conjuncts → relative clause. Only what differs from
- * the default is written, so a plain period reads plainly.
+ * Subject → verb (adverb, modals and theirs, tense, aspect, polarity) → object → complements in
+ * render order → the period's own links. Within a noun: word → adjectives → number → gender →
+ * determiner → relation → possessor → conjuncts → relative clause. Only what differs from the default
+ * is written, so a plain period reads plainly.
+ *
+ * Every word of the period is written in its own bracket, with all that describes it:
+ * `/subj ( cat /adj brown /pl ) /verb ( eat /past )`. Inside, an adjective or a modal takes a bracket
+ * of its own when something describes it in turn (`/adj ( big /more )`); a noun modifier always does,
+ * so what follows it is the head's. A possessor, or a conjunct with more than its word, is a noun
+ * phrase in square brackets, its head word first: `/poss [ child /adj old ]`.
  *
  * Clauses are periods of their own, so each prints on its own line and a link to one is a reference
- * (`/rel #2.subj`), never a bracket. What lives *inside* a period — a possessor, a conjunct with
- * settings of its own — prints in brackets, which keeps its settings unambiguous.
+ * (`/rel #2.subj`) — the braces a new clause is typed in (`/rel subj { … }`) are never printed.
  *
  * **Invariant:** for every reachable state, applying the printed text to an empty workspace gives the
  * state back (see the round-trip tests).
@@ -62,6 +68,8 @@ export interface PrintToken extends Span {
   kind: PrintKind;
   color: TokenColor;
   italic?: boolean;
+  /** A word's own bracket — part of how it is written, not of any one statement's text. */
+  element?: boolean;
   /** The box this token belongs to. */
   word?: WordRef;
   /** The statement it is part of (an index into `statements`). */
@@ -115,14 +123,22 @@ class Printer {
     return this.state.containers.find((c) => c.id === this.containerId)?.selection ?? {};
   }
 
-  /** Open a statement; every token emitted until the next one belongs to it. */
-  statement(s: Omit<Statement, "text">): number {
-    this.statements.push({ ...s, text: "" });
+  /**
+   * Open a statement; every token emitted until the next one belongs to it. `text` stands for tokens
+   * that would not say it alone — a phrase's head word, written without its `/subj`.
+   */
+  statement(s: Omit<Statement, "text"> & { text?: string }): number {
+    this.statements.push({ ...s, text: s.text ?? "" });
     this.current = this.statements.length - 1;
     return this.current;
   }
 
-  emit(text: string, kind: PrintKind, color: TokenColor, extra: { word?: WordRef; italic?: boolean; statement?: number } = {}) {
+  emit(
+    text: string,
+    kind: PrintKind,
+    color: TokenColor,
+    extra: { word?: WordRef; italic?: boolean; statement?: number; element?: boolean } = {},
+  ) {
     if (this.tokens.length) this.pos += 1;
     const statement = extra.statement ?? this.current;
     this.tokens.push({
@@ -134,19 +150,31 @@ class Printer {
       from: this.pos,
       to: this.pos + text.length,
       statement,
+      ...(extra.element && { element: true }),
     });
     this.pos += text.length;
   }
 
   done(): PrintedPeriod {
+    // A statement is what the console would type to make it: its command and argument, flat — a
+    // phrase's bracket as `[ … ]`, a word's own bracket not at all.
     const statements = this.statements.map((s, i) => ({
       ...s,
-      text: this.tokens
-        .filter((t) => t.statement === i)
-        .map((t) => (t.kind === "open" ? "( … )" : t.kind === "close" ? "" : t.text))
-        .filter(Boolean)
-        .join(" "),
+      text:
+        s.text ||
+        this.tokens
+          .filter((t) => t.statement === i && !t.element)
+          .map((t) => (t.kind === "open" ? `${t.text} … ${CLOSER[t.text as Shape]}` : t.kind === "close" ? "" : t.text))
+          .filter(Boolean)
+          .join(" "),
     }));
+    // Spans from the tokens as they stand: a bracket dropped after it was written moves what follows.
+    let pos = 0;
+    for (const t of this.tokens) {
+      t.from = pos;
+      t.to = pos + t.text.length;
+      pos = t.to + 1;
+    }
     return { text: this.tokens.map((t) => t.text).join(" "), tokens: this.tokens, statements };
   }
 
@@ -220,8 +248,9 @@ class Printer {
     );
     const hasModal = MODAL_SLOTS.some((key) => root[key]);
     if (!root.verb && !root.modifier && !hasModal && settings.length === 0) return;
-    this.statement({ key: `${wordKey(verbRef)}:word`, removal: "/del verb", owner: verbRef, about: verbRef });
+    const statement = this.statement({ key: `${wordKey(verbRef)}:word`, removal: "/del verb", owner: verbRef, about: verbRef });
     this.emit("/verb", "command", "secondary", { word: verbRef });
+    this.emit("(", "open", "secondary", { word: verbRef, element: true });
     if (root.verb) this.emit(this.word(root.verb, "verb"), "word", "secondary", { word: verbRef, italic: true });
     // The verb's own adverb before any modal: after one, `/adv` would be the modal's.
     if (root.modifier) this.wordStatement({ containerId: id, slot: "modifier" }, "/adv", "info", root.modifier, verbRef);
@@ -229,19 +258,35 @@ class Printer {
       const modal = root[key];
       if (!modal) continue;
       const ref: WordRef = { containerId: id, slot: key };
-      this.wordStatement(ref, "/modal", "secondary", modal, verbRef);
       const adverbKey = modalAdverbFor(key)!;
       const adverb = root[adverbKey];
-      if (adverb) this.wordStatement({ containerId: id, slot: adverbKey }, "/adv", "info", adverb, ref);
+      // A modal with an adverb of its own wears a bracket, which keeps the adverb its.
+      const own = this.wordStatement(ref, "/modal", "secondary", modal, verbRef, Boolean(adverb));
+      if (adverb) {
+        this.wordStatement({ containerId: id, slot: adverbKey }, "/adv", "info", adverb, ref);
+        this.emit(")", "close", "secondary", { word: ref, element: true, statement: own });
+      }
     }
     for (const s of settings) this.setting({ id: s, value: currentSetting(s, w) } as Setting, w);
+    this.emit(")", "close", "secondary", { word: verbRef, element: true, statement });
   }
 
-  /** A word that fills a box of its own: `/adv fast`, `/modal can`. */
-  wordStatement(ref: WordRef, command: string, color: TokenColor, concept: Concept, owner?: WordRef): void {
-    this.statement({ key: `${wordKey(ref)}:word`, removal: `/del ${command.slice(1)}`, owner, about: ref });
+  /**
+   * A word that fills a box of its own: `/adv fast`, `/modal can` — or, `open`, its bracket's start,
+   * `/modal ( can`, which the caller closes once it has written what describes the word.
+   */
+  wordStatement(ref: WordRef, command: string, color: TokenColor, concept: Concept, owner?: WordRef, open = false): number {
+    const statement = this.statement({ key: `${wordKey(ref)}:word`, removal: `/del ${command.slice(1)}`, owner, about: ref });
     this.emit(command, "command", color, { word: ref });
+    if (open) this.emit("(", "open", color, { word: ref, element: true });
     this.emit(this.word(concept, ref.slot), "word", color, { word: ref, italic: true });
+    return statement;
+  }
+
+  /** Whether a word holds a value of a setting other than its default — what `settings` writes. */
+  holds(w: WordInfo, id: Setting["id"]): boolean {
+    const value = currentSetting(id, w);
+    return value !== undefined && value !== defaultSetting(id, w) && settingTakes({ id, value } as Setting, w);
   }
 
   /** A setting on a word, written as the command that sets its current value. */
@@ -266,10 +311,12 @@ class Printer {
   // ── A noun and everything it carries ──
 
   /**
-   * A noun block: its word and what hangs off it. `slice` is the address of the nested phrase `sel`
-   * is (undefined for the period itself); `frame` says which kind of phrase that is.
+   * A noun and what hangs off it: `/subj ( cat … )`. `slice` is the address of the nested phrase `sel`
+   * is (undefined for the period itself); `frame` says which kind of phrase that is. `lead`: the head
+   * of a phrase in square brackets, written as the bracket's first word, without a command or a
+   * bracket of its own.
    */
-  noun(sel: PhraseSelection, which: NounKey, slice: NounAddress | undefined, frame: "period" | "possessor" | "conjunct"): void {
+  noun(sel: PhraseSelection, which: NounKey, slice: NounAddress | undefined, frame: "period" | "possessor" | "conjunct", lead = false): void {
     const id = this.containerId;
     const concept = sel[which];
     if (!concept) return;
@@ -277,44 +324,56 @@ class Printer {
     const w = this.info(ref)!;
     const role = roleCommand(which)!;
     const color = role.color;
-    this.statement({ key: `${wordKey(ref)}:word`, removal: `/del ${role.name}`, owner: slice ? ref : undefined, about: ref });
-    this.emit(`/${role.name}`, "command", color, { word: ref });
-    this.emit(this.word(concept, which, frame), "word", color, { word: ref, italic: true });
+    const word = this.word(concept, which, frame);
+    const statement = this.statement({
+      key: `${wordKey(ref)}:word`,
+      removal: `/del ${role.name}`,
+      owner: slice ? ref : undefined,
+      about: ref,
+      ...(lead && { text: `/${role.name} ${word}` }),
+    });
+    if (!lead) {
+      this.emit(`/${role.name}`, "command", color, { word: ref });
+      this.emit("(", "open", color, { word: ref, element: true });
+    }
+    this.emit(word, "word", color, { word: ref, italic: true });
 
+    // Its adjectives. One takes a bracket when something describes it in turn — and a noun modifier
+    // always, since what follows a bare one (`/adj`, `/pl`) would be its own rather than the head's.
+    // So does every one when the head's own degree is written after them.
     const chain = adjectiveSlots(which).filter((key) => sel[key]);
-    const modifiers = chain.some((key) => sel[key]?.role === "noun");
-    // A noun modifier takes a number of its own, so the head's is written before the adjectives when
-    // one is there: after it, `/pl` would be the modifier's.
-    if (modifiers) this.settings(w, ["number"]);
-    // Set once a noun modifier without an adjective of its own has been written: a later `/adj` would
-    // be taken as that adjective, so the head is named again first.
-    let open = false;
+    const headDegree = this.holds(w, "degree");
+    // A noun modifier's bracket around its word alone, while nothing may follow it yet.
+    let bare: PrintToken[] | undefined;
     for (const key of chain) {
       const adjective = sel[key]!;
-      if (open) {
-        this.statement({ key: `${wordKey(ref)}:anchor:${key}`, removal: "", anchor: true });
-        this.emit(`/${role.name}`, "command", color, { word: ref });
-      }
       const adjRef: WordRef = { containerId: id, slice, slot: key };
       const aw = this.info(adjRef)!;
-      this.statement({ key: `${wordKey(adjRef)}:word`, removal: "/del adj", owner: ref, about: adjRef });
+      const modifier = adjective.role === "noun";
+      const ids: Setting["id"][] = modifier ? ["number", "relation"] : ["degree"];
+      const own = modifier ? sel.modifierAdjectives?.[key] : undefined;
+      const bracket = modifier || headDegree || ids.some((i) => this.holds(aw, i));
+      const adjStatement = this.statement({ key: `${wordKey(adjRef)}:word`, removal: "/del adj", owner: ref, about: adjRef });
       this.emit("/adj", "command", "error", { word: adjRef });
+      if (bracket) this.emit("(", "open", "error", { word: adjRef, element: true });
+      const open = bracket ? this.tokens.at(-1) : undefined;
       this.emit(this.word(adjective, key), "word", "error", { word: adjRef, italic: true });
-      if (adjective.role === "noun") {
-        this.settings(aw, ["number", "relation"]);
-        const own = sel.modifierAdjectives?.[key];
-        if (own) {
-          const ownRef: WordRef = { ...adjRef, modifierAdjective: true };
-          this.statement({ key: `${wordKey(ownRef)}:word`, removal: "/del", owner: adjRef, about: ownRef });
-          this.emit("/adj", "command", "error", { word: ownRef });
-          this.emit(printWord(own, { roles: ["adjective"] }, this.vocab), "word", "error", { word: ownRef, italic: true });
-        }
-        open = !own;
+      this.settings(aw, ids);
+      if (own) {
+        const ownRef: WordRef = { ...adjRef, modifierAdjective: true };
+        this.statement({ key: `${wordKey(ownRef)}:word`, removal: "/del", owner: adjRef, about: ownRef });
+        this.emit("/adj", "command", "error", { word: ownRef });
+        this.emit(printWord(own, { roles: ["adjective"] }, this.vocab), "word", "error", { word: ownRef, italic: true });
+      }
+      if (open) {
+        this.emit(")", "close", "error", { word: adjRef, element: true, statement: adjStatement });
+        bare = this.tokens.at(-3) === open ? [open, this.tokens.at(-1)!] : undefined;
       } else {
-        this.settings(aw, ["degree"]);
+        bare = undefined;
       }
     }
-    this.settings(w, modifiers ? ["gender", "determiner", "specifier", "sentiment", "degree"] : ["number", "gender", "determiner", "specifier", "sentiment", "degree"]);
+    const afterAdjectives = this.tokens.length;
+    this.settings(w, ["number", "gender", "determiner", "specifier", "sentiment", "degree"]);
 
     // Its possessor: a phrase of its own in brackets, or a reference to another noun of the period.
     const address = w.address!;
@@ -364,9 +423,13 @@ class Printer {
       this.emit("/rel", "command", "primary", { word: ref });
       this.emit(printRef(this.periodNumber(rel.target.containerId), rel.target.nounKey), "ref", "ref");
     }
+    // Nothing came after the last noun modifier: its bracket says nothing.
+    if (bare && this.tokens.length === afterAdjectives)
+      this.tokens = this.tokens.filter((t) => !bare!.includes(t));
+    if (!lead) this.emit(")", "close", color, { word: ref, element: true, statement });
   }
 
-  /** A nested phrase in brackets: `/poss ( /subj man /adj old )`. */
+  /** A noun phrase in square brackets, its head word first: `/poss [ man /adj old ]`. */
   phrase(
     owner: WordRef,
     command: string,
@@ -380,9 +443,9 @@ class Printer {
     const statement = this.statement({ key, removal, owner, about: owner, scope: slice });
     const first = this.tokens.length;
     this.emit(command, "command", "primary", { word: { containerId: this.containerId, slice, slot: "subject" } });
-    this.emit("(", "open", color);
-    this.noun(sel, "subject", slice, frame);
-    this.emit(")", "close", color, { statement });
+    this.emit("[", "open", color);
+    this.noun(sel, "subject", slice, frame, true);
+    this.emit("]", "close", color, { statement });
     this.statements[statement]!.full = this.tokens
       .slice(first)
       .map((t) => t.text)

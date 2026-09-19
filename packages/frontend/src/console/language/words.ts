@@ -294,6 +294,8 @@ export function takes(action: Action, w: WordInfo): boolean {
       return modalTarget(w) !== undefined;
     case "setting":
       return settingTakes(action.setting, w);
+    case "set":
+      return settingTakes({ id: action.id, value: defaultSetting(action.id, w) } as Setting, w);
     case "possessor":
     case "relative":
       return w.kind === "noun" && w.concept?.role === "noun";
@@ -308,7 +310,7 @@ export function takes(action: Action, w: WordInfo): boolean {
 
 /** Whether a command attaches to a word, rather than to the period or the app. */
 export const attachesToWord = (action: Action): boolean =>
-  ["adjective", "adverb", "modal", "setting", "possessor", "conjunct", "relative"].includes(action.kind);
+  ["adjective", "adverb", "modal", "setting", "set", "possessor", "conjunct", "relative"].includes(action.kind);
 
 /** How a word kind is named in a diagnostic: "food is a noun". English, for /localize. */
 export function kindName(w: WordInfo): string {

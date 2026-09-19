@@ -4,21 +4,25 @@
 import { describe, expect, it } from 'vitest';
 import { complete, type Completion } from '../../src/console/language/complete.ts';
 import type { ConsoleContext, WorkspaceState } from '../../src/console/language/types.ts';
-import { empty, ok, periods } from './helpers.ts';
+import { empty, ok, periods, sel } from './helpers.ts';
 import { EN, byId } from './vocab.ts';
 
-function at(text: string, { state = empty(), context, caret = text.length, history, recent }: {
+function at(text: string, { state = empty(), context, caret = text.length, history, recent, pinned, aliases }: {
   state?: WorkspaceState;
   context?: ConsoleContext;
   caret?: number;
   history?: string[];
   recent?: string[];
+  pinned?: string[];
+  aliases?: Map<string, string[]>;
 } = {}): Completion {
   const c = complete(text, caret, state, {
     context: context ?? { containerId: state.containers[0]!.id },
     vocab: EN,
     history,
     recent,
+    pinned,
+    aliases,
   });
   if (!c) throw new Error(`no completion at “${text}”`);
   return c;
@@ -37,8 +41,11 @@ describe('commands', () => {
     expect(c.auto).toBe(true);
     expect(c.title).toBe('commands for');
     expect(c.about).toBe('cat');
-    // In the order of the noun's own controls, each setting led by the value that would change it.
-    expect(labels(c).slice(0, 7)).toEqual(['/adj', '/pl', '/fem', '/a', '/poss', '/rel', '/and']);
+    // Topic by topic, in the order of the noun's own controls, each topic headed.
+    expect(c.topics).toBe(true);
+    expect(labels(c).slice(0, 5)).toEqual(['/adj', '/sg', '/pl', '/masc', '/fem']);
+    const topics = [...new Set(c.candidates.map((x) => x.topic))];
+    expect(topics.slice(0, 8)).toEqual(['adjective', 'number', 'gender', 'determiner', 'possessor', 'relative clause', 'coordination', 'the period’s words']);
     expect(c.candidates.find((x) => x.label === '/pl')!.current).toEqual({ value: 'singular', key: 'number.value.singular' });
     // Roles, period and workspace commands follow the noun's own.
     expect(labels(c)).toContain('/verb');
@@ -73,9 +80,27 @@ describe('commands', () => {
     void state;
   });
 
-  it('puts recently used commands first among equals', () => {
-    const c = at('/', { ...onCat(), recent: ['poss'] });
-    expect(labels(c)[0]).toBe('/poss');
+  it('puts recently used commands first among equal matches', () => {
+    expect(labels(at('/p', onCat()))[0]).toBe('/pl');
+    expect(labels(at('/p', { ...onCat(), recent: ['poss'] }))[0]).toBe('/poss');
+    // The whole list keeps its topics' order.
+    expect(labels(at('/', { ...onCat(), recent: ['poss'] }))[0]).toBe('/adj');
+  });
+
+  it('lists a setting’s shortcuts under the command that names it, saying what each is short for', () => {
+    const c = at('/verb ( eat ', {});
+    const tense = c.candidates.filter((x) => x.topic === 'tense');
+    expect(tense.map((x) => [x.insert, x.shortcut])).toEqual([
+      ['/tense', undefined],
+      ['/past', '/tense past'],
+      ['/present', '/tense present'],
+      ['/future', '/tense future'],
+    ]);
+    expect(c.candidates.find((x) => x.insert === '/prog')!.shortcut).toBe('/aspect progressive');
+    // Typed, the shortcut still says so.
+    expect(at('/verb ( eat /pa').candidates[0]).toMatchObject({ insert: '/past', shortcut: '/tense past' });
+    // A setting with no command of its own is short for nothing.
+    expect(at('/', onCat()).candidates.find((x) => x.insert === '/pl')!.shortcut).toBeUndefined();
   });
 });
 
@@ -145,8 +170,8 @@ describe('links and references', () => {
   it('offers new clauses first after /rel, then the nouns the rules allow, numbered', () => {
     const c = at('/rel ', { state: two(), context: { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' } } });
     expect(c.candidates.map((x) => [x.label, x.number])).toEqual([
-      ['subj (', undefined],
-      ['obj (', undefined],
+      ['subj { … }', undefined],
+      ['obj { … }', undefined],
       ['#2.subj', 1],
       ['#2.obj', 2],
     ]);
@@ -155,7 +180,8 @@ describe('links and references', () => {
 
   it('offers the periods an if-condition may take', () => {
     const c = at('/if ', { state: two() });
-    expect(labels(c)).toEqual(['(', '#2']);
+    expect(labels(c)).toEqual(['{ … }', '#2']);
+    expect(c.candidates[0]).toMatchObject({ insert: '{', close: '}' });
   });
 
   it('completes a reference as it is typed', () => {
@@ -171,12 +197,12 @@ describe('links and references', () => {
   it('is done with a possessor once it has its word', () => {
     const c = at('/subj child /poss man ');
     expect(c.auto).toBe(false);
-    expect(labels(c)).not.toContain('(');
+    expect(labels(c)).not.toContain('[ … ]');
   });
 
   it('offers the bracket after /rel subj', () => {
     const c = at('/rel subj ', { state: two(), context: { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' } } });
-    expect(labels(c)).toEqual(['(']);
+    expect(labels(c)).toEqual(['{ … }']);
   });
 });
 
@@ -184,7 +210,7 @@ describe('the rest', () => {
   it('meets a word with no command with the command for the box under the cursor', () => {
     const c = at('ca', { state: periods({}), context: { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' } } });
     expect(c.title).toBe('did you mean');
-    expect(c.candidates[0]).toMatchObject({ insert: '/subj cat', label: '/subj cat' });
+    expect(c.candidates[0]).toMatchObject({ insert: '/subj ( cat', close: ')', label: '/subj ( cat )' });
     expect({ from: c.from, to: c.to }).toEqual({ from: 0, to: 2 });
   });
 
@@ -216,3 +242,120 @@ describe('the rest', () => {
     expect(labels(c)).not.toContain('/verb');
   });
 });
+
+describe('pinned lines and local names (phase 5)', () => {
+  it('offers the pinned lines, then the recent ones, on an empty prompt — only when asked', () => {
+    const c = at('', { pinned: ['/subj dog /verb run'], history: ['/subj cat', '/subj dog /verb run', '/verb eat'] });
+    expect(c.candidates.map((x) => [x.insert, x.detail])).toEqual([
+      ['/subj dog /verb run', 'pinned'],
+      ['/subj cat', 'recent'],
+      ['/verb eat', 'recent'],
+    ]);
+    expect(c.candidates.every((x) => x.kind === 'history')).toBe(true);
+    expect(c.auto).toBe(false);
+    expect({ from: c.from, to: c.to }).toEqual({ from: 0, to: 0 });
+  });
+
+  it('offers commands on an empty prompt when there is no line to offer', () => {
+    const c = at('', { pinned: [], history: [] });
+    expect(c.candidates.some((x) => x.kind === 'history')).toBe(false);
+  });
+
+  it('ghosts a pinned line before a recent one', () => {
+    const c = at('/subj cat ', { pinned: ['/subj cat /verb sleep'], history: ['/subj cat /verb eat'] });
+    expect(c.ghost).toBe('/verb sleep');
+  });
+
+  it('finds a command by its name in the interface language, and writes the English one', () => {
+    const aliases = new Map([['pl', ['plurale']], ['sg', ['singolare']]]);
+    const c = at('/singol', { ...onCat(), aliases });
+    expect(c.candidates[0]).toMatchObject({ insert: '/sg', alias: 'singolare' });
+    // Accents and case do not matter; a local name matches from its start only.
+    expect(at('/PLURÀLE', { ...onCat(), aliases }).candidates[0]).toMatchObject({ insert: '/pl', alias: 'plurale' });
+    expect(at('/golare', { ...onCat(), aliases }).candidates.map((x) => x.insert)).not.toContain('/sg');
+  });
+});
+
+describe('inside a bracket (structured lines)', () => {
+  const commands = (c: Completion) => c.candidates.filter((x) => x.kind === 'command').map((x) => x.insert);
+
+  it('offers the role’s words for the word that opens its bracket', () => {
+    expect(at('/subj ( ').candidates.map((x) => x.insert)).toContain('cat');
+    const c = at('/subj ( ca');
+    expect(c.candidates[0]).toMatchObject({ insert: 'cat' });
+    expect({ from: c.from, to: c.to }).toEqual({ from: 8, to: 10 });
+    expect(c.ghost).toBe('t');
+  });
+
+  it('offers only what describes the word inside its bracket', () => {
+    const c = at('/subj ( cat ');
+    expect(c.about).toBe('cat');
+    expect(commands(c)).toEqual(expect.arrayContaining(['/adj', '/pl', '/the', '/poss', '/rel', '/and']));
+    expect(commands(c)).not.toContain('/verb');
+    expect(commands(c)).not.toContain('/obj');
+    expect(commands(c)).not.toContain('/new');
+    expect(commands(c)).not.toContain('/help');
+  });
+
+  it('offers a verb’s commands in its bracket, and a noun’s none', () => {
+    const c = at('/subj ( cat ) /verb ( eat ');
+    expect(commands(c)).toEqual(expect.arrayContaining(['/past', '/not', '/modal', '/adv']));
+    expect(commands(c)).not.toContain('/adj');
+    expect(commands(c)).not.toContain('/pl');
+  });
+
+  it('offers the period’s commands once a word’s bracket has closed, and nothing of the word’s', () => {
+    const c = at('/subj ( cat ) ');
+    expect(commands(c)).toEqual(expect.arrayContaining(['/verb', '/new']));
+    expect(commands(c)).not.toContain('/pl');
+    expect(commands(c)).not.toContain('/adj');
+  });
+
+  it('offers an adjective’s degree in its own bracket, and not the noun’s number', () => {
+    const c = at('/subj ( cat /adj ( big ');
+    expect(commands(c)).toEqual(expect.arrayContaining(['/more', '/most']));
+    expect(commands(c)).not.toContain('/pl');
+  });
+
+  it('opens a possessor’s phrase with its word, then describes that word', () => {
+    expect(at('/subj ( cat /poss [ ').candidates.map((x) => x.insert)).toContain('man');
+    const c = at('/subj ( cat /poss [ man ');
+    expect(c.about).toBe('man');
+    expect(commands(c)).toContain('/adj');
+    // The phrase has its head already.
+    expect(commands(c)).not.toContain('/subj');
+  });
+
+  it('offers a phrase’s bracket in square brackets', () => {
+    const c = at('/subj ( cat /poss ');
+    expect(c.candidates[0]).toMatchObject({ kind: 'phrase', insert: '[', close: ']' });
+  });
+
+  it('ghosts the close of the innermost bracket, in its shape', () => {
+    const state = ok('/subj child /verb read');
+    const context = { containerId: 'p1', word: { containerId: 'p1', slot: 'subject' as const } };
+    expect(at('/rel subj { /verb love ', { state, context }).ghost).toBe('}');
+    expect(at('/subj ( child /poss [ man ', { state }).ghost).toBe(']');
+  });
+});
+
+describe('a verb’s tense and aspect by name', () => {
+  it('offers /tense and /aspect on a verb, with what the verb holds now', () => {
+    const c = at('/verb ( eat /past /t');
+    expect(c.candidates[0]).toMatchObject({ insert: '/tense', current: { value: 'past' } });
+    expect(at('/verb ( eat /as').candidates[0]).toMatchObject({ insert: '/aspect', current: { value: 'neutral' } });
+    // Not on a noun.
+    expect(at('/subj ( cat /t').candidates.map((x) => x.insert)).not.toContain('/tense');
+  });
+
+  it('offers the values each takes', () => {
+    expect(labels(at('/verb ( eat /tense '))).toEqual(['past', 'present', 'future']);
+    expect(labels(at('/verb ( eat /aspect '))).toEqual(['neutral', 'progressive', 'prospective', 'resultative']);
+    expect(at('/verb ( eat /aspect prosp').candidates[0]).toMatchObject({ insert: 'prospective' });
+  });
+
+  it('reads a value by its short name too', () => {
+    expect(sel(ok('/verb ( eat /aspect prog )')).verbAspect).toBe('progressive');
+  });
+});
+

@@ -9,9 +9,9 @@ describe('lex', () => {
       { kind: 'command', name: 'adj', from: 0, to: 4 },
       { kind: 'word', text: 'ice cream', from: 5, to: 14 },
       { kind: 'ref', text: '2.obj', from: 16, to: 22 },
-      { kind: 'open', from: 23, to: 24 },
+      { kind: 'open', shape: '(', from: 23, to: 24 },
       { kind: 'command', name: 'pl', from: 25, to: 28 },
-      { kind: 'close', from: 29, to: 30 },
+      { kind: 'close', shape: '(', from: 29, to: 30 },
     ]);
   });
 
@@ -65,7 +65,7 @@ describe('parse', () => {
   it('refuses a value a command does not take, and a stray close', () => {
     expect(parse('/level soon').diagnostic?.message).toMatch(/takes process, concept, object/);
     expect(parse('/subj cat )').diagnostic?.message).toMatch(/no bracket open/);
-    expect(parse('/rel dog').diagnostic?.message).toMatch(/subj \( … \) or obj/);
+    expect(parse('/rel dog').diagnostic?.message).toMatch(/subj \{ … \} or obj/);
   });
 
   it('reads a reference as an item of its own', () => {

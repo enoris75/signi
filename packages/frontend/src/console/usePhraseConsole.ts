@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import type { LanguageCode, PhrasePlan } from "@signi/shared";
 import { fetchSavedPhrase, listSavedPhrases, savePhrase } from "../api.ts";
@@ -9,13 +9,17 @@ import { hydrateWorkspace, serializeWorkspace } from "../components/PhraseBuilde
 import { workspaceToPlans } from "../components/PhraseBuilder/workspacePlan/index.ts";
 import type { PhraseLink } from "../components/PhraseBuilder/interfaces.ts";
 import { advanceContext, applyScript, wordExists, type ApplyResult, type Effect, type Frame } from "./language/apply.ts";
-import { commandNamed } from "./language/commands.ts";
-import { complete, previewIds, type Candidate, type Completion } from "./language/complete.ts";
+import { commandNamed, type CommandDef } from "./language/commands.ts";
+import { complete, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
+import { finished, nextStop, structure } from "./language/edit.ts";
 import { diffWorkspaces, type EchoPart } from "./language/diff.ts";
-import { lex } from "./language/lex.ts";
+import { lex, splitPeriods } from "./language/lex.ts";
 import { printPeriod, printWorkspace } from "./language/print.ts";
 import type { ConsoleContext, Diagnostic, WordRef, WorkspaceState } from "./language/types.ts";
-import { pushHistory, readHistory, writeHistory } from "./history.ts";
+import { pushHistory, readHistory, readPins, setPinned, writeHistory, writePins } from "./history.ts";
+import { EXAMPLES, helpPage } from "./language/help.ts";
+import { attachesToWord, currentSetting, takes, wordInfo } from "./language/words.ts";
+import { useLocalAliases } from "./useLocalAliases.ts";
 import { periodMark, wordMark, type ConsoleMarks } from "./ConsoleMarks.tsx";
 import { parseRef } from "./language/resolve.ts";
 import { nounWord } from "./language/words.ts";
@@ -42,7 +46,13 @@ export type TranscriptEntry =
   | { id: number; kind: "typed"; text: string; containerId: string; plan?: Partial<PhrasePlan> }
   | { id: number; kind: "echo"; parts: EchoPart[]; containerId: string; plan?: Partial<PhrasePlan> }
   | { id: number; kind: "error"; text: string; message: string }
-  | { id: number; kind: "info"; text: string; detail?: string };
+  | { id: number; kind: "info"; text: string; detail?: string }
+  /**
+   * A command's help page (`/help rel`): drawn from the catalogue when shown, so it follows the
+   * interface language; `plan` is its example's sentence, and `here` what the command would do at
+   * the context the page was asked from.
+   */
+  | { id: number; kind: "help"; name: string; plan?: Partial<PhrasePlan>; here?: string };
 
 /** An entry before it has its id — the union distributed, so each kind keeps its own fields. */
 type NewEntry = TranscriptEntry extends infer E ? (E extends TranscriptEntry ? Omit<E, "id"> : never) : never;
@@ -164,7 +174,12 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   };
 
   // ── The prompt ──
-  const inputRef = useRef<HTMLInputElement | null>(null);
+  const inputRef = useRef<HTMLTextAreaElement | null>(null);
+  /**
+   * Whether the caret is on the prompt's first row, and on its last — the prompt draws them, and a
+   * line that wraps walks the history only from its edges.
+   */
+  const rows = useRef<{ first: () => boolean; last: () => boolean }>({ first: () => true, last: () => true });
   const [text, setText] = useState("");
   const [caret, setCaret] = useState(0);
   const [focused, setFocused] = useState(false);
@@ -184,6 +199,15 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   const draft = useRef("");
   // The commands used this session, most recent first — completion ranks them higher.
   const [recent, setRecent] = useState<string[]>([]);
+  // The lines pinned, kept per browser (see history.ts).
+  const [pins, setPins] = useState<string[]>(() => readPins());
+  const pin = (line: string, pinned: boolean) => {
+    const next = setPinned(pins, line, pinned);
+    setPins(next);
+    writePins(next);
+  };
+  // The commands' names in the interface language, for completion (lines stay English).
+  const localAliases = useLocalAliases();
 
   // ── The transcript ──
   const [transcript, setTranscript] = useState<TranscriptEntry[]>([]);
@@ -239,22 +263,21 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     enabled: open && /\/load\b/.test(text),
   });
 
+  const completeOpts: CompleteOptions = useMemo(
+    () => ({
+      context: lineContext,
+      vocab,
+      recent,
+      history: lines,
+      pinned: pins,
+      aliases: localAliases,
+      saved: savedQuery.data?.map((p) => p.name),
+    }),
+    [vocab, recent, lines, pins, localAliases, savedQuery.data, lineContext.containerId, lineContext.word && wordMark(lineContext.word)],
+  );
   const completion: Completion | undefined = useMemo(
-    () =>
-      focused
-        ? safely(
-            () =>
-              complete(text, caret, base, {
-                context: lineContext,
-                vocab,
-                recent,
-                history: lines,
-                saved: savedQuery.data?.map((p) => p.name),
-              }),
-            undefined,
-          )
-        : undefined,
-    [focused, text, caret, base, vocab, recent, lines, savedQuery.data, lineContext.containerId, lineContext.word && wordMark(lineContext.word)],
+    () => (focused ? safely(() => complete(text, caret, base, completeOpts), undefined) : undefined),
+    [focused, text, caret, base, completeOpts],
   );
   const candidates = completion?.candidates ?? [];
   // The candidates change under a highlight that stays (the caret moved): it holds to the list.
@@ -263,7 +286,9 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     focused &&
     candidates.length > 0 &&
     (listMode === "forced" || (listMode === "auto" && Boolean(completion?.auto)));
-  const ghost = focused && caret === text.length ? completion?.ghost : undefined;
+  // Only closers after the caret: the line is being written there, and the ghost shows in front of them.
+  const atEnd = /^[\s)\]}）］｝]*$/.test(text.slice(caret));
+  const ghost = focused && atEnd ? completion?.ghost : undefined;
 
   // Where the caret is: the frames open there, for the context chip.
   const caretFrames: Frame[] = useMemo(() => {
@@ -280,17 +305,20 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     if (caretFrames.length === 0) {
       return { path: [{ period: number(lineContext.containerId, base) }], word: lineContext.word };
     }
-    const path: ChipStep[] = caretFrames.map((f) => ({ period: number(f.containerId, state), via: f.via }));
-    return { path, word: caretFrames.at(-1)!.words.at(-1) };
+    // A word's own bracket is no step of the path: the word says where the caret is.
+    const path: ChipStep[] = caretFrames
+      .filter((f) => f.kind !== "element")
+      .map((f) => ({ period: number(f.containerId, state), via: f.via }));
+    // The last word written where the caret is — or, just past a word's bracket, that word.
+    const here = caretFrames.at(-1)!;
+    return { path, word: here.words.at(-1) ?? here.anchor };
   })();
 
   // ── The diagnostic ──
   const raw: (Diagnostic & { incomplete?: boolean }) | undefined = preview?.diagnostic;
   // A word still being typed — the mistake is the token at the caret, and the list has words for it —
   // is unfinished rather than wrong: the console says so quietly until ↵ is pressed on it.
-  const typing = Boolean(
-    raw && focused && caret === text.length && raw.to === text.length && (completion?.candidates.length ?? 0) > 0,
-  );
+  const typing = Boolean(raw && focused && raw.to === caret && (completion?.candidates.length ?? 0) > 0);
   const diagnostic = raw && typing ? { ...raw, incomplete: true } : raw;
   const showDiagnostic = diagnostic && (refused || !diagnostic.incomplete);
 
@@ -361,41 +389,111 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     });
   };
 
+  // The caret the console put somewhere, set on the prompt once it holds the text it belongs to —
+  // before the next keystroke reads it.
+  const pendingCaret = useRef<number | [number, number] | null>(null);
+  useLayoutEffect(() => {
+    const at = pendingCaret.current;
+    if (at === null) return;
+    pendingCaret.current = null;
+    const [from, to] = typeof at === "number" ? [at, at] : at;
+    inputRef.current?.setSelectionRange(from, to);
+  });
+
   const setLine = (next: string, at = next.length) => {
     setText(next);
     setCaret(at);
     setHighlight(0);
     setRefused(false);
-    requestAnimationFrame(() => inputRef.current?.setSelectionRange(at, at));
+    pendingCaret.current = at;
   };
 
-  const onChange = (next: string, at: number) => {
-    setText(next);
-    setCaret(at);
+  const editContext = () => ({ state: base, opts: completeOpts });
+
+  /**
+   * A keystroke in the prompt. The console restructures the line as it goes — opening a word's
+   * bracket, stepping over a closer, moving a command out of a bracket it does not belong in (see
+   * edit.ts) — except while an input method is composing.
+   */
+  const onChange = (next: string, at: number, composing = false) => {
+    const edit = composing ? undefined : safely(() => structure(text, next, at, editContext()), undefined);
+    setText(edit?.text ?? next);
+    setCaret(edit?.caret ?? at);
+    if (edit) pendingCaret.current = edit.caret;
     setHighlight(0);
     setListMode("auto");
     setRefused(false);
     setWalk(null);
   };
 
-  /** Put a candidate in place of the range it completes, and a space after it for what follows. */
+  /**
+   * Put a candidate in place of the range it completes, and a space after it for what follows — or,
+   * for a bracket, the pair with the caret inside. A command chosen is finished as a space would
+   * finish it: its bracket opens, or it moves out of one it does not belong in.
+   */
   const choose = (c: Candidate) => {
     if (!completion) return;
     const before = text.slice(0, completion.from);
-    const after = text.slice(completion.to);
-    const spaced = after.startsWith(" ") ? "" : " ";
-    const next = `${before}${c.insert}${spaced}${after}`;
-    setLine(next, before.length + c.insert.length + spaced.length);
+    const after = text.slice(completion.to).replace(/^ /, "");
+    if (c.close) {
+      const head = `${before}${c.insert} `;
+      const tail = after && !/^\s/.test(after) ? ` ${after}` : after;
+      setLine(`${head} ${c.close}${tail}`, head.length);
+      setListMode("auto");
+      return;
+    }
+    const head = `${before}${c.insert} `;
+    // In front of a closer, a space either side of the caret: `cat | )`.
+    const next = /^\s*[)\]}）］｝]/.test(after) ? `${head} ${after.trimStart()}` : `${head}${after}`;
+    const edit = c.kind === "history" ? undefined : safely(() => finished(next, head.length, editContext()), undefined);
+    setLine(edit?.text ?? next, edit?.caret ?? head.length);
     setListMode("auto");
   };
 
-  /** ⇥: the ghost, or the highlighted row; the shared start of several; else open the list. */
+  /**
+   * ⇥ and ⇧⇥ where there is nothing to complete: the next command or word, or the previous, selected
+   * so typing replaces it — or just past a closing bracket, stepping out of it.
+   */
+  const jump = (dir: 1 | -1): boolean => {
+    const input = inputRef.current;
+    if (!input) return false;
+    const stop = nextStop(text, input.selectionStart, input.selectionEnd, dir);
+    if (!stop) return false;
+    let next = text;
+    // Past a closer at the end of the line, room to write what follows.
+    if (stop.from === stop.to && stop.to === text.length) next = `${text} `;
+    const to = stop.from === stop.to && next[stop.to] === " " ? stop.to + 1 : stop.to;
+    const from = stop.from === stop.to ? to : stop.from;
+    if (next !== text) setText(next);
+    // The caret the console reads is the selection's end: the chip names the word selected.
+    setCaret(to);
+    setListMode("closed");
+    input.setSelectionRange(from, to);
+    pendingCaret.current = [from, to];
+    return true;
+  };
+
+  /**
+   * ⇥: the ghost, or the highlighted row; the shared start of several; else, with nothing typed at the
+   * caret, on to the next word; else open the list.
+   */
   const tab = () => {
+    // A word selected — by ⇥ itself, or the mouse — is passed over, not completed again.
+    const input = inputRef.current;
+    if (input && input.selectionStart !== input.selectionEnd && !listShown && jump(1)) return;
     if (!completion || candidates.length === 0) {
+      if (text.trim() && jump(1)) return;
       setListMode("forced");
       return;
     }
     if (listShown && highlighted > 0) return choose(candidates[highlighted]!);
+    // Lines are offered whole: ⇥ opens them, and a second ⇥ takes the one highlighted.
+    if (candidates[0]!.kind === "history") {
+      if (listShown) return choose(candidates[highlighted]!);
+      setListMode("forced");
+      return;
+    }
+    if (!listShown && !completion.ghost && completion.from === completion.to && jump(1)) return;
     const typed = text.slice(completion.from, caret).toLowerCase();
     const matching = candidates.filter((c) => c.insert.toLowerCase().startsWith(typed));
     if (matching.length > 1) {
@@ -417,12 +515,24 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   };
 
   // ── Committing ──
-  // `state` and `at` are what the line left — the workspace and the period its context is in — which
-  // the handler's own render has not seen yet.
-  const runEffects = async (effects: Effect[], state: WorkspaceState, at: string) => {
+  // `state` and `here` are what the line left — the workspace and the context, in the period it is in —
+  // which the handler's own render has not seen yet.
+  const runEffects = async (effects: Effect[], state: WorkspaceState, here: ConsoleContext, script: string, before: string[]) => {
+    const at = here.containerId;
     for (const effect of effects) {
       const arg = effect.arg?.trim();
       switch (effect.app) {
+        case "pin":
+        case "unpin": {
+          // The line it is written in, without it — or, alone, the line run before it.
+          const rest = `${script.slice(0, effect.span.from)} ${script.slice(effect.span.to)}`.replace(/\s+/g, " ").trim();
+          const line = rest || before[0];
+          if (line) {
+            pin(line, effect.app === "pin");
+            add({ kind: "info", text: line, detail: effect.app === "pin" ? "Pinned." : "Unpinned." });
+          }
+          break;
+        }
         case "edit":
           edit(at, state);
           return;
@@ -452,20 +562,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
           actions.press("import-workspace");
           break;
         case "help":
-          if (arg) {
-            const def = commandNamed(arg.replace(/^\//, ""));
-            add(
-              def
-                ? {
-                    kind: "info",
-                    text: `/${def.name}${def.aliases.length ? `  (also ${def.aliases.map((a) => `/${a}`).join(" ")})` : ""}`,
-                    detail: `${def.description}${def.purpose ? ` — it ${def.purpose}` : ""}.`,
-                  }
-                : { kind: "error", text: `/help ${arg}`, message: `There is no command /${arg}.` },
-            );
-          } else {
-            actions.openHelp();
-          }
+          if (arg) showHelp(arg, state, here);
+          else actions.openHelp();
           break;
         case "save":
           if (!arg) {
@@ -523,7 +621,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
       writing.current = true;
       history.replace(result.state);
     }
-    const typed = script.includes("\n") ? script.split("\n").filter((l) => l.trim()) : [line];
+    const typed = splitPeriods(script).map((p) => p.text).filter((l) => l.trim());
     const at = result.context.containerId;
     for (const t of typed)
       add({ kind: "typed", text: t.trim(), containerId: at, plan: changed ? sentencePlan(result.state, at) : undefined });
@@ -540,28 +638,14 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     setWalk(null);
     setLine("");
     setListMode("auto");
-    void runEffects(result.effects, result.state, result.context.containerId);
+    void runEffects(result.effects, result.state, result.context, script, lines);
     // A new period's opening picker would have taken the keyboard as it mounted: the prompt keeps it.
     focusPrompt();
     return true;
   };
 
-  /** A script of several lines pasted at once runs as one step, each line its own period. */
-  const paste = (script: string): boolean => {
-    if (!script.includes("\n")) return false;
-    const result = safely(
-      () => applyScript(committed, script, { context: liveContext, vocab, newId: uid }),
-      unreadable(committed, script, liveContext),
-    );
-    if (result.diagnostic) {
-      add({ kind: "error", text: script.split("\n")[0]!, message: result.diagnostic.message });
-      return true;
-    }
-    return commit(script) || true;
-  };
-
   // ── Keys in the prompt ──
-  const onKeyDown = (event: KeyboardEvent<HTMLInputElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLTextAreaElement>) => {
     // While an input method composes (Japanese kana to kanji), ↵ confirms its conversion and the
     // arrows and esc are its own: none of them is the console's.
     if (event.nativeEvent.isComposing || event.keyCode === 229) return;
@@ -578,26 +662,32 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     }
     switch (key) {
       case "Tab":
-        if (event.shiftKey) return;
+        if (event.shiftKey) {
+          if (jump(-1)) event.preventDefault();
+          return;
+        }
         event.preventDefault();
         tab();
         return;
       case "ArrowRight":
-        if (caret === text.length && ghost) {
+        if (ghost) {
           event.preventDefault();
           if (candidates[0] && completion?.ghost && candidates[0].insert.toLowerCase().startsWith(text.slice(completion.from, caret).toLowerCase()))
             choose(candidates[0]);
-          else setLine(text + ghost);
+          else setLine(text.slice(0, caret) + ghost + text.slice(caret), caret + ghost.length);
         }
         return;
       case "ArrowDown":
       case "ArrowUp": {
-        event.preventDefault();
         const delta = key === "ArrowDown" ? 1 : -1;
         if (listShown) {
+          event.preventDefault();
           setHighlight((h) => (h + delta + candidates.length) % candidates.length);
           return;
         }
+        // A line over several rows moves between them; from its first or last, the history.
+        if (!(delta === -1 ? rows.current.first() : rows.current.last())) return;
+        event.preventDefault();
         // No list: walk the lines run before.
         if (lines.length === 0) return;
         if (walk === null) {
@@ -621,6 +711,8 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
         return;
       }
       case "Enter":
+        // ⇧↵ breaks the line: inside a bracket a space, outside one the next period.
+        if (event.shiftKey) return;
         event.preventDefault();
         if (listShown && candidates[highlighted]) {
           const c = candidates[highlighted]!;
@@ -687,6 +779,45 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     focusPrompt(1);
   };
 
+  /**
+   * A command's help page, written into the transcript: how it is written, what it does, its
+   * example with the sentence it makes, and what it would act on here.
+   */
+  const showHelp = (name: string, state = committed, here: ConsoleContext = liveContext) => {
+    const page = helpPage(name);
+    if (!page) {
+      add({ kind: "error", text: `/help ${name}`, message: `There is no command /${name.replace(/^\//, "")}.` });
+      return;
+    }
+    const example = EXAMPLES[page.def.name]!;
+    const built =
+      page.def.action.kind === "app"
+        ? undefined
+        : safely(
+            () => applyScript({ containers: [{ id: "help", selection: {} }], links: [] }, example, {
+              context: { containerId: "help" },
+              vocab,
+              newId: previewIds(),
+            }),
+            undefined,
+          );
+    const plan = built && !built.diagnostic ? sentencePlan(built.state, "help") : undefined;
+    add({ kind: "help", name: page.def.name, plan, here: hereFor(page.def, state, here) });
+    setOpen(true);
+  };
+
+  /** What a command would act on at the context — "on cat, now singular" — for its help page. */
+  const hereFor = (def: CommandDef, state: WorkspaceState, here: ConsoleContext): string | undefined => {
+    if (!attachesToWord(def.action)) return undefined;
+    const w = here.word ? wordInfo(state.containers, here.word) : undefined;
+    const name = w?.concept ? vocab.label(w.concept) : undefined;
+    if (!w || !name) return "Here: nothing under the cursor yet.";
+    if (!takes(def.action, w)) return `Here: ${name} does not take it.`;
+    const id = def.action.kind === "setting" ? def.action.setting.id : def.action.kind === "set" ? def.action.id : undefined;
+    const now = id ? currentSetting(id, w) : undefined;
+    return `Here: on ${name}${now ? `, now ${now}` : ""}.`;
+  };
+
   /** Load the focused period's source into the prompt, which ↵ then replaces the period with. */
   const edit = (id = liveContext.containerId, state = committed) => {
     setEditing(id);
@@ -711,7 +842,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     setFocused,
     onChange,
     onKeyDown,
-    paste,
+    rows,
     ghost,
     completion,
     listShown,
@@ -743,6 +874,10 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     focusPrompt,
     followCursor,
     printWorkspace: () => printWorkspace(committed, vocab),
+    // pins and help
+    pins,
+    pin,
+    showHelp: (name: string) => showHelp(name),
   };
 }
 

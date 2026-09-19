@@ -14,18 +14,22 @@ import {
   canStartCoordination,
 } from "../../components/PhraseBuilder/linkRules.ts";
 import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
-import { applyScript, roleRefusal, type Frame } from "./apply.ts";
+import { applyScript, roleRefusal, type Frame, type NounFrameKind } from "./apply.ts";
 import {
   COMMANDS,
   COORD_VALUES,
   commandNamed,
+  shortcutOf,
+  topicOf,
+  topicRank,
   valueNamed,
   type CommandDef,
+  type SettingId,
   type TokenColor,
   type ValueDef,
 } from "./commands.ts";
 import { sameKind } from "./parse.ts";
-import { lex, type Token } from "./lex.ts";
+import { CLOSER, lex, type Shape, type Token } from "./lex.ts";
 import {
   NOUN_NAMES,
   PRONOUN_NAMES,
@@ -62,15 +66,24 @@ export interface Candidate {
   kind: CandidateKind;
   /** What replaces the completed range. */
   insert: string;
+  /** A bracket's close, set after the caret when the candidate opens one: `subj {` then `}`. */
+  close?: string;
   /** The row's main text. */
   label: string;
   /** What it means, in English (the fallback for `detailKey`). */
   detail?: string;
   detailKey?: UiStringKey;
+  /** A line from history that was pinned. */
+  pinned?: boolean;
   /** For a setting: the value the word holds now, which the row shows as "now …". */
   current?: { value: string; key?: UiStringKey };
   /** The alias the query matched, when it was not the name: `also /plural`. */
   alias?: string;
+  /** For a command: what it is about, which heads it in the list — `tense`. */
+  topic?: string;
+  topicKey?: UiStringKey;
+  /** The long form a shortcut stands for: `/past` is `/tense past`. */
+  shortcut?: string;
   concept?: Concept;
   /** 1–9 on a numbered reference, which a digit picks. */
   number?: number;
@@ -90,6 +103,8 @@ export interface Completion {
   about?: string;
   /** Whether the list opens by itself here, rather than on ⇥. */
   auto: boolean;
+  /** Commands listed topic by topic, each topic headed — the whole list, before anything is typed. */
+  topics?: boolean;
 }
 
 export interface CompleteOptions {
@@ -99,6 +114,14 @@ export interface CompleteOptions {
   recent?: readonly string[];
   /** Lines run earlier, newest first — the ghost falls back on them. */
   history?: readonly string[];
+  /** Lines pinned, first offered on an empty prompt and first in the ghost. */
+  pinned?: readonly string[];
+  /**
+   * More names for a command, in the interface language (its description there: `plurale`,
+   * `soggetto`). They find the command; choosing it writes its English name, so a line reads the
+   * same in every interface language.
+   */
+  aliases?: ReadonlyMap<string, readonly string[]>;
   /** The names of the saved phrases, for `/load`. */
   saved?: readonly string[];
 }
@@ -113,8 +136,8 @@ const MAX_ROWS = 50;
  * letters in order. Lower is better; undefined is no match.
  */
 function matchClass(query: string, name: string): number | undefined {
-  const q = query.toLowerCase();
-  const n = name.toLowerCase();
+  const q = fold(query);
+  const n = fold(name);
   if (!q) return 1;
   if (n === q) return 0;
   if (n.startsWith(q)) return 1;
@@ -123,6 +146,9 @@ function matchClass(query: string, name: string): number | undefined {
   for (const ch of n) if (ch === q[i]) i++;
   return i === q.length ? 4 : undefined;
 }
+
+/** Lower case, accents off: what two spellings of one word have in common. */
+export const fold = (s: string) => s.toLowerCase().normalize("NFD").replace(/\p{M}/gu, "");
 
 // ── Where the caret is ───────────────────────────────────────────────────────
 
@@ -136,6 +162,45 @@ interface Site {
 }
 
 export function complete(
+  text: string,
+  caret: number,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+): Completion | undefined {
+  // An empty prompt offers lines, not commands: the pinned ones, then the recent.
+  if (!text.trim()) {
+    const lines = lineCompletion(text, opts);
+    if (lines) return lines;
+  }
+  const c = completeAt(text, caret, state, opts);
+  // Where nothing in the language continues what was typed, a pinned line or an earlier one may.
+  if (c && !c.ghost && caret === text.length && text.trim())
+    c.ghost = historyGhost(text, [...(opts.pinned ?? []), ...(opts.history ?? [])]);
+  return c;
+}
+
+/** The lines a user may want again: every pinned line, then the recent ones not pinned. */
+function lineCompletion(text: string, opts: CompleteOptions): Completion | undefined {
+  const pinned = opts.pinned ?? [];
+  const recent = (opts.history ?? []).filter((l) => !pinned.includes(l)).slice(0, 10);
+  if (pinned.length + recent.length === 0) return undefined;
+  const row = (line: string, isPinned: boolean): Candidate => ({
+    kind: "history",
+    insert: line,
+    label: line,
+    detail: isPinned ? "pinned" : "recent",
+    pinned: isPinned,
+  });
+  return {
+    from: 0,
+    to: text.length,
+    candidates: [...pinned.map((l) => row(l, true)), ...recent.map((l) => row(l, false))].slice(0, MAX_ROWS),
+    title: pinned.length ? "pinned and recent lines" : "recent lines",
+    auto: false,
+  };
+}
+
+function completeAt(
   text: string,
   caret: number,
   state: WorkspaceState,
@@ -155,6 +220,21 @@ export function complete(
   });
   const frame = applied.frames.at(-1)!;
   const now = applied.state;
+
+  // The word that opens a word's bracket, or a phrase's: `/subj ( ca`, `/poss [ `.
+  const leadOpen =
+    at?.kind === "word" ? tokens[tokens.indexOf(at) - 1] : at?.kind === "open" && caret === at.to ? at : !at ? before.at(-1) : undefined;
+  const lead = leadOpen?.kind === "open" ? leadOwner(tokens, tokens.indexOf(leadOpen)) : undefined;
+  if (lead) {
+    const parent = applied.frames.at(-2) ?? frame;
+    const spec = leadSpec(lead, parent, now);
+    if (spec) {
+      const from = at?.kind === "word" ? at.from : caret;
+      const to = at?.kind === "word" ? at.to : caret;
+      const query = at?.kind === "word" ? text.slice(at.from, caret) : "";
+      return wordCompletion(from, to, query, spec, opts, titleForSpec(spec, lead), lead.color);
+    }
+  }
 
   // A command being typed: `/`, `/pa`.
   if (at?.kind === "command") {
@@ -190,14 +270,29 @@ export function complete(
   if (at?.kind === "word") return didYouMean(at.from, at.to, query, frame, now, opts);
   // Between items: ⇥ offers the commands, and — inside an open bracket — the bracket's close.
   const c = commandCompletion(caret, caret, "", frame, now, opts, true);
-  const open = openBrackets(tokens.filter((t) => t.to <= caret));
-  if (open > 0 && caret === text.length) {
-    c.ghost = text.endsWith(" ") ? ")" : " )";
-  } else if (!c.ghost && caret === text.length && text.trim()) {
-    c.ghost = historyGhost(text, opts.history);
-  }
+  const open = innermostOpen(tokens.filter((t) => t.to <= caret));
+  if (open && caret === text.length) c.ghost = `${text.endsWith(" ") ? "" : " "}${CLOSER[open]}`;
   return c;
 }
+
+/** The command whose word may open the bracket at `index`: a word command's, a possessor's, a conjunct's. */
+function leadOwner(tokens: Token[], index: number): CommandDef | undefined {
+  const owner = tokens[index - 1];
+  if (tokens[index]?.kind !== "open" || owner?.kind !== "command") return undefined;
+  const def = commandNamed(owner.name);
+  return def && (def.arg.kind === "word" || def.arg.kind === "phrase") ? def : undefined;
+}
+
+/** The words that may open a bracket: the role's, the adjective's, the possessor's… */
+function leadSpec(def: CommandDef, parent: Frame, state: WorkspaceState): WordSpec | undefined {
+  const action = def.action;
+  if (action.kind === "possessor") return wordSpecFor("subject", "possessor");
+  if (action.kind === "conjunct") return wordSpecFor("subject", "conjunct");
+  return wordSpecForCommand(def, parent, frameWords(parent, state));
+}
+
+/** The noun phrase a frame is part of, for the words a role takes there: a word's bracket is its phrase's. */
+const nounFrame = (frame: Frame): NounFrameKind => (frame.kind === "element" ? "period" : frame.kind);
 
 /** Deterministic ids for a line's preview — the same keystroke always makes the same periods. */
 export function previewIds(): () => string {
@@ -215,13 +310,14 @@ function ownerOf(before: Token[]): Site["owner"] {
   return undefined;
 }
 
-function openBrackets(tokens: Token[]): number {
-  let depth = 0;
+/** The shape of the innermost bracket still open after `tokens`, if any. */
+function innermostOpen(tokens: Token[]): Shape | undefined {
+  const open: Shape[] = [];
   for (const t of tokens) {
-    if (t.kind === "open") depth++;
-    else if (t.kind === "close") depth = Math.max(0, depth - 1);
+    if (t.kind === "open") open.push(t.shape);
+    else if (t.kind === "close") open.pop();
   }
-  return depth;
+  return open.at(-1);
 }
 
 function historyGhost(text: string, history: readonly string[] | undefined): string | undefined {
@@ -247,6 +343,14 @@ function frameWords(frame: Frame, state: WorkspaceState): WordInfo[] {
     .filter((w): w is WordInfo => Boolean(w));
 }
 
+/**
+ * Whether a command may be written where `frame` is open — what the list offers there. A word's
+ * bracket takes what describes its words, a period what belongs to a period.
+ */
+export function commandFits(def: CommandDef, frame: Frame, state: WorkspaceState, opts: CompleteOptions): boolean {
+  return commandGroup(def, frame, state, frameWords(frame, state), opts) !== undefined;
+}
+
 /** Where a command stands in the list before any is typed: the closest word's first, then the rest. */
 function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, words: WordInfo[], opts: CompleteOptions): number | undefined {
   const action = def.action;
@@ -256,9 +360,12 @@ function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, word
     if (i === -1) return undefined;
     return i === 0 ? 0 : 1;
   }
+  // A word's bracket holds what describes the word: nothing of the period's.
+  if (frame.kind === "element") return undefined;
   switch (action.kind) {
     case "role":
-      if (frame.kind !== "period") return action.slot === "subject" ? 2 : undefined;
+      // A phrase names its head once, and only that: its bracket's first word, or /subj.
+      if (frame.kind !== "period") return action.slot === "subject" && frame.words.length === 0 ? 2 : undefined;
       return roleRefusal(state, frame.containerId, action.slot, def, opts.vocab) ? undefined : 2;
     case "condition": {
       const c = state.containers.find((x) => x.id === frame.containerId);
@@ -320,10 +427,22 @@ function commandCompletion(
         alias = a;
       }
     }
+    // The interface language's names: found by their start, as a whole.
+    for (const a of opts.aliases?.get(def.name) ?? []) {
+      const q = fold(query);
+      if (!q || !fold(a).startsWith(q)) continue;
+      const aliasClass = fold(a) === q ? 0.5 : 2.5;
+      if (cls === undefined || aliasClass < cls) {
+        cls = aliasClass;
+        alias = a;
+      }
+    }
     if (cls === undefined) return;
     const target = attachesToWord(def.action) ? words.find((w) => takes(def.action, w)) : undefined;
+    const settingId = def.action.kind === "setting" ? def.action.setting.id : def.action.kind === "set" ? def.action.id : undefined;
     const r = recent.indexOf(def.name);
-    const family = familyOrder(def);
+    const topic = topicOf(def);
+    const family = topicRank(def);
     // Of a setting's family, the value that would change something leads — `/pl` on a singular noun.
     const lead =
       def.action.kind !== "setting" || !target
@@ -338,11 +457,18 @@ function commandCompletion(
         label: `/${def.name}`,
         detail: def.description,
         detailKey: def.descriptionKey,
-        current: target && def.action.kind === "setting" ? currentValue(def, target) : undefined,
-        alias: alias ? `/${alias}` : undefined,
+        current: target && settingId ? currentValue(settingId, target) : undefined,
+        alias: alias ? (def.aliases.includes(alias) ? `/${alias}` : alias) : undefined,
+        topic: topic.label,
+        topicKey: topic.labelKey,
+        shortcut: shortcutOf(def),
         color: def.color,
       },
-      rank: query ? [cls, r === -1 ? 99 : r, group, family, lead, order] : [group, lead, r === -1 ? 99 : r, family, order],
+      // Typed, the best match first; untyped, topic by topic — the command that names a setting
+      // before its shortcuts, then the catalogue's order.
+      rank: query
+        ? [cls, r === -1 ? 99 : r, group, family, lead, order]
+        : [group, family, def.action.kind === "set" ? 0 : 1, order],
     });
   });
   ranked.sort((a, b) => compareRanks(a.rank, b.rank));
@@ -356,37 +482,8 @@ function commandCompletion(
     title: about ? "commands for" : "commands",
     about,
     auto: !between,
+    topics: !query,
   };
-}
-
-/**
- * Where a command's family stands in the list: the order a word's own controls come in on the canvas
- * — a noun's adjective, number, gender, determiner, relation, possessor, relative clause and
- * coordination; a verb's modal, adverb, tense, aspect and polarity.
- */
-const FAMILY_ORDER = [
-  "adjective",
-  "number",
-  "gender",
-  "determiner",
-  "specifier",
-  "sentiment",
-  "degree",
-  "relation",
-  "possessor",
-  "relative",
-  "conjunct",
-  "modal",
-  "adverb",
-  "tense",
-  "aspect",
-  "polarity",
-];
-
-function familyOrder(def: CommandDef): number {
-  const key = def.action.kind === "setting" ? def.action.setting.id : def.action.kind;
-  const i = FAMILY_ORDER.indexOf(key);
-  return i === -1 ? FAMILY_ORDER.length : i;
 }
 
 /** The command of a setting's family that leads the list for a word: the first that would change it. */
@@ -407,9 +504,7 @@ function compareRanks(a: number[], b: number[]): number {
 }
 
 /** A setting's current value on its word, for the row's "now …". */
-function currentValue(def: CommandDef, w: WordInfo): Candidate["current"] {
-  if (def.action.kind !== "setting") return undefined;
-  const id = def.action.setting.id;
+function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
   const value = currentSetting(id, w);
   if (value === undefined) return undefined;
   const keys: Partial<Record<typeof id, string>> = {
@@ -479,7 +574,7 @@ function wordSpecForCommand(def: CommandDef, frame: Frame, words: WordInfo[]): W
   const action = def.action;
   switch (action.kind) {
     case "role":
-      return wordSpecFor(action.slot, frame.kind);
+      return wordSpecFor(action.slot, nounFrame(frame));
     case "adjective": {
       const w = words.find((x) => takes(action, x));
       const t = w && adjectiveTarget(w);
@@ -692,19 +787,17 @@ function linkCompletion(
   // Where the target goes: straight after the command, or after the word it takes first — the
   // conjunction of a join, the gap of a relative clause.
   const targetHere = between.length === (action.kind === "join" ? 1 : 0);
-  // New phrases first: `subj (` and `obj (` for a relative clause, `(` for the others.
+  // New phrases first: `subj {` and `obj {` for a relative clause, `{` for a period of the others'
+  // own, `[` for a possessor's or a conjunct's phrase.
   if (action.kind === "relative" && between.length === 0) {
     rows.push(
-      { kind: "phrase", insert: "subj (", label: "subj (", detail: `new clause · ${headName ?? "the noun"} is its subject` },
-      { kind: "phrase", insert: "obj (", label: "obj (", detail: `new clause · ${headName ?? "the noun"} is its object` },
+      { kind: "phrase", insert: "subj {", close: "}", label: "subj { … }", detail: `new clause · ${headName ?? "the noun"} is its subject` },
+      { kind: "phrase", insert: "obj {", close: "}", label: "obj { … }", detail: `new clause · ${headName ?? "the noun"} is its object` },
     );
+  } else if (action.kind === "possessor" || action.kind === "conjunct") {
+    rows.push({ kind: "phrase", insert: "[", close: "]", label: "[ … ]", detail: "new phrase" });
   } else {
-    rows.push({
-      kind: "phrase",
-      insert: "(",
-      label: "(",
-      detail: action.kind === "possessor" || action.kind === "conjunct" ? "new phrase" : "new period",
-    });
+    rows.push({ kind: "phrase", insert: "{", close: "}", label: "{ … }", detail: "new period" });
   }
   // Then what exists already: the periods and nouns the rules let it reach.
   if (action.kind !== "conjunct" && targetHere) rows.push(...linkTargets(def, frame, state, words));
@@ -802,10 +895,10 @@ function didYouMean(
   const slot = word && !word.slice && !word.modifierAdjective ? word.slot : "subject";
   const role = COMMANDS.find((c) => c.action.kind === "role" && c.action.slot === slot);
   const def = role ?? COMMANDS.find((c) => c.name === "subj")!;
-  const spec = wordSpecFor(def.action.kind === "role" ? def.action.slot : "subject", frame.kind);
-  const c = wordCompletion(from, to, query, spec, opts, "did you mean", def.color, `/${def.name} `);
-  // A bare word never stays: the list says what it would become.
-  c.candidates = c.candidates.map((x) => ({ ...x, label: x.insert }));
+  const spec = wordSpecFor(def.action.kind === "role" ? def.action.slot : "subject", nounFrame(frame));
+  const c = wordCompletion(from, to, query, spec, opts, "did you mean", def.color, `/${def.name} ( `);
+  // A bare word never stays: the list says what it would become — the word in its role's bracket.
+  c.candidates = c.candidates.map((x) => ({ ...x, close: ")", label: `${x.insert} )` }));
   c.ghost = undefined;
   void state;
   return c;

@@ -114,7 +114,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
           </Tooltip>
         </Box>
       </Box>
-      <Transcript entries={model.transcript} />
+      <Transcript entries={model.transcript} pins={model.pins} onPin={model.pin} />
       <SourceStrip model={model} />
       <ConsolePrompt model={model} />
     </Box>

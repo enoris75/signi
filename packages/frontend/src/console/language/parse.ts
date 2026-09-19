@@ -8,7 +8,7 @@ import {
   type TokenColor,
   type ValueDef,
 } from "./commands.ts";
-import { lex, type Token } from "./lex.ts";
+import { lex, type Shape, type Token } from "./lex.ts";
 import type { Diagnostic, Span } from "./types.ts";
 
 /**
@@ -17,11 +17,18 @@ import type { Diagnostic, Span } from "./types.ts";
  *
  *   line      = item …
  *   item      = /command [argument]  ·  #reference
- *   argument  = a word · a value · a #reference · ( line )
+ *   argument  = a word · a value · a #reference · bracket
+ *   bracket   = ( [word] line )  ·  [ [word] line ]  ·  { line }
  *
- * A bracket becomes the nested item list of the command that owns it. It stops at the first mistake:
- * what came before it is the line's valid prefix, which still previews, and the mistake is the one
- * diagnostic the console shows. A line may end inside brackets — ↵ closes whatever is still open.
+ * A bracket becomes the nested item list of the command that owns it; what it holds is the command's
+ * to say, not the shape's. A word command's bracket holds its word and what describes it
+ * (`/subj ( cat /pl )`), a possessor's or a conjunct's the phrase, its head word first
+ * (`/poss [ child /adj old ]`), a link's a period (`/rel subj { /verb ( love ) }`). The printer writes
+ * each in its own shape; any shape reads, so the brackets of a keyboard without the others will do.
+ *
+ * It stops at the first mistake: what came before it is the line's valid prefix, which still
+ * previews, and the mistake is the one diagnostic the console shows. A line may end inside brackets —
+ * ↵ closes whatever is still open.
  */
 
 export interface TextArg extends Span {
@@ -39,11 +46,15 @@ export interface Item extends Span {
   word?: TextArg;
   /** A `#reference` argument, or the reference a goto item moves to. */
   ref?: TextArg;
-  /** The items of the `( … )` the command owns. */
+  /** The items of the bracket the command owns, after its word if it opens with one. */
   body?: Item[];
   open?: Span;
+  /** The bracket's shape, as written. */
+  shape?: Shape;
   /** Absent when the line ended inside the bracket. */
   close?: Span;
+  /** The word was written inside the bracket, first — `/subj ( cat …`, `/poss [ child …`. */
+  lead?: boolean;
 }
 
 export interface ParseResult {
@@ -92,7 +103,7 @@ export function parse(text: string): ParseResult {
     if (tok.kind === "word")
       fail(tok, "A line is made of commands — start it with one, such as /subj, or / for the list.");
     if (tok.kind === "open")
-      fail(tok, "A bracket opens a phrase after /rel, /if, /inst, /join, /poss, /and or /or.");
+      fail(tok, "A bracket belongs to the command before it: /subj ( … ), /poss [ … ], /rel subj { … }.");
     if (tok.kind !== "command") fail(tok, "Unexpected text.");
     const command = tok as Extract<Token, { kind: "command" }>;
     pos++;
@@ -114,12 +125,21 @@ export function parse(text: string): ParseResult {
     item.to = next.to;
   };
 
-  const takeBracket = (item: Item): void => {
-    const open = peek()!;
+  /** A bracket and its items; `lead`, when the command's word may open it. */
+  const takeBracket = (item: Item, lead = false): void => {
+    const open = peek() as Extract<Token, { kind: "open" }>;
     pos++;
-    item.open = open;
+    item.open = { from: open.from, to: open.to };
+    item.shape = open.shape;
     item.body = [];
     item.to = open.to;
+    const first = peek();
+    if (lead && first?.kind === "word") {
+      pos++;
+      item.word = { text: first.text, from: first.from, to: first.to };
+      item.lead = true;
+      item.to = first.to;
+    }
     // The body is attached before it is parsed, so a mistake inside still leaves the bracket, and
     // the items before the mistake, in the valid prefix.
     parseItems(item.body, 1);
@@ -129,7 +149,7 @@ export function parse(text: string): ParseResult {
       item.close = close;
       item.to = close.to;
     } else {
-      item.to = item.body.at(-1)?.to ?? open.to;
+      item.to = item.body.at(-1)?.to ?? item.word?.to ?? open.to;
     }
   };
 
@@ -141,7 +161,16 @@ export function parse(text: string): ParseResult {
       if (next?.kind === "word") fail(next, `/${def.name} takes no word.`);
       return;
     }
-    if (arg.kind === "word" || arg.kind === "text") {
+    if (arg.kind === "word") {
+      // A word, or a bracket that opens with it: `/subj cat`, `/subj ( cat /pl )`.
+      takeWord(item);
+      if (peek()?.kind === "open") {
+        if (item.word) fail(peek()!, `Put the word inside the bracket: /${def.name} ( ${item.word.text} … ).`);
+        takeBracket(item, true);
+      }
+      return;
+    }
+    if (arg.kind === "text") {
       takeWord(item);
       return;
     }
@@ -191,13 +220,14 @@ export function parse(text: string): ParseResult {
       return;
     }
     if (next?.kind === "open") {
-      if (item.word && (kind === "possessor" || kind === "conjunct"))
-        fail(next, `/${def.name} takes a word or a bracket, not both.`);
-      takeBracket(item);
+      const phrase = kind === "possessor" || kind === "conjunct";
+      if (item.word && phrase) fail(next, `Put the word inside the bracket: /${def.name} [ ${item.word.text} … ].`);
+      // A possessor's or a conjunct's bracket opens with its head word.
+      takeBracket(item, phrase);
       return;
     }
     if (item.word && kind === "relative")
-      fail(item.word, `Open the new clause: /rel ${item.word.text.toLowerCase()} ( … ).`);
+      fail(item.word, `Open the new clause: /rel ${item.word.text.toLowerCase()} { … }.`);
   };
 
   // The word a link command may carry before its target: the gap a relative clause names, the
@@ -207,11 +237,11 @@ export function parse(text: string): ParseResult {
     const kind = def.action.kind;
     const message =
       kind === "relative" && !/^(subj|obj)$/i.test(word.text)
-        ? "/rel takes #n.noun — or subj ( … ) or obj ( … ) for a new clause."
+        ? "/rel takes #n.noun — or subj { … } or obj { … } for a new clause."
         : kind === "condition" || kind === "instrument"
-          ? `/${def.name} takes #n for a period, or ( … ) for a new one.`
+          ? `/${def.name} takes #n for a period, or { … } for a new one.`
           : kind === "join" && !valueNamed(COORD_VALUES, word.text)
-            ? "/join takes a conjunction — and, or, but, thatis, therefore, then — then #n or ( … )."
+            ? "/join takes a conjunction — and, or, but, thatis, therefore, then — then #n or { … }."
             : undefined;
     if (!message) return;
     dropWord(item);
@@ -251,8 +281,12 @@ export interface StyledToken extends Span {
   italic?: boolean;
 }
 
-/** The colour of the bracket a link command opens: the colour of the connector it makes. */
+/**
+ * The colour of the bracket a command opens: a word's bracket wears the word's colour, a link's the
+ * colour of the connector it makes.
+ */
 export function bracketColor(def: CommandDef | undefined): TokenColor {
+  if (def?.arg.kind === "word") return def.color;
   switch (def?.action.kind) {
     case "condition":
       return "warning";
@@ -275,11 +309,18 @@ export function styleTokens(text: string): StyledToken[] {
   const styled: StyledToken[] = [];
   let last: CommandDef | undefined;
   const brackets: TokenColor[] = [];
-  for (const tok of tokens) {
+  tokens.forEach((tok, i) => {
     if (tok.kind === "command") {
       last = commandNamed(tok.name);
       styled.push({ kind: tok.kind, from: tok.from, to: tok.to, style: last ? last.color : tok.name ? "unknown" : "plain" });
     } else if (tok.kind === "word") {
+      // The word that opens a bracket is its command's: `/subj ( cat`.
+      const prev = tokens[i - 1];
+      const owner = tokens[i - 2];
+      if (prev?.kind === "open" && owner?.kind === "command") {
+        const def = commandNamed(owner.name);
+        if (def && (def.arg.kind === "word" || def.arg.kind === "phrase")) last = def;
+      }
       const takesWord =
         last && (last.arg.kind === "word" || last.arg.kind === "phrase");
       styled.push({
@@ -300,6 +341,6 @@ export function styleTokens(text: string): StyledToken[] {
       styled.push({ kind: tok.kind, from: tok.from, to: tok.to, style: brackets.pop() ?? "plain" });
       last = undefined;
     }
-  }
+  });
   return styled;
 }

@@ -15,13 +15,13 @@ describe('the examples of the plan', () => {
       verbTense: 'past',
       directObject: 'FOOD',
     });
-    expect(print(state)).toBe('/subj cat /adj brown /pl /verb eat /past /obj food');
+    expect(print(state)).toBe('/subj ( cat /adj brown /pl ) /verb ( eat /past ) /obj ( food )');
   });
 
   it('lands /past on the closest word that can take it, skipping the noun after the verb', () => {
     const state = ok('/subj cat /verb eat /obj food /past');
     expect(sel(state).verbTense).toBe('past');
-    expect(print(state)).toBe('/subj cat /verb eat /past /obj food');
+    expect(print(state)).toBe('/subj ( cat ) /verb ( eat /past ) /obj ( food )');
   });
 
   it('takes the box under the cursor as the word just before the line', () => {
@@ -38,7 +38,7 @@ describe('the examples of the plan', () => {
       verb: 'RUN',
       direction: 'HOUSE',
     });
-    expect(print(state)).toBe('/command lets /verb run /dir house');
+    expect(print(state)).toBe('/command lets /verb ( run ) /dir ( house )');
   });
 
   it('makes a relative clause in brackets, its subject the gap, and hands the line back to the head', () => {
@@ -52,7 +52,7 @@ describe('the examples of the plan', () => {
         target: { containerId: 'n1', nounKey: 'subject' },
       }),
     ]);
-    expect(script(state)).toBe('/subj child /rel #2.subj /verb read /obj book\n/subj child /verb love /obj cat');
+    expect(script(state)).toBe('/subj ( child /rel #2.subj ) /verb ( read ) /obj ( book )\n/subj ( child ) /verb ( love ) /obj ( cat )');
   });
 
   it('names the object as the gap', () => {
@@ -66,13 +66,13 @@ describe('the examples of the plan', () => {
     expect(state.links).toEqual([
       expect.objectContaining({ kind: 'conditional', source: { containerId: 'p1' }, target: { containerId: 'n1' } }),
     ]);
-    expect(script(state)).toBe('/subj dog /verb run /if #2\n/subj cat /verb eat');
+    expect(script(state)).toBe('/subj ( dog ) /verb ( run ) /if #2\n/subj ( cat ) /verb ( eat )');
   });
 
   it('makes an instrument', () => {
     const state = ok('/subj child /verb eat /obj food /inst ( /subj stick )');
     expect(state.links).toEqual([expect.objectContaining({ kind: 'instrumental', level: 'object' })]);
-    expect(script(state)).toBe('/subj child /verb eat /obj food /inst #2\n/subj stick');
+    expect(script(state)).toBe('/subj ( child ) /verb ( eat ) /obj ( food ) /inst #2\n/subj ( stick )');
   });
 
   it('gives a noun a possessor in brackets, and /pl after them goes back to the head', () => {
@@ -80,7 +80,7 @@ describe('the examples of the plan', () => {
     expect(ids_(sel(state))).toMatchObject({ subject: 'CHILD', subjectNumber: 'plural', verb: 'RUN' });
     expect(ids_(sel(state).subjectPossessor!)).toMatchObject({ subject: 'MAN', subjectAdjective: 'OLD' });
     expect(sel(state).subjectPossessor!.subjectNumber).toBeUndefined();
-    expect(print(state)).toBe('/subj child /pl /poss ( /subj man /adj old ) /verb run');
+    expect(print(state)).toBe('/subj ( child /pl /poss [ man /adj old ] ) /verb ( run )');
   });
 
   it('nests brackets', () => {
@@ -88,7 +88,7 @@ describe('the examples of the plan', () => {
     expect(state.containers).toHaveLength(3);
     expect(state.links.map((l) => l.kind ?? 'relative').sort()).toEqual(['conditional', 'relative']);
     expect(script(state)).toBe(
-      '/subj dog /verb run /if #2\n/subj cat /rel #3.subj /verb eat\n/subj cat /verb see /obj child',
+      '/subj ( dog ) /verb ( run ) /if #2\n/subj ( cat /rel #3.subj ) /verb ( eat )\n/subj ( cat ) /verb ( see ) /obj ( child )',
     );
   });
 
@@ -112,7 +112,7 @@ describe('the examples of the plan', () => {
     state = ok('/verb eat /obj food', { state });
     state = ok('/not', { state, word: { containerId: 'p1', slot: 'verb' } });
     state = ok('/modal can', { state, word: { containerId: 'p1', slot: 'verb' } });
-    expect(print(state)).toBe('/subj cat /adj brown /pl /verb eat /modal can /not /obj food');
+    expect(print(state)).toBe('/subj ( cat /adj brown /pl ) /verb ( eat /modal can /not ) /obj ( food )');
   });
 });
 
@@ -162,6 +162,6 @@ describe('lines that once broke the console', () => {
   it('does not print a link whose other end is gone', () => {
     const state = ok('/subj dog /verb run /if ( /subj cat /verb eat )');
     const dangling = { ...state, containers: state.containers.slice(0, 1) };
-    expect(print(dangling)).toBe('/subj dog /verb run');
+    expect(print(dangling)).toBe('/subj ( dog ) /verb ( run )');
   });
 });
