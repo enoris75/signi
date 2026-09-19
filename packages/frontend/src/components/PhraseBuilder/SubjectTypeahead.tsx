@@ -10,6 +10,7 @@ import { PronounChooser } from "./PronounChooser.tsx";
 import { usePickerKeys } from "./hooks/usePickerKeys.ts";
 import { usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
+import { useMayTakeFocus } from "../../console/ConsoleMarks.tsx";
 
 const TABS = ["noun", "pronoun"] as const;
 
@@ -49,6 +50,7 @@ export function SubjectTypeahead({
   const tab = onKindChange ? kind : localTab;
   const setTab = onKindChange ?? setLocalTab;
   const anchorRef = useRef<HTMLDivElement>(null);
+  const mayTakeFocus = useMayTakeFocus();
 
   const picker = usePickerKeys({
     items: nouns,
@@ -109,7 +111,7 @@ export function SubjectTypeahead({
     <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
       <PromptWidth prompt={prompt}>
         <InputBase
-          autoFocus
+          autoFocus={mayTakeFocus}
           value={picker.query}
           onChange={(e) => {
             picker.onChange(e);

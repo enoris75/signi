@@ -20,6 +20,7 @@ import { useUiString } from "../../i18n/useUiString.ts";
 import { Keycap } from "../../keyboard/Keycap.tsx";
 import { useInputModality } from "../../keyboard/KeyboardProvider.tsx";
 import { usePickKeys } from "../../keyboard/usePickKeys.ts";
+import { useConsoleMarks } from "../../console/ConsoleMarks.tsx";
 
 interface Props {
   containers: PhraseContainer[];
@@ -78,6 +79,9 @@ export function PhraseWorkspace({
     bumpGeom,
     connectors,
   } = useConnectors(links, t("slot.instrumental").toLowerCase());
+
+  // A link the console's line would make is drawn dashed until ↵, like the boxes it would change.
+  const marks = useConsoleMarks();
 
   const makeContainerUpdate =
     (id: string) => (updater: (prev: PhraseSelection) => PhraseSelection) =>
@@ -197,6 +201,7 @@ export function PhraseWorkspace({
                     strokeWidth="2"
                     strokeOpacity="0.85"
                     strokeLinejoin="round"
+                    strokeDasharray={marks?.previewLinks.has(c.id) ? "6 4" : undefined}
                     markerEnd={marker}
                   />
                   {/* Conjunction label ("if" / "and" / "but" / …) on the vertical run. */}
@@ -223,7 +228,7 @@ export function PhraseWorkspace({
                 y2={c.y2}
                 stroke={c.color}
                 strokeWidth="1.75"
-                strokeOpacity="0.5"
+                strokeOpacity={marks?.previewLinks.has(c.id) ? 0.9 : 0.5}
                 strokeDasharray="5 3"
               />
             );

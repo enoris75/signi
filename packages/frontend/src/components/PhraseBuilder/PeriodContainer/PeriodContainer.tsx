@@ -7,7 +7,7 @@ import { useBorderDrag } from "./hooks/useBorderDrag.ts";
 import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
-import { PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
+import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
 
 export interface PeriodContainerProps extends ClauseControls, HeaderControlsProps {
   // The card's padding, in theme spacing units. The caller's resize grip negates it to
@@ -26,6 +26,10 @@ export interface PeriodContainerProps extends ClauseControls, HeaderControlsProp
   // The header controls, for the owner to measure: compact view floats them over the canvas's
   // top-right corner, and the canvas packs its words clear of them.
   controlsRef?: React.Ref<HTMLDivElement>;
+  // A period the console's line would make, not yet made: a dashed card, captioned as a preview.
+  preview?: boolean;
+  // The number the console's link list gives this period (see ConsoleMarks.numbers).
+  consoleNumber?: number;
   children: React.ReactNode;
 }
 
@@ -42,6 +46,8 @@ export function PeriodContainer({
   position,
   onPositionChange,
   controlsRef,
+  preview = false,
+  consoleNumber,
   conditional,
   coordinative,
   instrumental,
@@ -70,16 +76,17 @@ export function PeriodContainer({
       // While a pick is in flight this card is one of the places it could land, and it is numbered
       // where it sits so a digit can take it (see usePickKeys).
       {...(target ? { [PICK_TARGET]: target } : {})}
+      {...(consoleNumber !== undefined ? { [PICK_INDEX]: consoleNumber } : {})}
       sx={{
-        ...(target ? pickBadgeSx : {}),
+        ...(target || consoleNumber !== undefined ? pickBadgeSx : {}),
         p: paperPad,
         // Compact floats its controls into the top-right corner, so the Paper is the
         // positioning context for that overlay.
         position: "relative",
-        border: "1px solid",
-        borderColor: accent.borderColor,
-        borderLeft: "3px solid",
-        borderLeftColor: accent.borderLeftColor,
+        border: preview ? "1.5px dashed" : "1px solid",
+        borderColor: preview ? "primary.main" : accent.borderColor,
+        borderLeft: preview ? "3px dashed" : "3px solid",
+        borderLeftColor: preview ? "primary.main" : accent.borderLeftColor,
         boxShadow: accent.boxShadow,
         mr: accent.gutter ? "64px" : 0,
         transition: "margin 0.15s ease",
@@ -120,7 +127,23 @@ export function PeriodContainer({
         }}
       >
         {/* The caption and the reification switch are chrome the compact overview doesn't need. */}
-        {!compact && <PeriodCaption controls={controls} showCanvas={showCanvas} />}
+        {!compact && preview && (
+          <Box
+            data-testid="period-preview"
+            sx={{
+              fontFamily: '"Inter", sans-serif',
+              fontSize: "0.62rem",
+              fontWeight: 700,
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "text.secondary",
+            }}
+          >
+            {/* English literal, for /localize. */}
+            · Preview
+          </Box>
+        )}
+        {!compact && !preview && <PeriodCaption controls={controls} showCanvas={showCanvas} />}
         {!compact && instrumental?.isInstrument && (
           <ReificationSwitch
             level={instrumental.level}

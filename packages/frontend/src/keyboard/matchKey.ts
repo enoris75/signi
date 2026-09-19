@@ -13,6 +13,10 @@ export type Platform = "mac" | "other";
 /** Only the parts of a `KeyboardEvent` matching reads, so the matcher is testable with a literal. */
 export interface KeyEventLike {
   key: string;
+  /** Which physical key it was, for a spec that names one by position (`Code:Backquote`). */
+  code?: string;
+  /** Set while an input method is composing, when every key is the input method's. */
+  isComposing?: boolean;
   shiftKey: boolean;
   ctrlKey: boolean;
   metaKey: boolean;
@@ -57,12 +61,43 @@ const EVENT_KEY: Record<string, string> = { Space: " " };
  */
 const isPunctuation = (key: string) => key.length === 1 && !/\p{L}|\p{N}/u.test(key);
 
+/**
+ * The keys named by where they are rather than by what they type. `Code:Backquote` is the key below
+ * esc, whatever it prints: many layouts have no plain backtick there (Italian) or make it a dead key
+ * (German, French, Spanish), and on a Mac with an ISO keyboard the browser reports that key as
+ * `IntlBackslash` — so both codes are that key there.
+ */
+const PHYSICAL_KEYS: Record<string, (platform: Platform) => string[]> = {
+  Backquote: (platform) => (platform === "mac" ? ["Backquote", "IntlBackslash"] : ["Backquote"]),
+};
+
+const CODE_PREFIX = "Code:";
+
+/**
+ * What the key in that place types on a Japanese keyboard: 半角/全角, the switch in and out of the
+ * input method. It is that switch, not the console's key.
+ */
+const INPUT_METHOD_KEYS = new Set(["Zenkaku", "Hankaku", "HankakuZenkaku", "KanjiMode", "Process"]);
+
 export function matchesKeySpec(
   spec: string,
   event: KeyEventLike,
   platform: Platform = currentPlatform(),
 ): boolean {
   const { mod, shift, key } = parseKeySpec(spec);
+  if (key.startsWith(CODE_PREFIX)) {
+    const codes = PHYSICAL_KEYS[key.slice(CODE_PREFIX.length)]?.(platform) ?? [key.slice(CODE_PREFIX.length)];
+    return (
+      !event.altKey &&
+      !event.ctrlKey &&
+      !event.metaKey &&
+      !event.isComposing &&
+      !INPUT_METHOD_KEYS.has(event.key) &&
+      !mod &&
+      shift === event.shiftKey &&
+      codes.includes(event.code ?? "")
+    );
+  }
   // Alt is never bound, so it never passes through: on a Mac it composes characters, and on
   // Windows and Linux it opens the browser's own menus.
   if (event.altKey) return false;
@@ -90,6 +125,7 @@ const CAP_LABEL: Record<string, string> = {
   Backspace: "⌫",
   Tab: "⇥",
   Space: "Space",
+  "Code:Backquote": "`",
 };
 
 /**

@@ -1,6 +1,7 @@
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Box, Container, Typography, Alert, Button, Snackbar } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
+import TerminalIcon from "@mui/icons-material/Terminal";
 import { PhraseWorkspace } from "./components/PhraseBuilder/PhraseWorkspace.tsx";
 import { workspaceToPlans } from "./components/PhraseBuilder/workspacePlan/index.ts";
 import TranslationPanel from "./components/TranslationPanel.tsx";
@@ -11,12 +12,15 @@ import { useTranslations } from "./hooks/useTranslation.ts";
 import { useWorkspaceHistory } from "./hooks/useWorkspaceHistory.ts";
 import { useUiString } from "./i18n/useUiString.ts";
 import { KeyboardProvider } from "./keyboard/KeyboardProvider.tsx";
-import { HintLine } from "./keyboard/HintLine.tsx";
 import { HelpOverlay } from "./keyboard/HelpOverlay.tsx";
 import { HelpButton } from "./keyboard/HelpButton.tsx";
 import { useToolbar } from "./keyboard/useToolbar.ts";
 import { pressControl } from "./keyboard/controls.ts";
 import { Keycap } from "./keyboard/Keycap.tsx";
+import { usePhraseConsole } from "./console/usePhraseConsole.ts";
+import { PhraseConsole } from "./console/PhraseConsole.tsx";
+import { ConsoleMarksProvider } from "./console/ConsoleMarks.tsx";
+import { CursorBridge } from "./console/CursorBridge.tsx";
 
 const newId = () =>
   typeof crypto !== "undefined" && crypto.randomUUID
@@ -56,6 +60,32 @@ export default function App() {
   // The header is one stop in the tab order, its controls walked with ← →.
   const toolbar = useToolbar();
 
+  // The phrase console (P02): the typed way to build a phrase, and a second view of it. It reads and
+  // writes the same workspace history the canvas does; while a line is typed, what the canvas and the
+  // translations show is that line's preview.
+  const phraseConsole = usePhraseConsole({
+    history,
+    actions: {
+      press: (control) => pressControl(control),
+      toggleWords: () => setWordsPanel(!wordsPanelOpen),
+      openHelp: () => setHelpOpen(true),
+    },
+  });
+  const shown = phraseConsole.preview?.state ?? phraseConsole.committed;
+  // The canvas picks links on what it shows, which may be a preview, and writes them to the phrase
+  // itself — where a period the preview only proposes does not exist. A link to one is no link.
+  const proposed = new Set(phraseConsole.preview?.created ?? []);
+  const setCommittedLinks: typeof setLinks = (update) =>
+    setLinks((ls) => {
+      const next = typeof update === "function" ? update(ls) : update;
+      const kept = next.filter((l) => !proposed.has(l.source.containerId) && !proposed.has(l.target.containerId));
+      return kept.length === next.length ? next : kept;
+    });
+  // Translations follow the preview a beat behind the keys, so a pause asks for one and a burst of
+  // typing asks for none; the committed state is never kept waiting.
+  const translated = useDebounced(shown, phraseConsole.preview ? 200 : 0);
+  const previewingTranslations = Boolean(phraseConsole.preview) && translated === shown;
+
   // What the app's own keys press. The four save/load controls own the dialogs they open, so the
   // keys press the buttons where they stand rather than lifting those dialogs out of them.
   const appKeys = () => ({
@@ -78,6 +108,7 @@ export default function App() {
     toggleHelp: () => setHelpOpen((open) => !open),
     undo: history.canUndo ? history.undo : undefined,
     redo: history.canRedo ? history.redo : undefined,
+    console: { toggle: phraseConsole.toggle, startCommand: phraseConsole.startCommand },
   });
 
   // The tagline is rendered by the engine from a fixed period, in the chosen UI language.
@@ -86,7 +117,7 @@ export default function App() {
 
   // One plan per root container (a container no link targets); linked containers fold in
   // as relative clauses. Every root is translated and shown in period order.
-  const sentences = workspaceToPlans(containers, links);
+  const sentences = workspaceToPlans(translated.containers, translated.links);
   const results = useTranslations(sentences.map((s) => s.plan));
   const isError = results.some((r) => r.isError);
 
@@ -168,6 +199,21 @@ export default function App() {
                 flexShrink: 0,
               }}
             >
+              {/* The console's own control, for whoever is using the mouse: ` does the same. */}
+              <Button
+                variant={phraseConsole.open ? "contained" : "outlined"}
+                size="small"
+                disableElevation
+                data-testid="console-toggle"
+                startIcon={<TerminalIcon />}
+                onClick={() => phraseConsole.setOpen(!phraseConsole.open)}
+                aria-pressed={phraseConsole.open}
+                sx={{ textTransform: "none", gap: 0.5 }}
+              >
+                {/* English literal, for /localize. */}
+                Console
+                <Keycap spec="Code:Backquote" />
+              </Button>
               <LanguageSelector />
               <SavedPhrasesToolbar
                 containers={containers}
@@ -213,16 +259,20 @@ export default function App() {
                 pr: 1.5,
               }}
             >
-              <PhraseWorkspace
-                containers={containers}
-                links={links}
-                setContainers={setContainers}
-                setLinks={setLinks}
-                wordsPanelOpen={wordsPanelOpen}
-                onWordsPanelClose={() => setWordsPanel(false)}
-                // English literal, for /localize.
-                onPeriodRemoved={() => setUndoToast("Period removed")}
-              />
+              {/* The canvas shows the console's preview while a line is typed, and edits the
+                  committed workspace underneath it (see usePhraseConsole). */}
+              <ConsoleMarksProvider marks={phraseConsole.marks}>
+                <PhraseWorkspace
+                  containers={shown.containers}
+                  links={shown.links}
+                  setContainers={setContainers}
+                  setLinks={setCommittedLinks}
+                  wordsPanelOpen={wordsPanelOpen}
+                  onWordsPanelClose={() => setWordsPanel(false)}
+                  // English literal, for /localize.
+                  onPeriodRemoved={() => setUndoToast("Period removed")}
+                />
+              </ConsoleMarksProvider>
             </Box>
 
             {/* Horizontal resize handle */}
@@ -277,16 +327,23 @@ export default function App() {
                 Could not reach the translation server.
               </Alert>
             )}
-            <TranslationPanel sentences={results} />
+            <TranslationPanel sentences={results} preview={previewingTranslations} />
           </Box>
         </Container>
 
-        {/* What the keys do here, for whoever is driving with the keyboard. */}
-        <HintLine />
+        {/* The console docks under the page, which keeps room for it rather than ending
+            underneath it. Its prompt line is P01's hint line; hidden, nothing is docked, and the
+            key tips and tooltips teach the keys. */}
+        <CursorBridge follow={phraseConsole.followCursor} />
+        {phraseConsole.open && <Box sx={{ height: phraseConsole.height }} aria-hidden />}
+        <PhraseConsole model={phraseConsole} wordsPanelOpen={wordsPanelOpen} />
         <HelpOverlay open={helpOpen} onClose={() => setHelpOpen(false)} />
-        {/* Last in the page's tab order, and out of the way of everything but the hint line it
-            steps over: help is wanted from wherever the work is. */}
-        <HelpButton onClick={() => setHelpOpen(true)} />
+        {/* Last in the page's tab order, and out of the way of everything but the strip it steps
+            over: help is wanted from wherever the work is. */}
+        <HelpButton
+          onClick={() => setHelpOpen(true)}
+          bottom={phraseConsole.open ? phraseConsole.height + 16 : undefined}
+        />
 
         {/* The toast that replaced the confirm dialog: the act has happened, and here is the way
             back. Reuses the filled Alert the app's other toasts use, in `info`. */}
@@ -324,4 +381,21 @@ export default function App() {
       </Box>
     </KeyboardProvider>
   );
+}
+
+/**
+ * A value that follows `value` after `delay` ms of quiet — or at once, with no delay. Used so the
+ * console's preview asks for translations after a pause rather than at every keystroke.
+ */
+function useDebounced<T>(value: T, delay: number): T {
+  const [settled, setSettled] = useState(value);
+  useEffect(() => {
+    if (delay <= 0) {
+      setSettled(value);
+      return;
+    }
+    const timer = setTimeout(() => setSettled(value), delay);
+    return () => clearTimeout(timer);
+  }, [value, delay]);
+  return delay <= 0 ? value : settled;
 }

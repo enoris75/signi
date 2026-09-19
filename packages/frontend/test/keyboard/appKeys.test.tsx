@@ -149,7 +149,10 @@ describe('walking the page with F6', () => {
     expect(activeRegion()).toBe('periods');
 
     // Nothing is translated yet and the words panel is hidden, so neither is a place to go: the
-    // walk carries past them to the header rather than stopping dead.
+    // walk carries past them to the console, shown on a first visit, and round to the header.
+    press('F6');
+    expect(activeRegion()).toBe('console');
+
     press('F6');
     expect(activeRegion()).toBe('header');
 
@@ -165,6 +168,7 @@ describe('walking the page with F6', () => {
     const input = screen.getByTestId('typeahead-subject');
     focus(input);
 
+    press('F6');
     press('F6');
     press('F6');
 

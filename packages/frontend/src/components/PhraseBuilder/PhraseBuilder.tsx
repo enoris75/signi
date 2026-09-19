@@ -102,6 +102,7 @@ import { pressControl } from "../../keyboard/controls.ts";
 import { usePickKeys } from "../../keyboard/usePickKeys.ts";
 import { satelliteKey as satelliteKeyFor, type BoxContext } from "../../keyboard/keymap.ts";
 import { boxScopesOf, nounBlockOf } from "../../keyboard/scope.ts";
+import { markKey, periodMark, useConsoleMarks } from "../../console/ConsoleMarks.tsx";
 
 export interface PhraseBuilderProps {
   selection: PhraseSelection;
@@ -254,6 +255,28 @@ export function PhraseBuilder({
   const activeSlotConfig =
     visibleSlots.find((s) => s.key === activeSlot) ?? null;
   const commands = phraseCommands(onPhraseUpdate);
+  // What the phrase console shows on this builder's boxes, and the box it is told the pointer is on.
+  // A box is named by its period, the nested phrase it is in (a hosted ring's head path), and its slot.
+  const marks = useConsoleMarks();
+  const markedContainer = binding?.containerId;
+  const consoleMark =
+    marks && markedContainer
+      ? (slot: SlotKey) => {
+          const key = markKey(markedContainer, possessorPath, slot);
+          return {
+            key,
+            preview: marks.preview.has(key),
+            lit: marks.lit.has(key),
+            cursor: marks.cursor === key,
+            number: marks.numbers.get(key),
+          };
+        }
+      : undefined;
+  const onHoverSlot =
+    marks && markedContainer
+      ? (slot: SlotKey | null) =>
+          marks.onHover(slot ? { containerId: markedContainer, slice: possessorPath, slot } : null)
+      : undefined;
 
   function handleConceptSelect(
     concept: Concept,
@@ -800,6 +823,7 @@ export function PhraseBuilder({
     if (!renderedSlots.some((s) => s.key === slot)) return null;
     return {
       slot,
+      path: possessorPath,
       selection,
       nounKey: nounBlockOf(slot),
       satellite: satelliteBy,
@@ -916,6 +940,8 @@ export function PhraseBuilder({
         : undefined,
     // How the noun boxes take part in cross-container links and coref picks (see linkPickHandlers).
     ...linkPickHandlers({ coref, linkBinding, nounAddress }),
+    consoleMark,
+    onHoverSlot,
   };
 
   const canvas = (
@@ -975,6 +1001,8 @@ export function PhraseBuilder({
     <PeriodCard
       selection={selection}
       binding={binding}
+      preview={Boolean(markedContainer && marks?.previewPeriods.has(markedContainer))}
+      consoleNumber={markedContainer ? marks?.numbers.get(periodMark(markedContainer)) : undefined}
       compact={compact}
       showCanvas={showCanvas}
       hasGroups={groupRects.length > 0}

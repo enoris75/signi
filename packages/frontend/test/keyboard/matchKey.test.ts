@@ -106,3 +106,29 @@ describe('keycapLabels', () => {
     expect(keycapText('Mod+Shift+S', 'mac')).toBe('⌘ ⇧ S');
   });
 });
+
+describe('a key named by where it is', () => {
+  const at = (key: string, code: string, extra: Record<string, unknown> = {}) => ({
+    key,
+    code,
+    shiftKey: false,
+    ctrlKey: false,
+    metaKey: false,
+    altKey: false,
+    ...extra,
+  });
+
+  it('matches the key below esc whatever it types, and its ISO twin on a Mac only', () => {
+    expect(matchesKeySpec('Code:Backquote', at('`', 'Backquote'), 'other')).toBe(true);
+    expect(matchesKeySpec('Code:Backquote', at('\\', 'Backquote'), 'other')).toBe(true);
+    expect(matchesKeySpec('Code:Backquote', at('<', 'IntlBackslash'), 'other')).toBe(false);
+    expect(matchesKeySpec('Code:Backquote', at('§', 'IntlBackslash'), 'mac')).toBe(true);
+    expect(keycapText('Code:Backquote')).toBe('`');
+  });
+
+  it('leaves the Japanese keyboard’s input-method switch in that place alone, and a composition', () => {
+    expect(matchesKeySpec('Code:Backquote', at('Zenkaku', 'Backquote'), 'other')).toBe(false);
+    expect(matchesKeySpec('Code:Backquote', at('`', 'Backquote', { isComposing: true }), 'other')).toBe(false);
+    expect(matchesKeySpec('Code:Backquote', at('`', 'Backquote', { ctrlKey: true }), 'other')).toBe(false);
+  });
+});

@@ -6,6 +6,7 @@ import { ConceptOption } from "./ConceptOption.tsx";
 import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PickerFooter } from "./PickerFooter.tsx";
 import type { PickerKeys } from "./hooks/usePickerKeys.ts";
+import { useMayTakeFocus } from "../../console/ConsoleMarks.tsx";
 
 /**
  * The shape every single-vocabulary word picker has: a field inside the box, and a dropdown of the
@@ -27,12 +28,13 @@ export function PickerList({
 }) {
   const anchorRef = useRef<HTMLDivElement>(null);
   const { open, filtered, highlightedIdx, inTabs, listRef } = picker;
+  const mayTakeFocus = useMayTakeFocus();
 
   return (
     <Box ref={anchorRef} onPointerDown={(e) => e.stopPropagation()} sx={{ mt: 0.25 }}>
       <PromptWidth prompt={placeholder}>
         <InputBase
-          autoFocus
+          autoFocus={mayTakeFocus}
           value={picker.query}
           onChange={picker.onChange}
           onFocus={picker.onFocus}

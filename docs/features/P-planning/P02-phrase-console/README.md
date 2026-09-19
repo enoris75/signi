@@ -10,7 +10,9 @@ and one console component. No change to the engine, the API or the saved-phrase 
 **Relation to [P01](../P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
 the keyboard (cursor, focus ring, key tips, box letters). The console is the fast path, and it
 replaces P01's command palette and hint bar.
-**Status:** planning. Direction settled on 2026-09-13 ([Decisions](#decisions)); no open questions.
+**Status:** phases 1–4 shipped, and phase 5 in part — the console builds, previews and edits every
+part of a phrase the canvas can, and writes every canvas change back as the command it equals. See
+[Phases](#6-phases) for what each covered, and the notes under the table for what the plan left open.
 **Drawings:** [`artwork/`](artwork/) — six images exported from page *Phrase console (P02)* of
 the [design canvas](https://claude.ai/code/artifact/7a68e65c-9f8b-44c0-b02c-8e4c4224dc8f), embedded in
 the sections they illustrate.
@@ -452,11 +454,85 @@ The `language/` layer imports no React and is fully unit-testable.
 
 | Phase | Scope | Done when |
 |---|---|---|
-| **1 · Language core** | Catalogue for subject, verb, object, adjectives, adverbs, modals, noun and verb settings; lex / parse / resolve / complete / apply / print; set-value reducers. No UI. | The round-trip invariant holds on generated states and on every saved-phrase fixture those commands cover; completion golden tests pass for every position kind. |
-| **2 · Console with completion** | Docked console, coloured prompt, **ghost type-ahead and the completion list** (commands, role words, values), history, transcript with sentences, source strip, context chip; ↵ applies; echo of canvas actions. | A period can be built from the console alone without typing any name in full, and clicking on the canvas shows up in the console. |
-| **3 · Live preview and cursor** | Preview state, dashed boxes, preview translations, diagnostics, shared cursor, hover highlight both ways, token click, `/edit`. | Typing a line previews on the canvas before ↵; esc leaves the state untouched. |
-| **4 · The whole language** | Complements and relations, possessors, conjuncts, moods, periods (`/new`, `#n`), links with references and numbered completion, bracketed subordinate phrases, `/del`, workspace commands, multi-line paste. | Every control on the canvas has a command (coverage test), and a pasted multi-period script rebuilds the workspace. |
-| **5 · Polish** | Recency ranking, `/help` pages, pinning, interface-language aliases if wanted. | — |
+| **1 · Language core** ✅ | Catalogue for subject, verb, object, adjectives, adverbs, modals, noun and verb settings; lex / parse / resolve / complete / apply / print; set-value reducers. No UI. | The round-trip invariant holds on generated states and on every saved-phrase fixture those commands cover; completion golden tests pass for every position kind. |
+| **2 · Console with completion** ✅ | Docked console, coloured prompt, **ghost type-ahead and the completion list** (commands, role words, values), history, transcript with sentences, source strip, context chip; ↵ applies; echo of canvas actions. | A period can be built from the console alone without typing any name in full, and clicking on the canvas shows up in the console. |
+| **3 · Live preview and cursor** ✅ | Preview state, dashed boxes, preview translations, diagnostics, shared cursor, hover highlight both ways, token click, `/edit`. | Typing a line previews on the canvas before ↵; esc leaves the state untouched. |
+| **4 · The whole language** ✅ | Complements and relations, possessors, conjuncts, moods, periods (`/new`, `#n`), links with references and numbered completion, bracketed subordinate phrases, `/del`, workspace commands, multi-line paste. | Every control on the canvas has a command (coverage test), and a pasted multi-period script rebuilds the workspace. |
+| **5 · Polish** (in part) | Recency ranking, `/help` pages, pinning, interface-language aliases if wanted. | — |
+
+**What phase 1 shipped, beside the table.** The language is pure TypeScript under
+`console/language/`: the files §5 names, plus `words.ts` (which kind of word each box holds, and which
+commands it can take — each satellite's own `available`, restated) and `normalize.ts` (what a
+workspace *says*, defaults and ids taken out, which is what "the same state" means for the round trip).
+The grammar was built whole in this phase rather than in phase 4, since print and apply have to
+agree on all of it for the invariant to mean anything. The set-value reducers are in `phraseReducers`,
+the canvas's toggles and cycles now thin wrappers over them, and the link rules are pure functions in
+`linkRules.ts` that `useWorkspaceLinks` calls — so a pick and a command accept the same links.
+
+The round trip is tested by a random walk of the canvas's own reducers and link rules from an empty
+workspace (400 walks in each of two interface languages; stress-tested at 6,000), not over the
+saved-phrase fixtures: those are serialisation fixtures, and not reachable states (a modal that is no
+modal verb, an adjective chain with a gap, a place the verb does not license). Several printing rules
+came out of it: a noun's own number is written before its adjectives when one of them is a noun
+modifier, which takes a number of its own; a bare role command re-anchors an adjective that a noun
+modifier without an adjective would otherwise take; a verb's own adverb is written before its modals; a
+conjunct heading a relative clause is written in brackets; an empty period after the first is `/new`;
+an ambiguous word is written as its id, and an id in capitals wins over a label that reads the same.
+Links are made last, in the order written, so a line may name a period a later line fills; a
+possessor pointing at another noun is resolved last for the same reason.
+
+It found two defects in the canvas, fixed here: a gendered noun replacing a 3rd-person pronoun kept the
+pronoun's neuter, which no noun control offers (it is masculine now); and the rule of one subordinate
+role per period held only one way round — a relative clause's gap could still be made an if-clause, a
+coordinate or an instrument. It can no longer.
+
+Decided where the plan was silent: `/and dog` and `/poss man` are phrases of their own, as if
+bracketed, so what follows them goes back to the head; `/plain` puts a degree back (the plan listed
+none); a reference to a conjunct counts the group's nouns, `#1.subj.and2` being the second; a script's
+first line applies where the context is and each later line starts a period, unless it begins with
+`#n` or `/new`; a pronoun takes the genders its chooser offers in any slot. A few states the canvas can
+leave behind are not rebuilt by their printed text — a link whose word was re-picked after the link was
+made, so that no pick could make it now (a relative clause on a word since re-picked as a pronoun; an
+instrument lowered to a thing after its act was given a verb). The console holds to the pick's rules
+and refuses them. A possessor pointing at a noun since removed, and a setting left on a word of the
+other kind, render nothing, and are left out.
+
+**What phases 2 and 3 shipped, beside the table.** The console is `PhraseConsole` and its parts, its
+state in `usePhraseConsole`; `ConsoleMarks` carries what it shows on the canvas (preview, hover, its
+cursor, numbered targets) down to the boxes, and `CursorBridge` carries the canvas cursor up. The key
+below esc is a keymap entry like any other: `matchKey` gained a physical-key spec, `Code:Backquote`
+(and `IntlBackslash` on a Mac), and both console keys are withheld inside every other text field. The
+prompt line is P01's hint line, so the standalone strip is gone; with the console hidden nothing is
+docked. F6 visits the console last. A picker mounting while the prompt has the keyboard no longer
+takes it — the preview mounts one at almost every keystroke. Translations preview 200 ms behind the
+keys, labelled *Preview*.
+
+Behaviour the plan did not pin down, settled in use: an action on the canvas moves the console's
+context to the box it changed (in §1, the click on *eat*'s polarity is what lets `/modal can` land on
+*eat*); a digit picks a numbered target only before anything is typed for the argument, since once a
+`#` is typed digits are the reference's own text; and a word still being typed, with words in the list
+for it, is shown as unfinished rather than as a mistake until ↵ is pressed on it. A values command
+takes as many values as it can use — one level, one language, an addressee and a register for a
+command — and further values are offered on ⇥ only, so ↵ after one runs the line. The preview and
+completion run during render at every keystroke, where nothing would catch an exception: should the
+language ever throw, the line says it could not be read, and the page and its phrase stay up. While an
+input method composes, its keys are its own; the Japanese keyboard's 半角/全角, which sits where the
+backtick does, switches the input method and not the console.
+
+**What phase 4 shipped, beside the table.** The grammar was already whole (phase 1); this phase is
+its surface. A paste of several lines runs as one step, each line a period. `/save name` and
+`/load name` save and load by name; alone, they open the header's dialogs, as `/export` and
+`/import` do. The coverage test holds every satellite, every reducer that edits the phrase, and every
+key the app binds to a command, or to an explicit note that the key only moves the cursor or the view.
+
+**What phase 5 has so far.** Recency ranking; the console's reference in the help overlay beside the
+keys, generated from the catalogue; `/help pl` writes a command's line into the transcript. Pinning and
+interface-language aliases are not done — nobody has asked for either yet.
+
+**Left open.** Every new caption, title and message is an English literal marked for `/localize`
+(command descriptions already come from the catalogue where the words are seeded). The IME slashes
+(`・`, `／`) and the ISO backtick are in, and still to be tried on real input methods and keyboards.
+The transcript lives for the session.
 
 ## 7. Testing
 

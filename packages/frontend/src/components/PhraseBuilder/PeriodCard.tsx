@@ -12,6 +12,10 @@ import { GRAPH_HEIGHT_KEY } from "./storageKeys.ts";
 
 export interface PeriodCardProps {
   selection: PhraseSelection;
+  // A period the console's line would make: drawn as a dashed card until ↵ (P02 §4).
+  preview?: boolean;
+  // The number the console's link list gives this period, worn on the card so a digit names it.
+  consoleNumber?: number;
   // The workspace container's linking hooks; undefined for a standalone period.
   binding?: WorkspaceBinding;
   compact: boolean;
@@ -58,6 +62,8 @@ const moodLocked = (binding: WorkspaceBinding | undefined): boolean =>
 // grip, and — for a standalone period — the border drag that floats it about the viewport.
 export function PeriodCard({
   selection,
+  preview = false,
+  consoleNumber,
   binding,
   compact,
   showCanvas,
@@ -171,6 +177,8 @@ export function PeriodCard({
       ]}
     >
       <PeriodContainer
+        preview={preview}
+        consoleNumber={consoleNumber}
         paperPad={paperPad}
         compact={compact}
         showCanvas={showCanvas}

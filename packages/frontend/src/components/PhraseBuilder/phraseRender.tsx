@@ -20,7 +20,7 @@ import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { useBoxCursor } from "../../keyboard/KeyboardProvider.tsx";
 import { focusRing } from "../../keyboard/focusRing.ts";
 import { boxScopesOf } from "../../keyboard/scope.ts";
-import { PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
+import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../keyboard/usePickKeys.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import type { GroupRect } from "./graph.ts";
 import type { Disc, Pt } from "./ringLayout.ts";
@@ -151,6 +151,12 @@ export interface PhraseRenderContext {
   // Register the instrumental toggle on the verb phrase's dotted ring with the workspace — the
   // start of an instrumental link's connector. Undefined for a standalone period.
   registerVerbAnchor?: (el: HTMLElement | null) => void;
+  // ── The phrase console (P02; undefined with no console on the page) ──
+  // What the console shows on a box — the line being typed would change it, its token is under the
+  // pointer, the console's context rests on it — and the box under the pointer, which the console
+  // lights the tokens of.
+  consoleMark?: (slot: SlotKey) => { key: string; preview: boolean; lit: boolean; cursor: boolean; number?: number };
+  onHoverSlot?: (slot: SlotKey | null) => void;
 }
 
 // Register one draggable node's element in the measurement map under `key`. Every node on
@@ -319,6 +325,7 @@ export function SlotNode({
   const t = useUiString();
   // Which keys this box answers to, and the cursor registration that decides when they apply.
   const cursor = useBoxCursor(slot.key, boxScopesOf(slot.key, selection));
+  const mark = ctx.consoleMark?.(slot.key);
   // Whether this canvas's `subject` slot is a noun-only head (see PhraseRenderContext.pronounHead).
   const nounSubject = Boolean(nounPhrase) && !pronounHead;
 
@@ -489,11 +496,18 @@ export function SlotNode({
       // A real click reaches the same handler through the drag machinery's own activation, so the
       // second call is a no-op — the pick it would complete is already resolved.
       {...(pickTarget ? { [PICK_TARGET]: slot.key, onClick: () => onPickTarget?.(slot.key) } : {})}
+      // A numbered target of the console's link list wears its number here too.
+      {...(mark?.number !== undefined ? { [PICK_INDEX]: mark.number } : {})}
       onPointerDown={(e: React.PointerEvent) => {
         selectedAtPress.current = activeSlot === slot.key;
         startDrag(e);
       }}
-      sx={[dragSx, focusRing(slot.color), pickTarget ? pickBadgeSx : {}]}
+      sx={[dragSx, focusRing(slot.color), pickTarget || mark?.number !== undefined ? pickBadgeSx : {}]}
+      // The console lights this box's tokens while the pointer is over it, and finds the box by its
+      // mark to give it the keyboard back.
+      data-console-mark={mark?.key}
+      onMouseEnter={() => ctx.onHoverSlot?.(slot.key)}
+      onMouseLeave={() => ctx.onHoverSlot?.(null)}
       ref={(el: HTMLElement | null) => {
         if (el) slotEls.current.set(slot.key, el);
         else slotEls.current.delete(slot.key);
@@ -544,6 +558,9 @@ export function SlotNode({
         })}
         footer={modifierFooter ?? (onDisc ? undefined : degreeChip)}
         rim={onDisc ? degreeChip : undefined}
+        preview={mark?.preview}
+        lit={mark?.lit}
+        consoleCursor={mark?.cursor}
       />
     </Box>
   );

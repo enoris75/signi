@@ -347,9 +347,12 @@ test.describe('the canvas by keyboard', () => {
       );
     expect(await region()).toBe('periods');
 
-    // F6 walks the page's landmarks. The words panel is hidden, so it is not one of them yet.
+    // F6 walks the page's landmarks. The words panel is hidden, so it is not one of them yet; the
+    // console, shown on a first visit, is the last (P02).
     await page.keyboard.press('F6');
     expect(await region()).toBe('translations');
+    await page.keyboard.press('F6');
+    expect(await region()).toBe('console');
     await page.keyboard.press('F6');
     expect(await region()).toBe('header');
 
@@ -359,7 +362,10 @@ test.describe('the canvas by keyboard', () => {
     await page.keyboard.press('ArrowRight');
     expect(await focused()).not.toBe(first);
 
-    // ↑ ↓ walk the translations, and C copies the row the cursor is on.
+    // ↑ ↓ walk the translations, and C copies the row the cursor is on. Back from the header, the
+    // walk goes by the console first.
+    await page.keyboard.press('Shift+F6');
+    expect(await region()).toBe('console');
     await page.keyboard.press('Shift+F6');
     expect(await region()).toBe('translations');
     await page.keyboard.press('ArrowDown');

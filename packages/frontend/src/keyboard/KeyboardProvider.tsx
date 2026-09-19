@@ -8,7 +8,7 @@ import {
   type ReactNode,
 } from "react";
 import type { SlotKey } from "../components/PhraseBuilder/interfaces.ts";
-import { currentPlatform, matchesKeySpec, type Platform } from "./matchKey.ts";
+import { currentPlatform, matchesKeySpec, parseKeySpec, type Platform } from "./matchKey.ts";
 import {
   APP_KEYMAP,
   KEYMAP,
@@ -244,10 +244,18 @@ export function KeyboardProvider({
       // The app's keys work wherever the cursor is — including inside a word picker, since a
       // chord is never what someone is typing. They are looked up *last*, so a bare letter is
       // always the level's before it is the app's.
-      const appKeys = () => run(APP_KEYMAP, ["app"], matches, value.app?.build(), regionNav);
-      // An open word picker is a text field, and it owns every bare key inside it (§4.5).
+      const appKeys = (keymap = APP_KEYMAP) => run(keymap, ["app"], matches, value.app?.build(), regionNav);
+      // An open word picker is a text field, and it owns every bare key inside it (§4.5) — the
+      // console's ` and / too, which it types. The console's own prompt is a line of commands, so
+      // everything typed there is its own — `?` too (`/?`) — save the chords, and the ` that hides it.
       if (isEditableTarget(event.target)) {
-        if (appKeys()) event.preventDefault();
+        const inPrompt = Boolean((event.target as Element).closest?.("[data-console-prompt]"));
+        const keymap = APP_KEYMAP.filter((c) =>
+          c.id === "app.console"
+            ? inPrompt
+            : c.id !== "app.console.command" && (!inPrompt || c.keys.every((k) => parseKeySpec(k).mod)),
+        );
+        if (appKeys(keymap)) event.preventDefault();
         return;
       }
       const cursor = value.cursor;

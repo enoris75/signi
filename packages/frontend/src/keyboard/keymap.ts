@@ -18,6 +18,7 @@ import type { ImperativeRegister, UiStringKey } from "@signi/shared";
 import type {
   BoxComplementType,
   ImperativePerson,
+  NounAddress,
   NounKey,
   PhraseSelection,
   SlotKey,
@@ -60,6 +61,12 @@ export interface PeriodNav extends CursorNav {
  */
 export interface BoxContext {
   slot: SlotKey;
+  /**
+   * The nested phrase the box is in, by its head's address — a hosted ring's (a possessor's or a
+   * conjunct's); undefined for a box of the period itself. The console reads it to know which word
+   * the cursor is on.
+   */
+  path?: NounAddress;
   selection: PhraseSelection;
   /** The noun block the box belongs to: its own key, or the noun an adjective slot describes. */
   nounKey: NounKey | null;
@@ -156,6 +163,11 @@ export interface AppContext {
   /** A step back through the phrase, and forward again. Absent where there is nowhere to go. */
   undo: (() => void) | undefined;
   redo: (() => void) | undefined;
+  /**
+   * The phrase console (P02): show it and put the caret in its prompt — or, from the prompt itself,
+   * hide it and give the keyboard back to the canvas; and show it with a command already begun.
+   */
+  console?: { toggle: () => void; startCommand: () => void };
 }
 
 /** The context an app command runs against. */
@@ -650,6 +662,25 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     keys: ["?"],
     label: "Help",
     run: (ctx) => ctx.toggleHelp(),
+  },
+  {
+    // The key below esc, matched by where it is rather than by what it types (see matchKey), so it
+    // is the same key on every layout. From outside the console it shows it, or takes the keyboard
+    // to it; from the prompt, it hides it.
+    id: "app.console",
+    scope: "app",
+    keys: ["Code:Backquote"],
+    label: "Show or hide the console",
+    when: (ctx) => Boolean(ctx.console),
+    run: (ctx) => ctx.console!.toggle(),
+  },
+  {
+    id: "app.console.command",
+    scope: "app",
+    keys: ["/"],
+    label: "Start a command in the console",
+    when: (ctx) => Boolean(ctx.console),
+    run: (ctx) => ctx.console!.startCommand(),
   },
   {
     id: "app.region.next",

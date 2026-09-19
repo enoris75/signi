@@ -40,11 +40,14 @@ interface Props {
   // One entry per root sentence, in period order. Sentences that aren't translatable yet
   // (no subject) are skipped; the panel shows its empty state when none are.
   sentences: SentenceResult[];
+  // The sentences are the console's preview of a line not yet committed (P02 §4): each language
+  // says so, until ↵ makes them the phrase's own.
+  preview?: boolean;
 }
 
 // One card holding every root sentence's translations, grouped by language: each language
 // row lists its sentences one under the other, in period order.
-export default function TranslationPanel({ sentences }: Props) {
+export default function TranslationPanel({ sentences, preview = false }: Props) {
   const ready = sentences.filter((s) => s.isReady);
   const t = useUiString();
   const heading = t('translations.heading');
@@ -96,6 +99,7 @@ export default function TranslationPanel({ sentences }: Props) {
               language={language}
               sentences={ready}
               isLast={idx === LANGUAGE_CODES.length - 1}
+              preview={preview}
             />
           ))}
         </Box>
@@ -110,10 +114,12 @@ function LanguageRow({
   language,
   sentences,
   isLast,
+  preview,
 }: {
   language: LanguageCode;
   sentences: SentenceResult[];
   isLast: boolean;
+  preview: boolean;
 }) {
   const [copied, setCopied] = useState(false);
   // Named `uiString` rather than `t` — the translation lambdas below already bind `t`.
@@ -177,6 +183,27 @@ function LanguageRow({
         >
           {name}
         </Typography>
+        {preview && (
+          <Box
+            component="span"
+            data-testid="translation-preview"
+            sx={{
+              px: 0.75,
+              border: '1px dashed',
+              borderColor: 'primary.main',
+              borderRadius: 2,
+              fontFamily: '"Inter", sans-serif',
+              fontSize: '0.55rem',
+              fontWeight: 700,
+              letterSpacing: '0.14em',
+              textTransform: 'uppercase',
+              color: 'primary.main',
+            }}
+          >
+            {/* English literal, for /localize. */}
+            Preview
+          </Box>
+        )}
         {text && (
           <Tooltip title={uiString(copied ? 'status.copied' : 'action.copyTranslation')} placement="top">
             <IconButton

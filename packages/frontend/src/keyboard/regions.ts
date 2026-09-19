@@ -10,7 +10,7 @@
  */
 
 /** The regions, in the order F6 walks them. A region absent from the page is skipped. */
-export const REGIONS = ["header", "periods", "translations", "words"] as const;
+export const REGIONS = ["header", "periods", "translations", "words", "console"] as const;
 
 export type Region = (typeof REGIONS)[number];
 

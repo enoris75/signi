@@ -1,6 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import { useInputModality, useKeyPlatform } from "./KeyboardProvider.tsx";
+import { useKeyPlatform } from "./KeyboardProvider.tsx";
 import { keycapText } from "./matchKey.ts";
 
 /**
@@ -9,16 +9,22 @@ import { keycapText } from "./matchKey.ts";
  *
  * It is one surface with two ways in rather than two surfaces — the icon opens exactly what the
  * key opens, so nothing can be in one and not the other. It rides above the page rather than in
- * the header, since help is wanted from wherever the work is, and it steps up over the hint line
- * when that strip is docked at the foot for a keyboard user.
+ * the header, since help is wanted from wherever the work is, and it steps up over the console
+ * while that is docked at the foot.
  */
 
 // English literal, for /localize: the catalogue has no word for help yet.
 const LABEL = "Help";
 
-export function HelpButton({ onClick }: { onClick: () => void }) {
+export function HelpButton({
+  onClick,
+  bottom = 16,
+}: {
+  onClick: () => void;
+  /** How far up the page it sits, when something is docked at the foot: the console, when shown. */
+  bottom?: number;
+}) {
   const platform = useKeyPlatform();
-  const modality = useInputModality();
   const key = keycapText("?", platform);
 
   return (
@@ -34,7 +40,7 @@ export function HelpButton({ onClick }: { onClick: () => void }) {
         sx={{
           position: "fixed",
           right: 16,
-          bottom: modality === "keyboard" ? 50 : 16,
+          bottom,
           zIndex: (theme) => theme.zIndex.drawer + 3,
           width: 36,
           height: 36,

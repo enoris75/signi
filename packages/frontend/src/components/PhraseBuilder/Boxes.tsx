@@ -197,6 +197,9 @@ export function SlotBox({
   editing = false,
   shape,
   rim,
+  preview = false,
+  lit = false,
+  consoleCursor = false,
 }: {
   slot: SlotConfig;
   concept?: Concept;
@@ -220,6 +223,13 @@ export function SlotBox({
   // A small control a filled disc wears on its rim at half past seven (the degree chip), rather
   // than in a footer that would swell the disc.
   rim?: ReactNode;
+  // The phrase console's marks (P02 §4): `preview` = the line being typed would change this box —
+  // dashed, with a ↵ tag, until it is committed; `lit` = its token is under the pointer in the
+  // console; `consoleCursor` = the console's context rests here, the ring a role command moves
+  // without taking the keyboard from the prompt.
+  preview?: boolean;
+  lit?: boolean;
+  consoleCursor?: boolean;
 }) {
   const t = useUiString();
   const word = useConceptLabel();
@@ -229,12 +239,51 @@ export function SlotBox({
   const showLabel = slot.key !== "verb" && !(shape?.kind === "disc" && filled);
   const outline = {
     borderWidth: shape?.kind === "disc" ? 1.5 : 2,
-    borderColor: highlight || isActive ? `${slot.color}.main` : filled && shape ? `${slot.color}.main` : "divider",
-    borderStyle: highlight ? "dashed" : "solid",
-    boxShadow: highlight ? (theme: Theme) => `0 0 0 3px ${theme.palette[slot.color].main}33` : "none",
+    borderColor:
+      highlight || isActive || preview || lit
+        ? `${slot.color}.main`
+        : filled && shape
+          ? `${slot.color}.main`
+          : "divider",
+    borderStyle: highlight || preview ? "dashed" : "solid",
+    boxShadow:
+      highlight || lit ? (theme: Theme) => `0 0 0 3px ${theme.palette[slot.color].main}33` : "none",
     bgcolor: isActive ? held(slot.color) : concept ? wash(slot.color) : "background.paper",
+    // The console's ring is the keyboard's own focus ring, drawn where the console's context is.
+    ...(consoleCursor && {
+      outline: "2px solid",
+      outlineColor: (theme: Theme) => theme.palette[slot.color].main,
+      outlineOffset: "3px",
+    }),
     transition: "border-color 0.15s, background-color 0.15s, box-shadow 0.15s",
   };
+  // A preview's tag: what ↵ would do to this box.
+  const previewTag = preview && (
+    <Box
+      aria-hidden
+      data-testid="preview-tag"
+      sx={{
+        position: "absolute",
+        top: -9,
+        right: -9,
+        zIndex: 2,
+        display: "grid",
+        placeItems: "center",
+        width: 16,
+        height: 16,
+        borderRadius: 0.5,
+        border: "1px solid",
+        borderColor: `${slot.color}.main`,
+        bgcolor: "background.paper",
+        color: `${slot.color}.main`,
+        fontFamily: '"Inter", sans-serif',
+        fontSize: "0.6rem",
+        lineHeight: 1,
+      }}
+    >
+      ↵
+    </Box>
+  );
   const faded = { opacity: dimmed ? 0.45 : 1, filter: dimmed ? "grayscale(1)" : "none" };
 
   const content = (
@@ -317,7 +366,11 @@ export function SlotBox({
 
   if (!shape) {
     return (
-      <Box data-testid={`box-${slot.key}`} sx={{ position: "relative", display: "inline-block" }}>
+      <Box
+        data-testid={`box-${slot.key}`}
+        data-preview={preview ? "" : undefined}
+        sx={{ position: "relative", display: "inline-block" }}
+      >
         <Paper
           variant="outlined"
           sx={{
@@ -334,9 +387,10 @@ export function SlotBox({
         >
           {content}
         </Paper>
-        {concept && !dimmed && !editing && (
+        {concept && !dimmed && !editing && !preview && (
           <ClearButton label={slot.label} labelKey={slot.labelKey} onClear={onClear} sx={{ position: "absolute", top: -8, right: -8 }} />
         )}
+        {previewTag}
       </Box>
     );
   }
@@ -349,6 +403,7 @@ export function SlotBox({
     <Box
       data-testid={`box-${slot.key}`}
       data-shape={kind}
+      data-preview={preview ? "" : undefined}
       sx={{
         position: "relative",
         display: "inline-block",
@@ -373,7 +428,20 @@ export function SlotBox({
       <Box sx={{ position: "relative", textAlign: "center", userSelect: "none", whiteSpace: "nowrap", ...faded }}>
         {content}
       </Box>
-      {kind === "disc" && concept && !dimmed && !editing && (
+      {preview && (
+        <Box
+          sx={{
+            position: "absolute",
+            left: `calc(50% + ${diagonal}px)`,
+            top: `calc(50% - ${diagonal}px)`,
+            transform: "translate(-50%, -50%)",
+            "& > *": { position: "static" },
+          }}
+        >
+          {previewTag}
+        </Box>
+      )}
+      {kind === "disc" && concept && !dimmed && !editing && !preview && (
         <ClearButton
           label={slot.label}
           labelKey={slot.labelKey}

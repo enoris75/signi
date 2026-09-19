@@ -175,8 +175,8 @@ Each subsection shows the drawing from [`artwork/`](artwork/) first and a text s
 
 While the console (P02) is shown and focus is on the canvas, its prompt line doubles as the hint line:
 its right side lists the keys for whatever the cursor is on, read from the keymap. When the console is
-hidden (<kbd>&#96;</kbd>), key tips and tooltips still teach the keys. Until P02 ships, phase 1 renders the
-same strip on its own.
+hidden (<kbd>&#96;</kbd>), key tips and tooltips still teach the keys. Phase 1 rendered the same strip on
+its own until P02 shipped; it is now the console's (`console/HintKeys.tsx`).
 
 ```
 ─────────────────────────────── grip ───────────────────────────────────────────────────────────
@@ -191,8 +191,8 @@ Signi                        [▣ Console `] [文A 🇬🇧 English ▾] [Save] 
 SEMANTIC PHRASE CREATOR       └ new
 ```
 
-The cluster becomes a single `role="toolbar"` stop. *The Console button waits for P02:* it would
-show and hide a console that does not exist yet, so phase 4 shipped the toolbar without it.
+The cluster becomes a single `role="toolbar"` stop. Phase 4 shipped the toolbar without the Console
+button, which had no console to show yet; P02 added it, wearing its <kbd>&#96;</kbd> keycap.
 
 ### 3.4 Period under the cursor — *artboard "Focus and key hints"*
 

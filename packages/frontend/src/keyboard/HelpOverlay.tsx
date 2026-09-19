@@ -13,6 +13,7 @@ import { useUiString } from "../i18n/useUiString.ts";
 import type { UiStringKey } from "@signi/shared";
 import { useKeyPlatform } from "./KeyboardProvider.tsx";
 import { APP_KEYMAP, KEYMAP, PERIOD_KEYMAP } from "./keymap.ts";
+import { ConsoleHelp } from "../console/ConsoleHelp.tsx";
 import { keycapLabels, type Platform } from "./matchKey.ts";
 import type { Scope } from "./scope.ts";
 
@@ -144,8 +145,9 @@ export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => v
           </IconButton>
         </Box>
 
-        {/* One section for now. Others (what the canvas is, saving and loading) belong beside it
-            rather than in a page of their own, which is why the overlay is not the sheet. */}
+        {/* The keys, then the console's commands. Others (what the canvas is, saving and loading)
+            belong beside them rather than in a page of their own, which is why the overlay is not
+            the sheet. */}
         <Box component="section" aria-labelledby={sectionId}>
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
             <Box sx={{ flex: 1 }}>
@@ -195,6 +197,7 @@ export function HelpOverlay({ open, onClose }: { open: boolean; onClose: () => v
             ))}
           </Box>
         </Box>
+        <ConsoleHelp />
       </DialogContent>
     </Dialog>
   );
