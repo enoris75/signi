@@ -1,0 +1,812 @@
+import {
+  PATH_SPECIFIER_LABELS,
+  canCoordinateImperative,
+  type Concept,
+  type UiStringKey,
+} from "@signi/shared";
+import { isInstrumentalLink, type NounKey, type SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import {
+  canBeCondition,
+  canBeCoordinate,
+  canBeInstrument,
+  canBeRelativeTarget,
+  canStartCondition,
+  canStartCoordination,
+} from "../../components/PhraseBuilder/linkRules.ts";
+import { BOX_COMPLEMENT_TYPES } from "../../components/PhraseBuilder/slots.ts";
+import { applyScript, roleRefusal, type Frame } from "./apply.ts";
+import {
+  COMMANDS,
+  COORD_VALUES,
+  commandNamed,
+  valueNamed,
+  type CommandDef,
+  type TokenColor,
+  type ValueDef,
+} from "./commands.ts";
+import { sameKind } from "./parse.ts";
+import { lex, type Token } from "./lex.ts";
+import {
+  NOUN_NAMES,
+  PRONOUN_NAMES,
+  printRef,
+  printWord,
+  wordSpecFor,
+  wordsFor,
+  type WordSpec,
+} from "./resolve.ts";
+import type { ConsoleContext, Vocabulary, WorkspaceState } from "./types.ts";
+import {
+  adjectiveTarget,
+  attachesToWord,
+  currentSetting,
+  takes,
+  wordInfo,
+  type WordInfo,
+} from "./words.ts";
+
+/**
+ * Completion at the caret: every candidate for the token being typed, best first, and the ghost —
+ * the single best completion, drawn faintly after the caret.
+ *
+ * It reads the same tokens the parser does, and applies the line up to the token to know where the
+ * command would attach, so what it offers is exactly what the line would accept there: the commands
+ * the closest word can take, the words of the role being filled, the values a command allows, the
+ * periods and nouns the link rules let a link reach. It is pure and synchronous over the vocabulary
+ * the pickers already hold, so it runs on every keystroke.
+ */
+
+export type CandidateKind = "command" | "word" | "value" | "ref" | "phrase" | "history";
+
+export interface Candidate {
+  kind: CandidateKind;
+  /** What replaces the completed range. */
+  insert: string;
+  /** The row's main text. */
+  label: string;
+  /** What it means, in English (the fallback for `detailKey`). */
+  detail?: string;
+  detailKey?: UiStringKey;
+  /** For a setting: the value the word holds now, which the row shows as "now …". */
+  current?: { value: string; key?: UiStringKey };
+  /** The alias the query matched, when it was not the name: `also /plural`. */
+  alias?: string;
+  concept?: Concept;
+  /** 1–9 on a numbered reference, which a digit picks. */
+  number?: number;
+  color?: TokenColor;
+}
+
+export interface Completion {
+  /** The range the chosen candidate replaces. */
+  from: number;
+  to: number;
+  candidates: Candidate[];
+  /** The rest of the best candidate, drawn after the caret; ⇥ or → takes it. */
+  ghost?: string;
+  /** The list's heading, English — with the word it is about, where there is one. */
+  title: string;
+  /** The word the heading names: "commands for *cat*". */
+  about?: string;
+  /** Whether the list opens by itself here, rather than on ⇥. */
+  auto: boolean;
+}
+
+export interface CompleteOptions {
+  context: ConsoleContext;
+  vocab: Vocabulary;
+  /** Command names used recently this session, most recent first — they rank higher. */
+  recent?: readonly string[];
+  /** Lines run earlier, newest first — the ghost falls back on them. */
+  history?: readonly string[];
+  /** The names of the saved phrases, for `/load`. */
+  saved?: readonly string[];
+}
+
+/** The list renders at most this many rows. */
+const MAX_ROWS = 50;
+
+// ── Ranking ──────────────────────────────────────────────────────────────────
+
+/**
+ * How well a name matches what was typed: exact, a prefix, the start of one of its words, or its
+ * letters in order. Lower is better; undefined is no match.
+ */
+function matchClass(query: string, name: string): number | undefined {
+  const q = query.toLowerCase();
+  const n = name.toLowerCase();
+  if (!q) return 1;
+  if (n === q) return 0;
+  if (n.startsWith(q)) return 1;
+  if (n.split(/[\s_-]+/).some((part) => part.startsWith(q))) return 3;
+  let i = 0;
+  for (const ch of n) if (ch === q[i]) i++;
+  return i === q.length ? 4 : undefined;
+}
+
+// ── Where the caret is ───────────────────────────────────────────────────────
+
+interface Site {
+  /** The token the caret is in or just after, when it is in or after one. */
+  token?: Token;
+  /** The command token owning the argument at the caret, if the caret is in an argument position. */
+  owner?: { token: Extract<Token, { kind: "command" }>; def?: CommandDef };
+  /** Tokens between the owner and the caret (a gap word, a conjunction). */
+  between: Token[];
+}
+
+export function complete(
+  text: string,
+  caret: number,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+): Completion | undefined {
+  const tokens = lex(text);
+  // The token the caret touches — in it, or at its end — is the one being completed.
+  const at = tokens.find((t) => caret > t.from && caret <= t.to);
+  const before = tokens.filter((t) => t.to <= (at ? at.from : caret));
+  const prefixEnd = at ? at.from : caret;
+
+  // Apply everything before the token, to know where it attaches.
+  const applied = applyScript(state, text.slice(0, prefixEnd), {
+    context: opts.context,
+    vocab: opts.vocab,
+    newId: previewIds(),
+  });
+  const frame = applied.frames.at(-1)!;
+  const now = applied.state;
+
+  // A command being typed: `/`, `/pa`.
+  if (at?.kind === "command") {
+    return commandCompletion(at.from, at.to, text.slice(at.from + 1, caret), frame, now, opts);
+  }
+  // A reference being typed: `#`, `#2.`.
+  if (at?.kind === "ref") {
+    const owner = ownerOf(before);
+    return refCompletion(at.from, at.to, text.slice(at.from + 1, caret), owner?.def, frame, now, opts);
+  }
+  // An argument, or a word with no command before it. A caret on a bracket is between items.
+  const owner = at?.kind === "open" || at?.kind === "close" ? undefined : ownerOf(before);
+  const wordFrom = at?.kind === "word" ? at.from : caret;
+  const wordTo = at?.kind === "word" ? at.to : caret;
+  const query = at?.kind === "word" ? text.slice(at.from, caret) : "";
+  const betweenWords = owner ? before.filter((t) => t.from > owner.token.from) : [];
+
+  if (owner?.def) {
+    const def = owner.def;
+    const arg = def.arg.kind;
+    // After an argument already given — the caret past it and a space — what follows is a new
+    // command: a word's, a possessor's or a conjunct's word, or as many values as the command takes.
+    const given = betweenWords.flatMap((t) => (t.kind === "word" ? t.text.split(/\s+/) : []));
+    const phraseWord = def.action.kind === "possessor" || def.action.kind === "conjunct";
+    const argumentDone =
+      !at &&
+      (arg === "none" ||
+        ((arg === "word" || arg === "text" || (arg === "phrase" && phraseWord)) && betweenWords.length > 0) ||
+        (def.arg.kind === "values" && given.length >= def.arg.max));
+    if (!argumentDone && arg !== "none")
+      return argumentCompletion(def, wordFrom, wordTo, query, betweenWords, frame, now, opts, text, caret);
+  }
+  if (at?.kind === "word") return didYouMean(at.from, at.to, query, frame, now, opts);
+  // Between items: ⇥ offers the commands, and — inside an open bracket — the bracket's close.
+  const c = commandCompletion(caret, caret, "", frame, now, opts, true);
+  const open = openBrackets(tokens.filter((t) => t.to <= caret));
+  if (open > 0 && caret === text.length) {
+    c.ghost = text.endsWith(" ") ? ")" : " )";
+  } else if (!c.ghost && caret === text.length && text.trim()) {
+    c.ghost = historyGhost(text, opts.history);
+  }
+  return c;
+}
+
+/** Deterministic ids for a line's preview — the same keystroke always makes the same periods. */
+export function previewIds(): () => string {
+  let n = 0;
+  return () => `preview-${++n}`;
+}
+
+/** The command whose argument the caret is in: the last command token, if nothing but its argument follows it. */
+function ownerOf(before: Token[]): Site["owner"] {
+  for (let i = before.length - 1; i >= 0; i--) {
+    const t = before[i]!;
+    if (t.kind === "command") return { token: t, def: commandNamed(t.name) };
+    if (t.kind !== "word") return undefined;
+  }
+  return undefined;
+}
+
+function openBrackets(tokens: Token[]): number {
+  let depth = 0;
+  for (const t of tokens) {
+    if (t.kind === "open") depth++;
+    else if (t.kind === "close") depth = Math.max(0, depth - 1);
+  }
+  return depth;
+}
+
+function historyGhost(text: string, history: readonly string[] | undefined): string | undefined {
+  const line = history?.find((h) => h.startsWith(text) && h.length > text.length);
+  return line?.slice(text.length);
+}
+
+/** The ghost for a range: the rest of the best candidate, when it continues what was typed. */
+function ghostFor(typed: string, best: Candidate | undefined): string | undefined {
+  if (!best || !typed) return undefined;
+  if (!best.insert.toLowerCase().startsWith(typed.toLowerCase())) return undefined;
+  const rest = best.insert.slice(typed.length);
+  return rest || undefined;
+}
+
+// ── Commands ─────────────────────────────────────────────────────────────────
+
+/** The words written in a frame, newest first — what an attaching command would look through. */
+function frameWords(frame: Frame, state: WorkspaceState): WordInfo[] {
+  return [...frame.words]
+    .reverse()
+    .map((ref) => wordInfo(state.containers, ref))
+    .filter((w): w is WordInfo => Boolean(w));
+}
+
+/** Where a command stands in the list before any is typed: the closest word's first, then the rest. */
+function commandGroup(def: CommandDef, frame: Frame, state: WorkspaceState, words: WordInfo[], opts: CompleteOptions): number | undefined {
+  const action = def.action;
+  const top = frame.words.length === 0 || frame.kind === "period";
+  if (attachesToWord(action)) {
+    const i = words.findIndex((w) => takes(action, w));
+    if (i === -1) return undefined;
+    return i === 0 ? 0 : 1;
+  }
+  switch (action.kind) {
+    case "role":
+      if (frame.kind !== "period") return action.slot === "subject" ? 2 : undefined;
+      return roleRefusal(state, frame.containerId, action.slot, def, opts.vocab) ? undefined : 2;
+    case "condition": {
+      const c = state.containers.find((x) => x.id === frame.containerId);
+      return frame.kind === "period" && c && canStartCondition(state.links, c) ? 3 : undefined;
+    }
+    case "join": {
+      const c = state.containers.find((x) => x.id === frame.containerId);
+      return frame.kind === "period" && c && canStartCoordination(state.links, c) ? 3 : undefined;
+    }
+    case "instrument": {
+      const c = state.containers.find((x) => x.id === frame.containerId);
+      return frame.kind === "period" && c?.selection.verb?.complements?.includes("instrumental") ? 2 : undefined;
+    }
+    case "level":
+      return state.links.some(
+        (l) => isInstrumentalLink(l) && (l.source.containerId === frame.containerId || l.target.containerId === frame.containerId),
+      )
+        ? 3
+        : undefined;
+    case "mood":
+      return frame.kind === "period" ? 3 : undefined;
+    case "new":
+      return top ? 3 : undefined;
+    case "del":
+      return 3;
+    case "app":
+      return 4;
+    default:
+      return undefined;
+  }
+}
+
+function commandCompletion(
+  from: number,
+  to: number,
+  query: string,
+  frame: Frame,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+  between = false,
+): Completion {
+  const words = frameWords(frame, state);
+  const recent = opts.recent ?? [];
+  const ranked: { c: Candidate; rank: number[] }[] = [];
+  COMMANDS.forEach((def, order) => {
+    const group = commandGroup(def, frame, state, words, opts);
+    if (group === undefined) return;
+    // Ranked by the best of its name and its aliases: exact, a prefix of the name, a prefix of an
+    // alias, the start of a word, the letters in order. Choosing an alias inserts the name.
+    const nameClass = matchClass(query, def.name);
+    let cls = nameClass;
+    let alias: string | undefined;
+    for (const a of def.aliases) {
+      const ac = matchClass(query, a);
+      if (ac === undefined) continue;
+      const aliasClass = ac === 0 ? 0.5 : ac === 1 ? 2 : ac;
+      if (cls === undefined || aliasClass < cls) {
+        cls = aliasClass;
+        alias = a;
+      }
+    }
+    if (cls === undefined) return;
+    const target = attachesToWord(def.action) ? words.find((w) => takes(def.action, w)) : undefined;
+    const r = recent.indexOf(def.name);
+    const family = familyOrder(def);
+    // Of a setting's family, the value that would change something leads — `/pl` on a singular noun.
+    const lead =
+      def.action.kind !== "setting" || !target
+        ? 0
+        : leadOf(def.action.setting.id, target) === def.name
+          ? 0
+          : 1;
+    ranked.push({
+      c: {
+        kind: "command",
+        insert: `/${def.name}`,
+        label: `/${def.name}`,
+        detail: def.description,
+        detailKey: def.descriptionKey,
+        current: target && def.action.kind === "setting" ? currentValue(def, target) : undefined,
+        alias: alias ? `/${alias}` : undefined,
+        color: def.color,
+      },
+      rank: query ? [cls, r === -1 ? 99 : r, group, family, lead, order] : [group, lead, r === -1 ? 99 : r, family, order],
+    });
+  });
+  ranked.sort((a, b) => compareRanks(a.rank, b.rank));
+  const candidates = ranked.slice(0, MAX_ROWS).map((r) => r.c);
+  const about = words[0]?.concept ? opts.vocab.label(words[0].concept) : undefined;
+  return {
+    from,
+    to,
+    candidates,
+    ghost: between ? undefined : ghostFor(`/${query}`, candidates[0]),
+    title: about ? "commands for" : "commands",
+    about,
+    auto: !between,
+  };
+}
+
+/**
+ * Where a command's family stands in the list: the order a word's own controls come in on the canvas
+ * — a noun's adjective, number, gender, determiner, relation, possessor, relative clause and
+ * coordination; a verb's modal, adverb, tense, aspect and polarity.
+ */
+const FAMILY_ORDER = [
+  "adjective",
+  "number",
+  "gender",
+  "determiner",
+  "specifier",
+  "sentiment",
+  "degree",
+  "relation",
+  "possessor",
+  "relative",
+  "conjunct",
+  "modal",
+  "adverb",
+  "tense",
+  "aspect",
+  "polarity",
+];
+
+function familyOrder(def: CommandDef): number {
+  const key = def.action.kind === "setting" ? def.action.setting.id : def.action.kind;
+  const i = FAMILY_ORDER.indexOf(key);
+  return i === -1 ? FAMILY_ORDER.length : i;
+}
+
+/** The command of a setting's family that leads the list for a word: the first that would change it. */
+function leadOf(id: string, w: WordInfo): string | undefined {
+  const current = currentSetting(id as never, w);
+  return COMMANDS.find(
+    (c) =>
+      c.action.kind === "setting" &&
+      c.action.setting.id === id &&
+      c.action.setting.value !== current &&
+      takes(c.action, w),
+  )?.name;
+}
+
+function compareRanks(a: number[], b: number[]): number {
+  for (let i = 0; i < a.length; i++) if (a[i] !== b[i]) return a[i]! - b[i]!;
+  return 0;
+}
+
+/** A setting's current value on its word, for the row's "now …". */
+function currentValue(def: CommandDef, w: WordInfo): Candidate["current"] {
+  if (def.action.kind !== "setting") return undefined;
+  const id = def.action.setting.id;
+  const value = currentSetting(id, w);
+  if (value === undefined) return undefined;
+  const keys: Partial<Record<typeof id, string>> = {
+    number: `number.value.${value}`,
+    gender: `gender.value.${value}`,
+    determiner: `determiner.name.${value}`,
+    tense: `tense.value.${value}`,
+    aspect: `aspect.value.${value}`,
+    polarity: `polarity.value.${value}`,
+    relation: `modifier.relation.${value}`,
+  };
+  const shown = id === "specifier" ? PATH_SPECIFIER_LABELS[value as keyof typeof PATH_SPECIFIER_LABELS] : value;
+  return { value: shown, key: keys[id] as UiStringKey | undefined };
+}
+
+// ── Arguments ────────────────────────────────────────────────────────────────
+
+function argumentCompletion(
+  def: CommandDef,
+  from: number,
+  to: number,
+  query: string,
+  between: Token[],
+  frame: Frame,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+  text: string,
+  caret: number,
+): Completion | undefined {
+  const action = def.action;
+  const words = frameWords(frame, state);
+  const arg = def.arg;
+  // The words argument of a role, an adjective, an adverb, a modal.
+  if (arg.kind === "word") {
+    const spec = wordSpecForCommand(def, frame, words);
+    if (!spec) return undefined;
+    return wordCompletion(from, to, query, spec, opts, titleForSpec(spec, def), def.color);
+  }
+  if (arg.kind === "values") {
+    // `/command lets instruction`: complete the value at the caret, among those not given yet.
+    const typedBefore = between.filter((t) => t.kind === "word").map((t) => (t as { text: string }).text.split(/\s+/)).flat();
+    const lastSpace = text.lastIndexOf(" ", caret - 1);
+    const partFrom = Math.max(from, lastSpace + 1);
+    const part = text.slice(partFrom, caret);
+    const given = typedBefore.filter((w) => w !== part).map((w) => valueNamed(arg.values, w)).filter((v): v is ValueDef => Boolean(v));
+    const c = valueCompletion(partFrom, to, part, arg.values.filter((v) => !given.some((g) => sameKind(g, v))), def);
+    // A second value is offered on ⇥, not pressed on whoever runs the line with ↵.
+    if (given.length > 0) c.auto = false;
+    return c;
+  }
+  if (arg.kind === "text") {
+    if (action.kind === "del") return valueCompletion(from, to, query, DEL_VALUES, def);
+    if (action.kind === "app" && action.app === "help")
+      return valueCompletion(from, to, query, COMMANDS.map((c) => ({ name: c.name, value: c.name, description: c.description, descriptionKey: c.descriptionKey })), def);
+    if (action.kind === "app" && action.app === "load")
+      return valueCompletion(from, to, query, (opts.saved ?? []).map((name) => ({ name, value: name, description: "" })), def, true);
+    return undefined;
+  }
+  if (arg.kind === "phrase" || arg.kind === "link") {
+    return linkCompletion(def, from, to, query, between, frame, state, opts, words);
+  }
+  return undefined;
+}
+
+/** The words a command's argument names, given where it would land. */
+function wordSpecForCommand(def: CommandDef, frame: Frame, words: WordInfo[]): WordSpec | undefined {
+  const action = def.action;
+  switch (action.kind) {
+    case "role":
+      return wordSpecFor(action.slot, frame.kind);
+    case "adjective": {
+      const w = words.find((x) => takes(action, x));
+      const t = w && adjectiveTarget(w);
+      if (!t) return wordSpecFor("subjectAdjective");
+      return t.modifierAdjective ? { roles: ["adjective"] } : wordSpecFor(t.slot);
+    }
+    case "adverb":
+      return { roles: ["adverb"] };
+    case "modal":
+      return { roles: ["verb"], modal: true };
+    default:
+      return undefined;
+  }
+}
+
+function titleForSpec(spec: WordSpec, def: CommandDef): string {
+  if (spec.modal) return "modals";
+  if (def.action.kind === "role") return `${def.description}`;
+  return `${spec.roles[0]}s`;
+}
+
+function wordCompletion(
+  from: number,
+  to: number,
+  query: string,
+  spec: WordSpec,
+  opts: CompleteOptions,
+  title: string,
+  color: TokenColor,
+  prefix = "",
+): Completion {
+  const vocab = opts.vocab;
+  const q = query.trim().toLowerCase();
+  const ranked: { c: Candidate; rank: number[] }[] = [];
+  wordsFor(spec, vocab).forEach((concept, order) => {
+    const insert = printWord(concept, spec, vocab);
+    const shown = concept.role === "pronoun" ? PRONOUN_NAMES[concept.id] ?? insert : vocab.label(concept);
+    // Matched as the pickers match: the word as shown, its English word, its reading, its gloss.
+    const hay = [
+      shown,
+      concept.role === "pronoun" ? vocab.label(concept) : "",
+      concept.label ?? "",
+      concept.readings?.[vocab.language] ?? "",
+      concept.synonym ?? "",
+      concept.id,
+    ].filter(Boolean);
+    let cls: number | undefined;
+    for (const h of hay) {
+      const c = matchClass(q, h);
+      if (c !== undefined && c < 4 && (cls === undefined || c < cls)) cls = c;
+      if (cls === undefined && h.toLowerCase().includes(q)) cls = 3.5;
+    }
+    if (cls === undefined) return;
+    ranked.push({
+      c: {
+        kind: "word",
+        insert: `${prefix}${insert}`,
+        label: shown,
+        detail: concept.role === "pronoun" ? vocab.label(concept) : vocab.gloss?.(concept),
+        concept,
+        color,
+      },
+      // Among words that match alike, the shorter is the closer to what was typed: `ca` is cat
+      // before it is care.
+      rank: [cls, spec.roles.indexOf(concept.role), cls <= 1 ? shown.length : 0, order],
+    });
+  });
+  ranked.sort((a, b) => compareRanks(a.rank, b.rank));
+  const candidates = ranked.slice(0, MAX_ROWS).map((r) => r.c);
+  return {
+    from,
+    to,
+    candidates,
+    ghost: ghostFor(`${prefix}${query}`, candidates[0]),
+    title,
+    auto: true,
+  };
+}
+
+function valueCompletion(
+  from: number,
+  to: number,
+  query: string,
+  values: readonly ValueDef[],
+  def: CommandDef,
+  free = false,
+): Completion {
+  const ranked = values
+    .map((v, order) => {
+      let cls = matchClass(query, v.name);
+      for (const a of v.aliases ?? []) {
+        const ac = matchClass(query, a);
+        if (ac !== undefined && (cls === undefined || ac < cls)) cls = ac + 1;
+      }
+      return cls === undefined ? undefined : { v, rank: [cls, order] };
+    })
+    .filter((x): x is { v: ValueDef; rank: number[] } => Boolean(x))
+    .sort((a, b) => compareRanks(a.rank, b.rank));
+  const candidates: Candidate[] = ranked.slice(0, MAX_ROWS).map(({ v }) => ({
+    kind: "value",
+    insert: v.name,
+    label: v.name,
+    detail: v.description,
+    detailKey: v.descriptionKey,
+  }));
+  return {
+    from,
+    to,
+    candidates,
+    ghost: ghostFor(query, candidates[0]),
+    title: free ? "saved phrases" : def.action.kind === "join" ? "conjunctions" : `values for /${def.name}`,
+    auto: true,
+  };
+}
+
+const DEL_VALUES: readonly ValueDef[] = [
+  { name: "adj", value: "adj", description: "an adjective" },
+  { name: "obj", value: "obj", description: "the direct object" },
+  { name: "adv", value: "adv", description: "the adverb" },
+  { name: "modal", value: "modal", description: "a modal" },
+  { name: "poss", value: "poss", description: "the possessor" },
+  { name: "and", value: "and", description: "a coordinated phrase" },
+  { name: "rel", value: "rel", description: "the relative clause" },
+  { name: "if", value: "if", description: "the if-condition" },
+  { name: "join", value: "join", description: "the coordination" },
+  { name: "inst", value: "inst", description: "the instrument" },
+  { name: "period", value: "period", description: "the whole period" },
+  { name: "subj", value: "subj", description: "the subject" },
+  { name: "verb", value: "verb", description: "the verb" },
+  ...BOX_COMPLEMENT_TYPES.map((t) => ({ name: NOUN_NAMES[t], value: NOUN_NAMES[t], description: t })),
+];
+
+// ── Links, phrases and references ────────────────────────────────────────────
+
+/** The periods and nouns a link command may reach from here, numbered in reading order. */
+function linkTargets(def: CommandDef, frame: Frame, state: WorkspaceState, words: WordInfo[]): Candidate[] {
+  const action = def.action;
+  const out: Candidate[] = [];
+  state.containers.forEach((c, i) => {
+    const n = i + 1;
+    switch (action.kind) {
+      case "relative": {
+        const source = words.find((w) => takes(action, w));
+        if (!source) return;
+        for (const key of ["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[]) {
+          const concept = c.selection[key as SlotKey];
+          if (!concept) continue;
+          if (!canBeRelativeTarget(state.containers, state.links, source.ref.containerId, { containerId: c.id, nounKey: key })) continue;
+          out.push(refCandidate(printRef(n, key), concept, `period ${n}`));
+        }
+        return;
+      }
+      case "condition":
+        if (canBeCondition(state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        return;
+      case "join":
+        if (canBeCoordinate(state.containers, state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        return;
+      case "instrument":
+        if (canBeInstrument(state.containers, state.links, frame.containerId, c.id)) out.push(refCandidate(printRef(n), undefined, periodSummary(c.selection)));
+        return;
+      case "possessor": {
+        // A possessor that refers to another noun of its own period.
+        if (c.id !== frame.containerId) return;
+        const possessed = words.find((w) => takes(action, w));
+        if (!possessed) return;
+        for (const key of ["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[]) {
+          const concept = c.selection[key as SlotKey];
+          if (!concept || key === possessed.address || key.startsWith(`${possessed.address}/`)) continue;
+          out.push(refCandidate(printRef(n, key), concept, `period ${n}`));
+        }
+        return;
+      }
+    }
+  });
+  return out.map((c, i) => (i < 9 ? { ...c, number: i + 1 } : c));
+}
+
+function refCandidate(ref: string, concept: Concept | undefined, detail: string): Candidate {
+  return { kind: "ref", insert: ref, label: ref, detail, concept, color: "ref" };
+}
+
+/** A period in a few words, for a reference row: its subject and verb. */
+function periodSummary(sel: WorkspaceState["containers"][number]["selection"]): string {
+  return [sel.subject?.label, sel.verb?.label].filter(Boolean).join(" ") || "empty";
+}
+
+function linkCompletion(
+  def: CommandDef,
+  from: number,
+  to: number,
+  query: string,
+  between: Token[],
+  frame: Frame,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+  words: WordInfo[],
+): Completion {
+  const action = def.action;
+  const q = query.trim().toLowerCase();
+  const head = words.find((w) => takes(action, w));
+  const headName = head?.concept ? opts.vocab.label(head.concept) : undefined;
+  // `/join` first takes its conjunction; with one given, the target follows.
+  if (action.kind === "join" && between.length === 0) {
+    const root = state.containers.find((c) => c.id === frame.containerId)?.selection;
+    const values = COORD_VALUES.filter((v) => !root?.imperative || canCoordinateImperative(v.value as never));
+    return valueCompletion(from, to, query, values, def);
+  }
+  const rows: Candidate[] = [];
+  // Where the target goes: straight after the command, or after the word it takes first — the
+  // conjunction of a join, the gap of a relative clause.
+  const targetHere = between.length === (action.kind === "join" ? 1 : 0);
+  // New phrases first: `subj (` and `obj (` for a relative clause, `(` for the others.
+  if (action.kind === "relative" && between.length === 0) {
+    rows.push(
+      { kind: "phrase", insert: "subj (", label: "subj (", detail: `new clause · ${headName ?? "the noun"} is its subject` },
+      { kind: "phrase", insert: "obj (", label: "obj (", detail: `new clause · ${headName ?? "the noun"} is its object` },
+    );
+  } else {
+    rows.push({
+      kind: "phrase",
+      insert: "(",
+      label: "(",
+      detail: action.kind === "possessor" || action.kind === "conjunct" ? "new phrase" : "new period",
+    });
+  }
+  // Then what exists already: the periods and nouns the rules let it reach.
+  if (action.kind !== "conjunct" && targetHere) rows.push(...linkTargets(def, frame, state, words));
+  // A possessor or a conjunct may also be named by its word.
+  if ((action.kind === "possessor" || action.kind === "conjunct") && q) {
+    const spec = wordSpecFor("subject", action.kind === "possessor" ? "possessor" : "conjunct");
+    rows.push(...wordCompletion(from, to, query, spec, opts, "", "primary").candidates);
+  }
+  const candidates = rows.filter((r) => !q || r.kind === "word" || r.insert.toLowerCase().startsWith(q) || r.label.toLowerCase().includes(q));
+  return {
+    from,
+    to,
+    candidates: candidates.slice(0, MAX_ROWS),
+    ghost: ghostFor(query, candidates[0]),
+    title: linkTitle(def),
+    about: headName,
+    auto: true,
+  };
+}
+
+function linkTitle(def: CommandDef): string {
+  switch (def.action.kind) {
+    case "relative":
+      return "relative clause on";
+    case "condition":
+      return "if-condition";
+    case "join":
+      return "period to join";
+    case "instrument":
+      return "instrument";
+    case "possessor":
+      return "possessor of";
+    default:
+      return "coordinate with";
+  }
+}
+
+function refCompletion(
+  from: number,
+  to: number,
+  query: string,
+  owner: CommandDef | undefined,
+  frame: Frame,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+): Completion {
+  const words = frameWords(frame, state);
+  let rows: Candidate[];
+  if (owner && (owner.arg.kind === "link" || owner.arg.kind === "phrase")) {
+    rows = linkTargets(owner, frame, state, words);
+  } else {
+    // Going to a period, or to a noun of one: every period, then its nouns.
+    rows = state.containers.flatMap((c, i) => {
+      const n = i + 1;
+      return [
+        refCandidate(printRef(n), undefined, periodSummary(c.selection)),
+        ...(["subject", "directObject", ...BOX_COMPLEMENT_TYPES] as NounKey[])
+          .filter((key) => c.selection[key as SlotKey])
+          .map((key) => refCandidate(printRef(n, key), c.selection[key as SlotKey], `period ${n}`)),
+      ];
+    });
+    rows = rows.map((c, i) => (i < 9 ? { ...c, number: i + 1 } : c));
+  }
+  const typed = `#${query}`;
+  const candidates = rows.filter((r) => r.insert.startsWith(typed));
+  return {
+    from,
+    to,
+    candidates: candidates.slice(0, MAX_ROWS),
+    ghost: ghostFor(typed, candidates[0]),
+    title: owner ? linkTitle(owner) : "periods",
+    about: (() => {
+      const concept = owner ? words.find((w) => takes(owner.action, w))?.concept : undefined;
+      return concept ? opts.vocab.label(concept) : undefined;
+    })(),
+    auto: true,
+  };
+}
+
+// ── A word with no command ───────────────────────────────────────────────────
+
+/**
+ * A word typed without a command is not part of the language, and is met by completion instead:
+ * *did you mean* the role command for the box under the cursor, with the word — `ca` → `/subj cat`.
+ */
+function didYouMean(
+  from: number,
+  to: number,
+  query: string,
+  frame: Frame,
+  state: WorkspaceState,
+  opts: CompleteOptions,
+): Completion {
+  const word = frame.words.at(-1) ?? opts.context.word;
+  const slot = word && !word.slice && !word.modifierAdjective ? word.slot : "subject";
+  const role = COMMANDS.find((c) => c.action.kind === "role" && c.action.slot === slot);
+  const def = role ?? COMMANDS.find((c) => c.name === "subj")!;
+  const spec = wordSpecFor(def.action.kind === "role" ? def.action.slot : "subject", frame.kind);
+  const c = wordCompletion(from, to, query, spec, opts, "did you mean", def.color, `/${def.name} `);
+  // A bare word never stays: the list says what it would become.
+  c.candidates = c.candidates.map((x) => ({ ...x, label: x.insert }));
+  c.ghost = undefined;
+  void state;
+  return c;
+}

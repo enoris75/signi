@@ -1,0 +1,700 @@
+import {
+  type AbstractionLevel,
+  type Aspect,
+  type CauseSentiment,
+  type CoordConjunction,
+  type Definiteness,
+  type Degree,
+  type ImperativeRegister,
+  type ModifierRelation,
+  type PathSpecifier,
+  type Tense,
+  type UiStringKey,
+} from "@signi/shared";
+import type { ImperativePerson, SlotConfig, SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
+import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
+
+/**
+ * The console's commands, declared once.
+ *
+ * Every command is here: its canonical short name (what the console prints), the long aliases
+ * completion also matches (`/plural` finds `/pl`), what it does, what its argument is, and the colour
+ * its token wears — the colour of the box it fills, so the two views read as one. The names are
+ * English for every interface language (decision 3); the descriptions come from the UI-string
+ * catalogue where the words are already seeded, and are English literals for /localize otherwise.
+ *
+ * What a command *does* is its `action`, interpreted by apply.ts; `satellites` and `reducers` say
+ * which canvas controls and which phraseReducers it reaches, which is what the coverage test holds
+ * the two views to.
+ */
+
+/** A token's colour: a box's slot colour, the quiet ink of a setting, or a reference's. */
+export type TokenColor = SlotConfig["color"] | "setting" | "ref";
+
+/** A value a setting command sets outright (see apply: settings set, they never toggle). */
+export type Setting =
+  | { id: "number"; value: "singular" | "plural" }
+  | { id: "gender"; value: Gender }
+  | { id: "determiner"; value: Definiteness }
+  | { id: "specifier"; value: PathSpecifier }
+  | { id: "sentiment"; value: CauseSentiment }
+  | { id: "tense"; value: Tense }
+  | { id: "aspect"; value: Aspect }
+  | { id: "polarity"; value: "positive" | "negative" }
+  | { id: "degree"; value: Degree }
+  | { id: "relation"; value: ModifierRelation };
+
+export type SettingId = Setting["id"];
+
+export type AppCommand =
+  | "save"
+  | "load"
+  | "export"
+  | "import"
+  | "lang"
+  | "undo"
+  | "redo"
+  | "words"
+  | "help"
+  | "edit";
+
+export type Action =
+  /** Fill a slot of the period (or of the noun phrase in brackets) — or, with no word, go to it. */
+  | { kind: "role"; slot: SlotKey }
+  /** The next adjective of the closest noun, or a noun modifier's own. */
+  | { kind: "adjective" }
+  /** The adverb of the closest verb or modal. */
+  | { kind: "adverb" }
+  /** The next modal of the closest verb or modal. */
+  | { kind: "modal" }
+  | { kind: "setting"; setting: Setting }
+  | { kind: "possessor" }
+  | { kind: "conjunct"; conjunction: "and" | "or" }
+  | { kind: "relative" }
+  | { kind: "condition" }
+  | { kind: "join" }
+  | { kind: "instrument" }
+  | { kind: "level" }
+  | { kind: "mood"; mood: "command" | "infinitive" | "statement" }
+  | { kind: "new" }
+  | { kind: "del" }
+  | { kind: "app"; app: AppCommand };
+
+/** One value a command takes as its argument: `/join and`, `/command lets`, `/level process`. */
+export interface ValueDef {
+  name: string;
+  aliases?: readonly string[];
+  value: string;
+  description: string;
+  descriptionKey?: UiStringKey;
+}
+
+export type ArgSpec =
+  | { kind: "none" }
+  /** A word of the command's own vocabulary, optional. */
+  | { kind: "word" }
+  /** A word, a `( … )` phrase, or — for a possessor — a `#reference` to a noun of the period. */
+  | { kind: "phrase" }
+  /** A `#reference` to a period, or a `( … )` clause made there and then. */
+  | { kind: "link" }
+  /** Up to `max` of the values: `/level process`, `/command lets instruction`. */
+  | { kind: "values"; values: readonly ValueDef[]; max: number }
+  | { kind: "text" };
+
+export type CommandGroup = "role" | "noun" | "verb" | "adjective" | "period" | "workspace";
+
+export interface CommandDef {
+  name: string;
+  aliases: readonly string[];
+  group: CommandGroup;
+  /** What the completion list says beside the name. English, the fallback for `descriptionKey`. */
+  description: string;
+  descriptionKey?: UiStringKey;
+  /** What it sets, for a diagnostic: "/past sets a verb's tense". English, for /localize. */
+  purpose?: string;
+  color: TokenColor;
+  arg: ArgSpec;
+  action: Action;
+  /** The canvas satellites this command reaches, matched by satellite key (see the coverage test). */
+  satellites?: RegExp;
+  /** The phraseReducers it calls. */
+  reducers?: readonly string[];
+}
+
+// ── The catalogue ────────────────────────────────────────────────────────────
+
+const role = (
+  name: string,
+  aliases: string[],
+  slot: SlotKey,
+  description: string,
+  descriptionKey: UiStringKey,
+  color: TokenColor,
+  satellites?: RegExp,
+): CommandDef => ({
+  name,
+  aliases,
+  group: "role",
+  description,
+  descriptionKey,
+  color,
+  arg: { kind: "word" },
+  action: { kind: "role", slot },
+  satellites,
+  reducers: ["applyConceptSelect", "applyClear"],
+});
+
+const setting = (
+  name: string,
+  aliases: string[],
+  group: CommandGroup,
+  s: Setting,
+  description: string,
+  descriptionKey: UiStringKey | undefined,
+  purpose: string,
+  satellites: RegExp,
+  reducers: string[],
+): CommandDef => ({
+  name,
+  aliases,
+  group,
+  description,
+  descriptionKey,
+  purpose,
+  color: "setting",
+  arg: { kind: "none" },
+  action: { kind: "setting", setting: s },
+  satellites,
+  reducers,
+});
+
+export const COORD_VALUES: readonly ValueDef[] = [
+  { name: "and", value: "and", description: "copulative", descriptionKey: "conjunction.kind.and" },
+  { name: "or", value: "or", description: "disjunctive", descriptionKey: "conjunction.kind.or" },
+  { name: "but", value: "but", description: "adversative", descriptionKey: "conjunction.kind.but" },
+  {
+    name: "thatis",
+    aliases: ["that_is"],
+    value: "that_is",
+    description: "explicative",
+    descriptionKey: "conjunction.kind.that_is",
+  },
+  {
+    name: "therefore",
+    value: "therefore",
+    description: "conclusive",
+    descriptionKey: "conjunction.kind.therefore",
+  },
+  { name: "then", value: "then", description: "temporal", descriptionKey: "conjunction.kind.then" },
+];
+
+export const PERSON_VALUES: readonly ValueDef[] = [
+  { name: "you", value: "2sg", description: "you", descriptionKey: "imperative.person.2sg" },
+  { name: "lets", aliases: ["let's"], value: "1pl", description: "let’s", descriptionKey: "imperative.person.1pl" },
+  { name: "youall", aliases: ["y'all"], value: "2pl", description: "you all", descriptionKey: "imperative.person.2pl" },
+];
+
+export const REGISTER_VALUES: readonly ValueDef[] = [
+  { name: "order", aliases: ["request"], value: "request", description: "order", descriptionKey: "imperative.register.request" },
+  {
+    name: "instruction",
+    value: "instruction",
+    description: "instruction",
+    descriptionKey: "imperative.register.instruction",
+  },
+];
+
+export const LEVEL_VALUES: readonly ValueDef[] = [
+  { name: "process", value: "process", description: "an act in flow", descriptionKey: "instrumental.level.process" },
+  { name: "concept", value: "concept", description: "the act named", descriptionKey: "instrumental.level.concept" },
+  { name: "object", value: "object", description: "the thing", descriptionKey: "instrumental.level.object" },
+];
+
+export const LANGUAGE_VALUES: readonly ValueDef[] = (
+  ["en", "it", "fr", "de", "es", "ja", "pt"] as const
+).map((code) => ({
+  name: code,
+  value: code,
+  description: code,
+  descriptionKey: `language.${code}` as UiStringKey,
+}));
+
+export const COMMANDS: readonly CommandDef[] = [
+  // ── Roles: take a word; alone they only move the context ──────────────────
+  role("subj", ["subject"], "subject", "subject", "slot.subject", "primary"),
+  role("verb", [], "verb", "verb", "slot.verb", "secondary"),
+  role("obj", ["object"], "directObject", "direct object", "slot.directObject", "success", /^directObject$/),
+  role("pred", ["predicative", "complement"], "predicative", "subject complement", "slot.predicative", "warning", /^predicative$/),
+  role("term", ["terminus"], "terminus", "terminus", "slot.terminus", "warning", /^terminus$/),
+  role("manner", [], "manner", "manner", "slot.manner", "warning", /^manner$/),
+  role("loc", ["locative", "place"], "locative", "place", "slot.locative", "warning", /^locative$/),
+  role("dir", ["direction"], "direction", "direction", "slot.direction", "warning", /^direction$/),
+  role("src", ["source"], "source", "source", "slot.source", "warning", /^source$/),
+  role("route", [], "route", "route", "slot.route", "warning", /^route$/),
+  role("cause", [], "cause", "cause", "slot.cause", "warning", /^cause$/),
+  {
+    name: "inst",
+    aliases: ["instrument", "instrumental"],
+    group: "role",
+    description: "instrumental",
+    descriptionKey: "slot.instrumental",
+    purpose: "gives the verb an instrument",
+    color: "secondary",
+    arg: { kind: "link" },
+    action: { kind: "instrument" },
+    satellites: /^instrumental$/,
+  },
+  {
+    name: "adj",
+    aliases: ["adjective"],
+    group: "role",
+    description: "add an adjective",
+    descriptionKey: "category.adjective",
+    purpose: "describes a noun",
+    color: "error",
+    arg: { kind: "word" },
+    action: { kind: "adjective" },
+    satellites: /Adjective\d?$/,
+    reducers: ["applyConceptSelect", "setModifierAdjective"],
+  },
+  {
+    name: "adv",
+    aliases: ["adverb"],
+    group: "role",
+    description: "adverb",
+    descriptionKey: "slot.adverb",
+    purpose: "qualifies a verb or a modal",
+    color: "info",
+    arg: { kind: "word" },
+    action: { kind: "adverb" },
+    satellites: /^(modifier|verbModal2?Adverb)$/,
+    reducers: ["applyConceptSelect"],
+  },
+  {
+    name: "modal",
+    aliases: [],
+    group: "role",
+    description: "modal",
+    descriptionKey: "slot.modal",
+    purpose: "governs a verb",
+    color: "secondary",
+    arg: { kind: "word" },
+    action: { kind: "modal" },
+    satellites: /^verbModal2?$/,
+    reducers: ["applyConceptSelect"],
+  },
+  {
+    name: "poss",
+    aliases: ["possessor", "of"],
+    group: "role",
+    description: "possessor",
+    descriptionKey: "slot.possessor",
+    purpose: "gives a noun its possessor",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "possessor" },
+    satellites: /Possessor$/,
+    reducers: ["updatePossessor", "setPossessorRef"],
+  },
+  {
+    name: "and",
+    aliases: [],
+    group: "role",
+    description: "coordinate",
+    descriptionKey: "satellite.coordination",
+    purpose: "coordinates another phrase with a noun",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "conjunct", conjunction: "and" },
+    satellites: /Conjunct$/,
+    reducers: ["addConjunct", "updateConjunct", "setNounConjunction"],
+  },
+  {
+    name: "or",
+    aliases: [],
+    group: "role",
+    description: "coordinate, disjunctive",
+    descriptionKey: "conjunction.kind.or",
+    purpose: "coordinates another phrase with a noun",
+    color: "primary",
+    arg: { kind: "phrase" },
+    action: { kind: "conjunct", conjunction: "or" },
+    satellites: /Conjunct$/,
+    reducers: ["addConjunct", "updateConjunct", "setNounConjunction"],
+  },
+
+  // ── Noun ──────────────────────────────────────────────────────────────────
+  setting("sg", ["singular"], "noun", { id: "number", value: "singular" }, "singular", "number.value.singular", "sets a noun’s number", /Number$/, ["setNumber", "setModifierNumber"]),
+  setting("pl", ["plural"], "noun", { id: "number", value: "plural" }, "plural", "number.value.plural", "sets a noun’s number", /Number$/, ["setNumber", "setModifierNumber"]),
+  setting("masc", ["masculine", "male"], "noun", { id: "gender", value: "masc" }, "masculine", "gender.value.masc", "sets a noun’s gender", /Gender$/, ["setGender"]),
+  setting("fem", ["feminine", "female"], "noun", { id: "gender", value: "fem" }, "feminine", "gender.value.fem", "sets a noun’s gender", /Gender$/, ["setGender"]),
+  setting("neut", ["neuter"], "noun", { id: "gender", value: "neut" }, "neuter", "gender.value.neut", "sets a pronoun’s gender", /Gender$/, ["setGender"]),
+  ...(
+    [
+      ["the", ["definite"], "definite"],
+      ["a", ["an", "indefinite"], "indefinite"],
+      ["zero", ["bare", "none"], "bare"],
+      ["this", [], "this"],
+      ["that", [], "that"],
+      ["some", [], "some"],
+      ["no", [], "no"],
+      ["many", [], "many"],
+      ["few", [], "few"],
+      ["all", [], "all"],
+    ] as const
+  ).map(([name, aliases, value]) =>
+    setting(
+      name,
+      [...aliases],
+      "noun",
+      { id: "determiner", value },
+      value,
+      `determiner.name.${value}` as UiStringKey,
+      "sets a noun’s determiner",
+      /Definiteness$/,
+      ["setDefiniteness"],
+    ),
+  ),
+  {
+    name: "rel",
+    aliases: ["relative", "who", "which"],
+    group: "noun",
+    description: "relative clause",
+    descriptionKey: "satellite.relative",
+    purpose: "gives a noun a relative clause",
+    color: "primary",
+    arg: { kind: "link" },
+    action: { kind: "relative" },
+    satellites: /Relative$/,
+  },
+  ...(
+    [
+      ["in", ["inside"], "in"],
+      ["through", [], "through"],
+      ["under", [], "under"],
+      ["over", ["above"], "over"],
+      ["around", [], "around"],
+      ["behind", [], "behind"],
+      ["front", ["infront", "in_front_of"], "in_front_of"],
+    ] as const
+  ).map(([name, aliases, value]) =>
+    setting(
+      name,
+      [...aliases],
+      "noun",
+      { id: "specifier", value },
+      value.replace(/_/g, " "),
+      undefined,
+      "sets the relation of a place or a route",
+      /^(locative|route)$/,
+      ["setSpecifier"],
+    ),
+  ),
+  ...(
+    [
+      ["because", [], "neutral", "because of"],
+      ["fault", ["blame"], "negative", "the fault of"],
+      ["thanks", ["thanksto"], "positive", "thanks to"],
+    ] as const
+  ).map(([name, aliases, value, description]) =>
+    setting(
+      name,
+      [...aliases],
+      "noun",
+      { id: "sentiment", value },
+      description,
+      undefined,
+      "sets how a cause is felt",
+      /^cause$/,
+      ["setSentiment"],
+    ),
+  ),
+
+  // ── Verb ──────────────────────────────────────────────────────────────────
+  ...(["present", "past", "future"] as const).map((value) =>
+    setting(value, [], "verb", { id: "tense", value }, value, `tense.value.${value}` as UiStringKey, "sets a verb’s tense", /^verbTense$/, ["setTense"]),
+  ),
+  ...(
+    [
+      ["neutral", ["simple"], "neutral"],
+      ["prog", ["progressive"], "progressive"],
+      ["prosp", ["prospective"], "prospective"],
+      ["result", ["resultative"], "resultative"],
+    ] as const
+  ).map(([name, aliases, value]) =>
+    setting(
+      name,
+      [...aliases],
+      "verb",
+      { id: "aspect", value },
+      value,
+      `aspect.value.${value}` as UiStringKey,
+      "sets a verb’s aspect",
+      /^verbAspect$/,
+      ["setAspect"],
+    ),
+  ),
+  setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", "negates a verb", /^verbNegative$/, ["setNegative"]),
+  setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", "sets a verb’s polarity", /^verbNegative$/, ["setNegative"]),
+
+  // ── Adjective ─────────────────────────────────────────────────────────────
+  ...(
+    [
+      ["more", [], "more"],
+      ["most", [], "most"],
+      ["less", [], "less"],
+      ["least", [], "least"],
+      ["equally", ["as"], "equally"],
+      ["plain", ["base"], "positive"],
+    ] as const
+  ).map(([name, aliases, value]) =>
+    setting(
+      name,
+      [...aliases],
+      "adjective",
+      { id: "degree", value },
+      value === "positive" ? "plain degree" : `${value} (degree)`,
+      undefined,
+      "sets an adjective’s degree",
+      /Adjective\d?$|^predicative$/,
+      ["setDegree"],
+    ),
+  ),
+  ...(["feature", "purpose", "material"] as const).map((value) =>
+    setting(
+      value,
+      [],
+      "adjective",
+      { id: "relation", value },
+      value,
+      `modifier.relation.${value}` as UiStringKey,
+      "sets how a noun modifier relates to its noun",
+      /Adjective\d?$/,
+      ["setModifierRelation"],
+    ),
+  ),
+
+  // ── Period ────────────────────────────────────────────────────────────────
+  {
+    name: "new",
+    aliases: ["period"],
+    group: "period",
+    description: "new period",
+    descriptionKey: "action.addPeriodContainer",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "new" },
+  },
+  {
+    name: "command",
+    aliases: ["imperative"],
+    group: "period",
+    description: "command",
+    descriptionKey: "imperative.command",
+    color: "setting",
+    // An addressee and a register: at most one of each.
+    arg: { kind: "values", values: [...PERSON_VALUES, ...REGISTER_VALUES], max: 2 },
+    action: { kind: "mood", mood: "command" },
+    reducers: ["setImperative", "setImperativePerson", "setImperativeRegister"],
+  },
+  {
+    name: "inf",
+    aliases: ["infinitive"],
+    group: "period",
+    description: "infinitive",
+    descriptionKey: "infinitive.phrase",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "mood", mood: "infinitive" },
+    reducers: ["setInfinitive"],
+  },
+  {
+    name: "statement",
+    aliases: ["indicative"],
+    group: "period",
+    description: "back to a plain statement",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "mood", mood: "statement" },
+    reducers: ["setImperative", "setInfinitive"],
+  },
+  {
+    name: "if",
+    aliases: ["condition"],
+    group: "period",
+    description: "if-condition",
+    descriptionKey: "clause.conditional",
+    purpose: "gives a period its if-condition",
+    color: "warning",
+    arg: { kind: "link" },
+    action: { kind: "condition" },
+  },
+  {
+    name: "join",
+    aliases: ["coordinate"],
+    group: "period",
+    description: "coordination",
+    descriptionKey: "action.coordinatePeriod",
+    purpose: "coordinates two periods",
+    color: "info",
+    arg: { kind: "link" },
+    action: { kind: "join" },
+  },
+  {
+    name: "level",
+    aliases: ["reification"],
+    group: "period",
+    description: "instrument level",
+    color: "setting",
+    arg: { kind: "values", values: LEVEL_VALUES, max: 1 },
+    action: { kind: "level" },
+  },
+  {
+    name: "del",
+    aliases: ["delete", "remove"],
+    group: "period",
+    description: "remove what the context names",
+    descriptionKey: "action.clear",
+    color: "setting",
+    arg: { kind: "text" },
+    action: { kind: "del" },
+    reducers: ["applyClear", "removePossessor", "clearPossessorRef", "removeConjunct"],
+  },
+  {
+    name: "edit",
+    aliases: [],
+    group: "period",
+    description: "load this period’s source into the prompt",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "edit" },
+  },
+
+  // ── Workspace ─────────────────────────────────────────────────────────────
+  {
+    name: "save",
+    aliases: [],
+    group: "workspace",
+    description: "save the workspace",
+    descriptionKey: "action.save.tooltip",
+    color: "setting",
+    arg: { kind: "text" },
+    action: { kind: "app", app: "save" },
+  },
+  {
+    name: "load",
+    aliases: ["open"],
+    group: "workspace",
+    description: "load a saved phrase",
+    descriptionKey: "action.load.tooltip",
+    color: "setting",
+    arg: { kind: "text" },
+    action: { kind: "app", app: "load" },
+  },
+  {
+    name: "export",
+    aliases: [],
+    group: "workspace",
+    description: "export as JSON",
+    descriptionKey: "action.export.tooltip",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "export" },
+  },
+  {
+    name: "import",
+    aliases: [],
+    group: "workspace",
+    description: "import JSON",
+    descriptionKey: "action.import.tooltip",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "import" },
+  },
+  {
+    name: "lang",
+    aliases: ["language"],
+    group: "workspace",
+    description: "interface language",
+    descriptionKey: "language.selector",
+    color: "setting",
+    arg: { kind: "values", values: LANGUAGE_VALUES, max: 1 },
+    action: { kind: "app", app: "lang" },
+  },
+  {
+    name: "undo",
+    aliases: [],
+    group: "workspace",
+    description: "undo",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "undo" },
+  },
+  {
+    name: "redo",
+    aliases: [],
+    group: "workspace",
+    description: "redo",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "redo" },
+  },
+  {
+    name: "words",
+    aliases: [],
+    group: "workspace",
+    description: "words panel",
+    descriptionKey: "words.heading",
+    color: "setting",
+    arg: { kind: "none" },
+    action: { kind: "app", app: "words" },
+  },
+  {
+    name: "help",
+    aliases: ["?"],
+    group: "workspace",
+    description: "help",
+    color: "setting",
+    arg: { kind: "text" },
+    action: { kind: "app", app: "help" },
+  },
+];
+
+const BY_NAME = new Map<string, CommandDef>(COMMANDS.map((c) => [c.name, c]));
+const BY_ALIAS = new Map<string, CommandDef>(
+  COMMANDS.flatMap((c) => c.aliases.map((a) => [a, c] as const)),
+);
+
+/** The command a name or an alias stands for. */
+export function commandNamed(name: string): CommandDef | undefined {
+  const key = name.toLowerCase();
+  return BY_NAME.get(key) ?? BY_ALIAS.get(key);
+}
+
+/** The value of a values argument a word names, by name or alias. */
+export function valueNamed(values: readonly ValueDef[], word: string): ValueDef | undefined {
+  const key = word.toLowerCase();
+  return values.find((v) => v.name === key || v.aliases?.includes(key));
+}
+
+/** The command that sets a setting to a value — what the printer writes for it. */
+export function settingCommand(s: Setting): CommandDef {
+  const hit = COMMANDS.find(
+    (c) => c.action.kind === "setting" && c.action.setting.id === s.id && c.action.setting.value === s.value,
+  );
+  if (!hit) throw new Error(`no command sets ${s.id} to ${String(s.value)}`);
+  return hit;
+}
+
+/** The role command that fills a slot of the period. */
+export function roleCommand(slot: SlotKey): CommandDef | undefined {
+  return COMMANDS.find((c) => c.action.kind === "role" && c.action.slot === slot);
+}
+
+export function commandByAction(kind: Action["kind"]): CommandDef {
+  const hit = COMMANDS.find((c) => c.action.kind === kind);
+  if (!hit) throw new Error(`no command for ${kind}`);
+  return hit;
+}
+
+export type { AbstractionLevel, CoordConjunction, ImperativePerson, ImperativeRegister };

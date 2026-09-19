@@ -4,12 +4,16 @@ import {
   MODIFIER_RELATIONS,
   NOUN_COORD_CONJUNCTIONS,
   TENSES,
+  type Aspect,
   type CauseSentiment,
   type Concept,
   type CoordConjunction,
   type Definiteness,
+  type Degree,
   type ImperativeRegister,
+  type ModifierRelation,
   type PathSpecifier,
+  type Tense,
 } from "@signi/shared";
 import {
   CONJUNCTION_KEY,
@@ -126,6 +130,13 @@ function clearChainedModals(sel: PhraseSelection, slot: SlotKey): void {
   }
 }
 
+// The gender a gendered noun keeps from the word it replaces. A noun is masculine or feminine; the
+// neuter a 3rd-person pronoun ("it") left behind is no gender its control offers, so it goes back to
+// the masculine rather than lingering where no key or click could reach it.
+function nounGender(prev: Gender | undefined): "masc" | "fem" {
+  return prev === "fem" ? "fem" : "masc";
+}
+
 // Pure state transform: place `concept` into `slot`, cascading the side effects
 // that keep the selection internally consistent (dropping now-invalid dependents,
 // seeding default gender/number, clearing chained adjectives, etc.). A picker that decided the
@@ -163,7 +174,7 @@ export function applyConceptSelect(
       next.subjectGender = concept.person !== "3" && g === "neut" ? "masc" : g;
     } else if (concept.role === "noun") {
       if (concept.gendered) {
-        next.subjectGender = prev.subjectGender ?? "masc";
+        next.subjectGender = nounGender(prev.subjectGender);
       } else {
         delete next.subjectGender;
       }
@@ -184,7 +195,7 @@ export function applyConceptSelect(
       const g = prev.directObjectGender ?? "masc";
       next.directObjectGender = concept.person !== "3" && g === "neut" ? "masc" : g;
     } else if (concept.gendered) {
-      next.directObjectGender = prev.directObjectGender ?? "masc";
+      next.directObjectGender = nounGender(prev.directObjectGender);
     } else {
       delete next.directObjectGender;
     }
@@ -194,8 +205,7 @@ export function applyConceptSelect(
     clearAdjectives(next, slot as NounKey);
     const gKey = `${slot}Gender` as keyof PhraseSelection;
     if (concept.gendered) {
-      (next[gKey] as "masc" | "fem") =
-        (prev[gKey] as "masc" | "fem") ?? "masc";
+      (next[gKey] as "masc" | "fem") = nounGender(prev[gKey] as Gender | undefined);
     } else {
       delete next[gKey];
     }
@@ -255,12 +265,90 @@ function cycled<V>(values: readonly V[], current: V, step: CycleStep): V {
   return values[(idx + step + values.length) % values.length];
 }
 
+// ── Set a value ──────────────────────────────────────────────────────────────
+// Each control's value, set outright. The console's settings set rather than toggle, so a typed line
+// means the same whatever the period held before it (see console/language); the canvas's toggles and
+// cycles below are these, fed the value after the current one.
+
+export type Gender = "masc" | "fem" | "neut";
+
+export function setNumber(
+  prev: PhraseSelection,
+  which: NumberSlot,
+  value: "singular" | "plural",
+): PhraseSelection {
+  return { ...prev, [`${which}Number`]: value };
+}
+
+/**
+ * The genders a noun block's head offers: every pronoun carries masculine and feminine, and only the
+ * 3rd person adds neuter (he/she/it); a gendered noun has the two.
+ */
+export function gendersOf(prev: PhraseSelection, which: GenderSlot): Gender[] {
+  const concept = prev[which] as Concept | undefined;
+  return concept?.role === "pronoun" && concept.person === "3"
+    ? ["masc", "fem", "neut"]
+    : ["masc", "fem"];
+}
+
+export function setGender(
+  prev: PhraseSelection,
+  which: GenderSlot,
+  value: Gender,
+): PhraseSelection {
+  return { ...prev, [`${which}Gender`]: value };
+}
+
+export function setNegative(prev: PhraseSelection, value: boolean): PhraseSelection {
+  return { ...prev, verbNegative: value };
+}
+
+export function setTense(prev: PhraseSelection, value: Tense): PhraseSelection {
+  return { ...prev, verbTense: value };
+}
+
+export function setAspect(prev: PhraseSelection, value: Aspect): PhraseSelection {
+  return { ...prev, verbAspect: value };
+}
+
+// A real adjective's comparative degree, stored per slot key in `adjectiveDegrees` — for an
+// adjective slot, or for the `predicative` slot holding a predicate adjective.
+export function setDegree(prev: PhraseSelection, slotKey: SlotKey, value: Degree): PhraseSelection {
+  return { ...prev, adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: value } };
+}
+
+// A noun-modifier's semantic relation, stored per adjective slot key in `modifierRelations`.
+export function setModifierRelation(
+  prev: PhraseSelection,
+  slotKey: SlotKey,
+  value: ModifierRelation,
+): PhraseSelection {
+  return { ...prev, modifierRelations: { ...prev.modifierRelations, [slotKey]: value } };
+}
+
+// A noun-modifier's own grammatical number, stored per adjective slot key in `modifierNumbers`.
+export function setModifierNumber(
+  prev: PhraseSelection,
+  slotKey: SlotKey,
+  value: "singular" | "plural",
+): PhraseSelection {
+  return { ...prev, modifierNumbers: { ...prev.modifierNumbers, [slotKey]: value } };
+}
+
+// The conjunction joining a noun block's group — one of the two that join noun phrases.
+export function setNounConjunction(
+  prev: PhraseSelection,
+  which: NounKey,
+  value: CoordConjunction,
+): PhraseSelection {
+  return { ...prev, [CONJUNCTION_KEY(which)]: value };
+}
+
 export function toggleNumber(
   prev: PhraseSelection,
   which: NumberSlot,
 ): PhraseSelection {
-  const key = `${which}Number` as keyof PhraseSelection;
-  return { ...prev, [key]: prev[key] === "plural" ? "singular" : "plural" };
+  return setNumber(prev, which, prev[`${which}Number`] === "plural" ? "singular" : "plural");
 }
 
 export function toggleGender(
@@ -268,19 +356,12 @@ export function toggleGender(
   which: GenderSlot,
   step: CycleStep = 1,
 ): PhraseSelection {
-  const key = `${which}Gender` as keyof PhraseSelection;
-  // Every pronoun carries gender (masc/fem); only the 3rd person adds neuter (he/she/it).
-  const concept = prev[which] as Concept | undefined;
-  const cycle: ("masc" | "fem" | "neut")[] =
-    concept?.role === "pronoun" && concept.person === "3"
-      ? ["masc", "fem", "neut"]
-      : ["masc", "fem"];
-  const cur = (prev[key] as "masc" | "fem" | "neut") ?? "masc";
-  return { ...prev, [key]: cycled(cycle, cur, step) };
+  const cur = (prev[`${which}Gender`] as Gender | undefined) ?? "masc";
+  return setGender(prev, which, cycled(gendersOf(prev, which), cur, step));
 }
 
 export function toggleNegative(prev: PhraseSelection): PhraseSelection {
-  return { ...prev, verbNegative: !prev.verbNegative };
+  return setNegative(prev, !prev.verbNegative);
 }
 
 // Set a noun's determiner to a value picked from the menu. Ten values across three semantic
@@ -302,11 +383,7 @@ export function cycleModifierRelation(
   step: CycleStep = 1,
 ): PhraseSelection {
   const cur = prev.modifierRelations?.[slotKey] ?? "feature";
-  const next = cycled(MODIFIER_RELATIONS, cur, step);
-  return {
-    ...prev,
-    modifierRelations: { ...prev.modifierRelations, [slotKey]: next },
-  };
+  return setModifierRelation(prev, slotKey, cycled(MODIFIER_RELATIONS, cur, step));
 }
 
 // Toggle a noun-modifier's own grammatical number (singular ⇄ plural), stored per adjective
@@ -316,11 +393,7 @@ export function cycleModifierNumber(
   slotKey: SlotKey,
 ): PhraseSelection {
   const cur = prev.modifierNumbers?.[slotKey] ?? "singular";
-  const next = cur === "singular" ? "plural" : "singular";
-  return {
-    ...prev,
-    modifierNumbers: { ...prev.modifierNumbers, [slotKey]: next },
-  };
+  return setModifierNumber(prev, slotKey, cur === "singular" ? "plural" : "singular");
 }
 
 // Set (or, with `concept: undefined`, clear) the adjective modifying a noun-modifier itself,
@@ -347,20 +420,18 @@ export function cycleDegree(
   step: CycleStep = 1,
 ): PhraseSelection {
   const cur = prev.adjectiveDegrees?.[slotKey] ?? "positive";
-  const next = cycled(DEGREES, cur, step);
-  return {
-    ...prev,
-    adjectiveDegrees: { ...prev.adjectiveDegrees, [slotKey]: next },
-  };
+  return setDegree(prev, slotKey, cycled(DEGREES, cur, step));
 }
 
-// Toggle imperative (command) mood on this period. Turning it on forces the verb into the
-// present tense, neutral aspect and clears any modals — an imperative is a mood, so it can't
+// Set imperative (command) mood on this period, or take it off. Turning it on forces the verb into
+// the present tense, neutral aspect and clears any modals — an imperative is a mood, so it can't
 // carry a tense/aspect/modal, and it's mutually exclusive with a conditional / coordination (the
 // UI gates those). The addressee defaults to 2sg. Turning it off leaves everything else intact,
-// including the user's own subject pick (which selectionToPlan restores).
-export function toggleImperative(prev: PhraseSelection): PhraseSelection {
-  if (prev.imperative) {
+// including the user's own subject pick (which selectionToPlan restores). Setting the mood a period
+// already has changes nothing.
+export function setImperative(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (Boolean(prev.imperative) === value) return prev;
+  if (!value) {
     return { ...prev, imperative: false };
   }
   return {
@@ -379,13 +450,18 @@ export function toggleImperative(prev: PhraseSelection): PhraseSelection {
   };
 }
 
-// Toggle the infinitive / citation render mode on this period. Like the imperative it is a mood
-// occupying the finite slot, so turning it on forces present tense / neutral aspect / no modals,
-// drops the (throwaway) subject, and is mutually exclusive with the imperative and with a
+export function toggleImperative(prev: PhraseSelection): PhraseSelection {
+  return setImperative(prev, !prev.imperative);
+}
+
+// Set the infinitive / citation render mode on this period, or take it off. Like the imperative it
+// is a mood occupying the finite slot, so turning it on forces present tense / neutral aspect / no
+// modals, drops the (throwaway) subject, and is mutually exclusive with the imperative and with a
 // conditional / coordination (the UI gates those). Unlike the imperative it takes no person or
 // register — a citation addresses nobody. Turning it off leaves everything else intact.
-export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
-  if (prev.infinitive) {
+export function setInfinitive(prev: PhraseSelection, value: boolean): PhraseSelection {
+  if (Boolean(prev.infinitive) === value) return prev;
+  if (!value) {
     return { ...prev, infinitive: false };
   }
   return {
@@ -399,6 +475,10 @@ export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
     verbModalAdverb: undefined,
     verbModal2Adverb: undefined,
   };
+}
+
+export function toggleInfinitive(prev: PhraseSelection): PhraseSelection {
+  return setInfinitive(prev, !prev.infinitive);
 }
 
 // Set the person the command's verb agrees with (2sg / 1pl "let's" / 2pl). Kept even under the
@@ -427,12 +507,12 @@ export function setImperativeRegister(
 
 // Cycle the verb tense present → past → future → present.
 export function cycleTense(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
-  return { ...prev, verbTense: cycled(TENSES, prev.verbTense ?? "present", step) };
+  return setTense(prev, cycled(TENSES, prev.verbTense ?? "present", step));
 }
 
 // Cycle the verb aspect neutral → progressive → prospective → resultative → neutral.
 export function cycleAspect(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
-  return { ...prev, verbAspect: cycled(ASPECTS, prev.verbAspect ?? "neutral", step) };
+  return setAspect(prev, cycled(ASPECTS, prev.verbAspect ?? "neutral", step));
 }
 
 // Set a spatial complement's relation (through / under / over / …). Route and locative draw on
@@ -568,8 +648,7 @@ export function cycleNounConjunction(
 ): PhraseSelection {
   const current = conjunctionOf(prev, which);
   const i = NOUN_COORD_CONJUNCTIONS.indexOf(current);
-  const next = NOUN_COORD_CONJUNCTIONS[(i + 1) % NOUN_COORD_CONJUNCTIONS.length];
-  return { ...prev, [CONJUNCTION_KEY(which)]: next };
+  return setNounConjunction(prev, which, NOUN_COORD_CONJUNCTIONS[(i + 1) % NOUN_COORD_CONJUNCTIONS.length]);
 }
 
 // ── Addressed edits ──

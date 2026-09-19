@@ -8,6 +8,7 @@ import {
   removePossessor,
   updateNounAt,
 } from '../src/components/PhraseBuilder/phraseReducers.ts';
+import * as R from '../src/components/PhraseBuilder/phraseReducers.ts';
 
 const noun = (id: string): Concept => ({ id, role: 'noun', description: id, label: id });
 
@@ -261,5 +262,46 @@ describe('updateNounAt', () => {
       subject: BOOK,
       subjectConjuncts: PERIOD.subjectConjuncts,
     });
+  });
+});
+
+describe('the set-value reducers', () => {
+  it('set a value outright, whatever was there', () => {
+    const s: PhraseSelection = { subject: CAT, verb: SEE };
+    expect(R.setNumber(R.setNumber(s, 'subject', 'plural'), 'subject', 'plural').subjectNumber).toBe('plural');
+    expect(R.setTense(s, 'future').verbTense).toBe('future');
+    expect(R.setAspect(s, 'resultative').verbAspect).toBe('resultative');
+    expect(R.setNegative(R.setNegative(s, true), true).verbNegative).toBe(true);
+    expect(R.setDegree(s, 'subjectAdjective', 'most').adjectiveDegrees).toEqual({ subjectAdjective: 'most' });
+    expect(R.setModifierRelation(s, 'subjectAdjective', 'material').modifierRelations).toEqual({ subjectAdjective: 'material' });
+    expect(R.setModifierNumber(s, 'subjectAdjective', 'plural').modifierNumbers).toEqual({ subjectAdjective: 'plural' });
+    expect(R.setNounConjunction(s, 'subject', 'or').subjectConjunction).toBe('or');
+  });
+
+  it('change nothing when the mood asked for is the mood there is', () => {
+    const command = R.setImperative({ verb: SEE, verbTense: 'past' }, true);
+    expect(command).toMatchObject({ imperative: true, verbTense: 'present' });
+    expect(R.setImperative(command, true)).toBe(command);
+    expect(R.setInfinitive(command, true)).toMatchObject({ infinitive: true, imperative: false });
+    expect(R.setInfinitive({}, false)).toEqual({});
+  });
+
+  it('are what the toggles and cycles feed the next value', () => {
+    const s: PhraseSelection = { subject: SHE };
+    expect(R.toggleGender(R.toggleGender(s, 'subject'), 'subject').subjectGender).toBe('neut');
+    expect(R.gendersOf(s, 'subject')).toEqual(['masc', 'fem', 'neut']);
+    expect(R.gendersOf({ subject: CAT }, 'subject')).toEqual(['masc', 'fem']);
+  });
+});
+
+describe('a noun replacing a pronoun', () => {
+  it('leaves the neuter a 3rd-person pronoun had, since no noun control offers it', () => {
+    const it_: Concept = { ...SHE, id: 'IT' };
+    const withIt = applyConceptSelect({ subjectGender: 'neut' }, 'subject', it_);
+    const gendered: Concept = { ...CAT, gendered: true };
+    expect(applyConceptSelect(withIt, 'subject', gendered).subjectGender).toBe('masc');
+    expect(applyConceptSelect({ directObjectGender: 'neut' }, 'directObject', gendered).directObjectGender).toBe('masc');
+    expect(applyConceptSelect({ locativeGender: 'neut' }, 'locative', gendered).locativeGender).toBe('masc');
+    expect(applyConceptSelect({ subjectGender: 'fem' }, 'subject', gendered).subjectGender).toBe('fem');
   });
 });
