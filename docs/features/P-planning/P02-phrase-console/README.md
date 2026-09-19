@@ -7,7 +7,7 @@ previews on the canvas, and every canvas action is written back to the console a
 equals.
 **Shape:** a pure text ⇄ selection layer (parse, complete, apply, print) over the existing reducers,
 and one console component. No change to the engine, the API or the saved-phrase format.
-**Relation to [P01](../P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
+**Relation to [P01](../../Z-Done/P01-keyboard-first-ux/README.md):** P01 keeps the canvas itself fully reachable from
 the keyboard (cursor, focus ring, key tips, box letters). The console is the fast path, and it
 replaces P01's command palette and hint bar.
 **Status:** phases 1–6 shipped — the console builds, previews and edits every
