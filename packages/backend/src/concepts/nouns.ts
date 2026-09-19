@@ -498,14 +498,15 @@ export const nouns: ConceptSeed[] = [
   {
     // The genus HOUSE and PRISON lacked: both are described as "a building", which was not itself a
     // concept (B29). It sits under PLACE beside HOME, MARKET and CONTINENT, so the two nouns gain
-    // BUILDING → PLACE rather than losing anything — both were roots. No `definition`: "a place
-    // that has walls" composes, but French drops the partitive on the bare plural and Japanese
-    // says it with 持つ, which is for things one carries (see C05). German "Gebäude" is one of the
-    // neuter nouns with an identical plural; Japanese 建物 is the everyday word, 建築物 the
-    // technical one.
+    // BUILDING → PLACE rather than losing anything — both were roots. Its gloss waited on two engine
+    // gaps (C05): French now writes the partitive on a bare plural object ("un lieu qui a des murs",
+    // A149), and Japanese says an inanimate owner's possession with ある (壁がある場所, A150), not 持つ.
+    // German "Gebäude" is one of the neuter nouns with an identical plural; Japanese 建物 is the
+    // everyday word, 建築物 the technical one.
     id: 'BUILDING',
     role: 'noun',
     description: 'a structure with walls and a roof',
+    definition: whoGloss('PLACE', 'HAVE', 'WALL'),
     emoji: '🏢',
     isA: 'PLACE',
     forms: {
@@ -516,6 +517,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'edificio', plural: 'edificios', gender: 'masc', count: 'singular' },
       ja: { base: '建物', count: 'singular', reading: 'たてもの' },
       pt: { base: 'edifício', plural: 'edifícios', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A building's wall, the differentia of BUILDING's gloss. Where a language has two words, this is
+    // the building's: it muro (a city's walls are the plural mura), de Wand (a free-standing wall is
+    // a Mauer), es pared (a free-standing one is a muro). No genus is seeded above it.
+    id: 'WALL',
+    role: 'noun',
+    description: 'an upright structure that encloses or divides a space',
+    emoji: '🧱',
+    forms: {
+      en: { base: 'wall', plural: 'walls', count: 'singular' },
+      it: { base: 'muro', plural: 'muri', gender: 'masc', count: 'singular' },
+      fr: { base: 'mur', plural: 'murs', gender: 'masc', count: 'singular' },
+      de: { base: 'Wand', plural: 'Wände', gender: 'fem', count: 'singular' },
+      es: { base: 'pared', plural: 'paredes', gender: 'fem', count: 'singular' },
+      ja: { base: '壁', count: 'singular', reading: 'かべ' },
+      pt: { base: 'parede', plural: 'paredes', gender: 'fem', count: 'singular' },
     },
   },
   {

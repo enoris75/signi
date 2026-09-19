@@ -6,24 +6,24 @@ import { test, expect } from './fixtures';
 // falling back to English:
 //   - an engine-composed `definition` plan (CAT → "a small mammal"), rendered from seeded
 //     concepts into every language, so the tooltip is localized like the rest of the UI;
-//   - the stored `concept_definitions` literal (BUILDING → "a structure with walls and a roof"),
+//   - the stored `concept_definitions` literal (FEELING → "an emotion or sensation one feels"),
 //     of which only English is seeded.
 test.describe('word definition tooltip', () => {
   const tooltip = '.MuiTooltip-tooltip';
 
   test('shows the definition on hover in the subject picker', async ({ app, page }) => {
-    // BUILDING carries only a stored English literal: its gloss "a place that has walls" was
-    // probed and rejected in B29, so C05 leaves it on the literal deliberately.
-    await app.subjectInput.fill('building');
+    // FEELING carries only a stored English literal: nothing composable distinguishes it from its
+    // siblings, so C05 leaves it on the literal deliberately.
+    await app.subjectInput.fill('feeling');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="BUILDING"]',
+      '[data-testid="typeahead-option"][data-concept="FEELING"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
     await expect(page.locator(tooltip)).toBeVisible();
-    await expect(page.locator(tooltip)).toHaveText('a structure with walls and a roof');
+    await expect(page.locator(tooltip)).toHaveText('an emotion or sensation one feels');
   });
 
   test('shows the definition on hover in the verb picker', async ({ app, page }) => {
@@ -119,13 +119,13 @@ test.describe('word definition tooltip', () => {
     await extEn.hover();
     await expect(page.locator(tooltip)).toHaveText('to destroy fire');
 
-    // French: the same plan, the object bare after the infinitive — "détruire feu".
+    // French: the same plan, the bare object taking the partitive (A149) — "détruire du feu".
     await app.setUiLanguage('fr');
     await app.verbInput.fill('extinguish');
     const extFr = page.locator('[data-testid="typeahead-option"][data-concept="EXTINGUISH"]');
     await expect(extFr).toBeVisible();
     await extFr.hover();
-    await expect(page.locator(tooltip)).toHaveText('détruire feu');
+    await expect(page.locator(tooltip)).toHaveText('détruire du feu');
   });
 
   test('a genus+mass-noun verb definition renders (localize-seed B10: CLEAR)', async ({
@@ -222,7 +222,7 @@ test.describe('word definition tooltip', () => {
   // source), an adverb (BEAT) and an object under a determiner (CHOOSE, CLICK).
   for (const [id, query, en, language, other] of [
     ['OWN', 'own', 'to have property', 'it', 'avere proprietà'],
-    ['HOLD', 'hold', 'to have objects', 'fr', 'avoir objets'],
+    ['HOLD', 'hold', 'to have objects', 'fr', 'avoir des objets'],
     ['BUY', 'buy', 'to acquire objects with money', 'de', 'Gegenstände mit Geld erwerben'],
     ['CUT', 'cut', 'to divide with a sharp blade', 'es', 'dividir con una cuchilla afilada'],
     ['BITE', 'bite', 'to cut with the teeth', 'ja', '歯で切る'],
@@ -230,12 +230,12 @@ test.describe('word definition tooltip', () => {
     ['GIVE', 'give', 'to transfer objects to a person', 'de', 'einer Person Gegenstände übertragen'],
     ['SEND', 'send', 'to transfer objects to a place', 'it', 'trasferire oggetti a un luogo'],
     ['NAME', 'name', 'to indicate objects with words', 'ja', '単語で物体を示す'],
-    ['DESCRIBE', 'describe', 'to indicate qualities', 'fr', 'indiquer qualités'],
+    ['DESCRIBE', 'describe', 'to indicate qualities', 'fr', 'indiquer des qualités'],
     ['EXPRESS', 'express', 'to indicate concepts', 'es', 'indicar conceptos'],
     ['MODIFY', 'modify', 'to change qualities', 'de', 'Qualitäten ändern'],
     ['LOVE', 'love', 'to feel affection', 'it', 'provare affetto'],
     ['CRY', 'cry', 'to shed tears', 'de', 'Tränen vergießen'],
-    ['CRY_OUT', 'cry', 'to produce loud sounds', 'fr', 'produire sons forts'],
+    ['CRY_OUT', 'cry', 'to produce loud sounds', 'fr', 'produire des sons forts'],
     ['CHOOSE', 'choose', 'to indicate an option', 'it', "indicare un'opzione"],
     ['CLICK', 'click', 'to press a button', 'es', 'pulsar un botón'],
     ['TYPE', 'type', 'to write with a keyboard', 'ja', 'キーボードで書く'],
@@ -721,7 +721,7 @@ test.describe('word definition tooltip', () => {
     const verbFr = page.locator('[data-testid="typeahead-option"][data-concept="VERB"]');
     await expect(verbFr).toBeVisible();
     await verbFr.hover();
-    await expect(page.locator(tooltip)).toHaveText('un mot qui exprime actions');
+    await expect(page.locator(tooltip)).toHaveText('un mot qui exprime des actions');
   });
 
   test('a genus+relative-clause noun definition renders (localize-seed B06: ADJECTIVE)', async ({
@@ -1063,21 +1063,49 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('un edificio donde se encierran personas');
   });
 
+  test('a possession gloss renders where French and Japanese blocked it (C05: BUILDING)', async ({
+    app,
+    page,
+  }) => {
+    // whoGloss on HAVE with a bare plural object. French writes the partitive a bare object needs
+    // (A149, "des murs"), and Japanese says an inanimate owner's possession with ある, its object
+    // marked が (A150), rather than 持つ, which is holding.
+    await app.subjectInput.fill('building');
+    const buildingEn = page.locator('[data-testid="typeahead-option"][data-concept="BUILDING"]');
+    await expect(buildingEn).toBeVisible();
+    await buildingEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a place that has walls');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('building');
+    const buildingFr = page.locator('[data-testid="typeahead-option"][data-concept="BUILDING"]');
+    await expect(buildingFr).toBeVisible();
+    await buildingFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un lieu qui a des murs');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('building');
+    const buildingJa = page.locator('[data-testid="typeahead-option"][data-concept="BUILDING"]');
+    await expect(buildingJa).toBeVisible();
+    await buildingJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('壁がある場所');
+  });
+
   test('a literal definition falls back to English under a non-English UI language', async ({
     app,
     page,
   }) => {
-    // BUILDING has no definition plan and only an English literal, so an Italian UI reverts to it.
-    // The search still finds it by its English label, which is why "building" works under it.
+    // FEELING has no definition plan and only an English literal, so an Italian UI reverts to it.
+    // The search still finds it by its English label, which is why "feeling" works under it.
     await app.setUiLanguage('it');
-    await app.subjectInput.fill('building');
+    await app.subjectInput.fill('feeling');
     const option = page.locator(
-      '[data-testid="typeahead-option"][data-concept="BUILDING"]',
+      '[data-testid="typeahead-option"][data-concept="FEELING"]',
     );
     await expect(option).toBeVisible();
 
     await option.hover();
 
-    await expect(page.locator(tooltip)).toHaveText('a structure with walls and a roof');
+    await expect(page.locator(tooltip)).toHaveText('an emotion or sensation one feels');
   });
 });

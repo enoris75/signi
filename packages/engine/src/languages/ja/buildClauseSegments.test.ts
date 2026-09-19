@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
 import { buildClauseSegments } from './buildClauseSegments.js';
 import {
-  adj, AGERU, ANATA, clause, complement, complements, el, HAYASA, HITO_GENERIC, HON, INU, NAKU, NEKO, NEZUMI, np, ONDO, OOKII, TABERU,
-  TAKAI, vp, WATASHI,
+  adj, AGERU, ANATA, clause, complement, complements, el, HAYASA, HITO_GENERIC, HON, IE, INU, KABE, MOTSU, NAKU, NEKO, NEZUMI, np, ONDO,
+  OOKII, TABERU, TAKAI, vp, WATASHI,
 } from './ja.fixtures.js';
 
 const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
@@ -50,6 +50,14 @@ describe('buildClauseSegments', () => {
     test('a subject with a relative clause', () => {
       const cat = np(NEKO, {}, { relative: { headRole: 'subject', verbPhrase: vp(TABERU), directObject: el(np(NEZUMI)) } });
       expect(say(clause(cat, vp(NAKU)), 'は')).toBe('ネズミを食べる猫は泣きます');
+    });
+
+    // A150: an inanimate owner keeps the topic は, and an "if" clause marks it with に in place of が.
+    test('an inanimate owner\'s possession is the existential, the owner marked に in an if clause', () => {
+      const houseHasWalls = clause(np(IE), vp(MOTSU), { directObject: el(np(KABE)) });
+      expect(say(houseHasWalls, 'は')).toBe('家は壁があります');
+      expect(say(clause(np(IE), vp(MOTSU, { mood: 'subjunctive' }), { directObject: el(np(KABE)) }), 'が')).toBe('家に壁があったら');
+      expect(say(clause(np(NEKO), vp(MOTSU, { mood: 'subjunctive' }), { directObject: el(np(HON)) }), 'が')).toBe('猫が本を持っていたら');
     });
 
     // どの猫も, never どの猫もは: the も replaces the topic particle, and the verb completes the circumfix.

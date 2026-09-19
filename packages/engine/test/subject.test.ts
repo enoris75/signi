@@ -556,6 +556,11 @@ const DIFFERENTIA_NOUNS: [id: string, the: Said, thePlural: Said, a: Said][] = [
     { en: 'the keyboard runs.', it: 'la tastiera corre.', fr: 'le clavier court.', de: 'die Tastatur läuft.', es: 'el teclado corre.', ja: 'キーボードは走ります。', pt: 'o teclado corre.' },
     { en: 'the keyboards run.', it: 'le tastiere corrono.', fr: 'les claviers courent.', de: 'die Tastaturen laufen.', es: 'los teclados corren.', ja: 'キーボードは走ります。', pt: 'os teclados correm.' },
     { en: 'a keyboard runs.', it: 'una tastiera corre.', fr: 'un clavier court.', de: 'eine Tastatur läuft.', es: 'un teclado corre.', ja: 'キーボードは走ります。', pt: 'um teclado corre.' }],
+  // BUILDING's differentia (C05): German umlauts its plural, Spanish and Portuguese are feminine.
+  ['WALL',
+    { en: 'the wall runs.', it: 'il muro corre.', fr: 'le mur court.', de: 'die Wand läuft.', es: 'la pared corre.', ja: '壁は走ります。', pt: 'a parede corre.' },
+    { en: 'the walls run.', it: 'i muri corrono.', fr: 'les murs courent.', de: 'die Wände laufen.', es: 'las paredes corren.', ja: '壁は走ります。', pt: 'as paredes correm.' },
+    { en: 'a wall runs.', it: 'un muro corre.', fr: 'un mur court.', de: 'eine Wand läuft.', es: 'una pared corre.', ja: '壁は走ります。', pt: 'uma parede corre.' }],
 ];
 
 describe('subject: the differentia nouns', () => {

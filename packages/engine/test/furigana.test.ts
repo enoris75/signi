@@ -39,7 +39,7 @@ const KANJI_NOUNS: [id: string, reading: string][] = [
   ['POSSESSOR', 'しょゆうしゃ'], ['PRISON', 'けいむしょ'], ['PROCESS', 'かてい'], ['PRONOUN', 'だいめいし'], ['PROPERTY', 'ざいさん'],
   ['QUANTIFIER', 'すうりょうし'], ['RELATIONSHIP', 'かんけい'], ['SINGULAR_GRAMMAR', 'たんすう'],
   ['SOUND', 'おと'], ['SOUTH_AMERICA', 'なんべい'], ['STICK', 'ぼう'], ['SUBJECT_COMPLEMENT', 'しゅかくほご'],
-  ['SUBJECT_GRAMMAR', 'しゅご'], ['TEAR', 'なみだ'], ['TOOTH', 'は'], ['TRANSLATION', 'ほんやく'], ['VERB', 'どうし'], ['WATER', 'みず'],
+  ['SUBJECT_GRAMMAR', 'しゅご'], ['TEAR', 'なみだ'], ['TOOTH', 'は'], ['TRANSLATION', 'ほんやく'], ['VERB', 'どうし'], ['WALL', 'かべ'], ['WATER', 'みず'],
   ['WING', 'つばさ'], ['WOLF', 'おおかみ'], ['WORD', 'たんご'],
 ];
 

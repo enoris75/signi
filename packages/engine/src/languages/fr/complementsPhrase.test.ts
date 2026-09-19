@@ -89,6 +89,20 @@ describe('complementsPhrase', () => {
         .toBe('avec des mots');
     });
 
+    test('a bare instrument takes the indefinite or partitive article (A149)', () => {
+      expect(complementsPhrase(complements({ instrumental: complement(np(MOT, { definiteness: 'bare', number: 'plural' })) })))
+        .toBe('avec des mots');
+      expect(complementsPhrase(complements({ instrumental: complement(np(NOURRITURE, { definiteness: 'bare' })) })))
+        .toBe('avec de la nourriture');
+      expect(complementsPhrase(complements({
+        instrumental: complement(np(BATON, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })),
+      }))).toBe('avec mon bâton');
+    });
+
+    test('while a bare manner of means keeps avec alone', () => {
+      expect(complementsPhrase(complements({ manner: complement(np(SOIN, { definiteness: 'bare' })) }))).toBe('avec soin');
+    });
+
     test('a process instrument is the gérondif, built on the nous stem, before its object', () => {
       expect(complementsPhrase(complements({ instrumental: complement(aWord, [abstraction('process')], vp(CHOISIR)) })))
         .toBe('en choisissant un mot');

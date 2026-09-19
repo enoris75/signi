@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
 import {
-  adj, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HITO_GENERIC, HON, IE, IMITEKI, INU, KODOMO, MIZU, NARU,
-  NEKO, NEZUMI, NOMU, np, nounModifier, OOKII, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
+  adj, BASHO, CHAIRO, CHIISAI, complement, complements, DENSETSU, DESU, el, FUREEZU, HITO_GENERIC, HON, IE, IMITEKI, INU, KABE, KODOMO,
+  MIZU, MOTSU, NARU, NEKO, NEZUMI, NOMU, np, nounModifier, OOKII, SHIAWASE, SOUZOUSHA, vp, WATASHI, YOMU,
 } from './ja.fixtures.js';
 import { npSegs } from './npSegs.js';
 
@@ -111,6 +111,20 @@ describe('npSegs', () => {
       { t: '読む', r: 'よむ' },
       { t: '本', r: 'ほん' },
     ]);
+  });
+
+  // A150: possession by an inanimate owner is the existential ある, the possession marked が and the
+  // owner, when it is the clause's own subject, に.
+  test('an inanimate owner\'s possession is the existential in a relative clause', () => {
+    const hasWalls = { headRole: 'subject' as const, verbPhrase: vp(MOTSU), directObject: el(np(KABE)) };
+    expect(text(npSegs(np(BASHO, { definiteness: 'indefinite' }, { relative: hasWalls })))).toBe('壁がある場所');
+    const theHouseHas = { headRole: 'directObject' as const, subject: el(np(IE)), verbPhrase: vp(MOTSU) };
+    expect(text(npSegs(np(KABE, {}, { relative: theHouseHas })))).toBe('家にある壁');
+  });
+
+  test('regression: an animate owner holds what it has, and leads with が', () => {
+    const catHas = { headRole: 'directObject' as const, subject: el(np(NEKO)), verbPhrase: vp(MOTSU) };
+    expect(text(npSegs(np(HON, {}, { relative: catHas })))).toBe('猫が持つ本');
   });
 
   test('a generic relative-clause subject is dropped', () => {

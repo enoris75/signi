@@ -789,6 +789,44 @@ describe('workspace verbs: REMOVE and DELETE', () => {
   });
 });
 
+// A150. Japanese says possession by a thing with the existential ある, the possession marked が: a
+// place has walls by their being there (壁がある場所), where a person or an animal holds what it has
+// (本を持っている). HAVE used to render 持つ for every owner, so "the house has walls" read 家は壁を
+// 持っています, "the house is holding walls". The owner keeps the topic は, and takes に where it would
+// take が: in an "if" clause and in a relative clause on the thing possessed.
+describe('A150: Japanese possession by an inanimate owner is the existential ある', () => {
+  const walls = np('WALL', { definiteness: 'bare', number: 'plural' });
+  const has = (owner: NounPhrase, extra: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(owner, 'HAVE', { directObject: walls, verbPhrase: extra }));
+
+  test('in every tense and polarity, and under a modal', () => {
+    expect(has(np('HOUSE'))).toEqual({
+      en: 'the house has walls.',
+      it: 'la casa ha muri.',
+      fr: 'la maison a des murs.',
+      de: 'das Haus hat Wände.',
+      es: 'la casa tiene paredes.',
+      ja: '家は壁があります。',
+      pt: 'a casa tem paredes.',
+    });
+    expect(has(np('HOUSE'), { negative: true, tense: 'past' }).ja).toBe('家は壁がありませんでした。');
+    expect(has(np('HOUSE'), { modals: ['MUST'] }).ja).toBe('家は壁がある必要があります。');
+    expect(has(np('HOUSE', { definiteness: 'no' })).ja).toBe('どの家も壁がありません。');
+  });
+
+  test('the owner takes に in an if clause and in a relative on the thing possessed', () => {
+    expect(say({ ...clause(np('CAT'), 'RUN'), condition: clause(np('HOUSE'), 'HAVE', { directObject: walls }) }, 'ja'))
+      .toBe('もし家に壁があったら、猫は走ります。');
+    expect(say(clause(np('WALL', { number: 'plural', relative: { headRole: 'directObject', subject: np('HOUSE'), verbPhrase: { verb: 'HAVE' } } }), 'COLLAPSE'), 'ja'))
+      .toBe('家にある壁は崩れます。');
+  });
+
+  test('regression: a person or an animal holds what it has', () => {
+    expect(say(clause(np('CAT'), 'HAVE', { directObject: np('BOOK') }), 'ja')).toBe('猫は本を持っています。');
+    expect(say(clause(np('FIRST_PERSON'), 'HAVE', { directObject: walls }), 'ja')).toBe('私は壁を持っています。');
+  });
+});
+
 // The two stative possession verbs (OWN, HOLD): pin their transitive paradigm — present and the
 // simple past — across every language, so a refactor can't silently break their conjugation.
 describe('possession verbs: OWN and HOLD', () => {

@@ -1750,6 +1750,10 @@ export const transitiveVerbs: ConceptSeed[] = [
         reading: 'もつ',
         masu_present: '持ちます',
         masu_present_reading: 'もちます',
+        // 持つ is holding, which only a person or an animal does. A thing has its parts by their
+        // being there, so an inanimate owner takes the existential ある, the object marked が:
+        // 壁がある場所, 家は窓があります (A150).
+        inanimate_aru: '1',
       },
       pt: {
         base: 'ter',

@@ -8,6 +8,7 @@ import { JA_DEGREE, JA_NEGATIVE_DETERMINER, JA_PRENOMINAL_DET, JA_SOU } from './
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
+import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { predicateSegs } from './predicateSegs.js';
@@ -76,14 +77,16 @@ export function npSegs(np: ResolvedNounPhrase): RubySegment[] {
   // predicate is built with `plain` set.
   const rel = np.relative;
   if (!rel) return core;
-  // A generic ("one") subject is dropped, leaving the bare prenominal clause (食べる物 "a thing one
-  // eats"); a specific non-subject relative leads with its own subject marked by が (私が読む本).
-  const clauseSubjectSegs: RubySegment[] =
-    rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
-      ? [...elSegs(rel.subject), ...jaParticleSegs(rel.subject, 'が')] : [];
-  const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // The clause's subject is the head itself for a subject relative, else its own subject.
   const relAnimate = isAnimate(rel.headRole !== 'subject' && rel.subject ? rel.subject.conjuncts : [np]);
+  // A generic ("one") subject is dropped, leaving the bare prenominal clause (食べる物 "a thing one
+  // eats"); a specific non-subject relative leads with its own subject marked by が (私が読む本). The
+  // owner in an existential possession is marked に instead: 家にある壁 "the wall the house has" (A150).
+  const clauseSubjectParticle = isPossessiveExistential(rel.verbPhrase.verb, relAnimate) ? 'に' : 'が';
+  const clauseSubjectSegs: RubySegment[] =
+    rel.headRole !== 'subject' && rel.subject && !isGenericSubject(rel.subject)
+      ? [...elSegs(rel.subject), ...jaParticleSegs(rel.subject, clauseSubjectParticle)] : [];
+  const relSubjNeg = rel.headRole !== 'subject' && rel.subject ? isNegativeGroup(rel.subject) : false;
   // A head that fills the copula's subject complement leaves a gap Japanese cannot leave empty: the
   // pro-form そう takes its place, with the plain copula a relative takes (犬がそうではない伝説, 犬がそう
   // である猫), rather than the existential a copula with no complement would be (A123).

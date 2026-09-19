@@ -1,7 +1,9 @@
+import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { aDet } from './aDet.js';
 import { deDet } from './deDet.js';
+import { partitiveArtFor } from './partitiveArtFor.js';
 import { prepDet } from './prepDet.js';
 import { renderNP } from './renderNP.js';
 
@@ -15,6 +17,11 @@ export function prepObjectText(np: ResolvedNounPhrase, prep: string): string {
   const f = np.head.forms;
   if (f['person']) return `${prep} ${f['disjunctive'] ?? f['base'] ?? ''}`;
   const head = possessedHeadForms(np, 'bare');
+  // An object is never bare, with a preposition or without one: "clique sur des boutons" (A149). A
+  // possessive takes the article's place ("sur son bouton").
+  const possessive = isPronominalPossessor(np.possessor);
   return renderNP(np, (plural, lead) =>
-    prep === 'à' ? aDet(head, plural, lead) : prep === 'de' ? deDet(head, plural, lead) : prepDet(prep, head, plural, lead));
+    prep === 'à' ? aDet(head, plural, lead) : prep === 'de' ? deDet(head, plural, lead)
+    : possessive ? prepDet(prep, head, plural, lead)
+    : `${prep} ${partitiveArtFor(head, plural, lead)}`);
 }

@@ -25,6 +25,8 @@ export const KODOMO: Forms = { base: '子供', count: 'singular', reading: 'こ�
 export const HITO: Forms = { base: '人', count: 'singular', reading: 'ひと', animate: '1', human: '1' };
 export const HON: Forms = { base: '本', count: 'singular', reading: 'ほん' };
 export const IE: Forms = { base: '家', count: 'singular', reading: 'いえ' };
+export const KABE: Forms = { base: '壁', count: 'singular', reading: 'かべ' };
+export const BASHO: Forms = { base: '場所', count: 'singular', reading: 'ばしょ' };
 export const ICHIBA: Forms = { base: '市場', count: 'singular', reading: 'いちば' };
 export const TANGO: Forms = { base: '単語', count: 'singular', reading: 'たんご' };
 export const DENSETSU: Forms = { base: '伝説', count: 'singular', reading: 'でんせつ' };
@@ -155,10 +157,10 @@ export const SHIRU: Forms = {
   base: '知る', reading: 'しる', masu_present: '知ります', masu_present_reading: 'しります',
   te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない', stative: '1', event_negative: '1',
 };
-/** HAVE: a state, said with 〜ている (持っています). */
+/** HAVE: a state, said with 〜ている (持っています); an inanimate owner's is the existential ある (A150). */
 export const MOTSU: Forms = {
   base: '持つ', reading: 'もつ', masu_present: '持ちます', masu_present_reading: 'もちます',
-  te: '持って', te_reading: 'もって', nai: '持たない', nai_reading: 'もたない', stative: '1',
+  te: '持って', te_reading: 'もって', nai: '持たない', nai_reading: 'もたない', stative: '1', inanimate_aru: '1',
 };
 /** BE: rendered specially as the copula on its predicate; these forms are only a fallback. */
 export const DESU: Forms = { base: 'です', copula: '1', masu_present: 'です' };

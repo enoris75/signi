@@ -1,4 +1,4 @@
-import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, type ComplementType } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, isPronominalPossessor, type ComplementType } from '@signi/shared';
 import type { ResolvedComplement } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
@@ -20,6 +20,7 @@ import { LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { joinArt } from './joinArt.js';
 import { npText } from './npText.js';
+import { partitiveArtFor } from './partitiveArtFor.js';
 import { prepDet } from './prepDet.js';
 import { presentParticiple } from './presentParticiple.js';
 import { renderNP } from './renderNP.js';
@@ -97,11 +98,15 @@ export function complementsPhrase(
       // and article ("sous l'Europe"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
-      const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
+      // `possessive`: a pronominal possessor stands in for the article, which leaves the head's forms
+      // bare (see possessedHeadForms), not a zero article to fill.
+      const headFor = (nf: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string =>
         type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'en' : spatialHead(locSpec, nf, plural, lead, 'locative')) :
         type === 'terminus'  ? aDet(nf, plural, lead) :
-        // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot").
-        type === 'instrumental' ? prepDet('avec', nf, plural, lead) :
+        // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
+        // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
+        // the manner below.
+        type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
         // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
         // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
         type === 'manner'    ? (
@@ -157,7 +162,8 @@ export function complementsPhrase(
         return `${causeSent === 'positive' ? 'grâce' : 'à cause'} ${conjuncts}`;
       }
       return coordinate(c.phrase, (np) =>
-        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(possessedHeadForms(np, 'bare'))));
+        (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
+        || renderNP(np, headFor(possessedHeadForms(np, 'bare'), isPronominalPossessor(np.possessor))));
     })
     .filter(Boolean)
     .join(' ');

@@ -22,16 +22,6 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
 - **FEELING** ("a feeling"), 2026-09-16 — seeded by [B30](../done/B30-feeling-genus.md) as
   AFFECTION's genus. Nothing composable distinguishes it: `patientGloss('CONCEPT', 'FEEL')` gives
   "a concept that one feels" (de "ein Begriff, den man fühlt"), which is its own genus restated.
-- **BUILDING** ("a building"), 2026-09-16 — the one entry here that is *not* a missing differentia.
-  "A place that has walls" distinguishes it fine and composes; it is the **rendering** that fails, in
-  two languages. French drops the partitive on the relative clause's bare plural object ("un lieu qui
-  a murs", for *des murs*), and Japanese renders possession with 持つ, which is for things one
-  carries, not for a wall that is part of the building (壁がある場所 is the idiom — an existential
-  *aru* the engine cannot select per language). Full probe in
-  [B29](../done/B29-building-genus.md). Unlike the rest of this file, this one is unblocked by
-  engine work, not by vocabulary: fix either gap and the gloss can ship. It is also what the tooltip
-  e2e spec now uses as its example of a concept with **no** plan, since
-  [B32](../done/B32-place-glosses.md) gave HOUSE one.
 - **Verbs whose composable gloss would duplicate a sibling's**, 2026-09-14:
   - **SELECT** would read the same as CHOOSE's "to indicate an option"
     ([B18](../done/B18-selection-verbs.md)).
@@ -39,3 +29,28 @@ needs geographic reference nouns and a PP-in-definition construct — out of sco
     like MODIFY or NAME ([B16](../done/B16-word-verbs.md)).
 
 This file is the record that the omission is **intentional**, not an oversight.
+
+## Unblocked: BUILDING (2026-09-19)
+
+BUILDING was the one entry here that was blocked by the engine rather than by a missing differentia.
+"A place that has walls" distinguished it and composed, but it rendered wrong in two languages
+([B29](../done/B29-building-genus.md) has the probe). Both gaps are now fixed, so the gloss ships as
+`whoGloss('PLACE', 'HAVE', 'WALL')`:
+
+- **French** left the bare plural object without its partitive: *un lieu qui a murs*. A French object
+  now has no zero article, and a negation turns its indefinite or partitive article into *de*
+  ([A149](../../bugs/fixed/A149-french-object-zero-article.md)). The fix also restored the article in
+  the 41 French glosses that had shipped without one (*une personne qui fait des objets*,
+  *consommer de la nourriture*).
+- **Japanese** said the possession with 持つ, which is holding: 壁を持つ場所. HAVE with an inanimate
+  owner is now the existential ある, its object marked が
+  ([A150](../../bugs/fixed/A150-japanese-inanimate-owner-aru.md)).
+
+WALL was seeded for it (muro / mur / Wand / pared / 壁 / parede).
+
+| en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|
+| a place that has walls | un luogo che ha muri | un lieu qui a des murs | ein Ort, der Wände hat | un lugar que tiene paredes | 壁がある場所 | um lugar que tem paredes |
+
+The tooltip e2e spec used BUILDING as its example of a concept with **no** plan. It now uses FEELING,
+which stays on the literal.

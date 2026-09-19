@@ -924,6 +924,7 @@ describe('locative relative clause: the place where', () => {
     expect(sayAll(placeWhere('BUY', { directObject: np('OBJECT_THING', { definiteness: 'bare', number: 'plural' }) }))).toMatchObject({
       en: 'a place where one buys objects.',
       it: 'un luogo dove si comprano oggetti.',
+      fr: "un lieu où l'on achète des objets.", // the object's partitive (A149)
       de: 'ein Ort, in dem man Gegenstände kauft.',
       es: 'un lugar donde se compran objetos.',
       ja: '物体を買う場所。',

@@ -20,7 +20,7 @@ import { frCliticize } from './frCliticize.js';
 import { frEnclitic } from './frEnclitic.js';
 import { modalGroupFr } from './modalGroupFr.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
-import { npText } from './npText.js';
+import { objectNpText } from './objectNpText.js';
 import { prepObjectText } from './prepObjectText.js';
 import { reflexiveFinite } from './reflexiveFinite.js';
 
@@ -96,11 +96,14 @@ export function predicateText(
     : isPronounElement(directObject) ? objectPronounForm(firstConjunct(directObject).head.forms)
     : dislocated ? groupObjectClitic(directObject) : '';
   // The alarm a cry raises takes "à" and the article ("cria au loup", A124).
+  // A noun object has no zero article, and a negation turns its indefinite or partitive article into
+  // "de" ("ne mange pas de souris", A149); an object taken with a preposition is no direct object.
+  const negatedClause = verbNegative === true || groupNegative || aucun;
   const tonicOrNoun = (np: ResolvedNounPhrase) => {
     if (objectPrep) return prepObjectText(np, objectPrep);
     if (np.head.forms['person']) return np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? '';
     const cry = alarmCry(verb, np);
-    return cry ? alarmCryText(cry) : npText(np);
+    return cry ? alarmCryText(cry) : objectNpText(np, negatedClause);
   };
   const objectGroup = directObject && (!objectClitic || dislocated) ? coordinate(directObject, tonicOrNoun) : '';
   const directObjectText = dislocated ? '' : objectGroup;

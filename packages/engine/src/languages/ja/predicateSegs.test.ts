@@ -2,7 +2,7 @@ import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
 import {
   AGERU, complement, complements, concept, DESU, el, group, HAYAKU, HITSUYOU_GA_ARU, HON, HOZON_SURU, ICHIBA, IE, IKU, INU, ITSUMO,
-  KESSHITE, KOTO_GA_DEKIRU, modal, MOTSU, NEZUMI, NOMU, np, OMOERU, SHINCHOU, SHIRU, TABERU, TAI, vp,
+  KABE, KESSHITE, KOTO_GA_DEKIRU, modal, MOTSU, NEZUMI, NOMU, np, OMOERU, SHINCHOU, SHIRU, TABERU, TAI, vp,
 } from './ja.fixtures.js';
 import { predicateSegs } from './predicateSegs.js';
 
@@ -104,19 +104,49 @@ describe('predicateSegs', () => {
     });
   });
 
+  // A150: HAVE with an inanimate owner is the existential ある, its object marked が, not 持つ + を.
+  describe('possession by an inanimate owner', () => {
+    const walls = el(np(KABE));
+
+    test('takes ある and が, in every tense and polarity', () => {
+      expect(predicateSegs(vp(MOTSU), walls, undefined)).toEqual([{ t: '壁', r: 'かべ' }, { t: 'が' }, { t: 'あります' }]);
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), walls, undefined))).toBe('壁がありました');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), walls, undefined))).toBe('壁がありませんでした');
+    });
+
+    test('ある is a state verb: no 〜ている, and the resultative reads as the past', () => {
+      expect(text(predicateSegs(vp(MOTSU, { aspect: 'progressive' }), walls, undefined))).toBe('壁があります');
+      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), walls, undefined))).toBe('壁がありました');
+    });
+
+    test('the plain, modal and たら paths compose on it', () => {
+      expect(text(predicateSegs(vp(MOTSU), walls, undefined, undefined, true))).toBe('壁がある');
+      expect(text(predicateSegs(vp(MOTSU, { modals: [modal(HITSUYOU_GA_ARU)] }), walls, undefined))).toBe('壁がある必要があります');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), walls, undefined))).toBe('壁があったら');
+    });
+
+    test('a no-determined object keeps its も in place of が', () => {
+      expect(text(predicateSegs(vp(MOTSU), el(np(KABE, { definiteness: 'no' })), undefined))).toBe('どの壁もありません');
+    });
+
+    test('regression: an animate owner keeps 持つ and を', () => {
+      expect(text(predicateSegs(vp(MOTSU), walls, undefined, undefined, false, false, true))).toBe('壁を持っています');
+    });
+  });
+
   // A132: a state verb says the state holds with 〜ている; its plain 〜ます names the change of state.
   describe('a state verb', () => {
     test('takes 〜ている in every tense and polarity', () => {
-      expect(predicateSegs(vp(MOTSU), el(np(HON)), undefined)).toEqual([{ t: '本', r: 'ほん' }, { t: 'を' }, { t: '持って', r: 'もって' }, { t: 'います' }]);
-      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined))).toBe('持っていました');
-      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), undefined, undefined))).toBe('持っていませんでした');
+      expect(predicateSegs(vp(MOTSU), el(np(HON)), undefined, undefined, false, false, true)).toEqual([{ t: '本', r: 'ほん' }, { t: 'を' }, { t: '持って', r: 'もって' }, { t: 'います' }]);
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, false, false, true))).toBe('持っていました');
+      expect(text(predicateSegs(vp(MOTSU, { negative: true, tense: 'past' }), undefined, undefined, undefined, false, false, true))).toBe('持っていませんでした');
       expect(text(predicateSegs(vp(SHIRU, { tense: 'past' }), undefined, undefined))).toBe('知っていました');
-      expect(text(predicateSegs(vp(MOTSU, { mood: 'conditional' }), undefined, undefined))).toBe('持っています');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'conditional' }), undefined, undefined, undefined, false, false, true))).toBe('持っています');
     });
 
     test('builds the たら protasis on 〜ている', () => {
-      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), undefined, undefined))).toBe('持っていたら');
-      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive', negative: true }), undefined, undefined))).toBe('持っていなかったら');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive' }), undefined, undefined, undefined, false, false, true))).toBe('持っていたら');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'subjunctive', negative: true }), undefined, undefined, undefined, false, false, true))).toBe('持っていなかったら');
     });
 
     test('a state whose negative is the event\'s takes the plain negative', () => {
@@ -132,11 +162,11 @@ describe('predicateSegs', () => {
     });
 
     test('regression: a relative clause, a modal, a command and the other aspects keep their own form', () => {
-      expect(text(predicateSegs(vp(MOTSU), el(np(HON)), undefined, undefined, true))).toBe('本を持つ');
-      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, true))).toBe('持った');
-      expect(text(predicateSegs(vp(MOTSU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined))).toBe('持つ必要があります');
-      expect(text(predicateSegs(vp(MOTSU, { mood: 'imperative' }), undefined, undefined, '2sg'))).toBe('持ってください');
-      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), undefined, undefined))).toBe('持ってしまいます');
+      expect(text(predicateSegs(vp(MOTSU), el(np(HON)), undefined, undefined, true, false, true))).toBe('本を持つ');
+      expect(text(predicateSegs(vp(MOTSU, { tense: 'past' }), undefined, undefined, undefined, true, false, true))).toBe('持った');
+      expect(text(predicateSegs(vp(MOTSU, { modals: [modal(HITSUYOU_GA_ARU)] }), undefined, undefined, undefined, false, false, true))).toBe('持つ必要があります');
+      expect(text(predicateSegs(vp(MOTSU, { mood: 'imperative' }), undefined, undefined, '2sg', false, false, true))).toBe('持ってください');
+      expect(text(predicateSegs(vp(MOTSU, { aspect: 'resultative' }), undefined, undefined, undefined, false, false, true))).toBe('持ってしまいます');
     });
   });
 

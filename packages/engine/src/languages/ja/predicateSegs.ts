@@ -9,6 +9,7 @@ import { complementSegs } from './complementSegs.js';
 import { copulaSegs } from './copulaSegs.js';
 import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
+import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
@@ -44,7 +45,12 @@ export function predicateSegs(
   // with に (猫はいます, 猫は家にいます, 本は家にあります). The existential is a real verb, so the plain,
   // modal, command and たら paths below compose on it. Being somewhere is a state, so a periphrastic
   // aspect has nothing to add, except the resultative, which reads as the past (家にいました).
-  const existential = givenVerbPhrase.verb.forms['copula'] === '1' && !predicative;
+  const copulaExistential = givenVerbPhrase.verb.forms['copula'] === '1' && !predicative;
+  // HAVE with an inanimate owner is the same existential, its object marked が in place of を: 壁がある場所
+  // "a place that has walls", 家は窓があります (A150). ある is a state verb, so it takes no 〜ている either.
+  const possessive = !copulaExistential && isPossessiveExistential(givenVerbPhrase.verb, animateSubject);
+  const existential = copulaExistential || possessive;
+  const objectParticle = possessive ? 'が' : 'を';
   const verbPhrase: ResolvedVerbPhrase = existential
     ? {
         ...givenVerbPhrase,
@@ -84,7 +90,7 @@ export function predicateSegs(
       return segs;
     }
     segs.push(...complementSegs(complements, existential));
-    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
+    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -99,7 +105,7 @@ export function predicateSegs(
   // lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
     segs.push(...complementSegs(complements, existential));
-    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
+    if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -136,7 +142,7 @@ export function predicateSegs(
     return segs;
   }
   segs.push(...complementSegs(complements, existential));
-  if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, 'を'));
+  if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.
   for (const m of modals) {

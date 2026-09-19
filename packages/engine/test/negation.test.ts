@@ -347,3 +347,74 @@ describe('known bugs: Spanish "ni" in a negative coordination', () => {
       .toBe('el gato no ve el ratón y la vaca.');
   });
 });
+
+// A149. French has no zero article on an object. Where English leaves an indefinite object bare
+// ("eats mice", "drinks water"), French writes the indefinite or partitive article, and a negation
+// turns that article into "de" ("ne mange pas de souris", "ne boit jamais d'eau"). The object used
+// to come out bare ("mange souris", "un lieu qui a murs"), and a negated one kept its article ("ne
+// mange pas des souris"). The other languages take a bare object as it is.
+describe('A149: the French object has no zero article, and a negation makes it de', () => {
+  const bareMice = np('MOUSE', { definiteness: 'bare', number: 'plural' });
+  const eats = (object: NounPhrase, extra: Partial<VerbPhrase> = {}, subject = np('CAT')) =>
+    sayAll(clause(subject, 'EAT', { directObject: object, verbPhrase: extra }));
+
+  test('a bare object takes the indefinite or partitive article', () => {
+    expect(eats(bareMice)).toEqual({
+      en: 'the cat eats mice.',
+      it: 'il gatto mangia topi.',
+      fr: 'le chat mange des souris.',
+      de: 'der Kater isst Mäuse.',
+      es: 'el gato come ratones.',
+      ja: '猫はネズミを食べます。',
+      pt: 'o gato come ratos.',
+    });
+    expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'bare' }) })).fr)
+      .toBe("le chat boit de l'eau.");
+    expect(eats(np('MOUSE', { definiteness: 'bare', number: 'plural', adjectives: ['BIG'] })).fr)
+      .toBe('le chat mange de grandes souris.');
+  });
+
+  test('a negation turns the indefinite and the partitive into de', () => {
+    expect(eats(np('MOUSE', { definiteness: 'indefinite' }), { negative: true }).fr).toBe('le chat ne mange pas de souris.');
+    expect(eats(np('MOUSE', { definiteness: 'indefinite', number: 'plural' }), { negative: true }).fr)
+      .toBe('le chat ne mange pas de souris.');
+    expect(eats(bareMice, { negative: true }).fr).toBe('le chat ne mange pas de souris.');
+    expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'bare' }), verbPhrase: { modifier: 'NEVER' } })).fr)
+      .toBe("le chat ne boit jamais d'eau.");
+    expect(eats(bareMice, {}, np('CAT', { definiteness: 'no' })).fr).toBe('aucun chat ne mange de souris.');
+  });
+
+  test('wherever the negation sits in the verb group', () => {
+    expect(eats(bareMice, { negative: true, modals: ['MUST'] }).fr).toBe('le chat ne doit pas manger de souris.');
+    expect(eats(bareMice, { negative: true, aspect: 'resultative' }).fr).toBe("le chat n'a pas mangé de souris.");
+    expect(sayAll({ ...clause(np('GENERIC_PERSON'), 'EAT', { directObject: bareMice, verbPhrase: { negative: true } }), infinitive: true }).fr)
+      .toBe('ne pas manger de souris.');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: bareMice, verbPhrase: { negative: true } }), imperative: true }).fr)
+      .toBe('ne mange pas de souris.');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: bareMice } }), 'RUN')).fr)
+      .toBe('le chat qui ne mange pas de souris court.');
+  });
+
+  test('an instrument and a prepositional object are never bare, and keep their article under a negation', () => {
+    expect(sayAll(clause(np('BOY'), 'BUY', {
+      directObject: np('BOOK', { definiteness: 'bare', number: 'plural' }),
+      complements: { instrumental: { phrase: np('MONEY', { definiteness: 'bare' }) } },
+    })).fr).toBe("le garçon achète des livres avec de l'argent.");
+    expect(sayAll(clause(np('BOY'), 'CLICK', {
+      directObject: np('BUTTON', { definiteness: 'bare', number: 'plural' }), verbPhrase: { negative: true },
+    })).fr).toBe('le garçon ne clique pas sur des boutons.');
+  });
+
+  test('regression: the definite article, a possessive and a predicate noun keep theirs', () => {
+    expect(eats(np('MOUSE'), { negative: true }).fr).toBe('le chat ne mange pas la souris.');
+    expect(sayAll(clause(np('CAT'), 'HAVE', {
+      directObject: np('BOOK', { possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }),
+      verbPhrase: { negative: true },
+    })).fr).toBe("le chat n'a pas son livre.");
+    // "ne … pas de" is the direct object's alone; être keeps its article.
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', {
+      verbPhrase: { negative: true },
+      complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite', number: 'plural' }) } },
+    })).fr).toBe('les chats ne sont pas des légendes.');
+  });
+});

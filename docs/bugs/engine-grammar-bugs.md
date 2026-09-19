@@ -248,6 +248,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A139 | [A139-click-prepositional-object.md](fixed/A139-click-prepositional-object.md) | Italian, French, German, Spanish, Portuguese | 2026-09-14 |
 | A140 | [A140-german-multiword-noun-adjective-declension.md](fixed/A140-german-multiword-noun-adjective-declension.md) | German | 2026-09-14 |
 | A141 | [A141-link-control-tooltips-offer-a-reveal.md](fixed/A141-link-control-tooltips-offer-a-reveal.md) | Frontend | 2026-09-14 |
+| A149 | [A149-french-object-zero-article.md](fixed/A149-french-object-zero-article.md) | French | 2026-09-19 |
+| A150 | [A150-japanese-inanimate-owner-aru.md](fixed/A150-japanese-inanimate-owner-aru.md) | Japanese | 2026-09-19 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

@@ -63,6 +63,11 @@ partitive is the same simplification [B31](B31-complement-genus.md) and
 part would need the engine to pick a possession verb per language. Neither is worth opening for one
 gloss. The hierarchy change was worth doing without it, and is what shipped.
 
+**Update, 2026-09-19:** both gaps are fixed, the French partitive in
+[A149](../../bugs/fixed/A149-french-object-zero-article.md) and the Japanese ある in
+[A150](../../bugs/fixed/A150-japanese-inanimate-owner-aru.md). WALL is seeded, and BUILDING's gloss ships
+as probed above, now reading *un lieu qui a des murs* and 壁がある場所. See
+[C05](../C-needs-engine/C05-non-distinguishing-genera.md#unblocked-building-2026-09-19).
 
 ## What shipped (2026-09-16)
 

@@ -1578,7 +1578,7 @@ describe('B08 verb definitions (infinitive citations)', () => {
     expect(definitionAll('EAT')).toEqual({
       en: 'to consume food.',
       it: 'consumare cibo.',
-      fr: 'consommer nourriture.',
+      fr: 'consommer de la nourriture.',
       de: 'Essen konsumieren.',
       es: 'consumir comida.',
       ja: '食べ物を摂取する。',
@@ -1590,7 +1590,7 @@ describe('B08 verb definitions (infinitive citations)', () => {
     expect(definitionAll('DRINK')).toEqual({
       en: 'to consume liquid.',
       it: 'consumare liquido.',
-      fr: 'consommer liquide.',
+      fr: 'consommer du liquide.',
       de: 'Flüssigkeit konsumieren.',
       es: 'consumir líquido.',
       ja: '液体を摂取する。',
@@ -1607,7 +1607,7 @@ describe('B09 verb definitions (CREATE genus)', () => {
     expect(definitionAll('MAKE')).toEqual({
       en: 'to create objects.',
       it: 'creare oggetti.',
-      fr: 'créer objets.',
+      fr: 'créer des objets.',
       de: 'Gegenstände erschaffen.',
       es: 'crear objetos.',
       ja: '物体を生み出す。',
@@ -1619,7 +1619,7 @@ describe('B09 verb definitions (CREATE genus)', () => {
     expect(definitionAll('SET_ON_FIRE')).toEqual({
       en: 'to create fire.',
       it: 'creare fuoco.',
-      fr: 'créer feu.',
+      fr: 'créer du feu.',
       de: 'Feuer erschaffen.',
       es: 'crear fuego.',
       ja: '火を生み出す。',
@@ -1635,7 +1635,7 @@ describe('B10 verb definitions (DESTROY genus)', () => {
     expect(definitionAll('KILL')).toEqual({
       en: 'to destroy life.',
       it: 'distruggere vita.',
-      fr: 'détruire vie.',
+      fr: 'détruire de la vie.',
       de: 'Leben zerstören.',
       es: 'destruir vida.',
       ja: '生命を破壊する。',
@@ -1647,7 +1647,7 @@ describe('B10 verb definitions (DESTROY genus)', () => {
     expect(definitionAll('EXTINGUISH')).toEqual({
       en: 'to destroy fire.',
       it: 'distruggere fuoco.',
-      fr: 'détruire feu.',
+      fr: 'détruire du feu.',
       de: 'Feuer zerstören.',
       es: 'destruir fuego.',
       ja: '火を破壊する。',
@@ -1659,7 +1659,7 @@ describe('B10 verb definitions (DESTROY genus)', () => {
     expect(definitionAll('CLEAR')).toEqual({
       en: 'to destroy content.',
       it: 'distruggere contenuto.',
-      fr: 'détruire contenu.',
+      fr: 'détruire du contenu.',
       de: 'Inhalt zerstören.',
       es: 'destruir contenido.',
       ja: '内容を破壊する。',
@@ -1678,7 +1678,7 @@ describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
     expect(definitionAll('SEE')).toEqual({
       en: 'to perceive light.',
       it: 'percepire luce.',
-      fr: 'percevoir lumière.',
+      fr: 'percevoir de la lumière.',
       de: 'Licht empfinden.',
       es: 'percibir luz.',
       ja: '光を知覚する。',
@@ -1690,7 +1690,7 @@ describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
     expect(definitionAll('KNOW')).toEqual({
       en: 'to understand concepts.',
       it: 'comprendere concetti.',
-      fr: 'comprendre concepts.',
+      fr: 'comprendre des concepts.',
       de: 'Begriffe verstehen.',
       es: 'comprender conceptos.',
       ja: '概念を理解する。',
@@ -1702,7 +1702,7 @@ describe('B11 verb definitions (PERCEIVE / UNDERSTAND genera)', () => {
     expect(definitionAll('READ')).toEqual({
       en: 'to understand written words.',
       it: 'comprendere parole scritte.',
-      fr: 'comprendre mots écrits.',
+      fr: 'comprendre des mots écrits.',
       de: 'geschriebene Wörter verstehen.',
       es: 'comprender palabras escritas.',
       ja: '書かれた単語を理解する。',
@@ -1716,7 +1716,7 @@ describe('B12 verb definitions (HAVE / ACQUIRE genera)', () => {
     expect(definitionAll('OWN')).toEqual({
       en: 'to have property.',
       it: 'avere proprietà.',
-      fr: 'avoir propriété.',
+      fr: 'avoir de la propriété.',
       de: 'Besitz haben.',
       es: 'tener propiedad.',
       ja: '財産を持つ。',
@@ -1728,7 +1728,7 @@ describe('B12 verb definitions (HAVE / ACQUIRE genera)', () => {
     expect(definitionAll('HOLD')).toEqual({
       en: 'to have objects.',
       it: 'avere oggetti.',
-      fr: 'avoir objets.',
+      fr: 'avoir des objets.',
       de: 'Gegenstände haben.',
       es: 'tener objetos.',
       ja: '物体を持つ。',
@@ -1740,7 +1740,7 @@ describe('B12 verb definitions (HAVE / ACQUIRE genera)', () => {
     expect(definitionAll('BUY')).toEqual({
       en: 'to acquire objects with money.',
       it: 'acquisire oggetti con denaro.',
-      fr: 'acquérir objets avec argent.',
+      fr: "acquérir des objets avec de l'argent.",
       de: 'Gegenstände mit Geld erwerben.',
       es: 'adquirir objetos con dinero.',
       ja: 'お金で物体を取得する。',
@@ -1792,7 +1792,7 @@ describe('B15 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('GIVE')).toEqual({
       en: 'to transfer objects to a person.',
       it: 'trasferire oggetti a una persona.',
-      fr: 'transférer objets à une personne.',
+      fr: 'transférer des objets à une personne.',
       de: 'einer Person Gegenstände übertragen.',
       es: 'transferir objetos a una persona.',
       ja: '人に物体を移す。',
@@ -1804,7 +1804,7 @@ describe('B15 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('SEND')).toEqual({
       en: 'to transfer objects to a place.',
       it: 'trasferire oggetti a un luogo.',
-      fr: 'transférer objets à un lieu.',
+      fr: 'transférer des objets à un lieu.',
       de: 'Gegenstände zu einem Ort übertragen.',
       es: 'transferir objetos a un lugar.',
       ja: '場所へ物体を移す。',
@@ -1818,7 +1818,7 @@ describe('B16 verb definitions (INDICATE / CHANGE genera)', () => {
     expect(definitionAll('NAME')).toEqual({
       en: 'to indicate objects with words.',
       it: 'indicare oggetti con parole.',
-      fr: 'indiquer objets avec mots.',
+      fr: 'indiquer des objets avec des mots.',
       de: 'Gegenstände mit Wörtern bezeichnen.',
       es: 'indicar objetos con palabras.',
       ja: '単語で物体を示す。',
@@ -1830,7 +1830,7 @@ describe('B16 verb definitions (INDICATE / CHANGE genera)', () => {
     expect(definitionAll('DESCRIBE')).toEqual({
       en: 'to indicate qualities.',
       it: 'indicare qualità.',
-      fr: 'indiquer qualités.',
+      fr: 'indiquer des qualités.',
       de: 'Qualitäten bezeichnen.',
       es: 'indicar calidades.',
       ja: '質を示す。',
@@ -1842,7 +1842,7 @@ describe('B16 verb definitions (INDICATE / CHANGE genera)', () => {
     expect(definitionAll('EXPRESS')).toEqual({
       en: 'to indicate concepts.',
       it: 'indicare concetti.',
-      fr: 'indiquer concepts.',
+      fr: 'indiquer des concepts.',
       de: 'Begriffe bezeichnen.',
       es: 'indicar conceptos.',
       ja: '概念を示す。',
@@ -1854,7 +1854,7 @@ describe('B16 verb definitions (INDICATE / CHANGE genera)', () => {
     expect(definitionAll('MODIFY')).toEqual({
       en: 'to change qualities.',
       it: 'cambiare qualità.',
-      fr: 'changer qualités.',
+      fr: 'changer des qualités.',
       de: 'Qualitäten ändern.',
       es: 'cambiar calidades.',
       ja: '質を変える。',
@@ -1868,7 +1868,7 @@ describe('B17 verb definitions (FEEL / SHED / PRODUCE genera)', () => {
     expect(definitionAll('LOVE')).toEqual({
       en: 'to feel affection.',
       it: 'provare affetto.',
-      fr: 'éprouver affection.',
+      fr: "éprouver de l'affection.",
       de: 'Zuneigung fühlen.',
       es: 'sentir afecto.',
       ja: '愛情を感じる。',
@@ -1880,7 +1880,7 @@ describe('B17 verb definitions (FEEL / SHED / PRODUCE genera)', () => {
     expect(definitionAll('CRY')).toEqual({
       en: 'to shed tears.',
       it: 'versare lacrime.',
-      fr: 'verser larmes.',
+      fr: 'verser des larmes.',
       de: 'Tränen vergießen.',
       es: 'derramar lágrimas.',
       ja: '涙を流す。',
@@ -1892,7 +1892,7 @@ describe('B17 verb definitions (FEEL / SHED / PRODUCE genera)', () => {
     expect(definitionAll('CRY_OUT')).toEqual({
       en: 'to produce loud sounds.',
       it: 'produrre suoni forti.',
-      fr: 'produire sons forts.',
+      fr: 'produire des sons forts.',
       de: 'laute Geräusche erzeugen.',
       es: 'producir sonidos fuertes.',
       ja: '大きい音を出す。',
@@ -1944,7 +1944,7 @@ describe('B19 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('EXPORT')).toEqual({
       en: 'to transfer content to a place.',
       it: 'trasferire contenuto a un luogo.',
-      fr: 'transférer contenu à un lieu.',
+      fr: 'transférer du contenu à un lieu.',
       de: 'Inhalt zu einem Ort übertragen.',
       es: 'transferir contenido a un lugar.',
       ja: '場所へ内容を移す。',
@@ -1956,11 +1956,35 @@ describe('B19 verb definitions (TRANSFER genus)', () => {
     expect(definitionAll('IMPORT')).toEqual({
       en: 'to transfer content from a place.',
       it: 'trasferire contenuto da un luogo.',
-      fr: "transférer contenu d'un lieu.",
+      fr: "transférer du contenu d'un lieu.",
       de: 'Inhalt aus einem Ort übertragen.',
       es: 'transferir contenido de un lugar.',
       ja: '場所から内容を移す。',
       pt: 'transferir conteúdo de um lugar.',
     });
+  });
+});
+
+// C05. BUILDING's gloss is a whoGloss on HAVE, "a place that has walls". It was probed and rejected
+// in B29 for two engine gaps, both since closed: French left the bare plural object without its
+// partitive ("qui a murs", A149), and Japanese said the possession with 持つ, which is holding, where
+// an inanimate owner takes the existential ある (A150). CREATOR is the same shape on a person, which
+// keeps 持つ's sibling 作る and shows the French fix reaching every shipped whoGloss.
+describe('C05: BUILDING, a place that has walls', () => {
+  test('renders in every language', () => {
+    expect(definitionAll('BUILDING')).toEqual({
+      en: 'a place that has walls.',
+      it: 'un luogo che ha muri.',
+      fr: 'un lieu qui a des murs.',
+      de: 'ein Ort, der Wände hat.',
+      es: 'un lugar que tiene paredes.',
+      ja: '壁がある場所。',
+      pt: 'um lugar que tem paredes.',
+    });
+  });
+
+  test('the French partitive reaches the glosses that shipped without it', () => {
+    expect(definitionAll('CREATOR').fr).toBe('une personne qui fait des objets.');
+    expect(definitionAll('NOUN').fr).toBe('un mot qui nomme des objets.');
   });
 });
