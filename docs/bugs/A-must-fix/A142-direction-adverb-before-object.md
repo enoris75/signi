@@ -17,7 +17,8 @@ libro* is "move onto the book".
 | it: instruction MOVE this PERIOD, UP | `sposta su questo periodo.` | `sposta questo periodo su.` |
 
 Already right: English (`the cat moves the book up`) and Japanese (`猫は本を上に移動します`). Without an
-object every language reads right (`sposta su`, `nach oben verschieben`).
+object every language reads right (`sposta su`, `nach oben verschieben`). English is only right while no
+complement follows. With one, it puts the adverb too late (`moves the book in the house up`, A156).
 
 Found while localizing the reorder controls ([B27](../../localization/done/B27-ui-clipboard-move-resize.md)),
 which say "Move up" without "this period" until this is fixed.

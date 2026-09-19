@@ -48,7 +48,7 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (23 of them,
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (32 of them,
 as of this writing).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
@@ -68,6 +68,11 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A146 | [A146-german-frequency-adverb-in-prospective.md](A-must-fix/A146-german-frequency-adverb-in-prospective.md) |
 | A147 | [A147-romance-frequency-adverb-after-periphrasis.md](A-must-fix/A147-romance-frequency-adverb-after-periphrasis.md) |
 | A148 | [A148-angel-not-a-person.md](A-must-fix/A148-angel-not-a-person.md) |
+| A153 | [A153-italian-animate-source-reads-as-goal.md](A-must-fix/A153-italian-animate-source-reads-as-goal.md) |
+| A154 | [A154-german-animate-source-takes-aus.md](A-must-fix/A154-german-animate-source-takes-aus.md) |
+| A155 | [A155-french-bien-after-nonfinite-verb.md](A-must-fix/A155-french-bien-after-nonfinite-verb.md) |
+| A156 | [A156-english-direction-adverb-after-complements.md](A-must-fix/A156-english-direction-adverb-after-complements.md) |
+| A157 | [A157-german-animals-fressen.md](A-must-fix/A157-german-animals-fressen.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

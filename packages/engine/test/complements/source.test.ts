@@ -236,6 +236,56 @@ describe('known bugs: source', () => {
   });
 });
 
+// A153. Italian marks an animate goal with "da" (the andare-da construction: "va dal ragazzo", pinned
+// in direction.test.ts) and every source with "da" too. The ablative "via" that tells them apart is
+// kept for RUN and JUMP only, so GO and COME say "to" where they mean "from": "va dal bambino" is
+// both. A place is not affected ("va dalla casa" can only be an origin).
+describe('known bugs: Italian animate source reads as a goal', () => {
+  const fromChild = (verb: string) =>
+    sayAll(clause(np('DOG'), verb, { complements: { source: { phrase: np('CHILD') } } })).it;
+
+  test.fails('GO and COME take "via da" from a person or an animal', () => {
+    expect(fromChild('GO')).toBe('il cane va via dal bambino.');
+    expect(fromChild('COME')).toBe('il cane viene via dal bambino.');
+    expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
+      verbPhrase: { modals: ['CAN'], negative: true },
+      complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
+    })).it).toBe("pochi buoni buoi non possono andare via da quell'angelo meno intero e freddo.");
+  });
+
+  test('regression: RUN already takes "via", a place stays bare, and the goal keeps "da"', () => {
+    expect(fromChild('RUN')).toBe('il cane corre via dal bambino.');
+    expect(from('GO').it).toBe('il gatto va dalla casa.');
+    expect(sayAll(clause(np('DOG'), 'GO', { complements: { direction: { phrase: np('CHILD') } } })).it)
+      .toBe('il cane va dal bambino.');
+  });
+});
+
+// A154. German marks every source with "aus", which is "out of" an enclosure: right for a house or a
+// continent, wrong for a person or an animal ("geht aus dem Engel" is "goes out of the angel"). A
+// living source takes "von", fused to "vom" before "dem".
+describe('known bugs: German animate source takes "aus"', () => {
+  test.fails('German takes "von" from a person or an animal', () => {
+    expect(from('COME', np('CHILD')).de).toBe('der Kater kommt vom Kind.');
+    expect(from('COME', np('WOMAN')).de).toBe('der Kater kommt von der Frau.');
+    expect(from('RUN', np('DOG', { number: 'plural' })).de).toBe('der Kater läuft von den Hunden.');
+    expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
+      verbPhrase: { modals: ['CAN'], negative: true },
+      complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
+    })).de).toBe('wenige gute Ochsen können von jenem weniger ganzen kalten Engel nicht gehen.');
+  });
+
+  test.fails('…and in a relative clause on the source', () => {
+    expect(sayAll(clause(np('MAN', { relative: { headRole: 'source', subject: np('DOG'), verbPhrase: { verb: 'GO' } } }), 'RUN')).de)
+      .toBe('der Mann, von dem der Hund geht, läuft.');
+  });
+
+  test('regression: a place keeps "aus"', () => {
+    expect(from('COME').de).toBe('der Kater kommt aus dem Haus.');
+    expect(from('COME', np('AFRICA')).de).toBe('der Kater kommt aus Afrika.');
+  });
+});
+
 // A89. A continent of origin takes bare "de" / "d'" in French ("vient d'Europe"), the source
 // counterpart of the goal's bare "en" (A31). The `source` head in `complementsPhrase` sends the
 // proper noun through `deDet` → `dePrep`, which keeps its fixed article ("de l'Europe").

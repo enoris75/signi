@@ -168,6 +168,40 @@ describe('known bugs: ANGEL is a person', () => {
   });
 });
 
+// A157. German has two verbs for eating: "essen" for a person, "fressen" for an animal. The corpus
+// seeds only "essen" (`concepts/verbs/transitive.ts`), so every animal in it eats like a person. The
+// other six languages have one verb, and so has English. A corpus entry, not the grammar — but unlike
+// A148 it needs a second paradigm, not a flag.
+describe('known bugs: a German animal "frisst"', () => {
+  const catEatsMouse = (verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), verbPhrase }), 'de');
+
+  test.fails('an animal subject takes "fressen" in every form', () => {
+    expect(catEatsMouse()).toBe('der Kater frisst die Maus.');
+    expect(say(clause(np('CAT', { number: 'plural' }), 'EAT', { directObject: np('MOUSE') }), 'de')).toBe('die Kater fressen die Maus.');
+    expect(catEatsMouse({ tense: 'past' })).toBe('der Kater fraß die Maus.');
+    expect(catEatsMouse({ aspect: 'resultative' })).toBe('der Kater hat die Maus gefressen.');
+    expect(catEatsMouse({ tense: 'future' })).toBe('der Kater wird die Maus fressen.');
+    expect(catEatsMouse({ modals: ['MUST'] })).toBe('der Kater muss die Maus fressen.');
+  });
+
+  test.fails('…and so does an animal in a relative clause', () => {
+    expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE') } }), 'RUN'), 'de'))
+      .toBe('der Kater, der die Maus frisst, läuft.');
+    expect(say(clause(np('WOLF'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('der Wolf frisst das Essen.');
+  });
+
+  test('regression: a person keeps "essen", as do a pronoun, a command and the other six', () => {
+    expect(say(clause(np('BOY'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('der Junge isst das Essen.');
+    expect(say(clause(np('THIRD_PERSON', { gender: 'masc' }), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('er isst das Essen.');
+    expect(say({ ...clause(np('SECOND_PERSON'), 'EAT', { directObject: np('MOUSE') }), imperative: true }, 'de')).toBe('iss die Maus.');
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }))).toMatchObject({
+      en: 'the cat eats the mouse.',
+      it: 'il gatto mangia il topo.',
+    });
+  });
+});
+
 // A120. BE with no complement at all ("the cat is", "Antarctica will not be") takes neither the copula
 // path, which needs a predicative, nor A109's existential, which needs a locative. It falls through to
 // the ordinary verb path on BE's fallback lexeme です, which has no stem, so the tense and polarity are
