@@ -371,7 +371,7 @@ describe('known bugs: a predicate NOUN under SEEM', () => {
     expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEEM' }, complements: { predicative: { phrase: legend() } } } }), 'EAT')))
       .toMatchObject({
         en: 'the dog that seems to be a legend eats.',
-        de: 'der Hund, der eine Legende zu sein scheint, isst.',
+        de: 'der Hund, der eine Legende zu sein scheint, frisst.',
         it: 'il cane che sembra una leggenda mangia.',
       });
   });

@@ -61,8 +61,8 @@ avoids both. The Resizer's "Drag to resize" tooltip is a purpose clause:
 |---|---|---|---|---|---|
 | `action.copyTranslation` | Copy the translation | Copia la traduzione | Copier la traduction | Die Übersetzung kopieren | 翻訳をコピー |
 | `status.copied` | Copied | Copiata | Copiée | Kopiert | コピー済み |
-| `action.movePeriodUp` | Move up | Sposta su | Déplacer vers le haut | Nach oben verschieben | 上に移動 |
-| `action.movePeriodDown` | Move down | Sposta giù | Déplacer vers le bas | Nach unten verschieben | 下に移動 |
+| `action.movePeriodUp` | Move this period up | Sposta questo periodo su | Déplacer cette période vers le haut | Dieses Satzgefüge nach oben verschieben | この文を上に移動 |
+| `action.movePeriodDown` | Move this period down | Sposta questo periodo giù | Déplacer cette période vers le bas | Dieses Satzgefüge nach unten verschieben | この文を下に移動 |
 | `action.resizeContainer` | Resize this period container | Ridimensiona questo contenitore di periodo | Redimensionner ce récipient de période | Diesen Satzgefügebehälter skalieren | この文の容器をサイズ変更 |
 
 Changes against the plan:
@@ -72,16 +72,16 @@ Changes against the plan:
   into (*negli appunti*, *in die Zwischenablage*, *para a área*). Italian *appunti* is also plural-only,
   which the lexicon cannot say. The copy button's tooltip is `action.copyTranslation` instead, and its
   aria-label the same with the row's language in brackets ("Copy the translation (Italian)").
-- **"Move up" and "Move down" leave out "this period".** The engines put an adverb of direction where a
-  manner adverb goes, before a noun object: *déplacer vers le haut cette période*, *nach oben dieses
-  Satzgefüge verschieben*, *sposta su questo periodo*. Filed as
-  [A142](../../bugs/A-must-fix/A142-direction-adverb-before-object.md). Without an object every language
-  says it as its buttons do.
+- **~~"Move up" and "Move down" leave out "this period".~~** They did, because the engines put an adverb
+  of direction where a manner adverb goes, before a noun object: *déplacer vers le haut cette période*,
+  *nach oben dieses Satzgefüge verschieben*, *sposta su questo periodo*. Filed as
+  [A142](../../bugs/fixed/A142-direction-adverb-before-object.md) and fixed on 2026-09-20, so both
+  controls now name what they move, as the controls beside them do.
 - **German RESIZE is *skalieren*.** *Die Größe ändern* is a phrase whose object is a genitive, not the verb's
   accusative. Japanese takes サイズ変更, the verbal noun its UIs use.
 - The Resizer's "Drag to resize" tooltip is still [C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md).
 
 Pinned by [program-controls.test.ts](../../../packages/engine/test/program-controls.test.ts) (with A142's
-`test.fails`), [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the copy,
+tests), [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the copy,
 reorder, resize and mood controls*), the frontend tests `TranslationPanel`, `HeaderControls`, `Resizer` and
 `PhraseBuilder`, and [language.spec.ts](../../../e2e/language.spec.ts).

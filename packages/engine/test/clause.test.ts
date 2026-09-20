@@ -11,7 +11,7 @@ describe('clause', () => {
       fr: 'le chat mange.',
       es: 'el gato come.',
       pt: 'o gato come.',
-      de: 'der Kater isst.',
+      de: 'der Kater frisst.',
       ja: '猫は食べます。',
     });
   });
@@ -46,7 +46,7 @@ describe('clause', () => {
       fr: 'les chats mangent.',
       es: 'los gatos comen.',
       pt: 'os gatos comem.',
-      de: 'die Kater essen.',
+      de: 'die Kater fressen.',
       // Japanese does not mark number on the noun or agree the verb.
       ja: '猫は食べます。',
     });
@@ -59,7 +59,7 @@ describe('clause', () => {
       fr: 'la chatte mange.',
       es: 'la gata come.',
       pt: 'a gata come.',
-      de: 'die Katze isst.',
+      de: 'die Katze frisst.',
       ja: '猫は食べます。',
     });
   });
@@ -72,7 +72,7 @@ describe('clause', () => {
       es: 'el gato come el ratón.',
       pt: 'o gato come o rato.',
       // German is the only one of the seven that marks the case on the article.
-      de: 'der Kater isst die Maus.',
+      de: 'der Kater frisst die Maus.',
       // Japanese marks it with the particle を.
       ja: '猫はネズミを食べます。',
     });
@@ -151,20 +151,42 @@ describe('known bugs: Spanish personal "a"', () => {
 // Both rules that read it skip the angel: Spanish leaves out the personal "a" ("ama este ángel")
 // and English relativises with "that". The engine is right; the corpus entry is not.
 describe('known bugs: ANGEL is a person', () => {
-  test.fails('Spanish marks ANGEL with the personal "a"', () => {
+  test('Spanish marks ANGEL with the personal "a"', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL') }), 'es')).toBe('el gato ve al ángel.');
     expect(say(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
       directObject: np('ANGEL', { definiteness: 'this' }), verbPhrase: { tense: 'past' },
     }), 'es')).toBe('ese hombre amaba a este ángel.');
   });
 
-  test.fails('English relativises ANGEL with "who"', () => {
+  test('English relativises ANGEL with "who"', () => {
     expect(say(clause(np('ANGEL', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('CAT') } }), 'RUN'), 'en'))
       .toBe('the angel who sees the cat runs.');
   });
 
+  // The generalisation: the flag is read per referent, so every determiner and number takes the "a",
+  // and the English "who" reaches the object gap as well.
+  test('the personal "a" reaches an indefinite and a plural angel', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL', { definiteness: 'indefinite' }) }), 'es'))
+      .toBe('el gato ve a un ángel.');
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL', { number: 'plural' }) }), 'es'))
+      .toBe('el gato ve a los ángeles.');
+  });
+
+  test('English takes "who" on an object gap too', () => {
+    expect(say(clause(np('ANGEL', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'SEE' } } }), 'RUN'), 'en'))
+      .toBe('the angel who the cat sees runs.');
+  });
+
   test('regression: Portuguese takes no personal "a"', () => {
     expect(say(clause(np('CAT'), 'SEE', { directObject: np('ANGEL') }), 'pt')).toBe('o gato vê o anjo.');
+  });
+
+  // Neither rule fires on a thing, and neither fires on an angel in the subject slot.
+  test('regression: a thing keeps the bare object and "that"', () => {
+    expect(say(clause(np('CAT'), 'SEE', { directObject: np('HOUSE') }), 'es')).toBe('el gato ve la casa.');
+    expect(say(clause(np('HOUSE', { relative: { verbPhrase: { verb: 'SEE' }, directObject: np('CAT') } }), 'RUN'), 'en'))
+      .toBe('the house that sees the cat runs.');
+    expect(say(clause(np('ANGEL'), 'SEE', { directObject: np('CAT') }), 'es')).toBe('el ángel ve el gato.');
   });
 });
 
@@ -176,7 +198,7 @@ describe('known bugs: a German animal "frisst"', () => {
   const catEatsMouse = (verbPhrase: Partial<VerbPhrase> = {}) =>
     say(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), verbPhrase }), 'de');
 
-  test.fails('an animal subject takes "fressen" in every form', () => {
+  test('an animal subject takes "fressen" in every form', () => {
     expect(catEatsMouse()).toBe('der Kater frisst die Maus.');
     expect(say(clause(np('CAT', { number: 'plural' }), 'EAT', { directObject: np('MOUSE') }), 'de')).toBe('die Kater fressen die Maus.');
     expect(catEatsMouse({ tense: 'past' })).toBe('der Kater fraß die Maus.');
@@ -185,10 +207,38 @@ describe('known bugs: a German animal "frisst"', () => {
     expect(catEatsMouse({ modals: ['MUST'] })).toBe('der Kater muss die Maus fressen.');
   });
 
-  test.fails('…and so does an animal in a relative clause', () => {
+  test('…and so does an animal in a relative clause', () => {
     expect(say(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE') } }), 'RUN'), 'de'))
       .toBe('der Kater, der die Maus frisst, läuft.');
     expect(say(clause(np('WOLF'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('der Wolf frisst das Essen.');
+  });
+
+  // The generalisation: "which subjects are animals" is the whole is-a chain (CAT isA MAMMAL isA
+  // ANIMAL), so the genus itself counts and an `animate` non-animal does not.
+  test('the rule is the hierarchy, not the animacy flag', () => {
+    expect(say(clause(np('ANIMAL'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('das Tier frisst das Essen.');
+    expect(say(clause(np('ANGEL'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('der Engel isst das Essen.');
+    expect(say(clause(np('CREATOR'), 'EAT', { directObject: np('FOOD') }), 'de')).toBe('der Schöpfer isst das Essen.');
+  });
+
+  // The subject selects the verb, so an object relative reads its OWN subject, and the citation —
+  // whose subject is a throwaway the plan never renders — keeps the dictionary "essen".
+  test('an object relative reads its own subject, and the citation keeps "essen"', () => {
+    expect(say(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' } } }), 'RUN'), 'de'))
+      .toBe('die Maus, die der Kater frisst, läuft.');
+    expect(say(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('BOY'), verbPhrase: { verb: 'EAT' } } }), 'RUN'), 'de'))
+      .toBe('die Maus, die der Junge isst, läuft.');
+    expect(say({ ...clause(np('DOG'), 'EAT', { directObject: np('FOOD') }), infinitive: true }, 'de'))
+      .toBe('das Essen essen.');
+  });
+
+  // An infinitive COMPLEMENT is the opposite case: its subject is the governing clause's, by
+  // subject control, so it follows the controller.
+  test('…but an infinitive complement follows its controlling subject', () => {
+    expect(say(clause(np('DOG'), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') } }), 'de'))
+      .toBe('der Hund wünscht, das Essen zu fressen.');
+    expect(say(clause(np('BOY'), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') } }), 'de'))
+      .toBe('der Junge wünscht, das Essen zu essen.');
   });
 
   test('regression: a person keeps "essen", as do a pronoun, a command and the other six', () => {

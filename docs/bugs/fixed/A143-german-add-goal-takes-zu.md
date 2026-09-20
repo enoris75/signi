@@ -44,3 +44,22 @@ preposition.
 | | |
 |---|---|
 | **Test** | `complements/terminus.test.ts` → *known bugs: German ADD takes its goal with zu* (2 `test.fails`, plus a regression test for SAVE and a person recipient) |
+
+## Resolved
+
+Fixed on 2026-09-20 by putting the preposition on the verb, as A139 put `object_prep` there:
+
+- `terminus_prep: 'zu'` on ADD's German lexeme
+  ([`concepts/verbs/transitive.ts`](../../../packages/backend/src/concepts/verbs/transitive.ts)).
+- The terminus branch of
+  [`de/complementsPhrase`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  renders a verb-named preposition with the dative, so `prepDet` fuses it (`zum`, `zur`) for a
+  definite article and leaves it whole otherwise (`zu keinem`). 'in' + accusative stays the default.
+- [`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts) now passes the
+  clause's verb forms into `complementsPhrase(gap)`, so the relativizer stand-in takes the same
+  preposition ('zu dem').
+
+Guarded by `complements/terminus.test.ts` → *known bugs: German ADD takes its goal with zu*: both
+former `test.fails` now pass, plus `zu` under a bare-negative determiner, an adjective, a proper name,
+the past and a modal, and regressions that SAVE keeps 'in', that a person recipient (including A8's
+weak masculine) keeps the bare dative, and that the other six languages are unchanged.

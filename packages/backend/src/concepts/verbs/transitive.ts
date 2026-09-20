@@ -110,12 +110,90 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_future': 'mangerons', '2pl_future': 'mangerez', '3pl_future': 'mangeront',
       },
       de: {
-        base: 'essen',
+        // German has two verbs for eating and the choice is obligatory: a person "isst", an animal
+        // "frisst". `subject_sense` names the concept the translator swaps in when the SUBJECT is an
+        // animal — the mirror of KNOW's `object_sense`, one slot over (A157).
+        base: 'essen', subject_sense: 'EAT_ANIMAL',
         '1sg_present': 'esse', '2sg_present': 'isst', '3sg_present': 'isst',
         '1pl_present': 'essen', '2pl_present': 'esst', '3pl_present': 'essen',
         '1sg_past': 'aß', '2sg_past': 'aßest', '3sg_past': 'aß',
         '1pl_past': 'aßen', '2pl_past': 'aßt', '3pl_past': 'aßen',
         '2sg_imperative': 'iss', // strong e→i: the du command keeps the vowel change
+      },
+      es: {
+        base: 'comer',
+        '1sg_present': 'como', '2sg_present': 'comes', '3sg_present': 'come',
+        '1pl_present': 'comemos', '2pl_present': 'coméis', '3pl_present': 'comen',
+        '1sg_past': 'comí', '2sg_past': 'comiste', '3sg_past': 'comió',
+        '1pl_past': 'comimos', '2pl_past': 'comisteis', '3pl_past': 'comieron',
+        '1sg_future': 'comeré', '2sg_future': 'comerás', '3sg_future': 'comerá',
+        '1pl_future': 'comeremos', '2pl_future': 'comeréis', '3pl_future': 'comerán',
+      },
+      ja: {
+        base: '食べる',
+        reading: 'たべる',
+        masu_present: '食べます',
+        masu_present_reading: 'たべます',
+      },
+      pt: {
+        base: 'comer',
+        '1sg_present': 'como', '2sg_present': 'come', '3sg_present': 'come',
+        '1pl_present': 'comemos', '2pl_present': 'comem', '3pl_present': 'comem',
+        '1sg_past': 'comi', '2sg_past': 'comeu', '3sg_past': 'comeu',
+        '1pl_past': 'comemos', '2pl_past': 'comeram', '3pl_past': 'comeram',
+        '1sg_future': 'comerei', '2sg_future': 'comerá', '3sg_future': 'comerá',
+        '1pl_future': 'comeremos', '2pl_future': 'comerão', '3pl_future': 'comerão',
+      },
+    },
+  },
+
+  {
+    // EAT's animal sense. German alone distinguishes it — a person "isst", an animal "frisst", and
+    // either word of the other is an error or an insult (A157). The translator selects it for EAT
+    // with an animal subject (`subject_sense` on EAT's German lexeme), so it is a sense of EAT and no
+    // picker offers it. The other six have one verb, and keep EAT's own forms here so nothing breaks
+    // if a plan ever names the sense directly.
+    id: 'EAT_ANIMAL',
+    role: 'verb',
+    senseOf: 'EAT',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to consume food, of an animal',
+    emoji: '🍴',
+    forms: {
+      en: {
+        base: 'eat',
+        '1sg_present': 'eat', '2sg_present': 'eat', '3sg_present': 'eats',
+        '1pl_present': 'eat', '2pl_present': 'eat', '3pl_present': 'eat',
+        past: 'ate',
+      },
+      it: {
+        base: 'mangiare',
+        '1sg_present': 'mangio', '2sg_present': 'mangi', '3sg_present': 'mangia',
+        '1pl_present': 'mangiamo', '2pl_present': 'mangiate', '3pl_present': 'mangiano',
+        '1sg_past': 'mangiai', '2sg_past': 'mangiasti', '3sg_past': 'mangiò',
+        '1pl_past': 'mangiammo', '2pl_past': 'mangiaste', '3pl_past': 'mangiarono',
+        '1sg_future': 'mangerò', '2sg_future': 'mangerai', '3sg_future': 'mangerà',
+        '1pl_future': 'mangeremo', '2pl_future': 'mangerete', '3pl_future': 'mangeranno',
+      },
+      fr: {
+        base: 'manger',
+        '1sg_present': 'mange', '2sg_present': 'manges', '3sg_present': 'mange',
+        '1pl_present': 'mangeons', '2pl_present': 'mangez', '3pl_present': 'mangent',
+        '1sg_past': 'mangeai', '2sg_past': 'mangeas', '3sg_past': 'mangea',
+        '1pl_past': 'mangeâmes', '2pl_past': 'mangeâtes', '3pl_past': 'mangèrent',
+        '1sg_future': 'mangerai', '2sg_future': 'mangeras', '3sg_future': 'mangera',
+        '1pl_future': 'mangerons', '2pl_future': 'mangerez', '3pl_future': 'mangeront',
+      },
+      de: {
+        // Strong e→i in the 2sg and 3sg present ("frisst") and in the du command ("friss"), as
+        // "essen" has it; the past is "fraß", the Partizip "gefressen" (see `nonfinite.ts`).
+        base: 'fressen',
+        '1sg_present': 'fresse', '2sg_present': 'frisst', '3sg_present': 'frisst',
+        '1pl_present': 'fressen', '2pl_present': 'fresst', '3pl_present': 'fressen',
+        '1sg_past': 'fraß', '2sg_past': 'fraßest', '3sg_past': 'fraß',
+        '1pl_past': 'fraßen', '2pl_past': 'fraßt', '3pl_past': 'fraßen',
+        '2sg_imperative': 'friss',
       },
       es: {
         base: 'comer',
@@ -3015,7 +3093,9 @@ export const transitiveVerbs: ConceptSeed[] = [
         // Putting a thing with others is "hinzufügen"; "addieren" adds numbers up (A138). It is separable:
         // the finite forms are the stem verb's, and the clause places the `particle` — last in a main
         // clause ("fügt eine Maus hinzu"), back on the verb in a subordinate one ("hinzufügt").
-        base: 'hinzufügen', particle: 'hinzu',
+        // Its goal is what the thing is added TO, which takes "zu" + dative, not the app's default
+        // "in" + accusative — that would read "puts it into the container, in addition" (A143).
+        base: 'hinzufügen', particle: 'hinzu', terminus_prep: 'zu',
         '1sg_present': 'füge', '2sg_present': 'fügst', '3sg_present': 'fügt',
         '1pl_present': 'fügen', '2pl_present': 'fügt', '3pl_present': 'fügen',
         '1sg_past': 'fügte', '2sg_past': 'fügtest', '3sg_past': 'fügte',

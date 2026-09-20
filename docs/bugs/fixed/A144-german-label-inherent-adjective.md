@@ -31,3 +31,18 @@ That check assumes a feminine noun, whose adjective cites in -e ("junge"). A mas
 | | |
 |---|---|
 | **Test** | `backend/src/index.test.ts` → *known bugs: the German label of a noun with an inherent adjective* (1 `test.fails`, plus a regression test for the other languages and the complement names) |
+
+## Resolved
+
+Fixed on 2026-09-20 by seeding `citation: 'junge Frau'` on YOUNG_WOMAN's German lexeme in
+[`packages/backend/src/concepts/nouns.ts`](../../../packages/backend/src/concepts/nouns.ts). The label
+already preferred a `citation`, so no backend or engine code changed.
+
+[`concepts/index.test.ts`](../../../packages/backend/src/concepts/index.test.ts)'s citation check now
+covers every noun with an inherent `adjective`, not only the ones with a `postnominal`, so the next
+such noun cannot be seeded without one.
+
+Guarded by `backend/src/index.test.ts` → *known bugs: the German label of a noun with an inherent
+adjective*: the former `test.fails` now passes, plus a check that the citation does not reach the
+rendered sentences ('die junge Frau läuft.', 'junge Frauen laufen.') and that WOMAN keeps the bare
+head as its label.

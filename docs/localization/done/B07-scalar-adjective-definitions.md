@@ -40,7 +40,7 @@ the degree adjectives (GREAT, HIGH, LOW, SMALL). **The Seed-first blocker is cle
 **A**: every adjective below is authorable.
 
 **One caveat blocks the five low-pole adjectives' French:** bug
-[A43](../../bugs/A-must-fix/A43-french-bas-feminine.md) — French renders LOW's feminine as "base"
+[A43](../../bugs/fixed/A43-french-bas-feminine.md) — French renders LOW's feminine as "base"
 instead of "basse", so LOW / BAD / WEAK / YOUNG / COLD would gloss as "à … base". Author the
 **high-pole** adjectives (degree GREAT/HIGH) now; hold the low-pole ones until A43 is fixed, or their
 French will be wrong.

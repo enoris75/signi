@@ -61,7 +61,7 @@ and `infinitive.phrase`, with `aria-pressed` saying whether the mode is on.
 
 Changes against the plan:
 - **German TURN_OFF is *deaktivieren*.** *ausschalten* is separable, which renders right in the instruction
-  but not in a finite clause ([A138](../../bugs/A-must-fix/A138-german-add-is-arithmetic.md)).
+  but not in a finite clause ([A138](../../bugs/fixed/A138-german-add-is-arithmetic.md)).
 - **English phrasal verbs move their particle after a pronoun object.** The probe gave "turn off it". An
   English verb form now names its `particle`, and `predicateParts` moves it across a lone pronoun object in
   every verb group: "turn it off", "has turned it off", "must turn it off", while a noun object keeps it by

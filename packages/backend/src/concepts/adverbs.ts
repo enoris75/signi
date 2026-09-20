@@ -62,7 +62,11 @@ export const adverbs: ConceptSeed[] = [
     forms: {
       en: { base: 'well' },
       it: { base: 'bene' },
-      fr: { base: 'bien' },
+      // French puts its short adverbs BEFORE the non-finite verb they modify — "a bien mangé",
+      // "doit bien manger", "en train de bien manger" — where a long -ment adverb follows it ("a
+      // mangé lentement"). `pre_nonfinite` marks the class, so "mal", "mieux" and "trop" can join
+      // it later without a word list in the engine (A155).
+      fr: { base: 'bien', pre_nonfinite: '1' },
       de: { base: 'gut' },
       es: { base: 'bien' },
       ja: { base: 'よく' },
@@ -104,19 +108,25 @@ export const adverbs: ConceptSeed[] = [
   },
   // Which way a thing goes (B27: "move this period up"). A phrase in French, German and Portuguese,
   // which have no one-word adverb of direction: "vers le haut", "nach oben", "para cima".
+  //
+  // The `direction` subtype is what tells these apart from a manner adverb, which is the only other
+  // thing a verb's `modifier` can be. A direction adverb says where the object ends up, so it stands
+  // right after the object and before the complements — "moves the book up in the house", "sposta il
+  // libro su" — where a manner adverb trails the whole clause in English and leads the object in
+  // Romance (A142, A156).
   {
     id: 'UP',
     role: 'adverb',
     description: 'towards a higher position',
     emoji: '⬆️',
     forms: {
-      en: { base: 'up' },
-      it: { base: 'su' },
-      fr: { base: 'vers le haut' },
-      de: { base: 'nach oben' },
-      es: { base: 'arriba' },
-      ja: { base: '上に', reading: 'うえに' },
-      pt: { base: 'para cima' },
+      en: { base: 'up', subtype: 'direction' },
+      it: { base: 'su', subtype: 'direction' },
+      fr: { base: 'vers le haut', subtype: 'direction' },
+      de: { base: 'nach oben', subtype: 'direction' },
+      es: { base: 'arriba', subtype: 'direction' },
+      ja: { base: '上に', subtype: 'direction', reading: 'うえに' },
+      pt: { base: 'para cima', subtype: 'direction' },
     },
   },
   {
@@ -125,13 +135,13 @@ export const adverbs: ConceptSeed[] = [
     description: 'towards a lower position',
     emoji: '⬇️',
     forms: {
-      en: { base: 'down' },
-      it: { base: 'giù' },
-      fr: { base: 'vers le bas' },
-      de: { base: 'nach unten' },
-      es: { base: 'abajo' },
-      ja: { base: '下に', reading: 'したに' },
-      pt: { base: 'para baixo' },
+      en: { base: 'down', subtype: 'direction' },
+      it: { base: 'giù', subtype: 'direction' },
+      fr: { base: 'vers le bas', subtype: 'direction' },
+      de: { base: 'nach unten', subtype: 'direction' },
+      es: { base: 'abajo', subtype: 'direction' },
+      ja: { base: '下に', subtype: 'direction', reading: 'したに' },
+      pt: { base: 'para baixo', subtype: 'direction' },
     },
   },
   {

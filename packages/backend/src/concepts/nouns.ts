@@ -780,6 +780,7 @@ export const nouns: ConceptSeed[] = [
     description: 'a spiritual being; a messenger of God',
     emoji: '👼',
     animate: true,
+    human: true,
     forms: {
       en: { base: 'angel', plural: 'angels', count: 'singular' },
       it: { base: 'angelo', plural: 'angeli', gender: 'masc', count: 'singular' },
@@ -1111,7 +1112,9 @@ export const nouns: ConceptSeed[] = [
       // "jung" is stored as the head's inherent attributive adjective, not baked into the
       // lemma: German declines it for case + determiner ("die junge Frau", "die jungen
       // Frauen", "von einer jungen Frau"), so no single surface string is right everywhere.
-      de: { base: 'Frau', plural: 'Frauen', adjective: 'jung', gender: 'fem', count: 'singular' },
+      // The picker shows a noun by its lexeme's singular, which here is WOMAN's word, so the whole
+      // name is spelled out in `citation` — the strong-weak form the label wants (A144).
+      de: { base: 'Frau', plural: 'Frauen', adjective: 'jung', citation: 'junge Frau', gender: 'fem', count: 'singular' },
       es: { base: 'joven', plural: 'jóvenes', gender: 'fem', count: 'singular' },
       ja: { base: '若い女性', count: 'singular', reading: 'わかいじょせい' },
       pt: { base: 'jovem', plural: 'jovens', gender: 'fem', count: 'singular' },

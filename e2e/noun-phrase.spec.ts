@@ -14,7 +14,7 @@ test.describe('noun phrase', () => {
       en: 'the cats eat the mouse.',
       it: 'i gatti mangiano il topo.',
       fr: 'les chats mangent la souris.',
-      de: 'die Kater essen die Maus.',
+      de: 'die Kater fressen die Maus.',
       es: 'los gatos comen el ratón.',
       pt: 'os gatos comem o rato.',
       ja: '猫はネズミを食べます。', // Japanese marks no number
@@ -33,7 +33,7 @@ test.describe('noun phrase', () => {
       en: 'the cat eats the mouse.',
       it: 'la gatta mangia il topo.',
       fr: 'la chatte mange la souris.',
-      de: 'die Katze isst die Maus.',
+      de: 'die Katze frisst die Maus.',
       es: 'la gata come el ratón.',
       pt: 'a gata come o rato.',
     });

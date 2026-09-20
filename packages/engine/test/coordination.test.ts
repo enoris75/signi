@@ -62,7 +62,7 @@ describe('coordinated noun groups', () => {
     }))).toMatchObject({
       en: 'the cat eats the mouse or the food.',
       it: 'il gatto mangia il topo o il cibo.',
-      de: 'der Kater isst die Maus oder das Essen.', // accusative on both
+      de: 'der Kater frisst die Maus oder das Essen.', // accusative on both
       ja: '猫はネズミか食べ物を食べます。', // か, を on the group
     });
     expect(sayAll(clause(np('CAT'), 'RUN', {

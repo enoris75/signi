@@ -279,8 +279,8 @@ test.describe('interface language', () => {
     await command.click();
     await expect(command).toHaveAttribute('aria-pressed', 'true');
     await expect(app.period(0).getByLabel('Questo periodo è un comando — disattivalo')).toBeAttached();
-    await expect(app.period(1).getByRole('button', { name: 'Sposta su', exact: true })).toBeEnabled();
-    await expect(app.period(0).getByRole('button', { name: 'Sposta giù', exact: true })).toBeEnabled();
+    await expect(app.period(1).getByRole('button', { name: 'Sposta questo periodo su', exact: true })).toBeEnabled();
+    await expect(app.period(0).getByRole('button', { name: 'Sposta questo periodo giù', exact: true })).toBeEnabled();
     await expect(
       app.period(0).getByRole('separator', { name: 'Ridimensiona questo contenitore di periodo' }),
     ).toBeAttached();

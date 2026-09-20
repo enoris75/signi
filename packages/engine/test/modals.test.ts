@@ -20,7 +20,7 @@ describe('modals', () => {
       fr: 'le chat doit manger.',
       es: 'el gato debe comer.',
       pt: 'o gato deve comer.',
-      de: 'der Kater muss essen.',
+      de: 'der Kater muss fressen.',
       ja: '猫は食べる必要があります。', // suffixal: 〜必要がある
     });
   });
@@ -32,7 +32,7 @@ describe('modals', () => {
       fr: 'le chat peut manger.',
       es: 'el gato puede comer.',
       pt: 'o gato pode comer.',
-      de: 'der Kater kann essen.',
+      de: 'der Kater kann fressen.',
       ja: '猫は食べることができます。', // 〜ことができる
     });
   });
@@ -46,7 +46,7 @@ describe('modals', () => {
       fr: 'le chat veut manger.',
       es: 'el gato quiere comer.',
       pt: 'o gato quer comer.',
-      de: 'der Kater will essen.',
+      de: 'der Kater will fressen.',
       ja: '猫は食べたいです。', // 〜たい
     });
   });
@@ -58,7 +58,7 @@ describe('modals', () => {
       en: 'the cats must eat.',
       it: 'i gatti devono mangiare.', // devono, not deve — the modal agrees
       fr: 'les chats doivent manger.',
-      de: 'die Kater müssen essen.',
+      de: 'die Kater müssen fressen.',
     });
 
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT', { verbPhrase: { modals: ['CAN'] } })))
@@ -77,7 +77,7 @@ describe('modals', () => {
       en: 'the cat can eat the mouse.',
       it: 'il gatto può mangiare il topo.',
       // German sends the governed infinitive to the end, behind the object.
-      de: 'der Kater kann die Maus essen.',
+      de: 'der Kater kann die Maus fressen.',
       ja: '猫はネズミを食べることができます。',
     });
   });
@@ -90,7 +90,7 @@ describe('modals: tense', () => {
       it: 'il gatto doveva mangiare.',
       fr: 'le chat devait manger.',
       es: 'el gato debía comer.',
-      de: 'der Kater musste essen.',
+      de: 'der Kater musste fressen.',
       ja: '猫は食べる必要がありました。',
     });
   });
@@ -101,7 +101,7 @@ describe('modals: tense', () => {
       it: 'il gatto dovrà mangiare.',
       fr: 'le chat devra manger.',
       // "wird essen müssen" — the double infinitive, both at the end.
-      de: 'der Kater wird essen müssen.',
+      de: 'der Kater wird fressen müssen.',
     });
   });
 });
@@ -116,7 +116,7 @@ describe('modals: aspect', () => {
       fr: 'le chat doit avoir mangé.',
       es: 'el gato debe haber comido.',
       pt: 'o gato deve ter comido.',
-      de: 'der Kater muss gegessen haben.',
+      de: 'der Kater muss gefressen haben.',
     });
   });
 
@@ -125,7 +125,7 @@ describe('modals: aspect', () => {
       en: 'the cat must be eating.',
       it: 'il gatto deve stare mangiando.',
       es: 'el gato debe estar comiendo.',
-      de: 'der Kater muss gerade essen.',
+      de: 'der Kater muss gerade fressen.',
     });
   });
 });
@@ -140,7 +140,7 @@ describe('modals: chains', () => {
       fr: 'le chat veut pouvoir manger.',
       es: 'el gato quiere poder comer.',
       pt: 'o gato quer poder comer.',
-      de: 'der Kater will essen können.',
+      de: 'der Kater will fressen können.',
     });
   });
 
@@ -149,13 +149,13 @@ describe('modals: chains', () => {
     expect(catModal({ modals: ['MUST', 'CAN'] })).toMatchObject({
       en: 'the cat must be able to eat.',
       it: 'il gatto deve poter mangiare.',
-      de: 'der Kater muss essen können.',
+      de: 'der Kater muss fressen können.',
     });
 
     expect(catModal({ modals: ['CAN', 'WILL'] })).toMatchObject({
       en: 'the cat can want to eat.',
       it: 'il gatto può voler mangiare.', // volere → voler
-      de: 'der Kater kann essen wollen.',
+      de: 'der Kater kann fressen wollen.',
     });
   });
 
@@ -164,7 +164,7 @@ describe('modals: chains', () => {
       en: 'the cat did not have to be able to eat.',
       it: 'il gatto non doveva poter mangiare.',
       fr: 'le chat ne devait pas pouvoir manger.',
-      de: 'der Kater musste nicht essen können.',
+      de: 'der Kater musste nicht fressen können.',
     });
   });
 
@@ -178,7 +178,7 @@ describe('modals: chains', () => {
       fr: 'le chat veut devoir pouvoir manger.',
       es: 'el gato quiere deber poder comer.',
       pt: 'o gato quer dever poder comer.',
-      de: 'der Kater will essen können müssen.',
+      de: 'der Kater will fressen können müssen.',
     });
   });
 
@@ -187,7 +187,7 @@ describe('modals: chains', () => {
       en: 'the cat did not want to have to be able to eat.', // do-support: WILL is the lexical "want"
       it: 'il gatto non voleva dover poter mangiare.',
       fr: 'le chat ne voulait pas devoir pouvoir manger.',
-      de: 'der Kater wollte nicht essen können müssen.',
+      de: 'der Kater wollte nicht fressen können müssen.',
     });
   });
 });
@@ -200,7 +200,7 @@ describe('modals: negation', () => {
       fr: 'le chat ne peut pas manger.',
       es: 'el gato no puede comer.',
       pt: 'o gato não pode comer.',
-      de: 'der Kater kann nicht essen.',
+      de: 'der Kater kann nicht fressen.',
       ja: '猫は食べることができません。',
     });
   });
@@ -214,7 +214,7 @@ describe('modals: every pair', () => {
       en: 'the cat must be able to eat.', // English supplets the inner modal
       it: 'il gatto deve poter mangiare.', // potere → poter
       fr: 'le chat doit pouvoir manger.',
-      de: 'der Kater muss essen können.', // both infinitives at the end
+      de: 'der Kater muss fressen können.', // both infinitives at the end
       ja: '猫は食べることができる必要があります。',
     });
 
@@ -222,7 +222,7 @@ describe('modals: every pair', () => {
       en: 'the cat must want to eat.',
       it: 'il gatto deve voler mangiare.', // volere → voler
       es: 'el gato debe querer comer.',
-      de: 'der Kater muss essen wollen.',
+      de: 'der Kater muss fressen wollen.',
     });
   });
 
@@ -232,13 +232,13 @@ describe('modals: every pair', () => {
       en: 'the cat can have to eat.',
       it: 'il gatto può dover mangiare.', // dovere → dover
       fr: 'le chat peut devoir manger.',
-      de: 'der Kater kann essen müssen.',
+      de: 'der Kater kann fressen müssen.',
     });
 
     expect(catModal({ modals: ['CAN', 'WILL'] })).toMatchObject({
       en: 'the cat can want to eat.',
       it: 'il gatto può voler mangiare.',
-      de: 'der Kater kann essen wollen.',
+      de: 'der Kater kann fressen wollen.',
     });
   });
 
@@ -247,13 +247,13 @@ describe('modals: every pair', () => {
       en: 'the cat wants to have to eat.',
       it: 'il gatto vuole dover mangiare.',
       pt: 'o gato quer dever comer.',
-      de: 'der Kater will essen müssen.',
+      de: 'der Kater will fressen müssen.',
     });
 
     expect(catModal({ modals: ['WILL', 'CAN'] })).toMatchObject({
       en: 'the cat wants to be able to eat.',
       it: 'il gatto vuole poter mangiare.',
-      de: 'der Kater will essen können.',
+      de: 'der Kater will fressen können.',
     });
   });
 
@@ -275,7 +275,7 @@ describe('modals: a pair with negation', () => {
       en: 'the cat does not have to be able to eat.',
       it: 'il gatto non deve poter mangiare.', // "non" precedes the finite modal only
       fr: 'le chat ne doit pas pouvoir manger.', // ne … pas brackets the FINITE modal
-      de: 'der Kater muss nicht essen können.',
+      de: 'der Kater muss nicht fressen können.',
       ja: '猫は食べることができる必要がありません。',
     });
 
@@ -291,13 +291,13 @@ describe('modals: a pair with negation', () => {
       en: 'the cat cannot have to eat.',
       it: 'il gatto non può dover mangiare.',
       fr: 'le chat ne peut pas devoir manger.',
-      de: 'der Kater kann nicht essen müssen.',
+      de: 'der Kater kann nicht fressen müssen.',
     });
 
     expect(negPair('CAN', 'WILL')).toMatchObject({
       en: 'the cat cannot want to eat.',
       pt: 'o gato não pode querer comer.',
-      de: 'der Kater kann nicht essen wollen.',
+      de: 'der Kater kann nicht fressen wollen.',
     });
   });
 
@@ -306,7 +306,7 @@ describe('modals: a pair with negation', () => {
       en: 'the cat does not want to be able to eat.', // not "wants not to"
       it: 'il gatto non vuole poter mangiare.',
       fr: 'le chat ne veut pas pouvoir manger.',
-      de: 'der Kater will nicht essen können.',
+      de: 'der Kater will nicht fressen können.',
     });
 
     expect(negPair('WILL', 'MUST')).toMatchObject({
@@ -320,7 +320,7 @@ describe('modals: a pair with negation', () => {
       en: 'the cat did not have to be able to eat.',
       it: 'il gatto non doveva poter mangiare.',
       fr: 'le chat ne devait pas pouvoir manger.',
-      de: 'der Kater musste nicht essen können.',
+      de: 'der Kater musste nicht fressen können.',
     });
   });
 });
@@ -334,14 +334,14 @@ describe('modals: with an adverb', () => {
       fr: 'le chat peut manger vite.',
       es: 'el gato puede comer rápido.',
       pt: 'o gato pode comer rapidamente.',
-      de: 'der Kater kann schnell essen.', // German puts it before the clause-final infinitive
+      de: 'der Kater kann schnell fressen.', // German puts it before the clause-final infinitive
       ja: '猫は速く食べることができます。',
     });
 
     expect(catModal({ modals: ['CAN'], modifier: 'WELL' })).toMatchObject({
       en: 'the cat can eat well.',
       it: 'il gatto può mangiare bene.',
-      de: 'der Kater kann gut essen.',
+      de: 'der Kater kann gut fressen.',
     });
   });
 
@@ -352,7 +352,7 @@ describe('modals: with an adverb', () => {
     }))).toMatchObject({
       en: 'the cat can eat the mouse fast.',
       it: 'il gatto può mangiare velocemente il topo.',
-      de: 'der Kater kann schnell die Maus essen.',
+      de: 'der Kater kann schnell die Maus fressen.',
       ja: '猫はネズミを速く食べることができます。',
     });
   });
@@ -361,7 +361,7 @@ describe('modals: with an adverb', () => {
     expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'FAST' })).toMatchObject({
       en: 'the cat must be able to eat fast.',
       it: 'il gatto deve poter mangiare velocemente.',
-      de: 'der Kater muss schnell essen können.',
+      de: 'der Kater muss schnell fressen können.',
     });
 
     expect(catModal({ modals: ['MUST', 'CAN'], modifier: 'FAST', negative: true }))
@@ -369,13 +369,13 @@ describe('modals: with an adverb', () => {
         en: 'the cat does not have to be able to eat fast.', // ¬obligation scope (see below)
         it: 'il gatto non deve poter mangiare velocemente.',
         fr: 'le chat ne doit pas pouvoir manger vite.',
-        de: 'der Kater muss nicht schnell essen können.',
+        de: 'der Kater muss nicht schnell fressen können.',
       });
 
     expect(catModal({ modals: ['CAN'], modifier: 'FAST', negative: true })).toMatchObject({
       en: 'the cat cannot eat fast.',
       es: 'el gato no puede comer rápido.',
-      de: 'der Kater kann nicht schnell essen.',
+      de: 'der Kater kann nicht schnell fressen.',
     });
   });
 
@@ -387,7 +387,7 @@ describe('modals: with an adverb', () => {
       en: 'the cat wanted to be able to eat the mouse fast.',
       it: 'il gatto voleva poter mangiare velocemente il topo.',
       fr: 'le chat voulait pouvoir manger vite la souris.',
-      de: 'der Kater wollte schnell die Maus essen können.',
+      de: 'der Kater wollte schnell die Maus fressen können.',
     });
   });
 
@@ -396,7 +396,7 @@ describe('modals: with an adverb', () => {
     expect(catModal({ modals: ['MUST'], modifier: 'ALWAYS' })).toMatchObject({
       it: 'il gatto deve mangiare sempre.',
       fr: 'le chat doit toujours manger.',
-      de: 'der Kater muss immer essen.',
+      de: 'der Kater muss immer fressen.',
       ja: '猫はいつも食べる必要があります。',
     });
 
@@ -404,7 +404,7 @@ describe('modals: with an adverb', () => {
       it: 'il gatto non deve mangiare mai.', // non … mai brackets the verb
       fr: 'le chat ne doit jamais manger.',
       es: 'el gato nunca debe comer.',
-      de: 'der Kater muss nie essen.',
+      de: 'der Kater muss nie fressen.',
     });
   });
 });
@@ -443,7 +443,7 @@ describe('known bugs: modals', () => {
     // English and German must not read as opposites.
     expect([said.en, said.de]).not.toEqual([
       'the cat must not eat.', // prohibition
-      'der Kater muss nicht essen.', // absence of obligation
+      'der Kater muss nicht fressen.', // absence of obligation
     ]);
   });
 
@@ -584,7 +584,7 @@ describe('per-modal adverbs', () => {
         fr: 'le chat ne voulait jamais toujours manger.',
         es: 'el gato nunca quería comer siempre.',
         pt: 'o gato nunca queria comer sempre.',
-        de: 'der Kater wollte nie immer essen.',
+        de: 'der Kater wollte nie immer fressen.',
         ja: '猫は決していつも食べたくなかったです。',
       });
   });
@@ -598,7 +598,7 @@ describe('per-modal adverbs', () => {
       fr: 'le chat doit toujours manger.',
       es: 'el gato debe siempre comer.',
       pt: 'o gato deve sempre comer.',
-      de: 'der Kater muss immer essen.',
+      de: 'der Kater muss immer fressen.',
       ja: '猫はいつも食べる必要があります。',
     });
   });
@@ -612,7 +612,7 @@ describe('per-modal adverbs', () => {
       fr: 'le chat ne veut jamais manger.',
       es: 'el gato nunca quiere comer.',
       pt: 'o gato nunca quer comer.',
-      de: 'der Kater will nie essen.',
+      de: 'der Kater will nie fressen.',
       ja: '猫は決して食べたくないです。',
     });
   });
@@ -626,38 +626,38 @@ describe('known bugs: German double infinitive in a verb-final clause', () => {
   test('German puts werden/würde before the infinitive cluster', () => {
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] }, directObject: np('BOOK') },
-    }), 'RUN')).de).toBe('der Hund, der das Buch wird essen müssen, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der das Buch wird fressen müssen, läuft.');
     expect(sayAll({
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') }),
-    }).de).toBe('wenn der Kater die Maus würde essen müssen, würde der Hund laufen.');
+    }).de).toBe('wenn der Kater die Maus würde fressen müssen, würde der Hund laufen.');
   });
 
   const dogWho = (verbPhrase: Partial<VerbPhrase>, extra: object = { directObject: np('BOOK') }) =>
     sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', ...verbPhrase }, ...extra } }), 'RUN')).de;
 
   test('German fronts the auxiliary over a modal chain, a perfect, a progressive, a negation and an object relative', () => {
-    expect(dogWho({ tense: 'future', modals: [{ verb: 'WILL' }, { verb: 'CAN' }] })).toBe('der Hund, der das Buch wird essen können wollen, läuft.');
-    expect(dogWho({ tense: 'future', aspect: 'resultative', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch wird gegessen haben müssen, läuft.');
-    expect(dogWho({ tense: 'future', aspect: 'progressive', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der gerade das Buch wird essen müssen, läuft.');
-    expect(dogWho({ tense: 'future', negative: true, modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch nicht wird essen müssen, läuft.');
+    expect(dogWho({ tense: 'future', modals: [{ verb: 'WILL' }, { verb: 'CAN' }] })).toBe('der Hund, der das Buch wird fressen können wollen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'resultative', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch wird gefressen haben müssen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'progressive', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der gerade das Buch wird fressen müssen, läuft.');
+    expect(dogWho({ tense: 'future', negative: true, modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch nicht wird fressen müssen, läuft.');
     expect(sayAll(clause(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', tense: 'future', modals: [{ verb: 'MUST' }] } },
-    }), 'RUN')).de).toBe('die Maus, die der Kater wird essen müssen, läuft.');
+    }), 'RUN')).de).toBe('die Maus, die der Kater wird fressen müssen, läuft.');
   });
 
   test('German fronts the auxiliary ahead of the prospective\'s "sein" and the modals', () => {
-    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] }, {})).toBe('der Hund, der im Begriff zu essen wird sein müssen, läuft.');
-    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff wird sein müssen, das Buch zu essen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] }, {})).toBe('der Hund, der im Begriff zu fressen wird sein müssen, läuft.');
+    expect(dogWho({ tense: 'future', aspect: 'prospective', modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff wird sein müssen, das Buch zu fressen, läuft.');
   });
 
   test('regression: a single infinitive keeps the finite verb last, and the main clause is unchanged', () => {
-    expect(dogWho({ tense: 'future' })).toBe('der Hund, der das Buch essen wird, läuft.');
-    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch essen muss, läuft.');
+    expect(dogWho({ tense: 'future' })).toBe('der Hund, der das Buch fressen wird, läuft.');
+    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der das Buch fressen muss, läuft.');
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT', { directObject: np('MOUSE') }) }).de)
-      .toBe('wenn der Kater die Maus essen würde, würde der Hund laufen.');
+      .toBe('wenn der Kater die Maus fressen würde, würde der Hund laufen.');
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'future', modals: [{ verb: 'MUST' }] }, directObject: np('MOUSE') })).de)
-      .toBe('der Kater wird die Maus essen müssen.');
+      .toBe('der Kater wird die Maus fressen müssen.');
   });
 });
 

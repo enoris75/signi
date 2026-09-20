@@ -192,24 +192,52 @@ describe('known bugs: German ADD takes its goal with zu', () => {
   const addTo = (goal: ReturnType<typeof np>) =>
     sayAll(clause(np('CAT'), 'ADD', { directObject: np('BOOK'), complements: { terminus: { phrase: goal } } })).de;
 
-  test.fails('German adds a thing to a goal with zu + dative', () => {
+  test('German adds a thing to a goal with zu + dative', () => {
     expect(addTo(np('CONTAINER'))).toBe('der Kater fügt das Buch zum Behälter hinzu.');
     expect(addTo(np('CONDITION'))).toBe('der Kater fügt das Buch zur Bedingung hinzu.');
     expect(addTo(np('CONTAINER', { definiteness: 'indefinite' }))).toBe('der Kater fügt das Buch zu einem Behälter hinzu.');
     expect(addTo(np('HOUSE', { number: 'plural' }))).toBe('der Kater fügt das Buch zu den Häusern hinzu.');
   });
 
-  test.fails('a relative on the goal takes zu too', () => {
+  test('a relative on the goal takes zu too', () => {
     expect(sayAll(clause(np('CONTAINER', {
       relative: { headRole: 'terminus', subject: np('CAT'), verbPhrase: { verb: 'ADD' }, directObject: np('BOOK') },
     }), 'RUN')).de).toBe('der Behälter, zu dem der Kater das Buch hinzufügt, läuft.');
   });
 
+  // The generalisation: "zu" is the verb's, so it rides through every determiner and every clause
+  // shape, and `prepDet` fuses it only with a definite article ("zum", "zur", but "zu keinem").
+  test('zu takes the dative under any determiner, tense or modal', () => {
+    expect(addTo(np('CONTAINER', { definiteness: 'no' }))).toBe('der Kater fügt das Buch zu keinem Behälter hinzu.');
+    expect(addTo(np('CONTAINER', { adjectives: ['SMALL'] }))).toBe('der Kater fügt das Buch zum kleinen Behälter hinzu.');
+    expect(addTo(np('AFRICA'))).toBe('der Kater fügt das Buch zu Afrika hinzu.');
+    expect(sayAll(clause(np('CAT'), 'ADD', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: np('CONTAINER') } }, verbPhrase: { tense: 'past' },
+    })).de).toBe('der Kater fügte das Buch zum Behälter hinzu.');
+    expect(sayAll(clause(np('CAT'), 'ADD', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: np('CONTAINER') } }, verbPhrase: { modals: ['MUST'] },
+    })).de).toBe('der Kater muss das Buch zum Behälter hinzufügen.');
+  });
+
   // Regression guard: a verb that puts a thing into a container keeps "in", and a person recipient
-  // keeps the bare dative.
+  // keeps the bare dative — including A8's weak masculine, which ADD takes as a recipient.
   test('regression: SAVE keeps in, and ADD keeps the dative of a person', () => {
     expect(sendTo('SAVE', 'CONTAINER').de).toBe('der Kater speichert das Buch in den Behälter.');
     expect(sendTo('ADD', 'DOG').de).toBe('der Kater fügt dem Hund das Buch hinzu.');
+    expect(addTo(np('BOY'))).toBe('der Kater fügt dem Jungen das Buch hinzu.');
+  });
+
+  // The other six never read `terminus_prep`; they have their own preposition for a goal.
+  test('regression: the other six are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'ADD', { directObject: np('BOOK'), complements: { terminus: { phrase: np('CONTAINER') } } })))
+      .toMatchObject({
+        en: 'the cat adds the book to the container.',
+        it: 'il gatto aggiunge il libro al contenitore.',
+        fr: 'le chat ajoute le livre au récipient.',
+        es: 'el gato añade el libro al recipiente.',
+        pt: 'o gato adiciona o livro ao recipiente.',
+        ja: '猫は容器に本を加えます。',
+      });
   });
 });
 

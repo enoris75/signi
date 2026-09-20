@@ -44,7 +44,7 @@ keys fall back to the English literal: keep `label` as the fallback.
 *Since done:* B22 and B23 added the modal, tense, aspect, verb phrase and all six complements.
 POLARITY is a direct toggle with nothing to show or hide, so it has no family member. RELATIVE_CLAUSE and
 COORDINATION name link and add controls, not reveals (see bug
-[A141](../../bugs/A-must-fix/A141-link-control-tooltips-offer-a-reveal.md)).
+[A141](../../bugs/fixed/A141-link-control-tooltips-offer-a-reveal.md)).
 
 If runtime arguments land first ([C14](C14-ui-runtime-values.md)), each family
 collapses to one entry per verb. Don't wait for it. *(C14 closed without them: it kept its values

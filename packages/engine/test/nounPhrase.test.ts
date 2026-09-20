@@ -12,7 +12,7 @@ describe('determiners', () => {
       fr: 'un chat mange.',
       es: 'un gato come.',
       pt: 'um gato come.',
-      de: 'ein Kater isst.',
+      de: 'ein Kater frisst.',
       ja: '猫は食べます。', // Japanese has no articles
     });
   });
@@ -35,7 +35,7 @@ describe('determiners', () => {
     expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('WATER') }))).toMatchObject({
       en: 'the cat eats the water.',
       it: "il gatto mangia l'acqua.",
-      de: 'der Kater isst das Wasser.',
+      de: 'der Kater frisst das Wasser.',
     });
   });
 
@@ -136,7 +136,7 @@ describe('determiners', () => {
       // English, Italian and German drop the article for an indefinite plural…
       en: 'the cat eats mice.',
       it: 'il gatto mangia topi.',
-      de: 'der Kater isst Mäuse.',
+      de: 'der Kater frisst Mäuse.',
       // …French needs its partitive, and Iberian Romance uses the plural indefinite.
       fr: 'le chat mange des souris.',
       es: 'el gato come unos ratones.',
@@ -273,25 +273,25 @@ describe('known bugs: German adjective on an article-less mass noun', () => {
   })).de;
 
   test('German declines the adjective strong after etwas and with no article', () => {
-    expect(eatsWith('some')).toBe('der Kater isst mit etwas kaltem Wasser.');
-    expect(eatsWith('indefinite')).toBe('der Kater isst mit kaltem Wasser.');
+    expect(eatsWith('some')).toBe('der Kater frisst mit etwas kaltem Wasser.');
+    expect(eatsWith('indefinite')).toBe('der Kater frisst mit kaltem Wasser.');
   });
 
   test('German declines strong after viel / wenig, and for a feminine mass noun in the dative and genitive', () => {
-    expect(eatsWith('many')).toBe('der Kater isst mit viel kaltem Wasser.');
-    expect(eatsWith('few')).toBe('der Kater isst mit wenig kaltem Wasser.');
+    expect(eatsWith('many')).toBe('der Kater frisst mit viel kaltem Wasser.');
+    expect(eatsWith('few')).toBe('der Kater frisst mit wenig kaltem Wasser.');
     expect(sayAll(clause(np('CAT'), 'EAT', { complements: { instrumental: { phrase: np('LIQUID', { definiteness: 'some', adjectives: ['COLD'] }) } } })).de)
-      .toBe('der Kater isst mit etwas kalter Flüssigkeit.');
+      .toBe('der Kater frisst mit etwas kalter Flüssigkeit.');
     expect(sayAll(clause(np('CAT'), 'EAT', {
       complements: { instrumental: { phrase: np('LIQUID', { definiteness: 'indefinite', adjectives: ['COLD'] }), specifiers: [{ kind: 'abstraction', value: 'concept' }], action: { verb: 'DRINK' } } },
-    })).de).toBe('der Kater isst mit dem Trinken kalter Flüssigkeit.');
+    })).de).toBe('der Kater frisst mit dem Trinken kalter Flüssigkeit.');
   });
 
   test('regression: a determiner that carries the case keeps the weak ending, and the nominative and accusative are unchanged', () => {
-    expect(eatsWith('definite')).toBe('der Kater isst mit dem kalten Wasser.');
-    expect(eatsWith('no')).toBe('der Kater isst mit keinem kalten Wasser.');
-    expect(eatsWith('this')).toBe('der Kater isst mit diesem kalten Wasser.');
-    expect(eatsWith('all')).toBe('der Kater isst mit all dem kalten Wasser.');
+    expect(eatsWith('definite')).toBe('der Kater frisst mit dem kalten Wasser.');
+    expect(eatsWith('no')).toBe('der Kater frisst mit keinem kalten Wasser.');
+    expect(eatsWith('this')).toBe('der Kater frisst mit diesem kalten Wasser.');
+    expect(eatsWith('all')).toBe('der Kater frisst mit all dem kalten Wasser.');
     expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('WATER', { definiteness: 'some', adjectives: ['COLD'] }) })).de).toBe('der Kater sieht etwas kaltes Wasser.');
     expect(sayAll(clause(np('WATER', { definiteness: 'indefinite', adjectives: ['COLD'] }), 'BURN')).de).toBe('kaltes Wasser brennt.');
   });
@@ -358,7 +358,7 @@ describe('a countable food noun: ICE_CREAM', () => {
       en: 'the cat eats the ice cream.',
       it: 'il gatto mangia il gelato.',
       fr: 'le chat mange la glace.',
-      de: 'der Kater isst das Eis.',
+      de: 'der Kater frisst das Eis.',
       es: 'el gato come el helado.',
       ja: '猫はアイスクリームを食べます。',
       pt: 'o gato come o sorvete.',
@@ -367,7 +367,7 @@ describe('a countable food noun: ICE_CREAM', () => {
       en: 'the cat eats the ice creams.',
       it: 'il gatto mangia i gelati.',
       fr: 'le chat mange les glaces.',
-      de: 'der Kater isst die Eis.', // invariable plural
+      de: 'der Kater frisst die Eis.', // invariable plural
       es: 'el gato come los helados.',
       ja: '猫はアイスクリームを食べます。',
       pt: 'o gato come os sorvetes.',
@@ -376,7 +376,7 @@ describe('a countable food noun: ICE_CREAM', () => {
       en: 'the cat eats an ice cream.',
       it: 'il gatto mangia un gelato.',
       fr: 'le chat mange une glace.',
-      de: 'der Kater isst ein Eis.',
+      de: 'der Kater frisst ein Eis.',
       es: 'el gato come un helado.',
       ja: '猫はアイスクリームを食べます。',
       pt: 'o gato come um sorvete.',
@@ -388,7 +388,7 @@ describe('a countable food noun: ICE_CREAM', () => {
       en: 'the cat eats many ice creams.',
       it: 'il gatto mangia molti gelati.',
       fr: 'le chat mange beaucoup de glaces.',
-      de: 'der Kater isst viele Eis.',
+      de: 'der Kater frisst viele Eis.',
       es: 'el gato come muchos helados.',
       ja: '猫は多くのアイスクリームを食べます。',
       pt: 'o gato come muitos sorvetes.',
@@ -400,7 +400,7 @@ describe('a countable food noun: ICE_CREAM', () => {
       en: 'the cat eats a big ice cream.',
       it: 'il gatto mangia un grande gelato.',
       fr: 'le chat mange une grande glace.', // feminine
-      de: 'der Kater isst ein großes Eis.', // neuter, mixed ending
+      de: 'der Kater frisst ein großes Eis.', // neuter, mixed ending
       es: 'el gato come un helado grande.',
       ja: '猫は大きいアイスクリームを食べます。',
       pt: 'o gato come um sorvete grande.',

@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
@@ -85,7 +86,13 @@ export function predicateText(
     verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
   // prepended below and lands in front of it, exactly as for a plain verb.
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
+  // a direction complement does, instead of taking the manner adverb's slot between the verb and the
+  // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
+  // book"). Leading the complements slot puts it there in every branch below (A142).
+  const isDirection = isDirectionAdverb(modifier);
+  const modifierText = isDirection ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // Spanish fronts one negative frequency adverb ("nunca") preverbally without "no", whichever verb
   // it modifies. Scan the group outermost-first (each modal, then the main verb); the first negative
@@ -104,6 +111,16 @@ export function predicateText(
     : aspect === 'neutral'
       ? finite(copulaVerb)
       : aspectVerb(copulaVerb.forms, agreeForms, tense, aspect, mood);
+  // A frequency adverb on the prospective belongs right after the finite "estar", not after the whole
+  // periphrasis, where it would scope over the infinitive alone — "está a punto de comer SIEMPRE" reads as
+  // *is about to always eat* (A147). A fronted "nunca" is already preverbal, and a manner adverb does
+  // trail the group ("está a punto de comer bien"). The progressive is idiomatic either way and is left alone.
+  const mainIsFronted = frontIdx === modals.length;
+  const splitFrequency = !mainIsFronted && !!modifierText && modifier?.forms['subtype'] === 'frequency'
+    && aspect === 'prospective' && modals.length === 0;
+  const grouped = splitFrequency
+    ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
+    : conjugated;
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
@@ -113,7 +130,7 @@ export function predicateText(
   // preverbal when the verb isn't itself negated) already negates the clause, so "no" is dropped.
   const subjectIsNegative = subjectForms['definiteness'] === 'no';
   const needsNo = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
-  const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${conjugated}` : conjugated;
+  const verbText = needsNo && !subjectIsNegative && !preVerbNunca ? `no ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb ("el gato me ve"), sitting after
   // "no" in the negative ("no me ve"), not a post-verbal noun ("ve el yo"). A noun object keeps the
   // post-verbal slot.
@@ -133,15 +150,21 @@ export function predicateText(
     : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : objectNounText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se lo come").
-  const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
+  // A reflexive verb already carries its own "se" in the form ("se mueve"), and the impersonal one
+  // cannot stand beside it — "*se se mueve" is no sentence. The generic subject is then spelled out as a
+  // word instead, written back into the subject slot the clause emptied: "uno se mueve" (A152).
+  const isGeneric = subjectForms['generic'] === '1';
+  const genericSubject = isGeneric && reflexiveClitic(copulaVerb.forms, subjectForms)
+    ? (subjectForms['generic_reflexive'] ?? '') : '';
+  const impersonalClitic = isGeneric && !genericSubject ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
   const directObjectText = directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun, true) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
-  const mainIsFronted = frontIdx === modals.length;
-  const postVerb = mainIsFronted ? '' : modifierText;
-  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
+  const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId)]
+    .filter(Boolean).join(' ');
   // Imperative: a subjectless command. The person picks the form (tú = 3sg-present, nosotros /
   // every negative = present subjunctive, vosotros = infinitive − r + d); a negative command
   // ("no comas", "no seáis") prefixes "no". The adverb simply trails the verb here. An object pronoun
@@ -177,7 +200,7 @@ export function predicateText(
       .filter(Boolean)
       .join(' ');
   }
-  return [preVerb, esCliticize(proclitics, verbText), postVerb, directObjectText, complementsText]
+  return [genericSubject, preVerb, esCliticize(proclitics, verbText), postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

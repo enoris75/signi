@@ -30,3 +30,16 @@ the complements. A manner adverb stays at the end.
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: English adverb of direction after the complements* (1 `test.fails`, plus a regression test for the complement-free clause and for Japanese) |
+
+## Resolved
+
+Fixed on 2026-09-20 together with [A142](A142-direction-adverb-before-object.md), whose step 1 —
+`subtype: 'direction'` on UP and DOWN — is the distinction both halves were missing.
+
+[`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) now gives a
+direction adverb the head of the complements slot, which puts it right after the object in every
+branch, and leaves the trailing slot — where a manner adverb goes — empty.
+
+Guarded by `adverb.test.ts` → *known bugs: English adverb of direction after the complements*: the
+former `test.fails` now passes, plus a modal, the prospective, a relative clause and a pronoun object,
+and regressions that a manner adverb still trails the complements and that Japanese is unchanged.

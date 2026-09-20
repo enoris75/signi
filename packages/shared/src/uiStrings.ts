@@ -1477,19 +1477,26 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Expand this period',
   },
 
-  // The two reorder controls beside them: MOVE with the UP or DOWN adverb ("Sposta su", "Nach oben
-  // verschieben", ja 「上に移動」). They leave out the "this period" the others say, because the engines
-  // put an adverb of direction before a noun object in five languages ("*déplacer vers le haut cette
-  // période", A142); without an object each language says it the way its buttons do.
+  // The two reorder controls beside them: MOVE with the UP or DOWN adverb, on the same "this period"
+  // object the others take ("Sposta questo periodo su", "Dieses Satzgefüge nach oben verschieben",
+  // ja 「この文を上に移動」). The adverb of direction follows the object in every language since A142.
   'action.movePeriodUp': {
-    plan: { ...commandOf('MOVE'), verbPhrase: { verb: 'MOVE', modifier: 'UP' } } as PhrasePlan,
+    plan: {
+      ...commandOf('MOVE'),
+      verbPhrase: { verb: 'MOVE', modifier: 'UP' },
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
     format: NAME_FORMAT,
-    fallback: 'Move up',
+    fallback: 'Move this period up',
   },
   'action.movePeriodDown': {
-    plan: { ...commandOf('MOVE'), verbPhrase: { verb: 'MOVE', modifier: 'DOWN' } } as PhrasePlan,
+    plan: {
+      ...commandOf('MOVE'),
+      verbPhrase: { verb: 'MOVE', modifier: 'DOWN' },
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+    } as PhrasePlan,
     format: NAME_FORMAT,
-    fallback: 'Move down',
+    fallback: 'Move this period down',
   },
 
   // The grab bar under a period container, named for what dragging it does: RESIZE on this container,

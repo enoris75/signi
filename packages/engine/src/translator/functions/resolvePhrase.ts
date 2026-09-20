@@ -21,19 +21,31 @@ export function resolvePhrase(
   lookup: LexiconLookup,
   mood?: Mood,
   register?: ImperativeRegister,
+  // A top-level citation phrase (a verb's dictionary form). Its subject is a throwaway the plan
+  // carries only to satisfy resolution and never renders, so it must not select a `subject_sense`
+  // either: the German citation of EAT is "essen", whoever the plan names (A157). An infinitive
+  // COMPLEMENT is the opposite case — its subject is the governing clause's, by subject control, so
+  // it does select one ("der Hund wünscht, das Essen zu fressen"), and the flag stops here.
+  citation = false,
 ): ResolvedPhrase {
   const imperative = mood === 'imperative';
   const impRegister = imperative ? (register ?? plan.imperativeRegister) : undefined;
   // A yes/no question is a statement's clause with another force, so it holds only where the mood is
   // indicative: a condition, a command or a citation keeps its own and drops the flag.
   const question = !!plan.interrogative && mood === undefined;
+  const subject = resolveNounElement(plan.subject, language, lookup);
   const resolved: ResolvedPhrase = {
-    subject: resolveNounElement(plan.subject, language, lookup),
+    subject,
     // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
     // render just the subject when it is absent.
     verbPhrase: plan.verbPhrase
       ? {
-          ...resolveVerbPhrase(plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject),
+          // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
+          // coordination is read off its first conjunct, as agreement is.
+          ...resolveVerbPhrase(
+            plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject,
+            citation ? undefined : subject.agreement,
+          ),
           ...(question ? { interrogative: true } : {}),
         }
       : undefined,

@@ -127,7 +127,7 @@ describe('possessor as a full SVO phrase', () => {
     }))).toMatchObject({
       it: 'il cane vede il libro del gatto che mangia il topo.',
       fr: 'le chien voit le livre du chat qui mange la souris.',
-      de: 'der Hund sieht das Buch vom Kater, der die Maus isst.',
+      de: 'der Hund sieht das Buch vom Kater, der die Maus frisst.',
     });
   });
 });

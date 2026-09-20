@@ -20,20 +20,31 @@ export const VOWEL_START = /^[aeiouàèéìòù]/i;
 export const SPECIAL_START = /^(s[^aeiou]|z|ps|gn|x|y)/i;
 
 /**
- * Concept IDs of the common short adjectives that idiomatically precede the noun
- * in Italian (the "BAGS"-style set: beauty, age, goodness, size). Everything else
- * (e.g. felice, triste, forte, colours) stays after the noun. Both size adjectives
- * (grande/piccolo) precede, so they behave consistently — the trade-off is that a
- * size + beauty pair stacks before the noun ("il grande bel cane").
+ * Concept IDs of the common short *qualifying* adjectives that idiomatically precede the noun in
+ * Italian (the "BAGS"-style set: beauty, age, goodness, size). Everything else (e.g. felice, triste,
+ * forte, colours) stays after the noun. Both size adjectives (grande/piccolo) precede, so they
+ * behave consistently.
+ *
+ * Italian gives the slot to **one** of these, so membership says an adjective *may* take it, not
+ * that it does: `splitAdjectives` keeps the first and demotes the rest ("il grande gatto bello",
+ * never "*il grande bel gatto" — A145).
  */
 // GREAT, the gloss degree word, is the same "grande" as BIG and precedes like it ("di grande
 // dimensione"). HIGH ("alto") stays after the noun: it is not a BAGS adjective ("la torre alta").
-// The ordinals join them: an ordinal precedes its noun in Italian ("il primo padre", "la
-// seconda volta"), unlike the qualifying adjectives that follow it. So does OTHER ("un altro gatto").
-export const PRENOMINAL = new Set([
+export const PRENOMINAL_QUALIFYING = new Set([
   'BIG', 'GREAT', 'SMALL', 'GOOD', 'BAD', 'OLD', 'YOUNG', 'NEW', 'BEAUTIFUL',
-  'FIRST', 'SECOND', 'THIRD', 'OTHER',
 ]);
+
+/**
+ * The determiner-like adjectives that precede the noun: an ordinal ("il primo padre", "la seconda
+ * volta") and OTHER ("un altro gatto"). They do not qualify the noun, so they do not compete for
+ * the one qualifying slot above and stand in front of it — "un altro grande topo", "il primo
+ * grande gatto".
+ */
+export const PRENOMINAL_DETERMINER = new Set(['FIRST', 'SECOND', 'THIRD', 'OTHER']);
+
+/** Every adjective that can precede the noun, of either kind. */
+export const PRENOMINAL = new Set([...PRENOMINAL_DETERMINER, ...PRENOMINAL_QUALIFYING]);
 
 // The quel- counterpart of each definite article form (see `quelloForm`).
 export const QUELLO_FOR_ARTICLE: Record<string, string> = {

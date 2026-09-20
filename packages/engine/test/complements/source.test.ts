@@ -129,11 +129,16 @@ describe('source: Romance', () => {
   });
 
   test('…and elides before a vowel', () => {
+    // The angel is animate, so Italian adds the ablative "via" that keeps a source apart from the
+    // andare-da goal (A153); the fusion behind it is what this pins.
     expect(from('COME', np('ANGEL'))).toMatchObject({
-      it: "il gatto viene dall'angelo.", // da + l' = dall'
+      it: "il gatto viene via dall'angelo.", // da + l' = dall'
       fr: "le chat vient de l'ange.",
       es: 'el gato viene del ángel.',
       pt: 'o gato vem do anjo.',
+    });
+    expect(from('COME', np('BUILDING'))).toMatchObject({
+      it: "il gatto viene dall'edificio.", // a place, so no "via"
     });
   });
 
@@ -230,9 +235,10 @@ describe('source: the ablative adverb is gated on the verb', () => {
 describe('known bugs: source', () => {
   // The same weak-masculine (n-declension) miss pinned in direction.test.ts and locative.test.ts:
   // it is a property of the NOUN, so every complement that puts "Junge" in an oblique case hits
-  // it. "aus dem Junge" should be "aus dem Jungen".
-  test('German should decline the weak masculine: "aus dem Jungen"', () => {
-    expect(from('COME', np('BOY'))).toMatchObject({ de: 'der Kater kommt aus dem Jungen.' });
+  // it. The boy is a person, so his source preposition is "von" → "vom" (A154); the -n is what
+  // this pins.
+  test('German should decline the weak masculine: "vom Jungen"', () => {
+    expect(from('COME', np('BOY'))).toMatchObject({ de: 'der Kater kommt vom Jungen.' });
   });
 });
 
@@ -244,13 +250,27 @@ describe('known bugs: Italian animate source reads as a goal', () => {
   const fromChild = (verb: string) =>
     sayAll(clause(np('DOG'), verb, { complements: { source: { phrase: np('CHILD') } } })).it;
 
-  test.fails('GO and COME take "via da" from a person or an animal', () => {
+  test('GO and COME take "via da" from a person or an animal', () => {
     expect(fromChild('GO')).toBe('il cane va via dal bambino.');
     expect(fromChild('COME')).toBe('il cane viene via dal bambino.');
     expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
       verbPhrase: { modals: ['CAN'], negative: true },
       complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
     })).it).toBe("pochi buoni buoi non possono andare via da quell'angelo meno intero e freddo.");
+  });
+
+  // The generalisation: the choice is per conjunct on the head's animacy, so it holds for an animal,
+  // a plural and any determiner — and it reaches the relativizer, which is the one place the file
+  // left undecided (an idiomatic Italian would say "da cui il cane va via"; unambiguous beats
+  // idiomatic here, and nothing pinned it either way).
+  test('…for an animal, a plural and an indefinite, and through the relativizer', () => {
+    expect(fromChild('GO')).toBe('il cane va via dal bambino.');
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('DOG', { number: 'plural' }) } } })).it)
+      .toBe('il gatto viene via dai cani.');
+    expect(sayAll(clause(np('CAT'), 'GO', { complements: { source: { phrase: np('CHILD', { definiteness: 'indefinite' }) } } })).it)
+      .toBe('il gatto va via da un bambino.');
+    expect(sayAll(clause(np('MAN', { relative: { headRole: 'source', subject: np('DOG'), verbPhrase: { verb: 'GO' } } }), 'RUN')).it)
+      .toBe("l'uomo via dal quale il cane va corre.");
   });
 
   test('regression: RUN already takes "via", a place stays bare, and the goal keeps "da"', () => {
@@ -265,7 +285,7 @@ describe('known bugs: Italian animate source reads as a goal', () => {
 // continent, wrong for a person or an animal ("geht aus dem Engel" is "goes out of the angel"). A
 // living source takes "von", fused to "vom" before "dem".
 describe('known bugs: German animate source takes "aus"', () => {
-  test.fails('German takes "von" from a person or an animal', () => {
+  test('German takes "von" from a person or an animal', () => {
     expect(from('COME', np('CHILD')).de).toBe('der Kater kommt vom Kind.');
     expect(from('COME', np('WOMAN')).de).toBe('der Kater kommt von der Frau.');
     expect(from('RUN', np('DOG', { number: 'plural' })).de).toBe('der Kater läuft von den Hunden.');
@@ -275,9 +295,24 @@ describe('known bugs: German animate source takes "aus"', () => {
     })).de).toBe('wenige gute Ochsen können von jenem weniger ganzen kalten Engel nicht gehen.');
   });
 
-  test.fails('…and in a relative clause on the source', () => {
+  test('…and in a relative clause on the source', () => {
     expect(sayAll(clause(np('MAN', { relative: { headRole: 'source', subject: np('DOG'), verbPhrase: { verb: 'GO' } } }), 'RUN')).de)
       .toBe('der Mann, von dem der Hund geht, läuft.');
+  });
+
+  // The generalisation: "von" is chosen per conjunct on the head's animacy, and `prepDet` fuses it
+  // only with the definite "dem" — every other determiner rides after the plain preposition.
+  test('von fuses to vom only before "dem", and declines like any dative', () => {
+    expect(from('COME', np('CHILD', { definiteness: 'indefinite' })).de).toBe('der Kater kommt von einem Kind.');
+    expect(from('COME', np('CHILD', { definiteness: 'no' })).de).toBe('der Kater kommt von keinem Kind.');
+    expect(from('COME', np('CHILD', { number: 'plural' })).de).toBe('der Kater kommt von den Kindern.');
+    expect(from('COME', np('CHILD', { adjectives: ['SMALL'] })).de).toBe('der Kater kommt vom kleinen Kind.');
+  });
+
+  test('…and it holds for a transitive verb that licenses a source', () => {
+    expect(sayAll(clause(np('CAT'), 'LOAD', {
+      directObject: np('BOOK'), complements: { source: { phrase: np('CHILD') } },
+    })).de).toBe('der Kater lädt das Buch vom Kind.');
   });
 
   test('regression: a place keeps "aus"', () => {

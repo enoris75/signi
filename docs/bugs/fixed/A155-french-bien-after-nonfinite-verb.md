@@ -49,3 +49,29 @@ la souris`) where they read better after it. That is a placement preference, not
 | | |
 |---|---|
 | **Test** | `adverb.test.ts` → *known bugs: French "bien" before the participle and the infinitive* (3 `test.fails`, plus a regression test for the finite verb) |
+
+## Resolved
+
+Fixed on 2026-09-20 by marking the class in the corpus and giving it a slot in every non-finite
+group:
+
+1. `pre_nonfinite: '1'` on WELL's French lexeme
+   ([`concepts/adverbs.ts`](../../../packages/backend/src/concepts/adverbs.ts)), so the rule is data
+   rather than a word list — 'mal', 'mieux' and 'trop' can join it.
+2. [`fr/predicateText.ts`](../../../packages/engine/src/languages/fr/predicateText.ts) reads it as
+   `preInfinitive` and hands it to the group builders, clearing the trailing modifier slot.
+   [`aspectVerbFr`](../../../packages/engine/src/languages/fr/aspectVerbFr.ts) puts it between the
+   auxiliary and the participle ('n'a pas bien mangé') and inside the periphrasis's 'de', which
+   then never elides ('en train de bien manger');
+   [`modalGroupFr`](../../../packages/engine/src/languages/fr/modalGroupFr.ts) passes it into
+   [`verbGroupInfinitiveFr`](../../../packages/engine/src/languages/fr/verbGroupInfinitiveFr.ts),
+   which leads the innermost infinitive with it ('doit bien manger', 'doit avoir bien mangé').
+3. `negateInfinitive` leads the infinitive with it behind any 'ne pas' ('ne pas bien manger').
+
+An object clitic falls behind it, as the file wanted: 'de bien le manger', 'doit bien le manger'.
+
+Guarded by `adverb.test.ts` → *known bugs: French bien before the participle and the infinitive*:
+the three former `test.fails` now pass, plus an object clitic, a modal over the perfect, an être
+participle and a negated infinitive clause, with regressions that the finite verb, its negation and
+the command are unchanged, that a -ment adverb still follows the participle, and that the other six
+languages never read the flag.

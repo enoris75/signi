@@ -86,7 +86,7 @@ LOADING, INTERFACE and RESULT under *A program's own things* in
 
 Changes against the plan:
 - **German keeps to inseparable verbs**, which the clause builder can place (see
-  [A138](../../bugs/A-must-fix/A138-german-add-is-arithmetic.md)): CANCEL is *annullieren*, not the dialog
+  [A138](../../bugs/fixed/A138-german-add-is-arithmetic.md)): CANCEL is *annullieren*, not the dialog
   word *abbrechen*. RETRY is *wiederholen*, the word of the classic *Abbrechen / Wiederholen / Ignorieren*
   dialog, and Portuguese says *repetir* there too, because *tentar novamente* is two words and the
   Portuguese imperative is derived from the first form. Once German separable verbs render, CANCEL can move

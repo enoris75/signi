@@ -113,7 +113,7 @@ describe('infinitive: the manner adverb REPEATEDLY', () => {
       fr: 'le chat mangea à plusieurs reprises.',
       es: 'el gato comió repetidamente.',
       pt: 'o gato comeu repetidamente.',
-      de: 'der Kater aß wiederholt.',
+      de: 'der Kater fraß wiederholt.',
       ja: '猫は繰り返し食べました。',
     });
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'REPEATEDLY' } })).en).toBe('the cat eats repeatedly.');

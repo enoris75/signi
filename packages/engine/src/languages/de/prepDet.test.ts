@@ -3,12 +3,15 @@ import { EUROPA, HAUS, KATER, KATZE, SCHWEIZ, WASSER } from './de.fixtures.js';
 import { prepDet } from './prepDet.js';
 
 describe('prepDet', () => {
-  test('a definite article fuses with in (dative dem, accusative das) and zu', () => {
+  test('a definite article fuses with in (dative dem, accusative das), zu and von', () => {
     expect(prepDet('in', HAUS, 'dat', false)).toBe('im');
     expect(prepDet('in', HAUS, 'acc', false)).toBe('ins');
     expect(prepDet('zu', KATER, 'dat', false)).toBe('zum');
     expect(prepDet('zu', KATZE, 'dat', false)).toBe('zur');
     expect(prepDet('zu', SCHWEIZ, 'dat', false)).toBe('zur');
+    // A living source's "von" (A154); "von der" does not contract.
+    expect(prepDet('von', KATER, 'dat', false)).toBe('vom');
+    expect(prepDet('von', HAUS, 'dat', false)).toBe('vom');
     // An articled name fuses whatever determiner was picked, since its article surfaces regardless.
     expect(prepDet('zu', { ...SCHWEIZ, definiteness: 'indefinite' }, 'dat', false)).toBe('zur');
   });
@@ -17,6 +20,8 @@ describe('prepDet', () => {
     expect(prepDet('in', KATZE, 'dat', false)).toBe('in der');
     expect(prepDet('zu', HAUS, 'dat', true)).toBe('zu den');
     expect(prepDet('aus', HAUS, 'dat', false)).toBe('aus dem');
+    expect(prepDet('von', KATZE, 'dat', false)).toBe('von der');
+    expect(prepDet('von', HAUS, 'dat', true)).toBe('von den');
     expect(prepDet('unter', KATER, 'acc', false)).toBe('unter den');
     // "ums" / "durchs" are colloquial, so only "ins" fuses in the accusative.
     expect(prepDet('um', HAUS, 'acc', false)).toBe('um das');

@@ -715,7 +715,10 @@ describe('known bugs: German object pronoun before an adverb', () => {
   // negation without an adverb, the other persons and tenses, and the inverted clause after "also".
   test('German puts the object pronoun first in the zu-infinitive group, the relative and every tense', () => {
     const de = (plan: PhrasePlan) => say(plan, 'de');
-    expect(de(sees({ modifier: 'ALWAYS', aspect: 'prospective' }))).toBe('der Kater ist im Begriff, ihn immer zu sehen.');
+    // A146 hoists a frequency adverb out of the group, so the manner adverb is what the pronoun
+    // leads inside it; the pronoun still opens the group either way.
+    expect(de(sees({ modifier: 'FAST', aspect: 'prospective' }))).toBe('der Kater ist im Begriff, ihn schnell zu sehen.');
+    expect(de(sees({ modifier: 'ALWAYS', aspect: 'prospective' }))).toBe('der Kater ist immer im Begriff, ihn zu sehen.');
     expect(de(sees({ aspect: 'prospective', negative: true }))).toBe('der Kater ist nicht im Begriff, ihn zu sehen.');
     expect(de(sees({ negative: true }))).toBe('der Kater sieht ihn nicht.');
     expect(de(sees({ aspect: 'progressive', negative: true }))).toBe('der Kater sieht ihn gerade nicht.');
@@ -729,7 +732,8 @@ describe('known bugs: German object pronoun before an adverb', () => {
       .toBe('ihn immer sehen.');
     const relative = (verbPhrase: Partial<VerbPhrase>) =>
       de(clause(np('DOG', { relative: { verbPhrase: { verb: 'SEE', ...verbPhrase }, directObject: np('THIRD_PERSON') } }), 'RUN'));
-    expect(relative({ modifier: 'ALWAYS', aspect: 'prospective' })).toBe('der Hund, der im Begriff ist, ihn immer zu sehen, läuft.');
+    expect(relative({ modifier: 'FAST', aspect: 'prospective' })).toBe('der Hund, der im Begriff ist, ihn schnell zu sehen, läuft.');
+    expect(relative({ modifier: 'ALWAYS', aspect: 'prospective' })).toBe('der Hund, der immer im Begriff ist, ihn zu sehen, läuft.');
     expect(relative({ aspect: 'progressive' })).toBe('der Hund, der ihn gerade sieht, läuft.');
   });
 

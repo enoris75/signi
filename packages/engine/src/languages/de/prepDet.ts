@@ -4,8 +4,8 @@ import { determiner } from './determiner.js';
 /**
  * A complement's preposition + case-declined determiner, honoring `definiteness`. Only a
  * *definite* article triggers the German preposition-article fusions (in+dem=im, in+das=ins,
- * zu+dem=zum, zu+der=zur); any other determiner (einem, keiner, vielen, bare) rides after the plain
- * preposition. An empty `prep` is the bare-dative terminus — the determiner alone.
+ * zu+dem=zum, zu+der=zur, von+dem=vom); any other determiner (einem, keiner, vielen, bare) rides
+ * after the plain preposition. An empty `prep` is the bare-dative terminus — the determiner alone.
  */
 export function prepDet(prep: string, forms: Record<string, string>, _case: Case, plural: boolean): string {
   const det = determiner(forms, _case, plural);
@@ -19,6 +19,8 @@ export function prepDet(prep: string, forms: Record<string, string>, _case: Case
     if (prep === 'in' && det === 'das') return 'ins';
     if (prep === 'zu' && det === 'dem') return 'zum';
     if (prep === 'zu' && det === 'der') return 'zur';
+    // A living source takes "von", which fuses the same way (A154), as `possessorText` has it.
+    if (prep === 'von' && det === 'dem') return 'vom';
   }
   if (!prep) return det;
   return det ? `${prep} ${det}` : prep;

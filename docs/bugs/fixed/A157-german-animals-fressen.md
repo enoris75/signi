@@ -45,8 +45,9 @@ The sense machinery A131 built for KNOW, one step over: there the **object** pic
    passes its own subject, or the head noun when the gap is the subject.
 
 **Which subjects are animals** is the part to decide. `animate && !human` is what the forms carry
-today, but it over-reaches: ANGEL is `animate` and not `human` (until [A148](A148-angel-not-a-person.md)
-sets the flag), and CREATOR and POSSESSOR are `animate`, glossed "someone or something". The clean rule
+today, but it over-reaches: CREATOR and POSSESSOR are `animate` and not `human`, and are glossed
+"someone or something". (ANGEL was the other one; [A148](../fixed/A148-angel-not-a-person.md) has since
+set its flag.) The clean rule
 is the hierarchy — CAT `isA` MAMMAL `isA` ANIMAL, while CREATOR `isA` PERSON — but `lookupNoun` threads
 only the **immediate** hypernym into `forms['isA']`, so the engine cannot walk the chain. Either thread
 an `animal` flag computed from the chain at lookup time, or add the concept-level flag to the seed.
@@ -66,3 +67,47 @@ Out of scope, and worth a decision of their own:
 | | |
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: a German animal "frisst"* (2 `test.fails`, plus a regression test for a person, a pronoun, a command and the other six) |
+
+## Resolved
+
+Fixed on 2026-09-20 with the sense machinery A131 built for KNOW, one argument over — there the
+object picks the verb, here the subject:
+
+1. A hidden `EAT_ANIMAL` sense, `senseOf: 'EAT'`, with the German paradigm — *fressen*, *frisst*
+   (2sg and 3sg, strong e→i), *fraß*, the imperative *friss*, and `participle: 'gefressen'` in
+   [`nonfinite.ts`](../../../packages/backend/src/concepts/verbs/nonfinite.ts). Being a sense it is
+   left out of `GET /api/concepts`, so no picker offers a second eat.
+2. `subject_sense: 'EAT_ANIMAL'` on EAT's German lexeme, beside `object_sense`.
+3. [`resolveVerbPhrase`](../../../packages/engine/src/translator/functions/resolveVerbPhrase.ts)
+   takes the subject's forms and resolves to `subject_sense` when they say `animal`.
+   [`resolvePhrase`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) passes the
+   plan's subject and
+   [`resolveRelativeClause`](../../../packages/engine/src/translator/functions/resolveRelativeClause.ts)
+   its own, or the head noun (threaded from `resolveNounPhrase`) where the gap is the subject.
+
+**Which subjects are animals** is the hierarchy, as the file hoped:
+[`lexicon.ts`](../../../packages/backend/src/lexicon.ts) walks the WHOLE is-a chain in one recursive
+query and sets `forms['animal']`. CAT isA MAMMAL isA ANIMAL counts; ANGEL, CREATOR and POSSESSOR do
+not, so `animate && !human` never had to be used.
+
+**One case the file did not name.** A top-level **citation** (`plan.infinitive`) carries a throwaway
+subject the plan never renders, and `infinitive.test.ts` pins that any subject renders the same — so
+the German citation of EAT must stay 'essen'. `resolvePhrase` takes a `citation` flag from
+`translate` and withholds the subject there. An infinitive **complement** is the opposite case: its
+subject is the governing clause's, by subject control, so it does follow it ('der Hund wünscht, das
+Essen zu fressen').
+
+Guarded by `clause.test.ts` → *known bugs: a German animal frisst*: both former `test.fails` now
+pass, plus the ANIMAL genus against ANGEL and CREATOR, an object relative reading its own subject,
+the citation keeping 'essen' and the infinitive complement following its controller; the regression
+for a person, a pronoun, a command and the other six is unchanged. `lexicon.test.ts` pins the
+`animal` flag and the `subject_sense` lookup, and `concepts/index.test.ts` checks every
+`subject_sense` names a sense of the verb that names it.
+
+**Re-record, as expected:** about 470 pinned German lines across `verb`, `modals`, `relative`,
+`adjectives`, `nounPhrase`, `negation` and the rest, 145 of them in
+[`hypothetical.test.ts.snap`](../../../packages/engine/test/__snapshots__/hypothetical.test.ts.snap)
+and 44 in `verb.conjugation.test.ts.snap`; every one is the same substitution. Twelve e2e
+expectations moved with them.
+
+Still out of scope, as the file has them: DRINK (*saufen*), and FOOD as an animal's *Futter*.

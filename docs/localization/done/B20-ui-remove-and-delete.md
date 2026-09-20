@@ -75,7 +75,7 @@ Changes against the plan:
 - "Remove this possessor" ([B21](B21-ui-clause-and-coordination-vocabulary.md)) needs
   nothing more now: REMOVE and POSSESSOR are both seeded.
 - Probing MOVE for B14 alongside this task turned up
-  [A137](../../bugs/A-must-fix/A137-pronominal-verb-in-a-hypothetical.md), in French and Portuguese.
+  [A137](../../bugs/fixed/A137-pronominal-verb-in-a-hypothetical.md), in French and Portuguese.
   It does not touch REMOVE or DELETE.
 
 Pinned by [verb.test.ts](../../../packages/engine/test/verb.test.ts) (the Italian resultative table,

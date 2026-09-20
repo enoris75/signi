@@ -35,3 +35,35 @@ which say "Move up" without "this period" until this is fixed.
 | | |
 |---|---|
 | **Test** | `program-controls.test.ts` → *known bugs: an adverb of direction before a noun object* (1 `test.fails`, plus a regression test for English and Japanese) |
+
+## Resolved
+
+Fixed on 2026-09-20, together with its English half
+[A156](A156-english-direction-adverb-after-complements.md), by marking the two adverbs of direction and
+giving them a slot of their own:
+
+1. `subtype: 'direction'` on UP and DOWN in every language
+   ([`concepts/adverbs.ts`](../../../packages/backend/src/concepts/adverbs.ts)), read by the new
+   [`isDirectionAdverb`](../../../packages/engine/src/functions/isDirectionAdverb.ts).
+2. The four Romance `predicateText`s
+   ([it](../../../packages/engine/src/languages/it/predicateText.ts),
+   [fr](../../../packages/engine/src/languages/fr/predicateText.ts),
+   [es](../../../packages/engine/src/languages/es/predicateText.ts),
+   [pt](../../../packages/engine/src/languages/pt/predicateText.ts)) give a direction adverb the head
+   of the complements slot, which is right after the object in every branch — declarative, command,
+   instruction and infinitive alike — and leave the manner adverb's slot empty.
+3. German splits the Mittelfeld through the new
+   [`adverbSlots`](../../../packages/engine/src/languages/de/adverbSlots.ts): a direction adverb
+   follows the objects and takes its leading 'nicht' with it ('verschiebt das Buch nicht nach oben'),
+   unless a modal's adverb holds that slot first.
+   [`prospectiveFrame`](../../../packages/engine/src/languages/de/prospectiveFrame.ts) gained a
+   `directionAdverb` field so the zu-group orders it the same way.
+4. `action.movePeriodUp` / `.movePeriodDown` got their object back
+   ([`shared/src/uiStrings.ts`](../../../packages/shared/src/uiStrings.ts)): 'Sposta questo periodo
+   su', 'Dieses Satzgefüge nach oben verschieben'. [B27](../../localization/done/B27-ui-clipboard-move-resize.md)
+   records the change.
+
+Guarded by `program-controls.test.ts` → *known bugs: an adverb of direction before a noun object*: the
+former `test.fails` now passes, plus the negated clause, a modal, the prospective, a relative clause
+and a clitic object, and a regression that a manner adverb still leads the object. `uiStrings.test.ts`
+pins both reorder labels in all seven languages.

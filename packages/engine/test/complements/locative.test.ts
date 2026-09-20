@@ -102,7 +102,7 @@ describe('locative: the transitive verbs', () => {
     expect(inPlace('EAT')).toMatchObject({
       en: 'the cat eats in the house.',
       it: 'il gatto mangia nella casa.',
-      de: 'der Kater isst im Haus.',
+      de: 'der Kater frisst im Haus.',
       ja: '猫は家で食べます。',
     });
     expect(inPlace('LOVE')).toMatchObject({

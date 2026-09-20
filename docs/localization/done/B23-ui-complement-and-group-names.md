@@ -93,7 +93,7 @@ Changes against the plan:
 - **B31's part is left to B31.** SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER keep no `isA`, and
   no complement has a `definition` yet. MEANS, which B31 also needs, is seeded ([B24](B24-ui-noun-modifier-chips.md)).
 
-Bug found and filed: [A140](../../bugs/A-must-fix/A140-german-multiword-noun-adjective-declension.md). The
+Bug found and filed: [A140](../../bugs/fixed/A140-german-multiword-noun-adjective-declension.md). The
 adjective inside a German name like *adverbiale Bestimmung des Ortes* never declines, so its plural and
 dative read "die adverbiale Bestimmungen". The UI only shows the singular nominative and accusative, which
 read right.

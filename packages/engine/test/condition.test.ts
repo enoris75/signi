@@ -36,7 +36,7 @@ describe('German conditional word order', () => {
   // position and pushes the finite verb ahead of the subject ("würde der Hund laufen"). Was B03.
   test('the "wenn" clause is verb-final and the main clause inverts after it', () => {
     expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'EAT') }))
-      .toMatchObject({ de: 'wenn der Kater essen würde, würde der Hund laufen.' });
+      .toMatchObject({ de: 'wenn der Kater fressen würde, würde der Hund laufen.' });
   });
 
   // Both clauses keep their objects, and the protasis object sits in the Mittelfeld of the
@@ -46,7 +46,7 @@ describe('German conditional word order', () => {
       ...clause(np('DOG'), 'SEE', { directObject: np('MOUSE') }),
       condition: clause(np('CAT'), 'EAT', { directObject: np('BOOK') }),
     })).toMatchObject({
-      de: 'wenn der Kater das Buch essen würde, würde der Hund die Maus sehen.',
+      de: 'wenn der Kater das Buch fressen würde, würde der Hund die Maus sehen.',
     });
   });
 });

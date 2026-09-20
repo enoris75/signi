@@ -57,3 +57,30 @@ Mirror Spanish ([A102](../fixed/A102-spanish-reflexive-nonfinite.md), [A30](../f
 | | |
 |---|---|
 | **Test** | `reflexive.test.ts` → *known bugs: Portuguese reflexive verb in a non-finite verb group* (3 `test.fails`, plus a regression test for the finite tense, the present resultative and the command) |
+
+## Resolved
+
+Fixed on 2026-09-20, mirroring Spanish's A102 and A30:
+
+- New [`pt/reflexiveNonfinite.ts`](../../../packages/engine/src/languages/pt/reflexiveNonfinite.ts)
+  strips the stored 3rd-person '-se' and re-attaches the subject's clitic with a hyphen
+  ('mover-me', 'movendo-nos'); a form with no '-se' takes it the same way, which is how 'ter'
+  carries it in a modal's perfect ('ter-se movido').
+- [`aspectVerb`](../../../packages/engine/src/languages/pt/aspectVerb.ts) uses it for the
+  progressive and the prospective, and puts the clitic before the finite 'ter' in the past and
+  future resultative ('se tinha movido'), where Spanish puts it before 'haber'.
+- [`verbGroupInfinitive`](../../../packages/engine/src/languages/pt/verbGroupInfinitive.ts) takes the
+  subject forms from `predicateText` and uses the helper throughout.
+
+The clitic stays **attached** to the non-finite verb, which is what the engine already did in the 3rd
+person ('deve mover-se') and what `hypothetical.test.ts` pins; Brazilian usage would put it in front
+('devo me mover'). Both are standard, and the engine now says so in one place.
+
+Guarded by `reflexive.test.ts` → *known bugs: Portuguese reflexive verb in a non-finite verb group*:
+the three former `test.fails` now pass, plus every person, a modal over each aspect, the future
+perfect, a negation and a relative clause, with regressions that the finite tenses, the present
+resultative, the command and the 3rd person are unchanged and that a non-reflexive verb takes no
+clitic. `reflexiveNonfinite.test.ts` and `verbGroupInfinitive.test.ts` pin the helper directly.
+
+Expected re-record: `verb.conjugation.test.ts.snap` held 24 BECOME lines with the wrong forms
+('estou tornando-se.', 'tinha tornado.'); all 24 are the fix.

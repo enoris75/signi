@@ -103,7 +103,9 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // A relative clause is the predicate half of a phrase whose subject is this
     // head. Recursing through resolveNounPhrase (its objects/complements are noun
     // phrases that may themselves carry `relative`) handles arbitrary nesting.
-    relative: np.relative ? resolveRelativeClause(np.relative, language, lookup) : undefined,
+    // The head's own forms reach the clause: they fill its subject slot where the gap is the
+    // subject, which a `subject_sense` reads (A157).
+    relative: np.relative ? resolveRelativeClause(np.relative, language, lookup, head.forms) : undefined,
     // A possessor is one of two shapes. A pronominal possessor ("his") is pure grammatical
     // features — it needs no lexicon lookup, so it passes straight through for the engine to
     // spell as a possessive pronoun. A genitive possessor is itself a noun phrase; recursing

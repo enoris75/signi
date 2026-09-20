@@ -26,6 +26,8 @@ export function modalGroupFr(
   // clitic before its infinitive ("doit me voir", "doit l'avoir vue") — never onto the modal.
   clitic = '',
   precedingObjectForms?: Record<string, string>,
+  // A short adverb that leads the main verb's own group ("doit bien manger", see `pre_nonfinite`).
+  preInfinitive = '',
 ): { finite: string; finiteAdverb: string; tail: string } {
   const pn = moodPN(subjectForms);
   // A modal names a state, so its past is the imparfait ("voulait", "devait"), not the passé simple (A130).
@@ -41,7 +43,7 @@ export function modalGroupFr(
     else inner.push(word);
     if (m.verb.forms['link']) inner.push(m.verb.forms['link']);
   });
-  const mainGroup = verbGroupInfinitiveFr(verbForms, subjectForms, aspect, clitic, precedingObjectForms);
+  const mainGroup = verbGroupInfinitiveFr(verbForms, subjectForms, aspect, clitic, precedingObjectForms, preInfinitive);
   const mainPart = mainFreqAdverb ? [mainFreqAdverb, mainGroup] : [mainGroup];
   return { finite, finiteAdverb, tail: [...inner, ...mainPart].join(' ') };
 }

@@ -152,8 +152,10 @@ describe('renderClause', () => {
 
     test('nicht scopes over the whole prospective, ahead of im Begriff', () => {
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective' })))).toBe('der Kater ist nicht im Begriff zu essen');
+      // A frequency adverb scopes over the prospective too, so it follows the "nicht" and both stand
+      // ahead of "im Begriff" (A146).
       expect(renderClause(clause(np(KATER), vp(ESSEN, { negative: true, aspect: 'prospective', modifier: concept(IMMER) }), { directObject: mouse })))
-        .toBe('der Kater ist nicht im Begriff , immer die Maus zu essen');
+        .toBe('der Kater ist nicht immer im Begriff , die Maus zu essen');
     });
   });
 

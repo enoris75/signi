@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
@@ -74,7 +75,13 @@ export function predicateText(
     verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
   // prepended below and lands in front of it, exactly as for a plain verb.
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
+  // a direction complement does, instead of taking the manner adverb's slot between the verb and the
+  // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
+  // book"). Leading the complements slot puts it there in every branch below (A142).
+  const isDirection = isDirectionAdverb(modifier);
+  const modifierText = isDirection ? '' : adverbText;
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // Portuguese fronts one negative frequency adverb ("nunca") preverbally without "não", whichever
   // verb it modifies. Scan the group outermost-first (each modal, then the main verb); the first
@@ -87,11 +94,21 @@ export function predicateText(
         // Each modal's adverb trails its verb ("não quer nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
         ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
-        verbGroupInfinitive(copulaVerb.forms, aspect),
+        verbGroupInfinitive(copulaVerb.forms, subjectForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
       ? finite(copulaVerb)
       : aspectVerb(copulaVerb.forms, subjectForms, tense, aspect, mood);
+  // A frequency adverb on the prospective belongs right after the finite "estar", not after the whole
+  // periphrasis, where it would scope over the infinitive alone — "está prestes a comer SEMPRE" reads as
+  // *is about to always eat* (A147). A fronted "nunca" is already preverbal, and a manner adverb does
+  // trail the group ("está prestes a comer bem"). The progressive is idiomatic either way and is left alone.
+  const mainIsFronted = frontIdx === modals.length;
+  const splitFrequency = !mainIsFronted && !!modifierText && modifier?.forms['subtype'] === 'frequency'
+    && aspect === 'prospective' && modals.length === 0;
+  const grouped = splitFrequency
+    ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
+    : conjugated;
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
@@ -101,7 +118,7 @@ export function predicateText(
   // already negates the clause, so "não" is dropped.
   const subjectIsNegative = subjectForms['definiteness'] === 'no';
   const needsNao = verbNegative || objectIsNegative || hasNegativeComplement(complements) || groupHasNegativeAdverb(verbPhrase);
-  const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${conjugated}` : conjugated;
+  const verbText = needsNao && !subjectIsNegative && !preVerbNunca ? `não ${grouped}` : grouped;
   // A pronoun direct object is a proclitic before the finite verb — the Brazilian order "o gato me
   // vê", after "não" in the negative ("não me vê") — not a post-verbal noun ("vê o eu"). A noun
   // object keeps the post-verbal slot.
@@ -116,7 +133,15 @@ export function predicateText(
     : np.head.forms['person'] ? `a ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}` : npText(np);
   // The impersonal "se" is a preverbal clitic standing in for a generic subject ("se come" — "one
   // eats"); the subject word is suppressed upstream. It leads any object clitic ("se o come").
-  const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
+  //
+  // A reflexive verb already carries its own "se" in the form ("se move"), and the impersonal one
+  // cannot stand beside it — "*se se move" is no sentence. The generic subject is then spelled out
+  // as a word instead, written back into the subject slot the clause emptied: "a gente se move"
+  // (A152). With a subject in front, a 3rd-person object clitic no longer opens the clause either.
+  const isGeneric = subjectForms['generic'] === '1';
+  const genericSubject = isGeneric && reflexiveClitic(copulaVerb.forms, subjectForms)
+    ? (subjectForms['generic_reflexive'] ?? '') : '';
+  const impersonalClitic = isGeneric && !genericSubject ? (subjectForms['base'] ?? '') : '';
   const proclitics = [impersonalClitic, objectClitic].filter(Boolean).join(' ');
   // A 3rd-person o / a / os / as cannot open a clause in either norm, so wherever nothing precedes
   // the verb it follows it, hyphenated (`ptEnclitic`): an affirmative command ("veja-o"), an
@@ -127,9 +152,9 @@ export function predicateText(
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
-  const mainIsFronted = frontIdx === modals.length;
-  const postVerb = mainIsFronted ? '' : modifierText;
-  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
+  const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId)]
+    .filter(Boolean).join(' ');
   // Imperative: a subjectless command. The person picks the form (tu = 3sg-present, nós / every
   // negative = present subjunctive, vós = 2pl-present − s); a negative command ("não comas")
   // prefixes "não". The adverb simply trails the verb here.
@@ -173,7 +198,7 @@ export function predicateText(
   // the finite verb ("vejo-o", "tinha-o visto") or a modal's infinitive ("posso vê-lo"), never a
   // participle. A synthetic future or conditional would split for it ("vê-lo-ei"); that mesoclisis
   // is not modelled, so those keep the clitic in front.
-  const verbFirst = verbLeads && !preVerb && !impersonalClitic && !verbText.startsWith('não ')
+  const verbFirst = verbLeads && !preVerb && !impersonalClitic && !genericSubject && !verbText.startsWith('não ')
     && (modals.length > 0 || aspect !== 'neutral' || (tense !== 'future' && mood !== 'conditional'));
   const participle = copulaVerb.forms['participle'];
   const verbWords = verbText.split(' ');
@@ -181,7 +206,7 @@ export function predicateText(
   const cliticizedVerb = verbFirst && thirdPersonClitic
     ? verbWords.map((w, i) => (i === host ? ptEnclitic(w, thirdPersonClitic) : w)).join(' ')
     : ptCliticize(proclitics, verbText);
-  return [preVerb, cliticizedVerb, postVerb, directObjectText, complementsText]
+  return [genericSubject, preVerb, cliticizedVerb, postVerb, directObjectText, complementsText]
     .filter(Boolean)
     .join(' ');
 }

@@ -1,6 +1,8 @@
 import type { ResolvedNounPhrase } from '../../types.js';
+import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { adverbSlots } from './adverbSlots.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
 import { modalAdverbs } from './modalAdverbs.js';
@@ -40,8 +42,10 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // complement's does: "die Taste, auf die der Kater klickt" (A139).
   const gap = relativeGapComplement(np, { definiteness: 'relative' });
   const headPrep = rel.headRole === 'directObject' ? objectPreposition(rel.verbPhrase.verb) : '';
+  // The gap's preposition can be the verb's own — ADD's goal takes "zu", not the default "in" (A143)
+  // — so the clause's verb forms reach the stand-in too, not only the rendered complements below.
   const pronoun = gap
-    ? complementsPhrase(gap)
+    ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
     : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
@@ -82,15 +86,24 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   const objectPronounText = [reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
   const modalAdverbsText = modalAdverbs(modals);
+  // The adverbs already follow the objects here, so a direction adverb only has to leave the
+  // prospective group's pre-object slot (see `adverbSlots`).
+  const adverb = adverbSlots(modifier, nicht, modalAdverbsText);
   const complementsText = [prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
 
   // The adverbs follow the objects ("der das Buch immer liest") but lead the other complements,
   // so a predicate complement stays against the verb ("der immer müde wird"). An object pronoun leads
   // even "gerade" ("der ihn gerade sieht"), and the prospective's zu-infinitive group (see `splitObject`).
+  // A frequency adverb scopes over the whole prospective, not over the zu-infinitive alone — "war
+  // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
+  // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
+  const prospectiveFrequency = isFrequencyAdverb(modifier) && modals.length === 0 ? modifierText : '';
   const predicate = complex.zuInfinitive
     ? prospectiveFrame(complex, {
-      nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText, pronoun: objectPronounText,
-      adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
+      nicht: nicht.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
+      pronoun: objectPronounText,
+      adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
+      directionAdverb: adverb.afterObject, complements: complementsText,
     }, true)
     : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]

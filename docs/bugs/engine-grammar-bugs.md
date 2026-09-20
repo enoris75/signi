@@ -5,7 +5,7 @@ and reviewing its output for linguistic correctness. Each one is already pinned 
 
 A134–A136 were the exception: defects in the backend's HTTP API (`packages/backend/src/index.ts`),
 not in the grammar. They were found while adding the backend's unit tests, and were pinned in
-`packages/backend/src/index.test.ts`, as A144 is (a concept label). A141 was a frontend defect, pinned in
+`packages/backend/src/index.test.ts`, as A144 was (a concept label). A141 was a frontend defect, pinned in
 `packages/frontend/test/`.
 
 The individual defects now live one-per-file under the three subdirectories:
@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (37 of them,
-as of this writing).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of them,
+as of this writing — all Part B, since Part A is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,22 +59,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File |
-|---|---|
-| A142 | [A142-direction-adverb-before-object.md](A-must-fix/A142-direction-adverb-before-object.md) |
-| A143 | [A143-german-add-goal-takes-zu.md](A-must-fix/A143-german-add-goal-takes-zu.md) |
-| A144 | [A144-german-label-inherent-adjective.md](A-must-fix/A144-german-label-inherent-adjective.md) |
-| A145 | [A145-italian-stacked-prenominal-adjectives.md](A-must-fix/A145-italian-stacked-prenominal-adjectives.md) |
-| A146 | [A146-german-frequency-adverb-in-prospective.md](A-must-fix/A146-german-frequency-adverb-in-prospective.md) |
-| A147 | [A147-romance-frequency-adverb-after-periphrasis.md](A-must-fix/A147-romance-frequency-adverb-after-periphrasis.md) |
-| A148 | [A148-angel-not-a-person.md](A-must-fix/A148-angel-not-a-person.md) |
-| A151 | [A151-portuguese-reflexive-nonfinite.md](A-must-fix/A151-portuguese-reflexive-nonfinite.md) |
-| A152 | [A152-impersonal-se-with-reflexive-verb.md](A-must-fix/A152-impersonal-se-with-reflexive-verb.md) |
-| A153 | [A153-italian-animate-source-reads-as-goal.md](A-must-fix/A153-italian-animate-source-reads-as-goal.md) |
-| A154 | [A154-german-animate-source-takes-aus.md](A-must-fix/A154-german-animate-source-takes-aus.md) |
-| A155 | [A155-french-bien-after-nonfinite-verb.md](A-must-fix/A155-french-bien-after-nonfinite-verb.md) |
-| A156 | [A156-english-direction-adverb-after-complements.md](A-must-fix/A156-english-direction-adverb-after-complements.md) |
-| A157 | [A157-german-animals-fressen.md](A-must-fix/A157-german-animals-fressen.md) |
+**Empty.** Every confirmed bug catalogued so far has been fixed; see the **Fixed** section below and
+[`A-must-fix/README.md`](A-must-fix/README.md) for what belongs here.
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -252,6 +238,20 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A141 | [A141-link-control-tooltips-offer-a-reveal.md](fixed/A141-link-control-tooltips-offer-a-reveal.md) | Frontend | 2026-09-14 |
 | A149 | [A149-french-object-zero-article.md](fixed/A149-french-object-zero-article.md) | French | 2026-09-19 |
 | A150 | [A150-japanese-inanimate-owner-aru.md](fixed/A150-japanese-inanimate-owner-aru.md) | Japanese | 2026-09-19 |
+| A148 | [A148-angel-not-a-person.md](fixed/A148-angel-not-a-person.md) | Spanish, English (corpus) | 2026-09-20 |
+| A144 | [A144-german-label-inherent-adjective.md](fixed/A144-german-label-inherent-adjective.md) | German (corpus) | 2026-09-20 |
+| A142 | [A142-direction-adverb-before-object.md](fixed/A142-direction-adverb-before-object.md) | Italian, French, German, Spanish, Portuguese | 2026-09-20 |
+| A156 | [A156-english-direction-adverb-after-complements.md](fixed/A156-english-direction-adverb-after-complements.md) | English | 2026-09-20 |
+| A143 | [A143-german-add-goal-takes-zu.md](fixed/A143-german-add-goal-takes-zu.md) | German | 2026-09-20 |
+| A145 | [A145-italian-stacked-prenominal-adjectives.md](fixed/A145-italian-stacked-prenominal-adjectives.md) | Italian | 2026-09-20 |
+| A146 | [A146-german-frequency-adverb-in-prospective.md](fixed/A146-german-frequency-adverb-in-prospective.md) | German | 2026-09-20 |
+| A147 | [A147-romance-frequency-adverb-after-periphrasis.md](fixed/A147-romance-frequency-adverb-after-periphrasis.md) | Italian, Spanish, Portuguese | 2026-09-20 |
+| A153 | [A153-italian-animate-source-reads-as-goal.md](fixed/A153-italian-animate-source-reads-as-goal.md) | Italian | 2026-09-20 |
+| A154 | [A154-german-animate-source-takes-aus.md](fixed/A154-german-animate-source-takes-aus.md) | German | 2026-09-20 |
+| A151 | [A151-portuguese-reflexive-nonfinite.md](fixed/A151-portuguese-reflexive-nonfinite.md) | Portuguese | 2026-09-20 |
+| A152 | [A152-impersonal-se-with-reflexive-verb.md](fixed/A152-impersonal-se-with-reflexive-verb.md) | Spanish, Portuguese | 2026-09-20 |
+| A155 | [A155-french-bien-after-nonfinite-verb.md](fixed/A155-french-bien-after-nonfinite-verb.md) | French | 2026-09-20 |
+| A157 | [A157-german-animals-fressen.md](fixed/A157-german-animals-fressen.md) | German (corpus + translator) | 2026-09-20 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

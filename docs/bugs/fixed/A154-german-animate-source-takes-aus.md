@@ -38,3 +38,23 @@ that part needs a new noun feature.
 | | |
 |---|---|
 | **Test** | `complements/source.test.ts` → *known bugs: German animate source takes "aus"* (2 `test.fails`, plus a regression test that a place keeps `aus`) |
+
+## Resolved
+
+Fixed on 2026-09-20. The source branch of
+[`de/complementsPhrase`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+picks 'von' when the conjunct's head is animate and keeps 'aus' otherwise, and
+[`prepDet`](../../../packages/engine/src/languages/de/prepDet.ts) gained the von+dem → vom fusion,
+for a definite article only, as `possessorText` already had it. The relativizer stand-in goes through
+the same branch, so it becomes 'von dem'.
+
+A surface is still no enclosure ('springt aus der Wand'), which needs a noun feature the corpus does
+not carry — out of scope, as the file has it.
+
+Guarded by `complements/source.test.ts` → *known bugs: German animate source takes 'aus'*: both
+former `test.fails` now pass, plus every determiner and an adjective through the fusion, and a
+transitive verb that licenses a source; the regression that a place keeps 'aus' is unchanged.
+`prepDet.test.ts` pins the fusion and the pairs that do not contract.
+
+Expected re-record: A8's weak-masculine source was pinned as 'aus dem Jungen' and is now 'vom
+Jungen' — the -n it pins is unchanged.

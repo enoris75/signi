@@ -3,6 +3,7 @@ import type { ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, Resol
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
@@ -48,7 +49,13 @@ export function predicateText(
   const moodFinite = moodForm('fr', plain, moodPN(subjectForms), mood) ?? statePastForm('fr', plain, moodPN(subjectForms), tense, mood);
   const conjugated = moodFinite !== undefined ? reflexiveFinite(verb.forms, subjectForms, moodFinite)
     : conjugate(verb.forms, subjectForms, tense);
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
+  // a direction complement does, instead of taking the manner adverb's slot between the verb and the
+  // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
+  // book"). Leading the complements slot puts it there in every branch below (A142).
+  const isDirection = isDirectionAdverb(modifier);
+  const modifierText = isDirection ? '' : adverbText;
   // "jamais" uses ne...jamais (replaces "pas"), even without verbNegative. A jamais on *any* verb
   // in the group (main or a modal) provides the negation, so "pas" is suppressed group-wide.
   const groupNegative = groupHasNegativeAdverb(verbPhrase);
@@ -56,6 +63,12 @@ export function predicateText(
   // in a compound tense means between the auxiliary and the participle ("n'a jamais été",
   // "doit toujours aller"), not trailing the whole group. Manner adverbs still trail.
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
+  // A short adverb — "bien", and later "mal" / "mieux" / "trop" — goes BEFORE the non-finite verb it
+  // modifies: between the auxiliary and the participle ("a bien mangé"), ahead of the infinitive a
+  // modal governs ("doit bien manger"), and inside a periphrasis's "de" ("en train de bien manger").
+  // A long -ment adverb follows it ("a mangé lentement"). After a FINITE verb it is already in place
+  // ("mange bien la souris"), so the class only matters where a non-finite verb is built (A155).
+  const preInfinitive = modifier?.forms['pre_nonfinite'] === '1' ? modifierText : '';
   // "aucun" (no) is itself the negator, so it takes "ne" alone (no "pas") — for a subject
   // ("aucun garçon ne pleure"), an object ("il ne voit aucun garçon"), or a postverbal complement
   // ("le chat ne court dans aucune maison"), which obliges the same preverbal "ne".
@@ -126,18 +139,21 @@ export function predicateText(
     // negation — and governs the inner modals' infinitives down to the main verb group's
     // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
     const { finite, finiteAdverb, tail } = modalGroupFr(
-      modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic, precedingObjectForms ?? cliticObjectForms,
+      modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic,
+      precedingObjectForms ?? cliticObjectForms, preInfinitive,
     );
     effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
-    effectiveMod = isFrequency ? '' : modifierText;
+    effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
   } else if (aspect !== 'neutral') {
     // Every non-neutral aspect is periphrastic on a finite auxiliary; negation (ne … pas, or
     // "ne" alone for the self-negating "aucun"/"jamais") wraps that auxiliary, then a
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
-    const { finite, tail } = aspectVerbFr(verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic);
+    const { finite, tail } = aspectVerbFr(
+      verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic, preInfinitive,
+    );
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
-    effectiveMod = isFrequency ? '' : modifierText;
+    effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
   } else if (verbNegative || aucun || groupNegative) {
     // Plain finite negation reuses `negateFinite`, which elides "ne" → "n'" before a vowel
     // ("il n'est pas prudent") and picks "ne … pas" vs bare "ne" (self-negating aucun/jamais).
@@ -147,15 +163,17 @@ export function predicateText(
     effectiveVerb = conjugated;
     effectiveMod = modifierText;
   }
-  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId)]
+    .filter(Boolean).join(' ');
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
   // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"
   // takes "ne" alone ("ne manger aucune souris"), as `negateFinite` has it; "ne" elides against the
   // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
   const negativeAdverb = isNegativeAdverb(modifier);
-  const infinitiveMod = negativeAdverb ? '' : modifierText;
+  const infinitiveMod = negativeAdverb || preInfinitive ? '' : modifierText;
   const negateInfinitive = (inf: string): string => {
-    const group = frCliticize(objectClitic, inf);
+    // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
+    const group = [preInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
     if (!verbNegative && !aucun && !negativeAdverb) return group;
     const negator = negativeAdverb ? modifierText : verbNegative && !aucun ? 'pas' : '';
     const tail = [negator, group].filter(Boolean).join(' ');

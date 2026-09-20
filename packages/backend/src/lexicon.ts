@@ -89,8 +89,34 @@ function lookupNoun(conceptId: string, language: string): LexicalEntry | undefin
     "SELECT concept_b_id FROM concept_relations WHERE concept_a_id = ? AND relation = 'hypernym'"
   ).get(conceptId);
   if (hyper) forms['isA'] = hyper.concept_b_id;
+  // Whether the referent is an animal, read off the WHOLE is-a chain rather than the direct
+  // hypernym above: CAT isA MAMMAL isA ANIMAL. German needs it to pick "fressen" over "essen" for an
+  // animal subject (A157). The chain is the right rule and the flag-per-concept the wrong one —
+  // `animate && !human` over-reaches (CREATOR and POSSESSOR are "someone or something"), and a
+  // hand-set flag would drift the moment another animal is seeded under MAMMAL.
+  if (isA(conceptId, ANIMAL_CONCEPT)) forms['animal'] = '1';
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
+}
+
+/** The root of the animal subtree; every noun under it is an animal (see `isA`). */
+const ANIMAL_CONCEPT = 'ANIMAL';
+
+/**
+ * Whether `conceptId` is `ancestor`, or sits under it anywhere in the hypernym chain. One recursive
+ * query, so a deep chain costs the same as a shallow one.
+ */
+function isA(conceptId: string, ancestor: string): boolean {
+  const row = getDb().prepare<[string, string], { found: number }>(`
+    WITH RECURSIVE chain(id) AS (
+      SELECT ?
+      UNION
+      SELECT cr.concept_b_id FROM concept_relations cr JOIN chain ON cr.concept_a_id = chain.id
+        WHERE cr.relation = 'hypernym'
+    )
+    SELECT 1 AS found FROM chain WHERE id = ? LIMIT 1
+  `).get(conceptId, ancestor);
+  return !!row;
 }
 
 function lookupPronoun(conceptId: string, language: string): LexicalEntry | undefined {

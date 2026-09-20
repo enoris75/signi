@@ -75,7 +75,7 @@ describe('infinitive complement', () => {
       en: 'the cat is able to eat the food.',
       it: 'la gatta è capace di mangiare il cibo.',
       fr: 'la chatte est capable de manger la nourriture.',
-      de: 'die Katze ist fähig, das Essen zu essen.',
+      de: 'die Katze ist fähig, das Essen zu fressen.',
       es: 'la gata es capaz de comer la comida.',
       ja: '猫は食べ物を食べることが可能です。',
       pt: 'a gata é capaz de comer a comida.',
@@ -87,7 +87,7 @@ describe('infinitive complement', () => {
       en: 'the dog desires to eat the food.',
       it: 'il cane desidera mangiare il cibo.',
       fr: 'le chien désire manger la nourriture.',
-      de: 'der Hund wünscht, das Essen zu essen.',
+      de: 'der Hund wünscht, das Essen zu fressen.',
       es: 'el perro desea comer la comida.',
       ja: '犬は食べ物を食べることを望んでいます。', // DESIRE is a state: 〜ている
       pt: 'o cão deseja comer a comida.',
@@ -117,7 +117,7 @@ describe('infinitive complement', () => {
       en: 'the cats were obliged to eat the food.',
       it: 'i gatti erano obbligati a mangiare il cibo.',
       fr: 'les chats étaient obligés de manger la nourriture.',
-      de: 'die Kater waren verpflichtet, das Essen zu essen.',
+      de: 'die Kater waren verpflichtet, das Essen zu fressen.',
       es: 'los gatos estaban obligados a comer la comida.',
       ja: '猫は食べ物を食べることが義務的でした。',
       pt: 'os gatos estavam obrigados a comer a comida.',
@@ -187,7 +187,7 @@ describe('infinitive complement', () => {
     expect(sayAll(plan)).toMatchObject({
       en: 'if the cat ate, the dog would be able to run.',
       it: 'se il gatto mangiasse, il cane sarebbe capace di correre.',
-      de: 'wenn der Kater essen würde, würde der Hund fähig sein, zu laufen.',
+      de: 'wenn der Kater fressen würde, würde der Hund fähig sein, zu laufen.',
       ja: 'もし猫が食べたら、犬は走ることが可能です。',
     });
   });

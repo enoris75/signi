@@ -43,3 +43,23 @@ never*, so the target there is a separate judgement.
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: German frequency adverb in the prospective* (2 `test.fails`, plus a regression test that the other six already scope the adverb over the prospective) |
+
+## Resolved
+
+Fixed on 2026-09-20.
+[`prospectiveFrame`](../../../packages/engine/src/languages/de/prospectiveFrame.ts) gained a
+`frequencyAdverb` field, rendered in the slot ahead of 'im Begriff' that `nicht` and the modals'
+adverbs already use — so 'nicht' leads a positive one ('ist nicht immer im Begriff'), as the file
+asked. Both callers,
+[`renderClause`](../../../packages/engine/src/languages/de/renderClause.ts) and
+[`subordinateClause`](../../../packages/engine/src/languages/de/subordinateClause.ts), do the split:
+a `subtype: 'frequency'` adverb on the main verb goes to the new field, a manner adverb stays in the
+group. Under a modal the adverb keeps the group, which is what the file put out of scope.
+
+Guarded by `verb.test.ts` → *known bugs: German frequency adverb in the prospective*: both former
+`test.fails` now pass, plus 'nicht' leading a positive adverb, a manner adverb staying in the group,
+and a modal keeping the old placement. `prospectiveFrame.test.ts` pins the frame's own slot in V2 and
+verb-final order.
+
+Expected re-records: `renderClause.test.ts`, `subordinateClause.test.ts` and `objectPronoun.test.ts`
+each held one prospective line whose frequency adverb was inside the group.

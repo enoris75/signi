@@ -15,7 +15,7 @@ describe('adjectives', () => {
       // Iberian Romance puts a qualifying adjective after the noun.
       es: 'el gato grande come.',
       pt: 'o gato grande come.',
-      de: 'der große Kater isst.',
+      de: 'der große Kater frisst.',
       ja: '大きい猫は食べます。',
     });
   });
@@ -27,7 +27,7 @@ describe('adjectives', () => {
       fr: 'les grandes chattes mangent.',
       es: 'las gatas grandes comen.',
       pt: 'as gatas grandes comem.',
-      de: 'die großen Katzen essen.',
+      de: 'die großen Katzen fressen.',
       ja: '大きい猫は食べます。',
     });
   });
@@ -40,23 +40,25 @@ describe('multiple adjectives', () => {
   test('two adjectives', () => {
     expect(cat({ adjectives: ['BIG', 'OLD'] })).toMatchObject({
       en: 'the big old cat eats.',
-      it: 'il grande vecchio gatto mangia.',
+      // Italian gives the prenominal slot to one qualifying adjective; the second follows the
+      // noun (A145). French stacks two of them idiomatically.
+      it: 'il grande gatto vecchio mangia.',
       fr: 'le grand vieux chat mange.',
       // Iberian Romance coordinates postnominal adjectives with a conjunction.
       es: 'el gato grande y viejo come.',
       pt: 'o gato grande e velho come.',
-      de: 'der große alte Kater isst.',
+      de: 'der große alte Kater frisst.',
       ja: '大きい古い猫は食べます。',
     });
   });
 
   test('all of them agree with the head', () => {
     expect(cat({ gender: 'fem', number: 'plural', adjectives: ['BIG', 'OLD'] })).toMatchObject({
-      it: 'le grandi vecchie gatte mangiano.',
+      it: 'le grandi gatte vecchie mangiano.',
       fr: 'les grandes vieilles chattes mangent.',
       es: 'las gatas grandes y viejas comen.',
       pt: 'as gatas grandes e velhas comem.',
-      de: 'die großen alten Katzen essen.',
+      de: 'die großen alten Katzen fressen.',
     });
   });
 
@@ -66,16 +68,21 @@ describe('multiple adjectives', () => {
       it: 'il grande gatto marrone mangia.',
       fr: 'le grand chat brun mange.',
       en: 'the big brown cat eats.',
-      de: 'der große braune Kater isst.',
+      de: 'der große braune Kater frisst.',
     });
   });
 
   test('Italian apocopates before a consonant', () => {
-    // bello → bel, prenominally: "il bel gatto", never "il bello gatto".
+    // bello → bel, prenominally: "il bel gatto", never "il bello gatto". It only apocopates where it
+    // stands before the noun, so it has to lead the list — behind another BAGS adjective it is
+    // demoted and takes its plain postnominal form (A145).
+    expect(cat({ adjectives: ['BEAUTIFUL', 'OLD'] })).toMatchObject({
+      it: 'il bel gatto vecchio mangia.',
+    });
     expect(cat({ adjectives: ['BIG', 'OLD', 'BEAUTIFUL'] })).toMatchObject({
-      it: 'il grande vecchio bel gatto mangia.',
+      it: 'il grande gatto vecchio e bello mangia.',
       fr: 'le grand vieux beau chat mange.',
-      de: 'der große alte schöne Kater isst.',
+      de: 'der große alte schöne Kater frisst.',
     });
   });
 });
@@ -269,7 +276,7 @@ describe('degree', () => {
       it: 'il gatto meno grande mangia.',
       fr: 'le chat moins grand mange.',
       es: 'el gato menos grande come.',
-      de: 'der weniger große Kater isst.',
+      de: 'der weniger große Kater frisst.',
     });
   });
 });
@@ -281,44 +288,44 @@ describe('known bugs: degree', () => {
     sayAll(clause(np('CAT', { adjectives: [adjective], adjectiveDegrees: [degree] }), 'EAT'));
 
   test('German umlauts the comparative: groß → größer', () => {
-    expect(withDegree('BIG', 'more')).toMatchObject({ de: 'der größere Kater isst.' });
+    expect(withDegree('BIG', 'more')).toMatchObject({ de: 'der größere Kater frisst.' });
   });
 
   test('German umlauts the superlative: groß → größt', () => {
-    expect(withDegree('BIG', 'most')).toMatchObject({ de: 'der größte Kater isst.' });
+    expect(withDegree('BIG', 'most')).toMatchObject({ de: 'der größte Kater frisst.' });
   });
 
   test('German has suppletive comparatives: gut → besser', () => {
-    expect(withDegree('GOOD', 'more')).toMatchObject({ de: 'der bessere Kater isst.' });
+    expect(withDegree('GOOD', 'more')).toMatchObject({ de: 'der bessere Kater frisst.' });
   });
 
   // The fix generalises beyond groß/gut: the umlaut set, the epenthesis rule and the
   // suppletive superlative, each verified below — and the non-umlauting stems left untouched.
   test('German umlauts the whole monosyllabic set, comparative and superlative', () => {
-    expect(withDegree('OLD', 'more').de).toBe('der ältere Kater isst.');
-    expect(withDegree('OLD', 'most').de).toBe('der älteste Kater isst.');
-    expect(withDegree('YOUNG', 'more').de).toBe('der jüngere Kater isst.');
-    expect(withDegree('YOUNG', 'most').de).toBe('der jüngste Kater isst.');
-    expect(withDegree('STRONG', 'more').de).toBe('der stärkere Kater isst.');
-    expect(withDegree('WEAK', 'most').de).toBe('der schwächste Kater isst.');
-    expect(withDegree('COLD', 'most').de).toBe('der kälteste Kater isst.'); // umlaut + epenthesis
+    expect(withDegree('OLD', 'more').de).toBe('der ältere Kater frisst.');
+    expect(withDegree('OLD', 'most').de).toBe('der älteste Kater frisst.');
+    expect(withDegree('YOUNG', 'more').de).toBe('der jüngere Kater frisst.');
+    expect(withDegree('YOUNG', 'most').de).toBe('der jüngste Kater frisst.');
+    expect(withDegree('STRONG', 'more').de).toBe('der stärkere Kater frisst.');
+    expect(withDegree('WEAK', 'most').de).toBe('der schwächste Kater frisst.');
+    expect(withDegree('COLD', 'most').de).toBe('der kälteste Kater frisst.'); // umlaut + epenthesis
   });
 
   test('German inserts the epenthetic -e- after a dental/sibilant stem', () => {
-    expect(withDegree('BAD', 'most').de).toBe('der schlechteste Kater isst.'); // -t → -est
-    expect(withDegree('HOT', 'most').de).toBe('der heißeste Kater isst.'); // -ß → -est, no umlaut
-    expect(withDegree('QUICK', 'most').de).toBe('der schnellste Kater isst.'); // plain -st
+    expect(withDegree('BAD', 'most').de).toBe('der schlechteste Kater frisst.'); // -t → -est
+    expect(withDegree('HOT', 'most').de).toBe('der heißeste Kater frisst.'); // -ß → -est, no umlaut
+    expect(withDegree('QUICK', 'most').de).toBe('der schnellste Kater frisst.'); // plain -st
   });
 
   test('German has a suppletive superlative too: gut → best', () => {
-    expect(withDegree('GOOD', 'most').de).toBe('der beste Kater isst.');
+    expect(withDegree('GOOD', 'most').de).toBe('der beste Kater frisst.');
   });
 
   // Regression guard: umlaut is lexical, not a blanket vowel rule — an unflagged stem stays put
   // (braun → brauner, never *bräuner; heiß → heißer, never *häißer).
   test('German does not umlaut an adjective not flagged for it', () => {
-    expect(withDegree('BROWN', 'more').de).toBe('der braunere Kater isst.');
-    expect(withDegree('HOT', 'more').de).toBe('der heißere Kater isst.');
+    expect(withDegree('BROWN', 'more').de).toBe('der braunere Kater frisst.');
+    expect(withDegree('HOT', 'more').de).toBe('der heißere Kater frisst.');
   });
 
   // The same machinery feeds the predicative "am …sten" frame.
@@ -578,7 +585,7 @@ describe('every adjective at every degree', () => {
       fr: 'le chat aussi grand mange.',
       es: 'el gato igual de grande come.',
       pt: 'o gato igualmente grande come.',
-      de: 'der gleich große Kater isst.',
+      de: 'der gleich große Kater frisst.',
       ja: '同じくらい大きい猫は食べます。',
     });
   });
@@ -587,11 +594,11 @@ describe('every adjective at every degree', () => {
     // "weniger ADJ" for less, "am wenigsten ADJ" for least, "gleich ADJ" for equally — none of
     // which touch the umlaut/suppletive machinery that the comparative and superlative get wrong.
     expect(cat({ adjectives: ['GOOD'], adjectiveDegrees: ['less'] }))
-      .toMatchObject({ de: 'der weniger gute Kater isst.' });
+      .toMatchObject({ de: 'der weniger gute Kater frisst.' });
     expect(cat({ adjectives: ['BIG'], adjectiveDegrees: ['least'] }))
-      .toMatchObject({ de: 'der am wenigsten große Kater isst.' });
+      .toMatchObject({ de: 'der am wenigsten große Kater frisst.' });
     expect(cat({ adjectives: ['OLD'], adjectiveDegrees: ['equally'] }))
-      .toMatchObject({ de: 'der gleich alte Kater isst.' });
+      .toMatchObject({ de: 'der gleich alte Kater frisst.' });
   });
 
   test('the Romance most/least are the comparative under the (default definite) article', () => {
@@ -618,7 +625,7 @@ describe('superlative with each determiner', () => {
       it: 'il gatto più grande mangia.', // definite article carries the superlative
       fr: 'le chat le plus grand mange.', // French doubles the article for the superlative
       es: 'el gato más grande come.',
-      de: 'der größte Kater isst.', // umlaut + irregular superlative (größt), the ending is right
+      de: 'der größte Kater frisst.', // umlaut + irregular superlative (größt), the ending is right
     });
   });
 
@@ -734,7 +741,7 @@ describe('known bugs: degree (extended)', () => {
   // is separate from the umlaut/suppletive misses on BIG/OLD/GOOD already pinned above.
   test('German superlative needs epenthetic -e- after -t: "interessanteste"', () => {
     expect(cat({ adjectives: ['INTERESTING'], adjectiveDegrees: ['most'] }))
-      .toMatchObject({ de: 'der interessanteste Kater isst.' });
+      .toMatchObject({ de: 'der interessanteste Kater frisst.' });
   });
 });
 
@@ -967,7 +974,7 @@ describe('adjective agreement and comparison: NEAR and FAR', () => {
       fr: 'les chattes proches mangent.',
       es: 'las gatas cercanas comen.',
       pt: 'as gatas próximas comem.',
-      de: 'die nahen Katzen essen.', // nah + the weak plural -en
+      de: 'die nahen Katzen fressen.', // nah + the weak plural -en
       ja: '近い猫は食べます。',
     });
     expect(cat({ gender: 'fem', number: 'plural', adjectives: ['FAR'] })).toEqual({
@@ -976,7 +983,7 @@ describe('adjective agreement and comparison: NEAR and FAR', () => {
       fr: 'les chattes lointaines mangent.', // lointain → lointaine, not the adverb "loin"
       es: 'las gatas lejanas comen.',
       pt: 'as gatas distantes comem.', // -e adjective: gender-invariant, plural only
-      de: 'die fernen Katzen essen.',
+      de: 'die fernen Katzen fressen.',
       ja: '遠い猫は食べます。',
     });
   });
@@ -1007,11 +1014,11 @@ describe('adjective agreement and comparison: NEAR and FAR', () => {
   test('compare: NEAR umlauts to näher/nächst, FAR is suppletive in English', () => {
     const degreed = (adjective: string, degree: Degree) =>
       cat({ adjectives: [adjective], adjectiveDegrees: [degree] });
-    expect(degreed('NEAR', 'more')).toMatchObject({ en: 'the nearer cat eats.', de: 'der nähere Kater isst.' });
+    expect(degreed('NEAR', 'more')).toMatchObject({ en: 'the nearer cat eats.', de: 'der nähere Kater frisst.' });
     // nächst, seeded whole: the umlaut rule alone would build *nähst.
-    expect(degreed('NEAR', 'most')).toMatchObject({ en: 'the nearest cat eats.', de: 'der nächste Kater isst.' });
-    expect(degreed('FAR', 'more')).toMatchObject({ en: 'the farther cat eats.', de: 'der fernere Kater isst.' });
-    expect(degreed('FAR', 'most')).toMatchObject({ en: 'the farthest cat eats.', de: 'der fernste Kater isst.' });
+    expect(degreed('NEAR', 'most')).toMatchObject({ en: 'the nearest cat eats.', de: 'der nächste Kater frisst.' });
+    expect(degreed('FAR', 'more')).toMatchObject({ en: 'the farther cat eats.', de: 'der fernere Kater frisst.' });
+    expect(degreed('FAR', 'most')).toMatchObject({ en: 'the farthest cat eats.', de: 'der fernste Kater frisst.' });
     // Romance and Japanese stay periphrastic for both.
     expect(degreed('FAR', 'more')).toMatchObject({
       it: 'il gatto più lontano mangia.',
@@ -1105,11 +1112,11 @@ describe('two adjectives across all degree combinations', () => {
   // Romance: a positive adjective of the prenominal class stays before the noun; a compared one
   // (any non-positive degree) moves after it. So which side each adjective lands on is a function
   // of its own degree — the four quadrants below.
-  test('both positive → both prenominal, juxtaposed (no conjunction)', () => {
+  test('both positive → French juxtaposes them, Italian keeps only the first', () => {
     expect(say('positive', 'positive')).toMatchObject({
-      it: 'il grande vecchio gatto mangia.',
+      it: 'il grande gatto vecchio mangia.',
       fr: 'le grand vieux chat mange.',
-      de: 'der große alte Kater isst.',
+      de: 'der große alte Kater frisst.',
     });
   });
 
@@ -1235,11 +1242,12 @@ describe('Romance: a prenominal and a postnominal adjective', () => {
     expect(reversed.es).toBe('el gato feliz y grande come.');
   });
 
-  test('two prenominal and one postnominal: the pair juxtaposes, the last trails', () => {
-    // "il grande vecchio gatto felice" — grande vecchio juxtaposed (no e), felice after the noun.
-    // Only one adjective is postnominal, so no coordinator appears at all.
+  test('two prenominal and one postnominal: French juxtaposes the pair, Italian demotes the second', () => {
+    // French: "le grand vieux chat heureux" — grand vieux juxtaposed (no et), heureux after the noun.
+    // Italian keeps one qualifying adjective in front, so "vecchio" joins "felice" behind the noun
+    // and A27's list coordinates the pair (A145).
     expect(cat({ adjectives: ['BIG', 'OLD', 'HAPPY'] })).toMatchObject({
-      it: 'il grande vecchio gatto felice mangia.',
+      it: 'il grande gatto vecchio e felice mangia.',
       fr: 'le grand vieux chat heureux mange.',
     });
   });
@@ -1290,9 +1298,11 @@ describe('known bugs: Romance postnominal coordination', () => {
 
   // Regression: PRENOMINAL adjectives (Italian/French BAGS set) still juxtapose with no comma and
   // no conjunction — the fix touches only the coordinated (postnominal / Iberian) list.
-  test('prenominal adjectives still juxtapose, uncoordinated', () => {
+  test("French's prenominal adjectives still juxtapose, uncoordinated", () => {
+    // Italian keeps one of the three in front and coordinates the other two behind the noun (A145);
+    // French stacks all three, juxtaposed with no "et".
     expect(cat({ adjectives: ['BIG', 'OLD', 'BEAUTIFUL'] })).toMatchObject({
-      it: 'il grande vecchio bel gatto mangia.',
+      it: 'il grande gatto vecchio e bello mangia.',
       fr: 'le grand vieux beau chat mange.',
     });
   });
@@ -1571,23 +1581,40 @@ describe('known bugs: Italian stacked prenominal adjectives', () => {
   const cries = (concept: string, adjectives: string[], extra = {}) =>
     sayAll(clause(np(concept, { adjectives, ...extra }), 'CRY_OUT'));
 
-  test.fails('Italian keeps one adjective before the noun and puts the rest after it', () => {
+  test('Italian keeps one adjective before the noun and puts the rest after it', () => {
     expect(cries('ANGEL', ['BEAUTIFUL', 'BIG']).it).toBe("il bell'angelo grande grida.");
     expect(cries('CAT', ['BEAUTIFUL', 'BIG']).it).toBe('il bel gatto grande grida.');
     expect(cries('ANGEL', ['OLD', 'BEAUTIFUL']).it).toBe('il vecchio angelo bello grida.');
   });
 
-  test.fails('the demoted adjectives coordinate as a list (A27)', () => {
+  test('the demoted adjectives coordinate as a list (A27)', () => {
     expect(cries('ANGEL', ['BIG', 'OLD', 'BEAUTIFUL']).it).toBe('il grande angelo vecchio e bello grida.');
     expect(cries('CAT', ['BIG', 'OLD', 'BEAUTIFUL']).it).toBe('il grande gatto vecchio e bello grida.');
   });
 
-  test.fails('the surviving prenominal adjective agrees with the noun it now precedes', () => {
+  test('the surviving prenominal adjective agrees with the noun it now precedes', () => {
     // "begli" (not "bei") once "grandi" no longer stands between "bello" and the vowel of "angeli".
     expect(cries('ANGEL', ['BEAUTIFUL', 'BIG'], { number: 'plural', definiteness: 'few' }).it)
       .toBe('pochi begli angeli grandi gridano.');
     expect(cries('ANGEL', ['BIG', 'OLD', 'BEAUTIFUL'], { number: 'plural', definiteness: 'few' }).it)
       .toBe('pochi grandi angeli vecchi e belli gridano.');
+  });
+
+  // The generalisation: the cap is on the *qualifying* (BAGS) adjectives, so a determiner-like
+  // prenominal — an ordinal, OTHER — still leads one of them, a fourth adjective joins the list,
+  // and a graded adjective was already postnominal and never held the slot.
+  test('a determiner-like prenominal still leads a qualifying one', () => {
+    expect(cries('ANGEL', ['FIRST', 'BIG', 'OLD']).it).toBe('il primo grande angelo vecchio grida.');
+    expect(cries('CAT', ['OTHER', 'BEAUTIFUL', 'BIG'], { definiteness: 'indefinite' }).it)
+      .toBe('un altro bel gatto grande grida.');
+  });
+
+  test('a fourth adjective joins the postnominal list, and a graded one was never in front', () => {
+    expect(cries('ANGEL', ['BIG', 'OLD', 'BEAUTIFUL', 'GOOD']).it)
+      .toBe('il grande angelo vecchio, bello e buono grida.');
+    expect(cries('ANGEL', ['HIGH', 'BIG', 'OLD']).it).toBe('il grande angelo alto e vecchio grida.');
+    expect(cries('ANGEL', ['BIG', 'BEAUTIFUL'], { adjectiveDegrees: ['more', 'positive'] }).it)
+      .toBe("il bell'angelo più grande grida.");
   });
 
   test('regression: one prenominal adjective, a postnominal one, and French are already right', () => {
@@ -1693,7 +1720,7 @@ describe('OTHER', () => {
       en: 'another cat eats.',
       it: 'un altro gatto mangia.',
       fr: 'un autre chat mange.',
-      de: 'ein anderer Kater isst.',
+      de: 'ein anderer Kater frisst.',
       es: 'otro gato come.',
       ja: '別の猫は食べます。',
       pt: 'outro gato come.',
@@ -1702,7 +1729,7 @@ describe('OTHER', () => {
       en: 'other cats eat.',
       it: 'altre gatte mangiano.',
       fr: "d'autres chattes mangent.",
-      de: 'andere Katzen essen.',
+      de: 'andere Katzen fressen.',
       es: 'otras gatas comen.',
       ja: '別の猫は食べます。',
       pt: 'outras gatas comem.',
@@ -1714,7 +1741,7 @@ describe('OTHER', () => {
       en: 'the other cat eats.',
       it: "l'altra gatta mangia.",
       fr: "l'autre chatte mange.",
-      de: 'die andere Katze isst.',
+      de: 'die andere Katze frisst.',
       es: 'la otra gata come.',
       ja: '別の猫は食べます。',
       pt: 'a outra gata come.',
@@ -1728,7 +1755,7 @@ describe('OTHER', () => {
       en: 'the cat eats in another house.',
       it: "il gatto mangia in un'altra casa.",
       fr: 'le chat mange dans une autre maison.',
-      de: 'der Kater isst in einem anderen Haus.',
+      de: 'der Kater frisst in einem anderen Haus.',
       es: 'el gato come en otra casa.',
       ja: '猫は別の家で食べます。',
       pt: 'o gato come em outra casa.',
@@ -1739,7 +1766,7 @@ describe('OTHER', () => {
       en: 'the cat eats another big mouse.',
       it: 'il gatto mangia un altro grande topo.',
       fr: 'le chat mange une autre grande souris.',
-      de: 'der Kater isst eine andere große Maus.',
+      de: 'der Kater frisst eine andere große Maus.',
       es: 'el gato come otro ratón grande.',
       ja: '猫は別の大きいネズミを食べます。',
       pt: 'o gato come outro rato grande.',

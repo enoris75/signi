@@ -3,6 +3,7 @@ import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNou
 import { alarmCry } from '../../functions/alarmCry.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
@@ -116,8 +117,15 @@ export function predicateText(
   // ("lo si mangia", "non lo si mangia", "mi si vede"); the subject word itself is suppressed upstream.
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
   const directObjectText = directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
-  const complementsText = complementsPhrase(complements, subjectForms, verb.conceptId);
+  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
+  // a direction complement does, instead of taking the manner adverb's slot between the verb and the
+  // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
+  // book"). Leading the complements slot puts it there in every branch below (A142).
+  const isDirection = isDirectionAdverb(modifier);
+  const modifierText = isDirection ? '' : adverbText;
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId)]
+    .filter(Boolean).join(' ');
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for
   // noi/voi). "non" already sits in negText, so reuse it as the negation flag and prefix.
@@ -150,15 +158,18 @@ export function predicateText(
       .filter(Boolean)
       .join(' ');
   }
-  // Italian slots a FREQUENCY adverb between the auxiliary and the past participle of a compound
-  // perfect ("ha SEMPRE mangiato", "non ha MAI mangiato"), not after the whole group — where a
-  // MANNER adverb does belong ("ha mangiato bene"). Only the resultative splits the verb into
-  // auxiliary + participle; a simple tense ("mangia sempre") and a modal chain ("deve mangiare
-  // sempre") keep the adverb after the verb, so both stay on the append path below.
+  // Italian slots a FREQUENCY adverb right after the FINITE verb of a periphrasis, not after the
+  // whole group — where a MANNER adverb does belong ("ha mangiato bene", "sta per mangiare bene").
+  // The compound perfect puts it between auxiliary and participle ("ha SEMPRE mangiato", "non ha
+  // MAI mangiato", A28); the progressive and the prospective put it after "stare", where trailing
+  // it would scope it over the non-finite verb alone ("sta per amare SEMPRE" is *is about to always
+  // love*, A147). A simple tense ("mangia sempre") and a modal chain ("deve mangiare sempre") have
+  // no periphrastic finite to follow, so both stay on the append path below.
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
-  if (isFrequency && modifierText && aspect === 'resultative' && modals.length === 0) {
-    const [aux, ...rest] = verbText.split(' ');
-    const withAdverb = [aux, modifierText, ...rest].join(' ');
+  const periphrastic = aspect === 'resultative' || aspect === 'progressive' || aspect === 'prospective';
+  if (isFrequency && modifierText && periphrastic && modals.length === 0) {
+    const [finite, ...rest] = verbText.split(' ');
+    const withAdverb = [finite, modifierText, ...rest].join(' ');
     return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, withAdverb, directObjectText, complementsText].filter(Boolean).join(' '));
   }
   return elideCi([negText, leadingReflexive, objectClitic, impersonalClitic, verbText, modifierText, directObjectText, complementsText]

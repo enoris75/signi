@@ -64,3 +64,28 @@ and `renderNP`'s `joinConjuncts` coordinates the enlarged `post` list.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: Italian stacked prenominal adjectives* (3 `test.fails`, plus a regression test for the single-adjective cases and for French) |
+
+## Resolved
+
+Fixed on 2026-09-20 in
+[`it/splitAdjectives.ts`](../../../packages/engine/src/languages/it/splitAdjectives.ts): `pre` now
+takes the **first** eligible adjective in the phrase's own list and demotes every later one to
+`post`, keeping the user's order. Nothing downstream changed — `prenominalChain` re-resolves the
+allomorph against whatever now follows (`pochi bei grandi angeli` → `pochi begli angeli grandi`), and
+`renderNP`'s `joinConjuncts` coordinates the enlarged `post` list.
+
+One refinement on the shape the file proposed: the cap is on the **qualifying** adjectives only.
+[`it.consts.ts`](../../../packages/engine/src/languages/it/it.consts.ts) splits `PRENOMINAL` into
+`PRENOMINAL_QUALIFYING` (the BAGS set) and `PRENOMINAL_DETERMINER` (the ordinals and OTHER). A
+determiner-like adjective does not qualify the noun, so it neither takes the one slot nor blocks it:
+'un altro grande topo' and 'il primo grande angelo' stay as they were, both pinned as right before
+this fix. The comment calling the stacking a deliberate trade-off is gone, as the file asked.
+
+Guarded by `adjectives.test.ts` → *known bugs: Italian stacked prenominal adjectives*: the three
+former `test.fails` now pass, plus a determiner-like prenominal leading a qualifying one, a fourth
+adjective joining the list, and a graded adjective that never held the slot; the regression test for
+the single-adjective cases and for French is unchanged. `splitAdjectives.test.ts` and
+`renderNP.test.ts` pin the split and the surface directly.
+
+Expected re-records, all the same substitution: `adjectives.test.ts`, `subject.test.ts` and
+`renderNP.test.ts` held Italian lines with two stacked prenominals ('il grande vecchio gatto').

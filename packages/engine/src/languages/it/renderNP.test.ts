@@ -43,16 +43,19 @@ describe('renderNP', () => {
   });
 
   describe('adjectives', () => {
-    test('prenominal adjectives precede the noun and agree with it', () => {
+    // One qualifying adjective takes the prenominal slot; the rest follow the noun (A145).
+    test('the first prenominal adjective precedes the noun and agrees with it', () => {
       expect(withDeterminer(np(GATTO, {}, { adjectives: [BIG] }))).toBe('il grande gatto');
-      expect(withDeterminer(np(GATTA, { number: 'plural' }, { adjectives: [BIG, OLD] }))).toBe('le grandi vecchie gatte');
+      expect(withDeterminer(np(GATTA, { number: 'plural' }, { adjectives: [BIG, OLD] }))).toBe('le grandi gatte vecchie');
     });
 
     test('bello inflects for the word after it, and the article for bello', () => {
       expect(withDeterminer(np(GATTO, {}, { adjectives: [BEAUTIFUL] }))).toBe('il bel gatto');
       expect(withDeterminer(np(UOMO, {}, { adjectives: [BEAUTIFUL] }))).toBe("il bell'uomo");
       expect(withDeterminer(np(UOMO, { number: 'plural' }, { adjectives: [BEAUTIFUL] }))).toBe('i begli uomini');
-      expect(withDeterminer(np(GATTO, {}, { adjectives: [BIG, OLD, BEAUTIFUL] }))).toBe('il grande vecchio bel gatto');
+      // Demoted behind the noun, "bello" is the plain postnominal form and joins A27's list.
+      expect(withDeterminer(np(GATTO, {}, { adjectives: [BIG, OLD, BEAUTIFUL] }))).toBe('il grande gatto vecchio e bello');
+      expect(withDeterminer(np(GATTO, {}, { adjectives: [BEAUTIFUL, BIG] }))).toBe('il bel gatto grande');
     });
 
     test('other adjectives follow the noun, listed with a single conjunction', () => {

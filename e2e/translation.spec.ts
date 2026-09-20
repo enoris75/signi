@@ -24,7 +24,7 @@ test.describe('translation', () => {
     expect(await app.sentence('pt')).toBe('o gato come.');
     // CAT is a gendered noun and the builder's default is masculine, so German picks the
     // masculine lexeme (Kater) rather than Katze.
-    expect(await app.sentence('de')).toBe('der Kater isst.');
+    expect(await app.sentence('de')).toBe('der Kater frisst.');
     expect(await app.sentence('ja')).toBe('猫は食べます。');
     // Japanese carries furigana over the kanji it renders.
     expect(await app.furigana('ja')).toEqual(['ねこ', 'たべます']);
@@ -39,7 +39,7 @@ test.describe('translation', () => {
     // The object is accusative — the case shows up in German's article.
     await expect.poll(() => app.sentence('en')).toBe('the cat eats the mouse.');
     expect(await app.sentence('it')).toBe('il gatto mangia il topo.');
-    expect(await app.sentence('de')).toBe('der Kater isst die Maus.');
+    expect(await app.sentence('de')).toBe('der Kater frisst die Maus.');
   });
 
   // The generic / impersonal subject, chosen from the pronoun chooser's "one" option (the pronoun

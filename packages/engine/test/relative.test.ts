@@ -25,7 +25,7 @@ describe('relative clauses', () => {
       it: 'il gatto che mangia il topo corre.',
       fr: 'le chat qui mange la souris court.',
       // German sends the relative clause's verb to the end, and brackets the clause in commas.
-      de: 'der Kater, der die Maus isst, läuft.',
+      de: 'der Kater, der die Maus frisst, läuft.',
     });
   });
 
@@ -40,7 +40,7 @@ describe('relative clauses', () => {
       // French distinguishes the subject relativiser (qui) from the object one (que).
       fr: 'la souris que le chat mange court.',
       es: 'el ratón que el gato come corre.',
-      de: 'die Maus, die der Kater isst, läuft.',
+      de: 'die Maus, die der Kater frisst, läuft.',
     });
   });
 
@@ -51,7 +51,7 @@ describe('relative clauses', () => {
       en: 'the dog sees the cat that ate.',
       it: 'il cane vede il gatto che mangiò.',
       fr: 'le chien voit le chat qui mangea.',
-      de: 'der Hund sieht den Kater, der aß.',
+      de: 'der Hund sieht den Kater, der fraß.',
     });
   });
 
@@ -108,7 +108,7 @@ describe('known bugs: relative clauses', () => {
   // sibling cases below where the clause ends the sentence).
   test('German closes the relative clause with a comma', () => {
     expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }), 'RUN')))
-      .toMatchObject({ de: 'der Kater, der isst, läuft.' });
+      .toMatchObject({ de: 'der Kater, der frisst, läuft.' });
   });
 
   // The closing comma merges with the sentence-final full stop when the clause ends the sentence:
@@ -116,7 +116,7 @@ describe('known bugs: relative clauses', () => {
   test('German drops the closing comma into the sentence-final stop', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', {
       directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT' } } }),
-    })).de).toBe('der Hund sieht den Kater, der isst.');
+    })).de).toBe('der Hund sieht den Kater, der frisst.');
   });
 
   // The clearest bug in the engine: the Japanese engine's own comment says the clause verb "takes the *plain*
@@ -198,14 +198,14 @@ describe('relative clauses: a tense of their own', () => {
       en: 'the cat that ate sees the mouse.',
       it: 'il gatto che mangiò vede il topo.',
       fr: 'le chat qui mangea voit la souris.',
-      de: 'der Kater, der aß, sieht die Maus.',
+      de: 'der Kater, der fraß, sieht die Maus.',
     });
 
     expect(matrix({ tense: 'past' }, {})).toMatchObject({
       en: 'the cat that eats saw the mouse.',
       it: 'il gatto che mangia vide il topo.', // mangia present, vide past
       es: 'el gato que come vio el ratón.',
-      de: 'der Kater, der isst, sah die Maus.',
+      de: 'der Kater, der frisst, sah die Maus.',
     });
   });
 
@@ -214,7 +214,7 @@ describe('relative clauses: a tense of their own', () => {
       en: 'the cat that will eat saw the mouse.',
       it: 'il gatto che mangerà vide il topo.',
       fr: 'le chat qui mangera vit la souris.',
-      de: 'der Kater, der essen wird, sah die Maus.', // verb-final: the auxiliary goes last
+      de: 'der Kater, der fressen wird, sah die Maus.', // verb-final: the auxiliary goes last
     });
 
     expect(matrix({ tense: 'future' }, { tense: 'past' })).toMatchObject({
@@ -240,7 +240,7 @@ describe('relative clauses: an aspect of their own', () => {
       en: 'the cat that eats has seen the mouse.',
       it: 'il gatto che mangia ha visto il topo.',
       fr: 'le chat qui mange a vu la souris.',
-      de: 'der Kater, der isst, hat die Maus gesehen.', // the matrix aspect DOES render
+      de: 'der Kater, der frisst, hat die Maus gesehen.', // the matrix aspect DOES render
     });
   });
 
@@ -429,13 +429,13 @@ describe('relative clauses: polarity and modals of their own', () => {
     expect(matrix({ negative: true }, {})).toMatchObject({
       en: 'the cat that eats does not see the mouse.',
       it: 'il gatto che mangia non vede il topo.',
-      de: 'der Kater, der isst, sieht die Maus nicht.',
+      de: 'der Kater, der frisst, sieht die Maus nicht.',
     });
 
     expect(matrix({}, { negative: true })).toMatchObject({
       en: 'the cat that does not eat sees the mouse.',
       fr: 'le chat qui ne mange pas voit la souris.',
-      de: 'der Kater, der nicht isst, sieht die Maus.', // negation survives into the clause
+      de: 'der Kater, der nicht frisst, sieht die Maus.', // negation survives into the clause
       ja: '食べません猫はネズミを見ます。', // documented gap, pinned as-is: B13
     });
   });
@@ -449,7 +449,7 @@ describe('relative clauses: polarity and modals of their own', () => {
     expect(matrix({}, { modals: ['CAN'] })).toMatchObject({
       en: 'the cat that can eat sees the mouse.',
       it: 'il gatto che può mangiare vede il topo.',
-      de: 'der Kater, der essen kann, sieht die Maus.', // modal goes final, like the tense auxiliary
+      de: 'der Kater, der fressen kann, sieht die Maus.', // modal goes final, like the tense auxiliary
     });
   });
 });
@@ -462,20 +462,20 @@ describe('known bugs: relative clauses (aspect)', () => {
   // too — verb-final: the finite auxiliary closes the clause behind the participle/infinitive.
   test('German renders a resultative inside a relative clause', () => {
     expect(matrix({}, { aspect: 'resultative' }))
-      .toMatchObject({ de: 'der Kater, der gegessen hat, sieht die Maus.' });
+      .toMatchObject({ de: 'der Kater, der gefressen hat, sieht die Maus.' });
   });
 
   test('German renders a progressive inside a relative clause', () => {
     // "der gerade isst" — the adverbial progressive German uses everywhere else, unaffected by the
     // matrix clause carrying an aspect of its own ("hat … gesehen").
     expect(matrix({ aspect: 'resultative' }, { aspect: 'progressive' }).de)
-      .toBe('der Kater, der gerade isst, hat die Maus gesehen.');
+      .toBe('der Kater, der gerade frisst, hat die Maus gesehen.');
   });
 
   test('German renders a prospective inside a relative clause', () => {
     // "im Begriff zu essen", with the finite "ist" pushed to the clause end (verb-final).
     expect(matrix({}, { aspect: 'prospective' }).de)
-      .toBe('der Kater, der im Begriff zu essen ist, sieht die Maus.');
+      .toBe('der Kater, der im Begriff zu fressen ist, sieht die Maus.');
   });
 
   test('German keeps BOTH the tense and the aspect of a relative clause', () => {
@@ -484,14 +484,14 @@ describe('known bugs: relative clauses (aspect)', () => {
     expect(matrix(
       { tense: 'future', aspect: 'progressive' },
       { tense: 'past', aspect: 'resultative' },
-    )).toMatchObject({ de: 'der Kater, der gegessen hatte, wird gerade die Maus sehen.' });
+    )).toMatchObject({ de: 'der Kater, der gefressen hatte, wird gerade die Maus sehen.' });
   });
 
   test('German renders a future perfect inside a relative clause', () => {
     // Future + resultative stacks the auxiliary's infinitive behind the participle, with "werden"
     // finite and clause-final: "gegessen haben wird".
     expect(matrix({}, { tense: 'future', aspect: 'resultative' }).de)
-      .toBe('der Kater, der gegessen haben wird, sieht die Maus.');
+      .toBe('der Kater, der gefressen haben wird, sieht die Maus.');
   });
 
   test('German orders the clause object before the resultative participle', () => {
@@ -500,7 +500,7 @@ describe('known bugs: relative clauses (aspect)', () => {
     expect(sayAll(clause(
       np('CAT', { relative: { verbPhrase: { verb: 'EAT', aspect: 'resultative' }, directObject: np('MOUSE') } }),
       'RUN',
-    )).de).toBe('der Kater, der die Maus gegessen hat, läuft.');
+    )).de).toBe('der Kater, der die Maus gefressen hat, läuft.');
   });
 });
 
@@ -543,7 +543,7 @@ describe('nested relative clauses: three tenses at once', () => {
       it: 'il gatto che mangiò il topo che corre vedrà il cane.',
       fr: 'le chat qui mangea la souris qui court verra le chien.',
       // Each German clause is verb-final on its own: "die läuft," inside "der … aß,".
-      de: 'der Kater, der die Maus, die läuft, aß, wird den Hund sehen.',
+      de: 'der Kater, der die Maus, die läuft, fraß, wird den Hund sehen.',
     });
   });
 
@@ -552,7 +552,7 @@ describe('nested relative clauses: three tenses at once', () => {
       en: 'the cat that will eat the mouse that ran sees the dog.',
       it: 'il gatto che mangerà il topo che corse vede il cane.',
       es: 'el gato que comerá el ratón que corrió ve el perro.',
-      de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.',
+      de: 'der Kater, der die Maus, die lief, fressen wird, sieht den Hund.',
     });
   });
 });
@@ -638,13 +638,13 @@ describe('known bugs: nested relative clauses', () => {
     const de = nested(
       { aspect: 'progressive' }, { aspect: 'resultative' }, { aspect: 'prospective' },
     ).de;
-    expect(de).toBe('der Kater, der die Maus, die im Begriff zu laufen ist, gegessen hat, sieht gerade den Hund.');
+    expect(de).toBe('der Kater, der die Maus, die im Begriff zu laufen ist, gefressen hat, sieht gerade den Hund.');
   });
 
   test('…and the TENSE still survives at every depth alongside it', () => {
     // Same nest, tenses instead of aspects: all three levels render. The path exists.
     expect(nested({}, { tense: 'future' }, { tense: 'past' }))
-      .toMatchObject({ de: 'der Kater, der die Maus, die lief, essen wird, sieht den Hund.' });
+      .toMatchObject({ de: 'der Kater, der die Maus, die lief, fressen wird, sieht den Hund.' });
   });
 });
 
@@ -656,47 +656,47 @@ describe('known bugs: German negation inside a relative clause', () => {
 
   test('German negates a relative clause the way it negates a main clause', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE', { definiteness: 'no' }) }))
-      .toBe('der Hund, der keine Maus isst, läuft.');
+      .toBe('der Hund, der keine Maus frisst, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true }, complements: { predicative: { phrase: np('TIRED') } } }))
       .toBe('der Hund, der nicht müde wird, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' } }))
-      .toBe('der Hund, der nicht immer isst, läuft.');
+      .toBe('der Hund, der nicht immer frisst, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, aspect: 'prospective' } }))
-      .toBe('der Hund, der nicht im Begriff zu essen ist, läuft.');
+      .toBe('der Hund, der nicht im Begriff zu fressen ist, läuft.');
   });
 
   test('German "nicht" leads any adverb, after an object and ahead of a predicate complement', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' }, directObject: np('MOUSE') }))
-      .toBe('der Hund, der die Maus nicht immer isst, läuft.');
+      .toBe('der Hund, der die Maus nicht immer frisst, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } }))
-      .toBe('der Hund, der nicht immer essen muss, läuft.');
+      .toBe('der Hund, der nicht immer fressen muss, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true, modifier: 'ALWAYS' }, complements: { predicative: { phrase: np('TIRED') } } }))
       .toBe('der Hund, der nicht immer müde wird, läuft.');
     expect(sayAll(clause(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT', negative: true, modifier: 'ALWAYS' } },
-    }), 'RUN')).de).toBe('die Maus, die der Kater nicht immer isst, läuft.');
+    }), 'RUN')).de).toBe('die Maus, die der Kater nicht immer frisst, läuft.');
   });
 
   test('German negates the relative the same way in another tense or aspect', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, tense: 'future' }, directObject: np('MOUSE', { definiteness: 'no' }) }))
-      .toBe('der Hund, der keine Maus essen wird, läuft.');
+      .toBe('der Hund, der keine Maus fressen wird, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'BECOME', negative: true, aspect: 'resultative' }, complements: { predicative: { phrase: np('TIRED') } } }))
       .toBe('der Hund, der nicht müde geworden ist, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, aspect: 'prospective' }, directObject: np('MOUSE') }))
-      .toBe('der Hund, der nicht im Begriff ist, die Maus zu essen, läuft.');
+      .toBe('der Hund, der nicht im Begriff ist, die Maus zu fressen, läuft.');
     // An un-negated verb with a "kein" object is negative all the same.
     expect(dogWho({ verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE', { definiteness: 'no' }) }))
-      .toBe('der Hund, der keine Maus isst, läuft.');
+      .toBe('der Hund, der keine Maus frisst, läuft.');
   });
 
   test('regression: "nicht" still trails the objects, "nie" still replaces it', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE') }))
-      .toBe('der Hund, der die Maus nicht isst, läuft.');
+      .toBe('der Hund, der die Maus nicht frisst, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true, modifier: 'NEVER' } }))
-      .toBe('der Hund, der nie isst, läuft.');
+      .toBe('der Hund, der nie frisst, läuft.');
     // An adverb now leads the other complements, as in the main clause, instead of trailing them.
     expect(dogWho({ verbPhrase: { verb: 'EAT', modifier: 'ALWAYS' }, complements: { locative: { phrase: np('MARKET') } } }))
-      .toBe('der Hund, der immer im Markt isst, läuft.');
+      .toBe('der Hund, der immer im Markt frisst, läuft.');
   });
 });
 
@@ -723,31 +723,31 @@ describe('known bugs: German means clause inside a relative clause', () => {
           },
         },
       },
-    }), 'RUN')).de).toBe('der Hund, der isst, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der frisst, indem man ein Wort wählt, läuft.');
   });
 
   test('German keeps the "indem" clause last with an object, a tense, a negation or an object relative', () => {
     const instrumental = byChoosing('process');
     expect(dogWho({ verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE'), complements: { instrumental } }))
-      .toBe('der Hund, der die Maus isst, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der die Maus frisst, indem man ein Wort wählt, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', aspect: 'resultative' }, complements: { instrumental } }))
-      .toBe('der Hund, der gegessen hat, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der gefressen hat, indem man ein Wort wählt, läuft.');
     expect(dogWho({ verbPhrase: { verb: 'EAT', negative: true }, complements: { instrumental } }))
-      .toBe('der Hund, der nicht isst, indem man ein Wort wählt, läuft.');
+      .toBe('der Hund, der nicht frisst, indem man ein Wort wählt, läuft.');
     expect(sayAll(clause(np('MOUSE', {
       relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'EAT' }, complements: { instrumental } },
-    }), 'RUN')).de).toBe('die Maus, die der Kater isst, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('die Maus, die der Kater frisst, indem man ein Wort wählt, läuft.');
   });
 
   test('German closes a sentence-final relative on the "indem" clause', () => {
     expect(sayAll(clause(np('DOG'), 'SEE', {
       directObject: np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, complements: { instrumental: byChoosing('process') } } }),
-    })).de).toBe('der Hund sieht den Kater, der isst, indem man ein Wort wählt.');
+    })).de).toBe('der Hund sieht den Kater, der frisst, indem man ein Wort wählt.');
   });
 
   test('regression: a concept-level instrument is a phrase and stays before the verb', () => {
     expect(dogWho({ verbPhrase: { verb: 'EAT' }, complements: { instrumental: byChoosing('concept') } }))
-      .toBe('der Hund, der mit dem Wählen eines Wortes isst, läuft.');
+      .toBe('der Hund, der mit dem Wählen eines Wortes frisst, läuft.');
   });
 });
 
@@ -762,7 +762,7 @@ describe('known bugs: relative clause on a complement slot', () => {
       relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
     }), 'BURN'))).toMatchObject({
       en: 'the house where the cat eats burns.',
-      de: 'das Haus, in dem der Kater isst, brennt.',
+      de: 'das Haus, in dem der Kater frisst, brennt.',
     });
     expect(sayAll(clause(np('BOY', {
       relative: { headRole: 'terminus', subject: np('MAN'), verbPhrase: { verb: 'GIVE' }, directObject: np('BOOK') },
@@ -801,7 +801,7 @@ describe('known bugs: relative clause on a complement slot', () => {
   test('the gap\'s specifiers pick the preposition, and the relativizer agrees in gender and number', () => {
     expect(gapped('HOUSE', 'locative', 'EAT', { headSpecifiers: [{ kind: 'path', value: 'under' }] })).toEqual({
       en: 'the house under which the cat eats burns.',
-      de: 'das Haus, unter dem der Kater isst, brennt.',
+      de: 'das Haus, unter dem der Kater frisst, brennt.',
       it: 'la casa sotto la quale il gatto mangia brucia.',
       fr: 'la maison sous laquelle le chat mange brûle.',
       es: 'la casa debajo de la que el gato come arde.',
@@ -809,7 +809,7 @@ describe('known bugs: relative clause on a complement slot', () => {
     });
     expect(gapped('HOUSE', 'locative', 'EAT', { headSpecifiers: [{ kind: 'path', value: 'around' }] }, { number: 'plural' })).toEqual({
       en: 'the houses around which the cat eats burn.',
-      de: 'die Häuser, um die der Kater isst, brennen.',
+      de: 'die Häuser, um die der Kater frisst, brennen.',
       it: 'le case intorno alle quali il gatto mangia bruciano.',
       fr: 'les maisons autour desquelles le chat mange brûlent.',
       es: 'las casas alrededor de las que el gato come arden.',
@@ -952,7 +952,7 @@ describe('locative relative clause: the place where', () => {
       en: 'the houses where the cat eats burn.',
       it: 'le case dove il gatto mangia bruciano.',
       fr: 'les maisons où le chat mange brûlent.',
-      de: 'die Häuser, in denen der Kater isst, brennen.',
+      de: 'die Häuser, in denen der Kater frisst, brennen.',
       es: 'las casas donde el gato come arden.',
       ja: '猫が食べる家は燃えます。',
       pt: 'as casas onde o gato come ardem.',

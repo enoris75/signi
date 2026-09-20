@@ -9,7 +9,7 @@ const catEats = (verbPhrase: Partial<VerbPhrase>) =>
 // Tense, aspect and negation — everything the verb phrase carries.
 describe('tense', () => {
   test('present', () => {
-    expect(catEats({})).toMatchObject({ en: 'the cat eats.', de: 'der Kater isst.' });
+    expect(catEats({})).toMatchObject({ en: 'the cat eats.', de: 'der Kater frisst.' });
   });
 
   test('past', () => {
@@ -21,7 +21,7 @@ describe('tense', () => {
       fr: 'le chat mangea.',
       es: 'el gato comió.',
       pt: 'o gato comeu.',
-      de: 'der Kater aß.',
+      de: 'der Kater fraß.',
       ja: '猫は食べました。',
     });
   });
@@ -33,7 +33,7 @@ describe('tense', () => {
       fr: 'le chat mangera.',
       es: 'el gato comerá.',
       pt: 'o gato comerá.',
-      de: 'der Kater wird essen.',
+      de: 'der Kater wird fressen.',
       // Japanese has no future tense: the non-past form covers it, so this is the present.
       ja: '猫は食べます。',
     });
@@ -48,7 +48,7 @@ describe('negation', () => {
       fr: 'le chat ne mange pas.', // French brackets the verb
       es: 'el gato no come.',
       pt: 'o gato não come.',
-      de: 'der Kater isst nicht.', // German puts it after the verb
+      de: 'der Kater frisst nicht.', // German puts it after the verb
       ja: '猫は食べません。', // Japanese inflects the verb itself
     });
   });
@@ -62,7 +62,7 @@ describe('aspect', () => {
       fr: 'le chat est en train de manger.',
       es: 'el gato está comiendo.',
       pt: 'o gato está comendo.',
-      de: 'der Kater isst gerade.', // German has no progressive; it uses an adverb
+      de: 'der Kater frisst gerade.', // German has no progressive; it uses an adverb
       ja: '猫は食べています。',
     });
   });
@@ -74,7 +74,7 @@ describe('aspect', () => {
       fr: 'le chat était en train de manger.',
       es: 'el gato estaba comiendo.',
       pt: 'o gato estava comendo.',
-      de: 'der Kater aß gerade.',
+      de: 'der Kater fraß gerade.',
       ja: '猫は食べていました。',
     });
   });
@@ -85,7 +85,7 @@ describe('aspect', () => {
       it: 'il gatto ha mangiato.',
       fr: 'le chat a mangé.',
       es: 'el gato ha comido.',
-      de: 'der Kater hat gegessen.',
+      de: 'der Kater hat gefressen.',
     });
   });
 
@@ -96,7 +96,7 @@ describe('aspect', () => {
       fr: 'le chat avait mangé.',
       es: 'el gato había comido.',
       pt: 'o gato tinha comido.',
-      de: 'der Kater hatte gegessen.',
+      de: 'der Kater hatte gefressen.',
     });
   });
 
@@ -107,7 +107,7 @@ describe('aspect', () => {
       fr: 'le chat est sur le point de manger.',
       es: 'el gato está a punto de comer.',
       pt: 'o gato está prestes a comer.',
-      de: 'der Kater ist im Begriff zu essen.',
+      de: 'der Kater ist im Begriff zu fressen.',
       ja: '猫は食べるところです。',
     });
   });
@@ -122,7 +122,7 @@ describe('aspect × tense', () => {
       it: 'il gatto starà mangiando.', // stare goes to the future, the gerund stays put
       fr: 'le chat sera en train de manger.',
       es: 'el gato estará comiendo.',
-      de: 'der Kater wird gerade essen.',
+      de: 'der Kater wird gerade fressen.',
     });
   });
 
@@ -131,14 +131,14 @@ describe('aspect × tense', () => {
       en: 'the cat was about to eat.',
       it: 'il gatto stava per mangiare.',
       fr: 'le chat était sur le point de manger.',
-      de: 'der Kater war im Begriff zu essen.',
+      de: 'der Kater war im Begriff zu fressen.',
       ja: '猫は食べるところでした。',
     });
 
     expect(catEats({ aspect: 'prospective', tense: 'future' })).toMatchObject({
       en: 'the cat will be about to eat.',
       it: 'il gatto starà per mangiare.',
-      de: 'der Kater wird im Begriff sein zu essen.',
+      de: 'der Kater wird im Begriff sein zu fressen.',
     });
   });
 
@@ -149,7 +149,7 @@ describe('aspect × tense', () => {
       fr: 'le chat aura mangé.',
       es: 'el gato habrá comido.',
       pt: 'o gato terá comido.',
-      de: 'der Kater wird gegessen haben.',
+      de: 'der Kater wird gefressen haben.',
     });
   });
 });
@@ -163,7 +163,7 @@ describe('aspect × negation', () => {
       it: 'il gatto non sta mangiando.', // non negates STARE, the finite auxiliary
       fr: "le chat n'est pas en train de manger.", // ne elides before the vowel
       es: 'el gato no está comiendo.',
-      de: 'der Kater isst gerade nicht.',
+      de: 'der Kater frisst gerade nicht.',
       ja: '猫は食べていません。',
     });
   });
@@ -174,7 +174,7 @@ describe('aspect × negation', () => {
       it: 'il gatto non ha mangiato.',
       fr: "le chat n'a pas mangé.", // pas sits between auxiliary and participle
       es: 'el gato no ha comido.',
-      de: 'der Kater hat nicht gegessen.',
+      de: 'der Kater hat nicht gefressen.',
       ja: '猫は食べてしまいません。',
     });
   });
@@ -184,7 +184,7 @@ describe('aspect × negation', () => {
       en: 'the cat had not eaten.',
       it: 'il gatto non aveva mangiato.',
       fr: "le chat n'avait pas mangé.",
-      de: 'der Kater hatte nicht gegessen.',
+      de: 'der Kater hatte nicht gefressen.',
       ja: '猫は食べてしまいませんでした。',
     });
 
@@ -192,7 +192,7 @@ describe('aspect × negation', () => {
       en: 'the cat will not be eating.',
       it: 'il gatto non starà mangiando.',
       fr: 'le chat ne sera pas en train de manger.',
-      de: 'der Kater wird gerade nicht essen.',
+      de: 'der Kater wird gerade nicht fressen.',
     });
   });
 });
@@ -205,7 +205,7 @@ describe('tense × negation', () => {
       fr: 'le chat ne mangea pas.',
       es: 'el gato no comió.',
       pt: 'o gato não comeu.',
-      de: 'der Kater aß nicht.',
+      de: 'der Kater fraß nicht.',
       ja: '猫は食べませんでした。',
     });
   });
@@ -217,7 +217,7 @@ describe('tense × negation', () => {
       fr: 'le chat ne mangera pas.',
       es: 'el gato no comerá.',
       pt: 'o gato não comerá.',
-      de: 'der Kater wird nicht essen.',
+      de: 'der Kater wird nicht fressen.',
       ja: '猫は食べません。', // the non-past covers the future
     });
   });
@@ -234,13 +234,13 @@ describe('adverb polarity', () => {
       it: 'il gatto non mangia sempre.',
       fr: 'le chat ne mange pas toujours.',
       es: 'el gato no come siempre.',
-      de: 'der Kater isst nicht immer.',
+      de: 'der Kater frisst nicht immer.',
     });
 
     expect(catEats({ modifier: 'ALWAYS', negative: true, tense: 'past' })).toMatchObject({
       en: 'the cat did not always eat.',
       it: 'il gatto non mangiò sempre.',
-      de: 'der Kater aß nicht immer.',
+      de: 'der Kater fraß nicht immer.',
     });
   });
 
@@ -253,7 +253,7 @@ describe('adverb polarity', () => {
       fr: 'le chat ne mange jamais.', // ne … jamais, with jamais replacing pas
       es: 'el gato nunca come.',
       pt: 'o gato nunca come.',
-      de: 'der Kater isst nie.',
+      de: 'der Kater frisst nie.',
       ja: '猫は決して食べません。', // 決して + a negated verb
     });
   });
@@ -275,7 +275,7 @@ describe('adverb polarity', () => {
       en: 'the cat never eats.',
       it: 'il gatto non mangia mai.',
       fr: 'le chat ne mange jamais.',
-      de: 'der Kater isst nie.',
+      de: 'der Kater frisst nie.',
     });
   });
 });
@@ -331,32 +331,32 @@ describe('known bugs: aspect', () => {
 
   // German used to negate INSIDE the prospective periphrasis rather than outside it:
   //
-  //     got   "der Kater ist im Begriff NICHT zu essen."   = is about to NOT eat
-  //     want  "der Kater ist NICHT im Begriff zu essen."   = is NOT about to eat
+  //     got   "der Kater ist im Begriff NICHT zu fressen."   = is about to NOT eat
+  //     want  "der Kater ist NICHT im Begriff zu fressen."   = is NOT about to eat
   //
   // The negation belongs on the finite "ist", as it does for the other aspects ("hat nicht
   // gegessen", "isst gerade nicht"). It now precedes the "im Begriff" predicate as a whole.
   test('German negates the prospective auxiliary, not the governed infinitive', () => {
     expect(catEats({ aspect: 'prospective', negative: true }))
-      .toMatchObject({ de: 'der Kater ist nicht im Begriff zu essen.' });
+      .toMatchObject({ de: 'der Kater ist nicht im Begriff zu fressen.' });
   });
 
   // The same placement holds across tenses: the negation sits on the finite auxiliary (present
   // "ist", past "war", future "wird") in front of "im Begriff", never inside the periphrasis.
   test('German negates the prospective on the finite auxiliary in every tense', () => {
     expect(catEats({ aspect: 'prospective', tense: 'past', negative: true }).de)
-      .toBe('der Kater war nicht im Begriff zu essen.');
+      .toBe('der Kater war nicht im Begriff zu fressen.');
     expect(catEats({ aspect: 'prospective', tense: 'future', negative: true }).de)
-      .toBe('der Kater wird nicht im Begriff sein zu essen.');
+      .toBe('der Kater wird nicht im Begriff sein zu fressen.');
   });
 
   // Regression guard: the OTHER aspects negate exactly where they did — the resultative's "nicht"
   // before the participle, the progressive's after its adverb "gerade" — and the affirmative
   // prospective is unchanged.
   test('German leaves the other aspects\' negation placement untouched', () => {
-    expect(catEats({ aspect: 'resultative', negative: true }).de).toBe('der Kater hat nicht gegessen.');
-    expect(catEats({ aspect: 'progressive', negative: true }).de).toBe('der Kater isst gerade nicht.');
-    expect(catEats({ aspect: 'prospective' }).de).toBe('der Kater ist im Begriff zu essen.');
+    expect(catEats({ aspect: 'resultative', negative: true }).de).toBe('der Kater hat nicht gefressen.');
+    expect(catEats({ aspect: 'progressive', negative: true }).de).toBe('der Kater frisst gerade nicht.');
+    expect(catEats({ aspect: 'prospective' }).de).toBe('der Kater ist im Begriff zu fressen.');
   });
 });
 
@@ -948,7 +948,7 @@ describe('the perfect auxiliary: Spanish and German', () => {
     expect(femResult('COME').de).toBe('die Katze ist gekommen.');
     expect(femResult('JUMP').de).toBe('die Katze ist gesprungen.'); // motion → sein
     expect(femResult('RUN').de).toBe('die Katze ist gelaufen.');
-    expect(femResult('EAT').de).toBe('die Katze hat gegessen.'); // haben
+    expect(femResult('EAT').de).toBe('die Katze hat gefressen.'); // haben
     expect(femResult('SEEM').de).toBe('die Katze hat geschienen.');
   });
 });
@@ -1079,63 +1079,63 @@ describe('known bugs: German prospective word order', () => {
     sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', ...verbPhrase }, directObject: np('MOUSE') })).de;
 
   test('German keeps the zu-infinitive group together, after "im Begriff sein"', () => {
-    expect(catEatsMouse({})).toBe('der Kater ist im Begriff, die Maus zu essen.');
-    expect(catEatsMouse({ tense: 'future' })).toBe('der Kater wird im Begriff sein, die Maus zu essen.');
-    expect(catEatsMouse({ modals: [{ verb: 'MUST' }] })).toBe('der Kater muss im Begriff sein, die Maus zu essen.');
+    expect(catEatsMouse({})).toBe('der Kater ist im Begriff, die Maus zu fressen.');
+    expect(catEatsMouse({ tense: 'future' })).toBe('der Kater wird im Begriff sein, die Maus zu fressen.');
+    expect(catEatsMouse({ modals: [{ verb: 'MUST' }] })).toBe('der Kater muss im Begriff sein, die Maus zu fressen.');
   });
 
   test('German closes a verb-final prospective on the finite verb', () => {
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', tense: 'future' } },
-    }), 'RUN')).de).toBe('der Hund, der im Begriff zu essen sein wird, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der im Begriff zu fressen sein wird, läuft.');
     expect(sayAll({
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' } }),
-    }).de).toBe('wenn der Kater im Begriff zu essen sein würde, würde der Hund laufen.');
+    }).de).toBe('wenn der Kater im Begriff zu fressen sein würde, würde der Hund laufen.');
   });
 
   test('German gathers the adverb, the recipient and the complements into the group', () => {
-    expect(catEatsMouse({ tense: 'past' })).toBe('der Kater war im Begriff, die Maus zu essen.');
+    expect(catEatsMouse({ tense: 'past' })).toBe('der Kater war im Begriff, die Maus zu fressen.');
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'FAST' } })).de)
-      .toBe('der Kater ist im Begriff, schnell zu essen.');
+      .toBe('der Kater ist im Begriff, schnell zu fressen.');
     expect(sayAll(clause(np('MAN'), 'GIVE', {
       verbPhrase: { aspect: 'prospective' }, directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } },
     })).de).toBe('der Mann ist im Begriff, dem Jungen das Buch zu geben.');
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, complements: { locative: { phrase: np('MARKET') } } })).de)
-      .toBe('der Kater ist im Begriff, im Markt zu essen.');
+      .toBe('der Kater ist im Begriff, im Markt zu fressen.');
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE', { relative: { verbPhrase: { verb: 'RUN' } } }) })).de)
-      .toBe('der Kater ist im Begriff, die Maus, die läuft, zu essen.');
+      .toBe('der Kater ist im Begriff, die Maus, die läuft, zu fressen.');
   });
 
   test('German keeps "nicht" and a modal\'s adverb ahead of "im Begriff", outside the group', () => {
-    expect(catEatsMouse({ negative: true })).toBe('der Kater ist nicht im Begriff, die Maus zu essen.');
-    expect(catEatsMouse({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('der Kater muss immer im Begriff sein, die Maus zu essen.');
-    expect(catEatsMouse({ tense: 'future', modals: [{ verb: 'MUST' }] })).toBe('der Kater wird im Begriff sein müssen, die Maus zu essen.');
+    expect(catEatsMouse({ negative: true })).toBe('der Kater ist nicht im Begriff, die Maus zu fressen.');
+    expect(catEatsMouse({ modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] })).toBe('der Kater muss immer im Begriff sein, die Maus zu fressen.');
+    expect(catEatsMouse({ tense: 'future', modals: [{ verb: 'MUST' }] })).toBe('der Kater wird im Begriff sein müssen, die Maus zu fressen.');
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', negative: true, modals: [{ verb: 'MUST', modifier: 'ALWAYS' }] } })).de)
-      .toBe('der Kater muss nicht immer im Begriff sein zu essen.');
+      .toBe('der Kater muss nicht immer im Begriff sein zu fressen.');
   });
 
   test('German extraposes a longer group after a verb-final clause\'s finite verb', () => {
     const dogWho = (verbPhrase: Partial<VerbPhrase>, extra: object = {}) =>
       sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', ...verbPhrase }, ...extra } }), 'RUN')).de;
-    expect(dogWho({}, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff ist, die Maus zu essen, läuft.');
-    expect(dogWho({ tense: 'future' }, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff sein wird, die Maus zu essen, läuft.');
-    expect(dogWho({ modifier: 'FAST' })).toBe('der Hund, der im Begriff ist, schnell zu essen, läuft.');
+    expect(dogWho({}, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff ist, die Maus zu fressen, läuft.');
+    expect(dogWho({ tense: 'future' }, { directObject: np('MOUSE') })).toBe('der Hund, der im Begriff sein wird, die Maus zu fressen, läuft.');
+    expect(dogWho({ modifier: 'FAST' })).toBe('der Hund, der im Begriff ist, schnell zu fressen, läuft.');
     expect(sayAll({
       ...clause(np('DOG'), 'RUN'),
       condition: clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
-    }).de).toBe('wenn der Kater im Begriff sein würde, die Maus zu essen, würde der Hund laufen.');
+    }).de).toBe('wenn der Kater im Begriff sein würde, die Maus zu fressen, würde der Hund laufen.');
     // A bare zu-infinitive under a modal stays inside the bracket.
-    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff zu essen sein muss, läuft.');
+    expect(dogWho({ modals: [{ verb: 'MUST' }] })).toBe('der Hund, der im Begriff zu fressen sein muss, läuft.');
   });
 
   test('German puts a bare zu-infinitive after "sein" in a V2 clause, with no comma', () => {
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modals: [{ verb: 'MUST' }] } })).de)
-      .toBe('der Kater muss im Begriff sein zu essen.');
+      .toBe('der Kater muss im Begriff sein zu fressen.');
     expect(sayAll({
       ...clause(np('DOG'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
       condition: clause(np('CAT'), 'RUN'),
-    }).de).toBe('wenn der Kater laufen würde, würde der Hund im Begriff sein, die Maus zu essen.');
+    }).de).toBe('wenn der Kater laufen würde, würde der Hund im Begriff sein, die Maus zu fressen.');
   });
 
   test('German follows the group with an "indem" clause or a coordinated clause', () => {
@@ -1143,14 +1143,14 @@ describe('known bugs: German prospective word order', () => {
       phrase: np('WORD', { definiteness: 'indefinite' }), specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE' },
     };
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, complements: { instrumental } })).de)
-      .toBe('der Kater ist im Begriff zu essen, indem man ein Wort wählt.');
+      .toBe('der Kater ist im Begriff zu fressen, indem man ein Wort wählt.');
     expect(sayAll(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective' }, directObject: np('MOUSE'), complements: { instrumental } },
-    }), 'RUN')).de).toBe('der Hund, der im Begriff ist, die Maus zu essen, indem man ein Wort wählt, läuft.');
+    }), 'RUN')).de).toBe('der Hund, der im Begriff ist, die Maus zu fressen, indem man ein Wort wählt, läuft.');
     expect(sayAll({
       ...clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective' }, directObject: np('MOUSE') }),
       coordination: { conjunction: 'and', clause: clause(np('DOG'), 'RUN') },
-    }).de).toBe('der Kater ist im Begriff, die Maus zu essen, und der Hund läuft.');
+    }).de).toBe('der Kater ist im Begriff, die Maus zu fressen, und der Hund läuft.');
   });
 });
 
@@ -1163,17 +1163,29 @@ describe('known bugs: German frequency adverb in the prospective', () => {
     verbPhrase: { aspect: 'prospective', tense: 'past', ...verbPhrase }, directObject: np('ANGEL', { definiteness: 'this' }),
   }), 'de');
 
-  test.fails('German puts "nie" and "immer" ahead of "im Begriff"', () => {
+  test('German puts "nie" and "immer" ahead of "im Begriff"', () => {
     expect(manLovesAngel({ modifier: 'NEVER' })).toBe('jener Mann war nie im Begriff, diesen Engel zu lieben.');
     expect(manLovesAngel({ modifier: 'ALWAYS' })).toBe('jener Mann war immer im Begriff, diesen Engel zu lieben.');
     expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'ALWAYS' } }), 'de'))
-      .toBe('der Kater ist immer im Begriff zu essen.');
+      .toBe('der Kater ist immer im Begriff zu fressen.');
   });
 
-  test.fails('…and in a verb-final relative clause', () => {
+  test('…and in a verb-final relative clause', () => {
     expect(say(clause(np('DOG', {
       relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', modifier: 'NEVER' }, directObject: np('MOUSE') },
-    }), 'RUN'), 'de')).toBe('der Hund, der nie im Begriff ist, die Maus zu essen, läuft.');
+    }), 'RUN'), 'de')).toBe('der Hund, der nie im Begriff ist, die Maus zu fressen, läuft.');
+  });
+
+  // The generalisation: the slot ahead of "im Begriff" is the one "nicht" already used, so the two
+  // stack in that order; a manner adverb keeps its place inside the group, which is where a
+  // frequency adverb under a modal stays too (out of scope, see the bug file).
+  test('"nicht" leads a positive frequency adverb, and a manner adverb stays in the group', () => {
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'ALWAYS', negative: true } }), 'de'))
+      .toBe('der Kater ist nicht immer im Begriff zu fressen.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'FAST' } }), 'de'))
+      .toBe('der Kater ist im Begriff, schnell zu fressen.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', modifier: 'ALWAYS', modals: ['MUST'] } }), 'de'))
+      .toBe('der Kater muss im Begriff sein, immer zu fressen.');
   });
 
   test('regression: the other six give the frequency adverb the whole prospective', () => {
@@ -1195,22 +1207,67 @@ describe('known bugs: Romance frequency adverb after the prospective infinitive'
   const catEatsMouse = (verbPhrase: Partial<VerbPhrase>) =>
     sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'prospective', ...verbPhrase }, directObject: np('MOUSE') }));
 
-  test.fails('Italian puts "mai" and "sempre" right after "stare"', () => {
+  test('Italian puts "mai" and "sempre" right after "stare"', () => {
     expect(say(clause(np('MAN', { definiteness: 'that' }), 'LOVE', {
       verbPhrase: { aspect: 'prospective', tense: 'past', modifier: 'NEVER' }, directObject: np('ANGEL', { definiteness: 'this' }),
     }), 'it')).toBe("quell'uomo non stava mai per amare quest'angelo.");
     expect(catEatsMouse({ modifier: 'ALWAYS' }).it).toBe('il gatto sta sempre per mangiare il topo.');
   });
 
-  test.fails('…and in the progressive', () => {
+  test('…and in the progressive', () => {
     expect(catEats({ aspect: 'progressive', modifier: 'ALWAYS' }).it).toBe('il gatto sta sempre mangiando.');
     expect(catEats({ aspect: 'progressive', modifier: 'NEVER' }).it).toBe('il gatto non sta mai mangiando.');
   });
 
-  test.fails('Spanish and Portuguese put "siempre" / "sempre" right after "estar"', () => {
+  test('Spanish and Portuguese put "siempre" / "sempre" right after "estar"', () => {
     expect(catEatsMouse({ modifier: 'ALWAYS' })).toMatchObject({
       es: 'el gato está siempre a punto de comer el ratón.',
       pt: 'o gato está sempre prestes a comer o rato.',
+    });
+  });
+
+  // The generalisation: the slot is behind the finite verb of the periphrasis, so it follows the
+  // tense and the negation, and it reaches a relative clause through the same `predicateText`.
+  test('…in every tense, under a negation, and in a relative clause', () => {
+    expect(catEatsMouse({ modifier: 'ALWAYS', tense: 'past' })).toMatchObject({
+      it: 'il gatto stava sempre per mangiare il topo.',
+      es: 'el gato estaba siempre a punto de comer el ratón.',
+      pt: 'o gato estava sempre prestes a comer o rato.',
+    });
+    expect(catEatsMouse({ modifier: 'ALWAYS', tense: 'future' })).toMatchObject({
+      it: 'il gatto starà sempre per mangiare il topo.',
+      es: 'el gato estará siempre a punto de comer el ratón.',
+    });
+    expect(catEatsMouse({ modifier: 'ALWAYS', negative: true })).toMatchObject({
+      it: 'il gatto non sta sempre per mangiare il topo.',
+      es: 'el gato no está siempre a punto de comer el ratón.',
+      pt: 'o gato não está sempre prestes a comer o rato.',
+    });
+    expect(sayAll(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'EAT', aspect: 'prospective', modifier: 'ALWAYS' }, directObject: np('MOUSE') },
+    }), 'RUN'))).toMatchObject({
+      it: 'il cane che sta sempre per mangiare il topo corre.',
+      es: 'el perro que está siempre a punto de comer el ratón corre.',
+      pt: 'o cão que está sempre prestes a comer o rato corre.',
+    });
+  });
+
+  test('regression: the modal chain, the compound perfect and the Iberian progressive are unchanged', () => {
+    // A28's guard: under a modal the adverb still trails the group.
+    expect(catEatsMouse({ modifier: 'ALWAYS', modals: ['MUST'] })).toMatchObject({
+      it: 'il gatto deve stare per mangiare sempre il topo.',
+      es: 'el gato debe estar a punto de comer siempre el ratón.',
+      pt: 'o gato deve estar prestes a comer sempre o rato.',
+    });
+    expect(catEats({ aspect: 'resultative', modifier: 'ALWAYS' })).toMatchObject({
+      it: 'il gatto ha sempre mangiato.',
+    });
+    // Spanish and Portuguese leave their progressive alone: both orders are idiomatic there.
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { aspect: 'progressive', modifier: 'ALWAYS' }, directObject: np('MOUSE'),
+    }))).toMatchObject({
+      es: 'el gato está comiendo siempre el ratón.',
+      pt: 'o gato está comendo sempre o rato.',
     });
   });
 

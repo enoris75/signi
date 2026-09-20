@@ -71,4 +71,21 @@ describe('prospectiveFrame', () => {
     expect(frame(must, { ...theMouse, nicht: 'nicht', modalAdverbs: 'immer' }, false)).toBe('nicht immer im Begriff sein , die Maus zu essen');
     expect(frame(must, { ...bare, nicht: 'nicht', modalAdverbs: 'immer' }, true)).toBe('nicht immer im Begriff zu essen sein muss');
   });
+
+  // A146: the main verb's own frequency adverb scopes over the whole prospective, so it joins them
+  // outside the group, behind the "nicht". A manner adverb stays in the group, where it belongs.
+  test("a frequency adverb leads \"im Begriff\" too, behind the \"nicht\"", () => {
+    expect(frame(present, { ...bare, frequencyAdverb: 'nie' }, false)).toBe('nie im Begriff zu essen');
+    expect(frame(present, { ...theMouse, nicht: 'nicht', frequencyAdverb: 'immer' }, false))
+      .toBe('nicht immer im Begriff , die Maus zu essen');
+    expect(frame(present, { ...theMouse, frequencyAdverb: 'nie' }, true)).toBe('nie im Begriff ist , die Maus zu essen');
+    expect(frame(present, { ...bare, frequencyAdverb: 'nie' }, true)).toBe('nie im Begriff zu essen ist');
+  });
+
+  // A142: a direction adverb says where the object ends up, so inside the group it follows it.
+  test('a direction adverb follows the object inside the group', () => {
+    const moving = { ...present, zuInfinitive: 'zu verschieben' };
+    expect(frame(moving, { ...bare, directObject: 'das Buch', directionAdverb: 'nach oben' }, false))
+      .toBe('im Begriff , das Buch nach oben zu verschieben');
+  });
 });

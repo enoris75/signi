@@ -1116,8 +1116,8 @@ describe('PhraseBuilder', () => {
       };
       renderPeriod({ subject: CAT }, handlers);
 
-      fireEvent.click(screen.getByRole('button', { name: 'Move up' }));
-      fireEvent.click(screen.getByRole('button', { name: 'Move down' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move this period up' }));
+      fireEvent.click(screen.getByRole('button', { name: 'Move this period down' }));
       fireEvent.click(screen.getByRole('button', { name: 'Save period' }));
       fireEvent.click(screen.getByRole('button', { name: 'Remove this period' }));
 
@@ -1131,7 +1131,7 @@ describe('PhraseBuilder', () => {
       );
 
       expect(screen.getAllByTestId('period-container')).toHaveLength(1);
-      for (const name of ['Command', 'Infinitive phrase', 'Move up']) {
+      for (const name of ['Command', 'Infinitive phrase', 'Move this period up']) {
         expect(screen.getAllByRole('button', { name })).toHaveLength(1);
       }
       // Only the outermost period has a words panel.
@@ -1150,7 +1150,7 @@ describe('PhraseBuilder', () => {
       renderPeriod({ subject: CAT }, { onRemove: () => {}, soleContainer: true });
 
       expect(screen.getByRole('button', { name: 'Clear this period' })).toBeInTheDocument();
-      expect(screen.queryByRole('button', { name: 'Move up' })).not.toBeInTheDocument();
+      expect(screen.queryByRole('button', { name: 'Move this period up' })).not.toBeInTheDocument();
     });
   });
 

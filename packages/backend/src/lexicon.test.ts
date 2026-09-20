@@ -39,6 +39,8 @@ describe('lookupLexicalEntry', () => {
         fem: 'gatta',
         fem_plural: 'gatte',
         animate: '1',
+        // The whole is-a chain, not the direct hypernym: CAT isA MAMMAL isA ANIMAL (A157).
+        animal: '1',
         isA: 'MAMMAL',
         role: 'noun',
       },
@@ -55,7 +57,9 @@ describe('lookupLexicalEntry', () => {
     ['AFRICA', 'fr', { proper: '1', uncountable: '1', gender: 'fem', isA: 'CONTINENT' }],
     ['SPEED', 'en', { mannerRelation: 'measure' }],
     ['SIZE', 'en', { dimensionRelation: 'extent' }],
-    ['WOLF', 'it', { alarm: '1', animate: '1' }],
+    ['WOLF', 'it', { alarm: '1', animate: '1', animal: '1' }],
+    // `animal` is walked up the whole chain, so the genus itself carries it and a person never does.
+    ['ANIMAL', 'de', { animal: '1', animate: '1' }],
   ])('carries %s\'s concept-level noun flags in %s', (id, language, flags) => {
     expect(lookupLexicalEntry(id, language)!.forms).toMatchObject(flags);
   });
@@ -73,11 +77,20 @@ describe('lookupLexicalEntry', () => {
     expect(lookupLexicalEntry('KNOW', 'en')!.forms).not.toHaveProperty('object_sense');
   });
 
+  // A157: the same machinery one argument over — the SUBJECT selects the sense.
+  test('…and the verb that names one as its subject sense', () => {
+    expect(lookupLexicalEntry('EAT', 'de')!.forms).toMatchObject({ base: 'essen', subject_sense: 'EAT_ANIMAL' });
+    expect(lookupLexicalEntry('EAT_ANIMAL', 'de')!.forms).toMatchObject({ base: 'fressen', participle: 'gefressen', role: 'verb' });
+    expect(lookupLexicalEntry('EAT', 'en')!.forms).not.toHaveProperty('subject_sense');
+  });
+
   test('keeps flags a noun does not have out of its forms', () => {
     const forms = lookupLexicalEntry('CAT', 'en')!.forms;
     for (const key of ['gender', 'human', 'uncountable', 'proper', 'mannerRelation', 'dimensionRelation', 'alarm']) {
       expect(forms).not.toHaveProperty(key);
     }
+    // A person is not an animal, however far up the chain: PERSON has no hypernym above it.
+    expect(lookupLexicalEntry('PERSON', 'de')!.forms).not.toHaveProperty('animal');
   });
 
   test('puts a pronoun\'s person, number and gender columns back into its forms', () => {

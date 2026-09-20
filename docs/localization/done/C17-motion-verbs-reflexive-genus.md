@@ -146,10 +146,10 @@ already fixed.
 **Found.** Seeding MOVE_ONESELF showed two defects outside Italian and German. Both were already live
 for BECOME:
 
-- [A151](../../bugs/A-must-fix/A151-portuguese-reflexive-nonfinite.md): Portuguese keeps the stored
+- [A151](../../bugs/fixed/A151-portuguese-reflexive-nonfinite.md): Portuguese keeps the stored
   `se` on the gerund and the infinitive (`estou movendo-se`), and loses it in the compound tenses
   (`tinha movido`).
-- [A152](../../bugs/A-must-fix/A152-impersonal-se-with-reflexive-verb.md): the impersonal subject
+- [A152](../../bugs/fixed/A152-impersonal-se-with-reflexive-verb.md): the impersonal subject
   doubles `se` in Spanish and Portuguese (`se se mueve`).
 
 **Tests.**

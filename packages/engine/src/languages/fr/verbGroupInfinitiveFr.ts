@@ -18,6 +18,10 @@ import { reflexiveInfinitive } from './reflexiveInfinitive.js';
  *
  * A reflexive verb's clitic agrees with the subject, on the infinitive ("doit m'effondrer") and before
  * the auxiliary of the perfect ("doit s'être effondré").
+ *
+ * `preInfinitive` is a short adverb that goes before the non-finite verb it modifies ("bien", see
+ * `pre_nonfinite`): ahead of the infinitive and inside the periphrasis's "de", which then never
+ * elides — "doit bien manger", "être en train de bien manger", "avoir bien mangé" (A155).
  */
 export function verbGroupInfinitiveFr(
   verbForms: Record<string, string>,
@@ -25,9 +29,11 @@ export function verbGroupInfinitiveFr(
   aspect: Aspect,
   clitic = '',
   precedingObjectForms?: Record<string, string>,
+  preInfinitive = '',
 ): string {
   const inf = verbForms['base'] ?? '';
-  const group = frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms));
+  const pre = (rest: string) => [preInfinitive, rest].filter(Boolean).join(' ');
+  const group = pre(frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms)));
   const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
   if (aspect === 'progressive') return `être en train ${deInf}`;
   if (aspect === 'prospective') return `être sur le point ${deInf}`;
@@ -35,8 +41,8 @@ export function verbGroupInfinitiveFr(
     const etre = verbForms['aux'] === 'be';
     const part = verbForms['participle'] ?? inf;
     return etre
-      ? frCliticize(clitic, reflexiveFinite(verbForms, subjectForms, `être ${agreeParticipleFr(part, subjectForms)}`))
-      : frCliticize(clitic, `avoir ${precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part}`);
+      ? frCliticize(clitic, reflexiveFinite(verbForms, subjectForms, `être ${pre(agreeParticipleFr(part, subjectForms))}`))
+      : frCliticize(clitic, `avoir ${pre(precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part)}`);
   }
   return group;
 }

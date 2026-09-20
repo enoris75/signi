@@ -166,7 +166,7 @@ describe('manner adverbial (complemento di modo)', () => {
         fr: 'le chat mange la nourriture avec soin.',
         es: 'el gato come la comida con cuidado.',
         pt: 'o gato come a comida com cuidado.',
-        de: 'der Kater isst das Essen mit Sorgfalt.',
+        de: 'der Kater frisst das Essen mit Sorgfalt.',
         ja: '猫は注意で食べ物を食べます。', // SOV: the manner complement precedes the direct object
       });
     });

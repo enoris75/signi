@@ -34,3 +34,25 @@ is emptied upstream for a generic subject, so the engine needs to know to write 
 | | |
 |---|---|
 | **Test** | `reflexive.test.ts` → *known bugs: Spanish and Portuguese impersonal subject of a reflexive verb* (2 `test.fails`, plus a regression test for French and Italian) |
+
+## Resolved
+
+Fixed on 2026-09-20 by giving GENERIC_PERSON a second surface and letting the two `predicateText`s
+choose between them:
+
+- `generic_reflexive` on the Spanish and Portuguese lexemes
+  ([`concepts/pronouns.ts`](../../../packages/backend/src/concepts/pronouns.ts)): Spanish takes the
+  standard pronoun 'uno'; Portuguese has no single standard form and takes the colloquial 'a
+  gente', which the engine's 'você' paradigm (A108) already leans towards. A written Portuguese
+  would say 'a pessoa' — one had to be picked, and the test pins only that 'se' is not doubled.
+- [es](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [pt](../../../packages/engine/src/languages/pt/predicateText.ts): when the subject is generic and
+  the verb is reflexive, the impersonal clitic is suppressed and the word is written back into the
+  subject slot the clause emptied, ahead of the negator, the fronted 'nunca' and the verb group.
+  Portuguese also stops treating the clause as verb-initial there, so a 3rd-person object clitic no
+  longer enclitizes.
+
+Guarded by `reflexive.test.ts` → *known bugs: Spanish and Portuguese impersonal subject of a
+reflexive verb*: both former `test.fails` now pass, plus Portuguese's own surface, the negation, the
+fronted 'nunca', a modal, the resultative and BECOME, with regressions that French and Italian are
+unchanged and that a non-reflexive verb keeps the impersonal clitic, in a clause and in a relative one.

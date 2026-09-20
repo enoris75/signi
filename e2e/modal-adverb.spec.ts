@@ -28,7 +28,7 @@ test.describe('per-modal adverbs', () => {
     await openAndPick({ page }, 'modifier', /type an adverb/, 'always', 'ALWAYS');
 
     expect(await app.sentence('en')).toBe('the cat never wants to always eat.');
-    expect(await app.sentence('de')).toBe('der Kater will nie immer essen.');
+    expect(await app.sentence('de')).toBe('der Kater will nie immer fressen.');
     expect(await app.sentence('it')).toBe('il gatto non vuole mai mangiare sempre.');
   });
 

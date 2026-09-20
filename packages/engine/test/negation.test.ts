@@ -21,7 +21,7 @@ describe('negative direct object: concord', () => {
       fr: 'le chat ne mange aucune souris.', // ne … aucune
       es: 'el gato no come ningún ratón.',
       pt: 'o gato não come nenhum rato.',
-      de: 'der Kater isst keine Maus.', // "kein" is a single negation — no concord needed
+      de: 'der Kater frisst keine Maus.', // "kein" is a single negation — no concord needed
     });
   });
 
@@ -34,7 +34,7 @@ describe('negative direct object: concord', () => {
         fr: 'le chat ne mangea aucune souris.',
         es: 'el gato no comió ningún ratón.',
         pt: 'o gato não comeu nenhum rato.',
-        de: 'der Kater aß keine Maus.',
+        de: 'der Kater fraß keine Maus.',
       });
   });
 
@@ -129,7 +129,7 @@ describe('known bugs: negative determiner with a plural noun', () => {
   test('English/German pluralise `no`', () => {
     expect(noMice()).toMatchObject({
       en: 'the cat eats no mice.',
-      de: 'der Kater isst keine Mäuse.',
+      de: 'der Kater frisst keine Mäuse.',
     });
   });
 
@@ -208,7 +208,7 @@ describe('known bugs: stacked negation is not collapsed', () => {
     }));
     expect(said).toMatchObject({
       en: 'the cat does not eat any mouse.',
-      de: 'der Kater isst keine Maus.',
+      de: 'der Kater frisst keine Maus.',
       it: 'il gatto non mangia nessun topo.',
       es: 'el gato no come ningún ratón.',
       pt: 'o gato não come nenhum rato.',
@@ -224,7 +224,7 @@ describe('known bugs: stacked negation is not collapsed', () => {
     }));
     expect(said).toMatchObject({
       en: 'the cat never eats any mouse.',
-      de: 'der Kater isst nie eine Maus.',
+      de: 'der Kater frisst nie eine Maus.',
       es: 'el gato nunca come ningún ratón.',
       pt: 'o gato nunca come nenhum rato.',
     });
@@ -236,7 +236,7 @@ describe('known bugs: stacked negation is not collapsed', () => {
     const said = sayAll(clause(np('CAT'), 'EAT', { directObject: noNP('MOUSE') }));
     expect(said).toMatchObject({
       en: 'the cat eats no mouse.',
-      de: 'der Kater isst keine Maus.',
+      de: 'der Kater frisst keine Maus.',
       it: 'il gatto non mangia nessun topo.',
       es: 'el gato no come ningún ratón.',
     });
@@ -363,7 +363,7 @@ describe('A149: the French object has no zero article, and a negation makes it d
       en: 'the cat eats mice.',
       it: 'il gatto mangia topi.',
       fr: 'le chat mange des souris.',
-      de: 'der Kater isst Mäuse.',
+      de: 'der Kater frisst Mäuse.',
       es: 'el gato come ratones.',
       ja: '猫はネズミを食べます。',
       pt: 'o gato come ratos.',

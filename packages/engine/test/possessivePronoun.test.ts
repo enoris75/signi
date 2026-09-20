@@ -150,7 +150,7 @@ describe('known bugs: German pronominal possessor on a complement', () => {
     expect(say(clause(np('CAT'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '2', number: 'singular' } }) } } }), 'de'))
       .toBe('der Kater gibt deinem Hund das Buch.');
     expect(say(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
-      .toBe('der Kater isst in meinem Haus.');
+      .toBe('der Kater frisst in meinem Haus.');
     expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('HOUSE', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
       .toBe('der Kater kommt aus meinem Haus.');
     expect(say(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: np('DOG', { possessor: { kind: 'pronominal', person: '1', number: 'singular' } }) } } }), 'de'))
@@ -198,21 +198,21 @@ describe('pronominal possessor on a complement: every language', () => {
 
   test('the possessive agrees in number and keeps the adjectives, under any relation', () => {
     expect(eatsIn({ possessor: pron('1', 'plural'), number: 'plural' })).toMatchObject({
-      de: 'der Kater isst in unseren Häusern.',
+      de: 'der Kater frisst in unseren Häusern.',
       it: 'il gatto mangia nelle nostre case.',
       fr: 'le chat mange dans nos maisons.',
       es: 'el gato come en nuestras casas.',
       pt: 'o gato come nas nossas casas.',
     });
     expect(eatsIn({ possessor: pron('1', 'singular'), adjectives: ['SMALL'] })).toMatchObject({
-      de: 'der Kater isst in meinem kleinen Haus.',
+      de: 'der Kater frisst in meinem kleinen Haus.',
       it: 'il gatto mangia nella mia piccola casa.',
       fr: 'le chat mange dans ma petite maison.',
       es: 'el gato come en mi casa pequeña.',
       pt: 'o gato come na minha casa pequena.',
     });
     expect(eatsIn({ possessor: pron('1', 'singular') }, [{ kind: 'path', value: 'under' }])).toMatchObject({
-      de: 'der Kater isst unter meinem Haus.',
+      de: 'der Kater frisst unter meinem Haus.',
       it: 'il gatto mangia sotto la mia casa.',
       fr: 'le chat mange sous ma maison.',
       es: 'el gato come debajo de mi casa.',
@@ -222,7 +222,7 @@ describe('pronominal possessor on a complement: every language', () => {
 
   test('the possessive overrides a picked determiner, on the direction and the instrument too', () => {
     expect(eatsIn({ possessor: pron('1', 'singular'), definiteness: 'indefinite' })).toMatchObject({
-      de: 'der Kater isst in meinem Haus.',
+      de: 'der Kater frisst in meinem Haus.',
       it: 'il gatto mangia nella mia casa.',
       fr: 'le chat mange dans ma maison.',
       es: 'el gato come en mi casa.',
@@ -246,7 +246,7 @@ describe('pronominal possessor on a complement: every language', () => {
 
   test('German keeps the mixed declension after the possessive, even on a mass noun', () => {
     expect(sayAll(clause(np('CAT'), 'EAT', { complements: { instrumental: { phrase: np('WATER', { possessor: pron('1', 'singular'), adjectives: ['COLD'] }) } } })).de)
-      .toBe('der Kater isst mit meinem kalten Wasser.');
+      .toBe('der Kater frisst mit meinem kalten Wasser.');
   });
 
   test('a plural genitive possessor keeps its own possessive', () => {

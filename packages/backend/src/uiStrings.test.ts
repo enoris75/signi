@@ -410,8 +410,17 @@ describe('buildUiStrings', () => {
     const strings = buildUiStrings();
     expect(strings['action.copyTranslation']).toMatchObject({ en: 'Copy the translation', ja: '翻訳をコピー' });
     expect(strings['status.copied']).toMatchObject({ it: 'Copiata', fr: 'Copiée', ja: 'コピー済み' });
+    // The adverb of direction follows the object in every language (A142), so the two reorder
+    // controls name what they move, as the controls beside them do.
     expect(strings['action.movePeriodUp']).toEqual({
-      en: 'Move up', it: 'Sposta su', fr: 'Déplacer vers le haut', de: 'Nach oben verschieben', es: 'Mover arriba', ja: '上に移動', pt: 'Mover para cima',
+      en: 'Move this period up', it: 'Sposta questo periodo su', fr: 'Déplacer cette période vers le haut',
+      de: 'Dieses Satzgefüge nach oben verschieben', es: 'Mover este período arriba', ja: 'この文を上に移動',
+      pt: 'Mover este período para cima',
+    });
+    expect(strings['action.movePeriodDown']).toEqual({
+      en: 'Move this period down', it: 'Sposta questo periodo giù', fr: 'Déplacer cette période vers le bas',
+      de: 'Dieses Satzgefüge nach unten verschieben', es: 'Mover este período abajo', ja: 'この文を下に移動',
+      pt: 'Mover este período para baixo',
     });
     expect(strings['action.resizeContainer']).toMatchObject({
       en: 'Resize this period container',

@@ -120,8 +120,10 @@ describe('subordinateClause', () => {
       const him = el(np(ER));
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'progressive' }), directObject: him }))
         .toBe(', der ihn gerade liest,');
+      // The frequency adverb leaves the group for the slot ahead of "im Begriff" (A146); the pronoun
+      // still opens what is left of it.
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { aspect: 'prospective', modifier: concept(IMMER) }), directObject: him }))
-        .toBe(', der im Begriff ist , ihn immer zu lesen,');
+        .toBe(', der immer im Begriff ist , ihn zu lesen,');
       expect(relativeOn(MANN, { headRole: 'subject', verbPhrase: vp(LESEN, { modifier: concept(IMMER), negative: true }), directObject: him }))
         .toBe(', der ihn nicht immer liest,');
     });

@@ -215,7 +215,7 @@ describe('subject: adjectives in the plural', () => {
   test('two adjectives — Iberian Romance coordinates them', () => {
     expect(subject(cat({ number: 'plural', adjectives: ['BIG', 'OLD'] }))).toMatchObject({
       en: 'the big old cats run.',
-      it: 'i grandi vecchi gatti corrono.',
+      it: 'i grandi gatti vecchi corrono.', // one qualifying adjective in front (A145)
       fr: 'les grands vieux chats courent.',
       es: 'los gatos grandes y viejos corren.', // "y" between postnominal adjectives
       pt: 'os gatos grandes e velhos correm.',
@@ -226,7 +226,7 @@ describe('subject: adjectives in the plural', () => {
   test('plural AND feminine — everything agrees at once', () => {
     expect(subject(cat({ number: 'plural', gender: 'fem', adjectives: ['BIG', 'OLD'] })))
       .toMatchObject({
-        it: 'le grandi vecchie gatte corrono.', // article, both adjectives, and the noun
+        it: 'le grandi gatte vecchie corrono.', // article, both adjectives, and the noun
         fr: 'les grandes vieilles chattes courent.',
         es: 'las gatas grandes y viejas corren.',
         de: 'die großen alten Katzen laufen.',
@@ -326,7 +326,7 @@ describe('subject: three genders, indefinite + two adjectives', () => {
     // CAT defaults to its masculine lexeme (der Kater / il gatto).
     expect(subject(twoAdj({}))).toMatchObject({
       en: 'a big old cat runs.',
-      it: 'un grande vecchio gatto corre.',
+      it: 'un grande gatto vecchio corre.',
       fr: 'un grand vieux chat court.',
       es: 'un gato grande y viejo corre.',
       de: 'ein großer alter Kater läuft.', // mixed masc: -er on both adjectives
@@ -336,7 +336,7 @@ describe('subject: three genders, indefinite + two adjectives', () => {
   test('feminine', () => {
     // gender:'fem' selects the feminine lexeme, and article, both adjectives and noun all agree.
     expect(subject(twoAdj({ gender: 'fem' }))).toMatchObject({
-      it: 'una grande vecchia gatta corre.', // una … vecchia … gatta
+      it: 'una grande gatta vecchia corre.', // una … gatta … vecchia
       fr: 'une grande vieille chatte court.',
       es: 'una gata grande y vieja corre.',
       pt: 'uma gata grande e velha corre.',
@@ -351,7 +351,7 @@ describe('subject: three genders, indefinite + two adjectives', () => {
       concept: 'BOOK', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'],
     })).toMatchObject({
       en: 'a big old book runs.',
-      it: 'un grande vecchio libro corre.', // masc in Italian
+      it: 'un grande libro vecchio corre.', // masc in Italian
       de: 'ein großes altes Buch läuft.', // mixed neut: -es
     });
   });
@@ -371,7 +371,7 @@ describe('subject: three genders, indefinite + two adjectives', () => {
       concept: 'HOUSE', definiteness: 'indefinite', adjectives: ['BIG', 'OLD'],
     })).toMatchObject({
       de: 'ein großes altes Haus läuft.', // neuter
-      it: 'una grande vecchia casa corre.', // feminine (la casa)
+      it: 'una grande casa vecchia corre.', // feminine (la casa)
       fr: 'une grande vieille maison court.',
       es: 'una casa grande y vieja corre.',
     });
@@ -580,7 +580,7 @@ describe('subject: the neuter gender value on a noun head', () => {
     };
     const neuter = subject({ ...base, gender: 'neut' });
     expect(neuter).toEqual(subject({ ...base, gender: 'masc' }));
-    expect(neuter).toMatchObject({ de: 'ein großer alter Kater läuft.', it: 'un grande vecchio gatto corre.' });
+    expect(neuter).toMatchObject({ de: 'ein großer alter Kater läuft.', it: 'un grande gatto vecchio corre.' });
   });
 });
 

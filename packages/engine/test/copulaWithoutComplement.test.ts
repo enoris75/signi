@@ -106,7 +106,7 @@ describe('BE without a subject complement: the IF condition', () => {
       fr: 'si le chat mangeait, le chien serait.',
       es: 'si el gato comiera, el perro sería.',
       pt: 'se o gato comesse, o cão seria.',
-      de: 'wenn der Kater essen würde, würde der Hund sein.',
+      de: 'wenn der Kater fressen würde, würde der Hund sein.',
     });
   });
 

@@ -1,6 +1,7 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
@@ -82,9 +83,17 @@ function predicateWords(
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounForm(np.head.forms)
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
-  const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
+  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
-  const complementsText = complementsPhrase(complements, verb.forms);
+  // A direction adverb (UP, DOWN) is a particle of the verb, not a comment on the action: it follows
+  // the verb or its object directly and leads the complements, because a complement after it joins
+  // itself to the object instead ("*moves the book in the house up"). Taking the head of the
+  // complements slot puts it there in every branch below, and leaves the trailing slot — where a
+  // manner adverb goes — empty (A156).
+  const isDirection = isDirectionAdverb(modifier);
+  const modifierText = isDirection ? '' : adverbText;
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, verb.forms)]
+    .filter(Boolean).join(' ');
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
   // clause with the main verb's: "can eat the mouse fast".
   const modalManner = modals.filter((m) => m.modifier && !isFrequencyAdverb(m.modifier)).map((m) => m.modifier!.forms['base'] ?? '');

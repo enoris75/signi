@@ -31,8 +31,11 @@ export function complementsPhrase(
 ): string {
   if (!complements) return '';
   // The ablative adverb "via" disambiguates source from direction, but only self-propelled
-  // motion verbs (RUN/JUMP) need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the
-  // transitive LOAD/IMPORT keep bare "da" ("viene dalla casa", "carica il libro dal contenitore").
+  // motion verbs (RUN/JUMP) need it for every source — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and
+  // the transitive LOAD/IMPORT keep bare "da" for a PLACE ("viene dalla casa", "carica il libro dal
+  // contenitore"); an animate source takes the adverb on any verb, because the animate *goal* takes
+  // "da" as well (the andare-da construction), so bare "va dal bambino" reads as "goes TO the boy"
+  // (A153). That part is decided per conjunct, in `headFor` below.
   const sourceAdverb = SOURCE_ABLATIVE_ADVERB_VERBS.has(verbConceptId) ? 'via ' : '';
   return COMPLEMENT_RENDER_ORDER
     .map((type) => {
@@ -123,7 +126,7 @@ export function complementsPhrase(
           nf['isA'] === 'CONTINENT' ? 'in' :
           prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
         ) :
-        type === 'source'    ? `${sourceAdverb}${prepDet('da', nf, plural, lead)}` :
+        type === 'source'    ? `${sourceAdverb || (nf['animate'] === '1' ? 'via ' : '')}${prepDet('da', nf, plural, lead)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `grazie ${prepDet('a', nf, plural, lead)}` :
           causeSent === 'negative' ? `per colpa ${prepDet('di', nf, plural, lead)}` :

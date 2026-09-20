@@ -1,6 +1,8 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
+import { adverbSlots } from './adverbSlots.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
@@ -81,13 +83,16 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // "kein" drops to "ein" under "nie" ("iss keine Maus", "iss nie eine Maus").
       const { nicht: neg, directObject: impObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
       const impDirect = splitObject(impObject, proObject, objectPrep);
-      const impModifier = modifier ? (modifier.forms['base'] ?? '') : '';
+      // A direction adverb follows the object ("das Buch nach oben verschieben"); every other adverb
+      // keeps the Mittelfeld slot ahead of it ("iss nicht schnell"). See `adverbSlots`.
+      const impAdverb = adverbSlots(modifier, neg, '');
       const impComplements = [proPlace, impDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
       // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
       // infinitive, and the infinitive is clause-final, so it inverts the V1 command order:
       // "Ein Satzgefüge laden", "Das Brot nicht essen" (vs the command "Iss das Brot nicht").
       const impPronoun = withReflexive(register === 'instruction' ? '3sg' : ipn, impDirect.pronoun);
-      const mittelfeld = [impPronoun, neg.beforeAdverb, impModifier, dativeText, impDirect.noun, neg.beforePredicative, impComplements, neg.after];
+      const mittelfeld = [impPronoun, impAdverb.nichtBeforeObject, impAdverb.beforeObject, dativeText, impDirect.noun,
+        impAdverb.nichtAfterObject, impAdverb.afterObject, neg.beforePredicative, impComplements, neg.after];
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
@@ -100,14 +105,15 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // its object ahead of it ("Nahrung konsumieren", "das Brot nicht essen"). This is the surface
     // German already gives the imperative `instruction` register above; the infinitive is `base`.
     if (mood === 'infinitive') {
-      const infModifier = modifier ? (modifier.forms['base'] ?? '') : '';
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
       const { nicht: neg, directObject: infObject } = finiteNegation(verbPhrase, directObject, hasPredicative);
+      const infAdverb = adverbSlots(modifier, neg, '');
       const infDirect = splitObject(infObject, proObject, objectPrep);
       const infComplements = [proPlace, infDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen").
       const infVerb = zu ? zuInfinitive(plain) : (plain['base'] ?? '');
-      return [withReflexive('3sg', infDirect.pronoun), neg.beforeAdverb, infModifier, dativeText, infDirect.noun, neg.beforePredicative, infComplements, neg.after, infVerb, meansText]
+      return [withReflexive('3sg', infDirect.pronoun), infAdverb.nichtBeforeObject, infAdverb.beforeObject, dativeText, infDirect.noun,
+        infAdverb.nichtAfterObject, infAdverb.afterObject, neg.beforePredicative, infComplements, neg.after, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
         .trim();
@@ -138,6 +144,9 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the
     // main verb's adverb: "er will nie immer gehen" (never wants to always go).
     const modalAdverbsText = modalAdverbs(verbPhrase.modals);
+    // The main verb's own adverb splits on its kind: a direction adverb follows the objects, every
+    // other one leads them, and the "nicht" that marks the adverb slot goes where the adverb went.
+    const adverb = adverbSlots(modifier, neg, modalAdverbsText);
     const complementsText = [proPlace, prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
     // V2 order puts the finite verb after the subject (before it when inverted). Verb-final
     // (subordinate) order leads with the subject and closes the clause on the finite verb, behind the
@@ -145,11 +154,19 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // "wenn" protasis of a conditional.
     const head =verbFinal ? [subj] : inverted ? [verbText, subj] : [subj, verbText];
     // The prospective keeps its zu-infinitive group whole ("ist im Begriff, die Maus zu essen").
+    // A frequency adverb scopes over the whole prospective, not over the zu-infinitive alone — "war
+    // NIE im Begriff zu lieben", where "im Begriff, nie zu lieben" says the opposite (A146). Under a
+    // modal it stays in the group: German "muss nie" means "need never", a separate judgement.
+    const prospectiveFrequency = isFrequencyAdverb(modifier) && verbPhrase.modals.length === 0 ? modifierText : '';
     const predicate = complex.zuInfinitive
       ? prospectiveFrame(complex, {
-        nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText, pronoun: objectPronounText,
-        adverb: modifierText, dative: dativeText, directObject: directObjectText, complements: complementsText,
+        nicht: neg.beforeAspect, modalAdverbs: modalAdverbsText, frequencyAdverb: prospectiveFrequency,
+        pronoun: objectPronounText,
+        adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
+        directionAdverb: adverb.afterObject, complements: complementsText,
       }, verbFinal)
-      : [objectPronounText, aspectMid, neg.beforeAdverb, modalAdverbsText, modifierText, dativeText, directObjectText, neg.beforePredicative, complementsText, neg.after, ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail, complex.particle ?? ''])];
+      : [objectPronounText, aspectMid, adverb.nichtBeforeObject, modalAdverbsText, adverb.beforeObject, dativeText, directObjectText,
+        adverb.nichtAfterObject, adverb.afterObject, neg.beforePredicative, complementsText, neg.after,
+        ...(verbFinal ? verbFinalCluster(complex) : [infinitiveTail, complex.particle ?? ''])];
     return [...head, ...predicate, meansText].filter(Boolean).join(' ').trim();
 }

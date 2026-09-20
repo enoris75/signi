@@ -140,7 +140,7 @@ test.describe('the canvas by keyboard', () => {
       en: 'the big cats do not eat the mouse.',
       it: 'i grandi gatti non mangiano il topo.',
       fr: 'les grands chats ne mangent pas la souris.',
-      de: 'die großen Kater essen die Maus nicht.',
+      de: 'die großen Kater fressen die Maus nicht.',
       es: 'los gatos grandes no comen el ratón.',
       pt: 'os gatos grandes não comem o rato.',
       ja: '大きい猫はネズミを食べません。',

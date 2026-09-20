@@ -270,37 +270,94 @@ describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
 // it on no auxiliary, so the non-finite verb keeps the 3rd-person "se" for every subject and the compound
 // tenses lose it. Spanish fixed the same in A102 (`reflexiveNonfinite`) and A30.
 describe('known bugs: Portuguese reflexive verb in a non-finite verb group', () => {
-  test.fails('the clitic on the gerund and the infinitive agrees with the subject', () => {
+  test('the clitic on the gerund and the infinitive agrees with the subject', () => {
     expect(moves(np('FIRST_PERSON'), { aspect: 'progressive' }).pt).toBe('estou movendo-me.');
   });
 
-  test.fails('a modal governs the infinitive with the subject\'s clitic', () => {
+  test('a modal governs the infinitive with the subject\'s clitic', () => {
     expect(moves(np('FIRST_PERSON'), { modals: ['MUST'] }).pt).toBe('devo mover-me.');
   });
 
-  test.fails('the pluperfect keeps the clitic', () => {
+  test('the pluperfect keeps the clitic', () => {
     expect(moves(np('CAT'), { aspect: 'resultative', tense: 'past' }).pt).toBe('o gato se tinha movido.');
+  });
+
+  // The generalisation: the clitic is the subject's wherever a non-finite form carries it, so it
+  // follows every person, every aspect under a modal, and the future perfect; and it climbs to the
+  // finite "ter" in the compound tenses, in a relative clause too.
+  test('…in every person, aspect and compound tense', () => {
+    expect(moves(np('FIRST_PERSON', { number: 'plural' }), { aspect: 'prospective' }).pt)
+      .toBe('estamos prestes a mover-nos.');
+    expect(moves(np('FIRST_PERSON'), { modals: ['MUST'], aspect: 'progressive' }).pt).toBe('devo estar movendo-me.');
+    expect(moves(np('CAT'), { modals: ['MUST'], aspect: 'resultative' }).pt).toBe('o gato deve ter-se movido.');
+    expect(moves(np('CAT'), { aspect: 'resultative', tense: 'future' }).pt).toBe('o gato se terá movido.');
+    expect(moves(np('FIRST_PERSON'), { aspect: 'progressive', negative: true }).pt).toBe('não estou movendo-me.');
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'MOVE_ONESELF', aspect: 'resultative', tense: 'past' } },
+    }), 'RUN')).pt).toBe('o gato que se tinha movido corre.');
   });
 
   test('regression guard: the finite tenses and the command are right', () => {
     expect(moves(np('FIRST_PERSON')).pt).toBe('me movo.');
     expect(moves(np('CAT'), { aspect: 'resultative' }).pt).toBe('o gato se moveu.');
     expect(command(WE).pt).toBe('movamo-nos.');
+    // The 3rd person is what the stored forms already said, and is unchanged.
+    expect(moves(np('CAT'), { modals: ['MUST'] }).pt).toBe('o gato deve mover-se.');
+  });
+
+  test('regression guard: a non-reflexive verb takes no clitic anywhere', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'resultative', tense: 'past' } })).pt)
+      .toBe('o gato tinha comido.');
   });
 });
 
 // A152. The impersonal "se" of Spanish and Portuguese meets the reflexive "se" of the verb: "se se
 // mueve". Italian says "ci si muove"; Spanish takes "uno" for the generic subject of a reflexive verb.
 describe('known bugs: Spanish and Portuguese impersonal subject of a reflexive verb', () => {
-  test.fails('Spanish takes uno', () => {
+  test('Spanish takes uno', () => {
     expect(moves(np('GENERIC_PERSON')).es).toBe('uno se mueve.');
   });
 
-  test.fails('Portuguese does not double se', () => {
+  test('Portuguese does not double se', () => {
     expect(moves(np('GENERIC_PERSON')).pt).not.toMatch(/\bse se\b/);
+  });
+
+  // Portuguese has no single standard form. The engine takes the colloquial "a gente", which its
+  // "você" paradigm (A108) already leans towards; a written text would say "a pessoa".
+  test('Portuguese says "a gente"', () => {
+    expect(moves(np('GENERIC_PERSON')).pt).toBe('a gente se move.');
+  });
+
+  // The generalisation: the word is the subject, so it stands ahead of the negator, the fronted
+  // "nunca" and the modal chain, and it holds for BECOME as it does for MOVE_ONESELF.
+  test('…and the subject word leads the negation, the fronted "nunca" and a modal', () => {
+    expect(moves(np('GENERIC_PERSON'), { negative: true })).toMatchObject({
+      es: 'uno no se mueve.', pt: 'a gente não se move.',
+    });
+    expect(moves(np('GENERIC_PERSON'), { modifier: 'NEVER' })).toMatchObject({
+      es: 'uno nunca se mueve.', pt: 'a gente nunca se move.',
+    });
+    expect(moves(np('GENERIC_PERSON'), { modals: ['MUST'] })).toMatchObject({
+      es: 'uno debe moverse.', pt: 'a gente deve mover-se.',
+    });
+    expect(moves(np('GENERIC_PERSON'), { aspect: 'resultative' })).toMatchObject({
+      es: 'uno se ha movido.', pt: 'a gente se moveu.',
+    });
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'BECOME', { complements: { predicative: { phrase: np('HAPPY') } } })))
+      .toMatchObject({ es: 'uno se vuelve feliz.', pt: 'a gente se torna feliz.' });
   });
 
   test('regression guard: French and Italian are right', () => {
     expect(moves(np('GENERIC_PERSON'))).toMatchObject({ fr: 'on se déplace.', it: 'ci si muove.' });
+  });
+
+  // A non-reflexive verb has no clash, so the impersonal clitic stays — in a clause and in a
+  // relative one.
+  test('regression guard: a non-reflexive verb keeps the impersonal clitic', () => {
+    expect(sayAll(clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('MOUSE') })))
+      .toMatchObject({ es: 'se come el ratón.', pt: 'se come o rato.' });
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('HOUSE', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'SEE' } } }),
+    }))).toMatchObject({ es: 'el gato ve la casa que se ve.', pt: 'o gato vê a casa que se vê.' });
   });
 });

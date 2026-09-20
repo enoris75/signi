@@ -11,6 +11,7 @@ import type {
   SavedPhraseRecord,
   SavedPhrasesResponse,
   SerializedWorkspace,
+  TranslateResponse,
   UiStringDef,
 } from '@signi/shared';
 import { concepts } from './concepts/index.js';
@@ -442,24 +443,43 @@ describe('unknown API paths', () => {
 });
 
 // ── Known bugs ───────────────────────────────────────────────────────────────
-// Each `test.fails` asserts the correct behaviour and is catalogued in docs/bugs/A-must-fix/. When a
-// fix makes one pass, Vitest reports "expected to fail but passed": delete the `.fails` marker.
+// Each block was a catalogued defect (docs/bugs/), pinned by a `test.fails` asserting the correct
+// behaviour. All of these are fixed now, so the assertions stand as ordinary tests; a new one starts
+// its life as a `test.fails` that Vitest reports "expected to fail but passed" once the fix lands.
 
 // A144. A German noun can carry an inherent adjective that the engine declines (YOUNG_WOMAN is "Frau"
-// with `adjective: 'jung'`: "die junge Frau", "den jungen Frauen"). The picker's label is the lexeme's
-// singular alone, so it shows "Frau", which is WOMAN's word, not YOUNG_WOMAN's.
+// with `adjective: 'jung'`: "die junge Frau", "den jungen Frauen"). The picker's label was the lexeme's
+// singular alone, so it showed "Frau", which is WOMAN's word, not YOUNG_WOMAN's; it reads a `citation`
+// now.
 describe('known bugs: the German label of a noun with an inherent adjective', () => {
   const concept = async (id: string): Promise<Concept> =>
     ((await (await get('/api/concepts?role=noun')).json()) as ConceptsResponse).concepts.find((c) => c.id === id)!;
 
-  test.fails('labels YOUNG_WOMAN with its adjective', async () => {
+  test('labels YOUNG_WOMAN with its adjective', async () => {
     expect((await concept('YOUNG_WOMAN')).labels?.de).toBe('junge Frau');
+  });
+
+  // The label is the only place the citation is read: the declining engine still builds the form
+  // the case and determiner call for, so the sentences are unchanged.
+  test('the citation does not reach the rendered sentences', async () => {
+    const translate = async (plan: unknown) =>
+      ((await (await post('/api/translate', { plan })).json()) as TranslateResponse)
+        .translations.find((t) => t.language === 'de')!.text;
+    expect(await translate({ subject: { concept: 'YOUNG_WOMAN' }, verbPhrase: { verb: 'RUN' } }))
+      .toBe('die junge Frau läuft.');
+    expect(await translate({ subject: { concept: 'YOUNG_WOMAN', number: 'plural', definiteness: 'indefinite' }, verbPhrase: { verb: 'RUN' } }))
+      .toBe('junge Frauen laufen.');
   });
 
   // Regression guard: the other languages seed the whole name, and so do A140's complement names.
   test('regression: the other languages and the complement names already read right', async () => {
     expect((await concept('YOUNG_WOMAN')).labels).toMatchObject({ en: 'young woman', fr: 'jeune femme', it: 'giovane', ja: '若い女性' });
     expect((await concept('LOCATIVE')).labels?.de).toBe('adverbiale Bestimmung des Ortes');
+  });
+
+  // The head noun's own label is untouched — the two concepts are told apart in the picker now.
+  test('regression: WOMAN keeps the bare head as its label', async () => {
+    expect((await concept('WOMAN')).labels?.de).toBe('Frau');
   });
 });
 

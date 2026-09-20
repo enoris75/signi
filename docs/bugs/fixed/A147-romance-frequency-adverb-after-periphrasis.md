@@ -49,3 +49,23 @@ Out of scope, because they are pinned as right today:
 | | |
 |---|---|
 | **Test** | `verb.test.ts` → *known bugs: Romance frequency adverb after the prospective infinitive* (3 `test.fails`, plus a regression test for French, the fronted `nunca` and a manner adverb) |
+
+## Resolved
+
+Fixed on 2026-09-20 in each language's `predicateText`, all three by splitting the verb group on its
+finite verb and slotting the adverb in behind it:
+
+- [it](../../../packages/engine/src/languages/it/predicateText.ts): the `aspect === 'resultative'`
+  guard A28 built now covers the progressive and the prospective too, which is all four Italian rows.
+- [es](../../../packages/engine/src/languages/es/predicateText.ts) and
+  [pt](../../../packages/engine/src/languages/pt/predicateText.ts): the same split for the
+  prospective, applied to the group before the preverbal 'no' / 'não' is prefixed, with the
+  trailing slot emptied.
+
+Kept out, as the file put them: the modal chain (A28's guard, 'deve mangiare sempre'), and the
+Spanish and Portuguese progressive, which is idiomatic either way.
+
+Guarded by `verb.test.ts` → *known bugs: Romance frequency adverb after the prospective infinitive*:
+the three former `test.fails` now pass, plus every tense, a negation and a relative clause, and
+regressions that the modal chain, the compound perfect and the Iberian progressive are unchanged —
+alongside the existing guard for French, the fronted 'nunca' and a manner adverb.

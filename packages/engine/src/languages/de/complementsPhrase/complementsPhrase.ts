@@ -101,13 +101,18 @@ export function complementsPhrase(
         // determiner ("der Katze"), the same case German gives the plain indirect object. An
         // inanimate goal is a destination, not a recipient, so it takes a directional preposition:
         // "in" + the accusative of motion-into ("speichert das Buch in den Behälter"), never the
-        // bare dative that would read as *giving the book to the container*. (Which preposition —
-        // in / an / zu — is verb-dependent; "in" is the app's into-a-container default.)
+        // bare dative that would read as *giving the book to the container*. Which preposition is
+        // the verb's own: ADD adds a thing TO something, so it says `terminus_prep: 'zu'` and takes
+        // the dative ("fügt das Buch zum Behälter hinzu", A143). "in" is the default.
         else if (type === 'terminus') {
           if (f['animate'] === '1') head = prepDet('', f, 'dat', plural);
+          else if (verb['terminus_prep']) head = prepDet(verb['terminus_prep'], f, 'dat', plural);
           else { _case = 'acc'; head = prepDet('in', f, 'acc', plural); }
         }
-        else /* source */         head = prepDet('aus', f, 'dat', plural);
+        // Source. "aus" is "out of" an enclosure, right for a house or a continent but not for a
+        // person or an animal, which one is not inside: a living source takes "von", fused to "vom"
+        // before "dem" (A154). The relativizer stand-in comes through here too ("von dem").
+        else /* source */         head = prepDet(f['animate'] === '1' ? 'von' : 'aus', f, 'dat', plural);
       }
       // A relativizer stand-in is its preposition and pronoun alone: "in dem", "mit denen", "dem".
       if (definiteness === 'relative') return head;

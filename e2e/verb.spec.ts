@@ -14,7 +14,7 @@ test.describe('verb', () => {
       en: 'the cat ate the mouse.',
       it: 'il gatto mangiò il topo.',
       fr: 'le chat mangea la souris.',
-      de: 'der Kater aß die Maus.',
+      de: 'der Kater fraß die Maus.',
       es: 'el gato comió el ratón.',
       pt: 'o gato comeu o rato.',
       ja: '猫はネズミを食べました。',
@@ -25,7 +25,7 @@ test.describe('verb', () => {
       en: 'the cat will eat the mouse.',
       it: 'il gatto mangerà il topo.',
       fr: 'le chat mangera la souris.',
-      de: 'der Kater wird die Maus essen.', // periphrastic werden + clause-final infinitive
+      de: 'der Kater wird die Maus fressen.', // periphrastic werden + clause-final infinitive
       es: 'el gato comerá el ratón.',
       pt: 'o gato comerá o rato.',
       ja: '猫はネズミを食べます。', // Japanese future is the non-past (C04)
@@ -45,7 +45,7 @@ test.describe('verb', () => {
       en: 'the cat is eating the mouse.',
       it: 'il gatto sta mangiando il topo.',
       fr: 'le chat est en train de manger la souris.',
-      de: 'der Kater isst gerade die Maus.', // German has no progressive; "gerade" stands in (C05)
+      de: 'der Kater frisst gerade die Maus.', // German has no progressive; "gerade" stands in (C05)
       es: 'el gato está comiendo el ratón.',
       pt: 'o gato está comendo o rato.',
       ja: '猫はネズミを食べています。',
@@ -56,7 +56,7 @@ test.describe('verb', () => {
       en: 'the cat is about to eat the mouse.',
       it: 'il gatto sta per mangiare il topo.',
       fr: 'le chat est sur le point de manger la souris.',
-      de: 'der Kater ist im Begriff, die Maus zu essen.',
+      de: 'der Kater ist im Begriff, die Maus zu fressen.',
       es: 'el gato está a punto de comer el ratón.',
       pt: 'o gato está prestes a comer o rato.',
       ja: '猫はネズミを食べるところです。',
@@ -68,7 +68,7 @@ test.describe('verb', () => {
       en: 'the cat has eaten the mouse.',
       it: 'il gatto ha mangiato il topo.',
       fr: 'le chat a mangé la souris.',
-      de: 'der Kater hat die Maus gegessen.',
+      de: 'der Kater hat die Maus gefressen.',
       es: 'el gato ha comido el ratón.',
       pt: 'o gato comeu o rato.',
     });
@@ -83,7 +83,7 @@ test.describe('verb', () => {
       en: 'the cat does not eat the mouse.',
       it: 'il gatto non mangia il topo.',
       fr: 'le chat ne mange pas la souris.',
-      de: 'der Kater isst die Maus nicht.',
+      de: 'der Kater frisst die Maus nicht.',
       es: 'el gato no come el ratón.',
       pt: 'o gato não come o rato.',
       ja: '猫はネズミを食べません。',

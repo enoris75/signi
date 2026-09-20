@@ -40,3 +40,14 @@ The other animate nouns without `human` are animals, plus CREATOR and POSSESSOR,
 | | |
 |---|---|
 | **Test** | `clause.test.ts` → *known bugs: ANGEL is a person* (2 `test.fails`, plus a regression test for Portuguese) |
+
+## Resolved
+
+Fixed on 2026-09-20 by seeding `human: true` on ANGEL in
+[`packages/backend/src/concepts/nouns.ts`](../../../packages/backend/src/concepts/nouns.ts). The engine
+was not changed: `takesPersonalA` (es) and `relativeText` (en) already read the flag.
+
+Guarded by `clause.test.ts` → *known bugs: ANGEL is a person*: the two former `test.fails` now pass,
+plus the personal `a` on an indefinite and a plural angel, English `who` on an object gap, and
+regressions that a thing keeps the bare object and `that`, that an angel in the subject slot takes
+neither, and that Portuguese stays bare.

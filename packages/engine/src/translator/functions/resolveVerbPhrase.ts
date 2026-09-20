@@ -5,9 +5,16 @@ import { resolve } from './resolve.js';
 
 /** Resolve a verb phrase (the shared predicate head of a plan or a relative clause). Only
  *  called when a verb phrase is present — a verbless period skips it (see translate).
- *  `hasObject` is whether the verb takes a direct object, its own or a relative's gap: a verb whose
- *  lexeme names a sense for an object (`object_sense`) resolves to that sense then — KNOW is "sapere"
- *  with no object but "conoscere" with one (A131). The user's concept stays KNOW. */
+ *
+ *  Two of the verb's arguments can select a lexical sense in its place, and the user's concept stays
+ *  what it was either way:
+ *  - `hasObject` is whether the verb takes a direct object, its own or a relative's gap: a lexeme
+ *    naming an `object_sense` resolves to it then — KNOW is "sapere" with no object but "conoscere"
+ *    with one (A131).
+ *  - `subjectForms` are the subject's, or the head noun's where a relative gaps the subject: a
+ *    lexeme naming a `subject_sense` resolves to it when the subject is an animal — German EAT is
+ *    "essen" of a person but "fressen" of an animal, and either word of the other is wrong (A157).
+ *  A missing sense concept leaves the verb as it is, so a language that seeds none is unaffected. */
 export function resolveVerbPhrase(
   vp: VerbPhrase,
   language: string,
@@ -15,6 +22,7 @@ export function resolveVerbPhrase(
   mood?: Mood,
   register?: ImperativeRegister,
   hasObject = false,
+  subjectForms?: Record<string, string>,
 ): ResolvedVerbPhrase {
   // An imperative or an infinitive is a mood that occupies the finite/mood slot: it is always
   // present-tense, neutral-aspect and modal-free. The UI already enforces this, but normalise
@@ -23,7 +31,9 @@ export function resolveVerbPhrase(
   const imperative = mood === 'imperative';
   const finiteSlotTaken = imperative || mood === 'infinitive';
   const given = resolve(vp.verb, language, lookup);
-  const sense = hasObject ? given.forms['object_sense'] : undefined;
+  // A pronoun subject carries no animacy of its own ("er isst"), so it keeps the person's verb.
+  const sense = (subjectForms?.['animal'] === '1' ? given.forms['subject_sense'] : undefined)
+    ?? (hasObject ? given.forms['object_sense'] : undefined);
   return {
     verb: sense && lookup(sense, language) ? resolve(sense, language, lookup) : given,
     negative: vp.negative,

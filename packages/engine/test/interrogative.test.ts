@@ -15,7 +15,7 @@ describe('interrogative', () => {
       en: 'does the cat eat the food?',
       it: 'il gatto mangia il cibo?',
       fr: 'est-ce que le chat mange la nourriture ?', // French sets "?" off with a no-break space
-      de: 'isst der Kater das Essen?', // V1: the finite verb leads
+      de: 'frisst der Kater das Essen?', // V1: the finite verb leads
       es: '¿el gato come la comida?',
       ja: '猫は食べ物を食べますか？',
       pt: 'o gato come a comida?',
@@ -25,12 +25,12 @@ describe('interrogative', () => {
   test('keeps the tense and the aspect, inverting whichever auxiliary is finite', () => {
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'past' } })))).toMatchObject({
       en: 'did the cat eat?',
-      de: 'aß der Kater?',
+      de: 'fraß der Kater?',
       ja: '猫は食べましたか？',
     });
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { tense: 'future' } })))).toMatchObject({
       en: 'will the cat eat?',
-      de: 'wird der Kater essen?',
+      de: 'wird der Kater fressen?',
       it: 'il gatto mangerà?',
     });
     expect(sayAll(ask(clause(np('CAT'), 'RUN', { verbPhrase: { aspect: 'progressive' } })))).toMatchObject({
@@ -40,7 +40,7 @@ describe('interrogative', () => {
     });
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { aspect: 'resultative' } })))).toMatchObject({
       en: 'has the cat eaten?',
-      de: 'hat der Kater gegessen?',
+      de: 'hat der Kater gefressen?',
       fr: 'est-ce que le chat a mangé ?',
     });
   });
@@ -62,7 +62,7 @@ describe('interrogative', () => {
       en: 'does the cat not eat?',
       it: 'il gatto non mangia?',
       fr: 'est-ce que le chat ne mange pas ?',
-      de: 'isst der Kater nicht?',
+      de: 'frisst der Kater nicht?',
       es: '¿el gato no come?',
       ja: '猫は食べませんか？',
       pt: 'o gato não come?',
@@ -74,7 +74,7 @@ describe('interrogative', () => {
   test('a frequency adverb follows the do-support; a manner adverb trails', () => {
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'ALWAYS' } })))).toMatchObject({
       en: 'does the cat always eat?',
-      de: 'isst der Kater immer?',
+      de: 'frisst der Kater immer?',
     });
     // NEVER negates the clause itself, so it takes do-support rather than a "not".
     expect(sayAll(ask(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'NEVER' } })))).toMatchObject({
@@ -133,7 +133,7 @@ describe('interrogative', () => {
     });
     expect(sayAll(pair)).toMatchObject({
       en: 'does the cat eat, and does the dog run?',
-      de: 'isst der Kater, und läuft der Hund?',
+      de: 'frisst der Kater, und läuft der Hund?',
       fr: 'est-ce que le chat mange, et le chien court ?', // one "est-ce que" asks the whole
       es: '¿el gato come, y el perro corre?',
       ja: '猫は食べますか。そして、犬は走りますか？',
@@ -144,7 +144,7 @@ describe('interrogative', () => {
     const cat = np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('FOOD') } });
     expect(sayAll(ask(clause(cat, 'RUN')))).toMatchObject({
       en: 'does the cat that eats the food run?',
-      de: 'läuft der Kater, der das Essen isst?',
+      de: 'läuft der Kater, der das Essen frisst?',
       ja: '食べ物を食べる猫は走りますか？',
     });
   });

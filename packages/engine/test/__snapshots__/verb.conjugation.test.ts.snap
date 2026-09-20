@@ -2730,7 +2730,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous serons en train de devenir.",
     "it": "staremo diventando.",
     "ja": "私たちはなっています。",
-    "pt": "estaremos tornando-se.",
+    "pt": "estaremos tornando-nos.",
   },
   "future · prospective": {
     "de": "wir werden im Begriff sein zu werden.",
@@ -2739,7 +2739,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous serons sur le point de devenir.",
     "it": "staremo per diventare.",
     "ja": "私たちはなるところです。",
-    "pt": "estaremos prestes a tornar-se.",
+    "pt": "estaremos prestes a tornar-nos.",
   },
   "future · resultative": {
     "de": "wir werden geworden sein.",
@@ -2748,7 +2748,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous serons devenus.",
     "it": "saremo diventati.",
     "ja": "私たちはなってしまいます。",
-    "pt": "teremos tornado.",
+    "pt": "nos teremos tornado.",
   },
   "past · neutral": {
     "de": "wir wurden.",
@@ -2766,7 +2766,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous étions en train de devenir.",
     "it": "stavamo diventando.",
     "ja": "私たちはなっていました。",
-    "pt": "estávamos tornando-se.",
+    "pt": "estávamos tornando-nos.",
   },
   "past · prospective": {
     "de": "wir waren im Begriff zu werden.",
@@ -2775,7 +2775,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous étions sur le point de devenir.",
     "it": "stavamo per diventare.",
     "ja": "私たちはなるところでした。",
-    "pt": "estávamos prestes a tornar-se.",
+    "pt": "estávamos prestes a tornar-nos.",
   },
   "past · resultative": {
     "de": "wir waren geworden.",
@@ -2784,7 +2784,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous étions devenus.",
     "it": "eravamo diventati.",
     "ja": "私たちはなってしまいました。",
-    "pt": "tínhamos tornado.",
+    "pt": "nos tínhamos tornado.",
   },
   "present · neutral": {
     "de": "wir werden.",
@@ -2802,7 +2802,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous sommes en train de devenir.",
     "it": "stiamo diventando.",
     "ja": "私たちはなっています。",
-    "pt": "estamos tornando-se.",
+    "pt": "estamos tornando-nos.",
   },
   "present · prospective": {
     "de": "wir sind im Begriff zu werden.",
@@ -2811,7 +2811,7 @@ exports[`conjugation: BECOME > 1st plural 1`] = `
     "fr": "nous sommes sur le point de devenir.",
     "it": "stiamo per diventare.",
     "ja": "私たちはなるところです。",
-    "pt": "estamos prestes a tornar-se.",
+    "pt": "estamos prestes a tornar-nos.",
   },
   "present · resultative": {
     "de": "wir sind geworden.",
@@ -2843,7 +2843,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je serai en train de devenir.",
     "it": "starò diventando.",
     "ja": "私はなっています。",
-    "pt": "estarei tornando-se.",
+    "pt": "estarei tornando-me.",
   },
   "future · prospective": {
     "de": "ich werde im Begriff sein zu werden.",
@@ -2852,7 +2852,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je serai sur le point de devenir.",
     "it": "starò per diventare.",
     "ja": "私はなるところです。",
-    "pt": "estarei prestes a tornar-se.",
+    "pt": "estarei prestes a tornar-me.",
   },
   "future · resultative": {
     "de": "ich werde geworden sein.",
@@ -2861,7 +2861,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je serai devenu.",
     "it": "sarò diventato.",
     "ja": "私はなってしまいます。",
-    "pt": "terei tornado.",
+    "pt": "me terei tornado.",
   },
   "past · neutral": {
     "de": "ich wurde.",
@@ -2879,7 +2879,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "j'étais en train de devenir.",
     "it": "stavo diventando.",
     "ja": "私はなっていました。",
-    "pt": "estava tornando-se.",
+    "pt": "estava tornando-me.",
   },
   "past · prospective": {
     "de": "ich war im Begriff zu werden.",
@@ -2888,7 +2888,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "j'étais sur le point de devenir.",
     "it": "stavo per diventare.",
     "ja": "私はなるところでした。",
-    "pt": "estava prestes a tornar-se.",
+    "pt": "estava prestes a tornar-me.",
   },
   "past · resultative": {
     "de": "ich war geworden.",
@@ -2897,7 +2897,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "j'étais devenu.",
     "it": "ero diventato.",
     "ja": "私はなってしまいました。",
-    "pt": "tinha tornado.",
+    "pt": "me tinha tornado.",
   },
   "present · neutral": {
     "de": "ich werde.",
@@ -2915,7 +2915,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je suis en train de devenir.",
     "it": "sto diventando.",
     "ja": "私はなっています。",
-    "pt": "estou tornando-se.",
+    "pt": "estou tornando-me.",
   },
   "present · prospective": {
     "de": "ich bin im Begriff zu werden.",
@@ -2924,7 +2924,7 @@ exports[`conjugation: BECOME > 1st singular 1`] = `
     "fr": "je suis sur le point de devenir.",
     "it": "sto per diventare.",
     "ja": "私はなるところです。",
-    "pt": "estou prestes a tornar-se.",
+    "pt": "estou prestes a tornar-me.",
   },
   "present · resultative": {
     "de": "ich bin geworden.",
@@ -2974,7 +2974,7 @@ exports[`conjugation: BECOME > 2nd plural 1`] = `
     "fr": "vous serez devenus.",
     "it": "sarete diventati.",
     "ja": "あなたたちはなってしまいます。",
-    "pt": "terão tornado.",
+    "pt": "se terão tornado.",
   },
   "past · neutral": {
     "de": "ihr wurdet.",
@@ -3010,7 +3010,7 @@ exports[`conjugation: BECOME > 2nd plural 1`] = `
     "fr": "vous étiez devenus.",
     "it": "eravate diventati.",
     "ja": "あなたたちはなってしまいました。",
-    "pt": "tinham tornado.",
+    "pt": "se tinham tornado.",
   },
   "present · neutral": {
     "de": "ihr werdet.",
@@ -3087,7 +3087,7 @@ exports[`conjugation: BECOME > 2nd singular 1`] = `
     "fr": "tu seras devenu.",
     "it": "sarai diventato.",
     "ja": "あなたはなってしまいます。",
-    "pt": "terá tornado.",
+    "pt": "se terá tornado.",
   },
   "past · neutral": {
     "de": "du wurdest.",
@@ -3123,7 +3123,7 @@ exports[`conjugation: BECOME > 2nd singular 1`] = `
     "fr": "tu étais devenu.",
     "it": "eri diventato.",
     "ja": "あなたはなってしまいました。",
-    "pt": "tinha tornado.",
+    "pt": "se tinha tornado.",
   },
   "present · neutral": {
     "de": "du wirst.",
@@ -3200,7 +3200,7 @@ exports[`conjugation: BECOME > 3rd plural 1`] = `
     "fr": "ils seront devenus.",
     "it": "saranno diventati.",
     "ja": "彼らはなってしまいます。",
-    "pt": "terão tornado.",
+    "pt": "se terão tornado.",
   },
   "past · neutral": {
     "de": "sie wurden.",
@@ -3236,7 +3236,7 @@ exports[`conjugation: BECOME > 3rd plural 1`] = `
     "fr": "ils étaient devenus.",
     "it": "erano diventati.",
     "ja": "彼らはなってしまいました。",
-    "pt": "tinham tornado.",
+    "pt": "se tinham tornado.",
   },
   "present · neutral": {
     "de": "sie werden.",
@@ -3313,7 +3313,7 @@ exports[`conjugation: BECOME > 3rd singular 1`] = `
     "fr": "il sera devenu.",
     "it": "sarà diventato.",
     "ja": "彼はなってしまいます。",
-    "pt": "terá tornado.",
+    "pt": "se terá tornado.",
   },
   "past · neutral": {
     "de": "er wurde.",
@@ -3349,7 +3349,7 @@ exports[`conjugation: BECOME > 3rd singular 1`] = `
     "fr": "il était devenu.",
     "it": "era diventato.",
     "ja": "彼はなってしまいました。",
-    "pt": "tinha tornado.",
+    "pt": "se tinha tornado.",
   },
   "present · neutral": {
     "de": "er wird.",

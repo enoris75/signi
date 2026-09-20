@@ -265,7 +265,7 @@ describe('adverbs of direction: UP and DOWN', () => {
 describe('known bugs: an adverb of direction before a noun object', () => {
   const movesUp = () => sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP' } }));
 
-  test.fails('follows the object in Italian, French, German, Spanish and Portuguese', () => {
+  test('follows the object in Italian, French, German, Spanish and Portuguese', () => {
     expect(movesUp()).toMatchObject({
       it: 'il gatto sposta il libro su.',
       fr: 'le chat déplace le livre vers le haut.',
@@ -277,5 +277,54 @@ describe('known bugs: an adverb of direction before a noun object', () => {
 
   test('regression: English and Japanese already put it after the object', () => {
     expect(movesUp()).toMatchObject({ en: 'the cat moves the book up.', ja: '猫は本を上に移動します。' });
+  });
+
+  // The generalisation: it is the slot after the object, so it holds wherever the object goes — under
+  // a modal, inside the prospective's zu-group, in a relative clause, and behind a clitic object.
+  test('…in a negated clause, where German "nicht" still leads it', () => {
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP', negative: true } })))
+      .toMatchObject({
+        it: 'il gatto non sposta il libro su.',
+        fr: 'le chat ne déplace pas le livre vers le haut.',
+        de: 'der Kater verschiebt das Buch nicht nach oben.',
+        es: 'el gato no mueve el libro arriba.',
+        pt: 'o gato não move o livro para cima.',
+      });
+  });
+
+  test('…under a modal, in the prospective, and in a relative clause', () => {
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP', modals: ['MUST'] } })))
+      .toMatchObject({ it: 'il gatto deve spostare il libro su.', de: 'der Kater muss das Buch nach oben verschieben.' });
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP', aspect: 'prospective' } })))
+      .toMatchObject({
+        it: 'il gatto sta per spostare il libro su.',
+        de: 'der Kater ist im Begriff, das Buch nach oben zu verschieben.',
+      });
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'MOVE', modifier: 'DOWN' }, directObject: np('BOOK') } }), 'RUN')))
+      .toMatchObject({ it: 'il gatto che sposta il libro giù corre.', de: 'der Kater, der das Buch nach unten verschiebt, läuft.' });
+  });
+
+  test('…and after a clitic object', () => {
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('THIRD_PERSON', { gender: 'masc' }), verbPhrase: { modifier: 'UP' } })))
+      .toMatchObject({
+        it: 'il gatto lo sposta su.',
+        fr: 'le chat le déplace vers le haut.',
+        de: 'der Kater verschiebt ihn nach oben.',
+        es: 'el gato lo mueve arriba.',
+        pt: 'o gato o move para cima.',
+      });
+  });
+
+  // Regression: a manner adverb keeps its own slot, which is the one the direction adverb left.
+  test('regression: a manner adverb still leads the object', () => {
+    expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'FAST' } })))
+      .toMatchObject({
+        it: 'il gatto sposta velocemente il libro.',
+        fr: 'le chat déplace vite le livre.',
+        de: 'der Kater verschiebt schnell das Buch.',
+        es: 'el gato mueve rápido el libro.',
+        pt: 'o gato move rapidamente o livro.',
+        en: 'the cat moves the book fast.',
+      });
   });
 });

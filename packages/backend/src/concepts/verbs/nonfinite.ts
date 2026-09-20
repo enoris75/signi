@@ -44,6 +44,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'comendo', participle: 'comido' },
     ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない' },
   },
+  // EAT's animal sense (A157): German alone differs — the strong Partizip is "gefressen".
+  EAT_ANIMAL: {
+    en: { gerund: 'eating', participle: 'eaten' },
+    it: { gerund: 'mangiando', participle: 'mangiato' },
+    fr: { participle: 'mangé' }, de: { participle: 'gefressen' },
+    es: { gerund: 'comiendo', participle: 'comido' },
+    pt: { gerund: 'comendo', participle: 'comido' },
+    ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない' },
+  },
   DRINK: {
     en: { gerund: 'drinking', participle: 'drunk' },
     it: { gerund: 'bevendo', participle: 'bevuto' },

@@ -28,10 +28,15 @@ export function aspectVerbFr(
   // train de me voir"); "de" elides against the clitic, not the verb ("de l'ajouter"). The resultative
   // ignores it: the compound past keeps its clitic on the auxiliary ("l'a vu"), placed by the caller.
   clitic = '',
+  // A short adverb that goes before the non-finite verb it modifies ("bien", see `pre_nonfinite`):
+  // inside the periphrasis's "de", which then never elides, and between the auxiliary and the
+  // participle — "en train de bien manger", "a bien mangé" (A155).
+  preInfinitive = '',
 ): { finite: string; tail: string } {
   const inf = verbForms['base'] ?? '';
+  const pre = (rest: string) => [preInfinitive, rest].filter(Boolean).join(' ');
   // A reflexive infinitive agrees its clitic with the subject ("en train de m'effondrer").
-  const group = frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms));
+  const group = pre(frCliticize(clitic, reflexiveInfinitive(verbForms, subjectForms)));
   const deInf = VOWEL_START.test(group) ? `d'${group}` : `de ${group}`;
   const etreFinite = auxFiniteFr(ETRE_AUX, ETRE_FR, subjectForms, tense, mood);
   if (aspect === 'progressive') return { finite: etreFinite, tail: `en train ${deInf}` };
@@ -46,8 +51,8 @@ export function aspectVerbFr(
     // An être participle agrees with the subject ("elle est allée"). An avoir participle does NOT
     // agree with the subject ("elle a vu"), but DOES agree with a PRECEDING direct object — the
     // accord du COD antéposé: "la souris que le chat a mangée". Without one it keeps its base.
-    tail: etre
+    tail: pre(etre
       ? agreeParticipleFr(part, subjectForms)
-      : precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part,
+      : precedingObjectForms ? agreeParticipleFr(part, precedingObjectForms) : part),
   };
 }

@@ -19,7 +19,7 @@ describe('relative × coordination', () => {
       fr: 'le chat qui mange et le chien courent.',
       es: 'el gato que come y el perro corren.',
       pt: 'o gato que come e o cão correm.',
-      de: 'der Kater, der isst, und der Hund laufen.',
+      de: 'der Kater, der frisst, und der Hund laufen.',
       ja: '食べる猫と犬は走ります。', // plain 食べる on the relative, and と joins the group
     });
   });
@@ -31,7 +31,7 @@ describe('relative × coordination', () => {
     ))).toMatchObject({
       en: 'the cat that eats or the dog runs.', // singular "runs"
       it: 'il gatto che mangia o il cane corre.',
-      de: 'der Kater, der isst, oder der Hund läuft.',
+      de: 'der Kater, der frisst, oder der Hund läuft.',
       ja: '食べる猫か犬は走ります。',
     });
   });
@@ -43,7 +43,7 @@ describe('relative × coordination', () => {
     ))).toMatchObject({
       en: 'the cat that ate and the dog run.', // relative past, matrix present
       it: 'il gatto che mangiò e il cane corrono.',
-      de: 'der Kater, der aß, und der Hund laufen.',
+      de: 'der Kater, der fraß, und der Hund laufen.',
       ja: '食べた猫と犬は走ります。', // plain past inside the relative
     });
   });
@@ -65,7 +65,7 @@ describe('relative × coordination', () => {
       fr: 'le chat qui mange la souris et la nourriture court.',
       es: 'el gato que come el ratón y la comida corre.',
       pt: 'o gato que come o rato e a comida corre.',
-      de: 'der Kater, der die Maus und das Essen isst, läuft.',
+      de: 'der Kater, der die Maus und das Essen frisst, läuft.',
       ja: 'ネズミと食べ物を食べる猫は走ります。',
     });
   });
@@ -88,7 +88,7 @@ describe('relative × coordination', () => {
       fr: 'le chat qui mange et le chien qui court sautent.',
       es: 'el gato que come y el perro que corre saltan.',
       pt: 'o gato que come e o cão que corre pulam.',
-      de: 'der Kater, der isst, und der Hund, der läuft, springen.',
+      de: 'der Kater, der frisst, und der Hund, der läuft, springen.',
       ja: '食べる猫と走る犬は跳びます。',
     });
   });
@@ -100,7 +100,7 @@ describe('relative × coordination', () => {
       en: 'the boy sees the cat that eats and the dog.',
       it: 'il ragazzo vede il gatto che mangia e il cane.',
       // German marks the accusative on both conjuncts and brackets the relative in commas.
-      de: 'der Junge sieht den Kater, der isst, und den Hund.',
+      de: 'der Junge sieht den Kater, der frisst, und den Hund.',
       ja: '男の子は食べる猫と犬を見ます。',
     });
   });

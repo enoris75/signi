@@ -137,11 +137,11 @@ Changes against the plan:
   `decoratePerimeterControls` takes `t` for the last conjunct's "Add another conjunct".
 
 Bugs found and filed:
-- [A138](../../bugs/A-must-fix/A138-german-add-is-arithmetic.md): German ADD is *addieren*, so every "add"
+- [A138](../../bugs/fixed/A138-german-add-is-arithmetic.md): German ADD is *addieren*, so every "add"
   control reads "addieren" where German wants *hinzufügen*.
-- [A139](../../bugs/A-must-fix/A139-click-prepositional-object.md): CLICK takes a bare object where five
+- [A139](../../bugs/fixed/A139-click-prepositional-object.md): CLICK takes a bare object where five
   languages want a preposition ("cliquer **sur** la période").
-- [A141](../../bugs/A-must-fix/A141-link-control-tooltips-offer-a-reveal.md): the relative-clause control's
+- [A141](../../bugs/fixed/A141-link-control-tooltips-offer-a-reveal.md): the relative-clause control's
   tooltip offers to "Show" and "Hide", which in a non-English UI mixes English with the localized name.
 
 Pinned by [adjectives.test.ts](../../../packages/engine/test/adjectives.test.ts) (*OTHER*, *French: an

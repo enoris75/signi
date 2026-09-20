@@ -45,3 +45,26 @@ premise ("COME/GO read their `source` as an origin") is only true for places.
 | | |
 |---|---|
 | **Test** | `complements/source.test.ts` → *known bugs: Italian animate source reads as a goal* (1 `test.fails`, plus a regression test: RUN keeps `via`, a place stays bare, and the animate goal keeps `da`) |
+
+## Resolved
+
+Fixed on 2026-09-20 in
+[`it/complementsPhrase.ts`](../../../packages/engine/src/languages/it/complementsPhrase.ts): the
+source branch of `headFor` emits 'via' when the conjunct's head is animate, alongside the verb-gated
+`SOURCE_ABLATIVE_ADVERB_VERBS`. A place keeps B01's bare 'da'. The comment on
+[`functions.consts.ts`](../../../packages/engine/src/functions/functions.consts.ts) now says the
+premise it rested on — COME/GO read `source` as an origin — holds for a place, not for a person.
+
+One case the file left undecided is settled by the same branch: a relative clause on the source now
+reads 'l'uomo via dal quale il cane va corre'. An idiomatic Italian would move the adverb behind
+the verb ('da cui il cane va via'), but nothing pinned it either way and being unambiguous beats
+being idiomatic here; the test records the output. MOVE_ONESELF, the transitive MOVE/COPY/TRANSFER
+and a source-plus-direction pair are still open, as the file has them.
+
+Guarded by `complements/source.test.ts` → *known bugs: Italian animate source reads as a goal*: the
+former `test.fails` now passes, plus an animal, a plural, an indefinite and the relativizer, with the
+existing regression that RUN keeps 'via', a place stays bare and the animate goal keeps 'da'.
+
+Expected re-record: the Romance elision test pinned COME from an ANGEL, which is animate, so it now
+carries the adverb in front of the fusion ('viene via dall'angelo'); a place source was added
+beside it.

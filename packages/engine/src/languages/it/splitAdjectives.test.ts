@@ -6,13 +6,23 @@ import { splitAdjectives } from './splitAdjectives.js';
 const ids = (xs: ConceptForms[]) => xs.map((a) => a.conceptId);
 
 describe('splitAdjectives', () => {
-  test('the BAGS adjectives precede, the rest follow, each side in order', () => {
+  // Italian gives the prenominal slot to ONE qualifying adjective (A145): the first in the user's
+  // list wins it, and every later BAGS adjective joins the postnominal list in place.
+  test('the first BAGS adjective precedes, the rest follow, each side in order', () => {
     const phrase = np(GATTO, {}, {
       adjectives: [concept(FELICE, 'HAPPY'), concept(GRANDE, 'BIG'), concept(STANCO, 'TIRED'), concept(VECCHIO, 'OLD')],
     });
     const { pre, post } = splitAdjectives(phrase);
-    expect(ids(pre)).toEqual(['BIG', 'OLD']);
-    expect(ids(post)).toEqual(['HAPPY', 'TIRED']);
+    expect(ids(pre)).toEqual(['BIG']);
+    expect(ids(post)).toEqual(['HAPPY', 'TIRED', 'OLD']);
+  });
+
+  test('a determiner-like prenominal does not take the qualifying slot, and stands in front of it', () => {
+    const { pre, post } = splitAdjectives(np(GATTO, {}, {
+      adjectives: [concept(PRIMO, 'FIRST'), concept(GRANDE, 'BIG'), concept(VECCHIO, 'OLD')],
+    }));
+    expect(ids(pre)).toEqual(['FIRST', 'BIG']);
+    expect(ids(post)).toEqual(['OLD']);
   });
 
   test('ordinals precede: il primo gatto', () => {

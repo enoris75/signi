@@ -79,7 +79,7 @@ test.describe('the phrase console', () => {
       en: 'the brown cats that the dog sees cannot eat the food.',
       it: 'i gatti marroni che il cane vede non possono mangiare il cibo.',
       fr: 'les chats bruns que le chien voit ne peuvent pas manger la nourriture.',
-      de: 'die braunen Kater, die der Hund sieht, können das Essen nicht essen.',
+      de: 'die braunen Kater, die der Hund sieht, können das Essen nicht fressen.',
       es: 'los gatos marrones que el perro ve no pueden comer la comida.',
       ja: '犬が見る茶色の猫は食べ物を食べることができません。',
       pt: 'os gatos castanhos que o cão vê não podem comer a comida.',
