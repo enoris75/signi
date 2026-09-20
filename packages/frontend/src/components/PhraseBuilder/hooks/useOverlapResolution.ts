@@ -108,17 +108,16 @@ export function useOverlapResolution({
       return grew ? RANK_GROWN : RANK_FREE;
     };
 
-    const separated =
-      groupRects.length < 2
-        ? null
-        : resolveGroupOverlaps({
-            groupRects,
-            pos,
-            svgSize: graphSize,
-            rankOf,
-          });
-    // Null once the boxes are clear of each other — which is the common case, and what
-    // lets this run on every commit without chasing its own writes.
+    // Every box, even a lone one: a single constituent wide enough to reach off the top of the
+    // canvas covers the header just as surely as one of three does.
+    const separated = resolveGroupOverlaps({
+      groupRects,
+      pos,
+      svgSize: graphSize,
+      rankOf,
+    });
+    // Null once the boxes are on the canvas and clear of each other — which is the common
+    // case, and what lets this run on every commit without chasing its own writes.
     if (separated) setPositions((prev) => ({ ...prev, ...separated.positions }));
 
     // Only once the pointer has travelled: a press that turns out to be a click on a slot

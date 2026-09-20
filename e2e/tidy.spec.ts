@@ -495,6 +495,63 @@ for (const viewport of VIEWPORTS) {
   });
 }
 
+// ── The fallback font ────────────────────────────────────────────────────────
+
+// The words are set in Lora, fetched from Google Fonts at page load. Where that fetch never
+// lands — a runner with no route to the CDN, an offline user — every word falls back to the
+// platform serif, which is wider, and every ring grows with it.
+//
+// A ring grows around its word in all four directions, so it grows *upward* too: the widest
+// phrase's object ring used to reach off the top of the canvas and over the period header,
+// covering the tidy wand so completely that it could not be clicked at all. With Lora the same
+// ring cleared the wand by five pixels, which is why only CI ever saw it — and why the cover is
+// checked here without the fonts, deliberately, rather than trusting whichever font a machine
+// happens to have.
+const withoutWebfonts = test.extend({
+  page: async ({ page }, use) => {
+    // Set on `page` rather than in the test body: the `app` fixture navigates during setup, and
+    // the first paint is the one that has to fall back.
+    await page.route(/fonts\.(googleapis|gstatic)\.com/, (route) => route.abort());
+    await use(page);
+  },
+});
+
+const WIDEST = PHRASES.find((p) => p.name === 'long words that widen every row')!;
+
+// The two window sizes wide enough to lay the phrase out in one row, which is what lifts the
+// object's ring level with the header.
+for (const viewport of [VIEWPORTS[0], VIEWPORTS[1]]) {
+  withoutWebfonts.describe(
+    `tidy the period · in the fallback font · ${viewport.name} (${viewport.width}×${viewport.height})`,
+    () => {
+      withoutWebfonts.use({ viewport: { width: viewport.width, height: viewport.height } });
+
+      withoutWebfonts(WIDEST.name, async ({ app, page }) => {
+        // If the fonts ever arrive anyway — a route that stops matching, a cache — this spec is
+        // measuring the same layout as every other one, and proves nothing. Say so here.
+        expect(
+          await page.evaluate(() => [...document.fonts].map((f) => f.family)),
+          'the webfonts loaded: this spec is no longer testing the fallback',
+        ).toEqual([]);
+
+        await WIDEST.build(app, page);
+
+        // The canvas's top edge is all that stands between a ring and the period's own controls,
+        // so nothing may be laid out above it — before any tidying, which is when the rings sit
+        // where they were first drawn.
+        const settled = await settledLayout(app.period(0));
+        expect(
+          settled.groups.filter((g) => g.rect.top < 0).map((g) => `${g.label} at ${g.rect.top}`),
+          'a ring is drawn above the top of the canvas, over the period header',
+        ).toEqual([]);
+
+        // And the wand still takes a click: this is where it used to time out.
+        await tidyAndCheck(app, WIDEST.groups);
+      });
+    },
+  );
+}
+
 // ── One constituent ──────────────────────────────────────────────────────────
 
 test.describe('a ring', () => {

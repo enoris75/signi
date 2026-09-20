@@ -11,6 +11,14 @@ import type { CanvasSize, PositionMap } from "./layout.ts";
 // wall, and a pair that can't fit side by side is separated top-to-bottom instead. Downward
 // is the one direction that can always absorb a shove, because the caller grows the canvas
 // to whatever height comes back.
+//
+// The top wall is also the one the period's own header sits behind. A ring grows around its
+// word in every direction, so a constituent that gains a determiner and two adjectives grows
+// *upward* too — off the canvas and over the tidy and save controls, which then can't be
+// clicked at all. Fencing a shove at that wall is not enough, because the overhang is not a
+// shove: it is where the footprint was drawn. So every box starts its pass by being pulled
+// back down to the wall, and the canvas grows under it like it does for any other downward
+// travel.
 
 // Clear space left between two separated boxes, in canvas px.
 const GAP = 10;
@@ -78,11 +86,12 @@ function allocate(
   return a + b >= need - EPS_PX ? [a, b] : null;
 }
 
-// Separate every overlapping pair of dotted rings, pushing each along whichever axis needs
-// the shorter travel — aside when they sit side by side, down when they sit one above the
-// other. Returns the new positions of the moved boxes' nodes (plus any extra canvas height
-// the downward shoves need), or null when the boxes are already clear of each other — the
-// common case, which is what lets the caller run this after every commit without looping.
+// Pull every box that overhangs the top of the canvas back onto it, then separate every
+// overlapping pair of dotted rings, pushing each along whichever axis needs the shorter travel —
+// aside when they sit side by side, down when they sit one above the other. Returns the new
+// positions of the moved boxes' nodes (plus any extra canvas height the downward travel needs),
+// or null when every box is already on the canvas and clear of the others — the common case,
+// and what lets the caller run this after every commit without looping.
 export function resolveGroupOverlaps({
   groupRects,
   pos,
@@ -94,15 +103,19 @@ export function resolveGroupOverlaps({
   svgSize: CanvasSize;
   rankOf: (group: GroupRect) => Rank;
 }): Separation | null {
-  if (groupRects.length < 2) return null;
-
-  const boxes = groupRects.map((g) => ({
-    group: g,
-    rect: { x: g.x, y: g.y, width: g.width, height: g.height },
-    rank: rankOf(g),
-    dx: 0,
-    dy: 0,
-  }));
+  const boxes = groupRects.map((g) => {
+    const rect = { x: g.x, y: g.y, width: g.width, height: g.height };
+    const rank = rankOf(g);
+    return {
+      group: g,
+      rect,
+      rank,
+      dx: 0,
+      // Off the top of the canvas and over the header: come back down to the wall. Not the box
+      // under the pointer, which is the user's to place — it settles when they let go.
+      dy: rank === RANK_DRAGGED ? 0 : Math.max(0, -rect.y),
+    };
+  });
   type Box = (typeof boxes)[number];
   // A resolution of one pair: b travels `db` px along `dir`, a travels `da` px against it.
   type Move = { dir: -1 | 1; da: number; db: number };

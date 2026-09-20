@@ -148,7 +148,12 @@ describe('useOverlapResolution', () => {
 
     it('lets a box that just grew hold its ground, pushing its neighbour away', () => {
       // The verb's ring sits clear of the subject's, then a satellite widens it and it reaches over.
-      const before: Scene = { positions: { subject: { x: 25, y: 50 }, verb: { x: 55, y: 50 } } };
+      // On a canvas tall enough to hold the widened ring: one that reached off the top would be
+      // brought back down to it, and this is about which box yields sideways, not about that.
+      const before: Scene = {
+        positions: { subject: { x: 25, y: 50 }, verb: { x: 55, y: 50 } },
+        graphSize: { w: 800, h: 400 },
+      };
       const grown: Scene = { ...before, radii: { verb: 150 } };
       const { rerender, setPositions, patch } = renderResolver(before);
       expect(setPositions).not.toHaveBeenCalled();
@@ -245,8 +250,12 @@ describe('useOverlapResolution', () => {
     });
 
     it('fits no smaller than the minimum canvas height', () => {
+      // Small rings, high up: the content asks for less than the minimum. They have to be small
+      // enough to sit under the top edge at this height, or they would be brought down to it and
+      // the content would ask for more than the minimum after all.
       const scene: Scene = {
         positions: { subject: { x: 25, y: 10 }, verb: { x: 75, y: 10 } },
+        radii: { subject: 40, verb: 40 },
         graphSize: { w: 800, h: 600 },
       };
       const { rerender, setGraphHeight, dragRef } = renderResolver(clear(600));
@@ -255,6 +264,26 @@ describe('useOverlapResolution', () => {
       rerender(scene);
 
       expect(setGraphHeight).toHaveBeenCalledExactlyOnceWith(MIN_GRAPH_HEIGHT);
+    });
+
+    // What CI saw: the object's ring grew with its determiner and adjectives until it reached off
+    // the top of the canvas and over the period header, where it covered the tidy wand.
+    it('brings a ring that grew off the top back down, and grows the canvas under it', () => {
+      const before: Scene = {
+        positions: { subject: { x: 25, y: 50 }, verb: { x: 75, y: 50 } },
+        graphSize: { w: 800, h: 300 },
+      };
+      // Half of a 150 px ring's 322 px footprint stands above the word, which sits at 150.
+      const grown: Scene = { ...before, radii: { verb: 150 } };
+      const { rerender, setGraphHeight, patch } = renderResolver(before);
+
+      rerender(grown);
+
+      const [, verb] = footprints({ ...grown.positions, ...patch() }, grown);
+      expect(verb.y).toBeGreaterThanOrEqual(0);
+      expect(setGraphHeight).toHaveBeenCalledExactlyOnceWith(
+        Math.ceil(verb.y + verb.height + BOTTOM_MARGIN),
+      );
     });
 
     it('does not resize under a press that has not travelled yet', () => {
