@@ -74,6 +74,9 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // Five languages have a true adverb here. The Spanish and Portuguese word is a predicative
+    // adjective agreeing with the subject ("las gatas comen juntas"), so both carry the agreeing
+    // masculine singular in `predicative` alongside the plural the picker cites (A162).
     id: 'TOGETHER',
     role: 'adverb',
     description: 'with each other, in company',
@@ -83,9 +86,9 @@ export const adverbs: ConceptSeed[] = [
       it: { base: 'insieme' },
       fr: { base: 'ensemble' },
       de: { base: 'zusammen' },
-      es: { base: 'juntos' },
+      es: { base: 'juntos', predicative: 'junto' },
       ja: { base: '一緒に', reading: 'いっしょに' },
-      pt: { base: 'juntos' },
+      pt: { base: 'juntos', predicative: 'junto' },
     },
   },
   {

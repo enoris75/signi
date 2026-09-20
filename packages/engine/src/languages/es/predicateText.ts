@@ -2,6 +2,7 @@ import type { ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement, ResolvedNounElement, ResolvedNounPhrase, ResolvedVerbPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import { agreeingAdverb } from '../../functions/agreeingAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { groupObjectClitic } from '../../functions/groupObjectClitic.js';
 import { hasNegativeComplement } from '../../functions/hasNegativeComplement.js';
@@ -11,12 +12,14 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
+import { agreeAdj } from './agreeAdj.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
 import { coordinateElement } from './coordinateElement.js';
 import { esCliticize } from './esCliticize.js';
 import { esEnclitic } from './esEnclitic.js';
+import { isPlural } from './isPlural.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
 import { objectNounText } from './objectNounText.js';
 import { prepObjectText } from './prepObjectText.js';
@@ -86,7 +89,19 @@ export function predicateText(
     verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
   // prepended below and lands in front of it, exactly as for a plain verb.
-  const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
+  // TOGETHER is an adverb in every language, but the Spanish word for it is a predicative
+  // adjective and agrees with the subject — "las gatas comen juntas", not the flat "*juntos" (A162).
+  // Such a lexeme carries its agreeing stem beside the citation form; a true adverb has none and
+  // emits `base` unchanged. Every adverb in the verb group is read through here, so a modal's own
+  // agrees too; where that one is *placed* is `modalChain`'s business and is not changed here.
+  const adverbSurface = (a?: ConceptForms): string => {
+    if (!a) return '';
+    const stem = agreeingAdverb(a);
+    return stem
+      ? agreeAdj(stem, subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
+      : (a.forms['base'] ?? '');
+  };
+  const adverbText = adverbSurface(modifier);
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
   // object — where it reads as a preposition on the object ("sposta su il libro" is "move onto the
@@ -105,7 +120,7 @@ export function predicateText(
     ? [
         // Each modal's adverb trails its verb ("no quiere nunca poder ir"), except the fronted
         // negative adverb, which takes the preverbal slot instead (emitted as preVerb).
-        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: m.modifier?.forms['base'] })),
+        ...modalChain(modals, finite, (m, i) => (i === frontIdx ? {} : { post: adverbSurface(m.modifier) })),
         verbGroupInfinitive(copulaVerb.forms, agreeForms, aspect),
       ].join(' ')
     : aspect === 'neutral'
@@ -161,7 +176,7 @@ export function predicateText(
   const directObjectText = directObject && (!objectClitic || pronounGroup) ? coordinateElement(directObject, tonicOrNoun, true) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
-  const preVerb = preVerbNunca ? (groupAdverbs[frontIdx]?.forms['base'] ?? '') : '';
+  const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : '';
   const postVerb = mainIsFronted || splitFrequency ? '' : modifierText;
   const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId)]
     .filter(Boolean).join(' ');

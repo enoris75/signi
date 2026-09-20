@@ -290,7 +290,7 @@ test.describe('word definition tooltip', () => {
     ['HIDE', 'hide', 'to cause an object not to be visible', 'it', 'indurre un oggetto a non essere visibile'],
     ['START', 'start', 'to cause an action to begin', 'de', 'eine Handlung veranlassen, zu beginnen'],
     ['COMPACT', 'compact', 'to cause an object to become smaller', 'es', 'inducir un objeto a volverse más pequeño'],
-    ['COORDINATE', 'coordinate', 'to cause people to act together', 'pt', 'induzir pessoas a agir juntos'],
+    ['COORDINATE', 'coordinate', 'to cause people to act together', 'pt', 'induzir pessoas a agir juntas'],
     ['APPEAR', 'appear', 'to become visible', 'fr', 'devenir visible'],
   ] as const) {
     test(`a causative verb definition renders (localize-seed C08: ${id})`, async ({ app, page }) => {

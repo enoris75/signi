@@ -131,7 +131,7 @@ gloss clause takes — a predicate adjective, its `predicateDegree`, an adverb, 
 |---|---|---|---|---|---|---|---|---|
 | SHOW | causee PERSON + SEE OBJECT_THING | to cause a person to see objects | indurre una persona a vedere oggetti | induire une personne à voir des objets | eine Person veranlassen, Gegenstände zu sehen | inducir a una persona a ver objetos | 人が物体を見るようにする | induzir uma pessoa a ver objetos |
 | HIDE | causee OBJECT_THING + **not** BE VISIBLE | to cause an object not to be visible | indurre un oggetto a non essere visibile | induire un objet à ne pas être visible | einen Gegenstand veranlassen, nicht sichtbar zu sein | inducir un objeto a no estar visible | 物体が可視ではないようにする | induzir um objeto a não estar visível |
-| COORDINATE | causee PERSON pl + ACT + TOGETHER | to cause people to act together | indurre persone ad agire insieme | induire des personnes à agir ensemble | Personen veranlassen, zusammen zu handeln | inducir personas a actuar juntos | 人が一緒に行動するようにする | induzir pessoas a agir juntos |
+| COORDINATE | causee PERSON pl + ACT + TOGETHER | to cause people to act together | indurre persone ad agire insieme | induire des personnes à agir ensemble | Personen veranlassen, zusammen zu handeln | inducir personas a actuar juntas | 人が一緒に行動するようにする | induzir pessoas a agir juntas |
 | START | causee ACTION + BEGIN | to cause an action to begin | indurre un'azione a iniziare | induire une action à commencer | eine Handlung veranlassen, zu beginnen | inducir una acción a empezar | 動作が始まるようにする | induzir uma ação a começar |
 | COMPACT | causee OBJECT_THING + BECOME SMALL·more | to cause an object to become smaller | indurre un oggetto a diventare più piccolo | induire un objet à devenir plus petit | einen Gegenstand veranlassen, kleiner zu werden | inducir un objeto a volverse más pequeño | 物体がもっと小さくなるようにする | induzir um objeto a tornar-se menor |
 | EXPAND | causee OBJECT_THING + BECOME BIG·more | to cause an object to become bigger | indurre un oggetto a diventare più grande | induire un objet à devenir plus grand | einen Gegenstand veranlassen, größer zu werden | inducir un objeto a volverse más grande | 物体がもっと大きくなるようにする | induzir um objeto a tornar-se maior |
@@ -156,12 +156,15 @@ negation", the negation riding the caused clause rather than the causing.
   causative one*, which is exactly what tells the picker's two identical Italian entries apart, and
   it is what those languages' own dictionaries say ("far sì che qcs. inizi"). en (start / begin) and
   ja (始める / 始まる) have two words and read cleanly.
-- **es/pt agree "juntos" with nobody** —
-  [A162](../../bugs/A-must-fix/A162-spanish-portuguese-juntos-agreement.md). TOGETHER is an adverb in
-  the model and invariant in the lexicon, but the Spanish and Portuguese word is a predicative
-  adjective, so COORDINATE's "inducir **personas** a actuar **juntos**" misses the *juntas* both
-  languages want. It is not specific to this gloss ("las gatas comen juntos" has always been wrong),
-  so the definition shipped and the defect was filed with the fix it needs.
+- **es/pt agreed "juntos" with nobody** —
+  [A162](../../bugs/fixed/A162-spanish-portuguese-juntos-agreement.md). TOGETHER is an adverb in
+  the model and was invariant in the lexicon, but the Spanish and Portuguese word is a predicative
+  adjective, so COORDINATE's "inducir **personas** a actuar **juntos**" missed the *juntas* both
+  languages want. It was not specific to this gloss ("las gatas comen juntos" had always been
+  wrong), so the definition shipped and the defect was filed with the fix it needs. **Fixed
+  2026-09-20**, as the first of its two shapes: the lexeme carries the agreeing adjective and the
+  two engines resolve it against the clause's subject — here the object-controlled causee. The
+  table above shows the corrected *juntas*.
 - **The Japanese negated-こと gap ([B13](../../bugs/B-can-fix/B13-japanese-plain-negative.md)) is
   still there** and still avoided: "to cause a person **not to act**" renders 行動しません inside the
   clause. HIDE is unaffected because its negation falls on a *copula*, which has its own plain

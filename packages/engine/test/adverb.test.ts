@@ -141,15 +141,15 @@ describe('known bugs: English adverb of direction after the complements', () => 
 });
 
 // A162. Spanish and Portuguese say "together" with "juntos", which is a predicative *adjective* and
-// agrees with the subject — "las gatas comen juntas". The seed carries it as an ordinary invariant
-// adverb, so a feminine subject keeps the masculine form. The other five languages have a real
+// agrees with the subject — "las gatas comen juntas". The seed carried it as an ordinary invariant
+// adverb, so a feminine subject kept the masculine form. The other five languages have a real
 // adverb (insieme / ensemble / zusammen / together / 一緒に) and are unaffected; it surfaced on
 // COORDINATE's definition, "inducir personas a actuar juntos" (localization C08).
 describe('known bugs: Spanish and Portuguese "juntos" does not agree with the subject', () => {
-  const eatTogether = (extra: Partial<NounPhrase>) =>
-    sayAll(clause(np('CAT', { number: 'plural', ...extra }), 'EAT', { verbPhrase: { modifier: 'TOGETHER' } }));
+  const eatTogether = (extra: Partial<NounPhrase>, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT', { number: 'plural', ...extra }), 'EAT', { verbPhrase: { modifier: 'TOGETHER', ...verbPhrase } }));
 
-  test.fails('a feminine plural subject takes the feminine juntas', () => {
+  test('a feminine plural subject takes the feminine juntas', () => {
     expect(eatTogether({ gender: 'fem' })).toMatchObject({
       es: 'las gatas comen juntas.',
       pt: 'as gatas comem juntas.',
@@ -166,5 +166,80 @@ describe('known bugs: Spanish and Portuguese "juntos" does not agree with the su
       ja: '猫は一緒に食べます。',
       pt: 'os gatos comem juntos.',
     });
+  });
+
+  // The generalisation: the word agrees wherever the clause puts it, because it is read off the
+  // subject and not off the verb — so every shape of the verb group carries the agreement along.
+  test('…under a modal, in the marked aspects, and negated', () => {
+    expect(eatTogether({ gender: 'fem' }, { modals: ['MUST'] })).toMatchObject({
+      es: 'las gatas deben comer juntas.',
+      pt: 'as gatas devem comer juntas.',
+    });
+    expect(eatTogether({ gender: 'fem' }, { aspect: 'progressive' })).toMatchObject({
+      es: 'las gatas están comiendo juntas.',
+      pt: 'as gatas estão comendo juntas.',
+    });
+    expect(eatTogether({ gender: 'fem' }, { aspect: 'resultative' })).toMatchObject({
+      es: 'las gatas han comido juntas.',
+      pt: 'as gatas comeram juntas.',
+    });
+    expect(eatTogether({ gender: 'fem' }, { negative: true })).toMatchObject({
+      es: 'las gatas no comen juntas.',
+      pt: 'as gatas não comem juntas.',
+    });
+  });
+
+  // A relative clause and an imperative agree with the noun standing in for the subject — the head
+  // noun and the addressee — which is the same `subjectForms` the finite verb already agrees with.
+  test('…in a relative clause, and in an imperative', () => {
+    expect(sayAll(clause(np('CAT', {
+      number: 'plural', gender: 'fem',
+      relative: { verbPhrase: { verb: 'EAT', modifier: 'TOGETHER' } },
+    }), 'RUN'))).toMatchObject({
+      es: 'las gatas que comen juntas corren.',
+      pt: 'as gatas que comem juntas correm.',
+    });
+    expect(sayAll({
+      ...clause(np('SECOND_PERSON', { number: 'plural', gender: 'fem' }), 'EAT', { verbPhrase: { modifier: 'TOGETHER' } }),
+      imperative: true,
+    })).toMatchObject({ es: 'comed juntas.', pt: 'comam juntas.' });
+  });
+
+  // The defect was found on COORDINATE's definition, an object-controlled infinitive whose causee is
+  // the feminine PERSON (localization C08); it agrees with the controller, as a predicate adjective
+  // in such a clause already did. The whole definition is pinned in `causative.test.ts`.
+  test('…and with the causee of an object-controlled infinitive', () => {
+    expect(sayAll({
+      subject: np('GENERIC_PERSON'),
+      verbPhrase: { verb: 'CAUSE_VERB' },
+      directObject: np('PERSON', { number: 'plural', definiteness: 'bare' }),
+      infinitiveComplement: { verbPhrase: { verb: 'ACT', modifier: 'TOGETHER' }, control: 'object' },
+      infinitive: true,
+    })).toMatchObject({
+      es: 'inducir personas a actuar juntas.',
+      pt: 'induzir pessoas a agir juntas.',
+    });
+  });
+
+  // A singular subject is a semantically odd plan — "together" needs somebody to be together with —
+  // but the form still tracks the subject rather than sitting frozen in the masculine plural.
+  test('…and a singular subject, which no longer keeps a plural form', () => {
+    expect(eatTogether({ number: 'singular', gender: 'fem' })).toMatchObject({
+      es: 'la gata come junta.',
+      pt: 'a gata come junta.',
+    });
+    expect(eatTogether({ number: 'singular' })).toMatchObject({
+      es: 'el gato come junto.',
+      pt: 'o gato come junto.',
+    });
+  });
+
+  // Regression: only a lexeme carrying an agreeing stem is inflected. An ordinary adverb still emits
+  // its one form whatever the subject, and the preverbal "nunca" slot is untouched.
+  test('regression: a true adverb is invariant, and "nunca" still fronts', () => {
+    expect(sayAll(clause(np('CAT', { number: 'plural', gender: 'fem' }), 'EAT', { verbPhrase: { modifier: 'FAST' } })))
+      .toMatchObject({ es: 'las gatas comen rápido.', pt: 'as gatas comem rapidamente.' });
+    expect(sayAll(clause(np('CAT', { number: 'plural', gender: 'fem' }), 'EAT', { verbPhrase: { modifier: 'NEVER' } })))
+      .toMatchObject({ es: 'las gatas nunca comen.', pt: 'as gatas nunca comem.' });
   });
 });

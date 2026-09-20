@@ -67,9 +67,11 @@ describe('the causative definitions (localization C08)', () => {
       it: 'indurre persone ad agire insieme.', // the euphonic d before another a
       fr: 'induire des personnes à agir ensemble.',
       de: 'Personen veranlassen, zusammen zu handeln.',
-      es: 'inducir personas a actuar juntos.',
+      // "juntos" is a predicative adjective in es/pt and agrees with the causee, feminine in both
+      // (A162); the other five have a true adverb and cite one form.
+      es: 'inducir personas a actuar juntas.',
       ja: '人が一緒に行動するようにする。',
-      pt: 'induzir pessoas a agir juntos.',
+      pt: 'induzir pessoas a agir juntas.',
     });
   });
 
