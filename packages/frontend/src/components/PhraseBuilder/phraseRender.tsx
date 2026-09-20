@@ -118,6 +118,7 @@ export interface PhraseRenderContext {
   handleToggleNegative: () => void;
   handleCycleTense: () => void;
   handleCycleAspect: () => void;
+  handleCycleVoice: () => void;
   handleSelectSpecifier: (spec: PathSpecifier) => void;
   handleSelectLocativeSpecifier: (spec: PathSpecifier) => void;
   handleSelectSentiment: (sentiment: CauseSentiment) => void;

@@ -23,6 +23,8 @@ describe('lookupLexicalEntry', () => {
         gerund: 'cutting',
         participle: 'cut',
         role: 'verb',
+        // Concept-level, exposed for the passive: only a verb with a patient can promote one (A01).
+        transitivity: 'transitive',
       },
     });
   });

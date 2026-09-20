@@ -84,7 +84,7 @@ import { applyCollapse } from "./functions/applyCollapse.ts";
 import { decoratePerimeterControls } from "./functions/decoratePerimeterControls.ts";
 import { ringLookup, wordPlacement } from "./functions/canvasGeometry.ts";
 import { resolveBuilderMode } from "./functions/resolveBuilderMode.ts";
-import { renderedSlotsFor, roleSlotFor, visibleSlotsFor } from "./functions/visibleSlots.ts";
+import { renderedSlotsFor, rendersPassive, roleSlotFor, visibleSlotsFor } from "./functions/visibleSlots.ts";
 import { phraseCommands } from "./functions/phraseCommands.ts";
 import { possessorToggleAction } from "./functions/possessorToggleAction.ts";
 import { canvasChains, ownableNouns } from "./functions/canvasNouns.ts";
@@ -552,6 +552,8 @@ export function PhraseBuilder({
     showSubject: !actionMode,
     visibleSlots,
     shownMap,
+    // A passive renames two of the groups, as it renames the word boxes inside them (A01).
+    passive: rendersPassive(selection),
   })
     // A hosted ring's builder draws one ring — its phrase's — and that ring drops the phrase: a
     // conjunct out of its group, an owner off the noun it owns.
@@ -865,6 +867,7 @@ export function PhraseBuilder({
       toggleNegative: commands.handleToggleNegative,
       cycleTense: commands.handleCycleTense,
       cycleAspect: commands.handleCycleAspect,
+      cycleVoice: commands.handleCycleVoice,
       cycleDegree: commands.handleCycleDegree,
       cycleModifierRelation: commands.handleCycleModifierRelation,
       cycleModifierNumber: commands.handleCycleModifierNumber,
@@ -924,6 +927,7 @@ export function PhraseBuilder({
     handleToggleNegative: commands.handleToggleNegative,
     handleCycleTense: commands.handleCycleTense,
     handleCycleAspect: commands.handleCycleAspect,
+    handleCycleVoice: commands.handleCycleVoice,
     handleSelectSpecifier: commands.handleSelectSpecifier,
     handleSelectLocativeSpecifier: commands.handleSelectLocativeSpecifier,
     handleSelectSentiment: commands.handleSelectSentiment,

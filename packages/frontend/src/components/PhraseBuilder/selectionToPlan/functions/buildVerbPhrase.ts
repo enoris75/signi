@@ -22,6 +22,7 @@ export function buildVerbPhrase(sel: PhraseSelection): VerbPhrase | undefined {
     negative: sel.verbNegative,
     tense: sel.verbTense,
     aspect: sel.verbAspect,
+    voice: sel.verbVoice,
     modifier: sel.modifier?.id,
     ...(modals.length > 0 && { modals }),
   };

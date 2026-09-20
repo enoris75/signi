@@ -1,5 +1,6 @@
-import { COMPLEMENT_LABELS } from "@signi/shared";
+import { COMPLEMENT_LABELS, type UiStringKey } from "@signi/shared";
 import { SlotConfig } from "./interfaces.ts";
+import { passiveCaptions } from "./functions/visibleSlots.ts";
 import type { SatelliteIcon } from "./Boxes.tsx";
 import {
   adjectiveSlots,
@@ -77,6 +78,7 @@ export function roleGroups({
   showSubject = true,
   visibleSlots,
   shownMap,
+  passive = false,
 }: {
   // Whether to paint the canvas at all: true once the period has a subject or verb (or in
   // noun-phrase mode). Before that the builder shows its empty-state opening picker instead.
@@ -88,15 +90,25 @@ export function roleGroups({
   showSubject?: boolean;
   visibleSlots: SlotConfig[];
   shownMap: Record<string, boolean>;
+  // Whether this period renders as a passive, which renames two of the groups (see `named`).
+  passive?: boolean;
 }): GroupDef[] {
   if (!drawCanvas) return [];
   const shown = (keys: string[]) => keys.filter((k) => shownMap[k]);
+  // A passive swaps which of the two core arguments is the clause's subject, and the dashed boxes
+  // say so with the words inside them: the object's box becomes the Subject and the subject's the
+  // Agent (see `passiveCaptions`, which names the word boxes the same way). Every other group keeps
+  // the name it is declared with — a hosted ring's own dressing is the ring's, not the group's.
+  const named = <K extends UiStringKey>(key: string, label: string, labelKey: K) => {
+    if (!passive) return { label, labelKey };
+    const slot = passiveCaptions({ key, label, labelKey } as SlotConfig);
+    return { label: slot.label, labelKey: (slot.labelKey ?? labelKey) as K };
+  };
   return [
     ...(showSubject
       ? [
           {
-            label: "Subject",
-            labelKey: "slot.subject" as const,
+            ...named("subject", "Subject", "slot.subject" as const),
             color: MUI_COLOR_HEX.primary,
             mainKey: "subject",
             nodeKeys: ["subject", ...shown([...adjectiveSlots("subject"), "subjectDefiniteness"])],
@@ -123,13 +135,12 @@ export function roleGroups({
     ...(visibleSlots.some((s) => s.key === "directObject") && shownMap.directObject
       ? [
           {
-            label: "Direct Object",
-            labelKey: "slot.directObject" as const,
+            ...named("directObject", "Direct Object", "slot.directObject" as const),
             color: MUI_COLOR_HEX.success,
             mainKey: "directObject",
             nodeKeys: [
               "directObject",
-              ...shown([...adjectiveSlots("directObject"), "directObjectDefiniteness"]),
+              ...shown([...adjectiveSlots("directObject"), "directObjectDefiniteness", "verbVoice"]),
             ],
           },
         ]

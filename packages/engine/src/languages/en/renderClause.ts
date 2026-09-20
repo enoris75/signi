@@ -29,7 +29,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // matrix clause's own subject counts: `relativeText` passes the head noun's forms for agreement,
   // but a `no` head negates THIS clause, not the relative one.
   const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
-    subject.agreement['definiteness'] === 'no');
+    subject.agreement['definiteness'] === 'no', phrase.agent);
   // A question puts the finite auxiliary before the subject: "is the server active?".
   const clause = (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
     .filter(Boolean)

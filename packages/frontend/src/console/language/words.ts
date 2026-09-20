@@ -16,6 +16,7 @@ import {
 import {
   nounSliceAt,
   setAspect,
+  setVoice,
   setDefiniteness,
   setDegree,
   setGender,
@@ -185,6 +186,17 @@ export function settingTakes(s: Setting, w: WordInfo): boolean {
     case "tense":
     case "aspect":
       return w.kind === "verb" && !finiteSlotTaken(w.root);
+    // Only a verb with a patient has a passive to be in (see `VerbPhrase.voice`), and a command is
+    // always active. The *canvas* satellite also waits for the object to be there, since a control
+    // that can do nothing is worth hiding; the console asks only about the verb, because a line
+    // names its object after its verb ("/verb ( eat /passive ) /obj ( food )") and a setting that
+    // could not be written until the object existed could not be printed back either.
+    case "voice":
+      return (
+        w.kind === "verb" &&
+        !finiteSlotTaken(w.root) &&
+        (w.slice.verb?.transitivity === "transitive" || w.slice.verb?.transitivity === "ditransitive")
+      );
     case "polarity":
       return w.kind === "verb";
     case "degree":
@@ -215,6 +227,8 @@ export function applySetting(s: Setting, w: WordInfo, slice: PhraseSelection): P
       return setTense(slice, s.value);
     case "aspect":
       return setAspect(slice, s.value);
+    case "voice":
+      return setVoice(slice, s.value);
     case "polarity":
       return setNegative(slice, s.value === "negative");
     case "degree":
@@ -248,6 +262,8 @@ export function currentSetting(id: Setting["id"], w: WordInfo): string | undefin
       return sel.verbTense ?? "present";
     case "aspect":
       return sel.verbAspect ?? "neutral";
+    case "voice":
+      return sel.verbVoice ?? "active";
     case "polarity":
       return sel.verbNegative ? "negative" : "positive";
     case "degree":
@@ -274,6 +290,8 @@ export function defaultSetting(id: Setting["id"], w: WordInfo): string {
       return "present";
     case "aspect":
       return "neutral";
+    case "voice":
+      return "active";
     case "polarity":
       return "positive";
     case "degree":

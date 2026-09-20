@@ -6,6 +6,25 @@
 tenses), **all 7 languages** incl. the Japanese れる/られる morphology. The **agentless**
 passive is deliberately *not* a value of this flag — it is the generic subject the corpus
 already has, and §0 says why.
+**Status: shipped.** All seven languages, composing with tense, aspect, modals, mood and the
+question flag; the agentless passive falls out of `GENERIC_PERSON` as §0 asked. Two things landed
+differently from the plan below, both noted where they occur:
+
+- **The voice control rides the direct object's ring, not the verb's** (§4). The verb's solid ring
+  was already at capacity — clear, tense, aspect, modal, adverb, polarity — and a seventh control
+  widened it enough to push the object off its row on every transitive clause until the canvas was
+  tidied. The object's ring had the room, the passive is what promotes *that* object, and the
+  control is wanted exactly when the object is there, so the gate the plan asked for comes for free.
+- **The console lets a verb take the voice before its object is named** (§4), where the canvas
+  waits for both. A line reads left to right — `/verb ( eat /passive ) /obj ( food )` — and a
+  setting that could not be written until the object existed could not be printed back either,
+  which would break the console's print → apply round trip.
+
+Three concepts were seeded for the control's own label, which the UI renders through the engine
+like every other: `VOICE` (diatesi / voix / Diathese / 態), `ACTIVE_VOICE` and `PASSIVE`, plus
+`AGENT_GRAMMAR` for the box the demoted agent keeps. The canvas presentation is the caption swap
+§4 describes; the boxes keep their slots' colours, so the promoted patient still wears the direct
+object's green.
 
 | lang | active → passive ("the cat eats the food" → "the food is eaten (by the cat)") |
 |---|---|

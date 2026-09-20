@@ -86,6 +86,7 @@ function context(overrides: Partial<PhraseRenderContext> = {}) {
     handleToggleNegative: vi.fn(() => {}),
     handleCycleTense: vi.fn(() => {}),
     handleCycleAspect: vi.fn(() => {}),
+    handleCycleVoice: vi.fn(() => {}),
     handleSelectSpecifier: vi.fn(() => {}),
     handleSelectLocativeSpecifier: vi.fn(() => {}),
     handleSelectSentiment: vi.fn(() => {}),

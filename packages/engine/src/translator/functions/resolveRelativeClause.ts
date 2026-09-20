@@ -26,9 +26,15 @@ export function resolveRelativeClause(
 ): ResolvedRelativeClause {
   const headRole = clause.headRole ?? 'subject';
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
+  // A relative clause stays **active** whatever voice its plan names (A01, documented gap). The
+  // passive re-maps a clause's subject and object, and here one of those slots is the gap the head
+  // noun fills: promoting the patient over it would have to move the gap too, which is a second
+  // feature and not this one. Dropping the flag renders the plain active clause, which is at least
+  // a true sentence, rather than an auxiliary with nothing promoted into place.
+  const { voice: _voice, ...verbPhrasePlan } = clause.verbPhrase;
   // The head gapped as the direct object is the verb's object too ("il ragazzo che il gatto conosce").
   const verbPhrase = resolveVerbPhrase(
-    clause.verbPhrase, language, lookup, undefined, undefined,
+    verbPhrasePlan, language, lookup, undefined, undefined,
     !!clause.directObject || headRole === 'directObject',
     headRole === 'subject' ? headForms : subject?.agreement,
   );

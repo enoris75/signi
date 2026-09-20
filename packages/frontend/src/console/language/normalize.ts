@@ -21,6 +21,7 @@ type Json = string | number | boolean | Json[] | { [k: string]: Json };
 const DEFAULTS: Record<string, string> = {
   verbTense: "present",
   verbAspect: "neutral",
+  verbVoice: "active",
   causeSentiment: "neutral",
   routeSpecifier: "through",
   locativeSpecifier: "in",

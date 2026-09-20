@@ -28,7 +28,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("dernières nouvelles").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, undefined, phrase.agent,
   );
   const clause = joinSubject(subj, predicate).trim();
   // An infinitive complement follows the clause, agreeing with its controller — this clause's

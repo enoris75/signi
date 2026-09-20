@@ -184,7 +184,11 @@ const OPS: Op[] = [
     const r = rng();
     const finite = !(sel.imperative || sel.infinitive);
     if (r < 0.3 && finite) return R.cycleTense(sel);
-    if (r < 0.55 && finite) return R.cycleAspect(sel);
+    if (r < 0.5 && finite) return R.cycleAspect(sel);
+    // The voice, which only a verb with a patient has (the satellite is gated on it too).
+    if (r < 0.6 && finite && (sel.verb?.transitivity === 'transitive' || sel.verb?.transitivity === 'ditransitive')) {
+      return R.cycleVoice(sel);
+    }
     if (r < 0.75) return R.toggleNegative(sel);
     return R.applyConceptSelect(sel, 'modifier', pick(rng, ADVERBS)!);
   }),

@@ -43,3 +43,20 @@ export const OR_RESOLVES_MIXED_PERSONS: ReadonlySet<string> = new Set(['fr']);
  * resolves bare. (English fuses the two into "another" instead, see en/nounPhrase.)
  */
 export const OTHER_REPLACES_INDEFINITE: ReadonlySet<string> = new Set(['es', 'pt']);
+
+/**
+ * The verb each language conjugates in place of the lexical one to build a **passive** — the
+ * auxiliary the past participle hangs off of. Six of the seven take their copula, *be* / *essere* /
+ * *être* / *ser* / *ser*; German takes *werden*, which is the BECOME concept, because *sein* +
+ * participle is the stative reading ("die Tür ist geschlossen" — it is shut) and not the event
+ * ("die Tür wird geschlossen" — someone is closing it).
+ *
+ * Japanese is absent on purpose: its passive is morphology on the verb itself (〜れる/られる), so
+ * there is no auxiliary to name, and its engine reads the lexeme's own `passive` form instead.
+ */
+export const PASSIVE_AUXILIARY: Record<string, string> = {
+  en: 'BE', it: 'BE', fr: 'BE', es: 'BE', pt: 'BE', de: 'BECOME',
+};
+
+/** Verb transitivities that have a patient to promote, and can therefore be passivized. */
+export const PASSIVIZABLE: ReadonlySet<string> = new Set(['transitive', 'ditransitive']);

@@ -1,4 +1,4 @@
-import type { Aspect, ComplementType, CoordConjunction, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { Aspect, ComplementType, CoordConjunction, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -89,12 +89,35 @@ export interface ResolvedNounElement {
  */
 export type Mood = 'indicative' | 'conditional' | 'subjunctive' | 'imperative' | 'infinitive';
 
-/** A resolved verb phrase: the verb, negation flag, tense, aspect, mood, and resolved adverb. */
+/** A resolved verb phrase: the verb, negation flag, tense, aspect, voice, mood, and resolved adverb. */
 export interface ResolvedVerbPhrase {
   verb: ConceptForms;
   negative?: boolean;
   tense?: Tense;
   aspect?: Aspect;
+  /**
+   * The voice the clause is realised in (see VerbPhrase.voice). Set to `'passive'` only where the
+   * verb can actually take it — a transitive verb with a patient to promote — so an engine reading
+   * it never has to re-check: the translator has already normalised an impossible passive back to
+   * active, and has already swapped the slots (`ResolvedPhrase.subject` is the patient,
+   * `ResolvedPhrase.agent` the demoted agent, and there is no `directObject` left).
+   *
+   * What each engine still owes is the morphology: auxiliary + past participle in six of the seven,
+   * and the 〜れる/られる form in Japanese.
+   */
+  voice?: Voice;
+  /**
+   * The passive auxiliary the clause conjugates in place of its lexical verb — *be* / *essere* /
+   * *être* / *ser* / *ser*, and German's *werden* (see `PASSIVE_AUXILIARY`). Present only under
+   * `voice === 'passive'`, and absent in Japanese, whose passive is morphological and needs none.
+   *
+   * It is a full lexeme, so everything the finite slot does — tense, agreement, mood, the marked
+   * aspects' own auxiliaries, a modal's infinitive — works on it unchanged, and the lexical verb
+   * comes along as the participle behind it. It carries the lexical verb's `stative` rather than its
+   * own: what decides whether the Romance past is the perfective or the imperfect is the event being
+   * spoken of, not the auxiliary spelling it ("fu mangiato", but "era conosciuto").
+   */
+  passiveAux?: ConceptForms;
   mood?: Mood;
   /**
    * The register of an imperative (see PhrasePlan.imperativeRegister). Absent ⇒ `'request'`,
@@ -184,6 +207,17 @@ export interface ResolvedPhrase {
   // Absent for a verbless period (a bare noun phrase — see PhrasePlan.verbPhrase).
   verbPhrase?: ResolvedVerbPhrase;
   directObject?: ResolvedNounElement;
+  /**
+   * The demoted agent of a passive clause — the by-phrase ("is eaten **by the cat**"). Set only
+   * where `verbPhrase.voice === 'passive'`, and only when the agent is one a language would speak:
+   * a **generic** agent is dropped here rather than rendered, because no language says *by one* /
+   * *da si* / *von man*, and the plain agentless passive is what is wanted there.
+   *
+   * It is deliberately its own slot rather than a complement: the passive re-maps the clause's core
+   * arguments, and `COMPLEMENT_RENDER_ORDER` and the complement machinery have nothing to do with
+   * it. Each engine renders it with its own adposition (by / da / par / por / por / von / に).
+   */
+  agent?: ResolvedNounElement;
   // The recipient ("gives the book *to the cat*") arrives as the `terminus` complement.
   complements?: Partial<Record<ComplementType, ResolvedComplement>>;
   /**

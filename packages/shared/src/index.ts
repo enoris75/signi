@@ -158,6 +158,34 @@ export type Aspect = 'neutral' | 'progressive' | 'prospective' | 'resultative';
 export const ASPECTS: Aspect[] = ['neutral', 'progressive', 'prospective', 'resultative'];
 
 /**
+ * Grammatical **voice** — which participant of the event the clause makes its subject. The
+ * proposition is the same either way: `EAT(agent: CAT, patient: FOOD)` is true in exactly the same
+ * worlds whether it is said as "the cat eats the food" or "the food is eaten by the cat". What
+ * changes is information structure, so voice is a realisation flag on the verb phrase, not a
+ * different plan:
+ *   active   — the agent is the subject, the patient the direct object (the unmarked order).
+ *   passive  — the **patient** is promoted to subject (it drives agreement, and a Romance
+ *              participle agrees with it), and the agent is demoted to an oblique by-phrase
+ *              (by / da / par / por / von / に). The verb is realised periphrastically as
+ *              auxiliary + past participle everywhere but Japanese, which has the 〜れる/られる
+ *              morphology instead.
+ *
+ * Only a **transitive or ditransitive** verb passivizes: there has to be a patient to promote, and
+ * a clause with no direct object has none. Voice composes with everything else — tense, aspect,
+ * modals and mood all sit on the auxiliary ("must have been eaten", "sarebbe stato mangiato").
+ *
+ * Agent **suppression** is not a value of this flag. "The food is eaten" asserts that somebody ate
+ * it, which the active proposition entails but does not equal, so it is a different plan and not a
+ * different rendering of this one: its subject is `GENERIC_PERSON`, and a generic agent is simply
+ * never spoken as a by-phrase (no *by one*, *da si*, *von man*).
+ */
+export type Voice = 'active' | 'passive';
+
+export const VOICES: Voice[] = ['active', 'passive'];
+
+export const VOICE_LABELS: Record<Voice, string> = { active: 'active', passive: 'passive' };
+
+/**
  * Semantic complement types — the "varieties" of indirect object a verb can
  * license. English collapses these into a single category, but each takes a
  * distinct adposition (and case, in German) across languages. Verbs declare
@@ -678,6 +706,13 @@ export interface VerbPhrase {
   tense?: Tense;                   // defaults to 'present'
   aspect?: Aspect;                 // defaults to 'neutral'
   /**
+   * Which participant heads the clause (see `Voice`). Defaults to `'active'`. A `'passive'` on a
+   * verb that cannot take it — an intransitive one, or a clause with no direct object to promote —
+   * normalises back to active rather than rendering half a passive. The agent is not lost: it
+   * survives as the by-phrase, unless it is the generic person, which no language spells there.
+   */
+  voice?: Voice;                   // defaults to 'active'
+  /**
    * Modal verbs governing this predicate, outermost first — obligation (must / dovere),
    * ability (can / potere), volition (will / volere). `[{verb:'WILL'}, {verb:'CAN'}]` over GO is
    * "voglio poter andare", "I want to be able to go". Each is an ordinary verb concept flagged
@@ -1014,7 +1049,7 @@ export const SAVED_PHRASE_FORMAT = 'signi.phrase' as const;
  * shape changes in a way an older loader couldn't read; the loader checks this to
  * migrate or reject. Starts at 1.
  */
-export const SAVED_PHRASE_VERSION = 6;
+export const SAVED_PHRASE_VERSION = 7;
 
 /**
  * The grain of a saved workspace:

@@ -1356,6 +1356,43 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The voice that makes the agent the subject (grammar) — not the ACTIVE of a running machine,
+    // which is a sense of its own. German and Japanese name the voices with what are nouns in their
+    // own grammars (Aktiv, 能動), which is what the label wants: the adjective alone, and Japanese
+    // strips the attributive の.
+    id: 'ACTIVE_VOICE',
+    role: 'adjective',
+    synonym: 'grammar',
+    description: 'presenting the agent of an event as the subject (grammar)',
+    emoji: '➡️',
+    forms: {
+      en: { base: 'active' },
+      it: { base: 'attivo' },
+      fr: { base: 'actif' },
+      de: { base: 'aktiv' },
+      es: { base: 'activo' },
+      ja: { base: '能動の', reading: 'のうどうの' },
+      pt: { base: 'ativo' },
+    },
+  },
+  {
+    // The voice that makes the patient the subject and demotes the agent to a by-phrase (grammar).
+    id: 'PASSIVE',
+    role: 'adjective',
+    synonym: 'grammar',
+    description: 'presenting the patient of an event as the subject (grammar)',
+    emoji: '⬅️',
+    forms: {
+      en: { base: 'passive' },
+      it: { base: 'passivo' },
+      fr: { base: 'passif' },
+      de: { base: 'passiv' },
+      es: { base: 'pasivo' },
+      ja: { base: '受動の', reading: 'じゅどうの' },
+      pt: { base: 'passivo' },
+    },
+  },
+  {
     id: 'PROGRESSIVE',
     role: 'adjective',
     description: 'presenting an event as in progress (grammar)',

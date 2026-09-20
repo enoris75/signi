@@ -157,6 +157,9 @@ describe('buildSatelliteIcons', () => {
       const { satelliteIconsByParent } = icons({ verb: SEE, directObject: CAT });
 
       expect(keysOf(satelliteIconsByParent['directObject'])).toEqual([
+        // The voice rides the object's ring, not the verb's: the object is what a passive
+        // promotes, and the verb's ring is full (A01).
+        'verbVoice',
         'directObjectAdjective',
         'directObjectNumber',
         'directObjectDefiniteness',

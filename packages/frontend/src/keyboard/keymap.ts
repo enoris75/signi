@@ -99,6 +99,7 @@ export interface BoxContext {
   toggleNegative: () => void;
   cycleTense: (step: 1 | -1) => void;
   cycleAspect: (step: 1 | -1) => void;
+  cycleVoice: (step: 1 | -1) => void;
   cycleDegree: (slotKey: SlotKey, step: 1 | -1) => void;
   cycleModifierRelation: (slotKey: SlotKey, step: 1 | -1) => void;
   cycleModifierNumber: (slotKey: SlotKey) => void;
@@ -394,6 +395,27 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     satellite: /Adjective\d?$/,
     when: (ctx) => nextAdjective(ctx) !== undefined,
     run: (ctx) => goTo(ctx, nextAdjective(ctx)!),
+  },
+  {
+    // The voice of the clause this noun is the object of (A01) — the control rides *this* ring,
+    // because the object is what a passive promotes, and `has` keeps the key off every other noun.
+    id: "object.voice",
+    scope: "box:noun",
+    keys: ["V"],
+    label: "Voice",
+    labelKey: "satellite.voice",
+    hint: true,
+    satellite: /^verbVoice$/,
+    when: (ctx) => has(ctx, "verbVoice"),
+    run: (ctx) => ctx.cycleVoice(1),
+  },
+  {
+    id: "object.voice.back",
+    scope: "box:noun",
+    keys: ["Shift+V"],
+    label: "Voice, backwards",
+    when: (ctx) => has(ctx, "verbVoice"),
+    run: (ctx) => ctx.cycleVoice(-1),
   },
   {
     id: "noun.possessor",

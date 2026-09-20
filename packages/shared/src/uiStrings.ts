@@ -431,6 +431,15 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Subject',
   },
 
+  // What the subject box is called once the period is passive: the patient has taken the subject's
+  // place, and the box that still holds the agent is captioned for the role it now plays — the one
+  // each language's by-phrase names (see `ResolvedPhrase.agent`).
+  'slot.agent': {
+    plan: { subject: { concept: 'AGENT_GRAMMAR', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Agent',
+  },
+
   // The subject box's placeholder, as a command to the user: "type a subject" — the TYPE
   // imperative taking an indefinite SUBJECT as its direct object. Lower-case (a placeholder,
   // not a label), and the call site adds the trailing ellipsis.
@@ -734,6 +743,11 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Aspect',
   },
+  'satellite.voice': {
+    plan: nameOf('VOICE'),
+    format: NAME_FORMAT,
+    fallback: 'Voice',
+  },
 
   // The link control on a noun that makes a period in another container its relative clause. One
   // noun per tradition, like the complement names: German and Japanese compound it (Relativsatz,
@@ -797,6 +811,24 @@ export const UI_STRINGS = defineUiStrings({
     agreesWith: 'ASPECT',
     format: { capitalize: true },
     fallback: 'Resultative',
+  },
+
+  // The two values of the voice satellite, keyed `voice.value.<Voice>`. Adjectives agreeing with
+  // VOICE, as the aspect's values agree with ASPECT — and VOICE is feminine wherever it has a
+  // gender, so they read "attiva / passiva", "active / passive", "activa / pasiva". German and
+  // Japanese show what their own grammars call the two (Aktiv / Passiv, 能動 / 受動), the second
+  // because Japanese strips the attributive の.
+  'voice.value.active': {
+    word: 'ACTIVE_VOICE',
+    agreesWith: 'VOICE',
+    format: { capitalize: true },
+    fallback: 'Active',
+  },
+  'voice.value.passive': {
+    word: 'PASSIVE',
+    agreesWith: 'VOICE',
+    format: { capitalize: true },
+    fallback: 'Passive',
   },
 
   // The two values of the polarity toggle, agreeing with POLARITY, which is feminine in the Romance

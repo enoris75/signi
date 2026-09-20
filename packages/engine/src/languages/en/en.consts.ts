@@ -37,6 +37,13 @@ export const PREP: Record<ComplementType, string> = {
 /** The essive marker: the object taken *as* the complement, not made into it ("as the condition"). */
 export const ESSIVE = 'as';
 
+/**
+ * The adposition the passive puts its demoted agent under — the by-phrase ("is eaten **by** the
+ * cat"). One word for every agent, animate or not, where the Romance languages split "da"/"par"
+ * from their other uses and German takes the dative "von".
+ */
+export const AGENT_PREP = 'by';
+
 // The manner adverbial's preposition follows the head noun's relation — similative "like (the
 // wind)", means "with (care)", measure "at (the speed)", mode "in (a good way)" — read off the
 // noun, not chosen by the speaker. 'like' is the default, and keeps clear of instrumental "with".

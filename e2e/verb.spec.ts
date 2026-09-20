@@ -1,4 +1,4 @@
-import { test } from './fixtures';
+import { expect, test } from './fixtures';
 
 // The verb's own controls: the tense and aspect toggle boxes (click to cycle), the polarity toggle
 // on the verb box border, and the modal chain. Each changes the finite verb the plan carries, a
@@ -72,6 +72,35 @@ test.describe('verb', () => {
       es: 'el gato ha comido el ratón.',
       pt: 'o gato comeu o rato.',
     });
+  });
+
+  // A01. The voice satellite is there only on a transitive verb that has an object to promote, so
+  // this is also the check that the gate lets it through; the canvas then has to agree with the
+  // translations about which box is the subject.
+  test('voice cycles active → passive, and the boxes change their names with it', async ({ app }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.setDirectObject('MOUSE');
+    await expect(app.groupBox('Subject')).toBeVisible();
+
+    await app.cycle('verbVoice');
+    await app.expectSentences({
+      en: 'the mouse is eaten by the cat.',
+      it: 'il topo è mangiato dal gatto.',
+      fr: 'la souris est mangée par le chat.',
+      de: 'die Maus wird vom Kater gefressen.',
+      es: 'el ratón es comido por el gato.',
+      pt: 'o rato é comido pelo gato.',
+      ja: 'ネズミは猫に食べられます。',
+    });
+    // The patient is the subject now, and the box still holding the agent says so.
+    await expect(app.groupBox('Agent')).toBeVisible();
+    await expect(app.groupBox('Direct Object')).toHaveCount(0);
+
+    // Cycling back restores the active clause and the names it had.
+    await app.cycle('verbVoice');
+    await app.expectSentences({ en: 'the cat eats the mouse.' });
+    await expect(app.groupBox('Subject')).toBeVisible();
+    await expect(app.groupBox('Agent')).toHaveCount(0);
   });
 
   test('the polarity toggle negates the clause', async ({ app }) => {

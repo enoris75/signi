@@ -72,10 +72,22 @@ export function resolvePhrase(
         ...(question ? { interrogative: true } : {}),
       }
     : undefined;
+  const directObject = plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined;
+  // A passive re-maps the clause's core arguments (A01). The patient becomes the grammatical
+  // subject — it drives the verb's agreement, and a Romance participle agrees with it — the object
+  // slot is emptied, and the agent is demoted to the by-phrase. `resolveVerbPhrase` has already
+  // checked that there is something to promote, so a `'passive'` here always has a `directObject`.
+  //
+  // A **generic** agent is demoted to nothing at all: no language says *by one* / *da si* / *von
+  // man*, and a plan whose agent is the generic person is exactly the one that wants the plain
+  // agentless passive ("the food is eaten", "das Futter wird gegessen").
+  const passive = verbPhrase?.voice === 'passive' && !!directObject;
+  const generic = subject.agreement['generic'] === '1';
   const resolved: ResolvedPhrase = {
-    subject,
+    subject: passive ? directObject : subject,
     verbPhrase,
-    directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
+    directObject: passive ? undefined : directObject,
+    ...(passive && !generic ? { agent: subject } : {}),
     complements: resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires

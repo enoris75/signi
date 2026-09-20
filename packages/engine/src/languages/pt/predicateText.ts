@@ -11,6 +11,7 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './pt.consts.js';
+import { agentPhrase } from './agentPhrase.js';
 import { agreeAdj } from './agreeAdj.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -38,6 +39,8 @@ export function predicateText(
   // Set when nothing is rendered ahead of the predicate: a main clause whose pronoun subject was
   // dropped (see `renderClause`). A 3rd-person clitic cannot open the clause, so it follows the verb.
   verbLeads = false,
+  // The demoted agent of a passive clause, rendered as the "por" phrase (see ResolvedPhrase.agent).
+  agent?: ResolvedNounElement,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite element takes the conditional (apodosis, "correria")
@@ -74,8 +77,18 @@ export function predicateText(
   const locativeAlone = !!locative && !predicative;
   // Every form of the verb below reads the choice, not only the finite one: "deve estar", "tinha
   // estado", "esteja", "estar na casa".
-  const copulaVerb =
-    verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
+  // The passive conjugates "ser" where the active conjugates the lexical verb, and agrees that
+  // verb's particípio with the promoted patient — now this clause's subject ("a comida é comida",
+  // "as comidas são comidas"). `copulaVerb` is what every branch below builds its group out of, so
+  // the composition follows: "foi comida", "está sendo comida", "deve ser comida", "seria comida".
+  // The estar/ser split above is the copula's own and has nothing to say here: a passive of a
+  // lexical verb is always "ser".
+  const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
+  const copulaVerb = passive ? verbPhrase.passiveAux!
+    : verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
+  const passiveParticiple = passive
+    ? agreeAdj(verb.forms['participle'] ?? verb.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
+    : '';
   // A modal chain makes the outermost modal the finite verb ("quero poder ir"); "não" is
   // prepended below and lands in front of it, exactly as for a plain verb.
   // TOGETHER is an adverb in every language, but the Portuguese word for it is a predicative
@@ -121,9 +134,10 @@ export function predicateText(
   const mainIsFronted = frontIdx === modals.length;
   const splitFrequency = !mainIsFronted && !!modifierText && modifier?.forms['subtype'] === 'frequency'
     && aspect === 'prospective' && modals.length === 0;
-  const grouped = splitFrequency
+  // The particípio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
+  const grouped = [splitFrequency
     ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
-    : conjugated;
+    : conjugated, passiveParticiple].filter(Boolean).join(' ');
   // A "nenhum" (no) direct object is post-verbal, so it triggers negative concord —
   // "não vê nenhum menino" — whereas a pre-verbal "nenhum" subject does not.
   // Any "nenhum" conjunct triggers the concord — "não vê nenhum menino e nenhuma menina".
@@ -163,7 +177,10 @@ export function predicateText(
   // instruction or infinitive ("vê-lo"), and a clause whose subject was dropped ("vejo-o"). Me / te /
   // nos lead a clause colloquially and stay in front ("me veja").
   const thirdPersonClitic = !!objectClitic && firstConjunct(directObject!).head.forms['person'] === '3' ? objectClitic : '';
-  const directObjectText = directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
+  // A passive has no direct object left — the patient is this clause's subject now — so the slot
+  // after the verb carries the by-phrase instead ("é comida pelo gato na casa").
+  const directObjectText = passive ? agentPhrase(agent)
+    : directObject && !objectClitic ? coordinateElement(directObject, tonicOrNoun) : '';
   // The fronted "nunca" is emitted preverbally; the main verb's own adverb trails the verb unless
   // it *is* the fronted one (frontIdx points past the last modal, at the main verb).
   const preVerb = preVerbNunca ? adverbSurface(groupAdverbs[frontIdx]) : '';
@@ -200,7 +217,8 @@ export function predicateText(
   // ("não consumir"); a 3rd-person object pronoun attaches after it ("consumi-lo"), and after "não"
   // it leads ("não o consumir").
   if (mood === 'infinitive') {
-    const inf = copulaVerb.forms['base'] ?? conjugated;
+    // A passive citation is the infinitive of "ser" plus the particípio ("ser comida").
+    const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticiple].filter(Boolean).join(' ');
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     const infVerb = !infNeg && thirdPersonClitic
       ? ptEnclitic(inf, thirdPersonClitic)

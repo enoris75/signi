@@ -1,6 +1,7 @@
 import type { ResolvedPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
+import { objectPredication } from '../../functions/objectPredication.js';
 import { dimensionGlossSegs } from './dimensionGlossSegs.js';
 import { elSegs } from './elSegs.js';
 import { isAnimate } from './isAnimate.js';
@@ -13,6 +14,15 @@ import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
 import { predicateSegs } from './predicateSegs.js';
+
+/** The particle a passive's agent takes: に, or によって where a complement already holds the に. */
+function jaAgentParticle(phrase: ResolvedPhrase): string {
+  const complements = phrase.complements;
+  const factitive = complements?.['objectPredicative'];
+  const niIsTaken = !!complements?.['terminus']
+    || (!!factitive && objectPredication(factitive) !== 'essive');
+  return niIsTaken ? 'によって' : 'に';
+}
 
 /**
  * Japanese word order: S 〈complements, recipient に〉 DirectObj+を Adv V
@@ -45,6 +55,15 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
   if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+  // The demoted agent of a passive takes に, right after the topic and before everything else the
+  // predicate holds: 食べ物は猫に食べられます ("the food is eaten by the cat"). The agentless passive has
+  // none — the translator drops a generic agent rather than passing it (see ResolvedPhrase.agent).
+  //
+  // Where the clause already spends its に on something else — the dative recipient of a
+  // ditransitive, or the factitive object complement — the agent takes the compound によって
+  // instead, because two に in one clause cannot be told apart: 本は猫によって子供にあげられます, never
+  // 「猫に子供に」.
+  if (phrase.agent) segs.push(...elSegs(phrase.agent), ...jaParticleSegs(phrase.agent, jaAgentParticle(phrase)));
   // A clause of purpose precedes what it is done for, closed by ために on the dictionary form:
   // 「変更するためにクリック」, 「翻訳を見るために主語を選択」. It is a citation clause, so it speaks no
   // subject of its own — the one it shares with this clause is already the topic above.

@@ -10,6 +10,7 @@ import {
   type PathSpecifier,
   type Tense,
   type UiStringKey,
+  type Voice,
 } from "@signi/shared";
 import type { ImperativePerson, SlotConfig, SlotKey } from "../../components/PhraseBuilder/interfaces.ts";
 import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
@@ -40,6 +41,7 @@ export type Setting =
   | { id: "sentiment"; value: CauseSentiment }
   | { id: "tense"; value: Tense }
   | { id: "aspect"; value: Aspect }
+  | { id: "voice"; value: Voice }
   | { id: "polarity"; value: "positive" | "negative" }
   | { id: "degree"; value: Degree }
   | { id: "relation"; value: ModifierRelation };
@@ -71,7 +73,7 @@ export type Action =
   | { kind: "modal" }
   | { kind: "setting"; setting: Setting }
   /** A setting set to the value its argument names: `/tense past`, `/aspect progressive`. */
-  | { kind: "set"; id: "tense" | "aspect" }
+  | { kind: "set"; id: "tense" | "aspect" | "voice" }
   | { kind: "possessor" }
   | { kind: "conjunct"; conjunction: "and" | "or" }
   | { kind: "relative" }
@@ -213,6 +215,11 @@ export const ASPECT_VALUES: readonly ValueDef[] = (
   description: value,
   descriptionKey: `aspect.value.${value}` as UiStringKey,
 }));
+
+export const VOICE_VALUES: readonly ValueDef[] = [
+  { name: "active", value: "active", description: "active", descriptionKey: "voice.value.active" },
+  { name: "passive", value: "passive", description: "passive", descriptionKey: "voice.value.passive" },
+];
 
 export const PERSON_VALUES: readonly ValueDef[] = [
   { name: "you", value: "2sg", description: "you", descriptionKey: "imperative.person.2sg" },
@@ -487,6 +494,22 @@ export const COMMANDS: readonly CommandDef[] = [
       /^verbAspect$/,
       ["setAspect"],
     ),
+  ),
+  {
+    name: "voice",
+    aliases: [],
+    group: "verb",
+    description: "voice",
+    descriptionKey: "satellite.voice",
+    purpose: "sets a verb’s voice",
+    color: "setting",
+    arg: { kind: "values", values: VOICE_VALUES, max: 1 },
+    action: { kind: "set", id: "voice" },
+    satellites: /^verbVoice$/,
+    reducers: ["setVoice"],
+  },
+  ...(["active", "passive"] as const).map((value) =>
+    setting(value, [], "verb", { id: "voice", value }, value, `voice.value.${value}` as UiStringKey, "sets a verb’s voice", /^verbVoice$/, ["setVoice"]),
   ),
   setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", "negates a verb", /^verbNegative$/, ["setNegative"]),
   setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", "sets a verb’s polarity", /^verbNegative$/, ["setNegative"]),
@@ -772,6 +795,7 @@ export type TopicId =
   | "adverb"
   | "tense"
   | "aspect"
+  | "voice"
   | "polarity"
   | "degree"
   | "relation"
@@ -805,6 +829,7 @@ export const TOPICS: readonly Topic[] = [
   { id: "adverb", label: "adverb", labelKey: "slot.adverb", part: "verb" },
   { id: "tense", label: "tense", labelKey: "satellite.tense", part: "verb" },
   { id: "aspect", label: "aspect", labelKey: "satellite.aspect", part: "verb" },
+  { id: "voice", label: "voice", labelKey: "satellite.voice", part: "verb" },
   { id: "polarity", label: "polarity", labelKey: "satellite.polarity", part: "verb" },
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
@@ -822,6 +847,7 @@ const SETTING_TOPICS: Record<SettingId, TopicId> = {
   sentiment: "cause",
   tense: "tense",
   aspect: "aspect",
+  voice: "voice",
   polarity: "polarity",
   degree: "degree",
   relation: "relation",

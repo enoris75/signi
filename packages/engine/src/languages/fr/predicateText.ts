@@ -12,6 +12,8 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
+import { agentPhrase } from './agentPhrase.js';
+import { agreeParticipleFr } from './agreeParticipleFr.js';
 import { alarmCryText } from './alarmCryText.js';
 import { aspectVerbFr } from './aspectVerbFr.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -38,6 +40,8 @@ export function predicateText(
   // Set when this is an object-relative clause: the antecedent's forms, which an avoir participle
   // agrees with (the accord du COD antéposé). Absent for a main clause / subject-relative.
   precedingObjectForms?: Record<string, string>,
+  // The demoted agent of a passive clause, rendered as the "par" phrase (see ResolvedPhrase.agent).
+  agent?: ResolvedNounElement,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // In a hypothetical conditional the finite verb takes the conditionnel (apodosis, "courrait")
@@ -45,10 +49,22 @@ export function predicateText(
   // A state verb's past is the imparfait ("avait", "était"), not the passé simple (A130).
   // A pronominal verb's stored forms carry a fixed clitic ("m'effondrerai", "nous effondrons"), so these
   // are derived from the plain verb and take the subject's clitic: "s'effondrerait", "nous effondrerions" (A137).
-  const plain = nonReflexiveVerb(verb);
+  //
+  // The passive conjugates "être" where the active conjugates the lexical verb, and hangs that
+  // verb's participe off it, agreeing with the promoted patient — now this clause's subject — as a
+  // French passive participle always does ("la nourriture est mangée"). Every branch below builds
+  // its group out of `finiteVerb`, so the composition follows: "a été mangée" (the compound past of
+  // être), "est en train d'être mangée", "doit être mangée", "serait mangée". A passive is never
+  // reflexive, whatever the lexical verb is.
+  const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
+  const finiteVerb = passive ? verbPhrase.passiveAux! : verb;
+  const passiveParticiple = passive
+    ? agreeParticipleFr(verb.forms['participle'] ?? verb.forms['base'] ?? '', subjectForms)
+    : '';
+  const plain = passive ? finiteVerb : nonReflexiveVerb(verb);
   const moodFinite = moodForm('fr', plain, moodPN(subjectForms), mood) ?? statePastForm('fr', plain, moodPN(subjectForms), tense, mood);
-  const conjugated = moodFinite !== undefined ? reflexiveFinite(verb.forms, subjectForms, moodFinite)
-    : conjugate(verb.forms, subjectForms, tense);
+  const conjugated = moodFinite !== undefined ? reflexiveFinite(finiteVerb.forms, subjectForms, moodFinite)
+    : conjugate(finiteVerb.forms, subjectForms, tense);
   const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
@@ -119,7 +135,9 @@ export function predicateText(
     return cry ? alarmCryText(cry) : objectNpText(np, negatedClause);
   };
   const objectGroup = directObject && (!objectClitic || dislocated) ? coordinate(directObject, tonicOrNoun) : '';
-  const directObjectText = dislocated ? '' : objectGroup;
+  // A passive has no direct object left — the patient is this clause's subject now — so the slot
+  // after the verb carries the by-phrase instead ("est mangée par le chat dans la maison").
+  const directObjectText = passive ? agentPhrase(agent) : dislocated ? '' : objectGroup;
   const withDislocated = (clause: string) => (dislocated ? `${clause}, ${objectGroup},` : clause);
   // The clitic precedes the verb, so an avoir participle agrees with it as with any preceding direct
   // object ("le chat l'a vue", "les a vus"); a resumed group agrees as the group ("nous a vus, lui
@@ -139,7 +157,7 @@ export function predicateText(
     // negation — and governs the inner modals' infinitives down to the main verb group's
     // ("je ne veux pas pouvoir aller", "il doit avoir vu le chat").
     const { finite, finiteAdverb, tail } = modalGroupFr(
-      modals, verb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic,
+      modals, finiteVerb.forms, subjectForms, tense, aspect, mood, isFrequency ? modifierText : '', infinitiveClitic,
       precedingObjectForms ?? cliticObjectForms, preInfinitive,
     );
     effectiveVerb = [negateFinite(finite), finiteAdverb, tail].filter(Boolean).join(' ');
@@ -150,7 +168,7 @@ export function predicateText(
     // frequency adverb, then the non-finite tail ("n'a jamais été", "n'est pas en train
     // d'aller", "est allé", "n'a pas vu").
     const { finite, tail } = aspectVerbFr(
-      verb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic, preInfinitive,
+      finiteVerb.forms, subjectForms, tense, aspect, mood, precedingObjectForms ?? cliticObjectForms, infinitiveClitic, preInfinitive,
     );
     effectiveVerb = [negateFinite(finite), isFrequency ? modifierText : '', tail].filter(Boolean).join(' ');
     effectiveMod = isFrequency || preInfinitive ? '' : modifierText;
@@ -163,6 +181,15 @@ export function predicateText(
     effectiveVerb = conjugated;
     effectiveMod = modifierText;
   }
+  // The participe closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
+  // A frequency adverb belongs between the finite verb and the participe ("n'est jamais mangée"),
+  // which the aspect and modal branches above already arrange for their own tails; the simple
+  // tenses put it in the trailing slot, so the passive takes it back into the group.
+  if (passive) {
+    const frequencyInGroup = isFrequency ? effectiveMod : '';
+    effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticiple].filter(Boolean).join(' ');
+    if (isFrequency) effectiveMod = '';
+  }
   const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement)]
     .filter(Boolean).join(' ');
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
@@ -171,6 +198,10 @@ export function predicateText(
   // word after it ("n'aimer aucun chat"). Shared by the instruction register and the infinitive mood.
   const negativeAdverb = isNegativeAdverb(modifier);
   const infinitiveMod = negativeAdverb || preInfinitive ? '' : modifierText;
+  // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée").
+  const infinitiveGroup = passive
+    ? [finiteVerb.forms['base'] ?? '', passiveParticiple].filter(Boolean).join(' ')
+    : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".
     const group = [preInfinitive, frCliticize(objectClitic, inf)].filter(Boolean).join(' ');
@@ -186,7 +217,7 @@ export function predicateText(
     // An instruction addressed to nobody — a button, a menu entry, a recipe step — is the
     // infinitive in French ("Charger une période", "Ne pas courir"), not the imperative.
     if (register === 'instruction') {
-      return withDislocated([negateInfinitive(verb.forms['base'] ?? conjugated), infinitiveMod, directObjectText, complementsText]
+      return withDislocated([negateInfinitive(infinitiveGroup || verb.forms['base'] || conjugated), infinitiveMod, directObjectText, complementsText]
         .filter(Boolean)
         .join(' '));
     }
@@ -208,7 +239,7 @@ export function predicateText(
   // infinitive ("ne pas consommer"); an object pronoun is proclitic ("le consommer"), via
   // `negateInfinitive`.
   if (mood === 'infinitive') {
-    return withDislocated([negateInfinitive(verb.forms['base'] ?? conjugated), infinitiveMod, directObjectText, complementsText]
+    return withDislocated([negateInfinitive(infinitiveGroup || verb.forms['base'] || conjugated), infinitiveMod, directObjectText, complementsText]
       .filter(Boolean)
       .join(' '));
   }

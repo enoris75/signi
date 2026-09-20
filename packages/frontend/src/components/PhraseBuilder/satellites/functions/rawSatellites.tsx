@@ -3,6 +3,7 @@ import NumbersIcon from "@mui/icons-material/Numbers";
 import RemoveCircleOutlineIcon from "@mui/icons-material/RemoveCircleOutline";
 import AccessTimeIcon from "@mui/icons-material/AccessTime";
 import TimelapseIcon from "@mui/icons-material/Timelapse";
+import SwapHorizIcon from "@mui/icons-material/SwapHoriz";
 import GavelIcon from "@mui/icons-material/Gavel";
 import TuneIcon from "@mui/icons-material/Tune";
 import AccountTreeIcon from "@mui/icons-material/AccountTree";
@@ -55,6 +56,10 @@ export function rawSatellites(
   const conjunctCount = (which: NounKey): number =>
     ((selection[CONJUNCTS_KEY(which)] as PhraseSelection[] | undefined) ?? []).length;
   const supportedComplements = selection.verb?.complements ?? [];
+  // Whether the verb has a patient at all. Only a transitive or ditransitive one does, and only
+  // those can be put in the passive (see `VerbPhrase.voice`).
+  const passivizable =
+    selection.verb?.transitivity === "transitive" || selection.verb?.transitivity === "ditransitive";
 
   const showSubjectNumber = Boolean(selection.subject);
   const showSubjectGender =
@@ -213,6 +218,22 @@ export function rawSatellites(
       hasValue: Boolean(selection.verbAspect) && selection.verbAspect !== "neutral",
       alwaysSet: true,
       valueLabel: t(`aspect.value.${selection.verbAspect ?? "neutral"}`),
+    },
+    {
+      key: "verbVoice",
+      parent: "directObject",
+      label: t("satellite.voice"),
+      labelKey: "satellite.voice",
+      icon: <SwapHorizIcon sx={iconSx} />,
+      // Only a transitive verb with a direct object has a patient to promote into the subject
+      // slot, so the control is there only when there is a passive to be had — the same condition
+      // the translator checks before it re-maps anything (see `resolveVoice`). A command is always
+      // active, so the finite slot being taken withdraws it as it does the tense and the aspect.
+      available: !finiteSlotTaken && passivizable && Boolean(selection.directObject),
+      // Non-default (solid) once the voice is anything but the implicit active.
+      hasValue: selection.verbVoice === "passive",
+      alwaysSet: true,
+      valueLabel: t(`voice.value.${selection.verbVoice ?? "active"}`),
     },
     {
       // Modals chain like the adjectives: the verb box carries the control for the

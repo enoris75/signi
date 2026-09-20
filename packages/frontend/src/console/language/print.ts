@@ -39,7 +39,7 @@ import { currentSetting, defaultSetting, settingTakes, wordInfo, type WordInfo }
 /**
  * The canonical text of a period — deterministic, and read back by `apply` into the same period.
  *
- * Subject → verb (adverb, modals and theirs, tense, aspect, polarity) → object → complements in
+ * Subject → verb (adverb, modals and theirs, tense, aspect, voice, polarity) → object → complements in
  * render order → the period's own links. Within a noun: word → adjectives → number → gender →
  * determiner → relation → possessor → conjuncts → relative clause. Only what differs from the default
  * is written, so a plain period reads plainly.
@@ -245,7 +245,7 @@ class Printer {
     const id = this.containerId;
     const verbRef: WordRef = { containerId: id, slot: "verb" };
     const w = this.info(verbRef)!;
-    const settings = (["tense", "aspect", "polarity"] as const).filter(
+    const settings = (["tense", "aspect", "voice", "polarity"] as const).filter(
       (s) => settingTakes({ id: s } as Setting, w) && currentSetting(s, w) !== defaultSetting(s, w),
     );
     const hasModal = MODAL_SLOTS.some((key) => root[key]);

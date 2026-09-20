@@ -11,6 +11,7 @@ import { elSegs } from './elSegs.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { jaImperativeSegs } from './jaImperativeSegs.js';
+import { jaPassiveVerb } from './jaPassiveVerb.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
 import { plainVerbSeg } from './plainVerbSeg.js';
@@ -52,6 +53,10 @@ export function predicateSegs(
   const possessive = !copulaExistential && isPossessiveExistential(givenVerbPhrase.verb, animateSubject);
   const existential = copulaExistential || possessive;
   const objectParticle = possessive ? 'が' : 'を';
+  // A passive is not a branch of the predicate but a different verb in the same slot: the 〜れる/られる
+  // form standing where the active one stood (see `jaPassiveVerb`), which then conjugates for tense,
+  // negation, aspect and the modal suffixes like any other ichidan verb. The existential substitution
+  // above wins where both could apply — an existential clause has no agent to demote.
   const verbPhrase: ResolvedVerbPhrase = existential
     ? {
         ...givenVerbPhrase,
@@ -59,7 +64,9 @@ export function predicateSegs(
         aspect: 'neutral',
         tense: givenVerbPhrase.aspect === 'resultative' ? 'past' : givenVerbPhrase.tense,
       }
-    : givenVerbPhrase;
+    : givenVerbPhrase.voice === 'passive'
+      ? { ...givenVerbPhrase, verb: jaPassiveVerb(givenVerbPhrase.verb) }
+      : givenVerbPhrase;
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // The object complement follows the object it predicates of, where every other complement
   // precedes it (see `splitObjectPredicative`).

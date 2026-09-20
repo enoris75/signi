@@ -176,10 +176,11 @@ export class Builder {
   }
 
   /**
-   * Advance a cycling verb toggle one step: tense (present → past → future) or aspect (neutral →
-   * progressive → prospective → resultative). The toggle box is revealed on first use.
+   * Advance a cycling toggle one step: the verb's tense (present → past → future) or aspect
+   * (neutral → progressive → prospective → resultative), or the clause's voice (active → passive),
+   * whose control rides the direct object's ring. The toggle box is revealed on first use.
    */
-  async cycle(toggle: 'verbTense' | 'verbAspect'): Promise<void> {
+  async cycle(toggle: 'verbTense' | 'verbAspect' | 'verbVoice'): Promise<void> {
     const box = this.page.getByTestId(`box-${toggle}`);
     if (!(await box.isVisible())) await (await this.centered(this.satellite(toggle))).click();
     await (await this.centered(box)).click();

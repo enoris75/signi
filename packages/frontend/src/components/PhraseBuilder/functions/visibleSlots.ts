@@ -19,8 +19,39 @@ export function roleSlotFor(ringHost: Pick<RingHost, "kind" | "role"> | undefine
     : hostRole;
 }
 
+/**
+ * A passive swaps which box is the clause's subject: the patient in the direct-object box is
+ * promoted to subject, and the agent stays where it was but is no longer one — it is spoken as the
+ * by-phrase (see `ResolvedPhrase.agent`). The boxes keep their places and their words; only what
+ * they are *called* changes, so the canvas says what the translation says.
+ *
+ * It applies only where the voice actually takes (a transitive verb with an object to promote),
+ * which is the condition the translator checks before it re-maps anything (see `resolveVoice`), and
+ * the same one the voice satellite is shown on.
+ */
+export function passiveCaptions(slot: SlotConfig): SlotConfig {
+  if (slot.key === "subject") return { ...slot, label: "Agent", labelKey: "slot.agent" };
+  if (slot.key === "directObject") {
+    const subject = ALL_SLOTS.find((s) => s.key === "subject")!;
+    return { ...slot, label: subject.label, labelKey: subject.labelKey };
+  }
+  return slot;
+}
+
+/** Whether this period's voice is one the engines will actually render (see `passiveCaptions`). */
+export function rendersPassive(selection: PhraseSelection): boolean {
+  const transitivity = selection.verb?.transitivity;
+  return (
+    selection.verbVoice === "passive" &&
+    !selection.imperative &&
+    (transitivity === "transitive" || transitivity === "ditransitive") &&
+    Boolean(selection.directObject)
+  );
+}
+
 /** The slots a period shows for what it holds, its subject slot dressed as `roleSlot` if given. */
 export function visibleSlotsFor(selection: PhraseSelection, roleSlot: RoleSlot | undefined): SlotConfig[] {
+  const passive = rendersPassive(selection);
   return (
     getActiveSlots(
       selection.verb?.transitivity,
@@ -31,6 +62,7 @@ export function visibleSlotsFor(selection: PhraseSelection, roleSlot: RoleSlot |
       // Objects hang off the verb, so a subject-only (verbless) period shows none —
       // otherwise an empty Direct Object box would appear before any verb is chosen.
       .filter((s) => selection.verb || !s.key.startsWith("directObject"))
+      .map((s) => (passive ? passiveCaptions(s) : s))
       .map((s) =>
         roleSlot && s.key === "subject"
           ? { ...s, label: roleSlot.label, labelKey: roleSlot.labelKey, required: roleSlot.required, color: roleSlot.color }

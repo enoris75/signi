@@ -1607,6 +1607,26 @@ export const nouns: ConceptSeed[] = [
   // labels in the current UI language. SUBJECT is suffixed _GRAMMAR because the plain word is
   // ambiguous (topic, school subject) and that sense may be seeded later.
   {
+    // The participant that acts — the one a passive demotes to its by-phrase, which is what the
+    // builder captions the box with once the patient has taken the subject's place. Suffixed like
+    // SUBJECT_GRAMMAR because the plain word also means a person acting for someone else, and only
+    // this sense is seeded. German keeps the Latin "Agens", as its grammars do.
+    id: 'AGENT_GRAMMAR',
+    role: 'noun',
+    description: 'the participant that carries out the event (grammar)',
+    emoji: '🫱',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'agent', plural: 'agents', count: 'singular' },
+      it: { base: 'agente', plural: 'agenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'agent', plural: 'agents', gender: 'masc', count: 'singular' },
+      de: { base: 'Agens', plural: 'Agentien', gender: 'neut', count: 'singular' },
+      es: { base: 'agente', plural: 'agentes', gender: 'masc', count: 'singular' },
+      ja: { base: '動作主', count: 'singular', reading: 'どうさしゅ' },
+      pt: { base: 'agente', plural: 'agentes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'SUBJECT_GRAMMAR',
     role: 'noun',
     description: 'the noun phrase a clause predicates something of (grammar)',
@@ -2526,6 +2546,27 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'aspecto', plural: 'aspectos', gender: 'masc', count: 'singular' },
       ja: { base: 'アスペクト', count: 'singular' },
       pt: { base: 'aspecto', plural: 'aspectos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Grammatical voice, not the sound one speaks with: which participant of the event the clause
+    // makes its subject. The Romance languages name it with the everyday word for the voice one
+    // speaks with ("voce"/"voix"/"voz"), except Italian, whose grammars say "diatesi"; German and
+    // Japanese use the technical term (Diathese, 態), as they do for the aspect. Feminine
+    // everywhere it has a gender, which is what makes its values read "attiva / passiva".
+    id: 'VOICE',
+    role: 'noun',
+    description: 'which participant of an event a clause makes its subject (grammar)',
+    emoji: '🔄',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'voice', plural: 'voices', count: 'singular' },
+      it: { base: 'diatesi', plural: 'diatesi', gender: 'fem', count: 'singular' },
+      fr: { base: 'voix', plural: 'voix', gender: 'fem', count: 'singular' },
+      de: { base: 'Diathese', plural: 'Diathesen', gender: 'fem', count: 'singular' },
+      es: { base: 'voz', plural: 'voces', gender: 'fem', count: 'singular' },
+      ja: { base: '態', count: 'singular', reading: 'たい' },
+      pt: { base: 'voz', plural: 'vozes', gender: 'fem', count: 'singular' },
     },
   },
   {

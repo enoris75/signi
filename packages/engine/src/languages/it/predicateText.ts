@@ -11,6 +11,9 @@ import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
+import { agentPhrase } from './agentPhrase.js';
+import { agreeAdj } from './agreeAdj.js';
+import { agreementForms } from './agreementForms.js';
 import { alarmCryText } from './alarmCryText.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -33,6 +36,8 @@ export function predicateText(
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  // The demoted agent of a passive clause, rendered as the "da" phrase (see ResolvedPhrase.agent).
+  agent?: ResolvedNounElement,
 ): string {
   const { verb, negative: verbNegative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
   // A verb that takes its object with a preposition ("clicca sul pulsante", A139) has no direct object to
@@ -61,15 +66,28 @@ export function predicateText(
   // muove", "si è mosso", "si muovesse"), attached to the infinitive and the gerund ("deve muoversi",
   // "sta per muovermi", "sta muovendosi") and after an affirmative command ("muoviti"). Under the
   // impersonal si it is "ci" and climbs to the finite verb whatever follows: "ci si deve muovere".
-  const plain = nonReflexiveVerb(verb);
-  const reflexive = reflexiveClitic(verb.forms, agreeForms);
+  //
+  // The passive conjugates "essere" where the active conjugates the lexical verb, and agrees that
+  // verb's participio with the promoted patient — now this clause's subject — as an essere
+  // participle always agrees ("il cibo è mangiato", "l'acqua è mangiata"). Because every branch
+  // below builds its group out of `plain`, the composition comes for free and stays idiomatic:
+  // "è stato mangiato" (the perfect of essere), "sta essendo mangiato", "deve essere mangiato",
+  // "sarebbe stato mangiato". A passive is never reflexive, whatever the lexical verb is.
+  const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
+  const plain = passive ? verbPhrase.passiveAux! : nonReflexiveVerb(verb);
+  const participleForms = agreementForms(subjectForms);
+  const passiveParticiple = passive
+    ? agreeAdj(verb.forms['participle'] ?? verb.forms['base'] ?? '',
+      participleForms['gender'] ?? 'masc', (participleForms['number'] ?? 'singular') === 'plural')
+    : '';
+  const reflexive = passive ? '' : reflexiveClitic(verb.forms, agreeForms);
   const reflexiveLeads = subjectForms['generic'] === '1' || (modals.length === 0 && (aspect === 'neutral' || aspect === 'resultative'));
   const leadingReflexive = reflexiveLeads ? reflexive : '';
   const attachedReflexive = reflexiveLeads ? '' : reflexive;
   // A modal chain makes the outermost modal the finite verb; every inner modal takes its
   // apocopated infinitive ("voglio poter andare") and the main verb closes the chain as the
   // infinitive of its whole group. "non" is prepended below, exactly as for a plain verb.
-  const verbText = modals.length > 0
+  const verbGroup = modals.length > 0
     ? [
         // Italian adverbs are postverbal, so each modal's own adverb trails its verb ("non
         // voglio mai poter sempre andare"); the main verb's adverb is appended after the group.
@@ -79,6 +97,8 @@ export function predicateText(
     : aspect === 'neutral'
       ? finite(plain)
       : aspectVerb(plain.forms, agreeForms, tense, aspect, mood, agreeingObject, attachedReflexive);
+  // The participio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
+  const verbText = [verbGroup, passiveParticiple].filter(Boolean).join(' ');
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
@@ -116,7 +136,10 @@ export function predicateText(
   // "one eats"). It sits after any "non", closest to the verb, so an object clitic comes before it
   // ("lo si mangia", "non lo si mangia", "mi si vede"); the subject word itself is suppressed upstream.
   const impersonalClitic = subjectForms['generic'] === '1' ? (subjectForms['base'] ?? '') : '';
-  const directObjectText = directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
+  // A passive has no direct object left — the patient is this clause's subject now — so the slot
+  // after the verb carries the by-phrase instead ("è mangiato dal gatto nella casa").
+  const directObjectText = passive ? agentPhrase(agent)
+    : directObject && !objectClitic ? coordinate(directObject, tonicOrNoun) : '';
   const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';
   // A direction adverb (UP, DOWN) says where the object ends up, so it follows a noun object the way
   // a direction complement does, instead of taking the manner adverb's slot between the verb and the
@@ -152,7 +175,11 @@ export function predicateText(
   // definition's own full-NP object, but supported for completeness) attaches enclitically,
   // dropping the infinitive's final -e ("consumarlo").
   if (mood === 'infinitive') {
-    const inf = verb.forms['base'] ?? verbText;
+    // A passive citation is the infinitive of the auxiliary plus the participio ("essere mangiato"),
+    // the same two pieces every other branch builds, in the one mood that has no finite verb.
+    const inf = passive
+      ? [plain.forms['base'] ?? '', passiveParticiple].filter(Boolean).join(' ')
+      : verb.forms['base'] ?? verbText;
     const infWithClitic = itEnclitic(inf, objectClitic, 'infinitive');
     return [negText, infWithClitic, modifierText, directObjectText, complementsText]
       .filter(Boolean)
@@ -166,7 +193,9 @@ export function predicateText(
   // love*, A147). A simple tense ("mangia sempre") and a modal chain ("deve mangiare sempre") have
   // no periphrastic finite to follow, so both stay on the append path below.
   const isFrequency = modifier?.forms['subtype'] === 'frequency';
-  const periphrastic = aspect === 'resultative' || aspect === 'progressive' || aspect === 'prospective';
+  // The passive is periphrastic too — "è mangiato" is auxiliary + participio — so a frequency adverb
+  // goes between the two ("è sempre mangiato"), not after the whole group.
+  const periphrastic = passive || aspect === 'resultative' || aspect === 'progressive' || aspect === 'prospective';
   if (isFrequency && modifierText && periphrastic && modals.length === 0) {
     const [finite, ...rest] = verbText.split(' ');
     const withAdverb = [finite, modifierText, ...rest].join(' ');

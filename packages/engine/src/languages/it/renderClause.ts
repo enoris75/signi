@@ -35,7 +35,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // impersonal si would ask for ("si è attenti", see `agreementForms`).
   const agreement = phrase.verbPhrase.mood === 'infinitive' ? withoutGeneric(subject.agreement) : subject.agreement;
   const predicate = predicateText(
-    agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, phrase.agent,
   );
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("essere capace di agire", "la gatta desidera essere attenta") or, under a causative,

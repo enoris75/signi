@@ -56,6 +56,9 @@ const HOME = {
   determiner: 6,
   tense: 11,
   aspect: 1,
+  // The voice rides the direct object's ring, not the verb's (see `rawSatellites`): on its right,
+  // away from the verb the line to it comes from.
+  voice: 3,
   modal: 8.5,
   adverb: 4.5,
 } as const;
@@ -104,6 +107,7 @@ function satelliteHome(key: string): number | undefined {
   if (key.endsWith("Definiteness")) return HOME.determiner;
   if (key === "verbTense") return HOME.tense;
   if (key === "verbAspect") return HOME.aspect;
+  if (key === "verbVoice") return HOME.voice;
   if (key === "modifier") return HOME.adverb;
   return undefined;
 }
@@ -251,6 +255,7 @@ export function buildRingSpecs({
           aim: object ? { point: centerOf(object.mainKey) } : { clock: DIRECT_OBJECT_HOUR },
         });
       }
+
       for (const other of groups) {
         if (other === verb || verbEnd(other, complementToggleIcons, directObjectToggle) !== null) continue;
         outer.push({ key: portKey(label, other.label), aim: { point: centerOf(other.mainKey) }, half: PORT_HALF });

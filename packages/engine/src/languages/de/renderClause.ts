@@ -3,6 +3,7 @@ import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { adverbSlots } from './adverbSlots.js';
+import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { deImperativePN } from './deImperativePN.js';
 import { deImperativeWord } from './deImperativeWord.js';
@@ -15,6 +16,7 @@ import { mannerGloss } from './mannerGloss.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
+import { passiveComplex } from './passiveComplex.js';
 import { prospectiveFrame } from './prospectiveFrame.js';
 import { reflexivePronoun } from './reflexivePronoun.js';
 import { splitDative } from './splitDative.js';
@@ -88,8 +90,16 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // A reflexive verb ("sich bewegen") builds its verb forms as the plain verb, and its pronoun,
     // agreeing with the subject, leads the Mittelfeld's pronoun slot: "bewegt sich nicht", "beweg
     // dich", "sich schnell bewegen". An instruction and the citation are infinitives, so "sich".
-    const plain = nonReflexiveVerb(verb).forms;
-    const withReflexive = (pn: string, pronoun: string) => [reflexivePronoun(verb.forms, pn), pronoun].filter(Boolean).join(' ');
+    //
+    // The passive conjugates "werden" in place of the lexical verb, which comes along as its
+    // Partizip II at the head of the clause-final material (see `passiveComplex`): "das Essen wird
+    // gegessen", "wurde gegessen", "wird gegessen werden", "muss gegessen werden". A passive is
+    // never reflexive, whatever the lexical verb is.
+    const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
+    const plain = passive ? verbPhrase.passiveAux!.forms : nonReflexiveVerb(verb).forms;
+    const passiveParticiple = passive ? (verb.forms['participle'] ?? verb.forms['base'] ?? '') : '';
+    const withReflexive = (pn: string, pronoun: string) =>
+      [passive ? '' : reflexivePronoun(verb.forms, pn), pronoun].filter(Boolean).join(' ');
 
     // Imperative: a subjectless V1 command. The subject's person picks the form; "nicht" takes the
     // declarative's slots (see `nichtSlots`): before the adverb ("iss nicht schnell"), before a
@@ -114,7 +124,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
-        ? [...mittelfeld, plain['base'] ?? word, meansText]
+        ? [...mittelfeld, [passiveParticiple, plain['base'] ?? word].filter(Boolean).join(' '), meansText]
         : [word, ...mittelfeld, verb.forms['particle'] ?? '', meansText];
       return parts.filter(Boolean).join(' ').trim();
     }
@@ -126,10 +136,15 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // Negated as the declarative is (see the command above): "keine Maus essen", "nie eine Maus essen".
       const infAdverb = adverbSlots(modifier, neg, '');
       const infDirect = splitObject(objectToRender, proObject, objectPrep);
+      // A passive has no accusative object; the by-phrase takes its slot, as in a finite clause.
+      const infObject = passive ? agentPhrase(phrase.agent) : infDirect.noun;
       const infComplements = [proPlace, infDirect.prepositional, complementsPhrase(rest, verb.forms)].filter(Boolean).join(' ');
-      // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen").
-      const infVerb = zu ? zuInfinitive(plain) : (plain['base'] ?? '');
-      return [withReflexive('3sg', infDirect.pronoun), infAdverb.nichtBeforeObject, infAdverb.beforeObject, dativeText, infDirect.noun,
+      // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
+      // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
+      // finite clause puts it too: "gegessen werden", "gegessen zu werden".
+      const infVerb = [passiveParticiple, zu ? zuInfinitive(plain) : (plain['base'] ?? '')]
+        .filter(Boolean).join(' ');
+      return [withReflexive('3sg', infDirect.pronoun), infAdverb.nichtBeforeObject, infAdverb.beforeObject, dativeText, infObject,
         infAdverb.nichtAfterObject, infAdverb.afterObject, neg.beforeComplements, infComplements, neg.after, infVerb, meansText]
         .filter(Boolean)
         .join(' ')
@@ -144,9 +159,10 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     const person = subject.agreement['person'] ?? '3';
     const number = subject.agreement['number'] ?? 'singular';
     const pn = `${person}${number === 'plural' ? 'pl' : 'sg'}`;
-    const complex = verbPhrase.modals.length > 0
+    const built = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, plain, pn, tense, aspect, mood)
       : verbGroup(plain, pn, tense, aspect, mood);
+    const complex = passive ? passiveComplex(built, passiveParticiple) : built;
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = complex;
     // "nicht" is dropped under "nie" or a "kein" object, and otherwise leads an adverb or a predicate
     // complement or trails the objects. It precedes the prospective's "im Begriff" as a whole: "ist
@@ -154,7 +170,11 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // progressive's "gerade" takes it after instead ("isst gerade nicht").
     // An object pronoun leads the Mittelfeld, ahead of "gerade", "nicht" and the adverbs; a noun object
     // follows them (see `splitObject`).
-    const { pronoun: objectPronoun, noun: directObjectText, prepositional } = splitObject(objectToRender, proObject, objectPrep);
+    // A passive has no accusative object left — the patient is this clause's subject now — so the
+    // Mittelfeld's noun-object slot carries the by-phrase instead, which is where German puts it:
+    // "das Essen wird von der Katze im Haus gegessen".
+    const { pronoun: objectPronoun, noun: objectNoun, prepositional } = splitObject(objectToRender, proObject, objectPrep);
+    const directObjectText = passive ? agentPhrase(phrase.agent) : objectNoun;
     const objectPronounText = withReflexive(pn, objectPronoun);
     const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
     // Each modal's own adverb sits in the Mittelfeld in scope order (outermost first), ahead of the

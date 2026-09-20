@@ -8,6 +8,14 @@
  *   • nai / nai_reading — Japanese plain negative (食べない), the base for the negative たら
  *     (食べなかったら). Only the "if" clause reads it; a negated relative clause or citation keeps the
  *     polite negative (B13).
+ *   • passive / passive_reading — Japanese passive (食べられる), on the **transitive** verbs, the
+ *     only ones a passive plan can reach (A01). Where the six European languages build their
+ *     passive from an auxiliary plus the `participle` already here, Japanese has morphology:
+ *     ichidan takes られる (食べる → 食べられる), godan the あ-stem + れる (飲む → 飲まれる), and the
+ *     irregulars share no rule at all (する → される, 来る → 来られる), so the form is stored rather
+ *     than derived, exactly as the participles and te-forms above are. What the engine derives
+ *     from it is free: 〜れる/られる is itself an ichidan verb, so the whole polite paradigm
+ *     (食べられます / 食べられました / 食べられません) follows from this one form.
  *   • aux        — "be" on the verbs whose resultative selects the BE auxiliary instead of
  *     the HAVE default (it essere / fr être / de sein). Selection is lexical, not syntactic,
  *     and it does not match across languages: "correre" takes avere but "laufen" takes sein.
@@ -34,7 +42,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'coupé' }, de: { participle: 'geschnitten' },
     es: { gerund: 'cortando', participle: 'cortado' },
     pt: { gerund: 'cortando', participle: 'cortado' },
-    ja: { te: '切って', te_reading: 'きって', nai: '切らない', nai_reading: 'きらない' },
+    ja: { te: '切って', te_reading: 'きって', nai: '切らない', nai_reading: 'きらない', passive: '切られる', passive_reading: 'きられる' },
   },
   EAT: {
     en: { gerund: 'eating', participle: 'eaten' },
@@ -42,7 +50,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'mangé' }, de: { participle: 'gegessen' },
     es: { gerund: 'comiendo', participle: 'comido' },
     pt: { gerund: 'comendo', participle: 'comido' },
-    ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない' },
+    ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない', passive: '食べられる', passive_reading: 'たべられる' },
   },
   // EAT's animal sense (A157): German alone differs — the strong Partizip is "gefressen".
   EAT_ANIMAL: {
@@ -51,7 +59,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'mangé' }, de: { participle: 'gefressen' },
     es: { gerund: 'comiendo', participle: 'comido' },
     pt: { gerund: 'comendo', participle: 'comido' },
-    ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない' },
+    ja: { te: '食べて', te_reading: 'たべて', nai: '食べない', nai_reading: 'たべない', passive: '食べられる', passive_reading: 'たべられる' },
   },
   DRINK: {
     en: { gerund: 'drinking', participle: 'drunk' },
@@ -59,7 +67,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'bu' }, de: { participle: 'getrunken' },
     es: { gerund: 'bebiendo', participle: 'bebido' },
     pt: { gerund: 'bebendo', participle: 'bebido' },
-    ja: { te: '飲んで', te_reading: 'のんで', nai: '飲まない', nai_reading: 'のまない' },
+    ja: { te: '飲んで', te_reading: 'のんで', nai: '飲まない', nai_reading: 'のまない', passive: '飲まれる', passive_reading: 'のまれる' },
   },
   CONSUME: {
     en: { gerund: 'consuming', participle: 'consumed' },
@@ -67,7 +75,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'consommé' }, de: { participle: 'konsumiert' },
     es: { gerund: 'consumiendo', participle: 'consumido' },
     pt: { gerund: 'consumindo', participle: 'consumido' },
-    ja: { te: '摂取して', te_reading: 'せっしゅして', nai: '摂取しない', nai_reading: 'せっしゅしない' },
+    ja: { te: '摂取して', te_reading: 'せっしゅして', nai: '摂取しない', nai_reading: 'せっしゅしない', passive: '摂取される', passive_reading: 'せっしゅされる' },
   },
   RUN: {
     en: { gerund: 'running', participle: 'run' },
@@ -83,7 +91,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'vu' }, de: { participle: 'gesehen' },
     es: { gerund: 'viendo', participle: 'visto' },
     pt: { gerund: 'vendo', participle: 'visto' },
-    ja: { te: '見て', te_reading: 'みて', nai: '見ない', nai_reading: 'みない' },
+    ja: { te: '見て', te_reading: 'みて', nai: '見ない', nai_reading: 'みない', passive: '見られる', passive_reading: 'みられる' },
   },
   LOVE: {
     en: { gerund: 'loving', participle: 'loved' },
@@ -91,7 +99,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'aimé' }, de: { participle: 'geliebt' },
     es: { gerund: 'amando', participle: 'amado' },
     pt: { gerund: 'amando', participle: 'amado' },
-    ja: { te: '愛して', te_reading: 'あいして', nai: '愛さない', nai_reading: 'あいさない' },
+    ja: { te: '愛して', te_reading: 'あいして', nai: '愛さない', nai_reading: 'あいさない', passive: '愛される', passive_reading: 'あいされる' },
   },
   DESIRE: {
     en: { gerund: 'desiring', participle: 'desired' },
@@ -99,7 +107,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'désiré' }, de: { participle: 'gewünscht' },
     es: { gerund: 'deseando', participle: 'deseado' },
     pt: { gerund: 'desejando', participle: 'desejado' },
-    ja: { te: '望んで', te_reading: 'のぞんで', nai: '望まない', nai_reading: 'のぞまない' },
+    ja: { te: '望んで', te_reading: 'のぞんで', nai: '望まない', nai_reading: 'のぞまない', passive: '望まれる', passive_reading: 'のぞまれる' },
   },
   KILL: {
     en: { gerund: 'killing', participle: 'killed' },
@@ -107,7 +115,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'tué' }, de: { participle: 'getötet' },
     es: { gerund: 'matando', participle: 'matado' },
     pt: { gerund: 'matando', participle: 'matado' },
-    ja: { te: '殺して', te_reading: 'ころして', nai: '殺さない', nai_reading: 'ころさない' },
+    ja: { te: '殺して', te_reading: 'ころして', nai: '殺さない', nai_reading: 'ころさない', passive: '殺される', passive_reading: 'ころされる' },
   },
   KNOW: {
     en: { gerund: 'knowing', participle: 'known' },
@@ -115,7 +123,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'su' }, de: { participle: 'gewusst' },
     es: { gerund: 'sabiendo', participle: 'sabido' },
     pt: { gerund: 'sabendo', participle: 'sabido' },
-    ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない' },
+    ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない', passive: '知られる', passive_reading: 'しられる' },
   },
   KNOW_ACQUAINTED: {
     en: { gerund: 'knowing', participle: 'known' },
@@ -123,7 +131,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'connu' }, de: { participle: 'gekannt' },
     es: { gerund: 'conociendo', participle: 'conocido' },
     pt: { gerund: 'conhecendo', participle: 'conhecido' },
-    ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない' },
+    ja: { te: '知って', te_reading: 'しって', nai: '知らない', nai_reading: 'しらない', passive: '知られる', passive_reading: 'しられる' },
   },
   READ: {
     en: { gerund: 'reading', participle: 'read' },
@@ -131,7 +139,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'lu' }, de: { participle: 'gelesen' },
     es: { gerund: 'leyendo', participle: 'leído' },
     pt: { gerund: 'lendo', participle: 'lido' },
-    ja: { te: '読んで', te_reading: 'よんで', nai: '読まない', nai_reading: 'よまない' },
+    ja: { te: '読んで', te_reading: 'よんで', nai: '読まない', nai_reading: 'よまない', passive: '読まれる', passive_reading: 'よまれる' },
   },
   JUMP: {
     en: { gerund: 'jumping', participle: 'jumped' },
@@ -163,7 +171,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'crié' }, de: { participle: 'gerufen' },
     es: { gerund: 'gritando', participle: 'gritado' },
     pt: { gerund: 'gritando', participle: 'gritado' },
-    ja: { te: '叫んで', te_reading: 'さけんで', nai: '叫ばない', nai_reading: 'さけばない' },
+    ja: { te: '叫んで', te_reading: 'さけんで', nai: '叫ばない', nai_reading: 'さけばない', passive: '叫ばれる', passive_reading: 'さけばれる' },
   },
   BITE: {
     en: { gerund: 'biting', participle: 'bitten' },
@@ -171,7 +179,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'mordu' }, de: { participle: 'gebissen' },
     es: { gerund: 'mordiendo', participle: 'mordido' },
     pt: { gerund: 'mordendo', participle: 'mordido' },
-    ja: { te: '噛んで', te_reading: 'かんで', nai: '噛まない', nai_reading: 'かまない' },
+    ja: { te: '噛んで', te_reading: 'かんで', nai: '噛まない', nai_reading: 'かまない', passive: '噛まれる', passive_reading: 'かまれる' },
   },
   BEAT: {
     en: { gerund: 'beating', participle: 'beaten' },
@@ -179,7 +187,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'battu' }, de: { participle: 'geschlagen' },
     es: { gerund: 'batiendo', participle: 'batido' },
     pt: { gerund: 'batendo', participle: 'batido' },
-    ja: { te: '打って', te_reading: 'うって', nai: '打たない', nai_reading: 'うたない' },
+    ja: { te: '打って', te_reading: 'うって', nai: '打たない', nai_reading: 'うたない', passive: '打たれる', passive_reading: 'うたれる' },
   },
   BURN: {
     en: { gerund: 'burning', participle: 'burned' },
@@ -195,7 +203,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'brûlé' }, de: { participle: 'verbrannt' },
     es: { gerund: 'quemando', participle: 'quemado' },
     pt: { gerund: 'queimando', participle: 'queimado' },
-    ja: { te: '燃やして', te_reading: 'もやして', nai: '燃やさない', nai_reading: 'もやさない' },
+    ja: { te: '燃やして', te_reading: 'もやして', nai: '燃やさない', nai_reading: 'もやさない', passive: '燃やされる', passive_reading: 'もやされる' },
   },
   EXTINGUISH: {
     en: { gerund: 'putting out', participle: 'put out' },
@@ -203,7 +211,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'éteint' }, de: { participle: 'gelöscht' },
     es: { gerund: 'apagando', participle: 'apagado' },
     pt: { gerund: 'apagando', participle: 'apagado' },
-    ja: { te: '消して', te_reading: 'けして', nai: '消さない', nai_reading: 'けさない' },
+    ja: { te: '消して', te_reading: 'けして', nai: '消さない', nai_reading: 'けさない', passive: '消される', passive_reading: 'けされる' },
   },
   BUY: {
     en: { gerund: 'buying', participle: 'bought' },
@@ -211,7 +219,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'acheté' }, de: { participle: 'gekauft' },
     es: { gerund: 'comprando', participle: 'comprado' },
     pt: { gerund: 'comprando', participle: 'comprado' },
-    ja: { te: '買って', te_reading: 'かって', nai: '買わない', nai_reading: 'かわない' },
+    ja: { te: '買って', te_reading: 'かって', nai: '買わない', nai_reading: 'かわない', passive: '買われる', passive_reading: 'かわれる' },
   },
   OWN: {
     en: { gerund: 'owning', participle: 'owned' },
@@ -219,7 +227,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'possédé' }, de: { participle: 'besessen' },
     es: { gerund: 'poseyendo', participle: 'poseído' },
     pt: { gerund: 'possuindo', participle: 'possuído' },
-    ja: { te: '所有して', te_reading: 'しょゆうして', nai: '所有しない', nai_reading: 'しょゆうしない' },
+    ja: { te: '所有して', te_reading: 'しょゆうして', nai: '所有しない', nai_reading: 'しょゆうしない', passive: '所有される', passive_reading: 'しょゆうされる' },
   },
   HOLD: {
     en: { gerund: 'holding', participle: 'held' },
@@ -227,7 +235,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'contenu' }, de: { participle: 'enthalten' },
     es: { gerund: 'conteniendo', participle: 'contenido' },
     pt: { gerund: 'contendo', participle: 'contido' },
-    ja: { te: '保持して', te_reading: 'ほじして', nai: '保持しない', nai_reading: 'ほじしない' },
+    ja: { te: '保持して', te_reading: 'ほじして', nai: '保持しない', nai_reading: 'ほじしない', passive: '保持される', passive_reading: 'ほじされる' },
   },
   CLICK: {
     en: { gerund: 'clicking', participle: 'clicked' },
@@ -235,7 +243,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'cliqué' }, de: { participle: 'geklickt' },
     es: { gerund: 'clicando', participle: 'clicado' },
     pt: { gerund: 'clicando', participle: 'clicado' },
-    ja: { te: 'クリックして', te_reading: 'くりっくして', nai: 'クリックしない', nai_reading: 'くりっくしない' },
+    ja: { te: 'クリックして', te_reading: 'くりっくして', nai: 'クリックしない', nai_reading: 'くりっくしない', passive: 'クリックされる', passive_reading: 'くりっくされる' },
   },
   CHOOSE: {
     en: { gerund: 'choosing', participle: 'chosen' },
@@ -243,7 +251,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'choisi' }, de: { participle: 'gewählt' },
     es: { gerund: 'eligiendo', participle: 'elegido' },
     pt: { gerund: 'escolhendo', participle: 'escolhido' },
-    ja: { te: '選んで', te_reading: 'えらんで', nai: '選ばない', nai_reading: 'えらばない' },
+    ja: { te: '選んで', te_reading: 'えらんで', nai: '選ばない', nai_reading: 'えらばない', passive: '選ばれる', passive_reading: 'えらばれる' },
   },
   FILTER: {
     en: { gerund: 'filtering', participle: 'filtered' },
@@ -251,7 +259,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'filtré' }, de: { participle: 'gefiltert' },
     es: { gerund: 'filtrando', participle: 'filtrado' },
     pt: { gerund: 'filtrando', participle: 'filtrado' },
-    ja: { te: '絞り込んで', te_reading: 'しぼりこんで', nai: '絞り込まない', nai_reading: 'しぼりこまない' },
+    ja: { te: '絞り込んで', te_reading: 'しぼりこんで', nai: '絞り込まない', nai_reading: 'しぼりこまない', passive: '絞り込まれる', passive_reading: 'しぼりこまれる' },
   },
   SELECT: {
     en: { gerund: 'selecting', participle: 'selected' },
@@ -259,7 +267,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'sélectionné' }, de: { participle: 'selektiert' },
     es: { gerund: 'seleccionando', participle: 'seleccionado' },
     pt: { gerund: 'selecionando', participle: 'selecionado' },
-    ja: { te: '選択して', te_reading: 'せんたくして', nai: '選択しない', nai_reading: 'せんたくしない' },
+    ja: { te: '選択して', te_reading: 'せんたくして', nai: '選択しない', nai_reading: 'せんたくしない', passive: '選択される', passive_reading: 'せんたくされる' },
   },
   TYPE: {
     en: { gerund: 'typing', participle: 'typed' },
@@ -267,7 +275,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'tapé' }, de: { participle: 'getippt' },
     es: { gerund: 'tecleando', participle: 'tecleado' },
     pt: { gerund: 'digitando', participle: 'digitado' },
-    ja: { te: '入力して', te_reading: 'にゅうりょくして', nai: '入力しない', nai_reading: 'にゅうりょくしない' },
+    ja: { te: '入力して', te_reading: 'にゅうりょくして', nai: '入力しない', nai_reading: 'にゅうりょくしない', passive: '入力される', passive_reading: 'にゅうりょくされる' },
   },
   GIVE: {
     en: { gerund: 'giving', participle: 'given' },
@@ -275,7 +283,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'donné' }, de: { participle: 'gegeben' },
     es: { gerund: 'dando', participle: 'dado' },
     pt: { gerund: 'dando', participle: 'dado' },
-    ja: { te: 'あげて', te_reading: 'あげて', nai: 'あげない' },
+    ja: { te: 'あげて', te_reading: 'あげて', nai: 'あげない', passive: 'あげられる' },
   },
   SHOW: {
     en: { gerund: 'showing', participle: 'shown' },
@@ -283,7 +291,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'montré' }, de: { participle: 'gezeigt' },
     es: { gerund: 'mostrando', participle: 'mostrado' },
     pt: { gerund: 'mostrando', participle: 'mostrado' },
-    ja: { te: '見せて', te_reading: 'みせて', nai: '見せない', nai_reading: 'みせない' },
+    ja: { te: '見せて', te_reading: 'みせて', nai: '見せない', nai_reading: 'みせない', passive: '見せられる', passive_reading: 'みせられる' },
   },
   SEND: {
     en: { gerund: 'sending', participle: 'sent' },
@@ -291,7 +299,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'envoyé' }, de: { participle: 'geschickt' },
     es: { gerund: 'enviando', participle: 'enviado' },
     pt: { gerund: 'enviando', participle: 'enviado' },
-    ja: { te: '送って', te_reading: 'おくって', nai: '送らない', nai_reading: 'おくらない' },
+    ja: { te: '送って', te_reading: 'おくって', nai: '送らない', nai_reading: 'おくらない', passive: '送られる', passive_reading: 'おくられる' },
   },
   GO: {
     en: { gerund: 'going', participle: 'gone', aux: 'be' }, // "is gone", not "has gone"
@@ -342,7 +350,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'enregistré' }, de: { participle: 'gespeichert' },
     es: { gerund: 'guardando', participle: 'guardado' },
     pt: { gerund: 'salvando', participle: 'salvado' },
-    ja: { te: '保存して', te_reading: 'ほぞんして', nai: '保存しない', nai_reading: 'ほぞんしない' },
+    ja: { te: '保存して', te_reading: 'ほぞんして', nai: '保存しない', nai_reading: 'ほぞんしない', passive: '保存される', passive_reading: 'ほぞんされる' },
   },
   LOAD: {
     en: { gerund: 'loading', participle: 'loaded' },
@@ -350,7 +358,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'chargé' }, de: { participle: 'geladen' },
     es: { gerund: 'cargando', participle: 'cargado' },
     pt: { gerund: 'carregando', participle: 'carregado' },
-    ja: { te: '読み込んで', te_reading: 'よみこんで', nai: '読み込まない', nai_reading: 'よみこまない' },
+    ja: { te: '読み込んで', te_reading: 'よみこんで', nai: '読み込まない', nai_reading: 'よみこまない', passive: '読み込まれる', passive_reading: 'よみこまれる' },
   },
   ADD: {
     en: { gerund: 'adding', participle: 'added' },
@@ -358,7 +366,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'ajouté' }, de: { participle: 'hinzugefügt' },
     es: { gerund: 'añadiendo', participle: 'añadido' },
     pt: { gerund: 'adicionando', participle: 'adicionado' },
-    ja: { te: '加えて', te_reading: 'くわえて', nai: '加えない', nai_reading: 'くわえない' },
+    ja: { te: '加えて', te_reading: 'くわえて', nai: '加えない', nai_reading: 'くわえない', passive: '加えられる', passive_reading: 'くわえられる' },
   },
   EXPORT: {
     en: { gerund: 'exporting', participle: 'exported' },
@@ -366,7 +374,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'exporté' }, de: { participle: 'exportiert' },
     es: { gerund: 'exportando', participle: 'exportado' },
     pt: { gerund: 'exportando', participle: 'exportado' },
-    ja: { te: '書き出して', te_reading: 'かきだして', nai: '書き出さない', nai_reading: 'かきださない' },
+    ja: { te: '書き出して', te_reading: 'かきだして', nai: '書き出さない', nai_reading: 'かきださない', passive: '書き出される', passive_reading: 'かきだされる' },
   },
   IMPORT: {
     en: { gerund: 'importing', participle: 'imported' },
@@ -374,7 +382,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'importé' }, de: { participle: 'importiert' },
     es: { gerund: 'importando', participle: 'importado' },
     pt: { gerund: 'importando', participle: 'importado' },
-    ja: { te: '取り込んで', te_reading: 'とりこんで', nai: '取り込まない', nai_reading: 'とりこまない' },
+    ja: { te: '取り込んで', te_reading: 'とりこんで', nai: '取り込まない', nai_reading: 'とりこまない', passive: '取り込まれる', passive_reading: 'とりこまれる' },
   },
   CLEAR: {
     en: { gerund: 'clearing', participle: 'cleared' },
@@ -382,7 +390,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'effacé' }, de: { participle: 'gelöscht' },
     es: { gerund: 'borrando', participle: 'borrado' },
     pt: { gerund: 'limpando', participle: 'limpado' },
-    ja: { te: '消去して', te_reading: 'しょうきょして', nai: '消去しない', nai_reading: 'しょうきょしない' },
+    ja: { te: '消去して', te_reading: 'しょうきょして', nai: '消去しない', nai_reading: 'しょうきょしない', passive: '消去される', passive_reading: 'しょうきょされる' },
   },
   // it rimosso is irregular. de entfernt takes no ge- after its unstressed ent-, where löschen does
   // (gelöscht). pt excluído keeps the accent that splits its u-i.
@@ -392,7 +400,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'retiré' }, de: { participle: 'entfernt' },
     es: { gerund: 'quitando', participle: 'quitado' },
     pt: { gerund: 'removendo', participle: 'removido' },
-    ja: { te: '取り除いて', te_reading: 'とりのぞいて', nai: '取り除かない', nai_reading: 'とりのぞかない' },
+    ja: { te: '取り除いて', te_reading: 'とりのぞいて', nai: '取り除かない', nai_reading: 'とりのぞかない', passive: '取り除かれる', passive_reading: 'とりのぞかれる' },
   },
   DELETE: {
     en: { gerund: 'deleting', participle: 'deleted' },
@@ -400,7 +408,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'supprimé' }, de: { participle: 'gelöscht' },
     es: { gerund: 'eliminando', participle: 'eliminado' },
     pt: { gerund: 'excluindo', participle: 'excluído' },
-    ja: { te: '削除して', te_reading: 'さくじょして', nai: '削除しない', nai_reading: 'さくじょしない' },
+    ja: { te: '削除して', te_reading: 'さくじょして', nai: '削除しない', nai_reading: 'さくじょしない', passive: '削除される', passive_reading: 'さくじょされる' },
   },
   COORDINATE: {
     en: { gerund: 'coordinating', participle: 'coordinated' },
@@ -408,7 +416,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'coordonné' }, de: { participle: 'koordiniert' },
     es: { gerund: 'coordinando', participle: 'coordinado' },
     pt: { gerund: 'coordenando', participle: 'coordenado' },
-    ja: { te: '調整して', te_reading: 'ちょうせいして', nai: '調整しない', nai_reading: 'ちょうせいしない' },
+    ja: { te: '調整して', te_reading: 'ちょうせいして', nai: '調整しない', nai_reading: 'ちょうせいしない', passive: '調整される', passive_reading: 'ちょうせいされる' },
   },
   // it crollare and de kollabieren both select BE; the fr participle drops the reflexive clitic
   // its finite forms carry, so the resultative reads as the resulting state ("est effondré").
@@ -426,7 +434,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'rangé' }, de: { participle: 'geordnet' },
     es: { gerund: 'ordenando', participle: 'ordenado' },
     pt: { gerund: 'arrumando', participle: 'arrumado' },
-    ja: { te: '片付けて', te_reading: 'かたづけて', nai: '片付けない', nai_reading: 'かたづけない' },
+    ja: { te: '片付けて', te_reading: 'かたづけて', nai: '片付けない', nai_reading: 'かたづけない', passive: '片付けられる', passive_reading: 'かたづけられる' },
   },
   MAKE: {
     en: { gerund: 'making', participle: 'made' },
@@ -434,7 +442,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'fait' }, de: { participle: 'gemacht' },
     es: { gerund: 'haciendo', participle: 'hecho' },
     pt: { gerund: 'fazendo', participle: 'feito' },
-    ja: { te: '作って', te_reading: 'つくって', nai: '作らない', nai_reading: 'つくらない' },
+    ja: { te: '作って', te_reading: 'つくって', nai: '作らない', nai_reading: 'つくらない', passive: '作られる', passive_reading: 'つくられる' },
   },
   CREATE: {
     en: { gerund: 'creating', participle: 'created' },
@@ -442,7 +450,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'créé' }, de: { participle: 'erschaffen' },
     es: { gerund: 'creando', participle: 'creado' },
     pt: { gerund: 'criando', participle: 'criado' },
-    ja: { te: '生み出して', te_reading: 'うみだして', nai: '生み出さない', nai_reading: 'うみださない' },
+    ja: { te: '生み出して', te_reading: 'うみだして', nai: '生み出さない', nai_reading: 'うみださない', passive: '生み出される', passive_reading: 'うみだされる' },
   },
   DESTROY: {
     en: { gerund: 'destroying', participle: 'destroyed' },
@@ -450,7 +458,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'détruit' }, de: { participle: 'zerstört' },
     es: { gerund: 'destruyendo', participle: 'destruido' },
     pt: { gerund: 'destruindo', participle: 'destruído' },
-    ja: { te: '破壊して', te_reading: 'はかいして', nai: '破壊しない', nai_reading: 'はかいしない' },
+    ja: { te: '破壊して', te_reading: 'はかいして', nai: '破壊しない', nai_reading: 'はかいしない', passive: '破壊される', passive_reading: 'はかいされる' },
   },
   PERCEIVE: {
     en: { gerund: 'perceiving', participle: 'perceived' },
@@ -458,7 +466,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'perçu' }, de: { participle: 'empfunden' },
     es: { gerund: 'percibiendo', participle: 'percibido' },
     pt: { gerund: 'percebendo', participle: 'percebido' },
-    ja: { te: '知覚して', te_reading: 'ちかくして', nai: '知覚しない', nai_reading: 'ちかくしない' },
+    ja: { te: '知覚して', te_reading: 'ちかくして', nai: '知覚しない', nai_reading: 'ちかくしない', passive: '知覚される', passive_reading: 'ちかくされる' },
   },
   UNDERSTAND: {
     en: { gerund: 'understanding', participle: 'understood' },
@@ -466,7 +474,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'compris' }, de: { participle: 'verstanden' },
     es: { gerund: 'comprendiendo', participle: 'comprendido' },
     pt: { gerund: 'compreendendo', participle: 'compreendido' },
-    ja: { te: '理解して', te_reading: 'りかいして', nai: '理解しない', nai_reading: 'りかいしない' },
+    ja: { te: '理解して', te_reading: 'りかいして', nai: '理解しない', nai_reading: 'りかいしない', passive: '理解される', passive_reading: 'りかいされる' },
   },
   // Genus verbs for the B12–B18 verb definitions. All transitive/ditransitive → HAVE auxiliary.
   HAVE: {
@@ -475,7 +483,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'eu' }, de: { participle: 'gehabt' },
     es: { gerund: 'teniendo', participle: 'tenido' },
     pt: { gerund: 'tendo', participle: 'tido' },
-    ja: { te: '持って', te_reading: 'もって', nai: '持たない', nai_reading: 'もたない' },
+    ja: { te: '持って', te_reading: 'もって', nai: '持たない', nai_reading: 'もたない', passive: '持たれる', passive_reading: 'もたれる' },
   },
   ACQUIRE: {
     en: { gerund: 'acquiring', participle: 'acquired' },
@@ -483,7 +491,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'acquis' }, de: { participle: 'erworben' },
     es: { gerund: 'adquiriendo', participle: 'adquirido' },
     pt: { gerund: 'adquirindo', participle: 'adquirido' },
-    ja: { te: '取得して', te_reading: 'しゅとくして', nai: '取得しない', nai_reading: 'しゅとくしない' },
+    ja: { te: '取得して', te_reading: 'しゅとくして', nai: '取得しない', nai_reading: 'しゅとくしない', passive: '取得される', passive_reading: 'しゅとくされる' },
   },
   DIVIDE: {
     en: { gerund: 'dividing', participle: 'divided' },
@@ -491,7 +499,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'divisé' }, de: { participle: 'geteilt' },
     es: { gerund: 'dividiendo', participle: 'dividido' },
     pt: { gerund: 'dividindo', participle: 'dividido' },
-    ja: { te: '分けて', te_reading: 'わけて', nai: '分けない', nai_reading: 'わけない' },
+    ja: { te: '分けて', te_reading: 'わけて', nai: '分けない', nai_reading: 'わけない', passive: '分けられる', passive_reading: 'わけられる' },
   },
   STRIKE: {
     en: { gerund: 'striking', participle: 'struck' },
@@ -499,7 +507,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'frappé' }, de: { participle: 'geschlagen' },
     es: { gerund: 'golpeando', participle: 'golpeado' },
     pt: { gerund: 'golpeando', participle: 'golpeado' },
-    ja: { te: '打って', te_reading: 'うって', nai: '打たない', nai_reading: 'うたない' },
+    ja: { te: '打って', te_reading: 'うって', nai: '打たない', nai_reading: 'うたない', passive: '打たれる', passive_reading: 'うたれる' },
   },
   TRANSFER: {
     en: { gerund: 'transferring', participle: 'transferred' },
@@ -507,7 +515,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'transféré' }, de: { participle: 'übertragen' },
     es: { gerund: 'transfiriendo', participle: 'transferido' },
     pt: { gerund: 'transferindo', participle: 'transferido' },
-    ja: { te: '移して', te_reading: 'うつして', nai: '移さない', nai_reading: 'うつさない' },
+    ja: { te: '移して', te_reading: 'うつして', nai: '移さない', nai_reading: 'うつさない', passive: '移される', passive_reading: 'うつされる' },
   },
   INDICATE: {
     en: { gerund: 'indicating', participle: 'indicated' },
@@ -515,7 +523,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'indiqué' }, de: { participle: 'bezeichnet' },
     es: { gerund: 'indicando', participle: 'indicado' },
     pt: { gerund: 'indicando', participle: 'indicado' },
-    ja: { te: '示して', te_reading: 'しめして', nai: '示さない', nai_reading: 'しめさない' },
+    ja: { te: '示して', te_reading: 'しめして', nai: '示さない', nai_reading: 'しめさない', passive: '示される', passive_reading: 'しめされる' },
   },
   CHANGE: {
     en: { gerund: 'changing', participle: 'changed' },
@@ -523,7 +531,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'changé' }, de: { participle: 'geändert' },
     es: { gerund: 'cambiando', participle: 'cambiado' },
     pt: { gerund: 'mudando', participle: 'mudado' },
-    ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない' },
+    ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない', passive: '変えられる', passive_reading: 'かえられる' },
   },
   TRANSFORM: {
     en: { gerund: 'transforming', participle: 'transformed' },
@@ -531,7 +539,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'transformé' }, de: { participle: 'verwandelt' },
     es: { gerund: 'transformando', participle: 'transformado' },
     pt: { gerund: 'transformando', participle: 'transformado' },
-    ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない' },
+    ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない', passive: '変えられる', passive_reading: 'かえられる' },
   },
   FEEL: {
     en: { gerund: 'feeling', participle: 'felt' },
@@ -539,7 +547,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'éprouvé' }, de: { participle: 'gefühlt' },
     es: { gerund: 'sintiendo', participle: 'sentido' },
     pt: { gerund: 'sentindo', participle: 'sentido' },
-    ja: { te: '感じて', te_reading: 'かんじて', nai: '感じない', nai_reading: 'かんじない' },
+    ja: { te: '感じて', te_reading: 'かんじて', nai: '感じない', nai_reading: 'かんじない', passive: '感じられる', passive_reading: 'かんじられる' },
   },
   SHED: {
     en: { gerund: 'shedding', participle: 'shed' },
@@ -547,7 +555,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'versé' }, de: { participle: 'vergossen' },
     es: { gerund: 'derramando', participle: 'derramado' },
     pt: { gerund: 'derramando', participle: 'derramado' },
-    ja: { te: '流して', te_reading: 'ながして', nai: '流さない', nai_reading: 'ながさない' },
+    ja: { te: '流して', te_reading: 'ながして', nai: '流さない', nai_reading: 'ながさない', passive: '流される', passive_reading: 'ながされる' },
   },
   PRODUCE: {
     en: { gerund: 'producing', participle: 'produced' },
@@ -555,7 +563,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'produit' }, de: { participle: 'erzeugt' },
     es: { gerund: 'produciendo', participle: 'producido' },
     pt: { gerund: 'produzindo', participle: 'produzido' },
-    ja: { te: '出して', te_reading: 'だして', nai: '出さない', nai_reading: 'ださない' },
+    ja: { te: '出して', te_reading: 'だして', nai: '出さない', nai_reading: 'ださない', passive: '出される', passive_reading: 'だされる' },
   },
   CAUSE_VERB: {
     en: { gerund: 'causing', participle: 'caused' },
@@ -563,7 +571,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'induit' }, de: { participle: 'veranlasst' },
     es: { gerund: 'induciendo', participle: 'inducido' },
     pt: { gerund: 'induzindo', participle: 'induzido' },
-    ja: { te: '引き起こして', te_reading: 'ひきおこして', nai: '引き起こさない', nai_reading: 'ひきおこさない' },
+    ja: { te: '引き起こして', te_reading: 'ひきおこして', nai: '引き起こさない', nai_reading: 'ひきおこさない', passive: '引き起こされる', passive_reading: 'ひきおこされる' },
   },
   PRESS: {
     en: { gerund: 'pressing', participle: 'pressed' },
@@ -571,7 +579,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'pressé' }, de: { participle: 'gedrückt' },
     es: { gerund: 'pulsando', participle: 'pulsado' },
     pt: { gerund: 'pressionando', participle: 'pressionado' },
-    ja: { te: '押して', te_reading: 'おして', nai: '押さない', nai_reading: 'おさない' },
+    ja: { te: '押して', te_reading: 'おして', nai: '押さない', nai_reading: 'おさない', passive: '押される', passive_reading: 'おされる' },
   },
   WRITE: {
     en: { gerund: 'writing', participle: 'written' },
@@ -579,7 +587,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'écrit' }, de: { participle: 'geschrieben' },
     es: { gerund: 'escribiendo', participle: 'escrito' },
     pt: { gerund: 'escrevendo', participle: 'escrito' },
-    ja: { te: '書いて', te_reading: 'かいて', nai: '書かない', nai_reading: 'かかない' },
+    ja: { te: '書いて', te_reading: 'かいて', nai: '書かない', nai_reading: 'かかない', passive: '書かれる', passive_reading: 'かかれる' },
   },
   COMPACT: {
     en: { gerund: 'compacting', participle: 'compacted' },
@@ -587,7 +595,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'compacté' }, de: { participle: 'verdichtet' },
     es: { gerund: 'compactando', participle: 'compactado' },
     pt: { gerund: 'compactando', participle: 'compactado' },
-    ja: { te: '圧縮して', te_reading: 'あっしゅくして', nai: '圧縮しない', nai_reading: 'あっしゅくしない' },
+    ja: { te: '圧縮して', te_reading: 'あっしゅくして', nai: '圧縮しない', nai_reading: 'あっしゅくしない', passive: '圧縮される', passive_reading: 'あっしゅくされる' },
   },
   EXPAND: {
     en: { gerund: 'expanding', participle: 'expanded' },
@@ -595,7 +603,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'étendu' }, de: { participle: 'erweitert' },
     es: { gerund: 'expandiendo', participle: 'expandido' },
     pt: { gerund: 'expandindo', participle: 'expandido' },
-    ja: { te: '展開して', te_reading: 'てんかいして', nai: '展開しない', nai_reading: 'てんかいしない' },
+    ja: { te: '展開して', te_reading: 'てんかいして', nai: '展開しない', nai_reading: 'てんかいしない', passive: '展開される', passive_reading: 'てんかいされる' },
   },
   HIDE: {
     en: { gerund: 'hiding', participle: 'hidden' },
@@ -603,7 +611,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'caché' }, de: { participle: 'versteckt' },
     es: { gerund: 'escondiendo', participle: 'escondido' },
     pt: { gerund: 'escondendo', participle: 'escondido' },
-    ja: { te: '隠して', te_reading: 'かくして', nai: '隠さない', nai_reading: 'かくさない' },
+    ja: { te: '隠して', te_reading: 'かくして', nai: '隠さない', nai_reading: 'かくさない', passive: '隠される', passive_reading: 'かくされる' },
   },
   START: {
     en: { gerund: 'starting', participle: 'started' },
@@ -611,7 +619,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'commencé' }, de: { participle: 'begonnen' },
     es: { gerund: 'empezando', participle: 'empezado' },
     pt: { gerund: 'começando', participle: 'começado' },
-    ja: { te: '始めて', te_reading: 'はじめて', nai: '始めない', nai_reading: 'はじめない' },
+    ja: { te: '始めて', te_reading: 'はじめて', nai: '始めない', nai_reading: 'はじめない', passive: '始められる', passive_reading: 'はじめられる' },
   },
   // The inchoative BEGIN, not START. Italian selects essere for it ("l'azione è iniziata") where
   // the causative takes avere ("ha iniziato l'azione") — the same verb, the auxiliary carrying the
@@ -641,7 +649,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'annulé' }, de: { participle: 'annulliert' },
     es: { gerund: 'cancelando', participle: 'cancelado' },
     pt: { gerund: 'cancelando', participle: 'cancelado' },
-    ja: { te: 'キャンセルして', te_reading: 'きゃんせるして', nai: 'キャンセルしない', nai_reading: 'きゃんせるしない' },
+    ja: { te: 'キャンセルして', te_reading: 'きゃんせるして', nai: 'キャンセルしない', nai_reading: 'きゃんせるしない', passive: 'キャンセルされる', passive_reading: 'きゃんせるされる' },
   },
   CLOSE: {
     en: { gerund: 'closing', participle: 'closed' },
@@ -649,7 +657,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'fermé' }, de: { participle: 'geschlossen' },
     es: { gerund: 'cerrando', participle: 'cerrado' },
     pt: { gerund: 'fechando', participle: 'fechado' },
-    ja: { te: '閉じて', te_reading: 'とじて', nai: '閉じない', nai_reading: 'とじない' },
+    ja: { te: '閉じて', te_reading: 'とじて', nai: '閉じない', nai_reading: 'とじない', passive: '閉じられる', passive_reading: 'とじられる' },
   },
   RETRY: {
     en: { gerund: 'retrying', participle: 'retried' },
@@ -657,7 +665,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'réessayé' }, de: { participle: 'wiederholt' },
     es: { gerund: 'reintentando', participle: 'reintentado' },
     pt: { gerund: 'repetindo', participle: 'repetido' },
-    ja: { te: '再試行して', te_reading: 'さいしこうして', nai: '再試行しない', nai_reading: 'さいしこうしない' },
+    ja: { te: '再試行して', te_reading: 'さいしこうして', nai: '再試行しない', nai_reading: 'さいしこうしない', passive: '再試行される', passive_reading: 'さいしこうされる' },
   },
   USE: {
     en: { gerund: 'using', participle: 'used' },
@@ -665,7 +673,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'utilisé' }, de: { participle: 'verwendet' },
     es: { gerund: 'usando', participle: 'usado' },
     pt: { gerund: 'usando', participle: 'usado' },
-    ja: { te: '使って', te_reading: 'つかって', nai: '使わない', nai_reading: 'つかわない' },
+    ja: { te: '使って', te_reading: 'つかって', nai: '使わない', nai_reading: 'つかわない', passive: '使われる', passive_reading: 'つかわれる' },
   },
   COPY: {
     en: { gerund: 'copying', participle: 'copied' },
@@ -673,7 +681,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'copié' }, de: { participle: 'kopiert' },
     es: { gerund: 'copiando', participle: 'copiado' },
     pt: { gerund: 'copiando', participle: 'copiado' },
-    ja: { te: 'コピーして', te_reading: 'こぴーして', nai: 'コピーしない', nai_reading: 'こぴーしない' },
+    ja: { te: 'コピーして', te_reading: 'こぴーして', nai: 'コピーしない', nai_reading: 'こぴーしない', passive: 'コピーされる', passive_reading: 'こぴーされる' },
   },
   MOVE: {
     en: { gerund: 'moving', participle: 'moved' },
@@ -681,7 +689,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'déplacé' }, de: { participle: 'verschoben' },
     es: { gerund: 'moviendo', participle: 'movido' },
     pt: { gerund: 'movendo', participle: 'movido' },
-    ja: { te: '移動して', te_reading: 'いどうして', nai: '移動しない', nai_reading: 'いどうしない' },
+    ja: { te: '移動して', te_reading: 'いどうして', nai: '移動しない', nai_reading: 'いどうしない', passive: '移動される', passive_reading: 'いどうされる' },
   },
   DRAG: {
     en: { gerund: 'dragging', participle: 'dragged' },
@@ -689,7 +697,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'glissé' }, de: { participle: 'gezogen' },
     es: { gerund: 'arrastrando', participle: 'arrastrado' },
     pt: { gerund: 'arrastando', participle: 'arrastado' },
-    ja: { te: 'ドラッグして', te_reading: 'どらっぐして', nai: 'ドラッグしない', nai_reading: 'どらっぐしない' },
+    ja: { te: 'ドラッグして', te_reading: 'どらっぐして', nai: 'ドラッグしない', nai_reading: 'どらっぐしない', passive: 'ドラッグされる' },
   },
   RESIZE: {
     en: { gerund: 'resizing', participle: 'resized' },
@@ -697,7 +705,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'redimensionné' }, de: { participle: 'skaliert' },
     es: { gerund: 'redimensionando', participle: 'redimensionado' },
     pt: { gerund: 'redimensionando', participle: 'redimensionado' },
-    ja: { te: 'サイズ変更して', te_reading: 'さいずへんこうして', nai: 'サイズ変更しない', nai_reading: 'さいずへんこうしない' },
+    ja: { te: 'サイズ変更して', te_reading: 'さいずへんこうして', nai: 'サイズ変更しない', nai_reading: 'さいずへんこうしない', passive: 'サイズ変更される', passive_reading: 'さいずへんこうされる' },
   },
   TURN_OFF: {
     en: { gerund: 'turning off', participle: 'turned off' },
@@ -705,7 +713,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'désactivé' }, de: { participle: 'deaktiviert' },
     es: { gerund: 'desactivando', participle: 'desactivado' },
     pt: { gerund: 'desativando', participle: 'desativado' },
-    ja: { te: 'オフにして', nai: 'オフにしない' },
+    ja: { te: 'オフにして', nai: 'オフにしない', passive: 'オフにされる' },
   },
   // Grammar-word verbs (B06). All transitive → avere/haber/ter default (no aux key).
   NAME: {
@@ -714,7 +722,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'nommé' }, de: { participle: 'benannt' },
     es: { gerund: 'nombrando', participle: 'nombrado' },
     pt: { gerund: 'nomeando', participle: 'nomeado' },
-    ja: { te: '名付けて', te_reading: 'なづけて', nai: '名付けない', nai_reading: 'なづけない' },
+    ja: { te: '名付けて', te_reading: 'なづけて', nai: '名付けない', nai_reading: 'なづけない', passive: '名付けられる', passive_reading: 'なづけられる' },
   },
   DESCRIBE: {
     en: { gerund: 'describing', participle: 'described' },
@@ -722,7 +730,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'décrit' }, de: { participle: 'beschrieben' },
     es: { gerund: 'describiendo', participle: 'descrito' },
     pt: { gerund: 'descrevendo', participle: 'descrito' },
-    ja: { te: '描写して', te_reading: 'びょうしゃして', nai: '描写しない', nai_reading: 'びょうしゃしない' },
+    ja: { te: '描写して', te_reading: 'びょうしゃして', nai: '描写しない', nai_reading: 'びょうしゃしない', passive: '描写される', passive_reading: 'びょうしゃされる' },
   },
   MODIFY: {
     en: { gerund: 'modifying', participle: 'modified' },
@@ -730,7 +738,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'modifié' }, de: { participle: 'modifiziert' },
     es: { gerund: 'modificando', participle: 'modificado' },
     pt: { gerund: 'modificando', participle: 'modificado' },
-    ja: { te: '修飾して', te_reading: 'しゅうしょくして', nai: '修飾しない', nai_reading: 'しゅうしょくしない' },
+    ja: { te: '修飾して', te_reading: 'しゅうしょくして', nai: '修飾しない', nai_reading: 'しゅうしょくしない', passive: '修飾される', passive_reading: 'しゅうしょくされる' },
   },
   EXPRESS: {
     en: { gerund: 'expressing', participle: 'expressed' },
@@ -738,7 +746,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'exprimé' }, de: { participle: 'vermittelt' },
     es: { gerund: 'expresando', participle: 'expresado' },
     pt: { gerund: 'exprimindo', participle: 'exprimido' },
-    ja: { te: '表して', te_reading: 'あらわして', nai: '表さない', nai_reading: 'あらわさない' },
+    ja: { te: '表して', te_reading: 'あらわして', nai: '表さない', nai_reading: 'あらわさない', passive: '表される', passive_reading: 'あらわされる' },
   },
   REPLACE: {
     en: { gerund: 'replacing', participle: 'replaced' },
@@ -746,7 +754,7 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'remplacé' }, de: { participle: 'ersetzt' },
     es: { gerund: 'reemplazando', participle: 'reemplazado' },
     pt: { gerund: 'substituindo', participle: 'substituído' },
-    ja: { te: '置き換えて', te_reading: 'おきかえて', nai: '置き換えない', nai_reading: 'おきかえない' },
+    ja: { te: '置き換えて', te_reading: 'おきかえて', nai: '置き換えない', nai_reading: 'おきかえない', passive: '置き換えられる', passive_reading: 'おきかえられる' },
   },
   // B32's three. it abitare and de wohnen both take the HAVE auxiliary ("ha abitato", "hat
   // gewohnt"), unlike the motion verbs above; de inhaftieren is an -ieren verb, so its participle
@@ -781,6 +789,6 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     fr: { participle: 'enfermé' }, de: { participle: 'inhaftiert' },
     es: { gerund: 'encerrando', participle: 'encerrado' },
     pt: { gerund: 'encarcerando', participle: 'encarcerado' },
-    ja: { te: '閉じ込めて', te_reading: 'とじこめて', nai: '閉じ込めない', nai_reading: 'とじこめない' },
+    ja: { te: '閉じ込めて', te_reading: 'とじこめて', nai: '閉じ込めない', nai_reading: 'とじこめない', passive: '閉じ込められる', passive_reading: 'とじこめられる' },
   },
 };

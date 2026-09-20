@@ -33,6 +33,7 @@ import {
   type PathSpecifier,
   type Tense,
   type UiStringKey,
+  type Voice,
 } from "@signi/shared";
 import { ReactNode } from "react";
 import { useUiString } from "../../i18n/useUiString.ts";
@@ -902,5 +903,13 @@ export function AspectToggleBox({ value, disc }: { value: Aspect; disc?: number 
   // Neutral is the implicit default → styled neutral; the marked aspects read as "set".
   return (
     <ToggleBox label={t("satellite.aspect")} value={t(`aspect.value.${value}`)} active={value !== "neutral"} disc={disc} />
+  );
+}
+
+export function VoiceToggleBox({ value, disc }: { value: Voice; disc?: number }) {
+  const t = useUiString();
+  // Active is the implicit default → styled neutral; the passive reads as "set".
+  return (
+    <ToggleBox label={t("satellite.voice")} value={t(`voice.value.${value}`)} active={value !== "active"} disc={disc} />
   );
 }

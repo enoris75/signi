@@ -37,6 +37,7 @@ const CASES: [keyof Commands, (c: Commands) => void, (prev: PhraseSelection) => 
   ['handleCycleDegree', (c) => c.handleCycleDegree('subjectAdjective'), (p) => reducers.cycleDegree(p, 'subjectAdjective')],
   ['handleCycleTense', (c) => c.handleCycleTense(), reducers.cycleTense],
   ['handleCycleAspect', (c) => c.handleCycleAspect(), reducers.cycleAspect],
+  ['handleCycleVoice', (c) => c.handleCycleVoice(), reducers.cycleVoice],
   ['handleSetImperativePerson', (c) => c.handleSetImperativePerson('2pl'), (p) => reducers.setImperativePerson(p, '2pl')],
   ['handleSetImperativeRegister', (c) => c.handleSetImperativeRegister('instruction'), (p) => reducers.setImperativeRegister(p, 'instruction')],
   ['handleSelectSpecifier', (c) => c.handleSelectSpecifier('over'), (p) => reducers.setSpecifier(p, 'over', 'route')],

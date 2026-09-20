@@ -9,6 +9,7 @@ import { withComplementDefiniteness } from '../../functions/withComplementDefini
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
+import { agentPhrase } from './agentPhrase.js';
 import { aspectVerb } from './aspectVerb.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { conjugate } from './conjugate.js';
@@ -30,8 +31,10 @@ export function predicateParts(
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   subjectIsNegative = false,
+  // The demoted agent of a passive clause, rendered as the by-phrase (see ResolvedPhrase.agent).
+  agent?: ResolvedNounElement,
 ): string[] {
-  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative);
+  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative, agent);
   return particleAfterPronoun(parts, verbPhrase, directObject);
 }
 
@@ -61,8 +64,20 @@ function predicateWords(
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   subjectIsNegative = false,
+  agent?: ResolvedNounElement,
 ): string[] {
-  const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
+  const { negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
+  // The passive conjugates "be" where the active conjugates the lexical verb, and hangs that verb's
+  // past participle off it: "is eaten", "was eaten", "will be eaten", and — because every branch
+  // below sees the auxiliary and not the verb — "is being eaten", "has been eaten", "must be
+  // eaten", "would be eaten" for free. "be" is an auxiliary of its own (forms.copula), so the
+  // negation and the question branches skip do-support: "is not eaten", "is the food eaten?".
+  //
+  // `lexical` stays the verb the clause is *about*: what the participle spells, and what the
+  // complements read for the idioms and links a verb licenses.
+  const lexical = verbPhrase.verb;
+  const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
+  const verb = passive ? verbPhrase.passiveAux! : lexical;
   // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
   // the main clause (conditional) is "would" + the verb group, handled in its own branch below.
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
@@ -85,7 +100,13 @@ function predicateWords(
   const anyComplement = neg.complement && (negatedAhead || neg.object);
   // The choice is per conjunct, so a group mixes the two ("sees the dog and me"). Only a conjunct
   // that is itself `no` switches to "any": "does not eat the mouse or any food".
-  const directObjectText = !directObject ? ''
+  // A passive has no direct object left — the patient is the subject now — so the slot right after
+  // the verb group carries the participle and the by-phrase instead. Every branch below puts this
+  // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
+  // the house"), so the passive needs no branch of its own.
+  const directObjectText = passive
+    ? [lexical.forms['participle'] ?? lexical.forms['base'] ?? '', agentPhrase(agent)].filter(Boolean).join(' ')
+    : !directObject ? ''
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounForm(np.head.forms)
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
@@ -100,7 +121,7 @@ function predicateWords(
   const modifierText = isDirection ? '' : adverbText;
   const complementsText = [
     isDirection ? adverbText : '',
-    complementsPhrase(anyComplement ? withComplementDefiniteness(complements, 'any') : complements, verb.forms),
+    complementsPhrase(anyComplement ? withComplementDefiniteness(complements, 'any') : complements, lexical.forms),
   ].filter(Boolean).join(' ');
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
   // clause with the main verb's: "can eat the mouse fast".

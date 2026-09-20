@@ -1,5 +1,6 @@
 import type { ImperativeRegister, VerbPhrase } from '@signi/shared';
-import type { Mood, ResolvedVerbPhrase } from '../../types.js';
+import type { ConceptForms, Mood, ResolvedVerbPhrase } from '../../types.js';
+import { PASSIVE_AUXILIARY, PASSIVIZABLE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolve } from './resolve.js';
 
@@ -14,7 +15,12 @@ import { resolve } from './resolve.js';
  *  - `subjectForms` are the subject's, or the head noun's where a relative gaps the subject: a
  *    lexeme naming a `subject_sense` resolves to it when the subject is an animal — German EAT is
  *    "essen" of a person but "fressen" of an animal, and either word of the other is wrong (A157).
- *  A missing sense concept leaves the verb as it is, so a language that seeds none is unaffected. */
+ *  A missing sense concept leaves the verb as it is, so a language that seeds none is unaffected.
+ *
+ *  Under a **passive** the sense is still selected by the *agent* — the one who acts is the one the
+ *  verb is chosen for, whichever slot the clause puts it in — so `subjectForms` are the plan's own
+ *  subject here, before `resolvePhrase` swaps the two around (A01).
+ */
 export function resolveVerbPhrase(
   vp: VerbPhrase,
   language: string,
@@ -34,11 +40,16 @@ export function resolveVerbPhrase(
   // A pronoun subject carries no animacy of its own ("er isst"), so it keeps the person's verb.
   const sense = (subjectForms?.['animal'] === '1' ? given.forms['subject_sense'] : undefined)
     ?? (hasObject ? given.forms['object_sense'] : undefined);
+  const verb = sense && lookup(sense, language) ? resolve(sense, language, lookup) : given;
+  const voice = resolveVoice(vp, verb, language, imperative, hasObject);
   return {
-    verb: sense && lookup(sense, language) ? resolve(sense, language, lookup) : given,
+    verb,
     negative: vp.negative,
     tense: finiteSlotTaken ? 'present' : vp.tense,
     aspect: finiteSlotTaken ? 'neutral' : vp.aspect,
+    ...(voice === 'passive'
+      ? { voice, ...passiveAuxiliary(verb, language, lookup) }
+      : {}),
     mood,
     register: imperative ? (register ?? 'request') : undefined,
     modifier: vp.modifier ? resolve(vp.modifier, language, lookup) : undefined,
@@ -55,5 +66,57 @@ export function resolveVerbPhrase(
             modifier: m.modifier ? resolve(m.modifier, language, lookup) : undefined,
           };
         }),
+  };
+}
+
+/**
+ * Whether this clause really is a passive, normalising every case that cannot be one back to active
+ * — the same defensive normalisation the imperative already does for tense/aspect/modals. A half
+ * passive (an auxiliary with nothing to promote into the subject slot) is worse than none:
+ *
+ *  - an **intransitive** verb has no patient at all;
+ *  - neither does a clause with **no direct object** to promote, whatever the verb could take;
+ *  - a verb whose object needs a **preposition** in this language ("clicca sul pulsante", A139) has
+ *    no direct object *there*, so it passivizes in some of the seven and not in others;
+ *  - an **imperative** is a command to the addressee to act, and it drops its subject, so there is
+ *    nothing for the patient to be promoted over. (The infinitive citation does passivize — "to be
+ *    eaten" is a perfectly good dictionary phrase.)
+ */
+function resolveVoice(
+  vp: VerbPhrase,
+  verb: ConceptForms,
+  language: string,
+  imperative: boolean,
+  hasObject: boolean,
+): 'active' | 'passive' {
+  if (vp.voice !== 'passive' || imperative || !hasObject) return 'active';
+  if (!PASSIVIZABLE.has(verb.forms['transitivity'] ?? '')) return 'active';
+  if (verb.forms['object_prep']) return 'active';
+  return 'passive';
+}
+
+/**
+ * The auxiliary the passive conjugates in this language, resolved from the lexicon like any other
+ * word (see `PASSIVE_AUXILIARY`). It takes over the finite slot, so it also takes over the one
+ * concept-level property that decides how that slot inflects: `stative` belongs to the event being
+ * spoken of, not to the auxiliary spelling it, so "the cat ate the food" passivizes to the
+ * perfective "il cibo fu mangiato" and not to *essere*'s own imperfect "era" (A130).
+ *
+ * Japanese names no auxiliary, and gets none.
+ */
+function passiveAuxiliary(
+  verb: ConceptForms,
+  language: string,
+  lookup: LexiconLookup,
+): { passiveAux?: ConceptForms } {
+  const auxId = PASSIVE_AUXILIARY[language];
+  if (!auxId) return {};
+  const aux = resolve(auxId, language, lookup);
+  const { stative: _auxStative, ...forms } = aux.forms;
+  return {
+    passiveAux: {
+      ...aux,
+      forms: { ...forms, ...(verb.forms['stative'] ? { stative: verb.forms['stative'] } : {}) },
+    },
   };
 }

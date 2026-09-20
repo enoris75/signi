@@ -377,7 +377,7 @@ export const COLLAPSIBLE_GROUPS: {
   {
     label: "Direct Object",
     mainKey: "directObject",
-    childKeys: [...adjectiveSlots("directObject"), "directObjectDefiniteness"],
+    childKeys: [...adjectiveSlots("directObject"), "directObjectDefiniteness", "verbVoice"],
   },
   ...BOX_COMPLEMENT_TYPES.map((type) => ({
     label: COMPLEMENT_LABELS[type],

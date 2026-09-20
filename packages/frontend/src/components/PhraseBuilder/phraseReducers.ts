@@ -4,6 +4,7 @@ import {
   MODIFIER_RELATIONS,
   NOUN_COORD_CONJUNCTIONS,
   TENSES,
+  VOICES,
   type Aspect,
   type CauseSentiment,
   type Concept,
@@ -14,6 +15,7 @@ import {
   type ModifierRelation,
   type PathSpecifier,
   type Tense,
+  type Voice,
 } from "@signi/shared";
 import {
   CONJUNCTION_KEY,
@@ -158,6 +160,11 @@ export function applyConceptSelect(
     ).map((s) => s.key);
     if (!nowVisible.includes("directObject")) clearNoun(next, "directObject");
     if (!nowVisible.includes("subjectAdjective")) clearAdjectives(next, "subject");
+    // Only a verb with a patient has a passive to be in (see `VerbPhrase.voice`), so a verb that
+    // has none takes the voice back to active rather than leaving a setting nothing can act on.
+    if (concept.transitivity !== "transitive" && concept.transitivity !== "ditransitive") {
+      delete next.verbVoice;
+    }
     // Drop complements the new verb no longer licenses.
     for (const type of BOX_COMPLEMENT_TYPES) {
       if (!nowVisible.includes(type)) clearNoun(next, type);
@@ -311,6 +318,10 @@ export function setAspect(prev: PhraseSelection, value: Aspect): PhraseSelection
   return { ...prev, verbAspect: value };
 }
 
+export function setVoice(prev: PhraseSelection, value: Voice): PhraseSelection {
+  return { ...prev, verbVoice: value };
+}
+
 // A real adjective's comparative degree, stored per slot key in `adjectiveDegrees` — for an
 // adjective slot, or for the `predicative` slot holding a predicate adjective.
 export function setDegree(prev: PhraseSelection, slotKey: SlotKey, value: Degree): PhraseSelection {
@@ -443,6 +454,9 @@ export function setImperative(prev: PhraseSelection, value: boolean): PhraseSele
     imperativePerson: prev.imperativePerson ?? "2sg",
     verbTense: "present",
     verbAspect: "neutral",
+    // A command tells the addressee to act, so it is always active (see the translator's
+    // `resolveVoice`, which normalises one either way).
+    verbVoice: "active",
     verbModal: undefined,
     verbModal2: undefined,
     verbModalAdverb: undefined,
@@ -513,6 +527,11 @@ export function cycleTense(prev: PhraseSelection, step: CycleStep = 1): PhraseSe
 // Cycle the verb aspect neutral → progressive → prospective → resultative → neutral.
 export function cycleAspect(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
   return setAspect(prev, cycled(ASPECTS, prev.verbAspect ?? "neutral", step));
+}
+
+// Cycle the verb voice active → passive → active.
+export function cycleVoice(prev: PhraseSelection, step: CycleStep = 1): PhraseSelection {
+  return setVoice(prev, cycled(VOICES, prev.verbVoice ?? "active", step));
 }
 
 // Set a spatial complement's relation (through / under / over / …). Route and locative draw on

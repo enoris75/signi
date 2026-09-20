@@ -30,8 +30,8 @@ function formsFromRows(rows: FormRow[]): Record<string, string> {
 
 function lookupVerb(conceptId: string, language: string): LexicalEntry | undefined {
   const db = getDb();
-  const lexeme = db.prepare<[string, string], { id: number; stative: number }>(`
-    SELECT vl.id, sc.stative FROM concept_verb_links cvl
+  const lexeme = db.prepare<[string, string], { id: number; stative: number; transitivity: string | null }>(`
+    SELECT vl.id, sc.stative, sc.transitivity FROM concept_verb_links cvl
     JOIN verb_lexemes vl ON vl.id = cvl.lexeme_id
     JOIN semantic_concepts sc ON sc.id = cvl.concept_id
     WHERE cvl.concept_id = ? AND vl.language = ? AND cvl.is_primary = 1
@@ -46,6 +46,10 @@ function lookupVerb(conceptId: string, language: string): LexicalEntry | undefin
   // A verb naming a state that holds, not an event: its Romance past is the imperfect ("voleva",
   // A130), and Japanese says it with 〜ている ("持っています", A132). Concept-level.
   if (lexeme.stative) forms['stative'] = '1';
+  // How many arguments the verb takes. Concept-level, like the two above, and exposed for the same
+  // reason `role` and `animate` are: only a verb with a patient can be put in the passive, and the
+  // translator has to decide that with nothing but the resolved forms in hand (A01).
+  if (lexeme.transitivity) forms['transitivity'] = lexeme.transitivity;
 
   return { conceptId, language: language as LexicalEntry['language'], forms };
 }

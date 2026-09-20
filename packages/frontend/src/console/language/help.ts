@@ -92,6 +92,10 @@ export const EXAMPLES: Record<string, string> = {
   prog: "/subj ( cat ) /verb ( eat /prog )",
   prosp: "/subj ( cat ) /verb ( eat /prosp )",
   result: "/subj ( cat ) /verb ( eat /result )",
+  // The voice needs a patient to promote, so its examples give the verb an object.
+  voice: "/subj ( cat ) /verb ( eat /voice passive ) /obj ( food )",
+  active: "/subj ( cat ) /verb ( eat /active ) /obj ( food )",
+  passive: "/subj ( cat ) /verb ( eat /passive ) /obj ( food )",
   not: "/subj ( cat ) /verb ( eat /not )",
   pos: "/subj ( cat ) /verb ( eat /pos )",
   // Adjective

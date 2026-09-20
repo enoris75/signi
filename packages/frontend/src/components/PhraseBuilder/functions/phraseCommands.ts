@@ -16,6 +16,7 @@ import type {
 import {
   addConjunct,
   cycleAspect,
+  cycleVoice,
   cycleDegree,
   cycleModifierNumber,
   cycleModifierRelation,
@@ -61,6 +62,7 @@ export function phraseCommands(onPhraseUpdate: PhraseUpdate) {
       onPhraseUpdate((prev) => cycleDegree(prev, slotKey, step)),
     handleCycleTense: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleTense(prev, step)),
     handleCycleAspect: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleAspect(prev, step)),
+    handleCycleVoice: (step: CycleStep = 1) => onPhraseUpdate((prev) => cycleVoice(prev, step)),
     handleSetImperativePerson: (person: ImperativePerson) =>
       onPhraseUpdate((prev) => setImperativePerson(prev, person)),
     handleSetImperativeRegister: (register: ImperativeRegister) =>

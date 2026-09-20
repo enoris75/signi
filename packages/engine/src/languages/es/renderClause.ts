@@ -31,7 +31,7 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // Verbless period: a bare noun phrase ("últimas noticias").
   if (!phrase.verbPhrase) return subj.trim();
   const predicate = predicateText(
-    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, phrase.agent,
   );
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("ser capaz de actuar", "el gato desea comer") or, under a causative, its object

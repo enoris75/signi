@@ -513,6 +513,7 @@ function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
     determiner: `determiner.name.${value}`,
     tense: `tense.value.${value}`,
     aspect: `aspect.value.${value}`,
+    voice: `voice.value.${value}`,
     polarity: `polarity.value.${value}`,
     relation: `modifier.relation.${value}`,
   };

@@ -6,7 +6,7 @@ import {
   defaultDefiniteness,
   type Definiteness,
 } from "@signi/shared";
-import { DeterminerToggleBox } from "./Boxes.tsx";
+import { DeterminerToggleBox, VoiceToggleBox } from "./Boxes.tsx";
 import { NounKey, NumberSlot, PhraseSelection } from "./interfaces.ts";
 import { nodeElRef, PhraseRenderContext, SlotNode } from "./phraseRender.tsx";
 import { GroupBox } from "./GroupBox.tsx";
@@ -183,6 +183,22 @@ export function NounPhraseBuilder({
             onClose={() => ctx.onDeterminerMenu(null)}
           />
         </>
+      )}
+      {/* The voice toggle rides the direct object's ring, not the verb's (A01): it is the object
+          this promotes to subject, and the verb's own ring is full enough that one more control
+          there pushes this very box off its row. `shownMap` is what gates it — the satellite is
+          only offered where the passive can be had (see `rawSatellites`). */}
+      {which === "directObject" && shownMap.verbVoice && (
+        <Box
+          data-testid="box-verbVoice"
+          {...activatable(makeDragProps("verbVoice", ctx.handleCycleVoice), {
+            onActivate: ctx.handleCycleVoice,
+            label: t("satellite.voice"),
+          })}
+          ref={nodeElRef(ctx, "verbVoice")}
+        >
+          <VoiceToggleBox value={selection.verbVoice ?? "active"} disc={ctx.discs.verbVoice?.r} />
+        </Box>
       )}
     </>
   );

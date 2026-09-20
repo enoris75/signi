@@ -1,4 +1,4 @@
-import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey } from "@signi/shared";
+import type { AbstractionLevel, Aspect, CauseSentiment, Concept, ComplementType, CoordConjunction, Definiteness, Degree, GrammaticalRole, ImperativeRegister, ModifierRelation, PathSpecifier, Tense, UiStringKey, Voice } from "@signi/shared";
 import { canCoordinateImperative } from "@signi/shared";
 
 export type { AbstractionLevel, CoordConjunction };
@@ -146,6 +146,10 @@ export interface PhraseSelection {
     // Grammatical aspect (neutral / progressive / prospective / resultative), orthogonal to
     // tense. Defaults to 'neutral' when absent.
     verbAspect?: Aspect;
+    // Grammatical voice (active / passive). Defaults to 'active' when absent. Only a transitive
+    // verb with a direct object can take the passive, which is what gates the satellite; the
+    // translator normalises an impossible passive back to active whatever the selection says.
+    verbVoice?: Voice;
     // Modal verbs governing the predicate, outermost first: `verbModal` governs `verbModal2`,
     // which governs the verb — "voglio poter andare". Like the adjectives they chain, each
     // revealed from a control on the previous one's box, so `verbModal2` only exists once
