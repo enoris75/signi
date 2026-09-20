@@ -764,3 +764,26 @@ describe('rawSatellites', () => {
     });
   });
 });
+
+// A164. An alarm cry — CRY_OUT with a danger for its object — is the shout itself, the word "Wolf!",
+// and spells no determiner in any language (A163). The canvas offers one anyway: the direct object's
+// determiner is gated on its head alone (`directObjectRole === 'noun'`), so the control sits on the
+// ring claiming a slot the grammar does not license, exactly as a measure manner adverbial's did
+// before it was withdrawn. Both flags reach `Concept` with the fix; the fixtures assert the shape it
+// introduces.
+const CRY_OUT = { ...concept('CRY_OUT', 'verb', { transitivity: 'transitive' }), alarmCry: true } as Concept;
+const WOLF = { ...concept('WOLF', 'noun'), alarm: true } as Concept;
+const WORD = concept('WORD', 'noun');
+
+describe('known bugs: the determiner an alarm cry cannot take', () => {
+  it.fails('withdraws the determiner from the alarm a cry raises', () => {
+    expect(satellite({ verb: CRY_OUT, directObject: WOLF }, 'directObjectDefiniteness').available).toBe(false);
+  });
+
+  // Regression: it is the pairing that licenses nothing, not either word on its own. The same danger
+  // under another verb, and an ordinary cry under the same verb, both still take a determiner.
+  it('leaves every other cry, and every other object, alone', () => {
+    expect(satellite({ verb: SEE, directObject: WOLF }, 'directObjectDefiniteness').available).toBe(true);
+    expect(satellite({ verb: CRY_OUT, directObject: WORD }, 'directObjectDefiniteness').available).toBe(true);
+  });
+});

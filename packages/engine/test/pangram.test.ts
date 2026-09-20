@@ -221,3 +221,44 @@ describe('known bugs: a relative on the alarm a cry raises', () => {
   });
 });
 
+// A163. An alarm cry is the shout itself — the word "Wolf!" — not a referring noun phrase, so it has
+// no determiner slot. A124 normalised a *bare* object to the fused article in Italian and French; the
+// determiner the user picked still reaches the output everywhere else. English has no alarm frame at
+// all, and transitive "cry" wants an utterance, so "cried the wolf" and "cried a wolf" are both
+// ungrammatical — only the bare "cried wolf" is right today. Italian and French keep an indefinite
+// inside the frame, which reads as the terminus ("shouted at a wolf"), and Italian's bare "a lupi" is
+// ungrammatical outright.
+describe('known bugs: an alarm cry has no determiner', () => {
+  test.fails('English cries the bare alarm whatever determiner the object carries', () => {
+    expect(say(cried(), 'en')).toBe('the boy cried wolf.');
+    expect(say(cried({ definiteness: 'indefinite' }), 'en')).toBe('the boy cried wolf.');
+    expect(say(cried({ number: 'plural' }), 'en')).toBe('the boy cried wolves.');
+    expect(say(clause(np('BOY'), 'CRY_OUT', { verbPhrase: { tense: 'past' }, directObject: np('FIRE') }), 'en'))
+      .toBe('the boy cried fire.');
+    // The pangram's own relative clause, the sentence this was found on.
+    expect(say(jumpedOver(theQuickBrownFoxOf(theBoyWhoCriedTheWolf()), 'locative'), 'en'))
+      .toBe('the quick brown fox of the boy who cried wolf jumped over the lazy dog.');
+  });
+
+  test.fails('Italian and French collapse an indefinite alarm into the frame', () => {
+    expect(sayAll(cried({ definiteness: 'indefinite' }))).toMatchObject({
+      it: 'il ragazzo gridò al lupo.',
+      fr: 'le garçon cria au loup.',
+    });
+    expect(sayAll(cried({ definiteness: 'indefinite', number: 'plural' }))).toMatchObject({
+      it: 'il ragazzo gridò ai lupi.',
+      fr: 'le garçon cria aux loups.',
+    });
+  });
+
+  // Regression: the determiner is only ignored on an alarm. An ordinary cry keeps the one it was
+  // given, in every language — this is what an English alarm arm must not break.
+  test('regression: a cry that is not an alarm keeps its determiner', () => {
+    expect(sayAll(clause(np('BOY'), 'CRY_OUT', { verbPhrase: { tense: 'past' }, directObject: np('WORD', { definiteness: 'indefinite' }) })))
+      .toMatchObject({
+        en: 'the boy cried a word.',
+        it: 'il ragazzo gridò una parola.',
+        fr: 'le garçon cria un mot.',
+      });
+  });
+});

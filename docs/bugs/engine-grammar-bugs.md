@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of
-them, as of this writing — all 9 in Part B; Part A is empty).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (12 of
+them, as of this writing — 9 in Part B and 3 in Part A: two pinning A163, one A164).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,7 +59,12 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Empty.** Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+| # | File | Area |
+|---|---|---|
+| A163 | [A163-alarm-cry-determiner.md](A-must-fix/A163-alarm-cry-determiner.md) | English, Italian, French |
+| A164 | [A164-alarm-cry-determiner-satellite.md](A-must-fix/A164-alarm-cry-determiner-satellite.md) | frontend (satellite controls) — do after A163 |
+
+Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
