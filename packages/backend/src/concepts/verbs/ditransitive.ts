@@ -1,5 +1,5 @@
 import type { ConceptSeed } from '../types.js';
-import { infinitiveGloss } from './gloss.js';
+import { causativeGloss, infinitiveGloss } from './gloss.js';
 
 // Ditransitive verbs (license a recipient/theme). The recipient is the `terminus` complement
 // — the dative "to whom" — which these verbs declare like any other complement-taking verb.
@@ -153,6 +153,13 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     transitivity: 'ditransitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to make something visible to someone',
+    // The causative of seeing: what SHOW adds to SEE is that someone *else* does the seeing, which
+    // is the object-controlled infinitive complement (localization C08). Japanese says it as
+    // 人が物体を見るようにする — 見る, not the 見せる this defines.
+    definition: causativeGloss(
+      { object: 'PERSON', definiteness: 'indefinite' },
+      { verb: 'SEE', object: 'OBJECT_THING', number: 'plural' },
+    ),
     emoji: '👁️',
     forms: {
       en: {

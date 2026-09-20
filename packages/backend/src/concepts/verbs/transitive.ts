@@ -1,5 +1,5 @@
 import type { ConceptSeed } from '../types.js';
-import { infinitiveGloss } from './gloss.js';
+import { causativeGloss, infinitiveGloss } from './gloss.js';
 
 // Plain transitive verbs.
 export const transitiveVerbs: ConceptSeed[] = [
@@ -559,7 +559,7 @@ export const transitiveVerbs: ConceptSeed[] = [
         masu_present: '望みます',
         masu_present_reading: 'のぞみます',
         // The こと clause it governs is its object: 行動することを望む.
-        infinitive_link: 'を',
+        infinitive_link: 'ことを',
       },
       pt: {
         base: 'desejar',
@@ -2495,6 +2495,96 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // The CAUSATIVE verb, the genus of every "to make something happen" definition: it governs an
+    // **object-controlled** infinitive complement, so its object is not what it acts on but the one
+    // that comes to act — "to cause a person to see objects" is the person seeing (localization
+    // C08). Which word links the infinitive is the governor's, so each lexeme names it
+    // (`infinitive_link`): indurre / induire / inducir / induzir **a**, **à**; English "to" and
+    // German "zu" are the only link their engines know. The four Romance languages take the
+    // "induce" verb rather than each one's most idiomatic causative periphrasis (fr *amener à*,
+    // es *llevar a*) because this one also reads as a plain transitive with an object of its own
+    // ("indurre un cambiamento"), which *amener un feu* / *llevar un fuego* would not.
+    //
+    // `causative: '1'` marks the verb as that construction's own, which only Japanese reads: it has
+    // no transitive verb governing a clause here, and says it as 〜ようにする ("bring it about that
+    // —"), so the ja engine closes the clause on する in place of the lexeme's 引き起こす — which is
+    // what the verb says standing on its own ("the cat causes a fire", 猫は火を引き起こします).
+    id: 'CAUSE_VERB',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause', 'locative'],
+    description: 'to make something or someone come to act or to be in a state',
+    emoji: '🎬',
+    synonym: 'bring about',
+    forms: {
+      en: {
+        base: 'cause', causative: '1',
+        '1sg_present': 'cause', '2sg_present': 'cause', '3sg_present': 'causes',
+        '1pl_present': 'cause', '2pl_present': 'cause', '3pl_present': 'cause',
+        past: 'caused',
+      },
+      it: {
+        // indurre contracts like produrre: induco / indusse / indurrà / indotto.
+        base: 'indurre', causative: '1', infinitive_link: 'a',
+        '1sg_present': 'induco', '2sg_present': 'induci', '3sg_present': 'induce',
+        '1pl_present': 'induciamo', '2pl_present': 'inducete', '3pl_present': 'inducono',
+        '1sg_past': 'indussi', '2sg_past': 'inducesti', '3sg_past': 'indusse',
+        '1pl_past': 'inducemmo', '2pl_past': 'induceste', '3pl_past': 'indussero',
+        '1sg_future': 'indurrò', '2sg_future': 'indurrai', '3sg_future': 'indurrà',
+        '1pl_future': 'indurremo', '2pl_future': 'indurrete', '3pl_future': 'indurranno',
+      },
+      fr: {
+        // induire, like produire: induis / induisit / induira / induit.
+        base: 'induire', causative: '1', infinitive_link: 'à',
+        '1sg_present': 'induis', '2sg_present': 'induis', '3sg_present': 'induit',
+        '1pl_present': 'induisons', '2pl_present': 'induisez', '3pl_present': 'induisent',
+        '1sg_past': 'induisis', '2sg_past': 'induisis', '3sg_past': 'induisit',
+        '1pl_past': 'induisîmes', '2pl_past': 'induisîtes', '3pl_past': 'induisirent',
+        '1sg_future': 'induirai', '2sg_future': 'induiras', '3sg_future': 'induira',
+        '1pl_future': 'induirons', '2pl_future': 'induirez', '3pl_future': 'induiront',
+      },
+      de: {
+        // Inseparable, and the stem already ends in -ss: 2sg/3sg and the Partizip are all veranlasst.
+        base: 'veranlassen', causative: '1',
+        '1sg_present': 'veranlasse', '2sg_present': 'veranlasst', '3sg_present': 'veranlasst',
+        '1pl_present': 'veranlassen', '2pl_present': 'veranlasst', '3pl_present': 'veranlassen',
+        '1sg_past': 'veranlasste', '2sg_past': 'veranlasstest', '3sg_past': 'veranlasste',
+        '1pl_past': 'veranlassten', '2pl_past': 'veranlasstet', '3pl_past': 'veranlassten',
+      },
+      es: {
+        // inducir, like producir: induzco / indujo / inducido.
+        base: 'inducir', causative: '1', infinitive_link: 'a',
+        '1sg_present': 'induzco', '2sg_present': 'induces', '3sg_present': 'induce',
+        '1pl_present': 'inducimos', '2pl_present': 'inducís', '3pl_present': 'inducen',
+        '1sg_past': 'induje', '2sg_past': 'indujiste', '3sg_past': 'indujo',
+        '1pl_past': 'indujimos', '2pl_past': 'indujisteis', '3pl_past': 'indujeron',
+        '1sg_future': 'induciré', '2sg_future': 'inducirás', '3sg_future': 'inducirá',
+        '1pl_future': 'induciremos', '2pl_future': 'induciréis', '3pl_future': 'inducirán',
+      },
+      ja: {
+        base: '引き起こす',
+        reading: 'ひきおこす',
+        masu_present: '引き起こします',
+        masu_present_reading: 'ひきおこします',
+        causative: '1',
+        // Japanese nominalizes the caused event with よう, not こと, and closes it on する:
+        // 人が物体を見るようにする.
+        infinitive_link: 'ように',
+      },
+      pt: {
+        // induzir, like produzir: induzo / induziu / induzido.
+        base: 'induzir', causative: '1', infinitive_link: 'a',
+        '1sg_present': 'induzo', '2sg_present': 'induz', '3sg_present': 'induz',
+        '1pl_present': 'induzimos', '2pl_present': 'induzem', '3pl_present': 'induzem',
+        '1sg_past': 'induzi', '2sg_past': 'induziu', '3sg_past': 'induziu',
+        '1pl_past': 'induzimos', '2pl_past': 'induziram', '3pl_past': 'induziram',
+        '1sg_future': 'induzirei', '2sg_future': 'induzirá', '3sg_future': 'induzirá',
+        '1pl_future': 'induziremos', '2pl_future': 'induzirão', '3pl_future': 'induzirão',
+      },
+    },
+  },
+
+  {
     // The genus of CLICK ("to press a button") — the verb of pushing against something that its
     // dictionary definition cites as its genus (see the B18 verb-definition task). Italian premere
     // takes the -etti remote past (premette) and the -uto participle (premuto); German takes the
@@ -3497,6 +3587,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative', 'instrumental'],
     description: 'to make separate parts or people work together',
+    // The causative of acting together: what is coordinated is not acted on, it is brought to act
+    // (localization C08). PERSON is the "or people" half of the description; the adverb carries the
+    // "together" that is the whole point of the verb.
+    definition: causativeGloss({ object: 'PERSON', number: 'plural' }, { verb: 'ACT', modifier: 'TOGETHER' }),
     emoji: '🎛️',
     forms: {
       en: {
@@ -3636,6 +3730,13 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to press something into a smaller space without losing what it holds',
+    // The resultative "into a smaller space" said as the state it leaves the thing in: the object
+    // comes to be smaller (localization C08). The degree is the comparative — a compacted thing is
+    // smaller than it was, not small.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BECOME', predicate: 'SMALL', predicateDegree: 'more' },
+    ),
     emoji: '🗜️',
     synonym: 'compress',
     forms: {
@@ -3705,6 +3806,11 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'cause'],
     description: 'to open something out into a larger space',
+    // COMPACT's opposite, the same shape: the object comes to be bigger than it was.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BECOME', predicate: 'BIG', predicateDegree: 'more' },
+    ),
     emoji: '↔️',
     synonym: 'enlarge',
     forms: {
@@ -3776,6 +3882,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'locative', 'cause', 'instrumental'],
     description: 'to put something out of sight',
+    // "Out of sight" is the negation of being visible, and hiding is causing it (localization C08).
+    // The negation sits on the caused clause, not on the causing: what is caused is a *not* being
+    // seen. VISIBLE rather than the seeded HIDDEN, which is this verb's own participle in every
+    // language ("nascondere" → "nascosto") and would define the word with itself.
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      { verb: 'BE', predicate: 'VISIBLE', negative: true },
+    ),
     emoji: '🙈',
     forms: {
       en: {
@@ -3844,6 +3958,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'instrumental', 'terminus', 'cause', 'locative'],
     description: 'to cause something to begin',
+    // The description, composed — START is the causative of BEGIN, which is the whole of the split
+    // between them (localization C08). The five labile languages name their own lemma inside it
+    // ("indurre un'azione a iniziare"), because their causative and their inchoative are one verb:
+    // the gloss is then what their dictionaries say, "far sì che qcs. inizi", and it is what tells
+    // the picker's two identical entries apart. en and ja have two words and read cleanly.
+    definition: causativeGloss({ object: 'ACTION', definiteness: 'indefinite' }, { verb: 'BEGIN' }),
     emoji: '▶️',
     forms: {
       en: {

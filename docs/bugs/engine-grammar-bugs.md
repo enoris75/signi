@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of them,
-as of this writing — all 9 in Part B; Part A is empty).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (10 of
+them, as of this writing — 9 in Part B and 1 in Part A).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,8 +59,9 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Empty.** Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
-filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
+| # | File |
+|---|---|
+| A162 | [A162-spanish-portuguese-juntos-agreement.md](A-must-fix/A162-spanish-portuguese-juntos-agreement.md) |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

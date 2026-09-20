@@ -139,3 +139,12 @@ export const JA_SOU: ResolvedComplement = {
 };
 export const JA_IRU: ConceptForms = { conceptId: 'IRU', forms: { base: 'いる', masu_present: 'います', te: 'いて', nai: 'いない' } };
 export const JA_ARU: ConceptForms = { conceptId: 'ARU', forms: { base: 'ある', masu_present: 'あります', te: 'あって', nai: 'ない' } };
+
+/**
+ * The light verb the causative construction closes on: 〜ようにする, "to bring it about that —"
+ * (人が物体を見るようにする). Japanese realises a causative as a construction, not as a transitive verb
+ * governing a clause, so a `causative` lexeme's own word — 引き起こす, which is what it says standing
+ * alone — gives way to this one when it governs an object-controlled infinitive complement, exactly
+ * as the copula gives way to ある / いる when it states that its subject exists. Kana, so no reading.
+ */
+export const JA_SURU: ConceptForms = { conceptId: 'SURU', forms: { base: 'する', masu_present: 'します', te: 'して', nai: 'しない' } };

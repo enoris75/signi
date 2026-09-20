@@ -578,8 +578,9 @@ export const adjectives: ConceptSeed[] = [
   // ABLE and OBLIGED govern an infinitive ("able to act", PhrasePlan.infinitiveComplement), and the
   // modals CAN and MUST are defined on them (localization C09). Which preposition links the
   // infinitive belongs to the adjective, so each lexeme names it as `infinitive_link`: capace di,
-  // capable de, capaz de; obbligato a, obligé de, obligado a. Japanese predicates both of the こと
-  // clause, marked with が: 行動することが可能である ("acting is possible").
+  // capable de, capaz de; obbligato a, obligé de, obligado a. The Japanese entry is the whole tail
+  // that closes the nominalized clause — both predicate of a こと clause marked with が:
+  // 行動することが可能である ("acting is possible").
   {
     id: 'ABLE',
     role: 'adjective',
@@ -591,7 +592,7 @@ export const adjectives: ConceptSeed[] = [
       fr: { base: 'capable', infinitive_link: 'de' },
       de: { base: 'fähig' },
       es: { base: 'capaz', infinitive_link: 'de' },
-      ja: { base: '可能な', reading: 'かのうな', infinitive_link: 'が' },
+      ja: { base: '可能な', reading: 'かのうな', infinitive_link: 'ことが' },
       pt: { base: 'capaz', infinitive_link: 'de' },
     },
   },
@@ -608,7 +609,7 @@ export const adjectives: ConceptSeed[] = [
       fr: { base: 'obligé', infinitive_link: 'de' },
       de: { base: 'verpflichtet' },
       es: { base: 'obligado', infinitive_link: 'a' },
-      ja: { base: '義務的な', reading: 'ぎむてきな', infinitive_link: 'が' },
+      ja: { base: '義務的な', reading: 'ぎむてきな', infinitive_link: 'ことが' },
       pt: { base: 'obrigado', infinitive_link: 'a' },
     },
   },
@@ -1476,6 +1477,25 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'oculto' },
       ja: { base: '非表示の', reading: 'ひひょうじの' },
       pt: { base: 'oculto' },
+    },
+  },
+  {
+    // HIDDEN's opposite, and what APPEAR comes to be ("to become visible", localization C08).
+    // Japanese takes 可視の, the word of 可視光 "visible light": 見える is a verb, and the UI's 表示の
+    // ("displayed") says a screen shows it rather than that an eye can see it.
+    id: 'VISIBLE',
+    role: 'adjective',
+    transient: true, // a state a thing comes into, like HIDDEN → es/pt predicate with estar (A47)
+    description: 'able to be seen',
+    emoji: '👓',
+    forms: {
+      en: { base: 'visible' },
+      it: { base: 'visibile' },
+      fr: { base: 'visible' },
+      de: { base: 'sichtbar' },
+      es: { base: 'visible' },
+      ja: { base: '可視の', reading: 'かしの' },
+      pt: { base: 'visível' },
     },
   },
 ];

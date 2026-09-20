@@ -1,5 +1,6 @@
 import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
+import { infinitiveController } from '../../functions/infinitiveController.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { dimensionGloss } from './dimensionGloss.js';
@@ -35,10 +36,11 @@ export function renderClause(phrase: ResolvedPhrase, subordinate = false): strin
   const predicate = predicateText(
     subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements, dropSubject && !subordinate,
   );
-  // An infinitive complement follows the clause, agreeing with the same subject ("ser capaz de agir",
-  // "o gato deseja comer").
+  // An infinitive complement follows the clause, agreeing with its controller — this clause's
+  // subject ("ser capaz de agir", "o gato deseja comer") or, under a causative, its object
+  // ("levar uma casa a estar oculta").
   const complement = phrase.infinitiveComplement
-    ? infinitiveComplementText(phrase.infinitiveComplement, subject.agreement, infinitiveLink(phrase))
+    ? infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))
     : '';
   return [subj, predicate, complement].filter(Boolean).join(' ').trim();
 }

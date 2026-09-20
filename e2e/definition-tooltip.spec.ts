@@ -282,6 +282,34 @@ test.describe('word definition tooltip', () => {
     });
   }
 
+  // C08: the causative — the definition's infinitive complement is controlled by the verb's OBJECT
+  // ("to cause a person TO SEE objects": the person sees), which Japanese says as 〜ようにする with the
+  // causee inside the clause. APPEAR rides along as the state one of them causes, BECOME + VISIBLE.
+  for (const [id, query, en, language, other] of [
+    ['SHOW', 'show', 'to cause a person to see objects', 'ja', '人が物体を見るようにする'],
+    ['HIDE', 'hide', 'to cause an object not to be visible', 'it', 'indurre un oggetto a non essere visibile'],
+    ['START', 'start', 'to cause an action to begin', 'de', 'eine Handlung veranlassen, zu beginnen'],
+    ['COMPACT', 'compact', 'to cause an object to become smaller', 'es', 'inducir un objeto a volverse más pequeño'],
+    ['COORDINATE', 'coordinate', 'to cause people to act together', 'pt', 'induzir pessoas a agir juntos'],
+    ['APPEAR', 'appear', 'to become visible', 'fr', 'devenir visible'],
+  ] as const) {
+    test(`a causative verb definition renders (localize-seed C08: ${id})`, async ({ app, page }) => {
+      const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
+      await app.setSubject('CAT');
+
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(en);
+
+      await app.setUiLanguage(language);
+      await app.verbInput.fill(query);
+      await expect(option).toBeVisible();
+      await option.hover();
+      await expect(page.locator(tooltip)).toHaveText(other);
+    });
+  }
+
   test('an engine-composed definition renders in the current UI language', async ({
     app,
     page,

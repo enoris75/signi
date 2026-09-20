@@ -92,6 +92,35 @@ describe('resolvePhrase', () => {
     expect(coordination?.clause.subject.conjuncts[0].head.conceptId).toBe('DOG');
   });
 
+  describe('an infinitive complement', () => {
+    const wants = (control?: 'object'): PhrasePlan => ({
+      ...CAT_RUNS,
+      directObject: { concept: 'DOG' },
+      infinitiveComplement: { verbPhrase: { verb: 'EAT' }, ...(control ? { control } : {}) },
+    });
+
+    test('is a clause of its own in the infinitive mood, subject-controlled by default', () => {
+      const { infinitiveComplement } = resolvePhrase(wants(), 'it', LOOKUP);
+      expect(infinitiveComplement?.verbPhrase).toMatchObject({ verb: { conceptId: 'EAT' }, mood: 'infinitive' });
+      expect(infinitiveComplement?.subject.conjuncts[0].head.conceptId).toBe('CAT');
+      expect(infinitiveComplement).not.toHaveProperty('control');
+    });
+
+    test('object control resolves the direct object as its subject, and says so', () => {
+      const { infinitiveComplement } = resolvePhrase(wants('object'), 'it', LOOKUP);
+      expect(infinitiveComplement?.subject.conjuncts[0].head.conceptId).toBe('DOG');
+      expect(infinitiveComplement?.control).toBe('object');
+    });
+
+    test('object control with no object falls back to the subject and is no longer object-controlled', () => {
+      const { infinitiveComplement } = resolvePhrase(
+        { ...CAT_RUNS, infinitiveComplement: { verbPhrase: { verb: 'EAT' }, control: 'object' } }, 'it', LOOKUP,
+      );
+      expect(infinitiveComplement?.subject.conjuncts[0].head.conceptId).toBe('CAT');
+      expect(infinitiveComplement).not.toHaveProperty('control');
+    });
+  });
+
   describe('a bare copula (A121)', () => {
     test('in the main clause elides the complement of its condition', () => {
       const resolved = resolvePhrase({ ...DOG_IS_NOT, condition: CAT_IS_HAPPY }, 'it', LOOKUP, 'conditional');

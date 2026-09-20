@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import type { RubySegment } from '../../types.js';
 import { buildClauseSegments } from './buildClauseSegments.js';
 import {
-  adj, AGERU, ANATA, clause, complement, complements, DESU, el, HAYASA, HITO_GENERIC, HON, IE, INU, KABE, MOTSU, NAKU, NEKO, NEZUMI, np,
-  ONDO, OOKII, TABERU, TAKAI, vp, WATASHI,
+  adj, AGERU, ANATA, clause, complement, complements, DESU, el, HAYASA, HIKIOKOSU, HITO, HITO_GENERIC, HON, IE, INU, KABE, MOTSU, NAKU,
+  NEKO, NEZUMI, np, ONDO, OOKII, TABERU, TAKAI, vp, WATASHI,
 } from './ja.fixtures.js';
 
 const text = (segs: RubySegment[]): string => segs.map((s) => s.t).join('');
@@ -81,10 +81,11 @@ describe('buildClauseSegments', () => {
     });
   });
 
-  // An infinitive complement is a こと clause ahead of the predicate, marked with the governor's particle.
+  // An infinitive complement is a nominalized clause ahead of the predicate, closed by the tail the
+  // governor's lexeme names (ことが / ことを / ように).
   describe('infinitive complement', () => {
-    const KANOU = { role: 'adjective', base: '可能な', reading: 'かのうな', infinitive_link: 'が' };
-    const NOZOMU = { base: '望む', reading: 'のぞむ', masu_present: '望みます', infinitive_link: 'を' };
+    const KANOU = { role: 'adjective', base: '可能な', reading: 'かのうな', infinitive_link: 'ことが' };
+    const NOZOMU = { base: '望む', reading: 'のぞむ', masu_present: '望みます', infinitive_link: 'ことを' };
     const eats = clause(np(NEKO), vp(TABERU, { mood: 'infinitive' }), { directObject: el(np(NEZUMI)) });
 
     test("an adjective's こと clause takes が, and the copula keeps the clause's register", () => {
@@ -96,6 +97,33 @@ describe('buildClauseSegments', () => {
 
     test("a verb's takes the particle its lexeme names", () => {
       expect(say(clause(np(NEKO), vp(NOZOMU), { infinitiveComplement: eats }), 'は')).toBe('猫はネズミを食べることを望みます');
+    });
+
+    test('a governor with no link of its own falls back to ことを', () => {
+      const nozomuBare = { base: '望む', reading: 'のぞむ', masu_present: '望みます' };
+      expect(say(clause(np(NEKO), vp(nozomuBare), { infinitiveComplement: eats }), 'は')).toBe('猫はネズミを食べることを望みます');
+    });
+  });
+
+  // The causative: the causee is the matrix object, but Japanese speaks it inside the clause with が
+  // and closes the predicate on する — 人がネズミを食べるようにする.
+  describe('causative (object control)', () => {
+    const personEats = clause(np(HITO), vp(TABERU, { mood: 'infinitive' }), { directObject: el(np(NEZUMI)), control: 'object' });
+
+    test('the causee leads the clause with が, and する closes it', () => {
+      expect(say(clause(np(HITO_GENERIC), vp(HIKIOKOSU, { mood: 'infinitive' }),
+        { directObject: el(np(HITO)), infinitiveComplement: personEats }), 'は')).toBe('人がネズミを食べるようにする');
+    });
+
+    test('a finite causative takes the polite する, and the causee never doubles as a を object', () => {
+      expect(say(clause(np(NEKO), vp(HIKIOKOSU), { directObject: el(np(HITO)), infinitiveComplement: personEats }), 'は'))
+        .toBe('猫は人がネズミを食べるようにします');
+    });
+
+    test('subject control leaves the object where it is', () => {
+      const catEats = clause(np(NEKO), vp(TABERU, { mood: 'infinitive' }), { directObject: el(np(NEZUMI)) });
+      expect(say(clause(np(NEKO), vp(HIKIOKOSU), { directObject: el(np(HON)), infinitiveComplement: catEats }), 'は'))
+        .toBe('猫はネズミを食べるように本を引き起こします');
     });
   });
 });

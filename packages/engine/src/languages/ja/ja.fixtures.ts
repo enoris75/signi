@@ -106,6 +106,11 @@ export const MIRU: Forms = {
   base: '見る', reading: 'みる', masu_present: '見ます', masu_present_reading: 'みます',
   te: '見て', te_reading: 'みて',
 };
+/** The causative verb (CAUSE_VERB): its clause closes on する, not on this word (see JA_SURU). */
+export const HIKIOKOSU: Forms = {
+  base: '引き起こす', reading: 'ひきおこす', masu_present: '引き起こします', masu_present_reading: 'ひきおこします',
+  te: '引き起こして', te_reading: 'ひきおこして', causative: '1', infinitive_link: 'ように',
+};
 /** A godan verb with the irregular te-form 行って. */
 export const IKU: Forms = {
   base: '行く', reading: 'いく', masu_present: '行きます', masu_present_reading: 'いきます',

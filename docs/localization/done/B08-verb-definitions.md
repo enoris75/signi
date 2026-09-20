@@ -67,7 +67,7 @@ shipped under this id; the remaining 54 verbs were too coarse a bucket to drive 
 | [B17](B17-feeling-and-sound-verbs.md) | FEEL / PRODUCE_SOUND | LOVE, CRY, CRY_OUT | partly — LOVE only |
 | [B18](B18-selection-verbs.md) | INDICATE / PRESS | CLICK, CHOOSE, SELECT, TYPE | partly |
 | [B19](B19-data-verbs.md) | — | 11 app verbs | ❌ recommended: leave literal |
-| [C08](../C-needs-engine/C08-copular-and-genus-verbs.md) | — | BE, BECOME, SEEM, APPEAR, BURN, CONSUME | ❌ engine / no genus |
+| [C08](C08-copular-and-genus-verbs.md) | — | BE, BECOME, SEEM, APPEAR, BURN, CONSUME | ❌ engine / no genus |
 | [C09](C09-modal-verbs.md) | — | MUST, CAN, WILL | ⚠ nested infinitive — **built and done** |
 
 Three findings the split surfaced, which the original bucket hid:

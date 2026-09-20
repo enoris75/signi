@@ -452,7 +452,9 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // The inchoative BEGIN selects essere and agrees; the causative START keeps avere.
     ['BEGIN', 'la gatta è iniziata.'], ['BITE', 'la gatta ha morso.'],
     ['BURN', 'la gatta ha bruciato.'], ['BUY', 'la gatta ha comprato.'],
-    ['CANCEL', 'la gatta ha annullato.'], ['CHANGE', 'la gatta ha cambiato.'],
+    ['CANCEL', 'la gatta ha annullato.'],
+    // The causative CAUSE_VERB: indurre contracts to the participle indotto, under avere.
+    ['CAUSE_VERB', 'la gatta ha indotto.'], ['CHANGE', 'la gatta ha cambiato.'],
     // The inchoative CHANGE_ONESELF selects essere, as BEGIN does.
     ['CHANGE_ONESELF', 'la gatta è cambiata.'],
     ['CHOOSE', 'la gatta ha scelto.'], ['CLEAR', 'la gatta ha cancellato.'],

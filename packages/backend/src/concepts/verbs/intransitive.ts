@@ -662,7 +662,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         past: 'began',
       },
       it: {
-        base: 'iniziare',
+        base: 'iniziare', infinitive_link: 'a',
         '1sg_present': 'inizio', '2sg_present': 'inizi', '3sg_present': 'inizia',
         '1pl_present': 'iniziamo', '2pl_present': 'iniziate', '3pl_present': 'iniziano',
         '1sg_past': 'iniziai', '2sg_past': 'iniziasti', '3sg_past': 'iniziò',
@@ -672,7 +672,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
       },
       fr: {
         // -cer keeps its soft c with a cedilla before a/o: nous commençons, je commençai.
-        base: 'commencer',
+        base: 'commencer', infinitive_link: 'à',
         '1sg_present': 'commence', '2sg_present': 'commences', '3sg_present': 'commence',
         '1pl_present': 'commençons', '2pl_present': 'commencez', '3pl_present': 'commencent',
         '1sg_past': 'commençai', '2sg_past': 'commenças', '3sg_past': 'commença',
@@ -688,7 +688,7 @@ export const intransitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'begannen', '2pl_past': 'begannt', '3pl_past': 'begannen',
       },
       es: {
-        base: 'empezar',
+        base: 'empezar', infinitive_link: 'a',
         '1sg_present': 'empiezo', '2sg_present': 'empiezas', '3sg_present': 'empieza',
         '1pl_present': 'empezamos', '2pl_present': 'empezáis', '3pl_present': 'empiezan',
         '1sg_past': 'empecé', '2sg_past': 'empezaste', '3sg_past': 'empezó',
@@ -703,9 +703,11 @@ export const intransitiveVerbs: ConceptSeed[] = [
         reading: 'はじまる',
         masu_present: '始まります',
         masu_present_reading: 'はじまります',
+        // What begins is its subject, so the こと clause it governs is marked が: 可視であることが始まる.
+        infinitive_link: 'ことが',
       },
       pt: {
-        base: 'começar',
+        base: 'começar', infinitive_link: 'a',
         '1sg_present': 'começo', '2sg_present': 'começa', '3sg_present': 'começa',
         '1pl_present': 'começamos', '2pl_present': 'começam', '3pl_present': 'começam',
         '1sg_past': 'comecei', '2sg_past': 'começou', '3sg_past': 'começou',

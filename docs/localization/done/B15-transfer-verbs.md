@@ -24,7 +24,7 @@ Genus **TRANSFER**. All three are **ditransitive** — their defining differenti
 
 SHOW's real sense is causative ("to make someone see"), which the engine cannot compose today. If it
 does not reduce to a TRANSFER gloss, move it to
-[C08](../C-needs-engine/C08-copular-and-genus-verbs.md) rather than forcing it.
+[C08](C08-copular-and-genus-verbs.md) rather than forcing it.
 
 ## Builder caveat
 
@@ -50,7 +50,7 @@ seeded PERSON, so RECIPIENT was not seeded.
 
 - The caveat checked out. The infinitive drops the throwaway subject and keeps the recipient on all
   seven surfaces: de *einer Person Gegenstände übertragen*, ja 人に物体を移す.
-- **SHOW moved to [C08](../C-needs-engine/C08-copular-and-genus-verbs.md).** Its sense is causative
+- **SHOW moved to [C08](C08-copular-and-genus-verbs.md).** Its sense is causative
   ("to make visible"), as the plan predicted.
 - German TRANSFER is the inseparable *übertragen*. Japanese is 移す. TRANSFER needed the es
   subjunctive override *transfiramos / transfiráis*.

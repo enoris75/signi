@@ -52,6 +52,10 @@ when it has one, else its verb, and its lexeme names the linker as **`infinitive
 particle after the nominalizing こと. A governor with none takes the bare infinitive (*desiderare
 agire*). Adding a governing word is therefore a seed entry, not an engine change.
 
+(The Japanese entry now holds the **whole** tail — ことが / ことを, and ように for the causative, which
+nominalizes with よう instead: [C08](C08-copular-and-genus-verbs.md) moved こと out of the engine and
+into the lexeme. The three entries here render as they did.)
+
 Per engine: **en** appends the clause, whose own "to" is the link every English governor takes;
 **it/fr/es/pt** append the link plus the clause (Italian adds the euphonic *ad* before another *a*,
 French elides *d'* before a vowel); **de** extraposes a zu-infinitive after a comma, behind the whole
@@ -96,5 +100,5 @@ Known gap: a **negated** Japanese こと clause inherits the citation's polite n
 (行動しませんこと) — that is [B13](../../bugs/B-can-fix/B13-japanese-plain-negative.md), not this
 construct, and no definition uses it. The builder has no UI for an infinitive complement; it is a
 plan-level construct the seed uses. The **inchoative** ("to begin to be —") and **causative** glosses
-[C08](../C-needs-engine/C08-copular-and-genus-verbs.md) waits on now have the nesting half of what
+[C08](C08-copular-and-genus-verbs.md) waits on now have the nesting half of what
 they need.

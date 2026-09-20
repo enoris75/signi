@@ -27,7 +27,7 @@ one genus for the batch — don't seed both.
 
 **BURN** ("to be on fire; to undergo combustion") does not fit — it is a state, not a transitive
 destruction, and its natural gloss is passive/copular. Tracked in
-[C08](../C-needs-engine/C08-copular-and-genus-verbs.md).
+[C08](C08-copular-and-genus-verbs.md).
 
 ## Done
 

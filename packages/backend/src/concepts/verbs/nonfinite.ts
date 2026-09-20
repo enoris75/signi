@@ -541,6 +541,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'produzindo', participle: 'produzido' },
     ja: { te: '出して', te_reading: 'だして', nai: '出さない', nai_reading: 'ださない' },
   },
+  CAUSE_VERB: {
+    en: { gerund: 'causing', participle: 'caused' },
+    it: { gerund: 'inducendo', participle: 'indotto' },
+    fr: { participle: 'induit' }, de: { participle: 'veranlasst' },
+    es: { gerund: 'induciendo', participle: 'inducido' },
+    pt: { gerund: 'induzindo', participle: 'induzido' },
+    ja: { te: '引き起こして', te_reading: 'ひきおこして', nai: '引き起こさない', nai_reading: 'ひきおこさない' },
+  },
   PRESS: {
     en: { gerund: 'pressing', participle: 'pressed' },
     it: { gerund: 'premendo', participle: 'premuto' },

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { infinitiveGloss } from './gloss.js';
+import { causativeGloss, infinitiveGloss } from './gloss.js';
 
 describe('infinitiveGloss', () => {
   test('a bare genus verb is a subject-less infinitive with no object', () => {
@@ -81,6 +81,10 @@ describe('infinitiveGloss', () => {
     });
   });
 
+  test('a negated clause marks its verb phrase', () => {
+    expect(infinitiveGloss('ACT', { negative: true }).verbPhrase).toEqual({ verb: 'ACT', negative: true });
+  });
+
   test('a predicate adjective joins the complements, and a whole clause may be governed', () => {
     const eatFood = { verbPhrase: { verb: 'EAT' }, directObject: { concept: 'FOOD' } };
     expect(infinitiveGloss('BE', { predicate: 'ABLE', infinitive: eatFood })).toEqual({
@@ -88,6 +92,50 @@ describe('infinitiveGloss', () => {
       verbPhrase: { verb: 'BE' },
       complements: { predicative: { phrase: { concept: 'ABLE' } } },
       infinitiveComplement: eatFood,
+      infinitive: true,
+    });
+  });
+});
+
+describe('causativeGloss', () => {
+  test('the causee is the object, and what it comes to do the object-controlled complement', () => {
+    expect(causativeGloss(
+      { object: 'PERSON', definiteness: 'indefinite' },
+      { verb: 'SEE', object: 'OBJECT_THING', number: 'plural' },
+    )).toEqual({
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'CAUSE_VERB' },
+      directObject: { concept: 'PERSON', definiteness: 'indefinite' },
+      infinitiveComplement: {
+        verbPhrase: { verb: 'SEE' },
+        directObject: { concept: 'OBJECT_THING', definiteness: 'bare', number: 'plural' },
+        control: 'object',
+      },
+      infinitive: true,
+    });
+  });
+
+  test('the caused clause takes a predicate adjective, its degree and its negation', () => {
+    expect(causativeGloss({ object: 'OBJECT_THING' }, { verb: 'BECOME', predicate: 'SMALL', predicateDegree: 'more' }).infinitiveComplement)
+      .toEqual({
+        verbPhrase: { verb: 'BECOME' },
+        complements: { predicative: { phrase: { concept: 'SMALL', headDegree: 'more' } } },
+        control: 'object',
+      });
+    expect(causativeGloss({ object: 'OBJECT_THING' }, { verb: 'BE', predicate: 'VISIBLE', negative: true }).infinitiveComplement)
+      .toEqual({
+        verbPhrase: { verb: 'BE', negative: true },
+        complements: { predicative: { phrase: { concept: 'VISIBLE' } } },
+        control: 'object',
+      });
+  });
+
+  test('a causee with no determiner of its own renders bare, as any gloss object does', () => {
+    expect(causativeGloss({ object: 'PERSON', number: 'plural' }, { verb: 'ACT', modifier: 'TOGETHER' })).toEqual({
+      subject: { concept: 'GENERIC_PERSON' },
+      verbPhrase: { verb: 'CAUSE_VERB' },
+      directObject: { concept: 'PERSON', definiteness: 'bare', number: 'plural' },
+      infinitiveComplement: { verbPhrase: { verb: 'ACT', modifier: 'TOGETHER' }, control: 'object' },
       infinitive: true,
     });
   });

@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import type { VerbPhrase } from '@signi/shared';
+import type { NounPhrase, VerbPhrase } from '@signi/shared';
 import { clause, np, sayAll } from './harness.js';
 
 // A155. French puts "bien" before the non-finite verb it modifies: between the auxiliary and the
@@ -137,5 +137,34 @@ describe('known bugs: English adverb of direction after the complements', () => 
     expect(sayAll(clause(np('CAT'), 'MOVE', { directObject: np('BOOK'), verbPhrase: { modifier: 'UP' } })).en)
       .toBe('the cat moves the book up.');
     expect(sayAll(plan).ja).toBe('猫は家で本を上に移動します。');
+  });
+});
+
+// A162. Spanish and Portuguese say "together" with "juntos", which is a predicative *adjective* and
+// agrees with the subject — "las gatas comen juntas". The seed carries it as an ordinary invariant
+// adverb, so a feminine subject keeps the masculine form. The other five languages have a real
+// adverb (insieme / ensemble / zusammen / together / 一緒に) and are unaffected; it surfaced on
+// COORDINATE's definition, "inducir personas a actuar juntos" (localization C08).
+describe('known bugs: Spanish and Portuguese "juntos" does not agree with the subject', () => {
+  const eatTogether = (extra: Partial<NounPhrase>) =>
+    sayAll(clause(np('CAT', { number: 'plural', ...extra }), 'EAT', { verbPhrase: { modifier: 'TOGETHER' } }));
+
+  test.fails('a feminine plural subject takes the feminine juntas', () => {
+    expect(eatTogether({ gender: 'fem' })).toMatchObject({
+      es: 'las gatas comen juntas.',
+      pt: 'as gatas comem juntas.',
+    });
+  });
+
+  test('a masculine plural subject is already right, and the other five are invariant', () => {
+    expect(eatTogether({})).toMatchObject({
+      en: 'the cats eat together.',
+      it: 'i gatti mangiano insieme.',
+      fr: 'les chats mangent ensemble.',
+      de: 'die Kater fressen zusammen.',
+      es: 'los gatos comen juntos.',
+      ja: '猫は一緒に食べます。',
+      pt: 'os gatos comem juntos.',
+    });
   });
 });

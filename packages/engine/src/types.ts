@@ -1,4 +1,4 @@
-import type { Aspect, ComplementType, CoordConjunction, ImperativeRegister, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
+import type { Aspect, ComplementType, CoordConjunction, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -192,11 +192,20 @@ export interface ResolvedPhrase {
   /**
    * A resolved infinitive complement: the clause this clause's predicate governs ("is able **to
    * eat**", see PhrasePlan.infinitiveComplement). Its verb is in the `'infinitive'` mood, so every
-   * engine drops its subject; the subject is this clause's own (the controller), kept for the
-   * agreement of a predicate adjective inside it. The linking word comes from the governor's
-   * lexeme (see `infinitiveLink`).
+   * engine drops its subject; the subject is its **controller** — the governing clause's own
+   * subject, or its direct object under a causative (see `control`) — kept for the agreement of a
+   * predicate adjective inside it. The linking word comes from the governor's lexeme (see
+   * `infinitiveLink`).
    */
   infinitiveComplement?: ResolvedPhrase;
+  /**
+   * Set on a resolved infinitive complement: which slot of the clause governing it its `subject`
+   * was taken from (see InfinitiveControl). `'object'` is the causative — the governing clause's
+   * direct object is the one that acts, which the Romance engines agree the clause with and
+   * Japanese speaks inside it. Absent ⇒ subject control, and absent altogether on a clause that
+   * is not an infinitive complement.
+   */
+  control?: InfinitiveControl;
 }
 
 export interface LanguageEngine {

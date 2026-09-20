@@ -305,6 +305,10 @@ export const motionVerbs: ConceptSeed[] = [
     // them takes a predicate nominative, which is why the slot is withheld rather than repaired.
     complements: ['locative', 'cause', 'terminus'],
     description: 'to come into view; to become visible',
+    // The second half of the description, composed: BECOME + VISIBLE, the state coming into view
+    // leaves the thing in (localization C08). No language's word for it echoes its own lemma —
+    // "diventare visibile" for apparire, 可視になる for 現れる.
+    definition: infinitiveGloss('BECOME', { predicate: 'VISIBLE' }),
     synonym: 'come into view',
     emoji: '👀',
     forms: {

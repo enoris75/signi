@@ -8,7 +8,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
-import { JA_NEGATIVE_DETERMINER } from './ja.consts.js';
+import { JA_NEGATIVE_DETERMINER, JA_SURU } from './ja.consts.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
@@ -45,14 +45,26 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
   if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
-  // An infinitive complement is a こと clause ahead of the predicate governing it, marked with the
-  // particle the governor's lexeme names: 行動することが可能です, 食べ物を食べることを望みます. The clause is
-  // itself a citation, in the dictionary form, and may govern one in turn (行動することが可能であることを望む).
-  // Negated, it inherits the citation's polite negative (B13).
+  // An infinitive complement is a nominalized clause ahead of the predicate governing it, closed by
+  // the tail the governor's lexeme names (`infinitive_link`, ことを by default): 行動することが可能です,
+  // 食べ物を食べることを望みます, and ように for the causative below. The clause is itself a citation, in
+  // the dictionary form, and may govern one in turn (行動することが可能であることを望む). Negated, it
+  // inherits the citation's polite negative (B13).
+  // Under object control the controller is the one that acts, so Japanese speaks it *inside* the
+  // clause with が (人が物体を見るようにする) instead of leaving it in the matrix object slot.
+  const causee = phrase.infinitiveComplement?.control === 'object' ? phrase.directObject : undefined;
   if (phrase.infinitiveComplement) {
-    segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: 'こと' }, { t: infinitiveLink(phrase) || 'を' });
+    if (causee) segs.push(...elSegs(causee), ...jaParticleSegs(causee, 'が'));
+    segs.push(...buildClauseSegments(phrase.infinitiveComplement, subjectParticle), { t: infinitiveLink(phrase) || 'ことを' });
   }
   const impPN = imperative ? jaImperativePN(phrase.subject.agreement) : undefined;
-  segs.push(...predicateSegs(phrase.verbPhrase, phrase.directObject, phrase.complements, impPN, false, subjectNegative, animate));
+  // Japanese has no transitive verb "to cause" that governs a clause: the causative is the ようにする
+  // construction, and its light verb する is what closes the predicate. The lexeme's own word
+  // (引き起こす, what the verb says standing alone) would not take a ように clause, so the construction
+  // supplies する in its place — the substitution the existential already makes for the copula.
+  const verbPhrase = causee && phrase.verbPhrase.verb.forms['causative'] === '1'
+    ? { ...phrase.verbPhrase, verb: JA_SURU }
+    : phrase.verbPhrase;
+  segs.push(...predicateSegs(verbPhrase, causee ? undefined : phrase.directObject, phrase.complements, impPN, false, subjectNegative, animate));
   return segs;
 }

@@ -1,4 +1,4 @@
-import type { ImperativeRegister, PhrasePlan } from '@signi/shared';
+import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { coordConjunction } from './coordConjunction.js';
@@ -6,6 +6,30 @@ import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { resolveComplements } from './resolveComplements.js';
 import { resolveNounElement } from './resolveNounElement.js';
 import { resolveVerbPhrase } from './resolveVerbPhrase.js';
+
+/** Whether `plan`'s infinitive complement is controlled by its direct object (see InfinitiveControl). */
+function objectControlled(plan: PhrasePlan): boolean {
+  return plan.infinitiveComplement?.control === 'object' && !!plan.directObject;
+}
+
+/**
+ * An infinitive complement resolved as a clause of its own in the citation mood, its subject filled
+ * by the slot of `plan` that controls it (see InfinitiveControl), and marked as object-controlled
+ * for the engines that place or agree it differently.
+ */
+function resolveInfinitiveComplement(
+  plan: PhrasePlan & { infinitiveComplement: InfinitiveComplement },
+  language: string,
+  lookup: LexiconLookup,
+): ResolvedPhrase {
+  const { control: _control, ...clause } = plan.infinitiveComplement;
+  const byObject = objectControlled(plan);
+  const subject: NounElement = byObject ? plan.directObject! : plan.subject;
+  return {
+    ...resolvePhrase({ ...clause, subject }, language, lookup, 'infinitive'),
+    ...(byObject ? { control: 'object' as const } : {}),
+  };
+}
 
 /**
  * Resolve one plan for one language. `mood` is threaded onto the verb phrase — set for the two
@@ -51,11 +75,15 @@ export function resolvePhrase(
       : undefined,
     directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
     complements: resolveComplements(plan.complements, language, lookup),
-    // An infinitive complement is a clause of its own in the infinitive mood. Its subject is this
-    // clause's (subject control: "the cat desires to eat" — the cat eats), which the infinitive never
-    // speaks but a predicate adjective inside it agrees with. It may govern one in turn.
+    // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
+    // slot of this clause that controls it — this clause's own subject by default ("the cat desires
+    // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see
+    // objects" — the person sees). The infinitive never speaks its subject, but a predicate
+    // adjective inside it agrees with it, and Japanese marks an object controller with が inside
+    // the clause. Object control with no object to control it falls back to the subject, so the
+    // clause always has one to resolve. It may govern one in turn.
     infinitiveComplement: plan.infinitiveComplement
-      ? resolvePhrase({ subject: plan.subject, ...plan.infinitiveComplement }, language, lookup, 'infinitive')
+      ? resolveInfinitiveComplement({ ...plan, infinitiveComplement: plan.infinitiveComplement }, language, lookup)
       : undefined,
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.

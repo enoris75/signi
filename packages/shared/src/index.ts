@@ -716,7 +716,28 @@ export interface InfinitiveComplement {
   directObject?: NounElement;
   complements?: Partial<Record<ComplementType, Complement>>;
   infinitiveComplement?: InfinitiveComplement;
+  /** Whose the unspoken subject is — see `InfinitiveControl`. Defaults to `'subject'`. */
+  control?: InfinitiveControl;
 }
+
+/**
+ * Which slot of the governing clause the infinitive complement's unspoken subject is: its
+ * **subject** (the default) or its **direct object**.
+ *
+ *  - `subject` — subject control. "The cat desires to eat" is the cat eating; "to be able to act"
+ *    is the able one acting. The governing clause needs no object for it.
+ *  - `object` — object control, which is what a **causative** is: "to cause a person to see
+ *    objects" is the *person* seeing, not the causer. The direct object names the causee and the
+ *    infinitive says what it comes to do, so a predicate adjective inside the clause agrees with
+ *    the object ("indurre una casa a essere nascosta"). Object control needs an object to control
+ *    it: a clause with none falls back to subject control rather than resolving a subjectless
+ *    clause.
+ *
+ * The distinction is invisible in English word order — both surface as "… to V" after the clause —
+ * but it decides agreement in the Romance engines and word order in Japanese, where an
+ * object-controlled clause speaks its controller with が inside the clause (人が物体を見るようにする).
+ */
+export type InfinitiveControl = 'subject' | 'object';
 
 export interface PhrasePlan {
   subject: NounElement;

@@ -1,7 +1,7 @@
 # A-must-fix — confirmed bugs
 
-Empty as of 2026-09-20: every catalogued defect in this class has been fixed and moved to
-[`../fixed/`](../fixed/).
+One open as of 2026-09-20 (A162); everything else catalogued in this class has been fixed and moved
+to [`../fixed/`](../fixed/).
 
 A file belongs here when the engine's output is **wrong** — not a simplification it makes on purpose
 (that is [`../B-can-fix/`](../B-can-fix/)) and not something that only looks wrong

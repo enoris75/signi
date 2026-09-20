@@ -1,4 +1,4 @@
-import type { Complement, ComplementType, Definiteness, InfinitiveComplement, PhrasePlan } from '@signi/shared';
+import type { Complement, ComplementType, Definiteness, Degree, InfinitiveComplement, PhrasePlan } from '@signi/shared';
 
 /**
  * The parts of a verb's gloss past its genus, for the glosses a bare object cannot carry alone: an
@@ -19,14 +19,54 @@ export interface GlossParts {
   complements?: Partial<Record<ComplementType, Complement>>;
   /** An adverb on the genus verb ("to strike repeatedly"). */
   modifier?: string;
+  /** Negates the clause: HIDE is causing an object **not** to be visible. */
+  negative?: boolean;
   /** A predicate adjective for a copular genus: BE + ABLE, "to be able". Shorthand for `complements.predicative`. */
   predicate?: string;
+  /** The predicate adjective's degree: BECOME + SMALL at `more`, "to become smaller". */
+  predicateDegree?: Degree;
   /**
    * The infinitive the genus governs (PhrasePlan.infinitiveComplement): a verb id, or a whole clause
    * for one with an object of its own. "to desire **to act**"; with a predicate adjective in
    * `complements`, the adjective governs it: "to be able **to act**".
    */
   infinitive?: string | InfinitiveComplement;
+}
+
+/** The causee of a causative gloss: the thing or person that comes to act (see `causativeGloss`). */
+export type GlossCausee = Pick<GlossParts, 'number' | 'adjectives' | 'definiteness'> & { object: string };
+
+/** What the causee comes to do: a genus verb plus the same parts any gloss clause takes. */
+export type GlossClause = GlossParts & { verb: string };
+
+/** The verb every causative gloss is built on — "to cause", `causative` in every lexeme. */
+const CAUSATIVE_VERB = 'CAUSE_VERB';
+
+// The clause a gloss renders: its verb (with any adverb), its object under the determiner the gloss
+// asks for, its complements — a predicate adjective among them — and any infinitive it governs.
+// Shared by the citation `infinitiveGloss` builds and by the clause a causative gloss puts under it,
+// which are the same clause in two positions.
+function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
+  const predicative: Partial<Record<ComplementType, Complement>> = p.predicate
+    ? { predicative: { phrase: { concept: p.predicate, ...(p.predicateDegree ? { headDegree: p.predicateDegree } : {}) } } }
+    : {};
+  return {
+    verbPhrase: { verb, ...(p.modifier ? { modifier: p.modifier } : {}), ...(p.negative ? { negative: true } : {}) },
+    ...(p.object
+      ? {
+          directObject: {
+            concept: p.object,
+            definiteness: p.definiteness ?? 'bare',
+            ...(p.number ? { number: p.number } : {}),
+            ...(p.adjectives?.length ? { adjectives: p.adjectives } : {}),
+          },
+        }
+      : {}),
+    ...(p.complements || p.predicate ? { complements: { ...p.complements, ...predicative } } : {}),
+    ...(p.infinitive
+      ? { infinitiveComplement: typeof p.infinitive === 'string' ? { verbPhrase: { verb: p.infinitive } } : p.infinitive }
+      : {}),
+  };
 }
 
 // A verb's dictionary definition as an infinitive citation: a subject-less, tenseless plan on the
@@ -58,23 +98,31 @@ export function infinitiveGloss(
   const p: GlossParts = typeof parts === 'string' ? { object: parts, number, adjectives } : (parts ?? {});
   return {
     subject: { concept: 'GENERIC_PERSON' },
-    verbPhrase: { verb, ...(p.modifier ? { modifier: p.modifier } : {}) },
-    ...(p.object
-      ? {
-          directObject: {
-            concept: p.object,
-            definiteness: p.definiteness ?? 'bare',
-            ...(p.number ? { number: p.number } : {}),
-            ...(p.adjectives?.length ? { adjectives: p.adjectives } : {}),
-          },
-        }
-      : {}),
-    ...(p.complements || p.predicate
-      ? { complements: { ...p.complements, ...(p.predicate ? { predicative: { phrase: { concept: p.predicate } } } : {}) } }
-      : {}),
-    ...(p.infinitive
-      ? { infinitiveComplement: typeof p.infinitive === 'string' ? { verbPhrase: { verb: p.infinitive } } : p.infinitive }
-      : {}),
+    ...glossClause(verb, p),
     infinitive: true,
   };
+}
+
+// A CAUSATIVE gloss: the verb that makes something happen, its causee, and what the causee comes to
+// do — "to cause a person to see objects", "to cause an object to become smaller" (localization
+// C08). The caused clause is an **object-controlled** infinitive complement (see InfinitiveControl):
+// its unspoken subject is the causee, not the causer, which is what distinguishes it from the
+// subject control the modals' glosses use.
+//
+//   causativeGloss({ object: 'PERSON', definiteness: 'indefinite' },
+//                  { verb: 'SEE', object: 'OBJECT_THING', number: 'plural' })
+//     → en "to cause a person to see objects", it "indurre una persona a vedere oggetti",
+//       de "eine Person veranlassen, Gegenstände zu sehen", ja 人が物体を見るようにする
+//   causativeGloss({ object: 'OBJECT_THING', definiteness: 'indefinite' },
+//                  { verb: 'BE', predicate: 'HIDDEN' })
+//     → en "to cause an object to be hidden", es "inducir un objeto a estar oculto"
+//
+// The causee takes the same parts an object takes anywhere (determiner, number, adjectives) and the
+// caused clause the same parts any gloss clause takes, a predicate adjective and its degree among
+// them ({ verb: 'BECOME', predicate: 'SMALL', predicateDegree: 'more' } → "to become smaller").
+export function causativeGloss(causee: GlossCausee, clause: GlossClause): PhrasePlan {
+  return infinitiveGloss(CAUSATIVE_VERB, {
+    ...causee,
+    infinitive: { ...glossClause(clause.verb, clause), control: 'object' },
+  });
 }

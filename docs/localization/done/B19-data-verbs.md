@@ -63,7 +63,7 @@ also read "content of a place". German source takes *aus*, not *von*. Both are t
 adposition choices, not this gloss's.
 
 **The other nine stay on their English literals.** Each is blocked on a construct rather than on
-vocabulary, so they moved to [C08](../C-needs-engine/C08-copular-and-genus-verbs.md):
+vocabulary, so they moved to [C08](C08-copular-and-genus-verbs.md):
 - SAVE: purpose clause.
 - LOAD: direction "back in".
 - ADD: comitative.
