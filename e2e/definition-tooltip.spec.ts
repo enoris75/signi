@@ -1161,4 +1161,40 @@ test.describe('word definition tooltip', () => {
     await canIt.hover();
     await expect(page.locator(tooltip)).toHaveText('essere capace di agire');
   });
+
+  test('a pronoun definition is hoverable in the person row (localization C06)', async ({
+    app,
+    page,
+  }) => {
+    // A pronoun is described rather than searched for, so it never passes through a picker list
+    // and never through ConceptOption — the person row is its definition surface instead. The
+    // gloss is a definite genus + ordinal ("the first person"), the ordinal being the same word
+    // the option under it is named with.
+    const person = (id: string) => page.locator(`[data-concept="${id}"]`);
+    const clearTooltip = async () => {
+      await page.mouse.move(0, 0);
+      await expect(page.locator(tooltip)).toHaveCount(0);
+    };
+
+    await app.subjectInput.click();
+    await page.getByTestId('pronoun-tab').click();
+
+    await expect(person('FIRST_PERSON')).toBeVisible();
+    await person('FIRST_PERSON').hover();
+    await expect(page.locator(tooltip)).toHaveText('the first person');
+    await clearTooltip();
+
+    await person('THIRD_PERSON').hover();
+    await expect(page.locator(tooltip)).toHaveText('the third person');
+    await clearTooltip();
+
+    // And in another UI language — the point of composing the gloss rather than storing a literal.
+    // German declines the ordinal after the definite article: "die zweite Person".
+    await app.setUiLanguage('de');
+    await app.subjectInput.click();
+    await page.getByTestId('pronoun-tab').click();
+    await expect(person('SECOND_PERSON')).toBeVisible();
+    await person('SECOND_PERSON').hover();
+    await expect(page.locator(tooltip)).toHaveText('die zweite Person');
+  });
 });

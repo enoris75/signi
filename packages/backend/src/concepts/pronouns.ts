@@ -1,4 +1,15 @@
 import type { ConceptSeed } from './types.js';
+import type { PhrasePlan } from '@signi/shared';
+
+// A grammatical person's definition: *the* nth person, a definite noun phrase. These name a fixed,
+// identifiable category of the grammar rather than one of several, so they read with the definite
+// article. personGloss('FIRST') -> en "the first person", it "la prima persona", de "die erste
+// Person", ja "第一の人称". PERSON_GRAMMAR is the grammar sense of the word (ja 人称, not 人), and
+// FIRST / SECOND / THIRD are the seeded ordinals the chooser's person row already names itself
+// with — so the tooltip and the option under it are the same two words.
+const personGloss = (ordinal: string): PhrasePlan => ({
+  subject: { concept: 'PERSON_GRAMMAR', definiteness: 'definite', adjectives: [ordinal] },
+});
 
 export const pronouns: ConceptSeed[] = [
   // ── PRONOUNS ────────────────────────────────────────────────────
@@ -10,6 +21,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'FIRST_PERSON',
     role: 'pronoun',
     description: '1st Person',
+    definition: personGloss('FIRST'),
     emoji: '🧍',
     forms: {
       // disjunctive = tonic/oblique form used after a preposition ("because of me/us").
@@ -31,6 +43,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'SECOND_PERSON',
     role: 'pronoun',
     description: '2nd Person',
+    definition: personGloss('SECOND'),
     emoji: '👉',
     forms: {
       en: { base: 'you',      person: '2', number: 'singular', plural: 'you',  disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you' },
@@ -46,6 +59,7 @@ export const pronouns: ConceptSeed[] = [
     id: 'THIRD_PERSON',
     role: 'pronoun',
     description: '3rd Person',
+    definition: personGloss('THIRD'),
     emoji: '👤',
     forms: {
       // base = default masc singular; singular_fem/singular_neut and plural stored as extra forms

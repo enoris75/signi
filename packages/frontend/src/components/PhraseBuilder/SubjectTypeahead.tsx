@@ -8,7 +8,7 @@ import { PickerFooter } from "./PickerFooter.tsx";
 import { PICKER_FONT, PromptWidth } from "./PromptWidth.tsx";
 import { PronounChooser } from "./PronounChooser.tsx";
 import { usePickerKeys } from "./hooks/usePickerKeys.ts";
-import { usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
+import { pronounFor, usePronounChooser, type PronounChoice } from "./hooks/usePronounChooser.ts";
 import { ConceptSelectOpts } from "./interfaces.ts";
 import { useMayTakeFocus } from "../../console/ConsoleMarks.tsx";
 
@@ -61,17 +61,15 @@ export function SubjectTypeahead({
   });
 
   function commitPronoun({ person, number, gender }: PronounChoice) {
-    // The generic ("one") is a distinct pronoun concept, not one of the 1/2/3 persons (it shares
-    // person 3 with THIRD_PERSON, so it must be matched by id); it is inherently 3rd-singular.
+    const concept = pronounFor(pronouns, person);
+    if (!concept) return;
+    // The generic ("one") is a distinct pronoun concept, not one of the 1/2/3 persons; it is
+    // inherently 3rd-singular, so the number and gender the grid last held are not its to carry.
     if (person === "generic") {
-      const generic = pronouns.find((p) => p.id === "GENERIC_PERSON");
-      if (!generic) return;
-      onSelect(generic, { number: "singular" });
+      onSelect(concept, { number: "singular" });
       picker.setOpen(false);
       return;
     }
-    const concept = pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON");
-    if (!concept) return;
     // Gender is carried for every person (it drives participle/adjective agreement in
     // Romance languages — "tu sei stato/stata"). Neuter is 3rd-person only ("it").
     onSelect(concept, {
@@ -163,7 +161,11 @@ export function SubjectTypeahead({
           </Tabs>
 
           {tab === "pronoun" ? (
-            <PronounChooser chooser={chooser} onCommit={() => commitPronoun(chooser.choice)} />
+            <PronounChooser
+              chooser={chooser}
+              pronouns={pronouns}
+              onCommit={() => commitPronoun(chooser.choice)}
+            />
           ) : (
             <Box ref={picker.listRef} sx={{ maxHeight: 200, overflow: "auto", py: 0.5 }}>
               {showList ? (

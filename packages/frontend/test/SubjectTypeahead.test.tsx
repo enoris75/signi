@@ -16,20 +16,26 @@ describeTypeahead({
   hasTabs: true,
 });
 
-const pronoun = (id: string, label: string, person: '1' | '2' | '3'): Concept => ({
+const pronoun = (
+  id: string,
+  label: string,
+  person: '1' | '2' | '3',
+  definition: string,
+): Concept => ({
   id,
   role: 'pronoun',
   description: label,
+  definitions: { en: definition },
   label,
   person,
 });
 
-const FIRST = pronoun('FIRST_PERSON', 'I', '1');
-const SECOND = pronoun('SECOND_PERSON', 'you', '2');
-const THIRD = pronoun('THIRD_PERSON', 'he', '3');
+const FIRST = pronoun('FIRST_PERSON', 'I', '1', 'the first person');
+const SECOND = pronoun('SECOND_PERSON', 'you', '2', 'the second person');
+const THIRD = pronoun('THIRD_PERSON', 'he', '3', 'the third person');
 // The impersonal "one" is a third person too, so the chooser must tell it apart by id. Listing it
 // ahead of THIRD makes a lookup by person alone pick the wrong one.
-const GENERIC = pronoun('GENERIC_PERSON', 'one', '3');
+const GENERIC = pronoun('GENERIC_PERSON', 'one', '3', 'one (generic person)');
 const PRONOUNS = [GENERIC, FIRST, SECOND, THIRD];
 
 const CAT: Concept = { id: 'CAT', role: 'noun', description: 'a feline', label: 'cat' };
@@ -257,6 +263,34 @@ describe('SubjectTypeahead', () => {
 
       choose('Select');
       expect(onSelect).toHaveBeenCalledExactlyOnceWith(GENERIC, { number: 'singular' });
+    });
+
+    // A pronoun never passes through a ConceptOption, so the person row is where its definition
+    // surfaces — the option names the concept it stands for and describes it on hover.
+    it('names the pronoun each person option stands for', () => {
+      renderSubject({ kind: 'pronoun' });
+
+      const option = (name: string) => screen.getByRole('button', { name });
+      expect(option('first')).toHaveAttribute('data-concept', 'FIRST_PERSON');
+      expect(option('second')).toHaveAttribute('data-concept', 'SECOND_PERSON');
+      expect(option('third')).toHaveAttribute('data-concept', 'THIRD_PERSON');
+      expect(option('impersonal')).toHaveAttribute('data-concept', 'GENERIC_PERSON');
+    });
+
+    it("describes a person with its pronoun's definition, without renaming the option", () => {
+      renderSubject({ kind: 'pronoun' });
+
+      // The definition is the option's *description*: getByRole finds it by the ordinal still.
+      expect(screen.getByRole('button', { name: 'second' })).toHaveAttribute(
+        'title',
+        'the second person',
+      );
+    });
+
+    it('names no concept while the pronouns have not loaded', () => {
+      renderSubject({ kind: 'pronoun' }, []);
+
+      expect(screen.getByRole('button', { name: 'first' })).not.toHaveAttribute('data-concept');
     });
 
     it('commits nothing, and stays open, while the pronouns have not loaded', () => {

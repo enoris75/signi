@@ -44,3 +44,48 @@ frontend surface is missing.)
 
 Until the pronoun tooltip surface exists, these stay on the English literal. Was catalogued as
 A08–A10; reclassified to C when the frontend gap was found.
+
+## Done
+
+2026-09-20. Built the missing frontend surface, then localized all three as plain seed data.
+
+**(a) Frontend — the pronoun definition surface.** The person row of the pronoun chooser
+([`PronounChooser.tsx`](../../../packages/frontend/src/components/PhraseBuilder/PronounChooser.tsx))
+now renders each option through a `PersonToggle`: a `ToggleButton` carrying `data-concept={concept.id}`
+inside a `useConceptDefinition` `Tooltip`, the same hover definition
+[`ConceptOption`](../../../packages/frontend/src/components/PhraseBuilder/ConceptOption.tsx) gives a
+noun. Two things made this cheap rather than a rewrite:
+
+- MUI's `ToggleButtonGroup` passes `value` / `selected` down by **context**, not by cloning its
+  children, so a `Tooltip` may sit between the group and its button without breaking the toggle.
+- The tooltip is `describeChild`. Without it MUI hangs the title on the child as an `aria-label` and
+  the option stops being named "second" — the definition *describes* the person, it does not rename
+  it. The unit test pins that.
+
+The person → concept lookup moved out of `SubjectTypeahead.commitPronoun` into a shared
+[`pronounFor`](../../../packages/frontend/src/components/PhraseBuilder/hooks/usePronounChooser.ts),
+so the option's tooltip and the pronoun it commits cannot drift apart (the generic "one" shares
+person 3 with THIRD_PERSON and must be matched by id — the one thing there was to get wrong).
+
+**(b) Seed.** A `personGloss(ordinal)` helper in
+[`pronouns.ts`](../../../packages/backend/src/concepts/pronouns.ts) — the definite genus + ordinal
+the **Blocks** table above proposed, unchanged. Renders, live from the backend boot:
+
+- **FIRST_PERSON** — en `the first person` · it `la prima persona` · de `die erste Person` ·
+  es `la primera persona` · fr `la première personne` · ja `第一の人称` · pt `a primeira pessoa`
+- **SECOND_PERSON** — en `the second person` · it `la seconda persona` · de `die zweite Person` ·
+  es `la segunda persona` · fr `la deuxième personne` · ja `第二の人称` · pt `a segunda pessoa`
+- **THIRD_PERSON** — en `the third person` · it `la terza persona` · de `die dritte Person` ·
+  es `la tercera persona` · fr `la troisième personne` · ja `第三の人称` · pt `a terceira pessoa`
+
+No engine change was needed — the gloss shape was already sound, as the file said.
+
+**Coverage.** `e2e/definition-tooltip.spec.ts` hovers FIRST_PERSON and THIRD_PERSON in English and
+SECOND_PERSON under a German UI; `packages/frontend/test/SubjectTypeahead.test.tsx` pins the
+`data-concept` on all four options, the `describeChild` description, and that a person names no
+concept while the pronouns have not loaded.
+
+**Left for later.** GENERIC_PERSON now has the surface too but keeps its English literal
+("one (generic person)"). Its gloss would be `personGloss('IMPERSONAL')` → "the impersonal person",
+using the IMPERSONAL adjective already seeded for the chooser's own label — outside this task's
+three, and worth judging on its own.

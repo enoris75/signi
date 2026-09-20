@@ -1,3 +1,4 @@
+import type { Concept } from "@signi/shared";
 import { useState, type KeyboardEvent } from "react";
 
 /**
@@ -35,6 +36,19 @@ export const pronounGenders = (person: PronounPerson): readonly PronounGender[] 
 /** The rows on offer: the generic ("one") is inherently third singular, so it asks nothing more. */
 export const pronounRows = (person: PronounPerson): readonly PronounRow[] =>
   person === "generic" ? ["person"] : ["person", "number", "gender"];
+
+/**
+ * The pronoun concept a person names. The generic ("one") is a pronoun of its own rather than a
+ * fourth person, and it shares person 3 with THIRD_PERSON, so it is matched by id and kept out of
+ * the deictic lookup — which is why this is one place both the chooser and the commit read.
+ */
+export const pronounFor = (
+  pronouns: readonly Concept[],
+  person: PronounPerson,
+): Concept | undefined =>
+  person === "generic"
+    ? pronouns.find((p) => p.id === "GENERIC_PERSON")
+    : pronouns.find((p) => p.person === person && p.id !== "GENERIC_PERSON");
 
 export interface PronounChooser {
   choice: PronounChoice;

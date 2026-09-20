@@ -72,8 +72,8 @@ section)._
 
 #### UI strings
 
-_None outstanding._ A11–A15 are done (see the Done section). A08–A10 are retired ids (see
-[C06](C-needs-engine/C06-pronoun-definitions.md)).
+_None outstanding._ A11–A15 are done (see the Done section). A08–A10 are retired ids: they became
+[C06](done/C06-pronoun-definitions.md), which is done.
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
@@ -105,7 +105,6 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | # | File | Blocked on |
 |---|---|---|
 | C05 | [C05-non-distinguishing-genera.md](C-needs-engine/C05-non-distinguishing-genera.md) | no differentia — 8 continents, 7 languages, grammar meta-nouns, FEELING; SELECT and REPLACE (their gloss would duplicate CHOOSE's / MODIFY's). BUILDING, the one entry the engine blocked, shipped 2026-09-19 (see Done) |
-| C06 | [C06-pronoun-definitions.md](C-needs-engine/C06-pronoun-definitions.md) | pronoun tooltip surface — FIRST/SECOND/THIRD_PERSON (was A08–A10) |
 | C08 | [C08-copular-and-genus-verbs.md](C-needs-engine/C08-copular-and-genus-verbs.md) | inchoative / passive infinitive, or no genus at all — BE, BECOME, SEEM, APPEAR, BURN, CONSUME (split from B08); causative / resultative / purpose — SHOW (from B15) and the nine workspace verbs left in B19 |
 | C18 | [C18-motion-verbs-without-a-gloss.md](C-needs-engine/C18-motion-verbs-without-a-gloss.md) | a differentia MOVE_ONESELF cannot carry: an *into* path and AIR (JUMP), two adverbs and SUDDENLY (COLLAPSE), deixis (COME) (split from C17) |
 
@@ -154,6 +153,7 @@ _None outstanding._ B20–B28 are done (see the Done section).
 | B31 | [done/B31-complement-genus.md](done/B31-complement-genus.md) | hierarchy + 4 glosses, **nothing seeded**: SUBJECT_COMPLEMENT, INSTRUMENTAL and ADVERBIAL_OF_MANNER hung under COMPLEMENT_GRAMMAR → PHRASE. COMPLEMENT_GRAMMAR → a phrase that modifies verbs; SUBJECT_COMPLEMENT → …that describes subjects; INSTRUMENTAL → …that indicates means; ADVERBIAL_OF_MANNER → …that indicates ways. **INDICATE replaced the proposed NAME / EXPRESS** on the probe (de *bezeichnet*, ja 示す); no MANNER noun was seeded, WAY renders the same in six of seven |
 | C09 | [done/C09-modal-verbs.md](done/C09-modal-verbs.md) | MUST → to be obliged to act; CAN → to be able to act; WILL → to desire to act (built the **infinitive complement**, `PhrasePlan.infinitiveComplement`: a subject-controlled clause in the citation mood, its linking word lexical on the governor — *capace **di*** / *obbligato **a*** / de extraposed *zu* / ja a こと clause before the predicate; seeded **ACT**, **DESIRE**, **ABLE**, **OBLIGED**; fixed the Italian citation's *si* agreement, "essere attento", and the Japanese copula citation, 慎重である) |
 | C17 | [done/C17-motion-verbs-reflexive-genus.md](done/C17-motion-verbs-reflexive-genus.md) | RUN → to move fast; GO → to move from a place to another place (built the **Italian pronominal verb**, *si è mosso* / *muoviti* / *ci si muove*, and the **German reflexive verb**, *bewegt sich* / *der sich bewegt* / *sich schnell bewegen*; seeded **MOVE_ONESELF** and the inchoative **CHANGE_ONESELF**, de *sich ändern*, ja 変わる; found bugs A151, A152). JUMP, COLLAPSE, COME → C18 |
+| C06 | [done/C06-pronoun-definitions.md](done/C06-pronoun-definitions.md) | FIRST_PERSON → the first person; SECOND_PERSON → the second person; THIRD_PERSON → the third person (was A08–A10). **Nothing seeded and no engine change** — the block was a missing frontend surface: a pronoun is described rather than searched for, so it never reached `ConceptOption` and had nowhere to show a definition. The chooser's person row became that surface (`PersonToggle`: `data-concept` + a `describeChild` `useConceptDefinition` tooltip), and the three glosses were then plain seed data. GENERIC_PERSON has the surface but keeps its literal |
 | B32 | [done/B32-place-glosses.md](done/B32-place-glosses.md) | HOME → a place where one lives; HOUSE → a building where one lives; MARKET → a place where one trades; PRISON → a building where one confines people (seeded **LIVE**, **TRADE**, **CONFINE**; added the `whereGloss` helper). MARKET took TRADE objectless — de *handeln* / fr *commercer* take no object; PRISON shipped after all, the active with a generic subject standing in for the blocked passive |
 
 #### UI strings

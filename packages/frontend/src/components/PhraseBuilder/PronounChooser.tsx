@@ -1,9 +1,13 @@
-import { Box, Button, ToggleButton, ToggleButtonGroup } from "@mui/material";
+import { Box, Button, ToggleButton, ToggleButtonGroup, Tooltip } from "@mui/material";
+import type { Concept } from "@signi/shared";
 import type { ReactNode } from "react";
+import { useConceptDefinition } from "../../i18n/useConceptLabel.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import {
+  pronounFor,
   pronounGenders,
   type PronounChooser as Chooser,
+  type PronounPerson,
   type PronounRow,
 } from "./hooks/usePronounChooser.ts";
 
@@ -14,9 +18,13 @@ import {
  */
 export function PronounChooser({
   chooser,
+  pronouns,
   onCommit,
 }: {
   chooser: Chooser;
+  // The pronoun vocabulary, so the person row can name the concept each option stands for and
+  // show its definition on hover — the tooltip the noun list gets from ConceptOption.
+  pronouns: readonly Concept[];
   onCommit: () => void;
 }) {
   const t = useUiString();
@@ -31,13 +39,16 @@ export function PronounChooser({
           value={choice.person}
           onChange={(_, v) => v && set("person", v)}
         >
-          <ToggleButton value="1">{t("pronoun.first")}</ToggleButton>
-          <ToggleButton value="2">{t("pronoun.second")}</ToggleButton>
-          <ToggleButton value="3">{t("pronoun.third")}</ToggleButton>
+          <PersonToggle person="1" pronouns={pronouns} label={t("pronoun.first")} />
+          <PersonToggle person="2" pronouns={pronouns} label={t("pronoun.second")} />
+          <PersonToggle person="3" pronouns={pronouns} label={t("pronoun.third")} />
           {/* The generic / impersonal "one" — a pronoun of its own, not a 4th person. */}
-          <ToggleButton value="generic" data-testid="pronoun-generic">
-            {t("pronoun.generic")}
-          </ToggleButton>
+          <PersonToggle
+            person="generic"
+            pronouns={pronouns}
+            label={t("pronoun.generic")}
+            testId="pronoun-generic"
+          />
         </ToggleButtonGroup>
       </ChooserRow>
 
@@ -86,6 +97,50 @@ export function PronounChooser({
         {t("action.select")}
       </Button>
     </Box>
+  );
+}
+
+/**
+ * One person in the top row, and the pronoun's definition surface.
+ *
+ * A pronoun is described rather than searched for, so it never passes through a picker list and
+ * never through [ConceptOption](./ConceptOption.tsx) — which is where every other word gets its
+ * hover definition. The option that names the person is where it belongs here: it carries the
+ * concept's `data-concept` and the same tooltip, so "the first person" reads the way "a small
+ * mammal" does in the noun list, in the UI language.
+ *
+ * ToggleButtonGroup passes `value`/`selected` down by context rather than by cloning its children,
+ * so a Tooltip may sit between the group and its button without breaking the toggle.
+ */
+function PersonToggle({
+  person,
+  pronouns,
+  label,
+  testId,
+}: {
+  person: PronounPerson;
+  pronouns: readonly Concept[];
+  label: string;
+  testId?: string;
+}) {
+  const definition = useConceptDefinition();
+  const concept = pronounFor(pronouns, person);
+  return (
+    // An empty title renders no tooltip — which is what a person whose pronoun has not loaded yet
+    // (or is missing from the corpus) should show. `describeChild` keeps the button's accessible
+    // name the ordinal it reads ("second"), with the definition as its description; without it MUI
+    // would hang the definition on the button as an aria-label and rename the option.
+    <Tooltip
+      title={concept ? definition(concept) : ""}
+      describeChild
+      placement="right"
+      enterDelay={400}
+      disableInteractive
+    >
+      <ToggleButton value={person} data-concept={concept?.id} data-testid={testId}>
+        {label}
+      </ToggleButton>
+    </Tooltip>
   );
 }
 
