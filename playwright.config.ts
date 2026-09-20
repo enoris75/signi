@@ -22,8 +22,15 @@ export default defineConfig({
   // the CPU — and the geometry specs measure a laid-out canvas — so it stays off.
   fullyParallel: !!process.env['CI'],
   reporter: process.env['CI'] ? [['github'], ['html', { open: 'never' }]] : [['list']],
-  timeout: 30_000,
-  expect: { timeout: 10_000 },
+  // Both budgets double on CI, because a runner gets through a test in about twice the time this
+  // machine does — a shard averaged 8s against 4.4s here — and `timeout` is the budget for the
+  // *whole* test. The console session spec (twenty-odd keystrokes, two periods, seven languages)
+  // takes 12s here, so it arrives there with seconds to spare, and it duly failed at whatever
+  // step the clock ran out on — a different one on each retry, which is what that looks like.
+  // Doubling rather than trimming the specs keeps them saying what they mean, and a page that
+  // really is hung still fails, just later.
+  timeout: process.env['CI'] ? 60_000 : 30_000,
+  expect: { timeout: process.env['CI'] ? 20_000 : 10_000 },
 
   use: {
     baseURL: `http://localhost:${FRONTEND_PORT}`,
