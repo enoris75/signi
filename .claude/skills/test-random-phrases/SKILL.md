@@ -58,18 +58,46 @@ Most suspicious output is already known, deliberate, or not yours. Run all four:
    output. If a *passing* test asserts it, the behaviour was a decision: do not file it and do not
    weaken the test — raise it with the user as a question. (German `schnell die Maus` is pinned in
    `modals.test.ts` and `imperative.test.ts`, for instance.)
-3. **Is it yours?** Other sessions edit this tree. Re-render the case against the engine at HEAD
-   before filing — `git archive HEAD packages/engine/src packages/engine/package.json | tar -x -C
-   <scratchpad>/head`, symlink `node_modules/@signi/shared` there, and point a probe at that
-   `index.ts`. A defect that only appears in the working tree is someone's work in progress.
+3. **Is it yours?** Other sessions edit this tree — the engine, and the **corpus the generator
+   reads** (`backend/src/concepts/`). Re-render the case at HEAD before filing:
+
+   ```
+   git worktree add --detach <scratchpad>/head HEAD
+   ln -s "$PWD/node_modules" <scratchpad>/head/node_modules
+   npx tsx <scratchpad>/head/probe.mts   # importing <scratchpad>/head/packages/engine/test/harness.js
+   ```
+
+   A whole worktree, not just `packages/engine/src`: the harness seeds from the backend's corpus and
+   reads its lexicon, so a seed edit changes renderings as readily as an engine edit. Anything that
+   reproduces only in the working tree is someone's work in progress. `git worktree remove --force`
+   when done.
 4. **Is the target exact?** Write the **Want** string, then run a probe that prints *now* against
    *want* for every assertion you plan to pin. Each must differ **only** by the defect. Never guess
    at a foreign-language string; render it.
 
+   When the engine cannot produce the target *yet* — which is often the point of the defect — reach
+   it another way rather than writing it by hand: the same plan with the trigger removed (a positive
+   verb, where the fix will drop a negator), a determiner the engine already spells the wanted way,
+   or, for a target only the fix produces, **apply a trial fix inside the check-3 worktree** and
+   render there. That copy is throwaway, so the shared tree is never touched, and it settles two
+   things at once: the exact **Want** strings, and whether your **Shape of the fix** actually yields
+   them. Say so in the file ("verified by applying it to a throwaway copy"). Never patch the real
+   tree to render a target.
+
+**Probes are not typechecked.** A scratch `.mts` probe passes `any`-shaped plans, so a wrong key or
+an out-of-union literal quietly takes a fallback path and manufactures a defect that is not there.
+Two that have bitten: the verb's adverb is `verbPhrase.modifier` — an `adverb` key is ignored, and
+the adverb simply vanishes from the output — and `definiteness` accepts only the ten values in
+`DEFINITENESS` (`'any'` is an engine-internal NPI surface, not a plan value). Check any suspicious
+key against [packages/shared/src/index.ts](../../packages/shared/src/index.ts) before believing
+what you see.
+
 ## 4. File what survives
 
 Follow the house format exactly — [docs/bugs/engine-grammar-bugs.md](../../docs/bugs/engine-grammar-bugs.md)
-explains the encoding, and A153–A157 are recent examples.
+explains the encoding, and [A158–A161](../../docs/bugs/A-must-fix/) are the current examples. Take
+the template from an **un-retired** file like those: anything in `fixed/` has a `## Resolved`
+section appended, which is the fixer's to write, not yours.
 
 - **Id:** the next free `A<n>`. **Re-list `docs/bugs/A-must-fix/` and grep the index immediately
   before numbering** — parallel sessions allocate ids too, and they race.
@@ -82,8 +110,28 @@ explains the encoding, and A153–A157 are recent examples.
   `test(...)` for the neighbouring behaviour that is already right. Put it in the suite the defect
   belongs to (`complements/source.test.ts`, `clause.test.ts`, `adverb.test.ts`, …) — and prefer a
   file **no other session is editing** (`git status`).
-- **The index:** add the row to the Part A table and bump the `test.fails` count in the prose **by
-  your own delta only**; another session's uncommitted pins are not yours to count.
+- **The index:** add the row to the Part A table, and correct the running count in the prose above
+  it. That number counts **bug files** (Part A + Part B), *not* `test.fails` — one file routinely
+  pins several — so it moves by how many files you added, not by how many pins. Move it **by your
+  own delta only**; another session's uncommitted files are not yours to count.
+- **The commit — only if the user asks for one.** Filing is a `docs:` commit, not `fix:`; a `fix:`
+  changes the engine, this changes the catalogue. Subject `docs: A<n>-A<m>, <how they were found>`
+  (e.g. *docs: A153-A157, found by rendering three random phrases*). Body: one paragraph per bug —
+  what is wrong, where, and what the fixer must decide — then a closing paragraph naming the test
+  files and the index count. Read `git log -1 --format=%B f2036ad` for the model.
+
+  **Stage by path — never `git add -A` or `commit -a`.** The tree is shared, and a parallel session
+  may already have staged work in the index; committing the index would sweep their work into your
+  commit under your message. Name your paths on the commit itself, which leaves the rest of the
+  index exactly as they left it:
+
+  ```
+  git commit -F <scratchpad>/msg.txt -- docs/bugs/... packages/engine/test/...
+  ```
+
+  Then `git show --stat HEAD` and confirm only your files are in it. Commit on the current branch:
+  this repo's history is linear on `main`, and switching branches would move HEAD under the other
+  sessions sharing the tree.
 
 ## 5. Verify
 
@@ -108,4 +156,5 @@ decision. That last list is the user's to rule on.
   `Want` string was rendered, not guessed, and reproduces at HEAD.
 - `npm run typecheck` and the engine suite pass, green, with no weakened assertion and no `B*`/`C*`
   defect "fixed" or re-filed.
-- Nothing was committed unless the user asked; if they did, only your own hunks were staged.
+- Nothing was committed unless the user asked; if they did, it is a `docs:` commit, staged **by
+  path**, and `git show --stat HEAD` lists only your own files.
