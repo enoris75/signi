@@ -22,10 +22,25 @@ jobs:
       - run: npm run test:unit
 
   # The wiring: canvas → plan → API → engine → panel, in a real browser.
+  #
+  # Split four ways. The suite is 226 specs driven one at a time through one browser, and a runner
+  # gets through about 80 of them in a quarter of an hour: the whole list is nearer forty minutes,
+  # and it grows with every feature. (That is what the fifteen-minute job started failing as —
+  # not a broken spec but a job cancelled mid-dot-stream.) Each shard takes a quarter of the list
+  # and boots a stack of its own, so the wall clock is a quarter of the suite plus its own setup:
+  # the heaviest quarter, the one carrying tidy.spec's edge cases, measures ~6 minutes locally.
+  # Even quarters need playwright.config.ts's fullyParallel — the note there says why.
   e2e:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 25
     needs: unit
+    strategy:
+      # One shard failing says nothing about the other three: let them finish and report. Without
+      # this a single real failure cancels its siblings, and their logs say only "the operation
+      # was canceled" — which is also what a timeout says, so the two become indistinguishable.
+      fail-fast: false
+      matrix:
+        shard: [1, 2, 3, 4]
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -45,11 +60,12 @@ jobs:
 
       # playwright.config.ts starts the backend and vite itself, on their own ports and against
       # a database it seeds from source — nothing to set up here.
-      - run: npm run test:e2e
+      - run: npm run test:e2e -- --shard=${{ matrix.shard }}/4
 
+      # One report per shard: upload-artifact refuses to write the same name twice.
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
-          name: playwright-report
+          name: playwright-report-shard-${{ matrix.shard }}
           path: playwright-report/
           retention-days: 14

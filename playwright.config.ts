@@ -14,6 +14,13 @@ export default defineConfig({
   // retry only on CI (for infrastructure noise) and never locally.
   retries: process.env['CI'] ? 2 : 0,
   workers: process.env['CI'] ? 1 : undefined,
+  // CI runs the suite in four shards, and a shard is drawn from whole *files* unless every test
+  // counts as a group of its own — with 73 specs in definition-tooltip.spec and 55 in tidy.spec,
+  // file-sized groups split 104/18/96/8 and the first shard is the whole problem again. With one
+  // worker this changes nothing about how tests run, only how evenly the four shards divide.
+  // Locally, where workers are plentiful, it would set tests inside a file racing each other for
+  // the CPU — and the geometry specs measure a laid-out canvas — so it stays off.
+  fullyParallel: !!process.env['CI'],
   reporter: process.env['CI'] ? [['github'], ['html', { open: 'never' }]] : [['list']],
   timeout: 30_000,
   expect: { timeout: 10_000 },
