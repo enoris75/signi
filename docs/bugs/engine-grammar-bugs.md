@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of them,
-as of this writing — all Part B, since Part A is empty).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (13 of them,
+as of this writing — 9 in Part B and 4 in Part A).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,8 +59,12 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-**Empty.** Every confirmed bug catalogued so far has been fixed; see the **Fixed** section below and
-[`A-must-fix/README.md`](A-must-fix/README.md) for what belongs here.
+| # | File | Language |
+|---|---|---|
+| A158 | [A158-negative-complement-not-collapsed.md](A-must-fix/A158-negative-complement-not-collapsed.md) | English, German |
+| A159 | [A159-german-nicht-before-a-prepositional-complement.md](A-must-fix/A159-german-nicht-before-a-prepositional-complement.md) | German |
+| A160 | [A160-negative-subject-not-collapsed.md](A-must-fix/A160-negative-subject-not-collapsed.md) | English, German |
+| A161 | [A161-japanese-feminine-plural-pronoun.md](A-must-fix/A161-japanese-feminine-plural-pronoun.md) | Japanese |
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 

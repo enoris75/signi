@@ -298,3 +298,75 @@ describe('known bugs: Japanese どの…も on a complement', () => {
     expect(sayAll(clause(np('CAT'), 'GO', { complements: { route: { phrase: no('MARKET') } } })).ja).toBe('猫はどの市場も行きません。');
   });
 });
+
+// A158. A `no` complement already negates the clause. With a SECOND negation source — a `negative`
+// verb or a NEVER adverb — English and German double the negative, because A35's collapse reads the
+// direct object only and never asks `hasNegativeComplement` (the predicate A33 added, which is why
+// the four Romance engines and Japanese are right here). The chosen surfaces are A35's, applied to
+// the complement: English switches to the "any"-series NPI, German keeps "kein" and drops the
+// redundant "nicht", and falls to a plain indefinite under "nie" (kein = nicht + ein).
+describe('known bugs: a negative complement is not collapsed', () => {
+  const noHouse = { locative: { phrase: np('HOUSE', { definiteness: 'no' as const }) } };
+
+  test.fails('English switches a negative complement to the "any" NPI', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: noHouse })).en)
+      .toBe('the cat does not run in any house.'); // now: "in no house"
+    expect(sayAll(clause(np('CAT'), 'GO', {
+      verbPhrase: { negative: true },
+      complements: { direction: { phrase: np('MARKET', { definiteness: 'no' }) } },
+    })).en).toBe('the cat does not go to any market.'); // now: "to no market"
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { modifier: 'NEVER' }, complements: noHouse })).en)
+      .toBe('the cat never runs in any house.'); // now: "in no house"
+    // The random phrase that found it (seed 484002).
+    expect(sayAll(clause(np('THIRD_PERSON', { number: 'plural', gender: 'fem' }), 'BITE', {
+      verbPhrase: { tense: 'past', aspect: 'progressive', negative: true },
+      directObject: np('HOUSE', { definiteness: 'that', adjectives: ['SHARP'] }),
+      complements: { locative: { phrase: np('ICE_CREAM', { definiteness: 'no', adjectives: ['ADULT'] }) } },
+    })).en).toBe('they were not biting that sharp house in any adult ice cream.');
+  });
+
+  test.fails('German drops the "nicht" a negative complement makes redundant', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: noHouse })).de)
+      .toBe('der Kater läuft in keinem Haus.'); // now: "… in keinem Haus nicht."
+    expect(sayAll(clause(np('CAT'), 'GO', {
+      verbPhrase: { negative: true },
+      complements: { direction: { phrase: np('MARKET', { definiteness: 'no' }) } },
+    })).de).toBe('der Kater geht zu keinem Markt.'); // now: "… zu keinem Markt nicht."
+    // Under a negative adverb it is "kein" that goes, as the object does ("isst nie eine Maus").
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { modifier: 'NEVER' }, complements: noHouse })).de)
+      .toBe('der Kater läuft nie in einem Haus.'); // now: "nie in keinem Haus"
+    // The random phrase that found it (seed 484002).
+    expect(sayAll(clause(np('THIRD_PERSON', { number: 'plural', gender: 'fem' }), 'BITE', {
+      verbPhrase: { tense: 'past', aspect: 'progressive', negative: true },
+      directObject: np('HOUSE', { definiteness: 'that', adjectives: ['SHARP'] }),
+      complements: { locative: { phrase: np('ICE_CREAM', { definiteness: 'no', adjectives: ['ADULT'] }) } },
+    })).de).toBe('sie bissen gerade jenes scharfe Haus in keinem erwachsenen Eis.');
+  });
+
+  // Regression: what must NOT change when the collapse reaches the complement path. A LONE `no`
+  // complement keeps English's "no" and German's bare "kein" (no second source to collapse against),
+  // and the five languages that already compose a negated verb with a negative complement correctly
+  // still take exactly one negator.
+  test('a lone `no` complement, and the five languages already right, are unchanged', () => {
+    expect(inHouse('no')).toMatchObject({
+      en: 'the cat runs in no house.',
+      de: 'der Kater läuft in keinem Haus.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: noHouse })))
+      .toMatchObject({
+        it: 'il gatto non corre in nessuna casa.',
+        fr: 'le chat ne court dans aucune maison.',
+        es: 'el gato no corre en ninguna casa.',
+        pt: 'o gato não corre em nenhuma casa.',
+        ja: '猫はどの家でも走りません。',
+      });
+    // A negated verb with a POSITIVE complement keeps "nicht", after the complements (A49's rule).
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      verbPhrase: { negative: true },
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'definite' }) } },
+    }))).toMatchObject({
+      en: 'the cat does not run in the house.',
+      de: 'der Kater läuft im Haus nicht.',
+    });
+  });
+});

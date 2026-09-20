@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase } from '@signi/shared';
-import { clause, np, sayAll } from './harness.js';
+import { clause, furigana, np, sayAll } from './harness.js';
 
 // A third-person pronoun subject, across the three gender values. `gender` on a NOUN head is a
 // no-op (see subject.test.ts); on a third-person pronoun it selects the surface form — he / she /
@@ -341,5 +341,43 @@ describe('known bugs: Portuguese você agreement', () => {
     expect(blame(np('THIRD_PERSON'))).toBe('o gato chora por sua culpa.');
     expect(sayAll(clause({ conjuncts: [you, np('CAT')], conjunction: 'and' }, 'BE', { complements: { predicative: { phrase: np('STRONG') } } })).pt)
       .toBe('você e o gato são fortes.');
+  });
+});
+
+// A161. A feminine PLURAL third person renders as 彼ら — the masculine/default plural. Japanese has
+// 彼女ら (かのじょら), and the engine already selects a feminine plural surface wherever the corpus
+// carries one (French elles, Spanish ellas, Portuguese elas all come out right from this plan);
+// the `ja` row of THIRD_PERSON is the one gendered plural that is not seeded. English `they`,
+// German `sie` and Italian `loro` have no gendered plural at all and are right as they stand.
+describe('known bugs: Japanese feminine plural pronoun', () => {
+  const plural = (gender: 'masc' | 'fem') =>
+    sayAll(clause(np('THIRD_PERSON', { number: 'plural', gender }), 'RUN'));
+
+  test.fails('a feminine plural subject and object read 彼女ら', () => {
+    expect(plural('fem').ja).toBe('彼女らは走ります。'); // now: 彼らは走ります。
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('THIRD_PERSON', { number: 'plural', gender: 'fem' }),
+    })).ja).toBe('猫は彼女らを見ます。'); // now: 猫は彼らを見ます。
+  });
+
+  // The seed alone fixes the text but not the READING: `resolveNounPhrase` picks `plural_fem` for
+  // the surface generically, then takes `plural_reading` unconditionally, so a feminine-plural
+  // surface keeps the masculine reading.
+  test.fails('the furigana reads かのじょら, not かれら', () => {
+    expect(furigana(clause(np('THIRD_PERSON', { number: 'plural', gender: 'fem' }), 'RUN')))
+      .toEqual(['かのじょら', 'はしります']);
+  });
+
+  // Regression: the masculine/mixed plural stays 彼ら, the feminine SINGULAR is already right, and
+  // the gendered-plural languages that do work must not change.
+  test('the masculine plural, the feminine singular and the other six are unchanged', () => {
+    expect(plural('masc').ja).toBe('彼らは走ります。');
+    expect(furigana(clause(np('THIRD_PERSON', { number: 'plural', gender: 'masc' }), 'RUN')))
+      .toEqual(['かれら', 'はしります']);
+    expect(third({ gender: 'fem' }).ja).toBe('彼女は食べます。');
+    expect(plural('fem')).toMatchObject({
+      en: 'they run.', fr: 'elles courent.', de: 'sie laufen.',
+      it: 'corrono.', es: 'corren.', pt: 'correm.',
+    });
   });
 });
