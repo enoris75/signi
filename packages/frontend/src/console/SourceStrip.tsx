@@ -62,6 +62,9 @@ export function SourceStrip({ model }: { model: PhraseConsoleModel }) {
                   italic={tok.italic}
                   data-testid="source-token"
                   data-mark={mark}
+                  // Washed because the cursor is on this word or its box is under the pointer —
+                  // a background colour alone, which nothing can read back.
+                  data-lit={on ? "" : undefined}
                   onMouseEnter={() => tok.word && model.setHoveredToken(tok.word)}
                   onMouseLeave={() => model.setHoveredToken(null)}
                   onClick={(e: React.MouseEvent) => {

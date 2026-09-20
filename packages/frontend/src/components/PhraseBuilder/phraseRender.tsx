@@ -506,6 +506,11 @@ export function SlotNode({
       // The console lights this box's tokens while the pointer is over it, and finds the box by its
       // mark to give it the keyboard back.
       data-console-mark={mark?.key}
+      // The console's other two marks are drawn in `sx` alone (see SlotBox), where nothing can read
+      // them back: the box whose token is under the pointer in the console, and the box the
+      // console's context rests on.
+      data-console-lit={mark?.lit ? "" : undefined}
+      data-console-cursor={mark?.cursor ? "" : undefined}
       onMouseEnter={() => ctx.onHoverSlot?.(slot.key)}
       onMouseLeave={() => ctx.onHoverSlot?.(null)}
       ref={(el: HTMLElement | null) => {
