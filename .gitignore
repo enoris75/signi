@@ -7,3 +7,8 @@ dist/
 test-results/
 playwright-report/
 e2e/.tmp/
+
+# SQLite's WAL-mode sidecars for the tracked packages/backend/signi.db — runtime
+# state, written and removed as connections come and go
+*.db-shm
+*.db-wal
