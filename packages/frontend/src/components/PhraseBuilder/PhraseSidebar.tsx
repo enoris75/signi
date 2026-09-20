@@ -261,7 +261,7 @@ export function PhraseSidebar({
               color="text.secondary"
               sx={{ fontSize: "0.72rem", fontStyle: "italic", mb: 1 }}
             >
-              Click a slot to filter.
+              {t("hint.clickSlotToFilter")}
             </Typography>
             <Divider sx={{ my: 1 }} />
             {visibleSlots.map((slot) =>

@@ -27,7 +27,7 @@ place the clitic differently).
 
 What the toggles say while *off* or *disabled* ("Make this period a command", "Remove the IF /
 coordination link to make this a command") needs an object complement and a purpose clause:
-[C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md).
+[C12](C12-ui-purpose-and-object-complements.md).
 
 ## Probe renders
 

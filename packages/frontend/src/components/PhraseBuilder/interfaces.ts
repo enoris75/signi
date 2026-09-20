@@ -59,7 +59,18 @@ export function coordConjunctionOptions(
  * selection. Everything keyed by "a noun block on this canvas" — slots, positions, number/gender
  * toggles, possessors — is keyed by this rather than by ComplementType.
  */
-export type BoxComplementType = Exclude<ComplementType, "instrumental">;
+/**
+ * The complements this canvas draws a box for. Two kinds are left out. The `instrumental` has a
+ * box, but in a period container of its own, reached by a link (see LINKED_COMPLEMENT_TYPES). The
+ * `objectPredicative` and the `comitative` have no builder slot at all: they are plan-only
+ * complements the engine renders (see COMPLEMENT_TYPES in @signi/shared), which is what the UI
+ * strings built on them need and all they need. Giving either one a box means adding its
+ * selection fields below, as every other complement has them.
+ */
+export type BoxComplementType = Exclude<
+    ComplementType,
+    "instrumental" | "objectPredicative" | "comitative"
+>;
 
 export interface SlotConfig {
     key: "subject" |

@@ -1,6 +1,7 @@
 import type { ComplementType, NounElement, NounPhrase, PhrasePlan } from '@signi/shared';
 import { defaultDefiniteness, isNounGroup, nounConjuncts } from '@signi/shared';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { objectPredicativeLink } from '../../functions/objectPredicativeLink.js';
 import type { ResolvedComplement } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveNounElement } from './resolveNounElement.js';
@@ -10,11 +11,16 @@ import { resolveVerbPhrase } from './resolveVerbPhrase.js';
  * Resolve the complement map (locative / direction / source / route). Each value is a
  * noun phrase with any specifiers carried straight through as plain data. Shared by the
  * top-level plan and by every relative clause.
+ *
+ * `verbForms` are the governing verb's, the one thing a complement needs of the clause around it:
+ * the factitive `objectPredicative` is linked by a word the verb names (see
+ * `ResolvedComplement.link`), and the verb is out of scope by the time a complement renders.
  */
 export function resolveComplements(
   complements: PhrasePlan['complements'],
   language: string,
   lookup: LexiconLookup,
+  verbForms?: Record<string, string>,
 ): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
   if (!complements) return undefined;
   const out: Partial<Record<ComplementType, ResolvedComplement>> = {};
@@ -52,6 +58,11 @@ export function resolveComplements(
       // It is non-finite — it takes no tense, mood or agreement of its own — so it resolves with
       // none, and each engine reads the lexical forms (gerund / infinitive / te-form) it needs.
       action: value.action ? resolveVerbPhrase(value.action, language, lookup) : undefined,
+      // Only the object predicative is linked by a word of the verb's own ("transform it INTO a
+      // command"); every other complement's adposition belongs to the complement type.
+      ...(type === 'objectPredicative' && objectPredicativeLink(verbForms)
+        ? { link: objectPredicativeLink(verbForms) }
+        : {}),
       specifiers: value.specifiers,
     };
   }

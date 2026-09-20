@@ -77,12 +77,14 @@ export const DEFINITENESS: Definiteness[] = DETERMINER_CATEGORIES.flatMap(
  * predicate noun ascribes class membership ("the angel becomes *a* cat"), so it defaults to
  * `indefinite`. `definite` there is the equative reading — an assertion of identity with a
  * known referent ("Clark Kent is *the* reporter") — which stays reachable by selecting it.
+ * The `objectPredicative` ascribes the same way, of the object instead of the subject ("makes
+ * the period *a* command"), so it shares the indefinite default.
  *
  * Read by the engine when resolving a plan, and by the UI to label the determiner toggle
  * and decide where its cycle starts. Both must agree, so both call this.
  */
 export function defaultDefiniteness(slot: string): Definiteness {
-  return slot === 'predicative' ? 'indefinite' : 'definite';
+  return slot === 'predicative' || slot === 'objectPredicative' ? 'indefinite' : 'definite';
 }
 
 /**
@@ -179,10 +181,23 @@ export const ASPECTS: Aspect[] = ['neutral', 'progressive', 'prospective', 'resu
  * **happy**". Unlike the others it takes no adposition; a noun head keeps its own
  * article (predicate nominative, German nominative case) and an adjective head agrees
  * with the subject (Romance) — English/German predicate adjectives are uninflected.
+ * `objectPredicative` is its counterpart on the *direct object* — what the object is made into
+ * ("make this period **a command**") or taken as ("use this period **as the condition**"); see
+ * `ObjectPredication` for the two readings and the marker each language puts on them.
+ * `comitative` is the companion the act is carried out *together with* — "coordinate **with the
+ * other period**" (con / avec / mit + dative / と). It is the accompanying party, where
+ * `instrumental` is the means: both spell "with" in English, and no other language conflates them
+ * beyond the Romance "con", which at least keeps the animate reading apart by context.
  */
-export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'terminus' | 'predicative';
+export type ComplementType = 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental' | 'manner' | 'comitative' | 'terminus' | 'predicative' | 'objectPredicative';
 
-/** Canonical UI order (matches how complements are presented to the user). */
+/**
+ * The complements the **builder** offers, in the order it presents them. Not every complement type
+ * is here: `objectPredicative` and `comitative` render from a plan (the UI strings of C12 are built
+ * on them) but have no box on the canvas yet, so the frontend — which derives its slots, satellites
+ * and selection fields from this list — does not know about them. Add one here to give it a box.
+ * The engine's own order is `COMPLEMENT_RENDER_ORDER`, which holds all of them.
+ */
 export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route', 'cause'];
 
 /**
@@ -194,12 +209,16 @@ export const COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'i
  * `terminus` ("to him") — the recipient — sits right after the subject complement, before the
  * path ("gives **a legend** to the cat from the house"). The `instrumental` follows it — the
  * means belongs with the act ("cuts the bread **with the knife** in the house"), before the
- * path and the place it happens in.
+ * path and the place it happens in. The `objectPredicative` follows the object it predicates of,
+ * so it leads the rest ("makes the period a command in the house"), and the `comitative` companion
+ * sits with the dative recipient, ahead of the instrument ("goes with the dog to the market").
  */
-export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'cause'];
+export const COMPLEMENT_RENDER_ORDER: ComplementType[] = ['objectPredicative', 'predicative', 'terminus', 'comitative', 'instrumental', 'manner', 'source', 'direction', 'route', 'locative', 'cause'];
 
 export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
   predicative: 'Subject Complement',
+  objectPredicative: 'Object Complement',
+  comitative: 'Comitative',
   terminus: 'Terminus',
   instrumental: 'Instrumental',
   manner: 'Adverbial of manner',
@@ -218,7 +237,7 @@ export const COMPLEMENT_LABELS: Record<ComplementType, string> = {
  * chosen determiner uncontracted ("a una casa", "a nessuna casa", "a molte case"). `cause` is
  * excluded: it accepts a pronoun and weaves the quantifier into its connector, a separate concern.
  */
-export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'terminus', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route'];
+export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'objectPredicative', 'terminus', 'comitative', 'instrumental', 'manner', 'locative', 'direction', 'source', 'route'];
 
 /**
  * Spatial relations a `route` (path) or `locative` (place) complement can express. English needs
@@ -339,6 +358,30 @@ export const ABSTRACTION_LEVELS: AbstractionLevel[] = ['process', 'concept', 'ob
 export function isActionLevel(level: AbstractionLevel): boolean {
   return level !== 'object';
 }
+
+/**
+ * What an `objectPredicative` says of the direct object — the two readings the construction has,
+ * which every one of these languages marks differently.
+ *
+ *   factitive — the object *becomes* the complement, by the act itself: "transform this period
+ *               **into a command**". The link is a fact about the verb, not about the
+ *               construction (English "make X a Y" takes none where "turn X into Y" takes one), so
+ *               the governing verb's lexeme names it as `object_predicative_link`, exactly as it
+ *               names an `infinitive_link`: en *into* / it *in* / fr, es *en* / pt *em* / de *in*
+ *               (+ accusative) / ja に. A verb naming none takes the bare predicate ("makes it a
+ *               command").
+ *   essive    — the object is *taken as* the complement, without becoming it: "use this period
+ *               **as the condition**". One word per language, a fact about the grammar rather than
+ *               the verb: en *as* / it *come* / fr *comme* / es, pt *como* / de *als* / ja として.
+ *               It names a role rather than picking a referent out, so the Romance engines and
+ *               German leave its noun article-less whatever determiner the plan carries ("come
+ *               condizione", "als Bedingung"); English keeps the article it was given.
+ *
+ * Carried as a `predication` specifier on the complement; absent ⇒ `factitive`.
+ */
+export type ObjectPredication = 'factitive' | 'essive';
+
+export const OBJECT_PREDICATIONS: ObjectPredication[] = ['factitive', 'essive'];
 
 export const LANGUAGES: Record<LanguageCode, string> = {
   en: 'English',
@@ -585,10 +628,17 @@ export const NOUN_COORD_CONJUNCTIONS: CoordConjunction[] = ['and', 'or'];
  * eats"). A `locative` gap in the plain default relation is the place the clause happens, "a place
  * *where* one lives": en *where*, it *dove*, fr *où*, es *donde*, pt *onde*. German keeps the
  * prepositional pronoun (*in dem*), and Japanese needs no relativizer (住む場所).
+ *
+ * A `'possessor'` gap is the genitive relative — the head *owns* the clause's subject rather than
+ * filling a slot of it: "a period **whose** noun is a word". The clause keeps its own `subject`
+ * (the possessed noun), and the relativizer is the possessive one, which every language writes
+ * together with that noun: en *whose noun*, it *il cui nome*, fr *dont le nom*, es *cuyo nombre*,
+ * pt *cujo nome*, de *dessen/deren Nomen*. Japanese needs no relativizer here either — its gapped
+ * clause simply precedes the head (名詞が単語である期間).
  */
 export interface RelativeClause {
   /** Which slot the head fills within this clause (the gap). Defaults to 'subject'. */
-  headRole?: 'subject' | 'directObject' | ComplementType;
+  headRole?: 'subject' | 'directObject' | 'possessor' | ComplementType;
   /**
    * The specifiers of the complement the head fills, when `headRole` is a complement: its spatial
    * relation or sentiment. The complement's noun phrase is the head itself, so these are all that
@@ -664,7 +714,8 @@ export interface VerbPhrase {
 export type Specifier =
   | { kind: 'path'; value: PathSpecifier }
   | { kind: 'sentiment'; value: CauseSentiment }
-  | { kind: 'abstraction'; value: AbstractionLevel };
+  | { kind: 'abstraction'; value: AbstractionLevel }
+  | { kind: 'predication'; value: ObjectPredication };
 
 /**
  * A complement: a noun phrase plus zero or more specifiers. Not every complement
@@ -738,6 +789,27 @@ export interface InfinitiveComplement {
  * object-controlled clause speaks its controller with が inside the clause (人が物体を見るようにする).
  */
 export type InfinitiveControl = 'subject' | 'object';
+
+/**
+ * A **clause of purpose** (a final clause) — what the act is done *for*: "click **to change**",
+ * "select a subject **to see the translations**". It is an adjunct, not a governed complement: no
+ * word licenses it, any predicate may carry one, and its unspoken subject is always the clause's
+ * own (the one who clicks is the one who changes). So, unlike an `InfinitiveComplement`, it takes
+ * no `control` and no link from a lexeme — the connector is the language's own:
+ *
+ *   en  the bare infinitive, "to change" (the marked "in order to" is not needed for a label)
+ *   it  *per* + infinito · fr *pour* · es, pt *para* + infinitivo
+ *   de  the *um … zu* clause, extraposed behind the whole clause ("klicken, um zu ändern")
+ *   ja  〜ために on the dictionary form, ahead of the predicate (変更するためにクリック)
+ *
+ * The clause renders as an infinitive citation (see `PhrasePlan.infinitive`), so it has no tense,
+ * aspect or modals of its own, and it may be negated ("**in order not to** lose the phrase").
+ */
+export interface PurposeClause {
+  verbPhrase: VerbPhrase;
+  directObject?: NounElement;
+  complements?: Partial<Record<ComplementType, Complement>>;
+}
 
 export interface PhrasePlan {
   subject: NounElement;
@@ -842,6 +914,13 @@ export interface PhrasePlan {
    * — is built on it.
    */
   infinitiveComplement?: InfinitiveComplement;
+  /**
+   * An optional **clause of purpose** — what this clause's act is done for ("click **to change**";
+   * see `PurposeClause`). An adjunct on the predicate, so it is meaningless on a verbless period,
+   * and it is dropped there. It follows the clause in the SVO languages (German extraposing its
+   * *um … zu* after a comma) and precedes the predicate in Japanese.
+   */
+  purpose?: PurposeClause;
 }
 
 /** See `PhrasePlan.imperativeRegister`. */

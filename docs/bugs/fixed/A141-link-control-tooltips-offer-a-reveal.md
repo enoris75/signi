@@ -16,7 +16,7 @@ half in English: it `Show Proposizione relativa`.
 | instrumental, unlinked | `Show the instrumental` | `Instrumental` |
 
 Already right: the instrumental's linked face (`Instrumental: Linked — click to remove`), which is why the
-relative clause's should match it. "Linked — click to remove" itself is English ([C12](../../localization/C-needs-engine/C12-ui-purpose-and-object-complements.md)).
+relative clause's should match it. "Linked — click to remove" itself is English ([C12](../../localization/done/C12-ui-purpose-and-object-complements.md)).
 
 Found while localizing the relative-clause label ([B21](../../localization/done/B21-ui-clause-and-coordination-vocabulary.md)).
 

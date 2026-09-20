@@ -6,7 +6,10 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
+import { objectPredication } from '../../functions/objectPredication.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveFr, pronounPossessor } from '../../possessive.js';
@@ -26,10 +29,13 @@ import { presentParticiple } from './presentParticiple.js';
 import { renderNP } from './renderNP.js';
 import { spatialHead } from './spatialHead.js';
 
+// `objectForms` are the direct object's, which the object complement predicates of and agrees an
+// adjective head with ("peint le mur rouge") — the object's counterpart of `subjectForms`.
 export function complementsPhrase(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   subjectForms: Record<string, string> = {},
   verbConceptId = '',
+  objectForms: Record<string, string> = {},
 ): string {
   if (!complements) return '';
   // "loin" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
@@ -56,6 +62,27 @@ export function complementsPhrase(
           return isRelativeSuperlative(np.head)
             ? joinArt(defArticle({ gender }, plural, surface), surface)
             : surface;
+        });
+      }
+      // Object complement: what the object is *made into* ("transformer la période en une
+      // commande") or *taken as* ("utiliser la période comme condition"). It predicates of the
+      // direct object, so an adjective head agrees with that and not with the subject. Neither
+      // marker contracts with the article — French fuses only "à" and "de", and a verb links its
+      // object predicative with neither — so the marker leads the phrase. The essive drops the
+      // article: it names a role rather than picking a referent out ("comme condition").
+      if (type === 'objectPredicative') {
+        const essive = objectPredication(c) === 'essive';
+        // The factitive link introduces a noun ("en une prison"); an adjective predicate takes
+        // none — "rend la maison belle", never "*en belle".
+        const marker = essive ? 'comme' : isAdjectivePredicate(c) ? '' : (c.link ?? '');
+        const gender = objectForms['gender'] ?? 'masc';
+        const plural = objectForms['number'] === 'plural';
+        return coordinate(c.phrase, (conjunct) => {
+          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+          const word = np.head.forms['role'] === 'adjective'
+            ? frComparison(np.head, gender, plural)
+            : npText(np);
+          return [marker, word].filter(Boolean).join(' ');
         });
       }
       // An instrument presented as an action: the gérondif for the process level ("en
@@ -107,6 +134,9 @@ export function complementsPhrase(
         // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
         // the manner below.
         type === 'instrumental' ? (possessive ? prepDet('avec', nf, plural, lead) : `avec ${partitiveArtFor(nf, plural, lead)}`) :
+        // The comitative companion takes the same "avec", with its ordinary article rather than the
+        // instrument's partitive: a companion is a definite party, not a quantity ("avec le chien").
+        type === 'comitative' ? prepDet('avec', nf, plural, lead) :
         // Manner: similative "comme" (comme le vent — the default), means "avec" (avec soin),
         // measure "à" (à la vitesse de la lumière), mode "de" (de la manière…). Read off the noun.
         type === 'manner'    ? (

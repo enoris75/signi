@@ -7,7 +7,7 @@ import { conditionalControl, TEXT_SECONDARY, WARNING } from './fixtures.ts';
 
 const START = 'Add a condition (this period becomes the main clause)';
 const REMOVE = 'Remove the condition';
-const PICK = 'Use this period as the IF condition';
+const PICK = 'Use this period as the condition';
 
 describe('ConditionalButton', () => {
   it.each<[string, Partial<ConditionalControl>, string, boolean]>([

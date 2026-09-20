@@ -24,6 +24,8 @@ const icon = (key: string, extra: Partial<SatelliteIcon> = {}): SatelliteIcon =>
 
 // The catalog's English, as `t` reads it before the bundle arrives.
 const t = (key: UiStringKey) => UI_STRINGS[key].fallback;
+// The concept's word in the UI language, as `useConceptLabel` gives it.
+const word = (concept: Concept) => concept.label ?? concept.id;
 
 const conjunct = (which: string) => icon(`${which}Conjunct`, { valueLabel: 'Add a conjunct' });
 const possessor = (which: string) => icon(`${which}Possessor`, { active: true, valued: false });
@@ -44,6 +46,7 @@ const decorate = (
     resolve: () => undefined,
     onTogglePossessor: () => {},
     t,
+    word,
     ...extra,
   });
 
@@ -96,14 +99,14 @@ describe('decoratePerimeterControls', () => {
       expect(resolve).toHaveBeenCalledWith('subject');
       expect(result.directObject?.possessor).toMatchObject({
         active: false,
-        valueLabel: 'points to peter (“his”) — click to remove',
+        valueLabel: 'peter (“his”) — click to remove',
       });
     });
 
     it('still offers removal when the noun it points to cannot be resolved', () => {
       const result = decorate({ subject: PETER, directObject: CAT, directObjectPossessorRef: 'subject' });
 
-      expect(result.directObject?.possessor?.valueLabel).toBe('points to a noun — click to remove');
+      expect(result.directObject?.possessor?.valueLabel).toBe('a noun — click to remove');
     });
   });
 
@@ -119,6 +122,7 @@ describe('decoratePerimeterControls', () => {
       resolve: () => undefined,
       onTogglePossessor: () => {},
       t,
+      word,
     });
 
     expect(perimeterByNoun.subject).toBe(subject);

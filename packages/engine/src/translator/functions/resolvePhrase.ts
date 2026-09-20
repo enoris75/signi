@@ -58,23 +58,25 @@ export function resolvePhrase(
   // indicative: a condition, a command or a citation keeps its own and drops the flag.
   const question = !!plan.interrogative && mood === undefined;
   const subject = resolveNounElement(plan.subject, language, lookup);
+  // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
+  // render just the subject when it is absent. Resolved before the rest, because a complement
+  // reads the verb's lexeme for the word it links an object predicative with.
+  const verbPhrase = plan.verbPhrase
+    ? {
+        // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
+        // coordination is read off its first conjunct, as agreement is.
+        ...resolveVerbPhrase(
+          plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject,
+          citation ? undefined : subject.agreement,
+        ),
+        ...(question ? { interrogative: true } : {}),
+      }
+    : undefined;
   const resolved: ResolvedPhrase = {
     subject,
-    // A verbless period (bare noun phrase) has no verb phrase to resolve; the engines
-    // render just the subject when it is absent.
-    verbPhrase: plan.verbPhrase
-      ? {
-          // The subject's forms select a `subject_sense` where the lexeme names one (A157); a
-          // coordination is read off its first conjunct, as agreement is.
-          ...resolveVerbPhrase(
-            plan.verbPhrase, language, lookup, mood, impRegister, !!plan.directObject,
-            citation ? undefined : subject.agreement,
-          ),
-          ...(question ? { interrogative: true } : {}),
-        }
-      : undefined,
+    verbPhrase,
     directObject: plan.directObject ? resolveNounElement(plan.directObject, language, lookup) : undefined,
-    complements: resolveComplements(plan.complements, language, lookup),
+    complements: resolveComplements(plan.complements, language, lookup, verbPhrase?.verb.forms),
     // An infinitive complement is a clause of its own in the infinitive mood. Its subject is the
     // slot of this clause that controls it — this clause's own subject by default ("the cat desires
     // to eat" — the cat eats), or its direct object under a causative ("to cause a person to see
@@ -84,6 +86,12 @@ export function resolvePhrase(
     // clause always has one to resolve. It may govern one in turn.
     infinitiveComplement: plan.infinitiveComplement
       ? resolveInfinitiveComplement({ ...plan, infinitiveComplement: plan.infinitiveComplement }, language, lookup)
+      : undefined,
+    // A clause of purpose is a clause of its own in the citation mood, its unspoken subject always
+    // this clause's own — the one who clicks is the one who changes — so it needs no control. It
+    // hangs off the predicate, so a verbless period has nothing to do it for and drops it.
+    purpose: plan.purpose && plan.verbPhrase
+      ? resolvePhrase({ ...plan.purpose, subject: plan.subject }, language, lookup, 'infinitive')
       : undefined,
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.

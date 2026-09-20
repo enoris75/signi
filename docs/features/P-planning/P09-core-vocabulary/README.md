@@ -136,7 +136,7 @@ already treats *may* and *might* as true auxiliaries
 | 179 | question | `QUESTION` | *domanda, question, Frage, pregunta, pergunta, 質問*. |
 | 182 | government | — | Seeded by P08 (`GOVERNMENT`). |
 | 189 | night | `NIGHT` | |
-| 192 | point | `POINT_NOUN` | D2. [C12](../../../localization/C-needs-engine/C12-ui-purpose-and-object-complements.md) needs the verb `POINT` ("points to"): seed both together. |
+| 192 | point | `POINT_NOUN` | D2. The verb `POINT` was left unseeded by [C12](../../../localization/done/C12-ui-purpose-and-object-complements.md): English's "point" needs a preposition on its object (`object_prep`, which en and ja do not read), and the tooltip that wanted it says the same thing with the noun alone. Seed the two together when a phrase needs the verb. |
 
 ### Adjectives (5)
 

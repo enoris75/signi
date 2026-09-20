@@ -34,7 +34,12 @@ export function renderClause(phrase: ResolvedPhrase): string {
   // An infinitive complement follows the clause, agreeing with its controller — this clause's
   // subject ("être capable d'agir", "le chat désire manger") or, under a causative, its object
   // ("amener une maison à être cachée").
-  return phrase.infinitiveComplement
+  const governed = phrase.infinitiveComplement
     ? `${clause} ${infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, subject.agreement), infinitiveLink(phrase))}`
     : clause;
+  // A clause of purpose closes the sentence, under "pour" + the infinitive ("cliquer pour changer").
+  // It is subject-controlled, so it agrees with this clause's own subject, as a complement does.
+  return phrase.purpose
+    ? `${governed} ${infinitiveComplementText(phrase.purpose, subject.agreement, 'pour')}`
+    : governed;
 }

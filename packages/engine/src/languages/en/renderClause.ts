@@ -37,5 +37,8 @@ export function renderClause(phrase: ResolvedPhrase): string {
     .trim();
   // An infinitive complement follows the clause as a clause of its own in the infinitive mood, whose
   // "to" is the link every English governor takes: "to be able to act", "the cat desires to eat".
-  return phrase.infinitiveComplement ? `${clause} ${renderClause(phrase.infinitiveComplement)}` : clause;
+  const governed = phrase.infinitiveComplement ? `${clause} ${renderClause(phrase.infinitiveComplement)}` : clause;
+  // A clause of purpose closes the sentence, and English marks it with the bare infinitive the
+  // citation mood already gives: "click to change", "select a subject to see the translations".
+  return phrase.purpose ? `${governed} ${renderClause(phrase.purpose)}` : governed;
 }

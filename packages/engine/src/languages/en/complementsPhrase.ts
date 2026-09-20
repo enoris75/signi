@@ -8,7 +8,9 @@ import { isSeemingPredicateNoun } from '../../functions/isSeemingPredicateNoun.j
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
-import { CAUSE_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
+import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
+import { objectPredication } from '../../functions/objectPredication.js';
+import { CAUSE_PREP, ESSIVE, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
@@ -64,6 +66,23 @@ export function complementsPhrase(
           np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),
         );
         return isSeemingPredicateNoun(c, verb) ? `to be ${predicate}` : predicate;
+      }
+      // Object complement: what the object is made into ("transform the period into a command") or
+      // taken as ("use the period as the condition"). It predicates of the object exactly as the
+      // subject complement does of the subject, so a noun head keeps its article and an adjective
+      // head stays bare ("paints the wall red"); only the marker differs — the verb's own link for
+      // the factitive reading, the invariant "as" for the essive one.
+      if (type === 'objectPredicative') {
+        const predicate = coordinate(c.phrase, (np) =>
+          np.head.forms['role'] === 'adjective' ? enAdj(np.head) : npText(np),
+        );
+        // A factitive link introduces a *noun* — "transforms it into a prison". An adjective
+        // predicate takes none in any of these languages: one makes a house beautiful, never
+        // "*into beautiful". The essive "as" stands before either.
+        const marker = objectPredication(c) === 'essive' ? ESSIVE
+          : isAdjectivePredicate(c) ? ''
+          : (c.link ?? '');
+        return [marker, predicate].filter(Boolean).join(' ');
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]

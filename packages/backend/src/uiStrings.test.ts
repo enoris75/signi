@@ -320,6 +320,118 @@ describe('buildUiStrings', () => {
       ja: '動詞句を圧縮',
     });
     expect(strings['wordMap.relation.isA']).toMatchObject({ en: 'Hypernyms', it: 'Iperonimi', ja: '上位語' });
+    // The two complements the builder has no box for, which the word map still names (C12).
+    expect(strings['slot.objectPredicative']).toMatchObject({
+      en: 'Object complement',
+      it: "Complemento predicativo dell'oggetto",
+      de: 'Objektsprädikativ',
+      ja: '目的語補語',
+    });
+    expect(strings['slot.comitative']).toMatchObject({
+      en: 'Comitative', fr: "Complément d'accompagnement", de: 'Komitativ', ja: '共同格',
+    });
+  });
+
+  // C12 — the four constructs the catalog gained: a clause of purpose, the two readings of the
+  // object complement, the comitative, and the genitive relative.
+  test('says what a click is for, in the final clause each language writes', () => {
+    const strings = buildUiStrings();
+    expect(strings['hint.clickToChange']).toEqual({
+      en: 'click to change',
+      it: 'clicca per cambiare',
+      fr: 'cliquer pour changer',
+      // German extraposes the purpose behind the clause, inside "um … zu".
+      de: 'klicken, um zu ändern',
+      es: 'clicar para cambiar',
+      // Japanese puts it first, closed by ために.
+      ja: '変えるためにクリック',
+      pt: 'clicar para mudar',
+    });
+    expect(strings['hint.dragToResize']).toEqual({
+      en: 'Drag to resize',
+      it: 'Trascina per ridimensionare',
+      fr: 'Glisser pour redimensionner',
+      de: 'Ziehen, um zu skalieren',
+      es: 'Arrastrar para redimensionar',
+      ja: 'サイズ変更するためにドラッグ',
+      pt: 'Arrastar para redimensionar',
+    });
+    expect(strings['hint.selectToTranslate']).toMatchObject({
+      en: 'Select a subject and a verb to see the translations.',
+      it: 'Seleziona un soggetto e un verbo per vedere le traduzioni.',
+      de: 'Ein Subjekt und ein Verb selektieren, um die Übersetzungen zu sehen.',
+      ja: '翻訳を見るために主語と動詞を選択。',
+    });
+  });
+
+  test('turns a period into a command, or takes it as a condition', () => {
+    const strings = buildUiStrings();
+    // The factitive: the link is the verb's own word, and it fuses with the article.
+    expect(strings['action.makeCommand']).toEqual({
+      en: 'Transform this period into a command',
+      it: 'Trasforma questo periodo in un comando',
+      fr: 'Transformer cette période en une commande',
+      de: 'Dieses Satzgefüge in einen Befehl verwandeln',
+      es: 'Transformar este período en un comando',
+      ja: 'この文を命令に変え',
+      pt: 'Transformar este período em um comando',
+    });
+    // The essive: one word per language, and no article outside English.
+    expect(strings['action.useAsCondition']).toEqual({
+      en: 'Use this period as the condition',
+      it: 'Usa questo periodo come condizione',
+      fr: 'Utiliser cette période comme condition',
+      de: 'Dieses Satzgefüge als Bedingung verwenden',
+      es: 'Usar este período como condición',
+      ja: 'この文を条件として使用',
+      pt: 'Usar este período como condição',
+    });
+    expect(strings['action.useAsCoordinated']).toMatchObject({
+      en: 'Use this period as the coordinated clause',
+      it: 'Usa questo periodo come proposizione coordinata',
+      de: 'Dieses Satzgefüge als beigeordneten Satz verwenden',
+    });
+    // Both at once: remove the link, in order to transform the period.
+    expect(strings['action.unlinkForCommand']).toMatchObject({
+      en: 'Remove the condition or the coordination to transform this period into a command',
+      de: 'Die Bedingung oder die Koordination entfernen, um dieses Satzgefüge in einen Befehl zu verwandeln',
+    });
+  });
+
+  test('names the period to pick, by the clause it joins or the noun it owns', () => {
+    const strings = buildUiStrings();
+    // The comitative companion of the act, under a purpose clause.
+    expect(strings['pick.coordinated']).toMatchObject({
+      en: 'Click the period in another period container to coordinate with this clause.',
+      de: 'Auf das Satzgefüge in einem anderen Satzgefügebehälter klicken, um mit diesem Satz zu koordinieren.',
+      ja: 'この節と調整するために文の別の容器で文をクリック。',
+    });
+    // The genitive relative — no passive needed to say what the period's noun is for.
+    expect(strings['pick.instrumental']).toEqual({
+      en: 'Click the period whose noun is the instrumental in another period container.',
+      it: 'Clicca sul periodo il cui sostantivo è il complemento di mezzo in un altro contenitore di periodo.',
+      fr: 'Cliquer sur la période dont le nom est le complément de moyen dans un autre récipient de période.',
+      de: 'Auf das Satzgefüge, dessen Substantiv der Instrumental ist, in einem anderen Satzgefügebehälter klicken.',
+      es: 'Clicar en el período cuyo sustantivo es el complemento circunstancial de instrumento en otro recipiente de período.',
+      ja: '文の別の容器で名詞が手段語である文をクリック。',
+      pt: 'Clicar no período cujo substantivo é o adjunto adverbial de instrumento em outro recipiente de período.',
+    });
+  });
+
+  test('says the map is drawing nothing, and how to make it draw', () => {
+    const strings = buildUiStrings();
+    expect(strings['wordMap.noRelationships']).toEqual({
+      en: 'The map shows no relationships.',
+      it: 'La mappa non mostra nessuna relazione.',
+      fr: 'La carte ne montre aucune relation.',
+      de: 'Die Karte zeigt keine Beziehungen.',
+      es: 'El mapa no muestra ninguna relación.',
+      ja: '地図はどの関係も見せません。',
+      pt: 'O mapa não mostra nenhuma relação.',
+    });
+    expect(strings['wordMap.showRelationships']).toMatchObject({
+      en: 'Show a relationship', it: 'Mostra una relazione', de: 'Eine Beziehung zeigen',
+    });
   });
 
   // The chips under an attributive noun (B24): the relation is spelled out by two nouns joined by "or".
@@ -410,6 +522,8 @@ describe('buildUiStrings', () => {
     const strings = buildUiStrings();
     expect(strings['action.copyTranslation']).toMatchObject({ en: 'Copy the translation', ja: '翻訳をコピー' });
     expect(strings['status.copied']).toMatchObject({ it: 'Copiata', fr: 'Copiée', ja: 'コピー済み' });
+    // LINKED agrees with the noun the satellite rides, as COPIED does with the translation.
+    expect(strings['status.linked']).toMatchObject({ en: 'Linked', it: 'Collegato', ja: 'リンク済み' });
     // The adverb of direction follows the object in every language (A142), so the two reorder
     // controls name what they move, as the controls beside them do.
     expect(strings['action.movePeriodUp']).toEqual({

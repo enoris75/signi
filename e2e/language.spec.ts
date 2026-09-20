@@ -259,7 +259,8 @@ test.describe('interface language', () => {
 
     await app.setUiLanguage('fr');
 
-    await expect(page.getByLabel('Relation: Caractéristique ou moyen — click to change')).toHaveText(
+    // The chip's tail is a clause of purpose now, so it changes language with the rest (C12).
+    await expect(page.getByLabel('Relation: Caractéristique ou moyen — cliquer pour changer')).toHaveText(
       'caractéristique',
     );
     await expect(page.getByLabel('Ajouter un adjectif qui décrit ce modificateur')).toBeVisible();
@@ -292,6 +293,43 @@ test.describe('interface language', () => {
     await expect(dialog.getByRole('textbox', { name: 'Nome' })).toBeVisible();
     await dialog.getByRole('button', { name: 'Annulla', exact: true }).click();
     await expect(dialog).toHaveCount(0);
+  });
+
+  // C12: the four constructs behind the strings that say what a control will do — a clause of
+  // purpose, the object complement in both readings, the comitative, and the genitive relative.
+  test('says what a click is for, and what a period would be used as, in the UI language', async ({
+    app,
+    page,
+  }) => {
+    await app.buildClause('CAT', 'EAT');
+    await app.addPeriod();
+    // The mood toggle while off: a factitive, the period turned into a command.
+    await expect(
+      app.period(0).getByLabel('Transform this period into a command'),
+    ).toBeAttached();
+
+    await app.setUiLanguage('de');
+
+    // German extraposes the purpose behind the clause, in the "um … zu" frame.
+    await expect(
+      app.period(0).getByLabel('Dieses Satzgefüge in einen Befehl verwandeln', { exact: true }),
+    ).toBeAttached();
+    await expect(
+      app.period(0).getByRole('separator', { name: 'Diesen Satzgefügebehälter skalieren' }),
+    ).toBeAttached();
+    await expect(app.period(0).getByTitle('Ziehen, um zu skalieren')).toBeAttached();
+
+    // Starting a coordination puts the period into pick mode, and the banner says what the click
+    // is for: the comitative companion of the act, under a purpose clause.
+    await app.period(0).getByRole('button', { name: 'Dieses Satzgefüge koordinieren' }).click();
+    await page.getByRole('menuitem').first().click();
+    await expect(page.getByTestId('pick-banner')).toContainText(
+      'Auf das Satzgefüge in einem anderen Satzgefügebehälter klicken, um mit diesem Satz zu koordinieren.',
+    );
+    // And the other period now offers itself: the essive — used *as* the coordinated clause.
+    await expect(
+      app.period(1).getByRole('button', { name: 'Dieses Satzgefüge als beigeordneten Satz verwenden' }),
+    ).toBeAttached();
   });
 
   test('leaves the translations themselves alone — every language is always shown', async ({

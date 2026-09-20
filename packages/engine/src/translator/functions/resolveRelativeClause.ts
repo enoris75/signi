@@ -11,6 +11,9 @@ import { resolveVerbPhrase } from './resolveVerbPhrase.js';
  * so it is absent from the clause's own fields; a non-subject relative carries its own
  * `subject`, which the engines use for agreement.
  *
+ * A `'possessor'` gap gaps no slot: the head owns the clause's own `subject`, which is present and
+ * drives agreement exactly as a non-subject relative's does ("a period whose noun is a word").
+ *
  * `headForms` are the head noun's, passed down from `resolveNounPhrase`. They stand in for the
  * clause's subject where the gap IS the subject, which is what a `subject_sense` reads ("der Kater,
  * der die Maus frisst", A157).
@@ -23,17 +26,18 @@ export function resolveRelativeClause(
 ): ResolvedRelativeClause {
   const headRole = clause.headRole ?? 'subject';
   const subject = clause.subject ? resolveNounElement(clause.subject, language, lookup) : undefined;
+  // The head gapped as the direct object is the verb's object too ("il ragazzo che il gatto conosce").
+  const verbPhrase = resolveVerbPhrase(
+    clause.verbPhrase, language, lookup, undefined, undefined,
+    !!clause.directObject || headRole === 'directObject',
+    headRole === 'subject' ? headForms : subject?.agreement,
+  );
   return {
     headRole,
     ...(clause.headSpecifiers?.length ? { headSpecifiers: clause.headSpecifiers } : {}),
     subject,
-    // The head gapped as the direct object is the verb's object too ("il ragazzo che il gatto conosce").
-    verbPhrase: resolveVerbPhrase(
-      clause.verbPhrase, language, lookup, undefined, undefined,
-      !!clause.directObject || headRole === 'directObject',
-      headRole === 'subject' ? headForms : subject?.agreement,
-    ),
+    verbPhrase,
     directObject: clause.directObject ? resolveNounElement(clause.directObject, language, lookup) : undefined,
-    complements: resolveComplements(clause.complements, language, lookup),
+    complements: resolveComplements(clause.complements, language, lookup, verbPhrase.verb.forms),
   };
 }

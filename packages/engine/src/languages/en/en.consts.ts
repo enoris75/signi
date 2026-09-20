@@ -26,9 +26,16 @@ export const PREP: Record<ComplementType, string> = {
   cause: 'because of',
   instrumental: 'with', // means / tool — "starts with a word"
   manner: 'like', // adverbial of manner — relation-driven, see MANNER_PREP; 'like' (similative) is the default
+  comitative: 'with', // companion — "coordinates with the other period"
   terminus: 'to', // dative recipient — "cut the hair to the cat"
   predicative: '', // subject complement — no adposition ("becomes a legend", "seems happy")
+  // Object complement — the factitive link is the verb's ("transform it INTO a command"), the
+  // essive's is ESSIVE below, so the type itself contributes none. See `complementsPhrase`.
+  objectPredicative: '',
 };
+
+/** The essive marker: the object taken *as* the complement, not made into it ("as the condition"). */
+export const ESSIVE = 'as';
 
 // The manner adverbial's preposition follows the head noun's relation — similative "like (the
 // wind)", means "with (care)", measure "at (the speed)", mode "in (a good way)" — read off the

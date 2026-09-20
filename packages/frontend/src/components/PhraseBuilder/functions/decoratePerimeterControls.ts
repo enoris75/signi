@@ -1,3 +1,4 @@
+import type { Concept } from "@signi/shared";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 import type { NounAddress, NounKey, PhraseSelection } from "../interfaces.ts";
 import { POSSESSOR_REF_KEY } from "../interfaces.ts";
@@ -17,7 +18,10 @@ type PerimeterByNoun = Partial<Record<NounKey, PerimeterEntry>>;
  *    stands alone, then the newest conjunct's — whose click adds to the head's group, not a group of
  *    its own. An owner's head coordinates nothing: the plan reads an owner as one noun phrase.
  *  · Each possessor control names or points to its noun's owner (`onTogglePossessor`). Pointing, it
- *    says what it points to.
+ *    says what it points to: the antecedent's word in the UI language and the possessive that
+ *    coreference will render. Both are known only at render time, so they sit outside the phrase
+ *    and behind the control's own "Possessor" title — the C14 shape. An antecedent that no longer
+ *    resolves leaves the bare indefinite noun (`hint.aNoun`) in the word's place.
  */
 export function decoratePerimeterControls({
   perimeterByNoun,
@@ -26,6 +30,7 @@ export function decoratePerimeterControls({
   resolve,
   onTogglePossessor,
   t,
+  word,
 }: {
   perimeterByNoun: PerimeterByNoun;
   selection: PhraseSelection;
@@ -35,6 +40,8 @@ export function decoratePerimeterControls({
   resolve: CorefPick["resolve"];
   onTogglePossessor: (which: NounKey) => void;
   t: UiStringLookup;
+  // The antecedent's word in the UI language (`useConceptLabel`), for the control that points at it.
+  word: (concept: Concept) => string;
 }): PerimeterByNoun {
   const next: PerimeterByNoun = {};
   for (const which of Object.keys(perimeterByNoun) as NounKey[])
@@ -57,9 +64,9 @@ export function decoratePerimeterControls({
       ...control,
       ...(antecedent && {
         active: false,
-        valueLabel: resolved
-          ? `points to ${resolved.concept.label ?? resolved.concept.id} (“${t(possessiveHintKey(resolved.features))}”) — click to remove`
-          : "points to a noun — click to remove",
+        valueLabel: `${resolved ? word(resolved.concept) : t("hint.aNoun")}${
+          resolved ? ` (“${t(possessiveHintKey(resolved.features))}”)` : ""
+        } — ${t("hint.clickToRemove")}`,
       }),
       onToggle: () => onTogglePossessor(which),
     };

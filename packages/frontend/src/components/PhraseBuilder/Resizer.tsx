@@ -40,7 +40,7 @@ export function Resizer({
       role="separator"
       aria-orientation="horizontal"
       aria-label={t("action.resizeContainer")}
-      title="Drag to resize"
+      title={t("hint.dragToResize")}
       tabIndex={0}
       onKeyDown={(e) => {
         if (e.key === "ArrowDown") {

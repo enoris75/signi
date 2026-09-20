@@ -33,7 +33,7 @@ concept, blocked on reflexive verbs in Italian and German ([C17](C17-motion-verb
 Putting the language inside the noun phrase ("copy the Italian translation") would need seven
 nationality adjectives, or a complement on a noun, which the model doesn't have. The join above
 avoids both. The Resizer's "Drag to resize" tooltip is a purpose clause:
-[C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md).
+[C12](C12-ui-purpose-and-object-complements.md).
 
 ## Tests that select on these literals
 
@@ -79,7 +79,7 @@ Changes against the plan:
   controls now name what they move, as the controls beside them do.
 - **German RESIZE is *skalieren*.** *Die Größe ändern* is a phrase whose object is a genitive, not the verb's
   accusative. Japanese takes サイズ変更, the verbal noun its UIs use.
-- The Resizer's "Drag to resize" tooltip is still [C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md).
+- The Resizer's "Drag to resize" tooltip is still [C12](C12-ui-purpose-and-object-complements.md).
 
 Pinned by [program-controls.test.ts](../../../packages/engine/test/program-controls.test.ts) (with A142's
 tests), [uiStrings.test.ts](../../../packages/backend/src/uiStrings.test.ts) (*names the copy,

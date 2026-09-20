@@ -296,7 +296,7 @@ describe('WordMap', () => {
 
       expect(drawing()).toBeNull();
       expect(
-        screen.getByText('No relationships to show. Switch one back on above.'),
+        screen.getByText('The map shows no relationships. Show a relationship.'),
       ).toBeInTheDocument();
       expect(caption()).toHaveTextContent(
         /^0 nodes · 0 relationships · 6 unconnected hidden words$/,

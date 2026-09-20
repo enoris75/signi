@@ -2,6 +2,7 @@ import type { ResolvedNounPhrase } from '../../types.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePossessed } from '../../functions/relativePossessed.js';
 import { adverbSlots } from './adverbSlots.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
@@ -26,7 +27,9 @@ import { verbGroup } from './verbGroup.js';
  * ("der Junge, der weint"). A direct-object relative uses an accusative pronoun, renders
  * the clause's own subject, and that subject drives agreement ("das Buch, das ich lese").
  * A head filling a complement takes that complement's preposition and case ("das Haus, in dem der
- * Kater isst", "der Junge, dem der Mann das Buch gibt"), see `relativePronoun`. Returns "" if `np`
+ * Kater isst", "der Junge, dem der Mann das Buch gibt"), see `relativePronoun`. A possessor gap is
+ * the genitive "dessen"/"deren", agreeing with the head, followed by the phrase it owns without an
+ * article of its own ("ein Satzgefüge, dessen Nomen ein Wort ist"). Returns "" if `np`
  * has no relative. The clause is bracketed by commas at both ends; a closing comma that lands
  * against the sentence-final stop (or another comma) is tidied up in `punctuate`.
  */
@@ -42,16 +45,22 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
   // A head gapped as the object of a verb that takes it with a preposition keeps that preposition, as a
   // complement's does: "die Taste, auf die der Kater klickt" (A139).
   const gap = relativeGapComplement(np, { definiteness: 'relative' });
+  // A genitive relative gaps no slot: the head owns the clause's subject, which follows the
+  // "dessen"/"deren" article-less, in the nominative its slot takes. It is already inside the
+  // pronoun, so the clause does not write it again as a subject.
+  const possessed = relativePossessed(rel);
   const headPrep = rel.headRole === 'directObject' ? objectPreposition(rel.verbPhrase.verb) : '';
   // The gap's preposition can be the verb's own — ADD's goal takes "zu", not the default "in" (A143)
   // — so the clause's verb forms reach the stand-in too, not only the rendered complements below.
-  const pronoun = gap
-    ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
-    : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
+  const pronoun = possessed
+    ? [relativePronoun(f, 'gen', plural), subjectText(possessed)].filter(Boolean).join(' ')
+    : gap
+      ? complementsPhrase(gap, rel.verbPhrase.verb.forms)
+      : [headPrep, relativePronoun(f, subjectRelative || rel.headRole === 'predicative' ? 'nom' : 'acc', plural)].filter(Boolean).join(' ');
   // Agreement + the rendered clause subject: the head fills it for a subject-relative;
   // otherwise the clause carries its own nominative subject.
   const agreeForms = subjectRelative ? f : rel.subject!.agreement;
-  const clauseSubjectText = subjectRelative ? '' : subjectText(rel.subject!);
+  const clauseSubjectText = subjectRelative || possessed ? '' : subjectText(rel.subject!);
 
   const { verb, modifier, tense = 'present', aspect = 'neutral', mood, modals } = rel.verbPhrase;
   const person = agreeForms['person'] ?? '3';

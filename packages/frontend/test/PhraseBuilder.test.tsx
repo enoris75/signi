@@ -736,7 +736,7 @@ describe('PhraseBuilder', () => {
       expect(screen.getAllByTestId('box-subject')).toHaveLength(1);
       expect(screen.getByTestId('pronoun-chip')).toHaveTextContent('his');
       expect(satellite('directObjectPossessor')).toHaveAccessibleName(
-        'Possessor: points to boy (“his”) — click to remove',
+        'Possessor: boy (“his”) — click to remove',
       );
     });
 

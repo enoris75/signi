@@ -7,7 +7,9 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { objectPredication } from '../../functions/objectPredication.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessivePt, pronounPossessor } from '../../possessive.js';
@@ -16,6 +18,7 @@ import { coordinateElement } from './coordinateElement.js';
 import { datPrep } from './datPrep.js';
 import { defArticle } from './defArticle.js';
 import { dePrep } from './dePrep.js';
+import { emPrep } from './emPrep.js';
 import { isPlural } from './isPlural.js';
 import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
@@ -29,10 +32,18 @@ import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
 import { ptPossessiveWord } from './ptPossessiveWord.js';
 
+/** The contraction each preposition a verb may link an object predicative with takes. */
+const LINK_CONTRACT: Record<string, (f: Record<string, string>, plural?: boolean) => string> = {
+  em: emPrep, a: datPrep, de: dePrep,
+};
+
+// `objectForms` are the direct object's, which the object complement predicates of and agrees an
+// adjective head with ("pinta a parede vermelha") — the object's counterpart of `subjectForms`.
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
   verbConceptId: string,
+  objectForms: Record<string, string> = {},
 ): string {
   // "longe" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
   // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
@@ -58,6 +69,32 @@ export function complementsPhrase(
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece O mais feliz" — distinct from the comparative "mais feliz".
           return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+        });
+      }
+      // Object complement: what the object is *made into* ("transformar o período em um comando")
+      // or *taken as* ("usar o período como condição"). It predicates of the direct object, so an
+      // adjective head agrees with that and not with the subject. The factitive link contracts
+      // with the article as any preposition does ("em" + "o" → "no"); the essive "como" contracts
+      // with none and drops the article, naming a role rather than picking a referent out.
+      if (type === 'objectPredicative') {
+        const essive = objectPredication(c) === 'essive';
+        const link = c.link ?? '';
+        const gender = objectForms['gender'] ?? 'masc';
+        const plural = objectForms['number'] === 'plural';
+        return coordinateElement(c.phrase, (conjunct) => {
+          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+          if (np.head.forms['role'] === 'adjective') {
+            return [essive ? 'como' : '', ptComparison(np.head, gender, plural)].filter(Boolean).join(' ');
+          }
+          const f = predicativeForms(np.head.forms);
+          const pl = isPlural(f);
+          const marker = essive ? prepDet('como', f, pl)
+            : !link ? ''
+            : LINK_CONTRACT[link] ? contractDet(LINK_CONTRACT[link], link, f, pl)
+            : prepDet(link, f, pl);
+          // The marker carries the determiner when there is one, so the phrase itself goes bare.
+          const bare = marker ? { ...f, definiteness: 'bare' } : f;
+          return [marker, withRelative(nounPhrase(bare, ptAdj(np)), np)].filter(Boolean).join(' ');
         });
       }
       // An instrument presented as an action: the bare gerúndio for the process level
@@ -108,7 +145,8 @@ export function complementsPhrase(
         type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
         // Instrumental → "com". It contracts only with the pronouns (comigo…), never with an
         // article, so the plain preposition leads the determiner: "com a faca", "com uma palavra".
-        type === 'instrumental' ? prepDet('com', f, plural) :
+        // The comitative companion takes the same "com": Portuguese does not separate the two either.
+        type === 'instrumental' || type === 'comitative' ? prepDet('com', f, plural) :
         // Manner: similative "como" (como o vento — the default), means "com" (com cuidado),
         // measure "a" (à velocidade da luz), mode "de" (de maneira…). Read off the head noun.
         type === 'manner'    ? (

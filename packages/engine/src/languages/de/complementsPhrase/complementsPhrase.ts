@@ -3,13 +3,15 @@ import type { ConceptForms, ResolvedComplement } from '../../../types.js';
 import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNoun.js';
 import { locativeIdiom } from '../../../functions/locativeIdiom.js';
+import { objectPredication } from '../../../functions/objectPredication.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
+import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
 import { possessiveDe } from '../../../possessive.js';
 import { adjPhrase } from '../adjPhrase.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { LOCATIVE_IDIOMS } from '../de.consts.js';
+import { LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
 import { germanCompound } from '../germanCompound.js';
@@ -55,7 +57,17 @@ export function complementsPhrase(
       }
       // The preposition governs a case, and the case is spelled on each conjunct's own article
       // ("mit dem Messer und dem Stock"), so preposition and determiner are emitted per conjunct.
-      return coordinate(c.phrase, (np) => {
+      return coordinate(c.phrase, (conjunct) => {
+      // The essive object complement names a role rather than picking a referent out, so German
+      // leaves it article-less whatever determiner was chosen: "als Bedingung", not "als die
+      // Bedingung". Its adjectives then decline strong, which `definiteness` below arranges.
+      const essive = type === 'objectPredicative' && objectPredication(c) === 'essive';
+      const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+      // A German object predicative adjective is uninflected, as the subject one is ("streicht
+      // die Wand rot", "betrachtet die Wand als rot").
+      if (type === 'objectPredicative' && np.head.forms['role'] === 'adjective') {
+        return [essive ? 'als' : '', dePredAdj(np.head)].filter(Boolean).join(' ');
+      }
       // A hearth noun takes its fixed locative idiom in place of the whole noun phrase — "zu Hause",
       // not "im Zuhause" — so no preposition, case or declension is chosen for it.
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
@@ -85,8 +97,18 @@ export function complementsPhrase(
         // negative sentiment and a pronoun never reach here — they took `causePhrase` above.
         if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
-        // doesn't exist for "mit", so prepDet leaves it uncontracted.
-        else if (type === 'instrumental') head = prepDet('mit', f, 'dat', plural);
+        // doesn't exist for "mit", so prepDet leaves it uncontracted. The comitative companion
+        // takes the same "mit": German does not separate the two either.
+        else if (type === 'instrumental' || type === 'comitative') head = prepDet('mit', f, 'dat', plural);
+        // Object complement: the essive "als" takes the case of the object it predicates of — the
+        // accusative — and no article at all; the factitive link is the verb's own preposition and
+        // governs its own case ("in einen Befehl", "zu einem Befehl"). A verb naming none leaves
+        // the bare accusative predicate ("macht das Satzgefüge einen Befehl").
+        else if (type === 'objectPredicative') {
+          const marker = essive ? 'als' : (c.link ?? '');
+          _case = OBJECT_PREDICATIVE_CASE[marker] ?? 'acc';
+          head = essive ? 'als' : prepDet(marker, f, _case, plural);
+        }
         // Manner: similative "wie" + nominative ("wie der Wind" — the default); means/measure
         // "mit" + dative ("mit der Geschwindigkeit des Lichts", "mit Sorgfalt"); mode "auf" +
         // accusative ("auf eine gute Weise"); a temporal noun "zu" + dative ("zu allen Zeiten").

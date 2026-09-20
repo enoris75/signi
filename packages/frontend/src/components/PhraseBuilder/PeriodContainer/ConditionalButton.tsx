@@ -19,11 +19,11 @@ export function ConditionalButton({ control }: ConditionalButtonProps) {
     pickActive: control.pickActive,
     canStart: control.canStart,
   });
-  // Picking this period "as" the condition needs a complement the engine lacks, so that face stays
-  // English. Starting a condition makes this period the main clause, which the control says in brackets.
+  // Picking this period "as" the condition is the essive object complement (C12). Starting a
+  // condition makes this period the main clause, which the control says in brackets.
   const title =
     face === "droppable"
-      ? "Use this period as the IF condition"
+      ? t("action.useAsCondition")
       : face === "source"
         ? t("action.removeCondition")
         : face === "target"

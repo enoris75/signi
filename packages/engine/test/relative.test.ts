@@ -1053,3 +1053,81 @@ describe('known bugs: Japanese relative clause with a modal or a copula', () => 
     expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modals: ['CAN'] } })).ja).toBe('猫は食べることができます。');
   });
 });
+
+// The GENITIVE relative (localization C12): `headRole: 'possessor'`, the one gap that gaps no
+// slot. The head does not fill a position in the clause — it *owns* the clause's subject, which
+// stays where it is and drives agreement. Every language writes the relativizer together with
+// that possessed phrase, and each does it differently: English and German put a possessive
+// pronoun in the article's place, Italian an article *before* "cui", Spanish and Portuguese an
+// agreeing "cuyo"/"cujo", and French "dont", which leaves the phrase its own article.
+describe('a genitive relative clause — "the cat whose book …"', () => {
+  test('the possessive relativizer, and the clause agreeing with what is possessed', () => {
+    expect(sayAll(clause(
+      np('CAT', {
+        relative: {
+          headRole: 'possessor',
+          subject: np('BOOK'),
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: np('BEAUTIFUL') } },
+        },
+      }),
+      'RUN',
+    ))).toEqual({
+      en: 'the cat whose book is beautiful runs.',
+      it: 'il gatto il cui libro è bello corre.', // the article agrees with "libro", not "gatto"
+      fr: 'le chat dont le livre est beau court.', // "dont" keeps the possessed article
+      de: 'der Kater, dessen Buch schön ist, läuft.', // genitive relative pronoun, verb-final
+      es: 'el gato cuyo libro es hermoso corre.',
+      // Japanese needs no relativizer at all: the clause simply precedes the head.
+      ja: '本が美しい猫は走ります。',
+      pt: 'o gato cujo livro é belo corre.',
+    });
+  });
+
+  test('the relativizer agrees with the POSSESSED phrase, not with the head', () => {
+    // A feminine head owning plural masculine books: Italian "i cui", Spanish "cuyos", German
+    // "deren" (which reads off the head) — the two systems pull apart exactly here.
+    expect(sayAll(clause(
+      np('WOMAN', {
+        gender: 'fem',
+        relative: {
+          headRole: 'possessor',
+          subject: np('BOOK', { number: 'plural' }),
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: np('BEAUTIFUL') } },
+        },
+      }),
+      'RUN',
+    ))).toEqual({
+      en: 'the woman whose books are beautiful runs.',
+      it: 'la donna i cui libri sono belli corre.',
+      fr: 'la femme dont les livres sont beaux court.',
+      de: 'die Frau, deren Bücher schön sind, läuft.',
+      es: 'la mujer cuyos libros son hermosos corre.',
+      ja: '本が美しい女は走ります。',
+      pt: 'a mulher cujos livros são belos corre.',
+    });
+  });
+
+  test('the clause takes an object of its own, as any relative does', () => {
+    expect(sayAll(clause(
+      np('CAT', {
+        relative: {
+          headRole: 'possessor',
+          subject: np('CHILD'),
+          verbPhrase: { verb: 'EAT' },
+          directObject: np('FOOD'),
+        },
+      }),
+      'RUN',
+    ))).toEqual({
+      en: 'the cat whose child eats the food runs.',
+      it: 'il gatto il cui bambino mangia il cibo corre.',
+      fr: "le chat dont l'enfant mange la nourriture court.",
+      de: 'der Kater, dessen Kind das Essen isst, läuft.',
+      es: 'el gato cuyo niño come la comida corre.',
+      ja: '子供が食べ物を食べる猫は走ります。',
+      pt: 'o gato cuja criança come a comida corre.',
+    });
+  });
+});

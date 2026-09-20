@@ -18,7 +18,7 @@ import {
 } from "../../components/PhraseBuilder/interfaces.ts";
 import { conjunctsOf } from "../../components/PhraseBuilder/phraseReducers.ts";
 import { resolveAntecedent } from "../../components/PhraseBuilder/selectionToPlan/index.ts";
-import { adjectiveSlots, MODAL_SLOTS, modalAdverbFor } from "../../components/PhraseBuilder/slots.ts";
+import { adjectiveSlots, isBoxComplement, MODAL_SLOTS, modalAdverbFor } from "../../components/PhraseBuilder/slots.ts";
 import {
   COORD_VALUES,
   LEVEL_VALUES,
@@ -210,7 +210,9 @@ class Printer {
     this.verbBlock(root);
     this.noun(root, "directObject", undefined, "period");
     for (const type of COMPLEMENT_RENDER_ORDER) {
-      if (type === "instrumental") continue;
+      // The instrumental is a period of its own, printed with the links below; the plan-only
+      // complements have no selection to print at all (see `isBoxComplement`).
+      if (!isBoxComplement(type)) continue;
       this.noun(root, type, undefined, "period");
     }
     // The period's own links: its if-clause, its coordinate, its instrument.

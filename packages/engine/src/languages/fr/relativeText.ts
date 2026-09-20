@@ -3,6 +3,7 @@ import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeAlarmHead } from '../../functions/relativeAlarmHead.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -21,11 +22,20 @@ import { subjectText } from './subjectText.js';
  * preposition with "lequel", agreeing with the head and fused with its article ("la maison sous
  * laquelle le chat mange", "le garçon auquel l'homme donne le livre", "à cause duquel"). So does the alarm a
  * cry raises, which the cry takes as its à-complement: "le loup auquel le garçon cria" (A129). A plain
- * locative gap is the relative adverb "où" instead ("la maison où le chat mange", C07).
+ * locative gap is the relative adverb "où" instead ("la maison où le chat mange", C07). A possessor gap is "dont",
+ * which keeps the possessed phrase's own article ("une période dont le nom est un mot").
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
+  // Genitive relative: "dont", the one relativizer French writes *before* the possessed phrase
+  // while leaving it its own article — "une période dont le nom est un mot". The clause agrees
+  // with that phrase, not with the head.
+  const possessed = relativePossessed(rel, 'definite');
+  if (possessed) {
+    return `dont ${joinSubject(subjectText(possessed),
+      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements))}`.trim();
+  }
   if (rel.headRole === 'subject' || !rel.subject) {
     return `qui ${predicateText(np.head.forms, rel.verbPhrase, rel.directObject, rel.complements)}`.trim();
   }

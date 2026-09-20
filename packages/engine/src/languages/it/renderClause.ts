@@ -43,7 +43,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const complement = phrase.infinitiveComplement
     ? infinitiveComplementText(phrase.infinitiveComplement, infinitiveController(phrase, agreement), infinitiveLink(phrase))
     : '';
-  return [subj, predicate, complement].filter(Boolean).join(' ').trim();
+  // A clause of purpose closes the sentence, under the final preposition every Romance language
+  // puts before the infinitive: "per cambiare", "per vedere le traduzioni". It is subject-controlled,
+  // so it agrees with this clause's own subject, exactly as an infinitive complement does.
+  const purpose = phrase.purpose ? infinitiveComplementText(phrase.purpose, agreement, 'per') : '';
+  return [subj, predicate, complement, purpose].filter(Boolean).join(' ').trim();
 }
 
 function withoutGeneric(forms: Record<string, string>): Record<string, string> {

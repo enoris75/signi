@@ -8,7 +8,7 @@ import { isDimensionGloss } from './isDimensionGloss.js';
 import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
-import { JA_NEGATIVE_DETERMINER, JA_SURU } from './ja.consts.js';
+import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
@@ -45,6 +45,10 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const particle = subjectParticle === 'が' && isPossessiveExistential(phrase.verbPhrase.verb, animate) ? 'に' : subjectParticle;
   // A `no` subject's も replaces the topic/subject particle (どの時間も, not どの時間もは).
   if (!dropsSubject) segs.push(...elSegs(phrase.subject), ...jaParticleSegs(phrase.subject, particle));
+  // A clause of purpose precedes what it is done for, closed by ために on the dictionary form:
+  // 「変更するためにクリック」, 「翻訳を見るために主語を選択」. It is a citation clause, so it speaks no
+  // subject of its own — the one it shares with this clause is already the topic above.
+  if (phrase.purpose) segs.push(...buildClauseSegments(phrase.purpose, subjectParticle), { t: JA_PURPOSE });
   // An infinitive complement is a nominalized clause ahead of the predicate governing it, closed by
   // the tail the governor's lexeme names (`infinitive_link`, ことを by default): 行動することが可能です,
   // 食べ物を食べることを望みます, and ように for the causative below. The clause is itself a citation, in

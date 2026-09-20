@@ -401,19 +401,24 @@ describe('PhraseWorkspace', () => {
       act(() => periodProps('A').binding!.coordinative.onStart('but'));
 
       expect(banner()).toHaveTextContent(
-        'Click the period to coordinate with “But” — in another phrase container.',
+        'Click the period in another period container to coordinate with this clause. (But)',
       );
     });
 
-    it('prompts for the instrument period by the instrumental’s name in the UI language', () => {
+    it('prompts for the instrument period in the UI language', () => {
       localStorage.setItem('signi:uiLanguage', 'it');
-      renderWorkspace({ strings: { 'slot.instrumental': { it: 'Strumento' } } });
+      renderWorkspace({
+        strings: {
+          'pick.instrumental': {
+            it: 'Clicca sul periodo il cui sostantivo è il complemento di mezzo in un altro contenitore di periodo.',
+          },
+        },
+      });
 
       act(() => periodProps('A').binding!.instrumental.onStart());
 
       expect(banner()).toHaveTextContent(
-        'Click the period holding the strumento — a period with no verb, whose noun is what ' +
-          'the action is done with.',
+        'Clicca sul periodo il cui sostantivo è il complemento di mezzo in un altro contenitore di periodo.',
       );
     });
 

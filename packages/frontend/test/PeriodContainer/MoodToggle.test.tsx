@@ -30,21 +30,21 @@ describe('MoodToggle', () => {
   });
 
   it.each<[Mood, string, boolean, boolean, string]>([
-    ['imperative', 'off', false, false, 'Make this period a command (imperative)'],
+    ['imperative', 'off', false, false, 'Transform this period into a command'],
     ['imperative', 'on', true, false, 'This period is a command — turn it off'],
     [
       'imperative',
       'locked by a relation',
       false,
       true,
-      'Remove the IF / coordination link to make this a command',
+      'Remove the condition or the coordination to transform this period into a command',
     ],
     [
       'infinitive',
       'off',
       false,
       false,
-      'Make this period an infinitive phrase (a citation, e.g. “to consume food”)',
+      'Transform this period into an infinitive phrase',
     ],
     ['infinitive', 'on', true, false, 'This period is an infinitive phrase — turn it off'],
     [
@@ -52,7 +52,7 @@ describe('MoodToggle', () => {
       'locked by a relation',
       false,
       true,
-      'Remove the IF / coordination link to make this an infinitive phrase',
+      'Remove the condition or the coordination to transform this period into an infinitive phrase',
     ],
   ])('explains the %s toggle while it is %s', (m, _, active, disabled, tooltip) => {
     renderWithProviders(<MoodToggle mood={m} control={mood(active, disabled)} />);

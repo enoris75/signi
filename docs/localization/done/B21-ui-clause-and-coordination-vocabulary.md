@@ -50,7 +50,7 @@ no new word and can go ahead of the rest.
 
 The remaining tooltips on these two controls ("Use this period as the IF condition", "Use this
 period as the coordinated clause", "Click the period to coordinate with …") need an "as" or a
-comitative "with". Those are [C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md).
+comitative "with". Those are [C12](C12-ui-purpose-and-object-complements.md).
 
 ## Tests that select on these literals
 
@@ -123,7 +123,7 @@ OTHER needed the engine:
 Changes against the plan:
 - **"IF" is gone from the strings.** The badge says "Conditional clause" (was "If clause"), and the controls
   say "condition" (was "IF condition"). "Use this period as the IF condition" keeps it: that string is
-  [C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md)'s.
+  [C12](C12-ui-purpose-and-object-complements.md)'s.
 - **The coordinated clause's badge** reads `clause.coordinated` plus the English conjunction in brackets,
   "Coordinated clause (But)", like the control's tooltip. It read "But clause". The conjunction is
   [C13](../C-needs-engine/C13-ui-grammatical-function-words.md).

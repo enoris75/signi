@@ -287,7 +287,7 @@ export class Builder {
       .getByRole('button', { name: 'Add a condition (this period becomes the main clause)' })
       .click();
     await this.period(ifIndex)
-      .getByRole('button', { name: 'Use this period as the IF condition' })
+      .getByRole('button', { name: 'Use this period as the condition' })
       .click();
   }
 

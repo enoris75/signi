@@ -7,7 +7,7 @@ localized the seven verbs it reached, and these are what it did not.)_
 ## Blocked on
 
 Two constructs of its own (a voice, a complement), one judgement about a gloss, and three more the
-workspace verbs want — two of which [C12](C12-ui-purpose-and-object-complements.md) already
+workspace verbs want — two of which [C12](../done/C12-ui-purpose-and-object-complements.md) already
 catalogues for the UI strings. None of them is the causative.
 
 ### 1. The passive voice — BURN
@@ -64,6 +64,12 @@ is worth the seed.
 
 Two of the three are C12's items 1 and 3, so those two land together with the UI strings or not at
 all; the prior state is this file's own.
+
+**Update 2026-09-20: they landed.** [C12](../done/C12-ui-purpose-and-object-complements.md) shipped
+`PhrasePlan.purpose` and the `comitative` complement, so **SAVE and ADD are no longer blocked** —
+both are now ordinary authoring work against constructs that render in all seven languages. What
+remains here is the passive (BURN), the similative complement (SEEM), the judgement on BECOME, and
+the prior state TIDY_UP and LOAD want.
 
 | verb | literal | missing construct | C12 |
 |---|---|---|---|

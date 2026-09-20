@@ -7,7 +7,10 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
+import { objectPredication } from '../../functions/objectPredication.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveEs, pronounPossessor } from '../../possessive.js';
@@ -31,10 +34,13 @@ import { withAdj } from './withAdj.js';
 import { withRelative } from './withRelative.js';
 import { esPossessiveWord } from './esPossessiveWord.js';
 
+// `objectForms` are the direct object's, which the object complement predicates of and agrees an
+// adjective head with ("pinta la pared roja") — the object's counterpart of `subjectForms`.
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
   verbConceptId: string,
+  objectForms: Record<string, string> = {},
 ): string {
   // "lejos" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
   // need it — see SOURCE_ABLATIVE_ADVERB_VERBS. COME/GO and the transitive LOAD/IMPORT keep bare
@@ -60,6 +66,27 @@ export function complementsPhrase(
           // A predicative superlative has no noun's article to borrow, so it adds its own, agreeing
           // with the subject: "parece EL más feliz" — distinct from the comparative "más feliz".
           return isRelativeSuperlative(np.head) ? `${defArticle({ gender }, plural)} ${surface}` : surface;
+        });
+      }
+      // Object complement: what the object is *made into* ("convertir el período en un comando")
+      // or *taken as* ("usar el período como condición"). It predicates of the direct object, so
+      // an adjective head agrees with that and not with the subject. Neither marker contracts —
+      // Spanish fuses only "a" and "de" with "el", and a verb links its object predicative with
+      // neither — so the marker simply leads the phrase. The essive drops the article: it names a
+      // role rather than picking a referent out ("como condición", never "como la condición").
+      if (type === 'objectPredicative') {
+        const essive = objectPredication(c) === 'essive';
+        // The factitive link introduces a noun ("en una prisión"); an adjective predicate takes
+        // none — "hace la casa hermosa", never "*en hermosa".
+        const marker = essive ? 'como' : isAdjectivePredicate(c) ? '' : (c.link ?? '');
+        const gender = objectForms['gender'] ?? 'masc';
+        const plural = objectForms['number'] === 'plural';
+        return coordinateElement(c.phrase, (conjunct) => {
+          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+          const word = np.head.forms['role'] === 'adjective'
+            ? esDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural))
+            : withRelative(nounPhrase(predicativeForms(np.head.forms), esAdj(np)), np);
+          return [marker, word].filter(Boolean).join(' ');
         });
       }
       // An instrument presented as an action: the bare gerundio for the process level
@@ -113,7 +140,8 @@ export function complementsPhrase(
         type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), plural, af) :
         type === 'terminus'  ? aDet(af, plural) :
         // Instrumental → "con", which contracts with nothing ("con el cuchillo", "con una palabra").
-        type === 'instrumental' ? prepDet('con', af, plural) :
+        // The comitative companion takes the same "con": Spanish does not separate the two either.
+        type === 'instrumental' || type === 'comitative' ? prepDet('con', af, plural) :
         // Manner: similative "como" (como el viento — the default), means "con" (con cuidado),
         // measure "a" (a la velocidad de la luz), mode "de" (de manera…). Read off the head noun.
         type === 'manner'    ? (

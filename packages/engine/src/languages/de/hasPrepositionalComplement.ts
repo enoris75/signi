@@ -22,6 +22,10 @@ import { firstConjunct } from '../../functions/firstConjunct.js';
  *
  * The last two are the ones `splitDative` / `splitMeansClause` lift out of the complements slot;
  * naming them here keeps the answer right whether or not the caller has split yet.
+ *
+ * The `objectPredicative` is not among the three, deliberately: it is a PP under a factitive link
+ * ("in ein Gefängnis") or the essive "als", and where a verb names no link it is a bare predicate,
+ * which "nicht" leads for the same reason a subject complement's does ("macht das Haus nicht …").
  */
 export function hasPrepositionalComplement(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,

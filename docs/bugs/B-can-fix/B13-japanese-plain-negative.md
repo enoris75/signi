@@ -18,6 +18,7 @@ plain (`食べる猫`, `食べる。`), but a negated predicate goes through the
 | the cat that never eats runs | `決して食べません猫は走ります。` | `決して食べない猫は走ります。` |
 | the cat that eats no mouse runs | `どのネズミも食べません猫は走ります。` | `どのネズミも食べない猫は走ります。` |
 | citation: not to eat | `食べません。` | `食べない。` |
+| the cat runs so as not to eat | `猫は食べませんために走ります。` | `猫は食べないために走ります。` |
 
 Two passing tests pin the fallback:
 
@@ -37,6 +38,13 @@ unblocks the negative たら protasis (`食べなかったら`) and the polite `
 | | |
 |---|---|
 | **Test** | `relative.test.ts` → *documented simplifications: Japanese plain negative* (1 `test.fails`) |
+
+## Update 2026-09-20
+
+A **third call site** joined the two above: the clause of purpose
+([C12](../../localization/done/C12-ui-purpose-and-object-complements.md)) renders as a citation and
+closes on ために, so a negated purpose reads 食べませんために. The fix is the same one — `plainVerbSeg`
+taking a `negative` flag — and the purpose clause needs no work of its own once it lands.
 
 ## Update 2026-09-13
 

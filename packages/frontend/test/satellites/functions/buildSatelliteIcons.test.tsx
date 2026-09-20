@@ -25,6 +25,7 @@ import {
   build,
   concept,
   glyph,
+  t,
 } from '../fixtures.tsx';
 
 // Only the parts of the workspace binding the satellite controls reach for.
@@ -64,6 +65,7 @@ function icons(
     shownMap,
     collapsedMainKeys: new Set(collapsed),
     linkBinding: binding as unknown as WorkspaceBinding | undefined,
+    t,
     ...callbacks,
   });
   const find = (key: string) => satellites.find((s) => s.key === key);
@@ -399,7 +401,7 @@ describe('buildSatelliteIcons', () => {
       expect(control).toMatchObject({
         active: false,
         isSet: true,
-        valueLabel: 'Linked — click to remove',
+        valueLabel: 't(status.linked) — t(hint.clickToRemove)',
       });
       control.onToggle();
       expect(binding.instrumental.onClear).toHaveBeenCalledOnce();
@@ -457,7 +459,7 @@ describe('buildSatelliteIcons', () => {
         expect(relative).toMatchObject({
           active: false,
           isSet: true,
-          valueLabel: 'Linked — click to remove',
+          valueLabel: 't(status.linked) — t(hint.clickToRemove)',
           link: true,
         });
         relative.onToggle();
@@ -577,6 +579,7 @@ describe('buildSatelliteIcons, on hand-built satellites', () => {
       shownMap,
       collapsedMainKeys: new Set(collapsed),
       linkBinding: undefined,
+      t,
       ...callbacks,
     });
     return { ...result, ...callbacks };
@@ -687,7 +690,7 @@ describe('known bugs: the link controls’ tooltips', () => {
       .perimeterByNoun['subject']!.relative!;
 
     expect(tooltip(unlinked)).toBe('t(satellite.relative)');
-    expect(tooltip(linked)).toBe('t(satellite.relative): Linked — click to remove');
+    expect(tooltip(linked)).toBe('t(satellite.relative): t(status.linked) — t(hint.clickToRemove)');
   });
 
   it('the instrumental control names the link before one is made', () => {
@@ -702,7 +705,7 @@ describe('known bugs: the link controls’ tooltips', () => {
     const binding = workspace({ relativeSources: ['directObject'] });
     const { perimeterByNoun } = icons({ verb: SEE, subject: CAT, directObject: FRIEND }, { binding });
 
-    expect(tooltip(perimeterByNoun['directObject']!.relative!)).toBe('t(satellite.relative): Linked — click to remove');
+    expect(tooltip(perimeterByNoun['directObject']!.relative!)).toBe('t(satellite.relative): t(status.linked) — t(hint.clickToRemove)');
     expect(tooltip(perimeterByNoun['subject']!.relative!)).toBe('t(satellite.relative)');
     perimeterByNoun['directObject']!.relative!.onToggle();
     expect(binding.relative.onRemoveLink).toHaveBeenCalledExactlyOnceWith('directObject');
@@ -722,6 +725,6 @@ describe('known bugs: the link controls’ tooltips', () => {
       (icon) => icon.key === 'instrumental',
     )!;
 
-    expect(tooltip(linked)).toBe('t(slot.instrumental): Linked — click to remove');
+    expect(tooltip(linked)).toBe('t(slot.instrumental): t(status.linked) — t(hint.clickToRemove)');
   });
 });

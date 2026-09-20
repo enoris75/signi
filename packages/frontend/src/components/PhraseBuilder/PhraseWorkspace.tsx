@@ -359,9 +359,12 @@ export function PhraseWorkspace({
             {pick.active && pick.kind === "conditional"
               ? t("pick.condition")
               : pick.active && pick.kind === "coordinative"
-                ? `Click the period to coordinate with “${COORD_CONJUNCTION_LABEL[pick.conjunction]}” — in another phrase container.`
+                // The conjunction the pick will join with is a function word the catalog cannot
+                // cite yet (C13), so it trails the sentence in brackets, as the coordination
+                // control's own label already writes it.
+                ? `${t("pick.coordinated")} (${COORD_CONJUNCTION_LABEL[pick.conjunction]})`
                 : pick.active && pick.kind === "instrumental"
-                  ? `Click the period holding the ${t("slot.instrumental").toLowerCase()} — a period with no verb, whose noun is what the action is done with.`
+                  ? t("pick.instrumental")
                   : t("pick.relativeHead")}
           </Typography>
           {/* How to give it from the keyboard. Only to a keyboard user: a mouse user points. */}

@@ -50,7 +50,7 @@ describe('TranslationPanel', () => {
 
     expect(screen.getByText('Translations')).toBeInTheDocument();
     expect(screen.getByTestId('translations-empty')).toHaveTextContent(
-      'Select at least a subject and a verb to see translations.',
+      'Select a subject and a verb to see the translations.',
     );
     expect(screen.queryByTestId('translation-en')).not.toBeInTheDocument();
   });

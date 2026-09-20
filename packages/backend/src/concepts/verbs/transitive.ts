@@ -2275,6 +2275,83 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // The factitive: changing a thing INTO another thing, and the first verb to license an
+    // `objectPredicative` (localization C12). What the object becomes is linked by a word that
+    // belongs to the verb, not to the construction, so each lexeme names it as
+    // `object_predicative_link` — "into" / in / en / em / in (+ accusative) — exactly as a
+    // governing word names its `infinitive_link`. Japanese needs none: its factitive is the same に
+    // the subject complement takes (「文を命令に変える」), which the engine's particle already gives.
+    //
+    // The whole family is transparent — transform / trasformare / transformer / transformar — except
+    // German, which takes verwandeln: "transformieren" is the technical loan (a matrix, a signal),
+    // where verwandeln is what a thing is turned into something else by.
+    id: 'TRANSFORM',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['objectPredicative', 'manner', 'instrumental', 'cause', 'locative'],
+    description: 'to change a thing into another thing',
+    emoji: '🦋',
+    isA: 'CHANGE',
+    forms: {
+      en: {
+        base: 'transform', object_predicative_link: 'into',
+        '1sg_present': 'transform', '2sg_present': 'transform', '3sg_present': 'transforms',
+        '1pl_present': 'transform', '2pl_present': 'transform', '3pl_present': 'transform',
+        past: 'transformed',
+      },
+      it: {
+        base: 'trasformare', object_predicative_link: 'in',
+        '1sg_present': 'trasformo', '2sg_present': 'trasformi', '3sg_present': 'trasforma',
+        '1pl_present': 'trasformiamo', '2pl_present': 'trasformate', '3pl_present': 'trasformano',
+        '1sg_past': 'trasformai', '2sg_past': 'trasformasti', '3sg_past': 'trasformò',
+        '1pl_past': 'trasformammo', '2pl_past': 'trasformaste', '3pl_past': 'trasformarono',
+        '1sg_future': 'trasformerò', '2sg_future': 'trasformerai', '3sg_future': 'trasformerà',
+        '1pl_future': 'trasformeremo', '2pl_future': 'trasformerete', '3pl_future': 'trasformeranno',
+      },
+      fr: {
+        base: 'transformer', object_predicative_link: 'en',
+        '1sg_present': 'transforme', '2sg_present': 'transformes', '3sg_present': 'transforme',
+        '1pl_present': 'transformons', '2pl_present': 'transformez', '3pl_present': 'transforment',
+        '1sg_past': 'transformai', '2sg_past': 'transformas', '3sg_past': 'transforma',
+        '1pl_past': 'transformâmes', '2pl_past': 'transformâtes', '3pl_past': 'transformèrent',
+        '1sg_future': 'transformerai', '2sg_future': 'transformeras', '3sg_future': 'transformera',
+        '1pl_future': 'transformerons', '2pl_future': 'transformerez', '3pl_future': 'transformeront',
+      },
+      de: {
+        base: 'verwandeln', object_predicative_link: 'in',
+        '1sg_present': 'verwandle', '2sg_present': 'verwandelst', '3sg_present': 'verwandelt',
+        '1pl_present': 'verwandeln', '2pl_present': 'verwandelt', '3pl_present': 'verwandeln',
+        '1sg_past': 'verwandelte', '2sg_past': 'verwandeltest', '3sg_past': 'verwandelte',
+        '1pl_past': 'verwandelten', '2pl_past': 'verwandeltet', '3pl_past': 'verwandelten',
+      },
+      es: {
+        base: 'transformar', object_predicative_link: 'en',
+        '1sg_present': 'transformo', '2sg_present': 'transformas', '3sg_present': 'transforma',
+        '1pl_present': 'transformamos', '2pl_present': 'transformáis', '3pl_present': 'transforman',
+        '1sg_past': 'transformé', '2sg_past': 'transformaste', '3sg_past': 'transformó',
+        '1pl_past': 'transformamos', '2pl_past': 'transformasteis', '3pl_past': 'transformaron',
+        '1sg_future': 'transformaré', '2sg_future': 'transformarás', '3sg_future': 'transformará',
+        '1pl_future': 'transformaremos', '2pl_future': 'transformaréis', '3pl_future': 'transformarán',
+      },
+      ja: {
+        base: '変える',
+        reading: 'かえる',
+        masu_present: '変えます',
+        masu_present_reading: 'かえます',
+      },
+      pt: {
+        base: 'transformar', object_predicative_link: 'em',
+        '1sg_present': 'transformo', '2sg_present': 'transforma', '3sg_present': 'transforma',
+        '1pl_present': 'transformamos', '2pl_present': 'transformam', '3pl_present': 'transformam',
+        '1sg_past': 'transformei', '2sg_past': 'transformou', '3sg_past': 'transformou',
+        '1pl_past': 'transformamos', '2pl_past': 'transformaram', '3pl_past': 'transformaram',
+        '1sg_future': 'transformarei', '2sg_future': 'transformará', '3sg_future': 'transformará',
+        '1pl_future': 'transformaremos', '2pl_future': 'transformarão', '3pl_future': 'transformarão',
+      },
+    },
+  },
+
+  {
     // The genus of LOVE ("to feel affection") — the verb of experiencing an emotion that its
     // dictionary definition cites as its genus (see the B17 verb-definition task). German takes
     // fühlen: empfinden is already PERCEIVE's. Italian and French take provare / éprouver, the
@@ -2862,6 +2939,75 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'escolhemos', '2pl_past': 'escolheram', '3pl_past': 'escolheram',
         '1sg_future': 'escolherei', '2sg_future': 'escolherá', '3sg_future': 'escolherá',
         '1pl_future': 'escolheremos', '2pl_future': 'escolherão', '3pl_future': 'escolherão',
+      },
+    },
+  },
+
+  {
+    // Narrowing a list down to what matches — what clicking a slot does to the word palette. Every
+    // language here has taken the computing loan (filtrare / filtrer / filtern / filtrar), and
+    // Japanese uses the native 絞り込む ("narrow down"), the word its interfaces say.
+    id: 'FILTER',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to keep only the items that match',
+    emoji: '🔎',
+    forms: {
+      en: {
+        base: 'filter',
+        '1sg_present': 'filter', '2sg_present': 'filter', '3sg_present': 'filters',
+        '1pl_present': 'filter', '2pl_present': 'filter', '3pl_present': 'filter',
+        past: 'filtered',
+      },
+      it: {
+        base: 'filtrare',
+        '1sg_present': 'filtro', '2sg_present': 'filtri', '3sg_present': 'filtra',
+        '1pl_present': 'filtriamo', '2pl_present': 'filtrate', '3pl_present': 'filtrano',
+        '1sg_past': 'filtrai', '2sg_past': 'filtrasti', '3sg_past': 'filtrò',
+        '1pl_past': 'filtrammo', '2pl_past': 'filtraste', '3pl_past': 'filtrarono',
+        '1sg_future': 'filtrerò', '2sg_future': 'filtrerai', '3sg_future': 'filtrerà',
+        '1pl_future': 'filtreremo', '2pl_future': 'filtrerete', '3pl_future': 'filtreranno',
+      },
+      fr: {
+        base: 'filtrer',
+        '1sg_present': 'filtre', '2sg_present': 'filtres', '3sg_present': 'filtre',
+        '1pl_present': 'filtrons', '2pl_present': 'filtrez', '3pl_present': 'filtrent',
+        '1sg_past': 'filtrai', '2sg_past': 'filtras', '3sg_past': 'filtra',
+        '1pl_past': 'filtrâmes', '2pl_past': 'filtrâtes', '3pl_past': 'filtrèrent',
+        '1sg_future': 'filtrerai', '2sg_future': 'filtreras', '3sg_future': 'filtrera',
+        '1pl_future': 'filtrerons', '2pl_future': 'filtrerez', '3pl_future': 'filtreront',
+      },
+      de: {
+        base: 'filtern',
+        '1sg_present': 'filtere', '2sg_present': 'filterst', '3sg_present': 'filtert',
+        '1pl_present': 'filtern', '2pl_present': 'filtert', '3pl_present': 'filtern',
+        '1sg_past': 'filterte', '2sg_past': 'filtertest', '3sg_past': 'filterte',
+        '1pl_past': 'filterten', '2pl_past': 'filtertet', '3pl_past': 'filterten',
+      },
+      es: {
+        base: 'filtrar',
+        '1sg_present': 'filtro', '2sg_present': 'filtras', '3sg_present': 'filtra',
+        '1pl_present': 'filtramos', '2pl_present': 'filtráis', '3pl_present': 'filtran',
+        '1sg_past': 'filtré', '2sg_past': 'filtraste', '3sg_past': 'filtró',
+        '1pl_past': 'filtramos', '2pl_past': 'filtrasteis', '3pl_past': 'filtraron',
+        '1sg_future': 'filtraré', '2sg_future': 'filtrarás', '3sg_future': 'filtrará',
+        '1pl_future': 'filtraremos', '2pl_future': 'filtraréis', '3pl_future': 'filtrarán',
+      },
+      ja: {
+        base: '絞り込む',
+        reading: 'しぼりこむ',
+        masu_present: '絞り込みます',
+        masu_present_reading: 'しぼりこみます',
+      },
+      pt: {
+        base: 'filtrar',
+        '1sg_present': 'filtro', '2sg_present': 'filtra', '3sg_present': 'filtra',
+        '1pl_present': 'filtramos', '2pl_present': 'filtram', '3pl_present': 'filtram',
+        '1sg_past': 'filtrei', '2sg_past': 'filtrou', '3sg_past': 'filtrou',
+        '1pl_past': 'filtramos', '2pl_past': 'filtraram', '3pl_past': 'filtraram',
+        '1sg_future': 'filtrarei', '2sg_future': 'filtrará', '3sg_future': 'filtrará',
+        '1pl_future': 'filtraremos', '2pl_future': 'filtrarão', '3pl_future': 'filtrarão',
       },
     },
   },
@@ -3585,7 +3731,9 @@ export const transitiveVerbs: ConceptSeed[] = [
     id: 'COORDINATE',
     role: 'verb',
     transitivity: 'transitive',
-    complements: ['manner', 'cause', 'locative', 'instrumental'],
+    // A comitative: one coordinates one thing *with* another, and the other is a companion in the
+    // act, not the means of it (localization C12).
+    complements: ['comitative', 'manner', 'cause', 'locative', 'instrumental'],
     description: 'to make separate parts or people work together',
     // The causative of acting together: what is coordinated is not acted on, it is brought to act
     // (localization C08). PERSON is the "or people" half of the description; the adverb carries the
@@ -4515,6 +4663,75 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'redimensionamos', '2pl_past': 'redimensionaram', '3pl_past': 'redimensionaram',
         '1sg_future': 'redimensionarei', '2sg_future': 'redimensionará', '3sg_future': 'redimensionará',
         '1pl_future': 'redimensionaremos', '2pl_future': 'redimensionarão', '3pl_future': 'redimensionarão',
+      },
+    },
+  },
+
+  {
+    // The pointer gesture: holding a thing and moving it. French says "faire glisser" in full, but
+    // an interface label writes the bare "glisser" ("glisser pour redimensionner"), and a lexeme
+    // has to be one word to conjugate, so glisser is what is seeded. German zieht, Italian
+    // trascina, Japanese takes the katakana loan every interface there uses.
+    id: 'DRAG',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'direction', 'cause'],
+    description: 'to move a thing by holding it and pulling',
+    emoji: '🫳',
+    isA: 'MOVE',
+    forms: {
+      en: {
+        base: 'drag',
+        '1sg_present': 'drag', '2sg_present': 'drag', '3sg_present': 'drags',
+        '1pl_present': 'drag', '2pl_present': 'drag', '3pl_present': 'drag',
+        past: 'dragged',
+      },
+      it: {
+        base: 'trascinare',
+        '1sg_present': 'trascino', '2sg_present': 'trascini', '3sg_present': 'trascina',
+        '1pl_present': 'trasciniamo', '2pl_present': 'trascinate', '3pl_present': 'trascinano',
+        '1sg_past': 'trascinai', '2sg_past': 'trascinasti', '3sg_past': 'trascinò',
+        '1pl_past': 'trascinammo', '2pl_past': 'trascinaste', '3pl_past': 'trascinarono',
+        '1sg_future': 'trascinerò', '2sg_future': 'trascinerai', '3sg_future': 'trascinerà',
+        '1pl_future': 'trascineremo', '2pl_future': 'trascinerete', '3pl_future': 'trascineranno',
+      },
+      fr: {
+        base: 'glisser',
+        '1sg_present': 'glisse', '2sg_present': 'glisses', '3sg_present': 'glisse',
+        '1pl_present': 'glissons', '2pl_present': 'glissez', '3pl_present': 'glissent',
+        '1sg_past': 'glissai', '2sg_past': 'glissas', '3sg_past': 'glissa',
+        '1pl_past': 'glissâmes', '2pl_past': 'glissâtes', '3pl_past': 'glissèrent',
+        '1sg_future': 'glisserai', '2sg_future': 'glisseras', '3sg_future': 'glissera',
+        '1pl_future': 'glisserons', '2pl_future': 'glisserez', '3pl_future': 'glisseront',
+      },
+      de: {
+        base: 'ziehen',
+        '1sg_present': 'ziehe', '2sg_present': 'ziehst', '3sg_present': 'zieht',
+        '1pl_present': 'ziehen', '2pl_present': 'zieht', '3pl_present': 'ziehen',
+        '1sg_past': 'zog', '2sg_past': 'zogst', '3sg_past': 'zog',
+        '1pl_past': 'zogen', '2pl_past': 'zogt', '3pl_past': 'zogen',
+      },
+      es: {
+        base: 'arrastrar',
+        '1sg_present': 'arrastro', '2sg_present': 'arrastras', '3sg_present': 'arrastra',
+        '1pl_present': 'arrastramos', '2pl_present': 'arrastráis', '3pl_present': 'arrastran',
+        '1sg_past': 'arrastré', '2sg_past': 'arrastraste', '3sg_past': 'arrastró',
+        '1pl_past': 'arrastramos', '2pl_past': 'arrastrasteis', '3pl_past': 'arrastraron',
+        '1sg_future': 'arrastraré', '2sg_future': 'arrastrarás', '3sg_future': 'arrastrará',
+        '1pl_future': 'arrastraremos', '2pl_future': 'arrastraréis', '3pl_future': 'arrastrarán',
+      },
+      ja: {
+        base: 'ドラッグする',
+        masu_present: 'ドラッグします',
+      },
+      pt: {
+        base: 'arrastar',
+        '1sg_present': 'arrasto', '2sg_present': 'arrasta', '3sg_present': 'arrasta',
+        '1pl_present': 'arrastamos', '2pl_present': 'arrastam', '3pl_present': 'arrastam',
+        '1sg_past': 'arrastei', '2sg_past': 'arrastou', '3sg_past': 'arrastou',
+        '1pl_past': 'arrastamos', '2pl_past': 'arrastaram', '3pl_past': 'arrastaram',
+        '1sg_future': 'arrastarei', '2sg_future': 'arrastará', '3sg_future': 'arrastará',
+        '1pl_future': 'arrastaremos', '2pl_future': 'arrastarão', '3pl_future': 'arrastarão',
       },
     },
   },

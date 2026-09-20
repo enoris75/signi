@@ -89,7 +89,7 @@ export default function TranslationPanel({ sentences, preview = false }: Props) 
             fontSize: '0.95rem',
           }}
         >
-          Select at least a subject and a verb to see translations.
+          {t('hint.selectToTranslate')}
         </Typography>
       ) : (
         <Box ref={listRef} onKeyDown={onKeyDown}>

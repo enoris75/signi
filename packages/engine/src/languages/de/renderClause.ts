@@ -36,9 +36,14 @@ export function renderClause(phrase: ResolvedPhrase, inverted = false, verbFinal
   const clause = clauseText(phrase, inverted, verbFinal, zu);
   // An infinitive complement is extraposed behind the whole clause, verb-final tail included, after
   // a comma: "fähig sein, zu handeln", "der Kater wird wünschen, das Essen zu essen".
-  return phrase.infinitiveComplement
+  const governed = phrase.infinitiveComplement
     ? `${clause}, ${renderClause(phrase.infinitiveComplement, false, false, true)}`
     : clause;
+  // A clause of purpose is extraposed the same way, inside the "um … zu" frame German puts a final
+  // clause in: "klicken, um zu ändern", "ein Subjekt selektieren, um die Übersetzungen zu sehen".
+  return phrase.purpose
+    ? `${governed}, um ${renderClause(phrase.purpose, false, false, true)}`
+    : governed;
 }
 
 function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolean, zu: boolean): string {

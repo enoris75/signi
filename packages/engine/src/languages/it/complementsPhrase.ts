@@ -7,12 +7,15 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { objectPredication } from '../../functions/objectPredication.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
+import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
 import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
+import { artFor } from './artFor.js';
 import { coordinate } from './coordinate.js';
 import { defArticle } from './defArticle.js';
 import { itDeg } from './itDeg.js';
@@ -20,14 +23,17 @@ import { itPossessedHeadForms } from './itPossessedHeadForms.js';
 import { joinArt } from './joinArt.js';
 import { joinWords } from './joinWords.js';
 import { npText } from './npText.js';
-import { prepDet } from './prepDet.js';
+import { prepDet, type ItPreposition } from './prepDet.js';
 import { renderNP } from './renderNP.js';
 import { spatialHead } from './spatialHead.js';
 
+// `objectForms` are the direct object's, which the object complement predicates of and agrees an
+// adjective head with ("dipinge la parete rossa") — the object's counterpart of `subjectForms`.
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
   verbConceptId: string,
+  objectForms: Record<string, string> = {},
 ): string {
   if (!complements) return '';
   // The ablative adverb "via" disambiguates source from direction, but only self-propelled
@@ -60,6 +66,30 @@ export function complementsPhrase(
           return isRelativeSuperlative(np.head)
             ? joinArt(defArticle({ gender }, plural, surface), surface)
             : surface;
+        });
+      }
+      // Object complement: what the object is *made into* ("trasformare il periodo in un comando")
+      // or *taken as* ("usare il periodo come condizione"). It predicates of the direct object, so
+      // an adjective head agrees with that and not with the subject. The factitive link is the
+      // verb's own word and fuses with a definite article like any preposition; the essive "come"
+      // fuses with none and drops the article altogether — it names a role rather than picking a
+      // referent out, so "come condizione", never "come la condizione".
+      if (type === 'objectPredicative') {
+        const essive = objectPredication(c) === 'essive';
+        const gender = objectForms['gender'] ?? 'masc';
+        const plural = objectForms['number'] === 'plural';
+        return coordinate(c.phrase, (conjunct) => {
+          const np = essive ? withDefiniteness(conjunct, 'bare') : conjunct;
+          if (np.head.forms['role'] === 'adjective') {
+            const adj = itDeg(np.head, agreeAdj(np.head.forms['base'] ?? '', gender, plural));
+            return joinWords([essive ? 'come' : '', adj]);
+          }
+          const nf = itPossessedHeadForms(np);
+          // The link is seeded on the verb, so it is one of the simple prepositions prepDet fuses.
+          return renderNP(np, (pl, lead) =>
+            essive ? prepDet('come', nf, pl, lead)
+            : c.link ? prepDet(c.link as ItPreposition, nf, pl, lead)
+            : artFor(nf, pl, lead));
         });
       }
       // An instrument presented as an action: the bare gerundio for the process level
@@ -118,7 +148,9 @@ export function complementsPhrase(
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
         type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
-        type === 'instrumental' ? prepDet('con', nf, plural, lead) :
+        // The comitative companion takes the same "con" as the instrument — Italian does not
+        // separate the two either ("coordina con il periodo").
+        type === 'instrumental' || type === 'comitative' ? prepDet('con', nf, plural, lead) :
         type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
         type === 'direction' ? (
           // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with

@@ -8,7 +8,9 @@ const RELATIVIZER_KEPT_FORMS = ['gender', 'number', 'count', 'animate', 'human',
  * The gap complement of a relative clause whose head fills a complement slot — "the house the cat
  * eats IN" relativises on `locative` — as a one-complement map for the engine's own
  * `complementsPhrase`, or `undefined` for any other gap. A predicative gap ("the legend the cat
- * becomes") takes no preposition and renders like a direct object, so it is not one.
+ * becomes") takes no preposition and renders like a direct object, so it is not one; nor is the
+ * object predicative it mirrors, nor a `'possessor'` gap, whose relativizer is the possessive one
+ * each engine writes on the clause's own subject ("a period whose noun is a word").
  *
  * The complement's noun phrase is a stand-in for the head: the relativizer word the engine passes
  * in `forms` (English "which", Italian "quale", Spanish "que"…) on the head's agreement and animacy,
@@ -21,7 +23,8 @@ export function relativeGapComplement(
   forms: Record<string, string>,
 ): Partial<Record<ComplementType, ResolvedComplement>> | undefined {
   const rel = np.relative;
-  if (!rel || rel.headRole === 'subject' || rel.headRole === 'directObject' || rel.headRole === 'predicative') return undefined;
+  if (!rel || rel.headRole === 'subject' || rel.headRole === 'directObject' || rel.headRole === 'possessor'
+    || rel.headRole === 'predicative' || rel.headRole === 'objectPredicative') return undefined;
   const kept = Object.fromEntries(
     RELATIVIZER_KEPT_FORMS.filter((k) => np.head.forms[k] !== undefined).map((k) => [k, np.head.forms[k]]),
   );

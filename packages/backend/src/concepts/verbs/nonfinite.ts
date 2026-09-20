@@ -245,6 +245,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'escolhendo', participle: 'escolhido' },
     ja: { te: '選んで', te_reading: 'えらんで', nai: '選ばない', nai_reading: 'えらばない' },
   },
+  FILTER: {
+    en: { gerund: 'filtering', participle: 'filtered' },
+    it: { gerund: 'filtrando', participle: 'filtrato' },
+    fr: { participle: 'filtré' }, de: { participle: 'gefiltert' },
+    es: { gerund: 'filtrando', participle: 'filtrado' },
+    pt: { gerund: 'filtrando', participle: 'filtrado' },
+    ja: { te: '絞り込んで', te_reading: 'しぼりこんで', nai: '絞り込まない', nai_reading: 'しぼりこまない' },
+  },
   SELECT: {
     en: { gerund: 'selecting', participle: 'selected' },
     it: { gerund: 'selezionando', participle: 'selezionato' },
@@ -517,6 +525,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'mudando', participle: 'mudado' },
     ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない' },
   },
+  TRANSFORM: {
+    en: { gerund: 'transforming', participle: 'transformed' },
+    it: { gerund: 'trasformando', participle: 'trasformato' },
+    fr: { participle: 'transformé' }, de: { participle: 'verwandelt' },
+    es: { gerund: 'transformando', participle: 'transformado' },
+    pt: { gerund: 'transformando', participle: 'transformado' },
+    ja: { te: '変えて', te_reading: 'かえて', nai: '変えない', nai_reading: 'かえない' },
+  },
   FEEL: {
     en: { gerund: 'feeling', participle: 'felt' },
     it: { gerund: 'provando', participle: 'provato' },
@@ -666,6 +682,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'moviendo', participle: 'movido' },
     pt: { gerund: 'movendo', participle: 'movido' },
     ja: { te: '移動して', te_reading: 'いどうして', nai: '移動しない', nai_reading: 'いどうしない' },
+  },
+  DRAG: {
+    en: { gerund: 'dragging', participle: 'dragged' },
+    it: { gerund: 'trascinando', participle: 'trascinato' },
+    fr: { participle: 'glissé' }, de: { participle: 'gezogen' },
+    es: { gerund: 'arrastrando', participle: 'arrastrado' },
+    pt: { gerund: 'arrastando', participle: 'arrastado' },
+    ja: { te: 'ドラッグして', te_reading: 'どらっぐして', nai: 'ドラッグしない', nai_reading: 'どらっぐしない' },
   },
   RESIZE: {
     en: { gerund: 'resizing', participle: 'resized' },

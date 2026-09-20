@@ -10,22 +10,21 @@ import { ACCENT, type Mood, type MoodControl } from "./PeriodContainer.types.ts"
 // it is on with `aria-pressed`, so its name stays put as it toggles.
 const MOODS: Record<
   Mood,
-  { icon: IconComponent; name: UiStringKey; on: UiStringKey; locked: string; off: string }
+  { icon: IconComponent; name: UiStringKey; on: UiStringKey; locked: UiStringKey; off: UiStringKey }
 > = {
   imperative: {
     icon: CampaignIcon,
     name: "imperative.command",
     on: "period.isCommand",
-    locked: "Remove the IF / coordination link to make this a command",
-    off: "Make this period a command (imperative)",
+    locked: "action.unlinkForCommand",
+    off: "action.makeCommand",
   },
   infinitive: {
     icon: AllInclusiveIcon,
     name: "infinitive.phrase",
     on: "period.isInfinitive",
-    locked:
-      "Remove the IF / coordination link to make this an infinitive phrase",
-    off: "Make this period an infinitive phrase (a citation, e.g. “to consume food”)",
+    locked: "action.unlinkForInfinitive",
+    off: "action.makeInfinitive",
   },
 };
 
@@ -40,7 +39,7 @@ export function MoodToggle({ mood, control }: MoodToggleProps) {
   const { icon, name, locked, on, off } = MOODS[mood];
   return (
     <BorderControlButton
-      title={control.disabled ? locked : control.active ? `${t(on)} — ${t("action.turnOff")}` : off}
+      title={control.disabled ? t(locked) : control.active ? `${t(on)} — ${t("action.turnOff")}` : t(off)}
       aria-label={t(name)}
       aria-pressed={control.active}
       icon={icon}

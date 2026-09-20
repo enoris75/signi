@@ -216,7 +216,7 @@ export function WordMap({ open, onClose }: Props) {
         ) : graph.nodes.length === 0 ? (
           <Box sx={{ display: "flex", alignItems: "center", justifyContent: "center", height: "100%" }}>
             <Typography color="text.secondary" sx={{ fontStyle: "italic" }}>
-              No relationships to show. Switch one back on above.
+              {t("wordMap.noRelationships")} {t("wordMap.showRelationships")}.
             </Typography>
           </Box>
         ) : (

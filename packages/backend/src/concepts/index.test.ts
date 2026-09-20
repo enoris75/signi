@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { COMPLEMENT_TYPES, LANGUAGES } from '@signi/shared';
+import { COMPLEMENT_RENDER_ORDER, LANGUAGES } from '@signi/shared';
 import type { GrammaticalRole } from '@signi/shared';
 import { concepts, NONFINITE } from './index.js';
 import { ancestors, assertValidHierarchy } from './hierarchy.js';
@@ -98,10 +98,13 @@ describe('the concept corpus', () => {
     expect(bad).toEqual([]);
   });
 
+  // Against the engine's full list, not the builder's: a verb may license a complement the canvas
+  // has no box for (TRANSFORM's objectPredicative, COORDINATE's comitative), which is what makes
+  // the UI strings built on them renderable. See COMPLEMENT_TYPES in @signi/shared.
   test('licenses only known complement types', () => {
     const bad = concepts.flatMap((c) =>
       (c.complements ?? [])
-        .filter((t) => !(COMPLEMENT_TYPES as string[]).includes(t))
+        .filter((t) => !(COMPLEMENT_RENDER_ORDER as string[]).includes(t))
         .map((t) => `${c.id}: ${t}`),
     );
     expect(bad).toEqual([]);

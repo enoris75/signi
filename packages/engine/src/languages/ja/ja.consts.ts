@@ -29,11 +29,25 @@ export const PARTICLE: Record<ComplementType, string> = {
   manner: 'で',
   // Terminus (dative recipient) — the same に that marks the indirect object ("猫に").
   terminus: 'に',
+  // Comitative (companion) — と, the particle that joins one party to another ("犬と歩く"). It is
+  // not the で of the instrument: Japanese keeps the companion and the means apart, where every
+  // other engine here spells both "with".
+  comitative: 'と',
+  // Object complement: the factitive に, the same one the subject complement takes — "この文を命令
+  // にする" is what "この文が命令になる" becomes under a causer. The essive reading takes として
+  // instead, which `complementSegs` supplies.
+  objectPredicative: 'に',
   // Subject complement: a noun/na-adjective predicate takes に (伝説になる); an i-adjective
   // takes its adverbial く-form with no particle (楽しくなる). Handled specially in
   // complementSegs — this に is the noun/na-adjective default.
   predicative: 'に',
 };
+
+/** The essive marker: the object *taken as* the complement rather than made into it. */
+export const JA_ESSIVE = 'として';
+
+/** The final-clause marker: 〜ために on the dictionary form ("変更するためにクリック"). */
+export const JA_PURPOSE = 'ために';
 
 /**
  * Cause postposition per sentiment — Japanese marks the stance cleanly: neutral のために

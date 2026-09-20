@@ -23,7 +23,7 @@ agreement; they are not engine renders.
 | literal | where | value |
 |---|---|---|
 | my · your · his · her · its · our · their (chip on the dashed line) | built by [`possessiveHintEn`](../../../packages/frontend/src/components/PhraseBuilder/CorefPickContext.tsx#L97) in [possessionEdges.ts:67](../../../packages/frontend/src/components/PhraseBuilder/functions/possessionEdges.ts#L67), drawn by [OwnerRings.tsx:70](../../../packages/frontend/src/components/PhraseBuilder/OwnerRings.tsx#L70) | the antecedent's person, number and gender, plus the possessed noun's gender and number (and in German, case) in the UI language |
-| the same word in the possessor control's tooltip, points to boy (“**his**”) — click to remove | [decoratePerimeterControls.ts:58](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L58) | as above. The rest of that tooltip is [C12](C12-ui-purpose-and-object-complements.md) |
+| the same word in the possessor control's tooltip, Possessor: boy (“**his**”) — click to remove | [decoratePerimeterControls.ts:67](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L67) | as above. The rest of that tooltip shipped with [C12](../done/C12-ui-purpose-and-object-complements.md): the antecedent's word is in the UI language now, and "click to remove" is a catalog entry. The chip reads `pronoun.possessive.*`, which is right only for the antecedent-driven languages |
 
 ## To unblock (pick one)
 

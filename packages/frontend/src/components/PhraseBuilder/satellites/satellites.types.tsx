@@ -8,6 +8,8 @@ import LinkIcon from "@mui/icons-material/Link";
 import CallReceivedIcon from "@mui/icons-material/CallReceived";
 import BuildIcon from "@mui/icons-material/Build";
 import SpeedIcon from "@mui/icons-material/Speed";
+import TransformIcon from "@mui/icons-material/Transform";
+import GroupIcon from "@mui/icons-material/Group";
 import type { ComplementType, UiStringKey } from "@signi/shared";
 import type {
   GenderSlot,
@@ -17,6 +19,7 @@ import type {
   WorkspaceBinding,
 } from "../interfaces.ts";
 import type { SatelliteIcon } from "../Boxes.tsx";
+import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
 
 // Satellite elements (gender / number / polarity / adjective / adverb) are hidden
 // by default and revealed via the small controls round each word's solid ring.
@@ -92,6 +95,9 @@ export interface BuildSatelliteIconsArgs {
   // Append a conjunct to a noun block. Unlike the reveals, this control *adds* — a block can
   // coordinate any number of phrases, so each click adds one more ring to the group.
   onAddConjunct: (which: NounKey) => void;
+  // The UI-string lookup: a link control says what state it is in and what a click will do, and
+  // both are catalog entries (`status.linked`, `hint.clickToRemove`).
+  t: UiStringLookup;
 }
 
 export interface SatelliteIcons {
@@ -113,4 +119,7 @@ export const complementIcons: Record<ComplementType, ReactNode> = {
   instrumental: <BuildIcon sx={iconSx} />,
   manner: <SpeedIcon sx={iconSx} />,
   terminus: <CallReceivedIcon sx={iconSx} />,
+  // What the object is turned into, and who the act is carried out alongside.
+  objectPredicative: <TransformIcon sx={iconSx} />,
+  comitative: <GroupIcon sx={iconSx} />,
 };

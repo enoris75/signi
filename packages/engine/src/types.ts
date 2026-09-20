@@ -143,9 +143,13 @@ export interface ResolvedModal {
  * subject-relative (`headRole === 'subject'`) the head drives verb agreement and
  * `subject` is undefined; otherwise the clause carries its own resolved `subject`
  * (which drives agreement) and the `headRole` slot is left undefined.
+ *
+ * `'possessor'` is the genitive relative (see RelativeClause): no slot is gapped at all — the head
+ * owns the clause's `subject`, which is present and drives agreement, and each engine writes the
+ * possessive relativizer together with it ("whose noun", "il cui nome", "dont le nom").
  */
 export interface ResolvedRelativeClause {
-  headRole: 'subject' | 'directObject' | ComplementType;
+  headRole: 'subject' | 'directObject' | 'possessor' | ComplementType;
   /** The gap complement's specifiers (see RelativeClause.headSpecifiers); plain data. */
   headSpecifiers?: Specifier[];
   subject?: ResolvedNounElement;
@@ -163,6 +167,15 @@ export interface ResolvedComplement {
    * the `object` level and on every other complement.
    */
   action?: ResolvedVerbPhrase;
+  /**
+   * The word the governing verb links a **factitive** `objectPredicative` with — "transform the
+   * period **into** a command" (see `objectPredicativeLink`). It is lexical, a property of the
+   * verb rather than of the construction, but the verb is not in scope where a complement is
+   * rendered, so the translator reads it off the verb once and carries it here. Absent (or "")
+   * is the bare predicate, which is what English takes ("makes the period a command"), and it is
+   * unread on every other complement and on the essive reading, whose word is the language's own.
+   */
+  link?: string;
   specifiers?: Specifier[];
 }
 
@@ -198,6 +211,15 @@ export interface ResolvedPhrase {
    * `infinitiveLink`).
    */
   infinitiveComplement?: ResolvedPhrase;
+  /**
+   * A resolved clause of purpose — what the act is done for ("click **to change**", see
+   * PhrasePlan.purpose). Like an infinitive complement it is a clause of its own in the
+   * `'infinitive'` mood, so every engine drops its subject; that subject is this clause's own,
+   * kept for the agreement of a predicate adjective inside it. Unlike one it is an adjunct: no
+   * governor, and no lexical link — each engine supplies its own connector (per / pour / um … zu /
+   * ために).
+   */
+  purpose?: ResolvedPhrase;
   /**
    * Set on a resolved infinitive complement: which slot of the clause governing it its `subject`
    * was taken from (see InfinitiveControl). `'object'` is the causative — the governing clause's

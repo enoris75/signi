@@ -28,6 +28,12 @@ the phrase"), so it is not a fix.
 
 All modals, tense and negation these need already render. Voice is the only missing piece.
 
+One string that reached for the passive has left: the instrumental pick hint ("whose noun is what
+the action **is done with**") was [C12](../done/C12-ui-purpose-and-object-complements.md)'s, and
+C12's genitive relative says it in the active — "the period whose noun is the instrumental" — by
+naming the complement the noun fills instead of the act done with it. Where a sentence can name a
+role rather than describe an action done to something, it needs no voice.
+
 ## To unblock
 
 1. Ship A01 passive voice, including agentless passives under modals.

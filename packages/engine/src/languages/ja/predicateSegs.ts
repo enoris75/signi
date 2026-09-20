@@ -14,6 +14,7 @@ import { jaImperativeSegs } from './jaImperativeSegs.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { modalSegs } from './modalSegs.js';
 import { plainVerbSeg } from './plainVerbSeg.js';
+import { splitObjectPredicative } from './splitObjectPredicative.js';
 import { taraSeg } from './taraSeg.js';
 import { verbSeg } from './verbSeg.js';
 import { wordSeg } from './wordSeg.js';
@@ -60,6 +61,9 @@ export function predicateSegs(
       }
     : givenVerbPhrase;
   const { verb, negative, modifier, tense = 'present', aspect = 'neutral', mood, register, modals } = verbPhrase;
+  // The object complement follows the object it predicates of, where every other complement
+  // precedes it (see `splitObjectPredicative`).
+  const { objectPredicative, rest: adjunctComplements } = splitObjectPredicative(complements);
   const segs: RubySegment[] = [];
   // A negative-polarity adverb (決して "never", めったに "rarely") grammatically demands a
   // negated predicate — 決して…ない — so it forces the predicate negative even when the verb
@@ -89,8 +93,9 @@ export function predicateSegs(
       segs.push(...(predicative === JA_SOU ? [{ t: 'そう' }] : complementSegs({ predicative })), { t: naru });
       return segs;
     }
-    segs.push(...complementSegs(complements, existential));
+    segs.push(...complementSegs(adjunctComplements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+    segs.push(...complementSegs(objectPredicative));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -104,8 +109,9 @@ export function predicateSegs(
   // which closes a citation in the plain written style (可能である). The plain negative needs a nai-form
   // the lexicon doesn't store, so a negative citation falls back to the polite verbSeg — a documented gap.
   if (mood === 'infinitive' && !(verb.forms['copula'] === '1' && predicative)) {
-    segs.push(...complementSegs(complements, existential));
+    segs.push(...complementSegs(adjunctComplements, existential));
     if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+    segs.push(...complementSegs(objectPredicative));
     if (modifier) {
       const b = modifier.forms['base'] ?? '';
       if (b) segs.push(wordSeg(b, modifier.forms['reading']));
@@ -143,8 +149,9 @@ export function predicateSegs(
     segs.push(...copulaSegs(predicative, copTense, negated, form));
     return segs;
   }
-  segs.push(...complementSegs(complements, existential));
+  segs.push(...complementSegs(adjunctComplements, existential));
   if (directObject) segs.push(...elSegs(directObject), ...jaParticleSegs(directObject, objectParticle));
+  segs.push(...complementSegs(objectPredicative));
   // Adverbs precede the predicate (SOV). Each modal's adverb stacks in scope order (outermost
   // first), with the main verb's adverb nearest the verb — 決して いつも 行きたくない.
   for (const m of modals) {

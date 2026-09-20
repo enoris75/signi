@@ -32,7 +32,7 @@ and a genitive possessor.
 | + adj | [phraseRender.tsx:197](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L197) | — | an English abbreviation. Replace it with an add icon; the tooltip above already says what it does |
 
 The "— click to change" tail on all three chips is a purpose clause:
-[C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md). The "Modifier number" chip is
+[C12](C12-ui-purpose-and-object-complements.md). The "Modifier number" chip is
 [A14](../done/A14-ui-satellite-and-badge-labels.md).
 
 ## Tests that select on these literals
@@ -79,7 +79,7 @@ Changes against the plan:
   title. USE_NOUN, because [B26](B26-ui-saved-item-feedback.md) seeds USE as a verb.
 - **"+ adj" is an add icon.** The chip's tooltip, and the accessible name it gives, say what it does.
 - `MODIFIER_RELATION_LABELS` is deleted from `@signi/shared`. The "— click to change" tail stays English
-  ([C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md)), and so do the degree values
+  ([C12](C12-ui-purpose-and-object-complements.md)), and so do the degree values
   ([C13](../C-needs-engine/C13-ui-grammatical-function-words.md)).
 - German says `Adjektiv vom Modifikator`, the colloquial *von* + dative the engine uses for a possessor
   ([B9](../../bugs/B-can-fix/B09-german-genitive-vs-colloquial-dative.md)).

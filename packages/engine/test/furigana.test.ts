@@ -33,7 +33,7 @@ const KANJI_NOUNS: [id: string, reading: string][] = [
   ['INSTRUMENTAL', 'しゅだんご'], ['JAPANESE', 'にほんご'], ['LANGUAGE', 'げんご'], ['LEGEND', 'でんせつ'],
   ['MAMMAL', 'ほにゅうるい'], ['MAN', 'おとこ'], ['MAP', 'ちず'], ['MARKET', 'いちば'],
   ['NORTH_AMERICA', 'ほくべい'], ['NOUN', 'めいし'], ['NUMBER', 'かず'], ['NUMBER_GRAMMAR', 'すう'],
-  ['OBJECT_GRAMMAR', 'もくてきご'], ['OBJECT_THING', 'ぶったい'], ['OPTION', 'せんたくし'], ['ORDER', 'めいれい'], ['OX', 'おうし'],
+  ['COMITATIVE', 'きょうどうかく'], ['OBJECT_COMPLEMENT', 'もくてきごほご'], ['OBJECT_GRAMMAR', 'もくてきご'], ['OBJECT_THING', 'ぶったい'], ['OPTION', 'せんたくし'], ['ORDER', 'めいれい'], ['OX', 'おうし'],
   ['PERIOD_PUNCTUATION', 'くてん'], ['PERIOD_SENTENCE', 'ぶん'], ['PERIOD_TIME', 'きかん'],
   ['PERSON', 'ひと'], ['PERSON_GRAMMAR', 'にんしょう'], ['PLACE', 'ばしょ'], ['PLURAL_GRAMMAR', 'ふくすう'],
   ['POSSESSOR', 'しょゆうしゃ'], ['PRISON', 'けいむしょ'], ['PROCESS', 'かてい'], ['PRONOUN', 'だいめいし'], ['PROPERTY', 'ざいさん'],

@@ -225,7 +225,7 @@ function ModifierAdjectiveChip({
       <Tooltip
         title={
           adjective
-            ? `${t("modifier.adjective")}: ${word(adjective)} — click to change`
+            ? `${t("modifier.adjective")}: ${word(adjective)} — ${t("hint.clickToChange")}`
             : t("modifier.addAdjective")
         }
       >
@@ -387,7 +387,7 @@ export function SlotNode({
         justifyContent: "center",
       }}
     >
-      <Tooltip title={`${t("modifier.relation")}: ${t(`modifier.relation.${relation}.gloss`)} — click to change`}>
+      <Tooltip title={`${t("modifier.relation")}: ${t(`modifier.relation.${relation}.gloss`)} — ${t("hint.clickToChange")}`}>
         <Box
           component="button"
           type="button"
@@ -402,7 +402,7 @@ export function SlotNode({
         </Box>
       </Tooltip>
       <Tooltip
-        title={`${t("satellite.number")}: ${t(`number.value.${modifierNumber}`)} — click to change`}
+        title={`${t("satellite.number")}: ${t(`number.value.${modifierNumber}`)} — ${t("hint.clickToChange")}`}
       >
         <Box
           component="button"
@@ -438,7 +438,7 @@ export function SlotNode({
   // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
   // On a disc it is a small round chip on the rim, marked with a sign rather than a word.
   const degreeChip = isRealAdjective ? (
-    <Tooltip title={`${t("modifier.degree")}: ${DEGREE_LABELS[degree]} — click to change`}>
+    <Tooltip title={`${t("modifier.degree")}: ${DEGREE_LABELS[degree]} — ${t("hint.clickToChange")}`}>
       <Box
         component="button"
         type="button"

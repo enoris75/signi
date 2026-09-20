@@ -1666,6 +1666,28 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // SUBJECT_COMPLEMENT's counterpart on the object — what the object is made into, or taken as
+    // ("transform the period into a command", "use the period as the condition", localization C12).
+    // Every tradition names it by naming the subject one and swapping the argument, which is what
+    // the pairs above and below look like; German alone compounds it (Objektsprädikativ).
+    id: 'OBJECT_COMPLEMENT',
+    role: 'noun',
+    description: 'the complement a verb predicates of its direct object (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'DESCRIBE', 'OBJECT_GRAMMAR'),
+    emoji: '🎯',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'object complement', plural: 'object complements', count: 'singular' },
+      it: { base: "complemento predicativo dell'oggetto", plural: "complementi predicativi dell'oggetto", gender: 'masc', count: 'singular' },
+      fr: { base: "attribut du complément d'objet", plural: "attributs du complément d'objet", gender: 'masc', count: 'singular' },
+      de: { base: 'Objektsprädikativ', plural: 'Objektsprädikative', gender: 'neut', count: 'singular' },
+      es: { base: 'complemento predicativo del objeto', plural: 'complementos predicativos del objeto', gender: 'masc', count: 'singular' },
+      ja: { base: '目的語補語', count: 'singular', reading: 'もくてきごほご' },
+      pt: { base: 'predicativo do objeto', plural: 'predicativos do objeto', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The name of the instrumental complement — the means or tool an action is carried out
     // with ("start with a word"). Each tradition names it its own way: a bare adjective-turned-
     // noun in en/de (the Indo-European case name), a full phrase in the Romance ones. Only the
@@ -1685,6 +1707,27 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'complemento circunstancial de instrumento', plural: 'complementos circunstanciales de instrumento', gender: 'masc', count: 'singular' },
       ja: { base: '手段語', count: 'singular', reading: 'しゅだんご' },
       pt: { base: 'adjunto adverbial de instrumento', plural: 'adjuntos adverbiais de instrumento', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The name of the comitative complement — the companion an action is carried out together with
+    // ("coordinate with the other period", localization C12). English and German take the
+    // Indo-European case name, as they do for the instrumental; the Romance traditions name the
+    // circumstance (compagnia / accompagnement / compañía / companhia), and Japanese the case.
+    id: 'COMITATIVE',
+    role: 'noun',
+    description: 'the complement naming the companion an action is carried out with (grammar)',
+    emoji: '🤝',
+    synonym: 'grammar',
+    isA: 'COMPLEMENT_GRAMMAR',
+    forms: {
+      en: { base: 'comitative', plural: 'comitatives', count: 'singular' },
+      it: { base: 'complemento di compagnia', plural: 'complementi di compagnia', gender: 'masc', count: 'singular' },
+      fr: { base: "complément d'accompagnement", plural: "compléments d'accompagnement", gender: 'masc', count: 'singular' },
+      de: { base: 'Komitativ', plural: 'Komitative', gender: 'masc', count: 'singular' },
+      es: { base: 'complemento circunstancial de compañía', plural: 'complementos circunstanciales de compañía', gender: 'masc', count: 'singular' },
+      ja: { base: '共同格', count: 'singular', reading: 'きょうどうかく' },
+      pt: { base: 'adjunto adverbial de companhia', plural: 'adjuntos adverbiais de companhia', gender: 'masc', count: 'singular' },
     },
   },
   {

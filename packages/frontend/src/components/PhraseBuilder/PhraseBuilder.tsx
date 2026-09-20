@@ -96,6 +96,7 @@ import { possessionEdges } from "./functions/possessionEdges.ts";
 import { ringHosts } from "./functions/ringHosts.ts";
 import { linkPickHandlers } from "./functions/linkPickHandlers.ts";
 import { useUiLanguage } from "../../i18n/LanguageContext.tsx";
+import { useConceptLabel } from "../../i18n/useConceptLabel.ts";
 import { useUiString } from "../../i18n/useUiString.ts";
 import { BoxScopeProvider, useBoxScope } from "../../keyboard/KeyboardProvider.tsx";
 import { pressControl } from "../../keyboard/controls.ts";
@@ -174,6 +175,8 @@ export function PhraseBuilder({
 }: PhraseBuilderProps) {
   const { uiLanguage } = useUiLanguage();
   const t = useUiString();
+  // The antecedent's word in the UI language, for the possessor control that points at it.
+  const word = useConceptLabel();
   // When this builder edits a possessor (a `possessorPath` naming its head), wrap the
   // container's `binding` so the sub-builder can link like any container: its internal head
   // key `"subject"` is mapped onto the possessor address, and it is never itself a link
@@ -444,6 +447,7 @@ export function PhraseBuilder({
       onToggleNegative: commands.handleToggleNegative,
       onToggleReveal: handleToggleReveal,
       onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : commands.handleAddConjunct,
+      t,
     });
   // The group-extending control rides the group's last ring; each possessor control names or points
   // to its noun's owner.
@@ -453,6 +457,7 @@ export function PhraseBuilder({
     ringHost,
     resolve: coref.resolve,
     onTogglePossessor: handleTogglePossessor,
+    word,
     t,
   });
 

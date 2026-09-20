@@ -782,6 +782,24 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The state a satellite reports when its noun already holds a link ("Linked — click to remove",
+    // localization C12). Japanese リンク済みの, like コピー済みの above; katakana, so no reading.
+    id: 'LINKED',
+    role: 'adjective',
+    transient: true, // a state a thing is put into and taken out of, like COPIED (A47)
+    description: 'joined to another by a link',
+    emoji: '🔗',
+    forms: {
+      en: { base: 'linked' },
+      it: { base: 'collegato' },
+      fr: { base: 'lié' },
+      de: { base: 'verknüpft' },
+      es: { base: 'vinculado' },
+      ja: { base: 'リンク済みの' },
+      pt: { base: 'ligado' },
+    },
+  },
+  {
     // In operation, as a server or a machine is while it runs — not the lively "active" of a child
     // (it vivace, ja 活発な), a sense of its own. A state the thing is in, so transient: es/pt predicate
     // it with estar ("el servidor está activo"). Japanese 稼働中 is a noun, linked by の.

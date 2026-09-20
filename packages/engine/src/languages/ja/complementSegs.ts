@@ -6,7 +6,8 @@ import { causeSentiment } from '../../functions/causeSentiment.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
-import { CAUSE_PARTICLE, JA_DEGREE, PARTICLE, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
+import { objectPredication } from '../../functions/objectPredication.js';
+import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, PARTICLE, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
 import { elSegs } from './elSegs.js';
 import { jaAdjClass } from './jaAdjClass.js';
 import { jaComparisonAdj } from './jaComparisonAdj.js';
@@ -25,6 +26,11 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
   for (const type of COMPLEMENT_RENDER_ORDER) {
     const c = complements[type];
     if (!c) continue;
+    // The factitive object complement takes the same shapes as the subject complement, and for the
+    // same reason: 「家を刑務所にする」 is 「家が刑務所になる」 under a causer, so an adjective head
+    // takes its く-form (家を美しくする) and a noun head the に. Only the essive differs — として
+    // attaches to the word as it stands — so it falls through to the particle path below.
+    const factitive = type === 'objectPredicative' && objectPredication(c) !== 'essive';
     // Subject complement (of なる/見える etc.), by head type:
     //  · i-adjective (…い) → adverbial く-form, no particle (楽しい → "楽しくなる")
     //  · na-adjective (…な) or の-adjective (…の) → drop the particle, then に (幸せな → "幸せになる",
@@ -33,7 +39,7 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     //  · noun → 〜に (伝説 → "伝説になる")
     // The furigana reading tracks the same trailing-mora substitution. A predicate adjective
     // takes its degree adverb before it, as an attributive one does (もっと楽しくなる).
-    if (type === 'predicative') {
+    if (type === 'predicative' || factitive) {
       // Coordinated conjuncts are strung with と / か, and the に — like every other particle in
       // Japanese — attaches once, to the group: 「幸せか疲れに見える」, never 「幸せにか疲れに」.
       // An i-adjective takes no に at all (it is already adverbial in the く-form), so the
@@ -106,6 +112,9 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
       type === 'locative' && existential ? 'に'
       : type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
+      // The object complement: the factitive に ("この文を命令にする"), or として where the object is
+      // only taken as the thing ("この文を条件として使う").
+      : type === 'objectPredicative' && objectPredication(c) === 'essive' ? JA_ESSIVE
       : PARTICLE[type];
     // A `no` group closes its circumfix here: も after the particle (どの家でも, どの犬にも), or in place of
     // the route's を (どの市場も).

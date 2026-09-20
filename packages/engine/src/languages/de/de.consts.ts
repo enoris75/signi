@@ -1,6 +1,14 @@
 import type { CoordConjunction, DimensionRelation } from '@signi/shared';
 import type { Case, Slot } from './de.types.js';
 
+/**
+ * The case each marker of an object predicative governs. The factitive link is the verb's own word
+ * ("in einen Befehl verwandeln", "zu einem Befehl machen"), and which case it takes is a fact
+ * about that preposition; the essive "als" takes the case of the phrase it predicates of, the
+ * accusative object. A verb naming no link leaves the predicate a bare accusative.
+ */
+export const OBJECT_PREDICATIVE_CASE: Record<string, 'nom' | 'acc' | 'dat'> = { in: 'acc', zu: 'dat', als: 'acc' };
+
 // The umlauted counterpart of each comparison-relevant stem vowel (see `deUmlaut`).
 export const DE_UMLAUT: Record<string, string> = { a: 'ä', o: 'ö', u: 'ü', au: 'äu' };
 

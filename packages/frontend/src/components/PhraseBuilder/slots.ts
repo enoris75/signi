@@ -16,10 +16,19 @@ import { BoxComplementType, NounKey, SlotConfig, SlotKey } from "./interfaces.ts
  */
 export const LINKED_COMPLEMENT_TYPES: ComplementType[] = ["instrumental"];
 
-/** The complements that do get a canvas box — everything else. */
+/** The complements that do get a canvas box — everything else the builder offers. */
 export const BOX_COMPLEMENT_TYPES: BoxComplementType[] = COMPLEMENT_TYPES.filter(
   (type) => !LINKED_COMPLEMENT_TYPES.includes(type),
 ) as BoxComplementType[];
+
+/**
+ * Whether a complement is one the canvas draws a box for. Narrows away the linked instrumental
+ * and the plan-only complements, which have no selection fields (see BoxComplementType), so a
+ * caller walking the engine's `COMPLEMENT_RENDER_ORDER` can skip the ones the builder has no slot
+ * for and keep that order for the rest.
+ */
+export const isBoxComplement = (type: ComplementType): type is BoxComplementType =>
+  (BOX_COMPLEMENT_TYPES as ComplementType[]).includes(type);
 
 // Every noun block on the canvas: the core roles plus each boxed complement. These are the
 // blocks that carry adjectives, number/gender, a determiner, a possessor, a relative clause.
@@ -111,6 +120,8 @@ export const modalChainParent = (key: string): SlotKey | undefined => {
  */
 export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
   predicative: "slot.predicative",
+  objectPredicative: "slot.objectPredicative",
+  comitative: "slot.comitative",
   terminus: "slot.terminus",
   instrumental: "slot.instrumental",
   manner: "slot.manner",
@@ -127,6 +138,10 @@ export const COMPLEMENT_LABEL_KEYS: Record<ComplementType, UiStringKey> = {
  */
 export const COMPLEMENT_KEYS: Record<ComplementType, string> = {
   predicative: "P",
+  // The object complement takes O, the initial of its name; the comitative cannot take C (the
+  // cause has it) so it answers to W, the "with" every language but Japanese spells it as.
+  objectPredicative: "O",
+  comitative: "W",
   terminus: "T",
   instrumental: "I",
   manner: "M",

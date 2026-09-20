@@ -23,7 +23,11 @@ export function buildSatelliteIcons({
   onToggleNegative,
   onToggleReveal,
   onAddConjunct,
+  t,
 }: BuildSatelliteIconsArgs): SatelliteIcons {
+  // What a made link says of itself, and what clicking it will do — the same pair on the
+  // instrumental control and on every noun's relative-clause control.
+  const linkedLabel = `${t("status.linked")} — ${t("hint.clickToRemove")}`;
   const satelliteIconsByParent: Record<string, SatelliteIcon[]> = {};
   const complementToggleIcons: SatelliteIcon[] = [];
   const perimeterByNoun: Partial<Record<NounKey, PerimeterEntry>> = {};
@@ -50,7 +54,7 @@ export function buildSatelliteIcons({
         label: sat.label,
         isSet: linked,
         valued: false,
-        valueLabel: linked ? "Linked — click to remove" : undefined,
+        valueLabel: linked ? linkedLabel : undefined,
         link: true,
         onToggle: () =>
           linked
@@ -77,7 +81,7 @@ export function buildSatelliteIcons({
         active: false,
         isSet: isSource,
         valued: false,
-        valueLabel: isSource ? "Linked — click to remove" : undefined,
+        valueLabel: isSource ? linkedLabel : undefined,
         link: true,
         onToggle: () =>
           isSource

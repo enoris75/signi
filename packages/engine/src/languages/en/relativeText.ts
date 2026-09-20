@@ -1,6 +1,7 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePossessed } from '../../functions/relativePossessed.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { predicateParts } from './predicateParts.js';
 import { subjectText } from './subjectText.js';
@@ -15,10 +16,20 @@ import { subjectText } from './subjectText.js';
  * fills a complement, the relativizer takes that complement's preposition, "whom" for a person and
  * "which" otherwise ("the house under which the cat eats", "the boy to whom the man gives the book").
  * A plain locative gap is the relative adverb "where" instead ("a place where one lives", C07).
+ * A possessor gap is the genitive relative "whose", which takes the place of the possessed
+ * phrase's determiner ("a period whose noun is a word").
  */
 export function relativeText(np: ResolvedNounPhrase): string {
   const rel = np.relative;
   if (!rel) return '';
+  // Genitive relative: "whose" + the possessed phrase, article-less, then the clause's predicate,
+  // which agrees with that phrase and not with the head ("a period whose nouns are words").
+  const possessed = relativePossessed(rel);
+  if (possessed) {
+    return ['whose', subjectText(possessed),
+      ...predicateParts(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements)]
+      .filter(Boolean).join(' ');
+  }
   // English relativises on PERSONHOOD, not animacy: "who" for a person, "that" for anything else
   // (an animal is animate but still takes "that"/"which").
   const human = np.head.forms['human'] === '1';

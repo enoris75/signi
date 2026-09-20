@@ -285,6 +285,17 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Copied',
   },
 
+  // What a link satellite says once its noun holds a link. Like COPIED it is a participle agreeing
+  // with what it describes — the noun the satellite rides, so it cites itself on NOUN (it
+  // "collegato", fr "lié", de "verknüpft"). Japanese strips the attributive の (リンク済み). The
+  // control's own "click to remove" is `hint.clickToRemove`, joined after a dash at the call site.
+  'status.linked': {
+    word: 'LINKED',
+    agreesWith: 'NOUN',
+    format: { capitalize: true },
+    fallback: 'Linked',
+  },
+
   // The header control that opens the word palette: the WORD noun in the plural, bare.
   'words.heading': {
     plan: { subject: { concept: 'WORD', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
@@ -384,6 +395,35 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'unconnected hidden words',
   },
 
+  // The map with every relation filter switched off. The English literal was two elliptical
+  // fragments — "No relationships to show. Switch one back on above." — and neither is a period:
+  // the first hangs a purpose clause off a noun, which only a predicate can carry, and the second
+  // is a particle verb pointing at a place on the screen. Said as two clauses instead: what the
+  // map is doing (SHOW with a `no` object, which every language weaves into the verb's own
+  // negation — it "la mappa non mostra nessuna relazione"), and the command that undoes it. The
+  // "above" is gone with the fragment: it is an adverb of place on the screen, and the chips it
+  // points at are the only ones there.
+  'wordMap.noRelationships': {
+    plan: {
+      subject: { concept: 'MAP', definiteness: 'definite' },
+      verbPhrase: { verb: 'SHOW' },
+      directObject: { concept: 'RELATIONSHIP', number: 'plural', definiteness: 'no' },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'The map shows no relationships.',
+  },
+  // Singular, as the literal's "switch one back on" was: one chip brings one kind of relation
+  // back. The plural would make Spanish and Portuguese say "unas relaciones" / "umas relações",
+  // which is the indefinite plural article those two spell where English and Italian spell none.
+  'wordMap.showRelationships': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: { concept: 'RELATIONSHIP', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show a relationship',
+  },
+
   // The subject box's own title: the grammatical SUBJECT noun, bare. The CSS uppercases it.
   'slot.subject': {
     plan: { subject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'bare' } } as PhrasePlan,
@@ -464,6 +504,25 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('SUBJECT_COMPLEMENT'),
     format: NAME_FORMAT,
     fallback: 'Subject Complement',
+  },
+
+  // The object complement's name — the subject complement's counterpart on the direct object, named
+  // the same way, by the phrase each tradition uses for it ("complemento predicativo dell'oggetto",
+  // "attribut du complément d'objet", de the compound Objektsprädikativ). Neither this nor the
+  // comitative below titles a box yet: the two are plan-only complements (see COMPLEMENT_TYPES),
+  // and what shows them is the word map, which names every complement a verb licenses.
+  'slot.objectPredicative': {
+    plan: nameOf('OBJECT_COMPLEMENT'),
+    format: NAME_FORMAT,
+    fallback: 'Object Complement',
+  },
+
+  // The comitative's — the companion an act is carried out with. English and German take the case
+  // name, as they do for the instrumental; the Romance traditions name the circumstance.
+  'slot.comitative': {
+    plan: nameOf('COMITATIVE'),
+    format: NAME_FORMAT,
+    fallback: 'Comitative',
   },
 
   // The other six complements' box titles and satellite labels, seeded the same way: one noun per
@@ -1681,6 +1740,17 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Remove this possessor',
   },
 
+  // What a possessor control that points at another noun shows in place of the owner's word, when
+  // that antecedent no longer resolves (it was cleared, or its period went): some noun, unnamed.
+  // The control is already titled "Possessor" and the value follows it after a colon, so this is
+  // the bare indefinite noun and not the sentence it would take to say "the possessor points at a
+  // noun" — which the label would then say twice.
+  'hint.aNoun': {
+    plan: { subject: { concept: 'NOUN', definiteness: 'indefinite' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'a noun',
+  },
+
   // The coordination control's value: ADD a conjunct, and once there is one, another. OTHER takes the
   // indefinite article's place in Spanish and Portuguese ("añadir otro miembro coordinado") and fuses
   // with it in English ("another"); in Italian and French it precedes the noun ("un altro congiunto").
@@ -1757,6 +1827,100 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: { capitalize: true },
     fallback: 'Click the noun that this clause describes in another period container.',
+  },
+  // The coordination pick says what the click is *for* rather than what the period must be: a
+  // purpose clause (localization C12) whose COORDINATE takes the clause already in hand as its
+  // `comitative` — the companion of the act, not its means, which is the one complement English
+  // spells "with" twice over and no other language does (con / avec / mit / と). The conjunction
+  // the user chose is a function word the catalog cannot cite yet (C13); the banner writes it
+  // after this sentence, in brackets.
+  'pick.coordinated': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            adjectives: ['OTHER'],
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+      purpose: {
+        verbPhrase: { verb: 'COORDINATE' },
+        complements: { comitative: { phrase: { concept: 'CLAUSE', definiteness: 'this' } } },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Click the period in another period container to coordinate with this clause.',
+  },
+  // The instrument pick names the period by what it *owns*: the genitive relative (C12), the one
+  // relative that gaps no slot — the head is the possessor of the clause's subject. en "whose
+  // noun", it "il cui sostantivo", fr "dont le nom", de "dessen Substantiv", es/pt "cuyo/cujo".
+  // It replaces a sentence that needed a passive to say the same thing ("whose noun is what the
+  // action is done with", C11): naming the complement the noun fills says it in the active.
+  'pick.instrumental': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: {
+        concept: 'PERIOD_SENTENCE',
+        definiteness: 'definite',
+        relative: {
+          headRole: 'possessor',
+          subject: { concept: 'NOUN', definiteness: 'definite' },
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: { concept: 'INSTRUMENTAL', definiteness: 'definite' } } },
+        },
+      },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'CONTAINER',
+            definiteness: 'indefinite',
+            adjectives: ['OTHER'],
+            nounModifiers: [{ concept: 'PERIOD_SENTENCE', relation: 'material' }],
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Click the period whose noun is the instrumental in another period container.',
+  },
+
+  // The two link controls while the period is an eligible target: what picking it would make the
+  // period *count as*. That is the essive reading of the object complement (C12) — the period is
+  // not turned into a condition, it is used as one — which every language marks with one word of
+  // its own (as / come / comme / como / als / として) and, outside English, with no article at
+  // all: it names a role, not a referent ("come condizione", "als Bedingung").
+  'action.useAsCondition': {
+    plan: {
+      ...commandOf('USE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'CONDITION', definiteness: 'definite' },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Use this period as the condition',
+  },
+  'action.useAsCoordinated': {
+    plan: {
+      ...commandOf('USE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: {
+        objectPredicative: {
+          phrase: { concept: 'CLAUSE', definiteness: 'definite', adjectives: ['COORDINATED'] },
+          specifiers: [{ kind: 'predication', value: 'essive' }],
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Use this period as the coordinated clause',
   },
 
   // The conjunction menu's hints: the kind of relation each conjunction sets up, as the grammar
@@ -1886,6 +2050,70 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'click a slot and then choose a word',
   },
 
+  // The tail every chip tooltip ends with, and the one every link control ends with: what the
+  // click will do, said as the *purpose* of the click (PhrasePlan.purpose — localization C12).
+  // Each language marks a final clause its own way and the catalog says none of it: en the bare
+  // infinitive, it/fr/es/pt per / pour / para + infinitive, de the um … zu frame, ja 〜ために ahead
+  // of the verb — "click to change", "clicca per cambiare", "klicken, um zu ändern",
+  // 「変えるためにクリック」. Lower-case: both trail an em-dash inside a longer tooltip.
+  'hint.clickToChange': {
+    plan: { ...commandOf('CLICK'), purpose: { verbPhrase: { verb: 'CHANGE' } } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'click to change',
+  },
+  'hint.clickToRemove': {
+    plan: { ...commandOf('CLICK'), purpose: { verbPhrase: { verb: 'REMOVE' } } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'click to remove',
+  },
+
+  // The resize handle's tooltip: the same purpose clause on the gesture that drives it. French
+  // says "faire glisser" in full but labels the gesture with the bare "glisser", which is what
+  // DRAG is seeded as — "glisser pour redimensionner", de "ziehen, um zu skalieren".
+  'hint.dragToResize': {
+    plan: { ...commandOf('DRAG'), purpose: { verbPhrase: { verb: 'RESIZE' } } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Drag to resize',
+  },
+
+  // The word palette's hint above the slot filters: what clicking one of them is *for*. The object
+  // of the click is a slot; what the click is for has none — one filters the list that is already
+  // there, and naming it ("filter the words") would say less than the sentence it sits above.
+  'hint.clickSlotToFilter': {
+    plan: {
+      ...commandOf('CLICK'),
+      directObject: { concept: 'SLOT_COMPUTING', definiteness: 'indefinite' },
+      purpose: { verbPhrase: { verb: 'FILTER' } },
+    } as PhrasePlan,
+    // A sentence in the sidebar, so it keeps the full stop its language ends one with.
+    format: { capitalize: true },
+    fallback: 'Click a slot to filter.',
+  },
+
+  // The translations panel before there is anything to translate: what to select, and what for.
+  // The two things needed are one coordinated object ("a subject and a verb"), and the purpose
+  // clause carries the rest. The English literal's "at least" is gone: it is a quantifying
+  // adverbial on the object, which nothing in the model expresses, and the sentence says the same
+  // thing without it — these are what a translation needs, not a ceiling on what may be picked.
+  'hint.selectToTranslate': {
+    plan: {
+      ...commandOf('SELECT'),
+      directObject: {
+        conjuncts: [
+          { concept: 'SUBJECT_GRAMMAR', definiteness: 'indefinite' },
+          { concept: 'VERB', definiteness: 'indefinite' },
+        ],
+        conjunction: 'and',
+      },
+      purpose: {
+        verbPhrase: { verb: 'SEE' },
+        directObject: { concept: 'TRANSLATION', number: 'plural', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Select a subject and a verb to see the translations.',
+  },
+
   // The reification switch on an instrument period — the three degrees an instrument can be
   // presented at (see AbstractionLevel), keyed by level so the selector can write
   // t(`instrumental.level.${level}`). Each is the bare noun the level is named after: the act in
@@ -1979,6 +2207,81 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: { stripPeriod: true },
     fallback: 'turn it off',
+  },
+
+  // What the same two toggles say while *off*: the command they carry out, which is a factitive —
+  // the period is not acted on, it is turned into something else. That is an `objectPredicative`
+  // (localization C12), and the word linking it belongs to the verb: TRANSFORM says "into" / in /
+  // en / em, and German "in" + the accusative. en "Transform this period into a command", it
+  // "trasforma questo periodo in un comando", de "dieses Satzgefüge in einen Befehl verwandeln",
+  // ja 「この文を命令に変え」. "Make" was the English literal these replace; TRANSFORM is what the
+  // other six languages needed, and it says the same thing — MAKE's lexemes are the plain verbs of
+  // creation (fare / hacer / 作る), which take no object complement in any of them.
+  'action.makeCommand': {
+    plan: {
+      ...commandOf('TRANSFORM'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: { objectPredicative: { phrase: { concept: 'COMMAND', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Transform this period into a command',
+  },
+  'action.makeInfinitive': {
+    plan: {
+      ...commandOf('TRANSFORM'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      complements: {
+        objectPredicative: { phrase: { concept: 'INFINITIVE_PHRASE', definiteness: 'indefinite' } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Transform this period into an infinitive phrase',
+  },
+
+  // What they say while *locked* — the period is in a conditional or a coordination, and a mood
+  // belongs to a clause standing on its own. So: remove whichever link holds it, and the purpose
+  // clause says what that is for. The object is the two links coordinated with "or", since the
+  // control cannot know which one is there; "link" itself is not seeded, and naming the two
+  // relations is more use than naming the mechanism.
+  'action.unlinkForCommand': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: {
+        conjuncts: [
+          { concept: 'CONDITION', definiteness: 'definite' },
+          { concept: 'COORDINATION', definiteness: 'definite' },
+        ],
+        conjunction: 'or',
+      },
+      purpose: {
+        verbPhrase: { verb: 'TRANSFORM' },
+        directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+        complements: { objectPredicative: { phrase: { concept: 'COMMAND', definiteness: 'indefinite' } } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the condition or the coordination to transform this period into a command',
+  },
+  'action.unlinkForInfinitive': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: {
+        conjuncts: [
+          { concept: 'CONDITION', definiteness: 'definite' },
+          { concept: 'COORDINATION', definiteness: 'definite' },
+        ],
+        conjunction: 'or',
+      },
+      purpose: {
+        verbPhrase: { verb: 'TRANSFORM' },
+        directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+        complements: {
+          objectPredicative: { phrase: { concept: 'INFINITIVE_PHRASE', definiteness: 'indefinite' } },
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the condition or the coordination to transform this period into an infinitive phrase',
   },
 
   // Where the second command of a coordination gets its (locked) choices from — the tooltip on

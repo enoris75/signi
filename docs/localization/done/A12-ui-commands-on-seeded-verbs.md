@@ -18,7 +18,7 @@ determiner the engine renders (`this` is the shape of `action.compactPeriod`).
 | Coordinate this period with another | [PeriodContainer.tsx:365](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer.tsx#L365) | `action.coordinatePeriod` | `commandOf('COORDINATE')` + `directObject: PERIOD_SENTENCE this` → "coordinate this period" |
 
 "with another" is dropped. A comitative "with" is not a complement type (see
-[C12](../C-needs-engine/C12-ui-purpose-and-object-complements.md)), and the button's next step, the
+[C12](C12-ui-purpose-and-object-complements.md)), and the button's next step, the
 conjunction menu and then the pick, already shows the other half.
 
 ## Probe renders

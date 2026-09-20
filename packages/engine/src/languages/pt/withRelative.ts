@@ -1,11 +1,14 @@
 import type { ResolvedNounPhrase } from '../../types.js';
 import { isGenericSubject } from '../../functions/isGenericSubject.js';
 import { isPlainLocativeGap } from '../../functions/isPlainLocativeGap.js';
+import { firstConjunct } from '../../functions/firstConjunct.js';
 import { relativeGapComplement } from '../../functions/relativeGapComplement.js';
+import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
 import { possessorText } from './possessorText.js';
+import { isPlural } from './isPlural.js';
 import { predicateText } from './predicateText.js';
 import { prepObjectText } from './prepObjectText.js';
 import { subjectText } from './subjectText.js';
@@ -17,12 +20,24 @@ import { subjectText } from './subjectText.js';
  * When the head fills a complement, the relativizer is that complement's preposition with the
  * article and "qual", agreeing with the head ("a casa debaixo da qual o gato come", "o menino ao qual o
  * homem dá o livro"). A plain locative gap is the relative adverb "onde" instead ("um lugar onde se
- * vive", C07).
+ * vive", C07). A possessor gap is the genitive relative
+ * "cujo", which agrees with the possessed noun and takes the place of its article
+ * ("um período cujo substantivo é uma palavra").
  */
 export function withRelative(text: string, np: ResolvedNounPhrase): string {
   const withPoss = `${text}${modifierText(np)}${possessorText(np)}`;
   const rel = np.relative;
   if (!rel) return withPoss;
+  // Genitive relative: "cujo" replaces the possessed phrase's article and agrees with it, not
+  // with the head — "um período cujo substantivo é uma palavra", and so does the clause's verb.
+  const possessed = relativePossessed(rel);
+  if (possessed) {
+    const pf = firstConjunct(possessed).head.forms;
+    const whose = `cuj${pf['gender'] === 'fem' ? 'a' : 'o'}${isPlural(pf) ? 's' : ''}`;
+    const owned = [whose, subjectText(possessed),
+      predicateText(possessed.agreement, rel.verbPhrase, rel.directObject, rel.complements)];
+    return `${withPoss} ${owned.filter(Boolean).join(' ')}`.trimEnd();
+  }
   const subjectRelative = rel.headRole === 'subject' || !rel.subject;
   const agreeForms = subjectRelative ? np.head.forms : rel.subject!.agreement;
   // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
