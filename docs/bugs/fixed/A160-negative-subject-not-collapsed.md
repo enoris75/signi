@@ -24,7 +24,7 @@ negation: `nessun gatto mangia nessun topo.`, `aucun chat ne court dans aucune m
 corre.`, `nenhum gato corre.`, `どの猫もどのネズミも食べません。`. A **lone** `no` subject is right in all
 seven (`no cat runs.`, `kein Kater läuft.`).
 
-**This is [A35](../fixed/A35-stacked-negation-not-collapsed.md)'s remaining corner.** A35 fixed the
+**This is [A35](A35-stacked-negation-not-collapsed.md)'s remaining corner.** A35 fixed the
 collapse for a negated verb or `NEVER` against a `no` **object**, and fixed the `no`-subject case for
 Italian/Spanish/Portuguese, but closed with: *"The English/German `no`-subject + `no`-object double —
 `no cat eats no mouse` — is a non-concord manifestation the bug table did not pin; it is left
@@ -69,3 +69,52 @@ computed once per clause rather than re-derived per constituent.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: a negative subject is not collapsed* (2 `test.fails`, plus a regression test that a lone `no` subject and the five collapsing languages are unchanged) |
+
+## Resolved
+
+**2026-09-20.** Fixed together with [A158](A158-negative-complement-not-collapsed.md) — see its
+`## Resolved` for the shared machinery ([`negationSources`](../../../packages/engine/src/functions/negationSources.ts)
+and [`withComplementDefiniteness`](../../../packages/engine/src/functions/withComplementDefiniteness.ts)),
+which is where "how many clause negators are there, and which one carries it" is now computed once
+per clause rather than re-derived per constituent.
+
+The precedence both engines read off it, leftmost first: a `no` **subject** outranks everything; a
+negative **adverb** outranks the postverbal phrases; between the object and the complements the
+object is leftmost. What differs is the verb: English keeps its "not" and switches the phrase behind
+it to the NPI (`does not eat any mouse`), where German drops its "nicht" and lets the `kein` stand
+(`frisst keine Maus`), because `kein` is already `nicht + ein`.
+
+- **English** — [`en/predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts):
+  the subject joins the disjunction that switches the object and the complements to the `any`-series,
+  and suppresses the finite "not" (`negateVerb`), which is a separate branch. The do-support gate now
+  reads `negateVerb` rather than the raw `verbNegative`, so every finite shape drops it: do-support
+  past, periphrastic future, progressive, a modal, and the copula.
+- **German** — [`de/finiteNegation.ts`](../../../packages/engine/src/languages/de/finiteNegation.ts):
+  a negative subject suppresses "nicht" and downgrades the object and the complements, exactly as
+  `nie` already did. It is threaded from `renderClause`, which now decides the negation once for all
+  three of its clause orders.
+- **The object's downgrade is now per conjunct** too (it had mapped *every* conjunct to the
+  indefinite), matching the complements and the English side: a mixed group keeps the conjuncts that
+  are not negative.
+
+**One deliberate limit.** In a **relative** clause the head noun stands in for the subject, but its
+`kein`/`no` negates the **matrix** clause, not the relative one — so the relative call sites pass no
+subject negativity, and `no cat that does not eat runs.` / `kein Kater, der nicht frisst, läuft.`
+keep both negators. Pinned as a guard. (Italian, Spanish and Portuguese *do* lose the relative
+clause's negator here — `nessun gatto che mangia corre.` — because they read it off the agreement
+forms they are handed. That is a pre-existing defect of theirs, not catalogued yet, and English and
+German were not regressed to match it.)
+
+**Still open, and the corpus decision the bug asked the fixer to raise.** `no` subject + `NEVER` is
+untouched: English `no cat never runs.`, German `kein Kater läuft nie.` The correct surfaces need a
+negative-polarity *adverb* — English `ever`, German `je`/`jemals` — which is not seeded, so nothing
+is pinned for it here. Italian and French already show the shape (`nessun gatto corre mai.`,
+`aucun chat ne court jamais.`). **Seeding that NPI adverb would close it.**
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: a negative subject is not collapsed*. Both pinning `test.fails` are now passing
+  `test`s, with their assertions unchanged. New cases:
+  - the subject taking the object **and** the complement with it at once;
+  - every finite shape dropping its "not"/"nicht" — past, future, progressive, a modal, the copula;
+  - the relative-clause guard above, for a negated relative verb and for a `no` object inside the
+    relative clause.

@@ -308,7 +308,7 @@ describe('known bugs: Japanese どの…も on a complement', () => {
 describe('known bugs: a negative complement is not collapsed', () => {
   const noHouse = { locative: { phrase: np('HOUSE', { definiteness: 'no' as const }) } };
 
-  test.fails('English switches a negative complement to the "any" NPI', () => {
+  test('English switches a negative complement to the "any" NPI', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: noHouse })).en)
       .toBe('the cat does not run in any house.'); // now: "in no house"
     expect(sayAll(clause(np('CAT'), 'GO', {
@@ -325,7 +325,7 @@ describe('known bugs: a negative complement is not collapsed', () => {
     })).en).toBe('they were not biting that sharp house in any adult ice cream.');
   });
 
-  test.fails('German drops the "nicht" a negative complement makes redundant', () => {
+  test('German drops the "nicht" a negative complement makes redundant', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: noHouse })).de)
       .toBe('der Kater läuft in keinem Haus.'); // now: "… in keinem Haus nicht."
     expect(sayAll(clause(np('CAT'), 'GO', {
@@ -360,13 +360,80 @@ describe('known bugs: a negative complement is not collapsed', () => {
         pt: 'o gato não corre em nenhuma casa.',
         ja: '猫はどの家でも走りません。',
       });
-    // A negated verb with a POSITIVE complement keeps "nicht", after the complements (A49's rule).
+    // A negated verb with a POSITIVE complement keeps its "nicht" — leading the prepositional
+    // complement, which is A159's rule (it superseded A49's "after the complements").
     expect(sayAll(clause(np('CAT'), 'RUN', {
       verbPhrase: { negative: true },
       complements: { locative: { phrase: np('HOUSE', { definiteness: 'definite' }) } },
     }))).toMatchObject({
       en: 'the cat does not run in the house.',
-      de: 'der Kater läuft im Haus nicht.',
+      de: 'der Kater läuft nicht im Haus.',
+    });
+  });
+
+  // The collapse is the complement's, not the locative's: every complement type reaches it, since
+  // they all go through the same `hasNegativeComplement` / `withComplementDefiniteness` pair.
+  test('every complement type collapses the same way', () => {
+    const notWith = (verb: string, complements: Record<string, unknown>) =>
+      sayAll(clause(np('CAT'), verb, { verbPhrase: { negative: true }, complements }));
+    const no = (concept: string) => ({ phrase: np(concept, { definiteness: 'no' as const }) });
+    expect(notWith('COME', { source: no('HOUSE') })).toMatchObject({
+      en: 'the cat does not come from any house.', de: 'der Kater kommt aus keinem Haus.',
+    });
+    expect(notWith('EAT', { instrumental: no('WORD') })).toMatchObject({
+      en: 'the cat does not eat with any word.', de: 'der Kater frisst mit keinem Wort.',
+    });
+    expect(notWith('CRY', { cause: no('DOG') })).toMatchObject({
+      en: 'the cat does not cry because of any dog.', de: 'der Kater weint wegen keinem Hund.',
+    });
+  });
+
+  // The switch is PER CONJUNCT and per complement, as the object's already was: a group mixing
+  // determiners keeps the ones that are not negative, and a positive complement beside a negative
+  // one is left alone.
+  test('only the negative conjunct, and only the negative complement, gives way', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      verbPhrase: { negative: true },
+      complements: { locative: { phrase: {
+        conjuncts: [np('HOUSE', { definiteness: 'definite' }), np('MARKET', { definiteness: 'no' })],
+        conjunction: 'or',
+      } } },
+    }))).toMatchObject({
+      en: 'the cat does not run in the house or any market.',
+      de: 'der Kater läuft im Haus oder in keinem Markt.',
+    });
+    expect(sayAll(clause(np('CAT'), 'GO', {
+      verbPhrase: { negative: true },
+      complements: {
+        source: { phrase: np('HOUSE', { definiteness: 'definite' }) },
+        direction: { phrase: np('MARKET', { definiteness: 'no' }) },
+      },
+    }))).toMatchObject({
+      en: 'the cat does not go from the house to any market.',
+      de: 'der Kater geht aus dem Haus zu keinem Markt.',
+    });
+  });
+
+  // A `no` object and a `no` complement are both postverbal, so neither is "ahead" of the other on
+  // the clause's own terms — the object is simply leftmost, keeps its negative, and the complement
+  // gives way. One negator, not two, and not a downgrade of both.
+  test('a negative object beside a negative complement: the object keeps it', () => {
+    const noNP = (concept: string) => np(concept, { definiteness: 'no' as const });
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      directObject: noNP('MOUSE'), complements: { locative: { phrase: noNP('HOUSE') } },
+    }))).toMatchObject({
+      en: 'the cat eats no mouse in any house.',
+      de: 'der Kater frisst keine Maus in einem Haus.',
+      it: 'il gatto non mangia nessun topo in nessuna casa.',
+      ja: '猫はどの家でもどのネズミも食べません。',
+    });
+    // Under "nie"/"never" the adverb is ahead of both, so both give way.
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      verbPhrase: { modifier: 'NEVER' },
+      directObject: noNP('MOUSE'), complements: { locative: { phrase: noNP('HOUSE') } },
+    }))).toMatchObject({
+      en: 'the cat never eats any mouse in any house.',
+      de: 'der Kater frisst nie eine Maus in einem Haus.',
     });
   });
 });

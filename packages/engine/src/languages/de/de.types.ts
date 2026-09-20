@@ -1,4 +1,5 @@
-import type { ResolvedNounElement } from '../../types.js';
+import type { ComplementType } from '@signi/shared';
+import type { ResolvedComplement, ResolvedNounElement } from '../../types.js';
 
 /** A German grammatical case. */
 export type Case = 'nom' | 'acc' | 'dat' | 'gen';
@@ -36,21 +37,23 @@ export interface VerbComplex {
 
 /**
  * The Mittelfeld slots a negating "nicht" may take (see `nichtSlots`): before the prospective's "im
- * Begriff", before a Mittelfeld adverb, before a predicate complement, or after the objects and
- * complements. Each holds "nicht" or "", and at most one holds it.
+ * Begriff", before a Mittelfeld adverb, before the complements, or after the objects. Each holds
+ * "nicht" or "", and at most one holds it.
  */
 export interface NichtSlots {
   beforeAspect: string;
   beforeAdverb: string;
-  beforePredicative: string;
+  beforeComplements: string;
   after: string;
 }
 
 /**
- * How a finite clause negates (see `finiteNegation`): the "nicht" slots, and the direct object to
- * render, which a negative adverb turns from "kein" into the plain indefinite.
+ * How a finite clause negates (see `finiteNegation`): the "nicht" slots, and the direct object and
+ * complements to render, whose "kein" a negator standing ahead of them turns into the plain
+ * indefinite ("isst nie eine Maus", "kein Kater läuft in einem Haus").
  */
 export interface FiniteNegation {
   nicht: NichtSlots;
   directObject?: ResolvedNounElement;
+  complements?: Partial<Record<ComplementType, ResolvedComplement>>;
 }

@@ -108,6 +108,24 @@ describe('resolveNounPhrase', () => {
       expect(headForms({ concept: 'HE', gender: 'masc' }, kare)).toMatchObject({ base: '彼', reading: 'かれ' });
     });
 
+    // A161. A gendered plural surface takes the gendered plural reading; without one it keeps the
+    // plain `plural_reading`, so a language that seeds the surface alone is no worse off.
+    test('a feminine plural surface takes the feminine plural reading', () => {
+      const forms = {
+        base: '彼', reading: 'かれ', person: '3', plural: '彼ら', plural_reading: 'かれら',
+        plural_fem: '彼女ら', plural_fem_reading: 'かのじょら',
+      };
+      const kanojora = only('HE', forms);
+      expect(headForms({ concept: 'HE', number: 'plural', gender: 'fem' }, kanojora))
+        .toMatchObject({ base: '彼女ら', plural: '彼女ら', reading: 'かのじょら' });
+      expect(headForms({ concept: 'HE', number: 'plural', gender: 'masc' }, kanojora))
+        .toMatchObject({ base: '彼ら', plural: '彼ら', reading: 'かれら' });
+      const { plural_fem_reading: _dropped, ...noReading } = forms;
+      const noFemReading = only('HE', noReading);
+      expect(headForms({ concept: 'HE', number: 'plural', gender: 'fem' }, noFemReading))
+        .toMatchObject({ base: '彼女ら', reading: 'かれら' });
+    });
+
     test('a missing plural surface, or plural oblique, falls back to what the pronoun has', () => {
       const si = only('SELF', { base: 'sé', person: '3', disjunctive: 'sé' });
       expect(headForms({ concept: 'SELF', number: 'plural' }, si)).toEqual({ base: 'sé', person: '3', disjunctive: 'sé', number: 'plural', gender: 'masc' });

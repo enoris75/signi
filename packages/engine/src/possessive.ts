@@ -187,9 +187,13 @@ const JA: Record<PN, RubySegment> = {
 
 export function possessiveJa(feats: PronominalPossessor): RubySegment[] {
   let pronoun = JA[pn(feats)];
+  // The 3rd person is the one that genders: 彼女 / それ in the singular, 彼女ら in the feminine
+  // plural (A161). The masculine and mixed plural keep 彼ら.
   if (pn(feats) === '3sg') {
     if (feats.gender === 'fem') pronoun = { t: '彼女', r: 'かのじょ' };
     else if (feats.gender === 'neut') pronoun = { t: 'それ' };
+  } else if (pn(feats) === '3pl' && feats.gender === 'fem') {
+    pronoun = { t: '彼女ら', r: 'かのじょら' };
   }
   return [pronoun, { t: 'の' }];
 }

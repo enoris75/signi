@@ -353,7 +353,7 @@ describe('known bugs: Japanese feminine plural pronoun', () => {
   const plural = (gender: 'masc' | 'fem') =>
     sayAll(clause(np('THIRD_PERSON', { number: 'plural', gender }), 'RUN'));
 
-  test.fails('a feminine plural subject and object read 彼女ら', () => {
+  test('a feminine plural subject and object read 彼女ら', () => {
     expect(plural('fem').ja).toBe('彼女らは走ります。'); // now: 彼らは走ります。
     expect(sayAll(clause(np('CAT'), 'SEE', {
       directObject: np('THIRD_PERSON', { number: 'plural', gender: 'fem' }),
@@ -363,7 +363,7 @@ describe('known bugs: Japanese feminine plural pronoun', () => {
   // The seed alone fixes the text but not the READING: `resolveNounPhrase` picks `plural_fem` for
   // the surface generically, then takes `plural_reading` unconditionally, so a feminine-plural
   // surface keeps the masculine reading.
-  test.fails('the furigana reads かのじょら, not かれら', () => {
+  test('the furigana reads かのじょら, not かれら', () => {
     expect(furigana(clause(np('THIRD_PERSON', { number: 'plural', gender: 'fem' }), 'RUN')))
       .toEqual(['かのじょら', 'はしります']);
   });
@@ -379,5 +379,30 @@ describe('known bugs: Japanese feminine plural pronoun', () => {
       en: 'they run.', fr: 'elles courent.', de: 'sie laufen.',
       it: 'corrono.', es: 'corren.', pt: 'correm.',
     });
+  });
+
+  // The surface is the pronoun's, so it reaches every slot the pronoun does — a complement, a
+  // conjunct, and both ends of one clause — and the furigana follows it there too.
+  test('彼女ら reaches the complements, a coordination and both ends of a clause', () => {
+    const femPlural = np('THIRD_PERSON', { number: 'plural', gender: 'fem' });
+    expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: femPlural } } })).ja)
+      .toBe('猫は彼女らのために泣きます。');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: femPlural } } })).ja)
+      .toBe('男は彼女らに本をあげます。');
+    expect(sayAll(clause({ conjuncts: [femPlural, np('CAT')], conjunction: 'and' }, 'RUN')).ja)
+      .toBe('彼女らと猫は走ります。');
+    expect(sayAll(clause(femPlural, 'SEE', { directObject: femPlural })).ja).toBe('彼女らは彼女らを見ます。');
+    expect(furigana(clause(np('CAT'), 'SEE', { directObject: femPlural }))).toEqual(['ねこ', 'かのじょら', 'みます']);
+  });
+
+  // The POSSESSIVE is a second surface, off a hardcoded table rather than the seed (`possessiveJa`),
+  // and had the same gap: a feminine plural possessor read 彼らの where the feminine singular already
+  // read 彼女の. The bug's table did not list it; it is the same missing pronoun.
+  test('a feminine plural possessor reads 彼女らの', () => {
+    const owns = (gender: 'masc' | 'fem', number: 'singular' | 'plural') =>
+      sayAll(clause(np('CAT', { possessor: { kind: 'pronominal', person: '3', number, gender } }), 'RUN')).ja;
+    expect(owns('fem', 'plural')).toBe('彼女らの猫は走ります。');
+    expect(owns('masc', 'plural')).toBe('彼らの猫は走ります。');
+    expect(owns('fem', 'singular')).toBe('彼女の猫は走ります。');
   });
 });

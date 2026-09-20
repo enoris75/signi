@@ -1,5 +1,7 @@
-import type { ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
+import type { ComplementType } from '@signi/shared';
+import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
+import { negationSources } from '../../functions/negationSources.js';
+import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import type { FiniteNegation } from './de.types.js';
 import { modalAdverbs } from './modalAdverbs.js';
@@ -10,29 +12,51 @@ import { nichtSlots } from './nichtSlots.js';
  * command, the instruction and the infinitive all decide it the same way, and place "nicht" by the
  * shared `nichtSlots`.
  *
- * - A negative adverb ("nie") on the main verb or any modal is itself the negator, so there is no
- *   "nicht" ("isst nie", "der nie isst").
- * - A `no` object's "kein" is too (kein = nicht + ein): "isst keine Maus", never "isst keine Maus
- *   nicht".
- * - With both, "nie keine Maus" would double the negative, so the object drops to the plain
- *   indefinite: "isst nie eine Maus".
+ * German has no negative concord, so exactly one of the clause's negation sources (see
+ * `negationSources`) may surface and the rest give way. Which one carries:
  *
- * `predicative` is whether the clause carries a predicate complement, which "nicht" leads.
+ * - a negator standing **ahead** of the postverbal phrases carries the clause — a `no` SUBJECT
+ *   ("kein Kater"), or a negative adverb ("nie") in the Mittelfeld — and the phrases behind it fall
+ *   to the plain indefinite: "kein Kater frisst eine Maus", "isst nie eine Maus", "läuft nie in
+ *   einem Haus" (A160, A158);
+ * - failing that, a `kein` phrase carries it and the verb's own "nicht" goes, because "kein" is
+ *   already "nicht + ein": "isst keine Maus", "läuft in keinem Haus", never "… keine Maus nicht";
+ * - with both an object and a complement negative, the object is the leftmost and keeps its "kein",
+ *   so the complement falls: "frisst keine Maus in einem Haus";
+ * - otherwise the verb's "nicht", which `nichtSlots` places.
+ *
+ * `leadsComplements` is whether the clause carries a constituent "nicht" leads rather than follows —
+ * a predicate complement or a prepositional one (A159).
  */
 export function finiteNegation(
-  verbPhrase: ResolvedVerbPhrase,
-  directObject: ResolvedNounElement | undefined,
-  predicative: boolean,
+  clause: {
+    subjectIsNegative?: boolean;
+    verbPhrase: ResolvedVerbPhrase;
+    directObject?: ResolvedNounElement;
+    complements?: Partial<Record<ComplementType, ResolvedComplement>>;
+  },
+  leadsComplements: boolean,
 ): FiniteNegation {
-  const adverbIsNegative = groupHasNegativeAdverb(verbPhrase);
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  const negate = verbPhrase.negative === true && !adverbIsNegative && !objectIsNegative;
+  const { verbPhrase, directObject, complements } = clause;
+  const neg = negationSources(clause);
+  const negate = neg.verb && !neg.adverb && !neg.subject && !neg.object && !neg.complement;
+  // What already negates ahead of the postverbal phrases, and so takes their "kein" away.
+  const negatedAhead = neg.subject || neg.adverb;
+  const plainObject = neg.object && negatedAhead;
+  const plainComplement = neg.complement && (negatedAhead || neg.object);
   // Any adverb in the Mittelfeld — a modal's or the main verb's — takes the "nicht immer" slot.
   const adverb = !!(modalAdverbs(verbPhrase.modals) || verbPhrase.modifier?.forms['base']);
   return {
-    nicht: nichtSlots(negate, { prospective: verbPhrase.aspect === 'prospective', adverb, predicative }),
-    directObject: directObject && adverbIsNegative && objectIsNegative
-      ? { ...directObject, conjuncts: directObject.conjuncts.map((np) => withDefiniteness(np, 'indefinite')) }
+    nicht: nichtSlots(negate, { prospective: verbPhrase.aspect === 'prospective', adverb, complements: leadsComplements }),
+    // Per conjunct, as the complements are: a group mixing determiners keeps the ones that are not
+    // negative ("die Maus und eine Katze").
+    directObject: directObject && plainObject
+      ? {
+        ...directObject,
+        conjuncts: directObject.conjuncts.map((np) =>
+          np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'indefinite') : np),
+      }
       : directObject,
+    complements: plainComplement ? withComplementDefiniteness(complements, 'indefinite') : complements,
   };
 }

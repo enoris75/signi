@@ -115,11 +115,16 @@ describe('possessiveDe', () => {
 });
 
 describe('possessiveJa', () => {
-  test('is the antecedent pronoun + の, its 3rd singular split on gender', () => {
+  test('is the antecedent pronoun + の, its 3rd person split on gender', () => {
     expect(possessiveJa(possessor('1'))).toEqual([{ t: '私', r: 'わたし' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'singular', 'masc'))).toEqual([{ t: '彼', r: 'かれ' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'singular', 'fem'))).toEqual([{ t: '彼女', r: 'かのじょ' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'singular', 'neut'))).toEqual([{ t: 'それ' }, { t: 'の' }]);
     expect(possessiveJa(possessor('3', 'plural'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
+    // A161. The feminine plural has its own surface and reading, like the feminine singular; the
+    // masculine and neuter plural keep 彼ら.
+    expect(possessiveJa(possessor('3', 'plural', 'fem'))).toEqual([{ t: '彼女ら', r: 'かのじょら' }, { t: 'の' }]);
+    expect(possessiveJa(possessor('3', 'plural', 'masc'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
+    expect(possessiveJa(possessor('3', 'plural', 'neut'))).toEqual([{ t: '彼ら', r: 'かれら' }, { t: 'の' }]);
   });
 });

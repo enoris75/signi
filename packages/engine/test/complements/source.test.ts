@@ -292,7 +292,7 @@ describe('known bugs: German animate source takes "aus"', () => {
     expect(sayAll(clause(np('OX', { number: 'plural', definiteness: 'few', adjectives: ['GOOD'] }), 'GO', {
       verbPhrase: { modals: ['CAN'], negative: true },
       complements: { source: { phrase: np('ANGEL', { definiteness: 'that', adjectives: ['WHOLE', 'COLD'], adjectiveDegrees: ['less', 'positive'] }) } },
-    })).de).toBe('wenige gute Ochsen können von jenem weniger ganzen kalten Engel nicht gehen.');
+    })).de).toBe('wenige gute Ochsen können nicht von jenem weniger ganzen kalten Engel gehen.');
   });
 
   test('…and in a relative clause on the source', () => {

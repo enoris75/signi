@@ -431,14 +431,14 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
   const theHouse = (type: 'locative' | 'source') =>
     ({ [type]: { phrase: np('HOUSE', { definiteness: 'definite' as const }) } });
 
-  test.fails('"nicht" leads a prepositional complement in the declarative', () => {
+  test('"nicht" leads a prepositional complement in the declarative', () => {
     expect(notWith('GO', theMarket)).toBe('der Kater geht nicht zum Markt.'); // now: "zum Markt nicht."
     expect(notWith('COME', theHouse('source'))).toBe('der Kater kommt nicht aus dem Haus.');
     expect(notWith('BE', theHouse('locative'))).toBe('der Kater ist nicht im Haus.'); // now ungrammatical
     expect(notWith('RUN', theHouse('locative'))).toBe('der Kater läuft nicht im Haus.');
   });
 
-  test.fails('the command, the modal and the relative clause place it the same way', () => {
+  test('the command, the modal and the relative clause place it the same way', () => {
     expect(say({
       subject: np('SECOND_PERSON'), verbPhrase: { verb: 'GO', negative: true },
       imperative: true, complements: theMarket,
@@ -473,6 +473,66 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
     expect(say(clause(np('CAT'), 'GO', { verbPhrase: { negative: true }, complements: theMarket }), 'en'))
       .toBe('the cat does not go to the market.');
   });
+
+  // Every complement that takes a preposition, not just the three in the bug's table: the
+  // instrumental "mit", the cause "wegen", the manner "mit", the route's spatial preposition, and an
+  // INANIMATE terminus, which is a destination rather than a recipient and so takes "in".
+  test('"nicht" leads every complement that carries a preposition', () => {
+    const the = (concept: string) => np(concept, { definiteness: 'definite' as const });
+    expect(notWith('EAT', { instrumental: { phrase: the('WORD') } })).toBe('der Kater frisst nicht mit dem Wort.');
+    expect(notWith('CRY', { cause: { phrase: the('DOG') } })).toBe('der Kater weint nicht wegen dem Hund.');
+    expect(notWith('RUN', { manner: { phrase: the('SPEED') } })).toBe('der Kater läuft nicht mit der Geschwindigkeit.');
+    expect(notWith('GO', { route: { phrase: the('MARKET') } })).toBe('der Kater geht nicht durch den Markt.');
+    expect(say(clause(np('MAN'), 'GIVE', {
+      verbPhrase: { negative: true }, directObject: the('BOOK'), complements: { terminus: { phrase: the('HOUSE') } },
+    }), 'de')).toBe('der Mann gibt das Buch nicht ins Haus.');
+  });
+
+  // The slot is between the objects and the complements, so both sides keep their order around it:
+  // the accusative object and the bare-dative recipient stay in front of "nicht", the PP behind. With
+  // TWO complements of which only one is a PP, "nicht" leads the group.
+  test('"nicht" sits between the objects and the prepositional complement', () => {
+    const the = (concept: string) => np(concept, { definiteness: 'definite' as const });
+    expect(say(clause(np('CAT'), 'EAT', {
+      verbPhrase: { negative: true }, directObject: the('MOUSE'), complements: theHouse('locative'),
+    }), 'de')).toBe('der Kater frisst die Maus nicht im Haus.');
+    expect(say(clause(np('MAN'), 'GIVE', {
+      verbPhrase: { negative: true }, directObject: the('BOOK'),
+      complements: { terminus: { phrase: the('DOG') }, locative: { phrase: the('HOUSE') } },
+    }), 'de')).toBe('der Mann gibt dem Hund das Buch nicht im Haus.');
+    expect(say(clause(np('CAT'), 'GO', {
+      verbPhrase: { negative: true }, complements: { terminus: { phrase: the('DOG') }, ...theMarket },
+    }), 'de')).toBe('der Kater geht dem Hund nicht zum Markt.');
+  });
+
+  // The two complements that are NOT prepositional phrases, and so do not pull "nicht" forward: a
+  // `process` instrumental is a means clause in the Nachfeld, behind the verb entirely, and a
+  // Mittelfeld adverb still outranks the complement slot ("geht nicht schnell zum Markt").
+  test('a means clause and an adverb leave the slot alone', () => {
+    expect(say(clause(np('CAT'), 'EAT', {
+      verbPhrase: { negative: true },
+      complements: { instrumental: {
+        phrase: np('WORD', { definiteness: 'indefinite' }),
+        specifiers: [{ kind: 'abstraction', value: 'process' }], action: { verb: 'CHOOSE' },
+      } },
+    }), 'de')).toBe('der Kater frisst nicht, indem man ein Wort wählt.');
+    expect(say(clause(np('CAT'), 'GO', {
+      verbPhrase: { negative: true, modifier: 'FAST' }, complements: theMarket,
+    }), 'de')).toBe('der Kater geht nicht schnell zum Markt.');
+  });
+
+  // The other two clause orders `finiteNegation` serves: the instruction register's clause-final
+  // infinitive, and the verb-final "wenn" protasis.
+  test('the instruction and the verb-final protasis place it the same way', () => {
+    expect(say({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'GO', negative: true },
+      imperative: true, imperativeRegister: 'instruction', complements: theMarket,
+    }, 'de')).toBe('nicht zum Markt gehen.');
+    expect(say({
+      ...clause(np('DOG'), 'RUN'),
+      condition: clause(np('CAT'), 'GO', { verbPhrase: { negative: true }, complements: theMarket }),
+    }, 'de')).toBe('wenn der Kater nicht zum Markt gehen würde, würde der Hund laufen.');
+  });
 });
 
 // A160. A `no` SUBJECT already negates the clause, so a second negation source after it — a `no`
@@ -483,7 +543,7 @@ describe('known bugs: German "nicht" and a prepositional complement', () => {
 describe('known bugs: a negative subject is not collapsed', () => {
   const noCat = noNP('CAT');
 
-  test.fails('English switches the second negative to the "any" NPI, or drops "not"', () => {
+  test('English switches the second negative to the "any" NPI, or drops "not"', () => {
     expect(sayAll(clause(noCat, 'EAT', { directObject: noNP('MOUSE') })).en)
       .toBe('no cat eats any mouse.'); // now: "no cat eats no mouse."
     expect(sayAll(clause(noCat, 'RUN', {
@@ -493,7 +553,7 @@ describe('known bugs: a negative subject is not collapsed', () => {
       .toBe('no cat runs.'); // now: "no cat does not run."
   });
 
-  test.fails('German falls to a plain indefinite, or drops "nicht"', () => {
+  test('German falls to a plain indefinite, or drops "nicht"', () => {
     expect(sayAll(clause(noCat, 'EAT', { directObject: noNP('MOUSE') })).de)
       .toBe('kein Kater frisst eine Maus.'); // now: "kein Kater frisst keine Maus."
     expect(sayAll(clause(noCat, 'RUN', {
@@ -520,6 +580,49 @@ describe('known bugs: a negative subject is not collapsed', () => {
     expect(sayAll(clause(noCat, 'RUN', { verbPhrase: { negative: true } }))).toMatchObject({
       it: 'nessun gatto corre.', fr: 'aucun chat ne court.',
       es: 'ningún gato corre.', pt: 'nenhum gato corre.',
+    });
+  });
+
+  // The subject outranks every other source at once, not one at a time.
+  test('a negative subject takes the object AND the complement with it', () => {
+    expect(sayAll(clause(noCat, 'EAT', {
+      verbPhrase: { negative: true },
+      directObject: noNP('MOUSE'), complements: { locative: { phrase: noNP('HOUSE') } },
+    }))).toMatchObject({
+      en: 'no cat eats any mouse in any house.',
+      de: 'kein Kater frisst eine Maus in einem Haus.',
+    });
+  });
+
+  // Suppressing the finite "not" is a branch per verb shape, so each one has to drop it: the
+  // do-support past, the periphrastic future and progressive, a modal, and the copula.
+  test('every finite shape drops its "not" under a negative subject', () => {
+    const notRun = (verbPhrase: Partial<VerbPhrase>) =>
+      sayAll(clause(noCat, 'RUN', { verbPhrase: { negative: true, ...verbPhrase } }));
+    expect(notRun({ tense: 'past' })).toMatchObject({ en: 'no cat ran.', de: 'kein Kater lief.' });
+    expect(notRun({ tense: 'future' })).toMatchObject({ en: 'no cat will run.', de: 'kein Kater wird laufen.' });
+    expect(notRun({ aspect: 'progressive' })).toMatchObject({ en: 'no cat is running.', de: 'kein Kater läuft gerade.' });
+    expect(notRun({ modals: ['CAN'] })).toMatchObject({ en: 'no cat can run.', de: 'kein Kater kann laufen.' });
+    expect(sayAll(clause(noCat, 'BE', {
+      verbPhrase: { negative: true }, complements: { predicative: { phrase: np('TIRED') } },
+    }))).toMatchObject({ en: 'no cat is tired.', de: 'kein Kater ist müde.' });
+  });
+
+  // The head of a RELATIVE clause stands in for its subject, but a `no` head negates the MATRIX
+  // clause, not the relative one — so the relative clause keeps its own negation. English and German
+  // are right here today and must stay right: the collapse reads only the clause's own subject.
+  test('a `no` head does not disarm the negation inside its relative clause', () => {
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'no', relative: { verbPhrase: { verb: 'EAT', negative: true } },
+    }), 'RUN'))).toMatchObject({
+      en: 'no cat that does not eat runs.',
+      de: 'kein Kater, der nicht frisst, läuft.',
+    });
+    expect(sayAll(clause(np('CAT', {
+      definiteness: 'no', relative: { verbPhrase: { verb: 'EAT' }, directObject: noNP('MOUSE') },
+    }), 'RUN'))).toMatchObject({
+      en: 'no cat that eats no mouse runs.',
+      de: 'kein Kater, der keine Maus frisst, läuft.',
     });
   });
 });

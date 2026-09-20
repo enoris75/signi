@@ -33,7 +33,7 @@ prepositional phrase:
 The other six languages are unaffected: English `the cat does not go to the market.`, and the Romance
 and Japanese negators are nowhere near this slot.
 
-**Note this supersedes an earlier decision.** [A49](../fixed/A49-german-nicht-in-commands-and-infinitives.md)
+**Note this supersedes an earlier decision.** [A49](A49-german-nicht-in-commands-and-infinitives.md)
 wrote the rule as "otherwise after the objects **and complements**" and centralised it; that phrasing
 is what is wrong here, and A49's own doc comment in `nichtSlots.ts` needs the correction. A49's
 *commands and infinitives* fix is untouched — this only changes which slot they are told to use.
@@ -72,3 +72,51 @@ complements where only one is a PP, `nicht` leads the group.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: German "nicht" and a prepositional complement* (2 `test.fails`, plus a regression test that the object, the bare-dative terminus and the predicative are unchanged) |
+
+## Resolved
+
+**2026-09-20.** The slot was already in the right place; only its gate and its name were wrong.
+
+- **New predicate** —
+  [`packages/engine/src/languages/de/hasPrepositionalComplement.ts`](../../../packages/engine/src/languages/de/hasPrepositionalComplement.ts):
+  is any complement rendered as a prepositional phrase? Rather than mirror `complementsPhrase`'s
+  preposition table, it names the three that are **not** PPs and lets everything else be one: the
+  `predicative` (a bare nominative, which the caller asks for separately), an **animate** `terminus`
+  (the bare dative recipient), and a `process` `instrumental` (a means clause in the Nachfeld). Those
+  last two are exactly what `splitDative` / `splitMeansClause` lift out of the complements slot, so
+  the answer is right whether or not the caller has split yet.
+- **The two gates** —
+  [`renderClause.ts`](../../../packages/engine/src/languages/de/renderClause.ts) and
+  [`subordinateClause.ts`](../../../packages/engine/src/languages/de/subordinateClause.ts) both widen
+  their flag with it. The relative clause is the second site, as the bug said, and does not come
+  right from `renderClause` alone.
+- **Renamed** `beforePredicative` → `beforeComplements` (and `nichtSlots`' `predicative` option →
+  `complements`) in [`de.types.ts`](../../../packages/engine/src/languages/de/de.types.ts),
+  [`nichtSlots.ts`](../../../packages/engine/src/languages/de/nichtSlots.ts),
+  `renderClause.ts` and `subordinateClause.ts`. `nichtSlots` needed no logic change. A49's rule is
+  corrected in both doc comments: "after the objects", not "after the objects **and complements**".
+
+**Three assertions elsewhere pinned the old placement and were re-pinned to the corrected one** —
+this is the supersession the bug announced, not a weakening:
+
+- `imperative.test.ts` → A49's own regression row, `iss im Markt nicht.` → `iss nicht im Markt.`;
+- `complements/determiner.test.ts` → A158's regression row, `der Kater läuft im Haus nicht.` →
+  `der Kater läuft nicht im Haus.`;
+- `complements/source.test.ts` → A154's modal row, `… können von jenem … Engel nicht gehen.` →
+  `… können nicht von jenem … Engel gehen.`
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: German "nicht" and a prepositional complement*. Both pinning `test.fails` are now
+  passing `test`s, with their assertions unchanged. New cases:
+  - every complement that carries a preposition — instrumental, cause, manner, route, and an
+    inanimate terminus;
+  - the slot's two sides: an accusative object and a bare-dative recipient stay in front of "nicht",
+    the PP behind, and with two complements of which only one is a PP "nicht" leads the group;
+  - the two shapes that must *not* pull "nicht" forward — a means clause in the Nachfeld, and a
+    Mittelfeld adverb, which still outranks the complement slot;
+  - the remaining two clause orders `finiteNegation` serves: the instruction and the "wenn" protasis.
+
+  Colocated unit test:
+  [`hasPrepositionalComplement.test.ts`](../../../packages/engine/src/languages/de/hasPrepositionalComplement.test.ts)
+  (new) — the prepositional types, the predicative, the terminus split on animacy, the process vs
+  concept instrumental, and one PP among several complements.

@@ -1,10 +1,11 @@
 import type { ComplementType, Tense } from '@signi/shared';
 import type { ResolvedComplement, ResolvedNounElement, ResolvedVerbPhrase } from '../../types.js';
-import { groupHasNegativeAdverb } from '../../functions/groupHasNegativeAdverb.js';
 import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
+import { negationSources } from '../../functions/negationSources.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
+import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
@@ -28,8 +29,9 @@ export function predicateParts(
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  subjectIsNegative = false,
 ): string[] {
-  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements);
+  const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative);
   return particleAfterPronoun(parts, verbPhrase, directObject);
 }
 
@@ -58,6 +60,7 @@ function predicateWords(
   verbPhrase: ResolvedVerbPhrase,
   directObject?: ResolvedNounElement,
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
+  subjectIsNegative = false,
 ): string[] {
   const { verb, negative: verbNegative, modifier, aspect = 'neutral', mood, register, modals, interrogative = false } = verbPhrase;
   // The hypothetical "if" clause (subjunctive) is realised by the past tense ("if the cat ate");
@@ -67,16 +70,19 @@ function predicateWords(
   // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
   // that would give "the I"; a noun object renders as an ordinary noun phrase.
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
-  // A negative adverb (NEVER) *anywhere* in the group — on the main verb or on any modal — is
-  // itself the clause negator, so the finite verb takes no separate "not" (English has no negative
-  // concord) and a `no` object switches to the "any"-series NPI.
-  const groupNegative = groupHasNegativeAdverb(verbPhrase);
-  // A `no` object with ANOTHER clause negator present (a negated verb, or a NEVER adverb) would
-  // double the negative ("does not eat NO mouse", "never eats NO mouse"); English has no negative
-  // concord, so the object switches to the "any"-series NPI — "does not eat any mouse", "never eats
-  // any mouse". A lone `no` object keeps "no" ("eats no mouse").
-  const objectIsNegative = directObject?.conjuncts.some((np) => np.head.forms['definiteness'] === 'no') ?? false;
-  const anyObject = objectIsNegative && (verbNegative === true || groupNegative);
+  // English has no negative concord, so exactly one of the clause's negation sources may surface and
+  // the rest give way to the "any"-series NPI (see `negationSources`). A negator standing AHEAD of
+  // the postverbal phrases takes them: a `no` SUBJECT ("no cat"), a negative adverb (NEVER)
+  // anywhere in the group, or the finite verb's own "not". Between the two postverbal phrases the
+  // object is leftmost and keeps its "no", so the complement is the one that gives way.
+  const neg = negationSources({ subjectIsNegative, verbPhrase, directObject, complements });
+  const negatedAhead = neg.subject || neg.adverb || neg.verb;
+  // "does not eat any mouse", "never eats any mouse", "no cat eats any mouse" — but a LONE `no`
+  // object keeps "no" ("eats no mouse"). A158/A160 widened this from the object to the subject that
+  // precedes it and the complements that follow it: "does not run in any house", "no cat runs in
+  // any house".
+  const anyObject = neg.object && negatedAhead;
+  const anyComplement = neg.complement && (negatedAhead || neg.object);
   // The choice is per conjunct, so a group mixes the two ("sees the dog and me"). Only a conjunct
   // that is itself `no` switches to "any": "does not eat the mouse or any food".
   const directObjectText = !directObject ? ''
@@ -92,14 +98,18 @@ function predicateWords(
   // manner adverb goes — empty (A156).
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection ? '' : adverbText;
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, verb.forms)]
-    .filter(Boolean).join(' ');
+  const complementsText = [
+    isDirection ? adverbText : '',
+    complementsPhrase(anyComplement ? withComplementDefiniteness(complements, 'any') : complements, verb.forms),
+  ].filter(Boolean).join(' ');
   // A modal's own manner adverb has no slot inside the verb group ("*can fast eat"), so it trails the
   // clause with the main verb's: "can eat the mouse fast".
   const modalManner = modals.filter((m) => m.modifier && !isFrequencyAdverb(m.modifier)).map((m) => m.modifier!.forms['base'] ?? '');
   const trailing = (mainManner: string) => [...modalManner, mainManner].filter(Boolean).join(' ');
 
-  const negateVerb = verbNegative === true && !groupNegative;
+  // A negative subject is itself the clause's negator, so the finite verb takes no "not" —
+  // "no cat runs", never "no cat does not run" — exactly as a NEVER adverb already did (A160).
+  const negateVerb = verbNegative === true && !neg.adverb && !neg.subject;
 
   // Imperative: a subjectless command on the bare base ("eat the food!", "run!"). The subject
   // pronoun's person selects the form — 1st-plural is the "let's …" cohortative ("let's eat"),
@@ -201,7 +211,7 @@ function predicateWords(
     return ['', verbText, directObjectText, complementsText, modifierText];
   }
 
-  if (verbNegative && !modifierIsNegative) {
+  if (negateVerb && !modifierIsNegative) {
     // The copula negates on itself — "is not careful", "was not careful", "will not be
     // careful" — never with do-support. A frequency adverb follows the "not", as it does after an
     // auxiliary: "is not always tired", "will not always be tired".

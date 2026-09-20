@@ -10,17 +10,21 @@ import type { NichtSlots } from './de.types.js';
  *   essen", never "im Begriff nicht zu essen");
  * - before a Mittelfeld adverb, whoever it belongs to ("isst nicht immer", "iss nicht schnell",
  *   "nicht immer essen");
- * - before a predicate complement ("ist nicht müde", "nicht müde sein");
- * - otherwise after the objects and complements ("isst die Maus nicht", "die Maus nicht essen").
+ * - before the complements, which belong to the predicate and so stand behind "nicht": a predicate
+ *   complement ("ist nicht müde", "nicht müde sein") and a prepositional one alike ("geht nicht
+ *   zum Markt", "ist nicht im Haus" — A159);
+ * - otherwise after the objects ("isst die Maus nicht", "die Maus nicht essen"), which is where a
+ *   bare-dative recipient stays too ("gibt dem Hund das Buch nicht").
  *
  * `negate` is the caller's decision that "nicht" is needed at all (a negative adverb or a "kein"
- * already negates); this only places it.
+ * already negates); `complements` is its decision that there is such a constituent to lead (see
+ * `hasPrepositionalComplement`). This only places it.
  */
 export function nichtSlots(
   negate: boolean,
-  { prospective = false, adverb, predicative }: { prospective?: boolean; adverb: boolean; predicative: boolean },
+  { prospective = false, adverb, complements }: { prospective?: boolean; adverb: boolean; complements: boolean },
 ): NichtSlots {
-  const slots: NichtSlots = { beforeAspect: '', beforeAdverb: '', beforePredicative: '', after: '' };
-  if (negate) slots[prospective ? 'beforeAspect' : adverb ? 'beforeAdverb' : predicative ? 'beforePredicative' : 'after'] = 'nicht';
+  const slots: NichtSlots = { beforeAspect: '', beforeAdverb: '', beforeComplements: '', after: '' };
+  if (negate) slots[prospective ? 'beforeAspect' : adverb ? 'beforeAdverb' : complements ? 'beforeComplements' : 'after'] = 'nicht';
   return slots;
 }

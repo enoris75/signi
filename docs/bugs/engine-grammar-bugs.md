@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (13 of them,
-as of this writing — 9 in Part B and 4 in Part A).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of them,
+as of this writing — all 9 in Part B; Part A is empty).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,12 +59,8 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Language |
-|---|---|---|
-| A158 | [A158-negative-complement-not-collapsed.md](A-must-fix/A158-negative-complement-not-collapsed.md) | English, German |
-| A159 | [A159-german-nicht-before-a-prepositional-complement.md](A-must-fix/A159-german-nicht-before-a-prepositional-complement.md) | German |
-| A160 | [A160-negative-subject-not-collapsed.md](A-must-fix/A160-negative-subject-not-collapsed.md) | English, German |
-| A161 | [A161-japanese-feminine-plural-pronoun.md](A-must-fix/A161-japanese-feminine-plural-pronoun.md) | Japanese |
+**Empty.** Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
 
@@ -256,6 +252,10 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A152 | [A152-impersonal-se-with-reflexive-verb.md](fixed/A152-impersonal-se-with-reflexive-verb.md) | Spanish, Portuguese | 2026-09-20 |
 | A155 | [A155-french-bien-after-nonfinite-verb.md](fixed/A155-french-bien-after-nonfinite-verb.md) | French | 2026-09-20 |
 | A157 | [A157-german-animals-fressen.md](fixed/A157-german-animals-fressen.md) | German (corpus + translator) | 2026-09-20 |
+| A161 | [A161-japanese-feminine-plural-pronoun.md](fixed/A161-japanese-feminine-plural-pronoun.md) | Japanese (corpus + engine) | 2026-09-20 |
+| A159 | [A159-german-nicht-before-a-prepositional-complement.md](fixed/A159-german-nicht-before-a-prepositional-complement.md) | German | 2026-09-20 |
+| A158 | [A158-negative-complement-not-collapsed.md](fixed/A158-negative-complement-not-collapsed.md) | English, German | 2026-09-20 |
+| A160 | [A160-negative-subject-not-collapsed.md](fixed/A160-negative-subject-not-collapsed.md) | English, German | 2026-09-20 |
 
 _B1 / B1b / B2 / B3 / B4 were documented simplifications (Part B), fixed after a product decision
 rather than as outright bugs._

@@ -25,7 +25,11 @@ export function renderClause(phrase: ResolvedPhrase): string {
   const subj = dropsSubject ? '' : subjectText(subject);
   // Verbless period: a bare noun phrase ("breaking news").
   if (!phrase.verbPhrase) return subj.trim();
-  const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements);
+  // A `no` subject is the clause's negator and takes the other negatives with it (A160). Only the
+  // matrix clause's own subject counts: `relativeText` passes the head noun's forms for agreement,
+  // but a `no` head negates THIS clause, not the relative one.
+  const parts = predicateParts(subject.agreement, phrase.verbPhrase, phrase.directObject, phrase.complements,
+    subject.agreement['definiteness'] === 'no');
   // A question puts the finite auxiliary before the subject: "is the server active?".
   const clause = (phrase.verbPhrase.interrogative ? invertSubject(subj, parts) : [subj, ...parts])
     .filter(Boolean)

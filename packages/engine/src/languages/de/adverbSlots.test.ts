@@ -2,8 +2,8 @@ import { describe, expect, test } from 'vitest';
 import { concept } from '../resolved.fixtures.js';
 import { adverbSlots } from './adverbSlots.js';
 
-const NICHT = { beforeAspect: '', beforeAdverb: 'nicht', beforePredicative: '', after: '' };
-const NONE = { beforeAspect: '', beforeAdverb: '', beforePredicative: '', after: '' };
+const NICHT = { beforeAspect: '', beforeAdverb: 'nicht', beforeComplements: '', after: '' };
+const NONE = { beforeAspect: '', beforeAdverb: '', beforeComplements: '', after: '' };
 
 describe('adverbSlots', () => {
   test('a manner or frequency adverb keeps the slot before the objects', () => {

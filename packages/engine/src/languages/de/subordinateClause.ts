@@ -5,6 +5,7 @@ import { relativeGapComplement } from '../../functions/relativeGapComplement.js'
 import { adverbSlots } from './adverbSlots.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
 import { finiteNegation } from './finiteNegation.js';
+import { hasPrepositionalComplement } from './hasPrepositionalComplement.js';
 import { modalAdverbs } from './modalAdverbs.js';
 import { modalVerbGroup } from './modalVerbGroup.js';
 import { nonReflexiveVerb } from './nonReflexiveVerb.js';
@@ -73,15 +74,23 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
 
   // The dative recipient leads the accusative object, and a subordinate means clause trails the
   // finite verb, as in the main clause (see `splitMeansClause`): "der isst, indem man ein Wort wählt".
-  const { dative, rest: undative } = splitDative(rel.complements);
+  // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
+  // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
+  // An object a preposition leads stands where a predicate complement does, after "nicht" (A139),
+  // and so does a prepositional complement: "der nicht zum Markt geht" (A159). The main clause
+  // computes the same flag in `renderClause`; this is the second site.
+  const objectPrep = objectPreposition(verb);
+  const leadsComplements = !!rel.complements?.['predicative'] || hasPrepositionalComplement(rel.complements)
+    || (!!objectPrep && !!rel.directObject);
+  // The head noun stands in for the subject here, but a `kein` head negates the MATRIX clause, not
+  // this one ("kein Kater, der nicht frisst, läuft"), so no `subjectIsNegative` is passed.
+  const { nicht, directObject, complements: negComplements } = finiteNegation({
+    verbPhrase: rel.verbPhrase, directObject: rel.directObject, complements: rel.complements,
+  }, leadsComplements);
+  const { dative, rest: undative } = splitDative(negComplements);
   const { means, rest } = splitMeansClause(undative);
   const dativeText = complementsPhrase(dative);
   const meansText = complementsPhrase(means);
-  // Negation follows the main clause's rules (see `finiteNegation`): "der keine Maus isst", "der nie
-  // isst", "der nicht immer isst", "der nicht müde wird", "der nicht im Begriff zu essen ist".
-  // An object a preposition leads stands where a predicate complement does, after "nicht" (A139).
-  const objectPrep = objectPreposition(verb);
-  const { nicht, directObject } = finiteNegation(rel.verbPhrase, rel.directObject, !!rel.complements?.['predicative'] || (!!objectPrep && !!rel.directObject));
   const { pronoun: objectPronoun, noun: directObjectText, prepositional } = splitObject(directObject, '', objectPrep);
   const objectPronounText = [reflexivePronoun(verb.forms, pn), objectPronoun].filter(Boolean).join(' ');
   const modifierText = modifier ? (modifier.forms['base'] ?? '') : '';
@@ -105,7 +114,7 @@ export function subordinateClause(np: ResolvedNounPhrase): string {
       adverb: prospectiveFrequency ? '' : adverb.beforeObject, dative: dativeText, directObject: directObjectText,
       directionAdverb: adverb.afterObject, complements: complementsText,
     }, true)
-    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforePredicative, complementsText, nicht.after, ...verbFinalCluster(complex)];
+    : [objectPronounText, mid, dativeText, directObjectText, nicht.beforeAdverb, modalAdverbsText, modifierText, nicht.beforeComplements, complementsText, nicht.after, ...verbFinalCluster(complex)];
   const body = [pronoun, clauseSubjectText, ...predicate, meansText]
     .filter(Boolean)
     .join(' ');

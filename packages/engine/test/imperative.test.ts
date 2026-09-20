@@ -383,8 +383,9 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
     }).de).toBe('werde nicht müde.');
   });
 
-  // Regression guards: with no adverb or predicate complement "nicht" still trails the objects, a
-  // negative adverb still replaces it, and an affirmative command is untouched.
+  // Regression guards: with no adverb or complement to lead, "nicht" still trails the objects —
+  // including a bare-dative recipient, which is an object — a negative adverb still replaces it, and
+  // an affirmative command is untouched.
   test('German keeps "nicht" after the objects, and "nie" in its place', () => {
     const eat = (plan: Partial<PhrasePlan>, verbPhrase: Partial<VerbPhrase>) => sayAll(command(plan, np('SECOND_PERSON'), verbPhrase)).de;
     expect(eat({ directObject: np('MOUSE') }, { negative: true })).toBe('iss die Maus nicht.');
@@ -393,7 +394,9 @@ describe('known bugs: German "nicht" in commands and instructions', () => {
       ...clause(np('SECOND_PERSON'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: np('BOY') } }, verbPhrase: { negative: true } }),
       imperative: true,
     }).de).toBe('gib dem Jungen das Buch nicht.');
-    expect(eat({ complements: { locative: { phrase: np('MARKET') } } }, { negative: true })).toBe('iss im Markt nicht.');
+    // A159 moved this one: a PREPOSITIONAL complement belongs to the predicate, so "nicht" leads it
+    // ("iss nicht im Markt"). A49 had written the rule as "after the objects and complements".
+    expect(eat({ complements: { locative: { phrase: np('MARKET') } } }, { negative: true })).toBe('iss nicht im Markt.');
     expect(eat({}, { negative: true, modifier: 'NEVER' })).toBe('iss nie.');
     expect(eat({ imperativeRegister: 'instruction' }, { negative: true, modifier: 'NEVER' })).toBe('nie essen.');
     expect(eat({ directObject: np('MOUSE') }, { modifier: 'FAST' })).toBe('iss schnell die Maus.');

@@ -52,3 +52,35 @@ seeding.
 | | |
 |---|---|
 | **Test** | `pronoun.test.ts` → *known bugs: Japanese feminine plural pronoun* (2 `test.fails`, plus a regression test that the masculine plural, the feminine singular and the other six languages are unchanged) |
+
+## Resolved
+
+**2026-09-20.** 彼女ら it is — ら, to match the 彼ら the corpus already uses for the 3rd person.
+
+- **Seed** — [`packages/backend/src/concepts/pronouns.ts`](../../../packages/backend/src/concepts/pronouns.ts):
+  the `ja` row of `THIRD_PERSON` gained `plural_fem: '彼女ら'` and `plural_fem_reading: 'かのじょら'`.
+  No new form key; `plural_fem` is the one French, Spanish and Portuguese already use.
+- **Engine** — [`packages/engine/src/translator/functions/resolveNounPhrase.ts`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts):
+  the plural branch now remembers *whether* it selected the feminine surface and takes
+  `plural_fem_reading` with it, falling back to `plural_reading` when the language seeds the surface
+  alone — mirroring the `singular_${gender}_reading` branch below it. The comment listing the
+  languages with no gendered plural no longer names Japanese.
+- **Also the possessive**, which the bug's table did not list. The possessive is a second surface,
+  off a hardcoded table rather than the seed, and it had the same gap: a feminine plural possessor
+  read 彼らの where the feminine *singular* already read 彼女の.
+  [`packages/engine/src/possessive.ts`](../../../packages/engine/src/possessive.ts)'s `possessiveJa`
+  now genders the plural as it already gendered the singular.
+
+- **Tests:** [`packages/engine/test/pronoun.test.ts`](../../../packages/engine/test/pronoun.test.ts)
+  → *known bugs: Japanese feminine plural pronoun*. Both pinning `test.fails` are now passing
+  `test`s, with their assertions unchanged. New cases:
+  - 彼女ら in a cause and a terminus complement, in a coordination, and at both ends of one clause,
+    plus the furigana of an object-slot 彼女ら;
+  - the possessive: 彼女らの猫 against the unchanged 彼らの猫 and 彼女の猫.
+
+  Colocated unit tests:
+  - [`resolveNounPhrase.test.ts`](../../../packages/engine/src/translator/functions/resolveNounPhrase.test.ts)
+    — a feminine plural surface takes the feminine plural reading, a masculine one keeps the plain
+    reading, and a surface seeded without its own reading falls back;
+  - [`possessive.test.ts`](../../../packages/engine/src/possessive.test.ts) — the 3rd plural split on
+    gender, masculine and neuter unchanged.
