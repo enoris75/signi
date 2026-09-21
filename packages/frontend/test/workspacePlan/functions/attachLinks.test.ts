@@ -7,10 +7,11 @@ import { BOY, byId, CAT, conditional, DOG, EAT, HOUSE, period, relative, SEE, SL
 const MAIN = period('main', { subject: CAT, verb: SEE, directObject: DOG, directObjectPossessor: { subject: BOY } });
 const SLEEPS = period('sleeps', { verb: SLEEP });
 const EATS = period('eats', { subject: BOY, verb: EAT });
+const NO_VERB = period('noVerb', { subject: BOY });
 
 const attach = (links: Parameters<typeof attachLinks>[2], seen = new Set(['main'])) => {
   const plan = selectionToPlan(MAIN.selection);
-  attachLinks(plan, MAIN, links, byId(MAIN, SLEEPS, EATS), seen);
+  attachLinks(plan, MAIN, links, byId(MAIN, SLEEPS, EATS, NO_VERB), seen);
   return plan;
 };
 
@@ -46,6 +47,7 @@ describe('attachLinks', () => {
     ['that is not a relative clause', conditional('l', 'main', 'sleeps')],
     ['to a period that is gone', relative('l', ['main', 'subject'], ['gone', 'subject'])],
     ['from a noun the plan does not hold', relative('l', ['main', 'locative'], ['sleeps', 'subject'])],
+    ['to a period with no verb yet', relative('l', ['main', 'subject'], ['noVerb', 'directObject'])],
   ])('ignores a link %s', (_, link) => {
     expect(attach([link])).toEqual(selectionToPlan(MAIN.selection));
   });

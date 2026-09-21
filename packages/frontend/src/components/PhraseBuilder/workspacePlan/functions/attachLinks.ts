@@ -20,6 +20,7 @@ export function attachLinks(
     if (!target || seen.has(target.id)) continue;
     const head = getNoun(plan, link.source.nounKey);
     if (!head) continue;
-    head.relative = buildRelativeClause(target, link.target.nounKey, links, byId, seen);
+    const relative = buildRelativeClause(target, link.target.nounKey, links, byId, seen);
+    if (relative) head.relative = relative;
   }
 }

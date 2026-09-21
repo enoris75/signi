@@ -259,6 +259,14 @@ export class Builder {
     await this.pickIn(this.period(index), 'typeahead-noun', conceptId);
   }
 
+  /** Set the verb of a specific period whose verb box has closed to "empty" — one that went on to
+   *  something else after its subject, so the box has to be clicked open before it takes a word. */
+  async setVerbIn(index: number, conceptId: string): Promise<void> {
+    const scope = this.period(index);
+    await scope.getByTestId('box-verb').click();
+    await this.pickIn(scope, 'typeahead-verb', conceptId);
+  }
+
   /**
    * Attach the clause in period `clauseIndex` to a noun in period `headIndex` as a restrictive
    * relative clause. Two clicks, the way the canvas takes it: start the link from the head noun's

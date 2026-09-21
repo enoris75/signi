@@ -8,14 +8,17 @@ import { attachLinks } from "./attachLinks.ts";
 // gap slot is dropped (its surface comes from the head above); any other slot is kept. A
 // non-subject relative keeps the clause's own subject, which drives agreement. A complement gap
 // keeps its specifiers, which pick the relativizer's preposition ("the house under which …").
+// A period with no verb yet is no clause at all: it yields nothing rather than a relative clause
+// without its predicate, which the engine cannot render.
 export function buildRelativeClause(
   container: PhraseContainer,
   gap: NounKey,
   links: PhraseLink[],
   byId: Map<string, PhraseContainer>,
   seen: Set<string>,
-): RelativeClause {
+): RelativeClause | undefined {
   const plan = selectionToPlan(container.selection);
+  if (!plan.verbPhrase) return undefined;
   attachLinks(plan, container, links, byId, new Set([...seen, container.id]));
   const complements = plan.complements ? { ...plan.complements } : undefined;
   const headSpecifiers = COMPLEMENT_KEYS.has(gap) ? complements?.[gap as ComplementType]?.specifiers : undefined;
@@ -25,7 +28,7 @@ export function buildRelativeClause(
     ...(headSpecifiers?.length ? { headSpecifiers } : {}),
     // The head fills the gap, so it is omitted; a non-subject relative keeps its own subject.
     subject: gap === "subject" ? undefined : plan.subject,
-    verbPhrase: plan.verbPhrase!,
+    verbPhrase: plan.verbPhrase,
     directObject: gap === "directObject" ? undefined : plan.directObject,
     complements: complements && Object.keys(complements).length > 0 ? complements : undefined,
   };

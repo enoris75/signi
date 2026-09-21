@@ -26,6 +26,32 @@ test.describe('subordinate clauses', () => {
     expect(await app.sentence('it')).toBe('il ragazzo che piange vede il cane.');
   });
 
+  test('a relative clause with no verb yet leaves the main sentence standing until it gets one', async ({
+    app,
+    page,
+  }) => {
+    // A verbless relative clause once reached the engine, which threw on its missing verb phrase,
+    // and every translate answered 500 until the clause had a verb.
+    const failures: string[] = [];
+    page.on('response', (r) => {
+      if (r.url().includes('/api/translate') && r.status() >= 500) failures.push(`${r.status()} ${r.url()}`);
+    });
+
+    // The relative clause holds only its subject — the gap — built while it is the only period.
+    await app.setSubject('BOY');
+    await app.addPeriod();
+    await app.buildClauseIn(1, 'BOY', 'SEE');
+    await app.setDirectObjectIn(1, 'DOG');
+    await app.linkRelative(1, 'subject', 0, 'subject');
+
+    await expect.poll(() => app.sentence('en')).toBe('the boy sees the dog.');
+
+    await app.setVerbIn(0, 'CRY');
+
+    await expect.poll(() => app.sentence('en')).toBe('the boy who cries sees the dog.');
+    expect(failures).toEqual([]);
+  });
+
   test('a non-subject relative links the head to the direct-object gap of the clause', async ({
     app,
   }) => {

@@ -38,13 +38,13 @@ describe('buildRelativeClause', () => {
       headSpecifiers: [{ kind: 'path', value: 'under' }],
       subject: { concept: 'CAT' },
     });
-    expect(relativeClause.complements).toBeUndefined();
+    expect(relativeClause?.complements).toBeUndefined();
   });
 
   it('keeps the complements other than the gap', () => {
     const sleeps = period('sleeps', { subject: CAT, verb: SLEEP, locative: HOUSE, manner: KNIFE });
 
-    expect(Object.keys(clause(sleeps, 'locative').complements!)).toEqual(['manner']);
+    expect(Object.keys(clause(sleeps, 'locative')?.complements ?? {})).toEqual(['manner']);
   });
 
   it('carries no head specifiers for a gap without any', () => {
@@ -59,7 +59,14 @@ describe('buildRelativeClause', () => {
     const relativeClause = clause(sleeps, 'subject');
 
     expect(relativeClause).not.toHaveProperty('headSpecifiers');
-    expect(relativeClause.complements?.locative?.specifiers).toEqual([{ kind: 'path', value: 'under' }]);
+    expect(relativeClause?.complements?.locative?.specifiers).toEqual([{ kind: 'path', value: 'under' }]);
+  });
+
+  it('is nothing yet for a period with no verb, rather than a clause without its predicate', () => {
+    const noVerb = period('boy', { subject: BOY, directObject: DOG });
+
+    expect(clause(noVerb, 'subject')).toBeUndefined();
+    expect(clause(noVerb, 'directObject')).toBeUndefined();
   });
 
   it('folds in the clause’s own relative clauses', () => {
@@ -67,7 +74,7 @@ describe('buildRelativeClause', () => {
 
     const relativeClause = clause(EATS, 'subject', [relative('l', ['eats', 'directObject'], ['sleeps', 'subject'])], [EATS, sleeps]);
 
-    expect((relativeClause.directObject as NounPhrase).relative?.verbPhrase.verb).toBe('SLEEP');
+    expect((relativeClause?.directObject as NounPhrase).relative?.verbPhrase.verb).toBe('SLEEP');
   });
 
   it('does not follow a link back into the period that holds the head', () => {
@@ -75,6 +82,6 @@ describe('buildRelativeClause', () => {
 
     const relativeClause = clause(EATS, 'subject', [relative('back', ['eats', 'directObject'], ['main', 'subject'])], [EATS, main]);
 
-    expect((relativeClause.directObject as NounPhrase).relative).toBeUndefined();
+    expect((relativeClause?.directObject as NounPhrase).relative).toBeUndefined();
   });
 });
