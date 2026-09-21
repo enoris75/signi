@@ -306,3 +306,62 @@ describe('known bugs: Italian possessive before a kinship noun', () => {
     expect(say(clause(np('DOG', { possessor: { kind: 'pronominal', person: '3', number: 'singular' } }), 'RUN'), 'it')).toBe('il suo cane corre.');
   });
 });
+
+// A187. A pronominal possessor ("her") fills the determiner slot, and the head's own determiner is
+// thrown away in every language but Japanese: `possessedHeadForms` overwrites it with `definite` or
+// `bare`, and English, German and Spanish put the possessive in its place. "this book of hers", "some
+// books of hers", "all her books" and "no book of hers" all come out as "her book(s)". The `no` still
+// drives the Romance concord. Its object is negated in four languages and positive in two ("il gatto
+// non vede il suo libro", "the cat sees her book"), and French is left with a bare "ne" ("son livre
+// ne brûle."). Each language has its own way to keep both: "questo suo libro", "este libro suyo",
+// "este livro seu", "ce livre à elle", "dieses Buch von ihr", "this book of hers", and after "all"
+// the possessive itself ("tutti i suoi libri", "all her books"). Found while probing A184.
+describe('known bugs: a pronominal possessor drops the head\'s determiner', () => {
+  const her: PronominalPossessor = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' };
+  const mine: PronominalPossessor = { kind: 'pronominal', person: '1', number: 'singular' };
+  const bookOfHers = (definiteness: 'this' | 'some' | 'no' | 'all') => sayAll(clause(np('BOOK', { definiteness, possessor: her }), 'BURN'));
+
+  test.fails('every language keeps a demonstrative, a quantifier, `no` and `all` beside the possessive', () => {
+    expect(bookOfHers('this')).toMatchObject({
+      en: 'this book of hers burns.', // now: "her book burns."
+      it: 'questo suo libro brucia.', fr: 'ce livre à elle brûle.', de: 'dieses Buch von ihr brennt.',
+      es: 'este libro suyo arde.', pt: 'este livro seu arde.',
+    });
+    expect(bookOfHers('some')).toMatchObject({
+      en: 'some books of hers burn.', it: 'alcuni suoi libri bruciano.', fr: 'quelques livres à elle brûlent.',
+      de: 'einige Bücher von ihr brennen.', es: 'algunos libros suyos arden.', pt: 'alguns livros seus ardem.',
+    });
+    expect(bookOfHers('no')).toMatchObject({
+      en: 'no book of hers burns.', it: 'nessun suo libro brucia.',
+      fr: 'aucun livre à elle ne brûle.', // now: "son livre ne brûle."
+      de: 'kein Buch von ihr brennt.', es: 'ningún libro suyo arde.', pt: 'nenhum livro seu arde.',
+    });
+    expect(bookOfHers('all')).toMatchObject({
+      en: 'all her books burn.', it: 'tutti i suoi libri bruciano.', fr: 'tous ses livres brûlent.',
+      de: 'alle ihre Bücher brennen.', es: 'todos sus libros arden.', pt: 'todos os seus livros ardem.',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('BOOK', { definiteness: 'no', possessor: her }) }))).toMatchObject({
+      en: 'the cat sees no book of hers.', // now: "the cat sees her book."
+      it: 'il gatto non vede nessun suo libro.', // now: "il gatto non vede il suo libro."
+      fr: 'le chat ne voit aucun livre à elle.', de: 'der Kater sieht kein Buch von ihr.',
+      es: 'el gato no ve ningún libro suyo.', pt: 'o gato não vê nenhum livro seu.',
+    });
+    expect(sayAll(clause(np('HOUSE', { definiteness: 'this', possessor: mine }), 'BURN'))).toMatchObject({
+      en: 'this house of mine burns.', it: 'questa mia casa brucia.', fr: 'cette maison à moi brûle.',
+      de: 'dieses Haus von mir brennt.', es: 'esta casa mía arde.', pt: 'esta casa minha arde.',
+    });
+  });
+
+  // Regression: the definite, indefinite and bare heads keep the plain possessive, a kinship noun
+  // keeps its bare Italian possessive, and a complement fuses as before.
+  test('the definite head, a kinship noun and a complement are right', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: her }), 'BURN'))).toMatchObject({
+      en: 'her book burns.', it: 'il suo libro brucia.', fr: 'son livre brûle.', de: 'ihr Buch brennt.', es: 'su libro arde.', pt: 'o seu livro arde.',
+    });
+    expect(say(clause(np('BOOK', { definiteness: 'indefinite', possessor: her }), 'BURN'), 'en')).toBe('her book burns.');
+    expect(say(clause(np('FATHER', { possessor: mine }), 'RUN'), 'it')).toBe('mio padre corre.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: mine }) } } }))).toMatchObject({
+      it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.', de: 'der Kater läuft in meinem Haus.',
+    });
+  });
+});

@@ -743,3 +743,50 @@ describe('known bugs: Japanese locative "through"', () => {
     });
   });
 });
+
+// A188. A superlative after a place name needs the name's article: the article is what makes "più
+// grande" the superlative and not the comparative (C01), and French cannot have "la plus grande"
+// after a bare "en". A169 gave a prenominal adjective the article back and left a postnominal one
+// bare ("in Asia lontana", as in "in Africa settentrionale"). That fits a region name, but it also
+// catches the superlative, which in Italian and French always follows the noun: "in Europa più
+// grande" reads "in a bigger Europe", and "en Europe la plus grande" is not French. Found while
+// reviewing the random phrase "… behind sharpest Europe." (seed 530537, A183).
+describe('known bugs: a superlative on a place name after a bare preposition', () => {
+  const most = (concept: string, adjective: string, degree: 'most' | 'least' = 'most'): NounPhrase =>
+    np(concept, { adjectives: [adjective], adjectiveDegrees: [degree] });
+  const runsIn = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase } } }));
+  const goesTo = (phrase: NounPhrase) => sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase } } }));
+
+  test.fails('Italian and French article a place name that carries a superlative', () => {
+    expect(runsIn(most('EUROPE', 'BIG'))).toMatchObject({
+      it: "il gatto corre nell'Europa più grande.", // now: "in Europa più grande"
+      fr: "le chat court dans l'Europe la plus grande.", // now: "en Europe la plus grande"
+    });
+    expect(goesTo(most('EUROPE', 'BIG'))).toMatchObject({
+      it: "il gatto va nell'Europa più grande.", fr: "le chat va dans l'Europe la plus grande.",
+    });
+    expect(runsIn(most('ASIA', 'FAR', 'least'))).toMatchObject({
+      it: "il gatto corre nell'Asia meno lontana.", fr: "le chat court dans l'Asie la moins lointaine.",
+    });
+    expect(goesTo(most('AFRICA', 'BEAUTIFUL'))).toMatchObject({
+      it: "il gatto va nell'Africa più bella.", fr: "le chat va dans l'Afrique la plus belle.",
+    });
+    expect(goesTo(most('ITALY', 'BIG'))).toMatchObject({
+      it: "il gatto va nell'Italia più grande.", fr: "le chat va dans l'Italie la plus grande.",
+    });
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('EUROPE', 'BIG') } } })).fr)
+      .toBe("le chat vient de l'Europe la plus grande."); // now: "d'Europe la plus grande"
+  });
+
+  // Regression: the plain and comparative postnominal adjectives keep A169's bare preposition, a
+  // prenominal adjective keeps its article, the Italian source was already right, and Spanish and
+  // German article every modified name.
+  test('the positive and comparative, a prenominal adjective, the Italian source, Spanish and German are right', () => {
+    expect(runsIn(np('ASIA', { adjectives: ['FAR'] }))).toMatchObject({ it: 'il gatto corre in Asia lontana.', fr: 'le chat court en Asie lointaine.' });
+    expect(runsIn(np('EUROPE', { adjectives: ['BIG'], adjectiveDegrees: ['more'] }))).toMatchObject({ it: 'il gatto corre in Europa più grande.' });
+    expect(runsIn(np('EUROPE', { adjectives: ['BIG'] }))).toMatchObject({ it: 'il gatto corre nella grande Europa.', fr: 'le chat court dans la grande Europe.' });
+    expect(sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: most('EUROPE', 'BIG') } } })).it)
+      .toBe("il gatto viene dall'Europa più grande.");
+    expect(runsIn(most('EUROPE', 'BIG'))).toMatchObject({ es: 'el gato corre en la Europa más grande.', de: 'der Kater läuft im größten Europa.' });
+  });
+});

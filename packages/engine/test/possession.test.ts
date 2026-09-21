@@ -602,3 +602,97 @@ describe('known bugs: German adjective after a plural possessive', () => {
     expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['BIG'], definiteness: 'no' }), 'RUN')).de).toBe('keine großen Kater laufen.');
   });
 });
+
+// A184. The Saxon genitive fills the determiner slot of the possessed head ("the cat's book"), so
+// English drops whatever determiner the head carried: `this`, `some`, `many`, `few`, `all` and
+// even `no` all read "the cat's book(s)". The clause loses its negation ("no book of the cat burns"
+// → "the cat's book burns"). Every other language keeps the head's determiner, because its genitive
+// follows the head ("nessun libro del gatto", "kein Buch des Katers"). English keeps it too once A21
+// has moved a heavy possessor to the of-genitive ("this book of the cat that eats the mouse").
+// Found by the random phrase "many happy adult tears' fires will want to have divided …" (seed
+// 530537), where the head's `some` is gone.
+describe('known bugs: English drops the possessed head\'s determiner', () => {
+  const bookOf = (definiteness: NounPhrase['definiteness'], extra: Partial<NounPhrase> = {}) =>
+    say(clause(np('BOOK', { definiteness, possessor: np('CAT'), ...extra }), 'BURN'), 'en');
+
+  test.fails('English keeps a demonstrative, a quantifier or `no` on the possessed head', () => {
+    expect(bookOf('this')).toBe('this book of the cat burns.'); // now: "the cat's book burns."
+    expect(bookOf('that')).toBe('that book of the cat burns.');
+    expect(bookOf('some')).toBe('some books of the cat burn.'); // now: "the cat's books burn."
+    expect(bookOf('many')).toBe('many books of the cat burn.');
+    expect(bookOf('few')).toBe('few books of the cat burn.');
+    expect(bookOf('no')).toBe('no book of the cat burns.'); // now: "the cat's book burns."
+    expect(bookOf('all')).toBe("all the cat's books burn.");
+    expect(bookOf('this', { adjectives: ['OLD'] })).toBe('this old book of the cat burns.');
+    expect(say(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { definiteness: 'no', possessor: np('CAT') }) }), 'en'))
+      .toBe('the dog sees no book of the cat.');
+    expect(say(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { definiteness: 'many', possessor: np('CAT', { number: 'plural' }) }) }), 'en'))
+      .toBe('the dog sees many books of the cats.');
+    expect(say(clause(np('DOG'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'this', possessor: np('CAT') }) } },
+    }), 'en')).toBe('the dog runs in this house of the cat.');
+    // A possessor that itself goes to the of-genitive can no longer take "'s" (A21's constraint).
+    expect(say(clause(np('BOOK', { possessor: np('FATHER', { definiteness: 'this', possessor: np('CAT') }) }), 'BURN'), 'en'))
+      .toBe('the book of this father of the cat burns.'); // now: "the cat's father's book burns."
+    // The random phrase's subject.
+    expect(say(clause(np('FIRE', {
+      definiteness: 'some', possessor: np('TEAR', { definiteness: 'many', adjectives: ['HAPPY', 'ADULT'] }),
+    }), 'BURN'), 'en')).toBe('some fires of many happy adult tears burn.');
+  });
+
+  // Regression: the definite head keeps the Saxon genitive, the possessor keeps its own determiner,
+  // a pronominal possessor and a post-modified one are unchanged, and the other languages already
+  // keep the head's determiner.
+  test('the definite head, the possessor\'s own determiner and the other languages are right', () => {
+    expect(bookOf('definite')).toBe("the cat's book burns.");
+    expect(say(clause(np('BOOK', { possessor: np('CAT', { definiteness: 'this' }) }), 'BURN'), 'en')).toBe("this cat's book burns.");
+    expect(say(clause(np('BOOK', { possessor: np('FATHER', { possessor: np('CAT') }) }), 'BURN'), 'en')).toBe("the cat's father's book burns.");
+    expect(say(clause(np('BOOK', {
+      definiteness: 'this', possessor: np('CAT', { relative: { verbPhrase: { verb: 'EAT' }, directObject: np('MOUSE') } }),
+    }), 'BURN'), 'en')).toBe('this book of the cat that eats the mouse burns.');
+    expect(sayAll(clause(np('BOOK', { definiteness: 'no', possessor: np('CAT') }), 'BURN'))).toMatchObject({
+      it: 'nessun libro del gatto brucia.', de: 'kein Buch des Katers brennt.',
+    });
+  });
+});
+
+// A185. Japanese puts the possessed head's determiner in front of its possessor: "この猫の本" for
+// "this book of the cat". A prenominal determiner modifies the nearest noun, so that reads "this
+// cat's book", and a quantifier reads as the possessor's ("多くの猫の本", "many cats' books"). When the
+// possessor has a determiner of its own, the two stack: "いくつかの多くの…涙の火". The head's determiner
+// belongs after the possessor's の ("猫のこの本", "猫の多くの本", "猫のどの本も"). Found by the random
+// phrase "many happy adult tears' fires will want to have divided …" (seed 530537): Japanese
+// "いくつかの多くの幸せな大人の涙の火".
+describe('known bugs: Japanese puts the head\'s determiner before its possessor', () => {
+  const bookOf = (definiteness: NounPhrase['definiteness'], possessor: NounPhrase['possessor'] = np('CAT')) =>
+    say(clause(np('BOOK', { definiteness, possessor }), 'BURN'), 'ja');
+  const hers = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
+
+  test.fails('Japanese puts the head\'s determiner after the possessor', () => {
+    expect(bookOf('this')).toBe('猫のこの本は燃えます。'); // now: この猫の本は燃えます。
+    expect(bookOf('that')).toBe('猫のその本は燃えます。');
+    expect(bookOf('some')).toBe('猫のいくつかの本は燃えます。');
+    expect(bookOf('many')).toBe('猫の多くの本は燃えます。');
+    expect(bookOf('all')).toBe('猫のすべての本は燃えます。');
+    expect(bookOf('no')).toBe('猫のどの本も燃えません。'); // now: どの猫の本も燃えません。
+    expect(bookOf('this', hers)).toBe('彼女のこの本は燃えます。'); // now: この彼女の本は燃えます。
+    expect(say(clause(np('DOG'), 'SEE', { directObject: np('BOOK', { definiteness: 'no', possessor: np('CAT') }) }), 'ja'))
+      .toBe('犬は猫のどの本も見ません。');
+    expect(say(clause(np('DOG'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE', { definiteness: 'this', possessor: np('CAT') }) } },
+    }), 'ja')).toBe('犬は猫のこの家で走ります。');
+    // The random phrase's subject.
+    expect(say(clause(np('FIRE', {
+      definiteness: 'some', possessor: np('TEAR', { definiteness: 'many', adjectives: ['HAPPY', 'ADULT'] }),
+    }), 'BURN'), 'ja')).toBe('多くの幸せな大人の涙のいくつかの火は燃えます。'); // now: いくつかの多くの…
+  });
+
+  // Regression: the possessor's own determiner leads it, and a head with no possessor keeps its
+  // determiner in front.
+  test('the possessor\'s own determiner and a head without a possessor are right', () => {
+    expect(bookOf('definite')).toBe('猫の本は燃えます。');
+    expect(say(clause(np('BOOK', { possessor: np('CAT', { definiteness: 'this' }) }), 'BURN'), 'ja')).toBe('この猫の本は燃えます。');
+    expect(say(clause(np('BOOK', { definiteness: 'this' }), 'BURN'), 'ja')).toBe('この本は燃えます。');
+    expect(say(clause(np('BOOK', { definiteness: 'no' }), 'BURN'), 'ja')).toBe('どの本も燃えません。');
+  });
+});

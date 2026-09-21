@@ -700,3 +700,95 @@ describe('known bugs: Japanese の/た adjective as a predicate', () => {
     expect(catIs('BECOME', 'LEGEND')).toBe('猫は伝説になります。');
   });
 });
+
+// A186. A predicate complement belongs next to its verb. German puts the predicate noun or adjective
+// at the end of the Mittelfeld, against the verb cluster ("ist wegen des Hundes eine Legende
+// geworden", "der wegen der Maus müde wird"), and so does the resultative of TRANSFORM ("hat das Haus
+// wegen des Hundes in ein Gefängnis verwandelt"). Japanese puts the に / ように phrase straight before
+// なる / 思える ("犬のために伝説になります"). Both engines render the complements in the shared
+// COMPLEMENT_RENDER_ORDER, which puts the predicate first. In Japanese that splits a set phrase:
+// "伝説に犬のためになります" also reads "became beneficial to the dog", and "伝説に犬となりました"
+// reads "became a dog". Found by the random phrase "have these sticks not become any person because of
+// the missing cow?" (seed 530539): "keine Person wegen der fehlenden Kuh geworden",
+// "どの人にも見つからない牛のためになっていませんか".
+describe('known bugs: the predicate is not next to its verb', () => {
+  const legend = np('LEGEND', { definiteness: 'indefinite' });
+  const becomes = (verbPhrase: Partial<VerbPhrase>, complements: PhrasePlan['complements']) =>
+    sayAll(clause(np('CAT'), 'BECOME', { verbPhrase, complements }));
+  const becauseOfDog = { cause: { phrase: np('DOG') } };
+
+  test.fails('German closes the Mittelfeld with the predicate', () => {
+    expect(becomes({}, { predicative: { phrase: legend }, ...becauseOfDog }).de).toBe('der Kater wird wegen des Hundes eine Legende.');
+    expect(becomes({ aspect: 'resultative' }, { predicative: { phrase: legend }, ...becauseOfDog }).de)
+      .toBe('der Kater ist wegen des Hundes eine Legende geworden.'); // now: "ist eine Legende wegen des Hundes geworden"
+    expect(becomes({ modals: ['MUST'] }, { predicative: { phrase: legend }, ...becauseOfDog }).de)
+      .toBe('der Kater muss wegen des Hundes eine Legende werden.');
+    expect(becomes({ tense: 'past' }, { predicative: { phrase: legend }, locative: { phrase: np('HOUSE') } }).de)
+      .toBe('der Kater wurde im Haus eine Legende.');
+    expect(becomes({}, { predicative: { phrase: np('TIRED') }, ...becauseOfDog }).de).toBe('der Kater wird wegen des Hundes müde.');
+    expect(say(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'BECOME' }, complements: { predicative: { phrase: np('TIRED') }, cause: { phrase: np('MOUSE') } } },
+    }), 'RUN'), 'de')).toBe('der Hund, der wegen der Maus müde wird, läuft.'); // now: "der müde wegen der Maus wird"
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } }), 'de'))
+      .toBe('der Kater scheint wegen des Hundes müde.');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend }, locative: { phrase: np('MARKET') } } }), 'de'))
+      .toBe('der Kater scheint im Markt eine Legende zu sein.');
+    expect(say(clause(np('CAT'), 'BE', { verbPhrase: { aspect: 'resultative' }, complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } }), 'de'))
+      .toBe('der Kater ist wegen des Hundes müde gewesen.');
+    expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: legend }, locative: { phrase: np('HOUSE') }, ...becauseOfDog } }), 'de'))
+      .toBe('der Kater ist im Haus wegen des Hundes eine Legende.');
+    expect(say(clause(np('CAT'), 'TRANSFORM', {
+      verbPhrase: { aspect: 'resultative' }, directObject: np('HOUSE'),
+      complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'indefinite' }) }, ...becauseOfDog },
+    }), 'de')).toBe('der Kater hat das Haus wegen des Hundes in ein Gefängnis verwandelt.');
+    // The random phrase.
+    expect(say({
+      subject: np('STICK', { number: 'plural', definiteness: 'this' }),
+      verbPhrase: { verb: 'BECOME', aspect: 'resultative', negative: true },
+      complements: {
+        predicative: { phrase: np('PERSON', { gender: 'fem', definiteness: 'no' }) },
+        cause: { phrase: np('COW', { adjectives: ['MISSING'] }), specifiers: [{ kind: 'sentiment', value: 'neutral' }] },
+      },
+      interrogative: true,
+    }, 'de')).toBe('sind diese Stöcke wegen der fehlenden Kuh keine Person geworden?');
+  });
+
+  test.fails('Japanese puts the predicate straight before なる and 思える', () => {
+    expect(becomes({}, { predicative: { phrase: legend }, ...becauseOfDog }).ja).toBe('猫は犬のために伝説になります。'); // now: 伝説に犬のためになります
+    expect(becomes({ modals: ['MUST'] }, { predicative: { phrase: legend }, ...becauseOfDog }).ja).toBe('猫は犬のために伝説になる必要があります。');
+    expect(becomes({ tense: 'past' }, { predicative: { phrase: legend }, locative: { phrase: np('HOUSE') } }).ja).toBe('猫は家で伝説になりました。');
+    expect(becomes({ tense: 'past' }, { predicative: { phrase: legend }, comitative: { phrase: np('DOG') } }).ja)
+      .toBe('猫は犬と伝説になりました。'); // now: 伝説に犬となりました ("became a dog")
+    expect(becomes({}, { predicative: { phrase: np('TIRED') }, ...becauseOfDog }).ja).toBe('猫は犬のために疲れているようになります。');
+    expect(becomes({ aspect: 'resultative', negative: true }, { predicative: { phrase: legend }, ...becauseOfDog }).ja)
+      .toBe('猫は犬のために伝説になっていません。');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: np('TIRED') }, ...becauseOfDog } }), 'ja'))
+      .toBe('猫は犬のために疲れているように思えます。');
+    expect(say(clause(np('CAT'), 'SEEM', { complements: { predicative: { phrase: legend }, locative: { phrase: np('MARKET') } } }), 'ja'))
+      .toBe('猫は市場で伝説に思えます。');
+    // The random phrase.
+    expect(say({
+      subject: np('STICK', { number: 'plural', definiteness: 'this' }),
+      verbPhrase: { verb: 'BECOME', aspect: 'resultative', negative: true },
+      complements: {
+        predicative: { phrase: np('PERSON', { gender: 'fem', definiteness: 'no' }) },
+        cause: { phrase: np('COW', { adjectives: ['MISSING'] }), specifiers: [{ kind: 'sentiment', value: 'neutral' }] },
+      },
+      interrogative: true,
+    }, 'ja')).toBe('この棒は見つからない牛のためにどの人にもなっていませんか？');
+  });
+
+  // Regression: a predicate alone, the Japanese copula (whose locative A42 already preposes) and
+  // TRANSFORM's Japanese object predicate are right, and English and Italian keep the predicate first.
+  test('a lone predicate, the Japanese copula and object predicate, and English and Italian are right', () => {
+    expect(becomes({}, { predicative: { phrase: legend } })).toMatchObject({ de: 'der Kater wird eine Legende.', ja: '猫は伝説になります。' });
+    expect(say(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: legend }, locative: { phrase: np('HOUSE') }, ...becauseOfDog } }), 'ja'))
+      .toBe('猫は家で犬のために伝説です。');
+    expect(say(clause(np('CAT'), 'TRANSFORM', {
+      directObject: np('HOUSE'), complements: { objectPredicative: { phrase: np('PRISON', { definiteness: 'indefinite' }) }, ...becauseOfDog },
+    }), 'ja')).toBe('猫は犬のために家を刑務所に変えます。');
+    expect(becomes({ aspect: 'resultative' }, { predicative: { phrase: legend }, ...becauseOfDog })).toMatchObject({
+      en: 'the cat has become a legend because of the dog.', it: 'il gatto è diventato una leggenda a causa del cane.',
+    });
+  });
+});

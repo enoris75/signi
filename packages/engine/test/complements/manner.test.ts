@@ -231,3 +231,71 @@ describe('manner adverbial (complemento di modo)', () => {
     });
   });
 });
+
+// A181. A similative manner phrase ("like the dog") is a comparison: "like no dog" says the act is
+// done as no dog does it, and the clause itself stays positive. English and German say so ("the cat
+// runs like no dog", "der Kater läuft wie kein Hund"). The negative word is licensed inside the
+// comparison, as in "canta come nessuno", "chante comme personne", "canta como nadie", "canta como
+// ninguém". The four Romance engines count the `no` as a postverbal negative word of the clause (A33)
+// and add its negator: "il gatto non corre come nessun cane" reads "does not run like any dog". The
+// measure, means and mode relations are not comparisons, and their `no` does negate ("non corre a
+// nessuna velocità"). Found by the random phrase "I have destroyed many young men who the near man
+// deletes down down like no tooth" (seed 857733), rendered "non ho distrutto …" in Italian.
+describe('known bugs: a `no` in a similative manner phrase', () => {
+  const likeNo = (concept: string) => ({ manner: { phrase: np(concept, { definiteness: 'no' }) } });
+
+  test.fails('Romance keeps the clause positive under "like no …"', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: likeNo('DOG') }))).toMatchObject({
+      it: 'il gatto corre come nessun cane.', // now: "il gatto non corre come nessun cane."
+      fr: 'le chat court comme aucun chien.', // now: "le chat ne court comme aucun chien."
+      es: 'el gato corre como ningún perro.',
+      pt: 'o gato corre como nenhum cão.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { tense: 'past' }, complements: likeNo('DOG') }))).toMatchObject({
+      it: 'il gatto corse come nessun cane.', fr: 'le chat courut comme aucun chien.',
+      es: 'el gato corrió como ningún perro.', pt: 'o gato correu como nenhum cão.',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: likeNo('DOG') }))).toMatchObject({
+      it: 'il gatto mangia il topo come nessun cane.', fr: 'le chat mange la souris comme aucun chien.',
+      es: 'el gato come el ratón como ningún perro.', pt: 'o gato come o rato como nenhum cão.',
+    });
+    expect(sayAll(clause(np('DOG', { relative: { verbPhrase: { verb: 'RUN' }, complements: likeNo('CAT') } }), 'EAT'))).toMatchObject({
+      it: 'il cane che corre come nessun gatto mangia.', fr: 'le chien qui court comme aucun chat mange.',
+      es: 'el perro que corre como ningún gato come.', pt: 'o cão que corre como nenhum gato come.',
+    });
+    // The random phrase.
+    expect(sayAll({
+      subject: np('FIRST_PERSON', { number: 'singular' }),
+      verbPhrase: { verb: 'DESTROY', aspect: 'resultative', modifier: 'DOWN' },
+      directObject: np('YOUNG_MAN', {
+        definiteness: 'many',
+        relative: { verbPhrase: { verb: 'DELETE', modifier: 'DOWN' }, headRole: 'directObject', subject: np('MAN', { gender: 'fem', adjectives: ['NEAR'] }) },
+      }),
+      complements: likeNo('TOOTH'),
+    })).toMatchObject({
+      it: "ho distrutto molti giovani che l'uomo vicino elimina giù giù come nessun dente.",
+      fr: "j'ai détruit beaucoup de jeunes hommes que l'homme proche supprime vers le bas vers le bas comme aucune dent.",
+      es: 'he destruido a muchos jóvenes que el hombre cercano elimina abajo abajo como ningún diente.',
+      pt: 'destruí muitos jovens que o homem próximo exclui para baixo para baixo como nenhum dente.',
+    });
+  });
+
+  // Regression: English and German already keep the clause positive, and a `no` under the other
+  // three relations, which are not comparisons, still negates the clause in every concord language.
+  test('English and German are right, and a measure, means or mode `no` still negates', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: likeNo('DOG') }))).toMatchObject({
+      en: 'the cat runs like no dog.', de: 'der Kater läuft wie kein Hund.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: likeNo('SPEED') }))).toMatchObject({
+      it: 'il gatto non corre a nessuna velocità.', fr: 'le chat ne court à aucune vitesse.',
+      es: 'el gato no corre a ninguna velocidad.', pt: 'o gato não corre a nenhuma velocidade.',
+      ja: '猫はどの速さでも走りません。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: likeNo('CARE') }))).toMatchObject({
+      it: 'il gatto non corre con nessuna cura.', fr: 'le chat ne court avec aucun soin.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: likeNo('WAY') }))).toMatchObject({
+      it: 'il gatto non corre in nessun modo.', es: 'el gato no corre de ninguna manera.',
+    });
+  });
+});

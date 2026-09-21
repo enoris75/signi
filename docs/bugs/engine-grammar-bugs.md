@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (4 of
-them, as of this writing, pinning two bugs in Part A; Part B has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (18 of
+them, as of this writing, pinning eleven bugs in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -63,6 +63,15 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 |---|---|---|
 | A178 | [A178-portuguese-suppletive-superlative-position.md](A-must-fix/A178-portuguese-suppletive-superlative-position.md) | Portuguese |
 | A179 | [A179-passive-infinitive-hidden-and-unprinted.md](A-must-fix/A179-passive-infinitive-hidden-and-unprinted.md) | Frontend |
+| A180 | [A180-determiner-on-a-proper-name.md](A-must-fix/A180-determiner-on-a-proper-name.md) | German, Spanish, Japanese, Italian, French, Portuguese (translator) |
+| A181 | [A181-negative-similative-manner-negates-the-clause.md](A-must-fix/A181-negative-similative-manner-negates-the-clause.md) | Italian, French, Spanish, Portuguese |
+| A182 | [A182-german-nicht-with-an-indefinite-object.md](A-must-fix/A182-german-nicht-with-an-indefinite-object.md) | German |
+| A183 | [A183-english-superlative-on-a-proper-name.md](A-must-fix/A183-english-superlative-on-a-proper-name.md) | English |
+| A184 | [A184-english-genitive-drops-the-head-determiner.md](A-must-fix/A184-english-genitive-drops-the-head-determiner.md) | English |
+| A185 | [A185-japanese-head-determiner-before-its-possessor.md](A-must-fix/A185-japanese-head-determiner-before-its-possessor.md) | Japanese |
+| A186 | [A186-predicate-not-next-to-its-verb.md](A-must-fix/A186-predicate-not-next-to-its-verb.md) | German, Japanese |
+| A187 | [A187-pronominal-possessor-drops-the-head-determiner.md](A-must-fix/A187-pronominal-possessor-drops-the-head-determiner.md) | English, Italian, French, German, Spanish, Portuguese |
+| A188 | [A188-superlative-place-name-bare-preposition.md](A-must-fix/A188-superlative-place-name-bare-preposition.md) | Italian, French |
 
 Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).

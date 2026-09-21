@@ -1122,3 +1122,68 @@ describe('known bugs: a negative controller negates its infinitive', () => {
     });
   });
 });
+
+// A182. German negates an indefinite noun phrase with "kein", not with "nicht": "kein" is "nicht +
+// ein", and the bare plural and the mass noun take it as well ("frisst keine Maus", "keine Mäuse",
+// "kein Wasser"). "frisst eine Maus nicht" can only mean one particular mouse the cat leaves alone,
+// and "frisst Mäuse nicht" is contrastive. The engine turns a `no` object into a plain indefinite
+// when something else negates the clause (A35, A158, A160), but it never goes the other way. A
+// negated verb keeps its "nicht" and leaves the indefinite object as it is. Found by the random
+// phrase "the least young adult woman will not have to consume phrases that are not eating …" (seed
+// 857734): "wird Phrasen, die …, nicht mit den runderen Gefühlen konsumieren müssen".
+describe('known bugs: German "nicht" with an indefinite object', () => {
+  const mouse = (extra: Partial<NounPhrase> = {}) => np('MOUSE', extra);
+  const notEat = (object: NounPhrase, verbPhrase: Partial<VerbPhrase> = {}) =>
+    say(clause(np('CAT'), 'EAT', { verbPhrase: { negative: true, ...verbPhrase }, directObject: object }), 'de');
+
+  test.fails('German negates an indefinite, bare plural or mass object with "kein"', () => {
+    expect(notEat(mouse({ definiteness: 'indefinite' }))).toBe('der Kater frisst keine Maus.'); // now: "frisst eine Maus nicht"
+    expect(notEat(mouse({ definiteness: 'indefinite', adjectives: ['BIG'] }))).toBe('der Kater frisst keine große Maus.');
+    expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }))).toBe('der Kater frisst keine Mäuse.'); // now: "frisst Mäuse nicht"
+    expect(notEat(mouse({ definiteness: 'indefinite', number: 'plural' }))).toBe('der Kater frisst keine Mäuse.');
+    expect(notEat(np('WATER', { definiteness: 'bare' }))).toBe('der Kater frisst kein Wasser.');
+    expect(notEat(mouse({ definiteness: 'bare', number: 'plural' }), { tense: 'future', modals: ['MUST'] }))
+      .toBe('der Kater wird keine Mäuse fressen müssen.');
+    expect(notEat(mouse({ definiteness: 'bare', number: 'plural', relative: { verbPhrase: { verb: 'RUN' } } })))
+      .toBe('der Kater frisst keine Mäuse, die laufen.'); // now: "frisst Mäuse, die laufen, nicht"
+    expect(say(clause(np('MAN'), 'GIVE', {
+      verbPhrase: { negative: true }, directObject: np('BOOK', { definiteness: 'indefinite' }), complements: { terminus: { phrase: np('BOY') } },
+    }), 'de')).toBe('der Mann gibt dem Jungen kein Buch.');
+    // The random phrase.
+    expect(say({
+      subject: np('WOMAN', { gender: 'fem', definiteness: 'definite', adjectives: ['YOUNG', 'ADULT'], adjectiveDegrees: ['least', 'positive'] }),
+      verbPhrase: { verb: 'CONSUME', tense: 'future', negative: true, modals: ['MUST'] },
+      directObject: np('PHRASE', {
+        number: 'plural', definiteness: 'bare',
+        relative: { verbPhrase: { verb: 'EAT', aspect: 'progressive', negative: true }, directObject: np('WATER', { adjectives: ['HIGH'], adjectiveDegrees: ['less'] }) },
+      }),
+      complements: { instrumental: { phrase: np('FEELING', { number: 'plural', adjectives: ['ROUND'], adjectiveDegrees: ['more'] }) } },
+    }, 'de')).toBe('die am wenigsten junge erwachsene Frau wird keine Phrasen, die gerade das weniger hohe Wasser nicht essen, mit den runderen Gefühlen konsumieren müssen.');
+  });
+
+  test.fails('…in a relative clause, a "wenn" clause, a command, an instruction and the infinitive', () => {
+    const aMouse = mouse({ definiteness: 'indefinite' });
+    expect(say(clause(np('DOG', { relative: { verbPhrase: { verb: 'EAT', negative: true }, directObject: aMouse } }), 'RUN'), 'de'))
+      .toBe('der Hund, der keine Maus frisst, läuft.');
+    expect(say(clause(np('DOG'), 'RUN', { condition: clause(np('CAT'), 'EAT', { verbPhrase: { negative: true }, directObject: aMouse }) }), 'de'))
+      .toBe('wenn der Kater keine Maus fressen würde, würde der Hund laufen.');
+    const command = { ...clause(np('SECOND_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: aMouse }), imperative: true };
+    expect(say(command, 'de')).toBe('iss keine Maus.'); // now: "iss eine Maus nicht."
+    expect(say({ ...command, imperativeRegister: 'instruction' }, 'de')).toBe('keine Maus essen.');
+    expect(say({ ...clause(np('GENERIC_PERSON'), 'EAT', { verbPhrase: { negative: true }, directObject: aMouse }), infinitive: true }, 'de'))
+      .toBe('keine Maus essen.');
+  });
+
+  // Regression: a definite, demonstrative or quantified object keeps "nicht", a `no` object keeps its
+  // "kein", "nie" keeps the plain indefinite (A35), and the affirmative is untouched.
+  test('a definite, demonstrative or "some" object keeps "nicht", and "kein" and "nie" are right', () => {
+    expect(notEat(mouse())).toBe('der Kater frisst die Maus nicht.');
+    expect(notEat(mouse({ definiteness: 'this' }))).toBe('der Kater frisst diese Maus nicht.');
+    expect(notEat(mouse({ definiteness: 'some' }))).toBe('der Kater frisst einige Mäuse nicht.');
+    expect(notEat(np('THIRD_PERSON', { gender: 'masc' }))).toBe('der Kater frisst ihn nicht.');
+    expect(notEat(mouse({ definiteness: 'no' }))).toBe('der Kater frisst keine Maus.');
+    expect(say(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'NEVER' }, directObject: mouse({ definiteness: 'indefinite' }) }), 'de'))
+      .toBe('der Kater frisst nie eine Maus.');
+    expect(say(clause(np('CAT'), 'EAT', { directObject: mouse({ definiteness: 'indefinite' }) }), 'de')).toBe('der Kater frisst eine Maus.');
+  });
+});
