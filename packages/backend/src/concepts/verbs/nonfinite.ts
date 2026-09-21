@@ -16,6 +16,9 @@
  *     than derived, exactly as the participles and te-forms above are. What the engine derives
  *     from it is free: 〜れる/られる is itself an ichidan verb, so the whole polite paradigm
  *     (食べられます / 食べられました / 食べられません) follows from this one form.
+ *   • participle_passive — the **short** participle of a verb that has two (an abundant
+ *     participle), spoken where the copula governs it and so in the passive: pt salvar is
+ *     *tinha salvado* but *foi salva*. Absent = the one `participle` serves both.
  *   • aux        — "be" on the verbs whose resultative selects the BE auxiliary instead of
  *     the HAVE default (it essere / fr être / de sein). Selection is lexical, not syntactic,
  *     and it does not match across languages: "correre" takes avere but "laufen" takes sein.
@@ -344,12 +347,22 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'aparecendo', participle: 'aparecido' },
     ja: { te: '現れて', te_reading: 'あらわれて', nai: '現れない', nai_reading: 'あらわれない' },
   },
+  TRANSLATE: {
+    en: { gerund: 'translating', participle: 'translated' },
+    it: { gerund: 'traducendo', participle: 'tradotto' },
+    fr: { participle: 'traduit' }, de: { participle: 'übersetzt' },
+    es: { gerund: 'traduciendo', participle: 'traducido' },
+    pt: { gerund: 'traduzindo', participle: 'traduzido' },
+    ja: { te: '翻訳して', te_reading: 'ほんやくして', nai: '翻訳しない', nai_reading: 'ほんやくしない', passive: '翻訳される', passive_reading: 'ほんやくされる' },
+  },
   SAVE: {
     en: { gerund: 'saving', participle: 'saved' },
     it: { gerund: 'salvando', participle: 'salvato' },
     fr: { participle: 'enregistré' }, de: { participle: 'gespeichert' },
     es: { gerund: 'guardando', participle: 'guardado' },
-    pt: { gerund: 'salvando', participle: 'salvado' },
+    // Abundant participle: the perfect takes the long form (tinha salvado), the copula the
+    // short one — which is what a passive is built on (foi salva). See `passiveParticiple`.
+    pt: { gerund: 'salvando', participle: 'salvado', participle_passive: 'salvo' },
     ja: { te: '保存して', te_reading: 'ほぞんして', nai: '保存しない', nai_reading: 'ほぞんしない', passive: '保存される', passive_reading: 'ほぞんされる' },
   },
   LOAD: {

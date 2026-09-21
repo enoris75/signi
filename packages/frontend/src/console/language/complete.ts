@@ -1,5 +1,4 @@
 import {
-  PATH_SPECIFIER_LABELS,
   canCoordinateImperative,
   type Concept,
   type UiStringKey,
@@ -516,9 +515,11 @@ function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
     voice: `voice.value.${value}`,
     polarity: `polarity.value.${value}`,
     relation: `modifier.relation.${value}`,
+    // The spatial relation is named by the adposition it spells, which the catalog now cites (C13):
+    // "under" / "sotto" / 〜の下で, in place of the English label this row used to print.
+    specifier: `specifier.value.${value}`,
   };
-  const shown = id === "specifier" ? PATH_SPECIFIER_LABELS[value as keyof typeof PATH_SPECIFIER_LABELS] : value;
-  return { value: shown, key: keys[id] as UiStringKey | undefined };
+  return { value, key: keys[id] as UiStringKey | undefined };
 }
 
 // ── Arguments ────────────────────────────────────────────────────────────────

@@ -8,6 +8,7 @@ import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js'
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
@@ -145,6 +146,7 @@ export function complementsPhrase(
       // and article ("sotto l'Europa"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
+      const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
       const headFor = (nf: Record<string, string>) => (plural: boolean, lead: string): string =>
         type === 'locative'  ? (nf['proper'] === '1' && locSpec === 'in' ? 'in' : spatialHead(locSpec, nf, plural, lead)) :
         type === 'terminus'  ? prepDet('a', nf, plural, lead) :
@@ -153,6 +155,9 @@ export function complementsPhrase(
         type === 'instrumental' || type === 'comitative' ? prepDet('con', nf, plural, lead) :
         type === 'manner'    ? prepDet(IT_MANNER_PREP[mannerRelation(nf)], nf, plural, lead) :
         type === 'direction' ? (
+          // A direction naming a relation is that relation's goal — Italian spells the two the same
+          // ("salta nell'aria", "è nell'aria"), so the place map serves ("jumps into the air").
+          dirSpec ? spatialHead(dirSpec, nf, plural, lead) :
           // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with
           // the proper noun's article ("all'Antartide"); an animate goal takes "da", a place "a".
           nf['isA'] === 'CONTINENT' ? 'in' :

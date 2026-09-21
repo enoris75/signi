@@ -1,13 +1,24 @@
 import { afterEach, describe, expect, test, vi } from 'vitest';
-import { translate, translateDeterminer, translatePossessive, translateWord } from '@signi/engine';
+import {
+  translate,
+  translateConjunction,
+  translateDegree,
+  translateDeterminer,
+  translatePossessive,
+  translateSpecifier,
+  translateWord,
+} from '@signi/engine';
 import { LANGUAGES, UI_STRINGS } from '@signi/shared';
 import type {
   LanguageCode,
   Translation,
+  UiStringConjunctionDef,
   UiStringDef,
+  UiStringDegreeDef,
   UiStringDeterminerDef,
   UiStringPlanDef,
   UiStringPossessiveDef,
+  UiStringSpecifierDef,
   UiStringWordDef,
 } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
@@ -23,25 +34,45 @@ vi.mock('@signi/engine', async (importOriginal) => {
     ...engine,
     translate: vi.fn(engine.translate),
     translateWord: vi.fn(engine.translateWord),
+    translateConjunction: vi.fn(engine.translateConjunction),
+    translateDegree: vi.fn(engine.translateDegree),
     translateDeterminer: vi.fn(engine.translateDeterminer),
     translatePossessive: vi.fn(engine.translatePossessive),
+    translateSpecifier: vi.fn(engine.translateSpecifier),
   };
 });
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
 const CATALOG = Object.entries(UI_STRINGS as Record<string, UiStringDef>);
+// The seven kinds, split the way `renderEntry` dispatches them: whichever of the six marker
+// properties an entry carries names its kind, and an entry carrying none is a plan.
+const kindOf = (d: UiStringDef): string =>
+  d.determiner !== undefined ? 'determiner'
+  : d.possessive !== undefined ? 'possessive'
+  : d.conjunction !== undefined ? 'conjunction'
+  : d.specifier !== undefined ? 'specifier'
+  : d.degree !== undefined ? 'degree'
+  : d.word !== undefined ? 'word'
+  : 'plan';
+const of = <T extends UiStringDef>(kind: string) =>
+  CATALOG.filter((e): e is [string, T] => kindOf(e[1]) === kind);
 const byKind = {
-  determiner: CATALOG.filter((e): e is [string, UiStringDeterminerDef] => e[1].determiner !== undefined),
-  possessive: CATALOG.filter((e): e is [string, UiStringPossessiveDef] => e[1].determiner === undefined && e[1].possessive !== undefined),
-  word: CATALOG.filter((e): e is [string, UiStringWordDef] => e[1].determiner === undefined && e[1].possessive === undefined && e[1].word !== undefined),
-  plan: CATALOG.filter((e): e is [string, UiStringPlanDef] => e[1].determiner === undefined && e[1].possessive === undefined && e[1].word === undefined),
+  determiner: of<UiStringDeterminerDef>('determiner'),
+  possessive: of<UiStringPossessiveDef>('possessive'),
+  conjunction: of<UiStringConjunctionDef>('conjunction'),
+  specifier: of<UiStringSpecifierDef>('specifier'),
+  degree: of<UiStringDegreeDef>('degree'),
+  word: of<UiStringWordDef>('word'),
+  plan: of<UiStringPlanDef>('plan'),
 };
 
 const rendering = (text: (language: LanguageCode) => string): Translation[] =>
   LANGUAGE_CODES.map((language) => ({ language, text: text(language) }) as Translation);
 
 afterEach(() => {
-  for (const fn of [translate, translateWord, translateDeterminer, translatePossessive]) vi.mocked(fn).mockReset();
+  const fns = [translate, translateWord, translateConjunction, translateDegree,
+    translateDeterminer, translatePossessive, translateSpecifier];
+  for (const fn of fns) vi.mocked(fn).mockReset();
 });
 
 describe('buildUiStrings', () => {
@@ -56,7 +87,7 @@ describe('buildUiStrings', () => {
 
   test('renders each entry through the engine function for its kind', () => {
     // The catalog has entries of every kind; this spec is only meaningful while it does.
-    expect(byKind.determiner.length && byKind.possessive.length && byKind.word.length && byKind.plan.length).toBeTruthy();
+    expect(Object.values(byKind).every((entries) => entries.length > 0)).toBe(true);
 
     buildUiStrings();
 
@@ -67,6 +98,19 @@ describe('buildUiStrings', () => {
     expect(translatePossessive).toHaveBeenCalledTimes(byKind.possessive.length);
     for (const [, d] of byKind.possessive) {
       expect(translatePossessive).toHaveBeenCalledWith(d.possessive, lookupLexicalEntry, d.agreesWith);
+    }
+    expect(translateConjunction).toHaveBeenCalledTimes(byKind.conjunction.length);
+    for (const [, d] of byKind.conjunction) {
+      // The one function word cited on nothing: a conjunction agrees with neither side.
+      expect(translateConjunction).toHaveBeenCalledWith(d.conjunction);
+    }
+    expect(translateSpecifier).toHaveBeenCalledTimes(byKind.specifier.length);
+    for (const [, d] of byKind.specifier) {
+      expect(translateSpecifier).toHaveBeenCalledWith(d.specifier, lookupLexicalEntry, d.agreesWith);
+    }
+    expect(translateDegree).toHaveBeenCalledTimes(byKind.degree.length);
+    for (const [, d] of byKind.degree) {
+      expect(translateDegree).toHaveBeenCalledWith(d.degree, lookupLexicalEntry, d.agreesWith);
     }
     expect(translateWord).toHaveBeenCalledTimes(byKind.word.length);
     for (const [, d] of byKind.word) {
@@ -105,6 +149,37 @@ describe('buildUiStrings', () => {
     expect(strings['pronoun.possessive.3pl']).toMatchObject({ en: 'their', it: 'loro', de: 'ihr' });
   });
 
+  // The "Could not …" messages: an agentless passive under a negated past ability (C11). The agent
+  // is GENERIC_PERSON, which no language speaks as a by-phrase, so nothing says who tried; the
+  // Romance past is CAN's imperfect, and Japanese says the whole thing as the potential on the
+  // active verb, which is what the language uses in place of a passive under 〜ことができる.
+  test('reports a failure as an agentless passive, naming no one who tried', () => {
+    const strings = buildUiStrings();
+    expect(strings['failure.phraseNotSaved']).toEqual({
+      en: 'The phrase could not be saved.',
+      it: 'La frase non poteva essere salvata.',
+      fr: 'La phrase ne pouvait pas être enregistrée.',
+      de: 'Die Phrase konnte nicht gespeichert werden.',
+      es: 'La frase no podía ser guardada.',
+      ja: 'フレーズは保存することができませんでした。',
+      // The short participle of an abundant pair: "foi salva", never "foi salvada".
+      pt: 'A frase não podia ser salva.',
+    });
+    expect(strings['failure.phraseNotTranslated']).toMatchObject({
+      en: 'The phrase could not be translated.',
+      de: 'Die Phrase konnte nicht übersetzt werden.',
+      ja: 'フレーズは翻訳することができませんでした。',
+    });
+    // A plural patient agrees the participle and the modal with itself, and takes the definite
+    // article French cannot do without on a plural subject.
+    expect(strings['failure.savedPeriodsNotLoaded']).toMatchObject({
+      en: 'The saved periods could not be loaded.',
+      it: 'I periodi salvati non potevano essere caricati.',
+      fr: 'Les périodes enregistrées ne pouvaient pas être chargées.',
+      es: 'Los períodos guardados no podían ser cargados.',
+    });
+  });
+
   // A language name is a proper noun, which the Romance languages article in a sentence
   // ("l'italiano è una lingua", A133). The selector's label is the word alone.
   test('names a language without the article a sentence would give it', () => {
@@ -123,7 +198,9 @@ describe('buildUiStrings', () => {
 
   test('applies each entry\'s format to what the engine rendered', () => {
     const rendered = rendering((language) => (language === 'ja' ? 'ねこ。 ' : 'é un gatto. '));
-    for (const fn of [translate, translateWord, translateDeterminer, translatePossessive]) vi.mocked(fn).mockReturnValue(rendered);
+    const fns = [translate, translateWord, translateConjunction, translateDegree,
+      translateDeterminer, translatePossessive, translateSpecifier];
+    for (const fn of fns) vi.mocked(fn).mockReturnValue(rendered);
 
     const strings = buildUiStrings();
 

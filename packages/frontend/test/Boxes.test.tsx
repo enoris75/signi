@@ -4,12 +4,12 @@ import type { ReactElement } from 'react';
 import {
   ASPECTS,
   CAUSE_SENTIMENTS,
-  CAUSE_SENTIMENT_LABELS,
   PATH_SPECIFIERS,
-  PATH_SPECIFIER_LABELS,
   TENSES,
+  type CauseSentiment,
   type Concept,
   type Definiteness,
+  type PathSpecifier,
 } from '@signi/shared';
 import {
   AspectToggleBox,
@@ -512,22 +512,41 @@ describe('DeterminerToggleBox', () => {
 });
 
 // The selectors mark the current choice by filling its button; the rest stay unfilled.
+// The two toolbars name their relations with the catalog's words (C13), so these are the English
+// fallbacks the components show while the bundle is in flight — not a table the app still keeps.
+// A specifier is the adposition its language spells the relation with; a sentiment is the stance
+// plus the connector it picks, joined with a dash.
+const SPECIFIER_LABEL: Record<PathSpecifier, string> = {
+  in: 'in',
+  through: 'through',
+  under: 'under',
+  over: 'over',
+  around: 'around',
+  behind: 'behind',
+  in_front_of: 'in front of',
+};
+const SENTIMENT_LABEL: Record<CauseSentiment, string> = {
+  neutral: 'Neutral — because of',
+  negative: 'Negative — through the fault of',
+  positive: 'Positive — thanks to',
+};
+
 // jsdom reports a computed `transparent` in its serialized form.
 const hasTransparentBackground = (el: Element) =>
   getComputedStyle(el).backgroundColor === 'rgba(0, 0, 0, 0)';
 
 describe('SpecifierSelector', () => {
   it('offers every spatial relation, in order', () => {
-    render(<SpecifierSelector value="in" onSelect={() => {}} />);
+    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} />);
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(
-      PATH_SPECIFIERS.map((s) => PATH_SPECIFIER_LABELS[s]),
+      PATH_SPECIFIERS.map((s) => SPECIFIER_LABEL[s]),
     );
   });
 
   it('selects the relation clicked', () => {
     const onSelect = vi.fn();
-    render(<SpecifierSelector value="in" onSelect={onSelect} />);
+    renderWithProviders(<SpecifierSelector value="in" onSelect={onSelect} />);
 
     fireEvent.click(screen.getByRole('button', { name: 'in front of' }));
 
@@ -535,7 +554,7 @@ describe('SpecifierSelector', () => {
   });
 
   it('highlights only the current relation', () => {
-    render(<SpecifierSelector value="under" onSelect={() => {}} />);
+    renderWithProviders(<SpecifierSelector value="under" onSelect={() => {}} />);
 
     const highlighted = screen
       .getAllByRole('button')
@@ -546,7 +565,7 @@ describe('SpecifierSelector', () => {
 
   it('keeps a press from starting a box drag', () => {
     const onCanvasPointerDown = vi.fn();
-    render(
+    renderWithProviders(
       <div onPointerDown={onCanvasPointerDown}>
         <SpecifierSelector value="in" onSelect={() => {}} />
       </div>,
@@ -562,7 +581,7 @@ describe('SpecifierSelector', () => {
       in: { x: 120, y: 30 },
       over: { x: 150, y: 24 },
     };
-    render(<SpecifierSelector value="in" onSelect={() => {}} placeAt={(s) => seats[s]} />);
+    renderWithProviders(<SpecifierSelector value="in" onSelect={() => {}} placeAt={(s) => seats[s]} />);
 
     const buttons = screen.getAllByRole('button');
     expect(buttons.map((b) => b.getAttribute('aria-label'))).toEqual(['in', 'over']);
@@ -573,30 +592,30 @@ describe('SpecifierSelector', () => {
 
 describe('SentimentSelector', () => {
   it('offers every stance, in order', () => {
-    render(<SentimentSelector value="neutral" onSelect={() => {}} />);
+    renderWithProviders(<SentimentSelector value="neutral" onSelect={() => {}} />);
 
     expect(screen.getAllByRole('button').map((b) => b.getAttribute('aria-label'))).toEqual(
-      CAUSE_SENTIMENTS.map((s) => CAUSE_SENTIMENT_LABELS[s]),
+      CAUSE_SENTIMENTS.map((s) => SENTIMENT_LABEL[s]),
     );
   });
 
   it('selects the stance clicked', () => {
     const onSelect = vi.fn();
-    render(<SentimentSelector value="neutral" onSelect={onSelect} />);
+    renderWithProviders(<SentimentSelector value="neutral" onSelect={onSelect} />);
 
-    fireEvent.click(screen.getByRole('button', { name: CAUSE_SENTIMENT_LABELS.positive }));
+    fireEvent.click(screen.getByRole('button', { name: SENTIMENT_LABEL.positive }));
 
     expect(onSelect).toHaveBeenCalledExactlyOnceWith('positive');
   });
 
   it('highlights only the current stance', () => {
-    render(<SentimentSelector value="negative" onSelect={() => {}} />);
+    renderWithProviders(<SentimentSelector value="negative" onSelect={() => {}} />);
 
     const highlighted = screen
       .getAllByRole('button')
       .filter((b) => !hasTransparentBackground(b))
       .map((b) => b.getAttribute('aria-label'));
-    expect(highlighted).toEqual([CAUSE_SENTIMENT_LABELS.negative]);
+    expect(highlighted).toEqual([SENTIMENT_LABEL.negative]);
   });
 });
 

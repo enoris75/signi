@@ -205,9 +205,7 @@ export function WordMap({ open, onClose }: Props) {
             sx={{ height: "100%", px: 3, textAlign: "center" }}
           >
             <Typography color="text.secondary">
-              {/* The failure stays English until the passive voice can say "could not be loaded"
-                  (C11); the question after it is the catalog's. */}
-              Could not load the words. {t("status.isServerActive")}
+              {t("failure.wordsNotLoaded")} {t("status.isServerActive")}
             </Typography>
             <Button size="small" variant="outlined" onClick={() => refetch()}>
               {t("action.retry")}

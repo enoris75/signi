@@ -1,7 +1,13 @@
+import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveDe } from '../../possessive.js';
 import { COORD_INVERTS, COORD_WORDS } from './de.consts.js';
+import { deComparative } from './deComparative.js';
+import { deStem } from './deStem.js';
+import { deSuperlativeSuffix } from './deSuperlativeSuffix.js';
 import { determiner } from './determiner.js';
+import { prepDet } from './prepDet.js';
+import { spatialHead } from './spatialHead.js';
 import { punctuate } from './punctuate.js';
 import { renderClause } from './renderClause.js';
 
@@ -43,5 +49,39 @@ export const germanEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  // The preposition alone. German marks its spatial relations with case rather than with different
+  // words, and the case shows on the *article*, so a bare noun leaves exactly the preposition —
+  // "unter", "über", "durch" — and the accusative/dative split (a route through vs a place in) has
+  // nothing to show. The cause takes "wegen", credits with "dank", and blames with the fixed
+  // "durch die Schuld" + genitive.
+  renderSpecifier(noun: ConceptForms, specifier: Specifier): string {
+    const f = { ...noun.forms, definiteness: 'bare' };
+    if (specifier.kind === 'sentiment') {
+      return specifier.value === 'positive' ? prepDet('dank', f, 'dat', false)
+        : specifier.value === 'negative' ? 'durch die Schuld'
+        : prepDet('wegen', f, 'dat', false);
+    }
+    return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, 'locative') : '';
+  },
+  // German compares **synthetically** upward and periphrastically downward, so there is no one
+  // degree word to show: the comparative and the superlative are the adjective itself, remade
+  // ("größer", "am größten"), while inferiority and equality are invariant adverbs in front of it
+  // ("weniger", "am wenigsten", "gleich"). The superlative is given in its predicative "am …-en"
+  // form, the one that stands without a noun.
+  renderDegree(adjective: ConceptForms, degree: Degree): string {
+    const base = adjective.forms['base'] ?? '';
+    if (degree === 'more') return adjective.forms['comparative'] ?? deComparative(deStem(adjective, base));
+    if (degree === 'most') {
+      const stem = adjective.forms['superlative'] ?? `${deStem(adjective, base)}${deSuperlativeSuffix(deStem(adjective, base))}`;
+      return `am ${stem}en`;
+    }
+    if (degree === 'less') return 'weniger';
+    if (degree === 'least') return 'am wenigsten';
+    if (degree === 'equally') return 'gleich';
+    return '';
   },
 };

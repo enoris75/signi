@@ -766,7 +766,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['POSITIVE', 'positive'], ['PROGRESSIVE', 'progressive'], ['PROSPECTIVE', 'prospective'], ['PROXIMAL', 'proximal'],
   ['QUICK', 'quick'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
   ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
-  ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
+  ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIDY', 'tidy'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
   ['UNIVERSAL', 'universal'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['VISIBLE', 'visible'], ['WARM', 'warm'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
   ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],

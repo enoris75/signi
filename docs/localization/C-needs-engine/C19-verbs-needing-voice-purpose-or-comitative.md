@@ -1,30 +1,37 @@
-# C19. Verbs still without a gloss — BURN, SEEM, BECOME, TIDY_UP, SAVE, LOAD, ADD
+# C19. Verbs still without a gloss — BURN, SEEM, BECOME
 
 _(split out of [C08](../done/C08-copular-and-genus-verbs.md) on 2026-09-20, the way
 [C18](C18-motion-verbs-without-a-gloss.md) was split out of C17: C08 built the **causative** and
-localized the seven verbs it reached, and these are what it did not.)_
+localized the seven verbs it reached, and these are what it did not. **SAVE, ADD, LOAD and TIDY_UP
+left 2026-09-21** — see Done.)_
 
 ## Blocked on
 
-Two constructs of its own (a voice, a complement), one judgement about a gloss, and three more the
-workspace verbs want — two of which [C12](../done/C12-ui-purpose-and-object-complements.md) already
-catalogues for the UI strings. None of them is the causative.
+One construct (a voice, in one language), one construct of its own (a complement), and one
+judgement about a gloss.
 
-### 1. The passive voice — BURN
+### 1. The passive voice — BURN. Now: a Japanese lexeme
 
 | verb | literal | wanted gloss |
 |---|---|---|
 | BURN | to be on fire; to undergo combustion | to be consumed by fire |
 
-Waits on [features/A01 passive voice](../../features/A-ready/A01-passive-voice/README.md), which
-C08 deliberately did not start: the passive is a whole feature (voice on the verb phrase, the
-by-phrase, seven morphologies, a builder satellite), not a corner of a gloss.
+[A01 passive voice](../../features/Z-Done/A01-passive-voice/README.md) **shipped**, and the gloss
+now renders — in six of the seven. Probed 2026-09-21 against the seeded lexicon:
+
+| plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| CONSUME, passive, agent FIRE | to be consumed by the fire | essere consumato dal fuoco | être consommé par le feu | vom Feuer konsumiert werden | ser consumido por el fuego | **火に摂取される** | ser consumido pelo fogo |
 
 C08 called BURN "lexically ready" because FIRE and CONSUME are both seeded. **It is not, in
-Japanese.** The active stand-in renders 火は物体を**摂取します** — CONSUME's ja lexeme is 摂取する, "to
-ingest", the word EAT and DRINK need, and fire does not ingest. A Japanese gloss would need a second
-consumption sense (燃やす / 焼く) before the passive could carry it. The other six are clean: *il fuoco
-consuma un oggetto*, *das Feuer konsumiert einen Gegenstand*.
+Japanese**, and the passive did not change that: CONSUME's ja lexeme is 摂取する, "to ingest", the
+word EAT and DRINK need, and fire does not ingest.
+
+What is left is **not** an engine gap but a lexical one, and it is a hard one: the Japanese for
+consumption-by-fire is 燃やす or 焼く, which *are* burning, so a gloss built on either defines the
+verb with itself; and the general 消費する is for resources, not for a thing a fire eats. A second
+consumption sense would have to be a word that is neither, and none of the obvious candidates is.
+**Reclassify if one is found** — everything else about this gloss is ready.
 
 ### 2. A similative complement — SEEM
 
@@ -33,10 +40,25 @@ consuma un oggetto*, *das Feuer konsumiert einen Gegenstand*.
 | SEEM | to look like; to give the impression of being similar to | a similative complement — "to be similar **to** a thing" |
 
 `predicative` ascribes a property to the subject; nothing says the subject *resembles* another noun
-phrase. The `manner` complement's `similative` relation is the nearest thing the engine has (it
-picks "like" / *come* / *wie*), but it is an adverbial of manner, not a complement of the copula, and
-no probe has been run on it. SEEM's own lexemes already carry `seeming: '1'`, so the verb is not the
-problem — the differentia is.
+phrase. The `manner` complement's `similative` relation is the nearest thing the engine has, and it
+**was probed** on 2026-09-21 — this file had recorded that no one had:
+
+| plan | en | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|---|
+| BE + manner OBJECT_THING | to be like an object | essere come un oggetto | être comme un objet | wie ein Gegenstand sein | ser como un objeto | **物体のようにいる** | ser como um objeto |
+
+Two things come out of it, and both say no:
+
+- **The relation itself renders.** "like" / *come* / *comme* / *wie* / 〜のように is right in every
+  language, so the adposition is not what is missing.
+- **Japanese picks the wrong copula.** 「物体のようにいる」 uses the animate existential いる where a
+  copula wants である — BE with no `predicative` falls to the existential branch
+  (`predicateSegs`), and a manner adverbial is not one. A similative complement would have to be a
+  complement of the copula, not an adverbial, which is exactly the construct this file names.
+
+And it would still not be SEEM: "to be like an object" says the subject *resembles* a thing, where
+SEEM says it *gives the impression* of being one. SEEM's own lexemes already carry `seeming: '1'`,
+so the verb is not the problem — the differentia is.
 
 ### 3. A gloss worth having — BECOME
 
@@ -60,28 +82,59 @@ BECOME is better read as BE plus an aspect than as a genus with a differentia, w
 copula: **leave it on the English literal**, as C08 leaves BE and CONSUME, unless a gloss appears that
 is worth the seed.
 
-### 4. A purpose clause, a comitative, a prior state — the four workspace verbs
-
-Two of the three are C12's items 1 and 3, so those two land together with the UI strings or not at
-all; the prior state is this file's own.
-
-**Update 2026-09-20: they landed.** [C12](../done/C12-ui-purpose-and-object-complements.md) shipped
-`PhrasePlan.purpose` and the `comitative` complement, so **SAVE and ADD are no longer blocked** —
-both are now ordinary authoring work against constructs that render in all seven languages. What
-remains here is the passive (BURN), the similative complement (SEEM), the judgement on BECOME, and
-the prior state TIDY_UP and LOAD want.
-
-| verb | literal | missing construct | C12 |
-|---|---|---|---|
-| SAVE | to store something so it can be retrieved later | purpose clause — "so it can be —" | 1 |
-| ADD | to put something together with something else | comitative — "together **with** something else" (`instrumental` is the means, not a companion) | 3 |
-| TIDY_UP | to put back in order what was left in a mess | resultative + a prior state — "back into order" | — |
-| LOAD | to bring stored content back in | direction "back in" over a prior state | — |
-
-TIDY_UP and LOAD both need a **prior state** ("back"), which nothing in the plan model expresses and
-no other task asks for: a resultative says where the thing ends up, not where it was.
-
 ## Not here
 
 **BE** and **CONSUME** stay on the English literal by design (nothing sits above them), and so does
 **CAUSE_VERB**, the genus C08 seeded. See [C08's Done note](../done/C08-copular-and-genus-verbs.md#still-on-the-english-literal-by-design).
+
+## Done: the four workspace verbs (2026-09-21)
+
+C12 shipped `PhrasePlan.purpose` and the `comitative` complement, which unblocked SAVE and ADD.
+Probing the other two showed that **neither actually needed the prior state** this file had them
+waiting for — one of them was blocked on a word, and the other on a reading of its own literal.
+
+| verb | gloss | what carried it |
+|---|---|---|
+| SAVE | to write content to load it | the **purpose clause** (C12 item 1) |
+| ADD | to cause an object to be with other objects | the **comitative** (C12 item 3) |
+| LOAD | to read written content | nothing new — see below |
+| TIDY_UP | to cause objects to be tidy | a seeded adjective — see below |
+
+| gloss | it | fr | de | es | ja | pt |
+|---|---|---|---|---|---|---|
+| SAVE | scrivere contenuto per caricarlo | écrire du contenu pour le charger | Inhalt schreiben, um es zu laden | escribir contenido para cargarlo | それを読み込むために内容を書く | escrever conteúdo para carregá-lo |
+| LOAD | leggere contenuto scritto | lire du contenu écrit | geschriebenen Inhalt lesen | leer contenido escrito | 書かれた内容を読む | ler conteúdo escrito |
+| ADD | indurre un oggetto a essere con altri oggetti | induire un objet à être avec d'autres objets | einen Gegenstand veranlassen, mit anderen Gegenständen zu sein | inducir un objeto a ser con otros objetos | 物体が別の物体とあるようにする | induzir um objeto a ser com outros objetos |
+| TIDY_UP | indurre oggetti a essere ordinati | induire des objets à être rangés | Gegenstände veranlassen, ordentlich zu sein | inducir objetos a estar ordenados | 物体が整然としているようにする | induzir objetos a estar arrumados |
+
+### LOAD: the "back" was already in the participle
+
+The literal is "to bring stored content back in", and this file read the "back" as a prior state
+the plan model cannot express. It does not need one: **WRITTEN** says the content was put there
+before, which is all the "back" was carrying. "To read written content" is the whole verb.
+
+### TIDY_UP: not an engine block at all — the wrong ORDER
+
+"To put back in order" was filed here for the same prior state, but the probe found a different
+blocker first. The seeded **ORDER** is the *command* sense — `isA: COMMAND`, de "Befehl", ja 命令 —
+so "in order" rendered "in Befehl" and 「命令に」. The arrangement sense is simply not in the corpus
+(and French would have wanted its own idiom, *en ordre*, where the locative gives *dans*).
+
+**TIDY** was seeded instead, a transient adjective ("arranged in order": it *ordinato*, fr *rangé*,
+de *ordentlich*, es *ordenado*, ja 整然とした, pt *arrumado*), and the gloss is the causative shape
+C08 already built for HIDE: *cause the objects to be in that state*. The prior state never came
+into it.
+
+### The gloss helper
+
+`GlossParts` gained two fields ([verbs/gloss.ts](../../../packages/backend/src/concepts/verbs/gloss.ts)):
+`purpose`, a clause of purpose hung off the citation (it is an adjunct, so it sits beside the
+predicate rather than inside it, unlike `infinitive`), and `gender`, which only a **pronoun** object
+reads — it is what keeps English off "to write content to load **him**" and gives German its "um
+**es** zu laden".
+
+### One more verb, seeded elsewhere
+
+**TRANSLATE** was seeded by [C11](../done/C11-ui-failure-messages-passive.md) and took a gloss with
+it — "to express concepts with another language", ja 別の言語で概念を表す — so it does not join the
+verbs waiting here.

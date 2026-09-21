@@ -271,6 +271,42 @@ describe('the agentless passive', () => {
   });
 });
 
+// ── The Japanese potential ───────────────────────────────────────────────────
+// 〜ことができる and the 〜れる/られる passive both demote the agent and leave the patient as the topic,
+// so Japanese does not stack them: what it says for "X cannot be V-ed" is the ability on the plain
+// verb, the topic は doing the promotion (see `isPotentialPassive`). This is the shape all eight of
+// C11's "Could not …" messages take, so it is the one Japanese output those strings depend on.
+describe('a passive under the Japanese potential', () => {
+  const generic = (verbPhrase: Partial<VerbPhrase> = {}): PhrasePlan =>
+    clause(np('GENERIC_PERSON'), 'EAT', { directObject: np('FOOD'), verbPhrase });
+
+  test('an agentless one is said on the active verb, not on 〜られる', () => {
+    expect(sayAll(generic({ voice: 'passive', modals: ['CAN'], tense: 'past', negative: true }))).toEqual({
+      en: 'the food could not be eaten.',
+      it: 'il cibo non poteva essere mangiato.',
+      fr: 'la nourriture ne pouvait pas être mangée.',
+      de: 'das Essen konnte nicht gegessen werden.',
+      es: 'la comida no podía ser comida.',
+      ja: '食べ物は食べることができませんでした。', // not 食べられることができませんでした
+      pt: 'a comida não podia ser comida.',
+    });
+  });
+
+  test('a spoken agent keeps the 〜られる — the に phrase needs a verb to attach to', () => {
+    expect(sayAll(passive({ modals: ['CAN'] }))).toMatchObject({
+      en: 'the food can be eaten by the cat.',
+      ja: '食べ物は猫に食べられることができます。',
+    });
+  });
+
+  test('another modal does not absorb the voice', () => {
+    expect(sayAll(generic({ voice: 'passive', modals: ['MUST'] }))).toMatchObject({
+      en: 'the food must be eaten.',
+      ja: '食べ物は食べられる必要があります。',
+    });
+  });
+});
+
 // ── What normalises back to active ───────────────────────────────────────────
 // A half passive — an auxiliary with nothing promoted into the subject slot — is worse than none,
 // so every case that cannot be one renders as the plain active clause instead (see resolveVoice).

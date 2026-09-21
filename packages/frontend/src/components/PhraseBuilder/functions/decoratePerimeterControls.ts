@@ -1,5 +1,6 @@
 import type { Concept } from "@signi/shared";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
+import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
 import type { NounAddress, NounKey, PhraseSelection } from "../interfaces.ts";
 import { POSSESSOR_REF_KEY } from "../interfaces.ts";
 import { NOUN_KEYS } from "../slots.ts";
@@ -31,6 +32,7 @@ export function decoratePerimeterControls({
   onTogglePossessor,
   t,
   word,
+  possessivePhrase,
 }: {
   perimeterByNoun: PerimeterByNoun;
   selection: PhraseSelection;
@@ -42,6 +44,8 @@ export function decoratePerimeterControls({
   t: UiStringLookup;
   // The antecedent's word in the UI language (`useConceptLabel`), for the control that points at it.
   word: (concept: Concept) => string;
+  // The possessed noun phrase the link will render (see `usePossessivePhrases`).
+  possessivePhrase: PossessivePhrase;
 }): PerimeterByNoun {
   const next: PerimeterByNoun = {};
   for (const which of Object.keys(perimeterByNoun) as NounKey[])
@@ -60,12 +64,19 @@ export function decoratePerimeterControls({
     if (!control) continue;
     const antecedent = selection[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
     const resolved = antecedent ? resolve(antecedent) : undefined;
+    // What the link will say, in quotes after the antecedent's own word: the whole possessed noun
+    // phrase once the backend has rendered it ("his horse", "la sua casa"), and the bare possessive
+    // until then — which is right in English, German and Japanese and only approximate in the
+    // Romance languages, where it agrees with the noun possessed (C16).
+    const says = resolved
+      && (possessivePhrase((selection[which] as Concept | undefined)?.id, resolved.features)
+        ?? t(possessiveHintKey(resolved.features)));
     next[which]!.possessor = {
       ...control,
       ...(antecedent && {
         active: false,
         valueLabel: `${resolved ? word(resolved.concept) : t("hint.aNoun")}${
-          resolved ? ` (“${t(possessiveHintKey(resolved.features))}”)` : ""
+          says ? ` (“${says}”)` : ""
         } — ${t("hint.clickToRemove")}`,
       }),
       onToggle: () => onTogglePossessor(which),

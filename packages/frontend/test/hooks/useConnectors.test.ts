@@ -3,6 +3,7 @@ import { act, renderHook } from '@testing-library/react';
 import { boxKey, useConnectors } from '../../src/components/PhraseBuilder/hooks/useConnectors.ts';
 import type { PhraseLink } from '../../src/components/PhraseBuilder/interfaces.ts';
 import { MUI_COLOR_HEX } from '../../src/components/PhraseBuilder/slots.ts';
+import { withProviders } from '../render.tsx';
 import { attach, place, placed } from './dom.ts';
 
 const INSTRUMENT_LABEL = 'with';
@@ -12,6 +13,8 @@ const INSTRUMENT_LABEL = 'with';
 function renderWorkspace(links: PhraseLink[]) {
   const hook = renderHook((ls: PhraseLink[]) => useConnectors(ls, INSTRUMENT_LABEL), {
     initialProps: links,
+    // The hook reads the UI-string catalog for a coordination's conjunction (C13).
+    wrapper: withProviders(),
   });
   attach(hook.result.current.workspaceRef, placed(100, 50, 1000, 1000));
   return hook;
@@ -27,6 +30,7 @@ describe('useConnectors', () => {
   it('draws nothing before the workspace has mounted', () => {
     const { result, rerender } = renderHook((ls: PhraseLink[]) => useConnectors(ls, INSTRUMENT_LABEL), {
       initialProps: [relative()],
+      wrapper: withProviders(),
     });
     result.current.sourceAnchorEls.current.set(boxKey('A', 'subject'), placed(200, 100, 20, 20));
     result.current.targetAnchorEls.current.set(boxKey('B', 'directObject'), placed(200, 400, 20, 20));

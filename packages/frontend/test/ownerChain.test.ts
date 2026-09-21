@@ -118,6 +118,8 @@ describe('possessionsFor', () => {
         role: 'directObject',
         antecedent: 'subject/conjunct/0',
         antecedentKey: 'subject+1',
+        // The noun possessed, which the chip on the line renders the phrase of (C16).
+        possessedConcept: 'HORSE',
       },
     ]);
   });

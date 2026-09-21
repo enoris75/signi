@@ -1,4 +1,4 @@
-import type { ResolvedPhrase, RubySegment } from '../../types.js';
+import type { ResolvedPhrase, ResolvedVerbPhrase, RubySegment } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { infinitiveLink } from '../../functions/infinitiveLink.js';
 import { objectPredication } from '../../functions/objectPredication.js';
@@ -10,6 +10,7 @@ import { isMannerGloss } from './isMannerGloss.js';
 import { isNegativeGroup } from './isNegativeGroup.js';
 import { isPossessiveExistential } from './isPossessiveExistential.js';
 import { JA_NEGATIVE_DETERMINER, JA_PURPOSE, JA_SURU } from './ja.consts.js';
+import { isPotentialPassive } from './isPotentialPassive.js';
 import { jaImperativePN } from './jaImperativePN.js';
 import { jaParticleSegs } from './jaParticleSegs.js';
 import { mannerGlossSegs } from './mannerGlossSegs.js';
@@ -85,9 +86,16 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   // construction, and its light verb する is what closes the predicate. The lexeme's own word
   // (引き起こす, what the verb says standing alone) would not take a ように clause, so the construction
   // supplies する in its place — the substitution the existential already makes for the copula.
-  const verbPhrase = causee && phrase.verbPhrase.verb.forms['causative'] === '1'
-    ? { ...phrase.verbPhrase, verb: JA_SURU }
+  // An agentless passive under the potential 〜ことができる keeps its **active** verb: the potential
+  // already demotes the agent and leaves the patient as the topic, so the 〜れる/られる would mark the
+  // same thing a second time (フレーズは保存することができません, not 保存されることができません).
+  // See `isPotentialPassive`; `predicateSegs` reads `voice` to decide, so the flag is what gives way.
+  const voiced: ResolvedVerbPhrase = isPotentialPassive(phrase)
+    ? { ...phrase.verbPhrase, voice: 'active' }
     : phrase.verbPhrase;
+  const verbPhrase = causee && voiced.verb.forms['causative'] === '1'
+    ? { ...voiced, verb: JA_SURU }
+    : voiced;
   segs.push(...predicateSegs(verbPhrase, causee ? undefined : phrase.directObject, phrase.complements, impPN, false, subjectNegative, animate));
   return segs;
 }

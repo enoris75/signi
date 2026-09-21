@@ -5,6 +5,7 @@ import { adjDegree } from '../../functions/adjDegree.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { CAUSE_PARTICLE, JA_DEGREE, JA_ESSIVE, PARTICLE, REL_NOUN, REL_NOUN_READING } from './ja.consts.js';
@@ -105,6 +106,15 @@ export function complementSegs(complements?: Partial<Record<ComplementType, Reso
     if (type === 'route' || type === 'locative') {
       const spec = pathSpecifier(c, type === 'locative' ? DEFAULT_LOCATIVE_SPECIFIER : DEFAULT_ROUTE_SPECIFIER);
       if (REL_NOUN[spec]) segs.push(wordSeg(REL_NOUN[spec], REL_NOUN_READING[spec]));
+    }
+    // A direction naming a relation takes the same relational noun before its へ — 空気の中へ ("into
+    // the air"), 家の後ろへ ("to behind the house"). Containment is the one that needs it: a *place*
+    // spells it with に alone (空気に), but a goal's へ says only "towards", so without 中 the phrase
+    // would be "towards the air". A bare direction adds no noun and stays the plain goal, 家へ.
+    if (type === 'direction') {
+      const goal = directionSpecifier(c);
+      const rel = goal === 'in' ? 'の中' : goal ? REL_NOUN[goal] : '';
+      if (rel) segs.push(wordSeg(rel, goal === 'in' ? 'のなか' : REL_NOUN_READING[goal!]));
     }
     // Manner: a similative head takes 〜のように ("風のように" = like the wind), not the で the
     // means/measure/mode relations share; every other complement uses its fixed particle.

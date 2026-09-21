@@ -1,8 +1,9 @@
 import { describe, expect, it, vi } from 'vitest';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { fireEvent, screen } from '@testing-library/react';
 import type { ComponentProps } from 'react';
 import type { Concept } from '@signi/shared';
 import { ConjunctRings } from '../src/components/PhraseBuilder/ConjunctRings.tsx';
+import { renderWithProviders } from './render.tsx';
 import type { RingHost } from '../src/components/PhraseBuilder/ringHost.ts';
 import type { ConjunctLink } from '../src/components/PhraseBuilder/conjunctChain.ts';
 import type {
@@ -72,7 +73,7 @@ function renderRings(overrides: Partial<ComponentProps<typeof ConjunctRings>> = 
     onRemoveConjunct: vi.fn(),
     onCycleConjunction: vi.fn(),
   };
-  const view = render(
+  const view = renderWithProviders(
     <ConjunctRings
       chains={CHAINS}
       selection={SELECTION}

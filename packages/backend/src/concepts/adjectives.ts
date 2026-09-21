@@ -714,6 +714,24 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    id: 'TIDY',
+    role: 'adjective',
+    transient: true, // a state a thing is put into, not a property it has → es/pt estar (A47)
+    description: 'arranged in order',
+    synonym: 'in order',
+    emoji: '🧹',
+    forms: {
+      en: { base: 'tidy' },
+      it: { base: 'ordinato' },
+      fr: { base: 'rangé' },
+      de: { base: 'ordentlich' },
+      es: { base: 'ordenado' },
+      ja: { base: '整然とした', reading: 'せいぜんとした' },
+      pt: { base: 'arrumado' },
+    },
+  },
+
+  {
     id: 'SAVED',
     role: 'adjective',
     transient: true, // ascribes a transient state → es/pt predicate with estar (A47)

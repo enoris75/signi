@@ -7,6 +7,7 @@ import { negationSources } from '../../functions/negationSources.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
+import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { MODAL_AUX } from './en.consts.js';
 import { afterFirstAux } from './afterFirstAux.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -105,7 +106,7 @@ function predicateWords(
   // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
   // the house"), so the passive needs no branch of its own.
   const directObjectText = passive
-    ? [lexical.forms['participle'] ?? lexical.forms['base'] ?? '', agentPhrase(agent)].filter(Boolean).join(' ')
+    ? [passiveParticiple(lexical), agentPhrase(agent)].filter(Boolean).join(' ')
     : !directObject ? ''
     : coordinate(directObject, (np) =>
       np.head.forms['person'] ? objectPronounForm(np.head.forms)

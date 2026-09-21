@@ -39,6 +39,7 @@ const POINTER: PointerSpot = {
   role: 'directObject',
   antecedent: 'subject',
   antecedentKey: 'subject',
+  possessedConcept: 'HORSE',
 };
 
 const edges = (over: Partial<Parameters<typeof possessionEdges>[0]> = {}) =>
@@ -50,6 +51,8 @@ const edges = (over: Partial<Parameters<typeof possessionEdges>[0]> = {}) =>
     colorOf,
     resolve: () => undefined,
     t,
+    // Nothing rendered yet, so the chip falls back to the catalog's bare possessive.
+    possessivePhrase: () => undefined,
     compact: false,
     ...over,
   });
@@ -87,6 +90,28 @@ describe('possessionEdges', () => {
     });
 
     expect(seen).toContainEqual(['subject+1', 'possessor:subject+1', 'possessor:subject']);
+  });
+
+  it('shows the whole possessed phrase once the backend has rendered it', () => {
+    // The Romance possessive agrees with the noun possessed, not only with the antecedent, so the
+    // chip names the phrase the link will say rather than a bare pronoun (C16).
+    const result = edges({
+      pointers: [POINTER],
+      resolve: () => ({ concept: BOY, features: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }),
+      possessivePhrase: (concept) => (concept === 'HORSE' ? 'his horse' : undefined),
+    });
+
+    expect(result.pointerLines[0]?.pronoun).toBe('his horse');
+  });
+
+  it('falls back to the bare possessive until that render arrives', () => {
+    const result = edges({
+      pointers: [{ ...POINTER, possessedConcept: undefined }],
+      resolve: () => ({ concept: BOY, features: { kind: 'pronominal', person: '3', number: 'singular', gender: 'masc' } }),
+      possessivePhrase: (concept) => (concept === 'HORSE' ? 'his horse' : undefined),
+    });
+
+    expect(result.pointerLines[0]?.pronoun).toBe('his');
   });
 
   it('draws a dashed, bowed line to the noun pointed to, carrying the pronoun it renders', () => {

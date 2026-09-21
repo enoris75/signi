@@ -3158,11 +3158,101 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    id: 'TRANSLATE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'terminus', 'cause'],
+    description: 'to express a meaning in another language',
+    // "to express concepts with another language": the differentia is the language it is done
+    // with, which is the `instrumental` — the means, not a companion. Japanese marks it with で,
+    // which is exactly the "in" the English literal wants (別の言語で概念を表す).
+    definition: infinitiveGloss('EXPRESS', {
+      object: 'CONCEPT',
+      number: 'plural',
+      complements: {
+        instrumental: { phrase: { concept: 'LANGUAGE', definiteness: 'indefinite', adjectives: ['OTHER'] } },
+      },
+    }),
+    emoji: '🌐',
+    isA: 'EXPRESS',
+    forms: {
+      en: {
+        base: 'translate',
+        '1sg_present': 'translate', '2sg_present': 'translate', '3sg_present': 'translates',
+        '1pl_present': 'translate', '2pl_present': 'translate', '3pl_present': 'translate',
+        past: 'translated',
+      },
+      it: {
+        // Irregular: the Latin -duc- stem keeps its c in the present and contracts the
+        // future/infinitive stem (tradurr-), and the passato remoto is the strong tradussi.
+        base: 'tradurre',
+        '1sg_present': 'traduco', '2sg_present': 'traduci', '3sg_present': 'traduce',
+        '1pl_present': 'traduciamo', '2pl_present': 'traducete', '3pl_present': 'traducono',
+        '1sg_past': 'tradussi', '2sg_past': 'traducesti', '3sg_past': 'tradusse',
+        '1pl_past': 'traducemmo', '2pl_past': 'traduceste', '3pl_past': 'tradussero',
+        '1sg_future': 'tradurrò', '2sg_future': 'tradurrai', '3sg_future': 'tradurrà',
+        '1pl_future': 'tradurremo', '2pl_future': 'tradurrete', '3pl_future': 'tradurranno',
+      },
+      fr: {
+        base: 'traduire',
+        '1sg_present': 'traduis', '2sg_present': 'traduis', '3sg_present': 'traduit',
+        '1pl_present': 'traduisons', '2pl_present': 'traduisez', '3pl_present': 'traduisent',
+        '1sg_past': 'traduisis', '2sg_past': 'traduisis', '3sg_past': 'traduisit',
+        '1pl_past': 'traduisîmes', '2pl_past': 'traduisîtes', '3pl_past': 'traduisirent',
+        '1sg_future': 'traduirai', '2sg_future': 'traduiras', '3sg_future': 'traduira',
+        '1pl_future': 'traduirons', '2pl_future': 'traduirez', '3pl_future': 'traduiront',
+      },
+      de: {
+        // Inseparable prefix, so the participle takes no ge- (übersetzt, not *übergesetzt).
+        base: 'übersetzen',
+        '1sg_present': 'übersetze', '2sg_present': 'übersetzt', '3sg_present': 'übersetzt',
+        '1pl_present': 'übersetzen', '2pl_present': 'übersetzt', '3pl_present': 'übersetzen',
+        '1sg_past': 'übersetzte', '2sg_past': 'übersetztest', '3sg_past': 'übersetzte',
+        '1pl_past': 'übersetzten', '2pl_past': 'übersetztet', '3pl_past': 'übersetzten',
+      },
+      es: {
+        // -ducir: the velar 1sg traduzco and the strong preterite traduje (no accent, -eron).
+        base: 'traducir',
+        '1sg_present': 'traduzco', '2sg_present': 'traduces', '3sg_present': 'traduce',
+        '1pl_present': 'traducimos', '2pl_present': 'traducís', '3pl_present': 'traducen',
+        '1sg_past': 'traduje', '2sg_past': 'tradujiste', '3sg_past': 'tradujo',
+        '1pl_past': 'tradujimos', '2pl_past': 'tradujisteis', '3pl_past': 'tradujeron',
+        '1sg_future': 'traduciré', '2sg_future': 'traducirás', '3sg_future': 'traducirá',
+        '1pl_future': 'traduciremos', '2pl_future': 'traduciréis', '3pl_future': 'traducirán',
+      },
+      ja: {
+        base: '翻訳する',
+        reading: 'ほんやくする',
+        masu_present: '翻訳します',
+        masu_present_reading: 'ほんやくします',
+        label: '翻訳',
+        label_reading: 'ほんやく',
+      },
+      pt: {
+        base: 'traduzir',
+        '1sg_present': 'traduzo', '2sg_present': 'traduz', '3sg_present': 'traduz',
+        '1pl_present': 'traduzimos', '2pl_present': 'traduzem', '3pl_present': 'traduzem',
+        '1sg_past': 'traduzi', '2sg_past': 'traduziu', '3sg_past': 'traduziu',
+        '1pl_past': 'traduzimos', '2pl_past': 'traduziram', '3pl_past': 'traduziram',
+        '1sg_future': 'traduzirei', '2sg_future': 'traduzirá', '3sg_future': 'traduzirá',
+        '1pl_future': 'traduziremos', '2pl_future': 'traduzirão', '3pl_future': 'traduzirão',
+      },
+    },
+  },
+
+  {
     id: 'SAVE',
     role: 'verb',
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to store something so it can be retrieved later',
+    // "to write content to load it": the whole differentia is what the writing is *for*, which is a
+    // clause of purpose (C12's PhrasePlan.purpose; localization C19). The pronoun object is neuter,
+    // or English would load a person and German an "ihn".
+    definition: infinitiveGloss('WRITE', {
+      object: 'CONTENT',
+      purpose: { verb: 'LOAD', object: 'THIRD_PERSON', gender: 'neut' },
+    }),
     emoji: '💾',
     forms: {
       en: {
@@ -3231,6 +3321,10 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'source', 'cause'],
     description: 'to bring stored content back in',
+    // "to read written content". The literal's "back" is a prior state nothing in the plan model
+    // expresses, but it turns out not to be needed: WRITTEN already says the content was put there
+    // before, which is the whole of what "back" was carrying (localization C19).
+    definition: infinitiveGloss('READ', { object: 'CONTENT', adjectives: ['WRITTEN'] }),
     emoji: '📂',
     forms: {
       en: {
@@ -3299,6 +3393,23 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'terminus', 'cause'],
     description: 'to put something together with something else',
+    // "to cause an object to be with other objects": the companion is the **comitative** complement
+    // (C12), the one that says "together with" rather than "by means of" — an instrumental would
+    // make the other objects the tool (localization C19). Indefinite, because French spells no
+    // zero-article plural after a preposition ("avec d'autres objets", not *"avec autres objets").
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', definiteness: 'indefinite' },
+      {
+        verb: 'BE',
+        complements: {
+          comitative: {
+            phrase: {
+              concept: 'OBJECT_THING', number: 'plural', definiteness: 'indefinite', adjectives: ['OTHER'],
+            },
+          },
+        },
+      },
+    ),
     emoji: '➕',
     forms: {
       en: {
@@ -3808,6 +3919,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     transitivity: 'transitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to put back in order what was left in a mess',
+    // "to cause objects to be tidy". The literal wants a prior state ("back") the plan model has no
+    // room for, and "in order" cannot be said with the seeded ORDER, which is the *command* sense
+    // (de "Befehl", ja 命令). TIDY carries the state instead, and the causative says who puts things
+    // into it — the C08 shape HIDE already takes (localization C19).
+    definition: causativeGloss(
+      { object: 'OBJECT_THING', number: 'plural' },
+      { verb: 'BE', predicate: 'TIDY' },
+    ),
     emoji: '🧹',
     forms: {
       en: {

@@ -151,7 +151,9 @@ export const modals: ConceptSeed[] = [
       ja: {
         // 〜ことができる: the periphrastic potential, derivable from the dictionary form
         // (the synthetic potential 行ける/食べられる is irregular per verb class).
-        base: 'ことができる', kind: 'verb', governs: 'dict',
+        // `potential` marks it out among the modals: an agentless passive under it is said on the
+        // active verb, because the potential already demotes the agent (see `isPotentialPassive`).
+        base: 'ことができる', kind: 'verb', governs: 'dict', potential: '1',
         suffix_dict: 'ことができる', suffix_stem: 'ことができ',
       },
       pt: {

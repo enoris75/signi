@@ -187,6 +187,39 @@ describe('known bugs: determiners', () => {
   });
 });
 
+// AIR, the mass noun JUMP's gloss is built on (C18). Its gender differs across the Romance
+// languages — feminine in Italian, masculine in the other three — and both Italian and French
+// elide their article against its initial vowel, which is what the gloss reads as "nell'aria" and
+// "dans l'air". German's Luft is feminine, so the accusative of motion into it is "die Luft".
+describe('AIR', () => {
+  const air = (extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'SEE', { directObject: np('AIR', extra) }));
+
+  test('the article agrees, and elides where the language elides', () => {
+    expect(air()).toEqual({
+      en: 'the cat sees the air.',
+      it: "il gatto vede l'aria.", // feminine, elided
+      fr: "le chat voit l'air.", // masculine, elided
+      de: 'der Kater sieht die Luft.', // feminine, accusative
+      es: 'el gato ve el aire.',
+      ja: '猫は空気を見ます。',
+      pt: 'o gato vê o ar.',
+    });
+  });
+
+  test('it is a mass noun, so it takes the mass quantifiers and no plural', () => {
+    expect(air({ definiteness: 'many' })).toMatchObject({
+      en: 'the cat sees much air.', // much, not "many airs"
+      it: 'il gatto vede molta aria.',
+      de: 'der Kater sieht viel Luft.',
+    });
+    expect(air({ definiteness: 'indefinite' })).toMatchObject({
+      en: 'the cat sees air.', // no article: a mass noun's indefinite is bare
+      fr: "le chat voit de l'air.", // French spells its partitive
+    });
+  });
+});
+
 // A mass (uncountable) noun does not just block the plural — it takes DIFFERENT quantifier words.
 // English splits many/much and few/little on countability; the Romance and German quantifiers
 // change form or become a partitive. WATER is the mass noun; MOUSE the count noun for contrast.

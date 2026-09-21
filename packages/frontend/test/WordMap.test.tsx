@@ -460,7 +460,7 @@ describe('WordMap', () => {
 
       const retry = await screen.findByRole('button', { name: 'Retry' });
       expect(
-        screen.getByText('Could not load the words. Is the server active?'),
+        screen.getByText('The words could not be loaded. Is the server active?'),
       ).toBeInTheDocument();
       expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
       expect(drawing()).toBeNull();

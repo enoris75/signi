@@ -77,6 +77,25 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
   in_front_of: 'の前',
 };
 
+/**
+ * The same relations as they are **cited** — named out of a sentence, for a label (see
+ * `translateSpecifier`). A clause builds a place from the relational noun above plus its particle
+ * (ベッドの下で), and two relations add no noun at all: plain containment and a plain traversal are
+ * carried by the particle alone (家で, 市場を), so deriving a label would name both 「で」. Cited on
+ * their own they take the 中 and the 通る the particle leaves implicit, which is how a dictionary
+ * writes them. Whole tails rather than a noun plus a particle, because traversal ends in a te-form
+ * (を通って) and not in a case particle at all.
+ */
+export const PATH_CITATION: Record<PathSpecifier, string> = {
+  in: 'の中で',
+  through: 'を通って',
+  under: 'の下で',
+  over: 'の上で',
+  around: 'の周りで',
+  behind: 'の後ろで',
+  in_front_of: 'の前で',
+};
+
 /** Readings for the relational nouns above (word-level furigana over the の+kanji run). */
 export const REL_NOUN_READING: Record<PathSpecifier, string> = {
   in: '',

@@ -500,6 +500,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['STRIKE', 'la gatta ha colpito.'], ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
     ['TRANSFER', 'la gatta ha trasferito.'], ['TRANSFORM', 'la gatta ha trasformato.'],
+    // -durre keeps its Latin stem in the participle: tradotto, not *tradutto.
+    ['TRANSLATE', 'la gatta ha tradotto.'],
     ['TURN_OFF', 'la gatta ha disattivato.'],
     ['TYPE', 'la gatta ha digitato.'],
     ['UNDERSTAND', 'la gatta ha compreso.'], ['USE', 'la gatta ha usato.'],

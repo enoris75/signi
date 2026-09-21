@@ -10,6 +10,7 @@ import { isNegativeAdverb } from '../../functions/isNegativeAdverb.js';
 import { isPronounElement } from '../../functions/isPronounElement.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
+import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { VOWEL_START } from './fr.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -58,8 +59,8 @@ export function predicateText(
   // reflexive, whatever the lexical verb is.
   const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
   const finiteVerb = passive ? verbPhrase.passiveAux! : verb;
-  const passiveParticiple = passive
-    ? agreeParticipleFr(verb.forms['participle'] ?? verb.forms['base'] ?? '', subjectForms)
+  const passiveParticipleText = passive
+    ? agreeParticipleFr(passiveParticiple(verb), subjectForms)
     : '';
   const plain = passive ? finiteVerb : nonReflexiveVerb(verb);
   const moodFinite = moodForm('fr', plain, moodPN(subjectForms), mood) ?? statePastForm('fr', plain, moodPN(subjectForms), tense, mood);
@@ -187,7 +188,7 @@ export function predicateText(
   // tenses put it in the trailing slot, so the passive takes it back into the group.
   if (passive) {
     const frequencyInGroup = isFrequency ? effectiveMod : '';
-    effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticiple].filter(Boolean).join(' ');
+    effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticipleText].filter(Boolean).join(' ');
     if (isFrequency) effectiveMod = '';
   }
   const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement)]
@@ -200,7 +201,7 @@ export function predicateText(
   const infinitiveMod = negativeAdverb || preInfinitive ? '' : modifierText;
   // A passive citation is the infinitive of the auxiliary plus the participe ("être mangée").
   const infinitiveGroup = passive
-    ? [finiteVerb.forms['base'] ?? '', passiveParticiple].filter(Boolean).join(' ')
+    ? [finiteVerb.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
     : '';
   const negateInfinitive = (inf: string): string => {
     // "bien" leads the infinitive here too, behind any "ne pas": "bien manger", "ne pas bien manger".

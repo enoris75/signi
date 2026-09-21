@@ -287,5 +287,5 @@ As P03 §4:
 
 Indeterminate motion verbs; the vocative; *się* second-position placement beyond simple clauses;
 numerals and their case government; a completion flag on the verb phrase; the passive
-([A01](../../A-ready/A01-passive-voice/README.md)) for Polish, which will need *zostać* + passive
+([A01](../../Z-Done/A01-passive-voice/README.md)) for Polish, which will need *zostać* + passive
 participle when A01 lands.

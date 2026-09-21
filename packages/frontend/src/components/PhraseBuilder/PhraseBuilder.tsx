@@ -62,6 +62,8 @@ import {
   dropConjunctPosition,
 } from "./conjunctChain.ts";
 import { ownersUnder, possessionsFor, type OwnerSpot } from "./ownerChain.ts";
+import { possessiveRequests } from "./functions/possessiveRequests.ts";
+import { usePossessivePhrases } from "../../i18n/usePossessivePhrase.ts";
 import { PeriodCard } from "./PeriodCard.tsx";
 import { GRAPH_HEIGHT_KEY, SIDEBAR_WIDTH_KEY } from "./storageKeys.ts";
 import { useDrag } from "./hooks/useDrag.ts";
@@ -449,18 +451,6 @@ export function PhraseBuilder({
       onAddConjunct: ringHost?.onAddConjunct ? () => ringHost.onAddConjunct!() : commands.handleAddConjunct,
       t,
     });
-  // The group-extending control rides the group's last ring; each possessor control names or points
-  // to its noun's owner.
-  const perimeterByNoun = decoratePerimeterControls({
-    perimeterByNoun: satellitePerimeter,
-    selection,
-    ringHost,
-    resolve: coref.resolve,
-    onTogglePossessor: handleTogglePossessor,
-    word,
-    t,
-  });
-
   const renderedSlots = renderedSlotsFor(visibleSlots, shownMap);
 
   const containerRef = useRef<HTMLDivElement>(null);
@@ -572,6 +562,26 @@ export function PhraseBuilder({
   const { owners, pointers } = ringHost
     ? { owners: [], pointers: [] }
     : possessionsFor({ selection, nouns: ownableNouns(groups, satellites), chains, ownersOpen });
+
+  // The possessed noun phrase each coreference link renders ("his horse", fr "son cheval"), which
+  // the backend renders on request: the Romance possessive agrees with the noun possessed, so no
+  // catalog entry can hold it (C16). Both the chip on the link and the control's tooltip read it.
+  const possessivePhrase = usePossessivePhrases(
+    possessiveRequests(selection, pointers, coref.resolve),
+  );
+
+  // The group-extending control rides the group's last ring; each possessor control names or points
+  // to its noun's owner.
+  const perimeterByNoun = decoratePerimeterControls({
+    perimeterByNoun: satellitePerimeter,
+    selection,
+    ringHost,
+    resolve: coref.resolve,
+    onTogglePossessor: handleTogglePossessor,
+    word,
+    possessivePhrase,
+    t,
+  });
 
   // What compact view packs, and in how big a cell (see compactPacking). A hosted ring's builder has
   // no canvas of its own to pack: its ring is placed by the period's.
@@ -711,6 +721,7 @@ export function PhraseBuilder({
     colorOf: (role) => headOf(role)?.color ?? "",
     resolve: coref.resolve,
     t,
+    possessivePhrase,
     compact,
   });
 

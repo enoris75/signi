@@ -1,4 +1,14 @@
-import type { AbstractionLevel, Definiteness, LanguageCode, PhrasePlan, PronominalPossessor } from './index.js';
+import type {
+  AbstractionLevel,
+  CoordConjunction,
+  Definiteness,
+  Degree,
+  LanguageCode,
+  NounPhrase,
+  PhrasePlan,
+  PronominalPossessor,
+  Specifier,
+} from './index.js';
 
 /**
  * Post-processing applied to an engine-rendered UI string, once, for every language.
@@ -32,6 +42,9 @@ export interface UiStringPlanDef extends UiStringCommon {
   word?: never;
   determiner?: never;
   possessive?: never;
+  conjunction?: never;
+  specifier?: never;
+  degree?: never;
 }
 
 /**
@@ -59,6 +72,9 @@ export interface UiStringWordDef extends UiStringCommon {
   plan?: never;
   determiner?: never;
   possessive?: never;
+  conjunction?: never;
+  specifier?: never;
+  degree?: never;
 }
 
 /**
@@ -80,6 +96,9 @@ export interface UiStringDeterminerDef extends UiStringCommon {
   plan?: never;
   word?: never;
   possessive?: never;
+  conjunction?: never;
+  specifier?: never;
+  degree?: never;
 }
 
 /**
@@ -102,13 +121,87 @@ export interface UiStringPossessiveDef extends UiStringCommon {
   plan?: never;
   word?: never;
   determiner?: never;
+  conjunction?: never;
+  specifier?: never;
+  degree?: never;
+}
+
+/**
+ * One coordinating conjunction, named by the word it spells — the entries of the conjunction menu.
+ * The one function word that agrees with nothing, so unlike a determiner it takes no `agreesWith`;
+ * what it still needs is an engine, because no lexicon holds it and what counts as *one word* is a
+ * fact about the language — `then` is a connective adverb in all seven and comes back with the
+ * coordinator it leans on ("e poi", "und dann", それから). It is cited between two clauses, which is
+ * where the menu puts it: the same word may join two nouns differently (ja 〜と, not そして).
+ */
+export interface UiStringConjunctionDef extends UiStringCommon {
+  /** The conjunction this string names ("but" → ma / mais / aber / しかし). */
+  conjunction: CoordConjunction;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  specifier?: never;
+  degree?: never;
+}
+
+/**
+ * One complement specifier, named by the adposition it spells — the tooltips of the spatial-relation
+ * and cause-sentiment toolbars. A specifier is not a word the plan carries but a choice the engines
+ * *realise*, and the adposition realising it has no citation form: the Romance prepositions fuse
+ * with the article ("nella casa"), German marks the relation on the article's case, and Japanese
+ * wraps its noun in a circumposition. So it is cited with a noun, held bare so that no article
+ * comes along, exactly as a determiner is cited on one.
+ */
+export interface UiStringSpecifierDef extends UiStringCommon {
+  /** The specifier this string names — a `path` relation or a cause `sentiment`. */
+  specifier: Specifier;
+  /**
+   * The noun the adposition is cited with. Defaults to the grammar noun NOUN, as a determiner's
+   * does. It is held bare whatever it is, so only a language whose adposition *changes* with the
+   * noun would have reason to name another; none of the seven does today.
+   */
+  agreesWith?: string;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  conjunction?: never;
+  degree?: never;
+}
+
+/**
+ * One comparative degree, named by what it adds to an adjective — the label on the degree chip.
+ * Three of the seven languages spell a degree as a word of its own ("più", "más", もっと), German
+ * remakes the adjective instead ("größer", "am größten"), and English does either depending on the
+ * adjective ("bigger", but "more beautiful"). That last is why it is cited rather than looked up,
+ * and why what it is cited *on* is an adjective rather than a noun.
+ */
+export interface UiStringDegreeDef extends UiStringCommon {
+  /** The degree this string names ("more" → più / plus / größer / もっと). */
+  degree: Degree;
+  /**
+   * The adjective the degree is cited on. Defaults to BIG — short, regular and compared
+   * synthetically wherever a language has the choice, so the label shows each language's ordinary
+   * comparison rather than the periphrasis a long adjective would force on English and German.
+   */
+  agreesWith?: string;
+  plan?: never;
+  word?: never;
+  determiner?: never;
+  possessive?: never;
+  conjunction?: never;
+  specifier?: never;
 }
 
 export type UiStringDef =
   | UiStringPlanDef
   | UiStringWordDef
   | UiStringDeterminerDef
-  | UiStringPossessiveDef;
+  | UiStringPossessiveDef
+  | UiStringConjunctionDef
+  | UiStringSpecifierDef
+  | UiStringDegreeDef;
 
 // Preserves the literal keys (a plain `Record<string, UiStringDef>` annotation would widen
 // them to `string` and lose the typo-checking on `t('…')`).
@@ -224,6 +317,26 @@ const exampleAt = (level: AbstractionLevel): PhrasePlan =>
         specifiers: [{ kind: 'abstraction', value: level }],
       },
     },
+  }) as PhrasePlan;
+
+// The shape every "Could not …" failure message takes: the thing that the act failed on, promoted
+// to subject of an agentless passive under a negated past ability — "the phrase could not be saved",
+// de "die Phrase konnte nicht gespeichert werden", ja 「フレーズは保存することができませんでした」.
+//
+// Agentlessness is a subject choice, not a value of `voice` (see Voice): the agent named here is
+// GENERIC_PERSON, and no language speaks a generic agent as a by-phrase, so the translator drops it
+// and the plain agentless passive is what is left. The active with that same subject reads well in
+// it/fr/de ("non si è potuto…", "man konnte…") but not in English ("one could not save the phrase"),
+// which is why these waited for the voice rather than taking it.
+//
+// The modal is CAN throughout, past and negative: it is the ability that failed. It also keeps the
+// Romance past in its imperfect ("non poteva", "ne pouvait pas"), where a bare past would reach for
+// the literary perfective ("non fu salvata") that no error message should be written in.
+const couldNotBe = (verb: string, patient: NounPhrase): PhrasePlan =>
+  ({
+    subject: { concept: 'GENERIC_PERSON' },
+    verbPhrase: { verb, voice: 'passive', modals: ['CAN'], tense: 'past', negative: true },
+    directObject: patient,
   }) as PhrasePlan;
 
 /**
@@ -1453,6 +1566,69 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'missing words',
   },
 
+  // ── "Could not …": the failure messages ─────────────────────────────────────
+  // All eight are `couldNotBe` (see above) over the thing the act failed on. They are whole
+  // sentences with their full stop kept: each stands alone in a toast or an alert.
+
+  // Saving and loading a whole phrase. The loaded one is `that` — the user picked it out of a list,
+  // and it is not the one in the workspace: en "that phrase", it "quella frase", de "jene Phrase".
+  'failure.phraseNotSaved': {
+    plan: couldNotBe('SAVE', { concept: 'PHRASE', definiteness: 'definite' }),
+    format: { capitalize: true },
+    fallback: 'The phrase could not be saved.',
+  },
+  'failure.phraseNotLoaded': {
+    plan: couldNotBe('LOAD', { concept: 'PHRASE', definiteness: 'that' }),
+    format: { capitalize: true },
+    fallback: 'That phrase could not be loaded.',
+  },
+  // The list the dialog failed to fetch — definite, because it is *the* stored ones, all of them.
+  // Bare would be ungrammatical where it matters: French spells no zero-article plural subject
+  // (*"phrases enregistrées ne pouvaient pas…").
+  'failure.savedPhrasesNotLoaded': {
+    plan: couldNotBe('LOAD', {
+      concept: 'PHRASE', number: 'plural', definiteness: 'definite', adjectives: ['SAVED'],
+    }),
+    format: { capitalize: true },
+    fallback: 'The saved phrases could not be loaded.',
+  },
+
+  // The same three for a single period (PERIOD_SENTENCE, de "Satzgefüge", ja 文).
+  'failure.periodNotSaved': {
+    plan: couldNotBe('SAVE', { concept: 'PERIOD_SENTENCE', definiteness: 'definite' }),
+    format: { capitalize: true },
+    fallback: 'The period could not be saved.',
+  },
+  'failure.periodNotLoaded': {
+    plan: couldNotBe('LOAD', { concept: 'PERIOD_SENTENCE', definiteness: 'that' }),
+    format: { capitalize: true },
+    fallback: 'That period could not be loaded.',
+  },
+  'failure.savedPeriodsNotLoaded': {
+    plan: couldNotBe('LOAD', {
+      concept: 'PERIOD_SENTENCE', number: 'plural', definiteness: 'definite', adjectives: ['SAVED'],
+    }),
+    format: { capitalize: true },
+    fallback: 'The saved periods could not be loaded.',
+  },
+
+  // The two failures that mean the backend is unreachable. Neither names the server: what the user
+  // is told is what did not happen — the phrase was not translated, the words were not loaded — and
+  // the call sites follow it with `status.isServerActive`, which is the question about the server
+  // and already says it without the compound German cannot form ("translation server", bug B10).
+  // That also spares the corpus a REACH whose Japanese (到達する) takes に and could not carry a
+  // direct object at all; TRANSLATE is transitive in all seven.
+  'failure.phraseNotTranslated': {
+    plan: couldNotBe('TRANSLATE', { concept: 'PHRASE', definiteness: 'definite' }),
+    format: { capitalize: true },
+    fallback: 'The phrase could not be translated.',
+  },
+  'failure.wordsNotLoaded': {
+    plan: couldNotBe('LOAD', { concept: 'WORD', number: 'plural', definiteness: 'definite' }),
+    format: { capitalize: true },
+    fallback: 'The words could not be loaded.',
+  },
+
   // The name a phrase is exported under when the user gave it none: PHRASE with UNTITLED, "Untitled
   // phrase", it "Frase senza titolo", de "Unbenannte Phrase". It is written into the file, so it keeps
   // the language that was active when the phrase was exported.
@@ -1965,6 +2141,86 @@ export const UI_STRINGS = defineUiStrings({
   'conjunction.kind.that_is': { word: 'EXPLICATIVE', agreesWith: 'CONJUNCTION', fallback: 'explicative' },
   'conjunction.kind.therefore': { word: 'CONCLUSIVE', agreesWith: 'CONJUNCTION', fallback: 'conclusive' },
   'conjunction.kind.then': { word: 'TEMPORAL', agreesWith: 'CONJUNCTION', fallback: 'temporal' },
+
+  // The conjunction menu's own entries: the word each conjunction *is*, which until now the menu
+  // wrote in English beside its localized hint. A conjunction is a function word no lexicon holds —
+  // each engine spells its own set — and what counts as one word is a fact about the language:
+  // `then` is a connective adverb in all seven and comes with the coordinator it leans on ("e poi",
+  // "und dann", それから). It is cited between two clauses, where the menu puts it; the three that
+  // can also join two nouns are written differently there (ja 〜と, not そして). Keyed by
+  // CoordConjunction beside the hints, so the menu writes t(`conjunction.value.${value}`).
+  'conjunction.value.and': { conjunction: 'and', format: { capitalize: true }, fallback: 'And' },
+  'conjunction.value.or': { conjunction: 'or', format: { capitalize: true }, fallback: 'Or' },
+  'conjunction.value.but': { conjunction: 'but', format: { capitalize: true }, fallback: 'But' },
+  'conjunction.value.that_is': { conjunction: 'that_is', format: { capitalize: true }, fallback: 'That is' },
+  // en "so", not "therefore": the conclusive coordinator English actually writes between two
+  // clauses. "Therefore" is the adverb, and the menu is offering a join.
+  'conjunction.value.therefore': { conjunction: 'therefore', format: { capitalize: true }, fallback: 'So' },
+  'conjunction.value.then': { conjunction: 'then', format: { capitalize: true }, fallback: 'And then' },
+
+  // The spatial-relation toolbar on a route or a locative: one icon per relation, its tooltip the
+  // adposition that relation is spoken with. Not a word of the lexicon — the Romance prepositions
+  // fuse with the article ("nella casa"), German marks the relation on the article's case, and
+  // Japanese wraps its noun in a circumposition — so each is cited on a bare noun and comes back as
+  // the adposition alone: it "sotto", "intorno a"; de "unter", "um"; ja 〜の下で, 〜を通って, which is
+  // how a dictionary writes a form that cannot stand without its noun. Keyed by PathSpecifier, so
+  // the toolbar writes t(`specifier.value.${value}`).
+  //
+  // Lower-case: they are words in running grammar, not names of things (the toolbar capitalizes
+  // nothing else either), and an adposition is not capitalized in any of the seven.
+  'specifier.value.in': { specifier: { kind: 'path', value: 'in' }, fallback: 'in' },
+  'specifier.value.through': { specifier: { kind: 'path', value: 'through' }, fallback: 'through' },
+  'specifier.value.under': { specifier: { kind: 'path', value: 'under' }, fallback: 'under' },
+  'specifier.value.over': { specifier: { kind: 'path', value: 'over' }, fallback: 'over' },
+  'specifier.value.around': { specifier: { kind: 'path', value: 'around' }, fallback: 'around' },
+  'specifier.value.behind': { specifier: { kind: 'path', value: 'behind' }, fallback: 'behind' },
+  'specifier.value.in_front_of': { specifier: { kind: 'path', value: 'in_front_of' }, fallback: 'in front of' },
+
+  // The cause complement's sentiment toolbar, whose tooltip names the stance and then shows the
+  // connector it picks — "Neutral — because of", it "Neutrale — a causa di", de "Neutral — wegen".
+  // Two entries per stance, joined with a dash at the call site, because they are two different
+  // kinds of string: the stance is an ordinary adjective agreeing with the CAUSE_COMPLEMENT it
+  // describes, and the connector is a specifier, cited like the spatial relations above. German
+  // blames with a fixed phrase rather than a preposition ("durch die Schuld"), and Japanese marks
+  // all three after the noun (〜のために / 〜のせいで / 〜のおかげで).
+  'sentiment.value.neutral': {
+    word: 'NEUTRAL',
+    agreesWith: 'CAUSE_COMPLEMENT',
+    format: { capitalize: true },
+    fallback: 'Neutral',
+  },
+  'sentiment.value.negative': {
+    word: 'NEGATIVE',
+    agreesWith: 'CAUSE_COMPLEMENT',
+    format: { capitalize: true },
+    fallback: 'Negative',
+  },
+  'sentiment.value.positive': {
+    word: 'POSITIVE',
+    agreesWith: 'CAUSE_COMPLEMENT',
+    format: { capitalize: true },
+    fallback: 'Positive',
+  },
+  'sentiment.connector.neutral': { specifier: { kind: 'sentiment', value: 'neutral' }, fallback: 'because of' },
+  'sentiment.connector.negative': { specifier: { kind: 'sentiment', value: 'negative' }, fallback: 'through the fault of' },
+  'sentiment.connector.positive': { specifier: { kind: 'sentiment', value: 'positive' }, fallback: 'thanks to' },
+
+  // The degree chip's tooltip: what the chosen degree adds to the adjective it rides. The seventh
+  // function-word kind, and the one that is least often a word at all — Italian, French, Spanish,
+  // Portuguese and Japanese put an adverb in front ("più", もっと), German remakes the adjective
+  // ("größer", "am größten"), and English does either depending on the adjective. So it is cited on
+  // one, BIG, which every language compares in its ordinary way: en "bigger", not the "more" a long
+  // adjective would force. The Romance superlatives keep the definite article the phrase gives them
+  // ("il più"), or "more" and "most" would be one word.
+  //
+  // `positive` adds nothing in any of the seven; it renders the em-dash the chip already showed for
+  // it. Keyed by Degree, so the chip writes t(`degree.value.${value}`).
+  'degree.value.positive': { degree: 'positive', fallback: '—' },
+  'degree.value.more': { degree: 'more', fallback: 'more' },
+  'degree.value.most': { degree: 'most', fallback: 'most' },
+  'degree.value.less': { degree: 'less', fallback: 'less' },
+  'degree.value.least': { degree: 'least', fallback: 'least' },
+  'degree.value.equally': { degree: 'equally', fallback: 'equally' },
 
   // The controls that act on one named part of the canvas — a word's clear button, a satellite's
   // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the

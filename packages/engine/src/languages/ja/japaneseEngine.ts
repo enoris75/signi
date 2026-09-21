@@ -1,6 +1,7 @@
-import type { Definiteness } from '@signi/shared';
+import type { CoordConjunction, Definiteness, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase, RubySegment } from '../../types.js';
-import { JA_DETERMINERS } from './ja.consts.js';
+import { CAUSE_PARTICLE, COORD_WORDS, JA_DEGREE, JA_DETERMINERS, PATH_CITATION } from './ja.consts.js';
+import { isLoweredDegree } from './isLoweredDegree.js';
 import { buildSegments } from './buildSegments.js';
 import { possessiveJa } from '../../possessive.js';
 
@@ -46,5 +47,38 @@ export const japaneseEngine: LanguageEngine = {
   // furigana of the ruby segments are dropped — a label shows the written word.
   renderPossessive(_noun: ConceptForms, possessor: PronominalPossessor): string {
     return possessiveJa(possessor).map((seg) => seg.t).join('');
+  },
+  // The connective adverb Japanese writes between two clauses (そして, しかし, つまり). It follows the
+  // first clause's 、 in a sentence; standing alone as a menu entry it is the word itself.
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  /**
+   * Japanese puts its spatial relation **after** the noun, as a relational noun plus a particle
+   * (ベッドの下に, "under the bed"), and the neutral relations are a bare particle (家に, 市場を). None
+   * of that can lead a label, so it is written the way a Japanese dictionary writes a bound form:
+   * with the 〜 that stands for the noun it attaches to — 〜の下で, 〜のために.
+   *
+   * The two relations a clause leaves to the particle alone are named in full here, or containment
+   * and traversal would both come back as 〜で (see `PATH_CITATION`). The place particle で is the one
+   * cited: the chip names a relation, and a relation is what a place states.
+   */
+  renderSpecifier(_noun: ConceptForms, specifier: Specifier): string {
+    if (specifier.kind === 'sentiment') return `〜${CAUSE_PARTICLE[specifier.value]}`;
+    return specifier.kind === 'path' ? `〜${PATH_CITATION[specifier.value]}` : '';
+  },
+  /**
+   * Japanese compares with a prenominal adverb and leaves the adjective alone (もっと大きい,
+   * 最も大きい), so the degree is a word of its own and the cited adjective goes unread — except
+   * that the **lowered** degrees are a circumfix: the adverb opens them and the adjective's own
+   * negation closes them (それほど大きくない, 最も大きくない). Naming only the adverb would give 最も
+   * for both `most` and `least`, so the lowered ones are cited whole, with the 〜 that stands for
+   * the adjective, the way `renderSpecifier` cites a postposition.
+   */
+  renderDegree(adjective: ConceptForms, degree: Degree): string {
+    const word = JA_DEGREE[degree];
+    return word && isLoweredDegree({ ...adjective, forms: { ...adjective.forms, degree } })
+      ? `${word}〜ない`
+      : word;
   },
 };

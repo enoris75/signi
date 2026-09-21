@@ -23,10 +23,8 @@ import SentimentNeutralIcon from "@mui/icons-material/SentimentNeutral";
 import SentimentVeryDissatisfiedIcon from "@mui/icons-material/SentimentVeryDissatisfied";
 import {
   CAUSE_SENTIMENTS,
-  CAUSE_SENTIMENT_LABELS,
   Concept,
   PATH_SPECIFIERS,
-  PATH_SPECIFIER_LABELS,
   type Aspect,
   type CauseSentiment,
   type Definiteness,
@@ -835,12 +833,19 @@ export function SpecifierSelector({
   onSelect: (s: PathSpecifier) => void;
   placeAt?: (s: PathSpecifier) => { x: number; y: number } | undefined;
 }) {
+  const t = useUiString();
+  // Each relation is named by the adposition its language spells it with — "under" / "sotto" /
+  // "unter" / 〜の下で (C13). The catalog cites them on a bare noun, so what comes back is the
+  // preposition alone, which is what the icon's tooltip wants.
+  const labels = Object.fromEntries(
+    PATH_SPECIFIERS.map((s) => [s, t(`specifier.value.${s}`)]),
+  ) as Record<PathSpecifier, string>;
   return (
     <RelationToolbar
       testId="specifier-toolbar"
       values={PATH_SPECIFIERS}
       value={value}
-      labels={PATH_SPECIFIER_LABELS}
+      labels={labels}
       icons={SPECIFIER_ICONS}
       keys={SPECIFIER_KEYS}
       armed={armed}
@@ -872,12 +877,19 @@ export function SentimentSelector({
   onSelect: (s: CauseSentiment) => void;
   placeAt?: (s: CauseSentiment) => { x: number; y: number } | undefined;
 }) {
+  const t = useUiString();
+  // The stance, then the connector it picks — "Neutral — because of", de "Neutral — wegen". Two
+  // catalog entries of different kinds (an adjective and a specifier), joined here with the same
+  // dash the other two-part tooltips use.
+  const labels = Object.fromEntries(
+    CAUSE_SENTIMENTS.map((v) => [v, `${t(`sentiment.value.${v}`)} — ${t(`sentiment.connector.${v}`)}`]),
+  ) as Record<CauseSentiment, string>;
   return (
     <RelationToolbar
       testId="sentiment-toolbar"
       values={CAUSE_SENTIMENTS}
       value={value}
-      labels={CAUSE_SENTIMENT_LABELS}
+      labels={labels}
       icons={SENTIMENT_ICONS}
       // Three stances with no shared initial worth the guess ("negative"/"neutral" collide), so
       // they are counted rather than lettered.

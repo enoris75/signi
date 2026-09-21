@@ -181,9 +181,11 @@ export const HITSUYOU_GA_ARU: Forms = {
   suffix_dict: '必要がある', suffix_dict_reading: 'ひつようがある',
   suffix_stem: '必要があり', suffix_stem_reading: 'ひつようがあり',
 };
-/** CAN: 〜ことができる, on the dictionary form; all kana. */
+/** CAN: 〜ことができる, on the dictionary form; all kana. `potential` marks it as the one modal that
+ *  absorbs a passive's voice (see `isPotentialPassive`). */
 export const KOTO_GA_DEKIRU: Forms = {
   base: 'ことができる', kind: 'verb', governs: 'dict', suffix_dict: 'ことができる', suffix_stem: 'ことができ',
+  potential: '1',
 };
 /** WANT (the WILL concept): 〜たい, an i-adjective on the polite stem. */
 export const TAI: Forms = { base: 'たい', kind: 'iadj', governs: 'stem', suffix_dict: 'たい', suffix_stem: 'たく' };

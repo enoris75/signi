@@ -676,7 +676,7 @@ describe('SlotNode', () => {
         },
       });
 
-      const chip = screen.getByLabelText('Degree: More — click to change');
+      const chip = screen.getByLabelText('Degree: more — click to change');
       expect(chip).toHaveTextContent('more');
       expect(getComputedStyle(chip).color).not.toBe(muted);
     });

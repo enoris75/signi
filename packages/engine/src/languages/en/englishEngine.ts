@@ -1,6 +1,8 @@
+import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEn } from '../../possessive.js';
-import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './en.consts.js';
+import { CAUSE_PREP, COORD_WORDS, EN_DEGREE, PARENTHETICAL_CONNECTORS, PATH_PREP } from './en.consts.js';
+import { enAdj } from './enAdj.js';
 import { determiner } from './determiner.js';
 import { renderClause } from './renderClause.js';
 
@@ -28,5 +30,27 @@ export const englishEngine: LanguageEngine = {
   // the possessed head, so the noun it is cited on goes unread ("his", "their").
   renderPossessive(_noun: ConceptForms, possessor: PronominalPossessor): string {
     return possessiveEn(possessor);
+  },
+  // The word between two clauses. English alone punctuates some of them ("…, that is, …"), which
+  // belongs to the sentence and not to the word, so the label is the bare connector.
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  // English prepositions neither fuse with an article nor decline, so the cited noun goes unread.
+  renderSpecifier(_noun: ConceptForms, specifier: Specifier): string {
+    return specifier.kind === 'sentiment' ? CAUSE_PREP[specifier.value]
+      : specifier.kind === 'path' ? PATH_PREP[specifier.value]
+      : '';
+  },
+  // English compares both ways, and which way is a fact about the adjective, not about the degree:
+  // short adjectives inflect ("bigger", "the biggest") and long ones take the adverb ("more
+  // beautiful"). So the label is whatever `enAdj` makes of the cited adjective — the inflected word
+  // where it inflected, the adverb alone where it did not.
+  renderDegree(adjective: ConceptForms, degree: Degree): string {
+    if (degree === 'positive') return '';
+    const marked = enAdj({ ...adjective, forms: { ...adjective.forms, degree } });
+    const adverb = EN_DEGREE[degree];
+    // Periphrastic: the adverb leads an unchanged base, and the adverb alone is what was added.
+    return marked === `${adverb} ${adjective.forms['base'] ?? ''}` ? adverb : marked;
   },
 };

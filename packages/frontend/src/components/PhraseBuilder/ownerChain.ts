@@ -66,6 +66,12 @@ export type PointerSpot = {
   antecedent: NounAddress;
   // The antecedent's ring, when one answers to its address.
   antecedentKey: string | undefined;
+  /**
+   * The possessed noun itself. The chip on the link renders *its* phrase ("his horse"), because the
+   * Romance possessive agrees with what is possessed and not only with who possesses it (C16).
+   * Absent while the slot is still empty — there is nothing to possess yet.
+   */
+  possessedConcept: string | undefined;
 };
 
 const isNoun = (concept: unknown) => (concept as Concept | undefined)?.role === "noun";
@@ -101,7 +107,14 @@ export function possessionsFor({
   ) => {
     const antecedent = slice[POSSESSOR_REF_KEY(which)] as NounAddress | undefined;
     if (antecedent) {
-      pointers.push({ possessed: address, possessedKey: key, role, antecedent, antecedentKey: canvasKeyOf(antecedent) });
+      pointers.push({
+        possessed: address,
+        possessedKey: key,
+        role,
+        antecedent,
+        antecedentKey: canvasKeyOf(antecedent),
+        possessedConcept: (slice[which] as Concept | undefined)?.id,
+      });
       return;
     }
     const owner = slice[POSSESSOR_KEY(which)] as PhraseSelection | undefined;

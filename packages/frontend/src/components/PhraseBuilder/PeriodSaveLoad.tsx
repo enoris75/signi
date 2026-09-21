@@ -75,7 +75,7 @@ export function PeriodSaveLoad({
       onCloseSave();
       setToast({ severity: "success", msg: t("toast.periodSaved") });
     },
-    onError: () => setToast({ severity: "error", msg: "Could not save the period." }),
+    onError: () => setToast({ severity: "error", msg: t("failure.periodNotSaved") }),
   });
 
   const listQuery = useQuery({
@@ -111,7 +111,7 @@ export function PeriodSaveLoad({
         setToast({ severity: "success", msg: t("toast.periodAdded") });
       }
     } catch {
-      setToast({ severity: "error", msg: "Could not load that period." });
+      setToast({ severity: "error", msg: t("failure.periodNotLoaded") });
     }
   }
 
@@ -156,7 +156,7 @@ export function PeriodSaveLoad({
         <DialogTitle>{t("action.addSavedPeriod")}</DialogTitle>
         <DialogContent>
           {listQuery.isLoading && <Typography color="text.secondary">{t("status.loading")}…</Typography>}
-          {listQuery.isError && <Alert severity="error">Could not load saved periods.</Alert>}
+          {listQuery.isError && <Alert severity="error">{t("failure.savedPeriodsNotLoaded")}</Alert>}
           {listQuery.data && listQuery.data.length === 0 && (
             <Typography color="text.secondary" sx={{ py: 2 }}>
               {t("saved.noPeriods")} — {t("saved.useSaveIcon")}

@@ -4,12 +4,13 @@ import type { CoordConjunction } from "@signi/shared";
 import {
   builderNounAddress,
   conjunctAddress,
-  COORD_CONJUNCTION_LABEL,
+  COORD_CONJUNCTION_LABEL_KEY,
   NounAddress,
   NounKey,
   PhraseSelection,
   WorkspaceBinding,
 } from "./interfaces.ts";
+import { useUiString } from "../../i18n/useUiString.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "./slots.ts";
 import { conjunctionOf, conjunctsOf, updateConjunct } from "./phraseReducers.ts";
 import type { ConjunctLink } from "./conjunctChain.ts";
@@ -99,9 +100,10 @@ export function ConjunctionChip({
   at: Pt;
   onClick: () => void;
 }) {
+  const t = useUiString();
   return (
     <LinkChip
-      label={COORD_CONJUNCTION_LABEL[conjunction]}
+      label={t(COORD_CONJUNCTION_LABEL_KEY[conjunction])}
       color={color}
       at={at}
       onClick={onClick}

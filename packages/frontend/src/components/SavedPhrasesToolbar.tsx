@@ -120,7 +120,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
       setName("");
       setToast({ severity: "success", msg: t("toast.phraseSaved") });
     },
-    onError: () => setToast({ severity: "error", msg: "Could not save the phrase." }),
+    onError: () => setToast({ severity: "error", msg: t("failure.phraseNotSaved") }),
   });
 
   const deleteMutation = useMutation({
@@ -155,7 +155,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
               workspace: record!.workspace,
             })
               .then(() => queryClient.invalidateQueries({ queryKey: ["savedPhrases"] }))
-              .catch(() => setToast({ severity: "error", msg: "Could not put it back." }));
+              .catch(() => setToast({ severity: "error", msg: t("failure.phraseNotSaved") }));
           }
         : undefined,
     });
@@ -167,7 +167,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
       await applyWorkspace(record.workspace);
       setLoadOpen(false);
     } catch {
-      setToast({ severity: "error", msg: "Could not load that phrase." });
+      setToast({ severity: "error", msg: t("failure.phraseNotLoaded") });
     }
   }
 
@@ -299,7 +299,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
         <DialogTitle>{t("action.load.tooltip")}</DialogTitle>
         <DialogContent>
           {listQuery.isLoading && <Typography color="text.secondary">{t("status.loading")}…</Typography>}
-          {listQuery.isError && <Alert severity="error">Could not load saved phrases.</Alert>}
+          {listQuery.isError && <Alert severity="error">{t("failure.savedPhrasesNotLoaded")}</Alert>}
           {listQuery.data && listQuery.data.length === 0 && (
             <Typography color="text.secondary" sx={{ py: 2 }}>
               {t("saved.noPhrases")}

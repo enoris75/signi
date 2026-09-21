@@ -8,6 +8,7 @@ import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js'
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
@@ -140,6 +141,7 @@ export function complementsPhrase(
       // demonstrative ("por causa do cão", "deste cão", "de um cão"); the sentiment swaps the
       // connector — negative "por culpa do cão", positive "graças ao cão".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
+      const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
       const head =
         type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), f, plural) :
         type === 'terminus'  ? contractDet(datPrep, 'a', f, plural) :
@@ -155,7 +157,12 @@ export function complementsPhrase(
           mannerRelation(f) === 'mode'    ? contractDet(dePrep, 'de', f, plural) :
           prepDet('como', f, plural)
         ) :
-        type === 'direction' ? (f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)) :
+        type === 'direction' ? (
+          // A direction naming a relation is that relation's goal, spelled as the place is ("salta
+          // no ar"); with none it is the plain goal "a", or "para" towards a person.
+          dirSpec ? spatialHead(dirSpec, f, plural) :
+          f['animate'] === '1' ? prepDet('para', f, plural) : contractDet(datPrep, 'a', f, plural)
+        ) :
         type === 'source'    ? `${sourceAdverb}${contractDet(dePrep, 'de', f, plural)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `${connectorShared ? '' : 'graças '}${contractDet(datPrep, 'a', f, plural)}` :

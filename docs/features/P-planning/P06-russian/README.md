@@ -203,4 +203,4 @@ share code (language folders never import each other). Copy structure from `pl/`
 
 Stress marks; transliteration; indeterminate motion verbs; the genitive of negation; numerals; the
 vocative; *а* as a contrastive conjunction; the passive
-([A01](../../A-ready/A01-passive-voice/README.md)), which for Russian needs short passive participles.
+([A01](../../Z-Done/A01-passive-voice/README.md)), which for Russian needs short passive participles.

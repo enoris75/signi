@@ -9,6 +9,7 @@ import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
+import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { IT_REFLEXIVE, IT_SHORT_IMPERATIVE } from './it.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -76,8 +77,8 @@ export function predicateText(
   const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
   const plain = passive ? verbPhrase.passiveAux! : nonReflexiveVerb(verb);
   const participleForms = agreementForms(subjectForms);
-  const passiveParticiple = passive
-    ? agreeAdj(verb.forms['participle'] ?? verb.forms['base'] ?? '',
+  const passiveParticipleText = passive
+    ? agreeAdj(passiveParticiple(verb),
       participleForms['gender'] ?? 'masc', (participleForms['number'] ?? 'singular') === 'plural')
     : '';
   const reflexive = passive ? '' : reflexiveClitic(verb.forms, agreeForms);
@@ -98,7 +99,7 @@ export function predicateText(
       ? finite(plain)
       : aspectVerb(plain.forms, agreeForms, tense, aspect, mood, agreeingObject, attachedReflexive);
   // The participio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
-  const verbText = [verbGroup, passiveParticiple].filter(Boolean).join(' ');
+  const verbText = [verbGroup, passiveParticipleText].filter(Boolean).join(' ');
   // "mai" always requires "non": "io non bevo mai" even without verbNegative.
   // A "nessun" (no) direct object is post-verbal, so it triggers negative concord —
   // "non vede nessun ragazzo" — whereas a pre-verbal "nessun" subject does not.
@@ -178,7 +179,7 @@ export function predicateText(
     // A passive citation is the infinitive of the auxiliary plus the participio ("essere mangiato"),
     // the same two pieces every other branch builds, in the one mood that has no finite verb.
     const inf = passive
-      ? [plain.forms['base'] ?? '', passiveParticiple].filter(Boolean).join(' ')
+      ? [plain.forms['base'] ?? '', passiveParticipleText].filter(Boolean).join(' ')
       : verb.forms['base'] ?? verbText;
     const infWithClitic = itEnclitic(inf, objectClitic, 'infinitive');
     return [negText, infWithClitic, modifierText, directObjectText, complementsText]

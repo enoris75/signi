@@ -1,14 +1,25 @@
 import type {
+  CoordConjunction,
   Definiteness,
+  Degree,
   LanguageCode,
   NounElement,
   NounPhrase,
   PhrasePlan,
   PronominalPossessor,
+  Specifier,
   Translation,
   VerbPhrase,
 } from '@signi/shared';
-import { translate, translateWord, translateDeterminer, translatePossessive } from '../src/index.js';
+import {
+  translate,
+  translateConjunction,
+  translateDegree,
+  translateDeterminer,
+  translatePossessive,
+  translateSpecifier,
+  translateWord,
+} from '../src/index.js';
 
 // The engine is a pure function of (plan, lexicon), so these tests give it the *real* lexicon:
 // an in-memory SQLite seeded from the same corpus the app ships, read through the same
@@ -78,6 +89,39 @@ export function possessiveAll(
 ): Record<LanguageCode, string> {
   return Object.fromEntries(
     translatePossessive(possessor, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+/**
+ * Render one coordinating conjunction into every language — the `translateConjunction` path behind
+ * the conjunction menu. It is cited between two clauses and agrees with nothing, so unlike the
+ * three above it takes no noun.
+ */
+export function conjunctionAll(conjunction: CoordConjunction): Record<LanguageCode, string> {
+  return Object.fromEntries(
+    translateConjunction(conjunction).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+/**
+ * Render one complement specifier into every language — the `translateSpecifier` path behind the
+ * spatial-relation and cause-sentiment toolbars. The noun it is cited on (default NOUN) is held
+ * bare, so what comes back is the adposition alone.
+ */
+export function specifierAll(specifier: Specifier, agreesWith?: string): Record<LanguageCode, string> {
+  return Object.fromEntries(
+    translateSpecifier(specifier, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
+  ) as Record<LanguageCode, string>;
+}
+
+/**
+ * Render one comparative degree into every language — the `translateDegree` path behind the degree
+ * chip. Cited on an adjective (default BIG), because whether a degree is a word of its own or a
+ * remaking of the adjective depends on which adjective it is.
+ */
+export function degreeAll(degree: Degree, agreesWith?: string): Record<LanguageCode, string> {
+  return Object.fromEntries(
+    translateDegree(degree, lookupLexicalEntry, agreesWith).map((t) => [t.language, t.text]),
   ) as Record<LanguageCode, string>;
 }
 

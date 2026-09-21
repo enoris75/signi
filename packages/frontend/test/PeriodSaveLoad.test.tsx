@@ -200,7 +200,7 @@ describe('PeriodSaveLoad', () => {
       fireEvent.change(nameField(), { target: { value: 'Breakfast' } });
       fireEvent.click(screen.getByRole('button', { name: 'Save' }));
 
-      const notice = await findNotice('Could not save the period.');
+      const notice = await findNotice('The period could not be saved.');
       expect(getComputedStyle(notice).backgroundColor).toBe(ERROR);
       expect(props.onCloseSave).not.toHaveBeenCalled();
       expect(nameField()).toHaveValue('Breakfast');
@@ -296,7 +296,7 @@ describe('PeriodSaveLoad', () => {
       vi.mocked(listSavedPhrases).mockRejectedValue(new Error('Failed to load saved phrases'));
       renderSaveLoad({ loadOpen: true });
 
-      expect(await screen.findByRole('alert')).toHaveTextContent('Could not load saved periods.');
+      expect(await screen.findByRole('alert')).toHaveTextContent('The saved periods could not be loaded.');
       expect(screen.queryByText(/^No saved periods/)).not.toBeInTheDocument();
     });
 
@@ -365,7 +365,7 @@ describe('PeriodSaveLoad', () => {
 
       fireEvent.click(await screen.findByText('Breakfast'));
 
-      const notice = await findNotice('Could not load that period.');
+      const notice = await findNotice('That period could not be loaded.');
       expect(getComputedStyle(notice).backgroundColor).toBe(ERROR);
       expect(props.onAppendPeriod).not.toHaveBeenCalled();
       expect(props.onCloseLoad).not.toHaveBeenCalled();

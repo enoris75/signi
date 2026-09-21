@@ -2,6 +2,7 @@ import type { ResolvedPhrase } from '../../types.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
+import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { adverbSlots } from './adverbSlots.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase/index.js';
@@ -97,7 +98,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     // never reflexive, whatever the lexical verb is.
     const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
     const plain = passive ? verbPhrase.passiveAux!.forms : nonReflexiveVerb(verb).forms;
-    const passiveParticiple = passive ? (verb.forms['participle'] ?? verb.forms['base'] ?? '') : '';
+    const passiveParticipleText = passive ? passiveParticiple(verb) : '';
     const withReflexive = (pn: string, pronoun: string) =>
       [passive ? '' : reflexivePronoun(verb.forms, pn), pronoun].filter(Boolean).join(' ');
 
@@ -124,7 +125,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // A separable verb's particle closes the command ("füge die Maus hinzu", A138); the instruction's
       // infinitive keeps it ("die Maus hinzufügen").
       const parts = register === 'instruction'
-        ? [...mittelfeld, [passiveParticiple, plain['base'] ?? word].filter(Boolean).join(' '), meansText]
+        ? [...mittelfeld, [passiveParticipleText, plain['base'] ?? word].filter(Boolean).join(' '), meansText]
         : [word, ...mittelfeld, verb.forms['particle'] ?? '', meansText];
       return parts.filter(Boolean).join(' ').trim();
     }
@@ -142,7 +143,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
       // Governed by another clause, it is the zu-infinitive ("zu handeln", "hinzuzufügen"). A
       // passive citation puts the Partizip II in front of the auxiliary's infinitive, where the
       // finite clause puts it too: "gegessen werden", "gegessen zu werden".
-      const infVerb = [passiveParticiple, zu ? zuInfinitive(plain) : (plain['base'] ?? '')]
+      const infVerb = [passiveParticipleText, zu ? zuInfinitive(plain) : (plain['base'] ?? '')]
         .filter(Boolean).join(' ');
       return [withReflexive('3sg', infDirect.pronoun), infAdverb.nichtBeforeObject, infAdverb.beforeObject, dativeText, infObject,
         infAdverb.nichtAfterObject, infAdverb.afterObject, neg.beforeComplements, infComplements, neg.after, infVerb, meansText]
@@ -162,7 +163,7 @@ function clauseText(phrase: ResolvedPhrase, inverted: boolean, verbFinal: boolea
     const built = verbPhrase.modals.length > 0
       ? modalVerbGroup(verbPhrase.modals, plain, pn, tense, aspect, mood)
       : verbGroup(plain, pn, tense, aspect, mood);
-    const complex = passive ? passiveComplex(built, passiveParticiple) : built;
+    const complex = passive ? passiveComplex(built, passiveParticipleText) : built;
     const { v2: verbText, mid: aspectMid, tail: infinitiveTail } = complex;
     // "nicht" is dropped under "nie" or a "kein" object, and otherwise leads an adverb or a predicate
     // complement or trails the objects. It precedes the prospective's "im Begriff" as a whole: "ist

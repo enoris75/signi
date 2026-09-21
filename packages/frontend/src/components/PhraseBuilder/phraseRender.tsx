@@ -3,7 +3,7 @@ import { Box, Popover, Tooltip } from "@mui/material";
 import type { SystemStyleObject, Theme } from "@mui/system";
 import AddIcon from "@mui/icons-material/Add";
 import { AdjectiveTypeahead } from "./AdjectiveTypeahead.tsx";
-import { DEGREE_LABELS, type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
+import { type CauseSentiment, type Concept, type Definiteness, type Degree, type ModifierRelation, type PathSpecifier } from "@signi/shared";
 import {
   BoxComplementType,
   ConceptSelectOpts,
@@ -439,7 +439,7 @@ export function SlotNode({
   // (unmarked) degree renders a muted "±" affordance so the control is always reachable.
   // On a disc it is a small round chip on the rim, marked with a sign rather than a word.
   const degreeChip = isRealAdjective ? (
-    <Tooltip title={`${t("modifier.degree")}: ${DEGREE_LABELS[degree]} — ${t("hint.clickToChange")}`}>
+    <Tooltip title={`${t("modifier.degree")}: ${t(`degree.value.${degree}`)} — ${t("hint.clickToChange")}`}>
       <Box
         component="button"
         type="button"

@@ -14,19 +14,24 @@ export interface Seed {
   concepts?: Partial<Record<GrammaticalRole, Concept[]>>;
 }
 
-// Components read the backend through react-query and the UI language through its context. The
-// query cache is seeded rather than fetched, so no request goes out. The providers wrap `ui` as a
-// Testing Library `wrapper`, so `rerender` keeps them.
-export function renderWithProviders(ui: ReactElement, { strings = {}, concepts = {} }: Seed = {}) {
+// The providers on their own, as a Testing Library `wrapper`. Components read the backend through
+// react-query and the UI language through its context; the query cache is seeded rather than
+// fetched, so no request goes out. Exported for `renderHook`, which needs the same context a
+// component does — `useConnectors` reads the UI-string catalog for a coordination's label.
+export function withProviders({ strings = {}, concepts = {} }: Seed = {}) {
   const client = new QueryClient({ defaultOptions: { queries: { retry: false } } });
   client.setQueryData(['ui-strings'], strings);
   for (const [role, list] of Object.entries(concepts)) {
     client.setQueryData(['concepts', role], list);
   }
-  const wrapper = ({ children }: { children: ReactNode }) => (
+  return ({ children }: { children: ReactNode }) => (
     <QueryClientProvider client={client}>
       <LanguageProvider>{children}</LanguageProvider>
     </QueryClientProvider>
   );
-  return render(ui, { wrapper });
+}
+
+// The providers wrap `ui` as a Testing Library `wrapper`, so `rerender` keeps them.
+export function renderWithProviders(ui: ReactElement, seed: Seed = {}) {
+  return render(ui, { wrapper: withProviders(seed) });
 }

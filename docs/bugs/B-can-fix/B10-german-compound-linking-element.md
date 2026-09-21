@@ -11,6 +11,6 @@
 **Met again 2026-09-20 ([C10](../../localization/done/C10-ui-questions.md)).** The UI string asking whether
 the server is up wanted "the translation server", which compounds as *Übersetzungserver* — TRANSLATION is
 an `-ung` noun, one of the endings that always take the -s-. The string dropped its modifier rather than
-ship the misspelling, and [C11](../../localization/C-needs-engine/C11-ui-failure-messages-passive.md) will
+ship the misspelling, and [C11](../../localization/done/C11-ui-failure-messages-passive.md) will
 meet the same wording. The suffix rule alone (-ung, -heit, -keit, -schaft, -ion, -tät, -ling, -tum) would
 cover it without the lexical stem the -n- cases need; it is left here as part of the product decision.

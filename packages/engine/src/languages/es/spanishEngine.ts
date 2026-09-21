@@ -1,9 +1,13 @@
+import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveEs } from '../../possessive.js';
-import { COORD_WORDS, PARENTHETICAL_CONNECTORS } from './es.consts.js';
+import { COORD_WORDS, ES_DEGREE, PARENTHETICAL_CONNECTORS } from './es.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
+import { aDet } from './aDet.js';
+import { deDet } from './deDet.js';
 import { renderClause } from './renderClause.js';
+import { spatialHead } from './spatialHead.js';
 
 export const spanishEngine: LanguageEngine = {
   language: 'es',
@@ -40,5 +44,28 @@ export const spanishEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  // The adposition alone: Spanish contracts only de/a + "el" ("debajo del árbol"), so a bare noun
+  // leaves the plain locution ("debajo de", "alrededor de", "a causa de").
+  renderSpecifier(noun: ConceptForms, specifier: Specifier): string {
+    const f = noun.forms;
+    if (specifier.kind === 'sentiment') {
+      return specifier.value === 'positive' ? `gracias ${aDet(f, false)}`
+        : specifier.value === 'negative' ? `por culpa ${deDet(f, false)}`
+        : `a causa ${deDet(f, false)}`;
+    }
+    return specifier.kind === 'path' ? spatialHead(specifier.value, false, f) : '';
+  },
+  // Periphrastic throughout ("más", "el más", "menos", "igualmente"), so the adjective goes unread.
+  renderDegree(_adjective: ConceptForms, degree: Degree): string {
+    // The relative superlative is the comparative under the definite article — the article
+    // belongs to the noun phrase, not to the degree, so a label that showed the adverb alone
+    // would say "más" for both degrees. Cited masculine singular, the
+    // gender a citation form is given in (as `renderPossessive` defaults).
+    const word = ES_DEGREE[degree];
+    return word && (degree === 'most' || degree === 'least') ? `el ${word}` : word;
   },
 };

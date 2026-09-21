@@ -1,6 +1,6 @@
 import { useCallback, useLayoutEffect, useRef, useState } from "react";
 import {
-  COORD_CONJUNCTION_LABEL,
+  COORD_CONJUNCTION_LABEL_KEY,
   NounAddress,
   PhraseLink,
   isConditionalLink,
@@ -8,6 +8,7 @@ import {
   isInstrumentalLink,
   isRelativeLink,
 } from "../interfaces.ts";
+import { useUiString } from "../../../i18n/useUiString.ts";
 import { ALL_SLOTS, MUI_COLOR_HEX } from "../slots.ts";
 
 export const boxKey = (containerId: string, nounKey: NounAddress) =>
@@ -51,6 +52,8 @@ function sameConnectors(a: Connector[], b: Connector[]): boolean {
 // Returns the refs for the workspace to wire into its container bindings and the computed
 // connectors for the SVG overlay to draw.
 export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
+  // Not the usual `t`: the measuring loop below already spends that name on a DOMRect.
+  const uiString = useUiString();
   const workspaceRef = useRef<HTMLDivElement>(null);
   const boxEls = useRef<Map<string, HTMLElement>>(new Map());
   // The anchor dots the link line snaps to: the source noun's relative-clause control
@@ -125,7 +128,7 @@ export function useConnectors(links: PhraseLink[], instrumentalLabel: string) {
         x2: t.left + t.width / 2 - rootRect.left,
         y2: t.top + t.height / 2 - rootRect.top,
         color: MUI_COLOR_HEX.info,
-        label: COORD_CONJUNCTION_LABEL[link.conjunction].toLowerCase(),
+        label: uiString(COORD_CONJUNCTION_LABEL_KEY[link.conjunction]).toLowerCase(),
       });
     }
     // Instrumental connectors: the clause's verb-phrase toggle row → the instrument period's

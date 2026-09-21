@@ -340,7 +340,7 @@ describe('App', () => {
       edit([period('a', { subject: CAT }), period('b', { subject: DOG })]);
 
       expect(await screen.findByRole('alert')).toHaveTextContent(
-        'Could not reach the translation server.',
+        'The phrase could not be translated. Is the server active?',
       );
       await waitFor(() => expect(lines('en')).toEqual(['CAT (en)']));
     });

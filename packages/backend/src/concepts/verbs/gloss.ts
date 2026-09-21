@@ -10,6 +10,12 @@ export interface GlossParts {
   number?: 'plural';
   /** Adjectives narrowing the object ("to understand written words"). */
   adjectives?: string[];
+  /**
+   * The object's natural gender. Only a **pronoun** object reads it — it is what tells en "it" from
+   * "him" and de "es" from "ihn" — and a gloss reaches for one in a `purpose` clause, where the
+   * thing acted on has already been named by the clause above ("to write content **to load it**").
+   */
+  gender?: 'masc' | 'fem' | 'neut';
   /** The object's determiner: bare unless the verb acts on one of a kind ("to press a button"). */
   definiteness?: Definiteness;
   /**
@@ -31,6 +37,15 @@ export interface GlossParts {
    * `complements`, the adjective governs it: "to be able **to act**".
    */
   infinitive?: string | InfinitiveComplement;
+  /**
+   * A **clause of purpose** (PhrasePlan.purpose): what the act is done *for*, which for some verbs
+   * is the whole differentia — saving is writing content **in order to load it** (localization
+   * C19). Unlike `infinitive` it is an adjunct, not something the genus governs: no word licenses
+   * it, and its unspoken subject is the gloss's own (see `PurposeClause`). It takes the same parts
+   * any gloss clause takes; the ones a purpose clause has no room for (a nested infinitive) are
+   * ignored.
+   */
+  purpose?: GlossClause;
 }
 
 /** The causee of a causative gloss: the thing or person that comes to act (see `causativeGloss`). */
@@ -58,6 +73,7 @@ function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
             concept: p.object,
             definiteness: p.definiteness ?? 'bare',
             ...(p.number ? { number: p.number } : {}),
+            ...(p.gender ? { gender: p.gender } : {}),
             ...(p.adjectives?.length ? { adjectives: p.adjectives } : {}),
           },
         }
@@ -89,6 +105,11 @@ function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
 // 'ACT' }) → "to desire to act", it "desiderare agire", de "wünschen, zu handeln"; under BE with a
 // predicate adjective the adjective governs it — infinitiveGloss('BE', { predicate: 'ABLE', infinitive:
 // 'ACT' }) → "to be able to act", it "essere capace di agire", ja "行動することが可能である".
+//
+// A gloss whose differentia is what the act is *for* names a `purpose` clause instead —
+// infinitiveGloss('WRITE', { object: 'CONTENT', purpose: { verb: 'LOAD', object: 'THIRD_PERSON',
+// gender: 'neut' } }) → "to write content to load it", de "Inhalt schreiben, um es zu laden",
+// ja 「それを読み込むために内容を書く」. It is an adjunct, not a governed clause (see GlossParts.purpose).
 export function infinitiveGloss(
   verb: string,
   parts?: string | GlossParts,
@@ -96,9 +117,14 @@ export function infinitiveGloss(
   adjectives?: string[],
 ): PhrasePlan {
   const p: GlossParts = typeof parts === 'string' ? { object: parts, number, adjectives } : (parts ?? {});
+  const { infinitiveComplement: _nested, ...purposeClause } = p.purpose
+    ? glossClause(p.purpose.verb, p.purpose)
+    : ({} as InfinitiveComplement);
   return {
     subject: { concept: 'GENERIC_PERSON' },
     ...glossClause(verb, p),
+    // An adjunct on the whole clause, so it sits beside the predicate rather than inside it.
+    ...(p.purpose ? { purpose: purposeClause } : {}),
     infinitive: true,
   };
 }

@@ -14,7 +14,7 @@ ones the pronoun chooser and number toggle already use: a bare grammar noun for 
 | TENSE | noun | the grammatical time of a verb | it *tempo*, de *Tempus*, ja 時制 |
 | PRESENT, PAST, FUTURE | adjectives | the three tenses | agree with TENSE (it *presente / passato / futuro*) |
 | ASPECT | noun | the internal time shape of an event | it *aspetto*, de *Aspekt*, ja 相 |
-| NEUTRAL, PROGRESSIVE, PROSPECTIVE, RESULTATIVE | adjectives | the four aspects | agree with ASPECT; NEUTRAL is also needed by [C13](../C-needs-engine/C13-ui-grammatical-function-words.md) |
+| NEUTRAL, PROGRESSIVE, PROSPECTIVE, RESULTATIVE | adjectives | the four aspects | agree with ASPECT; NEUTRAL is also needed by [C13](../done/C13-ui-grammatical-function-words.md) |
 | POLARITY | noun | whether a clause is affirmed or negated | |
 | POSITIVE | adjective | affirmed | NEGATIVE is already seeded ("asserting that there is none of it") |
 | MODAL | noun | a verb that expresses necessity, ability or will | it *verbo modale*, de *Modalverb*, ja 法助動詞 |

@@ -82,10 +82,15 @@ export function useProvideCorefPick(rootSelection: PhraseSelection): CorefPick {
   );
 }
 
-// The possessive pronoun the chosen antecedent spells, as a UI-string key — shown on the line to it
-// so the user sees what the link will render. The same features every engine spells its own way, so
-// the word itself comes from the catalog (`pronoun.possessive.*`) rather than from here: this only
-// says which of its cells the features land in.
+// The possessive pronoun the chosen antecedent spells, as a UI-string key. The same features every
+// engine spells its own way, so the word itself comes from the catalog (`pronoun.possessive.*`)
+// rather than from here: this only says which of its cells the features land in.
+//
+// It is what the chip and the possessor tooltip show **while the phrase they really want is in
+// flight**: the Romance possessive also agrees with the noun possessed, which no entry rendered
+// once at boot can know, so the phrase is rendered on request instead (C16,
+// `usePossessivePhrases`). This is right in English, German and Japanese, approximate in the
+// Romance languages, and never blank — which is exactly what a fallback is for.
 //
 // Third singular is the only cell any of the seven languages splits on the antecedent's *natural*
 // gender (en his/her/its, de sein/ihr, ja 彼の/彼女の/それの); an antecedent with none reads as

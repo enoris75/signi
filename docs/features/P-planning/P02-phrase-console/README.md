@@ -349,7 +349,7 @@ matches. "Code" is the existing function each one reaches.
 | `/undo` · `/redo` | history (P01 phase 5) |
 | `/words` · `/help [command]` | words panel · help |
 
-New grammar features add a command in the same change — e.g. [A01 passive voice](../../A-ready/A01-passive-voice/README.md) would add `/passive` · `/active`.
+New grammar features add a command in the same change — e.g. [A01 passive voice](../../Z-Done/A01-passive-voice/README.md) would add `/passive` · `/active`.
 
 ### Subordinate phrases — *artboard "Subordinate phrases"*
 

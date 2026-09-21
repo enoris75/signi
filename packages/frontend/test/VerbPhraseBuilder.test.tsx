@@ -1,12 +1,20 @@
 import { describe, expect, it, vi } from 'vitest';
 import { fireEvent, screen } from '@testing-library/react';
 import {
-  CAUSE_SENTIMENT_LABELS,
   CAUSE_SENTIMENTS,
   PATH_SPECIFIERS,
+  type CauseSentiment,
   type Concept,
 } from '@signi/shared';
 import type { SatelliteIcon } from '../src/components/PhraseBuilder/Boxes.tsx';
+
+// The stance toolbar names each stance and then the connector it picks, both from the catalog
+// (C13). These are the English fallbacks the component shows while the bundle is in flight.
+const SENTIMENT_LABEL: Record<CauseSentiment, string> = {
+  neutral: 'Neutral — because of',
+  negative: 'Negative — through the fault of',
+  positive: 'Positive — thanks to',
+};
 import type { GroupRect } from '../src/components/PhraseBuilder/graph.ts';
 import type { SlotKey } from '../src/components/PhraseBuilder/interfaces.ts';
 import type { PhraseRenderContext } from '../src/components/PhraseBuilder/phraseRender.tsx';
@@ -407,8 +415,8 @@ describe('VerbPhraseBuilder', () => {
     it('ride the top of the cause’s ring, neutral until a stance is chosen', () => {
       renderVerb({ selection: { cause: noun('DOG') }, groupRects: [CAUSE], controlPos: CONTROL_POS });
 
-      expect(highlighted()).toEqual([CAUSE_SENTIMENT_LABELS.neutral]);
-      expect(pinOf(screen.getByRole('button', { name: CAUSE_SENTIMENT_LABELS.positive }))).toEqual(
+      expect(highlighted()).toEqual([SENTIMENT_LABEL.neutral]);
+      expect(pinOf(screen.getByRole('button', { name: SENTIMENT_LABEL.positive }))).toEqual(
         { x: 464, y: 40 },
       );
     });
@@ -419,9 +427,9 @@ describe('VerbPhraseBuilder', () => {
         groupRects: [CAUSE],
         controlPos: CONTROL_POS,
       });
-      expect(highlighted()).toEqual([CAUSE_SENTIMENT_LABELS.negative]);
+      expect(highlighted()).toEqual([SENTIMENT_LABEL.negative]);
 
-      fireEvent.click(screen.getByRole('button', { name: CAUSE_SENTIMENT_LABELS.positive }));
+      fireEvent.click(screen.getByRole('button', { name: SENTIMENT_LABEL.positive }));
 
       expect(ctx.handleSelectSentiment).toHaveBeenCalledExactlyOnceWith('positive');
     });
@@ -441,7 +449,7 @@ describe('VerbPhraseBuilder', () => {
     it('need both the complement’s word and their seats on its ring', () => {
       const toolbars = () => [
         ...screen.queryAllByRole('button', { name: 'under' }),
-        ...screen.queryAllByRole('button', { name: CAUSE_SENTIMENT_LABELS.neutral }),
+        ...screen.queryAllByRole('button', { name: SENTIMENT_LABEL.neutral }),
       ];
       const { rerender } = renderVerb({ groupRects: [ROUTE, LOCATIVE, CAUSE], controlPos: CONTROL_POS });
       expect(toolbars()).toEqual([]);

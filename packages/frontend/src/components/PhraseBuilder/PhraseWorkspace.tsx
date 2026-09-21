@@ -7,7 +7,7 @@ import FolderOpenOutlinedIcon from "@mui/icons-material/FolderOpenOutlined";
 import { PhraseBuilder } from "./PhraseBuilder.tsx";
 import { PeriodSaveLoad } from "./PeriodSaveLoad.tsx";
 import {
-  COORD_CONJUNCTION_LABEL,
+  COORD_CONJUNCTION_LABEL_KEY,
   PhraseContainer,
   PhraseLink,
   PhraseSelection,
@@ -359,10 +359,9 @@ export function PhraseWorkspace({
             {pick.active && pick.kind === "conditional"
               ? t("pick.condition")
               : pick.active && pick.kind === "coordinative"
-                // The conjunction the pick will join with is a function word the catalog cannot
-                // cite yet (C13), so it trails the sentence in brackets, as the coordination
-                // control's own label already writes it.
-                ? `${t("pick.coordinated")} (${COORD_CONJUNCTION_LABEL[pick.conjunction]})`
+                // The conjunction the pick will join with trails the sentence in brackets, as the
+                // coordination control's own label writes it — the catalog's word now (C13).
+                ? `${t("pick.coordinated")} (${t(COORD_CONJUNCTION_LABEL_KEY[pick.conjunction])})`
                 : pick.active && pick.kind === "instrumental"
                   ? t("pick.instrumental")
                   : t("pick.relativeHead")}

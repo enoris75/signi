@@ -8,6 +8,7 @@ import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
@@ -125,6 +126,7 @@ export function complementsPhrase(
       // and article ("sous l'Europe"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
       const locSpec = pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER);
+      const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
       // `possessive`: a pronominal possessor stands in for the article, which leaves the head's forms
       // bare (see possessedHeadForms), not a zero article to fill.
       const headFor = (nf: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string =>
@@ -146,6 +148,10 @@ export function complementsPhrase(
           prepDet('comme', nf, plural, lead)
         ) :
         type === 'direction' ? (
+          // A direction naming a relation is that relation's goal, which French spells as it spells
+          // the place ("saute dans l'air"). `over` takes its locative reading, "au-dessus de": a
+          // goal above something is where the motion ends, not a crossing.
+          dirSpec ? spatialHead(dirSpec, nf, plural, lead, 'locative') :
           // A continent goal takes bare "en" ("va en Antarctique"), not the default place "à" with
           // the proper noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à".
           nf['isA'] === 'CONTINENT' ? 'en' :

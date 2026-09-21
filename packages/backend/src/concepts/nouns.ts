@@ -152,6 +152,23 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    id: 'AIR',
+    role: 'noun',
+    description: 'the gas that surrounds the earth',
+    emoji: '💨',
+    countable: false,
+    forms: {
+      en: { base: 'air', count: 'singular' },
+      it: { base: 'aria', gender: 'fem', count: 'singular' },
+      fr: { base: 'air', gender: 'masc', count: 'singular' },
+      de: { base: 'Luft', plural: 'Lüfte', gender: 'fem', count: 'singular' },
+      es: { base: 'aire', gender: 'masc', count: 'singular' },
+      ja: { base: '空気', count: 'singular', reading: 'くうき' },
+      pt: { base: 'ar', gender: 'masc', count: 'singular' },
+    },
+  },
+
+  {
     id: 'WATER',
     role: 'noun',
     description: 'the liquid H₂O',

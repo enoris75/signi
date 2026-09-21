@@ -9,6 +9,7 @@ import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
@@ -136,6 +137,7 @@ export function complementsPhrase(
       // causa del perro", "a causa de un perro"); the sentiment swaps the connector — negative "por
       // culpa del perro", positive "gracias al perro".
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
+      const dirSpec = type === 'direction' ? directionSpecifier(c) : undefined;
       const head =
         type === 'locative'  ? spatialHead(pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER), plural, af) :
         type === 'terminus'  ? aDet(af, plural) :
@@ -150,7 +152,12 @@ export function complementsPhrase(
           mannerRelation(af) === 'mode'    ? deDet(af, plural) :
           prepDet('como', af, plural)
         ) :
-        type === 'direction' ? (f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)) :
+        type === 'direction' ? (
+          // A direction naming a relation is that relation's goal, spelled as the place is
+          // ("salta en el aire"); with none it is the plain goal "a", or "hacia" towards a person.
+          dirSpec ? spatialHead(dirSpec, plural, af) :
+          f['animate'] === '1' ? prepDet('hacia', af, plural) : aDet(af, plural)
+        ) :
         type === 'source'    ? `${sourceAdverb}${deDet(af, plural)}` :
         type === 'cause'     ? (
           causeSent === 'positive' ? `${connectorShared ? '' : 'gracias '}${aDet(af, plural)}` :

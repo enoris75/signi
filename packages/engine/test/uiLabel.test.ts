@@ -1,7 +1,7 @@
 import { describe, expect, test } from 'vitest';
-import { DEFINITENESS, type Definiteness } from '@signi/shared';
+import { DEFINITENESS, type Definiteness, type PathSpecifier } from '@signi/shared';
 import type { PronominalPossessor } from '@signi/shared';
-import { determinerAll, possessiveAll, wordAll } from './harness.js';
+import { conjunctionAll, degreeAll, determinerAll, possessiveAll, specifierAll, wordAll } from './harness.js';
 
 // The single-word UI-label path — `translateWord` and `translateDeterminer`, the engine entry
 // points the sentence helpers never exercise. A label is a word standing alone (a menu entry, a
@@ -185,5 +185,124 @@ describe('coreference chip: the possessive the link spells', () => {
     expect(of({}, 'HOUSE')).toMatchObject({ it: 'sua', fr: 'sa', pt: 'sua' });
     // Invariant of the possessed in the languages that do not agree it.
     expect(of({}, 'HOUSE')).toMatchObject({ en: 'his', ja: '彼の' });
+  });
+});
+
+// ── translateConjunction: the word between two clauses ──────────────────────────
+// A conjunction agrees with nothing, so it is the one function word cited on its own. What makes
+// it an engine's business rather than a lexicon's is that the *set* differs: half of these are one
+// word in some languages and two in others, and `then` is not a conjunction anywhere.
+describe('conjunction menu: the word that joins two periods', () => {
+  test('each conjunction in every language', () => {
+    expect(conjunctionAll('and')).toEqual({
+      en: 'and', it: 'e', fr: 'et', de: 'und', es: 'y', ja: 'そして', pt: 'e',
+    });
+    expect(conjunctionAll('but')).toEqual({
+      en: 'but', it: 'ma', fr: 'mais', de: 'aber', es: 'pero', ja: 'しかし', pt: 'mas',
+    });
+    expect(conjunctionAll('that_is')).toMatchObject({
+      en: 'that is', it: 'cioè', fr: "c'est-à-dire", de: 'das heißt', ja: 'つまり',
+    });
+  });
+
+  test('the conclusive is the coordinator, not the adverb — English writes "so"', () => {
+    expect(conjunctionAll('therefore')).toMatchObject({
+      en: 'so', it: 'quindi', fr: 'donc', de: 'also', es: 'por lo tanto', pt: 'portanto',
+    });
+  });
+
+  test('the temporal is an adverb everywhere, so it comes with its coordinator', () => {
+    expect(conjunctionAll('then')).toEqual({
+      en: 'and then', it: 'e poi', fr: 'et puis', de: 'und dann', es: 'y luego', ja: 'それから', pt: 'e depois',
+    });
+  });
+});
+
+// ── translateSpecifier: the adposition a relation is spoken with ────────────────
+// Cited on a *bare* noun, so no article comes along with the preposition it would fuse to. What is
+// left is the relation's own name — except in Japanese, which puts it after the noun and therefore
+// writes it as a dictionary does, with the 〜 standing in for what it attaches to.
+describe('relation toolbars: the adposition each specifier spells', () => {
+  const path = (value: PathSpecifier) => specifierAll({ kind: 'path', value });
+
+  test('a spatial relation, in every language', () => {
+    expect(path('under')).toEqual({
+      en: 'under', it: 'sotto', fr: 'sous', de: 'unter', es: 'debajo de', ja: '〜の下で', pt: 'debaixo de',
+    });
+    expect(path('around')).toMatchObject({
+      en: 'around', it: 'intorno a', fr: 'autour de', de: 'um', es: 'alrededor de', pt: 'ao redor de',
+    });
+    expect(path('in_front_of')).toMatchObject({
+      en: 'in front of', it: 'davanti a', fr: 'devant', de: 'vor', ja: '〜の前で',
+    });
+  });
+
+  test('no article rides along: the noun is cited bare, so nothing fuses', () => {
+    // "in" + the definite article would be "nella"/"im"/"dans le"; a bare noun leaves the
+    // preposition alone, which is what names the relation.
+    expect(path('in')).toMatchObject({ it: 'in', de: 'in', fr: 'dans', es: 'en', pt: 'em' });
+  });
+
+  test('the two relations a clause leaves to the particle are still told apart in Japanese', () => {
+    // Inside a sentence both are bare (家で, 市場を). Named on their own they take the 中 and the
+    // 通る the particle leaves implicit, or the menu would show one word for two relations.
+    expect(path('in').ja).toBe('〜の中で');
+    expect(path('through').ja).toBe('〜を通って');
+  });
+
+  test('a cause connector is a specifier too — the stance picks the word', () => {
+    expect(specifierAll({ kind: 'sentiment', value: 'neutral' })).toEqual({
+      en: 'because of', it: 'a causa di', fr: 'à cause de', de: 'wegen',
+      es: 'a causa de', ja: '〜のために', pt: 'por causa de',
+    });
+    expect(specifierAll({ kind: 'sentiment', value: 'positive' })).toMatchObject({
+      en: 'thanks to', it: 'grazie a', fr: 'grâce à', de: 'dank', ja: '〜のおかげで',
+    });
+    // German blames with a fixed phrase rather than a preposition.
+    expect(specifierAll({ kind: 'sentiment', value: 'negative' })).toMatchObject({
+      en: 'through the fault of', it: 'per colpa di', de: 'durch die Schuld', ja: '〜のせいで',
+    });
+  });
+});
+
+// ── translateDegree: what a degree adds to an adjective ─────────────────────────
+// The one label cited on an adjective rather than on a noun, because whether a degree is a word at
+// all depends on the adjective: English inflects the short ones and German inflects them all.
+describe('degree chip: what each degree adds', () => {
+  test('the periphrastic languages give the word, the synthetic ones the remade adjective', () => {
+    expect(degreeAll('more')).toEqual({
+      en: 'bigger', it: 'più', fr: 'plus', de: 'größer', es: 'más', ja: 'もっと', pt: 'mais',
+    });
+  });
+
+  test('the relative superlative keeps the article that tells it from the comparative', () => {
+    // Without it Romance would say "più" for both degrees; German's own superlative is the
+    // predicative "am …-en", the form that stands without a noun.
+    expect(degreeAll('most')).toEqual({
+      en: 'biggest', it: 'il più', fr: 'le plus', de: 'am größten', es: 'el más', ja: '最も', pt: 'o mais',
+    });
+    expect(degreeAll('least')).toMatchObject({
+      en: 'least', it: 'il meno', fr: 'le moins', de: 'am wenigsten', es: 'el menos', pt: 'o menos',
+    });
+  });
+
+  test('the Japanese lowered degrees are a circumfix, and are cited whole', () => {
+    // Japanese lowers a degree by negating the adjective (それほど大きくない, 最も大きくない), so the
+    // opening adverb alone would name `most` and `least` with one word.
+    expect(degreeAll('less').ja).toBe('それほど〜ない');
+    expect(degreeAll('least').ja).toBe('最も〜ない');
+    expect(degreeAll('most').ja).toBe('最も');
+  });
+
+  test('English switches to the adverb on an adjective it does not inflect', () => {
+    // The whole reason the degree is cited on an adjective rather than looked up.
+    expect(degreeAll('more', 'BEAUTIFUL')).toMatchObject({ en: 'more', de: 'schöner' });
+    expect(degreeAll('most', 'BEAUTIFUL')).toMatchObject({ en: 'most', de: 'am schönsten' });
+  });
+
+  test('the positive degree marks nothing, and says so with the em-dash', () => {
+    expect(degreeAll('positive')).toEqual({
+      en: '—', it: '—', fr: '—', de: '—', es: '—', ja: '—', pt: '—',
+    });
   });
 });

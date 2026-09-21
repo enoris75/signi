@@ -18,8 +18,8 @@ order depend on it.
 | literal | where | value |
 |---|---|---|
 | `Loaded, but ${n} word(s) are no longer in the catalog: ${list}` | [SavedPhrasesToolbar.tsx:84](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L84), [PeriodSaveLoad.tsx:100](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L100) | a count that governs the verb's number, and a word list; also "no longer" |
-| `Delete ${p.name}` (aria-label) | [SavedPhrasesToolbar.tsx:256](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L256), [PeriodSaveLoad.tsx:166](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L166) | user-typed text as the object. [B20](../B-needs-seed/B20-ui-remove-and-delete.md) ships a nameless version |
-| `This phrase was saved by a newer version of Signi (v${doc.version}); please update.` | [parseSavedPhrase.ts:18](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/parseSavedPhrase.ts#L18) | a version number; also passive ([C11](../C-needs-engine/C11-ui-failure-messages-passive.md)) |
+| `Delete ${p.name}` (aria-label) | [SavedPhrasesToolbar.tsx:256](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L256), [PeriodSaveLoad.tsx:166](../../../packages/frontend/src/components/PhraseBuilder/PeriodSaveLoad.tsx#L166) | user-typed text as the object. [B20](../done/B20-ui-remove-and-delete.md) ships a nameless version |
+| `This phrase was saved by a newer version of Signi (v${doc.version}); please update.` | [parseSavedPhrase.ts:18](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/parseSavedPhrase.ts#L18) | a version number; also passive ([C11](../done/C11-ui-failure-messages-passive.md)) |
 
 ## To unblock (pick one)
 
@@ -60,7 +60,7 @@ load uses `toast.periodAdded` for the first half. The toast stays an error.
 Changes against the plan:
 - **Option 1 was not built.** None of the three strings still needed it (see the last two bullets), so
   parameterized entries and on-request rendering do not exist. The A15 families stay as they are.
-  [C16](../C-needs-engine/C16-ui-possessive-pronoun-chip.md) is the task still waiting on on-request
+  [C16](../done/C16-ui-possessive-pronoun-chip.md) is the task still waiting on on-request
   rendering.
 - **"Missing words", not "words missing from the catalog".** CATALOG was not seeded. An adjective cannot
   take a complement, and a clause-level `source` complement renders "away from" in the Romance languages

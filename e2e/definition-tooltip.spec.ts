@@ -1225,4 +1225,44 @@ test.describe('word definition tooltip', () => {
     await person('SECOND_PERSON').hover();
     await expect(page.locator(tooltip)).toHaveText('die zweite Person');
   });
+
+  test('a purpose clause carries the whole differentia (localization C19: SAVE)', async ({
+    app,
+    page,
+  }) => {
+    // SAVE is not distinguished by what it writes but by what the writing is *for*, so its gloss
+    // hangs a clause of purpose off the citation. Each language connects one its own way, which is
+    // the point of composing it: English the bare infinitive, German the extraposed "um … zu".
+    await app.setSubject('CAT');
+    await app.verbInput.fill('save');
+    const saveEn = page.locator('[data-testid="typeahead-option"][data-concept="SAVE"]');
+    await expect(saveEn).toBeVisible();
+    await saveEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to write content to load it');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('save');
+    const saveDe = page.locator('[data-testid="typeahead-option"][data-concept="SAVE"]');
+    await expect(saveDe).toBeVisible();
+    await saveDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('Inhalt schreiben, um es zu laden');
+  });
+
+  test('a comitative carries it for ADD (localization C19)', async ({ app, page }) => {
+    // "with other objects" is the companion, not the means — the comitative complement C12 built.
+    // French takes the partitive after the preposition, which a bare plural would have lost.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('add');
+    const addEn = page.locator('[data-testid="typeahead-option"][data-concept="ADD"]');
+    await expect(addEn).toBeVisible();
+    await addEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to cause an object to be with other objects');
+
+    await app.setUiLanguage('fr');
+    await app.verbInput.fill('add');
+    const addFr = page.locator('[data-testid="typeahead-option"][data-concept="ADD"]');
+    await expect(addFr).toBeVisible();
+    await addFr.hover();
+    await expect(page.locator(tooltip)).toHaveText("induire un objet à être avec d'autres objets");
+  });
 });

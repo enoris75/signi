@@ -239,7 +239,9 @@ describe('causative / inchoative: CHANGE and CHANGE_ONESELF', () => {
   });
 });
 
-// The glosses the genus supports (C17's "Once unblocked" table). JUMP, COLLAPSE and COME wait (C18).
+// The glosses the genus supports (C17's "Once unblocked" table), and JUMP, which C18 unblocked by
+// giving the `direction` complement a relation of its own. COLLAPSE still wants two adverbs on one
+// verb and COME a composable deixis, so both stay on the English literal (C18).
 describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
   test('RUN → to move fast', () => {
     expect(definitionAll('RUN')).toEqual({
@@ -262,6 +264,20 @@ describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
       es: 'moverse de un lugar a otro lugar.',
       ja: '場所から別の場所へ移動する。',
       pt: 'mover-se de um lugar a outro lugar.',
+    });
+  });
+
+  // The differentia is where the motion ends up, not what it heads towards: a `direction` naming
+  // the containment relation, which is "into" in English and the accusative in German (C18).
+  test('JUMP → to move into the air', () => {
+    expect(definitionAll('JUMP')).toEqual({
+      en: 'to move into the air.',
+      it: "muoversi nell'aria.",
+      fr: "se déplacer dans l'air.",
+      de: 'sich in die Luft bewegen.', // die, not der: the accusative of motion into
+      es: 'moverse en el aire.',
+      ja: '空気の中へ移動する。',
+      pt: 'mover-se no ar.',
     });
   });
 });

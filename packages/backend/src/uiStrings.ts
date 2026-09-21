@@ -1,6 +1,14 @@
-import { translate, translateWord, translateDeterminer, translatePossessive } from '@signi/engine';
+import {
+  translate,
+  translateConjunction,
+  translateDegree,
+  translateDeterminer,
+  translatePossessive,
+  translateSpecifier,
+  translateWord,
+} from '@signi/engine';
 import { UI_STRINGS, LANGUAGES } from '@signi/shared';
-import type { LanguageCode, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
+import type { LanguageCode, Translation, UiStringDef, UiStringFormat, UiStringKey, UiStrings } from '@signi/shared';
 import { lookupLexicalEntry } from './lexicon.js';
 
 const LANGUAGE_CODES = Object.keys(LANGUAGES) as LanguageCode[];
@@ -12,6 +20,26 @@ function applyFormat(text: string, format?: UiStringFormat): string {
   // The first letter, past any mark that opens the string: Spanish opens a question on "¿".
   if (format?.capitalize) out = out.replace(/^(\P{L}*)(\p{L})/u, (_, lead: string, first: string) => lead + first.toUpperCase());
   return out;
+}
+
+/**
+ * The engine call one catalog entry is rendered by — one per entry kind. Each of them words the
+ * same thing a different way: a `plan` is a period the engines render, and the other six are
+ * function words or lone lexemes no period can hold, each cited the way its language needs (on a
+ * noun, on an adjective, or on nothing at all).
+ *
+ * A function rather than a chain of ternaries inside the loop: narrowing a `const` starts from
+ * whatever its initializer happens to be, and the catalog's literal types would collapse the union
+ * before the later kinds were reached. A parameter narrows from its declared type.
+ */
+function renderEntry(def: UiStringDef): Translation[] {
+  if (def.determiner !== undefined) return translateDeterminer(def.determiner, lookupLexicalEntry, def.agreesWith);
+  if (def.possessive !== undefined) return translatePossessive(def.possessive, lookupLexicalEntry, def.agreesWith);
+  if (def.conjunction !== undefined) return translateConjunction(def.conjunction);
+  if (def.specifier !== undefined) return translateSpecifier(def.specifier, lookupLexicalEntry, def.agreesWith);
+  if (def.degree !== undefined) return translateDegree(def.degree, lookupLexicalEntry, def.agreesWith);
+  if (def.word !== undefined) return translateWord(def.word, lookupLexicalEntry, def.agreesWith);
+  return translate(def.plan, lookupLexicalEntry);
 }
 
 /**
@@ -29,14 +57,7 @@ export function buildUiStrings(): UiStrings {
     const def: UiStringDef = UI_STRINGS[key];
     const byLanguage = {} as Record<LanguageCode, string>;
 
-    const rendered =
-      def.determiner !== undefined
-        ? translateDeterminer(def.determiner, lookupLexicalEntry, def.agreesWith)
-        : def.possessive !== undefined
-          ? translatePossessive(def.possessive, lookupLexicalEntry, def.agreesWith)
-          : def.word !== undefined
-            ? translateWord(def.word, lookupLexicalEntry, def.agreesWith)
-            : translate(def.plan, lookupLexicalEntry);
+    const rendered = renderEntry(def);
 
     for (const t of rendered) {
       if (t.text) byLanguage[t.language] = applyFormat(t.text, def.format);

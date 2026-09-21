@@ -31,6 +31,55 @@ describe('direction', () => {
   });
 });
 
+// A direction that names a spatial relation: where the motion ends up with respect to its
+// landmark, not merely what it is headed towards (C18). It is what "into" needs, and what JUMP's
+// gloss is built on — without it the direction could only say "to the air".
+describe('direction: a relation, not just a goal', () => {
+  const goInto = (goal: NounElement, value: 'in' | 'behind' | 'under') =>
+    sayAll(clause(np('CAT'), 'GO', {
+      complements: { direction: { phrase: goal, specifiers: [{ kind: 'path', value }] } },
+    }));
+
+  test('containment is the one relation whose goal form is a different word in English', () => {
+    expect(goInto(np('HOUSE'), 'in')).toEqual({
+      en: 'the cat goes into the house.', // "into", not the locative "in"
+      it: 'il gatto va nella casa.',
+      fr: 'le chat va dans la maison.',
+      de: 'der Kater geht ins Haus.', // in + das, the ACCUSATIVE of motion into
+      es: 'el gato va en la casa.',
+      ja: '猫は家の中へ行きます。', // の中, which a place (家に) leaves out
+      pt: 'o gato vai na casa.',
+    });
+  });
+
+  test('German marks it on the case, so the goal and the place differ only there', () => {
+    // "ins Haus" goes in; "im Haus" happens inside. Both are "in" + the same noun.
+    expect(goInto(np('HOUSE'), 'in').de).toBe('der Kater geht ins Haus.');
+    expect(say(clause(np('CAT'), 'GO', {
+      complements: { locative: { phrase: np('HOUSE') } },
+    }), 'de')).toBe('der Kater geht im Haus.');
+  });
+
+  test('the other relations take the goal reading of the word they already have', () => {
+    expect(goInto(np('HOUSE'), 'behind')).toMatchObject({
+      en: 'the cat goes behind the house.',
+      it: 'il gatto va dietro la casa.',
+      de: 'der Kater geht hinter das Haus.', // accusative again: motion to behind it
+      ja: '猫は家の後ろへ行きます。',
+    });
+  });
+
+  test('a direction naming none is still the plain goal, unchanged', () => {
+    // The point of having no default: "no relation" means something here (see PathSpecifier).
+    expect(goTo(np('HOUSE'))).toMatchObject({
+      en: 'the cat goes to the house.',
+      it: 'il gatto va alla casa.',
+      de: 'der Kater geht zum Haus.',
+      ja: '猫は家へ行きます。',
+    });
+  });
+});
+
 // A plural goal. What is worth holding here is that the two choices are INDEPENDENT: animacy
 // picks the preposition, number picks the article, and each language then fuses the two.
 describe('direction: a plural goal', () => {

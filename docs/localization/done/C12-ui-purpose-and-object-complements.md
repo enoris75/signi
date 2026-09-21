@@ -12,7 +12,7 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 3. **Comitative "with":** "coordinate **with** …". `instrumental` is the means, not a companion.
 4. **Genitive relative and passive inside a relative:** "a period … **whose** noun is what the
    action **is done with**". `RelativeClause.headRole` has no possessor gap (and see
-   [C11](../C-needs-engine/C11-ui-failure-messages-passive.md) for the passive).
+   [C11](../done/C11-ui-failure-messages-passive.md) for the passive).
 
 ## Strings
 
@@ -20,7 +20,7 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 |---|---|---|
 | … — click to change (tail of the chip tooltips) | [phraseRender.tsx:179](../../../packages/frontend/src/components/PhraseBuilder/phraseRender.tsx#L179), 317, 331, 355 | 1 |
 | Linked — click to remove | [buildSatelliteIcons.ts:53](../../../packages/frontend/src/components/PhraseBuilder/satellites/functions/buildSatelliteIcons.ts#L53), 77 | 1 (+ LINKED, REMOVE) |
-| points to ${noun} (“${pronoun}”) — click to remove (a pointed-to owner's possessor control) | [decoratePerimeterControls.ts:58](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L58) | 1 (+ POINT, REMOVE); `noun` is the antecedent concept's English `label` ([C14](C14-ui-runtime-values.md)), and the pronoun is [C16](../C-needs-engine/C16-ui-possessive-pronoun-chip.md) |
+| points to ${noun} (“${pronoun}”) — click to remove (a pointed-to owner's possessor control) | [decoratePerimeterControls.ts:58](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L58) | 1 (+ POINT, REMOVE); `noun` is the antecedent concept's English `label` ([C14](C14-ui-runtime-values.md)), and the pronoun is [C16](../done/C16-ui-possessive-pronoun-chip.md) |
 | points to a noun — click to remove (the same control, its antecedent no longer resolving) | [decoratePerimeterControls.ts:59](../../../packages/frontend/src/components/PhraseBuilder/functions/decoratePerimeterControls.ts#L59) | 1 (+ POINT, REMOVE) |
 | Drag to resize | [Resizer.tsx:41](../../../packages/frontend/src/components/PhraseBuilder/Resizer.tsx#L41) | 1 (+ DRAG, RESIZE) |
 | Click a slot to filter. | [PhraseSidebar.tsx:198](../../../packages/frontend/src/components/PhraseBuilder/PhraseSidebar.tsx#L198) | 1 (+ FILTER) |
@@ -32,7 +32,7 @@ entry, driven by the [`/localize`](../../../.claude/skills/localize/SKILL.md) sk
 | Remove the IF / coordination link to make this an infinitive phrase | [MoodToggle.tsx:22](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/MoodToggle.tsx#L22) | 1 + 2 |
 | Use this period as the IF condition | [ConditionalButton.tsx:10](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ConditionalButton.tsx#L10) | 2 |
 | Use this period as the coordinated clause | [CoordinationButton.tsx:32](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/CoordinationButton.tsx#L32) | 2 |
-| Click the period to coordinate with “${conj}” — in another phrase container. | [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337) | 1 + 3; the conjunction word is [C13](../C-needs-engine/C13-ui-grammatical-function-words.md) |
+| Click the period to coordinate with “${conj}” — in another phrase container. | [PhraseWorkspace.tsx:337](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L337) | 1 + 3; the conjunction word is [C13](../done/C13-ui-grammatical-function-words.md) |
 | Click the period holding the instrumental — a period with no verb, whose noun is what the action is done with. | [PhraseWorkspace.tsx:339](../../../packages/frontend/src/components/PhraseBuilder/PhraseWorkspace.tsx#L339) | 4 |
 
 ## Escape hatches (authorable as B tasks, not faithful rewrites)
@@ -195,11 +195,11 @@ the bare *glisser* rather than *faire glisser*, which a lexeme cannot conjugate.
 - **The coordination banner was reshaped, not translated.** It now reads as the conditional banner
   beside it does — the period to click, the container to find it in — with the purpose clause and
   its comitative saying what the click is for. The conjunction still trails in brackets: it is a
-  function word the catalog cannot cite ([C13](../C-needs-engine/C13-ui-grammatical-function-words.md)).
+  function word the catalog cannot cite ([C13](../done/C13-ui-grammatical-function-words.md)).
 - **The instrumental banner no longer needs the passive.** "whose noun is what the action is done
   with" was a genitive relative *and* an agentless passive; naming the complement the noun fills
   ("whose noun is the instrumental") says it in the active, so that string leaves
-  [C11](../C-needs-engine/C11-ui-failure-messages-passive.md)'s orbit entirely. "A period with no
+  [C11](../done/C11-ui-failure-messages-passive.md)'s orbit entirely. "A period with no
   verb" went too: a noun phrase carries no complement, one relative clause per phrase is all the
   model has, and a period whose noun is the instrumental is verbless by construction.
 - **The mood toggles' locked tooltip names the two relations, not "the link".** LINK is not seeded,

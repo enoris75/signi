@@ -315,7 +315,7 @@ export default function App() {
           <Box data-kb-region="translations" sx={{ mb: 3 }}>
             {isError && (
               <Alert severity="error" sx={{ mb: 2 }}>
-                Could not reach the translation server.
+                {t("failure.phraseNotTranslated")} {t("status.isServerActive")}
               </Alert>
             )}
             <TranslationPanel sentences={results} preview={previewingTranslations} />

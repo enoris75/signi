@@ -71,7 +71,7 @@ Changes against the plan:
   say `action.deleteSavedPhrase` / `action.deleteSavedPeriod`. `aria-describedby` points at the row's
   name, whose id is a `useId()` prefix plus the saved item's id.
 - The confirmations ("Remove this main clause and everything in it?") stay English. They are questions:
-  [C10](../C-needs-engine/C10-ui-questions.md).
+  [C10](../done/C10-ui-questions.md).
 - "Remove this possessor" ([B21](B21-ui-clause-and-coordination-vocabulary.md)) needs
   nothing more now: REMOVE and POSSESSOR are both seeded.
 - Probing MOVE for B14 alongside this task turned up

@@ -17,9 +17,9 @@ test('point to a noun as the owner', async ({ app, page }) => {
   await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
   await page.getByTestId('box-subject').first().click();
 
-  // The empty ring is gone; a dashed line to the boy carries the pronoun.
+  // The empty ring is gone; a dashed line to the boy carries the phrase the link will say.
   await expect(page.getByTestId('box-subject')).toHaveCount(1);
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('his');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('his dog');
   // The reference now renders as a possessive pronoun agreeing with BOY (3rd-sing masc → "his").
   expect(await app.sentence('en')).toBe('the boy sees his dog.');
   expect(await app.sentence('it')).toBe('il ragazzo vede il suo cane.');
@@ -27,25 +27,40 @@ test('point to a noun as the owner', async ({ app, page }) => {
   expect(await app.sentence('es')).toBe('el niño ve su perro.');
 });
 
-// The chip names the possessive the link spells, so it is a UI string like any other: the engine
-// renders it in the interface language rather than English. It is cited on the grammar noun (it
-// "nome", masculine), so it reads "suo" even where the phrase itself says "la sua ..." — the chip
-// names the possessive, it does not preview the phrase.
-test('the pronoun chip follows the interface language', async ({ app, page }) => {
+// The chip shows the **possessed noun phrase** the link will render, in the interface language
+// (C16). The bare possessive could not be shown correctly: English, German and Japanese spell it
+// from the antecedent alone, but the Romance languages also agree it with the noun possessed — "il
+// **suo** cane" against "la **sua** casa" — and which gender that noun has is a per-language fact
+// about a word the user picks at run time, so no catalog entry rendered once at boot can hold it.
+// Rendering the phrase lets the engine do the agreement, and says more than the pronoun did.
+test('the chip shows the whole phrase, in the interface language', async ({ app, page }) => {
   await app.buildClause('BOY', 'SEE');
   await app.setDirectObject('DOG');
   await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
   await page.getByTestId('box-subject').first().click();
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('his');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('his dog');
 
   await app.setUiLanguage('it');
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('suo');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('il suo cane');
 
   await app.setUiLanguage('de');
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('sein');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('sein Hund');
 
   await app.setUiLanguage('ja');
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('彼の');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('彼の犬');
+});
+
+// The agreement the phrase is there for: a feminine possessed noun takes "la sua", where the boy
+// who owns it is masculine. The old chip, cited on the grammar noun NOUN, said "suo" for both.
+test('the Romance possessive agrees with what is possessed, not with who possesses it', async ({ app, page }) => {
+  await app.buildClause('BOY', 'SEE');
+  await app.setDirectObject('HOUSE');
+  await page.getByTestId('possessor-ctl-directObject').getByRole('button').click();
+  await page.getByTestId('box-subject').first().click();
+  await expect.poll(() => app.sentence('it')).toBe('il ragazzo vede la sua casa.');
+
+  await app.setUiLanguage('it');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('la sua casa');
 });
 
 // The reference is a `NounAddress` stored in the selection, so it must survive the trip through
@@ -75,7 +90,7 @@ test('a pronominal possessor survives a save/load round trip', async ({ app, pag
   // The possessive pronoun re-resolves from the reloaded reference, and its line is drawn again.
   await expect.poll(() => app.sentence('en')).toBe('the boy sees his dog.');
   expect(await app.sentence('it')).toBe('il ragazzo vede il suo cane.');
-  await expect(page.getByTestId('pronoun-chip')).toHaveText('his');
+  await expect(page.getByTestId('pronoun-chip')).toHaveText('his dog');
 });
 
 // Naming the owner instead: its word goes in the empty ring, on the same canvas as the noun it owns.

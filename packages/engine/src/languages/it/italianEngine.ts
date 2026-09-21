@@ -1,9 +1,12 @@
+import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveIt } from '../../possessive.js';
-import { COORD_WORDS } from './it.consts.js';
+import { COORD_WORDS, IT_DEGREE } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { artFor } from './artFor.js';
+import { prepDet } from './prepDet.js';
 import { renderClause } from './renderClause.js';
+import { spatialHead } from './spatialHead.js';
 
 export const italianEngine: LanguageEngine = {
   language: 'it',
@@ -38,5 +41,31 @@ export const italianEngine: LanguageEngine = {
       gender: (f['gender'] ?? 'masc') as 'masc' | 'fem',
       number: (f['number'] ?? f['count']) === 'plural' ? 'plural' : 'singular',
     });
+  },
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  // The adposition alone. Italian fuses its prepositions with the *definite* article ("nella
+  // casa"), so the noun is cited bare and `prepDet` leaves the plain preposition — which is the
+  // relation's own name ("in", "sotto", "intorno a", "a causa di").
+  renderSpecifier(noun: ConceptForms, specifier: Specifier): string {
+    const f = noun.forms;
+    const word = f['base'] ?? '';
+    if (specifier.kind === 'sentiment') {
+      return specifier.value === 'positive' ? `grazie ${prepDet('a', f, false, word)}`
+        : specifier.value === 'negative' ? `per colpa ${prepDet('di', f, false, word)}`
+        : `a causa ${prepDet('di', f, false, word)}`;
+    }
+    return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, word) : '';
+  },
+  // Italian compares periphrastically throughout, so the degree is a word of its own and the cited
+  // adjective goes unread ("più", "il più", "meno", "altrettanto").
+  renderDegree(_adjective: ConceptForms, degree: Degree): string {
+    // The relative superlative is the comparative under the definite article — the article
+    // belongs to the noun phrase, not to the degree, so a label that showed the adverb alone
+    // would say "più" for both degrees. Cited masculine singular, the
+    // gender a citation form is given in (as `renderPossessive` defaults).
+    const word = IT_DEGREE[degree];
+    return word && (degree === 'most' || degree === 'least') ? `il ${word}` : word;
   },
 };

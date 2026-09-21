@@ -113,15 +113,6 @@ export type Degree = 'positive' | 'more' | 'most' | 'less' | 'least' | 'equally'
 
 export const DEGREES: Degree[] = ['positive', 'more', 'most', 'less', 'least', 'equally'];
 
-export const DEGREE_LABELS: Record<Degree, string> = {
-  positive: '—',
-  more: 'More',
-  most: 'Most',
-  less: 'Less',
-  least: 'Least',
-  equally: 'Equally',
-};
-
 /**
  * Verb tense the phrase is rendered in. Only the simple tenses today; the
  * imperfect/continuous aspect is reserved for a later split of `past`.
@@ -280,6 +271,22 @@ export const DETERMINER_COMPLEMENT_TYPES: ComplementType[] = ['predicative', 'ob
  *
  * `in` and `through` are both members, so either complement can name either relation explicitly;
  * only the fallback differs (see DEFAULT_ROUTE_SPECIFIER / DEFAULT_LOCATIVE_SPECIFIER).
+ *
+ * The `direction` complement takes one too, and is the third member of the family — but it has
+ * **no default**, because having no relation is a meaning of its own there. A bare direction is the
+ * plain goal, the thing moved *towards* ("goes to the house" / *alla casa* / *zum Haus* / 家へ); a
+ * direction carrying a relation says where the motion ends up with respect to its landmark
+ * ("jumps **into** the air", "moves **behind** the house").
+ *
+ * `in` is what makes that worth having: it is the one relation English spells with a different word
+ * in the goal reading — *into*, not *in* — and Japanese with a relational noun a static place
+ * leaves out (空気**の中**へ, where being there is simply 空気**に**). Elsewhere the goal and the place
+ * share an adposition, and only German's case tells them apart: the accusative of motion-into ("in
+ * **die** Luft") against the dative of being there ("in **der** Luft").
+ *
+ * Plan-only for now: the canvas draws its specifier toolbar on the route and locative rings, and
+ * the direction ring has none — the same way `objectPredicative` and `comitative` render from a
+ * plan without a box of their own.
  */
 export type PathSpecifier = 'in' | 'through' | 'under' | 'over' | 'around' | 'behind' | 'in_front_of';
 
@@ -288,16 +295,6 @@ export const PATH_SPECIFIERS: PathSpecifier[] = ['in', 'through', 'under', 'over
 /** The relation each specifier-bearing complement falls back on when none is chosen. */
 export const DEFAULT_ROUTE_SPECIFIER: PathSpecifier = 'through';
 export const DEFAULT_LOCATIVE_SPECIFIER: PathSpecifier = 'in';
-
-export const PATH_SPECIFIER_LABELS: Record<PathSpecifier, string> = {
-  in: 'in',
-  through: 'through',
-  under: 'under',
-  over: 'over',
-  around: 'around',
-  behind: 'behind',
-  in_front_of: 'in front of',
-};
 
 /**
  * The affective stance a `cause` adjunct takes toward its reason — the difference
@@ -311,12 +308,6 @@ export const PATH_SPECIFIER_LABELS: Record<PathSpecifier, string> = {
 export type CauseSentiment = 'neutral' | 'negative' | 'positive';
 
 export const CAUSE_SENTIMENTS: CauseSentiment[] = ['neutral', 'negative', 'positive'];
-
-export const CAUSE_SENTIMENT_LABELS: Record<CauseSentiment, string> = {
-  neutral: 'Neutral — because of',
-  negative: 'Negative — fault of',
-  positive: 'Positive — thanks to',
-};
 
 /**
  * The relation a `manner` adverbial (complemento di modo) draws between the act and its noun.

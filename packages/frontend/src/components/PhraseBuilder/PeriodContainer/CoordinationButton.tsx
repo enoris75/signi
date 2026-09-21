@@ -1,7 +1,7 @@
 import { useState } from "react";
 import CallMergeIcon from "@mui/icons-material/CallMerge";
 import { useUiString } from "../../../i18n/useUiString.ts";
-import { COORD_CONJUNCTION_LABEL } from "../interfaces.ts";
+import { COORD_CONJUNCTION_LABEL_KEY } from "../interfaces.ts";
 import { ConjunctionMenu } from "./ConjunctionMenu.tsx";
 import { BorderControlButton } from "./ControlButton.tsx";
 import { relationButtonState } from "./functions/relationButtonState.ts";
@@ -25,10 +25,11 @@ export function CoordinationButton({ control }: CoordinationButtonProps) {
     canStart: control.canStart,
   });
   const conjunction = control.conjunction
-    ? COORD_CONJUNCTION_LABEL[control.conjunction]
+    ? t(COORD_CONJUNCTION_LABEL_KEY[control.conjunction])
     : "";
   // Picking this period "as" the coordinated clause is the essive object complement (C12); the
-  // conjunction in brackets is still a function word the catalog has no entry for (C13).
+  // conjunction in brackets is the catalog's word for it too (C13), so the whole tooltip is
+  // localized — "Rimuovi la coordinazione (Ma)", "Koordination entfernen (Aber)".
   const title =
     face === "droppable"
       ? t("action.useAsCoordinated")

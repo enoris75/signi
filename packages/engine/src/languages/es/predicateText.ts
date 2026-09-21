@@ -10,6 +10,7 @@ import { isPronounElement } from '../../functions/isPronounElement.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { objectPreposition } from '../../functions/objectPreposition.js';
 import { objectPronounForm } from '../../functions/objectPronounForm.js';
+import { passiveParticiple } from '../../functions/passiveParticiple.js';
 import { imperativeForm, moodForm, moodPN, statePastForm } from '../../mood.js';
 import { ESTAR_COPULA } from './es.consts.js';
 import { agentPhrase } from './agentPhrase.js';
@@ -97,8 +98,8 @@ export function predicateText(
   const passive = verbPhrase.voice === 'passive' && !!verbPhrase.passiveAux;
   const copulaVerb = passive ? verbPhrase.passiveAux!
     : verb.conceptId === 'BE' && (locativeAlone || transientPredicative) ? ESTAR_COPULA : verb;
-  const passiveParticiple = passive
-    ? agreeAdj(verb.forms['participle'] ?? verb.forms['base'] ?? '', subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
+  const passiveParticipleText = passive
+    ? agreeAdj(passiveParticiple(verb), subjectForms['gender'] ?? 'masc', isPlural(subjectForms))
     : '';
   // A modal chain makes the outermost modal the finite verb ("quiero poder ir"); "no" is
   // prepended below and lands in front of it, exactly as for a plain verb.
@@ -149,7 +150,7 @@ export function predicateText(
   // The participio closes the verb group, behind whatever auxiliaries the tense/aspect/modals built.
   const grouped = [splitFrequency
     ? [conjugated.split(' ')[0], modifierText, ...conjugated.split(' ').slice(1)].join(' ')
-    : conjugated, passiveParticiple].filter(Boolean).join(' ');
+    : conjugated, passiveParticipleText].filter(Boolean).join(' ');
   // A "ninguno" (no) direct object is post-verbal, so it triggers negative concord —
   // "no veo ningún niño" — whereas a pre-verbal "ningún" subject does not.
   // Any "ningún" conjunct triggers the concord — "no veo ningún niño ni ninguna niña".
@@ -226,7 +227,7 @@ export function predicateText(
   // consumir"); an object pronoun attaches after it ("consumirlo", "no consumirlo").
   if (mood === 'infinitive') {
     // A passive citation is the infinitive of "ser" plus the participio ("ser comida").
-    const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticiple].filter(Boolean).join(' ');
+    const inf = [copulaVerb.forms['base'] ?? conjugated, passiveParticipleText].filter(Boolean).join(' ');
     const infNeg = verbNegative === true || objectIsNegative || modifierIsNegative;
     const infVerb = `${infNeg ? 'no ' : ''}${esEnclitic(inf, objectClitic)}`;
     return [infVerb, modifierText, directObjectText, complementsText]

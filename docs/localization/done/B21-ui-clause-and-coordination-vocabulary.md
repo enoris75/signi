@@ -34,7 +34,7 @@ no new word and can go ahead of the rest.
 | Main clause (badge) | [periodAppearance.ts:88](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L88) | `clause.main` | `CLAUSE bare, adjectives [MAIN]`, `NAME_FORMAT` |
 | If clause (badge) | [periodAppearance.ts:89](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L89) | `clause.conditional` | `CLAUSE bare, adjectives [CONDITIONAL]` |
 | First clause (badge) | [periodAppearance.ts:90](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L90) | `clause.first` | `CLAUSE bare, adjectives [FIRST]` (FIRST is seeded) |
-| `${conjunction} clause` (badge) | [periodAppearance.ts:95](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L95) | `clause.coordinated` | `CLAUSE bare, adjectives [COORDINATED]`; the conjunction word itself is [C13](../C-needs-engine/C13-ui-grammatical-function-words.md) |
+| `${conjunction} clause` (badge) | [periodAppearance.ts:95](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/functions/periodAppearance.ts#L95) | `clause.coordinated` | `CLAUSE bare, adjectives [COORDINATED]`; the conjunction word itself is [C13](../done/C13-ui-grammatical-function-words.md) |
 | This period is an IF clause | [ConditionalButton.tsx:12](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ConditionalButton.tsx#L12) | `period.isConditional` | `subject: PERIOD_SENTENCE this`, `verb: BE`, `predicative: CLAUSE indefinite [CONDITIONAL]` |
 | `This period is a coordinated clause (${conjunction})` | [CoordinationButton.tsx:36](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/CoordinationButton.tsx#L36) | `period.isCoordinated` | same shape with `[COORDINATED]`; the parenthetical is C13 |
 | Add an IF condition (this becomes the main clause) | [ConditionalButton.tsx:13](../../../packages/frontend/src/components/PhraseBuilder/PeriodContainer/ConditionalButton.tsx#L13) | `action.addCondition` + `period.becomesMain` | two entries joined at the call site: `commandOf('ADD')` + `CONDITION indefinite`; `PERIOD_SENTENCE this` + `BECOME` + `predicative: CLAUSE definite [MAIN]`. They can't be one coordinated plan: the second clause would inherit the imperative mood |
@@ -126,7 +126,7 @@ Changes against the plan:
   [C12](C12-ui-purpose-and-object-complements.md)'s.
 - **The coordinated clause's badge** reads `clause.coordinated` plus the English conjunction in brackets,
   "Coordinated clause (But)", like the control's tooltip. It read "But clause". The conjunction is
-  [C13](../C-needs-engine/C13-ui-grammatical-function-words.md).
+  [C13](../done/C13-ui-grammatical-function-words.md).
 - **The conditional control's start face** joins its two entries in brackets: "Add a condition (this period
   becomes the main clause)". `period.becomesMain` is left lower-case for that (it strips only the period).
 - **The pick hints keep their full stop** ("。" in Japanese): `format` capitalizes only. The coordination and

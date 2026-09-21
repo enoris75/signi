@@ -1,4 +1,4 @@
-import type { Aspect, ComplementType, CoordConjunction, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
+import type { Aspect, ComplementType, CoordConjunction, Degree, ImperativeRegister, InfinitiveControl, LanguageCode, ModifierRelation, PronominalPossessor, RubySegment, Specifier, Tense, Voice } from '@signi/shared';
 
 export type { RubySegment, PronominalPossessor };
 
@@ -304,6 +304,36 @@ export interface LanguageEngine {
    * Optional; the translator falls back to nothing where a language spells no possessive.
    */
   renderPossessive?(noun: ConceptForms, possessor: PronominalPossessor): string;
+  /**
+   * The coordinating conjunction alone, for the menu that picks one — the word this language
+   * writes between two clauses ("but" / "ma" / "mais" / "aber" / しかし). Unlike a determiner it
+   * agrees with nothing, but it is still a word no lexicon holds: each engine spells its own set
+   * (see `translateConjunction`), and `then` is an adverb rather than a conjunction in most of
+   * them, which is why it comes back as two words ("e poi", "und dann").
+   */
+  renderConjunction?(conjunction: CoordConjunction): string;
+  /**
+   * The adposition a complement specifier spells, cited on a noun — the spatial relation of a
+   * route or a locative ("under" / "sotto" / "unter" / 〜の下に), or the connector a cause takes for
+   * its sentiment ("because of" / "a causa di" / "wegen"). Like a determiner it has no citation
+   * form of its own: the Romance prepositions fuse with the article and Japanese wraps its noun in
+   * a circumposition, so the caller supplies a **bare** noun to cite it on (see
+   * `translateSpecifier`) and this returns the adposition that noun would take, without an
+   * article. A language that writes the relation *after* its noun says so, in the way its
+   * dictionaries do (〜の下に).
+   *
+   * Optional; a language implementing none renders nothing and the caller shows an em-dash.
+   */
+  renderSpecifier?(noun: ConceptForms, specifier: Specifier): string;
+  /**
+   * What a comparative degree adds to an adjective, cited on one — the degree word where the
+   * language has one ("more" / "più" / "plus" / もっと) and the marked form of the adjective itself
+   * where the language inflects instead (en "bigger", de "größer" / "am größten"). English does
+   * both, on different adjectives, which is exactly why this is cited rather than looked up.
+   * `positive` marks nothing at all and returns '' — the em-dash the caller shows for it is the
+   * same "no word goes here" the bare determiner means.
+   */
+  renderDegree?(adjective: ConceptForms, degree: Degree): string;
   /**
    * Optional ruby (furigana) rendering: the same surface as `render`, split into
    * segments carrying kana readings. Implemented only by languages with furigana (ja).

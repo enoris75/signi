@@ -4,6 +4,7 @@ import { causeSentiment } from '../../../functions/causeSentiment.js';
 import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNoun.js';
 import { locativeIdiom } from '../../../functions/locativeIdiom.js';
 import { objectPredication } from '../../../functions/objectPredication.js';
+import { directionSpecifier } from '../../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
@@ -95,7 +96,13 @@ export function complementsPhrase(
         // Cause: "wegen" governs the genitive formally, but the dative ("wegen dem Hund") is
         // standard in speech and reuses the dative determiners; positive credits with "dank". The
         // negative sentiment and a pronoun never reach here — they took `causePhrase` above.
-        if (type === 'direction') head = prepDet('zu', f, 'dat', plural);
+        // A direction naming a relation is motion into it, which German marks with the accusative
+        // ("in die Luft"); a bare direction is the plain goal "zu" + dative ("zum Haus").
+        if (type === 'direction') {
+          const goal = directionSpecifier(c);
+          if (goal) { _case = spatialCase(goal, 'direction'); head = spatialHead(goal, f, plural, 'direction'); }
+          else head = prepDet('zu', f, 'dat', plural);
+        }
         // Instrumental: "mit" + dative ("mit dem Messer"). The mit+dem → "beim"-style fusion
         // doesn't exist for "mit", so prepDet leaves it uncontracted. The comitative companion
         // takes the same "mit": German does not separate the two either.

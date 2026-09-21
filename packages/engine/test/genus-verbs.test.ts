@@ -1988,3 +1988,55 @@ describe('C05: BUILDING, a place that has walls', () => {
     expect(definitionAll('NOUN').fr).toBe('un mot qui nomme des objets.');
   });
 });
+
+// C19. The four workspace verbs C08 could not reach, each on a construct C12 built or a word the
+// probe found was the real blocker. Two are causatives (pinned beside the C08 ones in
+// causative.test.ts); these two are not, and they are what the purpose clause was needed for.
+describe('C19: the verbs the purpose clause and a re-read literal unblocked', () => {
+  // The differentia is not what is written but what the writing is *for*, which only a clause of
+  // purpose can say (PhrasePlan.purpose): en the bare infinitive, Romance per/pour/para, de the
+  // extraposed "um … zu", ja 〜ために ahead of the predicate. The object of that clause is a neuter
+  // pronoun — the content is already named — which is what keeps English off "to load him".
+  test('SAVE → "to write content to load it"', () => {
+    expect(definitionAll('SAVE')).toEqual({
+      en: 'to write content to load it.',
+      it: 'scrivere contenuto per caricarlo.', // the clitic attaches to the infinitive
+      fr: 'écrire du contenu pour le charger.',
+      de: 'Inhalt schreiben, um es zu laden.',
+      es: 'escribir contenido para cargarlo.',
+      ja: 'それを読み込むために内容を書く。',
+      pt: 'escrever conteúdo para carregá-lo.',
+    });
+  });
+
+  // TRANSLATE was seeded for C11's "the phrase could not be translated", and takes a gloss of its
+  // own rather than joining the verbs on the English literal. The language it is done with is the
+  // instrumental — the means, not a companion — which Japanese marks with the で the English
+  // literal's "in" wants.
+  test('TRANSLATE → "to express concepts with another language"', () => {
+    expect(definitionAll('TRANSLATE')).toEqual({
+      en: 'to express concepts with another language.',
+      it: "esprimere concetti con un'altra lingua.",
+      fr: 'exprimer des concepts avec une autre langue.',
+      de: 'Begriffe mit einer anderen Sprache vermitteln.',
+      es: 'expresar conceptos con otro idioma.',
+      ja: '別の言語で概念を表す。',
+      pt: 'exprimir conceitos com outra língua.',
+    });
+  });
+
+  // The literal ("to bring stored content back in") asks for a prior state the plan model has no
+  // room for. It turns out not to need one: WRITTEN already says the content was put there before,
+  // which is all the "back" was carrying.
+  test('LOAD → "to read written content", the "back" carried by the participle', () => {
+    expect(definitionAll('LOAD')).toEqual({
+      en: 'to read written content.',
+      it: 'leggere contenuto scritto.',
+      fr: 'lire du contenu écrit.',
+      de: 'geschriebenen Inhalt lesen.',
+      es: 'leer contenido escrito.',
+      ja: '書かれた内容を読む。',
+      pt: 'ler conteúdo escrito.',
+    });
+  });
+});

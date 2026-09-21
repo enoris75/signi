@@ -465,6 +465,8 @@ describe('known bugs: Spanish/Portuguese ser vs estar in a predicative', () => {
     // Resultant-state participles — "the file is saved / written" → está guardado / escrito.
     expect(isThat('SAVED')).toMatchObject({ es: 'el gato está guardado.', pt: 'o gato está salvo.' });
     expect(isThat('WRITTEN')).toMatchObject({ es: 'el gato está escrito.', pt: 'o gato está escrito.' });
+    // A state something is *put into*, which is what TIDY_UP's gloss causes (localization C19).
+    expect(isThat('TIDY')).toMatchObject({ es: 'el gato está ordenado.', pt: 'o gato está arrumado.' });
   });
 
   // The product call for the both-copula adjectives: emotions take the transient reading

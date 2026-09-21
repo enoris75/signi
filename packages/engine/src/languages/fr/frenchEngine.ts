@@ -1,12 +1,17 @@
+import type { CoordConjunction, Degree, Specifier } from '@signi/shared';
 import type { ConceptForms, LanguageEngine, PronominalPossessor, ResolvedPhrase } from '../../types.js';
 import { possessiveFr } from '../../possessive.js';
 import { elidesBefore } from './elidesBefore.js';
 import { estCeQue } from './estCeQue.js';
-import { COORD_WORDS } from './fr.consts.js';
+import { COORD_WORDS, FR_DEGREE } from './fr.consts.js';
 import { agreeAdjFr } from './agreeAdjFr.js';
 import { artFor } from './artFor.js';
 import { punctuate } from './punctuate.js';
+import { deDet } from './deDet.js';
+import { prepDet } from './prepDet.js';
 import { renderClause } from './renderClause.js';
+import { aDet } from './aDet.js';
+import { spatialHead } from './spatialHead.js';
 
 export const frenchEngine: LanguageEngine = {
   language: 'fr',
@@ -56,5 +61,31 @@ export const frenchEngine: LanguageEngine = {
       { gender: (f['gender'] ?? 'masc') as 'masc' | 'fem', number: plural ? 'plural' : 'singular' },
       elidesBefore(f, word),
     );
+  },
+  renderConjunction(conjunction: CoordConjunction): string {
+    return COORD_WORDS[conjunction];
+  },
+  // The adposition alone: French contracts "de"/"à" with the definite article ("autour du chien"),
+  // so the noun is cited bare and only the preposition is left. `over` is cited in its **locative**
+  // reading, "au-dessus de" — the place above something; a route over it crosses, "par-dessus", and
+  // the chip that shows this label names a relation rather than a complement.
+  renderSpecifier(noun: ConceptForms, specifier: Specifier): string {
+    const f = noun.forms;
+    const word = f['base'] ?? '';
+    if (specifier.kind === 'sentiment') {
+      return specifier.value === 'positive' ? `grâce ${aDet(f, false, word)}`
+        : specifier.value === 'negative' ? `par la faute ${deDet(f, false, word)}`
+        : `à cause ${deDet(f, false, word)}`;
+    }
+    return specifier.kind === 'path' ? spatialHead(specifier.value, f, false, word, 'locative') : '';
+  },
+  // Periphrastic throughout ("plus", "le plus", "moins", "aussi"), so the cited adjective goes unread.
+  renderDegree(_adjective: ConceptForms, degree: Degree): string {
+    // The relative superlative is the comparative under the definite article — the article
+    // belongs to the noun phrase, not to the degree, so a label that showed the adverb alone
+    // would say "plus" for both degrees. Cited masculine singular, the
+    // gender a citation form is given in (as `renderPossessive` defaults).
+    const word = FR_DEGREE[degree];
+    return word && (degree === 'most' || degree === 'least') ? `le ${word}` : word;
   },
 };

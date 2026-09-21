@@ -7,10 +7,11 @@ import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isSeemingPredicateNoun } from '../../functions/isSeemingPredicateNoun.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
+import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
-import { CAUSE_PREP, ESSIVE, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
+import { CAUSE_PREP, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
@@ -85,8 +86,12 @@ export function complementsPhrase(
         return [marker, predicate].filter(Boolean).join(' ');
       }
       // The preposition is emitted once, before the whole group: "with the cat and the dog".
+      // A direction may name a relation of its own, and then it is that relation's goal form
+      // ("jumps into the air"); with none it is the plain goal "to" (see `directionSpecifier`).
+      const goal = type === 'direction' ? directionSpecifier(c) : undefined;
       const prep = type === 'route' ? PATH_PREP[pathSpecifier(c)]
         : type === 'locative' ? PATH_PREP[pathSpecifier(c, DEFAULT_LOCATIVE_SPECIFIER)]
+        : goal ? GOAL_PREP[goal]
         : type === 'manner' ? MANNER_PREP[mannerRelation(firstConjunct(c.phrase).head.forms)]
         : PREP[type];
       // A hearth noun takes its fixed locative idiom in place of preposition + noun phrase ("at

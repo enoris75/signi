@@ -287,7 +287,7 @@ describe('SavedPhrasesToolbar', () => {
 
       fireEvent.click(save);
 
-      expect(await findToast()).toHaveTextContent('Could not save the phrase.');
+      expect(await findToast()).toHaveTextContent('The phrase could not be saved.');
       expect(dialog).toBeInTheDocument();
       expect(name).toHaveValue('The cat sleeps');
       expect(save).toBeEnabled();
@@ -362,7 +362,7 @@ describe('SavedPhrasesToolbar', () => {
       const dialog = openLoadDialog();
 
       expect(await within(dialog).findByRole('alert')).toHaveTextContent(
-        'Could not load saved phrases.',
+        'The saved phrases could not be loaded.',
       );
       expect(within(dialog).queryByText('Loading…')).not.toBeInTheDocument();
       expect(within(dialog).queryByText('No saved phrases')).not.toBeInTheDocument();
@@ -445,7 +445,7 @@ describe('SavedPhrasesToolbar', () => {
 
       fireEvent.click(await within(dialog).findByText('The cat sleeps'));
 
-      expect(await findToast()).toHaveTextContent('Could not load that phrase.');
+      expect(await findToast()).toHaveTextContent('That phrase could not be loaded.');
       expect(onLoad).not.toHaveBeenCalled();
       expect(within(dialog).getByText('The cat sleeps')).toBeInTheDocument();
     });

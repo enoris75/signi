@@ -214,4 +214,4 @@ it as a small `euphony.ts` with its own unit tests.
 
 The vocative; the analytic imperfective future (unless the reviewer prefers it, D2); *є* as a
 present-tense copula; pronoun dropping (D5); indeterminate motion verbs; numerals; the passive
-([A01](../../A-ready/A01-passive-voice/README.md)).
+([A01](../../Z-Done/A01-passive-voice/README.md)).

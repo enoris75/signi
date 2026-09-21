@@ -78,7 +78,19 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to propel oneself into the air',
+    // "to move into the air" (localization C18). The differentia is where the motion ends up, which
+    // is a `direction` naming a relation rather than a plain goal — "into the air", not "to the
+    // air". Definite: French and Portuguese spell no zero-article mass noun after a preposition.
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      complements: {
+        direction: {
+          phrase: { concept: 'AIR', definiteness: 'definite' },
+          specifiers: [{ kind: 'path', value: 'in' }],
+        },
+      },
+    }),
     emoji: '🦘',
+    isA: 'MOVE_ONESELF',
     forms: {
       en: {
         base: 'jump',

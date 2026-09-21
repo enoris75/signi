@@ -23,7 +23,7 @@ const VERBS = [
   'RUN', 'JUMP', 'COME', 'CRY', 'BURN', 'COLLAPSE',
   // transitive
   'CUT', 'EAT', 'DRINK', 'SEE', 'LOVE', 'KILL', 'KNOW', 'READ', 'CRY_OUT', 'BITE', 'BEAT',
-  'SET_ON_FIRE', 'EXTINGUISH', 'BUY', 'MAKE', 'CLICK', 'CHOOSE', 'SELECT', 'TYPE', 'SAVE', 'LOAD',
+  'SET_ON_FIRE', 'EXTINGUISH', 'BUY', 'MAKE', 'CLICK', 'CHOOSE', 'SELECT', 'TYPE', 'TRANSLATE', 'SAVE', 'LOAD',
   'ADD', 'EXPORT', 'IMPORT', 'CLEAR', 'COORDINATE', 'TIDY_UP', 'COMPACT', 'EXPAND', 'HIDE', 'START',
   // ditransitive
   'GIVE', 'SHOW', 'SEND',

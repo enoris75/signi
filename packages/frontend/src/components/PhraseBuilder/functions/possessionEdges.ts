@@ -1,5 +1,6 @@
 import type { NounKey } from "../interfaces.ts";
 import type { UiStringLookup } from "../../../i18n/conceptWord.ts";
+import type { PossessivePhrase } from "../../../i18n/usePossessivePhrase.ts";
 import { possessiveHintKey, type CorefPick } from "../CorefPickContext.tsx";
 import {
   ownerLink,
@@ -14,7 +15,11 @@ import { perimeterControlKey } from "../ringSpecs.ts";
 import { linkEdge, type Edge } from "../graph.ts";
 import type { Pt } from "../ringLayout.ts";
 
-/** A pointed-to owner's line, with the pronoun it renders and its ring's colour. */
+/**
+ * A pointed-to owner's line, with the phrase its chip shows and its ring's colour. The phrase is
+ * the possessed noun under its possessive — "his horse", fr *son cheval* — rendered on request
+ * (see `usePossessivePhrases`), with the bare possessive as the fallback until it arrives.
+ */
 export type PointerLine = { spot: PointerSpot; link: PossessionLink; pronoun: string | undefined; color: string };
 
 /**
@@ -30,6 +35,7 @@ export function possessionEdges({
   colorOf,
   resolve,
   t,
+  possessivePhrase,
   compact,
 }: {
   owners: readonly OwnerSpot[];
@@ -41,6 +47,8 @@ export function possessionEdges({
   colorOf: (role: NounKey) => string;
   resolve: CorefPick["resolve"];
   t: UiStringLookup;
+  // The possessed noun phrase, once the backend has rendered it (see `usePossessivePhrases`).
+  possessivePhrase: PossessivePhrase;
   compact: boolean;
 }): { edges: Edge[]; pointerLines: PointerLine[] } {
   // A hosted ring's builder knows its own possessor control by its head's key.
@@ -67,7 +75,12 @@ export function possessionEdges({
     });
     if (!link) return [];
     const resolved = resolve(spot.antecedent);
-    return [{ spot, link, pronoun: resolved && t(possessiveHintKey(resolved.features)), color: colorOf(spot.role) }];
+    // The whole phrase where the render has come back, the bare possessive until then: the Romance
+    // possessive agrees with the noun possessed, which only the engine can settle (C16).
+    const pronoun = resolved
+      ? possessivePhrase(spot.possessedConcept, resolved.features) ?? t(possessiveHintKey(resolved.features))
+      : undefined;
+    return [{ spot, link, pronoun, color: colorOf(spot.role) }];
   });
 
   return {

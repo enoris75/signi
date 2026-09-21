@@ -1,5 +1,5 @@
 import type { UiStringKey } from "@signi/shared";
-import { COORD_CONJUNCTION_LABEL } from "../../interfaces.ts";
+import { COORD_CONJUNCTION_LABEL_KEY } from "../../interfaces.ts";
 import {
   ACCENT,
   type ClauseControls,
@@ -88,10 +88,11 @@ export function periodLabel(
   if (conditional?.hasCondition) return t("clause.main");
   if (conditional?.isIfClause) return t("clause.conditional");
   if (coordinative?.hasCoordination) return t("clause.first");
-  // The conjunction is a function word the catalog has no entry for yet, so it stays English.
+  // The conjunction in brackets is the catalog's word for it (C13): "Coordinated clause (But)",
+  // it "Proposizione coordinata (Ma)", ja 「等位節（しかし）」.
   if (coordinative?.isCoordinated) {
     return coordinative.conjunction
-      ? `${t("clause.coordinated")} (${COORD_CONJUNCTION_LABEL[coordinative.conjunction]})`
+      ? `${t("clause.coordinated")} (${t(COORD_CONJUNCTION_LABEL_KEY[coordinative.conjunction])})`
       : t("clause.coordinated");
   }
   return "";

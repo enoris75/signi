@@ -75,6 +75,16 @@ export const PATH_PREP: Record<PathSpecifier, string> = {
   in_front_of: 'in front of',
 };
 
+/**
+ * The same relations as the *goal* of a motion — a `direction` complement that names one. Only
+ * containment differs from the map above, and it is exactly the word English keeps for it: "jumps
+ * **into** the air" is where it ends up, "jumps **in** the air" is where the jumping happens. The
+ * others double for both readings ("runs **behind** the house" is either), so they are taken as they
+ * are. A direction naming no relation at all is not here: that is the plain goal, "to" (see
+ * `PathSpecifier`).
+ */
+export const GOAL_PREP: Record<PathSpecifier, string> = { ...PATH_PREP, in: 'into' };
+
 // The fixed idiom a plain locative takes on a hearth noun, keyed by concept id (see `locativeIdiom`).
 // English says "at home", not "in the home".
 export const LOCATIVE_IDIOMS: Record<string, string> = { HOME: 'at home' };

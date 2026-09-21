@@ -71,7 +71,7 @@ describe('CoordinationButton', () => {
       'AndcopulativeA',
       'OrdisjunctiveO',
       'ButadversativeB',
-      'ThentemporalT',
+      'And thentemporalT',
     ]);
   });
 
@@ -81,7 +81,7 @@ describe('CoordinationButton', () => {
 
     fireEvent.click(screen.getByRole('button', { name: START }));
     expect(control.onStart).not.toHaveBeenCalled();
-    fireEvent.click(screen.getByRole('menuitem', { name: /^Therefore/ }));
+    fireEvent.click(screen.getByRole('menuitem', { name: /^So/ }));
 
     expect(control.onStart).toHaveBeenCalledExactlyOnceWith('therefore');
     expect(screen.queryByRole('menu')).not.toBeInTheDocument();

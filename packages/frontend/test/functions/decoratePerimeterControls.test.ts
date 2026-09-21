@@ -47,6 +47,7 @@ const decorate = (
     onTogglePossessor: () => {},
     t,
     word,
+    possessivePhrase: () => undefined,
     ...extra,
   });
 
@@ -103,6 +104,21 @@ describe('decoratePerimeterControls', () => {
       });
     });
 
+    it('quotes the whole possessed phrase once the backend has rendered it', () => {
+      // "la sua casa", not the bare "suo": the Romance possessive agrees with what is possessed,
+      // which no catalog entry can know in advance (C16).
+      const resolve = () => ({
+        concept: PETER,
+        features: { kind: 'pronominal' as const, person: '3' as const, number: 'singular' as const, gender: 'masc' as const },
+      });
+      const result = decorate(
+        { subject: PETER, directObject: CAT, directObjectPossessorRef: 'subject' },
+        { resolve, possessivePhrase: (concept) => (concept === CAT.id ? 'his cat' : undefined) },
+      );
+
+      expect(result.directObject?.possessor?.valueLabel).toBe('peter (“his cat”) — click to remove');
+    });
+
     it('still offers removal when the noun it points to cannot be resolved', () => {
       const result = decorate({ subject: PETER, directObject: CAT, directObjectPossessorRef: 'subject' });
 
@@ -123,6 +139,7 @@ describe('decoratePerimeterControls', () => {
       onTogglePossessor: () => {},
       t,
       word,
+      possessivePhrase: () => undefined,
     });
 
     expect(perimeterByNoun.subject).toBe(subject);

@@ -3,25 +3,27 @@ import { canCoordinateImperative } from "@signi/shared";
 
 export type { AbstractionLevel, CoordConjunction };
 
-// UI metadata for the coordinating conjunctions offered on the coordinative control: the short menu
-// label, and the catalog key of the traditional grammatical name of each relation (`conjunction.kind.*`).
+// UI metadata for the coordinating conjunctions offered on the coordinative control: the catalog
+// key of the word itself (`conjunction.value.*`, which each engine spells) and the key of the
+// traditional grammatical name of the relation it sets up (`conjunction.kind.*`).
 export const COORD_CONJUNCTION_OPTIONS: {
   value: CoordConjunction;
-  label: string;
+  labelKey: UiStringKey;
   hintKey: UiStringKey;
 }[] = [
-  { value: "and", label: "And", hintKey: "conjunction.kind.and" },
-  { value: "or", label: "Or", hintKey: "conjunction.kind.or" },
-  { value: "but", label: "But", hintKey: "conjunction.kind.but" },
-  { value: "that_is", label: "That is", hintKey: "conjunction.kind.that_is" },
-  { value: "therefore", label: "Therefore", hintKey: "conjunction.kind.therefore" },
-  { value: "then", label: "Then", hintKey: "conjunction.kind.then" },
+  { value: "and", labelKey: "conjunction.value.and", hintKey: "conjunction.kind.and" },
+  { value: "or", labelKey: "conjunction.value.or", hintKey: "conjunction.kind.or" },
+  { value: "but", labelKey: "conjunction.value.but", hintKey: "conjunction.kind.but" },
+  { value: "that_is", labelKey: "conjunction.value.that_is", hintKey: "conjunction.kind.that_is" },
+  { value: "therefore", labelKey: "conjunction.value.therefore", hintKey: "conjunction.kind.therefore" },
+  { value: "then", labelKey: "conjunction.value.then", hintKey: "conjunction.kind.then" },
 ];
 
 /**
  * The letter each conjunction answers to in the menu (the plan's §3.7). Mostly the initial of the
- * English label, with two taken elsewhere: "that is" goes by its *I* and "therefore" by its *S*,
- * because T is "then" and the two Ts would otherwise collide.
+ * English name, with two taken elsewhere: "that is" goes by its *I* and "therefore" by its *S*,
+ * because T is "then" and the two Ts would otherwise collide. The keys stay English whatever the
+ * UI language, as every other shortcut does — a keyboard is not translated.
  */
 export const COORD_CONJUNCTION_KEYS: Record<CoordConjunction, string> = {
   and: "A",
@@ -32,10 +34,13 @@ export const COORD_CONJUNCTION_KEYS: Record<CoordConjunction, string> = {
   then: "T",
 };
 
-export const COORD_CONJUNCTION_LABEL: Record<CoordConjunction, string> =
+// The catalog key naming each conjunction, for the call sites that have a CoordConjunction rather
+// than a menu row — the coordination control, the connector label, a coordinated clause's badge.
+// The word itself comes from `useUiString`; only the key lives here (A15's `labelKey` convention).
+export const COORD_CONJUNCTION_LABEL_KEY: Record<CoordConjunction, UiStringKey> =
   Object.fromEntries(
-    COORD_CONJUNCTION_OPTIONS.map((o) => [o.value, o.label]),
-  ) as Record<CoordConjunction, string>;
+    COORD_CONJUNCTION_OPTIONS.map((o) => [o.value, o.labelKey]),
+  ) as Record<CoordConjunction, UiStringKey>;
 
 // The conjunctions offered when starting a coordination from `imperative` period. A command
 // coordinates with a second command, which only four of the six can join: the conclusive

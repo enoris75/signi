@@ -35,7 +35,9 @@ describe('ConjunctionMenu', () => {
   });
 
   // Each row ends in the letter it answers to: mostly the initial, but "that is" goes by its I
-  // and "therefore" by its S, T being taken by "then".
+  // and "therefore" by its S, T being taken by "then". The words themselves are the catalog's
+  // (C13), which is why the conclusive row reads "So" and the temporal one "And then": those are
+  // what English actually writes between two clauses, and the keys stay on the value's own name.
   it('lists every conjunction with the relation it expresses, and the key it answers to', () => {
     renderMenu();
 
@@ -45,9 +47,25 @@ describe('ConjunctionMenu', () => {
       'OrdisjunctiveO',
       'ButadversativeB',
       'That isexplicativeI',
-      'ThereforeconclusiveS',
-      'ThentemporalT',
+      'SoconclusiveS',
+      'And thentemporalT',
     ]);
+  });
+
+  // The words come from the bundle the backend renders, not from a table in the frontend (C13):
+  // seeding the entry changes the row, which a hardcoded "But" could not do. In another UI language
+  // that is what makes the menu read "Ma avversativa" or "Aber adversativ".
+  it('says each conjunction with the catalog\u2019s word for it', () => {
+    renderMenu({
+      seed: {
+        strings: {
+          'conjunction.value.but': { en: 'Ma' },
+          'conjunction.kind.but': { en: 'avversativa' },
+        },
+      },
+    });
+
+    expect(screen.getByRole('menuitem', { name: /avversativa/ }).textContent).toBe('MaavversativaB');
   });
 
   it('takes the conjunction its letter names', () => {
@@ -69,7 +87,7 @@ describe('ConjunctionMenu', () => {
     renderMenu({ options: coordConjunctionOptions(true) });
 
     expect(screen.getAllByRole('menuitem')).toHaveLength(4);
-    expect(screen.queryByRole('menuitem', { name: /^Therefore/ })).not.toBeInTheDocument();
+    expect(screen.queryByRole('menuitem', { name: /^So/ })).not.toBeInTheDocument();
   });
 
   it('reports the conjunction chosen', () => {

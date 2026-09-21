@@ -109,6 +109,36 @@ describe('the causative definitions (localization C08)', () => {
   });
 
   // Not a causative: APPEAR is the state itself, BECOME + VISIBLE, which needed only the adjective.
+  // C19's two causatives. ADD's companion is the **comitative** complement, the one that says
+  // "together with" rather than "by means of" (と in Japanese, "with" everywhere else); it is
+  // indefinite because French spells no zero-article plural after a preposition.
+  test('ADD is "to cause an object to be with other objects" — the comitative, not the instrumental', () => {
+    expect(definitionAll('ADD')).toEqual({
+      en: 'to cause an object to be with other objects.',
+      it: 'indurre un oggetto a essere con altri oggetti.',
+      fr: "induire un objet à être avec d'autres objets.",
+      de: 'einen Gegenstand veranlassen, mit anderen Gegenständen zu sein.',
+      es: 'inducir un objeto a ser con otros objetos.',
+      ja: '物体が別の物体とあるようにする。',
+      pt: 'induzir um objeto a ser com outros objetos.',
+    });
+  });
+
+  // TIDY carries the state the literal's "back … in order" was reaching for. The seeded ORDER is
+  // the *command* sense (de "Befehl", ja 命令), so "in order" could not be said with it at all.
+  // The adjective is transient, so es/pt predicate it with estar, and it agrees with the causee.
+  test('TIDY_UP is "to cause objects to be tidy"', () => {
+    expect(definitionAll('TIDY_UP')).toEqual({
+      en: 'to cause objects to be tidy.',
+      it: 'indurre oggetti a essere ordinati.',
+      fr: 'induire des objets à être rangés.',
+      de: 'Gegenstände veranlassen, ordentlich zu sein.',
+      es: 'inducir objetos a estar ordenados.',
+      ja: '物体が整然としているようにする。',
+      pt: 'induzir objetos a estar arrumados.',
+    });
+  });
+
   test('APPEAR is "to become visible"', () => {
     expect(definitionAll('APPEAR')).toEqual({
       en: 'to become visible.',

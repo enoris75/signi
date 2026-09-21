@@ -50,7 +50,7 @@ export function ConjunctionMenu({
           sx={{ gap: 1.5, justifyContent: "space-between" }}
         >
           <Typography component="span" sx={{ fontWeight: 600, fontSize: "0.8rem" }}>
-            {o.label}
+            {t(o.labelKey)}
             <Typography
               component="span"
               sx={{ ml: 1, color: "text.disabled", fontSize: "0.72rem" }}
