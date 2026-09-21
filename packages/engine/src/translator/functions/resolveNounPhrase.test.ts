@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounPhrase, PronominalPossessor } from '@signi/shared';
-import { ACQUA, CASA, GATTO, GRANDE, IO, lexicon, LOOKUP, LUI, ROSSO, type Forms } from '../translator.fixtures.js';
+import { ACQUA, CANE, CASA, GATTO, GRANDE, IO, lexicon, LOOKUP, LUI, ROSSO, type Forms } from '../translator.fixtures.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { resolveNounPhrase } from './resolveNounPhrase.js';
 
@@ -65,6 +65,43 @@ describe('resolveNounPhrase', () => {
       // Only an indefinite yields: "el otro gato" keeps its article.
       expect(definiteness('es', { ...other, definiteness: 'definite' })).toBe('definite');
       expect(definiteness('es', { ...other, adjectives: ['BIG'] })).toBe('indefinite');
+    });
+
+    // A175: a relative superlative picks one member out of a set, so it is definite in every language.
+    test('a superlative makes an indefinite or bare phrase definite, in every language', () => {
+      const biggest = (definiteness: NounPhrase['definiteness'], degree: 'most' | 'least' = 'most'): NounPhrase =>
+        ({ concept: 'DOG', definiteness, adjectives: ['BIG'], adjectiveDegrees: [degree] });
+      for (const language of ['en', 'it', 'fr', 'de', 'es', 'pt', 'ja']) {
+        expect(resolveNounPhrase(biggest('indefinite'), language, LOOKUP).head.forms['definiteness']).toBe('definite');
+      }
+      expect(headForms(biggest('bare'))['definiteness']).toBe('definite');
+      expect(headForms(biggest('indefinite', 'least'))['definiteness']).toBe('definite');
+      expect(headForms({ ...biggest('indefinite'), number: 'plural' })).toMatchObject({ number: 'plural', definiteness: 'definite' });
+      // One superlative among several adjectives is enough.
+      expect(headForms({ concept: 'DOG', definiteness: 'indefinite', adjectives: ['RED', 'BIG'], adjectiveDegrees: ['positive', 'most'] })['definiteness'])
+        .toBe('definite');
+    });
+
+    test('a superlative leaves every other determiner as picked, and a comparative leaves the indefinite', () => {
+      const biggest = (definiteness: NounPhrase['definiteness']): NounPhrase =>
+        ({ concept: 'DOG', definiteness, adjectives: ['BIG'], adjectiveDegrees: ['most'] });
+      for (const definiteness of ['this', 'that', 'no', 'some', 'many', 'few', 'all'] as const) {
+        expect(headForms(biggest(definiteness))['definiteness']).toBe(definiteness);
+      }
+      for (const degree of ['more', 'less', 'equally', 'positive'] as const) {
+        expect(headForms({ concept: 'DOG', definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: [degree] })['definiteness'])
+          .toBe('indefinite');
+      }
+      // A degree with no adjective to carry it is not a superlative.
+      expect(headForms({ concept: 'DOG', definiteness: 'indefinite', adjectiveDegrees: ['most'] })['definiteness']).toBe('indefinite');
+    });
+
+    // The superlative wins before OTHER is read, so Spanish keeps the article: "el otro perro más grande".
+    test('a superlative with OTHER is definite in Spanish and Portuguese too', () => {
+      const lookup = lexicon({ DOG: CANE, BIG: GRANDE, OTHER: { role: 'adjective', base: 'otro' } });
+      const otherBiggest: NounPhrase = { concept: 'DOG', definiteness: 'indefinite', adjectives: ['OTHER', 'BIG'], adjectiveDegrees: ['positive', 'most'] };
+      expect(resolveNounPhrase(otherBiggest, 'es', lookup).head.forms['definiteness']).toBe('definite');
+      expect(resolveNounPhrase(otherBiggest, 'pt', lookup).head.forms['definiteness']).toBe('definite');
     });
 
     test('a feminine referent takes the feminine forms', () => {

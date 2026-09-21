@@ -3,7 +3,7 @@
 **Language:** Spanish
 
 A Spanish place name that goes bare on its own (`Europa`, `Oceanía`) takes the definite article once
-an adjective modifies it: `la Europa medieval`, `en la Europa afilada`. [A169](../fixed/A169-adjective-on-a-place-name.md)
+an adjective modifies it: `la Europa medieval`, `en la Europa afilada`. [A169](A169-adjective-on-a-place-name.md)
 brought the article back in German, Italian and French and left Spanish out, pending a ruling on the
 names that begin with a stressed *a*. This file covers the rest.
 
@@ -69,3 +69,32 @@ slot. This is the Spanish counterpart of German's
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: a Spanish place name with an adjective* (2 `test.fails`, plus a regression test for the positions already right) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+- **The article.** [`es/artForms.ts`](../../../packages/engine/src/languages/es/artForms.ts) marks a
+  bare-name `proper` head that carries any adjective (`pre` or `post`) as `takes_article`. `artFor`,
+  `dePrep`, `datPrep` and `prepDet` then give it the article and fuse it, as they do for `la
+  Antártida`. Every position in the table now takes the article.
+- **A stressed *a*: `el`.** A feminine place name beginning with a stressed *a* takes `el` when
+  articled, as `el agua` does: `el Asia grande`, `el África grande`, `del Asia grande`, `al África
+  grande`, `por el África grande`. The corpus
+  ([`packages/backend/src/concepts/nouns.ts`](../../../packages/backend/src/concepts/nouns.ts)) now
+  marks the Spanish `Asia` and `África` `stressed_a: '1'`, as it marks `agua` and `ala`. A
+  prenominal adjective lifts it as before (`la primera Asia`, `la primera África`). Bare, the name
+  has no article for the flag to change (`Asia arde.`, `de África`). No other feminine place name
+  in the corpus begins with a stressed *a*: `América` and `Antártida` are stressed on a later
+  syllable.
+- **A name with its own complement.** `la América del Norte grande` now gets its article, but the
+  adjective still lands after `del Norte`. Where it should go is a separate question, left open
+  and not pinned.
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: a Spanish place name with an adjective*. Both pinning `test.fails` are now passing
+  `test`s, with their assertions unchanged. A new case covers the stressed *a* in every position,
+  the prenominal adjective that lifts it, the bare name and a possessive (`en tu Asia grande`).
+- **Unit tests:** `es/artForms.test.ts` checks that an adjective articles a bare name, not an
+  already-articled one, and that `África` takes `el`/`del` after a postnominal adjective and `la`
+  after a prenominal one. `es/nounPhrase.test.ts` renders the same cases. The `AFRICA` fixture in
+  `es/es.fixtures.ts` carries `stressed_a`, mirroring the corpus.

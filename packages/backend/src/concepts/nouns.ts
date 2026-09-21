@@ -1327,7 +1327,8 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'Africa', gender: 'fem', count: 'singular' },
       fr: { base: 'Afrique', gender: 'fem', count: 'singular' },
       de: { base: 'Afrika', gender: 'neut', count: 'singular' },
-      es: { base: 'África', gender: 'fem', count: 'singular' },
+      // Stressed a-, as "agua": bare on its own, but "el África negra" once an adjective articles it.
+      es: { base: 'África', gender: 'fem', stressed_a: '1', count: 'singular' },
       ja: { base: 'アフリカ', count: 'singular' },
       pt: { base: 'África', gender: 'fem', count: 'singular' },
     },
@@ -1367,7 +1368,7 @@ export const nouns: ConceptSeed[] = [
       it: { base: 'Asia',   gender: 'fem',  count: 'singular' },
       fr: { base: 'Asie',   gender: 'fem',  count: 'singular' },
       de: { base: 'Asien',  gender: 'neut', count: 'singular' },
-      es: { base: 'Asia',   gender: 'fem',  count: 'singular' },
+      es: { base: 'Asia',   gender: 'fem',  stressed_a: '1', count: 'singular' }, // "el Asia central", as AFRICA
       ja: { base: 'アジア', count: 'singular' },
       pt: { base: 'Ásia',   gender: 'fem',  count: 'singular' },
     },

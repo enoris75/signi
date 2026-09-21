@@ -70,6 +70,15 @@ describe('complementsPhrase', () => {
       expect(complementsPhrase(complements({ locative: complement(np(HAUS, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('in meinen Häusern');
     });
 
+    // A174: after a plural possessive the adjective takes the weak -en in the accusative and the
+    // genitive too, not the strong ending of an article-less plural.
+    test('an adjective after a plural possessive takes the weak -en', () => {
+      const mine = (forms: Forms) => np(forms, { number: 'plural' }, { possessor: { kind: 'pronominal', person: '1', number: 'singular' }, adjectives: [adj(GROSS)] });
+      expect(complementsPhrase(complements({ route: complement(mine(HAUS)) }))).toBe('durch meine großen Häuser');
+      expect(complementsPhrase(complements({ cause: complement(mine(KATER)) }))).toBe('wegen meiner großen Kater');
+      expect(complementsPhrase(complements({ comitative: complement(mine(KATER)) }))).toBe('mit meinen großen Katern');
+    });
+
     test('a possessed noun with no gender declines its possessive as a neuter', () => {
       const DING: Forms = { base: 'Ding', count: 'singular' };
       expect(complementsPhrase(complements({ locative: complement(np(DING, {}, { possessor: { kind: 'pronominal', person: '1', number: 'singular' } })) }))).toBe('in meinem Ding');

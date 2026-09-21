@@ -799,13 +799,14 @@ describe('English phrasal verb with a pronoun object', () => {
 // A177. A 1st- or 2nd-person object with the subject's person and number is the subject itself, and
 // English then wants the reflexive: "I see myself", not "I see me". Italian, French, German, Spanish
 // and Portuguese already read it so, since their object pronoun doubles as the reflexive ("mi vedo",
-// "ich sehe mich"). The passive agent ("I am seen by me") and Japanese 自分 are left unpinned.
+// "ich sehe mich"). The passive agent follows the same rule ("I am seen by myself"). Japanese 自分
+// is left unpinned.
 describe('known bugs: an English object that is the subject itself', () => {
   const person = (concept: string, number: 'singular' | 'plural' = 'singular') => np(concept, { number });
-  const sees = (subject: NounPhrase, object: NounPhrase, extra: Parameters<typeof clause>[2] = {}) =>
+  const sees = (subject: NounElement, object: NounElement, extra: Parameters<typeof clause>[2] = {}) =>
     sayAll(clause(subject, 'SEE', { directObject: object, ...extra })).en;
 
-  test.fails('each person takes its reflexive', () => {
+  test('each person takes its reflexive', () => {
     expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'))).toBe('I see myself.'); // now: "I see me."
     expect(sees(person('FIRST_PERSON', 'plural'), person('FIRST_PERSON', 'plural'))).toBe('we see ourselves.');
     expect(sees(person('SECOND_PERSON'), person('SECOND_PERSON'))).toBe('you see yourself.');
@@ -821,12 +822,56 @@ describe('known bugs: an English object that is the subject itself', () => {
     }).en).toBe('you are about to perceive yourselves with the phrase repeatedly.');
   });
 
-  test.fails('the reflexive holds through a modal, negation, a particle verb and a coordination', () => {
+  test('the reflexive holds through a modal, negation, a particle verb and a coordination', () => {
     expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'), { verbPhrase: { modals: ['MUST'] } })).toBe('I must see myself.');
     expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'), { verbPhrase: { tense: 'past', negative: true } })).toBe('I did not see myself.');
     expect(sayAll(clause(person('FIRST_PERSON'), 'EXTINGUISH', { directObject: person('FIRST_PERSON') })).en).toBe('I put myself out.');
     expect(sayAll(clause(person('FIRST_PERSON'), 'SEE', { directObject: { conjuncts: [person('FIRST_PERSON'), np('CAT')], conjunction: 'and' } })).en)
       .toBe('I see myself and the cat.');
+  });
+
+  // The reflexive reads the clause's subject AGREEMENT, so whatever drives the verb drives it too.
+  test('the reflexive follows the subject agreement: a group, a command, a question, an infinitive', () => {
+    const we = person('FIRST_PERSON', 'plural');
+    const you = person('SECOND_PERSON');
+    const youAll = person('SECOND_PERSON', 'plural');
+    // "the cat and I" agrees as the 1st plural.
+    expect(sees({ conjuncts: [np('CAT'), person('FIRST_PERSON')], conjunction: 'and' }, we)).toBe('the cat and I see ourselves.');
+    expect(sayAll({ ...clause(we, 'SEE', { directObject: we }), imperative: true }).en).toBe("let's see ourselves.");
+    expect(sayAll({ ...clause(youAll, 'SEE', { directObject: youAll }), imperative: true }).en).toBe('see yourselves.');
+    expect(sayAll({ ...clause(you, 'SEE', { directObject: you, verbPhrase: { negative: true } }), imperative: true }).en).toBe('do not see yourself.');
+    expect(sayAll({ ...clause(you, 'TURN_OFF', { directObject: you }), imperative: true }).en).toBe('turn yourself off.');
+    expect(sayAll({ ...clause(you, 'SEE', { directObject: you, verbPhrase: { tense: 'past' } }), interrogative: true }).en).toBe('did you see yourself?');
+    expect(sees(you, you, { verbPhrase: { aspect: 'progressive', tense: 'past' } })).toBe('you were seeing yourself.');
+    expect(sees(youAll, { conjuncts: [np('CAT'), youAll], conjunction: 'or' })).toBe('you see the cat or yourselves.');
+    expect(sayAll({ ...clause(person('FIRST_PERSON'), 'SEE', { directObject: person('FIRST_PERSON') }), condition: clause(np('CAT'), 'RUN') }).en)
+      .toBe('if the cat ran, I would see myself.');
+    // A controlled infinitive's subject is the controller, so its object is reflexive there too.
+    expect(sayAll(clause(person('FIRST_PERSON'), 'DESIRE', { infinitiveComplement: { verbPhrase: { verb: 'SEE' }, directObject: person('FIRST_PERSON') } })))
+      .toMatchObject({
+        en: 'I desire to see myself.',
+        it: 'desidero vedermi.', fr: 'je désire me voir.', de: 'ich wünsche, mich zu sehen.', es: 'deseo verme.', pt: 'desejo me ver.',
+      });
+  });
+
+  // The passive's by-phrase names the demoted subject of the active, so "by me" under "I" is the
+  // subject itself, exactly as the active object is.
+  test('a passive agent that is the subject itself is reflexive', () => {
+    const passive = (agent: NounElement, patient: NounPhrase) =>
+      sayAll(clause(agent, 'SEE', { directObject: patient, verbPhrase: { voice: 'passive' } }));
+    expect(passive(person('FIRST_PERSON'), person('FIRST_PERSON'))).toEqual({
+      en: 'I am seen by myself.',
+      it: 'sono visto da me.', fr: 'je suis vu par moi.', de: 'ich werde von mir gesehen.', es: 'soy visto por mí.', ja: '私は私に見られます。', pt: 'sou visto por mim.',
+    });
+    expect(passive(person('FIRST_PERSON', 'plural'), person('FIRST_PERSON', 'plural')).en).toBe('we are seen by ourselves.');
+    expect(passive(person('SECOND_PERSON'), person('SECOND_PERSON')).en).toBe('you are seen by yourself.');
+    expect(passive(person('SECOND_PERSON', 'plural'), person('SECOND_PERSON', 'plural')).en).toBe('you are seen by yourselves.');
+    expect(passive({ conjuncts: [person('FIRST_PERSON'), np('CAT')], conjunction: 'and' }, person('FIRST_PERSON')).en)
+      .toBe('I am seen by myself and the cat.');
+    // A differing person or number, and the 3rd person, keep the object form.
+    expect(passive(person('FIRST_PERSON', 'plural'), person('FIRST_PERSON')).en).toBe('I am seen by us.');
+    expect(passive(person('FIRST_PERSON'), person('SECOND_PERSON')).en).toBe('you are seen by me.');
+    expect(passive(np('THIRD_PERSON', { gender: 'masc' }), np('THIRD_PERSON', { gender: 'masc' })).en).toBe('he is seen by him.');
   });
 
   // Regression: a differing person or number, the 3rd person, and the languages already right.

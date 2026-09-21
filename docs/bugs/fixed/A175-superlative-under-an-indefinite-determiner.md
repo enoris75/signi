@@ -3,12 +3,12 @@
 **Languages:** Italian, French, German, Spanish, Portuguese
 
 A relative superlative picks out one member of a set, so it is definite: "the biggest dog", never
-"a biggest dog". [A25](../fixed/A25-english-superlative-indefinite-article.md) made English force
+"a biggest dog". [A25](A25-english-superlative-indefinite-article.md) made English force
 `the` when a superlative (`most` or `least`) meets an `indefinite` or `bare` determiner. The other
 languages still take the determiner the plan picked. Each goes wrong in its own way:
 
 - **Italian, Spanish and Portuguese** mark the superlative only with the definite article
-  ([C01](../../C-do-not-fix/C01-italian-spanish-superlative-comparative-homophony.md)). Without it,
+  ([C01](../C-do-not-fix/C01-italian-spanish-superlative-comparative-homophony.md)). Without it,
   the superlative turns into the comparative: `un cane più grande` says "a bigger dog".
 - **French** keeps the second article but loses the first: `un chien le plus grand`, `comme phrase
   la moins affamée`.
@@ -76,3 +76,60 @@ Keep it or retire it, since it now duplicates the translator.
 | | |
 |---|---|
 | **Test** | `adjectives.test.ts` → *known bugs: a superlative under an indefinite or bare determiner* (2 `test.fails`, plus a regression test for what is already right) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+- **The translator.** [`resolveNounPhrase`](../../../packages/engine/src/translator/functions/resolveNounPhrase.ts)
+  resolves a noun phrase as `definite` when one of its adjectives carries `most` or `least` and the
+  picked determiner is `indefinite` or `bare`. This runs before the `OTHER` rule reads the picked
+  value, so Spanish and Portuguese keep the article in `el otro perro más grande`. Only a degree that
+  an adjective carries counts. The two sets it reads, `SUPERLATIVE_DEGREES` and
+  `SUPERLATIVE_MAKES_DEFINITE`, are in
+  [`translator.consts.ts`](../../../packages/engine/src/translator/translator.consts.ts). No language
+  engine changed.
+- **English's own guard is kept.** `npHasSuperlative` and the `superlative` branch of
+  [`en/determiner.ts`](../../../packages/engine/src/languages/en/determiner.ts) now repeat the
+  translator for every plan `resolveNounPhrase` resolves. With the guard disabled, every A25
+  sentence test in `adjectives.test.ts` still passed. But two paths set the determiner to `bare`
+  after `resolveNounPhrase`, and English still needs the guard on both:
+  - the measure manner, which `resolveComplements` makes bare: `the cat runs at the highest speed.`
+    became `at highest speed`;
+  - English's shouted alarm, which `predicateParts` makes bare: `the boy cries the biggest wolf.`
+    became `cries biggest wolf`.
+
+  Five colocated unit tests (`determiner`, `nounPhrase`, `npText`, `subjectPhrase`,
+  `possessorPhrase`) also failed, because they pass resolved forms that are still indefinite
+  straight to the English builders. The comment on the guard in `determiner.ts` now names these two
+  paths.
+- **The measure manner is left as it was, and not pinned.** `resolveComplements` still makes a
+  measure manner with an adjective bare, after `resolveNounPhrase`. So a superlative there keeps no
+  article outside English: `a velocità più alta`, `à vitesse la plus haute`, `mit höchster
+  Geschwindigkeit`.
+- **The quantifiers are left as A25 left them, and not pinned** (`some biggest dogs`, `einige größte
+  Hunde`).
+
+- **Tests:** [`packages/engine/test/adjectives.test.ts`](../../../packages/engine/test/adjectives.test.ts)
+  → *known bugs: a superlative under an indefinite or bare determiner*. Both pinning `test.fails`
+  are now passing `test`s, with their assertions unchanged. New cases:
+  - the random phrase's German (seed 942887), asserted whole beside its ending, now that
+    [A174](A174-german-possessive-plural-adjective-ending.md) is fixed too. The A174 pin in
+    `possession.test.ts` asserts the whole German sentence as well. Its Romance openings (`sentimenti
+    domestici e meno cattivi`) are still not asserted;
+  - `least` in all seven languages;
+  - the indefinite plural in Italian and Portuguese, and a bare plural object;
+  - a feminine noun;
+  - the source and the goal;
+  - a noun possessor (`il libro del cane più grande`, `das Buch des größten Hundes`);
+  - the passive agent (`dal cane più grande`, `vom größten Hund`);
+  - one conjunct of a group (`un gatto e il cane più grande`);
+  - a regression test that `less`, `equally` and a bare comparative keep the determiner picked.
+- **Unit tests:** `translator/functions/resolveNounPhrase.test.ts` checks:
+  - `most` and `least` under an indefinite or bare determiner, in every language, in the plural and
+    among several adjectives;
+  - that the other determiners and degrees are unchanged;
+  - that a degree with no adjective is ignored;
+  - `OTHER` with a superlative in Spanish and Portuguese.
+
+No passing test changed its expectation.

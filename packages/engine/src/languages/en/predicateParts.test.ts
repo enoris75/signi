@@ -134,6 +134,28 @@ describe('predicateParts', () => {
       expect(said(CAT, vp(SEE), el(np(IT)))).toBe('sees it');
     });
 
+    // A177: English marks an object that is the subject itself; the 3rd person is two people.
+    test('a 1st- or 2nd-person object with the subject’s person and number is reflexive', () => {
+      const YOU_ALL: Forms = { ...YOU, number: 'plural' };
+      const PUT_OUT: Forms = { base: 'put out', '3sg_present': 'puts out', past: 'put out', participle: 'put out', particle: 'out' };
+      expect(said(I, vp(SEE), el(np(I)))).toBe('see myself');
+      expect(said(WE, vp(SEE), el(np(WE)))).toBe('see ourselves');
+      expect(said(YOU, vp(SEE), el(np(YOU)))).toBe('see yourself');
+      expect(said(YOU_ALL, vp(SEE), el(np(YOU_ALL)))).toBe('see yourselves');
+      // A command's subject is the addressee, and a passive's by-phrase reads the same subject.
+      expect(said(YOU, vp(SEE, { mood: 'imperative' }), el(np(YOU)))).toBe('see yourself');
+      expect(predicateParts(I, vp(SEE, { voice: 'passive', passiveAux: concept(BE) }), undefined, undefined, false, el(np(I)))
+        .filter(Boolean).join(' ')).toBe('am seen by myself');
+      // Per conjunct in a group, and the particle still follows the pronoun it now is.
+      expect(said(I, vp(SEE), el(np(I), np(CAT)))).toBe('see myself and the cat');
+      expect(said(I, vp(PUT_OUT), el(np(I)))).toBe('put myself out');
+      // A differing person or number, and the 3rd person, keep the object form.
+      expect(said(I, vp(SEE), el(np(WE)))).toBe('see us');
+      expect(said(WE, vp(SEE), el(np(I)))).toBe('see me');
+      expect(said(I, vp(SEE), el(np(YOU)))).toBe('see you');
+      expect(said(HE, vp(SEE), el(np(HE)))).toBe('sees him');
+    });
+
     test('a lone no object keeps no', () => {
       expect(said(CAT, vp(EAT), noMouse)).toBe('eats no mouse');
     });

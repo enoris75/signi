@@ -50,3 +50,32 @@ one ever does, it wants `を通って` too. Not pinned.
 | | |
 |---|---|
 | **Test** | `complements/locative.test.ts` → *known bugs: Japanese locative "through"* (1 `test.fails`, plus a regression test for the relations and languages already right) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+[`complementSegs.ts`](../../../packages/engine/src/languages/ja/complementSegs.ts) now gives a
+non-existential `locative` whose path specifier is `through` the tail `PATH_CITATION.through`
+(`を通って`) in place of `PARTICLE.locative`, reusing the citation from
+[`ja.consts.ts`](../../../packages/engine/src/languages/ja/ja.consts.ts) rather than a new literal.
+`jaParticleSegs` closes a `no` group after it, as after any particle (`どの家を通っても`). The
+existential keeps its `に` (`猫は家にいます`), and every other relation keeps `で`.
+
+**The route.** A route `through` keeps its bare `を` (`家を走ります`), which already marks the
+traversed path. A route on a transitive verb would put two `を` in one clause
+(`家をネズミを食べます`), but only intransitive verbs license a route today, so it cannot be built.
+If one ever does, it wants `を通って` too. Not pinned.
+
+- **Tests:** [`packages/engine/test/complements/locative.test.ts`](../../../packages/engine/test/complements/locative.test.ts)
+  → *known bugs: Japanese locative "through"*. The pinning `test.fails` is now a passing `test`,
+  with its assertions unchanged (a motion verb, a transitive verb, a `no` place, a coordinated
+  place, and the random phrase). New cases:
+  - the tail in every form of the clause: past negative, a modal, the progressive, a command, a
+    condition, and a relative clause;
+  - the tail after the whole place, before the object: an `or` group, a plural place, `HIDE` and
+    `EAT` with an object, and a `no` place under a transitive verb (`どの家を通ってもネズミを食べません`);
+  - regression guards: the route with `through`, bare and under `no` (`どの家も走りません`), the plain
+    locative, `in` and `under`, the existential, affirmative and negated, and a transitive
+    `through` in the other six languages.
+- **Unit test:** [`ja/complementSegs.test.ts`](../../../packages/engine/src/languages/ja/complementSegs.test.ts)
+  checks a `through` locative alone, in a group, under `no`, and in an existential clause (`家に`).

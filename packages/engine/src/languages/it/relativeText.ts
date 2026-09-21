@@ -8,6 +8,7 @@ import { relativeGapComplement } from '../../functions/relativeGapComplement.js'
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { relativeDropsSubject } from '../../functions/relativeDropsSubject.js';
 import { agentPhrase } from './agentPhrase.js';
 import { alarmCryText } from './alarmCryText.js';
 import { complementsPhrase } from './complementsPhrase.js';
@@ -21,7 +22,9 @@ import { subjectText } from './subjectText.js';
 /**
  * A relative clause on `np`: invariant "che" for both subject- and object-relatives. A
  * subject-relative agrees with the head ("il ragazzo che piange"); an object-relative
- * carries the clause's own subject, which drives agreement ("il libro che io leggo"). When the head
+ * carries the clause's own subject, which drives agreement ("il libro che il gatto legge"). A pronoun
+ * subject is dropped, as in the main clause ("il libro che leggo"), unless the clause would then read
+ * as a subject relative ("il gatto che lui vede", see `relativeDropsSubject`, A173). When the head
  * fills a complement, the relativizer is that complement's preposition fused with "il quale",
  * agreeing with the head ("la casa sotto la quale il gatto mangia", "il ragazzo al quale l'uomo dà il
  * libro"). So does the alarm a cry raises, which the cry takes as its a-complement: "il lupo al quale il
@@ -58,13 +61,12 @@ export function relativeText(np: ResolvedNounPhrase): string {
     && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural' && rel.verbPhrase.aspect !== 'resultative';
   const agreeForms = subjectRelative ? np.head.forms
     : passiveSi ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
-  // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
-  // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia".
-  const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
   // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
   // keeps its "non" ("nessun gatto che non mangia corre", A167).
-  const pred = predicateText(agreeForms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+  const predicateFor = (forms: Record<string, string>) =>
+    predicateText(forms, rel.verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+  const pred = predicateFor(agreeForms);
   const gap = relativeGapComplement(np, QUALE);
   const agentGap = relativeAgentGap(np, QUALE);
   const relativizer = agentGap ? agentPhrase(agentGap)
@@ -72,5 +74,11 @@ export function relativeText(np: ResolvedNounPhrase): string {
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'dove'
       : gap ? complementsPhrase(gap, {}, '') : 'che';
+  // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
+  // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia". A pronoun subject
+  // is dropped as in the main clause, "il libro che leggo", where that leaves no subject-relative
+  // reading (A173).
+  const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'che', predicateFor)
+    ? '' : subjectText(rel.subject!);
   return `${relativizer} ${[subjText, pred].filter(Boolean).join(' ')}`.trim();
 }

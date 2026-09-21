@@ -183,6 +183,16 @@ describe('complementSegs', () => {
     test('a coordinated place takes its particle once', () => {
       expect(text(complementSegs(complements({ locative: complement(group('or', np(IE), np(ICHIBA))) })))).toBe('家か市場で');
     });
+
+    // A176: a place passed through takes the traversal tail を通って, not the で of a plain place. A
+    // route keeps its bare を (above), and the existential keeps its に.
+    test('a through locative takes を通って, once for a group, with も after it for a no group', () => {
+      expect(complementSegs(complements({ locative: complement(np(IE), [path('through')]) })))
+        .toEqual([{ t: '家', r: 'いえ' }, { t: 'を通って' }]);
+      expect(text(complementSegs(complements({ locative: complement(el(np(IE), np(ICHIBA)), [path('through')]) })))).toBe('家と市場を通って');
+      expect(text(complementSegs(complements({ locative: complement(np(IE, { definiteness: 'no' }), [path('through')]) })))).toBe('どの家を通っても');
+      expect(text(complementSegs(complements({ locative: complement(np(IE), [path('through')]) }), true))).toBe('家に');
+    });
   });
 
   describe('cause', () => {

@@ -28,7 +28,9 @@ export const pronouns: ConceptSeed[] = [
       // object = accusative direct-object form (English "me"); in Romance the proclitic that moves
       // in front of the finite verb ("mi vede"). German's is the accusative, distinct from the
       // dative disjunctive ("mich" vs "mir").
-      en: { base: 'I',        person: '1', number: 'singular', plural: 'we',  disjunctive: 'me',   disjunctive_plural: 'us', object: 'me', object_plural: 'us' },
+      // reflexive = English's object when it is the subject itself ("I see myself", A177). The
+      // other languages need none: their object form doubles as the reflexive ("mi vedo").
+      en: { base: 'I',        person: '1', number: 'singular', plural: 'we',  disjunctive: 'me',   disjunctive_plural: 'us', object: 'me', object_plural: 'us', reflexive: 'myself', reflexive_plural: 'ourselves' },
       it: { base: 'io',       person: '1', number: 'singular', plural: 'noi', disjunctive: 'me',   disjunctive_plural: 'noi', object: 'mi', object_plural: 'ci' },
       fr: { base: 'je',       person: '1', number: 'singular', plural: 'nous', disjunctive: 'moi', disjunctive_plural: 'nous', object: 'me', object_plural: 'nous' },
       de: { base: 'ich',      person: '1', number: 'singular', plural: 'wir', disjunctive: 'mir',  disjunctive_plural: 'uns', object: 'mich', object_plural: 'uns' },
@@ -46,7 +48,7 @@ export const pronouns: ConceptSeed[] = [
     definition: personGloss('SECOND'),
     emoji: '👉',
     forms: {
-      en: { base: 'you',      person: '2', number: 'singular', plural: 'you',  disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you' },
+      en: { base: 'you',      person: '2', number: 'singular', plural: 'you',  disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you', reflexive: 'yourself', reflexive_plural: 'yourselves' },
       it: { base: 'tu',       person: '2', number: 'singular', plural: 'voi',  disjunctive: 'te',  disjunctive_plural: 'voi', object: 'ti', object_plural: 'vi' },
       fr: { base: 'tu',       person: '2', number: 'singular', plural: 'vous', disjunctive: 'toi', disjunctive_plural: 'vous', object: 'te', object_plural: 'vous' },
       de: { base: 'du',       person: '2', number: 'singular', plural: 'ihr',  disjunctive: 'dir', disjunctive_plural: 'euch', object: 'dich', object_plural: 'euch' },

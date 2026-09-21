@@ -1,6 +1,8 @@
 import { describe, expect, test } from 'vitest';
 import type { ResolvedRelativeClause } from '../../types.js';
-import { CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LIBRO, LUPO, MANGIARE, MONETA, np, SI, TOPO, vp } from './it.fixtures.js';
+import {
+  CANE, CASA, complement, complements, DARE, DONNA, el, type Forms, GATTO, IO, LEI, LIBRO, LORO, LUI, LUPO, MANGIARE, MONETA, NOI, np, SI, TOPO, TU, vp,
+} from './it.fixtures.js';
 import { relativeText } from './relativeText.js';
 
 const GRIDARE: Forms = { base: 'gridare', alarm_cry: '1', '3sg_present': 'grida', '3sg_past': 'gridò', '3pl_present': 'gridano' };
@@ -36,8 +38,26 @@ describe('relativeText', () => {
 
   test('an object relative carries its own subject, which drives agreement', () => {
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(GATTO, { number: 'plural' }))) }))).toBe('che i gatti mangiano');
-    expect(relativeText(np(LIBRO, {}, { relative: objectRelative(el(np(IO)), { verbPhrase: vp(LEGGERE) }) }))).toBe('che io leggo');
+    expect(relativeText(np(LIBRO, {}, { relative: objectRelative(el(np(IO)), { verbPhrase: vp(LEGGERE) }) }))).toBe('che leggo');
     expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(GATTO), np(CANE))) }))).toBe('che il gatto e il cane mangiano');
+  });
+
+  // A173: a pronoun subject drops, as in the main clause, unless "che" would then read as a subject
+  // relative, the verb agreeing with the head as well.
+  test('a pronoun subject drops where the verb still tells it from the head', () => {
+    const eats = (subject: Forms, rest: Partial<ResolvedRelativeClause> = {}) => objectRelative(el(np(subject)), rest);
+    expect(relativeText(np(TOPO, {}, { relative: eats(NOI) }))).toBe('che mangiamo');
+    expect(relativeText(np(TOPO, {}, { relative: eats(TU) }))).toBe('che mangi');
+    expect(relativeText(np(TOPO, {}, { relative: eats(LUI) }))).toBe('che lui mangia');
+    expect(relativeText(np(TOPO, {}, { relative: eats(LEI) }))).toBe('che lei mangia');
+    expect(relativeText(np(TOPO, { number: 'plural' }, { relative: eats(LORO) }))).toBe('che loro mangiano');
+    expect(relativeText(np(TOPO, { number: 'plural' }, { relative: eats(LUI) }))).toBe('che mangia');
+    expect(relativeText(np(TOPO, {}, { relative: eats(LORO) }))).toBe('che mangiano');
+    expect(relativeText(np(TOPO, {}, { relative: eats(IO, { verbPhrase: vp(MANGIARE, { mood: 'conditional' }) }) }))).toBe('che mangerei');
+    expect(relativeText(np(TOPO, {}, { relative: eats(LUI, { verbPhrase: vp(MANGIARE, { mood: 'conditional' }) }) }))).toBe('che lui mangerebbe');
+    // "dove" marks the gap itself, so even the 3rd person drops.
+    expect(relativeText(np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(LUI)), verbPhrase: vp(MANGIARE) } }))).toBe('dove mangia');
+    expect(relativeText(np(TOPO, {}, { relative: objectRelative(el(np(IO), np(LUI))) }))).toBe('che io e lui mangiamo');
   });
 
   test('an impersonal subject is the si clitic, not a subject word', () => {

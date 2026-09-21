@@ -8,6 +8,7 @@ import { coordinate } from './coordinate.js';
 import { datPluralN } from './datPluralN.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
+import { possessedDeclension } from './possessedDeclension.js';
 import { possessorText } from './possessorText.js';
 import { postnominal } from './postnominal.js';
 import { prepDet } from './prepDet.js';
@@ -34,11 +35,12 @@ export function agentPhrase(agent?: ResolvedNounElement): string {
       return `von ${np.head.forms['disjunctive'] ?? np.head.forms['base'] ?? ''}`;
     }
     // A possessive is an ein-word in place of the article, so the head is the preposition alone and
-    // the adjectives decline mixed ("von meinem kleinen Kater").
+    // the adjectives decline as they do after "kein" ("von meinem kleinen Kater", see
+    // `possessedDeclension`).
     const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
     const f = articledNameForms(np, possessedHeadForms(np, 'bare'));
     const plural = (f['number'] ?? f['count']) === 'plural';
-    const definiteness = poss ? 'indefinite' : (f['definiteness'] ?? 'definite');
+    const definiteness = possessedDeclension(np, f);
     const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
     const head = prepDet('von', f, 'dat', plural);
     // A weak masculine declines to -(e)n in the oblique ("von dem Jungen"); every other noun takes

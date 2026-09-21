@@ -60,3 +60,51 @@ is.
 | | |
 |---|---|
 | **Test** | `objectPronoun.test.ts` → *known bugs: an English object that is the subject itself* (2 `test.fails`, plus a regression test for the persons and languages already right) |
+
+## Resolved
+
+2026-09-21. Took the shape of the fix. The four words live in the lexicon, and the passive agent
+is covered too.
+
+- **The lexicon.** [`pronouns.ts`](../../../packages/backend/src/concepts/pronouns.ts) seeds
+  `reflexive` / `reflexive_plural` on the English `FIRST_PERSON` (`myself` / `ourselves`) and
+  `SECOND_PERSON` (`yourself` / `yourselves`), next to `object` / `object_plural`. Form keys are
+  free rows in `pronoun_forms`, and no type, schema or seed check lists them, so nothing else
+  declares them. `THIRD_PERSON` gets none, because the plan cannot say "himself". The English unit
+  fixtures ([`en.fixtures.ts`](../../../packages/engine/src/languages/en/en.fixtures.ts)) carry the
+  same forms. The running app needs `signi.db` reseeded to pick them up.
+- **One helper.** The new
+  [`en/objectPronounText.ts`](../../../packages/engine/src/languages/en/objectPronounText.ts)
+  returns the reflexive when the pronoun's `person` is `1` or `2` and its person and number match
+  the clause's subject agreement (`subjectForms`). Otherwise it returns `objectPronounForm`.
+  [`predicateParts.ts`](../../../packages/engine/src/languages/en/predicateParts.ts) calls it for
+  each conjunct of the direct object (`I see myself and the cat`). `particleAfterPronoun` calls it
+  too, so the particle still finds the pronoun (`I put myself out`). `subjectForms` is agreement,
+  so several cases need no extra work: a coordinated subject (`the cat and I see ourselves`), a
+  command (`see yourself`, `let's see ourselves`) and a controlled infinitive (`I desire to see
+  myself`).
+- **The passive agent: handled.** `predicateParts` already holds the passive subject's agreement
+  where it calls `agentPhrase`. [`agentPhrase.ts`](../../../packages/engine/src/languages/en/agentPhrase.ts)
+  now takes that agreement as an optional second argument and spells a pronoun through the same
+  helper: `I am seen by myself`, `you are seen by yourselves`. `relativeText`'s `by whom` passes no
+  agreement. The other European languages were already right (`da me`, `par moi`, `von mir`, `por
+  mí`, `por mim`).
+- **Japanese 自分.** Out of scope and not pinned. `私は私を見ます。` stays.
+
+- **Tests:** [`packages/engine/test/objectPronoun.test.ts`](../../../packages/engine/test/objectPronoun.test.ts)
+  → *known bugs: an English object that is the subject itself*. Both pinning `test.fails` are now
+  passing `test`s, with their assertions unchanged. New cases:
+  - the reflexive follows the subject agreement: a coordinated subject, the cohortative, a plural
+    and a negated command, a particle verb in a command, a question, the progressive, an `or`
+    group object, a conditional, and a controlled infinitive in the six European languages;
+  - a passive agent that is the subject itself, in all four persons and all seven languages for
+    the 1st singular. The same test also covers a coordinated agent and keeps the object form for a
+    differing person or number and for the 3rd person (`he is seen by him`).
+- **Unit tests:**
+  - [`en/objectPronounText.test.ts`](../../../packages/engine/src/languages/en/objectPronounText.test.ts)
+    is new;
+  - [`en/agentPhrase.test.ts`](../../../packages/engine/src/languages/en/agentPhrase.test.ts) is
+    new, because the function had none;
+  - `en/predicateParts.test.ts` adds a reflexive case under *objects*: the four persons, a command,
+    the passive agent, a group, a particle verb, and the object form kept where the person or
+    number differs.

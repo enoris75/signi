@@ -16,6 +16,10 @@ export function determiner(forms: Record<string, string>, lead: string, superlat
   // determiner is ungrammatical with one ("a biggest cat", "biggest cats"). Force "the". The
   // other determiners (demonstratives, quantifiers, and a possessor which replaces the article
   // upstream) are already definite and read correctly with a superlative, so leave them.
+  // The translator already resolves a plan's superlative as definite for every language (A175,
+  // `resolveNounPhrase`). This guard still catches the phrases made bare after that: the measure
+  // manner ("at the highest speed", `resolveComplements`) and the shouted alarm ("cries the biggest
+  // wolf", `predicateParts`).
   if (superlative && (definiteness === 'indefinite' || definiteness === 'bare')) return 'the ';
   const mass = forms['uncountable'] === '1';
   // A demonstrative agrees with the phrase's number ("this boy" / "these boys"); a mass

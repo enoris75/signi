@@ -21,6 +21,16 @@ export const engines: LanguageEngine[] = [
 export const PLURAL_DETERMINERS = new Set(['some', 'many', 'few', 'all']);
 
 /**
+ * The determiners a relative superlative cannot stand under, which it makes definite: "the biggest
+ * dog", never "*a biggest dog" or "*biggest dog" (A175). The others are already definite
+ * (demonstratives) or left as they are (the quantifiers: "some biggest dogs").
+ */
+export const SUPERLATIVE_MAKES_DEFINITE: ReadonlySet<string> = new Set(['indefinite', 'bare']);
+
+/** The degrees of a relative superlative, which picks one member out of a set. */
+export const SUPERLATIVE_DEGREES: ReadonlySet<string> = new Set(['most', 'least']);
+
+/**
  * Languages whose negative quantifier takes a singular noun whatever number was picked: it "nessuna
  * frase", fr "aucune phrase", es "ninguna frase", pt "nenhuma frase" — never "*aucune phrases". English
  * and German keep the number ("no phrases", "keine Phrasen"); Japanese marks none.

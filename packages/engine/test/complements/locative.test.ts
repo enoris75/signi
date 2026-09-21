@@ -637,14 +637,19 @@ describe('known bugs: Japanese BE with a locative', () => {
 });
 
 // A176. A locative "through" names a place the action passes through. Japanese says so with を通って
-// (家を通って走ります). The engine gives the plain place's で, so "through the house" reads "in the
-// house". The route keeps its bare を (家を走ります), which a motion verb wants.
+// (家を通って走ります). The engine used to give the plain place's で, so "through the house" read "in
+// the house":
+//
+//     was   猫は家で走ります。       / 猫は家でネズミを食べます。
+//     now   猫は家を通って走ります。 / 猫は家を通ってネズミを食べます。
+//
+// The route keeps its bare を (家を走ります), which a motion verb wants, and the existential keeps に.
 describe('known bugs: Japanese locative "through"', () => {
-  const through = (phrase: NounPhrase | { conjuncts: NounPhrase[]; conjunction: 'and' }, value: PathSpecifier = 'through') =>
+  const through = (phrase: NounPhrase | { conjuncts: NounPhrase[]; conjunction: 'and' | 'or' }, value: PathSpecifier = 'through') =>
     ({ locative: { phrase, specifiers: [{ kind: 'path' as const, value }] } });
 
-  test.fails('a locative "through" takes を通って', () => {
-    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE')) })).ja).toBe('猫は家を通って走ります。'); // now: "家で"
+  test('a locative "through" takes を通って', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE')) })).ja).toBe('猫は家を通って走ります。'); // was: "家で"
     expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: through(np('HOUSE')) })).ja)
       .toBe('猫は家を通ってネズミを食べます。');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE', { definiteness: 'no' })) })).ja)
@@ -674,10 +679,49 @@ describe('known bugs: Japanese locative "through"', () => {
     }).ja).toBe('ネズミは少しの空腹な全体の本を通って私たちを買います。または、すべての同じくらい強いボタンはこの鋭い最も空腹ではない天使のおかげで狼を修飾しています。');
   });
 
+  // The tail is the complement's, so it rides along wherever the clause goes: tense, negation, a
+  // modal, the progressive, a command, a condition and a relative clause.
+  test('the tail holds in every form of the clause', () => {
+    const inHouse = through(np('HOUSE'));
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { verb: 'RUN', negative: true, tense: 'past' }, complements: inHouse })).ja)
+      .toBe('猫は家を通って走りませんでした。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { verb: 'RUN', modals: [{ verb: 'MUST' }] }, complements: inHouse })).ja)
+      .toBe('猫は家を通って走る必要があります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { verb: 'RUN', aspect: 'progressive' }, complements: inHouse })).ja)
+      .toBe('猫は家を通って走っています。');
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'RUN', { complements: inHouse }), imperative: true }).ja)
+      .toBe('家を通って走ってください。');
+    expect(sayAll({ ...clause(np('DOG'), 'RUN'), condition: clause(np('CAT'), 'RUN', { complements: inHouse }) }).ja)
+      .toBe('もし猫が家を通って走ったら、犬は走ります。');
+    expect(sayAll(clause(np('CAT', { relative: { verbPhrase: { verb: 'RUN' }, complements: inHouse } }), 'EAT')).ja)
+      .toBe('家を通って走る猫は食べます。');
+  });
+
+  // The tail attaches once, after the whole place, whatever the place is: an "or" group, a plural,
+  // a transitive verb's object after it, and a `no` place under a transitive verb.
+  test('the tail follows the whole place, before the object', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through({ conjuncts: [np('HOUSE'), np('MARKET')], conjunction: 'or' }) })).ja)
+      .toBe('猫は家か市場を通って走ります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE', { number: 'plural' })) })).ja)
+      .toBe('猫は家を通って走ります。'); // no number marking
+    expect(sayAll(clause(np('CAT'), 'HIDE', { directObject: np('BOOK'), complements: through(np('HOUSE')) })).ja)
+      .toBe('猫は家を通って本を隠します。');
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: through(np('HOUSE', { definiteness: 'no' })) })).ja)
+      .toBe('猫はどの家を通ってもネズミを食べません。');
+  });
+
   // Regression: the route, the other relations, the existential and the other languages.
   test('the route, the other relations, the existential and the other languages are unchanged', () => {
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'through' }] } } })).ja)
       .toBe('猫は家を走ります。');
+    // A bare route is a traversal too, and a `no` route's も still replaces its を.
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('HOUSE') } } })).ja).toBe('猫は家を走ります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('HOUSE', { definiteness: 'no' }), specifiers: [{ kind: 'path', value: 'through' }] } } })).ja)
+      .toBe('猫はどの家も走りません。');
+    // The plain locative, with no specifier, is still containment.
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE') } } })).ja).toBe('猫は家で走ります。');
+    expect(sayAll(clause(np('BOOK'), 'BE', { verbPhrase: { verb: 'BE', negative: true }, complements: through(np('HOUSE')) })).ja)
+      .toBe('本は家にありません。');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE'), 'in') })).ja).toBe('猫は家で走ります。');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE'), 'under') })).ja).toBe('猫は家の下で走ります。');
     expect(sayAll(clause(np('CAT'), 'BE', { complements: through(np('HOUSE')) })).ja).toBe('猫は家にいます。');
@@ -688,6 +732,14 @@ describe('known bugs: Japanese locative "through"', () => {
       de: 'der Kater läuft durch das Haus.',
       es: 'el gato corre por la casa.',
       pt: 'o gato corre pela casa.',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: through(np('HOUSE')) }))).toMatchObject({
+      en: 'the cat eats the mouse through the house.',
+      it: 'il gatto mangia il topo attraverso la casa.',
+      fr: 'le chat mange la souris à travers la maison.',
+      de: 'der Kater frisst die Maus durch das Haus.',
+      es: 'el gato come el ratón por la casa.',
+      pt: 'o gato come o rato pela casa.',
     });
   });
 });

@@ -5,7 +5,6 @@ import { isDirectionAdverb } from '../../functions/isDirectionAdverb.js';
 import { isFrequencyAdverb } from '../../functions/isFrequencyAdverb.js';
 import { modalChain } from '../../functions/modalChain.js';
 import { negationSources } from '../../functions/negationSources.js';
-import { objectPronounForm } from '../../functions/objectPronounForm.js';
 import { withComplementDefiniteness } from '../../functions/withComplementDefiniteness.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { passiveParticiple } from '../../functions/passiveParticiple.js';
@@ -20,6 +19,7 @@ import { doSupport } from './doSupport.js';
 import { modalAdverbEn } from './modalAdverbEn.js';
 import { modalFinite } from './modalFinite.js';
 import { npText } from './npText.js';
+import { objectPronounText } from './objectPronounText.js';
 import { verbGroupInfinitive } from './verbGroupInfinitive.js';
 
 /**
@@ -37,19 +37,25 @@ export function predicateParts(
   agent?: ResolvedNounElement,
 ): string[] {
   const parts = predicateWords(subjectForms, verbPhrase, directObject, complements, subjectIsNegative, agent);
-  return particleAfterPronoun(parts, verbPhrase, directObject);
+  return particleAfterPronoun(parts, subjectForms, verbPhrase, directObject);
 }
 
 /**
  * A phrasal verb's particle ("turn **off**", seeded as the `particle` form) follows a pronoun object
  * and may precede a noun one: "turn it off", never "*turn off it", but "turn off the light". Every
  * verb group ends on the particle ("do not turn off", "has turned off", "must turn off"), and the
- * object is the part right after it, so the particle moves across that one part.
+ * object is the part right after it, so the particle moves across that one part. The pronoun is
+ * spelled as the object slot spells it, reflexive included: "I put myself out" (A177).
  */
-function particleAfterPronoun(parts: string[], verbPhrase: ResolvedVerbPhrase, directObject?: ResolvedNounElement): string[] {
+function particleAfterPronoun(
+  parts: string[],
+  subjectForms: Record<string, string>,
+  verbPhrase: ResolvedVerbPhrase,
+  directObject?: ResolvedNounElement,
+): string[] {
   const particle = verbPhrase.verb.forms['particle'];
   const pronoun = directObject?.conjuncts.length === 1 && directObject.conjuncts[0].head.forms['person']
-    ? objectPronounForm(directObject.conjuncts[0].head.forms)
+    ? objectPronounText(directObject.conjuncts[0].head.forms, subjectForms)
     : undefined;
   if (!particle || !pronoun) return parts;
   const at = parts.indexOf(pronoun);
@@ -85,7 +91,8 @@ function predicateWords(
   const tense: Tense = mood === 'subjunctive' ? 'past' : (verbPhrase.tense ?? 'present');
 
   // A pronoun direct object takes its object form with no article ("sees me"), not the noun path
-  // that would give "the I"; a noun object renders as an ordinary noun phrase.
+  // that would give "the I"; a noun object renders as an ordinary noun phrase. A 1st- or 2nd-person
+  // pronoun that is the subject itself is reflexive, per conjunct: "I see myself and the cat" (A177).
   const modifierIsNegative = modifier?.forms['polarity'] === 'negative';
   // English has no negative concord, so exactly one of the clause's negation sources may surface and
   // the rest give way to the "any"-series NPI (see `negationSources`). A negator standing AHEAD of
@@ -109,10 +116,10 @@ function predicateWords(
   // string immediately after the verb, which is exactly where both belong ("is eaten by the cat in
   // the house"), so the passive needs no branch of its own.
   const directObjectText = passive
-    ? [passiveParticiple(lexical), agentPhrase(agent)].filter(Boolean).join(' ')
+    ? [passiveParticiple(lexical), agentPhrase(agent, subjectForms)].filter(Boolean).join(' ')
     : !directObject ? ''
     : coordinate(directObject, (np) =>
-      np.head.forms['person'] ? objectPronounForm(np.head.forms)
+      np.head.forms['person'] ? objectPronounText(np.head.forms, subjectForms)
       : alarmCry(lexical, np) ? npText(withDefiniteness(np, 'bare'))
       : npText(anyObject && np.head.forms['definiteness'] === 'no' ? withDefiniteness(np, 'any') : np));
   const adverbText = modifier ? (modifier.forms['base'] ?? '') : '';

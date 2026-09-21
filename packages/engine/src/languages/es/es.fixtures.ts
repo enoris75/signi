@@ -37,8 +37,8 @@ export const AGUA: Forms = { base: 'agua', gender: 'fem', stressed_a: '1', count
 export const DINERO: Forms = { base: 'dinero', gender: 'masc', count: 'singular', uncountable: '1' };
 export const COMIDA: Forms = { base: 'comida', gender: 'fem', count: 'singular', uncountable: '1' };
 export const CONTINENTE: Forms = { base: 'continente', plural: 'continentes', gender: 'masc', count: 'singular' };
-/** Proper names that go bare. */
-export const AFRICA: Forms = { base: 'África', gender: 'fem', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
+/** Proper names that go bare. "África" begins with a stressed a-: once articled, it takes "el" (A172). */
+export const AFRICA: Forms = { base: 'África', gender: 'fem', stressed_a: '1', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
 export const EUROPA: Forms = { base: 'Europa', gender: 'fem', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
 /** A proper name that is inherently articled ("la Antártida"). */
 export const ANTARTIDA: Forms = { base: 'Antártida', gender: 'fem', takes_article: '1', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };

@@ -10,6 +10,7 @@ import { genitiveS } from './genitiveS.js';
 import { germanCompound } from './germanCompound.js';
 import { modifierGenitives } from './modifierGenitives.js';
 import { possessorText } from './possessorText.js';
+import { possessedDeclension } from './possessedDeclension.js';
 import { postnominal } from './postnominal.js';
 import { subordinateClause } from './subordinateClause.js';
 import { weakN } from './weakN.js';
@@ -27,12 +28,10 @@ export function nounPhrase(np: ResolvedNounPhrase, _case: Case): string {
     ? genitiveS(compound, _case, forms, plural)
     : forms['weak'] === '1' ? weakN(compound, _case, plural) : datPluralN(compound, _case, plural);
   // A pronominal possessor ("sein Hund") is a prenominal ein-word possessive replacing the
-  // article, declined for this possessed head's case/gender/number. Following adjectives then take
-  // the mixed (ein-word) declension, so the phrase declines like an indefinite one.
+  // article, declined for this possessed head's case/gender/number. Following adjectives then
+  // decline as they do after "kein" (`possessedDeclension`): "sein großer Hund", "seine großen Hunde".
   const poss = np.possessor;
-  const pronominalPoss = poss && isPronominalPossessor(poss);
-  const definiteness = pronominalPoss ? 'indefinite' : (forms['definiteness'] ?? 'definite');
-  const declined = adjPhrase(np, _case, definiteness);
+  const declined = adjPhrase(np, _case, possessedDeclension(np, forms));
   const a = declined ? `${declined} ` : '';
   const art = poss && isPronominalPossessor(poss)
     ? possessiveDe(poss, _case, { gender: (forms['gender'] ?? 'neut') as 'masc' | 'fem' | 'neut', number: plural ? 'plural' : 'singular' })

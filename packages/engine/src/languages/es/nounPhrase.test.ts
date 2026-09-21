@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AGUA, ANTARTIDA, CASA, DINERO, EUROPA, type Forms, GATO, IDIOMA, LIBRO, PALABRA, RATON } from './es.fixtures.js';
+import { AFRICA, AGUA, ANTARTIDA, CASA, DINERO, EUROPA, type Forms, GATO, IDIOMA, LIBRO, PALABRA, RATON } from './es.fixtures.js';
 import { nounPhrase } from './nounPhrase.js';
 
 /** A countable feminine noun with a stressed a- ("el águila", "las águilas"). */
@@ -78,6 +78,15 @@ describe('nounPhrase', () => {
     expect(nounPhrase({ ...EUROPA, definiteness: 'this' })).toBe('Europa');
     expect(nounPhrase(ANTARTIDA)).toBe('la Antártida');
     expect(nounPhrase({ ...ANTARTIDA, definiteness: 'indefinite' })).toBe('la Antártida');
+  });
+
+  // A172: an adjective articles the bare name; a stressed a- takes "el" until a prenominal one parts them.
+  test('an adjective gives a bare proper name the definite article', () => {
+    expect(nounPhrase(EUROPA, { pre: '', post: 'afilada' })).toBe('la Europa afilada');
+    expect(nounPhrase({ ...EUROPA, definiteness: 'this' }, { pre: 'primera', post: '' })).toBe('la primera Europa');
+    expect(nounPhrase(AFRICA, { pre: '', post: 'grande' })).toBe('el África grande');
+    expect(nounPhrase(AFRICA, { pre: 'primera', post: '' })).toBe('la primera África');
+    expect(nounPhrase(AFRICA)).toBe('África');
   });
 
   test('sets the adjectives around the noun, after the determiner', () => {

@@ -55,3 +55,46 @@ again.
 | | |
 |---|---|
 | **Test** | `possession.test.ts` → *known bugs: German adjective after a plural possessive* (2 `test.fails`, plus a regression test for the cases already right) |
+
+## Resolved
+
+2026-09-21. Took the shape above.
+
+- **One helper for the three sites.** A new German function,
+  [`de/possessedDeclension.ts`](../../../packages/engine/src/languages/de/possessedDeclension.ts),
+  gives the determiner a phrase's adjectives decline after: `no` when a pronominal possessor fills
+  the slot, else the determiner in the head forms (`definite` when they carry none). It is German
+  grammar, so it sits in the German folder, the way `it/itPossessedHeadForms.ts` does for Italian, and
+  takes the forms `possessedHeadForms` returns. [`nounPhrase.ts`](../../../packages/engine/src/languages/de/nounPhrase.ts),
+  [`complementsPhrase.ts`](../../../packages/engine/src/languages/de/complementsPhrase/complementsPhrase.ts)
+  and [`agentPhrase.ts`](../../../packages/engine/src/languages/de/agentPhrase.ts) all call it now,
+  in place of the `'indefinite'` each one set for itself. `endingsFor` already had the right table
+  for `no`, so it is unchanged. `adjPhrase`'s mass-noun guard still reads the possessor itself, so
+  `mein kaltes Wasser` is unaffected.
+
+- **Tests:** [`packages/engine/test/possession.test.ts`](../../../packages/engine/test/possession.test.ts)
+  → *known bugs: German adjective after a plural possessive*. Both pinning `test.fails` are now
+  passing `test`s, with their assertions unchanged. New cases:
+  - the plural in every gender (`meine großen Katzen`, `meine großen Häuser`) and after every
+    possessive (`eure`, `seine`, `ihre`);
+  - the plural under every degree (`meine größeren Kater`, `meine größten Kater`, `meine am wenigsten
+    großen Kater`);
+  - the plural in the predicate and in the manner complement's nominative (`sind meine großen
+    Hunde`, `wie meine großen Hunde`);
+  - the plural genitive in the feminine, after two adjectives, and under `wegen` with a neuter;
+  - a regression test for the singular in the dative, the genitive and a complement's accusative
+    (`mit meinem großen Kater`, `wegen meines großen Katers`, `durch meine große Katze`), the
+    passive agent, a possessed mass noun in the dative, a dative plural place (`in meinen großen
+    Häusern`), and the article-less indefinite plural, which keeps the strong endings (`große Kater
+    laufen`).
+- **Unit tests:**
+  - `de/possessedDeclension.test.ts` is new;
+  - `de/nounPhrase.test.ts` checks the plural possessive in all four cases;
+  - `de/complementsPhrase/complementsPhrase.test.ts` checks it in the accusative (`durch`), the
+    genitive (`wegen`) and the dative (`mit`).
+
+The random phrase's pin asserts its opening. Once
+[A175](A175-superlative-under-an-indefinite-determiner.md) was fixed as well, it also asserts the
+whole German sentence.
+
+No passing test changed its expectation.

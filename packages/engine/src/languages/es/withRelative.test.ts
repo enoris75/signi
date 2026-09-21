@@ -1,5 +1,8 @@
 import { describe, expect, test } from 'vitest';
-import { ARDER, CASA, COMER, COMIDA, complement, CORRER, CREADOR, DAR, el, type Forms, FRASE, GATO, LIBRO, MUJER, NINO, nounModifier, np, SE, vp, YO } from './es.fixtures.js';
+import {
+  ARDER, CASA, COMER, COMIDA, complement, CORRER, CREADOR, DAR, EL, el, ELLA, ELLOS, type Forms, FRASE, GATO, LIBRO, MUJER, NINO, NOSOTROS,
+  nounModifier, np, SE, TU, VER, vp, YO,
+} from './es.fixtures.js';
 import { withRelative } from './withRelative.js';
 
 const LLORAR: Forms = { base: 'llorar', '3sg_present': 'llora', '3pl_present': 'lloran' };
@@ -31,7 +34,29 @@ describe('withRelative', () => {
     const read = (subject: Forms, extra: Forms = {}) =>
       ({ headRole: 'directObject' as const, subject: el(np(subject, extra)), verbPhrase: vp(LEER) });
     expect(withRelative('el libro', np(LIBRO, {}, { relative: read(NINO, { number: 'plural' }) }))).toBe('el libro que los niños leen');
-    expect(withRelative('el libro', np(LIBRO, {}, { relative: read(YO) }))).toBe('el libro que yo leo');
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: read(YO) }))).toBe('el libro que leo');
+  });
+
+  // A173: a pronoun subject drops, as in the main clause, unless "que" would then read as a subject
+  // relative: the verb agrees with the head too, in the 3rd person or in a form shared with it.
+  test('a pronoun subject drops where the verb still tells it from the head', () => {
+    const sees = (subject: Forms, verbPhrase = vp(VER)) => ({ headRole: 'directObject' as const, subject: el(np(subject)), verbPhrase });
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: sees(NOSOTROS) }))).toBe('el libro que vemos');
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: sees(TU) }))).toBe('el libro que ves');
+    expect(withRelative('el gato', np(GATO, {}, { relative: sees(EL) }))).toBe('el gato que él ve');
+    expect(withRelative('el gato', np(GATO, {}, { relative: sees(ELLA) }))).toBe('el gato que ella ve');
+    expect(withRelative('los gatos', np(GATO, { number: 'plural' }, { relative: sees(ELLOS) }))).toBe('los gatos que ellos ven');
+    expect(withRelative('los gatos', np(GATO, { number: 'plural' }, { relative: sees(EL) }))).toBe('los gatos que ve');
+    expect(withRelative('el gato', np(GATO, {}, { relative: sees(ELLOS) }))).toBe('el gato que ven');
+    // The 1st singular shares its conditional and imperfect-subjunctive form with the 3rd.
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: sees(YO, vp(COMER, { mood: 'conditional' })) }))).toBe('el libro que yo comería');
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: sees(YO, vp(COMER, { mood: 'subjunctive' })) }))).toBe('el libro que yo comiera');
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: sees(TU, vp(COMER, { mood: 'conditional' })) }))).toBe('el libro que comerías');
+    // "donde" marks the gap itself, so even the 3rd person drops.
+    expect(withRelative('la casa', np(CASA, {}, { relative: { headRole: 'locative', subject: el(np(EL)), verbPhrase: vp(COMER) } })))
+      .toBe('la casa donde come');
+    expect(withRelative('el libro', np(LIBRO, {}, { relative: { headRole: 'directObject', subject: el(np(YO), np(EL)), verbPhrase: vp(VER) } })))
+      .toBe('el libro que yo y él vemos');
   });
 
   test('a gap with no subject of its own agrees with the head', () => {

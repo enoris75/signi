@@ -1215,14 +1215,16 @@ describe('a genitive relative clause — "the cat whose book …"', () => {
 });
 
 // A173. Italian, Spanish and Portuguese drop a pronoun subject by default, and A40 made the main clause
-// do so. A relative clause builds its own subject text and still prints it: "il libro che io leggo".
-// Only the 1st and 2nd persons are pinned. A dropped 3rd person (or Portuguese você) that agrees with
-// the head would read as a subject relative, "il gatto che vede", and is the fixer's to rule on.
+// do so. A relative clause builds its own subject text and still printed it: "il libro che io leggo".
+// Fixed: `relativeDropsSubject` drops a single pronoun subject in every person, except where the bare
+// "che" / "que" would then read as a subject relative, the verb rendered with the pronoun's agreement
+// being the one rendered with the head's: "il gatto che lui vede", "o livro que você mostra", and a
+// form shared across persons ("ningún gato que yo vea"). A relativizer that marks the gap drops it.
 describe('known bugs: a pronoun subject in a relative clause', () => {
   const bookThat = (subject: NonNullable<RelativeClause['subject']>, verbPhrase: Partial<VerbPhrase> = {}) =>
     sayAll(clause(np('BOOK', { relative: { headRole: 'directObject', subject, verbPhrase: { verb: 'READ', ...verbPhrase } } }), 'BURN'));
 
-  test.fails('a 1st-person pronoun subject is dropped', () => {
+  test('a 1st-person pronoun subject is dropped', () => {
     expect(bookThat(np('FIRST_PERSON'))).toMatchObject({
       it: 'il libro che leggo brucia.', // now: "che io leggo"
       es: 'el libro que leo arde.',     // now: "que yo leo"
@@ -1236,7 +1238,7 @@ describe('known bugs: a pronoun subject in a relative clause', () => {
     });
   });
 
-  test.fails('a 2nd-person pronoun subject is dropped in Italian and Spanish', () => {
+  test('a 2nd-person pronoun subject is dropped in Italian and Spanish', () => {
     expect(bookThat(np('SECOND_PERSON'))).toMatchObject({
       it: 'il libro che leggi brucia.', // now: "che tu leggi"
       es: 'el libro que lees arde.',    // now: "que tú lees"
@@ -1246,7 +1248,7 @@ describe('known bugs: a pronoun subject in a relative clause', () => {
     });
   });
 
-  test.fails('a complement relative drops it too, as in the random phrase that found it', () => {
+  test('a complement relative drops it too, as in the random phrase that found it', () => {
     expect(sayAll(clause(np('HOUSE', { relative: { headRole: 'locative', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'BURN')))
       .toMatchObject({
         it: 'la casa dove mangio brucia.', // now: "dove io mangio"
@@ -1266,6 +1268,52 @@ describe('known bugs: a pronoun subject in a relative clause', () => {
     })).toMatchObject({
       it: "i sentimenti ugualmente marroni stavano per dividere lentamente un vecchio sentimento forte che spegniamo su come l'Europa affilata?",
       pt: 'os sentimentos igualmente castanhos estavam prestes a dividir devagar um sentimento velho e alto que apagamos para cima como a Europa afiada?',
+      // With A172 fixed too, the whole Spanish phrase is right.
+      es: '¿los sentimientos igual de marrones estaban a punto de dividir lentamente un sentimiento viejo y fuerte que apagamos arriba como la Europa afilada?',
+    });
+  });
+
+  // The 3rd person drops too, unless the bare complementizer would then read as a subject relative:
+  // the verb the pronoun's agreement renders is the one the head's renders. A number or person the
+  // head does not have marks another subject, and so does a relativizer that marks the gap.
+  test('the pronoun stays only where dropping it would read as a subject relative', () => {
+    const catThat = (subject: NonNullable<RelativeClause['subject']>, head: Partial<NounPhrase> = {}, verbPhrase: Partial<VerbPhrase> = {}) =>
+      sayAll(clause(np('CAT', { ...head, relative: { headRole: 'directObject', subject, verbPhrase: { verb: 'SEE', ...verbPhrase } } }), 'RUN'));
+    // Kept: the verb agrees with the head as well.
+    expect(catThat(np('THIRD_PERSON'))).toMatchObject({
+      it: 'il gatto che lui vede corre.', es: 'el gato que él ve corre.', pt: 'o gato que ele vê corre.',
+    });
+    expect(catThat(np('THIRD_PERSON', { gender: 'fem' }))).toMatchObject({ it: 'il gatto che lei vede corre.', es: 'el gato que ella ve corre.' });
+    expect(catThat(np('THIRD_PERSON', { number: 'plural' }), { number: 'plural' })).toMatchObject({
+      it: 'i gatti che loro vedono corrono.', es: 'los gatos que ellos ven corren.', pt: 'os gatos que eles veem correm.',
+    });
+    expect(catThat(np('SECOND_PERSON')).pt).toBe('o gato que você vê corre.');
+    // Dropped: the verb's number differs from the head's.
+    expect(catThat(np('THIRD_PERSON'), { number: 'plural' })).toMatchObject({
+      it: 'i gatti che vede corrono.', es: 'los gatos que ve corren.', pt: 'os gatos que vê correm.',
+    });
+    expect(catThat(np('THIRD_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'il gatto che vedono corre.', es: 'el gato que ven corre.', pt: 'o gato que veem corre.',
+    });
+    expect(catThat(np('SECOND_PERSON'), { number: 'plural' })).toMatchObject({ it: 'i gatti che vedi corrono.', pt: 'os gatos que vê correm.' });
+    // Kept: a 1st person singular syncretic with the 3rd, in the Spanish and Portuguese imperfect and
+    // in the subjunctive a `no` head takes (A170). Italian's forms differ, so it drops.
+    expect(catThat(np('FIRST_PERSON'), {}, { tense: 'past', aspect: 'progressive' })).toMatchObject({
+      it: 'il gatto che stavo vedendo corre.', es: 'el gato que yo estaba viendo corre.', pt: 'o gato que eu estava vendo corre.',
+    });
+    expect(catThat(np('FIRST_PERSON'), { definiteness: 'no' })).toMatchObject({
+      it: 'nessun gatto che vedo corre.', es: 'ningún gato que yo vea corre.', pt: 'nenhum gato que eu veja corre.',
+    });
+    expect(catThat(np('FIRST_PERSON', { number: 'plural' }), { definiteness: 'no' })).toMatchObject({
+      es: 'ningún gato que veamos corre.', pt: 'nenhum gato que vejamos corre.',
+    });
+    // Dropped: "dove", "donde", "onde" and a preposition + relative mark the gap themselves.
+    const houseWhere = (headSpecifiers?: RelativeClause['headSpecifiers']) => sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', ...(headSpecifiers ? { headSpecifiers } : {}), subject: np('THIRD_PERSON'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN'));
+    expect(houseWhere()).toMatchObject({ it: 'la casa dove mangia brucia.', es: 'la casa donde come arde.', pt: 'a casa onde come arde.' });
+    expect(houseWhere([{ kind: 'path', value: 'under' }])).toMatchObject({
+      it: 'la casa sotto la quale mangia brucia.', es: 'la casa debajo de la que come arde.', pt: 'a casa debaixo da qual come arde.',
     });
   });
 

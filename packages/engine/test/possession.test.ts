@@ -497,21 +497,24 @@ describe('documented simplifications fixed: German genitive', () => {
 // weak -en in the plural ("meine großen Kater", "meiner großen Hunde"). The builders decline a
 // possessed phrase as `indefinite`, and an indefinite plural has no article, so the plural
 // nominative, accusative and genitive come out strong ("meine große Kater").
+// Fixed: the builders decline a possessed phrase as `no` (`possessedDeclension`), whose endings are
+// the possessive's.
 describe('known bugs: German adjective after a plural possessive', () => {
   const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
   const her = { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } as const;
   const bigMine = (concept: string, extra: Partial<NounPhrase> = {}) =>
     np(concept, { number: 'plural', adjectives: ['BIG'], possessor: my, ...extra });
 
-  test.fails('the plural nominative and accusative take the weak -en', () => {
+  test('the plural nominative and accusative take the weak -en', () => {
     expect(sayAll(clause(bigMine('CAT'), 'RUN')).de).toBe('meine großen Kater laufen.'); // now: "meine große Kater"
     expect(sayAll(clause(bigMine('CAT', { possessor: { ...my, number: 'plural' } }), 'RUN')).de).toBe('unsere großen Kater laufen.');
     expect(sayAll(clause(bigMine('CAT', { adjectives: ['BIG', 'BROWN'], possessor: her }), 'RUN')).de).toBe('ihre großen braunen Kater laufen.');
     expect(sayAll(clause(np('DOG'), 'SEE', { directObject: bigMine('CAT') })).de).toBe('der Hund sieht meine großen Kater.');
     expect(sayAll(clause(np('DOG'), 'RUN', { complements: { route: { phrase: bigMine('HOUSE') } } })).de)
       .toBe('der Hund läuft durch meine großen Häuser.');
-    // The random phrase that found it (seed 942887). Only its opening is asserted: A175 changes its end.
-    expect(sayAll({
+    // The random phrase that found it (seed 942887). Its opening was asserted alone while A175 changed
+    // its end; with both fixed, the whole sentence is right.
+    const phrase = sayAll({
       subject: np('FEELING', { number: 'plural', adjectives: ['DOMESTIC', 'BAD'], adjectiveDegrees: ['positive', 'least'], possessor: her }),
       verbPhrase: { verb: 'USE', aspect: 'resultative', negative: true },
       directObject: np('PERSON', {
@@ -519,13 +522,65 @@ describe('known bugs: German adjective after a plural possessive', () => {
         relative: { verbPhrase: { verb: 'START' }, headRole: 'directObject', subject: np('ANIMAL', { definiteness: 'indefinite', adjectives: ['SMALL'], adjectiveDegrees: ['equally'] }) },
       }),
       complements: { manner: { phrase: np('PHRASE', { definiteness: 'bare', adjectives: ['HUNGRY'], adjectiveDegrees: ['least'] }) } },
-    }).de).toMatch(/^ihre zahmen am wenigsten schlechten Gefühle haben /); // now: "ihre zahme am wenigsten schlechte"
+    }).de;
+    expect(phrase).toMatch(/^ihre zahmen am wenigsten schlechten Gefühle haben /); // now: "ihre zahme am wenigsten schlechte"
+    expect(phrase).toBe('ihre zahmen am wenigsten schlechten Gefühle haben jene hungrige faule Person, die ein gleich kleines Tier beginnt, nicht wie die am wenigsten hungrige Phrase verwendet.');
   });
 
-  test.fails('the plural genitive takes the weak -en', () => {
+  test('the plural genitive takes the weak -en', () => {
     expect(sayAll(clause(np('BOOK', { possessor: bigMine('DOG') }), 'BURN')).de).toBe('das Buch meiner großen Hunde brennt.'); // now: "großer"
     expect(sayAll(clause(np('DOG'), 'CRY', { complements: { cause: { phrase: bigMine('CAT') } } })).de)
       .toBe('der Hund weint wegen meiner großen Kater.');
+  });
+
+  // The plural in every gender, after every possessive, under every degree, and in the predicate
+  // and the manner complement's nominative.
+  test('the plural takes the weak -en in every gender, person, degree and nominative position', () => {
+    const de = (subject: NounPhrase) => sayAll(clause(subject, 'RUN')).de;
+    expect(de(bigMine('CAT', { gender: 'fem' }))).toBe('meine großen Katzen laufen.');
+    expect(sayAll(clause(bigMine('HOUSE'), 'BURN')).de).toBe('meine großen Häuser brennen.');
+    expect(sayAll(clause(bigMine('HOUSE', { possessor: { ...my, person: '2', number: 'plural' } }), 'BURN')).de)
+      .toBe('eure großen Häuser brennen.');
+    expect(de(bigMine('DOG', { possessor: { ...my, person: '3' } }))).toBe('seine großen Hunde laufen.');
+    expect(de(bigMine('DOG', { possessor: { ...my, person: '3', number: 'plural' } }))).toBe('ihre großen Hunde laufen.');
+    expect(de(bigMine('CAT', { adjectiveDegrees: ['more'] }))).toBe('meine größeren Kater laufen.');
+    expect(de(bigMine('CAT', { adjectiveDegrees: ['most'] }))).toBe('meine größten Kater laufen.');
+    expect(de(bigMine('CAT', { adjectiveDegrees: ['least'] }))).toBe('meine am wenigsten großen Kater laufen.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'BE', { complements: { predicative: { phrase: bigMine('DOG') } } })).de)
+      .toBe('die Kater sind meine großen Hunde.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: bigMine('DOG') } } })).de)
+      .toBe('der Kater läuft wie meine großen Hunde.');
+  });
+
+  test('the plural genitive takes the weak -en in every gender and after two adjectives', () => {
+    expect(sayAll(clause(np('BOOK', { possessor: bigMine('CAT', { gender: 'fem' }) }), 'BURN')).de)
+      .toBe('das Buch meiner großen Katzen brennt.');
+    expect(sayAll(clause(np('BOOK', { possessor: bigMine('DOG', { adjectives: ['BIG', 'BROWN'] }) }), 'BURN')).de)
+      .toBe('das Buch meiner großen braunen Hunde brennt.');
+    expect(sayAll(clause(np('DOG'), 'CRY', { complements: { cause: { phrase: bigMine('HOUSE') } } })).de)
+      .toBe('der Hund weint wegen meiner großen Häuser.');
+  });
+
+  // Regression: the singular in the dative, the genitive and a complement's accusative, the dative
+  // plural of a place, and the article-less indefinite plural, which keeps the strong endings.
+  test('the singular in every case, a dative plural place and the indefinite plural are unchanged', () => {
+    const my1 = (concept: string, extra: Partial<NounPhrase> = {}) => np(concept, { adjectives: ['BIG'], possessor: my, ...extra });
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { comitative: { phrase: my1('CAT') } } })).de)
+      .toBe('der Hund läuft mit meinem großen Kater.');
+    expect(sayAll(clause(np('DOG'), 'CRY', { complements: { cause: { phrase: my1('CAT') } } })).de)
+      .toBe('der Hund weint wegen meines großen Katers.');
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { locative: { phrase: my1('HOUSE') } } })).de)
+      .toBe('der Hund läuft in meinem großen Haus.');
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { route: { phrase: my1('CAT', { gender: 'fem' }) } } })).de)
+      .toBe('der Hund läuft durch meine große Katze.');
+    expect(sayAll(clause(my1('CAT'), 'SEE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).de)
+      .toBe('das Buch wird von meinem großen Kater gesehen.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { comitative: { phrase: np('WATER', { adjectives: ['COLD'], possessor: my }) } } })).de)
+      .toBe('der Kater läuft mit meinem kalten Wasser.');
+    expect(sayAll(clause(np('DOG'), 'RUN', { complements: { locative: { phrase: bigMine('HOUSE') } } })).de)
+      .toBe('der Hund läuft in meinen großen Häusern.');
+    expect(sayAll(clause(np('CAT', { number: 'plural', adjectives: ['BIG'], definiteness: 'indefinite' }), 'RUN')).de)
+      .toBe('große Kater laufen.');
   });
 
   // Regression: the singular, the dative plural, a mass noun and "kein" already decline right.

@@ -1,7 +1,7 @@
 import type { NounPhrase } from '@signi/shared';
 import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
-import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS } from '../translator.consts.js';
+import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
 import { applyNounGender } from './applyNounGender.js';
 import { resolve } from './resolve.js';
@@ -59,7 +59,15 @@ export function resolveNounPhrase(np: NounPhrase, language: string, lookup: Lexi
     // so each engine reads it off forms. Some quantifiers are inherently plural ("many
     // boys", "all boys"), so they force the plural surface — but only when the noun has
     // one (mass nouns like "water" stay singular: "some water").
-    const picked = np.definiteness ?? 'definite';
+    // A relative superlative ("most", "least") picks one member out of a set, so the phrase is
+    // definite whatever indefinite or bare determiner was picked: "the biggest dog", "il cane più
+    // grande", "der größte Hund". Resolved here, once for every language (A175): Italian, Spanish and
+    // Portuguese tell the superlative from the comparative by that article alone ("un cane più
+    // grande" is "a bigger dog"), and German and French would decline or article it wrong.
+    const superlative = (np.adjectives ?? []).some((_, i) => SUPERLATIVE_DEGREES.has(np.adjectiveDegrees?.[i] ?? 'positive'));
+    const picked = superlative && SUPERLATIVE_MAKES_DEFINITE.has(np.definiteness ?? 'definite')
+      ? 'definite'
+      : np.definiteness ?? 'definite';
     const definiteness =
       picked === 'indefinite' && OTHER_REPLACES_INDEFINITE.has(language) && np.adjectives?.includes('OTHER')
         ? 'bare'

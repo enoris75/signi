@@ -8,6 +8,7 @@ import { relativeGapComplement } from '../../functions/relativeGapComplement.js'
 import { relativePossessed } from '../../functions/relativePossessed.js';
 import { relativeSubjectIsNegative } from '../../functions/relativeSubjectIsNegative.js';
 import { relativePrepositionalHead } from '../../functions/relativePrepositionalHead.js';
+import { relativeDropsSubject } from '../../functions/relativeDropsSubject.js';
 import { agentPhrase } from './agentPhrase.js';
 import { complementsPhrase } from './complementsPhrase.js';
 import { modifierText } from './modifierText.js';
@@ -20,7 +21,9 @@ import { subjectText } from './subjectText.js';
 /**
  * Append a noun phrase's attributive nouns, possessor, and relative clause (invariant
  * "que" + predicate). A subject-relative agrees with the head ("el niño que llora"); an
- * object-relative carries the clause's own subject, which drives agreement ("el libro que yo leo").
+ * object-relative carries the clause's own subject, which drives agreement ("el libro que el gato
+ * lee"). A pronoun subject is dropped, as in the main clause ("el libro que leo"), unless the clause
+ * would then read as a subject relative ("el gato que él ve", see `relativeDropsSubject`, A173).
  * When the head fills a complement, the relativizer is that complement's preposition with the
  * article and "que", agreeing with the head ("la casa debajo de la que el gato come", "el niño al que el hombre da el libro").
  * A plain locative gap is the relative adverb "donde" instead ("un lugar donde se vive", C07). A possessor gap is the genitive relative
@@ -57,17 +60,21 @@ export function withRelative(text: string, np: ResolvedNounPhrase): string {
     && (np.head.forms['number'] ?? np.head.forms['count']) === 'plural';
   const agreeForms = subjectRelative ? np.head.forms
     : passiveSe ? { ...rel.subject!.agreement, number: 'plural' } : rel.subject!.agreement;
-  // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
-  // on agreeForms), not as a subject word — "una cosa que se come".
-  const subjText = subjectRelative || isGenericSubject(rel.subject!) ? '' : subjectText(rel.subject!);
   // Whether the relative's OWN subject negates it, asked of the clause and not of `agreeForms`: a
   // subject relative agrees with its head, but a `no` head negates the matrix clause, so the relative
   // keeps its "no" ("ningún gato que no coma corre", A167).
-  const clause = predicateText(agreeForms, verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+  const predicateFor = (forms: Record<string, string>) =>
+    predicateText(forms, verbPhrase, rel.directObject, rel.complements, rel.agent, relativeSubjectIsNegative(rel));
+  const clause = predicateFor(agreeForms);
   const gap = relativeGapComplement(np, QUE);
   const agentGap = relativeAgentGap(np, QUE);
   const relativizer = agentGap ? agentPhrase(agentGap)
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'donde' : gap ? complementsPhrase(gap, {}, '') : 'que';
+  // An impersonal ("se") subject is emitted as a proclitic by predicateText (off the generic flag
+  // on agreeForms), not as a subject word — "una cosa que se come". A pronoun subject is dropped as
+  // in the main clause, "el libro que leo", where that leaves no subject-relative reading (A173).
+  const subjText = subjectRelative || isGenericSubject(rel.subject!) || relativeDropsSubject(np, relativizer === 'que', predicateFor)
+    ? '' : subjectText(rel.subject!);
   return `${withPoss} ${relativizer} ${[subjText, clause].filter(Boolean).join(' ')}`.trimEnd();
 }

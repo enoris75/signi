@@ -59,8 +59,8 @@ export const TEMPERATURE: Forms = { base: 'temperature', plural: 'temperatures',
 
 // ── Lexicon: pronouns ───────────────────────────────────────────────────────
 
-export const I: Forms = { base: 'I', person: '1', number: 'singular', plural: 'we', disjunctive: 'me', disjunctive_plural: 'us', object: 'me', object_plural: 'us' };
-export const YOU: Forms = { base: 'you', person: '2', number: 'singular', plural: 'you', disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you' };
+export const I: Forms = { base: 'I', person: '1', number: 'singular', plural: 'we', disjunctive: 'me', disjunctive_plural: 'us', object: 'me', object_plural: 'us', reflexive: 'myself', reflexive_plural: 'ourselves' };
+export const YOU: Forms = { base: 'you', person: '2', number: 'singular', plural: 'you', disjunctive: 'you', disjunctive_plural: 'you', object: 'you', object_plural: 'you', reflexive: 'yourself', reflexive_plural: 'yourselves' };
 export const HE: Forms = {
   base: 'he', person: '3', number: 'singular', gender: 'masc', singular_fem: 'she', singular_neut: 'it', plural: 'they',
   disjunctive: 'him', disjunctive_fem: 'her', disjunctive_neut: 'it', disjunctive_plural: 'them',

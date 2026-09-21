@@ -84,7 +84,9 @@ export const REL_NOUN: Record<PathSpecifier, string> = {
  * carried by the particle alone (家で, 市場を), so deriving a label would name both 「で」. Cited on
  * their own they take the 中 and the 通る the particle leaves implicit, which is how a dictionary
  * writes them. Whole tails rather than a noun plus a particle, because traversal ends in a te-form
- * (を通って) and not in a case particle at all.
+ * (を通って) and not in a case particle at all. A clause borrows the traversal tail for a *locative*
+ * `through` (家を通って走ります, see `complementSegs`): a route's を marks the path, but a place's で
+ * says only where.
  */
 export const PATH_CITATION: Record<PathSpecifier, string> = {
   in: 'の中で',

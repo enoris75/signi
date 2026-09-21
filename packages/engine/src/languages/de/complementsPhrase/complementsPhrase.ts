@@ -22,6 +22,7 @@ import { genitiveShows } from '../genitiveShows.js';
 import { germanCompound } from '../germanCompound.js';
 import { modifierGenitives } from '../modifierGenitives.js';
 import { nounPhrase } from '../nounPhrase.js';
+import { possessedDeclension } from '../possessedDeclension.js';
 import { possessorText } from '../possessorText.js';
 import { postnominal } from '../postnominal.js';
 import { prepDet } from '../prepDet.js';
@@ -85,12 +86,13 @@ export function complementsPhrase(
       const idiom = type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS);
       if (idiom) return idiom;
       // A possessive is an ein-word in place of the article, so the head is the preposition alone and
-      // the adjectives decline mixed ("in meinem kleinen Haus", "deinem Hund"). A bare-name place
-      // modified by an adjective takes the article instead, and fuses ("im großen Asien").
+      // the adjectives decline as they do after "kein" ("in meinem kleinen Haus", "deinem Hund",
+      // "durch meine großen Häuser", see `possessedDeclension`). A bare-name place modified by an
+      // adjective takes the article instead, and fuses ("im großen Asien").
       const poss = np.possessor && isPronominalPossessor(np.possessor) ? np.possessor : undefined;
       const f = articledNameForms(np, possessedHeadForms(np, 'bare'));
       const plural = (f['number'] ?? f['count']) === 'plural';
-      const definiteness = poss ? 'indefinite' : (f['definiteness'] ?? 'definite');
+      const definiteness = possessedDeclension(np, f);
       const compound = germanCompound(np, plural ? (f['plural'] ?? f['base'] ?? '') : (f['base'] ?? ''));
       // route/locative → spatial preposition (+ its case); direction/source → two-way preps +
       // dative; the cause "wegen" → genitive. The in+dem=im / zu+dem=zum / zu+der=zur fusions fire

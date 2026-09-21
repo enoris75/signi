@@ -62,6 +62,19 @@ describe('nounPhrase', () => {
     expect(nounPhrase(phrase, 'acc')).toBe('meinen kleinen Kater');
   });
 
+  // A174: a possessive declines as "kein" does, so the plural takes the weak -en, not the strong
+  // endings of an article-less plural.
+  test('after a plural possessive the adjective takes the weak -en in every case', () => {
+    const phrase = np(KATER, { number: 'plural' }, {
+      adjectives: [adj(GROSS)],
+      possessor: { kind: 'pronominal', person: '1', number: 'singular' },
+    });
+    expect(nounPhrase(phrase, 'nom')).toBe('meine großen Kater');
+    expect(nounPhrase(phrase, 'acc')).toBe('meine großen Kater');
+    expect(nounPhrase(phrase, 'dat')).toBe('meinen großen Katern');
+    expect(nounPhrase(phrase, 'gen')).toBe('meiner großen Kater');
+  });
+
   // B09: a noun possessor trails in the genitive, whatever the head's own case.
   test('a noun possessor trails in the genitive', () => {
     expect(nounPhrase(np(BUCH, {}, { possessor: np(JUNGE) }), 'nom')).toBe('das Buch des Jungen');
