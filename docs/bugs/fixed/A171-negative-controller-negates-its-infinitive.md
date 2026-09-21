@@ -5,7 +5,7 @@
 A `no` subject negates its own clause, and nothing else. An infinitive complement or a clause of
 purpose is a clause of its own, whose unspoken subject is controlled by the matrix subject. "No cat
 desires not to eat" has two negations, one per clause, and "no cat desires to eat" has only the
-matrix one. [A167](../fixed/A167-negative-head-erases-relative-polarity.md) made the same point for a
+matrix one. [A167](A167-negative-head-erases-relative-polarity.md) made the same point for a
 relative clause under a `no` head.
 
 The translator resolves both embedded clauses with the controller as their subject
@@ -69,3 +69,61 @@ its subject from the other slot by the same path.
 | | |
 |---|---|
 | **Test** | `negation.test.ts` → *known bugs: a negative controller negates its infinitive* (2 `test.fails`, plus a regression test for the languages and shapes already right) |
+
+## Resolved
+
+2026-09-21. Took the translator shape, which fixed English, German and Japanese outright. Two
+engines needed the explicit shape as well, because they never read the embedded clause's subject.
+
+- **The subject the translator hands over.** A new function,
+  [`translator/functions/controlledSubject.ts`](../../../packages/engine/src/translator/functions/controlledSubject.ts),
+  changes every `no` conjunct of the controller to the definite and keeps any other determiner,
+  plus the person, number and gender a predicate adjective agrees with. It works on the plan, so
+  resolution (group agreement, `subject_sense`) runs as before.
+  [`resolvePhrase.ts`](../../../packages/engine/src/translator/functions/resolvePhrase.ts) calls it
+  in `resolveInfinitiveComplement`, under both subject and object control, and on the `purpose`
+  branch. The matrix clause keeps its own `no`.
+- **Italian and French.** Their `infinitiveComplementText`
+  ([`it/`](../../../packages/engine/src/languages/it/infinitiveComplementText.ts),
+  [`fr/`](../../../packages/engine/src/languages/fr/infinitiveComplementText.ts)) builds the
+  infinitive from the matrix controller's own forms (`infinitiveController`), `no` included, and
+  not from the resolved subject. So it now passes `subjectIsNegative: false` to `predicateText`
+  explicitly, the trailing parameter [A167](A167-negative-head-erases-relative-polarity.md) added.
+  Spanish and Portuguese needed nothing: their `predicateText` returns the infinitive before it
+  reads the flag.
+- **Object control, which the file asked to check, had the same defect.** `the cat causes no dog
+  not to eat` rendered `causes no dog to eat` / `a mangiare` / `à ne manger` / `, zu fressen`, and
+  French also printed `à ne manger` for the positive clause. The same two changes fix it. Japanese
+  needed one more:
+  [`ja/buildClauseSegments.ts`](../../../packages/engine/src/languages/ja/buildClauseSegments.ts)
+  speaks the causee inside the embedded clause (`どの犬も`) and takes it from the matrix's direct
+  object, so its `no` never reached the matrix predicate. Its negation had come from the embedded
+  subject instead, so `the cat causes no dog to eat` rendered `猫はどの犬も食べないようにします`
+  ("the cat makes it so that no dog eats"). A `no` causee now negates the causing predicate, as a
+  `no` object does, and the embedded clause keeps its own polarity: `猫はどの犬も食べるようにしません`,
+  and `猫はどの犬も食べないようにしません` for the negated clause.
+
+**Found while fixing, not fixed: a coordinated controller loses its `subject_sense` in German.**
+`no cat and no dog desire not to eat` renders `kein Kater und kein Hund wünschen, nicht zu essen`,
+where each animal alone takes `fressen`. This happens at HEAD too, in either polarity, so it is
+not this defect.
+
+- **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)
+  → *known bugs: a negative controller negates its infinitive*. Both pinning `test.fails` are now
+  passing `test`s, with their assertions unchanged. New cases:
+  - a `no` causee in all seven languages, with a positive and a negated clause. A regression
+    guard checks a `no` subject over a definite causee;
+  - a nested infinitive under a `no` controller (`nessun gatto desidera essere capace di non
+    mangiare`);
+  - a predicate adjective that still agrees with a feminine `no` controller (`nessuna gatta desidera
+    non essere attenta`, `aucune chatte ne désire ne pas être prudente`);
+  - a negated purpose clause with its own object;
+  - a coordinated `no` controller.
+- **Unit tests:**
+  - [`translator/functions/controlledSubject.test.ts`](../../../packages/engine/src/translator/functions/controlledSubject.test.ts)
+    is new;
+  - `resolvePhrase.test.ts` checks that the infinitive's subject, under either control, and the
+    purpose's subject are handed over definite, while the matrix keeps its `no`;
+  - `it/infinitiveComplementText.test.ts` and `fr/infinitiveComplementText.test.ts` check a `no`
+    controller in both polarities;
+  - `ja/buildClauseSegments.test.ts` checks that a `no` causee negates the causing predicate.

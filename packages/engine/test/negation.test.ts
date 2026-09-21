@@ -982,7 +982,7 @@ describe('known bugs: a negative controller negates its infinitive', () => {
   const runs = (negative: boolean) =>
     sayAll(clause(noCat(), 'RUN', { purpose: { verbPhrase: { verb: 'EAT', negative } } }));
 
-  test.fails('a negated infinitive complement under a `no` subject keeps its own negation', () => {
+  test('a negated infinitive complement under a `no` subject keeps its own negation', () => {
     expect(desires(true)).toMatchObject({
       en: 'no cat desires not to eat.', // now: "no cat desires to eat."
       it: 'nessun gatto desidera non mangiare.', // now: "desidera mangiare"
@@ -997,7 +997,7 @@ describe('known bugs: a negative controller negates its infinitive', () => {
     });
   });
 
-  test.fails('a positive infinitive under a `no` subject stays positive (fr, ja)', () => {
+  test('a positive infinitive under a `no` subject stays positive (fr, ja)', () => {
     expect(desires(false)).toMatchObject({
       fr: 'aucun chat ne désire manger.', // now: "ne désire ne manger"
       ja: 'どの猫も食べることを望んでいません。', // now: 食べないこと
@@ -1030,5 +1030,95 @@ describe('known bugs: a negative controller negates its infinitive', () => {
       });
     expect(sayAll(clause(np('CAT'), 'RUN', { purpose: { verbPhrase: { verb: 'EAT' } } })))
       .toMatchObject({ fr: 'le chat court pour manger.', ja: '猫は食べるために走ります。' });
+  });
+
+  // Object control takes its subject by the same path. A `no` causee negates the causing clause, as a
+  // `no` object always does, and the clause it controls keeps its own polarity. Japanese speaks the
+  // causee inside that clause (どの犬も), but its negation is still the causing predicate's (しません).
+  test('a `no` causee negates the causing clause, and the clause it controls keeps its own polarity', () => {
+    const causes = (object: NounPhrase, negative: boolean, subject = np('CAT')) => sayAll(clause(subject, 'CAUSE_VERB', {
+      directObject: object, infinitiveComplement: { verbPhrase: { verb: 'EAT', negative }, control: 'object' },
+    }));
+    expect(causes(noNP('DOG'), false)).toEqual({
+      en: 'the cat causes no dog to eat.',
+      it: 'il gatto non induce nessun cane a mangiare.',
+      fr: "le chat n'induit aucun chien à manger.", // was "à ne manger"
+      de: 'der Kater veranlasst keinen Hund, zu fressen.',
+      es: 'el gato no induce ningún perro a comer.',
+      ja: '猫はどの犬も食べるようにしません。', // was 食べないようにします: "makes no dog eat"
+      pt: 'o gato não induz nenhum cão a comer.',
+    });
+    expect(causes(noNP('DOG'), true)).toEqual({
+      en: 'the cat causes no dog not to eat.', // was "causes no dog to eat"
+      it: 'il gatto non induce nessun cane a non mangiare.', // was "a mangiare"
+      fr: "le chat n'induit aucun chien à ne pas manger.", // was "à ne manger"
+      de: 'der Kater veranlasst keinen Hund, nicht zu fressen.', // was ", zu fressen"
+      es: 'el gato no induce ningún perro a no comer.',
+      ja: '猫はどの犬も食べないようにしません。', // was 食べないようにします
+      pt: 'o gato não induz nenhum cão a não comer.',
+    });
+    // Regression: a `no` subject over a definite causee was already right, in both polarities.
+    expect(causes(np('DOG'), true, noCat())).toEqual({
+      en: 'no cat causes the dog not to eat.',
+      it: 'nessun gatto induce il cane a non mangiare.',
+      fr: "aucun chat n'induit le chien à ne pas manger.",
+      de: 'kein Kater veranlasst den Hund, nicht zu fressen.',
+      es: 'ningún gato induce el perro a no comer.',
+      ja: 'どの猫も犬が食べないようにしません。',
+      pt: 'nenhum gato induz o cão a não comer.',
+    });
+    expect(causes(np('DOG'), false, noCat())).toMatchObject({
+      fr: "aucun chat n'induit le chien à manger.", ja: 'どの猫も犬が食べるようにしません。',
+    });
+  });
+
+  // The controller's `no` stays out of everything the embedded clause holds: an infinitive it governs in
+  // turn, a predicate adjective that still agrees with the controller, its own object, and every
+  // conjunct of a coordinated controller.
+  test('the `no` stays out of a nested infinitive, an agreeing adjective, an object and a coordinated controller', () => {
+    expect(sayAll(clause(noCat(), 'DESIRE', {
+      infinitiveComplement: {
+        verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('ABLE') } },
+        infinitiveComplement: { verbPhrase: { verb: 'EAT', negative: true } },
+      },
+    }))).toEqual({
+      en: 'no cat desires to be able not to eat.',
+      it: 'nessun gatto desidera essere capace di non mangiare.',
+      fr: 'aucun chat ne désire être capable de ne pas manger.',
+      de: 'kein Kater wünscht, fähig zu sein, nicht zu fressen.',
+      es: 'ningún gato desea ser capaz de no comer.',
+      ja: 'どの猫も食べないことが可能であることを望んでいません。',
+      pt: 'nenhum gato deseja ser capaz de não comer.',
+    });
+    expect(sayAll(clause(noNP('CAT', { gender: 'fem' }), 'DESIRE', {
+      infinitiveComplement: { verbPhrase: { verb: 'BE', negative: true }, complements: { predicative: { phrase: np('CAREFUL') } } },
+    }))).toEqual({
+      en: 'no cat desires not to be careful.',
+      it: 'nessuna gatta desidera non essere attenta.',
+      fr: 'aucune chatte ne désire ne pas être prudente.',
+      de: 'keine Katze wünscht, nicht vorsichtig zu sein.',
+      es: 'ninguna gata desea no ser cuidadosa.',
+      ja: 'どの猫も慎重ではないことを望んでいません。',
+      pt: 'nenhuma gata deseja não ser cuidadosa.',
+    });
+    expect(sayAll(clause(noCat(), 'RUN', { purpose: { verbPhrase: { verb: 'EAT', negative: true }, directObject: np('MOUSE') } })))
+      .toEqual({
+        en: 'no cat runs not to eat the mouse.',
+        it: 'nessun gatto corre per non mangiare il topo.',
+        fr: 'aucun chat ne court pour ne pas manger la souris.',
+        de: 'kein Kater läuft, um die Maus nicht zu fressen.',
+        es: 'ningún gato corre para no comer el ratón.',
+        ja: 'どの猫もネズミを食べないために走りません。',
+        pt: 'nenhum gato corre para não comer o rato.',
+      });
+    expect(sayAll(clause({ conjuncts: [noNP('CAT'), noNP('DOG')], conjunction: 'and' }, 'DESIRE', {
+      infinitiveComplement: { verbPhrase: { verb: 'EAT', negative: true } },
+    }))).toMatchObject({
+      en: 'no cat and no dog desire not to eat.',
+      it: 'nessun gatto e nessun cane desiderano non mangiare.',
+      fr: 'aucun chat et aucun chien ne désirent ne pas manger.',
+      es: 'ningún gato y ningún perro desean no comer.',
+      pt: 'nenhum gato e nenhum cão desejam não comer.',
+    });
   });
 });

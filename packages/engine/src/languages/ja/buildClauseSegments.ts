@@ -87,6 +87,12 @@ export function buildClauseSegments(phrase: ResolvedPhrase, subjectParticle: str
   const verbPhrase = causee && voiced.verb.forms['causative'] === '1'
     ? { ...voiced, verb: JA_SURU }
     : voiced;
-  segs.push(...predicateSegs(verbPhrase, causee ? undefined : phrase.directObject, phrase.complements, impPN, false, subjectNegative, animate));
+  // A `no` causee is still this clause's object, and negates this clause, not the one it is spoken in
+  // (A171): 猫はどの犬も食べるようにしません, "the cat causes no dog to eat". The clause keeps its own polarity.
+  const causeeNegative = !!causee && isNegativeGroup(causee);
+  segs.push(...predicateSegs(
+    verbPhrase, causee ? undefined : phrase.directObject, phrase.complements, impPN, false,
+    subjectNegative || causeeNegative, animate,
+  ));
   return segs;
 }

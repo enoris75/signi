@@ -143,7 +143,7 @@ in brackets:
 | `no cat runs (in order) not to eat` | `no cat runs to eat.` [`runs not to eat`] | `kein Kater läuft, um zu fressen.` [`um nicht zu fressen`] | `nessun gatto corre per mangiare.` [`per non mangiare`] | `aucun chat ne court pour ne manger.` [`pour ne pas manger`] |
 
 Spanish and Portuguese keep the infinitive's `no` / `não` there. Filed as
-[A171](../A-must-fix/A171-negative-controller-negates-its-infinitive.md), which also found French and
+[A171](A171-negative-controller-negates-its-infinitive.md), which also found French and
 Japanese negating a *positive* infinitive by the same path.
 
 - **Tests:** [`packages/engine/test/negation.test.ts`](../../../packages/engine/test/negation.test.ts)

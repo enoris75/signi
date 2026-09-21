@@ -125,5 +125,14 @@ describe('buildClauseSegments', () => {
       expect(say(clause(np(NEKO), vp(HIKIOKOSU), { directObject: el(np(HON)), infinitiveComplement: catEats }), 'は'))
         .toBe('猫はネズミを食べるように本を引き起こします');
     });
+
+    // A171: a `no` causee is still the matrix object, so it negates the matrix predicate; the clause it is
+    // spoken in keeps its own polarity. A `no` subject negates the matrix as before.
+    test('a `no` causee negates the causing predicate, not the clause it is spoken in', () => {
+      expect(say(clause(np(NEKO), vp(HIKIOKOSU), { directObject: el(np(HITO, { definiteness: 'no' })), infinitiveComplement: personEats }), 'は'))
+        .toBe('猫はどの人もネズミを食べるようにしません');
+      expect(say(clause(np(NEKO, { definiteness: 'no' }), vp(HIKIOKOSU), { directObject: el(np(HITO)), infinitiveComplement: personEats }), 'は'))
+        .toBe('どの猫も人がネズミを食べるようにしません');
+    });
   });
 });

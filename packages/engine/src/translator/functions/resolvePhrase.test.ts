@@ -130,6 +130,32 @@ describe('resolvePhrase', () => {
       expect(infinitiveComplement?.subject.conjuncts[0].head.conceptId).toBe('CAT');
       expect(infinitiveComplement).not.toHaveProperty('control');
     });
+
+    // A171: a `no` controller negates this clause, so the infinitive's subject is handed over definite.
+    test('a `no` controller leaves its `no` with the governing clause, under either control', () => {
+      const noWants = (control?: 'object'): PhrasePlan => ({
+        ...wants(control),
+        subject: { concept: 'CAT', definiteness: 'no' },
+        directObject: { concept: 'DOG', definiteness: 'no' },
+      });
+      for (const control of [undefined, 'object'] as const) {
+        const resolved = resolvePhrase(noWants(control), 'it', LOOKUP);
+        expect(resolved.subject.agreement['definiteness']).toBe('no');
+        expect(resolved.directObject?.agreement['definiteness']).toBe('no');
+        expect(resolved.infinitiveComplement?.subject.agreement['definiteness']).toBe('definite');
+      }
+    });
+  });
+
+  // A clause of purpose takes this clause's subject, and a `no` on it stays here too (A171).
+  test('a clause of purpose takes the subject, with its `no` left to this clause', () => {
+    const { subject, purpose } = resolvePhrase(
+      { ...CAT_RUNS, subject: { concept: 'CAT', definiteness: 'no' }, purpose: { verbPhrase: { verb: 'EAT' } } }, 'it', LOOKUP,
+    );
+    expect(subject.agreement['definiteness']).toBe('no');
+    expect(purpose?.verbPhrase?.mood).toBe('infinitive');
+    expect(purpose?.subject.conjuncts[0].head.conceptId).toBe('CAT');
+    expect(purpose?.subject.agreement['definiteness']).toBe('definite');
   });
 
   describe('a bare copula (A121)', () => {

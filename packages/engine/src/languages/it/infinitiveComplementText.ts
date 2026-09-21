@@ -8,10 +8,14 @@ import { predicateText } from './predicateText.js';
  * "desiderare agire". The clause agrees with its controller, the governing clause's subject, in the
  * features the governing clause itself agrees in (`controller`): "la gatta desidera essere attenta".
  * A clause that governs one in turn carries it along: "desiderare essere capace di agire".
+ *
+ * The controller is never the clause's own negative subject: a `no` on it negates the governing
+ * clause, so the infinitive keeps its own "non" and takes none it lacks (A171): "nessun gatto
+ * desidera non mangiare", "nessun gatto desidera mangiare".
  */
 export function infinitiveComplementText(clause: ResolvedPhrase, controller: Record<string, string>, link: string): string {
   if (!clause.verbPhrase) return '';
-  const own = predicateText(controller, clause.verbPhrase, clause.directObject, clause.complements);
+  const own = predicateText(controller, clause.verbPhrase, clause.directObject, clause.complements, undefined, false);
   const text = clause.infinitiveComplement
     ? `${own} ${infinitiveComplementText(clause.infinitiveComplement, controller, infinitiveLink(clause))}`
     : own;

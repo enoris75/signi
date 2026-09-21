@@ -33,4 +33,14 @@ describe('infinitiveComplementText', () => {
     const able = inf(ESSERE, { complements: predicate(CAPACE), infinitiveComplement: inf(AGIRE) });
     expect(infinitiveComplementText(able, GATTO, '')).toBe('essere capace di agire');
   });
+
+  // A171: a `no` controller negates the governing clause, so the infinitive keeps its own polarity.
+  test('a `no` controller neither takes the infinitive\'s "non" nor adds one', () => {
+    const NESSUN_GATTO = { ...GATTO, definiteness: 'no' };
+    const notEats = clause(np(SI), vp(MANGIARE, { mood: 'infinitive', negative: true }));
+    expect(infinitiveComplementText(notEats, NESSUN_GATTO, '')).toBe('non mangiare');
+    expect(infinitiveComplementText(inf(MANGIARE), NESSUN_GATTO, 'per')).toBe('per mangiare');
+    const able = inf(ESSERE, { complements: predicate(CAPACE), infinitiveComplement: notEats });
+    expect(infinitiveComplementText(able, NESSUN_GATTO, '')).toBe('essere capace di non mangiare');
+  });
 });

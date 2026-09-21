@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (2 of
-them, as of this writing — both in Part A; Part B has no `test.fails` left).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (none,
+as of this writing — neither Part A nor Part B has a `test.fails` left).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,11 +59,7 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-| # | File | Area |
-|---|---|---|
-| A171 | [A171-negative-controller-negates-its-infinitive.md](A-must-fix/A171-negative-controller-negates-its-infinitive.md) | English, German, Italian, French, Japanese |
-
-Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+None open. Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)
@@ -260,6 +256,7 @@ is listed under **Fixed** below.
 | A166 | [A166-relative-own-negative-subject-not-collapsed.md](fixed/A166-relative-own-negative-subject-not-collapsed.md) | English, German | 2026-09-21 |
 | A167 | [A167-negative-head-erases-relative-polarity.md](fixed/A167-negative-head-erases-relative-polarity.md) | Italian, French, Spanish, Portuguese | 2026-09-21 |
 | A170 | [A170-subjunctive-under-a-negative-head.md](fixed/A170-subjunctive-under-a-negative-head.md) | Spanish, Portuguese | 2026-09-21 |
+| A171 | [A171-negative-controller-negates-its-infinitive.md](fixed/A171-negative-controller-negates-its-infinitive.md) | English, German, Italian, French, Japanese (translator + engine) | 2026-09-21 |
 | B5 | [B05-japanese-resultative-completive.md](fixed/B05-japanese-resultative-completive.md) | Japanese | 2026-09-21 |
 | B6 | [B06-german-means-clause-impersonal-man.md](fixed/B06-german-means-clause-impersonal-man.md) | German | 2026-09-21 |
 | B7 | [B07-japanese-aspect-under-modal.md](fixed/B07-japanese-aspect-under-modal.md) | Japanese | 2026-09-21 |

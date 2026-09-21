@@ -1,6 +1,7 @@
 import type { ImperativeRegister, InfinitiveComplement, NounElement, PhrasePlan } from '@signi/shared';
 import type { Mood, ResolvedPhrase } from '../../types.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { controlledSubject } from './controlledSubject.js';
 import { coordConjunction } from './coordConjunction.js';
 import { elideSubjectComplement } from './elideSubjectComplement.js';
 import { resolveComplements } from './resolveComplements.js';
@@ -16,7 +17,8 @@ function objectControlled(plan: PhrasePlan): boolean {
 /**
  * An infinitive complement resolved as a clause of its own in the citation mood, its subject filled
  * by the slot of `plan` that controls it (see InfinitiveControl), and marked as object-controlled
- * for the engines that place or agree it differently.
+ * for the engines that place or agree it differently. A `no` on the controller stays with the
+ * matrix clause (see `controlledSubject`).
  */
 function resolveInfinitiveComplement(
   plan: PhrasePlan & { infinitiveComplement: InfinitiveComplement },
@@ -25,7 +27,7 @@ function resolveInfinitiveComplement(
 ): ResolvedPhrase {
   const { control: _control, ...clause } = plan.infinitiveComplement;
   const byObject = objectControlled(plan);
-  const subject: NounElement = byObject ? plan.directObject! : plan.subject;
+  const subject: NounElement = controlledSubject(byObject ? plan.directObject! : plan.subject);
   return {
     ...resolvePhrase({ ...clause, subject }, language, lookup, 'infinitive'),
     ...(byObject ? { control: 'object' as const } : {}),
@@ -105,9 +107,10 @@ export function resolvePhrase(
       : undefined,
     // A clause of purpose is a clause of its own in the citation mood, its unspoken subject always
     // this clause's own — the one who clicks is the one who changes — so it needs no control. It
-    // hangs off the predicate, so a verbless period has nothing to do it for and drops it.
+    // hangs off the predicate, so a verbless period has nothing to do it for and drops it. A `no`
+    // subject negates this clause, not the purpose ("no cat runs not to eat", see `controlledSubject`).
     purpose: plan.purpose && plan.verbPhrase
-      ? resolvePhrase({ ...plan.purpose, subject: plan.subject }, language, lookup, 'infinitive')
+      ? resolvePhrase({ ...plan.purpose, subject: controlledSubject(plan.subject) }, language, lookup, 'infinitive')
       : undefined,
     // A hypothetical condition: this plan becomes the main clause (conditional mood) and its
     // `condition` the protasis (subjunctive mood). Conditions don't nest.

@@ -34,4 +34,12 @@ describe('infinitiveComplementText', () => {
     const able = inf(ETRE, { complements: predicate(CAPABLE), infinitiveComplement: inf(AGIR) });
     expect(infinitiveComplementText(able, IL, '')).toBe("être capable d'agir");
   });
+
+  // A171: a `no` controller negates the governing clause, and is no self-negating "aucun" in the infinitive.
+  test('a `no` controller neither drops the infinitive\'s "pas" nor adds a "ne"', () => {
+    const AUCUN = { ...IL, definiteness: 'no' };
+    expect(infinitiveComplementText(clause(np(ON), vp(AGIR, { mood: 'infinitive', negative: true })), AUCUN, 'de')).toBe('de ne pas agir');
+    expect(infinitiveComplementText(inf(MANGER), AUCUN, 'pour')).toBe('pour manger');
+    expect(infinitiveComplementText(inf(AGIR), AUCUN, 'de')).toBe("d'agir");
+  });
 });
