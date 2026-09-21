@@ -1213,3 +1213,74 @@ describe('a genitive relative clause — "the cat whose book …"', () => {
     });
   });
 });
+
+// A173. Italian, Spanish and Portuguese drop a pronoun subject by default, and A40 made the main clause
+// do so. A relative clause builds its own subject text and still prints it: "il libro che io leggo".
+// Only the 1st and 2nd persons are pinned. A dropped 3rd person (or Portuguese você) that agrees with
+// the head would read as a subject relative, "il gatto che vede", and is the fixer's to rule on.
+describe('known bugs: a pronoun subject in a relative clause', () => {
+  const bookThat = (subject: NonNullable<RelativeClause['subject']>, verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('BOOK', { relative: { headRole: 'directObject', subject, verbPhrase: { verb: 'READ', ...verbPhrase } } }), 'BURN'));
+
+  test.fails('a 1st-person pronoun subject is dropped', () => {
+    expect(bookThat(np('FIRST_PERSON'))).toMatchObject({
+      it: 'il libro che leggo brucia.', // now: "che io leggo"
+      es: 'el libro que leo arde.',     // now: "que yo leo"
+      pt: 'o livro que leio arde.',     // now: "que eu leio"
+    });
+    expect(bookThat(np('FIRST_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'il libro che leggiamo brucia.', es: 'el libro que leemos arde.', pt: 'o livro que lemos arde.',
+    });
+    expect(bookThat(np('FIRST_PERSON'), { tense: 'past' })).toMatchObject({
+      it: 'il libro che lessi brucia.', es: 'el libro que leí arde.', pt: 'o livro que li arde.',
+    });
+  });
+
+  test.fails('a 2nd-person pronoun subject is dropped in Italian and Spanish', () => {
+    expect(bookThat(np('SECOND_PERSON'))).toMatchObject({
+      it: 'il libro che leggi brucia.', // now: "che tu leggi"
+      es: 'el libro que lees arde.',    // now: "que tú lees"
+    });
+    expect(bookThat(np('SECOND_PERSON', { number: 'plural' }))).toMatchObject({
+      it: 'il libro che leggete brucia.', es: 'el libro que leéis arde.',
+    });
+  });
+
+  test.fails('a complement relative drops it too, as in the random phrase that found it', () => {
+    expect(sayAll(clause(np('HOUSE', { relative: { headRole: 'locative', subject: np('FIRST_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'BURN')))
+      .toMatchObject({
+        it: 'la casa dove mangio brucia.', // now: "dove io mangio"
+        es: 'la casa donde como arde.',
+        pt: 'a casa onde como arde.',
+      });
+    // Seed 892057, "… an old loud feeling that we put out up like sharp Europe slowly?"
+    expect(sayAll({
+      subject: np('FEELING', { number: 'plural', adjectives: ['BROWN'], adjectiveDegrees: ['equally'] }),
+      verbPhrase: { verb: 'DIVIDE', tense: 'past', aspect: 'prospective', modifier: 'SLOWLY' },
+      directObject: np('FEELING', {
+        definiteness: 'indefinite', adjectives: ['OLD', 'LOUD'],
+        relative: { verbPhrase: { verb: 'EXTINGUISH', tense: 'present', modifier: 'UP' }, headRole: 'directObject', subject: np('FIRST_PERSON', { number: 'plural' }) },
+      }),
+      complements: { manner: { phrase: np('EUROPE', { adjectives: ['SHARP'] }) } },
+      interrogative: true,
+    })).toMatchObject({
+      it: "i sentimenti ugualmente marroni stavano per dividere lentamente un vecchio sentimento forte che spegniamo su come l'Europa affilata?",
+      pt: 'os sentimentos igualmente castanhos estavam prestes a dividir devagar um sentimento velho e alto que apagamos para cima como a Europa afiada?',
+    });
+  });
+
+  // Regression: a noun, a coordinated pronoun and the impersonal subject, French and German, and the
+  // main clause A40 already drops in.
+  test('a noun, a coordination, the impersonal subject, French and German and the main clause are unchanged', () => {
+    expect(bookThat(np('CAT'))).toMatchObject({
+      it: 'il libro che il gatto legge brucia.', es: 'el libro que el gato lee arde.', pt: 'o livro que o gato lê arde.',
+    });
+    expect(bookThat({ conjuncts: [np('FIRST_PERSON'), np('THIRD_PERSON')], conjunction: 'and' })).toMatchObject({
+      it: 'il libro che io e lui leggiamo brucia.', es: 'el libro que yo y él leemos arde.', pt: 'o livro que eu e ele lemos arde.',
+    });
+    expect(sayAll(clause(np('MOUSE', { relative: { headRole: 'directObject', subject: np('GENERIC_PERSON'), verbPhrase: { verb: 'EAT' } } }), 'RUN')).it)
+      .toBe('il topo che si mangia corre.');
+    expect(bookThat(np('FIRST_PERSON'))).toMatchObject({ fr: 'le livre que je lis brûle.', de: 'das Buch, das ich lese, brennt.' });
+    expect(sayAll(clause(np('FIRST_PERSON'), 'EAT'))).toMatchObject({ it: 'mangio.', es: 'como.', pt: 'como.' });
+  });
+});

@@ -635,3 +635,59 @@ describe('known bugs: Japanese BE with a locative', () => {
     expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE') } } })).ja).toBe('猫は家で食べます。');
   });
 });
+
+// A176. A locative "through" names a place the action passes through. Japanese says so with を通って
+// (家を通って走ります). The engine gives the plain place's で, so "through the house" reads "in the
+// house". The route keeps its bare を (家を走ります), which a motion verb wants.
+describe('known bugs: Japanese locative "through"', () => {
+  const through = (phrase: NounPhrase | { conjuncts: NounPhrase[]; conjunction: 'and' }, value: PathSpecifier = 'through') =>
+    ({ locative: { phrase, specifiers: [{ kind: 'path' as const, value }] } });
+
+  test.fails('a locative "through" takes を通って', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE')) })).ja).toBe('猫は家を通って走ります。'); // now: "家で"
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: through(np('HOUSE')) })).ja)
+      .toBe('猫は家を通ってネズミを食べます。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE', { definiteness: 'no' })) })).ja)
+      .toBe('猫はどの家を通っても走りません。');
+    expect(sayAll(clause(np('MOUSE'), 'RUN', { complements: through({ conjuncts: [np('CAT'), np('DOG')], conjunction: 'and' }) })).ja)
+      .toBe('ネズミは猫と犬を通って走ります。');
+    // The random phrase that found it (seed 942888).
+    expect(sayAll({
+      subject: np('MOUSE'),
+      verbPhrase: { verb: 'BUY' },
+      directObject: np('FIRST_PERSON', { number: 'plural' }),
+      complements: through(np('BOOK', { definiteness: 'few', adjectives: ['HUNGRY', 'WHOLE'] })),
+      coordination: {
+        conjunction: 'or',
+        clause: {
+          subject: np('BUTTON', { number: 'plural', definiteness: 'all', adjectives: ['STRONG'], adjectiveDegrees: ['equally'] }),
+          verbPhrase: { verb: 'MODIFY', tense: 'future', aspect: 'progressive' },
+          directObject: np('WOLF', { definiteness: 'definite' }),
+          complements: {
+            cause: {
+              phrase: np('ANGEL', { gender: 'fem', definiteness: 'this', adjectives: ['SHARP', 'HUNGRY'], adjectiveDegrees: ['positive', 'least'] }),
+              specifiers: [{ kind: 'sentiment', value: 'positive' }],
+            },
+          },
+        },
+      },
+    }).ja).toBe('ネズミは少しの空腹な全体の本を通って私たちを買います。または、すべての同じくらい強いボタンはこの鋭い最も空腹ではない天使のおかげで狼を修飾しています。');
+  });
+
+  // Regression: the route, the other relations, the existential and the other languages.
+  test('the route, the other relations, the existential and the other languages are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { route: { phrase: np('HOUSE'), specifiers: [{ kind: 'path', value: 'through' }] } } })).ja)
+      .toBe('猫は家を走ります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE'), 'in') })).ja).toBe('猫は家で走ります。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE'), 'under') })).ja).toBe('猫は家の下で走ります。');
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: through(np('HOUSE')) })).ja).toBe('猫は家にいます。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: through(np('HOUSE')) }))).toMatchObject({
+      en: 'the cat runs through the house.',
+      it: 'il gatto corre attraverso la casa.',
+      fr: 'le chat court à travers la maison.',
+      de: 'der Kater läuft durch das Haus.',
+      es: 'el gato corre por la casa.',
+      pt: 'o gato corre pela casa.',
+    });
+  });
+});

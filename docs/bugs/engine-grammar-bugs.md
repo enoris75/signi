@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (none,
-as of this writing — neither Part A nor Part B has a `test.fails` left).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (6 of
+them, as of this writing — all in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,7 +59,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+| # | File | Area |
+|---|---|---|
+| A172 | [A172-spanish-adjective-on-a-place-name.md](A-must-fix/A172-spanish-adjective-on-a-place-name.md) | Spanish |
+| A173 | [A173-romance-relative-pro-drop.md](A-must-fix/A173-romance-relative-pro-drop.md) | Italian, Spanish, Portuguese |
+| A174 | [A174-german-possessive-plural-adjective-ending.md](A-must-fix/A174-german-possessive-plural-adjective-ending.md) | German |
+| A175 | [A175-superlative-under-an-indefinite-determiner.md](A-must-fix/A175-superlative-under-an-indefinite-determiner.md) | Italian, French, German, Spanish, Portuguese (translator) |
+| A176 | [A176-japanese-locative-through.md](A-must-fix/A176-japanese-locative-through.md) | Japanese |
+| A177 | [A177-english-reflexive-object.md](A-must-fix/A177-english-reflexive-object.md) | English |
+
+Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)

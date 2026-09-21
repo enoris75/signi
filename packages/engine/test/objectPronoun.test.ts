@@ -795,3 +795,48 @@ describe('English phrasal verb with a pronoun object', () => {
     });
   });
 });
+
+// A177. A 1st- or 2nd-person object with the subject's person and number is the subject itself, and
+// English then wants the reflexive: "I see myself", not "I see me". Italian, French, German, Spanish
+// and Portuguese already read it so, since their object pronoun doubles as the reflexive ("mi vedo",
+// "ich sehe mich"). The passive agent ("I am seen by me") and Japanese 自分 are left unpinned.
+describe('known bugs: an English object that is the subject itself', () => {
+  const person = (concept: string, number: 'singular' | 'plural' = 'singular') => np(concept, { number });
+  const sees = (subject: NounPhrase, object: NounPhrase, extra: Parameters<typeof clause>[2] = {}) =>
+    sayAll(clause(subject, 'SEE', { directObject: object, ...extra })).en;
+
+  test.fails('each person takes its reflexive', () => {
+    expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'))).toBe('I see myself.'); // now: "I see me."
+    expect(sees(person('FIRST_PERSON', 'plural'), person('FIRST_PERSON', 'plural'))).toBe('we see ourselves.');
+    expect(sees(person('SECOND_PERSON'), person('SECOND_PERSON'))).toBe('you see yourself.');
+    expect(sees(person('SECOND_PERSON', 'plural'), person('SECOND_PERSON', 'plural'))).toBe('you see yourselves.');
+    expect(sayAll({ ...clause(person('SECOND_PERSON'), 'SEE', { directObject: person('SECOND_PERSON') }), imperative: true }).en)
+      .toBe('see yourself.');
+    // The random phrase that found it (seed 942889).
+    expect(sayAll({
+      subject: person('SECOND_PERSON', 'plural'),
+      verbPhrase: { verb: 'PERCEIVE', aspect: 'prospective', modifier: 'REPEATEDLY' },
+      directObject: person('SECOND_PERSON', 'plural'),
+      complements: { instrumental: { phrase: np('PHRASE', { definiteness: 'definite' }) } },
+    }).en).toBe('you are about to perceive yourselves with the phrase repeatedly.');
+  });
+
+  test.fails('the reflexive holds through a modal, negation, a particle verb and a coordination', () => {
+    expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'), { verbPhrase: { modals: ['MUST'] } })).toBe('I must see myself.');
+    expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON'), { verbPhrase: { tense: 'past', negative: true } })).toBe('I did not see myself.');
+    expect(sayAll(clause(person('FIRST_PERSON'), 'EXTINGUISH', { directObject: person('FIRST_PERSON') })).en).toBe('I put myself out.');
+    expect(sayAll(clause(person('FIRST_PERSON'), 'SEE', { directObject: { conjuncts: [person('FIRST_PERSON'), np('CAT')], conjunction: 'and' } })).en)
+      .toBe('I see myself and the cat.');
+  });
+
+  // Regression: a differing person or number, the 3rd person, and the languages already right.
+  test('a differing person or number, the 3rd person and the other languages are unchanged', () => {
+    expect(sees(person('FIRST_PERSON'), person('FIRST_PERSON', 'plural'))).toBe('I see us.');
+    expect(sees(person('FIRST_PERSON', 'plural'), person('FIRST_PERSON'))).toBe('we see me.');
+    expect(sees(person('FIRST_PERSON'), person('SECOND_PERSON'))).toBe('I see you.');
+    expect(sees(np('THIRD_PERSON', { gender: 'masc' }), np('THIRD_PERSON', { gender: 'masc' }))).toBe('he sees him.');
+    expect(sayAll(clause(person('FIRST_PERSON'), 'SEE', { directObject: person('FIRST_PERSON') }))).toMatchObject({
+      it: 'mi vedo.', fr: 'je me vois.', de: 'ich sehe mich.', es: 'me veo.', pt: 'me vejo.',
+    });
+  });
+});

@@ -1959,3 +1959,129 @@ describe('known bugs: an adjective on a place name', () => {
     });
   });
 });
+
+// A172. A Spanish place name that goes bare on its own ("Europa") takes the definite article once an
+// adjective modifies it: "la Europa afilada", "en la Europa afilada". A169 did this for German,
+// Italian and French. Spanish `artFor` still reads only the lexicon's `takes_article`. The names that
+// begin with a stressed a ("Asia", "África", el or la?) wait on a ruling and are not pinned here.
+describe('known bugs: a Spanish place name with an adjective', () => {
+  const sharpEurope = np('EUROPE', { adjectives: ['SHARP'] });
+  const withPlace = (type: 'locative' | 'direction' | 'source' | 'manner' | 'comitative', verb: string, phrase = sharpEurope) =>
+    sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase } } })).es;
+
+  test.fails('the modified name takes its article as subject, object, possessor and agent', () => {
+    expect(sayAll(clause(sharpEurope, 'BURN')).es).toBe('la Europa afilada arde.'); // now: "Europa afilada arde."
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: sharpEurope })).es).toBe('el gato ve la Europa afilada.');
+    expect(sayAll(clause(np('BOOK', { possessor: sharpEurope }), 'BURN')).es).toBe('el libro de la Europa afilada arde.');
+    expect(sayAll(clause(sharpEurope, 'SEE', { directObject: np('BOOK'), verbPhrase: { voice: 'passive' } })).es)
+      .toBe('el libro es visto por la Europa afilada.');
+    expect(sayAll(clause(np('EUROPE', { adjectives: ['BIG', 'FAR'] }), 'BURN')).es).toBe('la Europa grande y lejana arde.');
+    expect(sayAll(clause(np('EUROPE', { adjectives: ['FIRST'] }), 'BURN')).es).toBe('la primera Europa arde.');
+  });
+
+  test.fails('the modified name takes its article after every preposition', () => {
+    expect(withPlace('locative', 'RUN')).toBe('el gato corre en la Europa afilada.'); // now: "en Europa afilada"
+    expect(withPlace('direction', 'GO')).toBe('el gato va a la Europa afilada.');
+    expect(withPlace('source', 'COME')).toBe('el gato viene de la Europa afilada.');
+    expect(withPlace('manner', 'RUN')).toBe('el gato corre como la Europa afilada.');
+    expect(withPlace('comitative', 'RUN')).toBe('el gato corre con la Europa afilada.');
+    expect(withPlace('locative', 'RUN', np('OCEANIA', { adjectives: ['BIG'] }))).toBe('el gato corre en la Oceanía grande.');
+    // The random phrase that found it (seed 892057). Only its end is asserted: A173 changes its relative.
+    expect(sayAll({
+      subject: np('FEELING', { number: 'plural', adjectives: ['BROWN'], adjectiveDegrees: ['equally'] }),
+      verbPhrase: { verb: 'DIVIDE', tense: 'past', aspect: 'prospective', modifier: 'SLOWLY' },
+      directObject: np('FEELING', {
+        definiteness: 'indefinite', adjectives: ['OLD', 'LOUD'],
+        relative: { verbPhrase: { verb: 'EXTINGUISH', tense: 'present', modifier: 'UP' }, headRole: 'directObject', subject: np('FIRST_PERSON', { number: 'plural' }) },
+      }),
+      complements: { manner: { phrase: sharpEurope } },
+      interrogative: true,
+    }).es).toMatch(/ arriba como la Europa afilada\?$/); // now: "arriba como Europa afilada?"
+  });
+
+  // Regression: the bare name, a name the lexicon articles, a possessive, and the other languages.
+  test('the bare name, an articled name, a possessive and the other languages are unchanged', () => {
+    expect(sayAll(clause(np('EUROPE'), 'BURN')).es).toBe('Europa arde.');
+    expect(withPlace('locative', 'RUN', np('EUROPE'))).toBe('el gato corre en Europa.');
+    expect(sayAll(clause(np('ANTARCTICA', { adjectives: ['BIG'] }), 'BURN')).es).toBe('la Antártida grande arde.');
+    expect(withPlace('locative', 'RUN', np('EUROPE', {
+      adjectives: ['SHARP'], possessor: { kind: 'pronominal', person: '2', number: 'singular', gender: 'masc' },
+    }))).toBe('el gato corre en tu Europa afilada.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { manner: { phrase: sharpEurope } } }))).toMatchObject({
+      en: 'the cat runs like sharp Europe.',
+      it: "il gatto corre come l'Europa affilata.",
+      fr: "le chat court comme l'Europe tranchante.",
+      de: 'der Kater läuft wie das scharfe Europa.',
+      pt: 'o gato corre como a Europa afiada.',
+    });
+  });
+});
+
+// A175. A relative superlative is definite ("the biggest dog"). A25 made English force "the" under an
+// indefinite or bare determiner. The other languages keep the determiner the plan picked: Italian,
+// Spanish and Portuguese then say the comparative ("un cane più grande", C01), French drops its first
+// article ("un chien le plus grand"), and German declines a superlative under "ein" ("einen größten
+// Hund"). The quantifiers (some/many/few/all) are left as A25 left them, unpinned.
+describe('known bugs: a superlative under an indefinite or bare determiner', () => {
+  const dog = (definiteness: Definiteness, degree: Degree = 'most', extra: Partial<NounPhrase> = {}) =>
+    np('DOG', { definiteness, adjectives: ['BIG'], adjectiveDegrees: [degree], ...extra });
+  const sees = (object: NounPhrase) => sayAll(clause(np('CAT'), 'SEE', { directObject: object }));
+
+  test.fails('an indefinite superlative takes the definite article', () => {
+    expect(sees(dog('indefinite'))).toMatchObject({
+      it: 'il gatto vede il cane più grande.', // now: "un cane più grande" (= a bigger dog)
+      fr: 'le chat voit le chien le plus grand.', // now: "un chien le plus grand"
+      de: 'der Kater sieht den größten Hund.', // now: "einen größten Hund"
+      es: 'el gato ve el perro más grande.',
+      pt: 'o gato vê o cão maior.',
+    });
+    expect(sees(dog('indefinite', 'least'))).toMatchObject({
+      it: 'il gatto vede il cane meno grande.', de: 'der Kater sieht den am wenigsten großen Hund.', fr: 'le chat voit le chien le moins grand.',
+    });
+    expect(sees(dog('indefinite', 'most', { number: 'plural' }))).toMatchObject({
+      fr: 'le chat voit les chiens les plus grands.', de: 'der Kater sieht die größten Hunde.', es: 'el gato ve los perros más grandes.',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { definiteness: 'indefinite', adjectives: ['BIG'], adjectiveDegrees: ['most'] }) } } })))
+      .toMatchObject({ it: 'il gatto corre nella casa più grande.', de: 'der Kater läuft im größten Haus.', pt: 'o gato corre na casa maior.' });
+    // A predicate noun defaults to the indefinite.
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('DOG', { adjectives: ['BIG'], adjectiveDegrees: ['most'] }) } } })))
+      .toMatchObject({ it: 'il gatto è il cane più grande.', de: 'der Kater ist der größte Hund.', fr: 'le chat est le chien le plus grand.' });
+  });
+
+  test.fails('a bare superlative takes the definite article', () => {
+    expect(sayAll(clause(dog('bare'), 'RUN'))).toMatchObject({
+      it: 'il cane più grande corre.', fr: 'le chien le plus grand court.', de: 'der größte Hund läuft.', es: 'el perro más grande corre.', pt: 'o cão maior corre.',
+    });
+    expect(sayAll(clause(np('CAT'), 'DRINK', { directObject: np('WATER', { definiteness: 'bare', adjectives: ['COLD'], adjectiveDegrees: ['most'] }) })))
+      .toMatchObject({ fr: "le chat boit l'eau la plus froide.", de: 'der Kater trinkt das kälteste Wasser.', pt: 'o gato bebe a água mais fria.' });
+    // The random phrase that found it (seed 942887): a bare manner. Only its end is asserted: A174
+    // changes its German subject.
+    const phrase = sayAll({
+      subject: np('FEELING', { number: 'plural', adjectives: ['DOMESTIC', 'BAD'], adjectiveDegrees: ['positive', 'least'], possessor: { kind: 'pronominal', person: '3', number: 'singular', gender: 'fem' } }),
+      verbPhrase: { verb: 'USE', aspect: 'resultative', negative: true },
+      directObject: np('PERSON', {
+        definiteness: 'that', adjectives: ['HUNGRY', 'LAZY'],
+        relative: { verbPhrase: { verb: 'START' }, headRole: 'directObject', subject: np('ANIMAL', { definiteness: 'indefinite', adjectives: ['SMALL'], adjectiveDegrees: ['equally'] }) },
+      }),
+      complements: { manner: { phrase: np('PHRASE', { definiteness: 'bare', adjectives: ['HUNGRY'], adjectiveDegrees: ['least'] }) } },
+    });
+    expect(phrase.it).toMatch(/ come la frase meno affamata\.$/); // now: "come frase meno affamata"
+    expect(phrase.fr).toMatch(/ comme la phrase la moins affamée\.$/);
+    expect(phrase.de).toMatch(/ nicht wie die am wenigsten hungrige Phrase verwendet\.$/);
+    expect(phrase.es).toMatch(/ como la frase menos hambrienta\.$/);
+    expect(phrase.pt).toMatch(/ como a frase menos faminta\.$/);
+  });
+
+  // Regression: English and Japanese, a comparative under an indefinite, and a superlative that is
+  // already definite, demonstrative or possessed.
+  test('English, Japanese, a comparative and an already definite superlative are unchanged', () => {
+    expect(sees(dog('indefinite'))).toMatchObject({ en: 'the cat sees the biggest dog.', ja: '猫は最も大きい犬を見ます。' });
+    expect(sees(dog('indefinite', 'more'))).toMatchObject({
+      en: 'the cat sees a bigger dog.', it: 'il gatto vede un cane più grande.', fr: 'le chat voit un chien plus grand.', de: 'der Kater sieht einen größeren Hund.',
+    });
+    expect(sees(dog('definite'))).toMatchObject({ it: 'il gatto vede il cane più grande.', de: 'der Kater sieht den größten Hund.' });
+    expect(sees(dog('that'))).toMatchObject({ it: 'il gatto vede quel cane più grande.', de: 'der Kater sieht jenen größten Hund.' });
+    expect(sees(np('DOG', { adjectives: ['BIG'], adjectiveDegrees: ['most'], possessor: { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } })))
+      .toMatchObject({ it: 'il gatto vede il mio cane più grande.', fr: 'le chat voit mon chien le plus grand.', de: 'der Kater sieht meinen größten Hund.' });
+  });
+});
