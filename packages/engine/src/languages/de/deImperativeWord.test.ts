@@ -82,4 +82,12 @@ describe('deImperativeWord', () => {
     expect(deImperativeWord(HINZUFUEGEN, '1pl')).toBe('fügen wir');
     expect(deImperativeWord({ base: 'hinzufügen', particle: 'hinzu' }, '2sg')).toBe('füg');
   });
+
+  // B40: a particle written apart leaves no space in front of the stem.
+  test('a verb whose particle is written apart commands with its bare stem', () => {
+    const undo = { base: 'rückgängig machen', particle: 'rückgängig', '2pl_present': 'macht' };
+    expect(deImperativeWord(undo, '2sg')).toBe('mach');
+    expect(deImperativeWord(undo, '2pl')).toBe('macht');
+    expect(deImperativeWord(undo, '1pl')).toBe('machen wir');
+  });
 });

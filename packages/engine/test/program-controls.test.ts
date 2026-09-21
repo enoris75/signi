@@ -51,6 +51,11 @@ describe('program verbs: present, plural, past and future', () => {
       { en: 'the dog turns off the option.', it: "il cane disattiva l'opzione.", fr: "le chien désactive l'option.", de: 'der Hund deaktiviert die Option.', es: 'el perro desactiva la opción.', ja: '犬は選択肢をオフにします。', pt: 'o cão desativa a opção.' },
       { en: 'the dog turned off the option.', it: "il cane disattivò l'opzione.", fr: "le chien désactiva l'option.", de: 'der Hund deaktivierte die Option.', es: 'el perro desactivó la opción.', ja: '犬は選択肢をオフにしました。', pt: 'o cão desativou a opção.' },
       { it: "i cani disattivano l'opzione.", fr: "les chiens désactivent l'option.", de: 'die Hunde deaktivieren die Option.', es: 'los perros desactivan la opción.', pt: 'os cães desativam a opção.' }],
+    // German verbinden is strong (verband); Italian collegare keeps its hard g (colleghiamo, collegherà).
+    ['LINK', 'PHRASE',
+      { en: 'the dog links the phrase.', it: 'il cane collega la frase.', fr: 'le chien relie la phrase.', de: 'der Hund verbindet die Phrase.', es: 'el perro enlaza la frase.', ja: '犬はフレーズをつなぎます。', pt: 'o cão liga a frase.' },
+      { en: 'the dog linked the phrase.', it: 'il cane collegò la frase.', fr: 'le chien relia la phrase.', de: 'der Hund verband die Phrase.', es: 'el perro enlazó la frase.', ja: '犬はフレーズをつなぎました。', pt: 'o cão ligou a frase.' },
+      { it: 'i cani collegano la frase.', fr: 'les chiens relient la phrase.', de: 'die Hunde verbinden die Phrase.', es: 'los perros enlazan la frase.', pt: 'os cães ligam a frase.' }],
   ])('%s', (verb, object, present, past, plural) => {
     expect(acts(np('DOG'), verb, object)).toEqual(present);
     expect(acts(np('DOG'), verb, object, { tense: 'past' })).toEqual(past);
@@ -66,6 +71,31 @@ describe('program verbs: present, plural, past and future', () => {
       fr: "le chien réessaiera l'action.", es: 'el perro reintentará la acción.', pt: 'o cão repetirá a ação.',
     });
     expect(acts(np('DOG'), 'MOVE', 'BOOK', { tense: 'future' })).toMatchObject({ it: 'il cane sposterà il libro.', de: 'der Hund wird das Buch verschieben.' });
+    expect(acts(np('DOG', { number: 'plural' }), 'LINK', 'PHRASE', { tense: 'future' })).toMatchObject({
+      it: 'i cani collegheranno la frase.', fr: 'les chiens relieront la phrase.', es: 'los perros enlazarán la frase.', pt: 'os cães ligarão a frase.',
+    });
+  });
+
+  // LINK joins a thing TO another: German says it WITH, "mit" + dative (the ADD case, A143).
+  // SPATIAL agrees like any -al adjective: fr spatiaux / spatiales, de räumliche(n).
+  test('SPATIAL agrees with the relationship it names', () => {
+    expect(sayAll({ subject: np('RELATIONSHIP', { number: 'plural', adjectives: ['SPATIAL'] }) })).toEqual({
+      en: 'the spatial relationships.', it: 'le relazioni spaziali.', fr: 'les relations spatiales.', de: 'die räumlichen Beziehungen.',
+      es: 'las relaciones espaciales.', ja: '空間的な関係。', pt: 'as relações espaciais.',
+    });
+    expect(sayAll({ subject: np('COMPLEMENT_GRAMMAR', { number: 'plural', adjectives: ['SPATIAL'] }) })).toMatchObject({
+      it: 'i complementi spaziali.', fr: 'les compléments spatiaux.', es: 'los complementos espaciales.', pt: 'os complementos espaciais.',
+    });
+  });
+
+  test('LINK takes its goal as a terminus', () => {
+    expect(sayAll(clause(np('DOG'), 'LINK', {
+      directObject: np('PHRASE'), complements: { terminus: { phrase: np('WORD', { definiteness: 'indefinite' }) } },
+    }))).toEqual({
+      en: 'the dog links the phrase to a word.', it: 'il cane collega la frase a una parola.', fr: 'le chien relie la phrase à un mot.',
+      de: 'der Hund verbindet die Phrase mit einem Wort.', es: 'el perro enlaza la frase a una palabra.', ja: '犬は単語にフレーズをつなぎます。',
+      pt: 'o cão liga a frase a uma palavra.',
+    });
   });
 });
 
@@ -163,6 +193,12 @@ describe('program nouns', () => {
     ['FILE',
       { en: 'a file.', it: 'un file.', fr: 'un fichier.', de: 'eine Datei.', es: 'un archivo.', ja: 'ファイル。', pt: 'um arquivo.' },
       { en: 'the files.', it: 'i file.', fr: 'les fichiers.', de: 'die Dateien.', es: 'los archivos.', ja: 'ファイル。', pt: 'os arquivos.' }],
+    ['LIST',
+      { en: 'a list.', it: 'un elenco.', fr: 'une liste.', de: 'eine Liste.', es: 'una lista.', ja: '一覧。', pt: 'uma lista.' },
+      { en: 'the lists.', it: 'gli elenchi.', fr: 'les listes.', de: 'die Listen.', es: 'las listas.', ja: '一覧。', pt: 'as listas.' }],
+    ['VALUE',
+      { en: 'a value.', it: 'un valore.', fr: 'une valeur.', de: 'ein Wert.', es: 'un valor.', ja: '値。', pt: 'um valor.' },
+      { en: 'the values.', it: 'i valori.', fr: 'les valeurs.', de: 'die Werte.', es: 'los valores.', ja: '値。', pt: 'os valores.' }],
   ])('%s', (concept, singular, plural) => {
     expect(said(concept, { definiteness: 'indefinite' })).toEqual(singular);
     expect(said(concept, { number: 'plural' })).toEqual(plural);

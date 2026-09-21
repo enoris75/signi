@@ -73,7 +73,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
     : alarmHead ? alarmCryText(alarmHead)
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
     : isPlainLocativeGap(rel) ? 'dove'
-      : gap ? complementsPhrase(gap, {}, '') : 'che';
+      // The verb's forms, for a goal preposition its lexeme fixes: "la casa verso la quale il gatto si muove".
+      : gap ? complementsPhrase(gap, {}, '', {}, rel.verbPhrase.verb.forms) : 'che';
   // An impersonal ("si") subject is not written as a subject word: predicateText emits the "si"
   // proclitic instead, off the generic flag on agreeForms — "una cosa che si mangia". A pronoun subject
   // is dropped as in the main clause, "il libro che leggo", where that leaves no subject-relative

@@ -13,16 +13,15 @@ import { MONO, tokenColor } from "./tokens.tsx";
  */
 
 // Each part headed by what its commands act on, the bare noun, as the keyboard sheet heads its
-// sections; the CSS uppercases it. `title` is the English, the fallback for `titleKey`. The workspace
-// and the note are English literals, for /localize: WORKSPACE is not seeded (B46), and the note is
-// prose (C22).
+// sections; the CSS uppercases it. `title` is the English, the fallback for `titleKey`. The note is an
+// English literal, for /localize: it is prose (C22).
 const GROUPS: { group: CommandGroup; title: string; titleKey?: UiStringKey; note?: string }[] = [
   { group: "role", title: "The period's words", titleKey: "console.topic.words", note: "take a word; alone they move the context" },
   { group: "noun", title: "Noun", titleKey: "category.noun" },
   { group: "verb", title: "Verb", titleKey: "slot.verb" },
   { group: "adjective", title: "Adjective", titleKey: "category.adjective" },
   { group: "period", title: "Period", titleKey: "period.name" },
-  { group: "workspace", title: "Workspace" },
+  { group: "workspace", title: "Workspace", titleKey: "console.topic.workspace" },
 ];
 
 export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void }) {
@@ -37,8 +36,8 @@ export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void 
           component: "button",
           type: "button",
           onClick: () => onCommand(c.name),
-          // English literal, for /localize.
-          title: `Show /${c.name} in the console`,
+          // The command's name is a value, so it follows the phrase: "Show in the console: /rel".
+          title: `${t("action.showInConsole")}: /${c.name}`,
           "data-testid": `console-help-row-${c.name}`,
         })}
         sx={{
@@ -79,9 +78,10 @@ export function ConsoleHelp({ onCommand }: { onCommand?: (name: string) => void 
   };
   return (
     <Box component="section" aria-labelledby={headingId} sx={{ mt: 2 }}>
-      {/* English literals, for /localize. */}
+      {/* The part sits under the overlay's help, so the console's name alone heads it. The paragraph
+          under it is prose, still English (C22). */}
       <Typography id={headingId} variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-        The phrase console
+        {t("console.name")}
       </Typography>
       <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6, mb: 2, maxWidth: 820 }}>
         A line is commands and their words. Each word of the period is written in its own bracket, with

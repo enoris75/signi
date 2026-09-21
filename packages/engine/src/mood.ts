@@ -301,6 +301,11 @@ const ES_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE: { '2sg': 'sé', '1pl': 'seamos', '2pl': 'sed' },          // ser: sé / seamos / sed
   GO: { '2sg': 've', '1pl': 'vamos' },                         // ir: ve / vamos (vosotros "id" is regular)
   HAVE: { '2sg': 'ten' },                                      // tener: ten (tengamos / tened are regular)
+  LEAVE: { '2sg': 'sal' },                                     // salir: sal (salgamos / salid are regular)
+  // hacer and its compounds take the short tú command, not the 3sg "hace" (B40): haz, deshaz, rehaz.
+  MAKE: { '2sg': 'haz' },                                      // hacer
+  UNDO: { '2sg': 'deshaz' },                                   // deshacer
+  REDO: { '2sg': 'rehaz' },                                    // rehacer
 };
 const IT_IMP_OVERRIDE: Record<string, Partial<Record<IPN, string>>> = {
   BE:   { '2sg': 'sii', '1pl': 'siamo', '2pl': 'siate' },      // essere: sii / siamo / siate

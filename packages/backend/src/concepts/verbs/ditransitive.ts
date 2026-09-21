@@ -151,7 +151,8 @@ export const ditransitiveVerbs: ConceptSeed[] = [
     id: 'SHOW',
     role: 'verb',
     transitivity: 'ditransitive',
-    complements: ['manner', 'terminus', 'cause'],
+    // `locative`: where the thing is shown — "show it in the console" (B42).
+    complements: ['manner', 'terminus', 'cause', 'locative'],
     description: 'to make something visible to someone',
     // The causative of seeing: what SHOW adds to SEE is that someone *else* does the seeing, which
     // is the object-controlled infinitive complement (localization C08). Japanese says it as

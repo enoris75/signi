@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AFRICA, CASA, EUROPA, GATO, LIVRO, TEMPO } from './pt.fixtures.js';
+import { AFRICA, CASA, EUROPA, GATO, JAPAO, LIVRO, PORTUGAL, TEMPO } from './pt.fixtures.js';
 import { contractDet } from './contractDet.js';
 import { datPrep } from './datPrep.js';
 import { dePrep } from './dePrep.js';
@@ -41,5 +41,13 @@ describe('contractDet', () => {
     expect(contractDet(emPrep, 'em', AFRICA)).toBe('na');
     expect(contractDet(dePrep, 'de', { ...EUROPA, definiteness: 'this' })).toBe('da');
     expect(contractDet(datPrep, 'a', { ...AFRICA, definiteness: 'indefinite' })).toBe('à');
+    expect(contractDet(dePrep, 'de', JAPAO)).toBe('do');
+  });
+
+  test('a bare name takes the plain preposition, whatever was picked', () => {
+    expect(contractDet(dePrep, 'de', PORTUGAL)).toBe('de');
+    expect(contractDet(emPrep, 'em', { ...PORTUGAL, definiteness: 'this' })).toBe('em');
+    expect(contractDet(datPrep, 'a', PORTUGAL)).toBe('a');
+    expect(contractDet(porPrep, 'por', { ...PORTUGAL, definiteness: 'indefinite' })).toBe('por');
   });
 });

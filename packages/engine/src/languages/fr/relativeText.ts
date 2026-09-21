@@ -69,7 +69,8 @@ export function relativeText(np: ResolvedNounPhrase): string {
   const lequel = agentGap ? agentPhrase(agentGap)
     : alarmHead ? alarmCryText(alarmHead)
     : prepHead ? prepObjectText(prepHead.head, prepHead.prep)
-    : gap ? complementsPhrase(gap, {}, '') : '';
+    // The verb's forms, for a goal preposition its lexeme fixes: "la maison vers laquelle le chat se déplace".
+    : gap ? complementsPhrase(gap, {}, '', {}, rel.verbPhrase.verb.forms) : '';
   return (lequel
     ? `${lequel.replace(/\b(le|la|les|du|des|au|aux) (quel)/, '$1$2')} ${clause}`
     : joinArt(VOWEL_START.test(clause) ? "qu'" : 'que', clause)).trim();

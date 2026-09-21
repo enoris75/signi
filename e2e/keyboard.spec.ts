@@ -102,6 +102,8 @@ test.describe('the canvas by keyboard', () => {
     await pickWord(page, 'eat', 'EAT');
     await pickWord(page, 'mouse', 'MOUSE');
     await app.expectSentences({ en: 'the cat eats the mouse.' });
+    // The caption says how a keyboard user fills a slot, where a mouse user reads "click a slot" (B44).
+    await expect(page.getByText('use the arrow keys, and then type a word')).toBeVisible();
 
     // With nothing left to fill the cursor stays on the word just chosen.
     expect(await cursorSlot(page)).toBe('directObject');
@@ -397,7 +399,7 @@ test.describe('the canvas by keyboard', () => {
     await page.keyboard.press('?');
     const sheet = page.getByRole('dialog');
     await expect(sheet).toBeVisible();
-    await expect(sheet.getByText('Anywhere')).toBeVisible();
+    await expect(sheet.getByTestId('help-section-app')).toContainText('Everywhere');
     // Exactly, since the sheet also lists the backwards twin the same key takes with ⇧ — and within
     // the keyboard section, since the console's reference below it has a /tense of its own.
     const keys = sheet.getByRole('region', { name: 'Keyboard navigation' });
@@ -468,6 +470,8 @@ test.describe('the canvas by keyboard', () => {
     await expect(page.getByTestId('period-container')).toHaveCount(1);
     expect(dialogs, 'the page asked before removing').toEqual([]);
     await expect(page.getByTestId('undo-toast')).toBeVisible();
+    await expect(page.getByTestId('undo-toast')).toContainText('Removed period');
+    await expect(page.getByTestId('undo-period')).toContainText('Undo');
 
     // And the key the toast offers puts the period back, words and all.
     await page.keyboard.press('ControlOrMeta+z');
@@ -498,7 +502,9 @@ test.describe('the help overlay', () => {
     await expect(overlay.getByRole('heading', { name: 'Help' })).toBeVisible();
     await expect(overlay.getByRole('heading', { name: 'Keyboard navigation' })).toBeVisible();
     // Read off the keymaps: the levels, and the caps of a binding at each.
-    await expect(overlay.getByText('Anywhere')).toBeVisible();
+    await expect(overlay.getByTestId('help-section-app')).toContainText('Everywhere');
+    // A ⇧ twin is named after the key it reverses (B44).
+    await expect(overlay.getByText('Tense, backwards', { exact: true })).toBeVisible();
     // The keyboard section's, first: the console's reference below heads a part "Period" too (A21).
     await expect(overlay.getByText('Period', { exact: true }).first()).toBeVisible();
     // ⇧↑ is named as the header button it presses is.
@@ -524,14 +530,22 @@ test.describe('the help overlay', () => {
     const footer = page.getByTestId('picker-footer-list');
     await expect(footer).toContainText('sposta');
     await expect(footer).toContainText('scegli');
+    await expect(footer).toContainText("scegli, e poi va' allo slot successivo");
     await expect(footer).toContainText('chiudi');
 
+    // The corner button is named as the overlay it opens, in the interface language (B41).
+    await expect(page.getByTestId('help-button')).toHaveAccessibleName('Aiuto');
     await page.getByTestId('help-button').click();
+    const overlay = page.getByTestId('help-overlay');
+    await expect(overlay.getByRole('heading', { name: 'Aiuto' })).toBeVisible();
     // The keyboard section, not the console's reference below it, which names /if the same way.
-    // Its own name is still English (B41).
-    const keys = page
-      .getByTestId('help-overlay')
-      .getByRole('region', { name: 'Keyboard navigation' });
+    const keys = overlay.getByRole('region', { name: 'Navigazione da tastiera' });
+    await expect(keys.getByTestId('help-section-app')).toContainText('Ovunque');
+    await expect(keys.getByTestId('help-section-pick')).toContainText('Destinazioni');
+    await expect(keys.getByText('Esci dal periodo', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Area successiva', { exact: true })).toBeVisible();
+    await expect(keys.getByText("Tempo, all'indietro", { exact: true })).toBeVisible();
+    await expect(keys.getByText('Scegli una destinazione numerata', { exact: true })).toBeVisible();
     await expect(keys.getByText('Periodo', { exact: true })).toBeVisible();
     await expect(keys.getByText('Soggetto del comando', { exact: true })).toBeVisible();
     await expect(keys.getByText('Traduzioni e parole', { exact: true })).toBeVisible();

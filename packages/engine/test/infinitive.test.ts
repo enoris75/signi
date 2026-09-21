@@ -121,6 +121,33 @@ describe('infinitive: the manner adverb REPEATEDLY', () => {
   });
 });
 
+// SUDDENLY, seeded as COLLAPSE's differentia ("to move to the ground suddenly", localization B34). A
+// manner adverb like REPEATEDLY, with no subtype, so it takes the same slot: after the verb in English
+// and Romance, before the object in Romance, before the verb in Japanese. Spanish and Portuguese say
+// it with the fixed phrase "de repente".
+describe('the manner adverb SUDDENLY', () => {
+  test('follows the verb in a finite clause', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { verbPhrase: { modifier: 'SUDDENLY', tense: 'past' } }))).toEqual({
+      en: 'the cat ate suddenly.',
+      it: 'il gatto mangiò improvvisamente.',
+      fr: 'le chat mangea soudainement.',
+      de: 'der Kater fraß plötzlich.',
+      es: 'el gato comió de repente.',
+      ja: '猫は突然食べました。',
+      pt: 'o gato comeu de repente.',
+    });
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), verbPhrase: { modifier: 'SUDDENLY' } }))).toEqual({
+      en: 'the cat eats the mouse suddenly.',
+      it: 'il gatto mangia improvvisamente il topo.',
+      fr: 'le chat mange soudainement la souris.',
+      de: 'der Kater frisst plötzlich die Maus.',
+      es: 'el gato come de repente el ratón.',
+      ja: '猫はネズミを突然食べます。',
+      pt: 'o gato come de repente o rato.',
+    });
+  });
+});
+
 describe('infinitive negation', () => {
   test('brackets the citation, not a finite verb', () => {
     expect(sayAll(infinitive({}, { negative: true }))).toMatchObject({

@@ -76,7 +76,7 @@ export interface Candidate {
   pinned?: boolean;
   /** For a setting: the value the word holds now, which the row shows as "now …". */
   current?: { value: string; key?: UiStringKey };
-  /** The alias the query matched, when it was not the name: `also /plural`. */
+  /** The alias the query matched, when it was not the name, which the row shows as "alias /plural". */
   alias?: string;
   /** For a command: what it is about, which heads it in the list — `tense`. */
   topic?: string;
@@ -98,8 +98,9 @@ export interface Completion {
   ghost?: string;
   /** The list's heading: what it holds, in English, the fallback for `titleKey`. */
   title: string;
-  titleKey?: UiStringKey;
-  /** The word the list is about, which the heading shows after it: "commands · *cat*". */
+  /** Or, for a list holding two kinds of rows, one title per kind, shown in order: "pinned lines · recent lines". */
+  titleKey?: UiStringKey | readonly UiStringKey[];
+  /** The word the list is about, which the heading shows after it: "commands · *cat*", "values · /tense". */
   about?: string;
   /** Whether the list opens by itself here, rather than on ⇥. */
   auto: boolean;
@@ -189,13 +190,20 @@ function lineCompletion(text: string, opts: CompleteOptions): Completion | undef
     insert: line,
     label: line,
     detail: isPinned ? "pinned" : "recent",
+    detailKey: isPinned ? "console.line.pinned" : "console.line.recent",
     pinned: isPinned,
   });
+  // Headed by what it holds: the pinned lines, the recent ones, or both, each title for its own rows.
+  const kinds = [
+    ...(pinned.length ? [{ title: "pinned lines", key: "console.list.pinned" as const }] : []),
+    ...(recent.length ? [{ title: "recent lines", key: "console.list.recent" as const }] : []),
+  ];
   return {
     from: 0,
     to: text.length,
     candidates: [...pinned.map((l) => row(l, true)), ...recent.map((l) => row(l, false))].slice(0, MAX_ROWS),
-    title: pinned.length ? "pinned and recent lines" : "recent lines",
+    title: kinds.map((k) => k.title).join(" · "),
+    titleKey: kinds.length === 1 ? kinds[0]!.key : kinds.map((k) => k.key),
     auto: false,
   };
 }
@@ -697,12 +705,12 @@ function valueCompletion(
     to,
     candidates,
     ghost: ghostFor(query, candidates[0]),
-    // English literal "values for /…", for /localize: VALUE is not seeded (B46).
+    // A command's values are headed by the command after the title, outside the phrase: "values · /tense".
     ...(free
       ? { title: "saved phrases", titleKey: "console.list.savedPhrases" as const }
       : def.action.kind === "join"
         ? { title: "conjunctions", titleKey: "console.list.conjunctions" as const }
-        : { title: `values for /${def.name}` }),
+        : { title: "values", titleKey: "console.list.values" as const, about: `/${def.name}` }),
     auto: true,
   };
 }

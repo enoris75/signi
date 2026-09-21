@@ -8,8 +8,7 @@ import { useUiString } from "../../i18n/useUiString.ts";
  * The strip along the foot of an open word picker, saying what its keys do (the plan's §3.5).
  *
  * Shown to a keyboard user only, like the key tips on the canvas: a mouse user's picker is the one
- * they have always seen. Each label is the catalogue's word where it is seeded, lower-case as the
- * strip reads; the English left without a key waits on words the corpus does not hold yet (B44).
+ * they have always seen. Each label is the catalogue's, lower-case as the strip reads.
  */
 
 interface FooterKey {
@@ -23,7 +22,7 @@ const LIST_KEYS: FooterKey[] = [
   { spec: "ArrowUp", label: "" },
   { spec: "ArrowDown", label: "move", labelKey: "action.move" },
   { spec: "Enter", label: "choose", labelKey: "slot.choose" },
-  { spec: "Tab", label: "choose, next box" },
+  { spec: "Tab", label: "choose, and then go to the next slot", labelKey: "hint.chooseAndNext" },
   { spec: "Escape", label: "close", labelKey: "action.close" },
 ];
 
@@ -32,9 +31,9 @@ const GRID_KEYS: FooterKey[] = [
   { spec: "1", label: "" },
   { spec: "4", label: "person", labelKey: "pronoun.person" },
   { spec: "ArrowUp", label: "" },
-  { spec: "ArrowDown", label: "row" },
+  { spec: "ArrowDown", label: "row", labelKey: "grid.row" },
   { spec: "ArrowLeft", label: "" },
-  { spec: "ArrowRight", label: "value" },
+  { spec: "ArrowRight", label: "value", labelKey: "grid.value" },
   // Selecting a pronoun is choosing it: the list's ↵ word.
   { spec: "Enter", label: "select", labelKey: "slot.choose" },
 ];

@@ -63,7 +63,7 @@ describe('the keys that work anywhere', () => {
     // Every level is listed, and each row carries the key it is actually bound to. (The console's
     // reference below it has rows of its own — /tense among them.)
     const keys = within(sheet).getByRole('region', { name: 'Keyboard navigation' });
-    expect(within(keys).getByText('Anywhere')).toBeInTheDocument();
+    expect(within(keys).getByTestId('help-section-app')).toHaveTextContent(/^Everywhere/);
     expect(within(keys).getByText('Period')).toBeInTheDocument();
     expect(within(keys).getByText('Noun')).toBeInTheDocument();
     expect(within(keys).getByText('Tense')).toBeInTheDocument();
@@ -93,13 +93,25 @@ describe('the keys that work anywhere', () => {
         'wordMap.heading': { de: 'Wortkarte' },
         'satellite.relative': { de: 'Relativsatz' },
         'clause.coordinated': { de: 'Beigeordneter Satz' },
+        'help.heading': { de: 'Hilfe' },
+        'help.keyboard': { de: 'Tastaturnavigation' },
+        'help.section.app': { de: 'Überall' },
+        'help.section.pick': { de: 'Ziele' },
+        'help.nextTarget': { de: 'Nächstes Ziel' },
+        'region.next': { de: 'Nächster Bereich' },
+        'action.leavePeriod': { de: 'Das Satzgefüge verlassen' },
+        'satellite.tense': { de: 'Tempus' },
+        'hint.backwards': { de: 'rückwärts' },
+        'hint.chooseAndNext': { de: 'wählen, und dann zum nächsten Slot gehen' },
       },
     });
 
+    // The corner button is named as the overlay it opens.
+    expect(screen.getByTestId('help-button')).toHaveAccessibleName('Hilfe');
     press('?');
 
-    const keys = within(screen.getByRole('dialog')).getByRole('region', {
-      name: 'Keyboard navigation',
+    const keys = within(screen.getByRole('dialog', { name: 'Hilfe' })).getByRole('region', {
+      name: 'Tastaturnavigation',
     });
     expect(within(keys).getByText('Satzgefüge')).toBeInTheDocument();
     expect(within(keys).getByText('Subjekt des Befehls')).toBeInTheDocument();
@@ -116,6 +128,51 @@ describe('the keys that work anywhere', () => {
     expect(within(keys).getByText(/^Relativsatz, .*, Beigeordneter Satz, /)).toBeInTheDocument();
     expect(within(keys).queryByText('If-condition')).not.toBeInTheDocument();
     expect(within(keys).queryByText('Move')).not.toBeInTheDocument();
+    // The section headings and the keys that move about the page (B41, B44).
+    expect(within(keys).getByTestId('help-section-app')).toHaveTextContent(/^Überall/);
+    expect(within(keys).getByTestId('help-section-pick')).toHaveTextContent(/^Ziele/);
+    expect(within(keys).getByText('Nächstes Ziel')).toBeInTheDocument();
+    expect(within(keys).getByText('Nächster Bereich')).toBeInTheDocument();
+    expect(within(keys).getByText('Das Satzgefüge verlassen')).toBeInTheDocument();
+    expect(within(keys).getByText('wählen, und dann zum nächsten Slot gehen')).toBeInTheDocument();
+    // A ⇧ twin is named after the key it reverses, a comma, and the adverb.
+    expect(within(keys).getByText('Tempus, rückwärts')).toBeInTheDocument();
+  });
+
+  // B40, B42, B43: undo and redo, the console's two keys, and the period's ↵, + and −. The console's
+  // commands below the keys name its help rows after the same console.
+  it('names the undo, console and canvas keys in the UI language', () => {
+    localStorage.setItem('signi:uiLanguage', 'de');
+    renderWithProviders(<App />, {
+      concepts: CONCEPTS,
+      strings: {
+        'action.undo': { de: 'Rückgängig machen' },
+        'action.redo': { de: 'Wiederholen' },
+        'console.name': { de: 'Konsole' },
+        'action.typeCommand': { de: 'Einen Befehl in der Konsole tippen' },
+        'action.edit': { de: 'Bearbeiten' },
+        'action.expandCanvas': { de: 'Die Arbeitsfläche erweitern' },
+        'action.shrinkCanvas': { de: 'Die Arbeitsfläche verkleinern' },
+        'action.returnToCanvas': { de: 'zur Arbeitsfläche zurückkehren' },
+        'words.heading': { de: 'Wörter' },
+        'action.showInConsole': { de: 'In der Konsole zeigen' },
+      },
+    });
+
+    press('?');
+
+    const sheet = screen.getByRole('dialog');
+    const keys = within(sheet).getByRole('region', { name: 'Keyboard navigation' });
+    for (const label of ['Rückgängig machen', 'Wiederholen', 'Konsole', 'Einen Befehl in der Konsole tippen', 'Bearbeiten', 'Die Arbeitsfläche verkleinern']) {
+      expect(within(keys).getByText(label)).toBeInTheDocument();
+    }
+    // + and = both grow the canvas.
+    expect(within(keys).getAllByText('Die Arbeitsfläche erweitern')).toHaveLength(2);
+    expect(within(keys).getByText('Wörter: zur Arbeitsfläche zurückkehren')).toBeInTheDocument();
+    // The console's part is headed by its name, and each row says where it opens the command's page.
+    expect(within(sheet).getByRole('heading', { name: 'Konsole' })).toBeInTheDocument();
+    expect(within(sheet).getByTestId('console-help-row-undo')).toHaveAttribute('title', 'In der Konsole zeigen: /undo');
+    expect(within(keys).queryByText('Undo')).not.toBeInTheDocument();
   });
 
   // The key is for whoever knows it; the icon is for whoever does not.
@@ -128,7 +185,7 @@ describe('the keys that work anywhere', () => {
 
     const overlay = screen.getByRole('dialog', { name: 'Help' });
     expect(within(overlay).getByRole('heading', { name: 'Keyboard navigation' })).toBeInTheDocument();
-    expect(within(overlay).getByText('Anywhere')).toBeInTheDocument();
+    expect(within(overlay).getByTestId('help-section-app')).toBeInTheDocument();
 
     fireEvent.click(within(overlay).getByRole('button', { name: 'Cancel' }));
     await waitFor(() => expect(screen.queryByRole('dialog')).not.toBeInTheDocument());

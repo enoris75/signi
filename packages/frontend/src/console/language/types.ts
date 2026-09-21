@@ -1,4 +1,4 @@
-import type { Concept, GrammaticalRole, LanguageCode } from "@signi/shared";
+import type { Concept, GrammaticalRole, LanguageCode, UiStringKey } from "@signi/shared";
 import type {
   NounAddress,
   PhraseContainer,
@@ -45,7 +45,9 @@ export interface ConsoleContext {
 export interface Diagnostic {
   from: number;
   to: number;
+  /** English: the fallback for `messageKey`, which the prompt shows when there is one. */
   message: string;
+  messageKey?: UiStringKey;
 }
 
 /**

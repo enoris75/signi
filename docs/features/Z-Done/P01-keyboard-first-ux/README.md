@@ -649,9 +649,11 @@ saved phrase is known by its name.
 **What phase 1 left.** Two things named in §3 need work that is not a frontend change:
 
 - **The keyboard caption** (§3.1, "· MOVE WITH THE ARROWS, TYPE TO CHOOSE A WORD"). Every caption
-  is an engine-composed catalogue string, and this one needs a concept the corpus does not hold
-  (an arrow, or a key). It is a `/seed` + `/localize` task, not a component edit — the caption
-  still reads "· click a slot, and then choose a word" under both modalities.
+  is an engine-composed catalogue string, and this one needed a concept the corpus did not hold
+  (an arrow, or a key). It was a `/seed` + `/localize` task, not a component edit. **Done
+  2026-09-21** ([B44](../../../localization/done/B44-ui-keyboard-movement-labels.md)): ARROW is
+  seeded, and under keyboard modality the caption reads "· use the arrow keys, and then type a
+  word" (`hint.chooseWordKeyboard`).
 (<kbd>R</kbd> on a noun and the complement menu's <kbd>+</kbd> shipped with phases 3 and 2.)
 
 Existing defects fixed along the way (found while auditing): focus ring suppressed on canvas nodes

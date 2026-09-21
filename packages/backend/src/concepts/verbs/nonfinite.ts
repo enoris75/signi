@@ -312,6 +312,16 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'indo', participle: 'ido' },
     ja: { te: '行って', te_reading: 'いって', nai: '行かない', nai_reading: 'いかない' },
   },
+  // Going back selects BE where GO does (è tornato, est revenu, ist zurückgekehrt); English keeps
+  // "has returned" (unlike "is gone").
+  RETURN: {
+    en: { gerund: 'returning', participle: 'returned' },
+    it: { gerund: 'tornando', participle: 'tornato', aux: 'be' },
+    fr: { participle: 'revenu', aux: 'be' }, de: { participle: 'zurückgekehrt', aux: 'be' },
+    es: { gerund: 'volviendo', participle: 'vuelto' },
+    pt: { gerund: 'voltando', participle: 'voltado' },
+    ja: { te: '戻って', te_reading: 'もどって', nai: '戻らない', nai_reading: 'もどらない' },
+  },
   // A pronominal verb selects essere / être in it and fr ("si è mosso", "s'est déplacé"); the German
   // reflexive takes haben ("hat sich bewegt"). The it / es / pt gerunds carry the clitic, which the
   // engine agrees with the subject ("sta muovendomi", "estoy moviéndome").
@@ -380,6 +390,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'añadiendo', participle: 'añadido' },
     pt: { gerund: 'adicionando', participle: 'adicionado' },
     ja: { te: '加えて', te_reading: 'くわえて', nai: '加えない', nai_reading: 'くわえない', passive: '加えられる', passive_reading: 'くわえられる' },
+  },
+  LINK: {
+    en: { gerund: 'linking', participle: 'linked' },
+    it: { gerund: 'collegando', participle: 'collegato' },
+    fr: { participle: 'relié' }, de: { participle: 'verbunden' },
+    es: { gerund: 'enlazando', participle: 'enlazado' },
+    pt: { gerund: 'ligando', participle: 'ligado' },
+    ja: { te: 'つないで', te_reading: 'つないで', nai: 'つながない', nai_reading: 'つながない', passive: 'つながれる', passive_reading: 'つながれる' },
   },
   EXPORT: {
     en: { gerund: 'exporting', participle: 'exported' },
@@ -618,6 +636,14 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'expandindo', participle: 'expandido' },
     ja: { te: '展開して', te_reading: 'てんかいして', nai: '展開しない', nai_reading: 'てんかいしない', passive: '展開される', passive_reading: 'てんかいされる' },
   },
+  SHRINK: {
+    en: { gerund: 'shrinking', participle: 'shrunk' },
+    it: { gerund: 'rimpicciolendo', participle: 'rimpicciolito' },
+    fr: { participle: 'réduit' }, de: { participle: 'verkleinert' },
+    es: { gerund: 'reduciendo', participle: 'reducido' },
+    pt: { gerund: 'reduzindo', participle: 'reduzido' },
+    ja: { te: '縮小して', te_reading: 'しゅくしょうして', nai: '縮小しない', nai_reading: 'しゅくしょうしない', passive: '縮小される', passive_reading: 'しゅくしょうされる' },
+  },
   HIDE: {
     en: { gerund: 'hiding', participle: 'hidden' },
     it: { gerund: 'nascondendo', participle: 'nascosto' },
@@ -664,6 +690,23 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'cancelando', participle: 'cancelado' },
     ja: { te: 'キャンセルして', te_reading: 'きゃんせるして', nai: 'キャンセルしない', nai_reading: 'きゃんせるしない', passive: 'キャンセルされる', passive_reading: 'きゃんせるされる' },
   },
+  // UNDO and REDO (B40). German UNDO's particle is written apart, so its participle is two words.
+  UNDO: {
+    en: { gerund: 'undoing', participle: 'undone' },
+    it: { gerund: 'annullando', participle: 'annullato' },
+    fr: { participle: 'annulé' }, de: { participle: 'rückgängig gemacht' },
+    es: { gerund: 'deshaciendo', participle: 'deshecho' },
+    pt: { gerund: 'desfazendo', participle: 'desfeito' },
+    ja: { te: '元に戻して', te_reading: 'もとにもどして', nai: '元に戻さない', nai_reading: 'もとにもどさない', passive: '元に戻される', passive_reading: 'もとにもどされる' },
+  },
+  REDO: {
+    en: { gerund: 'redoing', participle: 'redone' },
+    it: { gerund: 'ripetendo', participle: 'ripetuto' },
+    fr: { participle: 'rétabli' }, de: { participle: 'wiederholt' },
+    es: { gerund: 'rehaciendo', participle: 'rehecho' },
+    pt: { gerund: 'refazendo', participle: 'refeito' },
+    ja: { te: 'やり直して', te_reading: 'やりなおして', nai: 'やり直さない', nai_reading: 'やりなおさない', passive: 'やり直される', passive_reading: 'やりなおされる' },
+  },
   CLOSE: {
     en: { gerund: 'closing', participle: 'closed' },
     it: { gerund: 'chiudendo', participle: 'chiuso' },
@@ -704,6 +747,16 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'movendo', participle: 'movido' },
     ja: { te: '移動して', te_reading: 'いどうして', nai: '移動しない', nai_reading: 'いどうしない', passive: '移動される', passive_reading: 'いどうされる' },
   },
+  // Italian uscire selects essere ("è uscita dalla casa"); French quitter and German verlassen take
+  // their HAVE auxiliary with a direct object.
+  LEAVE: {
+    en: { gerund: 'leaving', participle: 'left' },
+    it: { gerund: 'uscendo', participle: 'uscito', aux: 'be' },
+    fr: { participle: 'quitté' }, de: { participle: 'verlassen' },
+    es: { gerund: 'saliendo', participle: 'salido' },
+    pt: { gerund: 'saindo', participle: 'saído' },
+    ja: { te: '出て', te_reading: 'でて', nai: '出ない', nai_reading: 'でない', passive: '出られる', passive_reading: 'でられる' },
+  },
   DRAG: {
     en: { gerund: 'dragging', participle: 'dragged' },
     it: { gerund: 'trascinando', participle: 'trascinato' },
@@ -727,6 +780,49 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'desactivando', participle: 'desactivado' },
     pt: { gerund: 'desativando', participle: 'desativado' },
     ja: { te: 'オフにして', nai: 'オフにしない', passive: 'オフにされる' },
+  },
+  // de festlegen is separable: the particle goes inside the participle (festgelegt).
+  SET: {
+    en: { gerund: 'setting', participle: 'set' },
+    it: { gerund: 'impostando', participle: 'impostato' },
+    fr: { participle: 'défini' }, de: { participle: 'festgelegt' },
+    es: { gerund: 'estableciendo', participle: 'establecido' },
+    pt: { gerund: 'definindo', participle: 'definido' },
+    ja: { te: '設定して', te_reading: 'せっていして', nai: '設定しない', nai_reading: 'せっていしない', passive: '設定される', passive_reading: 'せっていされる' },
+  },
+  // The console's verbs (B45). German anheften and anwenden are separable, so the participle takes
+  // ge- inside: angeheftet, angewandt. Japanese are verbal nouns with する.
+  PIN: {
+    en: { gerund: 'pinning', participle: 'pinned' },
+    it: { gerund: 'fissando', participle: 'fissato' },
+    fr: { participle: 'épinglé' }, de: { participle: 'angeheftet' },
+    es: { gerund: 'fijando', participle: 'fijado' },
+    pt: { gerund: 'fixando', participle: 'fixado' },
+    ja: { te: 'ピン留めして', te_reading: 'ぴんどめして', nai: 'ピン留めしない', nai_reading: 'ぴんどめしない', passive: 'ピン留めされる', passive_reading: 'ぴんどめされる' },
+  },
+  UNPIN: {
+    en: { gerund: 'unpinning', participle: 'unpinned' },
+    it: { gerund: 'sbloccando', participle: 'sbloccato' },
+    fr: { participle: 'désépinglé' }, de: { participle: 'gelöst' },
+    es: { gerund: 'desfijando', participle: 'desfijado' },
+    pt: { gerund: 'desafixando', participle: 'desafixado' },
+    ja: { te: 'ピン留め解除して', te_reading: 'ぴんどめかいじょして', nai: 'ピン留め解除しない', nai_reading: 'ぴんどめかいじょしない', passive: 'ピン留め解除される', passive_reading: 'ぴんどめかいじょされる' },
+  },
+  COMPLETE: {
+    en: { gerund: 'completing', participle: 'completed' },
+    it: { gerund: 'completando', participle: 'completato' },
+    fr: { participle: 'complété' }, de: { participle: 'vervollständigt' },
+    es: { gerund: 'completando', participle: 'completado' },
+    pt: { gerund: 'completando', participle: 'completado' },
+    ja: { te: '補完して', te_reading: 'ほかんして', nai: '補完しない', nai_reading: 'ほかんしない', passive: '補完される', passive_reading: 'ほかんされる' },
+  },
+  APPLY: {
+    en: { gerund: 'applying', participle: 'applied' },
+    it: { gerund: 'applicando', participle: 'applicato' },
+    fr: { participle: 'appliqué' }, de: { participle: 'angewandt' },
+    es: { gerund: 'aplicando', participle: 'aplicado' },
+    pt: { gerund: 'aplicando', participle: 'aplicado' },
+    ja: { te: '適用して', te_reading: 'てきようして', nai: '適用しない', nai_reading: 'てきようしない', passive: '適用される', passive_reading: 'てきようされる' },
   },
   // Grammar-word verbs (B06). All transitive → avere/haber/ter default (no aux key).
   NAME: {
@@ -752,6 +848,31 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'modificando', participle: 'modificado' },
     pt: { gerund: 'modificando', participle: 'modificado' },
     ja: { te: '修飾して', te_reading: 'しゅうしょくして', nai: '修飾しない', nai_reading: 'しゅうしょくしない', passive: '修飾される', passive_reading: 'しゅうしょくされる' },
+  },
+  // it reggere → retto; es regir raises e→i in the gerund (rigiendo).
+  GOVERN: {
+    en: { gerund: 'governing', participle: 'governed' },
+    it: { gerund: 'reggendo', participle: 'retto' },
+    fr: { participle: 'régi' }, de: { participle: 'regiert' },
+    es: { gerund: 'rigiendo', participle: 'regido' },
+    pt: { gerund: 'regendo', participle: 'regido' },
+    ja: { te: '支配して', te_reading: 'しはいして', nai: '支配しない', nai_reading: 'しはいしない', passive: '支配される', passive_reading: 'しはいされる' },
+  },
+  NEGATE: {
+    en: { gerund: 'negating', participle: 'negated' },
+    it: { gerund: 'negando', participle: 'negato' },
+    fr: { participle: 'nié' }, de: { participle: 'verneint' },
+    es: { gerund: 'negando', participle: 'negado' },
+    pt: { gerund: 'negando', participle: 'negado' },
+    ja: { te: '否定して', te_reading: 'ひていして', nai: '否定しない', nai_reading: 'ひていしない', passive: '否定される', passive_reading: 'ひていされる' },
+  },
+  EDIT: {
+    en: { gerund: 'editing', participle: 'edited' },
+    it: { gerund: 'modificando', participle: 'modificato' },
+    fr: { participle: 'modifié' }, de: { participle: 'bearbeitet' },
+    es: { gerund: 'editando', participle: 'editado' },
+    pt: { gerund: 'editando', participle: 'editado' },
+    ja: { te: '編集して', te_reading: 'へんしゅうして', nai: '編集しない', nai_reading: 'へんしゅうしない', passive: '編集される', passive_reading: 'へんしゅうされる' },
   },
   EXPRESS: {
     en: { gerund: 'expressing', participle: 'expressed' },

@@ -13,8 +13,8 @@ found that neither needs the engine, only words:
 
 | verb | now | gloss | seed first |
 |---|---|---|---|
-| COLLAPSE | [B34](../B-needs-seed/B34-collapse.md) | to move to the ground suddenly | GROUND, SUDDENLY |
-| COME | [B35](../B-needs-seed/B35-come.md) | to move to the speaker | SPEAKER |
+| COLLAPSE | [B34](B34-collapse.md) (done) | to move to the ground suddenly | GROUND, SUDDENLY |
+| COME | [B35](B35-come.md) (done) | to move to the speaker | SPEAKER |
 
 What changed from this file's own verdicts:
 
@@ -29,7 +29,9 @@ What changed from this file's own verdicts:
    not open: the motion complements are noun-only by design.
 
 Each ticket leaves one reading for a native speaker to judge: French *au sol* for COLLAPSE, and
-Italian *muoversi dal parlante* for COME. The probe tables are in the tickets.
+Italian *muoversi dal parlante* for COME. The probe tables are in the tickets. Both read wrong, and
+both shipped on 2026-09-21 with MOVE_ONESELF naming its own goal preposition, *vers* / *verso*: "se
+déplacer soudainement vers le sol", "muoversi verso il parlante" ([B34](B34-collapse.md#the-french-reading-judged)).
 
 ## Two adverbs on one verb: costed, not needed
 

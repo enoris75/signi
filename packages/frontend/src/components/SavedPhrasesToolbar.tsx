@@ -360,7 +360,7 @@ export function SavedPhrasesToolbar({ containers, links, onLoad }: Props) {
                   }}
                   sx={{ textTransform: "none" }}
                 >
-                  Undo
+                  {t("action.undo")}
                 </Button>
               ) : undefined
             }

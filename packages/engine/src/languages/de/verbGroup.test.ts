@@ -63,4 +63,12 @@ describe('verbGroup', () => {
     expect(verbGroup(HINZUFUEGEN, '3sg', 'present', 'resultative')).toEqual({ v2: 'hat', mid: '', tail: 'hinzugefügt', zuInfinitive: '' });
     expect(verbGroup(HINZUFUEGEN, '3sg', 'present', 'prospective')).toEqual({ v2: 'ist', mid: 'im Begriff', tail: '', zuInfinitive: 'hinzuzufügen' });
   });
+
+  // B40: a particle written apart hands over the space it rejoins with.
+  test('a particle written apart: the finite stem hands over the particle and its gap', () => {
+    const UNDO = { base: 'rückgängig machen', particle: 'rückgängig', '3sg_present': 'macht', participle: 'rückgängig gemacht' };
+    expect(verbGroup(UNDO, '3sg', 'present', 'neutral')).toEqual({ v2: 'macht', mid: '', tail: '', zuInfinitive: '', particle: 'rückgängig', particleGap: ' ' });
+    expect(verbGroup(UNDO, '3sg', 'future', 'neutral')).toEqual({ v2: 'wird', mid: '', tail: 'rückgängig machen', zuInfinitive: '' });
+    expect(verbGroup(UNDO, '3sg', 'present', 'prospective')).toEqual({ v2: 'ist', mid: 'im Begriff', tail: '', zuInfinitive: 'rückgängig zu machen' });
+  });
 });

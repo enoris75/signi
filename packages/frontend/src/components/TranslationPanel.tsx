@@ -200,8 +200,7 @@ function LanguageRow({
               color: 'primary.main',
             }}
           >
-            {/* English literal, for /localize. */}
-            Preview
+            {uiString('status.preview')}
           </Box>
         )}
         {text && (

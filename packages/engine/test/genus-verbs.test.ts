@@ -1899,6 +1899,21 @@ describe('B17 verb definitions (FEEL / SHED / PRODUCE genera)', () => {
       pt: 'produzir sons altos.',
     });
   });
+
+  // B33. PRODUCE's "give off" sense again, with FLAME: what a burning thing does. Not CONSUME, whose
+  // ingest sense reads fr "consommé", de "konsumiert", ja 摂取, and not "to produce fire", which is
+  // SET_ON_FIRE's "to create fire" in five languages. Japanese 炎を出す does not contain 燃.
+  test('BURN produces flames (localization B33)', () => {
+    expect(definitionAll('BURN')).toEqual({
+      en: 'to produce flames.',
+      it: 'produrre fiamme.',
+      fr: 'produire des flammes.',
+      de: 'Flammen erzeugen.',
+      es: 'producir llamas.',
+      ja: '炎を出す。',
+      pt: 'produzir chamas.',
+    });
+  });
 });
 
 describe('B18 verb definitions (INDICATE / PRESS / WRITE genera)', () => {

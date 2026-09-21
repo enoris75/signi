@@ -110,8 +110,7 @@ function safely<T>(run: () => T, fallback: T): T {
 
 const unreadable = (state: WorkspaceState, text: string, context: ConsoleContext): ApplyResult => ({
   state,
-  // English literal, for /localize.
-  diagnostic: { from: 0, to: text.length, message: "The console could not read this line." },
+  diagnostic: { from: 0, to: text.length, message: "This line could not be read.", messageKey: "failure.lineNotRead" },
   frames: [{ kind: "period", containerId: context.containerId, words: [] }],
   context,
   effects: [],
@@ -579,7 +578,13 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
           const line = rest || before[0];
           if (line) {
             pin(line, effect.app === "pin");
-            add({ kind: "info", text: line, detail: effect.app === "pin" ? "Pinned." : "Unpinned." });
+            add({
+              kind: "info",
+              text: line,
+              ...(effect.app === "pin"
+                ? { detail: "Pinned line", detailKey: "toast.linePinned" as const }
+                : { detail: "Unpinned line", detailKey: "toast.lineUnpinned" as const }),
+            });
           }
           break;
         }

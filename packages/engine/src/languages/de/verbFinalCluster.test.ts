@@ -15,4 +15,10 @@ describe('verbFinalCluster', () => {
   test('a separable verb closes on its particle and finite verb, written as one word', () => {
     expect(verbFinalCluster({ v2: 'fügt', mid: '', tail: '', zuInfinitive: '', particle: 'hinzu' })).toEqual(['', 'hinzufügt']);
   });
+
+  // B40: one written apart rejoins with its space.
+  test('a particle written apart rejoins its finite verb as a word of its own', () => {
+    expect(verbFinalCluster({ v2: 'macht', mid: '', tail: '', zuInfinitive: '', particle: 'rückgängig', particleGap: ' ' }))
+      .toEqual(['', 'rückgängig macht']);
+  });
 });

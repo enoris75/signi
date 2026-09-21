@@ -282,12 +282,27 @@ describe('App', () => {
       act(() => stubs.workspace.onPeriodRemoved?.());
 
       const toast = screen.getByTestId('undo-toast');
-      expect(toast).toHaveTextContent('Period removed');
+      expect(toast).toHaveTextContent('Removed period');
+      expect(within(toast).getByTestId('undo-period')).toHaveTextContent('Undo');
 
-      fireEvent.click(within(toast).getByRole('button', { name: 'Undo' }));
+      fireEvent.click(within(toast).getByTestId('undo-period'));
 
       expect(stubs.workspace.containers).toEqual([period('a'), period('b')]);
       await waitFor(() => expect(screen.queryByTestId('undo-toast')).not.toBeInTheDocument());
+    });
+
+    // B40: the toast and its button in the interface language — Italian Undo is its Cancel, "Annulla".
+    it('says so in the interface language', () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      renderApp({ 'toast.periodRemoved': { it: 'Periodo rimosso' }, 'action.undo': { it: 'Annulla' } });
+      edit([period('a'), period('b')]);
+      later(500);
+      edit([period('a')]);
+      act(() => stubs.workspace.onPeriodRemoved?.());
+
+      const toast = screen.getByTestId('undo-toast');
+      expect(toast).toHaveTextContent('Periodo rimosso');
+      expect(within(toast).getByTestId('undo-period')).toHaveTextContent('Annulla');
     });
 
     it('puts back the phrase a loaded one replaced', () => {

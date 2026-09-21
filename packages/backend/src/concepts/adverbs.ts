@@ -109,6 +109,24 @@ export const adverbs: ConceptSeed[] = [
       pt: { base: 'repetidamente' },
     },
   },
+  {
+    // A manner adverb like REPEATEDLY, without a subtype: it follows the verb, and it is COLLAPSE's
+    // differentia beside the ground it ends at, "to move to the ground suddenly" (localization B34).
+    // Spanish and Portuguese say it with the fixed phrase "de repente".
+    id: 'SUDDENLY',
+    role: 'adverb',
+    description: 'quickly and without warning',
+    emoji: '⚡',
+    forms: {
+      en: { base: 'suddenly' },
+      it: { base: 'improvvisamente' },
+      fr: { base: 'soudainement' },
+      de: { base: 'plötzlich' },
+      es: { base: 'de repente' },
+      ja: { base: '突然', reading: 'とつぜん' },
+      pt: { base: 'de repente' },
+    },
+  },
   // Which way a thing goes (B27: "move this period up"). A phrase in French, German and Portuguese,
   // which have no one-word adverb of direction: "vers le haut", "nach oben", "para cima".
   //
@@ -145,6 +163,92 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'abajo', subtype: 'direction' },
       ja: { base: '下に', subtype: 'direction', reading: 'したに' },
       pt: { base: 'para baixo', subtype: 'direction' },
+    },
+  },
+  // The other two ways a key moves the cursor, or a box (localization B44): "go left", "move the slot
+  // right". Directions like UP and DOWN, and a phrase in every language but English.
+  {
+    id: 'LEFT',
+    role: 'adverb',
+    description: 'towards the left side',
+    emoji: '⬅️',
+    forms: {
+      en: { base: 'left', subtype: 'direction' },
+      it: { base: 'a sinistra', subtype: 'direction' },
+      fr: { base: 'à gauche', subtype: 'direction' },
+      de: { base: 'nach links', subtype: 'direction' },
+      es: { base: 'a la izquierda', subtype: 'direction' },
+      ja: { base: '左に', subtype: 'direction', reading: 'ひだりに' },
+      pt: { base: 'para a esquerda', subtype: 'direction' },
+    },
+  },
+  {
+    id: 'RIGHT',
+    role: 'adverb',
+    description: 'towards the right side',
+    emoji: '➡️',
+    forms: {
+      en: { base: 'right', subtype: 'direction' },
+      it: { base: 'a destra', subtype: 'direction' },
+      fr: { base: 'à droite', subtype: 'direction' },
+      de: { base: 'nach rechts', subtype: 'direction' },
+      es: { base: 'a la derecha', subtype: 'direction' },
+      ja: { base: '右に', subtype: 'direction', reading: 'みぎに' },
+      pt: { base: 'para a direita', subtype: 'direction' },
+    },
+  },
+  {
+    // The reverse way: what ⇧ does to a key that cycles a value ("Tense, backwards"), and the way one
+    // walks backwards. A direction, so it follows the object as UP and DOWN do ("sposta il libro
+    // all'indietro"). Japanese 逆方向に, "in the reverse direction", which says both; 逆順に would
+    // only say the order.
+    id: 'BACKWARDS',
+    role: 'adverb',
+    description: 'in the reverse direction or order',
+    emoji: '↩️',
+    forms: {
+      en: { base: 'backwards', subtype: 'direction' },
+      it: { base: "all'indietro", subtype: 'direction' },
+      fr: { base: 'en arrière', subtype: 'direction' },
+      de: { base: 'rückwärts', subtype: 'direction' },
+      es: { base: 'hacia atrás', subtype: 'direction' },
+      ja: { base: '逆方向に', subtype: 'direction', reading: 'ぎゃくほうこうに' },
+      pt: { base: 'para trás', subtype: 'direction' },
+    },
+  },
+  {
+    // In every place: the keys that work wherever the cursor is, the help's first section (B41). An
+    // adverb of place, which follows the object as a locative complement does ("mange la souris
+    // partout", "come el ratón en todas partes"), where a manner adverb would lead it.
+    id: 'EVERYWHERE',
+    role: 'adverb',
+    description: 'in every place',
+    emoji: '🌍',
+    forms: {
+      en: { base: 'everywhere', subtype: 'place' },
+      it: { base: 'ovunque', subtype: 'place' },
+      fr: { base: 'partout', subtype: 'place' },
+      de: { base: 'überall', subtype: 'place' },
+      es: { base: 'en todas partes', subtype: 'place' },
+      ja: { base: 'どこでも', subtype: 'place' },
+      pt: { base: 'em toda parte', subtype: 'place' },
+    },
+  },
+  {
+    // At the present time: what a setting holds now, in the console's list ("now singular").
+    // Japanese 今, not 現在, which is also the present tense's name (現在 現在 on the tense's row).
+    id: 'NOW',
+    role: 'adverb',
+    description: 'at the present time',
+    emoji: '⏱️',
+    forms: {
+      en: { base: 'now' },
+      it: { base: 'ora' },
+      fr: { base: 'maintenant' },
+      de: { base: 'jetzt' },
+      es: { base: 'ahora' },
+      ja: { base: '今', reading: 'いま' },
+      pt: { base: 'agora' },
     },
   },
   {

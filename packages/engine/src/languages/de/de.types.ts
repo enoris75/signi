@@ -24,7 +24,9 @@ export type DeIPN = '2sg' | '1pl' | '2pl';
  * `particle` is a separable verb's particle when `v2` is that verb's own finite form (A138): a V2
  * clause leaves it at the very end ("fügt die Maus nicht hinzu"), a verb-final one joins it back onto
  * the finite verb ("die Maus hinzufügt"). It is absent when the verb is non-finite, where the particle
- * stays on the infinitive and the participle ("wird hinzufügen", "hat hinzugefügt").
+ * stays on the infinitive and the participle ("wird hinzufügen", "hat hinzugefügt"). `particleGap` is
+ * the space a particle written apart from its verb keeps when it rejoins it ("die sie rückgängig macht",
+ * B40); absent for one written onto it.
  */
 export interface VerbComplex {
   v2: string;
@@ -33,6 +35,7 @@ export interface VerbComplex {
   zuInfinitive: string;
   finiteLeadsTail?: true;
   particle?: string;
+  particleGap?: ' ';
 }
 
 /**

@@ -124,8 +124,8 @@ luogo", de "Adverbiale Bestimmung der Richtung", ja 方向の副詞語句).
 
 ## Not in this task
 
-The `/…` rows' "also /x" and "now …" ([B46](../B-needs-seed/B46-ui-console-topics-and-labels.md)), "values
-for /x" (B46), the echo icon's "from the canvas" ([B43](../B-needs-seed/B43-ui-canvas-preview-edit.md)) and
+The `/…` rows' "also /x" and "now …" ([B46](../done/B46-ui-console-topics-and-labels.md)), "values
+for /x" (B46), the echo icon's "from the canvas" ([B43](../done/B43-ui-canvas-preview-edit.md)) and
 the role group's note "take a word; alone they move the context"
 ([C22](../C-needs-engine/C22-ui-help-prose.md)) are catalogued already.
 

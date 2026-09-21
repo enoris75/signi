@@ -57,6 +57,10 @@ const shown = () => stubs.workspace.containers[0]!.selection;
 /** The text selected in the prompt. */
 const selected = (prompt: HTMLInputElement) => prompt.value.slice(prompt.selectionStart ?? 0, prompt.selectionEnd ?? 0);
 
+/** The number of the period the prompt is editing, as the chip's `data-editing` holds it; undefined when none is. */
+const editing = () =>
+  screen.getByTestId('console-chip').querySelector('[data-editing]')?.getAttribute('data-editing') ?? undefined;
+
 describe('the console', () => {
   it('is docked under the page on a first visit, and remembers being hidden', () => {
     renderApp();
@@ -137,7 +141,8 @@ describe('the console', () => {
     await waitFor(() => expect(prompt.value).toBe(''));
     key(prompt, 'ArrowUp');
     expect(prompt.value).toBe('/subj ( cat )');
-    expect(screen.getByTestId('console-history-tag')).toHaveTextContent('history · 1 of 1');
+    // Where the walk is, in figures after the word (B45): "history · 1/1".
+    expect(screen.getByTestId('console-history-tag')).toHaveTextContent('history · 1/1');
     expect(JSON.parse(localStorage.getItem('signi:consoleHistory')!)).toEqual(['/subj ( cat )']);
   });
 
@@ -188,10 +193,10 @@ describe('the console', () => {
       const prompt = renderApp();
       await commit(prompt, '/subj cat');
       fireEvent.click(screen.getByTestId('source-strip'));
-      await waitFor(() => expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i));
+      await waitFor(() => expect(editing()).toBe('1'));
       fireEvent.change(prompt, { target: { value: '', selectionStart: 0 } });
       key(prompt, 'Escape');
-      await waitFor(() => expect(screen.getByTestId('console-chip')).not.toHaveTextContent(/editing/i));
+      await waitFor(() => expect(editing()).toBeUndefined());
     });
 
     it('edits the period the line goes to, as the line leaves it', async () => {
@@ -201,7 +206,7 @@ describe('the console', () => {
       type(prompt, '#1 /edit');
       key(prompt, 'Enter');
       await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) '));
-      expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
+      expect(editing()).toBe('1');
       fireEvent.change(prompt, { target: { value: '', selectionStart: 0 } });
       key(prompt, 'Escape');
       type(prompt, '#1.subj /pl /edit');
@@ -213,7 +218,7 @@ describe('the console', () => {
       const prompt = renderApp();
       await commit(prompt, '/subj cat');
       fireEvent.click(screen.getByTestId('source-strip'));
-      await waitFor(() => expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing/i));
+      await waitFor(() => expect(editing()).toBeDefined());
       await new Promise((r) => setTimeout(r, 300));
       const before = stubs.renders;
       await new Promise((r) => setTimeout(r, 700));
@@ -276,7 +281,7 @@ describe('the console', () => {
       // /pin alone pins the line run before it.
       await commit(prompt, '/pin');
       expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual(['/subj ( dog )']);
-      expect(screen.getAllByTestId('transcript-info').at(-1)).toHaveTextContent('Pinned.');
+      expect(screen.getAllByTestId('transcript-info').at(-1)).toHaveTextContent('Pinned line');
       key(prompt, 'Tab');
       const rows = within(screen.getByTestId('console-list')).getAllByTestId('console-option');
       expect(rows.map((r) => r.getAttribute('data-insert'))).toEqual(['/subj ( dog )', '/pin', '/subj ( cat ) /verb ( eat )']);
@@ -291,8 +296,10 @@ describe('the console', () => {
       await commit(prompt, '/subj cat');
       const pin = within(screen.getByTestId('transcript-typed')).getByTestId('pin-line');
       expect(pin).toHaveAttribute('aria-pressed', 'false');
+      expect(pin).toHaveAccessibleName('Pin this line');
       fireEvent.click(pin);
       expect(pin).toHaveAttribute('aria-pressed', 'true');
+      expect(pin).toHaveAccessibleName('Unpin this line');
       expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual(['/subj ( cat )']);
       fireEvent.click(pin);
       expect(JSON.parse(localStorage.getItem('signi:consolePins')!)).toEqual([]);
@@ -304,8 +311,11 @@ describe('the console', () => {
       await commit(prompt, '#1.subj /help pl');
       const page = await screen.findByTestId('help-page');
       expect(page).toHaveTextContent('/pl');
-      expect(page).toHaveTextContent('Written /pl');
-      expect(page).toHaveTextContent('also /plural');
+      // What it is for, as a verb is glossed (B47): the catalogue's fallback until the bundle lands.
+      expect(page).toHaveTextContent("Plural — to set a noun's number");
+      expect(within(page).getByTestId('help-usage-line')).toHaveTextContent('Usage: /pl');
+      expect(within(page).getByTestId('help-aliases')).toHaveTextContent('alias /plural');
+      expect(within(page).getByTestId('help-example-line')).toHaveTextContent(/^Example: /);
       expect(page).toHaveTextContent('/subj ( cat /pl )');
       expect(page).toHaveTextContent('Here: on cat, now singular.');
     });
@@ -384,7 +394,10 @@ describe('the console', () => {
       key(prompt, 'Tab');
       expect(selected(prompt)).toBe('/pl');
       fireEvent.select(prompt);
-      await waitFor(() => expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1 ›\s*subject\s*cat/i));
+      await waitFor(() => {
+        expect(editing()).toBe('1');
+        expect(screen.getByTestId('console-chip')).toHaveTextContent(/›\s*subject\s*cat/i);
+      });
       key(prompt, 'Tab', { shiftKey: true });
       expect(selected(prompt)).toBe('cat');
     });
@@ -418,7 +431,7 @@ describe('the console', () => {
       await commit(prompt, '/subj cat /new /subj dog');
       fireEvent.click(screen.getAllByTestId('source-line')[0]!);
       await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) '));
-      expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
+      expect(editing()).toBe('1');
     });
   });
 
@@ -479,7 +492,7 @@ describe('the console', () => {
       await waitFor(() => expect(shown().verb?.id).toBe('EAT'));
       future();
       await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) /verb ( eat /future ) '));
-      expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
+      expect(editing()).toBe('1');
       expect(shown().verbTense).toBe('future');
       expect(screen.queryByTestId('transcript-typed')).not.toBeInTheDocument();
       // Esc leaves it all, the click with the line, as it would a line typed.
@@ -495,7 +508,7 @@ describe('the console', () => {
       act(() => stubs.workspace.setContainers((cs) => cs.map((c) => c)));
       await new Promise((r) => setTimeout(r, 20));
       expect(prompt.value).toBe('/subj ( cat ) /verb ( eat )');
-      expect(screen.getByTestId('console-chip')).not.toHaveTextContent(/editing/i);
+      expect(editing()).toBeUndefined();
     });
 
     it('writes a click to the phrase at once when no line is waiting', async () => {
@@ -530,6 +543,26 @@ describe('the console', () => {
       'failure.phraseNotSaved': { it: 'La frase non poteva essere salvata.' },
       'action.move': { it: 'sposta' },
       'slot.choose': { it: 'scegli' },
+      // B45 and B46.
+      'action.pinLine': { it: 'Fissa questa riga' },
+      'action.unpinLine': { it: 'Sblocca questa riga' },
+      'toast.linePinned': { it: 'Riga fissata' },
+      'console.history': { it: 'cronologia' },
+      'console.list.pinned': { it: 'righe fissate' },
+      'console.list.recent': { it: 'righe recenti' },
+      'console.line.pinned': { it: 'fissata' },
+      'console.line.recent': { it: 'recente' },
+      'console.list.values': { it: 'valori' },
+      'action.complete': { it: 'completa' },
+      'action.apply': { it: 'applica' },
+      'action.closeList': { it: "chiudi l'elenco" },
+      'console.now': { it: 'ora' },
+      'console.alias.singular': { it: 'alias' },
+      'console.help.usage': { it: 'Uso' },
+      'console.help.example': { it: 'Esempio' },
+      'console.topic.workspace': { it: 'area di lavoro' },
+      'console.topic.mood': { it: 'modo' },
+      'console.topic.place': { it: 'relazione spaziale' },
     };
     const italian = () => {
       localStorage.setItem('signi:uiLanguage', 'it');
@@ -578,6 +611,62 @@ describe('the console', () => {
       const subj = screen.getAllByTestId('help-page')[1]!;
       expect(within(subj).getByTestId('help-usage')).toHaveTextContent('/subj ( parola … )');
       expect(within(subj).getByTestId('help-example')).toHaveTextContent('/subj ( gatto )');
+      // The page's labels, each before a colon, and the other names after theirs (B46).
+      expect(within(page).getByTestId('help-usage-line')).toHaveTextContent('Uso: /pl');
+      expect(within(page).getByTestId('help-aliases')).toHaveTextContent('alias /plural');
+      expect(within(page).getByTestId('help-example-line')).toHaveTextContent('Esempio: /subj ( gatto /pl )');
+    });
+
+    it('pins, walks and completes in Italian: the pin, what it leaves, the list, its keys and the tag (B45)', async () => {
+      const prompt = italian();
+      await run(prompt, '/subj cat');
+      const pin = within(screen.getByTestId('transcript-typed')).getByTestId('pin-line');
+      expect(pin).toHaveAccessibleName('Fissa questa riga');
+      await run(prompt, '/pin');
+      expect(screen.getAllByTestId('transcript-info').at(-1)).toHaveTextContent('Riga fissata');
+      expect(pin).toHaveAccessibleName('Sblocca questa riga');
+      // An empty prompt's ⇥: the pinned line, then the recent one, the list headed by both titles.
+      key(prompt, 'Tab');
+      const list = screen.getByTestId('console-list');
+      expect(within(list).getByTestId('console-list-title')).toHaveTextContent('righe fissate · righe recenti');
+      const rows = within(list).getAllByTestId('console-option');
+      expect(rows[0]).toHaveTextContent('fissata');
+      expect(rows[1]).toHaveTextContent('recente');
+      expect(list).toHaveTextContent('completa');
+      expect(screen.getByTestId('phrase-console')).toHaveTextContent("chiudi l'elenco");
+      key(prompt, 'Escape');
+      // ↑ walks the lines run, the position in figures after the word.
+      key(prompt, 'ArrowUp');
+      expect(screen.getByTestId('console-history-tag')).toHaveTextContent('cronologia · 1/2');
+      expect(screen.getByTestId('phrase-console')).toHaveTextContent('applica');
+    });
+
+    it('annotates the list in Italian: what a setting holds now, and a command’s values (B46)', async () => {
+      const prompt = italian();
+      type(prompt, '/subj cat /');
+      const list = await screen.findByTestId('console-list');
+      expect(within(list).getAllByTestId('console-option-current')[0]).toHaveTextContent(/^ora /);
+      fireEvent.change(prompt, { target: { value: '/command ', selectionStart: 9, selectionEnd: 9 } });
+      await waitFor(() => expect(screen.getByTestId('console-list-title')).toHaveTextContent('valori · /command'));
+    });
+
+    // B47: what a command is for follows the interface language too, one entry for every command
+    // that shares the purpose.
+    it('says what a command is for in Italian', async () => {
+      localStorage.setItem('signi:uiLanguage', 'it');
+      const prompt = renderApp({
+        'number.value.plural': { it: 'Plurale' },
+        'purpose.number': { it: 'impostare il numero di un sostantivo' },
+        'purpose.negate': { it: 'negare un verbo' },
+      });
+      await run(prompt, '/help pl');
+      expect(await screen.findByTestId('help-page')).toHaveTextContent('Plurale — impostare il numero di un sostantivo');
+      await run(prompt, '/help sg');
+      await waitFor(() => expect(screen.getAllByTestId('help-page')).toHaveLength(2));
+      expect(screen.getAllByTestId('help-page')[1]).toHaveTextContent('— impostare il numero di un sostantivo');
+      await run(prompt, '/help not');
+      await waitFor(() => expect(screen.getAllByTestId('help-page')).toHaveLength(3));
+      expect(screen.getAllByTestId('help-page')[2]).toHaveTextContent('— negare un verbo');
     });
 
     it('heads the help overlay’s parts with the catalogue’s nouns', async () => {
@@ -588,6 +677,10 @@ describe('the console', () => {
       expect(within(screen.getByTestId('console-help-role')).getByTestId('console-help-part')).toHaveTextContent(
         'le parole del periodo',
       );
+      // The workspace's part, and the topics B46 named (the spatial relationship, the mood).
+      expect(within(screen.getByTestId('console-help-workspace')).getByTestId('console-help-part')).toHaveTextContent('area di lavoro');
+      expect(screen.getByTestId('console-help-topic-place')).toHaveTextContent('relazione spaziale');
+      expect(screen.getByTestId('console-help-topic-mood')).toHaveTextContent('modo');
     });
 
     it('says what /save did as the toolbar says it', async () => {
@@ -598,6 +691,34 @@ describe('the console', () => {
       vi.mocked(savePhrase).mockRejectedValueOnce(new Error('offline'));
       await run(prompt, '/save gatti');
       await waitFor(() => expect(screen.getByTestId('transcript-error')).toHaveTextContent('La frase non poteva essere salvata.'));
+    });
+
+    // B42, B43: the console's name, what its controls do to it, the way back to the canvas, and the
+    // chip that names the period being edited. German, where every one of them reads unlike English.
+    it('names itself, its controls and the period it edits in German', async () => {
+      localStorage.setItem('signi:uiLanguage', 'de');
+      const prompt = renderApp({
+        'console.name': { de: 'Konsole' },
+        'action.hideConsole': { de: 'Die Konsole verstecken' },
+        'action.resizeConsole': { de: 'Die Konsole skalieren' },
+        'action.returnToCanvas': { de: 'zur Arbeitsfläche zurückkehren' },
+        'action.edit': { de: 'Bearbeiten' },
+        'period.name': { de: 'Satzgefüge' },
+        'hint.clickToEdit': { de: 'klicken, um zu bearbeiten' },
+      });
+      const docked = screen.getByTestId('phrase-console');
+      expect(screen.getByTestId('console-toggle')).toHaveTextContent('Konsole');
+      expect(docked).toHaveTextContent('Konsole');
+      expect(prompt).toHaveAccessibleName('Konsole');
+      expect(within(docked).getByRole('button', { name: 'Die Konsole verstecken' })).toBeInTheDocument();
+      expect(within(docked).getByRole('separator', { name: 'Die Konsole skalieren' })).toBeInTheDocument();
+      expect(docked).toHaveTextContent('zur Arbeitsfläche zurückkehren');
+      await run(prompt, '/subj cat');
+      expect(screen.getByTestId('source-strip')).toHaveTextContent('/edit · klicken, um zu bearbeiten');
+      fireEvent.click(screen.getAllByTestId('source-line')[0]!);
+      await waitFor(() => expect(editing()).toBe('1'));
+      // The mode by its command, the period by its name, the number after it.
+      expect(screen.getByTestId('console-chip')).toHaveTextContent('Bearbeiten · Satzgefüge 1 ›');
     });
   });
 });

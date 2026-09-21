@@ -1,5 +1,5 @@
 import { describe, expect, test } from 'vitest';
-import { AFRICA, AGUA, CASA, CUIDADO, DINHEIRO, EUROPA, GATO, LIVRO } from './pt.fixtures.js';
+import { AFRICA, AGUA, CASA, CUIDADO, DINHEIRO, EUROPA, GATO, JAPAO, LIVRO, PORTUGAL } from './pt.fixtures.js';
 import { artFor } from './artFor.js';
 
 describe('artFor', () => {
@@ -56,5 +56,12 @@ describe('artFor', () => {
     expect(artFor({ ...EUROPA, definiteness: 'indefinite' })).toBe('a');
     expect(artFor({ ...EUROPA, definiteness: 'this' })).toBe('a');
     expect(artFor({ ...AFRICA, definiteness: 'bare' })).toBe('a');
+    expect(artFor(JAPAO)).toBe('o');
+  });
+
+  test('a bare name takes no article, whatever was picked', () => {
+    expect(artFor(PORTUGAL)).toBe('');
+    expect(artFor({ ...PORTUGAL, definiteness: 'indefinite' })).toBe('');
+    expect(artFor({ ...PORTUGAL, definiteness: 'this' })).toBe('');
   });
 });

@@ -45,7 +45,7 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
       <Box
         role="separator"
         aria-orientation="horizontal"
-        aria-label="Resize the console"
+        aria-label={t("action.resizeConsole")}
         aria-valuenow={model.height}
         tabIndex={0}
         onKeyDown={(e) => {
@@ -93,9 +93,8 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
         }}
       >
         <TerminalIcon sx={{ fontSize: 17 }} />
-        {/* English literal, for /localize. */}
         <Box component="span" sx={{ fontWeight: 700, letterSpacing: "0.16em", textTransform: "uppercase", color: "text.primary" }}>
-          Console
+          {t("console.name")}
         </Box>
         {/* The period by its name, as rendered: German capitalizes it (Satzgefüge 1), so no CSS lowers it. */}
         <Box
@@ -110,13 +109,12 @@ export function PhraseConsole({ model, wordsPanelOpen }: { model: PhraseConsoleM
             <Keycap spec="Code:Backquote" />
             {t("action.hide")}
           </Box>
-          {/* English literals, for /localize. */}
           <Box component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
             <Keycap spec="Escape" />
-            back to the canvas
+            {t("action.returnToCanvas")}
           </Box>
-          <Tooltip title="Hide the console">
-            <IconButton size="small" aria-label="Hide the console" onClick={() => model.setOpen(false)}>
+          <Tooltip title={t("action.hideConsole")}>
+            <IconButton size="small" aria-label={t("action.hideConsole")} onClick={() => model.setOpen(false)}>
               <ExpandMoreIcon fontSize="small" />
             </IconButton>
           </Tooltip>

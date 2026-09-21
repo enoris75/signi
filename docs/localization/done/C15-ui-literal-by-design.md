@@ -25,7 +25,7 @@ C: the right outcome is no catalog entry.
 | useUiLanguage must be used within a LanguageProvider | [LanguageContext.tsx:38](../../../packages/frontend/src/i18n/LanguageContext.tsx#L38) | developer error |
 | search haystack | [useConceptLabel.ts:60](../../../packages/frontend/src/i18n/useConceptLabel.ts#L60) | matched against, not displayed |
 | Not a valid phrase file. · This file is not a Signi phrase file. · Phrase file is missing a version. · This phrase was saved by a newer version of Signi (v…); please update. · Phrase file has no workspace data. · That file isn't valid JSON. | [parseSavedPhrase.ts:10-22](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/parseSavedPhrase.ts#L10-L22), [readSavedPhraseFile.ts:11](../../../packages/frontend/src/components/PhraseBuilder/phraseSerialize/functions/readSavedPhraseFile.ts#L11) | logged with `console.warn` ([SavedPhrasesToolbar.tsx:185](../../../packages/frontend/src/components/SavedPhrasesToolbar.tsx#L185)). The user sees `toast.importFailed` — `toast.invalidFile` ([B26](B26-ui-saved-item-feedback.md)) (added 2026-09-21) |
-| The phrase console could not read the line: | [usePhraseConsole.ts:104](../../../packages/frontend/src/console/usePhraseConsole.ts#L104) | `console.error`, for developers. The user sees the message at :112 ([B45](../B-needs-seed/B45-ui-console-lines-history-pins.md)) (added 2026-09-21) |
+| The phrase console could not read the line: | [usePhraseConsole.ts:104](../../../packages/frontend/src/console/usePhraseConsole.ts#L104) | `console.error`, for developers. The user sees the message at :112 ([B45](B45-ui-console-lines-history-pins.md), `failure.lineNotRead` since 2026-09-21) (added 2026-09-21) |
 
 ## Done
 
@@ -46,10 +46,10 @@ This section used to record the **phrase console** (P02) as outstanding rather t
 sweep of 2026-09-21 catalogued it, together with the keyboard help overlay (P01) and a few strings
 the 2026-09-13 sweep missed on the canvas. The phrase console is now covered by
 [A21](A21-ui-console-seeded-words.md),
-[B42](../B-needs-seed/B42-ui-console-name.md), [B45](../B-needs-seed/B45-ui-console-lines-history-pins.md)–[B47](../B-needs-seed/B47-ui-console-command-purposes.md)
+[B42](B42-ui-console-name.md), [B45](B45-ui-console-lines-history-pins.md)–[B47](B47-ui-console-command-purposes.md)
 and [C21](../C-needs-engine/C21-ui-console-diagnostics.md). The keyboard labels and help overlay are
-[A20](A20-ui-keyboard-labels-on-seeded-words.md), [B41](../B-needs-seed/B41-ui-help-overlay.md),
-[B44](../B-needs-seed/B44-ui-keyboard-movement-labels.md) and [C22](../C-needs-engine/C22-ui-help-prose.md).
-The canvas is [A19](A19-ui-leaks-past-the-catalogue.md), [B40](../B-needs-seed/B40-ui-undo-redo.md)
-and [B43](../B-needs-seed/B43-ui-canvas-preview-edit.md). The rows above marked *added 2026-09-21*
+[A20](A20-ui-keyboard-labels-on-seeded-words.md), [B41](B41-ui-help-overlay.md),
+[B44](B44-ui-keyboard-movement-labels.md) and [C22](../C-needs-engine/C22-ui-help-prose.md).
+The canvas is [A19](A19-ui-leaks-past-the-catalogue.md), [B40](B40-ui-undo-redo.md)
+and [B43](B43-ui-canvas-preview-edit.md). The rows above marked *added 2026-09-21*
 are what that sweep found to be deliberate.

@@ -124,7 +124,7 @@ Every grammar noun without a definition as of 2026-09-21 that no ticket takes, e
 | ARTICLE, DEMONSTRATIVE | children of DETERMINER, which [B51](../B-needs-seed/B51-specify.md) glosses. Their differentiae (identifiability, pointing) are grammar terms themselves | — |
 | TENSE | circular: "a category that indicates time" is *tempo* / *temps* / *tiempo* / *tempo* in it, fr, es and pt, the same word as TENSE | — |
 | PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE | circular: a time noun for "the past" is the tense's own word in six languages (en *the past*, *il passato*, *le passé*, *el pasado*, *o passado*, 過去). Only German keeps *Vergangenheit* apart from *Präteritum* | — |
-| POLARITY, DEGREE_GRAMMAR | "a category that indicates negation / comparison": French puts the bare mass object in the partitive, "qui indique **de la** négation", where a definition wants the generic *la*. The plural route [B39](../B-needs-seed/B39-quantity-and-category.md) takes reads wrong in English ("indicates negations") | a generic object for French (*le*, *la*) |
+| POLARITY, DEGREE_GRAMMAR | "a category that indicates negation / comparison": French puts the bare mass object in the partitive, "qui indique **de la** négation", where a definition wants the generic *la*. The plural route [B39](B39-quantity-and-category.md) takes reads wrong in English ("indicates negations") | a generic object for French (*le*, *la*) |
 | ASPECT, VOICE, GENDER, PERSON_GRAMMAR | categories with no single-noun differentia: what aspect or voice indicates is itself a grammar term | CATEGORY (B39) gives them a genus, not a gloss |
 | SINGULAR_GRAMMAR, PLURAL_GRAMMAR | "the form of a word referring to one" needs FORM and a numeral the engine has no determiner for | — |
 | COORDINATION | an event ("the joining of clauses"); nothing seeded names an event as its genus | — |
@@ -161,10 +161,10 @@ passive, the essive and the purpose clause. Half of it moved:
 |---|---|---|
 | ASIA, OCEANIA | [A17](A17-continent-superlatives.md) (done) | the biggest / the smallest continent |
 | CLAUSE, RELATIVE_CLAUSE, PERIOD_SENTENCE, VERB_PHRASE, MODIFIER, MODAL, CAUSE_COMPLEMENT, LOCATIVE | [A18](A18-grammar-nouns.md) (done) | a phrase that has a subject, a clause that describes nouns, … |
-| the seven languages | [B36](../B-needs-seed/B36-languages-by-country.md) (seed the countries) | the language of Italy |
-| DIRECTION, SOURCE, ROUTE, COMITATIVE, TERMINUS | [B37](../B-needs-seed/B37-complement-names.md) (seed five nouns) | a complement that indicates destinations, … |
-| CONJUNCTION, CONJUNCT | [B38](../B-needs-seed/B38-link.md) (seed LINK) | a word that links clauses |
-| NUMBER_GRAMMAR, QUANTIFIER | [B39](../B-needs-seed/B39-quantity-and-category.md) (seed QUANTITY, CATEGORY) | a category / a determiner that indicates quantities |
+| the seven languages | [B36](B36-languages-by-country.md) (done; seeded the countries) | the language of Italy |
+| DIRECTION, SOURCE, ROUTE, COMITATIVE, TERMINUS | [B37](B37-complement-names.md) (done; seeded five nouns) | a complement that indicates destinations, … |
+| CONJUNCTION, CONJUNCT | [B38](B38-link.md) (done; LINK) | a word that links clauses; a phrase that is linked by a conjunction |
+| NUMBER_GRAMMAR, QUANTIFIER | [B39](B39-quantity-and-category.md) (done; seeded QUANTITY, CATEGORY) | a category / a determiner that indicates quantities |
 | SELECT | [C20](../C-needs-engine/C20-pronoun-agreement.md) (engine) | to indicate an object to use it, once the pronoun agrees with its antecedent |
 
 This file's own record was stale in three places:

@@ -260,10 +260,13 @@ test.describe('word definition tooltip', () => {
   }
 
   // C17: the genus MOVE_ONESELF is a reflexive verb in Italian and German, which leads the citation with
-  // its clitic or pronoun: "muoversi da un luogo…", "sich schnell bewegen".
+  // its clitic or pronoun: "muoversi da un luogo…", "sich schnell bewegen". B34 and B35 gave it the
+  // goal preposition "verso" / "vers" in Italian and French: "verso il parlante", "vers le sol".
   for (const [id, query, en, language, other] of [
     ['RUN', 'run', 'to move fast', 'de', 'sich schnell bewegen'],
-    ['GO', 'go', 'to move from a place to another place', 'it', 'muoversi da un luogo a un altro luogo'],
+    ['GO', 'go', 'to move from a place to another place', 'it', 'muoversi da un luogo verso un altro luogo'],
+    ['COLLAPSE', 'collapse', 'to move to the ground suddenly', 'fr', 'se déplacer soudainement vers le sol'],
+    ['COME', 'come', 'to move to the speaker', 'it', 'muoversi verso il parlante'],
   ] as const) {
     test(`a reflexive-genus verb definition renders (localize-seed C17: ${id})`, async ({ app, page }) => {
       const option = page.locator(`[data-testid="typeahead-option"][data-concept="${id}"]`);
@@ -1336,6 +1339,97 @@ test.describe('word definition tooltip', () => {
     await expect(clauseJa).toBeVisible();
     await clauseJa.hover();
     await expect(page.locator(tooltip)).toHaveText('主語があるフレーズ');
+  });
+
+  test('a burning thing produces flames (localization B33: BURN)', async ({ app, page }) => {
+    // PRODUCE's "give off" sense with FLAME. The verb picker matches "burn" for SET_ON_FIRE too, so
+    // BURN is picked by its concept. Japanese 炎を出す does not contain 燃.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('burn');
+    const burnEn = page.locator('[data-testid="typeahead-option"][data-concept="BURN"]');
+    await expect(burnEn).toBeVisible();
+    await burnEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to produce flames');
+
+    await app.setUiLanguage('ja');
+    await app.verbInput.fill('burn');
+    const burnJa = page.locator('[data-testid="typeahead-option"][data-concept="BURN"]');
+    await expect(burnJa).toBeVisible();
+    await burnJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('炎を出す');
+  });
+
+  test('a language is glossed by its country (localization B36: ITALIAN)', async ({ app, page }) => {
+    // The definite LANGUAGE with the country as its genitive possessor. English takes the Saxon
+    // genitive; German declines the bare name, "Italiens".
+    await app.subjectInput.fill('italian');
+    const italianEn = page.locator('[data-testid="typeahead-option"][data-concept="ITALIAN"]');
+    await expect(italianEn).toBeVisible();
+    await italianEn.hover();
+    await expect(page.locator(tooltip)).toHaveText("Italy's language");
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('italian');
+    const italianDe = page.locator('[data-testid="typeahead-option"][data-concept="ITALIAN"]');
+    await expect(italianDe).toBeVisible();
+    await italianDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('die Sprache Italiens');
+  });
+
+  test('a motion complement is glossed by the place it reaches (localization B37: DIRECTION)', async ({
+    app,
+    page,
+  }) => {
+    // As INSTRUMENTAL and LOCATIVE: composed on COMPLEMENT_GRAMMAR with INDICATE, the differentia a
+    // noun of its own — the destination, where LOCATIVE takes "places". Japanese 目的地を示す補語.
+    await app.subjectInput.fill('direction');
+    const directionEn = page.locator('[data-testid="typeahead-option"][data-concept="DIRECTION"]');
+    await expect(directionEn).toBeVisible();
+    await directionEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a complement that indicates destinations');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('direction');
+    const directionJa = page.locator('[data-testid="typeahead-option"][data-concept="DIRECTION"]');
+    await expect(directionJa).toBeVisible();
+    await directionJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('目的地を示す補語');
+  });
+
+  test('a conjunction is a word that links clauses (localization B38: CONJUNCTION)', async ({
+    app,
+    page,
+  }) => {
+    // LINK, not COORDINATE, whose Japanese 調整する is to adjust: つなぐ.
+    await app.subjectInput.fill('conjunction');
+    const conjunctionEn = page.locator('[data-testid="typeahead-option"][data-concept="CONJUNCTION"]');
+    await expect(conjunctionEn).toBeVisible();
+    await conjunctionEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that links clauses');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('conjunction');
+    const conjunctionJa = page.locator('[data-testid="typeahead-option"][data-concept="CONJUNCTION"]');
+    await expect(conjunctionJa).toBeVisible();
+    await conjunctionJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('節をつなぐ単語');
+  });
+
+  test('a quantifier indicates quantities (localization B39: QUANTIFIER)', async ({ app, page }) => {
+    // The plural object on purpose: French would put a bare singular mass object in the partitive,
+    // "de la quantité".
+    await app.subjectInput.fill('quantifier');
+    const quantifierEn = page.locator('[data-testid="typeahead-option"][data-concept="QUANTIFIER"]');
+    await expect(quantifierEn).toBeVisible();
+    await quantifierEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a determiner that indicates quantities');
+
+    await app.setUiLanguage('fr');
+    await app.subjectInput.fill('quantifier');
+    const quantifierFr = page.locator('[data-testid="typeahead-option"][data-concept="QUANTIFIER"]');
+    await expect(quantifierFr).toBeVisible();
+    await quantifierFr.hover();
+    await expect(page.locator(tooltip)).toHaveText('un déterminant qui indique des quantités');
   });
 
   test('a place complement is glossed on its genus (localization A18: LOCATIVE)', async ({

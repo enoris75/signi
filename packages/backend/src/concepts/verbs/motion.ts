@@ -65,6 +65,11 @@ export const motionVerbs: ConceptSeed[] = [
         reading: 'いく',
         masu_present: '行きます',
         masu_present_reading: 'いきます',
+        // An instruction labels with a verbal noun (see ADD's 追加), and 行く has none of its own:
+        // a key that takes the cursor somewhere says 移動 ("左に移動", "次のスロットへ移動"), where
+        // the stem would leave a bare 行き (localization B44).
+        label: '移動',
+        label_reading: 'いどう',
       },
       pt: {
         base: 'ir',
@@ -77,6 +82,79 @@ export const motionVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // Going back to where one was: "back to the canvas" is RETURN with the place as its `direction`
+    // (B43). French "revenir", the coming back, is what a UI says for it ("revenir au canevas"); German
+    // "zurückkehren" is separable ("kehrt zur Arbeitsfläche zurück"), and all three of it / fr / de take
+    // the BE auxiliary, as GO does ("è tornato", "est revenu", "ist zurückgekehrt").
+    id: 'RETURN',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
+    description: 'to go back to a place',
+    emoji: '🔙',
+    isA: 'GO',
+    forms: {
+      en: {
+        base: 'return',
+        '1sg_present': 'return', '2sg_present': 'return', '3sg_present': 'returns',
+        '1pl_present': 'return', '2pl_present': 'return', '3pl_present': 'return',
+        past: 'returned',
+      },
+      it: {
+        base: 'tornare',
+        '1sg_present': 'torno', '2sg_present': 'torni', '3sg_present': 'torna',
+        '1pl_present': 'torniamo', '2pl_present': 'tornate', '3pl_present': 'tornano',
+        '1sg_past': 'tornai', '2sg_past': 'tornasti', '3sg_past': 'tornò',
+        '1pl_past': 'tornammo', '2pl_past': 'tornaste', '3pl_past': 'tornarono',
+        '1sg_future': 'tornerò', '2sg_future': 'tornerai', '3sg_future': 'tornerà',
+        '1pl_future': 'torneremo', '2pl_future': 'tornerete', '3pl_future': 'torneranno',
+      },
+      fr: {
+        base: 'revenir',
+        '1sg_present': 'reviens', '2sg_present': 'reviens', '3sg_present': 'revient',
+        '1pl_present': 'revenons', '2pl_present': 'revenez', '3pl_present': 'reviennent',
+        '1sg_past': 'revins', '2sg_past': 'revins', '3sg_past': 'revint',
+        '1pl_past': 'revînmes', '2pl_past': 'revîntes', '3pl_past': 'revinrent',
+        '1sg_future': 'reviendrai', '2sg_future': 'reviendras', '3sg_future': 'reviendra',
+        '1pl_future': 'reviendrons', '2pl_future': 'reviendrez', '3pl_future': 'reviendront',
+      },
+      de: {
+        base: 'zurückkehren', particle: 'zurück',
+        '1sg_present': 'kehre', '2sg_present': 'kehrst', '3sg_present': 'kehrt',
+        '1pl_present': 'kehren', '2pl_present': 'kehrt', '3pl_present': 'kehren',
+        '1sg_past': 'kehrte', '2sg_past': 'kehrtest', '3sg_past': 'kehrte',
+        '1pl_past': 'kehrten', '2pl_past': 'kehrtet', '3pl_past': 'kehrten',
+      },
+      es: {
+        base: 'volver',
+        '1sg_present': 'vuelvo', '2sg_present': 'vuelves', '3sg_present': 'vuelve',
+        '1pl_present': 'volvemos', '2pl_present': 'volvéis', '3pl_present': 'vuelven',
+        '1sg_past': 'volví', '2sg_past': 'volviste', '3sg_past': 'volvió',
+        '1pl_past': 'volvimos', '2pl_past': 'volvisteis', '3pl_past': 'volvieron',
+        '1sg_future': 'volveré', '2sg_future': 'volverás', '3sg_future': 'volverá',
+        '1pl_future': 'volveremos', '2pl_future': 'volveréis', '3pl_future': 'volverán',
+      },
+      ja: {
+        base: '戻る',
+        reading: 'もどる',
+        masu_present: '戻ります',
+        masu_present_reading: 'もどります',
+        // A "back" button says the dictionary form 戻る, as 閉じる does, not the stem 戻り.
+        label: '戻る',
+        label_reading: 'もどる',
+      },
+      pt: {
+        base: 'voltar',
+        '1sg_present': 'volto', '2sg_present': 'volta', '3sg_present': 'volta',
+        '1pl_present': 'voltamos', '2pl_present': 'voltam', '3pl_present': 'voltam',
+        '1sg_past': 'voltei', '2sg_past': 'voltou', '3sg_past': 'voltou',
+        '1pl_past': 'voltamos', '2pl_past': 'voltaram', '3pl_past': 'voltaram',
+        '1sg_future': 'voltarei', '2sg_future': 'voltará', '3sg_future': 'voltará',
+        '1pl_future': 'voltaremos', '2pl_future': 'voltarão', '3pl_future': 'voltarão',
+      },
+    },
+  },
 
   {
     // The intransitive "move", the genus GO and RUN are kinds of: the subject changes position. MOVE is
@@ -85,6 +163,10 @@ export const motionVerbs: ConceptSeed[] = [
     // moverse, pt mover-se. The Romance clitic rides inside each finite form, as in BECOME and
     // COLLAPSE, and the engines strip it to derive the moods. The German forms are the plain verb's:
     // the clause places the agreeing pronoun ("bewegt sich", "der sich bewegt", "sich schnell bewegen").
+    // Italian and French fix the goal's preposition, `direction_prep`: "verso" / "vers" for every goal,
+    // where GO takes "a" / "à" for a place and Italian "da" for a person. After this verb those read
+    // otherwise: "muoversi dal parlante" leaves the speaker, and "se déplacer au sol" / "muoversi al
+    // suolo" move about on the ground (localization B34, B35).
     id: 'MOVE_ONESELF',
     role: 'verb',
     transitivity: 'intransitive',
@@ -100,7 +182,7 @@ export const motionVerbs: ConceptSeed[] = [
         past: 'moved',
       },
       it: {
-        base: 'muoversi',
+        base: 'muoversi', direction_prep: 'verso',
         '1sg_present': 'mi muovo', '2sg_present': 'ti muovi', '3sg_present': 'si muove',
         '1pl_present': 'ci muoviamo', '2pl_present': 'vi muovete', '3pl_present': 'si muovono',
         '1sg_past': 'mi mossi', '2sg_past': 'ti muovesti', '3sg_past': 'si mosse',
@@ -110,7 +192,7 @@ export const motionVerbs: ConceptSeed[] = [
       },
       fr: {
         // -cer keeps its soft c with a cedilla before a/o: nous déplaçons, il se déplaça.
-        base: 'se déplacer',
+        base: 'se déplacer', direction_prep: 'vers',
         '1sg_present': 'me déplace', '2sg_present': 'te déplaces', '3sg_present': 'se déplace',
         '1pl_present': 'nous déplaçons', '2pl_present': 'vous déplacez', '3pl_present': 'se déplacent',
         '1sg_past': 'me déplaçai', '2sg_past': 'te déplaças', '3sg_past': 'se déplaça',

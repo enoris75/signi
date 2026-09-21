@@ -12,7 +12,7 @@ import { useId, useState } from "react";
 import { useUiString } from "../i18n/useUiString.ts";
 import type { UiStringKey } from "@signi/shared";
 import { useKeyPlatform } from "./KeyboardProvider.tsx";
-import { APP_KEYMAP, KEYMAP, PERIOD_KEYMAP } from "./keymap.ts";
+import { APP_KEYMAP, commandLabel, KEYMAP, PERIOD_KEYMAP, type CommandName } from "./keymap.ts";
 import { ConsoleHelp } from "../console/ConsoleHelp.tsx";
 import { keycapLabels, type Platform } from "./matchKey.ts";
 import type { Scope } from "./scope.ts";
@@ -30,9 +30,11 @@ import type { Scope } from "./scope.ts";
 /**
  * A heading or a row, named the way a keymap command is: `title` / `label` is the English, and the
  * catalogue key beside it is what the sheet shows, wherever the words are seeded. The literals left
- * without a key wait on vocabulary (B41, B43, B44) or are prose (C22).
+ * without a key are prose (C22). Each section is found by its `id` (its `data-testid` is
+ * `help-section-<id>`), since its title follows the UI language.
  */
 interface SheetSection {
+  id: string;
   title: string;
   titleKey?: UiStringKey;
   note?: string;
@@ -50,23 +52,32 @@ interface SheetRow {
 
 /** The order the sheet reads in, and what each section is called. */
 const SECTIONS: (SheetSection & { scope: Scope })[] = [
-  { scope: "app", title: "Anywhere", note: "Ctrl is ⌘ on a Mac" },
   {
+    id: "app",
+    scope: "app",
+    title: "Everywhere",
+    titleKey: "help.section.app",
+    note: "Ctrl is ⌘ on a Mac",
+  },
+  {
+    id: "period",
     scope: "period",
     title: "Period",
     titleKey: "period.name",
     note: "with the cursor on the period (esc from a box)",
   },
-  { scope: "box", title: "Moving around", note: "inside a period" },
+  { id: "box", scope: "box", title: "Navigation", titleKey: "help.section.box", note: "inside a period" },
   {
+    id: "noun",
     scope: "box:noun",
     title: "Noun",
     titleKey: "category.noun",
     note: "subject, object, complement, possessor, conjunct",
   },
-  { scope: "box:adjective", title: "Adjective", titleKey: "category.adjective" },
-  { scope: "box:verb", title: "Verb", titleKey: "slot.verb" },
+  { id: "adjective", scope: "box:adjective", title: "Adjective", titleKey: "category.adjective" },
+  { id: "verb", scope: "box:verb", title: "Verb", titleKey: "slot.verb" },
   {
+    id: "mood",
     scope: "box:mood",
     title: "Command subject",
     titleKey: "help.commandSubject",
@@ -81,11 +92,14 @@ const SECTIONS: (SheetSection & { scope: Scope })[] = [
  */
 const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
   {
-    title: "Word picker",
+    id: "picker",
+    title: "Word list",
+    titleKey: "help.section.picker",
     rows: [
       { keys: ["ArrowUp", "ArrowDown"], label: "Move", labelKey: "action.move" },
       { keys: ["Enter"], label: "Choose", labelKey: "slot.choose" },
-      { keys: ["Tab"], label: "Choose and go to the next box" },
+      // The footer's own words for ⇥, as the picker's strip shows them.
+      { keys: ["Tab"], label: "Choose, and then go to the next slot", labelKey: "hint.chooseAndNext" },
       { keys: ["ArrowUp"], label: "Up from the first row: the category tabs" },
       { keys: ["ArrowLeft", "ArrowRight"], label: "Switch vocabulary, in the tabs" },
       { keys: ["1", "4"], label: "Pronoun person", labelKey: "help.pronounPerson" },
@@ -93,9 +107,12 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
     ],
   },
   {
+    id: "menu",
     title: "Menus",
+    titleKey: "help.section.menu",
     rows: [
-      { keys: ["1", "9"], label: "The row's own key picks it" },
+      // The keycaps beside it say which digits: a menu numbers its rows.
+      { keys: ["1", "9"], label: "Choose a numbered row", labelKey: "help.pickNumberedRow" },
       { keys: ["ArrowUp", "ArrowDown"], label: "Move", labelKey: "action.move" },
       // "Pick" and "Choose" are the same act, so the sheet calls both what the picker's ↵ is called.
       { keys: ["Enter"], label: "Pick", labelKey: "slot.choose" },
@@ -103,7 +120,10 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
     ],
   },
   {
-    title: "Picking a link",
+    // A pick chooses the target of a link, which is what the section is named for.
+    id: "pick",
+    title: "Targets",
+    titleKey: "help.section.pick",
     // The five link controls a pick serves, by their own names.
     note: "relative clause, if, join, instrument, possessor",
     noteKeys: [
@@ -114,13 +134,14 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
       "slot.possessor",
     ],
     rows: [
-      { keys: ["1", "9"], label: "Pick a numbered target" },
-      { keys: ["Tab"], label: "Next target" },
+      { keys: ["1", "9"], label: "Choose a numbered target", labelKey: "help.pickNumbered" },
+      { keys: ["Tab"], label: "Next target", labelKey: "help.nextTarget" },
       { keys: ["Enter"], label: "Pick", labelKey: "slot.choose" },
       { keys: ["Escape"], label: "Cancel", labelKey: "action.cancel" },
     ],
   },
   {
+    id: "panels",
     title: "Translations & words",
     titleKey: "help.translationsAndWords",
     rows: [
@@ -140,7 +161,12 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
         labelKey: "wordMap.heading",
         whereKey: "words.heading",
       },
-      { keys: ["Escape"], label: "Words: back to the canvas" },
+      {
+        keys: ["Escape"],
+        label: "Words: return to the canvas",
+        labelKey: "action.returnToCanvas",
+        whereKey: "words.heading",
+      },
     ],
   },
 ];
@@ -150,11 +176,9 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
  * their commands run against, and none of that matters here — the sheet reads what they are
  * called and what they answer to.
  */
-interface Binding {
+interface Binding extends CommandName {
   scope: Scope;
   keys: string[];
-  label: string;
-  labelKey?: UiStringKey;
 }
 
 const ALL_BINDINGS: Binding[] = [...APP_KEYMAP, ...PERIOD_KEYMAP, ...KEYMAP];
@@ -180,7 +204,7 @@ export function HelpOverlay({
   const byScope = (scope: Scope) =>
     ALL_BINDINGS.filter((c) => c.scope === scope).map((c) => ({
       keys: c.keys,
-      label: c.labelKey ? t(c.labelKey) : c.label,
+      label: commandLabel(c, t),
     }));
   const titleOf = (section: SheetSection) =>
     section.titleKey ? t(section.titleKey) : section.title;
@@ -203,9 +227,8 @@ export function HelpOverlay({
     >
       <DialogContent sx={{ p: 4 }}>
         <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
-          {/* English literal, for /localize: the catalogue has no word for help yet. */}
           <Typography id={titleId} variant="h5" sx={{ fontWeight: 700, flex: 1 }}>
-            Help
+            {t("help.heading")}
           </Typography>
           <IconButton
             onClick={onClose}
@@ -219,12 +242,11 @@ export function HelpOverlay({
         {/* The keys, then the console's commands. Others (what the canvas is, saving and loading)
             belong beside them rather than in a page of their own, which is why the overlay is not
             the sheet. */}
-        <Box component="section" aria-labelledby={sectionId}>
+        <Box component="section" aria-labelledby={sectionId} data-testid="help-keyboard">
           <Box sx={{ display: "flex", alignItems: "flex-start", gap: 2, mb: 3 }}>
             <Box sx={{ flex: 1 }}>
-              {/* English literal, for /localize. */}
               <Typography id={sectionId} variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
-                Keyboard navigation
+                {t("help.keyboard")}
               </Typography>
               <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6 }}>
                 A bare key acts on what the cursor is on — a box, or the period once you step out
@@ -256,7 +278,8 @@ export function HelpOverlay({
           >
             {SECTIONS.map((section) => (
               <Section
-                key={section.scope}
+                key={section.id}
+                id={section.id}
                 title={titleOf(section)}
                 note={noteOf(section)}
                 rows={byScope(section.scope)}
@@ -265,7 +288,8 @@ export function HelpOverlay({
             ))}
             {HOOK_SECTIONS.map((section) => (
               <Section
-                key={section.title}
+                key={section.id}
+                id={section.id}
                 title={titleOf(section)}
                 note={noteOf(section)}
                 rows={section.rows.map(rowOf)}
@@ -281,11 +305,13 @@ export function HelpOverlay({
 }
 
 function Section({
+  id,
   title,
   note,
   rows,
   platform,
 }: {
+  id: string;
   title: string;
   note?: string;
   rows: { keys: string[]; label: string }[];
@@ -293,7 +319,7 @@ function Section({
 }) {
   if (rows.length === 0) return null;
   return (
-    <Box sx={{ mb: 3 }}>
+    <Box sx={{ mb: 3 }} data-testid={`help-section-${id}`}>
       <Typography
         sx={{
           fontFamily: '"Inter", sans-serif',

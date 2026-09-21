@@ -3,8 +3,8 @@
 _(split out of [C05](C05-non-distinguishing-genera.md) on 2026-09-21. C05 had the
 grammar meta-nouns as "GENDER, NUMBER_GRAMMAR, … etc." and no list. These eight compose from seeded
 words on shapes that already ship. The rest are sorted in C05 and in
-[B37](../B-needs-seed/B37-complement-names.md), [B38](../B-needs-seed/B38-link.md) and
-[B39](../B-needs-seed/B39-quantity-and-category.md). **Done 2026-09-21**, all eight as planned: see
+[B37](B37-complement-names.md), [B38](B38-link.md) and
+[B39](B39-quantity-and-category.md). **Done 2026-09-21**, all eight as planned: see
 [Done](#done-2026-09-21).)_
 
 ## Plans

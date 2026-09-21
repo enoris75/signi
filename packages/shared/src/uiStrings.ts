@@ -4,6 +4,7 @@ import type {
   Definiteness,
   Degree,
   LanguageCode,
+  NounElement,
   NounPhrase,
   PhrasePlan,
   PronominalPossessor,
@@ -344,6 +345,49 @@ const couldNotBe = (verb: string, patient: NounPhrase): PhrasePlan =>
     directObject: patient,
   }) as PhrasePlan;
 
+// What a console command is for, said as a dictionary says what a verb means: the infinitive
+// citation (PhrasePlan.infinitive), its GENERIC_PERSON subject a throwaway every engine drops —
+// "to set a noun's number", de "den Numerus eines Substantivs festlegen", ja 名詞の数を設定する. The
+// verb definitions are built the same way by the backend's `infinitiveGloss`, which the catalog
+// cannot import. `goal` is what the object is added or linked to, the verb's `terminus` ("to add a
+// possessor **to a noun**", de "zu einem Substantiv", ja 名詞に).
+const purposeOf = (verb: string, object: NounElement, goal?: NounPhrase): PhrasePlan =>
+  ({
+    subject: { concept: 'GENERIC_PERSON' },
+    verbPhrase: { verb },
+    directObject: object,
+    ...(goal ? { complements: { terminus: { phrase: goal } } } : {}),
+    infinitive: true,
+  }) as PhrasePlan;
+
+// The purposes of the setting commands: SET on the setting, definite, with the word it belongs to as
+// its possessor, indefinite — "to set a verb's tense", it "impostare il tempo di un verbo", de "das
+// Tempus eines Verbs festlegen".
+const setterOf = (setting: string, owner: string, adjectives?: string[]): PhrasePlan =>
+  purposeOf('SET', {
+    concept: setting,
+    definiteness: 'definite',
+    ...(adjectives ? { adjectives } : {}),
+    possessor: { concept: owner, definiteness: 'indefinite' },
+  });
+
+// The four ways an arrow key goes, each named by the direction adverb it puts on a verb as the verb's
+// modifier, as `action.movePeriodUp` does (localization B44). Keyed `<key>.<left|up|right|down>`, the
+// keymap's own direction names, so a command built per direction can write t(`action.go.${dir}`).
+const ARROW_DIRECTIONS = { left: 'LEFT', up: 'UP', right: 'RIGHT', down: 'DOWN' } as const;
+type ArrowDirection = keyof typeof ARROW_DIRECTIONS;
+const inEachDirection = <const K extends string>(
+  key: K,
+  plan: (adverb: string) => PhrasePlan,
+  fallback: (dir: ArrowDirection) => string,
+): Record<`${K}.${ArrowDirection}`, UiStringPlanDef> =>
+  Object.fromEntries(
+    (Object.keys(ARROW_DIRECTIONS) as ArrowDirection[]).map((dir) => [
+      `${key}.${dir}`,
+      { plan: plan(ARROW_DIRECTIONS[dir]), format: NAME_FORMAT, fallback: fallback(dir) },
+    ]),
+  ) as Record<`${K}.${ArrowDirection}`, UiStringPlanDef>;
+
 /**
  * Every engine-rendered string the UI shows, keyed. Adding one means adding one entry here:
  * the backend renders the whole catalog at startup and serves it from GET /api/ui-strings,
@@ -374,6 +418,9 @@ export const UI_STRINGS = defineUiStrings({
     // bundle lands as after (index.html carries it too, capitalized, until the app boots).
     fallback: 'semantic phrase creator',
   },
+  // The header's row of controls, as its aria-label: the bare TOOLBAR (it "Barra degli strumenti",
+  // de "Symbolleiste", ja ツールバー). It went unnamed until the catalogue had the word.
+  'app.toolbar': { plan: nameOf('TOOLBAR'), format: NAME_FORMAT, fallback: 'Toolbar' },
 
   // The heading of the translations area: the TRANSLATION noun in the plural, bare — the
   // panel lists many translations.
@@ -415,6 +462,11 @@ export const UI_STRINGS = defineUiStrings({
     format: { capitalize: true },
     fallback: 'Copied',
   },
+
+  // The tag on a translation, and the caption on a period, while they show a console line not yet
+  // applied: the bare PREVIEW (it "Anteprima", fr "Aperçu", es "Vista previa", ja プレビュー). The CSS
+  // uppercases it.
+  'status.preview': { plan: nameOf('PREVIEW'), format: NAME_FORMAT, fallback: 'Preview' },
 
   // What a link satellite says once its noun holds a link. Like COPIED it is a participle agreeing
   // with what it describes — the noun the satellite rides, so it cites itself on NOUN (it
@@ -807,6 +859,41 @@ export const UI_STRINGS = defineUiStrings({
     plan: commandOf('MOVE'),
     format: { stripPeriod: true },
     fallback: 'move',
+  },
+  // ⇥ in a picker takes the word and goes on to the next box: CHOOSE, then GO to the next slot, the two
+  // acts in sequence as `hint.chooseWord` joins them (en "choose, and then go to the next slot", it
+  // "scegli, e poi va' allo slot successivo", de "wählen, und dann zum nächsten Slot gehen", ja
+  // 選び、それから次のスロットへ移動). Lower-case like `slot.choose` beside it in the picker's key strip;
+  // the help sheet raises its first letter with CSS.
+  'hint.chooseAndNext': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      coordination: {
+        conjunction: 'then',
+        clause: {
+          ...commandOf('GO'),
+          complements: {
+            direction: {
+              phrase: { concept: 'SLOT_COMPUTING', definiteness: 'definite', adjectives: ['NEXT'] },
+            },
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'choose, and then go to the next slot',
+  },
+  // The pronoun chooser is a grid, and its key strip names what ↑ ↓ and ← → walk: the ROW (a person)
+  // and the VALUE in it (a number, a gender). Bare and lower-case, as the strip reads (it "riga",
+  // "valore", de "Zeile", "Wert", ja 行, 値).
+  'grid.row': { plan: nameOf('ROW'), format: { stripPeriod: true }, fallback: 'row' },
+  'grid.value': { plan: nameOf('VALUE'), format: { stripPeriod: true }, fallback: 'value' },
+  // ⇥ in the console's prompt goes to the next word of the line: WORD bare with NEXT, lower-case among
+  // the prompt's key hints (it "parola successiva", de "nächstes Wort", ja 次の単語).
+  'console.nextWord': {
+    plan: { subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'next word',
   },
   // The same box while it is not the active one: the EMPTY adjective, agreeing with the slot it describes
   // (SLOT_COMPUTING, the box's own noun). Lower-case, like `slot.choose`.
@@ -1582,6 +1669,21 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Added period',
   },
+  // And taking one off the canvas, the toast that offers it back: "Removed period", it "Periodo rimosso",
+  // de "Entferntes Satzgefüge", ja 「削除済みの文」 (REMOVED's Japanese is what a UI writes, see its seed).
+  'toast.periodRemoved': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['REMOVED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Removed period',
+  },
+  // The way back, on the toasts, the keys and the console: the bare UNDO and REDO commands, the Edit
+  // menu's own pair — it "Annulla" / "Ripeti", de "Rückgängig machen" / "Wiederholen", es "Deshacer" /
+  // "Rehacer", ja 「元に戻す」 / 「やり直し」. Italian and French Undo is their Cancel too ("Annulla",
+  // "Annuler"), and German Redo their Retry ("Wiederholen"), as their software writes them.
+  'action.undo': { plan: commandOf('UNDO'), format: NAME_FORMAT, fallback: 'Undo' },
+  'action.redo': { plan: commandOf('REDO'), format: NAME_FORMAT, fallback: 'Redo' },
 
   // The import toast when the file could not be read. The import is the act, IMPORT_NOUN under FAILED:
   // "Failed import", it "Importazione fallita", ja 「失敗した取り込み」. What was wrong with the file is a
@@ -1688,6 +1790,15 @@ export const UI_STRINGS = defineUiStrings({
     plan: couldNotBe('LOAD', { concept: 'WORD', number: 'plural', definiteness: 'definite' }),
     format: { capitalize: true },
     fallback: 'The words could not be loaded.',
+  },
+  // The phrase console's own failure: a line its language threw on, which the prompt reports rather
+  // than let the page, and the phrase on it, go down with it. The line is `this`, the one in the
+  // prompt: "This line could not be read.", de "Diese Zeile konnte nicht gelesen werden.", ja
+  // 「この行は読むことができませんでした。」.
+  'failure.lineNotRead': {
+    plan: couldNotBe('READ', { concept: 'LINE', definiteness: 'this' }),
+    format: { capitalize: true },
+    fallback: 'This line could not be read.',
   },
 
   // The name a phrase is exported under when the user gave it none: PHRASE with UNTITLED, "Untitled
@@ -1827,6 +1938,96 @@ export const UI_STRINGS = defineUiStrings({
     fallback: 'Move this period down',
   },
 
+  // The arrow keys on a box, which take the cursor to the nearest box that way: GO with the direction
+  // (it "Va' a sinistra", de "Nach links gehen", ja 左に移動 — GO's instruction label, since 行く has no
+  // verbal noun of its own). GO, not MOVE_ONESELF: it "muoviti su" is "hurry up". With ⇧ the same keys
+  // shift the box itself on the canvas: MOVE on the slot, the reorder buttons' shape ("Sposta lo slot a
+  // sinistra", de "Den Slot nach links verschieben", ja スロットを左に移動).
+  ...inEachDirection(
+    'action.go',
+    (adverb) => ({ ...commandOf('GO'), verbPhrase: { verb: 'GO', modifier: adverb } }) as PhrasePlan,
+    (dir) => `Go ${dir}`,
+  ),
+  ...inEachDirection(
+    'action.moveSlot',
+    (adverb) =>
+      ({
+        ...commandOf('MOVE'),
+        verbPhrase: { verb: 'MOVE', modifier: adverb },
+        directObject: { concept: 'SLOT_COMPUTING', definiteness: 'definite' },
+      }) as PhrasePlan,
+    (dir) => `Move the slot ${dir}`,
+  ),
+  // ⇥ and ⇧⇥ walk the boxes in reading order; ↑ and ↓ on a period walk the periods; F6 walks the page's
+  // regions. Each key is named by where it goes: the noun bare, as a label has it, with NEXT or
+  // PREVIOUS, which follow it in the Romance languages ("Slot successivo", "Période précédente") and
+  // decline in German ("Nächster Slot", "Vorheriges Satzgefüge"). REGION is the UI's word for a part
+  // of the page: it "Area successiva", fr "Zone suivante", de "Nächster Bereich", ja 次の領域.
+  'slot.next': {
+    plan: { subject: { concept: 'SLOT_COMPUTING', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Next slot',
+  },
+  'slot.previous': {
+    plan: { subject: { concept: 'SLOT_COMPUTING', definiteness: 'bare', adjectives: ['PREVIOUS'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Previous slot',
+  },
+  'period.next': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Next period',
+  },
+  'period.previous': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['PREVIOUS'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Previous period',
+  },
+  'region.next': {
+    plan: { subject: { concept: 'REGION', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Next region',
+  },
+  'region.previous': {
+    plan: { subject: { concept: 'REGION', definiteness: 'bare', adjectives: ['PREVIOUS'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Previous region',
+  },
+  // esc steps out one level: from a box onto its period, and from a period off the canvas. LEAVE on the
+  // definite slot or period, the one the cursor is in: it "Esci dallo slot", fr "Quitter le slot",
+  // de "Den Slot verlassen", es "Salir del slot", ja スロットを退出 (the label a "leave" button takes).
+  'action.leaveSlot': {
+    plan: {
+      ...commandOf('LEAVE'),
+      directObject: { concept: 'SLOT_COMPUTING', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Leave the slot',
+  },
+  'action.leavePeriod': {
+    plan: {
+      ...commandOf('LEAVE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Leave the period',
+  },
+  // Z on a box folds the dotted ring it sits in: COMPACT on the GROUP, the verb the ring's own toggle
+  // says it with (`action.compact.*`): it "Compatta il gruppo", de "Die Gruppe verdichten", ja グループを圧縮.
+  'action.compactGroup': {
+    plan: {
+      ...commandOf('COMPACT'),
+      directObject: { concept: 'GROUP', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Compact the group',
+  },
+  // A key that cycles a value runs it backwards with ⇧, and the help sheet names that key after the
+  // forward one: its name, a comma, and this adverb ("Tense, backwards", it "Tempo, all'indietro",
+  // de "Tempus, rückwärts"), joined where it is shown. An adverb has no noun to ride in a verbless
+  // label, so the value stays outside the phrase (the C14 rule). Lower-case: it follows the comma.
+  'hint.backwards': { word: 'BACKWARDS', fallback: 'backwards' },
+
   // The grab bar under a period container, named for what dragging it does: RESIZE on this container,
   // the noun phrase of `action.addPeriodContainer` ("ridimensiona questo contenitore di periodo").
   'action.resizeContainer': {
@@ -1840,6 +2041,21 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Resize this period container',
+  },
+  // The keys + and − on a period, which do what that grip does a step at a time: EXPAND and SHRINK on
+  // the canvas the period is drawn on, definite ("Espandi la tela" / "Rimpicciolisci la tela", de "Die
+  // Arbeitsfläche erweitern" / "verkleinern", ja 「キャンバスを展開」 / 「キャンバスを縮小」). SHRINK, not
+  // COMPACT: COMPACT is what Z does to the period, packing its rings in ("verdichten", 圧縮), where − only
+  // makes the surface shorter.
+  'action.expandCanvas': {
+    plan: { ...commandOf('EXPAND'), directObject: { concept: 'CANVAS', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Expand the canvas',
+  },
+  'action.shrinkCanvas': {
+    plan: { ...commandOf('SHRINK'), directObject: { concept: 'CANVAS', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Shrink the canvas',
   },
   // TIDY_UP, not a bare ORDER/ARRANGE: the button does not sort the period, it puts back in order
   // what dragging left in a mess — which is the verb every one of these languages already has for
@@ -2296,6 +2512,74 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'hide',
   },
+  // The console's name, the bare CONSOLE: the header button that shows it, its own title, its prompt's
+  // accessible name, the key that toggles it and its part of the help (it "Console", es "Consola",
+  // de "Konsole", ja コンソール). The part sits under the overlay's help, so the name alone says it.
+  'console.name': { plan: nameOf('CONSOLE'), format: NAME_FORMAT, fallback: 'Console' },
+  // The icon button beside the title and the grip above it, each named by what it does to the console,
+  // definite — the one open at the foot of the page: HIDE ("Nascondi la console", ja コンソールを隠し,
+  // the shipped 隠し of `action.hide.*`) and RESIZE, the `action.resizeContainer` verb ("Die Konsole
+  // skalieren", ja コンソールをサイズ変更).
+  'action.hideConsole': {
+    plan: { ...commandOf('HIDE'), directObject: { concept: 'CONSOLE', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Hide the console',
+  },
+  'action.resizeConsole': {
+    plan: { ...commandOf('RESIZE'), directObject: { concept: 'CONSOLE', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Resize the console',
+  },
+  // What the / key begins: TYPE on an indefinite COMMAND, the one the user has yet to write, with the
+  // console as its `locative` — "Type a command in the console", it "Digita un comando nella console",
+  // ja 「コンソールで命令を入力」. TYPE rather than START: typing is what the key begins.
+  'action.typeCommand': {
+    plan: {
+      ...commandOf('TYPE'),
+      directObject: { concept: 'COMMAND', definiteness: 'indefinite' },
+      complements: { locative: { phrase: { concept: 'CONSOLE', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Type a command in the console',
+  },
+  // A command's row in the help overlay, which opens its page in the console: SHOW with the console as
+  // its `locative` and no object ("Mostra nella console", de "In der Konsole zeigen", ja コンソールで見せ).
+  // The command's name follows after a colon, outside the phrase (the C14 rule): "Show in the console: /rel".
+  'action.showInConsole': {
+    plan: {
+      ...commandOf('SHOW'),
+      complements: { locative: { phrase: { concept: 'CONSOLE', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Show in the console',
+  },
+  // What esc does from the console's prompt (and from the words panel): RETURN, with the canvas as its
+  // `direction`, the place gone back to — "return to the canvas", it "torna alla tela", de "zur
+  // Arbeitsfläche zurückkehren", ja 「キャンバスへ戻る」. Lower-case: it sits beside its keycap.
+  'action.returnToCanvas': {
+    plan: {
+      ...commandOf('RETURN'),
+      complements: { direction: { phrase: { concept: 'CANVAS', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'return to the canvas',
+  },
+  // The icon on a transcript line the canvas wrote, as its title. No entry kind holds a bare "from the
+  // canvas" (C13's specifier kind cites the adposition alone), so the icon names its source: CANVAS
+  // (it "Tela", de "Arbeitsfläche", ja キャンバス).
+  'console.fromCanvas': { plan: nameOf('CANVAS'), format: NAME_FORMAT, fallback: 'Canvas' },
+  // Editing a period in the prompt. The bare EDIT command names ↵ on a period ("Modifica", de
+  // "Bearbeiten", ja 編集), and heads the prompt's chip while a period is loaded into it, before the
+  // period's name and number: EDIT · PERIOD 2. A mode label reads as the command's noun in every
+  // language (it "Modifica", de "Bearbeiten", ja 編集), so no participle phrase is needed. `/edit`, which
+  // loads the period the cursor is on, names it with `this`: "Edit this period", it "Modifica questo
+  // periodo", ja 「この文を編集」. Italian and French share MODIFY's verb, as their software does.
+  'action.edit': { plan: commandOf('EDIT'), format: NAME_FORMAT, fallback: 'Edit' },
+  'action.editPeriod': {
+    plan: { ...commandOf('EDIT'), directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Edit this period',
+  },
   // A period with no words yet, as the source strip writes its line: PERIOD_SENTENCE under EMPTY,
   // "empty period", it "periodo vuoto", de "leeres Satzgefüge", ja 空の文.
   'period.empty': {
@@ -2367,6 +2651,31 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'modals',
   },
+  // An empty prompt's list: the lines pinned, then the ones run recently. LINE plural under PINNED and
+  // under RECENT — "pinned lines", "recent lines"; it "righe fissate", "righe recenti"; de "angeheftete
+  // Zeilen", "zuletzt verwendete Zeilen"; ja ピン留め済みの行, 最近使用された行. A list holding both kinds is
+  // headed by both titles, "pinned lines · recent lines", rather than by one noun under two adjectives.
+  'console.list.pinned': {
+    plan: {
+      subject: { concept: 'LINE', number: 'plural', definiteness: 'bare', adjectives: ['PINNED'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'pinned lines',
+  },
+  'console.list.recent': {
+    plan: {
+      subject: { concept: 'LINE', number: 'plural', definiteness: 'bare', adjectives: ['RECENT'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'recent lines',
+  },
+  // A command's values: VALUE plural, with the command they are values of after it, outside the phrase
+  // as a list's word always is — "values · /tense", it "valori · /tense", de "Werte · /tense", ja 値.
+  'console.list.values': {
+    plan: { subject: { concept: 'VALUE', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'values',
+  },
 
   // The topics the commands are listed under, where no control's name already says it. The role
   // commands fill the period's own words, WORD plural with the period as its possessor ("the period's
@@ -2397,6 +2706,27 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'the period',
   },
+  // `/in … /front` set how a place or a route stands to its noun: RELATIONSHIP under SPATIAL, "spatial
+  // relationship" (it "relazione spaziale", de "räumliche Beziehung", ja 空間的な関係). Naming the two
+  // complements instead would be "complemento di stato in luogo o complemento di moto per luogo".
+  'console.topic.place': {
+    plan: { subject: { concept: 'RELATIONSHIP', definiteness: 'bare', adjectives: ['SPATIAL'] } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'spatial relationship',
+  },
+  // `/statement`, `/command` and `/inf` set the period's MOOD (it "modo", de "Modus", ja 叙法).
+  'console.topic.mood': {
+    plan: { subject: { concept: 'MOOD', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'mood',
+  },
+  // What `/save`, `/load`, `/export` … act on: the WORKSPACE, every period at once (it "area di lavoro",
+  // fr "espace de travail", de "Arbeitsbereich", ja ワークスペース). Also the help overlay's part for them.
+  'console.topic.workspace': {
+    plan: { subject: { concept: 'WORKSPACE', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'workspace',
+  },
 
   // The placeholders of a help page's usage line, where a command's argument goes: `/subj ( word … )`,
   // `/save name`, `/help [command]`. Bare nouns (it "parola", "nome", "comando"; de "Wort", "Name",
@@ -2404,6 +2734,255 @@ export const UI_STRINGS = defineUiStrings({
   'console.usage.word': { plan: nameOf('WORD'), format: { stripPeriod: true }, fallback: 'word' },
   'console.usage.name': { plan: nameOf('NAME_NOUN'), format: { stripPeriod: true }, fallback: 'name' },
   'console.usage.command': { plan: nameOf('COMMAND'), format: { stripPeriod: true }, fallback: 'command' },
+
+  // What each command that acts on a word is for, after its description on its help page: "/pl · plural
+  // — to set a noun's number" (B47). One key per distinct purpose, which the command names as its
+  // `purposeKey`; commands that do the same thing share one (`/sg` and `/pl`, the ten determiners).
+  // Each is the infinitive citation of `purposeOf`, lower-case and without its full stop, as a gloss
+  // is. The console's misuse diagnostic still says the purpose in English ("/more sets an adjective’s
+  // degree, and cat is a noun"): a sentence about the user's word is C21's.
+  //
+  // The five that add or link something put it on a goal, the verb's `terminus`: ADD's is "zu" +
+  // dative in German, LINK's "mit" (de "eine andere Phrase mit einem Substantiv verbinden"), and
+  // Japanese marks it に (名詞に所有者を加える). The instrument goes on *the* verb, the one a period has.
+  'purpose.instrument': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'INSTRUMENTAL', definiteness: 'indefinite' },
+      { concept: 'VERB', definiteness: 'definite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add an instrumental to the verb',
+  },
+  'purpose.possessor': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'POSSESSOR', definiteness: 'indefinite' },
+      { concept: 'NOUN', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a possessor to a noun',
+  },
+  'purpose.relative': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'RELATIVE_CLAUSE', definiteness: 'indefinite' },
+      { concept: 'NOUN', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a relative clause to a noun',
+  },
+  // `/if`: CONDITION, not the "conditional clause" its description names — de would read "einen
+  // konditionalen Satz" for what its grammars call a Konditionalsatz (it "aggiungere una condizione a un
+  // periodo", ja 文に条件を加える).
+  'purpose.condition': {
+    plan: purposeOf(
+      'ADD',
+      { concept: 'CONDITION', definiteness: 'indefinite' },
+      { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to add a condition to a period',
+  },
+  // `/and` and `/or` join a phrase to a noun: LINK, not COORDINATE, whose Japanese 調整する is to adjust.
+  'purpose.conjunct': {
+    plan: purposeOf(
+      'LINK',
+      { concept: 'PHRASE', definiteness: 'indefinite', adjectives: ['OTHER'] },
+      { concept: 'NOUN', definiteness: 'indefinite' },
+    ),
+    format: { stripPeriod: true },
+    fallback: 'to link another phrase to a noun',
+  },
+  // `/join` links two periods, bare plural (it "collegare periodi", de "Satzgefüge verbinden", ja 文をつなぐ;
+  // fr "relier des périodes", which spells no zero article).
+  'purpose.join': {
+    plan: purposeOf('LINK', { concept: 'PERIOD_SENTENCE', number: 'plural', definiteness: 'bare' }),
+    format: { stripPeriod: true },
+    fallback: 'to link periods',
+  },
+  // The word commands say what the word does, with the verb a grammar uses for it: an adjective
+  // DESCRIBEs a noun, an adverb MODIFYs a verb or a modal (it "modificare un verbo o un verbo modale", ja
+  // 動詞か法助動詞を修飾する), a modal GOVERNs a verb (it "reggere", de "regieren", ja 支配する).
+  'purpose.adjective': {
+    plan: purposeOf('DESCRIBE', { concept: 'NOUN', definiteness: 'indefinite' }),
+    format: { stripPeriod: true },
+    fallback: 'to describe a noun',
+  },
+  'purpose.adverb': {
+    plan: purposeOf('MODIFY', {
+      conjunction: 'or',
+      conjuncts: [
+        { concept: 'VERB', definiteness: 'indefinite' },
+        { concept: 'MODAL', definiteness: 'indefinite' },
+      ],
+    }),
+    format: { stripPeriod: true },
+    fallback: 'to modify a verb or a modal',
+  },
+  'purpose.modal': {
+    plan: purposeOf('GOVERN', { concept: 'VERB', definiteness: 'indefinite' }),
+    format: { stripPeriod: true },
+    fallback: 'to govern a verb',
+  },
+  // The setting commands (`setterOf`): SET — it "impostare", fr "définir", de "festlegen", ja 設定する —
+  // on the setting of a word. Keyed by the console's Setting id, so a setting command finds its own.
+  'purpose.number': {
+    plan: setterOf('NUMBER_GRAMMAR', 'NOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's number",
+  },
+  'purpose.gender': {
+    plan: setterOf('GENDER', 'NOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's gender",
+  },
+  // `/neut` is a pronoun's alone: a noun's gender control offers masculine and feminine only.
+  'purpose.pronounGender': {
+    plan: setterOf('GENDER', 'PRONOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a pronoun's gender",
+  },
+  'purpose.determiner': {
+    plan: setterOf('DETERMINER', 'NOUN'),
+    format: { stripPeriod: true },
+    fallback: "to set a noun's determiner",
+  },
+  // `/in … /front` set the relation of a place or a route: RELATIONSHIP under SPATIAL, of a COMPLEMENT
+  // (it "impostare la relazione spaziale di un complemento", de "die räumliche Beziehung einer Ergänzung
+  // festlegen").
+  'purpose.specifier': {
+    plan: setterOf('RELATIONSHIP', 'COMPLEMENT_GRAMMAR', ['SPATIAL']),
+    format: { stripPeriod: true },
+    fallback: "to set a complement's spatial relationship",
+  },
+  // `/because /fault /thanks` set the stance a cause is stated with, SENTIMENT (it "valutazione", de
+  // "Bewertung", ja 評価). "How a cause is felt", the English it replaces, is an embedded question no plan
+  // holds.
+  'purpose.sentiment': {
+    plan: setterOf('SENTIMENT', 'CAUSE_COMPLEMENT'),
+    format: { stripPeriod: true },
+    fallback: "to set a cause's sentiment",
+  },
+  'purpose.tense': {
+    plan: setterOf('TENSE', 'VERB'),
+    format: { stripPeriod: true },
+    fallback: "to set a verb's tense",
+  },
+  'purpose.aspect': {
+    plan: setterOf('ASPECT', 'VERB'),
+    format: { stripPeriod: true },
+    fallback: "to set a verb's aspect",
+  },
+  'purpose.voice': {
+    plan: setterOf('VOICE', 'VERB'),
+    format: { stripPeriod: true },
+    fallback: "to set a verb's voice",
+  },
+  'purpose.polarity': {
+    plan: setterOf('POLARITY', 'VERB'),
+    format: { stripPeriod: true },
+    fallback: "to set a verb's polarity",
+  },
+  // `/not` does more than set a value: it NEGATEs the verb (it "negare un verbo", de "ein Verb verneinen",
+  // ja 動詞を否定する). French says it with the grammarians' nier, "nier un verbe" (see NEGATE).
+  'purpose.negate': {
+    plan: purposeOf('NEGATE', { concept: 'VERB', definiteness: 'indefinite' }),
+    format: { stripPeriod: true },
+    fallback: 'to negate a verb',
+  },
+  'purpose.degree': {
+    plan: setterOf('DEGREE_GRAMMAR', 'ADJECTIVE'),
+    format: { stripPeriod: true },
+    fallback: "to set an adjective's degree",
+  },
+  // `/feature /purpose /material` set how a noun modifier relates to its noun, its RELATIONSHIP.
+  // "How it relates" is the embedded question again.
+  'purpose.relation': {
+    plan: setterOf('RELATIONSHIP', 'MODIFIER'),
+    format: { stripPeriod: true },
+    fallback: "to set a modifier's relationship",
+  },
+
+  // ── The console's lines, history and pins (B45) ──
+  // The pin a typed line wears in the transcript, and `/pin` / `/unpin` in the list and on their help
+  // pages: PIN and UNPIN on the line, `this` because it is the one the pin sits on — "Pin this line",
+  // it "Fissa questa riga", de "Diese Zeile anheften", ja この行をピン留め; "Unpin this line", it
+  // "Sblocca questa riga", de "Diese Zeile lösen", ja この行をピン留め解除. That `/pin` alone pins the
+  // line run before it is what its help page's example shows.
+  'action.pinLine': {
+    plan: { ...commandOf('PIN'), directObject: { concept: 'LINE', definiteness: 'this' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Pin this line',
+  },
+  'action.unpinLine': {
+    plan: { ...commandOf('UNPIN'), directObject: { concept: 'LINE', definiteness: 'this' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unpin this line',
+  },
+  // What pinning and unpinning leave in the transcript, said as `toast.phraseSaved` says a save: LINE
+  // under PINNED or UNPINNED, "Pinned line", it "Riga fissata", de "Angeheftete Zeile", ja
+  // ピン留め済みの行. UNPINNED is "no longer pinned" where UNPIN's participle would misread: it "Riga non
+  // più fissata" (not "sbloccata", unlocked), de "Nicht mehr angeheftete Zeile" (not "gelöste", solved).
+  'toast.linePinned': {
+    plan: { subject: { concept: 'LINE', definiteness: 'bare', adjectives: ['PINNED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Pinned line',
+  },
+  'toast.lineUnpinned': {
+    plan: { subject: { concept: 'LINE', definiteness: 'bare', adjectives: ['UNPINNED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unpinned line',
+  },
+  // The tag the prompt wears while ↑ walks back through the lines run: HISTORY (it "cronologia", fr
+  // "historique", de "Verlauf", ja 履歴). Where in it the walk is, is a value: the tag writes it after the
+  // word in figures, "history · 3/7" (the C14 rule), which also spares every language the English "of".
+  'console.history': { plan: nameOf('HISTORY'), format: { stripPeriod: true }, fallback: 'history' },
+  // What an empty prompt's list says beside each line: PINNED or RECENT, agreeing with LINE — it
+  // "fissata" / "recente", fr "épinglée" / "récente", de "angeheftet" / "zuletzt verwendet", ja
+  // ピン留め済み / 最近使用された.
+  'console.line.pinned': { word: 'PINNED', agreesWith: 'LINE', format: { stripPeriod: true }, fallback: 'pinned' },
+  'console.line.recent': { word: 'RECENT', agreesWith: 'LINE', format: { stripPeriod: true }, fallback: 'recent' },
+  // The prompt's key hints: ⇥ completes the word begun, ↵ applies the line, esc closes the list. Bare
+  // commands, lower-case like `slot.choose` beside its keycap — it "completa", "applica", "chiudi
+  // l'elenco"; de "vervollständigen", "anwenden", "die Liste schließen"; ja 補完, 適用, 一覧を閉じる. The
+  // list is definite: it is the one open above the prompt.
+  'action.complete': { plan: commandOf('COMPLETE'), format: { stripPeriod: true }, fallback: 'complete' },
+  'action.apply': { plan: commandOf('APPLY'), format: { stripPeriod: true }, fallback: 'apply' },
+  'action.closeList': {
+    plan: { ...commandOf('CLOSE'), directObject: { concept: 'LIST', definiteness: 'definite' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'close the list',
+  },
+
+  // ── The console's reference: its moods, degrees and labels (B46) ──
+  // What `/statement` sets, named as `/command` and `/inf` name theirs (`imperative.command`,
+  // `infinitive.phrase`): the STATEMENT, the clause that asserts, as each school grammar names it
+  // beside the question and the command — it "Proposizione enunciativa", fr "Phrase déclarative", de
+  // "Aussagesatz", es "Oración enunciativa", ja 平叙文.
+  'mood.statement': { plan: nameOf('STATEMENT'), format: NAME_FORMAT, fallback: 'Statement' },
+  // What `/plain` sets: the POSITIVE_DEGREE, an adjective compared with nothing (it "Grado positivo", de
+  // "Positiv", pt "Grau normal", ja 原級). A noun of its own: `degree.value.positive` cites the degree on
+  // an adjective, where the positive adds nothing ("—"), and POSITIVE is the polarity (ja 肯定).
+  'degree.name.positive': { plan: nameOf('POSITIVE_DEGREE'), format: NAME_FORMAT, fallback: 'Positive degree' },
+  // A completion row's note of what a setting holds now: NOW, the value after it, already in the
+  // interface language ("now singular", it "ora", de "jetzt"). Japanese 今, since 現在 is the present
+  // tense's own name.
+  'console.now': { word: 'NOW', format: { stripPeriod: true }, fallback: 'now' },
+  // The other names a command answers to, on its row ("alias /plural") and on its help page: ALIAS, then
+  // the names. A noun, not the adverb "also", which Japanese has no word for standing alone (も is a
+  // particle, また is "again"); ja 別名, "another name". One key per number, as a page lists every alias —
+  // "aliases /positive /affirmative", de "Aliasse"; the Romance "alias" is invariable.
+  'console.alias.singular': { plan: nameOf('ALIAS'), format: { stripPeriod: true }, fallback: 'alias' },
+  'console.alias.plural': {
+    plan: { subject: { concept: 'ALIAS', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'aliases',
+  },
+  // A help page's two labels, each before a colon: how the command is written, USAGE (it "Uso", fr
+  // "Utilisation", de "Verwendung", ja 使用法), and its EXAMPLE (it "Esempio", de "Beispiel", ja 例).
+  'console.help.usage': { plan: nameOf('USAGE'), format: NAME_FORMAT, fallback: 'Usage' },
+  'console.help.example': { plan: nameOf('EXAMPLE'), format: NAME_FORMAT, fallback: 'Example' },
 
   // The controls that act on one named part of the canvas — a word's clear button, a satellite's
   // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the
@@ -2543,6 +3122,25 @@ export const UI_STRINGS = defineUiStrings({
     format: { stripPeriod: true },
     fallback: 'click a slot and then choose a word',
   },
+  // The same caption to a keyboard user, who reaches a slot with the arrows and fills it by typing,
+  // the caption P01 designed: USE on the ARROW keys, then TYPE an indefinite WORD, the same two steps
+  // in sequence (en "use the arrow keys, and then type a word", it "usa le frecce, e poi digita una
+  // parola", de "die Pfeiltasten verwenden, und dann ein Wort tippen", ja 矢印キーを使用、それから単語を入力).
+  'hint.chooseWordKeyboard': {
+    plan: {
+      ...commandOf('USE'),
+      directObject: { concept: 'ARROW', number: 'plural', definiteness: 'definite' },
+      coordination: {
+        conjunction: 'then',
+        clause: {
+          ...commandOf('TYPE'),
+          directObject: { concept: 'WORD', definiteness: 'indefinite' },
+        },
+      },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'use the arrow keys, and then type a word',
+  },
 
   // The tail every chip tooltip ends with, and the one every link control ends with: what the
   // click will do, said as the *purpose* of the click (PhrasePlan.purpose — localization C12).
@@ -2559,6 +3157,13 @@ export const UI_STRINGS = defineUiStrings({
     plan: { ...commandOf('CLICK'), purpose: { verbPhrase: { verb: 'REMOVE' } } } as PhrasePlan,
     format: { stripPeriod: true },
     fallback: 'click to remove',
+  },
+  // The console's source strip, after the `/edit` that does the same: "click to edit", it "clicca per
+  // modificare", de "klicken, um zu bearbeiten", ja 「編集するためにクリック」.
+  'hint.clickToEdit': {
+    plan: { ...commandOf('CLICK'), purpose: { verbPhrase: { verb: 'EDIT' } } } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'click to edit',
   },
 
   // The resize handle's tooltip: the same purpose clause on the gesture that drives it. French
@@ -2628,6 +3233,21 @@ export const UI_STRINGS = defineUiStrings({
     plan: nameOf('OBJECT_THING'),
     format: NAME_FORMAT,
     fallback: 'Object',
+  },
+  // What those three are levels of, for the key that cycles them (R on an instrument period) and the
+  // console's /level: LEVEL bare, owned by the definite INSTRUMENTAL, the `help.commandSubject` shape
+  // (en "The instrumental's level", it "Livello del complemento di mezzo", de "Ebene des Instrumentals",
+  // ja 手段語の段階).
+  'instrumental.level': {
+    plan: {
+      subject: {
+        concept: 'LEVEL',
+        definiteness: 'bare',
+        possessor: { concept: 'INSTRUMENTAL', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "The instrumental's level",
   },
 
   // The tooltip on each of those buttons. A level is a *construction*, and no gloss of one
@@ -2802,6 +3422,13 @@ export const UI_STRINGS = defineUiStrings({
     format: NAME_FORMAT,
     fallback: 'Instruction',
   },
+  // What the two are two of, for the key that switches between them (R on the command box): the bare
+  // REGISTER (it "Registro", de "Register", ja 言語使用域).
+  'imperative.register': {
+    plan: nameOf('REGISTER'),
+    format: NAME_FORMAT,
+    fallback: 'Register',
+  },
 
   // The three persons an order can be spoken to — the box's second row, keyed by person so the
   // selector can write t(`imperative.person.${value}`). The buttons themselves carry the compact
@@ -2904,6 +3531,80 @@ export const UI_STRINGS = defineUiStrings({
     } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Translations and words',
+  },
+
+  // The help itself: the corner button's name and tooltip, the overlay's title, the ? key and the
+  // console's /help. The mass noun HELP, bare (it "Aiuto", fr "Aide", de "Hilfe", ja ヘルプ).
+  'help.heading': { plan: nameOf('HELP'), format: NAME_FORMAT, fallback: 'Help' },
+  // The overlay's keyboard section: NAVIGATION with KEYBOARD as an attributive noun, the
+  // `wordMap.heading` shape. The purpose relation, which gives Italian its "da" ("Navigazione da
+  // tastiera", as occhiali da sole); German compounds it ("Tastaturnavigation"). French, Spanish and
+  // Portuguese read "de clavier / de teclado", where their UIs more often say "au clavier / por
+  // teclado", a means no noun modifier has.
+  'help.keyboard': {
+    plan: {
+      subject: {
+        concept: 'NAVIGATION',
+        definiteness: 'bare',
+        nounModifiers: [{ concept: 'KEYBOARD', relation: 'purpose' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Keyboard navigation',
+  },
+  // The keyboard section's own headings, where no control already names the level. The keys that
+  // work wherever the cursor is are EVERYWHERE's (a word: an adverb heads no period — it "Ovunque",
+  // de "Überall", ja どこでも); the keys that move about a period are its NAVIGATION; the picker is a
+  // LIST of words (`wordMap.heading`'s shape: it "Elenco di parole", de "Wortliste", ja 単語の一覧);
+  // the menus are MENU plural; and a pick is the choice of a link's TARGET, plural (it "Destinazioni",
+  // fr "Cibles", de "Ziele", ja 対象).
+  'help.section.app': { word: 'EVERYWHERE', format: { capitalize: true }, fallback: 'Everywhere' },
+  'help.section.box': { plan: nameOf('NAVIGATION'), format: NAME_FORMAT, fallback: 'Navigation' },
+  'help.section.picker': {
+    plan: {
+      subject: {
+        concept: 'LIST',
+        definiteness: 'bare',
+        nounModifiers: [{ concept: 'WORD', relation: 'material', number: 'plural' }],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Word list',
+  },
+  'help.section.menu': {
+    plan: { subject: { concept: 'MENU', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Menus',
+  },
+  'help.section.pick': {
+    plan: { subject: { concept: 'TARGET', number: 'plural', definiteness: 'bare' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Targets',
+  },
+  // The digits that pick: a menu's row by its number, a pick's target by the number it wears. CHOOSE,
+  // as the picker's ↵ is called, on an indefinite NUMBERED row or target, the one the digit names
+  // (it "Scegli una riga numerata", de "Ein nummeriertes Ziel wählen", ja 番号付きの対象を選び). The
+  // keycaps beside them say which digits. ⇥ in a pick goes to the NEXT target (de "Nächstes Ziel").
+  'help.pickNumberedRow': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'ROW', definiteness: 'indefinite', adjectives: ['NUMBERED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a numbered row',
+  },
+  'help.pickNumbered': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'TARGET', definiteness: 'indefinite', adjectives: ['NUMBERED'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a numbered target',
+  },
+  'help.nextTarget': {
+    plan: { subject: { concept: 'TARGET', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Next target',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

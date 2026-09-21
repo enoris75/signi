@@ -14,7 +14,7 @@ the class that fits it:
 | verb | now | what it is waiting on |
 |---|---|---|
 | SEEM | [A16](A16-seem.md) (done) | nothing: "to be perceived as an object", the **passive** of PERCEIVE with the **essive** object complement, renders in all seven |
-| BURN | [B33](../B-needs-seed/B33-burn-flame.md) (needs seed) | the noun **FLAME**, for "to produce flames" (ja 炎を出す) |
+| BURN | [B33](B33-burn-flame.md) (done) | the noun **FLAME**, for "to produce flames" (ja 炎を出す) |
 | BECOME | [C05](C05-non-distinguishing-genera.md) (literal by design) | nothing composable earns a gloss: the copula plus an aspect, like BE |
 
 What changed from this file's own verdicts:

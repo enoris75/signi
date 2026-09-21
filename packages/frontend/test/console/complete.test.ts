@@ -115,9 +115,17 @@ describe('commands', () => {
     expect(detail('/', '/front', onHouse)).toBe('specifier.value.in_front_of');
     expect(detail('/subj ( dog ) /verb ( run ) /cause ( cat ', '/thanks')).toBe('sentiment.connector.positive');
     expect(detail('/subj ( cat /adj ( big ', '/more')).toBe('degree.value.more');
-    // The plain degree has no word yet (B46).
-    expect(detail('/subj ( cat /adj ( big ', '/plain')).toBeUndefined();
+    // The plain degree adds nothing to an adjective, so it is named: "Positive degree", de "Positiv" (B46).
+    expect(detail('/subj ( cat /adj ( big ', '/plain')).toBe('degree.name.positive');
+    // A mood by the clause it makes, as /command and /inf are named; a pin as the transcript's pin says it.
+    expect(detail('/', '/statement')).toBe('mood.statement');
+    expect(detail('/', '/pin')).toBe('action.pinLine');
+    expect(detail('/', '/unpin')).toBe('action.unpinLine');
     expect(detail('/', '/del')).toBe('action.remove');
+    // The way back and the way in: the Edit menu's pair, and EDIT on the period (B40, B43).
+    expect(detail('/', '/undo')).toBe('action.undo');
+    expect(detail('/', '/redo')).toBe('action.redo');
+    expect(detail('/', '/edit')).toBe('action.editPeriod');
   });
 });
 
@@ -147,9 +155,11 @@ describe('titles', () => {
     expect(title(at('#', { state }))).toEqual(['periods', 'console.list.periods', undefined]);
   });
 
-  it('heads the conjunctions and the saved phrases, and names an empty period as the box is named', () => {
+  it('heads the conjunctions, the saved phrases and a command’s values, and names an empty period as the box is named', () => {
     expect(title(at('/join '))).toEqual(['conjunctions', 'console.list.conjunctions', undefined]);
     expect(title(at('/load '))).toEqual(['saved phrases', 'console.list.savedPhrases', undefined]);
+    // A command's values, the command after the title outside the phrase: "values · /command" (B46).
+    expect(title(at('/command '))).toEqual(['values', 'console.list.values', '/command']);
     const state = periods({ subject: byId('CAT') }, {});
     expect(at('#', { state }).candidates.find((x) => x.insert === '#2')).toMatchObject({ detail: 'empty', detailKey: 'slot.empty' });
     expect(at('#', { state }).candidates.find((x) => x.insert === '#1')).toMatchObject({ detail: 'cat', detailKey: undefined });
@@ -303,6 +313,12 @@ describe('pinned lines and local names (phase 5)', () => {
       ['/subj cat', 'recent'],
       ['/verb eat', 'recent'],
     ]);
+    // Each row says which it is in the catalogue's words, agreeing with LINE (it "fissata", "recente").
+    expect(c.candidates.map((x) => x.detailKey)).toEqual(['console.line.pinned', 'console.line.recent', 'console.line.recent']);
+    // Headed by both kinds, each title its own (B45), and by one when there is one kind.
+    expect([c.title, c.titleKey]).toEqual(['pinned lines · recent lines', ['console.list.pinned', 'console.list.recent']]);
+    expect(at('', { history: ['/subj cat'] })).toMatchObject({ title: 'recent lines', titleKey: 'console.list.recent' });
+    expect(at('', { pinned: ['/subj cat'], history: ['/subj cat'] })).toMatchObject({ title: 'pinned lines', titleKey: 'console.list.pinned' });
     expect(c.candidates.every((x) => x.kind === 'history')).toBe(true);
     expect(c.auto).toBe(false);
     expect({ from: c.from, to: c.to }).toEqual({ from: 0, to: 0 });

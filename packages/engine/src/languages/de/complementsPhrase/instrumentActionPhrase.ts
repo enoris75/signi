@@ -4,6 +4,7 @@ import { actionInfinitive } from '../../../functions/actionInfinitive.js';
 import { coordinate } from '../coordinate.js';
 import { declineAdj } from '../declineAdj.js';
 import { nounPhrase } from '../nounPhrase.js';
+import { particleGap } from '../particleGap.js';
 import { personalPronoun } from '../personalPronoun.js';
 
 // An instrument presented as an action. German has no gerund, so the two levels part ways
@@ -29,16 +30,21 @@ export function instrumentActionPhrase(c: ResolvedComplement, doer?: Record<stri
   if (level === 'process') {
     const object = coordinate(c.phrase, (np) => nounPhrase(np, 'acc'));
     const { pronoun, pn } = personalPronoun(doer ?? { generic: '1' });
-    // A separable verb's finite form takes its particle back at the end of the clause: "indem man eine Maus hinzufügt" (A138).
+    // A separable verb's finite form takes its particle back at the end of the clause: "indem man eine Maus hinzufügt"
+    // (A138), "indem man sie rückgängig macht" (B40).
     const stem = action.verb.forms[`${pn}_present`];
-    const finite = stem ? `${action.verb.forms['particle'] ?? ''}${stem}` : (action.verb.forms['base'] ?? '');
+    const particle = action.verb.forms['particle'];
+    const finite = stem
+      ? (particle ? `${particle}${particleGap(action.verb.forms)}${stem}` : stem)
+      : (action.verb.forms['base'] ?? '');
     // A subordinate clause is set off by a comma ("beginnt, indem er ein Wort wählt").
     // It is emitted as a leading comma and pulled back onto the previous word when the
     // clause is joined (see `punctuate`), since the joiner knows nothing of punctuation.
     return [', indem', pronoun, object, adverb, finite].filter(Boolean).join(' ');
   }
   const object = coordinate(c.phrase, (np) => nounPhrase(np, 'gen'));
-  const infinitive = actionInfinitive(action);
+  // A nominalized infinitive is one word, a particle written apart included: "das Rückgängigmachen" (B40).
+  const infinitive = particleGap(action.verb.forms) ? actionInfinitive(action).replace(' ', '') : actionInfinitive(action);
   const act = infinitive.charAt(0).toUpperCase() + infinitive.slice(1);
   // Weak declension: the adjective sits behind the definite "dem" (dative neuter → -en).
   const attr = adverb ? declineAdj(adverb, 'dat', 'neut', false, 'definite') : '';

@@ -88,7 +88,7 @@ test.describe('the phrase console', () => {
     // ↑ brings the last line back.
     await page.keyboard.press('ArrowUp');
     await expect(prompt(page)).toHaveValue('#1.subj /rel obj { /subj ( dog ) /verb ( see ) }');
-    await expect(page.getByTestId('console-history-tag')).toContainText('history · 1 of');
+    await expect(page.getByTestId('console-history-tag')).toContainText('history · 1/');
   });
 
   test('writes a canvas change into the source strip and the transcript', async ({ app, page }) => {
@@ -197,7 +197,7 @@ test.describe('the phrase console', () => {
     await run(page);
     await page.keyboard.type('/pin');
     await run(page);
-    await expect(page.getByTestId('transcript-info').last()).toContainText('Pinned.');
+    await expect(page.getByTestId('transcript-info').last()).toContainText('Pinned line');
     await page.reload();
     await prompt(page).click();
     await page.keyboard.press('Tab');
@@ -215,6 +215,8 @@ test.describe('the phrase console', () => {
     await page.getByTestId('console-help-row-rel').click();
     await expect(page.getByRole('dialog')).toHaveCount(0);
     await expect(page.getByTestId('help-page')).toContainText('/rel #n.noun · /rel subj { … } · /rel obj { … }');
+    // What it is for, as a verb is glossed (B47).
+    await expect(page.getByTestId('help-page')).toContainText('— to add a relative clause to a noun');
     // The example's sentence, in the interface language.
     await expect(page.getByTestId('transcript-help').getByTestId('transcript-sentence')).toHaveText(
       'the child who loves the cat runs.',
@@ -242,6 +244,7 @@ test.describe('the phrase console', () => {
     await page.keyboard.type('/help rel');
     await run(page);
     const help = page.getByTestId('help-page');
+    await expect(help.first()).toContainText('— aggiungere una proposizione relativa a un sostantivo'); // B47
     await expect(help.first().getByTestId('help-example')).toHaveText(
       '/subj ( bambino /rel subj { /verb ( amare ) /obj ( gatto ) } ) /verb ( correre )',
     );
@@ -256,5 +259,74 @@ test.describe('the phrase console', () => {
     await app.setUiLanguage('de');
     await expect(page.getByTestId('console-period')).toHaveText('Satzgefüge 1');
     await expect(help.first().getByTestId('help-example')).toContainText('/subj ( Kind');
+    await expect(help.first()).toContainText('— einen Relativsatz zu einem Substantiv hinzufügen'); // B47
+  });
+
+  // B45 and B46: the pin, what pinning leaves, the lines' list and the history tag, a command's
+  // values and a help page's labels follow the interface language too.
+  test('pins, walks and labels its lines in the interface language', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat');
+    await run(page);
+    await expect(page.getByTestId('pin-line').first()).toHaveAccessibleName('Fissa questa riga');
+    await page.keyboard.type('/pin');
+    await run(page);
+    await expect(page.getByTestId('transcript-info').last()).toContainText('Riga fissata');
+    await expect(page.getByTestId('pin-line').first()).toHaveAttribute('aria-pressed', 'true');
+    await expect(page.getByTestId('pin-line').first()).toHaveAccessibleName('Sblocca questa riga');
+
+    // ⇥ on the empty prompt: the pinned line, then the recent one, the list headed by both kinds.
+    await page.keyboard.press('Tab');
+    await expect(page.getByTestId('console-list-title')).toHaveText('righe fissate · righe recenti');
+    await expect(page.getByTestId('console-option').first()).toContainText('fissata');
+    await expect(page.getByTestId('phrase-console')).toContainText("chiudi l'elenco");
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByTestId('console-history-tag')).toHaveText('cronologia · 1/2');
+    await page.keyboard.press('ArrowDown');
+    await expect(prompt(page)).toHaveValue('');
+
+    // A command's values, the command after the title; a help page's labels, each before a colon.
+    await page.keyboard.type('/command ');
+    await expect(page.getByTestId('console-list-title')).toHaveText('valori · /command');
+    await page.keyboard.press('Escape');
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+    await page.keyboard.type('/help pl');
+    await run(page);
+    const help = page.getByTestId('help-page').last();
+    await expect(help.getByTestId('help-usage-line')).toHaveText('Uso: /pl · alias /plural');
+    await expect(help.getByTestId('help-example-line')).toContainText('Esempio: /subj ( gatto /pl )');
+
+    await app.setUiLanguage('de');
+    await expect(help.getByTestId('help-usage-line')).toHaveText('Verwendung: /pl · Alias /plural');
+    await expect(page.getByTestId('pin-line').first()).toHaveAccessibleName('Diese Zeile lösen');
+    await prompt(page).click();
+    await page.keyboard.press('ArrowUp');
+    await expect(page.getByTestId('console-history-tag')).toHaveText('Verlauf · 1/3');
+  });
+
+  // B42, B43: the console's name, the way back to the canvas, the preview tags, the source strip's
+  // hint and the chip of a period being edited, in German — and the header row's name.
+  test('names itself, the canvas and the period it edits in the interface language', async ({ app, page }) => {
+    await app.setUiLanguage('de');
+    await expect(page.getByTestId('console-toggle')).toContainText('Konsole');
+    await expect(page.locator('[data-kb-region="header"]')).toHaveAttribute('aria-label', 'Symbolleiste');
+    const docked = page.getByTestId('phrase-console');
+    await expect(docked).toContainText('Konsole');
+    await expect(docked).toContainText('zur Arbeitsfläche zurückkehren');
+    await expect(prompt(page)).toHaveAttribute('aria-label', 'Konsole');
+    await expect(docked.getByRole('button', { name: 'Die Konsole verstecken' })).toBeVisible();
+
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat');
+    await expect(page.getByTestId('translation-preview').first()).toHaveText('Vorschau');
+    await run(page);
+    await expect(page.getByTestId('source-strip')).toContainText('/edit · klicken, um zu bearbeiten');
+    await page.getByTestId('source-line').first().click();
+    const chip = page.getByTestId('console-chip').locator('[data-editing]');
+    await expect(chip).toHaveAttribute('data-editing', '1');
+    await expect(chip).toHaveText('Bearbeiten · Satzgefüge 1 ›');
   });
 });

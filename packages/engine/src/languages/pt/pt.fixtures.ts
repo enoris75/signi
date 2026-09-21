@@ -49,6 +49,9 @@ export const DINHEIRO: Forms = { base: 'dinheiro', gender: 'masc', count: 'singu
 export const AFRICA: Forms = { base: 'África', gender: 'fem', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
 export const EUROPA: Forms = { base: 'Europa', gender: 'fem', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
 export const ANTARTIDA: Forms = { base: 'Antártida', gender: 'fem', count: 'singular', uncountable: '1', proper: '1', isA: 'CONTINENT' };
+/** A country that takes its article, and the one that takes none ("de Portugal"). */
+export const JAPAO: Forms = { base: 'Japão', gender: 'masc', count: 'singular', uncountable: '1', proper: '1', isA: 'PLACE' };
+export const PORTUGAL: Forms = { base: 'Portugal', gender: 'masc', count: 'singular', uncountable: '1', proper: '1', takes_article: '0', isA: 'PLACE' };
 
 // Manner nouns (how a noun enters a manner adverbial) and dimension nouns (an adjective gloss).
 export const VELOCIDADE: Forms = { base: 'velocidade', plural: 'velocidades', gender: 'fem', count: 'singular', mannerRelation: 'measure' };

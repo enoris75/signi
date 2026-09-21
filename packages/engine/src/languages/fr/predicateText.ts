@@ -196,7 +196,7 @@ export function predicateText(
     effectiveVerb = [effectiveVerb, frequencyInGroup, passiveParticipleText].filter(Boolean).join(' ');
     if (isFrequency) effectiveMod = '';
   }
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement)]
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement, verb.forms)]
     .filter(Boolean).join(' ');
   // A non-finite verb takes its whole negation in front, the clitic staying against the infinitive:
   // "ne pas le voir". A negative adverb is itself the negator ("ne jamais manger"), and an "aucun"

@@ -149,11 +149,11 @@ function SourceLine({
           component="span"
           sx={{ flexShrink: 0, fontFamily: '"Inter", sans-serif', fontSize: "0.72rem", color: "text.secondary" }}
         >
-          {/* English literal, for /localize. */}
+          {/* The command is a value, not a word: it stays as written, a middle dot before the hint. */}
           <Box component="span" sx={{ fontFamily: MONO, fontSize: "0.85rem" }}>
             /edit
-          </Box>{" "}
-          or click to edit
+          </Box>{" · "}
+          {t("hint.clickToEdit")}
         </Box>
       )}
     </Box>

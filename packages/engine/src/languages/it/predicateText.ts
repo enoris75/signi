@@ -152,7 +152,7 @@ export function predicateText(
   // book"). Leading the complements slot puts it there in every branch below (A142).
   const isDirection = isDirectionAdverb(modifier);
   const modifierText = isDirection ? '' : adverbText;
-  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement)]
+  const complementsText = [isDirection ? adverbText : '', complementsPhrase(complements, subjectForms, verb.conceptId, directObject?.agreement, verb.forms)]
     .filter(Boolean).join(' ');
   // Imperative: a subjectless command. The subject pronoun's person picks the form (tu / noi /
   // voi); the negative changes it (non + infinito for tu, "non" + the affirmative form for

@@ -1,7 +1,8 @@
 // The help pages (P02 phase 5): every command has one, and every example on them is a line the
 // console accepts — so a page can never teach a line that does not work.
 import { describe, expect, it } from 'vitest';
-import { COMMANDS } from '../../src/console/language/commands.ts';
+import { UI_STRINGS } from '@signi/shared';
+import { COMMANDS, commandNamed } from '../../src/console/language/commands.ts';
 import { EXAMPLES, helpPage, usageOf } from '../../src/console/language/help.ts';
 import { run } from './helpers.ts';
 
@@ -48,5 +49,25 @@ describe('the help pages', () => {
     expect(helpPage('plural')?.def.name).toBe('pl');
     expect(helpPage('/rel')?.def.name).toBe('rel');
     expect(helpPage('frob')).toBeUndefined();
+  });
+
+  // B47: the page says what a command is for from the catalogue. The diagnostic keeps the English
+  // `purpose`, so the two must name the same purpose: one key per distinct purpose, and back.
+  it('gives every command with a purpose the catalogue’s key for it, one key per purpose', () => {
+    const withPurpose = COMMANDS.filter((c) => c.purpose);
+    expect(withPurpose.filter((c) => !c.purposeKey || !UI_STRINGS[c.purposeKey]).map((c) => c.name)).toEqual([]);
+    expect(COMMANDS.filter((c) => c.purposeKey && !c.purpose).map((c) => c.name)).toEqual([]);
+    const keyOf = new Map(withPurpose.map((c) => [c.purpose, c.purposeKey]));
+    const purposeOf = new Map(withPurpose.map((c) => [c.purposeKey, c.purpose]));
+    expect(withPurpose.filter((c) => keyOf.get(c.purpose) !== c.purposeKey || purposeOf.get(c.purposeKey) !== c.purpose).map((c) => c.name)).toEqual([]);
+    expect(keyOf.size).toBe(22);
+    // Every purpose the catalogue holds is some command's.
+    const catalogued = Object.keys(UI_STRINGS).filter((key) => key.startsWith('purpose.'));
+    expect(catalogued.sort()).toEqual([...purposeOf.keys()].sort());
+    expect(commandNamed('pl')?.purposeKey).toBe('purpose.number');
+    expect(commandNamed('neut')?.purposeKey).toBe('purpose.pronounGender');
+    expect(commandNamed('not')?.purposeKey).toBe('purpose.negate');
+    expect(commandNamed('pos')?.purposeKey).toBe('purpose.polarity');
+    expect(commandNamed('front')?.purposeKey).toBe('purpose.specifier');
   });
 });

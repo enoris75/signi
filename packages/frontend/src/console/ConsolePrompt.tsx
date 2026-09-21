@@ -165,7 +165,7 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
               value={text}
               spellCheck={false}
               autoComplete="off"
-              aria-label="Console"
+              aria-label={t("console.name")}
               aria-autocomplete="both"
               aria-expanded={listShown}
               aria-controls={listShown ? listId : undefined}
@@ -231,7 +231,7 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
           <Box component="span" sx={{ color: model.unfinished ? "text.disabled" : "error.main", fontWeight: 700 }}>
             {model.unfinished ? "…" : "!"}
           </Box>
-          <MessageText message={diagnostic.message} />
+          <MessageText message={diagnostic.messageKey ? t(diagnostic.messageKey) : diagnostic.message} />
         </Box>
       )}
     </Box>
@@ -258,7 +258,9 @@ function MessageText({ message }: { message: string }) {
 
 /**
  * `1 · VERB eat ›` — or, inside brackets, `1 › rel › 2 · OBJ cat ›`. While a period is being edited,
- * the badge says which, and the word after it where the caret is: `EDITING PERIOD 1 › SUBJ uomo ›`.
+ * the badge says which, and the word after it where the caret is: `EDIT · PERIOD 1 › SUBJ uomo ›` —
+ * the mode by its command, then the period by its name, the number outside the phrase (it "MODIFICA ·
+ * PERIODO 1", de "BEARBEITEN · SATZGEFÜGE 1", ja 「編集 · 文 1」). `data-editing` holds the number.
  */
 function ContextChip({ model }: { model: PhraseConsoleModel }) {
   const t = useUiString();
@@ -300,6 +302,7 @@ function ContextChip({ model }: { model: PhraseConsoleModel }) {
       <Box data-testid="console-chip" sx={rowSx}>
         <Box
           component="span"
+          data-editing={editing}
           sx={{
             px: 0.75,
             borderRadius: 0.5,
@@ -312,8 +315,7 @@ function ContextChip({ model }: { model: PhraseConsoleModel }) {
             textTransform: "uppercase",
           }}
         >
-          {/* English literal, for /localize. */}
-          Editing period {editing} ›
+          {t("action.edit")} · {t("period.name")} {editing} ›
         </Box>
         {word && (
           <>
@@ -370,8 +372,6 @@ function PromptKeys({ model }: { model: PhraseConsoleModel }) {
       {label}
     </Box>
   );
-  // The English literals wait on B43 and B45: "next word", "complete", "apply", "close the list",
-  // "back to the canvas", and the history tag.
   return (
     <Box sx={keysSx}>
       {model.walk && (
@@ -380,31 +380,32 @@ function PromptKeys({ model }: { model: PhraseConsoleModel }) {
           data-testid="console-history-tag"
           sx={{ px: 0.75, border: "1px solid", borderColor: "divider", borderRadius: 2, fontSize: "0.68rem" }}
         >
-          history · {model.walk.at} of {model.walk.of}
+          {/* The position is a value, written in figures after the word (the C14 rule): "history · 3/7". */}
+          {t("console.history")} · {model.walk.at}/{model.walk.of}
         </Box>
       )}
       {model.editing !== undefined ? (
         <>
-          {key("Tab", "next word")}
+          {key("Tab", t("console.nextWord"))}
           {key("Enter", t("action.replacePeriod"))}
           {/* The dialogs' Cancel, lower-case among the hints: a command, so no language minds. */}
           {key("Escape", <Box component="span" sx={{ textTransform: "lowercase" }}>{t("action.cancel")}</Box>)}
         </>
       ) : model.listShown ? (
         <>
-          {key("Tab", "complete")}
+          {key("Tab", t("action.complete"))}
           {key("Enter", t("slot.choose"))}
-          {key("Escape", "close the list")}
+          {key("Escape", t("action.closeList"))}
         </>
       ) : model.text ? (
         <>
-          {key("Tab", model.ghost ? "complete" : "next word")}
-          {key("Enter", "apply")}
+          {key("Tab", model.ghost ? t("action.complete") : t("console.nextWord"))}
+          {key("Enter", t("action.apply"))}
           {key("Escape", t("action.clear"))}
         </>
       ) : (
         <>
-          {key("Escape", "back to the canvas")}
+          {key("Escape", t("action.returnToCanvas"))}
         </>
       )}
     </Box>

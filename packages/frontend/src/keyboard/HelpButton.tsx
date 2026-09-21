@@ -1,5 +1,6 @@
 import { IconButton, Tooltip } from "@mui/material";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import { useUiString } from "../i18n/useUiString.ts";
 import { useKeyPlatform } from "./KeyboardProvider.tsx";
 import { keycapText } from "./matchKey.ts";
 
@@ -13,9 +14,6 @@ import { keycapText } from "./matchKey.ts";
  * while that is docked at the foot.
  */
 
-// English literal, for /localize: the catalogue has no word for help yet.
-const LABEL = "Help";
-
 export function HelpButton({
   onClick,
   bottom = 16,
@@ -25,16 +23,19 @@ export function HelpButton({
   bottom?: number;
 }) {
   const platform = useKeyPlatform();
+  const t = useUiString();
   const key = keycapText("?", platform);
+  // The overlay's own title, so the button and what it opens are called the same.
+  const label = t("help.heading");
 
   return (
     // The tooltip shows the key; the accessible name does not — a screen reader announcing
     // "Help ?" would read the cap as part of the name, and a shortcut belongs in
     // `aria-keyshortcuts`, which is where assistive tech looks for one.
-    <Tooltip title={`${LABEL}  ${key}`} placement="left">
+    <Tooltip title={`${label}  ${key}`} placement="left">
       <IconButton
         data-testid="help-button"
-        aria-label={LABEL}
+        aria-label={label}
         aria-keyshortcuts={key}
         onClick={onClick}
         sx={{

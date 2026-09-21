@@ -9,9 +9,9 @@ against the plan.
 **Why it was ready:** the phrase console (P02) left "every new caption, title and message" as an English
 literal for `/localize` ([P02 README, *Left open*](../../features/P-planning/P02-phrase-console/README.md)),
 and [C15](C15-ui-literal-by-design.md) recorded the whole surface as outstanding. This file took the part
-that needed no new word. The console's own vocabulary is in [B42](../B-needs-seed/B42-ui-console-name.md),
-[B45](../B-needs-seed/B45-ui-console-lines-history-pins.md), [B46](../B-needs-seed/B46-ui-console-topics-and-labels.md)
-and [B47](../B-needs-seed/B47-ui-console-command-purposes.md). Its diagnostics are in [C21](../C-needs-engine/C21-ui-console-diagnostics.md).
+that needed no new word. The console's own vocabulary is in [B42](B42-ui-console-name.md),
+[B45](B45-ui-console-lines-history-pins.md), [B46](B46-ui-console-topics-and-labels.md)
+and [B47](B47-ui-console-command-purposes.md), all done on 2026-09-21. Its diagnostics are in [C21](../C-needs-engine/C21-ui-console-diagnostics.md).
 
 **Not in scope:** command names, aliases, value names (`past`, `lets`, `process`) and the syntax
 (`#2.obj`, `( … )`) stay English in every interface language. That is P02's decision 3, recorded
@@ -42,7 +42,9 @@ The line references are to the code as it reads after this task.
 | move | [CompletionList.tsx:256](../../../packages/frontend/src/console/CompletionList.tsx#L256) | `action.move` (shared with [A20](A20-ui-keyboard-labels-on-seeded-words.md)) |
 
 Still English, as planned: "next word", "complete", "apply", "close the list" and "back to the canvas"
-wait on B43–B45.
+wait on B43–B45. All five shipped on 2026-09-21: "next word" with [B44](B44-ui-keyboard-movement-labels.md),
+"complete", "apply" and "close the list" with [B45](B45-ui-console-lines-history-pins.md), and "back to
+the canvas" with [B43](B43-ui-canvas-preview-edit.md).
 
 ### The completion list's titles — shipped
 
@@ -69,9 +71,10 @@ language: "commands · cat", it "comandi · gatto" ([CompletionList.tsx:32-33](.
 | empty (a period row with no words) | [complete.ts:780](../../../packages/frontend/src/console/language/complete.ts#L780) | reuse `slot.empty`, as the row's `detailKey` |
 
 Still English, as planned: "recent lines" and "pinned and recent lines" ([complete.ts:198](../../../packages/frontend/src/console/language/complete.ts#L198))
-wait on [B45](../B-needs-seed/B45-ui-console-lines-history-pins.md), and "values for /x"
+wait on [B45](B45-ui-console-lines-history-pins.md), and "values for /x"
 ([complete.ts:705](../../../packages/frontend/src/console/language/complete.ts#L705)) on
-[B46](../B-needs-seed/B46-ui-console-topics-and-labels.md).
+[B46](B46-ui-console-topics-and-labels.md). Both shipped on 2026-09-21: `console.list.pinned` /
+`.recent` ("pinned lines · recent lines") and `console.list.values` ("values · /tense").
 
 ### Command descriptions the catalogue already had — shipped
 
@@ -84,7 +87,7 @@ control of the same value:
 |---|---|---|
 | `/in /through /under /over /around /behind /front` | [commands.ts:421](../../../packages/frontend/src/console/language/commands.ts#L421) | `specifier.value.<value>` |
 | `/because /fault /thanks` | [commands.ts:441](../../../packages/frontend/src/console/language/commands.ts#L441) | `sentiment.connector.<value>` |
-| `/more /most /less /least /equally` | [commands.ts:538](../../../packages/frontend/src/console/language/commands.ts#L538) | `degree.value.<value>`. **Judged and accepted:** cited on BIG, so en "bigger" / "biggest" and de "größer" / "am größten" — what the canvas's degree chip says. `/plain` has no entry (`degree.value.positive` is "—") and waits on [B46](../B-needs-seed/B46-ui-console-topics-and-labels.md) |
+| `/more /most /less /least /equally` | [commands.ts:538](../../../packages/frontend/src/console/language/commands.ts#L538) | `degree.value.<value>`. **Judged and accepted:** cited on BIG, so en "bigger" / "biggest" and de "größer" / "am größten" — what the canvas's degree chip says. `/plain` had no entry (`degree.value.positive` is "—") and waited on [B46](B46-ui-console-topics-and-labels.md), which named it `degree.name.positive`, "Positive degree" |
 | `/del` | [commands.ts:640](../../../packages/frontend/src/console/language/commands.ts#L640) | `action.remove`: the bare `commandOf('REMOVE')`, "Remove". What `/del` removes is the usage line's to say, which spells its arguments out |
 
 ### Topics and the help page's parts — shipped
@@ -98,7 +101,8 @@ control of the same value:
 
 Still English, as planned: "place or route", "mood" and "workspace" ([commands.ts:829, 842, 845](../../../packages/frontend/src/console/language/commands.ts#L829))
 and the workspace's help part ([ConsoleHelp.tsx:25](../../../packages/frontend/src/console/ConsoleHelp.tsx#L25))
-wait on [B46](../B-needs-seed/B46-ui-console-topics-and-labels.md).
+wait on [B46](B46-ui-console-topics-and-labels.md). All four shipped there on 2026-09-21:
+`console.topic.place` ("spatial relationship"), `console.topic.mood`, `console.topic.workspace`.
 
 ### Results of `/save` and `/load` — shipped
 
@@ -241,7 +245,8 @@ What landed differently from the plan:
    key. It read `action.clear`, "clear", which is only half of what it does (it takes a word, a link
    or the period away). It reads `action.remove` now.
 4. **"On the workspace" became the literal "Workspace".** The other parts dropped their "On a"; the
-   one still waiting on [B46](../B-needs-seed/B46-ui-console-topics-and-labels.md) dropped it too,
+   one still waiting on [B46](B46-ui-console-topics-and-labels.md) dropped it too (and reads
+   `console.topic.workspace` since),
    so the page reads as one list. The topic "links between periods" is now "linked periods" in
    English as well, the key's own words.
 5. **The example is printed word by word, not by `printPeriod`.** Printing the example's phrase
@@ -268,7 +273,7 @@ What landed differently from the plan:
    [complete.ts:812-818](../../../packages/frontend/src/console/language/complete.ts#L812-L818)), `/del`'s
    argument descriptions (`DEL_VALUES`, [complete.ts:710-725](../../../packages/frontend/src/console/language/complete.ts#L710-L725)),
    "did you mean" ([complete.ts:923](../../../packages/frontend/src/console/language/complete.ts#L923))
-   and the echo icon's "from the canvas" (B43 has that one). "period {n}" could take `period.name` and
+   and the echo icon's "from the canvas" (B43 has that one, shipped 2026-09-21 as `console.fromCanvas`). "period {n}" could take `period.name` and
    the number, as the header does, once a candidate can carry a value after its `detailKey`.
 7. **Found by the round-trip stress run, and filed as [A179](../../bugs/A-must-fix/A179-passive-infinitive-hidden-and-unprinted.md):**
    at `SEEDS=5000`, seeds 764, 1659 and 2022 fail the same way before and after this task. A passive

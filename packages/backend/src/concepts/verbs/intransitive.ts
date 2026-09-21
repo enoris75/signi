@@ -156,7 +156,14 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'direction', 'source', 'route', 'cause'],
     description: 'to move toward the speaker or a place',
+    // "to move to the speaker" (localization B35): the deixis is a noun, the goal of the `direction`
+    // complement. GO's gloss says where the motion starts, COME's whom it ends at. Italian says it
+    // "verso il parlante", MOVE_ONESELF's own preposition: "dal parlante" would read as leaving.
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      complements: { direction: { phrase: { concept: 'SPEAKER', definiteness: 'definite' } } },
+    }),
     emoji: '🚶',
+    isA: 'MOVE_ONESELF',
     forms: {
       en: {
         base: 'come',
@@ -291,6 +298,11 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'cause', 'locative'],
     description: 'to be on fire; to undergo combustion',
+    // "to produce flames" (localization B33): PRODUCE in its "give off" sense, what a burning thing
+    // does. Not "to be consumed by fire" (CONSUME is the ingest sense: fr consommer, de konsumieren,
+    // ja 摂取), and not "to produce fire", which reads as SET_ON_FIRE's "to create fire". Japanese
+    // 炎を出す does not define 燃える with itself.
+    definition: infinitiveGloss('PRODUCE', 'FLAME', 'plural'),
     emoji: '🔥',
     synonym: 'be on fire',
     forms: {
@@ -358,7 +370,15 @@ export const intransitiveVerbs: ConceptSeed[] = [
     transitivity: 'intransitive',
     complements: ['manner', 'locative', 'cause'],
     description: 'to fall down suddenly, losing all support',
+    // "to move to the ground suddenly" (localization B34). "Down" is the place the motion ends at,
+    // a `direction` goal, which leaves the one adverb slot for SUDDENLY. Definite: the ground. Italian
+    // and French say the goal "verso il suolo" / "vers le sol", MOVE_ONESELF's own preposition.
+    definition: infinitiveGloss('MOVE_ONESELF', {
+      modifier: 'SUDDENLY',
+      complements: { direction: { phrase: { concept: 'GROUND', definiteness: 'definite' } } },
+    }),
     emoji: '🏚️',
+    isA: 'MOVE_ONESELF',
     forms: {
       en: {
         base: 'collapse',

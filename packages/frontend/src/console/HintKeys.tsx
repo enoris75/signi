@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { hintsFor, KEYMAP, PERIOD_KEYMAP } from "../keyboard/keymap.ts";
+import { commandLabel, hintsFor, KEYMAP, PERIOD_KEYMAP } from "../keyboard/keymap.ts";
 import { Keycap } from "../keyboard/Keycap.tsx";
 import { useCursorContext, useInputModality } from "../keyboard/KeyboardProvider.tsx";
 import { useUiString } from "../i18n/useUiString.ts";
@@ -38,7 +38,7 @@ export function HintKeys() {
       {hints.map((command) => (
         <Box key={command.id} component="span" sx={{ display: "inline-flex", alignItems: "center", gap: 0.4 }}>
           <Keycap spec={command.keys[0]!} />
-          {command.labelKey ? t(command.labelKey) : command.label}
+          {commandLabel(command, t)}
         </Box>
       ))}
     </Box>

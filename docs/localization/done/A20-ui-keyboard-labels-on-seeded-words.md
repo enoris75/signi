@@ -6,9 +6,10 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 **Done 2026-09-21.** P01 (keyboard-first UX) shipped its labels as English literals, as its §6 planned ("new
 UI strings start as English, ready for `/localize`"). These were the ones that need no new word: a seeded
 verb on a seeded noun, or a catalogue entry that already exists. Every item below shipped. The rest wait on
-vocabulary in [B40](../B-needs-seed/B40-ui-undo-redo.md), [B41](../B-needs-seed/B41-ui-help-overlay.md),
-[B42](../B-needs-seed/B42-ui-console-name.md), [B43](../B-needs-seed/B43-ui-canvas-preview-edit.md) and
-[B44](../B-needs-seed/B44-ui-keyboard-movement-labels.md), or are prose ([C22](../C-needs-engine/C22-ui-help-prose.md)).
+vocabulary in [B40](B40-ui-undo-redo.md), [B41](B41-ui-help-overlay.md),
+[B42](B42-ui-console-name.md), [B43](B43-ui-canvas-preview-edit.md) and
+[B44](B44-ui-keyboard-movement-labels.md), or are prose ([C22](../C-needs-engine/C22-ui-help-prose.md)).
+B40–B44 were done on 2026-09-21 too, so their rows below are struck through.
 
 Where the labels show:
 
@@ -75,14 +76,14 @@ Each of these waits on a word the corpus does not hold, or is prose. Nothing her
 
 | literal | where | waits on |
 |---|---|---|
-| the 34 keymap labels without a `labelKey` | listed by id in [keymap.test.ts:117](../../../packages/frontend/test/keyboard/keymap.test.ts#L117) | B44 (movement, "Step out", "…, backwards", Register, Instrument level: 25 commands), B41 (Help), B42 (the console's two keys), B40 (Undo, Redo), B43 (Edit, Canvas taller / shorter: 4 commands) |
-| Anywhere · Moving around · Word picker · Menus · Picking a link (section titles) | [HelpOverlay.tsx:53, 60, 84, 96, 106](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L53) | B41 |
-| The row's own key picks it · Pick a numbered target · Next target | [HelpOverlay.tsx:98, 117, 118](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L98) | B41 |
-| Choose and go to the next box | [HelpOverlay.tsx:88](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L88) | B44 (`hint.chooseAndNext`) |
-| Words: back to the canvas | [HelpOverlay.tsx:143](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L143) | B43 (RETURN, CANVAS). It takes `whereKey: 'words.heading'` when it lands |
+| ~~the 34 keymap labels without a `labelKey`~~ | [keymap.test.ts:117](../../../packages/frontend/test/keyboard/keymap.test.ts#L117) now asserts that none is left | ~~B44 (movement, "Step out", "…, backwards", Register, Instrument level: 25 commands), B41 (Help), B42 (the console's two keys), B40 (Undo, Redo), B43 (Edit, Canvas taller / shorter: 4 commands)~~, done 2026-09-21 |
+| ~~Anywhere · Moving around · Word picker · Menus · Picking a link (section titles)~~ | [HelpOverlay.tsx:53, 60, 84, 96, 106](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L53) | ~~B41~~, done 2026-09-21 |
+| ~~The row's own key picks it · Pick a numbered target · Next target~~ | [HelpOverlay.tsx:98, 117, 118](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L98) | ~~B41~~, done 2026-09-21 |
+| ~~Choose and go to the next box~~ | [HelpOverlay.tsx:88](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L88) | ~~B44~~ (`hint.chooseAndNext`), done 2026-09-21 |
+| ~~Words: back to the canvas~~ | [HelpOverlay.tsx:143](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L143) | ~~B43 (RETURN, CANVAS)~~, done 2026-09-21 in [B43](B43-ui-canvas-preview-edit.md): "Words: return to the canvas" |
 | Up from the first row: the category tabs · Switch vocabulary, in the tabs · Close · again restores the word | [HelpOverlay.tsx:89, 90, 92](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L89) | C22. The last row stays English whole (Done, item 5) |
 | the sections' notes (Ctrl is ⌘ on a Mac, …) | [HelpOverlay.tsx:53-73](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L53-L73) | C22 |
-| choose, next box · row · value (the picker footer) | [PickerFooter.tsx:26, 35, 37](../../../packages/frontend/src/components/PhraseBuilder/PickerFooter.tsx#L26) | B44 |
+| ~~choose, next box · row · value (the picker footer)~~ | [PickerFooter.tsx:26, 35, 37](../../../packages/frontend/src/components/PhraseBuilder/PickerFooter.tsx#L26) | ~~B44~~, done 2026-09-21 |
 
 ## Left out on purpose
 

@@ -360,6 +360,82 @@ describe('COME to a continent — the article-dropping goal', () => {
   });
 });
 
+// B36 seeded the countries under COUNTRY, and a country is a land as a continent is: Italian goes
+// "in Italia", French "en Italie" but "au Japon", German "nach Italien". The rules key off either
+// hypernym (`isNamedLand`); before, a country goal took the article like a house ("all'Italia", "à
+// l'Italie", "zu Italien"). Portuguese names Portugal bare ("a Portugal", "em Portugal").
+describe('a country is a land, like a continent (localization B36)', () => {
+  const goTo = (country: string) => sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np(country) } } }));
+  const eatsIn = (country: string) => sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np(country) } } }));
+  const comesFrom = (country: string) => sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: np(country) } } }));
+
+  test('a feminine country: "in Italia", "en Italie", "nach Italien"', () => {
+    expect(goTo('ITALY')).toEqual({
+      en: 'the cat goes to Italy.',
+      it: 'il gatto va in Italia.',
+      fr: 'le chat va en Italie.',
+      de: 'der Kater geht nach Italien.',
+      es: 'el gato va a Italia.',
+      ja: '猫はイタリアへ行きます。',
+      pt: 'o gato vai à Itália.',
+    });
+    expect(eatsIn('ITALY')).toEqual({
+      en: 'the cat eats in Italy.',
+      it: 'il gatto mangia in Italia.',
+      fr: 'le chat mange en Italie.',
+      de: 'der Kater frisst in Italien.',
+      es: 'el gato come en Italia.',
+      ja: '猫はイタリアで食べます。',
+      pt: 'o gato come na Itália.',
+    });
+    expect(comesFrom('ITALY')).toEqual({
+      en: 'the cat comes from Italy.',
+      it: "il gatto viene dall'Italia.",
+      fr: "le chat vient d'Italie.",
+      de: 'der Kater kommt aus Italien.',
+      es: 'el gato viene de Italia.',
+      ja: '猫はイタリアから来ます。',
+      pt: 'o gato vem da Itália.',
+    });
+    expect(goTo('FRANCE')).toMatchObject({ it: 'il gatto va in Francia.', fr: 'le chat va en France.', de: 'der Kater geht nach Frankreich.' });
+    expect(comesFrom('FRANCE')).toMatchObject({ fr: 'le chat vient de France.' });
+  });
+
+  test('a masculine one opening on a consonant is "au" in French, as a goal and as a place', () => {
+    expect(goTo('JAPAN')).toEqual({
+      en: 'the cat goes to Japan.',
+      it: 'il gatto va in Giappone.',
+      fr: 'le chat va au Japon.',
+      de: 'der Kater geht nach Japan.',
+      es: 'el gato va a Japón.',
+      ja: '猫は日本へ行きます。',
+      pt: 'o gato vai ao Japão.',
+    });
+    expect(eatsIn('JAPAN')).toMatchObject({ it: 'il gatto mangia in Giappone.', fr: 'le chat mange au Japon.', pt: 'o gato come no Japão.' });
+    expect(comesFrom('JAPAN')).toMatchObject({ it: 'il gatto viene dal Giappone.', fr: 'le chat vient du Japon.', pt: 'o gato vem do Japão.' });
+  });
+
+  test('Portugal: "au Portugal", and bare in Portuguese', () => {
+    expect(goTo('PORTUGAL')).toEqual({
+      en: 'the cat goes to Portugal.',
+      it: 'il gatto va in Portogallo.',
+      fr: 'le chat va au Portugal.',
+      de: 'der Kater geht nach Portugal.',
+      es: 'el gato va a Portugal.',
+      ja: '猫はポルトガルへ行きます。',
+      pt: 'o gato vai a Portugal.',
+    });
+    expect(eatsIn('PORTUGAL')).toMatchObject({ fr: 'le chat mange au Portugal.', pt: 'o gato come em Portugal.' });
+    expect(comesFrom('PORTUGAL')).toMatchObject({ fr: 'le chat vient du Portugal.', pt: 'o gato vem de Portugal.' });
+  });
+
+  test('regression guard: the continents are unchanged, and a language name stays "en" in French', () => {
+    expect(goTo('EUROPE')).toMatchObject({ it: 'il gatto va in Europa.', fr: 'le chat va en Europe.', de: 'der Kater geht nach Europa.' });
+    expect(goTo('ANTARCTICA')).toMatchObject({ fr: 'le chat va en Antarctique.' });
+    expect(eatsIn('FRENCH')).toMatchObject({ fr: 'le chat mange en français.' });
+  });
+});
+
 describe('known bugs: direction', () => {
   // Junge is a weak masculine (n-declension) noun: every case but the nominative singular is
   // "Jungen". The engine misses it — but ONLY in the singular, because the plural happens to be

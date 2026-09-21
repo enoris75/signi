@@ -255,11 +255,12 @@ describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
     });
   });
 
+  // The goal takes MOVE_ONESELF's own preposition in Italian and French, "verso" / "vers" (B34, B35).
   test('GO → to move from a place to another place', () => {
     expect(definitionAll('GO')).toEqual({
       en: 'to move from a place to another place.',
-      it: 'muoversi da un luogo a un altro luogo.',
-      fr: "se déplacer d'un lieu à un autre lieu.",
+      it: 'muoversi da un luogo verso un altro luogo.',
+      fr: "se déplacer d'un lieu vers un autre lieu.",
       de: 'sich aus einem Ort zu einem anderen Ort bewegen.',
       es: 'moverse de un lugar a otro lugar.',
       ja: '場所から別の場所へ移動する。',
@@ -279,6 +280,92 @@ describe('C17 verb definitions (MOVE_ONESELF genus)', () => {
       ja: '空気の中へ移動する。',
       pt: 'mover-se no ar.',
     });
+  });
+
+  // B34. "Down" is a place the motion ends at, the ground, which leaves the one adverb slot for
+  // SUDDENLY. Italian and French say the goal with "verso" / "vers": after this verb, "al suolo" /
+  // "au sol" say where the moving happens ("les oiseaux se déplacent au sol").
+  test('COLLAPSE → to move to the ground suddenly', () => {
+    expect(definitionAll('COLLAPSE')).toEqual({
+      en: 'to move to the ground suddenly.',
+      it: 'muoversi improvvisamente verso il suolo.',
+      fr: 'se déplacer soudainement vers le sol.',
+      de: 'sich plötzlich zum Boden bewegen.',
+      es: 'moverse de repente al suelo.',
+      ja: '地面へ突然移動する。',
+      pt: 'mover-se de repente ao chão.',
+    });
+  });
+
+  // B35. The deixis is a noun, the speaker, as the goal. Italian "muoversi dal parlante" would read as
+  // leaving the speaker; the verb's "verso" makes it the goal.
+  test('COME → to move to the speaker', () => {
+    expect(definitionAll('COME')).toEqual({
+      en: 'to move to the speaker.',
+      it: 'muoversi verso il parlante.',
+      fr: 'se déplacer vers le locuteur.',
+      de: 'sich zum Sprecher bewegen.',
+      es: 'moverse hacia el hablante.',
+      ja: '話し手へ移動する。',
+      pt: 'mover-se para o falante.',
+    });
+  });
+});
+
+// B34, B35. MOVE_ONESELF fixes its goal's preposition in its Italian and French lexemes
+// (`direction_prep`): "verso" / "vers" for every plain goal, a place, a person or a land. GO keeps the
+// goal words the goal's kind selects ("va alla casa", "va dal bambino", "va in Europa").
+describe('MOVE_ONESELF: the goal takes the verb\'s own preposition in Italian and French', () => {
+  const movesTo = (verb: string, goal: ReturnType<typeof np>) =>
+    sayAll(clause(np('CAT'), verb, { complements: { direction: { phrase: goal } } }));
+
+  test('a place, a person and a continent all go "verso" / "vers"', () => {
+    expect(movesTo('MOVE_ONESELF', np('HOUSE'))).toEqual({
+      en: 'the cat moves to the house.',
+      it: 'il gatto si muove verso la casa.', // verso does not fuse with the article
+      fr: 'le chat se déplace vers la maison.',
+      de: 'der Kater bewegt sich zum Haus.',
+      es: 'el gato se mueve a la casa.',
+      ja: '猫は家へ移動します。',
+      pt: 'o gato se move à casa.',
+    });
+    expect(movesTo('MOVE_ONESELF', np('CHILD'))).toMatchObject({
+      it: 'il gatto si muove verso il bambino.', fr: "le chat se déplace vers l'enfant.",
+    });
+    expect(movesTo('MOVE_ONESELF', np('EUROPE'))).toMatchObject({
+      it: "il gatto si muove verso l'Europa.", fr: "le chat se déplace vers l'Europe.", de: 'der Kater bewegt sich nach Europa.',
+    });
+    expect(movesTo('MOVE_ONESELF', np('HOUSE', { definiteness: 'indefinite' }))).toMatchObject({
+      it: 'il gatto si muove verso una casa.', fr: 'le chat se déplace vers une maison.',
+    });
+  });
+
+  test('a relation still names its own goal: "into the air"', () => {
+    expect(sayAll(clause(np('CAT'), 'MOVE_ONESELF', {
+      complements: { direction: { phrase: np('AIR'), specifiers: [{ kind: 'path', value: 'in' }] } },
+    }))).toMatchObject({ it: "il gatto si muove nell'aria.", fr: "le chat se déplace dans l'air." });
+  });
+
+  test('a relative clause on the goal takes it too: "vers laquelle", "verso la quale"', () => {
+    const houseWhereTheCat = (verb: string) => sayAll({
+      subject: { concept: 'HOUSE', relative: { headRole: 'direction', subject: np('CAT'), verbPhrase: { verb } } },
+      verbPhrase: { verb: 'RUN' },
+    });
+    expect(houseWhereTheCat('MOVE_ONESELF')).toMatchObject({
+      it: 'la casa verso la quale il gatto si muove corre.',
+      fr: 'la maison vers laquelle le chat se déplace court.',
+      de: 'das Haus, zu dem der Kater sich bewegt, läuft.',
+    });
+    expect(houseWhereTheCat('GO')).toMatchObject({
+      it: 'la casa alla quale il gatto va corre.',
+      fr: 'la maison à laquelle le chat va court.',
+    });
+  });
+
+  test('regression guard: GO keeps the goal words its goal selects', () => {
+    expect(movesTo('GO', np('HOUSE'))).toMatchObject({ it: 'il gatto va alla casa.', fr: 'le chat va à la maison.' });
+    expect(movesTo('GO', np('CHILD'))).toMatchObject({ it: 'il gatto va dal bambino.', fr: "le chat va vers l'enfant." });
+    expect(movesTo('GO', np('EUROPE'))).toMatchObject({ it: 'il gatto va in Europa.', fr: 'le chat va en Europe.' });
   });
 });
 

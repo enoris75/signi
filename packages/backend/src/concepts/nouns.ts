@@ -62,6 +62,13 @@ const whereGloss = (genus: string, verb: string, object?: string): PhrasePlan =>
   },
 });
 
+// A language's gloss: the definite LANGUAGE with its country as the genitive possessor —
+// languageOf('ITALY') → en "Italy's language", it "la lingua dell'Italia", de "die Sprache Italiens",
+// ja "イタリアの言語" (localization B36). Definite, because "a language of Italy" says one of several.
+const languageOf = (country: string): PhrasePlan => ({
+  subject: { concept: 'LANGUAGE', definiteness: 'definite', possessor: { concept: country } },
+});
+
 // A German noun's `compound` form is the stem it takes as the first element of a compound, its
 // linking element (Fugenelement) included: "Hunde" (Hundebuch), "Lebens", "Kinder", "Sprach". It is
 // seeded only where the engine's suffix rule would get it wrong — -s- after -ung/-heit/-keit/-schaft/
@@ -170,6 +177,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'aire', gender: 'masc', count: 'singular' },
       ja: { base: '空気', count: 'singular', reading: 'くうき' },
       pt: { base: 'ar', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The surface one stands on, where a collapse ends: COLLAPSE is "to move to the ground suddenly"
+    // (localization B34), AIR's counterpart in JUMP's gloss. Italian "suolo", not "terra", which with
+    // the article reads as the Earth ("alla terra"); Portuguese "chão", the ground underfoot.
+    id: 'GROUND',
+    role: 'noun',
+    description: 'the solid surface of the earth',
+    emoji: '🟫',
+    forms: {
+      en: { base: 'ground', plural: 'grounds', count: 'singular' },
+      it: { base: 'suolo', plural: 'suoli', gender: 'masc', count: 'singular' },
+      fr: { base: 'sol', plural: 'sols', gender: 'masc', count: 'singular' },
+      de: { base: 'Boden', plural: 'Böden', gender: 'masc', count: 'singular' },
+      es: { base: 'suelo', plural: 'suelos', gender: 'masc', count: 'singular' },
+      ja: { base: '地面', count: 'singular', reading: 'じめん' },
+      pt: { base: 'chão', plural: 'chãos', gender: 'masc', count: 'singular' },
     },
   },
 
@@ -517,6 +542,60 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'lugar', plural: 'lugares', gender: 'masc', count: 'singular' },
     },
   },
+  // ── The places of a motion ────────────────────────────────────────
+  // Where a motion ends, starts and passes: what the direction, source and route complements indicate
+  // (localization B37, "a complement that indicates destinations"). Each is a place, but one reached,
+  // left or crossed, which PLACE alone does not say. German "Ziel" and Japanese 目的地 are the goal of a
+  // journey; 起点 and 経路 are the words the source and route complements are named with in Japanese.
+  {
+    id: 'DESTINATION',
+    role: 'noun',
+    description: 'the place where a motion ends',
+    emoji: '🏁',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'destination', plural: 'destinations', count: 'singular' },
+      it: { base: 'destinazione', plural: 'destinazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'destination', plural: 'destinations', gender: 'fem', count: 'singular' },
+      de: { base: 'Ziel', plural: 'Ziele', gender: 'neut', count: 'singular' },
+      es: { base: 'destino', plural: 'destinos', gender: 'masc', count: 'singular' },
+      ja: { base: '目的地', count: 'singular', reading: 'もくてきち' },
+      pt: { base: 'destino', plural: 'destinos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'ORIGIN',
+    role: 'noun',
+    description: 'the place where a motion starts',
+    emoji: '🚩',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'origin', plural: 'origins', count: 'singular' },
+      it: { base: 'origine', plural: 'origini', gender: 'fem', count: 'singular' },
+      fr: { base: 'origine', plural: 'origines', gender: 'fem', count: 'singular' },
+      de: { base: 'Ausgangspunkt', plural: 'Ausgangspunkte', gender: 'masc', count: 'singular' },
+      es: { base: 'origen', plural: 'orígenes', gender: 'masc', count: 'singular' },
+      ja: { base: '起点', count: 'singular', reading: 'きてん' },
+      pt: { base: 'origem', plural: 'origens', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // French "parcours" is the same word in the plural.
+    id: 'PATH',
+    role: 'noun',
+    description: 'the way a motion goes through',
+    emoji: '🛣️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'path', plural: 'paths', count: 'singular' },
+      it: { base: 'percorso', plural: 'percorsi', gender: 'masc', count: 'singular' },
+      fr: { base: 'parcours', plural: 'parcours', gender: 'masc', count: 'singular' },
+      de: { base: 'Weg', plural: 'Wege', gender: 'masc', count: 'singular' },
+      es: { base: 'recorrido', plural: 'recorridos', gender: 'masc', count: 'singular' },
+      ja: { base: '経路', count: 'singular', reading: 'けいろ' },
+      pt: { base: 'percurso', plural: 'percursos', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     // The genus HOUSE and PRISON lacked: both are described as "a building", which was not itself a
     // concept (B29). It sits under PLACE beside HOME, MARKET and CONTINENT, so the two nouns gain
@@ -627,6 +706,65 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'persona', plural: 'personas', gender: 'fem', count: 'singular' },
       ja: { base: '人', count: 'singular', reading: 'ひと' },
       pt: { base: 'pessoa', plural: 'pessoas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The person who is speaking, as a linguist says it: the deixis of COME, "to move to the speaker"
+    // (localization B35). The term in each language, not the loudspeaker. Human, which is what gives
+    // an animate goal its "vers" / "hacia" / "para" where a place would take "à" / "a".
+    id: 'SPEAKER',
+    role: 'noun',
+    description: 'the person who is speaking',
+    emoji: '🗣️',
+    animate: true,
+    human: true,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'speaker', plural: 'speakers', count: 'singular' },
+      it: { base: 'parlante', plural: 'parlanti', gender: 'masc', count: 'singular', fem: 'parlante', fem_plural: 'parlanti' },
+      fr: { base: 'locuteur', plural: 'locuteurs', gender: 'masc', count: 'singular', fem: 'locutrice', fem_plural: 'locutrices' },
+      de: { base: 'Sprecher', plural: 'Sprecher', gender: 'masc', count: 'singular', fem: 'Sprecherin', fem_plural: 'Sprecherinnen' },
+      es: { base: 'hablante', plural: 'hablantes', gender: 'masc', count: 'singular', fem: 'hablante', fem_plural: 'hablantes' },
+      ja: { base: '話し手', count: 'singular', reading: 'はなして' },
+      pt: { base: 'falante', plural: 'falantes', gender: 'masc', count: 'singular', fem: 'falante', fem_plural: 'falantes' },
+    },
+  },
+  // The parties the comitative and the terminus complements indicate (localization B37): the one an
+  // action is done together with, and the one it is done to or for.
+  {
+    id: 'COMPANION',
+    role: 'noun',
+    description: 'one who does something together with another',
+    emoji: '👯',
+    animate: true,
+    human: true,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'companion', plural: 'companions', count: 'singular' },
+      it: { base: 'compagno', plural: 'compagni', gender: 'masc', count: 'singular', fem: 'compagna', fem_plural: 'compagne' },
+      fr: { base: 'compagnon', plural: 'compagnons', gender: 'masc', count: 'singular', fem: 'compagne', fem_plural: 'compagnes' },
+      de: { base: 'Begleiter', plural: 'Begleiter', gender: 'masc', count: 'singular', fem: 'Begleiterin', fem_plural: 'Begleiterinnen' },
+      es: { base: 'compañero', plural: 'compañeros', gender: 'masc', count: 'singular', fem: 'compañera', fem_plural: 'compañeras' },
+      ja: { base: '同伴者', count: 'singular', reading: 'どうはんしゃ' },
+      pt: { base: 'companheiro', plural: 'companheiros', gender: 'masc', count: 'singular', fem: 'companheira', fem_plural: 'companheiras' },
+    },
+  },
+  {
+    id: 'RECIPIENT',
+    role: 'noun',
+    description: 'one who receives something',
+    emoji: '📬',
+    animate: true,
+    human: true,
+    isA: 'PERSON',
+    forms: {
+      en: { base: 'recipient', plural: 'recipients', count: 'singular' },
+      it: { base: 'destinatario', plural: 'destinatari', gender: 'masc', count: 'singular', fem: 'destinataria', fem_plural: 'destinatarie' },
+      fr: { base: 'destinataire', plural: 'destinataires', gender: 'masc', count: 'singular', fem: 'destinataire', fem_plural: 'destinataires' },
+      de: { base: 'Empfänger', plural: 'Empfänger', gender: 'masc', count: 'singular', fem: 'Empfängerin', fem_plural: 'Empfängerinnen' },
+      es: { base: 'destinatario', plural: 'destinatarios', gender: 'masc', count: 'singular', fem: 'destinataria', fem_plural: 'destinatarias' },
+      ja: { base: '受け手', count: 'singular', reading: 'うけて' },
+      pt: { base: 'destinatário', plural: 'destinatários', gender: 'masc', count: 'singular', fem: 'destinatária', fem_plural: 'destinatárias' },
     },
   },
   {
@@ -952,6 +1090,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'fuego', plural: 'fuegos', gender: 'masc', count: 'singular' },
       ja: { base: '火', count: 'singular', reading: 'ひ' },
       pt: { base: 'fogo', plural: 'fogos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The visible part of a fire, which a burning thing gives off: BURN is "to produce flames"
+    // (localization B33). A count noun, where FIRE is the phenomenon. Japanese 炎 is the flame
+    // itself and does not contain 燃, so BURN's gloss does not define 燃える with itself.
+    id: 'FLAME',
+    role: 'noun',
+    description: 'the visible, glowing part of a fire',
+    emoji: '🕯️',
+    forms: {
+      en: { base: 'flame', plural: 'flames', count: 'singular' },
+      it: { base: 'fiamma', plural: 'fiamme', gender: 'fem', count: 'singular' },
+      fr: { base: 'flamme', plural: 'flammes', gender: 'fem', count: 'singular' },
+      de: { base: 'Flamme', plural: 'Flammen', gender: 'fem', count: 'singular' },
+      es: { base: 'llama', plural: 'llamas', gender: 'fem', count: 'singular' },
+      ja: { base: '炎', count: 'singular', reading: 'ほのお' },
+      pt: { base: 'chama', plural: 'chamas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -1455,6 +1611,163 @@ export const nouns: ConceptSeed[] = [
     },
   },
 
+  // ── Countries ─────────────────────────────────────────────────────
+  // The country of each UI language, the possessor that tells one language from another: ITALIAN is
+  // "the language of Italy", de "die Sprache Italiens" (localization B36). Proper and uncountable,
+  // like the continents, and neuter in German, which declines them in the genitive with -s. England,
+  // not the United Kingdom: English is England's language. The countries themselves keep their
+  // literal descriptions: "a country" would be the same for all seven.
+  // Portuguese articles its country names as it articles the continents ("a Itália", "o Japão"),
+  // all but Portugal, which is bare: "de Portugal", "em Portugal". `takes_article: '0'` marks the
+  // exception on the pt forms; the Portuguese engine reads it, as de and es read `takes_article: '1'`.
+  // They hang under COUNTRY, as the continents under CONTINENT, and a named land's goal keys off
+  // either hypernym: "va in Italia", "va en Italie" but "au Japon", "geht nach Italien".
+  {
+    // The genus of the seven countries. A common noun, where its children are proper. Italian
+    // "paese" is the country (it is also the village, which the context tells apart); German "Land"
+    // declines "des Landes", "den Ländern".
+    id: 'COUNTRY',
+    role: 'noun',
+    description: 'a nation with its own territory and government',
+    emoji: '🏳️',
+    isA: 'PLACE',
+    forms: {
+      en: { base: 'country', plural: 'countries', count: 'singular' },
+      it: { base: 'paese', plural: 'paesi', gender: 'masc', count: 'singular' },
+      fr: { base: 'pays', plural: 'pays', gender: 'masc', count: 'singular' },
+      de: { base: 'Land', plural: 'Länder', gender: 'neut', count: 'singular', compound: 'Landes' },
+      es: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
+      ja: { base: '国', count: 'singular', reading: 'くに' },
+      pt: { base: 'país', plural: 'países', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'ENGLAND',
+    role: 'noun',
+    description: 'the largest country of the United Kingdom, in the south of Great Britain',
+    emoji: '🏴',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'England',     count: 'singular' },
+      it: { base: 'Inghilterra', gender: 'fem',  count: 'singular' },
+      fr: { base: 'Angleterre',  gender: 'fem',  count: 'singular' },
+      de: { base: 'England',     gender: 'neut', count: 'singular' },
+      es: { base: 'Inglaterra',  gender: 'fem',  count: 'singular' },
+      ja: { base: 'イングランド', count: 'singular' },
+      pt: { base: 'Inglaterra',  gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'ITALY',
+    role: 'noun',
+    description: 'the country of the peninsula in the middle of the Mediterranean',
+    emoji: '🇮🇹',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'Italy',   count: 'singular' },
+      it: { base: 'Italia',  gender: 'fem',  count: 'singular' },
+      fr: { base: 'Italie',  gender: 'fem',  count: 'singular' },
+      de: { base: 'Italien', gender: 'neut', count: 'singular' },
+      es: { base: 'Italia',  gender: 'fem',  count: 'singular' },
+      ja: { base: 'イタリア', count: 'singular' },
+      pt: { base: 'Itália',  gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'FRANCE',
+    role: 'noun',
+    description: 'the country of western Europe between the Atlantic and the Rhine',
+    emoji: '🇫🇷',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'France',     count: 'singular' },
+      it: { base: 'Francia',    gender: 'fem',  count: 'singular' },
+      fr: { base: 'France',     gender: 'fem',  count: 'singular' },
+      de: { base: 'Frankreich', gender: 'neut', count: 'singular' },
+      es: { base: 'Francia',    gender: 'fem',  count: 'singular' },
+      ja: { base: 'フランス',   count: 'singular' },
+      pt: { base: 'França',     gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'GERMANY',
+    role: 'noun',
+    description: 'the country of central Europe between the North Sea and the Alps',
+    emoji: '🇩🇪',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'Germany',     count: 'singular' },
+      it: { base: 'Germania',    gender: 'fem',  count: 'singular' },
+      fr: { base: 'Allemagne',   gender: 'fem',  count: 'singular' },
+      de: { base: 'Deutschland', gender: 'neut', count: 'singular' },
+      es: { base: 'Alemania',    gender: 'fem',  count: 'singular' },
+      ja: { base: 'ドイツ',      count: 'singular' },
+      pt: { base: 'Alemanha',    gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'SPAIN',
+    role: 'noun',
+    description: 'the country that covers most of the Iberian peninsula',
+    emoji: '🇪🇸',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'Spain',   count: 'singular' },
+      it: { base: 'Spagna',  gender: 'fem',  count: 'singular' },
+      fr: { base: 'Espagne', gender: 'fem',  count: 'singular' },
+      de: { base: 'Spanien', gender: 'neut', count: 'singular' },
+      es: { base: 'España',  gender: 'fem',  count: 'singular' },
+      ja: { base: 'スペイン', count: 'singular' },
+      pt: { base: 'Espanha', gender: 'fem',  count: 'singular' },
+    },
+  },
+  {
+    id: 'JAPAN',
+    role: 'noun',
+    description: 'the island country east of the Asian mainland',
+    emoji: '🇯🇵',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'Japan',     count: 'singular' },
+      it: { base: 'Giappone',  gender: 'masc', count: 'singular' },
+      fr: { base: 'Japon',     gender: 'masc', count: 'singular' },
+      de: { base: 'Japan',     gender: 'neut', count: 'singular' },
+      es: { base: 'Japón',     gender: 'masc', count: 'singular' },
+      ja: { base: '日本',      count: 'singular', reading: 'にほん' },
+      pt: { base: 'Japão',     gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'PORTUGAL',
+    role: 'noun',
+    description: 'the country on the western coast of the Iberian peninsula',
+    emoji: '🇵🇹',
+    proper: true,
+    countable: false,
+    isA: 'COUNTRY',
+    forms: {
+      en: { base: 'Portugal',    count: 'singular' },
+      it: { base: 'Portogallo',  gender: 'masc', count: 'singular' },
+      fr: { base: 'Portugal',    gender: 'masc', count: 'singular' },
+      de: { base: 'Portugal',    gender: 'neut', count: 'singular' },
+      es: { base: 'Portugal',    gender: 'masc', count: 'singular' },
+      ja: { base: 'ポルトガル',  count: 'singular' },
+      pt: { base: 'Portugal',    gender: 'masc', takes_article: '0', count: 'singular' },
+    },
+  },
+
   {
     id: 'LANGUAGE',
     role: 'noun',
@@ -1489,10 +1802,13 @@ export const nouns: ConceptSeed[] = [
   // Italian, French and Portuguese always article it ("l'italiano", "l'italien", "o italiano").
   // Spanish does too ("el italiano es un idioma"), unlike its bare continents, so its forms
   // carry takes_article as ANTARCTICA's does.
+  // "A language" is the same for all seven, so each is glossed by its country: "Italy's language",
+  // de "die Sprache Italiens" (`languageOf`, localization B36).
   {
     id: 'ENGLISH',
     role: 'noun',
     description: 'the English language',
+    definition: languageOf('ENGLAND'),
     emoji: '🇬🇧',
     proper: true,
     countable: false,
@@ -1513,6 +1829,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ITALIAN',
     role: 'noun',
     description: 'the Italian language',
+    definition: languageOf('ITALY'),
     emoji: '🇮🇹',
     proper: true,
     countable: false,
@@ -1531,6 +1848,7 @@ export const nouns: ConceptSeed[] = [
     id: 'FRENCH',
     role: 'noun',
     description: 'the French language',
+    definition: languageOf('FRANCE'),
     emoji: '🇫🇷',
     proper: true,
     countable: false,
@@ -1549,6 +1867,7 @@ export const nouns: ConceptSeed[] = [
     id: 'GERMAN',
     role: 'noun',
     description: 'the German language',
+    definition: languageOf('GERMANY'),
     emoji: '🇩🇪',
     proper: true,
     countable: false,
@@ -1567,6 +1886,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SPANISH',
     role: 'noun',
     description: 'the Spanish language',
+    definition: languageOf('SPAIN'),
     emoji: '🇪🇸',
     proper: true,
     countable: false,
@@ -1585,6 +1905,7 @@ export const nouns: ConceptSeed[] = [
     id: 'JAPANESE',
     role: 'noun',
     description: 'the Japanese language',
+    definition: languageOf('JAPAN'),
     emoji: '🇯🇵',
     proper: true,
     countable: false,
@@ -1603,6 +1924,8 @@ export const nouns: ConceptSeed[] = [
     id: 'PORTUGUESE',
     role: 'noun',
     description: 'the Portuguese language',
+    // "a língua de Portugal", bare: the one country name Portuguese does not article.
+    definition: languageOf('PORTUGAL'),
     emoji: '🇵🇹',
     proper: true,
     countable: false,
@@ -1771,6 +2094,7 @@ export const nouns: ConceptSeed[] = [
     id: 'COMITATIVE',
     role: 'noun',
     description: 'the complement naming the companion an action is carried out with (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'COMPANION'),
     emoji: '🤝',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -1858,6 +2182,10 @@ export const nouns: ConceptSeed[] = [
     id: 'DIRECTION',
     role: 'noun',
     description: 'the complement naming the place something moves towards (grammar)',
+    // "a complement that indicates destinations" (localization B37): the place reached, where
+    // LOCATIVE's "places" is where it happens. SOURCE and ROUTE take the place left and the place
+    // crossed, so the siblings differ only in the noun.
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'DESTINATION'),
     emoji: '➡️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -1875,6 +2203,7 @@ export const nouns: ConceptSeed[] = [
     id: 'SOURCE',
     role: 'noun',
     description: 'the complement naming the place something moves away from (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'ORIGIN'),
     emoji: '⬅️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -1892,6 +2221,7 @@ export const nouns: ConceptSeed[] = [
     id: 'ROUTE',
     role: 'noun',
     description: 'the complement naming the place something moves through (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'PATH'),
     emoji: '🛤️',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -1932,6 +2262,7 @@ export const nouns: ConceptSeed[] = [
     id: 'TERMINUS',
     role: 'noun',
     description: 'the complement naming the recipient or goal of an action (grammar)',
+    definition: whoGloss('COMPLEMENT_GRAMMAR', 'INDICATE', 'RECIPIENT'),
     emoji: '🎁',
     synonym: 'grammar',
     isA: 'COMPLEMENT_GRAMMAR',
@@ -2130,6 +2461,26 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // A clause that asserts something: the plain mood the console's /statement returns to. Named as
+    // each school grammar names that type of sentence beside the question and the command — it
+    // "proposizione enunciativa", fr "phrase déclarative", de "Aussagesatz", es "oración
+    // enunciativa", pt "frase declarativa", ja 平叙文.
+    id: 'STATEMENT',
+    role: 'noun',
+    description: 'a clause that asserts something (grammar)',
+    emoji: '💬',
+    isA: 'CLAUSE',
+    forms: {
+      en: { base: 'statement', plural: 'statements', count: 'singular' },
+      it: { base: 'proposizione enunciativa', plural: 'proposizioni enunciative', gender: 'fem', count: 'singular' },
+      fr: { base: 'phrase déclarative', plural: 'phrases déclaratives', gender: 'fem', count: 'singular' },
+      de: { base: 'Aussagesatz', plural: 'Aussagesätze', gender: 'masc', count: 'singular' },
+      es: { base: 'oración enunciativa', plural: 'oraciones enunciativas', gender: 'fem', count: 'singular' },
+      ja: { base: '平叙文', count: 'singular', reading: 'へいじょぶん' },
+      pt: { base: 'frase declarativa', plural: 'frases declarativas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     id: 'CONDITION',
     role: 'noun',
     description: 'what must be true for something else to happen',
@@ -2168,7 +2519,24 @@ export const nouns: ConceptSeed[] = [
     id: 'CONJUNCT',
     role: 'noun',
     description: 'one of the phrases a coordination joins (grammar)',
+    // "a phrase that is linked by a conjunction" (localization B38): the passive, not the active "a
+    // phrase that a conjunction links". German Phrase and Konjunktion are both feminine, so in the
+    // active "eine Phrase, die eine Konjunktion verbindet" neither the relative pronoun nor the article
+    // shows which is the subject, and it reads first as the phrase linking the conjunction. The
+    // passive says it once: "die von einer Konjunktion verbunden wird", ja 接続詞につながれるフレーズ.
+    definition: {
+      subject: {
+        concept: 'PHRASE',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'CONJUNCTION', definiteness: 'indefinite' },
+          verbPhrase: { verb: 'LINK', voice: 'passive' },
+        },
+      },
+    },
     emoji: '🧷',
+    isA: 'PHRASE',
     forms: {
       en: { base: 'conjunct', plural: 'conjuncts', count: 'singular' },
       it: { base: 'congiunto', plural: 'congiunti', gender: 'masc', count: 'singular' },
@@ -2183,6 +2551,9 @@ export const nouns: ConceptSeed[] = [
     id: 'CONJUNCTION',
     role: 'noun',
     description: 'a word that joins clauses or phrases — and, or, but (grammar)',
+    // "a word that links clauses" (localization B38). LINK, not COORDINATE: that one is people acting
+    // together, and its Japanese 調整する is to adjust.
+    definition: whoGloss('WORD', 'LINK', 'CLAUSE'),
     emoji: '➕',
     isA: 'WORD',
     forms: {
@@ -2299,6 +2670,9 @@ export const nouns: ConceptSeed[] = [
     id: 'QUANTIFIER',
     role: 'noun',
     description: 'the determiner of amount — some, many, few, all, no (grammar)',
+    // "a determiner that indicates quantities" (localization B39). Plural on purpose: French gives a
+    // bare mass object the partitive, "qui indique de la quantité" (A149); "des quantités" reads right.
+    definition: whoGloss('DETERMINER', 'INDICATE', 'QUANTITY'),
     emoji: '🔢',
     isA: 'DETERMINER',
     forms: {
@@ -2451,6 +2825,42 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // How much or how many: what grammatical number and a quantifier indicate (localization B39).
+    // Italian "quantità" is invariable. Japanese 数量 covers both amount and count.
+    id: 'QUANTITY',
+    role: 'noun',
+    description: 'how much or how many there is of something',
+    emoji: '⚖️',
+    forms: {
+      en: { base: 'quantity', plural: 'quantities', count: 'singular' },
+      it: { base: 'quantità', plural: 'quantità', gender: 'fem', count: 'singular' },
+      fr: { base: 'quantité', plural: 'quantités', gender: 'fem', count: 'singular' },
+      de: { base: 'Menge', plural: 'Mengen', gender: 'fem', count: 'singular' },
+      es: { base: 'cantidad', plural: 'cantidades', gender: 'fem', count: 'singular' },
+      ja: { base: '数量', count: 'singular', reading: 'すうりょう' },
+      pt: { base: 'quantidade', plural: 'quantidades', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A class of things that share a feature, and the genus of grammatical number (localization B39):
+    // "a category that indicates quantities". Japanese 範疇, the linguist's word (文法範疇), not the
+    // everyday カテゴリー. TENSE, ASPECT, VOICE, GENDER and PERSON_GRAMMAR could hang under it too;
+    // only NUMBER_GRAMMAR does, because only its gloss names it.
+    id: 'CATEGORY',
+    role: 'noun',
+    description: 'a class of things that share a feature',
+    emoji: '🗂️',
+    forms: {
+      en: { base: 'category', plural: 'categories', count: 'singular' },
+      it: { base: 'categoria', plural: 'categorie', gender: 'fem', count: 'singular' },
+      fr: { base: 'catégorie', plural: 'catégories', gender: 'fem', count: 'singular' },
+      de: { base: 'Kategorie', plural: 'Kategorien', gender: 'fem', count: 'singular' },
+      es: { base: 'categoría', plural: 'categorías', gender: 'fem', count: 'singular' },
+      ja: { base: '範疇', count: 'singular', reading: 'はんちゅう' },
+      pt: { base: 'categoria', plural: 'categorias', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
     // Grammatical number, as against the NUMBER above, which is the one you count with. Most
     // languages happen to use the same word for both (it "numero", fr "nombre"), but German does
     // not — a noun is in the "Numerus" singular, never in the "Zahl" singular — and Japanese
@@ -2458,8 +2868,12 @@ export const nouns: ConceptSeed[] = [
     id: 'NUMBER_GRAMMAR',
     role: 'noun',
     description: 'whether a word refers to one or to more than one (grammar)',
+    // "a category that indicates quantities" (localization B39), QUANTIFIER's differentia on the
+    // CATEGORY genus: ja 数量を示す範疇, de "eine Kategorie, die Mengen bezeichnet".
+    definition: whoGloss('CATEGORY', 'INDICATE', 'QUANTITY'),
     emoji: '🔢',
     synonym: 'grammar',
+    isA: 'CATEGORY',
     forms: {
       en: { base: 'number', plural: 'numbers', count: 'singular' },
       it: { base: 'numero', plural: 'numeri', gender: 'masc', count: 'singular' },
@@ -2653,6 +3067,46 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // The stance a cause is stated with — neutral, blamed or credited ("because of", "through the
+    // fault of", "thanks to"): the `CauseSentiment` the console's /because /fault /thanks set
+    // (localization B47). The other languages name it as the judgment it is, the word their
+    // grammars use for a positive or negative evaluation: it valutazione, fr appréciation, de
+    // Bewertung, es valoración, pt avaliação, ja 評価. Feminine wherever it has a gender, as
+    // POLARITY is.
+    id: 'SENTIMENT',
+    role: 'noun',
+    description: 'the positive, negative or neutral stance taken toward something',
+    emoji: '🙂',
+    forms: {
+      en: { base: 'sentiment', plural: 'sentiments', count: 'singular' },
+      it: { base: 'valutazione', plural: 'valutazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'appréciation', plural: 'appréciations', gender: 'fem', count: 'singular' },
+      de: { base: 'Bewertung', plural: 'Bewertungen', gender: 'fem', count: 'singular' },
+      es: { base: 'valoración', plural: 'valoraciones', gender: 'fem', count: 'singular' },
+      ja: { base: '評価', count: 'singular', reading: 'ひょうか' },
+      pt: { base: 'avaliação', plural: 'avaliações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Grammatical mood: whether a clause states, commands or cites (the console's /statement,
+    // /command and /inf), not a state of mind. German declines the Latin word (des Modus, die Modi);
+    // Japanese says 叙法, which a heading cannot misread as the 法 of "law".
+    id: 'MOOD',
+    role: 'noun',
+    description: 'the form of a verb that shows how a clause is meant (grammar)',
+    emoji: '🎭',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'mood', plural: 'moods', count: 'singular' },
+      it: { base: 'modo', plural: 'modi', gender: 'masc', count: 'singular' },
+      fr: { base: 'mode', plural: 'modes', gender: 'masc', count: 'singular' },
+      de: { base: 'Modus', plural: 'Modi', gender: 'masc', count: 'singular', genitive: 'Modus' },
+      es: { base: 'modo', plural: 'modos', gender: 'masc', count: 'singular' },
+      ja: { base: '叙法', count: 'singular', reading: 'じょほう' },
+      pt: { base: 'modo', plural: 'modos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The degree of comparison of an adjective (more beautiful, most beautiful), not a unit of heat
     // or a university title. German names it by the step of the comparison, Steigerungsstufe.
     id: 'DEGREE_GRAMMAR',
@@ -2668,6 +3122,26 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'grado', plural: 'grados', gender: 'masc', count: 'singular' },
       ja: { base: '程度', count: 'singular', reading: 'ていど' },
       pt: { base: 'grau', plural: 'graus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The plain form of an adjective, compared with nothing: "big" beside "bigger" and "biggest".
+    // A grammar noun of its own, since POSITIVE is the polarity sense (ja 肯定). Portuguese grammar
+    // calls it the "grau normal", German the Positiv, Japanese 原級.
+    id: 'POSITIVE_DEGREE',
+    role: 'noun',
+    description: 'the plain form of an adjective, not compared (grammar)',
+    emoji: '▫️',
+    synonym: 'grammar',
+    isA: 'DEGREE_GRAMMAR',
+    forms: {
+      en: { base: 'positive degree', plural: 'positive degrees', count: 'singular' },
+      it: { base: 'grado positivo', plural: 'gradi positivi', gender: 'masc', count: 'singular' },
+      fr: { base: 'degré positif', plural: 'degrés positifs', gender: 'masc', count: 'singular' },
+      de: { base: 'Positiv', plural: 'Positive', gender: 'masc', count: 'singular' },
+      es: { base: 'grado positivo', plural: 'grados positivos', gender: 'masc', count: 'singular' },
+      ja: { base: '原級', count: 'singular', reading: 'げんきゅう' },
+      pt: { base: 'grau normal', plural: 'graus normais', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -2742,6 +3216,24 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What ORDER and INSTRUCTION are two of: how formal a way of speaking is, and to whom (localization
+    // B44). The linguists' word in every language; Japanese 言語使用域, not the cash register レジスター.
+    id: 'REGISTER',
+    role: 'noun',
+    description: 'the level of formality of a way of speaking',
+    emoji: '🎩',
+    synonym: 'linguistics',
+    forms: {
+      en: { base: 'register', plural: 'registers', count: 'singular' },
+      it: { base: 'registro', plural: 'registri', gender: 'masc', count: 'singular' },
+      fr: { base: 'registre', plural: 'registres', gender: 'masc', count: 'singular' },
+      de: { base: 'Register', plural: 'Register', gender: 'neut', count: 'singular' },
+      es: { base: 'registro', plural: 'registros', gender: 'masc', count: 'singular' },
+      ja: { base: '言語使用域', count: 'singular', reading: 'げんごしよういき' },
+      pt: { base: 'registro', plural: 'registros', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // One of the alternatives a choice is made between. Feminine in every gendered language.
     id: 'OPTION',
     role: 'noun',
@@ -2792,6 +3284,147 @@ export const nouns: ConceptSeed[] = [
     },
   },
 
+  // ── Finding one's way about a page ────────────────────────────────
+  // What the keys and the help that lists them talk about (localization B41, B44): the keys that
+  // move the cursor, the parts of a page it moves between, the lists it walks and the help itself.
+  {
+    // The key, not the projectile or the drawn sign: "use the arrows" is what the Romance UIs say
+    // of the keys (it "usa le frecce", fr "les flèches"), where English, German and Japanese name
+    // the key (Pfeiltaste, 矢印キー). Katakana キー, so the reading is the kanji's with it.
+    id: 'ARROW',
+    role: 'noun',
+    description: 'a key marked with an arrow, that moves the cursor',
+    emoji: '⬅️',
+    synonym: 'key',
+    forms: {
+      en: { base: 'arrow key', plural: 'arrow keys', count: 'singular' },
+      it: { base: 'freccia', plural: 'frecce', gender: 'fem', count: 'singular' },
+      fr: { base: 'flèche', plural: 'flèches', gender: 'fem', count: 'singular' },
+      de: { base: 'Pfeiltaste', plural: 'Pfeiltasten', gender: 'fem', count: 'singular', compound: 'Pfeiltasten' },
+      es: { base: 'flecha', plural: 'flechas', gender: 'fem', count: 'singular' },
+      ja: { base: '矢印キー', count: 'singular', reading: 'やじるしきー' },
+      pt: { base: 'seta', plural: 'setas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A part of a page the keyboard walks between (F6): the canvas, the translations, the header.
+    // The UI's word in each language — it "area" (not "regione", the land), fr "zone", de "Bereich".
+    id: 'REGION',
+    role: 'noun',
+    description: 'a part of a page or a screen',
+    emoji: '🗺️',
+    forms: {
+      en: { base: 'region', plural: 'regions', count: 'singular' },
+      it: { base: 'area', plural: 'aree', gender: 'fem', count: 'singular' },
+      fr: { base: 'zone', plural: 'zones', gender: 'fem', count: 'singular' },
+      de: { base: 'Bereich', plural: 'Bereiche', gender: 'masc', count: 'singular', compound: 'Bereichs' },
+      es: { base: 'zona', plural: 'zonas', gender: 'fem', count: 'singular' },
+      ja: { base: '領域', count: 'singular', reading: 'りょういき' },
+      pt: { base: 'área', plural: 'áreas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Things that belong together: the dotted ring of boxes one word heads on the canvas.
+    id: 'GROUP',
+    role: 'noun',
+    description: 'a set of things that belong together',
+    emoji: '🫂',
+    forms: {
+      en: { base: 'group', plural: 'groups', count: 'singular' },
+      it: { base: 'gruppo', plural: 'gruppi', gender: 'masc', count: 'singular' },
+      fr: { base: 'groupe', plural: 'groupes', gender: 'masc', count: 'singular' },
+      de: { base: 'Gruppe', plural: 'Gruppen', gender: 'fem', count: 'singular', compound: 'Gruppen' },
+      es: { base: 'grupo', plural: 'grupos', gender: 'masc', count: 'singular' },
+      ja: { base: 'グループ', count: 'singular' },
+      pt: { base: 'grupo', plural: 'grupos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // A line of items across a list or a grid: a menu's entries, the pronoun grid's persons. The
+    // same words a line of text takes in it, fr, de, pt and ja; Spanish says "fila" of a table's row.
+    id: 'ROW',
+    role: 'noun',
+    description: 'a line of items across a list or a grid',
+    emoji: '🟰',
+    forms: {
+      en: { base: 'row', plural: 'rows', count: 'singular' },
+      it: { base: 'riga', plural: 'righe', gender: 'fem', count: 'singular' },
+      fr: { base: 'ligne', plural: 'lignes', gender: 'fem', count: 'singular' },
+      de: { base: 'Zeile', plural: 'Zeilen', gender: 'fem', count: 'singular', compound: 'Zeilen' },
+      es: { base: 'fila', plural: 'filas', gender: 'fem', count: 'singular' },
+      ja: { base: '行', count: 'singular', reading: 'ぎょう' },
+      pt: { base: 'linha', plural: 'linhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A list of commands to choose from. Italian "menu" is invariable (i menu); German das Menü.
+    id: 'MENU',
+    role: 'noun',
+    description: 'a list of commands to choose from',
+    emoji: '🍔',
+    forms: {
+      en: { base: 'menu', plural: 'menus', count: 'singular' },
+      it: { base: 'menu', plural: 'menu', gender: 'masc', count: 'singular' },
+      fr: { base: 'menu', plural: 'menus', gender: 'masc', count: 'singular' },
+      de: { base: 'Menü', plural: 'Menüs', gender: 'neut', count: 'singular', compound: 'Menü' },
+      es: { base: 'menú', plural: 'menús', gender: 'masc', count: 'singular' },
+      ja: { base: 'メニュー', count: 'singular' },
+      pt: { base: 'menu', plural: 'menus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // What a link points at: the period a pick chooses. French and Portuguese have a word of their
+    // own for a link's target (cible, alvo) and Japanese says 対象; Italian, German and Spanish use
+    // the one their DESTINATION takes (destinazione, Ziel, destino), as their UIs do.
+    id: 'TARGET',
+    role: 'noun',
+    description: 'the thing a link points to',
+    emoji: '🎯',
+    forms: {
+      en: { base: 'target', plural: 'targets', count: 'singular' },
+      it: { base: 'destinazione', plural: 'destinazioni', gender: 'fem', count: 'singular' },
+      fr: { base: 'cible', plural: 'cibles', gender: 'fem', count: 'singular' },
+      de: { base: 'Ziel', plural: 'Ziele', gender: 'neut', count: 'singular', compound: 'Ziel' },
+      es: { base: 'destino', plural: 'destinos', gender: 'masc', count: 'singular' },
+      ja: { base: '対象', count: 'singular', reading: 'たいしょう' },
+      pt: { base: 'alvo', plural: 'alvos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The information that shows how to use a program — the mass noun, not an act of helping.
+    id: 'HELP',
+    role: 'noun',
+    description: 'information that shows how to use something',
+    emoji: '🛟',
+    countable: false,
+    forms: {
+      en: { base: 'help', count: 'singular' },
+      it: { base: 'aiuto', gender: 'masc', count: 'singular' },
+      fr: { base: 'aide', gender: 'fem', count: 'singular' },
+      de: { base: 'Hilfe', gender: 'fem', count: 'singular', compound: 'Hilfe' },
+      es: { base: 'ayuda', gender: 'fem', count: 'singular' },
+      ja: { base: 'ヘルプ', count: 'singular' },
+      pt: { base: 'ajuda', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Moving from place to place in an interface: "keyboard navigation", the help's first section.
+    id: 'NAVIGATION',
+    role: 'noun',
+    description: 'moving from place to place in an interface',
+    emoji: '🧭',
+    countable: false,
+    forms: {
+      en: { base: 'navigation', count: 'singular' },
+      it: { base: 'navigazione', gender: 'fem', count: 'singular' },
+      fr: { base: 'navigation', gender: 'fem', count: 'singular' },
+      de: { base: 'Navigation', gender: 'fem', count: 'singular', compound: 'Navigations' },
+      es: { base: 'navegación', gender: 'fem', count: 'singular' },
+      ja: { base: 'ナビゲーション', count: 'singular' },
+      pt: { base: 'navegação', gender: 'fem', count: 'singular' },
+    },
+  },
+
   // ── A program's own things ────────────────────────────────────────
   // What the app's dialogs, lists and messages talk about (B25–B27): the name a saved phrase is
   // stored under, the file it is exported to, the icon one presses, the clipboard a translation is
@@ -2812,6 +3445,24 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'nombre', plural: 'nombres', gender: 'masc', count: 'singular' },
       ja: { base: '名前', count: 'singular', reading: 'なまえ' },
       pt: { base: 'nome', plural: 'nomes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Another name a thing answers to: `/plural` for `/pl`. The loan in every language but Japanese,
+    // which says 別名, "another name"; invariable in Italian, French, Spanish and Portuguese.
+    id: 'ALIAS',
+    role: 'noun',
+    description: 'another name a thing is also called by',
+    emoji: '🪪',
+    isA: 'NAME_NOUN',
+    forms: {
+      en: { base: 'alias', plural: 'aliases', count: 'singular' },
+      it: { base: 'alias', plural: 'alias', gender: 'masc', count: 'singular' },
+      fr: { base: 'alias', plural: 'alias', gender: 'masc', count: 'singular' },
+      de: { base: 'Alias', plural: 'Aliasse', gender: 'masc', count: 'singular', genitive: 'Alias' },
+      es: { base: 'alias', plural: 'alias', gender: 'masc', count: 'singular' },
+      ja: { base: '別名', count: 'singular', reading: 'べつめい' },
+      pt: { base: 'alias', plural: 'aliases', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -2950,6 +3601,198 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'portapapeles', plural: 'portapapeles', gender: 'masc', count: 'singular' },
       ja: { base: 'クリップボード', count: 'singular' },
       pt: { base: 'área de transferência', plural: 'áreas de transferência', gender: 'fem', count: 'singular' },
+    },
+  },
+  // ── The phrase console's own nouns (localization B45, B46) ─────────
+  {
+    // A row of text typed as one command: what the console runs, recalls and pins. Not a drawn line
+    // (it "linea", de "Linie") but the line of text, as an editor counts them: it "riga", de "Zeile",
+    // ja 行 (ぎょう). ROW, a row of a list, shares the German and the Japanese; they are two concepts.
+    id: 'LINE',
+    role: 'noun',
+    description: 'a row of text typed as one command',
+    emoji: '⌨️',
+    forms: {
+      en: { base: 'line', plural: 'lines', count: 'singular' },
+      it: { base: 'riga', plural: 'righe', gender: 'fem', count: 'singular' },
+      fr: { base: 'ligne', plural: 'lignes', gender: 'fem', count: 'singular' },
+      de: { base: 'Zeile', plural: 'Zeilen', gender: 'fem', count: 'singular', compound: 'Zeilen' },
+      es: { base: 'línea', plural: 'líneas', gender: 'fem', count: 'singular' },
+      ja: { base: '行', count: 'singular', reading: 'ぎょう' },
+      pt: { base: 'linha', plural: 'linhas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // The lines typed before, in order: a program's history, not the past of a country. Uncountable,
+    // like LOADING. Each language's interface word: it "cronologia", fr "historique" (m), de
+    // "Verlauf", es "historial", pt "histórico", ja 履歴.
+    id: 'HISTORY',
+    role: 'noun',
+    description: 'the lines typed before, in order',
+    emoji: '🕘',
+    countable: false,
+    forms: {
+      en: { base: 'history', count: 'singular' },
+      it: { base: 'cronologia', gender: 'fem', count: 'singular' },
+      fr: { base: 'historique', gender: 'masc', count: 'singular', elides: '1' },
+      de: { base: 'Verlauf', gender: 'masc', count: 'singular', compound: 'Verlaufs' },
+      es: { base: 'historial', gender: 'masc', count: 'singular' },
+      ja: { base: '履歴', count: 'singular', reading: 'りれき' },
+      pt: { base: 'histórico', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // All the periods being built at once, which the console saves, exports and imports as one. The
+    // canvas (CANVAS) is the surface one period is drawn on; this is everything on it together.
+    id: 'WORKSPACE',
+    role: 'noun',
+    description: 'all the periods being built at once',
+    emoji: '🗂️',
+    forms: {
+      en: { base: 'workspace', plural: 'workspaces', count: 'singular' },
+      it: { base: 'area di lavoro', plural: 'aree di lavoro', gender: 'fem', count: 'singular' },
+      fr: { base: 'espace de travail', plural: 'espaces de travail', gender: 'masc', count: 'singular' },
+      de: { base: 'Arbeitsbereich', plural: 'Arbeitsbereiche', gender: 'masc', count: 'singular', compound: 'Arbeitsbereichs' },
+      es: { base: 'espacio de trabajo', plural: 'espacios de trabajo', gender: 'masc', count: 'singular' },
+      ja: { base: 'ワークスペース', count: 'singular' },
+      pt: { base: 'espaço de trabalho', plural: 'espaços de trabalho', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // How a thing is written or used: the heading of a command's usage line, as a program's help says
+    // it — it/es/pt "uso", fr "utilisation", de "Verwendung", ja 使用法. Uncountable.
+    id: 'USAGE',
+    role: 'noun',
+    description: 'how a thing is written or used',
+    emoji: '📖',
+    countable: false,
+    forms: {
+      en: { base: 'usage', count: 'singular' },
+      it: { base: 'uso', gender: 'masc', count: 'singular' },
+      fr: { base: 'utilisation', gender: 'fem', count: 'singular' },
+      de: { base: 'Verwendung', gender: 'fem', count: 'singular', compound: 'Verwendungs' },
+      es: { base: 'uso', gender: 'masc', count: 'singular' },
+      ja: { base: '使用法', count: 'singular', reading: 'しようほう' },
+      pt: { base: 'uso', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    id: 'EXAMPLE',
+    role: 'noun',
+    description: 'a case that shows how something is used',
+    emoji: '💡',
+    forms: {
+      en: { base: 'example', plural: 'examples', count: 'singular' },
+      it: { base: 'esempio', plural: 'esempi', gender: 'masc', count: 'singular' },
+      fr: { base: 'exemple', plural: 'exemples', gender: 'masc', count: 'singular' },
+      de: { base: 'Beispiel', plural: 'Beispiele', gender: 'neut', count: 'singular', compound: 'Beispiel' },
+      es: { base: 'ejemplo', plural: 'ejemplos', gender: 'masc', count: 'singular' },
+      ja: { base: '例', count: 'singular', reading: 'れい' },
+      pt: { base: 'exemplo', plural: 'exemplos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The text field commands are typed into — the phrase console (B42), not the cabinet or the games
+    // machine. Italian borrows "console", feminine and invariable; Portuguese is Brazilian like the
+    // other entries (o console, pt-PT a consola).
+    id: 'CONSOLE',
+    role: 'noun',
+    description: 'a text field where a user types commands',
+    emoji: '💻',
+    forms: {
+      en: { base: 'console', plural: 'consoles', count: 'singular' },
+      it: { base: 'console', plural: 'console', gender: 'fem', count: 'singular' },
+      fr: { base: 'console', plural: 'consoles', gender: 'fem', count: 'singular' },
+      de: { base: 'Konsole', plural: 'Konsolen', gender: 'fem', count: 'singular', compound: 'Konsolen' },
+      es: { base: 'consola', plural: 'consolas', gender: 'fem', count: 'singular' },
+      ja: { base: 'コンソール', count: 'singular' },
+      pt: { base: 'console', plural: 'consoles', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The surface a phrase is built on (B43), in the painter's word design programs borrow for it: es
+    // lienzo, pt tela, fr canevas, ja キャンバス, de Arbeitsfläche (Photoshop's). Italian takes "tela" too:
+    // "area di lavoro" is the WORKSPACE, the whole of what is open, and the canvas is one part of it.
+    id: 'CANVAS',
+    role: 'noun',
+    description: 'the surface a phrase is built on',
+    emoji: '🎨',
+    forms: {
+      en: { base: 'canvas', plural: 'canvases', count: 'singular' },
+      it: { base: 'tela', plural: 'tele', gender: 'fem', count: 'singular' },
+      fr: { base: 'canevas', plural: 'canevas', gender: 'masc', count: 'singular' },
+      de: { base: 'Arbeitsfläche', plural: 'Arbeitsflächen', gender: 'fem', count: 'singular', compound: 'Arbeitsflächen' },
+      es: { base: 'lienzo', plural: 'lienzos', gender: 'masc', count: 'singular' },
+      ja: { base: 'キャンバス', count: 'singular' },
+      pt: { base: 'tela', plural: 'telas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A result shown before it is made: the translations of a line not yet applied (B43). Spanish says
+    // "vista previa", Portuguese "pré-visualização", as their software does.
+    id: 'PREVIEW',
+    role: 'noun',
+    description: 'a view of a result before it is made',
+    emoji: '👀',
+    forms: {
+      en: { base: 'preview', plural: 'previews', count: 'singular' },
+      it: { base: 'anteprima', plural: 'anteprime', gender: 'fem', count: 'singular' },
+      fr: { base: 'aperçu', plural: 'aperçus', gender: 'masc', count: 'singular' },
+      de: { base: 'Vorschau', plural: 'Vorschauen', gender: 'fem', count: 'singular', compound: 'Vorschau' },
+      es: { base: 'vista previa', plural: 'vistas previas', gender: 'fem', count: 'singular' },
+      ja: { base: 'プレビュー', count: 'singular' },
+      pt: { base: 'pré-visualização', plural: 'pré-visualizações', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // A row of controls — the app's header (B43). German Symbolleiste, the word its UIs use.
+    id: 'TOOLBAR',
+    role: 'noun',
+    description: 'a row of controls',
+    emoji: '🧰',
+    forms: {
+      en: { base: 'toolbar', plural: 'toolbars', count: 'singular' },
+      it: { base: 'barra degli strumenti', plural: 'barre degli strumenti', gender: 'fem', count: 'singular' },
+      fr: { base: "barre d'outils", plural: "barres d'outils", gender: 'fem', count: 'singular' },
+      de: { base: 'Symbolleiste', plural: 'Symbolleisten', gender: 'fem', count: 'singular', compound: 'Symbolleisten' },
+      es: { base: 'barra de herramientas', plural: 'barras de herramientas', gender: 'fem', count: 'singular' },
+      ja: { base: 'ツールバー', count: 'singular' },
+      pt: { base: 'barra de ferramentas', plural: 'barras de ferramentas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // Items written one after another: the console's completion list, the picker's list of words.
+    // Italian "elenco" is the list of items (a "lista" is also a strip); Japanese 一覧 is what a UI
+    // calls a list it shows (the table-of-contents sense), not the borrowed リスト.
+    id: 'LIST',
+    role: 'noun',
+    description: 'items written one after another',
+    emoji: '📃',
+    forms: {
+      en: { base: 'list', plural: 'lists', count: 'singular' },
+      it: { base: 'elenco', plural: 'elenchi', gender: 'masc', count: 'singular' },
+      fr: { base: 'liste', plural: 'listes', gender: 'fem', count: 'singular' },
+      de: { base: 'Liste', plural: 'Listen', gender: 'fem', count: 'singular', compound: 'Listen' },
+      es: { base: 'lista', plural: 'listas', gender: 'fem', count: 'singular' },
+      ja: { base: '一覧', count: 'singular', reading: 'いちらん' },
+      pt: { base: 'lista', plural: 'listas', gender: 'fem', count: 'singular' },
+    },
+  },
+  {
+    // One of the settings a control can have: the pronoun grid's column, the console's "values for
+    // /tense". The setting's sense, not worth or price.
+    id: 'VALUE',
+    role: 'noun',
+    description: 'one of the settings a control can have',
+    emoji: '🎛️',
+    forms: {
+      en: { base: 'value', plural: 'values', count: 'singular' },
+      it: { base: 'valore', plural: 'valori', gender: 'masc', count: 'singular' },
+      fr: { base: 'valeur', plural: 'valeurs', gender: 'fem', count: 'singular' },
+      de: { base: 'Wert', plural: 'Werte', gender: 'masc', count: 'singular', compound: 'Wert' },
+      es: { base: 'valor', plural: 'valores', gender: 'masc', count: 'singular' },
+      ja: { base: '値', count: 'singular', reading: 'あたい' },
+      pt: { base: 'valor', plural: 'valores', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -3093,6 +3936,23 @@ export const nouns: ConceptSeed[] = [
   // The three degrees an instrument can be reified to (see AbstractionLevel): an act in flow, the
   // act named, or the thing it leaves behind. Everyday nouns, seeded like any other — the levels
   // just happen to be the first thing that names them.
+  {
+    // A degree on a scale, which the three above are three of: "the instrumental's level" (B44).
+    // German Ebene, the word of "Abstraktionsebene"; Japanese 段階, a step on a scale.
+    id: 'LEVEL',
+    role: 'noun',
+    description: 'a degree on a scale',
+    emoji: '📶',
+    forms: {
+      en: { base: 'level', plural: 'levels', count: 'singular' },
+      it: { base: 'livello', plural: 'livelli', gender: 'masc', count: 'singular' },
+      fr: { base: 'niveau', plural: 'niveaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Ebene', plural: 'Ebenen', gender: 'fem', count: 'singular', compound: 'Ebenen' },
+      es: { base: 'nivel', plural: 'niveles', gender: 'masc', count: 'singular' },
+      ja: { base: '段階', count: 'singular', reading: 'だんかい' },
+      pt: { base: 'nível', plural: 'níveis', gender: 'masc', count: 'singular' },
+    },
+  },
   {
     id: 'PROCESS',
     role: 'noun',

@@ -194,6 +194,11 @@ export interface Command<C> {
   label: string;
   /** The catalogue key `label` is rendered from, where the action's words are already seeded. */
   labelKey?: UiStringKey;
+  /**
+   * The id of the command this one runs backwards: a key's ⇧ twin, which cycles the same value the
+   * other way. It is named after that command (see commandLabel), so the two cannot drift apart.
+   */
+  reverses?: string;
   /** Whether the key exists here at all — the same fact the control's own presence rests on. */
   when?: (ctx: C) => boolean;
   /** Returning `false` declines the keystroke, leaving it to the browser (see box.next). */
@@ -277,7 +282,9 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     id: `box.move.${dir}`,
     scope: "box",
     keys: [key],
-    label: `Nearest box ${dir}`,
+    // The cursor goes to the nearest box that way.
+    label: `Go ${dir}`,
+    labelKey: `action.go.${dir}`,
     run: (ctx) => ctx.nav.move(dir),
   })),
   ...(
@@ -291,21 +298,24 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     id: `box.nudge.${dir}`,
     scope: "box",
     keys: [key],
-    label: `Move the box ${dir}`,
+    label: `Move the slot ${dir}`,
+    labelKey: `action.moveSlot.${dir}`,
     run: (ctx) => ctx.nudge(ctx.slot, dx, dy),
   })),
   {
     id: "box.next",
     scope: "box",
     keys: ["Tab"],
-    label: "Next box",
+    label: "Next slot",
+    labelKey: "slot.next",
     run: (ctx) => ctx.nav.step(1),
   },
   {
     id: "box.previous",
     scope: "box",
     keys: ["Shift+Tab"],
-    label: "Previous box",
+    label: "Previous slot",
+    labelKey: "slot.previous",
     run: (ctx) => ctx.nav.step(-1),
   },
   {
@@ -339,14 +349,17 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     id: "box.fold",
     scope: "box",
     keys: ["Z"],
-    label: "Fold the group",
+    // The verb the ring's own toggle says it with.
+    label: "Compact the group",
+    labelKey: "action.compactGroup",
     run: (ctx) => ctx.toggleCollapse(ctx.slot),
   },
   {
     id: "box.out",
     scope: "box",
     keys: ["Escape"],
-    label: "Step out",
+    label: "Leave the slot",
+    labelKey: "action.leaveSlot",
     run: (ctx) => ctx.nav.exit(),
   },
 
@@ -378,6 +391,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:noun",
     keys: ["Shift+G"],
     label: "Gender, backwards",
+    labelKey: "hint.backwards",
+    reverses: "noun.gender",
     when: (ctx) => Boolean(ctx.nounKey) && has(ctx, `${ctx.nounKey}Gender`),
     run: (ctx) => ctx.toggleGender(ctx.nounKey!, -1),
   },
@@ -421,6 +436,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:noun",
     keys: ["Shift+V"],
     label: "Voice, backwards",
+    labelKey: "hint.backwards",
+    reverses: "object.voice",
     when: (ctx) => has(ctx, "verbVoice"),
     run: (ctx) => ctx.cycleVoice(-1),
   },
@@ -524,6 +541,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:adjective",
     keys: ["Shift+M"],
     label: "Degree, backwards",
+    labelKey: "hint.backwards",
+    reverses: "adjective.degree",
     when: isRealAdjective,
     run: (ctx) => ctx.cycleDegree(ctx.slot, -1),
   },
@@ -542,6 +561,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:adjective",
     keys: ["Shift+R"],
     label: "Relation, backwards",
+    labelKey: "hint.backwards",
+    reverses: "adjective.relation",
     when: isNounModifier,
     run: (ctx) => ctx.cycleModifierRelation(ctx.slot, -1),
   },
@@ -584,6 +605,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:verb",
     keys: ["Shift+T"],
     label: "Tense, backwards",
+    labelKey: "hint.backwards",
+    reverses: "verb.tense",
     when: (ctx) => has(ctx, "verbTense"),
     run: (ctx) => ctx.cycleTense(-1),
   },
@@ -603,6 +626,8 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:verb",
     keys: ["Shift+A"],
     label: "Aspect, backwards",
+    labelKey: "hint.backwards",
+    reverses: "verb.aspect",
     when: (ctx) => has(ctx, "verbAspect"),
     run: (ctx) => ctx.cycleAspect(-1),
   },
@@ -673,6 +698,7 @@ export const KEYMAP: Command<BoxKeyContext>[] = [
     scope: "box:mood",
     keys: ["R"],
     label: "Register",
+    labelKey: "imperative.register",
     hint: true,
     when: (ctx) => ctx.selection.imperative === true,
     run: (ctx) =>
@@ -696,6 +722,7 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["?"],
     label: "Help",
+    labelKey: "help.heading",
     run: (ctx) => ctx.toggleHelp(),
   },
   {
@@ -706,6 +733,8 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["Code:Backquote"],
     label: "Show or hide the console",
+    // The thing it toggles, as `app.words` names its panel.
+    labelKey: "console.name",
     when: (ctx) => Boolean(ctx.console),
     run: (ctx) => ctx.console!.toggle(),
   },
@@ -713,7 +742,8 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     id: "app.console.command",
     scope: "app",
     keys: ["/"],
-    label: "Start a command in the console",
+    label: "Type a command in the console",
+    labelKey: "action.typeCommand",
     when: (ctx) => Boolean(ctx.console),
     run: (ctx) => ctx.console!.startCommand(),
   },
@@ -722,6 +752,7 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["F6"],
     label: "Next region",
+    labelKey: "region.next",
     run: (ctx) => ctx.nav.step(1),
   },
   {
@@ -729,6 +760,7 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["Shift+F6"],
     label: "Previous region",
+    labelKey: "region.previous",
     run: (ctx) => ctx.nav.step(-1),
   },
   {
@@ -768,6 +800,7 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["Mod+Z"],
     label: "Undo",
+    labelKey: "action.undo",
     when: (ctx) => Boolean(ctx.undo),
     run: (ctx) => ctx.undo!(),
   },
@@ -776,6 +809,7 @@ export const APP_KEYMAP: Command<AppKeyContext>[] = [
     scope: "app",
     keys: ["Mod+Shift+Z"],
     label: "Redo",
+    labelKey: "action.redo",
     when: (ctx) => Boolean(ctx.redo),
     run: (ctx) => ctx.redo!(),
   },
@@ -806,6 +840,7 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     scope: "period",
     keys: ["Enter"],
     label: "Edit",
+    labelKey: "action.edit",
     hint: true,
     run: (ctx) => ctx.nav.enter(),
   },
@@ -814,6 +849,7 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     scope: "period",
     keys: ["ArrowUp"],
     label: "Previous period",
+    labelKey: "period.previous",
     run: (ctx) => ctx.nav.move("up"),
   },
   {
@@ -821,6 +857,7 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     scope: "period",
     keys: ["ArrowDown"],
     label: "Next period",
+    labelKey: "period.next",
     run: (ctx) => ctx.nav.move("down"),
   },
   // Named by the header buttons' tooltips, so the key and the button say the same.
@@ -918,7 +955,8 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     id: "period.level",
     scope: "period",
     keys: ["R"],
-    label: "Instrument level",
+    label: "The instrumental's level",
+    labelKey: "instrumental.level",
     when: (ctx) => Boolean(ctx.cycleLevel),
     run: (ctx) => ctx.cycleLevel!(),
   },
@@ -940,22 +978,25 @@ export const PERIOD_KEYMAP: Command<PeriodKeyContext>[] = [
     when: (ctx) => ctx.hasGroups,
     run: (ctx) => ctx.tidy(),
   },
+  // What the resize grip does, a step at a time: EXPAND and SHRINK the canvas (not COMPACT, which is Z).
   ...([
-    ["taller", "+", RESIZE_STEP],
-    ["taller", "=", RESIZE_STEP],
-    ["shorter", "-", -RESIZE_STEP],
-  ] as const).map(([dir, key, delta], i): Command<PeriodKeyContext> => ({
+    ["taller", "+", RESIZE_STEP, "Expand the canvas", "action.expandCanvas"],
+    ["taller", "=", RESIZE_STEP, "Expand the canvas", "action.expandCanvas"],
+    ["shorter", "-", -RESIZE_STEP, "Shrink the canvas", "action.shrinkCanvas"],
+  ] as const).map(([dir, key, delta, label, labelKey], i): Command<PeriodKeyContext> => ({
     id: `period.${dir}${i === 1 ? ".alt" : ""}`,
     scope: "period",
     keys: [key],
-    label: `Canvas ${dir}`,
+    label,
+    labelKey,
     run: (ctx) => ctx.resize(delta),
   })),
   {
     id: "period.out",
     scope: "period",
     keys: ["Escape"],
-    label: "Step out",
+    label: "Leave the period",
+    labelKey: "action.leavePeriod",
     run: (ctx) => ctx.nav.exit(),
   },
 ];
@@ -1001,4 +1042,25 @@ export function satelliteKey(satelliteKey: string, scopes: readonly Scope[]): st
     if (hit) return hit.keys[0];
   }
   return undefined;
+}
+
+/** What a list of keys needs of a command to name it. */
+export interface CommandName {
+  label: string;
+  labelKey?: UiStringKey;
+  reverses?: string;
+}
+
+/**
+ * What a command is called in the UI language: its catalogue entry, or its English `label` where the
+ * words are not seeded yet. A ⇧ twin is named after the command it `reverses`: that one's name, a
+ * comma, and `hint.backwards` — "Tense, backwards", it "Tempo, all'indietro". BACKWARDS is an adverb,
+ * which a verbless label has no verb for, so the two are joined here (the C14 rule).
+ */
+export function commandLabel(command: CommandName, t: (key: UiStringKey) => string): string {
+  const own = command.labelKey ? t(command.labelKey) : command.label;
+  if (!command.reverses) return own;
+  const commands: (CommandName & { id: string })[] = [...KEYMAP, ...PERIOD_KEYMAP, ...APP_KEYMAP];
+  const forward = commands.find((c) => c.id === command.reverses);
+  return forward ? `${commandLabel(forward, t)}, ${own}` : command.label;
 }

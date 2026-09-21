@@ -9,6 +9,7 @@ import { mannerRelation } from '../../functions/mannerRelation.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
+import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../functions/possessedHeadForms.js';
@@ -31,12 +32,14 @@ import { renderNP } from './renderNP.js';
 import { spatialHead } from './spatialHead.js';
 
 // `objectForms` are the direct object's, which the object complement predicates of and agrees an
-// adjective head with ("peint le mur rouge") — the object's counterpart of `subjectForms`.
+// adjective head with ("peint le mur rouge") — the object's counterpart of `subjectForms`. `verbForms`
+// are the governing verb's lexical forms, for a preposition the verb itself fixes (`direction_prep`).
 export function complementsPhrase(
   complements?: Partial<Record<ComplementType, ResolvedComplement>>,
   subjectForms: Record<string, string> = {},
   verbConceptId = '',
   objectForms: Record<string, string> = {},
+  verbForms: Record<string, string> = {},
 ): string {
   if (!complements) return '';
   // "loin" disambiguates source from direction, but only self-propelled motion verbs (RUN/JUMP)
@@ -120,8 +123,8 @@ export function complementsPhrase(
       // which `direction` needs: an animate goal takes "vers", a place "à".
       // A locative proper noun (a continent — "Europe", "Afrique") drops the definite article it
       // carries as a subject ("l'Europe mange"): the "in place" locative is a bare "en Europe", not
-      // the article-bearing "dans l'Europe". (All seeded continents are feminine/vowel-initial, which
-      // "en" fits; a masculine country would take "au" and a city "à", but none is seeded.)
+      // the article-bearing "dans l'Europe". A masculine country opening on a consonant takes "au"
+      // instead ("au Japon", see `landIn`); a city would take "à", but none is seeded.
       // That bare form belongs to plain containment only — a relational locative keeps its adverb
       // and article ("sous l'Europe"), so it goes through `spatialHead` like any other relation.
       const causeSent = type === 'cause' ? causeSentiment(c) : 'neutral';
@@ -134,8 +137,13 @@ export function complementsPhrase(
       // adjective does not let it do (A169). Otherwise the name has its article back: "dans ton Asie",
       // "dans la grande Asie", "de la grande Asie".
       const bareName = (nf: Record<string, string>, lead: string): boolean => nf['proper'] === '1' && lead === nf['base'];
+      // A bare land name is "in" and goes "to" with "en" when it is feminine or opens on a vowel ("en
+      // Italie", "en Antarctique"), and with "au" when it is a masculine opening on a consonant ("au
+      // Japon", "au Portugal"). All the continents take "en"; the countries split (localization B36).
+      const landIn = (nf: Record<string, string>, plural: boolean, lead: string): string =>
+        nf['gender'] === 'fem' || elidesBefore(nf, lead) ? 'en' : aDet(nf, plural, lead);
       const headFor = (nf: Record<string, string>, possessive = false) => (plural: boolean, lead: string): string =>
-        type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? 'en' : spatialHead(locSpec, nf, plural, lead, 'locative')) :
+        type === 'locative'  ? (bareName(nf, lead) && locSpec === 'in' ? (isNamedLand(nf) ? landIn(nf, plural, lead) : 'en') : spatialHead(locSpec, nf, plural, lead, 'locative')) :
         type === 'terminus'  ? aDet(nf, plural, lead) :
         // Instrumental → "avec", which contracts with nothing ("avec le couteau", "avec un mot"). An
         // instrument is never bare: "avec de l'argent", "avec des mots" (A149). The bare "avec soin" is
@@ -157,20 +165,25 @@ export function complementsPhrase(
           // the place ("saute dans l'air"). `over` takes its locative reading, "au-dessus de": a
           // goal above something is where the motion ends, not a crossing.
           dirSpec ? spatialHead(dirSpec, nf, plural, lead, 'locative') :
-          // A continent goal takes bare "en" ("va en Antarctique"), not the default place "à" with
-          // the proper noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à".
-          // A continent that is no longer a bare name goes "dans" like the locative: "va dans ton
-          // Asie", "va dans la grande Asie".
-          nf['isA'] === 'CONTINENT' ? (bareName(nf, lead) ? 'en' : spatialHead('in', nf, plural, lead, 'locative')) :
+          // A verb can fix its goal's preposition in its lexeme. "Se déplacer" takes "vers" for every
+          // goal: after it, "au sol" and "en Europe" say where the moving happens ("les oiseaux se
+          // déplacent au sol"), not where it ends ("se déplace vers le sol"). Localization B34.
+          verbForms['direction_prep'] ? prepDet(verbForms['direction_prep'], nf, plural, lead) :
+          // A land goal, a continent or a country, takes bare "en" ("va en Antarctique", "va en
+          // Italie") or "au" ("va au Japon", see `landIn`), not the default place "à" with the proper
+          // noun's article ("à l'Antarctique"); an animate goal takes "vers", a place "à". A land that
+          // is no longer a bare name goes "dans" like the locative: "va dans ton Asie", "va dans la
+          // grande Asie".
+          isNamedLand(nf) ? (bareName(nf, lead) ? landIn(nf, plural, lead) : spatialHead('in', nf, plural, lead, 'locative')) :
           nf['animate'] === '1' ? prepDet('vers', nf, plural, lead) : aDet(nf, plural, lead)
         ) :
         type === 'source'    ? (
-          // A continent of origin takes a bare "de" ("vient d'Europe", "d'Amérique du Nord"), the
-          // counterpart of the goal's "en". The masculine Antarctique keeps its article, as usage has
-          // it ("de l'Antarctique"), and so does the "loin de" of a self-propelled verb. A continent
-          // that is no longer a bare name takes "de" + its determiner ("de ton Asie", "de la grande
-          // Asie").
-          nf['isA'] === 'CONTINENT' && bareName(nf, lead) && nf['gender'] === 'fem' && !sourceAdverb ? (elidesBefore(nf, lead) ? "d'" : 'de') :
+          // A land of origin takes a bare "de" when feminine ("vient d'Europe", "d'Amérique du Nord",
+          // "de France"), the counterpart of the goal's "en". A masculine one keeps its article, as
+          // usage has it ("de l'Antarctique", "du Japon"), and so does the "loin de" of a
+          // self-propelled verb. A land that is no longer a bare name takes "de" + its determiner
+          // ("de ton Asie", "de la grande Asie").
+          isNamedLand(nf) && bareName(nf, lead) && nf['gender'] === 'fem' && !sourceAdverb ? (elidesBefore(nf, lead) ? "d'" : 'de') :
           `${sourceAdverb}${deDet(nf, plural, lead)}`
         ) :
         type === 'cause'     ? (

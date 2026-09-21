@@ -21,8 +21,8 @@ import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
  * Every command is here: its canonical short name (what the console prints), the long aliases
  * completion also matches (`/plural` finds `/pl`), what it does, what its argument is, and the colour
  * its token wears — the colour of the box it fills, so the two views read as one. The names are
- * English for every interface language (decision 3); the descriptions come from the UI-string
- * catalogue where the words are already seeded, and are English literals for /localize otherwise.
+ * English for every interface language (decision 3); the descriptions, purposes and topics come from
+ * the UI-string catalogue (A21, B41–B47), and `purpose` stays English only for C21's diagnostics.
  *
  * What a command *does* is its `action`, interpreted by apply.ts; `satellites` and `reducers` say
  * which canvas controls and which phraseReducers it reaches, which is what the coverage test holds
@@ -116,8 +116,13 @@ export interface CommandDef {
   /** What the completion list says beside the name. English, the fallback for `descriptionKey`. */
   description: string;
   descriptionKey?: UiStringKey;
-  /** What it sets, for a diagnostic: "/past sets a verb's tense". English, for /localize. */
+  /** What it sets, for a diagnostic: "/past sets a verb's tense". English, for /localize (C21). */
   purpose?: string;
+  /**
+   * The same purpose as its help page says it, from the catalogue: an infinitive citation, "to set a
+   * verb's tense" (B47). Commands that share a `purpose` share its key.
+   */
+  purposeKey?: UiStringKey;
   color: TokenColor;
   arg: ArgSpec;
   action: Action;
@@ -167,12 +172,22 @@ const setting = (
   description,
   descriptionKey,
   purpose,
+  purposeKey: settingPurpose(s),
   color: "setting",
   arg: { kind: "none" },
   action: { kind: "setting", setting: s },
   satellites,
   reducers,
 });
+
+// A setting command's purpose in the catalogue: its setting's, except where the command does
+// something narrower — /neut sets a pronoun's gender, and /not negates the verb rather than naming a
+// polarity (B47).
+function settingPurpose(s: Setting): UiStringKey {
+  if (s.id === "gender" && s.value === "neut") return "purpose.pronounGender";
+  if (s.id === "polarity" && s.value === "negative") return "purpose.negate";
+  return `purpose.${s.id}`;
+}
 
 export const COORD_VALUES: readonly ValueDef[] = [
   { name: "and", value: "and", description: "copulative", descriptionKey: "conjunction.kind.and" },
@@ -272,6 +287,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "instrumental",
     descriptionKey: "slot.instrumental",
     purpose: "gives the verb an instrument",
+    purposeKey: "purpose.instrument",
     color: "secondary",
     arg: { kind: "link" },
     action: { kind: "instrument" },
@@ -284,6 +300,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "add an adjective",
     descriptionKey: "category.adjective",
     purpose: "describes a noun",
+    purposeKey: "purpose.adjective",
     color: "error",
     arg: { kind: "word" },
     action: { kind: "adjective" },
@@ -297,6 +314,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "adverb",
     descriptionKey: "slot.adverb",
     purpose: "qualifies a verb or a modal",
+    purposeKey: "purpose.adverb",
     color: "info",
     arg: { kind: "word" },
     action: { kind: "adverb" },
@@ -310,6 +328,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "modal",
     descriptionKey: "slot.modal",
     purpose: "governs a verb",
+    purposeKey: "purpose.modal",
     color: "secondary",
     arg: { kind: "word" },
     action: { kind: "modal" },
@@ -323,6 +342,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "possessor",
     descriptionKey: "slot.possessor",
     purpose: "gives a noun its possessor",
+    purposeKey: "purpose.possessor",
     color: "primary",
     arg: { kind: "phrase" },
     action: { kind: "possessor" },
@@ -336,6 +356,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "coordinate",
     descriptionKey: "satellite.coordination",
     purpose: "coordinates another phrase with a noun",
+    purposeKey: "purpose.conjunct",
     color: "primary",
     arg: { kind: "phrase" },
     action: { kind: "conjunct", conjunction: "and" },
@@ -349,6 +370,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "coordinate, disjunctive",
     descriptionKey: "conjunction.kind.or",
     purpose: "coordinates another phrase with a noun",
+    purposeKey: "purpose.conjunct",
     color: "primary",
     arg: { kind: "phrase" },
     action: { kind: "conjunct", conjunction: "or" },
@@ -395,6 +417,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "relative clause",
     descriptionKey: "satellite.relative",
     purpose: "gives a noun a relative clause",
+    purposeKey: "purpose.relative",
     color: "primary",
     arg: { kind: "link" },
     action: { kind: "relative" },
@@ -455,6 +478,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "tense",
     descriptionKey: "satellite.tense",
     purpose: "sets a verb’s tense",
+    purposeKey: "purpose.tense",
     color: "setting",
     arg: { kind: "values", values: TENSE_VALUES, max: 1 },
     action: { kind: "set", id: "tense" },
@@ -468,6 +492,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "aspect",
     descriptionKey: "satellite.aspect",
     purpose: "sets a verb’s aspect",
+    purposeKey: "purpose.aspect",
     color: "setting",
     arg: { kind: "values", values: ASPECT_VALUES, max: 1 },
     action: { kind: "set", id: "aspect" },
@@ -504,6 +529,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "voice",
     descriptionKey: "satellite.voice",
     purpose: "sets a verb’s voice",
+    purposeKey: "purpose.voice",
     color: "setting",
     arg: { kind: "values", values: VOICE_VALUES, max: 1 },
     action: { kind: "set", id: "voice" },
@@ -532,10 +558,11 @@ export const COMMANDS: readonly CommandDef[] = [
       [...aliases],
       "adjective",
       { id: "degree", value },
-      value === "positive" ? "plain degree" : `${value} (degree)`,
+      value === "positive" ? "positive degree" : `${value} (degree)`,
       // What the degree does to an adjective, as the degree chip says it (C13): cited on BIG, so en
-      // "bigger", de "größer". The plain degree adds nothing to say, and waits on its own name (B46).
-      value === "positive" ? undefined : `degree.value.${value}`,
+      // "bigger", de "größer". The plain degree adds nothing to say, so it is named instead (B46):
+      // "Positive degree", de "Positiv", ja 原級.
+      value === "positive" ? "degree.name.positive" : `degree.value.${value}`,
       "sets an adjective’s degree",
       /Adjective\d?$|^predicative$/,
       ["setDegree"],
@@ -593,7 +620,9 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "statement",
     aliases: ["indicative"],
     group: "period",
-    description: "back to a plain statement",
+    description: "statement",
+    // The mood it sets, as /command and /inf name theirs (B46): it "Proposizione enunciativa", ja 平叙文.
+    descriptionKey: "mood.statement",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "mood", mood: "statement" },
@@ -606,6 +635,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "if-condition",
     descriptionKey: "clause.conditional",
     purpose: "gives a period its if-condition",
+    purposeKey: "purpose.condition",
     color: "warning",
     arg: { kind: "link" },
     action: { kind: "condition" },
@@ -617,6 +647,7 @@ export const COMMANDS: readonly CommandDef[] = [
     description: "coordination",
     descriptionKey: "action.coordinatePeriod",
     purpose: "coordinates two periods",
+    purposeKey: "purpose.join",
     color: "info",
     arg: { kind: "link" },
     action: { kind: "join" },
@@ -626,6 +657,8 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: ["reification"],
     group: "period",
     description: "instrument level",
+    // What its R key on the period is called too.
+    descriptionKey: "instrumental.level",
     color: "setting",
     arg: { kind: "values", values: LEVEL_VALUES, max: 1 },
     action: { kind: "level" },
@@ -648,6 +681,8 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: [],
     group: "period",
     description: "load this period’s source into the prompt",
+    // EDIT on the period the cursor is on; the help page says how its source reaches the prompt.
+    descriptionKey: "action.editPeriod",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "app", app: "edit" },
@@ -709,6 +744,7 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: [],
     group: "workspace",
     description: "undo",
+    descriptionKey: "action.undo",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "app", app: "undo" },
@@ -718,6 +754,7 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: [],
     group: "workspace",
     description: "redo",
+    descriptionKey: "action.redo",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "app", app: "redo" },
@@ -737,6 +774,7 @@ export const COMMANDS: readonly CommandDef[] = [
     aliases: ["?"],
     group: "workspace",
     description: "help",
+    descriptionKey: "help.heading",
     color: "setting",
     arg: { kind: "text" },
     action: { kind: "app", app: "help" },
@@ -746,7 +784,9 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "pin",
     aliases: [],
     group: "workspace",
-    description: "pin this line, or the last one run",
+    // What the transcript's pin says (B45). Alone it pins the line run before, as its example shows.
+    description: "pin this line",
+    descriptionKey: "action.pinLine",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "app", app: "pin" },
@@ -755,7 +795,8 @@ export const COMMANDS: readonly CommandDef[] = [
     name: "unpin",
     aliases: [],
     group: "workspace",
-    description: "unpin this line, or the last one run",
+    description: "unpin this line",
+    descriptionKey: "action.unpinLine",
     color: "setting",
     arg: { kind: "none" },
     action: { kind: "app", app: "unpin" },
@@ -812,7 +853,7 @@ export type TopicId =
 
 export interface Topic {
   id: TopicId;
-  /** English, the fallback for `labelKey`; the literals are for /localize. */
+  /** English, the fallback for `labelKey`. */
   label: string;
   labelKey?: UiStringKey;
   /** The part of the reference it is listed in. */
@@ -826,7 +867,7 @@ export const TOPICS: readonly Topic[] = [
   { id: "number", label: "number", labelKey: "satellite.number", part: "noun" },
   { id: "gender", label: "gender", labelKey: "satellite.gender", part: "noun" },
   { id: "determiner", label: "determiner", labelKey: "satellite.determiner", part: "noun" },
-  { id: "place", label: "place or route", part: "noun" },
+  { id: "place", label: "spatial relationship", labelKey: "console.topic.place", part: "noun" },
   { id: "cause", label: "cause", labelKey: "slot.cause", part: "noun" },
   { id: "possessor", label: "possessor", labelKey: "slot.possessor", part: "noun" },
   { id: "relative", label: "relative clause", labelKey: "satellite.relative", part: "noun" },
@@ -839,10 +880,10 @@ export const TOPICS: readonly Topic[] = [
   { id: "polarity", label: "polarity", labelKey: "satellite.polarity", part: "verb" },
   { id: "degree", label: "degree", labelKey: "modifier.degree", part: "adjective" },
   { id: "relation", label: "relation", labelKey: "modifier.relation", part: "adjective" },
-  { id: "mood", label: "mood", part: "period" },
+  { id: "mood", label: "mood", labelKey: "console.topic.mood", part: "period" },
   { id: "links", label: "linked periods", labelKey: "console.topic.links", part: "period" },
   { id: "period", label: "the period", labelKey: "console.topic.period", part: "period" },
-  { id: "workspace", label: "workspace", part: "workspace" },
+  { id: "workspace", label: "workspace", labelKey: "console.topic.workspace", part: "workspace" },
 ];
 
 const SETTING_TOPICS: Record<SettingId, TopicId> = {

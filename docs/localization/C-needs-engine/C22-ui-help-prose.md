@@ -16,7 +16,7 @@ of three to eight sentences. Inside them are constructs no plan holds:
   row: the category tabs".
 
 The overlay's name, headings and rows are in [A20](../done/A20-ui-keyboard-labels-on-seeded-words.md)
-and [B41](../B-needs-seed/B41-ui-help-overlay.md).
+and [B41](../done/B41-ui-help-overlay.md).
 
 ## Strings
 
@@ -42,7 +42,7 @@ file the pieces as A and B tasks. Some examples:
 
 - "A bare key acts on the box under the cursor." That is a relative clause (exists) instead of a free
   one.
-- "⇧ runs a key backwards." That uses BACKWARDS from [B44](../B-needs-seed/B44-ui-keyboard-movement-labels.md).
+- "⇧ runs a key backwards." That uses BACKWARDS from [B44](../done/B44-ui-keyboard-movement-labels.md).
 
 Whatever cannot be said that way stays literal, and each such piece gets a C15-style row with its
 reason.

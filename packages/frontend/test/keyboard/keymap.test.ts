@@ -1,9 +1,10 @@
 import { describe, expect, it } from 'vitest';
-import { UI_STRINGS, type Concept } from '@signi/shared';
+import { UI_STRINGS, type Concept, type UiStringKey } from '@signi/shared';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { Satellite } from '../../src/components/PhraseBuilder/satellites/index.ts';
 import {
   APP_KEYMAP,
+  commandLabel,
   hintsFor,
   KEYMAP,
   PERIOD_KEYMAP,
@@ -110,49 +111,45 @@ describe('the keymap', () => {
     }
   });
 
-  // A label without a key shows its English in every language, so only the commands whose words
-  // the corpus does not hold yet may go without one — each listed with the task that seeds them.
-  // A new command must name itself from the catalogue, and a task that seeds a word takes its
-  // commands off this list.
-  it('names from the catalogue every command but those still waiting on a word', () => {
-    const waiting: Record<string, string> = {
-      ...Object.fromEntries(
-        ['left', 'up', 'right', 'down'].flatMap((dir) => [
-          [`box.move.${dir}`, 'B44'],
-          [`box.nudge.${dir}`, 'B44'],
-        ]),
-      ),
-      'box.next': 'B44',
-      'box.previous': 'B44',
-      'box.fold': 'B44',
-      'box.out': 'B44',
-      'noun.gender.back': 'B44',
-      'object.voice.back': 'B44',
-      'adjective.degree.back': 'B44',
-      'adjective.relation.back': 'B44',
-      'verb.tense.back': 'B44',
-      'verb.aspect.back': 'B44',
-      'mood.register': 'B44',
-      'app.region.next': 'B44',
-      'app.region.previous': 'B44',
-      'period.previous': 'B44',
-      'period.next': 'B44',
-      'period.level': 'B44',
-      'period.out': 'B44',
-      'app.help': 'B41',
-      'app.console': 'B42',
-      'app.console.command': 'B42',
-      'app.undo': 'B40',
-      'app.redo': 'B40',
-      'period.enter': 'B43',
-      'period.taller': 'B43',
-      'period.taller.alt': 'B43',
-      'period.shorter': 'B43',
-    };
+  // A label without a key shows its English in every language. A20 named the commands whose words
+  // were seeded and B40–B44 seeded the rest, so none goes without one now: a new command names
+  // itself from the catalogue, seeding its word first if the corpus lacks it.
+  it('names every command from the catalogue', () => {
     const commands = [...ALL_COMMANDS, ...APP_KEYMAP];
-    const unnamed = commands.filter((c) => !c.labelKey).map((c) => c.id);
+    expect(commands.filter((c) => !c.labelKey).map((c) => c.id)).toEqual([]);
+  });
 
-    expect(unnamed.sort()).toEqual(Object.keys(waiting).sort());
+  // A ⇧ twin that runs a cycle backwards is named after the key it reverses, so the two cannot drift:
+  // "Tense, backwards" is `satellite.tense`, a comma, and `hint.backwards` (B44).
+  it('names each backwards key after the key it reverses, in the same scope', () => {
+    const commands = [...ALL_COMMANDS, ...APP_KEYMAP];
+    const reversing = commands.filter((c) => c.reverses);
+    expect(reversing.map((c) => c.id).sort()).toEqual([
+      'adjective.degree.back', 'adjective.relation.back', 'noun.gender.back',
+      'object.voice.back', 'verb.aspect.back', 'verb.tense.back',
+    ]);
+    for (const command of reversing) {
+      const forward = commands.find((c) => c.id === command.reverses);
+      expect(forward, command.id).toBeDefined();
+      expect(forward!.scope, command.id).toBe(command.scope);
+      expect(forward!.labelKey, command.id).toBeDefined();
+      expect(command.labelKey, command.id).toBe('hint.backwards');
+    }
+  });
+
+  it('joins a backwards key’s name to its forward key’s, in the UI language', () => {
+    const tense = KEYMAP.find((c) => c.id === 'verb.tense.back')!;
+    const english = (key: UiStringKey) => UI_STRINGS[key].fallback;
+    expect(commandLabel(tense, english)).toBe('Tense, backwards');
+
+    const italian: Partial<Record<UiStringKey, string>> = {
+      'satellite.tense': 'Tempo',
+      'hint.backwards': "all'indietro",
+    };
+    expect(commandLabel(tense, (key) => italian[key] ?? '?')).toBe("Tempo, all'indietro");
+    // A command that reverses nothing is its own name.
+    expect(commandLabel(KEYMAP.find((c) => c.id === 'verb.tense')!, (key) => italian[key] ?? '?'))
+      .toBe('Tempo');
   });
 });
 

@@ -5,6 +5,7 @@ import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNou
 import { locativeIdiom } from '../../../functions/locativeIdiom.js';
 import { objectPredication } from '../../../functions/objectPredication.js';
 import { directionSpecifier } from '../../../functions/directionSpecifier.js';
+import { isNamedLand } from '../../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../../functions/withDefiniteness.js';
 import { possessedHeadForms } from '../../../functions/possessedHeadForms.js';
@@ -33,11 +34,11 @@ import { weakN } from '../weakN.js';
 import { causePhrase } from './causePhrase.js';
 import { instrumentActionPhrase } from './instrumentActionPhrase.js';
 
-// A continent named without an article ("Europa", "Asien"), the goal German marks with "nach". Keyed
-// off the hypernym, as the Italian and French continent goals are: a country or city seeded later
-// would want a place flag on the concept instead.
+// A land named without an article, a continent or a country ("Europa", "Asien", "Italien", "Japan"),
+// the goal German marks with "nach". Keyed off the hypernym (`isNamedLand`), as the Italian and French
+// land goals are; an articled one goes "in die Schweiz", and a city seeded later would need its own.
 function isBareNamePlace(f: Record<string, string>): boolean {
-  return f['isA'] === 'CONTINENT' && f['proper'] === '1' && f['takes_article'] !== '1';
+  return isNamedLand(f) && f['proper'] === '1' && f['takes_article'] !== '1';
 }
 
 // `verb` is the governing verb's forms: a predicate noun under a seeming verb reads it to close the

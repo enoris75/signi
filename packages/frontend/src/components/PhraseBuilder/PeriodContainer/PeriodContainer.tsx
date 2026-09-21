@@ -8,6 +8,7 @@ import { PeriodCaption } from "./PeriodCaption.tsx";
 import type { ClauseControls } from "./PeriodContainer.types.ts";
 import { ReificationSwitch } from "./ReificationSwitch.tsx";
 import { PICK_INDEX, PICK_TARGET, pickBadgeSx } from "../../../keyboard/usePickKeys.ts";
+import { useUiString } from "../../../i18n/useUiString.ts";
 
 export interface PeriodContainerProps extends ClauseControls, HeaderControlsProps {
   // The card's padding, in theme spacing units. The caller's resize grip negates it to
@@ -56,6 +57,7 @@ export function PeriodContainer({
   children,
   ...headerControls
 }: PeriodContainerProps) {
+  const t = useUiString();
   const controls = { conditional, coordinative, instrumental, imperative, infinitive };
   const { dragging, dragHandlers } = useBorderDrag({
     enabled: floatable,
@@ -139,8 +141,7 @@ export function PeriodContainer({
               color: "text.secondary",
             }}
           >
-            {/* English literal, for /localize. */}
-            · Preview
+            · {t("status.preview")}
           </Box>
         )}
         {!compact && !preview && <PeriodCaption controls={controls} showCanvas={showCanvas} />}

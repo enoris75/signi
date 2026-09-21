@@ -1,4 +1,5 @@
 import { demonstrative } from './demonstrative.js';
+import { isBareName } from './isBareName.js';
 import { prepDet } from './prepDet.js';
 
 /**
@@ -16,7 +17,9 @@ export function contractDet(
 ): string {
   const definiteness = forms['definiteness'] ?? 'definite';
   // A proper noun keeps its definite article whatever was picked (see `artFor`), so it
-  // contracts with it: "na África".
+  // contracts with it: "na África". A bare name has no article to contract with, and takes the
+  // plain preposition whatever was picked: "de Portugal", "em Portugal".
+  if (isBareName(forms)) return prep;
   if (definiteness === 'definite' || forms['proper'] === '1') return contract(forms, plural);
   if ((definiteness === 'this' || definiteness === 'that') && (prep === 'em' || prep === 'de')) {
     return `${prep === 'em' ? 'n' : 'd'}${demonstrative(definiteness === 'that', forms, plural)}`;

@@ -2,6 +2,7 @@ import type { Aspect, Tense } from '@signi/shared';
 import type { VerbComplex } from './de.types.js';
 import { HABEN, SEIN, WERDEN, WUERDE } from './de.consts.js';
 import { isConditionalMood } from './isConditionalMood.js';
+import { particleGap } from './particleGap.js';
 import { zuInfinitive } from './zuInfinitive.js';
 
 /**
@@ -33,7 +34,11 @@ export function verbGroup(
   const perfFinite = periphrastic ? '' : (perfAux === 'sein' ? SEIN : HABEN)[tense][pn];
   const conjug = periphrastic ? auxV2 : (verbForms[`${pn}_${tense}`] ?? verbForms[tense] ?? verbForms[`${pn}_present`] ?? base);
   // A separable verb's own finite form leaves its particle for the clause to place (A138): "fügt … hinzu".
-  const particle = !periphrastic && verbForms['particle'] ? { particle: verbForms['particle'] } : {};
+  // One written apart from its verb says so, to be rejoined with a space (B40): "…, der sie rückgängig macht".
+  const gap = particleGap(verbForms);
+  const particle = !periphrastic && verbForms['particle']
+    ? { particle: verbForms['particle'], ...(gap ? { particleGap: gap } : {}) }
+    : {};
   switch (aspect) {
     case 'progressive':
       // Plain finite verb + "gerade"; periphrastic keeps aux … Infinitiv, with "gerade" mid.

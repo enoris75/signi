@@ -42,6 +42,18 @@ describe('imperativeForm (es)', () => {
     expect(imperativeForm('es', TENER, '2sg', true)).toBe('tengas');
   });
 
+  // B40: hacer and its compounds deshacer (UNDO) and rehacer (REDO) command with the short haz.
+  test('hacer and its compounds take the short tú command; their other persons are regular', () => {
+    const DESHACER = verb('UNDO', { base: 'deshacer', '1sg_present': 'deshago', '3sg_present': 'deshace', '1pl_present': 'deshacemos' });
+    const REHACER = verb('REDO', { base: 'rehacer', '1sg_present': 'rehago', '3sg_present': 'rehace', '1pl_present': 'rehacemos' });
+    expect(imperativeForm('es', HACER, '2sg', false)).toBe('haz');
+    expect(imperativeForm('es', DESHACER, '2sg', false)).toBe('deshaz');
+    expect(imperativeForm('es', REHACER, '2sg', false)).toBe('rehaz');
+    expect(imperativeForm('es', DESHACER, '2sg', true)).toBe('deshagas');
+    expect(imperativeForm('es', DESHACER, '1pl', false)).toBe('deshagamos');
+    expect(imperativeForm('es', REHACER, '2pl', false)).toBe('rehaced');
+  });
+
   test('an -ir verb that diphthongs under stress raises to i in the 1st and 2nd plural', () => {
     const SENTIR = verb('FEEL', { base: 'sentir', '1sg_present': 'siento', '3sg_present': 'siente', '1pl_present': 'sentimos' });
     const ADQUIRIR = verb('ACQUIRE', { base: 'adquirir', '1sg_present': 'adquiero', '3sg_present': 'adquiere', '1pl_present': 'adquirimos' });

@@ -766,6 +766,27 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // ADDED's opposite (B40): the participle of each language's REMOVE (rimosso, retiré, entfernt, quitado,
+    // removido). Japanese says 削除済み, what its software writes for anything taken off a list, and not
+    // REMOVE's own 取り除き済み: 済み attaches to the Sino-Japanese verbal noun, and 取り除き済み reads as a
+    // coinage. It is DELETE's 削除, which the saved items' delete control says, so in Japanese removing a
+    // period and deleting a saved phrase end on the same word.
+    id: 'REMOVED',
+    role: 'adjective',
+    transient: true,
+    description: 'taken away from the others',
+    emoji: '➖',
+    forms: {
+      en: { base: 'removed' },
+      it: { base: 'rimosso' },
+      fr: { base: 'retiré' },
+      de: { base: 'entfernt' },
+      es: { base: 'quitado' },
+      ja: { base: '削除済みの', reading: 'さくじょずみの' },
+      pt: { base: 'removido' },
+    },
+  },
+  {
     // Portuguese "malsucedido" ("importação malsucedida"); "falhado" reads as European Portuguese.
     id: 'FAILED',
     role: 'adjective',
@@ -815,6 +836,81 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'vinculado' },
       ja: { base: 'リンク済みの' },
       pt: { base: 'ligado' },
+    },
+  },
+  // What a console line can be (localization B45): kept at the top of the list, no longer kept
+  // there, or used a short time ago. PINNED and UNPINNED are the states PIN and UNPIN leave a line in,
+  // so transient like SAVED; each language's interface word (fr épinglé, es fijado, pt fixado).
+  {
+    id: 'PINNED',
+    role: 'adjective',
+    transient: true,
+    description: 'kept at the top of a list',
+    emoji: '📌',
+    forms: {
+      en: { base: 'pinned' },
+      it: { base: 'fissato' },
+      fr: { base: 'épinglé' },
+      de: { base: 'angeheftet' },
+      es: { base: 'fijado' },
+      ja: { base: 'ピン留め済みの', reading: 'ぴんどめずみの' },
+      pt: { base: 'fixado' },
+    },
+  },
+  {
+    // "No longer pinned": the state, not the act. Italian and German say it so — the participle of
+    // UNPIN (it "sbloccato", de "gelöst") would read "unlocked" and "solved" without the list around it.
+    id: 'UNPINNED',
+    role: 'adjective',
+    transient: true,
+    description: 'no longer kept at the top of a list',
+    emoji: '📍',
+    forms: {
+      en: { base: 'unpinned' },
+      it: { base: 'non più fissato' },
+      fr: { base: 'désépinglé' },
+      de: { base: 'nicht mehr angeheftet' },
+      es: { base: 'desfijado' },
+      ja: { base: 'ピン留め解除済みの', reading: 'ぴんどめかいじょずみの' },
+      pt: { base: 'desafixado' },
+    },
+  },
+  {
+    // Used a short time ago: the console's recent lines. German and Japanese say what an interface
+    // says, "zuletzt verwendet" ("zuletzt verwendete Zeilen": "letzt-" has no form standing alone) and
+    // 最近使用された ("最近使用された行"; the predicate reads 最近使用されています). 最近の, "of late",
+    // would predicate as *行は最近です.
+    id: 'RECENT',
+    role: 'adjective',
+    description: 'used a short time ago',
+    emoji: '🕑',
+    forms: {
+      en: { base: 'recent' },
+      it: { base: 'recente' },
+      fr: { base: 'récent' },
+      de: { base: 'zuletzt verwendet' },
+      es: { base: 'reciente' },
+      ja: { base: '最近使用された', reading: 'さいきんしようされた' },
+      pt: { base: 'recente' },
+    },
+  },
+  {
+    // Marked with a number, as a menu's rows and a pick's targets are, so a digit picks one
+    // (localization B41). A participle, and the state numbering leaves a thing in: es/pt predicate it
+    // with estar ("la fila está numerada"). Japanese 番号付きの, "with a number attached".
+    id: 'NUMBERED',
+    role: 'adjective',
+    transient: true,
+    description: 'marked with a number',
+    emoji: '🔢',
+    forms: {
+      en: { base: 'numbered' },
+      it: { base: 'numerato' },
+      fr: { base: 'numéroté' },
+      de: { base: 'nummeriert' },
+      es: { base: 'numerado' },
+      ja: { base: '番号付きの', reading: 'ばんごうつきの' },
+      pt: { base: 'numerado' },
     },
   },
   {
@@ -1169,6 +1265,41 @@ export const adjectives: ConceptSeed[] = [
       pt: { base: 'terceiro' },
     },
   },
+  // The one straight after or straight before in a sequence — the next slot, the previous period
+  // (localization B44). Postnominal in the Romance languages ("lo slot successivo", "la période
+  // précédente"); German declines from the -e citation form, as the ordinals above do (nächste,
+  // vorherige). Portuguese "seguinte", which follows the noun as the others do, where "próximo" would
+  // lead it.
+  {
+    id: 'NEXT',
+    role: 'adjective',
+    description: 'coming straight after in a sequence',
+    emoji: '⏭️',
+    forms: {
+      en: { base: 'next' },
+      it: { base: 'successivo' },
+      fr: { base: 'suivant' },
+      de: { base: 'nächste' },
+      es: { base: 'siguiente' },
+      ja: { base: '次の', reading: 'つぎの' },
+      pt: { base: 'seguinte' },
+    },
+  },
+  {
+    id: 'PREVIOUS',
+    role: 'adjective',
+    description: 'coming straight before in a sequence',
+    emoji: '⏮️',
+    forms: {
+      en: { base: 'previous' },
+      it: { base: 'precedente' },
+      fr: { base: 'précédent' },
+      de: { base: 'vorherige' },
+      es: { base: 'anterior' },
+      ja: { base: '前の', reading: 'まえの' },
+      pt: { base: 'anterior' },
+    },
+  },
   // Not standing for any particular person — the grammatical category of the generic subject
   // ("one eats"), GENERIC_PERSON. Offered in the pronoun chooser's person row alongside the three
   // ordinals, and naming the concept in the picker/chip, so it is seeded like them: an adjective
@@ -1352,6 +1483,23 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'temporal' },
       ja: { base: '時間的な', reading: 'じかんてきな' },
       pt: { base: 'temporal' },
+    },
+  },
+  {
+    // Having to do with place: the relation /in, /through, /under … set on a place or a route, "a
+    // spatial relationship" (localization B46, B47). TEMPORAL's sibling, and shaped like it.
+    id: 'SPATIAL',
+    role: 'adjective',
+    description: 'having to do with place',
+    emoji: '📐',
+    forms: {
+      en: { base: 'spatial' },
+      it: { base: 'spaziale' },
+      fr: { base: 'spatial' },
+      de: { base: 'räumlich' },
+      es: { base: 'espacial' },
+      ja: { base: '空間的な', reading: 'くうかんてきな' },
+      pt: { base: 'espacial' },
     },
   },
   // ── Aspects and polarity ─────────────────────────────────────────

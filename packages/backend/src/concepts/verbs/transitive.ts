@@ -3481,6 +3481,77 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // Joining one thing to another: what a conjunction does to clauses (localization B38), and what
+    // /and and /join do in the console (B47). Not COORDINATE, whose Japanese 調整する is to adjust.
+    // The words keep step with the seeded participle LINKED where the language allows (collegato,
+    // relié, verbunden, つながった). German verbinden is strong (verband / verbunden) and joins a thing
+    // WITH another: its goal takes "mit" + dative, not the default "in" + accusative (the ADD case).
+    id: 'LINK',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'terminus', 'cause'],
+    description: 'to join one thing to another',
+    emoji: '🔗',
+    forms: {
+      en: {
+        base: 'link',
+        '1sg_present': 'link', '2sg_present': 'link', '3sg_present': 'links',
+        '1pl_present': 'link', '2pl_present': 'link', '3pl_present': 'link',
+        past: 'linked',
+      },
+      it: {
+        base: 'collegare',
+        '1sg_present': 'collego', '2sg_present': 'colleghi', '3sg_present': 'collega',
+        '1pl_present': 'colleghiamo', '2pl_present': 'collegate', '3pl_present': 'collegano',
+        '1sg_past': 'collegai', '2sg_past': 'collegasti', '3sg_past': 'collegò',
+        '1pl_past': 'collegammo', '2pl_past': 'collegaste', '3pl_past': 'collegarono',
+        '1sg_future': 'collegherò', '2sg_future': 'collegherai', '3sg_future': 'collegherà',
+        '1pl_future': 'collegheremo', '2pl_future': 'collegherete', '3pl_future': 'collegheranno',
+      },
+      fr: {
+        base: 'relier',
+        '1sg_present': 'relie', '2sg_present': 'relies', '3sg_present': 'relie',
+        '1pl_present': 'relions', '2pl_present': 'reliez', '3pl_present': 'relient',
+        '1sg_past': 'reliai', '2sg_past': 'relias', '3sg_past': 'relia',
+        '1pl_past': 'reliâmes', '2pl_past': 'reliâtes', '3pl_past': 'relièrent',
+        '1sg_future': 'relierai', '2sg_future': 'relieras', '3sg_future': 'reliera',
+        '1pl_future': 'relierons', '2pl_future': 'relierez', '3pl_future': 'relieront',
+      },
+      de: {
+        base: 'verbinden', terminus_prep: 'mit',
+        '1sg_present': 'verbinde', '2sg_present': 'verbindest', '3sg_present': 'verbindet',
+        '1pl_present': 'verbinden', '2pl_present': 'verbindet', '3pl_present': 'verbinden',
+        '1sg_past': 'verband', '2sg_past': 'verbandest', '3sg_past': 'verband',
+        '1pl_past': 'verbanden', '2pl_past': 'verbandet', '3pl_past': 'verbanden',
+      },
+      es: {
+        base: 'enlazar',
+        '1sg_present': 'enlazo', '2sg_present': 'enlazas', '3sg_present': 'enlaza',
+        '1pl_present': 'enlazamos', '2pl_present': 'enlazáis', '3pl_present': 'enlazan',
+        '1sg_past': 'enlacé', '2sg_past': 'enlazaste', '3sg_past': 'enlazó',
+        '1pl_past': 'enlazamos', '2pl_past': 'enlazasteis', '3pl_past': 'enlazaron',
+        '1sg_future': 'enlazaré', '2sg_future': 'enlazarás', '3sg_future': 'enlazará',
+        '1pl_future': 'enlazaremos', '2pl_future': 'enlazaréis', '3pl_future': 'enlazarán',
+      },
+      ja: {
+        base: 'つなぐ',
+        reading: 'つなぐ',
+        masu_present: 'つなぎます',
+        masu_present_reading: 'つなぎます',
+      },
+      pt: {
+        base: 'ligar',
+        '1sg_present': 'ligo', '2sg_present': 'liga', '3sg_present': 'liga',
+        '1pl_present': 'ligamos', '2pl_present': 'ligam', '3pl_present': 'ligam',
+        '1sg_past': 'liguei', '2sg_past': 'ligou', '3sg_past': 'ligou',
+        '1pl_past': 'ligamos', '2pl_past': 'ligaram', '3pl_past': 'ligaram',
+        '1sg_future': 'ligarei', '2sg_future': 'ligará', '3sg_future': 'ligará',
+        '1pl_future': 'ligaremos', '2pl_future': 'ligarão', '3pl_future': 'ligarão',
+      },
+    },
+  },
+
+  {
     id: 'EXPORT',
     role: 'verb',
     transitivity: 'transitive',
@@ -4142,6 +4213,77 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  {
+    // Making a thing smaller in size, not packing it into less room: the canvas's − key (B43). COMPACT
+    // is the packing ("verdichten", 圧縮), which says the wrong thing of a surface made shorter: German
+    // "verkleinern" and Japanese 縮小 are the words for that, and fr "réduire", es "reducir", pt "reduzir".
+    // Italian takes the regular "rimpicciolire" over "ridurre", whose contracted infinitive hides its stem.
+    id: 'SHRINK',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to make something smaller',
+    emoji: '🤏',
+    forms: {
+      en: {
+        base: 'shrink',
+        '1sg_present': 'shrink', '2sg_present': 'shrink', '3sg_present': 'shrinks',
+        '1pl_present': 'shrink', '2pl_present': 'shrink', '3pl_present': 'shrink',
+        past: 'shrank',
+      },
+      it: {
+        base: 'rimpicciolire',
+        '1sg_present': 'rimpicciolisco', '2sg_present': 'rimpicciolisci', '3sg_present': 'rimpicciolisce',
+        '1pl_present': 'rimpiccioliamo', '2pl_present': 'rimpicciolite', '3pl_present': 'rimpiccioliscono',
+        '1sg_past': 'rimpicciolii', '2sg_past': 'rimpicciolisti', '3sg_past': 'rimpicciolì',
+        '1pl_past': 'rimpicciolimmo', '2pl_past': 'rimpiccioliste', '3pl_past': 'rimpicciolirono',
+        '1sg_future': 'rimpicciolirò', '2sg_future': 'rimpicciolirai', '3sg_future': 'rimpicciolirà',
+        '1pl_future': 'rimpiccioliremo', '2pl_future': 'rimpicciolirete', '3pl_future': 'rimpiccioliranno',
+      },
+      fr: {
+        base: 'réduire',
+        '1sg_present': 'réduis', '2sg_present': 'réduis', '3sg_present': 'réduit',
+        '1pl_present': 'réduisons', '2pl_present': 'réduisez', '3pl_present': 'réduisent',
+        '1sg_past': 'réduisis', '2sg_past': 'réduisis', '3sg_past': 'réduisit',
+        '1pl_past': 'réduisîmes', '2pl_past': 'réduisîtes', '3pl_past': 'réduisirent',
+        '1sg_future': 'réduirai', '2sg_future': 'réduiras', '3sg_future': 'réduira',
+        '1pl_future': 'réduirons', '2pl_future': 'réduirez', '3pl_future': 'réduiront',
+      },
+      de: {
+        base: 'verkleinern',
+        '1sg_present': 'verkleinere', '2sg_present': 'verkleinerst', '3sg_present': 'verkleinert',
+        '1pl_present': 'verkleinern', '2pl_present': 'verkleinert', '3pl_present': 'verkleinern',
+        '1sg_past': 'verkleinerte', '2sg_past': 'verkleinertest', '3sg_past': 'verkleinerte',
+        '1pl_past': 'verkleinerten', '2pl_past': 'verkleinertet', '3pl_past': 'verkleinerten',
+      },
+      es: {
+        base: 'reducir',
+        '1sg_present': 'reduzco', '2sg_present': 'reduces', '3sg_present': 'reduce',
+        '1pl_present': 'reducimos', '2pl_present': 'reducís', '3pl_present': 'reducen',
+        '1sg_past': 'reduje', '2sg_past': 'redujiste', '3sg_past': 'redujo',
+        '1pl_past': 'redujimos', '2pl_past': 'redujisteis', '3pl_past': 'redujeron',
+        '1sg_future': 'reduciré', '2sg_future': 'reducirás', '3sg_future': 'reducirá',
+        '1pl_future': 'reduciremos', '2pl_future': 'reduciréis', '3pl_future': 'reducirán',
+      },
+      ja: {
+        base: '縮小する',
+        reading: 'しゅくしょうする',
+        masu_present: '縮小します',
+        masu_present_reading: 'しゅくしょうします',
+        label: '縮小',
+        label_reading: 'しゅくしょう',
+      },
+      pt: {
+        base: 'reduzir',
+        '1sg_present': 'reduzo', '2sg_present': 'reduz', '3sg_present': 'reduz',
+        '1pl_present': 'reduzimos', '2pl_present': 'reduzem', '3pl_present': 'reduzem',
+        '1sg_past': 'reduzi', '2sg_past': 'reduziu', '3sg_past': 'reduziu',
+        '1pl_past': 'reduzimos', '2pl_past': 'reduziram', '3pl_past': 'reduziram',
+        '1sg_future': 'reduzirei', '2sg_future': 'reduzirá', '3sg_future': 'reduzirá',
+        '1pl_future': 'reduziremos', '2pl_future': 'reduzirão', '3pl_future': 'reduzirão',
+      },
+    },
+  },
 
   {
     // Takes `locative` rather than `instrumental`: what a hiding wants to say is *where* the thing
@@ -4363,6 +4505,152 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'cancelamos', '2pl_past': 'cancelaram', '3pl_past': 'cancelaram',
         '1sg_future': 'cancelarei', '2sg_future': 'cancelará', '3sg_future': 'cancelará',
         '1pl_future': 'cancelaremos', '2pl_future': 'cancelarão', '3pl_future': 'cancelarão',
+      },
+    },
+  },
+
+  // Undo and redo (B40), the pair every editor's Edit menu opens with, in the words those menus use:
+  // it Annulla / Ripeti, fr Annuler / Rétablir, de Rückgängig machen / Wiederholen, es Deshacer /
+  // Rehacer, pt Desfazer / Refazer, ja 元に戻す / やり直し. Italian and French UNDO is CANCEL's verb
+  // (annullare, annuler), and German REDO is RETRY's (wiederholen, as Google's and Apple's editors pair
+  // it with "Rückgängig machen"): that is what their software writes, so those controls read alike.
+  // German UNDO is the light verb "machen" with "rückgängig" as its separable particle, written apart
+  // ("macht die Phrase rückgängig", "rückgängig gemacht", "rückgängig zu machen"). Microsoft's
+  // "wiederherstellen" was not taken: its particle is spelled "wieder her" once it leaves the verb,
+  // which no lexeme can say yet. Spanish and Portuguese conjugate like hacer / fazer.
+  {
+    id: 'UNDO',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to reverse the last change',
+    emoji: '↩️',
+    forms: {
+      en: {
+        base: 'undo',
+        '1sg_present': 'undo', '2sg_present': 'undo', '3sg_present': 'undoes',
+        '1pl_present': 'undo', '2pl_present': 'undo', '3pl_present': 'undo',
+        past: 'undid',
+      },
+      it: {
+        base: 'annullare',
+        '1sg_present': 'annullo', '2sg_present': 'annulli', '3sg_present': 'annulla',
+        '1pl_present': 'annulliamo', '2pl_present': 'annullate', '3pl_present': 'annullano',
+        '1sg_past': 'annullai', '2sg_past': 'annullasti', '3sg_past': 'annullò',
+        '1pl_past': 'annullammo', '2pl_past': 'annullaste', '3pl_past': 'annullarono',
+        '1sg_future': 'annullerò', '2sg_future': 'annullerai', '3sg_future': 'annullerà',
+        '1pl_future': 'annulleremo', '2pl_future': 'annullerete', '3pl_future': 'annulleranno',
+      },
+      fr: {
+        base: 'annuler',
+        '1sg_present': 'annule', '2sg_present': 'annules', '3sg_present': 'annule',
+        '1pl_present': 'annulons', '2pl_present': 'annulez', '3pl_present': 'annulent',
+        '1sg_past': 'annulai', '2sg_past': 'annulas', '3sg_past': 'annula',
+        '1pl_past': 'annulâmes', '2pl_past': 'annulâtes', '3pl_past': 'annulèrent',
+        '1sg_future': 'annulerai', '2sg_future': 'annuleras', '3sg_future': 'annulera',
+        '1pl_future': 'annulerons', '2pl_future': 'annulerez', '3pl_future': 'annuleront',
+      },
+      de: {
+        base: 'rückgängig machen', particle: 'rückgängig',
+        '1sg_present': 'mache', '2sg_present': 'machst', '3sg_present': 'macht',
+        '1pl_present': 'machen', '2pl_present': 'macht', '3pl_present': 'machen',
+        '1sg_past': 'machte', '2sg_past': 'machtest', '3sg_past': 'machte',
+        '1pl_past': 'machten', '2pl_past': 'machtet', '3pl_past': 'machten',
+      },
+      es: {
+        base: 'deshacer',
+        '1sg_present': 'deshago', '2sg_present': 'deshaces', '3sg_present': 'deshace',
+        '1pl_present': 'deshacemos', '2pl_present': 'deshacéis', '3pl_present': 'deshacen',
+        '1sg_past': 'deshice', '2sg_past': 'deshiciste', '3sg_past': 'deshizo',
+        '1pl_past': 'deshicimos', '2pl_past': 'deshicisteis', '3pl_past': 'deshicieron',
+        '1sg_future': 'desharé', '2sg_future': 'desharás', '3sg_future': 'deshará',
+        '1pl_future': 'desharemos', '2pl_future': 'desharéis', '3pl_future': 'desharán',
+      },
+      ja: {
+        base: '元に戻す',
+        reading: 'もとにもどす',
+        masu_present: '元に戻します',
+        masu_present_reading: 'もとにもどします',
+        // The button says the dictionary form, as it does for 閉じる: 元に戻す, not the stem 元に戻し.
+        label: '元に戻す',
+        label_reading: 'もとにもどす',
+      },
+      pt: {
+        base: 'desfazer',
+        '1sg_present': 'desfaço', '2sg_present': 'desfaz', '3sg_present': 'desfaz',
+        '1pl_present': 'desfazemos', '2pl_present': 'desfazem', '3pl_present': 'desfazem',
+        '1sg_past': 'desfiz', '2sg_past': 'desfez', '3sg_past': 'desfez',
+        '1pl_past': 'desfizemos', '2pl_past': 'desfizeram', '3pl_past': 'desfizeram',
+        '1sg_future': 'desfarei', '2sg_future': 'desfará', '3sg_future': 'desfará',
+        '1pl_future': 'desfaremos', '2pl_future': 'desfarão', '3pl_future': 'desfarão',
+      },
+    },
+  },
+  {
+    id: 'REDO',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to make again a change that was undone',
+    emoji: '↪️',
+    forms: {
+      en: {
+        base: 'redo',
+        '1sg_present': 'redo', '2sg_present': 'redo', '3sg_present': 'redoes',
+        '1pl_present': 'redo', '2pl_present': 'redo', '3pl_present': 'redo',
+        past: 'redid',
+      },
+      it: {
+        base: 'ripetere',
+        '1sg_present': 'ripeto', '2sg_present': 'ripeti', '3sg_present': 'ripete',
+        '1pl_present': 'ripetiamo', '2pl_present': 'ripetete', '3pl_present': 'ripetono',
+        '1sg_past': 'ripetei', '2sg_past': 'ripetesti', '3sg_past': 'ripeté',
+        '1pl_past': 'ripetemmo', '2pl_past': 'ripeteste', '3pl_past': 'ripeterono',
+        '1sg_future': 'ripeterò', '2sg_future': 'ripeterai', '3sg_future': 'ripeterà',
+        '1pl_future': 'ripeteremo', '2pl_future': 'ripeterete', '3pl_future': 'ripeteranno',
+      },
+      fr: {
+        base: 'rétablir',
+        '1sg_present': 'rétablis', '2sg_present': 'rétablis', '3sg_present': 'rétablit',
+        '1pl_present': 'rétablissons', '2pl_present': 'rétablissez', '3pl_present': 'rétablissent',
+        '1sg_past': 'rétablis', '2sg_past': 'rétablis', '3sg_past': 'rétablit',
+        '1pl_past': 'rétablîmes', '2pl_past': 'rétablîtes', '3pl_past': 'rétablirent',
+        '1sg_future': 'rétablirai', '2sg_future': 'rétabliras', '3sg_future': 'rétablira',
+        '1pl_future': 'rétablirons', '2pl_future': 'rétablirez', '3pl_future': 'rétabliront',
+      },
+      de: {
+        base: 'wiederholen',
+        '1sg_present': 'wiederhole', '2sg_present': 'wiederholst', '3sg_present': 'wiederholt',
+        '1pl_present': 'wiederholen', '2pl_present': 'wiederholt', '3pl_present': 'wiederholen',
+        '1sg_past': 'wiederholte', '2sg_past': 'wiederholtest', '3sg_past': 'wiederholte',
+        '1pl_past': 'wiederholten', '2pl_past': 'wiederholtet', '3pl_past': 'wiederholten',
+        '2sg_imperative': 'wiederhole', // the optional du -e, kept
+      },
+      es: {
+        // The i of the preterite stem is stressed after the vowel of re-, and written so: rehíce, rehízo.
+        base: 'rehacer',
+        '1sg_present': 'rehago', '2sg_present': 'rehaces', '3sg_present': 'rehace',
+        '1pl_present': 'rehacemos', '2pl_present': 'rehacéis', '3pl_present': 'rehacen',
+        '1sg_past': 'rehíce', '2sg_past': 'rehiciste', '3sg_past': 'rehízo',
+        '1pl_past': 'rehicimos', '2pl_past': 'rehicisteis', '3pl_past': 'rehicieron',
+        '1sg_future': 'reharé', '2sg_future': 'reharás', '3sg_future': 'rehará',
+        '1pl_future': 'reharemos', '2pl_future': 'reharéis', '3pl_future': 'reharán',
+      },
+      ja: {
+        // No label: the stem やり直し is the button's own word.
+        base: 'やり直す',
+        reading: 'やりなおす',
+        masu_present: 'やり直します',
+        masu_present_reading: 'やりなおします',
+      },
+      pt: {
+        base: 'refazer',
+        '1sg_present': 'refaço', '2sg_present': 'refaz', '3sg_present': 'refaz',
+        '1pl_present': 'refazemos', '2pl_present': 'refazem', '3pl_present': 'refazem',
+        '1sg_past': 'refiz', '2sg_past': 'refez', '3sg_past': 'refez',
+        '1pl_past': 'refizemos', '2pl_past': 'refizeram', '3pl_past': 'refizeram',
+        '1sg_future': 'refarei', '2sg_future': 'refará', '3sg_future': 'refará',
+        '1pl_future': 'refaremos', '2pl_future': 'refarão', '3pl_future': 'refarão',
       },
     },
   },
@@ -4717,6 +5005,83 @@ export const transitiveVerbs: ConceptSeed[] = [
   },
 
   {
+    // To go away from a place — what esc does to the slot or the period the cursor is in (localization
+    // B44). French quitter, German verlassen and Japanese 出る take the place as their object; Italian,
+    // Spanish and Portuguese go OUT OF it, uscire da / salir de / sair de, the verbs their UIs say it
+    // with ("Esci", "Salir", "Sair"). The place is still the verb's patient in the plan and the
+    // preposition is lexical (`object_prep`, as CLICK's), so those three keep the active where a
+    // passive is asked for, as CLICK does. Italian uscire takes essere; Spanish salir's tú command is
+    // the irregular "sal" (mood.ts). Japanese instructions say 退出, the verbal noun a "leave" button
+    // takes, since the stem of 出る is a bare 出.
+    id: 'LEAVE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'direction', 'cause'],
+    description: 'to go away from a place',
+    emoji: '🚪',
+    forms: {
+      en: {
+        base: 'leave',
+        '1sg_present': 'leave', '2sg_present': 'leave', '3sg_present': 'leaves',
+        '1pl_present': 'leave', '2pl_present': 'leave', '3pl_present': 'leave',
+        past: 'left',
+      },
+      it: {
+        base: 'uscire', object_prep: 'da',
+        '1sg_present': 'esco', '2sg_present': 'esci', '3sg_present': 'esce',
+        '1pl_present': 'usciamo', '2pl_present': 'uscite', '3pl_present': 'escono',
+        '1sg_past': 'uscii', '2sg_past': 'uscisti', '3sg_past': 'uscì',
+        '1pl_past': 'uscimmo', '2pl_past': 'usciste', '3pl_past': 'uscirono',
+        '1sg_future': 'uscirò', '2sg_future': 'uscirai', '3sg_future': 'uscirà',
+        '1pl_future': 'usciremo', '2pl_future': 'uscirete', '3pl_future': 'usciranno',
+      },
+      fr: {
+        base: 'quitter',
+        '1sg_present': 'quitte', '2sg_present': 'quittes', '3sg_present': 'quitte',
+        '1pl_present': 'quittons', '2pl_present': 'quittez', '3pl_present': 'quittent',
+        '1sg_past': 'quittai', '2sg_past': 'quittas', '3sg_past': 'quitta',
+        '1pl_past': 'quittâmes', '2pl_past': 'quittâtes', '3pl_past': 'quittèrent',
+        '1sg_future': 'quitterai', '2sg_future': 'quitteras', '3sg_future': 'quittera',
+        '1pl_future': 'quitterons', '2pl_future': 'quitterez', '3pl_future': 'quitteront',
+      },
+      de: {
+        base: 'verlassen',
+        '1sg_present': 'verlasse', '2sg_present': 'verlässt', '3sg_present': 'verlässt',
+        '1pl_present': 'verlassen', '2pl_present': 'verlasst', '3pl_present': 'verlassen',
+        '1sg_past': 'verließ', '2sg_past': 'verließest', '3sg_past': 'verließ',
+        '1pl_past': 'verließen', '2pl_past': 'verließt', '3pl_past': 'verließen',
+        '2sg_imperative': 'verlass', // strong a→ä: the du command drops the umlaut
+      },
+      es: {
+        base: 'salir', object_prep: 'de',
+        '1sg_present': 'salgo', '2sg_present': 'sales', '3sg_present': 'sale',
+        '1pl_present': 'salimos', '2pl_present': 'salís', '3pl_present': 'salen',
+        '1sg_past': 'salí', '2sg_past': 'saliste', '3sg_past': 'salió',
+        '1pl_past': 'salimos', '2pl_past': 'salisteis', '3pl_past': 'salieron',
+        '1sg_future': 'saldré', '2sg_future': 'saldrás', '3sg_future': 'saldrá',
+        '1pl_future': 'saldremos', '2pl_future': 'saldréis', '3pl_future': 'saldrán',
+      },
+      ja: {
+        base: '出る',
+        reading: 'でる',
+        masu_present: '出ます',
+        masu_present_reading: 'でます',
+        label: '退出',
+        label_reading: 'たいしゅつ',
+      },
+      pt: {
+        base: 'sair', object_prep: 'de',
+        '1sg_present': 'saio', '2sg_present': 'sai', '3sg_present': 'sai',
+        '1pl_present': 'saímos', '2pl_present': 'saem', '3pl_present': 'saem',
+        '1sg_past': 'saí', '2sg_past': 'saiu', '3sg_past': 'saiu',
+        '1pl_past': 'saímos', '2pl_past': 'saíram', '3pl_past': 'saíram',
+        '1sg_future': 'sairei', '2sg_future': 'sairá', '3sg_future': 'sairá',
+        '1pl_future': 'sairemos', '2pl_future': 'sairão', '3pl_future': 'sairão',
+      },
+    },
+  },
+
+  {
     // German skalieren: "die Größe ändern" is a phrase whose object is a genitive, not the verb's
     // accusative. Japanese サイズ変更, the verbal noun its UIs use.
     id: 'RESIZE',
@@ -4927,6 +5292,363 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  {
+    // Giving a setting its value: what the console's setting commands do to a noun's number or a
+    // verb's tense (localization B47). The software sense in every language — it impostare, fr
+    // définir, es establecer, pt definir, ja 設定する — not the table one sets (it apparecchiare) nor
+    // the sun that sets. German festlegen is separable, like ADD's hinzufügen: the finite forms are
+    // legen's and the clause places the particle ("legt den Numerus fest", "festlegt" in a
+    // subordinate clause, "festzulegen"). Spanish establecer takes -zc- in the 1st singular
+    // (establezco).
+    id: 'SET',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to give a setting a value',
+    emoji: '⚙️',
+    forms: {
+      en: {
+        base: 'set',
+        '1sg_present': 'set', '2sg_present': 'set', '3sg_present': 'sets',
+        '1pl_present': 'set', '2pl_present': 'set', '3pl_present': 'set',
+        past: 'set',
+      },
+      it: {
+        base: 'impostare',
+        '1sg_present': 'imposto', '2sg_present': 'imposti', '3sg_present': 'imposta',
+        '1pl_present': 'impostiamo', '2pl_present': 'impostate', '3pl_present': 'impostano',
+        '1sg_past': 'impostai', '2sg_past': 'impostasti', '3sg_past': 'impostò',
+        '1pl_past': 'impostammo', '2pl_past': 'impostaste', '3pl_past': 'impostarono',
+        '1sg_future': 'imposterò', '2sg_future': 'imposterai', '3sg_future': 'imposterà',
+        '1pl_future': 'imposteremo', '2pl_future': 'imposterete', '3pl_future': 'imposteranno',
+      },
+      fr: {
+        base: 'définir',
+        '1sg_present': 'définis', '2sg_present': 'définis', '3sg_present': 'définit',
+        '1pl_present': 'définissons', '2pl_present': 'définissez', '3pl_present': 'définissent',
+        '1sg_past': 'définis', '2sg_past': 'définis', '3sg_past': 'définit',
+        '1pl_past': 'définîmes', '2pl_past': 'définîtes', '3pl_past': 'définirent',
+        '1sg_future': 'définirai', '2sg_future': 'définiras', '3sg_future': 'définira',
+        '1pl_future': 'définirons', '2pl_future': 'définirez', '3pl_future': 'définiront',
+      },
+      de: {
+        base: 'festlegen', particle: 'fest',
+        '1sg_present': 'lege', '2sg_present': 'legst', '3sg_present': 'legt',
+        '1pl_present': 'legen', '2pl_present': 'legt', '3pl_present': 'legen',
+        '1sg_past': 'legte', '2sg_past': 'legtest', '3sg_past': 'legte',
+        '1pl_past': 'legten', '2pl_past': 'legtet', '3pl_past': 'legten',
+      },
+      es: {
+        base: 'establecer',
+        '1sg_present': 'establezco', '2sg_present': 'estableces', '3sg_present': 'establece',
+        '1pl_present': 'establecemos', '2pl_present': 'establecéis', '3pl_present': 'establecen',
+        '1sg_past': 'establecí', '2sg_past': 'estableciste', '3sg_past': 'estableció',
+        '1pl_past': 'establecimos', '2pl_past': 'establecisteis', '3pl_past': 'establecieron',
+        '1sg_future': 'estableceré', '2sg_future': 'establecerás', '3sg_future': 'establecerá',
+        '1pl_future': 'estableceremos', '2pl_future': 'estableceréis', '3pl_future': 'establecerán',
+      },
+      ja: {
+        base: '設定する',
+        reading: 'せっていする',
+        masu_present: '設定します',
+        masu_present_reading: 'せっていします',
+      },
+      pt: {
+        base: 'definir',
+        '1sg_present': 'defino', '2sg_present': 'define', '3sg_present': 'define',
+        '1pl_present': 'definimos', '2pl_present': 'definem', '3pl_present': 'definem',
+        '1sg_past': 'defini', '2sg_past': 'definiu', '3sg_past': 'definiu',
+        '1pl_past': 'definimos', '2pl_past': 'definiram', '3pl_past': 'definiram',
+        '1sg_future': 'definirei', '2sg_future': 'definirá', '3sg_future': 'definirá',
+        '1pl_future': 'definiremos', '2pl_future': 'definirão', '3pl_future': 'definirão',
+      },
+    },
+  },
+
+  // The phrase console's verbs (localization B45): pinning a line and taking the pin off, completing
+  // a word begun, applying a line. Each language's interface word for the pin and its undoing: it
+  // fissare / sbloccare, fr épingler / désépingler, es fijar / desfijar, pt fixar / desafixar, de
+  // anheften / lösen (as in "An Taskleiste anheften" / "Von Taskleiste lösen").
+  {
+    // German anheften is separable, like hinzufügen (ADD): the finite forms are heften's, and the
+    // clause places the particle. Japanese labels with the verbal noun ピン留め, as ADD with 追加.
+    id: 'PIN',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to keep an item at the top of a list',
+    emoji: '📌',
+    forms: {
+      en: {
+        base: 'pin',
+        '1sg_present': 'pin', '2sg_present': 'pin', '3sg_present': 'pins',
+        '1pl_present': 'pin', '2pl_present': 'pin', '3pl_present': 'pin',
+        past: 'pinned',
+      },
+      it: {
+        base: 'fissare',
+        '1sg_present': 'fisso', '2sg_present': 'fissi', '3sg_present': 'fissa',
+        '1pl_present': 'fissiamo', '2pl_present': 'fissate', '3pl_present': 'fissano',
+        '1sg_past': 'fissai', '2sg_past': 'fissasti', '3sg_past': 'fissò',
+        '1pl_past': 'fissammo', '2pl_past': 'fissaste', '3pl_past': 'fissarono',
+        '1sg_future': 'fisserò', '2sg_future': 'fisserai', '3sg_future': 'fisserà',
+        '1pl_future': 'fisseremo', '2pl_future': 'fisserete', '3pl_future': 'fisseranno',
+      },
+      fr: {
+        base: 'épingler',
+        '1sg_present': 'épingle', '2sg_present': 'épingles', '3sg_present': 'épingle',
+        '1pl_present': 'épinglons', '2pl_present': 'épinglez', '3pl_present': 'épinglent',
+        '1sg_past': 'épinglai', '2sg_past': 'épinglas', '3sg_past': 'épingla',
+        '1pl_past': 'épinglâmes', '2pl_past': 'épinglâtes', '3pl_past': 'épinglèrent',
+        '1sg_future': 'épinglerai', '2sg_future': 'épingleras', '3sg_future': 'épinglera',
+        '1pl_future': 'épinglerons', '2pl_future': 'épinglerez', '3pl_future': 'épingleront',
+      },
+      de: {
+        base: 'anheften', particle: 'an',
+        '1sg_present': 'hefte', '2sg_present': 'heftest', '3sg_present': 'heftet',
+        '1pl_present': 'heften', '2pl_present': 'heftet', '3pl_present': 'heften',
+        '1sg_past': 'heftete', '2sg_past': 'heftetest', '3sg_past': 'heftete',
+        '1pl_past': 'hefteten', '2pl_past': 'heftetet', '3pl_past': 'hefteten',
+        '2sg_imperative': 'hefte',
+      },
+      es: {
+        base: 'fijar',
+        '1sg_present': 'fijo', '2sg_present': 'fijas', '3sg_present': 'fija',
+        '1pl_present': 'fijamos', '2pl_present': 'fijáis', '3pl_present': 'fijan',
+        '1sg_past': 'fijé', '2sg_past': 'fijaste', '3sg_past': 'fijó',
+        '1pl_past': 'fijamos', '2pl_past': 'fijasteis', '3pl_past': 'fijaron',
+        '1sg_future': 'fijaré', '2sg_future': 'fijarás', '3sg_future': 'fijará',
+        '1pl_future': 'fijaremos', '2pl_future': 'fijaréis', '3pl_future': 'fijarán',
+      },
+      ja: {
+        base: 'ピン留めする',
+        reading: 'ぴんどめする',
+        masu_present: 'ピン留めします',
+        masu_present_reading: 'ぴんどめします',
+        label: 'ピン留め',
+        label_reading: 'ぴんどめ',
+      },
+      pt: {
+        base: 'fixar',
+        '1sg_present': 'fixo', '2sg_present': 'fixa', '3sg_present': 'fixa',
+        '1pl_present': 'fixamos', '2pl_present': 'fixam', '3pl_present': 'fixam',
+        '1sg_past': 'fixei', '2sg_past': 'fixou', '3sg_past': 'fixou',
+        '1pl_past': 'fixamos', '2pl_past': 'fixaram', '3pl_past': 'fixaram',
+        '1sg_future': 'fixarei', '2sg_future': 'fixará', '3sg_future': 'fixará',
+        '1pl_future': 'fixaremos', '2pl_future': 'fixarão', '3pl_future': 'fixarão',
+      },
+    },
+  },
+  {
+    // Japanese ピン留め解除する, one verbal noun: ピン留めを外す would put a second を beside the object's.
+    id: 'UNPIN',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to stop keeping an item at the top of a list',
+    emoji: '📍',
+    forms: {
+      en: {
+        base: 'unpin',
+        '1sg_present': 'unpin', '2sg_present': 'unpin', '3sg_present': 'unpins',
+        '1pl_present': 'unpin', '2pl_present': 'unpin', '3pl_present': 'unpin',
+        past: 'unpinned',
+      },
+      it: {
+        base: 'sbloccare',
+        '1sg_present': 'sblocco', '2sg_present': 'sblocchi', '3sg_present': 'sblocca',
+        '1pl_present': 'sblocchiamo', '2pl_present': 'sbloccate', '3pl_present': 'sbloccano',
+        '1sg_past': 'sbloccai', '2sg_past': 'sbloccasti', '3sg_past': 'sbloccò',
+        '1pl_past': 'sbloccammo', '2pl_past': 'sbloccaste', '3pl_past': 'sbloccarono',
+        '1sg_future': 'sbloccherò', '2sg_future': 'sbloccherai', '3sg_future': 'sbloccherà',
+        '1pl_future': 'sbloccheremo', '2pl_future': 'sbloccherete', '3pl_future': 'sbloccheranno',
+      },
+      fr: {
+        base: 'désépingler',
+        '1sg_present': 'désépingle', '2sg_present': 'désépingles', '3sg_present': 'désépingle',
+        '1pl_present': 'désépinglons', '2pl_present': 'désépinglez', '3pl_present': 'désépinglent',
+        '1sg_past': 'désépinglai', '2sg_past': 'désépinglas', '3sg_past': 'désépingla',
+        '1pl_past': 'désépinglâmes', '2pl_past': 'désépinglâtes', '3pl_past': 'désépinglèrent',
+        '1sg_future': 'désépinglerai', '2sg_future': 'désépingleras', '3sg_future': 'désépinglera',
+        '1pl_future': 'désépinglerons', '2pl_future': 'désépinglerez', '3pl_future': 'désépingleront',
+      },
+      de: {
+        base: 'lösen',
+        '1sg_present': 'löse', '2sg_present': 'löst', '3sg_present': 'löst',
+        '1pl_present': 'lösen', '2pl_present': 'löst', '3pl_present': 'lösen',
+        '1sg_past': 'löste', '2sg_past': 'löstest', '3sg_past': 'löste',
+        '1pl_past': 'lösten', '2pl_past': 'löstet', '3pl_past': 'lösten',
+        '2sg_imperative': 'löse',
+      },
+      es: {
+        base: 'desfijar',
+        '1sg_present': 'desfijo', '2sg_present': 'desfijas', '3sg_present': 'desfija',
+        '1pl_present': 'desfijamos', '2pl_present': 'desfijáis', '3pl_present': 'desfijan',
+        '1sg_past': 'desfijé', '2sg_past': 'desfijaste', '3sg_past': 'desfijó',
+        '1pl_past': 'desfijamos', '2pl_past': 'desfijasteis', '3pl_past': 'desfijaron',
+        '1sg_future': 'desfijaré', '2sg_future': 'desfijarás', '3sg_future': 'desfijará',
+        '1pl_future': 'desfijaremos', '2pl_future': 'desfijaréis', '3pl_future': 'desfijarán',
+      },
+      ja: {
+        base: 'ピン留め解除する',
+        reading: 'ぴんどめかいじょする',
+        masu_present: 'ピン留め解除します',
+        masu_present_reading: 'ぴんどめかいじょします',
+        label: 'ピン留め解除',
+        label_reading: 'ぴんどめかいじょ',
+      },
+      pt: {
+        base: 'desafixar',
+        '1sg_present': 'desafixo', '2sg_present': 'desafixa', '3sg_present': 'desafixa',
+        '1pl_present': 'desafixamos', '2pl_present': 'desafixam', '3pl_present': 'desafixam',
+        '1sg_past': 'desafixei', '2sg_past': 'desafixou', '3sg_past': 'desafixou',
+        '1pl_past': 'desafixamos', '2pl_past': 'desafixaram', '3pl_past': 'desafixaram',
+        '1sg_future': 'desafixarei', '2sg_future': 'desafixará', '3sg_future': 'desafixará',
+        '1pl_future': 'desafixaremos', '2pl_future': 'desafixarão', '3pl_future': 'desafixarão',
+      },
+    },
+  },
+  {
+    // Finishing a word that has been started, as ⇥ does: the completion sense, not "to accomplish".
+    // German vervollständigen, inseparable; Japanese 補完, the word every editor's completion uses.
+    id: 'COMPLETE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to finish a word that has been started',
+    emoji: '⇥',
+    forms: {
+      en: {
+        base: 'complete',
+        '1sg_present': 'complete', '2sg_present': 'complete', '3sg_present': 'completes',
+        '1pl_present': 'complete', '2pl_present': 'complete', '3pl_present': 'complete',
+        past: 'completed',
+      },
+      it: {
+        base: 'completare',
+        '1sg_present': 'completo', '2sg_present': 'completi', '3sg_present': 'completa',
+        '1pl_present': 'completiamo', '2pl_present': 'completate', '3pl_present': 'completano',
+        '1sg_past': 'completai', '2sg_past': 'completasti', '3sg_past': 'completò',
+        '1pl_past': 'completammo', '2pl_past': 'completaste', '3pl_past': 'completarono',
+        '1sg_future': 'completerò', '2sg_future': 'completerai', '3sg_future': 'completerà',
+        '1pl_future': 'completeremo', '2pl_future': 'completerete', '3pl_future': 'completeranno',
+      },
+      fr: {
+        base: 'compléter',
+        '1sg_present': 'complète', '2sg_present': 'complètes', '3sg_present': 'complète',
+        '1pl_present': 'complétons', '2pl_present': 'complétez', '3pl_present': 'complètent',
+        '1sg_past': 'complétai', '2sg_past': 'complétas', '3sg_past': 'compléta',
+        '1pl_past': 'complétâmes', '2pl_past': 'complétâtes', '3pl_past': 'complétèrent',
+        '1sg_future': 'compléterai', '2sg_future': 'compléteras', '3sg_future': 'complétera',
+        '1pl_future': 'compléterons', '2pl_future': 'compléterez', '3pl_future': 'compléteront',
+      },
+      de: {
+        base: 'vervollständigen',
+        '1sg_present': 'vervollständige', '2sg_present': 'vervollständigst', '3sg_present': 'vervollständigt',
+        '1pl_present': 'vervollständigen', '2pl_present': 'vervollständigt', '3pl_present': 'vervollständigen',
+        '1sg_past': 'vervollständigte', '2sg_past': 'vervollständigtest', '3sg_past': 'vervollständigte',
+        '1pl_past': 'vervollständigten', '2pl_past': 'vervollständigtet', '3pl_past': 'vervollständigten',
+        '2sg_imperative': 'vervollständige',
+      },
+      es: {
+        base: 'completar',
+        '1sg_present': 'completo', '2sg_present': 'completas', '3sg_present': 'completa',
+        '1pl_present': 'completamos', '2pl_present': 'completáis', '3pl_present': 'completan',
+        '1sg_past': 'completé', '2sg_past': 'completaste', '3sg_past': 'completó',
+        '1pl_past': 'completamos', '2pl_past': 'completasteis', '3pl_past': 'completaron',
+        '1sg_future': 'completaré', '2sg_future': 'completarás', '3sg_future': 'completará',
+        '1pl_future': 'completaremos', '2pl_future': 'completaréis', '3pl_future': 'completarán',
+      },
+      ja: {
+        base: '補完する',
+        reading: 'ほかんする',
+        masu_present: '補完します',
+        masu_present_reading: 'ほかんします',
+        label: '補完',
+        label_reading: 'ほかん',
+      },
+      pt: {
+        base: 'completar',
+        '1sg_present': 'completo', '2sg_present': 'completa', '3sg_present': 'completa',
+        '1pl_present': 'completamos', '2pl_present': 'completam', '3pl_present': 'completam',
+        '1sg_past': 'completei', '2sg_past': 'completou', '3sg_past': 'completou',
+        '1pl_past': 'completamos', '2pl_past': 'completaram', '3pl_past': 'completaram',
+        '1sg_future': 'completarei', '2sg_future': 'completará', '3sg_future': 'completará',
+        '1pl_future': 'completaremos', '2pl_future': 'completarão', '3pl_future': 'completarão',
+      },
+    },
+  },
+  {
+    // Putting a change into effect, as ↵ runs a line. German anwenden is separable (wendet … an) and
+    // takes the strong past wandte / angewandt; Japanese labels with 適用.
+    id: 'APPLY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to put a change into effect',
+    emoji: '✔️',
+    forms: {
+      en: {
+        base: 'apply',
+        '1sg_present': 'apply', '2sg_present': 'apply', '3sg_present': 'applies',
+        '1pl_present': 'apply', '2pl_present': 'apply', '3pl_present': 'apply',
+        past: 'applied',
+      },
+      it: {
+        base: 'applicare',
+        '1sg_present': 'applico', '2sg_present': 'applichi', '3sg_present': 'applica',
+        '1pl_present': 'applichiamo', '2pl_present': 'applicate', '3pl_present': 'applicano',
+        '1sg_past': 'applicai', '2sg_past': 'applicasti', '3sg_past': 'applicò',
+        '1pl_past': 'applicammo', '2pl_past': 'applicaste', '3pl_past': 'applicarono',
+        '1sg_future': 'applicherò', '2sg_future': 'applicherai', '3sg_future': 'applicherà',
+        '1pl_future': 'applicheremo', '2pl_future': 'applicherete', '3pl_future': 'applicheranno',
+      },
+      fr: {
+        base: 'appliquer',
+        '1sg_present': 'applique', '2sg_present': 'appliques', '3sg_present': 'applique',
+        '1pl_present': 'appliquons', '2pl_present': 'appliquez', '3pl_present': 'appliquent',
+        '1sg_past': 'appliquai', '2sg_past': 'appliquas', '3sg_past': 'appliqua',
+        '1pl_past': 'appliquâmes', '2pl_past': 'appliquâtes', '3pl_past': 'appliquèrent',
+        '1sg_future': 'appliquerai', '2sg_future': 'appliqueras', '3sg_future': 'appliquera',
+        '1pl_future': 'appliquerons', '2pl_future': 'appliquerez', '3pl_future': 'appliqueront',
+      },
+      de: {
+        base: 'anwenden', particle: 'an',
+        '1sg_present': 'wende', '2sg_present': 'wendest', '3sg_present': 'wendet',
+        '1pl_present': 'wenden', '2pl_present': 'wendet', '3pl_present': 'wenden',
+        '1sg_past': 'wandte', '2sg_past': 'wandtest', '3sg_past': 'wandte',
+        '1pl_past': 'wandten', '2pl_past': 'wandtet', '3pl_past': 'wandten',
+        '2sg_imperative': 'wende',
+      },
+      es: {
+        base: 'aplicar',
+        '1sg_present': 'aplico', '2sg_present': 'aplicas', '3sg_present': 'aplica',
+        '1pl_present': 'aplicamos', '2pl_present': 'aplicáis', '3pl_present': 'aplican',
+        '1sg_past': 'apliqué', '2sg_past': 'aplicaste', '3sg_past': 'aplicó',
+        '1pl_past': 'aplicamos', '2pl_past': 'aplicasteis', '3pl_past': 'aplicaron',
+        '1sg_future': 'aplicaré', '2sg_future': 'aplicarás', '3sg_future': 'aplicará',
+        '1pl_future': 'aplicaremos', '2pl_future': 'aplicaréis', '3pl_future': 'aplicarán',
+      },
+      ja: {
+        base: '適用する',
+        reading: 'てきようする',
+        masu_present: '適用します',
+        masu_present_reading: 'てきようします',
+        label: '適用',
+        label_reading: 'てきよう',
+      },
+      pt: {
+        base: 'aplicar',
+        '1sg_present': 'aplico', '2sg_present': 'aplica', '3sg_present': 'aplica',
+        '1pl_present': 'aplicamos', '2pl_present': 'aplicam', '3pl_present': 'aplicam',
+        '1sg_past': 'apliquei', '2sg_past': 'aplicou', '3sg_past': 'aplicou',
+        '1pl_past': 'aplicamos', '2pl_past': 'aplicaram', '3pl_past': 'aplicaram',
+        '1sg_future': 'aplicarei', '2sg_future': 'aplicará', '3sg_future': 'aplicará',
+        '1pl_future': 'aplicaremos', '2pl_future': 'aplicarão', '3pl_future': 'aplicarão',
+      },
+    },
+  },
+
   // Grammar-word verbs (B06): the acts that define a part of speech — a noun NAMEs, an adjective
   // DESCRIBEs, an adverb MODIFYs, a verb EXPRESSes, a pronoun REPLACEs. German keeps to
   // non-separable stems so the finite form stays whole at the end of a relative clause.
@@ -5132,6 +5854,226 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'modificamos', '2pl_past': 'modificaram', '3pl_past': 'modificaram',
         '1sg_future': 'modificarei', '2sg_future': 'modificará', '3sg_future': 'modificará',
         '1pl_future': 'modificaremos', '2pl_future': 'modificarão', '3pl_future': 'modificarão',
+      },
+    },
+  },
+  {
+    // Changing a text or a piece of work, as an editor does (B43) — not MODIFY, which is what a word
+    // does to another. Italian and French share MODIFY's verb (modificare, modifier): it is what their
+    // software writes on the Edit button ("Modifica", "Modifier"), where redigere and éditer are the
+    // editor's trade. German "bearbeiten" and Japanese 編集 are the Edit menu's words.
+    id: 'EDIT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'locative', 'instrumental'],
+    description: 'to change a text or a piece of work',
+    emoji: '✏️',
+    isA: 'CHANGE',
+    forms: {
+      en: {
+        base: 'edit',
+        '1sg_present': 'edit', '2sg_present': 'edit', '3sg_present': 'edits',
+        '1pl_present': 'edit', '2pl_present': 'edit', '3pl_present': 'edit',
+        past: 'edited',
+      },
+      it: {
+        base: 'modificare',
+        '1sg_present': 'modifico', '2sg_present': 'modifichi', '3sg_present': 'modifica',
+        '1pl_present': 'modifichiamo', '2pl_present': 'modificate', '3pl_present': 'modificano',
+        '1sg_past': 'modificai', '2sg_past': 'modificasti', '3sg_past': 'modificò',
+        '1pl_past': 'modificammo', '2pl_past': 'modificaste', '3pl_past': 'modificarono',
+        '1sg_future': 'modificherò', '2sg_future': 'modificherai', '3sg_future': 'modificherà',
+        '1pl_future': 'modificheremo', '2pl_future': 'modificherete', '3pl_future': 'modificheranno',
+      },
+      fr: {
+        base: 'modifier',
+        '1sg_present': 'modifie', '2sg_present': 'modifies', '3sg_present': 'modifie',
+        '1pl_present': 'modifions', '2pl_present': 'modifiez', '3pl_present': 'modifient',
+        '1sg_past': 'modifiai', '2sg_past': 'modifias', '3sg_past': 'modifia',
+        '1pl_past': 'modifiâmes', '2pl_past': 'modifiâtes', '3pl_past': 'modifièrent',
+        '1sg_future': 'modifierai', '2sg_future': 'modifieras', '3sg_future': 'modifiera',
+        '1pl_future': 'modifierons', '2pl_future': 'modifierez', '3pl_future': 'modifieront',
+      },
+      de: {
+        base: 'bearbeiten',
+        '1sg_present': 'bearbeite', '2sg_present': 'bearbeitest', '3sg_present': 'bearbeitet',
+        '1pl_present': 'bearbeiten', '2pl_present': 'bearbeitet', '3pl_present': 'bearbeiten',
+        '1sg_past': 'bearbeitete', '2sg_past': 'bearbeitetest', '3sg_past': 'bearbeitete',
+        '1pl_past': 'bearbeiteten', '2pl_past': 'bearbeitetet', '3pl_past': 'bearbeiteten',
+      },
+      es: {
+        base: 'editar',
+        '1sg_present': 'edito', '2sg_present': 'editas', '3sg_present': 'edita',
+        '1pl_present': 'editamos', '2pl_present': 'editáis', '3pl_present': 'editan',
+        '1sg_past': 'edité', '2sg_past': 'editaste', '3sg_past': 'editó',
+        '1pl_past': 'editamos', '2pl_past': 'editasteis', '3pl_past': 'editaron',
+        '1sg_future': 'editaré', '2sg_future': 'editarás', '3sg_future': 'editará',
+        '1pl_future': 'editaremos', '2pl_future': 'editaréis', '3pl_future': 'editarán',
+      },
+      ja: {
+        base: '編集する',
+        reading: 'へんしゅうする',
+        masu_present: '編集します',
+        masu_present_reading: 'へんしゅうします',
+        label: '編集',
+        label_reading: 'へんしゅう',
+      },
+      pt: {
+        base: 'editar',
+        '1sg_present': 'edito', '2sg_present': 'edita', '3sg_present': 'edita',
+        '1pl_present': 'editamos', '2pl_present': 'editam', '3pl_present': 'editam',
+        '1sg_past': 'editei', '2sg_past': 'editou', '3sg_past': 'editou',
+        '1pl_past': 'editamos', '2pl_past': 'editaram', '3pl_past': 'editaram',
+        '1sg_future': 'editarei', '2sg_future': 'editará', '3sg_future': 'editará',
+        '1pl_future': 'editaremos', '2pl_future': 'editarão', '3pl_future': 'editarão',
+      },
+    },
+  },
+
+  {
+    // The grammarian's government: a word fixing the form of another, as a modal governs the
+    // infinitive after it (localization B47) or a preposition its case. Not the political sense,
+    // though every language but Japanese uses the one verb for both: it reggere, fr régir, de
+    // regieren, es regir, pt reger. Japanese linguistics says 支配する (格支配, case government).
+    // Italian reggere is irregular in the past (resse) and the participle (retto); Spanish regir
+    // raises e→i under stress and before -ió, and writes the g as j before o and a (rijo, rigió).
+    id: 'GOVERN',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to determine the form of another word (grammar)',
+    emoji: '🧭',
+    synonym: 'grammar',
+    forms: {
+      en: {
+        base: 'govern',
+        '1sg_present': 'govern', '2sg_present': 'govern', '3sg_present': 'governs',
+        '1pl_present': 'govern', '2pl_present': 'govern', '3pl_present': 'govern',
+        past: 'governed',
+      },
+      it: {
+        base: 'reggere',
+        '1sg_present': 'reggo', '2sg_present': 'reggi', '3sg_present': 'regge',
+        '1pl_present': 'reggiamo', '2pl_present': 'reggete', '3pl_present': 'reggono',
+        '1sg_past': 'ressi', '2sg_past': 'reggesti', '3sg_past': 'resse',
+        '1pl_past': 'reggemmo', '2pl_past': 'reggeste', '3pl_past': 'ressero',
+        '1sg_future': 'reggerò', '2sg_future': 'reggerai', '3sg_future': 'reggerà',
+        '1pl_future': 'reggeremo', '2pl_future': 'reggerete', '3pl_future': 'reggeranno',
+      },
+      fr: {
+        base: 'régir',
+        '1sg_present': 'régis', '2sg_present': 'régis', '3sg_present': 'régit',
+        '1pl_present': 'régissons', '2pl_present': 'régissez', '3pl_present': 'régissent',
+        '1sg_past': 'régis', '2sg_past': 'régis', '3sg_past': 'régit',
+        '1pl_past': 'régîmes', '2pl_past': 'régîtes', '3pl_past': 'régirent',
+        '1sg_future': 'régirai', '2sg_future': 'régiras', '3sg_future': 'régira',
+        '1pl_future': 'régirons', '2pl_future': 'régirez', '3pl_future': 'régiront',
+      },
+      de: {
+        base: 'regieren',
+        '1sg_present': 'regiere', '2sg_present': 'regierst', '3sg_present': 'regiert',
+        '1pl_present': 'regieren', '2pl_present': 'regiert', '3pl_present': 'regieren',
+        '1sg_past': 'regierte', '2sg_past': 'regiertest', '3sg_past': 'regierte',
+        '1pl_past': 'regierten', '2pl_past': 'regiertet', '3pl_past': 'regierten',
+        '2sg_imperative': 'regiere', // the optional du -e, kept, as on the other -ieren verbs
+      },
+      es: {
+        base: 'regir',
+        '1sg_present': 'rijo', '2sg_present': 'riges', '3sg_present': 'rige',
+        '1pl_present': 'regimos', '2pl_present': 'regís', '3pl_present': 'rigen',
+        '1sg_past': 'regí', '2sg_past': 'registe', '3sg_past': 'rigió',
+        '1pl_past': 'regimos', '2pl_past': 'registeis', '3pl_past': 'rigieron',
+        '1sg_future': 'regiré', '2sg_future': 'regirás', '3sg_future': 'regirá',
+        '1pl_future': 'regiremos', '2pl_future': 'regiréis', '3pl_future': 'regirán',
+      },
+      ja: {
+        base: '支配する',
+        reading: 'しはいする',
+        masu_present: '支配します',
+        masu_present_reading: 'しはいします',
+      },
+      pt: {
+        base: 'reger',
+        '1sg_present': 'rejo', '2sg_present': 'rege', '3sg_present': 'rege',
+        '1pl_present': 'regemos', '2pl_present': 'regem', '3pl_present': 'regem',
+        '1sg_past': 'regi', '2sg_past': 'regeu', '3sg_past': 'regeu',
+        '1pl_past': 'regemos', '2pl_past': 'regeram', '3pl_past': 'regeram',
+        '1sg_future': 'regerei', '2sg_future': 'regerá', '3sg_future': 'regerá',
+        '1pl_future': 'regeremos', '2pl_future': 'regerão', '3pl_future': 'regerão',
+      },
+    },
+  },
+
+  {
+    // Making a clause say the opposite: what `/not` does to a verb (localization B47), with the verb
+    // each language's grammar teaching uses for it — it "negare un verbo", de "ein Verb verneinen",
+    // es "negar un verbo", pt "negar um verbo", ja 動詞を否定する. French nier is the verb of logical
+    // and grammatical negation (to negate a proposition, a term), though in everyday French it is
+    // to deny; the school phrase, "mettre un verbe à la forme négative", puts fixed words after the
+    // object, which no lexeme can hold. Spanish negar diphthongizes under stress (niego) and writes
+    // gu before e (negué); Italian and Portuguese keep the hard g the same way (neghi, neguei).
+    id: 'NEGATE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to make a clause say the opposite (grammar)',
+    emoji: '🙅',
+    synonym: 'grammar',
+    forms: {
+      en: {
+        base: 'negate',
+        '1sg_present': 'negate', '2sg_present': 'negate', '3sg_present': 'negates',
+        '1pl_present': 'negate', '2pl_present': 'negate', '3pl_present': 'negate',
+        past: 'negated',
+      },
+      it: {
+        base: 'negare',
+        '1sg_present': 'nego', '2sg_present': 'neghi', '3sg_present': 'nega',
+        '1pl_present': 'neghiamo', '2pl_present': 'negate', '3pl_present': 'negano',
+        '1sg_past': 'negai', '2sg_past': 'negasti', '3sg_past': 'negò',
+        '1pl_past': 'negammo', '2pl_past': 'negaste', '3pl_past': 'negarono',
+        '1sg_future': 'negherò', '2sg_future': 'negherai', '3sg_future': 'negherà',
+        '1pl_future': 'negheremo', '2pl_future': 'negherete', '3pl_future': 'negheranno',
+      },
+      fr: {
+        base: 'nier',
+        '1sg_present': 'nie', '2sg_present': 'nies', '3sg_present': 'nie',
+        '1pl_present': 'nions', '2pl_present': 'niez', '3pl_present': 'nient',
+        '1sg_past': 'niai', '2sg_past': 'nias', '3sg_past': 'nia',
+        '1pl_past': 'niâmes', '2pl_past': 'niâtes', '3pl_past': 'nièrent',
+        '1sg_future': 'nierai', '2sg_future': 'nieras', '3sg_future': 'niera',
+        '1pl_future': 'nierons', '2pl_future': 'nierez', '3pl_future': 'nieront',
+      },
+      de: {
+        base: 'verneinen',
+        '1sg_present': 'verneine', '2sg_present': 'verneinst', '3sg_present': 'verneint',
+        '1pl_present': 'verneinen', '2pl_present': 'verneint', '3pl_present': 'verneinen',
+        '1sg_past': 'verneinte', '2sg_past': 'verneintest', '3sg_past': 'verneinte',
+        '1pl_past': 'verneinten', '2pl_past': 'verneintet', '3pl_past': 'verneinten',
+      },
+      es: {
+        base: 'negar',
+        '1sg_present': 'niego', '2sg_present': 'niegas', '3sg_present': 'niega',
+        '1pl_present': 'negamos', '2pl_present': 'negáis', '3pl_present': 'niegan',
+        '1sg_past': 'negué', '2sg_past': 'negaste', '3sg_past': 'negó',
+        '1pl_past': 'negamos', '2pl_past': 'negasteis', '3pl_past': 'negaron',
+        '1sg_future': 'negaré', '2sg_future': 'negarás', '3sg_future': 'negará',
+        '1pl_future': 'negaremos', '2pl_future': 'negaréis', '3pl_future': 'negarán',
+      },
+      ja: {
+        base: '否定する',
+        reading: 'ひていする',
+        masu_present: '否定します',
+        masu_present_reading: 'ひていします',
+      },
+      pt: {
+        base: 'negar',
+        '1sg_present': 'nego', '2sg_present': 'nega', '3sg_present': 'nega',
+        '1pl_present': 'negamos', '2pl_present': 'negam', '3pl_present': 'negam',
+        '1sg_past': 'neguei', '2sg_past': 'negou', '3sg_past': 'negou',
+        '1pl_past': 'negamos', '2pl_past': 'negaram', '3pl_past': 'negaram',
+        '1sg_future': 'negarei', '2sg_future': 'negará', '3sg_future': 'negará',
+        '1pl_future': 'negaremos', '2pl_future': 'negarão', '3pl_future': 'negarão',
       },
     },
   },

@@ -9,6 +9,7 @@ import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { objectPredication } from '../../functions/objectPredication.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
+import { isNamedLand } from '../../functions/isNamedLand.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
@@ -30,11 +31,14 @@ import { spatialHead } from './spatialHead.js';
 
 // `objectForms` are the direct object's, which the object complement predicates of and agrees an
 // adjective head with ("dipinge la parete rossa") — the object's counterpart of `subjectForms`.
+// `verbForms` are the governing verb's lexical forms, for a preposition the verb itself fixes
+// (`direction_prep`).
 export function complementsPhrase(
   complements: Partial<Record<ComplementType, ResolvedComplement>> | undefined,
   subjectForms: Record<string, string>,
   verbConceptId: string,
   objectForms: Record<string, string> = {},
+  verbForms: Record<string, string> = {},
 ): string {
   if (!complements) return '';
   // The ablative adverb "via" disambiguates source from direction, but only self-propelled
@@ -163,11 +167,15 @@ export function complementsPhrase(
           // A direction naming a relation is that relation's goal — Italian spells the two the same
           // ("salta nell'aria", "è nell'aria"), so the place map serves ("jumps into the air").
           dirSpec ? spatialHead(dirSpec, nf, plural, lead) :
-          // A continent goal takes bare "in" ("va in Antartide"), not the default place "a" with
-          // the proper noun's article ("all'Antartide"); an animate goal takes "da", a place "a".
-          // A continent that is no longer a bare name takes the "in" that fuses with its article: "va
-          // nella tua Asia", "va nella grande Asia".
-          nf['isA'] === 'CONTINENT' ? (bareName(nf, lead) ? 'in' : spatialHead('in', nf, plural, lead)) :
+          // A verb can fix its goal's preposition in its lexeme. "Muoversi" takes "verso" for every
+          // goal: after it, "da" reads as the place left ("muoversi dal parlante" is moving away from
+          // the speaker), "al suolo" and "in Europa" as where the moving happens. Localization B34, B35.
+          verbForms['direction_prep'] ? prepDet(verbForms['direction_prep'] as ItPreposition, nf, plural, lead) :
+          // A land goal, a continent or a country, takes bare "in" ("va in Antartide", "va in
+          // Giappone"), not the default place "a" with the proper noun's article ("all'Antartide", "al
+          // Giappone"); an animate goal takes "da", a place "a". A land that is no longer a bare name
+          // takes the "in" that fuses with its article: "va nella tua Asia", "va nella grande Asia".
+          isNamedLand(nf) ? (bareName(nf, lead) ? 'in' : spatialHead('in', nf, plural, lead)) :
           prepDet(nf['animate'] === '1' ? 'da' : 'a', nf, plural, lead)
         ) :
         type === 'source'    ? `${sourceAdverb || (nf['animate'] === '1' ? 'via ' : '')}${prepDet('da', nf, plural, lead)}` :

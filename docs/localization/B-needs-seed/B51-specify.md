@@ -24,7 +24,7 @@ refers to. C05 asked for a verb for fixing reference.)_
 It stays apart from its neighbours: ADJECTIVE is "a word that describes nouns"
 ([B06](../done/B06-grammar-words.md)), MODIFIER "a word that modifies other words"
 ([A18](../done/A18-grammar-nouns.md)), and QUANTIFIER, its child, "a determiner that indicates
-quantities" ([B39](B39-quantity-and-category.md)).
+quantities" ([B39](../done/B39-quantity-and-category.md)).
 
 ### Probe renders (2026-09-21, engine source at HEAD, SPECIFY through a lookup wrapper, nothing seeded)
 

@@ -29,7 +29,9 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
   if (!completion) return null;
   const numbered = completion.candidates.some((c) => c.number);
   // What the list holds, then the word it is about, outside the phrase (the C14 rule): "commands · cat".
-  const heading = completion.titleKey ? t(completion.titleKey) : completion.title;
+  // A list of two kinds of rows is headed by both titles: "pinned lines · recent lines".
+  const keys = completion.titleKey === undefined ? [] : [completion.titleKey].flat();
+  const heading = keys.length ? keys.map((k) => t(k)).join(" · ") : completion.title;
   const title = completion.about ? `${heading} · ${completion.about}` : heading;
 
   const row = (c: Candidate, i: number) => {
@@ -140,12 +142,13 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
         {(c.current || c.alias || c.shortcut) && (
           <Box
             component="span"
-            data-testid={c.shortcut && !c.alias ? "console-option-shortcut" : undefined}
+            data-testid={c.alias ? "console-option-alias" : c.shortcut ? "console-option-shortcut" : "console-option-current"}
             sx={{ ml: "auto", pl: 2, fontFamily: '"Inter", sans-serif', fontSize: "0.72rem", color: "text.disabled", whiteSpace: "nowrap" }}
           >
-            {/* English literals, for /localize. A shortcut says what it is short for: `/past` = `/tense past`. */}
+            {/* The name matched, which is another name of the command: "alias /plural". A shortcut says
+                what it is short for: `/past` = `/tense past`. And a setting what it holds: "now singular". */}
             {c.alias ? (
-              `also ${c.alias}`
+              `${t("console.alias.singular")} ${c.alias}`
             ) : c.shortcut ? (
               <>
                 ={" "}
@@ -154,7 +157,7 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
                 </Box>
               </>
             ) : (
-              `now ${c.current!.key ? t(c.current!.key as never) : c.current!.value}`
+              `${t("console.now")} ${c.current!.key ? t(c.current!.key as never) : c.current!.value}`
             )}
           </Box>
         )}
@@ -255,10 +258,9 @@ export function CompletionList({ model, id, left = 16 }: { model: PhraseConsoleM
           <Keycap spec="ArrowDown" />
           {t("action.move")}
         </Box>
-        {/* English literal, for /localize: COMPLETE is not seeded (B45). */}
         <Box component="span" sx={{ display: "inline-flex", gap: 0.5, alignItems: "center" }}>
           <Keycap spec="Tab" />
-          complete
+          {t("action.complete")}
         </Box>
         {/* A digit picks a row as ↵ does: the same act, CHOOSE (the A12 ruling). */}
         {numbered ? (

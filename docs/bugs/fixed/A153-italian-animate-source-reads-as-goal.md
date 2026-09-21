@@ -68,3 +68,8 @@ existing regression that RUN keeps 'via', a place stays bare and the animate goa
 Expected re-record: the Romance elision test pinned COME from an ANGEL, which is animate, so it now
 carries the adverb in front of the fusion ('viene via dall'angelo'); a place source was added
 beside it.
+
+**MOVE_ONESELF settled, 2026-09-21** (localization [B35](../../localization/done/B35-come.md)): its goal
+no longer takes `da`. The verb's Italian lexeme names its goal preposition, `direction_prep: 'verso'`,
+so the two directions read `il cane si muove verso il bambino` and `il cane si muove via dal bambino`.
+The transitive MOVE/COPY/TRANSFER and a source-plus-direction pair on GO remain as above.

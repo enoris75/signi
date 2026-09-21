@@ -669,6 +669,120 @@ describe('buildUiStrings', () => {
     expect(strings['console.usage.command']).toMatchObject({ en: 'command', fr: 'commande', ja: '命令' });
   });
 
+  // What each console command is for, on its help page (B47): an infinitive citation, lower-case and
+  // without its full stop, as a gloss is.
+  test('says what each console command is for, as a verb is glossed', () => {
+    const strings = buildUiStrings();
+    const purposes = Object.entries(strings).filter(([key]) => key.startsWith('purpose.'));
+    expect(purposes).toHaveLength(22);
+    const stopped = purposes.flatMap(([key, byLanguage]) =>
+      Object.entries(byLanguage as Record<string, string>).filter(([, text]) => /[.。]$/.test(text)).map(([l]) => `${key}:${l}`),
+    );
+    expect(stopped).toEqual([]);
+    expect(purposes.filter(([, byLanguage]) => !(byLanguage as Record<string, string>)['en']!.startsWith('to ')).map(([key]) => key)).toEqual([]);
+    // SET on a setting, the word it belongs to as its possessor; German festlegen keeps its particle
+    // on the infinitive.
+    expect(strings['purpose.number']).toEqual({
+      en: "to set a noun's number",
+      it: 'impostare il numero di un sostantivo',
+      fr: "définir le nombre d'un nom",
+      de: 'den Numerus eines Substantivs festlegen',
+      es: 'establecer el número de un sustantivo',
+      ja: '名詞の数を設定する',
+      pt: 'definir o número de um substantivo',
+    });
+    // LINK's goal takes "mit" in German, ADD's "zu"; Japanese marks both に.
+    expect(strings['purpose.conjunct']).toMatchObject({
+      de: 'eine andere Phrase mit einem Substantiv verbinden', ja: '名詞に別のフレーズをつなぐ',
+    });
+    expect(strings['purpose.possessor']).toMatchObject({ de: 'einen Besitzer zu einem Substantiv hinzufügen', ja: '名詞に所有者を加える' });
+    expect(strings['purpose.modal']).toMatchObject({ en: 'to govern a verb', it: 'reggere un verbo', de: 'ein Verb regieren', ja: '動詞を支配する' });
+    expect(strings['purpose.negate']).toMatchObject({ en: 'to negate a verb', fr: 'nier un verbe', de: 'ein Verb verneinen', ja: '動詞を否定する' });
+    expect(strings['purpose.sentiment']).toMatchObject({ it: 'impostare la valutazione di un complemento di causa', ja: '原因の副詞語句の評価を設定する' });
+  });
+
+  // The console's lines, history and pins (B45).
+  test('names the console’s pins, its history, its lines and its keys', () => {
+    const strings = buildUiStrings();
+    // `this` line, the one the pin sits on. Japanese labels with the verbal noun.
+    expect(strings['action.pinLine']).toEqual({
+      en: 'Pin this line', it: 'Fissa questa riga', fr: 'Épingler cette ligne', de: 'Diese Zeile anheften',
+      es: 'Fijar esta línea', ja: 'この行をピン留め', pt: 'Fixar esta linha',
+    });
+    expect(strings['action.unpinLine']).toEqual({
+      en: 'Unpin this line', it: 'Sblocca questa riga', fr: 'Désépingler cette ligne', de: 'Diese Zeile lösen',
+      es: 'Desfijar esta línea', ja: 'この行をピン留め解除', pt: 'Desafixar esta linha',
+    });
+    // The toast.phraseSaved shape. Unpinned is "no longer pinned" in Italian and German.
+    expect(strings['toast.linePinned']).toEqual({
+      en: 'Pinned line', it: 'Riga fissata', fr: 'Ligne épinglée', de: 'Angeheftete Zeile', es: 'Línea fijada', ja: 'ピン留め済みの行', pt: 'Linha fixada',
+    });
+    expect(strings['toast.lineUnpinned']).toEqual({
+      en: 'Unpinned line', it: 'Riga non più fissata', fr: 'Ligne désépinglée', de: 'Nicht mehr angeheftete Zeile',
+      es: 'Línea desfijada', ja: 'ピン留め解除済みの行', pt: 'Linha desafixada',
+    });
+    expect(strings['console.history']).toEqual({
+      en: 'history', it: 'cronologia', fr: 'historique', de: 'Verlauf', es: 'historial', ja: '履歴', pt: 'histórico',
+    });
+    expect(strings['console.list.pinned']).toEqual({
+      en: 'pinned lines', it: 'righe fissate', fr: 'lignes épinglées', de: 'angeheftete Zeilen', es: 'líneas fijadas', ja: 'ピン留め済みの行', pt: 'linhas fixadas',
+    });
+    expect(strings['console.list.recent']).toEqual({
+      en: 'recent lines', it: 'righe recenti', fr: 'lignes récentes', de: 'zuletzt verwendete Zeilen', es: 'líneas recientes', ja: '最近使用された行', pt: 'linhas recentes',
+    });
+    // A row's note agrees with LINE, feminine in the Romance languages.
+    expect(strings['console.line.pinned']).toMatchObject({ it: 'fissata', fr: 'épinglée', es: 'fijada', ja: 'ピン留め済み' });
+    expect(strings['console.line.recent']).toMatchObject({ fr: 'récente', de: 'zuletzt verwendet', ja: '最近使用された' });
+    expect(strings['action.complete']).toEqual({
+      en: 'complete', it: 'completa', fr: 'compléter', de: 'vervollständigen', es: 'completar', ja: '補完', pt: 'completar',
+    });
+    expect(strings['action.apply']).toEqual({
+      en: 'apply', it: 'applica', fr: 'appliquer', de: 'anwenden', es: 'aplicar', ja: '適用', pt: 'aplicar',
+    });
+    expect(strings['action.closeList']).toEqual({
+      en: 'close the list', it: "chiudi l'elenco", fr: 'fermer la liste', de: 'die Liste schließen', es: 'cerrar la lista', ja: '一覧を閉じる', pt: 'fechar a lista',
+    });
+    // C11's agentless passive.
+    expect(strings['failure.lineNotRead']).toEqual({
+      en: 'This line could not be read.',
+      it: 'Questa riga non poteva essere letta.',
+      fr: 'Cette ligne ne pouvait pas être lue.',
+      de: 'Diese Zeile konnte nicht gelesen werden.',
+      es: 'Esta línea no podía ser leída.',
+      ja: 'この行は読むことができませんでした。',
+      pt: 'Esta linha não podia ser lida.',
+    });
+  });
+
+  // The console's topics, its moods and degrees, and its list and help page's labels (B46).
+  test('names the console’s remaining topics, /statement, /plain and the list and help page’s labels', () => {
+    const strings = buildUiStrings();
+    expect(strings['console.topic.place']).toEqual({
+      en: 'spatial relationship', it: 'relazione spaziale', fr: 'relation spatiale', de: 'räumliche Beziehung',
+      es: 'relación espacial', ja: '空間的な関係', pt: 'relação espacial',
+    });
+    expect(strings['console.topic.mood']).toEqual({ en: 'mood', it: 'modo', fr: 'mode', de: 'Modus', es: 'modo', ja: '叙法', pt: 'modo' });
+    expect(strings['console.topic.workspace']).toEqual({
+      en: 'workspace', it: 'area di lavoro', fr: 'espace de travail', de: 'Arbeitsbereich', es: 'espacio de trabajo', ja: 'ワークスペース', pt: 'espaço de trabalho',
+    });
+    // Each school grammar's name for the sentence that asserts.
+    expect(strings['mood.statement']).toEqual({
+      en: 'Statement', it: 'Proposizione enunciativa', fr: 'Phrase déclarative', de: 'Aussagesatz',
+      es: 'Oración enunciativa', ja: '平叙文', pt: 'Frase declarativa',
+    });
+    // Its own noun: not POSITIVE's polarity (ja 肯定).
+    expect(strings['degree.name.positive']).toEqual({
+      en: 'Positive degree', it: 'Grado positivo', fr: 'Degré positif', de: 'Positiv', es: 'Grado positivo', ja: '原級', pt: 'Grau normal',
+    });
+    expect(strings['console.list.values']).toEqual({ en: 'values', it: 'valori', fr: 'valeurs', de: 'Werte', es: 'valores', ja: '値', pt: 'valores' });
+    // 今, not 現在, which names the present tense a verb's row so often holds.
+    expect(strings['console.now']).toEqual({ en: 'now', it: 'ora', fr: 'maintenant', de: 'jetzt', es: 'ahora', ja: '今', pt: 'agora' });
+    expect(strings['console.alias.singular']).toEqual({ en: 'alias', it: 'alias', fr: 'alias', de: 'Alias', es: 'alias', ja: '別名', pt: 'alias' });
+    expect(strings['console.alias.plural']).toEqual({ en: 'aliases', it: 'alias', fr: 'alias', de: 'Aliasse', es: 'alias', ja: '別名', pt: 'aliases' });
+    expect(strings['console.help.usage']).toEqual({ en: 'Usage', it: 'Uso', fr: 'Utilisation', de: 'Verwendung', es: 'Uso', ja: '使用法', pt: 'Uso' });
+    expect(strings['console.help.example']).toEqual({ en: 'Example', it: 'Esempio', fr: 'Exemple', de: 'Beispiel', es: 'Ejemplo', ja: '例', pt: 'Exemplo' });
+  });
+
   // The copy, reorder, resize and mood controls (B27, B28).
   test('names the copy, reorder, resize and mood controls', () => {
     const strings = buildUiStrings();
@@ -743,6 +857,207 @@ describe('buildUiStrings', () => {
     });
     expect(strings['action.copyLanguage']).toMatchObject({
       en: 'Copy a language', it: 'Copia una lingua', es: 'Copiar un idioma', ja: '言語をコピー',
+    });
+  });
+
+  // The keys that move about the page, leave a level, fold a group and cycle a value backwards (B44).
+  test('names the keys that move the cursor, and the ways it moves', () => {
+    const strings = buildUiStrings();
+    // GO takes the cursor somewhere; Japanese labels it 移動, GO's instruction label.
+    expect(strings['action.go.left']).toEqual({
+      en: 'Go left', it: "Va' a sinistra", fr: 'Aller à gauche', de: 'Nach links gehen',
+      es: 'Ir a la izquierda', ja: '左に移動', pt: 'Ir para a esquerda',
+    });
+    expect(strings['action.go.up']).toMatchObject({ it: "Va' su", de: 'Nach oben gehen', ja: '上に移動' });
+    expect(strings['action.go.right']).toMatchObject({ fr: 'Aller à droite', es: 'Ir a la derecha', ja: '右に移動' });
+    expect(strings['action.go.down']).toMatchObject({ it: "Va' giù", pt: 'Ir para baixo', ja: '下に移動' });
+    // MOVE on the slot, the adverb after the object as the period's reorder buttons have it.
+    expect(strings['action.moveSlot.left']).toEqual({
+      en: 'Move the slot left', it: 'Sposta lo slot a sinistra', fr: 'Déplacer le slot à gauche',
+      de: 'Den Slot nach links verschieben', es: 'Mover el slot a la izquierda', ja: 'スロットを左に移動',
+      pt: 'Mover o slot para a esquerda',
+    });
+    expect(strings['action.moveSlot.up']).toMatchObject({ en: 'Move the slot up', de: 'Den Slot nach oben verschieben' });
+    expect(strings['action.moveSlot.right']).toMatchObject({ it: 'Sposta lo slot a destra', ja: 'スロットを右に移動' });
+    expect(strings['action.moveSlot.down']).toMatchObject({ fr: 'Déplacer le slot vers le bas', es: 'Mover el slot abajo' });
+    // NEXT and PREVIOUS follow the noun in the Romance languages and decline in German.
+    expect(strings['slot.next']).toEqual({
+      en: 'Next slot', it: 'Slot successivo', fr: 'Slot suivant', de: 'Nächster Slot', es: 'Slot siguiente', ja: '次のスロット', pt: 'Slot seguinte',
+    });
+    expect(strings['slot.previous']).toMatchObject({ it: 'Slot precedente', de: 'Vorheriger Slot', ja: '前のスロット' });
+    expect(strings['period.previous']).toEqual({
+      en: 'Previous period', it: 'Periodo precedente', fr: 'Période précédente', de: 'Vorheriges Satzgefüge',
+      es: 'Período anterior', ja: '前の文', pt: 'Período anterior',
+    });
+    expect(strings['period.next']).toMatchObject({ fr: 'Période suivante', de: 'Nächstes Satzgefüge', ja: '次の文' });
+    expect(strings['region.next']).toEqual({
+      en: 'Next region', it: 'Area successiva', fr: 'Zone suivante', de: 'Nächster Bereich', es: 'Zona siguiente', ja: '次の領域', pt: 'Área seguinte',
+    });
+    expect(strings['region.previous']).toMatchObject({ it: 'Area precedente', de: 'Vorheriger Bereich', ja: '前の領域' });
+    // LEAVE: out of the slot in Italian, Spanish and Portuguese, the slot as the object elsewhere.
+    expect(strings['action.leaveSlot']).toEqual({
+      en: 'Leave the slot', it: 'Esci dallo slot', fr: 'Quitter le slot', de: 'Den Slot verlassen',
+      es: 'Salir del slot', ja: 'スロットを退出', pt: 'Sair do slot',
+    });
+    expect(strings['action.leavePeriod']).toEqual({
+      en: 'Leave the period', it: 'Esci dal periodo', fr: 'Quitter la période', de: 'Das Satzgefüge verlassen',
+      es: 'Salir del período', ja: '文を退出', pt: 'Sair do período',
+    });
+    expect(strings['action.compactGroup']).toEqual({
+      en: 'Compact the group', it: 'Compatta il gruppo', fr: 'Compacter le groupe', de: 'Die Gruppe verdichten',
+      es: 'Compactar el grupo', ja: 'グループを圧縮', pt: 'Compactar o grupo',
+    });
+    // The word a ⇧ twin's name ends on, after the forward key's and a comma.
+    expect(strings['hint.backwards']).toEqual({
+      en: 'backwards', it: "all'indietro", fr: 'en arrière', de: 'rückwärts', es: 'hacia atrás', ja: '逆方向に', pt: 'para trás',
+    });
+    expect(strings['imperative.register']).toEqual({
+      en: 'Register', it: 'Registro', fr: 'Registre', de: 'Register', es: 'Registro', ja: '言語使用域', pt: 'Registro',
+    });
+    expect(strings['instrumental.level']).toEqual({
+      en: "The instrumental's level", it: 'Livello del complemento di mezzo', fr: 'Niveau du complément de moyen',
+      de: 'Ebene des Instrumentals', es: 'Nivel del complemento circunstancial de instrumento', ja: '手段語の段階',
+      pt: 'Nível do adjunto adverbial de instrumento',
+    });
+  });
+
+  // The picker's and the console's key strips, and the caption a keyboard user reads (B44).
+  test('says what ⇥ does in a picker and a prompt, and how a keyboard user fills a slot', () => {
+    const strings = buildUiStrings();
+    expect(strings['hint.chooseAndNext']).toEqual({
+      en: 'choose, and then go to the next slot', it: "scegli, e poi va' allo slot successivo",
+      fr: 'choisir, et puis aller au slot suivant', de: 'wählen, und dann zum nächsten Slot gehen',
+      es: 'elegir, y luego ir al slot siguiente', ja: '選び、それから次のスロットへ移動', pt: 'escolher, e depois ir ao slot seguinte',
+    });
+    expect(strings['grid.row']).toEqual({ en: 'row', it: 'riga', fr: 'ligne', de: 'Zeile', es: 'fila', ja: '行', pt: 'linha' });
+    expect(strings['grid.value']).toEqual({ en: 'value', it: 'valore', fr: 'valeur', de: 'Wert', es: 'valor', ja: '値', pt: 'valor' });
+    expect(strings['console.nextWord']).toEqual({
+      en: 'next word', it: 'parola successiva', fr: 'mot suivant', de: 'nächstes Wort', es: 'palabra siguiente', ja: '次の単語', pt: 'palavra seguinte',
+    });
+    expect(strings['hint.chooseWordKeyboard']).toEqual({
+      en: 'use the arrow keys, and then type a word', it: 'usa le frecce, e poi digita una parola',
+      fr: 'utiliser les flèches, et puis taper un mot', de: 'die Pfeiltasten verwenden, und dann ein Wort tippen',
+      es: 'usar las flechas, y luego teclear una palabra', ja: '矢印キーを使用、それから単語を入力', pt: 'usar as setas, e depois digitar uma palavra',
+    });
+  });
+
+  // The help overlay's name, its keyboard section and that section's headings and rows (B41).
+  test('names the help, and the parts of its keyboard section', () => {
+    const strings = buildUiStrings();
+    expect(strings['help.heading']).toEqual({
+      en: 'Help', it: 'Aiuto', fr: 'Aide', de: 'Hilfe', es: 'Ayuda', ja: 'ヘルプ', pt: 'Ajuda',
+    });
+    // The purpose relation: Italian "da tastiera", German compounds.
+    expect(strings['help.keyboard']).toEqual({
+      en: 'Keyboard navigation', it: 'Navigazione da tastiera', fr: 'Navigation de clavier', de: 'Tastaturnavigation',
+      es: 'Navegación de teclado', ja: 'キーボードのナビゲーション', pt: 'Navegação de teclado',
+    });
+    expect(strings['help.section.app']).toEqual({
+      en: 'Everywhere', it: 'Ovunque', fr: 'Partout', de: 'Überall', es: 'En todas partes', ja: 'どこでも', pt: 'Em toda parte',
+    });
+    expect(strings['help.section.box']).toMatchObject({ en: 'Navigation', it: 'Navigazione', es: 'Navegación', ja: 'ナビゲーション' });
+    expect(strings['help.section.picker']).toEqual({
+      en: 'Word list', it: 'Elenco di parole', fr: 'Liste de mots', de: 'Wortliste', es: 'Lista de palabras', ja: '単語の一覧', pt: 'Lista de palavras',
+    });
+    expect(strings['help.section.menu']).toEqual({
+      en: 'Menus', it: 'Menu', fr: 'Menus', de: 'Menüs', es: 'Menús', ja: 'メニュー', pt: 'Menus',
+    });
+    expect(strings['help.section.pick']).toEqual({
+      en: 'Targets', it: 'Destinazioni', fr: 'Cibles', de: 'Ziele', es: 'Destinos', ja: '対象', pt: 'Alvos',
+    });
+    expect(strings['help.pickNumberedRow']).toEqual({
+      en: 'Choose a numbered row', it: 'Scegli una riga numerata', fr: 'Choisir une ligne numérotée',
+      de: 'Eine nummerierte Zeile wählen', es: 'Elegir una fila numerada', ja: '番号付きの行を選び', pt: 'Escolher uma linha numerada',
+    });
+    expect(strings['help.pickNumbered']).toEqual({
+      en: 'Choose a numbered target', it: 'Scegli una destinazione numerata', fr: 'Choisir une cible numérotée',
+      de: 'Ein nummeriertes Ziel wählen', es: 'Elegir un destino numerado', ja: '番号付きの対象を選び', pt: 'Escolher um alvo numerado',
+    });
+    expect(strings['help.nextTarget']).toEqual({
+      en: 'Next target', it: 'Destinazione successiva', fr: 'Cible suivante', de: 'Nächstes Ziel',
+      es: 'Destino siguiente', ja: '次の対象', pt: 'Alvo seguinte',
+    });
+  });
+
+  // The way back (B40): the Edit menu's pair, in the words each language's editors use, and the toast
+  // that offers it, shaped like `toast.periodAdded`.
+  test('names undo and redo, and the period a removal took away', () => {
+    const strings = buildUiStrings();
+    // Italian and French Undo is their Cancel; German keeps "rückgängig" apart from its verb.
+    expect(strings['action.undo']).toEqual({
+      en: 'Undo', it: 'Annulla', fr: 'Annuler', de: 'Rückgängig machen', es: 'Deshacer', ja: '元に戻す', pt: 'Desfazer',
+    });
+    // German Redo is its Retry; Japanese says the stem やり直し.
+    expect(strings['action.redo']).toEqual({
+      en: 'Redo', it: 'Ripeti', fr: 'Rétablir', de: 'Wiederholen', es: 'Rehacer', ja: 'やり直し', pt: 'Refazer',
+    });
+    expect(strings['toast.periodRemoved']).toEqual({
+      en: 'Removed period', it: 'Periodo rimosso', fr: 'Période retirée', de: 'Entferntes Satzgefüge',
+      es: 'Período quitado', ja: '削除済みの文', pt: 'Período removido',
+    });
+  });
+
+  // The console's name, and what its controls do to it (B42).
+  test('names the console, and what its controls and keys do to it', () => {
+    const strings = buildUiStrings();
+    expect(strings['console.name']).toEqual({
+      en: 'Console', it: 'Console', fr: 'Console', de: 'Konsole', es: 'Consola', ja: 'コンソール', pt: 'Console',
+    });
+    expect(strings['action.hideConsole']).toEqual({
+      en: 'Hide the console', it: 'Nascondi la console', fr: 'Cacher la console', de: 'Die Konsole verstecken',
+      es: 'Esconder la consola', ja: 'コンソールを隠し', pt: 'Esconder o console',
+    });
+    expect(strings['action.resizeConsole']).toMatchObject({
+      en: 'Resize the console', it: 'Ridimensiona la console', de: 'Die Konsole skalieren', ja: 'コンソールをサイズ変更',
+    });
+    // The console is where the command is typed: a locative, which each language marks its own way.
+    expect(strings['action.typeCommand']).toEqual({
+      en: 'Type a command in the console', it: 'Digita un comando nella console', fr: 'Taper une commande dans la console',
+      de: 'Einen Befehl in der Konsole tippen', es: 'Teclear un comando en la consola', ja: 'コンソールで命令を入力',
+      pt: 'Digitar um comando no console',
+    });
+    expect(strings['action.showInConsole']).toEqual({
+      en: 'Show in the console', it: 'Mostra nella console', fr: 'Montrer dans la console', de: 'In der Konsole zeigen',
+      es: 'Mostrar en la consola', ja: 'コンソールで見せ', pt: 'Mostrar no console',
+    });
+  });
+
+  // The canvas, a preview, editing and the toolbar (B43).
+  test('names the canvas and what the keys do to it, the preview, editing and the toolbar', () => {
+    const strings = buildUiStrings();
+    expect(strings['status.preview']).toEqual({
+      en: 'Preview', it: 'Anteprima', fr: 'Aperçu', de: 'Vorschau', es: 'Vista previa', ja: 'プレビュー', pt: 'Pré-visualização',
+    });
+    // The canvas as the goal of going back: German contracts "zu der" and puts the particle last.
+    expect(strings['action.returnToCanvas']).toEqual({
+      en: 'return to the canvas', it: 'torna alla tela', fr: 'revenir au canevas', de: 'zur Arbeitsfläche zurückkehren',
+      es: 'volver al lienzo', ja: 'キャンバスへ戻る', pt: 'voltar à tela',
+    });
+    expect(strings['console.fromCanvas']).toEqual({
+      en: 'Canvas', it: 'Tela', fr: 'Canevas', de: 'Arbeitsfläche', es: 'Lienzo', ja: 'キャンバス', pt: 'Tela',
+    });
+    expect(strings['action.expandCanvas']).toEqual({
+      en: 'Expand the canvas', it: 'Espandi la tela', fr: 'Étendre le canevas', de: 'Die Arbeitsfläche erweitern',
+      es: 'Expandir el lienzo', ja: 'キャンバスを展開', pt: 'Expandir a tela',
+    });
+    // SHRINK, not COMPACT: the surface gets smaller, nothing is packed ("verkleinern", 縮小, not "verdichten", 圧縮).
+    expect(strings['action.shrinkCanvas']).toEqual({
+      en: 'Shrink the canvas', it: 'Rimpicciolisci la tela', fr: 'Réduire le canevas', de: 'Die Arbeitsfläche verkleinern',
+      es: 'Reducir el lienzo', ja: 'キャンバスを縮小', pt: 'Reduzir a tela',
+    });
+    expect(strings['action.edit']).toEqual({
+      en: 'Edit', it: 'Modifica', fr: 'Modifier', de: 'Bearbeiten', es: 'Editar', ja: '編集', pt: 'Editar',
+    });
+    expect(strings['action.editPeriod']).toMatchObject({
+      en: 'Edit this period', it: 'Modifica questo periodo', de: 'Dieses Satzgefüge bearbeiten', ja: 'この文を編集',
+    });
+    expect(strings['hint.clickToEdit']).toEqual({
+      en: 'click to edit', it: 'clicca per modificare', fr: 'cliquer pour modifier', de: 'klicken, um zu bearbeiten',
+      es: 'clicar para editar', ja: '編集するためにクリック', pt: 'clicar para editar',
+    });
+    expect(strings['app.toolbar']).toEqual({
+      en: 'Toolbar', it: 'Barra degli strumenti', fr: "Barre d'outils", de: 'Symbolleiste', es: 'Barra de herramientas',
+      ja: 'ツールバー', pt: 'Barra de ferramentas',
     });
   });
 });

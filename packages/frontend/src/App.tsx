@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import type { UiStringKey } from "@signi/shared";
 import { Box, Container, Typography, Alert, Button, Snackbar } from "@mui/material";
 import MenuBookIcon from "@mui/icons-material/MenuBook";
 import TerminalIcon from "@mui/icons-material/Terminal";
@@ -36,8 +37,9 @@ export default function App() {
   });
   const { containers, links } = history;
   // What the last destructive act was, and how to take it back. Shown as the toast that replaced
-  // the confirm dialog (the plan's §3.9).
-  const [undoToast, setUndoToast] = useState<string | null>(null);
+  // the confirm dialog (the plan's §3.9). Held as its catalogue key, so the toast follows a change of
+  // language while it shows.
+  const [undoToast, setUndoToast] = useState<UiStringKey | null>(null);
   const [leftWidthPct, setLeftWidthPct] = useState<number>(() => {
     const saved = localStorage.getItem("signi:leftWidth");
     return saved ? Number(saved) : 58.33;
@@ -184,8 +186,7 @@ export default function App() {
             <Box
               ref={toolbar.ref}
               role={toolbar.role}
-              // No aria-label: the catalogue has no word for this row yet, and a wrong name is
-              // worse than none. One for /localize.
+              aria-label={t("app.toolbar")}
               data-kb-region="header"
               onKeyDown={toolbar.onKeyDown}
               onFocus={toolbar.onFocus}
@@ -207,8 +208,7 @@ export default function App() {
                 aria-pressed={phraseConsole.open}
                 sx={{ textTransform: "none", gap: 0.5 }}
               >
-                {/* English literal, for /localize. */}
-                Console
+                {t("console.name")}
                 <Keycap spec="Code:Backquote" />
               </Button>
               <LanguageSelector />
@@ -266,8 +266,7 @@ export default function App() {
                   setLinks={phraseConsole.canvas.setLinks}
                   wordsPanelOpen={wordsPanelOpen}
                   onWordsPanelClose={() => setWordsPanel(false)}
-                  // English literal, for /localize.
-                  onPeriodRemoved={() => setUndoToast("Period removed")}
+                  onPeriodRemoved={() => setUndoToast("toast.periodRemoved")}
                 />
               </ConsoleMarksProvider>
             </Box>
@@ -368,18 +367,19 @@ export default function App() {
                 <Button
                   size="small"
                   color="inherit"
+                  data-testid="undo-period"
                   onClick={() => {
                     history.undo();
                     setUndoToast(null);
                   }}
                   sx={{ textTransform: "none", gap: 0.5 }}
                 >
-                  Undo
+                  {t("action.undo")}
                   <Keycap spec="Mod+Z" />
                 </Button>
               }
             >
-              {undoToast}
+              {t(undoToast)}
             </Alert>
           ) : undefined}
         </Snackbar>

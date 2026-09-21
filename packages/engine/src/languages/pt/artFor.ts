@@ -1,6 +1,7 @@
 import { defArticle } from './defArticle.js';
 import { demonstrative } from './demonstrative.js';
 import { indefArticle } from './indefArticle.js';
+import { isBareName } from './isBareName.js';
 
 /**
  * The determiner for a subject/direct-object noun phrase, from its `definiteness`
@@ -10,8 +11,10 @@ import { indefArticle } from './indefArticle.js';
  */
 export function artFor(forms: Record<string, string>, plural = false): string {
   // A proper noun (a África) always takes the definite article in Portuguese, whatever
-  // determiner the user picked; it is a property of the name, not a choice.
-  if (forms['proper'] === '1') return defArticle(forms, plural);
+  // determiner the user picked; it is a property of the name, not a choice. A few names are bare
+  // instead ("Portugal", never "o Portugal"), which their forms mark with `takes_article: '0'`:
+  // the inverse of the de/es flag, whose proper nouns go bare by default (localization B36).
+  if (forms['proper'] === '1') return isBareName(forms) ? '' : defArticle(forms, plural);
   const definiteness = forms['definiteness'] ?? 'definite';
   const fem = (forms['gender'] ?? 'masc') === 'fem';
   // Mass nouns ("água") stay singular: "um pouco de água", "muita/pouca água", "toda a água".

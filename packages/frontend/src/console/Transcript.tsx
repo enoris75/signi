@@ -64,7 +64,8 @@ export function Transcript({
         >
           <Box component="span" sx={{ color: "text.disabled", fontFamily: MONO, fontSize: "0.85rem", textAlign: "center" }}>
             {entry.kind === "echo" ? (
-              <TouchAppOutlinedIcon sx={{ fontSize: 15, verticalAlign: "-2px" }} titleAccess="from the canvas" />
+              // Named by its source: the canvas wrote this line.
+              <TouchAppOutlinedIcon sx={{ fontSize: 15, verticalAlign: "-2px" }} titleAccess={t("console.fromCanvas")} />
             ) : entry.kind === "error" ? (
               <Box component="span" sx={{ color: "error.main", fontWeight: 700 }}>
                 !
@@ -109,8 +110,8 @@ export function Transcript({
 
 /** The pin a typed line wears: shown on hover or focus, and always once pinned. */
 function PinToggle({ pinned, onPin }: { pinned: boolean; onPin: (pinned: boolean) => void }) {
-  // English literals, for /localize.
-  const label = pinned ? "Unpin this line" : "Pin this line";
+  const t = useUiString();
+  const label = pinned ? t("action.unpinLine") : t("action.pinLine");
   return (
     <Tooltip title={label}>
       <IconButton
@@ -161,16 +162,22 @@ function HelpPage({ name, here, vocab }: { name: string; here?: string; vocab: V
         </Box>
         <Box component="span" sx={{ ...prose, color: "text.primary" }}>
           {def.descriptionKey ? t(def.descriptionKey) : def.description}
-          {def.purpose ? ` — it ${def.purpose}.` : ""}
+          {def.purposeKey ? ` — ${t(def.purposeKey)}` : ""}
         </Box>
       </Box>
-      {/* English literals, for /localize. */}
-      <Box sx={prose}>
-        Written{" "}
+      {/* Each label before a colon, the value after it as the console writes it: "Usage: /pl · alias /plural". */}
+      <Box sx={prose} data-testid="help-usage-line">
+        {t("console.help.usage")}:{" "}
         <Box component="span" data-testid="help-usage" sx={{ fontFamily: MONO, color: "text.primary" }}>
           {usage}
         </Box>
-        {def.aliases.length > 0 && <> · also {def.aliases.map((a) => `/${a}`).join(" ")}</>}
+        {def.aliases.length > 0 && (
+          <Box component="span" data-testid="help-aliases">
+            {" · "}
+            {t(def.aliases.length === 1 ? "console.alias.singular" : "console.alias.plural")}{" "}
+            {def.aliases.map((a) => `/${a}`).join(" ")}
+          </Box>
+        )}
       </Box>
       {def.arg.kind === "values" && (
         <Box sx={prose}>
@@ -185,8 +192,8 @@ function HelpPage({ name, here, vocab }: { name: string; here?: string; vocab: V
           ))}
         </Box>
       )}
-      <Box sx={{ ...prose, mt: 0.25 }}>
-        For example{" "}
+      <Box sx={{ ...prose, mt: 0.25 }} data-testid="help-example-line">
+        {t("console.help.example")}:{" "}
         <Box component="span" data-testid="help-example" sx={{ fontFamily: MONO, fontSize: "0.85rem" }}>
           <Line text={example} />
         </Box>
