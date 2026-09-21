@@ -545,3 +545,39 @@ describe('known bugs: Italian fusion on an articled proper name', () => {
     expect(say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: np('EUROPE', { definiteness: 'indefinite' }) } } }), 'it')).toBe('il gatto va in Europa.');
   });
 });
+
+// A168. German marks motion to a place named without an article with "nach" ("nach Europa"); "zu" is
+// the goal preposition of common nouns and people ("zum Markt"). The German direction always takes
+// "zu", so a bare-name continent reads "geht zu Europa". Two older passing tests in this file pin that
+// "zu" (the COME test above, and the A63 regression) and change with the fix — see the bug file.
+describe('known bugs: German continent goal "nach"', () => {
+  const goes = (goal: NounPhrase) => say(clause(np('CAT'), 'GO', { complements: { direction: { phrase: goal } } }), 'de');
+
+  test.fails('a bare-name continent goal takes "nach", in a clause, a command and a relative clause', () => {
+    expect(goes(np('EUROPE'))).toBe('der Kater geht nach Europa.'); // now: "zu Europa"
+    expect(goes(np('ASIA'))).toBe('der Kater geht nach Asien.');
+    expect(goes(np('NORTH_AMERICA'))).toBe('der Kater geht nach Nordamerika.');
+    expect(say(clause(np('CAT'), 'COME', {
+      complements: { source: { phrase: np('AFRICA') }, direction: { phrase: np('EUROPE') } },
+    }), 'de')).toBe('der Kater kommt aus Afrika nach Europa.');
+    expect(say({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'GO' }, imperative: true,
+      complements: { direction: { phrase: np('EUROPE') } },
+    }, 'de')).toBe('geh nach Europa.');
+    expect(say(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'GO' }, complements: { direction: { phrase: np('EUROPE') } } },
+    }), 'RUN'), 'de')).toBe('der Kater, der nach Europa geht, läuft.');
+  });
+
+  // Regression: a common-noun goal, the articled continent, the source, and ADD's own "zu" (a
+  // terminus, not a motion goal) keep their forms.
+  test('a common-noun goal, the articled continent, the source and ADD\'s "zu" are unchanged', () => {
+    expect(goes(place())).toBe('der Kater geht zum Markt.');
+    expect(goes(np('ANTARCTICA'))).toBe('der Kater geht zur Antarktis.');
+    expect(say(clause(np('CAT'), 'COME', { complements: { source: { phrase: np('AFRICA') } } }), 'de'))
+      .toBe('der Kater kommt aus Afrika.');
+    expect(say(clause(np('CAT'), 'ADD', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: np('AFRICA') } },
+    }), 'de')).toBe('der Kater fügt das Buch zu Afrika hinzu.');
+  });
+});

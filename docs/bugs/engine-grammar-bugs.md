@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (9 of
-them, as of this writing — all 9 in Part B; Part A has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (15 of
+them, as of this writing — 9 in Part B and 6 in Part A).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -59,7 +59,16 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 
 ### Part A — Confirmed bugs (`A-must-fix/`)
 
-None open. Every confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
+| # | File | Area |
+|---|---|---|
+| A165 | [A165-possessive-on-a-place-name.md](A-must-fix/A165-possessive-on-a-place-name.md) | French, Italian, Spanish, German |
+| A166 | [A166-relative-own-negative-subject-not-collapsed.md](A-must-fix/A166-relative-own-negative-subject-not-collapsed.md) | English, German |
+| A167 | [A167-negative-head-erases-relative-polarity.md](A-must-fix/A167-negative-head-erases-relative-polarity.md) | Italian, French, Spanish, Portuguese |
+| A168 | [A168-german-continent-goal-nach.md](A-must-fix/A168-german-continent-goal-nach.md) | German |
+| A169 | [A169-adjective-on-a-place-name.md](A-must-fix/A169-adjective-on-a-place-name.md) | German, Italian, French |
+| A170 | [A170-subjunctive-under-a-negative-head.md](A-must-fix/A170-subjunctive-under-a-negative-head.md) | Spanish, Portuguese |
+
+Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
 
 ### Part B — Documented simplifications (`B-can-fix/`)

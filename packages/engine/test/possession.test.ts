@@ -335,3 +335,73 @@ describe('known bugs: Portuguese possessor determiner', () => {
     expect(bookOf(np('EUROPE'))).toBe('o livro da Europa arde.');
   });
 });
+
+// A165. A pronominal possessive fills the determiner slot, so it displaces a common noun's article
+// ("ta maison", "en mi casa") — and a proper place name's too: the article a name takes as a name is
+// only its default determiner. The proper-noun branches run before the possessive is consulted, so
+// the two stack (French "la ton Asie", Spanish "la mi Antártida", German "in der meiner Antarktis"),
+// and Italian/French keep a bare continent's article-less "in" / "en" in front of it ("in tua Asia").
+describe('known bugs: a possessive on a place name', () => {
+  const your = { kind: 'pronominal', person: '2', number: 'singular', gender: 'masc' } as const;
+  const my = { kind: 'pronominal', person: '1', number: 'singular', gender: 'masc' } as const;
+  const our = { kind: 'pronominal', person: '1', number: 'plural', gender: 'masc' } as const;
+  const yourAsia = np('ASIA', { possessor: your });
+  const myAntarctica = np('ANTARCTICA', { possessor: my });
+  const runsIn = (place: NounPhrase) => sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: place } } }));
+  const goesTo = (place: NounPhrase) => sayAll(clause(np('CAT'), 'GO', { complements: { direction: { phrase: place } } }));
+  const comesFrom = (place: NounPhrase) => sayAll(clause(np('CAT'), 'COME', { complements: { source: { phrase: place } } }));
+
+  test.fails('French drops the name\'s article for the possessive, in every position', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: yourAsia })).fr).toBe('le chat voit ton Asie.'); // now: "la ton Asie"
+    expect(sayAll(clause(np('EUROPE', { possessor: our }), 'BURN')).fr).toBe('notre Europe brûle.');
+    expect(sayAll(clause(np('CAT'), 'GIVE', {
+      directObject: np('BOOK'), complements: { terminus: { phrase: yourAsia } },
+    })).fr).toBe('le chat donne le livre à ton Asie.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: yourAsia } } })).fr)
+      .toBe('le chat court à cause de ton Asie.');
+    expect(bookOf(yourAsia).fr).toBe('le livre de ton Asie brûle.');
+    expect(comesFrom(myAntarctica).fr).toBe('le chat vient de mon Antarctique.'); // now: "du mon"
+  });
+
+  // The goal keeps the continent's own "in" / "en", with the article the possessive now needs. The
+  // common-place goal ("alla tua Asia", "à ton Asie") is the alternative — a decision for the fixer.
+  test.fails('Italian and French take the article-bearing "in" once a possessive leads a continent', () => {
+    expect(runsIn(yourAsia)).toMatchObject({
+      it: 'il gatto corre nella tua Asia.', // now: "in tua Asia"
+      fr: 'le chat court dans ton Asie.', // now: "en ton Asie"
+    });
+    expect(goesTo(yourAsia)).toMatchObject({
+      it: 'il gatto va nella tua Asia.',
+      fr: 'le chat va dans ton Asie.',
+    });
+  });
+
+  test.fails('Spanish and German drop an articled name\'s article for the possessive', () => {
+    expect(runsIn(myAntarctica)).toMatchObject({
+      es: 'el gato corre en mi Antártida.', // now: "en la mi Antártida"
+      de: 'der Kater läuft in meiner Antarktis.', // now: "in der meiner Antarktis"
+    });
+    expect(comesFrom(myAntarctica)).toMatchObject({
+      es: 'el gato viene de mi Antártida.',
+      de: 'der Kater kommt aus meiner Antarktis.',
+    });
+  });
+
+  // Regression: the languages and positions that already let the possessive have the slot, a name
+  // without a possessive, and a common noun with one.
+  test('the positions already right, a bare name, and a possessed common noun are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: yourAsia }))).toMatchObject({
+      en: 'the cat sees your Asia.', it: 'il gatto vede la tua Asia.', es: 'el gato ve tu Asia.',
+      pt: 'o gato vê a sua Ásia.', de: 'der Kater sieht dein Asien.', ja: '猫はあなたのアジアを見ます。',
+    });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: myAntarctica })).de).toBe('der Kater sieht meine Antarktis.');
+    expect(runsIn(yourAsia)).toMatchObject({
+      es: 'el gato corre en tu Asia.', pt: 'o gato corre na sua Ásia.', de: 'der Kater läuft in deinem Asien.',
+    });
+    expect(comesFrom(yourAsia)).toMatchObject({ it: 'il gatto viene dalla tua Asia.', fr: 'le chat vient de ton Asie.' });
+    expect(runsIn(np('ASIA'))).toMatchObject({ it: 'il gatto corre in Asia.', fr: 'le chat court en Asie.' });
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('ASIA') })).fr).toBe("le chat voit l'Asie.");
+    expect(sayAll(clause(np('CAT'), 'EAT', { complements: { locative: { phrase: np('HOUSE', { possessor: your }) } } })))
+      .toMatchObject({ it: 'il gatto mangia nella tua casa.', fr: 'le chat mange dans ta maison.' });
+  });
+});

@@ -1807,3 +1807,52 @@ describe('the grammar adjectives agree with the noun they name', () => {
     expect(named(noun, adjective)).toEqual(expected);
   });
 });
+
+// A169. A place name that takes no article alone takes one once an adjective modifies it: German "das
+// große Asien", not "große Asien" (no article, and a weak ending with nothing to be weak after). The
+// bare continent prepositions of Italian and French ("in Asia", "en Asie") likewise fit the bare
+// name only; a prenominal adjective needs the article-bearing one ("nella grande Asia").
+describe('known bugs: an adjective on a place name', () => {
+  const bigAsia = np('ASIA', { adjectives: ['BIG'] });
+  const withPlace = (type: 'locative' | 'direction' | 'source', verb: string) =>
+    sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: bigAsia } } }));
+
+  test.fails('German gives the modified name its article, in every position', () => {
+    expect(sayAll(clause(bigAsia, 'BURN')).de).toBe('das große Asien brennt.'); // now: "große Asien"
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: bigAsia })).de).toBe('der Kater sieht das große Asien.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('ASIA', { adjectives: ['FAR'] }) })).de)
+      .toBe('der Kater sieht das ferne Asien.');
+    expect(withPlace('locative', 'RUN').de).toBe('der Kater läuft im großen Asien.'); // now: "in großen Asien"
+    expect(withPlace('direction', 'GO').de).toBe('der Kater geht zum großen Asien.');
+    expect(withPlace('source', 'COME').de).toBe('der Kater kommt aus dem großen Asien.');
+    expect(sayAll(clause(np('BOOK', { possessor: bigAsia }), 'BURN')).de).toBe('das Buch vom großen Asien brennt.');
+  });
+
+  test.fails('Italian and French take the article-bearing preposition before a prenominal adjective', () => {
+    expect(withPlace('locative', 'RUN')).toMatchObject({
+      it: 'il gatto corre nella grande Asia.', // now: "in grande Asia"
+      fr: 'le chat court dans la grande Asie.', // now: "en grande Asie"
+    });
+    expect(withPlace('direction', 'GO')).toMatchObject({
+      it: 'il gatto va nella grande Asia.',
+      fr: 'le chat va dans la grande Asie.',
+    });
+    expect(withPlace('source', 'COME').fr).toBe('le chat vient de la grande Asie.'); // now: "de grande Asie"
+  });
+
+  // Regression: the positions and languages already right, an articled name, and the bare name.
+  test('the articled positions, Portuguese, an articled name and the bare name are unchanged', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: bigAsia }))).toMatchObject({
+      en: 'the cat sees big Asia.', it: 'il gatto vede la grande Asia.', fr: 'le chat voit la grande Asie.',
+      pt: 'o gato vê a Ásia grande.',
+    });
+    expect(withPlace('source', 'COME').it).toBe('il gatto viene dalla grande Asia.');
+    expect(withPlace('locative', 'RUN').pt).toBe('o gato corre na Ásia grande.');
+    expect(sayAll(clause(np('BOOK', { possessor: bigAsia }), 'BURN')).fr).toBe('le livre de la grande Asie brûle.');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('ANTARCTICA', { adjectives: ['BIG'] }) })).de)
+      .toBe('der Kater sieht die große Antarktis.');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('ASIA') } } }))).toMatchObject({
+      it: 'il gatto corre in Asia.', fr: 'le chat court en Asie.', de: 'der Kater läuft in Asien.',
+    });
+  });
+});
