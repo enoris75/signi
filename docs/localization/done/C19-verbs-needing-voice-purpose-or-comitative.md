@@ -1,7 +1,7 @@
 # C19. The verbs C08 did not reach: SAVE, ADD, LOAD, TIDY_UP, BURN, SEEM, BECOME
 
 _(split out of [C08](C08-copular-and-genus-verbs.md) on 2026-09-20, the way
-[C18](../C-needs-engine/C18-motion-verbs-without-a-gloss.md) was split out of C17: C08 built the
+[C18](C18-motion-verbs-without-a-gloss.md) was split out of C17: C08 built the
 **causative** and localized the seven verbs it reached, and these are what it did not. **Retired by
 splitting** on 2026-09-21: the four workspace verbs shipped here (see Done), and the other three
 were split into their own tickets.)_

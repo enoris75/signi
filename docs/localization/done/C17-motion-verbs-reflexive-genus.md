@@ -90,7 +90,7 @@ semantic id of its own.
 ## Done
 
 2026-09-19. The engine work, the two seeds and the two glosses the probe supported. JUMP, COLLAPSE
-and COME moved to [C18](../C-needs-engine/C18-motion-verbs-without-a-gloss.md).
+and COME moved to [C18](C18-motion-verbs-without-a-gloss.md).
 
 **Italian pronominal verbs.** The lexeme is stored as the Spanish one is: base `muoversi`, and every
 finite form carries its clitic (`si muove`). `it/nonReflexiveVerb.ts` strips it: the base becomes

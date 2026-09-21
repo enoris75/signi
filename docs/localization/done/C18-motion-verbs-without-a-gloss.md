@@ -1,46 +1,45 @@
-# C18. Motion verbs the genus cannot gloss yet: COLLAPSE and COME
+# C18. Motion verbs the genus could not gloss yet: JUMP, COLLAPSE, COME
 
-_(split out of [C17](../done/C17-motion-verbs-reflexive-genus.md) when C17 shipped. **JUMP left
-2026-09-21** — see Done.)_
+_(split out of [C17](C17-motion-verbs-reflexive-genus.md) when C17 shipped. **Retired by splitting**
+on 2026-09-21: JUMP shipped here (see Done), and COLLAPSE and COME were split into their own
+tickets.)_
 
-**Blocked on:** a differentia the plan cannot compose. The genus is ready. C17 built the Italian
-pronominal and German reflexive verbs and seeded **MOVE_ONESELF** ("to change position": it
-*muoversi*, fr *se déplacer*, de *sich bewegen*, es *moverse*, pt *mover-se*, ja 移動する), and RUN,
-GO and now JUMP are glossed on it. These two need something MOVE_ONESELF cannot carry today:
+## Split (2026-09-21)
 
-| verb | gloss (en) | blocked on |
-|---|---|---|
-| COLLAPSE | to move downward suddenly | **two adverbs on one verb**. `GlossParts.modifier` and `VerbPhrase.modifier` each hold one, and SUDDENLY is not seeded |
-| COME | to move toward the speaker | no composable deixis ("toward the speaker", "here"). Stays literal, like the [C05](C05-non-distinguishing-genera.md) genera |
+C17 seeded the genus **MOVE_ONESELF** ("to change position": it *muoversi*, fr *se déplacer*, de
+*sich bewegen*, es *moverse*, pt *mover-se*, ja 移動する), and RUN, GO and JUMP are glossed on it.
+This file had the other two waiting on a differentia MOVE_ONESELF could not carry. A fresh probe
+found that neither needs the engine, only words:
 
-## COLLAPSE: what "two adverbs" costs
+| verb | now | gloss | seed first |
+|---|---|---|---|
+| COLLAPSE | [B34](../B-needs-seed/B34-collapse.md) | to move to the ground suddenly | GROUND, SUDDENLY |
+| COME | [B35](../B-needs-seed/B35-come.md) | to move to the speaker | SPEAKER |
 
-Not a corner of a gloss — a feature, the way the passive was for [C19](../done/C19-verbs-needing-voice-purpose-or-comitative.md).
-`VerbPhrase.modifier` is one adverb, and **37 sites across 21 files** read it: the seven engines'
-adverb placement, the builder's adverb slot and its satellite, the console's `/adv`, the
-serialization format, the relative-clause and modal paths. Each language would also need an
+What changed from this file's own verdicts:
+
+1. **COLLAPSE never needed two adverbs.** "To move downward suddenly" spent both of its adverb slots
+   on "down" and "suddenly". The `direction` complement, which unblocked JUMP, can say "down" as a
+   place, *the ground*. That leaves the one `modifier` for SUDDENLY. This file had ruled the
+   direction out because "there is no noun for COLLAPSE to end up in relation to". There is one; it
+   was just not seeded.
+2. **COME's deixis is a noun.** This file put COME with the [C05](../C-needs-engine/C05-non-distinguishing-genera.md)
+   literals for want of a "composable deixis". "The speaker" as the goal of the same `direction`
+   complement is that deixis, and it renders in all seven. The pronoun route, "to move to me", is
+   not open: the motion complements are noun-only by design.
+
+Each ticket leaves one reading for a native speaker to judge: French *au sol* for COLLAPSE, and
+Italian *muoversi dal parlante* for COME. The probe tables are in the tickets.
+
+## Two adverbs on one verb: costed, not needed
+
+This was COLLAPSE's blocker, and it is kept here as the cost of the feature in case anything else
+asks for it. `VerbPhrase.modifier` is one adverb, and **37 sites across 21 files** read it: the
+seven engines' adverb placement, the builder's adverb slot and its satellite, the console's `/adv`,
+the serialization format, the relative-clause and modal paths. Each language would also need an
 *order* for two adverbs, which is a real question and not a mechanical one (en "moves down
 suddenly" / "suddenly moves down"; de "bewegt sich plötzlich nach unten"; ja 「突然下に移動する」).
-Seeding SUDDENLY before that exists would put a word in the corpus with nothing able to use it, so
-it is not seeded either.
-
-The single-adverb fallbacks were probed and rejected when this file was written, and the reason
-still holds — neither tells its verb apart, because lifting also moves up and sinking moves down:
-
-| Plan | en | it | fr | de | es | ja | pt |
-|---|---|---|---|---|---|---|---|
-| `infinitiveGloss('MOVE_ONESELF', { modifier: 'UP' })` | to move up | muoversi su | se déplacer vers le haut | sich nach oben bewegen | moverse arriba | 上に移動する | mover-se para cima |
-| `infinitiveGloss('MOVE_ONESELF', { modifier: 'DOWN' })` | to move down | muoversi giù | se déplacer vers le bas | sich nach unten bewegen | moverse abajo | 下に移動する | mover-se para baixo |
-
-The `direction` complement, which is what unblocked JUMP, does not help here: "down" is an adverb,
-not a landmark, and there is no noun for COLLAPSE to end up in relation to. A `manner` complement
-would want a SUDDENNESS noun, which is the same seed with an extra step.
-
-## Once unblocked
-
-Set `isA: 'MOVE_ONESELF'` on each verb whose gloss cites it, as RUN, GO and JUMP have, and pin the
-gloss in `packages/engine/test/reflexive.test.ts` (*C17 verb definitions*) and in
-`e2e/definition-tooltip.spec.ts`.
+No localization task needs it now.
 
 ## Done: JUMP (2026-09-21)
 
@@ -67,7 +66,7 @@ default**, because having no relation is a meaning of its own there
 
 | | plain goal | + `in` |
 |---|---|---|
-| en | to the house | **into** the house — a different word, which is the whole gap [B27](../done/B27-ui-clipboard-move-resize.md) hit |
+| en | to the house | **into** the house — a different word, which is the whole gap [B27](B27-ui-clipboard-move-resize.md) hit |
 | de | zum Haus | **ins** Haus — the same preposition, in the **accusative** of motion-into, against the dative of being there ("im Haus") |
 | ja | 家へ | 家**の中**へ — the relational noun a static place leaves out (家に) |
 | it / fr / es / pt | alla casa / à la maison / a la casa / à casa | nella casa / dans la maison / en la casa / na casa |
