@@ -3,6 +3,7 @@ import type { ResolvedComplement, RubySegment } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { adjDegree } from '../../functions/adjDegree.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
+import { causeNegative } from '../../functions/causeNegative.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
 import { directionSpecifier } from '../../functions/directionSpecifier.js';
@@ -16,6 +17,16 @@ import { jaParticleSegs } from './jaParticleSegs.js';
 import { npSegs } from './npSegs.js';
 import { predicateLinkSegs } from './predicateLinkSegs.js';
 import { wordSeg } from './wordSeg.js';
+
+// The cause particle, denied where the plan denies the cause rather than the clause (see
+// `Complement.negative`). Japanese negates such a phrase with ではなく in place of the particle's own
+// trailing に / で: 犬のために → 犬のためではなく, 犬のおかげで → 犬のおかげではなく, 犬のせいで →
+// 犬のせいではなく. The verb is untouched, so 「猫は犬のためではなく走ります」 says the cat runs and the
+// dog is not why.
+function jaCauseParticle(c: ResolvedComplement): string {
+  const particle = CAUSE_PARTICLE[causeSentiment(c)];
+  return causeNegative(c) ? `${particle.slice(0, -1)}ではなく` : particle;
+}
 
 // The Japanese render order: the shared one with the subject complement moved to the end, against
 // the verb it predicates (A186).
@@ -149,7 +160,7 @@ export function complementSegs(
       // A verb that puts something *at* the place wins over it: its に above says the same thing
       // better ("lives through the house" is 家に住みます), as the existential already did.
       : type === 'locative' && spec === 'through' ? PATH_CITATION.through
-      : type === 'cause' ? CAUSE_PARTICLE[causeSentiment(c)]
+      : type === 'cause' ? jaCauseParticle(c)
       : type === 'manner' && mannerRelation(firstConjunct(c.phrase).head.forms) === 'similative' ? 'のように'
       // The object complement: the factitive に ("この文を命令にする"), or として where the object is
       // only taken as the thing ("この文を条件として使う").

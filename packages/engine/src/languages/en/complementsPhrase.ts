@@ -3,6 +3,7 @@ import type { ConceptForms, ResolvedComplement } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
+import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { firstConjunct } from '../../functions/firstConjunct.js';
 import { isSeemingPredicateNoun } from '../../functions/isSeemingPredicateNoun.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
@@ -11,7 +12,7 @@ import { directionSpecifier } from '../../functions/directionSpecifier.js';
 import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { isAdjectivePredicate } from '../../functions/isAdjectivePredicate.js';
 import { objectPredication } from '../../functions/objectPredication.js';
-import { CAUSE_PREP, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
+import { CAUSE_PREP, CONSTITUENT_NEGATOR, ESSIVE, GOAL_PREP, LOCATIVE_IDIOMS, MANNER_PREP, PATH_PREP, PREP } from './en.consts.js';
 import { coordinate } from './coordinate.js';
 import { enAdj } from './enAdj.js';
 import { npText } from './npText.js';
@@ -102,6 +103,9 @@ export function complementsPhrase(
       }
       return `${prep} ${coordinate(c.phrase, npText)}`;
     })
+    // A cause the plan denies rather than the clause takes its negator here, in front of whatever
+    // shape the sentiment gave it (see `withCauseNegator`).
+    .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
 }

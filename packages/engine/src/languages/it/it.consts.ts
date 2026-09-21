@@ -136,3 +136,7 @@ export const IT_DI_BEFORE_PRONOUN: ReadonlySet<string> = new Set(['su', 'sopra',
 // the infinitive ends in the enclitic -rsi ("muoversi"), and each stored finite form carries the clitic
 // as a proclitic word ("si muove"), as the Spanish lexicon stores "se vuelve".
 export const IT_REFLEXIVE: Record<string, string> = { '1sg': 'mi', '2sg': 'ti', '3sg': 'si', '1pl': 'ci', '2pl': 'vi', '3pl': 'si' };
+
+// Il negatore di un singolo costituente, non della frase: "corre **non** a causa del cane" — corre,
+// e il cane non ne è la ragione (vedi `Complement.negative`).
+export const CONSTITUENT_NEGATOR = 'non';

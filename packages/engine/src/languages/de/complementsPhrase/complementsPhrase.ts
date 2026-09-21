@@ -1,6 +1,7 @@
 import { COMPLEMENT_RENDER_ORDER, DEFAULT_LOCATIVE_SPECIFIER, DEFAULT_ROUTE_SPECIFIER, isPronominalPossessor, type ComplementType } from '@signi/shared';
 import type { ConceptForms, ResolvedComplement } from '../../../types.js';
 import { causeSentiment } from '../../../functions/causeSentiment.js';
+import { withCauseNegator } from '../../../functions/withCauseNegator.js';
 import { isSeemingPredicateNoun } from '../../../functions/isSeemingPredicateNoun.js';
 import { locativeIdiom } from '../../../functions/locativeIdiom.js';
 import { objectPredication } from '../../../functions/objectPredication.js';
@@ -14,7 +15,7 @@ import { adjPhrase } from '../adjPhrase.js';
 import { articledNameForms } from '../articledNameForms.js';
 import { coordinate } from '../coordinate.js';
 import { datPluralN } from '../datPluralN.js';
-import { LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
+import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, OBJECT_PREDICATIVE_CASE } from '../de.consts.js';
 import type { Case } from '../de.types.js';
 import { mannerPrepCase } from '../mannerPrepCase.js';
 import { dePredAdj } from '../dePredAdj.js';
@@ -193,7 +194,11 @@ export function complementsParts(
       return head ? `${head} ${rest}` : rest;
       });
   };
-  const adjuncts = DE_ADJUNCT_ORDER.map(render).filter(Boolean).join(' ');
+  // A cause the plan denies rather than the clause takes its negator here, directly before the
+  // phrase, which is where a constituent negation stands in the Mittelfeld (see `withCauseNegator`).
+  const adjuncts = DE_ADJUNCT_ORDER
+    .map((type) => withCauseNegator(render(type), type, complements[type], CONSTITUENT_NEGATOR))
+    .filter(Boolean).join(' ');
   const text = DE_PREDICATE_TYPES.map(render).filter(Boolean).join(' ');
   // "scheinen" takes no predicate nominative at all — "*scheint eine Legende" — only the infinitive
   // "zu sein" (a predicate adjective alone stays bare: "scheint müde"). The infinitive is

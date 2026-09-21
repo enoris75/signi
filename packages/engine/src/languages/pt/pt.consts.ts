@@ -122,3 +122,7 @@ export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set([
  * either like any adjective with its ending ("*sem títula").
  */
 export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zero', 'sem título']);
+
+// O negador de um só constituinte, e não da oração: "corre **não** por causa do cão" — corre, e o
+// cão não é a razão (ver `Complement.negative`).
+export const CONSTITUENT_NEGATOR = 'não';

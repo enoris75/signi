@@ -114,3 +114,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * never takes one.
  */
 export const PARENTHETICAL_CONNECTORS: ReadonlySet<CoordConjunction> = new Set(['that_is']);
+
+// The negator that denies one constituent rather than the clause: "runs **not** because of the
+// dog", which says the cat runs and the dog is not why (see `Complement.negative`). English sets
+// such a phrase off with nothing but the word itself.
+export const CONSTITUENT_NEGATOR = 'not';

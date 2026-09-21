@@ -22,6 +22,13 @@ export function complementsWithNicht(
   nicht: string,
 ): string {
   const { adjuncts, predicate } = complementsParts(complements, verb);
-  const parts = predicate ? [...lead, adjuncts, nicht, predicate] : [nicht, ...lead, adjuncts];
+  // German spells a clause's "nicht" and a denied cause's own in the same slot (see
+  // `Complement.negative`). With a predicate they stay apart, one at each end of the adjuncts, and
+  // the sentence says both: "ist nicht wegen des Hundes nicht müde". With no predicate to anchor the
+  // clause's, the two land side by side — "läuft nicht nicht wegen des Hundes", which is not German.
+  // One "nicht" carries both readings there; telling them apart would need the "sondern" clause the
+  // plan has no room for.
+  const clauseNicht = !predicate && nicht && adjuncts.startsWith(`${nicht} `) ? '' : nicht;
+  const parts = predicate ? [...lead, adjuncts, nicht, predicate] : [clauseNicht, ...lead, adjuncts];
   return parts.filter(Boolean).join(' ');
 }

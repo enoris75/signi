@@ -147,3 +147,8 @@ export const COORD_INVERTS: Record<CoordConjunction, boolean> = {
 // Reflexivity is lexical: the citation infinitive leads with "sich" ("sich bewegen"), and the finite
 // forms are the plain verb's ("bewegt"), so the clause places the pronoun (see `reflexivePronoun`).
 export const DE_REFLEXIVE: Record<string, string> = { '1sg': 'mich', '2sg': 'dich', '3sg': 'sich', '1pl': 'uns', '2pl': 'euch', '3pl': 'sich' };
+
+// Der Negator eines einzelnen Satzglieds, nicht des Satzes: "ist **nicht** wegen des Hundes müde" —
+// er ist müde, und der Hund ist nicht der Grund (siehe `Complement.negative`). Er steht direkt vor
+// dem Satzglied, wo die Satznegation vor dem Prädikat steht (A186).
+export const CONSTITUENT_NEGATOR = 'nicht';

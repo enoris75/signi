@@ -559,3 +559,92 @@ describe('known bugs: Portuguese cause with coordinated pronouns', () => {
     expect(runs('neutral', np('DOG'), np('MOUSE'))).toBe('o gato corre por causa do cão e por causa do rato.');
   });
 });
+
+// A cause the plan denies rather than the clause: "runs not because of the dog" — the cat runs, and
+// the dog is not the reason (`Complement.negative`). It is a constituent negation, so the verb stays
+// positive and no negative concord fires; the clause's own negation is independent of it.
+describe('a denied cause', () => {
+  const notBecauseOf = (value?: CauseSentiment, phrase: NounElement = np('DOG')) => ({
+    cause: { phrase, negative: true, ...(value ? { specifiers: [{ kind: 'sentiment' as const, value }] } : {}) },
+  });
+
+  test('the negator stands before the whole cause phrase', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: notBecauseOf() }))).toEqual({
+      en: 'the cat runs not because of the dog.',
+      it: 'il gatto corre non a causa del cane.',
+      fr: 'le chat court non pas à cause du chien.',
+      es: 'el gato corre no a causa del perro.',
+      pt: 'o gato corre não por causa do cão.',
+      de: 'der Kater läuft nicht wegen des Hundes.',
+      ja: '猫は犬のためではなく走ります。',
+    });
+  });
+
+  test('it denies the reason, not the stance taken on it', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: notBecauseOf('positive') }))).toMatchObject({
+      en: 'the cat runs not thanks to the dog.', it: 'il gatto corre non grazie al cane.',
+      fr: 'le chat court non pas grâce au chien.', es: 'el gato corre no gracias al perro.',
+      pt: 'o gato corre não graças ao cão.', de: 'der Kater läuft nicht dank dem Hund.',
+      ja: '猫は犬のおかげではなく走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: notBecauseOf('negative') }))).toMatchObject({
+      en: 'the cat runs not through the fault of the dog.', it: 'il gatto corre non per colpa del cane.',
+      fr: 'le chat court non pas par la faute du chien.', es: 'el gato corre no por culpa del perro.',
+      pt: 'o gato corre não por culpa do cão.', de: 'der Kater läuft nicht durch die Schuld des Hundes.',
+      ja: '猫は犬のせいではなく走ります。',
+    });
+  });
+
+  test('a pronoun cause keeps its own shape under the negator', () => {
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: notBecauseOf(undefined, np('SECOND_PERSON')) }))).toMatchObject({
+      en: 'the cat runs not because of you.', it: 'il gatto corre non a causa tua.',
+      fr: 'le chat court non pas à cause de toi.', de: 'der Kater läuft nicht deinetwegen.',
+      ja: '猫はあなたのためではなく走ります。',
+    });
+  });
+
+  // The two negations are independent: the clause says the cat is NOT tired, and the cause says the
+  // dog is not why. German tells them apart by position — the denied cause before the adjunct slot,
+  // the clause's own before the predicate (A186).
+  test('a negated clause and a denied cause both stand', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      verbPhrase: { negative: true },
+      complements: { predicative: { phrase: np('TIRED') }, ...notBecauseOf() },
+    }))).toMatchObject({
+      en: 'the cat is not tired not because of the dog.',
+      it: 'il gatto non è stanco non a causa del cane.',
+      fr: "le chat n'est pas fatigué non pas à cause du chien.",
+      es: 'el gato no está cansado no a causa del perro.',
+      pt: 'o gato não está cansado não por causa do cão.',
+      de: 'der Kater ist nicht wegen des Hundes nicht müde.',
+      ja: '猫は犬のためではなく疲れていません。',
+    });
+    // With no predicate to anchor the clause's "nicht", German spells the two in one slot and says
+    // one "nicht" — "läuft nicht nicht wegen des Hundes" is not German (see `complementsWithNicht`).
+    expect(sayAll(clause(np('CAT'), 'RUN', { verbPhrase: { negative: true }, complements: notBecauseOf() }))).toMatchObject({
+      en: 'the cat does not run not because of the dog.',
+      it: 'il gatto non corre non a causa del cane.',
+      de: 'der Kater läuft nicht wegen des Hundes.',
+      ja: '猫は犬のためではなく走りません。',
+    });
+  });
+
+  test('the clause around it is untouched', () => {
+    expect(sayAll(clause(np('CAT'), 'EAT', { directObject: np('MOUSE'), complements: notBecauseOf() }))).toMatchObject({
+      en: 'the cat eats the mouse not because of the dog.',
+      de: 'der Kater frisst die Maus nicht wegen des Hundes.',
+      ja: '猫は犬のためではなくネズミを食べます。',
+    });
+    expect(say(clause(np('DOG', {
+      relative: { verbPhrase: { verb: 'RUN' }, complements: notBecauseOf() },
+    }), 'CRY'), 'de')).toBe('der Hund, der nicht wegen des Hundes läuft, weint.');
+    // A cause left alone is what it always was — the flag is absent on every other complement.
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: np('DOG') } } }))).toMatchObject({
+      en: 'the cat runs because of the dog.', de: 'der Kater läuft wegen des Hundes.',
+      ja: '猫は犬のために走ります。',
+    });
+    expect(sayAll(clause(np('CAT'), 'RUN', {
+      complements: { locative: { phrase: np('HOUSE'), negative: true } },
+    }))).toMatchObject({ en: 'the cat runs in the house.', de: 'der Kater läuft im Haus.' });
+  });
+});

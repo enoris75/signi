@@ -107,3 +107,8 @@ export const COORD_WORDS: Record<CoordConjunction, string> = {
  * inflect either like any adjective with its ending ("*sans titres").
  */
 export const INVARIABLE_ADJ: ReadonlySet<string> = new Set(['zéro', 'sans titre']);
+
+// The negator of one constituent rather than the clause: "court **non pas** à cause du chien". The
+// full "non pas" and not a bare "pas", which after a verb reads as the colloquial dropped-"ne"
+// negation of the verb itself (see `Complement.negative`).
+export const CONSTITUENT_NEGATOR = 'non pas';

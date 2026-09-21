@@ -3,6 +3,7 @@ import type { ResolvedComplement, ResolvedNounPhrase } from '../../types.js';
 import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
+import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
@@ -21,7 +22,7 @@ import { datPrep } from './datPrep.js';
 import { deDet } from './deDet.js';
 import { defArticle } from './defArticle.js';
 import { elidesBefore } from './elidesBefore.js';
-import { LOCATIVE_IDIOMS } from './fr.consts.js';
+import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS } from './fr.consts.js';
 import { frComparison } from './frComparison.js';
 import { joinArt } from './joinArt.js';
 import { npText } from './npText.js';
@@ -234,6 +235,9 @@ export function complementsPhrase(
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS))
         || renderNP(np, headFor(headForms(np), isPronominalPossessor(np.possessor))));
     })
+    // A cause the plan denies rather than the clause takes its negator here, in front of whatever
+    // shape the sentiment gave it (see `withCauseNegator`).
+    .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
 }

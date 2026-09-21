@@ -4,6 +4,7 @@ import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
+import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
@@ -14,7 +15,7 @@ import { pathSpecifier } from '../../functions/pathSpecifier.js';
 import { withDefiniteness } from '../../functions/withDefiniteness.js';
 import { SOURCE_ABLATIVE_ADVERB_VERBS } from '../../functions/functions.consts.js';
 import { possessiveIt, pronounPossessor } from '../../possessive.js';
-import { IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
+import { CONSTITUENT_NEGATOR, IT_MANNER_PREP, LOCATIVE_IDIOMS } from './it.consts.js';
 import { agreeAdj } from './agreeAdj.js';
 import { agreementForms } from './agreementForms.js';
 import { artFor } from './artFor.js';
@@ -201,6 +202,9 @@ export function complementsPhrase(
         (type === 'cause' && np.head.forms['person'] ? pronounCause(np.head.forms) : '') ||
         (type === 'locative' && locativeIdiom(c, np, LOCATIVE_IDIOMS)) || renderNP(np, headFor(headForms(np))));
     })
+    // A cause the plan denies rather than the clause takes its negator here, in front of whatever
+    // shape the sentiment gave it (see `withCauseNegator`).
+    .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
 }

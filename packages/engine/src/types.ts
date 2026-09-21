@@ -197,6 +197,8 @@ export interface ResolvedRelativeClause {
 /** A resolved complement: its noun phrase plus any specifiers (plain data). */
 export interface ResolvedComplement {
   phrase: ResolvedNounElement;
+  /** The complement's own negation, carried through from the plan (see `Complement.negative`). */
+  negative?: boolean;
   /**
    * The resolved action an instrument *is* at the `process` / `concept` abstraction levels —
    * "by **choosing** a word" (see Complement.action). `phrase` is the noun it acts on. Absent at

@@ -774,6 +774,18 @@ export interface Complement {
   phrase: NounElement;
   specifiers?: Specifier[];
   /**
+   * The complement's own negation, not the clause's: "runs **not because of** the dog", which says
+   * the cat runs and the dog is not the reason. The clause itself stays positive, so this is not
+   * the sentential negation `VerbPhrase.negative` carries and it triggers no negative concord —
+   * the two are independent, and both at once is a real sentence ("der Kater ist nicht wegen des
+   * Hundes nicht müde", the cat is not tired, and the dog is not why).
+   *
+   * Read on the `cause` complement, the one adjunct whose whole point is to name a reason that can
+   * be denied. The field is on `Complement` rather than on the cause alone so a second adjunct can
+   * take it without a model change; every other complement ignores it today.
+   */
+  negative?: boolean;
+  /**
    * The instrument as an *action* rather than a thing — set only on the `instrumental`
    * complement, and only at the `process` and `concept` abstraction levels (see
    * AbstractionLevel). The verb is rendered non-finitely (gerund / nominalised infinitive) and

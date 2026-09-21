@@ -64,6 +64,9 @@ export function resolveComplements(
         ? { link: objectPredicativeLink(verbForms) }
         : {}),
       specifiers: value.specifiers,
+      // The complement's own negation ("not because of the dog"), which is not the clause's and so
+      // is carried straight through, like the specifiers (see `Complement.negative`).
+      ...(value.negative ? { negative: true } : {}),
     };
   }
   return out;

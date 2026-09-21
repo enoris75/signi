@@ -4,6 +4,7 @@ import { abstractionLevel } from '../../functions/abstractionLevel.js';
 import { actionGerund } from '../../functions/actionGerund.js';
 import { actionInfinitive } from '../../functions/actionInfinitive.js';
 import { causeSentiment } from '../../functions/causeSentiment.js';
+import { withCauseNegator } from '../../functions/withCauseNegator.js';
 import { isRelativeSuperlative } from '../../functions/isRelativeSuperlative.js';
 import { locativeIdiom } from '../../functions/locativeIdiom.js';
 import { mannerRelation } from '../../functions/mannerRelation.js';
@@ -25,7 +26,7 @@ import { nounPhrase } from './nounPhrase.js';
 import { npText } from './npText.js';
 import { predicativeForms } from './predicativeForms.js';
 import { prepDet } from './prepDet.js';
-import { LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
+import { CONSTITUENT_NEGATOR, LOCATIVE_IDIOMS, PT_DE_FUSING_PRONOUN } from './pt.consts.js';
 import { ptAdj } from './ptAdj.js';
 import { ptComparison } from './ptComparison.js';
 import { spatialHead } from './spatialHead.js';
@@ -197,6 +198,9 @@ export function complementsPhrase(
       }
       return coordinateElement(c.phrase, (np) => conjunctText(np));
     })
+    // A cause the plan denies rather than the clause takes its negator here, in front of whatever
+    // shape the sentiment gave it (see `withCauseNegator`).
+    .map((text, i) => withCauseNegator(text, COMPLEMENT_RENDER_ORDER[i], complements[COMPLEMENT_RENDER_ORDER[i]], CONSTITUENT_NEGATOR))
     .filter(Boolean)
     .join(' ');
 }
