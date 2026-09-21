@@ -81,16 +81,9 @@ became [C06](done/C06-pronoun-definitions.md), which is done.
 
 ### Part B — Needs seeding (`B-needs-seed/`)
 
-Concept definitions:
-
-B33–B39 were done on 2026-09-21 (see the Done section).
-
-| # | File | Seed first → unlocks |
-|---|---|---|
-| B48 | [B48-climate-cold-hot.md](B-needs-seed/B48-climate-cold-hot.md) | **COLD_CLIMATE, HOT_CLIMATE** → ANTARCTICA: the coldest continent; AFRICA: the hottest continent, A17's superlative (split from C05). The seeded COLD and HOT are the touch senses: ja 冷たい / 熱い, es *caliente*. ICE ("covered with ice") was probed and rejected |
-| B49 | [B49-participant.md](B-needs-seed/B49-participant.md) | **PARTICIPANT_GRAMMAR** → AGENT_GRAMMAR: a participant that acts, de "ein Partizipant, der handelt" (split from C05). Judge ja 行動する参与者 |
-| B50 | [B50-meaning-include.md](B-needs-seed/B50-meaning-include.md) | **MEANING, INCLUDE** → HYPERNYM: a word whose meaning includes another word's meaning, via C12's genitive relative (de "dessen Bedeutung die Bedeutung eines anderen Wortes umfasst") (split from C05) |
-| B51 | [B51-specify.md](B-needs-seed/B51-specify.md) | **SPECIFY** → DETERMINER: a word that specifies nouns, de "Substantive bestimmt" (split from C05). INDICATE renders but says a determiner stands for nouns |
+Concept definitions: **none is left.** B33–B39 and B48–B51 were all done on 2026-09-21 (see the Done
+section). B48–B51 were C05's second pass, and seeding their six words glossed the five concepts they
+named.
 
 Verb definitions (B09–B19) are the split of [B08](done/B08-verb-definitions.md), one genus verb per
 task. **None is left.** B09–B13 and B15–B19 are done. B14, the motion verbs, moved to
@@ -103,7 +96,9 @@ landed with [done/B12](done/B12-possession-verbs.md): `infinitiveGloss` (now in
 ("to have objects", not "to have object"); see [done/B09](done/B09-create-verbs.md).
 [C09](done/C09-modal-verbs.md) added two more parts: a `predicate` adjective for the copular genus
 BE, and the `infinitive` a gloss governs — "to be able **to act**". [C19](done/C19-verbs-needing-voice-purpose-or-comitative.md)
-added a `purpose` clause ("to write content **to load it**") and the `gender` a pronoun object reads.
+added a `purpose` clause ("to write content **to load it**"), whose pronoun object
+[C20](done/C20-pronoun-agreement.md) then taught to name its **antecedent** instead of a gender, so
+each language genders it off its own lexeme (de "um **ihn** zu laden", for *Inhalt*).
 
 Genus nouns (B29–B32) came from the isA audit of 2026-09-14 — each named children whose description
 cites a parent that isn't seeded. **All four are done** (see the Done section). The audit's remaining
@@ -117,30 +112,31 @@ the catalogue.
 
 ### Part C — Needs engine / deferred (`C-needs-engine/`)
 
-| # | File | Blocked on |
-|---|---|---|
-| C20 | [C20-pronoun-agreement.md](C-needs-engine/C20-pronoun-agreement.md) | a pronoun that takes its antecedent's grammatical gender (de *ihn* for *Gegenstand*) where English and Japanese want the natural one: SELECT → to indicate an object to use it (split from C05). Also fixes SAVE's shipped German, "um **es** zu laden" |
+**None is left**, for the first time: C20, C21 and C22, the last three, shipped on 2026-09-21 (see the
+Done section). C20 built the construct it named — a pronoun that genders itself off the noun it stands
+for — rather than deferring it again.
 
 #### UI strings
 
-C11, C13, C15 and C16 are done (see the Done section). The phrase console, which C15 recorded as
-outstanding, was catalogued on 2026-09-21. Its diagnostics are here. The rest was A21 (the part that
-needed no new word) and B42–B47, all done.
-
-| # | File | Blocked on |
-|---|---|---|
-| C21 | [C21-ui-console-diagnostics.md](C-needs-engine/C21-ui-console-diagnostics.md) | about 100 console diagnostics, grouped by what each family needs. First, **message codes** (a refactor: the tests assert the English, including golden.test.ts's 34 `says`). Then an **existential clause** ("There is no period 3", or reword around it C14's way), and **on-request rendering** for sentences about the user's words (C16's route). The instruction and possession families are easy once codes exist. The purpose half of "/more sets an adjective's degree, and cat is a noun" is what [B47](done/B47-ui-console-command-purposes.md) left: its help-page citation (`purpose.*`) cannot stand as the sentence's subject and present tense |
-| C22 | [C22-ui-help-prose.md](C-needs-engine/C22-ui-help-prose.md) | the help overlay's paragraphs and notes: multi-sentence prose with free relatives, a temporal clause, keys inside sentences, "in place of" (REPLACE's gloss waits on it too, [C05](done/C05-non-distinguishing-genera.md#replace)). An editorial rewrite into short statements comes before any engine work. The noun-kind note collides in es (*complemento* ×2) |
+**None is left.** C11, C13, C15 and C16 were done earlier; the phrase console, which C15 recorded as
+outstanding, was catalogued on 2026-09-21 and cleared the same day — A21 and B42–B47 took the part
+that needed no new word, C21 the ~100 diagnostics, and C22 the help overlay's prose. Neither C21 nor
+C22 needed the engine work its **Blocked on** section had expected: C21 rewords around the
+existential and puts the value after a colon, and C22 was an editorial rewrite first.
 
 ### Not yet sorted
 
-Counted on 2026-09-21, when C05 closed, at commit 6081d5c: 263 of the 370 seeded concepts had no
-`definition`. 36 of those have a ticket that glosses them (A16–A18, B33–B39, B48–B51, C20). 27 stay
-on the literal by design: C05's, and BE, CONSUME and CAUSE_VERB in
-[C08](done/C08-copular-and-genus-verbs.md). The other **200 are in no ticket that glosses them**.
-Most were never probed, and C05 is no verdict on them. A sweep would sort them into A, B and C, the
-way the isA audit of 2026-09-14 produced B29–B32. Words seeded since, for the UI-string tickets
-(LINK, LIST, …), are not counted. B33–B39 have since shipped their 19 glosses.
+**This is all that is left of the catalogue.** Recounted on 2026-09-21, after B48–B51 and C20 shipped:
+**318 of the 463 seeded concepts have no `definition`**, and **no ticket glosses any of them** — every
+one that did (A16–A18, B33–B39, B48–B51, C20) is done. 27 stay on the literal by design: C05's, and
+BE, CONSUME and CAUSE_VERB in [C08](done/C08-copular-and-genus-verbs.md). Most of the rest were never
+probed, and C05 is no verdict on them. A sweep would sort them into A, B and C, the way the isA audit
+of 2026-09-14 produced B29–B32.
+
+The table below was drawn at the earlier count (370 concepts at commit 6081d5c, 263 without a gloss).
+The 93 words seeded since, for the UI-string tickets and for these — LINK, LIST, BRACKET, CURSOR, KEY,
+MEANING, ACCEPT, … — are not in it, and none has a definition either, except the two climate
+adjectives.
 
 | group | # | concepts | what is already known |
 |---|---|---|---|
@@ -201,6 +197,11 @@ way the isA audit of 2026-09-14 produced B29–B32. Words seeded since, for the 
 | B37 | [done/B37-complement-names.md](done/B37-complement-names.md) | DIRECTION, SOURCE, ROUTE, COMITATIVE, TERMINUS → a complement that indicates destinations / origins / paths / companions / recipients (seeded **DESTINATION**, **ORIGIN**, **PATH** under PLACE, **COMPANION**, **RECIPIENT** under PERSON) |
 | B38 | [done/B38-link.md](done/B38-link.md) | CONJUNCTION → a word that links clauses; CONJUNCT → a phrase that is linked by a conjunction (seeded **LINK**). CONJUNCT is the **passive**: the active "eine Phrase, die eine Konjunktion verbindet" reads first as the phrase linking the conjunction |
 | B39 | [done/B39-quantity-and-category.md](done/B39-quantity-and-category.md) | NUMBER_GRAMMAR → a category that indicates quantities; QUANTIFIER → a determiner that indicates quantities (seeded **QUANTITY**, **CATEGORY**; NUMBER_GRAMMAR isA CATEGORY) |
+| B48 | [done/B48-climate-cold-hot.md](done/B48-climate-cold-hot.md) | ANTARCTICA → the coldest continent; AFRICA → the hottest continent, A17's superlative (seeded **COLD_CLIMATE**, **HOT_CLIMATE**, `synonym: 'climate'`, glossed as their siblings). ja 最も寒い大陸 / 最も暑い大陸 and es *el continente más caluroso*, where the seeded COLD and HOT are the senses of touch (冷たい / 熱い, *caliente*). A climate is what a place is, so es and pt predicate it with *ser*. ICE ("a continent covered with ice") was probed and rejected: two seeds, a generic-article gap and no passive to relativize |
+| B49 | [done/B49-participant.md](done/B49-participant.md) | AGENT_GRAMMAR → a participant that acts, de "ein Partizipant, der handelt" (seeded **PARTICIPANT_GRAMMAR**, a German weak masculine, `synonym: 'grammar'`, itself a root genus with no gloss, as FEELING; AGENT_GRAMMAR isA it). ja 行動する参与者 judged and kept |
+| B50 | [done/B50-meaning-include.md](done/B50-meaning-include.md) | HYPERNYM → a word whose meaning includes another word's meaning, on C12's genitive relative: de "ein Wort, dessen Bedeutung die Bedeutung eines anderen Wortes umfasst", ja 意味が別の単語の意味を含む単語 (seeded **MEANING**, **INCLUDE** — de *umfassen*, what a broader term does to a narrower one, and stative like HOLD). Probing it found a French defect outside the gloss: a masculine plural participle in -s doubles it (*incluss*, *compriss*) |
+| B51 | [done/B51-specify.md](done/B51-specify.md) | DETERMINER → a word that specifies nouns, de "ein Wort, das Substantive bestimmt" (seeded **SPECIFY**: de *bestimmen*, the grammar's own verb, fr *préciser*, ja 特定する). INDICATE rendered but said a determiner *stands for* nouns |
+| C20 | [done/C20-pronoun-agreement.md](done/C20-pronoun-agreement.md) | SELECT → to indicate an object to use it, and SAVE re-authored. Built the construct C05 deferred: **`NounPhrase.antecedent`**, a pronoun that names the noun it stands for, gendered off each language's own lexeme — grammatical gender in de/it/fr/es/pt (*Inhalt* → "um **ihn** zu laden", correcting the German C19 shipped), natural gender in en and ja, where a thing is "it" / それ and a person of unstated sex becomes "that person" / その人. `GlossParts.gender` is gone; `antecedentAgreement` sits in the translator, so no language engine changed. USE over MODIFY, whose ja 修飾する is the grammatical sense |
 
 #### UI strings
 
@@ -238,6 +239,8 @@ way the isA audit of 2026-09-14 produced B29–B32. Words seeded since, for the 
 | B45 | [done/B45-ui-console-lines-history-pins.md](done/B45-ui-console-lines-history-pins.md) | `action.pinLine/unpinLine` (the transcript's pin; `/pin` and `/unpin` read them too: "Pin this line", it "Fissa questa riga", de "Diese Zeile anheften", ja この行をピン留め), `toast.linePinned/lineUnpinned` ("Pinned line"; it "Riga non più fissata", de "Nicht mehr angeheftete Zeile", since UNPIN's participle reads "unlocked", "solved"), `console.history` ("history · 3/7", the position in figures), `console.list.pinned/recent` + the rows' `console.line.pinned/recent` (one title per kind of row, "pinned lines · recent lines"; `Completion.titleKey` takes a list), `action.complete/apply/closeList`, `failure.lineNotRead` (C11's passive; a console `Diagnostic` gained `messageKey`) (seeded LINE, HISTORY, PIN, UNPIN, PINNED, UNPINNED, RECENT, COMPLETE, APPLY; RECENT is de "zuletzt verwendet", ja 最近使用された; ja UNPIN ピン留め解除する, no second を) |
 | B46 | [done/B46-ui-console-topics-and-labels.md](done/B46-ui-console-topics-and-labels.md) | `console.topic.place` ("spatial relationship", RELATIONSHIP under SPATIAL), `console.topic.mood`, `console.topic.workspace` (also the help overlay's part), `mood.statement` (`/statement`: it "Proposizione enunciativa", de "Aussagesatz", ja 平叙文), `degree.name.positive` (`/plain`: de "Positiv", pt "Grau normal", ja 原級), `console.list.values` ("values · /tense"), `console.now` (ja 今, because 現在 is the present tense's name), `console.alias.singular/plural` ("alias /plural"), `console.help.usage/example` ("Usage: /pl", "Example: …") (seeded MOOD, STATEMENT, WORKSPACE, POSITIVE_DEGREE, USAGE, EXAMPLE, NOW, and **ALIAS** in place of the adverb ALSO, whose ja is また "again") |
 | B47 | [done/B47-ui-console-command-purposes.md](done/B47-ui-console-command-purposes.md) | the help page's 22 command purposes as infinitive citations, "Plural — to set a noun's number" (it "impostare il numero di un sostantivo", de "den Numerus eines Substantivs festlegen", ja 名詞の数を設定する): one `purpose.*` entry per distinct purpose, named by a new `CommandDef.purposeKey`, and `setting()` derives it from the Setting (seeded **SET**, **GOVERN**, **NEGATE**, **SENTIMENT**; LINK and SPATIAL came with B38 and B46). fr NEGATE is *nier*, probed against SET POLARITY, TRANSFORM + objectPredicative and CAUSE. `/if` kept CONDITION (de "einen konditionalen Satz" for CLAUSE [CONDITIONAL]). The misuse diagnostic keeps the English `purpose` for [C21](C-needs-engine/C21-ui-console-diagnostics.md) |
+| C21 | [done/C21-ui-console-diagnostics.md](done/C21-ui-console-diagnostics.md) | the phrase console's **85 diagnostics**, in the interface language. First the codes, as a pure refactor: each diagnostic is a `code` and its typed `args` ([diagnostics.ts](../../packages/frontend/src/console/language/diagnostics.ts)), every assertion moved off the English, which a table test still pins as each entry's fallback. Then **74 `diagnostic.*` entries**, said as one or two periods with the value after a colon — "Unknown command: /frob", it "Comando sconosciuto: /frob", ja 「不明な命令: /frob」 — joined by the language's own full stop (seeded **UNKNOWN**, **UNEXPECTED**, **ALREADY**, **TEXT**, **REFERENCE**, **OPEN**, **ACCEPT**). **Neither construct the file waited on was needed:** no existential (MISSING / UNKNOWN on a bare noun, C14's rule) and no on-request rendering (once the user's word follows the colon nothing has to agree with it; probed, and a pronoun as subject is dropped in it/es/pt). Licensing is ACCEPT with *this* command or verb as subject ("This command accepts no word: /pl"; TAKE reads as grabbing in five languages); the misuse message leads with B47's citation ("/more — to set an adjective's degree. This word is a noun: cat"), so `CommandDef.purpose`, the last English the console held, is gone. The explanations were reworded, none left literal; a `#2.obj` leak that printed the internal key is now "Missing noun: #2.obj"; the help page says "Cursor: cat · now Singular" |
+| C22 | [done/C22-ui-help-prose.md](done/C22-ui-help-prose.md) | the help overlay's paragraphs and notes and the console help page's prose: **rewritten first**, as short statements in shapes that exist — one period each, a relative clause in place of a free one, keys and syntax after a colon — then **30 `help.*` / `help.console.*` entries** ("A key works in the slot that has the cursor.", de "Eine Taste funktioniert im Slot, der den Cursor hat."; "Return to the period: esc"; "A bracket holds a word and commands: /subj ( cat /adj brown /pl )"). Seeded **KEY**, **TAB**, **NOUN_PHRASE**, **WORK**, **RESTORE** (de *zurückholen*, since *wiederherstellen* cannot be said as a separable verb), **AGAIN**. "Ctrl is ⌘ on a Mac" dropped: the sheet's platform switch already redraws every cap, and `keycapLabels` now draws a modifier named alone. The noun note names the **direct** object, or es says *complemento* twice; "in place of" is said with REPLACE, so C05's REPLACE entry does not move. The console's examples now write their words in the interface language (`exampleIn`). Nothing left literal: *only*, "the right one" and "whatever the period held" were each probed and said another way |
 | B29 | [done/B29-building-genus.md](done/B29-building-genus.md) | hierarchy only: seeded **BUILDING** (isA PLACE) and hung HOUSE and PRISON under it, both previously roots. No render changed — the one rule reading `isA` tests for CONTINENT. Its own gloss "a place that has walls" was probed and rejected (fr drops *des*, ja 持つ is wrong for a wall), so BUILDING stayed on the English literal (C05) and WALL was not seeded. Both gaps were fixed on 2026-09-19 (A149, A150), and BUILDING's gloss shipped under C05 |
 | C05 | [done/C05-non-distinguishing-genera.md](done/C05-non-distinguishing-genera.md#done-2026-09-21) | BUILDING → a place that has walls, 2026-09-19 (seeded **WALL**; built the French object partitive and the negative *de*, [A149](../bugs/fixed/A149-french-object-zero-article.md), which restored the article in 41 shipped French glosses, and the Japanese ある of an inanimate owner, [A150](../bugs/fixed/A150-japanese-inanimate-owner-aru.md)). **Retired by splitting** on 2026-09-21, in two passes: A17, A18, B36–B39 and C20, then B48–B51 once every lead the file named but had not tried was probed (AFRICA moved with ANTARCTICA). The rest stays on the literal **by design**, each with a probe: EUROPE and the Americas, FEELING, REPLACE (moves with C22's "in place of"), BECOME, and 18 grammar meta-nouns. PERIOD_PUNCTUATION stays, though MARK renders: en *period* is also the sentence it ends |
 

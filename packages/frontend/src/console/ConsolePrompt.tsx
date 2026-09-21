@@ -9,6 +9,7 @@ import { CompletionList } from "./CompletionList.tsx";
 import { HintKeys } from "./HintKeys.tsx";
 import { MONO, Token, tokenColor } from "./tokens.tsx";
 import type { PhraseConsoleModel } from "./usePhraseConsole.ts";
+import { useDiagnosticText } from "./useDiagnosticText.ts";
 
 /**
  * The prompt: a real `<textarea>` with a highlighted mirror behind it — the same text, coloured token
@@ -25,6 +26,7 @@ const MAX_ROWS = 8;
 
 export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
   const t = useUiString();
+  const say = useDiagnosticText();
   const { text, ghost, listShown, completion, diagnostic, caret } = model;
   const styled = useMemo(() => styleTokens(text), [text]);
   const listId = "console-completions";
@@ -216,6 +218,7 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
         <Box
           role="status"
           data-testid="console-diagnostic"
+          data-code={diagnostic.code}
           sx={{
             display: "flex",
             alignItems: "baseline",
@@ -231,7 +234,7 @@ export function ConsolePrompt({ model }: { model: PhraseConsoleModel }) {
           <Box component="span" sx={{ color: model.unfinished ? "text.disabled" : "error.main", fontWeight: 700 }}>
             {model.unfinished ? "…" : "!"}
           </Box>
-          <MessageText message={diagnostic.messageKey ? t(diagnostic.messageKey) : diagnostic.message} />
+          <MessageText message={say(diagnostic)} />
         </Box>
       )}
     </Box>

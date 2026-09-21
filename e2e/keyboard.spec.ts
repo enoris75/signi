@@ -560,4 +560,41 @@ test.describe('the help overlay', () => {
       await move.evaluate((el) => getComputedStyle(el, '::first-letter').textTransform),
     ).toBe('uppercase');
   });
+
+  // C22: the overlay's prose is the catalogue's too, one statement to a line, each key or piece of the
+  // console's syntax after a colon — and a whole example line in the words of the interface language.
+  test('says where the keys work and how a console line is written, in the interface language', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+    await page.getByTestId('help-button').click();
+    const overlay = page.getByTestId('help-overlay');
+    const keys = overlay.getByRole('region', { name: 'Navigazione da tastiera' });
+
+    const prose = keys.getByTestId('help-keyboard-prose');
+    await expect(prose).toContainText('Un tasto funziona nello slot che ha il cursore.');
+    await expect(prose).toContainText('Torna al periodo: esc');
+    await expect(prose).toContainText('Scegli il valore precedente: ⇧');
+    await expect(keys.getByTestId('help-section-period').getByTestId('help-section-note')).toHaveText('Il cursore è nel periodo.');
+    await expect(keys.getByTestId('help-section-box').getByTestId('help-section-note')).toHaveText('Il cursore è in uno slot.');
+    await expect(keys.getByTestId('help-section-noun').getByTestId('help-section-note')).toHaveText(
+      'Soggetto, Complemento oggetto diretto, Complemento, Possessore, Congiunto',
+    );
+    await expect(keys.getByTestId('help-section-mood').getByTestId('help-section-note')).toHaveText(
+      'Questo slot sostituisce il soggetto in un comando.',
+    );
+    await expect(keys.getByText("Va' dalla prima riga alle schede", { exact: true })).toBeVisible();
+    await expect(keys.getByText('Scegli una scheda', { exact: true })).toBeVisible();
+    await expect(keys.getByText('Ripristina la parola', { exact: true })).toBeVisible();
+    // Everywhere has no note: its caps follow the platform switch.
+    await expect(keys.getByTestId('help-section-app').getByTestId('help-section-note')).toHaveCount(0);
+
+    const consoleProse = overlay.getByTestId('console-help-prose');
+    await expect(consoleProse).toContainText(
+      'Una parentesi contiene una parola e comandi: /subj ( gatto /adj marrone /pl ) /verb ( mangiare /past )',
+    );
+    await expect(consoleProse).toContainText('Sintagma nominale di un sostantivo: /subj ( libro /poss [ bambino /adj vecchio ] )');
+    await expect(consoleProse).toContainText('Una riga che è applicata di nuovo non cambia il periodo.');
+    await expect(overlay.getByTestId('console-help-keys')).toContainText('Riga vuota: mostra le righe fissate');
+    await expect(overlay.getByTestId('console-help-note')).toContainText('Digita una parola: /subj ( … )');
+    await expect(overlay.getByTestId('console-help-note')).toContainText('Sposta il cursore: /subj');
+  });
 });

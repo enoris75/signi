@@ -1434,6 +1434,23 @@ export const nouns: ConceptSeed[] = [
     },
   },
   {
+    // What a word expresses: HYPERNYM is "a word whose meaning includes another word's meaning"
+    // (localization B50). French sens is the same word in the plural (les sens).
+    id: 'MEANING',
+    role: 'noun',
+    description: 'what a word expresses',
+    emoji: '💭',
+    forms: {
+      en: { base: 'meaning', plural: 'meanings', count: 'singular' },
+      it: { base: 'significato', plural: 'significati', gender: 'masc', count: 'singular' },
+      fr: { base: 'sens', plural: 'sens', gender: 'masc', count: 'singular' },
+      de: { base: 'Bedeutung', plural: 'Bedeutungen', gender: 'fem', count: 'singular' },
+      es: { base: 'significado', plural: 'significados', gender: 'masc', count: 'singular' },
+      ja: { base: '意味', count: 'singular', reading: 'いみ' },
+      pt: { base: 'significado', plural: 'significados', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     id: 'TRANSLATION',
     role: 'noun',
     description: 'a rendering of text or speech from one language into another',
@@ -1473,6 +1490,9 @@ export const nouns: ConceptSeed[] = [
     id: 'AFRICA',
     role: 'noun',
     description: 'the continent south of the Mediterranean',
+    // The hottest continent (localization B48), A17's superlative on the climate sense of HOT: ja
+    // 最も暑い大陸, es "el continente más caluroso", where HOT is 熱い to the touch and caliente.
+    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['HOT_CLIMATE'], adjectiveDegrees: ['most'] } },
     emoji: '🌍',
     // A proper noun: no plural, and the article is the language's to fix — English, German,
     // Spanish and Japanese take none; Italian, French and Portuguese take the definite one.
@@ -1594,6 +1614,9 @@ export const nouns: ConceptSeed[] = [
     id: 'ANTARCTICA',
     role: 'noun',
     description: 'the continent at the south pole',
+    // The coldest continent (localization B48), as AFRICA is the hottest: ja 最も寒い大陸, where COLD
+    // is 冷たい, cold to the touch. German umlauts it, "der kälteste Kontinent".
+    definition: { subject: { concept: 'CONTINENT', definiteness: 'definite', adjectives: ['COLD_CLIMATE'], adjectiveDegrees: ['most'] } },
     emoji: '🧊',
     proper: true,
     countable: false,
@@ -1964,15 +1987,41 @@ export const nouns: ConceptSeed[] = [
   // labels in the current UI language. SUBJECT is suffixed _GRAMMAR because the plain word is
   // ambiguous (topic, school subject) and that sense may be seeded later.
   {
+    // One of the entities an event involves: the genus of the agent (localization B49). The grammar
+    // sense only, suffixed and glossed like AGENT_GRAMMAR, because the everyday word is another in
+    // two languages: German Teilnehmer and Japanese 参加者 are attendees, where Partizipant and 参与者
+    // are what grammars say. Partizipant is a weak masculine: den / dem / des Partizipanten. No gloss
+    // of its own: a genus with nothing above it, as FEELING is.
+    id: 'PARTICIPANT_GRAMMAR',
+    role: 'noun',
+    description: 'one of the entities an event involves (grammar)',
+    emoji: '👥',
+    synonym: 'grammar',
+    forms: {
+      en: { base: 'participant', plural: 'participants', count: 'singular' },
+      it: { base: 'partecipante', plural: 'partecipanti', gender: 'masc', count: 'singular' },
+      fr: { base: 'participant', plural: 'participants', gender: 'masc', count: 'singular' },
+      de: { base: 'Partizipant', plural: 'Partizipanten', gender: 'masc', count: 'singular', weak: '1' },
+      es: { base: 'participante', plural: 'participantes', gender: 'masc', count: 'singular' },
+      ja: { base: '参与者', count: 'singular', reading: 'さんよしゃ' },
+      pt: { base: 'participante', plural: 'participantes', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
     // The participant that acts — the one a passive demotes to its by-phrase, which is what the
     // builder captions the box with once the patient has taken the subject's place. Suffixed like
     // SUBJECT_GRAMMAR because the plain word also means a person acting for someone else, and only
     // this sense is seeded. German keeps the Latin "Agens", as its grammars do.
+    // "A participant that acts" (localization B49): de "ein Partizipant, der handelt", ja
+    // 行動する参与者. ACT's 行動する is said of people, and a grammar would say 動作をする, but the gloss
+    // still reads as a participant that acts.
     id: 'AGENT_GRAMMAR',
     role: 'noun',
     description: 'the participant that carries out the event (grammar)',
+    definition: whoGloss('PARTICIPANT_GRAMMAR', 'ACT'),
     emoji: '🫱',
     synonym: 'grammar',
+    isA: 'PARTICIPANT_GRAMMAR',
     forms: {
       en: { base: 'agent', plural: 'agents', count: 'singular' },
       it: { base: 'agente', plural: 'agenti', gender: 'masc', count: 'singular' },
@@ -2406,6 +2455,26 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'sintagma verbal', plural: 'sintagmas verbais', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // A noun with everything hanging off it: its determiner, adjectives, possessor and relative
+    // clause. The phrase console's square brackets hold one hanging off a noun, "/poss [ child /adj
+    // old ]" (localization C22). Named as VERB_PHRASE is: "sintagma" / "syntagme" in the Romance
+    // traditions, compounded on the noun in German and Japanese.
+    id: 'NOUN_PHRASE',
+    role: 'noun',
+    description: 'a noun together with its determiner and modifiers (grammar)',
+    emoji: '🧩',
+    isA: 'PHRASE',
+    forms: {
+      en: { base: 'noun phrase', plural: 'noun phrases', count: 'singular' },
+      it: { base: 'sintagma nominale', plural: 'sintagmi nominali', gender: 'masc', count: 'singular' },
+      fr: { base: 'syntagme nominal', plural: 'syntagmes nominaux', gender: 'masc', count: 'singular' },
+      de: { base: 'Nominalphrase', plural: 'Nominalphrasen', gender: 'fem', count: 'singular', compound: 'Nominalphrasen' },
+      es: { base: 'sintagma nominal', plural: 'sintagmas nominales', gender: 'masc', count: 'singular' },
+      ja: { base: '名詞句', count: 'singular', reading: 'めいしく' },
+      pt: { base: 'sintagma nominal', plural: 'sintagmas nominais', gender: 'masc', count: 'singular' },
+    },
+  },
   // ── Clauses and their links ───────────────────────────────────────
   // The words for how periods join: the clause a period is, the condition one period sets another,
   // the coordination that joins two of equal rank and the conjunction that spells it, and the
@@ -2603,6 +2672,24 @@ export const nouns: ConceptSeed[] = [
     id: 'HYPERNYM',
     role: 'noun',
     description: 'a word whose meaning includes that of another word (grammar)',
+    // Its own description, word for word (localization B50): the genitive relative, headed on the
+    // possessor (C12). de "ein Wort, dessen Bedeutung die Bedeutung eines anderen Wortes umfasst".
+    definition: {
+      subject: {
+        concept: 'WORD',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'possessor',
+          subject: { concept: 'MEANING', definiteness: 'definite' },
+          verbPhrase: { verb: 'INCLUDE' },
+          directObject: {
+            concept: 'MEANING',
+            definiteness: 'definite',
+            possessor: { concept: 'WORD', definiteness: 'indefinite', adjectives: ['OTHER'] },
+          },
+        },
+      },
+    },
     emoji: '🌳',
     isA: 'WORD',
     forms: {
@@ -2619,6 +2706,9 @@ export const nouns: ConceptSeed[] = [
     id: 'DETERMINER',
     role: 'noun',
     description: 'a word fixing the reference of a noun — the, a, this, some (grammar)',
+    // "A word that specifies nouns" (localization B51): de "ein Wort, das Substantive bestimmt", the
+    // grammar's own verb (Bestimmungswort, bestimmter Artikel). INDICATE would say it stands for them.
+    definition: whoGloss('WORD', 'SPECIFY', 'NOUN'),
     emoji: '🔖',
     isA: 'WORD',
     forms: {
@@ -2717,6 +2807,26 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'punto', plural: 'puntos', gender: 'masc', count: 'singular' },
       ja: { base: '句点', count: 'singular', reading: 'くてん' },
       pt: { base: 'ponto', plural: 'pontos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // One of a pair of marks that open and close a group: the phrase console writes each word in
+    // one, "( … )", a nested noun phrase in "[ … ]" and a period in "{ … }". German Klammer, Italian
+    // parentesi and Japanese 括弧 name every shape. French, Spanish and Portuguese name the round
+    // one, the shape the console uses for a word, and say it of the others in everyday speech.
+    // Italian parentesi and Spanish paréntesis are invariable.
+    id: 'BRACKET',
+    role: 'noun',
+    description: 'one of a pair of marks that enclose a group of words',
+    emoji: '🔣',
+    forms: {
+      en: { base: 'bracket', plural: 'brackets', count: 'singular' },
+      it: { base: 'parentesi', plural: 'parentesi', gender: 'fem', count: 'singular' },
+      fr: { base: 'parenthèse', plural: 'parenthèses', gender: 'fem', count: 'singular' },
+      de: { base: 'Klammer', plural: 'Klammern', gender: 'fem', count: 'singular', compound: 'Klammer' },
+      es: { base: 'paréntesis', plural: 'paréntesis', gender: 'masc', count: 'singular' },
+      ja: { base: '括弧', count: 'singular', reading: 'かっこ' },
+      pt: { base: 'parêntese', plural: 'parênteses', gender: 'masc', count: 'singular' },
     },
   },
   {
@@ -3284,6 +3394,26 @@ export const nouns: ConceptSeed[] = [
       pt: { base: 'teclado', plural: 'teclados', gender: 'masc', count: 'singular' },
     },
   },
+  {
+    // One of the keys of a KEYBOARD, which the help overlay says the keys of the app work in
+    // (localization C22). German Taste is BUTTON's word too, a homograph as ORDER and COMMAND share
+    // Befehl: a German key and a German button are both pressed. Katakana キー, with no separate
+    // reading (see BUTTON).
+    id: 'KEY',
+    role: 'noun',
+    description: 'one of the buttons of a keyboard',
+    emoji: '🔑',
+    synonym: 'keyboard',
+    forms: {
+      en: { base: 'key', plural: 'keys', count: 'singular' },
+      it: { base: 'tasto', plural: 'tasti', gender: 'masc', count: 'singular' },
+      fr: { base: 'touche', plural: 'touches', gender: 'fem', count: 'singular' },
+      de: { base: 'Taste', plural: 'Tasten', gender: 'fem', count: 'singular', compound: 'Tasten' },
+      es: { base: 'tecla', plural: 'teclas', gender: 'fem', count: 'singular' },
+      ja: { base: 'キー', count: 'singular' },
+      pt: { base: 'tecla', plural: 'teclas', gender: 'fem', count: 'singular' },
+    },
+  },
 
   // ── Finding one's way about a page ────────────────────────────────
   // What the keys and the help that lists them talk about (localization B41, B44): the keys that
@@ -3371,6 +3501,25 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'menú', plural: 'menús', gender: 'masc', count: 'singular' },
       ja: { base: 'メニュー', count: 'singular' },
       pt: { base: 'menu', plural: 'menus', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // One of the labels along the top of a panel that each show a page of it: the word picker's
+    // Noun | Pronoun switch (localization C22). Each UI's word — it "scheda", fr "onglet", es
+    // "pestaña", pt "aba"; German keeps the loanword, der Tab, which its UIs write beside
+    // Registerkarte.
+    id: 'TAB',
+    role: 'noun',
+    description: 'a label at the top of a panel that shows one of its pages',
+    emoji: '🗂️',
+    forms: {
+      en: { base: 'tab', plural: 'tabs', count: 'singular' },
+      it: { base: 'scheda', plural: 'schede', gender: 'fem', count: 'singular' },
+      fr: { base: 'onglet', plural: 'onglets', gender: 'masc', count: 'singular' },
+      de: { base: 'Tab', plural: 'Tabs', gender: 'masc', count: 'singular', compound: 'Tab' },
+      es: { base: 'pestaña', plural: 'pestañas', gender: 'fem', count: 'singular' },
+      ja: { base: 'タブ', count: 'singular' },
+      pt: { base: 'aba', plural: 'abas', gender: 'fem', count: 'singular' },
     },
   },
   {
@@ -3794,6 +3943,58 @@ export const nouns: ConceptSeed[] = [
       es: { base: 'valor', plural: 'valores', gender: 'masc', count: 'singular' },
       ja: { base: '値', count: 'singular', reading: 'あたい' },
       pt: { base: 'valor', plural: 'valores', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // The mark that shows where the next key acts: the canvas's box outline, the console's caret.
+    // German keeps the loanword, invariable in the plural (die Cursor).
+    id: 'CURSOR',
+    role: 'noun',
+    description: 'the mark on a screen that shows where the next key acts',
+    emoji: '🖱️',
+    forms: {
+      en: { base: 'cursor', plural: 'cursors', count: 'singular' },
+      it: { base: 'cursore', plural: 'cursori', gender: 'masc', count: 'singular' },
+      fr: { base: 'curseur', plural: 'curseurs', gender: 'masc', count: 'singular' },
+      de: { base: 'Cursor', plural: 'Cursor', gender: 'masc', count: 'singular', compound: 'Cursor' },
+      es: { base: 'cursor', plural: 'cursores', gender: 'masc', count: 'singular' },
+      ja: { base: 'カーソル', count: 'singular' },
+      pt: { base: 'cursor', plural: 'cursores', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // Written words, as a line holds them: what the console's parser reads (localization C21,
+    // "unexpected text"). Japanese keeps the loanword テキスト, as its software does.
+    id: 'TEXT',
+    role: 'noun',
+    description: 'written words',
+    emoji: '📝',
+    forms: {
+      en: { base: 'text', plural: 'texts', count: 'singular' },
+      it: { base: 'testo', plural: 'testi', gender: 'masc', count: 'singular' },
+      fr: { base: 'texte', plural: 'textes', gender: 'masc', count: 'singular' },
+      de: { base: 'Text', plural: 'Texte', gender: 'masc', count: 'singular', compound: 'Text' },
+      es: { base: 'texto', plural: 'textos', gender: 'masc', count: 'singular' },
+      ja: { base: 'テキスト', count: 'singular', reading: 'てきすと' },
+      pt: { base: 'texto', plural: 'textos', gender: 'masc', count: 'singular' },
+    },
+  },
+  {
+    // What names something by pointing at it: the console's `#2.obj`, a period and a noun of it
+    // (localization C21, "unexpected reference"). German Verweis, the native word (Referenz is the
+    // programmer's); Japanese 参照, what its software calls a reference.
+    id: 'REFERENCE',
+    role: 'noun',
+    description: 'something that points to something else',
+    emoji: '🔗',
+    forms: {
+      en: { base: 'reference', plural: 'references', count: 'singular' },
+      it: { base: 'riferimento', plural: 'riferimenti', gender: 'masc', count: 'singular' },
+      fr: { base: 'référence', plural: 'références', gender: 'fem', count: 'singular' },
+      de: { base: 'Verweis', plural: 'Verweise', gender: 'masc', count: 'singular', compound: 'Verweis' },
+      es: { base: 'referencia', plural: 'referencias', gender: 'fem', count: 'singular' },
+      ja: { base: '参照', count: 'singular', reading: 'さんしょう' },
+      pt: { base: 'referência', plural: 'referências', gender: 'fem', count: 'singular' },
     },
   },
   {

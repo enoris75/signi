@@ -172,6 +172,25 @@ describe('resolveNounPhrase', () => {
       const ci = only('THERE', { base: 'ci', person: '3' });
       expect(headForms({ concept: 'THERE' }, ci)).not.toHaveProperty('disjunctive');
     });
+
+    // C20. The gender comes from the noun the pronoun stands for, before the surface is picked.
+    test('a 3rd-person pronoun takes its gender from its antecedent, over its own', () => {
+      expect(headForms({ concept: 'HE', antecedent: 'HOUSE' })).toMatchObject({ base: 'lei', disjunctive: 'lei', gender: 'fem' });
+      expect(headForms({ concept: 'HE', antecedent: 'DOG', gender: 'fem' })).toMatchObject({ base: 'lui', gender: 'masc' });
+      expect(headForms({ concept: 'HE', antecedent: 'HOUSE', number: 'plural' })).toMatchObject({ base: 'loro', number: 'plural', gender: 'fem' });
+    });
+
+    test('a 1st- or 2nd-person pronoun, or the generic one, has no antecedent to agree with', () => {
+      expect(headForms({ concept: 'I', antecedent: 'HOUSE' })).toMatchObject({ gender: 'masc' });
+      const si = lexicon({ ONE: { base: 'si', person: '3', generic: '1' }, HOUSE: CASA });
+      expect(headForms({ concept: 'ONE', antecedent: 'HOUSE' }, si)).toMatchObject({ gender: 'masc' });
+    });
+
+    test('where the language could only guess, the antecedent itself stands in, under the demonstrative', () => {
+      const lookup = lexicon({ HE: { base: 'he', person: '3', singular_fem: 'she' }, PERSON: { base: 'person', human: '1' } });
+      expect(resolveNounPhrase({ concept: 'HE', antecedent: 'PERSON' }, 'en', lookup).head)
+        .toEqual({ conceptId: 'PERSON', forms: { base: 'person', human: '1', number: 'singular', definiteness: 'that' } });
+    });
   });
 
   describe('the head degree', () => {

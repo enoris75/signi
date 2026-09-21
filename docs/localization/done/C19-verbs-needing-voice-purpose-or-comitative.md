@@ -84,6 +84,10 @@ predicate rather than inside it, unlike `infinitive`), and `gender`, which only 
 reads — it is what keeps English off "to write content to load **him**" and gives German its "um
 **es** zu laden".
 
+_(2026-09-21: that German was wrong. *Inhalt* is masculine, so it should be "ihn". [C20](C20-pronoun-agreement.md)
+replaced `gender` with `antecedent`, a pronoun that names the noun it stands for, so each language
+takes the gender it wants from its own lexicon. SAVE now reads "Inhalt schreiben, um ihn zu laden".)_
+
 ### One more verb, seeded elsewhere
 
 **TRANSLATE** was seeded by [C11](C11-ui-failure-messages-passive.md) and took a gloss with

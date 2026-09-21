@@ -490,7 +490,27 @@ export interface NounPhrase {
   concept: string;                 // core noun or pronoun id
   number?: 'singular' | 'plural';
   // 'neut' is only meaningful for a 3rd-person pronoun head ("it"); noun heads use masc/fem.
+  // Under an `antecedent` it is the referent's natural gender instead (see there).
   gender?: 'masc' | 'fem' | 'neut';
+  /**
+   * The noun a **3rd-person pronoun** head stands for — a concept id: `{ concept: 'THIRD_PERSON',
+   * antecedent: 'CONTENT' }` is "it" (en), "lo" (it), "ihn" (de). The pronoun names the noun rather
+   * than a gender because the languages want different genders of it, and each reads its own from
+   * its own lexicon (localization C20):
+   *
+   *  - de, it, fr, es, pt take the antecedent's **grammatical** gender — *Inhalt* is masculine, so
+   *    German says "ihn"; *Option* is feminine, so Italian says "la". A `gender` on the pronoun is
+   *    the referent's, and reaches the noun only through a feminine counterpart of its own ("la
+   *    compagna" → "la"): "la persona" is "la" whoever it is.
+   *  - en, ja take the **natural** gender, which no noun lexeme carries: the pronoun's own `gender`
+   *    when the plan states it, else neuter for anything that is not a person ("it", それ). A person
+   *    whose gender is not stated is never guessed at: the singular is not pronominalised at all,
+   *    and reads as the antecedent under the anaphoric demonstrative ("that person", その人).
+   *
+   * Number is the pronoun's own (`number`, singular by default): the antecedent names a word, not
+   * a referent, and a word has no number. Ignored on any head but a 3rd-person pronoun.
+   */
+  antecedent?: string;
   /** Determiner to render with; defaults to 'definite'. Ignored for pronoun heads. */
   definiteness?: Definiteness;
   /** Adjective ids, in order. The UI supplies up to three today; the model is uncapped. */

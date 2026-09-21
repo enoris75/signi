@@ -134,6 +134,11 @@ const CAP_LABEL: Record<string, string> = {
  */
 export function keycapLabels(spec: string, platform: Platform = currentPlatform()): string[] {
   const { mod, shift, key } = parseKeySpec(spec);
+  // A modifier named alone, as the help's prose names one ("Keys that work everywhere: Ctrl"): the
+  // app modifier drawn for the platform, and Shift as the ⇧ a chord draws it as. No keymap binds
+  // either spec, since a modifier by itself is never a command.
+  if (!mod && !shift && key === "Mod") return [platform === "mac" ? "⌘" : "Ctrl"];
+  if (!mod && !shift && key === "Shift") return ["⇧"];
   const caps: string[] = [];
   if (mod) caps.push(platform === "mac" ? "⌘" : "Ctrl");
   if (shift) caps.push("⇧");

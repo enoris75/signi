@@ -105,6 +105,14 @@ describe('keycapLabels', () => {
     expect(keycapLabels('n', 'other')).toEqual(['N']);
     expect(keycapText('Mod+Shift+S', 'mac')).toBe('⌘ ⇧ S');
   });
+
+  // The help's prose names a modifier by itself ("Keys that work everywhere: Ctrl"), and it follows the
+  // sheet's platform switch as a chord's does.
+  it('draws a modifier named alone as its own cap', () => {
+    expect(keycapLabels('Mod', 'other')).toEqual(['Ctrl']);
+    expect(keycapLabels('Mod', 'mac')).toEqual(['⌘']);
+    expect(keycapLabels('Shift', 'mac')).toEqual(['⇧']);
+  });
 });
 
 describe('a key named by where it is', () => {

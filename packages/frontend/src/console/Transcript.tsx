@@ -10,11 +10,13 @@ import { fetchTranslation } from "../api.ts";
 import { useUiLanguage } from "../i18n/LanguageContext.tsx";
 import { styleTokens } from "./language/parse.ts";
 import { ECHO_PARTS } from "./language/diff.ts";
+import { sayHere, type Here } from "./language/diagnostics.ts";
 import { exampleIn, helpPage } from "./language/help.ts";
 import type { Vocabulary } from "./language/types.ts";
 import { useUiString } from "../i18n/useUiString.ts";
 import { MONO, Token, tokenColor } from "./tokens.tsx";
 import type { TranscriptEntry } from "./usePhraseConsole.ts";
+import { useDiagnosticText } from "./useDiagnosticText.ts";
 
 /**
  * What has happened, newest last: each line typed (›), each change made on the canvas written back as
@@ -36,6 +38,7 @@ export function Transcript({
   vocab: Vocabulary;
 }) {
   const t = useUiString();
+  const say = useDiagnosticText();
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     end.current?.scrollIntoView({ block: "nearest" });
@@ -86,8 +89,12 @@ export function Transcript({
               <PinToggle pinned={pins.includes(entry.text)} onPin={(pinned) => onPin(entry.text, pinned)} />
             )}
             {entry.kind === "error" && (
-              <Box sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "error.main" }}>
-                {entry.messageKey ? t(entry.messageKey) : entry.message}
+              <Box
+                data-testid="transcript-error-message"
+                data-code={entry.diagnostic.code}
+                sx={{ fontFamily: '"Inter", sans-serif', fontSize: "0.78rem", color: "error.main" }}
+              >
+                {say(entry.diagnostic)}
               </Box>
             )}
             {entry.kind === "info" && (entry.detail || entry.detailKey) && (
@@ -142,7 +149,7 @@ function PinToggle({ pinned, onPin }: { pinned: boolean; onPin: (pinned: boolean
  * interface language — the usage line's placeholders, and the example's words, which are printed as
  * the source strip prints them.
  */
-function HelpPage({ name, here, vocab }: { name: string; here?: string; vocab: Vocabulary }) {
+function HelpPage({ name, here, vocab }: { name: string; here?: Here; vocab: Vocabulary }) {
   const t = useUiString();
   const page = helpPage(name, {
     word: t("console.usage.word"),
@@ -198,7 +205,11 @@ function HelpPage({ name, here, vocab }: { name: string; here?: string; vocab: V
           <Line text={example} />
         </Box>
       </Box>
-      {here && <Box sx={{ ...prose, fontStyle: "italic" }}>{here}</Box>}
+      {here && (
+        <Box data-testid="help-here" sx={{ ...prose, fontStyle: "italic" }}>
+          {sayHere(here, t)}
+        </Box>
+      )}
     </Box>
   );
 }

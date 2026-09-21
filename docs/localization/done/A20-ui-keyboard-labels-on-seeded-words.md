@@ -8,7 +8,7 @@ UI strings start as English, ready for `/localize`"). These were the ones that n
 verb on a seeded noun, or a catalogue entry that already exists. Every item below shipped. The rest wait on
 vocabulary in [B40](B40-ui-undo-redo.md), [B41](B41-ui-help-overlay.md),
 [B42](B42-ui-console-name.md), [B43](B43-ui-canvas-preview-edit.md) and
-[B44](B44-ui-keyboard-movement-labels.md), or are prose ([C22](../C-needs-engine/C22-ui-help-prose.md)).
+[B44](B44-ui-keyboard-movement-labels.md), or are prose ([C22](C22-ui-help-prose.md)).
 B40–B44 were done on 2026-09-21 too, so their rows below are struck through.
 
 Where the labels show:
@@ -90,7 +90,7 @@ Each of these waits on a word the corpus does not hold, or is prose. Nothing her
 The subject/object/complement/possessor/conjunct note on the Noun section ([HelpOverlay.tsx:65](../../../packages/frontend/src/keyboard/HelpOverlay.tsx#L65))
 looks composable, since it is five seeded nouns coordinated. It renders es "sujeto, complemento,
 complemento, poseedor y miembro coordinado", because OBJECT_GRAMMAR's Spanish is *complemento* too. It
-moved to [C22](../C-needs-engine/C22-ui-help-prose.md) with the other notes.
+moved to [C22](C22-ui-help-prose.md) with the other notes.
 
 ## Probe renders
 
@@ -187,7 +187,7 @@ Changes against the plan:
    That is not this task. The keymap keeps "You · Let’s · You all" as its English `label`, the addressee
    the key picks.
 5. **The Word picker's "Close · again restores the word" stays English whole.** Half of it is `action.close`,
-   and the rest needs RESTORE and AGAIN ([C22](../C-needs-engine/C22-ui-help-prose.md)). A row that switches
+   and the rest needs RESTORE and AGAIN ([C22](C22-ui-help-prose.md)). A row that switches
    language halfway reads worse than one that waits, so `action.close` shows in the Menus row only.
 6. **`box.word`'s English `label` is now "Replace the word",** to match its key. The other commands keep
    their English `label`s, which are what the sheet shows for a command without a `labelKey`.

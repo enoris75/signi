@@ -22,7 +22,7 @@ import type { Gender } from "../../components/PhraseBuilder/phraseReducers.ts";
  * completion also matches (`/plural` finds `/pl`), what it does, what its argument is, and the colour
  * its token wears — the colour of the box it fills, so the two views read as one. The names are
  * English for every interface language (decision 3); the descriptions, purposes and topics come from
- * the UI-string catalogue (A21, B41–B47), and `purpose` stays English only for C21's diagnostics.
+ * the UI-string catalogue (A21, B41–B47), and so does what a diagnostic says of a command (C21).
  *
  * What a command *does* is its `action`, interpreted by apply.ts; `satellites` and `reducers` say
  * which canvas controls and which phraseReducers it reaches, which is what the coverage test holds
@@ -116,11 +116,10 @@ export interface CommandDef {
   /** What the completion list says beside the name. English, the fallback for `descriptionKey`. */
   description: string;
   descriptionKey?: UiStringKey;
-  /** What it sets, for a diagnostic: "/past sets a verb's tense". English, for /localize (C21). */
-  purpose?: string;
   /**
-   * The same purpose as its help page says it, from the catalogue: an infinitive citation, "to set a
-   * verb's tense" (B47). Commands that share a `purpose` share its key.
+   * What it is for, from the catalogue: an infinitive citation, "to set a verb's tense" (B47), which its
+   * help page and its misuse diagnostic say after its name ("/past — to set a verb's tense", C21).
+   * Commands that do the same thing share one key.
    */
   purposeKey?: UiStringKey;
   color: TokenColor;
@@ -162,7 +161,6 @@ const setting = (
   s: Setting,
   description: string,
   descriptionKey: UiStringKey | undefined,
-  purpose: string,
   satellites: RegExp,
   reducers: string[],
 ): CommandDef => ({
@@ -171,7 +169,6 @@ const setting = (
   group,
   description,
   descriptionKey,
-  purpose,
   purposeKey: settingPurpose(s),
   color: "setting",
   arg: { kind: "none" },
@@ -286,7 +283,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "instrumental",
     descriptionKey: "slot.instrumental",
-    purpose: "gives the verb an instrument",
     purposeKey: "purpose.instrument",
     color: "secondary",
     arg: { kind: "link" },
@@ -299,7 +295,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "add an adjective",
     descriptionKey: "category.adjective",
-    purpose: "describes a noun",
     purposeKey: "purpose.adjective",
     color: "error",
     arg: { kind: "word" },
@@ -313,7 +308,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "adverb",
     descriptionKey: "slot.adverb",
-    purpose: "qualifies a verb or a modal",
     purposeKey: "purpose.adverb",
     color: "info",
     arg: { kind: "word" },
@@ -327,7 +321,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "modal",
     descriptionKey: "slot.modal",
-    purpose: "governs a verb",
     purposeKey: "purpose.modal",
     color: "secondary",
     arg: { kind: "word" },
@@ -341,7 +334,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "possessor",
     descriptionKey: "slot.possessor",
-    purpose: "gives a noun its possessor",
     purposeKey: "purpose.possessor",
     color: "primary",
     arg: { kind: "phrase" },
@@ -355,7 +347,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "coordinate",
     descriptionKey: "satellite.coordination",
-    purpose: "coordinates another phrase with a noun",
     purposeKey: "purpose.conjunct",
     color: "primary",
     arg: { kind: "phrase" },
@@ -369,7 +360,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "role",
     description: "coordinate, disjunctive",
     descriptionKey: "conjunction.kind.or",
-    purpose: "coordinates another phrase with a noun",
     purposeKey: "purpose.conjunct",
     color: "primary",
     arg: { kind: "phrase" },
@@ -379,11 +369,11 @@ export const COMMANDS: readonly CommandDef[] = [
   },
 
   // ── Noun ──────────────────────────────────────────────────────────────────
-  setting("sg", ["singular"], "noun", { id: "number", value: "singular" }, "singular", "number.value.singular", "sets a noun’s number", /Number$/, ["setNumber", "setModifierNumber"]),
-  setting("pl", ["plural"], "noun", { id: "number", value: "plural" }, "plural", "number.value.plural", "sets a noun’s number", /Number$/, ["setNumber", "setModifierNumber"]),
-  setting("masc", ["masculine", "male"], "noun", { id: "gender", value: "masc" }, "masculine", "gender.value.masc", "sets a noun’s gender", /Gender$/, ["setGender"]),
-  setting("fem", ["feminine", "female"], "noun", { id: "gender", value: "fem" }, "feminine", "gender.value.fem", "sets a noun’s gender", /Gender$/, ["setGender"]),
-  setting("neut", ["neuter"], "noun", { id: "gender", value: "neut" }, "neuter", "gender.value.neut", "sets a pronoun’s gender", /Gender$/, ["setGender"]),
+  setting("sg", ["singular"], "noun", { id: "number", value: "singular" }, "singular", "number.value.singular", /Number$/, ["setNumber", "setModifierNumber"]),
+  setting("pl", ["plural"], "noun", { id: "number", value: "plural" }, "plural", "number.value.plural", /Number$/, ["setNumber", "setModifierNumber"]),
+  setting("masc", ["masculine", "male"], "noun", { id: "gender", value: "masc" }, "masculine", "gender.value.masc", /Gender$/, ["setGender"]),
+  setting("fem", ["feminine", "female"], "noun", { id: "gender", value: "fem" }, "feminine", "gender.value.fem", /Gender$/, ["setGender"]),
+  setting("neut", ["neuter"], "noun", { id: "gender", value: "neut" }, "neuter", "gender.value.neut", /Gender$/, ["setGender"]),
   ...(
     [
       ["the", ["definite"], "definite"],
@@ -405,7 +395,6 @@ export const COMMANDS: readonly CommandDef[] = [
       { id: "determiner", value },
       value,
       `determiner.name.${value}` as UiStringKey,
-      "sets a noun’s determiner",
       /Definiteness$/,
       ["setDefiniteness"],
     ),
@@ -416,7 +405,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "noun",
     description: "relative clause",
     descriptionKey: "satellite.relative",
-    purpose: "gives a noun a relative clause",
     purposeKey: "purpose.relative",
     color: "primary",
     arg: { kind: "link" },
@@ -442,7 +430,6 @@ export const COMMANDS: readonly CommandDef[] = [
       value.replace(/_/g, " "),
       // The adposition the relation is spoken with, as the canvas's toolbar names it (C13).
       `specifier.value.${value}`,
-      "sets the relation of a place or a route",
       /^(locative|route)$/,
       ["setSpecifier"],
     ),
@@ -462,7 +449,6 @@ export const COMMANDS: readonly CommandDef[] = [
       description,
       // The connector the stance picks, as the cause's toolbar shows it (C13): "thanks to", "per colpa di".
       `sentiment.connector.${value}`,
-      "sets how a cause is felt",
       /^cause$/,
       ["setSentiment"],
     ),
@@ -477,7 +463,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "verb",
     description: "tense",
     descriptionKey: "satellite.tense",
-    purpose: "sets a verb’s tense",
     purposeKey: "purpose.tense",
     color: "setting",
     arg: { kind: "values", values: TENSE_VALUES, max: 1 },
@@ -491,7 +476,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "verb",
     description: "aspect",
     descriptionKey: "satellite.aspect",
-    purpose: "sets a verb’s aspect",
     purposeKey: "purpose.aspect",
     color: "setting",
     arg: { kind: "values", values: ASPECT_VALUES, max: 1 },
@@ -500,7 +484,7 @@ export const COMMANDS: readonly CommandDef[] = [
     reducers: ["setAspect"],
   },
   ...(["past", "present", "future"] as const).map((value) =>
-    setting(value, [], "verb", { id: "tense", value }, value, `tense.value.${value}` as UiStringKey, "sets a verb’s tense", /^verbTense$/, ["setTense"]),
+    setting(value, [], "verb", { id: "tense", value }, value, `tense.value.${value}` as UiStringKey, /^verbTense$/, ["setTense"]),
   ),
   ...(
     [
@@ -517,7 +501,6 @@ export const COMMANDS: readonly CommandDef[] = [
       { id: "aspect", value },
       value,
       `aspect.value.${value}` as UiStringKey,
-      "sets a verb’s aspect",
       /^verbAspect$/,
       ["setAspect"],
     ),
@@ -528,7 +511,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "verb",
     description: "voice",
     descriptionKey: "satellite.voice",
-    purpose: "sets a verb’s voice",
     purposeKey: "purpose.voice",
     color: "setting",
     arg: { kind: "values", values: VOICE_VALUES, max: 1 },
@@ -537,10 +519,10 @@ export const COMMANDS: readonly CommandDef[] = [
     reducers: ["setVoice"],
   },
   ...(["active", "passive"] as const).map((value) =>
-    setting(value, [], "verb", { id: "voice", value }, value, `voice.value.${value}` as UiStringKey, "sets a verb’s voice", /^verbVoice$/, ["setVoice"]),
+    setting(value, [], "verb", { id: "voice", value }, value, `voice.value.${value}` as UiStringKey, /^verbVoice$/, ["setVoice"]),
   ),
-  setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", "negates a verb", /^verbNegative$/, ["setNegative"]),
-  setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", "sets a verb’s polarity", /^verbNegative$/, ["setNegative"]),
+  setting("not", ["negative"], "verb", { id: "polarity", value: "negative" }, "negative", "polarity.value.negative", /^verbNegative$/, ["setNegative"]),
+  setting("pos", ["positive", "affirmative"], "verb", { id: "polarity", value: "positive" }, "positive", "polarity.value.positive", /^verbNegative$/, ["setNegative"]),
 
   // ── Adjective ─────────────────────────────────────────────────────────────
   ...(
@@ -563,7 +545,6 @@ export const COMMANDS: readonly CommandDef[] = [
       // "bigger", de "größer". The plain degree adds nothing to say, so it is named instead (B46):
       // "Positive degree", de "Positiv", ja 原級.
       value === "positive" ? "degree.name.positive" : `degree.value.${value}`,
-      "sets an adjective’s degree",
       /Adjective\d?$|^predicative$/,
       ["setDegree"],
     ),
@@ -576,7 +557,6 @@ export const COMMANDS: readonly CommandDef[] = [
       { id: "relation", value },
       value,
       `modifier.relation.${value}` as UiStringKey,
-      "sets how a noun modifier relates to its noun",
       /Adjective\d?$/,
       ["setModifierRelation"],
     ),
@@ -634,7 +614,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "period",
     description: "if-condition",
     descriptionKey: "clause.conditional",
-    purpose: "gives a period its if-condition",
     purposeKey: "purpose.condition",
     color: "warning",
     arg: { kind: "link" },
@@ -646,7 +625,6 @@ export const COMMANDS: readonly CommandDef[] = [
     group: "period",
     description: "coordination",
     descriptionKey: "action.coordinatePeriod",
-    purpose: "coordinates two periods",
     purposeKey: "purpose.join",
     color: "info",
     arg: { kind: "link" },

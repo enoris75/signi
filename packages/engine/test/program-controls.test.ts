@@ -199,6 +199,12 @@ describe('program nouns', () => {
     ['VALUE',
       { en: 'a value.', it: 'un valore.', fr: 'une valeur.', de: 'ein Wert.', es: 'un valor.', ja: '値。', pt: 'um valor.' },
       { en: 'the values.', it: 'i valori.', fr: 'les valeurs.', de: 'die Werte.', es: 'los valores.', ja: '値。', pt: 'os valores.' }],
+    ['BRACKET',
+      { en: 'a bracket.', it: 'una parentesi.', fr: 'une parenthèse.', de: 'eine Klammer.', es: 'un paréntesis.', ja: '括弧。', pt: 'um parêntese.' },
+      { en: 'the brackets.', it: 'le parentesi.', fr: 'les parenthèses.', de: 'die Klammern.', es: 'los paréntesis.', ja: '括弧。', pt: 'os parênteses.' }],
+    ['CURSOR',
+      { en: 'a cursor.', it: 'un cursore.', fr: 'un curseur.', de: 'ein Cursor.', es: 'un cursor.', ja: 'カーソル。', pt: 'um cursor.' },
+      { en: 'the cursors.', it: 'i cursori.', fr: 'les curseurs.', de: 'die Cursor.', es: 'los cursores.', ja: 'カーソル。', pt: 'os cursores.' }],
   ])('%s', (concept, singular, plural) => {
     expect(said(concept, { definiteness: 'indefinite' })).toEqual(singular);
     expect(said(concept, { number: 'plural' })).toEqual(plural);
@@ -210,6 +216,17 @@ describe('program nouns', () => {
       en: 'the loading.', it: 'il caricamento.', fr: 'le chargement.', de: 'das Laden.', es: 'la carga.', ja: '読み込み。', pt: 'o carregamento.',
     });
     expect(said('LOADING', { definiteness: 'some' })).toMatchObject({ en: 'some loading.', it: 'del caricamento.', fr: 'du chargement.', es: 'algo de carga.' });
+  });
+
+  // The console's own marks (C21, C22). Italian parentesi and Spanish paréntesis are invariable,
+  // German Cursor takes -s in the genitive and nothing in the plural.
+  test('BRACKET and CURSOR in a command and a genitive', () => {
+    expect(sayAll({ ...clause(np('SECOND_PERSON'), 'CLOSE', { directObject: np('BRACKET') }), imperative: true })).toEqual({
+      en: 'close the bracket.', it: 'chiudi la parentesi.', fr: 'ferme la parenthèse.', de: 'schließ die Klammer.', es: 'cierra el paréntesis.', ja: '括弧を閉じてください。', pt: 'feche o parêntese.',
+    });
+    expect(sayAll({ subject: np('WORD', { possessor: np('CURSOR') }) })).toEqual({
+      en: "the cursor's word.", it: 'la parola del cursore.', fr: 'le mot du curseur.', de: 'das Wort des Cursors.', es: 'la palabra del cursor.', ja: 'カーソルの単語。', pt: 'a palavra do cursor.',
+    });
   });
 
   // German Name is a weak noun: den Namen, dem Namen.

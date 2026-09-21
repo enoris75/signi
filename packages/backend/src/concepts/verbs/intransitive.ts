@@ -663,6 +663,79 @@ export const intransitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Doing what a thing is for, said of a machine or a key rather than of a person: "the key works",
+  // it "il tasto funziona", de "die Taste funktioniert", ja キーは動作します. ACT is the person's act
+  // (de "handeln", ja 行動する), which a key does not do. The help overlay says where the keys work
+  // (localization C22). Not the toil of WORK in "go to work", hence the synonym.
+  {
+    id: 'WORK',
+    role: 'verb',
+    transitivity: 'intransitive',
+    complements: ['manner', 'locative', 'cause', 'instrumental'],
+    description: 'to do what it is made for; to function',
+    synonym: 'function',
+    emoji: '⚙️',
+    forms: {
+      en: {
+        base: 'work',
+        '1sg_present': 'work', '2sg_present': 'work', '3sg_present': 'works',
+        '1pl_present': 'work', '2pl_present': 'work', '3pl_present': 'work',
+        past: 'worked',
+      },
+      it: {
+        base: 'funzionare',
+        '1sg_present': 'funziono', '2sg_present': 'funzioni', '3sg_present': 'funziona',
+        '1pl_present': 'funzioniamo', '2pl_present': 'funzionate', '3pl_present': 'funzionano',
+        '1sg_past': 'funzionai', '2sg_past': 'funzionasti', '3sg_past': 'funzionò',
+        '1pl_past': 'funzionammo', '2pl_past': 'funzionaste', '3pl_past': 'funzionarono',
+        '1sg_future': 'funzionerò', '2sg_future': 'funzionerai', '3sg_future': 'funzionerà',
+        '1pl_future': 'funzioneremo', '2pl_future': 'funzionerete', '3pl_future': 'funzioneranno',
+      },
+      fr: {
+        base: 'fonctionner',
+        '1sg_present': 'fonctionne', '2sg_present': 'fonctionnes', '3sg_present': 'fonctionne',
+        '1pl_present': 'fonctionnons', '2pl_present': 'fonctionnez', '3pl_present': 'fonctionnent',
+        '1sg_past': 'fonctionnai', '2sg_past': 'fonctionnas', '3sg_past': 'fonctionna',
+        '1pl_past': 'fonctionnâmes', '2pl_past': 'fonctionnâtes', '3pl_past': 'fonctionnèrent',
+        '1sg_future': 'fonctionnerai', '2sg_future': 'fonctionneras', '3sg_future': 'fonctionnera',
+        '1pl_future': 'fonctionnerons', '2pl_future': 'fonctionnerez', '3pl_future': 'fonctionneront',
+      },
+      de: {
+        base: 'funktionieren',
+        '1sg_present': 'funktioniere', '2sg_present': 'funktionierst', '3sg_present': 'funktioniert',
+        '1pl_present': 'funktionieren', '2pl_present': 'funktioniert', '3pl_present': 'funktionieren',
+        '1sg_past': 'funktionierte', '2sg_past': 'funktioniertest', '3sg_past': 'funktionierte',
+        '1pl_past': 'funktionierten', '2pl_past': 'funktioniertet', '3pl_past': 'funktionierten',
+      },
+      es: {
+        base: 'funcionar',
+        '1sg_present': 'funciono', '2sg_present': 'funcionas', '3sg_present': 'funciona',
+        '1pl_present': 'funcionamos', '2pl_present': 'funcionáis', '3pl_present': 'funcionan',
+        '1sg_past': 'funcioné', '2sg_past': 'funcionaste', '3sg_past': 'funcionó',
+        '1pl_past': 'funcionamos', '2pl_past': 'funcionasteis', '3pl_past': 'funcionaron',
+        '1sg_future': 'funcionaré', '2sg_future': 'funcionarás', '3sg_future': 'funcionará',
+        '1pl_future': 'funcionaremos', '2pl_future': 'funcionaréis', '3pl_future': 'funcionarán',
+      },
+      ja: {
+        base: '動作する',
+        reading: 'どうさする',
+        masu_present: '動作します',
+        masu_present_reading: 'どうさします',
+        label: '動作',
+        label_reading: 'どうさ',
+      },
+      pt: {
+        base: 'funcionar',
+        '1sg_present': 'funciono', '2sg_present': 'funciona', '3sg_present': 'funciona',
+        '1pl_present': 'funcionamos', '2pl_present': 'funcionam', '3pl_present': 'funcionam',
+        '1sg_past': 'funcionei', '2sg_past': 'funcionou', '3sg_past': 'funcionou',
+        '1pl_past': 'funcionamos', '2pl_past': 'funcionaram', '3pl_past': 'funcionaram',
+        '1sg_future': 'funcionarei', '2sg_future': 'funcionará', '3sg_future': 'funcionará',
+        '1pl_future': 'funcionaremos', '2pl_future': 'funcionarão', '3pl_future': 'funcionarão',
+      },
+    },
+  },
+
   // The inchoative half of the causative/inchoative pair START heads. English, Italian, French,
   // German, Spanish and Portuguese all say both halves with one labile verb ("the man starts the
   // action" / "the action starts"), so six of the seven paradigms below repeat START's. Japanese

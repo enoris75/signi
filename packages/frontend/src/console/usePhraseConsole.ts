@@ -10,15 +10,16 @@ import { workspaceToPlans } from "../components/PhraseBuilder/workspacePlan/inde
 import type { PhraseContainer, PhraseLink } from "../components/PhraseBuilder/interfaces.ts";
 import { advanceContext, applyScript, wordExists, type ApplyResult, type Effect, type Frame } from "./language/apply.ts";
 import { commandNamed, type CommandDef } from "./language/commands.ts";
-import { complete, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
+import { complete, currentValue, previewIds, type Candidate, type CompleteOptions, type Completion } from "./language/complete.ts";
 import { finished, nextStop, structure } from "./language/edit.ts";
 import { diffWorkspaces, type EchoPart } from "./language/diff.ts";
 import { lex, splitPeriods } from "./language/lex.ts";
 import { printPeriod, printWorkspace } from "./language/print.ts";
+import { coded, diagnosticAt, type Coded, type Here } from "./language/diagnostics.ts";
 import type { ConsoleContext, Diagnostic, WordRef, WorkspaceState } from "./language/types.ts";
 import { pushHistory, readHistory, readPins, setPinned, writeHistory, writePins } from "./history.ts";
 import { EXAMPLES, helpPage } from "./language/help.ts";
-import { attachesToWord, currentSetting, takes, wordInfo } from "./language/words.ts";
+import { attachesToWord, takes, wordInfo } from "./language/words.ts";
 import { useLocalAliases } from "./useLocalAliases.ts";
 import { periodMark, wordMark, type ConsoleMarks } from "./ConsoleMarks.tsx";
 import { parseRef } from "./language/resolve.ts";
@@ -45,16 +46,16 @@ const NARROW = 600;
 export type TranscriptEntry =
   | { id: number; kind: "typed"; text: string; containerId: string; plan?: Partial<PhrasePlan> }
   | { id: number; kind: "echo"; parts: EchoPart[]; containerId: string; plan?: Partial<PhrasePlan> }
-  /** A mistake. `message` is English, the fallback for `messageKey`, which the transcript draws as shown. */
-  | { id: number; kind: "error"; text: string; message: string; messageKey?: UiStringKey }
+  /** A mistake, by its code: the transcript says it in the interface language as it draws it. */
+  | { id: number; kind: "error"; text: string; diagnostic: Coded }
   /** A line that did something besides the phrase. `detail` is English, the fallback for `detailKey`. */
   | { id: number; kind: "info"; text: string; detail?: string; detailKey?: UiStringKey }
   /**
    * A command's help page (`/help rel`): drawn from the catalogue when shown, so it follows the
-   * interface language; `plan` is its example's sentence, and `here` what the command would do at
-   * the context the page was asked from.
+   * interface language; `plan` is its example's sentence, and `here` what the command would act on
+   * at the context the page was asked from.
    */
-  | { id: number; kind: "help"; name: string; plan?: Partial<PhrasePlan>; here?: string };
+  | { id: number; kind: "help"; name: string; plan?: Partial<PhrasePlan>; here?: Here };
 
 /** An entry before it has its id — the union distributed, so each kind keeps its own fields. */
 type NewEntry = TranscriptEntry extends infer E ? (E extends TranscriptEntry ? Omit<E, "id"> : never) : never;
@@ -110,7 +111,7 @@ function safely<T>(run: () => T, fallback: T): T {
 
 const unreadable = (state: WorkspaceState, text: string, context: ConsoleContext): ApplyResult => ({
   state,
-  diagnostic: { from: 0, to: text.length, message: "This line could not be read.", messageKey: "failure.lineNotRead" },
+  diagnostic: diagnosticAt({ from: 0, to: text.length }, coded("lineNotRead")),
   frames: [{ kind: "period", containerId: context.containerId, words: [] }],
   context,
   effects: [],
@@ -632,12 +633,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             // interface language, as it draws a help page.
             add({ kind: "info", text: `/save ${arg}`, detail: "Saved phrase", detailKey: "toast.phraseSaved" });
           } catch {
-            add({
-              kind: "error",
-              text: `/save ${arg}`,
-              message: "The phrase could not be saved.",
-              messageKey: "failure.phraseNotSaved",
-            });
+            add({ kind: "error", text: `/save ${arg}`, diagnostic: coded("phraseNotSaved") });
           }
           break;
         case "load": {
@@ -649,7 +645,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             const list = await listSavedPhrases("phrase");
             const hit = list.find((p) => p.name.toLowerCase() === arg.toLowerCase());
             if (!hit) {
-              add({ kind: "error", text: `/load ${arg}`, message: `There is no saved phrase “${arg}”.` });
+              add({ kind: "error", text: `/load ${arg}`, diagnostic: coded("noSavedPhrase", { name: arg }) });
               break;
             }
             const record = await fetchSavedPhrase(hit.id);
@@ -659,12 +655,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
             history.replace({ containers, links });
             add({ kind: "info", text: `/load ${arg}`, detail: "Loaded phrase", detailKey: "toast.phraseLoaded" });
           } catch {
-            add({
-              kind: "error",
-              text: `/load ${arg}`,
-              message: "That phrase could not be loaded.",
-              messageKey: "failure.phraseNotLoaded",
-            });
+            add({ kind: "error", text: `/load ${arg}`, diagnostic: coded("phraseNotLoaded") });
           }
           break;
         }
@@ -929,7 +920,7 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
   const showHelp = (name: string, state = committed, here: ConsoleContext = liveContext) => {
     const page = helpPage(name);
     if (!page) {
-      add({ kind: "error", text: `/help ${name}`, message: `There is no command /${name.replace(/^\//, "")}.` });
+      add({ kind: "error", text: `/help ${name}`, diagnostic: coded("unknownCommand", { command: name.replace(/^\//, "") }) });
       return;
     }
     const example = EXAMPLES[page.def.name]!;
@@ -949,16 +940,20 @@ export function usePhraseConsole({ history, actions }: { history: WorkspaceHisto
     setOpen(true);
   };
 
-  /** What a command would act on at the context — "on cat, now singular" — for its help page. */
-  const hereFor = (def: CommandDef, state: WorkspaceState, here: ConsoleContext): string | undefined => {
+  /**
+   * What a command would act on at the context, for its help page: the word under the cursor as the
+   * pickers show it, and the value it holds now — which the page says as "Cursor: cat · now singular"
+   * (see `sayHere`).
+   */
+  const hereFor = (def: CommandDef, state: WorkspaceState, here: ConsoleContext): Here | undefined => {
     if (!attachesToWord(def.action)) return undefined;
     const w = here.word ? wordInfo(state.containers, here.word) : undefined;
-    const name = w?.concept ? vocab.label(w.concept) : undefined;
-    if (!w || !name) return "Here: nothing under the cursor yet.";
-    if (!takes(def.action, w)) return `Here: ${name} does not take it.`;
+    const word = w?.concept ? vocab.label(w.concept) : undefined;
+    if (!w || !word) return { kind: "nothing" };
+    if (!takes(def.action, w)) return { kind: "refused", word };
     const id = def.action.kind === "setting" ? def.action.setting.id : def.action.kind === "set" ? def.action.id : undefined;
-    const now = id ? currentSetting(id, w) : undefined;
-    return `Here: on ${name}${now ? `, now ${now}` : ""}.`;
+    const now = id ? currentValue(id, w) : undefined;
+    return { kind: "on", word, ...(now && { now }) };
   };
 
   /** Load the focused period's source into the prompt, which ↵ then replaces the period with. */

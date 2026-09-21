@@ -1,13 +1,15 @@
 import { describe, expect, test } from 'vitest';
-import type { LanguageCode, NounPhrase } from '@signi/shared';
+import type { LanguageCode, NounPhrase, VerbPhrase } from '@signi/shared';
 import { np, sayAll } from './harness.js';
 import { translate } from '../src/index.js';
 import { lookupLexicalEntry } from '../../backend/src/lexicon.js';
 import { concepts } from '../../backend/src/concepts/index.js';
 
-// The words seeded for the concept definitions of localization B33–B39, and the glosses they unlock
-// on the noun side. The verb glosses they unlock are pinned beside their genus: BURN in
-// genus-verbs.test.ts, COLLAPSE and COME in reflexive.test.ts.
+// The words seeded for the concept definitions of localization B33–B39 and B48–B51, and the glosses
+// they unlock on the noun side. The verb glosses they unlock are pinned beside their genus: BURN in
+// genus-verbs.test.ts, COLLAPSE and COME in reflexive.test.ts. B48's two adjectives are in
+// adjectives.test.ts's EVERY_ADJECTIVE and B50–B51's two verbs in verb.test.ts's Italian table; the
+// rest of their paradigms is pinned here.
 
 /** Render a seeded concept's own `definition` plan (its picker tooltip) into every language. */
 function definitionAll(id: string): Record<LanguageCode, string> {
@@ -62,6 +64,14 @@ describe('the definition words: a singular and a plural in every language', () =
     ['CATEGORY',
       { en: 'a category.', it: 'una categoria.', fr: 'une catégorie.', de: 'eine Kategorie.', es: 'una categoría.', ja: '範疇。', pt: 'uma categoria.' },
       { en: 'the categories.', it: 'le categorie.', fr: 'les catégories.', de: 'die Kategorien.', es: 'las categorías.', ja: '範疇。', pt: 'as categorias.' }],
+    // B49. The grammar sense: German Partizipant, not Teilnehmer; Japanese 参与者, not 参加者.
+    ['PARTICIPANT_GRAMMAR',
+      { en: 'a participant.', it: 'un partecipante.', fr: 'un participant.', de: 'ein Partizipant.', es: 'un participante.', ja: '参与者。', pt: 'um participante.' },
+      { en: 'the participants.', it: 'i partecipanti.', fr: 'les participants.', de: 'die Partizipanten.', es: 'los participantes.', ja: '参与者。', pt: 'os participantes.' }],
+    // B50. French sens is the same word in the plural.
+    ['MEANING',
+      { en: 'a meaning.', it: 'un significato.', fr: 'un sens.', de: 'eine Bedeutung.', es: 'un significado.', ja: '意味。', pt: 'um significado.' },
+      { en: 'the meanings.', it: 'i significati.', fr: 'les sens.', de: 'die Bedeutungen.', es: 'los significados.', ja: '意味。', pt: 'os significados.' }],
   ])('%s', (concept, singular, plural) => {
     expect(said(concept, { definiteness: 'indefinite' })).toEqual(singular);
     expect(said(concept, { number: 'plural' })).toEqual(plural);
@@ -88,6 +98,17 @@ describe('the definition words: a singular and a plural in every language', () =
     expect(sayAll({ subject: { concept: 'LANGUAGE', definiteness: 'definite', possessor: { concept: 'COUNTRY' } } })).toEqual({
       en: "the country's language.", it: 'la lingua del paese.', fr: 'la langue du pays.', de: 'die Sprache des Landes.',
       es: 'el idioma del país.', ja: '国の言語。', pt: 'a língua do país.',
+    });
+  });
+
+  // B49. A weak masculine takes -en in every case but the nominative singular, the genitive too.
+  test('PARTICIPANT_GRAMMAR declines weak in German: "den Partizipanten", "des Partizipanten"', () => {
+    expect(sayAll({ subject: np('CAT'), verbPhrase: { verb: 'SEE' }, directObject: np('PARTICIPANT_GRAMMAR') })).toMatchObject({
+      de: 'der Kater sieht den Partizipanten.',
+    });
+    expect(sayAll({ subject: { concept: 'NAME_NOUN', definiteness: 'definite', possessor: { concept: 'PARTICIPANT_GRAMMAR' } } })).toEqual({
+      en: "the participant's name.", it: 'il nome del partecipante.', fr: 'le nom du participant.', de: 'der Name des Partizipanten.',
+      es: 'el nombre del participante.', ja: '参与者の名前。', pt: 'o nome do participante.',
     });
   });
 });
@@ -196,6 +217,170 @@ describe('number and the quantifier indicate quantities (localization B39)', () 
       es: 'un determinante que indica cantidades.',
       ja: '数量を示す限定詞。',
       pt: 'um determinante que indica quantidades.',
+    });
+  });
+});
+
+// B48. The climate senses of COLD and HOT. Japanese says 寒い / 暑い of a place and the weather where
+// COLD and HOT are 冷たい / 熱い to the touch, and Spanish caluroso where HOT is caliente. A climate
+// is what a place is, so es and pt predicate it with ser, where COLD and HOT take estar.
+describe('the continents of extreme climate (localization B48)', () => {
+  test('ANTARCTICA → the coldest continent', () => {
+    expect(definitionAll('ANTARCTICA')).toEqual({
+      en: 'the coldest continent.',
+      it: 'il continente più freddo.',
+      fr: 'le continent le plus froid.',
+      de: 'der kälteste Kontinent.',
+      es: 'el continente más frío.',
+      ja: '最も寒い大陸。',
+      pt: 'o continente mais frio.',
+    });
+  });
+
+  test('AFRICA → the hottest continent', () => {
+    expect(definitionAll('AFRICA')).toEqual({
+      en: 'the hottest continent.',
+      it: 'il continente più caldo.',
+      fr: 'le continent le plus chaud.',
+      de: 'der heißeste Kontinent.',
+      es: 'el continente más caluroso.',
+      ja: '最も暑い大陸。',
+      pt: 'o continente mais quente.',
+    });
+  });
+
+  test('a climate is predicated with ser, where the touch senses take estar', () => {
+    const is = (place: string, adjective: string) =>
+      sayAll({ subject: np(place), verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np(adjective) } } });
+    expect(is('ANTARCTICA', 'COLD_CLIMATE')).toEqual({
+      en: 'Antarctica is cold.', it: "l'Antartide è fredda.", fr: "l'Antarctique est froid.", de: 'die Antarktis ist kalt.',
+      es: 'la Antártida es fría.', ja: '南極大陸は寒いです。', pt: 'a Antártida é fria.',
+    });
+    expect(is('AFRICA', 'HOT_CLIMATE')).toEqual({
+      en: 'Africa is hot.', it: "l'Africa è calda.", fr: "l'Afrique est chaude.", de: 'Afrika ist heiß.',
+      es: 'África es calurosa.', ja: 'アフリカは暑いです。', pt: 'a África é quente.',
+    });
+    expect(is('WATER', 'COLD')).toMatchObject({ es: 'el agua está fría.', ja: '水は冷たいです。', pt: 'a água está fria.' });
+  });
+
+  test('the climate senses agree and compare as their siblings do: de kälter, es calurosas', () => {
+    expect(sayAll({ subject: np('CAT', { adjectives: ['COLD_CLIMATE'], adjectiveDegrees: ['more'] }), verbPhrase: { verb: 'EAT' } })).toMatchObject({
+      de: 'der kältere Kater frisst.', ja: 'もっと寒い猫は食べます。',
+    });
+    expect(sayAll({ subject: np('CAT', { adjectives: ['HOT_CLIMATE'], gender: 'fem', number: 'plural' }), verbPhrase: { verb: 'EAT' } })).toEqual({
+      en: 'the hot cats eat.', it: 'le gatte calde mangiano.', fr: 'les chattes chaudes mangent.', de: 'die heißen Katzen fressen.',
+      es: 'las gatas calurosas comen.', ja: '暑い猫は食べます。', pt: 'as gatas quentes comem.',
+    });
+  });
+
+  // Their own glosses are their siblings': the senses differ in register, not in meaning.
+  test('COLD_CLIMATE and HOT_CLIMATE share COLD\'s and HOT\'s glosses', () => {
+    expect(definitionAll('COLD_CLIMATE')).toEqual(definitionAll('COLD'));
+    expect(definitionAll('HOT_CLIMATE')).toEqual(definitionAll('HOT'));
+    expect(definitionAll('COLD_CLIMATE')).toMatchObject({ en: 'at low temperature.', ja: '温度が低い。' });
+  });
+});
+
+// B49. The agent is a role, defined by what it does in the clause: whoGloss on its genus, the
+// intransitive ACT. Japanese 行動する is said of people, and a grammar would say 動作をする, but
+// 行動する参与者 still reads as "a participant that acts".
+describe('the agent is the participant that acts (localization B49)', () => {
+  test('AGENT_GRAMMAR → a participant that acts', () => {
+    expect(definitionAll('AGENT_GRAMMAR')).toEqual({
+      en: 'a participant that acts.',
+      it: 'un partecipante che agisce.',
+      fr: 'un participant qui agit.',
+      de: 'ein Partizipant, der handelt.',
+      es: 'un participante que actúa.',
+      ja: '行動する参与者。',
+      pt: 'um participante que age.',
+    });
+  });
+});
+
+// B50. HYPERNYM's own description, word for word: C12's genitive relative, headed on the possessor.
+// The indefinite OTHER merges as each language wants (en another, it un'altra, de eines anderen), and
+// es and pt drop its article (de otra palabra).
+describe('the hypernym includes another word\'s meaning (localization B50)', () => {
+  test('HYPERNYM → a word whose meaning includes another word\'s meaning', () => {
+    expect(definitionAll('HYPERNYM')).toEqual({
+      en: "a word whose meaning includes another word's meaning.",
+      it: "una parola il cui significato include il significato di un'altra parola.",
+      fr: "un mot dont le sens inclut le sens d'un autre mot.",
+      de: 'ein Wort, dessen Bedeutung die Bedeutung eines anderen Wortes umfasst.',
+      es: 'una palabra cuyo significado incluye el significado de otra palabra.',
+      ja: '意味が別の単語の意味を含む単語。',
+      pt: 'uma palavra cujo significado inclui o significado de outra palavra.',
+    });
+  });
+
+  // A state, as HOLD is: the Romance past is the imperfect, Japanese says the state with 〜ている.
+  test('INCLUDE conjugates as a state verb: it includeva, ja 含んでいます', () => {
+    const includes = (extra: Partial<VerbPhrase> = {}) =>
+      sayAll({ subject: np('WORD'), verbPhrase: { verb: 'INCLUDE', ...extra }, directObject: np('MEANING') });
+    expect(includes()).toEqual({
+      en: 'the word includes the meaning.', it: 'la parola include il significato.', fr: 'le mot inclut le sens.',
+      de: 'das Wort umfasst die Bedeutung.', es: 'la palabra incluye el significado.', ja: '単語は意味を含んでいます。',
+      pt: 'a palavra inclui o significado.',
+    });
+    expect(includes({ tense: 'past' })).toEqual({
+      en: 'the word included the meaning.', it: 'la parola includeva il significato.', fr: 'le mot incluait le sens.',
+      de: 'das Wort umfasste die Bedeutung.', es: 'la palabra incluía el significado.', ja: '単語は意味を含んでいました。',
+      pt: 'a palavra incluía o significado.',
+    });
+    expect(sayAll({ subject: np('FIRST_PERSON', { number: 'plural' }), verbPhrase: { verb: 'INCLUDE' }, directObject: np('MEANING') })).toMatchObject({
+      it: 'includiamo il significato.', fr: 'nous incluons le sens.', de: 'wir umfassen die Bedeutung.', es: 'incluimos el significado.',
+      pt: 'incluímos o significado.',
+    });
+    // Godan: the plain negative 含まない before a head noun, the passive 含まれる.
+    expect(said('WORD', {
+      definiteness: 'indefinite',
+      relative: { verbPhrase: { verb: 'INCLUDE', negative: true }, directObject: np('MEANING', { definiteness: 'bare', number: 'plural' }) },
+    }).ja).toBe('意味を含まない単語。');
+    expect(sayAll({ subject: np('WORD'), verbPhrase: { verb: 'INCLUDE', voice: 'passive' }, directObject: np('HOUSE', { number: 'plural' }) })).toMatchObject({
+      it: 'le case sono incluse dalla parola.', fr: 'les maisons sont incluses par le mot.', de: 'die Häuser werden vom Wort umfasst.',
+      es: 'las casas son incluidas por la palabra.', ja: '家は単語に含まれています。', pt: 'as casas são incluídas pela palavra.',
+    });
+  });
+});
+
+// B51. What a determiner does to a noun is fix which thing it refers to: German bestimmen, the
+// grammar's own verb, where INDICATE ("bezeichnen") would say it stands for nouns.
+describe('the determiner specifies nouns (localization B51)', () => {
+  test('DETERMINER → a word that specifies nouns', () => {
+    expect(definitionAll('DETERMINER')).toEqual({
+      en: 'a word that specifies nouns.',
+      it: 'una parola che specifica sostantivi.',
+      fr: 'un mot qui précise des noms.',
+      de: 'ein Wort, das Substantive bestimmt.',
+      es: 'una palabra que especifica sustantivos.',
+      ja: '名詞を特定する単語。',
+      pt: 'uma palavra que especifica substantivos.',
+    });
+  });
+
+  test('SPECIFY conjugates: it specifichi, es especificó, ja 特定します', () => {
+    const specifies = (subject: NounPhrase, extra: Partial<VerbPhrase> = {}) =>
+      sayAll({ subject, verbPhrase: { verb: 'SPECIFY', ...extra }, directObject: np('NOUN') });
+    expect(specifies(np('WORD'))).toEqual({
+      en: 'the word specifies the noun.', it: 'la parola specifica il sostantivo.', fr: 'le mot précise le nom.',
+      de: 'das Wort bestimmt das Substantiv.', es: 'la palabra especifica el sustantivo.', ja: '単語は名詞を特定します。',
+      pt: 'a palavra especifica o substantivo.',
+    });
+    expect(specifies(np('WORD'), { tense: 'past' })).toEqual({
+      en: 'the word specified the noun.', it: 'la parola specificò il sostantivo.', fr: 'le mot précisa le nom.',
+      de: 'das Wort bestimmte das Substantiv.', es: 'la palabra especificó el sustantivo.', ja: '単語は名詞を特定しました。',
+      pt: 'a palavra especificou o substantivo.',
+    });
+    expect(specifies(np('SECOND_PERSON'))).toMatchObject({
+      it: 'specifichi il sostantivo.', fr: 'tu précises le nom.', de: 'du bestimmst das Substantiv.', es: 'especificas el sustantivo.',
+    });
+    expect(specifies(np('WORD'), { negative: true })).toMatchObject({
+      fr: 'le mot ne précise pas le nom.', de: 'das Wort bestimmt das Substantiv nicht.', ja: '単語は名詞を特定しません。',
+    });
+    expect(sayAll({ subject: np('WORD'), verbPhrase: { verb: 'SPECIFY', voice: 'passive' }, directObject: np('NOUN', { number: 'plural' }) })).toMatchObject({
+      it: 'i sostantivi sono specificati dalla parola.', fr: 'les noms sont précisés par le mot.', de: 'die Substantive werden vom Wort bestimmt.',
+      ja: '名詞は単語に特定されます。',
     });
   });
 });

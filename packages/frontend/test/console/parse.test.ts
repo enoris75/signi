@@ -47,7 +47,7 @@ describe('parse', () => {
   it('stops at the first mistake, keeping what came before it', () => {
     const { items, diagnostic } = parse('/subj cat /frob /pl');
     expect(items.map((i) => i.name)).toEqual(['subj']);
-    expect(diagnostic).toMatchObject({ from: 10, to: 15, message: 'There is no command /frob.' });
+    expect(diagnostic).toMatchObject({ from: 10, to: 15, code: 'unknownCommand', args: { command: 'frob' } });
   });
 
   it('keeps a bracket whose inside has a mistake, up to it', () => {
@@ -59,13 +59,16 @@ describe('parse', () => {
   it('refuses a word a command takes none of, and keeps the command', () => {
     const { items, diagnostic } = parse('/pl cats');
     expect(items.map((i) => i.name)).toEqual(['pl']);
-    expect(diagnostic?.message).toBe('/pl takes no word.');
+    expect(diagnostic).toMatchObject({ code: 'takesNoWord', args: { command: 'pl' } });
   });
 
   it('refuses a value a command does not take, and a stray close', () => {
-    expect(parse('/level soon').diagnostic?.message).toMatch(/takes process, concept, object/);
-    expect(parse('/subj cat )').diagnostic?.message).toMatch(/no bracket open/);
-    expect(parse('/rel dog').diagnostic?.message).toMatch(/subj \{ … \} or obj/);
+    expect(parse('/level soon').diagnostic).toMatchObject({
+      code: 'valueNotTaken',
+      args: { command: 'level', values: ['process', 'concept', 'object'], given: 'soon' },
+    });
+    expect(parse('/subj cat )').diagnostic).toMatchObject({ code: 'strayCloser' });
+    expect(parse('/rel dog').diagnostic).toMatchObject({ code: 'relativeTakes' });
   });
 
   it('reads a reference as an item of its own', () => {
@@ -80,7 +83,7 @@ describe('references', () => {
     expect(parseRef('1.subj.poss')).toEqual({ period: 1, address: 'subject/possessor' });
     expect(parseRef('1.obj.and2')).toEqual({ period: 1, address: 'directObject/conjunct/0' });
     expect(printRef(1, 'directObject/conjunct/0/possessor')).toBe('#1.obj.and2.poss');
-    expect(parseRef('x')).toMatchObject({ error: expect.any(String) });
+    expect(parseRef('x')).toMatchObject({ error: { code: 'referenceStartsWithNumber' } });
   });
 });
 

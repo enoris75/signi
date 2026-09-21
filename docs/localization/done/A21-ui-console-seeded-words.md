@@ -11,7 +11,7 @@ literal for `/localize` ([P02 README, *Left open*](../../features/P-planning/P02
 and [C15](C15-ui-literal-by-design.md) recorded the whole surface as outstanding. This file took the part
 that needed no new word. The console's own vocabulary is in [B42](B42-ui-console-name.md),
 [B45](B45-ui-console-lines-history-pins.md), [B46](B46-ui-console-topics-and-labels.md)
-and [B47](B47-ui-console-command-purposes.md), all done on 2026-09-21. Its diagnostics are in [C21](../C-needs-engine/C21-ui-console-diagnostics.md).
+and [B47](B47-ui-console-command-purposes.md), all done on 2026-09-21. Its diagnostics are in [C21](C21-ui-console-diagnostics.md).
 
 **Not in scope:** command names, aliases, value names (`past`, `lets`, `process`) and the syntax
 (`#2.obj`, `( … )`) stay English in every interface language. That is P02's decision 3, recorded
@@ -119,7 +119,7 @@ help page does.
 | Could not load the phrase. | [usePhraseConsole.ts:661](../../../packages/frontend/src/console/usePhraseConsole.ts#L661) | reuse `failure.phraseNotLoaded` |
 
 "There is no saved phrase “…”." ([usePhraseConsole.ts:647](../../../packages/frontend/src/console/usePhraseConsole.ts#L647))
-is existential, so it stays in [C21](../C-needs-engine/C21-ui-console-diagnostics.md).
+is existential, so it stays in [C21](C21-ui-console-diagnostics.md), which shipped it as "Unknown phrase: “…”".
 
 ### The help page's usage line and example — shipped
 

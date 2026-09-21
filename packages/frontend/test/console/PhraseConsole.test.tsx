@@ -116,7 +116,8 @@ describe('the console', () => {
     // Nothing completes /frob, so no list is up and ↵ runs the line.
     expect(screen.queryByTestId('console-list')).not.toBeInTheDocument();
     key(prompt, 'Enter');
-    await waitFor(() => expect(screen.getByTestId('console-diagnostic')).toHaveTextContent('There is no command /frob.'));
+    await waitFor(() => expect(screen.getByTestId('console-diagnostic')).toHaveAttribute('data-code', 'unknownCommand'));
+    expect(screen.getByTestId('console-diagnostic')).toHaveTextContent('Unknown command: /frob');
     expect(prompt.value).toBe('/verb ( eat /frob )');
   });
 
@@ -317,7 +318,8 @@ describe('the console', () => {
       expect(within(page).getByTestId('help-aliases')).toHaveTextContent('alias /plural');
       expect(within(page).getByTestId('help-example-line')).toHaveTextContent(/^Example: /);
       expect(page).toHaveTextContent('/subj ( cat /pl )');
-      expect(page).toHaveTextContent('Here: on cat, now singular.');
+      // What it would act on at the cursor, and what that word holds now (C21).
+      expect(within(page).getByTestId('help-here')).toHaveTextContent('Cursor: cat · now Singular');
     });
 
     it('opens the page of a command chosen in the help overlay', async () => {

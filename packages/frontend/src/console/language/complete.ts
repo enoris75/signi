@@ -513,7 +513,7 @@ function compareRanks(a: number[], b: number[]): number {
 }
 
 /** A setting's current value on its word, for the row's "now …". */
-function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
+export function currentValue(id: SettingId, w: WordInfo): Candidate["current"] {
   const value = currentSetting(id, w);
   if (value === undefined) return undefined;
   const keys: Partial<Record<typeof id, string>> = {

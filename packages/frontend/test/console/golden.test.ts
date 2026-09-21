@@ -1,8 +1,10 @@
 // One golden entry per command of the catalogue (P02 §7): what a line using it does, how the result
-// prints, and what the console says about the command's common misuse. The last test fails the build
-// when a command is added without an entry here.
+// prints, and what the console says about the command's common misuse — by the diagnostic's code and
+// what it names; diagnostics.test.ts holds each code's words. The last test fails the build when a
+// command is added without an entry here.
 import { describe, expect, it } from 'vitest';
 import { COMMANDS } from '../../src/console/language/commands.ts';
+import type { DiagnosticCode } from '../../src/console/language/diagnostics.ts';
 import type { PhraseSelection } from '../../src/components/PhraseBuilder/interfaces.ts';
 import type { WorkspaceState } from '../../src/console/language/types.ts';
 import { ids_, ok, print, run, sel } from './helpers.ts';
@@ -15,19 +17,19 @@ interface Golden {
   check?: (state: WorkspaceState) => void;
   /** How the first period prints afterwards (the line itself when omitted and `holds` is given). */
   prints?: string;
-  misuse?: { line: string; says: RegExp };
+  misuse?: { line: string; says: { code: DiagnosticCode; args?: Record<string, unknown> } };
 }
 
 const noun = (s: PhraseSelection) => ids_(s);
 
 const GOLDEN: Record<string, Golden> = {
-  subj: { line: '/subj cat', prints: '/subj ( cat )', holds: { subject: 'CAT' }, misuse: { line: '/subj frobnicate', says: /no word “frobnicate”/ } },
-  verb: { line: '/verb eat', prints: '/verb ( eat )', holds: { verb: 'EAT' }, misuse: { line: '/verb can', says: /no word “can”/ } },
-  obj: { line: '/verb eat /obj food', prints: '/verb ( eat ) /obj ( food )', holds: { directObject: 'FOOD' }, misuse: { line: '/verb run /obj food', says: /run takes no object/ } },
-  pred: { line: '/verb seem /pred happy', prints: '/verb ( seem ) /pred ( happy )', holds: { predicative: 'HAPPY' }, misuse: { line: '/verb eat /pred happy', says: /eat takes no subject complement/ } },
-  term: { line: '/verb read /term child', prints: '/verb ( read ) /term ( child )', holds: { terminus: 'CHILD' }, misuse: { line: '/term child', says: /its verb first/ } },
-  manner: { line: '/verb run /manner care', prints: '/verb ( run ) /manner ( care )', holds: { manner: 'CARE' }, misuse: { line: '/verb eat /manner care', says: /takes no manner/ } },
-  loc: { line: '/verb run /loc house', prints: '/verb ( run ) /loc ( house )', holds: { locative: 'HOUSE' }, misuse: { line: '/verb see /loc house', says: /takes no place/ } },
+  subj: { line: '/subj cat', prints: '/subj ( cat )', holds: { subject: 'CAT' }, misuse: { line: '/subj frobnicate', says: { code: 'unknownWord', args: { text: 'frobnicate' } } } },
+  verb: { line: '/verb eat', prints: '/verb ( eat )', holds: { verb: 'EAT' }, misuse: { line: '/verb can', says: { code: 'unknownWord', args: { text: 'can' } } } },
+  obj: { line: '/verb eat /obj food', prints: '/verb ( eat ) /obj ( food )', holds: { directObject: 'FOOD' }, misuse: { line: '/verb run /obj food', says: { code: 'takesNoObject', args: { verb: 'run' } } } },
+  pred: { line: '/verb seem /pred happy', prints: '/verb ( seem ) /pred ( happy )', holds: { predicative: 'HAPPY' }, misuse: { line: '/verb eat /pred happy', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'predicative' } } } },
+  term: { line: '/verb read /term child', prints: '/verb ( read ) /term ( child )', holds: { terminus: 'CHILD' }, misuse: { line: '/term child', says: { code: 'complementNeedsVerb', args: { command: 'term' } } } },
+  manner: { line: '/verb run /manner care', prints: '/verb ( run ) /manner ( care )', holds: { manner: 'CARE' }, misuse: { line: '/verb eat /manner care', says: { code: 'takesNoComplement', args: { verb: 'eat', slot: 'manner' } } } },
+  loc: { line: '/verb run /loc house', prints: '/verb ( run ) /loc ( house )', holds: { locative: 'HOUSE' }, misuse: { line: '/verb see /loc house', says: { code: 'takesNoComplement', args: { verb: 'see', slot: 'locative' } } } },
   dir: { line: '/verb run /dir house', prints: '/verb ( run ) /dir ( house )', holds: { direction: 'HOUSE' } },
   src: { line: '/verb run /src house', prints: '/verb ( run ) /src ( house )', holds: { source: 'HOUSE' } },
   route: { line: '/verb run /route house', prints: '/verb ( run ) /route ( house )', holds: { route: 'HOUSE' } },
@@ -36,7 +38,7 @@ const GOLDEN: Record<string, Golden> = {
     line: '/subj child /verb eat /inst ( /subj stick )',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'object' }),
     prints: '/subj ( child ) /verb ( eat ) /inst #2',
-    misuse: { line: '/verb see /inst ( /subj stick )', says: /see takes no instrument/ },
+    misuse: { line: '/verb see /inst ( /subj stick )', says: { code: 'takesNoInstrument', args: { verb: 'see' } } },
   },
   adj: {
     line: '/subj creator /adj phrase /adj semantic',
@@ -45,10 +47,10 @@ const GOLDEN: Record<string, Golden> = {
       expect(sel(s).modifierAdjectives?.subjectAdjective?.id).toBe('SEMANTIC');
     },
     prints: '/subj ( creator /adj ( phrase /adj semantic ) )',
-    misuse: { line: '/verb eat /adj brown', says: /\/adj describes a noun/ },
+    misuse: { line: '/verb eat /adj brown', says: { code: 'noTarget', args: { command: 'adj', last: { word: 'eat', kind: 'verb' } } } },
   },
-  adv: { line: '/verb eat /adv fast', prints: '/verb ( eat /adv fast )', holds: { modifier: 'FAST' }, misuse: { line: '/subj cat /adv fast', says: /qualifies a verb or a modal/ } },
-  modal: { line: '/verb eat /modal can /modal want', prints: '/verb ( eat /modal can /modal want )', holds: { verbModal: 'CAN', verbModal2: 'WILL' }, misuse: { line: '/command /verb eat /modal can', says: /governs a verb/ } },
+  adv: { line: '/verb eat /adv fast', prints: '/verb ( eat /adv fast )', holds: { modifier: 'FAST' }, misuse: { line: '/subj cat /adv fast', says: { code: 'noTarget', args: { command: 'adv', last: { word: 'cat', kind: 'noun' } } } } },
+  modal: { line: '/verb eat /modal can /modal want', prints: '/verb ( eat /modal can /modal want )', holds: { verbModal: 'CAN', verbModal2: 'WILL' }, misuse: { line: '/command /verb eat /modal can', says: { code: 'noTarget', args: { command: 'modal' } } } },
   poss: {
     line: '/subj child /poss ( /subj man /adj old ) /pl',
     check: (s) => {
@@ -56,21 +58,21 @@ const GOLDEN: Record<string, Golden> = {
       expect(noun(sel(s).subjectPossessor!)).toMatchObject({ subject: 'MAN', subjectAdjective: 'OLD' });
     },
     prints: '/subj ( child /pl /poss [ man /adj old ] )',
-    misuse: { line: '/subj 1st /poss man', says: /gives a noun its possessor/ },
+    misuse: { line: '/subj 1st /poss man', says: { code: 'noTarget', args: { command: 'poss', last: { kind: 'pronoun' } } } },
   },
   and: {
     line: '/subj cat /and ( /subj dog /pl )',
     check: (s) => expect(noun(sel(s).subjectConjuncts![0]!)).toMatchObject({ subject: 'DOG', subjectNumber: 'plural' }),
     prints: '/subj ( cat /and [ dog /pl ] )',
-    misuse: { line: '/verb eat /and dog', says: /coordinates another phrase/ },
+    misuse: { line: '/verb eat /and dog', says: { code: 'noTarget', args: { command: 'and' } } },
   },
   or: { line: '/subj cat /or dog', prints: '/subj ( cat /or dog )', holds: { subjectConjunction: 'or' }, check: (s) => expect(sel(s).subjectConjuncts).toHaveLength(1) },
-  sg: { line: '/subj cat /pl /sg', holds: { subjectNumber: 'singular' }, prints: '/subj ( cat )', misuse: { line: '/verb eat /sg', says: /sets a noun’s number/ } },
+  sg: { line: '/subj cat /pl /sg', holds: { subjectNumber: 'singular' }, prints: '/subj ( cat )', misuse: { line: '/verb eat /sg', says: { code: 'noTarget', args: { command: 'sg' } } } },
   pl: { line: '/subj cat /pl', prints: '/subj ( cat /pl )', holds: { subjectNumber: 'plural' } },
   masc: { line: '/subj cat /fem /masc', holds: { subjectGender: 'masc' }, prints: '/subj ( cat )' },
-  fem: { line: '/subj cat /fem', prints: '/subj ( cat /fem )', holds: { subjectGender: 'fem' }, misuse: { line: '/subj dog /fem', says: /sets a noun’s gender/ } },
-  neut: { line: '/subj 3rd /neut', prints: '/subj ( 3rd /neut )', holds: { subjectGender: 'neut' }, misuse: { line: '/subj cat /neut', says: /sets a pronoun’s gender/ } },
-  the: { line: '/subj cat /a /the', holds: { subjectDefiniteness: 'definite' }, prints: '/subj ( cat )', misuse: { line: '/subj 1st /the', says: /sets a noun’s determiner/ } },
+  fem: { line: '/subj cat /fem', prints: '/subj ( cat /fem )', holds: { subjectGender: 'fem' }, misuse: { line: '/subj dog /fem', says: { code: 'noTarget', args: { command: 'fem' } } } },
+  neut: { line: '/subj 3rd /neut', prints: '/subj ( 3rd /neut )', holds: { subjectGender: 'neut' }, misuse: { line: '/subj cat /neut', says: { code: 'noTarget', args: { command: 'neut' } } } },
+  the: { line: '/subj cat /a /the', holds: { subjectDefiniteness: 'definite' }, prints: '/subj ( cat )', misuse: { line: '/subj 1st /the', says: { code: 'noTarget', args: { command: 'the' } } } },
   a: { line: '/subj cat /a', prints: '/subj ( cat /a )', holds: { subjectDefiniteness: 'indefinite' } },
   zero: { line: '/subj cat /zero', prints: '/subj ( cat /zero )', holds: { subjectDefiniteness: 'bare' } },
   this: { line: '/subj cat /this', prints: '/subj ( cat /this )', holds: { subjectDefiniteness: 'this' } },
@@ -84,32 +86,32 @@ const GOLDEN: Record<string, Golden> = {
     line: '/subj child /rel subj ( /verb love /obj cat ) /verb read',
     check: (s) => expect(s.links[0]).toMatchObject({ source: { nounKey: 'subject' }, target: { nounKey: 'subject' } }),
     prints: '/subj ( child /rel #2.subj ) /verb ( read )',
-    misuse: { line: '/subj child /verb read /rel #1.subj', says: /not the one its noun is in/ },
+    misuse: { line: '/subj child /verb read /rel #1.subj', says: { code: 'relativeSamePeriod' } },
   },
   in: { line: '/verb run /route house /in', prints: '/verb ( run ) /route ( house /in )', holds: { routeSpecifier: 'in' } },
   through: { line: '/verb run /loc house /through', prints: '/verb ( run ) /loc ( house /through )', holds: { locativeSpecifier: 'through' } },
-  under: { line: '/verb run /loc house /under', prints: '/verb ( run ) /loc ( house /under )', holds: { locativeSpecifier: 'under' }, misuse: { line: '/verb run /dir house /under', says: /sets the relation of a place or a route/ } },
+  under: { line: '/verb run /loc house /under', prints: '/verb ( run ) /loc ( house /under )', holds: { locativeSpecifier: 'under' }, misuse: { line: '/verb run /dir house /under', says: { code: 'noTarget', args: { command: 'under' } } } },
   over: { line: '/verb run /loc house /over', prints: '/verb ( run ) /loc ( house /over )', holds: { locativeSpecifier: 'over' } },
   around: { line: '/verb run /route house /around', prints: '/verb ( run ) /route ( house /around )', holds: { routeSpecifier: 'around' } },
   behind: { line: '/verb run /loc house /behind', prints: '/verb ( run ) /loc ( house /behind )', holds: { locativeSpecifier: 'behind' } },
   front: { line: '/verb run /loc house /front', prints: '/verb ( run ) /loc ( house /front )', holds: { locativeSpecifier: 'in_front_of' } },
   because: { line: '/verb run /cause dog /thanks /because', holds: { causeSentiment: 'neutral' }, prints: '/verb ( run ) /cause ( dog )' },
   fault: { line: '/verb run /cause dog /fault', prints: '/verb ( run ) /cause ( dog /fault )', holds: { causeSentiment: 'negative' } },
-  thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: /sets how a cause is felt/ } },
+  thanks: { line: '/verb run /cause dog /thanks', prints: '/verb ( run ) /cause ( dog /thanks )', holds: { causeSentiment: 'positive' }, misuse: { line: '/subj cat /thanks', says: { code: 'noTarget', args: { command: 'thanks' } } } },
   tense: {
     line: '/verb eat /tense past',
     holds: { verbTense: 'past' },
     prints: '/verb ( eat /past )',
-    misuse: { line: '/verb eat /tense soon', says: /\/tense takes past, present, future — not “soon”/ },
+    misuse: { line: '/verb eat /tense soon', says: { code: 'valueNotTaken', args: { command: 'tense', values: ['past', 'present', 'future'], given: 'soon' } } },
   },
   aspect: {
     line: '/verb eat /aspect prospective',
     holds: { verbAspect: 'prospective' },
     prints: '/verb ( eat /prosp )',
-    misuse: { line: '/subj cat /aspect progressive', says: /\/aspect sets a verb’s aspect/ },
+    misuse: { line: '/subj cat /aspect progressive', says: { code: 'noTarget', args: { command: 'aspect' } } },
   },
   present: { line: '/verb eat /past /present', holds: { verbTense: 'present' }, prints: '/verb ( eat )' },
-  past: { line: '/verb eat /past', prints: '/verb ( eat /past )', holds: { verbTense: 'past' }, misuse: { line: '/command /verb eat /past', says: /sets a verb’s tense/ } },
+  past: { line: '/verb eat /past', prints: '/verb ( eat /past )', holds: { verbTense: 'past' }, misuse: { line: '/command /verb eat /past', says: { code: 'noTarget', args: { command: 'past' } } } },
   future: { line: '/verb eat /future', prints: '/verb ( eat /future )', holds: { verbTense: 'future' } },
   neutral: { line: '/verb eat /prog /neutral', holds: { verbAspect: 'neutral' }, prints: '/verb ( eat )' },
   prog: { line: '/verb eat /prog', prints: '/verb ( eat /prog )', holds: { verbAspect: 'progressive' } },
@@ -119,13 +121,13 @@ const GOLDEN: Record<string, Golden> = {
     line: '/verb eat /voice passive /obj food',
     holds: { verbVoice: 'passive' },
     prints: '/verb ( eat /passive ) /obj ( food )',
-    misuse: { line: '/verb run /voice passive', says: /\/voice sets a verb’s voice/ },
+    misuse: { line: '/verb run /voice passive', says: { code: 'noTarget', args: { command: 'voice' } } },
   },
   active: { line: '/verb eat /passive /active /obj food', holds: { verbVoice: 'active' }, prints: '/verb ( eat ) /obj ( food )' },
   passive: { line: '/verb eat /passive /obj food', prints: '/verb ( eat /passive ) /obj ( food )', holds: { verbVoice: 'passive' } },
-  not: { line: '/verb eat /not', prints: '/verb ( eat /not )', holds: { verbNegative: true }, misuse: { line: '/subj cat /not', says: /negates a verb/ } },
+  not: { line: '/verb eat /not', prints: '/verb ( eat /not )', holds: { verbNegative: true }, misuse: { line: '/subj cat /not', says: { code: 'noTarget', args: { command: 'not' } } } },
   pos: { line: '/verb eat /not /pos', holds: { verbNegative: false }, prints: '/verb ( eat )' },
-  more: { line: '/subj cat /adj big /more', prints: '/subj ( cat /adj ( big /more ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('more'), misuse: { line: '/subj cat /more', says: /sets an adjective’s degree/ } },
+  more: { line: '/subj cat /adj big /more', prints: '/subj ( cat /adj ( big /more ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('more'), misuse: { line: '/subj cat /more', says: { code: 'noTarget', args: { command: 'more', last: { word: 'cat', kind: 'noun' } } } } },
   most: { line: '/verb seem /pred happy /most', prints: '/verb ( seem ) /pred ( happy /most )', check: (s) => expect(sel(s).adjectiveDegrees?.predicative).toBe('most') },
   less: { line: '/subj cat /adj big /less', prints: '/subj ( cat /adj ( big /less ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('less') },
   least: { line: '/subj cat /adj big /least', prints: '/subj ( cat /adj ( big /least ) )', check: (s) => expect(sel(s).adjectiveDegrees?.subjectAdjective).toBe('least') },
@@ -136,13 +138,13 @@ const GOLDEN: Record<string, Golden> = {
   material: {
     line: '/subj creator /adj sail /material', prints: '/subj ( creator /adj ( sail /material ) )',
     check: (s) => expect(sel(s).modifierRelations?.subjectAdjective).toBe('material'),
-    misuse: { line: '/subj cat /adj big /material', says: /how a noun modifier relates to its noun/ },
+    misuse: { line: '/subj cat /adj big /material', says: { code: 'noTarget', args: { command: 'material', last: { kind: 'adjective' } } } },
   },
   new: { line: '/subj cat /new /subj dog', check: (s) => expect(s.containers.map((c) => c.selection.subject?.id)).toEqual(['CAT', 'DOG']), prints: '/subj ( cat )' },
   command: {
     line: '/command lets instruction /verb run', prints: '/command lets instruction /verb ( run )',
     holds: { imperative: true, imperativePerson: '1pl', imperativeRegister: 'instruction' },
-    misuse: { line: '/command soon', says: /takes you, lets, youall, order, instruction/ },
+    misuse: { line: '/command soon', says: { code: 'valueNotTaken', args: { command: 'command', given: 'soon' } } },
   },
   inf: { line: '/inf /verb eat', prints: '/inf /verb ( eat )', holds: { infinitive: true } },
   statement: { line: '/command /verb eat /statement', holds: { imperative: false }, prints: '/verb ( eat )' },
@@ -150,19 +152,19 @@ const GOLDEN: Record<string, Golden> = {
     line: '/subj dog /verb run /if ( /subj cat /verb eat )',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'conditional' }),
     prints: '/subj ( dog ) /verb ( run ) /if #2',
-    misuse: { line: '/command /verb run /if ( /subj cat /verb eat )', says: /can’t take an if-condition/ },
+    misuse: { line: '/command /verb run /if ( /subj cat /verb eat )', says: { code: 'cantTakeCondition' } },
   },
   join: {
     line: '/subj dog /verb run /join but ( /subj cat /verb eat )',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'coordinative', conjunction: 'but' }),
     prints: '/subj ( dog ) /verb ( run ) /join but #2',
-    misuse: { line: '/command /verb run /join therefore ( /verb eat )', says: /only with and, then, but or or/ },
+    misuse: { line: '/command /verb run /join therefore ( /verb eat )', says: { code: 'imperativeJoin' } },
   },
   level: {
     line: '/subj child /verb start /inst ( /verb choose /obj word ) /level process',
     check: (s) => expect(s.links[0]).toMatchObject({ kind: 'instrumental', level: 'process' }),
     prints: '/subj ( child ) /verb ( start ) /inst #2 /level process',
-    misuse: { line: '/verb eat /level process', says: /no instrument link/ },
+    misuse: { line: '/verb eat /level process', says: { code: 'noInstrumentLink' } },
   },
   del: {
     line: '/subj cat /adj brown /adj big /del adj 2',
@@ -171,7 +173,7 @@ const GOLDEN: Record<string, Golden> = {
       expect(sel(s).subjectAdjective2).toBeUndefined();
     },
     prints: '/subj ( cat /adj brown )',
-    misuse: { line: '/del everything', says: /\/del removes/ },
+    misuse: { line: '/del everything', says: { code: 'unknownRemoval', args: { what: 'everything' } } },
   },
   // The app's own commands are effects the console runs, not edits of the phrase.
   edit: { line: '/edit', check: () => expect(run('/edit').effects).toEqual([expect.objectContaining({ app: 'edit' })]), prints: '' },
@@ -179,7 +181,7 @@ const GOLDEN: Record<string, Golden> = {
   load: { line: '/load my cats', check: () => expect(run('/load my cats').effects[0]).toMatchObject({ app: 'load', arg: 'my cats' }), prints: '' },
   export: { line: '/export', check: () => expect(run('/export').effects[0]).toMatchObject({ app: 'export' }), prints: '' },
   import: { line: '/import', check: () => expect(run('/import').effects[0]).toMatchObject({ app: 'import' }), prints: '' },
-  lang: { line: '/lang it', check: () => expect(run('/lang it').effects[0]).toMatchObject({ app: 'lang', arg: 'it' }), prints: '', misuse: { line: '/lang xx', says: /takes en, it/ } },
+  lang: { line: '/lang it', check: () => expect(run('/lang it').effects[0]).toMatchObject({ app: 'lang', arg: 'it' }), prints: '', misuse: { line: '/lang xx', says: { code: 'valueNotTaken', args: { command: 'lang', given: 'xx' } } } },
   undo: { line: '/undo', check: () => expect(run('/undo').effects[0]).toMatchObject({ app: 'undo' }), prints: '' },
   redo: { line: '/redo', check: () => expect(run('/redo').effects[0]).toMatchObject({ app: 'redo' }), prints: '' },
   words: { line: '/words', check: () => expect(run('/words').effects[0]).toMatchObject({ app: 'words' }), prints: '' },
@@ -199,7 +201,7 @@ describe('every command', () => {
       });
       if (g.misuse) {
         it(`says what is wrong with “${g.misuse.line}”`, () => {
-          expect(run(g.misuse!.line).diagnostic?.message).toMatch(g.misuse!.says);
+          expect(run(g.misuse!.line).diagnostic).toMatchObject(g.misuse!.says);
         });
       }
     });

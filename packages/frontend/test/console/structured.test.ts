@@ -34,23 +34,22 @@ describe('brackets', () => {
   });
 
   it('refuses a word before its own bracket, and says where it goes', () => {
-    expect(parse('/subj cat ( /pl )').diagnostic?.message).toBe('Put the word inside the bracket: /subj ( cat … ).');
-    expect(parse('/subj ( cat /poss man [ /adj old ] )').diagnostic?.message).toBe('Put the word inside the bracket: /poss [ man … ].');
+    expect(parse('/subj cat ( /pl )').diagnostic).toMatchObject({ code: 'wordInsideBracket', args: { command: 'subj', word: 'cat', shape: '(' } });
+    expect(parse('/subj ( cat /poss man [ /adj old ] )').diagnostic).toMatchObject({
+      code: 'wordInsideBracket',
+      args: { command: 'poss', word: 'man', shape: '[' },
+    });
   });
 });
 
 describe('what a bracket keeps its own', () => {
   it('refuses a command of the period inside a word’s bracket', () => {
-    expect(run('/subj ( cat /verb eat )').diagnostic?.message).toBe(
-      '/verb belongs to the period, not inside /subj ( … ) — close the bracket first.',
-    );
-    expect(run('/verb ( eat /new )').diagnostic?.message).toMatch(/\/new belongs to the period/);
+    expect(run('/subj ( cat /verb eat )').diagnostic).toMatchObject({ code: 'periodCommandInBracket', args: { command: 'verb', via: 'subj' } });
+    expect(run('/verb ( eat /new )').diagnostic).toMatchObject({ code: 'periodCommandInBracket', args: { command: 'new', via: 'verb' } });
   });
 
   it('does not reach a word whose bracket has closed', () => {
-    expect(run('/subj ( cat ) /pl').diagnostic?.message).toBe(
-      '/pl describes a word: write it inside its bracket, /subj ( cat … /pl ).',
-    );
+    expect(run('/subj ( cat ) /pl').diagnostic).toMatchObject({ code: 'describesAWord', args: { command: 'pl', role: 'subj', word: 'cat' } });
   });
 
   it('keeps what follows a noun modifier’s bracket the head’s', () => {
@@ -67,7 +66,10 @@ describe('what a bracket keeps its own', () => {
 
   it('keeps an adjective’s degree in its bracket, and says where a stray one goes', () => {
     expect(sel(ok('/subj ( cat /adj ( big /more ) )')).adjectiveDegrees?.subjectAdjective).toBe('more');
-    expect(run('/subj ( cat /more )').diagnostic?.message).toMatch(/\/more sets an adjective’s degree, and cat is a noun/);
+    expect(run('/subj ( cat /more )').diagnostic).toMatchObject({
+      code: 'noTarget',
+      args: { command: 'more', last: { word: 'cat', kind: 'noun' }, inElement: true },
+    });
   });
 
   it('rests the context on the word whose bracket closed last', () => {

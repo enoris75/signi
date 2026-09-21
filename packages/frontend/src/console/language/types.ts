@@ -1,4 +1,4 @@
-import type { Concept, GrammaticalRole, LanguageCode, UiStringKey } from "@signi/shared";
+import type { Concept, GrammaticalRole, LanguageCode } from "@signi/shared";
 import type {
   NounAddress,
   PhraseContainer,
@@ -41,14 +41,8 @@ export interface ConsoleContext {
   word?: WordRef;
 }
 
-/** Something wrong with a line, where it is, and what to do about it. */
-export interface Diagnostic {
-  from: number;
-  to: number;
-  /** English: the fallback for `messageKey`, which the prompt shows when there is one. */
-  message: string;
-  messageKey?: UiStringKey;
-}
+/** Something wrong with a line, where it is, and what to do about it: a code and its args (see diagnostics.ts). */
+export type { Diagnostic } from "./diagnostics.ts";
 
 /**
  * The words the console can name, per grammatical role, and how the interface language shows them.

@@ -979,6 +979,174 @@ describe('buildUiStrings', () => {
     });
   });
 
+  // The keyboard section's paragraph and its levels' notes, and the word list's rows for the tabs and
+  // esc (C22). A statement a key follows drops its full stop; one that stands alone keeps it.
+  test('says where the keys work, and what the sheet’s notes and the word list’s rows are', () => {
+    const strings = buildUiStrings();
+    expect(strings['help.keyWorks']).toEqual({
+      en: 'A key works in the slot that has the cursor.', it: 'Un tasto funziona nello slot che ha il cursore.',
+      fr: 'Une touche fonctionne dans le slot qui a le curseur.',
+      de: 'Eine Taste funktioniert im Slot, der den Cursor hat.',
+      es: 'Una tecla funciona en el slot que tiene el cursor.', ja: 'キーはカーソルがあるスロットで動作します。',
+      pt: 'Uma tecla funciona no slot que tem o cursor.',
+    });
+    expect(strings['help.returnToPeriod']).toEqual({
+      en: 'Return to the period', it: 'Torna al periodo', fr: 'Revenir à la période',
+      de: 'Zum Satzgefüge zurückkehren', es: 'Volver al período', ja: '文へ戻る', pt: 'Voltar ao período',
+    });
+    expect(strings['help.keysEverywhere']).toEqual({
+      en: 'Keys that work everywhere', it: 'Tasti che funzionano ovunque', fr: 'Touches qui fonctionnent partout',
+      de: 'Tasten, die überall funktionieren', es: 'Teclas que funcionan en todas partes', ja: 'どこでも動作するキー',
+      pt: 'Teclas que funcionam em toda parte',
+    });
+    expect(strings['help.previousValue']).toEqual({
+      en: 'Choose the previous value', it: 'Scegli il valore precedente', fr: 'Choisir la valeur précédente',
+      de: 'Den vorherigen Wert wählen', es: 'Elegir el valor anterior', ja: '前の値を選び', pt: 'Escolher o valor anterior',
+    });
+    // BE with a place: estar in Spanish and Portuguese, ある in Japanese.
+    expect(strings['help.cursorInPeriod']).toEqual({
+      en: 'The cursor is in the period.', it: 'Il cursore è nel periodo.', fr: 'Le curseur est dans la période.',
+      de: 'Der Cursor ist im Satzgefüge.', es: 'El cursor está en el período.', ja: 'カーソルは文にあります。',
+      pt: 'O cursor está no período.',
+    });
+    expect(strings['help.cursorInSlot']).toEqual({
+      en: 'The cursor is in a slot.', it: 'Il cursore è in uno slot.', fr: 'Le curseur est dans un slot.',
+      de: 'Der Cursor ist in einem Slot.', es: 'El cursor está en un slot.', ja: 'カーソルはスロットにあります。',
+      pt: 'O cursor está em um slot.',
+    });
+    // The noun note's five names are five words in Spanish too, where `slot.directObject` repeated
+    // "complemento".
+    expect(strings['help.directObject']).toEqual({
+      en: 'Direct object', it: 'Complemento oggetto diretto', fr: "Complément d'objet direct", de: 'Direktes Objekt',
+      es: 'Complemento directo', ja: '直接の目的語', pt: 'Objeto direto',
+    });
+    const nounNote = (['slot.subject', 'help.directObject', 'help.complement', 'slot.possessor', 'help.conjunct'] as const)
+      .map((key) => strings[key].es);
+    expect(nounNote).toEqual(['Sujeto', 'Complemento directo', 'Complemento', 'Poseedor', 'Miembro coordinado']);
+    expect(strings['help.complement']).toEqual({
+      en: 'Complement', it: 'Complemento', fr: 'Complément', de: 'Ergänzung', es: 'Complemento', ja: '補語',
+      pt: 'Complemento',
+    });
+    expect(strings['help.conjunct']).toEqual({
+      en: 'Conjunct', it: 'Congiunto', fr: 'Conjoint', de: 'Konjunkt', es: 'Miembro coordinado', ja: '等位項',
+      pt: 'Membro coordenado',
+    });
+    expect(strings['help.replacesSubject']).toEqual({
+      en: 'This slot replaces the subject in a command.', it: 'Questo slot sostituisce il soggetto in un comando.',
+      fr: 'Ce slot remplace le sujet dans une commande.', de: 'Dieser Slot ersetzt das Subjekt in einem Befehl.',
+      es: 'Este slot reemplaza el sujeto en un comando.', ja: 'このスロットは命令で主語を置き換えます。',
+      pt: 'Este slot substitui o sujeito em um comando.',
+    });
+    // A source and a direction on one GO: Portuguese contracts "a as" to "às".
+    expect(strings['help.goToTabs']).toEqual({
+      en: 'Go from the first row to the tabs', it: "Va' dalla prima riga alle schede",
+      fr: 'Aller de la première ligne aux onglets', de: 'Aus der ersten Zeile zu den Tabs gehen',
+      es: 'Ir de la primera fila a las pestañas', ja: '第一の行からタブへ移動', pt: 'Ir da primeira linha às abas',
+    });
+    expect(strings['help.chooseTab']).toEqual({
+      en: 'Choose a tab', it: 'Scegli una scheda', fr: 'Choisir un onglet', de: 'Einen Tab wählen',
+      es: 'Elegir una pestaña', ja: 'タブを選び', pt: 'Escolher uma aba',
+    });
+    expect(strings['help.restoreWord']).toEqual({
+      en: 'Restore the word', it: 'Ripristina la parola', fr: 'Restaurer le mot', de: 'Das Wort zurückholen',
+      es: 'Restaurar la palabra', ja: '単語を復元', pt: 'Restaurar a palavra',
+    });
+  });
+
+  // The console's part of the overlay: its paragraph, the role commands' note, the prompt's keys and the
+  // last line (C22). The syntax after each colon is the call site's.
+  test('says how the console’s language is written, and what its prompt’s keys do', () => {
+    const strings = buildUiStrings();
+    expect(strings['help.console.typeWord']).toEqual({
+      en: 'Type a word', it: 'Digita una parola', fr: 'Taper un mot', de: 'Ein Wort tippen',
+      es: 'Teclear una palabra', ja: '単語を入力', pt: 'Digitar uma palavra',
+    });
+    expect(strings['help.console.moveCursor']).toEqual({
+      en: 'Move the cursor', it: 'Sposta il cursore', fr: 'Déplacer le curseur', de: 'Den Cursor verschieben',
+      es: 'Mover el cursor', ja: 'カーソルを移動', pt: 'Mover o cursor',
+    });
+    expect(strings['help.console.bracket']).toEqual({
+      en: 'A bracket holds a word and commands', it: 'Una parentesi contiene una parola e comandi',
+      fr: 'Une parenthèse contient un mot et des commandes', de: 'Eine Klammer enthält ein Wort und Befehle',
+      es: 'Un paréntesis contiene una palabra y comandos', ja: '括弧は単語と命令を保持しています',
+      pt: 'Um parêntese contém uma palavra e comandos',
+    });
+    expect(strings['help.console.writesBrackets']).toEqual({
+      en: 'The console writes the brackets.', it: 'La console scrive le parentesi.',
+      fr: 'La console écrit les parenthèses.', de: 'Die Konsole schreibt die Klammern.',
+      es: 'La consola escribe los paréntesis.', ja: 'コンソールは括弧を書きます。', pt: 'O console escreve os parênteses.',
+    });
+    expect(strings['help.console.listShows']).toEqual({
+      en: "The list shows the word's commands.", it: "L'elenco mostra i comandi della parola.",
+      fr: 'La liste montre les commandes du mot.', de: 'Die Liste zeigt die Befehle des Wortes.',
+      es: 'La lista muestra los comandos de la palabra.', ja: '一覧は単語の命令を見せます。',
+      pt: 'A lista mostra os comandos da palavra.',
+    });
+    expect(strings['help.console.nounPhrase']).toEqual({
+      en: "A noun's noun phrase", it: 'Sintagma nominale di un sostantivo', fr: "Syntagme nominal d'un nom",
+      de: 'Nominalphrase eines Substantivs', es: 'Sintagma nominal de un sustantivo', ja: '名詞の名詞句',
+      pt: 'Sintagma nominal de um substantivo',
+    });
+    // NEW leads its noun in Italian and French, follows it in Spanish and Portuguese.
+    expect(strings['help.console.newPeriod']).toEqual({
+      en: 'New period', it: 'Nuovo periodo', fr: 'Nouvelle période', de: 'Neues Satzgefüge', es: 'Período nuevo',
+      ja: '新しい文', pt: 'Período novo',
+    });
+    expect(strings['help.console.otherNoun']).toEqual({
+      en: "Another period's noun", it: 'Sostantivo di un altro periodo', fr: "Nom d'une autre période",
+      de: 'Substantiv eines anderen Satzgefüges', es: 'Sustantivo de otro período', ja: '別の文の名詞',
+      pt: 'Substantivo de outro período',
+    });
+    expect(strings['help.console.commandEdits']).toEqual({
+      en: 'A command edits the slot that has the cursor', it: 'Un comando modifica lo slot che ha il cursore',
+      fr: 'Une commande modifie le slot qui a le curseur', de: 'Ein Befehl bearbeitet den Slot, der den Cursor hat',
+      es: 'Un comando edita el slot que tiene el cursor', ja: '命令はカーソルがあるスロットを編集します',
+      pt: 'Um comando edita o slot que tem o cursor',
+    });
+    expect(strings['help.console.setsValue']).toEqual({
+      en: 'A command sets a value', it: 'Un comando imposta un valore', fr: 'Une commande définit une valeur',
+      de: 'Ein Befehl legt einen Wert fest', es: 'Un comando establece un valor', ja: '命令は値を設定します',
+      pt: 'Um comando define um valor',
+    });
+    expect(strings['help.console.lineAgain']).toEqual({
+      en: 'A line that is applied again does not change the period.',
+      it: 'Una riga che è applicata di nuovo non cambia il periodo.',
+      fr: 'Une ligne qui est appliquée de nouveau ne change pas la période.',
+      de: 'Eine Zeile, die erneut angewandt wird, ändert das Satzgefüge nicht.',
+      es: 'Una línea que es aplicada de nuevo no cambia el período.', ja: 'もう一度適用される行は文を変えません。',
+      pt: 'Uma linha que é aplicada de novo não muda o período.',
+    });
+    // Two commands offered as a choice, the second going to the next word.
+    expect(strings['help.console.tab']).toEqual({
+      en: 'Complete, or go to the next word', it: "Completa, o va' alla parola successiva",
+      fr: 'Compléter, ou aller au mot suivant', de: 'Vervollständigen, oder zum nächsten Wort gehen',
+      es: 'Completar, o ir a la palabra siguiente', ja: '補完、または次の単語へ移動', pt: 'Completar, ou ir à palavra seguinte',
+    });
+    expect(strings['help.console.addLine']).toEqual({
+      en: 'Add a line', it: 'Aggiungi una riga', fr: 'Ajouter une ligne', de: 'Eine Zeile hinzufügen',
+      es: 'Añadir una línea', ja: '行を追加', pt: 'Adicionar uma linha',
+    });
+    expect(strings['help.console.previousLine']).toEqual({
+      en: 'Previous line', it: 'Riga precedente', fr: 'Ligne précédente', de: 'Vorherige Zeile', es: 'Línea anterior',
+      ja: '前の行', pt: 'Linha anterior',
+    });
+    expect(strings['help.console.emptyLine']).toEqual({
+      en: 'Empty line', it: 'Riga vuota', fr: 'Ligne vide', de: 'Leere Zeile', es: 'Línea vacía', ja: '空の行',
+      pt: 'Linha vazia',
+    });
+    expect(strings['help.console.showPinned']).toEqual({
+      en: 'show the pinned lines', it: 'mostra le righe fissate', fr: 'montrer les lignes épinglées',
+      de: 'die angehefteten Zeilen zeigen', es: 'mostrar las líneas fijadas', ja: 'ピン留め済みの行を見せ',
+      pt: 'mostrar as linhas fixadas',
+    });
+    expect(strings['help.console.chooseCommand']).toEqual({
+      en: 'Choose a command to see an example.', it: 'Scegli un comando per vedere un esempio.',
+      fr: 'Choisir une commande pour voir un exemple.', de: 'Einen Befehl wählen, um ein Beispiel zu sehen.',
+      es: 'Elegir un comando para ver un ejemplo.', ja: '例を見るために命令を選び。',
+      pt: 'Escolher um comando para ver um exemplo.',
+    });
+  });
+
   // The way back (B40): the Edit menu's pair, in the words each language's editors use, and the toast
   // that offers it, shaped like `toast.periodAdded`.
   test('names undo and redo, and the period a removal took away', () => {

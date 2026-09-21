@@ -7,7 +7,7 @@ by the [`/localize`](../../../.claude/skills/localize/SKILL.md) skill.
 few nouns besides. Both are seeded, and every item below shipped. The rows whose words were already
 seeded are in [A20](A20-ui-keyboard-labels-on-seeded-words.md), the keys that move about the page in
 [B44](B44-ui-keyboard-movement-labels.md), and the overlay's paragraphs and notes in
-[C22](../C-needs-engine/C22-ui-help-prose.md). What the overlay still writes in English is those notes,
+[C22](C22-ui-help-prose.md). What the overlay still writes in English is those notes,
 the Windows / Mac switch ([C15](C15-ui-literal-by-design.md)) and "Words: back to the canvas"
 ([B43](B43-ui-canvas-preview-edit.md)).
 

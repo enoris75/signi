@@ -18,7 +18,7 @@ phrase with no key. Two places show it:
 - the misuse diagnostic, "/more sets an adjective’s degree, and cat is a noun."
   ([apply.ts:574-599](../../../packages/frontend/src/console/language/apply.ts#L574-L599), the purpose at
   [apply.ts:584](../../../packages/frontend/src/console/language/apply.ts#L584)). **Left to
-  [C21](../C-needs-engine/C21-ui-console-diagnostics.md)**, on the English `purpose`, which stays on
+  [C21](C21-ui-console-diagnostics.md)**, on the English `purpose`, which stays on
   `CommandDef` for it. It did not fall out: the sentence has the command as its subject, a
   third-person present ("/more sets …"), then a clause about the user's own word ("and cat is a noun"),
   which needs C21's on-request rendering. The infinitive citation the help page reads cannot stand in
@@ -121,7 +121,7 @@ object-literal commands name theirs beside their `purpose`
 | `purpose.relation` | `/feature /purpose /material` | SET + RELATIONSHIP def, `possessor` MODIFIER indef | shipped |
 | `purpose.condition` | `/if` | ADD + CONDITION indef, `terminus` PERIOD_SENTENCE indef | shipped |
 | `purpose.join` | `/join` | LINK + PERIOD_SENTENCE plural bare | shipped |
-| the misuse diagnostic | every command above | — | left to [C21](../C-needs-engine/C21-ui-console-diagnostics.md) (see above) |
+| the misuse diagnostic | every command above | — | left to [C21](C21-ui-console-diagnostics.md) (see above) |
 
 **Not GIVE.** "Gives a noun its possessor" was probed with the seeded GIVE and a `terminus` before this
 task. de reads "es gibt einen Besitzer **in** ein Substantiv", both *there is* and *into*, and ja
@@ -209,8 +209,10 @@ What landed differently from the plan:
 4. **French *nier* was kept after probing three other plans** (the table under *The judgments*).
    It is the one purpose a French reader could misread ("to deny a verb").
 5. **The misuse diagnostic did not fall out.** It is C21's and keeps the English `purpose`. What is left
-   for it is written in [C21](../C-needs-engine/C21-ui-console-diagnostics.md): the purpose half needs a
-   third-person present with the command as subject, not the citation.
+   for it is written in [C21](C21-ui-console-diagnostics.md): the purpose half needs a
+   third-person present with the command as subject, not the citation. (C21, 2026-09-21: the diagnostic
+   leads with the command and says this citation after a dash, "/more — to set an adjective's degree",
+   and the English `purpose` is gone from `CommandDef`.)
 6. **Not in this task, found while probing:** German negates an indefinite object with *nicht* after it
    instead of *kein*: "das Verb regiert ein Substantiv nicht", "der Kater frisst eine Maus nicht" (want
    "regiert kein Substantiv", "frisst keine Maus"). No purpose is negated, so nothing here shows it.

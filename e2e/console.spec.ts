@@ -135,13 +135,48 @@ test.describe('the phrase console', () => {
     await prompt(page).click();
     await page.keyboard.type('/subj cat /frob');
     await page.keyboard.press('Enter');
-    await expect(page.getByTestId('console-diagnostic')).toContainText('There is no command /frob.');
+    await expect(page.getByTestId('console-diagnostic')).toHaveAttribute('data-code', 'unknownCommand');
+    await expect(page.getByTestId('console-diagnostic')).toContainText('Unknown command: /frob');
     await expect(prompt(page)).toHaveValue('/subj ( cat /frob )');
     // The valid part still previews; esc clears the line and the preview with it.
     await expect(page.getByTestId('box-subject')).toHaveAttribute('data-preview', '');
     await page.keyboard.press('Escape');
     await expect(prompt(page)).toHaveValue('');
     await expect(page.getByTestId('typeahead-subject')).toBeVisible();
+  });
+
+  // C21: what is wrong with a line is said in the interface language — a sentence from the catalogue,
+  // and what it is about after a colon: the user's word as the pickers show it, a command, a line to
+  // write. A help page says what the command would act on at the cursor the same way.
+  test('says what is wrong with a line in the interface language', async ({ app, page }) => {
+    await app.setUiLanguage('it');
+    await prompt(page).click();
+    await page.keyboard.insertText('/verb ( run ) /obj ( food )');
+    const diagnostic = page.getByTestId('console-diagnostic');
+    await expect(diagnostic).toHaveAttribute('data-code', 'takesNoObject');
+    await expect(diagnostic).toContainText('Questo verbo non accetta nessun complemento oggetto: correre');
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+
+    // Two sentences, the command's purpose first, as its help page says it.
+    await app.setUiLanguage('de');
+    await prompt(page).click();
+    await page.keyboard.insertText('/subj ( cat /more )');
+    await expect(diagnostic).toHaveAttribute('data-code', 'noTarget');
+    await expect(diagnostic).toContainText(
+      /\/more — die Steigerungsstufe eines Adjektivs festlegen\. Dieses Wort ist ein Substantiv: \S+/,
+    );
+    await page.keyboard.press('Escape');
+    await expect(prompt(page)).toHaveValue('');
+
+    // A help page, from a cursor on a word: the word, and the value it holds now.
+    await app.setUiLanguage('it');
+    await prompt(page).click();
+    await page.keyboard.type('/subj cat');
+    await run(page);
+    await page.keyboard.type('#1.subj /help pl');
+    await run(page);
+    await expect(page.getByTestId('help-here').last()).toHaveText('Cursore: gatto · ora Singolare');
   });
 
   test('rebuilds a workspace from a pasted two-period script, run with ↵', async ({ app, page }) => {

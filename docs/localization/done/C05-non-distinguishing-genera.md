@@ -24,10 +24,10 @@ rendered:
 
 | concepts | now | gloss |
 |---|---|---|
-| ANTARCTICA, AFRICA | [B48](../B-needs-seed/B48-climate-cold-hot.md) (seed the climate senses of COLD and HOT) | the coldest / the hottest continent |
-| AGENT_GRAMMAR | [B49](../B-needs-seed/B49-participant.md) (seed PARTICIPANT_GRAMMAR) | a participant that acts |
-| HYPERNYM | [B50](../B-needs-seed/B50-meaning-include.md) (seed MEANING, INCLUDE) | a word whose meaning includes another word's meaning |
-| DETERMINER | [B51](../B-needs-seed/B51-specify.md) (seed SPECIFY) | a word that specifies nouns |
+| ANTARCTICA, AFRICA | [B48](B48-climate-cold-hot.md) (seed the climate senses of COLD and HOT) | the coldest / the hottest continent |
+| AGENT_GRAMMAR | [B49](B49-participant.md) (seed PARTICIPANT_GRAMMAR) | a participant that acts |
+| HYPERNYM | [B50](B50-meaning-include.md) (seed MEANING, INCLUDE) | a word whose meaning includes another word's meaning |
+| DETERMINER | [B51](B51-specify.md) (seed SPECIFY) | a word that specifies nouns |
 
 Where the second pass differed from what the file predicted:
 
@@ -44,8 +44,9 @@ Where the second pass differed from what the file predicted:
    outside definitions:
    - a compass relation (*north of*) in `PathSpecifier`, plus landmark nouns: EUROPE,
      NORTH_AMERICA, SOUTH_AMERICA.
-   - "in place of": REPLACE. [C22](../C-needs-engine/C22-ui-help-prose.md) needs the same idiom for
-     the help prose, so REPLACE moves when C22 builds it.
+   - "in place of": REPLACE. [C22](C22-ui-help-prose.md) needed the same idiom for
+     the help prose, and said it with REPLACE instead (2026-09-21), so REPLACE's gloss is the
+     relation's only use.
    - a generic object article for French (*le*, *la*): POLARITY, DEGREE_GRAMMAR. The ICE subject B48
      rejected hit the same gap in all four Romance languages.
 5. **FEELING's probe is complete.** The file quoted it in English and German. The seven-language
@@ -58,7 +59,7 @@ Where the second pass differed from what the file predicted:
 Their descriptions place them: "north of the Mediterranean", "north of the isthmus of Panama". That
 needs a compass relation (*north of*, *south of*), which `PathSpecifier` does not have, and landmark
 nouns (MEDITERRANEAN, PANAMA). No superlative fits them. AFRICA, which was here for the same reason,
-and ANTARCTICA are [B48](../B-needs-seed/B48-climate-cold-hot.md).
+and ANTARCTICA are [B48](B48-climate-cold-hot.md).
 
 ### FEELING
 
@@ -87,8 +88,9 @@ the comitative and the purpose clause:
 de*, *an der Stelle*, の代わりに. Only Spanish and Portuguese say it with their word for "place".
 CHANGE is MODIFY's genus (de *ändern*), and a purpose clause says the removal is *for* the adding.
 What would move it: a preposition-like "instead of" relation, which no complement has.
-[C22](../C-needs-engine/C22-ui-help-prose.md) needs the same idiom ("the box a command puts in place
-of the subject"), so REPLACE's gloss follows once C22 builds it.
+[C22](C22-ui-help-prose.md) needed the same idiom ("the box a command puts in place
+of the subject") and reworded it with REPLACE itself, "This slot replaces the subject in a command"
+(2026-09-21). The relation was not built, and a gloss cannot use the word it defines.
 
 ### BECOME
 
@@ -120,8 +122,8 @@ Every grammar noun without a definition as of 2026-09-21 that no ticket takes, e
 
 | concept | why it stays | what would move it |
 |---|---|---|
-| SUBJECT_GRAMMAR, OBJECT_GRAMMAR | roles, each defined by its relation to a clause. AGENT_GRAMMAR, the third, is "a participant that acts" ([B49](../B-needs-seed/B49-participant.md)). The subject is a syntactic function, not a participant. The object would need a verb for undergoing an action, and "a participant that one acts on" is not what a grammar says | — |
-| ARTICLE, DEMONSTRATIVE | children of DETERMINER, which [B51](../B-needs-seed/B51-specify.md) glosses. Their differentiae (identifiability, pointing) are grammar terms themselves | — |
+| SUBJECT_GRAMMAR, OBJECT_GRAMMAR | roles, each defined by its relation to a clause. AGENT_GRAMMAR, the third, is "a participant that acts" ([B49](B49-participant.md)). The subject is a syntactic function, not a participant. The object would need a verb for undergoing an action, and "a participant that one acts on" is not what a grammar says | — |
+| ARTICLE, DEMONSTRATIVE | children of DETERMINER, which [B51](B51-specify.md) glosses. Their differentiae (identifiability, pointing) are grammar terms themselves | — |
 | TENSE | circular: "a category that indicates time" is *tempo* / *temps* / *tiempo* / *tempo* in it, fr, es and pt, the same word as TENSE | — |
 | PRESENT_TENSE, PAST_TENSE, FUTURE_TENSE | circular: a time noun for "the past" is the tense's own word in six languages (en *the past*, *il passato*, *le passé*, *el pasado*, *o passado*, 過去). Only German keeps *Vergangenheit* apart from *Präteritum* | — |
 | POLARITY, DEGREE_GRAMMAR | "a category that indicates negation / comparison": French puts the bare mass object in the partitive, "qui indique **de la** négation", where a definition wants the generic *la*. The plural route [B39](B39-quantity-and-category.md) takes reads wrong in English ("indicates negations") | a generic object for French (*le*, *la*) |
@@ -165,7 +167,7 @@ passive, the essive and the purpose clause. Half of it moved:
 | DIRECTION, SOURCE, ROUTE, COMITATIVE, TERMINUS | [B37](B37-complement-names.md) (done; seeded five nouns) | a complement that indicates destinations, … |
 | CONJUNCTION, CONJUNCT | [B38](B38-link.md) (done; LINK) | a word that links clauses; a phrase that is linked by a conjunction |
 | NUMBER_GRAMMAR, QUANTIFIER | [B39](B39-quantity-and-category.md) (done; seeded QUANTITY, CATEGORY) | a category / a determiner that indicates quantities |
-| SELECT | [C20](../C-needs-engine/C20-pronoun-agreement.md) (engine) | to indicate an object to use it, once the pronoun agrees with its antecedent |
+| SELECT | [C20](C20-pronoun-agreement.md) (done; the pronoun names its antecedent) | to indicate an object to use it |
 
 This file's own record was stale in three places:
 - There are **seven** continents, not eight.

@@ -2004,20 +2004,39 @@ describe('C05: BUILDING, a place that has walls', () => {
   });
 });
 
+// C20. SELECT is CHOOSE's genus with what the indicating is *for*: a clause of purpose whose object
+// is a pronoun standing for the object (`antecedent`), so each language genders it off its own word —
+// en "it", ja それ, de "ihn" (*Gegenstand* is masculine). Without the purpose it would read as CHOOSE.
+describe('C20: SELECT, a pronoun standing for its antecedent', () => {
+  test('SELECT → "to indicate an object to use it"', () => {
+    expect(definitionAll('SELECT')).toEqual({
+      en: 'to indicate an object to use it.',
+      it: 'indicare un oggetto per usarlo.',
+      fr: "indiquer un objet pour l'utiliser.",
+      de: 'einen Gegenstand bezeichnen, um ihn zu verwenden.',
+      es: 'indicar un objeto para usarlo.',
+      ja: 'それを使うために物体を示す。',
+      pt: 'indicar um objeto para usá-lo.',
+    });
+    expect(definitionAll('SELECT')).not.toEqual(definitionAll('CHOOSE'));
+  });
+});
+
 // C19. The four workspace verbs C08 could not reach, each on a construct C12 built or a word the
 // probe found was the real blocker. Two are causatives (pinned beside the C08 ones in
 // causative.test.ts); these two are not, and they are what the purpose clause was needed for.
 describe('C19: the verbs the purpose clause and a re-read literal unblocked', () => {
   // The differentia is not what is written but what the writing is *for*, which only a clause of
   // purpose can say (PhrasePlan.purpose): en the bare infinitive, Romance per/pour/para, de the
-  // extraposed "um … zu", ja 〜ために ahead of the predicate. The object of that clause is a neuter
-  // pronoun — the content is already named — which is what keeps English off "to load him".
+  // extraposed "um … zu", ja 〜ために ahead of the predicate. The object of that clause is a pronoun
+  // standing for the content, already named (C20): a thing is "it" in English, but *Inhalt* is
+  // masculine, so German says "ihn". C19 shipped it neuter, "um es zu laden".
   test('SAVE → "to write content to load it"', () => {
     expect(definitionAll('SAVE')).toEqual({
       en: 'to write content to load it.',
       it: 'scrivere contenuto per caricarlo.', // the clitic attaches to the infinitive
       fr: 'écrire du contenu pour le charger.',
-      de: 'Inhalt schreiben, um es zu laden.',
+      de: 'Inhalt schreiben, um ihn zu laden.',
       es: 'escribir contenido para cargarlo.',
       ja: 'それを読み込むために内容を書く。',
       pt: 'escrever conteúdo para carregá-lo.',

@@ -3,6 +3,7 @@ import { isPronominalPossessor } from '@signi/shared';
 import type { ResolvedNounPhrase } from '../../types.js';
 import { NO_TAKES_SINGULAR, OTHER_REPLACES_INDEFINITE, PLURAL_DETERMINERS, SUPERLATIVE_DEGREES, SUPERLATIVE_MAKES_DEFINITE } from '../translator.consts.js';
 import type { LexiconLookup } from '../translator.types.js';
+import { antecedentAgreement } from './antecedentAgreement.js';
 import { applyNounGender } from './applyNounGender.js';
 import { resolve } from './resolve.js';
 import { resolveRelativeClause } from './resolveRelativeClause.js';
@@ -16,10 +17,18 @@ import { resolveRelativeClause } from './resolveRelativeClause.js';
 export function resolveNounPhrase(np: NounPhrase, language: string, lookup: LexiconLookup): ResolvedNounPhrase {
   const head = resolve(np.concept, language, lookup);
   if (head.forms['person']) {
+    // A 3rd-person pronoun that names the noun it stands for takes its gender from that noun, the
+    // way this language reads it (C20): de *Inhalt* → "ihn", but en "it". Settled here, before the
+    // surface is picked, so every slot a pronoun can fill agrees alike. Where the language could
+    // only guess (a person of unstated sex in en/ja), the pronoun gives way to a noun phrase.
+    const agreed = np.antecedent && head.forms['person'] === '3' && !head.forms['generic']
+      ? antecedentAgreement(np, np.antecedent, language, lookup)
+      : undefined;
+    if (agreed && 'anaphor' in agreed) return resolveNounPhrase(agreed.anaphor, language, lookup);
     // Pronoun: synthesise the correct surface form as 'base' so all engines can use
     // their existing `forms['base']` / `forms['plural']` logic unchanged.
     const number = np.number ?? 'singular';
-    const gender = np.gender ?? 'masc';
+    const gender = agreed?.gender ?? np.gender ?? 'masc';
     head.forms['number'] = number;
     // Expose the referent's gender for every person: the 1st/2nd-person surface is
     // gender-invariant ("io", "tu"), but Romance participle/adjective agreement still

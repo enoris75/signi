@@ -71,6 +71,29 @@ describe('the keys that work anywhere', () => {
     // Listed whether or not there is anything to take back: the sheet says what the keys are.
     expect(within(keys).getByText('Undo')).toBeInTheDocument();
     expect(within(keys).getByText('Redo')).toBeInTheDocument();
+    // What the keys work on, one statement to a line, on the catalogue's English fallbacks (C22). The
+    // Everywhere level has no note: its caps are drawn for the platform the switch is on.
+    const prose = within(keys).getByTestId('help-keyboard-prose');
+    expect(prose).toHaveTextContent('A key works in the slot that has the cursor.');
+    expect(prose).toHaveTextContent('Return to the period: esc');
+    expect(prose).toHaveTextContent('Choose the previous value: ⇧');
+    expect(within(within(keys).getByTestId('help-section-app')).queryByTestId('help-section-note')).toBeNull();
+    expect(within(keys).getByTestId('help-section-mood')).toHaveTextContent('This slot replaces the subject in a command.');
+  });
+
+  // The switch redraws the paragraph's modifier with the rows' caps, which is why the sheet no longer
+  // says that Ctrl is ⌘ on a Mac (C22).
+  it('draws the paragraph’s modifier for the platform the switch is on', () => {
+    renderApp();
+    press('?');
+    const sheet = screen.getByRole('dialog', { name: 'Help' });
+    const prose = within(sheet).getByTestId('help-keyboard-prose');
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Mac' }));
+    expect(prose).toHaveTextContent('Keys that work everywhere: ⌘');
+    expect(within(sheet).getByTestId('help-section-app')).toHaveTextContent('⌘');
+    fireEvent.click(within(sheet).getByRole('button', { name: 'Windows & Linux' }));
+    expect(prose).toHaveTextContent('Keys that work everywhere: Ctrl');
+    expect(within(sheet).getByTestId('help-section-app')).not.toHaveTextContent('⌘');
   });
 
   // The sheet's headings and rows are the catalogue's where the words are seeded: the levels by the
@@ -103,6 +126,16 @@ describe('the keys that work anywhere', () => {
         'satellite.tense': { de: 'Tempus' },
         'hint.backwards': { de: 'rückwärts' },
         'hint.chooseAndNext': { de: 'wählen, und dann zum nächsten Slot gehen' },
+        'help.keyWorks': { de: 'Eine Taste funktioniert im Slot, der den Cursor hat.' },
+        'help.keysEverywhere': { de: 'Tasten, die überall funktionieren' },
+        'help.cursorInPeriod': { de: 'Der Cursor ist im Satzgefüge.' },
+        'slot.subject': { de: 'Subjekt' },
+        'help.directObject': { de: 'Direktes Objekt' },
+        'help.complement': { de: 'Ergänzung' },
+        'slot.possessor': { de: 'Besitzer' },
+        'help.conjunct': { de: 'Konjunkt' },
+        'help.goToTabs': { de: 'Aus der ersten Zeile zu den Tabs gehen' },
+        'help.restoreWord': { de: 'Das Wort zurückholen' },
       },
     });
 
@@ -121,7 +154,8 @@ describe('the keys that work anywhere', () => {
     expect(within(keys).getByText('Das Wort ersetzen')).toBeInTheDocument();
     // The picker's bare commands, which the sheet capitalizes with CSS rather than in the text.
     expect(within(keys).getAllByText('verschieben').length).toBeGreaterThan(0);
-    expect(within(keys).getByText('schließen')).toBeInTheDocument();
+    // The menu's esc, and the word list's first one (C22).
+    expect(within(keys).getAllByText('schließen')).toHaveLength(2);
     // A panel's row says which panel before its colon.
     expect(within(keys).getByText('Wörter: Wortkarte')).toBeInTheDocument();
     // The link controls a pick serves, each by its own name.
@@ -137,6 +171,17 @@ describe('the keys that work anywhere', () => {
     expect(within(keys).getByText('wählen, und dann zum nächsten Slot gehen')).toBeInTheDocument();
     // A ⇧ twin is named after the key it reverses, a comma, and the adverb.
     expect(within(keys).getByText('Tempus, rückwärts')).toBeInTheDocument();
+    // The paragraph, one statement to a line, a key after its colon; the levels' notes; the word
+    // list's rows (C22).
+    const prose = within(keys).getByTestId('help-keyboard-prose');
+    expect(prose).toHaveTextContent('Eine Taste funktioniert im Slot, der den Cursor hat.');
+    expect(prose).toHaveTextContent('Tasten, die überall funktionieren: Ctrl');
+    expect(within(keys).getByTestId('help-section-period')).toHaveTextContent('Der Cursor ist im Satzgefüge.');
+    expect(within(within(keys).getByTestId('help-section-noun')).getByTestId('help-section-note')).toHaveTextContent(
+      'Subjekt, Direktes Objekt, Ergänzung, Besitzer, Konjunkt',
+    );
+    expect(within(keys).getByText('Aus der ersten Zeile zu den Tabs gehen')).toBeInTheDocument();
+    expect(within(keys).getByText('Das Wort zurückholen')).toBeInTheDocument();
   });
 
   // B40, B42, B43: undo and redo, the console's two keys, and the period's ↵, + and −. The console's

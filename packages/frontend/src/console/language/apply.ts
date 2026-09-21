@@ -76,6 +76,7 @@ import {
   type CommandDef,
   type Setting,
 } from "./commands.ts";
+import { codeOf, coded, diagnosticAt, type ClauseRole, type Coded, type ComplementSlot, type Nest } from "./diagnostics.ts";
 import { splitPeriods } from "./lex.ts";
 import { parse, type Item } from "./parse.ts";
 import { NOUN_NAMES, parseRef, printRef as printRefText, resolveWord, wordSpecFor, type Ref, type WordSpec } from "./resolve.ts";
@@ -85,7 +86,7 @@ import {
   adverbTarget,
   applySetting,
   attachesToWord,
-  kindName,
+  kindOf,
   modalTarget,
   nounWord,
   sliceOf,
@@ -212,21 +213,27 @@ type LinkOp =
   | { kind: "unlink"; link: "relative" | "condition" | "join" | "instrument"; containerId: string; nounKey?: NounAddress; span: Span };
 
 class ApplyError extends Error {
+  readonly diagnostic: Diagnostic;
   constructor(
-    readonly span: Span,
-    message: string,
+    span: Span,
+    d: Coded,
     readonly incomplete = false,
   ) {
-    super(message);
+    const diagnostic = diagnosticAt(span, d);
+    super(diagnostic.message);
+    this.diagnostic = diagnostic;
   }
 }
 
-const fail = (span: Span, message: string): never => {
-  throw new ApplyError(span, message);
+const fail = (span: Span, d: Coded): never => {
+  throw new ApplyError(span, d);
 };
-const unfinished = (span: Span, message: string): never => {
-  throw new ApplyError(span, message, true);
+const unfinished = (span: Span, d: Coded): never => {
+  throw new ApplyError(span, d, true);
 };
+
+/** The bracket a frame is, as a diagnostic names it. */
+const nest = (frame: Frame): Nest => ({ kind: frame.kind, via: frame.via });
 
 /** Apply one line. See `applyScript` for several. */
 export function applyLine(state: WorkspaceState, text: string, opts: ApplyOptions): ApplyResult {
@@ -258,10 +265,10 @@ export function applyScript(state: WorkspaceState, text: string, opts: ApplyOpti
       } catch (error) {
         // An item left waiting for the argument the parser refused (`/tense soon`): the refusal says
         // more than the wait.
-        if (refused && error instanceof ApplyError && error.incomplete) throw new ApplyError(refused, refused.message);
+        if (refused && error instanceof ApplyError && error.incomplete) throw new ApplyError(refused, codeOf(refused));
         throw error;
       }
-      if (refused) throw new ApplyError(refused, refused.message);
+      if (refused) throw new ApplyError(refused, codeOf(refused));
     });
     run.makeLinks();
     return run.result();
@@ -274,7 +281,7 @@ export function applyScript(state: WorkspaceState, text: string, opts: ApplyOpti
     } catch (late) {
       if (!(late instanceof ApplyError)) throw late;
     }
-    return run.result({ from: error.span.from, to: error.span.to, message: error.message, incomplete: error.incomplete });
+    return run.result({ ...error.diagnostic, incomplete: error.incomplete });
   }
 }
 
@@ -402,7 +409,7 @@ class Run {
     if (attachesToWord(action)) return this.attach(item, def, frame);
     // A word's bracket holds what describes the word, and nothing of the period's.
     if (frame.kind === "element")
-      fail(item.head, `/${def.name} belongs to the period, not inside /${frame.via} ( … ) — close the bracket first.`);
+      fail(item.head, coded("periodCommandInBracket", { command: def.name, via: frame.via ?? "" }));
     switch (action.kind) {
       case "role":
         return this.role(item, def, action.slot, frame);
@@ -426,16 +433,17 @@ class Run {
 
   /** `#2` — go to a period; `#2.obj` — to a noun of one. Only at the top of a line: a bracket is one phrase. */
   goto(item: Item, frame: Frame): void {
-    if (frame !== this.top) fail(item, "Inside brackets the phrase is the bracket’s — close it before going to another period.");
+    if (frame !== this.top) fail(item, coded("gotoInsideBracket", nest(frame)));
     const ref = this.readRef(item.ref!);
     const c = this.containers[ref.period - 1];
-    if (!c) fail(item, `There is no period ${ref.period}.`);
+    if (!c) fail(item, coded("noSuchPeriod", { period: ref.period }));
     frame.containerId = c!.id;
     frame.words = [];
     frame.anchor = undefined;
     if (ref.address) {
       const word = nounWord(c!.id, ref.address);
-      if (!this.info(word)) fail(item, `Period ${ref.period} has no ${ref.address.split("/")[0]} there.`);
+      if (!this.info(word))
+        fail(item, coded("noNounThere", { period: ref.period, ref: printRefText(ref.period, ref.address) }));
       frame.words.push(word);
     }
   }
@@ -443,7 +451,7 @@ class Run {
   readRef(arg: { text: string } & Span): Ref {
     const ref = parseRef(arg.text);
     if ("error" in ref) {
-      if (!arg.text) unfinished(arg, "Name a period after the #: #2, #2.obj.");
+      if (!arg.text) unfinished(arg, coded("referenceIncomplete"));
       fail(arg, ref.error);
     }
     return ref as Ref;
@@ -458,12 +466,12 @@ class Run {
 
   role(item: Item, def: CommandDef, slot: SlotKey, frame: Frame): void {
     if (frame.kind !== "period" && slot !== "subject")
-      fail(item.head, `A ${frame.kind} is a noun phrase: only /subj names its word here.`);
+      fail(item.head, coded("nestedRoleNotSubj", nest(frame)));
     if (frame.kind === "period") this.checkSlot(item, def, slot, frame.containerId);
     const ref = this.slotRef(frame, slot);
     if (item.word) {
       const spec = wordSpecFor(slot, frame.kind as NounFrameKind);
-      const concept = this.word(item.word, spec, `/${def.name}`);
+      const concept = this.word(item.word, spec, def.name);
       this.updateSlice(frame.containerId, frame.slice, (s) => applyConceptSelect(s, slot, concept.concept, concept.opts));
       this.touch(ref);
       if (frame === this.top) this.filled.push(ref);
@@ -489,7 +497,7 @@ class Run {
     if (why) fail(item.head, why);
   }
 
-  /** The concept a word argument names, or a diagnostic saying why it names none. */
+  /** The concept a word argument names, or a diagnostic saying why it names none. `command` is its name, without the slash. */
   word(arg: { text: string } & Span, spec: WordSpec, command: string) {
     const res = resolveWord(arg.text, spec, this.vocab);
     if (res.ok) {
@@ -497,8 +505,8 @@ class Run {
       return res;
     }
     if (res.reason === "ambiguous")
-      fail(arg, `“${arg.text}” names ${res.candidates.length} words — choose one: ${res.candidates.map((c) => c.id).join(", ")}.`);
-    return fail(arg, `${command} has no word “${arg.text}” — the list shows the ones it takes.`);
+      fail(arg, coded("ambiguousWord", { text: arg.text, candidates: res.candidates.map((c) => c.id) }));
+    return fail(arg, coded("unknownWord", { command, text: arg.text }));
   }
 
   // ── Attaching to the closest word that can take it ──
@@ -523,7 +531,7 @@ class Run {
         return;
       case "set": {
         const values = def.arg.kind === "values" ? def.arg.values : [];
-        if (!item.word) return unfinished(item.head, `Say which: /${def.name} ${values.map((v) => v.name).join(", ")}.`);
+        if (!item.word) return unfinished(item.head, coded("setNeedsValue", { command: def.name, values: values.map((v) => v.name) }));
         const value = valueNamed(values, item.word.text.trim())!.value;
         const setting = { id: action.id, value } as Setting;
         this.updateSlice(w.ref.containerId, w.ref.slice, (s) => applySetting(setting, w, s));
@@ -535,7 +543,7 @@ class Run {
         const ref: WordRef = { containerId: w.ref.containerId, slice: w.ref.slice, slot: t.slot, ...(t.modifierAdjective && { modifierAdjective: true }) };
         if (item.word) {
           const spec: WordSpec = t.modifierAdjective ? { roles: ["adjective"] } : wordSpecFor(t.slot);
-          const { concept } = this.word(item.word, spec, "/adj");
+          const { concept } = this.word(item.word, spec, "adj");
           this.updateSlice(w.ref.containerId, w.ref.slice, (s) =>
             t.modifierAdjective ? setModifierAdjective(s, t.slot, concept) : applyConceptSelect(s, t.slot, concept),
           );
@@ -550,7 +558,7 @@ class Run {
         const slot = action.kind === "adverb" ? adverbTarget(w)! : modalTarget(w)!;
         const ref: WordRef = { containerId: w.ref.containerId, slot };
         if (item.word) {
-          const { concept } = this.word(item.word, wordSpecFor(slot), `/${def.name}`);
+          const { concept } = this.word(item.word, wordSpecFor(slot), def.name);
           this.updateRoot(w.ref.containerId, (s) => applyConceptSelect(s, slot, concept));
           this.touch(ref);
         }
@@ -577,25 +585,24 @@ class Run {
       const anchor = this.info(frame.anchor);
       const role = frame.anchor.slice ? undefined : roleCommand(frame.anchor.slot);
       if (anchor?.concept && role && takes(def.action, anchor))
-        fail(item.head, `/${def.name} describes a word: write it inside its bracket, /${role.name} ( ${this.vocab.label(anchor.concept)} … /${def.name} ).`);
+        fail(item.head, coded("describesAWord", { command: def.name, role: role.name, word: this.vocab.label(anchor.concept) }));
     }
     const last = frame.words.at(-1);
     const lastInfo = last && this.info(last);
-    const what = def.purpose ? `/${def.name} ${def.purpose}` : `/${def.name}`;
     // A word of the period that could take it, if any — the one to put the command after.
     const root = this.root(frame.containerId);
     const candidates = this.periodWords(frame.containerId, root);
     const fit = candidates.find((w) => takes(def.action, w));
-    const lastWord = lastInfo?.concept ? `${this.vocab.label(lastInfo.concept)} is ${kindName(lastInfo)}` : undefined;
-    let message = lastWord ? `${what}, and ${lastWord}.` : `${what}, and nothing before it takes it.`;
-    if (fit?.concept) {
-      const role = fit.ref.slice ? undefined : roleCommand(fit.ref.slot);
-      message +=
-        frame.kind === "element"
-          ? ` It belongs in ${this.vocab.label(fit.concept)}’s bracket${role ? `: /${role.name} ( ${this.vocab.label(fit.concept)} … /${def.name} )` : ""}.`
-          : ` Put it after ${this.vocab.label(fit.concept)}${role ? `, or write /${role.name} /${def.name}` : ""}.`;
-    }
-    return fail(item.head, message);
+    const role = fit?.concept && !fit.ref.slice ? roleCommand(fit.ref.slot) : undefined;
+    return fail(
+      item.head,
+      coded("noTarget", {
+        command: def.name,
+        ...(lastInfo?.concept && { last: { word: this.vocab.label(lastInfo.concept), kind: kindOf(lastInfo) } }),
+        ...(fit?.concept && { fit: { word: this.vocab.label(fit.concept), ...(role && { role: role.name }) } }),
+        inElement: frame.kind === "element",
+      }),
+    );
   }
 
   /** Every word of a period that holds one, period nouns first — where a stray command might belong. */
@@ -617,12 +624,11 @@ class Run {
     if (item.ref) {
       // A possessor that refers to another noun of the period ("the boy and *his* horse").
       const ref = this.readRef(item.ref);
-      if (ref.period !== this.periodNumber(containerId))
-        fail(item.ref, "A possessor can only refer to a noun of its own period.");
-      if (!ref.address) unfinished(item.ref, "Name the noun it refers to: #1.subj.");
+      const period = this.periodNumber(containerId);
+      if (ref.period !== period) fail(item.ref, coded("possessorOwnPeriod", { period }));
+      if (!ref.address) unfinished(item.ref, coded("possessorNeedsNoun", { period }));
       const address = ref.address!;
-      if (address === possessed || address.startsWith(`${possessed}/`))
-        fail(item.ref, "A noun cannot be its own possessor, nor one of its own parts’.");
+      if (address === possessed || address.startsWith(`${possessed}/`)) fail(item.ref, coded("ownPossessor"));
       // The noun it points at may come later in the line, so it is looked for at the end.
       this.queue.push({ kind: "possessorRef", containerId, possessed, antecedent: address, span: item.ref });
       this.touch(w.ref);
@@ -632,7 +638,7 @@ class Run {
     this.updateRoot(containerId, (root) => updateNounAt(root, possessed, (s, which) => updatePossessor(s, which, (p) => p)));
     this.touch(w.ref);
     if (item.word) {
-      const { concept } = this.word(item.word, wordSpecFor("subject", "possessor"), "/poss");
+      const { concept } = this.word(item.word, wordSpecFor("subject", "possessor"), "poss");
       this.updateSlice(containerId, headRef.slice, (s) => applyConceptSelect(s, "subject", concept));
       this.touch(headRef);
     }
@@ -650,7 +656,7 @@ class Run {
     const headRef: WordRef = { containerId, slice, slot: "subject" };
     this.touch(w.ref);
     if (item.word) {
-      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "conjunct"), `/${conjunction}`);
+      const { concept, opts } = this.word(item.word, wordSpecFor("subject", "conjunct"), conjunction);
       this.updateRoot(containerId, (root) => updateConjunct(root, which, i, (c) => applyConceptSelect(c, "subject", concept, opts)));
       this.touch(headRef);
     }
@@ -662,8 +668,8 @@ class Run {
     const source = { containerId: w.ref.containerId, nounKey: w.address! };
     if (item.ref) {
       const ref = this.readRef(item.ref);
-      if (!ref.address) unfinished(item.ref, `Name the noun of period ${ref.period} the clause is about: #${ref.period}.subj, #${ref.period}.obj.`);
-      if (ref.address!.includes("/")) fail(item.ref, "The noun a relative clause is about is a noun of its period: #2.subj, #2.obj, …");
+      if (!ref.address) unfinished(item.ref, coded("relativeNeedsNoun", { period: ref.period }));
+      if (ref.address!.includes("/")) fail(item.ref, coded("relativeNounOfPeriod", { period: ref.period }));
       this.queue.push({
         kind: "relative",
         source,
@@ -674,7 +680,7 @@ class Run {
       this.touch(w.ref);
       return;
     }
-    if (!item.body) unfinished(item.head, "Name the clause: /rel #2.subj, or /rel subj { … } for a new one.");
+    if (!item.body) unfinished(item.head, coded("relativeNeedsClause"));
     // A new clause, made where the command stands. Its gap — the box the head's word stands in for —
     // holds the head's word, as a pick on the canvas makes it.
     const gap: NounKey = item.word?.text.toLowerCase() === "obj" ? "directObject" : "subject";
@@ -704,24 +710,24 @@ class Run {
   /** `/if`, `/join`, `/inst`: a clause-level link from the frame's period. */
   clauseLink(item: Item, def: CommandDef, frame: Frame): void {
     const kind = def.action.kind as "condition" | "join" | "instrument";
-    if (frame.kind !== "period") fail(item.head, `/${def.name} links periods — it has no place inside a ${frame.kind}.`);
+    if (frame.kind !== "period") fail(item.head, coded("linkInsideNounPhrase", { command: def.name, ...nest(frame) }));
     const id = frame.containerId;
     const root = this.root(id);
     let conjunction: CoordConjunction = "and";
     if (kind === "join") {
       conjunction = (valueNamed(COORD_VALUES, item.word?.text ?? "and")?.value ?? "and") as CoordConjunction;
       if (root.imperative && !canCoordinateImperative(conjunction))
-        fail(item.word ?? item.head, "A command joins another command only with and, then, but or or.");
+        fail(item.word ?? item.head, coded("imperativeJoin"));
     }
     if (kind === "instrument") {
-      if (!root.verb) fail(item.head, "An instrument is something the verb acts with: give the period its verb first.");
+      if (!root.verb) fail(item.head, coded("instrumentNeedsVerb"));
       if (!root.verb!.complements?.includes("instrumental"))
-        fail(item.head, `${this.vocab.label(root.verb!)} takes no instrument.`);
+        fail(item.head, coded("takesNoInstrument", { verb: this.vocab.label(root.verb!) }));
     }
     let target: Target;
     if (item.ref) {
       const ref = this.readRef(item.ref);
-      if (ref.address) fail(item.ref, `/${def.name} links whole periods: #${ref.period}, not a noun of one.`);
+      if (ref.address) fail(item.ref, coded("linksWholePeriods", { command: def.name, period: ref.period }));
       target = this.target4(ref, item.ref);
     } else if (item.body) {
       // The new period is made already linked. A command's coordinate is a command too: the mood
@@ -729,7 +735,10 @@ class Run {
       const seed: PhraseSelection = kind === "join" && root.imperative ? setImperative({}, true) : {};
       target = { containerId: this.newPeriod(seed) };
     } else {
-      return unfinished(item.head, `Name the period: /${def.name}${kind === "join" ? ` ${item.word?.text ?? "and"}` : ""} #2, or { … } for a new one.`);
+      return unfinished(
+        item.head,
+        coded("clauseLinkNeedsTarget", { command: def.name, ...(kind === "join" && { conjunction: item.word?.text ?? "and" }) }),
+      );
     }
     const span: Span = item;
     if (kind === "condition") this.queue.push({ kind, mainId: id, target, span });
@@ -743,9 +752,9 @@ class Run {
 
   /** `/level` — how far the instrument this period takes part in is reified. */
   level(item: Item, frame: Frame): void {
-    if (!item.word) return unfinished(item.head, "Say which: /level process, concept or object.");
+    if (!item.word) return unfinished(item.head, coded("levelNeedsValue"));
     const level = valueNamed(LEVEL_VALUES, item.word.text.trim())?.value as AbstractionLevel | undefined;
-    if (!level) return fail(item.word, "/level takes process, concept or object.");
+    if (!level) return fail(item.word, coded("levelNotTaken", { text: item.word.text.trim() }));
     const id = frame.containerId;
     // An instrument this very line is linking takes the level with it, so the link is checked at it.
     const pending = [...this.queue].reverse().find(
@@ -758,7 +767,7 @@ class Run {
   }
 
   mood(item: Item, mood: "command" | "infinitive" | "statement", frame: Frame): void {
-    if (frame.kind !== "period") fail(item.head, `A mood belongs to a period, not to a ${frame.kind}.`);
+    if (frame.kind !== "period") fail(item.head, coded("moodInNounPhrase", nest(frame)));
     const id = frame.containerId;
     const root = this.root(id);
     const next =
@@ -776,7 +785,7 @@ class Run {
         (l.source.containerId === id || l.target.containerId === id),
     );
     if (flips && locked)
-      fail(item.head, "This period is in an if-condition or a coordination, which fixes its mood — /del if or /del join first.");
+      fail(item.head, coded("moodLocked"));
     let sel = next;
     if (mood === "command" && item.word) {
       for (const part of item.word.text.split(/\s+/)) {
@@ -791,7 +800,7 @@ class Run {
   }
 
   newCommand(item: Item, frame: Frame): void {
-    if (frame !== this.top) fail(item.head, "A new period starts a line of its own — close the bracket first.");
+    if (frame !== this.top) fail(item.head, coded("newPeriodInBracket", nest(frame)));
     const id = this.newPeriod();
     frame.containerId = id;
     frame.words = [{ containerId: id, slot: "subject" }];
@@ -818,12 +827,12 @@ class Run {
     if (!what) {
       const last = frame.words.at(-1) ?? frame.anchor;
       const w = last && this.info(last);
-      if (!w) fail(item.head, "Nothing is in hand here to remove — name it: /del obj, /del adj, /del period.");
+      if (!w) fail(item.head, coded("nothingToRemove"));
       return this.clearWord(w!);
     }
     const slot = roleSlot(what);
     if (slot) {
-      if (frame.kind !== "period" && slot !== "subject") fail(span, `A ${frame.kind} has only its /subj to remove.`);
+      if (frame.kind !== "period" && slot !== "subject") fail(span, coded("nestedRemovesOnlySubj", nest(frame)));
       this.updateSlice(containerId, frame.slice, (s) => applyClear(s, slot));
       this.touch(this.slotRef(frame, slot));
       return;
@@ -831,10 +840,10 @@ class Run {
     switch (what) {
       case "adj": {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Adjective` as SlotKey]));
-        if (!w) fail(span, "No noun here has an adjective to remove.");
+        if (!w) fail(span, coded("noAdjectiveToRemove"));
         const chain = adjectiveSlots(w!.which!).filter((key) => w!.slice[key]);
         const key = index === undefined ? chain.at(-1) : adjectiveSlots(w!.which!)[index - 1];
-        if (!key || !w!.slice[key]) fail(span, `There is no adjective ${index} there.`);
+        if (!key || !w!.slice[key]) fail(span, coded("noSuchAdjective", { index: index! }));
         this.updateSlice(containerId, w!.ref.slice, (s) => applyClear(s, key!));
         this.touch(w!.ref);
         return;
@@ -844,7 +853,7 @@ class Run {
           const slot = adverbTarget(x);
           return Boolean(slot && x.root[slot]);
         });
-        if (!w) fail(span, "No verb here has an adverb to remove.");
+        if (!w) fail(span, coded("noAdverbToRemove"));
         this.updateRoot(containerId, (s) => applyClear(s, adverbTarget(w!)!));
         this.touch(w!.ref);
         return;
@@ -853,14 +862,14 @@ class Run {
         const root = this.root(containerId);
         const filled = MODAL_SLOTS.filter((key) => root[key]);
         const key = index === undefined ? filled.at(-1) : MODAL_SLOTS[index - 1];
-        if (!key || !root[key]) fail(span, "There is no modal to remove.");
+        if (!key || !root[key]) fail(span, coded("noModalToRemove", index === undefined ? {} : { index }));
         this.updateRoot(containerId, (s) => applyClear(s, key!));
         this.touch({ containerId, slot: "verb" });
         return;
       }
       case "poss": {
         const w = closest((x) => x.kind === "noun" && Boolean(x.slice[`${x.which}Possessor` as keyof PhraseSelection] || x.slice[`${x.which}PossessorRef` as keyof PhraseSelection]));
-        if (!w) fail(span, "No noun here has a possessor to remove.");
+        if (!w) fail(span, coded("noPossessorToRemove"));
         this.updateRoot(containerId, (root) =>
           updateNounAt(root, w!.address!, (s, which) => clearPossessorRef(removePossessor(s, which), which)),
         );
@@ -870,10 +879,10 @@ class Run {
       case "and":
       case "or": {
         const w = closest((x) => x.kind === "noun" && !x.ref.slice && conjunctsOf(x.slice, x.which!).length > 0);
-        if (!w) fail(span, "No noun here is coordinated with another.");
+        if (!w) fail(span, coded("noConjunctToRemove"));
         const count = conjunctsOf(w!.slice, w!.which!).length;
         const i = index === undefined ? count - 1 : index - 2;
-        if (i < 0 || i >= count) fail(span, `There is no ${index}${ordinalSuffix(index!)} phrase in that group.`);
+        if (i < 0 || i >= count) fail(span, coded("noSuchConjunct", { index: index! }));
         this.updateRoot(containerId, (root) => removeConjunct(root, w!.which!, i));
         this.touch(w!.ref);
         return;
@@ -885,7 +894,7 @@ class Run {
             (this.links.some((l) => isRelativeLink(l) && l.source.containerId === containerId && l.source.nounKey === x.address) ||
               this.queue.some((op) => op.kind === "relative" && op.source.containerId === containerId && op.source.nounKey === x.address)),
         );
-        if (!w) fail(span, "No noun here has a relative clause to remove.");
+        if (!w) fail(span, coded("noRelativeToRemove"));
         this.queue.push({ kind: "unlink", link: "relative", containerId, nounKey: w!.address!, span: item });
         this.touch(w!.ref);
         return;
@@ -900,7 +909,7 @@ class Run {
       case "period":
         return this.removePeriod(item, frame);
     }
-    fail(span, `/del removes a word (subj, verb, obj, adj, adv, modal, poss, and, …), a link (rel, if, join, inst) or the period — not “${what}”.`);
+    fail(span, coded("unknownRemoval", { what }));
   }
 
   /** Clear the word in hand; a nested phrase's head takes its whole phrase with it. */
@@ -928,7 +937,7 @@ class Run {
   }
 
   removePeriod(item: Item, frame: Frame): void {
-    if (frame !== this.top) fail(item.head, "Close the bracket before removing the period.");
+    if (frame !== this.top) fail(item.head, coded("removePeriodInBracket", nest(frame)));
     const id = frame.containerId;
     const at = this.containers.findIndex((c) => c.id === id);
     // The workspace always keeps one period: the last one is emptied rather than removed.
@@ -955,11 +964,11 @@ class Run {
   resolveTarget(target: Target): string {
     if ("containerId" in target) {
       if (!this.containers.some((c) => c.id === target.containerId))
-        fail({ from: 0, to: 0 }, "The period this link leads to has been removed.");
+        fail({ from: 0, to: 0 }, coded("linkTargetRemoved"));
       return target.containerId;
     }
     const c = this.containers[target.period - 1];
-    if (!c) fail(target.span, `There is no period ${target.period}.`);
+    if (!c) fail(target.span, coded("noSuchPeriod", { period: target.period }));
     return c!.id;
   }
 
@@ -968,7 +977,7 @@ class Run {
     // A period the line removed after naming it (`/if ( … ) /del period`) takes its links with it.
     const from =
       op.kind === "relative" ? op.source.containerId : op.kind === "condition" ? op.mainId : op.kind === "join" ? op.firstId : op.kind === "instrument" ? op.clauseId : op.containerId;
-    if (!this.containers.some((c) => c.id === from)) fail(op.span, "The period this link starts from has been removed.");
+    if (!this.containers.some((c) => c.id === from)) fail(op.span, coded("linkSourceRemoved"));
     switch (op.kind) {
       case "relative": {
         const target = { containerId: this.resolveTarget(op.target), nounKey: op.nounKey! };
@@ -981,8 +990,8 @@ class Run {
         const ifId = this.resolveTarget(op.target);
         const main = this.containers.find((c) => c.id === op.mainId)!;
         if (!canStartCondition(this.links, main))
-          fail(op.span, "This period can’t take an if-condition: a command, an infinitive, an if-clause or a coordinated period takes none.");
-        if (!canBeCondition(this.links, op.mainId, ifId)) fail(op.span, this.clauseRefusal(op.mainId, ifId, "its if-condition"));
+          fail(op.span, coded("cantTakeCondition"));
+        if (!canBeCondition(this.links, op.mainId, ifId)) fail(op.span, this.clauseRefusal(op.mainId, ifId, "condition"));
         this.links = addConditional(this.links, op.mainId, ifId, id());
         return;
       }
@@ -990,12 +999,12 @@ class Run {
         const second = this.resolveTarget(op.target);
         const first = this.containers.find((c) => c.id === op.firstId)!;
         if (!canStartCoordination(this.links, first))
-          fail(op.span, "This period can’t start a coordination: an infinitive, a coordinated period or one in an if-condition can’t.");
+          fail(op.span, coded("cantStartCoordination"));
         if (!canBeCoordinate(this.containers, this.links, op.firstId, second)) {
           const other = this.containers.find((c) => c.id === second);
           if (other && Boolean(other.selection.imperative) !== Boolean(first.selection.imperative))
-            fail(op.span, "A command joins a command, and a statement a statement — make the two periods the same mood first.");
-          fail(op.span, this.clauseRefusal(op.firstId, second, "its coordinate"));
+            fail(op.span, coded("joinMoodMismatch", { imperative: Boolean(first.selection.imperative) }));
+          fail(op.span, this.clauseRefusal(op.firstId, second, "coordinate"));
         }
         this.links = addCoordinative(this.links, op.firstId, second, op.conjunction, id());
         return;
@@ -1005,15 +1014,15 @@ class Run {
         if (!canBeInstrument(this.containers, this.links, op.clauseId, instrument, op.level)) {
           const other = this.containers.find((c) => c.id === instrument);
           if (other?.selection.verb && op.level === "object")
-            fail(op.span, "An instrument held as a thing is a noun phrase: that period has a verb. Use /level process or concept for an act.");
-          fail(op.span, this.clauseRefusal(op.clauseId, instrument, "its instrument"));
+            fail(op.span, coded("instrumentThingHasVerb"));
+          fail(op.span, this.clauseRefusal(op.clauseId, instrument, "instrument"));
         }
         this.links = addInstrumental(this.links, op.clauseId, instrument, id(), op.level);
         return;
       }
       case "possessorRef": {
         if (!resolveAntecedent(this.root(op.containerId), op.antecedent))
-          fail(op.span, `There is no noun at ${printRefText(this.periodNumber(op.containerId), op.antecedent)}.`);
+          fail(op.span, coded("noNounAt", { ref: printRefText(this.periodNumber(op.containerId), op.antecedent) }));
         this.updateRoot(op.containerId, (root) =>
           updateNounAt(root, op.possessed, (s, which) => setPossessorRef(s, which, op.antecedent)),
         );
@@ -1021,7 +1030,7 @@ class Run {
       }
       case "level": {
         if (!this.links.some((l) => isInstrumentalLink(l) && (l.source.containerId === op.containerId || l.target.containerId === op.containerId)))
-          fail(op.span, "/level sets how an instrument is held, and this period has no instrument link.");
+          fail(op.span, coded("noInstrumentLink"));
         this.links = setInstrumentalLevel(this.links, op.containerId, op.level);
         return;
       }
@@ -1032,33 +1041,30 @@ class Run {
         else if (op.link === "join") this.links = clearCoordinative(this.links, op.containerId);
         else this.links = clearInstrumental(this.links, op.containerId);
         if (before.length === this.links.length && op.link !== "relative")
-          fail(op.span, `This period has no ${op.link === "condition" ? "if-condition" : op.link === "join" ? "coordination" : "instrument"} to remove.`);
+          fail(op.span, coded("noLinkToRemove", { link: op.link }));
         return;
       }
     }
   }
 
   /** Why a relative link can't be made, in the terms a user would give — or nothing if it can. */
-  relativeRefusal(sourceId: string, target: { containerId: string; nounKey: NounKey }): string | undefined {
+  relativeRefusal(sourceId: string, target: { containerId: string; nounKey: NounKey }): Coded | undefined {
     const n = this.periodNumber(target.containerId);
-    const name = `#${n}.${NOUN_NAMES[target.nounKey]}`;
-    if (sourceId === target.containerId) return "A relative clause is another period — not the one its noun is in.";
+    const ref = `#${n}.${NOUN_NAMES[target.nounKey]}`;
+    if (sourceId === target.containerId) return coded("relativeSamePeriod");
     const c = this.containers.find((x) => x.id === target.containerId);
-    if (!c?.selection[target.nounKey]) return `${name} is empty: the clause needs a word there to be about.`;
-    if (relativeTargetKeys(this.links, target.containerId).has(target.nounKey))
-      return `${name} is already the gap of another relative clause.`;
-    if (isSelfOrAncestor(target.containerId, sourceId, this.links))
-      return `Period ${n} already leads to this one — the link would go round in a circle.`;
+    if (!c?.selection[target.nounKey]) return coded("relativeGapEmpty", { ref });
+    if (relativeTargetKeys(this.links, target.containerId).has(target.nounKey)) return coded("relativeGapTaken", { ref });
+    if (isSelfOrAncestor(target.containerId, sourceId, this.links)) return coded("linkCircle", { period: n });
     return undefined;
   }
 
-  clauseRefusal(sourceId: string, targetId: string, role: string): string {
+  clauseRefusal(sourceId: string, targetId: string, role: ClauseRole): Coded {
     const n = this.periodNumber(targetId);
-    if (sourceId === targetId) return `A period can’t be ${role} itself.`;
-    if (isSelfOrAncestor(targetId, sourceId, this.links))
-      return `Period ${n} already leads to this one — the link would go round in a circle.`;
-    if (inClauseRelation(this.links, targetId)) return `Period ${n} already takes part in another link between periods.`;
-    return `Period ${n} can’t be ${role}.`;
+    if (sourceId === targetId) return coded("clauseSelf", { role });
+    if (isSelfOrAncestor(targetId, sourceId, this.links)) return coded("linkCircle", { period: n });
+    if (inClauseRelation(this.links, targetId)) return coded("clauseInOtherLink", { period: n });
+    return coded("clauseCannot", { period: n, role });
   }
 }
 
@@ -1072,25 +1078,26 @@ export function roleRefusal(
   slot: SlotKey,
   def: CommandDef,
   vocab: Vocabulary,
-): string | undefined {
+): Coded | undefined {
   const root = state.containers.find((c) => c.id === containerId)?.selection ?? {};
   const verb = root.verb;
-  const verbName = verb ? vocab.label(verb) : undefined;
+  const verbName = verb ? vocab.label(verb) : "";
   if (slot === "verb") {
     const objectInstrument = state.links.some(
       (l) => isInstrumentalLink(l) && l.target.containerId === containerId && (l.level ?? "object") === "object",
     );
-    return objectInstrument
-      ? "This period is an instrument held as a thing — a noun phrase with no verb. Raise it with /level process first."
-      : undefined;
+    return objectInstrument ? coded("instrumentAsThing") : undefined;
   }
   if (slot === "subject") return undefined;
   if (slot === "directObject") {
-    if (!verb) return "An object hangs off the verb: give the period its verb first, /verb …";
-    return verb.transitivity === "intransitive" ? `${verbName} takes no object.` : undefined;
+    if (!verb) return coded("objectNeedsVerb");
+    return verb.transitivity === "intransitive" ? coded("takesNoObject", { verb: verbName }) : undefined;
   }
-  if (!verb) return `/${def.name} hangs off the verb: give the period its verb first, /verb …`;
-  return verb.complements?.includes(slot as never) ? undefined : `${verbName} takes no ${def.description}.`;
+  if (!verb) return coded("complementNeedsVerb", { command: def.name });
+  // The role commands left name the complements a verb licenses (see COMMANDS' role entries).
+  return verb.complements?.includes(slot as never)
+    ? undefined
+    : coded("takesNoComplement", { verb: verbName, command: def.name, slot: slot as ComplementSlot });
 }
 
 /** The period slot a `/del` target names by its role command's name or alias. */
@@ -1098,8 +1105,6 @@ function roleSlot(name: string): SlotKey | undefined {
   const def = commandNamed(name);
   return def?.action.kind === "role" ? def.action.slot : undefined;
 }
-
-const ordinalSuffix = (n: number) => (n === 1 ? "st" : n === 2 ? "nd" : n === 3 ? "rd" : "th");
 
 /**
  * Where the context goes once a line is committed: like the pickers' auto-advance, on from the last

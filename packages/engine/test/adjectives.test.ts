@@ -752,12 +752,12 @@ describe('known bugs: degree (extended)', () => {
 const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['ABLE', 'able'], ['ACTIVE', 'active'], ['ADDED', 'added'], ['ADULT', 'adult'], ['ADVERSATIVE', 'adversative'], ['BAD', 'bad'], ['BEAUTIFUL', 'beautiful'], ['BIG', 'big'],
   ['BROWN', 'brown'], ['CANINE', 'canine'], ['CAREFUL', 'careful'], ['CASTRATED', 'castrated'],
-  ['COLD', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
+  ['COLD', 'cold'], ['COLD_CLIMATE', 'cold'], ['CONCLUSIVE', 'conclusive'], ['CONDITIONAL', 'conditional'], ['COORDINATED', 'coordinated'],
   ['COPIED', 'copied'], ['COPULATIVE', 'copulative'], ['DEFINITE', 'definite'], ['DIRECT', 'direct'], ['DISJUNCTIVE', 'disjunctive'],
   ['DISTAL', 'distal'], ['DOMESTIC', 'domestic'], ['EMPTY', 'empty'], ['EXPLICATIVE', 'explicative'],
   ['FAILED', 'failed'], ['FAR', 'far'], ['FEMALE', 'female'],
   ['FIRST', 'first'], ['GOOD', 'good'],
-  ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HUNGRY', 'hungry'],
+  ['HAPPY', 'happy'], ['HIDDEN', 'hidden'], ['HOT', 'hot'], ['HOT_CLIMATE', 'hot'], ['HUNGRY', 'hungry'],
   ['INDEFINITE', 'indefinite'], ['INDIRECT', 'indirect'], ['INTERESTING', 'interesting'],
   ['LAZY', 'lazy'], ['LINKED', 'linked'], ['LOADED', 'loaded'], ['LOUD', 'loud'], ['MAIN', 'main'], ['MALE', 'male'], ['MISSING', 'missing'], ['MULTAL', 'multal'],
   ['NEAR', 'near'], ['NEGATIVE', 'negative'], ['NEUTER', 'neuter'], ['NEUTRAL', 'neutral'], ['NEW', 'new'], ['NEXT', 'next'],
@@ -768,7 +768,7 @@ const EVERY_ADJECTIVE: [id: string, en: string][] = [
   ['QUICK', 'quick'], ['RECENT', 'recent'], ['REMOVED', 'removed'], ['RESULTATIVE', 'resultative'], ['ROUND', 'round'], ['SAD', 'sad'], ['SAVED', 'saved'],
   ['SECOND', 'second'], ['SEMANTIC', 'semantic'], ['SHARP', 'sharp'], ['SINGULAR', 'singular'], ['SMALL', 'small'],
   ['SPATIAL', 'spatial'], ['STRONG', 'strong'], ['TEMPORAL', 'temporal'], ['THIRD', 'third'], ['TIDY', 'tidy'], ['TIRED', 'tired'], ['UNCONNECTED', 'unconnected'],
-  ['UNIVERSAL', 'universal'], ['UNPINNED', 'unpinned'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['VISIBLE', 'visible'], ['WARM', 'warm'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
+  ['UNEXPECTED', 'unexpected'], ['UNIVERSAL', 'universal'], ['UNKNOWN', 'unknown'], ['UNPINNED', 'unpinned'], ['UNTITLED', 'untitled'], ['VALID', 'valid'], ['VISIBLE', 'visible'], ['WARM', 'warm'], ['WEAK', 'weak'], ['WHOLE', 'whole'],
   ['WILD', 'wild'],
   ['WRITTEN', 'written'], ['YOUNG', 'young'], ['ZERO', 'zero'],
 ];

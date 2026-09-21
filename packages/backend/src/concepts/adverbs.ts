@@ -110,6 +110,25 @@ export const adverbs: ConceptSeed[] = [
     },
   },
   {
+    // One more time, after the first: a manner-position adverb like REPEATEDLY, which counts no
+    // times at all. The console's help says a line applied again leaves the period as it is
+    // (localization C22). The Romance languages say it with a fixed phrase ("di nuovo", "de
+    // nouveau", "de nuevo", "de novo"), and Japanese with もう一度, one time more.
+    id: 'AGAIN',
+    role: 'adverb',
+    description: 'one more time',
+    emoji: '🔂',
+    forms: {
+      en: { base: 'again' },
+      it: { base: 'di nuovo' },
+      fr: { base: 'de nouveau' },
+      de: { base: 'erneut' },
+      es: { base: 'de nuevo' },
+      ja: { base: 'もう一度', reading: 'もういちど' },
+      pt: { base: 'de novo' },
+    },
+  },
+  {
     // A manner adverb like REPEATEDLY, without a subtype: it follows the verb, and it is COLLAPSE's
     // differentia beside the ground it ends at, "to move to the ground suddenly" (localization B34).
     // Spanish and Portuguese say it with the fixed phrase "de repente".
@@ -249,6 +268,26 @@ export const adverbs: ConceptSeed[] = [
       es: { base: 'ahora' },
       ja: { base: '今', reading: 'いま' },
       pt: { base: 'agora' },
+    },
+  },
+  {
+    // By this time, sooner than expected: "this command already has a value" (localization C21). It
+    // sits where ALWAYS and NEVER sit — before the verb in English ("already has"), between the
+    // auxiliary and the participle in a compound tense (it "ha già mangiato", fr "a déjà mangé", de
+    // "hat schon gegessen") — so it shares their `frequency` subtype, which is a position, not a
+    // meaning. German schon, the everyday word (bereits is the written one); Japanese もう.
+    id: 'ALREADY',
+    role: 'adverb',
+    description: 'by this time; before now',
+    emoji: '✔️',
+    forms: {
+      en: { base: 'already', subtype: 'frequency' },
+      it: { base: 'già', subtype: 'frequency' },
+      fr: { base: 'déjà', subtype: 'frequency' },
+      de: { base: 'schon', subtype: 'frequency' },
+      es: { base: 'ya', subtype: 'frequency' },
+      ja: { base: 'もう', subtype: 'frequency' },
+      pt: { base: 'já', subtype: 'frequency' },
     },
   },
   {

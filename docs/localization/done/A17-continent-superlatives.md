@@ -54,6 +54,10 @@ reason (re-probed 2026-09-21: en "the coldest continent", de "der kälteste Kont
 最も冷たい大陸, pt "o continente mais frio"). AFRICA, EUROPE and the two Americas have no superlative.
 Their descriptions place them ("south of the Mediterranean"), and they stay in C05 too.
 
+_(Later the same day C05's second pass split two of them out to [B48](B48-climate-cold-hot.md),
+which seeded the climate senses of COLD and HOT: ANTARCTICA is now the coldest continent, ja
+最も寒い大陸, and AFRICA the hottest.)_
+
 ## Coverage
 
 ASIA in [e2e/definition-tooltip.spec.ts](../../../e2e/definition-tooltip.spec.ts), in English and

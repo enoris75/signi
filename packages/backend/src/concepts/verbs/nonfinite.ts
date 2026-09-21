@@ -240,6 +240,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'contendo', participle: 'contido' },
     ja: { te: '保持して', te_reading: 'ほじして', nai: '保持しない', nai_reading: 'ほじしない', passive: '保持される', passive_reading: 'ほじされる' },
   },
+  // it includere → incluso, fr inclure → inclus (the feminine incluse); ja 含む is godan.
+  INCLUDE: {
+    en: { gerund: 'including', participle: 'included' },
+    it: { gerund: 'includendo', participle: 'incluso' },
+    fr: { participle: 'inclus' }, de: { participle: 'umfasst' },
+    es: { gerund: 'incluyendo', participle: 'incluido' },
+    pt: { gerund: 'incluindo', participle: 'incluído' },
+    ja: { te: '含んで', te_reading: 'ふくんで', nai: '含まない', nai_reading: 'ふくまない', passive: '含まれる', passive_reading: 'ふくまれる' },
+  },
   CLICK: {
     en: { gerund: 'clicking', participle: 'clicked' },
     it: { gerund: 'cliccando', participle: 'cliccato' },
@@ -707,6 +716,24 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'refazendo', participle: 'refeito' },
     ja: { te: 'やり直して', te_reading: 'やりなおして', nai: 'やり直さない', nai_reading: 'やりなおさない', passive: 'やり直される', passive_reading: 'やりなおされる' },
   },
+  // RESTORE (C22). German zurückholen is separable, so its participle takes the ge- inside.
+  RESTORE: {
+    en: { gerund: 'restoring', participle: 'restored' },
+    it: { gerund: 'ripristinando', participle: 'ripristinato' },
+    fr: { participle: 'restauré' }, de: { participle: 'zurückgeholt' },
+    es: { gerund: 'restaurando', participle: 'restaurado' },
+    pt: { gerund: 'restaurando', participle: 'restaurado' },
+    ja: { te: '復元して', te_reading: 'ふくげんして', nai: '復元しない', nai_reading: 'ふくげんしない', passive: '復元される', passive_reading: 'ふくげんされる' },
+  },
+  // The participles are irregular everywhere but in English and German: aperto, ouvert, abierto, aberto.
+  OPEN: {
+    en: { gerund: 'opening', participle: 'opened' },
+    it: { gerund: 'aprendo', participle: 'aperto' },
+    fr: { participle: 'ouvert' }, de: { participle: 'geöffnet' },
+    es: { gerund: 'abriendo', participle: 'abierto' },
+    pt: { gerund: 'abrindo', participle: 'aberto' },
+    ja: { te: '開いて', te_reading: 'ひらいて', nai: '開かない', nai_reading: 'ひらかない', passive: '開かれる', passive_reading: 'ひらかれる' },
+  },
   CLOSE: {
     en: { gerund: 'closing', participle: 'closed' },
     it: { gerund: 'chiudendo', participle: 'chiuso' },
@@ -849,6 +876,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     pt: { gerund: 'modificando', participle: 'modificado' },
     ja: { te: '修飾して', te_reading: 'しゅうしょくして', nai: '修飾しない', nai_reading: 'しゅうしょくしない', passive: '修飾される', passive_reading: 'しゅうしょくされる' },
   },
+  // B51: DETERMINER's verb. de bestimmen has no ge- (an inseparable be- verb): bestimmt.
+  SPECIFY: {
+    en: { gerund: 'specifying', participle: 'specified' },
+    it: { gerund: 'specificando', participle: 'specificato' },
+    fr: { participle: 'précisé' }, de: { participle: 'bestimmt' },
+    es: { gerund: 'especificando', participle: 'especificado' },
+    pt: { gerund: 'especificando', participle: 'especificado' },
+    ja: { te: '特定して', te_reading: 'とくていして', nai: '特定しない', nai_reading: 'とくていしない', passive: '特定される', passive_reading: 'とくていされる' },
+  },
   // it reggere → retto; es regir raises e→i in the gerund (rigiendo).
   GOVERN: {
     en: { gerund: 'governing', participle: 'governed' },
@@ -857,6 +893,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'rigiendo', participle: 'regido' },
     pt: { gerund: 'regendo', participle: 'regido' },
     ja: { te: '支配して', te_reading: 'しはいして', nai: '支配しない', nai_reading: 'しはいしない', passive: '支配される', passive_reading: 'しはいされる' },
+  },
+  // pt aceitar is abundant: aceitado after ter, aceite with ser.
+  ACCEPT: {
+    en: { gerund: 'accepting', participle: 'accepted' },
+    it: { gerund: 'accettando', participle: 'accettato' },
+    fr: { participle: 'accepté' }, de: { participle: 'akzeptiert' },
+    es: { gerund: 'aceptando', participle: 'aceptado' },
+    pt: { gerund: 'aceitando', participle: 'aceitado', participle_passive: 'aceite' },
+    ja: { te: '受け付けて', te_reading: 'うけつけて', nai: '受け付けない', nai_reading: 'うけつけない', passive: '受け付けられる', passive_reading: 'うけつけられる' },
   },
   NEGATE: {
     en: { gerund: 'negating', participle: 'negated' },
@@ -916,6 +961,15 @@ export const NONFINITE: Record<string, Record<string, Record<string, string>>> =
     es: { gerund: 'actuando', participle: 'actuado' },
     pt: { gerund: 'agindo', participle: 'agido' },
     ja: { te: '行動して', te_reading: 'こうどうして', nai: '行動しない', nai_reading: 'こうどうしない' },
+  },
+  // WORK (C22): avere in Italian ("ha funzionato"), and German funktionieren has no ge-.
+  WORK: {
+    en: { gerund: 'working', participle: 'worked' },
+    it: { gerund: 'funzionando', participle: 'funzionato' },
+    fr: { participle: 'fonctionné' }, de: { participle: 'funktioniert' },
+    es: { gerund: 'funcionando', participle: 'funcionado' },
+    pt: { gerund: 'funcionando', participle: 'funcionado' },
+    ja: { te: '動作して', te_reading: 'どうさして', nai: '動作しない', nai_reading: 'どうさしない' },
   },
   CONFINE: {
     en: { gerund: 'confining', participle: 'confined' },

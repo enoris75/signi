@@ -1246,13 +1246,14 @@ test.describe('word definition tooltip', () => {
     await expect(page.locator(tooltip)).toHaveText('die zweite Person');
   });
 
-  test('a purpose clause carries the whole differentia (localization C19: SAVE)', async ({
+  test('a purpose clause carries the whole differentia (localization C19 and C20: SAVE)', async ({
     app,
     page,
   }) => {
     // SAVE is not distinguished by what it writes but by what the writing is *for*, so its gloss
     // hangs a clause of purpose off the citation. Each language connects one its own way, which is
-    // the point of composing it: English the bare infinitive, German the extraposed "um … zu".
+    // the point of composing it: English the bare infinitive, German the extraposed "um … zu". The
+    // pronoun stands for the content (C20), so German genders it off *Inhalt*, a masculine: "ihn".
     await app.setSubject('CAT');
     await app.verbInput.fill('save');
     const saveEn = page.locator('[data-testid="typeahead-option"][data-concept="SAVE"]');
@@ -1265,7 +1266,30 @@ test.describe('word definition tooltip', () => {
     const saveDe = page.locator('[data-testid="typeahead-option"][data-concept="SAVE"]');
     await expect(saveDe).toBeVisible();
     await saveDe.hover();
-    await expect(page.locator(tooltip)).toHaveText('Inhalt schreiben, um es zu laden');
+    await expect(page.locator(tooltip)).toHaveText('Inhalt schreiben, um ihn zu laden');
+  });
+
+  test('a pronoun genders itself off its antecedent (localization C20: SELECT)', async ({
+    app,
+    page,
+  }) => {
+    // SELECT is CHOOSE's genus with what the indicating is *for*. The purpose clause's object is a
+    // pronoun standing for the object, and each language reads its gender off its own word: a thing
+    // is "it" in English, but *Gegenstand* is masculine, so German says "ihn". "select" also finds
+    // CHOOSE, whose synonym it is; the option is picked out by its concept.
+    await app.setSubject('CAT');
+    await app.verbInput.fill('select');
+    const selectEn = page.locator('[data-testid="typeahead-option"][data-concept="SELECT"]');
+    await expect(selectEn).toBeVisible();
+    await selectEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('to indicate an object to use it');
+
+    await app.setUiLanguage('de');
+    await app.verbInput.fill('select');
+    const selectDe = page.locator('[data-testid="typeahead-option"][data-concept="SELECT"]');
+    await expect(selectDe).toBeVisible();
+    await selectDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('einen Gegenstand bezeichnen, um ihn zu verwenden');
   });
 
   test('a comitative carries it for ADD (localization C19)', async ({ app, page }) => {
@@ -1430,6 +1454,91 @@ test.describe('word definition tooltip', () => {
     await expect(quantifierFr).toBeVisible();
     await quantifierFr.hover();
     await expect(page.locator(tooltip)).toHaveText('un déterminant qui indique des quantités');
+  });
+
+  test('the climate senses tell two continents apart (localization B48: ANTARCTICA, AFRICA)', async ({
+    app,
+    page,
+  }) => {
+    // A17's superlative on COLD_CLIMATE and HOT_CLIMATE: Japanese 寒い / 暑い, the cold and heat of a
+    // place, where COLD and HOT are 冷たい / 熱い to the touch; Spanish caluroso where HOT is caliente.
+    await app.subjectInput.fill('antarctica');
+    const antarcticaEn = page.locator('[data-testid="typeahead-option"][data-concept="ANTARCTICA"]');
+    await expect(antarcticaEn).toBeVisible();
+    await antarcticaEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('the coldest continent');
+
+    await app.setUiLanguage('ja');
+    await app.subjectInput.fill('antarctica');
+    const antarcticaJa = page.locator('[data-testid="typeahead-option"][data-concept="ANTARCTICA"]');
+    await expect(antarcticaJa).toBeVisible();
+    await antarcticaJa.hover();
+    await expect(page.locator(tooltip)).toHaveText('最も寒い大陸');
+
+    await app.setUiLanguage('es');
+    await app.subjectInput.fill('africa');
+    const africaEs = page.locator('[data-testid="typeahead-option"][data-concept="AFRICA"]');
+    await expect(africaEs).toBeVisible();
+    await africaEs.hover();
+    await expect(page.locator(tooltip)).toHaveText('el continente más caluroso');
+  });
+
+  test('the agent is a participant that acts (localization B49: AGENT_GRAMMAR)', async ({ app, page }) => {
+    // Composed on its new genus, PARTICIPANT_GRAMMAR: German Partizipant, the grammar's word, where
+    // Teilnehmer is an attendee.
+    await app.subjectInput.fill('agent');
+    const agentEn = page.locator('[data-testid="typeahead-option"][data-concept="AGENT_GRAMMAR"]');
+    await expect(agentEn).toBeVisible();
+    await agentEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a participant that acts');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('agent');
+    const agentDe = page.locator('[data-testid="typeahead-option"][data-concept="AGENT_GRAMMAR"]');
+    await expect(agentDe).toBeVisible();
+    await agentDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Partizipant, der handelt');
+  });
+
+  test('a hypernym is a word whose meaning includes another\'s (localization B50: HYPERNYM)', async ({
+    app,
+    page,
+  }) => {
+    // C12's genitive relative, headed on the possessor: German "dessen", and the inseparable umfassen
+    // closes the clause as one word.
+    await app.subjectInput.fill('hypernym');
+    const hypernymEn = page.locator('[data-testid="typeahead-option"][data-concept="HYPERNYM"]');
+    await expect(hypernymEn).toBeVisible();
+    await hypernymEn.hover();
+    await expect(page.locator(tooltip)).toHaveText("a word whose meaning includes another word's meaning");
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('hypernym');
+    const hypernymDe = page.locator('[data-testid="typeahead-option"][data-concept="HYPERNYM"]');
+    await expect(hypernymDe).toBeVisible();
+    await hypernymDe.hover();
+    await expect(page.locator(tooltip)).toHaveText(
+      'ein Wort, dessen Bedeutung die Bedeutung eines anderen Wortes umfasst',
+    );
+  });
+
+  test('a determiner is a word that specifies nouns (localization B51: DETERMINER)', async ({
+    app,
+    page,
+  }) => {
+    // SPECIFY, not INDICATE: German bestimmen is the grammar's own verb (the bestimmter Artikel).
+    await app.subjectInput.fill('determiner');
+    const determinerEn = page.locator('[data-testid="typeahead-option"][data-concept="DETERMINER"]');
+    await expect(determinerEn).toBeVisible();
+    await determinerEn.hover();
+    await expect(page.locator(tooltip)).toHaveText('a word that specifies nouns');
+
+    await app.setUiLanguage('de');
+    await app.subjectInput.fill('determiner');
+    const determinerDe = page.locator('[data-testid="typeahead-option"][data-concept="DETERMINER"]');
+    await expect(determinerDe).toBeVisible();
+    await determinerDe.hover();
+    await expect(page.locator(tooltip)).toHaveText('ein Wort, das Substantive bestimmt');
   });
 
   test('a place complement is glossed on its genus (localization A18: LOCATIVE)', async ({

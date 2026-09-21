@@ -39,6 +39,7 @@ import {
   NOUN_KEYS,
 } from "../../components/PhraseBuilder/slots.ts";
 import type { Action, Setting } from "./commands.ts";
+import type { WordKindName } from "./diagnostics.ts";
 import type { WordRef } from "./types.ts";
 
 /**
@@ -330,20 +331,20 @@ export function takes(action: Action, w: WordInfo): boolean {
 export const attachesToWord = (action: Action): boolean =>
   ["adjective", "adverb", "modal", "setting", "set", "possessor", "conjunct", "relative"].includes(action.kind);
 
-/** How a word kind is named in a diagnostic: "food is a noun". English, for /localize. */
-export function kindName(w: WordInfo): string {
+/** What kind of word a diagnostic says a word is: "food is a noun" (see diagnostics.ts). */
+export function kindOf(w: WordInfo): WordKindName {
   switch (w.kind) {
     case "noun":
-      return w.concept?.role === "pronoun" ? "a pronoun" : w.concept?.role === "adjective" ? "an adjective" : "a noun";
+      return w.concept?.role === "pronoun" ? "pronoun" : w.concept?.role === "adjective" ? "adjective" : "noun";
     case "adjective":
-      return w.concept?.role === "noun" ? "a noun modifier" : "an adjective";
+      return w.concept?.role === "noun" ? "nounModifier" : "adjective";
     case "modifierAdjective":
-      return "an adjective";
+      return "adjective";
     case "verb":
-      return "a verb";
+      return "verb";
     case "modal":
-      return "a modal";
+      return "modal";
     case "adverb":
-      return "an adverb";
+      return "adverb";
   }
 }

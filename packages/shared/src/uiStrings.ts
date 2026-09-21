@@ -2984,6 +2984,588 @@ export const UI_STRINGS = defineUiStrings({
   'console.help.usage': { plan: nameOf('USAGE'), format: NAME_FORMAT, fallback: 'Usage' },
   'console.help.example': { plan: nameOf('EXAMPLE'), format: NAME_FORMAT, fallback: 'Example' },
 
+  // ── What the console says is wrong with a line (localization C21) ──
+  // A diagnostic is a code and the values it names (packages/frontend/src/console/language/diagnostics.ts),
+  // said as one or two of these, each followed by its value after a colon, outside the phrase (the C14
+  // rule): a command name, a period number, a reference, the user's word as the pickers show it, or a
+  // line of the console's syntax. "Unknown command: /frob", it "Comando sconosciuto: /frob", de
+  // "Unbekannter Befehl: /frob", ja 「不明な命令: /frob」. Several are joined by the interface language's
+  // full stop. So each entry is a name or a sentence without its own full stop, capitalized.
+  //
+  // No sentence here is about the user's word *as its subject*: the word follows the colon instead
+  // ("This word is a noun: cat", it "Questa parola è un sostantivo: gatto"), so no sentence has to agree
+  // with it and none is rendered on request (the translate route C16 uses). Syntax, command names and
+  // references stay as the console writes them in every language (P02's decision 3).
+
+  // What is not there, said as a noun phrase: what is missing or unknown, with its name after it. The
+  // existential "there is no …" is a clause no plan holds (c'è, il y a, es gibt + accusative, hay, há,
+  // ja ある / いる by animacy), so none is built: MISSING (C14) and UNKNOWN say the same thing of the
+  // noun. Japanese reads 見つからない ("cannot be found") and 不明な, what its software writes.
+  'diagnostic.unknownCommand': {
+    plan: { subject: { concept: 'COMMAND', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown command',
+  },
+  'diagnostic.unknownWord': {
+    plan: { subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown word',
+  },
+  'diagnostic.unknownValue': {
+    plan: { subject: { concept: 'VALUE', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown value',
+  },
+  // A reference's step that names no noun: `#2.foo`, `#2.subj.foo` (it "Sostantivo sconosciuto", ja 不明な名詞).
+  'diagnostic.unknownNoun': {
+    plan: { subject: { concept: 'NOUN', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown noun',
+  },
+  // `/load` with a name no saved phrase has. Not "unknown saved phrase": two adjectives on one noun
+  // coordinate in five languages (it "frase sconosciuta e salvata"), and `/load` lists saved ones anyway.
+  'diagnostic.unknownPhrase': {
+    plan: { subject: { concept: 'PHRASE', definiteness: 'bare', adjectives: ['UNKNOWN'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unknown phrase',
+  },
+  'diagnostic.missingPeriod': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing period',
+  },
+  'diagnostic.missingNoun': {
+    plan: { subject: { concept: 'NOUN', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing noun',
+  },
+  // A box with no word in it (`#2.subj` as a relative clause's gap), or no word before a command that
+  // describes one. The noun and adjective of `toast.missingWords.singular`, capitalized.
+  'diagnostic.missingWord': {
+    plan: { subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing word',
+  },
+  // `/del adj 2`, `/del modal 2`, `/del and 3`, past the last one there is. CONJUNCT, the grammar's name
+  // for one noun of a coordinated group (it "Congiunto mancante", es "Miembro coordinado faltante").
+  'diagnostic.missingAdjective': {
+    plan: { subject: { concept: 'ADJECTIVE', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing adjective',
+  },
+  'diagnostic.missingModal': {
+    plan: { subject: { concept: 'MODAL', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing modal',
+  },
+  'diagnostic.missingConjunct': {
+    plan: { subject: { concept: 'CONJUNCT', definiteness: 'bare', adjectives: ['MISSING'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Missing conjunct',
+  },
+  // A token the parser meets where nothing of its kind can stand: UNEXPECTED on what it is (it "Parentesi
+  // inattesa", de "Unerwartete Klammer", ja 予期しない括弧). The token is marked in the line, so no value
+  // follows.
+  'diagnostic.unexpectedText': {
+    plan: { subject: { concept: 'TEXT', definiteness: 'bare', adjectives: ['UNEXPECTED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unexpected text',
+  },
+  'diagnostic.unexpectedBracket': {
+    plan: { subject: { concept: 'BRACKET', definiteness: 'bare', adjectives: ['UNEXPECTED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unexpected bracket',
+  },
+  'diagnostic.unexpectedReference': {
+    plan: { subject: { concept: 'REFERENCE', definiteness: 'bare', adjectives: ['UNEXPECTED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unexpected reference',
+  },
+  'diagnostic.unexpectedWord': {
+    plan: { subject: { concept: 'WORD', definiteness: 'bare', adjectives: ['UNEXPECTED'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Unexpected word',
+  },
+
+  // What a command or a verb takes: ACCEPT, the licensing sense (it "accettare", de "akzeptieren", ja
+  // 受け付ける), under the `no` determiner — "This command accepts no word: /pl", it "Questo comando non
+  // accetta nessuna parola", fr "Cette commande n'accepte aucun mot", ja この命令はどの単語も受け付けません.
+  // The command or the verb cannot be the subject (a command name is a token, not a concept), so the
+  // subject is `this` command, this verb, and the name follows the colon. Not the negated verb with an
+  // indefinite object: German says "akzeptiert ein Wort nicht" where it means "kein Wort".
+  'diagnostic.commandAcceptsNoWord': {
+    plan: {
+      subject: { concept: 'COMMAND', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'WORD', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This command accepts no word',
+  },
+  // A command that takes one value, given a second: HAVE with ALREADY, whose `frequency` subtype puts it
+  // before the verb in English — "This command already has a value: process", it "Questo comando ha già
+  // un valore", de "Dieser Befehl hat schon einen Wert", ja この命令は値がもうあります.
+  'diagnostic.commandHasValue': {
+    plan: {
+      subject: { concept: 'COMMAND', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE', modifier: 'ALREADY' },
+      directObject: { concept: 'VALUE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This command already has a value',
+  },
+  // A verb that does not license the box a role command names, one entry per box, keyed by the slot so
+  // the console can write t(`diagnostic.verbAcceptsNo.${slot}`); the verb follows the colon in the
+  // interface language ("This verb accepts no object: run", it "Questo verbo non accetta nessun
+  // complemento oggetto: correre"). Each box by the grammar noun its canvas box is titled with.
+  ...Object.fromEntries(
+    (
+      [
+        ['directObject', 'OBJECT_GRAMMAR', 'object'],
+        ['predicative', 'SUBJECT_COMPLEMENT', 'subject complement'],
+        ['terminus', 'TERMINUS', 'terminus'],
+        ['manner', 'ADVERBIAL_OF_MANNER', 'adverbial of manner'],
+        ['locative', 'LOCATIVE', 'locative'],
+        ['direction', 'DIRECTION', 'direction'],
+        ['source', 'SOURCE', 'source'],
+        ['route', 'ROUTE', 'route'],
+        ['cause', 'CAUSE_COMPLEMENT', 'cause'],
+        ['instrumental', 'INSTRUMENTAL', 'instrumental'],
+      ] as const
+    ).map(([slot, concept, en]) => [
+      `diagnostic.verbAcceptsNo.${slot}`,
+      {
+        plan: {
+          subject: { concept: 'VERB', definiteness: 'this' },
+          verbPhrase: { verb: 'ACCEPT' },
+          directObject: { concept, definiteness: 'no' },
+        } as PhrasePlan,
+        format: NAME_FORMAT,
+        fallback: `This verb accepts no ${en}`,
+      },
+    ]),
+  ) as Record<
+    `diagnostic.verbAcceptsNo.${'directObject' | 'predicative' | 'terminus' | 'manner' | 'locative' | 'direction' | 'source' | 'route' | 'cause' | 'instrumental'}`,
+    UiStringPlanDef
+  >,
+  // A period that cannot be linked so: a command, an infinitive, an if-clause or a coordinated period
+  // takes no condition (it "Questo periodo non accetta nessuna condizione", ja この文はどの条件も受け付けません).
+  'diagnostic.periodAcceptsNoCondition': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'CONDITION', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period accepts no condition',
+  },
+  'diagnostic.periodAcceptsNoCoordination': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT' },
+      directObject: { concept: 'COORDINATION', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period accepts no coordination',
+  },
+
+  // `/del` with nothing of its kind in reach: HAVE with a `no` subject — "No noun has an adjective", it
+  // "Nessun sostantivo ha un aggettivo", fr "Aucun nom n'a d'adjectif", ja どの名詞も形容詞がありません —
+  // or, for what a period or its verb has, a `no` object ("This period has no condition", de "Dieses
+  // Satzgefüge hat keine Bedingung"). The English "here" and "to remove" are gone: an adverb of place has
+  // no Japanese that stands before a verb unmarked (ここ needs で), and "an adjective to remove" is an
+  // infinitival relative, which PhrasePlan.purpose would say as an aim (it "per rimuovere", not "da").
+  'diagnostic.noNounHasAdjective': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'ADJECTIVE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No noun has an adjective',
+  },
+  'diagnostic.noVerbHasAdverb': {
+    plan: {
+      subject: { concept: 'VERB', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'ADVERB', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No verb has an adverb',
+  },
+  'diagnostic.noNounHasPossessor': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'POSSESSOR', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No noun has a possessor',
+  },
+  'diagnostic.noNounHasRelative': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'no' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'RELATIVE_CLAUSE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No noun has a relative clause',
+  },
+  // `/del and` with no coordinated noun: BE on COORDINATED, the canvas's adjective for it (it "Nessun
+  // sostantivo è coordinato", de "Kein Substantiv ist beigeordnet").
+  'diagnostic.noNounIsCoordinated': {
+    plan: {
+      subject: { concept: 'NOUN', definiteness: 'no' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'COORDINATED' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No noun is coordinated',
+  },
+  // `/del modal` on a verb with none: the period has one verb, so it is definite ("Il verbo non ha nessun
+  // verbo modale", ja 動詞はどの法助動詞もありません).
+  'diagnostic.verbHasNoModal': {
+    plan: {
+      subject: { concept: 'VERB', definiteness: 'definite' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'MODAL', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'The verb has no modal',
+  },
+  // `/del if`, `/del join`, `/del inst` and `/level` on a period without the link, keyed by the link's
+  // name in the console (condition, join, instrument): "This period has no condition", it "Questo periodo
+  // non ha nessuna condizione", ja この文はどの条件もありません.
+  'diagnostic.periodHasNo.condition': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'CONDITION', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period has no condition',
+  },
+  'diagnostic.periodHasNo.join': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'COORDINATION', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period has no coordination',
+  },
+  'diagnostic.periodHasNo.instrument': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'INSTRUMENTAL', definiteness: 'no' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period has no instrumental',
+  },
+  // An instrument held as a thing is a noun phrase, and the period linked as one has a verb: `that`
+  // period, the other end of the link (it "Quel periodo ha un verbo", de "Jenes Satzgefüge hat ein Verb").
+  'diagnostic.thatPeriodHasVerb': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'that' },
+      verbPhrase: { verb: 'HAVE' },
+      directObject: { concept: 'VERB', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'That period has a verb',
+  },
+
+  // What a period is, where its mood refuses a link: "This period is a command", it "Questo periodo è un
+  // comando", de "Dieses Satzgefüge ist ein Befehl", ja この文は命令です; the statement is `mood.statement`'s
+  // STATEMENT (de "ein Aussagesatz", ja 平叙文).
+  'diagnostic.periodIsCommand': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'COMMAND', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a command',
+  },
+  'diagnostic.periodIsStatement': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'this' },
+      verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: { concept: 'STATEMENT', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This period is a statement',
+  },
+  // A period already in another link between periods: LINKED, the topic's adjective, with ALREADY (it
+  // "Quel periodo è già collegato", fr "Cette période est déjà liée", ja その文はもうリンク済みです).
+  'diagnostic.periodAlreadyLinked': {
+    plan: {
+      subject: { concept: 'PERIOD_SENTENCE', definiteness: 'that' },
+      verbPhrase: { verb: 'BE', modifier: 'ALREADY' },
+      complements: { predicative: { phrase: { concept: 'LINKED' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'That period is already linked',
+  },
+  // A noun already the gap of another relative clause, said from the clause's side, since "gap" is no
+  // word the corpus has: "Another relative clause already has this noun: #2.subj", it "Un'altra
+  // proposizione relativa ha già questo sostantivo", de "Ein anderer Relativsatz hat schon dieses Substantiv".
+  'diagnostic.nounAlreadyTaken': {
+    plan: {
+      subject: { concept: 'RELATIVE_CLAUSE', definiteness: 'indefinite', adjectives: ['OTHER'] },
+      verbPhrase: { verb: 'HAVE', modifier: 'ALREADY' },
+      directObject: { concept: 'NOUN', definiteness: 'this' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Another relative clause already has this noun',
+  },
+
+  // What kind of word the closest one is, where a command cannot take it: the word follows the colon,
+  // in the interface language, so nothing agrees with it — "This word is a noun: cat", it "Questa parola
+  // è un sostantivo: gatto", fr "Ce mot est un nom : chat", ja この単語は名詞です: 猫. Keyed by the kind
+  // the console names (`WordKindName`); a noun used as a modifier is MODIFIER ("a modifier").
+  ...Object.fromEntries(
+    (
+      [
+        ['noun', 'NOUN', 'a noun'],
+        ['pronoun', 'PRONOUN', 'a pronoun'],
+        ['adjective', 'ADJECTIVE', 'an adjective'],
+        ['nounModifier', 'MODIFIER', 'a modifier'],
+        ['verb', 'VERB', 'a verb'],
+        ['modal', 'MODAL', 'a modal'],
+        ['adverb', 'ADVERB', 'an adverb'],
+      ] as const
+    ).map(([kind, concept, en]) => [
+      `diagnostic.wordIs.${kind}`,
+      {
+        plan: {
+          subject: { concept: 'WORD', definiteness: 'this' },
+          verbPhrase: { verb: 'BE' },
+          complements: { predicative: { phrase: { concept, definiteness: 'indefinite' } } },
+        } as PhrasePlan,
+        format: NAME_FORMAT,
+        fallback: `This word is ${en}`,
+      },
+    ]),
+  ) as Record<
+    `diagnostic.wordIs.${'noun' | 'pronoun' | 'adjective' | 'nounModifier' | 'verb' | 'modal' | 'adverb'}`,
+    UiStringPlanDef
+  >,
+  // A command's help page, from a cursor on no word: BE with the CURSOR as a `locative` under the `under`
+  // specifier — "No word is under the cursor", it "Nessuna parola è sotto il cursore", de "Kein Wort ist
+  // unter dem Cursor", ja どの単語もカーソルの下にありません.
+  'diagnostic.noWordUnderCursor': {
+    plan: {
+      subject: { concept: 'WORD', definiteness: 'no' },
+      verbPhrase: { verb: 'BE' },
+      complements: {
+        locative: { phrase: { concept: 'CURSOR', definiteness: 'definite' }, specifiers: [{ kind: 'path', value: 'under' }] },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'No word is under the cursor',
+  },
+  // …and on a word the command cannot act on, which follows the colon: "This word does not accept the
+  // command: cat", it "Questa parola non accetta il comando", ja この単語は命令を受け付けません. The
+  // command is definite, the one the page is about.
+  'diagnostic.wordRefusesCommand': {
+    plan: {
+      subject: { concept: 'WORD', definiteness: 'this' },
+      verbPhrase: { verb: 'ACCEPT', negative: true },
+      directObject: { concept: 'COMMAND', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'This word does not accept the command',
+  },
+
+  // What to do, where the console knows: an instruction (`commandOf`, the register the app's hints are
+  // in — it "Chiudi la parentesi", fr "Fermer la parenthèse", de "Die Klammer schließen", ja 括弧を閉じる),
+  // with the line to write after the colon: "Close the bracket: /subj ( … )".
+  'diagnostic.closeBracket': {
+    plan: { ...commandOf('CLOSE'), directObject: { concept: 'BRACKET', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Close the bracket',
+  },
+  // A word before its own bracket, a command past a closed one: MOVE it, where the line after the colon
+  // shows (it "Sposta la parola: /subj ( gatto … )", de "Den Befehl verschieben", ja 命令を移動).
+  'diagnostic.moveWord': {
+    plan: { ...commandOf('MOVE'), directObject: { concept: 'WORD', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move the word',
+  },
+  'diagnostic.moveCommand': {
+    plan: { ...commandOf('MOVE'), directObject: { concept: 'COMMAND', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move the command',
+  },
+  // `/rel subj` with no braces: OPEN a new CLAUSE (it "Apri una nuova proposizione", de "Einen neuen Satz
+  // öffnen", ja 新しい節を開く).
+  'diagnostic.openClause': {
+    plan: {
+      ...commandOf('OPEN'),
+      directObject: { concept: 'CLAUSE', definiteness: 'indefinite', adjectives: ['NEW'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Open a new clause',
+  },
+  // A bracket with no command before it: a command opens a bracket, its object-level instrumental (it
+  // "Apri una parentesi con un comando", de "Eine Klammer mit einem Befehl öffnen", ja 命令で括弧を開く).
+  'diagnostic.openBracketWithCommand': {
+    plan: {
+      ...commandOf('OPEN'),
+      directObject: { concept: 'BRACKET', definiteness: 'indefinite' },
+      complements: {
+        instrumental: {
+          phrase: { concept: 'COMMAND', definiteness: 'indefinite' },
+          specifiers: [{ kind: 'abstraction', value: 'object' }],
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Open a bracket with a command',
+  },
+  // A line that begins with a word: TYPE a command (the `console.placeholder` verb; it "Digita un
+  // comando", ja 命令を入力). Not "start the line with a command": fr "commencer … avec" wants "par".
+  'diagnostic.typeCommand': {
+    plan: { ...commandOf('TYPE'), directObject: { concept: 'COMMAND', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Type a command',
+  },
+  // A slash with no name: CHOOSE one in the LIST the slash opened, its `locative` (it "Scegli un comando
+  // nell'elenco", de "Einen Befehl in der Liste wählen", ja 一覧で命令を選び).
+  'diagnostic.chooseCommand': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'COMMAND', definiteness: 'indefinite' },
+      complements: { locative: { phrase: { concept: 'LIST', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a command in the list',
+  },
+  // A command waiting for what it names, or given the wrong one: CHOOSE it, with what it can be after
+  // the colon — "Choose a period: #2, #2.obj", "Choose a value: past, present, future", it "Scegli un
+  // valore", de "Einen Wert wählen", ja 値を選び. CHOOSE, not NAME, whose seeded sense is to give a name to.
+  'diagnostic.choosePeriod': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a period',
+  },
+  // A link that cannot go where it was pointed: the period itself, one that leads back to this one (the
+  // link would go round in a circle), one in another link. OTHER, as `purpose.conjunct` has it (it
+  // "Scegli un altro periodo", de "Ein anderes Satzgefüge wählen", ja 別の文を選び).
+  'diagnostic.chooseOtherPeriod': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite', adjectives: ['OTHER'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose another period',
+  },
+  'diagnostic.chooseNoun': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'NOUN', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a noun',
+  },
+  // A possessor that points at a noun: of its own period, the `locative` `this` (it "Scegli un sostantivo
+  // in questo periodo", ja この文で名詞を選び). Not the period as the noun's possessor: English turns an
+  // indefinite head with a genitive into "this period's noun", which says there is only one.
+  'diagnostic.chooseNounInPeriod': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'NOUN', definiteness: 'indefinite' },
+      complements: { locative: { phrase: { concept: 'PERIOD_SENTENCE', definiteness: 'this' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a noun in this period',
+  },
+  // A possessor pointing at its own noun, or a part of it.
+  'diagnostic.chooseOtherNoun': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'NOUN', definiteness: 'indefinite', adjectives: ['OTHER'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose another noun',
+  },
+  'diagnostic.chooseRelativeClause': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'RELATIVE_CLAUSE', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a relative clause',
+  },
+  'diagnostic.chooseValue': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'VALUE', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a value',
+  },
+  'diagnostic.chooseConjunction': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'CONJUNCTION', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a conjunction',
+  },
+  // A label two words share: the ids tell them apart, after the colon ("Choose a word: CRY, CRY_OUT").
+  'diagnostic.chooseWord': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'WORD', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a word',
+  },
+  // An object, a complement or an instrument hangs off the verb: a period without one needs it first.
+  'diagnostic.chooseVerb': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'VERB', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a verb',
+  },
+  // An instrument held as a thing: the other `/level`s make it an act (it "Scegli un livello", ja
+  // 段階を選び), and a verb in a period held so needs its LEVEL changed (it "Cambia il livello", de "Die
+  // Ebene ändern").
+  'diagnostic.chooseLevel': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'LEVEL', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a level',
+  },
+  'diagnostic.changeLevel': {
+    plan: { ...commandOf('CHANGE'), directObject: { concept: 'LEVEL', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Change the level',
+  },
+  // `/del` with nothing in hand: what it can remove, a word or the period, `/del`'s own REMOVE (it
+  // "Rimuovi una parola o il periodo", de "Ein Wort oder das Satzgefüge entfernen", ja 単語か文を取り除き).
+  'diagnostic.removeWordOrPeriod': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'WORD', definiteness: 'indefinite' },
+          { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove a word or the period',
+  },
+  // A mood the period's links fix: they go first (it "Rimuovi la condizione o la coordinazione", ja
+  // 条件か等位接続を取り除き). The explanation — "which fixes its mood" — is a non-restrictive relative no
+  // plan holds, and the instruction says what it would have led to.
+  'diagnostic.removeConditionOrCoordination': {
+    plan: {
+      ...commandOf('REMOVE'),
+      directObject: {
+        conjunction: 'or',
+        conjuncts: [
+          { concept: 'CONDITION', definiteness: 'definite' },
+          { concept: 'COORDINATION', definiteness: 'definite' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Remove the condition or the coordination',
+  },
+  // A command's help page says what the command would act on at the cursor: the word under it, after
+  // the CURSOR's name, and the value it holds now — "Cursor: cat · now singular", it "Cursore: gatto ·
+  // ora singolare", ja 「カーソル: 猫 · 今 単数」. Not "Here": HERE has no Japanese that stands before a
+  // verb unmarked (ここ needs で), so it is not seeded for a label alone.
+  'console.help.cursor': { plan: nameOf('CURSOR'), format: NAME_FORMAT, fallback: 'Cursor' },
+
   // The controls that act on one named part of the canvas — a word's clear button, a satellite's
   // show / hide control, a ring's expand / compact toggle. Each is a command whose object is the
   // part's own grammar noun, the one its box is titled with. That noun has to sit *inside* the plan,
@@ -3605,6 +4187,330 @@ export const UI_STRINGS = defineUiStrings({
     plan: { subject: { concept: 'TARGET', definiteness: 'bare', adjectives: ['NEXT'] } } as PhrasePlan,
     format: NAME_FORMAT,
     fallback: 'Next target',
+  },
+
+  // ── The help's prose (localization C22) ──
+  // The overlay's paragraphs and notes, rewritten as short statements in the shapes the engines have:
+  // one period each, a relative clause where the prose had a free one, and the key or the console
+  // syntax after a colon, outside the phrase (the C14 rule), which the call site writes. A statement
+  // that stands alone keeps its full stop (`hint.clickSlotToFilter`); one a key follows drops it.
+  //
+  // The keyboard section's paragraph. A bare key works in the box the cursor is on: WORK, the verb of a
+  // key or a machine (ACT is a person's, de "handeln"), with the box as its `locative` and the cursor
+  // in a relative clause on HAVE — it "Un tasto funziona nello slot che ha il cursore", de "Eine Taste
+  // funktioniert im Slot, der den Cursor hat", ja キーはカーソルがあるスロットで動作します. HAVE, not BE
+  // in a place relative ("the slot where the cursor is"): Spanish and Portuguese render that one with
+  // ser, "donde el cursor es". Then what esc does from a box, RETURN to the period (it "Torna al
+  // periodo", ja 文へ戻る), the keys that work EVERYWHERE, as the section they head is called (it "Tasti
+  // che funzionano ovunque", ja どこでも動作するキー), and what ⇧ does to a key that cycles a value
+  // ("Choose the previous value", de "Den vorherigen Wert wählen", ja 前の値を選び).
+  'help.keyWorks': {
+    plan: {
+      subject: { concept: 'KEY', definiteness: 'indefinite' },
+      verbPhrase: { verb: 'WORK' },
+      complements: {
+        locative: {
+          phrase: {
+            concept: 'SLOT_COMPUTING',
+            definiteness: 'definite',
+            relative: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
+          },
+        },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'A key works in the slot that has the cursor.',
+  },
+  'help.returnToPeriod': {
+    plan: {
+      ...commandOf('RETURN'),
+      complements: { direction: { phrase: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Return to the period',
+  },
+  'help.keysEverywhere': {
+    plan: {
+      subject: {
+        concept: 'KEY',
+        number: 'plural',
+        definiteness: 'bare',
+        relative: { verbPhrase: { verb: 'WORK', modifier: 'EVERYWHERE' } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Keys that work everywhere',
+  },
+  'help.previousValue': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'VALUE', definiteness: 'definite', adjectives: ['PREVIOUS'] },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose the previous value',
+  },
+  // The notes under the sheet's levels: where the cursor is for the period's keys and for a box's,
+  // said with BE and a `locative`, which Spanish and Portuguese say with estar in a main clause (it "Il
+  // cursore è nel periodo", es "El cursor está en un slot", ja カーソルは文にあります). The period is
+  // the one there is; a box, any of them.
+  'help.cursorInPeriod': {
+    plan: {
+      subject: { concept: 'CURSOR', definiteness: 'definite' },
+      verbPhrase: { verb: 'BE' },
+      complements: { locative: { phrase: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' } } },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'The cursor is in the period.',
+  },
+  'help.cursorInSlot': {
+    plan: {
+      subject: { concept: 'CURSOR', definiteness: 'definite' },
+      verbPhrase: { verb: 'BE' },
+      complements: { locative: { phrase: { concept: 'SLOT_COMPUTING', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'The cursor is in a slot.',
+  },
+  // The noun keys' note: the five boxes a noun can stand in, by name, joined with commas at the call
+  // site as the Targets note is. The subject and the possessor are the boxes' own titles (`slot.*`).
+  // The object is named DIRECT here, because Spanish OBJECT_GRAMMAR is "complemento" like
+  // COMPLEMENT_GRAMMAR, and `slot.directObject` made the list read "complemento, complemento": es
+  // "Complemento directo", fr "Complément d'objet direct", pt "Objeto direto", ja 直接の目的語.
+  'help.directObject': {
+    plan: { subject: { concept: 'OBJECT_GRAMMAR', definiteness: 'bare', adjectives: ['DIRECT'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Direct object',
+  },
+  'help.complement': { plan: nameOf('COMPLEMENT_GRAMMAR'), format: NAME_FORMAT, fallback: 'Complement' },
+  'help.conjunct': { plan: nameOf('CONJUNCT'), format: NAME_FORMAT, fallback: 'Conjunct' },
+  // The note under "The command's subject": what that box is, REPLACE with the subject as its object
+  // and the command as the place it happens — the prose's "in place of", which no complement says,
+  // turned into the verb that means it (it "Questo slot sostituisce il soggetto in un comando", de
+  // "Dieser Slot ersetzt das Subjekt in einem Befehl", ja このスロットは命令で主語を置き換えます).
+  'help.replacesSubject': {
+    plan: {
+      subject: { concept: 'SLOT_COMPUTING', definiteness: 'this' },
+      verbPhrase: { verb: 'REPLACE' },
+      directObject: { concept: 'SUBJECT_GRAMMAR', definiteness: 'definite' },
+      complements: { locative: { phrase: { concept: 'COMMAND', definiteness: 'indefinite' } } },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'This slot replaces the subject in a command.',
+  },
+  // The word list's rows for the tabs above it and for esc. ↑ from the first row goes up to the tabs:
+  // GO with the row as its `source` and the tabs as its `direction` (it "Va' dalla prima riga alle
+  // schede", pt "Ir da primeira linha às abas", ja 第一の行からタブへ移動); ← → there choose a TAB, the
+  // vocabulary each one shows (fr "Choisir un onglet", ja タブを選び). A second esc gives the box back
+  // the word it was replacing: RESTORE, the row the sheet draws with two esc caps (de "Das Wort
+  // zurückholen", ja 単語を復元).
+  'help.goToTabs': {
+    plan: {
+      ...commandOf('GO'),
+      complements: {
+        source: { phrase: { concept: 'ROW', definiteness: 'definite', adjectives: ['FIRST'] } },
+        direction: { phrase: { concept: 'TAB', number: 'plural', definiteness: 'definite' } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Go from the first row to the tabs',
+  },
+  'help.chooseTab': {
+    plan: { ...commandOf('CHOOSE'), directObject: { concept: 'TAB', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Choose a tab',
+  },
+  'help.restoreWord': {
+    plan: { ...commandOf('RESTORE'), directObject: { concept: 'WORD', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Restore the word',
+  },
+  // The console's part of the overlay. Under "The period's words", what a role command does with a
+  // word and without one: TYPE a word, as the prompt's placeholder says it (`console.placeholder`), and
+  // MOVE the cursor, which is the console's context (it "Digita una parola: /subj ( … )", "Sposta il
+  // cursore: /subj", ja 単語を入力 / カーソルを移動).
+  'help.console.typeWord': {
+    plan: { ...commandOf('TYPE'), directObject: { concept: 'WORD', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Type a word',
+  },
+  'help.console.moveCursor': {
+    plan: { ...commandOf('MOVE'), directObject: { concept: 'CURSOR', definiteness: 'definite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Move the cursor',
+  },
+  // The console's paragraph, one statement to a line, each example after a colon. What a bracket
+  // holds: HOLD on a word and bare plural commands (it "Una parentesi contiene una parola e comandi", fr
+  // "…un mot et des commandes", ja 括弧は単語と命令を保持しています). Not "its commands": Japanese spells
+  // that possessive それの, where it would say その, and a pronoun's gender would have to follow WORD's
+  // in each language. That the console writes the brackets (WRITE, it "La console scrive le
+  // parentesi"), and that the list inside one shows the word's commands (SHOW, whose Japanese says it
+  // with 見せる as the word map's sentence does).
+  'help.console.bracket': {
+    plan: {
+      subject: { concept: 'BRACKET', definiteness: 'indefinite' },
+      verbPhrase: { verb: 'HOLD' },
+      directObject: {
+        conjunction: 'and',
+        conjuncts: [
+          { concept: 'WORD', definiteness: 'indefinite' },
+          { concept: 'COMMAND', number: 'plural', definiteness: 'bare' },
+        ],
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'A bracket holds a word and commands',
+  },
+  'help.console.writesBrackets': {
+    plan: {
+      subject: { concept: 'CONSOLE', definiteness: 'definite' },
+      verbPhrase: { verb: 'WRITE' },
+      directObject: { concept: 'BRACKET', number: 'plural', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'The console writes the brackets.',
+  },
+  'help.console.listShows': {
+    plan: {
+      subject: { concept: 'LIST', definiteness: 'definite' },
+      verbPhrase: { verb: 'SHOW' },
+      directObject: {
+        concept: 'COMMAND',
+        number: 'plural',
+        definiteness: 'definite',
+        possessor: { concept: 'WORD', definiteness: 'definite' },
+      },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: "The list shows the word's commands.",
+  },
+  // The other two brackets, each named by what it holds, head bare as a legend's is, the example after
+  // the colon: a noun's NOUN_PHRASE (it "Sintagma nominale di un sostantivo", de "Nominalphrase eines
+  // Substantivs", ja 名詞の名詞句) and a NEW period (it "Nuovo periodo", es "Período nuevo", ja 新しい文).
+  // A reference to a noun elsewhere is another period's noun (OTHER: it "Sostantivo di un altro
+  // periodo", ja 別の文の名詞).
+  'help.console.nounPhrase': {
+    plan: {
+      subject: { concept: 'NOUN_PHRASE', definiteness: 'bare', possessor: { concept: 'NOUN', definiteness: 'indefinite' } },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "A noun's noun phrase",
+  },
+  'help.console.newPeriod': {
+    plan: { subject: { concept: 'PERIOD_SENTENCE', definiteness: 'bare', adjectives: ['NEW'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'New period',
+  },
+  'help.console.otherNoun': {
+    plan: {
+      subject: {
+        concept: 'NOUN',
+        definiteness: 'bare',
+        possessor: { concept: 'PERIOD_SENTENCE', definiteness: 'indefinite', adjectives: ['OTHER'] },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: "Another period's noun",
+  },
+  // A command outside every bracket acts on the box the cursor is on: EDIT, with the relative clause
+  // `help.keyWorks` takes (it "Un comando modifica lo slot che ha il cursore", ja
+  // 命令はカーソルがあるスロットを編集します). A setting SETs a value rather than toggling one (de "Ein
+  // Befehl legt einen Wert fest"), which is why a line applied AGAIN leaves the period as it is: an
+  // agentless passive in an object relative (it "Una riga che è applicata di nuovo non cambia il
+  // periodo", de "Eine Zeile, die erneut angewandt wird, ändert das Satzgefüge nicht", ja
+  // もう一度適用される行は文を変えません).
+  'help.console.commandEdits': {
+    plan: {
+      subject: { concept: 'COMMAND', definiteness: 'indefinite' },
+      verbPhrase: { verb: 'EDIT' },
+      directObject: {
+        concept: 'SLOT_COMPUTING',
+        definiteness: 'definite',
+        relative: { verbPhrase: { verb: 'HAVE' }, directObject: { concept: 'CURSOR', definiteness: 'definite' } },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'A command edits the slot that has the cursor',
+  },
+  'help.console.setsValue': {
+    plan: {
+      subject: { concept: 'COMMAND', definiteness: 'indefinite' },
+      verbPhrase: { verb: 'SET' },
+      directObject: { concept: 'VALUE', definiteness: 'indefinite' },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'A command sets a value',
+  },
+  'help.console.lineAgain': {
+    plan: {
+      subject: {
+        concept: 'LINE',
+        definiteness: 'indefinite',
+        relative: {
+          headRole: 'directObject',
+          subject: { concept: 'GENERIC_PERSON' },
+          verbPhrase: { verb: 'APPLY', voice: 'passive', modifier: 'AGAIN' },
+        },
+      },
+      verbPhrase: { verb: 'CHANGE', negative: true },
+      directObject: { concept: 'PERIOD_SENTENCE', definiteness: 'definite' },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'A line that is applied again does not change the period.',
+  },
+  // The prompt's keys, as rows beside their caps, the sheet's way. ⇥ completes the word begun or goes
+  // on to the next one, two commands offered as a choice (`or`: it "Completa, o va' alla parola
+  // successiva", ja 補完、または次の単語へ移動); ⇧↵ adds a LINE (de "Eine Zeile hinzufügen"); ↑ is the
+  // previous line (ja 前の行); and ⇥ on an empty line shows the pinned ones, the row naming where
+  // before a colon as the words panel's rows do ("Empty line: show the pinned lines", it "Riga vuota:
+  // mostra le righe fissate", ja 空の行: ピン留め済みの行を見せ).
+  'help.console.tab': {
+    plan: {
+      ...commandOf('COMPLETE'),
+      coordination: {
+        conjunction: 'or',
+        clause: {
+          ...commandOf('GO'),
+          complements: { direction: { phrase: { concept: 'WORD', definiteness: 'definite', adjectives: ['NEXT'] } } },
+        },
+      },
+    } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Complete, or go to the next word',
+  },
+  'help.console.addLine': {
+    plan: { ...commandOf('ADD'), directObject: { concept: 'LINE', definiteness: 'indefinite' } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Add a line',
+  },
+  'help.console.previousLine': {
+    plan: { subject: { concept: 'LINE', definiteness: 'bare', adjectives: ['PREVIOUS'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Previous line',
+  },
+  'help.console.emptyLine': {
+    plan: { subject: { concept: 'LINE', definiteness: 'bare', adjectives: ['EMPTY'] } } as PhrasePlan,
+    format: NAME_FORMAT,
+    fallback: 'Empty line',
+  },
+  'help.console.showPinned': {
+    plan: {
+      ...commandOf('SHOW'),
+      directObject: { concept: 'LINE', number: 'plural', definiteness: 'definite', adjectives: ['PINNED'] },
+    } as PhrasePlan,
+    format: { stripPeriod: true },
+    fallback: 'show the pinned lines',
+  },
+  // The last line: what choosing a command's row does. CHOOSE with the purpose of seeing an EXAMPLE
+  // (it "Scegli un comando per vedere un esempio.", de "Einen Befehl wählen, um ein Beispiel zu sehen.",
+  // ja 例を見るために命令を選び。). "Its page" would need the possessive `help.console.bracket` avoids.
+  'help.console.chooseCommand': {
+    plan: {
+      ...commandOf('CHOOSE'),
+      directObject: { concept: 'COMMAND', definiteness: 'indefinite' },
+      purpose: { verbPhrase: { verb: 'SEE' }, directObject: { concept: 'EXAMPLE', definiteness: 'indefinite' } },
+    } as PhrasePlan,
+    format: { capitalize: true },
+    fallback: 'Choose a command to see an example.',
   },
 
   // Each selectable UI language's name, so the header selector and the translations panel

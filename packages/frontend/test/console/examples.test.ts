@@ -122,19 +122,20 @@ describe('what a line says when it goes wrong', () => {
   it('explains a setting with nothing before it to take it, and where it belongs', () => {
     const state = periods({ subject: byId('CAT'), verb: byId('EAT'), directObject: byId('FOOD') });
     const result = run('/obj food /past', { state });
-    expect(result.diagnostic?.message).toBe(
-      '/past sets a verb’s tense, and food is a noun. Put it after eat, or write /verb /past.',
-    );
+    expect(result.diagnostic).toMatchObject({
+      code: 'noTarget',
+      args: { command: 'past', last: { word: 'food', kind: 'noun' }, fit: { word: 'eat', role: 'verb' }, inElement: false },
+    });
     expect(result.diagnostic).toMatchObject({ from: 10, to: 15 });
   });
 
   it('refuses a line that starts with a bare word', () => {
-    expect(run('cat').diagnostic?.message).toMatch(/start it with one/);
+    expect(run('cat').diagnostic).toMatchObject({ code: 'lineStartsWithWord' });
   });
 
   it('keeps the valid part before a mistake', () => {
     const result = run('/subj cat /adj brown /pl /verb frobnicate');
-    expect(result.diagnostic?.message).toMatch(/no word “frobnicate”/);
+    expect(result.diagnostic).toMatchObject({ code: 'unknownWord', args: { command: 'verb', text: 'frobnicate' } });
     expect(ids_(sel(result.state))).toMatchObject({ subject: 'CAT', subjectAdjective: 'BROWN', subjectNumber: 'plural' });
   });
 
@@ -148,16 +149,16 @@ describe('what a line says when it goes wrong', () => {
 // Found in review: lines the console must refuse rather than crash on, or quietly misread.
 describe('lines that once broke the console', () => {
   it('takes one level, one language, and one of each for a command', () => {
-    expect(run('/level process concept').diagnostic?.message).toMatch(/takes one value/);
-    expect(run('/lang it en').diagnostic?.message).toMatch(/takes one value/);
-    expect(run('/command lets youall').diagnostic?.message).toMatch(/one of each/);
+    expect(run('/level process concept').diagnostic).toMatchObject({ code: 'valueAlreadyGiven', args: { max: 1, given: 'process' } });
+    expect(run('/lang it en').diagnostic).toMatchObject({ code: 'valueAlreadyGiven', args: { max: 1, given: 'it' } });
+    expect(run('/command lets youall').diagnostic).toMatchObject({ code: 'valueAlreadyGiven', args: { max: 2, given: 'lets' } });
     expect(run('/command lets instruction').diagnostic).toBeUndefined();
   });
 
   it('refuses a link from a period the line then removes, instead of throwing', () => {
     for (const line of ['/if ( /subj cat ) /del period', '/join and ( /subj cat ) /del period', '/subj cat /rel subj ( /verb run ) /del period']) {
       const result = run(line);
-      expect(result.diagnostic?.message, line).toMatch(/has been removed/);
+      expect(result.diagnostic, line).toMatchObject({ code: 'linkSourceRemoved' });
     }
   });
 

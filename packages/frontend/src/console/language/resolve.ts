@@ -6,6 +6,7 @@ import type {
   SlotKey,
 } from "../../components/PhraseBuilder/interfaces.ts";
 import { COMPLEMENT_KEY_SET } from "../../components/PhraseBuilder/slots.ts";
+import { coded, type Coded } from "./diagnostics.ts";
 import type { Vocabulary } from "./types.ts";
 
 /**
@@ -196,20 +197,20 @@ export interface Ref {
  * Read a reference's text (what follows the `#`): `2`, `2.obj`, `1.subj.poss`, `1.subj.and2` — the
  * second noun of the subject's group, the first of its conjuncts.
  */
-export function parseRef(text: string): Ref | { error: string } {
+export function parseRef(text: string): Ref | { error: Coded } {
   const [head, ...steps] = text.split(".");
-  if (!head || !/^\d+$/.test(head)) return { error: "a reference starts with a period number: #2, #2.obj" };
+  if (!head || !/^\d+$/.test(head)) return { error: coded("referenceStartsWithNumber") };
   const period = Number(head);
-  if (period < 1) return { error: "periods are numbered from 1" };
+  if (period < 1) return { error: coded("periodsFromOne") };
   if (steps.length === 0) return { period };
   const noun = NOUN_BY_NAME[steps[0]!];
-  if (!noun) return { error: `“${steps[0]}” is not a noun of a period: subj, obj, pred, loc, …` };
+  if (!noun) return { error: coded("notANoun", { step: steps[0]! }) };
   let address: NounAddress = noun;
   for (const step of steps.slice(1)) {
     if (step === "poss") address = `${address}/possessor`;
     else if (/^and\d+$/.test(step) && Number(step.slice(3)) >= 2)
       address = `${address}/conjunct/${Number(step.slice(3)) - 2}`;
-    else return { error: `“${step}” is not a step of a noun: poss, and2, …` };
+    else return { error: coded("notAStep", { step }) };
   }
   return { period, address };
 }

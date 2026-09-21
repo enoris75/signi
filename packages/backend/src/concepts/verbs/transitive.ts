@@ -1421,6 +1421,77 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
 
+  // Seeded for HYPERNYM's gloss (B50): "a word whose meaning includes another word's meaning".
+  // German umfassen, not einschließen: it is what a broader term does to a narrower one ("der
+  // Oberbegriff umfasst …"), and it is inseparable, so the relative clause ends on one word; HOLD
+  // already has enthalten. A state, as HOLD is. Japanese 含む is godan (含まない, 含んで, 含まれる).
+  {
+    id: 'INCLUDE',
+    role: 'verb',
+    stative: true, // a state: the Romance past is its imperfect, Japanese its 〜ている (A130, A132)
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to have as a part',
+    emoji: '🧺',
+    forms: {
+      en: {
+        base: 'include',
+        '1sg_present': 'include', '2sg_present': 'include', '3sg_present': 'includes',
+        '1pl_present': 'include', '2pl_present': 'include', '3pl_present': 'include',
+        past: 'included',
+      },
+      it: {
+        base: 'includere',
+        '1sg_present': 'includo', '2sg_present': 'includi', '3sg_present': 'include',
+        '1pl_present': 'includiamo', '2pl_present': 'includete', '3pl_present': 'includono',
+        '1sg_past': 'inclusi', '2sg_past': 'includesti', '3sg_past': 'incluse',
+        '1pl_past': 'includemmo', '2pl_past': 'includeste', '3pl_past': 'inclusero',
+        '1sg_future': 'includerò', '2sg_future': 'includerai', '3sg_future': 'includerà',
+        '1pl_future': 'includeremo', '2pl_future': 'includerete', '3pl_future': 'includeranno',
+      },
+      fr: {
+        base: 'inclure',
+        '1sg_present': 'inclus', '2sg_present': 'inclus', '3sg_present': 'inclut',
+        '1pl_present': 'incluons', '2pl_present': 'incluez', '3pl_present': 'incluent',
+        '1sg_past': 'inclus', '2sg_past': 'inclus', '3sg_past': 'inclut',
+        '1pl_past': 'inclûmes', '2pl_past': 'inclûtes', '3pl_past': 'inclurent',
+        '1sg_future': 'inclurai', '2sg_future': 'incluras', '3sg_future': 'inclura',
+        '1pl_future': 'inclurons', '2pl_future': 'inclurez', '3pl_future': 'incluront',
+      },
+      de: {
+        base: 'umfassen',
+        '1sg_present': 'umfasse', '2sg_present': 'umfasst', '3sg_present': 'umfasst',
+        '1pl_present': 'umfassen', '2pl_present': 'umfasst', '3pl_present': 'umfassen',
+        '1sg_past': 'umfasste', '2sg_past': 'umfasstest', '3sg_past': 'umfasste',
+        '1pl_past': 'umfassten', '2pl_past': 'umfasstet', '3pl_past': 'umfassten',
+      },
+      es: {
+        base: 'incluir',
+        '1sg_present': 'incluyo', '2sg_present': 'incluyes', '3sg_present': 'incluye',
+        '1pl_present': 'incluimos', '2pl_present': 'incluís', '3pl_present': 'incluyen',
+        '1sg_past': 'incluí', '2sg_past': 'incluiste', '3sg_past': 'incluyó',
+        '1pl_past': 'incluimos', '2pl_past': 'incluisteis', '3pl_past': 'incluyeron',
+        '1sg_future': 'incluiré', '2sg_future': 'incluirás', '3sg_future': 'incluirá',
+        '1pl_future': 'incluiremos', '2pl_future': 'incluiréis', '3pl_future': 'incluirán',
+      },
+      ja: {
+        base: '含む',
+        reading: 'ふくむ',
+        masu_present: '含みます',
+        masu_present_reading: 'ふくみます',
+      },
+      pt: {
+        base: 'incluir',
+        '1sg_present': 'incluo', '2sg_present': 'inclui', '3sg_present': 'inclui',
+        '1pl_present': 'incluímos', '2pl_present': 'incluem', '3pl_present': 'incluem',
+        '1sg_past': 'incluí', '2sg_past': 'incluiu', '3sg_past': 'incluiu',
+        '1pl_past': 'incluímos', '2pl_past': 'incluíram', '3pl_past': 'incluíram',
+        '1sg_future': 'incluirei', '2sg_future': 'incluirá', '3sg_future': 'incluirá',
+        '1pl_future': 'incluiremos', '2pl_future': 'incluirão', '3pl_future': 'incluirão',
+      },
+    },
+  },
+
   // Seeded for PRISON's gloss (B32): "a building where one confines people". German takes
   // inhaftieren rather than einsperren, whose separable prefix the engine cannot place; its
   // participle has no ge-, as -ieren verbs do not. Spanish encerrar diphthongs its stem
@@ -3022,6 +3093,14 @@ export const transitiveVerbs: ConceptSeed[] = [
     // Distinct from CHOOSE: not "pick one option over the others" but "mark this item as
     // the one acted on" — the interface sense (select a word, select a slot).
     description: 'to mark out an item as the one to act on',
+    // "to indicate an object to use it" (localization C20). CHOOSE is "to indicate an option"; what
+    // sets SELECT apart is what the indicating is *for*, a clause of purpose, whose object is a
+    // pronoun standing for the object: en "it", but de "ihn", because *Gegenstand* is masculine.
+    definition: infinitiveGloss('INDICATE', {
+      object: 'OBJECT_THING',
+      definiteness: 'indefinite',
+      purpose: { verb: 'USE', object: 'THIRD_PERSON', antecedent: 'OBJECT_THING' },
+    }),
     emoji: '🖱️',
     synonym: 'mark',
     forms: {
@@ -3249,11 +3328,12 @@ export const transitiveVerbs: ConceptSeed[] = [
     complements: ['manner', 'terminus', 'cause'],
     description: 'to store something so it can be retrieved later',
     // "to write content to load it": the whole differentia is what the writing is *for*, which is a
-    // clause of purpose (C12's PhrasePlan.purpose; localization C19). The pronoun object is neuter,
-    // or English would load a person and German an "ihn".
+    // clause of purpose (C12's PhrasePlan.purpose; localization C19). The pronoun object stands for
+    // the content (C20), so each language genders it off its own word: en "it", ja それ, but de
+    // "ihn", because *Inhalt* is masculine.
     definition: infinitiveGloss('WRITE', {
       object: 'CONTENT',
-      purpose: { verb: 'LOAD', object: 'THIRD_PERSON', gender: 'neut' },
+      purpose: { verb: 'LOAD', object: 'THIRD_PERSON', antecedent: 'CONTENT' },
     }),
     emoji: '💾',
     forms: {
@@ -4654,6 +4734,154 @@ export const transitiveVerbs: ConceptSeed[] = [
       },
     },
   },
+  // Putting back what was there before: a second esc in the word picker gives the box back the word
+  // that was being replaced (localization C22). Not REDO, which makes an undone change again: French
+  // REDO is "rétablir", so RESTORE is "restaurer". German says "wiederherstellen" on its buttons, but
+  // that particle is spelled "wieder her" apart from the verb (see UNDO); "zurückholen", fetching it
+  // back, is a plain separable verb. Japanese 復元する is a suru compound, labelled 復元.
+  {
+    id: 'RESTORE',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to put something back as it was before',
+    emoji: '♻️',
+    forms: {
+      en: {
+        base: 'restore',
+        '1sg_present': 'restore', '2sg_present': 'restore', '3sg_present': 'restores',
+        '1pl_present': 'restore', '2pl_present': 'restore', '3pl_present': 'restore',
+        past: 'restored',
+      },
+      it: {
+        base: 'ripristinare',
+        '1sg_present': 'ripristino', '2sg_present': 'ripristini', '3sg_present': 'ripristina',
+        '1pl_present': 'ripristiniamo', '2pl_present': 'ripristinate', '3pl_present': 'ripristinano',
+        '1sg_past': 'ripristinai', '2sg_past': 'ripristinasti', '3sg_past': 'ripristinò',
+        '1pl_past': 'ripristinammo', '2pl_past': 'ripristinaste', '3pl_past': 'ripristinarono',
+        '1sg_future': 'ripristinerò', '2sg_future': 'ripristinerai', '3sg_future': 'ripristinerà',
+        '1pl_future': 'ripristineremo', '2pl_future': 'ripristinerete', '3pl_future': 'ripristineranno',
+      },
+      fr: {
+        base: 'restaurer',
+        '1sg_present': 'restaure', '2sg_present': 'restaures', '3sg_present': 'restaure',
+        '1pl_present': 'restaurons', '2pl_present': 'restaurez', '3pl_present': 'restaurent',
+        '1sg_past': 'restaurai', '2sg_past': 'restauras', '3sg_past': 'restaura',
+        '1pl_past': 'restaurâmes', '2pl_past': 'restaurâtes', '3pl_past': 'restaurèrent',
+        '1sg_future': 'restaurerai', '2sg_future': 'restaureras', '3sg_future': 'restaurera',
+        '1pl_future': 'restaurerons', '2pl_future': 'restaurerez', '3pl_future': 'restaureront',
+      },
+      de: {
+        // Separable, as ADD is: the stem's finite forms, the particle placed by the clause ("holt das
+        // Wort zurück", "…, das das Wort zurückholt", "zurückzuholen").
+        base: 'zurückholen', particle: 'zurück',
+        '1sg_present': 'hole', '2sg_present': 'holst', '3sg_present': 'holt',
+        '1pl_present': 'holen', '2pl_present': 'holt', '3pl_present': 'holen',
+        '1sg_past': 'holte', '2sg_past': 'holtest', '3sg_past': 'holte',
+        '1pl_past': 'holten', '2pl_past': 'holtet', '3pl_past': 'holten',
+        '2sg_imperative': 'hole', // the optional du -e, kept
+      },
+      es: {
+        base: 'restaurar',
+        '1sg_present': 'restauro', '2sg_present': 'restauras', '3sg_present': 'restaura',
+        '1pl_present': 'restauramos', '2pl_present': 'restauráis', '3pl_present': 'restauran',
+        '1sg_past': 'restauré', '2sg_past': 'restauraste', '3sg_past': 'restauró',
+        '1pl_past': 'restauramos', '2pl_past': 'restaurasteis', '3pl_past': 'restauraron',
+        '1sg_future': 'restauraré', '2sg_future': 'restaurarás', '3sg_future': 'restaurará',
+        '1pl_future': 'restauraremos', '2pl_future': 'restauraréis', '3pl_future': 'restaurarán',
+      },
+      ja: {
+        base: '復元する',
+        reading: 'ふくげんする',
+        masu_present: '復元します',
+        masu_present_reading: 'ふくげんします',
+        label: '復元',
+        label_reading: 'ふくげん',
+      },
+      pt: {
+        base: 'restaurar',
+        '1sg_present': 'restauro', '2sg_present': 'restaura', '3sg_present': 'restaura',
+        '1pl_present': 'restauramos', '2pl_present': 'restauram', '3pl_present': 'restauram',
+        '1sg_past': 'restaurei', '2sg_past': 'restaurou', '3sg_past': 'restaurou',
+        '1pl_past': 'restauramos', '2pl_past': 'restauraram', '3pl_past': 'restauraram',
+        '1sg_future': 'restaurarei', '2sg_future': 'restaurará', '3sg_future': 'restaurará',
+        '1pl_future': 'restauraremos', '2pl_future': 'restaurarão', '3pl_future': 'restaurarão',
+      },
+    },
+  },
+
+  {
+    // CLOSE's opposite: what a command does to its bracket (localization C21, "open a bracket with a
+    // command"). Japanese 開く (ひらく), the verb brackets and files take (括弧を開く, ファイルを開く), in
+    // the dictionary form on a control, as CLOSE's 閉じる is. Italian aprire and French ouvrir are
+    // irregular in the participle (aperto, ouvert), and so are Spanish and Portuguese abrir (abierto,
+    // aberto).
+    id: 'OPEN',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'instrumental', 'cause'],
+    description: 'to make something no longer closed',
+    emoji: '📂',
+    forms: {
+      en: {
+        base: 'open',
+        '1sg_present': 'open', '2sg_present': 'open', '3sg_present': 'opens',
+        '1pl_present': 'open', '2pl_present': 'open', '3pl_present': 'open',
+        past: 'opened',
+      },
+      it: {
+        base: 'aprire',
+        '1sg_present': 'apro', '2sg_present': 'apri', '3sg_present': 'apre',
+        '1pl_present': 'apriamo', '2pl_present': 'aprite', '3pl_present': 'aprono',
+        '1sg_past': 'aprii', '2sg_past': 'apristi', '3sg_past': 'aprì',
+        '1pl_past': 'aprimmo', '2pl_past': 'apriste', '3pl_past': 'aprirono',
+        '1sg_future': 'aprirò', '2sg_future': 'aprirai', '3sg_future': 'aprirà',
+        '1pl_future': 'apriremo', '2pl_future': 'aprirete', '3pl_future': 'apriranno',
+      },
+      fr: {
+        base: 'ouvrir',
+        '1sg_present': 'ouvre', '2sg_present': 'ouvres', '3sg_present': 'ouvre',
+        '1pl_present': 'ouvrons', '2pl_present': 'ouvrez', '3pl_present': 'ouvrent',
+        '1sg_past': 'ouvris', '2sg_past': 'ouvris', '3sg_past': 'ouvrit',
+        '1pl_past': 'ouvrîmes', '2pl_past': 'ouvrîtes', '3pl_past': 'ouvrirent',
+        '1sg_future': 'ouvrirai', '2sg_future': 'ouvriras', '3sg_future': 'ouvrira',
+        '1pl_future': 'ouvrirons', '2pl_future': 'ouvrirez', '3pl_future': 'ouvriront',
+      },
+      de: {
+        base: 'öffnen',
+        '1sg_present': 'öffne', '2sg_present': 'öffnest', '3sg_present': 'öffnet',
+        '1pl_present': 'öffnen', '2pl_present': 'öffnet', '3pl_present': 'öffnen',
+        '1sg_past': 'öffnete', '2sg_past': 'öffnetest', '3sg_past': 'öffnete',
+        '1pl_past': 'öffneten', '2pl_past': 'öffnetet', '3pl_past': 'öffneten',
+      },
+      es: {
+        base: 'abrir',
+        '1sg_present': 'abro', '2sg_present': 'abres', '3sg_present': 'abre',
+        '1pl_present': 'abrimos', '2pl_present': 'abrís', '3pl_present': 'abren',
+        '1sg_past': 'abrí', '2sg_past': 'abriste', '3sg_past': 'abrió',
+        '1pl_past': 'abrimos', '2pl_past': 'abristeis', '3pl_past': 'abrieron',
+        '1sg_future': 'abriré', '2sg_future': 'abrirás', '3sg_future': 'abrirá',
+        '1pl_future': 'abriremos', '2pl_future': 'abriréis', '3pl_future': 'abrirán',
+      },
+      ja: {
+        base: '開く',
+        reading: 'ひらく',
+        masu_present: '開きます',
+        masu_present_reading: 'ひらきます',
+        label: '開く',
+        label_reading: 'ひらく',
+      },
+      pt: {
+        base: 'abrir',
+        '1sg_present': 'abro', '2sg_present': 'abre', '3sg_present': 'abre',
+        '1pl_present': 'abrimos', '2pl_present': 'abrem', '3pl_present': 'abrem',
+        '1sg_past': 'abri', '2sg_past': 'abriu', '3sg_past': 'abriu',
+        '1pl_past': 'abrimos', '2pl_past': 'abriram', '3pl_past': 'abriram',
+        '1sg_future': 'abrirei', '2sg_future': 'abrirá', '3sg_future': 'abrirá',
+        '1pl_future': 'abriremos', '2pl_future': 'abrirão', '3pl_future': 'abrirão',
+      },
+    },
+  },
 
   {
     // Japanese buttons say the dictionary form 閉じる, not the verbal noun the other instructions take.
@@ -5858,6 +6086,75 @@ export const transitiveVerbs: ConceptSeed[] = [
     },
   },
   {
+    // What a determiner does to a noun: fixing which thing it refers to, "a word that specifies
+    // nouns" (localization B51). German bestimmen is the grammar's own verb: articles are
+    // Bestimmungswörter, and the definite one is the bestimmter Artikel. French préciser, the
+    // everyday word, over spécifier. Japanese 特定する is a suru compound.
+    id: 'SPECIFY',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause', 'instrumental'],
+    description: 'to identify exactly',
+    emoji: '🔍',
+    forms: {
+      en: {
+        base: 'specify',
+        '1sg_present': 'specify', '2sg_present': 'specify', '3sg_present': 'specifies',
+        '1pl_present': 'specify', '2pl_present': 'specify', '3pl_present': 'specify',
+        past: 'specified',
+      },
+      it: {
+        base: 'specificare',
+        '1sg_present': 'specifico', '2sg_present': 'specifichi', '3sg_present': 'specifica',
+        '1pl_present': 'specifichiamo', '2pl_present': 'specificate', '3pl_present': 'specificano',
+        '1sg_past': 'specificai', '2sg_past': 'specificasti', '3sg_past': 'specificò',
+        '1pl_past': 'specificammo', '2pl_past': 'specificaste', '3pl_past': 'specificarono',
+        '1sg_future': 'specificherò', '2sg_future': 'specificherai', '3sg_future': 'specificherà',
+        '1pl_future': 'specificheremo', '2pl_future': 'specificherete', '3pl_future': 'specificheranno',
+      },
+      fr: {
+        base: 'préciser',
+        '1sg_present': 'précise', '2sg_present': 'précises', '3sg_present': 'précise',
+        '1pl_present': 'précisons', '2pl_present': 'précisez', '3pl_present': 'précisent',
+        '1sg_past': 'précisai', '2sg_past': 'précisas', '3sg_past': 'précisa',
+        '1pl_past': 'précisâmes', '2pl_past': 'précisâtes', '3pl_past': 'précisèrent',
+        '1sg_future': 'préciserai', '2sg_future': 'préciseras', '3sg_future': 'précisera',
+        '1pl_future': 'préciserons', '2pl_future': 'préciserez', '3pl_future': 'préciseront',
+      },
+      de: {
+        base: 'bestimmen',
+        '1sg_present': 'bestimme', '2sg_present': 'bestimmst', '3sg_present': 'bestimmt',
+        '1pl_present': 'bestimmen', '2pl_present': 'bestimmt', '3pl_present': 'bestimmen',
+        '1sg_past': 'bestimmte', '2sg_past': 'bestimmtest', '3sg_past': 'bestimmte',
+        '1pl_past': 'bestimmten', '2pl_past': 'bestimmtet', '3pl_past': 'bestimmten',
+      },
+      es: {
+        base: 'especificar',
+        '1sg_present': 'especifico', '2sg_present': 'especificas', '3sg_present': 'especifica',
+        '1pl_present': 'especificamos', '2pl_present': 'especificáis', '3pl_present': 'especifican',
+        '1sg_past': 'especifiqué', '2sg_past': 'especificaste', '3sg_past': 'especificó',
+        '1pl_past': 'especificamos', '2pl_past': 'especificasteis', '3pl_past': 'especificaron',
+        '1sg_future': 'especificaré', '2sg_future': 'especificarás', '3sg_future': 'especificará',
+        '1pl_future': 'especificaremos', '2pl_future': 'especificaréis', '3pl_future': 'especificarán',
+      },
+      ja: {
+        base: '特定する',
+        reading: 'とくていする',
+        masu_present: '特定します',
+        masu_present_reading: 'とくていします',
+      },
+      pt: {
+        base: 'especificar',
+        '1sg_present': 'especifico', '2sg_present': 'especifica', '3sg_present': 'especifica',
+        '1pl_present': 'especificamos', '2pl_present': 'especificam', '3pl_present': 'especificam',
+        '1sg_past': 'especifiquei', '2sg_past': 'especificou', '3sg_past': 'especificou',
+        '1pl_past': 'especificamos', '2pl_past': 'especificaram', '3pl_past': 'especificaram',
+        '1sg_future': 'especificarei', '2sg_future': 'especificará', '3sg_future': 'especificará',
+        '1pl_future': 'especificaremos', '2pl_future': 'especificarão', '3pl_future': 'especificarão',
+      },
+    },
+  },
+  {
     // Changing a text or a piece of work, as an editor does (B43) — not MODIFY, which is what a word
     // does to another. Italian and French share MODIFY's verb (modificare, modifier): it is what their
     // software writes on the Edit button ("Modifica", "Modifier"), where redigere and éditer are the
@@ -6000,6 +6297,78 @@ export const transitiveVerbs: ConceptSeed[] = [
         '1pl_past': 'regemos', '2pl_past': 'regeram', '3pl_past': 'regeram',
         '1sg_future': 'regerei', '2sg_future': 'regerá', '3sg_future': 'regerá',
         '1pl_future': 'regeremos', '2pl_future': 'regerão', '3pl_future': 'regerão',
+      },
+    },
+  },
+
+  {
+    // To take what is offered as valid: a command that accepts no word, a verb that accepts no object
+    // (localization C21) — the licensing sense a grammar and a program share, with the verb each
+    // language's software writes for it (it accettare, fr accepter, de akzeptieren, es aceptar, pt
+    // aceitar). Japanese 受け付ける, "to take in", what an input that refuses something says (受け付けません).
+    // Portuguese has two participles: aceitado after ter, the short aceite with ser (EP).
+    id: 'ACCEPT',
+    role: 'verb',
+    transitivity: 'transitive',
+    complements: ['manner', 'cause'],
+    description: 'to take something offered as valid',
+    emoji: '🤝',
+    forms: {
+      en: {
+        base: 'accept',
+        '1sg_present': 'accept', '2sg_present': 'accept', '3sg_present': 'accepts',
+        '1pl_present': 'accept', '2pl_present': 'accept', '3pl_present': 'accept',
+        past: 'accepted',
+      },
+      it: {
+        base: 'accettare',
+        '1sg_present': 'accetto', '2sg_present': 'accetti', '3sg_present': 'accetta',
+        '1pl_present': 'accettiamo', '2pl_present': 'accettate', '3pl_present': 'accettano',
+        '1sg_past': 'accettai', '2sg_past': 'accettasti', '3sg_past': 'accettò',
+        '1pl_past': 'accettammo', '2pl_past': 'accettaste', '3pl_past': 'accettarono',
+        '1sg_future': 'accetterò', '2sg_future': 'accetterai', '3sg_future': 'accetterà',
+        '1pl_future': 'accetteremo', '2pl_future': 'accetterete', '3pl_future': 'accetteranno',
+      },
+      fr: {
+        base: 'accepter',
+        '1sg_present': 'accepte', '2sg_present': 'acceptes', '3sg_present': 'accepte',
+        '1pl_present': 'acceptons', '2pl_present': 'acceptez', '3pl_present': 'acceptent',
+        '1sg_past': 'acceptai', '2sg_past': 'acceptas', '3sg_past': 'accepta',
+        '1pl_past': 'acceptâmes', '2pl_past': 'acceptâtes', '3pl_past': 'acceptèrent',
+        '1sg_future': 'accepterai', '2sg_future': 'accepteras', '3sg_future': 'acceptera',
+        '1pl_future': 'accepterons', '2pl_future': 'accepterez', '3pl_future': 'accepteront',
+      },
+      de: {
+        base: 'akzeptieren',
+        '1sg_present': 'akzeptiere', '2sg_present': 'akzeptierst', '3sg_present': 'akzeptiert',
+        '1pl_present': 'akzeptieren', '2pl_present': 'akzeptiert', '3pl_present': 'akzeptieren',
+        '1sg_past': 'akzeptierte', '2sg_past': 'akzeptiertest', '3sg_past': 'akzeptierte',
+        '1pl_past': 'akzeptierten', '2pl_past': 'akzeptiertet', '3pl_past': 'akzeptierten',
+        '2sg_imperative': 'akzeptiere', // the optional du -e, kept, as on the other -ieren verbs
+      },
+      es: {
+        base: 'aceptar',
+        '1sg_present': 'acepto', '2sg_present': 'aceptas', '3sg_present': 'acepta',
+        '1pl_present': 'aceptamos', '2pl_present': 'aceptáis', '3pl_present': 'aceptan',
+        '1sg_past': 'acepté', '2sg_past': 'aceptaste', '3sg_past': 'aceptó',
+        '1pl_past': 'aceptamos', '2pl_past': 'aceptasteis', '3pl_past': 'aceptaron',
+        '1sg_future': 'aceptaré', '2sg_future': 'aceptarás', '3sg_future': 'aceptará',
+        '1pl_future': 'aceptaremos', '2pl_future': 'aceptaréis', '3pl_future': 'aceptarán',
+      },
+      ja: {
+        base: '受け付ける',
+        reading: 'うけつける',
+        masu_present: '受け付けます',
+        masu_present_reading: 'うけつけます',
+      },
+      pt: {
+        base: 'aceitar',
+        '1sg_present': 'aceito', '2sg_present': 'aceita', '3sg_present': 'aceita',
+        '1pl_present': 'aceitamos', '2pl_present': 'aceitam', '3pl_present': 'aceitam',
+        '1sg_past': 'aceitei', '2sg_past': 'aceitou', '3sg_past': 'aceitou',
+        '1pl_past': 'aceitamos', '2pl_past': 'aceitaram', '3pl_past': 'aceitaram',
+        '1sg_future': 'aceitarei', '2sg_future': 'aceitará', '3sg_future': 'aceitará',
+        '1pl_future': 'aceitaremos', '2pl_future': 'aceitarão', '3pl_future': 'aceitarão',
       },
     },
   },

@@ -8,8 +8,9 @@ import {
   type TokenColor,
   type ValueDef,
 } from "./commands.ts";
+import { coded, diagnosticAt, type Coded, type Diagnostic } from "./diagnostics.ts";
 import { lex, type Shape, type Token } from "./lex.ts";
-import type { Diagnostic, Span } from "./types.ts";
+import type { Span } from "./types.ts";
 
 /**
  * The console's parser: a line of tokens into a list of items — a command and its argument, or a
@@ -69,8 +70,8 @@ class ParseError extends Error {
   }
 }
 
-const fail = (span: Span, message: string): never => {
-  throw new ParseError({ from: span.from, to: span.to, message });
+const fail = (span: Span, d: Coded): never => {
+  throw new ParseError(diagnosticAt(span, d));
 };
 
 export function parse(text: string): ParseResult {
@@ -85,7 +86,7 @@ export function parse(text: string): ParseResult {
       const tok = tokens[pos]!;
       if (tok.kind === "close") {
         if (depth > 0) return;
-        fail(tok, "There is no bracket open here to close.");
+        fail(tok, coded("strayCloser"));
       }
       parseItem(into);
     }
@@ -101,15 +102,15 @@ export function parse(text: string): ParseResult {
       return;
     }
     if (tok.kind === "word")
-      fail(tok, "A line is made of commands — start it with one, such as /subj, or / for the list.");
+      fail(tok, coded("lineStartsWithWord"));
     if (tok.kind === "open")
-      fail(tok, "A bracket belongs to the command before it: /subj ( … ), /poss [ … ], /rel subj { … }.");
-    if (tok.kind !== "command") fail(tok, "Unexpected text.");
+      fail(tok, coded("strayBracket"));
+    if (tok.kind !== "command") fail(tok, coded("unexpectedText"));
     const command = tok as Extract<Token, { kind: "command" }>;
     pos++;
-    if (!command.name) fail(command, "Name a command after the slash — the list shows them all.");
+    if (!command.name) fail(command, coded("commandNameMissing"));
     const def = commandNamed(command.name);
-    if (!def) fail(command, `There is no command /${command.name}.`);
+    if (!def) fail(command, coded("unknownCommand", { command: command.name }));
     const item: Item = { kind: "command", name: command.name, def, head: command, from: command.from, to: command.to };
     into.push(item);
     parseArgument(item, def!);
@@ -158,14 +159,14 @@ export function parse(text: string): ParseResult {
     const kind = def.action.kind;
     if (arg.kind === "none") {
       const next = peek();
-      if (next?.kind === "word") fail(next, `/${def.name} takes no word.`);
+      if (next?.kind === "word") fail(next, coded("takesNoWord", { command: def.name }));
       return;
     }
     if (arg.kind === "word") {
       // A word, or a bracket that opens with it: `/subj cat`, `/subj ( cat /pl )`.
       takeWord(item);
       if (peek()?.kind === "open") {
-        if (item.word) fail(peek()!, `Put the word inside the bracket: /${def.name} ( ${item.word.text} … ).`);
+        if (item.word) fail(peek()!, coded("wordInsideBracket", { command: def.name, word: item.word.text, shape: "(" }));
         takeBracket(item, true);
       }
       return;
@@ -192,13 +193,13 @@ export function parse(text: string): ParseResult {
           const value = valueNamed(arg.values, m[0]);
           if (!value) {
             keepBefore(from);
-            fail(span, `/${def.name} takes ${arg.values.map((v) => v.name).join(", ")} — not “${m[0]}”.`);
+            fail(span, coded("valueNotTaken", { command: def.name, values: arg.values.map((v) => v.name), given: m[0] }));
           }
           // One value of each kind — an addressee and a register for a command, one level, one language.
           const clash = given.find((g) => sameKind(g, value!));
           if (given.length >= arg.max || clash) {
             keepBefore(from);
-            fail(span, `/${def.name} takes ${arg.max === 1 ? "one value" : "one of each"} — “${clash?.name ?? given[0]!.name}” is already given.`);
+            fail(span, coded("valueAlreadyGiven", { command: def.name, max: arg.max, given: clash?.name ?? given[0]!.name }));
           }
           given.push(value!);
         }
@@ -212,8 +213,8 @@ export function parse(text: string): ParseResult {
     if (item.word) checkLinkWord(item, def);
     const next = peek();
     if (next?.kind === "ref") {
-      if (kind === "conjunct") fail(next, `/${def.name} coordinates a phrase: a word, or ( … ).`);
-      if (item.word && kind !== "join") fail(next, `/${def.name} takes a word or a reference, not both.`);
+      if (kind === "conjunct") fail(next, coded("conjunctTakesNoReference", { command: def.name }));
+      if (item.word && kind !== "join") fail(next, coded("wordOrReference", { command: def.name }));
       pos++;
       item.ref = { text: next.text, from: next.from, to: next.to };
       item.to = next.to;
@@ -221,13 +222,13 @@ export function parse(text: string): ParseResult {
     }
     if (next?.kind === "open") {
       const phrase = kind === "possessor" || kind === "conjunct";
-      if (item.word && phrase) fail(next, `Put the word inside the bracket: /${def.name} [ ${item.word.text} … ].`);
+      if (item.word && phrase) fail(next, coded("wordInsideBracket", { command: def.name, word: item.word.text, shape: "[" }));
       // A possessor's or a conjunct's bracket opens with its head word.
       takeBracket(item, phrase);
       return;
     }
     if (item.word && kind === "relative")
-      fail(item.word, `Open the new clause: /rel ${item.word.text.toLowerCase()} { … }.`);
+      fail(item.word, coded("openNewClause", { gap: item.word.text.toLowerCase() }));
   };
 
   // The word a link command may carry before its target: the gap a relative clause names, the
@@ -235,17 +236,17 @@ export function parse(text: string): ParseResult {
   const checkLinkWord = (item: Item, def: CommandDef): void => {
     const word = item.word!;
     const kind = def.action.kind;
-    const message =
+    const refusal =
       kind === "relative" && !/^(subj|obj)$/i.test(word.text)
-        ? "/rel takes #n.noun — or subj { … } or obj { … } for a new clause."
+        ? coded("relativeTakes")
         : kind === "condition" || kind === "instrument"
-          ? `/${def.name} takes #n for a period, or { … } for a new one.`
+          ? coded("clauseLinkTakes", { command: def.name })
           : kind === "join" && !valueNamed(COORD_VALUES, word.text)
-            ? "/join takes a conjunction — and, or, but, thatis, therefore, then — then #n or { … }."
+            ? coded("joinTakes")
             : undefined;
-    if (!message) return;
+    if (!refusal) return;
     dropWord(item);
-    fail(word, message);
+    fail(word, refusal);
   };
 
   // A word the command refused is not part of the valid prefix: the command is, without it.

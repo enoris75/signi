@@ -501,6 +501,7 @@ const femResult = (verb: string) =>
 
 describe('feminine subject, resultative present: Italian, every verb', () => {
   const IT: [id: string, it: string][] = [
+    ['ACCEPT', 'la gatta ha accettato.'],
     ['ACQUIRE', 'la gatta ha acquisito.'], ['ACT', 'la gatta ha agito.'],
     ['ADD', 'la gatta ha aggiunto.'], ['APPEAR', 'la gatta è apparsa.'],
     ['APPLY', 'la gatta ha applicato.'],
@@ -539,7 +540,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // reggere's participle is the strong retto.
     ['GOVERN', 'la gatta ha retto.'], ['HAVE', 'la gatta ha avuto.'],
     ['HIDE', 'la gatta ha nascosto.'], ['HOLD', 'la gatta ha contenuto.'],
-    ['IMPORT', 'la gatta ha importato.'], ['INDICATE', 'la gatta ha indicato.'],
+    ['IMPORT', 'la gatta ha importato.'], ['INCLUDE', 'la gatta ha incluso.'],
+    ['INDICATE', 'la gatta ha indicato.'],
     ['JUMP', 'la gatta ha saltato.'],
     ['KILL', 'la gatta ha ucciso.'], ['KNOW', 'la gatta ha saputo.'],
     // LEAVE is uscire (da), which selects essere and agrees.
@@ -551,13 +553,15 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // A pronominal verb takes essere, its clitic ahead of it (C17).
     ['MOVE_ONESELF', 'la gatta si è mossa.'],
     ['NAME', 'la gatta ha nominato.'], ['NEGATE', 'la gatta ha negato.'],
-    ['OWN', 'la gatta ha posseduto.'],
+    // OPEN: aprire's participle is the irregular aperto.
+    ['OPEN', 'la gatta ha aperto.'], ['OWN', 'la gatta ha posseduto.'],
     ['PERCEIVE', 'la gatta ha percepito.'], ['PIN', 'la gatta ha fissato.'],
     ['PRESS', 'la gatta ha premuto.'],
     ['PRODUCE', 'la gatta ha prodotto.'],
     ['READ', 'la gatta ha letto.'], ['REDO', 'la gatta ha ripetuto.'],
     ['REMOVE', 'la gatta ha rimosso.'],
     ['REPLACE', 'la gatta ha sostituito.'], ['RESIZE', 'la gatta ha ridimensionato.'],
+    ['RESTORE', 'la gatta ha ripristinato.'],
     ['RETRY', 'la gatta ha riprovato.'],
     // Going back takes essere, as GO does, and agrees (B43).
     ['RETURN', 'la gatta è tornata.'],
@@ -567,6 +571,7 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     ['SET', 'la gatta ha impostato.'],
     ['SET_ON_FIRE', 'la gatta ha bruciato.'], ['SHED', 'la gatta ha versato.'],
     ['SHOW', 'la gatta ha mostrato.'], ['SHRINK', 'la gatta ha rimpicciolito.'],
+    ['SPECIFY', 'la gatta ha specificato.'],
     ['START', 'la gatta ha iniziato.'],
     ['STRIKE', 'la gatta ha colpito.'], ['TIDY_UP', 'la gatta ha riordinato.'],
     ['TRADE', 'la gatta ha commerciato.'],
@@ -579,6 +584,8 @@ describe('feminine subject, resultative present: Italian, every verb', () => {
     // UNDO shares CANCEL's verb (B40).
     ['UNDO', 'la gatta ha annullato.'], ['UNPIN', 'la gatta ha sbloccato.'],
     ['USE', 'la gatta ha usato.'],
+    // A thing that works takes avere, as ACT does (C22).
+    ['WORK', 'la gatta ha funzionato.'],
     ['WRITE', 'la gatta ha scritto.'],
   ];
 

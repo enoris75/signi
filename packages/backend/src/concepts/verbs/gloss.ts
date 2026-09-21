@@ -11,11 +11,14 @@ export interface GlossParts {
   /** Adjectives narrowing the object ("to understand written words"). */
   adjectives?: string[];
   /**
-   * The object's natural gender. Only a **pronoun** object reads it — it is what tells en "it" from
-   * "him" and de "es" from "ihn" — and a gloss reaches for one in a `purpose` clause, where the
-   * thing acted on has already been named by the clause above ("to write content **to load it**").
+   * The noun a **pronoun** object stands for (NounPhrase.antecedent). A gloss reaches for one in a
+   * `purpose` clause, where the thing acted on has already been named by the clause above ("to
+   * write content **to load it**"): each language reads the pronoun's gender off its own word for
+   * the antecedent, so en "it" and ja それ (a thing is neuter) but de "ihn" (*Inhalt* is
+   * masculine) and it "la" for a feminine one (localization C20). It replaced a `gender` field,
+   * which gave all seven one gender and so could not be right in German and English at once.
    */
-  gender?: 'masc' | 'fem' | 'neut';
+  antecedent?: string;
   /** The object's determiner: bare unless the verb acts on one of a kind ("to press a button"). */
   definiteness?: Definiteness;
   /**
@@ -73,7 +76,7 @@ function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
             concept: p.object,
             definiteness: p.definiteness ?? 'bare',
             ...(p.number ? { number: p.number } : {}),
-            ...(p.gender ? { gender: p.gender } : {}),
+            ...(p.antecedent ? { antecedent: p.antecedent } : {}),
             ...(p.adjectives?.length ? { adjectives: p.adjectives } : {}),
           },
         }
@@ -108,8 +111,9 @@ function glossClause(verb: string, p: GlossParts): InfinitiveComplement {
 //
 // A gloss whose differentia is what the act is *for* names a `purpose` clause instead —
 // infinitiveGloss('WRITE', { object: 'CONTENT', purpose: { verb: 'LOAD', object: 'THIRD_PERSON',
-// gender: 'neut' } }) → "to write content to load it", de "Inhalt schreiben, um es zu laden",
-// ja 「それを読み込むために内容を書く」. It is an adjunct, not a governed clause (see GlossParts.purpose).
+// antecedent: 'CONTENT' } }) → "to write content to load it", de "Inhalt schreiben, um ihn zu
+// laden", ja 「それを読み込むために内容を書く」. It is an adjunct, not a governed clause (see
+// GlossParts.purpose); the pronoun names what it stands for (see GlossParts.antecedent).
 export function infinitiveGloss(
   verb: string,
   parts?: string | GlossParts,

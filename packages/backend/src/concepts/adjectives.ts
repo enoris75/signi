@@ -412,6 +412,28 @@ export const adjectives: ConceptSeed[] = [
     },
   },
   {
+    // The climate sense of COLD, the cold of a place or the weather: ANTARCTICA is "the coldest
+    // continent" (localization B48). Japanese splits the two senses: COLD is 冷たい, cold to the
+    // touch, and this is 寒い, the cold the whole body feels. The other six use one word for both,
+    // so the gloss is COLD's. Inherent, not transient: a climate is what a place is, so es/pt
+    // predicate it with ser ("la Antártida es fría"), where COLD takes estar.
+    id: 'COLD_CLIMATE',
+    role: 'adjective',
+    description: 'cold, of weather or a climate',
+    definition: dimGloss('TEMPERATURE', 'LOW'),
+    emoji: '❄️',
+    synonym: 'climate',
+    forms: {
+      en: { base: 'cold' },
+      it: { base: 'freddo' },
+      fr: { base: 'froid' },
+      de: { base: 'kalt', umlaut: 'true' }, // kalt → kälter / kältest, as COLD
+      es: { base: 'frío' },
+      ja: { base: '寒い', reading: 'さむい' },
+      pt: { base: 'frio' },
+    },
+  },
+  {
     // The *figurative* sense — a warm feeling, a warm welcome — not the temperature one. The two
     // senses split in four languages (it tiepido / caloroso, fr tiède / chaleureux, pt morno /
     // caloroso), so only the one AFFECTION's gloss needs is seeded; B07's TEMPERATURE scale has
@@ -447,6 +469,26 @@ export const adjectives: ConceptSeed[] = [
       de: { base: 'heiß' },
       es: { base: 'caliente' },
       ja: { base: '熱い', reading: 'あつい' },
+      pt: { base: 'quente' },
+    },
+  },
+  {
+    // The climate sense of HOT, as COLD_CLIMATE is COLD's: AFRICA is "the hottest continent"
+    // (localization B48). Japanese says 暑い of the weather where HOT is 熱い to the touch, and
+    // Spanish caluroso where HOT is caliente. Inherent, so es/pt predicate it with ser.
+    id: 'HOT_CLIMATE',
+    role: 'adjective',
+    description: 'hot, of weather or a climate',
+    definition: dimGloss('TEMPERATURE', 'HIGH'),
+    emoji: '☀️',
+    synonym: 'climate',
+    forms: {
+      en: { base: 'hot' },
+      it: { base: 'caldo' },
+      fr: { base: 'chaud' },
+      de: { base: 'heiß' },
+      es: { base: 'caluroso' },
+      ja: { base: '暑い', reading: 'あつい' },
       pt: { base: 'quente' },
     },
   },
@@ -1002,6 +1044,42 @@ export const adjectives: ConceptSeed[] = [
       es: { base: 'faltante' },
       ja: { base: '見つからない', reading: 'みつからない' },
       pt: { base: 'faltante' },
+    },
+  },
+  {
+    // Not known to whoever reads it: what the console calls a command, a word or a value it has no
+    // entry for — "unknown command", it "comando sconosciuto", de "unbekannter Befehl" (localization
+    // C21). Japanese software says 不明な ("unclear"), a na-adjective: 不明な命令.
+    id: 'UNKNOWN',
+    role: 'adjective',
+    description: 'not known',
+    emoji: '❓',
+    forms: {
+      en: { base: 'unknown' },
+      it: { base: 'sconosciuto' },
+      fr: { base: 'inconnu' },
+      de: { base: 'unbekannt' },
+      es: { base: 'desconocido' },
+      ja: { base: '不明な', reading: 'ふめいな' },
+      pt: { base: 'desconhecido' },
+    },
+  },
+  {
+    // Not expected where it comes: a token the console's parser meets where nothing of its kind can
+    // stand — "unexpected bracket", it "parentesi inattesa", de "unerwartete Klammer" (localization
+    // C21). Japanese says it with the negative of 予期する, which inflects as an i-adjective: 予期しない.
+    id: 'UNEXPECTED',
+    role: 'adjective',
+    description: 'not expected',
+    emoji: '⁉️',
+    forms: {
+      en: { base: 'unexpected' },
+      it: { base: 'inatteso' },
+      fr: { base: 'inattendu' },
+      de: { base: 'unerwartet' },
+      es: { base: 'inesperado' },
+      ja: { base: '予期しない', reading: 'よきしない' },
+      pt: { base: 'inesperado' },
     },
   },
   {

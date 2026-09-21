@@ -28,51 +28,72 @@ import type { Scope } from "./scope.ts";
  */
 
 /**
- * A heading or a row, named the way a keymap command is: `title` / `label` is the English, and the
- * catalogue key beside it is what the sheet shows, wherever the words are seeded. The literals left
- * without a key are prose (C22). Each section is found by its `id` (its `data-testid` is
- * `help-section-<id>`), since its title follows the UI language.
+ * A heading or a row, named the way a keymap command is: `title` / `label` / `note` is the English,
+ * and the catalogue key beside it is what the sheet shows. Each section is found by its `id` (its
+ * `data-testid` is `help-section-<id>`), since its title follows the UI language.
  */
 interface SheetSection {
   id: string;
   title: string;
   titleKey?: UiStringKey;
   note?: string;
+  /** The note as one statement: where the cursor is for the section's keys, or what its box is. */
+  noteKey?: UiStringKey;
   /** A list of names, the note spelled as the controls themselves are named, joined with commas. */
   noteKeys?: UiStringKey[];
 }
 
 interface SheetRow {
   keys: string[];
+  /** The keys are pressed one after the other (esc, then esc), not either of them. */
+  inTurn?: boolean;
   label: string;
   labelKey?: UiStringKey;
   /** The panel a row's key works in, written before its label with a colon ("Words: the word map"). */
   whereKey?: UiStringKey;
 }
 
+/**
+ * The paragraph under the keyboard section's heading, one statement to a line (C22). A statement
+ * that names keys has them after a colon, drawn as caps for the platform the switch is on, so the
+ * modifier reads Ctrl or ⌘ as the rows below do — which is why the sheet no longer says that Ctrl
+ * is ⌘ on a Mac. `Mod` and `Shift` alone are the modifiers themselves (see `keycapLabels`).
+ */
+const KEYBOARD_PROSE: { key: UiStringKey; keys?: string[] }[] = [
+  { key: "help.keyWorks" },
+  { key: "help.returnToPeriod", keys: ["Escape"] },
+  { key: "help.keysEverywhere", keys: ["Mod"] },
+  { key: "help.previousValue", keys: ["Shift"] },
+];
+
 /** The order the sheet reads in, and what each section is called. */
 const SECTIONS: (SheetSection & { scope: Scope })[] = [
-  {
-    id: "app",
-    scope: "app",
-    title: "Everywhere",
-    titleKey: "help.section.app",
-    note: "Ctrl is ⌘ on a Mac",
-  },
+  { id: "app", scope: "app", title: "Everywhere", titleKey: "help.section.app" },
   {
     id: "period",
     scope: "period",
     title: "Period",
     titleKey: "period.name",
-    note: "with the cursor on the period (esc from a box)",
+    note: "The cursor is in the period.",
+    noteKey: "help.cursorInPeriod",
   },
-  { id: "box", scope: "box", title: "Navigation", titleKey: "help.section.box", note: "inside a period" },
+  {
+    id: "box",
+    scope: "box",
+    title: "Navigation",
+    titleKey: "help.section.box",
+    note: "The cursor is in a slot.",
+    noteKey: "help.cursorInSlot",
+  },
   {
     id: "noun",
     scope: "box:noun",
     title: "Noun",
     titleKey: "category.noun",
-    note: "subject, object, complement, possessor, conjunct",
+    // The boxes a noun stands in, by the names the canvas gives them. The object is the direct
+    // object here, since Spanish names the object and the complement both "complemento".
+    note: "subject, direct object, complement, possessor, conjunct",
+    noteKeys: ["slot.subject", "help.directObject", "help.complement", "slot.possessor", "help.conjunct"],
   },
   { id: "adjective", scope: "box:adjective", title: "Adjective", titleKey: "category.adjective" },
   { id: "verb", scope: "box:verb", title: "Verb", titleKey: "slot.verb" },
@@ -81,7 +102,8 @@ const SECTIONS: (SheetSection & { scope: Scope })[] = [
     scope: "box:mood",
     title: "Command subject",
     titleKey: "help.commandSubject",
-    note: "the box a command puts in place of the subject",
+    note: "This slot replaces the subject in a command.",
+    noteKey: "help.replacesSubject",
   },
 ];
 
@@ -100,10 +122,14 @@ const HOOK_SECTIONS: (SheetSection & { rows: SheetRow[] })[] = [
       { keys: ["Enter"], label: "Choose", labelKey: "slot.choose" },
       // The footer's own words for ⇥, as the picker's strip shows them.
       { keys: ["Tab"], label: "Choose, and then go to the next slot", labelKey: "hint.chooseAndNext" },
-      { keys: ["ArrowUp"], label: "Up from the first row: the category tabs" },
-      { keys: ["ArrowLeft", "ArrowRight"], label: "Switch vocabulary, in the tabs" },
+      { keys: ["ArrowUp"], label: "Go from the first row to the tabs", labelKey: "help.goToTabs" },
+      // Each tab is a vocabulary (Noun | Pronoun), so choosing one switches the list.
+      { keys: ["ArrowLeft", "ArrowRight"], label: "Choose a tab", labelKey: "help.chooseTab" },
       { keys: ["1", "4"], label: "Pronoun person", labelKey: "help.pronounPerson" },
-      { keys: ["Escape"], label: "Close · again restores the word" },
+      // The first esc closes the list; the second steps out onto the box, which gives it back the
+      // word it was replacing.
+      { keys: ["Escape"], label: "Close", labelKey: "action.close" },
+      { keys: ["Escape", "Escape"], inTurn: true, label: "Restore the word", labelKey: "help.restoreWord" },
     ],
   },
   {
@@ -209,9 +235,14 @@ export function HelpOverlay({
   const titleOf = (section: SheetSection) =>
     section.titleKey ? t(section.titleKey) : section.title;
   const noteOf = (section: SheetSection) =>
-    section.noteKeys ? section.noteKeys.map((key) => t(key)).join(", ") : section.note;
-  const rowOf = ({ keys, label, labelKey, whereKey }: SheetRow) => ({
+    section.noteKey
+      ? t(section.noteKey)
+      : section.noteKeys
+        ? section.noteKeys.map((key) => t(key)).join(", ")
+        : section.note;
+  const rowOf = ({ keys, inTurn, label, labelKey, whereKey }: SheetRow) => ({
     keys,
+    inTurn,
     label: !labelKey ? label : whereKey ? `${t(whereKey)}: ${t(labelKey)}` : t(labelKey),
   });
 
@@ -248,10 +279,24 @@ export function HelpOverlay({
               <Typography id={sectionId} variant="h6" sx={{ fontWeight: 700, mb: 0.5 }}>
                 {t("help.keyboard")}
               </Typography>
-              <Typography sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6 }}>
-                A bare key acts on what the cursor is on — a box, or the period once you step out
-                with esc. Ctrl acts on the app. Keys that cycle a value run backwards with ⇧.
-              </Typography>
+              <Box
+                data-testid="help-keyboard-prose"
+                sx={{ color: "text.secondary", fontSize: "0.85rem", lineHeight: 1.6 }}
+              >
+                {KEYBOARD_PROSE.map(({ key, keys }) => (
+                  <Box key={key}>
+                    {t(key)}
+                    {keys && (
+                      <>
+                        {": "}
+                        {keys.map((spec) => (
+                          <SheetCap key={spec} spec={spec} platform={platform} />
+                        ))}
+                      </>
+                    )}
+                  </Box>
+                ))}
+              </Box>
             </Box>
             <ToggleButtonGroup
               exclusive
@@ -314,7 +359,7 @@ function Section({
   id: string;
   title: string;
   note?: string;
-  rows: { keys: string[]; label: string }[];
+  rows: { keys: string[]; inTurn?: boolean; label: string }[];
   platform: Platform;
 }) {
   if (rows.length === 0) return null;
@@ -334,6 +379,7 @@ function Section({
       </Typography>
       {note && (
         <Typography
+          data-testid="help-section-note"
           sx={{ fontStyle: "italic", fontSize: "0.72rem", color: "text.secondary", mb: 0.5 }}
         >
           {note}
@@ -358,8 +404,9 @@ function Section({
           </Box>
           <Box sx={{ display: "flex", alignItems: "center", gap: 0.5, flexShrink: 0 }}>
             {row.keys.map((spec, k) => (
-              <Box key={spec} sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
-                {k > 0 && (
+              <Box key={`${spec}-${k}`} sx={{ display: "inline-flex", alignItems: "center", gap: 0.5 }}>
+                {/* Either key, or — pressed in turn — one after the other, drawn side by side. */}
+                {k > 0 && !row.inTurn && (
                   <Box component="span" sx={{ color: "text.disabled", fontSize: "0.7rem" }}>
                     /
                   </Box>
@@ -379,7 +426,7 @@ function Section({
 function SheetCap({ spec, platform }: { spec: string; platform: Platform }) {
   const caps = keycapLabels(spec, platform);
   return (
-    <Box component="span" aria-hidden sx={{ display: "inline-flex", gap: 0.25 }}>
+    <Box component="span" aria-hidden sx={{ display: "inline-flex", gap: 0.25, verticalAlign: "middle" }}>
       {caps.map((cap, i) => (
         <Box
           key={`${cap}-${i}`}
