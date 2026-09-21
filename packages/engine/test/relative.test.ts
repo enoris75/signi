@@ -1332,3 +1332,77 @@ describe('known bugs: a pronoun subject in a relative clause', () => {
     expect(sayAll(clause(np('FIRST_PERSON'), 'EAT'))).toMatchObject({ it: 'mangio.', es: 'como.', pt: 'como.' });
   });
 });
+
+// A199. A47 settled the locative copula — a place is "estar", unconditionally — but only for a
+// locative the clause carries. Relativise the place and it becomes the GAP: it is not in
+// `rel.complements`, `withRelative` renders it as the relativizer ("donde" / "onde", or the
+// complement's preposition), and `predicateText`, which decides the copula off
+// `complements?.locative`, sees a clause with no place in it and picks "ser". So "the slot where
+// the cursor is" reads "el slot donde el cursor ES" / "o slot onde o cursor É" — the copula of
+// identity. The same relative clause with the locative as a complement rather than the gap is
+// already right ("el gato que está en la casa corre"). The stranded Romance copula ("dove il
+// cursore è", "où le curseur est") is a separate concern; see the bug file's closing note.
+describe('known bugs: Spanish and Portuguese use ser in a place relative clause', () => {
+  const houseWhereIs = (verbPhrase: Partial<VerbPhrase> = {}, headSpecifiers?: RelativeClause['headSpecifiers']) =>
+    sayAll(clause(np('HOUSE', {
+      relative: {
+        headRole: 'locative', ...(headSpecifiers ? { headSpecifiers } : {}),
+        subject: np('CAT'), verbPhrase: { verb: 'BE', ...verbPhrase },
+      },
+    }), 'BURN'));
+
+  test.fails('a locative gap over BE takes estar, as the main clause does', () => {
+    expect(houseWhereIs()).toMatchObject({
+      es: 'la casa donde el gato está arde.', // now: "donde el gato es"
+      pt: 'a casa onde o gato está arde.',    // now: "onde o gato é"
+    });
+    // The past is the imperfect of "estar" (A130's state-verb rule), as it already is in the main
+    // clause ("el gato estaba en la casa").
+    expect(houseWhereIs({ tense: 'past' })).toMatchObject({
+      es: 'la casa donde el gato estaba arde.', pt: 'a casa onde o gato estava arde.',
+    });
+    expect(houseWhereIs({ negative: true })).toMatchObject({
+      es: 'la casa donde el gato no está arde.', pt: 'a casa onde o gato não está arde.',
+    });
+    // A marked relation keeps its preposition + relative instead of the relative adverb; the copula
+    // is the same choice either way.
+    expect(houseWhereIs({}, [{ kind: 'path', value: 'under' }])).toMatchObject({
+      es: 'la casa debajo de la que el gato está arde.', pt: 'a casa debaixo da qual o gato está arde.',
+    });
+    // The head in the object slot, and the plan that found it.
+    expect(sayAll(clause(np('DOG'), 'SEE', {
+      directObject: np('HOUSE', { relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'BE' } } }),
+    }))).toMatchObject({ es: 'el perro ve la casa donde el gato está.', pt: 'o cão vê a casa onde o gato está.' });
+    expect(sayAll(clause(np('SLOT_COMPUTING', {
+      definiteness: 'definite',
+      relative: { headRole: 'locative', subject: np('CURSOR', { definiteness: 'definite' }), verbPhrase: { verb: 'BE' } },
+    }), 'BURN'))).toMatchObject({
+      es: 'el slot donde el cursor está arde.', pt: 'o slot onde o cursor está arde.',
+    });
+  });
+
+  // Regression: the main clause A47 fixed, a locative COMPLEMENT inside a relative clause, a
+  // predicate nominal (which keeps "ser"), a lexical verb under the same gap, and the other five
+  // languages — Japanese takes the existential いる, which is its own A109 rule.
+  test('the main clause, a locative complement, a predicate nominal and the other five are right', () => {
+    expect(sayAll(clause(np('CAT'), 'BE', { complements: { locative: { phrase: np('HOUSE') } } }))).toMatchObject({
+      es: 'el gato está en la casa.', pt: 'o gato está na casa.',
+    });
+    expect(sayAll(clause(np('CAT'), 'BE', { verbPhrase: { tense: 'past' }, complements: { locative: { phrase: np('HOUSE') } } }))).toMatchObject({
+      es: 'el gato estaba en la casa.', pt: 'o gato estava na casa.',
+    });
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'BE' }, complements: { locative: { phrase: np('HOUSE') } } },
+    }), 'RUN'))).toMatchObject({ es: 'el gato que está en la casa corre.', pt: 'o gato que está na casa corre.' });
+    expect(sayAll(clause(np('CAT', {
+      relative: { verbPhrase: { verb: 'BE' }, complements: { predicative: { phrase: np('LEGEND', { definiteness: 'indefinite' }) } } },
+    }), 'RUN'))).toMatchObject({ es: 'el gato que es una leyenda corre.', pt: 'o gato que é uma lenda corre.' });
+    expect(sayAll(clause(np('HOUSE', {
+      relative: { headRole: 'locative', subject: np('CAT'), verbPhrase: { verb: 'EAT' } },
+    }), 'BURN'))).toMatchObject({ es: 'la casa donde el gato come arde.', pt: 'a casa onde o gato come arde.' });
+    expect(houseWhereIs()).toMatchObject({
+      en: 'the house where the cat is burns.', de: 'das Haus, in dem der Kater ist, brennt.',
+      it: 'la casa dove il gatto è brucia.', fr: 'la maison où le chat est brûle.', ja: '猫がいる家は燃えます。',
+    });
+  });
+});

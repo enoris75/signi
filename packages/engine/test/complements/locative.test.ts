@@ -844,3 +844,98 @@ describe('known bugs: Japanese 住む and 閉じ込める mark their place with 
     }).ja).toBe('住む建物。');
   });
 });
+
+// A196. French has no zero article on a plural. Where English writes a bare plural after a
+// preposition ("in brackets"), French writes "des": "dans des parenthèses". A149 gave the direct
+// object, the prepositional object and the instrumental the article French cannot leave out, and
+// said what it did not cover — "a bare object after à". The spatial and comitative complements
+// were never brought along: their heads read `artFor`, which answers `bare` with nothing.
+describe('known bugs: a French bare plural after a preposition', () => {
+  const BARE_PLURAL = { definiteness: 'bare', number: 'plural' } as const;
+  const inBrackets = (value?: PathSpecifier, verb = 'BE') => sayAll(clause(np('CAT'), verb, {
+    complements: {
+      locative: {
+        phrase: np('BRACKET', BARE_PLURAL),
+        ...(value ? { specifiers: [{ kind: 'path' as const, value }] } : {}),
+      },
+    },
+  })).fr;
+
+  test.fails('the locative takes "des", under every spatial relation it spells with a preposition', () => {
+    expect(inBrackets()).toBe('le chat est dans des parenthèses.');       // now: "dans parenthèses"
+    expect(inBrackets('under')).toBe('le chat est sous des parenthèses.');
+    expect(inBrackets('behind')).toBe('le chat est derrière des parenthèses.');
+    expect(inBrackets('in_front_of')).toBe('le chat est devant des parenthèses.');
+    expect(inBrackets('through')).toBe('le chat est à travers des parenthèses.');
+    // The generalisation: the head is the same with a real verb, with a masculine noun, and with a
+    // preposed adjective — where written French writes "de" for "des", as the indefinite already does.
+    expect(inBrackets(undefined, 'RUN')).toBe('le chat court dans des parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('WORD', BARE_PLURAL) } },
+    })).fr).toBe('le chat est dans des mots.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('WORD', { ...BARE_PLURAL, adjectives: ['BIG'] }) } },
+    })).fr).toBe('le chat est dans de grands mots.');
+  });
+
+  test.fails('…and so do the route, terminus, direction, comitative and manner', () => {
+    const with_ = (type: 'route' | 'terminus' | 'direction' | 'comitative' | 'manner', verb = 'BE') =>
+      sayAll(clause(np('CAT'), verb, { complements: { [type]: { phrase: np('BRACKET', BARE_PLURAL) } } })).fr;
+    expect(with_('route')).toBe('le chat est à travers des parenthèses.');
+    expect(with_('terminus')).toBe('le chat est à des parenthèses.');
+    expect(with_('direction')).toBe('le chat est à des parenthèses.');
+    expect(with_('direction', 'GO')).toBe('le chat va à des parenthèses.');
+    expect(with_('comitative')).toBe('le chat est avec des parenthèses.');
+    expect(with_('manner')).toBe('le chat est comme des parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { route: { phrase: np('BRACKET', BARE_PLURAL), specifiers: [{ kind: 'path', value: 'over' }] } },
+    })).fr).toBe('le chat est par-dessus des parenthèses.');
+  });
+
+  // Regression: the instrumental already has its article (A149); every relation that governs "de"
+  // is right as it stands, because French drops "des" after "de"; every other determiner, a
+  // pronominal possessor (whose `bare` is the possessive taking the article's place), a proper name
+  // and the bare-by-idiom manner of means are untouched; and so are the other six languages.
+  test('regression: the instrument, the de-relations, the other determiners and the other six', () => {
+    const loc = (extra: Record<string, unknown>) => sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('BRACKET', { number: 'plural', ...extra }) } },
+    })).fr;
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { instrumental: { phrase: np('BRACKET', BARE_PLURAL) } },
+    })).fr).toBe('le chat est avec des parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { source: { phrase: np('BRACKET', BARE_PLURAL) } },
+    })).fr).toBe('le chat est de parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('BRACKET', BARE_PLURAL), specifiers: [{ kind: 'path', value: 'over' }] } },
+    })).fr).toBe('le chat est au-dessus de parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('BRACKET', BARE_PLURAL), specifiers: [{ kind: 'path', value: 'around' }] } },
+    })).fr).toBe('le chat est autour de parenthèses.');
+    expect(loc({ definiteness: 'definite' })).toBe('le chat est dans les parenthèses.');
+    expect(loc({ definiteness: 'indefinite' })).toBe('le chat est dans des parenthèses.');
+    expect(loc({ definiteness: 'some' })).toBe('le chat est dans quelques parenthèses.');
+    expect(loc({ definiteness: 'many' })).toBe('le chat est dans beaucoup de parenthèses.');
+    expect(loc({ definiteness: 'all' })).toBe('le chat est dans toutes les parenthèses.');
+    expect(loc({ definiteness: 'this' })).toBe('le chat est dans ces parenthèses.');
+    expect(sayAll(clause(np('CAT'), 'EAT', {
+      complements: { locative: { phrase: np('HOUSE', { number: 'plural', possessor: { kind: 'pronominal', person: '1', number: 'plural' } }) } },
+    })).fr).toBe('le chat mange dans nos maisons.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('EUROPE', { definiteness: 'bare' }) } },
+    })).fr).toBe('le chat est en Europe.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { manner: { phrase: np('CARE', { definiteness: 'bare' }) } },
+    })).fr).toBe('le chat est avec soin.');
+    expect(sayAll(clause(np('CAT'), 'BE', {
+      complements: { locative: { phrase: np('BRACKET', BARE_PLURAL) } },
+    }))).toMatchObject({
+      en: 'the cat is in brackets.',
+      it: 'il gatto è in parentesi.',
+      de: 'der Kater ist in Klammern.',
+      es: 'el gato está en paréntesis.',
+      ja: '猫は括弧にいます。',
+      pt: 'o gato está em parênteses.',
+    });
+  });
+});

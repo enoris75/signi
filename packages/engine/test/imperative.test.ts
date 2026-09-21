@@ -715,3 +715,67 @@ describe('known bugs: Japanese copula command', () => {
     expect(sayAll(clause(np('CAT'), 'BE', { complements: { predicative: { phrase: np('BIG') } } })).ja).toBe('猫は大きいです。');
   });
 });
+
+// A195. The French tu imperative is the 2sg present with its final -s dropped — but only where that
+// form ends in -es. That is the -er paradigm and, with it, the ouvrir / offrir / couvrir / cueillir
+// class, which takes -er endings on an -ir infinitive: "tu ouvres" → "ouvre". `imperativeForm`
+// (mood.ts) keys the drop off the *infinitive* instead, so ouvrir keeps the -s: "ouvres le livre."
+// OPEN is the only verb in the corpus this hits — BE is the one other non--er verb with an -es 2sg,
+// and FR_IMP_OVERRIDE gives it "sois". Reported while probing for localization C21.
+describe('known bugs: the French tu imperative of an -ir verb conjugated like an -er verb', () => {
+  const opens = (directObject = np('BOOK'), negative = false) => sayAll({
+    subject: np('SECOND_PERSON'), verbPhrase: { verb: 'OPEN', negative }, directObject, imperative: true,
+  }).fr;
+
+  test.fails('ouvrir drops the -s of its 2sg present, as the -er verbs do', () => {
+    expect(opens()).toBe('ouvre le livre.');                        // now: "ouvres le livre."
+    expect(opens(np('BOOK'), true)).toBe("n'ouvre pas le livre.");  // now: "n'ouvres pas"
+    expect(opens(np('BRACKET'))).toBe('ouvre la parenthèse.');
+    expect(opens(np('THIRD_PERSON'))).toBe('ouvre-le.');            // now: "ouvres-le."
+  });
+
+  // Regression: the -s belongs to every other form of ouvrir and to every other verb's imperative.
+  // The instruction register is the infinitive, which is why localization C21's shipped console
+  // hint ("Ouvrir une parenthèse avec une commande") is unaffected.
+  test('regression: the other registers and persons, the declarative, and the other verbs', () => {
+    expect(sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'OPEN' }, directObject: np('BOOK'),
+      imperative: true, imperativeRegister: 'instruction',
+    }).fr).toBe('ouvrir le livre.');
+    expect(sayAll({
+      subject: np('SECOND_PERSON', { number: 'plural' }), verbPhrase: { verb: 'OPEN' },
+      directObject: np('BOOK'), imperative: true,
+    }).fr).toBe('ouvrez le livre.');
+    expect(sayAll({
+      subject: np('FIRST_PERSON', { number: 'plural' }), verbPhrase: { verb: 'OPEN' },
+      directObject: np('BOOK'), imperative: true,
+    }).fr).toBe('ouvrons le livre.');
+    // The declarative 2sg keeps its -s: only the imperative drops it.
+    expect(sayAll(clause(np('SECOND_PERSON'), 'OPEN', { directObject: np('BOOK') })).fr)
+      .toBe('tu ouvres le livre.');
+    expect(sayAll(clause(np('SECOND_PERSON'), 'OPEN', { directObject: np('BOOK'), verbPhrase: { modals: ['MUST'] } })).fr)
+      .toBe('tu dois ouvrir le livre.');
+    const imp = (verb: string, directObject?: NounPhrase) => sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb }, ...(directObject && { directObject }), imperative: true,
+    }).fr;
+    expect(imp('CLOSE', np('BOOK'))).toBe('ferme le livre.');    // -er
+    expect(imp('EAT', np('BOOK'))).toBe('mange le livre.');      // -er
+    expect(imp('CHOOSE', np('BOOK'))).toBe('choisis le livre.'); // -ir, 2sg in -is: keeps the -s
+    expect(imp('RUN')).toBe('cours.');                           // -ir, 2sg in -s: keeps it
+    expect(imp('GO')).toBe('va.');                               // FR_IMP_OVERRIDE
+    expect(sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'BE' },
+      complements: { predicative: { phrase: np('HAPPY') } }, imperative: true,
+    }).fr).toBe('sois heureux.');                                // FR_IMP_OVERRIDE
+    expect(sayAll({
+      subject: np('SECOND_PERSON'), verbPhrase: { verb: 'OPEN' }, directObject: np('BOOK'), imperative: true,
+    })).toMatchObject({
+      en: 'open the book.',
+      it: 'apri il libro.',
+      de: 'öffne das Buch.',
+      es: 'abre el libro.',
+      ja: '本を開いてください。',
+      pt: 'abra o livro.',
+    });
+  });
+});

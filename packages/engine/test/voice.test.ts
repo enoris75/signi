@@ -475,3 +475,76 @@ describe('a passive relative clause', () => {
     });
   });
 });
+
+// A194. A French past participle agrees like an adjective, and one that already ends in -s has no
+// separate masculine plural: "des mots compris", never "compriss". `agreeParticipleFr` appends the
+// plural -s unconditionally, so the three seeded participles ending in -s — INCLUDE "inclus",
+// UNDERSTAND "compris", ACQUIRE "acquis" — double it. The feminine is right, because the -e comes
+// first ("comprise" → "comprises"). Reported while seeding MEANING and INCLUDE (localization B50).
+describe('known bugs: a French participle in -s doubles it in the masculine plural', () => {
+  const understood = (verbPhrase: Partial<VerbPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('WORD', { number: 'plural' }),
+      verbPhrase: { voice: 'passive', ...verbPhrase },
+    })).fr;
+
+  test.fails('the passive participle of the three verbs whose participle ends in -s', () => {
+    expect(understood()).toBe('les mots sont compris par le chat.'); // now: "compriss"
+    expect(sayAll(clause(np('CAT'), 'INCLUDE', {
+      directObject: np('MEANING', { number: 'plural' }), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('les sens sont inclus par le chat.'); // now: "incluss"
+    expect(sayAll(clause(np('CAT'), 'ACQUIRE', {
+      directObject: np('WORD', { number: 'plural' }), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('les mots sont acquis par le chat.'); // now: "acquiss"
+    // The generalisation: the participle is the same word in every tense, aspect and polarity,
+    // under a modal and inside a relative clause.
+    expect(understood({ tense: 'past' })).toBe('les mots furent compris par le chat.');
+    expect(understood({ tense: 'future' })).toBe('les mots seront compris par le chat.');
+    expect(understood({ aspect: 'resultative' })).toBe('les mots ont été compris par le chat.');
+    expect(understood({ negative: true })).toBe('les mots ne sont pas compris par le chat.');
+    expect(understood({ modals: ['MUST'] })).toBe('les mots doivent être compris par le chat.');
+    expect(sayAll(clause(np('WORD', {
+      number: 'plural',
+      relative: { headRole: 'directObject', subject: np('CAT'), verbPhrase: { verb: 'UNDERSTAND', voice: 'passive' } },
+    }), 'RUN')).fr).toBe('les mots qui sont compris par le chat courent.');
+  });
+
+  test.fails('…and the avoir participle agreeing with a preceding clitic object', () => {
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('THIRD_PERSON', { number: 'plural' }), verbPhrase: { aspect: 'resultative' },
+    })).fr).toBe('le chat les a compris.'); // now: "le chat les a compriss."
+  });
+
+  // Regression: the feminine puts an -e between the two, so it is regular in both numbers; the
+  // masculine singular is the bare participle; every other seeded participle ends in a vowel or -t,
+  // including the être-selecting ones; and no other language doubles anything.
+  test('regression: the feminine, the singular, the other participles and the other six', () => {
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('PHRASE'), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('la phrase est comprise par le chat.');
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('PHRASE', { number: 'plural' }), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('les phrases sont comprises par le chat.');
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('THIRD_PERSON', { number: 'plural', gender: 'fem' }), verbPhrase: { aspect: 'resultative' },
+    })).fr).toBe('le chat les a comprises.');
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('WORD'), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('le mot est compris par le chat.');
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('DOG', { number: 'plural' }), verbPhrase: { voice: 'passive' },
+    })).fr).toBe('les chiens sont vus par le chat.');
+    expect(sayAll(clause(np('CAT', { number: 'plural' }), 'GO', { verbPhrase: { aspect: 'resultative' } })).fr)
+      .toBe('les chats sont allés.');
+    expect(sayAll(clause(np('CAT'), 'UNDERSTAND', {
+      directObject: np('WORD', { number: 'plural' }), verbPhrase: { voice: 'passive' },
+    }))).toMatchObject({
+      en: 'the words are understood by the cat.',
+      it: 'le parole sono comprese dal gatto.',
+      de: 'die Wörter werden vom Kater verstanden.',
+      es: 'las palabras son comprendidas por el gato.',
+      ja: '単語は猫に理解されます。',
+      pt: 'as palavras são compreendidas pelo gato.',
+    });
+  });
+});

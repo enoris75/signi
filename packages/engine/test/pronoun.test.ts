@@ -406,3 +406,46 @@ describe('known bugs: Japanese feminine plural pronoun', () => {
     expect(owns('fem', 'singular')).toBe('彼女の猫は走ります。');
   });
 });
+
+// A200. 彼ら is a group of PEOPLE. A group of things is それら, the plural of それ, and the engine has
+// no such word: a neuter third plural comes out 彼ら. `resolveNounPhrase` selects a plural pronoun's
+// surface with `gender === 'fem' && forms['plural_fem']` — `plural_fem` is the only gendered plural
+// it knows — and the `ja` row of THIRD_PERSON carries `plural` and `plural_fem` and nothing else, so
+// a neuter plural misses both tests and takes the masculine default. The singular is complete
+// (`singular_neut: 'それ'`, read generically), which is why それ is right and それら is not. The fix
+// is a seed form AND engine logic: a `plural_neut` row the resolver does not look at changes
+// nothing. This is the gap C20 named in its item 7 and did not close. A201 is the possessive, off a
+// different (hardcoded) table, and is not fixed by this.
+describe('known bugs: the Japanese plural neuter pronoun', () => {
+  const neutPl = np('THIRD_PERSON', { gender: 'neut', number: 'plural' });
+
+  test.fails('a neuter plural third person reads それら in every slot', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: neutPl })).ja).toBe('猫はそれらを見ます。'); // now: 猫は彼らを見ます。
+    expect(sayAll(clause(neutPl, 'RUN')).ja).toBe('それらは走ります。'); // now: 彼らは走ります。
+    expect(sayAll(clause(np('CAT'), 'CRY', { complements: { cause: { phrase: neutPl } } })).ja).toBe('猫はそれらのために泣きます。');
+    expect(sayAll(clause(np('MAN'), 'GIVE', { directObject: np('BOOK'), complements: { terminus: { phrase: neutPl } } })).ja)
+      .toBe('男はそれらに本をあげます。');
+    expect(sayAll(clause({ conjuncts: [neutPl, np('CAT')], conjunction: 'and' }, 'RUN')).ja).toBe('それらと猫は走ります。');
+  });
+
+  // それら is kana, so it takes no furigana — unlike 彼ら, whose かれら the surface drags along today.
+  test.fails('それら carries no reading', () => {
+    expect(furigana(clause(neutPl, 'RUN'))).toEqual(['はしります']); // now: ['かれら', 'はしります']
+  });
+
+  // Regression: the masculine and mixed plural keep 彼ら and its reading, the feminine plural keeps
+  // A161's 彼女ら, the neuter SINGULAR それ is already right, and the other six languages have no
+  // person/thing split in the plural pronoun at all.
+  test('the masculine and feminine plurals, the neuter singular and the other six are unchanged', () => {
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'masc', number: 'plural' }), 'RUN')).ja).toBe('彼らは走ります。');
+    expect(furigana(clause(np('THIRD_PERSON', { gender: 'masc', number: 'plural' }), 'RUN'))).toEqual(['かれら', 'はしります']);
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'fem', number: 'plural' }), 'RUN')).ja).toBe('彼女らは走ります。');
+    expect(furigana(clause(np('THIRD_PERSON', { gender: 'fem', number: 'plural' }), 'RUN'))).toEqual(['かのじょら', 'はしります']);
+    expect(sayAll(clause(np('THIRD_PERSON', { gender: 'neut' }), 'RUN')).ja).toBe('それは走ります。');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('THIRD_PERSON', { gender: 'neut' }) })).ja).toBe('猫はそれを見ます。');
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: neutPl }))).toMatchObject({
+      en: 'the cat sees them.', it: 'il gatto li vede.', fr: 'le chat les voit.',
+      de: 'der Kater sieht sie.', es: 'el gato los ve.', pt: 'o gato os vê.',
+    });
+  });
+});

@@ -51,3 +51,151 @@ describe('comitative', () => {
     expect(coordinates(np('DOG')).en).toContain('with the dog');
   });
 });
+
+// A197. A pronoun after an adposition takes its tonic (disjunctive) form and no article: "with
+// him", "con lui", "avec lui", "mit ihm", "con él", "com ele". Six of the seven engines run a
+// comitative pronoun through the ordinary noun-phrase renderer instead, which hands it a determiner
+// and the citation form ("with the he", "con il lui", "avec l'il", "mit dem er") — and in the plural
+// declines it as a noun ("mit den sien", "con i loro"). Only the causal adjunct has a pronoun path;
+// the passive by-phrase (`agentPhrase`) and a verb's prepositional object (`prepObjectText`, A139)
+// already do it right. Japanese, which marks the companion と and needs no article, is right.
+// The comitative is plan-only (localization C12), so nothing shipped shows it.
+describe('known bugs: a pronoun in the comitative renders as a noun', () => {
+  const withPronoun = (concept: string, extra: Partial<NounPhrase> = {}) =>
+    sayAll(clause(np('CAT'), 'COORDINATE', { complements: { comitative: { phrase: np(concept, extra) } } }));
+
+  test.fails('the third person, in all six languages, by gender and number', () => {
+    expect(withPronoun('THIRD_PERSON')).toEqual({
+      en: 'the cat coordinates with him.',      // now: "with the he"
+      it: 'il gatto coordina con lui.',         // now: "con il lui"
+      fr: 'le chat coordonne avec lui.',        // now: "avec l'il"
+      de: 'der Kater koordiniert mit ihm.',     // now: "mit dem er"; mit governs the dative
+      es: 'el gato coordina con él.',           // now: "con el él"
+      ja: '猫は彼と調整します。',                  // already right
+      pt: 'o gato coordena com ele.',           // now: "com o ele"
+    });
+    expect(withPronoun('THIRD_PERSON', { gender: 'fem' })).toEqual({
+      en: 'the cat coordinates with her.',
+      it: 'il gatto coordina con lei.',
+      fr: 'le chat coordonne avec elle.',
+      de: 'der Kater koordiniert mit ihr.',
+      es: 'el gato coordina con ella.',
+      ja: '猫は彼女と調整します。',
+      pt: 'o gato coordena com ela.',
+    });
+    expect(withPronoun('THIRD_PERSON', { gender: 'neut' })).toMatchObject({
+      en: 'the cat coordinates with it.',
+      it: 'il gatto coordina con esso.',
+      fr: 'le chat coordonne avec cela.',
+      de: 'der Kater koordiniert mit ihm.',
+    });
+    // The plural is the worst of it: German declines the pronoun with the dative-plural -n.
+    expect(withPronoun('THIRD_PERSON', { number: 'plural' })).toEqual({
+      en: 'the cat coordinates with them.',
+      it: 'il gatto coordina con loro.',
+      fr: 'le chat coordonne avec eux.',
+      de: 'der Kater koordiniert mit ihnen.',   // now: "mit den sien"
+      es: 'el gato coordina con ellos.',
+      ja: '猫は彼らと調整します。',
+      pt: 'o gato coordena com eles.',
+    });
+    // Per conjunct, so a group mixes a noun and a pronoun under the one preposition.
+    expect(sayAll(clause(np('CAT'), 'COORDINATE', {
+      complements: { comitative: { phrase: { conjuncts: [np('DOG'), np('THIRD_PERSON')], conjunction: 'and' } } },
+    }))).toMatchObject({
+      en: 'the cat coordinates with the dog and him.',
+      fr: 'le chat coordonne avec le chien et avec lui.',
+      de: 'der Kater koordiniert mit dem Hund und mit ihm.',
+    });
+  });
+
+  test.fails('the first and second persons, where Spanish and Portuguese fuse the preposition', () => {
+    expect(withPronoun('FIRST_PERSON')).toEqual({
+      en: 'the cat coordinates with me.',
+      it: 'il gatto coordina con me.',
+      fr: 'le chat coordonne avec moi.',
+      de: 'der Kater koordiniert mit mir.',
+      es: 'el gato coordina conmigo.',          // con + mí fuses
+      ja: '猫は私と調整します。',
+      pt: 'o gato coordena comigo.',            // com + mim fuses
+    });
+    expect(withPronoun('SECOND_PERSON')).toEqual({
+      en: 'the cat coordinates with you.',
+      it: 'il gatto coordina con te.',
+      fr: 'le chat coordonne avec toi.',
+      de: 'der Kater koordiniert mit dir.',
+      es: 'el gato coordina contigo.',          // con + ti fuses
+      ja: '猫はあなたと調整します。',
+      pt: 'o gato coordena com você.',          // "você" is already the tonic form
+    });
+    expect(withPronoun('FIRST_PERSON', { number: 'plural' })).toMatchObject({
+      en: 'the cat coordinates with us.',
+      it: 'il gatto coordina con noi.',
+      fr: 'le chat coordonne avec nous.',
+      de: 'der Kater koordiniert mit uns.',     // now: "mit den wirn"
+      es: 'el gato coordina con nosotros.',
+    });
+    expect(withPronoun('SECOND_PERSON', { number: 'plural' })).toMatchObject({
+      it: 'il gatto coordina con voi.',
+      fr: 'le chat coordonne avec vous.',
+      de: 'der Kater koordiniert mit euch.',    // now: "mit den ihrn"
+      pt: 'o gato coordena com vocês.',
+    });
+  });
+
+  // The same branch is missing from every other adposition-bearing complement — instrumental,
+  // locative, terminus, direction, source, route and manner all render "the he" / "nel lui" /
+  // "mit dem er". The instrumental stands here as the reminder that they are one defect and should
+  // be fixed together: it takes the very same adposition as the comitative in all six, so its want
+  // is the comitative's. The others are not pinned, because each needs its own adposition and, in
+  // German, its own case — "durch" takes the accusative ("durch ihn"), not the dative the
+  // `disjunctive` form already is. See the bug file.
+  test.fails('…and the instrumental, which shares the adposition, does the same', () => {
+    expect(sayAll(clause(np('CAT'), 'SEE', {
+      directObject: np('DOG'), complements: { instrumental: { phrase: np('THIRD_PERSON') } },
+    }))).toEqual({
+      en: 'the cat sees the dog with him.',     // now: "with the he"
+      it: 'il gatto vede il cane con lui.',     // now: "con il lui"
+      fr: 'le chat voit le chien avec lui.',    // now: "avec l'il"
+      de: 'der Kater sieht den Hund mit ihm.',  // now: "mit dem er"
+      es: 'el gato ve el perro con él.',        // now: "con el él"
+      ja: '猫は彼で犬を見ます。',                  // already right: the means takes で
+      pt: 'o gato vê o cão com ele.',           // now: "com o ele"
+    });
+  });
+
+  // Regression: Japanese is right, a noun companion is right, and every other place a pronoun
+  // stands behind an adposition already takes the tonic form.
+  test('regression: Japanese, a noun companion, the cause, the agent and the prepositional object', () => {
+    expect(coordinates(np('DOG'))).toMatchObject({
+      en: 'the cat coordinates with the dog.',
+      it: 'il gatto coordina con il cane.',
+      fr: 'le chat coordonne avec le chien.',
+      de: 'der Kater koordiniert mit dem Hund.',
+      ja: '猫は犬と調整します。',
+    });
+    expect(withPronoun('THIRD_PERSON').ja).toBe('猫は彼と調整します。');
+    expect(withPronoun('THIRD_PERSON', { gender: 'fem' }).ja).toBe('猫は彼女と調整します。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { cause: { phrase: np('THIRD_PERSON') } } })))
+      .toMatchObject({
+        en: 'the cat runs because of him.',
+        it: 'il gatto corre a causa sua.',
+        fr: 'le chat court à cause de lui.',
+        de: 'der Kater läuft seinetwegen.',
+        es: 'el gato corre a causa de él.',
+        pt: 'o gato corre por causa dele.',
+      });
+    expect(sayAll(clause(np('THIRD_PERSON'), 'SEE', { directObject: np('DOG'), verbPhrase: { voice: 'passive' } })))
+      .toMatchObject({
+        en: 'the dog is seen by him.',
+        it: 'il cane è visto da lui.',
+        fr: 'le chien est vu par lui.',
+        de: 'der Hund wird von ihm gesehen.',
+      });
+    expect(sayAll(clause(np('CAT'), 'CLICK', { directObject: np('THIRD_PERSON') }))).toMatchObject({
+      it: 'il gatto clicca su di lui.',
+      fr: 'le chat clique sur lui.',
+      pt: 'o gato clica nele.',
+    });
+  });
+});

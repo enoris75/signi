@@ -1,6 +1,6 @@
 import { describe, expect, test } from 'vitest';
 import type { NounGroup, PronominalPossessor } from '@signi/shared';
-import { clause, np, say, sayAll } from './harness.js';
+import { clause, furigana, np, say, sayAll } from './harness.js';
 
 // A *pronominal* possessor ("the boy and HIS dog") is a possessive pronoun, not a genitive noun
 // phrase. It carries only the antecedent's person/number/(natural) gender; the engine spells the
@@ -362,6 +362,52 @@ describe('known bugs: a pronominal possessor drops the head\'s determiner', () =
     expect(say(clause(np('FATHER', { possessor: mine }), 'RUN'), 'it')).toBe('mio padre corre.');
     expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: mine }) } } }))).toMatchObject({
       it: 'il gatto corre nella mia casa.', fr: 'le chat court dans ma maison.', de: 'der Kater läuft in meinem Haus.',
+    });
+  });
+});
+
+// A201. それ is the one pronoun of the こ/そ/あ series with a suppletive adnominal: この / その / あの,
+// never これの / それの / あれの. So "its command" is その命令, and `possessiveJa`'s それの is not the
+// word. That function builds every Japanese possessive as "antecedent pronoun + の", which is right
+// for eight of its ten cells and wrong for the two neuter ones — the singular, which must not take
+// の, and the plural, which has no neuter branch at all and falls through to 彼ら (それら is the word,
+// and its adnominal IS regular: それらの). Distinct from A187 (the head's determiner, and not in
+// Japanese) and from A185 (where Japanese puts that determiner): this is the possessive word
+// itself, and it is wrong with no determiner on the head at all. The pronoun それら is A200, off the
+// seed rather than this table; neither fix reaches the other.
+describe('known bugs: the Japanese neuter pronominal possessor', () => {
+  const owns = (poss: PronominalPossessor, head = 'CAT') => sayAll(clause(np(head, { possessor: poss }), 'RUN')).ja;
+  const its = pron('3', 'singular', 'neut');
+
+  test.fails('a neuter possessor reads その in the singular and それらの in the plural', () => {
+    expect(owns(its)).toBe('その猫は走ります。'); // now: それの猫は走ります。
+    expect(owns(pron('3', 'plural', 'neut'))).toBe('それらの猫は走ります。'); // now: 彼らの猫は走ります。
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('COMMAND', { possessor: its }) })).ja).toBe('猫はその命令を見ます。');
+    expect(sayAll(clause(np('CAT'), 'RUN', { complements: { locative: { phrase: np('HOUSE', { possessor: its }) } } })).ja)
+      .toBe('猫はその家で走ります。');
+    // The plan that found it: "the word and its commands".
+    expect(sayAll(clause({
+      conjuncts: [np('WORD'), np('COMMAND', { number: 'plural', possessor: its })], conjunction: 'and',
+    }, 'BE')).ja).toBe('単語とその命令はあります。'); // now: 単語とそれの命令はあります。
+  });
+
+  // Regression: the eight regular cells, which spell the possessive by the ordinary "+ の" rule and
+  // must not move, with the furigana each of them carries (あなた / あなたたち are kana and carry
+  // none). The other six languages say "its" as they always did.
+  test('the eight regular cells and the other six languages are right', () => {
+    expect(owns(pron('1', 'singular'))).toBe('私の猫は走ります。');
+    expect(owns(pron('2', 'singular'))).toBe('あなたの猫は走ります。');
+    expect(owns(pron('3', 'singular', 'masc'))).toBe('彼の猫は走ります。');
+    expect(owns(pron('3', 'singular', 'fem'))).toBe('彼女の猫は走ります。');
+    expect(owns(pron('1', 'plural'))).toBe('私たちの猫は走ります。');
+    expect(owns(pron('2', 'plural'))).toBe('あなたたちの猫は走ります。');
+    expect(owns(pron('3', 'plural', 'masc'))).toBe('彼らの猫は走ります。');
+    expect(owns(pron('3', 'plural', 'fem'))).toBe('彼女らの猫は走ります。');
+    expect(furigana(clause(np('CAT', { possessor: pron('3', 'singular', 'masc') }), 'RUN'))).toEqual(['かれ', 'ねこ', 'はしります']);
+    expect(furigana(clause(np('CAT', { possessor: pron('3', 'plural', 'fem') }), 'RUN'))).toEqual(['かのじょら', 'ねこ', 'はしります']);
+    expect(sayAll(clause(np('CAT'), 'SEE', { directObject: np('COMMAND', { possessor: its }) }))).toMatchObject({
+      en: 'the cat sees its command.', it: 'il gatto vede il suo comando.', fr: 'le chat voit sa commande.',
+      de: 'der Kater sieht seinen Befehl.', es: 'el gato ve su comando.', pt: 'o gato vê o seu comando.',
     });
   });
 });

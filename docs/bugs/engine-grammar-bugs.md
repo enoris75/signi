@@ -48,8 +48,8 @@ They live in `describe` blocks named either:
   recorded only so the correct target is written down.
 
 **This file set is kept in sync with the tests: every `test.fails` in `packages/engine/test/`,
-`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (23 of
-them, as of this writing, pinning sixteen bugs in Part A; Part B has none open).** If
+`packages/backend/src/` and `packages/frontend/test/` appears in one of the subdirectories (37 of
+them, as of this writing, pinning twenty-four bugs in Part A; Part B has none open).** If
 you add or move a `test.fails`, add or update the matching file. Classification (A vs B) follows the
 `describe` block name, not the code comment.
 
@@ -77,6 +77,14 @@ Fixed defects are moved to [`fixed/`](fixed/) and listed in the **Fixed** sectio
 | A191 | [A191-german-nicht-and-adverb-before-a-definite-object.md](A-must-fix/A191-german-nicht-and-adverb-before-a-definite-object.md) | German |
 | A192 | [A192-german-das-heisst-without-a-comma.md](A-must-fix/A192-german-das-heisst-without-a-comma.md) | German |
 | A193 | [A193-english-particle-after-a-relative-clause.md](A-must-fix/A193-english-particle-after-a-relative-clause.md) | English |
+| A194 | [A194-french-participle-in-s-doubles-it.md](A-must-fix/A194-french-participle-in-s-doubles-it.md) | French |
+| A195 | [A195-french-tu-imperative-of-ouvrir.md](A-must-fix/A195-french-tu-imperative-of-ouvrir.md) | French |
+| A196 | [A196-french-bare-plural-after-a-preposition.md](A-must-fix/A196-french-bare-plural-after-a-preposition.md) | French |
+| A197 | [A197-pronoun-in-the-comitative.md](A-must-fix/A197-pronoun-in-the-comitative.md) | English, Italian, French, German, Spanish, Portuguese |
+| A198 | [A198-spanish-portuguese-predicative-drops-a-pronominal-possessor.md](A-must-fix/A198-spanish-portuguese-predicative-drops-a-pronominal-possessor.md) | Spanish, Portuguese |
+| A199 | [A199-spanish-portuguese-ser-in-a-place-relative.md](A-must-fix/A199-spanish-portuguese-ser-in-a-place-relative.md) | Spanish, Portuguese |
+| A200 | [A200-japanese-plural-neuter-pronoun.md](A-must-fix/A200-japanese-plural-neuter-pronoun.md) | Japanese (corpus + translator) |
+| A201 | [A201-japanese-neuter-pronominal-possessor.md](A-must-fix/A201-japanese-neuter-pronominal-possessor.md) | Japanese |
 
 Every other confirmed bug found so far is fixed and listed under **Fixed** below. New ones are
 filed here as they are found — see [`A-must-fix/README.md`](A-must-fix/README.md).
