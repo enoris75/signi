@@ -388,6 +388,38 @@ describe('the console', () => {
     });
   });
 
+  describe('the source strip', () => {
+    async function commit(prompt: HTMLInputElement, line: string) {
+      type(prompt, line);
+      if (screen.queryByTestId('console-list')) key(prompt, 'Escape');
+      key(prompt, 'Enter');
+      await waitFor(() => expect(prompt.value).toBe(''));
+    }
+
+    const current = () =>
+      screen.getAllByTestId('source-line').filter((l) => l.hasAttribute('data-current')).map((l) => l.getAttribute('data-period'));
+
+    it('shows every period, a numbered line each, the one the context is in marked', async () => {
+      const prompt = renderApp();
+      await commit(prompt, '/subj cat /verb eat /new /subj dog');
+      const lines = screen.getAllByTestId('source-line');
+      expect(lines.map((l) => l.getAttribute('data-period'))).toEqual(['1', '2']);
+      expect(lines[0]).toHaveTextContent('/subj ( cat ) /verb ( eat )');
+      expect(lines[1]).toHaveTextContent('/subj ( dog )');
+      expect(current()).toEqual(['2']);
+      await commit(prompt, '#1');
+      expect(current()).toEqual(['1']);
+    });
+
+    it('loads the period whose line is clicked into the prompt, whichever the context is in', async () => {
+      const prompt = renderApp();
+      await commit(prompt, '/subj cat /new /subj dog');
+      fireEvent.click(screen.getAllByTestId('source-line')[0]!);
+      await waitFor(() => expect(prompt.value).toBe('/subj ( cat ) '));
+      expect(screen.getByTestId('console-chip')).toHaveTextContent(/editing period 1/i);
+    });
+  });
+
   describe('commands by topic', () => {
     it('heads the list topic by topic, a shortcut saying what it is short for', async () => {
       const prompt = renderApp();

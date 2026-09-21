@@ -152,6 +152,11 @@ test.describe('the phrase console', () => {
     await run(page);
     await app.expectSentences({ en: 'the child who loves the cat reads the book.' });
     await expect(page.getByTestId('transcript-typed')).toHaveCount(2);
+    // The source strip holds the whole script, a numbered line per period.
+    const lines = page.getByTestId('source-line');
+    await expect(lines).toHaveCount(2);
+    await expect(lines.nth(0)).toContainText('/rel #2.subj');
+    await expect(lines.nth(1)).toContainText('/verb ( love ) /obj ( cat )');
   });
 
   test('grows the prompt with a long line, and breaks it with ⇧↵', async ({ app, page }) => {

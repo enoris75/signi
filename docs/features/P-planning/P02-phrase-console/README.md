@@ -117,9 +117,12 @@ to the console's height so nothing hides under it.
   The valid part before the error still previews; <kbd>↵</kbd> is refused until the line parses.
 - **Transcript** — typed lines (`›`), echoes of canvas actions (pointer glyph), errors; the right
   column is the period's sentence in the interface language after the change.
-- **Source strip** — the focused period's canonical text, on the canvas colour. The cursor's box is
-  washed; hovering a token lights its box and vice versa; clicking a token moves the cursor.
-  `/edit`, or a click on the strip, loads the whole source into the prompt; <kbd>↵</kbd> replaces the period.
+- **Source strip** — the workspace's canonical text, on the canvas colour: a numbered line per
+  period, the focused period's number in ink (2026-09-21; it held the focused period alone before, so
+  the rest of a multi-period script was out of sight). Past 40% of the console it scrolls, keeping the
+  focused line in view. The cursor's box is washed; hovering a token lights its box and vice versa;
+  clicking a token moves the cursor. `/edit` loads the focused period's source into the prompt, and a
+  click on a line loads that line's period; <kbd>↵</kbd> replaces the period.
 
 ### 2.3 Tokens wear their box's colour
 
