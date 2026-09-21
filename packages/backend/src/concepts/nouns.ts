@@ -905,6 +905,7 @@ export const nouns: ConceptSeed[] = [
     definition: glossOf('BOVINE', 'CASTRATED', 'ADULT', 'MALE'),
     emoji: '🐂',
     animate: true,
+    isA: 'BOVINE',
     forms: {
       en: { base: 'ox', plural: 'oxen', count: 'singular' },
       it: { base: 'bue', plural: 'buoi', gender: 'masc', count: 'singular' },
